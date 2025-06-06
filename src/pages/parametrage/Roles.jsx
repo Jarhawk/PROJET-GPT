@@ -250,9 +250,10 @@ export default function Roles() {
       {editPermsRole && (
         <Dialog open={!!editPermsRole} onOpenChange={v => !v && setEditPermsRole(null)}>
           <DialogContent className="bg-white rounded-xl shadow-lg p-6 max-w-xl">
-            <PermissionsForm
-              role={editPermsRole} {/* Passe bien tout l'objet ici */}
-              onClose={() => setEditPermsRole(null)}
+              {/* Passe bien tout l'objet ici */}
+              <PermissionsForm
+                role={editPermsRole}
+                onClose={() => setEditPermsRole(null)}
               afterSaveLog={async () => {
                 // Log en base le changement de permissions
                 await supabase.from("user_logs").insert([{

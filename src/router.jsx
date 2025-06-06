@@ -14,9 +14,9 @@ import FactureDetail from "@/pages/factures/FactureDetail";
 import Produits from "@/pages/produits/Produits";
 import ProduitDetail from "@/pages/produits/ProduitDetail";
 import ProduitForm from "@/pages/produits/ProduitForm";
-import Inventaire from "@/pages/inventaire/Inventaire";
-import Requisitions from "@/pages/requisitions/Requisitions";
-import Mouvements from "@/pages/mouvements/Mouvements";
+import Inventaire from "@/pages/Inventaire";
+import Requisitions from "@/pages/Requisitions";
+import Mouvements from "@/pages/Mouvements";
 
 import Fiches from "@/pages/fiches/Fiches";
 import FicheForm from "@/pages/fiches/FicheForm";

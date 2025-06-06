@@ -1,0 +1,60 @@
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+
+export default function AutoCompleteField({
+  label,
+  value,
+  onChange,
+  options,
+  onAddOption,
+  required = false,
+}) {
+  const [inputValue, setInputValue] = useState(value || "");
+  const [showAdd, setShowAdd] = useState(false);
+
+  const optionsSafe = options ?? []; // ✅ Évite le crash si options est undefined
+
+  const handleInputChange = (e) => {
+    const val = e.target.value;
+    setInputValue(val);
+    onChange(val);
+    setShowAdd(val && !optionsSafe.includes(val));
+  };
+
+  const handleAddOption = () => {
+    if (inputValue && onAddOption) {
+      onAddOption(inputValue);
+      setShowAdd(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-1 w-full">
+      <label className="text-sm text-white font-medium">
+        {label} {required && "*"}
+      </label>
+      <Input
+        list={`list-${label}`}
+        value={inputValue}
+        onChange={handleInputChange}
+        className="bg-white text-black"
+      />
+      <datalist id={`list-${label}`}>
+        {optionsSafe.map((opt, idx) => (
+          <option key={idx} value={opt} />
+        ))}
+      </datalist>
+      {showAdd && (
+        <Button
+          type="button"
+          size="sm"
+          onClick={handleAddOption}
+          className="mt-1 w-fit text-xs bg-mamastockGold text-black"
+        >
+          ➕ Ajouter "{inputValue}"
+        </Button>
+      )}
+    </div>
+  );
+}

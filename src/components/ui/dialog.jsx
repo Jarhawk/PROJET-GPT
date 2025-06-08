@@ -1,9 +1,9 @@
 diff --git a//dev/null b/src/components/ui/dialog.jsx
-index 0000000000000000000000000000000000000000..4843b9c33bc9058899ae4a25f7976d53d8bc281a 100644
+index 0000000000000000000000000000000000000000..e88d3b1dae6c9b7994823fb04a70a726cdfdedae 100644
 --- a//dev/null
 +++ b/src/components/ui/dialog.jsx
 @@ -0,0 +1,45 @@
-+import React from 'react';
++import React from "react";
 +import {
 +  Dialog as RadixDialog,
 +  DialogContent as RadixDialogContent,
@@ -11,7 +11,7 @@ index 0000000000000000000000000000000000000000..4843b9c33bc9058899ae4a25f7976d53
 +  DialogTitle as RadixDialogTitle,
 +  DialogClose as RadixDialogClose,
 +  DialogPortal,
-+} from '@radix-ui/react-dialog';
++} from "@radix-ui/react-dialog";
 +
 +export function Dialog(props) {
 +  return <RadixDialog {...props} />;
@@ -41,7 +41,7 @@ index 0000000000000000000000000000000000000000..4843b9c33bc9058899ae4a25f7976d53
 +  return <RadixDialogClose {...props} />;
 +}
 +
-+export function DialogHeader({ children, className = '', ...props }) {
++export function DialogHeader({ children, className = "", ...props }) {
 +  return (
 +    <div className={`p-4 border-b relative ${className}`} {...props}>
 +      {children}

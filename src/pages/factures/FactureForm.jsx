@@ -18,7 +18,6 @@ export default function FactureForm() {
     commentaire: "",
     statut: "en_attente",
   });
-  const [prevStatut, setPrevStatut] = useState("en_attente");
   const [fournisseurs, setFournisseurs] = useState([]);
   const [produits, setProduits] = useState([]);
   const [lignes, setLignes] = useState([]);
@@ -88,7 +87,6 @@ export default function FactureForm() {
           commentaire: factureRes.data.commentaire || "",
           statut: factureRes.data.statut || "en_attente",
         });
-        setPrevStatut(factureRes.data.statut || "en_attente");
       }
       setLignes(
         (lignesRes.data || []).map((l) => ({
@@ -129,7 +127,7 @@ export default function FactureForm() {
           const last = lastPrices[pId];
           if (last && Math.abs((valeur - last) / last) > 0.1) {
             toast(
-              `Le prix saisi (${valeur} €) diffère de plus de 10 % du dernier prix enregistré (${last} €) !`,
+              `Le prix saisi (${valeur} €) diffère de plus de 10 % du dernier prix enregistré (${last} €) !`,
               { icon: "⚠️" }
             );
           }
@@ -172,7 +170,7 @@ export default function FactureForm() {
       return;
     }
 
-    // 1. GESTION STOCK : rollback des anciennes lignes si édition
+    // 1. GESTION STOCK : rollback des anciennes lignes si édition
     if (isEdit) {
       for (const oldLigne of lignesAvantEdition) {
         await supabase.rpc("update_stock", {
@@ -183,7 +181,7 @@ export default function FactureForm() {
       }
     }
 
-    // 2. GESTION STOCK : rollback si statut rejeté
+    // 2. GESTION STOCK : rollback si statut rejeté
     if (form.statut === "rejetée") {
       for (const l of lignes) {
         await supabase.rpc("update_stock", {
@@ -243,7 +241,7 @@ export default function FactureForm() {
       await supabase.from("invoice_lines").insert(lignesToInsert);
     }
 
-    // 5. GESTION STOCK : application des nouvelles lignes (sauf si rejetée)
+    // 5. GESTION STOCK : application des nouvelles lignes (sauf si rejetée)
     if (form.statut !== "rejetée") {
       for (const l of lignes) {
         await supabase.rpc("update_stock", {

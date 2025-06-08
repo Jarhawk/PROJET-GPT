@@ -6,7 +6,7 @@ import toast, { Toaster } from "react-hot-toast";
 import FicheForm from "@/components/fiches/FicheForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogOverlay, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion as _motion } from "framer-motion";
 
 export default function FicheDetail() {
   const { id } = useParams();
@@ -136,8 +136,8 @@ export default function FicheDetail() {
       <div className="bg-white shadow rounded-xl p-6 mb-6">
         <p><strong>Famille :</strong> {fiche.famille || "-"}</p>
         <p><strong>Rendement :</strong> {fiche.rendement} {fiche.unite}</p>
-        <p><strong>Coût matière total :</strong> {fiche.cout_total ? Number(fiche.cout_total).toFixed(2) : "-"} €</p>
-        <p><strong>Coût/portion :</strong> {fiche.cout_portion ? Number(fiche.cout_portion).toFixed(2) : "-"} €</p>
+        <p><strong>Coût matière total :</strong> {fiche.cout_total ? Number(fiche.cout_total).toFixed(2) : "-"} €</p>
+        <p><strong>Coût/portion :</strong> {fiche.cout_portion ? Number(fiche.cout_portion).toFixed(2) : "-"} €</p>
         <p>
           <strong>Statut :</strong>{" "}
           {fiche.actif
@@ -199,7 +199,7 @@ export default function FicheDetail() {
         {editModal && (
           <Dialog open={editModal} onOpenChange={setEditModal}>
             <DialogOverlay asChild>
-              <motion.div
+              <_motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -207,7 +207,7 @@ export default function FicheDetail() {
               />
             </DialogOverlay>
             <DialogContent asChild>
-              <motion.div
+              <_motion.div
                 initial={{ scale: 0.85, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.85, opacity: 0 }}
@@ -227,7 +227,7 @@ export default function FicheDetail() {
                   </DialogClose>
                 </DialogHeader>
                 <FicheForm initialData={fiche} onSave={handleEdited} onCancel={() => setEditModal(false)} />
-              </motion.div>
+              </_motion.div>
             </DialogContent>
           </Dialog>
         )}

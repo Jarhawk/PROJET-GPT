@@ -8,7 +8,7 @@ import * as XLSX from "xlsx";
 import FournisseurForm from "@/components/fournisseurs/FournisseurForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogOverlay, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion as _motion } from "framer-motion";
 
 export default function FournisseurDetail() {
   const { id } = useParams();
@@ -96,7 +96,6 @@ export default function FournisseurDetail() {
       setContacts(contactsRes.data || []);
       setLoading(false);
     });
-    // eslint-disable-next-line
   }, [id, claims?.mama_id, isAuthenticated]);
 
   // Graphique achats (mensuel + top produits)
@@ -461,7 +460,7 @@ export default function FournisseurDetail() {
         {editModal && (
           <Dialog open={editModal} onOpenChange={setEditModal}>
             <DialogOverlay asChild>
-              <motion.div
+              <_motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -469,7 +468,7 @@ export default function FournisseurDetail() {
               />
             </DialogOverlay>
             <DialogContent asChild>
-              <motion.div
+              <_motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.8, opacity: 0 }}
@@ -493,7 +492,7 @@ export default function FournisseurDetail() {
                   onSave={handleEdited}
                   onCancel={() => setEditModal(false)}
                 />
-              </motion.div>
+              </_motion.div>
             </DialogContent>
           </Dialog>
         )}

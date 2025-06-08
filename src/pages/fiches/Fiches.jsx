@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogOverlay, DialogClose } from "@/components/ui/dialog";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion as _motion } from "framer-motion";
 import FicheForm from "@/components/fiches/FicheForm";
 
 export default function Fiches() {
@@ -197,7 +197,7 @@ export default function Fiches() {
         {openModal && (
           <Dialog open={openModal} onOpenChange={setOpenModal}>
             <DialogOverlay asChild>
-              <motion.div
+              <_motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -205,7 +205,7 @@ export default function Fiches() {
               />
             </DialogOverlay>
             <DialogContent asChild>
-              <motion.div
+              <_motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.8, opacity: 0 }}
@@ -225,7 +225,7 @@ export default function Fiches() {
                   </DialogClose>
                 </DialogHeader>
                 <FicheForm onSave={handleCreated} onCancel={() => setOpenModal(false)} />
-              </motion.div>
+              </_motion.div>
             </DialogContent>
           </Dialog>
         )}

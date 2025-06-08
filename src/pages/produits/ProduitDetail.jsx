@@ -66,7 +66,7 @@ export default function ProduitDetail() {
             grouped[sid].achats.push(item);
           });
           // Calcule KPI par fournisseur
-          const historyData = Object.entries(grouped).map(([sid, group]) => {
+          const historyData = Object.entries(grouped).map(([_sid, group]) => {
             const achats = group.achats;
             const nb = achats.length;
             const prixMoy = achats.reduce((acc, a) => acc + (a.prix_achat || 0), 0) / nb || 0;

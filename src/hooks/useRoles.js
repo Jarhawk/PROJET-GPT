@@ -1,5 +1,5 @@
 // src/hooks/useRoles.js
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 
@@ -9,7 +9,7 @@ export function useRoles() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchRoles = async () => {
+  const fetchRoles = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -31,11 +31,11 @@ export function useRoles() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [mama_id, role]);
 
   useEffect(() => {
     if (mama_id || role === "superadmin") fetchRoles();
-  }, [mama_id, role]);
+  }, [mama_id, role, fetchRoles]);
 
   return { roles, loading, error, refetch: fetchRoles };
 }

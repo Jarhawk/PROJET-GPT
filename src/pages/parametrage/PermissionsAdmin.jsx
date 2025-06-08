@@ -61,7 +61,7 @@ export default function PermissionsAdmin() {
       <h1 className="text-2xl font-bold text-mamastock-gold mb-4">Permissions globales (superadmin)</h1>
       <div className="flex items-end gap-4 mb-4">
         <label>
-          <span className="text-gray-600">Filtrer par établissement :</span>
+          <span className="text-gray-600">Filtrer par établissement :</span>
           <select
             className="input input-bordered ml-2"
             value={filterMama}

@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import toast, { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogOverlay, DialogClose } from "@/components/ui/dialog";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion as _motion } from "framer-motion";
 import { useFicheCoutHistory } from "@/hooks/useFicheCoutHistory";
 
 function calcCoutSousRecette(fiche, qteUtilisee) {
@@ -74,8 +74,8 @@ export default function FicheForm({ initialData = null, onSave, onCancel }) {
   const coutPortion = form.rendement ? (coutTotal / form.rendement) : 0;
 
   // Lignes ingrédients
-  const addLigne = (ligne) => setLignes(prev => [...prev, ligne]);
-  const removeLigne = (idx) => setLignes(prev => prev.filter((_, i) => i !== idx));
+  const removeLigne = (idx) =>
+    setLignes(prev => prev.filter((_, i) => i !== idx));
   const updateLigne = (idx, newLigne) => setLignes(prev => prev.map((l, i) => i === idx ? newLigne : l));
 
   // Ajout ligne produit/sous-recette
@@ -352,8 +352,8 @@ export default function FicheForm({ initialData = null, onSave, onCancel }) {
       </div>
       <div className="flex flex-col md:flex-row gap-4 justify-end items-center mt-4">
         <div>
-          <p><strong>Coût matière total :</strong> {coutTotal.toFixed(2)} €</p>
-          <p><strong>Coût matière/portion :</strong> {coutPortion.toFixed(2)} €</p>
+          <p><strong>Coût matière total:</strong> {coutTotal.toFixed(2)} €</p>
+          <p><strong>Coût matière/portion:</strong> {coutPortion.toFixed(2)} €</p>
         </div>
         <div className="flex gap-2">
           <Button type="button" onClick={onCancel} disabled={loading}>
@@ -365,12 +365,12 @@ export default function FicheForm({ initialData = null, onSave, onCancel }) {
         </div>
       </div>
 
-      {/* MODALE IMBRIQUEE : création rapide sous-recette */}
+      {/* MODALE IMBRIQUEE: création rapide sous-recette */}
       <AnimatePresence>
         {openSousRecette && (
           <Dialog open={openSousRecette} onOpenChange={setOpenSousRecette}>
             <DialogOverlay asChild>
-              <motion.div
+              <_motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -378,7 +378,7 @@ export default function FicheForm({ initialData = null, onSave, onCancel }) {
               />
             </DialogOverlay>
             <DialogContent asChild>
-              <motion.div
+              <_motion.div
                 initial={{ scale: 0.85, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.85, opacity: 0 }}
@@ -402,7 +402,7 @@ export default function FicheForm({ initialData = null, onSave, onCancel }) {
                   onSave={handleSousRecetteCreated}
                   onCancel={() => setOpenSousRecette(false)}
                 />
-              </motion.div>
+              </_motion.div>
             </DialogContent>
           </Dialog>
         )}

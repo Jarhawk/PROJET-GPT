@@ -1,5 +1,5 @@
 // src/hooks/usePermissions.js
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 
@@ -9,7 +9,7 @@ export function usePermissions({ roleId = null, userId = null }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchPermissions = async () => {
+  const fetchPermissions = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -30,11 +30,11 @@ export function usePermissions({ roleId = null, userId = null }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [mama_id, roleId, userId]);
 
   useEffect(() => {
     if (mama_id) fetchPermissions();
-  }, [mama_id, roleId, userId]);
+  }, [mama_id, roleId, userId, fetchPermissions]);
 
   return { permissions, loading, error, refetch: fetchPermissions };
 }

@@ -1,14 +1,13 @@
 // ✅ src/hooks/useInventaires.js
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
-import { useAuth } from "@/context/AuthContext";
 
 export const useInventaires = ({ mama_id }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const fetchInventaires = async () => {
+  const fetchInventaires = useCallback(async () => {
     if (!mama_id) return;
 
     setLoading(true);
@@ -28,13 +27,13 @@ export const useInventaires = ({ mama_id }) => {
     }
 
     setLoading(false);
-  };
+  }, [mama_id]);
 
   useEffect(() => {
     if (mama_id) {
       fetchInventaires();
     }
-  }, [mama_id]);
+  }, [mama_id, fetchInventaires]);
 
   return { data, loading, error, fetchInventaires };
 };

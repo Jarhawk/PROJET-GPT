@@ -11,7 +11,6 @@ export default function StatsFiches() {
   const { isAuthenticated, loading: authLoading, claims } = useAuth();
   const [fiches, setFiches] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [familles, setFamilles] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedFiche, setSelectedFiche] = useState(null);
@@ -26,8 +25,7 @@ export default function StatsFiches() {
       supabase.from("fiches_techniques").select("*").eq("mama_id", claims.mama_id),
       supabase.from("familles").select("nom").eq("mama_id", claims.mama_id),
     ]).then(([ficheRes, familleRes]) => {
-      if (ficheRes.error) setError("Erreur chargement : " + ficheRes.error.message);
-      else setFiches(ficheRes.data || []);
+      if (!ficheRes.error) setFiches(ficheRes.data || []);
       setFamilles((familleRes.data || []).map(f => f.nom));
       setLoading(false);
     });
@@ -229,7 +227,7 @@ export default function StatsFiches() {
           {historyChartData.length > 1 &&
             historyChartData[historyChartData.length - 1].cout > 1.15 * historyChartData[0].cout && (
             <div className="text-red-700 font-semibold mt-2">
-              ⚠️ Hausse du coût matière supérieure à 15% sur la période !
+              ⚠️ Hausse du coût matière supérieure à 15% sur la période !
             </div>
           )}
         </div>

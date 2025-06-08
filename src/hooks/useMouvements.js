@@ -43,7 +43,7 @@ export const useMouvements = () => {
       throw error;
     }
 
-    console.log("✅ Mouvement créé avec succès :", payload);
+    // Successfully created
   };
 
   return { getMouvements, createMouvement };

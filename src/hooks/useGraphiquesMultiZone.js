@@ -1,5 +1,5 @@
 // src/hooks/useGraphiquesMultiZone.js
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 
@@ -8,7 +8,7 @@ export function useGraphiquesMultiZone({ startDate, endDate }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     let query = supabase
       .from("factures")
@@ -25,11 +25,11 @@ export function useGraphiquesMultiZone({ startDate, endDate }) {
     else console.error("Erreur graphique multi-zone", error);
 
     setLoading(false);
-  };
+  }, [mama_id, startDate, endDate]);
 
   useEffect(() => {
     if (mama_id) fetchData();
-  }, [mama_id, startDate, endDate]);
+  }, [mama_id, startDate, endDate, fetchData]);
 
   return { data, loading, refetch: fetchData };
 }

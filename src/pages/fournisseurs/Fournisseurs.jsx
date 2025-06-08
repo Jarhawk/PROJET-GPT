@@ -6,7 +6,7 @@ import toast, { Toaster } from "react-hot-toast";
 import FournisseurForm from "@/components/fournisseurs/FournisseurForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogOverlay, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion as _motion } from "framer-motion";
 
 export default function Fournisseurs() {
   const { isAuthenticated, loading: authLoading, claims } = useAuth();
@@ -214,7 +214,7 @@ export default function Fournisseurs() {
         {openModal && (
           <Dialog open={openModal} onOpenChange={setOpenModal}>
             <DialogOverlay asChild>
-              <motion.div
+              <_motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -222,7 +222,7 @@ export default function Fournisseurs() {
               />
             </DialogOverlay>
             <DialogContent asChild>
-              <motion.div
+              <_motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.8, opacity: 0 }}
@@ -242,7 +242,7 @@ export default function Fournisseurs() {
                   </DialogClose>
                 </DialogHeader>
                 <FournisseurForm onSave={handleCreated} onCancel={() => setOpenModal(false)} />
-              </motion.div>
+              </_motion.div>
             </DialogContent>
           </Dialog>
         )}

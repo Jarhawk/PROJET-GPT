@@ -1,5 +1,5 @@
 // src/hooks/useFournisseurs.js
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 
@@ -9,7 +9,7 @@ export function useFournisseurs() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchFournisseurs = async () => {
+  const fetchFournisseurs = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -30,11 +30,11 @@ export function useFournisseurs() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [mama_id]);
 
   useEffect(() => {
     if (mama_id) fetchFournisseurs();
-  }, [mama_id]);
+  }, [mama_id, fetchFournisseurs]);
 
   return { data, loading, error, refetch: fetchFournisseurs };
 }

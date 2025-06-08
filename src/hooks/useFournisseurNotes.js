@@ -1,5 +1,5 @@
 // src/hooks/useFournisseurNotes.js
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 
@@ -9,7 +9,7 @@ export function useFournisseurNotes(fournisseurId) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const fetchNotes = async () => {
+  const fetchNotes = useCallback(async () => {
     if (!fournisseurId || !mama_id) return;
     setLoading(true);
     setError("");
@@ -29,9 +29,9 @@ export function useFournisseurNotes(fournisseurId) {
     }
 
     setLoading(false);
-  };
+  }, [fournisseurId, mama_id]);
 
-  const addNote = async (note) => {
+  const addNote = useCallback(async (note) => {
     if (!mama_id || !fournisseurId) return;
     const { error } = await supabase
       .from("fournisseur_notes")
@@ -43,9 +43,9 @@ export function useFournisseurNotes(fournisseurId) {
     } else {
       await fetchNotes();
     }
-  };
+  }, [fournisseurId, mama_id, fetchNotes]);
 
-  const deleteNote = async (noteId) => {
+  const deleteNote = useCallback(async (noteId) => {
     if (!noteId || !mama_id) return;
     const { error } = await supabase
       .from("fournisseur_notes")
@@ -59,13 +59,13 @@ export function useFournisseurNotes(fournisseurId) {
     } else {
       await fetchNotes();
     }
-  };
+  }, [mama_id, fetchNotes]);
 
   useEffect(() => {
     if (fournisseurId && mama_id) {
       fetchNotes();
     }
-  }, [fournisseurId, mama_id]);
+  }, [fournisseurId, mama_id, fetchNotes]);
 
   return { notes, loading, error, fetchNotes, addNote, deleteNote };
 }

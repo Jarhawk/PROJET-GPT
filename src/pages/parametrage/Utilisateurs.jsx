@@ -15,7 +15,6 @@ export default function Utilisateurs() {
   const [search, setSearch] = useState("");
   const [logs, setLogs] = useState([]);
   const [logUser, setLogUser] = useState(null);
-  const [editUser, setEditUser] = useState(null);
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 30;
 

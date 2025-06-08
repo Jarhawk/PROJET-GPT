@@ -31,5 +31,5 @@ export const useCustomClaims = (session) => {
     };
 
     fetchClaims();
-  }, [session]);
+  }, [session, setRole, setMamaId, setAccessRights]);
 };

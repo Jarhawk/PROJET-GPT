@@ -126,7 +126,7 @@ export default function Inventaire() {
     )
   );
 
-  // produitsAffiches : regroupement pour le tableau principal
+  // produitsAffiches : regroupement pour le tableau principal
   const produitsAffiches = produits
     .map(p => ({
       ...p,

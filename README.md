@@ -1,2 +1,2 @@
-# PROJET-GPT
+# mamastock.com
 

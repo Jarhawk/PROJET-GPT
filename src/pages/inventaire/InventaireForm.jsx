@@ -1,9 +1,11 @@
 import { useProducts } from "@/hooks/useProducts";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/context/AuthContext";
 
 function InventaireFormPage() {
-  const { products } = useProducts();
+  const { data: products, loading: loadingProducts } = useProducts();
+  const { mama_id } = useAuth();
   const [zone, setZone] = useState("");
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [stockFinal, setStockFinal] = useState({});
@@ -17,13 +19,14 @@ function InventaireFormPage() {
         .select("*")
         .eq("date", date)
         .eq("zone", zone)
+        .eq("mama_id", mama_id)
         .eq("etat", "cloturé");
 
       setIsLocked(data?.length > 0);
     };
 
     checkIfLocked();
-  }, [zone, date]);
+  }, [zone, date, mama_id]);
 
   const handleChange = (productId, value) => {
     setStockFinal((prev) => ({
@@ -38,7 +41,7 @@ function InventaireFormPage() {
 
     const { data: inv, error: invError } = await supabase
       .from("inventaires")
-      .insert({ date, zone, etat: "brouillon" })
+      .insert({ date, zone, etat: "brouillon", mama_id })
       .select()
       .single();
 
@@ -54,6 +57,7 @@ function InventaireFormPage() {
           inventaire_id: inv.id,
           product_id: productId,
           stock_final: quantite,
+          mama_id,
         });
       }
     }
@@ -108,23 +112,31 @@ function InventaireFormPage() {
               </tr>
             </thead>
             <tbody>
-              {products
-                .sort((a, b) => a.nom.localeCompare(b.nom))
-                .map((prod) => (
-                  <tr key={prod.id} className="border-b hover:bg-gray-50">
-                    <td className="p-3">{prod.nom}</td>
-                    <td className="p-3">
-                      <input
-                        type="number"
-                        min="0"
-                        className="border rounded px-2 py-1 w-32"
-                        value={stockFinal[prod.id] || ""}
-                        disabled={isLocked}
-                        onChange={(e) => handleChange(prod.id, e.target.value)}
-                      />
-                    </td>
-                  </tr>
-                ))}
+              {loadingProducts ? (
+                <tr>
+                  <td className="p-3" colSpan="2">
+                    Chargement...
+                  </td>
+                </tr>
+              ) : (
+                products
+                  .sort((a, b) => a.nom.localeCompare(b.nom))
+                  .map((prod) => (
+                    <tr key={prod.id} className="border-b hover:bg-gray-50">
+                      <td className="p-3">{prod.nom}</td>
+                      <td className="p-3">
+                        <input
+                          type="number"
+                          min="0"
+                          className="border rounded px-2 py-1 w-32"
+                          value={stockFinal[prod.id] || ""}
+                          disabled={isLocked}
+                          onChange={(e) => handleChange(prod.id, e.target.value)}
+                        />
+                      </td>
+                    </tr>
+                  ))
+              )}
             </tbody>
           </table>
 
@@ -139,7 +151,7 @@ function InventaireFormPage() {
 
             <button
               onClick={() => window.open(`/ecarts?date=${date}&zone=${zone}`, "_blank")}
-              className="bg-blue-500 hover:bg-blue-600 text-white font-bold px-6 py-2 rounded"
+              className="bg-mamastock-gold hover:bg-mamastock-gold-hover text-white font-bold px-6 py-2 rounded"
             >
               📊 Voir les écarts
             </button>
@@ -149,7 +161,7 @@ function InventaireFormPage() {
                 const firstDay = date.slice(0, 7) + "-01";
                 window.open(`/ecarts?mode=pdf&mois=${firstDay}&zone=${zone}`, "_blank");
               }}
-              className="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2 rounded"
+              className="bg-mamastock-gold hover:bg-mamastock-gold-hover text-white font-bold px-6 py-2 rounded"
             >
               🧾 Export PDF – Écarts du mois
             </button>

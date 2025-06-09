@@ -1,13 +1,20 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/context/AuthContext";
 
 export default function MobileInventaire() {
+  const { mama_id } = useAuth();
   const [produits, setProduits] = useState([]);
   const [stockFinal, setStockFinal] = useState({});
 
   useEffect(() => {
-    supabase.from("products").select("*").then(({ data }) => setProduits(data || []));
-  }, []);
+    if (!mama_id) return;
+    supabase
+      .from("products")
+      .select("*")
+      .eq("mama_id", mama_id)
+      .then(({ data }) => setProduits(data || []));
+  }, [mama_id]);
 
   const handleChange = (id, value) => {
     setStockFinal(prev => ({ ...prev, [id]: value }));
@@ -15,11 +22,14 @@ export default function MobileInventaire() {
 
   const handleSave = async () => {
     for (const produitId in stockFinal) {
-      await supabase.from("inventaire_lignes").insert([{
-        produit_id: produitId,
-        stock_final: parseFloat(stockFinal[produitId]),
-        periode: "2025-05"
-      }]);
+      await supabase.from("inventaire_lignes").insert([
+        {
+          produit_id: produitId,
+          stock_final: parseFloat(stockFinal[produitId]),
+          periode: "2025-05",
+          mama_id,
+        },
+      ]);
     }
   };
 
@@ -39,7 +49,12 @@ export default function MobileInventaire() {
           </li>
         ))}
       </ul>
-      <button onClick={handleSave} className="mt-4 w-full bg-blue-600 text-white py-2 rounded">Valider Inventaire</button>
+      <button
+        onClick={handleSave}
+        className="mt-4 w-full bg-mamastock-gold text-white py-2 rounded hover:bg-mamastock-gold-hover"
+      >
+        Valider Inventaire
+      </button>
     </div>
   );
 }

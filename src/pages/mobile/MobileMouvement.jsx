@@ -2,15 +2,22 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "react-toastify";
+import { useAuth } from "@/context/AuthContext";
 
 export default function MobileMouvement() {
+  const { mama_id } = useAuth();
   const [produits, setProduits] = useState([]);
   const [selectedId, setSelectedId] = useState("");
   const [quantite, setQuantite] = useState(1);
 
   useEffect(() => {
-    supabase.from("products").select("id, nom").then(({ data }) => setProduits(data || []));
-  }, []);
+    if (!mama_id) return;
+    supabase
+      .from("products")
+      .select("id, nom")
+      .eq("mama_id", mama_id)
+      .then(({ data }) => setProduits(data || []));
+  }, [mama_id]);
 
   const handleSubmit = async () => {
     if (!selectedId || quantite <= 0) {
@@ -18,13 +25,16 @@ export default function MobileMouvement() {
       return;
     }
 
-    const { error } = await supabase.from("movements").insert([{
-      produit_id: selectedId,
-      zone_source: "Cave",
-      zone_destination: "Bar",
-      quantite,
-      date: new Date(),
-    }]);
+    const { error } = await supabase.from("movements").insert([
+      {
+        produit_id: selectedId,
+        zone_source: "Cave",
+        zone_destination: "Bar",
+        quantite,
+        date: new Date(),
+        mama_id,
+      },
+    ]);
 
     if (error) {
       toast.error("Erreur lors de la création du mouvement");
@@ -59,7 +69,7 @@ export default function MobileMouvement() {
 
       <button
         onClick={handleSubmit}
-        className="w-full bg-mamastockGold text-white py-2 rounded hover:bg-mamastockGoldHover transition"
+        className="w-full bg-mamastock-gold text-white py-2 rounded hover:bg-mamastock-gold-hover transition"
       >
         Créer mouvement
       </button>

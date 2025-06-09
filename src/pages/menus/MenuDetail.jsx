@@ -1,16 +1,20 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import MenuPDF from "./MenuPDF";
+import { useAuth } from "@/context/AuthContext";
 
 export default function MenuDetail({ id }) {
+  const { mama_id } = useAuth();
   const [ficheDetails, setFicheDetails] = useState([]);
 
   useEffect(() => {
     const fetchDetails = async () => {
+      if (!mama_id) return;
       const { data: menu, error } = await supabase
         .from("menus")
         .select("*")
         .eq("id", id)
+        .eq("mama_id", mama_id)
         .single();
 
       if (error || !menu) return;
@@ -18,13 +22,14 @@ export default function MenuDetail({ id }) {
       const { data: fiches } = await supabase
         .from("fiches")
         .select("*")
-        .in("id", menu.fiches || []);
+        .in("id", menu.fiches || [])
+        .eq("mama_id", mama_id);
 
       setFicheDetails(fiches || []);
     };
 
     fetchDetails();
-  }, [id]);
+  }, [id, mama_id]);
 
   if (ficheDetails.length === 0) {
     return <p className="text-gray-500 italic">Aucune fiche technique liée</p>;

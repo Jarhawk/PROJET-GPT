@@ -1,18 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useFiches } from "@/hooks/useFiches";
 import { toast } from "react-toastify";
+import { useAuth } from "@/context/AuthContext";
 
 export default function MenuForm({ onSuccess }) {
+  const { mama_id } = useAuth();
   const [nom, setNom] = useState("");
   const [date, setDate] = useState("");
   const [selectedFiches, setSelectedFiches] = useState([]);
-  const { getFiches } = useFiches();
-  const [fiches, setFiches] = useState([]);
-
-  useEffect(() => {
-    getFiches().then(setFiches);
-  }, [getFiches]);
+  const { fiches, loading: loadingFiches } = useFiches();
 
   const handleSubmit = async () => {
     if (!nom || !date || selectedFiches.length === 0) {
@@ -24,6 +21,7 @@ export default function MenuForm({ onSuccess }) {
       nom,
       date,
       fiches: selectedFiches,
+      mama_id,
     });
 
     if (error) {
@@ -69,25 +67,29 @@ export default function MenuForm({ onSuccess }) {
       <div className="mb-4">
         <label className="font-semibold">Sélectionner les fiches à associer :</label>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mt-2 max-h-60 overflow-y-auto border rounded p-2">
-          {fiches.map((fiche) => (
-            <label
-              key={fiche.id}
-              className={`flex items-start gap-3 p-2 rounded-lg cursor-pointer border hover:shadow-sm transition
+          {loadingFiches ? (
+            <div className="col-span-full text-center py-4">Chargement...</div>
+          ) : (
+            fiches.map((fiche) => (
+              <label
+                key={fiche.id}
+                className={`flex items-start gap-3 p-2 rounded-lg cursor-pointer border hover:shadow-sm transition
                 ${selectedFiches.includes(fiche.id) ? "bg-mamastock-gold text-white" : "bg-gray-50"}`}
-            >
-              <input
-                type="checkbox"
-                checked={selectedFiches.includes(fiche.id)}
-                onChange={() => toggleFiche(fiche.id)}
-              />
-              <div>
-                <div className="font-semibold">{fiche.nom}</div>
-                <div className="text-xs italic">
-                  Type : {fiche.type} | Catégorie : {fiche.categorie}
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedFiches.includes(fiche.id)}
+                  onChange={() => toggleFiche(fiche.id)}
+                />
+                <div>
+                  <div className="font-semibold">{fiche.nom}</div>
+                  <div className="text-xs italic">
+                    Type : {fiche.type} | Catégorie : {fiche.categorie}
+                  </div>
                 </div>
-              </div>
-            </label>
-          ))}
+              </label>
+            ))
+          )}
         </div>
       </div>
 

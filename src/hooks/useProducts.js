@@ -12,10 +12,12 @@ export function useProducts({ search = "", famille = "", actif = true } = {}) {
   const [produits, setProduits] = useState([]);
   const [familles, setFamilles] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const fetchProduits = useCallback(async () => {
     if (!mama_id) return;
     setLoading(true);
+    setError(null);
     try {
       let query = supabase
         .from("products")
@@ -38,6 +40,7 @@ export function useProducts({ search = "", famille = "", actif = true } = {}) {
       setFamilles(uniqueFamilles);
     } catch (err) {
       console.error("❌ Erreur fetchProduits :", err);
+      setError(err.message);
       setProduits([]);
     } finally {
       setLoading(false);
@@ -50,11 +53,12 @@ export function useProducts({ search = "", famille = "", actif = true } = {}) {
   }, [fetchProduits]);
 
   return {
-    produits,
-    // compatibilité anciens composants
-    products: produits,
+    data: produits,
+    produits, // FR alias
+    products: produits, // legacy alias
     familles,
     loading,
+    error,
     refetch: fetchProduits,
   };
 }

@@ -2,15 +2,22 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "react-toastify";
+import { useAuth } from "@/context/AuthContext";
 
 export default function MobileRequisition() {
+  const { mama_id } = useAuth();
   const [produits, setProduits] = useState([]);
   const [selectedId, setSelectedId] = useState("");
   const [quantite, setQuantite] = useState(1);
 
   useEffect(() => {
-    supabase.from("products").select("id, nom").then(({ data }) => setProduits(data || []));
-  }, []);
+    if (!mama_id) return;
+    supabase
+      .from("products")
+      .select("id, nom")
+      .eq("mama_id", mama_id)
+      .then(({ data }) => setProduits(data || []));
+  }, [mama_id]);
 
   const handleSubmit = async () => {
     if (!selectedId || quantite <= 0) {
@@ -20,7 +27,7 @@ export default function MobileRequisition() {
 
     const { data, error } = await supabase
       .from("requisitions")
-      .insert([{ zone: "Bar" }])
+      .insert([{ zone: "Bar", mama_id }])
       .select()
       .single();
 
@@ -31,7 +38,7 @@ export default function MobileRequisition() {
 
     const { error: lineError } = await supabase
       .from("requisition_lines")
-      .insert([{ requisition_id: data.id, produit_id: selectedId, quantite }]);
+      .insert([{ requisition_id: data.id, produit_id: selectedId, quantite, mama_id }]);
 
     if (lineError) {
       toast.error("Erreur lors de l'ajout du produit");
@@ -66,7 +73,7 @@ export default function MobileRequisition() {
 
       <button
         onClick={handleSubmit}
-        className="w-full bg-mamastockGold text-white py-2 rounded hover:bg-mamastockGoldHover transition"
+        className="w-full bg-mamastock-gold text-white py-2 rounded hover:bg-mamastock-gold-hover transition"
       >
         Créer réquisition
       </button>

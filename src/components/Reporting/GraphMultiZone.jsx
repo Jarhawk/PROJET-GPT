@@ -45,7 +45,7 @@ export default function GraphMultiZone({ data }) {
         <h3 className="text-lg font-semibold">Comparatif par zone</h3>
         <button
           onClick={exportImage}
-          className="text-sm px-3 py-1 bg-mamastock-gold text-white rounded hover:bg-mamastock-goldHover"
+          className="text-sm px-3 py-1 bg-mamastock-gold text-white rounded hover:bg-mamastock-gold-hover"
         >
           Exporter en PNG
         </button>

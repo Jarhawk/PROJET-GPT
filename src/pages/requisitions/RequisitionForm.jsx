@@ -6,7 +6,7 @@ import { useProducts } from "@/hooks/useProducts";
 function RequisitionFormPage() {
   const navigate = useNavigate();
   const { createRequisition } = useRequisitions();
-  const { products } = useProducts();
+  const { data: products, loading: loadingProducts } = useProducts();
 
   const [type, setType] = useState("");
   const [motif, setMotif] = useState("");
@@ -78,11 +78,15 @@ function RequisitionFormPage() {
                 required
               >
                 <option value="">Sélectionner un produit</option>
-                {products.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.nom}
-                  </option>
-                ))}
+                {loadingProducts ? (
+                  <option disabled>Chargement...</option>
+                ) : (
+                  products.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.nom}
+                    </option>
+                  ))
+                )}
               </select>
               <input
                 type="number"

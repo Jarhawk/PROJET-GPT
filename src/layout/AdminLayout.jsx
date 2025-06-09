@@ -11,7 +11,7 @@ export default function AdminLayout({ children }) {
       <Sidebar />
       <div className="flex flex-col flex-1">
         <Navbar />
-<main className="flex-1 p-6 overflow-auto">{children}</main>
+        <main className="flex-1 p-6 overflow-auto">{children}</main>
       </div>
     </div>
   );

@@ -8,7 +8,7 @@ import "jspdf-autotable";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@radix-ui/react-dialog";
-import { motion as _motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 const FOOD_COST_SEUIL = 28;
 const PERIODES = [
@@ -72,6 +72,7 @@ export default function BarManager() {
   }, [claims?.mama_id, dates]);
 
   // Map boissons et ventes
+  const boissonsById = Object.fromEntries(boissons.map(b => [b.id, b]));
   const ventesAgg = {};
   ventes.forEach(v => {
     ventesAgg[v.boisson_id] = (ventesAgg[v.boisson_id] || 0) + v.quantite;
@@ -189,25 +190,25 @@ export default function BarManager() {
       {/* Stat globales */}
       <div className="bg-white shadow rounded-xl p-4 mb-6 flex flex-wrap gap-6">
         <div>
-          <span className="font-semibold text-blue-700">Ventes totales :</span>
+          <span className="font-semibold text-blue-700">Ventes totales :</span>
           <span className="font-bold"> {ventesTot} </span>
         </div>
         <div>
-          <span className="font-semibold text-blue-700">Chiffre d'affaires :</span>
+          <span className="font-semibold text-blue-700">Chiffre d'affaires :</span>
           <span className="font-bold"> {caTot.toFixed(2)} €</span>
         </div>
         <div>
-          <span className="font-semibold">Marge totale :</span>
+          <span className="font-semibold">Marge totale :</span>
           <span className="font-bold"> {margeTot.toFixed(2)} €</span>
         </div>
         <div>
-          <span className="font-semibold">Food cost moyen :</span>
+          <span className="font-semibold">Food cost moyen :</span>
           <span className={avgFC > FOOD_COST_SEUIL ? "text-red-600 font-bold" : "font-bold"}>
             {avgFC ? avgFC.toFixed(1) + " %" : "-"}
           </span>
         </div>
         <div>
-          <span className="font-semibold">Boissons référencées :</span> {boissonsStats.length}
+          <span className="font-semibold">Boissons référencées :</span> {boissonsStats.length}
         </div>
       </div>
       {/* Graphe top ventes */}
@@ -256,7 +257,7 @@ export default function BarManager() {
           <tbody>
             <AnimatePresence>
               {boissonsStats.map(b => (
-                <_motion.tr
+                <motion.tr
                   key={b.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -276,15 +277,15 @@ export default function BarManager() {
                       >
                         <h2 className="font-bold text-xl mb-2">{b.nom}</h2>
                         <p>
-                          <b>Type :</b> {b.type || b.famille || "-"}
+                          <b>Type :</b> {b.type || b.famille || "-"}
                           <br />
-                          <b>Coût/portion :</b>{" "}
+                          <b>Coût/portion :</b>{" "}
                           {b.cout_portion ? Number(b.cout_portion).toFixed(2) : "-"} €
                           <br />
-                          <b>Prix vente :</b>{" "}
+                          <b>Prix vente :</b>{" "}
                           {b.prix_vente ? Number(b.prix_vente).toFixed(2) : "-"} €
                           <br />
-                          <b>Food cost :</b>{" "}
+                          <b>Food cost :</b>{" "}
                           {b.foodCost ? (
                             <span className={b.foodCost > FOOD_COST_SEUIL ? "text-red-600 font-semibold" : ""}>
                               {b.foodCost.toFixed(1)} %
@@ -293,13 +294,13 @@ export default function BarManager() {
                             "-"
                           )}
                           <br />
-                          <b>Ventes sur période sélectionnée : </b>
+                          <b>Ventes sur période sélectionnée : </b>
                           {b.quantiteVendue}
                           <br />
-                          <b>Marge totale : </b>
+                          <b>Marge totale : </b>
                           {b.totalMarge ? b.totalMarge.toFixed(2) : "-"} €
                           <br />
-                          <b>Chiffre d'affaires : </b>
+                          <b>Chiffre d'affaires : </b>
                           {b.totalCA ? b.totalCA.toFixed(2) : "-"} €
                         </p>
                       </DialogContent>
@@ -314,7 +315,7 @@ export default function BarManager() {
                   <td className="px-2 py-1">{b.quantiteVendue}</td>
                   <td className="px-2 py-1">{b.totalMarge ? b.totalMarge.toFixed(2) : "-"}</td>
                   <td className="px-2 py-1">{b.totalCA ? b.totalCA.toFixed(2) : "-"}</td>
-                </_motion.tr>
+                </motion.tr>
               ))}
             </AnimatePresence>
           </tbody>

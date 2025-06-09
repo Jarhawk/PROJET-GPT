@@ -376,10 +376,10 @@ export default function Menus() {
           {/* Stats */}
           <div className="bg-white shadow rounded-xl p-4 mb-8">
             <h2 className="font-bold mb-2">Statistiques du menu</h2>
-            <p><strong>Coût matière total menu :</strong> {coutTotal.toFixed(2)} €</p>
-            <p><strong>Total prix de vente :</strong> {pvTotal.toFixed(2)} €</p>
+            <p><strong>Coût matière total menu :</strong> {coutTotal.toFixed(2)} €</p>
+            <p><strong>Total prix de vente :</strong> {pvTotal.toFixed(2)} €</p>
             <p>
-              <strong>Food cost global :</strong>{" "}
+              <strong>Food cost global :</strong>{" "}
               <span className={foodCost > FOOD_COST_SEUIL ? "text-red-600 font-semibold" : ""}>
                 {foodCost ? foodCost.toFixed(1) : "-"} %
               </span>

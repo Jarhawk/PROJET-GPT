@@ -11,7 +11,7 @@ function RequisitionDetailPage() {
     if (id) {
       getRequisitionById(id).then(setRequisition);
     }
-  }, [id, getRequisitionById]);
+  }, [id]);
 
   if (!requisition) {
     return <div className="p-6 text-gray-500">Chargement…</div>;

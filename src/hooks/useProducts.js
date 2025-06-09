@@ -15,7 +15,12 @@ export function useProducts({ search = "", famille = "", actif = true } = {}) {
   const [error, setError] = useState(null);
 
   const fetchProduits = useCallback(async () => {
-    if (!mama_id) return;
+    if (!mama_id) {
+      setProduits([]);
+      setFamilles([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -40,7 +45,7 @@ export function useProducts({ search = "", famille = "", actif = true } = {}) {
       setFamilles(uniqueFamilles);
     } catch (err) {
       console.error("❌ Erreur fetchProduits :", err);
-      setError(err.message);
+      setError(err);
       setProduits([]);
     } finally {
       setLoading(false);
@@ -59,6 +64,7 @@ export function useProducts({ search = "", famille = "", actif = true } = {}) {
     familles,
     loading,
     error,
+    fetchProduits,
     refetch: fetchProduits,
   };
 }

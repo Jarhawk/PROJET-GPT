@@ -9,7 +9,12 @@ export default function MenuForm({ onSuccess }) {
   const [nom, setNom] = useState("");
   const [date, setDate] = useState("");
   const [selectedFiches, setSelectedFiches] = useState([]);
-  const { fiches, loading: loadingFiches } = useFiches();
+  const { getFiches } = useFiches();
+  const [fiches, setFiches] = useState([]);
+
+  useEffect(() => {
+    getFiches().then(setFiches);
+  }, [getFiches]);
 
   const handleSubmit = async () => {
     if (!nom || !date || selectedFiches.length === 0) {

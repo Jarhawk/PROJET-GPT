@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 
@@ -7,7 +7,7 @@ export function useFamilles() {
   const [familles, setFamilles] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchFamilles = useCallback(async () => {
+  const fetchFamilles = async () => {
     if (!mama_id) return;
     setLoading(true);
     const { data, error } = await supabase
@@ -24,20 +24,20 @@ export function useFamilles() {
       setFamilles(unique);
     }
     setLoading(false);
-  }, [mama_id]);
+  };
 
-  const addFamille = useCallback(async (nom) => {
+  const addFamille = async (nom) => {
     if (!mama_id || !nom) return;
     const { error } = await supabase
       .from("familles")
       .insert([{ nom, mama_id }]);
     if (error) console.error("Erreur ajout famille :", error.message);
     else await fetchFamilles();
-  }, [mama_id, fetchFamilles]);
+  };
 
   useEffect(() => {
     fetchFamilles();
-  }, [mama_id, fetchFamilles]);
+  }, [mama_id]);
 
   return { familles, addFamille, loading, fetchFamilles };
 }

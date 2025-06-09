@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
 function EcartInventairePage() {
@@ -6,10 +6,10 @@ function EcartInventairePage() {
   const [date, setDate] = useState(params.get("date") || "");
   const [zone, setZone] = useState(params.get("zone") || "");
   const [mois, setMois] = useState(params.get("mois") || "");
-  const [mode] = useState(params.get("mode") || "");
+  const [mode, setMode] = useState(params.get("mode") || "");
   const [ecarts, setEcarts] = useState([]);
 
-  const fetchEcarts = useCallback(async () => {
+  const fetchEcarts = async () => {
     if ((!date && !mois) || !zone) return;
 
     let all = [];
@@ -45,9 +45,9 @@ function EcartInventairePage() {
     }
 
     setEcarts(all);
-  }, [date, mois, zone]);
+  };
 
-  const renderPDF = useCallback(() => {
+  const renderPDF = () => {
     const rows = ecarts
       .map(
         (e) => `
@@ -98,17 +98,17 @@ function EcartInventairePage() {
     win.document.write(content);
     win.document.close();
     setTimeout(() => win.print(), 300);
-  }, [ecarts, zone]);
+  };
 
   useEffect(() => {
     fetchEcarts();
-  }, [date, zone, mois, fetchEcarts]);
+  }, [date, zone, mois]);
 
   useEffect(() => {
     if (mode === "pdf" && zone && (date || mois)) {
       fetchEcarts().then(() => setTimeout(() => renderPDF(), 500));
     }
-  }, [mode, ecarts, zone, date, mois, fetchEcarts, renderPDF]);
+  }, [mode, ecarts]);
 
   return (
     <div className="p-6 bg-mamastock-bg min-h-screen">

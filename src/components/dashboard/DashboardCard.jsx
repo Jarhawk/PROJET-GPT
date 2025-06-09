@@ -1,8 +1,8 @@
-import { motion as _motion } from "framer-motion";
+import { motion } from "framer-motion";
 
 export default function DashboardCard({ icon: Icon, title, value }) {
   return (
-    <_motion.div
+    <motion.div
       className="bg-white/10 border border-mamastock-gold rounded-xl p-6 shadow hover:bg-white/20 transition text-white"
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -15,6 +15,6 @@ export default function DashboardCard({ icon: Icon, title, value }) {
         </div>
         {Icon && <Icon className="w-8 h-8 text-mamastock-gold" />}
       </div>
-    </_motion.div>
+    </motion.div>
   );
 }

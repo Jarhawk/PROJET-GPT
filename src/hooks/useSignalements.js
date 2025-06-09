@@ -1,5 +1,5 @@
 // ✅ src/hooks/useSignalements.js
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 
@@ -9,7 +9,7 @@ export function useSignalements() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchSignalements = useCallback(async () => {
+  const fetchSignalements = async () => {
     if (!mama_id) return;
 
     try {
@@ -28,11 +28,11 @@ export function useSignalements() {
     } finally {
       setLoading(false);
     }
-  }, [mama_id]);
+  };
 
   useEffect(() => {
     fetchSignalements();
-  }, [mama_id, fetchSignalements]);
+  }, [mama_id]);
 
   const addSignalement = async (newSignalement) => {
     if (!mama_id) return;

@@ -49,7 +49,7 @@ export const useComparatif = (produitId) => {
         byFournisseur[supplierId].push(ligne);
       }
 
-      const lignesFinales = Object.entries(byFournisseur).map(([_fid, achats]) => {
+      const lignesFinales = Object.entries(byFournisseur).map(([fid, achats]) => {
         const total = achats.reduce((acc, l) => acc + (l.total || 0), 0);
         const quantite = achats.reduce((acc, l) => acc + (l.quantite || 0), 0);
         const pmp = quantite ? (total / quantite).toFixed(2) : "0.00";

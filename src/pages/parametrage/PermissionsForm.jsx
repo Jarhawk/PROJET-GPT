@@ -85,7 +85,7 @@ export default function PermissionsForm({ role, onClose, onSaved }) {
     <div className="w-full">
       <Toaster />
       <h2 className="font-bold mb-4 text-lg">
-        Permissions pour : <span className="text-mamastock-gold">{role.nom}</span>
+        Permissions pour : <span className="text-mamastock-gold">{role.nom}</span>
       </h2>
       <div className="overflow-x-auto mb-4">
         <table className="min-w-full table-auto text-center">

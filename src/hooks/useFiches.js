@@ -1,5 +1,5 @@
 // src/hooks/useFiches.js
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 
@@ -9,7 +9,7 @@ export const useFiches = ({ tri = "nom" } = {}) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchFiches = useCallback(async () => {
+  const fetchFiches = async () => {
     setLoading(true);
     setError(null);
 
@@ -34,11 +34,11 @@ export const useFiches = ({ tri = "nom" } = {}) => {
     } finally {
       setLoading(false);
     }
-  }, [mama_id, tri]);
+  };
 
   useEffect(() => {
     if (mama_id) fetchFiches();
-  }, [mama_id, tri, fetchFiches]);
+  }, [mama_id, tri]);
 
   return { fiches, loading, error, refetch: fetchFiches };
 };

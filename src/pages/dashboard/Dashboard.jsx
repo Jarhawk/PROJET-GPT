@@ -56,7 +56,7 @@ export default function Dashboard() {
       setLoading(true);
       try {
         // 1. Produits actifs/inactifs + stock total
-        const { count: produits } = await supabase
+        const { count: produits, error: prodErr } = await supabase
           .from("products")
           .select("id", { count: "exact", head: true })
           .eq("mama_id", claims.mama_id)
@@ -130,7 +130,7 @@ export default function Dashboard() {
         });
       } catch (err) {
         // Gère les erreurs globales
-        // (option : tu peux ajouter un toast d’erreur)
+        // (option : tu peux ajouter un toast d’erreur)
         console.error("Erreur chargement KPIs", err);
       } finally {
         setLoading(false);
@@ -178,11 +178,11 @@ export default function Dashboard() {
             Bonjour <span className="font-semibold">{user?.email}</span> !
           </p>
           <p>
-            Rôle : <strong>{claims?.role}</strong> – Mama : <strong>{claims?.mama_id}</strong>
+            Rôle : <strong>{claims?.role}</strong> – Mama : <strong>{claims?.mama_id}</strong>
           </p>
         </div>
         <div className="mt-4 sm:mt-0">
-          {/* Tu peux mettre un bouton d’accès rapide (ex : nouvelle facture, nouveau produit…) */}
+          {/* Tu peux mettre un bouton d’accès rapide (ex : nouvelle facture, nouveau produit…) */}
         </div>
       </div>
       {/* KPI cards */}
@@ -202,7 +202,7 @@ export default function Dashboard() {
       <div className="bg-white shadow rounded-xl p-6">
         <h2 className="text-xl font-bold mb-4 text-mamastock-gold">Analyse & Statistiques (prochaines évolutions)</h2>
         <p className="text-mamastock-text">
-          Tu peux intégrer ici des graphiques d’évolution (ex : factures/mois, stock par famille, top produits, alertes de stock bas, etc.).
+          Tu peux intégrer ici des graphiques d’évolution (ex : factures/mois, stock par famille, top produits, alertes de stock bas, etc.).
         </p>
       </div>
     </div>

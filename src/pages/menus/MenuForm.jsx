@@ -12,7 +12,7 @@ export default function MenuForm({ onSuccess }) {
 
   useEffect(() => {
     getFiches().then(setFiches);
-  }, [getFiches]);
+  }, []);
 
   const handleSubmit = async () => {
     if (!nom || !date || selectedFiches.length === 0) {

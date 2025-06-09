@@ -1,5 +1,5 @@
 // src/hooks/useFichesTechniques.js
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 
@@ -9,7 +9,7 @@ export function useFichesTechniques() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const getFiches = useCallback(async () => {
+  const getFiches = async () => {
     setLoading(true);
     setError(null);
     try {
@@ -27,7 +27,7 @@ export function useFichesTechniques() {
     } finally {
       setLoading(false);
     }
-  }, [mama_id]);
+  };
 
   const addFiche = async (fiche) => {
     if (!mama_id) return { error: "mama_id manquant" };
@@ -58,7 +58,7 @@ export function useFichesTechniques() {
 
   useEffect(() => {
     if (mama_id) getFiches();
-  }, [mama_id, getFiches]);
+  }, [mama_id]);
 
   return {
     fiches,

@@ -58,9 +58,9 @@ export function useProducts({ search = "", famille = "", actif = true } = {}) {
   }, [fetchProduits]);
 
   return {
-    produits,
-    // compatibilité anciens composants
-    products: produits,
+    data: produits,
+    produits, // FR alias
+    products: produits, // legacy alias
     familles,
     loading,
     error,

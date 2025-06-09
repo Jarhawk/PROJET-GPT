@@ -4,7 +4,7 @@ import { useProducts } from "@/hooks/useProducts";
 
 export default function MouvementForm() {
   const { createMouvement } = useMouvements();
-  const { products } = useProducts();
+  const { data: products, loading } = useProducts();
   const [form, setForm] = useState({
     produit_id: "",
     zone_source: "",
@@ -37,11 +37,15 @@ export default function MouvementForm() {
           className="border p-2 rounded"
         >
           <option value="">Choisir un produit</option>
-          {products.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.nom}
-            </option>
-          ))}
+          {loading ? (
+            <option disabled>Chargement...</option>
+          ) : (
+            products.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.nom}
+              </option>
+            ))
+          )}
         </select>
 
         <input

@@ -1,16 +1,20 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/context/AuthContext";
 
 export default function MenuPDF({ id }) {
+  const { mama_id } = useAuth();
   const [menu, setMenu] = useState(null);
   const [fiches, setFiches] = useState([]);
 
   useEffect(() => {
     const fetchMenu = async () => {
+      if (!mama_id) return;
       const { data: menuData } = await supabase
         .from("menus")
         .select("*")
         .eq("id", id)
+        .eq("mama_id", mama_id)
         .single();
 
       if (menuData) {
@@ -18,13 +22,14 @@ export default function MenuPDF({ id }) {
         const { data: fichesData } = await supabase
           .from("fiches")
           .select("*")
-          .in("id", menuData.fiches || []);
+          .in("id", menuData.fiches || [])
+          .eq("mama_id", mama_id);
         setFiches(fichesData || []);
       }
     };
 
     fetchMenu();
-  }, [id]);
+  }, [id, mama_id]);
 
   const exportPDF = () => {
     const content = `
@@ -68,7 +73,7 @@ export default function MenuPDF({ id }) {
   return (
     <button
       onClick={exportPDF}
-      className="bg-blue-600 text-white px-3 py-1 rounded text-sm"
+      className="bg-mamastock-gold hover:bg-mamastock-gold-hover text-white px-3 py-1 rounded text-sm"
     >
       📄 Exporter ce menu
     </button>

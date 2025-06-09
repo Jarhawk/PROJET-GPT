@@ -9,21 +9,21 @@ body {
 h1,
 h2,
 h3 {
-  @apply text-mamastockGold;
+  @apply text-mamastock-gold;
 }
 
 button {
-  @apply bg-mamastockGold text-white font-semibold rounded-lg px-4 py-2 transition;
+  @apply bg-mamastock-gold text-white font-semibold rounded-lg px-4 py-2 transition;
 }
 
 button:hover {
-  @apply bg-mamastockGoldHover;
+  @apply bg-mamastock-gold-hover;
 }
 
 input,
 select,
 textarea {
-  @apply bg-white text-black border border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-mamastockGold focus:ring-2 focus:ring-mamastockGold/30;
+  @apply bg-white text-black border border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-mamastock-gold focus:ring-2 focus:ring-mamastock-gold/30;
 }
 
 @layer utilities {

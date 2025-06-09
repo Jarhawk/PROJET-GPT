@@ -92,7 +92,8 @@ export default function Menus() {
     const { error } = await supabase
       .from("menus")
       .update({ lignes, pv_global: pvGlobal ? Number(pvGlobal) : null })
-      .eq("id", menuId);
+      .eq("id", menuId)
+      .eq("mama_id", claims.mama_id);
     if (!error) toast.success("Menu sauvegardé !");
     else toast.error(error.message);
   };
@@ -101,7 +102,11 @@ export default function Menus() {
   const handleDeleteMenu = async () => {
     if (!menuId) return;
     if (!window.confirm("Supprimer ce menu ?")) return;
-    const { error } = await supabase.from("menus").delete().eq("id", menuId);
+    const { error } = await supabase
+      .from("menus")
+      .delete()
+      .eq("id", menuId)
+      .eq("mama_id", claims.mama_id);
     if (!error) {
       setMenus(menus.filter(m => m.id !== menuId));
       setMenuId("");

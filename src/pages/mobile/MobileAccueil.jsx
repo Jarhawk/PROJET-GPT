@@ -10,19 +10,19 @@ export default function MobileAccueil() {
         <div className="flex flex-col gap-4">
           <Link
             to="/mobile/inventaire"
-            className="bg-blue-600 hover:bg-blue-700 transition text-white py-3 px-6 rounded-lg shadow-md text-lg font-semibold"
+            className="bg-mamastock-gold hover:bg-mamastock-gold-hover transition text-white py-3 px-6 rounded-lg shadow-md text-lg font-semibold"
           >
             📦 Inventaire
           </Link>
           <Link
             to="/mobile/requisition"
-            className="bg-green-600 hover:bg-green-700 transition text-white py-3 px-6 rounded-lg shadow-md text-lg font-semibold"
+            className="bg-mamastock-gold hover:bg-mamastock-gold-hover transition text-white py-3 px-6 rounded-lg shadow-md text-lg font-semibold"
           >
             🔄 Réquisition
           </Link>
           <Link
             to="/mobile/mouvement"
-            className="bg-orange-500 hover:bg-orange-600 transition text-white py-3 px-6 rounded-lg shadow-md text-lg font-semibold"
+            className="bg-mamastock-gold hover:bg-mamastock-gold-hover transition text-white py-3 px-6 rounded-lg shadow-md text-lg font-semibold"
           >
             🚚 Mouvement
           </Link>

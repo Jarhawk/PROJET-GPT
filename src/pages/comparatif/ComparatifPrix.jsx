@@ -1,33 +1,11 @@
 // src/pages/comparatif/ComparatifPrix.jsx
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import PrixFournisseurs from "./PrixFournisseurs";
-import { supabase } from "@/lib/supabase";
-import { useAuth } from "@/context/AuthContext";
+import { useProducts } from "@/hooks/useProducts";
 
 export default function ComparatifPrix() {
-  const { mama_id } = useAuth();
-  const [produits, setProduits] = useState([]);
+  const { products } = useProducts();
   const [produitId, setProduitId] = useState("");
-
-  useEffect(() => {
-    const fetchProduits = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("products")
-          .select("id, nom")
-          .eq("mama_id", mama_id)
-          .order("nom", { ascending: true });
-
-        if (error) throw error;
-        setProduits(data || []);
-      } catch (err) {
-        console.error("Erreur chargement produits :", err.message);
-        setProduits([]);
-      }
-    };
-
-    if (mama_id) fetchProduits();
-  }, [mama_id]);
 
   return (
     <div className="p-4">
@@ -44,7 +22,7 @@ export default function ComparatifPrix() {
         aria-label="Sélection produit"
       >
         <option value="">-- Choisir un produit --</option>
-        {produits.map((p) => (
+        {products.map((p) => (
           <option key={p.id} value={p.id}>
             {p.nom}
           </option>

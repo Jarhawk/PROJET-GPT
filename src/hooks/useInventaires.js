@@ -1,14 +1,22 @@
 // ✅ src/hooks/useInventaires.js
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/context/AuthContext";
 
-export const useInventaires = ({ mama_id }) => {
+export const useInventaires = ({ mama_id: mamaIdProp } = {}) => {
+  const { mama_id } = useAuth();
+  const activeMamaId = mamaIdProp || mama_id;
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const fetchInventaires = useCallback(async () => {
-    if (!mama_id) return;
+    if (!activeMamaId) {
+      setData([]);
+      setError(null);
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -16,7 +24,7 @@ export const useInventaires = ({ mama_id }) => {
     const { data, error } = await supabase
       .from("inventaires")
       .select("*")
-      .eq("mama_id", mama_id)
+      .eq("mama_id", activeMamaId)
       .order("date", { ascending: false });
 
     if (error) {
@@ -27,13 +35,11 @@ export const useInventaires = ({ mama_id }) => {
     }
 
     setLoading(false);
-  }, [mama_id]);
+  }, [activeMamaId]);
 
   useEffect(() => {
-    if (mama_id) {
-      fetchInventaires();
-    }
-  }, [mama_id, fetchInventaires]);
+    fetchInventaires();
+  }, [fetchInventaires]);
 
   return { data, loading, error, fetchInventaires };
 };

@@ -7,6 +7,7 @@ export function useMamas() {
   const { role, mama_id } = useAuth();
   const [mamas, setMamas] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const fetchMamas = useCallback(async () => {
     setLoading(true);
@@ -15,9 +16,14 @@ export function useMamas() {
     if (role !== "superadmin") query = query.eq("id", mama_id);
 
     const { data, error } = await query;
-
-    if (!error && data) setMamas(data);
-    else console.error("Erreur chargement mamas :", error);
+    if (error) {
+      console.error("Erreur chargement mamas :", error);
+      setError(error);
+      setMamas([]);
+    } else {
+      setMamas(data || []);
+      setError(null);
+    }
 
     setLoading(false);
   }, [role, mama_id]);
@@ -26,5 +32,5 @@ export function useMamas() {
     fetchMamas();
   }, [role, mama_id, fetchMamas]);
 
-  return { mamas, loading, refetch: fetchMamas };
+  return { mamas, loading, error, refetch: fetchMamas };
 }

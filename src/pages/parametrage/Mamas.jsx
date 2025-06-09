@@ -1,36 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@radix-ui/react-dialog";
 import MamaForm from "./MamaForm";
+import { useMamas } from "@/hooks/useMamas";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function Mamas() {
-  const [mamas, setMamas] = useState([]);
+  const { mamas, loading, error, refetch } = useMamas();
   const [search, setSearch] = useState("");
   const [editMama, setEditMama] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
-
-  useEffect(() => {
-    fetchMamas();
-  }, []);
-
-  const fetchMamas = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from("mamas")
-      .select("*")
-      .order("nom", { ascending: true });
-    if (!error) setMamas(data || []);
-    setLoading(false);
-  };
 
   const handleDelete = async id => {
     const { error } = await supabase.from("mamas").delete().eq("id", id);
     if (!error) {
       toast.success("Établissement supprimé.");
-      fetchMamas();
+      refetch();
     } else {
       toast.error("Erreur lors de la suppression.");
     }
@@ -49,6 +35,11 @@ export default function Mamas() {
       <h1 className="text-2xl font-bold text-mamastock-gold mb-4">
         Établissements (MAMA)
       </h1>
+      {error && (
+        <div className="text-center text-red-600 mb-2">
+          Erreur lors du chargement des établissements.
+        </div>
+      )}
       <div className="flex gap-4 mb-4 items-end">
         <input
           className="input input-bordered w-64"
@@ -148,7 +139,7 @@ export default function Mamas() {
           <MamaForm
             mama={editMama}
             onSaved={() => {
-              fetchMamas();
+              refetch();
               setEditMama(null);
             }}
             onClose={() => setEditMama(null)}

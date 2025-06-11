@@ -1,219 +1,151 @@
-// src/pages/Produits.jsx
-
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
-import { supabase } from "@/lib/supabase";
-
-const PAGE_SIZE = 50;
+import { useState, useEffect } from "react";
+import { useEnrichedProducts } from "@/hooks/useEnrichedProducts";
+import { useFamilles } from "@/hooks/useFamilles";
+import { useUnites } from "@/hooks/useUnites";
+import ProduitForm from "@/components/produits/ProduitForm";
+import ProduitDetail from "@/components/produits/ProduitDetail";
+import { Button } from "@/components/ui/button";
+import { Toaster, toast } from "react-hot-toast";
+import { saveAs } from "file-saver";
+import * as XLSX from "xlsx";
+import { motion } from "framer-motion";
 
 export default function Produits() {
-  const { isAuthenticated, loading: authLoading, claims } = useAuth();
-  const navigate = useNavigate();
+  const { products, fetchProducts } = useEnrichedProducts();
+  const { familles, fetchFamilles } = useFamilles();
+  const { unites, fetchUnites } = useUnites();
 
-  // Gestion état UI
-  const [produits, setProduits] = useState([]);
-  const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [familleFilter, setFamilleFilter] = useState("");
   const [search, setSearch] = useState("");
-  const [actifFilter, setActifFilter] = useState("true"); // "true", "false", "all"
-  const [familles, setFamilles] = useState([]);
+  const [familleFilter, setFamilleFilter] = useState("");
+  const [uniteFilter, setUniteFilter] = useState("");
+  const [actifFilter, setActifFilter] = useState("all");
+  const [showForm, setShowForm] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
-  // Sécurité : redirection login si non auth
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      navigate("/login");
-    }
-  }, [authLoading, isAuthenticated, navigate]);
-
-  // Charge les familles pour le filtre
-  useEffect(() => {
-    if (!claims?.mama_id || !isAuthenticated) return;
-    async function fetchFamilles() {
-      const { data } = await supabase
-        .from("familles")
-        .select("nom")
-        .eq("mama_id", claims.mama_id);
-      setFamilles(data?.map((f) => f.nom) || []);
-    }
+    fetchProducts();
     fetchFamilles();
-  }, [claims?.mama_id, isAuthenticated]);
+    fetchUnites();
+  }, []);
 
-  // Charge les produits paginés
-  useEffect(() => {
-    if (!claims?.mama_id || !isAuthenticated) return;
+  // Export Excel/XLSX
+  const exportExcel = () => {
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(products);
+    XLSX.utils.book_append_sheet(wb, ws, "Produits");
+    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    saveAs(new Blob([buf]), "produits.xlsx");
+  };
 
-    setLoading(true);
-
-    let query = supabase
-      .from("products")
-      .select("*", { count: "exact" })
-      .eq("mama_id", claims.mama_id);
-
-    // Filtres
-    if (actifFilter !== "all") {
-      query = query.eq("actif", actifFilter === "true");
-    }
-    if (familleFilter) {
-      query = query.ilike("famille", familleFilter);
-    }
-    if (search) {
-      query = query.or(
-        `nom.ilike.%${search}%,famille.ilike.%${search}%,unite.ilike.%${search}%`
-      );
-    }
-
-    query = query.order("famille", { ascending: true })
-                 .order("nom", { ascending: true })
-                 .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
-
-    query.then(({ data, count, error }) => {
-      if (error) {
-        setProduits([]);
-        setTotal(0);
-      } else {
-        setProduits(data || []);
-        setTotal(count || 0);
-      }
-      setLoading(false);
-    });
-  }, [claims?.mama_id, isAuthenticated, page, familleFilter, actifFilter, search]);
-
-  if (authLoading || loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <span className="text-mamastock-gold animate-pulse">Chargement des produits...</span>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) return null;
-
-  // Pagination
-  const totalPages = Math.ceil(total / PAGE_SIZE);
+  // Filtrage avancé et recherche
+  const produitsFiltres = products.filter(p =>
+    (!search || p.nom?.toLowerCase().includes(search.toLowerCase()) || p.famille?.toLowerCase().includes(search.toLowerCase())) &&
+    (!familleFilter || p.famille === familleFilter) &&
+    (!uniteFilter || p.unite === uniteFilter) &&
+    (actifFilter === "all" || (actifFilter === "true" ? p.actif : !p.actif))
+  );
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold text-mamastock-gold mb-6">
-        Produits
-      </h1>
-      <div className="mb-4 flex flex-wrap gap-4 items-end">
+    <div className="p-6 container mx-auto">
+      <Toaster position="top-right" />
+      <div className="flex flex-wrap gap-4 items-center mb-4">
         <input
-          className="input input-bordered"
-          type="text"
-          placeholder="Recherche nom, famille, unité..."
+          type="search"
           value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
+          onChange={e => setSearch(e.target.value)}
+          className="input"
+          placeholder="Recherche produit/famille"
         />
-        <select
-          className="select select-bordered"
-          value={familleFilter}
-          onChange={(e) => {
-            setFamilleFilter(e.target.value);
-            setPage(1);
-          }}
-        >
+        <select className="input" value={familleFilter} onChange={e => setFamilleFilter(e.target.value)}>
           <option value="">Toutes familles</option>
-          {familles.map((fam) => (
-            <option key={fam} value={fam}>
-              {fam}
-            </option>
-          ))}
+          {familles.map(f => <option key={f.id} value={f.nom}>{f.nom}</option>)}
         </select>
-        <select
-          className="select select-bordered"
-          value={actifFilter}
-          onChange={(e) => {
-            setActifFilter(e.target.value);
-            setPage(1);
-          }}
-        >
-          <option value="true">Actifs</option>
-          <option value="false">Inactifs</option>
+        <select className="input" value={uniteFilter} onChange={e => setUniteFilter(e.target.value)}>
+          <option value="">Toutes unités</option>
+          {unites.map(u => <option key={u.id} value={u.nom}>{u.nom}</option>)}
+        </select>
+        <select className="input" value={actifFilter} onChange={e => setActifFilter(e.target.value)}>
           <option value="all">Tous</option>
+          <option value="true">Actif</option>
+          <option value="false">Inactif</option>
         </select>
-        <button
-          className="btn bg-mamastock-gold text-white"
-          onClick={() => navigate("/produits/nouveau")}
-        >
-          + Nouveau produit
-        </button>
+        <Button onClick={() => { setSelectedProduct(null); setShowForm(true); }}>
+          Ajouter un produit
+        </Button>
+        <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
       </div>
-      {/* Table produits */}
-      <div className="overflow-x-auto bg-white rounded-xl shadow p-4">
-        <table className="min-w-full table-auto">
-          <thead>
-            <tr className="bg-mamastock-bg text-mamastock-gold">
-              <th className="py-2 px-3 text-left">Nom</th>
-              <th className="py-2 px-3 text-left">Famille</th>
-              <th className="py-2 px-3 text-left">Unité</th>
-              <th className="py-2 px-3 text-left">Stock théorique</th>
-              <th className="py-2 px-3 text-left">PMP</th>
-              <th className="py-2 px-3"></th>
+      <motion.table
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="min-w-full bg-white rounded-xl shadow-md"
+      >
+        <thead>
+          <tr>
+            <th className="px-4 py-2">Nom</th>
+            <th className="px-4 py-2">Famille</th>
+            <th className="px-4 py-2">Unité</th>
+            <th className="px-4 py-2">Stock</th>
+            <th className="px-4 py-2">Actif</th>
+            <th className="px-4 py-2">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {produitsFiltres.map((product) => (
+            <tr key={product.id}>
+              <td className="border px-4 py-2">
+                <Button
+                  variant="link"
+                  className="font-semibold text-mamastockGold"
+                  onClick={() => { setSelectedProduct(product); setShowForm(false); }}
+                >
+                  {product.nom}
+                </Button>
+              </td>
+              <td className="border px-4 py-2">{product.famille}</td>
+              <td className="border px-4 py-2">{product.unite}</td>
+              <td className="border px-4 py-2">{product.stock}</td>
+              <td className="border px-4 py-2">
+                <span className={product.actif ? "badge badge-admin" : "badge badge-user"}>
+                  {product.actif ? "Actif" : "Inactif"}
+                </span>
+              </td>
+              <td className="border px-4 py-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => { setSelectedProduct(product); setShowForm(true); }}
+                  className="mr-2"
+                >
+                  Modifier
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setSelectedProduct(product)}
+                >
+                  Détail
+                </Button>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {produits.length === 0 && (
-              <tr>
-                <td colSpan={6} className="py-6 text-center text-gray-500">
-                  Aucun produit trouvé
-                </td>
-              </tr>
-            )}
-            {produits.map((p) => (
-              <tr
-                key={p.id}
-                className="hover:bg-mamastock-bg/10 cursor-pointer"
-                onClick={() => navigate(`/produits/${p.id}`)}
-              >
-                <td className="py-2 px-3">{p.nom}</td>
-                <td className="py-2 px-3">{p.famille}</td>
-                <td className="py-2 px-3">{p.unite}</td>
-                <td className="py-2 px-3">{p.quantite_theorique ?? "-"}</td>
-                <td className="py-2 px-3">
-                  {p.pmp
-                    ? `${parseFloat(p.pmp).toFixed(2)} €`
-                    : p.prix_moyen
-                    ? `${parseFloat(p.prix_moyen).toFixed(2)} €`
-                    : "-"}
-                </td>
-                <td className="py-2 px-3">
-                  {!p.actif && (
-                    <span className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs">
-                      Inactif
-                    </span>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {/* Pagination */}
-      <div className="flex gap-4 mt-4 items-center justify-center">
-        <button
-          className="btn"
-          disabled={page <= 1}
-          onClick={() => setPage((p) => Math.max(1, p - 1))}
-        >
-          Précédent
-        </button>
-        <span>
-          Page {page} / {totalPages || 1}
-        </span>
-        <button
-          className="btn"
-          disabled={page >= totalPages}
-          onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-        >
-          Suivant
-        </button>
-      </div>
+          ))}
+        </tbody>
+      </motion.table>
+
+      {showForm && (
+        <ProduitForm
+          produit={selectedProduct}
+          familles={familles}
+          unites={unites}
+          onClose={() => { setShowForm(false); setSelectedProduct(null); fetchProducts(); }}
+        />
+      )}
+      {selectedProduct && !showForm && (
+        <ProduitDetail
+          produit={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+          refreshList={fetchProducts}
+        />
+      )}
     </div>
   );
 }

@@ -11,11 +11,15 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);                   // Objet user (email, id, etc.)
   const [claims, setClaims] = useState(null);               // { role, mama_id, access_rights }
   const [loading, setLoading] = useState(true);             // Chargement initial/refresh
+  const [claimsError, setClaimsError] = useState(null);
 
   // Récupérer les claims personnalisés depuis la table "users"
   const fetchClaims = useCallback(async (userId) => {
-    if (!userId) return setClaims(null);
-
+    if (!userId) {
+      setClaims(null);
+      setClaimsError(null);
+      return;
+    }
     const { data, error } = await supabase
       .from("users")
       .select("role, mama_id, access_rights")
@@ -24,9 +28,14 @@ export function AuthProvider({ children }) {
 
     if (error) {
       setClaims(null);
+      setClaimsError(error.message || "Erreur lors de la récupération des droits utilisateur.");
       console.error("Erreur récupération claims:", error);
+    } else if (!data) {
+      setClaims(null);
+      setClaimsError("Aucune information utilisateur trouvée pour ce compte.");
     } else {
       setClaims(data);
+      setClaimsError(null);
     }
   }, []);
 
@@ -52,11 +61,17 @@ export function AuthProvider({ children }) {
         setLoading(false);
       } else {
         setClaims(null);
+        setClaimsError(null);
       }
     });
 
     return () => listener?.subscription?.unsubscribe();
   }, [fetchClaims]);
+
+  // Rafraîchit manuellement les claims (ex: changement de droits à chaud)
+  const refreshClaims = useCallback(() => {
+    if (user?.id) fetchClaims(user.id);
+  }, [user, fetchClaims]);
 
   // Déconnexion utilisateur
   const logout = async () => {
@@ -64,6 +79,7 @@ export function AuthProvider({ children }) {
     setSession(null);
     setUser(null);
     setClaims(null);
+    setClaimsError(null);
     window.location.href = "/login";
   };
 
@@ -73,9 +89,10 @@ export function AuthProvider({ children }) {
     user,
     claims,             // { role, mama_id, access_rights }
     loading,
+    claimsError,
     logout,
+    refreshClaims,
     isAuthenticated: !!user && !!claims,
-    // helpers (facultatif)
     isAdmin: claims?.role === "admin" || claims?.role === "superadmin",
     mama_id: claims?.mama_id || null,
     access_rights: claims?.access_rights || [],
@@ -85,11 +102,17 @@ export function AuthProvider({ children }) {
   return (
     <AuthContext.Provider value={value}>
       {children}
+      {/* Affiche une alerte si claims non trouvés */}
+      {claimsError && (
+        <div className="fixed top-4 right-4 bg-red-700 text-white px-4 py-2 rounded-lg shadow z-50 animate-fade-in">
+          <b>Erreur sécurité :</b> {claimsError}
+        </div>
+      )}
     </AuthContext.Provider>
   );
 }
 
 // Hook d'accès au contexte Auth
 export function useAuth() {
-  return useContext(AuthContext);
+  return useContext(AuthContext) || {};
 }

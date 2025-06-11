@@ -1,43 +1,112 @@
-// src/hooks/useRoles.js
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 export function useRoles() {
   const { mama_id, role } = useAuth();
   const [roles, setRoles] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const fetchRoles = async () => {
+  // 1. Charger les rôles (tous si superadmin, sinon liés à mama_id)
+  async function fetchRoles({ search = "", actif = null } = {}) {
     setLoading(true);
     setError(null);
+    let query = supabase.from("roles").select("*");
+    if (role !== "superadmin") query = query.eq("mama_id", mama_id);
+    if (search) query = query.ilike("nom", `%${search}%`);
+    if (typeof actif === "boolean") query = query.eq("actif", actif);
 
+    const { data, error } = await query.order("nom", { ascending: true });
+    setRoles(Array.isArray(data) ? data : []);
+    setLoading(false);
+    if (error) setError(error);
+    return data || [];
+  }
+
+  // 2. Ajouter un rôle
+  async function addRole(roleData) {
+    setLoading(true);
+    setError(null);
+    const { error } = await supabase
+      .from("roles")
+      .insert([{ ...roleData, mama_id }]);
+    if (error) setError(error);
+    setLoading(false);
+    await fetchRoles();
+  }
+
+  // 3. Modifier un rôle
+  async function updateRole(id, updateFields) {
+    setLoading(true);
+    setError(null);
+    const { error } = await supabase
+      .from("roles")
+      .update(updateFields)
+      .eq("id", id)
+      .eq("mama_id", mama_id);
+    if (error) setError(error);
+    setLoading(false);
+    await fetchRoles();
+  }
+
+  // 4. Désactiver/réactiver un rôle
+  async function toggleRoleActive(id, actif) {
+    setLoading(true);
+    setError(null);
+    const { error } = await supabase
+      .from("roles")
+      .update({ actif })
+      .eq("id", id)
+      .eq("mama_id", mama_id);
+    if (error) setError(error);
+    setLoading(false);
+    await fetchRoles();
+  }
+
+  // 5. Export Excel
+  function exportRolesToExcel() {
+    const datas = (roles || []).map(r => ({
+      id: r.id,
+      nom: r.nom,
+      actif: r.actif,
+      droits: r.droits,
+      mama_id: r.mama_id,
+    }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Roles");
+    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    saveAs(new Blob([buf]), "roles_mamastock.xlsx");
+  }
+
+  // 6. Import Excel
+  async function importRolesFromExcel(file) {
+    setLoading(true);
+    setError(null);
     try {
-      let query = supabase.from("roles").select("*");
-
-      if (role !== "superadmin") {
-        query = query.eq("mama_id", mama_id);
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      setRoles(data || []);
-    } catch (err) {
-      console.error("❌ Erreur chargement rôles :", err.message);
-      setError(err.message);
-      setRoles([]);
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data, { type: "array" });
+      const arr = XLSX.utils.sheet_to_json(workbook.Sheets["Roles"]);
+      return arr;
+    } catch (error) {
+      setError(error);
+      return [];
     } finally {
       setLoading(false);
     }
+  }
+
+  return {
+    roles,
+    loading,
+    error,
+    fetchRoles,
+    addRole,
+    updateRole,
+    toggleRoleActive,
+    exportRolesToExcel,
+    importRolesFromExcel,
   };
-
-  useEffect(() => {
-    if (mama_id || role === "superadmin") fetchRoles();
-  }, [mama_id, role]);
-
-  return { roles, loading, error, refetch: fetchRoles };
 }
-
-export default useRoles;

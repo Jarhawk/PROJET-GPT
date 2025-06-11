@@ -1,71 +1,58 @@
-// src/hooks/useFournisseurNotes.js
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 
-export function useFournisseurNotes(fournisseurId) {
+export function useFournisseurNotes() {
   const { mama_id } = useAuth();
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(null);
 
-  const fetchNotes = async () => {
-    if (!fournisseurId || !mama_id) return;
+  async function fetchNotes(fournisseur_id) {
     setLoading(true);
-    setError("");
+    setError(null);
+    try {
+      const { data, error } = await supabase
+        .from("fournisseur_notes")
+        .select("*")
+        .eq("mama_id", mama_id)
+        .eq("fournisseur_id", fournisseur_id)
+        .order("date", { ascending: false });
 
-    const { data, error } = await supabase
-      .from("fournisseur_notes")
-      .select("*")
-      .eq("fournisseur_id", fournisseurId)
-      .eq("mama_id", mama_id)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Erreur fetchNotes:", error);
-      setError("Impossible de charger les notes");
-    } else {
-      setNotes(data);
+      if (error) throw error;
+      setNotes(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setError(err.message || "Erreur chargement des notes fournisseur.");
+      setNotes([]);
+    } finally {
+      setLoading(false);
     }
+  }
 
-    setLoading(false);
-  };
-
-  const addNote = async (note) => {
-    if (!mama_id || !fournisseurId) return;
+  async function addNote(note) {
     const { error } = await supabase
       .from("fournisseur_notes")
-      .insert([{ fournisseur_id: fournisseurId, note, mama_id }]);
+      .insert([{ ...note, mama_id }]);
+    if (error) throw error;
+    // Optionnel: refetch
+  }
 
-    if (error) {
-      console.error("Erreur addNote:", error);
-      throw error;
-    } else {
-      await fetchNotes();
-    }
-  };
-
-  const deleteNote = async (noteId) => {
-    if (!noteId || !mama_id) return;
+  async function deleteNote(id) {
     const { error } = await supabase
       .from("fournisseur_notes")
       .delete()
-      .eq("id", noteId)
-      .eq("mama_id", mama_id); // sécurité RLS
+      .eq("id", id)
+      .eq("mama_id", mama_id);
+    if (error) throw error;
+    // Optionnel: refetch
+  }
 
-    if (error) {
-      console.error("Erreur deleteNote:", error);
-      throw error;
-    } else {
-      await fetchNotes();
-    }
+  return {
+    notes,
+    loading,
+    error,
+    fetchNotes,
+    addNote,
+    deleteNote,
   };
-
-  useEffect(() => {
-    if (fournisseurId && mama_id) {
-      fetchNotes();
-    }
-  }, [fournisseurId, mama_id]);
-
-  return { notes, loading, error, fetchNotes, addNote, deleteNote };
 }

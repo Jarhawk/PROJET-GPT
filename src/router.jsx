@@ -1,105 +1,272 @@
-// src/router.jsx
-import React from "react";
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import AdminLayout from "@/layout/AdminLayout";
-import ViewerLayout from "@/layout/ViewerLayout";
-import Login from "@/pages/auth/Login";
-import Unauthorized from "@/pages/auth/Unauthorized";
-import Dashboard from "@/pages/dashboard/Dashboard";
+import React, { lazy, Suspense } from "react";
+import Breadcrumbs from "@/components/ui/Breadcrumbs";
 
-import Factures from "@/pages/factures/Factures";
-import FactureDetail from "@/pages/factures/FactureDetail";
+// Pages principales (adaptées à la structure réelle)
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const Stock = lazy(() => import("@/pages/Stock"));
+const Produits = lazy(() => import("@/pages/produits/Produits.jsx"));
+const ProduitDetail = lazy(() => import("@/pages/produits/ProduitDetail.jsx"));
+const ProduitForm = lazy(() => import("@/pages/produits/ProduitForm.jsx"));
+const Fiches = lazy(() => import("@/pages/fiches/Fiches.jsx"));
+const FicheForm = lazy(() => import("@/pages/fiches/FicheForm.jsx"));
+const FicheDetail = lazy(() => import("@/pages/fiches/FicheDetail.jsx"));
+const Inventaire = lazy(() => import("@/pages/inventaire/Inventaire.jsx"));
+const InventaireForm = lazy(() => import("@/pages/inventaire/InventaireForm.jsx"));
+const EcartInventaire = lazy(() => import("@/pages/inventaire/EcartInventaire.jsx"));
+const Factures = lazy(() => import("@/pages/factures/Factures.jsx"));
+const FactureForm = lazy(() => import("@/pages/factures/FactureForm.jsx"));
+const FactureDetail = lazy(() => import("@/pages/factures/FactureDetail.jsx"));
+const Menus = lazy(() => import("@/pages/menus/Menus.jsx"));
+const MenuForm = lazy(() => import("@/pages/menus/MenuForm.jsx"));
+const Fournisseurs = lazy(() => import("@/pages/fournisseurs/Fournisseurs.jsx"));
+const FournisseurDetail = lazy(() => import("@/pages/fournisseurs/FournisseurDetail.jsx"));
+const Utilisateurs = lazy(() => import("@/pages/Utilisateurs.jsx"));
+const Roles = lazy(() => import("@/pages/parametrage/Roles.jsx"));
+const Permissions = lazy(() => import("@/pages/parametrage/Permissions.jsx"));
+const Mamas = lazy(() => import("@/pages/parametrage/Mamas.jsx"));
+const Parametrage = lazy(() => import("@/pages/Parametrage.jsx"));
+const Login = lazy(() => import("@/pages/auth/Login.jsx"));
+const Unauthorized = lazy(() => import("@/pages/auth/Unauthorized.jsx"));
+const NotFound = lazy(() => import("@/pages/NotFound.jsx"));
 
-import Produits from "@/pages/produits/Produits";
-import ProduitDetail from "@/pages/produits/ProduitDetail";
-import ProduitForm from "@/pages/produits/ProduitForm";
-import Inventaire from "@/pages/Inventaire";
-import Requisitions from "@/pages/Requisitions";
-import Mouvements from "@/pages/Mouvements";
+// Ajoute ici tout nouveau module/page selon l’arborescence réelle
 
-import Fiches from "@/pages/fiches/Fiches";
-import FicheForm from "@/pages/fiches/FicheForm";
-import FicheDetail from "@/pages/fiches/FicheDetail";
+function ProtectedRoute({ children, accessKey }) {
+  const { isAuthenticated, access_rights, loading } = useAuth();
+  if (loading) return <div className="loader mx-auto my-16" />;
+  if (!isAuthenticated) return <Navigate to="/login" />;
+  if (accessKey && !access_rights.includes(accessKey))
+    return <Navigate to="/unauthorized" />;
+  return children;
+}
 
-import Roles from "@/pages/parametrage/Roles";
-import Utilisateurs from "@/pages/parametrage/Utilisateurs";
-import Mamas from "@/pages/parametrage/Mamas";
-import MamaForm from "@/pages/parametrage/MamaForm";
-import PermissionsAdmin from "@/pages/parametrage/PermissionsAdmin";
-import PermissionsForm from "@/pages/parametrage/PermissionsForm";
+function LayoutWithBreadcrumb() {
+  return (
+    <>
+      <Breadcrumbs />
+      <Suspense fallback={<div className="loader mx-auto my-8" />}>
+        <Outlet />
+      </Suspense>
+    </>
+  );
+}
 
-import Menus from "@/pages/menus/Menus";
-import CostBoisson from "@/pages/costboisson/CostBoisson";
-
-const ProtectedRoute = ({ element, accessKey }) => {
-  const { session, authReady, access_rights } = useAuth();
-  const location = useLocation();
-
-  if (!authReady) return <div className="text-center p-6">Chargement des autorisations...</div>;
-  if (!session) return <Navigate to="/login" state={{ from: location }} replace />;
-
-  const allowed = accessKey ? access_rights?.[accessKey] === true : true;
-  if (accessKey && !allowed) return <Navigate to="/unauthorized" replace />;
-
-  return element;
-};
-
-const RouteWithLayout = ({ element, accessKey }) => {
-  const { role } = useAuth();
-  const Layout = role === "viewer" ? ViewerLayout : AdminLayout;
-  return <ProtectedRoute accessKey={accessKey} element={<Layout>{element}</Layout>} />;
-};
-
-export default function Router() {
-  const { session, authReady } = useAuth();
-
-  if (!authReady) return <div className="text-center p-6">Initialisation de l'application...</div>;
-
+export default function RouterConfig() {
   return (
     <Routes>
-      <Route path="/" element={session ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/unauthorized" element={<Unauthorized />} />
+      <Route element={<LayoutWithBreadcrumb />}>
 
-      {/* Dashboard */}
-      <Route path="/dashboard" element={<RouteWithLayout element={<Dashboard />} accessKey="dashboard" />} />
+        {/* Homepage = Dashboard officiel */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute accessKey="dashboard">
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Factures */}
-      <Route path="/factures" element={<RouteWithLayout element={<Factures />} accessKey="factures" />} />
-      <Route path="/factures/:id" element={<RouteWithLayout element={<FactureDetail />} accessKey="factures" />} />
+        {/* Stock */}
+        <Route
+          path="/stock"
+          element={
+            <ProtectedRoute accessKey="stock">
+              <Stock />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Produits */}
-      <Route path="/produits" element={<RouteWithLayout element={<Produits />} accessKey="produits" />} />
-      <Route path="/produits/nouveau" element={<RouteWithLayout element={<ProduitForm />} accessKey="produits" />} />
-      <Route path="/produits/:id" element={<RouteWithLayout element={<ProduitDetail />} accessKey="produits" />} />
+        {/* Produits (liste, détail, formulaire) */}
+        <Route
+          path="/produits"
+          element={
+            <ProtectedRoute accessKey="stock">
+              <Produits />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/produits/nouveau"
+          element={
+            <ProtectedRoute accessKey="stock">
+              <ProduitForm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/produits/:id"
+          element={
+            <ProtectedRoute accessKey="stock">
+              <ProduitDetail />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Stock */}
-      <Route path="/inventaire" element={<RouteWithLayout element={<Inventaire />} accessKey="inventaire" />} />
-      <Route path="/requisitions" element={<RouteWithLayout element={<Requisitions />} accessKey="requisitions" />} />
-      <Route path="/mouvements" element={<RouteWithLayout element={<Mouvements />} accessKey="mouvements" />} />
+        {/* Fiches techniques */}
+        <Route
+          path="/fiches"
+          element={
+            <ProtectedRoute accessKey="fiches">
+              <Fiches />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/fiches/nouveau"
+          element={
+            <ProtectedRoute accessKey="fiches">
+              <FicheForm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/fiches/:id"
+          element={
+            <ProtectedRoute accessKey="fiches">
+              <FicheDetail />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Fiches techniques */}
-      <Route path="/fiches" element={<RouteWithLayout element={<Fiches />} accessKey="fiches" />} />
-      <Route path="/fiches/nouveau" element={<RouteWithLayout element={<FicheForm />} accessKey="fiches" />} />
-      <Route path="/fiches/:id" element={<RouteWithLayout element={<FicheDetail />} accessKey="fiches" />} />
+        {/* Inventaire */}
+        <Route
+          path="/inventaire"
+          element={
+            <ProtectedRoute accessKey="inventaires">
+              <Inventaire />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/inventaire/nouveau"
+          element={
+            <ProtectedRoute accessKey="inventaires">
+              <InventaireForm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/inventaire/ecart/:id"
+          element={
+            <ProtectedRoute accessKey="inventaires">
+              <EcartInventaire />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Menus */}
-      <Route path="/menus" element={<RouteWithLayout element={<Menus />} accessKey="menus" />} />
+        {/* Factures */}
+        <Route
+          path="/factures"
+          element={
+            <ProtectedRoute accessKey="factures">
+              <Factures />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/factures/nouveau"
+          element={
+            <ProtectedRoute accessKey="factures">
+              <FactureForm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/factures/:id"
+          element={
+            <ProtectedRoute accessKey="factures">
+              <FactureDetail />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Analyse */}
-      <Route path="/cost-boisson" element={<RouteWithLayout element={<CostBoisson />} accessKey="costboisson" />} />
+        {/* Menus */}
+        <Route
+          path="/menus"
+          element={
+            <ProtectedRoute accessKey="menus">
+              <Menus />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/menus/nouveau"
+          element={
+            <ProtectedRoute accessKey="menus">
+              <MenuForm />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Paramétrage */}
-      <Route path="/parametrage/roles" element={<RouteWithLayout element={<Roles />} accessKey="roles" />} />
-      <Route path="/parametrage/utilisateurs" element={<RouteWithLayout element={<Utilisateurs />} accessKey="utilisateurs" />} />
-      <Route path="/parametrage/mamas" element={<RouteWithLayout element={<Mamas />} accessKey="mamas" />} />
-      <Route path="/parametrage/mamas/:id" element={<RouteWithLayout element={<MamaForm />} accessKey="mamas" />} />
-      <Route path="/parametrage/permissions" element={<RouteWithLayout element={<PermissionsAdmin />} accessKey="permissions" />} />
-      <Route path="/parametrage/permissions/:id" element={<RouteWithLayout element={<PermissionsForm />} accessKey="permissions" />} />
+        {/* Fournisseurs */}
+        <Route
+          path="/fournisseurs"
+          element={
+            <ProtectedRoute accessKey="fournisseurs">
+              <Fournisseurs />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/fournisseurs/:id"
+          element={
+            <ProtectedRoute accessKey="fournisseurs">
+              <FournisseurDetail />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+        {/* Utilisateurs */}
+        <Route
+          path="/utilisateurs"
+          element={
+            <ProtectedRoute accessKey="parametrage">
+              <Utilisateurs />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Paramétrage & sous-modules */}
+        <Route
+          path="/parametrage"
+          element={
+            <ProtectedRoute accessKey="parametrage">
+              <Parametrage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/parametrage/roles"
+          element={
+            <ProtectedRoute accessKey="parametrage">
+              <Roles />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/parametrage/permissions"
+          element={
+            <ProtectedRoute accessKey="parametrage">
+              <Permissions />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/parametrage/mamas"
+          element={
+            <ProtectedRoute accessKey="parametrage">
+              <Mamas />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Auth, erreurs */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="*" element={<NotFound />} />
+      </Route>
     </Routes>
   );
 }

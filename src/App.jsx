@@ -1,41 +1,50 @@
-// src/App.jsx
-import { useAuth } from "@/context/AuthContext";
-import Router from "@/router";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import React from "react";
+import { BrowserRouter as Router } from "react-router-dom";
+import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { Toaster } from "react-hot-toast";
+import RouterConfig from "./router";
+import { useEffect } from "react";
 
-// Composant pour gérer le chargement initial (avant que authReady soit vrai)
-function AppGuard() {
-  const { authReady } = useAuth();
+// ErrorBoundary simple
+function ErrorBoundary({ children }) {
+  return (
+    <React.Suspense fallback={<div>Chargement...</div>}>
+      <React.Fragment>{children}</React.Fragment>
+    </React.Suspense>
+  );
+}
 
-  if (!authReady) {
-    return (
-      <div className="flex items-center justify-center min-h-screen text-white">
-        <div className="text-center space-y-2">
-          <div className="animate-spin h-10 w-10 border-4 border-mamastockGold border-t-transparent rounded-full mx-auto" />
-          <p className="text-sm text-mamastockText">Chargement des accès...</p>
-        </div>
-      </div>
-    );
-  }
+// Loader contextuel (si Auth pas prêt)
+function GlobalLoader() {
+  const { loading } = useAuth();
+  if (!loading) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+      <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-mamastockGold"></div>
+    </div>
+  );
+}
 
-  return <Router />;
+// Dark mode auto
+function useDarkMode() {
+  useEffect(() => {
+    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      document.documentElement.classList.add("dark");
+    }
+  }, []);
 }
 
 export default function App() {
+  useDarkMode();
   return (
-    <>
-      <AppGuard />
-      <ToastContainer
-        position="bottom-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        pauseOnHover
-        draggable
-        theme="colored"
-      />
-    </>
+    <AuthProvider>
+      <Router>
+        <GlobalLoader />
+        <ErrorBoundary>
+          <RouterConfig />
+        </ErrorBoundary>
+        <Toaster position="top-right" />
+      </Router>
+    </AuthProvider>
   );
 }

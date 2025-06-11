@@ -1,42 +1,113 @@
-// src/hooks/usePermissions.js
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
-export function usePermissions({ roleId = null, userId = null }) {
-  const { mama_id } = useAuth();
+export function usePermissions() {
+  const { mama_id, role } = useAuth();
   const [permissions, setPermissions] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const fetchPermissions = async () => {
+  // 1. Récupérer toutes les permissions
+  async function fetchPermissions({ roleId = null, userId = null } = {}) {
     setLoading(true);
     setError(null);
+    let query = supabase.from("permissions").select("*");
+    if (role !== "superadmin") query = query.eq("mama_id", mama_id);
+    if (roleId) query = query.eq("role_id", roleId);
+    if (userId) query = query.eq("user_id", userId);
 
+    const { data, error } = await query.order("role_id", { ascending: true });
+    setPermissions(Array.isArray(data) ? data : []);
+    setLoading(false);
+    if (error) setError(error);
+    return data || [];
+  }
+
+  // 2. Ajouter une permission
+  async function addPermission(permission) {
+    setLoading(true);
+    setError(null);
+    const { error } = await supabase
+      .from("permissions")
+      .insert([{ ...permission, mama_id }]);
+    if (error) setError(error);
+    setLoading(false);
+    await fetchPermissions();
+  }
+
+  // 3. Modifier une permission
+  async function updatePermission(id, updateFields) {
+    setLoading(true);
+    setError(null);
+    const { error } = await supabase
+      .from("permissions")
+      .update(updateFields)
+      .eq("id", id)
+      .eq("mama_id", mama_id);
+    if (error) setError(error);
+    setLoading(false);
+    await fetchPermissions();
+  }
+
+  // 4. Supprimer une permission
+  async function deletePermission(id) {
+    setLoading(true);
+    setError(null);
+    const { error } = await supabase
+      .from("permissions")
+      .delete()
+      .eq("id", id)
+      .eq("mama_id", mama_id);
+    if (error) setError(error);
+    setLoading(false);
+    await fetchPermissions();
+  }
+
+  // 5. Export Excel
+  function exportPermissionsToExcel() {
+    const datas = (permissions || []).map(p => ({
+      id: p.id,
+      role_id: p.role_id,
+      user_id: p.user_id,
+      droit: p.droit,
+      actif: p.actif,
+      mama_id: p.mama_id,
+    }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Permissions");
+    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    saveAs(new Blob([buf]), "permissions_mamastock.xlsx");
+  }
+
+  // 6. Import Excel
+  async function importPermissionsFromExcel(file) {
+    setLoading(true);
+    setError(null);
     try {
-      let query = supabase.from("permissions").select("*").eq("mama_id", mama_id);
-
-      if (roleId) query = query.eq("role_id", roleId);
-      if (userId) query = query.eq("user_id", userId);
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      setPermissions(data || []);
-    } catch (err) {
-      console.error("❌ Erreur chargement permissions :", err.message);
-      setError(err);
-      setPermissions([]);
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data, { type: "array" });
+      const arr = XLSX.utils.sheet_to_json(workbook.Sheets["Permissions"]);
+      return arr;
+    } catch (error) {
+      setError(error);
+      return [];
     } finally {
       setLoading(false);
     }
+  }
+
+  return {
+    permissions,
+    loading,
+    error,
+    fetchPermissions,
+    addPermission,
+    updatePermission,
+    deletePermission,
+    exportPermissionsToExcel,
+    importPermissionsFromExcel,
   };
-
-  useEffect(() => {
-    if (mama_id) fetchPermissions();
-  }, [mama_id, roleId, userId]);
-
-  return { permissions, loading, error, refetch: fetchPermissions };
 }
-
-export default usePermissions;

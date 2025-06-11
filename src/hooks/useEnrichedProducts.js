@@ -1,39 +1,34 @@
-// src/hooks/useEnrichedProducts.js
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 
 export function useEnrichedProducts() {
-  const { mama_id } = useAuth(); // ✅ remplacement correct
-  const [produits, setProduits] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { mama_id } = useAuth();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    if (!mama_id) {
+  async function fetchEnrichedProducts() {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data, error } = await supabase
+        .from("products")
+        .select(`
+          *,
+          suppliers:products_suppliers(*, supplier:suppliers(*))
+        `)
+        .eq("mama_id", mama_id);
+
+      if (error) throw error;
+      setProducts(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setError(err.message || "Erreur chargement produits enrichis.");
+      setProducts([]);
+    } finally {
       setLoading(false);
-      return;
     }
+  }
 
-    const fetch = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("products")
-          .select("*")
-          .eq("mama_id", mama_id);
-
-        if (error) throw error;
-
-        setProduits(data);
-      } catch (e) {
-        setError(e);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetch();
-  }, [mama_id]);
-
-  return { produits, loading, error };
+  return { products, loading, error, fetchEnrichedProducts };
 }

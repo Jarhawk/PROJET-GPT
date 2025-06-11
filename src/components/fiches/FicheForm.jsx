@@ -483,3 +483,147 @@ function SousRecetteForm({ mama_id, onSave, onCancel }) {
     </form>
   );
 }
+import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { useProducts } from "@/hooks/useProducts";
+import { useFiches } from "@/hooks/useFiches";
+import toast from "react-hot-toast";
+
+function calcTotal(products, lignes) {
+  let total = 0;
+  for (const l of lignes) {
+    const prod = products.find(p => p.id === l.product_id);
+    if (prod && prod.pmp) {
+      total += Number(l.quantite) * Number(prod.pmp);
+    }
+  }
+  return total;
+}
+
+export default function FicheForm({ fiche, onSuccess }) {
+  const { mama_id } = useAuth();
+  const { products, fetchProducts } = useProducts(mama_id);
+  const { addFiche, editFiche } = useFiches(mama_id);
+
+  const [nom, setNom] = useState(fiche?.nom || "");
+  const [portion, setPortion] = useState(fiche?.portion || 1);
+  const [description, setDescription] = useState(fiche?.description || "");
+  const [produits, setProduits] = useState(fiche?.produits || []);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => { fetchProducts(); }, [mama_id]);
+
+  const handleAddProduct = (productId) => {
+    if (!produits.some(p => p.product_id === productId)) {
+      setProduits([...produits, { product_id: productId, quantite: 1 }]);
+    }
+  };
+
+  const handleUpdateQuantite = (productId, quantite) => {
+    setProduits(produits.map(p =>
+      p.product_id === productId ? { ...p, quantite } : p
+    ));
+  };
+
+  const handleRemoveProduct = (productId) => {
+    setProduits(produits.filter(p => p.product_id !== productId));
+  };
+
+  const handleExportPDF = () => {
+    // Utiliser une lib style jsPDF, ici pseudo-code
+    toast.success("Export PDF non implémenté (ajouter jsPDF)");
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const ficheData = { nom, portion, description, produits, mama_id };
+      if (fiche?.id) {
+        await editFiche(fiche.id, ficheData);
+        toast.success("Fiche technique modifiée !");
+      } else {
+        await addFiche(ficheData);
+        toast.success("Fiche technique créée !");
+      }
+      onSuccess?.();
+    } catch (err) {
+      toast.error("Erreur lors de l'enregistrement.");
+    }
+    setLoading(false);
+  };
+
+  const total = calcTotal(products, produits);
+  const totalParPortion = portion > 0 ? total / portion : 0;
+
+  return (
+    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl shadow-md max-w-2xl mx-auto">
+      <h2 className="font-bold text-xl mb-4">
+        {fiche?.id ? "Modifier la fiche technique" : "Créer une fiche technique"}
+      </h2>
+      <input
+        type="text"
+        value={nom}
+        onChange={e => setNom(e.target.value)}
+        placeholder="Nom de la fiche"
+        className="input mb-2"
+        required
+      />
+      <input
+        type="number"
+        value={portion}
+        onChange={e => setPortion(Number(e.target.value))}
+        placeholder="Portions"
+        min={1}
+        className="input mb-2"
+      />
+      <textarea
+        value={description}
+        onChange={e => setDescription(e.target.value)}
+        placeholder="Description / Étapes"
+        className="input mb-2"
+        rows={3}
+      />
+      <div className="mb-4">
+        <label className="block font-semibold mb-2">Produits utilisés :</label>
+        <select onChange={e => handleAddProduct(e.target.value)} value="">
+          <option value="">Ajouter un produit</option>
+          {products.map(p => (
+            <option key={p.id} value={p.id}>{p.nom} ({p.unite})</option>
+          ))}
+        </select>
+        <ul>
+          {produits.map(p => {
+            const prod = products.find(prod => prod.id === p.product_id);
+            return (
+              <li key={p.product_id} className="flex gap-2 items-center my-2">
+                <span>{prod?.nom}</span>
+                <input
+                  type="number"
+                  value={p.quantite}
+                  min={0}
+                  step="0.01"
+                  className="input w-20"
+                  onChange={e => handleUpdateQuantite(p.product_id, Number(e.target.value))}
+                />
+                <span>{prod?.unite}</span>
+                <span className="ml-2 text-sm">{prod?.pmp ? (prod.pmp * p.quantite).toFixed(2) + " €" : "-"}</span>
+                <button type="button" className="ml-2 text-red-500" onClick={() => handleRemoveProduct(p.product_id)}>Supprimer</button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+      <div className="my-4 flex flex-col gap-2">
+        <span className="font-bold">Coût total : {total.toFixed(2)} €</span>
+        <span className="font-bold">Coût par portion : {totalParPortion.toFixed(2)} €</span>
+      </div>
+      <div className="flex gap-4 mt-4">
+        <button type="submit" className="btn btn-primary" disabled={loading}>
+          {fiche?.id ? "Modifier" : "Créer"}
+        </button>
+        <button type="button" className="btn" onClick={handleExportPDF}>Exporter PDF</button>
+      </div>
+    </form>
+  );
+}

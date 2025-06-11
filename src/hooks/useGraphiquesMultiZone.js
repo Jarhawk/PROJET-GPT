@@ -1,35 +1,51 @@
-// src/hooks/useGraphiquesMultiZone.js
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 
-export function useGraphiquesMultiZone({ startDate, endDate }) {
+export function useGraphiquesMultiZone() {
   const { mama_id } = useAuth();
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const fetchData = async () => {
+  // Exemple : récupère les évolutions par zone pour graphiques
+  async function fetchGraphiquesMultiZone() {
     setLoading(true);
-    let query = supabase
-      .from("factures")
-      .select("date, total_ht")
-      .eq("mama_id", mama_id)
-      .order("date", { ascending: true });
+    setError(null);
+    try {
+      const { data: zones, error } = await supabase
+        .from("zones_stock")
+        .select("id, nom");
 
-    if (startDate) query = query.gte("date", startDate);
-    if (endDate) query = query.lte("date", endDate);
+      if (error) throw error;
 
-    const { data, error } = await query;
+      let allData = [];
+      for (const zone of (zones || [])) {
+        const { data: inventaires, error: errorInv } = await supabase
+          .from("inventaires")
+          .select("date, stock_valorise")
+          .eq("mama_id", mama_id)
+          .eq("zone_id", zone.id)
+          .order("date", { ascending: true });
 
-    if (!error && data) setData(data);
-    else console.error("Erreur graphique multi-zone", error);
+        if (errorInv) throw errorInv;
 
-    setLoading(false);
-  };
+        allData.push({
+          zone: zone.nom,
+          points: (inventaires || []).map(inv => ({
+            date: inv.date,
+            stock_valorise: inv.stock_valorise,
+          })),
+        });
+      }
+      setData(allData);
+    } catch (err) {
+      setError(err.message || "Erreur chargement graphiques multi-zone.");
+      setData([]);
+    } finally {
+      setLoading(false);
+    }
+  }
 
-  useEffect(() => {
-    if (mama_id) fetchData();
-  }, [mama_id, startDate, endDate]);
-
-  return { data, loading, refetch: fetchData };
+  return { data, loading, error, fetchGraphiquesMultiZone };
 }

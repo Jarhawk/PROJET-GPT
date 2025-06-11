@@ -1,74 +1,68 @@
-// src/hooks/useFichesTechniques.js
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 
 export function useFichesTechniques() {
   const { mama_id } = useAuth();
-  const [fiches, setFiches] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [fichesTechniques, setFichesTechniques] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const getFiches = async () => {
+  async function fetchFichesTechniques() {
     setLoading(true);
     setError(null);
     try {
       const { data, error } = await supabase
         .from("fiches_techniques")
-        .select("id, nom, cout_total, portions, created_at")
+        .select("*")
         .eq("mama_id", mama_id)
         .order("nom", { ascending: true });
 
       if (error) throw error;
-      setFiches(data || []);
+      setFichesTechniques(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error("❌ Erreur chargement fiches techniques :", err.message);
-      setError(err);
+      setError(err.message || "Erreur chargement fiches techniques.");
+      setFichesTechniques([]);
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  const addFiche = async (fiche) => {
-    if (!mama_id) return { error: "mama_id manquant" };
-    const withMama = { ...fiche, mama_id };
-    return await supabase.from("fiches_techniques").insert([withMama]);
-  };
-
-  const updateFiche = async (id, updates) => {
-    return await supabase
+  async function addFicheTechnique(ft) {
+    const { error } = await supabase
       .from("fiches_techniques")
-      .update(updates)
+      .insert([{ ...ft, mama_id }]);
+    if (error) throw error;
+    await fetchFichesTechniques();
+  }
+
+  async function updateFicheTechnique(id, updateFields) {
+    const { error } = await supabase
+      .from("fiches_techniques")
+      .update(updateFields)
       .eq("id", id)
       .eq("mama_id", mama_id);
-  };
+    if (error) throw error;
+    await fetchFichesTechniques();
+  }
 
-  const deleteFiche = async (id) => {
-    return await supabase
+  async function deleteFicheTechnique(id) {
+    const { error } = await supabase
       .from("fiches_techniques")
       .delete()
       .eq("id", id)
       .eq("mama_id", mama_id);
-  };
-
-  const upsertFiche = async (fiche) => {
-    const withMama = { ...fiche, mama_id };
-    return await supabase.from("fiches_techniques").upsert([withMama]);
-  };
-
-  useEffect(() => {
-    if (mama_id) getFiches();
-  }, [mama_id]);
+    if (error) throw error;
+    await fetchFichesTechniques();
+  }
 
   return {
-    fiches,
+    fichesTechniques,
     loading,
     error,
-    getFiches,
-    addFiche,
-    updateFiche,
-    deleteFiche,
-    upsertFiche,
-    refetch: getFiches,
+    fetchFichesTechniques,
+    addFicheTechnique,
+    updateFicheTechnique,
+    deleteFicheTechnique,
   };
 }

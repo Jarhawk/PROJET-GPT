@@ -1,64 +1,138 @@
-// ✅ src/hooks/useInvoices.js
+import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
-export const useInvoices = () => {
+export function useInvoices() {
   const { mama_id } = useAuth();
+  const [invoices, setInvoices] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const getInvoices = async () => {
-    if (!mama_id) return [];
-    const { data, error } = await supabase
-      .from("invoices")
-      .select("*")
+  // 1. Charger toutes les factures (avec fournisseur, filtrage)
+  async function fetchInvoices({ search = "", fournisseur = "", statut = "", date = "" } = {}) {
+    setLoading(true);
+    setError(null);
+    let query = supabase
+      .from("factures")
+      .select(`
+        *,
+        fournisseur: fournisseurs (id, nom)
+      `)
       .eq("mama_id", mama_id)
       .order("date", { ascending: false });
 
-    if (error) {
-      console.error("❌ Erreur lors du chargement des factures :", error);
-      return [];
-    }
+    if (search) query = query.ilike("reference", `%${search}%`);
+    if (fournisseur) query = query.eq("fournisseur_id", fournisseur);
+    if (statut) query = query.eq("statut", statut);
+    if (date) query = query.eq("date", date);
 
-    return data || [];
-  };
+    const { data, error } = await query;
+    setInvoices(data || []);
+    setLoading(false);
+    if (error) setError(error);
+    return data;
+  }
 
-  const createInvoice = async (data) => {
+  // 2. Ajouter une facture
+  async function addInvoice(invoice) {
+    setLoading(true);
+    setError(null);
     const { error } = await supabase
-      .from("invoices")
-      .insert([{ ...data, mama_id }]);
+      .from("factures")
+      .insert([{ ...invoice, mama_id }]);
+    if (error) setError(error);
+    setLoading(false);
+    await fetchInvoices();
+  }
 
-    if (error) {
-      console.error("❌ Erreur lors de la création de la facture :", error);
-      throw error;
-    }
-  };
-
-  const updateInvoice = async (id, data) => {
+  // 3. Modifier une facture
+  async function updateInvoice(id, updateFields) {
+    setLoading(true);
+    setError(null);
     const { error } = await supabase
-      .from("invoices")
-      .update(data)
+      .from("factures")
+      .update(updateFields)
       .eq("id", id)
       .eq("mama_id", mama_id);
+    if (error) setError(error);
+    setLoading(false);
+    await fetchInvoices();
+  }
 
-    if (error) {
-      console.error("❌ Erreur lors de la mise à jour de la facture :", error);
-      throw error;
-    }
-  };
-
-  const deleteInvoice = async (id) => {
+  // 4. Supprimer une facture
+  async function deleteInvoice(id) {
+    setLoading(true);
+    setError(null);
     const { error } = await supabase
-      .from("invoices")
+      .from("factures")
       .delete()
       .eq("id", id)
       .eq("mama_id", mama_id);
+    if (error) setError(error);
+    setLoading(false);
+    await fetchInvoices();
+  }
 
-    if (error) {
-      console.error("❌ Erreur lors de la suppression de la facture :", error);
-      throw error;
+  // 5. Batch statut
+  async function batchUpdateStatus(ids = [], statut) {
+    setLoading(true);
+    setError(null);
+    const { error } = await supabase
+      .from("factures")
+      .update({ statut })
+      .in("id", ids)
+      .eq("mama_id", mama_id);
+    if (error) setError(error);
+    setLoading(false);
+    await fetchInvoices();
+  }
+
+  // 6. Export Excel
+  function exportInvoicesToExcel() {
+    const datas = (invoices || []).map(f => ({
+      id: f.id,
+      reference: f.reference,
+      date: f.date,
+      fournisseur: f.fournisseur?.nom,
+      montant: f.montant,
+      statut: f.statut,
+      mama_id: f.mama_id,
+    }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Factures");
+    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    saveAs(new Blob([buf]), "factures_mamastock.xlsx");
+  }
+
+  // 7. Import Excel
+  async function importInvoicesFromExcel(file) {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data, { type: "array" });
+      const arr = XLSX.utils.sheet_to_json(workbook.Sheets["Factures"]);
+      return arr;
+    } catch (error) {
+      setError(error);
+      return [];
+    } finally {
+      setLoading(false);
     }
+  }
+
+  return {
+    invoices,
+    loading,
+    error,
+    fetchInvoices,
+    addInvoice,
+    updateInvoice,
+    deleteInvoice,
+    batchUpdateStatus,
+    exportInvoicesToExcel,
+    importInvoicesFromExcel,
   };
-
-  return { getInvoices, createInvoice, updateInvoice, deleteInvoice };
-};
-
-export default useInvoices;
+}

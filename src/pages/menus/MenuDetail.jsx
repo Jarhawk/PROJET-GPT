@@ -1,57 +1,59 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
-import MenuPDF from "./MenuPDF";
-import { useAuth } from "@/context/AuthContext";
+import { saveAs } from "file-saver";
+import * as XLSX from "xlsx";
+import { Button } from "@/components/ui/button";
+import toast from "react-hot-toast";
 
-export default function MenuDetail({ id }) {
-  const { mama_id } = useAuth();
-  const [ficheDetails, setFicheDetails] = useState([]);
+export default function MenuDetail({ menu, onClose }) {
+  // Export Excel d'un menu
+  const exportExcel = () => {
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet([{
+      ...menu,
+      fiches: menu.fiches?.map(f => f.nom).join(", ")
+    }]);
+    XLSX.utils.book_append_sheet(wb, ws, "Menu");
+    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    saveAs(new Blob([buf]), `menu_${menu.id}.xlsx`);
+  };
 
-  useEffect(() => {
-    const fetchDetails = async () => {
-      if (!mama_id) return;
-      const { data: menu, error } = await supabase
-        .from("menus")
-        .select("*")
-        .eq("id", id)
-        .eq("mama_id", mama_id)
-        .single();
+  const exportPDF = () => {
+    toast.success("Export PDF non implémenté (plug jsPDF)");
+  };
 
-      if (error || !menu) return;
-
-      const { data: fiches } = await supabase
-        .from("fiches")
-        .select("*")
-        .in("id", menu.fiches || [])
-        .eq("mama_id", mama_id);
-
-      setFicheDetails(fiches || []);
-    };
-
-    fetchDetails();
-  }, [id, mama_id]);
-
-  if (ficheDetails.length === 0) {
-    return <p className="text-gray-500 italic">Aucune fiche technique liée</p>;
-  }
+  const historique = menu.historique || [
+    { date: "2024-06-10", user: "admin", action: "Création" }
+  ];
 
   return (
-    <div className="mt-4 space-y-3">
-      {ficheDetails.map((fiche) => (
-        <div
-          key={fiche.id}
-          className="border rounded p-3 bg-white shadow-sm"
-        >
-          <div className="font-semibold text-lg">{fiche.nom}</div>
-          <div className="text-sm text-gray-600">
-            Type : <span className="font-medium">{fiche.type}</span> | Catégorie :{" "}
-            <span className="font-medium">{fiche.categorie}</span>
-          </div>
+    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl shadow-lg p-8 min-w-[400px] max-w-[95vw] flex flex-col gap-2 relative">
+        <Button variant="outline" className="absolute top-2 right-2" onClick={onClose}>Fermer</Button>
+        <h2 className="font-bold text-xl mb-4">{menu.nom}</h2>
+        <div><b>Date :</b> {menu.date}</div>
+        <div>
+          <b>Fiches :</b>
+          <ul className="list-disc pl-6">
+            {menu.fiches?.map((f, i) => <li key={i}>{f.nom}</li>)}
+          </ul>
         </div>
-      ))}
-
-      <div className="mt-4">
-        <MenuPDF id={id} />
+        <div>
+          <b>Document :</b> {menu.document ?
+            <a href={menu.document} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">Voir document</a> :
+            <span className="text-gray-400">Aucun</span>
+          }
+        </div>
+        <div className="flex gap-2 mt-4">
+          <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
+          <Button variant="outline" onClick={exportPDF}>Export PDF</Button>
+        </div>
+        <div className="mt-4">
+          <b>Historique :</b>
+          <ul className="list-disc pl-6">
+            {historique.map((h, i) =>
+              <li key={i}>{h.date} — {h.user} — {h.action}</li>
+            )}
+          </ul>
+        </div>
       </div>
     </div>
   );

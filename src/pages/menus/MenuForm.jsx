@@ -1,109 +1,95 @@
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
-import { useFiches } from "@/hooks/useFiches";
-import { toast } from "react-toastify";
-import { useAuth } from "@/context/AuthContext";
+import { useMenus } from "@/hooks/useMenus";
+import { Button } from "@/components/ui/button";
+import toast from "react-hot-toast";
 
-export default function MenuForm({ onSuccess }) {
-  const { mama_id } = useAuth();
-  const [nom, setNom] = useState("");
-  const [date, setDate] = useState("");
-  const [selectedFiches, setSelectedFiches] = useState([]);
-  const { getFiches } = useFiches();
-  const [fiches, setFiches] = useState([]);
+export default function MenuForm({ menu, fiches = [], onClose }) {
+  const { addMenu, editMenu } = useMenus();
+  const [nom, setNom] = useState(menu?.nom || "");
+  const [date, setDate] = useState(menu?.date || "");
+  const [selectedFiches, setSelectedFiches] = useState(menu?.fiches?.map(f => f.id) || []);
+  const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    getFiches().then(setFiches);
-  }, []);
+  const handleSelectFiche = id => {
+    setSelectedFiches(selectedFiches.includes(id)
+      ? selectedFiches.filter(f => f !== id)
+      : [...selectedFiches, id]
+    );
+  };
 
-  const handleSubmit = async () => {
-    if (!nom || !date || selectedFiches.length === 0) {
-      toast.error("Tous les champs sont obligatoires.");
-      return;
-    }
+  // Upload PDF/image éventuel (mock)
+  const handleUpload = () => {
+    if (file) toast.success("Upload document (mock)");
+  };
 
-    const { error } = await supabase.from("menus").insert({
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    const menuData = {
       nom,
       date,
       fiches: selectedFiches,
-      mama_id,
-    });
-
-    if (error) {
-      console.error(error);
-      toast.error("Erreur lors de la création du menu.");
-    } else {
-      toast.success("Menu du jour enregistré !");
-      setNom("");
-      setDate("");
-      setSelectedFiches([]);
-      if (onSuccess) onSuccess();
+      document: file ? "TODO-upload" : menu?.document
+    };
+    try {
+      if (menu?.id) {
+        await editMenu(menu.id, menuData);
+        toast.success("Menu modifié !");
+      } else {
+        await addMenu(menuData);
+        toast.success("Menu ajouté !");
+      }
+      onClose?.();
+    } catch {
+      toast.error("Erreur lors de l'enregistrement.");
     }
-  };
-
-  const toggleFiche = (ficheId) => {
-    if (selectedFiches.includes(ficheId)) {
-      setSelectedFiches(selectedFiches.filter((id) => id !== ficheId));
-    } else {
-      setSelectedFiches([...selectedFiches, ficheId]);
-    }
+    setLoading(false);
   };
 
   return (
-    <div className="bg-white p-6 rounded shadow mb-6">
-      <h2 className="text-2xl font-bold mb-4 text-mamastock-gold">Créer un menu du jour</h2>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <input
-          type="text"
-          placeholder="Nom du menu"
-          value={nom}
-          onChange={(e) => setNom(e.target.value)}
-          className="border px-3 py-2 rounded"
-        />
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="border px-3 py-2 rounded"
-        />
-      </div>
-
+    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md max-w-xl mx-auto">
+      <h2 className="text-lg font-bold mb-4">
+        {menu ? "Modifier le menu" : "Ajouter un menu"}
+      </h2>
+      <input
+        className="input mb-2"
+        value={nom}
+        onChange={e => setNom(e.target.value)}
+        placeholder="Nom du menu"
+        required
+      />
+      <input
+        className="input mb-2"
+        type="date"
+        value={date}
+        onChange={e => setDate(e.target.value)}
+        required
+      />
       <div className="mb-4">
-        <label className="font-semibold">Sélectionner les fiches à associer :</label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mt-2 max-h-60 overflow-y-auto border rounded p-2">
-          {loadingFiches ? (
-            <div className="col-span-full text-center py-4">Chargement...</div>
-          ) : (
-            fiches.map((fiche) => (
-              <label
-                key={fiche.id}
-                className={`flex items-start gap-3 p-2 rounded-lg cursor-pointer border hover:shadow-sm transition
-                ${selectedFiches.includes(fiche.id) ? "bg-mamastock-gold text-white" : "bg-gray-50"}`}
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedFiches.includes(fiche.id)}
-                  onChange={() => toggleFiche(fiche.id)}
-                />
-                <div>
-                  <div className="font-semibold">{fiche.nom}</div>
-                  <div className="text-xs italic">
-                    Type : {fiche.type} | Catégorie : {fiche.categorie}
-                  </div>
-                </div>
-              </label>
-            ))
-          )}
+        <label className="block font-semibold mb-2">Fiches du menu :</label>
+        <div className="max-h-48 overflow-auto border rounded p-2 bg-gray-50">
+          {fiches.map(f => (
+            <label key={f.id} className="block">
+              <input
+                type="checkbox"
+                checked={selectedFiches.includes(f.id)}
+                onChange={() => handleSelectFiche(f.id)}
+                className="mr-2"
+              />
+              {f.nom}
+            </label>
+          ))}
         </div>
       </div>
-
-      <button
-        onClick={handleSubmit}
-        className="bg-mamastock-gold text-white px-4 py-2 rounded font-semibold"
-      >
-        ✅ Enregistrer le menu
-      </button>
-    </div>
+      <label>
+        Document/PDF menu : <input type="file" onChange={e => setFile(e.target.files[0])} />
+        <Button type="button" size="sm" variant="outline" className="ml-2" onClick={handleUpload}>Upload</Button>
+      </label>
+      <div className="flex gap-2 mt-4">
+        <Button type="submit" disabled={loading}>{menu ? "Modifier" : "Ajouter"}</Button>
+        <Button variant="outline" type="button" onClick={onClose}>Annuler</Button>
+      </div>
+    </form>
   );
 }

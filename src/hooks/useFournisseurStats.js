@@ -1,75 +1,38 @@
-// src/hooks/useFournisseurStats.js
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 
-export const useFournisseurStats = (fournisseurId) => {
+export function useFournisseurStats() {
   const { mama_id } = useAuth();
-  const [stats, setStats] = useState({
-    montant: 0,
-    nbFactures: 0,
-    notes: 0,
-    signalements: 0,
-  });
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      if (!fournisseurId || !mama_id) return;
+  async function fetchFournisseurStats(fournisseur_id) {
+    setLoading(true);
+    setError(null);
+    try {
+      // Exemple : agrégation des factures du fournisseur, total achats, etc.
+      const { data, error } = await supabase
+        .from("factures")
+        .select("id, montant, date")
+        .eq("mama_id", mama_id)
+        .eq("fournisseur_id", fournisseur_id);
 
-      try {
-        // Factures
-        const { data: factures, error: errFactures } = await supabase
-          .from("invoices")
-          .select("montant")
-          .eq("supplier_id", fournisseurId)
-          .eq("mama_id", mama_id);
+      if (error) throw error;
+      // Statistiques simples
+      const totalAchats = Array.isArray(data)
+        ? data.reduce((sum, f) => sum + (Number(f.montant) || 0), 0)
+        : 0;
+      const nbFactures = Array.isArray(data) ? data.length : 0;
+      setStats({ totalAchats, nbFactures, factures: data || [] });
+    } catch (err) {
+      setError(err.message || "Erreur récupération stats fournisseur.");
+      setStats(null);
+    } finally {
+      setLoading(false);
+    }
+  }
 
-        if (errFactures) throw errFactures;
-
-        // Notes
-        const { data: notes, error: errNotes } = await supabase
-          .from("notations")
-          .select("note")
-          .eq("fournisseur_id", fournisseurId)
-          .eq("mama_id", mama_id);
-
-        if (errNotes) throw errNotes;
-
-        // Signalements (à adapter si tu as une vraie relation avec fournisseur)
-        const { data: signalements, error: errSignals } = await supabase
-          .from("signalements")
-          .select("id")
-          .eq("fournisseur_id", fournisseurId) // remplace produit_id si applicable
-          .eq("mama_id", mama_id);
-
-        if (errSignals) throw errSignals;
-
-        const montant = factures?.reduce((acc, f) => acc + (f.montant || 0), 0);
-        const moyenne = notes?.length
-          ? (notes.reduce((acc, n) => acc + n.note, 0) / notes.length).toFixed(1)
-          : "0.0";
-
-        setStats({
-          montant: montant || 0,
-          nbFactures: factures?.length || 0,
-          notes: moyenne,
-          signalements: signalements?.length || 0,
-        });
-      } catch (err) {
-        console.error("❌ useFournisseurStats error :", err);
-        setStats({
-          montant: 0,
-          nbFactures: 0,
-          notes: 0,
-          signalements: 0,
-        });
-      }
-    };
-
-    fetchStats();
-  }, [fournisseurId, mama_id]);
-
-  return { stats };
-};
-
-export default useFournisseurStats;
+  return { stats, loading, error, fetchFournisseurStats };
+}

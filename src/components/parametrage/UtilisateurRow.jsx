@@ -1,31 +1,70 @@
-// src/components/parametrage/UtilisateurRow.jsx
-import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/context/AuthContext";
+import { useState } from "react";
+import toast from "react-hot-toast";
 
-export default function UtilisateurRow({ utilisateur, refresh }) {
-  const toggleActif = async () => {
-    await supabase
-      .from("users")
-      .update({ actif: !utilisateur.actif })
-      .eq("id", utilisateur.id);
-    refresh();
+export default function UtilisateurRow({ utilisateur, onEdit, onToggleActive }) {
+  const { isAdmin, mama_id } = useAuth();
+  const [showHistory, setShowHistory] = useState(false);
+
+  // Historique mock connexions
+  const history = [
+    { date: "2024-06-01 10:22", ip: "192.168.0.12" },
+    { date: "2024-05-31 08:18", ip: "192.168.0.19" }
+  ];
+
+  const resetPassword = () => {
+    // TODO : appeler l’API Supabase reset password
+    toast.success("Lien de réinitialisation envoyé à " + utilisateur.email);
   };
 
   return (
-    <div className="bg-white/10 border border-white/20 p-4 rounded flex justify-between items-center">
-      <div>
-        <p className="font-semibold">{utilisateur.email}</p>
-        <p className="text-sm text-gray-300">{utilisateur.role || "Sans rôle"}</p>
-      </div>
-      <div className="flex gap-2">
-        <button
-          onClick={toggleActif}
-          className={`px-3 py-1 rounded ${
-            utilisateur.actif ? "bg-red-600" : "bg-green-600"
-          } text-white`}
-        >
-          {utilisateur.actif ? "🛑 Désactiver" : "✅ Réactiver"}
-        </button>
-      </div>
-    </div>
+    <>
+      <tr className={utilisateur.actif ? "" : "opacity-60"}>
+        <td>{utilisateur.email}</td>
+        <td>
+          <span className={
+            utilisateur.role === "superadmin"
+              ? "badge badge-superadmin"
+              : utilisateur.role === "admin"
+                ? "badge badge-admin"
+                : "badge badge-user"
+          }>
+            {utilisateur.role}
+          </span>
+        </td>
+        <td>{utilisateur.mama_id}</td>
+        <td>
+          {isAdmin && utilisateur.mama_id === mama_id && (
+            <>
+              <button className="btn btn-sm mr-2" onClick={() => onEdit(utilisateur)}>Éditer</button>
+              <button
+                className="btn btn-sm mr-2"
+                onClick={() => onToggleActive(utilisateur.id, !utilisateur.actif)}
+              >
+                {utilisateur.actif ? "Désactiver" : "Activer"}
+              </button>
+              <button className="btn btn-sm mr-2" onClick={resetPassword}>Reset MDP</button>
+              <button className="btn btn-sm" onClick={() => setShowHistory(!showHistory)}>
+                {showHistory ? "Masquer historique" : "Connexions"}
+              </button>
+            </>
+          )}
+        </td>
+      </tr>
+      {showHistory && (
+        <tr>
+          <td colSpan={4} className="bg-gray-50">
+            <div>
+              <b>Connexions récentes :</b>
+              <ul>
+                {history.map((h, i) => (
+                  <li key={i}>{h.date} — IP {h.ip}</li>
+                ))}
+              </ul>
+            </div>
+          </td>
+        </tr>
+      )}
+    </>
   );
 }

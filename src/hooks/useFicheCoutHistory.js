@@ -1,30 +1,34 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/context/AuthContext";
 
-export function useFicheCoutHistory(ficheId, mamaId) {
+export function useFicheCoutHistory() {
+  const { mama_id } = useAuth();
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const fetchHistory = async () => {
+  async function fetchFicheCoutHistory(fiche_id) {
+    if (!fiche_id) return;
     setLoading(true);
-    const { data, error } = await supabase
-      .from("fiche_cout_history")
-      .select("*")
-      .eq("fiche_id", ficheId)
-      .eq("mama_id", mamaId)
-      .order("date_cout", { ascending: true });
-    setHistory(data || []);
-    setLoading(false);
-    return !error;
-  };
+    setError(null);
+    try {
+      const { data, error } = await supabase
+        .from("fiche_cout_history")
+        .select("*")
+        .eq("fiche_id", fiche_id)
+        .eq("mama_id", mama_id)
+        .order("date", { ascending: false });
 
-  // Pour enregistrement auto lors de modif
-  const addHistory = async ({ cout_total, cout_portion, updated_by }) => {
-    const { error } = await supabase
-      .from("fiche_cout_history")
-      .insert([{ fiche_id: ficheId, mama_id: mamaId, cout_total, cout_portion, updated_by }]);
-    return !error;
-  };
+      if (error) throw error;
+      setHistory(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setError(err.message || "Erreur chargement historique coût fiche.");
+      setHistory([]);
+    } finally {
+      setLoading(false);
+    }
+  }
 
-  return { history, loading, fetchHistory, addHistory };
+  return { history, loading, error, fetchFicheCoutHistory };
 }

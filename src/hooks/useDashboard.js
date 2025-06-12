@@ -5,7 +5,7 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
 export function useDashboard() {
-  const { user } = useAuth();
+  const { mama_id, loading: authLoading } = useAuth();
   const [stats, setStats] = useState({});
   const [evolutionStock, setEvolutionStock] = useState([]);
   const [evolutionConso, setEvolutionConso] = useState([]);
@@ -16,27 +16,43 @@ export function useDashboard() {
   const [margeBrute, setMargeBrute] = useState({ valeur: 0, taux: 0 });
   const [alertesStockBas, setAlertesStockBas] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
+  // fetchDashboard s'exécute UNIQUEMENT quand mama_id prêt
   async function fetchDashboard(caFnbInput) {
+    if (!mama_id || authLoading) return;
     setLoading(true);
+    setError(null);
 
-    let mama_id = user?.mama_id;
-
-    // 1. Récupère produits (toujours fallback tableau vide)
-    const { data: produitsRaw, error: errorProd } = await supabase
-      .from("products")
-      .select("id, nom, famille, unite, pmp, stock_reel, stock_min")
-      .eq("mama_id", mama_id);
-
-    const produits = Array.isArray(produitsRaw) ? produitsRaw : [];
+    // 1. Récupère produits
+    let produits = [];
+    let mouvements = [];
+    try {
+      const { data: produitsRaw, error: errorProd } = await supabase
+        .from("products")
+        .select("id, nom, famille, unite, pmp, stock_reel, stock_min")
+        .eq("mama_id", mama_id);
+      if (errorProd) throw errorProd;
+      produits = Array.isArray(produitsRaw) ? produitsRaw : [];
+    } catch (err) {
+      setError("Erreur chargement produits");
+      setLoading(false);
+      return;
+    }
 
     // 2. Récupère mouvements
-    const { data: mouvementsRaw, error: errorMouv } = await supabase
-      .from("mouvements_stock")
-      .select("type, quantite, product_id, date")
-      .eq("mama_id", mama_id);
-
-    const mouvements = Array.isArray(mouvementsRaw) ? mouvementsRaw : [];
+    try {
+      const { data: mouvementsRaw, error: errorMouv } = await supabase
+        .from("mouvements_stock")
+        .select("type, quantite, product_id, date")
+        .eq("mama_id", mama_id);
+      if (errorMouv) throw errorMouv;
+      mouvements = Array.isArray(mouvementsRaw) ? mouvementsRaw : [];
+    } catch (err) {
+      setError("Erreur chargement mouvements");
+      setLoading(false);
+      return;
+    }
 
     // 3. Statistiques de base
     const stock_valorise = produits.reduce((sum, p) => sum + (Number(p.pmp) || 0) * (Number(p.stock_reel) || 0), 0);
@@ -71,7 +87,7 @@ export function useDashboard() {
     });
     const consoAlim = familles.includes("Alimentaire")
       ? consoByFamille["Alimentaire"] || 0
-      : Object.values(consoByFamille).reduce((sum, v) => sum + v, 0); // fallback
+      : Object.values(consoByFamille).reduce((sum, v) => sum + v, 0);
 
     setFoodCostGlobal(ca_fnb ? consoAlim / ca_fnb : 0);
 
@@ -98,7 +114,7 @@ export function useDashboard() {
       moisArray.push(mois);
       evolutionStockData.push({
         mois,
-        stock_valorise: stock_valorise // Optionnel : historiser
+        stock_valorise: stock_valorise // Pas d’historique stock par défaut
       });
     }
     setEvolutionStock(evolutionStockData);
@@ -114,7 +130,6 @@ export function useDashboard() {
 
     // 9. Évolution food cost
     let evolFoodCost = moisArray.map(mois => {
-      // Dummy CA = ca_fnb pour tous les mois (à historiser si besoin)
       const caDummy = ca_fnb;
       const conso = mouvements
         .filter(m => m.date?.startsWith(mois) && m.type === "sortie")
@@ -158,6 +173,7 @@ export function useDashboard() {
     margeBrute,
     alertesStockBas,
     loading,
+    error,
     fetchDashboard,
     exportExcelDashboard,
   };

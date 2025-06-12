@@ -3,45 +3,64 @@ import { useAuth } from "@/context/AuthContext";
 import React, { lazy, Suspense } from "react";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 
-// Pages principales (adaptées à la structure réelle)
-const Dashboard = lazy(() => import("@/pages/Dashboard"));
-const Stock = lazy(() => import("@/pages/Stock"));
+// --- Imports pages réels ---
+const Dashboard = lazy(() => import("@/pages/Dashboard.jsx"));
+const Stock = lazy(() => import("@/pages/Stock.jsx"));
+
+// Produits
 const Produits = lazy(() => import("@/pages/produits/Produits.jsx"));
 const ProduitDetail = lazy(() => import("@/pages/produits/ProduitDetail.jsx"));
 const ProduitForm = lazy(() => import("@/pages/produits/ProduitForm.jsx"));
-const Fiches = lazy(() => import("@/pages/fiches/Fiches.jsx"));
-const FicheForm = lazy(() => import("@/pages/fiches/FicheForm.jsx"));
-const FicheDetail = lazy(() => import("@/pages/fiches/FicheDetail.jsx"));
-const Inventaire = lazy(() => import("@/pages/inventaire/Inventaire.jsx"));
-const InventaireForm = lazy(() => import("@/pages/inventaire/InventaireForm.jsx"));
-const EcartInventaire = lazy(() => import("@/pages/inventaire/EcartInventaire.jsx"));
+
+// Fournisseurs
+const Fournisseurs = lazy(() => import("@/pages/fournisseurs/Fournisseurs.jsx"));
+const FournisseurDetail = lazy(() => import("@/pages/fournisseurs/FournisseurDetail.jsx"));
+
+// Factures
 const Factures = lazy(() => import("@/pages/factures/Factures.jsx"));
 const FactureForm = lazy(() => import("@/pages/factures/FactureForm.jsx"));
 const FactureDetail = lazy(() => import("@/pages/factures/FactureDetail.jsx"));
+
+// Fiches Techniques
+const Fiches = lazy(() => import("@/pages/fiches/Fiches.jsx"));
+const FicheForm = lazy(() => import("@/pages/fiches/FicheForm.jsx"));
+const FicheDetail = lazy(() => import("@/pages/fiches/FicheDetail.jsx"));
+
+// Inventaire
+const Inventaire = lazy(() => import("@/pages/inventaire/Inventaire.jsx"));
+const InventaireForm = lazy(() => import("@/pages/inventaire/InventaireForm.jsx"));
+const EcartInventaire = lazy(() => import("@/pages/inventaire/EcartInventaire.jsx"));
+
+// Mouvements Stock
+const Mouvements = lazy(() => import("@/pages/Mouvements.jsx"));
+const MouvementDetail = lazy(() => import("@/pages/MouvementDetail.jsx"));
+
+// Menus
 const Menus = lazy(() => import("@/pages/menus/Menus.jsx"));
 const MenuForm = lazy(() => import("@/pages/menus/MenuForm.jsx"));
-const Fournisseurs = lazy(() => import("@/pages/fournisseurs/Fournisseurs.jsx"));
-const FournisseurDetail = lazy(() => import("@/pages/fournisseurs/FournisseurDetail.jsx"));
+
+// Utilisateurs et Paramétrage
 const Utilisateurs = lazy(() => import("@/pages/Utilisateurs.jsx"));
 const Roles = lazy(() => import("@/pages/parametrage/Roles.jsx"));
 const Permissions = lazy(() => import("@/pages/parametrage/Permissions.jsx"));
 const Mamas = lazy(() => import("@/pages/parametrage/Mamas.jsx"));
 const Parametrage = lazy(() => import("@/pages/Parametrage.jsx"));
+
+// Pages Auth et UI
 const Login = lazy(() => import("@/pages/auth/Login.jsx"));
 const Unauthorized = lazy(() => import("@/pages/auth/Unauthorized.jsx"));
 const NotFound = lazy(() => import("@/pages/NotFound.jsx"));
 
-// Ajoute ici tout nouveau module/page selon l’arborescence réelle
-
+// ProtectedRoute (inline)
 function ProtectedRoute({ children, accessKey }) {
   const { isAuthenticated, access_rights, loading } = useAuth();
   if (loading) return <div className="loader mx-auto my-16" />;
   if (!isAuthenticated) return <Navigate to="/login" />;
-  if (accessKey && !access_rights.includes(accessKey))
-    return <Navigate to="/unauthorized" />;
+  if (accessKey && !access_rights?.includes(accessKey)) return <Navigate to="/unauthorized" />;
   return children;
 }
 
+// Layout avec breadcrumbs
 function LayoutWithBreadcrumb() {
   return (
     <>
@@ -57,8 +76,7 @@ export default function RouterConfig() {
   return (
     <Routes>
       <Route element={<LayoutWithBreadcrumb />}>
-
-        {/* Homepage = Dashboard officiel */}
+        {/* Dashboard */}
         <Route
           path="/"
           element={
@@ -78,7 +96,7 @@ export default function RouterConfig() {
           }
         />
 
-        {/* Produits (liste, détail, formulaire) */}
+        {/* Produits */}
         <Route
           path="/produits"
           element={
@@ -100,6 +118,50 @@ export default function RouterConfig() {
           element={
             <ProtectedRoute accessKey="stock">
               <ProduitDetail />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Fournisseurs */}
+        <Route
+          path="/fournisseurs"
+          element={
+            <ProtectedRoute accessKey="fournisseurs">
+              <Fournisseurs />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/fournisseurs/:id"
+          element={
+            <ProtectedRoute accessKey="fournisseurs">
+              <FournisseurDetail />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Factures */}
+        <Route
+          path="/factures"
+          element={
+            <ProtectedRoute accessKey="factures">
+              <Factures />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/factures/nouveau"
+          element={
+            <ProtectedRoute accessKey="factures">
+              <FactureForm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/factures/:id"
+          element={
+            <ProtectedRoute accessKey="factures">
+              <FactureDetail />
             </ProtectedRoute>
           }
         />
@@ -156,28 +218,20 @@ export default function RouterConfig() {
           }
         />
 
-        {/* Factures */}
+        {/* Mouvements */}
         <Route
-          path="/factures"
+          path="/mouvements"
           element={
-            <ProtectedRoute accessKey="factures">
-              <Factures />
+            <ProtectedRoute accessKey="stock">
+              <Mouvements />
             </ProtectedRoute>
           }
         />
         <Route
-          path="/factures/nouveau"
+          path="/mouvements/:id"
           element={
-            <ProtectedRoute accessKey="factures">
-              <FactureForm />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/factures/:id"
-          element={
-            <ProtectedRoute accessKey="factures">
-              <FactureDetail />
+            <ProtectedRoute accessKey="stock">
+              <MouvementDetail />
             </ProtectedRoute>
           }
         />
@@ -200,24 +254,6 @@ export default function RouterConfig() {
           }
         />
 
-        {/* Fournisseurs */}
-        <Route
-          path="/fournisseurs"
-          element={
-            <ProtectedRoute accessKey="fournisseurs">
-              <Fournisseurs />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/fournisseurs/:id"
-          element={
-            <ProtectedRoute accessKey="fournisseurs">
-              <FournisseurDetail />
-            </ProtectedRoute>
-          }
-        />
-
         {/* Utilisateurs */}
         <Route
           path="/utilisateurs"
@@ -228,7 +264,7 @@ export default function RouterConfig() {
           }
         />
 
-        {/* Paramétrage & sous-modules */}
+        {/* Paramétrage */}
         <Route
           path="/parametrage"
           element={

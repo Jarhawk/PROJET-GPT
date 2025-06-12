@@ -1,38 +1,28 @@
+// src/hooks/useFournisseurStats.js
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 
+// Stats d’évolution d’achats (tous fournisseurs ou par fournisseur)
 export function useFournisseurStats() {
   const { mama_id } = useAuth();
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
-  async function fetchFournisseurStats(fournisseur_id) {
-    setLoading(true);
-    setError(null);
-    try {
-      // Exemple : agrégation des factures du fournisseur, total achats, etc.
-      const { data, error } = await supabase
-        .from("factures")
-        .select("id, montant, date")
-        .eq("mama_id", mama_id)
-        .eq("fournisseur_id", fournisseur_id);
-
-      if (error) throw error;
-      // Statistiques simples
-      const totalAchats = Array.isArray(data)
-        ? data.reduce((sum, f) => sum + (Number(f.montant) || 0), 0)
-        : 0;
-      const nbFactures = Array.isArray(data) ? data.length : 0;
-      setStats({ totalAchats, nbFactures, factures: data || [] });
-    } catch (err) {
-      setError(err.message || "Erreur récupération stats fournisseur.");
-      setStats(null);
-    } finally {
-      setLoading(false);
-    }
+  // Stats tous fournisseurs (évolution mensuelle)
+  async function fetchStatsAll() {
+    const { data, error } = await supabase.rpc("stats_achats_fournisseurs", { mama_id_param: mama_id });
+    if (error) return [];
+    return data || [];
   }
 
-  return { stats, loading, error, fetchFournisseurStats };
+  // Stats pour 1 fournisseur précis (évolution mensuelle)
+  async function fetchStatsForFournisseur(fournisseur_id) {
+    const { data, error } = await supabase.rpc("stats_achats_fournisseur", {
+      mama_id_param: mama_id,
+      fournisseur_id_param: fournisseur_id,
+    });
+    if (error) return [];
+    return data || [];
+  }
+
+  return { fetchStatsAll, fetchStatsForFournisseur };
 }

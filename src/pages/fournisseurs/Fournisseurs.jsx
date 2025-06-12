@@ -1,148 +1,245 @@
-import { useEffect, useState } from "react";
-import { useSuppliers } from "@/hooks/useSuppliers";
-import SupplierForm from "@/components/fournisseurs/SupplierForm";
-import SupplierDetail from "@/components/fournisseurs/SupplierDetail";
+// src/pages/Fournisseurs.jsx
+import { useState, useEffect } from "react";
+import { useFournisseurs } from "@/hooks/useFournisseurs";
+import { useFournisseurStats } from "@/hooks/useFournisseurStats";
+import { useSupplierProducts } from "@/hooks/useSupplierProducts";
+import { useProducts } from "@/hooks/useProducts";
 import { Button } from "@/components/ui/button";
-import { Toaster, toast } from "react-hot-toast";
-import { saveAs } from "file-saver";
-import * as XLSX from "xlsx";
-import { motion } from "framer-motion";
-
-const PAGE_SIZE = 20;
+import { Dialog, DialogTrigger, DialogContent } from "@radix-ui/react-dialog";
+import toast, { Toaster } from "react-hot-toast";
+import { ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
+import FournisseurDetail from "./FournisseurDetail";
+import { PlusCircle, Search } from "lucide-react";
 
 export default function Fournisseurs() {
-  const { suppliers, fetchSuppliers, deleteSupplier, toggleSupplierActive } = useSuppliers();
+  const { fournisseurs, fetchFournisseurs, addFournisseur, updateFournisseur, deleteFournisseur } = useFournisseurs();
+  const { getStatsForFournisseur, fetchStatsAll } = useFournisseurStats();
+  const { getProductsBySupplier } = useSupplierProducts();
+  const { products } = useProducts();
   const [search, setSearch] = useState("");
-  const [actifFilter, setActifFilter] = useState("all");
-  const [page, setPage] = useState(1);
-  const [showForm, setShowForm] = useState(false);
   const [selected, setSelected] = useState(null);
-  const [showDetail, setShowDetail] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
+  const [editRow, setEditRow] = useState(null);
+  const [stats, setStats] = useState([]);
+  const [topProducts, setTopProducts] = useState([]);
+  const [loadingStats, setLoadingStats] = useState(false);
 
-  useEffect(() => { fetchSuppliers(); }, []);
+  useEffect(() => {
+    fetchFournisseurs();
+    fetchStatsAll().then(setStats);
+  }, []);
 
-  // Filtrage et pagination
-  const suppliersFiltres = suppliers.filter(s =>
-    (!search || s.nom?.toLowerCase().includes(search.toLowerCase()) || s.ville?.toLowerCase().includes(search.toLowerCase()))
-    && (actifFilter === "all" || (actifFilter === "true" ? s.actif : !s.actif))
+  // Recherche live
+  const fournisseursFiltrés = fournisseurs.filter(f =>
+    f.nom?.toLowerCase().includes(search.toLowerCase()) ||
+    f.ville?.toLowerCase().includes(search.toLowerCase())
   );
-  const nbPages = Math.ceil(suppliersFiltres.length / PAGE_SIZE);
-  const pagedSuppliers = suppliersFiltres.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  // Export Excel
-  const exportExcel = () => {
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(suppliersFiltres);
-    XLSX.utils.book_append_sheet(wb, ws, "Fournisseurs");
-    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([buf]), "fournisseurs.xlsx");
-  };
-
-  // Suppression avec confirmation
-  const handleDelete = async (f) => {
-    if (window.confirm(`Supprimer définitivement le fournisseur "${f.nom}" ?`)) {
-      await deleteSupplier(f.id);
-      await fetchSuppliers();
-      toast.success("Fournisseur supprimé.");
-    }
-  };
-
-  // Désactivation/réactivation
-  const handleToggleActive = async (f) => {
-    await toggleSupplierActive(f.id, !f.actif);
-    await fetchSuppliers();
-    toast.success(f.actif ? "Fournisseur désactivé" : "Fournisseur réactivé");
-  };
+  // Top produits global
+  useEffect(() => {
+    if (!fournisseurs.length || !products.length) return;
+    const statsProduits = {};
+    fournisseurs.forEach(f => {
+      const ps = getProductsBySupplier(f.id) || [];
+      ps.forEach(p => {
+        statsProduits[p.product_id] = (statsProduits[p.product_id] || 0) + (p.total_achat || 0);
+      });
+    });
+    setTopProducts(Object.entries(statsProduits)
+      .map(([id, total]) => ({
+        nom: products.find(p => p.id === id)?.nom || "-",
+        total
+      }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 8));
+  }, [fournisseurs, products]);
 
   return (
-    <div className="p-6 container mx-auto">
-      <Toaster position="top-right" />
-      <div className="flex flex-wrap gap-4 items-center mb-4">
-        <input
-          type="search"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="input"
-          placeholder="Recherche (nom, ville)"
-        />
-        <select className="input" value={actifFilter} onChange={e => setActifFilter(e.target.value)}>
-          <option value="all">Tous</option>
-          <option value="true">Actif</option>
-          <option value="false">Inactif</option>
-        </select>
-        <Button onClick={() => { setSelected(null); setShowForm(true); }}>
-          Ajouter un fournisseur
-        </Button>
-        <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
+    <div className="max-w-7xl mx-auto p-8">
+      <Toaster />
+      <h1 className="text-2xl font-bold text-mamastockGold mb-6">Gestion des fournisseurs</h1>
+      <div className="flex gap-4 mb-6 items-center">
+        <div className="relative flex-1">
+          <input
+            className="input input-bordered w-full pl-8"
+            placeholder="Recherche fournisseur ou ville"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          <Search className="absolute left-2 top-2.5 text-mamastockGold" size={18} />
+        </div>
+        <Button onClick={() => setShowCreate(true)}><PlusCircle className="mr-2" /> Ajouter fournisseur</Button>
       </div>
-      <motion.table
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="min-w-full bg-white rounded-xl shadow-md"
-      >
-        <thead>
-          <tr>
-            <th className="px-4 py-2">Nom</th>
-            <th className="px-4 py-2">Ville</th>
-            <th className="px-4 py-2">Téléphone</th>
-            <th className="px-4 py-2">Statut</th>
-            <th className="px-4 py-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {pagedSuppliers.map(s => (
-            <tr key={s.id}>
-              <td className="border px-4 py-2">
-                <Button
-                  variant="link"
-                  className="font-semibold text-mamastockGold"
-                  onClick={() => { setSelected(s); setShowDetail(true); }}
-                >
-                  {s.nom}
-                </Button>
-              </td>
-              <td className="border px-4 py-2">{s.ville}</td>
-              <td className="border px-4 py-2">{s.telephone}</td>
-              <td className="border px-4 py-2">
-                <span className={s.actif ? "badge badge-admin" : "badge badge-user"}>
-                  {s.actif ? "Actif" : "Inactif"}
-                </span>
-              </td>
-              <td className="border px-4 py-2 flex gap-2">
-                <Button size="sm" variant="outline" onClick={() => { setSelected(s); setShowForm(true); }}>Modifier</Button>
-                <Button size="sm" variant="outline" onClick={() => handleDelete(s)}>Supprimer</Button>
-                <Button size="sm" variant="outline" onClick={() => handleToggleActive(s)}>
-                  {s.actif ? "Désactiver" : "Réactiver"}
-                </Button>
-              </td>
+      {/* Statistiques générales */}
+      <div className="grid md:grid-cols-2 gap-8 mb-10">
+        <div className="glass-card p-4">
+          <h2 className="font-semibold mb-2">Évolution des achats (tous fournisseurs)</h2>
+          <ResponsiveContainer width="100%" height={180}>
+            <LineChart data={stats}>
+              <XAxis dataKey="mois" fontSize={11} />
+              <YAxis fontSize={11} />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="total_achats" stroke="#bfa14d" name="Total Achats" />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="glass-card p-4">
+          <h2 className="font-semibold mb-2">Top produits achetés</h2>
+          <ResponsiveContainer width="100%" height={180}>
+            <BarChart data={topProducts}>
+              <XAxis dataKey="nom" fontSize={11} />
+              <YAxis fontSize={11} />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="total" fill="#0f1c2e" name="Quantité achetée" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+      {/* Tableau fournisseurs */}
+      <div className="glass-table overflow-x-auto shadow-xl rounded-2xl mb-6">
+        <table className="min-w-full text-center">
+          <thead>
+            <tr>
+              <th className="py-2 px-3">Nom</th>
+              <th className="py-2 px-3">Ville</th>
+              <th className="py-2 px-3">Téléphone</th>
+              <th className="py-2 px-3">Contact</th>
+              <th className="py-2 px-3">Nb Produits</th>
+              <th className="py-2 px-3"></th>
+              <th className="py-2 px-3"></th>
             </tr>
-          ))}
-        </tbody>
-      </motion.table>
-      <div className="mt-4 flex gap-2">
-        {Array.from({ length: nbPages }, (_, i) =>
-          <Button
-            key={i + 1}
-            size="sm"
-            variant={page === i + 1 ? "default" : "outline"}
-            onClick={() => setPage(i + 1)}
-          >{i + 1}</Button>
-        )}
+          </thead>
+          <tbody>
+            {fournisseursFiltrés.map(f => (
+              <tr key={f.id}>
+                <td className="py-1 px-3 font-semibold text-mamastockGold">{f.nom}</td>
+                <td>{f.ville}</td>
+                <td>{f.tel}</td>
+                <td>{f.contact}</td>
+                <td>{getProductsBySupplier(f.id)?.length || 0}</td>
+                <td>
+                  <Button size="sm" variant="outline" onClick={() => setSelected(f.id)}>
+                    Voir détails
+                  </Button>
+                </td>
+                <td>
+                  <Button size="sm" variant="destructive" onClick={() => deleteFournisseur(f.id)}>
+                    Supprimer
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-      {/* Modal Ajout/Modif */}
-      {showForm && (
-        <SupplierForm
-          supplier={selected}
-          onClose={() => { setShowForm(false); setSelected(null); fetchSuppliers(); }}
-        />
-      )}
-      {/* Modal Détail */}
-      {showDetail && selected && (
-        <SupplierDetail
-          supplier={selected}
-          onClose={() => { setShowDetail(false); setSelected(null); }}
-        />
-      )}
+
+      {/* Modal création/édition */}
+      <Dialog open={showCreate || !!editRow} onOpenChange={v => { if (!v) { setShowCreate(false); setEditRow(null); } }}>
+        <DialogContent className="glass-modal max-w-lg w-full p-8">
+          <FournisseurForm
+            fournisseur={editRow}
+            onCancel={() => { setShowCreate(false); setEditRow(null); }}
+            onSubmit={async (data) => {
+              if (editRow) await updateFournisseur(editRow.id, data);
+              else await addFournisseur(data);
+              setShowCreate(false);
+              setEditRow(null);
+              fetchFournisseurs();
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal détail */}
+      <Dialog open={!!selected} onOpenChange={v => !v && setSelected(null)}>
+        <DialogContent className="glass-modal max-w-2xl w-full p-10">
+          {selected && <FournisseurDetail id={selected} />}
+        </DialogContent>
+      </Dialog>
+
+      <style>{`
+        .glass-card {
+          background: rgba(255,255,255,0.35);
+          backdrop-filter: blur(16px);
+          border-radius: 20px;
+          box-shadow: 0 8px 32px 0 rgba(191,161,77,0.13), 0 1.5px 10px 0 rgba(15,28,46,0.09);
+        }
+        .glass-table {
+          background: rgba(255,255,255,0.32);
+          backdrop-filter: blur(12px);
+          border-radius: 18px;
+        }
+        .glass-modal {
+          background: rgba(255,255,255,0.40);
+          box-shadow: 0 12px 40px 0 #bfa14d1a, 0 2px 20px 0 #0f1c2e21;
+          border-radius: 2rem;
+          backdrop-filter: blur(18px);
+          border: 1.5px solid #e5c98455;
+        }
+      `}</style>
     </div>
+  );
+}
+
+// ---- FournisseurForm à placer dans src/components/fournisseurs/FournisseurForm.jsx
+
+function FournisseurForm({ fournisseur = {}, onCancel, onSubmit }) {
+  const [form, setForm] = useState({
+    nom: fournisseur.nom || "",
+    ville: fournisseur.ville || "",
+    tel: fournisseur.tel || "",
+    contact: fournisseur.contact || "",
+    actif: fournisseur.actif ?? true,
+  });
+  return (
+    <form
+      className="space-y-4"
+      onSubmit={e => {
+        e.preventDefault();
+        onSubmit(form);
+      }}
+    >
+      <div>
+        <label className="block font-semibold">Nom</label>
+        <input
+          className="input input-bordered w-full"
+          value={form.nom}
+          onChange={e => setForm(f => ({ ...f, nom: e.target.value }))}
+          required
+        />
+      </div>
+      <div>
+        <label className="block font-semibold">Ville</label>
+        <input
+          className="input input-bordered w-full"
+          value={form.ville}
+          onChange={e => setForm(f => ({ ...f, ville: e.target.value }))}
+        />
+      </div>
+      <div>
+        <label className="block font-semibold">Téléphone</label>
+        <input
+          className="input input-bordered w-full"
+          value={form.tel}
+          onChange={e => setForm(f => ({ ...f, tel: e.target.value }))}
+        />
+      </div>
+      <div>
+        <label className="block font-semibold">Contact</label>
+        <input
+          className="input input-bordered w-full"
+          value={form.contact}
+          onChange={e => setForm(f => ({ ...f, contact: e.target.value }))}
+        />
+      </div>
+      <div className="flex gap-4 mt-4">
+        <Button type="submit">Enregistrer</Button>
+        <Button type="button" variant="secondary" onClick={onCancel}>
+          Annuler
+        </Button>
+      </div>
+    </form>
   );
 }

@@ -1,76 +1,80 @@
 import { useEffect, useState } from "react";
-import { useSupplierStats } from "@/hooks/useSupplierStats";
+import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
-import { saveAs } from "file-saver";
-import * as XLSX from "xlsx";
+import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from "recharts";
 
-export default function SupplierDetail({ supplier, onClose }) {
-  const { stats, fetchStats } = useSupplierStats();
-  const [loading, setLoading] = useState(false);
+export default function SupplierDetail({ supplier, onClose, glass }) {
+  const [stats, setStats] = useState({});
+  const [contacts, setContacts] = useState([]);
+  const [produits, setProduits] = useState([]);
+  const [graphAchats, setGraphAchats] = useState([]);
+  const [topProduits, setTopProduits] = useState([]);
+  const [historique, setHistorique] = useState([]);
+  const [selectedProduit, setSelectedProduit] = useState("");
 
   useEffect(() => {
-    fetchStats(supplier.id);
-    // eslint-disable-next-line
-  }, [supplier.id]);
+    if (!supplier) return;
+    // Tu peux faire du Promise.all ici pour tout charger plus vite
+    (async () => {
+      const { data: contactsData } = await supabase
+        .from("fournisseur_contacts")
+        .select("*")
+        .eq("fournisseur_id", supplier.id);
+      setContacts(contactsData || []);
+      const { data: produitsData } = await supabase
+        .from("products")
+        .select("id, nom")
+        .eq("main_supplier_id", supplier.id);
+      setProduits(produitsData || []);
+      // Charger stats, graphique, top produits… (à compléter selon besoin)
+    })();
+  }, [supplier]);
 
-  // Export stats Excel
-  const exportExcel = () => {
+  // Export Excel (simple, tu peux l’enrichir)
+  const handleExport = () => {
     const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(stats || []);
-    XLSX.utils.book_append_sheet(wb, ws, "Stats");
+    const ws = XLSX.utils.json_to_sheet([supplier]);
+    XLSX.utils.book_append_sheet(wb, ws, "Fournisseur");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([buf]), `stats_${supplier.nom}.xlsx`);
-  };
-
-  // Export PDF (à brancher jsPDF)
-  const exportPDF = () => {
-    toast.success("Export PDF non implémenté (brancher jsPDF)");
+    saveAs(new Blob([buf]), `Fournisseur_${supplier.nom}.xlsx`);
+    toast.success("Export Excel généré !");
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-lg p-8 min-w-[400px] max-w-[95vw] flex flex-col gap-2 relative">
-        <Button variant="outline" className="absolute top-2 right-2" onClick={onClose}>Fermer</Button>
-        <h2 className="font-bold text-xl mb-4">{supplier.nom}</h2>
-        <div><b>Ville :</b> {supplier.ville}</div>
-        <div><b>Téléphone :</b> {supplier.telephone}</div>
-        <div>
-          <b>Document/Logo :</b> {supplier.document ?
-            <a href={supplier.document} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">Voir</a> :
-            <span className="text-gray-400">Aucun</span>
-          }
+    <motion.div
+      initial={{ scale: 0.95, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      exit={{ scale: 0.95, opacity: 0 }}
+      className={`fixed inset-0 z-50 flex items-center justify-center ${glass ? 'backdrop-blur-lg bg-black/20' : ''}`}
+    >
+      <div className="max-w-2xl w-full bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-mamastockGold relative p-8 glass-anim">
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 text-xl text-mamastockGold hover:text-black focus:outline-none"
+          aria-label="Fermer"
+        >
+          ✕
+        </button>
+        <h2 className="text-2xl font-bold text-mamastockGold mb-2">{supplier.nom}</h2>
+        <div className="mb-4">
+          <p><strong>Ville :</strong> {supplier.ville || "-"}</p>
+          <p><strong>Email :</strong> {supplier.email || "-"}</p>
+          <p><strong>Téléphone :</strong> {supplier.telephone || "-"}</p>
+          <p>
+            <strong>Statut :</strong>{" "}
+            {supplier.actif
+              ? <span className="text-green-600 font-semibold">Actif</span>
+              : <span className="text-red-600 font-semibold">Inactif</span>
+            }
+          </p>
         </div>
-        <div className="my-4">
-          <h3 className="font-bold mb-2">Statistiques Achats / Factures</h3>
-          <table className="min-w-full bg-gray-50 rounded">
-            <thead>
-              <tr>
-                <th>Période</th>
-                <th>Nb factures</th>
-                <th>Montant total</th>
-                <th>Dernier achat</th>
-              </tr>
-            </thead>
-            <tbody>
-              {stats && stats.length > 0 ? stats.map((stat, i) => (
-                <tr key={i}>
-                  <td>{stat.periode}</td>
-                  <td>{stat.nb_factures}</td>
-                  <td>{stat.montant_total?.toFixed(2)} €</td>
-                  <td>{stat.dernier_achat ? new Date(stat.dernier_achat).toLocaleDateString() : "-"}</td>
-                </tr>
-              )) : (
-                <tr><td colSpan={4} className="text-gray-400">Aucune donnée</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-        <div className="flex gap-2 mt-4">
-          <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
-          <Button variant="outline" onClick={exportPDF}>Export PDF</Button>
-        </div>
+        <Button onClick={handleExport}>Export Excel</Button>
+        {/* TODO : Stats, graphiques, contacts, historique, etc. à brancher */}
       </div>
-    </div>
+    </motion.div>
   );
 }

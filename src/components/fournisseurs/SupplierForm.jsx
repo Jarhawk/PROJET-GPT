@@ -1,82 +1,90 @@
 import { useState } from "react";
-import { useSuppliers } from "@/hooks/useSuppliers";
+import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
+import { motion } from "framer-motion";
 
-export default function SupplierForm({ supplier, onClose }) {
-  const { addSupplier, editSupplier } = useSuppliers();
-  const [nom, setNom] = useState(supplier?.nom || "");
-  const [ville, setVille] = useState(supplier?.ville || "");
-  const [telephone, setTelephone] = useState(supplier?.telephone || "");
-  const [actif, setActif] = useState(supplier?.actif ?? true);
-  const [file, setFile] = useState(null); // Upload document/logo
+export default function SupplierForm({ supplier, onClose, glass }) {
+  const [form, setForm] = useState({
+    nom: supplier?.nom || "",
+    ville: supplier?.ville || "",
+    telephone: supplier?.telephone || "",
+    email: supplier?.email || "",
+    actif: supplier?.actif ?? true,
+  });
   const [loading, setLoading] = useState(false);
 
-  const handleUpload = () => {
-    if (file) toast.success("Upload document (mock)");
-  };
+  const handleChange = e => setForm(f => ({
+    ...f, [e.target.name]: e.target.value
+  }));
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     setLoading(true);
-    const data = {
-      nom,
-      ville,
-      telephone,
-      actif,
-      document: file ? "TODO-upload" : supplier?.document
-    };
-    try {
-      if (supplier?.id) {
-        await editSupplier(supplier.id, data);
-        toast.success("Fournisseur modifié !");
-      } else {
-        await addSupplier(data);
-        toast.success("Fournisseur ajouté !");
-      }
-      onClose?.();
-    } catch {
-      toast.error("Erreur lors de l'enregistrement.");
+    if (!form.nom) {
+      toast.error("Le nom est obligatoire");
+      setLoading(false);
+      return;
+    }
+    let error = null;
+    if (supplier) {
+      ({ error } = await supabase
+        .from("suppliers")
+        .update(form)
+        .eq("id", supplier.id));
+    } else {
+      ({ error } = await supabase
+        .from("suppliers")
+        .insert([{ ...form }]));
     }
     setLoading(false);
+    if (error) toast.error(error.message);
+    else {
+      toast.success("Fournisseur sauvegardé");
+      onClose?.();
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md max-w-xl mx-auto">
-      <h2 className="text-lg font-bold mb-4">
-        {supplier ? "Modifier le fournisseur" : "Ajouter un fournisseur"}
-      </h2>
-      <input
-        className="input mb-2"
-        value={nom}
-        onChange={e => setNom(e.target.value)}
-        placeholder="Nom du fournisseur"
-        required
-      />
-      <input
-        className="input mb-2"
-        value={ville}
-        onChange={e => setVille(e.target.value)}
-        placeholder="Ville"
-      />
-      <input
-        className="input mb-2"
-        value={telephone}
-        onChange={e => setTelephone(e.target.value)}
-        placeholder="Téléphone"
-      />
-      <label className="flex items-center gap-2 mb-2">
-        <input type="checkbox" checked={actif} onChange={e => setActif(e.target.checked)} />
-        Actif
-      </label>
-      <label>
-        Document/Logo : <input type="file" onChange={e => setFile(e.target.files[0])} />
-        <Button type="button" variant="outline" size="sm" className="ml-2" onClick={handleUpload}>Upload</Button>
-      </label>
-      <div className="flex gap-2 mt-4">
-        <Button type="submit" disabled={loading}>{supplier ? "Modifier" : "Ajouter"}</Button>
-        <Button variant="outline" type="button" onClick={onClose}>Annuler</Button>
+    <motion.form
+      initial={{ scale: 0.98, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      exit={{ scale: 0.98, opacity: 0 }}
+      onSubmit={handleSubmit}
+      className={`rounded-xl p-6 space-y-4 ${glass ? "bg-white/80 backdrop-blur-xl shadow-2xl border border-mamastockGold" : "bg-white shadow"}`}
+      style={{ minWidth: 340 }}
+    >
+      <h3 className="text-xl font-bold mb-2">{supplier ? "Modifier" : "Ajouter"} un fournisseur</h3>
+      <div>
+        <label>Nom</label>
+        <input className="input input-bordered w-full" name="nom" value={form.nom} onChange={handleChange} required />
       </div>
-    </form>
+      <div>
+        <label>Ville</label>
+        <input className="input input-bordered w-full" name="ville" value={form.ville} onChange={handleChange} />
+      </div>
+      <div>
+        <label>Email</label>
+        <input className="input input-bordered w-full" name="email" value={form.email} onChange={handleChange} type="email" />
+      </div>
+      <div>
+        <label>Téléphone</label>
+        <input className="input input-bordered w-full" name="telephone" value={form.telephone} onChange={handleChange} />
+      </div>
+      <div>
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={form.actif}
+            onChange={e => setForm(f => ({ ...f, actif: e.target.checked }))}
+          />
+          Actif
+        </label>
+      </div>
+      <div className="flex gap-2 justify-end">
+        <Button type="button" variant="outline" onClick={onClose}>Annuler</Button>
+        <Button type="submit" loading={loading}>{supplier ? "Enregistrer" : "Ajouter"}</Button>
+      </div>
+    </motion.form>
   );
 }

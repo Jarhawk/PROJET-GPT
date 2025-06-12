@@ -1,3 +1,4 @@
+// src/hooks/useFournisseurs.js
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
@@ -10,19 +11,21 @@ export function useFournisseurs() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // 1. Charger les fournisseurs (recherche, tri, actif)
-  async function fetchFournisseurs({ search = "", ville = "", actif = null } = {}) {
+  // 1. Charger tous les fournisseurs (avec pagination/filtrage si besoin)
+  async function fetchFournisseurs({ search = "", actif = null, page = 1, limit = 100 } = {}) {
     setLoading(true);
     setError(null);
     let query = supabase
       .from("fournisseurs")
       .select("*")
-      .eq("mama_id", mama_id);
+      .eq("mama_id", mama_id)
+      .order("nom", { ascending: true })
+      .range((page - 1) * limit, page * limit - 1);
+
     if (search) query = query.ilike("nom", `%${search}%`);
-    if (ville) query = query.ilike("ville", `%${ville}%`);
     if (typeof actif === "boolean") query = query.eq("actif", actif);
 
-    const { data, error } = await query.order("nom", { ascending: true });
+    const { data, error } = await query;
     setFournisseurs(Array.isArray(data) ? data : []);
     setLoading(false);
     if (error) setError(error);
@@ -36,8 +39,8 @@ export function useFournisseurs() {
     const { error } = await supabase
       .from("fournisseurs")
       .insert([{ ...fournisseur, mama_id }]);
-    if (error) setError(error);
     setLoading(false);
+    if (error) setError(error);
     await fetchFournisseurs();
   }
 
@@ -50,48 +53,34 @@ export function useFournisseurs() {
       .update(updateFields)
       .eq("id", id)
       .eq("mama_id", mama_id);
-    if (error) setError(error);
     setLoading(false);
+    if (error) setError(error);
     await fetchFournisseurs();
   }
 
-  // 4. Désactiver/réactiver un fournisseur
-  async function toggleFournisseurActive(id, actif) {
-    setLoading(true);
-    setError(null);
-    const { error } = await supabase
-      .from("fournisseurs")
-      .update({ actif })
-      .eq("id", id)
-      .eq("mama_id", mama_id);
-    if (error) setError(error);
-    setLoading(false);
-    await fetchFournisseurs();
-  }
-
-  // 5. Supprimer un fournisseur (avec confirmation)
+  // 4. Supprimer un fournisseur (soft delete = désactivation)
   async function deleteFournisseur(id) {
     setLoading(true);
     setError(null);
     const { error } = await supabase
       .from("fournisseurs")
-      .delete()
+      .update({ actif: false })
       .eq("id", id)
       .eq("mama_id", mama_id);
-    if (error) setError(error);
     setLoading(false);
+    if (error) setError(error);
     await fetchFournisseurs();
   }
 
-  // 6. Export Excel
+  // 5. Export Excel
   function exportFournisseursToExcel() {
     const datas = (fournisseurs || []).map(f => ({
       id: f.id,
       nom: f.nom,
       ville: f.ville,
-      email: f.email,
+      tel: f.tel,
+      contact: f.contact,
       actif: f.actif,
-      mama_id: f.mama_id,
     }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Fournisseurs");
@@ -99,7 +88,7 @@ export function useFournisseurs() {
     saveAs(new Blob([buf]), "fournisseurs_mamastock.xlsx");
   }
 
-  // 7. Import Excel (lecture seule, insertion à sécuriser)
+  // 6. Import Excel
   async function importFournisseursFromExcel(file) {
     setLoading(true);
     setError(null);
@@ -123,7 +112,6 @@ export function useFournisseurs() {
     fetchFournisseurs,
     addFournisseur,
     updateFournisseur,
-    toggleFournisseurActive,
     deleteFournisseur,
     exportFournisseursToExcel,
     importFournisseursFromExcel,

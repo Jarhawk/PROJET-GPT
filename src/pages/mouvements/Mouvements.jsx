@@ -1,3 +1,4 @@
+// src/pages/Mouvements.jsx
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
@@ -6,8 +7,9 @@ import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogTrigger, DialogContent } from "@radix-ui/react-dialog";
+import { Dialog, DialogTrigger, DialogContent, DialogOverlay, DialogClose } from "@radix-ui/react-dialog";
 import { ResponsiveContainer, BarChart, LineChart, Bar, Line, XAxis, YAxis, Tooltip, Legend } from "recharts";
+import { motion, AnimatePresence } from "framer-motion";
 
 const TYPES = [
   { label: "Entrées", value: "ENTREE" },
@@ -35,12 +37,19 @@ export default function Mouvements() {
   const [timeline, setTimeline] = useState([]);
   const [loadingTimeline, setLoadingTimeline] = useState(false);
 
+  // Animation glass
+  const glassVariants = {
+    hidden: { opacity: 0, y: 24, filter: "blur(20px)" },
+    visible: { opacity: 1, y: 0, filter: "blur(0px)" },
+    exit: { opacity: 0, y: 24, filter: "blur(20px)" }
+  };
+
   // Charger produits
   useEffect(() => {
     if (!claims?.mama_id) return;
     supabase
       .from("products")
-      .select("*")
+      .select("id, nom")
       .eq("mama_id", claims.mama_id)
       .then(({ data }) => setProduits(data || []));
   }, [claims?.mama_id]);
@@ -58,7 +67,7 @@ export default function Mouvements() {
       .then(({ data }) => setMouvements(data || []));
   }, [claims?.mama_id, periode]);
 
-  // Charger stock initial de chaque produit au début de période
+  // Charger stock initial pour la période
   useEffect(() => {
     if (!claims?.mama_id || !periode.debut) return setStockInit({});
     supabase
@@ -75,7 +84,7 @@ export default function Mouvements() {
       });
   }, [claims?.mama_id, periode.debut]);
 
-  // Filtrage
+  // Filtrage dynamique
   const filtered = mouvements.filter(
     m =>
       m.type === tab &&
@@ -87,18 +96,7 @@ export default function Mouvements() {
       )
   );
 
-  // Stats par type/sous-type
-  const statsType = {};
-  filtered.forEach(m => {
-    statsType[m.sous_type] = (statsType[m.sous_type] || 0) + Number(m.quantite || 0);
-  });
-  const statsProduit = {};
-  filtered.forEach(m => {
-    statsProduit[m.produit_id] = (statsProduit[m.produit_id] || 0) + Number(m.quantite || 0);
-  });
-
-  // Stock théorique live (par produit sur la période)
-  // stock théorique = stock initial + entrées - sorties (depuis début période)
+  // Stock théorique live (par produit)
   const mouvementsAgg = {};
   produits.forEach(p => {
     mouvementsAgg[p.id] = { entree: 0, sortie: 0 };
@@ -108,7 +106,6 @@ export default function Mouvements() {
     if (m.type === "SORTIE") mouvementsAgg[m.produit_id].sortie += Number(m.quantite);
   });
 
-  // Liste produits affichés selon search
   const produitsAffiches = produits
     .map(p => {
       const init = stockInit[p.id] ?? 0;
@@ -124,10 +121,9 @@ export default function Mouvements() {
     })
     .filter(p => p.nom?.toLowerCase().includes(search.toLowerCase()));
 
-  // Correction/justif
-  const handleEditRow = mv => {
-    setEditRow({ ...mv, quantite: mv.quantite || 0, motif: mv.motif || "" });
-  };
+  // Edition/correction mouvement
+  const handleEditRow = mv => setEditRow({ ...mv, quantite: mv.quantite || 0, motif: mv.motif || "" });
+
   const handleSaveEdit = async () => {
     const { error } = await supabase
       .from("mouvements")
@@ -140,7 +136,7 @@ export default function Mouvements() {
       .eq("mama_id", claims.mama_id);
     if (!error) {
       setEditRow(null);
-      setPeriode(p => ({ ...p }));
+      setPeriode(p => ({ ...p })); // refresh
       toast.success("Correction sauvegardée !");
     } else {
       toast.error(error.message);
@@ -196,7 +192,7 @@ export default function Mouvements() {
     setLoadingTimeline(false);
   };
 
-  // Export Excel/PDF
+  // Exports Excel/PDF
   const handleExportExcel = () => {
     const ws = XLSX.utils.json_to_sheet(
       filtered.map(m => ({
@@ -235,7 +231,7 @@ export default function Mouvements() {
     toast.success("Export PDF généré !");
   };
 
-  // Data graph : evolution quotidienne
+  // Graphique évolution quotidienne
   const days = [];
   if (periode.debut && periode.fin) {
     const d1 = new Date(periode.debut);
@@ -252,7 +248,11 @@ export default function Mouvements() {
     return { date, Entrees: entrees, Sorties: sorties };
   });
 
-  // Data graph : top produits
+  // Data graph top produits
+  const statsProduit = {};
+  filtered.forEach(m => {
+    statsProduit[m.produit_id] = (statsProduit[m.produit_id] || 0) + Number(m.quantite || 0);
+  });
   const topEntrees = Object.entries(statsProduit)
     .map(([id, qte]) => ({
       nom: produits.find(p => p.id === id)?.nom || "-",
@@ -268,7 +268,7 @@ export default function Mouvements() {
   return (
     <div className="p-8 max-w-7xl mx-auto">
       <Toaster />
-      <h1 className="text-2xl font-bold text-mamastock-gold mb-4">
+      <h1 className="text-2xl font-bold text-mamastockGold drop-shadow mb-4">
         Mouvements de stock (Entrées / Sorties)
       </h1>
       {/* Onglets Entrées/Sorties */}
@@ -288,7 +288,7 @@ export default function Mouvements() {
       </div>
       {/* Stats graphiques */}
       <div className="grid md:grid-cols-2 gap-6 mb-6">
-        <div className="bg-white shadow rounded-xl p-4">
+        <div className="glass-liquid shadow-2xl p-4">
           <h2 className="font-bold mb-2">Evolution quotidienne (Entrées/Sorties)</h2>
           <ResponsiveContainer width="100%" height={180}>
             <LineChart data={dataDays}>
@@ -301,7 +301,7 @@ export default function Mouvements() {
             </LineChart>
           </ResponsiveContainer>
         </div>
-        <div className="bg-white shadow rounded-xl p-4">
+        <div className="glass-liquid shadow-2xl p-4">
           <h2 className="font-bold mb-2">Top produits {tab.toLowerCase()}s</h2>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={topEntrees}>
@@ -315,7 +315,7 @@ export default function Mouvements() {
         </div>
       </div>
       {/* Stock théorique live */}
-      <div className="bg-white shadow rounded-xl p-4 mb-4">
+      <div className="glass-liquid shadow-2xl p-4 mb-4">
         <h2 className="font-bold mb-2">Stock théorique (période sélectionnée)</h2>
         <table className="min-w-full table-auto text-center">
           <thead>
@@ -371,7 +371,8 @@ export default function Mouvements() {
         <Button onClick={handleExportPDF}>Export PDF</Button>
         <Button onClick={() => setShowCreate(true)}>+ Nouveau mouvement</Button>
       </div>
-      <div className="bg-white shadow rounded-xl overflow-x-auto">
+      {/* Table mouvements */}
+      <div className="glass-liquid shadow-2xl overflow-x-auto">
         <table className="min-w-full table-auto text-center">
           <thead>
             <tr>
@@ -412,39 +413,60 @@ export default function Mouvements() {
                         Timeline produit
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="bg-white rounded-xl shadow-lg p-6 max-w-lg">
-                      <h3 className="font-bold mb-2">
-                        Timeline mouvements : {produits.find(p => p.id === m.produit_id)?.nom}
-                      </h3>
-                      {loadingTimeline ? (
-                        <div>Chargement…</div>
-                      ) : (
-                        <table className="w-full text-xs">
-                          <thead>
-                            <tr>
-                              <th>Date</th>
-                              <th>Type</th>
-                              <th>Sous-type</th>
-                              <th>Quantité</th>
-                              <th>Zone</th>
-                              <th>Motif</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {timeline.map((l, i) => (
-                              <tr key={i}>
-                                <td>{l.date_mouvement}</td>
-                                <td>{l.type}</td>
-                                <td>{l.sous_type}</td>
-                                <td>{l.quantite}</td>
-                                <td>{l.zone}</td>
-                                <td>{l.motif || "-"}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                    <AnimatePresence>
+                      {timeline.length > 0 && (
+                        <DialogOverlay forceMount>
+                          <motion.div
+                            className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                          />
+                        </DialogOverlay>
                       )}
-                    </DialogContent>
+                      {timeline.length > 0 && (
+                        <DialogContent forceMount className="glass-liquid rounded-2xl p-6 max-w-lg z-50">
+                          <motion.div
+                            variants={glassVariants}
+                            initial="hidden"
+                            animate="visible"
+                            exit="exit"
+                          >
+                            <h3 className="font-bold mb-2">
+                              Timeline mouvements : {produits.find(p => p.id === timeline[0]?.produit_id)?.nom}
+                            </h3>
+                            {loadingTimeline ? (
+                              <div>Chargement…</div>
+                            ) : (
+                              <table className="w-full text-xs">
+                                <thead>
+                                  <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Sous-type</th>
+                                    <th>Quantité</th>
+                                    <th>Zone</th>
+                                    <th>Motif</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {timeline.map((l, i) => (
+                                    <tr key={i}>
+                                      <td>{l.date_mouvement}</td>
+                                      <td>{l.type}</td>
+                                      <td>{l.sous_type}</td>
+                                      <td>{l.quantite}</td>
+                                      <td>{l.zone}</td>
+                                      <td>{l.motif || "-"}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            )}
+                          </motion.div>
+                        </DialogContent>
+                      )}
+                    </AnimatePresence>
                   </Dialog>
                 </td>
               </tr>
@@ -453,159 +475,217 @@ export default function Mouvements() {
         </table>
       </div>
       {/* Modal création mouvement */}
-      <Dialog open={showCreate} onOpenChange={v => !v && setShowCreate(false)}>
-        <DialogContent className="bg-white rounded-xl shadow-lg p-6 max-w-md">
-          <h2 className="font-bold mb-2">Nouveau mouvement stock</h2>
-          <form
-            onSubmit={handleCreateMv}
-            className="space-y-3"
-          >
-            <div>
-              <label>Produit</label>
-              <select
-                className="input input-bordered w-full"
-                value={createMv.produit_id}
-                onChange={e =>
-                  setCreateMv(r => ({ ...r, produit_id: e.target.value }))
-                }
+      <AnimatePresence>
+        {showCreate && (
+          <Dialog open={showCreate} onOpenChange={v => !v && setShowCreate(false)}>
+            <DialogOverlay forceMount>
+              <motion.div
+                className="fixed inset-0 z-40 bg-black/30 backdrop-blur"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              />
+            </DialogOverlay>
+            <DialogContent forceMount className="glass-liquid rounded-2xl shadow-2xl p-8 max-w-md z-50">
+              <motion.div
+                variants={glassVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
               >
-                <option value="">Sélectionne…</option>
-                {produits.map(p => (
-                  <option key={p.id} value={p.id}>
-                    {p.nom}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label>Type</label>
-              <select
-                className="input input-bordered w-full"
-                value={createMv.type}
-                onChange={e =>
-                  setCreateMv(r => ({ ...r, type: e.target.value }))
-                }
-              >
-                <option value="ENTREE">Entrée</option>
-                <option value="SORTIE">Sortie</option>
-              </select>
-            </div>
-            <div>
-              <label>Sous-type</label>
-              <input
-                className="input input-bordered w-full"
-                value={createMv.sous_type}
-                onChange={e =>
-                  setCreateMv(r => ({ ...r, sous_type: e.target.value }))
-                }
-                placeholder="(ex: Achat, Réquisition, Perte, Retour…)"
-              />
-            </div>
-            <div>
-              <label>Quantité</label>
-              <input
-                type="number"
-                className="input input-bordered w-24"
-                value={createMv.quantite}
-                onChange={e =>
-                  setCreateMv(r => ({ ...r, quantite: e.target.value }))
-                }
-                min={0}
-              />
-            </div>
-            <div>
-              <label>Zone</label>
-              <input
-                className="input input-bordered w-full"
-                value={createMv.zone}
-                onChange={e =>
-                  setCreateMv(r => ({ ...r, zone: e.target.value }))
-                }
-              />
-            </div>
-            <div>
-              <label>Motif</label>
-              <textarea
-                className="input input-bordered w-full"
-                value={createMv.motif}
-                rows={2}
-                onChange={e =>
-                  setCreateMv(r => ({ ...r, motif: e.target.value }))
-                }
-              />
-            </div>
-            <Button type="submit">Créer</Button>
-          </form>
-        </DialogContent>
-      </Dialog>
-      {/* Modal correction/justif */}
-      <Dialog open={!!editRow} onOpenChange={v => !v && setEditRow(null)}>
-        <DialogContent className="bg-white rounded-xl shadow-lg p-6 max-w-md">
-          <h2 className="font-bold mb-2">
-            Correction/justification du mouvement
-          </h2>
-          {editRow && (
-            <form
-              onSubmit={e => {
-                e.preventDefault();
-                handleSaveEdit();
-              }}
-              className="space-y-3"
-            >
-              <div>
-                <label>Produit : {produits.find(p => p.id === editRow.produit_id)?.nom}</label>
-              </div>
-              <div>
-                <label>Type</label>
-                <select
-                  className="input input-bordered w-full"
-                  value={editRow.type}
-                  onChange={e =>
-                    setEditRow(r => ({ ...r, type: e.target.value }))
-                  }
+                <h2 className="font-bold mb-2">Nouveau mouvement stock</h2>
+                <form
+                  onSubmit={handleCreateMv}
+                  className="space-y-3"
                 >
-                  <option value="ENTREE">Entrée</option>
-                  <option value="SORTIE">Sortie</option>
-                </select>
-              </div>
-              <div>
-                <label>Sous-type</label>
-                <input
-                  className="input input-bordered w-full"
-                  value={editRow.sous_type}
-                  onChange={e =>
-                    setEditRow(r => ({ ...r, sous_type: e.target.value }))
-                  }
-                />
-              </div>
-              <div>
-                <label>Quantité</label>
-                <input
-                  type="number"
-                  className="input input-bordered w-24"
-                  value={editRow.quantite}
-                  onChange={e =>
-                    setEditRow(r => ({ ...r, quantite: e.target.value }))
-                  }
-                  min={0}
-                />
-              </div>
-              <div>
-                <label>Motif</label>
-                <textarea
-                  className="input input-bordered w-full"
-                  value={editRow.motif}
-                  rows={2}
-                  onChange={e =>
-                    setEditRow(r => ({ ...r, motif: e.target.value }))
-                  }
-                />
-              </div>
-              <Button type="submit">Enregistrer</Button>
-            </form>
-          )}
-        </DialogContent>
-      </Dialog>
+                  <div>
+                    <label>Produit</label>
+                    <select
+                      className="input input-bordered w-full"
+                      value={createMv.produit_id}
+                      onChange={e =>
+                        setCreateMv(r => ({ ...r, produit_id: e.target.value }))
+                      }
+                    >
+                      <option value="">Sélectionne…</option>
+                      {produits.map(p => (
+                        <option key={p.id} value={p.id}>
+                          {p.nom}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label>Type</label>
+                    <select
+                      className="input input-bordered w-full"
+                      value={createMv.type}
+                      onChange={e =>
+                        setCreateMv(r => ({ ...r, type: e.target.value }))
+                      }
+                    >
+                      <option value="ENTREE">Entrée</option>
+                      <option value="SORTIE">Sortie</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label>Sous-type</label>
+                    <input
+                      className="input input-bordered w-full"
+                      value={createMv.sous_type}
+                      onChange={e =>
+                        setCreateMv(r => ({ ...r, sous_type: e.target.value }))
+                      }
+                      placeholder="(ex: Achat, Réquisition, Perte, Retour…)"
+                    />
+                  </div>
+                  <div>
+                    <label>Quantité</label>
+                    <input
+                      type="number"
+                      className="input input-bordered w-24"
+                      value={createMv.quantite}
+                      onChange={e =>
+                        setCreateMv(r => ({ ...r, quantite: e.target.value }))
+                      }
+                      min={0}
+                    />
+                  </div>
+                  <div>
+                    <label>Zone</label>
+                    <input
+                      className="input input-bordered w-full"
+                      value={createMv.zone}
+                      onChange={e =>
+                        setCreateMv(r => ({ ...r, zone: e.target.value }))
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label>Motif</label>
+                    <textarea
+                      className="input input-bordered w-full"
+                      value={createMv.motif}
+                      rows={2}
+                      onChange={e =>
+                        setCreateMv(r => ({ ...r, motif: e.target.value }))
+                      }
+                    />
+                  </div>
+                  <Button type="submit">Créer</Button>
+                </form>
+              </motion.div>
+            </DialogContent>
+          </Dialog>
+        )}
+      </AnimatePresence>
+      {/* Modal correction/justif */}
+      <AnimatePresence>
+        {editRow && (
+          <Dialog open={!!editRow} onOpenChange={v => !v && setEditRow(null)}>
+            <DialogOverlay forceMount>
+              <motion.div
+                className="fixed inset-0 z-40 bg-black/30 backdrop-blur"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              />
+            </DialogOverlay>
+            <DialogContent forceMount className="glass-liquid rounded-2xl shadow-2xl p-8 max-w-md z-50">
+              <motion.div
+                variants={glassVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+              >
+                <h2 className="font-bold mb-2">
+                  Correction/justification du mouvement
+                </h2>
+                {editRow && (
+                  <form
+                    onSubmit={e => {
+                      e.preventDefault();
+                      handleSaveEdit();
+                    }}
+                    className="space-y-3"
+                  >
+                    <div>
+                      <label>Produit : {produits.find(p => p.id === editRow.produit_id)?.nom}</label>
+                    </div>
+                    <div>
+                      <label>Type</label>
+                      <select
+                        className="input input-bordered w-full"
+                        value={editRow.type}
+                        onChange={e =>
+                          setEditRow(r => ({ ...r, type: e.target.value }))
+                        }
+                      >
+                        <option value="ENTREE">Entrée</option>
+                        <option value="SORTIE">Sortie</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label>Sous-type</label>
+                      <input
+                        className="input input-bordered w-full"
+                        value={editRow.sous_type}
+                        onChange={e =>
+                          setEditRow(r => ({ ...r, sous_type: e.target.value }))
+                        }
+                      />
+                    </div>
+                    <div>
+                      <label>Quantité</label>
+                      <input
+                        type="number"
+                        className="input input-bordered w-24"
+                        value={editRow.quantite}
+                        onChange={e =>
+                          setEditRow(r => ({ ...r, quantite: e.target.value }))
+                        }
+                        min={0}
+                      />
+                    </div>
+                    <div>
+                      <label>Motif</label>
+                      <textarea
+                        className="input input-bordered w-full"
+                        value={editRow.motif}
+                        rows={2}
+                        onChange={e =>
+                          setEditRow(r => ({ ...r, motif: e.target.value }))
+                        }
+                      />
+                    </div>
+                    <Button type="submit">Enregistrer</Button>
+                  </form>
+                )}
+              </motion.div>
+            </DialogContent>
+          </Dialog>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+
+// -----------------
+// Ajoute ce style global dans ton index.css si pas déjà là :
+/*
+.glass-liquid {
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.25), 0 1.5px 12px 0 #bfa14d44;
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border-radius: 24px;
+  border: 1.5px solid rgba(255,255,255,0.25);
+  border-bottom: 2px solid #bfa14d66;
+  animation: glassyPop 0.25s cubic-bezier(.6,2,.5,1) both;
+}
+@keyframes glassyPop {
+  0% { opacity: 0; transform: scale(.95) translateY(40px);}
+  100% { opacity: 1; transform: scale(1) translateY(0);}
+}
+*/
+// -----------------

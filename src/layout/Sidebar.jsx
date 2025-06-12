@@ -4,148 +4,203 @@ import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import mamaLogo from "@/assets/logo-mamastock.png";
 import { ChevronRight, ChevronDown } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+
+const MENUS = [
+  {
+    label: "Dashboard",
+    icon: "📊",
+    to: "/",
+    accessKey: "dashboard",
+  },
+  {
+    label: "Stock",
+    icon: "📦",
+    accessKey: "stock",
+    children: [
+      { label: "Produits", to: "/produits" },
+      { label: "Mouvements", to: "/mouvements" },
+      { label: "Stock synthèse", to: "/stock" },
+    ],
+  },
+  {
+    label: "Fiches techniques",
+    icon: "📑",
+    to: "/fiches",
+    accessKey: "fiches",
+  },
+  {
+    label: "Inventaire",
+    icon: "📋",
+    to: "/inventaire",
+    accessKey: "inventaire",
+  },
+  {
+    label: "Factures",
+    icon: "🧾",
+    to: "/factures",
+    accessKey: "factures",
+  },
+  {
+    label: "Menus du jour",
+    icon: "🍽️",
+    to: "/menus",
+    accessKey: "menus",
+  },
+  {
+    label: "Fournisseurs",
+    icon: "🏢",
+    to: "/fournisseurs",
+    accessKey: "fournisseurs",
+  },
+  {
+    label: "Paramétrage",
+    icon: "⚙️",
+    accessKey: "parametrage",
+    children: [
+      { label: "Utilisateurs", to: "/parametrage/utilisateurs" },
+      { label: "Rôles", to: "/parametrage/roles" },
+      { label: "Permissions", to: "/parametrage/permissions" },
+      { label: "Établissements", to: "/parametrage/mamas" },
+      { label: "Paramétrage global", to: "/parametrage" },
+    ],
+  },
+];
 
 export default function Sidebar() {
   const { access_rights } = useAuth();
   const location = useLocation();
 
-  const [open, setOpen] = useState({
-    achats: false,
-    cuisine: false,
-    stock: false,
-    analyse: false,
-    parametrage: false,
-  });
-
-  // Utilitaire : teste si l'utilisateur a ce droit (clé)
-  const hasRight = (key) => Array.isArray(access_rights) && access_rights.includes(key);
-
-  // Pour des groupes de droits
-  const hasAny = (keys) => Array.isArray(access_rights) && keys.some((k) => access_rights.includes(k));
+  // Permet de voir quels menus sont ouverts selon la route active
+  const [open, setOpen] = useState({});
 
   useEffect(() => {
     const path = location.pathname;
-    setOpen({
-      achats: path.includes("/fournisseurs") || path.includes("/factures") || path.includes("/produits"),
-      cuisine: path.includes("/fiches") || path.includes("/menus"),
-      stock: path.includes("/inventaire") || path.includes("/mouvements") || path.includes("/requisitions"),
-      analyse: path.includes("/cost-boisson"),
-      parametrage: path.includes("/parametrage"),
+    const newOpen = {};
+    MENUS.forEach((menu, idx) => {
+      if (menu.children) {
+        // Ouvre la section si la route actuelle commence par un des children
+        newOpen[idx] = menu.children.some(child => path.startsWith(child.to));
+      }
     });
+    setOpen(newOpen);
   }, [location.pathname]);
 
+  const hasAccess = (accessKey) =>
+    access_rights?.includes?.(accessKey) ||
+    (typeof access_rights === "object" && access_rights?.[accessKey]);
+
   return (
-    <aside className="w-64 bg-mamastockBg text-mamastockText border-r border-mamastockGold shadow-md flex flex-col">
+    <aside
+      className="w-64 min-h-screen bg-white/50 backdrop-blur-2xl border-r border-mamastockGold shadow-lg flex flex-col glass-sidebar transition-all"
+      style={{
+        boxShadow:
+          "0 8px 32px 0 rgba(31, 38, 135, 0.23), 0 1.5px 8px 0 #bfa14d55",
+        borderRadius: "2rem 0 0 2rem",
+      }}
+    >
       <div className="flex flex-col items-center p-6 border-b border-mamastockGold">
-        <img src={mamaLogo} alt="MamaStock" className="w-48 h-auto mb-2" />
-        <span className="text-lg font-semibold text-mamastockGold tracking-widest">Menu</span>
+        <img
+          src={mamaLogo}
+          alt="MamaStock"
+          className="w-36 h-auto mb-2 drop-shadow-lg"
+          style={{ filter: "drop-shadow(0 0 16px #bfa14d88)" }}
+        />
+        <span className="text-lg font-semibold text-mamastockGold tracking-widest drop-shadow-sm">
+          Menu
+        </span>
       </div>
       <nav className="flex-1 px-4 py-4 space-y-2 text-sm overflow-y-auto scrollbar-thin scrollbar-thumb-mamastockGold/50">
-        {hasRight("dashboard") && (
-          <SidebarLink to="/" label="Dashboard" icon="📊" />
-        )}
-
-        {hasAny(["factures", "produits", "fournisseurs"]) && (
-          <SidebarSection
-            label="Achats & Produits"
-            open={open.achats}
-            toggle={() => setOpen((prev) => ({ ...prev, achats: !prev.achats }))}
-            items={[
-              hasRight("fournisseurs") && { to: "/fournisseurs", label: "Fournisseurs" },
-              hasRight("produits") && { to: "/produits", label: "Produits" },
-              hasRight("factures") && { to: "/factures", label: "Factures" },
-            ].filter(Boolean)}
-          />
-        )}
-
-        {hasAny(["fiches", "menus"]) && (
-          <SidebarSection
-            label="Cuisine"
-            open={open.cuisine}
-            toggle={() => setOpen((prev) => ({ ...prev, cuisine: !prev.cuisine }))}
-            items={[
-              hasRight("fiches") && { to: "/fiches", label: "Fiches Techniques" },
-              hasRight("menus") && { to: "/menus", label: "Menus du jour" },
-            ].filter(Boolean)}
-          />
-        )}
-
-        {hasAny(["inventaire", "mouvements", "requisitions"]) && (
-          <SidebarSection
-            label="Stock"
-            open={open.stock}
-            toggle={() => setOpen((prev) => ({ ...prev, stock: !prev.stock }))}
-            items={[
-              hasRight("inventaire") && { to: "/inventaire", label: "Inventaire" },
-              hasRight("mouvements") && { to: "/mouvements", label: "Mouvements" },
-              hasRight("requisitions") && { to: "/requisitions", label: "Réquisitions" },
-            ].filter(Boolean)}
-          />
-        )}
-
-        {hasRight("costboisson") && (
-          <SidebarSection
-            label="Analyse"
-            open={open.analyse}
-            toggle={() => setOpen((prev) => ({ ...prev, analyse: !prev.analyse }))}
-            items={[{ to: "/cost-boisson", label: "Cost Boisson" }]}
-          />
-        )}
-
-        {hasRight("parametrage") && (
-          <SidebarSection
-            label="Paramétrage"
-            open={open.parametrage}
-            toggle={() => setOpen((prev) => ({ ...prev, parametrage: !prev.parametrage }))}
-            items={[
-              hasRight("roles") && { to: "/parametrage/roles", label: "Rôles" },
-              hasRight("utilisateurs") && { to: "/parametrage/utilisateurs", label: "Utilisateurs" },
-              hasRight("mamas") && { to: "/parametrage/mamas", label: "Établissements" },
-              hasRight("permissions") && { to: "/parametrage/permissions", label: "Droits personnalisés" },
-            ].filter(Boolean)}
-          />
+        {MENUS.filter(m => hasAccess(m.accessKey)).map((menu, idx) =>
+          menu.children ? (
+            <SidebarSection
+              key={menu.label}
+              label={menu.label}
+              icon={menu.icon}
+              open={!!open[idx]}
+              onToggle={() => setOpen(o => ({ ...o, [idx]: !o[idx] }))}
+              childrenLinks={menu.children}
+            />
+          ) : (
+            <SidebarLink
+              key={menu.label}
+              to={menu.to}
+              label={menu.label}
+              icon={menu.icon}
+              active={location.pathname === menu.to}
+            />
+          )
         )}
       </nav>
+      <style>
+        {`
+          .glass-sidebar {
+            background: linear-gradient(120deg, rgba(255,255,255,0.85) 40%, rgba(191,161,77,0.07) 100%);
+            border-right: 2px solid #bfa14d55;
+          }
+        `}
+      </style>
     </aside>
   );
 }
 
-function SidebarLink({ to, label, icon = null }) {
-  const location = useLocation();
-  const active = location.pathname === to;
-
+function SidebarLink({ to, label, icon, active }) {
   return (
     <Link
       to={to}
-      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition font-medium ${
-        active ? "bg-mamastockGold text-black" : "hover:bg-white/10 text-mamastockText"
-      }`}
+      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition font-medium
+        ${active
+          ? "bg-mamastockGold/90 text-black shadow-lg"
+          : "hover:bg-white/20 text-mamastockText"}
+      `}
+      style={{
+        boxShadow: active
+          ? "0 8px 16px 0 #bfa14d55"
+          : "0 1.5px 8px 0 rgba(191,161,77,0.08)",
+        backdropFilter: "blur(4px)",
+      }}
     >
-      {icon && <span>{icon}</span>}
+      {icon && <span className="text-lg">{icon}</span>}
       {label}
     </Link>
   );
 }
 
-function SidebarSection({ label, open, toggle, items }) {
+function SidebarSection({ label, icon, open, onToggle, childrenLinks }) {
   return (
     <div>
       <button
-        onClick={toggle}
-        className={`w-full flex justify-between items-center px-4 py-2 rounded-lg font-semibold transition ${
-          open ? "bg-mamastockGold text-black" : "hover:bg-white/10 text-mamastockText"
-        }`}
+        onClick={onToggle}
+        className={`w-full flex justify-between items-center px-4 py-2 rounded-lg font-semibold transition
+          ${open ? "bg-mamastockGold/80 text-black shadow-lg" : "hover:bg-white/10 text-mamastockText"}
+        `}
+        style={{
+          boxShadow: open
+            ? "0 8px 16px 0 #bfa14d55"
+            : "0 1.5px 8px 0 rgba(191,161,77,0.08)",
+        }}
       >
-        <span>{label}</span>
+        <span className="flex items-center gap-2">
+          {icon && <span className="text-lg">{icon}</span>}
+          {label}
+        </span>
         {open ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
       </button>
-      {open && Array.isArray(items) && (
-        <div className="pl-4 mt-1 space-y-1">
-          {items.map(({ to, label }) => (
-            <SidebarLink key={to} to={to} label={label} />
-          ))}
-        </div>
-      )}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="pl-4 mt-1 space-y-1"
+            transition={{ duration: 0.21 }}
+          >
+            {childrenLinks.map(link => (
+              <SidebarLink key={link.to} to={link.to} label={link.label} />
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

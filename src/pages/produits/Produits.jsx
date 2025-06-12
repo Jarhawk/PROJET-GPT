@@ -1,151 +1,89 @@
-import { useState, useEffect } from "react";
-import { useEnrichedProducts } from "@/hooks/useEnrichedProducts";
-import { useFamilles } from "@/hooks/useFamilles";
-import { useUnites } from "@/hooks/useUnites";
-import ProduitForm from "@/components/produits/ProduitForm";
+// src/pages/Produits.jsx
+import { useEffect, useState } from "react";
+import { useProducts } from "@/hooks/useProducts";
+import ProduitFormModal from "@/components/produits/ProduitFormModal";
 import ProduitDetail from "@/components/produits/ProduitDetail";
 import { Button } from "@/components/ui/button";
-import { Toaster, toast } from "react-hot-toast";
-import { saveAs } from "file-saver";
-import * as XLSX from "xlsx";
-import { motion } from "framer-motion";
+import { toast, Toaster } from "react-hot-toast";
 
 export default function Produits() {
-  const { products, fetchProducts } = useEnrichedProducts();
-  const { familles, fetchFamilles } = useFamilles();
-  const { unites, fetchUnites } = useUnites();
+  const {
+    products,
+    fetchProducts,
+    loading,
+    exportProductsToExcel,
+  } = useProducts();
 
-  const [search, setSearch] = useState("");
-  const [familleFilter, setFamilleFilter] = useState("");
-  const [uniteFilter, setUniteFilter] = useState("");
-  const [actifFilter, setActifFilter] = useState("all");
   const [showForm, setShowForm] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showDetail, setShowDetail] = useState(false);
+
+  // Filtre et familles/unites dynamiques
+  const familles = [...new Set(products.map(p => p.famille).filter(Boolean))];
+  const unites = [...new Set(products.map(p => p.unite).filter(Boolean))];
 
   useEffect(() => {
     fetchProducts();
-    fetchFamilles();
-    fetchUnites();
   }, []);
 
-  // Export Excel/XLSX
-  const exportExcel = () => {
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(products);
-    XLSX.utils.book_append_sheet(wb, ws, "Produits");
-    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([buf]), "produits.xlsx");
-  };
-
-  // Filtrage avancé et recherche
-  const produitsFiltres = products.filter(p =>
-    (!search || p.nom?.toLowerCase().includes(search.toLowerCase()) || p.famille?.toLowerCase().includes(search.toLowerCase())) &&
-    (!familleFilter || p.famille === familleFilter) &&
-    (!uniteFilter || p.unite === uniteFilter) &&
-    (actifFilter === "all" || (actifFilter === "true" ? p.actif : !p.actif))
-  );
-
   return (
-    <div className="p-6 container mx-auto">
-      <Toaster position="top-right" />
-      <div className="flex flex-wrap gap-4 items-center mb-4">
-        <input
-          type="search"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="input"
-          placeholder="Recherche produit/famille"
-        />
-        <select className="input" value={familleFilter} onChange={e => setFamilleFilter(e.target.value)}>
-          <option value="">Toutes familles</option>
-          {familles.map(f => <option key={f.id} value={f.nom}>{f.nom}</option>)}
-        </select>
-        <select className="input" value={uniteFilter} onChange={e => setUniteFilter(e.target.value)}>
-          <option value="">Toutes unités</option>
-          {unites.map(u => <option key={u.id} value={u.nom}>{u.nom}</option>)}
-        </select>
-        <select className="input" value={actifFilter} onChange={e => setActifFilter(e.target.value)}>
-          <option value="all">Tous</option>
-          <option value="true">Actif</option>
-          <option value="false">Inactif</option>
-        </select>
-        <Button onClick={() => { setSelectedProduct(null); setShowForm(true); }}>
-          Ajouter un produit
-        </Button>
-        <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
+    <div className="p-8 max-w-7xl mx-auto">
+      <Toaster />
+      <h1 className="text-2xl font-bold text-mamastockGold mb-4">Produits stock</h1>
+      <div className="flex gap-2 mb-6">
+        <Button onClick={() => { setShowForm(true); setSelectedProduct(null); }}>+ Nouveau produit</Button>
+        <Button onClick={exportProductsToExcel}>Export Excel</Button>
       </div>
-      <motion.table
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="min-w-full bg-white rounded-xl shadow-md"
-      >
-        <thead>
-          <tr>
-            <th className="px-4 py-2">Nom</th>
-            <th className="px-4 py-2">Famille</th>
-            <th className="px-4 py-2">Unité</th>
-            <th className="px-4 py-2">Stock</th>
-            <th className="px-4 py-2">Actif</th>
-            <th className="px-4 py-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {produitsFiltres.map((product) => (
-            <tr key={product.id}>
-              <td className="border px-4 py-2">
-                <Button
-                  variant="link"
-                  className="font-semibold text-mamastockGold"
-                  onClick={() => { setSelectedProduct(product); setShowForm(false); }}
-                >
-                  {product.nom}
-                </Button>
-              </td>
-              <td className="border px-4 py-2">{product.famille}</td>
-              <td className="border px-4 py-2">{product.unite}</td>
-              <td className="border px-4 py-2">{product.stock}</td>
-              <td className="border px-4 py-2">
-                <span className={product.actif ? "badge badge-admin" : "badge badge-user"}>
-                  {product.actif ? "Actif" : "Inactif"}
-                </span>
-              </td>
-              <td className="border px-4 py-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => { setSelectedProduct(product); setShowForm(true); }}
-                  className="mr-2"
-                >
-                  Modifier
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setSelectedProduct(product)}
-                >
-                  Détail
-                </Button>
-              </td>
+      <div className="bg-white/70 shadow rounded-xl overflow-x-auto">
+        <table className="min-w-full table-auto text-center">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Famille</th>
+              <th>Unité</th>
+              <th>PMP (€)</th>
+              <th>Stock</th>
+              <th>Actif</th>
+              <th>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </motion.table>
-
-      {showForm && (
-        <ProduitForm
-          produit={selectedProduct}
-          familles={familles}
-          unites={unites}
-          onClose={() => { setShowForm(false); setSelectedProduct(null); fetchProducts(); }}
-        />
-      )}
-      {selectedProduct && !showForm && (
-        <ProduitDetail
-          produit={selectedProduct}
-          onClose={() => setSelectedProduct(null)}
-          refreshList={fetchProducts}
-        />
-      )}
+          </thead>
+          <tbody>
+            {products.map(p => (
+              <tr key={p.id}>
+                <td>{p.nom}</td>
+                <td>{p.famille}</td>
+                <td>{p.unite}</td>
+                <td>{p.pmp}</td>
+                <td>{p.stock_reel}</td>
+                <td>{p.actif ? "✅" : "❌"}</td>
+                <td>
+                  <Button size="sm" variant="outline" onClick={() => { setSelectedProduct(p); setShowForm(true); }}>
+                    Éditer
+                  </Button>
+                  <Button size="sm" variant="secondary" onClick={() => { setSelectedProduct(p); setShowDetail(true); }}>
+                    Historique prix
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {/* Modale création/édition */}
+      <ProduitFormModal
+        open={showForm}
+        produit={selectedProduct}
+        familles={familles}
+        unites={unites}
+        onClose={() => { setShowForm(false); setSelectedProduct(null); fetchProducts(); }}
+        onSuccess={() => { fetchProducts(); }}
+      />
+      {/* Modale détail historique */}
+      <ProduitDetail
+        produitId={selectedProduct?.id}
+        open={showDetail}
+        onClose={() => { setShowDetail(false); setSelectedProduct(null); }}
+      />
     </div>
   );
 }

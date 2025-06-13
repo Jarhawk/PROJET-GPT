@@ -2,14 +2,16 @@
 
 This folder contains SQL files to bootstrap a fresh Supabase project for MamaStock.
 
-- `schema.sql` – tables and minimal policies
-- `seeds.sql`  – example seed data
+- `init.sql` – full schema creation with triggers
+- `rls.sql`  – row level security policies
+- `seed.sql` – example seed data
 
 To initialize a local project with the Supabase CLI:
 
 ```bash
 supabase start
-supabase db reset --file sql/schema.sql --seed sql/seeds.sql
+supabase db reset --file sql/init.sql --seed sql/seed.sql
+psql "$SUPABASE_DB_URL" -f sql/rls.sql
 ```
 
 Adjust the command to your workflow if needed.

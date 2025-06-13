@@ -19,7 +19,8 @@ SQL scripts are stored in [`sql/`](./sql). To initialise a local Supabase instan
 
 ```bash
 supabase start
-supabase db reset --file sql/schema.sql --seed sql/seeds.sql
+supabase db reset --file sql/init.sql --seed sql/seed.sql
+psql "$SUPABASE_DB_URL" -f sql/rls.sql
 ```
 
 Adjust configuration in `supabase/config.toml` as required.

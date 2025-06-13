@@ -58,7 +58,7 @@ export default function InventaireForm({ inventaire, onClose }) {
     const mvts = mouvementsProduits.filter(m => m.product_id === product_id);
     const entrees = mvts.filter(m => m.type === "entree").reduce((sum, m) => sum + m.quantite, 0);
     const sorties = mvts.filter(m => m.type === "sortie").reduce((sum, m) => sum + m.quantite, 0);
-    // Stock de début : à définir selon la base (dernier inventaire clôturé, ou 0 si pas trouvé)
+    // Stock de début : à définir selon la base (dernier inventaire clôturé, ou 0 si pas trouvé)
     const stock_debut = mvts[0]?.stock_debut ?? 0;
     const stock_fin = quantite_inventaire ?? 0;
     const conso_theorique = stock_debut + entrees - sorties - stock_fin;
@@ -71,7 +71,7 @@ export default function InventaireForm({ inventaire, onClose }) {
   // Clôture (voir version précédente)
   const handleCloture = async () => {
     if (!inventaire?.id) return;
-    if (window.confirm("Clôturer cet inventaire ? (action irréversible)")) {
+    if (window.confirm("Clôturer cet inventaire ? (action irréversible)")) {
       setLoading(true);
       await clotureInventaire(inventaire.id);
       toast.success("Inventaire clôturé !");
@@ -124,7 +124,7 @@ export default function InventaireForm({ inventaire, onClose }) {
         onChange={e => setDate(e.target.value)}
         required
       />
-      {/* Optionnel : affichage période analysée */}
+      {/* Optionnel : affichage période analysée */}
       <div className="mb-4 text-xs">
         <b>Période d’analyse mouvements :</b> {dateDebut} → {date || "?"}
       </div>
@@ -205,7 +205,7 @@ export default function InventaireForm({ inventaire, onClose }) {
         <Button type="button" size="sm" variant="outline" onClick={addLigne}>Ajouter produit</Button>
       </div>
       <label>
-        Document/photo : <input type="file" onChange={e => setFile(e.target.files[0])} />
+        Document/photo : <input type="file" onChange={e => setFile(e.target.files[0])} />
         <Button type="button" size="sm" variant="outline" className="ml-2" onClick={handleUpload}>Upload</Button>
       </label>
       <div className="flex gap-2 mt-4">

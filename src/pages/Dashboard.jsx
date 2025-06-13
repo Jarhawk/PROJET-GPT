@@ -3,7 +3,6 @@ import { useDashboard } from "@/hooks/useDashboard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Toaster, toast } from "react-hot-toast";
-import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -21,7 +20,6 @@ export default function Dashboard() {
     evolutionFoodCost,
     margeBrute,
     alertesStockBas,
-    loading,
     fetchDashboard,
     exportExcelDashboard,
   } = useDashboard();

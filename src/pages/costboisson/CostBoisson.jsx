@@ -8,7 +8,7 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { Dialog, DialogContent, DialogTrigger } from "@radix-ui/react-dialog";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion as Motion, AnimatePresence } from "framer-motion";
 
 const FOOD_COST_SEUIL = 28;
 
@@ -16,7 +16,6 @@ export default function CostBoissons() {
   const { isAuthenticated, claims } = useAuth();
   const [boissons, setBoissons] = useState([]);
   const [savingId, setSavingId] = useState(null);
-  const [modal, setModal] = useState(null);
   const [search, setSearch] = useState("");
   const [ventes, setVentes] = useState([]);
   const [ventesInput, setVentesInput] = useState({});
@@ -272,7 +271,7 @@ export default function CostBoissons() {
                     ? ((b.cout_portion / b.prix_vente) * 100).toFixed(1)
                     : null;
                 return (
-                  <motion.tr
+                  <Motion.tr
                     key={b.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -367,16 +366,16 @@ export default function CostBoissons() {
                         >
                           <h2 className="font-bold text-xl mb-2">{b.nom}</h2>
                           <p>
-                            <b>Détails techniques :</b>
+                            <b>Détails techniques :</b>
                             <br />
-                            ID : {b.id}
+                            ID : {b.id}
                             <br />
-                            Dernière mise à jour : {b.updated_at || "-"}
+                            Dernière mise à jour : {b.updated_at || "-"}
                           </p>
                         </DialogContent>
                       </Dialog>
                     </td>
-                  </motion.tr>
+                  </Motion.tr>
                 );
               })}
             </AnimatePresence>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@radix-ui/react-dialog";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion as Motion } from "framer-motion";
 import toast from "react-hot-toast";
 
 export default function MouvementFormModal({
@@ -65,7 +65,7 @@ export default function MouvementFormModal({
       <AnimatePresence>
         {open && (
           <DialogContent asChild>
-            <motion.div
+            <Motion.div
               initial={{ scale: 0.95, opacity: 0, y: 30 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 20 }}
@@ -182,7 +182,7 @@ export default function MouvementFormModal({
                 .glass-modal { animation: fadeGlass .5s cubic-bezier(.77,0,.18,1) both; }
                 @keyframes fadeGlass { from {opacity:0;transform:scale(.93);} to{opacity:1;transform:scale(1);} }
               `}</style>
-            </motion.div>
+            </Motion.div>
           </DialogContent>
         )}
       </AnimatePresence>

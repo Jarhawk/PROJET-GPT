@@ -31,7 +31,7 @@ export default function MenuDuJourDetail({ menu, onClose }) {
         <h2 className="font-bold text-xl mb-4">{menu.nom}</h2>
         <div><b>Date :</b> {menu.date}</div>
         <div>
-          <b>Fiches :</b>
+          <b>Fiches :</b>
           <ul className="list-disc pl-6">
             {menu.fiches?.map((f, i) => <li key={i}>{f.nom}</li>)}
           </ul>
@@ -47,7 +47,7 @@ export default function MenuDuJourDetail({ menu, onClose }) {
           <Button variant="outline" onClick={exportPDF}>Export PDF</Button>
         </div>
         <div className="mt-4">
-          <b>Historique :</b>
+          <b>Historique :</b>
           <ul className="list-disc pl-6">
             {historique.map((h, i) =>
               <li key={i}>{h.date} — {h.user} — {h.action}</li>

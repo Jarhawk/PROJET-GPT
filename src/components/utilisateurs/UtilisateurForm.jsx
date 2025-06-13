@@ -10,7 +10,7 @@ const ROLES = [
 ];
 
 export default function UtilisateurForm({ utilisateur, onClose }) {
-  const { addUser, editUser } = useUsers();
+  const { addUser, updateUser } = useUsers();
   const [email, setEmail] = useState(utilisateur?.email || "");
   const [role, setRole] = useState(utilisateur?.role || "user");
   const [actif, setActif] = useState(utilisateur?.actif ?? true);
@@ -28,7 +28,7 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
     };
     try {
       if (utilisateur?.id) {
-        await editUser(utilisateur.id, data);
+        await updateUser(utilisateur.id, data);
         toast.success("Utilisateur modifié !");
       } else {
         await addUser(data);

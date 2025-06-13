@@ -8,7 +8,7 @@ export function useSupplierProducts() {
   const { mama_id } = useAuth();
 
   // Tous les produits fournis par ce fournisseur (avec totaux achats/prix moyens)
-  function getProductsBySupplier(fournisseur_id) {
+  function useProductsBySupplier(fournisseur_id) {
     // Peut être asynchrone si tu veux charger en temps réel
     // Ou utiliser un state global pour garder cache
     // Ici on te propose le pattern async + hook si besoin
@@ -33,5 +33,5 @@ export function useSupplierProducts() {
     return { products, loading, error, fetch };
   }
 
-  return { getProductsBySupplier };
+  return { useProductsBySupplier };
 }

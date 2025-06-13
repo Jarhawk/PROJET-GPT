@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { useInvoices } from "@/hooks/useInvoices";
 import { useSuppliers } from "@/hooks/useSuppliers";
-import FactureForm from "@/components/factures/FactureForm";
-import FactureDetail from "@/components/factures/FactureDetail"; // On suppose qu’il existe ou à créer pour le détail !
+import FactureForm from "./FactureForm.jsx";
+import FactureDetail from "./FactureDetail.jsx"; // On suppose qu’il existe ou à créer pour le détail !
 import { Button } from "@/components/ui/button";
 import { Toaster, toast } from "react-hot-toast";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 
 const STATUTS = {
   "en attente": "badge badge-user",
@@ -84,7 +84,7 @@ export default function Factures() {
         </Button>
         <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
       </div>
-      <motion.table
+      <Motion.table
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="min-w-full bg-white rounded-xl shadow-md"
@@ -144,7 +144,7 @@ export default function Factures() {
             </tr>
           ))}
         </tbody>
-      </motion.table>
+      </Motion.table>
       {/* Modal d’ajout/modif */}
       {showForm && (
         <FactureForm

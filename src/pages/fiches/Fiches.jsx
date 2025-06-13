@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useFiches } from "@/hooks/useFiches";
-import FicheForm from "@/components/fiches/FicheForm";
-import FicheDetail from "@/components/fiches/FicheDetail";
+import FicheForm from "./FicheForm.jsx";
+import FicheDetail from "./FicheDetail.jsx";
 import { Button } from "@/components/ui/button";
 import { Toaster, toast } from "react-hot-toast";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 
 export default function Fiches() {
   const { fiches, fetchFiches, deleteFiche } = useFiches();
@@ -14,7 +14,7 @@ export default function Fiches() {
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState("");
-  const [familleFilter, setFamilleFilter] = useState("");
+  const [familleFilter] = useState("");
 
   useEffect(() => { fetchFiches(); }, []);
 
@@ -58,7 +58,7 @@ export default function Fiches() {
         </Button>
         <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
       </div>
-      <motion.table
+      <Motion.table
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="min-w-full bg-white rounded-xl shadow-md"
@@ -108,7 +108,7 @@ export default function Fiches() {
             </tr>
           ))}
         </tbody>
-      </motion.table>
+      </Motion.table>
       {showForm && (
         <FicheForm
           fiche={selected}

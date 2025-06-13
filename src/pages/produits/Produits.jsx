@@ -4,13 +4,12 @@ import { useProducts } from "@/hooks/useProducts";
 import ProduitFormModal from "@/components/produits/ProduitFormModal";
 import ProduitDetail from "@/components/produits/ProduitDetail";
 import { Button } from "@/components/ui/button";
-import { toast, Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 
 export default function Produits() {
   const {
     products,
     fetchProducts,
-    loading,
     exportProductsToExcel,
   } = useProducts();
 

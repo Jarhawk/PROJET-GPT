@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 
 export default function DashboardCard({ title, value, icon, type = "default", progress = null, children }) {
   const colorClass = {
@@ -10,7 +10,7 @@ export default function DashboardCard({ title, value, icon, type = "default", pr
   }[type] || "bg-white text-mamastockText";
 
   return (
-    <motion.div
+    <Motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
@@ -27,6 +27,6 @@ export default function DashboardCard({ title, value, icon, type = "default", pr
         </div>
       }
       {children && <div className="w-full mt-2">{children}</div>}
-    </motion.div>
+    </Motion.div>
   );
 }

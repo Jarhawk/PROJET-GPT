@@ -12,7 +12,7 @@ export default function ParamRoles() {
 
   const handleEdit = r => { setForm(r); setEditMode(true); };
   const handleDelete = async id => {
-    if (window.confirm("Supprimer le rôle ?")) {
+    if (window.confirm("Supprimer le rôle ?")) {
       await deleteRole(id); await fetchRoles();
       toast.success("Rôle supprimé.");
     }

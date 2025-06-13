@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { useMenus } from "@/hooks/useMenus";
 import { useFiches } from "@/hooks/useFiches";
-import MenuForm from "@/components/menus/MenuForm";
-import MenuDetail from "@/components/menus/MenuDetail";
+import MenuForm from "./MenuForm.jsx";
+import MenuDetail from "./MenuDetail.jsx";
 import { Button } from "@/components/ui/button";
 import { Toaster, toast } from "react-hot-toast";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 
 export default function Menus() {
   const { menus, fetchMenus, deleteMenu } = useMenus();
@@ -66,7 +66,7 @@ export default function Menus() {
         </Button>
         <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
       </div>
-      <motion.table
+      <Motion.table
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="min-w-full bg-white rounded-xl shadow-md"
@@ -116,7 +116,7 @@ export default function Menus() {
             </tr>
           ))}
         </tbody>
-      </motion.table>
+      </Motion.table>
       {showForm && (
         <MenuForm
           menu={selected}

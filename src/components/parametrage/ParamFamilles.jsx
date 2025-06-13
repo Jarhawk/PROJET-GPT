@@ -19,7 +19,7 @@ export default function ParamFamilles() {
 
   const handleEdit = f => { setForm(f); setEditMode(true); };
   const handleDelete = async id => {
-    if (window.confirm("Supprimer la famille ?")) {
+    if (window.confirm("Supprimer la famille ?")) {
       await deleteFamille(id); await fetchFamilles();
       toast.success("Famille supprimée.");
     }

@@ -6,7 +6,7 @@ function EcartInventairePage() {
   const [date, setDate] = useState(params.get("date") || "");
   const [zone, setZone] = useState(params.get("zone") || "");
   const [mois, setMois] = useState(params.get("mois") || "");
-  const [mode, setMode] = useState(params.get("mode") || "");
+  const [mode] = useState(params.get("mode") || "");
   const [ecarts, setEcarts] = useState([]);
 
   const fetchEcarts = async () => {

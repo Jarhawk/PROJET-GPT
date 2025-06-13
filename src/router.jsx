@@ -9,8 +9,8 @@ const Stock = lazy(() => import("@/pages/Stock.jsx"));
 
 // Produits
 const Produits = lazy(() => import("@/pages/produits/Produits.jsx"));
-const ProduitDetail = lazy(() => import("@/pages/produits/ProduitDetail.jsx"));
-const ProduitForm = lazy(() => import("@/pages/produits/ProduitForm.jsx"));
+const ProduitDetail = lazy(() => import("@/pages/components/ProduitDetail.jsx"));
+const ProduitForm = lazy(() => import("@/pages/components/ProduitForm.jsx"));
 
 // Fournisseurs
 const Fournisseurs = lazy(() => import("@/pages/fournisseurs/Fournisseurs.jsx"));
@@ -33,7 +33,7 @@ const EcartInventaire = lazy(() => import("@/pages/inventaire/EcartInventaire.js
 
 // Mouvements Stock
 const Mouvements = lazy(() => import("@/pages/Mouvements.jsx"));
-const MouvementDetail = lazy(() => import("@/pages/MouvementDetail.jsx"));
+const MouvementDetail = lazy(() => import("@/components/mouvements/MouvementFormModal.jsx"));
 
 // Menus
 const Menus = lazy(() => import("@/pages/menus/Menus.jsx"));

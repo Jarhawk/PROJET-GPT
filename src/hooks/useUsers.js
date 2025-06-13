@@ -10,7 +10,7 @@ export function useUsers() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // 1. Charger les utilisateurs (superadmin : tous, sinon par mama_id)
+  // 1. Charger les utilisateurs (superadmin : tous, sinon par mama_id)
   async function fetchUsers({ search = "", actif = null, filterRole = "" } = {}) {
     setLoading(true);
     setError(null);

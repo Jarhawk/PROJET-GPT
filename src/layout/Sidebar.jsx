@@ -4,7 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import mamaLogo from "@/assets/logo-mamastock.png";
 import { ChevronRight, ChevronDown } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion as Motion } from "framer-motion";
 
 const MENUS = [
   {
@@ -58,7 +58,7 @@ const MENUS = [
     icon: "⚙️",
     accessKey: "parametrage",
     children: [
-      { label: "Utilisateurs", to: "/parametrage/utilisateurs" },
+      { label: "Utilisateurs", to: "/utilisateurs" },
       { label: "Rôles", to: "/parametrage/roles" },
       { label: "Permissions", to: "/parametrage/permissions" },
       { label: "Établissements", to: "/parametrage/mamas" },
@@ -188,7 +188,7 @@ function SidebarSection({ label, icon, open, onToggle, childrenLinks }) {
       </button>
       <AnimatePresence>
         {open && (
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
@@ -198,7 +198,7 @@ function SidebarSection({ label, icon, open, onToggle, childrenLinks }) {
             {childrenLinks.map(link => (
               <SidebarLink key={link.to} to={link.to} label={link.label} />
             ))}
-          </motion.div>
+          </Motion.div>
         )}
       </AnimatePresence>
     </div>

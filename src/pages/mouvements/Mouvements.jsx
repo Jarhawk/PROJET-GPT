@@ -9,7 +9,7 @@ import "jspdf-autotable";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger, DialogContent, DialogOverlay, DialogClose } from "@radix-ui/react-dialog";
 import { ResponsiveContainer, BarChart, LineChart, Bar, Line, XAxis, YAxis, Tooltip, Legend } from "recharts";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion as Motion, AnimatePresence } from "framer-motion";
 
 const TYPES = [
   { label: "Entrées", value: "ENTREE" },
@@ -416,7 +416,7 @@ export default function Mouvements() {
                     <AnimatePresence>
                       {timeline.length > 0 && (
                         <DialogOverlay forceMount>
-                          <motion.div
+                          <Motion.div
                             className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -426,7 +426,7 @@ export default function Mouvements() {
                       )}
                       {timeline.length > 0 && (
                         <DialogContent forceMount className="glass-liquid rounded-2xl p-6 max-w-lg z-50">
-                          <motion.div
+                          <Motion.div
                             variants={glassVariants}
                             initial="hidden"
                             animate="visible"
@@ -463,7 +463,7 @@ export default function Mouvements() {
                                 </tbody>
                               </table>
                             )}
-                          </motion.div>
+                          </Motion.div>
                         </DialogContent>
                       )}
                     </AnimatePresence>
@@ -479,7 +479,7 @@ export default function Mouvements() {
         {showCreate && (
           <Dialog open={showCreate} onOpenChange={v => !v && setShowCreate(false)}>
             <DialogOverlay forceMount>
-              <motion.div
+              <Motion.div
                 className="fixed inset-0 z-40 bg-black/30 backdrop-blur"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -487,7 +487,7 @@ export default function Mouvements() {
               />
             </DialogOverlay>
             <DialogContent forceMount className="glass-liquid rounded-2xl shadow-2xl p-8 max-w-md z-50">
-              <motion.div
+              <Motion.div
                 variants={glassVariants}
                 initial="hidden"
                 animate="visible"
@@ -574,7 +574,7 @@ export default function Mouvements() {
                   </div>
                   <Button type="submit">Créer</Button>
                 </form>
-              </motion.div>
+              </Motion.div>
             </DialogContent>
           </Dialog>
         )}
@@ -584,7 +584,7 @@ export default function Mouvements() {
         {editRow && (
           <Dialog open={!!editRow} onOpenChange={v => !v && setEditRow(null)}>
             <DialogOverlay forceMount>
-              <motion.div
+              <Motion.div
                 className="fixed inset-0 z-40 bg-black/30 backdrop-blur"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -592,7 +592,7 @@ export default function Mouvements() {
               />
             </DialogOverlay>
             <DialogContent forceMount className="glass-liquid rounded-2xl shadow-2xl p-8 max-w-md z-50">
-              <motion.div
+              <Motion.div
                 variants={glassVariants}
                 initial="hidden"
                 animate="visible"
@@ -661,7 +661,7 @@ export default function Mouvements() {
                     <Button type="submit">Enregistrer</Button>
                   </form>
                 )}
-              </motion.div>
+              </Motion.div>
             </DialogContent>
           </Dialog>
         )}

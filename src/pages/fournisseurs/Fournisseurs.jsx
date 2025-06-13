@@ -6,14 +6,14 @@ import { useSupplierProducts } from "@/hooks/useSupplierProducts";
 import { useProducts } from "@/hooks/useProducts";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger, DialogContent } from "@radix-ui/react-dialog";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import { ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import FournisseurDetail from "./FournisseurDetail";
 import { PlusCircle, Search } from "lucide-react";
 
 export default function Fournisseurs() {
   const { fournisseurs, fetchFournisseurs, addFournisseur, updateFournisseur, deleteFournisseur } = useFournisseurs();
-  const { getStatsForFournisseur, fetchStatsAll } = useFournisseurStats();
+  const { fetchStatsAll } = useFournisseurStats();
   const { getProductsBySupplier } = useSupplierProducts();
   const { products } = useProducts();
   const [search, setSearch] = useState("");
@@ -22,7 +22,6 @@ export default function Fournisseurs() {
   const [editRow, setEditRow] = useState(null);
   const [stats, setStats] = useState([]);
   const [topProducts, setTopProducts] = useState([]);
-  const [loadingStats, setLoadingStats] = useState(false);
 
   useEffect(() => {
     fetchFournisseurs();

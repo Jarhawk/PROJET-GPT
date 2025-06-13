@@ -54,7 +54,7 @@ export default function FicheDetail({ fiche, onClose }) {
           <Button variant="outline" onClick={exportPDF}>Export PDF</Button>
         </div>
         <div className="mt-4">
-          <b>Historique :</b>
+          <b>Historique :</b>
           <ul className="list-disc pl-6">
             {historique.map((h, i) =>
               <li key={i}>{h.date} — {h.user} — {h.action}</li>

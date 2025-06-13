@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { useMenuDuJour } from "@/hooks/useMenuDuJour";
 import { useFiches } from "@/hooks/useFiches";
-import MenuDuJourForm from "@/components/menus/MenuDuJourForm";
-import MenuDuJourDetail from "@/components/menus/MenuDuJourDetail";
+import MenuDuJourForm from "./MenuDuJourForm.jsx";
+import MenuDuJourDetail from "./MenuDuJourDetail.jsx";
 import { Button } from "@/components/ui/button";
 import { Toaster, toast } from "react-hot-toast";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 
 export default function MenuDuJour() {
   const { menusDuJour, fetchMenusDuJour, deleteMenuDuJour } = useMenuDuJour();
@@ -66,7 +66,7 @@ export default function MenuDuJour() {
         </Button>
         <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
       </div>
-      <motion.table
+      <Motion.table
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="min-w-full bg-white rounded-xl shadow-md"
@@ -116,7 +116,7 @@ export default function MenuDuJour() {
             </tr>
           ))}
         </tbody>
-      </motion.table>
+      </Motion.table>
       {showForm && (
         <MenuDuJourForm
           menu={selected}

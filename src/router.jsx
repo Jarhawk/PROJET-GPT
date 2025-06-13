@@ -9,8 +9,8 @@ const Stock = lazy(() => import("@/pages/Stock.jsx"));
 
 // Produits
 const Produits = lazy(() => import("@/pages/produits/Produits.jsx"));
-const ProduitDetail = lazy(() => import("@/pages/components/ProduitDetail.jsx"));
-const ProduitForm = lazy(() => import("@/pages/components/ProduitForm.jsx"));
+const ProduitDetail = lazy(() => import("@/components/produits/ProduitDetail.jsx"));
+const ProduitForm = lazy(() => import("@/components/produits/ProduitForm.jsx"));
 
 // Fournisseurs
 const Fournisseurs = lazy(() => import("@/pages/fournisseurs/Fournisseurs.jsx"));
@@ -32,7 +32,7 @@ const InventaireForm = lazy(() => import("@/pages/inventaire/InventaireForm.jsx"
 const EcartInventaire = lazy(() => import("@/pages/inventaire/EcartInventaire.jsx"));
 
 // Mouvements Stock
-const Mouvements = lazy(() => import("@/pages/Mouvements.jsx"));
+const Mouvements = lazy(() => import("@/pages/mouvements/Mouvements.jsx"));
 const MouvementDetail = lazy(() => import("@/components/mouvements/MouvementFormModal.jsx"));
 
 // Menus
@@ -44,7 +44,7 @@ const Utilisateurs = lazy(() => import("@/pages/Utilisateurs.jsx"));
 const Roles = lazy(() => import("@/pages/parametrage/Roles.jsx"));
 const Permissions = lazy(() => import("@/pages/parametrage/Permissions.jsx"));
 const Mamas = lazy(() => import("@/pages/parametrage/Mamas.jsx"));
-const Parametrage = lazy(() => import("@/pages/Parametrage.jsx"));
+const Parametrage = lazy(() => import("@/pages/parametrage/Parametrage.jsx"));
 
 // Pages Auth et UI
 const Login = lazy(() => import("@/pages/auth/Login.jsx"));

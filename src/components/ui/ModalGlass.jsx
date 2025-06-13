@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion as Motion, AnimatePresence } from "framer-motion";
 
 // Modal glassy avec overlay et anims
 export default function ModalGlass({ open, onClose, children }) {
@@ -7,7 +7,7 @@ export default function ModalGlass({ open, onClose, children }) {
       {open && (
         <>
           {/* Overlay glass */}
-          <motion.div
+          <Motion.div
             className="fixed inset-0 bg-gradient-to-br from-[#0f1c2e99] via-[#fff4e144] to-[#bfa14d55] z-40 backdrop-blur-xl"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -15,7 +15,7 @@ export default function ModalGlass({ open, onClose, children }) {
             onClick={onClose}
           />
           {/* Modale animée */}
-          <motion.div
+          <Motion.div
             className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none"
             initial={{ opacity: 0, y: 40, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -42,7 +42,7 @@ export default function ModalGlass({ open, onClose, children }) {
               </button>
               {children}
             </div>
-          </motion.div>
+          </Motion.div>
         </>
       )}
     </AnimatePresence>

@@ -3,10 +3,10 @@ import { useStock } from "@/hooks/useStock";
 import StockMouvementForm from "@/components/stock/StockMouvementForm";
 import StockDetail from "@/components/stock/StockDetail";
 import { Button } from "@/components/ui/button";
-import { Toaster, toast } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 
 const PAGE_SIZE = 20;
 
@@ -59,7 +59,7 @@ export default function Stock() {
         </Button>
         <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
       </div>
-      <motion.table
+      <Motion.table
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="min-w-full bg-white rounded-xl shadow-md"
@@ -98,7 +98,7 @@ export default function Stock() {
             </tr>
           ))}
         </tbody>
-      </motion.table>
+      </Motion.table>
       <div className="mt-4 flex gap-2">
         {Array.from({ length: nbPages }, (_, i) =>
           <Button

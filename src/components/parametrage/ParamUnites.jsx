@@ -14,7 +14,7 @@ export default function ParamUnites() {
 
   const handleEdit = u => { setForm(u); setEditMode(true); };
   const handleDelete = async id => {
-    if (window.confirm("Supprimer l’unité ?")) {
+    if (window.confirm("Supprimer l’unité ?")) {
       await deleteUnite(id); await fetchUnites();
       toast.success("Unité supprimée.");
     }

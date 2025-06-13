@@ -1,5 +1,5 @@
 // src/components/produits/ProduitFormModal.jsx
-import { motion, AnimatePresence } from "framer-motion";
+import { motion as Motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import ProduitForm from "./ProduitForm";
 import { useEffect } from "react";
@@ -17,13 +17,13 @@ export default function ProduitFormModal({ open, produit, familles, unites, onCl
   return (
     <AnimatePresence>
       {open && (
-        <motion.div
+        <Motion.div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          <motion.div
+          <Motion.div
             className="relative bg-white/80 dark:bg-[#181f31]/90 rounded-2xl shadow-2xl border border-mamastockGold/30 p-0 overflow-hidden min-w-[350px] max-w-lg w-full backdrop-blur-[8px]"
             initial={{ y: 80, opacity: 0, scale: 0.94 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
@@ -47,8 +47,8 @@ export default function ProduitFormModal({ open, produit, familles, unites, onCl
               onSuccess={onSuccess}
               onClose={onClose}
             />
-          </motion.div>
-        </motion.div>
+          </Motion.div>
+        </Motion.div>
       )}
     </AnimatePresence>
   );

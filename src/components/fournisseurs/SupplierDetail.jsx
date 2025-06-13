@@ -1,20 +1,20 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion as Motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from "recharts";
 
 export default function SupplierDetail({ supplier, onClose, glass }) {
-  const [stats, setStats] = useState({});
-  const [contacts, setContacts] = useState([]);
-  const [produits, setProduits] = useState([]);
-  const [graphAchats, setGraphAchats] = useState([]);
-  const [topProduits, setTopProduits] = useState([]);
-  const [historique, setHistorique] = useState([]);
-  const [selectedProduit, setSelectedProduit] = useState("");
+  const [_stats, _setStats] = useState({});
+  const [_contacts, _setContacts] = useState([]);
+  const [_produits, _setProduits] = useState([]);
+  const [_graphAchats, _setGraphAchats] = useState([]);
+  const [_topProduits, _setTopProduits] = useState([]);
+  const [_historique, _setHistorique] = useState([]);
+  const [_selectedProduit, _setSelectedProduit] = useState("");
 
   useEffect(() => {
     if (!supplier) return;
@@ -24,13 +24,13 @@ export default function SupplierDetail({ supplier, onClose, glass }) {
         .from("fournisseur_contacts")
         .select("*")
         .eq("fournisseur_id", supplier.id);
-      setContacts(contactsData || []);
+      _setContacts(contactsData || []);
       const { data: produitsData } = await supabase
         .from("products")
         .select("id, nom")
         .eq("main_supplier_id", supplier.id);
-      setProduits(produitsData || []);
-      // Charger stats, graphique, top produits… (à compléter selon besoin)
+      _setProduits(produitsData || []);
+      // Charger _stats, graphique, top _produits… (à compléter selon besoin)
     })();
   }, [supplier]);
 
@@ -45,7 +45,7 @@ export default function SupplierDetail({ supplier, onClose, glass }) {
   };
 
   return (
-    <motion.div
+    <Motion.div
       initial={{ scale: 0.95, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       exit={{ scale: 0.95, opacity: 0 }}
@@ -73,8 +73,8 @@ export default function SupplierDetail({ supplier, onClose, glass }) {
           </p>
         </div>
         <Button onClick={handleExport}>Export Excel</Button>
-        {/* TODO : Stats, graphiques, contacts, historique, etc. à brancher */}
+        {/* TODO : Stats, graphiques, _contacts, _historique, etc. à brancher */}
       </div>
-    </motion.div>
+    </Motion.div>
   );
 }

@@ -12,7 +12,7 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Upload PDF réel : à brancher à ton backend ou Supabase Storage
+  // Upload PDF réel : à brancher à ton backend ou Supabase Storage
   const handleUpload = async () => {
     if (!file) return toast.error("Sélectionnez un fichier PDF !");
     // TODO: remplacer par upload réel vers Supabase Storage ou backend
@@ -85,7 +85,7 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
         <option value="refusée">Refusée</option>
       </select>
       <label>
-        Justificatif PDF : <input type="file" accept="application/pdf" onChange={e => setFile(e.target.files[0])} />
+        Justificatif PDF : <input type="file" accept="application/pdf" onChange={e => setFile(e.target.files[0])} />
         <Button type="button" size="sm" variant="outline" className="ml-2" onClick={handleUpload}>Upload</Button>
       </label>
       <div className="flex gap-2 mt-4">

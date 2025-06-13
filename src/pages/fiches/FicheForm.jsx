@@ -148,11 +148,11 @@ export default function FicheForm({ fiche, onClose }) {
         <Button type="button" size="sm" variant="outline" onClick={addLigne}>Ajouter ingrédient</Button>
       </div>
       <div className="mb-4 flex gap-4">
-        <div><b>Coût total :</b> {cout_total.toFixed(2)} €</div>
-        <div><b>Coût/portion :</b> {cout_par_portion.toFixed(2)} €</div>
+        <div><b>Coût total :</b> {cout_total.toFixed(2)} €</div>
+        <div><b>Coût/portion :</b> {cout_par_portion.toFixed(2)} €</div>
       </div>
       <label>
-        Image fiche : <input type="file" onChange={e => setImage(e.target.files[0])} />
+        Image fiche : <input type="file" onChange={e => setImage(e.target.files[0])} />
         <Button type="button" size="sm" variant="outline" className="ml-2" onClick={handleUpload}>Upload</Button>
       </label>
       <div className="flex gap-2 mt-4">

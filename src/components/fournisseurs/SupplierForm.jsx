@@ -2,7 +2,7 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 
 export default function SupplierForm({ supplier, onClose, glass }) {
   const [form, setForm] = useState({
@@ -46,7 +46,7 @@ export default function SupplierForm({ supplier, onClose, glass }) {
   };
 
   return (
-    <motion.form
+    <Motion.form
       initial={{ scale: 0.98, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       exit={{ scale: 0.98, opacity: 0 }}
@@ -85,6 +85,6 @@ export default function SupplierForm({ supplier, onClose, glass }) {
         <Button type="button" variant="outline" onClick={onClose}>Annuler</Button>
         <Button type="submit" loading={loading}>{supplier ? "Enregistrer" : "Ajouter"}</Button>
       </div>
-    </motion.form>
+    </Motion.form>
   );
 }

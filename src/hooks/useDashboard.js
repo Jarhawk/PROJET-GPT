@@ -34,7 +34,7 @@ export function useDashboard() {
         .eq("mama_id", mama_id);
       if (errorProd) throw errorProd;
       produits = Array.isArray(produitsRaw) ? produitsRaw : [];
-    } catch (err) {
+    } catch (_err) { void _err; 
       setError("Erreur chargement produits");
       setLoading(false);
       return;
@@ -48,8 +48,9 @@ export function useDashboard() {
         .eq("mama_id", mama_id);
       if (errorMouv) throw errorMouv;
       mouvements = Array.isArray(mouvementsRaw) ? mouvementsRaw : [];
-    } catch (err) {
+    } catch (_err) {
       setError("Erreur chargement mouvements");
+      void _err;
       setLoading(false);
       return;
     }

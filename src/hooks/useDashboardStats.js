@@ -72,7 +72,7 @@ export function useDashboardStats(options = {}) {
     if (!mama_id && !authLoading) setStats(null);
   }, [mama_id, authLoading]);
 
-  // Pagination : fetch si page/pageSize changent (hors auto)
+  // Pagination : fetch si page/pageSize changent (hors auto)
   useEffect(() => {
     if (auto) return;
     if (!mama_id || authLoading) return;

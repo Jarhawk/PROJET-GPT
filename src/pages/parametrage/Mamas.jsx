@@ -14,7 +14,7 @@ export default function Mamas() {
 
   useEffect(() => {
     fetchMamas();
-    // eslint-disable-next-line
+     
   }, []);
 
   const fetchMamas = async () => {

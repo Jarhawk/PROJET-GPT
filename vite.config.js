@@ -9,4 +9,9 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'), // 👈 définit @ comme racine de /src
     },
   },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './vitest.setup.js',
+  },
 });

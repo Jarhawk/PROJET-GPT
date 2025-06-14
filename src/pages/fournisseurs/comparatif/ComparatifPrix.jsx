@@ -1,4 +1,4 @@
-// src/pages/comparatif/ComparatifPrix.jsx
+// src/pages/fournisseurs/comparatif/ComparatifPrix.jsx
 import { useEffect, useState } from "react";
 import PrixFournisseurs from "./PrixFournisseurs";
 import { supabase } from "@/lib/supabase";
@@ -8,9 +8,13 @@ export default function ComparatifPrix() {
   const { mama_id } = useAuth();
   const [produits, setProduits] = useState([]);
   const [produitId, setProduitId] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchProduits = async () => {
+      setLoading(true);
+      setError(null);
       try {
         const { data, error } = await supabase
           .from("products")
@@ -22,12 +26,19 @@ export default function ComparatifPrix() {
         setProduits(data || []);
       } catch (err) {
         console.error("Erreur chargement produits :", err.message);
+        setError(err);
         setProduits([]);
+      } finally {
+        setLoading(false);
       }
     };
 
     if (mama_id) fetchProduits();
   }, [mama_id]);
+
+  if (loading) {
+    return <div className="loader mx-auto my-16" />;
+  }
 
   return (
     <div className="p-4">
@@ -36,6 +47,11 @@ export default function ComparatifPrix() {
       <label htmlFor="produit-select" className="block font-semibold mb-1">
         Sélectionner un produit
       </label>
+      {error && (
+        <p className="text-red-600 bg-red-50 border border-red-200 rounded px-2 py-1 text-sm mb-2">
+          {error.message || "Erreur de chargement"}
+        </p>
+      )}
       <select
         id="produit-select"
         value={produitId}

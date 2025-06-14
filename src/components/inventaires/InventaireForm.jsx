@@ -3,6 +3,7 @@ import { useInventaires } from "@/hooks/useInventaires";
 import { useProducts } from "@/hooks/useProducts";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
+import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
 
 // Ajuste le seuil d’alerte si besoin
 const SEUIL_ECART = 0.5; // Unité
@@ -22,6 +23,7 @@ export default function InventaireForm({ inventaire, onClose }) {
   const [lignes, setLignes] = useState(inventaire?.lignes || []);
   const [mouvementsProduits, setMouvementsProduits] = useState([]);
   const [file, setFile] = useState(null);
+  const [fileUrl, setFileUrl] = useState(inventaire?.document || "");
   const [loading, setLoading] = useState(false);
 
   // Recherche la période d’inventaire automatiquement à partir de l’inventaire précédent
@@ -65,8 +67,21 @@ export default function InventaireForm({ inventaire, onClose }) {
     return { stock_debut, entrees, sorties, stock_fin, conso_theorique };
   };
 
-  // Upload document (mock)
-  const handleUpload = () => { if (file) toast.success("Upload document (mock)"); };
+  // Upload document vers Supabase Storage
+  const handleUpload = async () => {
+    if (!file) return toast.error("Sélectionnez un fichier");
+    try {
+      if (fileUrl) {
+        await deleteFile("inventaires", pathFromUrl(fileUrl));
+      }
+      const url = await uploadFile("inventaires", file);
+      setFileUrl(url);
+      toast.success("Fichier uploadé !");
+    } catch (err) {
+      console.error(err);
+      toast.error("Échec de l'upload");
+    }
+  };
 
   // Clôture (voir version précédente)
   const handleCloture = async () => {
@@ -87,7 +102,7 @@ export default function InventaireForm({ inventaire, onClose }) {
       nom,
       date,
       lignes,
-      document: file ? "TODO-upload" : inventaire?.document,
+      document: fileUrl || inventaire?.document,
       date_debut: dateDebut,
     };
     try {
@@ -207,6 +222,16 @@ export default function InventaireForm({ inventaire, onClose }) {
       <label>
         Document/photo : <input type="file" onChange={e => setFile(e.target.files[0])} />
         <Button type="button" size="sm" variant="outline" className="ml-2" onClick={handleUpload}>Upload</Button>
+        {fileUrl && (
+          <a
+            href={fileUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-2 text-blue-600 underline"
+          >
+            Voir
+          </a>
+        )}
       </label>
       <div className="flex gap-2 mt-4">
         <Button type="submit" disabled={loading}>{inventaire ? "Modifier" : "Ajouter"}</Button>

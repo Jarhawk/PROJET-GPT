@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMenuDuJour } from "@/hooks/useMenuDuJour";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
+import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
 
 export default function MenuDuJourForm({ menu, fiches = [], onClose }) {
   const { addMenuDuJour, editMenuDuJour } = useMenuDuJour();
@@ -9,6 +10,7 @@ export default function MenuDuJourForm({ menu, fiches = [], onClose }) {
   const [date, setDate] = useState(menu?.date || "");
   const [selectedFiches, setSelectedFiches] = useState(menu?.fiches?.map(f => f.id) || []);
   const [file, setFile] = useState(null);
+  const [fileUrl, setFileUrl] = useState(menu?.document || "");
   const [loading, setLoading] = useState(false);
 
   const handleSelectFiche = id => {
@@ -18,9 +20,20 @@ export default function MenuDuJourForm({ menu, fiches = [], onClose }) {
     );
   };
 
-  // Upload PDF/image éventuel (mock)
-  const handleUpload = () => {
-    if (file) toast.success("Upload document (mock)");
+  // Upload PDF/image vers Supabase Storage
+  const handleUpload = async () => {
+    if (!file) return toast.error("Sélectionnez un fichier");
+    try {
+      if (fileUrl) {
+        await deleteFile("menus", pathFromUrl(fileUrl));
+      }
+      const url = await uploadFile("menus", file);
+      setFileUrl(url);
+      toast.success("Fichier uploadé !");
+    } catch (err) {
+      console.error(err);
+      toast.error("Échec de l'upload");
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -30,7 +43,7 @@ export default function MenuDuJourForm({ menu, fiches = [], onClose }) {
       nom,
       date,
       fiches: selectedFiches,
-      document: file ? "TODO-upload" : menu?.document
+      document: fileUrl || menu?.document
     };
     try {
       if (menu?.id) {
@@ -85,6 +98,16 @@ export default function MenuDuJourForm({ menu, fiches = [], onClose }) {
       <label>
         Document/PDF du menu : <input type="file" onChange={e => setFile(e.target.files[0])} />
         <Button type="button" size="sm" variant="outline" className="ml-2" onClick={handleUpload}>Upload</Button>
+        {fileUrl && (
+          <a
+            href={fileUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-2 text-blue-600 underline"
+          >
+            Voir
+          </a>
+        )}
       </label>
       <div className="flex gap-2 mt-4">
         <Button type="submit" disabled={loading}>{menu ? "Modifier" : "Ajouter"}</Button>

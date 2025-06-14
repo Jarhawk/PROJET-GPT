@@ -24,3 +24,10 @@ psql "$SUPABASE_DB_URL" -f sql/rls.sql
 ```
 
 Adjust configuration in `supabase/config.toml` as required.
+
+## Features
+- Upload and delete files via Supabase Storage using `useStorage`, with automatic cleanup of replaced uploads
+- Daily menu handling provided by `useMenuDuJour`
+- PDF export for invoices and fiches techniques using jsPDF
+- Forms display links to preview uploaded documents immediately
+

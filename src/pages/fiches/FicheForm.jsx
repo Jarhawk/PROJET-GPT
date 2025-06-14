@@ -3,6 +3,7 @@ import { useFiches } from "@/hooks/useFiches";
 import { useProducts } from "@/hooks/useProducts";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
+import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
 
 export default function FicheForm({ fiche, onClose }) {
   const { addFiche, editFiche } = useFiches();
@@ -12,6 +13,7 @@ export default function FicheForm({ fiche, onClose }) {
   const [portions, setPortions] = useState(fiche?.portions || 1);
   const [lignes, setLignes] = useState(fiche?.lignes || []);
   const [image, setImage] = useState(null);
+  const [imageUrl, setImageUrl] = useState(fiche?.image || "");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => { fetchProducts(); }, []);
@@ -32,9 +34,20 @@ export default function FicheForm({ fiche, onClose }) {
   }, 0);
   const cout_par_portion = portions > 0 ? cout_total / portions : 0;
 
-  // Upload image (mock)
-  const handleUpload = () => {
-    if (image) toast.success("Upload image (mock)");
+  // Upload image vers Supabase Storage
+  const handleUpload = async () => {
+    if (!image) return toast.error("Sélectionnez une image");
+    try {
+      if (imageUrl) {
+        await deleteFile("fiches", pathFromUrl(imageUrl));
+      }
+      const url = await uploadFile("fiches", image);
+      setImageUrl(url);
+      toast.success("Image uploadée !");
+    } catch (err) {
+      console.error(err);
+      toast.error("Échec de l'upload");
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -47,7 +60,7 @@ export default function FicheForm({ fiche, onClose }) {
       lignes,
       cout_total,
       cout_par_portion,
-      image: image ? "TODO-upload" : fiche?.image
+      image: imageUrl || fiche?.image
     };
     try {
       if (fiche?.id) {
@@ -154,6 +167,16 @@ export default function FicheForm({ fiche, onClose }) {
       <label>
         Image fiche : <input type="file" onChange={e => setImage(e.target.files[0])} />
         <Button type="button" size="sm" variant="outline" className="ml-2" onClick={handleUpload}>Upload</Button>
+        {imageUrl && (
+          <a
+            href={imageUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-2 text-blue-600 underline"
+          >
+            Voir
+          </a>
+        )}
       </label>
       <div className="flex gap-2 mt-4">
         <Button type="submit" disabled={loading}>{fiche ? "Modifier" : "Ajouter"}</Button>

@@ -54,18 +54,12 @@ export default function Login() {
       </div>
       <div className="z-10 w-full max-w-md mx-auto">
         <div
-          className="rounded-2xl shadow-2xl bg-white/30 dark:bg-[#202638]/40 border border-white/30 backdrop-blur-xl px-8 py-12 flex flex-col items-center glass-panel"
-          style={{
-            boxShadow: "0 10px 32px 0 rgba(50,50,80,0.14), 0 1.5px 10px 0 rgba(191,161,77,0.10)",
-            backdropFilter: "blur(32px) saturate(1.3)",
-            WebkitBackdropFilter: "blur(32px) saturate(1.3)"
-          }}
+          className="rounded-2xl shadow-2xl bg-white/30 dark:bg-[#202638]/40 border border-white/30 backdrop-blur-xl px-8 py-12 flex flex-col items-center glass-panel auth-card"
         >
           <img
             src={logo}
             alt="MamaStock"
-            className="w-24 h-24 mb-6 rounded-full shadow-md bg-mamastockGold/10 object-contain border-4 border-mamastockGold/30"
-            style={{ boxShadow: "0 2px 20px 0 #bfa14d50" }}
+            className="w-24 h-24 mb-6 rounded-full shadow-md bg-mamastockGold/10 object-contain border-4 border-mamastockGold/30 logo-glow"
           />
           <h2 className="text-3xl font-bold text-mamastockGold drop-shadow mb-1 text-center tracking-wide">
             Connexion
@@ -118,48 +112,6 @@ export default function Login() {
           </form>
         </div>
       </div>
-      <style>{`
-        .loader-glass {
-          border: 2px solid #fff;
-          border-top: 2px solid #bfa14d;
-          border-radius: 50%;
-          width: 1rem;
-          height: 1rem;
-          margin-right: 8px;
-          animation: spin .9s linear infinite;
-          display: inline-block;
-        }
-        @keyframes spin {
-          0% { transform: rotate(0deg);}
-          100% { transform: rotate(360deg);}
-        }
-        .animate-fade-in { animation: fadeIn 0.7s;}
-        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
-        .animate-liquid {
-          animation: glassMove 12s ease-in-out infinite alternate;
-        }
-        .animate-liquid2 {
-          animation: glassMove2 18s ease-in-out infinite alternate;
-        }
-        .animate-liquid3 {
-          animation: glassMove3 20s ease-in-out infinite alternate;
-        }
-        @keyframes glassMove {
-          0% { transform: scale(1) translate(0, 0);}
-          100% { transform: scale(1.14) translate(35px, 32px);}
-        }
-        @keyframes glassMove2 {
-          0% { transform: scale(1) translate(0, 0);}
-          100% { transform: scale(1.08) translate(-48px, 12px);}
-        }
-        @keyframes glassMove3 {
-          0% { transform: scale(1.06) translate(0, 0);}
-          100% { transform: scale(1) translate(12px, -32px);}
-        }
-        .glass-panel {
-          background: linear-gradient(125deg, rgba(255,255,255,0.24) 40%, rgba(191,161,77,0.11) 100%);
-        }
-      `}</style>
     </div>
   );
 }

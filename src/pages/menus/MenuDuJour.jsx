@@ -18,7 +18,10 @@ export default function MenuDuJour() {
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState("");
 
-  useEffect(() => { fetchMenusDuJour(); fetchFiches(); }, []);
+  useEffect(() => {
+    fetchMenusDuJour();
+    fetchFiches();
+  }, [fetchMenusDuJour, fetchFiches]);
 
   const menusFiltres = menusDuJour.filter(m =>
     (!search || m.nom?.toLowerCase().includes(search.toLowerCase())) &&

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 
@@ -10,7 +10,7 @@ export function useStock() {
   const [error, setError] = useState(null);
 
   // 1. Charger stock (avec valorisation en direct)
-  async function fetchStocks() {
+  const fetchStocks = useCallback(async () => {
     setLoading(true);
     setError(null);
     let query = supabase
@@ -24,10 +24,10 @@ export function useStock() {
     if (error) setError(error);
     setStocks(data || []);
     return data;
-  }
+  }, [user?.mama_id]);
 
   // 2. Charger mouvements stock
-  async function fetchMouvements() {
+  const fetchMouvements = useCallback(async () => {
     setLoading(true);
     setError(null);
     let query = supabase
@@ -40,7 +40,7 @@ export function useStock() {
     if (error) setError(error);
     setMouvements(data || []);
     return data;
-  }
+  }, [user?.mama_id]);
 
   // 3. Ajouter mouvement de stock
   async function addMouvementStock({ product_id, type, quantite, zone, motif }) {

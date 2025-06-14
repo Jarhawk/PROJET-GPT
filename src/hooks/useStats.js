@@ -1,5 +1,5 @@
 // src/hooks/useStats.js
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 
@@ -8,7 +8,7 @@ export function useStats() {
   const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(true);
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     setLoading(true);
 
     const queries = [
@@ -27,11 +27,11 @@ export function useStats() {
     });
 
     setLoading(false);
-  };
+  }, [mama_id]);
 
   useEffect(() => {
     if (mama_id) fetchStats();
-  }, [mama_id]);
+  }, [mama_id, fetchStats]);
 
   return { stats, loading, refetch: fetchStats };
 }

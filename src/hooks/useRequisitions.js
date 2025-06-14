@@ -21,6 +21,21 @@ export const useRequisitions = () => {
     return data || [];
   };
 
+  const getRequisitionById = async (id) => {
+    if (!id || !mama_id) return null;
+    const { data, error } = await supabase
+      .from("requisitions")
+      .select("*, requisition_lines(*)")
+      .eq("id", id)
+      .eq("mama_id", mama_id)
+      .single();
+    if (error) {
+      console.error("❌ Erreur getRequisitionById:", error.message);
+      return null;
+    }
+    return data || null;
+  };
+
   const createRequisition = async ({ zone, lignes = [], status = "en_attente" }) => {
     if (!mama_id) return { success: false, message: "mama_id manquant" };
 
@@ -56,6 +71,7 @@ export const useRequisitions = () => {
 
   return {
     getRequisitions,
+    getRequisitionById,
     createRequisition,
     refetch: getRequisitions,
   };

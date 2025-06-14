@@ -14,7 +14,6 @@ export default function Permissions() {
 
   useEffect(() => {
     if (mama_id) fetchRoles();
-    // eslint-disable-next-line
   }, [mama_id]);
 
   const fetchRoles = async () => {

@@ -10,6 +10,7 @@ npm install
 npm run dev
 npm run lint
 npm test
+npm run test:e2e
 npm run build
 npm run preview
 ```
@@ -41,6 +42,22 @@ These variables are loaded by Vite during development and build.
 The `.env` file is not tracked by Git, so you can safely replace these
 defaults with your own credentials for local development.
 
+## Tests
+
+Unit tests run with `vitest`:
+
+```bash
+npm test
+```
+
+End-to-end tests use Playwright and require your `.env` Supabase credentials:
+
+```bash
+npm run test:e2e
+```
+
+The Playwright configuration automatically starts the dev server.
+
 ## Features
 - Supplier price comparison with average and latest purchase metrics
 - Comparison page available at `/fournisseurs/comparatif` and linked from the sidebar
@@ -48,6 +65,11 @@ defaults with your own credentials for local development.
 - Daily menu handling provided by `useMenuDuJour`
 - PDF export for invoices and fiches techniques using jsPDF
 - Forms display links to preview uploaded documents immediately
+
+## Continuous Integration
+
+The GitHub Actions workflow automatically runs `npm audit fix`, linting,
+unit tests and Playwright end-to-end tests on every push.
 
 
 ## FAQ

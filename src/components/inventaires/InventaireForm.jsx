@@ -45,7 +45,6 @@ export default function InventaireForm({ inventaire, onClose }) {
       }
     }
     init();
-    // eslint-disable-next-line
   }, [date]);
 
   // Ajout/suppression de lignes

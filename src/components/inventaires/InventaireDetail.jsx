@@ -11,7 +11,6 @@ export default function InventaireDetail({ inventaire, onClose }) {
 
   useEffect(() => {
     if (inventaire?.id) fetchMouvementsInventaire(inventaire.id).then(setMouvements);
-    // eslint-disable-next-line
   }, [inventaire?.id]);
 
   // Export Excel

@@ -1,7 +1,8 @@
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import { Button } from "@/components/ui/button";
-import toast from "react-hot-toast";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 export default function FicheDetail({ fiche, onClose }) {
   // Export Excel fiche
@@ -13,9 +14,20 @@ export default function FicheDetail({ fiche, onClose }) {
     saveAs(new Blob([buf]), `fiche_${fiche.id}.xlsx`);
   };
 
-  // Export PDF (à brancher jsPDF)
+  // Export PDF de la fiche technique
   const exportPDF = () => {
-    toast.success("PDF export non implémenté (brancher jsPDF)");
+    const doc = new jsPDF();
+    doc.text(`Fiche: ${fiche.nom}`, 10, 12);
+    doc.text(`Portions: ${fiche.portions}`, 10, 20);
+    doc.text(`Coût total: ${fiche.cout_total?.toFixed(2)} €`, 10, 28);
+    doc.text(`Coût/portion: ${fiche.cout_par_portion?.toFixed(2)} €`, 10, 36);
+    doc.autoTable({
+      startY: 44,
+      head: [["Ingrédient", "Qté", "Unité", "Coût €"]],
+      body: fiche.lignes?.map(l => [l.nom, l.quantite, l.unite, (l.pmp * l.quantite).toFixed(2)]) || [],
+      styles: { fontSize: 9 },
+    });
+    doc.save(`fiche_${fiche.id}.pdf`);
   };
 
   // Historique des modifs (à brancher si besoin)

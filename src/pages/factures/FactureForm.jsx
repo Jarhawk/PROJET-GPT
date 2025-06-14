@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useInvoices } from "@/hooks/useInvoices";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
+import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
 
 export default function FactureForm({ facture, suppliers = [], onClose }) {
   const { addInvoice, editInvoice } = useInvoices();
@@ -10,13 +11,23 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
   const [montant, setMontant] = useState(facture?.montant || 0);
   const [statut, setStatut] = useState(facture?.statut || "en attente");
   const [file, setFile] = useState(null);
+  const [fileUrl, setFileUrl] = useState(facture?.justificatif || "");
   const [loading, setLoading] = useState(false);
 
   // Upload PDF réel : à brancher à ton backend ou Supabase Storage
   const handleUpload = async () => {
     if (!file) return toast.error("Sélectionnez un fichier PDF !");
-    // TODO: remplacer par upload réel vers Supabase Storage ou backend
-    toast.success("Upload fictif (brancher sur Supabase Storage)");
+    try {
+      if (fileUrl) {
+        await deleteFile("factures", pathFromUrl(fileUrl));
+      }
+      const url = await uploadFile("factures", file);
+      setFileUrl(url);
+      toast.success("Fichier uploadé !");
+    } catch (err) {
+      console.error(err);
+      toast.error("Échec de l'upload");
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -27,7 +38,7 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
       fournisseur_id,
       montant,
       statut,
-      justificatif: file ? "TODO-upload" : facture?.justificatif
+      justificatif: fileUrl || facture?.justificatif
     };
     try {
       if (facture?.id) {
@@ -87,6 +98,16 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
       <label>
         Justificatif PDF : <input type="file" accept="application/pdf" onChange={e => setFile(e.target.files[0])} />
         <Button type="button" size="sm" variant="outline" className="ml-2" onClick={handleUpload}>Upload</Button>
+        {fileUrl && (
+          <a
+            href={fileUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-2 text-blue-600 underline"
+          >
+            Voir
+          </a>
+        )}
       </label>
       <div className="flex gap-2 mt-4">
         <Button type="submit" disabled={loading}>{facture ? "Modifier" : "Ajouter"}</Button>

@@ -1,6 +1,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { supabase } from "@/lib/supabase";
 
 export default function UtilisateurRow({ utilisateur, onEdit, onToggleActive }) {
   const { isAdmin, mama_id } = useAuth();
@@ -12,9 +13,15 @@ export default function UtilisateurRow({ utilisateur, onEdit, onToggleActive }) 
     { date: "2024-05-31 08:18", ip: "192.168.0.19" }
   ];
 
-  const resetPassword = () => {
-    // TODO : appeler l’API Supabase reset password
-    toast.success("Lien de réinitialisation envoyé à " + utilisateur.email);
+  const resetPassword = async () => {
+    const { error } = await supabase.auth.resetPasswordForEmail(utilisateur.email, {
+      redirectTo: `${window.location.origin}/update-password`,
+    });
+    if (error) {
+      toast.error("Erreur lors de l'envoi du lien");
+    } else {
+      toast.success("Lien de réinitialisation envoyé à " + utilisateur.email);
+    }
   };
 
   return (

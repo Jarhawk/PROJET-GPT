@@ -1,10 +1,18 @@
+import { useEffect } from "react";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 import { Button } from "@/components/ui/button";
-import toast from "react-hot-toast";
+import { useFactureProduits } from "@/hooks/useFactureProduits";
 
 export default function FactureDetail({ facture, onClose }) {
-  // TODO: remplacer par chargement des mouvements/fichiers liés à la facture si besoin
+  const { produitsFacture, fetchProduitsByFacture } = useFactureProduits();
+
+  useEffect(() => {
+    if (facture?.id) fetchProduitsByFacture(facture.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [facture?.id]);
 
   // Export Excel d'une seule facture
   const exportExcel = () => {
@@ -15,9 +23,23 @@ export default function FactureDetail({ facture, onClose }) {
     saveAs(new Blob([buf]), `facture_${facture.id}.xlsx`);
   };
 
-  // Export PDF (à brancher jsPDF)
   const exportPDF = () => {
-    toast.success("PDF export non implémenté (brancher jsPDF)");
+    const doc = new jsPDF();
+    doc.text(`Facture #${facture.id}`, 10, 12);
+    doc.text(`Fournisseur: ${facture.fournisseur_nom}`, 10, 20);
+    doc.text(`Date: ${facture.date}`, 10, 28);
+    doc.autoTable({
+      startY: 36,
+      head: [["Produit", "Quantité", "PU", "Total"]],
+      body: produitsFacture.map(l => [
+        l.produit?.nom || "-",
+        l.quantite,
+        l.prix_unitaire,
+        l.total,
+      ]),
+      styles: { fontSize: 9 },
+    });
+    doc.save(`facture_${facture.id}.pdf`);
   };
 
   return (
@@ -35,6 +57,28 @@ export default function FactureDetail({ facture, onClose }) {
             <span className="text-gray-400">Aucun</span>
           }
         </div>
+        {produitsFacture.length > 0 && (
+          <table className="mt-4 text-sm w-full border">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="px-2 py-1 border">Produit</th>
+                <th className="px-2 py-1 border">Quantité</th>
+                <th className="px-2 py-1 border">PU</th>
+                <th className="px-2 py-1 border">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {produitsFacture.map(l => (
+                <tr key={l.id}>
+                  <td className="border px-2 py-1">{l.produit?.nom || '-'}</td>
+                  <td className="border px-2 py-1 text-right">{l.quantite}</td>
+                  <td className="border px-2 py-1 text-right">{l.prix_unitaire}</td>
+                  <td className="border px-2 py-1 text-right">{l.total}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
         <div className="flex gap-2 mt-4">
           <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
           <Button variant="outline" onClick={exportPDF}>Export PDF</Button>

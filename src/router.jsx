@@ -15,6 +15,7 @@ const ProduitForm = lazy(() => import("@/components/produits/ProduitForm.jsx"));
 // Fournisseurs
 const Fournisseurs = lazy(() => import("@/pages/fournisseurs/Fournisseurs.jsx"));
 const FournisseurDetail = lazy(() => import("@/pages/fournisseurs/FournisseurDetail.jsx"));
+const ComparatifPrix = lazy(() => import("@/pages/fournisseurs/comparatif/ComparatifPrix.jsx"));
 
 // Factures
 const Factures = lazy(() => import("@/pages/factures/Factures.jsx"));
@@ -136,6 +137,16 @@ export default function RouterConfig() {
           element={
             <ProtectedRoute accessKey="fournisseurs">
               <FournisseurDetail />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Comparatif prix */}
+        <Route
+          path="/fournisseurs/comparatif"
+          element={
+            <ProtectedRoute accessKey="fournisseurs">
+              <ComparatifPrix />
             </ProtectedRoute>
           }
         />

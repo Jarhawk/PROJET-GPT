@@ -1,8 +1,22 @@
-// src/pages/comparatif/PrixFournisseurs.jsx
+// src/pages/fournisseurs/comparatif/PrixFournisseurs.jsx
 import { useComparatif } from "@/hooks/useComparatif";
 
+// Affiche le comparatif des prix par fournisseur pour un produit
+
 export default function PrixFournisseurs({ produitId }) {
-  const { lignes } = useComparatif(produitId);
+  const { lignes, loading, error } = useComparatif(produitId);
+
+  if (loading) {
+    return <div className="loader mx-auto my-8" />;
+  }
+
+  if (error) {
+    return (
+      <p className="text-red-600 bg-red-50 border border-red-200 rounded px-2 py-1 text-sm mt-2">
+        {error.message || "Erreur de chargement"}
+      </p>
+    );
+  }
 
   if (!lignes || lignes.length === 0) {
     return <p className="text-gray-500 text-sm mt-2">Aucune donnée fournisseur pour ce produit.</p>;

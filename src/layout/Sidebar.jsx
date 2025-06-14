@@ -54,6 +54,12 @@ const MENUS = [
     accessKey: "fournisseurs",
   },
   {
+    label: "Comparatif prix",
+    icon: "💶",
+    to: "/fournisseurs/comparatif",
+    accessKey: "fournisseurs",
+  },
+  {
     label: "Paramétrage",
     icon: "⚙️",
     accessKey: "parametrage",

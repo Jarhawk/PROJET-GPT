@@ -15,6 +15,7 @@ export default function FournisseurDetail({ id }) {
   const [topProducts, setTopProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Récupère statistiques et factures lors du chargement ou du changement d'id
   useEffect(() => {
     setLoading(true);
     Promise.all([
@@ -23,6 +24,7 @@ export default function FournisseurDetail({ id }) {
     ]).then(() => setLoading(false));
   }, [id]);
 
+  // Met à jour le top produits lors du changement d'id
   useEffect(() => {
     // Top produits du fournisseur
     const ps = getProductsBySupplier(id) || [];

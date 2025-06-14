@@ -28,7 +28,6 @@ export default function PermissionsForm({ role, onClose, onSaved }) {
 
   useEffect(() => {
     fetchPermissions();
-    // eslint-disable-next-line
   }, [role]);
 
   const fetchPermissions = async () => {

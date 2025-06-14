@@ -23,6 +23,7 @@ export default function Fournisseurs() {
   const [stats, setStats] = useState([]);
   const [topProducts, setTopProducts] = useState([]);
 
+  // Chargement initial des fournisseurs et stats globales
   useEffect(() => {
     fetchFournisseurs();
     fetchStatsAll().then(setStats);
@@ -34,7 +35,7 @@ export default function Fournisseurs() {
     f.ville?.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Top produits global
+  // Top produits global recalculé lorsqu'on reçoit les données
   useEffect(() => {
     if (!fournisseurs.length || !products.length) return;
     const statsProduits = {};

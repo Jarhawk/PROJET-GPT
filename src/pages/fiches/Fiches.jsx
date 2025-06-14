@@ -16,6 +16,7 @@ export default function Fiches() {
   const [search, setSearch] = useState("");
   const [familleFilter] = useState("");
 
+  // Charge les fiches au montage uniquement
   useEffect(() => { fetchFiches(); }, []);
 
   // Export Excel

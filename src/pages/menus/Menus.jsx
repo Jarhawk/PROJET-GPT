@@ -18,6 +18,7 @@ export default function Menus() {
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState("");
 
+  // Récupération initiale des menus et fiches
   useEffect(() => { fetchMenus(); fetchFiches(); }, []);
 
   const menusFiltres = menus.filter(m =>

@@ -11,7 +11,6 @@ export default function FactureDetail({ facture, onClose }) {
 
   useEffect(() => {
     if (facture?.id) fetchProduitsByFacture(facture.id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [facture?.id]);
 
   // Export Excel d'une seule facture

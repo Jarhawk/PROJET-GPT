@@ -36,6 +36,9 @@ export default [
         'warn',
         { allowConstantExport: true },
       ],
+      // Les hooks sont souvent volontairement exécutés une seule fois,
+      // on désactive donc la règle exhaustive-deps pour éviter de faux positifs
+      'react-hooks/exhaustive-deps': 'off',
     },
   },
   {

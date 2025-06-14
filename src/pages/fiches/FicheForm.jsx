@@ -16,6 +16,7 @@ export default function FicheForm({ fiche, onClose }) {
   const [imageUrl, setImageUrl] = useState(fiche?.image || "");
   const [loading, setLoading] = useState(false);
 
+  // Fetch products once on mount
   useEffect(() => { fetchProducts(); }, []);
 
   // Ajouter une ligne produit

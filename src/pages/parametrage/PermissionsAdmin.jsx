@@ -19,7 +19,6 @@ export default function PermissionsAdmin() {
       fetchMamas();
       fetchRoles();
     }
-    // eslint-disable-next-line
   }, [role]);
 
   const fetchMamas = async () => {
@@ -38,7 +37,6 @@ export default function PermissionsAdmin() {
 
   useEffect(() => {
     if (role === "superadmin") fetchRoles();
-    // eslint-disable-next-line
   }, [filterMama]);
 
   const handlePermissionsSaved = () => {

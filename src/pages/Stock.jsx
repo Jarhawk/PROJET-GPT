@@ -19,7 +19,10 @@ export default function Stock() {
   const [showDetail, setShowDetail] = useState(false);
   const [page, setPage] = useState(1);
 
-  useEffect(() => { fetchStocks(); fetchMouvements(); }, []);
+  useEffect(() => {
+    fetchStocks();
+    fetchMouvements();
+  }, [fetchStocks, fetchMouvements]);
 
   const filtered = stocks.filter(
     s =>

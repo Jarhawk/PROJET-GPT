@@ -1,8 +1,21 @@
 import { Button } from "@/components/ui/button";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, Legend } from "recharts";
+
+// eslint-disable-next-line react-refresh/only-export-components
+export function buildRotationData(mouvements) {
+  const map = {};
+  mouvements.forEach(m => {
+    if (m.type !== 'sortie' || !m.date) return;
+    const mois = m.date.slice(0, 7);
+    map[mois] = (map[mois] || 0) + Number(m.quantite || 0);
+  });
+  return Object.entries(map).map(([mois, q]) => ({ mois, q }));
+}
 
 export default function StockDetail({ produit, mouvements, onClose }) {
+  const rotationData = buildRotationData(mouvements);
   const exportExcel = () => {
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(mouvements);
@@ -45,6 +58,20 @@ export default function StockDetail({ produit, mouvements, onClose }) {
             </tbody>
           </table>
         </div>
+        {rotationData.length > 0 && (
+          <div className="mt-4">
+            <h3 className="font-semibold mb-1">Rotation mensuelle</h3>
+            <ResponsiveContainer width="100%" height={180}>
+              <LineChart data={rotationData}>
+                <XAxis dataKey="mois" fontSize={11} />
+                <YAxis fontSize={11} />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="q" name="Sorties" stroke="#bfa14d" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        )}
         <div className="flex gap-2 mt-4">
           <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
         </div>

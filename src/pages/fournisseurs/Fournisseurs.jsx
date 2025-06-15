@@ -6,13 +6,15 @@ import { useSupplierProducts } from "@/hooks/useSupplierProducts";
 import { useProducts } from "@/hooks/useProducts";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger, DialogContent } from "@radix-ui/react-dialog";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 import { Toaster } from "react-hot-toast";
 import { ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import FournisseurDetail from "./FournisseurDetail";
 import { PlusCircle, Search } from "lucide-react";
 
 export default function Fournisseurs() {
-  const { fournisseurs, fetchFournisseurs, addFournisseur, updateFournisseur, deleteFournisseur } = useFournisseurs();
+  const { fournisseurs, fetchFournisseurs, addFournisseur, updateFournisseur, deleteFournisseur, exportFournisseursToExcel } = useFournisseurs();
   const { fetchStatsAll } = useFournisseurStats();
   const { getProductsBySupplier } = useSupplierProducts();
   const { products } = useProducts();
@@ -22,6 +24,19 @@ export default function Fournisseurs() {
   const [editRow, setEditRow] = useState(null);
   const [stats, setStats] = useState([]);
   const [topProducts, setTopProducts] = useState([]);
+  const inactifs = fournisseurs.filter(f => !f.actif);
+
+  const exportPDF = () => {
+    const doc = new jsPDF();
+    doc.text("Liste Fournisseurs", 10, 12);
+    doc.autoTable({
+      startY: 20,
+      head: [["Nom", "Ville", "Téléphone", "Contact"]],
+      body: fournisseurs.map(f => [f.nom, f.ville || "", f.tel || "", f.contact || ""]),
+      styles: { fontSize: 9 },
+    });
+    doc.save("fournisseurs.pdf");
+  };
 
   // Chargement initial des fournisseurs et stats globales
   useEffect(() => {
@@ -58,7 +73,7 @@ export default function Fournisseurs() {
     <div className="max-w-7xl mx-auto p-8">
       <Toaster />
       <h1 className="text-2xl font-bold text-mamastockGold mb-6">Gestion des fournisseurs</h1>
-      <div className="flex gap-4 mb-6 items-center">
+      <div className="flex flex-wrap gap-4 mb-6 items-end">
         <div className="relative flex-1">
           <input
             className="input input-bordered w-full pl-8"
@@ -69,7 +84,14 @@ export default function Fournisseurs() {
           <Search className="absolute left-2 top-2.5 text-mamastockGold" size={18} />
         </div>
         <Button onClick={() => setShowCreate(true)}><PlusCircle className="mr-2" /> Ajouter fournisseur</Button>
+        <Button variant="outline" onClick={exportFournisseursToExcel}>Export Excel</Button>
+        <Button variant="outline" onClick={exportPDF}>Export PDF</Button>
       </div>
+      {inactifs.length > 0 && (
+        <div className="mb-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded px-2 py-1">
+          {inactifs.length} fournisseur(s) inactif(s)
+        </div>
+      )}
       {/* Statistiques générales */}
       <div className="grid md:grid-cols-2 gap-8 mb-10">
         <div className="glass-card p-4">
@@ -113,7 +135,7 @@ export default function Fournisseurs() {
           </thead>
           <tbody>
             {fournisseursFiltrés.map(f => (
-              <tr key={f.id}>
+              <tr key={f.id} className={f.actif ? '' : 'opacity-50'}>
                 <td className="py-1 px-3 font-semibold text-mamastockGold">{f.nom}</td>
                 <td>{f.ville}</td>
                 <td>{f.tel}</td>

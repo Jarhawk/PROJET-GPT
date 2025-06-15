@@ -60,6 +60,15 @@ export function useStock() {
     // On ne met pas à jour ici, c’est fait au fetchStocks/fetchMouvements
   }
 
+  async function fetchRotationStats(product_id) {
+    const { data, error } = await supabase.rpc('stats_rotation_produit', {
+      mama_id_param: user?.mama_id,
+      product_id_param: product_id,
+    });
+    if (error) return [];
+    return data || [];
+  }
+
   return {
     stocks,
     mouvements,
@@ -68,5 +77,6 @@ export function useStock() {
     fetchStocks,
     fetchMouvements,
     addMouvementStock,
+    fetchRotationStats,
   };
 }

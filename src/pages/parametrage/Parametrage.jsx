@@ -4,6 +4,7 @@ import ParamUnites from "@/components/parametrage/ParamUnites";
 import ParamRoles from "@/components/parametrage/ParamRoles";
 import ParamAccess from "@/components/parametrage/ParamAccess";
 import ParamMama from "@/components/parametrage/ParamMama";
+import ParamCostCenters from "@/components/parametrage/ParamCostCenters";
 
 export default function Parametrage() {
   return (
@@ -14,6 +15,7 @@ export default function Parametrage() {
           { name: "Unités", content: <ParamUnites /> },
           { name: "Rôles", content: <ParamRoles /> },
           { name: "Accès", content: <ParamAccess /> },
+          { name: "Cost centers", content: <ParamCostCenters /> },
           { name: "Établissement", content: <ParamMama /> },
         ]}
       />

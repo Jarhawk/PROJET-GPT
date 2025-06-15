@@ -1,0 +1,35 @@
+import { renderHook, act } from '@testing-library/react';
+import { vi, beforeEach, test, expect } from 'vitest';
+
+const orderMock = vi.fn(() => Promise.resolve({ data: [{ id: 'p1' }], error: null }));
+const lteMock = vi.fn(() => ({ order: orderMock }));
+const gteMock = vi.fn(() => ({ lte: lteMock, order: orderMock }));
+const eqMock = vi.fn(() => ({ gte: gteMock, lte: lteMock, order: orderMock }));
+const selectMock = vi.fn(() => ({ eq: eqMock, gte: gteMock, lte: lteMock, order: orderMock }));
+const fromMock = vi.fn(() => ({ select: selectMock }));
+
+vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
+vi.mock('@/hooks/useAuditLog', () => ({ useAuditLog: () => ({ log: vi.fn() }) }));
+
+let usePertes;
+
+beforeEach(async () => {
+  ({ usePertes } = await import('@/hooks/usePertes'));
+  fromMock.mockClear();
+  selectMock.mockClear();
+  eqMock.mockClear();
+  gteMock.mockClear();
+  lteMock.mockClear();
+  orderMock.mockClear();
+});
+
+test('fetchPertes retrieves data', async () => {
+  const { result } = renderHook(() => usePertes());
+  await act(async () => { await result.current.fetchPertes(); });
+  expect(fromMock).toHaveBeenCalledWith('pertes');
+  expect(selectMock).toHaveBeenCalledWith('*, produit:product_id(nom)');
+  expect(eqMock).toHaveBeenCalledWith('mama_id', 'm1');
+  expect(orderMock).toHaveBeenCalledWith('date_perte', { ascending: false });
+  expect(result.current.pertes).toEqual([{ id: 'p1' }]);
+});

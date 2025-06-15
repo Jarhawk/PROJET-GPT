@@ -7,6 +7,7 @@ import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { Button } from "@/components/ui/button";
+import CostCenterAllocationModal from "@/components/analytics/CostCenterAllocationModal";
 import { Dialog, DialogTrigger, DialogContent, DialogOverlay, DialogClose } from "@radix-ui/react-dialog";
 import { ResponsiveContainer, BarChart, LineChart, Bar, Line, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { motion as Motion, AnimatePresence } from "framer-motion";
@@ -36,6 +37,8 @@ export default function Mouvements() {
   });
   const [timeline, setTimeline] = useState([]);
   const [loadingTimeline, setLoadingTimeline] = useState(false);
+  // selected mouvement for cost center allocation { id, product_id }
+  const [ccMouvement, setCcMouvement] = useState(null);
 
   // Animation glass
   const glassVariants = {
@@ -383,8 +386,9 @@ export default function Mouvements() {
               <th className="px-2 py-1">Quantité</th>
               <th className="px-2 py-1">Zone</th>
               <th className="px-2 py-1">Motif</th>
-              <th className="px-2 py-1"></th>
-              <th className="px-2 py-1"></th>
+            <th className="px-2 py-1"></th>
+            <th className="px-2 py-1"></th>
+            <th className="px-2 py-1"></th>
             </tr>
           </thead>
           <tbody>
@@ -467,11 +471,16 @@ export default function Mouvements() {
                         </DialogContent>
                       )}
                     </AnimatePresence>
-                  </Dialog>
-                </td>
-              </tr>
-            ))}
-          </tbody>
+                </Dialog>
+              </td>
+              <td>
+                <Button size="sm" variant="ghost" onClick={() => setCcMouvement({ id: m.id, product_id: m.produit_id })}>
+                  Ventilation CC
+                </Button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
         </table>
       </div>
       {/* Modal création mouvement */}
@@ -666,26 +675,12 @@ export default function Mouvements() {
           </Dialog>
         )}
       </AnimatePresence>
+      <CostCenterAllocationModal
+        mouvementId={ccMouvement?.id}
+        productId={ccMouvement?.product_id}
+        open={!!ccMouvement}
+        onOpenChange={v => !v && setCcMouvement(null)}
+      />
     </div>
   );
 }
-
-// -----------------
-// Ajoute ce style global dans ton index.css si pas déjà là :
-/*
-.glass-liquid {
-  background: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.25), 0 1.5px 12px 0 #bfa14d44;
-  backdrop-filter: blur(14px) saturate(140%);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
-  border-radius: 24px;
-  border: 1.5px solid rgba(255,255,255,0.25);
-  border-bottom: 2px solid #bfa14d66;
-  animation: glassyPop 0.25s cubic-bezier(.6,2,.5,1) both;
-}
-@keyframes glassyPop {
-  0% { opacity: 0; transform: scale(.95) translateY(40px);}
-  100% { opacity: 1; transform: scale(1) translateY(0);}
-}
-*/
-// -----------------

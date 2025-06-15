@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Toaster, toast } from "react-hot-toast";
 import * as XLSX from "xlsx";
+import { usePriceTrends } from "@/hooks/usePriceTrends";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, PieChart, Pie, Cell, Legend
@@ -25,6 +26,18 @@ export default function Dashboard() {
   } = useDashboard();
 
   const [caFnb, setCaFnb] = useState(stats?.ca_fnb || 0);
+  const [trendProduct, setTrendProduct] = useState(null);
+  const { data: priceTrend, fetchTrends } = usePriceTrends(trendProduct);
+
+  useEffect(() => {
+    if (topProducts.length > 0 && !trendProduct) {
+      setTrendProduct(topProducts[0].id);
+    }
+  }, [topProducts, trendProduct]);
+
+  useEffect(() => {
+    if (trendProduct) fetchTrends(trendProduct);
+  }, [trendProduct, fetchTrends]);
 
   useEffect(() => { fetchDashboard(caFnb); }, [caFnb]);
 
@@ -33,7 +46,7 @@ export default function Dashboard() {
       <Toaster position="top-right" />
       <h1 className="text-3xl font-bold mb-6">Dashboard Stock & Achats</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-6 mb-8">
         <Card>
           <CardContent>
             <div className="text-xs text-gray-500 mb-1">Stock valorisé</div>
@@ -50,6 +63,18 @@ export default function Dashboard() {
           <CardContent>
             <div className="text-xs text-gray-500 mb-1">Nb mouvements stock</div>
             <div className="text-2xl font-bold">{stats?.nb_mouvements || 0}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent>
+            <div className="text-xs text-gray-500 mb-1">Nb factures</div>
+            <div className="text-2xl font-bold">{stats?.nb_factures || 0}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent>
+            <div className="text-xs text-gray-500 mb-1">Nb fournisseurs</div>
+            <div className="text-2xl font-bold">{stats?.nb_fournisseurs || 0}</div>
           </CardContent>
         </Card>
         <Card>
@@ -160,6 +185,31 @@ export default function Dashboard() {
           </PieChart>
         </ResponsiveContainer>
       </div>
+
+      {/* Tendance prix d'achat */}
+      {trendProduct && (
+        <div className="bg-white rounded-xl shadow-md p-4 mb-8">
+          <h2 className="font-semibold mb-2">Tendance prix d'achat</h2>
+          <select
+            className="input mb-2"
+            value={trendProduct}
+            onChange={e => setTrendProduct(e.target.value)}
+          >
+            {topProducts.map(tp => (
+              <option key={tp.id} value={tp.id}>{tp.nom}</option>
+            ))}
+          </select>
+          <ResponsiveContainer width="100%" height={220}>
+            <LineChart data={priceTrend}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="mois" />
+              <YAxis />
+              <Tooltip />
+              <Line type="monotone" dataKey="prix_moyen" stroke="#0f1c2e" />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
 
       {/* Alertes stocks bas */}
       <div className="bg-white rounded-xl shadow-md p-4 mb-8">

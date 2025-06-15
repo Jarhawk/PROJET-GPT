@@ -35,6 +35,7 @@ const EcartInventaire = lazy(() => import("@/pages/inventaire/EcartInventaire.js
 // Mouvements Stock
 const Mouvements = lazy(() => import("@/pages/mouvements/Mouvements.jsx"));
 const MouvementDetail = lazy(() => import("@/components/mouvements/MouvementFormModal.jsx"));
+const Pertes = lazy(() => import("@/pages/Pertes.jsx"));
 
 // Menus
 const Menus = lazy(() => import("@/pages/menus/Menus.jsx"));
@@ -46,6 +47,10 @@ const Roles = lazy(() => import("@/pages/parametrage/Roles.jsx"));
 const Permissions = lazy(() => import("@/pages/parametrage/Permissions.jsx"));
 const Mamas = lazy(() => import("@/pages/parametrage/Mamas.jsx"));
 const Parametrage = lazy(() => import("@/pages/parametrage/Parametrage.jsx"));
+const Journal = lazy(() => import("@/pages/Journal.jsx"));
+const StatsCostCenters = lazy(() => import("@/pages/stats/StatsCostCenters.jsx"));
+const StatsCostCentersPivot = lazy(() => import("@/pages/stats/StatsCostCentersPivot.jsx"));
+const StatsFournisseurs = lazy(() => import("@/pages/stats/StatsFournisseurs.jsx"));
 
 // Pages Auth et UI
 const Login = lazy(() => import("@/pages/auth/Login.jsx"));
@@ -246,6 +251,14 @@ export default function RouterConfig() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/pertes"
+          element={
+            <ProtectedRoute accessKey="stock">
+              <Pertes />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Menus */}
         <Route
@@ -305,6 +318,42 @@ export default function RouterConfig() {
           element={
             <ProtectedRoute accessKey="parametrage">
               <Mamas />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Journal d'audit */}
+        <Route
+          path="/journal"
+          element={
+            <ProtectedRoute accessKey="audit">
+              <Journal />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Stats cost centers */}
+        <Route
+          path="/stats/cost-centers"
+          element={
+            <ProtectedRoute accessKey="dashboard">
+              <StatsCostCenters />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/stats/cost-centers-monthly"
+          element={
+            <ProtectedRoute accessKey="dashboard">
+              <StatsCostCentersPivot />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/stats/fournisseurs"
+          element={
+            <ProtectedRoute accessKey="dashboard">
+              <StatsFournisseurs />
             </ProtectedRoute>
           }
         />

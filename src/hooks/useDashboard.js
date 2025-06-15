@@ -27,6 +27,8 @@ export function useDashboard() {
     // 1. Récupère produits
     let produits = [];
     let mouvements = [];
+    let nbFactures = 0;
+    let nbFournisseurs = 0;
     try {
       const { data: produitsRaw, error: errorProd } = await supabase
         .from("products")
@@ -55,6 +57,22 @@ export function useDashboard() {
       return;
     }
 
+    // 2b. Nombre de factures et fournisseurs
+    try {
+      const { count: factCount } = await supabase
+        .from("factures")
+        .select("id", { count: 'exact', head: true })
+        .eq("mama_id", mama_id);
+      nbFactures = factCount || 0;
+      const { count: fourCount } = await supabase
+        .from("fournisseurs")
+        .select("id", { count: 'exact', head: true })
+        .eq("mama_id", mama_id);
+      nbFournisseurs = fourCount || 0;
+    } catch (_err) {
+      void _err;
+    }
+
     // 3. Statistiques de base
     const stock_valorise = produits.reduce((sum, p) => sum + (Number(p.pmp) || 0) * (Number(p.stock_reel) || 0), 0);
     const moisCourant = new Date().toISOString().slice(0, 7);
@@ -62,18 +80,23 @@ export function useDashboard() {
       .filter(m => m.date && m.date.startsWith(moisCourant) && m.type === "sortie")
       .reduce((sum, m) => sum + (Number(m.quantite) || 0), 0);
     const nb_mouvements = mouvements.length;
-    setStats({ stock_valorise, conso_mois, nb_mouvements, ca_fnb: caFnbInput });
-
-    // 4. Top produits consommés
-    let topProductsData = [];
-    produits.forEach(p => {
-      const total = mouvements.filter(m => m.product_id === p.id && m.type === "sortie")
-        .reduce((sum, m) => sum + (Number(m.quantite) || 0), 0);
-      if (total > 0)
-        topProductsData.push({ nom: p.nom, total, unite: p.unite, id: p.id });
+    setStats({
+      stock_valorise,
+      conso_mois,
+      nb_mouvements,
+      ca_fnb: caFnbInput,
+      nb_factures: nbFactures,
+      nb_fournisseurs: nbFournisseurs,
     });
-    topProductsData = topProductsData.sort((a, b) => b.total - a.total).slice(0, 8);
-    setTopProducts(topProductsData);
+
+    // 4. Top produits consommés via RPC
+    const { data: topData, error: topErr } = await supabase.rpc('top_products', {
+      mama_id_param: mama_id,
+      debut_param: null,
+      fin_param: null,
+      limit_param: 8,
+    });
+    if (!topErr) setTopProducts(Array.isArray(topData) ? topData : []);
 
     // 5. Food cost global & par famille
     const ca_fnb = Number(caFnbInput) || 1;

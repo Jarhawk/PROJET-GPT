@@ -56,6 +56,12 @@ End-to-end tests use Playwright and require your `.env` Supabase credentials:
 npm run test:e2e
 ```
 
+First-time runs require downloading Playwright browsers:
+
+```bash
+npx playwright install
+```
+
 The Playwright configuration automatically starts the dev server.
 
 ## Features
@@ -65,6 +71,15 @@ The Playwright configuration automatically starts the dev server.
 - Daily menu handling provided by `useMenuDuJour`
 - PDF export for invoices and fiches techniques using jsPDF
 - Forms display links to preview uploaded documents immediately
+- Product management supports codes, allergens and photo upload
+- Products track a minimum stock level for dashboard alerts
+- Product list features pagination, sortable columns, filters, quick
+  duplication of existing entries and Excel import/export (the importer reads
+  the first sheet if no "Produits" sheet is found)
+- Each product records supplier prices and automatically updates its PMP
+- Stock and movement history available from the product detail modal
+- Supplier list supports Excel/PDF export and highlights inactive suppliers
+- Stock detail charts show monthly product rotation
 
 ## Continuous Integration
 

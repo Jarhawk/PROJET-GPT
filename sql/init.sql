@@ -79,7 +79,11 @@ create table if not exists products (
     pmp numeric default 0,
     stock_theorique numeric default 0,
     stock_reel numeric default 0,
+    stock_min numeric default 0,
     actif boolean default true,
+    code text,
+    allergenes text,
+    image text,
     main_supplier_id uuid references fournisseurs(id) on delete set null,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
@@ -458,3 +462,43 @@ create trigger trg_fiche_update_cost
 after update on fiches
 for each row execute procedure refresh_fiche_cost();
 
+-- Stats: total purchases per month for all suppliers
+create or replace function stats_achats_fournisseurs(mama_id_param uuid)
+returns table(mois text, total_achats numeric)
+language sql as $$
+  select to_char(f.date, 'YYYY-MM') as mois,
+         sum(fl.total) as total_achats
+  from factures f
+    join facture_lignes fl on fl.facture_id = f.id
+  where f.mama_id = mama_id_param
+  group by 1
+  order by 1;
+$$;
+
+-- Stats: total purchases per month for one supplier
+create or replace function stats_achats_fournisseur(mama_id_param uuid, fournisseur_id_param uuid)
+returns table(mois text, total_achats numeric)
+language sql as $$
+  select to_char(f.date, 'YYYY-MM') as mois,
+         sum(fl.total) as total_achats
+  from factures f
+    join facture_lignes fl on fl.facture_id = f.id
+  where f.mama_id = mama_id_param
+    and f.fournisseur_id = fournisseur_id_param
+  group by 1
+  order by 1;
+$$;
+
+-- Stats: product rotation per month
+create or replace function stats_rotation_produit(mama_id_param uuid, product_id_param uuid)
+returns table(mois text, quantite_sortie numeric)
+language sql as $$
+  select to_char(date, 'YYYY-MM') as mois,
+         sum(quantite) as quantite_sortie
+  from mouvements_stock
+  where mama_id = mama_id_param
+    and product_id = product_id_param
+    and type = 'sortie'
+  group by 1
+  order by 1;
+$$;

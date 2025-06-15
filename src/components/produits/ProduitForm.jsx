@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useProducts } from "@/hooks/useProducts";
 import { toast } from "react-hot-toast";
+import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
 
 export default function ProduitForm({ produit, familles, unites, onSuccess, onClose }) {
   const editing = !!produit;
@@ -10,7 +11,12 @@ export default function ProduitForm({ produit, familles, unites, onSuccess, onCl
   const [unite, setUnite] = useState(produit?.unite || "");
   const [pmp, setPmp] = useState(produit?.pmp || "");
   const [stock_reel, setStockReel] = useState(produit?.stock_reel || 0);
+  const [stock_min, setStockMin] = useState(produit?.stock_min || 0);
   const [actif, setActif] = useState(produit?.actif ?? true);
+  const [code, setCode] = useState(produit?.code || "");
+  const [allergenes, setAllergenes] = useState(produit?.allergenes || "");
+  const [image, setImage] = useState(null);
+  const [imageUrl, setImageUrl] = useState(produit?.image || "");
 
   const { addProduct, updateProduct, loading } = useProducts();
 
@@ -21,7 +27,11 @@ export default function ProduitForm({ produit, familles, unites, onSuccess, onCl
       setUnite(produit.unite || "");
       setPmp(produit.pmp || "");
       setStockReel(produit.stock_reel || 0);
+      setStockMin(produit.stock_min || 0);
       setActif(produit.actif ?? true);
+      setCode(produit.code || "");
+      setAllergenes(produit.allergenes || "");
+      setImageUrl(produit.image || "");
     }
   }, [editing, produit]);
 
@@ -31,7 +41,18 @@ export default function ProduitForm({ produit, familles, unites, onSuccess, onCl
       toast.error("Tous les champs sont obligatoires.");
       return;
     }
-    const newProd = { nom, famille, unite, pmp: Number(pmp), stock_reel: Number(stock_reel), actif };
+    const newProd = {
+      nom,
+      famille,
+      unite,
+      pmp: Number(pmp),
+      stock_reel: Number(stock_reel),
+      stock_min: Number(stock_min),
+      actif,
+      code,
+      allergenes,
+      image: imageUrl || produit?.image,
+    };
     if (editing) {
       await updateProduct(produit.id, newProd);
       toast.success("Produit mis à jour !");
@@ -42,6 +63,19 @@ export default function ProduitForm({ produit, familles, unites, onSuccess, onCl
     onSuccess?.();
     onClose?.();
   };
+
+  async function handleUpload() {
+    if (!image) return toast.error("Sélectionnez une image");
+    try {
+      if (imageUrl) await deleteFile("products", pathFromUrl(imageUrl));
+      const url = await uploadFile("products", image);
+      setImageUrl(url);
+      toast.success("Image uploadée !");
+    } catch (err) {
+      console.error(err);
+      toast.error("Échec upload");
+    }
+  }
 
   return (
     <form onSubmit={handleSubmit} className="p-8 space-y-4">
@@ -91,6 +125,46 @@ export default function ProduitForm({ produit, familles, unites, onSuccess, onCl
         </datalist>
       </div>
       <div>
+        <label htmlFor="prod-code" className="block text-sm mb-1 font-medium">Code interne</label>
+        <input
+          id="prod-code"
+          type="text"
+          className="input input-bordered w-full"
+          value={code}
+          onChange={e => setCode(e.target.value)}
+        />
+      </div>
+      <div>
+        <label htmlFor="prod-allerg" className="block text-sm mb-1 font-medium">Allergènes</label>
+        <input
+          id="prod-allerg"
+          type="text"
+          className="input input-bordered w-full"
+          value={allergenes}
+          onChange={e => setAllergenes(e.target.value)}
+          placeholder="Ex: gluten, lait"
+        />
+      </div>
+      <div>
+        <label htmlFor="prod-photo" className="block text-sm mb-1 font-medium">Photo</label>
+        {imageUrl && (
+          <img src={imageUrl} alt="aperçu" className="h-20 mb-2 rounded" />
+        )}
+        <input
+          id="prod-photo"
+          type="file"
+          accept="image/*"
+          onChange={e => setImage(e.target.files[0])}
+        />
+        <button
+          type="button"
+          className="btn btn-secondary mt-1"
+          onClick={handleUpload}
+        >
+          Upload
+        </button>
+      </div>
+      <div>
         <label className="block text-sm mb-1 font-medium">PMP (€)</label>
         <input
           type="number"
@@ -108,6 +182,17 @@ export default function ProduitForm({ produit, familles, unites, onSuccess, onCl
           className="input input-bordered w-28"
           value={stock_reel}
           onChange={e => setStockReel(e.target.value)}
+          min={0}
+        />
+      </div>
+      <div>
+        <label htmlFor="prod-min" className="block text-sm mb-1 font-medium">Stock minimum</label>
+        <input
+          id="prod-min"
+          type="number"
+          className="input input-bordered w-28"
+          value={stock_min}
+          onChange={e => setStockMin(e.target.value)}
           min={0}
         />
       </div>

@@ -4,6 +4,7 @@ import { useFournisseurs } from "@/hooks/useFournisseurs";
 import { useFournisseurStats } from "@/hooks/useFournisseurStats";
 import { useSupplierProducts } from "@/hooks/useSupplierProducts";
 import { useProducts } from "@/hooks/useProducts";
+import { useFournisseursInactifs } from "@/hooks/useFournisseursInactifs";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger, DialogContent } from "@radix-ui/react-dialog";
 import jsPDF from "jspdf";
@@ -18,6 +19,7 @@ export default function Fournisseurs() {
   const { fetchStatsAll } = useFournisseurStats();
   const { getProductsBySupplier } = useSupplierProducts();
   const { products } = useProducts();
+  const { fournisseurs: inactiveByInvoices, fetchInactifs } = useFournisseursInactifs();
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(null);
   const [showCreate, setShowCreate] = useState(false);
@@ -42,6 +44,7 @@ export default function Fournisseurs() {
   useEffect(() => {
     fetchFournisseurs();
     fetchStatsAll().then(setStats);
+    fetchInactifs();
   }, []);
 
   // Recherche live
@@ -88,8 +91,13 @@ export default function Fournisseurs() {
         <Button variant="outline" onClick={exportPDF}>Export PDF</Button>
       </div>
       {inactifs.length > 0 && (
-        <div className="mb-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded px-2 py-1">
+        <div className="mb-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded px-2 py-1">
           {inactifs.length} fournisseur(s) inactif(s)
+        </div>
+      )}
+      {inactiveByInvoices.length > 0 && (
+        <div className="mb-4 text-sm text-orange-700 bg-orange-50 border border-orange-200 rounded px-2 py-1">
+          {inactiveByInvoices.length} fournisseur(s) sans facture depuis 6 mois
         </div>
       )}
       {/* Statistiques générales */}

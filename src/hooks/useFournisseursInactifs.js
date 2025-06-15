@@ -1,0 +1,23 @@
+import { useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/context/AuthContext";
+
+export function useFournisseursInactifs() {
+  const { mama_id } = useAuth();
+  const [fournisseurs, setFournisseurs] = useState([]);
+
+  async function fetchInactifs() {
+    const { data, error } = await supabase
+      .from('v_fournisseurs_inactifs')
+      .select('*')
+      .eq('mama_id', mama_id);
+    if (error) {
+      setFournisseurs([]);
+      return [];
+    }
+    setFournisseurs(Array.isArray(data) ? data : []);
+    return data || [];
+  }
+
+  return { fournisseurs, fetchInactifs };
+}

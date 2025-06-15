@@ -20,6 +20,7 @@ const MENUS = [
     children: [
       { label: "Produits", to: "/produits" },
       { label: "Mouvements", to: "/mouvements" },
+      { label: "Pertes", to: "/pertes" },
       { label: "Stock synthèse", to: "/stock" },
     ],
   },
@@ -58,6 +59,21 @@ const MENUS = [
     icon: "💶",
     to: "/fournisseurs/comparatif",
     accessKey: "fournisseurs",
+  },
+  {
+    label: "Journal",
+    icon: "📝",
+    to: "/journal",
+    accessKey: "audit",
+  },
+  {
+    label: "Statistiques",
+    icon: "📈",
+    accessKey: "dashboard",
+    children: [
+      { label: "Cost centers", to: "/stats/cost-centers" },
+      { label: "CC mensuels", to: "/stats/cost-centers-monthly" },
+    ],
   },
   {
     label: "Paramétrage",

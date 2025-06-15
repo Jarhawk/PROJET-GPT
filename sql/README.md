@@ -12,6 +12,7 @@ To initialize a local project with the Supabase CLI:
 supabase start
 supabase db reset --file sql/init.sql --seed sql/seed.sql
 psql "$SUPABASE_DB_URL" -f sql/rls.sql
+psql "$SUPABASE_DB_URL" -f sql/mama_stock_patch.sql
 ```
 
 Adjust the command to your workflow if needed.

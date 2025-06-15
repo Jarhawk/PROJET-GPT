@@ -1,8 +1,27 @@
+import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
+import { useGlobalSearch } from "@/hooks/useGlobalSearch";
 
 export default function Navbar() {
   const { session, role } = useAuth();
+  const [term, setTerm] = useState("");
+  const { results, search } = useGlobalSearch();
+  const [dark, setDark] = useState(false);
+
+  useEffect(() => {
+    if (localStorage.theme === 'dark') {
+      document.documentElement.classList.add('dark');
+      setDark(true);
+    }
+  }, []);
+
+  const toggleDark = () => {
+    const html = document.documentElement;
+    const isDark = html.classList.toggle('dark');
+    localStorage.theme = isDark ? 'dark' : 'light';
+    setDark(isDark);
+  };
 
   const handleLogout = async () => {
     const confirmLogout = window.confirm("Voulez-vous vraiment vous déconnecter ?");
@@ -21,6 +40,31 @@ export default function Navbar() {
 
       {/* Zone utilisateur */}
       <div className="flex items-center gap-4">
+        <div className="relative">
+          <input
+            type="text"
+            value={term}
+            onChange={e => { setTerm(e.target.value); search(e.target.value); }}
+            placeholder="Recherche..."
+            className="input input-bordered text-black w-48"
+          />
+          {results.length > 0 && (
+            <div className="absolute z-10 bg-white text-black w-full shadow-lg mt-1 text-xs rounded">
+              {results.map(r => (
+                <div key={r.type + r.id} className="px-2 py-1 border-b last:border-0">
+                  {r.type}: {r.nom}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <button
+          onClick={toggleDark}
+          className="bg-mamastock-gold text-black px-3 py-1 rounded-md text-sm"
+          title="Basculer mode sombre"
+        >
+          {dark ? '☀️' : '🌙'}
+        </button>
         {session?.user?.email && typeof session.user.email === "string" ? (
           <>
             <span className="text-sm text-mamastock-text font-medium">

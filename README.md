@@ -90,6 +90,7 @@ The Playwright configuration automatically starts the dev server.
 - Product list features pagination, sortable columns, filters, quick
   duplication of existing entries and Excel import/export (the importer reads
   the first sheet if no "Produits" sheet is found)
+- Users can mark products as favorites and filter the list accordingly
 - Each product records supplier prices and automatically updates its PMP
 - Stock and movement history available from the product detail modal
 - Supplier list supports Excel/PDF export and highlights inactive suppliers

@@ -1,6 +1,7 @@
 // src/pages/Produits.jsx
 import { useEffect, useState, useRef } from "react";
 import { useProducts } from "@/hooks/useProducts";
+import { useFavorites } from "@/hooks/useFavorites";
 import ProduitFormModal from "@/components/produits/ProduitFormModal";
 import ProduitDetail from "@/components/produits/ProduitDetail";
 import { Button } from "@/components/ui/button";
@@ -25,10 +26,13 @@ export default function Produits() {
   const [search, setSearch] = useState("");
   const [familleFilter, setFamilleFilter] = useState("");
   const [actifFilter, setActifFilter] = useState("all");
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [page, setPage] = useState(1);
   const [sortField, setSortField] = useState("famille");
   const [sortOrder, setSortOrder] = useState("asc");
   const fileRef = useRef();
+
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   async function handleImport(e) {
     const file = e.target.files[0];
@@ -69,6 +73,9 @@ export default function Produits() {
   // Filtre et familles/unites dynamiques
   const familles = [...new Set(products.map(p => p.famille).filter(Boolean))];
   const unites = [...new Set(products.map(p => p.unite).filter(Boolean))];
+  const displayProducts = favoritesOnly
+    ? products.filter(p => isFavorite(p.id))
+    : products;
 
   useEffect(() => {
     fetchProducts({
@@ -111,6 +118,10 @@ export default function Produits() {
           <option value="true">Actif</option>
           <option value="false">Inactif</option>
         </select>
+        <label className="flex items-center gap-1 text-sm">
+          <input type="checkbox" checked={favoritesOnly} onChange={e => setFavoritesOnly(e.target.checked)} />
+          Favoris
+        </label>
         <Button onClick={() => { setShowForm(true); setSelectedProduct(null); }}>+ Nouveau produit</Button>
         <Button onClick={exportProductsToExcel}>Export Excel</Button>
         <Button onClick={() => fileRef.current.click()}>Import Excel</Button>
@@ -138,9 +149,19 @@ export default function Produits() {
             </tr>
           </thead>
           <tbody>
-          {products.map(p => (
+          {displayProducts.map(p => (
             <tr key={p.id}>
-                <td>{p.nom}</td>
+                <td className="text-left flex items-center gap-1">
+                  <button
+                    type="button"
+                    className="text-yellow-500 focus:outline-none"
+                    aria-label={isFavorite(p.id) ? "Retirer des favoris" : "Ajouter aux favoris"}
+                    onClick={() => toggleFavorite(p.id)}
+                  >
+                    {isFavorite(p.id) ? "★" : "☆"}
+                  </button>
+                  {p.nom}
+                </td>
                 <td>{p.famille}</td>
                 <td>{p.unite}</td>
                 <td>{p.pmp}</td>

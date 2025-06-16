@@ -17,6 +17,7 @@
 - Supplier statistics page summarising total purchase amounts
 - Excel export for cost center analytics
 - Global search bar in the navbar to quickly find products or suppliers
+- Ability to mark products as favorites with a local filter
 - Losses management page with Supabase table and audit logging
 - Alerts for suppliers with no invoices in the last 6 months
 - Docker deployment instructions and Dockerfile

@@ -3,6 +3,7 @@ import { useInvoices } from "@/hooks/useInvoices";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
+import { useInvoiceOcr } from "@/hooks/useInvoiceOcr";
 
 export default function FactureForm({ facture, suppliers = [], onClose }) {
   const { addInvoice, editInvoice } = useInvoices();
@@ -13,6 +14,7 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
   const [file, setFile] = useState(null);
   const [fileUrl, setFileUrl] = useState(facture?.justificatif || "");
   const [loading, setLoading] = useState(false);
+  const { scan, text: ocrText } = useInvoiceOcr();
 
   // Upload PDF réel : à brancher à ton backend ou Supabase Storage
   const handleUpload = async () => {
@@ -96,8 +98,9 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
         <option value="refusée">Refusée</option>
       </select>
       <label>
-        Justificatif PDF : <input type="file" accept="application/pdf" onChange={e => setFile(e.target.files[0])} />
+        Justificatif PDF : <input type="file" accept="application/pdf,image/*" onChange={e => setFile(e.target.files[0])} />
         <Button type="button" size="sm" variant="outline" className="ml-2" onClick={handleUpload}>Upload</Button>
+        <Button type="button" size="sm" variant="secondary" className="ml-2" onClick={() => scan(file)}>OCR</Button>
         {fileUrl && (
           <a
             href={fileUrl}
@@ -109,6 +112,11 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
           </a>
         )}
       </label>
+      {ocrText && (
+        <div className="text-xs text-gray-600 whitespace-pre-wrap mt-2 border rounded p-2 max-h-32 overflow-auto">
+          {ocrText}
+        </div>
+      )}
       <div className="flex gap-2 mt-4">
         <Button type="submit" disabled={loading}>{facture ? "Modifier" : "Ajouter"}</Button>
         <Button variant="outline" type="button" onClick={onClose}>Annuler</Button>

@@ -19,6 +19,9 @@ vi.mock('@/hooks/useProducts', () => ({
 vi.mock('@/hooks/useInvoices', () => ({
   useInvoices: () => ({ fetchInvoicesBySupplier: vi.fn() }),
 }));
+vi.mock('@/hooks/useFournisseursInactifs', () => ({
+  useFournisseursInactifs: () => ({ fournisseurs: [], fetchInactifs: vi.fn() }),
+}));
 vi.mock('@/lib/supabase', () => ({ supabase: { from: vi.fn() } }));
 vi.mock('recharts', () => ({
   ResponsiveContainer: ({ children }) => <div>{children}</div>,

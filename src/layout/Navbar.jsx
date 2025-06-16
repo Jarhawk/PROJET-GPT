@@ -1,11 +1,32 @@
+import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
+import { useGlobalSearch } from "@/hooks/useGlobalSearch";
+import { useLocale } from "@/context/useLocale";
 
 export default function Navbar() {
   const { session, role } = useAuth();
+  const [term, setTerm] = useState("");
+  const { results, search } = useGlobalSearch();
+  const [dark, setDark] = useState(false);
+  const { locale, setLocale, t } = useLocale();
+
+  useEffect(() => {
+    if (localStorage.theme === 'dark') {
+      document.documentElement.classList.add('dark');
+      setDark(true);
+    }
+  }, []);
+
+  const toggleDark = () => {
+    const html = document.documentElement;
+    const isDark = html.classList.toggle('dark');
+    localStorage.theme = isDark ? 'dark' : 'light';
+    setDark(isDark);
+  };
 
   const handleLogout = async () => {
-    const confirmLogout = window.confirm("Voulez-vous vraiment vous déconnecter ?");
+    const confirmLogout = window.confirm(t('logoutConfirm'));
     if (!confirmLogout) return;
 
     await supabase.auth.signOut();
@@ -21,6 +42,47 @@ export default function Navbar() {
 
       {/* Zone utilisateur */}
       <div className="flex items-center gap-4">
+        <div className="relative">
+          <input
+            type="text"
+            value={term}
+            onChange={e => { setTerm(e.target.value); search(e.target.value); }}
+            placeholder={t('search')}
+            className="input input-bordered text-black w-48"
+          />
+          {results.length > 0 && (
+            <div
+              className="absolute z-10 bg-white text-black w-full shadow-lg mt-1 text-xs rounded"
+              role="listbox"
+              aria-label="Résultats recherche"
+            >
+              {results.map(r => (
+                <div
+                  key={r.type + r.id}
+                  className="px-2 py-1 border-b last:border-0"
+                  role="option"
+                  tabIndex="0"
+                >
+                  {r.type}: {r.nom}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <button
+          onClick={toggleDark}
+          className="bg-mamastock-gold text-black px-3 py-1 rounded-md text-sm"
+          title={t('darkToggle')}
+        >
+          {dark ? '☀️' : '🌙'}
+        </button>
+        <button
+          onClick={() => setLocale(locale === 'fr' ? 'en' : 'fr')}
+          className="bg-mamastock-gold text-black px-2 py-1 rounded-md text-sm"
+          title={t('lang')}
+        >
+          {locale.toUpperCase()}
+        </button>
         {session?.user?.email && typeof session.user.email === "string" ? (
           <>
             <span className="text-sm text-mamastock-text font-medium">
@@ -33,7 +95,7 @@ export default function Navbar() {
               onClick={handleLogout}
               className="text-sm bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded-md transition"
             >
-              Déconnexion
+              {t('logout')}
             </button>
           </>
         ) : (

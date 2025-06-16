@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { LocaleProvider } from "@/context/LocaleContext";
 import { Toaster } from "react-hot-toast";
 import RouterConfig from "./router";
 import { useEffect } from "react";
@@ -38,13 +39,15 @@ export default function App() {
   useDarkMode();
   return (
     <AuthProvider>
-      <Router>
-        <GlobalLoader />
-        <ErrorBoundary>
-          <RouterConfig />
-        </ErrorBoundary>
-        <Toaster position="top-right" />
-      </Router>
+      <LocaleProvider>
+        <Router>
+          <GlobalLoader />
+          <ErrorBoundary>
+            <RouterConfig />
+          </ErrorBoundary>
+          <Toaster position="top-right" />
+        </Router>
+      </LocaleProvider>
     </AuthProvider>
   );
 }

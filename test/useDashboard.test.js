@@ -1,0 +1,31 @@
+import { renderHook, act } from '@testing-library/react';
+import { vi, beforeEach, test, expect } from 'vitest';
+
+const eqMock = vi.fn(() => Promise.resolve({ data: [], error: null, count: 0 }));
+const selectMock = vi.fn(() => ({ eq: eqMock }));
+const fromMock = vi.fn(() => ({ select: selectMock }));
+const rpcMock = vi.fn(() => Promise.resolve({ data: [], error: null }));
+vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock, rpc: rpcMock } }));
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ mama_id: 'm1', loading: false }) }));
+
+let useDashboard;
+
+beforeEach(async () => {
+  ({ useDashboard } = await import('@/hooks/useDashboard'));
+  fromMock.mockClear();
+  selectMock.mockClear();
+  eqMock.mockClear();
+  rpcMock.mockClear();
+});
+
+test('fetchDashboard queries products and mouvements and calls RPC', async () => {
+  const { result } = renderHook(() => useDashboard());
+  await act(async () => {
+    await result.current.fetchDashboard(1000);
+  });
+  expect(fromMock).toHaveBeenCalledWith('products');
+  expect(fromMock).toHaveBeenCalledWith('mouvements_stock');
+  expect(fromMock).toHaveBeenCalledWith('factures');
+  expect(fromMock).toHaveBeenCalledWith('fournisseurs');
+  expect(rpcMock).toHaveBeenCalledWith('top_products', expect.any(Object));
+});

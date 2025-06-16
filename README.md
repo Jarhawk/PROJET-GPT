@@ -1,7 +1,8 @@
 # MamaStock
 
-React application using Supabase. The toolchain relies on modern ESM modules and
-requires **Node.js 18+** (see `package.json` engines field).
+MamaStock is a stock and cost management application built with React and
+Supabase. The toolchain relies on modern ESM modules and requires **Node.js
+18+** (see `package.json` engines field).
 
 ## Development
 
@@ -15,6 +16,10 @@ npm run build
 npm run preview
 ```
 
+If linting or tests fail because required packages are missing, simply run
+`npm install` again. This ensures `vitest`, `@eslint/js` and `playwright` are
+available before running the commands above.
+
 ### Database
 
 SQL scripts are stored in [`sql/`](./sql). To initialise a local Supabase instance:
@@ -23,6 +28,7 @@ SQL scripts are stored in [`sql/`](./sql). To initialise a local Supabase instan
 supabase start
 supabase db reset --file sql/init.sql --seed sql/seed.sql
 psql "$SUPABASE_DB_URL" -f sql/rls.sql
+psql "$SUPABASE_DB_URL" -f sql/mama_stock_patch.sql
 ```
 
 Adjust configuration in `supabase/config.toml` as required.
@@ -56,19 +62,28 @@ End-to-end tests use Playwright and require your `.env` Supabase credentials:
 npm run test:e2e
 ```
 
-First-time runs require downloading Playwright browsers:
+End-to-end tests rely on Playwright browsers. First-time runs require downloading them:
 
 ```bash
-npx playwright install
+npm run install:browsers
 ```
+
+If this command fails due to restricted network access, manually copy the
+browser binaries from another machine or configure the environment to allow
+downloads from `cdn.playwright.dev`.
+
+Running `npm run test:e2e` automatically skips the tests when browsers are missing.
 
 The Playwright configuration automatically starts the dev server.
 
 ## Features
+- Dashboard overview with KPI widgets, stock alerts and trend charts. The widgets now show invoice and supplier counts
+- Quick action buttons from the dashboard let you create a product, invoice or inventory in one click
 - Supplier price comparison with average and latest purchase metrics
 - Comparison page available at `/fournisseurs/comparatif` and linked from the sidebar
 - Upload and delete files via Supabase Storage using `useStorage`, with automatic cleanup of replaced uploads
 - Daily menu handling provided by `useMenuDuJour`
+- Menu planning with recipe associations, production planning and automatic stock decrement
 - PDF export for invoices and fiches techniques using jsPDF
 - Forms display links to preview uploaded documents immediately
 - Product management supports codes, allergens and photo upload
@@ -76,15 +91,72 @@ The Playwright configuration automatically starts the dev server.
 - Product list features pagination, sortable columns, filters, quick
   duplication of existing entries and Excel import/export (the importer reads
   the first sheet if no "Produits" sheet is found)
+- Users can mark products as favorites and filter the list accordingly
 - Each product records supplier prices and automatically updates its PMP
 - Stock and movement history available from the product detail modal
 - Supplier list supports Excel/PDF export and highlights inactive suppliers
+- Alerts for suppliers with no invoices in the last 6 months
 - Stock detail charts show monthly product rotation
+- Audit log viewer with date and text filters plus Excel and PDF export, accessible from the sidebar
+- Destructive actions in the audit log are highlighted for quick review
+- Cost center management with allocation modal and dedicated settings page
+- Access cost center settings from the Parametrage menu under "Cost centers"
+- Cost centers can be imported or exported via Excel in the settings page (the importer falls back to the first sheet if no "CostCenters" sheet is present)
+- Cost center analytics page summarising allocations by value and quantity with date range filters and graceful error handling (tested for RPC errors)
+- Analytics tables can be exported to Excel for further reporting
+- Supplier statistics page summarises total purchases and invoice counts
+- Loss management page to record wastage, breakage and donations with cost center tracking
+- Monthly cost center pivot with columns per month for trend analysis
+- Dashboard chart showing monthly purchase price trends per product
+- Dashboard pie chart highlights top consumed products over the last month
+- Invoice form supports OCR scanning of uploaded documents
+- Automatic audit triggers log cost center changes and allocations
+- Cost center allocation modal offers suggestions based on historical data
+- Dedicated page lists unallocated movements for quick cost center allocation (via `/mouvements/ventilation`)
+- Command `npm run allocate:history` applies those suggestions to past movements
+- Global search bar in the navbar to quickly find products or suppliers
+- Built-in dark mode toggle for better accessibility
+- Interface available in French or English with a language toggle in the navbar
+- Optional two-factor authentication (TOTP) for user accounts, verified via QR code before activation
+- Multi-site support with per-site cost centers and data isolation
+- Installable PWA with offline support
 
 ## Continuous Integration
 
 The GitHub Actions workflow automatically runs `npm audit fix`, linting,
 unit tests and Playwright end-to-end tests on every push.
+
+## Deployment
+
+Build the production bundle and run it in Docker:
+```bash
+docker build -t mamastock .
+docker run -p 4173:4173 mamastock
+```
+
+For Vercel or Netlify, provide environment variables and deploy the `dist` folder created by `npm run build`.
+
+## Reporting
+
+Generate a weekly cost center report with `node scripts/weekly_report.js` which outputs `weekly_cost_centers.xlsx`.
+
+Export monthly invoices for your accounting system using
+`node scripts/export_accounting.js 2024-01` which creates
+`invoices_YYYY-MM.csv`.
+
+Automatically allocate historic stock movements to cost centers with
+`node scripts/reallocate_history.js`. The script analyses past consumption and
+creates missing allocations based on historical ratios.
+
+Create JSON backups of core tables using `node scripts/backup_db.js`. The script
+exports products, suppliers, invoices and stock movements into a dated file such
+as `backup_20250101.json`.
+
+Upload any generated report to an SFTP server with
+`node scripts/upload_sftp.js <file>` which uses environment variables
+`SFTP_HOST`, `SFTP_USER`, `SFTP_PASS` and optional `SFTP_DIR`.
+
+
 
 
 ## FAQ
@@ -92,3 +164,6 @@ unit tests and Playwright end-to-end tests on every push.
 **Dev server cannot connect to Supabase**
 
 Ensure the `.env` file contains valid Supabase credentials and that you have an active internet connection. Delete `node_modules` and run `npm install` if issues persist.
+**Lint or tests fail due to missing packages**
+
+Run `npm install` to ensure dependencies like `vitest`, `@eslint/js` and `playwright` are available before running lint or test commands.

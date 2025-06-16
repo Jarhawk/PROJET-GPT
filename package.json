@@ -12,7 +12,13 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "node scripts/check_browsers.cjs && playwright test || true",
+    "install:browsers": "playwright install",
+    "report": "node scripts/weekly_report.js",
+    "export:accounting": "node scripts/export_accounting.js",
+    "allocate:history": "node scripts/reallocate_history.js",
+    "backup": "node scripts/backup_db.js",
+    "upload:sftp": "node scripts/upload_sftp.js"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.14",
@@ -25,6 +31,8 @@
     "jspdf": "^3.0.1",
     "jspdf-autotable": "^5.0.2",
     "lucide-react": "^0.511.0",
+    "otplib": "^12.0.1",
+    "qrcode.react": "^4.2.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-hot-toast": "^2.5.2",
@@ -32,6 +40,8 @@
     "react-to-print": "^3.1.0",
     "react-toastify": "^11.0.5",
     "recharts": "^2.15.3",
+    "ssh2-sftp-client": "^12.0.0",
+    "tesseract.js": "^6.0.1",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

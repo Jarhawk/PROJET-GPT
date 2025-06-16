@@ -5,7 +5,7 @@
 - Playwright end-to-end tests (`npm run test:e2e`).
 - GitHub Actions workflow running `npm audit fix`, lint, unit and e2e tests.
 - Audit log page with SQL schema and React UI
-- Cost center allocation modal and settings management
+- Cost center allocation modal and settings management accessible from the Parametrage menu
 - Cost center analytics page with SQL view and React UI
 - Cost center analytics page now supports filtering by date range
 - Excel import/export on the cost center settings page

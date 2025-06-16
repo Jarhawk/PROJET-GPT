@@ -100,6 +100,7 @@ The Playwright configuration automatically starts the dev server.
 - Audit log viewer with date and text filters plus Excel export, accessible from the sidebar
 - Destructive actions in the audit log are highlighted for quick review
 - Cost center management with allocation modal and dedicated settings page
+- Access cost center settings from the Parametrage menu under "Cost centers"
 - Cost centers can be imported or exported via Excel in the settings page (the importer falls back to the first sheet if no "CostCenters" sheet is present)
 - Cost center analytics page summarising allocations by value and quantity with date range filters and graceful error handling (tested for RPC errors)
 - Analytics tables can be exported to Excel for further reporting
@@ -111,7 +112,7 @@ The Playwright configuration automatically starts the dev server.
 - Invoice form supports OCR scanning of uploaded documents
 - Automatic audit triggers log cost center changes and allocations
 - Cost center allocation modal offers suggestions based on historical data
-- Dedicated page lists unallocated movements for quick cost center allocation
+- Dedicated page lists unallocated movements for quick cost center allocation (via `/mouvements/ventilation`)
 - Command `npm run allocate:history` applies those suggestions to past movements
 - Global search bar in the navbar to quickly find products or suppliers
 - Built-in dark mode toggle for better accessibility

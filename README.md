@@ -148,6 +148,10 @@ Create JSON backups of core tables using `node scripts/backup_db.js`. The script
 exports products, suppliers, invoices and stock movements into a dated file such
 as `backup_20250101.json`.
 
+Upload any generated report to an SFTP server with
+`node scripts/upload_sftp.js <file>` which uses environment variables
+`SFTP_HOST`, `SFTP_USER`, `SFTP_PASS` and optional `SFTP_DIR`.
+
 
 
 

@@ -31,6 +31,7 @@
 - Historic reallocation script `npm run allocate:history` to apply suggested cost center allocations
 - New page `/mouvements/ventilation` listing movements without allocations
 - Database backup script `npm run backup` saving core tables to JSON
+- SFTP upload script `npm run upload:sftp <file>` for sending reports
 - Note on Playwright browser downloads in README
 - Added `npm run install:browsers` script to download Playwright browsers
 - End-to-end tests now check for installed browsers and skip if missing

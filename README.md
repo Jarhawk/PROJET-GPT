@@ -97,6 +97,7 @@ The Playwright configuration automatically starts the dev server.
 - Alerts for suppliers with no invoices in the last 6 months
 - Stock detail charts show monthly product rotation
 - Audit log viewer with date and text filters plus Excel export, accessible from the sidebar
+- Destructive actions in the audit log are highlighted for quick review
 - Cost center management with allocation modal and dedicated settings page
 - Cost centers can be imported or exported via Excel in the settings page (the importer falls back to the first sheet if no "CostCenters" sheet is present)
 - Cost center analytics page summarising allocations by value and quantity with date range filters and graceful error handling (tested for RPC errors)

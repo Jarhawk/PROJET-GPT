@@ -42,6 +42,7 @@
 - Two-factor setup now requires verifying a TOTP code before activation
 - Cost center suggestions based on historical allocations
 - Installable PWA with offline support using VitePWA
+- Audit log viewer highlights destructive actions in red
 
 ### Changed
 - Updated ESLint config and cleaned all warnings.

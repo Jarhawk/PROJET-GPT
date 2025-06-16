@@ -5,6 +5,7 @@ import { Toaster } from "react-hot-toast";
 
 export default function Journal() {
   const { logs, fetchLogs, exportLogsToExcel } = useLogs();
+  const isCritical = action => /delete|drop|remove/i.test(action);
   const [search, setSearch] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -55,7 +56,7 @@ export default function Journal() {
         </thead>
         <tbody>
           {logs.map(l => (
-            <tr key={l.id}>
+            <tr key={l.id} className={isCritical(l.action) ? 'bg-red-50' : ''}>
               <td className="px-2 py-1">
                 {new Date(l.created_at).toLocaleString()}
               </td>

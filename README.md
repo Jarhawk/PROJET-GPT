@@ -78,6 +78,7 @@ The Playwright configuration automatically starts the dev server.
 
 ## Features
 - Dashboard overview with KPI widgets, stock alerts and trend charts. The widgets now show invoice and supplier counts
+- Quick action buttons from the dashboard let you create a product, invoice or inventory in one click
 - Supplier price comparison with average and latest purchase metrics
 - Comparison page available at `/fournisseurs/comparatif` and linked from the sidebar
 - Upload and delete files via Supabase Storage using `useStorage`, with automatic cleanup of replaced uploads

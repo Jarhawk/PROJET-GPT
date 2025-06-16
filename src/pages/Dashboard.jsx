@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useDashboard } from "@/hooks/useDashboard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,12 @@ export default function Dashboard() {
     <div className="p-6 container mx-auto">
       <Toaster position="top-right" />
       <h1 className="text-3xl font-bold mb-6">Dashboard Stock & Achats</h1>
+      <div className="flex flex-wrap gap-4 mb-6">
+        <Link className="btn" to="/produits/nouveau">+ Produit</Link>
+        <Link className="btn" to="/factures/nouveau">+ Facture</Link>
+        <Link className="btn" to="/inventaire/nouveau">+ Inventaire</Link>
+        <Link className="btn" to="/mouvements">Voir mouvements</Link>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-6 gap-6 mb-8">
         <Card>

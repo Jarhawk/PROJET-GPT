@@ -14,6 +14,7 @@
 - Product price trend chart on the dashboard
 - Top products function for the dashboard with React hook
 - Dashboard widgets now show invoice and supplier counts
+- Quick action buttons on the dashboard to create products, invoices or inventories
 - Supplier statistics page summarising total purchase amounts
 - Excel export for cost center analytics
 - Global search bar in the navbar to quickly find products or suppliers

@@ -36,6 +36,7 @@ const EcartInventaire = lazy(() => import("@/pages/inventaire/EcartInventaire.js
 const Mouvements = lazy(() => import("@/pages/mouvements/Mouvements.jsx"));
 const MouvementDetail = lazy(() => import("@/components/mouvements/MouvementFormModal.jsx"));
 const Pertes = lazy(() => import("@/pages/Pertes.jsx"));
+const MouvementsAVentiler = lazy(() => import("@/pages/mouvements/MouvementsAVentiler.jsx"));
 
 // Menus
 const Menus = lazy(() => import("@/pages/menus/Menus.jsx"));
@@ -240,6 +241,14 @@ export default function RouterConfig() {
           element={
             <ProtectedRoute accessKey="stock">
               <Mouvements />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/mouvements/ventilation"
+          element={
+            <ProtectedRoute accessKey="stock">
+              <MouvementsAVentiler />
             </ProtectedRoute>
           }
         />

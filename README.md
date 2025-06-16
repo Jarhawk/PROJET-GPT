@@ -108,6 +108,7 @@ The Playwright configuration automatically starts the dev server.
 - Invoice form supports OCR scanning of uploaded documents
 - Automatic audit triggers log cost center changes and allocations
 - Cost center allocation modal offers suggestions based on historical data
+- Dedicated page lists unallocated movements for quick cost center allocation
 - Command `npm run allocate:history` applies those suggestions to past movements
 - Global search bar in the navbar to quickly find products or suppliers
 - Built-in dark mode toggle for better accessibility

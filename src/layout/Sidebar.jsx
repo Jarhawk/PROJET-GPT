@@ -20,6 +20,7 @@ const MENUS = [
     children: [
       { label: "Produits", to: "/produits" },
       { label: "Mouvements", to: "/mouvements" },
+      { label: "À ventiler", to: "/mouvements/ventilation" },
       { label: "Pertes", to: "/pertes" },
       { label: "Stock synthèse", to: "/stock" },
     ],

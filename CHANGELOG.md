@@ -28,6 +28,7 @@
 - Invoice OCR scanning using tesseract.js with unit test
 - Monthly accounting export script producing CSV invoices
 - Historic reallocation script `npm run allocate:history` to apply suggested cost center allocations
+- New page `/mouvements/ventilation` listing movements without allocations
 - Database backup script `npm run backup` saving core tables to JSON
 - Note on Playwright browser downloads in README
 - Added `npm run install:browsers` script to download Playwright browsers

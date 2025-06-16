@@ -1,7 +1,8 @@
 # MamaStock
 
-React application using Supabase. The toolchain relies on modern ESM modules and
-requires **Node.js 18+** (see `package.json` engines field).
+MamaStock is a stock and cost management application built with React and
+Supabase. The toolchain relies on modern ESM modules and requires **Node.js
+18+** (see `package.json` engines field).
 
 ## Development
 

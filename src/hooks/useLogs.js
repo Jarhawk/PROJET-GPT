@@ -3,8 +3,10 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+
 
 export function useLogs() {
   const { mama_id } = useAuth();
@@ -47,6 +49,7 @@ export function useLogs() {
     saveAs(new Blob([buf]), "audit_logs.xlsx");
   }
 
+
   function exportLogsToPdf() {
     const doc = new jsPDF();
     doc.autoTable({
@@ -61,4 +64,7 @@ export function useLogs() {
   }
 
   return { logs, loading, error, fetchLogs, exportLogsToExcel, exportLogsToPdf };
+
+  return { logs, loading, error, fetchLogs, exportLogsToExcel };
+
 }

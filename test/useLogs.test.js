@@ -15,6 +15,7 @@ vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
 vi.mock('file-saver', () => ({ saveAs: vi.fn() }));
 vi.mock('xlsx', () => ({ utils: { book_new: vi.fn(() => ({})), book_append_sheet: vi.fn(), json_to_sheet: vi.fn(() => ({})) }, write: vi.fn(() => new ArrayBuffer(10)) }));
+
 const autoTableMock = vi.fn();
 vi.mock('jspdf', () => {
   return {
@@ -22,6 +23,8 @@ vi.mock('jspdf', () => {
   };
 });
 vi.mock('jspdf-autotable');
+
+
 
 let useLogs;
 
@@ -73,5 +76,7 @@ test('exportLogsToPdf writes pdf', async () => {
   expect(jsPDF.default).toHaveBeenCalled();
   expect(autoTableMock).toHaveBeenCalled();
 });
+
+
 
 

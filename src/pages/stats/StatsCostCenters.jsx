@@ -7,8 +7,11 @@ export default function StatsCostCenters() {
   const { fetchStats } = useCostCenterStats();
   const [stats, setStats] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+
+
 
   const exportExcel = () => {
     const wb = XLSX.utils.book_new();
@@ -24,6 +27,7 @@ export default function StatsCostCenters() {
     });
   }, [fetchStats]);
 
+
   const handleSubmit = async e => {
     e.preventDefault();
     setLoading(true);
@@ -35,12 +39,15 @@ export default function StatsCostCenters() {
     setLoading(false);
   };
 
+
+
   if (loading) return <div className="p-8">Chargement...</div>;
 
   return (
     <div className="p-8 container mx-auto">
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold mb-4">Ventilation par Cost Center</h1>
+
       <form onSubmit={handleSubmit} className="flex gap-2 mb-2">
         <input
           type="date"
@@ -61,6 +68,11 @@ export default function StatsCostCenters() {
           Export Excel
         </button>
       </form>
+
+      <button onClick={exportExcel} className="btn btn-outline mb-2">
+        Export Excel
+      </button>
+
       <table className="min-w-full text-xs bg-white rounded-xl shadow-md">
         <thead>
           <tr>

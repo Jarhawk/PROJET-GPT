@@ -29,17 +29,22 @@ test('fetchStats calls stats_cost_centers RPC', async () => {
 
 test('fetchStats returns empty array on error', async () => {
   rpcMock.mockResolvedValueOnce({ data: null, error: { message: 'bad' } });
+
   vi.spyOn(console, 'error').mockImplementation(() => {});
+
+
   const { result } = renderHook(() => useCostCenterStats());
   let data;
   await act(async () => {
     data = await result.current.fetchStats();
   });
   expect(data).toEqual([]);
+
   expect(console.error).toHaveBeenCalledWith(
     'Failed to fetch cost center stats',
     { message: 'bad' }
   );
   console.error.mockRestore();
+
 });
 

@@ -2,14 +2,20 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useGlobalSearch } from "@/hooks/useGlobalSearch";
+
 import { useLocale } from "@/context/useLocale";
+
+
 
 export default function Navbar() {
   const { session, role } = useAuth();
   const [term, setTerm] = useState("");
   const { results, search } = useGlobalSearch();
   const [dark, setDark] = useState(false);
+
   const { locale, setLocale, t } = useLocale();
+
+
 
   useEffect(() => {
     if (localStorage.theme === 'dark') {
@@ -47,6 +53,7 @@ export default function Navbar() {
             type="text"
             value={term}
             onChange={e => { setTerm(e.target.value); search(e.target.value); }}
+
             placeholder={t('search')}
             className="input input-bordered text-black w-48"
           />
@@ -63,6 +70,15 @@ export default function Navbar() {
                   role="option"
                   tabIndex="0"
                 >
+
+            placeholder="Recherche..."
+            className="input input-bordered text-black w-48"
+          />
+          {results.length > 0 && (
+            <div className="absolute z-10 bg-white text-black w-full shadow-lg mt-1 text-xs rounded">
+              {results.map(r => (
+                <div key={r.type + r.id} className="px-2 py-1 border-b last:border-0">
+
                   {r.type}: {r.nom}
                 </div>
               ))}
@@ -72,6 +88,7 @@ export default function Navbar() {
         <button
           onClick={toggleDark}
           className="bg-mamastock-gold text-black px-3 py-1 rounded-md text-sm"
+
           title={t('darkToggle')}
         >
           {dark ? '☀️' : '🌙'}
@@ -83,6 +100,12 @@ export default function Navbar() {
         >
           {locale.toUpperCase()}
         </button>
+
+          title="Basculer mode sombre"
+        >
+          {dark ? '☀️' : '🌙'}
+        </button>
+
         {session?.user?.email && typeof session.user.email === "string" ? (
           <>
             <span className="text-sm text-mamastock-text font-medium">

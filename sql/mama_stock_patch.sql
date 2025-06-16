@@ -299,6 +299,7 @@ language sql stable security definer as $$
   limit limit_param;
 $$;
 
+
 -- View summarising purchase totals per supplier
 create or replace view v_fournisseur_totaux as
 select

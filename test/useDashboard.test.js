@@ -1,7 +1,11 @@
 import { renderHook, act } from '@testing-library/react';
 import { vi, beforeEach, test, expect } from 'vitest';
 
+
 const eqMock = vi.fn(() => Promise.resolve({ data: [], error: null, count: 0 }));
+
+const eqMock = vi.fn(() => Promise.resolve({ data: [], error: null }));
+
 const selectMock = vi.fn(() => ({ eq: eqMock }));
 const fromMock = vi.fn(() => ({ select: selectMock }));
 const rpcMock = vi.fn(() => Promise.resolve({ data: [], error: null }));
@@ -25,7 +29,9 @@ test('fetchDashboard queries products and mouvements and calls RPC', async () =>
   });
   expect(fromMock).toHaveBeenCalledWith('products');
   expect(fromMock).toHaveBeenCalledWith('mouvements_stock');
+
   expect(fromMock).toHaveBeenCalledWith('factures');
   expect(fromMock).toHaveBeenCalledWith('fournisseurs');
+
   expect(rpcMock).toHaveBeenCalledWith('top_products', expect.any(Object));
 });

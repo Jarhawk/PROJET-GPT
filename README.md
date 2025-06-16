@@ -77,8 +77,12 @@ Running `npm run test:e2e` automatically skips the tests when browsers are missi
 The Playwright configuration automatically starts the dev server.
 
 ## Features
+
 - Dashboard overview with KPI widgets, stock alerts and trend charts. The widgets now show invoice and supplier counts
 - Quick action buttons from the dashboard let you create a product, invoice or inventory in one click
+
+- Dashboard overview with KPI widgets, stock alerts and trend charts
+
 - Supplier price comparison with average and latest purchase metrics
 - Comparison page available at `/fournisseurs/comparatif` and linked from the sidebar
 - Upload and delete files via Supabase Storage using `useStorage`, with automatic cleanup of replaced uploads
@@ -97,6 +101,7 @@ The Playwright configuration automatically starts the dev server.
 - Supplier list supports Excel/PDF export and highlights inactive suppliers
 - Alerts for suppliers with no invoices in the last 6 months
 - Stock detail charts show monthly product rotation
+
 - Audit log viewer with date and text filters plus Excel and PDF export, accessible from the sidebar
 - Destructive actions in the audit log are highlighted for quick review
 - Cost center management with allocation modal and dedicated settings page
@@ -105,6 +110,13 @@ The Playwright configuration automatically starts the dev server.
 - Cost center analytics page summarising allocations by value and quantity with date range filters and graceful error handling (tested for RPC errors)
 - Analytics tables can be exported to Excel for further reporting
 - Supplier statistics page summarises total purchases and invoice counts
+
+- Audit log viewer with date and text filters plus Excel export, accessible from the sidebar
+- Cost center management with allocation modal and dedicated settings page
+- Cost centers can be imported or exported via Excel in the settings page (the importer falls back to the first sheet if no "CostCenters" sheet is present)
+- Cost center analytics page summarising allocations by value and quantity with graceful error handling (tested for RPC errors)
+- Analytics tables can be exported to Excel for further reporting
+
 - Loss management page to record wastage, breakage and donations with cost center tracking
 - Monthly cost center pivot with columns per month for trend analysis
 - Dashboard chart showing monthly purchase price trends per product
@@ -112,11 +124,17 @@ The Playwright configuration automatically starts the dev server.
 - Invoice form supports OCR scanning of uploaded documents
 - Automatic audit triggers log cost center changes and allocations
 - Cost center allocation modal offers suggestions based on historical data
+
 - Dedicated page lists unallocated movements for quick cost center allocation (via `/mouvements/ventilation`)
 - Command `npm run allocate:history` applies those suggestions to past movements
 - Global search bar in the navbar to quickly find products or suppliers
 - Built-in dark mode toggle for better accessibility
 - Interface available in French or English with a language toggle in the navbar
+
+- Command `npm run allocate:history` applies those suggestions to past movements
+- Global search bar in the navbar to quickly find products or suppliers
+- Built-in dark mode toggle for better accessibility
+
 - Optional two-factor authentication (TOTP) for user accounts, verified via QR code before activation
 - Multi-site support with per-site cost centers and data isolation
 - Installable PWA with offline support
@@ -152,9 +170,10 @@ Create JSON backups of core tables using `node scripts/backup_db.js`. The script
 exports products, suppliers, invoices and stock movements into a dated file such
 as `backup_20250101.json`.
 
-Upload any generated report to an SFTP server with
+
 `node scripts/upload_sftp.js <file>` which uses environment variables
 `SFTP_HOST`, `SFTP_USER`, `SFTP_PASS` and optional `SFTP_DIR`.
+
 
 
 

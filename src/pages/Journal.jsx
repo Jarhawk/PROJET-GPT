@@ -4,8 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Toaster } from "react-hot-toast";
 
 export default function Journal() {
+
   const { logs, fetchLogs, exportLogsToExcel, exportLogsToPdf } = useLogs();
   const isCritical = action => /delete|drop|remove/i.test(action);
+
+  const { logs, fetchLogs, exportLogsToExcel } = useLogs();
+
   const [search, setSearch] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -45,9 +49,12 @@ export default function Journal() {
         <Button variant="outline" type="button" onClick={exportLogsToExcel}>
           Export Excel
         </Button>
+
         <Button variant="outline" type="button" onClick={exportLogsToPdf}>
           Export PDF
         </Button>
+
+
       </form>
       <table className="min-w-full bg-white rounded-xl shadow-md text-xs">
         <thead>
@@ -59,7 +66,11 @@ export default function Journal() {
         </thead>
         <tbody>
           {logs.map(l => (
+
             <tr key={l.id} className={isCritical(l.action) ? 'bg-red-50' : ''}>
+
+            <tr key={l.id}>
+
               <td className="px-2 py-1">
                 {new Date(l.created_at).toLocaleString()}
               </td>

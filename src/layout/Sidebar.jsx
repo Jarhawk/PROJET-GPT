@@ -20,7 +20,10 @@ const MENUS = [
     children: [
       { label: "Produits", to: "/produits" },
       { label: "Mouvements", to: "/mouvements" },
+
       { label: "À ventiler", to: "/mouvements/ventilation" },
+
+
       { label: "Pertes", to: "/pertes" },
       { label: "Stock synthèse", to: "/stock" },
     ],
@@ -74,7 +77,10 @@ const MENUS = [
     children: [
       { label: "Cost centers", to: "/stats/cost-centers" },
       { label: "CC mensuels", to: "/stats/cost-centers-monthly" },
+
       { label: "Fournisseurs", to: "/stats/fournisseurs" },
+
+
     ],
   },
   {

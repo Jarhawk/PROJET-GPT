@@ -10,10 +10,14 @@ export function useCostCenterStats() {
       debut_param: debut,
       fin_param: fin,
     });
+
     if (error) {
       console.error("Failed to fetch cost center stats", error);
       return [];
     }
+
+    if (error) return [];
+
     return data || [];
   }
 

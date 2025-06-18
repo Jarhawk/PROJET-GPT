@@ -6,7 +6,7 @@ import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
 import { useInvoiceOcr } from "@/hooks/useInvoiceOcr";
 
 export default function FactureForm({ facture, suppliers = [], onClose }) {
-  const { addInvoice, editInvoice } = useInvoices();
+  const { addInvoice, updateInvoice } = useInvoices();
   const [date, setDate] = useState(facture?.date || "");
   const [fournisseur_id, setFournisseurId] = useState(facture?.fournisseur_id || "");
   const [montant, setMontant] = useState(facture?.montant || 0);
@@ -44,7 +44,7 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
     };
     try {
       if (facture?.id) {
-        await editInvoice(facture.id, invoice);
+        await updateInvoice(facture.id, invoice);
         toast.success("Facture modifiée !");
       } else {
         await addInvoice(invoice);

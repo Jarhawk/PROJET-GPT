@@ -25,7 +25,7 @@ export function useSuppliers() {
       if (!mama_id) return;
       setLoading(true);
       let query = supabase
-        .from("suppliers")
+        .from("fournisseurs")
         .select("*", { count: "exact" })
         .eq("mama_id", mama_id);
 
@@ -61,7 +61,7 @@ export function useSuppliers() {
       if (!mama_id || !id) return;
       setLoading(true);
       const { data, error } = await supabase
-        .from("suppliers")
+        .from("fournisseurs")
         .select("*")
         .eq("id", id)
         .eq("mama_id", mama_id)
@@ -84,7 +84,7 @@ export function useSuppliers() {
       if (!mama_id) return { error: "Aucun mama_id" };
       setLoading(true);
       const { data, error } = await supabase
-        .from("suppliers")
+        .from("fournisseurs")
         .insert([{ ...supplierData, mama_id }])
         .select()
         .single();
@@ -101,7 +101,7 @@ export function useSuppliers() {
       if (!mama_id || !id) return { error: "Aucun mama_id" };
       setLoading(true);
       const { data, error } = await supabase
-        .from("suppliers")
+        .from("fournisseurs")
         .update(supplierData)
         .eq("id", id)
         .eq("mama_id", mama_id)
@@ -128,7 +128,7 @@ export function useSuppliers() {
       if (!mama_id || !id) return { error: "Aucun mama_id" };
       setLoading(true);
       const { error } = await supabase
-        .from("suppliers")
+        .from("fournisseurs")
         .delete()
         .eq("id", id)
         .eq("mama_id", mama_id);

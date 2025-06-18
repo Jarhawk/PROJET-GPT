@@ -26,6 +26,20 @@ beforeEach(async () => {
 
 test('backupDb fetches tables and writes file', async () => {
   await backupDb('out.json');
-  expect(fromMock).toHaveBeenCalledWith('produits');
+  const tables = [
+    'products',
+    'fournisseurs',
+    'factures',
+    'facture_lignes',
+    'inventaires',
+    'inventaire_lignes',
+    'supplier_products',
+    'taches',
+    'tache_instances',
+    'mouvements_stock',
+  ];
+  for (const table of tables) {
+    expect(fromMock).toHaveBeenCalledWith(table);
+  }
   expect(writeFileSync).toHaveBeenCalledWith('out.json', expect.any(String));
 });

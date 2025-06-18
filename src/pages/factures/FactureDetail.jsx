@@ -1,17 +1,28 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { Button } from "@/components/ui/button";
 import { useFactureProduits } from "@/hooks/useFactureProduits";
+import { useInvoices } from "@/hooks/useInvoices";
 
-export default function FactureDetail({ facture, onClose }) {
+export default function FactureDetail({ facture: factureProp, onClose }) {
+  const { id } = useParams();
+  const { fetchInvoiceById } = useInvoices();
   const { produitsFacture, fetchProduitsByFacture } = useFactureProduits();
+  const [facture, setFacture] = useState(factureProp);
 
   useEffect(() => {
-    if (facture?.id) fetchProduitsByFacture(facture.id);
-  }, [facture?.id]);
+    const fid = factureProp?.id || id;
+    if (fid) {
+      if (!factureProp) fetchInvoiceById(fid).then(setFacture);
+      fetchProduitsByFacture(fid);
+    }
+  }, [factureProp, id]);
+
+  if (!facture) return <div className="p-8">Chargement...</div>;
 
   // Export Excel d'une seule facture
   const exportExcel = () => {
@@ -25,7 +36,7 @@ export default function FactureDetail({ facture, onClose }) {
   const exportPDF = () => {
     const doc = new jsPDF();
     doc.text(`Facture #${facture.id}`, 10, 12);
-    doc.text(`Fournisseur: ${facture.fournisseur_nom}`, 10, 20);
+    doc.text(`Fournisseur: ${facture.fournisseur?.nom}`, 10, 20);
     doc.text(`Date: ${facture.date}`, 10, 28);
     doc.autoTable({
       startY: 36,
@@ -47,7 +58,7 @@ export default function FactureDetail({ facture, onClose }) {
         <Button variant="outline" className="absolute top-2 right-2" onClick={onClose}>Fermer</Button>
         <h2 className="font-bold text-xl mb-4">Détail de la facture #{facture.id}</h2>
         <div><b>Date :</b> {facture.date}</div>
-        <div><b>Fournisseur :</b> {facture.fournisseur_nom}</div>
+        <div><b>Fournisseur :</b> {facture.fournisseur?.nom}</div>
         <div><b>Montant :</b> {facture.montant?.toFixed(2)} €</div>
         <div><b>Statut :</b> {facture.statut}</div>
         <div>

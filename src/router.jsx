@@ -50,9 +50,19 @@ const Parametrage = lazy(() => import("@/pages/parametrage/Parametrage.jsx"));
 const Journal = lazy(() => import("@/pages/Journal.jsx"));
 const StatsCostCenters = lazy(() => import("@/pages/stats/StatsCostCenters.jsx"));
 const StatsCostCentersPivot = lazy(() => import("@/pages/stats/StatsCostCentersPivot.jsx"));
+const StatsStock = lazy(() => import("@/pages/stats/StatsStock.jsx"));
+
+// Taches
+const Taches = lazy(() => import("@/pages/taches/Taches.jsx"));
+const TacheNew = lazy(() => import("@/pages/taches/TacheNew.jsx"));
+const TacheDetail = lazy(() => import("@/pages/taches/TacheDetail.jsx"));
 
 // Pages Auth et UI
 const Login = lazy(() => import("@/pages/auth/Login.jsx"));
+const Logout = lazy(() => import("@/pages/auth/Logout.jsx"));
+const ResetPassword = lazy(() => import("@/pages/auth/ResetPassword.jsx"));
+const UpdatePassword = lazy(() => import("@/pages/auth/UpdatePassword.jsx"));
+const AuthDebug = lazy(() => import("@/pages/debug/AuthDebug.jsx"));
 const Unauthorized = lazy(() => import("@/pages/auth/Unauthorized.jsx"));
 const NotFound = lazy(() => import("@/pages/NotFound.jsx"));
 
@@ -82,8 +92,9 @@ export default function RouterConfig() {
     <Routes>
       <Route element={<LayoutWithBreadcrumb />}>
         {/* Dashboard */}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route
-          path="/"
+          path="/dashboard"
           element={
             <ProtectedRoute accessKey="dashboard">
               <Dashboard />
@@ -277,6 +288,32 @@ export default function RouterConfig() {
           }
         />
 
+        {/* Taches */}
+        <Route
+          path="/taches"
+          element={
+            <ProtectedRoute accessKey="taches">
+              <Taches />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/taches/nouveau"
+          element={
+            <ProtectedRoute accessKey="taches">
+              <TacheNew />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/taches/:id"
+          element={
+            <ProtectedRoute accessKey="taches">
+              <TacheDetail />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Utilisateurs */}
         <Route
           path="/utilisateurs"
@@ -348,9 +385,21 @@ export default function RouterConfig() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/stats/stocks"
+          element={
+            <ProtectedRoute accessKey="dashboard">
+              <StatsStock />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Auth, erreurs */}
         <Route path="/login" element={<Login />} />
+        <Route path="/logout" element={<Logout />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/update-password" element={<UpdatePassword />} />
+        <Route path="/debug/auth" element={<AuthDebug />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="*" element={<NotFound />} />
       </Route>

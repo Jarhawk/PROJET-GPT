@@ -21,6 +21,8 @@ export default function Dashboard() {
     evolutionFoodCost,
     margeBrute,
     alertesStockBas,
+    loading,
+    error,
     fetchDashboard,
     exportExcelDashboard,
   } = useDashboard();
@@ -40,6 +42,8 @@ export default function Dashboard() {
   }, [trendProduct, fetchTrends]);
 
   useEffect(() => { fetchDashboard(caFnb); }, [caFnb]);
+  if (loading) return <div className="p-6">Chargement...</div>;
+  if (error) return <div className="p-6 text-red-600">{error}</div>;
 
   return (
     <div className="p-6 container mx-auto">
@@ -152,26 +156,30 @@ export default function Dashboard() {
       {/* Top produits consommés */}
       <div className="bg-white rounded-xl shadow-md p-4 mb-8">
         <h2 className="font-semibold mb-2">Top produits consommés</h2>
-        <ResponsiveContainer width="100%" height={280}>
-          <PieChart>
-            <Pie
-              data={topProducts}
-              dataKey="total"
-              nameKey="nom"
-              cx="50%"
-              cy="50%"
-              outerRadius={100}
-              fill="#bfa14d"
-              label
-            >
-              {topProducts.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={["#bfa14d", "#0f1c2e", "#d7263d", "#f46036", "#2e294e"][index % 5]} />
-              ))}
-            </Pie>
-            <Legend />
-            <Tooltip />
-          </PieChart>
-        </ResponsiveContainer>
+        {topProducts.length === 0 ? (
+          <p className="text-center text-sm text-gray-500 py-8">Aucune donnée</p>
+        ) : (
+          <ResponsiveContainer width="100%" height={280}>
+            <PieChart>
+              <Pie
+                data={topProducts}
+                dataKey="total"
+                nameKey="nom"
+                cx="50%"
+                cy="50%"
+                outerRadius={100}
+                fill="#bfa14d"
+                label
+              >
+                {topProducts.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={["#bfa14d", "#0f1c2e", "#d7263d", "#f46036", "#2e294e"][index % 5]} />
+                ))}
+              </Pie>
+              <Legend />
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        )}
       </div>
 
       {/* Tendance prix d'achat */}

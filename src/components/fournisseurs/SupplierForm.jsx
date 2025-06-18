@@ -1,14 +1,15 @@
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { useFournisseurs } from "@/hooks/useFournisseurs";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 import { motion as Motion } from "framer-motion";
 
 export default function SupplierForm({ supplier, onClose, glass }) {
+  const { addFournisseur, updateFournisseur } = useFournisseurs();
   const [form, setForm] = useState({
     nom: supplier?.nom || "",
     ville: supplier?.ville || "",
-    telephone: supplier?.telephone || "",
+    tel: supplier?.tel || "",
     email: supplier?.email || "",
     actif: supplier?.actif ?? true,
   });
@@ -26,19 +27,14 @@ export default function SupplierForm({ supplier, onClose, glass }) {
       setLoading(false);
       return;
     }
-    let error = null;
+    let res;
     if (supplier) {
-      ({ error } = await supabase
-        .from("suppliers")
-        .update(form)
-        .eq("id", supplier.id));
+      res = await updateFournisseur(supplier.id, form);
     } else {
-      ({ error } = await supabase
-        .from("suppliers")
-        .insert([{ ...form }]));
+      res = await addFournisseur(form);
     }
     setLoading(false);
-    if (error) toast.error(error.message);
+    if (res?.error) toast.error(res.error);
     else {
       toast.success("Fournisseur sauvegardé");
       onClose?.();
@@ -69,7 +65,7 @@ export default function SupplierForm({ supplier, onClose, glass }) {
       </div>
       <div>
         <label>Téléphone</label>
-        <input className="input input-bordered w-full" name="telephone" value={form.telephone} onChange={handleChange} />
+        <input className="input input-bordered w-full" name="tel" value={form.tel} onChange={handleChange} />
       </div>
       <div>
         <label className="flex items-center gap-2">

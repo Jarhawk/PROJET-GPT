@@ -76,7 +76,8 @@ Running `npm run test:e2e` automatically skips the tests when browsers are missi
 The Playwright configuration automatically starts the dev server.
 
 ## Features
-- Dashboard overview with KPI widgets, stock alerts and trend charts
+- Dashboard overview at `/dashboard` (root `/` redirects here) with KPI widgets,
+  stock alerts and trend charts
 - Supplier price comparison with average and latest purchase metrics
 - Comparison page available at `/fournisseurs/comparatif` and linked from the sidebar
 - Upload and delete files via Supabase Storage using `useStorage`, with automatic cleanup of replaced uploads
@@ -86,32 +87,55 @@ The Playwright configuration automatically starts the dev server.
 - Forms display links to preview uploaded documents immediately
 - Product management supports codes, allergens and photo upload
 - Products track a minimum stock level for dashboard alerts
-- Product list features pagination, sortable columns, filters, quick
-  duplication of existing entries and Excel import/export (the importer reads
-  the first sheet if no "Produits" sheet is found)
+- Product list features pagination, sortable columns, filters, quick duplication of existing entries and Excel import/export (the importer reads the first sheet if no "Produits" sheet is found)
+- Manage products from `/produits` with creation and detail pages at
+  `/produits/nouveau` and `/produits/:id`
 - Each product records supplier prices and automatically updates its PMP
 - Stock and movement history available from the product detail modal
 - Supplier list supports Excel/PDF export and highlights inactive suppliers
 - Alerts for suppliers with no invoices in the last 6 months
 - Stock detail charts show monthly product rotation
+- Stock movement management available at `/mouvements`
+- Indexes on `mouvements_stock.type`, `zone`, `sous_type` and `motif` speed up filtering
 - Audit log viewer with date and text filters plus Excel export, accessible from the sidebar
 - Cost center management with allocation modal and dedicated settings page
 - Cost centers can be imported or exported via Excel in the settings page (the importer falls back to the first sheet if no "CostCenters" sheet is present)
 - Cost center analytics page summarising allocations by value and quantity with graceful error handling (tested for RPC errors)
+- Cost center analytics pages available at `/stats/cost-centers` and `/stats/cost-centers-monthly` with Excel export
 - Analytics tables can be exported to Excel for further reporting
 - Loss management page to record wastage, breakage and donations with cost center tracking
 - Monthly cost center pivot with columns per month for trend analysis
 - Dashboard chart showing monthly purchase price trends per product
 - Dashboard pie chart highlights top consumed products over the last month
+- Inventory management with start/end dates accessible from `/inventaire` and `/inventaire/nouveau`; indexes speed up lookups on `date` and `date_debut`
+- Stock statistics page `/stats/stocks` uses the `dashboard_stats` RPC and offers Excel export from the sidebar
+- Simple task manager available at `/taches` with creation and detail pages at `/taches/nouveau` and `/taches/:id`
+- Indexes on `taches.next_echeance` and `tache_instances.done_by` speed up task queries
 - Invoice form supports OCR scanning of uploaded documents
+- Manage invoices from `/factures` with pages `/factures/nouveau` and `/factures/:id`
+- Index on `factures.reference` speeds up invoice search queries
+- Index on `products.code` speeds up lookups by internal product code
+- Index on `fournisseurs.nom` speeds up supplier search queries
 - Automatic audit triggers log cost center changes and allocations
 - Cost center allocation modal offers suggestions based on historical data
+- SQL function `suggest_cost_centers` is granted to authenticated users for these recommendations
+- SQL function `stats_cost_centers` can be executed by any authenticated user for cost center analytics
+- Dashboard analytics functions `dashboard_stats`, `top_products` and `mouvements_without_alloc` are also executable by authenticated users
 - Command `npm run allocate:history` applies those suggestions to past movements
 - Global search bar in the navbar to quickly find products or suppliers
 - Built-in dark mode toggle for better accessibility
+- Password reset link on the login form points to `/reset-password` and the flow continues on `/update-password`
 - Optional two-factor authentication (TOTP) for user accounts, verified via QR code before activation
+- Functions `enable_two_fa` and `disable_two_fa` can be executed by any authenticated user for self-service 2FA
 - Multi-site support with per-site cost centers and data isolation
 - Installable PWA with offline support
+- Index on `users.email` speeds up login queries
+
+## Password reset
+
+1. Visit `/reset-password` to request a magic link by email.
+2. Follow the link you receive, which opens `/update-password` once authenticated.
+3. Choose your new password and submit the form to complete the reset.
 
 ## Continuous Integration
 
@@ -141,11 +165,9 @@ Automatically allocate historic stock movements to cost centers with
 creates missing allocations based on historical ratios.
 
 Create JSON backups of core tables using `node scripts/backup_db.js`. The script
-exports products, suppliers, invoices and stock movements into a dated file such
+exports products, suppliers, supplier product links, invoices, invoice lines,
+inventories, inventory lines, tasks and stock movements into a dated file such
 as `backup_20250101.json`.
-
-
-
 
 ## FAQ
 

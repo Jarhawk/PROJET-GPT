@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import logo from "@/assets/logo-mamastock.png";
 import { useAuth } from "@/context/AuthContext";
@@ -109,6 +109,14 @@ export default function Login() {
                 "Se connecter"
               )}
             </button>
+            <div className="text-right mt-2">
+              <Link
+                to="/reset-password"
+                className="text-xs text-mamastockGold hover:underline"
+              >
+                Mot de passe oublié ?
+              </Link>
+            </div>
           </form>
         </div>
       </div>

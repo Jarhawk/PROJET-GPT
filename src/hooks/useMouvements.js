@@ -11,7 +11,7 @@ export const useMouvements = () => {
     }
 
     const { data, error } = await supabase
-      .from("movements")
+      .from("mouvements_stock")
       .select("*")
       .eq("mama_id", mama_id)
       .order("date", { ascending: false });
@@ -36,7 +36,7 @@ export const useMouvements = () => {
       mama_id,
     };
 
-    const { error } = await supabase.from("movements").insert([payload]);
+    const { error } = await supabase.from("mouvements_stock").insert([payload]);
 
     if (error) {
       console.error("❌ Erreur création mouvement :", error);

@@ -23,12 +23,12 @@ export function useProducts() {
   } = {}) => {
     setLoading(true);
     setError(null);
-    let query = supabase
-      .from("products")
-      .select(
-        "*, fournisseurs:supplier_products(*, fournisseur: fournisseurs(nom)), main_supplier: suppliers(id, nom)",
-        { count: "exact" }
-      )
+      let query = supabase
+        .from("products")
+        .select(
+          "*, fournisseurs:supplier_products(*, fournisseur: fournisseurs(nom)), main_supplier: fournisseurs!products_main_supplier_id_fkey(id, nom)",
+          { count: "exact" }
+        )
       .eq("mama_id", mama_id)
       .order(sortBy, { ascending: order === "asc" })
       .order("nom", { ascending: true })
@@ -112,7 +112,9 @@ export function useProducts() {
     setError(null);
     const { data, error } = await supabase
       .from("supplier_products")
-      .select("*, fournisseur: fournisseurs(id, nom)")
+      .select(
+        "*, fournisseur: fournisseurs(id, nom), derniere_livraison:date_livraison"
+      )
       .eq("product_id", productId)
       .eq("mama_id", mama_id)
       .order("updated_at", { ascending: false });

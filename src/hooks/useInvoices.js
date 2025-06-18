@@ -35,7 +35,44 @@ export function useInvoices() {
     return data;
   }
 
-  // 2. Ajouter une facture
+  // 2. Factures par fournisseur
+  async function fetchInvoicesBySupplier(fournisseur_id) {
+    if (!fournisseur_id) return [];
+    setLoading(true);
+    setError(null);
+    const { data, error } = await supabase
+      .from("factures")
+      .select("id, date_facture:date, numero_facture:reference, montant_total:montant, statut")
+      .eq("mama_id", mama_id)
+      .eq("fournisseur_id", fournisseur_id)
+      .order("date", { ascending: false });
+    setLoading(false);
+    if (error) {
+      setError(error);
+      return [];
+    }
+    return data || [];
+  }
+
+  // 3. Charger une facture par id
+  async function fetchInvoiceById(id) {
+    if (!id) return null;
+    setLoading(true);
+    setError(null);
+    const { data, error } = await supabase
+      .from("factures")
+      .select("*, fournisseur:fournisseurs(id, nom)")
+      .eq("id", id)
+      .eq("mama_id", mama_id)
+      .single();
+    setLoading(false);
+    if (error) {
+      setError(error);
+      return null;
+    }
+    return data;
+  }
+  // 4. Ajouter une facture
   async function addInvoice(invoice) {
     setLoading(true);
     setError(null);
@@ -47,7 +84,7 @@ export function useInvoices() {
     await fetchInvoices();
   }
 
-  // 3. Modifier une facture
+  // 5. Modifier une facture
   async function updateInvoice(id, updateFields) {
     setLoading(true);
     setError(null);
@@ -61,7 +98,7 @@ export function useInvoices() {
     await fetchInvoices();
   }
 
-  // 4. Supprimer une facture
+  // 6. Supprimer une facture
   async function deleteInvoice(id) {
     setLoading(true);
     setError(null);
@@ -75,7 +112,7 @@ export function useInvoices() {
     await fetchInvoices();
   }
 
-  // 5. Batch statut
+  // 7. Batch statut
   async function batchUpdateStatus(ids = [], statut) {
     setLoading(true);
     setError(null);
@@ -89,7 +126,7 @@ export function useInvoices() {
     await fetchInvoices();
   }
 
-  // 6. Export Excel
+  // 8. Export Excel
   function exportInvoicesToExcel() {
     const datas = (invoices || []).map(f => ({
       id: f.id,
@@ -106,7 +143,7 @@ export function useInvoices() {
     saveAs(new Blob([buf]), "factures_mamastock.xlsx");
   }
 
-  // 7. Import Excel
+  // 9. Import Excel
   async function importInvoicesFromExcel(file) {
     setLoading(true);
     setError(null);
@@ -128,6 +165,8 @@ export function useInvoices() {
     loading,
     error,
     fetchInvoices,
+    fetchInvoicesBySupplier,
+    fetchInvoiceById,
     addInvoice,
     updateInvoice,
     deleteInvoice,

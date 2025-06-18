@@ -10,7 +10,7 @@ const MENUS = [
   {
     label: "Dashboard",
     icon: "📊",
-    to: "/",
+    to: "/dashboard",
     accessKey: "dashboard",
   },
   {
@@ -49,6 +49,12 @@ const MENUS = [
     accessKey: "menus",
   },
   {
+    label: "Tâches",
+    icon: "🗓️",
+    to: "/taches",
+    accessKey: "taches",
+  },
+  {
     label: "Fournisseurs",
     icon: "🏢",
     to: "/fournisseurs",
@@ -73,6 +79,7 @@ const MENUS = [
     children: [
       { label: "Cost centers", to: "/stats/cost-centers" },
       { label: "CC mensuels", to: "/stats/cost-centers-monthly" },
+      { label: "Stocks produits", to: "/stats/stocks" },
     ],
   },
   {

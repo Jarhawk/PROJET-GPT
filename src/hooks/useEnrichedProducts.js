@@ -16,7 +16,7 @@ export function useEnrichedProducts() {
         .from("products")
         .select(`
           *,
-          suppliers:products_suppliers(*, supplier:suppliers(*))
+          suppliers:supplier_products(*, fournisseur: fournisseurs(*))
         `)
         .eq("mama_id", mama_id);
 

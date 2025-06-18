@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useCostCenterStats } from "@/hooks/useCostCenterStats";
 import { Toaster } from "react-hot-toast";
+import { Button } from "@/components/ui/button";
 import * as XLSX from "xlsx";
 
 export default function StatsCostCenters() {
@@ -28,9 +29,9 @@ export default function StatsCostCenters() {
     <div className="p-8 container mx-auto">
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold mb-4">Ventilation par Cost Center</h1>
-      <button onClick={exportExcel} className="btn btn-outline mb-2">
+      <Button variant="outline" className="mb-2" onClick={exportExcel}>
         Export Excel
-      </button>
+      </Button>
       <table className="min-w-full text-xs bg-white rounded-xl shadow-md">
         <thead>
           <tr>
@@ -40,13 +41,21 @@ export default function StatsCostCenters() {
           </tr>
         </thead>
         <tbody>
-          {stats.map(s => (
-            <tr key={s.cost_center_id}>
-              <td className="px-2 py-1">{s.nom}</td>
-              <td className="px-2 py-1">{Number(s.quantite).toLocaleString()}</td>
-              <td className="px-2 py-1">{Number(s.valeur).toLocaleString()}</td>
+          {stats.length === 0 ? (
+            <tr>
+              <td colSpan="3" className="p-2 text-center text-gray-500">
+                Aucune donnée
+              </td>
             </tr>
-          ))}
+          ) : (
+            stats.map((s) => (
+              <tr key={s.cost_center_id}>
+                <td className="px-2 py-1">{s.nom}</td>
+                <td className="px-2 py-1">{Number(s.quantite).toLocaleString()}</td>
+                <td className="px-2 py-1">{Number(s.valeur).toLocaleString()}</td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>

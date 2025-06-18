@@ -28,7 +28,7 @@ export default function Mouvements() {
   const [editRow, setEditRow] = useState(null);
   const [showCreate, setShowCreate] = useState(false);
   const [createMv, setCreateMv] = useState({
-    produit_id: "",
+    product_id: "",
     type: tab,
     sous_type: "",
     quantite: 0,
@@ -61,30 +61,38 @@ export default function Mouvements() {
   useEffect(() => {
     if (!claims?.mama_id || !periode.debut || !periode.fin) return;
     supabase
-      .from("mouvements")
+      .from("mouvements_stock")
       .select("*")
       .eq("mama_id", claims.mama_id)
-      .gte("date_mouvement", periode.debut)
-      .lte("date_mouvement", periode.fin)
-      .order("date_mouvement", { ascending: false })
+      .gte("date", periode.debut)
+      .lte("date", periode.fin)
+      .order("date", { ascending: false })
       .then(({ data }) => setMouvements(data || []));
   }, [claims?.mama_id, periode]);
 
   // Charger stock initial pour la période
   useEffect(() => {
-    if (!claims?.mama_id || !periode.debut) return setStockInit({});
-    supabase
-      .from("inventaires")
-      .select("produit_id, quantite")
-      .eq("mama_id", claims.mama_id)
-      .eq("date_inventaire", periode.debut)
-      .then(({ data }) => {
+    async function loadStockInit() {
+      if (!claims?.mama_id || !periode.debut) {
+        setStockInit({});
+        return;
+      }
+      const { data, error } = await supabase
+        .from("inventaire_lignes")
+        .select("product_id, quantite, inventaires!inner(date)")
+        .eq("inventaires.date", periode.debut)
+        .eq("inventaire_lignes.mama_id", claims.mama_id);
+      if (!error) {
         const stock = {};
-        data?.forEach(l => {
-          stock[l.produit_id] = Number(l.quantite) || 0;
+        (data || []).forEach(l => {
+          stock[l.product_id] = Number(l.quantite) || 0;
         });
         setStockInit(stock);
-      });
+      } else {
+        setStockInit({});
+      }
+    }
+    loadStockInit();
   }, [claims?.mama_id, periode.debut]);
 
   // Filtrage dynamique
@@ -92,7 +100,7 @@ export default function Mouvements() {
     m =>
       m.type === tab &&
       (
-        produits.find(p => p.id === m.produit_id)?.nom?.toLowerCase().includes(search.toLowerCase()) ||
+        produits.find(p => p.id === m.product_id)?.nom?.toLowerCase().includes(search.toLowerCase()) ||
         m.sous_type?.toLowerCase().includes(search.toLowerCase()) ||
         m.zone?.toLowerCase().includes(search.toLowerCase()) ||
         m.motif?.toLowerCase().includes(search.toLowerCase())
@@ -105,8 +113,8 @@ export default function Mouvements() {
     mouvementsAgg[p.id] = { entree: 0, sortie: 0 };
   });
   mouvements.forEach(m => {
-    if (m.type === "ENTREE") mouvementsAgg[m.produit_id].entree += Number(m.quantite);
-    if (m.type === "SORTIE") mouvementsAgg[m.produit_id].sortie += Number(m.quantite);
+    if (m.type === "ENTREE") mouvementsAgg[m.product_id].entree += Number(m.quantite);
+    if (m.type === "SORTIE") mouvementsAgg[m.product_id].sortie += Number(m.quantite);
   });
 
   const produitsAffiches = produits
@@ -129,7 +137,7 @@ export default function Mouvements() {
 
   const handleSaveEdit = async () => {
     const { error } = await supabase
-      .from("mouvements")
+      .from("mouvements_stock")
       .update({
         quantite: Number(editRow.quantite),
         motif: editRow.motif,
@@ -149,22 +157,22 @@ export default function Mouvements() {
   // Création mouvement
   const handleCreateMv = async e => {
     e.preventDefault();
-    if (!createMv.produit_id || !createMv.quantite || !createMv.type) {
+    if (!createMv.product_id || !createMv.quantite || !createMv.type) {
       toast.error("Produit, type et quantité requis !");
       return;
     }
-    const { error } = await supabase.from("mouvements").insert([
+    const { error } = await supabase.from("mouvements_stock").insert([
       {
         ...createMv,
         mama_id: claims.mama_id,
-        date_mouvement: new Date().toISOString().slice(0, 10),
+        date: new Date().toISOString().slice(0, 10),
         created_by: claims.user_id,
       },
     ]);
     if (!error) {
       setShowCreate(false);
       setCreateMv({
-        produit_id: "",
+        product_id: "",
         type: tab,
         sous_type: "",
         quantite: 0,
@@ -179,14 +187,14 @@ export default function Mouvements() {
   };
 
   // Timeline produit
-  const handleShowTimeline = async produit_id => {
+  const handleShowTimeline = async product_id => {
     setLoadingTimeline(true);
     const { data, error } = await supabase
-      .from("mouvements")
-      .select("date_mouvement, type, sous_type, quantite, zone, motif")
+      .from("mouvements_stock")
+      .select("date, type, sous_type, quantite, zone, motif")
       .eq("mama_id", claims.mama_id)
-      .eq("produit_id", produit_id)
-      .order("date_mouvement", { ascending: false });
+      .eq("product_id", product_id)
+      .order("date", { ascending: false });
     if (!error) setTimeline(data || []);
     else {
       setTimeline([]);
@@ -199,8 +207,8 @@ export default function Mouvements() {
   const handleExportExcel = () => {
     const ws = XLSX.utils.json_to_sheet(
       filtered.map(m => ({
-        Produit: produits.find(p => p.id === m.produit_id)?.nom || "-",
-        Date: m.date_mouvement,
+        Produit: produits.find(p => p.id === m.product_id)?.nom || "-",
+        Date: m.date,
         Type: m.type,
         SousType: m.sous_type,
         Quantité: m.quantite,
@@ -220,8 +228,8 @@ export default function Mouvements() {
       startY: 20,
       head: [["Produit", "Date", "Type", "Sous-type", "Quantité", "Zone", "Motif"]],
       body: filtered.map(m => [
-        produits.find(p => p.id === m.produit_id)?.nom || "-",
-        m.date_mouvement,
+        produits.find(p => p.id === m.product_id)?.nom || "-",
+        m.date,
         m.type,
         m.sous_type,
         m.quantite,
@@ -244,9 +252,9 @@ export default function Mouvements() {
     }
   }
   const dataDays = days.map(date => {
-    const entrees = mouvements.filter(m => m.date_mouvement === date && m.type === "ENTREE")
+    const entrees = mouvements.filter(m => m.date === date && m.type === "ENTREE")
       .reduce((sum, m) => sum + Number(m.quantite), 0);
-    const sorties = mouvements.filter(m => m.date_mouvement === date && m.type === "SORTIE")
+    const sorties = mouvements.filter(m => m.date === date && m.type === "SORTIE")
       .reduce((sum, m) => sum + Number(m.quantite), 0);
     return { date, Entrees: entrees, Sorties: sorties };
   });
@@ -254,7 +262,7 @@ export default function Mouvements() {
   // Data graph top produits
   const statsProduit = {};
   filtered.forEach(m => {
-    statsProduit[m.produit_id] = (statsProduit[m.produit_id] || 0) + Number(m.quantite || 0);
+    statsProduit[m.product_id] = (statsProduit[m.product_id] || 0) + Number(m.quantite || 0);
   });
   const topEntrees = Object.entries(statsProduit)
     .map(([id, qte]) => ({
@@ -394,8 +402,8 @@ export default function Mouvements() {
           <tbody>
             {filtered.map(m => (
               <tr key={m.id}>
-                <td className="px-2 py-1">{m.date_mouvement}</td>
-                <td className="px-2 py-1">{produits.find(p => p.id === m.produit_id)?.nom || "-"}</td>
+                <td className="px-2 py-1">{m.date}</td>
+                <td className="px-2 py-1">{produits.find(p => p.id === m.product_id)?.nom || "-"}</td>
                 <td className="px-2 py-1">{m.type}</td>
                 <td className="px-2 py-1">{m.sous_type}</td>
                 <td className="px-2 py-1">{m.quantite}</td>
@@ -407,12 +415,12 @@ export default function Mouvements() {
                   </Button>
                 </td>
                 <td>
-                  <Dialog>
+                  <Dialog onOpenChange={v => !v && setTimeline([])}>
                     <DialogTrigger asChild>
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => handleShowTimeline(m.produit_id)}
+                        onClick={() => handleShowTimeline(m.product_id)}
                       >
                         Timeline produit
                       </Button>
@@ -437,7 +445,7 @@ export default function Mouvements() {
                             exit="exit"
                           >
                             <h3 className="font-bold mb-2">
-                              Timeline mouvements : {produits.find(p => p.id === timeline[0]?.produit_id)?.nom}
+                              Timeline mouvements : {produits.find(p => p.id === timeline[0]?.product_id)?.nom}
                             </h3>
                             {loadingTimeline ? (
                               <div>Chargement…</div>
@@ -456,7 +464,7 @@ export default function Mouvements() {
                                 <tbody>
                                   {timeline.map((l, i) => (
                                     <tr key={i}>
-                                      <td>{l.date_mouvement}</td>
+                                      <td>{l.date}</td>
                                       <td>{l.type}</td>
                                       <td>{l.sous_type}</td>
                                       <td>{l.quantite}</td>
@@ -474,7 +482,7 @@ export default function Mouvements() {
                 </Dialog>
               </td>
               <td>
-                <Button size="sm" variant="ghost" onClick={() => setCcMouvement({ id: m.id, product_id: m.produit_id })}>
+                <Button size="sm" variant="ghost" onClick={() => setCcMouvement({ id: m.id, product_id: m.product_id })}>
                   Ventilation CC
                 </Button>
               </td>
@@ -511,9 +519,9 @@ export default function Mouvements() {
                     <label>Produit</label>
                     <select
                       className="input input-bordered w-full"
-                      value={createMv.produit_id}
+                      value={createMv.product_id}
                       onChange={e =>
-                        setCreateMv(r => ({ ...r, produit_id: e.target.value }))
+                        setCreateMv(r => ({ ...r, product_id: e.target.value }))
                       }
                     >
                       <option value="">Sélectionne…</option>
@@ -619,7 +627,7 @@ export default function Mouvements() {
                     className="space-y-3"
                   >
                     <div>
-                      <label>Produit : {produits.find(p => p.id === editRow.produit_id)?.nom}</label>
+                      <label>Produit : {produits.find(p => p.id === editRow.product_id)?.nom}</label>
                     </div>
                     <div>
                       <label>Type</label>

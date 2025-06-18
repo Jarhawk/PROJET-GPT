@@ -14,6 +14,7 @@ export default function InventaireForm({ inventaire, onClose }) {
     editInventaire,
     clotureInventaire,
     fetchMouvementsForPeriod,
+    fetchLastClosedInventaire,
   } = useInventaires();
   const { products, fetchProducts } = useProducts();
 
@@ -30,14 +31,15 @@ export default function InventaireForm({ inventaire, onClose }) {
   useEffect(() => {
     async function init() {
       await fetchProducts();
-      // Recherche l’inventaire précédent (ou fixe date de début)
-      // Ici, suppose un hook ou une requête qui te donne la date de fin du dernier inventaire clôturé avant celui-ci
       let date_debut = dateDebut;
       if (!date_debut && inventaire?.date) {
-        // Charge le dernier inventaire clôturé avant celui-ci pour date_debut
-        // (Tu peux optimiser cette partie selon ta base)
+        const prev = await fetchLastClosedInventaire(inventaire.date);
+        if (prev?.date) date_debut = prev.date;
       }
-      if (!date_debut) date_debut = "2024-06-01"; // fallback
+      if (!date_debut) {
+        const prev = await fetchLastClosedInventaire();
+        date_debut = prev?.date || "2024-06-01"; // fallback
+      }
       setDateDebut(date_debut);
       if (date) {
         const mouvements = await fetchMouvementsForPeriod(date_debut, date);
@@ -45,7 +47,7 @@ export default function InventaireForm({ inventaire, onClose }) {
       }
     }
     init();
-  }, [date]);
+  }, [date, inventaire?.date]);
 
   // Ajout/suppression de lignes
   const addLigne = () => setLignes([...lignes, { product_id: "", quantite: 0 }]);

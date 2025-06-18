@@ -1,18 +1,11 @@
-// src/hooks/useSupplierProducts.js
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
-
-// Permet de récupérer tous les produits liés à un fournisseur (+ historique achats, PMP, etc.)
 export function useSupplierProducts() {
   const { mama_id } = useAuth();
   const [cache, setCache] = useState({});
 
-  // Tous les produits fournis par ce fournisseur (avec totaux achats/prix moyens)
   function useProductsBySupplier(fournisseur_id) {
-    // Peut être asynchrone si tu veux charger en temps réel
-    // Ou utiliser un state global pour garder cache
-    // Ici on te propose le pattern async + hook si besoin
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -23,7 +16,7 @@ export function useSupplierProducts() {
       const { data, error } = await supabase
         .from("supplier_products")
         .select(
-          "*, product:products(nom, famille, unite), achats:invoices(date_facture, montant_total)"
+          "*, product:products(nom, famille, unite), achats:factures(date_facture:date, numero_facture:reference, montant_total:montant)"
         )
         .eq("fournisseur_id", fournisseur_id)
         .eq("mama_id", mama_id);
@@ -41,7 +34,7 @@ export function useSupplierProducts() {
     const { data } = await supabase
       .from("supplier_products")
       .select(
-        "*, product:products(nom, famille, unite), achats:invoices(date_facture, montant_total)"
+        "*, product:products(nom, famille, unite), achats:factures(date_facture:date, numero_facture:reference, montant_total:montant)"
       )
       .eq("fournisseur_id", fournisseur_id)
       .eq("mama_id", mama_id);

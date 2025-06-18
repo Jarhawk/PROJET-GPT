@@ -163,7 +163,21 @@ export function useInventaires() {
     return data || [];
   }
 
-  // 9. Export Excel
+  // 9. Récupérer le dernier inventaire clôturé
+  async function fetchLastClosedInventaire(beforeDate = null) {
+    let query = supabase
+      .from("inventaires")
+      .select("*")
+      .eq("mama_id", mama_id)
+      .eq("cloture", true)
+      .order("date", { ascending: false })
+      .limit(1);
+    if (beforeDate) query = query.lt("date", beforeDate);
+    const { data } = await query.single();
+    return data;
+  }
+
+  // 10. Export Excel
   function exportInventairesToExcel() {
     const datas = (inventaires || []).map(i => ({
       id: i.id,
@@ -192,6 +206,7 @@ export function useInventaires() {
     resetInventaire,
     fetchMouvementsForPeriod,
     fetchMouvementsInventaire,
+    fetchLastClosedInventaire,
     exportInventairesToExcel,
   };
 }

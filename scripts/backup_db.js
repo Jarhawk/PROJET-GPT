@@ -10,7 +10,18 @@ export async function backupDb(output = null) {
   }
   const supabase = createClient(supabaseUrl, supabaseKey);
   const mama_id = process.env.MAMA_ID || null;
-  const tables = ['produits', 'fournisseurs', 'factures', 'mouvements_stock'];
+  const tables = [
+    'products',
+    'fournisseurs',
+    'factures',
+    'facture_lignes',
+    'inventaires',
+    'inventaire_lignes',
+    'supplier_products',
+    'taches',
+    'tache_instances',
+    'mouvements_stock'
+  ];
   const result = {};
   for (const table of tables) {
     let query = supabase.from(table).select('*');

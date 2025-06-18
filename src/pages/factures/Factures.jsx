@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useInvoices } from "@/hooks/useInvoices";
 import { useSuppliers } from "@/hooks/useSuppliers";
 import FactureForm from "./FactureForm.jsx";
-import FactureDetail from "./FactureDetail.jsx"; // On suppose qu’il existe ou à créer pour le détail !
+import FactureDetail from "./FactureDetail.jsx";
 import { Button } from "@/components/ui/button";
 import { Toaster, toast } from "react-hot-toast";
 import { saveAs } from "file-saver";
@@ -33,7 +33,7 @@ export default function Factures() {
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(invoices.map(f => ({
       ...f,
-      fournisseur_nom: suppliers.find(s => s.id === f.fournisseur_id)?.nom || f.fournisseur_nom
+      fournisseur_nom: suppliers.find(s => s.id === f.fournisseur_id)?.nom || f.fournisseur?.nom
     })));
     XLSX.utils.book_append_sheet(wb, ws, "Factures");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
@@ -42,7 +42,7 @@ export default function Factures() {
 
   // Filtres avancés
   const facturesFiltres = invoices.filter(f =>
-    (!search || (f.fournisseur_nom?.toLowerCase().includes(search.toLowerCase()) || f.id?.toString().includes(search)))
+    (!search || (f.fournisseur?.nom?.toLowerCase().includes(search.toLowerCase()) || f.id?.toString().includes(search)))
     && (!statutFilter || f.statut === statutFilter)
     && (!supplierFilter || f.fournisseur_id === supplierFilter)
   );
@@ -103,7 +103,7 @@ export default function Factures() {
           {facturesFiltres.map((facture) => (
             <tr key={facture.id}>
               <td className="border px-4 py-2">{facture.date}</td>
-              <td className="border px-4 py-2">{facture.fournisseur_nom}</td>
+              <td className="border px-4 py-2">{facture.fournisseur?.nom}</td>
               <td className="border px-4 py-2">{facture.montant?.toFixed(2)} €</td>
               <td className="border px-4 py-2">
                 <span className={STATUTS[facture.statut] || "badge"}>{facture.statut}</span>

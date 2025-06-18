@@ -47,6 +47,7 @@ export default function Navbar() {
             onChange={e => { setTerm(e.target.value); search(e.target.value); }}
             placeholder="Recherche..."
             className="input input-bordered text-black w-48"
+            aria-label="Recherche globale"
           />
           {results.length > 0 && (
             <div className="absolute z-10 bg-white text-black w-full shadow-lg mt-1 text-xs rounded">
@@ -62,6 +63,8 @@ export default function Navbar() {
           onClick={toggleDark}
           className="bg-mamastock-gold text-black px-3 py-1 rounded-md text-sm"
           title="Basculer mode sombre"
+          aria-label="Basculer le thème"
+          aria-pressed={dark}
         >
           {dark ? '☀️' : '🌙'}
         </button>

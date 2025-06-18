@@ -332,6 +332,83 @@ BEGIN
   END IF;
 END $$;
 
+-- ---------------------------------------
+-- Module Carte - additional fields
+-- ---------------------------------------
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='fiches_techniques' AND column_name='carte_actuelle'
+  ) THEN
+    ALTER TABLE fiches_techniques ADD COLUMN carte_actuelle boolean DEFAULT false;
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='fiches_techniques' AND column_name='type_carte'
+  ) THEN
+    ALTER TABLE fiches_techniques ADD COLUMN type_carte text;
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='fiches_techniques' AND column_name='sous_type_carte'
+  ) THEN
+    ALTER TABLE fiches_techniques ADD COLUMN sous_type_carte text;
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='fiches_techniques' AND column_name='prix_vente'
+  ) THEN
+    ALTER TABLE fiches_techniques ADD COLUMN prix_vente numeric;
+  END IF;
+END $$;
+
+create index if not exists idx_ft_carte on fiches_techniques(carte_actuelle, type_carte, sous_type_carte);
+create index if not exists idx_ft_prix on fiches_techniques(prix_vente);
+create index if not exists idx_ft_nom on fiches_techniques(nom);
+
+alter table fiches_techniques enable row level security;
+alter table fiches_techniques force row level security;
+create policy fiches_techniques_all on fiches_techniques
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+grant select, insert, update, delete on fiches_techniques to authenticated;
+
+-- Audit table for price changes
+create table if not exists fiche_prix_history (
+    id uuid primary key default uuid_generate_v4(),
+    fiche_id uuid references fiches_techniques(id) on delete cascade,
+    old_prix numeric,
+    new_prix numeric,
+    changed_by uuid references users(id),
+    mama_id uuid not null references mamas(id),
+    changed_at timestamptz default now()
+);
+create index if not exists idx_fiche_prix_history_fiche on fiche_prix_history(fiche_id);
+
+alter table fiche_prix_history enable row level security;
+alter table fiche_prix_history force row level security;
+create policy fiche_prix_history_all on fiche_prix_history
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+grant select, insert, update, delete on fiche_prix_history to authenticated;
+
+create or replace function log_fiche_prix_change()
+returns trigger language plpgsql as $$
+begin
+  if new.prix_vente is distinct from old.prix_vente or new.carte_actuelle is distinct from old.carte_actuelle then
+    insert into fiche_prix_history (fiche_id, old_prix, new_prix, changed_by, mama_id)
+    values (new.id, old.prix_vente, new.prix_vente, auth.uid(), new.mama_id);
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_fiche_prix_change on fiches_techniques;
+create trigger trg_fiche_prix_change
+after update on fiches_techniques
+for each row execute procedure log_fiche_prix_change();
+
 -- Indexes for optional movement columns
 create index if not exists idx_mouvements_stock_sous_type on mouvements_stock(sous_type);
 create index if not exists idx_mouvements_stock_zone on mouvements_stock(zone);

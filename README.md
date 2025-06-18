@@ -169,6 +169,15 @@ exports products, suppliers, supplier product links, invoices, invoice lines,
 inventories, inventory lines, tasks and stock movements into a dated file such
 as `backup_20250101.json`.
 
+## Gestion de la carte
+
+Les fiches techniques constituent la base de données de production. Un nouvel
+écran **Carte** liste uniquement les fiches actives à la vente (`carte_actuelle`)
+et permet la mise à jour rapide du prix de vente, du type (nourriture ou
+boisson) et du sous-type. Retirer une fiche de la carte ne la supprime pas : le
+champ `carte_actuelle` est simplement désactivé. Les politiques RLS s'assurent
+que seules les fiches rattachées à la `mama_id` de l'utilisateur sont visibles.
+
 ## FAQ
 
 **Dev server cannot connect to Supabase**

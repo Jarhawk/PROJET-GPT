@@ -27,6 +27,7 @@ const Fiches = lazy(() => import("@/pages/fiches/Fiches.jsx"));
 const FicheForm = lazy(() => import("@/pages/fiches/FicheForm.jsx"));
 const FicheDetail = lazy(() => import("@/pages/fiches/FicheDetail.jsx"));
 const Carte = lazy(() => import("@/pages/carte/Carte.jsx"));
+const MenuEngineering = lazy(() => import("@/pages/MenuEngineering.jsx"));
 
 // Inventaire
 const Inventaire = lazy(() => import("@/pages/inventaire/Inventaire.jsx"));
@@ -225,6 +226,16 @@ export default function RouterConfig() {
           element={
             <ProtectedRoute accessKey="fiches">
               <Carte />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Menu engineering */}
+        <Route
+          path="/menu-engineering"
+          element={
+            <ProtectedRoute accessKey="fiches">
+              <MenuEngineering />
             </ProtectedRoute>
           }
         />

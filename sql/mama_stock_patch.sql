@@ -557,3 +557,26 @@ BEGIN
     ALTER TABLE mouvements_stock ADD COLUMN motif text;
   END IF;
 END $$;
+
+-- Menu engineering sales table
+create table if not exists ventes_fiches_carte (
+  id uuid primary key default uuid_generate_v4(),
+  fiche_id uuid references fiches_techniques(id) on delete cascade,
+  periode date not null,
+  ventes integer not null,
+  mama_id uuid references mamas(id) not null,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  unique (fiche_id, periode, mama_id)
+);
+create index if not exists idx_vfc_fiche_periode_mama on ventes_fiches_carte(fiche_id, periode, mama_id);
+create index if not exists idx_vfc_periode on ventes_fiches_carte(periode);
+
+alter table ventes_fiches_carte enable row level security;
+alter table ventes_fiches_carte force row level security;
+create policy ventes_fiches_carte_all on ventes_fiches_carte
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+grant select, insert, update, delete on ventes_fiches_carte to authenticated;
+
+

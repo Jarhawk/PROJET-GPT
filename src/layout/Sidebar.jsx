@@ -31,6 +31,12 @@ const MENUS = [
     accessKey: "fiches",
   },
   {
+    label: "Carte",
+    icon: "🍽️",
+    to: "/carte",
+    accessKey: "fiches",
+  },
+  {
     label: "Inventaire",
     icon: "📋",
     to: "/inventaire",

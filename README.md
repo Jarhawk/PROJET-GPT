@@ -186,6 +186,15 @@ ventes par fiche sont saisies mensuellement et stockées dans la table
 la popularité et attribue un classement automatique (Star, Plow Horse,
 Puzzle ou Dog).
 
+## UI Guidelines
+
+This project provides a small design system to keep all screens visually
+consistent. See [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) for colour codes,
+typography details and component examples. When adding new pages, reuse the
+existing button and form classes to match the MamaStock branding. Tailwind
+utility classes such as `bg-mamastock-bg` and `text-mamastock-gold` should be
+used whenever possible to keep colours consistent.
+
 ## FAQ
 
 **Dev server cannot connect to Supabase**

@@ -203,3 +203,10 @@ Ensure the `.env` file contains valid Supabase credentials and that you have an 
 **Lint or tests fail due to missing packages**
 
 Run `npm install` to ensure dependencies like `vitest`, `@eslint/js` and `playwright` are available before running lint or test commands.
+
+## Module Promotions
+
+Un nouvel écran permet de gérer les promotions et opérations commerciales (route `/promotions`).
+Les promotions possèdent un nom, une période de validité et un indicateur d'activation.
+Le stockage est assuré via les tables `promotions` et `promotion_products` définies dans
+`sql/mama_stock_patch.sql`.

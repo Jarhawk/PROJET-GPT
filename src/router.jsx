@@ -43,6 +43,9 @@ const Pertes = lazy(() => import("@/pages/Pertes.jsx"));
 const Menus = lazy(() => import("@/pages/menus/Menus.jsx"));
 const MenuForm = lazy(() => import("@/pages/menus/MenuForm.jsx"));
 
+// Promotions
+const Promotions = lazy(() => import("@/pages/promotions/Promotions.jsx"));
+
 // Utilisateurs et Paramétrage
 const Utilisateurs = lazy(() => import("@/pages/Utilisateurs.jsx"));
 const Roles = lazy(() => import("@/pages/parametrage/Roles.jsx"));
@@ -306,6 +309,16 @@ export default function RouterConfig() {
           element={
             <ProtectedRoute accessKey="menus">
               <MenuForm />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Promotions */}
+        <Route
+          path="/promotions"
+          element={
+            <ProtectedRoute accessKey="promotions">
+              <Promotions />
             </ProtectedRoute>
           }
         />

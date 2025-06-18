@@ -580,3 +580,61 @@ create policy ventes_fiches_carte_all on ventes_fiches_carte
 grant select, insert, update, delete on ventes_fiches_carte to authenticated;
 
 
+-- Module Promotions / Operations commerciales
+
+create table if not exists promotions (
+    id uuid primary key default uuid_generate_v4(),
+    mama_id uuid not null references mamas(id) on delete cascade,
+    nom text not null,
+    description text,
+    date_debut date not null,
+    date_fin date,
+    actif boolean default true,
+    created_at timestamptz default now(),
+    unique (mama_id, nom, date_debut)
+);
+
+create table if not exists promotion_products (
+    id uuid primary key default uuid_generate_v4(),
+    promotion_id uuid references promotions(id) on delete cascade,
+    product_id uuid references products(id) on delete cascade,
+    discount numeric,
+    prix_promo numeric,
+    mama_id uuid not null references mamas(id),
+    created_at timestamptz default now(),
+    unique (promotion_id, product_id)
+);
+
+create index if not exists idx_promotions_mama on promotions(mama_id);
+create index if not exists idx_promotions_actif on promotions(actif);
+create index if not exists idx_promo_prod_mama on promotion_products(mama_id);
+create index if not exists idx_promo_prod_promotion on promotion_products(promotion_id);
+create index if not exists idx_promo_prod_product on promotion_products(product_id);
+
+alter table promotions enable row level security;
+alter table promotions force row level security;
+create policy promotions_all on promotions
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+grant select, insert, update, delete on promotions to authenticated;
+
+alter table promotion_products enable row level security;
+alter table promotion_products force row level security;
+create policy promotion_products_all on promotion_products
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+grant select, insert, update, delete on promotion_products to authenticated;
+
+create or replace function log_promotions_changes()
+returns trigger language plpgsql as $$
+begin
+  insert into user_logs(mama_id, user_id, action, details, done_by)
+  values(coalesce(new.mama_id, old.mama_id), auth.uid(), 'promotions ' || tg_op,
+         jsonb_build_object('id_new', new.id, 'id_old', old.id), auth.uid());
+  return new;
+end;
+$$;
+
+create trigger trg_log_promotions
+after insert or update or delete on promotions
+for each row execute function log_promotions_changes();

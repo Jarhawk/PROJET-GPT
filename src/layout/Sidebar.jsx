@@ -37,6 +37,12 @@ const MENUS = [
     accessKey: "fiches",
   },
   {
+    label: "Menu Engineering",
+    icon: "📊",
+    to: "/menu-engineering",
+    accessKey: "fiches",
+  },
+  {
     label: "Inventaire",
     icon: "📋",
     to: "/inventaire",

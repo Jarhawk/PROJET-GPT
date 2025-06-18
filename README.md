@@ -178,6 +178,14 @@ boisson) et du sous-type. Retirer une fiche de la carte ne la supprime pas : le
 champ `carte_actuelle` est simplement désactivé. Les politiques RLS s'assurent
 que seules les fiches rattachées à la `mama_id` de l'utilisateur sont visibles.
 
+## Menu Engineering
+
+La page **Menu Engineering** analyse la performance des plats à la carte. Les
+ventes par fiche sont saisies mensuellement et stockées dans la table
+`ventes_fiches_carte`. Pour chaque période, l'application calcule le food cost,
+la popularité et attribue un classement automatique (Star, Plow Horse,
+Puzzle ou Dog).
+
 ## FAQ
 
 **Dev server cannot connect to Supabase**

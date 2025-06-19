@@ -20,7 +20,11 @@ export default function Journal() {
     <div className="p-6 container mx-auto">
       <Toaster position="top-right" />
       <form onSubmit={handleSubmit} className="flex gap-2 mb-4">
+        <label htmlFor="log-search" className="sr-only">
+          Recherche action
+        </label>
         <input
+          id="log-search"
           className="input"
           placeholder="Recherche action"
           value={search}
@@ -46,6 +50,7 @@ export default function Journal() {
         </Button>
       </form>
       <table className="min-w-full bg-white rounded-xl shadow-md text-xs">
+        <caption className="sr-only">Journal des actions utilisateur</caption>
         <thead>
           <tr>
             <th className="px-2 py-1">Date</th>

@@ -154,7 +154,9 @@ export default function BarManager() {
       <h1 className="text-2xl font-bold text-blue-700 mb-4">Bar Manager — Analyses avancées</h1>
       {/* Période, recherche, export */}
       <div className="flex flex-wrap gap-2 mb-4 items-end">
+        <label htmlFor="periode" className="sr-only">Période</label>
         <select
+          id="periode"
           className="select select-bordered"
           value={periode}
           onChange={e => setPeriode(e.target.value)}
@@ -163,21 +165,27 @@ export default function BarManager() {
             <option key={p.value} value={p.value}>{p.label}</option>
           ))}
         </select>
+        <label htmlFor="debut" className="sr-only">Date début</label>
         <input
+          id="debut"
           type="date"
           className="input input-bordered"
           value={dates.debut}
           onChange={e => setDates(d => ({ ...d, debut: e.target.value }))}
           disabled={periode !== "custom"}
         />
+        <label htmlFor="fin" className="sr-only">Date fin</label>
         <input
+          id="fin"
           type="date"
           className="input input-bordered"
           value={dates.fin}
           onChange={e => setDates(d => ({ ...d, fin: e.target.value }))}
           disabled={periode !== "custom"}
         />
+        <label htmlFor="search-bar" className="sr-only">Recherche</label>
         <input
+          id="search-bar"
           className="input input-bordered w-64"
           placeholder="Recherche (nom/type/contenance)"
           value={search}
@@ -241,6 +249,7 @@ export default function BarManager() {
       {/* Tableau interactif */}
       <div className="bg-white shadow rounded-xl overflow-x-auto">
         <table className="min-w-full table-auto">
+          <caption className="sr-only">Détails des statistiques boissons</caption>
           <thead>
             <tr>
               <th className="px-2 py-1">Nom</th>

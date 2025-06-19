@@ -58,9 +58,11 @@ export default function PermissionsAdmin() {
       <Toaster />
       <h1 className="text-2xl font-bold text-mamastock-gold mb-4">Permissions globales (superadmin)</h1>
       <div className="flex items-end gap-4 mb-4">
-        <label>
-          <span className="text-gray-600">Filtrer par établissement :</span>
+        <label htmlFor="perms-mama-filter" className="text-gray-600">
+          Filtrer par établissement :
+        </label>
           <select
+            id="perms-mama-filter"
             className="input input-bordered ml-2"
             value={filterMama}
             onChange={e => setFilterMama(e.target.value)}
@@ -72,8 +74,7 @@ export default function PermissionsAdmin() {
               </option>
             ))}
           </select>
-        </label>
-      </div>
+        </div>
       <div className="bg-white shadow rounded-xl overflow-x-auto mb-6">
         {loading ? (
           <div className="text-center py-8 text-gray-500">
@@ -81,6 +82,7 @@ export default function PermissionsAdmin() {
           </div>
         ) : (
           <table className="min-w-full table-auto text-center">
+            <caption className="sr-only">Rôles globaux par établissement</caption>
             <thead>
               <tr>
                 <th className="px-2 py-1">Établissement</th>

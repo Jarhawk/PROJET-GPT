@@ -62,7 +62,9 @@ export default function Factures() {
     <div className="p-6 container mx-auto">
       <Toaster position="top-right" />
       <div className="flex flex-wrap gap-4 items-center mb-4">
+        <label htmlFor="facture-search" className="sr-only">Recherche</label>
         <input
+          id="facture-search"
           type="search"
           value={search}
           onChange={e => setSearch(e.target.value)}
@@ -89,6 +91,7 @@ export default function Factures() {
         animate={{ opacity: 1 }}
         className="min-w-full bg-white rounded-xl shadow-md"
       >
+        <caption className="sr-only">Liste des factures</caption>
         <thead>
           <tr>
             <th className="px-4 py-2">Date</th>

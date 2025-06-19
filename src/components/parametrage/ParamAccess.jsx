@@ -28,6 +28,7 @@ export default function ParamAccess() {
       <Toaster position="top-right" />
       <h2 className="font-bold text-xl mb-4">Grille d’accès par rôle</h2>
       <table className="min-w-full bg-white rounded-xl shadow-md text-xs">
+        <caption className="sr-only">Grille d’accès par rôle</caption>
         <thead>
           <tr>
             <th>Rôle</th>

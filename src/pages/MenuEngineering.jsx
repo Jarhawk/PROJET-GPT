@@ -40,10 +40,12 @@ export default function MenuEngineering() {
       <Toaster />
       <h1 className="text-2xl font-bold mb-4">Menu Engineering</h1>
       <div className="flex items-center gap-2 mb-4">
-        <input type="month" value={periode.slice(0,7)} onChange={e => setPeriode(e.target.value+'-01')} className="input" />
+        <label htmlFor="me-periode" className="sr-only">Période</label>
+        <input id="me-periode" type="month" value={periode.slice(0,7)} onChange={e => setPeriode(e.target.value+'-01')} className="input" />
         <Button onClick={() => fetchData(periode).then(res => setRows(classify(res)))}>Rafraîchir</Button>
       </div>
       <table className="min-w-full table-auto">
+        <caption className="sr-only">Analyse menu engineering</caption>
         <thead>
           <tr>
             <th className="px-2 py-1">Nom</th>

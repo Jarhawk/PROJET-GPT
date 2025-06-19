@@ -51,7 +51,9 @@ export default function Mamas() {
         Établissements (MAMA)
       </h1>
       <div className="flex gap-4 mb-4 items-end">
+        <label htmlFor="mamas-search" className="sr-only">Recherche établissement</label>
         <input
+          id="mamas-search"
           className="input input-bordered w-64"
           placeholder="Recherche nom, ville"
           value={search}
@@ -68,6 +70,7 @@ export default function Mamas() {
           </div>
         ) : (
           <table className="min-w-full table-auto text-center">
+            <caption className="sr-only">Liste des établissements</caption>
             <thead>
               <tr>
                 <th className="px-2 py-1">Nom</th>

@@ -114,8 +114,9 @@ export default function Requisitions() {
       <h1 className="text-2xl font-bold text-mamastock-gold mb-4">Réquisitions (sortie stock)</h1>
       <div className="flex gap-4 mb-4 items-end">
         <div>
-          <label className="block font-medium">Début période</label>
+          <label className="block font-medium" htmlFor="debut">Début période</label>
           <input
+            id="debut"
             type="date"
             className="input input-bordered"
             value={periode.debut}
@@ -123,8 +124,9 @@ export default function Requisitions() {
           />
         </div>
         <div>
-          <label className="block font-medium">Fin période</label>
+          <label className="block font-medium" htmlFor="fin">Fin période</label>
           <input
+            id="fin"
             type="date"
             className="input input-bordered"
             value={periode.fin}
@@ -132,7 +134,9 @@ export default function Requisitions() {
             max={today}
           />
         </div>
+        <label className="sr-only" htmlFor="req-search">Recherche</label>
         <input
+          id="req-search"
           className="input input-bordered w-64"
           placeholder="Recherche produit, zone ou motif"
           value={search}
@@ -144,6 +148,7 @@ export default function Requisitions() {
       </div>
       <div className="bg-white shadow rounded-xl overflow-x-auto">
         <table className="min-w-full table-auto text-center">
+          <caption className="sr-only">Historique des réquisitions</caption>
           <thead>
             <tr>
               <th className="px-2 py-1">Date</th>

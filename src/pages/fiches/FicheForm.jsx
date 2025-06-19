@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
 
 export default function FicheForm({ fiche, onClose }) {
-  const { addFiche, editFiche } = useFiches();
+  const { addFiche, updateFiche } = useFiches();
   const { products, fetchProducts } = useProducts();
   const [nom, setNom] = useState(fiche?.nom || "");
   const [description, setDescription] = useState(fiche?.description || "");
@@ -65,7 +65,7 @@ export default function FicheForm({ fiche, onClose }) {
     };
     try {
       if (fiche?.id) {
-        await editFiche(fiche.id, ficheData);
+        await updateFiche(fiche.id, ficheData);
         toast.success("Fiche modifiée !");
       } else {
         await addFiche(ficheData);
@@ -83,20 +83,26 @@ export default function FicheForm({ fiche, onClose }) {
       <h2 className="text-lg font-bold mb-4">
         {fiche ? "Modifier la fiche technique" : "Ajouter une fiche technique"}
       </h2>
+      <label htmlFor="fiche-nom" className="sr-only">Nom de la fiche</label>
       <input
+        id="fiche-nom"
         className="input mb-2"
         value={nom}
         onChange={e => setNom(e.target.value)}
         placeholder="Nom de la fiche"
         required
       />
+      <label htmlFor="fiche-description" className="sr-only">Description</label>
       <textarea
+        id="fiche-description"
         className="input mb-2"
         value={description}
         onChange={e => setDescription(e.target.value)}
         placeholder="Description / étapes"
       />
+      <label htmlFor="fiche-portions" className="sr-only">Nombre de portions</label>
       <input
+        id="fiche-portions"
         className="input mb-2"
         type="number"
         min={1}
@@ -109,6 +115,7 @@ export default function FicheForm({ fiche, onClose }) {
       <div className="mb-4">
         <label className="block font-semibold mb-2">Ingrédients :</label>
         <table className="min-w-full mb-2">
+          <caption className="sr-only">Liste des ingrédients de la fiche</caption>
           <thead>
             <tr>
               <th>Produit</th>
@@ -165,20 +172,31 @@ export default function FicheForm({ fiche, onClose }) {
         <div><b>Coût total :</b> {cout_total.toFixed(2)} €</div>
         <div><b>Coût/portion :</b> {cout_par_portion.toFixed(2)} €</div>
       </div>
-      <label>
-        Image fiche : <input type="file" onChange={e => setImage(e.target.files[0])} />
-        <Button type="button" size="sm" variant="outline" className="ml-2" onClick={handleUpload}>Upload</Button>
-        {imageUrl && (
-          <a
-            href={imageUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ml-2 text-blue-600 underline"
-          >
-            Voir
-          </a>
-        )}
-      </label>
+      <label htmlFor="fiche-image">Image fiche :</label>
+      <input
+        id="fiche-image"
+        type="file"
+        onChange={e => setImage(e.target.files[0])}
+      />
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        className="ml-2"
+        onClick={handleUpload}
+      >
+        Upload
+      </Button>
+      {imageUrl && (
+        <a
+          href={imageUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ml-2 text-blue-600 underline"
+        >
+          Voir
+        </a>
+      )}
       <div className="flex gap-2 mt-4">
         <Button type="submit" disabled={loading}>{fiche ? "Modifier" : "Ajouter"}</Button>
         <Button variant="outline" type="button" onClick={onClose}>Annuler</Button>

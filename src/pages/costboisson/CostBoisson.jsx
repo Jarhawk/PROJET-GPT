@@ -251,6 +251,7 @@ export default function CostBoissons() {
       {/* Tableau interactif */}
       <div className="bg-white shadow rounded-xl overflow-x-auto">
         <table className="min-w-full table-auto">
+          <caption className="sr-only">Analyse coût boissons</caption>
           <thead>
             <tr>
               <th className="px-2 py-1">Nom</th>

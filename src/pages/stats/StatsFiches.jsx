@@ -158,7 +158,11 @@ export default function StatsFiches() {
 
       {/* Recherche & liste */}
       <div className="mb-4">
+        <label htmlFor="search-fiche" className="sr-only">
+          Recherche fiche
+        </label>
         <input
+          id="search-fiche"
           className="input input-bordered w-72"
           placeholder="Recherche fiche par nom..."
           value={search}
@@ -167,6 +171,7 @@ export default function StatsFiches() {
       </div>
       <div className="bg-white shadow rounded-xl p-4 mb-8">
         <table className="min-w-full table-auto">
+          <caption className="sr-only">Liste des fiches techniques</caption>
           <thead>
             <tr>
               <th className="px-3 py-2">Nom</th>

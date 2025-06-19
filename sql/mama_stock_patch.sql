@@ -1,5 +1,160 @@
 -- mama_stock_patch.sql - additional tables for analytic cost center management
 
+-- -------------------------------------------------
+-- Base tables (ensures core schema exists)
+-- -------------------------------------------------
+create table if not exists mamas (
+    id uuid primary key default uuid_generate_v4(),
+    nom text not null,
+    logo text,
+    contact text,
+    created_at timestamptz default now()
+);
+create index if not exists idx_mamas_nom on mamas(nom);
+
+create table if not exists roles (
+    id serial primary key,
+    nom text not null unique,
+    description text
+);
+create index if not exists idx_roles_nom on roles(nom);
+
+create table if not exists users (
+    id uuid primary key default uuid_generate_v4(),
+    email text not null unique,
+    password text,
+    role_id integer references roles(id),
+    access_rights jsonb default '[]',
+    actif boolean default true,
+    mama_id uuid not null references mamas(id),
+    created_at timestamptz default now()
+);
+create index if not exists idx_users_mama on users(mama_id);
+create index if not exists idx_users_role on users(role_id);
+create index if not exists idx_users_actif on users(actif);
+create index if not exists idx_users_email on users(email);
+
+-- Row level security for users table to protect 2FA secrets and user data
+alter table users enable row level security;
+alter table users force row level security;
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies where schemaname = 'public' and tablename = 'users' and polname = 'users_select'
+  ) then
+    create policy users_select on users for select using (id = auth.uid());
+  end if;
+  if not exists (
+    select 1 from pg_policies where schemaname = 'public' and tablename = 'users' and polname = 'users_mod'
+  ) then
+    create policy users_mod on users for update using (id = auth.uid()) with check (id = auth.uid());
+  end if;
+  if not exists (
+    select 1 from pg_policies where schemaname = 'public' and tablename = 'users' and polname = 'users_insert'
+  ) then
+    create policy users_insert on users for insert with check (
+      id = auth.uid() and mama_id = current_user_mama_id()
+    );
+  end if;
+end $$;
+
+-- -------------------------------------------------
+-- Families and Units reference tables
+-- -------------------------------------------------
+create table if not exists familles (
+    id uuid primary key default uuid_generate_v4(),
+    nom text not null,
+    mama_id uuid not null references mamas(id),
+    created_at timestamptz default now(),
+    unique(mama_id, nom)
+);
+create table if not exists unites (
+    id uuid primary key default uuid_generate_v4(),
+    nom text not null,
+    abbr text,
+    mama_id uuid not null references mamas(id),
+    created_at timestamptz default now(),
+    unique(mama_id, nom)
+);
+create index if not exists idx_familles_mama on familles(mama_id);
+create index if not exists idx_unites_mama on unites(mama_id);
+
+alter table familles enable row level security;
+alter table familles force row level security;
+create policy familles_all on familles
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+grant select, insert, update, delete on familles to authenticated;
+
+alter table unites enable row level security;
+alter table unites force row level security;
+create policy unites_all on unites
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+grant select, insert, update, delete on unites to authenticated;
+
+-- -------------------------------------------------
+-- Suppliers table
+-- -------------------------------------------------
+create table if not exists fournisseurs (
+    id uuid primary key default uuid_generate_v4(),
+    nom text not null,
+    ville text,
+    tel text,
+    contact text,
+    actif boolean default true,
+    mama_id uuid not null references mamas(id),
+    created_at timestamptz default now(),
+    unique(mama_id, nom)
+);
+create index if not exists idx_fournisseurs_mama on fournisseurs(mama_id);
+create index if not exists idx_fournisseurs_nom on fournisseurs(nom);
+create index if not exists idx_fournisseurs_ville on fournisseurs(ville);
+create index if not exists idx_fournisseurs_actif on fournisseurs(actif);
+
+alter table fournisseurs enable row level security;
+alter table fournisseurs force row level security;
+create policy fournisseurs_all on fournisseurs
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+grant select, insert, update, delete on fournisseurs to authenticated;
+
+-- -------------------------------------------------
+-- Products table
+-- -------------------------------------------------
+create table if not exists products (
+    id uuid primary key default uuid_generate_v4(),
+    nom text not null,
+    famille_id uuid references familles(id) on delete set null,
+    unite_id uuid references unites(id) on delete set null,
+    pmp numeric default 0,
+    stock_theorique numeric default 0,
+    stock_reel numeric default 0,
+    stock_min numeric default 0,
+    actif boolean default true,
+    code text,
+    allergenes text,
+    image text,
+    main_supplier_id uuid references fournisseurs(id) on delete set null,
+    mama_id uuid not null references mamas(id),
+    created_at timestamptz default now(),
+    unique(mama_id, nom)
+);
+create index if not exists idx_products_mama on products(mama_id);
+create index if not exists idx_products_nom on products(nom);
+create index if not exists idx_products_actif on products(actif);
+create index if not exists idx_products_famille on products(famille_id);
+create index if not exists idx_products_unite on products(unite_id);
+create index if not exists idx_products_main_supplier on products(main_supplier_id);
+
+alter table products enable row level security;
+alter table products force row level security;
+create policy products_all on products
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+grant select, insert, update, delete on products to authenticated;
+
+
 -- Table of cost centers per mama
 create table if not exists cost_centers (
     id uuid primary key default uuid_generate_v4(),
@@ -191,6 +346,8 @@ create table if not exists pertes (
 );
 create index if not exists idx_pertes_mama on pertes(mama_id);
 create index if not exists idx_pertes_product on pertes(product_id);
+create index if not exists idx_pertes_cost_center on pertes(cost_center_id);
+create index if not exists idx_pertes_date on pertes(date_perte);
 
 -- RLS for pertes
 alter table pertes enable row level security;
@@ -212,6 +369,7 @@ begin
   return new;
 end;
 $$;
+drop trigger if exists trg_log_pertes on pertes;
 create trigger trg_log_pertes
 after insert or update or delete on pertes
 for each row execute function log_pertes_changes();
@@ -313,7 +471,6 @@ language sql stable security definer as $$
 $$;
 
 -- Index for user login by email
-create index if not exists idx_users_email on users(email);
 
 -- Optional famille/unite text columns for products
 DO $$

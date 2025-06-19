@@ -43,33 +43,38 @@ export default function FournisseurDetail({ id }) {
       <div className="grid md:grid-cols-2 gap-6">
         <div className="glass-card p-4">
           <h3 className="font-semibold mb-2">Évolution achats mensuels</h3>
-          <ResponsiveContainer width="100%" height={150}>
-            <LineChart data={stats}>
-              <XAxis dataKey="mois" fontSize={11} />
-              <YAxis fontSize={11} />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="total_achats" stroke="#bfa14d" name="Total Achats" />
-            </LineChart>
-          </ResponsiveContainer>
+          <div role="img" aria-label="Graphique d'évolution des achats du fournisseur">
+            <ResponsiveContainer width="100%" height={150}>
+              <LineChart data={stats}>
+                <XAxis dataKey="mois" fontSize={11} />
+                <YAxis fontSize={11} />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="total_achats" stroke="#bfa14d" name="Total Achats" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         </div>
         <div className="glass-card p-4">
           <h3 className="font-semibold mb-2">Top produits achetés</h3>
-          <ResponsiveContainer width="100%" height={150}>
-            <BarChart data={topProducts}>
-              <XAxis dataKey="nom" fontSize={11} />
-              <YAxis fontSize={11} />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="total" fill="#0f1c2e" name="Quantité achetée" />
-            </BarChart>
-          </ResponsiveContainer>
+          <div role="img" aria-label="Histogramme des produits les plus achetés par ce fournisseur">
+            <ResponsiveContainer width="100%" height={150}>
+              <BarChart data={topProducts}>
+                <XAxis dataKey="nom" fontSize={11} />
+                <YAxis fontSize={11} />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="total" fill="#0f1c2e" name="Quantité achetée" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
       {/* Factures liées */}
       <div className="glass-table mt-4 p-2">
         <h3 className="font-semibold mb-2">Factures associées</h3>
         <table className="w-full table-auto text-xs">
+          <caption className="sr-only">Liste des factures du fournisseur</caption>
           <thead>
             <tr>
               <th>Date</th>

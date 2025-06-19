@@ -49,16 +49,28 @@ export default function MobileMouvement() {
     <div className="p-4 animate-fade-in">
       <h2 className="text-xl font-bold mb-4 text-center">🚚 Mouvement rapide</h2>
 
+      <label htmlFor="mvt-produit" className="sr-only">
+        Produit
+      </label>
       <select
+        id="mvt-produit"
         value={selectedId}
         onChange={(e) => setSelectedId(e.target.value)}
         className="w-full border border-gray-300 rounded p-2 mb-3"
       >
         <option value="">Sélectionner un produit</option>
-        {produits.map(p => <option key={p.id} value={p.id}>{p.nom}</option>)}
+        {produits.map(p => (
+          <option key={p.id} value={p.id}>
+            {p.nom}
+          </option>
+        ))}
       </select>
 
+      <label htmlFor="mvt-quantite" className="sr-only">
+        Quantité
+      </label>
       <input
+        id="mvt-quantite"
         type="number"
         min={1}
         value={quantite}

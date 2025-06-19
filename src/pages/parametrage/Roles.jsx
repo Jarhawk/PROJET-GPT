@@ -113,19 +113,22 @@ export default function Roles() {
       <h1 className="text-2xl font-bold text-mamastock-gold mb-4">
         Gestion des rôles
       </h1>
-      <div className="flex gap-4 mb-4 items-end">
-        <input
-          className="input input-bordered w-64"
-          placeholder="Recherche nom, description"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
+        <div className="flex gap-4 mb-4 items-end">
+          <label htmlFor="roles-search" className="sr-only">Recherche rôle</label>
+          <input
+            id="roles-search"
+            className="input input-bordered w-64"
+            placeholder="Recherche nom, description"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
         <Button onClick={() => setEditRole({ nom: "", description: "", actif: true })}>
           + Nouveau rôle
         </Button>
       </div>
       <div className="bg-white shadow rounded-xl overflow-x-auto mb-6">
         <table className="min-w-full table-auto text-center">
+          <caption className="sr-only">Liste des rôles</caption>
           <thead>
             <tr>
               <th className="px-2 py-1">Nom</th>
@@ -213,8 +216,9 @@ export default function Roles() {
             className="space-y-3"
           >
             <div>
-              <label>Nom</label>
+              <label htmlFor="roles-nom" className="sr-only">Nom</label>
               <input
+                id="roles-nom"
                 className="input input-bordered w-full"
                 value={editRole?.nom || ""}
                 onChange={e =>
@@ -224,8 +228,9 @@ export default function Roles() {
               />
             </div>
             <div>
-              <label>Description</label>
+              <label htmlFor="roles-description" className="sr-only">Description</label>
               <textarea
+                id="roles-description"
                 className="input input-bordered w-full"
                 value={editRole?.description || ""}
                 rows={2}

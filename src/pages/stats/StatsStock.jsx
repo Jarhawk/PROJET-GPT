@@ -36,6 +36,7 @@ export default function StatsStock() {
       </Button>
       <div className="overflow-x-auto bg-white rounded-xl shadow-md">
         <table className="min-w-full text-xs">
+          <caption className="sr-only">Stocks des produits</caption>
           <thead>
             <tr>
               <th className="px-2 py-1">Produit</th>

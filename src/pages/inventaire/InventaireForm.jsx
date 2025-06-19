@@ -71,8 +71,11 @@ function InventaireFormPage() {
 
       <div className="mb-4 flex gap-4 items-end">
         <div>
-          <label className="text-sm block">Zone</label>
+          <label className="text-sm block" htmlFor="zone-select">
+            Zone
+          </label>
           <select
+            id="zone-select"
             className="border rounded px-3 py-2"
             value={zone}
             onChange={(e) => setZone(e.target.value)}
@@ -85,8 +88,11 @@ function InventaireFormPage() {
           </select>
         </div>
         <div>
-          <label className="text-sm block">Date</label>
+          <label className="text-sm block" htmlFor="inv-date">
+            Date
+          </label>
           <input
+            id="inv-date"
             type="date"
             className="border rounded px-3 py-2"
             value={date}
@@ -105,6 +111,9 @@ function InventaireFormPage() {
       ) : (
         <>
           <table className="w-full bg-white rounded-xl shadow text-sm mt-4">
+            <caption className="sr-only">
+              Saisie du stock final par produit pour la zone sélectionnée
+            </caption>
             <thead className="bg-gray-100 text-gray-600">
               <tr>
                 <th className="p-3 text-left">Article</th>
@@ -125,7 +134,11 @@ function InventaireFormPage() {
                     <tr key={prod.id} className="border-b hover:bg-gray-50">
                       <td className="p-3">{prod.nom}</td>
                       <td className="p-3">
+                        <label htmlFor={`final-${prod.id}`} className="sr-only">
+                          Stock final {prod.nom}
+                        </label>
                         <input
+                          id={`final-${prod.id}`}
                           type="number"
                           min="0"
                           className="border rounded px-2 py-1 w-32"

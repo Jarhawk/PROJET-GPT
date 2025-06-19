@@ -25,14 +25,18 @@ export default function Documents() {
     <div className="p-8 container mx-auto">
       <h1 className="text-2xl font-bold mb-4">Documents</h1>
       <form onSubmit={handleAdd} className="flex gap-2 mb-4 items-end">
+        <label htmlFor="doc-title" className="sr-only">Titre</label>
         <input
+          id="doc-title"
           className="input"
           placeholder="Titre"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
         />
+        <label htmlFor="doc-url" className="sr-only">URL</label>
         <input
+          id="doc-url"
           className="input flex-1"
           placeholder="URL"
           value={url}

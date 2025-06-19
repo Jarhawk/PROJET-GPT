@@ -51,14 +51,18 @@ export default function MenuDuJour() {
     <div className="p-6 container mx-auto">
       <Toaster position="top-right" />
       <div className="flex flex-wrap gap-4 items-center mb-4">
+        <label htmlFor="menusdujour-search" className="sr-only">Recherche menu du jour</label>
         <input
+          id="menusdujour-search"
           type="search"
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="input"
           placeholder="Recherche menu du jour"
         />
+        <label htmlFor="menusdujour-date" className="sr-only">Filtrer par date</label>
         <input
+          id="menusdujour-date"
           type="date"
           value={dateFilter}
           onChange={e => setDateFilter(e.target.value)}
@@ -74,6 +78,7 @@ export default function MenuDuJour() {
         animate={{ opacity: 1 }}
         className="min-w-full bg-white rounded-xl shadow-md"
       >
+        <caption className="sr-only">Liste des menus du jour</caption>
         <thead>
           <tr>
             <th className="px-4 py-2">Date</th>

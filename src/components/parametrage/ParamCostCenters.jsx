@@ -68,15 +68,18 @@ export default function ParamCostCenters() {
       <Toaster position="top-right" />
       <h2 className="font-bold text-xl mb-4">Cost Centers</h2>
       <form onSubmit={handleSubmit} className="flex gap-2 mb-4">
+        <label htmlFor="cc-nom" className="sr-only">Nom</label>
         <input
+          id="cc-nom"
           className="input"
           placeholder="Nom"
           value={form.nom}
           onChange={e => setForm(f => ({ ...f, nom: e.target.value }))}
           required
         />
-        <label className="flex items-center gap-1">
+        <label htmlFor="cc-actif" className="flex items-center gap-1">
           <input
+            id="cc-actif"
             type="checkbox"
             checked={form.actif}
             onChange={e => setForm(f => ({ ...f, actif: e.target.checked }))}
@@ -88,7 +91,9 @@ export default function ParamCostCenters() {
           <Button variant="outline" type="button" onClick={() => { setEditMode(false); setForm({ nom: "", actif: true, id: null }); }}>Annuler</Button>
         )}
       </form>
+      <label htmlFor="cc-search" className="sr-only">Recherche cost center</label>
       <input
+        id="cc-search"
         className="input mb-2"
         placeholder="Recherche"
         value={search}
@@ -107,6 +112,7 @@ export default function ParamCostCenters() {
         />
       </div>
       <table className="min-w-full bg-white rounded-xl shadow-md text-xs">
+        <caption className="sr-only">Liste des cost centers</caption>
         <thead>
           <tr>
             <th>Nom</th>

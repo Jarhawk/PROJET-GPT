@@ -62,14 +62,18 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
       <h2 className="text-lg font-bold mb-4">
         {facture ? "Modifier la facture" : "Ajouter une facture"}
       </h2>
+      <label htmlFor="facture-date" className="sr-only">Date</label>
       <input
+        id="facture-date"
         className="input mb-2"
         type="date"
         value={date}
         onChange={e => setDate(e.target.value)}
         required
       />
+      <label htmlFor="facture-fournisseur" className="sr-only">Fournisseur</label>
       <select
+        id="facture-fournisseur"
         className="input mb-2"
         value={fournisseur_id}
         onChange={e => setFournisseurId(e.target.value)}
@@ -80,7 +84,9 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
           <option key={s.id} value={s.id}>{s.nom}</option>
         ))}
       </select>
+      <label htmlFor="facture-montant" className="sr-only">Montant</label>
       <input
+        id="facture-montant"
         className="input mb-2"
         type="number"
         value={montant}
@@ -88,7 +94,9 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
         placeholder="Montant"
         required
       />
+      <label htmlFor="facture-statut" className="sr-only">Statut</label>
       <select
+        id="facture-statut"
         className="input mb-2"
         value={statut}
         onChange={e => setStatut(e.target.value)}
@@ -97,21 +105,27 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
         <option value="payée">Payée</option>
         <option value="refusée">Refusée</option>
       </select>
-      <label>
-        Justificatif PDF : <input type="file" accept="application/pdf,image/*" onChange={e => setFile(e.target.files[0])} />
-        <Button type="button" size="sm" variant="outline" className="ml-2" onClick={handleUpload}>Upload</Button>
-        <Button type="button" size="sm" variant="secondary" className="ml-2" onClick={() => scan(file)}>OCR</Button>
-        {fileUrl && (
-          <a
-            href={fileUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ml-2 text-blue-600 underline"
-          >
-            Voir
-          </a>
-        )}
-      </label>
+      <div className="mb-2">
+        <label htmlFor="facture-file" className="mr-2">Justificatif PDF</label>
+        <input
+          id="facture-file"
+          type="file"
+          accept="application/pdf,image/*"
+          onChange={e => setFile(e.target.files[0])}
+        />
+      </div>
+      <Button type="button" size="sm" variant="outline" className="ml-2" onClick={handleUpload}>Upload</Button>
+      <Button type="button" size="sm" variant="secondary" className="ml-2" onClick={() => scan(file)}>OCR</Button>
+      {fileUrl && (
+        <a
+          href={fileUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ml-2 text-blue-600 underline"
+        >
+          Voir
+        </a>
+      )}
       {ocrText && (
         <div className="text-xs text-gray-600 whitespace-pre-wrap mt-2 border rounded p-2 max-h-32 overflow-auto">
           {ocrText}

@@ -11,7 +11,14 @@ import { motion as Motion } from "framer-motion";
 const PAGE_SIZE = 20;
 
 export default function Stock() {
-  const { stocks, fetchStocks, fetchMouvements, mouvements } = useStock();
+  const {
+    stocks,
+    fetchStocks,
+    fetchMouvements,
+    mouvements,
+    loading,
+    error,
+  } = useStock();
   const [search, setSearch] = useState("");
   const [zoneFilter, setZoneFilter] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -40,18 +47,33 @@ export default function Stock() {
     saveAs(new Blob([buf]), "stock.xlsx");
   };
 
+  if (loading) return <div className="p-6" role="status">Chargement...</div>;
+  if (error) return (
+    <div className="p-6 text-red-600" role="alert">
+      {error.message || String(error)}
+    </div>
+  );
+
   return (
     <div className="p-6 container mx-auto">
       <Toaster position="top-right" />
       <div className="flex flex-wrap gap-4 items-center mb-4">
+        <label htmlFor="search" className="sr-only">Recherche</label>
         <input
+          id="search"
           type="search"
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="input"
           placeholder="Recherche produit"
         />
-        <select className="input" value={zoneFilter} onChange={e => setZoneFilter(e.target.value)}>
+        <label htmlFor="zoneFilter" className="sr-only">Zone</label>
+        <select
+          id="zoneFilter"
+          className="input"
+          value={zoneFilter}
+          onChange={e => setZoneFilter(e.target.value)}
+        >
           <option value="">Toutes zones</option>
           {[...new Set(stocks.map(s => s.zone))].filter(Boolean).map(z =>
             <option key={z} value={z}>{z}</option>
@@ -67,6 +89,7 @@ export default function Stock() {
         animate={{ opacity: 1 }}
         className="min-w-full bg-white rounded-xl shadow-md"
       >
+        <caption className="sr-only">Liste des produits en stock</caption>
         <thead>
           <tr>
             <th className="px-4 py-2">Produit</th>

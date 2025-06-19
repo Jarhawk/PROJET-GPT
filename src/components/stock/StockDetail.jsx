@@ -27,13 +27,21 @@ export default function StockDetail({ produit, mouvements, onClose }) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
       <div className="bg-white rounded-xl shadow-lg p-8 min-w-[400px] max-w-[95vw] flex flex-col gap-2 relative">
-        <Button variant="outline" className="absolute top-2 right-2" onClick={onClose}>Fermer</Button>
+        <Button
+          variant="outline"
+          className="absolute top-2 right-2"
+          onClick={onClose}
+          aria-label="Fermer"
+        >
+          Fermer
+        </Button>
         <h2 className="font-bold text-xl mb-4">{produit.nom} — Mouvements</h2>
         <div className="mb-2">Zone : {produit.zone || "N/A"}</div>
         <div className="mb-2">Stock réel : {produit.stock_reel} {produit.unite}</div>
         <div className="mb-2">Valorisation : {(produit.pmp * produit.stock_reel).toFixed(2)} €</div>
         <div>
           <table className="min-w-full bg-gray-50 rounded text-xs">
+            <caption className="sr-only">Mouvements du produit</caption>
             <thead>
               <tr>
                 <th>Date</th>
@@ -59,7 +67,7 @@ export default function StockDetail({ produit, mouvements, onClose }) {
           </table>
         </div>
         {rotationData.length > 0 && (
-          <div className="mt-4">
+          <div className="mt-4" role="img" aria-label="Graphique de la rotation mensuelle">
             <h3 className="font-semibold mb-1">Rotation mensuelle</h3>
             <ResponsiveContainer width="100%" height={180}>
               <LineChart data={rotationData}>

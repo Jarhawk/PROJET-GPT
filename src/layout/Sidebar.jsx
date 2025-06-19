@@ -187,7 +187,9 @@ export default function Sidebar() {
 
   return (
     <aside
+      id="sidebar"
       ref={containerRef}
+      aria-hidden={isMobile ? !mobileOpen : false}
       className={`w-64 min-h-screen bg-white/50 backdrop-blur-2xl border-r border-mamastockGold shadow-lg flex flex-col glass-sidebar transition-all transform md:translate-x-0 ${isMobile ? (mobileOpen ? 'translate-x-0' : '-translate-x-full') : ''}`}
       style={{
         boxShadow:

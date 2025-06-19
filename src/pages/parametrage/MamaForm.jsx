@@ -66,8 +66,9 @@ export default function MamaForm({ mama, onClose, onSaved }) {
     <form className="space-y-3 p-4" onSubmit={handleSubmit}>
       <Toaster />
       <div>
-        <label>Nom</label>
+        <label htmlFor="mama-nom" className="sr-only">Nom</label>
         <input
+          id="mama-nom"
           className="input input-bordered w-full"
           name="nom"
           value={values.nom}
@@ -77,8 +78,9 @@ export default function MamaForm({ mama, onClose, onSaved }) {
         />
       </div>
       <div>
-        <label>Ville</label>
+        <label htmlFor="mama-ville" className="sr-only">Ville</label>
         <input
+          id="mama-ville"
           className="input input-bordered w-full"
           name="ville"
           value={values.ville}
@@ -86,13 +88,14 @@ export default function MamaForm({ mama, onClose, onSaved }) {
         />
       </div>
       <div>
-        <label>
+        <label htmlFor="mama-actif" className="flex items-center gap-1">
           <input
+            id="mama-actif"
             type="checkbox"
             name="actif"
             checked={!!values.actif}
             onChange={e => setValues(v => ({ ...v, actif: e.target.checked }))}
-          />{" "}
+          />
           Actif
         </label>
       </div>

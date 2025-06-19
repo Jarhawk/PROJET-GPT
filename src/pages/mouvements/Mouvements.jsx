@@ -299,7 +299,7 @@ export default function Mouvements() {
       </div>
       {/* Stats graphiques */}
       <div className="grid md:grid-cols-2 gap-6 mb-6">
-        <div className="glass-liquid shadow-2xl p-4">
+        <div className="glass-liquid shadow-2xl p-4" role="img" aria-label="Graphique evolution quotidienne des mouvements">
           <h2 className="font-bold mb-2">Evolution quotidienne (Entrées/Sorties)</h2>
           <ResponsiveContainer width="100%" height={180}>
             <LineChart data={dataDays}>
@@ -312,7 +312,7 @@ export default function Mouvements() {
             </LineChart>
           </ResponsiveContainer>
         </div>
-        <div className="glass-liquid shadow-2xl p-4">
+        <div className="glass-liquid shadow-2xl p-4" role="img" aria-label={`Graphique top produits ${tab.toLowerCase()}s`}>
           <h2 className="font-bold mb-2">Top produits {tab.toLowerCase()}s</h2>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={topEntrees}>
@@ -329,6 +329,7 @@ export default function Mouvements() {
       <div className="glass-liquid shadow-2xl p-4 mb-4">
         <h2 className="font-bold mb-2">Stock théorique (période sélectionnée)</h2>
         <table className="min-w-full table-auto text-center">
+          <caption className="sr-only">Stock théorique pour la période sélectionnée</caption>
           <thead>
             <tr>
               <th className="px-2 py-1">Produit</th>
@@ -372,7 +373,9 @@ export default function Mouvements() {
             max={today}
           />
         </div>
+        <label htmlFor="searchMv" className="sr-only">Recherche</label>
         <input
+          id="searchMv"
           className="input input-bordered w-64"
           placeholder="Recherche produit, zone, motif"
           value={search}
@@ -385,6 +388,7 @@ export default function Mouvements() {
       {/* Table mouvements */}
       <div className="glass-liquid shadow-2xl overflow-x-auto">
         <table className="min-w-full table-auto text-center">
+          <caption className="sr-only">Historique des mouvements de stock</caption>
           <thead>
             <tr>
               <th className="px-2 py-1">Date</th>
@@ -448,9 +452,10 @@ export default function Mouvements() {
                               Timeline mouvements : {produits.find(p => p.id === timeline[0]?.product_id)?.nom}
                             </h3>
                             {loadingTimeline ? (
-                              <div>Chargement…</div>
+                              <div role="status">Chargement…</div>
                             ) : (
                               <table className="w-full text-xs">
+                                <caption className="sr-only">Timeline du produit</caption>
                                 <thead>
                                   <tr>
                                     <th>Date</th>

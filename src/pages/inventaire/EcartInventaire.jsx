@@ -115,22 +115,34 @@ function EcartInventairePage() {
       <h1 className="text-2xl font-bold text-mamastock-gold mb-4">Écarts d'inventaire</h1>
 
       <div className="flex gap-4 mb-6">
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => {
-            setDate(e.target.value);
-            setMois("");
-          }}
-          className="border px-3 py-2 rounded"
-        />
-        <input
-          type="text"
-          placeholder="Zone (ex: bar, cuisine...)"
-          value={zone}
-          onChange={(e) => setZone(e.target.value)}
-          className="border px-3 py-2 rounded"
-        />
+        <div>
+          <label htmlFor="ecart-date" className="sr-only">
+            Date inventaire
+          </label>
+          <input
+            id="ecart-date"
+            type="date"
+            value={date}
+            onChange={(e) => {
+              setDate(e.target.value);
+              setMois("");
+            }}
+            className="border px-3 py-2 rounded"
+          />
+        </div>
+        <div>
+          <label htmlFor="ecart-zone" className="sr-only">
+            Zone
+          </label>
+          <input
+            id="ecart-zone"
+            type="text"
+            placeholder="Zone (ex: bar, cuisine...)"
+            value={zone}
+            onChange={(e) => setZone(e.target.value)}
+            className="border px-3 py-2 rounded"
+          />
+        </div>
         <button
           onClick={renderPDF}
           className="bg-mamastock-gold text-white font-bold px-4 py-2 rounded"
@@ -141,6 +153,9 @@ function EcartInventairePage() {
 
       <div className="overflow-x-auto">
         <table className="w-full bg-white rounded-xl shadow text-sm">
+          <caption className="sr-only">
+            Liste des écarts d'inventaire pour la zone sélectionnée
+          </caption>
           <thead className="bg-gray-100 text-gray-600">
             <tr>
               <th className="p-3 text-left">Date</th>

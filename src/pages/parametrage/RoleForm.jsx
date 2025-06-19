@@ -69,8 +69,9 @@ export default function RoleForm({ role, onClose, onSaved }) {
     <form className="space-y-3 p-4" onSubmit={handleSubmit}>
       <Toaster />
       <div>
-        <label>Nom du rôle</label>
+        <label htmlFor="role-nom" className="sr-only">Nom du rôle</label>
         <input
+          id="role-nom"
           className="input input-bordered w-full"
           name="nom"
           value={values.nom}
@@ -80,8 +81,9 @@ export default function RoleForm({ role, onClose, onSaved }) {
         />
       </div>
       <div>
-        <label>Description</label>
+        <label htmlFor="role-description" className="sr-only">Description</label>
         <input
+          id="role-description"
           className="input input-bordered w-full"
           name="description"
           value={values.description}
@@ -89,13 +91,14 @@ export default function RoleForm({ role, onClose, onSaved }) {
         />
       </div>
       <div>
-        <label>
+        <label htmlFor="role-actif" className="flex items-center gap-1">
           <input
+            id="role-actif"
             type="checkbox"
             name="actif"
             checked={!!values.actif}
             onChange={e => setValues(v => ({ ...v, actif: e.target.checked }))}
-          />{" "}
+          />
           Actif
         </label>
       </div>

@@ -88,6 +88,7 @@ export default function PermissionsForm({ role, onClose, onSaved }) {
       </h2>
       <div className="overflow-x-auto mb-4">
         <table className="min-w-full table-auto text-center">
+          <caption className="sr-only">Grille des permissions</caption>
           <thead>
             <tr>
               <th className="px-2 py-1 text-left">Module</th>

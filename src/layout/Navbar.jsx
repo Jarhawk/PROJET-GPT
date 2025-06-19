@@ -38,7 +38,12 @@ export default function Navbar() {
     <nav className="bg-mamastock-bg border-b border-mamastock-gold text-white px-6 py-4 flex items-center justify-between shadow-md">
       {/* Logo / Titre */}
       <div className="flex items-center gap-4">
-        <button onClick={toggleSidebar} className="md:hidden text-mamastock-gold text-2xl" aria-label="Ouvrir le menu">
+        <button
+          onClick={toggleSidebar}
+          className="md:hidden text-mamastock-gold text-2xl"
+          aria-label="Ouvrir le menu"
+          aria-controls="sidebar"
+        >
           ☰
         </button>
         <h1 className="text-2xl font-bold text-mamastock-gold tracking-widest">

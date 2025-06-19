@@ -19,7 +19,13 @@ export default function ImportFactures() {
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold mb-4">Import e-facture</h1>
       <form onSubmit={handleSubmit} className="flex gap-2 items-end">
-        <input type="file" accept="application/json,application/xml" onChange={(e) => setFile(e.target.files[0])} />
+        <label htmlFor="import-file" className="sr-only">Fichier facture</label>
+        <input
+          id="import-file"
+          type="file"
+          accept="application/json,application/xml"
+          onChange={(e) => setFile(e.target.files[0])}
+        />
         <Button type="submit" disabled={loading}>Importer</Button>
       </form>
       {error && <p className="text-red-600 mt-2">{error}</p>}

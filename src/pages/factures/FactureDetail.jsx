@@ -69,6 +69,7 @@ export default function FactureDetail({ facture: factureProp, onClose }) {
         </div>
         {produitsFacture.length > 0 && (
           <table className="mt-4 text-sm w-full border">
+            <caption className="sr-only">Produits de la facture</caption>
             <thead>
               <tr className="bg-gray-100">
                 <th className="px-2 py-1 border">Produit</th>

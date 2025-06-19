@@ -45,7 +45,9 @@ export default function ParamUnites() {
       <Toaster position="top-right" />
       <h2 className="font-bold text-xl mb-4">Unités</h2>
       <form onSubmit={handleSubmit} className="flex gap-2 mb-4">
+        <label htmlFor="unite-nom" className="sr-only">Nom de l’unité</label>
         <input
+          id="unite-nom"
           className="input"
           placeholder="Nom de l’unité"
           value={form.nom}
@@ -57,6 +59,7 @@ export default function ParamUnites() {
       </form>
       <Button variant="outline" className="mb-2" onClick={exportExcel}>Export Excel</Button>
       <table className="min-w-full bg-white rounded-xl shadow-md text-xs">
+        <caption className="sr-only">Liste des unités</caption>
         <thead>
           <tr>
             <th>Nom</th>

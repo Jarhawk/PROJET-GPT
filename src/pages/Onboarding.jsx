@@ -10,7 +10,7 @@ const steps = [
 ];
 
 export default function Onboarding() {
-  const { step, loading, saveStep } = useOnboarding();
+  const { step, loading, error, saveStep } = useOnboarding();
 
   if (loading) return <div className="p-8">Chargement...</div>;
 
@@ -23,7 +23,14 @@ export default function Onboarding() {
     <div className="p-8 container mx-auto text-center max-w-lg">
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold mb-4">Onboarding</h1>
-      <p className="mb-6">{steps[step]}</p>
+      {error && (
+        <p className="text-red-600" role="alert">
+          {error}
+        </p>
+      )}
+      <p className="mb-6" aria-live="polite">
+        {steps[step]} ({step + 1}/{steps.length})
+      </p>
       {step < steps.length - 1 ? (
         <Button onClick={next}>Étape suivante</Button>
       ) : (

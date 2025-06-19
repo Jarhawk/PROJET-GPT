@@ -35,7 +35,9 @@ export default function ParamRoles() {
       <Toaster position="top-right" />
       <h2 className="font-bold text-xl mb-4">Rôles</h2>
       <form onSubmit={handleSubmit} className="flex gap-2 mb-4">
+        <label htmlFor="param-role-nom" className="sr-only">Nom du rôle</label>
         <input
+          id="param-role-nom"
           className="input"
           placeholder="Nom du rôle"
           value={form.nom}
@@ -46,6 +48,7 @@ export default function ParamRoles() {
         {editMode && <Button variant="outline" type="button" onClick={() => { setEditMode(false); setForm({ nom: "", id: null }); }}>Annuler</Button>}
       </form>
       <table className="min-w-full bg-white rounded-xl shadow-md text-xs">
+        <caption className="sr-only">Liste des rôles paramétrables</caption>
         <thead>
           <tr>
             <th>Nom</th>

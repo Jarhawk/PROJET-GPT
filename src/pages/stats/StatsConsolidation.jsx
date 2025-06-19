@@ -26,6 +26,7 @@ export default function StatsConsolidation() {
         Export Excel
       </Button>
       <table className="min-w-full text-xs bg-white rounded-xl shadow-md">
+        <caption className="sr-only">Consolidation multi-sites</caption>
         <thead>
           <tr>
             <th className="px-2 py-1">Établissement</th>

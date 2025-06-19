@@ -71,7 +71,12 @@ export function useDashboard() {
       fin_param: null,
       limit_param: 8,
     });
-    if (!topErr) setTopProducts(Array.isArray(topData) ? topData : []);
+    if (topErr) {
+      console.error('Erreur top_products', topErr);
+      setError('Erreur chargement top produits');
+    } else {
+      setTopProducts(Array.isArray(topData) ? topData : []);
+    }
 
     // 5. Food cost global & par famille
     const ca_fnb = Number(caFnbInput) || 1;

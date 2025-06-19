@@ -44,6 +44,7 @@ export default function Permissions() {
           </div>
         ) : (
           <table className="min-w-full table-auto text-center">
+            <caption className="sr-only">Liste des rôles avec actions</caption>
             <thead>
               <tr>
                 <th className="px-2 py-1">Rôle</th>

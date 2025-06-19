@@ -25,6 +25,7 @@ export default function PrixFournisseurs({ produitId }) {
   return (
     <div className="border p-4 rounded text-sm bg-white shadow">
       <table className="w-full text-left border-collapse">
+        <caption className="sr-only">Comparatif des prix fournisseurs pour le produit sélectionné</caption>
         <thead className="bg-gray-100">
           <tr>
             <th className="px-2 py-1">Fournisseur</th>

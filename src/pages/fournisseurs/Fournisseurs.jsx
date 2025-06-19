@@ -78,7 +78,11 @@ export default function Fournisseurs() {
       <h1 className="text-2xl font-bold text-mamastockGold mb-6">Gestion des fournisseurs</h1>
       <div className="flex flex-wrap gap-4 mb-6 items-end">
         <div className="relative flex-1">
+          <label htmlFor="fournisseur-search" className="sr-only">
+            Rechercher fournisseur ou ville
+          </label>
           <input
+            id="fournisseur-search"
             className="input input-bordered w-full pl-8"
             placeholder="Recherche fournisseur ou ville"
             value={search}
@@ -104,32 +108,37 @@ export default function Fournisseurs() {
       <div className="grid md:grid-cols-2 gap-8 mb-10">
         <div className="glass-card p-4">
           <h2 className="font-semibold mb-2">Évolution des achats (tous fournisseurs)</h2>
-          <ResponsiveContainer width="100%" height={180}>
-            <LineChart data={stats}>
-              <XAxis dataKey="mois" fontSize={11} />
-              <YAxis fontSize={11} />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="total_achats" stroke="#bfa14d" name="Total Achats" />
-            </LineChart>
-          </ResponsiveContainer>
+          <div role="img" aria-label="Graphique d'évolution des achats de tous les fournisseurs">
+            <ResponsiveContainer width="100%" height={180}>
+              <LineChart data={stats}>
+                <XAxis dataKey="mois" fontSize={11} />
+                <YAxis fontSize={11} />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="total_achats" stroke="#bfa14d" name="Total Achats" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         </div>
         <div className="glass-card p-4">
           <h2 className="font-semibold mb-2">Top produits achetés</h2>
-          <ResponsiveContainer width="100%" height={180}>
-            <BarChart data={topProducts}>
-              <XAxis dataKey="nom" fontSize={11} />
-              <YAxis fontSize={11} />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="total" fill="#0f1c2e" name="Quantité achetée" />
-            </BarChart>
-          </ResponsiveContainer>
+          <div role="img" aria-label="Histogramme des produits les plus achetés">
+            <ResponsiveContainer width="100%" height={180}>
+              <BarChart data={topProducts}>
+                <XAxis dataKey="nom" fontSize={11} />
+                <YAxis fontSize={11} />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="total" fill="#0f1c2e" name="Quantité achetée" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
       {/* Tableau fournisseurs */}
       <div className="glass-table overflow-x-auto shadow-xl rounded-2xl mb-6">
         <table className="min-w-full text-center">
+          <caption className="sr-only">Liste des fournisseurs</caption>
           <thead>
             <tr>
               <th className="py-2 px-3">Nom</th>

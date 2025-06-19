@@ -47,6 +47,7 @@ export default function CartePlats() {
       <Toaster />
       <h1 className="text-2xl font-bold text-mamastock-gold mb-4">Carte des plats actifs</h1>
       <table className="min-w-full table-auto">
+        <caption className="sr-only">Carte des plats actifs</caption>
         <thead>
           <tr>
             <th className="px-2 py-1">Nom</th>
@@ -68,7 +69,11 @@ export default function CartePlats() {
                 <td className="px-2 py-1">{f.famille || "-"}</td>
                 <td className="px-2 py-1">{f.cout_portion ? Number(f.cout_portion).toFixed(2) : "-"}</td>
                 <td className="px-2 py-1">
+                  <label htmlFor={`pv-${f.id}`} className="sr-only">
+                    Prix de vente
+                  </label>
                   <input
+                    id={`pv-${f.id}`}
                     type="number"
                     min={0}
                     step="0.01"

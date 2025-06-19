@@ -36,11 +36,15 @@ export default function MobileInventaire() {
   return (
     <div className="p-4">
       <h2 className="text-lg font-bold mb-4">📦 Inventaire - Stock Final uniquement</h2>
-      <ul className="space-y-2">
+      <ul className="space-y-2" aria-label="Liste des produits pour inventaire">
         {produits.map(p => (
           <li key={p.id} className="flex justify-between items-center border p-2 rounded">
+            <label htmlFor={`prod-${p.id}`} className="sr-only">
+              {p.nom}
+            </label>
             <span>{p.nom}</span>
             <input
+              id={`prod-${p.id}`}
               type="number"
               className="w-20 border px-1"
               value={stockFinal[p.id] || ""}

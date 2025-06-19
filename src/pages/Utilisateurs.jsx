@@ -54,14 +54,17 @@ export default function Utilisateurs() {
     <div className="p-6 container mx-auto">
       <Toaster position="top-right" />
       <div className="flex flex-wrap gap-4 items-center mb-4">
+        <label className="sr-only" htmlFor="user-search">Recherche email</label>
         <input
+          id="user-search"
           type="search"
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="input"
           placeholder="Recherche email"
         />
-        <select className="input" value={actifFilter} onChange={e => setActifFilter(e.target.value)}>
+        <label className="sr-only" htmlFor="active-filter">Filtre actif</label>
+        <select id="active-filter" className="input" value={actifFilter} onChange={e => setActifFilter(e.target.value)}>
           <option value="all">Tous</option>
           <option value="true">Actif</option>
           <option value="false">Inactif</option>
@@ -76,6 +79,7 @@ export default function Utilisateurs() {
         animate={{ opacity: 1 }}
         className="min-w-full bg-white rounded-xl shadow-md"
       >
+        <caption className="sr-only">Liste des utilisateurs</caption>
         <thead>
           <tr>
             <th className="px-4 py-2">Email</th>

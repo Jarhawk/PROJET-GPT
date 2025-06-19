@@ -27,29 +27,34 @@ export default function AuditTrail() {
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold mb-4">Audit avancé</h1>
       <form onSubmit={handleSubmit} className="flex gap-2 mb-4 items-end">
+        <label className="sr-only" htmlFor="audit-table">Table</label>
         <input
+          id="audit-table"
           className="input"
           placeholder="Table"
           value={table}
           onChange={(e) => setTable(e.target.value)}
         />
+        <label className="sr-only" htmlFor="audit-start">Date début</label>
         <input
+          id="audit-start"
           type="date"
           className="input"
           value={start}
           onChange={(e) => setStart(e.target.value)}
-          aria-label="Date début"
         />
+        <label className="sr-only" htmlFor="audit-end">Date fin</label>
         <input
+          id="audit-end"
           type="date"
           className="input"
           value={end}
           onChange={(e) => setEnd(e.target.value)}
-          aria-label="Date fin"
         />
         <Button type="submit">Filtrer</Button>
       </form>
       <table className="min-w-full bg-white rounded-xl shadow-md">
+        <caption className="sr-only">Historique des modifications</caption>
         <thead>
           <tr>
             <th className="px-2 py-1">Date</th>

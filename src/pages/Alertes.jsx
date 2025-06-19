@@ -34,7 +34,9 @@ export default function Alertes() {
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold mb-4">Alertes avancées</h1>
       <form onSubmit={handleSubmit} className="flex gap-2 mb-4 items-end">
+        <label className="sr-only" htmlFor="alert-product">Produit</label>
         <Select
+          id="alert-product"
           value={form.product_id}
           onChange={(e) => setForm(f => ({ ...f, product_id: e.target.value }))}
           className="w-64"
@@ -44,7 +46,9 @@ export default function Alertes() {
             <option key={p.id} value={p.id}>{p.nom}</option>
           ))}
         </Select>
+        <label className="sr-only" htmlFor="alert-threshold">Seuil</label>
         <input
+          id="alert-threshold"
           type="number"
           className="input w-32"
           placeholder="Seuil"
@@ -55,6 +59,7 @@ export default function Alertes() {
         <Button type="submit">Ajouter</Button>
       </form>
       <table className="min-w-full bg-white rounded-xl shadow-md">
+        <caption className="sr-only">Règles d'alerte configurées</caption>
         <thead>
           <tr>
             <th className="px-2 py-1">Produit</th>

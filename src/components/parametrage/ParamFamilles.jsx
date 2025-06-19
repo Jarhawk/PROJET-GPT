@@ -50,7 +50,9 @@ export default function ParamFamilles() {
       <Toaster position="top-right" />
       <h2 className="font-bold text-xl mb-4">Familles</h2>
       <form onSubmit={handleSubmit} className="flex gap-2 mb-4">
+        <label htmlFor="famille-nom" className="sr-only">Nom de la famille</label>
         <input
+          id="famille-nom"
           className="input"
           placeholder="Nom de la famille"
           value={form.nom}
@@ -60,7 +62,9 @@ export default function ParamFamilles() {
         <Button type="submit">{editMode ? "Modifier" : "Ajouter"}</Button>
         {editMode && <Button variant="outline" type="button" onClick={() => { setEditMode(false); setForm({ nom: "", id: null }); }}>Annuler</Button>}
       </form>
+      <label htmlFor="famille-search" className="sr-only">Recherche famille</label>
       <input
+        id="famille-search"
         className="input mb-2"
         placeholder="Recherche"
         value={search}
@@ -68,6 +72,7 @@ export default function ParamFamilles() {
       />
       <Button variant="outline" className="mb-2" onClick={exportExcel}>Export Excel</Button>
       <table className="min-w-full bg-white rounded-xl shadow-md text-xs">
+        <caption className="sr-only">Liste des familles</caption>
         <thead>
           <tr>
             <th>Nom</th>

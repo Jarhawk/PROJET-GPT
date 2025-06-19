@@ -82,8 +82,9 @@ export default function InviteUser({ onClose, onInvited }) {
       <Toaster />
       <h2 className="font-bold text-lg mb-2">Inviter un utilisateur</h2>
       <div>
-        <label>Email</label>
+        <label htmlFor="invite-email" className="sr-only">Email</label>
         <input
+          id="invite-email"
           className="input input-bordered w-full"
           name="email"
           type="email"
@@ -93,8 +94,9 @@ export default function InviteUser({ onClose, onInvited }) {
         />
       </div>
       <div>
-        <label>Établissement (MAMA)</label>
+        <label htmlFor="invite-mama" className="sr-only">Établissement (MAMA)</label>
         <select
+          id="invite-mama"
           className="input input-bordered w-full"
           name="mama_id"
           required
@@ -110,8 +112,9 @@ export default function InviteUser({ onClose, onInvited }) {
         </select>
       </div>
       <div>
-        <label>Rôle</label>
+        <label htmlFor="invite-role" className="sr-only">Rôle</label>
         <select
+          id="invite-role"
           className="input input-bordered w-full"
           name="role"
           required

@@ -65,14 +65,18 @@ export default function MenuForm({ menu, fiches = [], onClose }) {
       <h2 className="text-lg font-bold mb-4">
         {menu ? "Modifier le menu" : "Ajouter un menu"}
       </h2>
+      <label htmlFor="menu-nom" className="sr-only">Nom du menu</label>
       <input
+        id="menu-nom"
         className="input mb-2"
         value={nom}
         onChange={e => setNom(e.target.value)}
         placeholder="Nom du menu"
         required
       />
+      <label htmlFor="menu-date" className="sr-only">Date du menu</label>
       <input
+        id="menu-date"
         className="input mb-2"
         type="date"
         value={date}
@@ -95,20 +99,31 @@ export default function MenuForm({ menu, fiches = [], onClose }) {
           ))}
         </div>
       </div>
-      <label>
-        Document/PDF menu : <input type="file" onChange={e => setFile(e.target.files[0])} />
-        <Button type="button" size="sm" variant="outline" className="ml-2" onClick={handleUpload}>Upload</Button>
-        {fileUrl && (
-          <a
-            href={fileUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ml-2 text-blue-600 underline"
-          >
-            Voir
-          </a>
-        )}
-      </label>
+      <label htmlFor="menu-file">Document/PDF menu :</label>
+      <input
+        id="menu-file"
+        type="file"
+        onChange={e => setFile(e.target.files[0])}
+      />
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        className="ml-2"
+        onClick={handleUpload}
+      >
+        Upload
+      </Button>
+      {fileUrl && (
+        <a
+          href={fileUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ml-2 text-blue-600 underline"
+        >
+          Voir
+        </a>
+      )}
       <div className="flex gap-2 mt-4">
         <Button type="submit" disabled={loading}>{menu ? "Modifier" : "Ajouter"}</Button>
         <Button variant="outline" type="button" onClick={onClose}>Annuler</Button>

@@ -27,14 +27,18 @@ export default function Planning() {
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold mb-4">Planning prévisionnel</h1>
       <form onSubmit={handleAdd} className="flex gap-2 mb-4 items-end">
+        <label className="sr-only" htmlFor="date_prevue">Date prévue</label>
         <input
+          id="date_prevue"
           type="date"
           className="input"
           value={date}
           onChange={(e) => setDate(e.target.value)}
           required
         />
+        <label className="sr-only" htmlFor="notes">Notes</label>
         <input
+          id="notes"
           className="input flex-1"
           placeholder="Notes"
           value={notes}
@@ -43,6 +47,7 @@ export default function Planning() {
         <Button type="submit">Ajouter</Button>
       </form>
       <table className="min-w-full text-sm bg-white rounded-xl shadow-md">
+        <caption className="sr-only">Dates planifiées à venir</caption>
         <thead>
           <tr>
             <th className="px-2 py-1">Date</th>

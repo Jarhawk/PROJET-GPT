@@ -46,7 +46,9 @@ export default function Fiches() {
     <div className="p-6 container mx-auto">
       <Toaster position="top-right" />
       <div className="flex flex-wrap gap-4 items-center mb-4">
+        <label htmlFor="fiches-search" className="sr-only">Recherche fiche</label>
         <input
+          id="fiches-search"
           type="search"
           value={search}
           onChange={e => setSearch(e.target.value)}
@@ -64,6 +66,7 @@ export default function Fiches() {
         animate={{ opacity: 1 }}
         className="min-w-full bg-white rounded-xl shadow-md"
       >
+        <caption className="sr-only">Liste des fiches techniques</caption>
         <thead>
           <tr>
             <th className="px-4 py-2">Nom</th>

@@ -15,7 +15,7 @@ export default function StatsAdvanced() {
     <div className="p-8 container mx-auto">
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold mb-4">Analytique avancée</h1>
-      <ResponsiveContainer width="100%" height={300}>
+      <ResponsiveContainer width="100%" height={300} role="img" aria-label="Graphique analytique avancé">
         <LineChart data={data} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
           <XAxis dataKey="month" />
           <YAxis />

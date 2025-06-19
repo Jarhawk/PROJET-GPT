@@ -43,6 +43,7 @@ export default function StatsCostCentersPivot() {
       <Button variant="outline" className="mb-2" onClick={exportExcel}>Export Excel</Button>
       <div className="overflow-x-auto bg-white rounded-xl shadow-md">
         <table className="min-w-full text-xs">
+          <caption className="sr-only">Stats mensuelles par cost center</caption>
           <thead>
             <tr>
               <th className="px-2 py-1">Cost Center</th>

@@ -35,21 +35,27 @@ export default function Validations() {
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold mb-4">Validations</h1>
       <form onSubmit={handleSubmit} className="flex gap-2 mb-4 items-end">
+        <label className="sr-only" htmlFor="module">Module</label>
         <input
+          id="module"
           className="input"
           placeholder="Module"
           value={form.module}
           onChange={(e) => setForm(f => ({ ...f, module: e.target.value }))}
           required
         />
+        <label className="sr-only" htmlFor="action">Action</label>
         <input
+          id="action"
           className="input"
           placeholder="Action"
           value={form.action}
           onChange={(e) => setForm(f => ({ ...f, action: e.target.value }))}
           required
         />
+        <label className="sr-only" htmlFor="entity_id">Entité</label>
         <input
+          id="entity_id"
           className="input"
           placeholder="Entité"
           value={form.entity_id}
@@ -58,6 +64,7 @@ export default function Validations() {
         <Button type="submit">Demander</Button>
       </form>
       <table className="min-w-full bg-white rounded-xl shadow-md">
+        <caption className="sr-only">Demandes de validations en attente</caption>
         <thead>
           <tr>
             <th className="px-2 py-1">Module</th>

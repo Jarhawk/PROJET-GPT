@@ -28,6 +28,7 @@ export default function Taches() {
         </Link>
       </div>
       <table className="w-full text-sm bg-white shadow rounded">
+        <caption className="sr-only">Liste des tâches programmées</caption>
         <thead>
           <tr>
             <th className="px-2 py-1">Titre</th>

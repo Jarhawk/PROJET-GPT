@@ -60,6 +60,7 @@ export default function InvitationsEnAttente() {
       </h1>
       <div className="bg-white shadow rounded-xl overflow-x-auto">
         <table className="min-w-full table-auto text-center">
+          <caption className="sr-only">Invitations en attente</caption>
           <thead>
             <tr>
               <th>Email</th>

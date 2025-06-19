@@ -338,8 +338,11 @@ export default function Inventaire() {
       </div>
       <div className="flex gap-4 mb-4 items-end">
         <div>
-          <label className="block font-medium">Début période</label>
+          <label className="block font-medium" htmlFor="periode-debut">
+            Début période
+          </label>
           <input
+            id="periode-debut"
             type="date"
             className="input input-bordered"
             value={periode.debut}
@@ -347,8 +350,11 @@ export default function Inventaire() {
           />
         </div>
         <div>
-          <label className="block font-medium">Fin période</label>
+          <label className="block font-medium" htmlFor="periode-fin">
+            Fin période
+          </label>
           <input
+            id="periode-fin"
             type="date"
             className="input input-bordered"
             value={periode.fin}
@@ -356,18 +362,27 @@ export default function Inventaire() {
             max={today}
           />
         </div>
-        <input
-          className="input input-bordered w-64"
-          placeholder="Recherche produit"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
+        <div className="w-64">
+          <label htmlFor="search-produit" className="sr-only">
+            Recherche produit
+          </label>
+          <input
+            id="search-produit"
+            className="input input-bordered w-full"
+            placeholder="Recherche produit"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+        </div>
         <Button onClick={handleExportAuditExcel}>Export Audit Excel</Button>
         <Button onClick={handleExportAuditPDF}>Export Audit PDF</Button>
       </div>
       {/* Tableau principal, par zone */}
       <div className="bg-white shadow rounded-xl overflow-x-auto">
         <table className="min-w-full table-auto text-center">
+          <caption className="sr-only">
+            Détails des stocks et écarts par zone
+          </caption>
           <thead>
             <tr>
               <th className="px-2 py-1">Produit</th>
@@ -429,9 +444,12 @@ export default function Inventaire() {
                             Historique inventaire {p.nom} ({zone})
                           </h3>
                           {loadingTimeline ? (
-                            <div>Chargement…</div>
+                            <div aria-live="polite">Chargement…</div>
                           ) : (
                             <table className="w-full text-xs">
+                              <caption className="sr-only">
+                                Historique détaillé des stocks
+                              </caption>
                               <thead>
                                 <tr>
                                   <th>Date</th>
@@ -531,6 +549,9 @@ export default function Inventaire() {
         </h2>
         <div className="bg-white shadow rounded-xl p-4 mb-4">
           <table className="min-w-full table-auto text-center">
+            <caption className="sr-only">
+              Liste des transferts inter-zones pour la période sélectionnée
+            </caption>
             <thead>
               <tr>
                 <th className="px-2 py-1">Produit</th>

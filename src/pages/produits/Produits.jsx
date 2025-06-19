@@ -87,14 +87,18 @@ export default function Produits() {
       <Toaster />
       <h1 className="text-2xl font-bold text-mamastockGold mb-4">Produits stock</h1>
       <div className="flex flex-wrap gap-2 mb-6 items-end">
+        <label className="sr-only" htmlFor="produit-search">Recherche nom</label>
         <input
+          id="produit-search"
           type="search"
           value={search}
           onChange={e => { setPage(1); setSearch(e.target.value); }}
           className="input"
           placeholder="Recherche nom"
         />
+        <label className="sr-only" htmlFor="famille-filter">Famille</label>
         <select
+          id="famille-filter"
           className="input"
           value={familleFilter}
           onChange={e => { setPage(1); setFamilleFilter(e.target.value); }}
@@ -102,7 +106,9 @@ export default function Produits() {
           <option value="">Toutes familles</option>
           {familles.map(f => <option key={f} value={f}>{f}</option>)}
         </select>
+        <label className="sr-only" htmlFor="actif-filter">Actif</label>
         <select
+          id="actif-filter"
           className="input"
           value={actifFilter}
           onChange={e => { setPage(1); setActifFilter(e.target.value); }}
@@ -125,6 +131,7 @@ export default function Produits() {
       </div>
       <div className="bg-white/70 shadow rounded-xl overflow-x-auto">
         <table className="min-w-full table-auto text-center">
+          <caption className="sr-only">Liste des produits</caption>
           <thead>
             <tr>
               <th className="cursor-pointer" onClick={() => toggleSort("nom")}>Nom{renderArrow("nom")}</th>

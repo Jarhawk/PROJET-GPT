@@ -42,8 +42,8 @@ export default function Dashboard() {
   }, [trendProduct, fetchTrends]);
 
   useEffect(() => { fetchDashboard(caFnb); }, [caFnb]);
-  if (loading) return <div className="p-6">Chargement...</div>;
-  if (error) return <div className="p-6 text-red-600">{error}</div>;
+  if (loading) return <div className="p-6" role="status">Chargement...</div>;
+  if (error) return <div className="p-6 text-red-600" role="alert">{error}</div>;
 
   return (
     <div className="p-6 container mx-auto">
@@ -95,7 +95,7 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div className="bg-white rounded-xl shadow-md p-4">
+        <div className="bg-white rounded-xl shadow-md p-4" role="img" aria-label="Graphique de l'évolution de la valorisation du stock">
           <h2 className="font-semibold mb-2">Évolution valorisation stock</h2>
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={evolutionStock}>
@@ -107,7 +107,7 @@ export default function Dashboard() {
             </LineChart>
           </ResponsiveContainer>
         </div>
-        <div className="bg-white rounded-xl shadow-md p-4">
+        <div className="bg-white rounded-xl shadow-md p-4" role="img" aria-label="Graphique de la consommation sur 12 mois">
           <h2 className="font-semibold mb-2">Consommation (12 derniers mois)</h2>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={evolutionConso}>
@@ -122,7 +122,7 @@ export default function Dashboard() {
       </div>
 
       {/* Food cost par famille */}
-      <div className="bg-white rounded-xl shadow-md p-4 mb-8">
+      <div className="bg-white rounded-xl shadow-md p-4 mb-8" role="img" aria-label="Graphique du food cost par famille">
         <h2 className="font-semibold mb-2">Food cost par famille</h2>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={foodCostParFamille}>
@@ -140,7 +140,7 @@ export default function Dashboard() {
       </div>
 
       {/* Évolution food cost (line chart) */}
-      <div className="bg-white rounded-xl shadow-md p-4 mb-8">
+      <div className="bg-white rounded-xl shadow-md p-4 mb-8" role="img" aria-label="Graphique de l'évolution du food cost">
         <h2 className="font-semibold mb-2">Évolution food cost (%)</h2>
         <ResponsiveContainer width="100%" height={220}>
           <LineChart data={evolutionFoodCost}>
@@ -154,7 +154,7 @@ export default function Dashboard() {
       </div>
 
       {/* Top produits consommés */}
-      <div className="bg-white rounded-xl shadow-md p-4 mb-8">
+      <div className="bg-white rounded-xl shadow-md p-4 mb-8" role="img" aria-label="Diagramme des produits les plus consommés">
         <h2 className="font-semibold mb-2">Top produits consommés</h2>
         {topProducts.length === 0 ? (
           <p className="text-center text-sm text-gray-500 py-8">Aucune donnée</p>
@@ -184,7 +184,7 @@ export default function Dashboard() {
 
       {/* Tendance prix d'achat */}
       {trendProduct && (
-        <div className="bg-white rounded-xl shadow-md p-4 mb-8">
+        <div className="bg-white rounded-xl shadow-md p-4 mb-8" role="img" aria-label="Graphique de la tendance des prix d'achat">
           <h2 className="font-semibold mb-2">Tendance prix d'achat</h2>
           <select
             className="input mb-2"
@@ -211,6 +211,7 @@ export default function Dashboard() {
       <div className="bg-white rounded-xl shadow-md p-4 mb-8">
         <h2 className="font-semibold mb-2">Alertes stocks bas</h2>
         <table className="min-w-full bg-gray-50 rounded text-xs">
+          <caption className="sr-only">Produits avec stock inférieur au minimum</caption>
           <thead>
             <tr>
               <th>Produit</th>

@@ -238,8 +238,9 @@ export default function Transferts() {
       {/* Barre filtre, exports */}
       <div className="flex gap-4 mb-4 items-end">
         <div>
-          <label className="block font-medium">Début période</label>
+          <label className="block font-medium" htmlFor="tf-debut">Début période</label>
           <input
+            id="tf-debut"
             type="date"
             className="input input-bordered"
             value={periode.debut}
@@ -247,8 +248,9 @@ export default function Transferts() {
           />
         </div>
         <div>
-          <label className="block font-medium">Fin période</label>
+          <label className="block font-medium" htmlFor="tf-fin">Fin période</label>
           <input
+            id="tf-fin"
             type="date"
             className="input input-bordered"
             value={periode.fin}
@@ -256,7 +258,9 @@ export default function Transferts() {
             max={today}
           />
         </div>
+        <label className="sr-only" htmlFor="tf-search">Recherche</label>
         <input
+          id="tf-search"
           className="input input-bordered w-64"
           placeholder="Recherche produit, zone, motif"
           value={search}
@@ -268,6 +272,7 @@ export default function Transferts() {
       </div>
       <div className="bg-white shadow rounded-xl overflow-x-auto">
         <table className="min-w-full table-auto text-center">
+          <caption className="sr-only">Historique des transferts</caption>
           <thead>
             <tr>
               <th className="px-2 py-1">Date</th>

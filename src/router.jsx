@@ -21,6 +21,7 @@ const ComparatifPrix = lazy(() => import("@/pages/fournisseurs/comparatif/Compar
 const Factures = lazy(() => import("@/pages/factures/Factures.jsx"));
 const FactureForm = lazy(() => import("@/pages/factures/FactureForm.jsx"));
 const FactureDetail = lazy(() => import("@/pages/factures/FactureDetail.jsx"));
+const ImportFactures = lazy(() => import("@/pages/factures/ImportFactures.jsx"));
 
 // Fiches Techniques
 const Fiches = lazy(() => import("@/pages/fiches/Fiches.jsx"));
@@ -53,9 +54,19 @@ const Permissions = lazy(() => import("@/pages/parametrage/Permissions.jsx"));
 const Mamas = lazy(() => import("@/pages/parametrage/Mamas.jsx"));
 const Parametrage = lazy(() => import("@/pages/parametrage/Parametrage.jsx"));
 const Journal = lazy(() => import("@/pages/Journal.jsx"));
+const AuditTrail = lazy(() => import("@/pages/AuditTrail.jsx"));
 const StatsCostCenters = lazy(() => import("@/pages/stats/StatsCostCenters.jsx"));
 const StatsCostCentersPivot = lazy(() => import("@/pages/stats/StatsCostCentersPivot.jsx"));
 const StatsStock = lazy(() => import("@/pages/stats/StatsStock.jsx"));
+const StatsConsolidation = lazy(() => import("@/pages/stats/StatsConsolidation.jsx"));
+const StatsAdvanced = lazy(() => import("@/pages/stats/StatsAdvanced.jsx"));
+// Planning prévisionnel
+const Planning = lazy(() => import("@/pages/Planning.jsx"));
+const Alertes = lazy(() => import("@/pages/Alertes.jsx"));
+const Documents = lazy(() => import("@/pages/Documents.jsx"));
+const Validations = lazy(() => import("@/pages/Validations.jsx"));
+const Onboarding = lazy(() => import("@/pages/Onboarding.jsx"));
+const HelpCenter = lazy(() => import("@/pages/HelpCenter.jsx"));
 
 // Taches
 const Taches = lazy(() => import("@/pages/taches/Taches.jsx"));
@@ -103,6 +114,22 @@ export default function RouterConfig() {
           element={
             <ProtectedRoute accessKey="dashboard">
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/onboarding"
+          element={
+            <ProtectedRoute accessKey="dashboard">
+              <Onboarding />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/aide"
+          element={
+            <ProtectedRoute accessKey="dashboard">
+              <HelpCenter />
             </ProtectedRoute>
           }
         />
@@ -185,6 +212,14 @@ export default function RouterConfig() {
           element={
             <ProtectedRoute accessKey="factures">
               <FactureForm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/factures/import"
+          element={
+            <ProtectedRoute accessKey="factures">
+              <ImportFactures />
             </ProtectedRoute>
           }
         />
@@ -323,6 +358,46 @@ export default function RouterConfig() {
           }
         />
 
+        {/* Planning prévisionnel */}
+        <Route
+          path="/planning"
+          element={
+            <ProtectedRoute accessKey="planning">
+              <Planning />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Alertes avancées */}
+        <Route
+          path="/alertes"
+          element={
+            <ProtectedRoute accessKey="alertes">
+              <Alertes />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Documents */}
+        <Route
+          path="/documents"
+          element={
+            <ProtectedRoute accessKey="documents">
+              <Documents />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Validations */}
+        <Route
+          path="/validations"
+          element={
+            <ProtectedRoute accessKey="validations">
+              <Validations />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Taches */}
         <Route
           path="/taches"
@@ -403,6 +478,15 @@ export default function RouterConfig() {
           }
         />
 
+        <Route
+          path="/audit-trail"
+          element={
+            <ProtectedRoute accessKey="audit">
+              <AuditTrail />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Stats cost centers */}
         <Route
           path="/stats/cost-centers"
@@ -425,6 +509,22 @@ export default function RouterConfig() {
           element={
             <ProtectedRoute accessKey="dashboard">
               <StatsStock />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/stats/advanced"
+          element={
+            <ProtectedRoute accessKey="dashboard">
+              <StatsAdvanced />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/stats/consolidation"
+          element={
+            <ProtectedRoute accessKey="dashboard">
+              <StatsConsolidation />
             </ProtectedRoute>
           }
         />

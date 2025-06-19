@@ -12,7 +12,16 @@ const pageModules = import.meta.glob("./pages/**/*.jsx");
 function toRoutePath(file) {
   let p = file.replace(/^\.\/pages/, "").replace(/\.jsx$/, "");
   p = p.replace(/\/index$/i, "");
-  const parts = p.split("/").map(seg => seg.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase());
+  const parts = p
+    .split("/")
+    .map((seg) => seg.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase());
+  for (let i = 1; i < parts.length; ) {
+    if (parts[i] === parts[i - 1]) {
+      parts.splice(i, 1);
+    } else {
+      i += 1;
+    }
+  }
   p = parts.join("/");
   if (p === "/auth/login") return "/login";
   if (p === "/debug/auth-debug") return "/debug/auth";
@@ -20,7 +29,7 @@ function toRoutePath(file) {
 }
 
 const routes = Object.entries(pageModules).map(([file, loader]) => ({
-  path: toRoutePath(file.replace("./pages", "")),
+  path: toRoutePath(file),
   Component: lazy(loader),
 }));
 

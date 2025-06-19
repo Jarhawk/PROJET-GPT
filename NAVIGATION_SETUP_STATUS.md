@@ -2,6 +2,6 @@
 // AuthContext.jsx: ✅
 // Sidebar.jsx: ✅
 // Layout.jsx: ✅
-// router.jsx: ✅
+// router.jsx: ✅ (global dedupe fix)
 // App.jsx: ✅
 // AuthDebug.jsx: ✅

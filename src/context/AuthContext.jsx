@@ -48,10 +48,10 @@ export function AuthProvider({ children }) {
     setLoading(true);
 
     // Check session à l'ouverture
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user || null);
-      if (session?.user) fetchClaims(session.user.id);
+      if (session?.user) await fetchClaims(session.user.id);
       setLoading(false);
     });
 
@@ -96,10 +96,11 @@ export function AuthProvider({ children }) {
     claimsError,
     logout,
     refreshClaims,
+    user_id: user?.id || null,
     isAuthenticated: !!user && !!claims,
     isAdmin: claims?.role === "admin" || claims?.role === "superadmin",
     mama_id: claims?.mama_id || null,
-    access_rights: claims?.access_rights || [],
+    access_rights: claims?.access_rights,
     role: claims?.role || null,
   };
 

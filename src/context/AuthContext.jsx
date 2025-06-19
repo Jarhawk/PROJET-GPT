@@ -1,118 +1,85 @@
 // src/context/AuthContext.jsx
 
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 // Contexte global Auth
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [session, setSession] = useState(null);             // Session Supabase
-  const [user, setUser] = useState(null);                   // Objet user (email, id, etc.)
-  const [claims, setClaims] = useState(null);               // { role, mama_id, access_rights }
-  const [loading, setLoading] = useState(true);             // Chargement initial/refresh
-  const [claimsError, setClaimsError] = useState(null);
+  const [session, setSession] = useState(null); // Session Supabase
+  const [userData, setUserData] = useState({
+    role: null,
+    mama_id: null,
+    access_rights: [],
+    user_id: null,
+  });
+  const [loading, setLoading] = useState(true); // Chargement initial/refresh
 
-  // Récupérer les claims personnalisés depuis la table "users"
-  const fetchClaims = useCallback(async (userId) => {
-    if (!userId) {
-      setClaims(null);
-      setClaimsError(null);
+  async function fetchUserData(session) {
+    if (!session?.user) {
+      setUserData({ role: null, mama_id: null, access_rights: [], user_id: null });
       return;
     }
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("users")
       .select("role, mama_id, access_rights")
-      .eq("id", userId)
+      .eq("id", session.user.id)
       .single();
 
-    if (error) {
-      setClaims(null);
-      setClaimsError(error.message || "Erreur lors de la récupération des droits utilisateur.");
-      console.error("Erreur récupération claims:", error);
-    } else if (!data) {
-      setClaims(null);
-      setClaimsError("Aucune information utilisateur trouvée pour ce compte.");
-    } else {
-      setClaims({
-        role: data.role,
-        mama_id: data.mama_id,
-        access_rights: data.access_rights || [],
-      });
-      setClaimsError(null);
-    }
-  }, []);
+    setUserData({
+      role: data?.role || null,
+      mama_id: data?.mama_id || null,
+      access_rights: Array.isArray(data?.access_rights) ? data.access_rights : [],
+      user_id: session.user.id,
+    });
+  }
 
   // Initialisation / listener session Supabase
   useEffect(() => {
     setLoading(true);
 
-    // Check session à l'ouverture
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
-      setUser(session?.user || null);
-      if (session?.user) await fetchClaims(session.user.id);
+      if (session) await fetchUserData(session);
       setLoading(false);
     });
 
-    // Listener sur les changements d'état auth
-    const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
-      setUser(session?.user || null);
-      if (session?.user) {
+      if (session) {
         setLoading(true);
-        await fetchClaims(session.user.id);
+        await fetchUserData(session);
         setLoading(false);
       } else {
-        setClaims(null);
-        setClaimsError(null);
+        setUserData({ role: null, mama_id: null, access_rights: [], user_id: null });
       }
     });
 
     return () => listener?.subscription?.unsubscribe();
-  }, [fetchClaims]);
-
-  // Rafraîchit manuellement les claims (ex: changement de droits à chaud)
-  const refreshClaims = useCallback(() => {
-    if (user?.id) fetchClaims(user.id);
-  }, [user, fetchClaims]);
+  }, []);
 
   // Déconnexion utilisateur
   const logout = async () => {
     await supabase.auth.signOut();
     setSession(null);
-    setUser(null);
-    setClaims(null);
-    setClaimsError(null);
+    setUserData({ role: null, mama_id: null, access_rights: [], user_id: null });
     window.location.href = "/login";
   };
 
   // Exporte le contexte
   const value = {
+    ...userData,
     session,
-    user,
-    claims,             // { role, mama_id, access_rights }
     loading,
-    claimsError,
     logout,
-    refreshClaims,
-    user_id: user?.id || null,
-    isAuthenticated: !!user && !!claims,
-    isAdmin: claims?.role === "admin" || claims?.role === "superadmin",
-    mama_id: claims?.mama_id || null,
-    access_rights: claims?.access_rights,
-    role: claims?.role || null,
+    isAuthenticated: !!session,
+    isAdmin: userData.role === "admin" || userData.role === "superadmin",
   };
 
   return (
     <AuthContext.Provider value={value}>
       {children}
-      {/* Affiche une alerte si claims non trouvés */}
-      {claimsError && (
-        <div className="fixed top-4 right-4 bg-red-700 text-white px-4 py-2 rounded-lg shadow z-50 animate-fade-in">
-          <b>Erreur sécurité :</b> {claimsError}
-        </div>
-      )}
     </AuthContext.Provider>
   );
 }

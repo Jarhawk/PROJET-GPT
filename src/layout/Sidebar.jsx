@@ -151,7 +151,7 @@ const MENUS = [
 ];
 
 export default function Sidebar() {
-  const { access_rights, role } = useAuth();
+  const { access_rights, role, loading } = useAuth();
   const location = useLocation();
   const containerRef = useRef(null);
 
@@ -188,7 +188,7 @@ export default function Sidebar() {
     setOpen(newOpen);
   }, [location.pathname]);
 
-  if (access_rights === undefined) return <div>Chargement des droits...</div>;
+  if (loading) return null;
 
   const hasAccess = (accessKey) =>
     role === "superadmin" ||

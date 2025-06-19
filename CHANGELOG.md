@@ -8,6 +8,7 @@
 - Cost center allocation modal and settings management
 - Cost center analytics page with SQL view and React UI
 - Excel import/export on the cost center settings page
+- Consolidated `full_setup.sql` combines schema, policies and patches for easier database setup
 - Cost center Excel import falls back to the first sheet when "CostCenters" is missing
 - Monthly cost center pivot page with trend table
 - Cost center analytics pages `/stats/cost-centers` and `/stats/cost-centers-monthly` with Excel export
@@ -58,6 +59,8 @@
 - Index on `users.email` for faster authentication queries
 - Root path `/` now redirects to `/dashboard` for convenience
 - Dashboard page shows loading and error messages while fetching data
+- README clarifies that `full_setup.sql` is idempotent and bundles schema,
+  policies and patches for repeated use.
 
 ### Changed
 - Updated ESLint config and cleaned all warnings.

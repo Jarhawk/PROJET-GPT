@@ -151,22 +151,15 @@ const MENUS = [
 ];
 
 export default function Sidebar() {
-  const { access_rights } = useAuth();
+  const { access_rights, role } = useAuth();
   const location = useLocation();
   const containerRef = useRef(null);
-
-  useEffect(() => {
-    if (Array.isArray(access_rights) && access_rights.length === 0) {
-      console.warn("Aucun droit d'accès défini pour l'utilisateur", access_rights);
-    }
-  }, [access_rights]);
-
-  if (!access_rights) return <div>Chargement des droits...</div>;
 
   // Permet de voir quels menus sont ouverts selon la route active
   const [open, setOpen] = useState({});
   const [mobileOpen, setMobileOpen] = useState(false);
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
   useSwipe(containerRef, {
     onSwipeLeft: () => setMobileOpen(false),
     onSwipeRight: () => setMobileOpen(true),
@@ -176,6 +169,12 @@ export default function Sidebar() {
     document.addEventListener('toggle-sidebar', toggle);
     return () => document.removeEventListener('toggle-sidebar', toggle);
   }, []);
+
+  useEffect(() => {
+    if (Array.isArray(access_rights) && access_rights.length === 0) {
+      console.warn("Aucun droit d'accès défini pour l'utilisateur", access_rights);
+    }
+  }, [access_rights]);
 
   useEffect(() => {
     const path = location.pathname;
@@ -189,8 +188,11 @@ export default function Sidebar() {
     setOpen(newOpen);
   }, [location.pathname]);
 
+  if (access_rights === undefined) return <div>Chargement des droits...</div>;
+
   const hasAccess = (accessKey) =>
-    access_rights?.includes?.(accessKey) ||
+    role === "superadmin" ||
+    (Array.isArray(access_rights) && access_rights.includes(accessKey)) ||
     (typeof access_rights === "object" && access_rights?.[accessKey]);
 
   return (

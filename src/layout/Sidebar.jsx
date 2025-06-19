@@ -1,10 +1,11 @@
 // src/layout/Sidebar.jsx
 import { useAuth } from "@/context/AuthContext";
 import { Link, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import mamaLogo from "@/assets/logo-mamastock.png";
 import { ChevronRight, ChevronDown } from "lucide-react";
 import { AnimatePresence, motion as Motion } from "framer-motion";
+import { useSwipe } from "@/hooks/useSwipe";
 
 const MENUS = [
   {
@@ -55,6 +56,18 @@ const MENUS = [
     accessKey: "factures",
   },
   {
+    label: "Import e-factures",
+    icon: "⬆️",
+    to: "/factures/import",
+    accessKey: "factures",
+  },
+  {
+    label: "Promotions",
+    icon: "🏷️",
+    to: "/promotions",
+    accessKey: "promotions",
+  },
+  {
     label: "Menus du jour",
     icon: "🍽️",
     to: "/menus",
@@ -65,6 +78,30 @@ const MENUS = [
     icon: "🗓️",
     to: "/taches",
     accessKey: "taches",
+  },
+  {
+    label: "Planning",
+    icon: "🗓️",
+    to: "/planning",
+    accessKey: "planning",
+  },
+  {
+    label: "Alertes",
+    icon: "🔔",
+    to: "/alertes",
+    accessKey: "alertes",
+  },
+  {
+    label: "Documents",
+    icon: "📂",
+    to: "/documents",
+    accessKey: "documents",
+  },
+  {
+    label: "Validations",
+    icon: "✅",
+    to: "/validations",
+    accessKey: "validations",
   },
   {
     label: "Fournisseurs",
@@ -84,6 +121,7 @@ const MENUS = [
     to: "/journal",
     accessKey: "audit",
   },
+  { label: "Audit avancé", icon: "📜", to: "/audit-trail", accessKey: "audit" },
   {
     label: "Statistiques",
     icon: "📈",
@@ -92,8 +130,12 @@ const MENUS = [
       { label: "Cost centers", to: "/stats/cost-centers" },
       { label: "CC mensuels", to: "/stats/cost-centers-monthly" },
       { label: "Stocks produits", to: "/stats/stocks" },
+      { label: "Consolidation", to: "/stats/consolidation" },
+      { label: "Analytique avancée", to: "/stats/advanced" },
     ],
   },
+  { label: "Onboarding", icon: "❓", to: "/onboarding", accessKey: "dashboard" },
+  { label: "Aide", icon: "💡", to: "/aide", accessKey: "dashboard" },
   {
     label: "Paramétrage",
     icon: "⚙️",
@@ -111,9 +153,21 @@ const MENUS = [
 export default function Sidebar() {
   const { access_rights } = useAuth();
   const location = useLocation();
+  const containerRef = useRef(null);
 
   // Permet de voir quels menus sont ouverts selon la route active
   const [open, setOpen] = useState({});
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  useSwipe(containerRef, {
+    onSwipeLeft: () => setMobileOpen(false),
+    onSwipeRight: () => setMobileOpen(true),
+  });
+  useEffect(() => {
+    const toggle = () => setMobileOpen(o => !o);
+    document.addEventListener('toggle-sidebar', toggle);
+    return () => document.removeEventListener('toggle-sidebar', toggle);
+  }, []);
 
   useEffect(() => {
     const path = location.pathname;
@@ -133,7 +187,8 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="w-64 min-h-screen bg-white/50 backdrop-blur-2xl border-r border-mamastockGold shadow-lg flex flex-col glass-sidebar transition-all"
+      ref={containerRef}
+      className={`w-64 min-h-screen bg-white/50 backdrop-blur-2xl border-r border-mamastockGold shadow-lg flex flex-col glass-sidebar transition-all transform md:translate-x-0 ${isMobile ? (mobileOpen ? 'translate-x-0' : '-translate-x-full') : ''}`}
       style={{
         boxShadow:
           "0 8px 32px 0 rgba(31, 38, 135, 0.23), 0 1.5px 8px 0 #bfa14d55",

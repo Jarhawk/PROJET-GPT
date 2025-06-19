@@ -638,3 +638,327 @@ $$;
 create trigger trg_log_promotions
 after insert or update or delete on promotions
 for each row execute function log_promotions_changes();
+
+-- View and function for consolidated multi-site stats
+create or replace view v_consolidated_stats as
+select
+  m.id as mama_id,
+  m.nom,
+  coalesce(sum(p.stock_reel * p.pmp),0) as stock_valorise,
+  (select count(*) from mouvements_stock ms where ms.mama_id = m.id) as nb_mouvements,
+  (select sum(abs(ms.quantite)) from mouvements_stock ms
+      where ms.mama_id = m.id and ms.type='sortie'
+        and date_trunc('month', ms.date) = date_trunc('month', current_date)) as conso_mois
+from mamas m
+left join products p on p.mama_id = m.id
+group by m.id, m.nom;
+grant select on v_consolidated_stats to authenticated;
+
+create or replace function consolidated_stats()
+returns table(
+  mama_id uuid,
+  nom text,
+  stock_valorise numeric,
+  conso_mois numeric,
+  nb_mouvements bigint
+)
+language sql
+security definer as $$
+  select * from v_consolidated_stats
+  where (
+    select role from users where id = auth.uid()
+  ) = 'superadmin' or mama_id = current_user_mama_id();
+$$;
+
+grant execute on function consolidated_stats() to authenticated;
+
+-- Advanced audit trail for legal compliance
+create table if not exists audit_entries (
+    id serial primary key,
+    mama_id uuid not null references mamas(id) on delete cascade,
+    table_name text not null,
+    row_id uuid,
+    operation text not null,
+    old_data jsonb,
+    new_data jsonb,
+    changed_by uuid references users(id) on delete set null,
+    changed_at timestamptz default now()
+);
+create index if not exists idx_audit_entries_mama on audit_entries(mama_id);
+create index if not exists idx_audit_entries_table on audit_entries(table_name);
+create index if not exists idx_audit_entries_date on audit_entries(changed_at);
+
+alter table audit_entries enable row level security;
+alter table audit_entries force row level security;
+create policy audit_entries_all on audit_entries
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+grant select on audit_entries to authenticated;
+
+create or replace function add_audit_entry()
+returns trigger language plpgsql security definer as $$
+begin
+  insert into audit_entries(mama_id, table_name, row_id, operation, old_data, new_data, changed_by)
+  values(coalesce(new.mama_id, old.mama_id), TG_TABLE_NAME, coalesce(new.id, old.id), TG_OP, to_jsonb(old), to_jsonb(new), auth.uid());
+  return new;
+end;
+$$;
+grant execute on function add_audit_entry() to authenticated;
+
+create trigger trg_audit_products
+after insert or update or delete on products
+for each row execute function add_audit_entry();
+create trigger trg_audit_factures
+after insert or update or delete on factures
+for each row execute function add_audit_entry();
+
+-- Planning prévisionnel des besoins
+create table if not exists planning_previsionnel (
+    id uuid primary key default uuid_generate_v4(),
+    mama_id uuid not null references mamas(id) on delete cascade,
+    date_prevue date not null,
+    notes text,
+    created_by uuid references users(id) on delete set null,
+    created_at timestamptz default now()
+);
+create index if not exists idx_planning_mama on planning_previsionnel(mama_id, date_prevue);
+alter table planning_previsionnel enable row level security;
+alter table planning_previsionnel force row level security;
+create policy planning_previsionnel_all on planning_previsionnel
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+grant select, insert, update, delete on planning_previsionnel to authenticated;
+create trigger trg_audit_planning
+after insert or update or delete on planning_previsionnel
+for each row execute function add_audit_entry();
+
+-- Alertes avancees automatique
+create table if not exists alert_rules (
+    id uuid primary key default uuid_generate_v4(),
+    mama_id uuid not null references mamas(id) on delete cascade,
+    product_id uuid references products(id) on delete cascade,
+    threshold numeric not null,
+    message text,
+    enabled boolean default true,
+    created_at timestamptz default now()
+);
+create index if not exists idx_alert_rules_mama on alert_rules(mama_id);
+alter table alert_rules enable row level security;
+alter table alert_rules force row level security;
+create policy alert_rules_all on alert_rules
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+grant select, insert, update, delete on alert_rules to authenticated;
+
+create table if not exists alert_logs (
+    id uuid primary key default uuid_generate_v4(),
+    rule_id uuid references alert_rules(id) on delete cascade,
+    mama_id uuid not null references mamas(id) on delete cascade,
+    product_id uuid references products(id) on delete cascade,
+    stock_reel numeric,
+    created_at timestamptz default now()
+);
+create index if not exists idx_alert_logs_mama on alert_logs(mama_id);
+alter table alert_logs enable row level security;
+alter table alert_logs force row level security;
+create policy alert_logs_all on alert_logs
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+grant select on alert_logs to authenticated;
+
+create or replace function check_stock_alert()
+returns trigger language plpgsql as $$
+declare
+  r record;
+begin
+  for r in
+    select * from alert_rules
+    where enabled and mama_id = new.mama_id
+      and (product_id is null or product_id = new.id)
+  loop
+    if new.stock_reel < r.threshold then
+      insert into alert_logs(rule_id, mama_id, product_id, stock_reel)
+        values (r.id, new.mama_id, new.id, new.stock_reel);
+    end if;
+  end loop;
+  return new;
+end;
+$$;
+
+grant execute on function check_stock_alert() to authenticated;
+
+create trigger trg_stock_alert
+after update of stock_reel on products
+for each row execute function check_stock_alert();
+
+
+-- Import automatique des factures electroniques
+create table if not exists incoming_invoices (
+    id uuid primary key default uuid_generate_v4(),
+    mama_id uuid not null references mamas(id) on delete cascade,
+    fournisseur_id uuid references fournisseurs(id) on delete set null,
+    payload jsonb not null,
+    processed boolean default false,
+    created_at timestamptz default now()
+);
+create index if not exists idx_incoming_invoices_mama on incoming_invoices(mama_id);
+
+alter table incoming_invoices enable row level security;
+alter table incoming_invoices force row level security;
+create policy incoming_invoices_all on incoming_invoices
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+grant select, insert, update, delete on incoming_invoices to authenticated;
+
+create or replace function import_invoice(payload jsonb)
+returns uuid language plpgsql security definer as $$
+declare
+  fac_id uuid;
+  supp_id uuid;
+begin
+  select id into supp_id from fournisseurs
+    where nom = payload->>'supplier_name'
+      and mama_id = current_user_mama_id()
+    limit 1;
+  insert into factures(reference, date, fournisseur_id, montant, statut, mama_id)
+    values (payload->>'reference', (payload->>'date')::date, supp_id,
+            (payload->>'total')::numeric, 'en attente', current_user_mama_id())
+    returning id into fac_id;
+  insert into facture_lignes(facture_id, product_id, quantite, prix_unitaire, mama_id)
+  select fac_id, p.id, (l->>'quantity')::numeric, (l->>'unit_price')::numeric, current_user_mama_id()
+  from jsonb_array_elements(payload->'lines') as l
+  left join products p on p.code = l->>'product_code' and p.mama_id = current_user_mama_id();
+  return fac_id;
+end;
+$$;
+
+grant execute on function import_invoice(jsonb) to authenticated;
+
+-- Gestion documentaire avancée
+create table if not exists documents (
+    id uuid primary key default uuid_generate_v4(),
+    mama_id uuid not null references mamas(id) on delete cascade,
+    title text not null,
+    file_url text not null,
+    uploaded_by uuid references users(id) on delete set null,
+    created_at timestamptz default now()
+);
+create index if not exists idx_documents_mama on documents(mama_id);
+
+alter table documents enable row level security;
+alter table documents force row level security;
+create policy documents_all on documents
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+
+grant select, insert, update, delete on documents to authenticated;
+
+-- Gestion fine des droits avec validations
+create or replace function current_user_role()
+returns text language sql stable security definer as $$
+  select r.nom from users u join roles r on r.id = u.role_id where u.id = auth.uid();
+$$;
+grant execute on function current_user_role() to authenticated;
+
+create table if not exists validation_requests (
+    id uuid primary key default uuid_generate_v4(),
+    mama_id uuid not null references mamas(id) on delete cascade,
+    module text not null,
+    entity_id uuid,
+    action text not null,
+    status text default 'pending',
+    requested_by uuid references users(id) on delete set null,
+    reviewed_by uuid references users(id) on delete set null,
+    reviewed_at timestamptz,
+    comment text,
+    created_at timestamptz default now()
+);
+create index if not exists idx_validation_requests_mama on validation_requests(mama_id);
+create index if not exists idx_validation_requests_status on validation_requests(status);
+
+alter table validation_requests enable row level security;
+alter table validation_requests force row level security;
+create policy validation_requests_select on validation_requests
+  for select using (mama_id = current_user_mama_id());
+create policy validation_requests_insert on validation_requests
+  for insert with check (
+    mama_id = current_user_mama_id() and requested_by = auth.uid()
+  );
+create policy validation_requests_update on validation_requests
+  for update using (
+    mama_id = current_user_mama_id() and
+    current_user_role() in ('admin','superadmin')
+  ) with check (mama_id = current_user_mama_id());
+create policy validation_requests_delete on validation_requests
+  for delete using (
+    mama_id = current_user_mama_id() and current_user_role() in ('admin','superadmin')
+  );
+
+grant select, insert, update, delete on validation_requests to authenticated;
+
+-- Vue pour l'analytique avancée
+create or replace view v_monthly_purchases as
+select
+  f.mama_id,
+  date_trunc('month', f.date) as month,
+  sum(fl.total) as purchases
+from factures f
+join facture_lignes fl on fl.facture_id = f.id
+group by f.mama_id, month;
+grant select on v_monthly_purchases to authenticated;
+
+create or replace function advanced_stats(start_date date default null, end_date date default null)
+returns table(month date, purchases numeric)
+language sql security definer as $$
+  select month, purchases
+  from v_monthly_purchases
+  where mama_id = current_user_mama_id()
+    and (start_date is null or month >= date_trunc('month', start_date))
+    and (end_date is null or month <= date_trunc('month', end_date))
+  order by month;
+$$;
+grant execute on function advanced_stats(date, date) to authenticated;
+
+-- Suivi de l'onboarding par utilisateur
+create table if not exists onboarding_progress (
+    user_id uuid references users(id) on delete cascade,
+    mama_id uuid not null references mamas(id) on delete cascade,
+    step integer default 0,
+    updated_at timestamptz default now(),
+    primary key(user_id, mama_id)
+);
+create index if not exists idx_onboarding_mama on onboarding_progress(mama_id);
+alter table onboarding_progress enable row level security;
+alter table onboarding_progress force row level security;
+create policy onboarding_progress_select on onboarding_progress
+  for select to authenticated
+  using (user_id = auth.uid());
+create policy onboarding_progress_insert on onboarding_progress
+  for insert to authenticated
+  with check (user_id = auth.uid() and mama_id = current_user_mama_id());
+create policy onboarding_progress_update on onboarding_progress
+  for update to authenticated
+  using (user_id = auth.uid())
+  with check (user_id = auth.uid());
+grant select, insert, update on onboarding_progress to authenticated;
+
+-- Articles d'aide et FAQ
+create table if not exists help_articles (
+    id uuid primary key default uuid_generate_v4(),
+    mama_id uuid not null references mamas(id) on delete cascade,
+    title text not null,
+    content text not null,
+    role text default 'all',
+    created_at timestamptz default now()
+);
+create index if not exists idx_help_articles_mama on help_articles(mama_id);
+alter table help_articles enable row level security;
+alter table help_articles force row level security;
+create policy help_articles_select on help_articles
+  for select to authenticated
+  using (mama_id = current_user_mama_id());
+create policy help_articles_mutation on help_articles
+  for all to authenticated
+  using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+grant select, insert, update, delete on help_articles to authenticated;

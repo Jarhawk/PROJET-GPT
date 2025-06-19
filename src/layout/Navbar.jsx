@@ -8,6 +8,9 @@ export default function Navbar() {
   const [term, setTerm] = useState("");
   const { results, search } = useGlobalSearch();
   const [dark, setDark] = useState(false);
+  const toggleSidebar = () => {
+    document.dispatchEvent(new CustomEvent('toggle-sidebar'));
+  };
 
   useEffect(() => {
     if (localStorage.theme === 'dark') {
@@ -34,9 +37,14 @@ export default function Navbar() {
   return (
     <nav className="bg-mamastock-bg border-b border-mamastock-gold text-white px-6 py-4 flex items-center justify-between shadow-md">
       {/* Logo / Titre */}
-      <h1 className="text-2xl font-bold text-mamastock-gold tracking-widest">
-        MAMA STOCK
-      </h1>
+      <div className="flex items-center gap-4">
+        <button onClick={toggleSidebar} className="md:hidden text-mamastock-gold text-2xl" aria-label="Ouvrir le menu">
+          ☰
+        </button>
+        <h1 className="text-2xl font-bold text-mamastock-gold tracking-widest">
+          MAMA STOCK
+        </h1>
+      </div>
 
       {/* Zone utilisateur */}
       <div className="flex items-center gap-4">

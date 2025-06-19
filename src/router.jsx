@@ -12,6 +12,22 @@ const pageModules = import.meta.glob("./pages/**/*.jsx");
 function toRoutePath(file) {
   let p = file.replace(/^\.\/pages/, "").replace(/\.jsx$/, "");
   p = p.replace(/\/index$/i, "");
+  const parts = p
+    .split("/")
+    .map(seg => seg.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase());
+
+  if (parts.length > 1) {
+    const last = parts[parts.length - 1];
+    const prev = parts[parts.length - 2];
+    if (last === prev) {
+      parts.pop();
+    } else if (last.startsWith(prev + "-")) {
+      parts[parts.length - 1] = last.slice(prev.length + 1);
+    }
+  }
+
+  p = parts.join("/");
+
   const parts = p.split("/").map(seg => seg.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase());
   p = parts.join("/");
   if (p === "/auth/login") return "/login";
@@ -50,6 +66,11 @@ export default function Router() {
         <Route path="/login" element={<Login />} />
         <Route element={<Layout />}>
           {routes
+            .filter(r =>
+              !["/login", "/debug/auth", "/unauthorized", "/auth/unauthorized"].includes(
+                r.path,
+              ),
+            )
             .filter(r => !["/login", "/debug/auth", "/unauthorized"].includes(r.path))
             .map(({ path, Component }) => {
               const Element = Component;

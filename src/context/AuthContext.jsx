@@ -34,7 +34,11 @@ export function AuthProvider({ children }) {
       setClaims(null);
       setClaimsError("Aucune information utilisateur trouvée pour ce compte.");
     } else {
-      setClaims(data);
+      setClaims({
+        role: data.role,
+        mama_id: data.mama_id,
+        access_rights: data.access_rights || [],
+      });
       setClaimsError(null);
     }
   }, []);

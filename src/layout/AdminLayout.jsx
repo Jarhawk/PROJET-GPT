@@ -1,4 +1,4 @@
-import Sidebar from "@/layout/Sidebar";
+import Sidebar from "@/components/layout/Sidebar";
 import Navbar from "@/layout/Navbar";
 
 /**

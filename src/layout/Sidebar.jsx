@@ -155,6 +155,14 @@ export default function Sidebar() {
   const location = useLocation();
   const containerRef = useRef(null);
 
+  useEffect(() => {
+    if (Array.isArray(access_rights) && access_rights.length === 0) {
+      console.warn("Aucun droit d'accès défini pour l'utilisateur", access_rights);
+    }
+  }, [access_rights]);
+
+  if (!access_rights) return <div>Chargement des droits...</div>;
+
   // Permet de voir quels menus sont ouverts selon la route active
   const [open, setOpen] = useState({});
   const [mobileOpen, setMobileOpen] = useState(false);

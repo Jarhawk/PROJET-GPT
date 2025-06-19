@@ -28,6 +28,8 @@ function toRoutePath(file) {
 
   p = parts.join("/");
 
+  const parts = p.split("/").map(seg => seg.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase());
+  p = parts.join("/");
   if (p === "/auth/login") return "/login";
   if (p === "/debug/auth-debug") return "/debug/auth";
   return p;
@@ -69,6 +71,7 @@ export default function Router() {
                 r.path,
               ),
             )
+            .filter(r => !["/login", "/debug/auth", "/unauthorized"].includes(r.path))
             .map(({ path, Component }) => {
               const Element = Component;
               return (

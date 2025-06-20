@@ -45,9 +45,9 @@ export default function Mamas() {
   );
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
+    <div className="p-8 max-w-4xl mx-auto" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
       <Toaster />
-      <h1 className="text-2xl font-bold text-mamastock-gold mb-4">
+      <h1 className="text-2xl font-bold mb-4">
         Établissements (MAMA)
       </h1>
       <div className="flex gap-4 mb-4 items-end">
@@ -61,7 +61,7 @@ export default function Mamas() {
           + Nouvel établissement
         </Button>
       </div>
-      <div className="bg-white shadow rounded-xl overflow-x-auto mb-6">
+      <div className="bg-white/5 backdrop-blur-lg shadow rounded-xl overflow-x-auto mb-6">
         {loading ? (
           <div className="text-center py-8 text-gray-500">
             <span className="animate-spin mr-2">⏳</span>Chargement…
@@ -145,7 +145,7 @@ export default function Mamas() {
         )}
       </div>
       <Dialog open={!!editMama} onOpenChange={v => !v && setEditMama(null)}>
-        <DialogContent className="bg-white rounded-xl shadow-lg p-6 max-w-md">
+        <DialogContent className="bg-glass backdrop-blur-lg text-white rounded-xl shadow-lg p-6 max-w-md">
           <MamaForm
             mama={editMama}
             onSaved={() => {

@@ -73,9 +73,9 @@ export default function Fournisseurs() {
   }, [fournisseurs, products]);
 
   return (
-    <div className="max-w-7xl mx-auto p-8">
+    <div className="max-w-7xl mx-auto p-8" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
       <Toaster />
-      <h1 className="text-2xl font-bold text-mamastockGold mb-6">Gestion des fournisseurs</h1>
+      <h1 className="text-2xl font-bold mb-6">Gestion des fournisseurs</h1>
       <div className="flex flex-wrap gap-4 mb-6 items-end">
         <div className="relative flex-1">
           <input
@@ -84,7 +84,7 @@ export default function Fournisseurs() {
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
-          <Search className="absolute left-2 top-2.5 text-mamastockGold" size={18} />
+          <Search className="absolute left-2 top-2.5 text-white" size={18} />
         </div>
         <Button onClick={() => setShowCreate(true)}><PlusCircle className="mr-2" /> Ajouter fournisseur</Button>
         <Button variant="outline" onClick={exportFournisseursToExcel}>Export Excel</Button>
@@ -102,7 +102,7 @@ export default function Fournisseurs() {
       )}
       {/* Statistiques générales */}
       <div className="grid md:grid-cols-2 gap-8 mb-10">
-        <div className="glass-card p-4">
+        <div className="bg-glass backdrop-blur-lg p-4 rounded-xl shadow-md">
           <h2 className="font-semibold mb-2">Évolution des achats (tous fournisseurs)</h2>
           <ResponsiveContainer width="100%" height={180}>
             <LineChart data={stats}>
@@ -114,7 +114,7 @@ export default function Fournisseurs() {
             </LineChart>
           </ResponsiveContainer>
         </div>
-        <div className="glass-card p-4">
+        <div className="bg-glass backdrop-blur-lg p-4 rounded-xl shadow-md">
           <h2 className="font-semibold mb-2">Top produits achetés</h2>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={topProducts}>
@@ -128,7 +128,7 @@ export default function Fournisseurs() {
         </div>
       </div>
       {/* Tableau fournisseurs */}
-      <div className="glass-table overflow-x-auto shadow-xl rounded-2xl mb-6">
+      <div className="bg-white/5 backdrop-blur-lg overflow-x-auto shadow-xl rounded-2xl mb-6">
         <table className="min-w-full text-center">
           <thead>
             <tr>
@@ -144,7 +144,7 @@ export default function Fournisseurs() {
           <tbody>
             {fournisseursFiltrés.map(f => (
               <tr key={f.id} className={f.actif ? '' : 'opacity-50'}>
-                <td className="py-1 px-3 font-semibold text-mamastockGold">{f.nom}</td>
+                <td className="py-1 px-3 font-semibold text-white">{f.nom}</td>
                 <td>{f.ville}</td>
                 <td>{f.tel}</td>
                 <td>{f.contact}</td>
@@ -167,7 +167,7 @@ export default function Fournisseurs() {
 
       {/* Modal création/édition */}
       <Dialog open={showCreate || !!editRow} onOpenChange={v => { if (!v) { setShowCreate(false); setEditRow(null); } }}>
-        <DialogContent className="glass-modal max-w-lg w-full p-8">
+        <DialogContent className="bg-glass backdrop-blur-lg rounded-2xl shadow-xl max-w-lg w-full p-8">
           <FournisseurForm
             fournisseur={editRow}
             onCancel={() => { setShowCreate(false); setEditRow(null); }}
@@ -184,31 +184,11 @@ export default function Fournisseurs() {
 
       {/* Modal détail */}
       <Dialog open={!!selected} onOpenChange={v => !v && setSelected(null)}>
-        <DialogContent className="glass-modal max-w-2xl w-full p-10">
+        <DialogContent className="bg-glass backdrop-blur-lg rounded-2xl shadow-xl max-w-2xl w-full p-10">
           {selected && <FournisseurDetail id={selected} />}
         </DialogContent>
       </Dialog>
 
-      <style>{`
-        .glass-card {
-          background: rgba(255,255,255,0.35);
-          backdrop-filter: blur(16px);
-          border-radius: 20px;
-          box-shadow: 0 8px 32px 0 rgba(191,161,77,0.13), 0 1.5px 10px 0 rgba(15,28,46,0.09);
-        }
-        .glass-table {
-          background: rgba(255,255,255,0.32);
-          backdrop-filter: blur(12px);
-          border-radius: 18px;
-        }
-        .glass-modal {
-          background: rgba(255,255,255,0.40);
-          box-shadow: 0 12px 40px 0 #bfa14d1a, 0 2px 20px 0 #0f1c2e21;
-          border-radius: 2rem;
-          backdrop-filter: blur(18px);
-          border: 1.5px solid #e5c98455;
-        }
-      `}</style>
     </div>
   );
 }

@@ -308,13 +308,13 @@ export default function Inventaire() {
   if (!mama_id) return null;
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
+    <div className="p-8 max-w-7xl mx-auto" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
       <Toaster />
-      <h1 className="text-2xl font-bold text-mamastock-gold mb-4">
+      <h1 className="text-2xl font-bold mb-4">
         Suivi des écarts théoriques (Inventaire)
       </h1>
       {/* Graphe top écarts */}
-      <div className="mb-8 bg-white shadow rounded-xl p-4">
+      <div className="mb-8 bg-white/5 backdrop-blur-lg shadow rounded-xl p-4 text-white">
         <h2 className="font-bold mb-2">Top écarts valeur (€)</h2>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={topEcarts}>
@@ -367,8 +367,8 @@ export default function Inventaire() {
         <Button onClick={handleExportAuditPDF}>Export Audit PDF</Button>
       </div>
       {/* Tableau principal, par zone */}
-      <div className="bg-white shadow rounded-xl overflow-x-auto">
-        <table className="min-w-full table-auto text-center">
+      <div className="bg-white/5 backdrop-blur-lg shadow rounded-xl overflow-x-auto">
+        <table className="min-w-full table-auto text-center text-white">
           <thead>
             <tr>
               <th className="px-2 py-1">Produit</th>
@@ -425,7 +425,7 @@ export default function Inventaire() {
                             Timeline
                           </Button>
                         </DialogTrigger>
-                        <DialogContent className="bg-white rounded-xl shadow-lg p-6 max-w-lg">
+                        <DialogContent className="bg-glass backdrop-blur-lg text-white rounded-xl shadow-lg p-6 max-w-lg">
                           <h3 className="font-bold mb-2">
                             Historique inventaire {p.nom} ({zone})
                           </h3>
@@ -465,7 +465,7 @@ export default function Inventaire() {
       </div>
       {/* Modal édition ligne */}
       <Dialog open={!!editRow} onOpenChange={v => !v && setEditRow(null)}>
-        <DialogContent className="bg-white rounded-xl shadow-lg p-6 max-w-md">
+        <DialogContent className="bg-glass backdrop-blur-lg text-white rounded-xl shadow-lg p-6 max-w-md">
           <h2 className="font-bold mb-2">
             Correction stock physique / commentaire
           </h2>
@@ -531,7 +531,7 @@ export default function Inventaire() {
           Justificatifs transferts inter-zones (période)
         </h2>
         <div className="bg-white shadow rounded-xl p-4 mb-4">
-          <table className="min-w-full table-auto text-center">
+          <table className="min-w-full table-auto text-center text-white">
             <thead>
               <tr>
                 <th className="px-2 py-1">Produit</th>

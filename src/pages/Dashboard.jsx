@@ -50,7 +50,7 @@ export default function Dashboard() {
   if (error) return <div className="p-6 text-red-600">{error}</div>;
 
   return (
-    <div className="p-6 container mx-auto">
+    <div className="p-6 container mx-auto" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
       <Toaster position="top-right" />
       <h1 className="text-3xl font-bold mb-6">Dashboard Stock & Achats</h1>
 

@@ -7,7 +7,10 @@ import Navbar from "@/layout/Navbar";
  */
 export default function AdminLayout({ children }) {
   return (
-    <div className="flex min-h-screen bg-mamastock-bg text-white">
+    <div
+      className="flex min-h-screen text-white"
+      style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}
+    >
       <Sidebar />
       <div className="flex flex-col flex-1">
         <Navbar />

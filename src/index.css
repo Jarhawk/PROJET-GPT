@@ -5,7 +5,7 @@
 /* Style custom global pour MamaStock */
 body {
   font-family: "Inter", sans-serif;
-  @apply bg-white text-black dark:bg-mamastock-bg dark:text-mamastock-text;
+  @apply bg-gradient-to-br from-[#2b4b61] to-[#6c92a9] text-white;
 }
 
 a {
@@ -48,7 +48,7 @@ a:hover {
 /* Buttons pro */
 .btn,
 .btn-primary {
-  @apply px-4 py-2 rounded-xl font-bold bg-mamastockGold text-mamastockBg shadow hover:bg-mamastockGoldHover transition;
+  @apply px-4 py-2 rounded-xl font-bold bg-white/10 text-white shadow hover:shadow-md transition backdrop-blur-lg;
 }
 .btn-sm {
   @apply px-2 py-1 text-sm;
@@ -70,13 +70,12 @@ a:hover {
 
 /* Input custom */
 .input {
-  @apply px-3 py-2 rounded-lg border border-mamastockGold bg-transparent text-mamastockText focus:outline-none;
+  @apply px-3 py-2 rounded-lg border border-white/20 bg-white/10 text-white placeholder-white/70 focus:outline-none;
 }
 
 /* Dark mode auto */
 html.dark body {
-  background-color: #111827;
-  color: #f0f0f5;
+  @apply bg-gradient-to-br from-[#2b4b61] to-[#6c92a9] text-white;
 }
 /* Animations LiquidGlass & glass panel */
 .animate-liquid { animation: glassMove 12s ease-in-out infinite alternate; }

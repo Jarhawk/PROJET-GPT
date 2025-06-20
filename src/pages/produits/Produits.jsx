@@ -83,9 +83,9 @@ export default function Produits() {
   }, [fetchProducts, search, familleFilter, actifFilter, page, sortField, sortOrder]);
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
+    <div className="p-8 max-w-7xl mx-auto" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
       <Toaster />
-      <h1 className="text-2xl font-bold text-mamastockGold mb-4">Produits stock</h1>
+      <h1 className="text-2xl font-bold mb-4">Produits stock</h1>
       <div className="flex flex-wrap gap-2 mb-6 items-end">
         <input
           type="search"
@@ -123,8 +123,8 @@ export default function Produits() {
           className="hidden"
         />
       </div>
-      <div className="bg-white/70 shadow rounded-xl overflow-x-auto">
-        <table className="min-w-full table-auto text-center">
+      <div className="bg-white/5 backdrop-blur-lg shadow rounded-xl overflow-x-auto">
+        <table className="min-w-full table-auto text-center text-white">
           <thead>
             <tr>
               <th className="cursor-pointer" onClick={() => toggleSort("nom")}>Nom{renderArrow("nom")}</th>

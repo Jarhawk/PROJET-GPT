@@ -18,7 +18,7 @@ export function Input({
       placeholder={placeholder}
       disabled={disabled}
       aria-label={ariaLabel || placeholder || "Champ de saisie"}
-      className={`w-full p-2 border border-mamastock-gold rounded-md bg-white text-mamastock-text placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-mamastock-gold disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+      className={`w-full p-2 rounded-lg border border-white/20 bg-white/10 text-white placeholder-white/70 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
       {...props}
     />
   );

@@ -231,3 +231,7 @@
 - Reinstalled dependencies and verified lint/tests pass after environment reset.
 - Project stable after latest verification.
 
+## 2025-06-20 Step 37
+- Restored npm dependencies to fix missing eslint packages.
+- Confirmed `npm run lint` and `npm test` succeed on fresh install.
+- Continuing overall review, ready to finalize any remaining modules.

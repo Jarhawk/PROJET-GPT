@@ -182,3 +182,42 @@
 - Verified project linting and unit tests pass
 - e2e tests skipped due to missing Playwright browsers
 - Ready for full integration review
+## 2025-06-20 Step 28
+- Reviewed mobile pages for authentication safety.
+- Added authLoading and mama_id guards in MobileInventaire, MobileRequisition and MobileMouvement.
+- Ran npm run lint and npm test successfully.
+- Next: audit debug pages and finalize integration.
+## 2025-06-20 Step 29
+- Cleaned debug and mobile pages by removing checkmark comments.
+- Updated Debug.jsx, DebugUser.jsx and Ecarts.jsx to use authLoading state.
+- Added loading placeholders when auth data not ready.
+- npm run lint && npm test both pass.
+- Next: finalize integration and review SQL patch.
+
+## 2025-06-20 Step 30
+- Reviewed `mama_stock_patch.sql` ensuring all tables, policies and triggers are idempotent.
+- Reinstalled Node dependencies because lint initially failed.
+- Verified integration by running `npm run lint` and `npm test`, both succeeded.
+- Next: continue auditing remaining modules or finalize docs.
+
+## 2025-06-20 Step 31
+- Removed leftover checkmark comments from core files for clarity.
+- Confirmed `npm run lint` and `npm test` pass after cleanup.
+- Next: finalize documentation review and close remaining tasks.
+
+## 2025-06-20 Step 32
+- Reviewed all documentation for leftover generated comments or checkmarks.
+- Removed outdated navigation status notes.
+- Reinstalled packages and confirmed `npm run lint` and `npm test` pass.
+- Project ready for final integration review.
+
+## 2025-06-20 Step 33
+- Confirmed debug pages use loading state and display spinner when auth not ready.
+- Reinstalled node modules to fix eslint error.
+- Ran npm run lint and npm test successfully.
+- Next: final integration review.
+
+## 2025-06-20 Step 34
+- Ran npm install to restore eslint dependencies.
+- Verified final integration by running `npm run lint` and `npm test` which both pass.
+- Project ready for next phase or deployment.

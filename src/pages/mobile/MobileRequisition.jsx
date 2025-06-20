@@ -1,25 +1,25 @@
-// ✅ src/pages/mobile/MobileRequisition.jsx
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "react-toastify";
 import { useAuth } from "@/context/AuthContext";
 
 export default function MobileRequisition() {
-  const { mama_id } = useAuth();
+  const { mama_id, loading: authLoading } = useAuth();
   const [produits, setProduits] = useState([]);
   const [selectedId, setSelectedId] = useState("");
   const [quantite, setQuantite] = useState(1);
 
   useEffect(() => {
-    if (!mama_id) return;
+    if (authLoading || !mama_id) return;
     supabase
       .from("products")
       .select("id, nom")
       .eq("mama_id", mama_id)
       .then(({ data }) => setProduits(data || []));
-  }, [mama_id]);
+  }, [mama_id, authLoading]);
 
   const handleSubmit = async () => {
+    if (authLoading || !mama_id) return;
     if (!selectedId || quantite <= 0) {
       toast.error("Sélectionnez un produit et une quantité valide");
       return;

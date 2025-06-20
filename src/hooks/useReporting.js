@@ -1,4 +1,4 @@
-// ✅ src/hooks/useReporting.js
+// src/hooks/useReporting.js
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
@@ -21,7 +21,7 @@ export const useReporting = (periode) => {
       const end = `${periode}-31`;
 
       try {
-        // ✅ Quantité réelle issue des mouvements d'inventaire
+        // Quantité réelle issue des mouvements d'inventaire
         const { data: reelData, error: reelError } = await supabase
           .from("stocks")
           .select("quantite, zone")
@@ -30,7 +30,7 @@ export const useReporting = (periode) => {
           .gte("date", start)
           .lte("date", end);
 
-        // ✅ Quantité théorique issue des achats - sorties
+        // Quantité théorique issue des achats - sorties
         const { data: theoData, error: theoError } = await supabase
           .from("stocks")
           .select("quantite, type, zone")

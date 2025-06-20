@@ -13,7 +13,7 @@ export default function Login() {
 
   const { isAuthenticated, loading: authLoading } = useAuth();
 
-  // ✅ Redirection propre (évite navigate dans le rendu)
+  // Redirection propre (évite navigate dans le rendu)
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
       navigate("/");

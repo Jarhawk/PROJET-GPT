@@ -2,7 +2,8 @@ import React from "react";
 import { useAuth } from "@/context/AuthContext";
 
 export default function Debug() {
-  const { session, role, mama_id, access_rights, authReady } = useAuth();
+  const { session, role, mama_id, access_rights, loading: authLoading } = useAuth();
+  if (authLoading) return (<div className="p-8 text-center">⏳ Chargement...</div>);
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
@@ -11,7 +12,7 @@ export default function Debug() {
 
         <div className="space-y-3">
           <div>
-            <strong>authReady :</strong> {authReady ? "✅ true" : "⏳ false"}
+            <strong>Chargement :</strong> {authLoading ? "⏳ true" : "✅ false"}
           </div>
           <div>
             <strong>Session ID :</strong> {session?.id || "❌ Aucun"}

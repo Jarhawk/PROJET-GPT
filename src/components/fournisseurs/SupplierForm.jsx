@@ -47,9 +47,8 @@ export default function SupplierForm({ supplier, onClose, glass }) {
       animate={{ scale: 1, opacity: 1 }}
       exit={{ scale: 0.98, opacity: 0 }}
       onSubmit={handleSubmit}
-      className={`rounded-xl p-6 space-y-4 ${glass ? "bg-white/80 backdrop-blur-xl shadow-2xl border border-mamastockGold" : "bg-white shadow"}`}
-      style={{ minWidth: 340 }}
-    >
+      className={`rounded-xl p-6 space-y-4 ${glass ? "bg-white/80 backdrop-blur-xl shadow-2xl border border-mamastockGold" : "bg-white shadow"} min-w-[340px]`}
+   >
       <h3 className="text-xl font-bold mb-2">{supplier ? "Modifier" : "Ajouter"} un fournisseur</h3>
       <div>
         <label>Nom</label>

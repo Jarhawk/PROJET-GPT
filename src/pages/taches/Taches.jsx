@@ -4,6 +4,7 @@ import { useTasks } from "@/hooks/useTasks";
 import { useAuth } from "@/context/AuthContext";
 import { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
+import TableContainer from "@/components/ui/TableContainer";
 
 export default function Taches() {
   const { tasks, loading, error, fetchTasks, deleteTask } = useTasks();
@@ -23,7 +24,7 @@ export default function Taches() {
   if (error) return <div className="p-8 text-red-600">{error}</div>;
 
   return (
-    <div className="p-8" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
+    <div className="p-8 text-shadow">
       <Toaster position="top-right" />
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Tâches</h1>
@@ -31,7 +32,8 @@ export default function Taches() {
           Nouvelle tâche
         </Link>
       </div>
-      <table className="w-full text-sm bg-white/5 backdrop-blur-lg shadow rounded text-white">
+      <TableContainer className="mb-4">
+        <table className="w-full text-sm text-white">
         <thead>
           <tr>
             <th className="px-2 py-1">Titre</th>
@@ -71,6 +73,7 @@ export default function Taches() {
           )}
         </tbody>
       </table>
+      </TableContainer>
     </div>
   );
 }

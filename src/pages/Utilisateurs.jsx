@@ -4,6 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import UtilisateurForm from "@/components/utilisateurs/UtilisateurForm";
 import UtilisateurDetail from "@/components/utilisateurs/UtilisateurDetail";
 import { Button } from "@/components/ui/button";
+import TableContainer from "@/components/ui/TableContainer";
 import { Toaster, toast } from "react-hot-toast";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
@@ -55,7 +56,7 @@ export default function Utilisateurs() {
   };
 
   return (
-    <div className="p-6 container mx-auto" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
+    <div className="p-6 container mx-auto text-shadow">
       <Toaster position="top-right" />
       <div className="flex flex-wrap gap-4 items-center mb-4">
         <input
@@ -75,11 +76,12 @@ export default function Utilisateurs() {
         </Button>
         <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
       </div>
-      <Motion.table
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="min-w-full bg-white/5 backdrop-blur-lg rounded-xl shadow-md text-white"
-      >
+      <TableContainer className="mb-4">
+        <Motion.table
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="min-w-full text-white"
+        >
         <thead>
           <tr>
             <th className="px-4 py-2">Email</th>
@@ -116,7 +118,8 @@ export default function Utilisateurs() {
             </tr>
           ))}
         </tbody>
-      </Motion.table>
+        </Motion.table>
+      </TableContainer>
       <div className="mt-4 flex gap-2">
         {Array.from({ length: nbPages }, (_, i) => (
           <Button

@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import toast, { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
+import TableContainer from "@/components/ui/TableContainer";
 import { Dialog, DialogContent } from "@radix-ui/react-dialog";
 import PermissionsForm from "./PermissionsForm"; // adapte le chemin si besoin
 
@@ -109,7 +110,7 @@ export default function Roles() {
   if (!mama_id) return null;
 
   return (
-    <div className="p-8 max-w-4xl mx-auto" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
+    <div className="p-8 max-w-4xl mx-auto text-shadow">
       <Toaster />
       <h1 className="text-2xl font-bold mb-4">
         Gestion des rôles
@@ -125,7 +126,7 @@ export default function Roles() {
           + Nouveau rôle
         </Button>
       </div>
-      <div className="bg-white/5 backdrop-blur-lg shadow rounded-xl overflow-x-auto mb-6">
+      <TableContainer className="mb-6">
         <table className="min-w-full table-auto text-center">
           <thead>
             <tr>
@@ -182,7 +183,7 @@ export default function Roles() {
             ))}
           </tbody>
         </table>
-      </div>
+      </TableContainer>
       {/* Pagination */}
       <div className="flex justify-end gap-2 mb-12">
         <Button

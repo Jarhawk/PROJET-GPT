@@ -6,6 +6,7 @@ import { useSupplierProducts } from "@/hooks/useSupplierProducts";
 import { useProducts } from "@/hooks/useProducts";
 import { useFournisseursInactifs } from "@/hooks/useFournisseursInactifs";
 import { Button } from "@/components/ui/button";
+import TableContainer from "@/components/ui/TableContainer";
 import { Dialog, DialogTrigger, DialogContent } from "@radix-ui/react-dialog";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -73,7 +74,7 @@ export default function Fournisseurs() {
   }, [fournisseurs, products]);
 
   return (
-    <div className="max-w-7xl mx-auto p-8" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
+    <div className="max-w-7xl mx-auto p-8 text-shadow">
       <Toaster />
       <h1 className="text-2xl font-bold mb-6">Gestion des fournisseurs</h1>
       <div className="flex flex-wrap gap-4 mb-6 items-end">
@@ -128,7 +129,7 @@ export default function Fournisseurs() {
         </div>
       </div>
       {/* Tableau fournisseurs */}
-      <div className="bg-white/5 backdrop-blur-lg overflow-x-auto shadow-xl rounded-2xl mb-6">
+      <TableContainer className="mb-6 shadow-xl rounded-2xl">
         <table className="min-w-full text-center">
           <thead>
             <tr>
@@ -163,7 +164,7 @@ export default function Fournisseurs() {
             ))}
           </tbody>
         </table>
-      </div>
+      </TableContainer>
 
       {/* Modal création/édition */}
       <Dialog open={showCreate || !!editRow} onOpenChange={v => { if (!v) { setShowCreate(false); setEditRow(null); } }}>

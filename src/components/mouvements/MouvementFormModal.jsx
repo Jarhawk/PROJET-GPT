@@ -70,15 +70,7 @@ export default function MouvementFormModal({
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 20 }}
               transition={{ duration: 0.25, ease: "easeOut" }}
-              className="glass-modal border border-white/40 shadow-2xl relative overflow-hidden"
-              style={{
-                background:
-                  "linear-gradient(120deg,rgba(255,255,255,0.85) 60%,rgba(191,161,77,0.07) 100%)",
-                boxShadow:
-                  "0 8px 32px 0 rgba(50,50,80,0.19), 0 1.5px 10px 0 rgba(191,161,77,0.14)",
-                backdropFilter: "blur(12px)",
-                borderRadius: "2rem",
-              }}
+              className="glass-modal border border-white/40 shadow-[0_8px_32px_0_rgba(50,50,80,0.19),0_1.5px_10px_0_rgba(191,161,77,0.14)] relative overflow-hidden bg-[linear-gradient(120deg,rgba(255,255,255,0.85)_60%,rgba(191,161,77,0.07)_100%)] backdrop-blur-[12px] rounded-[2rem]"
             >
               {/* Effets glass liquid */}
               <span className="absolute -top-12 -left-20 w-60 h-40 bg-mamastockGold/30 blur-3xl rounded-full z-0 opacity-30 animate-pulse" />

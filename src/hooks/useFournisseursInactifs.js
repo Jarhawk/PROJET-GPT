@@ -7,6 +7,7 @@ export function useFournisseursInactifs() {
   const [fournisseurs, setFournisseurs] = useState([]);
 
   async function fetchInactifs() {
+    if (!mama_id) return [];
     const { data, error } = await supabase
       .from('v_fournisseurs_inactifs')
       .select('*')

@@ -12,6 +12,7 @@ export function useUnites() {
 
   // 1. Charger toutes les unités (filtrage recherche, batch)
   async function fetchUnites({ search = "" } = {}) {
+    if (!mama_id) return [];
     setLoading(true);
     setError(null);
     let query = supabase.from("unites").select("*").eq("mama_id", mama_id);
@@ -25,6 +26,7 @@ export function useUnites() {
 
   // 2. Ajouter une unité (avec vérif unicité)
   async function addUnite(nom) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     if (!nom) {
@@ -53,6 +55,7 @@ export function useUnites() {
 
   // 3. Modifier une unité
   async function updateUnite(id, newNom) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     if (!newNom) {
@@ -72,6 +75,7 @@ export function useUnites() {
 
   // 4. Batch suppression (désactivation)
   async function batchDeleteUnites(ids = []) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase

@@ -7,7 +7,7 @@ import { Dialog, DialogContent } from "@radix-ui/react-dialog";
 import PermissionsForm from "./PermissionsForm"; // adapte le chemin si besoin
 
 export default function Roles() {
-  const { isAuthenticated, claims } = useAuth();
+  const { mama_id, user_id, loading: authLoading } = useAuth();
   const [roles, setRoles] = useState([]);
   const [search, setSearch] = useState("");
   const [editRole, setEditRole] = useState(null);
@@ -17,14 +17,14 @@ export default function Roles() {
   const PAGE_SIZE = 20;
 
   useEffect(() => {
-    if (!claims?.mama_id) return;
+    if (!mama_id || authLoading) return;
     supabase
       .from("roles")
       .select("*")
-      .eq("mama_id", claims.mama_id)
+      .eq("mama_id", mama_id)
       .order("nom", { ascending: true })
       .then(({ data }) => setRoles(data || []));
-  }, [claims?.mama_id]);
+  }, [mama_id, authLoading]);
 
   // Sauvegarde (création/édition)
   const handleSave = async () => {
@@ -38,7 +38,7 @@ export default function Roles() {
       const { data: existing } = await supabase
         .from("roles")
         .select("id")
-        .eq("mama_id", claims.mama_id)
+        .eq("mama_id", mama_id)
         .eq("nom", editRole.nom)
         .maybeSingle();
       if (existing) {
@@ -53,7 +53,7 @@ export default function Roles() {
         .from("roles")
         .update(editRole)
         .eq("id", editRole.id)
-        .eq("mama_id", claims.mama_id);
+        .eq("mama_id", mama_id);
       if (!error) {
         setRoles(rs => rs.map(r => (r.id === editRole.id ? editRole : r)));
         setEditRole(null);
@@ -65,7 +65,7 @@ export default function Roles() {
       // insert
       const { data, error } = await supabase
         .from("roles")
-        .insert([{ ...editRole, mama_id: claims.mama_id, actif: true }])
+        .insert([{ ...editRole, mama_id, actif: true }])
         .select()
         .single();
       if (!error && data) {
@@ -85,7 +85,7 @@ export default function Roles() {
       .from("roles")
       .update({ actif: !role.actif })
       .eq("id", role.id)
-      .eq("mama_id", claims.mama_id);
+      .eq("mama_id", mama_id);
     if (!error) {
       setRoles(rs =>
         rs.map(r =>
@@ -105,7 +105,8 @@ export default function Roles() {
   );
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  if (!isAuthenticated) return null;
+  if (authLoading) return <div className="p-8">Chargement...</div>;
+  if (!mama_id) return null;
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
@@ -257,11 +258,11 @@ export default function Roles() {
               afterSaveLog={async () => {
                 // Log en base le changement de permissions
                 await supabase.from("user_logs").insert([{
-                  mama_id: claims.mama_id,
+                  mama_id,
                   user_id: null,
                   action: "Modification permissions",
-                  details: { role: editPermsRole.nom, by: claims.user_id },
-                  done_by: claims.user_id,
+                  details: { role: editPermsRole.nom, by: user_id },
+                  done_by: user_id,
                 }]);
               }}
             />

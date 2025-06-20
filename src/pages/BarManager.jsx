@@ -19,7 +19,7 @@ const PERIODES = [
 ];
 
 export default function BarManager() {
-  const { isAuthenticated, claims } = useAuth();
+  const { mama_id, loading: authLoading } = useAuth();
   const [ventes, setVentes] = useState([]);
   const [boissons, setBoissons] = useState([]);
   const [periode, setPeriode] = useState("week");
@@ -49,27 +49,27 @@ export default function BarManager() {
 
   // Charger boissons actives
   useEffect(() => {
-    if (!claims?.mama_id) return;
+    if (!mama_id) return;
     supabase
       .from("fiches_techniques")
       .select("*")
-      .eq("mama_id", claims.mama_id)
+      .eq("mama_id", mama_id)
       .eq("actif", true)
       .ilike("famille", "%boisson%")
       .then(({ data }) => setBoissons(data || []));
-  }, [claims?.mama_id]);
+  }, [mama_id]);
 
   // Charger stats ventes boissons sur période
   useEffect(() => {
-    if (!claims?.mama_id || !dates.debut || !dates.fin) return;
+    if (!mama_id || !dates.debut || !dates.fin) return;
     supabase
       .from("ventes_boissons")
       .select("boisson_id, quantite, date_vente")
-      .eq("mama_id", claims.mama_id)
+      .eq("mama_id", mama_id)
       .gte("date_vente", dates.debut)
       .lte("date_vente", dates.fin)
       .then(({ data }) => setVentes(data || []));
-  }, [claims?.mama_id, dates]);
+  }, [mama_id, dates]);
 
   // Map boissons et ventes
   const ventesAgg = {};
@@ -146,7 +146,8 @@ export default function BarManager() {
     toast.success("Export PDF généré !");
   };
 
-  if (!isAuthenticated) return null;
+  if (authLoading) return <div className="p-8">Chargement...</div>;
+  if (!mama_id) return null;
 
   return (
     <div className="p-8 max-w-6xl mx-auto">

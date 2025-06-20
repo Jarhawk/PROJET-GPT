@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useFiches } from "@/hooks/useFiches";
+import { useAuth } from "@/context/AuthContext";
 import FicheForm from "./FicheForm.jsx";
 import FicheDetail from "./FicheDetail.jsx";
 import { Button } from "@/components/ui/button";
@@ -10,14 +11,17 @@ import { motion as Motion } from "framer-motion";
 
 export default function Fiches() {
   const { fiches, fetchFiches, deleteFiche } = useFiches();
+  const { mama_id, loading: authLoading } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState("");
   const [familleFilter] = useState("");
 
-  // Charge les fiches au montage uniquement
-  useEffect(() => { fetchFiches(); }, []);
+  // Charge les fiches lorsque l'auth est prête
+  useEffect(() => {
+    if (!authLoading && mama_id) fetchFiches();
+  }, [authLoading, mama_id, fetchFiches]);
 
   // Export Excel
   const exportExcel = () => {

@@ -1,17 +1,19 @@
 import { useParams } from "react-router-dom";
 import { useRequisitions } from "@/hooks/useRequisitions";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 function RequisitionDetailPage() {
   const { id } = useParams();
   const { getRequisitionById } = useRequisitions();
+  const { loading: authLoading } = useAuth();
   const [requisition, setRequisition] = useState(null);
 
   useEffect(() => {
-    if (id) {
+    if (id && !authLoading) {
       getRequisitionById(id).then(setRequisition);
     }
-  }, [id, getRequisitionById]);
+  }, [id, getRequisitionById, authLoading]);
 
   if (!requisition) {
     return <div className="p-6 text-gray-500">Chargement…</div>;

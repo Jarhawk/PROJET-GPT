@@ -1,16 +1,20 @@
 import { useUnites } from "@/hooks/useUnites";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { Toaster, toast } from "react-hot-toast";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 
 export default function ParamUnites() {
   const { unites, fetchUnites, addUnite, editUnite, deleteUnite } = useUnites();
+  const { mama_id } = useAuth();
   const [form, setForm] = useState({ nom: "", id: null });
   const [editMode, setEditMode] = useState(false);
 
-  useEffect(() => { fetchUnites(); }, []);
+  useEffect(() => {
+    if (mama_id) fetchUnites();
+  }, [mama_id]);
 
   const handleEdit = u => { setForm(u); setEditMode(true); };
   const handleDelete = async id => {

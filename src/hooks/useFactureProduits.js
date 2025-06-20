@@ -10,6 +10,7 @@ export function useFactureProduits() {
   const [error, setError] = useState(null);
 
   async function fetchProduitsByFacture(facture_id) {
+    if (!facture_id || !mama_id) return [];
     setLoading(true);
     setError(null);
     const { data, error } = await supabase

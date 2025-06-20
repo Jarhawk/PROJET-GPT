@@ -11,15 +11,13 @@ export function useStock() {
 
   // 1. Charger stock (avec valorisation en direct)
   const fetchStocks = useCallback(async () => {
+    if (!user?.mama_id) return [];
     setLoading(true);
     setError(null);
-    let query = supabase
+    const { data, error } = await supabase
       .from("products")
-      .select("*"); // Ajoute les champs utiles stock_reel, pmp, unite, zone
-
-    if (user?.mama_id) query = query.eq("mama_id", user.mama_id);
-
-    const { data, error } = await query;
+      .select("*")
+      .eq("mama_id", user.mama_id);
     setLoading(false);
     if (error) setError(error);
     setStocks(data || []);
@@ -28,14 +26,14 @@ export function useStock() {
 
   // 2. Charger mouvements stock
   const fetchMouvements = useCallback(async () => {
+    if (!user?.mama_id) return [];
     setLoading(true);
     setError(null);
-    let query = supabase
+    const { data, error } = await supabase
       .from("mouvements_stock")
       .select("*")
+      .eq("mama_id", user.mama_id)
       .order("date", { ascending: false });
-    if (user?.mama_id) query = query.eq("mama_id", user.mama_id);
-    const { data, error } = await query;
     setLoading(false);
     if (error) setError(error);
     setMouvements(data || []);

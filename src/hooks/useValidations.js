@@ -9,6 +9,7 @@ export function useValidations() {
   const [error, setError] = useState(null);
 
   async function fetchRequests() {
+    if (!mama_id) return [];
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
@@ -27,6 +28,7 @@ export function useValidations() {
   }
 
   async function addRequest(values) {
+    if (!mama_id || !user) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -41,6 +43,7 @@ export function useValidations() {
   }
 
   async function updateStatus(id, status) {
+    if (!mama_id || !user) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase

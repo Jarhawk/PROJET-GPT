@@ -21,6 +21,7 @@ export function useProducts() {
     sortBy = "famille",
     order = "asc",
   } = {}) => {
+    if (!mama_id) return [];
     setLoading(true);
     setError(null);
       let query = supabase
@@ -47,6 +48,7 @@ export function useProducts() {
   }, [mama_id]);
 
   async function addProduct(product) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase.from("products").insert([{ ...product, mama_id }]);
@@ -56,6 +58,7 @@ export function useProducts() {
   }
 
   async function updateProduct(id, updateFields) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -73,6 +76,7 @@ export function useProducts() {
     if (!orig) return;
     const copy = { ...orig, nom: `${orig.nom} (copie)` };
     delete copy.id;
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase.from("products").insert([{ ...copy, mama_id }]);
@@ -82,6 +86,7 @@ export function useProducts() {
   }
 
   async function toggleProductActive(id, actif) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -95,6 +100,7 @@ export function useProducts() {
   }
 
   async function deleteProduct(id) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -108,6 +114,7 @@ export function useProducts() {
   }
 
   async function fetchProductPrices(productId) {
+    if (!mama_id) return [];
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
@@ -145,6 +152,7 @@ export function useProducts() {
   }
 
   async function importProductsFromExcel(file) {
+    if (!mama_id) return [];
     setLoading(true);
     setError(null);
     try {

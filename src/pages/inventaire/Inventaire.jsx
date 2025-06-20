@@ -10,7 +10,7 @@ import { Dialog, DialogTrigger, DialogContent } from "@radix-ui/react-dialog";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
 
 export default function Inventaire() {
-  const { isAuthenticated, claims } = useAuth();
+  const { mama_id, loading: authLoading } = useAuth();
   const [inventaires, setInventaires] = useState([]);
   const [produits, setProduits] = useState([]);
   const [achats, setAchats] = useState([]);
@@ -24,61 +24,61 @@ export default function Inventaire() {
 
   // Charger produits (avec dernier_prix/PMP)
   useEffect(() => {
-    if (!claims?.mama_id) return;
+    if (!mama_id || authLoading) return;
     supabase
       .from("products")
       .select("*")
-      .eq("mama_id", claims.mama_id)
+      .eq("mama_id", mama_id)
       .then(({ data }) => setProduits(data || []));
-  }, [claims?.mama_id]);
+  }, [mama_id, authLoading]);
 
   // Charger inventaires sur période
   useEffect(() => {
-    if (!claims?.mama_id || !periode.debut || !periode.fin) return;
+    if (!mama_id || authLoading || !periode.debut || !periode.fin) return;
     supabase
       .from("inventaires")
       .select("*")
-      .eq("mama_id", claims.mama_id)
+      .eq("mama_id", mama_id)
       .gte("date_inventaire", periode.debut)
       .lte("date_inventaire", periode.fin)
       .then(({ data }) => setInventaires(data || []));
-  }, [claims?.mama_id, periode]);
+  }, [mama_id, authLoading, periode]);
 
   // Charger achats (factures) sur période
   useEffect(() => {
-    if (!claims?.mama_id || !periode.debut || !periode.fin) return;
+    if (!mama_id || authLoading || !periode.debut || !periode.fin) return;
     supabase
       .from("facture_lignes")
       .select("produit_id, quantite, zone")
-      .eq("mama_id", claims.mama_id)
+      .eq("mama_id", mama_id)
       .gte("date_livraison", periode.debut)
       .lte("date_livraison", periode.fin)
       .then(({ data }) => setAchats(data || []));
-  }, [claims?.mama_id, periode]);
+  }, [mama_id, authLoading, periode]);
 
   // Charger réquisitions sur période
   useEffect(() => {
-    if (!claims?.mama_id || !periode.debut || !periode.fin) return;
+    if (!mama_id || authLoading || !periode.debut || !periode.fin) return;
     supabase
       .from("requisitions")
       .select("produit_id, quantite, zone")
-      .eq("mama_id", claims.mama_id)
+      .eq("mama_id", mama_id)
       .gte("date_requisition", periode.debut)
       .lte("date_requisition", periode.fin)
       .then(({ data }) => setRequisitions(data || []));
-  }, [claims?.mama_id, periode]);
+  }, [mama_id, authLoading, periode]);
 
   // Charger transferts inter-zones sur période
   useEffect(() => {
-    if (!claims?.mama_id || !periode.debut || !periode.fin) return;
+    if (!mama_id || authLoading || !periode.debut || !periode.fin) return;
     supabase
       .from("transferts")
       .select("*")
-      .eq("mama_id", claims.mama_id)
+      .eq("mama_id", mama_id)
       .gte("date_transfert", periode.debut)
       .lte("date_transfert", periode.fin)
       .then(({ data }) => setTransferts(data || []));
-  }, [claims?.mama_id, periode]);
+  }, [mama_id, authLoading, periode]);
 
   // -- Agrégation par produit ET par zone --
   const produitsParZone = {};
@@ -259,7 +259,7 @@ export default function Inventaire() {
         commentaire: editRow.commentaire,
       })
       .eq("id", editRow.id_inventaire)
-      .eq("mama_id", claims.mama_id);
+      .eq("mama_id", mama_id);
     if (!error) {
       setInventaires(prev =>
         prev.map(i =>
@@ -281,7 +281,7 @@ export default function Inventaire() {
     const { data, error } = await supabase
       .from("inventaires")
       .select("date_inventaire, quantite, commentaire, zone")
-      .eq("mama_id", claims.mama_id)
+      .eq("mama_id", mama_id)
       .eq("produit_id", produit_id)
       .eq("zone", zone)
       .order("date_inventaire", { ascending: false });
@@ -304,7 +304,8 @@ export default function Inventaire() {
     return { ...t, nom: prod.nom || "-", prix, cout };
   });
 
-  if (!isAuthenticated) return null;
+  if (authLoading) return <div className="p-8">Chargement...</div>;
+  if (!mama_id) return null;
 
   return (
     <div className="p-8 max-w-7xl mx-auto">

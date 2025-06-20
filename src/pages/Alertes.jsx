@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAlerts } from "@/hooks/useAlerts";
 import { useProducts } from "@/hooks/useProducts";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { Toaster, toast } from "react-hot-toast";
@@ -8,12 +9,15 @@ import { Toaster, toast } from "react-hot-toast";
 export default function Alertes() {
   const { rules, fetchRules, addRule, deleteRule } = useAlerts();
   const { products, fetchProducts } = useProducts();
+  const { mama_id, loading: authLoading } = useAuth();
   const [form, setForm] = useState({ product_id: "", threshold: "" });
 
   useEffect(() => {
-    fetchRules();
-    fetchProducts({ limit: 200 });
-  }, []);
+    if (!authLoading && mama_id) {
+      fetchRules();
+      fetchProducts({ limit: 200 });
+    }
+  }, [authLoading, mama_id, fetchRules, fetchProducts]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

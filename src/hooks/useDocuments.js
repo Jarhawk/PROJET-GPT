@@ -9,6 +9,7 @@ export function useDocuments() {
   const [error, setError] = useState(null);
 
   async function fetchDocs() {
+    if (!mama_id) return [];
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
@@ -27,6 +28,7 @@ export function useDocuments() {
   }
 
   async function addDoc(values) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -41,6 +43,7 @@ export function useDocuments() {
   }
 
   async function updateDoc(id, values) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -57,6 +60,7 @@ export function useDocuments() {
   }
 
   async function deleteDoc(id) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase

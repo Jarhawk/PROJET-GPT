@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/context/AuthContext";
 
 export function useAuditTrail() {
+  const { mama_id } = useAuth();
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   async function fetchEntries({ table = "", start = null, end = null } = {}) {
+    if (!mama_id) return [];
     setLoading(true);
     let query = supabase
       .from("audit_entries")

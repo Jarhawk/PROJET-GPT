@@ -12,6 +12,7 @@ export function usePermissions() {
 
   // 1. Récupérer toutes les permissions
   async function fetchPermissions({ roleId = null, userId = null } = {}) {
+    if (!mama_id && role !== "superadmin") return [];
     setLoading(true);
     setError(null);
     let query = supabase.from("permissions").select("*");
@@ -28,6 +29,7 @@ export function usePermissions() {
 
   // 2. Ajouter une permission
   async function addPermission(permission) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -40,6 +42,7 @@ export function usePermissions() {
 
   // 3. Modifier une permission
   async function updatePermission(id, updateFields) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -54,6 +57,7 @@ export function usePermissions() {
 
   // 4. Supprimer une permission
   async function deletePermission(id) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase

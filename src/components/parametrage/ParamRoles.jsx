@@ -1,14 +1,18 @@
 import { useRoles } from "@/hooks/useRoles";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { Toaster, toast } from "react-hot-toast";
 
 export default function ParamRoles() {
   const { roles, fetchRoles, addRole, editRole, deleteRole } = useRoles();
+  const { mama_id, role } = useAuth();
   const [form, setForm] = useState({ nom: "", id: null });
   const [editMode, setEditMode] = useState(false);
 
-  useEffect(() => { fetchRoles(); }, []);
+  useEffect(() => {
+    if (mama_id || role === "superadmin") fetchRoles();
+  }, [mama_id, role]);
 
   const handleEdit = r => { setForm(r); setEditMode(true); };
   const handleDelete = async id => {

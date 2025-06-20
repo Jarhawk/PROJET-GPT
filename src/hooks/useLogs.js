@@ -11,6 +11,10 @@ export function useLogs() {
   const [error, setError] = useState(null);
 
   async function fetchLogs({ search = "", startDate = null, endDate = null, page = 1, limit = 100 } = {}) {
+    if (!mama_id) {
+      // Skip querying when authentication hasn't provided a mama id yet
+      return [];
+    }
     setLoading(true);
     setError(null);
     let query = supabase

@@ -1,12 +1,14 @@
 import { useEffect } from "react";
 import { useHelpArticles } from "@/hooks/useHelpArticles";
+import { useAuth } from "@/context/AuthContext";
 
 export default function HelpCenter() {
+  const { mama_id } = useAuth();
   const { items, fetchArticles, loading, error } = useHelpArticles();
 
   useEffect(() => {
-    fetchArticles();
-  }, []);
+    if (mama_id) fetchArticles();
+  }, [fetchArticles, mama_id]);
 
   return (
     <div className="p-8 space-y-6">

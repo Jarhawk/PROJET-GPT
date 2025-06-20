@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/context/AuthContext";
 
 function EcartInventairePage() {
   const params = new URLSearchParams(window.location.search);
+  const { mama_id, isAuthenticated } = useAuth();
   const [date, setDate] = useState(params.get("date") || "");
   const [zone, setZone] = useState(params.get("zone") || "");
   const [mois, setMois] = useState(params.get("mois") || "");
@@ -10,7 +12,7 @@ function EcartInventairePage() {
   const [ecarts, setEcarts] = useState([]);
 
   const fetchEcarts = useCallback(async () => {
-    if ((!date && !mois) || !zone) return;
+    if ((!date && !mois) || !zone || !mama_id) return;
 
     let all = [];
 
@@ -29,6 +31,7 @@ function EcartInventairePage() {
         const { data, error } = await supabase.rpc("calcul_ecarts_inventaire", {
           p_date: d,
           p_zone: zone,
+          mama_id_param: mama_id,
         });
         if (!error && data.length > 0) {
           all.push(...data.map((e) => ({ ...e, date: d })));
@@ -38,6 +41,7 @@ function EcartInventairePage() {
       const { data, error } = await supabase.rpc("calcul_ecarts_inventaire", {
         p_date: date,
         p_zone: zone,
+        mama_id_param: mama_id,
       });
       if (!error) {
         all = data.map((e) => ({ ...e, date }));
@@ -101,14 +105,14 @@ function EcartInventairePage() {
   }, [ecarts, zone]);
 
   useEffect(() => {
-    fetchEcarts();
-  }, [fetchEcarts]);
+    if (isAuthenticated && mama_id) fetchEcarts();
+  }, [fetchEcarts, isAuthenticated, mama_id]);
 
   useEffect(() => {
-    if (mode === "pdf" && zone && (date || mois)) {
+    if (mode === "pdf" && zone && (date || mois) && mama_id) {
       fetchEcarts().then(() => setTimeout(() => renderPDF(), 500));
     }
-  }, [mode, zone, date, mois, fetchEcarts, renderPDF]);
+  }, [mode, zone, date, mois, fetchEcarts, renderPDF, mama_id]);
 
   return (
     <div className="p-6 bg-mamastock-bg min-h-screen">

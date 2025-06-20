@@ -12,6 +12,7 @@ export function useFiches() {
 
   // 1. Charger les fiches (filtrage recherche, famille, actif)
   async function fetchFiches({ search = "", famille = "", actif = null } = {}) {
+    if (!mama_id) return [];
     setLoading(true);
     setError(null);
     let query = supabase.from("fiches").select("*").eq("mama_id", mama_id);
@@ -27,6 +28,7 @@ export function useFiches() {
 
   // 2. Ajouter une fiche
   async function addFiche(fiche) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -39,6 +41,7 @@ export function useFiches() {
 
   // 3. Modifier une fiche
   async function updateFiche(id, updateFields) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -53,6 +56,7 @@ export function useFiches() {
 
   // 4. Supprimer une fiche
   async function deleteFiche(id) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -67,6 +71,7 @@ export function useFiches() {
 
   // 5. Désactiver/réactiver une fiche
   async function toggleFicheActive(id, actif) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase

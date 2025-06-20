@@ -1,18 +1,22 @@
 import { useEffect, useState } from "react";
 import { usePertes } from "@/hooks/usePertes";
 import { useProducts } from "@/hooks/useProducts";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "react-hot-toast";
 
 export default function Pertes() {
+  const { mama_id } = useAuth();
   const { pertes, fetchPertes, addPerte, deletePerte } = usePertes();
   const { products, fetchProducts } = useProducts();
   const [form, setForm] = useState({ product_id: "", quantite: 0, motif: "", date_perte: "" });
 
   useEffect(() => {
-    fetchPertes();
-    fetchProducts();
-  }, [fetchPertes, fetchProducts]);
+    if (mama_id) {
+      fetchPertes();
+      fetchProducts();
+    }
+  }, [fetchPertes, fetchProducts, mama_id]);
 
   const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
 

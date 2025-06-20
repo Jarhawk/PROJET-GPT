@@ -31,6 +31,7 @@ create index if not exists idx_mouvement_cc_cc on mouvement_cost_centers(cost_ce
 -- Row level security policies
 alter table cost_centers enable row level security;
 alter table cost_centers force row level security;
+drop policy if exists cost_centers_all on cost_centers;
 create policy cost_centers_all on cost_centers
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
@@ -38,6 +39,7 @@ grant select, insert, update, delete on cost_centers to authenticated;
 
 alter table mouvement_cost_centers enable row level security;
 alter table mouvement_cost_centers force row level security;
+drop policy if exists mouvement_cost_centers_all on mouvement_cost_centers;
 create policy mouvement_cost_centers_all on mouvement_cost_centers
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
@@ -73,6 +75,7 @@ create index if not exists idx_user_logs_date on user_logs(created_at);
 
 alter table user_logs enable row level security;
 alter table user_logs force row level security;
+drop policy if exists user_logs_all on user_logs;
 create policy user_logs_all on user_logs
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
@@ -138,6 +141,7 @@ begin
 end;
 $$;
 
+drop trigger if exists trg_log_cost_centers on cost_centers;
 create trigger trg_log_cost_centers
 after insert or update or delete on cost_centers
 for each row execute function log_cost_centers_changes();
@@ -158,6 +162,7 @@ begin
 end;
 $$;
 
+drop trigger if exists trg_log_mouvement_cc on mouvement_cost_centers;
 create trigger trg_log_mouvement_cc
 after insert or update or delete on mouvement_cost_centers
 for each row execute function log_mouvement_cc_changes();
@@ -195,6 +200,7 @@ create index if not exists idx_pertes_product on pertes(product_id);
 -- RLS for pertes
 alter table pertes enable row level security;
 alter table pertes force row level security;
+drop policy if exists pertes_all on pertes;
 create policy pertes_all on pertes
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
@@ -212,6 +218,7 @@ begin
   return new;
 end;
 $$;
+drop trigger if exists trg_log_pertes on pertes;
 create trigger trg_log_pertes
 after insert or update or delete on pertes
 for each row execute function log_pertes_changes();
@@ -369,6 +376,7 @@ create index if not exists idx_ft_nom on fiches_techniques(nom);
 
 alter table fiches_techniques enable row level security;
 alter table fiches_techniques force row level security;
+drop policy if exists fiches_techniques_all on fiches_techniques;
 create policy fiches_techniques_all on fiches_techniques
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
@@ -388,6 +396,7 @@ create index if not exists idx_fiche_prix_history_fiche on fiche_prix_history(fi
 
 alter table fiche_prix_history enable row level security;
 alter table fiche_prix_history force row level security;
+drop policy if exists fiche_prix_history_all on fiche_prix_history;
 create policy fiche_prix_history_all on fiche_prix_history
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
@@ -480,6 +489,7 @@ create index if not exists idx_taches_fin on taches(date_fin);
 
 alter table taches enable row level security;
 alter table taches force row level security;
+drop policy if exists taches_all on taches;
 create policy taches_all on taches
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
@@ -500,6 +510,7 @@ create index if not exists idx_tache_instances_done on tache_instances(done_by);
 
 alter table tache_instances enable row level security;
 alter table tache_instances force row level security;
+drop policy if exists tache_instances_all on tache_instances;
 create policy tache_instances_all on tache_instances
   for all using (exists (select 1 from taches where taches.id = tache_instances.tache_id and taches.mama_id = current_user_mama_id()))
   with check (exists (select 1 from taches where taches.id = tache_instances.tache_id and taches.mama_id = current_user_mama_id()));
@@ -530,6 +541,7 @@ create index if not exists idx_supplier_products_livraison on supplier_products(
 
 alter table supplier_products enable row level security;
 alter table supplier_products force row level security;
+drop policy if exists supplier_products_all on supplier_products;
 create policy supplier_products_all on supplier_products
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
@@ -574,6 +586,7 @@ create index if not exists idx_vfc_periode on ventes_fiches_carte(periode);
 
 alter table ventes_fiches_carte enable row level security;
 alter table ventes_fiches_carte force row level security;
+drop policy if exists ventes_fiches_carte_all on ventes_fiches_carte;
 create policy ventes_fiches_carte_all on ventes_fiches_carte
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
@@ -613,6 +626,7 @@ create index if not exists idx_promo_prod_product on promotion_products(product_
 
 alter table promotions enable row level security;
 alter table promotions force row level security;
+drop policy if exists promotions_all on promotions;
 create policy promotions_all on promotions
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
@@ -620,6 +634,7 @@ grant select, insert, update, delete on promotions to authenticated;
 
 alter table promotion_products enable row level security;
 alter table promotion_products force row level security;
+drop policy if exists promotion_products_all on promotion_products;
 create policy promotion_products_all on promotion_products
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
@@ -635,6 +650,7 @@ begin
 end;
 $$;
 
+drop trigger if exists trg_log_promotions on promotions;
 create trigger trg_log_promotions
 after insert or update or delete on promotions
 for each row execute function log_promotions_changes();
@@ -690,6 +706,7 @@ create index if not exists idx_audit_entries_date on audit_entries(changed_at);
 
 alter table audit_entries enable row level security;
 alter table audit_entries force row level security;
+drop policy if exists audit_entries_all on audit_entries;
 create policy audit_entries_all on audit_entries
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
@@ -705,9 +722,11 @@ end;
 $$;
 grant execute on function add_audit_entry() to authenticated;
 
+drop trigger if exists trg_audit_products on products;
 create trigger trg_audit_products
 after insert or update or delete on products
 for each row execute function add_audit_entry();
+drop trigger if exists trg_audit_factures on factures;
 create trigger trg_audit_factures
 after insert or update or delete on factures
 for each row execute function add_audit_entry();
@@ -724,10 +743,12 @@ create table if not exists planning_previsionnel (
 create index if not exists idx_planning_mama on planning_previsionnel(mama_id, date_prevue);
 alter table planning_previsionnel enable row level security;
 alter table planning_previsionnel force row level security;
+drop policy if exists planning_previsionnel_all on planning_previsionnel;
 create policy planning_previsionnel_all on planning_previsionnel
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
 grant select, insert, update, delete on planning_previsionnel to authenticated;
+drop trigger if exists trg_audit_planning on planning_previsionnel;
 create trigger trg_audit_planning
 after insert or update or delete on planning_previsionnel
 for each row execute function add_audit_entry();
@@ -745,6 +766,7 @@ create table if not exists alert_rules (
 create index if not exists idx_alert_rules_mama on alert_rules(mama_id);
 alter table alert_rules enable row level security;
 alter table alert_rules force row level security;
+drop policy if exists alert_rules_all on alert_rules;
 create policy alert_rules_all on alert_rules
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
@@ -761,6 +783,7 @@ create table if not exists alert_logs (
 create index if not exists idx_alert_logs_mama on alert_logs(mama_id);
 alter table alert_logs enable row level security;
 alter table alert_logs force row level security;
+drop policy if exists alert_logs_all on alert_logs;
 create policy alert_logs_all on alert_logs
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
@@ -787,6 +810,7 @@ $$;
 
 grant execute on function check_stock_alert() to authenticated;
 
+drop trigger if exists trg_stock_alert on products;
 create trigger trg_stock_alert
 after update of stock_reel on products
 for each row execute function check_stock_alert();
@@ -805,6 +829,7 @@ create index if not exists idx_incoming_invoices_mama on incoming_invoices(mama_
 
 alter table incoming_invoices enable row level security;
 alter table incoming_invoices force row level security;
+drop policy if exists incoming_invoices_all on incoming_invoices;
 create policy incoming_invoices_all on incoming_invoices
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
@@ -847,6 +872,7 @@ create index if not exists idx_documents_mama on documents(mama_id);
 
 alter table documents enable row level security;
 alter table documents force row level security;
+drop policy if exists documents_all on documents;
 create policy documents_all on documents
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
@@ -878,17 +904,21 @@ create index if not exists idx_validation_requests_status on validation_requests
 
 alter table validation_requests enable row level security;
 alter table validation_requests force row level security;
+drop policy if exists validation_requests_select on validation_requests;
 create policy validation_requests_select on validation_requests
   for select using (mama_id = current_user_mama_id());
+drop policy if exists validation_requests_insert on validation_requests;
 create policy validation_requests_insert on validation_requests
   for insert with check (
     mama_id = current_user_mama_id() and requested_by = auth.uid()
   );
+drop policy if exists validation_requests_update on validation_requests;
 create policy validation_requests_update on validation_requests
   for update using (
     mama_id = current_user_mama_id() and
     current_user_role() in ('admin','superadmin')
   ) with check (mama_id = current_user_mama_id());
+drop policy if exists validation_requests_delete on validation_requests;
 create policy validation_requests_delete on validation_requests
   for delete using (
     mama_id = current_user_mama_id() and current_user_role() in ('admin','superadmin')
@@ -930,12 +960,15 @@ create table if not exists onboarding_progress (
 create index if not exists idx_onboarding_mama on onboarding_progress(mama_id);
 alter table onboarding_progress enable row level security;
 alter table onboarding_progress force row level security;
+drop policy if exists onboarding_progress_select on onboarding_progress;
 create policy onboarding_progress_select on onboarding_progress
   for select to authenticated
   using (user_id = auth.uid());
+drop policy if exists onboarding_progress_insert on onboarding_progress;
 create policy onboarding_progress_insert on onboarding_progress
   for insert to authenticated
   with check (user_id = auth.uid() and mama_id = current_user_mama_id());
+drop policy if exists onboarding_progress_update on onboarding_progress;
 create policy onboarding_progress_update on onboarding_progress
   for update to authenticated
   using (user_id = auth.uid())
@@ -954,11 +987,41 @@ create table if not exists help_articles (
 create index if not exists idx_help_articles_mama on help_articles(mama_id);
 alter table help_articles enable row level security;
 alter table help_articles force row level security;
+drop policy if exists help_articles_select on help_articles;
 create policy help_articles_select on help_articles
   for select to authenticated
   using (mama_id = current_user_mama_id());
+drop policy if exists help_articles_mutation on help_articles;
 create policy help_articles_mutation on help_articles
   for all to authenticated
   using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
 grant select, insert, update, delete on help_articles to authenticated;
+
+-- Signalements / Issue reporting
+create table if not exists signalements (
+    id uuid primary key default uuid_generate_v4(),
+    mama_id uuid not null references mamas(id) on delete cascade,
+    titre text not null,
+    commentaire text,
+    statut text default 'ouvert',
+    date timestamptz default now(),
+    created_by uuid references users(id) on delete set null,
+    created_at timestamptz default now()
+);
+create index if not exists idx_signalements_mama on signalements(mama_id);
+alter table signalements enable row level security;
+alter table signalements force row level security;
+drop policy if exists signalements_all on signalements;
+create policy signalements_all on signalements
+  for all to authenticated
+  using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+grant select, insert, update, delete on signalements to authenticated;
+
+-- Extend requisitions table with tracking columns
+alter table requisitions add column if not exists produit_id uuid references products(id) on delete set null;
+alter table requisitions add column if not exists quantite numeric;
+alter table requisitions add column if not exists motif text;
+alter table requisitions add column if not exists date_requisition date default current_date;
+alter table requisitions add column if not exists created_by uuid references users(id) on delete set null;

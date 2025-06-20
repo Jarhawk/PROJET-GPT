@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useCostCenterMonthlyStats } from "@/hooks/useCostCenterMonthlyStats";
+import { useAuth } from "@/context/AuthContext";
 import { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import * as XLSX from "xlsx";
 
 export default function StatsCostCentersPivot() {
   const { fetchMonthly } = useCostCenterMonthlyStats();
+  const { mama_id, loading: authLoading } = useAuth();
   const [rows, setRows] = useState([]);
   const [months, setMonths] = useState([]);
 
@@ -21,6 +23,7 @@ export default function StatsCostCentersPivot() {
   };
 
   useEffect(() => {
+    if (!mama_id || authLoading) return;
     fetchMonthly().then(data => {
       const moisSet = new Set();
       data.forEach(d => moisSet.add(d.mois.slice(0,7)));
@@ -34,7 +37,7 @@ export default function StatsCostCentersPivot() {
       setMonths(sortedMonths);
       setRows(Object.values(grouped));
     });
-  }, [fetchMonthly]);
+  }, [fetchMonthly, mama_id, authLoading]);
 
   return (
     <div className="p-8 container mx-auto">

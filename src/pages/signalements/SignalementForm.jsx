@@ -1,21 +1,21 @@
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { useSignalements } from "@/hooks/useSignalements";
+import { useAuth } from "@/context/AuthContext";
 
 export default function SignalementForm({ onCreated }) {
+  const { loading: authLoading } = useAuth();
+  const { addSignalement } = useSignalements();
   const [titre, setTitre] = useState("");
-  const [description, setDescription] = useState("");
+  const [commentaire, setCommentaire] = useState("");
   const [statut, setStatut] = useState("ouvert");
 
   const handleSubmit = async () => {
-    const { error } = await supabase.from("signalements").insert([
-      { titre, description, statut }
-    ]);
-    if (!error) {
-      setTitre("");
-      setDescription("");
-      setStatut("ouvert");
-      onCreated?.();
-    }
+    if (authLoading) return;
+    await addSignalement({ titre, commentaire, statut });
+    setTitre("");
+    setCommentaire("");
+    setStatut("ouvert");
+    onCreated?.();
   };
 
   return (
@@ -32,8 +32,8 @@ export default function SignalementForm({ onCreated }) {
         placeholder="Description"
         className="border px-2 py-1 w-full mb-2"
         rows={3}
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
+        value={commentaire}
+        onChange={(e) => setCommentaire(e.target.value)}
       />
       <select
         value={statut}

@@ -2,13 +2,20 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { useRoles } from "@/hooks/useRoles";
 import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { Toaster, toast } from "react-hot-toast";
 
 export default function ParamAccess() {
   const { permissions, fetchPermissions, updatePermission } = usePermissions();
   const { roles, fetchRoles } = useRoles();
+  const { mama_id, role } = useAuth();
 
-  useEffect(() => { fetchPermissions(); fetchRoles(); }, []);
+  useEffect(() => {
+    if (mama_id || role === "superadmin") {
+      fetchPermissions();
+      fetchRoles();
+    }
+  }, [mama_id, role]);
 
   // Accès disponibles (hardcodés ou via table 'modules')
   const modules = [

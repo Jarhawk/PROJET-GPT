@@ -9,6 +9,10 @@ export function useFournisseurNotes() {
   const [error, setError] = useState(null);
 
   async function fetchNotes(fournisseur_id) {
+    if (!mama_id) {
+      setNotes([]);
+      return [];
+    }
     setLoading(true);
     setError(null);
     try {
@@ -30,6 +34,7 @@ export function useFournisseurNotes() {
   }
 
   async function addNote(note) {
+    if (!mama_id) return;
     const { error } = await supabase
       .from("fournisseur_notes")
       .insert([{ ...note, mama_id }]);
@@ -38,6 +43,7 @@ export function useFournisseurNotes() {
   }
 
   async function deleteNote(id) {
+    if (!mama_id) return;
     const { error } = await supabase
       .from("fournisseur_notes")
       .delete()

@@ -9,7 +9,7 @@ export function useFicheCoutHistory() {
   const [error, setError] = useState(null);
 
   async function fetchFicheCoutHistory(fiche_id) {
-    if (!fiche_id) return;
+    if (!fiche_id || !mama_id) return;
     setLoading(true);
     setError(null);
     try {

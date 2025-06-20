@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useUsers } from "@/hooks/useUsers";
+import { useAuth } from "@/context/AuthContext";
 import UtilisateurForm from "@/components/utilisateurs/UtilisateurForm";
 import UtilisateurDetail from "@/components/utilisateurs/UtilisateurDetail";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ const PAGE_SIZE = 20;
 
 export default function Utilisateurs() {
   const { users, fetchUsers, toggleUserActive, deleteUser } = useUsers();
+  const { mama_id, loading: authLoading } = useAuth();
   const [search, setSearch] = useState("");
   const [actifFilter, setActifFilter] = useState("all");
   const [page, setPage] = useState(1);
@@ -19,7 +21,9 @@ export default function Utilisateurs() {
   const [selected, setSelected] = useState(null);
   const [showDetail, setShowDetail] = useState(false);
 
-  useEffect(() => { fetchUsers(); }, []);
+  useEffect(() => {
+    if (!authLoading && mama_id) fetchUsers();
+  }, [authLoading, mama_id, fetchUsers]);
 
   const filtres = users.filter(u =>
     (!search || u.email?.toLowerCase().includes(search.toLowerCase())) &&

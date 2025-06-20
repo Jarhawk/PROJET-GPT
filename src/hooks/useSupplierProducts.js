@@ -11,6 +11,10 @@ export function useSupplierProducts() {
     const [error, setError] = useState(null);
 
     async function fetch() {
+      if (!mama_id || !fournisseur_id) {
+        setProducts([]);
+        return [];
+      }
       setLoading(true);
       setError(null);
       const { data, error } = await supabase
@@ -30,6 +34,7 @@ export function useSupplierProducts() {
   }
 
   async function getProductsBySupplier(fournisseur_id) {
+    if (!mama_id || !fournisseur_id) return [];
     if (cache[fournisseur_id]) return cache[fournisseur_id];
     const { data } = await supabase
       .from("supplier_products")

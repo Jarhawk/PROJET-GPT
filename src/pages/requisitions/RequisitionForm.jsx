@@ -2,9 +2,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRequisitions } from "@/hooks/useRequisitions";
 import { useProducts } from "@/hooks/useProducts";
+import { useAuth } from "@/context/AuthContext";
 
 function RequisitionFormPage() {
   const navigate = useNavigate();
+  const { loading: authLoading } = useAuth();
   const { createRequisition } = useRequisitions();
   const { data: products, loading: loadingProducts } = useProducts();
 
@@ -28,6 +30,10 @@ function RequisitionFormPage() {
     await createRequisition({ type, motif, zone, articles });
     navigate("/requisitions");
   };
+
+  if (authLoading) {
+    return <div className="p-6">Chargement...</div>;
+  }
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">

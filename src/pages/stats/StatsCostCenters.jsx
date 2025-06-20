@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { useCostCenterStats } from "@/hooks/useCostCenterStats";
+import { useAuth } from "@/context/AuthContext";
 import { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import * as XLSX from "xlsx";
 
 export default function StatsCostCenters() {
   const { fetchStats } = useCostCenterStats();
+  const { mama_id, loading: authLoading } = useAuth();
   const [stats, setStats] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -17,11 +19,12 @@ export default function StatsCostCenters() {
   };
 
   useEffect(() => {
+    if (!mama_id || authLoading) return;
     fetchStats().then(data => {
       setStats(data);
       setLoading(false);
     });
-  }, [fetchStats]);
+  }, [fetchStats, mama_id, authLoading]);
 
   if (loading) return <div className="p-8">Chargement...</div>;
 

@@ -1,17 +1,21 @@
 import { useFamilles } from "@/hooks/useFamilles";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { Toaster, toast } from "react-hot-toast";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 
 export default function ParamFamilles() {
   const { familles, fetchFamilles, addFamille, editFamille, deleteFamille } = useFamilles();
+  const { mama_id } = useAuth();
   const [search, setSearch] = useState("");
   const [form, setForm] = useState({ nom: "", id: null });
   const [editMode, setEditMode] = useState(false);
 
-  useEffect(() => { fetchFamilles(); }, []);
+  useEffect(() => {
+    if (mama_id) fetchFamilles();
+  }, [mama_id]);
 
   const filtered = familles.filter(f =>
     !search || f.nom.toLowerCase().includes(search.toLowerCase())

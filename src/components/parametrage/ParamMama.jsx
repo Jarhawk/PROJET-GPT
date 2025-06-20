@@ -1,14 +1,16 @@
 import { useMama } from "@/hooks/useMama";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { Toaster, toast } from "react-hot-toast";
 
 export default function ParamMama() {
   const { mama, fetchMama, updateMama } = useMama();
+  const { mama_id } = useAuth();
   const [edit, setEdit] = useState(false);
   const [form, setForm] = useState({});
 
-  useEffect(() => { fetchMama(); }, []);
+  useEffect(() => { if (mama_id) fetchMama(); }, [mama_id]);
   useEffect(() => { setForm(mama || {}); }, [mama]);
 
   const handleSubmit = async e => {

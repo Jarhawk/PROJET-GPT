@@ -12,6 +12,7 @@ export function useUsers() {
 
   // 1. Charger les utilisateurs (superadmin : tous, sinon par mama_id)
   async function fetchUsers({ search = "", actif = null, filterRole = "" } = {}) {
+    if (role !== "superadmin" && !mama_id) return [];
     setLoading(true);
     setError(null);
     let query = supabase
@@ -33,6 +34,7 @@ export function useUsers() {
 
   // 2. Ajouter un utilisateur (invitation)
   async function addUser(user) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -45,6 +47,7 @@ export function useUsers() {
 
   // 3. Modifier un utilisateur (rôle, droits, etc.)
   async function updateUser(id, updateFields) {
+    if (!mama_id && role !== "superadmin") return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -58,6 +61,7 @@ export function useUsers() {
 
   // 4. Activer/désactiver un utilisateur
   async function toggleUserActive(id, actif) {
+    if (!mama_id && role !== "superadmin") return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -71,6 +75,7 @@ export function useUsers() {
 
   // 5. Supprimer un utilisateur (optionnel)
   async function deleteUser(id) {
+    if (!mama_id && role !== "superadmin") return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase

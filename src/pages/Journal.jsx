@@ -1,15 +1,22 @@
 import { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { useLogs } from "@/hooks/useLogs";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "react-hot-toast";
 
 export default function Journal() {
+  const { mama_id, loading: authLoading } = useAuth();
   const { logs, fetchLogs, exportLogsToExcel } = useLogs();
   const [search, setSearch] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  useEffect(() => { fetchLogs(); }, []);
+  useEffect(() => {
+    if (!authLoading && mama_id) fetchLogs();
+  }, [authLoading, mama_id, fetchLogs]);
+
+  if (authLoading) return <div className="p-6">Chargement...</div>;
+  if (!mama_id) return null;
 
   const handleSubmit = async e => {
     e.preventDefault();

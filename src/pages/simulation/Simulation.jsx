@@ -1,9 +1,11 @@
 import { useSignalements } from "@/hooks/useSignalements";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Simulation() {
+  const { loading: authLoading } = useAuth();
   const { data: signalements, loading, error } = useSignalements();
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="p-6 text-white text-center">
         ⏳ Chargement des signalements...

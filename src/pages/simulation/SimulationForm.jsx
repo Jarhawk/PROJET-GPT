@@ -1,14 +1,21 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/context/AuthContext";
 
 export default function SimulationForm({ addRecipe, setPrix }) {
+  const { mama_id, loading: authLoading } = useAuth();
   const [recipes, setRecipes] = useState([]);
   const [selectedId, setSelectedId] = useState("");
   const [prix, setPrixLocal] = useState("");
 
   useEffect(() => {
-    supabase.from("recipes").select("*").then(({ data }) => setRecipes(data || []));
-  }, []);
+    if (!mama_id || authLoading) return;
+    supabase
+      .from("fiches")
+      .select("*")
+      .eq("mama_id", mama_id)
+      .then(({ data }) => setRecipes(data || []));
+  }, [mama_id, authLoading]);
 
   const handleAdd = () => {
     const recette = recipes.find(r => r.id === selectedId);

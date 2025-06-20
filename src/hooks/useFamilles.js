@@ -12,6 +12,7 @@ export function useFamilles() {
 
   // 1. Charger toutes les familles (recherche, batch)
   async function fetchFamilles({ search = "" } = {}) {
+    if (!mama_id) return [];
     setLoading(true);
     setError(null);
     let query = supabase.from("familles").select("*").eq("mama_id", mama_id);
@@ -25,6 +26,7 @@ export function useFamilles() {
 
   // 2. Ajouter une famille (avec vérif unicité)
   async function addFamille(nom) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     if (!nom) {
@@ -53,6 +55,7 @@ export function useFamilles() {
 
   // 3. Modifier une famille
   async function updateFamille(id, newNom) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     if (!newNom) {
@@ -72,6 +75,7 @@ export function useFamilles() {
 
   // 4. Batch suppression (désactivation réelle ou suppression selon politique)
   async function batchDeleteFamilles(ids = []) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase

@@ -12,6 +12,7 @@ export function useMenus() {
 
   // 1. Charger les menus (recherche, date, batch)
   async function fetchMenus({ search = "", date = "", actif = null } = {}) {
+    if (!mama_id) return [];
     setLoading(true);
     setError(null);
     let query = supabase
@@ -33,6 +34,7 @@ export function useMenus() {
 
   // 2. Ajouter un menu (avec ses fiches)
   async function addMenu(menu) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { fiches, ...entete } = menu;
@@ -58,6 +60,7 @@ export function useMenus() {
 
   // 3. Modifier un menu (maj entête + fiches)
   async function updateMenu(id, menu) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { fiches, ...entete } = menu;
@@ -85,6 +88,7 @@ export function useMenus() {
 
   // 4. Supprimer un menu (et ses liaisons)
   async function deleteMenu(id) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     await supabase.from("menu_fiches").delete().eq("menu_id", id);
@@ -96,6 +100,7 @@ export function useMenus() {
 
   // 5. Désactiver/réactiver un menu
   async function toggleMenuActive(id, actif) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase

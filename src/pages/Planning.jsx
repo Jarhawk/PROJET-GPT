@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
 import { usePlanning } from "@/hooks/usePlanning";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "react-hot-toast";
 
 export default function Planning() {
+  const { mama_id } = useAuth();
   const { items, loading, error, fetchPlanning, addPlanning } = usePlanning();
   const [date, setDate] = useState("");
   const [notes, setNotes] = useState("");
 
   useEffect(() => {
-    fetchPlanning();
-  }, []);
+    if (mama_id) fetchPlanning();
+  }, [fetchPlanning, mama_id]);
 
   const handleAdd = async (e) => {
     e.preventDefault();

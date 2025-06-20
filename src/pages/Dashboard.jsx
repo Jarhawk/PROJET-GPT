@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Toaster, toast } from "react-hot-toast";
 import * as XLSX from "xlsx";
+import { useAuth } from "@/context/AuthContext";
 import { usePriceTrends } from "@/hooks/usePriceTrends";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -30,6 +31,7 @@ export default function Dashboard() {
   const [caFnb, setCaFnb] = useState(stats?.ca_fnb || 0);
   const [trendProduct, setTrendProduct] = useState(null);
   const { data: priceTrend, fetchTrends } = usePriceTrends(trendProduct);
+  const { mama_id, loading: authLoading } = useAuth();
 
   useEffect(() => {
     if (topProducts.length > 0 && !trendProduct) {
@@ -41,7 +43,9 @@ export default function Dashboard() {
     if (trendProduct) fetchTrends(trendProduct);
   }, [trendProduct, fetchTrends]);
 
-  useEffect(() => { fetchDashboard(caFnb); }, [caFnb]);
+  useEffect(() => {
+    if (!authLoading && mama_id) fetchDashboard(caFnb);
+  }, [caFnb, mama_id, authLoading]);
   if (loading) return <div className="p-6">Chargement...</div>;
   if (error) return <div className="p-6 text-red-600">{error}</div>;
 

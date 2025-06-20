@@ -13,6 +13,7 @@ export function useFournisseurs() {
 
   // 1. Charger tous les fournisseurs (avec pagination/filtrage si besoin)
   async function fetchFournisseurs({ search = "", actif = null, page = 1, limit = 100 } = {}) {
+    if (!mama_id) return [];
     setLoading(true);
     setError(null);
     let query = supabase
@@ -34,6 +35,7 @@ export function useFournisseurs() {
 
   // 2. Ajouter un fournisseur
   async function addFournisseur(fournisseur) {
+    if (!mama_id) return;
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -46,6 +48,7 @@ export function useFournisseurs() {
 
   // 3. Modifier un fournisseur
   async function updateFournisseur(id, updateFields) {
+    if (!mama_id) return;
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -60,6 +63,7 @@ export function useFournisseurs() {
 
   // 4. Supprimer un fournisseur (soft delete = désactivation)
   async function deleteFournisseur(id) {
+    if (!mama_id) return;
     setLoading(true);
     setError(null);
     const { error } = await supabase

@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import { saveAs } from "file-saver";
 
 export default function Ecarts() {
-  const { authReady } = useAuth();
+  const { loading: authLoading } = useAuth();
   const { data: ecartsRaw, loading, error } = useEcartsInventaire();
   const [search, setSearch] = useState("");
 
-  if (!authReady) {
+  if (authLoading) {
     return (
       <div className="p-6 text-white text-center">
         ⏳ Chargement utilisateur...

@@ -13,7 +13,7 @@ export default function AutoCompleteField({
   const [inputValue, setInputValue] = useState(value || "");
   const [showAdd, setShowAdd] = useState(false);
 
-  const optionsSafe = options ?? []; // ✅ Évite le crash si options est undefined
+  const optionsSafe = options ?? []; // Évite le crash si options est undefined
 
   const handleInputChange = (e) => {
     const val = e.target.value;

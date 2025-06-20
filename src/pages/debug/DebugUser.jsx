@@ -2,9 +2,9 @@
 import { useAuth } from "@/context/AuthContext";
 
 export default function DebugUser() {
-  const { session, role, mama_id, access_rights, authReady } = useAuth();
+  const { session, role, mama_id, access_rights, loading: authLoading } = useAuth();
 
-  if (!authReady) return <p>Chargement...</p>;
+  if (authLoading) return <p>Chargement...</p>;
 
   return (
     <div className="p-6 text-white bg-black">

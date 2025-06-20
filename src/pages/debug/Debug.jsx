@@ -12,16 +12,16 @@ export default function Debug() {
 
         <div className="space-y-3">
           <div>
-            <strong>Chargement :</strong> {authLoading ? "⏳ true" : "✅ false"}
+            <strong>Chargement :</strong> {authLoading ? "true" : "false"}
           </div>
           <div>
-            <strong>Session ID :</strong> {session?.id || "❌ Aucun"}
+            <strong>Session ID :</strong> {session?.id || "Aucun"}
           </div>
           <div>
-            <strong>Role :</strong> {role || "❌ non défini"}
+            <strong>Role :</strong> {role || "non défini"}
           </div>
           <div>
-            <strong>Mama ID :</strong> {mama_id || "❌ non défini"}
+            <strong>Mama ID :</strong> {mama_id || "non défini"}
           </div>
           <div>
             <strong>Access Rights :</strong>

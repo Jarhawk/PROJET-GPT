@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useFiches } from "@/hooks/useFiches";
 import { useProducts } from "@/hooks/useProducts";
 import { Button } from "@/components/ui/button";
+import TableContainer from "@/components/ui/TableContainer";
 import toast from "react-hot-toast";
 import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
 
@@ -79,7 +80,7 @@ export default function FicheForm({ fiche, onClose }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-glass backdrop-blur-lg text-white p-6 rounded-lg shadow-md max-w-2xl mx-auto" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
+    <form onSubmit={handleSubmit} className="bg-glass backdrop-blur-lg text-white p-6 rounded-lg shadow-md max-w-2xl mx-auto text-shadow">
       <h2 className="text-lg font-bold mb-4">
         {fiche ? "Modifier la fiche technique" : "Ajouter une fiche technique"}
       </h2>
@@ -108,7 +109,8 @@ export default function FicheForm({ fiche, onClose }) {
       {/* Gestion dynamique des lignes produits */}
       <div className="mb-4">
         <label className="block font-semibold mb-2">Ingrédients :</label>
-        <table className="min-w-full mb-2 bg-white/5 backdrop-blur-lg rounded-md text-white">
+        <TableContainer>
+          <table className="min-w-full mb-2 text-white">
           <thead>
             <tr>
               <th>Produit</th>
@@ -159,6 +161,7 @@ export default function FicheForm({ fiche, onClose }) {
             })}
           </tbody>
         </table>
+        </TableContainer>
         <Button type="button" size="sm" variant="outline" onClick={addLigne}>Ajouter ingrédient</Button>
       </div>
       <div className="mb-4 flex gap-4">

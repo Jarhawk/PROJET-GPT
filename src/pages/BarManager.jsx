@@ -272,8 +272,7 @@ export default function BarManager() {
                         </Button>
                       </DialogTrigger>
                       <DialogContent
-                        className="bg-white rounded-xl shadow-lg p-6 max-w-md"
-                        style={{ zIndex: 1000 }}
+                        className="bg-white rounded-xl shadow-lg p-6 max-w-md z-[1000]"
                       >
                         <h2 className="font-bold text-xl mb-2">{b.nom}</h2>
                         <p>

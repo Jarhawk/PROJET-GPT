@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
+import TableContainer from "@/components/ui/TableContainer";
 import { Dialog, DialogContent } from "@radix-ui/react-dialog";
 import MamaForm from "./MamaForm";
 import toast, { Toaster } from "react-hot-toast";
@@ -45,7 +46,7 @@ export default function Mamas() {
   );
 
   return (
-    <div className="p-8 max-w-4xl mx-auto" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
+    <div className="p-8 max-w-4xl mx-auto text-shadow">
       <Toaster />
       <h1 className="text-2xl font-bold mb-4">
         Établissements (MAMA)
@@ -61,7 +62,7 @@ export default function Mamas() {
           + Nouvel établissement
         </Button>
       </div>
-      <div className="bg-white/5 backdrop-blur-lg shadow rounded-xl overflow-x-auto mb-6">
+      <TableContainer className="mb-6">
         {loading ? (
           <div className="text-center py-8 text-gray-500">
             <span className="animate-spin mr-2">⏳</span>Chargement…
@@ -143,7 +144,7 @@ export default function Mamas() {
             </tbody>
           </table>
         )}
-      </div>
+      </TableContainer>
       <Dialog open={!!editMama} onOpenChange={v => !v && setEditMama(null)}>
         <DialogContent className="bg-glass backdrop-blur-lg text-white rounded-xl shadow-lg p-6 max-w-md">
           <MamaForm

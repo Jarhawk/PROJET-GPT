@@ -23,14 +23,7 @@ export default function ModalGlass({ open, onClose, children }) {
             transition={{ type: "spring", stiffness: 230, damping: 22 }}
           >
             <div
-              className="relative p-8 rounded-2xl shadow-2xl bg-white/40 dark:bg-[#222634]/60 border border-mamastockGold/25 pointer-events-auto backdrop-blur-xl"
-              style={{
-                boxShadow:
-                  "0 8px 40px 0 #bfa14d55, 0 1.5px 12px 0 #2a304130, 0 0 80px 0 #fff8e144",
-                minWidth: 340,
-                maxWidth: 420,
-                margin: "auto",
-              }}
+              className="relative p-8 rounded-2xl shadow-2xl bg-white/40 dark:bg-[#222634]/60 border border-mamastockGold/25 pointer-events-auto backdrop-blur-xl shadow-[0_8px_40px_0_#bfa14d55,0_1.5px_12px_0_#2a304130,0_0_80px_0_#fff8e144] min-w-[340px] max-w-[420px] mx-auto"
             >
               <button
                 className="absolute top-3 right-3 bg-mamastockGold/20 hover:bg-mamastockGold/40 rounded-full p-2 transition"

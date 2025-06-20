@@ -6,6 +6,7 @@ import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { Button } from "@/components/ui/button";
+import TableContainer from "@/components/ui/TableContainer";
 import { Dialog, DialogTrigger, DialogContent } from "@radix-ui/react-dialog";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
 
@@ -308,7 +309,7 @@ export default function Inventaire() {
   if (!mama_id) return null;
 
   return (
-    <div className="p-8 max-w-7xl mx-auto" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
+    <div className="p-8 max-w-7xl mx-auto text-shadow">
       <Toaster />
       <h1 className="text-2xl font-bold mb-4">
         Suivi des écarts théoriques (Inventaire)
@@ -367,7 +368,7 @@ export default function Inventaire() {
         <Button onClick={handleExportAuditPDF}>Export Audit PDF</Button>
       </div>
       {/* Tableau principal, par zone */}
-      <div className="bg-white/5 backdrop-blur-lg shadow rounded-xl overflow-x-auto">
+      <TableContainer>
         <table className="min-w-full table-auto text-center text-white">
           <thead>
             <tr>
@@ -462,7 +463,7 @@ export default function Inventaire() {
             )}
           </tbody>
         </table>
-      </div>
+      </TableContainer>
       {/* Modal édition ligne */}
       <Dialog open={!!editRow} onOpenChange={v => !v && setEditRow(null)}>
         <DialogContent className="bg-glass backdrop-blur-lg text-white rounded-xl shadow-lg p-6 max-w-md">

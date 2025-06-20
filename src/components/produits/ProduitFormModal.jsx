@@ -24,14 +24,11 @@ export default function ProduitFormModal({ open, produit, familles, unites, onCl
           exit={{ opacity: 0 }}
         >
           <Motion.div
-            className="relative bg-white/80 dark:bg-[#181f31]/90 rounded-2xl shadow-2xl border border-mamastockGold/30 p-0 overflow-hidden min-w-[350px] max-w-lg w-full backdrop-blur-[8px]"
+            className="relative bg-white/80 dark:bg-[#181f31]/90 rounded-2xl shadow-2xl border border-mamastockGold/30 p-0 overflow-hidden min-w-[350px] max-w-lg w-full backdrop-blur-[8px] shadow-[0_8px_42px_0_#bfa14d33,0_2px_16px_0_#0f1c2e22]"
             initial={{ y: 80, opacity: 0, scale: 0.94 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 60, opacity: 0, scale: 0.95 }}
             transition={{ type: "spring", duration: 0.37 }}
-            style={{
-              boxShadow: "0 8px 42px 0 #bfa14d33, 0 2px 16px 0 #0f1c2e22",
-            }}
           >
             <button
               onClick={onClose}

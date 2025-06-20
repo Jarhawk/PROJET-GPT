@@ -4,8 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 
 // Hook principal pour tout accès/fonction fournisseur
 export function useSuppliers() {
-  const { claims } = useAuth();
-  const mama_id = claims?.mama_id;
+  const { mama_id } = useAuth();
 
   const [suppliers, setSuppliers] = useState([]);
   const [supplier, setSupplier] = useState(null);

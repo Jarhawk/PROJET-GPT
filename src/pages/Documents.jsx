@@ -1,15 +1,19 @@
 import { useEffect, useState } from "react";
 import { useDocuments } from "@/hooks/useDocuments";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 
 export default function Documents() {
   const { docs, loading, error, fetchDocs, addDoc } = useDocuments();
+  const { mama_id, loading: authLoading } = useAuth();
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
 
   useEffect(() => {
-    fetchDocs();
-  }, []);
+    if (!authLoading && mama_id) {
+      fetchDocs();
+    }
+  }, [authLoading, mama_id, fetchDocs]);
 
   const handleAdd = async (e) => {
     e.preventDefault();

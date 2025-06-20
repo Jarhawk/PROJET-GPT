@@ -5,6 +5,7 @@ export function useCostCenterStats() {
   const { mama_id } = useAuth();
 
   async function fetchStats({ debut = null, fin = null } = {}) {
+    if (!mama_id) return [];
     const { data, error } = await supabase.rpc("stats_cost_centers", {
       mama_id_param: mama_id,
       debut_param: debut,

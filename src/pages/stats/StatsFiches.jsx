@@ -8,7 +8,7 @@ import * as XLSX from "xlsx";
 import { useFicheCoutHistory } from "@/hooks/useFicheCoutHistory";
 
 export default function StatsFiches() {
-  const { isAuthenticated, loading: authLoading, claims } = useAuth();
+  const { mama_id, loading: authLoading, isAuthenticated } = useAuth();
   const [fiches, setFiches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [familles, setFamilles] = useState([]);
@@ -16,25 +16,25 @@ export default function StatsFiches() {
   const [selectedFiche, setSelectedFiche] = useState(null);
 
   // Historique coût réel
-  const { history, fetchHistory } = useFicheCoutHistory(selectedFiche?.id, claims?.mama_id);
+  const { history, fetchFicheCoutHistory } = useFicheCoutHistory();
 
   useEffect(() => {
-    if (!claims?.mama_id || !isAuthenticated) return;
+    if (!mama_id || !isAuthenticated || authLoading) return;
     setLoading(true);
     Promise.all([
-      supabase.from("fiches_techniques").select("*").eq("mama_id", claims.mama_id),
-      supabase.from("familles").select("nom").eq("mama_id", claims.mama_id),
+      supabase.from("fiches_techniques").select("*").eq("mama_id", mama_id),
+      supabase.from("familles").select("nom").eq("mama_id", mama_id),
     ]).then(([ficheRes, familleRes]) => {
       if (ficheRes.error) toast.error("Erreur chargement : " + ficheRes.error.message);
       else setFiches(ficheRes.data || []);
       setFamilles((familleRes.data || []).map(f => f.nom));
       setLoading(false);
     });
-  }, [claims?.mama_id, isAuthenticated]);
+  }, [mama_id, isAuthenticated, authLoading]);
 
   useEffect(() => {
-    if (selectedFiche?.id && claims?.mama_id) fetchHistory();
-  }, [selectedFiche?.id, claims?.mama_id, fetchHistory]);
+    if (selectedFiche?.id && mama_id) fetchFicheCoutHistory(selectedFiche.id);
+  }, [selectedFiche?.id, mama_id, fetchFicheCoutHistory]);
 
   // Graphiques
   const repartFamille = familles.map(f => ({

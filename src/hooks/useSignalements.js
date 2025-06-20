@@ -4,14 +4,15 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 
 export function useSignalements() {
-  const { mama_id } = useAuth();
+  const { mama_id, user_id, loading: authLoading } = useAuth();
   const [signalements, setSignalements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const fetchSignalements = async () => {
-    if (!mama_id) return;
+    if (!mama_id || authLoading) return;
 
+    setLoading(true);
     try {
       const { data, error } = await supabase
         .from("signalements")
@@ -31,15 +32,22 @@ export function useSignalements() {
   };
 
   useEffect(() => {
-    fetchSignalements();
-  }, [mama_id]);
+    if (!authLoading) fetchSignalements();
+  }, [mama_id, authLoading]);
 
   const addSignalement = async (newSignalement) => {
-    if (!mama_id) return;
+    if (!mama_id || authLoading) return;
 
     const { error } = await supabase
       .from("signalements")
-      .insert([{ ...newSignalement, mama_id, date: new Date().toISOString() }]);
+      .insert([
+        {
+          ...newSignalement,
+          mama_id,
+          created_by: user_id,
+          date: new Date().toISOString(),
+        },
+      ]);
 
     if (error) {
       console.error("❌ Erreur ajout signalement:", error.message);
@@ -56,12 +64,12 @@ export function useSignalement(id) {
   const [signalement, setSignalement] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { mama_id } = useAuth();
+  const { mama_id, loading: authLoading } = useAuth();
 
   useEffect(() => {
     const fetchSignalement = async () => {
-      if (!id || !mama_id) return;
-
+      if (!id || !mama_id || authLoading) return;
+      
       try {
         const { data, error } = await supabase
           .from("signalements")
@@ -81,7 +89,7 @@ export function useSignalement(id) {
     };
 
     fetchSignalement();
-  }, [id, mama_id]);
+  }, [id, mama_id, authLoading]);
 
   return { signalement, loading, error };
 }

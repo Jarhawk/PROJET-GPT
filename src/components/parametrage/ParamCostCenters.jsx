@@ -1,5 +1,6 @@
 import { useCostCenters } from "@/hooks/useCostCenters";
 import { useState, useEffect, useRef } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Toaster, toast } from "react-hot-toast";
 import * as XLSX from "xlsx";
@@ -13,12 +14,15 @@ export default function ParamCostCenters() {
     deleteCostCenter,
     importCostCentersFromExcel,
   } = useCostCenters();
+  const { mama_id } = useAuth();
   const [search, setSearch] = useState("");
   const [form, setForm] = useState({ nom: "", actif: true, id: null });
   const [editMode, setEditMode] = useState(false);
   const fileRef = useRef();
 
-  useEffect(() => { fetchCostCenters(); }, []);
+  useEffect(() => {
+    if (mama_id) fetchCostCenters();
+  }, [mama_id]);
 
   const filtered = costCenters.filter(c =>
     !search || c.nom.toLowerCase().includes(search.toLowerCase())

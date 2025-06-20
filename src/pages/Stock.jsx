@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useStock } from "@/hooks/useStock";
+import { useAuth } from "@/context/AuthContext";
 import StockMouvementForm from "@/components/stock/StockMouvementForm";
 import StockDetail from "@/components/stock/StockDetail";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ const PAGE_SIZE = 20;
 
 export default function Stock() {
   const { stocks, fetchStocks, fetchMouvements, mouvements } = useStock();
+  const { mama_id, loading: authLoading } = useAuth();
   const [search, setSearch] = useState("");
   const [zoneFilter, setZoneFilter] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -20,9 +22,11 @@ export default function Stock() {
   const [page, setPage] = useState(1);
 
   useEffect(() => {
-    fetchStocks();
-    fetchMouvements();
-  }, [fetchStocks, fetchMouvements]);
+    if (!authLoading && mama_id) {
+      fetchStocks();
+      fetchMouvements();
+    }
+  }, [authLoading, mama_id, fetchStocks, fetchMouvements]);
 
   const filtered = stocks.filter(
     s =>

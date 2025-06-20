@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useMenus } from "@/hooks/useMenus";
 import { useFiches } from "@/hooks/useFiches";
+import { useAuth } from "@/context/AuthContext";
 import MenuForm from "./MenuForm.jsx";
 import MenuDetail from "./MenuDetail.jsx";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { motion as Motion } from "framer-motion";
 export default function Menus() {
   const { menus, fetchMenus, deleteMenu } = useMenus();
   const { fiches, fetchFiches } = useFiches();
+  const { mama_id, loading: authLoading } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected] = useState(null);
@@ -19,7 +21,12 @@ export default function Menus() {
   const [dateFilter, setDateFilter] = useState("");
 
   // Récupération initiale des menus et fiches
-  useEffect(() => { fetchMenus(); fetchFiches(); }, []);
+  useEffect(() => {
+    if (!authLoading && mama_id) {
+      fetchMenus();
+      fetchFiches();
+    }
+  }, [authLoading, mama_id, fetchMenus, fetchFiches]);
 
   const menusFiltres = menus.filter(m =>
     (!search || m.nom?.toLowerCase().includes(search.toLowerCase())) &&

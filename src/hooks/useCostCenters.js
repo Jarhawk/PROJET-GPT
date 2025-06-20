@@ -13,6 +13,7 @@ export function useCostCenters() {
   const [error, setError] = useState(null);
 
   async function fetchCostCenters({ search = "" } = {}) {
+    if (!mama_id) return [];
     setLoading(true);
     setError(null);
     let query = supabase.from("cost_centers").select("*").eq("mama_id", mama_id);
@@ -25,6 +26,7 @@ export function useCostCenters() {
   }
 
   async function addCostCenter(values) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -37,6 +39,7 @@ export function useCostCenters() {
   }
 
   async function updateCostCenter(id, values) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -51,6 +54,7 @@ export function useCostCenters() {
   }
 
   async function deleteCostCenter(id) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase

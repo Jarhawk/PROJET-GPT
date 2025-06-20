@@ -1,13 +1,17 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useTasks } from "@/hooks/useTasks";
+import { useAuth } from "@/context/AuthContext";
 import { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 
 export default function Taches() {
   const { tasks, loading, error, fetchTasks, deleteTask } = useTasks();
+  const { mama_id, loading: authLoading } = useAuth();
 
-  useEffect(() => { fetchTasks(); }, [fetchTasks]);
+  useEffect(() => {
+    if (!authLoading && mama_id) fetchTasks();
+  }, [authLoading, mama_id, fetchTasks]);
 
   const handleDelete = async id => {
     if (window.confirm("Supprimer cette tâche ?")) {

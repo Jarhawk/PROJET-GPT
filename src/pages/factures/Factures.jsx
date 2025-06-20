@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useInvoices } from "@/hooks/useInvoices";
 import { useSuppliers } from "@/hooks/useSuppliers";
+import { useAuth } from "@/context/AuthContext";
 import FactureForm from "./FactureForm.jsx";
 import FactureDetail from "./FactureDetail.jsx";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ const STATUTS = {
 export default function Factures() {
   const { invoices, fetchInvoices, deleteInvoice } = useInvoices();
   const { suppliers } = useSuppliers();
+  const { mama_id } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected] = useState(null);
@@ -26,7 +28,7 @@ export default function Factures() {
   const [supplierFilter, setSupplierFilter] = useState("");
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => { fetchInvoices(); }, []);
+  useEffect(() => { if (mama_id) fetchInvoices(); }, [mama_id]);
 
   // Export Excel/XLSX
   const exportExcel = () => {

@@ -5,13 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Toaster, toast } from "react-hot-toast";
 
 export default function Validations() {
+  const { isAdmin, mama_id } = useAuth();
   const validations = useValidations();
-  const { isAdmin } = useAuth();
   const [form, setForm] = useState({ module: "", entity_id: "", action: "" });
 
   useEffect(() => {
-    validations.fetchRequests();
-  }, []);
+    if (mama_id) validations.fetchRequests();
+  }, [validations.fetchRequests, mama_id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

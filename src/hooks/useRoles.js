@@ -12,6 +12,7 @@ export function useRoles() {
 
   // 1. Charger les rôles (tous si superadmin, sinon liés à mama_id)
   async function fetchRoles({ search = "", actif = null } = {}) {
+    if (!mama_id && role !== "superadmin") return [];
     setLoading(true);
     setError(null);
     let query = supabase.from("roles").select("*");
@@ -28,6 +29,7 @@ export function useRoles() {
 
   // 2. Ajouter un rôle
   async function addRole(roleData) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -40,6 +42,7 @@ export function useRoles() {
 
   // 3. Modifier un rôle
   async function updateRole(id, updateFields) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -54,6 +57,7 @@ export function useRoles() {
 
   // 4. Désactiver/réactiver un rôle
   async function toggleRoleActive(id, actif) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase

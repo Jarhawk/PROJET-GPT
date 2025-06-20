@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useMenuEngineering } from '@/hooks/useMenuEngineering';
 import { Toaster, toast } from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/AuthContext';
 
 function classify(items) {
   const ventes = items.map(i => i.ventes).sort((a,b)=>a-b);
@@ -24,9 +25,14 @@ export default function MenuEngineering() {
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`;
   });
   const { fetchData, saveVente } = useMenuEngineering();
+  const { mama_id, loading: authLoading } = useAuth();
   const [rows, setRows] = useState([]);
 
-  useEffect(() => { fetchData(periode).then(res => setRows(classify(res))); }, [periode, fetchData]);
+  useEffect(() => {
+    if (!authLoading && mama_id) {
+      fetchData(periode).then(res => setRows(classify(res)));
+    }
+  }, [periode, fetchData, authLoading, mama_id]);
 
   const handleChange = async (fiche, val) => {
     await saveVente(fiche.id, periode, Number(val));
@@ -34,6 +40,9 @@ export default function MenuEngineering() {
     const res = await fetchData(periode);
     setRows(classify(res));
   };
+
+  if (authLoading) return <div className="p-8">Chargement...</div>;
+  if (!mama_id) return null;
 
   return (
     <div className="p-8 max-w-4xl mx-auto">

@@ -12,6 +12,7 @@ const queryObj = {
 };
 const fromMock = vi.fn(() => queryObj);
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ mama_id: '1' }) }));
 
 let useAuditTrail;
 

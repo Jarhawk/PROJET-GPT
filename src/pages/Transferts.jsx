@@ -7,10 +7,18 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger, DialogContent } from "@radix-ui/react-dialog";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+} from "recharts";
 
 export default function Transferts() {
-  const { isAuthenticated, claims } = useAuth();
+  const { isAuthenticated, mama_id, user_id, loading: authLoading } = useAuth();
   const [transferts, setTransferts] = useState([]);
   const [produits, setProduits] = useState([]);
   const [zones, setZones] = useState([]);
@@ -28,55 +36,57 @@ export default function Transferts() {
   const [loadingTimeline, setLoadingTimeline] = useState(false);
 
   useEffect(() => {
-    if (!claims?.mama_id) return;
+    if (!mama_id) return;
     supabase
       .from("products")
       .select("*")
-      .eq("mama_id", claims.mama_id)
+      .eq("mama_id", mama_id)
       .then(({ data }) => setProduits(data || []));
     supabase
       .from("inventaires")
       .select("zone")
-      .eq("mama_id", claims.mama_id)
+      .eq("mama_id", mama_id)
       .then(({ data }) => {
-        const uniques = [...new Set((data || []).map(z => z.zone).filter(Boolean))];
+        const uniques = [
+          ...new Set((data || []).map((z) => z.zone).filter(Boolean)),
+        ];
         setZones(uniques);
       });
-  }, [claims?.mama_id]);
+  }, [mama_id]);
 
   useEffect(() => {
-    if (!claims?.mama_id || !periode.debut || !periode.fin) return;
+    if (!mama_id || !periode.debut || !periode.fin) return;
     supabase
       .from("transferts")
       .select("*")
-      .eq("mama_id", claims.mama_id)
+      .eq("mama_id", mama_id)
       .gte("date_transfert", periode.debut)
       .lte("date_transfert", periode.fin)
       .order("date_transfert", { ascending: false })
       .then(({ data }) => setTransferts(data || []));
-  }, [claims?.mama_id, periode]);
+  }, [mama_id, periode]);
 
   // Jointure produit, calcul coût €
   const filtered = transferts
-    .map(t => {
-      const prod = produits.find(p => p.id === t.produit_id) || {};
+    .map((t) => {
+      const prod = produits.find((p) => p.id === t.produit_id) || {};
       const prix = prod.pmp || prod.dernier_prix || 0;
       const cout = Math.round(t.quantite * prix * 100) / 100;
       return { ...t, nom: prod.nom || "-", prix, cout };
     })
     .filter(
-      t =>
+      (t) =>
         t.nom?.toLowerCase().includes(search.toLowerCase()) ||
         t.zone_depart?.toLowerCase().includes(search.toLowerCase()) ||
         t.zone_arrivee?.toLowerCase().includes(search.toLowerCase()) ||
-        t.motif?.toLowerCase().includes(search.toLowerCase())
+        t.motif?.toLowerCase().includes(search.toLowerCase()),
     );
 
   // Stats globales coût total
   const totalEuro = filtered.reduce((sum, t) => sum + (t.cout || 0), 0);
   // Par couple de zones
   const statsZone = {};
-  filtered.forEach(t => {
+  filtered.forEach((t) => {
     const key = `${t.zone_depart}→${t.zone_arrivee}`;
     statsZone[key] = (statsZone[key] || 0) + (t.cout || 0);
   });
@@ -89,7 +99,7 @@ export default function Transferts() {
 
   // Top produits transférés (€)
   const statsProduit = {};
-  filtered.forEach(t => {
+  filtered.forEach((t) => {
     statsProduit[t.nom] = (statsProduit[t.nom] || 0) + (t.cout || 0);
   });
   const topProduits = Object.entries(statsProduit)
@@ -103,7 +113,7 @@ export default function Transferts() {
   // Export Excel/PDF
   const handleExportExcel = () => {
     const ws = XLSX.utils.json_to_sheet(
-      filtered.map(t => ({
+      filtered.map((t) => ({
         Produit: t.nom,
         Date: t.date_transfert,
         Quantité: t.quantite,
@@ -112,7 +122,7 @@ export default function Transferts() {
         Motif: t.motif,
         Prix: t.prix,
         "Coût (€)": t.cout,
-      }))
+      })),
     );
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Transferts");
@@ -125,8 +135,19 @@ export default function Transferts() {
     doc.text("Historique Transferts de stock inter-zones", 10, 12);
     doc.autoTable({
       startY: 20,
-      head: [["Produit", "Date", "Quantité", "Zone départ", "Zone arrivée", "Motif", "Prix", "Coût (€)"]],
-      body: filtered.map(t => [
+      head: [
+        [
+          "Produit",
+          "Date",
+          "Quantité",
+          "Zone départ",
+          "Zone arrivée",
+          "Motif",
+          "Prix",
+          "Coût (€)",
+        ],
+      ],
+      body: filtered.map((t) => [
         t.nom,
         t.date_transfert,
         t.quantite,
@@ -143,9 +164,14 @@ export default function Transferts() {
   };
 
   // Saisie création transfert
-  const handleCreateTf = async e => {
+  const handleCreateTf = async (e) => {
     e.preventDefault();
-    if (!createTf.produit_id || !createTf.quantite || !createTf.zone_depart || !createTf.zone_arrivee) {
+    if (
+      !createTf.produit_id ||
+      !createTf.quantite ||
+      !createTf.zone_depart ||
+      !createTf.zone_arrivee
+    ) {
       toast.error("Tous les champs sont obligatoires !");
       return;
     }
@@ -153,12 +179,16 @@ export default function Transferts() {
       toast.error("Zone départ et arrivée doivent être différentes !");
       return;
     }
+    if (!mama_id) {
+      toast.error("Authentification requise");
+      return;
+    }
     const { error } = await supabase.from("transferts").insert([
       {
         ...createTf,
-        mama_id: claims.mama_id,
+        mama_id,
         date_transfert: new Date().toISOString().slice(0, 10),
-        created_by: claims.user_id,
+        created_by: user_id,
       },
     ]);
     if (!error) {
@@ -171,19 +201,20 @@ export default function Transferts() {
         motif: "",
       });
       toast.success("Transfert enregistré !");
-      setPeriode(p => ({ ...p }));
+      setPeriode((p) => ({ ...p }));
     } else {
       toast.error(error.message);
     }
   };
 
   // Timeline produit
-  const handleShowTimeline = async produit_id => {
+  const handleShowTimeline = async (produit_id) => {
     setLoadingTimeline(true);
+    if (!mama_id) return;
     const { data, error } = await supabase
       .from("transferts")
       .select("date_transfert, zone_depart, zone_arrivee, quantite, motif")
-      .eq("mama_id", claims.mama_id)
+      .eq("mama_id", mama_id)
       .eq("produit_id", produit_id)
       .order("date_transfert", { ascending: false });
     if (!error) setTimeline(data || []);
@@ -196,6 +227,7 @@ export default function Transferts() {
 
   const today = new Date().toISOString().slice(0, 10);
 
+  if (authLoading) return <div className="p-8">Chargement...</div>;
   if (!isAuthenticated) return null;
 
   return (
@@ -233,7 +265,8 @@ export default function Transferts() {
       </div>
       {/* Total général */}
       <div className="mb-4 font-bold text-lg text-mamastock-gold">
-        Total valeur transférée sur la période : {Math.round(totalEuro * 100) / 100} €
+        Total valeur transférée sur la période :{" "}
+        {Math.round(totalEuro * 100) / 100} €
       </div>
       {/* Barre filtre, exports */}
       <div className="flex gap-4 mb-4 items-end">
@@ -243,7 +276,9 @@ export default function Transferts() {
             type="date"
             className="input input-bordered"
             value={periode.debut}
-            onChange={e => setPeriode(p => ({ ...p, debut: e.target.value }))}
+            onChange={(e) =>
+              setPeriode((p) => ({ ...p, debut: e.target.value }))
+            }
           />
         </div>
         <div>
@@ -252,7 +287,7 @@ export default function Transferts() {
             type="date"
             className="input input-bordered"
             value={periode.fin}
-            onChange={e => setPeriode(p => ({ ...p, fin: e.target.value }))}
+            onChange={(e) => setPeriode((p) => ({ ...p, fin: e.target.value }))}
             max={today}
           />
         </div>
@@ -260,7 +295,7 @@ export default function Transferts() {
           className="input input-bordered w-64"
           placeholder="Recherche produit, zone, motif"
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={(e) => setSearch(e.target.value)}
         />
         <Button onClick={handleExportExcel}>Export Excel</Button>
         <Button onClick={handleExportPDF}>Export PDF</Button>
@@ -282,7 +317,7 @@ export default function Transferts() {
             </tr>
           </thead>
           <tbody>
-            {filtered.map(t => (
+            {filtered.map((t) => (
               <tr key={t.id}>
                 <td className="px-2 py-1">{t.date_transfert}</td>
                 <td className="px-2 py-1">{t.nom}</td>
@@ -295,7 +330,11 @@ export default function Transferts() {
                 <td>
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button size="sm" variant="ghost" onClick={() => handleShowTimeline(t.produit_id)}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleShowTimeline(t.produit_id)}
+                      >
                         Timeline
                       </Button>
                     </DialogTrigger>
@@ -338,7 +377,10 @@ export default function Transferts() {
         </table>
       </div>
       {/* Modal création transfert */}
-      <Dialog open={showCreate} onOpenChange={v => !v && setShowCreate(false)}>
+      <Dialog
+        open={showCreate}
+        onOpenChange={(v) => !v && setShowCreate(false)}
+      >
         <DialogContent className="bg-white rounded-xl shadow-lg p-6 max-w-md">
           <h2 className="font-bold mb-2">Nouveau transfert de stock</h2>
           <form onSubmit={handleCreateTf} className="space-y-3">
@@ -347,12 +389,12 @@ export default function Transferts() {
               <select
                 className="input input-bordered w-full"
                 value={createTf.produit_id}
-                onChange={e =>
-                  setCreateTf(r => ({ ...r, produit_id: e.target.value }))
+                onChange={(e) =>
+                  setCreateTf((r) => ({ ...r, produit_id: e.target.value }))
                 }
               >
                 <option value="">Sélectionne…</option>
-                {produits.map(p => (
+                {produits.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.nom}
                   </option>
@@ -365,8 +407,8 @@ export default function Transferts() {
                 type="number"
                 className="input input-bordered w-24"
                 value={createTf.quantite}
-                onChange={e =>
-                  setCreateTf(r => ({ ...r, quantite: e.target.value }))
+                onChange={(e) =>
+                  setCreateTf((r) => ({ ...r, quantite: e.target.value }))
                 }
                 min={0}
               />
@@ -376,12 +418,12 @@ export default function Transferts() {
               <select
                 className="input input-bordered w-full"
                 value={createTf.zone_depart}
-                onChange={e =>
-                  setCreateTf(r => ({ ...r, zone_depart: e.target.value }))
+                onChange={(e) =>
+                  setCreateTf((r) => ({ ...r, zone_depart: e.target.value }))
                 }
               >
                 <option value="">Sélectionne…</option>
-                {zones.map(z => (
+                {zones.map((z) => (
                   <option key={z} value={z}>
                     {z}
                   </option>
@@ -393,12 +435,12 @@ export default function Transferts() {
               <select
                 className="input input-bordered w-full"
                 value={createTf.zone_arrivee}
-                onChange={e =>
-                  setCreateTf(r => ({ ...r, zone_arrivee: e.target.value }))
+                onChange={(e) =>
+                  setCreateTf((r) => ({ ...r, zone_arrivee: e.target.value }))
                 }
               >
                 <option value="">Sélectionne…</option>
-                {zones.map(z => (
+                {zones.map((z) => (
                   <option key={z} value={z}>
                     {z}
                   </option>
@@ -411,8 +453,8 @@ export default function Transferts() {
                 className="input input-bordered w-full"
                 value={createTf.motif}
                 rows={2}
-                onChange={e =>
-                  setCreateTf(r => ({ ...r, motif: e.target.value }))
+                onChange={(e) =>
+                  setCreateTf((r) => ({ ...r, motif: e.target.value }))
                 }
               />
             </div>

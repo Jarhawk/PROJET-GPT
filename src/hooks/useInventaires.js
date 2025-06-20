@@ -13,6 +13,7 @@ export function useInventaires() {
 
   // 1. Charger tous les inventaires (avec lignes)
   async function fetchInventaires({ search = "", date = "", actif = null } = {}) {
+    if (!mama_id) return [];
     setLoading(true);
     setError(null);
     let query = supabase
@@ -34,6 +35,7 @@ export function useInventaires() {
 
   // 2. Ajouter un inventaire (avec lignes)
   async function addInventaire(inv) {
+    if (!mama_id) return;
     setLoading(true);
     setError(null);
     const { lignes, ...entete } = inv;
@@ -62,6 +64,7 @@ export function useInventaires() {
 
   // 3. Modifier un inventaire (maj entête + lignes)
   async function editInventaire(id, inv) {
+    if (!mama_id) return;
     setLoading(true);
     setError(null);
     const { lignes, ...entete } = inv;
@@ -89,6 +92,7 @@ export function useInventaires() {
 
   // 4. Supprimer un inventaire (et ses lignes)
   async function deleteInventaire(id) {
+    if (!mama_id) return;
     setLoading(true);
     setError(null);
     await supabase.from("inventaire_lignes").delete().eq("inventaire_id", id);
@@ -100,6 +104,7 @@ export function useInventaires() {
 
   // 5. Clôturer un inventaire
   async function clotureInventaire(id) {
+    if (!mama_id) return;
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -113,6 +118,7 @@ export function useInventaires() {
 
   // 6. Réinitialiser un inventaire (reset lignes à 0)
   async function resetInventaire(id) {
+    if (!mama_id) return;
     setLoading(true);
     setError(null);
     // Set all lignes quantité to 0
@@ -131,6 +137,7 @@ export function useInventaires() {
 
   // 7. Charger mouvements stock sur période
   async function fetchMouvementsForPeriod(date_debut, date_fin) {
+    if (!mama_id) return [];
     setLoading(true);
     setError(null);
     let query = supabase
@@ -149,6 +156,7 @@ export function useInventaires() {
 
   // 8. Charger mouvements liés à un inventaire précis
   async function fetchMouvementsInventaire(inventaire_id) {
+    if (!mama_id) return [];
     setLoading(true);
     setError(null);
     let query = supabase
@@ -165,6 +173,7 @@ export function useInventaires() {
 
   // 9. Récupérer le dernier inventaire clôturé
   async function fetchLastClosedInventaire(beforeDate = null) {
+    if (!mama_id) return null;
     let query = supabase
       .from("inventaires")
       .select("*")

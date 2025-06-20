@@ -1,15 +1,21 @@
 import { useEffect, useState } from "react";
 import { usePromotions } from "@/hooks/usePromotions";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Toaster, toast } from "react-hot-toast";
 
 export default function Promotions() {
   const { promotions, fetchPromotions, addPromotion, updatePromotion, deletePromotion } = usePromotions();
+  const { mama_id, loading: authLoading } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [editRow, setEditRow] = useState(null);
   const [search, setSearch] = useState("");
 
-  useEffect(() => { fetchPromotions(); }, [fetchPromotions]);
+  useEffect(() => {
+    if (!authLoading && mama_id) fetchPromotions();
+  }, [authLoading, mama_id, fetchPromotions]);
+
+  if (authLoading || !mama_id) return null;
 
   const filtered = promotions.filter(p =>
     !search || p.nom.toLowerCase().includes(search.toLowerCase())

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useMenuDuJour } from "@/hooks/useMenuDuJour";
 import { useFiches } from "@/hooks/useFiches";
+import { useAuth } from "@/context/AuthContext";
 import MenuDuJourForm from "./MenuDuJourForm.jsx";
 import MenuDuJourDetail from "./MenuDuJourDetail.jsx";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { motion as Motion } from "framer-motion";
 export default function MenuDuJour() {
   const { menusDuJour, fetchMenusDuJour, deleteMenuDuJour } = useMenuDuJour();
   const { fiches, fetchFiches } = useFiches();
+  const { mama_id, loading: authLoading } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected] = useState(null);
@@ -19,9 +21,11 @@ export default function MenuDuJour() {
   const [dateFilter, setDateFilter] = useState("");
 
   useEffect(() => {
-    fetchMenusDuJour();
-    fetchFiches();
-  }, [fetchMenusDuJour, fetchFiches]);
+    if (!authLoading && mama_id) {
+      fetchMenusDuJour();
+      fetchFiches();
+    }
+  }, [authLoading, mama_id, fetchMenusDuJour, fetchFiches]);
 
   const menusFiltres = menusDuJour.filter(m =>
     (!search || m.nom?.toLowerCase().includes(search.toLowerCase())) &&

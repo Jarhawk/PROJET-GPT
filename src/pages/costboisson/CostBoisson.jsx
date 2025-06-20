@@ -13,7 +13,7 @@ import { motion as Motion, AnimatePresence } from "framer-motion";
 const FOOD_COST_SEUIL = 28;
 
 export default function CostBoissons() {
-  const { isAuthenticated, claims } = useAuth();
+  const { mama_id, user_id, loading: authLoading } = useAuth();
   const [boissons, setBoissons] = useState([]);
   const [savingId, setSavingId] = useState(null);
   const [search, setSearch] = useState("");
@@ -23,37 +23,38 @@ export default function CostBoissons() {
 
   // Charger boissons actives
   useEffect(() => {
-    if (!claims?.mama_id) return;
+    if (!mama_id || authLoading) return;
     supabase
       .from("fiches_techniques")
       .select("*")
-      .eq("mama_id", claims.mama_id)
+      .eq("mama_id", mama_id)
       .eq("actif", true)
       .ilike("famille", "%boisson%")
       .then(({ data }) => setBoissons(data || []));
-  }, [claims?.mama_id]);
+  }, [mama_id, authLoading]);
 
   // Charger stats ventes sur la période (top ventes, volumes)
   useEffect(() => {
-    if (!claims?.mama_id) return;
+    if (!mama_id || authLoading) return;
     if (!periode.debut || !periode.fin) return setVentes([]);
     supabase
       .from("ventes_boissons")
       .select("boisson_id, quantite")
-      .eq("mama_id", claims.mama_id)
+      .eq("mama_id", mama_id)
       .gte("date_vente", periode.debut)
       .lte("date_vente", periode.fin)
       .then(({ data }) => setVentes(data || []));
-  }, [claims?.mama_id, periode]);
+  }, [mama_id, authLoading, periode]);
 
   // Saisie rapide PV
   const handleChangePV = async (boisson, newPV) => {
+    if (!mama_id) return;
     setSavingId(boisson.id);
     const { error } = await supabase
       .from("fiches_techniques")
       .update({ prix_vente: newPV })
       .eq("id", boisson.id)
-      .eq("mama_id", claims.mama_id);
+      .eq("mama_id", mama_id);
     if (!error) {
       setBoissons(prev =>
         prev.map(b =>
@@ -72,17 +73,18 @@ export default function CostBoissons() {
     setVentesInput(prev => ({ ...prev, [boissonId]: value }));
   };
   const handleSaveVente = async (boissonId) => {
+    if (!mama_id) return;
     const quantite = Number(ventesInput[boissonId]);
     if (!quantite || quantite < 0) {
       toast.error("Saisir une quantité > 0");
       return;
     }
     const { error } = await supabase.from("ventes_boissons").insert([{
-      mama_id: claims.mama_id,
+      mama_id,
       boisson_id: boissonId,
       quantite,
       date_vente: new Date().toISOString().slice(0, 10),
-      created_by: claims.user_id,
+      created_by: user_id,
     }]);
     if (!error) {
       toast.success("Vente enregistrée !");
@@ -175,7 +177,8 @@ export default function CostBoissons() {
       "Marge (€)": b.prix_vente && b.cout_portion ? (b.prix_vente - b.cout_portion).toFixed(2) : 0
     }));
 
-  if (!isAuthenticated) return null;
+  if (authLoading) return <div className="p-8">Chargement...</div>;
+  if (!mama_id) return null;
 
   return (
     <div className="p-8 max-w-6xl mx-auto">

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
+import { useAuth } from "@/context/AuthContext";
 import { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import * as XLSX from "xlsx";
@@ -7,10 +8,12 @@ import * as XLSX from "xlsx";
 export default function StatsStock() {
   const { stats, loading, error, fetchStats } = useDashboardStats({ pageSize: 1000 });
   const [rows, setRows] = useState([]);
+  const { mama_id, loading: authLoading } = useAuth();
 
   useEffect(() => {
+    if (!mama_id || authLoading) return;
     fetchStats();
-  }, [fetchStats]);
+  }, [fetchStats, mama_id, authLoading]);
 
   useEffect(() => {
     const arr = Array.isArray(stats) ? [...stats] : [];

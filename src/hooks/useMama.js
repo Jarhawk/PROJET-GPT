@@ -9,6 +9,7 @@ export function useMama() {
   const [error, setError] = useState(null);
 
   async function fetchMama() {
+    if (!mama_id) return null;
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
@@ -23,6 +24,7 @@ export function useMama() {
   }
 
   async function updateMama(fields) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase

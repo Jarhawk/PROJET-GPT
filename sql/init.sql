@@ -379,6 +379,8 @@ begin
 end;
 $$;
 
+-- Drop and recreate trigger for idempotence
+drop trigger if exists trg_facture_ligne on facture_lignes;
 create trigger trg_facture_ligne after insert on facture_lignes
 for each row execute procedure update_product_pmp();
 
@@ -393,6 +395,8 @@ begin
 end;
 $$;
 
+-- Recreate trigger safely
+drop trigger if exists trg_facture_total on facture_lignes;
 create trigger trg_facture_total
 after insert or update or delete on facture_lignes
 for each row execute procedure refresh_facture_total();
@@ -410,6 +414,7 @@ begin
 end;
 $$;
 
+drop trigger if exists trg_mouvement_stock on mouvements_stock;
 create trigger trg_mouvement_stock after insert on mouvements_stock
 for each row execute procedure update_stock_theorique();
 
@@ -422,6 +427,7 @@ begin
 end;
 $$;
 
+drop trigger if exists trg_inventaire_ligne on inventaire_lignes;
 create trigger trg_inventaire_ligne after insert on inventaire_lignes
 for each row execute procedure apply_inventaire_line();
 
@@ -454,10 +460,12 @@ begin
 end;
 $$;
 
+drop trigger if exists trg_fiche_lignes_cost on fiche_lignes;
 create trigger trg_fiche_lignes_cost
 after insert or update or delete on fiche_lignes
 for each row execute procedure refresh_fiche_cost();
 
+drop trigger if exists trg_fiche_update_cost on fiches;
 create trigger trg_fiche_update_cost
 after update on fiches
 for each row execute procedure refresh_fiche_cost();

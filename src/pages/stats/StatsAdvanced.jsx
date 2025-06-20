@@ -1,12 +1,17 @@
 import { useEffect } from "react";
 import { useAdvancedStats } from "@/hooks/useAdvancedStats";
+import { useAuth } from "@/context/AuthContext";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { Toaster } from "react-hot-toast";
 
 export default function StatsAdvanced() {
   const { data, loading, error, fetchStats } = useAdvancedStats();
+  const { isAuthenticated, loading: authLoading } = useAuth();
 
-  useEffect(() => { fetchStats(); }, [fetchStats]);
+  useEffect(() => {
+    if (!isAuthenticated || authLoading) return;
+    fetchStats();
+  }, [fetchStats, isAuthenticated, authLoading]);
 
   if (loading) return <div className="p-8">Chargement...</div>;
   if (error) return <div className="p-8 text-red-600">{error}</div>;

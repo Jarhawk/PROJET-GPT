@@ -6,19 +6,19 @@ import toast, { Toaster } from "react-hot-toast";
 const FOOD_COST_SEUIL = 35;
 
 export default function CartePlats() {
-  const { isAuthenticated, claims } = useAuth();
+  const { mama_id, loading: authLoading } = useAuth();
   const [fiches, setFiches] = useState([]);
   const [savingId, setSavingId] = useState(null);
 
   useEffect(() => {
-    if (!claims?.mama_id) return;
+    if (!mama_id || authLoading) return;
     supabase
       .from("fiches_techniques")
       .select("*")
-      .eq("mama_id", claims.mama_id)
+      .eq("mama_id", mama_id)
       .eq("actif", true)
       .then(({ data }) => setFiches(data || []));
-  }, [claims?.mama_id]);
+  }, [mama_id, authLoading]);
 
   const handleChangePV = async (fiche, newPV) => {
     setSavingId(fiche.id);
@@ -26,7 +26,7 @@ export default function CartePlats() {
       .from("fiches_techniques")
       .update({ prix_vente: newPV })
       .eq("id", fiche.id)
-      .eq("mama_id", claims.mama_id);
+      .eq("mama_id", mama_id);
     if (!error) {
       setFiches(prev =>
         prev.map(f =>
@@ -40,7 +40,8 @@ export default function CartePlats() {
     setSavingId(null);
   };
 
-  if (!isAuthenticated) return null;
+  if (authLoading) return <div className="p-6">Chargement...</div>;
+  if (!mama_id) return null;
 
   return (
     <div className="p-8 max-w-3xl mx-auto">

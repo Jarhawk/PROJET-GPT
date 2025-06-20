@@ -11,6 +11,7 @@ export function usePertes() {
   const [error, setError] = useState(null);
 
   async function fetchPertes({ debut = null, fin = null } = {}) {
+    if (!mama_id) return [];
     setLoading(true);
     setError(null);
     let query = supabase
@@ -31,6 +32,7 @@ export function usePertes() {
   }
 
   async function addPerte(values) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -46,6 +48,7 @@ export function usePertes() {
   }
 
   async function updatePerte(id, values) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -63,6 +66,7 @@ export function usePertes() {
   }
 
   async function deletePerte(id) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase

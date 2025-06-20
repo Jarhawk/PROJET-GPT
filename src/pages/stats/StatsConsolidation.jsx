@@ -1,11 +1,13 @@
 import { useEffect } from "react";
 import { useConsolidatedStats } from "@/hooks/useConsolidatedStats";
+import { useAuth } from "@/context/AuthContext";
 import { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import * as XLSX from "xlsx";
 
 export default function StatsConsolidation() {
   const { stats, loading, error, fetchStats } = useConsolidatedStats();
+  const { isAuthenticated, loading: authLoading } = useAuth();
 
   const exportExcel = () => {
     const wb = XLSX.utils.book_new();
@@ -13,7 +15,10 @@ export default function StatsConsolidation() {
     XLSX.writeFile(wb, "consolidation_stats.xlsx");
   };
 
-  useEffect(() => { fetchStats(); }, [fetchStats]);
+  useEffect(() => {
+    if (!isAuthenticated || authLoading) return;
+    fetchStats();
+  }, [fetchStats, isAuthenticated, authLoading]);
 
   if (loading) return <div className="p-8">Chargement...</div>;
   if (error) return <div className="p-8 text-red-600">{error}</div>;

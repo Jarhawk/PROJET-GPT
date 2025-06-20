@@ -18,7 +18,7 @@ const TYPES = [
 ];
 
 export default function Mouvements() {
-  const { isAuthenticated, claims } = useAuth();
+  const { mama_id, user_id, loading: authLoading } = useAuth();
   const [mouvements, setMouvements] = useState([]);
   const [produits, setProduits] = useState([]);
   const [stockInit, setStockInit] = useState({});
@@ -49,31 +49,31 @@ export default function Mouvements() {
 
   // Charger produits
   useEffect(() => {
-    if (!claims?.mama_id) return;
+    if (!mama_id || authLoading) return;
     supabase
       .from("products")
       .select("id, nom")
-      .eq("mama_id", claims.mama_id)
+      .eq("mama_id", mama_id)
       .then(({ data }) => setProduits(data || []));
-  }, [claims?.mama_id]);
+  }, [mama_id, authLoading]);
 
   // Charger mouvements sur période
   useEffect(() => {
-    if (!claims?.mama_id || !periode.debut || !periode.fin) return;
+    if (!mama_id || authLoading || !periode.debut || !periode.fin) return;
     supabase
       .from("mouvements_stock")
       .select("*")
-      .eq("mama_id", claims.mama_id)
+      .eq("mama_id", mama_id)
       .gte("date", periode.debut)
       .lte("date", periode.fin)
       .order("date", { ascending: false })
       .then(({ data }) => setMouvements(data || []));
-  }, [claims?.mama_id, periode]);
+  }, [mama_id, authLoading, periode]);
 
   // Charger stock initial pour la période
   useEffect(() => {
     async function loadStockInit() {
-      if (!claims?.mama_id || !periode.debut) {
+      if (!mama_id || authLoading || !periode.debut) {
         setStockInit({});
         return;
       }
@@ -81,7 +81,7 @@ export default function Mouvements() {
         .from("inventaire_lignes")
         .select("product_id, quantite, inventaires!inner(date)")
         .eq("inventaires.date", periode.debut)
-        .eq("inventaire_lignes.mama_id", claims.mama_id);
+        .eq("inventaire_lignes.mama_id", mama_id);
       if (!error) {
         const stock = {};
         (data || []).forEach(l => {
@@ -93,7 +93,7 @@ export default function Mouvements() {
       }
     }
     loadStockInit();
-  }, [claims?.mama_id, periode.debut]);
+  }, [mama_id, authLoading, periode.debut]);
 
   // Filtrage dynamique
   const filtered = mouvements.filter(
@@ -144,7 +144,7 @@ export default function Mouvements() {
         sous_type: editRow.sous_type,
       })
       .eq("id", editRow.id)
-      .eq("mama_id", claims.mama_id);
+      .eq("mama_id", mama_id);
     if (!error) {
       setEditRow(null);
       setPeriode(p => ({ ...p })); // refresh
@@ -164,9 +164,9 @@ export default function Mouvements() {
     const { error } = await supabase.from("mouvements_stock").insert([
       {
         ...createMv,
-        mama_id: claims.mama_id,
+        mama_id,
         date: new Date().toISOString().slice(0, 10),
-        created_by: claims.user_id,
+        created_by: user_id,
       },
     ]);
     if (!error) {
@@ -192,7 +192,7 @@ export default function Mouvements() {
     const { data, error } = await supabase
       .from("mouvements_stock")
       .select("date, type, sous_type, quantite, zone, motif")
-      .eq("mama_id", claims.mama_id)
+      .eq("mama_id", mama_id)
       .eq("product_id", product_id)
       .order("date", { ascending: false });
     if (!error) setTimeline(data || []);
@@ -274,7 +274,8 @@ export default function Mouvements() {
 
   const today = new Date().toISOString().slice(0, 10);
 
-  if (!isAuthenticated) return null;
+  if (authLoading) return <div className="p-8">Chargement...</div>;
+  if (!mama_id) return null;
 
   return (
     <div className="p-8 max-w-7xl mx-auto">

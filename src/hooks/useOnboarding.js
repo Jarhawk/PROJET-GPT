@@ -8,12 +8,13 @@ export function useOnboarding() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !mama_id) return;
     fetchProgress();
     // fetchProgress has stable identity
-  }, [user?.id]);
+  }, [user?.id, mama_id]);
 
   async function fetchProgress() {
+    if (!user || !mama_id) return [];
     setLoading(true);
     const { data } = await supabase
       .from("onboarding_progress")
@@ -23,9 +24,11 @@ export function useOnboarding() {
       .single();
     setLoading(false);
     if (data) setStep(data.step);
+    return data || [];
   }
 
   async function saveStep(nextStep) {
+    if (!user || !mama_id) return;
     setStep(nextStep);
     await supabase
       .from("onboarding_progress")

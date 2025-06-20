@@ -5,6 +5,7 @@ export function useCostCenterMonthlyStats() {
   const { mama_id } = useAuth();
 
   async function fetchMonthly({ debut = null, fin = null } = {}) {
+    if (!mama_id) return [];
     let query = supabase
       .from('v_cost_center_monthly')
       .select('*')

@@ -9,6 +9,7 @@ export function useFournisseurStats() {
 
   // Stats tous fournisseurs (évolution mensuelle)
   async function fetchStatsAll() {
+    if (!mama_id) return [];
     const { data, error } = await supabase.rpc("stats_achats_fournisseurs", { mama_id_param: mama_id });
     if (error) return [];
     return data || [];
@@ -16,6 +17,7 @@ export function useFournisseurStats() {
 
   // Stats pour 1 fournisseur précis (évolution mensuelle)
   async function fetchStatsForFournisseur(fournisseur_id) {
+    if (!mama_id) return [];
     const { data, error } = await supabase.rpc("stats_achats_fournisseur", {
       mama_id_param: mama_id,
       fournisseur_id_param: fournisseur_id,

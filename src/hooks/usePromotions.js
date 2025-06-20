@@ -9,6 +9,7 @@ export function usePromotions() {
   const [error, setError] = useState(null);
 
   async function fetchPromotions({ search = "", actif = null } = {}) {
+    if (!mama_id) return [];
     setLoading(true);
     setError(null);
     let query = supabase
@@ -26,6 +27,7 @@ export function usePromotions() {
   }
 
   async function addPromotion(values) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -37,6 +39,7 @@ export function usePromotions() {
   }
 
   async function updatePromotion(id, values) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -50,6 +53,7 @@ export function usePromotions() {
   }
 
   async function deletePromotion(id) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase

@@ -34,6 +34,7 @@ export function useMenuEngineering() {
   }, [mama_id]);
 
   const saveVente = useCallback(async (fiche_id, periode, ventes) => {
+    if (!mama_id) return;
     const { data: existing } = await supabase
       .from('ventes_fiches_carte')
       .select('id')

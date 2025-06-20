@@ -9,6 +9,7 @@ export function usePlanning() {
   const [error, setError] = useState(null);
 
   async function fetchPlanning({ start, end } = {}) {
+    if (!mama_id) return [];
     setLoading(true);
     setError(null);
     let query = supabase
@@ -30,6 +31,7 @@ export function usePlanning() {
   }
 
   async function addPlanning(values) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -44,6 +46,7 @@ export function usePlanning() {
   }
 
   async function updatePlanning(id, values) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -60,6 +63,7 @@ export function usePlanning() {
   }
 
   async function deletePlanning(id) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase

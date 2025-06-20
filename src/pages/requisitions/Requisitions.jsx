@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger, DialogContent } from "@radix-ui/react-dialog";
 
 export default function Requisitions() {
-  const { isAuthenticated, claims } = useAuth();
+  const { mama_id, user_id, loading: authLoading } = useAuth();
   const [requisitions, setRequisitions] = useState([]);
   const [produits, setProduits] = useState([]);
   const [search, setSearch] = useState("");
@@ -18,22 +18,22 @@ export default function Requisitions() {
   const [createReq, setCreateReq] = useState({ produit_id: "", quantite: 0, zone: "", motif: "" });
 
   useEffect(() => {
-    if (!claims?.mama_id) return;
-    supabase.from("products").select("*").eq("mama_id", claims.mama_id)
+    if (!mama_id || authLoading) return;
+    supabase.from("products").select("*").eq("mama_id", mama_id)
       .then(({ data }) => setProduits(data || []));
-  }, [claims?.mama_id]);
+  }, [mama_id, authLoading]);
 
   useEffect(() => {
-    if (!claims?.mama_id || !periode.debut || !periode.fin) return;
+    if (!mama_id || authLoading || !periode.debut || !periode.fin) return;
     supabase
       .from("requisitions")
       .select("*")
-      .eq("mama_id", claims.mama_id)
+      .eq("mama_id", mama_id)
       .gte("date_requisition", periode.debut)
       .lte("date_requisition", periode.fin)
       .order("date_requisition", { ascending: false })
       .then(({ data }) => setRequisitions(data || []));
-  }, [claims?.mama_id, periode]);
+  }, [mama_id, authLoading, periode]);
 
   const filtered = requisitions.filter(
     r =>
@@ -52,9 +52,9 @@ export default function Requisitions() {
     const { error } = await supabase.from("requisitions").insert([
       {
         ...createReq,
-        mama_id: claims.mama_id,
+        mama_id,
         date_requisition: new Date().toISOString().slice(0, 10),
-        created_by: claims.user_id,
+        created_by: user_id,
       },
     ]);
     if (!error) {
@@ -106,7 +106,8 @@ export default function Requisitions() {
 
   const today = new Date().toISOString().slice(0, 10);
 
-  if (!isAuthenticated) return null;
+  if (authLoading) return <div className="p-8">Chargement...</div>;
+  if (!mama_id) return null;
 
   return (
     <div className="p-8 max-w-5xl mx-auto">

@@ -12,6 +12,7 @@ export function useInvoices() {
 
   // 1. Charger toutes les factures (avec fournisseur, filtrage)
   async function fetchInvoices({ search = "", fournisseur = "", statut = "", date = "" } = {}) {
+    if (!mama_id) return [];
     setLoading(true);
     setError(null);
     let query = supabase
@@ -37,7 +38,7 @@ export function useInvoices() {
 
   // 2. Factures par fournisseur
   async function fetchInvoicesBySupplier(fournisseur_id) {
-    if (!fournisseur_id) return [];
+    if (!fournisseur_id || !mama_id) return [];
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
@@ -56,7 +57,7 @@ export function useInvoices() {
 
   // 3. Charger une facture par id
   async function fetchInvoiceById(id) {
-    if (!id) return null;
+    if (!id || !mama_id) return null;
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
@@ -74,6 +75,7 @@ export function useInvoices() {
   }
   // 4. Ajouter une facture
   async function addInvoice(invoice) {
+    if (!mama_id) return;
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -86,6 +88,7 @@ export function useInvoices() {
 
   // 5. Modifier une facture
   async function updateInvoice(id, updateFields) {
+    if (!mama_id) return;
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -100,6 +103,7 @@ export function useInvoices() {
 
   // 6. Supprimer une facture
   async function deleteInvoice(id) {
+    if (!mama_id) return;
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -114,6 +118,7 @@ export function useInvoices() {
 
   // 7. Batch statut
   async function batchUpdateStatus(ids = [], statut) {
+    if (!mama_id) return;
     setLoading(true);
     setError(null);
     const { error } = await supabase

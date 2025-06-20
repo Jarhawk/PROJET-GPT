@@ -12,7 +12,8 @@ const selectMock = vi.fn(() => ({ eq: eqMock }));
 const fromMock = vi.fn(() => ({ select: selectMock }));
 
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
-vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
+const authMock = vi.fn(() => ({ mama_id: 'm1' }));
+vi.mock('@/context/AuthContext', () => ({ useAuth: authMock }));
 vi.mock('file-saver', () => ({ saveAs: vi.fn() }));
 vi.mock('xlsx', () => ({ utils: { book_new: vi.fn(() => ({})), book_append_sheet: vi.fn(), json_to_sheet: vi.fn(() => ({})) }, write: vi.fn(() => new ArrayBuffer(10)) }));
 
@@ -38,6 +39,13 @@ test('fetchLogs queries user_logs', async () => {
   expect(ilikeMock).toHaveBeenCalledWith('action', '%TEST%');
   expect(rangeMock).toHaveBeenCalledWith(0, 99);
   expect(result.current.logs).toEqual([{ id: 'l1' }]);
+});
+
+test('fetchLogs skips when no mama_id', async () => {
+  authMock.mockReturnValueOnce({ mama_id: null });
+  const { result } = renderHook(() => useLogs());
+  await act(async () => { await result.current.fetchLogs(); });
+  expect(fromMock).not.toHaveBeenCalled();
 });
 
 test('fetchLogs applies date filters', async () => {

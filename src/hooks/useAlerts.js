@@ -9,6 +9,7 @@ export function useAlerts() {
   const [error, setError] = useState(null);
 
   async function fetchRules() {
+    if (!mama_id) return [];
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
@@ -27,6 +28,7 @@ export function useAlerts() {
   }
 
   async function addRule(values) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -41,6 +43,7 @@ export function useAlerts() {
   }
 
   async function updateRule(id, values) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -57,6 +60,7 @@ export function useAlerts() {
   }
 
   async function deleteRule(id) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase

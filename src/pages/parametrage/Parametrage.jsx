@@ -5,8 +5,11 @@ import ParamRoles from "@/components/parametrage/ParamRoles";
 import ParamAccess from "@/components/parametrage/ParamAccess";
 import ParamMama from "@/components/parametrage/ParamMama";
 import ParamCostCenters from "@/components/parametrage/ParamCostCenters";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Parametrage() {
+  const { isAuthenticated } = useAuth();
+  if (!isAuthenticated) return null;
   return (
     <div className="p-6 container mx-auto">
       <Tabs

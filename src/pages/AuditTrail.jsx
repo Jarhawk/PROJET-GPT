@@ -1,17 +1,21 @@
 import { useEffect, useState } from "react";
 import { useAuditTrail } from "@/hooks/useAuditTrail";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "react-hot-toast";
 
 export default function AuditTrail() {
   const { entries, fetchEntries, loading, error } = useAuditTrail();
+  const { mama_id, loading: authLoading } = useAuth();
   const [table, setTable] = useState("");
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
 
   useEffect(() => {
-    fetchEntries();
-  }, []);
+    if (!authLoading && mama_id) {
+      fetchEntries();
+    }
+  }, [authLoading, mama_id, fetchEntries]);
 
 
   const handleSubmit = async (e) => {

@@ -9,7 +9,7 @@ export default function Sidebar() {
   const rights = Array.isArray(access_rights) ? access_rights : [];
 
   return (
-    <aside className="w-64 bg-mamastockBg text-white p-4 h-screen shadow-md">
+    <aside className="w-64 bg-white/5 backdrop-blur-xl text-white p-4 h-screen shadow-md">
       <h2 className="text-2xl font-bold mb-6">MamaStock</h2>
       <nav className="flex flex-col gap-2">
         {(showAll || rights.includes("dashboard")) && (

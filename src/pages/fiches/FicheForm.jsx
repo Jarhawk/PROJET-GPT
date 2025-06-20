@@ -79,7 +79,7 @@ export default function FicheForm({ fiche, onClose }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md max-w-2xl mx-auto">
+    <form onSubmit={handleSubmit} className="bg-glass backdrop-blur-lg text-white p-6 rounded-lg shadow-md max-w-2xl mx-auto" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
       <h2 className="text-lg font-bold mb-4">
         {fiche ? "Modifier la fiche technique" : "Ajouter une fiche technique"}
       </h2>
@@ -108,7 +108,7 @@ export default function FicheForm({ fiche, onClose }) {
       {/* Gestion dynamique des lignes produits */}
       <div className="mb-4">
         <label className="block font-semibold mb-2">Ingrédients :</label>
-        <table className="min-w-full mb-2">
+        <table className="min-w-full mb-2 bg-white/5 backdrop-blur-lg rounded-md text-white">
           <thead>
             <tr>
               <th>Produit</th>

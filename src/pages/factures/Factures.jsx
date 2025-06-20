@@ -61,7 +61,7 @@ export default function Factures() {
   };
 
   return (
-    <div className="p-6 container mx-auto">
+    <div className="p-6 container mx-auto" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
       <Toaster position="top-right" />
       <div className="flex flex-wrap gap-4 items-center mb-4">
         <input
@@ -89,7 +89,7 @@ export default function Factures() {
       <Motion.table
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="min-w-full bg-white rounded-xl shadow-md"
+        className="min-w-full bg-white/5 backdrop-blur-lg rounded-xl shadow-md text-white"
       >
         <thead>
           <tr>

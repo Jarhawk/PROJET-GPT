@@ -1,10 +1,32 @@
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 
-export default function FicheDetail({ fiche, onClose }) {
+export default function FicheDetail({ fiche: ficheProp, onClose }) {
+  const { id } = useParams();
+  const { mama_id } = useAuth();
+  const [fiche, setFiche] = useState(ficheProp);
+
+  useEffect(() => {
+    const fid = ficheProp?.id || id;
+    if (fid && mama_id && !ficheProp) {
+      supabase
+        .from("fiches")
+        .select("*")
+        .eq("id", fid)
+        .eq("mama_id", mama_id)
+        .single()
+        .then(({ data }) => setFiche(data));
+    }
+  }, [ficheProp, id, mama_id]);
+
+  if (!fiche) return <div className="p-8">Chargement...</div>;
   // Export Excel fiche
   const exportExcel = () => {
     const wb = XLSX.utils.book_new();

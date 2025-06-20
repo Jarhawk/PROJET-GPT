@@ -24,4 +24,4 @@
 
 ## Étape 6 – Vérification finale : ✅
 - Validation du design Liquid Glass sur toutes les pages.
-- Lint et tests impossibles car dépendances manquantes.
+- Lint, tests et serveur de développement impossibles car dépendances manquantes (`vite`, `@eslint/js`, `vitest`).

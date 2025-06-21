@@ -4,12 +4,13 @@ import { supabase } from "@/lib/supabase";
 import MamaLogo from "@/components/ui/MamaLogo";
 import { useAuth } from "@/context/AuthContext";
 import toast, { Toaster } from "react-hot-toast";
+import useFormErrors from "@/hooks/useFormErrors";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { errors, setError, clearErrors } = useFormErrors();
   const navigate = useNavigate();
 
   const { isAuthenticated, loading: authLoading } = useAuth();
@@ -23,24 +24,24 @@ export default function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
+    clearErrors();
+    if (!email) setError("email", "Email requis");
+    if (!password) setError("password", "Mot de passe requis");
+    if (!email || !password) return;
 
+    setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
-      setError("Identifiants incorrects ou compte inactif.");
+      setError("password", "Identifiants incorrects ou compte inactif.");
       toast.error("Échec de la connexion");
       setLoading(false);
     } else {
       toast.success("Connecté !");
-      setTimeout(() => {
-        setLoading(false);
-        navigate("/dashboard");
-      }, 800);
+      navigate("/dashboard");
     }
   };
 
@@ -60,8 +61,8 @@ export default function Login() {
         <div
           className="rounded-2xl shadow-2xl bg-white/30 dark:bg-[#202638]/40 border border-white/30 backdrop-blur-xl px-8 py-12 flex flex-col items-center glass-panel auth-card"
         >
-          <div className="mb-6">
-            <MamaLogo width={96} />
+          <div className="mb-6 animate-fade-in-down">
+            <MamaLogo width={96} className="animate-fade-in-down" />
           </div>
           <h2 className="text-3xl font-bold text-mamastockGold drop-shadow mb-1 text-center tracking-wide">
             Connexion
@@ -69,7 +70,7 @@ export default function Login() {
           <p className="text-xs text-mamastockText/70 text-center mb-6">
             Plateforme F&B<br />by MamaStock
           </p>
-          <form onSubmit={handleLogin} className="w-full flex flex-col gap-4">
+          <form onSubmit={handleLogin} className="w-full flex flex-col gap-4 animate-fade-in-down">
             <div>
               <label className="block text-xs font-semibold text-mamastockText/90 mb-1">Email</label>
               <input
@@ -77,10 +78,14 @@ export default function Login() {
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
+                autoFocus
                 autoComplete="email"
                 required
                 placeholder="votre@email.com"
               />
+              {errors.email && (
+                <p className="text-sm text-red-500 mt-1">{errors.email}</p>
+              )}
             </div>
             <div>
               <label className="block text-xs font-semibold text-mamastockText/90 mb-1">Mot de passe</label>
@@ -93,14 +98,14 @@ export default function Login() {
                 required
                 placeholder="••••••••"
               />
+              {errors.password && (
+                <p className="text-sm text-red-500 mt-1">{errors.password}</p>
+              )}
             </div>
-            {error && (
-              <div className="text-red-700 bg-red-50 border border-red-100 rounded px-2 py-1 text-xs shadow animate-fade-in">{error}</div>
-            )}
             <button
               className="w-full mt-3 py-2 rounded-xl bg-mamastockGold hover:bg-[#b89730] text-white font-semibold text-lg shadow transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               type="submit"
-              disabled={loading}
+              disabled={!email || !password || loading}
             >
               {loading ? (
                 <>

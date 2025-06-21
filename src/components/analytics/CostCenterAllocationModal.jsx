@@ -4,35 +4,74 @@ import { Button } from "@/components/ui/button";
 import { useCostCenters } from "@/hooks/useCostCenters";
 import { useMouvementCostCenters } from "@/hooks/useMouvementCostCenters";
 import { useCostCenterSuggestions } from "@/hooks/useCostCenterSuggestions";
+import toast from "react-hot-toast";
 
 export default function CostCenterAllocationModal({ mouvementId, productId, open, onOpenChange }) {
   const { costCenters, fetchCostCenters } = useCostCenters();
   const { fetchAllocations, saveAllocations } = useMouvementCostCenters();
   const { suggestions, fetchSuggestions } = useCostCenterSuggestions();
   const [rows, setRows] = useState([]);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (open) {
-      fetchCostCenters();
-      fetchAllocations(mouvementId).then(data => {
-        setRows(data.map(a => ({ cost_center_id: a.cost_center_id, quantite: a.quantite, valeur: a.valeur })));
-      });
-      fetchSuggestions(productId);
-    }
+    if (!open) return;
+    (async () => {
+      try {
+        const [allocs] = await Promise.all([
+          fetchCostCenters(),
+          fetchAllocations(mouvementId).then(data => {
+            return data.map(a => ({
+              cost_center_id: a.cost_center_id,
+              quantite: a.quantite,
+              valeur: a.valeur,
+            }));
+          }),
+          fetchSuggestions(productId),
+        ]);
+        setRows(allocs);
+      } catch (err) {
+        console.error("Erreur chargement ventilation:", err);
+        toast.error("Erreur de chargement");
+      }
+    })();
   }, [open, mouvementId, productId]);
 
   const handleAdd = () => setRows(r => [...r, { cost_center_id: costCenters[0]?.id || "", quantite: 0, valeur: 0 }]);
 
   const handleChange = (idx, field, value) => {
-    setRows(r => r.map((row, i) => (i === idx ? { ...row, [field]: value } : row)));
+    setRows(r =>
+      r.map((row, i) =>
+        i === idx
+          ? {
+              ...row,
+              [field]:
+                field === "quantite"
+                  ? Number(value) || 0
+                  : field === "valeur"
+                  ? value === "" ? null : Number(value)
+                  : value,
+            }
+          : row
+      )
+    );
   };
 
   const handleRemove = idx => setRows(r => r.filter((_, i) => i !== idx));
 
   const handleSubmit = async e => {
     e.preventDefault();
-    await saveAllocations(mouvementId, rows);
-    onOpenChange(false);
+    if (saving) return;
+    try {
+      setSaving(true);
+      await saveAllocations(mouvementId, rows);
+      toast.success("Ventilation enregistrée");
+      onOpenChange(false);
+    } catch (err) {
+      console.error("Erreur sauvegarde ventilation:", err);
+      toast.error("Erreur lors de l'enregistrement");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -84,7 +123,7 @@ export default function CostCenterAllocationModal({ mouvementId, productId, open
           ))}
           <Button type="button" variant="outline" onClick={handleAdd}>+ Ajouter</Button>
           <div className="mt-4 flex gap-2">
-            <Button type="submit">Enregistrer</Button>
+            <Button type="submit" disabled={saving}>Enregistrer</Button>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Annuler</Button>
           </div>
         </form>

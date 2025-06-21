@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { usePlanning } from "@/hooks/usePlanning";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Toaster } from "react-hot-toast";
+import { Toaster, toast } from "react-hot-toast";
 
 export default function Planning() {
   const { mama_id } = useAuth();
   const { items, loading, error, fetchPlanning, addPlanning } = usePlanning();
   const [date, setDate] = useState("");
   const [notes, setNotes] = useState("");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (mama_id) fetchPlanning();
@@ -16,9 +17,23 @@ export default function Planning() {
 
   const handleAdd = async (e) => {
     e.preventDefault();
-    await addPlanning({ date_prevue: date, notes });
-    setDate("");
-    setNotes("");
+    if (!date) {
+      toast.error("Date requise");
+      return;
+    }
+    try {
+      setSaving(true);
+      await addPlanning({ date_prevue: date, notes });
+      toast.success("Entrée ajoutée !");
+      setDate("");
+      setNotes("");
+      fetchPlanning();
+    } catch (err) {
+      console.error("Erreur ajout planning:", err);
+      toast.error("Erreur lors de l'enregistrement.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) return <div className="p-8">Chargement...</div>;
@@ -42,7 +57,7 @@ export default function Planning() {
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
         />
-        <Button type="submit">Ajouter</Button>
+        <Button type="submit" disabled={saving}>Ajouter</Button>
       </form>
       <table className="min-w-full text-sm bg-white rounded-xl shadow-md">
         <thead>

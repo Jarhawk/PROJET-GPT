@@ -10,6 +10,7 @@ export default function Promotions() {
   const [showForm, setShowForm] = useState(false);
   const [editRow, setEditRow] = useState(null);
   const [search, setSearch] = useState("");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!authLoading && mama_id) fetchPromotions();
@@ -73,13 +74,27 @@ export default function Promotions() {
       {showForm && (
         <PromotionForm
           promotion={editRow}
+          saving={saving}
           onClose={() => { setShowForm(false); setEditRow(null); }}
           onSave={async values => {
-            if (editRow) await updatePromotion(editRow.id, values);
-            else await addPromotion(values);
-            setShowForm(false);
-            setEditRow(null);
-            fetchPromotions();
+            try {
+              setSaving(true);
+              if (editRow) {
+                await updatePromotion(editRow.id, values);
+                toast.success("Promotion modifiée !");
+              } else {
+                await addPromotion(values);
+                toast.success("Promotion ajoutée !");
+              }
+              setShowForm(false);
+              setEditRow(null);
+              fetchPromotions();
+            } catch (err) {
+              console.error("Erreur enregistrement promotion:", err);
+              toast.error("Erreur lors de l'enregistrement.");
+            } finally {
+              setSaving(false);
+            }
           }}
         />
       )}
@@ -87,7 +102,7 @@ export default function Promotions() {
   );
 }
 
-function PromotionForm({ promotion = {}, onClose, onSave }) {
+function PromotionForm({ promotion = {}, onClose, onSave, saving }) {
   const [form, setForm] = useState({
     nom: promotion.nom || "",
     description: promotion.description || "",
@@ -126,7 +141,7 @@ function PromotionForm({ promotion = {}, onClose, onSave }) {
             </label>
           </div>
           <div className="flex gap-4 justify-end pt-2">
-            <Button type="submit">Enregistrer</Button>
+            <Button type="submit" disabled={saving}>Enregistrer</Button>
             <Button type="button" variant="secondary" onClick={onClose}>Annuler</Button>
           </div>
         </form>

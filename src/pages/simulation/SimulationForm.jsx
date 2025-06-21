@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
+import toast from "react-hot-toast";
 
 export default function SimulationForm({ addRecipe, setPrix }) {
   const { mama_id, loading: authLoading } = useAuth();
@@ -18,10 +19,15 @@ export default function SimulationForm({ addRecipe, setPrix }) {
   }, [mama_id, authLoading]);
 
   const handleAdd = () => {
+    if (!selectedId) {
+      toast.error("Sélectionnez une fiche");
+      return;
+    }
     const recette = recipes.find(r => r.id === selectedId);
     if (recette) {
       addRecipe(recette);
-      setPrix(""); setSelectedId("");
+      setPrix("");
+      setSelectedId("");
     }
   };
 

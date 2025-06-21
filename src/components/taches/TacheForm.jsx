@@ -3,6 +3,7 @@ import { useTasks } from "@/hooks/useTasks";
 import { useUsers } from "@/hooks/useUsers";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import toast from "react-hot-toast";
 
 export default function TacheForm({ task }) {
   const { addTask, updateTask } = useTasks();
@@ -28,11 +29,26 @@ export default function TacheForm({ task }) {
 
   const handleSubmit = async e => {
     e.preventDefault();
+    if (!form.titre.trim()) {
+      toast.error("Le titre est requis");
+      return;
+    }
     setLoading(true);
-    if (task) await updateTask(task.id, form);
-    else await addTask(form);
-    setLoading(false);
-    navigate("/taches");
+    try {
+      if (task) {
+        await updateTask(task.id, form);
+        toast.success("Tâche mise à jour !");
+      } else {
+        await addTask(form);
+        toast.success("Tâche ajoutée !");
+      }
+      navigate("/taches");
+    } catch (err) {
+      console.error("Erreur enregistrement tâche:", err);
+      toast.error("Erreur lors de l'enregistrement.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

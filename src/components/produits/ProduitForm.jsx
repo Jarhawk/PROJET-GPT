@@ -19,6 +19,7 @@ export default function ProduitForm({ produit, familles, unites, onSuccess, onCl
   const [imageUrl, setImageUrl] = useState(produit?.image || "");
 
   const { addProduct, updateProduct, loading } = useProducts();
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (editing && produit) {
@@ -37,7 +38,8 @@ export default function ProduitForm({ produit, familles, unites, onSuccess, onCl
 
   const handleSubmit = async e => {
     e.preventDefault();
-    if (!nom || !famille || !unite) {
+    if (saving) return;
+    if (!nom.trim() || !famille.trim() || !unite.trim()) {
       toast.error("Tous les champs sont obligatoires.");
       return;
     }
@@ -53,15 +55,25 @@ export default function ProduitForm({ produit, familles, unites, onSuccess, onCl
       allergenes,
       image: imageUrl || produit?.image,
     };
-    if (editing) {
-      await updateProduct(produit.id, newProd);
-      toast.success("Produit mis à jour !");
-    } else {
-      await addProduct(newProd);
-      toast.success("Produit ajouté !");
+    try {
+      setSaving(true);
+      if (editing) {
+        const res = await updateProduct(produit.id, newProd);
+        if (res?.error) throw res.error;
+        toast.success("Produit mis à jour !");
+      } else {
+        const res = await addProduct(newProd);
+        if (res?.error) throw res.error;
+        toast.success("Produit ajouté !");
+      }
+      onSuccess?.();
+      onClose?.();
+    } catch (err) {
+      console.error("Erreur enregistrement produit:", err);
+      toast.error("Erreur lors de l'enregistrement.");
+    } finally {
+      setSaving(false);
     }
-    onSuccess?.();
-    onClose?.();
   };
 
   async function handleUpload() {
@@ -207,7 +219,7 @@ export default function ProduitForm({ produit, familles, unites, onSuccess, onCl
       </div>
       <div className="flex gap-2 justify-end mt-4">
         <button type="button" onClick={onClose} className="btn">Annuler</button>
-        <button type="submit" disabled={loading} className="btn btn-primary">
+        <button type="submit" disabled={loading || saving} className="btn btn-primary">
           {editing ? "Enregistrer" : "Créer"}
         </button>
       </div>

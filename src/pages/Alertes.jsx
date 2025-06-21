@@ -23,17 +23,31 @@ export default function Alertes() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await addRule({ ...form, threshold: Number(form.threshold) });
-    toast.success("Règle ajoutée");
-    await fetchRules({ search });
-    setForm({ product_id: "", threshold: "" });
+    if (!form.product_id) {
+      toast.error("Produit requis");
+      return;
+    }
+    try {
+      await addRule({ ...form, threshold: Number(form.threshold) });
+      toast.success("Règle ajoutée");
+      await fetchRules({ search });
+      setForm({ product_id: "", threshold: "" });
+    } catch (err) {
+      console.error("Erreur ajout règle:", err);
+      toast.error("Erreur lors de l'enregistrement.");
+    }
   };
 
   const handleDelete = async (id) => {
     if (window.confirm("Supprimer cette règle ?")) {
-      await deleteRule(id);
-      toast.success("Règle supprimée");
-      await fetchRules({ search });
+      try {
+        await deleteRule(id);
+        toast.success("Règle supprimée");
+        await fetchRules({ search });
+      } catch (err) {
+        console.error("Erreur suppression règle:", err);
+        toast.error("Erreur lors de la suppression.");
+      }
     }
   };
 
@@ -47,6 +61,7 @@ export default function Alertes() {
           value={form.product_id}
           onChange={(e) => setForm(f => ({ ...f, product_id: e.target.value }))}
           className="w-64"
+          required
         >
           <option value="">-- Produit --</option>
           {products.map(p => (

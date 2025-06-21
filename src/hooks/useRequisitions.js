@@ -36,13 +36,13 @@ export const useRequisitions = () => {
     return data || null;
   };
 
-  const createRequisition = async ({ zone, lignes = [], status = "en_attente" }) => {
+  const createRequisition = async ({ zone, type = "", motif = "", lignes = [], status = "en_attente" }) => {
     if (!mama_id) return { success: false, message: "mama_id manquant" };
 
     try {
       const { data: req, error: reqError } = await supabase
         .from("requisitions")
-        .insert([{ zone, mama_id, status }])
+        .insert([{ zone, type, motif, mama_id, status }])
         .select()
         .single();
 

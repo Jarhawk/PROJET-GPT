@@ -10,7 +10,7 @@ import TableContainer from "@/components/ui/TableContainer";
 import { Dialog, DialogTrigger, DialogContent } from "@radix-ui/react-dialog";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
-import { Toaster } from "react-hot-toast";
+import { Toaster, toast } from "react-hot-toast";
 import { ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import FournisseurDetail from "./FournisseurDetail";
 import { PlusCircle, Search } from "lucide-react";
@@ -25,6 +25,7 @@ export default function Fournisseurs() {
   const [selected, setSelected] = useState(null);
   const [showCreate, setShowCreate] = useState(false);
   const [editRow, setEditRow] = useState(null);
+  const [saving, setSaving] = useState(false);
   const [stats, setStats] = useState([]);
   const [topProducts, setTopProducts] = useState([]);
   const inactifs = fournisseurs.filter(f => !f.actif);
@@ -178,13 +179,25 @@ export default function Fournisseurs() {
         <DialogContent className="bg-glass backdrop-blur-lg rounded-2xl shadow-xl max-w-lg w-full p-8">
           <FournisseurForm
             fournisseur={editRow}
+            saving={saving}
             onCancel={() => { setShowCreate(false); setEditRow(null); }}
             onSubmit={async (data) => {
-              if (editRow) await updateFournisseur(editRow.id, data);
-              else await addFournisseur(data);
-              setShowCreate(false);
-              setEditRow(null);
-              fetchFournisseurs({ search });
+              setSaving(true);
+              try {
+                if (editRow) {
+                  await updateFournisseur(editRow.id, data);
+                  toast.success("Fournisseur modifié !");
+                } else {
+                  await addFournisseur(data);
+                  toast.success("Fournisseur ajouté !");
+                }
+                setShowCreate(false);
+                setEditRow(null);
+                fetchFournisseurs({ search });
+              } catch (err) {
+                toast.error(err?.message || "Erreur enregistrement");
+              }
+              setSaving(false);
             }}
           />
         </DialogContent>
@@ -203,7 +216,7 @@ export default function Fournisseurs() {
 
 // ---- FournisseurForm à placer dans src/components/fournisseurs/FournisseurForm.jsx
 
-function FournisseurForm({ fournisseur = {}, onCancel, onSubmit }) {
+function FournisseurForm({ fournisseur = {}, onCancel, onSubmit, saving }) {
   const [form, setForm] = useState({
     nom: fournisseur.nom || "",
     ville: fournisseur.ville || "",
@@ -216,6 +229,7 @@ function FournisseurForm({ fournisseur = {}, onCancel, onSubmit }) {
       className="space-y-4"
       onSubmit={e => {
         e.preventDefault();
+        if (!form.nom.trim()) return toast.error("Nom obligatoire");
         onSubmit(form);
       }}
     >
@@ -253,8 +267,8 @@ function FournisseurForm({ fournisseur = {}, onCancel, onSubmit }) {
         />
       </div>
       <div className="flex gap-4 mt-4">
-        <Button type="submit">Enregistrer</Button>
-        <Button type="button" variant="secondary" onClick={onCancel}>
+        <Button type="submit" disabled={saving}>Enregistrer</Button>
+        <Button type="button" variant="secondary" onClick={onCancel} disabled={saving}>
           Annuler
         </Button>
       </div>

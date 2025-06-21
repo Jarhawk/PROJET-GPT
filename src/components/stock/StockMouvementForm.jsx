@@ -13,21 +13,29 @@ export default function StockMouvementForm({ produit, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
+    if (!quantite || Number(quantite) <= 0) {
+      toast.error("Quantité invalide");
+      return;
+    }
     setLoading(true);
     try {
-      await addMouvementStock({
+      const res = await addMouvementStock({
         product_id: produit?.id,
         type,
         quantite: Number(quantite),
         zone,
         motif,
       });
+      if (res?.error) throw res.error;
       toast.success("Mouvement enregistré !");
       onClose?.();
-    } catch {
-      toast.error("Erreur lors de l’enregistrement.");
+    } catch (err) {
+      console.error("Erreur mouvement stock:", err);
+      toast.error("Erreur lors de l'enregistrement.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -66,7 +74,7 @@ export default function StockMouvementForm({ produit, onClose }) {
       />
       <div className="flex gap-2 mt-4">
         <Button type="submit" disabled={loading}>Valider</Button>
-        <Button variant="outline" type="button" onClick={onClose}>Annuler</Button>
+        <Button variant="outline" type="button" onClick={onClose} disabled={loading}>Annuler</Button>
       </div>
     </form>
   );

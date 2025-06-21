@@ -17,7 +17,7 @@ export default function Login() {
   // Redirection propre (évite navigate dans le rendu)
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
-      navigate("/");
+      navigate("/dashboard");
     }
   }, [isAuthenticated, authLoading, navigate]);
 
@@ -39,7 +39,7 @@ export default function Login() {
       toast.success("Connecté !");
       setTimeout(() => {
         setLoading(false);
-        navigate("/");
+        navigate("/dashboard");
       }, 800);
     }
   };

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useSignalements } from "@/hooks/useSignalements";
 import { useAuth } from "@/context/AuthContext";
+import toast from "react-hot-toast";
 
 export default function SignalementForm({ onCreated }) {
   const { loading: authLoading } = useAuth();
@@ -8,18 +9,33 @@ export default function SignalementForm({ onCreated }) {
   const [titre, setTitre] = useState("");
   const [commentaire, setCommentaire] = useState("");
   const [statut, setStatut] = useState("ouvert");
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = async () => {
-    if (authLoading) return;
-    await addSignalement({ titre, commentaire, statut });
-    setTitre("");
-    setCommentaire("");
-    setStatut("ouvert");
-    onCreated?.();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (authLoading || submitting) return;
+    if (!titre.trim()) {
+      toast.error("Le titre est requis.");
+      return;
+    }
+    try {
+      setSubmitting(true);
+      await addSignalement({ titre, commentaire, statut });
+      toast.success("Signalement ajouté !");
+      setTitre("");
+      setCommentaire("");
+      setStatut("ouvert");
+      onCreated?.();
+    } catch (err) {
+      console.error("Erreur enregistrement signalement:", err);
+      toast.error("Erreur lors de l'enregistrement.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <div className="bg-white p-4 rounded shadow mb-4">
+    <form onSubmit={handleSubmit} className="bg-white p-4 rounded shadow mb-4">
       <h3 className="text-lg font-bold mb-2">Nouveau signalement</h3>
       <input
         type="text"
@@ -45,11 +61,12 @@ export default function SignalementForm({ onCreated }) {
         <option value="résolu">Résolu</option>
       </select>
       <button
-        onClick={handleSubmit}
-        className="bg-mamastock-gold text-white px-4 py-2 rounded"
+        type="submit"
+        disabled={authLoading || submitting}
+        className="bg-mamastock-gold text-white px-4 py-2 rounded disabled:opacity-50"
       >
         Ajouter
       </button>
-    </div>
+    </form>
   );
 }

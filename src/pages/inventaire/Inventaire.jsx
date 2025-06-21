@@ -253,6 +253,10 @@ export default function Inventaire() {
       toast.error("Aucun inventaire à corriger !");
       return;
     }
+    if (editRow.stockFinal === "" || isNaN(editRow.stockFinal)) {
+      toast.error("Quantité finale requise");
+      return;
+    }
     const { error } = await supabase
       .from("inventaires")
       .update({

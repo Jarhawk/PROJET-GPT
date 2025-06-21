@@ -49,14 +49,27 @@ export default function MouvementFormModal({
     setForm(f => ({ ...f, [name]: value }));
   }
 
-  function handleSubmit(e) {
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleSubmit(e) {
     e.preventDefault();
     const err = validate();
     setErrors(err);
-    if (Object.keys(err).length === 0) {
-      onSubmit(form);
-    } else {
+    if (Object.keys(err).length > 0) {
       toast.error("Veuillez corriger les erreurs.");
+      return;
+    }
+    if (submitting) return;
+    try {
+      setSubmitting(true);
+      await onSubmit(form);
+      toast.success("Mouvement enregistré !");
+      onOpenChange(false);
+    } catch (err) {
+      console.error("Erreur enregistrement mouvement:", err);
+      toast.error("Erreur lors de l'enregistrement.");
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -162,11 +175,11 @@ export default function MouvementFormModal({
                 <Button
                   type="submit"
                   className={`w-full mt-3 py-2 rounded-xl bg-mamastockGold hover:bg-[#b89730] text-white font-semibold text-lg shadow transition-all flex items-center justify-center gap-2 disabled:opacity-50 ${
-                    loading ? "opacity-70" : ""
+                    loading || submitting ? "opacity-70" : ""
                   }`}
-                  disabled={loading}
+                  disabled={loading || submitting}
                 >
-                  {loading ? "Enregistrement…" : (editMode ? "Enregistrer" : "Créer")}
+                  {loading || submitting ? "Enregistrement…" : (editMode ? "Enregistrer" : "Créer")}
                 </Button>
               </form>
               {/* Animation */}

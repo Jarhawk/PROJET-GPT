@@ -32,6 +32,7 @@ export default function Transferts() {
     zone_arrivee: "",
     motif: "",
   });
+  const [savingTf, setSavingTf] = useState(false);
   const [timeline, setTimeline] = useState([]);
   const [loadingTimeline, setLoadingTimeline] = useState(false);
 
@@ -166,6 +167,7 @@ export default function Transferts() {
   // Saisie création transfert
   const handleCreateTf = async (e) => {
     e.preventDefault();
+    if (savingTf) return;
     if (
       !createTf.produit_id ||
       !createTf.quantite ||
@@ -183,6 +185,7 @@ export default function Transferts() {
       toast.error("Authentification requise");
       return;
     }
+    setSavingTf(true);
     const { error } = await supabase.from("transferts").insert([
       {
         ...createTf,
@@ -205,6 +208,7 @@ export default function Transferts() {
     } else {
       toast.error(error.message);
     }
+    setSavingTf(false);
   };
 
   // Timeline produit
@@ -458,7 +462,9 @@ export default function Transferts() {
                 }
               />
             </div>
-            <Button type="submit">Créer</Button>
+            <Button type="submit" disabled={savingTf}>
+              {savingTf ? "Enregistrement…" : "Créer"}
+            </Button>
           </form>
         </DialogContent>
       </Dialog>

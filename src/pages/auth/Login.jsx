@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import logo from "@/assets/logo-mamastock.png";
 import { useAuth } from "@/context/AuthContext";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -32,8 +33,10 @@ export default function Login() {
 
     if (error) {
       setError("Identifiants incorrects ou compte inactif.");
+      toast.error("Échec de la connexion");
       setLoading(false);
     } else {
+      toast.success("Connecté !");
       setTimeout(() => {
         setLoading(false);
         navigate("/");
@@ -53,6 +56,7 @@ export default function Login() {
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[280px] h-[180px] bg-white/20 blur-2xl rounded-[36%_54%_41%_59%/50%_41%_59%_50%] opacity-15 animate-liquid3" />
       </div>
       <div className="z-10 w-full max-w-md mx-auto">
+        <Toaster position="top-right" />
         <div
           className="rounded-2xl shadow-2xl bg-white/30 dark:bg-[#202638]/40 border border-white/30 backdrop-blur-xl px-8 py-12 flex flex-col items-center glass-panel auth-card"
         >

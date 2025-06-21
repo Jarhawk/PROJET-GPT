@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useRequisitions } from "@/hooks/useRequisitions";
 import { useProducts } from "@/hooks/useProducts";
 import { useAuth } from "@/context/AuthContext";
+import { Toaster, toast } from "react-hot-toast";
 
 function RequisitionFormPage() {
   const navigate = useNavigate();
@@ -27,8 +28,22 @@ function RequisitionFormPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await createRequisition({ type, motif, zone, articles });
-    navigate("/requisitions");
+    if (!type || !zone || articles.some(a => !a.product_id || !a.quantite)) {
+      toast.error("Tous les champs sont obligatoires");
+      return;
+    }
+    const { success, message } = await createRequisition({
+      zone,
+      type,
+      motif,
+      lignes: articles.map(a => ({ product_id: a.product_id, quantite: Number(a.quantite) })),
+    });
+    if (success) {
+      toast.success("Réquisition créée !");
+      navigate("/requisitions");
+    } else {
+      toast.error(message || "Erreur lors de la création");
+    }
   };
 
   if (authLoading) {
@@ -37,6 +52,7 @@ function RequisitionFormPage() {
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
+      <Toaster position="top-right" />
       <h1 className="text-3xl font-bold text-mamastock-gold mb-6">Nouvelle réquisition</h1>
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow space-y-4">
 

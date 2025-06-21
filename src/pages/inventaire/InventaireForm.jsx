@@ -2,6 +2,7 @@ import { useProducts } from "@/hooks/useProducts";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
+import toast, { Toaster } from "react-hot-toast";
 
 function InventaireFormPage() {
   const { data: products, loading: loadingProducts } = useProducts();
@@ -10,6 +11,7 @@ function InventaireFormPage() {
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [stockFinal, setStockFinal] = useState({});
   const [isLocked, setIsLocked] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const checkIfLocked = async () => {
@@ -36,9 +38,11 @@ function InventaireFormPage() {
   };
 
   const handleSubmit = async () => {
-    if (!zone) return alert("Veuillez sélectionner une zone.");
-    if (isLocked) return;
+    if (saving) return;
+    if (!zone) return toast.error("Veuillez sélectionner une zone.");
+    if (isLocked) return toast.error("Inventaire clôturé");
 
+    setSaving(true);
     const { data: inv, error: invError } = await supabase
       .from("inventaires")
       .insert({ date, zone, etat: "brouillon", mama_id })
@@ -46,27 +50,35 @@ function InventaireFormPage() {
       .single();
 
     if (invError) {
-      console.error(invError);
-      return alert("Erreur lors de l'enregistrement de l'inventaire.");
+      toast.error("Erreur lors de l'enregistrement");
+      setSaving(false);
+      return;
     }
 
     for (const productId of Object.keys(stockFinal)) {
       const quantite = parseFloat(stockFinal[productId]);
       if (!isNaN(quantite)) {
-        await supabase.from("inventaire_lignes").insert({
+        const { error } = await supabase.from("inventaire_lignes").insert({
           inventaire_id: inv.id,
           product_id: productId,
           stock_final: quantite,
           mama_id,
         });
+        if (error) {
+          toast.error("Erreur sur une ligne d'inventaire");
+          setSaving(false);
+          return;
+        }
       }
     }
 
-    alert("Inventaire enregistré avec succès.");
+    toast.success("Inventaire enregistré");
+    setSaving(false);
   };
 
   return (
     <div className="p-6 bg-mamastock-bg min-h-screen">
+      <Toaster />
       <h1 className="text-3xl font-bold text-mamastock-gold mb-6">Saisie Inventaire</h1>
 
       <div className="mb-4 flex gap-4 items-end">
@@ -143,10 +155,10 @@ function InventaireFormPage() {
           <div className="mt-6 flex flex-wrap gap-4">
             <button
               onClick={handleSubmit}
-              disabled={isLocked}
+              disabled={isLocked || saving}
               className="bg-mamastock-gold text-white font-bold px-6 py-2 rounded disabled:opacity-50"
             >
-              Enregistrer
+              {saving ? "Enregistrement..." : "Enregistrer"}
             </button>
 
             <button

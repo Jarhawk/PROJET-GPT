@@ -31,13 +31,20 @@ export default function ParamCostCenters() {
   const handleEdit = c => { setForm(c); setEditMode(true); };
   const handleDelete = async id => {
     if (window.confirm("Supprimer ce cost center ?")) {
-      await deleteCostCenter(id); await fetchCostCenters();
-      toast.success("Cost center supprimé.");
+      try {
+        await deleteCostCenter(id);
+        await fetchCostCenters();
+        toast.success("Cost center supprimé.");
+      } catch (err) {
+        console.error("Erreur suppression cost center:", err);
+        toast.error("Échec suppression");
+      }
     }
   };
 
   const handleSubmit = async e => {
     e.preventDefault();
+    if (!form.nom.trim()) return toast.error("Nom requis");
     if (editMode) {
       await updateCostCenter(form.id, { nom: form.nom, actif: form.actif });
       toast.success("Cost center modifié !");

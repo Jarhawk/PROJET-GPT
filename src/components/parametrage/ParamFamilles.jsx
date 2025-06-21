@@ -7,7 +7,13 @@ import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 
 export default function ParamFamilles() {
-  const { familles, fetchFamilles, addFamille, editFamille, deleteFamille } = useFamilles();
+  const {
+    familles,
+    fetchFamilles,
+    addFamille,
+    updateFamille,
+    batchDeleteFamilles,
+  } = useFamilles();
   const { mama_id } = useAuth();
   const [search, setSearch] = useState("");
   const [form, setForm] = useState({ nom: "", id: null });
@@ -24,21 +30,35 @@ export default function ParamFamilles() {
   const handleEdit = f => { setForm(f); setEditMode(true); };
   const handleDelete = async id => {
     if (window.confirm("Supprimer la famille ?")) {
-      await deleteFamille(id); await fetchFamilles();
-      toast.success("Famille supprimée.");
+      try {
+        await batchDeleteFamilles([id]);
+        await fetchFamilles();
+        toast.success("Famille supprimée.");
+      } catch (err) {
+        console.error("Erreur suppression famille:", err);
+        toast.error("Échec suppression");
+      }
     }
   };
 
   const handleSubmit = async e => {
     e.preventDefault();
-    if (editMode) {
-      await editFamille(form.id, { nom: form.nom });
-      toast.success("Famille modifiée !");
-    } else {
-      await addFamille({ nom: form.nom });
-      toast.success("Famille ajoutée !");
+    if (!form.nom.trim()) return toast.error("Nom requis");
+    try {
+      if (editMode) {
+        await updateFamille(form.id, form.nom);
+        toast.success("Famille modifiée !");
+      } else {
+        await addFamille(form.nom);
+        toast.success("Famille ajoutée !");
+      }
+      setEditMode(false);
+      setForm({ nom: "", id: null });
+      await fetchFamilles();
+    } catch (err) {
+      console.error("Erreur enregistrement famille:", err);
+      toast.error("Échec enregistrement");
     }
-    setEditMode(false); setForm({ nom: "", id: null }); await fetchFamilles();
   };
 
   const exportExcel = () => {

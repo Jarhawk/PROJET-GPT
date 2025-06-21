@@ -88,16 +88,26 @@ export default function InventaireForm({ inventaire, onClose }) {
   const handleCloture = async () => {
     if (!inventaire?.id) return;
     if (window.confirm("Clôturer cet inventaire ? (action irréversible)")) {
-      setLoading(true);
-      await clotureInventaire(inventaire.id);
-      toast.success("Inventaire clôturé !");
-      onClose?.();
+      try {
+        setLoading(true);
+        await clotureInventaire(inventaire.id);
+        toast.success("Inventaire clôturé !");
+        onClose?.();
+      } catch (err) {
+        console.error("Erreur clôture inventaire:", err);
+        toast.error("Erreur lors de la clôture.");
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
   // Submit CRUD
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!nom.trim()) return toast.error("Nom requis");
+    if (!date) return toast.error("Date requise");
+    if (lignes.some(l => !l.product_id)) return toast.error("Produit manquant");
     setLoading(true);
     const invData = {
       nom,

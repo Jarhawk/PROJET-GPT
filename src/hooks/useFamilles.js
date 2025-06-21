@@ -30,27 +30,34 @@ export function useFamilles() {
     setLoading(true);
     setError(null);
     if (!nom) {
-      setError("Le nom est obligatoire.");
+      const err = "Le nom est obligatoire.";
+      setError(err);
       setLoading(false);
-      return;
+      return { error: err };
     }
-    // Vérifie unicité (insensible à la casse)
     const { data: existing } = await supabase
       .from("familles")
       .select("id")
       .eq("mama_id", mama_id)
       .ilike("nom", nom);
     if (existing && existing.length > 0) {
+      const err = "Famille déjà existante.";
       setLoading(false);
-      setError("Famille déjà existante.");
-      return;
+      setError(err);
+      return { error: err };
     }
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("familles")
-      .insert([{ nom, mama_id }]);
-    if (error) setError(error);
+      .insert([{ nom, mama_id }])
+      .select()
+      .single();
     setLoading(false);
+    if (error) {
+      setError(error);
+      return { error };
+    }
     await fetchFamilles();
+    return { data };
   }
 
   // 3. Modifier une famille

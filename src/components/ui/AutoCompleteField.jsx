@@ -14,17 +14,18 @@ export default function AutoCompleteField({
   const [showAdd, setShowAdd] = useState(false);
 
   const optionsSafe = options ?? []; // Évite le crash si options est undefined
+  const isValid = inputValue && optionsSafe.includes(inputValue);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     const val = e.target.value;
     setInputValue(val);
     onChange(val);
     setShowAdd(val && !optionsSafe.includes(val));
   };
 
-  const handleAddOption = () => {
+  const handleAddOption = async () => {
     if (inputValue && onAddOption) {
-      onAddOption(inputValue);
+      await onAddOption(inputValue);
       setShowAdd(false);
     }
   };
@@ -38,7 +39,11 @@ export default function AutoCompleteField({
         list={`list-${label}`}
         value={inputValue}
         onChange={handleInputChange}
-        className="bg-white text-black"
+        className={`bg-white text-black ${isValid ? "border-2 border-mamastockGold shadow" : ""}`}
+        aria-label={label}
+        aria-autocomplete="list"
+        role="combobox"
+        aria-expanded={showAdd ? "true" : "false"}
       />
       <datalist id={`list-${label}`}>
         {optionsSafe.map((opt, idx) => (

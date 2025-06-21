@@ -12,6 +12,15 @@ vi.mock('@/hooks/useStorage', () => ({
   deleteFile: vi.fn(),
   pathFromUrl: () => '',
 }));
+vi.mock('@/hooks/useFamilles', () => ({
+  useFamilles: () => ({ familles: [], fetchFamilles: vi.fn(), addFamille: vi.fn() })
+}));
+vi.mock('@/hooks/useUnites', () => ({
+  useUnites: () => ({ unites: [], fetchUnites: vi.fn(), addUnite: vi.fn() })
+}));
+vi.mock('@/hooks/useFournisseurs', () => ({
+  useFournisseurs: () => ({ fournisseurs: [], fetchFournisseurs: vi.fn() })
+}));
 
 import Produits from '@/pages/produits/Produits.jsx';
 

@@ -5,6 +5,7 @@ const queryObj = {
   select: vi.fn(() => queryObj),
   order: vi.fn(() => queryObj),
   eq: vi.fn(() => queryObj),
+  ilike: vi.fn(() => queryObj),
   insert: vi.fn(() => queryObj),
   update: vi.fn(() => queryObj),
   delete: vi.fn(() => queryObj),
@@ -22,15 +23,17 @@ beforeEach(async () => {
   queryObj.select.mockClear();
   queryObj.order.mockClear();
   queryObj.eq.mockClear();
+  queryObj.ilike.mockClear();
   queryObj.insert.mockClear();
 });
 
-test('fetchDocs queries documents', async () => {
+test('fetchDocs queries documents with search', async () => {
   const { result } = renderHook(() => useDocuments());
-  await act(async () => { await result.current.fetchDocs(); });
+  await act(async () => { await result.current.fetchDocs({ search: 'foo' }); });
   expect(fromMock).toHaveBeenCalledWith('documents');
   expect(queryObj.select).toHaveBeenCalledWith('*');
   expect(queryObj.eq).toHaveBeenCalledWith('mama_id', 'm1');
+  expect(queryObj.ilike).toHaveBeenCalledWith('title', '%foo%');
   expect(queryObj.order).toHaveBeenCalledWith('created_at', { ascending: false });
 });
 

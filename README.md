@@ -125,6 +125,7 @@ The Playwright configuration automatically starts the dev server.
 - Dashboard analytics functions `dashboard_stats`, `top_products` and `mouvements_without_alloc` are also executable by authenticated users
 - Command `npm run allocate:history` applies those suggestions to past movements
 - Global search bar in the navbar to quickly find products or suppliers
+- Live search on documents, alerts and suppliers lists with server-side filtering
 - Built-in dark mode toggle for better accessibility
 - Password reset link on the login form points to `/reset-password` and the flow continues on `/update-password`
 - Optional two-factor authentication (TOTP) for user accounts, verified via QR code before activation

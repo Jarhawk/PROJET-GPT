@@ -41,12 +41,16 @@ export default function Fournisseurs() {
     doc.save("fournisseurs.pdf");
   };
 
-  // Chargement initial des fournisseurs et stats globales
+  // Chargement initial
   useEffect(() => {
-    fetchFournisseurs();
     fetchStatsAll().then(setStats);
     fetchInactifs();
   }, []);
+
+  // Rafraîchissement selon la recherche
+  useEffect(() => {
+    fetchFournisseurs({ search });
+  }, [search]);
 
   // Recherche live
   const fournisseursFiltrés = fournisseurs.filter(f =>
@@ -156,7 +160,10 @@ export default function Fournisseurs() {
                   </Button>
                 </td>
                 <td>
-                  <Button size="sm" variant="destructive" onClick={() => deleteFournisseur(f.id)}>
+                  <Button size="sm" variant="destructive" onClick={async () => {
+                    await deleteFournisseur(f.id);
+                    fetchFournisseurs({ search });
+                  }}>
                     Supprimer
                   </Button>
                 </td>
@@ -177,7 +184,7 @@ export default function Fournisseurs() {
               else await addFournisseur(data);
               setShowCreate(false);
               setEditRow(null);
-              fetchFournisseurs();
+              fetchFournisseurs({ search });
             }}
           />
         </DialogContent>

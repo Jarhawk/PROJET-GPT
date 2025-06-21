@@ -5,6 +5,7 @@ const queryObj = {
   select: vi.fn(() => queryObj),
   order: vi.fn(() => queryObj),
   eq: vi.fn(() => queryObj),
+  ilike: vi.fn(() => queryObj),
   insert: vi.fn(() => queryObj),
   update: vi.fn(() => queryObj),
   delete: vi.fn(() => queryObj),
@@ -22,15 +23,18 @@ beforeEach(async () => {
   queryObj.select.mockClear();
   queryObj.order.mockClear();
   queryObj.eq.mockClear();
+  queryObj.ilike.mockClear();
   queryObj.insert.mockClear();
 });
 
-test('fetchRules queries alert_rules', async () => {
+test('fetchRules queries alert_rules with filters', async () => {
   const { result } = renderHook(() => useAlerts());
-  await act(async () => { await result.current.fetchRules(); });
+  await act(async () => { await result.current.fetchRules({ search: 'foo', actif: true }); });
   expect(fromMock).toHaveBeenCalledWith('alert_rules');
-  expect(queryObj.select).toHaveBeenCalledWith('*');
+  expect(queryObj.select).toHaveBeenCalledWith('*, product:products(id, nom)');
   expect(queryObj.eq).toHaveBeenCalledWith('mama_id', 'm1');
+  expect(queryObj.eq).toHaveBeenCalledWith('enabled', true);
+  expect(queryObj.ilike).toHaveBeenCalledWith('product.nom', '%foo%');
   expect(queryObj.order).toHaveBeenCalledWith('created_at', { ascending: false });
 });
 

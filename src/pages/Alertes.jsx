@@ -4,6 +4,7 @@ import { useProducts } from "@/hooks/useProducts";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
+import { Search } from "lucide-react";
 import { Toaster, toast } from "react-hot-toast";
 
 export default function Alertes() {
@@ -11,18 +12,20 @@ export default function Alertes() {
   const { products, fetchProducts } = useProducts();
   const { mama_id, loading: authLoading } = useAuth();
   const [form, setForm] = useState({ product_id: "", threshold: "" });
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     if (!authLoading && mama_id) {
-      fetchRules();
+      fetchRules({ search });
       fetchProducts({ limit: 200 });
     }
-  }, [authLoading, mama_id, fetchRules, fetchProducts]);
+  }, [authLoading, mama_id, search, fetchRules, fetchProducts]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     await addRule({ ...form, threshold: Number(form.threshold) });
     toast.success("Règle ajoutée");
+    await fetchRules({ search });
     setForm({ product_id: "", threshold: "" });
   };
 
@@ -30,8 +33,10 @@ export default function Alertes() {
     if (window.confirm("Supprimer cette règle ?")) {
       await deleteRule(id);
       toast.success("Règle supprimée");
+      await fetchRules({ search });
     }
   };
+
 
   return (
     <div className="p-6 container mx-auto text-sm">
@@ -58,6 +63,16 @@ export default function Alertes() {
         />
         <Button type="submit">Ajouter</Button>
       </form>
+      <div className="relative w-64 mb-4">
+        <input
+          type="search"
+          className="input w-full pl-8"
+          placeholder="Recherche produit"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
+        <Search className="absolute left-2 top-2.5 text-white" size={18} />
+      </div>
       <table className="min-w-full bg-white rounded-xl shadow-md">
         <thead>
           <tr>
@@ -80,6 +95,13 @@ export default function Alertes() {
               </td>
             </tr>
           ))}
+          {rules.length === 0 && (
+            <tr>
+              <td colSpan={3} className="py-2 text-center text-gray-500">
+                Aucun résultat trouvé.
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>

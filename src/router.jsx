@@ -67,10 +67,17 @@ function ProtectedRoute({ children, path }) {
   return children;
 }
 
+function RootRedirect() {
+  const { isAuthenticated, loading } = useAuth();
+  if (loading) return null;
+  return <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />;
+}
+
 export default function Router() {
   return (
     <Suspense fallback={null}>
       <Routes>
+        <Route path="/" element={<RootRedirect />} />
         <Route path="/login" element={<Login />} />
         <Route element={<Layout />}>
           <Route

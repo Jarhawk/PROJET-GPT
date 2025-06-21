@@ -4,8 +4,9 @@ import React from 'react';
 import { vi } from 'vitest';
 import RouterConfig from '../src/router.jsx';
 
+const authState = { isAuthenticated: false, access_rights: ['dashboard'], loading: false };
 vi.mock('@/context/AuthContext', () => ({
-  useAuth: () => ({ isAuthenticated: true, access_rights: ['dashboard'], loading: false })
+  useAuth: () => authState
 }));
 
 vi.mock('@/hooks/useDashboard', () => ({
@@ -36,14 +37,24 @@ vi.mock('@/pages/auth/Login.jsx', () => ({
   default: () => <div>Login</div>,
 }));
 
-// We only test that navigating to '/' renders the dashboard component
-// which implies the redirect is configured.
-test('root path redirects to dashboard', async () => {
+// We test that navigating to '/' shows the login component when not authenticated
+test('root path redirects to login when unauthenticated', async () => {
   render(
     <MemoryRouter initialEntries={["/"]}>
       <RouterConfig />
     </MemoryRouter>
   );
-  // Check dashboard component is displayed
+  // Login component should be displayed
+  expect(await screen.findByText('Login')).toBeInTheDocument();
+});
+
+test('root path redirects to dashboard when authenticated', async () => {
+  authState.isAuthenticated = true;
+  render(
+    <MemoryRouter initialEntries={["/"]}>
+      <RouterConfig />
+    </MemoryRouter>
+  );
   expect(await screen.findByText('Dashboard Stock & Achats')).toBeInTheDocument();
+  authState.isAuthenticated = false;
 });

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 
@@ -8,15 +8,20 @@ export function useAlerts() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  async function fetchRules() {
+  const fetchRules = useCallback(async ({ search = "", actif = null } = {}) => {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase
+    let query = supabase
       .from("alert_rules")
-      .select("*")
+      .select("*, product:products(id, nom)")
       .eq("mama_id", mama_id)
       .order("created_at", { ascending: false });
+
+    if (typeof actif === "boolean") query = query.eq("enabled", actif);
+    if (search) query = query.ilike("product.nom", `%${search}%`);
+
+    const { data, error } = await query;
     setLoading(false);
     if (error) {
       setError(error.message || error);
@@ -25,7 +30,7 @@ export function useAlerts() {
     }
     setRules(Array.isArray(data) ? data : []);
     return data || [];
-  }
+  }, [mama_id]);
 
   async function addRule(values) {
     if (!mama_id) return { error: "Aucun mama_id" };
@@ -39,7 +44,6 @@ export function useAlerts() {
       setError(error.message || error);
       return;
     }
-    await fetchRules();
   }
 
   async function updateRule(id, values) {
@@ -56,7 +60,6 @@ export function useAlerts() {
       setError(error.message || error);
       return;
     }
-    await fetchRules();
   }
 
   async function deleteRule(id) {
@@ -73,7 +76,6 @@ export function useAlerts() {
       setError(error.message || error);
       return;
     }
-    await fetchRules();
   }
 
   return { rules, loading, error, fetchRules, addRule, updateRule, deleteRule };

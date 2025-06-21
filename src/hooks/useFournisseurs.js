@@ -43,7 +43,6 @@ export function useFournisseurs() {
       .insert([{ ...fournisseur, mama_id }]);
     setLoading(false);
     if (error) setError(error);
-    await fetchFournisseurs();
   }
 
   // 3. Modifier un fournisseur
@@ -58,7 +57,6 @@ export function useFournisseurs() {
       .eq("mama_id", mama_id);
     setLoading(false);
     if (error) setError(error);
-    await fetchFournisseurs();
   }
 
   // 4. Supprimer un fournisseur (soft delete = désactivation)
@@ -73,7 +71,6 @@ export function useFournisseurs() {
       .eq("mama_id", mama_id);
     setLoading(false);
     if (error) setError(error);
-    await fetchFournisseurs();
   }
 
   // 5. Export Excel

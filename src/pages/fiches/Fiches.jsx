@@ -19,10 +19,12 @@ export default function Fiches() {
   const [search, setSearch] = useState("");
   const [familleFilter] = useState("");
 
-  // Charge les fiches lorsque l'auth est prête
+  // Charge les fiches et rafraîchit selon la recherche
   useEffect(() => {
-    if (!authLoading && mama_id) fetchFiches();
-  }, [authLoading, mama_id, fetchFiches]);
+    if (!authLoading && mama_id) {
+      fetchFiches({ search });
+    }
+  }, [authLoading, mama_id, search, fetchFiches]);
 
   // Export Excel
   const exportExcel = () => {
@@ -33,16 +35,16 @@ export default function Fiches() {
     saveAs(new Blob([buf]), "fiches.xlsx");
   };
 
-  const fichesFiltres = fiches.filter(f =>
-    (!search || f.nom?.toLowerCase().includes(search.toLowerCase())) &&
-    (!familleFilter || f.famille === familleFilter)
+  // Filtre local uniquement sur la famille
+  const fichesFiltres = fiches.filter(
+    f => !familleFilter || f.famille === familleFilter
   );
 
   // Suppression fiche
   const handleDelete = async (fiche) => {
     if (window.confirm(`Supprimer la fiche technique "${fiche.nom}" ?`)) {
       await deleteFiche(fiche.id);
-      await fetchFiches();
+      await fetchFiches({ search });
       toast.success("Fiche supprimée.");
     }
   };
@@ -120,7 +122,7 @@ export default function Fiches() {
       {showForm && (
         <FicheForm
           fiche={selected}
-          onClose={() => { setShowForm(false); setSelected(null); fetchFiches(); }}
+          onClose={() => { setShowForm(false); setSelected(null); fetchFiches({ search }); }}
         />
       )}
       {showDetail && selected && (

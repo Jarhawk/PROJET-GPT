@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 
@@ -8,15 +8,19 @@ export function useDocuments() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  async function fetchDocs() {
+  const fetchDocs = useCallback(async ({ search = "" } = {}) => {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase
+    let query = supabase
       .from("documents")
       .select("*")
       .eq("mama_id", mama_id)
       .order("created_at", { ascending: false });
+
+    if (search) query = query.ilike("title", `%${search}%`);
+
+    const { data, error } = await query;
     setLoading(false);
     if (error) {
       setError(error.message || error);
@@ -25,7 +29,7 @@ export function useDocuments() {
     }
     setDocs(Array.isArray(data) ? data : []);
     return data || [];
-  }
+  }, [mama_id]);
 
   async function addDoc(values) {
     if (!mama_id) return { error: "Aucun mama_id" };
@@ -39,7 +43,6 @@ export function useDocuments() {
       setError(error.message || error);
       return;
     }
-    await fetchDocs();
   }
 
   async function updateDoc(id, values) {
@@ -56,7 +59,6 @@ export function useDocuments() {
       setError(error.message || error);
       return;
     }
-    await fetchDocs();
   }
 
   async function deleteDoc(id) {
@@ -73,7 +75,6 @@ export function useDocuments() {
       setError(error.message || error);
       return;
     }
-    await fetchDocs();
   }
 
   return { docs, loading, error, fetchDocs, addDoc, updateDoc, deleteDoc };

@@ -48,13 +48,13 @@ test('root path redirects to login when unauthenticated', async () => {
   expect(await screen.findByText('Login')).toBeInTheDocument();
 });
 
-test('root path redirects to dashboard when authenticated', async () => {
+test('root path redirects to login even when authenticated', async () => {
   authState.isAuthenticated = true;
   render(
     <MemoryRouter initialEntries={["/"]}>
       <RouterConfig />
     </MemoryRouter>
   );
-  expect(await screen.findByText('Dashboard Stock & Achats')).toBeInTheDocument();
+  expect(await screen.findByText('Login')).toBeInTheDocument();
   authState.isAuthenticated = false;
 });

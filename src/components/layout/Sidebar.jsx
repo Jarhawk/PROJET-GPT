@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import MamaLogo from "@/components/ui/MamaLogo";
 
 export default function Sidebar() {
   const { access_rights, role, loading } = useAuth();
@@ -12,7 +13,9 @@ export default function Sidebar() {
 
   return (
     <aside className="w-64 bg-white/5 backdrop-blur-xl text-white p-4 h-screen shadow-md text-shadow">
-      <h2 className="text-2xl font-bold mb-6">MamaStock</h2>
+      <div className="mb-6">
+        <MamaLogo width={140} />
+      </div>
       <nav className="flex flex-col gap-2 text-sm">
         {has("dashboard") && <Link to="/dashboard">Dashboard</Link>}
 

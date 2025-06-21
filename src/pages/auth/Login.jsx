@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
-import logo from "@/assets/logo-mamastock.png";
+import MamaLogo from "@/components/ui/MamaLogo";
 import { useAuth } from "@/context/AuthContext";
 import toast, { Toaster } from "react-hot-toast";
 
@@ -60,11 +60,9 @@ export default function Login() {
         <div
           className="rounded-2xl shadow-2xl bg-white/30 dark:bg-[#202638]/40 border border-white/30 backdrop-blur-xl px-8 py-12 flex flex-col items-center glass-panel auth-card"
         >
-          <img
-            src={logo}
-            alt="MamaStock"
-            className="w-24 h-24 mb-6 rounded-full shadow-md bg-mamastockGold/10 object-contain border-4 border-mamastockGold/30 logo-glow"
-          />
+          <div className="mb-6">
+            <MamaLogo width={96} />
+          </div>
           <h2 className="text-3xl font-bold text-mamastockGold drop-shadow mb-1 text-center tracking-wide">
             Connexion
           </h2>

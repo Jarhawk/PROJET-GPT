@@ -19,6 +19,13 @@ If linting or tests fail because required packages are missing, simply run
 `npm install` again. This ensures `vitest`, `@eslint/js` and `playwright` are
 available before running the commands above.
 
+### Branding & PWA
+
+The interface uses a reusable `MamaLogo` component for consistent branding.
+The default router redirects unauthenticated visitors from `/` to `/login` and
+shows the dashboard when logged in. `index.html` contains PWA metadata with the
+favicon, manifest and splash screen so you can install the app on mobile.
+
 ### Database
 
 SQL scripts are stored in [`sql/`](./sql). To initialise a local Supabase instance:

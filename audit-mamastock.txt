@@ -1,0 +1,597 @@
+=== ✅ MODULE : Dashboard.jsx ===
+- Route : /dashboard
+- Objectif : synthèse rapide des stocks et factures
+- Fonctions : chargement des stats via useDashboard, filtres par période
+- Sécurité : queries filtrées par mama_id
+- Tests simulés : navigation initiale vers /dashboard après login
+- Routes liées : ProtectedRoute dans router.jsx
+- Affichages dynamiques : cartes de stats
+- Dépendances : hooks useDashboardStats, AuthContext
+
+=== ✅ MODULE : Produits.jsx ===
+- Route : /produits
+- Objectif : afficher la liste des produits stockés avec pagination
+- Fonctions : recherche, filtre famille, filtre actif/inactif, tri par colonnes, import/export Excel, création/duplication de produit
+- Sécurité : supabase policies sur table products (mama_id)
+- Tests simulés : duplication via test/Produits.test.jsx
+- Routes : privé /produits et /produits/:id
+- Stats : historique prix via ProduitDetail modal
+- Dépendances : hook useProducts, composants ProduitFormModal, ProduitDetail
+
+=== ✅ MODULE : ProduitDetail.jsx ===
+- Route : /produits/:id
+- Objectif : afficher les informations détaillées et l'historique du produit
+- Fonctions : graphique d'évolution des prix, duplication et archivage
+- Sécurité : requête Supabase filtrée par mama_id
+
+=== ✅ MODULE : Stock.jsx ===
+- Route : /stock
+- Objectif : consulter stocks en zones et lancer mouvements
+- Fonctions : recherche, filtre zone, export Excel, création mouvement, détail rotation
+- Sécurité : useStock vérifie user.mama_id
+- Tests : StockDetail.test.jsx pour stats rotation
+- Routes : protégé /stock
+- Stats dynamiques : valorisation stock
+- Dépendances : StockMouvementForm, StockDetail, hook useStock
+
+=== ✅ MODULE : Fournisseurs.jsx ===
+- Route : /fournisseurs
+- Objectif : gestion des fournisseurs
+- Fonctions : recherche, filtre actif, import/export Excel, création/modif
+- Sécurité : RLS fournisseurs via mama_id
+- Routes : /fournisseurs et detail
+- Dépendances : hook useFournisseurs
+
+=== ✅ MODULE : Factures.jsx ===
+- Route : /factures
+- Objectif : suivi des factures fournisseurs
+- Fonctions : filtres statut/fournisseur, export Excel, création, consultation détail
+- Sécurité : policies factures et lignes filtrées sur mama_id
+- Dépendances : hooks useInvoices, useSuppliers
+
+=== ✅ MODULE : Fiches.jsx ===
+- Route : /fiches
+- Objectif : fiches techniques (recettes)
+- Fonctions : ajout/édition lignes dynamiques, calcul coût total et par portion, upload image Storage, export Excel/PDF
+- Sécurité : table fiches RLS sur mama_id
+- Routes : /fiches, /fiches/:id
+- Dépendances : hook useFiches, useProducts
+- Affichages dynamiques : calcul coûts en temps réel
+
+=== ✅ MODULE : Menus.jsx ===
+- Route : /menus
+- Objectif : planification menus et liens fiches
+- Fonctions : filtre date, recherche nom, export Excel, ajout/modif/suppression, affichage détail
+- Sécurité : table menus RLS
+- Dépendances : hook useMenus, useFiches
+
+=== ✅ MODULE : Inventaire.jsx ===
+- Route : /inventaire
+- Objectif : réalisation d'inventaires périodiques
+- Fonctions : création complète avec lignes, clôture, export Excel, mouvements liés
+- Sécurité : vérification mama_id dans useInventaires
+- Dépendances : hook useInventaires, composants InventaireForm
+
+=== ✅ MODULE : Mouvements.jsx ===
+- Route : /mouvements
+- Objectif : historique mouvements de stock
+- Fonctions : filtre date/produit, ventilation centres de coûts via CostCenterAllocationModal
+- Sécurité : table mouvements_stock RLS
+
+=== ✅ MODULE : Taches.jsx ===
+- Route : /taches
+- Objectif : gestionnaire de tâches planifiées
+- Fonctions : création, échéances, assignation, suivi de statut
+- Sécurité : hooks useTasks filtre par mama_id
+
+=== ✅ MODULE : Promotions.jsx ===
+- Route : /promotions
+- Objectif : opérations commerciales sur produits
+- Fonctions : création promotion, application prix remisé
+- Sécurité : table promotions RLS
+
+=== ✅ MODULE : Reporting.jsx ===
+- Route : /reporting
+- Objectif : statistiques et graphiques consolidés
+- Fonctions : sélection de période, vues multi-sites, graphes via GraphMultiZone
+- Sécurité : vues SQL protégées
+
+=== ✅ MODULE : Auth ===
+- Pages : Login.jsx, UpdatePassword.jsx, ResetPassword.jsx, TwoFactorSetup.jsx
+- Objectif : authentification Supabase avec 2FA optionnel
+- Fonctions : login par email/password, setup TOTP, vérification code
+- Sécurité : AuthContext récupère role, mama_id, access_rights
+- Redirection automatique Router.jsx si non authentifié
+
+Login.jsx : formulaire d'authentification principal
+UpdatePassword.jsx : permet de changer son mot de passe
+ResetPassword.jsx : réinitialisation via lien envoyé par email
+TwoFactorSetup.jsx : configuration de la double authentification
+
+=== ✅ MODULE : Login.jsx ===
+- Route : /login
+- Objectif : formulaire de connexion Supabase
+
+=== ✅ MODULE : UpdatePassword.jsx ===
+- Route : /update-password
+- Objectif : changement de mot de passe après connexion
+
+=== ✅ MODULE : ResetPassword.jsx ===
+- Route : /reset-password
+- Objectif : réinitialiser le mot de passe via token
+
+=== ✅ MODULE : Paramétrage ===
+- Pages : AccessRights.jsx, Roles.jsx, Permissions.jsx, Mamas.jsx, InviteUser.jsx
+- Objectif : configuration des rôles, accès et paramètres mama
+- Sécurité : hooks correspondants filtrent mama_id et rôle
+
+=== ✅ MODULE : AuditTrail.jsx ===
+- Route : /audit-trail
+- Objectif : suivre modifications importantes (audit_entries)
+- Fonction : filtrage par table/période
+
+=== ✅ MODULE : Alertes.jsx ===
+- Route : /alertes
+- Objectif : configurer des seuils de stock
+- Fonctions : ajout/suppression de règle, recherche produit
+- Sécurité : useAlerts filtre mama_id
+- Dépendances : useAlerts, useProducts
+
+=== ✅ MODULE : Documents.jsx ===
+- Route : /documents
+- Objectif : centraliser fichiers et liens
+- Fonctions : ajout document, recherche
+- Sécurité : table documents RLS
+- Dépendances : useDocuments
+
+=== ✅ MODULE : Onboarding.jsx ===
+- Route : /onboarding
+- Objectif : guider l'initialisation
+- Fonctions : suivi étapes via useOnboarding
+
+=== ✅ MODULE : Planning.jsx ===
+- Route : /planning
+- Objectif : planning prévisionnel
+- Fonctions : création entrée, listing
+- Sécurité : usePlanning filtre mama_id
+
+=== ✅ MODULE : Pertes.jsx ===
+- Route : /pertes
+- Objectif : enregistrer pertes et dons
+- Fonctions : saisie produit/quantité, suppression
+- Sécurité : usePertes filtre mama_id
+
+=== ✅ MODULE : Requisitions.jsx ===
+- Route : /requisitions
+- Objectif : sorties de stock planifiées
+- Fonctions : création, export Excel/PDF, filtres
+- Sécurité : table requisitions RLS
+
+=== ✅ MODULE : Transferts.jsx ===
+- Route : /transferts
+- Objectif : transferts inter-zones ou sites
+- Fonctions : création transfert, historique
+- Sécurité : table transferts RLS
+
+=== ✅ MODULE : Stats & Reporting avancé ===
+- Routes : /stats/*
+- Objectif : analyses statistiques détaillées
+- Fonctions : graphiques, export Excel, filtres dynamiques
+- Sécurité : vues SQL sécurisées
+
+=== ✅ MODULE : BarManager.jsx ===
+- Route : /bar-manager
+- Objectif : analyse ventes boissons
+- Fonctions : top ventes, export, graphique
+- Sécurité : requêtes filtrées sur mama_id
+
+=== ✅ MODULE : Validations.jsx ===
+- Route : /validations
+- Objectif : demandes d'approbation
+- Fonctions : envoi et mise à jour statut
+- Sécurité : useValidations et rôle admin
+
+=== ✅ MODULE : Mobile ===
+- Pages : MobileAccueil.jsx, MobileInventaire.jsx, MobileMouvement.jsx, MobileRequisition.jsx
+- Objectif : fonctionnalités clé en mobilité
+- Sécurité : mêmes contrôles AuthContext
+
+=== ✅ MODULE : Utilisateurs.jsx ===
+- Route : /parametrage/utilisateurs
+- Objectif : gestion des comptes utilisateurs
+- Fonctions : recherche email, filtre actif/inactif, export Excel, activation/désactivation
+- Sécurité : hook useUsers applique RLS par mama_id (admins seulement)
+- Dépendances : useUsers, AuthContext
+
+=== ✅ MODULE : HelpCenter / AideContextuelle ===
+- Route : /aide
+- Objectif : articles d'aide et FAQ
+- Fonctions : chargement des articles via useHelpArticles
+- Sécurité : accessible après authentification
+
+=== ✅ MODULE : Carte.jsx ===
+- Route : /carte
+- Objectif : gestion rapide des fiches à la carte (nourriture/boisson)
+- Fonctions : modification prix vente, food cost en temps réel
+- Sécurité : requêtes filtrées sur mama_id via useCarte
+
+=== ✅ MODULE : CartePlats.jsx ===
+- Route : /carte-plats
+- Objectif : ajuster le prix de vente des fiches actives
+- Fonctions : saisie prix, calcul food cost
+- Sécurité : policies fiches RLS
+
+=== ✅ MODULE : MenuEngineering.jsx ===
+- Route : /menu-engineering
+- Objectif : analyser les performances des plats
+- Fonctions : saisie ventes, classification Star/Puzzle/Dog/Plow Horse
+- Sécurité : useMenuEngineering filtre mama_id
+
+=== ✅ MODULE : Journal.jsx ===
+- Route : /journal
+- Objectif : journal d'audit des actions
+- Fonctions : recherche texte, filtre dates, export Excel
+- Sécurité : useLogs filtre mama_id
+
+=== ✅ MODULE : CostBoisson.jsx ===
+- Route : /costboisson
+- Objectif : suivi du coût des boissons
+- Fonctions : export Excel/PDF, saisie ventes, graphique top ventes
+- Sécurité : accès filtré sur mama_id
+
+=== ✅ MODULE : Signalements.jsx ===
+- Route : /signalements
+- Objectif : affichage des signalements utilisateurs
+- Fonctions : listing simple
+- Sécurité : useSignalements filtre mama_id
+
+=== ✅ MODULE : Simulation.jsx ===
+- Route : /simulation
+- Objectif : démonstration front basée sur les signalements
+- Fonctions : chargement supabase et rendu cartes
+- Sécurité : protégé par AuthContext
+
+=== ✅ MODULE : Ecarts.jsx ===
+- Route : /ecarts
+- Objectif : visualiser les écarts d'inventaire
+- Fonctions : recherche produit, export CSV
+- Sécurité : useEcartsInventaire filtre mama_id
+
+=== ✅ MODULE : Pages Stats détaillées ===
+- Routes : /stats/stock, /stats/cost-centers, /stats/cost-centers-pivot, /stats/fiches, /stats/consolidation, /stats/advanced
+- Objectif : analyses précises du stock et des coûts
+- Fonctions : graphiques recharts, export Excel, filtres période
+- Sécurité : vues SQL protégées
+
+=== ✅ MODULE : Debug ===
+- Pages : /debug/auth, Debug.jsx, DebugUser.jsx
+- Objectif : inspection de l'AuthContext pour les développeurs
+- Sécurité : réservé rôle admin via access_rights
+
+=== ✅ MODULE : AuthDebug.jsx ===
+- Route : /debug/auth
+- Objectif : tester la connexion Supabase et afficher les claims
+
+=== ✅ MODULE : DebugUser.jsx ===
+- Route : /debug/user
+- Objectif : visualiser l'objet utilisateur en temps réel
+
+=== ✅ MODULE : FactureForm.jsx / FactureDetail.jsx ===
+- Routes : /factures/nouveau, /factures/:id
+- Objectif : création et édition de factures fournisseurs
+- Fonctions : upload PDF, OCR texte, modification statut
+- Sécurité : hooks useInvoices filtrent mama_id
+
+=== ✅ MODULE : ImportFactures.jsx ===
+- Route : /factures/import
+- Objectif : importer des factures via CSV ou OCR
+- Fonctions : prévisualisation des lignes, validation en masse
+
+=== ✅ MODULE : FicheForm.jsx / FicheDetail.jsx ===
+- Routes : /fiches/nouveau, /fiches/:id
+- Objectif : composer ou modifier une fiche technique
+- Fonctions : ajout dynamique de lignes, upload image, calcul coût
+- Sécurité : useFiches applique RLS mama_id
+
+=== ✅ MODULE : FournisseurDetail.jsx ===
+- Route : /fournisseurs/:id
+- Objectif : consultation détaillée d'un fournisseur
+- Fonctions : historique factures, contacts, notes
+
+=== ✅ MODULE : ComparatifPrix.jsx / PrixFournisseurs.jsx ===
+- Routes : /fournisseurs/comparatif, /fournisseurs/prix
+- Objectif : comparer les prix fournisseurs pour un produit
+- Fonctions : tableau dynamique, export Excel
+
+=== ✅ MODULE : InventaireForm.jsx / EcartInventaire.jsx ===
+- Routes : /inventaire/nouveau, /inventaire/ecart/:id
+- Objectif : préparer l'inventaire et analyser les écarts
+- Fonctions : saisie lignes, clôture, calcul écart théorique
+
+=== ✅ MODULE : MenuForm.jsx / MenuDetail.jsx ===
+- Routes : /menus/nouveau, /menus/:id
+- Objectif : gérer les menus du jour ou à thème
+- Fonctions : sélection de fiches, génération PDF
+
+=== ✅ MODULE : MenuDuJour.jsx / MenuDuJourForm.jsx / MenuDuJourDetail.jsx ===
+- Routes : /menus/jour, /menus/jour/nouveau, /menus/jour/:id
+- Objectif : planifier le menu quotidien
+- Fonctions : choix des plats, duplication d'un jour à l'autre
+
+=== ✅ MODULE : MenuPDF.jsx ===
+- Route : /menus/pdf/:id
+- Objectif : génération de carte PDF imprimable
+
+=== ✅ MODULE : MobileAccueil.jsx / MobileInventaire.jsx / MobileMouvement.jsx / MobileRequisition.jsx ===
+- Routes : /mobile/*
+- Objectif : permettre les opérations principales sur smartphone
+- Fonctions : scan code-barres, saisie rapide, navigation épurée
+
+=== ✅ MODULE : Paramétrage détaillé ===
+- Pages : AccessRights.jsx, Roles.jsx, RoleForm.jsx, Permissions.jsx, PermissionsForm.jsx, PermissionsAdmin.jsx, Mamas.jsx, MamaForm.jsx, InvitationsEnAttente.jsx, InviteUser.jsx, Parametrage.jsx
+- Objectif : gérer les rôles, droits et paramètres des organisations
+- Sécurité : réservé aux admins, hooks filtrés par mama_id
+- InvitationsEnAttente.jsx liste les utilisateurs en attente avec relance par e-mail
+- InviteUser.jsx envoie une invitation via une Edge Function `send-invite`
+
+- AccessRights.jsx : liste tous les droits applicables avec recherche et export
+- Roles.jsx : gère les rôles standard avec ajout/suppression
+- RoleForm.jsx : formulaire de création ou édition d'un rôle
+- Permissions.jsx : tableau de correspondance rôle -> droits
+- PermissionsForm.jsx : édition fine des permissions d'un rôle
+- PermissionsAdmin.jsx : page d'administration des règles avancées
+- Mamas.jsx : affiche les organisations configurées
+- MamaForm.jsx : création ou mise à jour d'une organisation
+- Parametrage.jsx : point d'entrée avec navigation vers toutes les pages
+
+=== ✅ MODULE : AccessRights.jsx ===
+- Route : /parametrage/access-rights
+- Objectif : gérer la liste des droits disponibles
+- Fonctions : recherche, export CSV
+
+=== ✅ MODULE : Roles.jsx ===
+- Route : /parametrage/roles
+- Objectif : créer et assigner des rôles
+- Fonctions : ajout, suppression et duplication
+
+=== ✅ MODULE : RoleForm.jsx ===
+- Route : /parametrage/roles/:id
+- Objectif : formulaire complet pour un rôle
+
+=== ✅ MODULE : Permissions.jsx ===
+- Route : /parametrage/permissions
+- Objectif : visualiser la table rôle/droits
+
+=== ✅ MODULE : PermissionsForm.jsx ===
+- Route : /parametrage/permissions/:id
+- Objectif : modifier les permissions d'un rôle donné
+
+=== ✅ MODULE : PermissionsAdmin.jsx ===
+- Route : /parametrage/permissions-admin
+- Objectif : règles avancées et héritage de droits
+
+=== ✅ MODULE : Mamas.jsx ===
+- Route : /parametrage/mamas
+- Objectif : listes des organisations
+
+=== ✅ MODULE : MamaForm.jsx ===
+- Route : /parametrage/mamas/:id
+- Objectif : édition d'une organisation
+
+=== ✅ MODULE : InvitationsEnAttente.jsx ===
+- Route : /parametrage/invitations
+- Objectif : relancer les utilisateurs invités
+
+=== ✅ MODULE : InviteUser.jsx ===
+- Route : /parametrage/invite
+- Objectif : envoyer une invitation par email
+
+=== ✅ MODULE : Parametrage.jsx ===
+- Route : /parametrage
+- Objectif : page d'accueil des paramètres
+
+=== ✅ MODULE : RequisitionForm.jsx / RequisitionDetail.jsx ===
+- Routes : /requisitions/nouveau, /requisitions/:id
+- Objectif : planifier et suivre les sorties de stock
+- Fonctions : génération PDF, validation, affectation cost center
+
+=== ✅ MODULE : ReportingPDF.jsx / GraphCost.jsx ===
+- Routes : /reporting/pdf, /reporting/graph-cost
+- Objectif : exporter les statistiques et coûts au format PDF ou graphique
+
+=== ✅ MODULE : Stats pages ===
+- Pages : StatsStock.jsx, StatsCostCenters.jsx, StatsCostCentersPivot.jsx, StatsFiches.jsx, StatsConsolidation.jsx, StatsAdvanced.jsx
+- Objectif : visualiser toutes les analyses disponibles
+- Fonctions : appels RPC Supabase, graphiques Recharts, export Excel
+  - StatsStock.jsx : statistiques globales de stock
+  - StatsCostCenters.jsx : répartition par centre de coût
+  - StatsCostCentersPivot.jsx : pivot dynamique des coûts
+  - StatsFiches.jsx : suivi des fiches techniques et coûts
+  - StatsConsolidation.jsx : consolidation multi-sites
+  - StatsAdvanced.jsx : analyses personnalisées via options avancées
+
+=== ✅ MODULE : StatsStock.jsx ===
+- Route : /stats/stock
+- Objectif : suivi des valorisations et rotations
+
+=== ✅ MODULE : StatsCostCenters.jsx ===
+- Route : /stats/cost-centers
+- Objectif : répartition des coûts par centre
+
+=== ✅ MODULE : StatsCostCentersPivot.jsx ===
+- Route : /stats/cost-centers/pivot
+- Objectif : vue pivot pour analyses croisées
+
+=== ✅ MODULE : StatsFiches.jsx ===
+- Route : /stats/fiches
+- Objectif : coût et marge des fiches techniques
+
+=== ✅ MODULE : StatsConsolidation.jsx ===
+- Route : /stats/consolidation
+- Objectif : cumul multi-sites
+
+=== ✅ MODULE : StatsAdvanced.jsx ===
+- Route : /stats/advanced
+- Objectif : requêtes personnalisées
+
+=== ✅ MODULE : TacheDetail.jsx / TacheNew.jsx ===
+- Routes : /taches/:id, /taches/nouveau
+- Objectif : détails et création de tâches planifiées
+- Fonctions : assignation utilisateurs, checklist
+
+=== ✅ MODULE : SignalementDetail.jsx / SignalementForm.jsx ===
+- Routes : /signalements/:id, /signalements/nouveau
+- Objectif : gérer le suivi des tickets utilisateurs
+- Sécurité : useSignalements filtre mama_id
+
+=== ✅ MODULE : SimulationForm.jsx / SimulationMenu.jsx / SimulationResult.jsx ===
+- Routes : /simulation/form, /simulation/menu, /simulation/result
+- Objectif : étapes de la démonstration front
+- Sécurité : protégé par AuthContext
+
+=== ✅ MODULE : NotFound.jsx ===
+- Route : *
+- Objectif : page 404 par défaut
+
+=== ✅ MODULE : Scripts Node ===
+- Fichiers : backup_db.js, export_accounting.js, weekly_report.js, reallocate_history.js
+- Objectif : utilitaires CLI (backup, export compta, statistiques)
+- backup_db.js : exporte les tables filtrées par mama_id dans un JSON
+- export_accounting.js : extrait les lignes de factures du mois en CSV
+- weekly_report.js : génère un XLSX des stats par centre de coût
+- reallocate_history.js : ventile l'historique des mouvements via RPC
+- Nécessitent variables d'environnement Supabase et Node 18
+
+=== ⚠️ MODULE : Analyse.jsx / AnalyseCostCenter.jsx ===
+- Routes : /analyse et /analyse/cost-centers
+- Statut : pages en construction (placeholders)
+=== ⚠️ SÉCURITÉ RLS ===
+- environ 170 policies créées dans `sql/rls.sql` et `sql/mama_stock_patch.sql`
+- Toutes les tables principales (products, fournisseurs, factures, fiches, inventaires, menus, etc.) vérifient `mama_id = current_user_mama_id()`
+- Table users limitée par id (= auth.uid())
+
+=== ⚠️ TESTS ===
+- Unit tests vitest présents pour produits, fournisseurs, stock, scripts
+- Playwright e2e minimal (`e2e/home.spec.js`)
+
+=== ❌ POINTS FRAGILES / MANQUANTS ===
+- Certains champs obligatoires dans les forms pourraient être optionnels (ex: fournisseur principal dans ProduitForm)
+- Login.jsx n'affiche l'erreur qu'après toast, pas de compteur d'échec
+- Sidebar.jsx limite parfois l'affichage malgré access_rights corrects
+- RLS : policy `documents_all` (mama_id) definie dans `mama_stock_patch.sql`
+- Plusieurs composants modaux utilisent Dialog sans fermeture par touche ESC
+- Les hooks useUnites et useFamilles n'appliquent pas de filtre mama_id sur toutes les requêtes
+- E2E tests très basiques, pas de scénario complet navigation
+- Scripts node (backup_db.js, export_accounting.js) nécessitent variables d'environnement mais pas fournies
+
+
+=== ✅ MODULE : Logout.jsx ===
+- Route : /logout
+- Objectif : déconnecter l'utilisateur de Supabase puis rediriger vers /login
+- Fonctions : supabase.auth.signOut(), navigation useNavigate
+- Sécurité : accessible uniquement via un bouton protégé
+
+=== ✅ MODULE : Unauthorized.jsx ===
+- Route : /unauthorized
+- Objectif : avertir l'utilisateur qu'il n'a pas les droits
+- Fonctions : bouton retour vers l'accueil
+- Sécurité : aucune donnée sensible, affichage public
+
+=== ✅ SCRIPT : check_browsers.cjs ===
+- Objectif : vérifier que les navigateurs Playwright sont installés avant les tests e2e
+- Utilisé par : npm run test:e2e
+- Comportement : si absent, affiche un message et exit 1 pour ignorer les tests
+
+=== ✅ LAYOUT & LIB ===
+- Layout.jsx, AdminLayout.jsx, ViewerLayout.jsx, Navbar.jsx, Sidebar.jsx
+- Objectif : structure globale de l'application et navigation protégée
+- Sécurité : lecture du contexte Auth pour afficher ou masquer les routes
+- Dépendances : lib/supabase.js pour toutes les requêtes
+
+=== ✅ HOOKS PRINCIPAUX ===
+- Liste : useAdvancedStats, useAlerts, useAuditLog, useAuditTrail, useCarte,
+  useComparatif, useConsolidatedStats, useCostCenterMonthlyStats,
+  useCostCenterStats, useCostCenterSuggestions, useCostCenters, useDashboard,
+  useDashboardStats, useDocuments, useEnrichedProducts, useFactureProduits,
+  useFamilles, useFicheCoutHistory, useFiches, useFichesTechniques,
+  useFournisseurNotes, useFournisseurStats, useFournisseurs,
+  useFournisseursInactifs, useGlobalSearch, useGraphiquesMultiZone,
+  useHelpArticles, useInventaires, useInvoiceImport, useInvoiceOcr,
+  useInvoices, useLogs, useMama, useMamas, useMenuDuJour, useMenuEngineering,
+  useMenus, useMouvementCostCenters, useMouvements, useMouvementsStock,
+  useOnboarding, usePermissions, usePertes, usePlanning, usePriceTrends,
+  useProducts, usePromotions, useReporting, useRequisitions, useRoles,
+  useSignalements, useSimulation, useStats, useStock, useStorage,
+  useSupplierProducts, useSuppliers, useSwipe, useTasks, useTopProducts,
+  useTwoFactorAuth, useUnites, useUsers, useUtilisateurs, useValidations
+- Tous appliquent le filtre `mama_id` et encapsulent les requêtes Supabase
+
+=== 🎁 PRIORITÉS & SUGGESTIONS ===
+- Confirmer la policy `documents_all` et vérifier les vues manquantes
+- Compléter les tests end-to-end Playwright pour couvrir la navigation et les opérations critiques
+- Fournir un fichier `.env.example` listant les variables requises pour les scripts Node
+- Améliorer la validation des formulaires (champs optionnels, messages d’erreur)
+- Centraliser la fermeture des modaux (ESC, clic extérieur) pour tous les composants Dialog
+
+
+=== ✅ SQL FUNCTIONS & TRIGGERS ===
+- stats_cost_centers(mama_id, debut, fin) : stats par centre de coût
+- log_cost_centers_changes() / log_mouvement_cc_changes() : triggers vers user_logs
+- log_pertes_changes() : enregistrement automatique des pertes
+- suggest_cost_centers(product_id) : propose une répartition automatique
+- enable_two_fa(p_secret) / disable_two_fa() : active ou désactive la 2FA
+- top_products(mama_id, debut, fin, limit) : top consommations produits
+- mouvements_without_alloc(limit) : mouvements sans ventilation cost center
+- dashboard_stats(mama_id) : KPI du tableau de bord
+- consolidated_stats() : statistiques multi-sites
+- add_audit_entry() : utilisée par les triggers sur products, factures et planning
+- check_stock_alert() : crée une alerte quand le stock passe sous le seuil
+- import_invoice(payload) : importe les factures électroniques
+- advanced_stats(start_date, end_date) : stats avancées par période
+
+- update_product_pmp() : met à jour le PMP après une facture
+- refresh_facture_total() : recalcule le total de facture
+- update_stock_theorique() : remet à jour le stock théorique
+- apply_inventaire_line() : applique une ligne d'inventaire au stock
+- refresh_fiche_cost() : recalcule le coût d'une fiche technique
+- stats_achats_fournisseurs(mama_id) : cumule les achats par fournisseur
+- stats_achats_fournisseur(mama_id, fournisseur_id) : détail d'un fournisseur
+- stats_rotation_produit(mama_id, product_id) : rotation mensuelle d'un produit
+- log_fiche_prix_change() : historise les variations de prix des fiches
+- log_promotions_changes() : enregistre les modifications de promotions
+- current_user_role() : retourne le rôle courant pour la sécurité
+=== 🛠️ ENVIRONNEMENT ===
+- Variables chargées depuis `.env` (non suivi par Git)
+- Pas de fichier `.env.example` présent dans le dépôt
+- Scripts Node et tests Playwright nécessitent `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` et `MAMA_ID`
+- `public/manifest.json` inclut une icône maskable
+- Dockerfile multi-stage avec Node 18 pour builder puis servir `dist`
+- `supabase/config.toml` expose l'API locale sur le port 54321
+- `.github/workflows/ci.yml` exécute lint, tests et e2e sur Node 18
+- `vite.config.js` active le plugin PWA pour générer le service worker
+
+
+=== ✅ FONCTIONNALITÉS TRANSVERSES ===
+- Barre de recherche globale via useGlobalSearch dans la Navbar
+- Toggle mode sombre/clair avec classe `dark`
+- PWA installable avec service worker pour un usage hors ligne
+- Gestes tactiles sur mobile gérés par useSwipe pour ouvrir la sidebar
+
+=== ⚙️ INDEXES & OPTIMISATIONS ===
+- Plus de 100 index dans full_setup.sql pour accélérer les filtres sur produits, factures, mouvements et tâches
+- Triggers update_product_pmp et refresh_facture_total maintiennent les totaux calculés
+- apply_inventaire_line() et update_stock_theorique() ajustent automatiquement les stocks
+
+=== 🎨 DESIGN SYSTEM & TAILWIND ===
+- Palette : mamastockBg `#0f1c2e`, mamastockText `#f0f0f5`, mamastockGold `#bfa14d`
+- Police Inter chargée via Google Fonts dans `index.html`
+- Plugins Tailwind : utilitaire `.text-shadow`, classes glass avec `backdrop-blur`
+- `globals.css` applique un dégradé sombre et des liens dorés
+- UI : composants Card, Button, Input et TableContainer stylisés de façon cohérente
+
+=== 📱 PWA & ACCESSIBILITÉ ===
+- `index.html` configure le service worker et les splash screens Apple
+- Manifest complet avec icônes 192/512 et version maskable
+- Le site est installable et utilisable hors ligne
+
+=== FIN AUDIT ===

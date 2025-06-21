@@ -35,6 +35,7 @@ export default function Mouvements() {
     zone: "",
     motif: "",
   });
+  const [saving, setSaving] = useState(false);
   const [timeline, setTimeline] = useState([]);
   const [loadingTimeline, setLoadingTimeline] = useState(false);
   // selected mouvement for cost center allocation { id, product_id }
@@ -161,6 +162,11 @@ export default function Mouvements() {
       toast.error("Produit, type et quantité requis !");
       return;
     }
+    if (Number(createMv.quantite) <= 0) {
+      toast.error("Quantité invalide");
+      return;
+    }
+    setSaving(true);
     const { error } = await supabase.from("mouvements_stock").insert([
       {
         ...createMv,
@@ -184,6 +190,7 @@ export default function Mouvements() {
     } else {
       toast.error(error.message);
     }
+    setSaving(false);
   };
 
   // Timeline produit
@@ -590,7 +597,7 @@ export default function Mouvements() {
                       }
                     />
                   </div>
-                  <Button type="submit">Créer</Button>
+                  <Button type="submit" disabled={saving}>Créer</Button>
                 </form>
               </Motion.div>
             </DialogContent>

@@ -3,13 +3,14 @@ import { usePertes } from "@/hooks/usePertes";
 import { useProducts } from "@/hooks/useProducts";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Toaster } from "react-hot-toast";
+import { Toaster, toast } from "react-hot-toast";
 
 export default function Pertes() {
   const { mama_id } = useAuth();
   const { pertes, fetchPertes, addPerte, deletePerte } = usePertes();
   const { products, fetchProducts } = useProducts();
   const [form, setForm] = useState({ product_id: "", quantite: 0, motif: "", date_perte: "" });
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (mama_id) {
@@ -22,8 +23,32 @@ export default function Pertes() {
 
   const handleSubmit = async e => {
     e.preventDefault();
-    await addPerte(form);
-    setForm({ product_id: "", quantite: 0, motif: "", date_perte: "" });
+    if (!form.product_id || !form.quantite) {
+      toast.error("Produit et quantité requis !");
+      return;
+    }
+    try {
+      setSaving(true);
+      await addPerte(form);
+      toast.success("Perte enregistrée !");
+      setForm({ product_id: "", quantite: 0, motif: "", date_perte: "" });
+    } catch (err) {
+      console.error("Erreur ajout perte:", err);
+      toast.error("Erreur lors de l'enregistrement.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async id => {
+    if (!window.confirm("Supprimer cette perte ?")) return;
+    try {
+      await deletePerte(id);
+      toast.success("Perte supprimée.");
+    } catch (err) {
+      console.error("Erreur suppression perte:", err);
+      toast.error("Échec suppression");
+    }
   };
 
   return (
@@ -42,7 +67,7 @@ export default function Pertes() {
         <input type="date" name="date_perte" className="input" value={form.date_perte}
                onChange={handleChange} />
         <input name="motif" className="input flex-1" placeholder="Motif" value={form.motif} onChange={handleChange} />
-        <Button type="submit">Ajouter</Button>
+        <Button type="submit" disabled={saving}>Ajouter</Button>
       </form>
       <table className="min-w-full text-xs bg-white rounded-xl shadow-md">
         <thead>
@@ -62,7 +87,7 @@ export default function Pertes() {
               <td className="px-2 py-1 text-right">{Number(p.quantite).toLocaleString()}</td>
               <td className="px-2 py-1">{p.motif}</td>
               <td className="px-2 py-1">
-                <Button variant="ghost" size="sm" onClick={() => deletePerte(p.id)}>Supprimer</Button>
+                <Button variant="ghost" size="sm" onClick={() => handleDelete(p.id)}>Supprimer</Button>
               </td>
             </tr>
           ))}

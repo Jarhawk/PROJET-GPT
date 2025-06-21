@@ -1,0 +1,178 @@
+[
+  {
+    "form": "src/components/analytics/CostCenterAllocationModal.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/components/inventaires/InventaireForm.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/components/mouvements/MouvementFormModal.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/components/parametrage/ParamCostCenters.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/components/parametrage/ParamFamilles.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/components/parametrage/ParamMama.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/components/parametrage/ParamRoles.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/components/parametrage/ParamUnites.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/components/produits/ProduitForm.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/components/stock/StockMouvementForm.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/components/taches/TacheForm.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/components/utilisateurs/UtilisateurForm.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/Alertes.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/AuditTrail.jsx",
+    "status": "ok"
+  },
+  {
+    "form": "src/pages/Documents.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/Journal.jsx",
+    "status": "ok"
+  },
+  {
+    "form": "src/pages/Pertes.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/Planning.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/Transferts.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/Validations.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/auth/Login.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/auth/ResetPassword.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/auth/UpdatePassword.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/factures/FactureForm.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/factures/ImportFactures.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/fiches/FicheForm.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/fournisseurs/Fournisseurs.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/inventaire/Inventaire.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/menus/MenuDuJourForm.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/menus/MenuForm.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/mouvements/Mouvements.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/parametrage/InviteUser.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/parametrage/MamaForm.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/parametrage/RoleForm.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/parametrage/Roles.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/promotions/Promotions.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/requisitions/RequisitionForm.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/requisitions/Requisitions.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/signalements/SignalementForm.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/components/fournisseurs/SupplierForm.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/parametrage/PermissionsForm.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/simulation/SimulationForm.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/inventaire/InventaireForm.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/components/produits/ProduitFormModal.jsx",
+    "status": "corrected"
+  }
+]

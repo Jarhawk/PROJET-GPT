@@ -77,6 +77,7 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
           onChange={e => setPassword(e.target.value)}
           placeholder="Mot de passe"
           required
+          minLength={6}
         />
       )}
       {utilisateur && (
@@ -86,6 +87,7 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
           value={password}
           onChange={e => setPassword(e.target.value)}
           placeholder="Nouveau mot de passe (laisser vide si inchangé)"
+          minLength={6}
         />
       )}
       <div className="flex gap-2 mt-4">

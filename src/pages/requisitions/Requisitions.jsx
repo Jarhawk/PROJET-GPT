@@ -16,6 +16,7 @@ export default function Requisitions() {
   const [periode, setPeriode] = useState({ debut: "", fin: "" });
   const [showCreate, setShowCreate] = useState(false);
   const [createReq, setCreateReq] = useState({ produit_id: "", quantite: 0, zone: "", motif: "" });
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!mama_id || authLoading) return;
@@ -49,6 +50,11 @@ export default function Requisitions() {
       toast.error("Sélectionne un produit et une quantité !");
       return;
     }
+    if (Number(createReq.quantite) <= 0) {
+      toast.error("Quantité invalide");
+      return;
+    }
+    setSaving(true);
     const { error } = await supabase.from("requisitions").insert([
       {
         ...createReq,
@@ -65,6 +71,7 @@ export default function Requisitions() {
     } else {
       toast.error(error.message);
     }
+    setSaving(false);
   };
 
   // Export Excel
@@ -227,7 +234,7 @@ export default function Requisitions() {
                 }
               />
             </div>
-            <Button type="submit">Créer</Button>
+            <Button type="submit" disabled={saving}>Créer</Button>
           </form>
         </DialogContent>
       </Dialog>

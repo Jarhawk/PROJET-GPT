@@ -19,21 +19,35 @@ export default function ParamUnites() {
   const handleEdit = u => { setForm(u); setEditMode(true); };
   const handleDelete = async id => {
     if (window.confirm("Supprimer l’unité ?")) {
-      await deleteUnite(id); await fetchUnites();
-      toast.success("Unité supprimée.");
+      try {
+        await deleteUnite(id);
+        await fetchUnites();
+        toast.success("Unité supprimée.");
+      } catch (err) {
+        console.error("Erreur suppression unité:", err);
+        toast.error("Échec suppression");
+      }
     }
   };
 
   const handleSubmit = async e => {
     e.preventDefault();
-    if (editMode) {
-      await editUnite(form.id, { nom: form.nom });
-      toast.success("Unité modifiée !");
-    } else {
-      await addUnite({ nom: form.nom });
-      toast.success("Unité ajoutée !");
+    if (!form.nom.trim()) return toast.error("Nom requis");
+    try {
+      if (editMode) {
+        await editUnite(form.id, { nom: form.nom });
+        toast.success("Unité modifiée !");
+      } else {
+        await addUnite({ nom: form.nom });
+        toast.success("Unité ajoutée !");
+      }
+      setEditMode(false);
+      setForm({ nom: "", id: null });
+      await fetchUnites();
+    } catch (err) {
+      console.error("Erreur enregistrement unité:", err);
+      toast.error("Échec enregistrement");
     }
-    setEditMode(false); setForm({ nom: "", id: null }); await fetchUnites();
   };
 
   const exportExcel = () => {

@@ -15,9 +15,15 @@ export default function ParamMama() {
 
   const handleSubmit = async e => {
     e.preventDefault();
-    await updateMama(form);
-    setEdit(false);
-    toast.success("Établissement mis à jour !");
+    if (!form.nom?.trim()) return toast.error("Nom requis");
+    try {
+      await updateMama(form);
+      toast.success("Établissement mis à jour !");
+      setEdit(false);
+    } catch (err) {
+      console.error("Erreur mise à jour établissement:", err);
+      toast.error("Échec de la mise à jour");
+    }
   };
 
   return (

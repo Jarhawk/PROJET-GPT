@@ -9,9 +9,10 @@ export default function ImportFactures() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!file) return;
+    if (!file) return toast.error("Sélectionne un fichier à importer");
     const id = await importFromFile(file);
     if (id) toast.success("Facture importée !");
+    else toast.error("Echec de l'import");
   };
 
   return (

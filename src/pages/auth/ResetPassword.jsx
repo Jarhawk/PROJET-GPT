@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import logo from "@/assets/logo-mamastock.png";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function ResetPassword() {
   const [email, setEmail] = useState("");
@@ -13,13 +14,19 @@ export default function ResetPassword() {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/update-password`,
     });
-    if (error) setError("Erreur lors de l'envoi du lien.");
-    else setSent(true);
+    if (error) {
+      setError("Erreur lors de l'envoi du lien.");
+      toast.error("Échec de l'envoi");
+    } else {
+      toast.success("Email envoyé !");
+      setSent(true);
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f1c2e] via-[#232a34] to-[#bfa14d] relative overflow-hidden">
       <div className="z-10 w-full max-w-md mx-auto">
+        <Toaster position="top-right" />
         <div className="rounded-2xl shadow-2xl bg-white/30 dark:bg-[#202638]/40 border border-white/30 backdrop-blur-xl px-8 py-12 flex flex-col items-center glass-panel auth-card">
           <img src={logo} alt="MamaStock" className="w-24 h-24 mb-6 rounded-full shadow-md bg-mamastockGold/10 object-contain border-4 border-mamastockGold/30 logo-glow" />
           <h2 className="text-3xl font-bold text-mamastockGold drop-shadow mb-1 text-center tracking-wide">Réinitialisation</h2>

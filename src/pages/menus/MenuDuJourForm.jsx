@@ -38,6 +38,10 @@ export default function MenuDuJourForm({ menu, fiches = [], onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!nom.trim() || !date) {
+      toast.error("Nom et date requis");
+      return;
+    }
     setLoading(true);
     const menuData = {
       nom,
@@ -54,8 +58,8 @@ export default function MenuDuJourForm({ menu, fiches = [], onClose }) {
         toast.success("Menu du jour ajouté !");
       }
       onClose?.();
-    } catch {
-      toast.error("Erreur lors de l'enregistrement.");
+    } catch (err) {
+      toast.error(err?.message || "Erreur lors de l'enregistrement.");
     }
     setLoading(false);
   };

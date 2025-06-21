@@ -34,6 +34,10 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!date || !fournisseur_id || !montant) {
+      toast.error("Date, fournisseur et montant requis !");
+      return;
+    }
     setLoading(true);
     const invoice = {
       date,
@@ -51,8 +55,8 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
         toast.success("Facture ajoutée !");
       }
       onClose?.();
-    } catch {
-      toast.error("Erreur lors de l'enregistrement.");
+    } catch (err) {
+      toast.error(err?.message || "Erreur lors de l'enregistrement.");
     }
     setLoading(false);
   };

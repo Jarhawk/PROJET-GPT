@@ -3,6 +3,7 @@ import { useDocuments } from "@/hooks/useDocuments";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function Documents() {
   const { docs, loading, error, fetchDocs, addDoc } = useDocuments();
@@ -19,10 +20,20 @@ export default function Documents() {
 
   const handleAdd = async (e) => {
     e.preventDefault();
-    await addDoc({ title, file_url: url });
-    await fetchDocs({ search });
-    setTitle("");
-    setUrl("");
+    if (!title.trim() || !url.trim()) {
+      toast.error("Titre et URL requis");
+      return;
+    }
+    try {
+      await addDoc({ title, file_url: url });
+      toast.success("Document ajouté");
+      await fetchDocs({ search });
+      setTitle("");
+      setUrl("");
+    } catch (err) {
+      console.error("Erreur ajout document:", err);
+      toast.error("Erreur lors de l'enregistrement.");
+    }
   };
 
 

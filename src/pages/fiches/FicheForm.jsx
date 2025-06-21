@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
 
 export default function FicheForm({ fiche, onClose }) {
-  const { addFiche, editFiche } = useFiches();
+  const { addFiche, updateFiche } = useFiches();
   const { products, fetchProducts } = useProducts();
   const [nom, setNom] = useState(fiche?.nom || "");
   const [description, setDescription] = useState(fiche?.description || "");
@@ -54,6 +54,10 @@ export default function FicheForm({ fiche, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!nom.trim()) return toast.error("Le nom est obligatoire");
+    if (lignes.some(l => !l.product_id || !l.quantite)) {
+      return toast.error("Chaque ligne doit avoir produit et quantité");
+    }
     setLoading(true);
     const ficheData = {
       nom,
@@ -66,15 +70,15 @@ export default function FicheForm({ fiche, onClose }) {
     };
     try {
       if (fiche?.id) {
-        await editFiche(fiche.id, ficheData);
+        await updateFiche(fiche.id, ficheData);
         toast.success("Fiche modifiée !");
       } else {
         await addFiche(ficheData);
         toast.success("Fiche ajoutée !");
       }
       onClose?.();
-    } catch {
-      toast.error("Erreur lors de l'enregistrement.");
+    } catch (err) {
+      toast.error(err?.message || "Erreur lors de l'enregistrement.");
     }
     setLoading(false);
   };

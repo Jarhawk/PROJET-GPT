@@ -8,6 +8,7 @@ export default function Validations() {
   const { isAdmin, mama_id } = useAuth();
   const validations = useValidations();
   const [form, setForm] = useState({ module: "", entity_id: "", action: "" });
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (mama_id) validations.fetchRequests();
@@ -15,14 +16,28 @@ export default function Validations() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (saving) return;
+    setSaving(true);
     await validations.addRequest(form);
-    toast.success("Demande envoyée");
-    setForm({ module: "", entity_id: "", action: "" });
+    if (validations.error) {
+      toast.error(validations.error);
+    } else {
+      toast.success("Demande envoyée");
+      setForm({ module: "", entity_id: "", action: "" });
+    }
+    setSaving(false);
   };
 
   const handleUpdate = async (id, status) => {
+    if (saving) return;
+    setSaving(true);
     await validations.updateStatus(id, status);
-    toast.success("Statut mis à jour");
+    if (validations.error) {
+      toast.error(validations.error);
+    } else {
+      toast.success("Statut mis à jour");
+    }
+    setSaving(false);
   };
 
   const { items, loading, error } = validations;
@@ -55,7 +70,9 @@ export default function Validations() {
           value={form.entity_id}
           onChange={(e) => setForm(f => ({ ...f, entity_id: e.target.value }))}
         />
-        <Button type="submit">Demander</Button>
+        <Button type="submit" disabled={saving}>
+          {saving ? "Envoi…" : "Demander"}
+        </Button>
       </form>
       <table className="min-w-full bg-white rounded-xl shadow-md">
         <thead>
@@ -74,10 +91,10 @@ export default function Validations() {
               <td className="px-2 py-1">{v.status}</td>
               {isAdmin && (
                 <td className="px-2 py-1 space-x-1 text-right">
-                  <Button size="sm" onClick={() => handleUpdate(v.id, 'approved')}>
+                  <Button size="sm" disabled={saving} onClick={() => handleUpdate(v.id, 'approved')}>
                     OK
                   </Button>
-                  <Button size="sm" variant="destructive" onClick={() => handleUpdate(v.id, 'rejected')}>
+                  <Button size="sm" variant="destructive" disabled={saving} onClick={() => handleUpdate(v.id, 'rejected')}>
                     Refus
                   </Button>
                 </td>

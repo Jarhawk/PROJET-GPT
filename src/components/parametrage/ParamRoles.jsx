@@ -17,21 +17,35 @@ export default function ParamRoles() {
   const handleEdit = r => { setForm(r); setEditMode(true); };
   const handleDelete = async id => {
     if (window.confirm("Supprimer le rôle ?")) {
-      await deleteRole(id); await fetchRoles();
-      toast.success("Rôle supprimé.");
+      try {
+        await deleteRole(id);
+        await fetchRoles();
+        toast.success("Rôle supprimé.");
+      } catch (err) {
+        console.error("Erreur suppression rôle:", err);
+        toast.error("Échec suppression");
+      }
     }
   };
 
   const handleSubmit = async e => {
     e.preventDefault();
-    if (editMode) {
-      await editRole(form.id, { nom: form.nom });
-      toast.success("Rôle modifié !");
-    } else {
-      await addRole({ nom: form.nom });
-      toast.success("Rôle ajouté !");
+    if (!form.nom.trim()) return toast.error("Nom requis");
+    try {
+      if (editMode) {
+        await editRole(form.id, { nom: form.nom });
+        toast.success("Rôle modifié !");
+      } else {
+        await addRole({ nom: form.nom });
+        toast.success("Rôle ajouté !");
+      }
+      setEditMode(false);
+      setForm({ nom: "", id: null });
+      await fetchRoles();
+    } catch (err) {
+      console.error("Erreur enregistrement rôle:", err);
+      toast.error("Échec enregistrement");
     }
-    setEditMode(false); setForm({ nom: "", id: null }); await fetchRoles();
   };
 
   return (

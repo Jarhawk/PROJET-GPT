@@ -1,6 +1,7 @@
 // src/context/AuthContext.jsx
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { authenticator } from "otplib";
 import { supabase } from "@/lib/supabase";
 
 // Contexte global Auth
@@ -15,6 +16,38 @@ export function AuthProvider({ children }) {
     user_id: null,
   });
   const [loading, setLoading] = useState(true); // Chargement initial/refresh
+
+  async function refreshUser(sessionParam) {
+    const current = sessionParam || session;
+    if (current) await fetchUserData(current);
+  }
+
+  // Login utilisateur avec gestion 2FA
+  const login = async ({ email, password, totp }) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) return { error };
+
+    const { session: newSession, user } = data;
+    const { data: twoFA } = await supabase
+      .from("two_factor_auth")
+      .select("secret, enabled")
+      .eq("id", user.id)
+      .single();
+
+    if (twoFA?.enabled) {
+      if (!totp || !authenticator.check(totp, twoFA.secret)) {
+        await supabase.auth.signOut();
+        return { error: "Code 2FA invalide", twofaRequired: true };
+      }
+    }
+
+    setSession(newSession);
+    await fetchUserData(newSession);
+    return { data: newSession };
+  };
 
   async function fetchUserData(session) {
     if (!session?.user) {
@@ -72,7 +105,9 @@ export function AuthProvider({ children }) {
     ...userData,
     session,
     loading,
+    login,
     logout,
+    refreshUser,
     isAuthenticated: !!session,
     isAdmin: userData.role === "admin" || userData.role === "superadmin",
   };

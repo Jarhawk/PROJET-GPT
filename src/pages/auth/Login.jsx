@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { supabase } from "@/lib/supabase";
 import MamaLogo from "@/components/ui/MamaLogo";
-import { useAuth } from "@/context/AuthContext";
+import useAuth from "@/hooks/useAuth";
 import toast, { Toaster } from "react-hot-toast";
 import useFormErrors from "@/hooks/useFormErrors";
 
@@ -13,7 +12,9 @@ export default function Login() {
   const { errors, setError, clearErrors } = useFormErrors();
   const navigate = useNavigate();
 
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { isAuthenticated, loading: authLoading, login } = useAuth();
+  const [totp, setTotp] = useState("");
+  const [twoFA, setTwoFA] = useState(false);
 
   // Redirection propre (évite navigate dans le rendu)
   useEffect(() => {
@@ -30,13 +31,15 @@ export default function Login() {
     if (!email || !password) return;
 
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { error, twofaRequired } = await login({ email, password, totp });
 
     if (error) {
-      setError("password", "Identifiants incorrects ou compte inactif.");
+      if (twofaRequired) {
+        setTwoFA(true);
+        setError("totp", error);
+      } else {
+        setError("password", error);
+      }
       toast.error("Échec de la connexion");
       setLoading(false);
     } else {
@@ -102,10 +105,25 @@ export default function Login() {
                 <p className="text-sm text-red-500 mt-1">{errors.password}</p>
               )}
             </div>
+            {twoFA && (
+              <div>
+                <label className="block text-xs font-semibold text-mamastockText/90 mb-1">Code 2FA</label>
+                <input
+                  className="w-full rounded-xl border border-mamastockGold/30 bg-white/70 dark:bg-[#202638]/50 py-2 px-4 text-mamastockBg dark:text-white placeholder-mamastockText/40 focus:outline-none focus:ring-2 focus:ring-mamastockGold/30 backdrop-blur transition"
+                  type="text"
+                  value={totp}
+                  onChange={e => setTotp(e.target.value)}
+                  placeholder="000000"
+                />
+                {errors.totp && (
+                  <p className="text-sm text-red-500 mt-1">{errors.totp}</p>
+                )}
+              </div>
+            )}
             <button
               className="w-full mt-3 py-2 rounded-xl bg-mamastockGold hover:bg-[#b89730] text-white font-semibold text-lg shadow transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               type="submit"
-              disabled={!email || !password || loading}
+              disabled={!email || !password || loading || (twoFA && !totp)}
             >
               {loading ? (
                 <>

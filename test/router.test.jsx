@@ -4,6 +4,9 @@ import React from 'react';
 import { vi } from 'vitest';
 import RouterConfig from '../src/router.jsx';
 
+process.env.VITE_SUPABASE_URL = 'https://example.supabase.co';
+process.env.VITE_SUPABASE_ANON_KEY = 'key';
+
 const authState = { isAuthenticated: false, access_rights: ['dashboard'], loading: false };
 vi.mock('@/context/AuthContext', () => ({
   useAuth: () => authState

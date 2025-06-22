@@ -21,7 +21,7 @@ const InventaireDetail = lazy(() => import("@/pages/inventaire/InventaireDetail.
 const Mouvements = lazy(() => import("@/pages/mouvements/Mouvements.jsx"));
 const Alertes = lazy(() => import("@/pages/Alertes.jsx"));
 const Promotions = lazy(() => import("@/pages/promotions/Promotions.jsx"));
-const Documents = lazy(() => import("@/pages/Documents.jsx"));
+const Documents = lazy(() => import("@/pages/documents/Documents.jsx"));
 const Analyse = lazy(() => import("@/pages/analyse/Analyse.jsx"));
 const AnalyseCostCenter = lazy(() => import("@/pages/analyse/AnalyseCostCenter.jsx"));
 const Utilisateurs = lazy(() => import("@/pages/parametrage/Utilisateurs.jsx"));

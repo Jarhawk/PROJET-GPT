@@ -41,10 +41,11 @@ test('export excel button triggers hook', async () => {
   const excel = vi.fn();
   mockHook = () => ({
     fournisseurs: [],
-    fetchFournisseurs: vi.fn(),
-    addFournisseur: vi.fn(),
+    total: 0,
+    getFournisseurs: vi.fn(),
+    createFournisseur: vi.fn(),
     updateFournisseur: vi.fn(),
-    deleteFournisseur: vi.fn(),
+    disableFournisseur: vi.fn(),
     exportFournisseursToExcel: excel,
   });
   render(<Fournisseurs />);

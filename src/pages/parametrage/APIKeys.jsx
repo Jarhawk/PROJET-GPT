@@ -1,0 +1,94 @@
+import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { useApiKeys } from '@/hooks/useApiKeys';
+import { Toaster, toast } from 'react-hot-toast';
+
+export default function APIKeys() {
+  const { keys, loading, listKeys, createKey, revokeKey } = useApiKeys();
+  const [formOpen, setFormOpen] = useState(false);
+  const [form, setForm] = useState({ name: '', scopes: '', role: '', expiration: '' });
+
+  useEffect(() => { listKeys(); }, [listKeys]);
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+    const { error } = await createKey(form);
+    if (error) toast.error(error.message || 'Erreur');
+    else {
+      toast.success('Clé créée');
+      setForm({ name: '', scopes: '', role: '', expiration: '' });
+      setFormOpen(false);
+    }
+  };
+
+  return (
+    <div className="p-6 max-w-4xl mx-auto">
+      <Toaster />
+      <h1 className="text-2xl font-bold mb-4">Clés API</h1>
+      <Button onClick={() => setFormOpen(o => !o)}>Nouvelle clé</Button>
+      {formOpen && (
+        <form className="space-y-2 mt-4" onSubmit={handleSubmit}>
+          <div>
+            <label>Nom</label>
+            <input className="input input-bordered w-full" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
+          </div>
+          <div>
+            <label>Scopes</label>
+            <input className="input input-bordered w-full" value={form.scopes} onChange={e => setForm(f => ({ ...f, scopes: e.target.value }))} required />
+          </div>
+          <div>
+            <label>Rôle</label>
+            <input className="input input-bordered w-full" value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))} />
+          </div>
+          <div>
+            <label>Expiration</label>
+            <input type="date" className="input input-bordered" value={form.expiration} onChange={e => setForm(f => ({ ...f, expiration: e.target.value }))} />
+          </div>
+          <Button type="submit">Créer</Button>
+        </form>
+      )}
+      <div className="bg-white shadow rounded-xl mt-6 overflow-x-auto">
+        <table className="min-w-full table-auto text-center">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Scopes</th>
+              <th>Rôle</th>
+              <th>Date création</th>
+              <th>Expiration</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {keys.map(k => (
+              <tr key={k.id} className="border-t">
+                <td>{k.name}</td>
+                <td>{k.scopes}</td>
+                <td>{k.role}</td>
+                <td>{k.created_at?.slice(0,16).replace('T',' ')}</td>
+                <td>{k.expiration?.slice(0,10) || '-'}</td>
+                <td>{k.revoked ? 'Révoquée' : 'Active'}</td>
+                <td>
+                  {!k.revoked && (
+                    <Button size="sm" variant="destructive" onClick={() => revokeKey(k.id)}>Révoquer</Button>
+                  )}
+                </td>
+              </tr>
+            ))}
+            {keys.length === 0 && !loading && (
+              <tr>
+                <td colSpan={7} className="py-4 text-gray-500">Aucune clé</td>
+              </tr>
+            )}
+            {loading && (
+              <tr>
+                <td colSpan={7} className="py-4">Chargement…</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}

@@ -1,23 +1,7 @@
-// src/components/ui/card.jsx
-import React from "react";
-
-export function Card({ className = "", children, ...props }) {
+export default function Card({ title, children }) {
   return (
-    <div
-      className={
-        "rounded-xl shadow-md bg-glass backdrop-blur-lg p-4 text-white animate-fade-in " +
-        className
-      }
-      {...props}
-    >
-      {children}
-    </div>
-  );
-}
-
-export function CardContent({ className = "", children, ...props }) {
-  return (
-    <div className={"p-2 text-white " + className} {...props}>
+    <div className="bg-zinc-800 text-white rounded-2xl shadow-lg p-6">
+      {title && <h2 className="text-xl font-bold mb-4">{title}</h2>}
       {children}
     </div>
   );

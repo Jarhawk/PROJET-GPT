@@ -1,22 +1,7 @@
-// src/components/ui/button.jsx
-
-export function Button({
-  children,
-  onClick,
-  type = "button",
-  disabled = false,
-  className = "",
-  ariaLabel,
-  ...props
-}) {
+export default function Button({ children, ...props }) {
   return (
     <button
-      type={type}
-      onClick={onClick}
-      disabled={disabled}
-      className={`bg-white/10 backdrop-blur-lg text-white font-semibold py-2 px-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none ${className}`}
-      aria-label={ariaLabel || undefined}
-      aria-disabled={disabled}
+      className="px-4 py-2 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black font-semibold shadow transition-all"
       {...props}
     >
       {children}

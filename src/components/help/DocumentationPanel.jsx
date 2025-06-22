@@ -1,0 +1,35 @@
+import { useEffect, useState } from "react";
+import { Dialog, DialogContent, DialogOverlay } from "@/components/ui/dialog";
+import { useHelp } from "@/context/HelpProvider";
+
+export default function DocumentationPanel({ open, onOpenChange }) {
+  const { docs, fetchDocs } = useHelp();
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    if (open) fetchDocs({ search });
+  }, [open, search]);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogOverlay className="fixed inset-0 bg-black/40" />
+      <DialogContent className="fixed right-0 top-0 bottom-0 w-96 bg-white p-4 overflow-y-auto">
+        <input
+          className="input input-bordered w-full mb-4"
+          placeholder="Recherche..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <ul className="space-y-4">
+          {docs.map((d) => (
+            <li key={d.id} className="text-sm">
+              <h4 className="font-semibold mb-1">{d.titre}</h4>
+              <div dangerouslySetInnerHTML={{ __html: d.contenu }} />
+            </li>
+          ))}
+        </ul>
+      </DialogContent>
+    </Dialog>
+  );
+}
+

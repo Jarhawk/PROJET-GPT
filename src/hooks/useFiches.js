@@ -7,93 +7,99 @@ import { saveAs } from "file-saver";
 export function useFiches() {
   const { mama_id } = useAuth();
   const [fiches, setFiches] = useState([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // 1. Charger les fiches (filtrage recherche, famille, actif)
-  async function fetchFiches({ search = "", famille = "", actif = null } = {}) {
+  // Liste paginée des fiches
+  async function getFiches({ search = "", actif = null, page = 1, limit = 20 } = {}) {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
-    let query = supabase.from("fiches").select("*").eq("mama_id", mama_id);
+    let query = supabase
+      .from("fiches")
+      .select("*, lignes:fiche_lignes(id)", { count: "exact" })
+      .eq("mama_id", mama_id)
+      .order("nom", { ascending: true })
+      .range((page - 1) * limit, page * limit - 1);
     if (search) query = query.ilike("nom", `%${search}%`);
-    if (famille) query = query.ilike("famille", `%${famille}%`);
     if (typeof actif === "boolean") query = query.eq("actif", actif);
-    const { data, error } = await query.order("famille", { ascending: true }).order("nom", { ascending: true });
-    setFiches(Array.isArray(data) ? data : []);
+    const { data, error, count } = await query;
     setLoading(false);
-    if (error) setError(error);
+    if (error) { setError(error); return []; }
+    setFiches(Array.isArray(data) ? data : []);
+    setTotal(count || 0);
     return data || [];
   }
 
-  // 2. Ajouter une fiche
-  async function addFiche(fiche) {
-    if (!mama_id) return { error: "Aucun mama_id" };
+  // Récupération d'une fiche avec ses lignes + produits
+  async function getFicheById(id) {
+    if (!id || !mama_id) return null;
     setLoading(true);
-    setError(null);
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("fiches")
-      .insert([{ ...fiche, mama_id }]);
-    if (error) setError(error);
-    setLoading(false);
-    await fetchFiches();
-  }
-
-  // 3. Modifier une fiche
-  async function updateFiche(id, updateFields) {
-    if (!mama_id) return { error: "Aucun mama_id" };
-    setLoading(true);
-    setError(null);
-    const { error } = await supabase
-      .from("fiches")
-      .update(updateFields)
+      .select("*, lignes:fiche_lignes(*, product:products(id, nom, unite, pmp))")
       .eq("id", id)
-      .eq("mama_id", mama_id);
-    if (error) setError(error);
+      .eq("mama_id", mama_id)
+      .single();
     setLoading(false);
-    await fetchFiches();
+    if (error) { setError(error); return null; }
+    return data;
   }
 
-  // 4. Supprimer une fiche
+  // Création fiche + lignes
+  async function createFiche({ lignes = [], ...fiche }) {
+    if (!mama_id) return { error: "Aucun mama_id" };
+    setLoading(true);
+    setError(null);
+    const { data, error } = await supabase
+      .from("fiches")
+      .insert([{ ...fiche, mama_id }])
+      .select("id")
+      .single();
+    if (error) { setLoading(false); setError(error); return { error }; }
+    const ficheId = data.id;
+    if (lignes.length > 0) {
+      const toInsert = lignes.map(l => ({ fiche_id: ficheId, product_id: l.product_id, quantite: l.quantite, mama_id }));
+      await supabase.from("fiche_lignes").insert(toInsert);
+    }
+    setLoading(false);
+    await getFiches();
+    return { data: ficheId };
+  }
+
+  // Mise à jour fiche + lignes
+  async function updateFiche(id, { lignes = [], ...fiche }) {
+    if (!mama_id) return { error: "Aucun mama_id" };
+    setLoading(true);
+    setError(null);
+    await supabase.from("fiches").update(fiche).eq("id", id).eq("mama_id", mama_id);
+    await supabase.from("fiche_lignes").delete().eq("fiche_id", id);
+    if (lignes.length > 0) {
+      const toInsert = lignes.map(l => ({ fiche_id: id, product_id: l.product_id, quantite: l.quantite, mama_id }));
+      await supabase.from("fiche_lignes").insert(toInsert);
+    }
+    setLoading(false);
+    await getFiches();
+  }
+
+  // Désactivation logique
   async function deleteFiche(id) {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { error } = await supabase
-      .from("fiches")
-      .delete()
-      .eq("id", id)
-      .eq("mama_id", mama_id);
-    if (error) setError(error);
+    await supabase.from("fiches").update({ actif: false }).eq("id", id).eq("mama_id", mama_id);
     setLoading(false);
-    await fetchFiches();
+    await getFiches();
   }
 
-  // 5. Désactiver/réactiver une fiche
-  async function toggleFicheActive(id, actif) {
-    if (!mama_id) return { error: "Aucun mama_id" };
-    setLoading(true);
-    setError(null);
-    const { error } = await supabase
-      .from("fiches")
-      .update({ actif })
-      .eq("id", id)
-      .eq("mama_id", mama_id);
-    if (error) setError(error);
-    setLoading(false);
-    await fetchFiches();
-  }
-
-  // 6. Export Excel
   function exportFichesToExcel() {
     const datas = (fiches || []).map(f => ({
       id: f.id,
       nom: f.nom,
-      famille: f.famille,
-      unite: f.unite,
       portions: f.portions,
-      rendement: f.rendement,
       cout_total: f.cout_total,
+      cout_par_portion: f.cout_par_portion,
       actif: f.actif,
     }));
     const wb = XLSX.utils.book_new();
@@ -102,33 +108,5 @@ export function useFiches() {
     saveAs(new Blob([buf]), "fiches_mamastock.xlsx");
   }
 
-  // 7. Import Excel
-  async function importFichesFromExcel(file) {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data, { type: "array" });
-      const arr = XLSX.utils.sheet_to_json(workbook.Sheets["Fiches"]);
-      return arr;
-    } catch (error) {
-      setError(error);
-      return [];
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  return {
-    fiches,
-    loading,
-    error,
-    fetchFiches,
-    addFiche,
-    updateFiche,
-    deleteFiche,
-    toggleFicheActive,
-    exportFichesToExcel,
-    importFichesFromExcel,
-  };
+  return { fiches, total, loading, error, getFiches, getFicheById, createFiche, updateFiche, deleteFiche, exportFichesToExcel };
 }

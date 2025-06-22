@@ -47,6 +47,7 @@ const FournisseurApiSettingsForm = lazy(() => import("@/pages/fournisseurs/Fourn
 const CatalogueSyncViewer = lazy(() => import("@/pages/catalogue/CatalogueSyncViewer.jsx"));
 const CommandesEnvoyees = lazy(() => import("@/pages/commandes/CommandesEnvoyees.jsx"));
 const SimulationPlanner = lazy(() => import("@/pages/planning/SimulationPlanner.jsx"));
+const DashboardBuilder = lazy(() => import("@/pages/dashboard/DashboardBuilder.jsx"));
 
 
 export default function Router() {
@@ -61,9 +62,13 @@ export default function Router() {
         <Route path="/privacy" element={<PagePrivacy />} />
         <Route path="/mentions" element={<PageMentions />} />
         <Route element={<Layout />}>
-          <Route
+        <Route
             path="/dashboard"
             element={<ProtectedRoute accessKey="dashboard"><Dashboard /></ProtectedRoute>}
+          />
+          <Route
+            path="/dashboard/builder"
+            element={<ProtectedRoute accessKey="dashboard"><DashboardBuilder /></ProtectedRoute>}
           />
           <Route
             path="/fournisseurs"

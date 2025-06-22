@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useInvoices } from "@/hooks/useInvoices";
+import { useFactures } from "@/hooks/useFactures";
 import { useSuppliers } from "@/hooks/useSuppliers";
 import { useAuth } from "@/context/AuthContext";
 import FactureForm from "./FactureForm.jsx";
@@ -18,7 +18,7 @@ const STATUTS = {
 };
 
 export default function Factures() {
-  const { invoices, fetchInvoices, deleteInvoice } = useInvoices();
+  const { factures, total, getFactures, deleteFacture } = useFactures();
   const { suppliers } = useSuppliers();
   const { mama_id } = useAuth();
   const [showForm, setShowForm] = useState(false);
@@ -27,14 +27,26 @@ export default function Factures() {
   const [search, setSearch] = useState("");
   const [statutFilter, setStatutFilter] = useState("");
   const [supplierFilter, setSupplierFilter] = useState("");
+  const [monthFilter, setMonthFilter] = useState("");
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => { if (mama_id) fetchInvoices(); }, [mama_id]);
+  useEffect(() => {
+    if (mama_id) getFactures({
+      search,
+      fournisseur: supplierFilter,
+      statut: statutFilter,
+      mois: monthFilter,
+      page,
+      pageSize,
+    });
+  }, [mama_id, search, statutFilter, supplierFilter, monthFilter, page]);
 
   // Export Excel/XLSX
   const exportExcel = () => {
     const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(invoices.map(f => ({
+    const ws = XLSX.utils.json_to_sheet(factures.map(f => ({
       ...f,
       fournisseur_nom: suppliers.find(s => s.id === f.fournisseur_id)?.nom || f.fournisseur?.nom
     })));
@@ -44,18 +56,21 @@ export default function Factures() {
   };
 
   // Filtres avancés
-  const facturesFiltres = invoices.filter(f =>
-    (!search || (f.fournisseur?.nom?.toLowerCase().includes(search.toLowerCase()) || f.id?.toString().includes(search)))
-    && (!statutFilter || f.statut === statutFilter)
-    && (!supplierFilter || f.fournisseur_id === supplierFilter)
-  );
+  const facturesFiltres = factures;
 
   // Suppression avec confirmation
   const handleDelete = async (facture) => {
     if (window.confirm(`Supprimer la facture n°${facture.id} ?`)) {
       setLoading(true);
-      await deleteInvoice(facture.id);
-      await fetchInvoices();
+      await deleteFacture(facture.id);
+      await getFactures({
+        search,
+        fournisseur: supplierFilter,
+        statut: statutFilter,
+        mois: monthFilter,
+        page,
+        pageSize,
+      });
       setLoading(false);
       toast.success("Facture supprimée.");
     }
@@ -82,6 +97,12 @@ export default function Factures() {
           <option value="payée">Payée</option>
           <option value="refusée">Refusée</option>
         </select>
+        <input
+          type="month"
+          className="input"
+          value={monthFilter}
+          onChange={e => { setMonthFilter(e.target.value); setPage(1); }}
+        />
         <Button onClick={() => { setSelected(null); setShowForm(true); }}>
           Ajouter une facture
         </Button>
@@ -95,28 +116,23 @@ export default function Factures() {
         >
         <thead>
           <tr>
+            <th className="px-4 py-2">Numéro</th>
             <th className="px-4 py-2">Date</th>
             <th className="px-4 py-2">Fournisseur</th>
-            <th className="px-4 py-2">Montant</th>
+            <th className="px-4 py-2">Montant TTC</th>
             <th className="px-4 py-2">Statut</th>
-            <th className="px-4 py-2">Justificatif</th>
             <th className="px-4 py-2">Actions</th>
           </tr>
         </thead>
         <tbody>
           {facturesFiltres.map((facture) => (
             <tr key={facture.id}>
+              <td className="border px-4 py-2">{facture.reference || facture.id}</td>
               <td className="border px-4 py-2">{facture.date}</td>
               <td className="border px-4 py-2">{facture.fournisseur?.nom}</td>
-              <td className="border px-4 py-2">{facture.montant?.toFixed(2)} €</td>
+              <td className="border px-4 py-2">{(facture.total_ttc || facture.montant)?.toFixed(2)} €</td>
               <td className="border px-4 py-2">
                 <span className={STATUTS[facture.statut] || "badge"}>{facture.statut}</span>
-              </td>
-              <td className="border px-4 py-2">
-                {facture.justificatif ?
-                  <a href={facture.justificatif} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">Voir</a> :
-                  <span className="text-gray-400">Aucun</span>
-                }
               </td>
               <td className="border px-4 py-2">
                 <Button
@@ -150,12 +166,40 @@ export default function Factures() {
         </tbody>
         </Motion.table>
       </TableContainer>
+      <div className="flex justify-between items-center mb-4">
+        <Button
+          variant="outline"
+          disabled={page === 1}
+          onClick={() => setPage(p => Math.max(1, p - 1))}
+        >
+          Précédent
+        </Button>
+        <span className="px-2">Page {page}</span>
+        <Button
+          variant="outline"
+          disabled={page * pageSize >= total}
+          onClick={() => setPage(p => p + 1)}
+        >
+          Suivant
+        </Button>
+      </div>
       {/* Modal d’ajout/modif */}
       {showForm && (
         <FactureForm
           facture={selected}
           suppliers={suppliers}
-          onClose={() => { setShowForm(false); setSelected(null); fetchInvoices(); }}
+          onClose={() => {
+            setShowForm(false);
+            setSelected(null);
+            getFactures({
+              search,
+              fournisseur: supplierFilter,
+              statut: statutFilter,
+              mois: monthFilter,
+              page,
+              pageSize,
+            });
+          }}
         />
       )}
       {/* Modal de détail */}

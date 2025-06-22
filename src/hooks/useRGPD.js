@@ -1,0 +1,35 @@
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/context/AuthContext";
+
+export function useRGPD() {
+  const { user_id, mama_id, role } = useAuth();
+
+  async function logAccess(userId, action, table) {
+    if (!userId) return;
+    await supabase.from("audit_logs").insert([
+      { user_id: userId, mama_id, action, table_name: table },
+    ]);
+  }
+
+  async function getUserDataExport(userId = user_id) {
+    if (!userId) return null;
+    const { data: profil } = await supabase
+      .from("users")
+      .select("id,email,created_at")
+      .eq("id", userId)
+      .single();
+    const { data: logs } = await supabase
+      .from("audit_logs")
+      .select("action, table_name, created_at")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+    return { profil, logs };
+  }
+
+  async function purgeUserData(userId) {
+    if (role !== "superadmin") return { error: "not allowed" };
+    return await supabase.from("users").delete().eq("id", userId);
+  }
+
+  return { logAccess, getUserDataExport, purgeUserData };
+}

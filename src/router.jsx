@@ -35,6 +35,8 @@ const AccessRights = lazy(() => import("@/pages/parametrage/AccessRights.jsx"));
 const Onboarding = lazy(() => import("@/pages/public/Onboarding.jsx"));
 const LandingPage = lazy(() => import("@/pages/public/LandingPage.jsx"));
 const Signup = lazy(() => import("@/pages/public/Signup.jsx"));
+const PagePrivacy = lazy(() => import("@/pages/public/PagePrivacy.jsx"));
+const PageMentions = lazy(() => import("@/pages/public/PageMentions.jsx"));
 const AideContextuelle = lazy(() => import("@/pages/AideContextuelle.jsx"));
 const SupervisionGroupe = lazy(() => import("@/pages/supervision/SupervisionGroupe.jsx"));
 const ComparateurFiches = lazy(() => import("@/pages/supervision/ComparateurFiches.jsx"));
@@ -49,6 +51,8 @@ export default function Router() {
         <Route path="/login" element={<Login />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="/privacy" element={<PagePrivacy />} />
+        <Route path="/mentions" element={<PageMentions />} />
         <Route element={<Layout />}>
           <Route
             path="/dashboard"

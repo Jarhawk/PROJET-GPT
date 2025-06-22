@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./globals.css";
 import "@/i18n/i18n";
+import "./registerSW.js";
 
 // Option sentry/reporting
 // import * as Sentry from "@sentry/react";

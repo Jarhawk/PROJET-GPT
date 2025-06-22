@@ -5,7 +5,8 @@ import { authenticator } from "otplib";
 import { supabase } from "@/lib/supabase";
 
 // Contexte global Auth
-const AuthContext = createContext();
+// Exported separately for hooks like src/hooks/useAuth.js
+export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null); // Session Supabase

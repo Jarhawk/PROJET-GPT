@@ -45,6 +45,7 @@ const NotificationSettingsForm = lazy(() => import("@/pages/notifications/Notifi
 const FournisseurApiSettingsForm = lazy(() => import("@/pages/fournisseurs/FournisseurApiSettingsForm.jsx"));
 const CatalogueSyncViewer = lazy(() => import("@/pages/catalogue/CatalogueSyncViewer.jsx"));
 const CommandesEnvoyees = lazy(() => import("@/pages/commandes/CommandesEnvoyees.jsx"));
+const SimulationPlanner = lazy(() => import("@/pages/planning/SimulationPlanner.jsx"));
 
 
 export default function Router() {
@@ -154,6 +155,10 @@ export default function Router() {
           <Route
             path="/commandes/envoyees"
             element={<ProtectedRoute accessKey="fournisseurs"><CommandesEnvoyees /></ProtectedRoute>}
+          />
+          <Route
+            path="/planning/simulation"
+            element={<ProtectedRoute accessKey="planning"><SimulationPlanner /></ProtectedRoute>}
           />
           <Route
             path="/analyse"

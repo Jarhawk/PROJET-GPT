@@ -36,6 +36,8 @@ const Onboarding = lazy(() => import("@/pages/public/Onboarding.jsx"));
 const LandingPage = lazy(() => import("@/pages/public/LandingPage.jsx"));
 const Signup = lazy(() => import("@/pages/public/Signup.jsx"));
 const AideContextuelle = lazy(() => import("@/pages/AideContextuelle.jsx"));
+const SupervisionGroupe = lazy(() => import("@/pages/supervision/SupervisionGroupe.jsx"));
+const ComparateurFiches = lazy(() => import("@/pages/supervision/ComparateurFiches.jsx"));
 
 
 export default function Router() {
@@ -155,6 +157,14 @@ export default function Router() {
           <Route
             path="/aide"
             element={<ProtectedRoute accessKey="aide"><AideContextuelle /></ProtectedRoute>}
+          />
+          <Route
+            path="/supervision"
+            element={<ProtectedRoute accessKey="dashboard"><SupervisionGroupe /></ProtectedRoute>}
+          />
+          <Route
+            path="/supervision/comparateur"
+            element={<ProtectedRoute accessKey="fiches"><ComparateurFiches /></ProtectedRoute>}
           />
           <Route
             path="/debug/auth"

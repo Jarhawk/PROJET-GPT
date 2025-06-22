@@ -1,9 +1,9 @@
 import { Outlet, useLocation } from "react-router-dom";
-import Sidebar from "@/components/layout/Sidebar";
+import Sidebar from "@/layout/Sidebar";
 
 export default function Layout() {
   const { pathname } = useLocation();
-  if (pathname === "/login") return <Outlet />;
+  if (pathname === "/login" || pathname === "/unauthorized") return <Outlet />;
 
   return (
     <div className="flex h-screen overflow-auto text-shadow">

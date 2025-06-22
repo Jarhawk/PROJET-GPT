@@ -5,7 +5,7 @@ export function Card({ className = "", children, ...props }) {
   return (
     <div
       className={
-        "rounded-xl shadow-md bg-glass backdrop-blur-lg p-4 text-white " +
+        "rounded-xl shadow-md bg-glass backdrop-blur-lg p-4 text-white animate-fade-in " +
         className
       }
       {...props}

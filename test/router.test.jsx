@@ -4,6 +4,9 @@ import React from 'react';
 import { vi } from 'vitest';
 import RouterConfig from '../src/router.jsx';
 
+process.env.VITE_SUPABASE_URL = 'https://example.supabase.co';
+process.env.VITE_SUPABASE_ANON_KEY = 'key';
+
 const authState = { isAuthenticated: false, access_rights: ['dashboard'], loading: false };
 vi.mock('@/context/AuthContext', () => ({
   useAuth: () => authState
@@ -38,23 +41,22 @@ vi.mock('@/pages/auth/Login.jsx', () => ({
 }));
 
 // We test that navigating to '/' shows the login component when not authenticated
-test('root path redirects to login when unauthenticated', async () => {
+test('root path shows landing when unauthenticated', async () => {
   render(
     <MemoryRouter initialEntries={["/"]}>
       <RouterConfig />
     </MemoryRouter>
   );
-  // Login component should be displayed
-  expect(await screen.findByText('Login')).toBeInTheDocument();
+  expect(await screen.findByText(/Simplifiez votre gestion/)).toBeInTheDocument();
 });
 
-test('root path redirects to dashboard when authenticated', async () => {
+test('root path shows landing even when authenticated', async () => {
   authState.isAuthenticated = true;
   render(
     <MemoryRouter initialEntries={["/"]}>
       <RouterConfig />
     </MemoryRouter>
   );
-  expect(await screen.findByText('Dashboard Stock & Achats')).toBeInTheDocument();
+  expect(await screen.findByText(/Simplifiez votre gestion/)).toBeInTheDocument();
   authState.isAuthenticated = false;
 });

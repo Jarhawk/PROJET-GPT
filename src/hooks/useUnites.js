@@ -30,27 +30,34 @@ export function useUnites() {
     setLoading(true);
     setError(null);
     if (!nom) {
-      setError("Le nom est obligatoire.");
+      const err = "Le nom est obligatoire.";
+      setError(err);
       setLoading(false);
-      return;
+      return { error: err };
     }
-    // Vérifie que l'unité n'existe pas déjà (case insensitive)
     const { data: existing } = await supabase
       .from("unites")
       .select("id")
       .eq("mama_id", mama_id)
       .ilike("nom", nom);
     if (existing && existing.length > 0) {
+      const err = "Unité déjà existante.";
       setLoading(false);
-      setError("Unité déjà existante.");
-      return;
+      setError(err);
+      return { error: err };
     }
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("unites")
-      .insert([{ nom, mama_id }]);
-    if (error) setError(error);
+      .insert([{ nom, mama_id }])
+      .select()
+      .single();
     setLoading(false);
+    if (error) {
+      setError(error);
+      return { error };
+    }
     await fetchUnites();
+    return { data };
   }
 
   // 3. Modifier une unité

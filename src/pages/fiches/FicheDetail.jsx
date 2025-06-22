@@ -1,62 +1,45 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { saveAs } from "file-saver";
-import * as XLSX from "xlsx";
-import { supabase } from "@/lib/supabase";
-import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import jsPDF from "jspdf";
-import "jspdf-autotable";
+import * as XLSX from "xlsx";
+import { useFiches } from "@/hooks/useFiches";
+import { useFicheCoutHistory } from "@/hooks/useFicheCoutHistory";
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from "recharts";
 
 export default function FicheDetail({ fiche: ficheProp, onClose }) {
-  const { id } = useParams();
-  const { mama_id } = useAuth();
-  const [fiche, setFiche] = useState(ficheProp);
+  const { id: routeId } = useParams();
+  const { getFicheById } = useFiches();
+  const [fiche, setFiche] = useState(ficheProp || null);
+  const { history, fetchFicheCoutHistory } = useFicheCoutHistory();
+  const [simPrix, setSimPrix] = useState(null);
 
   useEffect(() => {
-    const fid = ficheProp?.id || id;
-    if (fid && mama_id && !ficheProp) {
-      supabase
-        .from("fiches")
-        .select("*")
-        .eq("id", fid)
-        .eq("mama_id", mama_id)
-        .single()
-        .then(({ data }) => setFiche(data));
+    const fid = ficheProp?.id || routeId;
+    if (fid && !ficheProp) {
+      getFicheById(fid).then(setFiche);
     }
-  }, [ficheProp, id, mama_id]);
+  }, [ficheProp, routeId, getFicheById]);
+
+  useEffect(() => {
+    if (fiche?.id) {
+      fetchFicheCoutHistory(fiche.id);
+      setSimPrix(fiche.prix_vente || 0);
+    }
+  }, [fiche?.id, fetchFicheCoutHistory, fiche?.prix_vente]);
 
   if (!fiche) return <div className="p-8">Chargement...</div>;
-  // Export Excel fiche
-  const exportExcel = () => {
+
+  function exportExcel() {
+    const rows = fiche.lignes?.map(l => ({
+      Produit: l.product?.nom,
+      Quantite: l.quantite,
+      Unite: l.product?.unite,
+      Cout: l.product?.pmp ? (l.product.pmp * l.quantite).toFixed(2) : "",
+    })) || [];
     const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet([fiche]);
-    XLSX.utils.book_append_sheet(wb, ws, "Fiche");
-    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([buf]), `fiche_${fiche.id}.xlsx`);
-  };
-
-  // Export PDF de la fiche technique
-  const exportPDF = () => {
-    const doc = new jsPDF();
-    doc.text(`Fiche: ${fiche.nom}`, 10, 12);
-    doc.text(`Portions: ${fiche.portions}`, 10, 20);
-    doc.text(`Coût total: ${fiche.cout_total?.toFixed(2)} €`, 10, 28);
-    doc.text(`Coût/portion: ${fiche.cout_par_portion?.toFixed(2)} €`, 10, 36);
-    doc.autoTable({
-      startY: 44,
-      head: [["Ingrédient", "Qté", "Unité", "Coût €"]],
-      body: fiche.lignes?.map(l => [l.nom, l.quantite, l.unite, (l.pmp * l.quantite).toFixed(2)]) || [],
-      styles: { fontSize: 9 },
-    });
-    doc.save(`fiche_${fiche.id}.pdf`);
-  };
-
-  // Historique des modifs (à brancher si besoin)
-  const historique = fiche.historique || [
-    { date: "2024-06-01", user: "admin", action: "Création" },
-    { date: "2024-06-02", user: "chef", action: "Maj portions" },
-  ];
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "Fiche");
+    XLSX.writeFile(wb, `fiche_${fiche.id}.xlsx`);
+  }
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -64,36 +47,39 @@ export default function FicheDetail({ fiche: ficheProp, onClose }) {
         <Button variant="outline" className="absolute top-2 right-2" onClick={onClose}>Fermer</Button>
         <h2 className="font-bold text-xl mb-4">{fiche.nom}</h2>
         <div><b>Portions :</b> {fiche.portions}</div>
-        <div><b>Coût total :</b> {fiche.cout_total?.toFixed(2)} €</div>
-        <div><b>Coût/portion :</b> {fiche.cout_par_portion?.toFixed(2)} €</div>
-        <div><b>Description :</b> {fiche.description}</div>
+        <div><b>Coût total :</b> {Number(fiche.cout_total).toFixed(2)} €</div>
+        <div><b>Coût/portion :</b> {Number(fiche.cout_par_portion).toFixed(2)} €</div>
         <div className="my-2">
           <b>Ingrédients :</b>
           <ul className="list-disc pl-6">
-            {fiche.lignes?.map((l, i) =>
+            {fiche.lignes?.map((l, i) => (
               <li key={i}>
-                {l.nom} — {l.quantite} {l.unite} — {(l.pmp * l.quantite).toFixed(2)} €
+                {l.product?.nom} — {l.quantite} {l.product?.unite} — {l.product?.pmp ? (l.product.pmp * l.quantite).toFixed(2) : "-"} €
               </li>
-            )}
+            ))}
           </ul>
-        </div>
-        <div>
-          <b>Image :</b> {fiche.image ?
-            <img src={fiche.image} alt="Fiche" className="max-h-32" /> :
-            <span className="text-gray-400">Aucune</span>
-          }
         </div>
         <div className="flex gap-2 mt-4">
           <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
-          <Button variant="outline" onClick={exportPDF}>Export PDF</Button>
         </div>
-        <div className="mt-4">
-          <b>Historique :</b>
-          <ul className="list-disc pl-6">
-            {historique.map((h, i) =>
-              <li key={i}>{h.date} — {h.user} — {h.action}</li>
+        <div className="mt-6">
+          <h3 className="font-semibold mb-2">Analyse rentabilité</h3>
+          <div className="h-32 bg-white rounded mb-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={(history || []).map(h => ({ date: new Date(h.date).toLocaleDateString('fr-FR'), marge: h.prix_vente && h.cout_portion ? ((h.prix_vente - h.cout_portion) / h.prix_vente) * 100 : null }))}>
+                <XAxis dataKey="date" hide />
+                <YAxis domain={[0, 'dataMax']} />
+                <Tooltip />
+                <Line type="monotone" dataKey="marge" stroke="#8884d8" dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="flex items-center gap-2">
+            <input type="number" className="input w-24" value={simPrix ?? ''} onChange={e => setSimPrix(Number(e.target.value))} />
+            {simPrix !== null && (
+              <span>Si je vends à {simPrix.toFixed(2)} € : marge {(simPrix > 0 ? ((simPrix - Number(fiche.cout_par_portion)) / simPrix) * 100 : 0).toFixed(1)}%</span>
             )}
-          </ul>
+          </div>
         </div>
       </div>
     </div>

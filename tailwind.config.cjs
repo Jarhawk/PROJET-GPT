@@ -31,8 +31,11 @@ module.exports = {
     function ({ addUtilities }) {
       addUtilities({
         '.text-shadow': {
-          textShadow: '0 1px 2px rgba(0,0,0,0.25)'
-        }
+          textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
+        },
+        '.glow-gold': {
+          textShadow: '0 0 8px var(--mamastock-gold)',
+        },
       });
     },
   ],

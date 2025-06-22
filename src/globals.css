@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --mamastock-bg: #0f1c2e;
+  --mamastock-text: #f0f0f5;
+  --mamastock-gold: #bfa14d;
+  /* Theme variables overridable via ThemeProvider */
+  --primary-color: var(--mamastock-gold);
+  --secondary-color: var(--mamastock-bg);
+}
+
 /* Style custom global pour MamaStock */
 body {
   font-family: "Inter", sans-serif;
@@ -97,8 +106,8 @@ html.dark body {
   background: linear-gradient(125deg, rgba(255,255,255,0.24) 40%, rgba(191,161,77,0.11) 100%);
 }
 
-.animate-fade-in { animation: fade-in 0.8s ease-out forwards; }
-.animate-fade-in-down { animation: fade-in-down 0.8s ease-out forwards; }
+.animate-fade-in { animation: fade-in 0.5s ease-out forwards; }
+.animate-fade-in-down { animation: fade-in-down 0.5s ease-out forwards; }
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -118,5 +127,20 @@ html.dark body {
   box-shadow: 0 2px 20px 0 #bfa14d50;
 }
 
-.text-shadow { text-shadow: 0 1px 2px rgba(0,0,0,0.25); }
+.text-shadow { text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+.glow-gold { text-shadow: 0 0 8px var(--mamastock-gold); }
+
+/* Theme color helpers */
+.text-primary,
+.text-mamastockGold {
+  color: var(--primary-color);
+}
+.bg-primary,
+.bg-mamastockGold {
+  background-color: var(--primary-color);
+}
+.border-primary,
+.border-mamastockGold {
+  border-color: var(--primary-color);
+}
 

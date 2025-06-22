@@ -17,7 +17,8 @@
     "report": "node scripts/weekly_report.js",
     "export:accounting": "node scripts/export_accounting.js",
     "allocate:history": "node scripts/reallocate_history.js",
-    "backup": "node scripts/backup_db.js"
+    "backup": "node scripts/backup_db.js",
+    "test:manifest": "node scripts/validate_manifest_icons.cjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.14",
@@ -27,6 +28,7 @@
     "file-saver": "^2.0.5",
     "framer-motion": "^12.18.1",
     "html2canvas": "^1.4.1",
+    "i18next": "^25.2.1",
     "jspdf": "^3.0.1",
     "jspdf-autotable": "^5.0.2",
     "lucide-react": "^0.511.0",
@@ -35,11 +37,12 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-hot-toast": "^2.5.2",
+    "react-i18next": "^15.5.3",
     "react-router-dom": "^7.6.2",
     "react-to-print": "^3.1.0",
     "react-toastify": "^11.0.5",
     "recharts": "^2.15.3",
-    "tesseract.js": "^6.0.1",
+    "tesseract.js": "6.0.1",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

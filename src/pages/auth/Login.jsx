@@ -1,51 +1,55 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { supabase } from "@/lib/supabase";
 import MamaLogo from "@/components/ui/MamaLogo";
-import { useAuth } from "@/context/AuthContext";
+import useAuth from "@/hooks/useAuth";
 import toast, { Toaster } from "react-hot-toast";
+import useFormErrors from "@/hooks/useFormErrors";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { errors, setError, clearErrors } = useFormErrors();
   const navigate = useNavigate();
 
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { isAuthenticated, loading: authLoading, login } = useAuth();
+  const [totp, setTotp] = useState("");
+  const [twoFA, setTwoFA] = useState(false);
 
   // Redirection propre (évite navigate dans le rendu)
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
-      navigate("/");
+      navigate("/dashboard");
     }
   }, [isAuthenticated, authLoading, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
+    clearErrors();
+    if (!email) setError("email", "Email requis");
+    if (!password) setError("password", "Mot de passe requis");
+    if (!email || !password) return;
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    setLoading(true);
+    const { error, twofaRequired } = await login({ email, password, totp });
 
     if (error) {
-      setError("Identifiants incorrects ou compte inactif.");
+      if (twofaRequired) {
+        setTwoFA(true);
+        setError("totp", error);
+      } else {
+        setError("password", error);
+      }
       toast.error("Échec de la connexion");
       setLoading(false);
     } else {
       toast.success("Connecté !");
-      setTimeout(() => {
-        setLoading(false);
-        navigate("/");
-      }, 800);
+      navigate("/dashboard");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f1c2e] via-[#232a34] to-[#bfa14d] relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f1c2e] via-[#232a34] to-[#bfa14d] relative overflow-hidden animate-fade-in">
       {/* Liquid/Glass dynamic background */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         {/* Big gold blur top left */}
@@ -60,8 +64,8 @@ export default function Login() {
         <div
           className="rounded-2xl shadow-2xl bg-white/30 dark:bg-[#202638]/40 border border-white/30 backdrop-blur-xl px-8 py-12 flex flex-col items-center glass-panel auth-card"
         >
-          <div className="mb-6">
-            <MamaLogo width={96} />
+          <div className="mb-6 animate-fade-in-down">
+            <MamaLogo width={96} className="animate-fade-in-down" />
           </div>
           <h2 className="text-3xl font-bold text-mamastockGold drop-shadow mb-1 text-center tracking-wide">
             Connexion
@@ -69,7 +73,7 @@ export default function Login() {
           <p className="text-xs text-mamastockText/70 text-center mb-6">
             Plateforme F&B<br />by MamaStock
           </p>
-          <form onSubmit={handleLogin} className="w-full flex flex-col gap-4">
+          <form onSubmit={handleLogin} className="w-full flex flex-col gap-4 animate-fade-in-down">
             <div>
               <label className="block text-xs font-semibold text-mamastockText/90 mb-1">Email</label>
               <input
@@ -77,10 +81,14 @@ export default function Login() {
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
+                autoFocus
                 autoComplete="email"
                 required
                 placeholder="votre@email.com"
               />
+              {errors.email && (
+                <p className="text-sm text-red-500 mt-1">{errors.email}</p>
+              )}
             </div>
             <div>
               <label className="block text-xs font-semibold text-mamastockText/90 mb-1">Mot de passe</label>
@@ -93,14 +101,29 @@ export default function Login() {
                 required
                 placeholder="••••••••"
               />
+              {errors.password && (
+                <p className="text-sm text-red-500 mt-1">{errors.password}</p>
+              )}
             </div>
-            {error && (
-              <div className="text-red-700 bg-red-50 border border-red-100 rounded px-2 py-1 text-xs shadow animate-fade-in">{error}</div>
+            {twoFA && (
+              <div>
+                <label className="block text-xs font-semibold text-mamastockText/90 mb-1">Code 2FA</label>
+                <input
+                  className="w-full rounded-xl border border-mamastockGold/30 bg-white/70 dark:bg-[#202638]/50 py-2 px-4 text-mamastockBg dark:text-white placeholder-mamastockText/40 focus:outline-none focus:ring-2 focus:ring-mamastockGold/30 backdrop-blur transition"
+                  type="text"
+                  value={totp}
+                  onChange={e => setTotp(e.target.value)}
+                  placeholder="000000"
+                />
+                {errors.totp && (
+                  <p className="text-sm text-red-500 mt-1">{errors.totp}</p>
+                )}
+              </div>
             )}
             <button
               className="w-full mt-3 py-2 rounded-xl bg-mamastockGold hover:bg-[#b89730] text-white font-semibold text-lg shadow transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               type="submit"
-              disabled={loading}
+              disabled={!email || !password || loading || (twoFA && !totp)}
             >
               {loading ? (
                 <>

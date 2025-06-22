@@ -67,6 +67,61 @@ export function useStock() {
     return data || [];
   }
 
+  // ----- New helpers for stock module -----
+  const getStockTheorique = useCallback(
+    async (product_id) => {
+      if (!user?.mama_id || !product_id) return 0;
+      const { data, error } = await supabase
+        .from("products")
+        .select("stock_theorique")
+        .eq("mama_id", user.mama_id)
+        .eq("id", product_id)
+        .single();
+      if (error) return 0;
+      return data?.stock_theorique ?? 0;
+    },
+    [user?.mama_id]
+  );
+
+  const getInventaires = useCallback(async () => {
+    if (!user?.mama_id) return [];
+    const { data, error } = await supabase
+      .from("inventaires")
+      .select("*, users:created_by(username)")
+      .eq("mama_id", user.mama_id)
+      .order("date", { ascending: false });
+    if (error) return [];
+    return data || [];
+  }, [user?.mama_id]);
+
+  const createInventaire = useCallback(
+    async (payload) => {
+      if (!user?.mama_id) return null;
+      const { data, error } = await supabase
+        .from("inventaires")
+        .insert([{ ...payload, mama_id: user.mama_id, created_by: user?.user_id }])
+        .select()
+        .single();
+      if (error) return null;
+      return data;
+    },
+    [user?.mama_id, user?.user_id]
+  );
+
+  const createMouvement = useCallback(
+    async (payload) => {
+      if (!user?.mama_id) return null;
+      const { data, error } = await supabase
+        .from("mouvements_stock")
+        .insert([{ ...payload, mama_id: user.mama_id, created_by: user?.user_id }])
+        .select()
+        .single();
+      if (error) return null;
+      return data;
+    },
+    [user?.mama_id, user?.user_id]
+  );
+
   return {
     stocks,
     mouvements,
@@ -76,5 +131,9 @@ export function useStock() {
     fetchMouvements,
     addMouvementStock,
     fetchRotationStats,
+    getStockTheorique,
+    getInventaires,
+    createInventaire,
+    createMouvement,
   };
 }

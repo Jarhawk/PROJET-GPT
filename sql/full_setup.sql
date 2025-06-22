@@ -1574,6 +1574,30 @@ create policy onboarding_progress_update on onboarding_progress
   with check (user_id = auth.uid());
 grant select, insert, update on onboarding_progress to authenticated;
 
+-- Historique détaillé des étapes d'onboarding
+create table if not exists etapes_onboarding (
+    id uuid primary key default uuid_generate_v4(),
+    user_id uuid references users(id) on delete cascade,
+    etape text,
+    statut text check (statut in ('en cours','terminé','sauté')),
+    mama_id uuid not null references mamas(id) on delete cascade,
+    created_at timestamptz default now()
+);
+create index if not exists idx_etapes_onboarding_mama on etapes_onboarding(mama_id);
+alter table etapes_onboarding enable row level security;
+alter table etapes_onboarding force row level security;
+create policy etapes_onboarding_select on etapes_onboarding
+  for select to authenticated
+  using (mama_id = current_user_mama_id());
+create policy etapes_onboarding_insert on etapes_onboarding
+  for insert to authenticated
+  with check (mama_id = current_user_mama_id() and user_id = auth.uid());
+create policy etapes_onboarding_update on etapes_onboarding
+  for update to authenticated
+  using (user_id = auth.uid() and mama_id = current_user_mama_id())
+  with check (user_id = auth.uid() and mama_id = current_user_mama_id());
+grant select, insert, update on etapes_onboarding to authenticated;
+
 -- Articles d'aide et FAQ
 create table if not exists help_articles (
     id uuid primary key default uuid_generate_v4(),
@@ -1594,3 +1618,72 @@ create policy help_articles_mutation on help_articles
   using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
 grant select, insert, update, delete on help_articles to authenticated;
+
+-- Audit et statistiques d'usage
+create table if not exists logs_audit (
+    id uuid primary key default uuid_generate_v4(),
+    user_id uuid references users(id) on delete set null,
+    mama_id uuid not null references mamas(id) on delete cascade,
+    module text not null,
+    action text not null,
+    cible_id uuid,
+    details jsonb,
+    created_at timestamptz default now()
+);
+create index if not exists idx_logs_audit_mama on logs_audit(mama_id);
+create index if not exists idx_logs_audit_module on logs_audit(module);
+create index if not exists idx_logs_audit_date on logs_audit(created_at);
+alter table logs_audit enable row level security;
+alter table logs_audit force row level security;
+create policy logs_audit_all on logs_audit
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+grant select, insert on logs_audit to authenticated;
+
+create table if not exists logs_securite (
+    id uuid primary key default uuid_generate_v4(),
+    type text not null,
+    user_id uuid references users(id) on delete set null,
+    mama_id uuid not null references mamas(id) on delete cascade,
+    ip text,
+    navigateur text,
+    description text,
+    created_at timestamptz default now()
+);
+create index if not exists idx_logs_securite_mama on logs_securite(mama_id);
+create index if not exists idx_logs_securite_type on logs_securite(type);
+create index if not exists idx_logs_securite_date on logs_securite(created_at);
+alter table logs_securite enable row level security;
+alter table logs_securite force row level security;
+create policy logs_securite_all on logs_securite
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+grant select, insert on logs_securite to authenticated;
+
+create table if not exists usage_stats (
+    id uuid primary key default uuid_generate_v4(),
+    user_id uuid references users(id) on delete set null,
+    mama_id uuid not null references mamas(id) on delete cascade,
+    module text,
+    action text,
+    timestamp timestamptz default now()
+);
+create index if not exists idx_usage_stats_mama on usage_stats(mama_id);
+create index if not exists idx_usage_stats_user on usage_stats(user_id);
+create index if not exists idx_usage_stats_module on usage_stats(module);
+alter table usage_stats enable row level security;
+alter table usage_stats force row level security;
+create policy usage_stats_all on usage_stats
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+grant select, insert on usage_stats to authenticated;
+
+create or replace function log_audit_event(p_mama uuid, p_user uuid, p_module text, p_action text, p_cible uuid, p_details jsonb)
+returns void language plpgsql security definer as $$
+begin
+  insert into logs_audit(mama_id, user_id, module, action, cible_id, details)
+  values(p_mama, p_user, p_module, p_action, p_cible, p_details);
+end;
+$$;
+grant execute on function log_audit_event(uuid, uuid, text, text, uuid, jsonb) to authenticated;
+

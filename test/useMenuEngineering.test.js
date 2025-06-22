@@ -31,14 +31,14 @@ beforeEach(async () => {
 test('fetchData queries fiches and ventes', async () => {
   const { result } = renderHook(() => useMenuEngineering())
   await act(async () => {
-    await result.current.fetchData('2025-06-01')
+    await result.current.fetchData()
   })
-  expect(fromMock).toHaveBeenCalledWith('fiches_techniques')
+  expect(fromMock).toHaveBeenCalledWith('fiches')
   expect(query.select).toHaveBeenCalledWith('*')
   expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1')
-  expect(query.eq).toHaveBeenCalledWith('carte_actuelle', true)
   expect(query.order).toHaveBeenCalledWith('nom')
-  expect(fromMock).toHaveBeenCalledWith('ventes_fiches_carte')
+  expect(fromMock).toHaveBeenCalledWith('ventes_fiches')
+  expect(fromMock).toHaveBeenCalledWith('prix_vente')
 })
 
 test('fetchData skips when no mama_id', async () => {

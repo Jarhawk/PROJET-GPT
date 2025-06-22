@@ -6,18 +6,18 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { Button } from "@/components/ui/button";
 import { useFactureProduits } from "@/hooks/useFactureProduits";
-import { useInvoices } from "@/hooks/useInvoices";
+import { useFactures } from "@/hooks/useFactures";
 
 export default function FactureDetail({ facture: factureProp, onClose }) {
   const { id } = useParams();
-  const { fetchInvoiceById } = useInvoices();
+  const { fetchFactureById, createFacture, addLigneFacture, calculateTotals } = useFactures();
   const { produitsFacture, fetchProduitsByFacture } = useFactureProduits();
   const [facture, setFacture] = useState(factureProp);
 
   useEffect(() => {
     const fid = factureProp?.id || id;
     if (fid) {
-      if (!factureProp) fetchInvoiceById(fid).then(setFacture);
+      if (!factureProp) fetchFactureById(fid).then(setFacture);
       fetchProduitsByFacture(fid);
     }
   }, [factureProp, id]);
@@ -50,6 +50,18 @@ export default function FactureDetail({ facture: factureProp, onClose }) {
       styles: { fontSize: 9 },
     });
     doc.save(`facture_${facture.id}.pdf`);
+  };
+
+  const duplicate = async () => {
+    const { id: _id, ...payload } = facture;
+    const { data } = await createFacture({ ...payload, reference: `${facture.reference || facture.id}-copie` });
+    if (data) {
+      for (const l of produitsFacture) {
+        await addLigneFacture(data.id, { product_id: l.product_id, quantite: l.quantite, prix_unitaire: l.prix_unitaire, tva: l.tva, fournisseur_id: facture.fournisseur_id });
+      }
+      await calculateTotals(data.id);
+      onClose?.();
+    }
   };
 
   return (
@@ -92,6 +104,7 @@ export default function FactureDetail({ facture: factureProp, onClose }) {
         <div className="flex gap-2 mt-4">
           <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
           <Button variant="outline" onClick={exportPDF}>Export PDF</Button>
+          <Button variant="outline" onClick={duplicate}>Dupliquer</Button>
         </div>
       </div>
     </div>

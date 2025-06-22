@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
 import { Dialog, DialogContent } from "@radix-ui/react-dialog";
@@ -7,6 +8,7 @@ import MamaForm from "./MamaForm";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function Mamas() {
+  const { mama_id: myMama, role } = useAuth();
   const [mamas, setMamas] = useState([]);
   const [search, setSearch] = useState("");
   const [editMama, setEditMama] = useState(null);
@@ -58,9 +60,11 @@ export default function Mamas() {
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
-        <Button onClick={() => setEditMama({ nom: "", ville: "", actif: true })}>
-          + Nouvel établissement
-        </Button>
+        {role === "superadmin" && (
+          <Button onClick={() => setEditMama({ nom: "", ville: "", actif: true })}>
+            + Nouvel établissement
+          </Button>
+        )}
       </div>
       <TableContainer className="mb-6">
         {loading ? (
@@ -98,7 +102,7 @@ export default function Mamas() {
                       size="sm"
                       variant="secondary"
                       onClick={() => setEditMama(m)}
-                      disabled={loading}
+                      disabled={loading || (role !== "superadmin" && m.id !== myMama)}
                     >
                       Éditer
                     </Button>
@@ -108,7 +112,7 @@ export default function Mamas() {
                           size="sm"
                           variant="destructive"
                           onClick={() => handleDelete(m.id)}
-                          disabled={loading}
+                          disabled={loading || (role !== "superadmin" && m.id !== myMama)}
                         >
                           Confirmer
                         </Button>
@@ -126,7 +130,7 @@ export default function Mamas() {
                         size="sm"
                         variant="destructive"
                         onClick={() => setConfirmDeleteId(m.id)}
-                        disabled={loading}
+                        disabled={loading || (role !== "superadmin" && m.id !== myMama)}
                       >
                         Supprimer
                       </Button>

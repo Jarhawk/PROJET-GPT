@@ -22,7 +22,7 @@ const Promotions = lazy(() => import("@/pages/promotions/Promotions.jsx"));
 const Documents = lazy(() => import("@/pages/Documents.jsx"));
 const Analyse = lazy(() => import("@/pages/analyse/Analyse.jsx"));
 const AnalyseCostCenter = lazy(() => import("@/pages/analyse/AnalyseCostCenter.jsx"));
-const Utilisateurs = lazy(() => import("@/pages/Utilisateurs.jsx"));
+const Utilisateurs = lazy(() => import("@/pages/parametrage/Utilisateurs.jsx"));
 const Roles = lazy(() => import("@/pages/parametrage/Roles.jsx"));
 const Mamas = lazy(() => import("@/pages/parametrage/Mamas.jsx"));
 const Permissions = lazy(() => import("@/pages/parametrage/Permissions.jsx"));

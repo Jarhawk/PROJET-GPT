@@ -1,191 +1,133 @@
+import { useState } from "react";
+import { useInventaires } from "@/hooks/useInventaires";
 import { useProducts } from "@/hooks/useProducts";
-import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
-import { useAuth } from "@/context/AuthContext";
-import toast, { Toaster } from "react-hot-toast";
-
-function InventaireFormPage() {
-  const { data: products, loading: loadingProducts } = useProducts();
-  const { mama_id } = useAuth();
-  const [zone, setZone] = useState("");
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [stockFinal, setStockFinal] = useState({});
-  const [isLocked, setIsLocked] = useState(false);
-  const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    const checkIfLocked = async () => {
-      if (!zone) return;
-      const { data } = await supabase
-        .from("inventaires")
-        .select("*")
-        .eq("date", date)
-        .eq("zone", zone)
-        .eq("mama_id", mama_id)
-        .eq("etat", "cloturé");
-
-      setIsLocked(data?.length > 0);
-    };
-
-    checkIfLocked();
-  }, [zone, date, mama_id]);
-
-  const handleChange = (productId, value) => {
-    setStockFinal((prev) => ({
-      ...prev,
-      [productId]: value,
-    }));
-  };
-
-  const handleSubmit = async () => {
-    if (saving) return;
-    if (!zone) return toast.error("Veuillez sélectionner une zone.");
-    if (isLocked) return toast.error("Inventaire clôturé");
-
-    setSaving(true);
-    const { data: inv, error: invError } = await supabase
-      .from("inventaires")
-      .insert({ date, zone, etat: "brouillon", mama_id })
-      .select()
-      .single();
-
-    if (invError) {
-      toast.error("Erreur lors de l'enregistrement");
-      setSaving(false);
-      return;
-    }
-
-    for (const productId of Object.keys(stockFinal)) {
-      const quantite = parseFloat(stockFinal[productId]);
-      if (!isNaN(quantite)) {
-        const { error } = await supabase.from("inventaire_lignes").insert({
-          inventaire_id: inv.id,
-          product_id: productId,
-          stock_final: quantite,
-          mama_id,
-        });
-        if (error) {
-          toast.error("Erreur sur une ligne d'inventaire");
-          setSaving(false);
-          return;
-        }
-      }
-    }
-
-    toast.success("Inventaire enregistré");
-    setSaving(false);
-  };
-
-  return (
-    <div className="p-6 bg-mamastock-bg min-h-screen">
-      <Toaster />
-      <h1 className="text-3xl font-bold text-mamastock-gold mb-6">Saisie Inventaire</h1>
-
-      <div className="mb-4 flex gap-4 items-end">
-        <div>
-          <label className="text-sm block">Zone</label>
-          <select
-            className="border rounded px-3 py-2"
-            value={zone}
-            onChange={(e) => setZone(e.target.value)}
-          >
-            <option value="">Choisir une zone</option>
-            <option value="cuisine">Cuisine</option>
-            <option value="bar">Bar</option>
-            <option value="cave">Cave</option>
-            <option value="frigo">Frigo</option>
-          </select>
-        </div>
-        <div>
-          <label className="text-sm block">Date</label>
-          <input
-            type="date"
-            className="border rounded px-3 py-2"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-          />
-        </div>
-        {isLocked && (
-          <span className="text-red-600 font-semibold">
-            Inventaire clôturé – saisie impossible
-          </span>
-        )}
-      </div>
-
-      {!zone ? (
-        <p className="text-gray-600 italic">Sélectionnez une zone pour afficher les produits</p>
-      ) : (
-        <>
-          <table className="w-full bg-white rounded-xl shadow text-sm mt-4">
-            <thead className="bg-gray-100 text-gray-600">
-              <tr>
-                <th className="p-3 text-left">Article</th>
-                <th className="p-3 text-left">Stock final</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loadingProducts ? (
-                <tr>
-                  <td className="p-3" colSpan="2">
-                    Chargement...
-                  </td>
-                </tr>
-              ) : (
-                products
-                  .sort((a, b) => a.nom.localeCompare(b.nom))
-                  .map((prod) => (
-                    <tr key={prod.id} className="border-b hover:bg-gray-50">
-                      <td className="p-3">{prod.nom}</td>
-                      <td className="p-3">
-                        <input
-                          type="number"
-                          min="0"
-                          className="border rounded px-2 py-1 w-32"
-                          value={stockFinal[prod.id] || ""}
-                          disabled={isLocked}
-                          onChange={(e) => handleChange(prod.id, e.target.value)}
-                        />
-                      </td>
-                    </tr>
-                  ))
-              )}
-            </tbody>
-          </table>
-
-          <div className="mt-6 flex flex-wrap gap-4">
-            <button
-              onClick={handleSubmit}
-              disabled={isLocked || saving}
-              className="bg-mamastock-gold text-white font-bold px-6 py-2 rounded disabled:opacity-50"
-            >
-              {saving ? "Enregistrement..." : "Enregistrer"}
-            </button>
-
-            <button
-              onClick={() => window.open(`/ecarts?date=${date}&zone=${zone}`, "_blank")}
-              className="bg-mamastock-gold hover:bg-mamastock-gold-hover text-white font-bold px-6 py-2 rounded"
-            >
-              📊 Voir les écarts
-            </button>
-
-            <button
-              onClick={() => {
-                const firstDay = date.slice(0, 7) + "-01";
-                window.open(`/ecarts?mode=pdf&mois=${firstDay}&zone=${zone}`, "_blank");
-              }}
-              className="bg-mamastock-gold hover:bg-mamastock-gold-hover text-white font-bold px-6 py-2 rounded"
-            >
-              🧾 Export PDF – Écarts du mois
-            </button>
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import TableContainer from "@/components/ui/TableContainer";
 
 export default function InventaireForm() {
+  const navigate = useNavigate();
+  const { createInventaire, inventaires } = useInventaires();
+  const { products } = useProducts();
+
+  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [zone, setZone] = useState("");
+  const [lignes, setLignes] = useState([]);
+
+  const zoneSuggestions = Array.from(new Set(inventaires.map(i => i.zone).filter(Boolean)));
+
+  const addLine = () => setLignes([...lignes, { product_id: "", quantite_physique: "" }]);
+  const updateLine = (idx, field, val) => {
+    setLignes(lignes.map((l, i) => (i === idx ? { ...l, [field]: val } : l)));
+  };
+  const removeLine = idx => setLignes(lignes.filter((_, i) => i !== idx));
+
+  const getProduct = id => products.find(p => p.id === id) || {};
+  const getTheo = id => Number(getProduct(id).stock_theorique || 0);
+  const getPrice = id => Number(getProduct(id).pmp || getProduct(id).dernier_prix || 0);
+
+  const totalValeur = lignes.reduce((s, l) => s + Number(l.quantite_physique || 0) * getPrice(l.product_id), 0);
+  const totalEcart = lignes.reduce((s, l) => s + (Number(l.quantite_physique || 0) - getTheo(l.product_id)) * getPrice(l.product_id), 0);
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+    const payload = {
+      date,
+      zone,
+      lignes: lignes.map(l => ({
+        produit_id: l.product_id,
+        quantite_physique: Number(l.quantite_physique || 0),
+        quantite_theorique: getTheo(l.product_id),
+        prix_unitaire: getPrice(l.product_id),
+      })),
+    };
+    const created = await createInventaire(payload);
+    if (created) navigate("/inventaire");
+  };
+
   return (
-    <InventaireFormPage />
+    <form onSubmit={handleSubmit} className="p-6 max-w-5xl mx-auto space-y-4">
+      <h1 className="text-xl font-bold">Nouvel inventaire</h1>
+
+      <div className="flex gap-4">
+        <input type="date" className="input" value={date} onChange={e => setDate(e.target.value)} />
+        <input
+          list="zones"
+          className="input"
+          placeholder="Zone"
+          value={zone}
+          onChange={e => setZone(e.target.value)}
+        />
+        <datalist id="zones">
+          {zoneSuggestions.map(z => (
+            <option key={z} value={z} />
+          ))}
+        </datalist>
+      </div>
+
+      <TableContainer>
+        <table className="min-w-full text-sm text-center">
+          <thead>
+            <tr>
+              <th className="p-2">Produit</th>
+              <th className="p-2">Quantité physique</th>
+              <th className="p-2">Théorique</th>
+              <th className="p-2">Prix</th>
+              <th className="p-2">Écart</th>
+              <th className="p-2">Valeur écart</th>
+              <th className="p-2" />
+            </tr>
+          </thead>
+          <tbody>
+            {lignes.map((l, idx) => {
+              const theo = getTheo(l.product_id);
+              const price = getPrice(l.product_id);
+              const ecart = Number(l.quantite_physique || 0) - theo;
+              return (
+                <tr key={idx} className="border-b last:border-none">
+                  <td className="p-2">
+                    <select
+                      className="input"
+                      value={l.product_id}
+                      onChange={e => updateLine(idx, "product_id", e.target.value)}
+                    >
+                      <option value="">-- produit --</option>
+                      {products.map(p => (
+                        <option key={p.id} value={p.id}>{p.nom}</option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className="p-2">
+                    <input
+                      type="number"
+                      className="input w-24"
+                      value={l.quantite_physique}
+                      onChange={e => updateLine(idx, "quantite_physique", e.target.value)}
+                    />
+                  </td>
+                  <td className="p-2">{theo}</td>
+                  <td className="p-2">{price}</td>
+                  <td className={`p-2 ${ecart < 0 ? 'text-red-600' : ecart > 0 ? 'text-green-600' : ''}`}>{ecart.toFixed(2)}</td>
+                  <td className={`p-2 ${ecart * price < 0 ? 'text-red-600' : ecart * price > 0 ? 'text-green-600' : ''}`}>{(ecart * price).toFixed(2)}</td>
+                  <td className="p-2">
+                    <Button size="sm" variant="ghost" type="button" onClick={() => removeLine(idx)}>✕</Button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </TableContainer>
+      <Button type="button" variant="outline" onClick={addLine}>Ajouter produit</Button>
+
+      <div className="text-right font-semibold">
+        Valeur totale : {totalValeur.toFixed(2)} € – Écart global : {totalEcart.toFixed(2)} €
+      </div>
+
+      <div className="flex gap-4">
+        <Button type="submit">Enregistrer</Button>
+        <Button type="button" variant="outline" onClick={() => navigate(-1)}>Annuler</Button>
+      </div>
+    </form>
   );
 }

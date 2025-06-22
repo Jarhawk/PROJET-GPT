@@ -3,11 +3,15 @@ import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import * as XLSX from "xlsx";
 import { useFiches } from "@/hooks/useFiches";
+import { useFicheCoutHistory } from "@/hooks/useFicheCoutHistory";
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from "recharts";
 
 export default function FicheDetail({ fiche: ficheProp, onClose }) {
   const { id: routeId } = useParams();
   const { getFicheById } = useFiches();
   const [fiche, setFiche] = useState(ficheProp || null);
+  const { history, fetchFicheCoutHistory } = useFicheCoutHistory();
+  const [simPrix, setSimPrix] = useState(null);
 
   useEffect(() => {
     const fid = ficheProp?.id || routeId;
@@ -15,6 +19,13 @@ export default function FicheDetail({ fiche: ficheProp, onClose }) {
       getFicheById(fid).then(setFiche);
     }
   }, [ficheProp, routeId, getFicheById]);
+
+  useEffect(() => {
+    if (fiche?.id) {
+      fetchFicheCoutHistory(fiche.id);
+      setSimPrix(fiche.prix_vente || 0);
+    }
+  }, [fiche?.id, fetchFicheCoutHistory, fiche?.prix_vente]);
 
   if (!fiche) return <div className="p-8">Chargement...</div>;
 
@@ -50,6 +61,25 @@ export default function FicheDetail({ fiche: ficheProp, onClose }) {
         </div>
         <div className="flex gap-2 mt-4">
           <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
+        </div>
+        <div className="mt-6">
+          <h3 className="font-semibold mb-2">Analyse rentabilité</h3>
+          <div className="h-32 bg-white rounded mb-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={(history || []).map(h => ({ date: new Date(h.date).toLocaleDateString('fr-FR'), marge: h.prix_vente && h.cout_portion ? ((h.prix_vente - h.cout_portion) / h.prix_vente) * 100 : null }))}>
+                <XAxis dataKey="date" hide />
+                <YAxis domain={[0, 'dataMax']} />
+                <Tooltip />
+                <Line type="monotone" dataKey="marge" stroke="#8884d8" dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="flex items-center gap-2">
+            <input type="number" className="input w-24" value={simPrix ?? ''} onChange={e => setSimPrix(Number(e.target.value))} />
+            {simPrix !== null && (
+              <span>Si je vends à {simPrix.toFixed(2)} € : marge {(simPrix > 0 ? ((simPrix - Number(fiche.cout_par_portion)) / simPrix) * 100 : 0).toFixed(1)}%</span>
+            )}
+          </div>
         </div>
       </div>
     </div>

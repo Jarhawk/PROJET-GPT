@@ -38,23 +38,22 @@ vi.mock('@/pages/auth/Login.jsx', () => ({
 }));
 
 // We test that navigating to '/' shows the login component when not authenticated
-test('root path redirects to login when unauthenticated', async () => {
+test('root path shows landing when unauthenticated', async () => {
   render(
     <MemoryRouter initialEntries={["/"]}>
       <RouterConfig />
     </MemoryRouter>
   );
-  // Login component should be displayed
-  expect(await screen.findByText('Login')).toBeInTheDocument();
+  expect(await screen.findByText(/Simplifiez votre gestion/)).toBeInTheDocument();
 });
 
-test('root path redirects to login even when authenticated', async () => {
+test('root path shows landing even when authenticated', async () => {
   authState.isAuthenticated = true;
   render(
     <MemoryRouter initialEntries={["/"]}>
       <RouterConfig />
     </MemoryRouter>
   );
-  expect(await screen.findByText('Login')).toBeInTheDocument();
+  expect(await screen.findByText(/Simplifiez votre gestion/)).toBeInTheDocument();
   authState.isAuthenticated = false;
 });

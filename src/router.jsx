@@ -20,6 +20,9 @@ const InventaireForm = lazy(() => import("@/pages/inventaire/InventaireForm.jsx"
 const InventaireDetail = lazy(() => import("@/pages/inventaire/InventaireDetail.jsx"));
 const Mouvements = lazy(() => import("@/pages/mouvements/Mouvements.jsx"));
 const Alertes = lazy(() => import("@/pages/Alertes.jsx"));
+const Taches = lazy(() => import("@/pages/taches/Taches.jsx"));
+const TacheForm = lazy(() => import("@/pages/taches/TacheForm.jsx"));
+const AlertesTaches = lazy(() => import("@/pages/taches/Alertes.jsx"));
 const Promotions = lazy(() => import("@/pages/promotions/Promotions.jsx"));
 const Documents = lazy(() => import("@/pages/documents/Documents.jsx"));
 const Analyse = lazy(() => import("@/pages/analyse/Analyse.jsx"));
@@ -92,6 +95,18 @@ export default function Router() {
           <Route
             path="/mouvements"
             element={<ProtectedRoute accessKey="mouvements"><Mouvements /></ProtectedRoute>}
+          />
+          <Route
+            path="/taches"
+            element={<ProtectedRoute accessKey="taches"><Taches /></ProtectedRoute>}
+          />
+          <Route
+            path="/taches/new"
+            element={<ProtectedRoute accessKey="taches"><TacheForm /></ProtectedRoute>}
+          />
+          <Route
+            path="/taches/alertes"
+            element={<ProtectedRoute accessKey="alertes"><AlertesTaches /></ProtectedRoute>}
           />
           <Route
             path="/alertes"

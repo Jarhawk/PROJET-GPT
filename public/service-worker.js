@@ -5,8 +5,9 @@ const OFFLINE_URL = "/index.html";
 const ASSETS_TO_CACHE = [
   OFFLINE_URL,
   "/manifest.json",
-  "/icons/icon-192x192.png",
-  "/icons/icon-512x512.png",
+  "icons/icon-192x192.png",
+  "icons/icon-512x512.png",
+  "icons/maskable-icon-512x512.png",
 ];
 
 // Installation du Service Worker

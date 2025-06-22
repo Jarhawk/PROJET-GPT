@@ -17,7 +17,8 @@
     "report": "node scripts/weekly_report.js",
     "export:accounting": "node scripts/export_accounting.js",
     "allocate:history": "node scripts/reallocate_history.js",
-    "backup": "node scripts/backup_db.js"
+    "backup": "node scripts/backup_db.js",
+    "test:manifest": "node scripts/validate_manifest_icons.cjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.14",

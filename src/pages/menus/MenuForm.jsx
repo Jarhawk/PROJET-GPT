@@ -5,10 +5,11 @@ import toast from "react-hot-toast";
 import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
 
 export default function MenuForm({ menu, fiches = [], onClose }) {
-  const { addMenu, editMenu } = useMenus();
+  const { createMenu, updateMenu } = useMenus();
   const [nom, setNom] = useState(menu?.nom || "");
   const [date, setDate] = useState(menu?.date || "");
   const [selectedFiches, setSelectedFiches] = useState(menu?.fiches?.map(f => f.id) || []);
+  const [ficheInput, setFicheInput] = useState("");
   const [file, setFile] = useState(null);
   const [fileUrl, setFileUrl] = useState(menu?.document || "");
   const [loading, setLoading] = useState(false);
@@ -18,6 +19,14 @@ export default function MenuForm({ menu, fiches = [], onClose }) {
       ? selectedFiches.filter(f => f !== id)
       : [...selectedFiches, id]
     );
+  };
+
+  const handleAddFiche = () => {
+    const fiche = fiches.find(f => f.nom === ficheInput);
+    if (fiche && !selectedFiches.includes(fiche.id)) {
+      setSelectedFiches([...selectedFiches, fiche.id]);
+    }
+    setFicheInput("");
   };
 
   // Upload PDF/image vers Supabase Storage
@@ -36,10 +45,29 @@ export default function MenuForm({ menu, fiches = [], onClose }) {
     }
   };
 
+  const selectedObjects = fiches.filter(f => selectedFiches.includes(f.id));
+  const coutTotal = selectedObjects.reduce(
+    (sum, f) => sum + (Number(f.cout_total) || 0),
+    0
+  );
+  const totalPortions = selectedObjects.reduce(
+    (sum, f) => sum + (Number(f.portions) || 0),
+    0
+  );
+  const coutPortion = totalPortions > 0 ? coutTotal / totalPortions : 0;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!nom.trim() || !date) {
       toast.error("Nom et date requis");
+      return;
+    }
+    if (selectedFiches.length === 0) {
+      toast.error("Au moins une fiche requise");
+      return;
+    }
+    if (coutTotal === 0) {
+      toast.error("Coût total nul");
       return;
     }
     setLoading(true);
@@ -47,14 +75,14 @@ export default function MenuForm({ menu, fiches = [], onClose }) {
       nom,
       date,
       fiches: selectedFiches,
-      document: fileUrl || menu?.document
+      document: fileUrl || menu?.document,
     };
     try {
       if (menu?.id) {
-        await editMenu(menu.id, menuData);
+        await updateMenu(menu.id, menuData);
         toast.success("Menu modifié !");
       } else {
-        await addMenu(menuData);
+        await createMenu(menuData);
         toast.success("Menu ajouté !");
       }
       onClose?.();
@@ -85,19 +113,31 @@ export default function MenuForm({ menu, fiches = [], onClose }) {
       />
       <div className="mb-4">
         <label className="block font-semibold mb-2">Fiches du menu :</label>
-        <div className="max-h-48 overflow-auto border rounded p-2 bg-gray-50">
-          {fiches.map(f => (
-            <label key={f.id} className="block">
-              <input
-                type="checkbox"
-                checked={selectedFiches.includes(f.id)}
-                onChange={() => handleSelectFiche(f.id)}
-                className="mr-2"
-              />
-              {f.nom}
-            </label>
-          ))}
+        <div className="flex gap-2 mb-2">
+          <input
+            list="fiches-list"
+            className="input flex-1"
+            value={ficheInput}
+            onChange={e => setFicheInput(e.target.value)}
+            placeholder="Rechercher une fiche"
+          />
+          <datalist id="fiches-list">
+            {fiches.map(f => (
+              <option key={f.id} value={f.nom} />
+            ))}
+          </datalist>
+          <Button type="button" variant="outline" onClick={handleAddFiche}>Ajouter</Button>
         </div>
+        {selectedObjects.map(f => (
+          <div key={f.id} className="flex items-center gap-2 mb-1">
+            <span className="flex-1">{f.nom}</span>
+            <Button size="sm" variant="outline" onClick={() => handleSelectFiche(f.id)}>Retirer</Button>
+          </div>
+        ))}
+      </div>
+      <div className="mb-4 flex gap-4">
+        <div><b>Coût total :</b> {coutTotal.toFixed(2)} €</div>
+        <div><b>Coût moyen/portion :</b> {coutPortion.toFixed(2)} €</div>
       </div>
       <label>
         Document/PDF menu : <input type="file" onChange={e => setFile(e.target.files[0])} />

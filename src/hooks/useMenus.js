@@ -7,33 +7,45 @@ import { saveAs } from "file-saver";
 export function useMenus() {
   const { mama_id } = useAuth();
   const [menus, setMenus] = useState([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   // 1. Charger les menus (recherche, date, batch)
-  async function fetchMenus({ search = "", date = "", actif = null } = {}) {
+  async function getMenus({
+    search = "",
+    date = "",
+    start = "",
+    end = "",
+    actif = null,
+  } = {}) {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
     let query = supabase
       .from("menus")
-      .select("*, fiches:menu_fiches(fiche_id, fiche: fiches(id, nom))")
+      .select(
+        "*, fiches:menu_fiches(fiche_id, fiche: fiches(id, nom))"
+      )
       .eq("mama_id", mama_id)
       .order("date", { ascending: false });
 
     if (search) query = query.ilike("nom", `%${search}%`);
     if (date) query = query.eq("date", date);
+    if (start) query = query.gte("date", start);
+    if (end) query = query.lte("date", end);
     if (typeof actif === "boolean") query = query.eq("actif", actif);
 
     const { data, error } = await query;
     setMenus(Array.isArray(data) ? data : []);
+    setTotal(Array.isArray(data) ? data.length : 0);
     setLoading(false);
     if (error) setError(error);
     return data || [];
   }
 
   // 2. Ajouter un menu (avec ses fiches)
-  async function addMenu(menu) {
+  async function createMenu(menu) {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
@@ -54,12 +66,12 @@ export function useMenus() {
       await supabase.from("menu_fiches").insert(fichesWithFk);
     }
     setLoading(false);
-    await fetchMenus();
+    await getMenus();
     return data;
   }
 
   // 3. Modifier un menu (maj entête + fiches)
-  async function updateMenu(id, menu) {
+  async function updateMenuData(id, menu) {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
@@ -83,22 +95,42 @@ export function useMenus() {
     }
     setLoading(false);
     if (errorMenu) setError(errorMenu);
-    await fetchMenus();
+    await getMenus();
   }
 
-  // 4. Supprimer un menu (et ses liaisons)
+  // 4. Récupérer un menu par id
+  async function getMenuById(id) {
+    if (!mama_id || !id) return null;
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("menus")
+      .select(
+        "*, fiches:menu_fiches(fiche_id, fiche: fiches(id, nom, portions, cout_total))"
+      )
+      .eq("id", id)
+      .eq("mama_id", mama_id)
+      .single();
+    setLoading(false);
+    if (error) { setError(error); return null; }
+    return data;
+  }
+
+  // 5. Supprimer un menu (désactivation logique)
   async function deleteMenu(id) {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    await supabase.from("menu_fiches").delete().eq("menu_id", id);
-    const { error } = await supabase.from("menus").delete().eq("id", id).eq("mama_id", mama_id);
+    const { error } = await supabase
+      .from("menus")
+      .update({ actif: false })
+      .eq("id", id)
+      .eq("mama_id", mama_id);
     setLoading(false);
     if (error) setError(error);
-    await fetchMenus();
+    await getMenus();
   }
 
-  // 5. Désactiver/réactiver un menu
+  // 6. Désactiver/réactiver un menu
   async function toggleMenuActive(id, actif) {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
@@ -110,10 +142,10 @@ export function useMenus() {
       .eq("mama_id", mama_id);
     setLoading(false);
     if (error) setError(error);
-    await fetchMenus();
+    await getMenus();
   }
 
-  // 6. Export Excel
+  // 7. Export Excel
   function exportMenusToExcel() {
     const datas = (menus || []).map(m => ({
       id: m.id,
@@ -129,7 +161,7 @@ export function useMenus() {
     saveAs(new Blob([buf]), "menus_mamastock.xlsx");
   }
 
-  // 7. Import Excel (lecture, à compléter avec création des liaisons menu_fiches)
+  // 8. Import Excel (lecture, à compléter avec création des liaisons menu_fiches)
   async function importMenusFromExcel(file) {
     setLoading(true);
     setError(null);
@@ -148,12 +180,19 @@ export function useMenus() {
 
   return {
     menus,
+    total,
     loading,
     error,
-    fetchMenus,
-    addMenu,
-    updateMenu,
+    // nouvelles API
+    getMenus,
+    createMenu,
+    updateMenu: updateMenuData,
+    getMenuById,
     deleteMenu,
+    // compatibilite
+    fetchMenus: getMenus,
+    addMenu: createMenu,
+    editMenu: updateMenuData,
     toggleMenuActive,
     exportMenusToExcel,
     importMenusFromExcel,

@@ -113,7 +113,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
   }
 
   return (
-    <form onSubmit={handleSubmit} className="p-8 space-y-4">
+    <form onSubmit={handleSubmit} className="p-8 space-y-4 animate-fade-in">
       <h2 className="text-xl font-bold mb-2 text-mamastockGold">
         {editing ? "Éditer le produit" : "Nouveau produit"}
       </h2>

@@ -15,8 +15,14 @@ export function DialogOverlay({ asChild = false, ...props }) {
   return <RadixDialogOverlay asChild={asChild} {...props} />;
 }
 
-export function DialogContent({ asChild = false, ...props }) {
-  return <RadixDialogContent asChild={asChild} {...props} />;
+export function DialogContent({ asChild = false, className = "", ...props }) {
+  return (
+    <RadixDialogContent
+      asChild={asChild}
+      className={`animate-fade-in-down ${className}`}
+      {...props}
+    />
+  );
 }
 
 export function DialogTitle(props) {

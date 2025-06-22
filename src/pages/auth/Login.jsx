@@ -46,7 +46,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f1c2e] via-[#232a34] to-[#bfa14d] relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f1c2e] via-[#232a34] to-[#bfa14d] relative overflow-hidden animate-fade-in">
       {/* Liquid/Glass dynamic background */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         {/* Big gold blur top left */}

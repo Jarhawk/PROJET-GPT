@@ -13,14 +13,14 @@ export function useTwoFactorAuth() {
     setError(null);
     const { data: userData } = await supabase.auth.getUser();
     const { data, error } = await supabase
-      .from("users")
-      .select("two_fa_enabled, two_fa_secret")
+      .from("two_factor_auth")
+      .select("enabled, secret")
       .eq("id", userData.user.id)
       .single();
     if (error) setError(error);
     else {
-      setEnabled(data.two_fa_enabled);
-      setSecret(data.two_fa_secret);
+      setEnabled(data.enabled);
+      setSecret(data.secret);
     }
     setLoading(false);
   }
@@ -36,7 +36,10 @@ export function useTwoFactorAuth() {
     if (!secret) return;
     setLoading(true);
     setError(null);
-    const { error } = await supabase.rpc("enable_two_fa", { p_secret: secret });
+    const { data: userData } = await supabase.auth.getUser();
+    const { error } = await supabase
+      .from("two_factor_auth")
+      .upsert({ id: userData.user.id, secret, enabled: true });
     if (error) setError(error);
     else setEnabled(true);
     setLoading(false);
@@ -44,7 +47,11 @@ export function useTwoFactorAuth() {
 
   async function disable() {
     setLoading(true);
-    const { error } = await supabase.rpc("disable_two_fa");
+    const { data: userData } = await supabase.auth.getUser();
+    const { error } = await supabase
+      .from("two_factor_auth")
+      .update({ enabled: false, secret: null })
+      .eq("id", userData.user.id);
     if (error) setError(error);
     else {
       setSecret(null);

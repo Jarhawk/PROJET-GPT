@@ -61,7 +61,7 @@ export default function Sidebar() {
         )}
 
         {(has("documents") || has("analyse")) && (
-          <details open={pathname.startsWith("/documents") || pathname.startsWith("/analyse")}> 
+          <details open={pathname.startsWith("/documents") || pathname.startsWith("/analyse")}>
             <summary className="cursor-pointer">Documents / Analyse</summary>
             <div className="ml-4 flex flex-col gap-1 mt-1">
               {has("documents") && <Link to="/documents">Documents</Link>}
@@ -69,6 +69,8 @@ export default function Sidebar() {
             </div>
           </details>
         )}
+
+        {has("notifications") && <Link to="/notifications">Notifications</Link>}
 
         {(has("parametrage") || has("utilisateurs") || has("roles") || has("mamas") || has("permissions") || has("access")) && (
           <details open={pathname.startsWith("/parametrage")}> 

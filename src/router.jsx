@@ -40,6 +40,8 @@ const PageMentions = lazy(() => import("@/pages/public/PageMentions.jsx"));
 const AideContextuelle = lazy(() => import("@/pages/AideContextuelle.jsx"));
 const SupervisionGroupe = lazy(() => import("@/pages/supervision/SupervisionGroupe.jsx"));
 const ComparateurFiches = lazy(() => import("@/pages/supervision/ComparateurFiches.jsx"));
+const NotificationsInbox = lazy(() => import("@/pages/notifications/NotificationsInbox.jsx"));
+const NotificationSettingsForm = lazy(() => import("@/pages/notifications/NotificationSettingsForm.jsx"));
 
 
 export default function Router() {
@@ -125,6 +127,14 @@ export default function Router() {
           <Route
             path="/promotions"
             element={<ProtectedRoute accessKey="promotions"><Promotions /></ProtectedRoute>}
+          />
+          <Route
+            path="/notifications"
+            element={<ProtectedRoute accessKey="notifications"><NotificationsInbox /></ProtectedRoute>}
+          />
+          <Route
+            path="/notifications/settings"
+            element={<ProtectedRoute accessKey="notifications"><NotificationSettingsForm /></ProtectedRoute>}
           />
           <Route
             path="/documents"

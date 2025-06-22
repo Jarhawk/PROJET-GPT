@@ -27,6 +27,7 @@ const Promotions = lazy(() => import("@/pages/promotions/Promotions.jsx"));
 const Documents = lazy(() => import("@/pages/documents/Documents.jsx"));
 const Analyse = lazy(() => import("@/pages/analyse/Analyse.jsx"));
 const AnalyseCostCenter = lazy(() => import("@/pages/analyse/AnalyseCostCenter.jsx"));
+const AnalytiqueDashboard = lazy(() => import("@/pages/analytique/AnalytiqueDashboard.jsx"));
 const Utilisateurs = lazy(() => import("@/pages/parametrage/Utilisateurs.jsx"));
 const Roles = lazy(() => import("@/pages/parametrage/Roles.jsx"));
 const Mamas = lazy(() => import("@/pages/parametrage/Mamas.jsx"));
@@ -167,6 +168,10 @@ export default function Router() {
           <Route
             path="/analyse/cost-centers"
             element={<ProtectedRoute accessKey="analyse"><AnalyseCostCenter /></ProtectedRoute>}
+          />
+          <Route
+            path="/analyse/analytique"
+            element={<ProtectedRoute accessKey="analyse"><AnalytiqueDashboard /></ProtectedRoute>}
           />
           <Route
             path="/parametrage/utilisateurs"

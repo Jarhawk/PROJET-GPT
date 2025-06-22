@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import { useFiches } from "@/hooks/useFiches";
 

@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function MamaForm({ mama, onClose, onSaved }) {
+  const { mama_id: myMama, role } = useAuth();
   const [values, setValues] = useState({
     nom: mama?.nom || "",
     ville: mama?.ville || "",
@@ -17,6 +19,12 @@ export default function MamaForm({ mama, onClose, onSaved }) {
   const handleSubmit = async e => {
     e.preventDefault();
     setSaving(true);
+
+    if (role !== "superadmin" && mama?.id !== myMama) {
+      toast.error("Action non autorisée");
+      setSaving(false);
+      return;
+    }
 
     // Vérification anti-doublon (en création uniquement)
     if (!mama?.id) {

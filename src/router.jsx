@@ -42,6 +42,9 @@ const SupervisionGroupe = lazy(() => import("@/pages/supervision/SupervisionGrou
 const ComparateurFiches = lazy(() => import("@/pages/supervision/ComparateurFiches.jsx"));
 const NotificationsInbox = lazy(() => import("@/pages/notifications/NotificationsInbox.jsx"));
 const NotificationSettingsForm = lazy(() => import("@/pages/notifications/NotificationSettingsForm.jsx"));
+const FournisseurApiSettingsForm = lazy(() => import("@/pages/fournisseurs/FournisseurApiSettingsForm.jsx"));
+const CatalogueSyncViewer = lazy(() => import("@/pages/catalogue/CatalogueSyncViewer.jsx"));
+const CommandesEnvoyees = lazy(() => import("@/pages/commandes/CommandesEnvoyees.jsx"));
 
 
 export default function Router() {
@@ -63,6 +66,10 @@ export default function Router() {
           <Route
             path="/fournisseurs"
             element={<ProtectedRoute accessKey="fournisseurs"><Fournisseurs /></ProtectedRoute>}
+          />
+          <Route
+            path="/fournisseurs/:id/api"
+            element={<ProtectedRoute accessKey="fournisseurs"><FournisseurApiSettingsForm /></ProtectedRoute>}
           />
           <Route
             path="/factures"
@@ -139,6 +146,14 @@ export default function Router() {
           <Route
             path="/documents"
             element={<ProtectedRoute accessKey="documents"><Documents /></ProtectedRoute>}
+          />
+          <Route
+            path="/catalogue/sync"
+            element={<ProtectedRoute accessKey="produits"><CatalogueSyncViewer /></ProtectedRoute>}
+          />
+          <Route
+            path="/commandes/envoyees"
+            element={<ProtectedRoute accessKey="fournisseurs"><CommandesEnvoyees /></ProtectedRoute>}
           />
           <Route
             path="/analyse"

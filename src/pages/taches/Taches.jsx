@@ -1,79 +1,69 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useTasks } from "@/hooks/useTasks";
-import { useAuth } from "@/context/AuthContext";
-import { Toaster } from "react-hot-toast";
+import { useTaches } from "@/hooks/useTaches";
 import { Button } from "@/components/ui/button";
-import TableContainer from "@/components/ui/TableContainer";
 
 export default function Taches() {
-  const { tasks, loading, error, fetchTasks, deleteTask } = useTasks();
-  const { mama_id, loading: authLoading } = useAuth();
+  const { taches, loading, error, getTaches } = useTaches();
+  const [filters, setFilters] = useState({ type: "", statut: "", start: "", end: "" });
 
   useEffect(() => {
-    if (!authLoading && mama_id) fetchTasks();
-  }, [authLoading, mama_id, fetchTasks]);
+    getTaches(filters);
+  }, [getTaches, filters]);
 
-  const handleDelete = async id => {
-    if (window.confirm("Supprimer cette tâche ?")) {
-      await deleteTask(id);
-    }
-  };
-
-  if (loading) return <div className="p-8">Chargement...</div>;
-  if (error) return <div className="p-8 text-red-600">{error}</div>;
+  const handleChange = e => setFilters(f => ({ ...f, [e.target.name]: e.target.value }));
 
   return (
-    <div className="p-8 text-shadow">
-      <Toaster position="top-right" />
+    <div className="p-6 text-sm">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Tâches</h1>
-        <Link to="/taches/nouveau" className="bg-white/10 backdrop-blur-lg text-white font-semibold py-2 px-4 rounded-xl shadow-md hover:shadow-lg">
-          Nouvelle tâche
-        </Link>
+        <h1 className="text-2xl font-bold">Tâches planifiées</h1>
+        <Link to="/taches/new" className="bg-white/10 backdrop-blur-lg text-white font-semibold py-2 px-4 rounded-xl shadow-md hover:shadow-lg">Créer une tâche</Link>
       </div>
-      <TableContainer className="mb-4">
-        <table className="w-full text-sm text-white">
+      <div className="flex gap-2 mb-4">
+        <select name="type" value={filters.type} onChange={handleChange} className="input">
+          <option value="">-- Fréquence --</option>
+          <option value="quotidien">Quotidien</option>
+          <option value="hebdo">Hebdomadaire</option>
+          <option value="mensuelle">Mensuelle</option>
+          <option value="unique">Unique</option>
+        </select>
+        <select name="statut" value={filters.statut} onChange={handleChange} className="input">
+          <option value="">-- Statut --</option>
+          <option value="fait">Réalisée</option>
+          <option value="a faire">En attente</option>
+          <option value="en retard">En retard</option>
+        </select>
+        <input type="date" name="start" value={filters.start} onChange={handleChange} className="input" />
+        <input type="date" name="end" value={filters.end} onChange={handleChange} className="input" />
+        <Button onClick={() => getTaches(filters)}>Filtrer</Button>
+      </div>
+      {loading && <div>Chargement...</div>}
+      {error && <div className="text-red-600">{error}</div>}
+      <table className="min-w-full text-white">
         <thead>
           <tr>
-            <th className="px-2 py-1">Titre</th>
-            <th className="px-2 py-1">Type</th>
-            <th className="px-2 py-1">Prochaine échéance</th>
-            <th className="px-2 py-1">Assignée à</th>
+            <th className="px-2 py-1">Nom</th>
+            <th className="px-2 py-1">Fréquence</th>
+            <th className="px-2 py-1">Prochaine occurrence</th>
             <th className="px-2 py-1">Statut</th>
-            <th className="px-2 py-1"></th>
           </tr>
         </thead>
         <tbody>
-          {tasks.length === 0 ? (
-            <tr>
-              <td colSpan="6" className="px-2 py-4 text-center text-gray-500">
-                Aucune tâche pour le moment
-              </td>
+          {taches.map(t => (
+            <tr key={t.id} className="border-t">
+              <td className="px-2 py-1">{t.nom}</td>
+              <td className="px-2 py-1">{t.frequence}</td>
+              <td className="px-2 py-1">{t.next_occurrence || ""}</td>
+              <td className="px-2 py-1">{t.status || "à faire"}</td>
             </tr>
-          ) : (
-            tasks.map(t => (
-              <tr key={t.id}>
-                <td className="px-2 py-1">
-                  <Link to={`/taches/${t.id}`} className="underline text-white">
-                    {t.titre}
-                  </Link>
-                </td>
-                <td className="px-2 py-1">{t.type}</td>
-                <td className="px-2 py-1">{t.next_echeance || ""}</td>
-                <td className="px-2 py-1">{t.assigned?.email || "-"}</td>
-                <td className="px-2 py-1">{t.statut}</td>
-                <td className="px-2 py-1 text-right">
-                  <button onClick={() => handleDelete(t.id)} className="text-red-600 hover:underline">
-                    Supprimer
-                  </button>
-                </td>
-              </tr>
-            ))
+          ))}
+          {taches.length === 0 && !loading && (
+            <tr>
+              <td colSpan="4" className="py-4 text-center text-gray-500">Aucune tâche</td>
+            </tr>
           )}
         </tbody>
       </table>
-      </TableContainer>
     </div>
   );
 }

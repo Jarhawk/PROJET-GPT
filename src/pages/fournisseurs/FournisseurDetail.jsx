@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { useFournisseurStats } from "@/hooks/useFournisseurStats";
 import { useSupplierProducts } from "@/hooks/useSupplierProducts";
 import { useInvoices } from "@/hooks/useInvoices";
+import { useFournisseurs } from "@/hooks/useFournisseurs";
+import { supabase } from "@/lib/supabase";
 import { ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { Button } from "@/components/ui/button";
 
@@ -10,18 +12,33 @@ export default function FournisseurDetail({ id }) {
   const { fetchStatsForFournisseur } = useFournisseurStats();
   const { getProductsBySupplier } = useSupplierProducts();
   const { fetchInvoicesBySupplier } = useInvoices();
+  const { updateFournisseur } = useFournisseurs();
   const [stats, setStats] = useState([]);
   const [invoices, setInvoices] = useState([]);
   const [topProducts, setTopProducts] = useState([]);
+  const [fournisseur, setFournisseur] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Récupère statistiques et factures lors du chargement ou du changement d'id
+  // Chargement des infos fournisseur et de ses factures
   useEffect(() => {
+    if (!id) return;
     setLoading(true);
     Promise.all([
       fetchStatsForFournisseur(id).then(setStats),
-      fetchInvoicesBySupplier(id).then(setInvoices),
-    ]).then(() => setLoading(false));
+      fetchInvoicesBySupplier(id).then(async (arr) => {
+        const withCount = await Promise.all(
+          (arr || []).map(async (f) => {
+            const { count } = await supabase
+              .from("facture_lignes")
+              .select("id", { count: "exact", head: true })
+              .eq("facture_id", f.id);
+            return { ...f, nb_produits: count || 0 };
+          })
+        );
+        setInvoices(withCount);
+      }),
+      supabase.from("fournisseurs").select("*").eq("id", id).single().then(({ data }) => setFournisseur(data)),
+    ]).finally(() => setLoading(false));
   }, [id]);
 
   // Met à jour le top produits lors du changement d'id
@@ -39,6 +56,17 @@ export default function FournisseurDetail({ id }) {
   return (
     <div className="space-y-8">
       <h2 className="text-xl font-bold text-mamastockGold mb-2">Détail fournisseur</h2>
+      {fournisseur && (
+        <Button
+          size="sm"
+          onClick={async () => {
+            await updateFournisseur(fournisseur.id, { actif: !fournisseur.actif });
+            setFournisseur({ ...fournisseur, actif: !fournisseur.actif });
+          }}
+        >
+          {fournisseur.actif ? "Désactiver" : "Réactiver"}
+        </Button>
+      )}
       {/* Stats d’achats/factures */}
       <div className="grid md:grid-cols-2 gap-6">
         <div className="glass-card p-4">
@@ -66,16 +94,16 @@ export default function FournisseurDetail({ id }) {
           </ResponsiveContainer>
         </div>
       </div>
-      {/* Factures liées */}
+      {/* Historique des achats */}
       <div className="glass-table mt-4 p-2">
-        <h3 className="font-semibold mb-2">Factures associées</h3>
+        <h3 className="font-semibold mb-2">Historique des achats</h3>
         <table className="w-full table-auto text-xs">
           <thead>
             <tr>
-              <th>Date</th>
-              <th>N° Facture</th>
-              <th>Montant</th>
-              <th>État</th>
+              <th>Date facture</th>
+              <th>Total HT</th>
+              <th>Nb produits</th>
+              <th>Utilisateur</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -83,9 +111,9 @@ export default function FournisseurDetail({ id }) {
             {invoices.map(f => (
               <tr key={f.id}>
                 <td>{f.date_facture}</td>
-                <td>{f.numero_facture}</td>
                 <td>{f.montant_total.toFixed(2)} €</td>
-                <td>{f.statut}</td>
+                <td>{f.nb_produits}</td>
+                <td>-</td>
                 <td>
                   <Button size="sm" variant="outline" onClick={() => window.open(`/factures/${f.id}`)}>
                     Voir

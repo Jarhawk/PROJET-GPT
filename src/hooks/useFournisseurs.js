@@ -8,33 +8,35 @@ import { saveAs } from "file-saver";
 export function useFournisseurs() {
   const { mama_id } = useAuth();
   const [fournisseurs, setFournisseurs] = useState([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // 1. Charger tous les fournisseurs (avec pagination/filtrage si besoin)
-  async function fetchFournisseurs({ search = "", actif = null, page = 1, limit = 100 } = {}) {
+  // 1. Charger les fournisseurs (filtrage par mama_id automatiquement)
+  async function getFournisseurs({ search = "", actif = null, page = 1, limit = 20 } = {}) {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
     let query = supabase
       .from("fournisseurs")
-      .select("*")
+      .select("*", { count: "exact" })
       .eq("mama_id", mama_id)
       .order("nom", { ascending: true })
       .range((page - 1) * limit, page * limit - 1);
 
-    if (search) query = query.ilike("nom", `%${search}%`);
+    if (search) query = query.or(`nom.ilike.%${search}%,ville.ilike.%${search}%`);
     if (typeof actif === "boolean") query = query.eq("actif", actif);
 
-    const { data, error } = await query;
+    const { data, error, count } = await query;
     setFournisseurs(Array.isArray(data) ? data : []);
+    setTotal(count || 0);
     setLoading(false);
     if (error) setError(error);
     return data || [];
   }
 
   // 2. Ajouter un fournisseur
-  async function addFournisseur(fournisseur) {
+  async function createFournisseur(fournisseur) {
     if (!mama_id) return;
     setLoading(true);
     setError(null);
@@ -59,8 +61,8 @@ export function useFournisseurs() {
     if (error) setError(error);
   }
 
-  // 4. Supprimer un fournisseur (soft delete = désactivation)
-  async function deleteFournisseur(id) {
+  // 4. Désactiver un fournisseur (soft delete)
+  async function disableFournisseur(id) {
     if (!mama_id) return;
     setLoading(true);
     setError(null);
@@ -108,12 +110,13 @@ export function useFournisseurs() {
 
   return {
     fournisseurs,
+    total,
     loading,
     error,
-    fetchFournisseurs,
-    addFournisseur,
+    getFournisseurs,
+    createFournisseur,
     updateFournisseur,
-    deleteFournisseur,
+    disableFournisseur,
     exportFournisseursToExcel,
     importFournisseursFromExcel,
   };

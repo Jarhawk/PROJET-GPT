@@ -13,10 +13,11 @@ import "jspdf-autotable";
 import { Toaster, toast } from "react-hot-toast";
 import { ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import FournisseurDetail from "./FournisseurDetail";
+import FournisseurForm from "./FournisseurForm";
 import { PlusCircle, Search } from "lucide-react";
 
 export default function Fournisseurs() {
-  const { fournisseurs, fetchFournisseurs, addFournisseur, updateFournisseur, deleteFournisseur, exportFournisseursToExcel } = useFournisseurs();
+  const { fournisseurs, total, getFournisseurs, createFournisseur, updateFournisseur, disableFournisseur, exportFournisseursToExcel } = useFournisseurs();
   const { fetchStatsAll } = useFournisseurStats();
   const { getProductsBySupplier } = useSupplierProducts();
   const { products } = useProducts();
@@ -28,6 +29,9 @@ export default function Fournisseurs() {
   const [saving, setSaving] = useState(false);
   const [stats, setStats] = useState([]);
   const [topProducts, setTopProducts] = useState([]);
+  const [actifFilter, setActifFilter] = useState("all");
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 20;
   const inactifs = fournisseurs.filter(f => !f.actif);
 
   const exportPDF = () => {
@@ -48,10 +52,15 @@ export default function Fournisseurs() {
     fetchInactifs();
   }, []);
 
-  // Rafraîchissement selon la recherche
+  // Rafraîchissement selon la recherche ou filtre
   useEffect(() => {
-    fetchFournisseurs({ search });
-  }, [search]);
+    getFournisseurs({
+      search,
+      actif: actifFilter === "all" ? null : actifFilter === "true",
+      page,
+      limit: PAGE_SIZE,
+    });
+  }, [search, actifFilter, page]);
 
   // Recherche live
   const fournisseursFiltrés = fournisseurs.filter(f =>
@@ -88,10 +97,15 @@ export default function Fournisseurs() {
             className="input input-bordered w-full pl-8"
             placeholder="Recherche fournisseur ou ville"
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={e => { setPage(1); setSearch(e.target.value); }}
           />
           <Search className="absolute left-2 top-2.5 text-white" size={18} />
         </div>
+        <select className="input" value={actifFilter} onChange={e => { setPage(1); setActifFilter(e.target.value); }}>
+          <option value="all">Tous</option>
+          <option value="true">Actif</option>
+          <option value="false">Inactif</option>
+        </select>
         <Button onClick={() => setShowCreate(true)}><PlusCircle className="mr-2" /> Ajouter fournisseur</Button>
         <Button variant="outline" onClick={exportFournisseursToExcel}>Export Excel</Button>
         <Button variant="outline" onClick={exportPDF}>Export PDF</Button>
@@ -162,8 +176,8 @@ export default function Fournisseurs() {
                 </td>
                 <td>
                   <Button size="sm" variant="destructive" onClick={async () => {
-                    await deleteFournisseur(f.id);
-                    fetchFournisseurs({ search });
+                    await disableFournisseur(f.id);
+                    getFournisseurs({ search });
                   }}>
                     Supprimer
                   </Button>
@@ -172,6 +186,18 @@ export default function Fournisseurs() {
             ))}
           </tbody>
         </table>
+        <div className="mt-4 flex gap-2 justify-center">
+          {Array.from({ length: Math.max(1, Math.ceil(total / PAGE_SIZE)) }, (_, i) => (
+            <Button
+              key={i + 1}
+              size="sm"
+              variant={page === i + 1 ? "default" : "outline"}
+              onClick={() => setPage(i + 1)}
+            >
+              {i + 1}
+            </Button>
+          ))}
+        </div>
       </TableContainer>
 
       {/* Modal création/édition */}
@@ -188,12 +214,12 @@ export default function Fournisseurs() {
                   await updateFournisseur(editRow.id, data);
                   toast.success("Fournisseur modifié !");
                 } else {
-                  await addFournisseur(data);
+                  await createFournisseur(data);
                   toast.success("Fournisseur ajouté !");
                 }
                 setShowCreate(false);
                 setEditRow(null);
-                fetchFournisseurs({ search });
+                getFournisseurs({ search });
               } catch (err) {
                 toast.error(err?.message || "Erreur enregistrement");
               }
@@ -211,67 +237,5 @@ export default function Fournisseurs() {
       </Dialog>
 
     </div>
-  );
-}
-
-// ---- FournisseurForm à placer dans src/components/fournisseurs/FournisseurForm.jsx
-
-function FournisseurForm({ fournisseur = {}, onCancel, onSubmit, saving }) {
-  const [form, setForm] = useState({
-    nom: fournisseur.nom || "",
-    ville: fournisseur.ville || "",
-    tel: fournisseur.tel || "",
-    contact: fournisseur.contact || "",
-    actif: fournisseur.actif ?? true,
-  });
-  return (
-    <form
-      className="space-y-4"
-      onSubmit={e => {
-        e.preventDefault();
-        if (!form.nom.trim()) return toast.error("Nom obligatoire");
-        onSubmit(form);
-      }}
-    >
-      <div>
-        <label className="block font-semibold">Nom</label>
-        <input
-          className="input input-bordered w-full"
-          value={form.nom}
-          onChange={e => setForm(f => ({ ...f, nom: e.target.value }))}
-          required
-        />
-      </div>
-      <div>
-        <label className="block font-semibold">Ville</label>
-        <input
-          className="input input-bordered w-full"
-          value={form.ville}
-          onChange={e => setForm(f => ({ ...f, ville: e.target.value }))}
-        />
-      </div>
-      <div>
-        <label className="block font-semibold">Téléphone</label>
-        <input
-          className="input input-bordered w-full"
-          value={form.tel}
-          onChange={e => setForm(f => ({ ...f, tel: e.target.value }))}
-        />
-      </div>
-      <div>
-        <label className="block font-semibold">Contact</label>
-        <input
-          className="input input-bordered w-full"
-          value={form.contact}
-          onChange={e => setForm(f => ({ ...f, contact: e.target.value }))}
-        />
-      </div>
-      <div className="flex gap-4 mt-4">
-        <Button type="submit" disabled={saving}>Enregistrer</Button>
-        <Button type="button" variant="secondary" onClick={onCancel} disabled={saving}>
-          Annuler
-        </Button>
-      </div>
-    </form>
   );
 }

@@ -1,29 +1,26 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-import fr from './locales/fr.json';
-import en from './locales/en.json';
-import es from './locales/es.json';
-
-const resources = {
-  fr: { translation: fr },
-  en: { translation: en },
-  es: { translation: es },
-};
-
-const storedLang = localStorage.getItem('lang');
-const browserLang = navigator.language.split('-')[0];
-
-i18n
-  .use(initReactI18next)
-  .init({
-    resources,
-    lng: storedLang || browserLang || 'fr',
-    fallbackLng: 'fr',
-    interpolation: {
-      escapeValue: false,
+i18n.use(initReactI18next).init({
+  resources: {
+    fr: {
+      translation: {
+        "welcome": "Bienvenue",
+        // autres clés ici
+      },
     },
-    react: { useSuspense: false },
-  });
+    en: {
+      translation: {
+        "welcome": "Welcome",
+        // autres clés ici
+      },
+    },
+  },
+  lng: 'fr',
+  fallbackLng: 'fr',
+  interpolation: {
+    escapeValue: false,
+  },
+});
 
 export default i18n;

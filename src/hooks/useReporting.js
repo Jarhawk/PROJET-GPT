@@ -1,87 +1,90 @@
-// src/hooks/useReporting.js
-import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 
-export const useReporting = (periode) => {
+export function useReporting() {
   const { mama_id } = useAuth();
-  const [stats, setStats] = useState({
-    reel: 0,
-    theorique: 0,
-    ecart: 0,
-    pourcent: 0,
-    detail: [],
-  });
 
-  useEffect(() => {
-    const fetchReporting = async () => {
-      if (!periode || !mama_id) return;
+  const applyFilters = (query, filters = {}) => {
+    if (filters.date_start) query = query.gte("date", filters.date_start);
+    if (filters.date_end) query = query.lte("date", filters.date_end);
+    if (filters.fournisseur) query = query.eq("fournisseur", filters.fournisseur);
+    if (filters.famille) query = query.eq("famille", filters.famille);
+    if (filters.fiche) query = query.eq("fiche_id", filters.fiche);
+    if (filters.cost_center) query = query.eq("cost_center_id", filters.cost_center);
+    return query;
+  };
 
-      const start = `${periode}-01`;
-      const end = `${periode}-31`;
+  async function getIndicators({ date_start, date_end } = {}) {
+    if (!mama_id) return {};
+    const { data, error } = await supabase
+      .from("v_stock_valorise")
+      .select("cout_matiere_total, evolution_pmp, food_cost, ecart_inventaire")
+      .eq("mama_id", mama_id)
+      .gte("date", date_start)
+      .lte("date", date_end)
+      .single();
+    if (error) {
+      console.error("getIndicators", error);
+      return {};
+    }
+    return data || {};
+  }
 
-      try {
-        // Quantité réelle issue des mouvements d'inventaire
-        const { data: reelData, error: reelError } = await supabase
-          .from("stocks")
-          .select("quantite, zone")
-          .eq("mama_id", mama_id)
-          .eq("type", "inventaire")
-          .gte("date", start)
-          .lte("date", end);
+  async function getGraphData(type, filters = {}) {
+    if (!mama_id) return [];
+    let query;
+    switch (type) {
+      case "achats":
+        query = supabase.from("v_achats_par_mois").select("*");
+        break;
+      case "pmp":
+        query = supabase.from("v_stock_valorise").select("*");
+        break;
+      case "familles":
+        query = supabase.from("v_fiches_techniques_cout").select("*");
+        break;
+      case "cost_center":
+        query = supabase.from("v_cost_center_month").select("*");
+        break;
+      default:
+        return [];
+    }
+    query = query.eq("mama_id", mama_id);
+    query = applyFilters(query, filters);
+    const { data, error } = await query;
+    if (error) {
+      console.error("getGraphData", error);
+      return [];
+    }
+    return data || [];
+  }
 
-        // Quantité théorique issue des achats - sorties
-        const { data: theoData, error: theoError } = await supabase
-          .from("stocks")
-          .select("quantite, type, zone")
-          .eq("mama_id", mama_id)
-          .gte("date", start)
-          .lte("date", end);
+  async function getEcartInventaire(filters = {}) {
+    if (!mama_id) return [];
+    let query = supabase.from("v_ecarts_inventaire").select("*").eq("mama_id", mama_id);
+    query = applyFilters(query, filters);
+    const { data, error } = await query;
+    if (error) {
+      console.error("getEcartInventaire", error);
+      return [];
+    }
+    return data || [];
+  }
 
-        if (reelError || theoError) {
-          console.error("Erreur reporting :", reelError || theoError);
-          return;
-        }
+  async function getCostCenterBreakdown(filters = {}) {
+    if (!mama_id) return [];
+    let query = supabase.from("v_cost_center_month").select("*").eq("mama_id", mama_id);
+    if (filters.date_start) query = query.gte("mois", filters.date_start);
+    if (filters.date_end) query = query.lte("mois", filters.date_end);
+    const { data, error } = await query;
+    if (error) {
+      console.error("getCostCenterBreakdown", error);
+      return [];
+    }
+    return data || [];
+  }
 
-        const totalReel = reelData?.reduce((sum, r) => sum + (r.quantite || 0), 0) || 0;
-
-        const achats = theoData?.filter((s) => s.type === "achat") || [];
-        const sorties = theoData?.filter((s) => s.type === "sortie") || [];
-
-        const totalAchats = achats.reduce((sum, a) => sum + (a.quantite || 0), 0);
-        const totalSorties = sorties.reduce((sum, s) => sum + (s.quantite || 0), 0);
-        const totalTheorique = totalAchats - totalSorties;
-
-        const ecart = totalReel - totalTheorique;
-        const pourcent = totalTheorique !== 0 ? ((ecart / totalTheorique) * 100).toFixed(1) : 0;
-
-        // Répartition par zone (bar / cuisine / autre)
-        const zones = {};
-        for (const r of reelData || []) {
-          zones[r.zone] = (zones[r.zone] || 0) + (r.quantite || 0);
-        }
-
-        const detail = Object.entries(zones).map(([nom, valeur]) => ({
-          nom,
-          valeur,
-        }));
-
-        setStats({
-          reel: totalReel,
-          theorique: totalTheorique,
-          ecart,
-          pourcent,
-          detail,
-        });
-      } catch (e) {
-        console.error("❌ Erreur reporting :", e);
-      }
-    };
-
-    fetchReporting();
-  }, [periode, mama_id]);
-
-  return { stats };
-};
+  return { getIndicators, getGraphData, getEcartInventaire, getCostCenterBreakdown };
+}
 
 export default useReporting;

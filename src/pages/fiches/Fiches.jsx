@@ -5,49 +5,31 @@ import FicheForm from "./FicheForm.jsx";
 import FicheDetail from "./FicheDetail.jsx";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
-import { Toaster, toast } from "react-hot-toast";
-import { saveAs } from "file-saver";
-import * as XLSX from "xlsx";
+import { Toaster } from "react-hot-toast";
 import { motion as Motion } from "framer-motion";
 
+const PAGE_SIZE = 20;
+
 export default function Fiches() {
-  const { fiches, fetchFiches, deleteFiche } = useFiches();
+  const { fiches, total, getFiches, deleteFiche, exportFichesToExcel } = useFiches();
   const { mama_id, loading: authLoading } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState("");
-  const [familleFilter] = useState("");
+  const [page, setPage] = useState(1);
 
-  // Charge les fiches et rafraîchit selon la recherche
+  // Chargement
   useEffect(() => {
     if (!authLoading && mama_id) {
-      fetchFiches({ search });
+      getFiches({ search, page, limit: PAGE_SIZE });
     }
-  }, [authLoading, mama_id, search, fetchFiches]);
+  }, [authLoading, mama_id, search, page, getFiches]);
 
-  // Export Excel
-  const exportExcel = () => {
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(fiches);
-    XLSX.utils.book_append_sheet(wb, ws, "Fiches");
-    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([buf]), "fiches.xlsx");
-  };
+  const exportExcel = () => exportFichesToExcel();
 
-  // Filtre local uniquement sur la famille
-  const fichesFiltres = fiches.filter(
-    f => !familleFilter || f.famille === familleFilter
-  );
+  const fichesFiltres = fiches;
 
-  // Suppression fiche
-  const handleDelete = async (fiche) => {
-    if (window.confirm(`Supprimer la fiche technique "${fiche.nom}" ?`)) {
-      await deleteFiche(fiche.id);
-      await fetchFiches({ search });
-      toast.success("Fiche supprimée.");
-    }
-  };
 
   return (
     <div className="p-6 container mx-auto text-shadow">
@@ -75,9 +57,10 @@ export default function Fiches() {
         <thead>
           <tr>
             <th className="px-4 py-2">Nom</th>
-            <th className="px-4 py-2">Portions</th>
-            <th className="px-4 py-2">Coût total</th>
+            <th className="px-4 py-2">Famille</th>
             <th className="px-4 py-2">Coût/portion</th>
+            <th className="px-4 py-2"># Produits</th>
+            <th className="px-4 py-2">Actif</th>
             <th className="px-4 py-2">Actions</th>
           </tr>
         </thead>
@@ -93,9 +76,10 @@ export default function Fiches() {
                   {fiche.nom}
                 </Button>
               </td>
-              <td className="border px-4 py-2">{fiche.portions}</td>
-              <td className="border px-4 py-2">{fiche.cout_total?.toFixed(2)} €</td>
-              <td className="border px-4 py-2">{fiche.cout_par_portion?.toFixed(2)} €</td>
+              <td className="border px-4 py-2">{fiche.famille_id || '-'}</td>
+              <td className="border px-4 py-2">{Number(fiche.cout_par_portion).toFixed(2)} €</td>
+              <td className="border px-4 py-2">{fiche.lignes?.length || 0}</td>
+              <td className="border px-4 py-2">{fiche.actif ? '✅' : '❌'}</td>
               <td className="border px-4 py-2">
                 <Button
                   size="sm"
@@ -109,9 +93,16 @@ export default function Fiches() {
                   size="sm"
                   variant="outline"
                   className="mr-2"
-                  onClick={() => handleDelete(fiche)}
+                  onClick={() => { setSelected(fiche); setShowDetail(true); }}
                 >
-                  Supprimer
+                  Voir
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => deleteFiche(fiche.id)}
+                >
+                  Désactiver
                 </Button>
               </td>
             </tr>
@@ -119,10 +110,22 @@ export default function Fiches() {
         </tbody>
         </Motion.table>
       </TableContainer>
+      <div className="mt-4 flex gap-2 justify-center">
+        {Array.from({ length: Math.max(1, Math.ceil(total / PAGE_SIZE)) }, (_, i) => (
+          <Button
+            key={i}
+            size="sm"
+            variant={page === i + 1 ? "default" : "outline"}
+            onClick={() => setPage(i + 1)}
+          >
+            {i + 1}
+          </Button>
+        ))}
+      </div>
       {showForm && (
         <FicheForm
           fiche={selected}
-          onClose={() => { setShowForm(false); setSelected(null); fetchFiches({ search }); }}
+          onClose={() => { setShowForm(false); setSelected(null); getFiches({ search, page, limit: PAGE_SIZE }); }}
         />
       )}
       {showDetail && selected && (

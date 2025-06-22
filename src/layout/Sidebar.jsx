@@ -41,7 +41,7 @@ export default function Sidebar() {
   );
 
   return (
-    <aside className="w-64 bg-white/5 backdrop-blur-xl text-white p-4 h-screen shadow-md text-shadow hidden md:block">
+    <aside className="w-64 bg-white/5 backdrop-blur-xl text-white p-4 h-screen shadow-md text-shadow hidden md:block animate-fade-in-down">
       <nav className="flex flex-col gap-4 text-sm">
         {has("dashboard") && (
           <Item to="/dashboard" icon={<Home size={16} />} label="Dashboard" />

@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from 'react-i18next';
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useGlobalSearch } from "@/hooks/useGlobalSearch";
+import LanguageSelector from "@/components/ui/LanguageSelector";
 
 export default function Navbar() {
+  const { t } = useTranslation();
   const { session, role } = useAuth();
   const [term, setTerm] = useState("");
   const { results, search } = useGlobalSearch();
@@ -53,9 +56,9 @@ export default function Navbar() {
             type="text"
             value={term}
             onChange={e => { setTerm(e.target.value); search(e.target.value); }}
-            placeholder="Recherche..."
+            placeholder={t('search')}
             className="input input-bordered text-black w-48"
-            aria-label="Recherche globale"
+            aria-label={t('search')}
           />
           {results.length > 0 && (
             <div className="absolute z-10 bg-white text-black w-full shadow-lg mt-1 text-xs rounded">
@@ -67,11 +70,12 @@ export default function Navbar() {
             </div>
           )}
         </div>
+        <LanguageSelector />
         <button
           onClick={toggleDark}
           className="bg-mamastock-gold text-black px-3 py-1 rounded-md text-sm"
-          title="Basculer mode sombre"
-          aria-label="Basculer le thème"
+          title={t('toggleTheme')}
+          aria-label={t('toggleTheme')}
           aria-pressed={dark}
         >
           {dark ? '☀️' : '🌙'}
@@ -88,7 +92,7 @@ export default function Navbar() {
               onClick={handleLogout}
               className="text-sm bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded-md transition"
             >
-              Déconnexion
+              {t('logout')}
             </button>
           </>
         ) : (

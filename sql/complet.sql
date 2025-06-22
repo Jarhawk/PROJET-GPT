@@ -1593,6 +1593,30 @@ create policy onboarding_progress_update on onboarding_progress
   with check (user_id = auth.uid());
 grant select, insert, update on onboarding_progress to authenticated;
 
+-- Historique détaillé des étapes d'onboarding
+create table if not exists etapes_onboarding (
+    id uuid primary key default uuid_generate_v4(),
+    user_id uuid references users(id) on delete cascade,
+    etape text,
+    statut text check (statut in ('en cours','terminé','sauté')),
+    mama_id uuid not null references mamas(id) on delete cascade,
+    created_at timestamptz default now()
+);
+create index if not exists idx_etapes_onboarding_mama on etapes_onboarding(mama_id);
+alter table etapes_onboarding enable row level security;
+alter table etapes_onboarding force row level security;
+create policy etapes_onboarding_select on etapes_onboarding
+  for select to authenticated
+  using (mama_id = current_user_mama_id());
+create policy etapes_onboarding_insert on etapes_onboarding
+  for insert to authenticated
+  with check (mama_id = current_user_mama_id() and user_id = auth.uid());
+create policy etapes_onboarding_update on etapes_onboarding
+  for update to authenticated
+  using (user_id = auth.uid() and mama_id = current_user_mama_id())
+  with check (user_id = auth.uid() and mama_id = current_user_mama_id());
+grant select, insert, update on etapes_onboarding to authenticated;
+
 -- Articles d'aide et FAQ
 create table if not exists help_articles (
     id uuid primary key default uuid_generate_v4(),

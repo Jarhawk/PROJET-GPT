@@ -10,30 +10,63 @@ export function useOnboarding() {
   useEffect(() => {
     if (!user || !mama_id) return;
     fetchProgress();
-    // fetchProgress has stable identity
   }, [user?.id, mama_id]);
 
   async function fetchProgress() {
     if (!user || !mama_id) return [];
     setLoading(true);
     const { data } = await supabase
-      .from("onboarding_progress")
-      .select("step")
+      .from("etapes_onboarding")
+      .select("etape, statut")
       .eq("user_id", user.id)
       .eq("mama_id", mama_id)
-      .single();
+      .order("created_at", { ascending: true });
     setLoading(false);
-    if (data) setStep(data.step);
+    if (data && data.length) {
+      const last = data[data.length - 1];
+      setStep(parseInt(last.etape, 10));
+    }
     return data || [];
   }
 
-  async function saveStep(nextStep) {
+  async function startOnboarding() {
     if (!user || !mama_id) return;
-    setStep(nextStep);
-    await supabase
-      .from("onboarding_progress")
-      .upsert({ user_id: user.id, mama_id, step: nextStep });
+    setStep(0);
+    await supabase.from("etapes_onboarding").insert([
+      { user_id: user.id, mama_id, etape: "0", statut: "en cours" },
+    ]);
   }
 
-  return { step, loading, fetchProgress, saveStep };
+  async function nextStep() {
+    if (!user || !mama_id) return;
+    const next = step + 1;
+    setStep(next);
+    await supabase.from("etapes_onboarding").insert([
+      { user_id: user.id, mama_id, etape: String(next), statut: "en cours" },
+    ]);
+  }
+
+  async function skip() {
+    if (!user || !mama_id) return;
+    await supabase.from("etapes_onboarding").insert([
+      { user_id: user.id, mama_id, etape: String(step), statut: "sauté" },
+    ]);
+  }
+
+  async function complete() {
+    if (!user || !mama_id) return;
+    await supabase.from("etapes_onboarding").insert([
+      { user_id: user.id, mama_id, etape: String(step), statut: "terminé" },
+    ]);
+  }
+
+  return {
+    step,
+    loading,
+    fetchProgress,
+    startOnboarding,
+    nextStep,
+    skip,
+    complete,
+  };
 }

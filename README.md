@@ -16,8 +16,8 @@ npm run preview
 ```
 
 If linting or tests fail because required packages are missing, simply run
-`npm install` again. This ensures `vitest`, `@eslint/js` and `playwright` are
-available before running the commands above.
+`npm install` again. This ensures `tesseract.js`, `vitest`, `@eslint/js` and
+`playwright` are available before running the commands above.
 
 ### Branding & PWA
 
@@ -57,6 +57,9 @@ The `.env` file is not tracked by Git, so you can safely replace these
 defaults with your own credentials for local development.
 
 ## Tests
+
+Invoice OCR features rely on `tesseract.js`, so ensure dependencies are
+installed with `npm install` before running tests.
 
 Unit tests run with `vitest`:
 

@@ -1,14 +1,15 @@
 import { useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
+import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
 
 export function useDocuments() {
   const { mama_id } = useAuth();
-  const [docs, setDocs] = useState([]);
+  const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const fetchDocs = useCallback(async ({ search = "" } = {}) => {
+  const listDocuments = useCallback(async (filters = {}) => {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
@@ -18,64 +19,130 @@ export function useDocuments() {
       .eq("mama_id", mama_id)
       .order("created_at", { ascending: false });
 
-    if (search) query = query.ilike("title", `%${search}%`);
+    if (filters.entite_liee_type)
+      query = query.eq("entite_liee_type", filters.entite_liee_type);
+    if (filters.entite_liee_id)
+      query = query.eq("entite_liee_id", filters.entite_liee_id);
+    if (filters.categorie) query = query.eq("categorie", filters.categorie);
+    if (filters.type) query = query.eq("type", filters.type);
+    if (filters.search) query = query.ilike("nom", `%${filters.search}%`);
 
     const { data, error } = await query;
     setLoading(false);
     if (error) {
       setError(error.message || error);
-      setDocs([]);
+      setDocuments([]);
       return [];
     }
-    setDocs(Array.isArray(data) ? data : []);
+    setDocuments(Array.isArray(data) ? data : []);
     return data || [];
   }, [mama_id]);
 
-  async function addDoc(values) {
-    if (!mama_id) return { error: "Aucun mama_id" };
-    setLoading(true);
-    setError(null);
-    const { error } = await supabase
-      .from("documents")
-      .insert([{ ...values, mama_id }]);
-    setLoading(false);
-    if (error) {
-      setError(error.message || error);
-      return;
-    }
-  }
+  const uploadDocument = useCallback(
+    async (file, metadata = {}) => {
+      if (!mama_id || !file) return { error: "Aucun fichier" };
+      setLoading(true);
+      setError(null);
+      try {
+        const folder = metadata.entite_liee_type
+          ? `${metadata.entite_liee_type}s`
+          : "misc";
+        const url = await uploadFile("mamastock-documents", file, folder);
+        const { data, error } = await supabase
+          .from("documents")
+          .insert([
+            {
+              nom: file.name,
+              type: file.type,
+              taille: file.size,
+              categorie: metadata.categorie || null,
+              url,
+              entite_liee_type: metadata.entite_liee_type || null,
+              entite_liee_id: metadata.entite_liee_id || null,
+              mama_id,
+            },
+          ])
+          .select()
+          .single();
+        setLoading(false);
+        if (error) {
+          setError(error.message || error);
+          return { error };
+        }
+        setDocuments((d) => [data, ...d]);
+        return { data };
+      } catch (err) {
+        setLoading(false);
+        setError(err.message || err);
+        return { error: err };
+      }
+    },
+    [mama_id]
+  );
 
-  async function updateDoc(id, values) {
-    if (!mama_id) return { error: "Aucun mama_id" };
-    setLoading(true);
-    setError(null);
-    const { error } = await supabase
-      .from("documents")
-      .update(values)
-      .eq("id", id)
-      .eq("mama_id", mama_id);
-    setLoading(false);
-    if (error) {
-      setError(error.message || error);
-      return;
-    }
-  }
+  const getDocumentUrl = useCallback(
+    async (id) => {
+      if (!id || !mama_id) return null;
+      const { data, error } = await supabase
+        .from("documents")
+        .select("url")
+        .eq("id", id)
+        .eq("mama_id", mama_id)
+        .single();
+      if (error) {
+        setError(error.message || error);
+        return null;
+      }
+      return data?.url || null;
+    },
+    [mama_id]
+  );
 
-  async function deleteDoc(id) {
-    if (!mama_id) return { error: "Aucun mama_id" };
-    setLoading(true);
-    setError(null);
-    const { error } = await supabase
-      .from("documents")
-      .delete()
-      .eq("id", id)
-      .eq("mama_id", mama_id);
-    setLoading(false);
-    if (error) {
-      setError(error.message || error);
-      return;
-    }
-  }
+  const deleteDocument = useCallback(
+    async (id) => {
+      if (!id || !mama_id) return { error: "Aucun id" };
+      setLoading(true);
+      setError(null);
+      const { data: doc, error: fetchError } = await supabase
+        .from("documents")
+        .select("url")
+        .eq("id", id)
+        .eq("mama_id", mama_id)
+        .single();
+      if (fetchError) {
+        setLoading(false);
+        setError(fetchError.message || fetchError);
+        return { error: fetchError };
+      }
+      const path = pathFromUrl(doc.url);
+      try {
+        await deleteFile("mamastock-documents", path);
+      } catch {
+        /* ignore */
+      }
+      const { error } = await supabase
+        .from("documents")
+        .delete()
+        .eq("id", id)
+        .eq("mama_id", mama_id);
+      setLoading(false);
+      if (error) {
+        setError(error.message || error);
+        return { error };
+      }
+      setDocuments((d) => d.filter((doc) => doc.id !== id));
+      return { success: true };
+    },
+    [mama_id]
+  );
 
-  return { docs, loading, error, fetchDocs, addDoc, updateDoc, deleteDoc };
+  return {
+    documents,
+    loading,
+    error,
+    listDocuments,
+    uploadDocument,
+    deleteDocument,
+    getDocumentUrl,
+  };
 }

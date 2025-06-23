@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from 'react-i18next';
 import { useAuth } from "@/context/AuthContext";
-import { supabase } from "@/lib/supabase";
 import { useGlobalSearch } from "@/hooks/useGlobalSearch";
 import LanguageSelector from "@/components/ui/LanguageSelector";
 
@@ -30,11 +29,12 @@ export default function Navbar() {
   };
 
   const handleLogout = async () => {
-    const confirmLogout = window.confirm("Voulez-vous vraiment vous déconnecter ?");
+    const confirmLogout = window.confirm(
+      "Voulez-vous vraiment vous déconnecter ?"
+    );
     if (!confirmLogout) return;
 
-    await supabase.auth.signOut();
-    window.location.href = "/login";
+    window.location.href = "/logout";
   };
 
   return (

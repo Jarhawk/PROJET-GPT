@@ -60,12 +60,12 @@ test('updatePromotion updates with id and mama_id', async () => {
   expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1');
 });
 
-test('deletePromotion deletes with id and mama_id', async () => {
+test('deletePromotion deactivates with id and mama_id', async () => {
   const { result } = renderHook(() => usePromotions());
   await act(async () => {
     await result.current.deletePromotion('id1');
   });
-  expect(query.delete).toHaveBeenCalled();
+  expect(query.update).toHaveBeenCalledWith({ actif: false });
   expect(query.eq).toHaveBeenCalledWith('id', 'id1');
   expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1');
 });

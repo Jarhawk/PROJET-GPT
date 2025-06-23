@@ -25,7 +25,7 @@ export function useProducts() {
     setLoading(true);
     setError(null);
       let query = supabase
-        .from("products")
+        .from("v_products_last_price")
         .select(
           "*, fournisseurs:supplier_products(*, fournisseur: fournisseurs(nom)), main_supplier: fournisseurs!products_main_supplier_id_fkey(id, nom)",
           { count: "exact" }

@@ -80,7 +80,7 @@ export function useUtilisateurs() {
     setError(null);
     const { error } = await supabase
       .from("users")
-      .delete()
+      .update({ actif: false })
       .eq("id", id);
     if (error) setError(error);
     setLoading(false);

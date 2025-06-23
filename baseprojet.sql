@@ -369,6 +369,7 @@ create index if not exists idx_unites_mama on unites(mama_id);
 create index if not exists idx_supplier_products_mama on supplier_products(mama_id);
 create index if not exists idx_supplier_products_product on supplier_products(product_id);
 create index if not exists idx_supplier_products_fournisseur on supplier_products(fournisseur_id);
+create index if not exists idx_supplier_products_product_date on supplier_products(product_id, date_livraison desc);
 create index if not exists idx_facture_lignes_mama on facture_lignes(mama_id);
 create index if not exists idx_facture_lignes_facture on facture_lignes(facture_id);
 create index if not exists idx_facture_lignes_product on facture_lignes(product_id);
@@ -773,6 +774,11 @@ left join mouvement_cost_centers m on m.cost_center_id = c.id
 group by c.mama_id, c.id, mois, c.nom;
 grant select on v_cost_center_monthly to authenticated;
 
+-- Alias view for monthly cost center totals
+create or replace view v_cost_center_month as
+select * from v_cost_center_monthly;
+grant select on v_cost_center_month to authenticated;
+
 -- Function returning stats per cost center for a date range
 create or replace function stats_cost_centers(mama_id_param uuid, debut_param date default null, fin_param date default null)
 returns table(cost_center_id uuid, nom text, quantite numeric, valeur numeric)
@@ -831,6 +837,22 @@ create or replace trigger trg_log_mouvement_cc
 after insert or update or delete on mouvement_cost_centers
 for each row execute function log_mouvement_cc_changes();
 grant execute on function log_mouvement_cc_changes() to authenticated;
+
+-- Detailed view of stock movement allocations
+create or replace view v_ventilation as
+select
+  mc.mama_id,
+  mc.mouvement_id,
+  m.date,
+  m.product_id,
+  mc.cost_center_id,
+  cc.nom as cost_center,
+  mc.quantite,
+  mc.valeur
+from mouvement_cost_centers mc
+join mouvements_stock m on m.id = mc.mouvement_id
+join cost_centers cc on cc.id = mc.cost_center_id;
+grant select on v_ventilation to authenticated;
 
 -- View of suppliers with no invoices in the last 6 months
 create or replace view v_fournisseurs_inactifs as
@@ -957,6 +979,38 @@ from fournisseurs f
 left join factures fc on fc.fournisseur_id = f.id
 group by f.mama_id, f.id, f.nom;
 grant select on v_fournisseur_stats to authenticated;
+
+-- View of products with latest supplier price
+create or replace view v_products_last_price as
+select
+  p.id,
+  p.nom,
+  p.famille_id,
+  p.unite_id,
+  p.pmp,
+  p.stock_theorique,
+  p.stock_reel,
+  p.stock_min,
+  p.actif,
+  p.code,
+  p.allergenes,
+  p.image,
+  p.main_supplier_id,
+  p.mama_id,
+  p.created_at,
+  sp.prix_achat as dernier_prix,
+  sp.date_livraison as dernier_prix_date,
+  sp.fournisseur_id as dernier_fournisseur_id
+from products p
+left join lateral (
+  select prix_achat, date_livraison, fournisseur_id
+  from supplier_products sp
+  where sp.product_id = p.id
+    and sp.mama_id = p.mama_id
+  order by sp.date_livraison desc
+  limit 1
+) sp on true;
+grant select on v_products_last_price to authenticated;
 
 -- 2FA columns for users
 alter table users
@@ -1085,6 +1139,7 @@ create table if not exists fiche_prix_history (
     new_prix numeric,
     changed_by uuid references users(id),
     mama_id uuid not null references mamas(id),
+    created_at timestamptz default now(),
     changed_at timestamptz default now()
 );
 create index if not exists idx_fiche_prix_history_fiche on fiche_prix_history(fiche_id);
@@ -1372,6 +1427,7 @@ create table if not exists audit_entries (
     old_data jsonb,
     new_data jsonb,
     changed_by uuid references users(id) on delete set null,
+    created_at timestamptz default now(),
     changed_at timestamptz default now()
 );
 create index if not exists idx_audit_entries_mama on audit_entries(mama_id);
@@ -1614,6 +1670,7 @@ create table if not exists onboarding_progress (
     user_id uuid references users(id) on delete cascade,
     mama_id uuid not null references mamas(id) on delete cascade,
     step integer default 0,
+    created_at timestamptz default now(),
     updated_at timestamptz default now(),
     primary key(user_id, mama_id)
 );
@@ -1678,4 +1735,4 @@ create policy help_articles_mutation on help_articles
 grant select, insert, update, delete on help_articles to authenticated;
 
 -- Summary:
--- Supabase-ready schema with 48 tables, 11 views, 28 functions, and over 100 combined policies and grants.
+-- Supabase-ready schema with 48 tables, 14 views, 28 functions, and over 100 combined policies and grants.

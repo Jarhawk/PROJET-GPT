@@ -44,7 +44,11 @@ export function useFournisseurs() {
       .from("fournisseurs")
       .insert([{ ...fournisseur, mama_id }]);
     setLoading(false);
-    if (error) setError(error);
+    if (error) {
+      setError(error);
+    } else {
+      await getFournisseurs();
+    }
   }
 
   // 3. Modifier un fournisseur
@@ -58,7 +62,11 @@ export function useFournisseurs() {
       .eq("id", id)
       .eq("mama_id", mama_id);
     setLoading(false);
-    if (error) setError(error);
+    if (error) {
+      setError(error);
+    } else {
+      await getFournisseurs();
+    }
   }
 
   // 4. Désactiver un fournisseur (soft delete)
@@ -72,7 +80,11 @@ export function useFournisseurs() {
       .eq("id", id)
       .eq("mama_id", mama_id);
     setLoading(false);
-    if (error) setError(error);
+    if (error) {
+      setError(error);
+    } else {
+      await getFournisseurs();
+    }
   }
 
   // 5. Export Excel

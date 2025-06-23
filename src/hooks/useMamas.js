@@ -11,13 +11,12 @@ export function useMamas() {
   const [error, setError] = useState(null);
 
   // 1. Récupérer tous les établissements (tous si superadmin, sinon accès limité)
-  async function fetchMamas({ search = "", actif = null } = {}) {
+  async function fetchMamas({ search = "" } = {}) {
     setLoading(true);
     setError(null);
     let query = supabase.from("mamas").select("*");
     if (role !== "superadmin") query = query.eq("id", mama_id);
     if (search) query = query.ilike("nom", `%${search}%`);
-    if (typeof actif === "boolean") query = query.eq("actif", actif);
 
     const { data, error } = await query.order("nom", { ascending: true });
     setMamas(Array.isArray(data) ? data : []);
@@ -51,18 +50,7 @@ export function useMamas() {
     await fetchMamas();
   }
 
-  // 4. Désactiver/réactiver un établissement
-  async function toggleMamaActive(id, actif) {
-    setLoading(true);
-    setError(null);
-    const { error } = await supabase
-      .from("mamas")
-      .update({ actif })
-      .eq("id", id);
-    if (error) setError(error);
-    setLoading(false);
-    await fetchMamas();
-  }
+
 
   // 5. Export Excel
   function exportMamasToExcel() {
@@ -70,7 +58,6 @@ export function useMamas() {
       id: m.id,
       nom: m.nom,
       ville: m.ville,
-      actif: m.actif,
       email: m.email,
     }));
     const wb = XLSX.utils.book_new();
@@ -103,7 +90,6 @@ export function useMamas() {
     fetchMamas,
     addMama,
     updateMama,
-    toggleMamaActive,
     exportMamasToExcel,
     importMamasFromExcel,
   };

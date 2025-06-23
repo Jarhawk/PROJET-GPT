@@ -62,7 +62,7 @@ export function usePermissions() {
     setError(null);
     const { error } = await supabase
       .from("permissions")
-      .delete()
+      .update({ actif: false })
       .eq("id", id)
       .eq("mama_id", mama_id);
     if (error) setError(error);

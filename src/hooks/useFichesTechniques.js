@@ -49,7 +49,7 @@ export function useFichesTechniques() {
   async function deleteFicheTechnique(id) {
     const { error } = await supabase
       .from("fiches_techniques")
-      .delete()
+      .update({ actif: false })
       .eq("id", id)
       .eq("mama_id", mama_id);
     if (error) throw error;

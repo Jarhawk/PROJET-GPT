@@ -59,7 +59,7 @@ export function useCostCenters() {
     setError(null);
     const { error } = await supabase
       .from("cost_centers")
-      .delete()
+      .update({ actif: false })
       .eq("id", id)
       .eq("mama_id", mama_id);
     if (error) setError(error);

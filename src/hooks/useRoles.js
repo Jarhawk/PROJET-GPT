@@ -5,20 +5,17 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
 export function useRoles() {
-  const { mama_id, role } = useAuth();
+  const { role } = useAuth();
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // 1. Charger les rôles (tous si superadmin, sinon liés à mama_id)
-  async function fetchRoles({ search = "", actif = null } = {}) {
-    if (!mama_id && role !== "superadmin") return [];
+  // 1. Charger les rôles
+  async function fetchRoles({ search = "" } = {}) {
     setLoading(true);
     setError(null);
     let query = supabase.from("roles").select("*");
-    if (role !== "superadmin") query = query.eq("mama_id", mama_id);
     if (search) query = query.ilike("nom", `%${search}%`);
-    if (typeof actif === "boolean") query = query.eq("actif", actif);
 
     const { data, error } = await query.order("nom", { ascending: true });
     setRoles(Array.isArray(data) ? data : []);
@@ -29,12 +26,11 @@ export function useRoles() {
 
   // 2. Ajouter un rôle
   async function addRole(roleData) {
-    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
       .from("roles")
-      .insert([{ ...roleData, mama_id }]);
+      .insert([roleData]);
     if (error) setError(error);
     setLoading(false);
     await fetchRoles();
@@ -42,32 +38,21 @@ export function useRoles() {
 
   // 3. Modifier un rôle
   async function updateRole(id, updateFields) {
-    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
       .from("roles")
       .update(updateFields)
-      .eq("id", id)
-      .eq("mama_id", mama_id);
+      .eq("id", id);
     if (error) setError(error);
     setLoading(false);
     await fetchRoles();
   }
 
   // 4. Désactiver/réactiver un rôle
-  async function toggleRoleActive(id, actif) {
-    if (!mama_id) return { error: "Aucun mama_id" };
-    setLoading(true);
-    setError(null);
-    const { error } = await supabase
-      .from("roles")
-      .update({ actif })
-      .eq("id", id)
-      .eq("mama_id", mama_id);
-    if (error) setError(error);
-    setLoading(false);
-    await fetchRoles();
+  // Placeholder to maintain compatibility (no-op as roles have no 'actif')
+  async function toggleRoleActive() {
+    return { error: "Not supported" };
   }
 
   // 5. Export Excel
@@ -75,9 +60,7 @@ export function useRoles() {
     const datas = (roles || []).map(r => ({
       id: r.id,
       nom: r.nom,
-      actif: r.actif,
-      droits: r.droits,
-      mama_id: r.mama_id,
+      description: r.description,
     }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Roles");

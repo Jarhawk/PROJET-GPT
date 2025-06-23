@@ -105,7 +105,7 @@ export function useProducts() {
     setError(null);
     const { error } = await supabase
       .from("products")
-      .delete()
+      .update({ actif: false })
       .eq("id", id)
       .eq("mama_id", mama_id);
     setLoading(false);

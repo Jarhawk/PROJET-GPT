@@ -48,6 +48,15 @@ const CatalogueSyncViewer = lazy(() => import("@/pages/catalogue/CatalogueSyncVi
 const CommandesEnvoyees = lazy(() => import("@/pages/commandes/CommandesEnvoyees.jsx"));
 const SimulationPlanner = lazy(() => import("@/pages/planning/SimulationPlanner.jsx"));
 const DashboardBuilder = lazy(() => import("@/pages/dashboard/DashboardBuilder.jsx"));
+const Requisitions = lazy(() => import("@/pages/requisitions/Requisitions.jsx"));
+const RequisitionForm = lazy(() => import("@/pages/requisitions/RequisitionForm.jsx"));
+const RequisitionDetail = lazy(() => import("@/pages/requisitions/RequisitionDetail.jsx"));
+const Receptions = lazy(() => import("@/pages/receptions/Receptions.jsx"));
+const Recettes = lazy(() => import("@/pages/recettes/Recettes.jsx"));
+const Surcouts = lazy(() => import("@/pages/surcouts/Surcouts.jsx"));
+const TableauxDeBord = lazy(() => import("@/pages/analyse/TableauxDeBord.jsx"));
+const Comparatif = lazy(() => import("@/pages/fournisseurs/comparatif/ComparatifPrix.jsx"));
+const Logout = lazy(() => import("@/pages/auth/Logout.jsx"));
 
 
 export default function Router() {
@@ -57,6 +66,7 @@ export default function Router() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/logout" element={<Logout />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/privacy" element={<PagePrivacy />} />
@@ -87,6 +97,10 @@ export default function Router() {
             element={<ProtectedRoute accessKey="factures"><FactureDetail /></ProtectedRoute>}
           />
           <Route
+            path="/receptions"
+            element={<ProtectedRoute accessKey="receptions"><Receptions /></ProtectedRoute>}
+          />
+          <Route
             path="/fiches"
             element={<ProtectedRoute accessKey="fiches"><Fiches /></ProtectedRoute>}
           />
@@ -97,6 +111,22 @@ export default function Router() {
           <Route
             path="/menus"
             element={<ProtectedRoute accessKey="menus"><Menus /></ProtectedRoute>}
+          />
+          <Route
+            path="/recettes"
+            element={<ProtectedRoute accessKey="recettes"><Recettes /></ProtectedRoute>}
+          />
+          <Route
+            path="/requisitions"
+            element={<ProtectedRoute accessKey="requisitions"><Requisitions /></ProtectedRoute>}
+          />
+          <Route
+            path="/requisitions/new"
+            element={<ProtectedRoute accessKey="requisitions"><RequisitionForm /></ProtectedRoute>}
+          />
+          <Route
+            path="/requisitions/:id"
+            element={<ProtectedRoute accessKey="requisitions"><RequisitionDetail /></ProtectedRoute>}
           />
           <Route
             path="/produits"
@@ -177,6 +207,18 @@ export default function Router() {
           <Route
             path="/analyse/analytique"
             element={<ProtectedRoute accessKey="analyse"><AnalytiqueDashboard /></ProtectedRoute>}
+          />
+          <Route
+            path="/tableaux-de-bord"
+            element={<ProtectedRoute accessKey="analyse"><TableauxDeBord /></ProtectedRoute>}
+          />
+          <Route
+            path="/comparatif"
+            element={<ProtectedRoute accessKey="analyse"><Comparatif /></ProtectedRoute>}
+          />
+          <Route
+            path="/surcouts"
+            element={<ProtectedRoute accessKey="analyse"><Surcouts /></ProtectedRoute>}
           />
           <Route
             path="/parametrage/utilisateurs"

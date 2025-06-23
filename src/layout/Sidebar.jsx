@@ -16,6 +16,7 @@ import {
   Shield,
   Building2,
   Home,
+  Bug,
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -58,45 +59,68 @@ export default function Sidebar() {
           </div>
         )}
 
-        {(has("fournisseurs") || has("factures")) && (
+        {(has("fournisseurs") || has("factures") || has("receptions")) && (
           <div>
             <p className="uppercase text-xs font-semibold text-mamastockGold mb-1">Achats</p>
             <div className="flex flex-col gap-1 ml-2">
               {has("fournisseurs") && <Item to="/fournisseurs" icon={<Truck size={16} />} label="Fournisseurs" />}
               {has("factures") && <Item to="/factures" icon={<FileText size={16} />} label="Factures" />}
+              {has("receptions") && <Item to="/receptions" icon={<FileText size={16} />} label="Réceptions" />}
             </div>
           </div>
         )}
 
-        {(has("fiches") || has("menus") || has("carte")) && (
+        {(has("fiches") || has("menus") || has("carte") || has("recettes") || has("requisitions")) && (
           <div>
             <p className="uppercase text-xs font-semibold text-mamastockGold mb-1">Cuisine</p>
             <div className="flex flex-col gap-1 ml-2">
               {has("fiches") && <Item to="/fiches" icon={<ChefHat size={16} />} label="Fiches" />}
               {has("menus") && <Item to="/menus" icon={<MenuIcon size={16} />} label="Menus" />}
               {has("carte") && <Item to="/carte" icon={<BookOpen size={16} />} label="Carte" />}
+              {has("recettes") && <Item to="/recettes" icon={<BookOpen size={16} />} label="Recettes" />}
+              {has("requisitions") && <Item to="/requisitions" icon={<ClipboardList size={16} />} label="Réquisitions" />}
             </div>
           </div>
         )}
 
-        {(has("stats") || has("reporting")) && (
+        {(has("analyse") || has("stats") || has("reporting")) && (
           <div>
             <p className="uppercase text-xs font-semibold text-mamastockGold mb-1">Analyse</p>
             <div className="flex flex-col gap-1 ml-2">
               {has("stats") && <Item to="/stats" icon={<BarChart2 size={16} />} label="Stats" />}
               {has("reporting") && <Item to="/reporting" icon={<FileBarChart size={16} />} label="Reporting" />}
+              {has("analyse") && <Item to="/tableaux-de-bord" icon={<BarChart2 size={16} />} label="Tableaux de bord" />}
+              {has("analyse") && <Item to="/comparatif" icon={<BarChart2 size={16} />} label="Comparatif" />}
+              {has("analyse") && <Item to="/surcouts" icon={<FileBarChart size={16} />} label="Surcoûts" />}
+              {has("alertes") && <Item to="/alertes" icon={<FileText size={16} />} label="Alertes" />}
             </div>
           </div>
         )}
 
-        {(has("utilisateurs") || has("roles") || has("mamas")) && (
+        {(has("utilisateurs") || has("roles") || has("mamas") || has("permissions")) && (
           <div>
             <p className="uppercase text-xs font-semibold text-mamastockGold mb-1">Paramètres</p>
             <div className="flex flex-col gap-1 ml-2">
               {has("utilisateurs") && <Item to="/parametrage/utilisateurs" icon={<UsersIcon size={16} />} label="Utilisateurs" />}
               {has("roles") && <Item to="/parametrage/roles" icon={<Shield size={16} />} label="Rôles" />}
               {has("mamas") && <Item to="/parametrage/mamas" icon={<Building2 size={16} />} label="Mamas" />}
+              {has("permissions") && (
+                <Item
+                  to="/parametrage/permissions"
+                  icon={<Shield size={16} />}
+                  label="Permissions"
+                />
+              )}
               {has("settings") && <Item to="/parametrage/settings" icon={<Settings size={16} />} label="Autres" />}
+            </div>
+          </div>
+        )}
+
+        {has("dashboard") && (
+          <div>
+            <p className="uppercase text-xs font-semibold text-mamastockGold mb-1">Debug</p>
+            <div className="flex flex-col gap-1 ml-2">
+              <Item to="/debug/auth" icon={<Bug size={16} />} label="Debug Auth" />
             </div>
           </div>
         )}

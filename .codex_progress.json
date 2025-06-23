@@ -1,0 +1,17 @@
+{
+  "routes_added": [
+    "/receptions",
+    "/recettes",
+    "/requisitions",
+    "/requisitions/new",
+    "/requisitions/:id",
+    "/tableaux-de-bord",
+    "/comparatif",
+    "/surcouts",
+    "/logout",
+    "/parametrage/permissions",
+    "/debug/auth"
+  ],
+  "all_modules_checked": true,
+  "navigation_complete": true
+}

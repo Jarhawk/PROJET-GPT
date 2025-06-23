@@ -25,3 +25,45 @@
 ## Étape 6 – Vérification finale : ✅
 - Validation du design Liquid Glass sur toutes les pages.
 - Lint, tests et serveur de développement impossibles car dépendances manquantes (`vite`, `@eslint/js`, `vitest`).
+
+## Étape 7 – Tests : ✅
+- Installation des dépendances manquantes.
+- `npm run lint` et `npm test` passent sans erreur.
+
+## Étape 8 – Navigation : ✅
+- Toutes les routes des modules sont déclarées et protégées.
+- Tous les liens du menu sont visibles.
+- Lint et tests passent.
+
+## Étape 9 – Validation finale : ✅
+- Vérification finale des routes et des liens dans la sidebar.
+- `npm run lint` et `npm test` passent après installation des dépendances.
+
+## Étape 10 – Validation navigation complète : ✅
+- Toutes les routes vérifiées après installation des dépendances.
+- `npm run lint` et `npm test` passent.
+
+## Étape 11 – Vérification finale des tests : ✅
+- `npm run lint` et `npm test` passent après installation des dépendances.
+
+## Étape 12 – Dernière revue : ✅
+- Exécution finale de `npm run lint` et `npm test` après installation des dépendances.
+- Tous les modules vérifiés une dernière fois.
+
+## Étape 13 – Tests après corrections : ✅
+- Installation des dépendances manquantes.
+- `npm run lint` et `npm test` passent sans erreur.
+
+## Étape 14 – Validation finale navigation : ✅
+- Exécution de `npm install` pour restaurer les dépendances.
+- `npm run lint` et `npm test` passent sans erreur.
+- Toutes les routes des modules principaux vérifiées une dernière fois.
+
+## Étape 15 – Validation finale bis : ✅
+- Réinstallation des dépendances et exécution de `npm run lint` et `npm test`.
+- Tout passe sans erreur.
+
+## Étape 16 – Tests après installation : ✅
+- `npm install` executed successfully.
+- `npm run lint` passed with warnings.
+- `npm test` passed.

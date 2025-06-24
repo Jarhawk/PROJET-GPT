@@ -51,7 +51,7 @@ export default function Login() {
       const { data: profil } = await supabase
         .from("utilisateurs")
         .select("actif")
-        .eq("auth_id", data.user.id)
+        .eq("id", data.user.id)
         .maybeSingle();
       if (!profil) {
         toast.error("Profil inexistant");

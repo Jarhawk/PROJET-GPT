@@ -50,7 +50,7 @@ export default function Login() {
     } else {
       const { data: profil } = await supabase
         .from("utilisateurs")
-        .select("id")
+        .select("id, mama_id")
         .eq("auth_id", data.user.id)
         .maybeSingle();
       if (!profil) {
@@ -58,7 +58,7 @@ export default function Login() {
         navigate("/unauthorized");
       } else {
         toast.success("Connecté !");
-        navigate("/dashboard");
+        navigate(profil.mama_id ? "/dashboard" : "/create-mama");
       }
     }
   };

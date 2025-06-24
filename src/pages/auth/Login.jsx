@@ -50,11 +50,15 @@ export default function Login() {
     } else {
       const { data: profil } = await supabase
         .from("utilisateurs")
-        .select("id, mama_id")
+        .select("mama_id, access_rights, actif")
         .eq("auth_id", data.user.id)
         .maybeSingle();
       if (!profil) {
-        toast.error("Profil inexistant");
+        toast("Compte en cours de création");
+        navigate("/pending");
+      } else if (profil.actif === false) {
+        navigate("/blocked");
+      } else if (!profil.access_rights || profil.access_rights.length === 0) {
         navigate("/unauthorized");
       } else {
         toast.success("Connecté !");

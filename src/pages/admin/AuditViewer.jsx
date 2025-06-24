@@ -89,7 +89,7 @@ export default function AuditViewer() {
                 <td className="px-2 py-1 whitespace-nowrap">
                   {new Date(l.created_at).toLocaleString()}
                 </td>
-                <td className="px-2 py-1">{l.users?.email || l.user_id}</td>
+                <td className="px-2 py-1">{l.utilisateurs?.email || l.user_id}</td>
                 <td className="px-2 py-1">
                   {l._source === "security" ? "🛡️" : "✏️"} {l.action || l.type}
                 </td>

@@ -41,7 +41,7 @@ export function useLogs() {
     const rows = (logs || []).map(l => ({
       date: l.created_at,
       action: l.action,
-      utilisateur: l.users?.email || l.done_by,
+      utilisateur: l.utilisateurs?.email || l.done_by,
     }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "Logs");

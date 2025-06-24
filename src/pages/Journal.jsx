@@ -67,7 +67,7 @@ export default function Journal() {
                 {new Date(l.created_at).toLocaleString()}
               </td>
               <td className="px-2 py-1">{l.action}</td>
-              <td className="px-2 py-1">{l.users?.email || l.done_by}</td>
+              <td className="px-2 py-1">{l.utilisateurs?.email || l.done_by}</td>
             </tr>
           ))}
         </tbody>

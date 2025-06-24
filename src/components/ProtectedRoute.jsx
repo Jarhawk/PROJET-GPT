@@ -9,8 +9,8 @@ export default function ProtectedRoute({ accessKey, children }) {
 
   if (!session) return <Navigate to="/login" />;
   if (actif === false) return <Navigate to="/blocked" />;
-  if (!role || mama_id === null || access_rights === null) {
-    return <Navigate to="/unauthorized" />;
+  if (role === null || mama_id === null || access_rights === null) {
+    return <Navigate to="/pending" />;
   }
   if (!mama_id && location.pathname !== "/create-mama") {
     return <Navigate to="/create-mama" />;
@@ -20,6 +20,9 @@ export default function ProtectedRoute({ accessKey, children }) {
     accessKey &&
     !access_rights.includes(accessKey)
   ) {
+    return <Navigate to="/unauthorized" />;
+  }
+  if (Array.isArray(access_rights) && access_rights.length === 0) {
     return <Navigate to="/unauthorized" />;
   }
 

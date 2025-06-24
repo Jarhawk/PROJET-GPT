@@ -12,82 +12,72 @@ export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null); // Session Supabase
-  const [userData, setUserData] = useState({
-    role: null,
-    mama_id: null,
-    access_rights: [],
-    auth_id: null,
-    actif: true,
-    user_id: null,
-  });
+  const [userData, setUserData] = useState(null); // Données utilisateurs
   const [loading, setLoading] = useState(true); // Chargement initial/refresh
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   async function refreshUser(sessionParam) {
     const current = sessionParam || session;
-    if (current) await fetchUserData(current);
+    if (current) {
+      setLoading(true);
+      await fetchUserData(current);
+      setLoading(false);
+    }
   }
 
   // Login utilisateur avec gestion 2FA
   const login = async ({ email, password, totp }) => {
-    let authData;
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       if (error) throw error;
-      authData = data;
-    } catch (err) {
-      if (err?.message) toast.error(err.message);
-      if (err?.status === 500) toast.error("Erreur serveur Supabase (500)");
-      return { error: err?.message || "Erreur" };
-    }
-    const { session: newSession, user } = authData;
-    const { data: twoFA } = await supabase
-      .from("two_factor_auth")
-      .select("secret, enabled")
-      .eq("id", user.id)
-      .single();
 
-    if (twoFA?.enabled) {
-      if (!totp || !authenticator.check(totp, twoFA.secret)) {
-        await supabase.auth.signOut();
-        return { error: "Code 2FA invalide", twofaRequired: true };
+      const { session: newSession, user } = data;
+      const { data: twoFA } = await supabase
+        .from("two_factor_auth")
+        .select("secret, enabled")
+        .eq("id", user.id)
+        .single();
+
+      if (twoFA?.enabled) {
+        if (!totp || !authenticator.check(totp, twoFA.secret)) {
+          await supabase.auth.signOut();
+          return { error: "Code 2FA invalide", twofaRequired: true };
+        }
       }
-    }
 
-    setSession(newSession);
-    await fetchUserData(newSession);
-    return { data: newSession };
+      setSession(newSession);
+      await fetchUserData(newSession);
+      return { data: newSession };
+    } catch (err) {
+      toast.error(err?.message || "Échec de la connexion");
+      return { error: err?.message };
+    }
   };
 
   async function fetchUserData(session) {
     if (!session?.user) {
-      setUserData({
-        role: null,
-        mama_id: null,
-        access_rights: [],
-        auth_id: null,
-        actif: true,
-        user_id: null,
-      });
+      setUserData(null);
       return;
     }
     const { data, error, status } = await supabase
       .from("utilisateurs")
       .select("role, mama_id, access_rights, actif")
       .eq("auth_id", session.user.id)
-      .single();
+      .maybeSingle();
 
-    if (error) {
-      if (status === 400) navigate("/unauthorized");
+    if (error && status !== 406) {
+      setError(error.message);
       toast.error(error.message);
       return;
     }
 
-    if (!data || data.role === null || data.mama_id === null || data.access_rights === null) {
-      navigate("/unauthorized");
+    if (!data) {
+      // Row not yet created
+      setUserData(null);
       return;
     }
 
@@ -102,7 +92,7 @@ export function AuthProvider({ children }) {
         actif: false,
         user_id: session.user.id,
       });
-      window.location.href = "/blocked";
+      navigate("/blocked");
       return;
     }
 
@@ -133,14 +123,7 @@ export function AuthProvider({ children }) {
         await fetchUserData(session);
         setLoading(false);
       } else {
-        setUserData({
-          role: null,
-          mama_id: null,
-          access_rights: [],
-          auth_id: null,
-          actif: true,
-          user_id: null,
-        });
+        setUserData(null);
       }
     });
 
@@ -151,27 +134,26 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     await supabase.auth.signOut();
     setSession(null);
-    setUserData({
-      role: null,
-      mama_id: null,
-      access_rights: [],
-      auth_id: null,
-      actif: true,
-      user_id: null,
-    });
-    window.location.href = "/login";
+    setUserData(null);
+    navigate("/login");
   };
 
   // Exporte le contexte
   const value = {
-    ...userData,
+    role: userData?.role ?? null,
+    mama_id: userData?.mama_id ?? null,
+    access_rights: userData?.access_rights ?? [],
+    auth_id: userData?.auth_id ?? null,
+    actif: userData?.actif ?? true,
+    user_id: userData?.user_id ?? null,
     session,
     loading,
+    error,
     login,
     logout,
     refreshUser,
     isAuthenticated: !!session,
-    isAdmin: userData.role === "admin" || userData.role === "superadmin",
+    isAdmin: userData?.role === "admin" || userData?.role === "superadmin",
   };
 
   return (

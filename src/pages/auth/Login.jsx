@@ -7,7 +7,7 @@ import useFormErrors from "@/hooks/useFormErrors";
 import GlassCard from "@/components/ui/GlassCard";
 import PageWrapper from "@/components/ui/PageWrapper";
 import PrimaryButton from "@/components/ui/PrimaryButton";
-import { supabase } from "@/lib/supabase";
+
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -35,31 +35,20 @@ export default function Login() {
     if (!email || !password) return;
 
     setLoading(true);
-    const { data, error, twofaRequired } = await login({ email, password, totp });
+    const { error, twofaRequired } = await login({ email, password, totp });
 
     if (error) {
+      toast.error(error);
       if (twofaRequired) {
         setTwoFA(true);
         setError("totp", error);
       } else {
         setError("password", error);
       }
-      if (error) toast.error(error);
-      else toast.error("Échec de la connexion");
       setLoading(false);
     } else {
-      const { data: profil } = await supabase
-        .from("utilisateurs")
-        .select("id, mama_id")
-        .eq("auth_id", data.user.id)
-        .maybeSingle();
-      if (!profil) {
-        toast.error("Profil inexistant");
-        navigate("/unauthorized");
-      } else {
-        toast.success("Connecté !");
-        navigate(profil.mama_id ? "/dashboard" : "/create-mama");
-      }
+      toast.success("Connecté !");
+      navigate("/dashboard");
     }
   };
 

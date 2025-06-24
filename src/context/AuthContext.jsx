@@ -15,6 +15,8 @@ export function AuthProvider({ children }) {
     role: null,
     mama_id: null,
     access_rights: [],
+    auth_id: null,
+    actif: true,
     user_id: null,
   });
   const [loading, setLoading] = useState(true); // Chargement initial/refresh
@@ -60,19 +62,28 @@ export function AuthProvider({ children }) {
 
   async function fetchUserData(session) {
     if (!session?.user) {
-      setUserData({ role: null, mama_id: null, access_rights: [], user_id: null });
+      setUserData({
+        role: null,
+        mama_id: null,
+        access_rights: [],
+        auth_id: null,
+        actif: true,
+        user_id: null,
+      });
       return;
     }
     const { data } = await supabase
-      .from("users")
-      .select("role, mama_id, access_rights")
-      .eq("id", session.user.id)
+      .from("utilisateurs")
+      .select("role, mama_id, access_rights, actif")
+      .eq("auth_id", session.user.id)
       .single();
 
     setUserData({
       role: data?.role || null,
       mama_id: data?.mama_id || null,
       access_rights: Array.isArray(data?.access_rights) ? data.access_rights : [],
+      auth_id: session.user.id,
+      actif: data?.actif ?? true,
       user_id: session.user.id,
     });
   }
@@ -94,7 +105,14 @@ export function AuthProvider({ children }) {
         await fetchUserData(session);
         setLoading(false);
       } else {
-        setUserData({ role: null, mama_id: null, access_rights: [], user_id: null });
+        setUserData({
+          role: null,
+          mama_id: null,
+          access_rights: [],
+          auth_id: null,
+          actif: true,
+          user_id: null,
+        });
       }
     });
 
@@ -105,7 +123,14 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     await supabase.auth.signOut();
     setSession(null);
-    setUserData({ role: null, mama_id: null, access_rights: [], user_id: null });
+    setUserData({
+      role: null,
+      mama_id: null,
+      access_rights: [],
+      auth_id: null,
+      actif: true,
+      user_id: null,
+    });
     window.location.href = "/login";
   };
 

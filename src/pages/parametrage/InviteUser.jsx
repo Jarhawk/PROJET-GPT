@@ -34,7 +34,7 @@ export default function InviteUser({ onClose, onInvited }) {
 
     // Empêche doublon email
     const { data: existingUser } = await supabase
-      .from("users")
+      .from("utilisateurs")
       .select("id")
       .eq("email", values.email)
       .maybeSingle();
@@ -46,7 +46,7 @@ export default function InviteUser({ onClose, onInvited }) {
     }
 
     const { error } = await supabase
-      .from("users")
+      .from("utilisateurs")
       .insert([
         {
           email: values.email,

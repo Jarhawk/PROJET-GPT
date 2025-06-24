@@ -17,7 +17,7 @@ export default function InvitationsEnAttente() {
     supabase.from("roles").select("*").then(({ data }) => setRoles(data || []));
     setLoading(true);
     supabase
-      .from("users")
+      .from("utilisateurs")
       .select("id, email, mama_id, role, invite_pending, actif, created_at")
       .eq("invite_pending", true)
       .order("created_at", { ascending: false })
@@ -44,7 +44,7 @@ export default function InvitationsEnAttente() {
   };
 
   const handleCancel = async (userId) => {
-    await supabase.from("users").delete().eq("id", userId);
+    await supabase.from("utilisateurs").delete().eq("id", userId);
     setInvites(invites => invites.filter(u => u.id !== userId));
     setConfirmDeleteId(null);
     toast.success("Invitation annulée !");

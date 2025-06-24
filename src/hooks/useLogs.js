@@ -19,7 +19,7 @@ export function useLogs() {
     setError(null);
     let query = supabase
       .from("user_logs")
-      .select("*, users:done_by(email)")
+      .select("*, utilisateurs:done_by(email)")
       .eq("mama_id", mama_id)
       .order("created_at", { ascending: false })
       .range((page - 1) * limit, page * limit - 1);

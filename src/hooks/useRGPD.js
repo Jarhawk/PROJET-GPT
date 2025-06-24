@@ -14,7 +14,7 @@ export function useRGPD() {
   async function getUserDataExport(userId = user_id) {
     if (!userId) return null;
     const { data: profil } = await supabase
-      .from("users")
+      .from("utilisateurs")
       .select("id,email,created_at")
       .eq("id", userId)
       .single();
@@ -28,7 +28,7 @@ export function useRGPD() {
 
   async function purgeUserData(userId) {
     if (role !== "superadmin") return { error: "not allowed" };
-    return await supabase.from("users").delete().eq("id", userId);
+    return await supabase.from("utilisateurs").delete().eq("id", userId);
   }
 
   return { logAccess, getUserDataExport, purgeUserData };

@@ -16,13 +16,13 @@ export default function AuditViewer() {
     setLoading(true);
     const { data: audit } = await supabase
       .from("logs_audit")
-      .select("*, users:user_id(email)")
+      .select("*, utilisateurs:user_id(email)")
       .eq("mama_id", mama_id)
       .order("created_at", { ascending: false })
       .limit(200);
     const { data: security } = await supabase
       .from("logs_securite")
-      .select("*, users:user_id(email)")
+      .select("*, utilisateurs:user_id(email)")
       .eq("mama_id", mama_id)
       .order("created_at", { ascending: false })
       .limit(200);

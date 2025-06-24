@@ -47,9 +47,12 @@ Create a `.env` file at the project root with your Supabase credentials. For
 development this repository already includes default values:
 
 ```env
+PUBLIC_API_KEY=dev_key
 VITE_SUPABASE_URL=https://jhpfdeolleprmvtchoxt.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpocGZkZW9sbGVwcm12dGNob3h0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY3MjI4MzMsImV4cCI6MjA2MjI5ODgzM30.f_J81QTBK4cvFoFUvlY6XNmuS5DSMLUdT_ZQQ7FpOFQ
 ```
+`PUBLIC_API_KEY` is used by the Express routes in `src/api/public`. Set it to a strong random string in production to authorize external requests.
+
 
 These variables are loaded by Vite during development and build.
 

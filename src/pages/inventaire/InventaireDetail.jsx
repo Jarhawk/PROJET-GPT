@@ -15,7 +15,7 @@ export default function InventaireDetail() {
 
   useEffect(() => {
     if (id) getInventaireById(id).then(setInventaire);
-  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [id]);
 
   if (!inventaire) return <div className="p-6">Chargement...</div>;
 

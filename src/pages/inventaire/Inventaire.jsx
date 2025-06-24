@@ -11,7 +11,7 @@ export default function Inventaire() {
 
   useEffect(() => {
     getInventaires();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   const filtered = inventaires
     .filter(i => !zoneFilter || i.zone === zoneFilter)

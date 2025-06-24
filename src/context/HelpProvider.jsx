@@ -69,6 +69,7 @@ export function HelpProvider({ children }) {
   return <HelpContext.Provider value={value}>{children}</HelpContext.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useHelp() {
   return useContext(HelpContext) || {};
 }

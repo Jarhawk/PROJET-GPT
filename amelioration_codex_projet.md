@@ -11,6 +11,9 @@
   - Vérification d'un token Bearer avec Supabase lorsque disponible.
 - Ajout de l'entête `/* eslint-env node */` pour les fichiers de l'API afin que ESLint reconnaisse l'environnement Node.
 - Mise à jour des tests unitaires pour refléter le nouvel alias `utilisateurs`.
+- Nettoyage des directives ESLint inutiles et ajout de commentaires
+  `react-refresh/only-export-components` pour les hooks exportés.
+- Les variables d'environnement clés sont maintenant documentées dans `README.md`.
 
 ## 🟢 Suggestions d'amélioration futures
 - Compléter l'implémentation des routes publiques `produits` et `stock` (actuellement placeholders).
@@ -19,4 +22,5 @@
 
 ## 🔖 TODO
 - Vérifier l'impact de la nouvelle authentification sur l'appel du SDK `mamastock-sdk`.
-- Documenter les variables d'environnement nécessaires (`PUBLIC_API_KEY`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`).
+- Poursuivre la documentation et vérifier que le SDK interne gère correctement
+  l'authentification via clé API ou JWT.

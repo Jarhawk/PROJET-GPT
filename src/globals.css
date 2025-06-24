@@ -3,9 +3,9 @@
 @tailwind utilities;
 
 :root {
-  --mamastock-bg: #0f1c2e;
-  --mamastock-text: #f0f0f5;
-  --mamastock-gold: #bfa14d;
+  --mamastock-bg: #0C1C2E;
+  --mamastock-text: #FFFFFF;
+  --mamastock-gold: #F6C343;
   /* Theme variables overridable via ThemeProvider */
   --primary-color: var(--mamastock-gold);
   --secondary-color: var(--mamastock-bg);
@@ -14,7 +14,7 @@
 /* Style custom global pour MamaStock */
 body {
   font-family: "Inter", sans-serif;
-  @apply bg-gradient-to-br from-[#2b4b61] to-[#6c92a9] text-white;
+  @apply bg-background text-text;
 }
 
 a {
@@ -84,7 +84,7 @@ a:hover {
 
 /* Dark mode auto */
 html.dark body {
-  @apply bg-gradient-to-br from-[#2b4b61] to-[#6c92a9] text-white;
+  @apply bg-background text-text;
 }
 /* Animations LiquidGlass & glass panel */
 .animate-liquid { animation: glassMove 12s ease-in-out infinite alternate; }

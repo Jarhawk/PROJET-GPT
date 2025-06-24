@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { beforeAll, beforeEach, afterEach, test, expect, vi } from 'vitest';
+import { beforeAll, afterEach, test, expect, vi } from 'vitest';
 import fs from 'fs';
 
 // reset log file before tests

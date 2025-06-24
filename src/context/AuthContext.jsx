@@ -75,8 +75,8 @@ export function AuthProvider({ children }) {
     const { data } = await supabase
       .from("utilisateurs")
       .select("role, mama_id, access_rights, actif")
-      .eq("auth_id", session.user.id)
-      .single();
+      .eq("id", session.user.id)
+      .maybeSingle();
 
     setUserData({
       role: data?.role || null,

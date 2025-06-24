@@ -2,6 +2,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import MamaLogo from "@/components/ui/MamaLogo";
+import toast from "react-hot-toast";
+import PageWrapper from "@/components/ui/PageWrapper";
+import GlassCard from "@/components/ui/GlassCard";
 
 export default function Signup() {
   const [restaurant, setRestaurant] = useState("");
@@ -13,33 +16,39 @@ export default function Signup() {
   const handleSignup = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const { data: authData, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-    if (error) {
+
+    try {
+      const { data: authData, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+
+      const { data: mama } = await supabase
+        .from("mamas")
+        .insert({ nom: restaurant })
+        .select()
+        .single();
+
+      await supabase
+        .from("users")
+        .update({ role: "admin", mama_id: mama.id })
+        .eq("id", authData.user.id);
+
+      navigate("/onboarding");
+    } catch (err) {
+      if (err?.message) toast.error(err.message);
+      if (err?.status === 500) toast.error("Erreur serveur Supabase (500)");
+    } finally {
       setLoading(false);
-      return;
     }
-    const { data: mama } = await supabase
-      .from("mamas")
-      .insert({ nom: restaurant })
-      .select()
-      .single();
-    await supabase
-      .from("users")
-      .update({ role: "admin", mama_id: mama.id })
-      .eq("id", authData.user.id);
-    setLoading(false);
-    navigate("/onboarding");
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f1c2e] via-[#232a34] to-[#bfa14d] p-8">
-      <form
-        onSubmit={handleSignup}
-        className="w-full max-w-md bg-white/30 backdrop-blur-xl rounded-xl p-8 space-y-4"
-      >
+    <PageWrapper>
+      <GlassCard className="space-y-4">
+        <form onSubmit={handleSignup} className="space-y-4">
         <div className="text-center">
           <MamaLogo width={80} className="mx-auto mb-4" />
           <h1 className="text-xl font-bold text-white">Créer un compte</h1>
@@ -79,7 +88,8 @@ export default function Signup() {
         >
           {loading ? "Création..." : "S'inscrire"}
         </button>
-      </form>
-    </div>
+        </form>
+      </GlassCard>
+    </PageWrapper>
   );
 }

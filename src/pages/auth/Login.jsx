@@ -43,7 +43,8 @@ export default function Login() {
       } else {
         setError("password", error);
       }
-      toast.error("Échec de la connexion");
+      if (error) toast.error(error);
+      else toast.error("Échec de la connexion");
       setLoading(false);
     } else {
       toast.success("Connecté !");

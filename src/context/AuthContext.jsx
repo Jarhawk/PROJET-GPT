@@ -22,6 +22,7 @@ export function AuthProvider({ children }) {
     user_id: null,
   });
   const [loading, setLoading] = useState(true); // Chargement initial/refresh
+  const [pending, setPending] = useState(false); // ligne utilisateurs manquante
   const navigate = useNavigate();
 
   async function refreshUser(sessionParam) {
@@ -63,6 +64,22 @@ export function AuthProvider({ children }) {
     return { data: newSession };
   };
 
+  // Création de compte
+  const signup = async ({ email, password }) => {
+    try {
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      if (error) throw error;
+      if (data.session) {
+        setSession(data.session);
+        await fetchUserData(data.session);
+      }
+      return { data };
+    } catch (err) {
+      toast.error(err?.message || "Erreur");
+      return { error: err?.message || "Erreur" };
+    }
+  };
+
   async function fetchUserData(session) {
     if (!session?.user) {
       setUserData({
@@ -73,24 +90,35 @@ export function AuthProvider({ children }) {
         actif: true,
         user_id: null,
       });
+      setPending(false);
       return;
     }
     const { data, error, status } = await supabase
       .from("utilisateurs")
       .select("role, mama_id, access_rights, actif")
       .eq("auth_id", session.user.id)
-      .single();
+      .maybeSingle();
 
-    if (error) {
+    if (error && status !== 406) {
       if (status === 400) navigate("/unauthorized");
       toast.error(error.message);
       return;
     }
 
-    if (!data || data.role === null || data.mama_id === null || data.access_rights === null) {
-      navigate("/unauthorized");
+    if (!data) {
+      setPending(true);
+      setUserData({
+        role: null,
+        mama_id: null,
+        access_rights: null,
+        auth_id: session.user.id,
+        actif: true,
+        user_id: session.user.id,
+      });
       return;
     }
+
+    setPending(false);
 
     if (data && data.actif === false) {
       await supabase.auth.signOut();
@@ -142,6 +170,7 @@ export function AuthProvider({ children }) {
           actif: true,
           user_id: null,
         });
+        setPending(false);
       }
     });
 
@@ -160,6 +189,7 @@ export function AuthProvider({ children }) {
       actif: true,
       user_id: null,
     });
+    setPending(false);
     window.location.href = "/login";
   };
 
@@ -168,7 +198,9 @@ export function AuthProvider({ children }) {
     ...userData,
     session,
     loading,
+    pending,
     login,
+    signup,
     logout,
     refreshUser,
     isAuthenticated: !!session,

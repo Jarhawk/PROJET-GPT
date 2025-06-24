@@ -4,6 +4,9 @@ import MamaLogo from "@/components/ui/MamaLogo";
 import useAuth from "@/hooks/useAuth";
 import toast, { Toaster } from "react-hot-toast";
 import useFormErrors from "@/hooks/useFormErrors";
+import GlassCard from "@/components/ui/GlassCard";
+import PageWrapper from "@/components/ui/PageWrapper";
+import PrimaryButton from "@/components/ui/PrimaryButton";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -49,35 +52,19 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f1c2e] via-[#232a34] to-[#bfa14d] relative overflow-hidden animate-fade-in">
-      {/* Liquid/Glass dynamic background */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        {/* Big gold blur top left */}
-        <div className="absolute top-[-10%] left-[-20%] w-[500px] h-[400px] bg-gradient-to-br from-[#bfa14d] via-[#fff8e1]/70 to-[#c4a65d]/0 blur-[90px] rounded-full opacity-40 animate-liquid" />
-        {/* White flare bottom right */}
-        <div className="absolute bottom-[-20%] right-[-18%] w-[480px] h-[420px] bg-gradient-to-br from-[#fff8e1]/90 via-white/60 to-transparent blur-[80px] rounded-full opacity-20 animate-liquid2" />
-        {/* Subtle center ripple */}
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[280px] h-[180px] bg-white/20 blur-2xl rounded-[36%_54%_41%_59%/50%_41%_59%_50%] opacity-15 animate-liquid3" />
-      </div>
-      <div className="z-10 w-full max-w-md mx-auto">
-        <Toaster position="top-right" />
-        <div
-          className="rounded-2xl shadow-2xl bg-white/30 dark:bg-[#202638]/40 border border-white/30 backdrop-blur-xl px-8 py-12 flex flex-col items-center glass-panel auth-card"
-        >
-          <div className="mb-6 animate-fade-in-down">
-            <MamaLogo width={96} className="animate-fade-in-down" />
-          </div>
-          <h2 className="text-3xl font-bold text-mamastockGold drop-shadow mb-1 text-center tracking-wide">
-            Connexion
-          </h2>
-          <p className="text-xs text-mamastockText/70 text-center mb-6">
-            Plateforme F&B<br />by MamaStock
-          </p>
-          <form onSubmit={handleLogin} className="w-full flex flex-col gap-4 animate-fade-in-down">
+    <PageWrapper>
+      <Toaster position="top-right" />
+      <GlassCard className="flex flex-col items-center">
+        <div className="mb-6">
+          <MamaLogo width={96} />
+        </div>
+        <h2 className="text-3xl font-bold text-gold text-shadow mb-1 text-center">Connexion</h2>
+        <p className="text-xs text-white/70 text-center mb-6">Plateforme F&B<br />by MamaStock</p>
+        <form onSubmit={handleLogin} className="w-full flex flex-col gap-4">
             <div>
-              <label className="block text-xs font-semibold text-mamastockText/90 mb-1">Email</label>
+              <label className="block text-xs font-semibold text-white/90 mb-1">Email</label>
               <input
-                className="w-full rounded-xl border border-mamastockGold/30 bg-white/70 dark:bg-[#202638]/50 py-2 px-4 text-mamastockBg dark:text-white placeholder-mamastockText/40 focus:outline-none focus:ring-2 focus:ring-mamastockGold/30 backdrop-blur transition"
+                className="w-full rounded-xl border border-gold/30 bg-white/70 dark:bg-[#202638]/50 py-2 px-4 text-background dark:text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-gold/30 backdrop-blur transition"
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
@@ -91,9 +78,9 @@ export default function Login() {
               )}
             </div>
             <div>
-              <label className="block text-xs font-semibold text-mamastockText/90 mb-1">Mot de passe</label>
+              <label className="block text-xs font-semibold text-white/90 mb-1">Mot de passe</label>
               <input
-                className="w-full rounded-xl border border-mamastockGold/30 bg-white/70 dark:bg-[#202638]/50 py-2 px-4 text-mamastockBg dark:text-white placeholder-mamastockText/40 focus:outline-none focus:ring-2 focus:ring-mamastockGold/30 backdrop-blur transition"
+                className="w-full rounded-xl border border-gold/30 bg-white/70 dark:bg-[#202638]/50 py-2 px-4 text-background dark:text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-gold/30 backdrop-blur transition"
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
@@ -107,9 +94,9 @@ export default function Login() {
             </div>
             {twoFA && (
               <div>
-                <label className="block text-xs font-semibold text-mamastockText/90 mb-1">Code 2FA</label>
+              <label className="block text-xs font-semibold text-white/90 mb-1">Code 2FA</label>
                 <input
-                  className="w-full rounded-xl border border-mamastockGold/30 bg-white/70 dark:bg-[#202638]/50 py-2 px-4 text-mamastockBg dark:text-white placeholder-mamastockText/40 focus:outline-none focus:ring-2 focus:ring-mamastockGold/30 backdrop-blur transition"
+                  className="w-full rounded-xl border border-gold/30 bg-white/70 dark:bg-[#202638]/50 py-2 px-4 text-background dark:text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-gold/30 backdrop-blur transition"
                   type="text"
                   value={totp}
                   onChange={e => setTotp(e.target.value)}
@@ -120,9 +107,9 @@ export default function Login() {
                 )}
               </div>
             )}
-            <button
-              className="w-full mt-3 py-2 rounded-xl bg-mamastockGold hover:bg-[#b89730] text-white font-semibold text-lg shadow transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+            <PrimaryButton
               type="submit"
+              className="w-full mt-3 flex items-center justify-center gap-2 disabled:opacity-50"
               disabled={!email || !password || loading || (twoFA && !totp)}
             >
               {loading ? (
@@ -133,18 +120,14 @@ export default function Login() {
               ) : (
                 "Se connecter"
               )}
-            </button>
+            </PrimaryButton>
             <div className="text-right mt-2">
-              <Link
-                to="/reset-password"
-                className="text-xs text-mamastockGold hover:underline"
-              >
+              <Link to="/reset-password" className="text-xs text-gold hover:underline">
                 Mot de passe oublié ?
               </Link>
             </div>
           </form>
-        </div>
-      </div>
-    </div>
+        </GlassCard>
+      </PageWrapper>
   );
 }

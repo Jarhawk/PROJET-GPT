@@ -87,7 +87,7 @@ export function useStock() {
     if (!user?.mama_id) return [];
     const { data, error } = await supabase
       .from("inventaires")
-      .select("*, users:created_by(username)")
+      .select("*, utilisateurs:created_by(email)")
       .eq("mama_id", user.mama_id)
       .order("date", { ascending: false });
     if (error) return [];

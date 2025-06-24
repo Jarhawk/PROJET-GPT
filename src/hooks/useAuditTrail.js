@@ -13,7 +13,7 @@ export function useAuditTrail() {
     setLoading(true);
     let query = supabase
       .from("audit_entries")
-      .select("*, users:changed_by(email)")
+      .select("*, utilisateurs:changed_by(email)")
       .order("changed_at", { ascending: false })
       .limit(100);
     if (table) query = query.eq("table_name", table);

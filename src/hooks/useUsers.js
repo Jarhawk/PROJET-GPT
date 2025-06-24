@@ -16,7 +16,7 @@ export function useUsers() {
     setLoading(true);
     setError(null);
     let query = supabase
-      .from("users")
+      .from("utilisateurs")
       .select("id, email, actif, mama_id, role, access_rights")
       .order("email", { ascending: true });
 
@@ -38,7 +38,7 @@ export function useUsers() {
     setLoading(true);
     setError(null);
     const { error } = await supabase
-      .from("users")
+      .from("utilisateurs")
       .insert([{ ...user, mama_id }]);
     if (error) setError(error);
     setLoading(false);
@@ -51,7 +51,7 @@ export function useUsers() {
     setLoading(true);
     setError(null);
     const { error } = await supabase
-      .from("users")
+      .from("utilisateurs")
       .update(updateFields)
       .eq("id", id);
     if (error) setError(error);
@@ -65,7 +65,7 @@ export function useUsers() {
     setLoading(true);
     setError(null);
     const { error } = await supabase
-      .from("users")
+      .from("utilisateurs")
       .update({ actif })
       .eq("id", id);
     if (error) setError(error);
@@ -79,7 +79,7 @@ export function useUsers() {
     setLoading(true);
     setError(null);
     const { error } = await supabase
-      .from("users")
+      .from("utilisateurs")
       .update({ actif: false })
       .eq("id", id);
     if (error) setError(error);

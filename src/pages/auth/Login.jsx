@@ -7,6 +7,7 @@ import useFormErrors from "@/hooks/useFormErrors";
 import GlassCard from "@/components/ui/GlassCard";
 import PageWrapper from "@/components/ui/PageWrapper";
 import PrimaryButton from "@/components/ui/PrimaryButton";
+import { supabase } from "@/lib/supabase";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -34,7 +35,7 @@ export default function Login() {
     if (!email || !password) return;
 
     setLoading(true);
-    const { error, twofaRequired } = await login({ email, password, totp });
+    const { data, error, twofaRequired } = await login({ email, password, totp });
 
     if (error) {
       if (twofaRequired) {
@@ -47,8 +48,20 @@ export default function Login() {
       else toast.error("Échec de la connexion");
       setLoading(false);
     } else {
-      toast.success("Connecté !");
-      navigate("/dashboard");
+      const { data: profil } = await supabase
+        .from("utilisateurs")
+        .select("actif")
+        .eq("auth_id", data.user.id)
+        .maybeSingle();
+      if (!profil) {
+        toast.error("Profil inexistant");
+        navigate("/unauthorized");
+      } else if (profil.actif === false) {
+        navigate("/blocked");
+      } else {
+        toast.success("Connecté !");
+        navigate("/dashboard");
+      }
     }
   };
 

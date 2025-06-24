@@ -31,10 +31,13 @@ export default function Signup() {
         .select()
         .single();
 
-      await supabase
-        .from("users")
-        .update({ role: "admin", mama_id: mama.id })
-        .eq("id", authData.user.id);
+      await supabase.from("utilisateurs").insert({
+        auth_id: authData.user.id,
+        email,
+        mama_id: mama.id,
+        role: "admin",
+        actif: true,
+      });
 
       navigate("/onboarding");
     } catch (err) {

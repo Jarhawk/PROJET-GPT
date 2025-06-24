@@ -49,12 +49,16 @@ development this repository already includes default values:
 ```env
 VITE_SUPABASE_URL=https://jhpfdeolleprmvtchoxt.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpocGZkZW9sbGVwcm12dGNob3h0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY3MjI4MzMsImV4cCI6MjA2MjI5ODgzM30.f_J81QTBK4cvFoFUvlY6XNmuS5DSMLUdT_ZQQ7FpOFQ
+PUBLIC_API_KEY=dev-public-key
 ```
 
 These variables are loaded by Vite during development and build.
 
 The `.env` file is not tracked by Git, so you can safely replace these
 defaults with your own credentials for local development.
+
+`PUBLIC_API_KEY` authenticates requests to the `/api/public` routes when no
+Bearer token is provided. Use a random value in production.
 
 ## Tests
 

@@ -17,6 +17,10 @@ body {
   @apply bg-background text-text;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 a {
   color: #bfa14d;
   text-decoration: none;

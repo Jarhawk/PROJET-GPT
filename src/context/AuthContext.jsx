@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { authenticator } from "otplib";
 import { supabase } from "@/lib/supabase";
+import toast from "react-hot-toast";
 
 // Contexte global Auth
 // Exported separately for hooks like src/hooks/useAuth.js
@@ -25,13 +26,20 @@ export function AuthProvider({ children }) {
 
   // Login utilisateur avec gestion 2FA
   const login = async ({ email, password, totp }) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) return { error };
-
-    const { session: newSession, user } = data;
+    let authData;
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw error;
+      authData = data;
+    } catch (err) {
+      if (err?.message) toast.error(err.message);
+      if (err?.status === 500) toast.error("Erreur serveur Supabase (500)");
+      return { error: err?.message || "Erreur" };
+    }
+    const { session: newSession, user } = authData;
     const { data: twoFA } = await supabase
       .from("two_factor_auth")
       .select("secret, enabled")

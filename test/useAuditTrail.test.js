@@ -33,7 +33,7 @@ test('fetchEntries queries audit_entries with filters', async () => {
     await result.current.fetchEntries({ table: 'products', start: '2024-01-01', end: '2024-01-31' });
   });
   expect(fromMock).toHaveBeenCalledWith('audit_entries');
-  expect(queryObj.select).toHaveBeenCalledWith('*, users:changed_by(email)');
+  expect(queryObj.select).toHaveBeenCalledWith('*, utilisateurs:changed_by(email)');
   expect(queryObj.order).toHaveBeenCalledWith('changed_at', { ascending: false });
   expect(queryObj.limit).toHaveBeenCalledWith(100);
   expect(queryObj.eq).toHaveBeenCalledWith('table_name', 'products');

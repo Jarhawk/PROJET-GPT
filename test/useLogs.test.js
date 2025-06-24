@@ -33,7 +33,7 @@ test('fetchLogs queries user_logs', async () => {
   const { result } = renderHook(() => useLogs());
   await act(async () => { await result.current.fetchLogs({ search: 'TEST' }); });
   expect(fromMock).toHaveBeenCalledWith('user_logs');
-  expect(selectMock).toHaveBeenCalledWith('*, users:done_by(email)');
+  expect(selectMock).toHaveBeenCalledWith('*, utilisateurs:done_by(email)');
   expect(eqMock).toHaveBeenCalledWith('mama_id', 'm1');
   expect(orderMock).toHaveBeenCalledWith('created_at', { ascending: false });
   expect(ilikeMock).toHaveBeenCalledWith('action', '%TEST%');

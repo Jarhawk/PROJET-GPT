@@ -78,6 +78,21 @@ export function AuthProvider({ children }) {
       .eq("auth_id", session.user.id)
       .maybeSingle();
 
+    if (data && data.actif === false) {
+      await supabase.auth.signOut();
+      setSession(null);
+      setUserData({
+        role: null,
+        mama_id: null,
+        access_rights: [],
+        auth_id: session.user.id,
+        actif: false,
+        user_id: session.user.id,
+      });
+      window.location.href = "/blocked";
+      return;
+    }
+
     setUserData({
       role: data?.role || null,
       mama_id: data?.mama_id || null,

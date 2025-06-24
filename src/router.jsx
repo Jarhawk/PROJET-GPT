@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "@/layout/Layout";
 import Login from "@/pages/auth/Login";
 import Unauthorized from "@/pages/auth/Unauthorized";
+import Pending from "@/pages/auth/Pending";
 import Blocked from "@/pages/auth/Blocked";
 import AuthDebug from "@/pages/debug/AuthDebug";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -71,6 +72,7 @@ export default function Router() {
         <Route path="/logout" element={<Logout />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/create-mama" element={<CreateMama />} />
+        <Route path="/pending" element={<Pending />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/blocked" element={<Blocked />} />
         <Route path="/privacy" element={<PagePrivacy />} />

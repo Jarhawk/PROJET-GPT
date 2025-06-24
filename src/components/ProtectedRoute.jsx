@@ -1,5 +1,5 @@
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
+import useAuth from "@/hooks/useAuth";
 
 export default function ProtectedRoute({ accessKey, children }) {
   const { session, loading, access_rights, role, actif, mama_id } = useAuth();
@@ -9,6 +9,9 @@ export default function ProtectedRoute({ accessKey, children }) {
 
   if (!session) return <Navigate to="/login" />;
   if (actif === false) return <Navigate to="/blocked" />;
+  if (!role || mama_id === null || access_rights === null) {
+    return <Navigate to="/unauthorized" />;
+  }
   if (!mama_id && location.pathname !== "/create-mama") {
     return <Navigate to="/create-mama" />;
   }

@@ -1,6 +1,7 @@
 // src/context/AuthContext.jsx
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { authenticator } from "otplib";
 import { supabase } from "@/lib/supabase";
 import toast from "react-hot-toast";
@@ -20,6 +21,7 @@ export function AuthProvider({ children }) {
     user_id: null,
   });
   const [loading, setLoading] = useState(true); // Chargement initial/refresh
+  const navigate = useNavigate();
 
   async function refreshUser(sessionParam) {
     const current = sessionParam || session;
@@ -72,11 +74,22 @@ export function AuthProvider({ children }) {
       });
       return;
     }
-    const { data } = await supabase
+    const { data, error, status } = await supabase
       .from("utilisateurs")
       .select("role, mama_id, access_rights, actif")
       .eq("auth_id", session.user.id)
-      .maybeSingle();
+      .single();
+
+    if (error) {
+      if (status === 400) navigate("/unauthorized");
+      toast.error(error.message);
+      return;
+    }
+
+    if (!data || data.role === null || data.mama_id === null || data.access_rights === null) {
+      navigate("/unauthorized");
+      return;
+    }
 
     if (data && data.actif === false) {
       await supabase.auth.signOut();

@@ -49,6 +49,7 @@ const CatalogueSyncViewer = lazy(() => import("@/pages/catalogue/CatalogueSyncVi
 const CommandesEnvoyees = lazy(() => import("@/pages/commandes/CommandesEnvoyees.jsx"));
 const SimulationPlanner = lazy(() => import("@/pages/planning/SimulationPlanner.jsx"));
 const DashboardBuilder = lazy(() => import("@/pages/dashboard/DashboardBuilder.jsx"));
+const CreateMama = lazy(() => import("@/pages/auth/CreateMama.jsx"));
 const Requisitions = lazy(() => import("@/pages/requisitions/Requisitions.jsx"));
 const RequisitionForm = lazy(() => import("@/pages/requisitions/RequisitionForm.jsx"));
 const RequisitionDetail = lazy(() => import("@/pages/requisitions/RequisitionDetail.jsx"));
@@ -69,6 +70,7 @@ export default function Router() {
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="/create-mama" element={<CreateMama />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/blocked" element={<Blocked />} />
         <Route path="/privacy" element={<PagePrivacy />} />

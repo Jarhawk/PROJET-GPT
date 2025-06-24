@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 
 // Contexte global Auth
 // Exported separately for hooks like src/hooks/useAuth.js
+// eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {

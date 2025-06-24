@@ -20,7 +20,6 @@ export function MultiMamaProvider({ children }) {
 
   useEffect(() => {
     if (user_id) fetchMamas();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user_id, role]);
 
   async function fetchMamas() {
@@ -53,6 +52,7 @@ export function MultiMamaProvider({ children }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useMultiMama() {
   return useContext(MultiMamaContext) || {};
 }

@@ -10,7 +10,6 @@ export default function SupervisionGroupe() {
 
   useEffect(() => {
     if (mamas.length > 0) fetchStats();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mamas]);
 
   async function fetchStats() {

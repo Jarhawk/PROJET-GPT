@@ -17,9 +17,11 @@ export default function Signup() {
     e.preventDefault();
     setLoading(true);
 
+    const sanitizedEmail = email.trim();
+
     try {
       const { data: authData, error } = await supabase.auth.signUp({
-        email,
+        email: sanitizedEmail,
         password,
       });
 
@@ -31,13 +33,22 @@ export default function Signup() {
         .select()
         .single();
 
-      await supabase.from("utilisateurs").insert({
-        auth_id: authData.user.id,
-        email,
-        mama_id: mama.id,
-        role: "admin",
-        actif: true,
-      });
+      const { error: userError } = await supabase
+        .from("utilisateurs")
+        .insert({
+          auth_id: authData.user.id,
+          email: sanitizedEmail,
+          mama_id: mama.id,
+          role: "admin",
+          actif: true,
+        })
+        .select()
+        .single();
+
+      if (userError) {
+        toast.error("Erreur lors de la création du profil utilisateur");
+        return;
+      }
 
       navigate("/onboarding");
     } catch (err) {

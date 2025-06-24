@@ -72,7 +72,7 @@ export default function AuditTrail() {
               </td>
               <td className="px-2 py-1">{e.table_name}</td>
               <td className="px-2 py-1">{e.operation}</td>
-              <td className="px-2 py-1">{e.users?.email || e.changed_by}</td>
+              <td className="px-2 py-1">{e.utilisateurs?.email || e.changed_by}</td>
               <td className="px-2 py-1 font-mono break-all">
                 {JSON.stringify(e.old_data)}
               </td>

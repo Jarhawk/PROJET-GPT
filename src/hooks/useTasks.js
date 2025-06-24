@@ -15,7 +15,7 @@ export function useTasks() {
     const { data, error } = await supabase
       .from("taches")
       .select(
-        "*, assigned:users!taches_assigned_to_fkey(email)"
+        "*, assigned:utilisateurs!taches_assigned_to_fkey(email)"
       )
       .eq("mama_id", mama_id)
       .order("next_echeance", { ascending: true });
@@ -33,7 +33,7 @@ export function useTasks() {
     const { data, error } = await supabase
       .from("taches")
       .select(
-        "*, assigned:users!taches_assigned_to_fkey(email)"
+        "*, assigned:utilisateurs!taches_assigned_to_fkey(email)"
       )
       .eq("id", id)
       .eq("mama_id", mama_id)
@@ -52,7 +52,7 @@ export function useTasks() {
     let query = supabase
       .from("taches")
       .select(
-        "*, assigned:users!taches_assigned_to_fkey(email)"
+        "*, assigned:utilisateurs!taches_assigned_to_fkey(email)"
       )
       .eq("mama_id", mama_id);
     if (statut) query = query.eq("statut", statut);

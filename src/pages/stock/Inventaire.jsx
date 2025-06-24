@@ -34,7 +34,7 @@ export default function InventairePage() {
             <tr key={inv.id}>
               <td className="p-2">{inv.nom || inv.reference}</td>
               <td className="p-2 text-center">{inv.date}</td>
-              <td className="p-2 text-center">{inv.users?.username || "-"}</td>
+              <td className="p-2 text-center">{inv.utilisateurs?.username || "-"}</td>
               <td className="p-2 text-center">{inv.cloture ? "validé" : "en cours"}</td>
               <td className="p-2 text-center">{inv.ecart_total ?? "-"}</td>
             </tr>

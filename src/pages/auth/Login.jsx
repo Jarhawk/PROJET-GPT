@@ -20,7 +20,6 @@ export default function Login() {
     user,
     login,
     pending,
-    mama_id,
     access_rights,
     actif,
   } = useAuth();

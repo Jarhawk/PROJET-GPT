@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import toast from "react-hot-toast";
 import {
@@ -23,7 +23,6 @@ import {
 export default function Sidebar() {
   const { access_rights, loading, user, logout, session } = useAuth();
   const { pathname } = useLocation();
-  const navigate = useNavigate();
 
   if (loading || !access_rights) {
     return <aside className="w-64 p-4" />;

@@ -11,6 +11,9 @@ const authState = { isAuthenticated: false, access_rights: ['dashboard'], loadin
 vi.mock('@/context/AuthContext', () => ({
   useAuth: () => authState
 }));
+vi.mock('@/hooks/useAuth', () => ({
+  default: () => authState
+}));
 
 vi.mock('@/hooks/useDashboard', () => ({
   useDashboard: () => ({

@@ -2,12 +2,11 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import MamaLogo from "@/components/ui/MamaLogo";
 import useAuth from "@/hooks/useAuth";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import useFormErrors from "@/hooks/useFormErrors";
 import GlassCard from "@/components/ui/GlassCard";
 import PageWrapper from "@/components/ui/PageWrapper";
 import PrimaryButton from "@/components/ui/PrimaryButton";
-import { supabase } from "@/lib/supabase";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -16,7 +15,15 @@ export default function Login() {
   const { errors, setError, clearErrors } = useFormErrors();
   const navigate = useNavigate();
 
-  const { isAuthenticated, loading: authLoading, login } = useAuth();
+  const {
+    isAuthenticated,
+    loading: authLoading,
+    login,
+    pending,
+    mama_id,
+    access_rights,
+    actif,
+  } = useAuth();
   const [totp, setTotp] = useState("");
   const [twoFA, setTwoFA] = useState(false);
 
@@ -35,41 +42,51 @@ export default function Login() {
     if (!email || !password) return;
 
     setLoading(true);
-    const { data, error, twofaRequired } = await login({ email, password, totp });
+    try {
+      const { error, twofaRequired } = await login({
+        email: email.trim(),
+        password,
+        totp,
+      });
 
-    if (error) {
-      if (twofaRequired) {
-        setTwoFA(true);
-        setError("totp", error);
-      } else {
-        setError("password", error);
+      if (error) {
+        if (twofaRequired) {
+          setTwoFA(true);
+          setError("totp", error);
+        } else {
+          setError("password", error);
+        }
+        toast.error(error || "Échec de la connexion");
+        return;
       }
-      if (error) toast.error(error);
-      else toast.error("Échec de la connexion");
-      setLoading(false);
-    } else {
-      const { data: profil } = await supabase
-        .from("utilisateurs")
-        .select("mama_id, access_rights, actif")
-        .eq("auth_id", data.user.id)
-        .maybeSingle();
-      if (!profil) {
+
+      if (pending) {
         toast("Compte en cours de création");
         navigate("/pending");
-      } else if (profil.actif === false) {
-        navigate("/blocked");
-      } else if (!profil.access_rights || profil.access_rights.length === 0) {
-        navigate("/unauthorized");
-      } else {
-        toast.success("Connecté !");
-        navigate(profil.mama_id ? "/dashboard" : "/create-mama");
+        return;
       }
+
+      if (actif === false) {
+        navigate("/blocked");
+        return;
+      }
+
+      if (!access_rights || access_rights.length === 0) {
+        navigate("/unauthorized");
+        return;
+      }
+
+      toast.success("Connecté !");
+      navigate(mama_id ? "/dashboard" : "/create-mama");
+    } catch (err) {
+      toast.error(err?.message || "Échec de la connexion");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <PageWrapper>
-      <Toaster position="top-right" />
       <GlassCard className="flex flex-col items-center">
         <div className="mb-6">
           <MamaLogo width={96} />
@@ -144,6 +161,7 @@ export default function Login() {
             </div>
           </form>
         </GlassCard>
+        <p className="text-xs text-center text-white/40 mt-4">© MamaStock 2025</p>
       </PageWrapper>
   );
 }

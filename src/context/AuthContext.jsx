@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { authenticator } from "otplib";
 import { supabase } from "@/lib/supabase";
 import toast from "react-hot-toast";
+// ✅ Étape validée
 
 // Contexte global Auth
 // Exported separately for hooks like src/hooks/useAuth.js
@@ -157,19 +158,21 @@ export function AuthProvider({ children }) {
     setLoading(true);
 
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-      console.log('DEBUG context initial', session);
+      console.log("DEBUG context initial", session);
       setSession(session);
       if (session) await fetchUserData(session);
       setLoading(false);
+      console.log("CONTEXT READY", session, session?.user); // ✅ Étape validée
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      console.log('DEBUG context change', session);
+      console.log("DEBUG context change", session);
       setSession(session);
       if (session) {
         setLoading(true);
         await fetchUserData(session);
         setLoading(false);
+        console.log("CONTEXT READY", session, session?.user);
       } else {
         setUserData({
           role: null,
@@ -183,7 +186,16 @@ export function AuthProvider({ children }) {
       }
     });
 
-    return () => listener?.subscription?.unsubscribe();
+    const refreshInterval = setInterval(() => {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) setSession(session);
+      });
+    }, 1000 * 60 * 10);
+
+    return () => {
+      listener?.subscription?.unsubscribe();
+      clearInterval(refreshInterval);
+    };
   }, []);
 
   // Déconnexion utilisateur

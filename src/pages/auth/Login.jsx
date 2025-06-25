@@ -43,11 +43,12 @@ export default function Login() {
 
     setLoading(true);
     try {
-      const { error, twofaRequired } = await login({
+      const { data, error, twofaRequired } = await login({
         email: email.trim(),
         password,
         totp,
       });
+      console.debug("login", { data, error });
 
       if (error) {
         if (twofaRequired) {
@@ -56,7 +57,7 @@ export default function Login() {
         } else {
           setError("password", error);
         }
-        toast.error(error || "Échec de la connexion");
+        toast.error(error?.message || error || "Échec de la connexion");
         return;
       }
 
@@ -77,7 +78,7 @@ export default function Login() {
       }
 
       toast.success("Connecté !");
-      navigate(mama_id ? "/dashboard" : "/create-mama");
+      navigate("/dashboard");
     } catch (err) {
       toast.error(err?.message || "Échec de la connexion");
     } finally {

@@ -205,6 +205,7 @@ export function AuthProvider({ children }) {
   const value = {
     ...userData,
     session,
+    user: session?.user || null,
     loading,
     pending,
     login,

@@ -1,4 +1,5 @@
 import { useState } from "react";
+// ✅ Vérifié
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ export default function MamaForm({ mama, onClose, onSaved }) {
 
   const handleSubmit = async e => {
     e.preventDefault();
+    if (saving) return;
     setSaving(true);
 
     if (role !== "superadmin" && mama?.id !== myMama) {
@@ -40,33 +42,40 @@ export default function MamaForm({ mama, onClose, onSaved }) {
       }
     }
 
-    let error = null;
-    let saved = null;
-    if (mama?.id) {
-      const res = await supabase
-        .from("mamas")
-        .update(values)
-        .eq("id", mama.id)
-        .select()
-        .single();
-      error = res.error;
-      saved = res.data;
-    } else {
-      const res = await supabase
-        .from("mamas")
-        .insert([{ ...values }])
-        .select()
-        .single();
-      error = res.error;
-      saved = res.data;
-    }
-    setSaving(false);
-    if (!error && saved) {
-      toast.success("Établissement enregistré !");
-      if (onSaved) onSaved(saved);
-      if (onClose) onClose();
-    } else {
-      toast.error(error?.message || "Erreur à l'enregistrement !");
+    console.log("DEBUG form", values);
+    try {
+      let error = null;
+      let saved = null;
+      if (mama?.id) {
+        const res = await supabase
+          .from("mamas")
+          .update(values)
+          .eq("id", mama.id)
+          .select()
+          .single();
+        error = res.error;
+        saved = res.data;
+      } else {
+        const res = await supabase
+          .from("mamas")
+          .insert([{ ...values }])
+          .select()
+          .single();
+        error = res.error;
+        saved = res.data;
+      }
+      if (!error && saved) {
+        toast.success("Établissement enregistré !");
+        onSaved?.(saved);
+        onClose?.();
+      } else {
+        throw error;
+      }
+    } catch (err) {
+      console.log("DEBUG error", err);
+      toast.error(err?.message || "Erreur à l'enregistrement !");
+    } finally {
+      setSaving(false);
     }
   };
 

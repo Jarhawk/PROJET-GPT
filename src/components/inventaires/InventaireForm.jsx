@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+// ✅ Vérifié
 import { useInventaires } from "@/hooks/useInventaires";
 import { useProducts } from "@/hooks/useProducts";
 import { Button } from "@/components/ui/button";
@@ -116,6 +117,7 @@ export default function InventaireForm({ inventaire, onClose }) {
       document: fileUrl || inventaire?.document,
       date_debut: dateDebut,
     };
+    console.log("DEBUG form", invData);
     try {
       if (inventaire?.id) {
         await editInventaire(inventaire.id, invData);
@@ -125,10 +127,12 @@ export default function InventaireForm({ inventaire, onClose }) {
         toast.success("Inventaire ajouté !");
       }
       onClose?.();
-    } catch {
+    } catch (err) {
+      console.log("DEBUG error", err);
       toast.error("Erreur lors de l'enregistrement.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

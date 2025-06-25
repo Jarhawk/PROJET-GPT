@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+// ✅ Vérifié
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 
@@ -21,6 +22,7 @@ export default function FournisseurForm({ fournisseur = {}, onSubmit, onCancel, 
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (saving) return;
     const errs = {};
     if (!nom.trim()) errs.nom = "Nom requis";
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = "Email invalide";
@@ -29,7 +31,13 @@ export default function FournisseurForm({ fournisseur = {}, onSubmit, onCancel, 
       toast.error("Veuillez corriger les erreurs");
       return;
     }
-    onSubmit?.({ nom, ville, telephone, email, actif });
+    const data = { nom, ville, telephone, email, actif };
+    console.log("DEBUG form", data);
+    try {
+      onSubmit?.(data);
+    } catch (err) {
+      console.log("DEBUG error", err);
+    }
   };
 
   return (

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+// ✅ Vérifié
 import { useFactures } from "@/hooks/useFactures";
 import { useProducts } from "@/hooks/useProducts";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,7 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
       toast.error("Date et fournisseur requis !");
       return;
     }
+    if (loading) return;
     setLoading(true);
     const total_ht = lignes.reduce((s,l) => s + l.quantite * l.prix_unitaire, 0);
     const total_tva = lignes.reduce((s,l) => s + l.quantite * l.prix_unitaire * (l.tva || 0) / 100, 0);
@@ -60,6 +62,7 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
       total_ttc: total_ht + total_tva,
       justificatif: fileUrl || facture?.justificatif,
     };
+    console.log("DEBUG form", invoice, lignes);
     try {
       let fid = facture?.id;
       if (fid) {
@@ -79,9 +82,11 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
       toast.success(facture ? "Facture modifiée !" : "Facture ajoutée !");
       onClose?.();
     } catch (err) {
+      console.log("DEBUG error", err);
       toast.error(err?.message || "Erreur lors de l'enregistrement.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

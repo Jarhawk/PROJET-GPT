@@ -1,4 +1,5 @@
 import { useState } from "react";
+// ✅ Vérifié
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ export default function RoleForm({ role, onClose, onSaved }) {
 
   const handleSubmit = async e => {
     e.preventDefault();
+    if (saving) return;
     setSaving(true);
 
     // Anti-doublon création
@@ -35,33 +37,40 @@ export default function RoleForm({ role, onClose, onSaved }) {
       }
     }
 
-    let error = null;
-    let saved = null;
-    if (role?.id) {
-      const res = await supabase
-        .from("roles")
-        .update(values)
-        .eq("id", role.id)
-        .select()
-        .single();
-      error = res.error;
-      saved = res.data;
-    } else {
-      const res = await supabase
-        .from("roles")
-        .insert([{ ...values, mama_id }])
-        .select()
-        .single();
-      error = res.error;
-      saved = res.data;
-    }
-    setSaving(false);
-    if (!error && saved) {
-      toast.success("Rôle enregistré !");
-      if (onSaved) onSaved(saved);
-      if (onClose) onClose();
-    } else {
-      toast.error(error?.message || "Erreur à l'enregistrement !");
+    console.log("DEBUG form", values);
+    try {
+      let error = null;
+      let saved = null;
+      if (role?.id) {
+        const res = await supabase
+          .from("roles")
+          .update(values)
+          .eq("id", role.id)
+          .select()
+          .single();
+        error = res.error;
+        saved = res.data;
+      } else {
+        const res = await supabase
+          .from("roles")
+          .insert([{ ...values, mama_id }])
+          .select()
+          .single();
+        error = res.error;
+        saved = res.data;
+      }
+      if (!error && saved) {
+        toast.success("Rôle enregistré !");
+        onSaved?.(saved);
+        onClose?.();
+      } else {
+        throw error;
+      }
+    } catch (err) {
+      console.log("DEBUG error", err);
+      toast.error(err?.message || "Erreur à l'enregistrement !");
+    } finally {
+      setSaving(false);
     }
   };
 

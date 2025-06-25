@@ -1,4 +1,5 @@
 // src/pages/Fournisseurs.jsx
+// ✅ Vérifié
 import { useState, useEffect } from "react";
 import { useFournisseurs } from "@/hooks/useFournisseurs";
 import { useFournisseurStats } from "@/hooks/useFournisseurStats";
@@ -208,7 +209,9 @@ export default function Fournisseurs() {
             saving={saving}
             onCancel={() => { setShowCreate(false); setEditRow(null); }}
             onSubmit={async (data) => {
+              if (saving) return;
               setSaving(true);
+              console.log("DEBUG form", data);
               try {
                 if (editRow) {
                   await updateFournisseur(editRow.id, data);
@@ -221,6 +224,7 @@ export default function Fournisseurs() {
                 setEditRow(null);
                 getFournisseurs({ search });
               } catch (err) {
+                console.log("DEBUG error", err);
                 toast.error(err?.message || "Erreur enregistrement");
               }
               setSaving(false);

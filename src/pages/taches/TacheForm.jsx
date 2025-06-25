@@ -1,7 +1,9 @@
 import { useState } from "react";
+// ✅ Vérifié
 import { useNavigate } from "react-router-dom";
 import { useTaches } from "@/hooks/useTaches";
 import { Button } from "@/components/ui/button";
+import toast from "react-hot-toast";
 
 export default function TacheForm() {
   const { createTache } = useTaches();
@@ -15,6 +17,7 @@ export default function TacheForm() {
     notification: [],
     module_lie: "",
   });
+  const [loading, setLoading] = useState(false);
 
   const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
   const handleCheck = e => {
@@ -28,8 +31,19 @@ export default function TacheForm() {
 
   const handleSubmit = async e => {
     e.preventDefault();
-    await createTache(form);
-    navigate("/taches");
+    if (loading) return;
+    setLoading(true);
+    console.log("DEBUG form", form);
+    try {
+      await createTache(form);
+      toast.success("Tâche ajoutée !");
+      navigate("/taches");
+    } catch (err) {
+      console.log("DEBUG error", err);
+      toast.error("Erreur lors de l'enregistrement.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -72,7 +86,7 @@ export default function TacheForm() {
         <span>Module lié</span>
         <input className="input w-full" name="module_lie" value={form.module_lie} onChange={handleChange} />
       </label>
-      <Button type="submit">Enregistrer</Button>
+      <Button type="submit" disabled={loading}>Enregistrer</Button>
     </form>
   );
 }

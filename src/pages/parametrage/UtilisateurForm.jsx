@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+// ✅ Vérifié
 import { useUtilisateurs } from "@/hooks/useUtilisateurs";
 import { useRoles } from "@/hooks/useRoles";
 import { useMamas } from "@/hooks/useMamas";
@@ -24,6 +25,7 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
     const data = {
       email,
@@ -31,6 +33,7 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
       actif,
       mama_id: mama,
     };
+    console.log("DEBUG form", data);
     try {
       if (utilisateur?.id) {
         await updateUser(utilisateur.id, data);
@@ -40,10 +43,12 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
         toast.success("Utilisateur ajouté !");
       }
       onClose?.();
-    } catch {
+    } catch (err) {
+      console.log("DEBUG error", err);
       toast.error("Erreur lors de l'enregistrement.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

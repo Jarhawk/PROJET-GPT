@@ -1,8 +1,10 @@
 import { useState } from "react";
+// ✅ Vérifié
 import { Dialog, DialogContent, DialogOverlay } from "@/components/ui/dialog";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
+import { toast } from "react-hot-toast";
 
 export default function FeedbackForm({ open, onOpenChange }) {
   const { user_id, mama_id } = useAuth();
@@ -15,12 +17,20 @@ export default function FeedbackForm({ open, onOpenChange }) {
     e.preventDefault();
     if (sending) return;
     setSending(true);
-    await supabase.from("feedback").insert([
-      { user_id, mama_id, module, message, urgence } ,
-    ]);
-    setSending(false);
-    setMessage("");
-    onOpenChange(false);
+    const payload = { user_id, mama_id, module, message, urgence };
+    console.log("DEBUG form", payload);
+    try {
+      const { error } = await supabase.from("feedback").insert([payload]);
+      if (error) throw error;
+      toast.success("Message envoyé !");
+      setMessage("");
+      onOpenChange(false);
+    } catch (err) {
+      console.log("DEBUG error", err);
+      toast.error(err.message || "Erreur lors de l'envoi");
+    } finally {
+      setSending(false);
+    }
   }
 
   return (

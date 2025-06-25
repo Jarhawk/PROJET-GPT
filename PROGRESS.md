@@ -536,3 +536,7 @@
 - `npm run lint` produced warnings only.
 - `npm test` reported all 81 tests passing.
 - Verified schema summary remains 48 tables, 14 views, 28 functions.
+## 2025-06-25 Step 90
+- Verified new auth context logs and root redirection.
+- Layout now shows email, role and logout with toast.
+- Lint and unit tests pass after fresh npm install.

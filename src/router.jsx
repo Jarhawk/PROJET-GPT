@@ -1,7 +1,9 @@
 import { Suspense, lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import useAuth from "@/hooks/useAuth";
 import Layout from "@/layout/Layout";
 import Login from "@/pages/auth/Login";
+// ✅ Étape validée
 import Unauthorized from "@/pages/auth/Unauthorized";
 import Pending from "@/pages/auth/Pending";
 import Blocked from "@/pages/auth/Blocked";
@@ -62,11 +64,18 @@ const Comparatif = lazy(() => import("@/pages/fournisseurs/comparatif/Comparatif
 const Logout = lazy(() => import("@/pages/auth/Logout.jsx"));
 
 
+function RootRoute() {
+  const { session, user } = useAuth();
+  if (session && user) return <Navigate to="/dashboard" replace />;
+  return <Navigate to="/accueil" replace />;
+}
+
 export default function Router() {
   return (
     <Suspense fallback={null}>
       <Routes>
-        <Route path="/" element={<Accueil />} />
+        <Route path="/" element={<RootRoute />} />
+        <Route path="/accueil" element={<Accueil />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />

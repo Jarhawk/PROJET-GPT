@@ -7,6 +7,7 @@ import useFormErrors from "@/hooks/useFormErrors";
 import GlassCard from "@/components/ui/GlassCard";
 import PageWrapper from "@/components/ui/PageWrapper";
 import PrimaryButton from "@/components/ui/PrimaryButton";
+// ✅ Étape validée
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -28,7 +29,7 @@ export default function Login() {
 
   // Redirection après authentification
   useEffect(() => {
-    console.log("DEBUG login", session, user);
+    console.log("LOGIN STATE", session, user); // ✅ Étape validée
     if (session && user) {
       navigate("/dashboard");
     }

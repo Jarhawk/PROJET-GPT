@@ -67,3 +67,11 @@
 - `npm install` executed successfully.
 - `npm run lint` passed with warnings.
 - `npm test` passed.
+## Étape 17 – Vérification authentification : ✅
+- Ajout des logs session et déconnexion toast.
+- Rafraîchissement périodique des tokens et redirection root.
+- `npm install` OK, lint et tests passent.
+## Étape 18 – Intégration finale authentification : ✅
+- Login et logout vérifiés, Layout affiche utilisateur et rôle.
+- Route `/` redirige selon la session.
+- `npm install`, `npm run lint`, `npm test` passent.

@@ -38,6 +38,7 @@ export function AuthProvider({ children }) {
         email,
         password,
       });
+      console.debug('login response', { data, error });
       if (error) throw error;
       authData = data;
     } catch (err) {
@@ -93,6 +94,8 @@ export function AuthProvider({ children }) {
       setPending(false);
       return;
     }
+
+    const meta = session.user.user_metadata || {};
     const { data, error, status } = await supabase
       .from("utilisateurs")
       .select("role, mama_id, access_rights, actif")
@@ -108,9 +111,9 @@ export function AuthProvider({ children }) {
     if (!data) {
       setPending(true);
       setUserData({
-        role: null,
-        mama_id: null,
-        access_rights: null,
+        role: meta.role ?? null,
+        mama_id: meta.mama_id ?? null,
+        access_rights: Array.isArray(meta.access_rights) ? meta.access_rights : null,
         auth_id: session.user.id,
         actif: true,
         user_id: session.user.id,
@@ -136,9 +139,13 @@ export function AuthProvider({ children }) {
     }
 
     setUserData({
-      role: data?.role || null,
-      mama_id: data?.mama_id || null,
-      access_rights: Array.isArray(data?.access_rights) ? data.access_rights : [],
+      role: data?.role ?? meta.role ?? null,
+      mama_id: data?.mama_id ?? meta.mama_id ?? null,
+      access_rights: Array.isArray(data?.access_rights)
+        ? data.access_rights
+        : Array.isArray(meta.access_rights)
+        ? meta.access_rights
+        : [],
       auth_id: session.user.id,
       actif: data?.actif ?? true,
       user_id: session.user.id,
@@ -156,6 +163,7 @@ export function AuthProvider({ children }) {
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      console.debug('auth state change', session);
       setSession(session);
       if (session) {
         setLoading(true);

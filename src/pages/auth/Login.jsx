@@ -16,8 +16,8 @@ export default function Login() {
   const navigate = useNavigate();
 
   const {
-    isAuthenticated,
-    loading: authLoading,
+    session,
+    user,
     login,
     pending,
     mama_id,
@@ -27,12 +27,13 @@ export default function Login() {
   const [totp, setTotp] = useState("");
   const [twoFA, setTwoFA] = useState(false);
 
-  // Redirection propre (évite navigate dans le rendu)
+  // Redirection après authentification
   useEffect(() => {
-    if (isAuthenticated && !authLoading) {
+    console.log("DEBUG auth", session, user);
+    if (session && user) {
       navigate("/dashboard");
     }
-  }, [isAuthenticated, authLoading, navigate]);
+  }, [session, user, navigate]); // ✅ Reprendre ici si Codex s'arrête.
 
   const handleLogin = async (e) => {
     e.preventDefault();

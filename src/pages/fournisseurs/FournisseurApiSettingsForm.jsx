@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+// ✅ Vérifié
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -37,18 +38,23 @@ export default function FournisseurApiSettingsForm({ fournisseur_id }) {
 
   const handleSubmit = async e => {
     e.preventDefault();
-    if (!mama_id || !fournisseur_id) return;
-    setSaving(true);
-    const { data, error } = await supabase
-      .from("fournisseurs_api_config")
-      .upsert([{ ...config, fournisseur_id, mama_id }], { onConflict: "fournisseur_id" })
-      .select()
-      .single();
-    setSaving(false);
-    if (error) toast.error(error.message || error);
-    else {
+    if (!mama_id || !fournisseur_id || saving) return;
+    console.log("DEBUG form", config);
+    try {
+      setSaving(true);
+      const { data, error } = await supabase
+        .from("fournisseurs_api_config")
+        .upsert([{ ...config, fournisseur_id, mama_id }], { onConflict: "fournisseur_id" })
+        .select()
+        .single();
+      if (error) throw error;
       toast.success("Configuration sauvegardée");
       setConfig(data);
+    } catch (err) {
+      console.log("DEBUG error", err);
+      toast.error(err.message || "Erreur lors de la sauvegarde");
+    } finally {
+      setSaving(false);
     }
   };
 

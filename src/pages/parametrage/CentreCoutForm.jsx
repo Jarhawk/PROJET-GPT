@@ -1,4 +1,5 @@
 import { useState } from "react";
+// ✅ Vérifié
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -22,29 +23,34 @@ export default function CentreCoutForm({ centre, onClose, onSaved }) {
 
   const handleSubmit = async e => {
     e.preventDefault();
-    setSaving(true);
-    let res;
-    if (centre?.id) {
-      res = await supabase
-        .from("cost_centers")
-        .update(values)
-        .eq("id", centre.id)
-        .select()
-        .single();
-    } else {
-      res = await supabase
-        .from("cost_centers")
-        .insert([{ ...values, mama_id }])
-        .select()
-        .single();
-    }
-    setSaving(false);
-    if (res.error) {
-      toast.error(res.error.message || "Erreur");
-    } else {
+    if (saving) return;
+    console.log("DEBUG form", values);
+    try {
+      setSaving(true);
+      let res;
+      if (centre?.id) {
+        res = await supabase
+          .from("cost_centers")
+          .update(values)
+          .eq("id", centre.id)
+          .select()
+          .single();
+      } else {
+        res = await supabase
+          .from("cost_centers")
+          .insert([{ ...values, mama_id }])
+          .select()
+          .single();
+      }
+      if (res.error) throw res.error;
       toast.success("Enregistré !");
-      if (onSaved) onSaved(res.data);
-      if (onClose) onClose();
+      onSaved?.(res.data);
+      onClose?.();
+    } catch (err) {
+      console.log("DEBUG error", err);
+      toast.error(err.message || "Erreur");
+    } finally {
+      setSaving(false);
     }
   };
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+// ✅ Vérifié
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import toast, { Toaster } from "react-hot-toast";
@@ -31,11 +32,17 @@ export default function PermissionsForm({ role, onClose, onSaved }) {
   }, [role]);
 
   const fetchPermissions = async () => {
-    const { data, error } = await supabase
-      .from("permissions")
-      .select("*")
-      .eq("role_id", role.id);
-    if (!error) setPermissions(data || []);
+    try {
+      const { data, error } = await supabase
+        .from("permissions")
+        .select("*")
+        .eq("role_id", role.id);
+      if (error) throw error;
+      setPermissions(data || []);
+    } catch (err) {
+      console.log("DEBUG error", err);
+      toast.error(err.message || "Erreur chargement permissions");
+    }
   };
 
   const hasPermission = (module_cle, droit_cle) => {
@@ -45,38 +52,41 @@ export default function PermissionsForm({ role, onClose, onSaved }) {
   };
 
   const togglePermission = async (module_cle, droit_cle) => {
-    setSaving(true);
-    const exists = hasPermission(module_cle, droit_cle);
-    let error = null;
-    if (exists) {
-      // Supprime la permission
-      const { error: err } = await supabase
-        .from("permissions")
-        .delete()
-        .eq("role_id", role.id)
-        .eq("module", module_cle)
-        .eq("droit", droit_cle);
-      error = err;
-    } else {
-      // Ajoute la permission
-      const { error: err } = await supabase
-        .from("permissions")
-        .insert([
-          {
-            role_id: role.id,
-            module: module_cle,
-            droit: droit_cle,
-          },
-        ]);
-      error = err;
-    }
-    setSaving(false);
-    if (!error) {
+    if (saving) return;
+    console.log("DEBUG form", { module_cle, droit_cle });
+    try {
+      setSaving(true);
+      const exists = hasPermission(module_cle, droit_cle);
+      let error = null;
+      if (exists) {
+        const { error: err } = await supabase
+          .from("permissions")
+          .delete()
+          .eq("role_id", role.id)
+          .eq("module", module_cle)
+          .eq("droit", droit_cle);
+        error = err;
+      } else {
+        const { error: err } = await supabase
+          .from("permissions")
+          .insert([
+            {
+              role_id: role.id,
+              module: module_cle,
+              droit: droit_cle,
+            },
+          ]);
+        error = err;
+      }
+      if (error) throw error;
       fetchPermissions();
       toast.success("Permission modifiée");
-      if (onSaved) onSaved();
-    } else {
-      toast.error("Erreur lors de la modification.");
+      onSaved?.();
+    } catch (err) {
+      console.log("DEBUG error", err);
+      toast.error(err.message || "Erreur lors de la modification.");
+    } finally {
+      setSaving(false);
     }
   };
 

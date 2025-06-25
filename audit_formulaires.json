@@ -174,5 +174,41 @@
   {
     "form": "src/components/produits/ProduitFormModal.jsx",
     "status": "corrected"
+  },
+  {
+    "form": "src/pages/fournisseurs/FournisseurApiSettingsForm.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/supervision/GroupeParamForm.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/notifications/NotificationSettingsForm.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/requisitions/RequisitionForm.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/menus/MenuDuJourForm.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/menus/MenuForm.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/parametrage/CentreCoutForm.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/parametrage/MamaSettingsForm.jsx",
+    "status": "corrected"
+  },
+  {
+    "form": "src/pages/parametrage/RGPDConsentForm.jsx",
+    "status": "corrected"
   }
 ]

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+// ✅ Vérifié
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -31,42 +32,45 @@ export default function GroupeParamForm({ groupe, onClose, onSaved }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (role !== "superadmin") return;
-    setSaving(true);
-    let saved = null;
-    let error = null;
-    if (groupe?.id) {
-      const res = await supabase
-        .from("groupes")
-        .update({ nom: values.nom, description: values.description })
-        .eq("id", groupe.id)
-        .select()
-        .single();
-      error = res.error;
-      saved = res.data;
-      await supabase.from("mamas").update({ groupe_id: null }).eq("groupe_id", groupe.id);
-      if (selected.length > 0) {
-        await supabase.from("mamas").update({ groupe_id: groupe.id }).in("id", selected);
+    if (role !== "superadmin" || saving) return;
+    const payload = { nom: values.nom, description: values.description };
+    console.log("DEBUG form", { ...payload, selected });
+    try {
+      setSaving(true);
+      let saved = null;
+      if (groupe?.id) {
+        const res = await supabase
+          .from("groupes")
+          .update(payload)
+          .eq("id", groupe.id)
+          .select()
+          .single();
+        if (res.error) throw res.error;
+        saved = res.data;
+        await supabase.from("mamas").update({ groupe_id: null }).eq("groupe_id", groupe.id);
+        if (selected.length > 0) {
+          await supabase.from("mamas").update({ groupe_id: groupe.id }).in("id", selected);
+        }
+      } else {
+        const res = await supabase
+          .from("groupes")
+          .insert(payload)
+          .select()
+          .single();
+        if (res.error) throw res.error;
+        saved = res.data;
+        if (saved && selected.length > 0) {
+          await supabase.from("mamas").update({ groupe_id: saved.id }).in("id", selected);
+        }
       }
-    } else {
-      const res = await supabase
-        .from("groupes")
-        .insert({ nom: values.nom, description: values.description })
-        .select()
-        .single();
-      error = res.error;
-      saved = res.data;
-      if (saved && selected.length > 0) {
-        await supabase.from("mamas").update({ groupe_id: saved.id }).in("id", selected);
-      }
-    }
-    setSaving(false);
-    if (!error) {
       toast.success("Groupe enregistré");
-      if (onSaved) onSaved(saved);
-      if (onClose) onClose();
-    } else {
-      toast.error("Erreur enregistrement");
+      onSaved?.(saved);
+      onClose?.();
+    } catch (err) {
+      console.log("DEBUG error", err);
+      toast.error(err.message || "Erreur enregistrement");
+    } finally {
+      setSaving(false);
     }
   };
 

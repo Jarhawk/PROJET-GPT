@@ -18,7 +18,8 @@
     "export:accounting": "node scripts/export_accounting.js",
     "allocate:history": "node scripts/reallocate_history.js",
     "backup": "node scripts/backup_db.js",
-    "test:manifest": "node scripts/validate_manifest_icons.cjs"
+    "test:manifest": "node scripts/validate_manifest_icons.cjs",
+    "deploy": "npm run build && npx netlify deploy --dir=dist --prod"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.14",

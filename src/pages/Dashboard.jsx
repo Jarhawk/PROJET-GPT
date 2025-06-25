@@ -2,7 +2,6 @@ import { useAuth } from "@/context/AuthContext";
 
 export default function Dashboard() {
   const { user } = useAuth();
-  console.log("DEBUG user", user);
 
   if (!user) return <div>Chargement...</div>;
 
@@ -13,4 +12,3 @@ export default function Dashboard() {
     </div>
   );
 }
-// ✅ Étape validée

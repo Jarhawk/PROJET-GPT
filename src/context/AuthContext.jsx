@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { authenticator } from "otplib";
 import { supabase } from "@/lib/supabase";
 import toast from "react-hot-toast";
-// ✅ Étape validée
 
 // Contexte global Auth
 // Exported separately for hooks like src/hooks/useAuth.js
@@ -39,7 +38,6 @@ export function AuthProvider({ children }) {
         email,
         password,
       });
-      console.debug('login response', { data, error });
       if (error) throw error;
       authData = data;
     } catch (err) {
@@ -158,21 +156,17 @@ export function AuthProvider({ children }) {
     setLoading(true);
 
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-      console.log("DEBUG context initial", session);
       setSession(session);
       if (session) await fetchUserData(session);
       setLoading(false);
-      console.log("CONTEXT READY", session, session?.user); // ✅ Étape validée
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      console.log("DEBUG context change", session);
       setSession(session);
       if (session) {
         setLoading(true);
         await fetchUserData(session);
         setLoading(false);
-        console.log("CONTEXT READY", session, session?.user);
       } else {
         setUserData({
           role: null,
@@ -227,6 +221,7 @@ export function AuthProvider({ children }) {
     refreshUser,
     isAuthenticated: !!session,
     isAdmin: userData.role === "admin" || userData.role === "superadmin",
+    isSuperadmin: userData.role === "superadmin",
   };
 
   return (

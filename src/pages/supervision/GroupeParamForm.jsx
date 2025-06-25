@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-// ✅ Vérifié
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -34,7 +33,6 @@ export default function GroupeParamForm({ groupe, onClose, onSaved }) {
     e.preventDefault();
     if (role !== "superadmin" || saving) return;
     const payload = { nom: values.nom, description: values.description };
-    console.log("DEBUG form", { ...payload, selected });
     try {
       setSaving(true);
       let saved = null;
@@ -67,7 +65,6 @@ export default function GroupeParamForm({ groupe, onClose, onSaved }) {
       onSaved?.(saved);
       onClose?.();
     } catch (err) {
-      console.log("DEBUG error", err);
       toast.error(err.message || "Erreur enregistrement");
     } finally {
       setSaving(false);

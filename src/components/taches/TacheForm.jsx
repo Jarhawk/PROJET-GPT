@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-// ✅ Vérifié
 import { useTasks } from "@/hooks/useTasks";
 import { useUsers } from "@/hooks/useUsers";
 import { useNavigate } from "react-router-dom";
@@ -36,7 +35,6 @@ export default function TacheForm({ task }) {
       return;
     }
     setLoading(true);
-    console.log("DEBUG form", form);
     try {
       if (task) {
         await updateTask(task.id, form);
@@ -47,7 +45,6 @@ export default function TacheForm({ task }) {
       }
       navigate("/taches");
     } catch (err) {
-      console.log("DEBUG error", err);
       console.error("Erreur enregistrement tâche:", err);
       toast.error("Erreur lors de l'enregistrement.");
     } finally {

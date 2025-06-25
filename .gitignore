@@ -23,6 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 .env
+.env.production
 test-results
 weekly_cost_centers.xlsx
 backup_*.json

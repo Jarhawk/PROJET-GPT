@@ -1,5 +1,4 @@
 import { useState } from "react";
-// ✅ Vérifié
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -22,7 +21,6 @@ export default function RGPDConsentForm() {
       consentement: values.cookies && values.interne && values.tiers,
       date_consentement: new Date().toISOString(),
     };
-    console.log("DEBUG form", payload);
     try {
       setLoading(true);
       const { error } = await supabase.from("consentements_utilisateur").insert([
@@ -31,7 +29,6 @@ export default function RGPDConsentForm() {
       if (error) throw error;
       toast.success("Consentement enregistré");
     } catch (err) {
-      console.log("DEBUG error", err);
       toast.error(err.message || "Erreur d'enregistrement");
     } finally {
       setLoading(false);

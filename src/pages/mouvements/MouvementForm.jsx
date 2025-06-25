@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-// ✅ Vérifié
 import { Button } from "@/components/ui/button";
 import { useMouvements } from "@/hooks/useMouvements";
 import { useProducts } from "@/hooks/useProducts";
@@ -32,7 +31,6 @@ export default function MouvementForm({ onClose }) {
       toast.error("Produit et quantité requis");
       return;
     }
-    console.log("DEBUG form", form);
     try {
       setLoading(true);
       const { error } = await createMouvement(form);
@@ -40,7 +38,6 @@ export default function MouvementForm({ onClose }) {
       toast.success("Mouvement enregistré !");
       onClose?.();
     } catch (err) {
-      console.log("DEBUG error", err);
       toast.error(err?.message || "Erreur lors de l'enregistrement");
     } finally {
       setLoading(false);

@@ -26,6 +26,7 @@ The default router redirects unauthenticated visitors from `/` to `/login` and
 shows the dashboard when logged in. `index.html` contains PWA metadata with the
 favicon, manifest and splash screen so you can install the app on mobile.
 
+Le script `src/registerSW.js` enregistre automatiquement un service worker pour activer l'usage hors ligne. Lancez `npm run preview` ou servez le dossier `dist` pour vérifier que l'enregistrement fonctionne.
 ### Database
 
 SQL scripts are stored in [`sql/`](./sql). To initialise a local Supabase instance:
@@ -43,13 +44,13 @@ Adjust configuration in `supabase/config.toml` as required.
 
 ### Environment variables
 
-Create a `.env` file at the project root with your Supabase credentials. For
-development this repository already includes default values:
+Copy `.env.example` to `.env` at the project root and adjust the Supabase
+credentials. For development this repository already includes default values:
 
 ```env
 PUBLIC_API_KEY=dev_key
 VITE_SUPABASE_URL=https://jhpfdeolleprmvtchoxt.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpocGZkZW9sbGVwcm12dGNob3h0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY3MjI4MzMsImV4cCI6MjA2MjI5ODgzM30.f_J81QTBK4cvFoFUvlY6XNmuS5DSMLUdT_ZQQ7FpOFQ
+VITE_SUPABASE_ANON_KEY=<your-supabase-anon-key>
 ```
 `PUBLIC_API_KEY` is used by the Express routes in `src/api/public`. Set it to a strong random string in production to authorize external requests.
 
@@ -57,7 +58,15 @@ VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 These variables are loaded by Vite during development and build.
 
 The `.env` file is not tracked by Git, so you can safely replace these
-defaults with your own credentials for local development.
+defaults with your own credentials for local development. Pour un déploiement
+en production, copiez `.env.production.example` vers `.env.production` puis
+renseignez `VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY`. Ce fichier
+`\.env.production` est également ignoré par Git afin de protéger les clés
+sensibles.
+Le fichier d'exemple indique également l'URL du projet Supabase et contient
+la clé anonyme fournie
+`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`. Vérifiez que ces valeurs
+correspondent bien à votre projet avant de lancer un déploiement.
 
 ## Tests
 
@@ -166,7 +175,16 @@ docker build -t mamastock .
 docker run -p 4173:4173 mamastock
 ```
 
-For Vercel or Netlify, provide environment variables and deploy the `dist` folder created by `npm run build`.
+For Vercel or Netlify, provide environment variables and deploy the `dist` folder created by `npm run build`. Une commande `npm run deploy` est
+prête à utiliser avec Netlify (nécessite `netlify-cli`).
+
+### Deployment checklist
+
+1. Copiez `.env.production.example` vers `.env.production` et vérifiez les valeurs `VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY`.
+2. Exécutez `npm install && npm run lint && npm test` pour s'assurer que l'environnement est sain.
+3. Lancez `npm run build` puis `npm run preview` afin de vérifier le bundle généré.
+4. Une fois le rendu validé, déployez avec `npm run deploy`.
+5. Appliquez les politiques RLS en exécutant `psql -f sql/rls.sql` si nécessaire.
 
 ## Reporting
 

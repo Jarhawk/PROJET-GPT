@@ -1,5 +1,4 @@
 import { useState } from "react";
-// ✅ Vérifié
 import { useFournisseurs } from "@/hooks/useFournisseurs";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
@@ -24,7 +23,6 @@ export default function SupplierForm({ supplier, onClose, glass }) {
     e.preventDefault();
     if (loading) return;
     setLoading(true);
-    console.log("DEBUG form", form);
     if (!form.nom) {
       toast.error("Le nom est obligatoire");
       setLoading(false);
@@ -41,7 +39,6 @@ export default function SupplierForm({ supplier, onClose, glass }) {
       toast.success("Fournisseur sauvegardé");
       onClose?.();
     } catch (err) {
-      console.log("DEBUG error", err);
       toast.error(err?.message || "Erreur enregistrement");
     } finally {
       setLoading(false);

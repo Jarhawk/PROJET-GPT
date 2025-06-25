@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-// ✅ Vérifié
 import toast, { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import useMamaSettings from "@/hooks/useMamaSettings";

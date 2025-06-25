@@ -1,5 +1,4 @@
 import { useState } from "react";
-// ✅ Vérifié
 import { useNavigate } from "react-router-dom";
 import { useRequisitions } from "@/hooks/useRequisitions";
 import { useProducts } from "@/hooks/useProducts";
@@ -41,7 +40,6 @@ function RequisitionFormPage() {
       motif,
       lignes: articles.map(a => ({ product_id: a.product_id, quantite: Number(a.quantite) })),
     };
-    console.log("DEBUG form", payload);
     try {
       setSubmitting(true);
       const { success, message } = await createRequisition(payload);
@@ -52,7 +50,6 @@ function RequisitionFormPage() {
         throw new Error(message);
       }
     } catch (err) {
-      console.log("DEBUG error", err);
       toast.error(err.message || "Erreur lors de la création");
     } finally {
       setSubmitting(false);

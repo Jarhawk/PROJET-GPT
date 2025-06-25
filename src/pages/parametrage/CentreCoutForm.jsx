@@ -1,5 +1,4 @@
 import { useState } from "react";
-// ✅ Vérifié
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -24,7 +23,6 @@ export default function CentreCoutForm({ centre, onClose, onSaved }) {
   const handleSubmit = async e => {
     e.preventDefault();
     if (saving) return;
-    console.log("DEBUG form", values);
     try {
       setSaving(true);
       let res;
@@ -47,7 +45,6 @@ export default function CentreCoutForm({ centre, onClose, onSaved }) {
       onSaved?.(res.data);
       onClose?.();
     } catch (err) {
-      console.log("DEBUG error", err);
       toast.error(err.message || "Erreur");
     } finally {
       setSaving(false);

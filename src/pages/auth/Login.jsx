@@ -7,7 +7,6 @@ import useFormErrors from "@/hooks/useFormErrors";
 import GlassCard from "@/components/ui/GlassCard";
 import PageWrapper from "@/components/ui/PageWrapper";
 import PrimaryButton from "@/components/ui/PrimaryButton";
-// ✅ Étape validée
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -29,7 +28,6 @@ export default function Login() {
 
   // Redirection après authentification
   useEffect(() => {
-    console.log("LOGIN STATE", session, user); // ✅ Étape validée
     if (session && user) {
       navigate("/dashboard");
     }
@@ -45,12 +43,11 @@ export default function Login() {
 
     setLoading(true);
     try {
-      const { data, error, twofaRequired } = await login({
+      const { error, twofaRequired } = await login({
         email: email.trim(),
         password,
         totp,
       });
-      console.debug("login", { data, error });
 
       if (error) {
         if (twofaRequired) {

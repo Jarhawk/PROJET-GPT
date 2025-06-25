@@ -1,5 +1,4 @@
 import { useState } from "react";
-// ✅ Vérifié
 import { useNavigate } from "react-router-dom";
 import { useTaches } from "@/hooks/useTaches";
 import { Button } from "@/components/ui/button";
@@ -33,14 +32,12 @@ export default function TacheForm() {
     e.preventDefault();
     if (loading) return;
     setLoading(true);
-    console.log("DEBUG form", form);
     try {
       await createTache(form);
       toast.success("Tâche ajoutée !");
       navigate("/taches");
     } catch (err) {
-      console.log("DEBUG error", err);
-      toast.error("Erreur lors de l'enregistrement.");
+      toast.error(err?.message || "Erreur lors de l'enregistrement.");
     } finally {
       setLoading(false);
     }

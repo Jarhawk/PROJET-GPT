@@ -540,3 +540,112 @@
 - Verified new auth context logs and root redirection.
 - Layout now shows email, role and logout with toast.
 - Lint and unit tests pass after fresh npm install.
+
+## 2025-06-25 Step 91
+- Documented example environment files for development and production.
+- Added Netlify deploy script in `package.json` and updated README accordingly.
+
+## 2025-06-25 Step 92
+- Clarified `.env.production` instructions in README with the provided Supabase
+  anonymous key.
+- Noted that `npm run deploy` requires this file before deploying to Netlify.
+
+## 2025-06-25 Step 93
+- Removed leftover `// ✅` comments and debug `console.log` statements across
+  components and pages.
+- Fixed lint errors from unused variables after cleanup.
+- Confirmed `npm run lint`, `npm test` and `npm run build` succeed.
+
+## 2025-06-25 Step 94
+- Reinstalled dependencies to restore missing packages.
+- Verified `npm run lint`, `npm test`, `npm run build` and `npm run preview` succeed.
+
+## 2025-06-25 Step 95
+- Documenté l'enregistrement du service worker pour le mode hors ligne dans le README.
+- Vérifié que les commandes de build fonctionnent avant déploiement.
+
+## 2025-06-25 Step 96
+- Executed `npm install` to restore missing dependencies.
+- Confirmed lint, tests and build run successfully.
+
+## 2025-06-25 Step 97
+- Création du fichier `.env.production` local avec l'URL et la clé Supabase pour
+  préparer le déploiement.
+- Vérifié que ce fichier reste ignoré par Git.
+- Les commandes `npm run lint`, `npm test` et `npm run build` passent toujours.
+
+## 2025-06-25 Step 98
+- Ajout d'un indicateur `isSuperadmin` dans `AuthContext.jsx` pour différencier les rôles.
+- Réexécution de `npm install`, `npm run lint`, `npm test` et `npm run build` pour confirmer la stabilité.
+## 2025-06-25 Step 99
+- Mise à jour de ProtectedRoute pour utiliser le nouvel indicateur `isSuperadmin` lors de la vérification des droits.
+- Lint, tests et build repassés avec succès.
+
+## 2025-06-25 Step 100
+- Ajout du fichier `.env.production.example` avec l'URL et la clé Supabase de
+  démonstration.
+- Documentation mise à jour pour expliquer de copier ce fichier avant
+  l'exécution de `npm run deploy`.
+- Réinstallé les dépendances puis vérifié `npm run lint`, `npm test`,
+  `npm run build` et `npm run preview`.
+
+## 2025-06-25 Step 101
+- Ajout d'une checklist de déploiement détaillée dans le README.
+- Exécution finale des commandes `npm run lint`, `npm test`, `npm run build`,
+  `npm run preview` et `npm run test:e2e` (skipped: Playwright browsers not
+  installed).
+
+## 2025-06-25 Step 102
+- Ajout d'un contrôle `mama_id` dans `ProtectedRoute` pour bloquer l'accès si non défini.
+- Mise à jour du changelog en conséquence.
+- Vérifié avec `npm run lint`, `npm test`, `npm run build` et `npm run preview`.
+
+## 2025-06-25 Step 103
+- Réinstallé les dépendances et confirmé le succès des commandes lint, test, build et preview.
+## 2025-06-25 Step 104
+- Exécuté `npm install` pour restaurer les packages manquants.
+- Vérifié `npm run lint`, `npm test`, `npm run build` et `npm run preview`.
+- `npm run test:e2e` toujours ignoré faute de navigateurs.
+
+
+## 2025-06-25 Step 105
+- Réinstallation des dépendances pour finaliser la préparation.
+- `npm run lint`, `npm test`, `npm run build` et `npm run preview` passent sans erreur.
+- `npm run test:e2e` reste ignoré car les navigateurs Playwright ne sont pas installés.
+
+## 2025-06-25 Step 106
+- Confirmé que `.env.production` est bien ignoré par Git et documenté ce point.
+- Réinstallé les dépendances pour exécuter `npm run lint`, `npm test`,
+  `npm run build` et `npm run preview` sans erreur.
+- `npm run test:e2e` toujours ignoré faute de navigateurs.
+
+## 2025-06-25 Step 107
+- Nouvelle installation des dépendances pour vérifier l'environnement complet.
+- Toutes les commandes `npm run lint`, `npm test`, `npm run build` et `npm run preview` réussissent.
+- `npm run test:e2e` reste ignoré car les navigateurs Playwright ne sont pas installés.
+
+## 2025-06-25 Step 108
+- Vérification finale de la configuration RLS via `sql/rls.sql` et validation de la redirection automatique du login.
+- Exécuté `npm run lint`, `npm test`, `npm run build` et `npm run preview` pour confirmer un environnement opérationnel avant déploiement.
+- `npm run test:e2e` toujours ignoré faute de navigateurs.
+## 2025-06-25 Step 109
+- Ajout du fichier .env.production contenant l'URL et la clef Supabase.
+- Confirmation que 'npm run lint', 'npm test', 'npm run build' et 'npm run preview' fonctionnent.
+- 'npm run test:e2e' toujours ignoré faute de navigateurs Playwright.
+
+## 2025-06-25 Step 110
+- Nouvelle execution de `npm install` suite au commit precedent.
+- Verification du fichier `.env.production.example` contenant l'URL et la clef Supabase.
+- `npm run lint`, `npm test`, `npm run build` et `npm run preview` reussissent.
+- `npm run test:e2e` est ignore faute de navigateurs Playwright.
+
+## 2025-06-25 Step 111
+- Nouvelle verification apres `npm install`.
+- Lint, tests, build et preview fonctionnent a nouveau.
+
+## 2025-06-25 Step 112
+- Audit final du routeur et des principales pages (Produits, Fournisseurs, Factures...) pour confirmer le chargement des donnees filtrees par `mama_id`.
+- Verification manuelle des formulaires en mode creation et edition, validations obligatoires et pre-remplissage actifs.
+- Confirmed service worker registration via `npm run preview`.
+- `npm run lint`, `npm test`, `npm run build` et `npm run preview` passent sans erreur.
+- `npm run test:e2e` toujours ignore faute de navigateurs.

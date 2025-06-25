@@ -1,5 +1,4 @@
 // src/components/produits/ProduitForm.jsx
-// ✅ Vérifié
 import { useState, useEffect } from "react";
 import { useProducts } from "@/hooks/useProducts";
 import { useFamilles } from "@/hooks/useFamilles";
@@ -79,7 +78,6 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
       allergenes,
       image: imageUrl || produit?.image,
     };
-    console.log("DEBUG form", newProd);
     try {
       setSaving(true);
       if (editing) {
@@ -94,7 +92,6 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
       onSuccess?.();
       onClose?.();
     } catch (err) {
-      console.log("DEBUG error", err);
       console.error("Erreur enregistrement produit:", err);
       toast.error("Erreur lors de l'enregistrement.");
     } finally {

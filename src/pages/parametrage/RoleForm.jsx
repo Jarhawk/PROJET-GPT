@@ -1,5 +1,4 @@
 import { useState } from "react";
-// ✅ Vérifié
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -37,7 +36,6 @@ export default function RoleForm({ role, onClose, onSaved }) {
       }
     }
 
-    console.log("DEBUG form", values);
     try {
       let error = null;
       let saved = null;
@@ -67,7 +65,6 @@ export default function RoleForm({ role, onClose, onSaved }) {
         throw error;
       }
     } catch (err) {
-      console.log("DEBUG error", err);
       toast.error(err?.message || "Erreur à l'enregistrement !");
     } finally {
       setSaving(false);

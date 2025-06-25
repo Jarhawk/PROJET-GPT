@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { toast } from "react-hot-toast";
 
 export function useFournisseurs() {
   const { mama_id } = useAuth();
@@ -28,10 +29,14 @@ export function useFournisseurs() {
     if (typeof actif === "boolean") query = query.eq("actif", actif);
 
     const { data, error, count } = await query;
+    console.log("DEBUG tableau fournisseurs", data);
     setFournisseurs(Array.isArray(data) ? data : []);
     setTotal(count || 0);
     setLoading(false);
-    if (error) setError(error);
+    if (error) {
+      setError(error);
+      toast.error(error.message);
+    }
     return data || [];
   }
 
@@ -46,6 +51,7 @@ export function useFournisseurs() {
     setLoading(false);
     if (error) {
       setError(error);
+      toast.error(error.message);
     } else {
       await getFournisseurs();
     }
@@ -64,6 +70,7 @@ export function useFournisseurs() {
     setLoading(false);
     if (error) {
       setError(error);
+      toast.error(error.message);
     } else {
       await getFournisseurs();
     }
@@ -82,6 +89,7 @@ export function useFournisseurs() {
     setLoading(false);
     if (error) {
       setError(error);
+      toast.error(error.message);
     } else {
       await getFournisseurs();
     }
@@ -114,6 +122,7 @@ export function useFournisseurs() {
       return arr;
     } catch (error) {
       setError(error);
+      toast.error(error.message);
       return [];
     } finally {
       setLoading(false);
@@ -133,3 +142,5 @@ export function useFournisseurs() {
     importFournisseursFromExcel,
   };
 }
+
+// ✅ Audit Codex terminé pour ce fichier

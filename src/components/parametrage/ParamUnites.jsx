@@ -11,6 +11,7 @@ export default function ParamUnites() {
   const { mama_id } = useAuth();
   const [form, setForm] = useState({ nom: "", id: null });
   const [editMode, setEditMode] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (mama_id) fetchUnites();
@@ -32,7 +33,9 @@ export default function ParamUnites() {
 
   const handleSubmit = async e => {
     e.preventDefault();
+    if (loading) return;
     if (!form.nom.trim()) return toast.error("Nom requis");
+    setLoading(true);
     try {
       if (editMode) {
         await editUnite(form.id, { nom: form.nom });
@@ -47,6 +50,8 @@ export default function ParamUnites() {
     } catch (err) {
       console.error("Erreur enregistrement unité:", err);
       toast.error("Échec enregistrement");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -70,8 +75,17 @@ export default function ParamUnites() {
           onChange={e => setForm(f => ({ ...f, nom: e.target.value }))}
           required
         />
-        <Button type="submit">{editMode ? "Modifier" : "Ajouter"}</Button>
-        {editMode && <Button variant="outline" type="button" onClick={() => { setEditMode(false); setForm({ nom: "", id: null }); }}>Annuler</Button>}
+        <Button type="submit" disabled={loading}>{editMode ? "Modifier" : "Ajouter"}</Button>
+        {editMode && (
+          <Button
+            variant="outline"
+            type="button"
+            onClick={() => { setEditMode(false); setForm({ nom: "", id: null }); }}
+            disabled={loading}
+          >
+            Annuler
+          </Button>
+        )}
       </form>
       <Button variant="outline" className="mb-2" onClick={exportExcel}>Export Excel</Button>
       <table className="min-w-full bg-white rounded-xl shadow-md text-xs">
@@ -96,3 +110,4 @@ export default function ParamUnites() {
     </div>
   );
 }
+// ✅ Correction Codex : feedback utilisateur rétabli

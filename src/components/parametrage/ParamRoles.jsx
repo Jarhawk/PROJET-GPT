@@ -9,6 +9,7 @@ export default function ParamRoles() {
   const { mama_id, role } = useAuth();
   const [form, setForm] = useState({ nom: "", id: null });
   const [editMode, setEditMode] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (mama_id || role === "superadmin") fetchRoles();
@@ -30,7 +31,9 @@ export default function ParamRoles() {
 
   const handleSubmit = async e => {
     e.preventDefault();
+    if (loading) return;
     if (!form.nom.trim()) return toast.error("Nom requis");
+    setLoading(true);
     try {
       if (editMode) {
         await editRole(form.id, { nom: form.nom });
@@ -45,6 +48,8 @@ export default function ParamRoles() {
     } catch (err) {
       console.error("Erreur enregistrement rôle:", err);
       toast.error("Échec enregistrement");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -60,8 +65,17 @@ export default function ParamRoles() {
           onChange={e => setForm(f => ({ ...f, nom: e.target.value }))}
           required
         />
-        <Button type="submit">{editMode ? "Modifier" : "Ajouter"}</Button>
-        {editMode && <Button variant="outline" type="button" onClick={() => { setEditMode(false); setForm({ nom: "", id: null }); }}>Annuler</Button>}
+        <Button type="submit" disabled={loading}>{editMode ? "Modifier" : "Ajouter"}</Button>
+        {editMode && (
+          <Button
+            variant="outline"
+            type="button"
+            onClick={() => { setEditMode(false); setForm({ nom: "", id: null }); }}
+            disabled={loading}
+          >
+            Annuler
+          </Button>
+        )}
       </form>
       <table className="min-w-full bg-white rounded-xl shadow-md text-xs">
         <thead>
@@ -85,3 +99,4 @@ export default function ParamRoles() {
     </div>
   );
 }
+// ✅ Correction Codex : feedback utilisateur rétabli

@@ -139,28 +139,36 @@ export default function Produits() {
             </tr>
           </thead>
           <tbody>
-          {products.map(p => (
-            <tr key={p.id}>
-                <td>{p.nom}</td>
-                <td>{p.famille}</td>
-                <td>{p.unite}</td>
-                <td>{p.pmp}</td>
-                <td>{p.stock_reel}</td>
-                <td>{p.stock_min}</td>
-                <td>{p.actif ? "✅" : "❌"}</td>
-                <td>
-                  <Button size="sm" variant="outline" onClick={() => { setSelectedProduct(p); setShowForm(true); }}>
-                    Éditer
-                  </Button>
-                  <Button size="sm" variant="secondary" onClick={() => { setSelectedProduct(p); setShowDetail(true); }}>
-                    Historique prix
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => duplicateProduct(p.id)}>
-                    Dupliquer
-                  </Button>
-                </td>
-              </tr>
-          ))}
+          {products.length === 0 ? (
+            <tr>
+              <td colSpan={8} className="py-4 text-muted-foreground">
+                Aucun produit trouvé
+              </td>
+            </tr>
+          ) : (
+            products.map(p => (
+              <tr key={p.id}>
+                  <td>{p.nom}</td>
+                  <td>{p.famille}</td>
+                  <td>{p.unite}</td>
+                  <td>{p.pmp}</td>
+                  <td>{p.stock_reel}</td>
+                  <td>{p.stock_min}</td>
+                  <td>{p.actif ? "✅" : "❌"}</td>
+                  <td>
+                    <Button size="sm" variant="outline" onClick={() => { setSelectedProduct(p); setShowForm(true); }}>
+                      Éditer
+                    </Button>
+                    <Button size="sm" variant="secondary" onClick={() => { setSelectedProduct(p); setShowDetail(true); }}>
+                      Historique prix
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => duplicateProduct(p.id)}>
+                      Dupliquer
+                    </Button>
+                  </td>
+                </tr>
+            ))
+          )}
         </tbody>
       </table>
       <div className="mt-4 flex gap-2 justify-center">
@@ -194,3 +202,4 @@ export default function Produits() {
     </div>
   );
 }
+// ✅ Audit Codex terminé pour ce fichier

@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { toast } from "react-hot-toast";
 
 export function useProducts() {
   const { mama_id } = useAuth();
@@ -40,10 +41,14 @@ export function useProducts() {
     if (typeof actif === "boolean") query = query.eq("actif", actif);
 
     const { data, error, count } = await query;
+    console.log("DEBUG tableau produits", data);
     setProducts(Array.isArray(data) ? data : []);
     setTotal(count || 0);
     setLoading(false);
-    if (error) setError(error);
+    if (error) {
+      setError(error);
+      toast.error(error.message);
+    }
     return data || [];
   }, [mama_id]);
 
@@ -53,7 +58,10 @@ export function useProducts() {
     setError(null);
     const { error } = await supabase.from("products").insert([{ ...product, mama_id }]);
     setLoading(false);
-    if (error) setError(error);
+    if (error) {
+      setError(error);
+      toast.error(error.message);
+    }
     await fetchProducts();
   }
 
@@ -67,7 +75,10 @@ export function useProducts() {
       .eq("id", id)
       .eq("mama_id", mama_id);
     setLoading(false);
-    if (error) setError(error);
+    if (error) {
+      setError(error);
+      toast.error(error.message);
+    }
     await fetchProducts();
   }
 
@@ -81,7 +92,10 @@ export function useProducts() {
     setError(null);
     const { error } = await supabase.from("products").insert([{ ...copy, mama_id }]);
     setLoading(false);
-    if (error) setError(error);
+    if (error) {
+      setError(error);
+      toast.error(error.message);
+    }
     await fetchProducts();
   }
 
@@ -95,7 +109,10 @@ export function useProducts() {
       .eq("id", id)
       .eq("mama_id", mama_id);
     setLoading(false);
-    if (error) setError(error);
+    if (error) {
+      setError(error);
+      toast.error(error.message);
+    }
     await fetchProducts();
   }
 
@@ -109,7 +126,10 @@ export function useProducts() {
       .eq("id", id)
       .eq("mama_id", mama_id);
     setLoading(false);
-    if (error) setError(error);
+    if (error) {
+      setError(error);
+      toast.error(error.message);
+    }
     await fetchProducts();
   }
 
@@ -126,7 +146,10 @@ export function useProducts() {
       .eq("mama_id", mama_id)
       .order("updated_at", { ascending: false });
     setLoading(false);
-    if (error) setError(error);
+    if (error) {
+      setError(error);
+      toast.error(error.message);
+    }
     return data || [];
   }
 
@@ -164,6 +187,7 @@ export function useProducts() {
       return arr;
     } catch (error) {
       setError(error);
+      toast.error(error.message);
       return [];
     } finally {
       setLoading(false);
@@ -186,3 +210,5 @@ export function useProducts() {
     importProductsFromExcel,
   };
 }
+
+// ✅ Audit Codex terminé pour ce fichier

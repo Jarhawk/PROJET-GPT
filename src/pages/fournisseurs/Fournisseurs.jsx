@@ -163,28 +163,36 @@ export default function Fournisseurs() {
             </tr>
           </thead>
           <tbody>
-            {fournisseursFiltrés.map(f => (
-              <tr key={f.id} className={f.actif ? '' : 'opacity-50'}>
-                <td className="py-1 px-3 font-semibold text-white">{f.nom}</td>
-                <td>{f.ville}</td>
-                <td>{f.tel}</td>
-                <td>{f.contact}</td>
-                <td>{getProductsBySupplier(f.id)?.length || 0}</td>
-                <td>
-                  <Button size="sm" variant="outline" onClick={() => setSelected(f.id)}>
-                    Voir détails
-                  </Button>
-                </td>
-                <td>
-                  <Button size="sm" variant="destructive" onClick={async () => {
-                    await disableFournisseur(f.id);
-                    getFournisseurs({ search });
-                  }}>
-                    Supprimer
-                  </Button>
+            {fournisseursFiltrés.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="py-4 text-muted-foreground">
+                  Aucun fournisseur trouvé
                 </td>
               </tr>
-            ))}
+            ) : (
+              fournisseursFiltrés.map(f => (
+                <tr key={f.id} className={f.actif ? '' : 'opacity-50'}>
+                  <td className="py-1 px-3 font-semibold text-white">{f.nom}</td>
+                  <td>{f.ville}</td>
+                  <td>{f.tel}</td>
+                  <td>{f.contact}</td>
+                  <td>{getProductsBySupplier(f.id)?.length || 0}</td>
+                  <td>
+                    <Button size="sm" variant="outline" onClick={() => setSelected(f.id)}>
+                      Voir détails
+                    </Button>
+                  </td>
+                  <td>
+                    <Button size="sm" variant="destructive" onClick={async () => {
+                      await disableFournisseur(f.id);
+                      getFournisseurs({ search });
+                    }}>
+                      Supprimer
+                    </Button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
         <div className="mt-4 flex gap-2 justify-center">
@@ -243,3 +251,4 @@ export default function Fournisseurs() {
     </div>
   );
 }
+// ✅ Audit Codex terminé pour ce fichier

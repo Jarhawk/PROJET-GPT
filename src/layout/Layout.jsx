@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 // ✅ Étape validée
 
 export default function Layout() {
+  console.log("Layout rendu");
   const { pathname } = useLocation();
   const { user, role, logout } = useAuth();
   if (pathname === "/login" || pathname === "/unauthorized") return <Outlet />;

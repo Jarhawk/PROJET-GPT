@@ -18,6 +18,7 @@ export default function ParamCostCenters() {
   const [search, setSearch] = useState("");
   const [form, setForm] = useState({ nom: "", actif: true, id: null });
   const [editMode, setEditMode] = useState(false);
+  const [loading, setLoading] = useState(false);
   const fileRef = useRef();
 
   useEffect(() => {
@@ -44,27 +45,46 @@ export default function ParamCostCenters() {
 
   const handleSubmit = async e => {
     e.preventDefault();
+    if (loading) return;
     if (!form.nom.trim()) return toast.error("Nom requis");
-    if (editMode) {
-      await updateCostCenter(form.id, { nom: form.nom, actif: form.actif });
-      toast.success("Cost center modifié !");
-    } else {
-      await addCostCenter({ nom: form.nom, actif: form.actif });
-      toast.success("Cost center ajouté !");
+    setLoading(true);
+    try {
+      if (editMode) {
+        await updateCostCenter(form.id, { nom: form.nom, actif: form.actif });
+        toast.success("Cost center modifié !");
+      } else {
+        await addCostCenter({ nom: form.nom, actif: form.actif });
+        toast.success("Cost center ajouté !");
+      }
+      setEditMode(false);
+      setForm({ nom: "", actif: true, id: null });
+      await fetchCostCenters();
+    } catch (err) {
+      console.error("Erreur enregistrement cost center:", err);
+      toast.error("Échec enregistrement");
+    } finally {
+      setLoading(false);
     }
-    setEditMode(false); setForm({ nom: "", actif: true, id: null });
-    await fetchCostCenters();
   };
 
   const handleImport = async e => {
     const file = e.target.files[0];
     if (!file) return;
-    const rows = await importCostCentersFromExcel(file);
-    for (const row of rows) {
-      await addCostCenter({ nom: row.nom, actif: row.actif !== false });
+    setLoading(true);
+    try {
+      const rows = await importCostCentersFromExcel(file);
+      for (const row of rows) {
+        await addCostCenter({ nom: row.nom, actif: row.actif !== false });
+      }
+      await fetchCostCenters();
+      toast.success("Cost centers importés");
+    } catch (err) {
+      console.error("Erreur import cost centers:", err);
+      toast.error("Échec import");
+    } finally {
+      setLoading(false);
+      e.target.value = null;
     }
-    await fetchCostCenters();
-    e.target.value = null;
   };
 
   const exportExcel = () => {
@@ -94,9 +114,16 @@ export default function ParamCostCenters() {
           />
           Actif
         </label>
-        <Button type="submit">{editMode ? "Modifier" : "Ajouter"}</Button>
+        <Button type="submit" disabled={loading}>{editMode ? "Modifier" : "Ajouter"}</Button>
         {editMode && (
-          <Button variant="outline" type="button" onClick={() => { setEditMode(false); setForm({ nom: "", actif: true, id: null }); }}>Annuler</Button>
+          <Button
+            variant="outline"
+            type="button"
+            onClick={() => { setEditMode(false); setForm({ nom: "", actif: true, id: null }); }}
+            disabled={loading}
+          >
+            Annuler
+          </Button>
         )}
       </form>
       <input
@@ -106,8 +133,8 @@ export default function ParamCostCenters() {
         onChange={e => setSearch(e.target.value)}
       />
       <div className="flex gap-2 mb-2">
-        <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
-        <Button variant="outline" onClick={() => fileRef.current.click()}>Import Excel</Button>
+        <Button variant="outline" onClick={exportExcel} disabled={loading}>Export Excel</Button>
+        <Button variant="outline" onClick={() => fileRef.current.click()} disabled={loading}>Import Excel</Button>
         <input
           type="file"
           accept=".xlsx"
@@ -141,3 +168,4 @@ export default function ParamCostCenters() {
     </div>
   );
 }
+// ✅ Correction Codex : feedback utilisateur rétabli

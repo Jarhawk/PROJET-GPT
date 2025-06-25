@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 export default function UtilisateurRow({ utilisateur, onEdit, onToggleActive }) {
   const { isAdmin, mama_id } = useAuth();
   const [showHistory, setShowHistory] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Historique mock connexions
   const history = [
@@ -14,13 +15,18 @@ export default function UtilisateurRow({ utilisateur, onEdit, onToggleActive }) 
   ];
 
   const resetPassword = async () => {
-    const { error } = await supabase.auth.resetPasswordForEmail(utilisateur.email, {
-      redirectTo: `${window.location.origin}/update-password`,
-    });
-    if (error) {
-      toast.error("Erreur lors de l'envoi du lien");
-    } else {
+    if (loading) return;
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(utilisateur.email, {
+        redirectTo: `${window.location.origin}/update-password`,
+      });
+      if (error) throw error;
       toast.success("Lien de réinitialisation envoyé à " + utilisateur.email);
+    } catch {
+      toast.error("Erreur lors de l'envoi du lien");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -50,7 +56,9 @@ export default function UtilisateurRow({ utilisateur, onEdit, onToggleActive }) 
               >
                 {utilisateur.actif ? "Désactiver" : "Activer"}
               </button>
-              <button className="btn btn-sm mr-2" onClick={resetPassword}>Reset MDP</button>
+              <button className="btn btn-sm mr-2" onClick={resetPassword} disabled={loading}>
+                Reset MDP
+              </button>
               <button className="btn btn-sm" onClick={() => setShowHistory(!showHistory)}>
                 {showHistory ? "Masquer historique" : "Connexions"}
               </button>
@@ -75,3 +83,4 @@ export default function UtilisateurRow({ utilisateur, onEdit, onToggleActive }) 
     </>
   );
 }
+// ✅ Correction Codex : feedback utilisateur rétabli

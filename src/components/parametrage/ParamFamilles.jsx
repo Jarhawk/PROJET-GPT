@@ -18,6 +18,7 @@ export default function ParamFamilles() {
   const [search, setSearch] = useState("");
   const [form, setForm] = useState({ nom: "", id: null });
   const [editMode, setEditMode] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (mama_id) fetchFamilles();
@@ -43,6 +44,8 @@ export default function ParamFamilles() {
 
   const handleSubmit = async e => {
     e.preventDefault();
+    if (loading) return;
+    setLoading(true);
     if (!form.nom.trim()) return toast.error("Nom requis");
     try {
       if (editMode) {
@@ -58,6 +61,8 @@ export default function ParamFamilles() {
     } catch (err) {
       console.error("Erreur enregistrement famille:", err);
       toast.error("Échec enregistrement");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -81,8 +86,17 @@ export default function ParamFamilles() {
           onChange={e => setForm(f => ({ ...f, nom: e.target.value }))}
           required
         />
-        <Button type="submit">{editMode ? "Modifier" : "Ajouter"}</Button>
-        {editMode && <Button variant="outline" type="button" onClick={() => { setEditMode(false); setForm({ nom: "", id: null }); }}>Annuler</Button>}
+        <Button type="submit" disabled={loading}>{editMode ? "Modifier" : "Ajouter"}</Button>
+        {editMode && (
+          <Button
+            variant="outline"
+            type="button"
+            onClick={() => { setEditMode(false); setForm({ nom: "", id: null }); }}
+            disabled={loading}
+          >
+            Annuler
+          </Button>
+        )}
       </form>
       <input
         className="input mb-2"
@@ -113,3 +127,4 @@ export default function ParamFamilles() {
     </div>
   );
 }
+// ✅ Correction Codex : feedback utilisateur rétabli

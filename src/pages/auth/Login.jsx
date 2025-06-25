@@ -29,14 +29,15 @@ export default function Login() {
 
   // Redirection après authentification
   useEffect(() => {
-    console.log("DEBUG auth", session, user);
+    console.log("DEBUG login", session, user);
     if (session && user) {
       navigate("/dashboard");
     }
-  }, [session, user, navigate]); // ✅ Reprendre ici si Codex s'arrête.
+  }, [session, user, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    if (loading) return;
     clearErrors();
     if (!email) setError("email", "Email requis");
     if (!password) setError("password", "Mot de passe requis");

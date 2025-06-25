@@ -36,7 +36,7 @@ const Mamas = lazy(() => import("@/pages/parametrage/Mamas.jsx"));
 const Permissions = lazy(() => import("@/pages/parametrage/Permissions.jsx"));
 const AccessRights = lazy(() => import("@/pages/parametrage/AccessRights.jsx"));
 const Onboarding = lazy(() => import("@/pages/public/Onboarding.jsx"));
-const LandingPage = lazy(() => import("@/pages/public/LandingPage.jsx"));
+const Accueil = lazy(() => import("@/pages/Accueil.jsx"));
 const Signup = lazy(() => import("@/pages/public/Signup.jsx"));
 const PagePrivacy = lazy(() => import("@/pages/public/PagePrivacy.jsx"));
 const PageMentions = lazy(() => import("@/pages/public/PageMentions.jsx"));
@@ -66,7 +66,7 @@ export default function Router() {
   return (
     <Suspense fallback={null}>
       <Routes>
-        <Route path="/" element={<LandingPage />} />
+        <Route path="/" element={<Accueil />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />

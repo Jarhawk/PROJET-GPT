@@ -157,13 +157,14 @@ export function AuthProvider({ children }) {
     setLoading(true);
 
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log('DEBUG context initial', session);
       setSession(session);
       if (session) await fetchUserData(session);
       setLoading(false);
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      console.debug('auth state change', session);
+      console.log('DEBUG context change', session);
       setSession(session);
       if (session) {
         setLoading(true);

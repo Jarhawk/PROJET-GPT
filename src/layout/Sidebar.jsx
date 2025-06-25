@@ -1,5 +1,6 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import toast from "react-hot-toast";
 import {
   Boxes,
   ClipboardList,
@@ -20,8 +21,9 @@ import {
 } from "lucide-react";
 
 export default function Sidebar() {
-  const { access_rights, loading } = useAuth();
+  const { access_rights, loading, user, logout, session } = useAuth();
   const { pathname } = useLocation();
+  const navigate = useNavigate();
 
   if (loading || !access_rights) {
     return <aside className="w-64 p-4" />;
@@ -125,6 +127,20 @@ export default function Sidebar() {
           </div>
         )}
       </nav>
+      {session && (
+        <div className="mt-6 border-t border-white/20 pt-4 text-sm flex flex-col gap-2">
+          <span>Bienvenue, {user?.email}</span>
+          <button
+            onClick={() => {
+              logout();
+              toast.success('Déconnexion réussie');
+            }}
+            className="text-left text-red-400 hover:underline"
+          >
+            Se déconnecter
+          </button>
+        </div>
+      )}
     </aside>
   );
 }

@@ -1,4 +1,5 @@
 import { useState } from "react";
+// ✅ Vérifié
 import { useNavigate } from "react-router-dom";
 import { useRequisitions } from "@/hooks/useRequisitions";
 import { useProducts } from "@/hooks/useProducts";
@@ -15,6 +16,7 @@ function RequisitionFormPage() {
   const [motif, setMotif] = useState("");
   const [zone, setZone] = useState("");
   const [articles, setArticles] = useState([{ product_id: "", quantite: 1 }]);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChangeArticle = (index, field, value) => {
     const updated = [...articles];
@@ -32,17 +34,28 @@ function RequisitionFormPage() {
       toast.error("Tous les champs sont obligatoires");
       return;
     }
-    const { success, message } = await createRequisition({
+    if (submitting) return;
+    const payload = {
       zone,
       type,
       motif,
       lignes: articles.map(a => ({ product_id: a.product_id, quantite: Number(a.quantite) })),
-    });
-    if (success) {
-      toast.success("Réquisition créée !");
-      navigate("/requisitions");
-    } else {
-      toast.error(message || "Erreur lors de la création");
+    };
+    console.log("DEBUG form", payload);
+    try {
+      setSubmitting(true);
+      const { success, message } = await createRequisition(payload);
+      if (success) {
+        toast.success("Réquisition créée !");
+        navigate("/requisitions");
+      } else {
+        throw new Error(message);
+      }
+    } catch (err) {
+      console.log("DEBUG error", err);
+      toast.error(err.message || "Erreur lors de la création");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -130,7 +143,7 @@ function RequisitionFormPage() {
         </div>
 
         <div className="text-right">
-          <button type="submit" className="bg-mamastock-gold text-white px-4 py-2 rounded">
+          <button type="submit" disabled={submitting} className="bg-mamastock-gold text-white px-4 py-2 rounded disabled:opacity-50">
             Enregistrer
           </button>
         </div>

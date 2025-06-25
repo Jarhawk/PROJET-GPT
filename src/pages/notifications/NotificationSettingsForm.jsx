@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+// ✅ Vérifié
 import useNotifications from "@/hooks/useNotifications";
 import { Toaster, toast } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
@@ -23,11 +24,19 @@ export default function NotificationSettingsForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSaving(true);
-    const { error } = await updatePreferences(prefs);
-    setSaving(false);
-    if (error) toast.error(error.message || error);
-    else toast.success("Préférences mises à jour");
+    if (saving) return;
+    console.log("DEBUG form", prefs);
+    try {
+      setSaving(true);
+      const { error } = await updatePreferences(prefs);
+      if (error) throw error;
+      toast.success("Préférences mises à jour");
+    } catch (err) {
+      console.log("DEBUG error", err);
+      toast.error(err.message || "Erreur lors de la sauvegarde");
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) return <div className="p-6">Chargement...</div>;

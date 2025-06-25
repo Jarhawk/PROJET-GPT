@@ -110,4 +110,3 @@ export default function ParamUnites() {
     </div>
   );
 }
-// ✅ Correction Codex : feedback utilisateur rétabli

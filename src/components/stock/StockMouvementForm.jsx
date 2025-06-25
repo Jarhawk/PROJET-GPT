@@ -1,5 +1,4 @@
 import { useState } from "react";
-// ✅ Vérifié
 import { useStock } from "@/hooks/useStock";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
@@ -27,14 +26,12 @@ export default function StockMouvementForm({ produit, onClose }) {
       zone,
       motif,
     };
-    console.log("DEBUG form", payload);
     try {
       const res = await addMouvementStock(payload);
       if (res?.error) throw res.error;
       toast.success("Mouvement enregistré !");
       onClose?.();
     } catch (err) {
-      console.log("DEBUG error", err);
       console.error("Erreur mouvement stock:", err);
       toast.error("Erreur lors de l'enregistrement.");
     } finally {

@@ -64,4 +64,3 @@ export default function ParamMama() {
     </div>
   );
 }
-// ✅ Correction Codex : feedback utilisateur rétabli

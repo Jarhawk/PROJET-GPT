@@ -1,7 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import useAuth from "@/hooks/useAuth";
-// ✅ Étape validée
 
 export default function Accueil() {
   const { session, user } = useAuth();

@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-// ✅ Vérifié
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import toast, { Toaster } from "react-hot-toast";
@@ -40,7 +39,6 @@ export default function PermissionsForm({ role, onClose, onSaved }) {
       if (error) throw error;
       setPermissions(data || []);
     } catch (err) {
-      console.log("DEBUG error", err);
       toast.error(err.message || "Erreur chargement permissions");
     }
   };
@@ -53,7 +51,6 @@ export default function PermissionsForm({ role, onClose, onSaved }) {
 
   const togglePermission = async (module_cle, droit_cle) => {
     if (saving) return;
-    console.log("DEBUG form", { module_cle, droit_cle });
     try {
       setSaving(true);
       const exists = hasPermission(module_cle, droit_cle);
@@ -83,7 +80,6 @@ export default function PermissionsForm({ role, onClose, onSaved }) {
       toast.success("Permission modifiée");
       onSaved?.();
     } catch (err) {
-      console.log("DEBUG error", err);
       toast.error(err.message || "Erreur lors de la modification.");
     } finally {
       setSaving(false);

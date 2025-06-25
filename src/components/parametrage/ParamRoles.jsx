@@ -99,4 +99,3 @@ export default function ParamRoles() {
     </div>
   );
 }
-// ✅ Correction Codex : feedback utilisateur rétabli

@@ -202,4 +202,3 @@ export default function Produits() {
     </div>
   );
 }
-// ✅ Audit Codex terminé pour ce fichier

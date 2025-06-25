@@ -31,6 +31,8 @@
 - Note on Playwright browser downloads in README
 - Added `npm run install:browsers` script to download Playwright browsers
 - End-to-end tests now check for installed browsers and skip if missing
+- Example environment files `.env.example` and `.env.production.example` ease configuration
+- Added clarification on using `.env.production` for Netlify deployment
 - Menu planning with recipe associations and automatic stock decrement
 - Dark mode toggle in the navigation bar
 - Multi-site support with per-site cost centers and user isolation
@@ -65,6 +67,27 @@
 ### Changed
 - Updated ESLint config and cleaned all warnings.
 - Dependencies updated via `npm audit fix`.
+- Removed leftover checkmark comments and debug console statements
+  before preparing deployment.
+- Verified clean install and build steps for production
+- Documented service worker registration for offline usage in the README
+- Added `isSuperadmin` flag in `AuthContext` to better handle role-based access
+- `ProtectedRoute` now relies on `isSuperadmin` for role checks
+- ProtectedRoute refuse l'accès si aucun `mama_id` n'est associé
+- `.env.production.example` fournit désormais l'URL et la clé Supabase prêtes
+  à copier pour le déploiement
+- `.env.production` est ignoré par Git pour éviter de publier des clés sensibles
+- Dernière installation des dépendances et vérification des commandes de test et de build
+- Nouvelle installation validée lors de l'étape 107 pour confirmer un environnement sain
+### Added
+- Section "Deployment checklist" in the README with final verification steps
+- Création d'un fichier `.env.production` local prêt à copier pour le déploiement
 
 ### Known Issues
 - `xlsx` package has a high severity vulnerability that cannot be fixed automatically.
+
+- Confirmed all RLS policies using `sql/rls.sql` and verified login redirects to `/dashboard` when already authenticated.
+- Validation finale Step 110 : `npm install`, lint, tests, build et preview avec `.env.production.example`.
+- Validation finale Step 111 : verification complete apres `npm install`.
+
+- Validation finale Step 112 : audit du routeur, des pages principales et des formulaires. Toutes les commandes passent avant déploiement.

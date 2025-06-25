@@ -83,4 +83,3 @@ export default function UtilisateurRow({ utilisateur, onEdit, onToggleActive }) 
     </>
   );
 }
-// ✅ Correction Codex : feedback utilisateur rétabli

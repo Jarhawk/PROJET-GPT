@@ -29,7 +29,6 @@ export function useFournisseurs() {
     if (typeof actif === "boolean") query = query.eq("actif", actif);
 
     const { data, error, count } = await query;
-    console.log("DEBUG tableau fournisseurs", data);
     setFournisseurs(Array.isArray(data) ? data : []);
     setTotal(count || 0);
     setLoading(false);
@@ -143,4 +142,3 @@ export function useFournisseurs() {
   };
 }
 
-// ✅ Audit Codex terminé pour ce fichier

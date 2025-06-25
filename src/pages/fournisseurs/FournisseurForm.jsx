@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-// ✅ Vérifié
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 
@@ -32,11 +31,10 @@ export default function FournisseurForm({ fournisseur = {}, onSubmit, onCancel, 
       return;
     }
     const data = { nom, ville, telephone, email, actif };
-    console.log("DEBUG form", data);
     try {
       onSubmit?.(data);
     } catch (err) {
-      console.log("DEBUG error", err);
+      toast.error(err?.message || "Erreur lors de l'enregistrement.");
     }
   };
 

@@ -1,5 +1,4 @@
 import { useState } from "react";
-// ✅ Vérifié
 import { Dialog, DialogContent, DialogOverlay } from "@/components/ui/dialog";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
@@ -18,7 +17,6 @@ export default function FeedbackForm({ open, onOpenChange }) {
     if (sending) return;
     setSending(true);
     const payload = { user_id, mama_id, module, message, urgence };
-    console.log("DEBUG form", payload);
     try {
       const { error } = await supabase.from("feedback").insert([payload]);
       if (error) throw error;
@@ -26,7 +24,6 @@ export default function FeedbackForm({ open, onOpenChange }) {
       setMessage("");
       onOpenChange(false);
     } catch (err) {
-      console.log("DEBUG error", err);
       toast.error(err.message || "Erreur lors de l'envoi");
     } finally {
       setSending(false);

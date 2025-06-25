@@ -1,5 +1,4 @@
 import { useState } from "react";
-// ✅ Vérifié
 import { useInventaires } from "@/hooks/useInventaires";
 import { useProducts } from "@/hooks/useProducts";
 import { useNavigate } from "react-router-dom";
@@ -50,7 +49,6 @@ export default function InventaireForm() {
         prix_unitaire: getPrice(l.product_id),
       })),
     };
-    console.log("DEBUG form", payload);
     try {
       const created = await createInventaire(payload);
       if (created) {
@@ -58,7 +56,6 @@ export default function InventaireForm() {
         navigate("/inventaire");
       }
     } catch (err) {
-      console.log("DEBUG error", err);
       toast.error(err?.message || "Erreur à l'enregistrement");
     } finally {
       setLoading(false);

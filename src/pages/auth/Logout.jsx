@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
-// ✅ Étape validée
 
 export default function Logout() {
   const navigate = useNavigate();

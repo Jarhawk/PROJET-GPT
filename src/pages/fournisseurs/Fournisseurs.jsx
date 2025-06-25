@@ -1,5 +1,4 @@
 // src/pages/Fournisseurs.jsx
-// ✅ Vérifié
 import { useState, useEffect } from "react";
 import { useFournisseurs } from "@/hooks/useFournisseurs";
 import { useFournisseurStats } from "@/hooks/useFournisseurStats";
@@ -219,7 +218,6 @@ export default function Fournisseurs() {
             onSubmit={async (data) => {
               if (saving) return;
               setSaving(true);
-              console.log("DEBUG form", data);
               try {
                 if (editRow) {
                   await updateFournisseur(editRow.id, data);
@@ -232,7 +230,6 @@ export default function Fournisseurs() {
                 setEditRow(null);
                 getFournisseurs({ search });
               } catch (err) {
-                console.log("DEBUG error", err);
                 toast.error(err?.message || "Erreur enregistrement");
               }
               setSaving(false);
@@ -251,4 +248,3 @@ export default function Fournisseurs() {
     </div>
   );
 }
-// ✅ Audit Codex terminé pour ce fichier

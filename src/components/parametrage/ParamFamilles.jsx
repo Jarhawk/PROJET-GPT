@@ -127,4 +127,3 @@ export default function ParamFamilles() {
     </div>
   );
 }
-// ✅ Correction Codex : feedback utilisateur rétabli

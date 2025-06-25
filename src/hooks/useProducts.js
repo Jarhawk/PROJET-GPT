@@ -41,7 +41,6 @@ export function useProducts() {
     if (typeof actif === "boolean") query = query.eq("actif", actif);
 
     const { data, error, count } = await query;
-    console.log("DEBUG tableau produits", data);
     setProducts(Array.isArray(data) ? data : []);
     setTotal(count || 0);
     setLoading(false);
@@ -211,4 +210,3 @@ export function useProducts() {
   };
 }
 
-// ✅ Audit Codex terminé pour ce fichier

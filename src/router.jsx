@@ -3,7 +3,6 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import useAuth from "@/hooks/useAuth";
 import Layout from "@/layout/Layout";
 import Login from "@/pages/auth/Login";
-// ✅ Étape validée
 import Unauthorized from "@/pages/auth/Unauthorized";
 import Pending from "@/pages/auth/Pending";
 import Blocked from "@/pages/auth/Blocked";
@@ -69,7 +68,6 @@ function RootRoute() {
   if (session && user) return <Navigate to="/dashboard" replace />;
   return <Navigate to="/accueil" replace />;
 }
-// ✅ Étape validée
 
 export default function Router() {
   return (
@@ -282,4 +280,3 @@ export default function Router() {
     </Suspense>
   );
 }
-// ✅ Étape validée

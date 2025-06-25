@@ -199,7 +199,7 @@ export function AuthProvider({ children }) {
       user_id: null,
     });
     setPending(false);
-    window.location.href = "/login";
+    navigate("/login");
   };
 
   // Exporte le contexte

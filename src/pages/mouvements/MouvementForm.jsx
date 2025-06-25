@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+// ✅ Vérifié
 import { Button } from "@/components/ui/button";
 import { useMouvements } from "@/hooks/useMouvements";
 import { useProducts } from "@/hooks/useProducts";
+import toast from "react-hot-toast";
 
 export default function MouvementForm({ onClose }) {
   const { createMouvement } = useMouvements();
@@ -25,10 +27,24 @@ export default function MouvementForm({ onClose }) {
 
   const handleSubmit = async e => {
     e.preventDefault();
-    setLoading(true);
-    await createMouvement(form);
-    setLoading(false);
-    onClose?.();
+    if (loading) return;
+    if (!form.produit_id || !form.quantite) {
+      toast.error("Produit et quantité requis");
+      return;
+    }
+    console.log("DEBUG form", form);
+    try {
+      setLoading(true);
+      const { error } = await createMouvement(form);
+      if (error) throw error;
+      toast.success("Mouvement enregistré !");
+      onClose?.();
+    } catch (err) {
+      console.log("DEBUG error", err);
+      toast.error(err?.message || "Erreur lors de l'enregistrement");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleProduitChange = val => {

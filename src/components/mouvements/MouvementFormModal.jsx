@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+// ✅ Vérifié
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@radix-ui/react-dialog";
 import { AnimatePresence, motion as Motion } from "framer-motion";
@@ -60,12 +61,14 @@ export default function MouvementFormModal({
       return;
     }
     if (submitting) return;
+    console.log("DEBUG form", form);
     try {
       setSubmitting(true);
       await onSubmit(form);
       toast.success("Mouvement enregistré !");
       onOpenChange(false);
     } catch (err) {
+      console.log("DEBUG error", err);
       console.error("Erreur enregistrement mouvement:", err);
       toast.error("Erreur lors de l'enregistrement.");
     } finally {

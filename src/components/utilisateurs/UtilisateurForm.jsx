@@ -1,4 +1,5 @@
 import { useState } from "react";
+// ✅ Vérifié
 import { useUsers } from "@/hooks/useUsers";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
@@ -19,6 +20,7 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
     const data = {
       email,
@@ -26,6 +28,7 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
       actif,
       ...(password && { password }),
     };
+    console.log("DEBUG form", data);
     try {
       if (utilisateur?.id) {
         await updateUser(utilisateur.id, data);
@@ -35,10 +38,12 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
         toast.success("Utilisateur ajouté !");
       }
       onClose?.();
-    } catch {
+    } catch (err) {
+      console.log("DEBUG error", err);
       toast.error("Erreur lors de l'enregistrement.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

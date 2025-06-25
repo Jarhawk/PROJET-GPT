@@ -1,9 +1,11 @@
 import { useState } from "react";
+// ✅ Vérifié
 import { useInventaires } from "@/hooks/useInventaires";
 import { useProducts } from "@/hooks/useProducts";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
+import toast from "react-hot-toast";
 
 export default function InventaireForm() {
   const navigate = useNavigate();
@@ -13,6 +15,7 @@ export default function InventaireForm() {
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [zone, setZone] = useState("");
   const [lignes, setLignes] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const zoneSuggestions = Array.from(new Set(inventaires.map(i => i.zone).filter(Boolean)));
 
@@ -31,6 +34,12 @@ export default function InventaireForm() {
 
   const handleSubmit = async e => {
     e.preventDefault();
+    if (loading) return;
+    if (!lignes.length) {
+      toast.error("Ajoutez au moins un produit");
+      return;
+    }
+    setLoading(true);
     const payload = {
       date,
       zone,
@@ -41,8 +50,19 @@ export default function InventaireForm() {
         prix_unitaire: getPrice(l.product_id),
       })),
     };
-    const created = await createInventaire(payload);
-    if (created) navigate("/inventaire");
+    console.log("DEBUG form", payload);
+    try {
+      const created = await createInventaire(payload);
+      if (created) {
+        toast.success("Inventaire enregistré !");
+        navigate("/inventaire");
+      }
+    } catch (err) {
+      console.log("DEBUG error", err);
+      toast.error(err?.message || "Erreur à l'enregistrement");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -125,8 +145,8 @@ export default function InventaireForm() {
       </div>
 
       <div className="flex gap-4">
-        <Button type="submit">Enregistrer</Button>
-        <Button type="button" variant="outline" onClick={() => navigate(-1)}>Annuler</Button>
+        <Button type="submit" disabled={loading}>Enregistrer</Button>
+        <Button type="button" variant="outline" onClick={() => navigate(-1)} disabled={loading}>Annuler</Button>
       </div>
     </form>
   );

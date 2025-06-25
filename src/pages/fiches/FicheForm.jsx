@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+// ✅ Vérifié
 import { useFiches } from "@/hooks/useFiches";
 import { useProducts } from "@/hooks/useProducts";
 import { useFamilles } from "@/hooks/useFamilles";
@@ -38,6 +39,7 @@ export default function FicheForm({ fiche, onClose }) {
     if (lignes.some(l => !l.product_id || !l.quantite)) {
       return toast.error("Ligne incomplète");
     }
+    if (loading) return;
     setLoading(true);
     const payload = {
       nom,
@@ -46,6 +48,7 @@ export default function FicheForm({ fiche, onClose }) {
       rendement,
       lignes,
     };
+    console.log("DEBUG form", payload);
     try {
       if (fiche?.id) {
         await updateFiche(fiche.id, payload);
@@ -56,9 +59,11 @@ export default function FicheForm({ fiche, onClose }) {
       }
       onClose?.();
     } catch (err) {
+      console.log("DEBUG error", err);
       toast.error(err.message);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   return (

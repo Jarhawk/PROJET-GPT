@@ -1,4 +1,5 @@
 import { useState } from "react";
+// ✅ Vérifié
 import { useFournisseurs } from "@/hooks/useFournisseurs";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
@@ -21,23 +22,29 @@ export default function SupplierForm({ supplier, onClose, glass }) {
 
   const handleSubmit = async e => {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
+    console.log("DEBUG form", form);
     if (!form.nom) {
       toast.error("Le nom est obligatoire");
       setLoading(false);
       return;
     }
-    let res;
-    if (supplier) {
-      res = await updateFournisseur(supplier.id, form);
-    } else {
-      res = await addFournisseur(form);
-    }
-    setLoading(false);
-    if (res?.error) toast.error(res.error);
-    else {
+    try {
+      let res;
+      if (supplier) {
+        res = await updateFournisseur(supplier.id, form);
+      } else {
+        res = await addFournisseur(form);
+      }
+      if (res?.error) throw res.error;
       toast.success("Fournisseur sauvegardé");
       onClose?.();
+    } catch (err) {
+      console.log("DEBUG error", err);
+      toast.error(err?.message || "Erreur enregistrement");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -77,8 +84,8 @@ export default function SupplierForm({ supplier, onClose, glass }) {
         </label>
       </div>
       <div className="flex gap-2 justify-end">
-        <Button type="button" variant="outline" onClick={onClose}>Annuler</Button>
-        <Button type="submit" loading={loading}>{supplier ? "Enregistrer" : "Ajouter"}</Button>
+        <Button type="button" variant="outline" onClick={onClose} disabled={loading}>Annuler</Button>
+        <Button type="submit" loading={loading} disabled={loading}>{supplier ? "Enregistrer" : "Ajouter"}</Button>
       </div>
     </Motion.form>
   );

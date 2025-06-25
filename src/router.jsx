@@ -69,6 +69,7 @@ function RootRoute() {
   if (session && user) return <Navigate to="/dashboard" replace />;
   return <Navigate to="/accueil" replace />;
 }
+// ✅ Étape validée
 
 export default function Router() {
   return (
@@ -86,10 +87,14 @@ export default function Router() {
         <Route path="/blocked" element={<Blocked />} />
         <Route path="/privacy" element={<PagePrivacy />} />
         <Route path="/mentions" element={<PageMentions />} />
-        <Route element={<Layout />}>
-        <Route
-            path="/dashboard"
-            element={<ProtectedRoute accessKey="dashboard"><Dashboard /></ProtectedRoute>}
+        <Route path="/" element={<Layout />}>
+          <Route
+            path="dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
           />
           <Route
             path="/dashboard/builder"
@@ -277,3 +282,4 @@ export default function Router() {
     </Suspense>
   );
 }
+// ✅ Étape validée

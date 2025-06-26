@@ -5,10 +5,12 @@ import { useSupplierProducts } from "@/hooks/useSupplierProducts";
 import { useInvoices } from "@/hooks/useInvoices";
 import { useFournisseurs } from "@/hooks/useFournisseurs";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/context/AuthContext";
 import { ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { Button } from "@/components/ui/button";
 
 export default function FournisseurDetail({ id }) {
+  const { mama_id } = useAuth();
   const { fetchStatsForFournisseur } = useFournisseurStats();
   const { getProductsBySupplier } = useSupplierProducts();
   const { fetchInvoicesBySupplier } = useInvoices();
@@ -21,7 +23,7 @@ export default function FournisseurDetail({ id }) {
 
   // Chargement des infos fournisseur et de ses factures
   useEffect(() => {
-    if (!id) return;
+    if (!id || !mama_id) return;
     setLoading(true);
     Promise.all([
       fetchStatsForFournisseur(id).then(setStats),
@@ -37,9 +39,15 @@ export default function FournisseurDetail({ id }) {
         );
         setInvoices(withCount);
       }),
-      supabase.from("fournisseurs").select("*").eq("id", id).single().then(({ data }) => setFournisseur(data)),
+      supabase
+        .from("fournisseurs")
+        .select("*")
+        .eq("id", id)
+        .eq("mama_id", mama_id)
+        .single()
+        .then(({ data }) => setFournisseur(data)),
     ]).finally(() => setLoading(false));
-  }, [id]);
+  }, [id, mama_id]);
 
   // Met à jour le top produits lors du changement d'id
   useEffect(() => {

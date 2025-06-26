@@ -1,22 +1,26 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Alertes() {
+  const { mama_id, loading: authLoading } = useAuth();
   const [alertes, setAlertes] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function fetchAlertes() {
+      if (!mama_id || authLoading) return;
       setLoading(true);
       const { data } = await supabase
         .from("alertes")
         .select("*")
+        .eq("mama_id", mama_id)
         .order("created_at", { ascending: false });
       setAlertes(Array.isArray(data) ? data : []);
       setLoading(false);
     }
     fetchAlertes();
-  }, []);
+  }, [mama_id, authLoading]);
 
   return (
     <div className="p-6 text-sm">

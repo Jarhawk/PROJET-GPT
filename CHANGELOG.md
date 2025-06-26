@@ -91,3 +91,8 @@
 - Validation finale Step 111 : verification complete apres `npm install`.
 
 - Validation finale Step 112 : audit du routeur, des pages principales et des formulaires. Toutes les commandes passent avant déploiement.
+- Validation step 113: filtres mama_id appliques aux alertes de taches et tests/lint OK.
+- Validation step 114: corrections catalogue viewer et ecarts inventaire.
+
+- Validation step 115: filtre mama_id pour detail fournisseur.
+- Validation step 116: filtre mama_id pour la page InvitationsEnAttente.

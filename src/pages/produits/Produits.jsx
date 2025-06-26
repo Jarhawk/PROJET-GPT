@@ -47,7 +47,7 @@ export default function Produits() {
         code: row.code || "",
         allergenes: row.allergenes || "",
         image: row.image || "",
-      });
+      }, { refresh: false });
     }
     fetchProducts();
     e.target.value = null;

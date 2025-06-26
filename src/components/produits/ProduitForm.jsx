@@ -81,11 +81,11 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
     try {
       setSaving(true);
       if (editing) {
-        const res = await updateProduct(produit.id, newProd);
+        const res = await updateProduct(produit.id, newProd, { refresh: false });
         if (res?.error) throw res.error;
         toast.success("Produit mis à jour !");
       } else {
-        const res = await addProduct(newProd);
+        const res = await addProduct(newProd, { refresh: false });
         if (res?.error) throw res.error;
         toast.success("Produit ajouté !");
       }

@@ -51,7 +51,7 @@ export function useProducts() {
     return data || [];
   }, [mama_id]);
 
-  async function addProduct(product) {
+  async function addProduct(product, { refresh = true } = {}) {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
@@ -61,10 +61,10 @@ export function useProducts() {
       setError(error);
       toast.error(error.message);
     }
-    await fetchProducts();
+    if (refresh) await fetchProducts();
   }
 
-  async function updateProduct(id, updateFields) {
+  async function updateProduct(id, updateFields, { refresh = true } = {}) {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
@@ -78,10 +78,10 @@ export function useProducts() {
       setError(error);
       toast.error(error.message);
     }
-    await fetchProducts();
+    if (refresh) await fetchProducts();
   }
 
-  async function duplicateProduct(id) {
+  async function duplicateProduct(id, { refresh = true } = {}) {
     const orig = products.find(p => p.id === id);
     if (!orig) return;
     const copy = { ...orig, nom: `${orig.nom} (copie)` };
@@ -95,10 +95,10 @@ export function useProducts() {
       setError(error);
       toast.error(error.message);
     }
-    await fetchProducts();
+    if (refresh) await fetchProducts();
   }
 
-  async function toggleProductActive(id, actif) {
+  async function toggleProductActive(id, actif, { refresh = true } = {}) {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
@@ -112,10 +112,10 @@ export function useProducts() {
       setError(error);
       toast.error(error.message);
     }
-    await fetchProducts();
+    if (refresh) await fetchProducts();
   }
 
-  async function deleteProduct(id) {
+  async function deleteProduct(id, { refresh = true } = {}) {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
@@ -129,7 +129,7 @@ export function useProducts() {
       setError(error);
       toast.error(error.message);
     }
-    await fetchProducts();
+    if (refresh) await fetchProducts();
   }
 
   async function fetchProductPrices(productId) {

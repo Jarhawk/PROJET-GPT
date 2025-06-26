@@ -1953,6 +1953,20 @@ drop policy if exists utilisateurs_select on public.utilisateurs;
 create policy utilisateurs_select on public.utilisateurs
   for select using (auth.uid() = auth_id);
 
+create table if not exists public.two_factor_auth (
+    id uuid primary key references auth.users(id) on delete cascade,
+    secret text,
+    enabled boolean default false,
+    created_at timestamptz default now()
+);
+alter table public.two_factor_auth enable row level security;
+drop policy if exists two_factor_select on public.two_factor_auth;
+create policy two_factor_select on public.two_factor_auth
+  for select using (auth.uid() = id);
+drop policy if exists two_factor_upsert on public.two_factor_auth;
+create policy two_factor_upsert on public.two_factor_auth
+  for all using (auth.uid() = id) with check (auth.uid() = id);
+
 -- ----------------------------------------------------
 -- Additional Supabase views
 -- ----------------------------------------------------
@@ -2085,6 +2099,8 @@ language sql as $$
 $$;
 grant execute on function fn_calc_budgets to authenticated;
 
+-- Manual signup now inserts into utilisateurs so no trigger on auth.users is required
+-- Function kept for reference but trigger creation removed for compatibility
 create or replace function handle_new_user()
 returns trigger language plpgsql security definer set search_path=public as $$
 begin
@@ -2096,10 +2112,6 @@ begin
   return new;
 end;
 $$;
-drop trigger if exists trg_handle_new_user on auth.users;
-create trigger trg_handle_new_user
-after insert on auth.users
-for each row execute function handle_new_user();
 
 -- ----------------------------------------------------
 -- End of schema

@@ -23,3 +23,4 @@ Final verification 22/06/2025: navigation works as expected.
 Final check 22/06/2025: toutes les routes fonctionnent après installation des dépendances.
 
 Dernier test 22/06/2025 : `npm run lint` et `npm test` passent après `npm install`.
+Test additionnel 2025-06-26 : ajout de la page NotFound. Toutes les commandes `npm run lint`, `npm test` et `npm run build` réussissent après `npm install`.

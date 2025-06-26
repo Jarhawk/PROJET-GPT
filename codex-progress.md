@@ -75,3 +75,8 @@
 - Login et logout vérifiés, Layout affiche utilisateur et rôle.
 - Route `/` redirige selon la session.
 - `npm install`, `npm run lint`, `npm test` passent.
+
+## Étape 19 – Page NotFound : ✅
+- Ajout de la page `NotFound` dans le routeur.
+- La route `*` affiche maintenant `NotFound.jsx` au lieu de rediriger.
+- Nouvelle installation des dépendances et vérification des commandes lint, test et build.

@@ -10,7 +10,8 @@
     "/surcouts",
     "/logout",
     "/parametrage/permissions",
-    "/debug/auth"
+    "/debug/auth",
+    "/404"
   ],
   "all_modules_checked": true,
   "navigation_complete": true

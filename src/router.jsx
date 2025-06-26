@@ -7,6 +7,7 @@ import Unauthorized from "@/pages/auth/Unauthorized";
 import Pending from "@/pages/auth/Pending";
 import Blocked from "@/pages/auth/Blocked";
 import AuthDebug from "@/pages/debug/AuthDebug";
+import NotFound from "@/pages/NotFound";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 const Dashboard = lazy(() => import("@/pages/Dashboard.jsx"));
@@ -274,7 +275,7 @@ export default function Router() {
             path="/debug/auth"
             element={<ProtectedRoute accessKey="dashboard"><AuthDebug /></ProtectedRoute>}
           />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
     </Suspense>

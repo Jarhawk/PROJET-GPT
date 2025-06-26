@@ -649,3 +649,4 @@
 - Confirmed service worker registration via `npm run preview`.
 - `npm run lint`, `npm test`, `npm run build` et `npm run preview` passent sans erreur.
 - `npm run test:e2e` toujours ignore faute de navigateurs.
+- Ajout des champs de totaux aux factures et calcul automatique via trigger SQL.

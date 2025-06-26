@@ -126,6 +126,9 @@ create table if not exists factures (
     date date not null,
     fournisseur_id uuid references fournisseurs(id) on delete set null,
     montant numeric,
+    total_ht numeric default 0,
+    total_tva numeric default 0,
+    total_ttc numeric default 0,
     statut text,
     justificatif text,
     mama_id uuid not null references mamas(id),
@@ -138,6 +141,7 @@ create table if not exists facture_lignes (
     product_id uuid references products(id) on delete set null,
     quantite numeric not null,
     prix_unitaire numeric not null,
+    tva numeric default 0,
     total numeric generated always as (quantite * prix_unitaire) stored,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now()
@@ -424,10 +428,22 @@ for each row execute procedure update_product_pmp();
 -- Trigger to keep invoice total in sync with its lines
 create or replace function refresh_facture_total()
 returns trigger language plpgsql as $$
+declare
+  fid uuid := coalesce(new.facture_id, old.facture_id);
+  ht numeric;
+  tv numeric;
 begin
+  select sum(quantite * prix_unitaire),
+         sum(quantite * prix_unitaire * (coalesce(tva,0)/100))
+    into ht, tv
+    from facture_lignes
+   where facture_id = fid;
   update factures f
-    set montant = coalesce((select sum(total) from facture_lignes where facture_id = f.id),0)
-  where f.id = coalesce(new.facture_id, old.facture_id);
+     set montant   = coalesce(ht,0) + coalesce(tv,0),
+         total_ht  = coalesce(ht,0),
+         total_tva = coalesce(tv,0),
+         total_ttc = coalesce(ht,0) + coalesce(tv,0)
+   where f.id = fid;
   return new;
 end;
 $$;

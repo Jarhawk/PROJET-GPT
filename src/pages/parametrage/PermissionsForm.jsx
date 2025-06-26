@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import toast, { Toaster } from "react-hot-toast";
+import { useAuth } from "@/context/AuthContext";
 
 const MODULES = [
   { nom: "Factures", cle: "factures" },
@@ -23,6 +24,7 @@ const DROITS = [
 ];
 
 export default function PermissionsForm({ role, onClose, onSaved }) {
+  const { mama_id, role: myRole } = useAuth();
   const [permissions, setPermissions] = useState([]);
   const [saving, setSaving] = useState(false);
 
@@ -32,10 +34,12 @@ export default function PermissionsForm({ role, onClose, onSaved }) {
 
   const fetchPermissions = async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from("permissions")
         .select("*")
         .eq("role_id", role.id);
+      if (myRole !== "superadmin") query = query.eq("mama_id", mama_id);
+      const { data, error } = await query;
       if (error) throw error;
       setPermissions(data || []);
     } catch (err) {
@@ -56,23 +60,24 @@ export default function PermissionsForm({ role, onClose, onSaved }) {
       const exists = hasPermission(module_cle, droit_cle);
       let error = null;
       if (exists) {
-        const { error: err } = await supabase
+        let query = supabase
           .from("permissions")
           .delete()
           .eq("role_id", role.id)
           .eq("module", module_cle)
           .eq("droit", droit_cle);
+        if (myRole !== "superadmin") query = query.eq("mama_id", mama_id);
+        const { error: err } = await query;
         error = err;
       } else {
-        const { error: err } = await supabase
-          .from("permissions")
-          .insert([
-            {
-              role_id: role.id,
-              module: module_cle,
-              droit: droit_cle,
-            },
-          ]);
+        const { error: err } = await supabase.from("permissions").insert([
+          {
+            role_id: role.id,
+            module: module_cle,
+            droit: droit_cle,
+            mama_id,
+          },
+        ]);
         error = err;
       }
       if (error) throw error;

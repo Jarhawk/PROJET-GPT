@@ -5,7 +5,7 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
 export function useRoles() {
-  useAuth();
+  const { mama_id, role } = useAuth();
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -26,11 +26,12 @@ export function useRoles() {
 
   // 2. Ajouter un rôle
   async function addRole(roleData) {
+    if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
       .from("roles")
-      .insert([roleData]);
+      .insert([{ ...roleData, mama_id }]);
     if (error) setError(error);
     setLoading(false);
     await fetchRoles();
@@ -38,12 +39,15 @@ export function useRoles() {
 
   // 3. Modifier un rôle
   async function updateRole(id, updateFields) {
+    if (!mama_id && role !== "superadmin") return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { error } = await supabase
+    let query = supabase
       .from("roles")
       .update(updateFields)
       .eq("id", id);
+    if (role !== "superadmin") query = query.eq("mama_id", mama_id);
+    const { error } = await query;
     if (error) setError(error);
     setLoading(false);
     await fetchRoles();

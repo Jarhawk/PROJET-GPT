@@ -138,6 +138,7 @@ The Playwright configuration automatically starts the dev server.
 - Invoice form supports OCR scanning of uploaded documents
 - Manage invoices from `/factures` with pages `/factures/nouveau` and `/factures/:id`
 - Index on `factures.reference` speeds up invoice search queries
+- Columns `total_ht`, `total_tva` and `total_ttc` are computed automatically via triggers
 - Index on `products.code` speeds up lookups by internal product code
 - Index on `fournisseurs.nom` speeds up supplier search queries
 - Automatic audit triggers log cost center changes and allocations

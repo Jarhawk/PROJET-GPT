@@ -38,7 +38,8 @@ supabase db reset --file sql/full_setup.sql --seed sql/seed.sql
 The standalone scripts `init.sql`, `rls.sql` and `mama_stock_patch.sql` remain
 available if you prefer running them individually. The combined
 `full_setup.sql` is idempotent and includes the full schema, policies and
-patches so you can run it safely multiple times.
+patches (including the `two_factor_auth` table and `access_rights`/`actif`
+columns on `utilisateurs`) so you can run it safely multiple times.
 
 Adjust configuration in `supabase/config.toml` as required.
 

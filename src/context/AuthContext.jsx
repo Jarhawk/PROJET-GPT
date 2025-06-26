@@ -69,10 +69,23 @@ export function AuthProvider({ children }) {
     try {
       const { data, error } = await supabase.auth.signUp({ email, password });
       if (error) throw error;
+
+      const authId = data.user?.id;
+      if (authId) {
+        await supabase.from("utilisateurs").insert({
+          auth_id: authId,
+          email,
+          role: "user",
+          access_rights: {},
+          actif: true,
+        });
+      }
+
       if (data.session) {
         setSession(data.session);
         await fetchUserData(data.session);
       }
+
       return { data };
     } catch (err) {
       toast.error(err?.message || "Erreur");

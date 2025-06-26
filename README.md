@@ -132,6 +132,7 @@ The Playwright configuration automatically starts the dev server.
 - Dashboard chart showing monthly purchase price trends per product
 - Dashboard pie chart highlights top consumed products over the last month
 - Inventory management with start/end dates accessible from `/inventaire` and `/inventaire/nouveau`; indexes speed up lookups on `date` and `date_debut`
+- Inventory integrity can be verified with the `validateInventaireStock` helper which compares product stock after closing an inventory
 - Stock statistics page `/stats/stocks` uses the `dashboard_stats` RPC and offers Excel export from the sidebar
 - Simple task manager available at `/taches` with creation and detail pages at `/taches/nouveau` and `/taches/:id`
 - Indexes on `taches.next_echeance` and `tache_instances.done_by` speed up task queries

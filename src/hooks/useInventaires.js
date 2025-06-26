@@ -26,6 +26,38 @@ export function useInventaires() {
     return data || [];
   }
 
+  async function fetchMouvementsInventaire(inventaireId) {
+    if (!mama_id || !inventaireId) return [];
+    const { data, error } = await supabase
+      .from("mouvements_stock")
+      .select("*")
+      .eq("inventaire_id", inventaireId)
+      .eq("mama_id", mama_id)
+      .order("date", { ascending: true });
+    if (error) {
+      setError(error);
+      return [];
+    }
+    return data || [];
+  }
+
+  async function validateInventaireStock(inventaireId) {
+    if (!mama_id || !inventaireId) return false;
+    const inv = await getInventaireById(inventaireId);
+    if (!inv) return false;
+    for (const line of inv.lignes || []) {
+      const { data, error } = await supabase
+        .from("products")
+        .select("stock_reel")
+        .eq("id", line.produit_id)
+        .eq("mama_id", mama_id)
+        .single();
+      if (error || !data) return false;
+      if (Number(data.stock_reel) !== Number(line.quantite_physique)) return false;
+    }
+    return true;
+  }
+
   async function createInventaire(inv) {
     if (!mama_id) return null;
     setLoading(true);
@@ -91,5 +123,7 @@ export function useInventaires() {
     createInventaire,
     getInventaireById,
     deleteInventaire,
+    fetchMouvementsInventaire,
+    validateInventaireStock,
   };
 }

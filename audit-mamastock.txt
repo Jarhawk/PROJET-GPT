@@ -71,6 +71,11 @@
 - Fonctions : création complète avec lignes, clôture, export Excel, mouvements liés
 - Sécurité : vérification mama_id dans useInventaires
 - Dépendances : hook useInventaires, composants InventaireForm
+- Audit 2025-06-15 : navigation testée sur /inventaire, /inventaire/new et
+  /inventaire/:id. Filtres date et zone fonctionnent avec pagination 30
+  entrées. Nouveau helper fetchMouvementsInventaire pour l'historique et
+  validateInventaireStock pour contrôler la mise à jour des stocks après
+  clôture.
 
 === ✅ MODULE : Mouvements.jsx ===
 - Route : /mouvements

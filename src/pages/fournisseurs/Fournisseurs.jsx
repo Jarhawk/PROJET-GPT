@@ -7,7 +7,7 @@ import { useProducts } from "@/hooks/useProducts";
 import { useFournisseursInactifs } from "@/hooks/useFournisseursInactifs";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
-import { Dialog, DialogTrigger, DialogContent } from "@radix-ui/react-dialog";
+import { Dialog, DialogContent } from "@radix-ui/react-dialog";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { Toaster, toast } from "react-hot-toast";
@@ -19,7 +19,7 @@ import { PlusCircle, Search } from "lucide-react";
 export default function Fournisseurs() {
   const { fournisseurs, total, getFournisseurs, createFournisseur, updateFournisseur, disableFournisseur, exportFournisseursToExcel } = useFournisseurs();
   const { fetchStatsAll } = useFournisseurStats();
-  const { getProductsBySupplier } = useSupplierProducts();
+  const { getProductsBySupplier, countProductsBySupplier } = useSupplierProducts();
   const { products } = useProducts();
   const { fournisseurs: inactiveByInvoices, fetchInactifs } = useFournisseursInactifs();
   const [search, setSearch] = useState("");
@@ -29,10 +29,22 @@ export default function Fournisseurs() {
   const [saving, setSaving] = useState(false);
   const [stats, setStats] = useState([]);
   const [topProducts, setTopProducts] = useState([]);
+  const [productCounts, setProductCounts] = useState({});
   const [actifFilter, setActifFilter] = useState("all");
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 20;
   const inactifs = fournisseurs.filter(f => !f.actif);
+
+  useEffect(() => {
+    async function fetchCounts() {
+      const counts = {};
+      for (const f of fournisseurs) {
+        counts[f.id] = await countProductsBySupplier(f.id);
+      }
+      setProductCounts(counts);
+    }
+    if (fournisseurs.length) fetchCounts();
+  }, [fournisseurs]);
 
   const exportPDF = () => {
     const doc = new jsPDF();
@@ -70,21 +82,23 @@ export default function Fournisseurs() {
 
   // Top produits global recalculé lorsqu'on reçoit les données
   useEffect(() => {
-    if (!fournisseurs.length || !products.length) return;
-    const statsProduits = {};
-    fournisseurs.forEach(f => {
-      const ps = getProductsBySupplier(f.id) || [];
-      ps.forEach(p => {
-        statsProduits[p.product_id] = (statsProduits[p.product_id] || 0) + (p.total_achat || 0);
-      });
-    });
-    setTopProducts(Object.entries(statsProduits)
-      .map(([id, total]) => ({
-        nom: products.find(p => p.id === id)?.nom || "-",
-        total
-      }))
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 8));
+    async function computeTop() {
+      if (!fournisseurs.length || !products.length) return;
+      const statsProduits = {};
+      for (const f of fournisseurs) {
+        const ps = await getProductsBySupplier(f.id);
+        ps.forEach(p => {
+          statsProduits[p.product_id] = (statsProduits[p.product_id] || 0) + (p.total_achat || 0);
+        });
+      }
+      setTopProducts(
+        Object.entries(statsProduits)
+          .map(([id, total]) => ({ nom: products.find(p => p.id === id)?.nom || "-", total }))
+          .sort((a, b) => b.total - a.total)
+          .slice(0, 8)
+      );
+    }
+    computeTop();
   }, [fournisseurs, products]);
 
   return (
@@ -175,17 +189,22 @@ export default function Fournisseurs() {
                   <td>{f.ville}</td>
                   <td>{f.tel}</td>
                   <td>{f.contact}</td>
-                  <td>{getProductsBySupplier(f.id)?.length || 0}</td>
+                  <td>{productCounts[f.id] ?? 0}</td>
                   <td>
                     <Button size="sm" variant="outline" onClick={() => setSelected(f.id)}>
                       Voir détails
                     </Button>
                   </td>
                   <td>
-                    <Button size="sm" variant="destructive" onClick={async () => {
-                      await disableFournisseur(f.id);
-                      getFournisseurs({ search });
-                    }}>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={async () => {
+                        if (!window.confirm('Désactiver ce fournisseur ?')) return;
+                        await disableFournisseur(f.id);
+                        getFournisseurs({ search });
+                      }}
+                    >
                       Supprimer
                     </Button>
                   </td>

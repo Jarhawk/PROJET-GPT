@@ -43,12 +43,16 @@ export default function FournisseurDetail({ id }) {
 
   // Met à jour le top produits lors du changement d'id
   useEffect(() => {
-    // Top produits du fournisseur
-    const ps = getProductsBySupplier(id) || [];
-    setTopProducts(ps.map(p => ({
-      nom: p.product_nom,
-      total: p.total_achat,
-    })).sort((a, b) => b.total - a.total).slice(0, 8));
+    async function loadTop() {
+      const ps = await getProductsBySupplier(id);
+      setTopProducts(
+        ps
+          .map(p => ({ nom: p.product_nom, total: p.total_achat }))
+          .sort((a, b) => b.total - a.total)
+          .slice(0, 8)
+      );
+    }
+    if (id) loadTop();
   }, [id]);
 
   if (loading) return <div>Chargement…</div>;

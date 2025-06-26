@@ -31,13 +31,21 @@ export default function CatalogueSyncViewer({ fournisseur_id }) {
       .eq("product_id", row.produit_id)
       .eq("fournisseur_id", row.fournisseur_id)
       .eq("mama_id", mama_id);
-    await supabase.from("catalogue_updates").delete().eq("id", row.id);
+    await supabase
+      .from("catalogue_updates")
+      .delete()
+      .eq("id", row.id)
+      .eq("mama_id", mama_id);
     setItems((it) => it.filter((i) => i.id !== row.id));
     toast.success("Modification appliquée");
   };
 
   const rejectUpdate = async (id) => {
-    await supabase.from("catalogue_updates").delete().eq("id", id);
+    await supabase
+      .from("catalogue_updates")
+      .delete()
+      .eq("id", id)
+      .eq("mama_id", mama_id);
     setItems((it) => it.filter((i) => i.id !== id));
   };
 

@@ -650,3 +650,17 @@
 - `npm run lint`, `npm test`, `npm run build` et `npm run preview` passent sans erreur.
 - `npm run test:e2e` toujours ignore faute de navigateurs.
 - Ajout des champs de totaux aux factures et calcul automatique via trigger SQL.
+
+## 2025-06-26 Step 113
+- Ajout du filtre mama_id dans la page Alertes des taches.
+- `npm run lint` et `npm test` passent apres `npm install`.
+
+## 2025-06-26 Step 114
+- Filtre mama_id ajoute pour la suppression des mises a jour de catalogue.
+- Correction dependance du hook dans `EcartInventaire`.
+- `npm run lint` et `npm test` passent.
+
+## 2025-06-26 Step 115
+- Filtre mama_id ajoute dans FournisseurDetail.
+- `npm run lint` et `npm test` passent apres `npm install`.
+\n## 2025-06-26 Step 116\n- Filtre mama_id ajoute dans InvitationsEnAttente pour la suppression et le chargement des invitations.\n- npm run lint et npm test passent.

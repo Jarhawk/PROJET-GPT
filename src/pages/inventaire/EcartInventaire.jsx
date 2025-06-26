@@ -49,7 +49,7 @@ function EcartInventairePage() {
     }
 
     setEcarts(all);
-  }, [date, mois, zone]);
+  }, [date, mois, zone, mama_id]);
 
   const renderPDF = useCallback(() => {
     const rows = ecarts

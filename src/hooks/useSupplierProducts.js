@@ -47,5 +47,15 @@ export function useSupplierProducts() {
     return data || [];
   }
 
-  return { useProductsBySupplier, getProductsBySupplier };
+  async function countProductsBySupplier(fournisseur_id) {
+    if (!mama_id || !fournisseur_id) return 0;
+    const { count } = await supabase
+      .from("supplier_products")
+      .select("id", { count: "exact", head: true })
+      .eq("fournisseur_id", fournisseur_id)
+      .eq("mama_id", mama_id);
+    return count || 0;
+  }
+
+  return { useProductsBySupplier, getProductsBySupplier, countProductsBySupplier };
 }

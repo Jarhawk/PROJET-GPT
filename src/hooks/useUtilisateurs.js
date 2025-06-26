@@ -50,10 +50,12 @@ export function useUtilisateurs() {
     if (!mama_id && role !== "superadmin") return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { error } = await supabase
+    let query = supabase
       .from("utilisateurs")
       .update(updateFields)
       .eq("id", id);
+    if (role !== "superadmin") query = query.eq("mama_id", mama_id);
+    const { error } = await query;
     if (error) setError(error);
     setLoading(false);
     await fetchUsers();
@@ -64,10 +66,12 @@ export function useUtilisateurs() {
     if (!mama_id && role !== "superadmin") return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { error } = await supabase
+    let query = supabase
       .from("utilisateurs")
       .update({ actif })
       .eq("id", id);
+    if (role !== "superadmin") query = query.eq("mama_id", mama_id);
+    const { error } = await query;
     if (error) setError(error);
     setLoading(false);
     await fetchUsers();
@@ -78,10 +82,12 @@ export function useUtilisateurs() {
     if (!mama_id && role !== "superadmin") return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { error } = await supabase
+    let query = supabase
       .from("utilisateurs")
       .update({ actif: false })
       .eq("id", id);
+    if (role !== "superadmin") query = query.eq("mama_id", mama_id);
+    const { error } = await query;
     if (error) setError(error);
     setLoading(false);
     await fetchUsers();

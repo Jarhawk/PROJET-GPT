@@ -22,16 +22,22 @@ export default function Mamas() {
 
   const fetchMamas = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("mamas")
-      .select("*")
-      .order("nom", { ascending: true });
+    let query = supabase.from("mamas").select("*");
+    if (role !== "superadmin") query = query.eq("id", myMama);
+    const { data, error } = await query.order("nom", { ascending: true });
     if (!error) setMamas(data || []);
     setLoading(false);
   };
 
   const handleDelete = async id => {
-    const { error } = await supabase.from("mamas").delete().eq("id", id);
+    if (role !== "superadmin" && id !== myMama) {
+      toast.error("Action non autorisée");
+      return;
+    }
+    const { error } = await supabase
+      .from("mamas")
+      .delete()
+      .eq("id", id);
     if (!error) {
       toast.success("Établissement supprimé.");
       fetchMamas();

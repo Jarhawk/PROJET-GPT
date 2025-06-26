@@ -3,6 +3,8 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 export function useFiches() {
   const { mama_id } = useAuth();
@@ -18,7 +20,7 @@ export function useFiches() {
     setError(null);
     let query = supabase
       .from("fiches")
-      .select("*, lignes:fiche_lignes(id)", { count: "exact" })
+      .select("*, famille:familles(id, nom), lignes:fiche_lignes(id)", { count: "exact" })
       .eq("mama_id", mama_id)
       .order("nom", { ascending: true })
       .range((page - 1) * limit, page * limit - 1);
@@ -38,7 +40,7 @@ export function useFiches() {
     setLoading(true);
     const { data, error } = await supabase
       .from("fiches")
-      .select("*, lignes:fiche_lignes(*, product:products(id, nom, unite, pmp))")
+      .select("*, famille:familles(id, nom), lignes:fiche_lignes(*, product:products(id, nom, unite, pmp))")
       .eq("id", id)
       .eq("mama_id", mama_id)
       .single();
@@ -108,5 +110,17 @@ export function useFiches() {
     saveAs(new Blob([buf]), "fiches_mamastock.xlsx");
   }
 
-  return { fiches, total, loading, error, getFiches, getFicheById, createFiche, updateFiche, deleteFiche, exportFichesToExcel };
+  function exportFichesToPDF() {
+    const doc = new jsPDF();
+    const rows = (fiches || []).map(f => [
+      f.nom,
+      f.famille?.nom || "",
+      f.portions,
+      f.cout_par_portion,
+    ]);
+    doc.autoTable({ head: [["Nom", "Famille", "Portions", "Coût/portion"]], body: rows });
+    doc.save("fiches_mamastock.pdf");
+  }
+
+  return { fiches, total, loading, error, getFiches, getFicheById, createFiche, updateFiche, deleteFiche, exportFichesToExcel, exportFichesToPDF };
 }

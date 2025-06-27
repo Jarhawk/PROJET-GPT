@@ -79,6 +79,12 @@ Unit tests run with `vitest`:
 ```bash
 npm test
 ```
+The suite includes Supertest checks for the Express routes in
+`src/api/public`. These tests cover API key and Bearer token authentication on
+both `/produits` and `/stock`, including scenarios where Supabase returns an
+error, credentials are missing or the API key is invalid. Additional tests
+validate that the `MamaStockSDK` attaches the correct headers when calling these
+endpoints.
 
 End-to-end tests use Playwright and require your `.env` Supabase credentials:
 
@@ -99,6 +105,23 @@ downloads from `cdn.playwright.dev`.
 Running `npm run test:e2e` automatically skips the tests when browsers are missing.
 
 The Playwright configuration automatically starts the dev server.
+
+### MamaStock SDK
+
+The lightweight SDK in `lib/mamastock-sdk` provides helper functions to call the
+public API. Instantiate `MamaStockSDK` with your base URL, API key and/or bearer
+token and use `getProduits` or `getStock` to fetch data. Both helpers accept an
+options object so you can specify the `mama_id` and optional filters. When
+authenticating via API key, provide the `mama_id`:
+
+```ts
+const sdk = new MamaStockSDK({ baseUrl: 'https://api', apiKey: 'key' });
+const produits = await getProduits(sdk, { mamaId: 'm1', famille: 'dessert' });
+```
+
+`getStock` follows the same pattern and supports a `since` option to filter
+movements from a given date. These filters mirror the Express routes of the
+public API.
 
 ## Features
 - Dashboard overview at `/dashboard` (root `/` redirects here) with KPI widgets,

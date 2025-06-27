@@ -924,3 +924,35 @@
 - Reinstalled node modules so ESLint could load @eslint/js
 - Verified no missing mama_id filters in hooks and pages
 - `npm run lint` and `npm test` both pass after reinstall
+\n## 2025-06-27 Step 173
+- Added Supertest coverage for /stock route with API key and bearer token.
+- Tested Supabase error handling on produits endpoint.
+- Lint and unit tests now pass with 95 tests.
+\n## 2025-06-27 Step 174
+- Added stock error scenario and invalid token check in public API tests.
+- Introduced sdk_headers test to verify MamaStockSDK header injection.
+- Updated README documentation.
+- Lint and tests pass with 98 passing.
+\n## 2025-06-27 Step 175
+- SDK updated to accept `mama_id` parameter so API key requests work
+  without manual query building.
+- Adjusted sdk_headers test and README example accordingly.
+- `npm run lint` and `npm test` both succeed with 98 tests.
+
+## 2025-06-27 Step 176
+- Added `famille` and `since` filters to public API routes and updated SDK helpers
+  to accept option objects.
+- Extended Supertest suite with filter checks and adapted mocks.
+- Documented the new options in README and improvement log.
+- Lint and tests pass with updated coverage.
+
+## 2025-06-27 Step 177
+- Added tests for missing Supabase credentials on public routes.
+- README now notes these error scenarios.
+- Updated improvement log accordingly.
+- Lint and tests pass with 102 checks.
+
+## 2025-06-27 Step 178
+- Added invalid API key checks on both public routes.
+- Documented this scenario in README and improvement log.
+- Lint and tests pass with 104 tests.

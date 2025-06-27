@@ -17,11 +17,16 @@ export class MamaStockSDK {
     this.token = options.token;
   }
 
-  async fetchData(endpoint: string) {
+  async fetchData(endpoint: string, params: Record<string, string> = {}) {
     const headers: Record<string, string> = {};
     if (this.apiKey) headers['x-api-key'] = this.apiKey;
     if (this.token) headers['Authorization'] = `Bearer ${this.token}`;
-    const res = await fetch(`${this.baseUrl}${endpoint}`, { headers });
+
+    const query = Object.keys(params).length
+      ? `?${new URLSearchParams(params).toString()}`
+      : '';
+
+    const res = await fetch(`${this.baseUrl}${endpoint}${query}`, { headers });
     if (!res.ok) throw new Error(`Request failed: ${res.status}`);
     return res.json();
   }

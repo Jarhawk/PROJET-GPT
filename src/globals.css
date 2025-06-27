@@ -29,15 +29,6 @@ a:hover {
   text-decoration: underline;
 }
 
-/* Loader */
-.loader {
-  border: 8px solid #bfa14d;
-  border-top: 8px solid #0f1c2e;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite;
-}
 /* Smaller loader used in inline buttons */
 .loader-glass {
   border: 2px solid #fff;

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTaches } from "@/hooks/useTaches";
 import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function Taches() {
   const { taches, loading, error, getTaches } = useTaches();
@@ -37,7 +38,7 @@ export default function Taches() {
         <input type="date" name="end" value={filters.end} onChange={handleChange} className="input" />
         <Button onClick={() => getTaches(filters)}>Filtrer</Button>
       </div>
-      {loading && <div>Chargement...</div>}
+      {loading && <LoadingSpinner message="Chargement..." />}
       {error && <div className="text-red-600">{error}</div>}
       <table className="min-w-full text-white">
         <thead>

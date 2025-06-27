@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import PrixFournisseurs from "./PrixFournisseurs";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function ComparatifPrix() {
   const { mama_id } = useAuth();
@@ -37,7 +38,7 @@ export default function ComparatifPrix() {
   }, [mama_id]);
 
   if (loading) {
-    return <div className="loader mx-auto my-16" />;
+    return <LoadingSpinner message="Chargement..." />;
   }
 
   return (

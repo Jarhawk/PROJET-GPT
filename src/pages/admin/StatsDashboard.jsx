@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useUsageStats } from "@/hooks/useUsageStats";
 import { useAuth } from "@/context/AuthContext";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function StatsDashboard() {
   const { mama_id } = useAuth();
@@ -27,7 +28,7 @@ export default function StatsDashboard() {
     <div className="p-8 container mx-auto">
       <h1 className="text-2xl font-bold mb-4">Statistiques d'usage</h1>
       {loading ? (
-        <div>Chargement...</div>
+        <LoadingSpinner message="Chargement..." />
       ) : (
         <div className="grid gap-6">
           <div className="bg-white rounded-xl shadow p-4">

@@ -1,4 +1,4 @@
-import { Loader } from "lucide-react";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { useRecommendations } from "@/hooks/useRecommendations";
 
 export default function RecommandationsBox({ filter }) {
@@ -10,7 +10,7 @@ export default function RecommandationsBox({ filter }) {
   if (loading) {
     return (
       <div className="p-4 text-center text-sm text-gray-500">
-        <Loader className="animate-spin inline-block" />
+        <LoadingSpinner message="Chargement..." />
       </div>
     );
   }

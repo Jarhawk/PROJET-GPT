@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 
 export default function GroupeParamForm({ groupe, onClose, onSaved }) {
-  const { role } = useAuth();
+  const { role, user_id } = useAuth();
   const [values, setValues] = useState({
     nom: groupe?.nom || "",
     description: groupe?.description || "",
@@ -19,8 +19,20 @@ export default function GroupeParamForm({ groupe, onClose, onSaved }) {
   }, []);
 
   async function fetchMamas() {
-    const { data } = await supabase.from("mamas").select("id, nom").order("nom");
-    setMamas(data || []);
+    if (role === "superadmin") {
+      const { data } = await supabase
+        .from("mamas")
+        .select("id, nom")
+        .order("nom");
+      setMamas(data || []);
+    } else {
+      const { data } = await supabase
+        .from("users_mamas")
+        .select("mamas(id, nom)")
+        .eq("user_id", user_id)
+        .eq("actif", true);
+      setMamas((data || []).map((r) => r.mamas));
+    }
   }
 
   const toggleMama = (id) => {

@@ -6,6 +6,7 @@ import TableContainer from "@/components/ui/TableContainer";
 import { Dialog, DialogContent } from "@radix-ui/react-dialog";
 import MamaForm from "./MamaForm";
 import toast, { Toaster } from "react-hot-toast";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function Mamas() {
   const { mama_id: myMama, role } = useAuth();
@@ -74,9 +75,7 @@ export default function Mamas() {
       </div>
       <TableContainer className="mb-6">
         {loading ? (
-          <div className="text-center py-8 text-gray-500">
-            <span className="animate-spin mr-2">⏳</span>Chargement…
-          </div>
+          <LoadingSpinner message="Chargement…" />
         ) : (
           <table className="min-w-full table-auto text-center">
             <thead>

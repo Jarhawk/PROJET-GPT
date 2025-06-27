@@ -5,6 +5,7 @@ import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { useFactureProduits } from "@/hooks/useFactureProduits";
 import { useFactures } from "@/hooks/useFactures";
 
@@ -22,7 +23,7 @@ export default function FactureDetail({ facture: factureProp, onClose }) {
     }
   }, [factureProp, id]);
 
-  if (!facture) return <div className="p-8">Chargement...</div>;
+  if (!facture) return <LoadingSpinner message="Chargement..." />;
 
   // Export Excel d'une seule facture
   const exportExcel = () => {

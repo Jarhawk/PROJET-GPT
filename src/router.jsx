@@ -1,4 +1,6 @@
 import { Suspense, lazy } from "react";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { Routes, Route, Navigate } from "react-router-dom";
 import useAuth from "@/hooks/useAuth";
 import Layout from "@/layout/Layout";
@@ -65,15 +67,17 @@ const Logout = lazy(() => import("@/pages/auth/Logout.jsx"));
 
 
 function RootRoute() {
-  const { session, user } = useAuth();
+  const { session, user, loading } = useAuth();
+  if (loading) return <LoadingSpinner message="Chargement..." />;
   if (session && user) return <Navigate to="/dashboard" replace />;
   return <Navigate to="/accueil" replace />;
 }
 
 export default function Router() {
   return (
-    <Suspense fallback={null}>
-      <Routes>
+    <ErrorBoundary>
+      <Suspense fallback={<LoadingSpinner message="Chargement..." />}>
+        <Routes>
         <Route path="/" element={<RootRoute />} />
         <Route path="/accueil" element={<Accueil />} />
         <Route path="/signup" element={<Signup />} />
@@ -278,6 +282,7 @@ export default function Router() {
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
-    </Suspense>
+      </Suspense>
+    </ErrorBoundary>
   );
 }

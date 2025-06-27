@@ -11,8 +11,8 @@ vi.mock('@/hooks/useComparatif', () => ({
 
 test('shows loader while loading comparatif', () => {
   mockHook = () => ({ lignes: [], loading: true, error: null });
-  const { container } = render(<PrixFournisseurs produitId="1" />);
-  expect(container.querySelector('.loader')).toBeInTheDocument();
+  render(<PrixFournisseurs produitId="1" />);
+  expect(screen.getByRole('status')).toBeInTheDocument();
 });
 
 test('displays error message when hook returns error', () => {

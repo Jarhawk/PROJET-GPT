@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import toast, { Toaster } from "react-hot-toast";
 import * as XLSX from "xlsx";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
@@ -146,7 +147,7 @@ export default function BarManager() {
     toast.success("Export PDF généré !");
   };
 
-  if (authLoading) return <div className="p-8">Chargement...</div>;
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
   if (!mama_id) return null;
 
   return (

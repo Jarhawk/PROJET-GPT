@@ -3,6 +3,7 @@ import { usePlanning } from "@/hooks/usePlanning";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Toaster, toast } from "react-hot-toast";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function Planning() {
   const { mama_id } = useAuth();
@@ -36,7 +37,7 @@ export default function Planning() {
     }
   };
 
-  if (loading) return <div className="p-8">Chargement...</div>;
+  if (loading) return <LoadingSpinner message="Chargement..." />;
   if (error) return <div className="p-8 text-red-600">{error}</div>;
 
   return (

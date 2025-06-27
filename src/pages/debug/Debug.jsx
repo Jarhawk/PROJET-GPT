@@ -1,9 +1,10 @@
 import React from "react";
 import { useAuth } from "@/context/AuthContext";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function Debug() {
   const { session, role, mama_id, access_rights, loading: authLoading } = useAuth();
-  if (authLoading) return (<div className="p-8 text-center">⏳ Chargement...</div>);
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">

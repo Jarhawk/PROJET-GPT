@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useApiKeys } from '@/hooks/useApiKeys';
 import { Toaster, toast } from 'react-hot-toast';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 export default function APIKeys() {
   const { keys, loading, listKeys, createKey, revokeKey } = useApiKeys();
@@ -83,7 +84,9 @@ export default function APIKeys() {
             )}
             {loading && (
               <tr>
-                <td colSpan={7} className="py-4">Chargement…</td>
+                <td colSpan={7} className="py-4">
+                  <LoadingSpinner message="Chargement…" />
+                </td>
               </tr>
             )}
           </tbody>

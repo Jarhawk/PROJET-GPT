@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
 import { Dialog, DialogContent } from "@radix-ui/react-dialog";
 import PermissionsForm from "./PermissionsForm"; // adapte le chemin si besoin
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function Roles() {
   const { mama_id, user_id, loading: authLoading } = useAuth();
@@ -106,7 +107,7 @@ export default function Roles() {
   );
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  if (authLoading) return <div className="p-8">Chargement...</div>;
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
   if (!mama_id) return null;
 
   return (

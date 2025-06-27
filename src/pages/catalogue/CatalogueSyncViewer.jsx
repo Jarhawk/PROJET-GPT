@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function CatalogueSyncViewer({ fournisseur_id }) {
   const { mama_id } = useAuth();
@@ -49,7 +50,7 @@ export default function CatalogueSyncViewer({ fournisseur_id }) {
     setItems((it) => it.filter((i) => i.id !== id));
   };
 
-  if (loading) return <div className="p-6">Chargement...</div>;
+  if (loading) return <LoadingSpinner message="Chargement..." />;
 
   return (
     <div className="p-6">

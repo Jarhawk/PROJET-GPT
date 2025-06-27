@@ -1,6 +1,7 @@
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "react-hot-toast";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 const steps = [
   "Bienvenue sur MamaStock !",
@@ -12,7 +13,7 @@ const steps = [
 export default function Onboarding() {
   const { step, loading, saveStep } = useOnboarding();
 
-  if (loading) return <div className="p-8">Chargement...</div>;
+  if (loading) return <LoadingSpinner message="Chargement..." />;
 
   const next = () => {
     const nextStep = step + 1;

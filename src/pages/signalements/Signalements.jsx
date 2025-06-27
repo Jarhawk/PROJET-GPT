@@ -1,5 +1,6 @@
 import { useSignalements } from "@/hooks/useSignalements";
 import { useAuth } from "@/context/AuthContext";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function Signalements() {
   const { loading: authLoading } = useAuth();
@@ -7,8 +8,8 @@ export default function Signalements() {
 
   if (loading || authLoading) {
     return (
-      <div className="p-6 text-white text-center">
-        ⏳ Chargement des signalements...
+      <div className="p-6 text-center">
+        <LoadingSpinner message="Chargement des signalements..." />
       </div>
     );
   }

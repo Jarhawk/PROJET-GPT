@@ -3,6 +3,7 @@ import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { useAuth } from "@/context/AuthContext";
 import { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import * as XLSX from "xlsx";
 
 export default function StatsStock() {
@@ -27,7 +28,7 @@ export default function StatsStock() {
     XLSX.writeFile(wb, "stocks_dashboard.xlsx");
   };
 
-  if (loading) return <div className="p-8">Chargement...</div>;
+  if (loading) return <LoadingSpinner message="Chargement..." />;
   if (error) return <div className="p-8 text-red-600">{error}</div>;
 
   return (

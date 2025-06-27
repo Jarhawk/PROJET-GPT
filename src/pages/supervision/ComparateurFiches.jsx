@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { useMultiMama } from "@/context/MultiMamaContext";
 import TableContainer from "@/components/ui/TableContainer";
 import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function ComparateurFiches() {
   const { mamas } = useMultiMama();
@@ -35,7 +36,7 @@ export default function ComparateurFiches() {
           Comparer
         </Button>
       </div>
-      {loading && <div className="mb-2">Chargement...</div>}
+      {loading && <LoadingSpinner message="Chargement..." />}
       {results.length > 0 && (
         <TableContainer>
           <table className="min-w-full text-center">

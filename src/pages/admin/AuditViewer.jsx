@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function AuditViewer() {
   const { mama_id } = useAuth();
@@ -72,7 +73,7 @@ export default function AuditViewer() {
         <Button type="submit">Filtrer</Button>
       </form>
       {loading ? (
-        <div>Chargement...</div>
+        <LoadingSpinner message="Chargement..." />
       ) : (
         <table className="min-w-full bg-white rounded-xl shadow-md">
           <thead>

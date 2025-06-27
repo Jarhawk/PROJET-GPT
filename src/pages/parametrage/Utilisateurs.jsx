@@ -11,6 +11,7 @@ import { Toaster, toast } from "react-hot-toast";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import { motion as Motion } from "framer-motion";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 const PAGE_SIZE = 20;
 
@@ -32,6 +33,9 @@ export default function Utilisateurs() {
     fetchRoles();
     fetchMamas();
   }, [authLoading, mama_id, fetchUsers, fetchRoles, fetchMamas]);
+
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
+  if (!mama_id) return null;
 
   const mapped = users.map(u => ({
     ...u,

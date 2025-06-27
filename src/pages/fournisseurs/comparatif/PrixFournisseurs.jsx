@@ -1,5 +1,6 @@
 // src/pages/fournisseurs/comparatif/PrixFournisseurs.jsx
 import { useComparatif } from "@/hooks/useComparatif";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 // Affiche le comparatif des prix par fournisseur pour un produit
 
@@ -7,7 +8,7 @@ export default function PrixFournisseurs({ produitId }) {
   const { lignes, loading, error } = useComparatif(produitId);
 
   if (loading) {
-    return <div className="loader mx-auto my-8" />;
+    return <LoadingSpinner message="Chargement..." />;
   }
 
   if (error) {

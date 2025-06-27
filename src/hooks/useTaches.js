@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 
 export function useTaches() {
-  const { mama_id } = useAuth();
+  const { mama_id, user_id } = useAuth();
   const [taches, setTaches] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -13,11 +13,11 @@ export function useTaches() {
     setLoading(true);
     setError(null);
     let query = supabase
-      .from("taches_recurrentes")
+      .from("taches")
       .select("*")
       .eq("mama_id", mama_id)
       .order("date_debut", { ascending: true });
-    if (filters.type) query = query.eq("frequence", filters.type);
+    if (filters.type) query = query.eq("type", filters.type);
     const { data, error } = await query;
     setLoading(false);
     if (error) {
@@ -34,7 +34,7 @@ export function useTaches() {
     setLoading(true);
     setError(null);
     const { error } = await supabase
-      .from("taches_recurrentes")
+      .from("taches")
       .insert([{ ...values, mama_id }]);
     setLoading(false);
     if (error) {
@@ -45,19 +45,24 @@ export function useTaches() {
     return {};
   }, [mama_id, getTaches]);
 
-  const validerTache = useCallback(async (id) => {
-    setLoading(true);
-    const { error } = await supabase
-      .from("tache_occurrences")
-      .update({ status: "fait", date_realisation: new Date().toISOString() })
-      .eq("id", id);
-    setLoading(false);
-    if (error) {
-      setError(error.message || error);
-      return;
-    }
-    await getTaches();
-  }, [getTaches]);
+  const validerTache = useCallback(
+    async (id) => {
+      if (!id || !user_id) return;
+      setLoading(true);
+      const { error } = await supabase
+        .from("tache_instances")
+        .update({ statut: "fait", done_by: user_id })
+        .eq("id", id)
+        .eq("mama_id", mama_id);
+      setLoading(false);
+      if (error) {
+        setError(error.message || error);
+        return;
+      }
+      await getTaches();
+    },
+    [getTaches, user_id, mama_id]
+  );
 
   const generateOccurrences = useCallback(async () => {
     await supabase.rpc("generate_occurrences");

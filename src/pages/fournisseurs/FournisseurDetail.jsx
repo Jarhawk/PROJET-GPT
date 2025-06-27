@@ -6,6 +6,7 @@ import { useInvoices } from "@/hooks/useInvoices";
 import { useFournisseurs } from "@/hooks/useFournisseurs";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { Button } from "@/components/ui/button";
 
@@ -63,7 +64,7 @@ export default function FournisseurDetail({ id }) {
     if (id) loadTop();
   }, [id]);
 
-  if (loading) return <div>Chargement…</div>;
+  if (loading) return <LoadingSpinner message="Chargement..." />;
 
   return (
     <div className="space-y-8">

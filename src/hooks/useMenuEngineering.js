@@ -81,7 +81,8 @@ export function useMenuEngineering() {
         ;({ error } = await supabase
           .from('ventes_fiches')
           .update({ quantite, prix_vente })
-          .eq('id', existing.id))
+          .eq('id', existing.id)
+          .eq('mama_id', mama_id))
       } else {
         ;({ error } = await supabase
           .from('ventes_fiches')

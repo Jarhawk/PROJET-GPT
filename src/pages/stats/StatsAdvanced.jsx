@@ -3,6 +3,7 @@ import { useAdvancedStats } from "@/hooks/useAdvancedStats";
 import { useAuth } from "@/context/AuthContext";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { Toaster } from "react-hot-toast";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function StatsAdvanced() {
   const { data, loading, error, fetchStats } = useAdvancedStats();
@@ -13,7 +14,7 @@ export default function StatsAdvanced() {
     fetchStats();
   }, [fetchStats, isAuthenticated, authLoading]);
 
-  if (loading) return <div className="p-8">Chargement...</div>;
+  if (loading) return <LoadingSpinner message="Chargement..." />;
   if (error) return <div className="p-8 text-red-600">{error}</div>;
 
   return (

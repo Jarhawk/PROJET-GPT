@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
+import toast from "react-hot-toast";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 const MultiMamaContext = createContext();
 
@@ -25,18 +27,30 @@ export function MultiMamaProvider({ children }) {
   async function fetchMamas() {
     setLoading(true);
     let data = [];
-    if (role === "superadmin") {
-      const res = await supabase.from("mamas").select("id, nom").order("nom");
-      if (!res.error) data = res.data;
-    } else {
-      const res = await supabase
-        .from("users_mamas")
-        .select("mamas(id, nom)")
-        .eq("user_id", user_id)
-        .eq("actif", true);
-      if (!res.error) data = (res.data || []).map((r) => r.mamas);
+    try {
+      if (role === "superadmin") {
+        const { data: rows, error } = await supabase
+          .from("mamas")
+          .select("id, nom")
+          .order("nom");
+        if (error) throw error;
+        data = rows || [];
+      } else {
+        const { data: rows, error } = await supabase
+          .from("users_mamas")
+          .select("mamas(id, nom)")
+          .eq("user_id", user_id)
+          .eq("actif", true);
+        if (error) throw error;
+        data = (rows || []).map((r) => r.mamas);
+      }
+    } catch (err) {
+      toast.error(err.message || "Erreur chargement établissements");
     }
     setMamas(Array.isArray(data) ? data : []);
+    if (!mamaActif && Array.isArray(data) && data.length > 0) {
+      changeMama(data[0].id);
+    }
     setLoading(false);
   }
 
@@ -46,6 +60,10 @@ export function MultiMamaProvider({ children }) {
   };
 
   const value = { mamas, mamaActif, setMamaActif: changeMama, loading };
+
+  if (loading && mamas.length === 0) {
+    return <LoadingSpinner message="Chargement établissements..." />;
+  }
 
   return (
     <MultiMamaContext.Provider value={value}>{children}</MultiMamaContext.Provider>

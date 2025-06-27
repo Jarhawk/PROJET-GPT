@@ -76,3 +76,10 @@
 - Step 88: Reinstalled npm dependencies to restore eslint and vitest after lint failure. `npm run lint` warned only and `npm test` passed with 81 tests.
 
 - Step 89: Reinstalled npm dependencies so lint and tests run successfully. `npm run lint` warns only and `npm test` passes (81). Schema summary remains 48 tables, 14 views, 28 functions.
+- Step 90: Installed dependencies, lint passes silently, tests pass (88). Added public API tests for bearer token and missing mama_id.
+- Step 91: Added stock route tests and Supabase error case. Lint and tests pass (95).
+- Step 92: Added SDK header test and invalid token scenario. Lint and tests pass (98).
+- Step 93: SDK updated with mama_id parameter and tests adjusted. Lint and tests pass (98).
+- Step 94: Added filters to public API routes and updated SDK and tests accordingly. Lint and tests pass.
+- Step 95: Added tests for missing Supabase credentials and updated README. Lint and 102 tests pass.
+- Step 96: Added invalid API key tests on public routes. Lint and 104 tests pass.

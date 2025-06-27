@@ -1,5 +1,13 @@
 import { MamaStockSDK } from './index';
 
-export async function getStock(sdk: MamaStockSDK) {
-  return sdk.fetchData('/api/public/v1/stock');
+export interface StockOptions {
+  mamaId?: string;
+  since?: string;
+}
+
+export async function getStock(sdk: MamaStockSDK, options: StockOptions = {}) {
+  const params: Record<string, string> = {};
+  if (options.mamaId) params.mama_id = options.mamaId;
+  if (options.since) params.since = options.since;
+  return sdk.fetchData('/api/public/v1/stock', params);
 }

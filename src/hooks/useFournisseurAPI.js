@@ -41,7 +41,7 @@ export function useFournisseurAPI() {
       for (const ft of factures) {
         await supabase
           .from("factures")
-          .upsert({ ...ft, fournisseur_id, mama_id }, { onConflict: "reference" });
+          .upsert({ ...ft, fournisseur_id, mama_id }, { onConflict: "numero" });
       }
       toast.success("Factures importées");
       return factures;

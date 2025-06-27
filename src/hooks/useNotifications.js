@@ -88,29 +88,6 @@ export default function useNotifications() {
     [mama_id, user_id]
   );
 
-  const fetchPreferences = useCallback(async () => {
-    if (!mama_id || !user_id) return null;
-    const { data } = await supabase
-      .from("notification_preferences")
-      .select("*")
-      .eq("mama_id", mama_id)
-      .eq("user_id", user_id)
-      .maybeSingle();
-    return data;
-  }, [mama_id, user_id]);
-
-  const updatePreferences = useCallback(
-    async (fields) => {
-      if (!mama_id || !user_id) return { error: "missing ids" };
-      const { data, error } = await supabase
-        .from("notification_preferences")
-        .upsert([{ ...fields, mama_id, user_id }], { onConflict: "user_id" })
-        .select()
-        .single();
-      return { data, error };
-    },
-    [mama_id, user_id]
-  );
 
   return {
     items,
@@ -118,8 +95,6 @@ export default function useNotifications() {
     error,
     fetchNotifications,
     markAsRead,
-    fetchPreferences,
-    updatePreferences,
     sendToast,
     createNotification,
     sendEmailNotification,

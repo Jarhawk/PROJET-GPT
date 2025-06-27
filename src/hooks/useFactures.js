@@ -27,7 +27,7 @@ export function useFactures() {
       .order("date", { ascending: false })
       .range((page - 1) * pageSize, page * pageSize - 1);
 
-    if (search) query = query.ilike("reference", `%${search}%`);
+    if (search) query = query.ilike("numero", `%${search}%`);
     if (fournisseur) query = query.eq("fournisseur_id", fournisseur);
     if (statut) query = query.eq("statut", statut);
     if (mois) query = query.ilike("date", `${mois}%`);

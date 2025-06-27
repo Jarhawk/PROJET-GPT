@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { saveAs } from "file-saver";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function Ecarts() {
   const { loading: authLoading } = useAuth();
@@ -11,19 +12,11 @@ export default function Ecarts() {
   const [search, setSearch] = useState("");
 
   if (authLoading) {
-    return (
-      <div className="p-6 text-white text-center">
-        ⏳ Chargement utilisateur...
-      </div>
-    );
+    return <LoadingSpinner message="Chargement utilisateur..." />;
   }
 
   if (loading) {
-    return (
-      <div className="p-6 text-white text-center">
-        ⏳ Chargement des écarts d'inventaire...
-      </div>
-    );
+    return <LoadingSpinner message="Chargement des écarts d'inventaire..." />;
   }
 
   if (error) {

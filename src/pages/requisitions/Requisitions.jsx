@@ -4,6 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import toast, { Toaster } from "react-hot-toast";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import "jspdf-autotable";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger, DialogContent } from "@radix-ui/react-dialog";
@@ -113,7 +114,7 @@ export default function Requisitions() {
 
   const today = new Date().toISOString().slice(0, 10);
 
-  if (authLoading) return <div className="p-8">Chargement...</div>;
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
   if (!mama_id) return null;
 
   return (

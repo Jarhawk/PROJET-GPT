@@ -76,7 +76,11 @@ export function useFiches() {
     setLoading(true);
     setError(null);
     await supabase.from("fiches").update(fiche).eq("id", id).eq("mama_id", mama_id);
-    await supabase.from("fiche_lignes").delete().eq("fiche_id", id);
+    await supabase
+      .from("fiche_lignes")
+      .delete()
+      .eq("fiche_id", id)
+      .eq("mama_id", mama_id);
     if (lignes.length > 0) {
       const toInsert = lignes.map(l => ({ fiche_id: id, product_id: l.product_id, quantite: l.quantite, mama_id }));
       await supabase.from("fiche_lignes").insert(toInsert);

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useInventaires } from "@/hooks/useInventaires";
 import TableContainer from "@/components/ui/TableContainer";
 import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -17,7 +18,7 @@ export default function InventaireDetail() {
     if (id) getInventaireById(id).then(setInventaire);
   }, [id]);
 
-  if (!inventaire) return <div className="p-6">Chargement...</div>;
+  if (!inventaire) return <LoadingSpinner message="Chargement..." />;
 
   const exportCSV = () => {
     const rows = (inventaire.lignes || []).map(l => ({

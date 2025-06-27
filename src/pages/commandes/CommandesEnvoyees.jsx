@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useFournisseurAPI } from "@/hooks/useFournisseurAPI";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function CommandesEnvoyees() {
   const { mama_id } = useAuth();
@@ -28,7 +29,7 @@ export default function CommandesEnvoyees() {
     await envoyerCommande(id);
   };
 
-  if (loading) return <div className="p-6">Chargement...</div>;
+  if (loading) return <LoadingSpinner message="Chargement..." />;
 
   return (
     <div className="p-6">

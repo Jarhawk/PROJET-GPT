@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useReporting } from "@/hooks/useReporting";
 import StatCard from "@/components/ui/StatCard";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import {
   ResponsiveContainer,
   LineChart,
@@ -47,7 +48,7 @@ export default function Reporting() {
     })();
   }, [filters, mama_id]);
 
-  if (authLoading) return <div className="p-6">Chargement...</div>;
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
   if (!mama_id) return null;
 
   return (

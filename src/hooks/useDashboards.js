@@ -78,14 +78,15 @@ export function useDashboards() {
     return data;
   }
 
-  async function updateWidget(id, values) {
-    if (!id) return null;
+  async function updateWidget(dashboardId, id, values) {
+    if (!dashboardId || !id) return null;
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
       .from("widgets")
       .update(values)
       .eq("id", id)
+      .eq("dashboard_id", dashboardId)
       .select()
       .single();
     setLoading(false);
@@ -102,11 +103,15 @@ export function useDashboards() {
     return data;
   }
 
-  async function deleteWidget(id) {
-    if (!id) return;
+  async function deleteWidget(dashboardId, id) {
+    if (!dashboardId || !id) return;
     setLoading(true);
     setError(null);
-    const { error } = await supabase.from("widgets").delete().eq("id", id);
+    const { error } = await supabase
+      .from("widgets")
+      .delete()
+      .eq("id", id)
+      .eq("dashboard_id", dashboardId);
     setLoading(false);
     if (error) {
       setError(error.message || error);

@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabase";
 import toast, { Toaster } from "react-hot-toast";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Legend, LineChart, Line } from "recharts";
 import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import * as XLSX from "xlsx";
 import { useFicheCoutHistory } from "@/hooks/useFicheCoutHistory";
 
@@ -90,14 +91,7 @@ export default function StatsFiches() {
   };
 
   if (authLoading || loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Toaster />
-        <span className="text-mamastock-gold animate-pulse">
-          Chargement statistiques fiches...
-        </span>
-      </div>
-    );
+    return <LoadingSpinner message="Chargement statistiques fiches..." />;
   }
 
   if (!isAuthenticated) return null;

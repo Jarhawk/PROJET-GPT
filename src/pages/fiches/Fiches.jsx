@@ -7,11 +7,20 @@ import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
 import { Toaster } from "react-hot-toast";
 import { motion as Motion } from "framer-motion";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 const PAGE_SIZE = 20;
 
 export default function Fiches() {
-  const { fiches, total, getFiches, deleteFiche, exportFichesToExcel, exportFichesToPDF } = useFiches();
+  const {
+    fiches,
+    total,
+    loading,
+    getFiches,
+    deleteFiche,
+    exportFichesToExcel,
+    exportFichesToPDF,
+  } = useFiches();
   const { mama_id, loading: authLoading } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
@@ -30,6 +39,10 @@ export default function Fiches() {
   const exportPdf = () => exportFichesToPDF();
 
   const fichesFiltres = fiches;
+  if (authLoading || loading) {
+    return <LoadingSpinner message="Chargement..." />;
+  }
+
 
 
   return (

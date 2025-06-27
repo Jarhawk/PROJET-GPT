@@ -4,6 +4,7 @@ import { useMenus } from "@/hooks/useMenus";
 import { useSimulation } from "@/hooks/useSimulation";
 import SimulationDetailsModal from "@/components/simulation/SimulationDetailsModal";
 import Button from "@/components/ui/Button";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function SimulationPlanner() {
   const { mama_id, loading: authLoading } = useAuth();
@@ -34,7 +35,7 @@ export default function SimulationPlanner() {
     setResult(res);
   };
 
-  if (authLoading) return <div className="p-6">Chargement...</div>;
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
 
   return (
     <div className="p-6 text-white">

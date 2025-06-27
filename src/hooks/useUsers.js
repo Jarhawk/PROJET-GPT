@@ -53,7 +53,8 @@ export function useUsers() {
     const { error } = await supabase
       .from("utilisateurs")
       .update(updateFields)
-      .eq("id", id);
+      .eq("id", id)
+      .eq("mama_id", mama_id);
     if (error) setError(error);
     setLoading(false);
     await fetchUsers();
@@ -67,7 +68,8 @@ export function useUsers() {
     const { error } = await supabase
       .from("utilisateurs")
       .update({ actif })
-      .eq("id", id);
+      .eq("id", id)
+      .eq("mama_id", mama_id);
     if (error) setError(error);
     setLoading(false);
     await fetchUsers();
@@ -81,7 +83,8 @@ export function useUsers() {
     const { error } = await supabase
       .from("utilisateurs")
       .update({ actif: false })
-      .eq("id", id);
+      .eq("id", id)
+      .eq("mama_id", mama_id);
     if (error) setError(error);
     setLoading(false);
     await fetchUsers();

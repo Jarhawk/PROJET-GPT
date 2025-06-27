@@ -3,6 +3,7 @@ import { useCostCenterStats } from "@/hooks/useCostCenterStats";
 import { useAuth } from "@/context/AuthContext";
 import { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import * as XLSX from "xlsx";
 
 export default function StatsCostCenters() {
@@ -26,7 +27,7 @@ export default function StatsCostCenters() {
     });
   }, [fetchStats, mama_id, authLoading]);
 
-  if (loading) return <div className="p-8">Chargement...</div>;
+  if (loading) return <LoadingSpinner message="Chargement..." />;
 
   return (
     <div className="p-8 container mx-auto">

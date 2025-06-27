@@ -12,9 +12,11 @@ export function useRoles() {
 
   // 1. Charger les rôles
   async function fetchRoles({ search = "" } = {}) {
+    if (role !== "superadmin" && !mama_id) return [];
     setLoading(true);
     setError(null);
     let query = supabase.from("roles").select("*");
+    if (role !== "superadmin") query = query.eq("mama_id", mama_id);
     if (search) query = query.ilike("nom", `%${search}%`);
 
     const { data, error } = await query.order("nom", { ascending: true });

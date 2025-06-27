@@ -3,6 +3,7 @@ import { useValidations } from "@/hooks/useValidations";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Toaster, toast } from "react-hot-toast";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function Validations() {
   const { isAdmin, mama_id } = useAuth();
@@ -42,7 +43,7 @@ export default function Validations() {
 
   const { items, loading, error } = validations;
 
-  if (loading) return <div className="p-8">Chargement...</div>;
+  if (loading) return <LoadingSpinner message="Chargement..." />;
   if (error) return <div className="p-8 text-red-600">{error}</div>;
 
   return (

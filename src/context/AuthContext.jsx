@@ -93,7 +93,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  async function fetchUserData(session) {
+  async function fetchUserData(session, retry = 0) {
     if (!session?.user) {
       setUserData({
         role: null,
@@ -108,15 +108,28 @@ export function AuthProvider({ children }) {
     }
 
     const meta = session.user.user_metadata || {};
-    const { data, error, status } = await supabase
-      .from("utilisateurs")
-      .select("role, mama_id, access_rights, actif")
-      .eq("auth_id", session.user.id)
-      .maybeSingle();
+    let data, error, status;
+    try {
+      const res = await supabase
+        .from("utilisateurs")
+        .select("role, mama_id, access_rights, actif")
+        .eq("auth_id", session.user.id)
+        .maybeSingle();
+      data = res.data;
+      error = res.error;
+      status = res.status;
+    } catch (err) {
+      error = err;
+    }
 
     if (error && status !== 406) {
       if (status === 400) navigate("/unauthorized");
-      toast.error(error.message);
+      if (retry < 3) {
+        toast.error(error.message);
+        setTimeout(() => fetchUserData(session, retry + 1), 3000);
+      } else {
+        toast.error("Impossible de charger les infos utilisateur");
+      }
       return;
     }
 

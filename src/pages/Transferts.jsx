@@ -7,6 +7,7 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger, DialogContent } from "@radix-ui/react-dialog";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import {
   ResponsiveContainer,
   BarChart,
@@ -231,7 +232,7 @@ export default function Transferts() {
 
   const today = new Date().toISOString().slice(0, 10);
 
-  if (authLoading) return <div className="p-8">Chargement...</div>;
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
   if (!isAuthenticated) return null;
 
   return (
@@ -347,7 +348,7 @@ export default function Transferts() {
                         Timeline transferts : {t.nom}
                       </h3>
                       {loadingTimeline ? (
-                        <div>Chargement…</div>
+                        <LoadingSpinner message="Chargement..." />
                       ) : (
                         <table className="w-full text-xs">
                           <thead>

@@ -3,6 +3,7 @@ import { useAuditTrail } from "@/hooks/useAuditTrail";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "react-hot-toast";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function AuditTrail() {
   const { entries, fetchEntries, loading, error } = useAuditTrail();
@@ -23,7 +24,7 @@ export default function AuditTrail() {
     await fetchEntries({ table, start: start || null, end: end || null });
   };
 
-  if (loading) return <div className="p-8">Chargement...</div>;
+  if (loading) return <LoadingSpinner message="Chargement..." />;
   if (error) return <div className="p-8 text-red-600">{error}</div>;
 
   return (

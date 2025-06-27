@@ -40,16 +40,15 @@ export function useMamas() {
 
   // 3. Modifier un établissement
   async function updateMama(id, updateFields) {
-    if (role !== "superadmin" && id !== mama_id)
+    if (role !== "superadmin" && id !== mama_id) {
       return { error: "Action non autorisée" };
+    }
     setLoading(true);
     setError(null);
-    let query = supabase
+    const { error } = await supabase
       .from("mamas")
       .update(updateFields)
       .eq("id", id);
-    if (role !== "superadmin") query = query.eq("id", mama_id);
-    const { error } = await query;
     if (error) setError(error);
     setLoading(false);
     await fetchMamas();

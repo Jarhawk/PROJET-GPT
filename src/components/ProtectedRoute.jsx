@@ -1,11 +1,12 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function ProtectedRoute({ children, accessKey }) {
   const { session, user, mama_id, loading, access_rights, isSuperadmin } =
     useAuth();
 
-  if (loading) return <div>Chargement...</div>;
+  if (loading) return <LoadingSpinner message="Chargement..." />;
   if (!session || !user) return <Navigate to="/login" />;
   if (!mama_id) return <Navigate to="/pending" />;
 

@@ -1,9 +1,10 @@
 import { useAuth } from "@/context/AuthContext";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function Dashboard() {
   const { user } = useAuth();
 
-  if (!user) return <div>Chargement...</div>;
+  if (!user) return <LoadingSpinner message="Chargement..." />;
 
   return (
     <div className="p-6">

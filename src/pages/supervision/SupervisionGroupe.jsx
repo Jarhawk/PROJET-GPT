@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useMultiMama } from "@/context/MultiMamaContext";
 import TableContainer from "@/components/ui/TableContainer";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function SupervisionGroupe() {
   const { mamas } = useMultiMama();
@@ -25,7 +26,7 @@ export default function SupervisionGroupe() {
   return (
     <div className="p-6 container mx-auto text-shadow">
       <h1 className="text-2xl font-bold mb-4">Supervision Groupe</h1>
-      {loading && <div className="mb-2">Chargement...</div>}
+      {loading && <LoadingSpinner message="Chargement..." />}
       <TableContainer>
         <table className="min-w-full text-center">
           <thead>

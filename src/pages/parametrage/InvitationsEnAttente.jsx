@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import toast, { Toaster } from "react-hot-toast";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 // Suppose que tu as un hook ou un cache des MAMA/roles
 // Sinon tu peux les fetch en plus simple comme plus haut
@@ -16,8 +17,16 @@ export default function InvitationsEnAttente() {
 
   useEffect(() => {
     if (!mama_id) return;
-    supabase.from("mamas").select("*").then(({ data }) => setMamas(data || []));
-    supabase.from("roles").select("*").then(({ data }) => setRoles(data || []));
+    supabase
+      .from("mamas")
+      .select("id, nom")
+      .eq("id", mama_id)
+      .then(({ data }) => setMamas(data || []));
+    supabase
+      .from("roles")
+      .select("*")
+      .eq("mama_id", mama_id)
+      .then(({ data }) => setRoles(data || []));
     setLoading(true);
     supabase
       .from("utilisateurs")
@@ -58,7 +67,7 @@ export default function InvitationsEnAttente() {
     toast.success("Invitation annulée !");
   };
 
-  if (loading) return <div>Chargement…</div>;
+  if (loading) return <LoadingSpinner message="Chargement…" />;
 
   return (
     <div className="p-6 max-w-3xl mx-auto">

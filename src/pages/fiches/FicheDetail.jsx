@@ -6,6 +6,7 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { useFiches } from "@/hooks/useFiches";
 import { useFicheCoutHistory } from "@/hooks/useFicheCoutHistory";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from "recharts";
 
 export default function FicheDetail({ fiche: ficheProp, onClose }) {
@@ -29,7 +30,7 @@ export default function FicheDetail({ fiche: ficheProp, onClose }) {
     }
   }, [fiche?.id, fetchFicheCoutHistory, fiche?.prix_vente]);
 
-  if (!fiche) return <div className="p-8">Chargement...</div>;
+  if (!fiche) return <LoadingSpinner message="Chargement..." />;
 
   function exportExcel() {
     const rows = fiche.lignes?.map(l => ({

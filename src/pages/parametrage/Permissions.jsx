@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@radix-ui/react-dialog";
 import PermissionsForm from "./PermissionsForm";
 import toast, { Toaster } from "react-hot-toast";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function Permissions() {
   const { mama_id } = useAuth();
@@ -40,7 +41,7 @@ export default function Permissions() {
       <div className="bg-white shadow rounded-xl overflow-x-auto mb-6">
         {loading ? (
           <div className="text-center py-8 text-gray-500">
-            <span className="animate-spin mr-2">⏳</span>Chargement…
+            <LoadingSpinner message="Chargement…" />
           </div>
         ) : (
           <table className="min-w-full table-auto text-center">

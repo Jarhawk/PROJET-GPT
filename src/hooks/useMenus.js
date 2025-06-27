@@ -83,7 +83,11 @@ export function useMenus() {
       .eq("mama_id", mama_id);
     // Suppression puis réinsertion des fiches
     if (Array.isArray(fiches)) {
-      await supabase.from("menu_fiches").delete().eq("menu_id", id);
+      await supabase
+        .from("menu_fiches")
+        .delete()
+        .eq("menu_id", id)
+        .eq("mama_id", mama_id);
       const fichesWithFk = fiches.map(fiche_id => ({
         menu_id: id,
         fiche_id,

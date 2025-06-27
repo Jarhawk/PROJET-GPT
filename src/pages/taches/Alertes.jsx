@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function Alertes() {
   const { mama_id, loading: authLoading } = useAuth();
@@ -25,7 +26,7 @@ export default function Alertes() {
   return (
     <div className="p-6 text-sm">
       <h1 className="text-2xl font-bold mb-4">Alertes</h1>
-      {loading && <div>Chargement...</div>}
+      {loading && <LoadingSpinner message="Chargement..." />}
       <table className="min-w-full text-white">
         <thead>
           <tr>

@@ -3,6 +3,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useLogs } from "@/hooks/useLogs";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "react-hot-toast";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function Journal() {
   const { mama_id, loading: authLoading } = useAuth();
@@ -15,7 +16,7 @@ export default function Journal() {
     if (!authLoading && mama_id) fetchLogs();
   }, [authLoading, mama_id, fetchLogs]);
 
-  if (authLoading) return <div className="p-6">Chargement...</div>;
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
   if (!mama_id) return null;
 
   const handleSubmit = async e => {

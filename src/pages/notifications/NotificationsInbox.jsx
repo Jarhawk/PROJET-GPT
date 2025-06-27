@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import useNotifications from "@/hooks/useNotifications";
 import { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function NotificationsInbox() {
   const {
@@ -38,7 +39,7 @@ export default function NotificationsInbox() {
         </select>
         <Button onClick={() => fetchNotifications(filters)}>Filtrer</Button>
       </div>
-      {loading && <div>Chargement...</div>}
+      {loading && <LoadingSpinner message="Chargement..." />}
       {error && <div className="text-red-600">{error}</div>}
       <table className="min-w-full">
         <thead>

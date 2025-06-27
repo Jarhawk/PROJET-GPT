@@ -23,7 +23,7 @@ export function useMouvementsStock() {
     if (produit) query = query.eq("product_id", produit);
     if (date_debut) query = query.gte("date", date_debut);
     if (date_fin) query = query.lte("date", date_fin);
-    if (search) query = query.ilike("reference", `%${search}%`);
+
 
     const { data, error } = await query.order("date", { ascending: false });
     setMouvements(Array.isArray(data) ? data : []);
@@ -94,8 +94,8 @@ export function useMouvementsStock() {
       type: m.type,
       product_id: m.product_id,
       quantite: m.quantite,
-      reference: m.reference,
-      inventaire_id: m.inventaire_id,
+      zone_source: m.zone_source,
+      zone_destination: m.zone_destination,
       mama_id: m.mama_id,
     }));
     const wb = XLSX.utils.book_new();

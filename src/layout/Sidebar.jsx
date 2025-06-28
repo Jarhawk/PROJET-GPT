@@ -28,7 +28,8 @@ export default function Sidebar() {
     return <aside className="w-64 p-4" />;
   }
 
-  const has = (key) => access_rights.includes(key);
+  const rights = typeof access_rights === "object" ? access_rights : {};
+  const has = (key) => rights[key];
 
   const Item = ({ to, icon, label }) => (
     <Link

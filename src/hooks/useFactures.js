@@ -1,9 +1,16 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
+import { useInvoiceLines } from "./useInvoiceLines";
 
 export function useFactures() {
   const { mama_id } = useAuth();
+  const {
+    addLine,
+    updateLine,
+    deleteLine,
+    fetchLines,
+  } = useInvoiceLines();
   const [factures, setFactures] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -108,6 +115,18 @@ export function useFactures() {
     if (!mama_id) return { error: "no mama_id" };
     setLoading(true);
     setError(null);
+    const { count } = await supabase
+      .from("facture_lignes")
+      .select("id", { count: "exact", head: true })
+      .eq("facture_id", id)
+      .eq("mama_id", mama_id);
+    if (count > 0) {
+      setLoading(false);
+      const msg = "Lignes de facture existantes";
+      setError(msg);
+      console.error(msg);
+      return { error: msg };
+    }
     const { error } = await supabase
       .from("factures")
       .delete()
@@ -134,20 +153,12 @@ export function useFactures() {
       tva,
       date,
     } = ligne || {};
-    const { data: inserted, error } = await supabase
-      .from("facture_lignes")
-      .insert([
-        {
-          product_id,
-          quantite,
-          prix_unitaire,
-          tva,
-          facture_id,
-          mama_id,
-        },
-      ])
-      .select()
-      .single();
+    const { data: inserted, error } = await addLine(facture_id, {
+      product_id,
+      quantite,
+      prix_unitaire,
+      tva,
+    });
     if (!error && product_id && fournisseur_id) {
       await supabase
         .from("supplier_products")
@@ -172,11 +183,7 @@ export function useFactures() {
 
   async function calculateTotals(facture_id) {
     if (!mama_id) return { ht: 0, tva: 0, ttc: 0 };
-    const { data: lignes } = await supabase
-      .from("facture_lignes")
-      .select("quantite, prix_unitaire, tva")
-      .eq("facture_id", facture_id)
-      .eq("mama_id", mama_id);
+    const lignes = await fetchLines(facture_id);
     const ht = (lignes || []).reduce((s,l) => s + l.quantite * l.prix_unitaire, 0);
     const tva = (lignes || []).reduce((s,l) => s + l.quantite * l.prix_unitaire * (l.tva || 0) / 100, 0);
     const ttc = ht + tva;
@@ -200,5 +207,7 @@ export function useFactures() {
     deleteFacture,
     addLigneFacture,
     calculateTotals,
+    updateLine,
+    deleteLine,
   };
 }

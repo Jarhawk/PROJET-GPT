@@ -334,6 +334,15 @@ create table if not exists zones_stock (
     unique(mama_id, nom)
 );
 
+-- Inventaire zones
+create table if not exists inventaire_zones (
+    id uuid primary key default uuid_generate_v4(),
+    nom text not null,
+    mama_id uuid not null references mamas(id),
+    created_at timestamptz default now(),
+    unique(mama_id, nom)
+);
+
 -- Ventes de boissons
 create table if not exists ventes_boissons (
     id uuid primary key default uuid_generate_v4(),
@@ -415,6 +424,7 @@ create index if not exists idx_requisition_lines_produit on requisition_lines(pr
 create index if not exists idx_transferts_mama on transferts(mama_id);
 create index if not exists idx_transferts_produit on transferts(produit_id);
 create index if not exists idx_zones_stock_mama on zones_stock(mama_id);
+create index if not exists idx_inventaire_zones_mama on inventaire_zones(mama_id);
 create index if not exists idx_ventes_boissons_mama on ventes_boissons(mama_id);
 create index if not exists idx_ventes_boissons_boisson on ventes_boissons(boisson_id);
 create or replace view stock_mouvements as select * from mouvements_stock;
@@ -715,6 +725,11 @@ alter table zones_stock enable row level security;
 alter table zones_stock force row level security;
 drop policy if exists zones_stock_all on zones_stock;
 create policy zones_stock_all on zones_stock for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+
+alter table inventaire_zones enable row level security;
+alter table inventaire_zones force row level security;
+drop policy if exists inventaire_zones_all on inventaire_zones;
+create policy inventaire_zones_all on inventaire_zones for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
 
 alter table ventes_boissons enable row level security;
 alter table ventes_boissons force row level security;

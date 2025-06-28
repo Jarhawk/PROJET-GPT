@@ -357,8 +357,8 @@ Ce module gère les paramètres de connexion aux API des fournisseurs
 (`fournisseurs_api_config`). Chaque configuration est liée à un fournisseur et à
 un `mama`. Les données sont protégées par RLS et les index sur
 `fournisseur_id` et `mama_id` accélèrent les requêtes. Le hook React
-`useFournisseurApiConfig` permet de charger, enregistrer ou supprimer cette
-configuration depuis l'interface.
+`useFournisseurApiConfig` permet de charger, enregistrer, lister ou supprimer ces
+configurations depuis l'interface.
 
 ## Module Analytique avancée
 

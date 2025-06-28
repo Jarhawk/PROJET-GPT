@@ -119,3 +119,4 @@
 
 
 - Step 131: additional verification cycle; searched again for `users_mamas` and found none. Ran `npm install`, `npm run lint` and `npm test` successfully.
+- Step 132: audited FournisseursAPIConfig module; added listConfigs API, updated docs and tests.

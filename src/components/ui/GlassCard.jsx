@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function GlassCard({ children, className = '', ...props }) {
+export function GlassCard({ children, className = '', ...props }) {
   return (
     <div
       className={`bg-glass border border-borderGlass backdrop-blur rounded-xl p-6 ${className}`}
@@ -10,3 +10,5 @@ export default function GlassCard({ children, className = '', ...props }) {
     </div>
   );
 }
+
+export default GlassCard;

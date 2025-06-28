@@ -133,7 +133,10 @@ export default function InventaireForm({ inventaire, onClose }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md max-w-2xl mx-auto">
+    <form
+      onSubmit={handleSubmit}
+      className="bg-glass border border-borderGlass backdrop-blur p-6 rounded-2xl shadow-lg max-w-2xl mx-auto"
+    >
       <h2 className="text-lg font-bold mb-4">
         {inventaire ? "Modifier l’inventaire" : "Ajouter un inventaire"}
       </h2>

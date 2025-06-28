@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { useMultiMama } from "@/context/MultiMamaContext";
 import TableContainer from "@/components/ui/TableContainer";
 import { Button } from "@/components/ui/button";
+import GlassCard from "@/components/ui/GlassCard";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function ComparateurFiches() {
@@ -23,42 +24,44 @@ export default function ComparateurFiches() {
   };
 
   return (
-    <div className="p-6 container mx-auto text-shadow">
-      <h1 className="text-2xl font-bold mb-4">Comparateur de fiches</h1>
-      <div className="flex gap-2 mb-4">
-        <input
-          className="input input-bordered"
-          placeholder="ID fiche"
-          value={ficheId}
-          onChange={(e) => setFicheId(e.target.value)}
-        />
-        <Button onClick={handleCompare} disabled={loading || !ficheId}>
-          Comparer
-        </Button>
-      </div>
-      {loading && <LoadingSpinner message="Chargement..." />}
-      {results.length > 0 && (
-        <TableContainer>
-          <table className="min-w-full text-center">
-            <thead>
-              <tr>
-                <th className="px-2 py-1">Mama</th>
-                <th className="px-2 py-1">Coût</th>
-                <th className="px-2 py-1">Rendement</th>
-              </tr>
-            </thead>
-            <tbody>
-              {results.map((r) => (
-                <tr key={r.mama_id}>
-                  <td className="px-2 py-1">{r.nom}</td>
-                  <td className="px-2 py-1">{r.cout || '-'}</td>
-                  <td className="px-2 py-1">{r.rendement || '-'}</td>
+    <div className="p-6 flex justify-center">
+      <GlassCard className="w-full max-w-3xl">
+        <h1 className="text-2xl font-bold mb-4">Comparateur de fiches</h1>
+        <div className="flex gap-2 mb-4">
+          <input
+            className="input"
+            placeholder="ID fiche"
+            value={ficheId}
+            onChange={(e) => setFicheId(e.target.value)}
+          />
+          <Button onClick={handleCompare} disabled={loading || !ficheId}>
+            Comparer
+          </Button>
+        </div>
+        {loading && <LoadingSpinner message="Chargement..." />}
+        {results.length > 0 && (
+          <TableContainer>
+            <table className="min-w-full text-center">
+              <thead>
+                <tr>
+                  <th className="px-2 py-1">Mama</th>
+                  <th className="px-2 py-1">Coût</th>
+                  <th className="px-2 py-1">Rendement</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </TableContainer>
-      )}
+              </thead>
+              <tbody>
+                {results.map((r) => (
+                  <tr key={r.mama_id}>
+                    <td className="px-2 py-1">{r.nom}</td>
+                    <td className="px-2 py-1">{r.cout || '-'}</td>
+                    <td className="px-2 py-1">{r.rendement || '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </TableContainer>
+        )}
+      </GlassCard>
     </div>
   );
 }

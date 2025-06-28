@@ -3,6 +3,7 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, PieChart, Pi
 import { Toaster } from "react-hot-toast";
 import * as XLSX from "xlsx";
 import { Button } from "@/components/ui/button";
+import GlassCard from "@/components/ui/GlassCard";
 import { useAuth } from "@/context/AuthContext";
 import { useCostCenters } from "@/hooks/useCostCenters";
 import { useFamilles } from "@/hooks/useFamilles";
@@ -61,7 +62,7 @@ export default function AnalytiqueDashboard() {
       </div>
       <Button variant="outline" className="mb-4" onClick={exportExcel}>Export Excel</Button>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white p-4 rounded-xl shadow">
+        <GlassCard className="p-4">
           <h3 className="font-semibold mb-2">Consommation par activité</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={dataActivite}>
@@ -71,8 +72,8 @@ export default function AnalytiqueDashboard() {
               <Bar dataKey="sumv" fill="#8884d8" />
             </BarChart>
           </ResponsiveContainer>
-        </div>
-        <div className="bg-white p-4 rounded-xl shadow">
+        </GlassCard>
+        <GlassCard className="p-4">
           <h3 className="font-semibold mb-2">Ventilation produits</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
@@ -84,7 +85,7 @@ export default function AnalytiqueDashboard() {
               <Tooltip />
             </PieChart>
           </ResponsiveContainer>
-        </div>
+        </GlassCard>
       </div>
     </div>
   );

@@ -89,7 +89,7 @@ export default function DashboardBuilder() {
         className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6"
       >
         {ordered.map((w) => (
-          <Reorder.Item key={w.id} value={w} className="bg-white rounded-xl p-4 relative">
+          <Reorder.Item key={w.id} value={w} className="bg-glass backdrop-blur border border-borderGlass rounded-xl p-4 relative">
             <button
               className="absolute top-2 right-2 text-red-600"
               onClick={() => deleteWidget(current.id, w.id)}

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
+import TableContainer from "@/components/ui/TableContainer";
 import toast from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
@@ -61,37 +62,39 @@ export default function CatalogueSyncViewer({ fournisseur_id }) {
   return (
     <div className="p-6">
       <h2 className="text-lg font-bold mb-4">Mises à jour catalogue</h2>
-      <table className="w-full table-auto text-sm">
-        <thead>
-          <tr>
-            <th className="px-2 py-1 text-left">Produit</th>
-            <th className="px-2 py-1">Ancien prix</th>
-            <th className="px-2 py-1">Nouveau prix</th>
-            <th className="px-2 py-1" />
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((u) => (
-            <tr key={u.id}>
-              <td className="px-2 py-1">{u.produit?.nom || u.produit_id}</td>
-              <td className="px-2 py-1">{u.ancienne_valeur}</td>
-              <td className="px-2 py-1">{u.nouvelle_valeur}</td>
-              <td className="px-2 py-1 space-x-1">
-                <Button size="sm" onClick={() => acceptUpdate(u)}>
-                  Accepter
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => rejectUpdate(u.id)}
-                >
-                  Rejeter
-                </Button>
-              </td>
+      <TableContainer className="mt-2">
+        <table className="w-full table-auto text-sm">
+          <thead>
+            <tr>
+              <th className="px-2 py-1 text-left">Produit</th>
+              <th className="px-2 py-1">Ancien prix</th>
+              <th className="px-2 py-1">Nouveau prix</th>
+              <th className="px-2 py-1" />
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {items.map((u) => (
+              <tr key={u.id}>
+                <td className="border px-2 py-1">{u.produit?.nom || u.produit_id}</td>
+                <td className="border px-2 py-1">{u.ancienne_valeur}</td>
+                <td className="border px-2 py-1">{u.nouvelle_valeur}</td>
+                <td className="border px-2 py-1 space-x-1">
+                  <Button size="sm" onClick={() => acceptUpdate(u)}>
+                    Accepter
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => rejectUpdate(u.id)}
+                  >
+                    Rejeter
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </TableContainer>
     </div>
   );
 }

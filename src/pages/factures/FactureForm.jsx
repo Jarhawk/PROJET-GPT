@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useFactures } from "@/hooks/useFactures";
 import { useProducts } from "@/hooks/useProducts";
 import { Button } from "@/components/ui/button";
+import GlassCard from "@/components/ui/GlassCard";
 import toast from "react-hot-toast";
 import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
 import { useInvoiceOcr } from "@/hooks/useInvoiceOcr";
@@ -85,10 +86,11 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-lg font-bold mb-4">
-        {facture ? "Modifier la facture" : "Ajouter une facture"}
-      </h2>
+    <GlassCard className="p-6">
+      <form onSubmit={handleSubmit} className="space-y-2">
+        <h2 className="text-lg font-bold mb-4">
+          {facture ? "Modifier la facture" : "Ajouter une facture"}
+        </h2>
       <input
         className="input mb-2"
         type="date"
@@ -184,13 +186,14 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
           {ocrText}
         </div>
       )}
-      <div className="mt-4 p-2 bg-gray-100 rounded">
+      <div className="mt-4 p-2 bg-glass backdrop-blur rounded border border-borderGlass">
         Total HT: {lignes.reduce((s,l)=>s+l.quantite*l.prix_unitaire,0).toFixed(2)} € - TVA: {lignes.reduce((s,l)=>s+l.quantite*l.prix_unitaire*(l.tva||0)/100,0).toFixed(2)} € - TTC: {(lignes.reduce((s,l)=>s+l.quantite*l.prix_unitaire,0)+lignes.reduce((s,l)=>s+l.quantite*l.prix_unitaire*(l.tva||0)/100,0)).toFixed(2)} €
       </div>
       <div className="flex gap-2 mt-4">
         <Button type="submit" disabled={loading}>{facture ? "Modifier" : "Ajouter"}</Button>
         <Button variant="outline" type="button" onClick={onClose}>Annuler</Button>
       </div>
-    </form>
+      </form>
+    </GlassCard>
   );
 }

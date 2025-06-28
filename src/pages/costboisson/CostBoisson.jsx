@@ -4,6 +4,8 @@ import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import toast, { Toaster } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import GlassCard from "@/components/ui/GlassCard";
+import TableContainer from "@/components/ui/TableContainer";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -215,7 +217,7 @@ export default function CostBoissons() {
         <Button onClick={handleExportPDF}>Exporter PDF</Button>
       </div>
       {/* Stats avancées */}
-      <div className="bg-white shadow rounded-xl p-4 mb-6 flex flex-wrap gap-6">
+      <GlassCard className="p-4 mb-6 flex flex-wrap gap-6">
         <div>
           <span className="font-semibold text-blue-700">Food cost moyen&nbsp;:</span>
           <span className={avgFC > FOOD_COST_SEUIL ? "text-red-600 font-bold" : "font-bold"}>
@@ -237,9 +239,9 @@ export default function CostBoissons() {
           <span className="font-semibold">Total boissons actives&nbsp;: </span>
           {filtered.length}
         </div>
-      </div>
+      </GlassCard>
       {/* Graphique top ventes */}
-      <div className="bg-white shadow rounded-xl p-4 mb-6">
+      <GlassCard className="p-4 mb-6">
         <h2 className="font-bold mb-2">Top 10 ventes boissons (période)</h2>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={chartData}>
@@ -251,9 +253,9 @@ export default function CostBoissons() {
             <Bar dataKey="Marge (€)" fill="#e0a800" />
           </BarChart>
         </ResponsiveContainer>
-      </div>
+      </GlassCard>
       {/* Tableau interactif */}
-      <div className="bg-white shadow rounded-xl overflow-x-auto">
+      <TableContainer>
         <table className="min-w-full table-auto">
           <thead>
             <tr>
@@ -290,7 +292,7 @@ export default function CostBoissons() {
                           </Button>
                         </DialogTrigger>
                         <DialogContent
-                          className="bg-white rounded-xl shadow-lg p-6 max-w-md z-[1000]"
+                          className="bg-glass backdrop-blur-lg border border-borderGlass rounded-xl shadow-lg p-6 max-w-md z-[1000]"
                         >
                           <h2 className="font-bold text-xl mb-2">{b.nom}</h2>
                           <p>
@@ -364,7 +366,7 @@ export default function CostBoissons() {
                           <Button variant="ghost" className="text-sm">Voir fiche</Button>
                         </DialogTrigger>
                         <DialogContent
-                          className="bg-white rounded-xl shadow-lg p-6 max-w-md z-[1000]"
+                          className="bg-glass backdrop-blur-lg border border-borderGlass rounded-xl shadow-lg p-6 max-w-md z-[1000]"
                         >
                           <h2 className="font-bold text-xl mb-2">{b.nom}</h2>
                           <p>
@@ -383,7 +385,7 @@ export default function CostBoissons() {
             </AnimatePresence>
           </tbody>
         </table>
-      </div>
+      </TableContainer>
     </div>
   );
 }

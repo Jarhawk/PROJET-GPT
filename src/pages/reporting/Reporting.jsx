@@ -3,6 +3,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useReporting } from "@/hooks/useReporting";
 import StatCard from "@/components/ui/StatCard";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import GlassCard from "@/components/ui/GlassCard";
 import {
   ResponsiveContainer,
   LineChart,
@@ -76,7 +77,7 @@ export default function Reporting() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white/10 p-4 rounded-xl">
+        <GlassCard className="p-4">
           <h2 className="font-semibold mb-2">Achats par mois</h2>
           {achats.length === 0 ? (
             <p className="text-center text-sm">Aucune donnée pour la période sélectionnée</p>
@@ -91,8 +92,8 @@ export default function Reporting() {
               </BarChart>
             </ResponsiveContainer>
           )}
-        </div>
-        <div className="bg-white/10 p-4 rounded-xl">
+        </GlassCard>
+        <GlassCard className="p-4">
           <h2 className="font-semibold mb-2">Coûts par famille</h2>
           {familles.length === 0 ? (
             <p className="text-center text-sm">Aucune donnée pour la période sélectionnée</p>
@@ -107,10 +108,10 @@ export default function Reporting() {
               </LineChart>
             </ResponsiveContainer>
           )}
-        </div>
+        </GlassCard>
       </div>
 
-      <div className="bg-white/10 p-4 rounded-xl mt-6 overflow-auto">
+      <GlassCard className="p-4 mt-6 overflow-auto">
         <h2 className="font-semibold mb-2">Écarts d'inventaire</h2>
         {ecarts.length === 0 ? (
           <p className="text-center text-sm text-gray-400">Aucune donnée pour la période sélectionnée</p>
@@ -132,10 +133,10 @@ export default function Reporting() {
             </tbody>
           </table>
         )}
-      </div>
+      </GlassCard>
 
       {ccData.length > 0 && (
-        <div className="bg-white/10 p-4 rounded-xl mt-6">
+        <GlassCard className="p-4 mt-6">
           <h2 className="font-semibold mb-2">Répartition par cost center</h2>
           <ResponsiveContainer width="100%" height={240}>
             <LineChart data={ccData}>
@@ -146,7 +147,7 @@ export default function Reporting() {
               <Line type="monotone" dataKey="valeur" stroke="#0f1c2e" />
             </LineChart>
           </ResponsiveContainer>
-        </div>
+        </GlassCard>
       )}
     </div>
   );

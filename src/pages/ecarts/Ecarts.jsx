@@ -3,6 +3,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import GlassCard from "@/components/ui/GlassCard";
 import { saveAs } from "file-saver";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
@@ -46,7 +47,7 @@ export default function Ecarts() {
   };
 
   return (
-    <div className="p-6 text-white">
+    <div className="p-6 text-white space-y-6">
       <h1 className="text-3xl font-bold text-mamastockGold mb-4">Écarts d'inventaire</h1>
 
       <div className="flex flex-wrap gap-4 mb-4 items-center">
@@ -66,10 +67,7 @@ export default function Ecarts() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {ecarts.map((ecart) => (
-            <div
-              key={ecart.id}
-              className="bg-white/10 border border-mamastockGold rounded-xl p-4 hover:bg-white/20 transition"
-            >
+            <GlassCard key={ecart.id} className="p-4">
               <h2 className="text-lg font-semibold">{ecart.produit}</h2>
               <p className="text-sm text-gray-300">
                 Écart : <span className="font-bold">{ecart.ecart}</span>
@@ -82,7 +80,7 @@ export default function Ecarts() {
                   📅 {new Date(ecart.date).toLocaleDateString()}
                 </p>
               )}
-            </div>
+            </GlassCard>
           ))}
         </div>
       )}

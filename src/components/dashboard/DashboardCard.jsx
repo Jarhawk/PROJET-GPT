@@ -2,19 +2,19 @@ import { motion as Motion } from "framer-motion";
 
 export default function DashboardCard({ title, value, icon, type = "default", progress = null, children }) {
   const colorClass = {
-    default: "bg-white text-mamastockText",
-    stock: "bg-blue-50 text-blue-800",
-    ca: "bg-green-50 text-green-800",
-    cost: "bg-orange-50 text-orange-800",
-    alert: "bg-red-50 text-red-800"
-  }[type] || "bg-white text-mamastockText";
+    default: "text-white",
+    stock: "text-blue-200",
+    ca: "text-green-200",
+    cost: "text-orange-200",
+    alert: "text-red-200"
+  }[type] || "text-white";
 
   return (
     <Motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`rounded-2xl shadow-md p-4 flex flex-col items-center min-w-[180px] ${colorClass}`}
+      className={`bg-glass border border-borderGlass backdrop-blur rounded-2xl shadow-md p-4 flex flex-col items-center min-w-[180px] ${colorClass}`}
     >
       <div className="flex items-center space-x-2">
         {icon && <span className="text-2xl">{icon}</span>}
@@ -22,7 +22,7 @@ export default function DashboardCard({ title, value, icon, type = "default", pr
       </div>
       <div className="text-3xl font-extrabold my-2">{value}</div>
       {progress !== null &&
-        <div className="w-full h-2 rounded bg-gray-200 mt-1">
+        <div className="w-full h-2 rounded bg-white/20 mt-1">
           <div className="h-2 rounded bg-mamastockGold" style={{ width: `${progress}%` }} />
         </div>
       }

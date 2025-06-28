@@ -9,6 +9,8 @@ import { useAuth } from "@/context/AuthContext";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { Button } from "@/components/ui/button";
+import GlassCard from "@/components/ui/GlassCard";
+import TableContainer from "@/components/ui/TableContainer";
 
 export default function FournisseurDetail({ id }) {
   const { mama_id } = useAuth();
@@ -83,7 +85,7 @@ export default function FournisseurDetail({ id }) {
       )}
       {/* Stats d’achats/factures */}
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="glass-card p-4">
+        <GlassCard className="p-4">
           <h3 className="font-semibold mb-2">Évolution achats mensuels</h3>
           <ResponsiveContainer width="100%" height={150}>
             <LineChart data={stats}>
@@ -94,8 +96,8 @@ export default function FournisseurDetail({ id }) {
               <Line type="monotone" dataKey="total_achats" stroke="#bfa14d" name="Total Achats" />
             </LineChart>
           </ResponsiveContainer>
-        </div>
-        <div className="glass-card p-4">
+        </GlassCard>
+        <GlassCard className="p-4">
           <h3 className="font-semibold mb-2">Top produits achetés</h3>
           <ResponsiveContainer width="100%" height={150}>
             <BarChart data={topProducts}>
@@ -106,10 +108,10 @@ export default function FournisseurDetail({ id }) {
               <Bar dataKey="total" fill="#0f1c2e" name="Quantité achetée" />
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </GlassCard>
       </div>
       {/* Historique des achats */}
-      <div className="glass-table mt-4 p-2">
+      <TableContainer className="mt-4 p-2">
         <h3 className="font-semibold mb-2">Historique des achats</h3>
         <table className="w-full table-auto text-xs">
           <thead>
@@ -137,14 +139,7 @@ export default function FournisseurDetail({ id }) {
             ))}
           </tbody>
         </table>
-      </div>
-      <style>{`
-        .glass-card, .glass-table {
-          background: rgba(255,255,255,0.33);
-          backdrop-filter: blur(13px);
-          border-radius: 16px;
-        }
-      `}</style>
+      </TableContainer>
     </div>
   );
 }

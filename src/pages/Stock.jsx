@@ -4,6 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import StockMouvementForm from "@/components/stock/StockMouvementForm";
 import StockDetail from "@/components/stock/StockDetail";
 import { Button } from "@/components/ui/button";
+import TableContainer from "@/components/ui/TableContainer";
 import { Toaster } from "react-hot-toast";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
@@ -66,11 +67,12 @@ export default function Stock() {
         </Button>
         <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
       </div>
-      <Motion.table
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="min-w-full bg-white rounded-xl shadow-md"
-      >
+      <TableContainer className="mt-4">
+        <Motion.table
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="min-w-full text-sm"
+        >
         <thead>
           <tr>
             <th className="px-4 py-2">Produit</th>
@@ -105,7 +107,8 @@ export default function Stock() {
             </tr>
           ))}
         </tbody>
-      </Motion.table>
+        </Motion.table>
+      </TableContainer>
       <div className="mt-4 flex gap-2">
         {Array.from({ length: nbPages }, (_, i) =>
           <Button

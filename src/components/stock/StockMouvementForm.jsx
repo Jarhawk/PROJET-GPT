@@ -40,7 +40,10 @@ export default function StockMouvementForm({ produit, onClose }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md max-w-md mx-auto">
+    <form
+      onSubmit={handleSubmit}
+      className="bg-glass border border-borderGlass backdrop-blur p-6 rounded-2xl shadow-lg max-w-md mx-auto"
+    >
       <h2 className="text-lg font-bold mb-4">Mouvement de stock</h2>
       <div className="mb-2">Produit : <b>{produit?.nom}</b></div>
       <select

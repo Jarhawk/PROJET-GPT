@@ -68,7 +68,7 @@ export default function UtilisateurRow({ utilisateur, onEdit, onToggleActive }) 
       </tr>
       {showHistory && (
         <tr>
-          <td colSpan={4} className="bg-gray-50">
+          <td colSpan={4} className="bg-glass border border-borderGlass backdrop-blur">
             <div>
               <b>Connexions récentes :</b>
               <ul>

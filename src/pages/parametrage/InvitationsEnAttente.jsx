@@ -75,7 +75,7 @@ export default function InvitationsEnAttente() {
       <h1 className="text-2xl font-bold text-mamastock-gold mb-4">
         Invitations en attente
       </h1>
-      <div className="bg-white shadow rounded-xl overflow-x-auto">
+      <div className="bg-glass border border-borderGlass backdrop-blur shadow rounded-xl overflow-x-auto">
         <table className="min-w-full table-auto text-center">
           <thead>
             <tr>

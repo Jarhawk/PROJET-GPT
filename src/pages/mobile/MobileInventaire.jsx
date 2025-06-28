@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import { useInventaires } from "@/hooks/useInventaires";
+import { LiquidBackground, TouchLight } from "@/components/LiquidBackground";
+import GlassCard from "@/components/ui/GlassCard";
 
 export default function MobileInventaire() {
   const { mama_id, loading: authLoading } = useAuth();
@@ -38,27 +40,31 @@ export default function MobileInventaire() {
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-lg font-bold mb-4">📦 Inventaire - Stock Final uniquement</h2>
-      <ul className="space-y-2">
-        {produits.map(p => (
-          <li key={p.id} className="flex justify-between items-center border p-2 rounded">
-            <span>{p.nom}</span>
-            <input
-              type="number"
-              className="w-20 border px-1"
-              value={stockFinal[p.id] || ""}
-              onChange={(e) => handleChange(p.id, e.target.value)}
-            />
-          </li>
-        ))}
-      </ul>
-      <button
-        onClick={handleSave}
-        className="mt-4 w-full bg-mamastock-gold text-white py-2 rounded hover:bg-mamastock-gold-hover"
-      >
-        Valider Inventaire
-      </button>
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden p-4 text-white">
+      <LiquidBackground showParticles />
+      <TouchLight />
+      <GlassCard className="w-full max-w-sm space-y-4 relative z-10">
+        <h2 className="text-lg font-bold">📦 Inventaire - Stock Final uniquement</h2>
+        <ul className="space-y-2">
+          {produits.map(p => (
+            <li key={p.id} className="flex justify-between items-center border p-2 rounded">
+              <span>{p.nom}</span>
+              <input
+                type="number"
+              className="w-20 border px-1 bg-transparent"
+                value={stockFinal[p.id] || ""}
+                onChange={(e) => handleChange(p.id, e.target.value)}
+              />
+            </li>
+          ))}
+        </ul>
+        <button
+          onClick={handleSave}
+          className="mt-4 w-full bg-mamastock-gold text-white py-2 rounded hover:bg-mamastock-gold-hover"
+        >
+          Valider Inventaire
+        </button>
+      </GlassCard>
     </div>
   );
 }

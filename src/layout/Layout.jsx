@@ -3,6 +3,12 @@ import Sidebar from "@/layout/Sidebar";
 import useAuth from "@/hooks/useAuth";
 import toast from "react-hot-toast";
 import Footer from "@/components/Footer";
+import {
+  LiquidBackground,
+  WavesBackground,
+  MouseLight,
+  TouchLight,
+} from "@/components/LiquidBackground";
 
 export default function Layout() {
   const { pathname } = useLocation();
@@ -10,9 +16,13 @@ export default function Layout() {
   if (pathname === "/login" || pathname === "/unauthorized") return <Outlet />;
 
   return (
-    <div className="flex h-screen overflow-auto text-shadow">
+    <div className="relative flex h-screen overflow-auto text-shadow">
+      <LiquidBackground showParticles />
+      <WavesBackground className="opacity-40" />
+      <MouseLight />
+      <TouchLight />
       <Sidebar />
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1 relative z-10">
         <main className="flex-1 p-4 overflow-auto">
           <div className="flex justify-end items-center gap-2 mb-4">
           {user && (

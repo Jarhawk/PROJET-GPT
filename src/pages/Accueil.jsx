@@ -1,13 +1,26 @@
 import { motion as Motion } from "framer-motion";
 import logoMamaStock from "@/assets/logo-mamastock.png";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import useAuth from "@/hooks/useAuth";
 import Footer from "@/components/Footer";
+import PreviewBanner from "@/components/ui/PreviewBanner";
+import {
+  LiquidBackground,
+  WavesBackground,
+  MouseLight,
+  TouchLight,
+} from "@/components/LiquidBackground";
 
 export default function Accueil() {
   const { session, user } = useAuth();
   const navigate = useNavigate();
+  const { search } = useLocation();
+  const params = new URLSearchParams(search);
+  const previewIntensity = parseFloat(params.get('intensity'));
+  const intensity = params.has('preview') && !Number.isNaN(previewIntensity)
+    ? Math.min(Math.max(previewIntensity, 0.2), 2)
+    : 1;
 
   useEffect(() => {
     if (session && user) {
@@ -16,15 +29,20 @@ export default function Accueil() {
   }, [session, user, navigate]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#1E3A8A] text-white relative">
-      <div className="flex-grow flex flex-col items-center justify-center px-4">
+    <div className="relative flex flex-col min-h-screen text-white overflow-hidden">
+      <LiquidBackground showParticles intensity={intensity} />
+      <WavesBackground className="opacity-40" />
+      <MouseLight />
+      <TouchLight />
+      <PreviewBanner />
+      <div className="flex-grow flex flex-col items-center justify-center px-4 relative z-10">
         <Motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8 }}
           className="w-full max-w-md"
         >
-          <div className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-3xl shadow-xl p-6 flex flex-col items-center">
+          <div className="bg-glass border border-borderGlass backdrop-blur-lg rounded-3xl shadow-xl p-6 flex flex-col items-center">
             <img
               src={logoMamaStock}
               alt="MamaStock"

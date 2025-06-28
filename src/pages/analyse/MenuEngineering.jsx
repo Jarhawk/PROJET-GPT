@@ -40,7 +40,7 @@ export default function MenuEngineering() {
         <Button onClick={() => fetchData(filters)}>Rafraîchir</Button>
         <Button variant="outline" onClick={exportPdf}>Export</Button>
       </div>
-      <div id="matrix" className="w-full h-80 bg-white rounded">
+      <div id="matrix" className="w-full h-80 bg-glass border border-borderGlass backdrop-blur rounded">
         <ResponsiveContainer width="100%" height="100%">
           <ScatterChart>
             <CartesianGrid />

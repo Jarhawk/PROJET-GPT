@@ -11,7 +11,7 @@ import * as XLSX from "xlsx";
 import { motion as Motion } from "framer-motion";
 
 export default function Menus() {
-  const { menus, getMenus, deleteMenu } = useMenus();
+  const { menus, total, getMenus, deleteMenu } = useMenus();
   const { fiches, fetchFiches } = useFiches();
   const { mama_id, loading: authLoading } = useAuth();
   const [showForm, setShowForm] = useState(false);
@@ -23,32 +23,44 @@ export default function Menus() {
   const [monthFilter, setMonthFilter] = useState("");
   const [page, setPage] = useState(1);
 
-  const getWeek = (dateStr) => {
-    const d = new Date(dateStr);
-    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
-    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-    const weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
-    return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, "0")}`;
+  const perPage = 10;
+
+  const loadMenus = () => {
+    const opts = {
+      search,
+      date: dateFilter || undefined,
+      offset: (page - 1) * perPage,
+      limit: perPage,
+    };
+    if (weekFilter) {
+      const [year, wk] = weekFilter.split("-W");
+      const first = new Date(year, 0, 1 + (wk - 1) * 7);
+      const start = new Date(first.setDate(first.getDate() - first.getDay() + 1));
+      const end = new Date(start);
+      end.setDate(start.getDate() + 6);
+      opts.start = start.toISOString().slice(0, 10);
+      opts.end = end.toISOString().slice(0, 10);
+    }
+    if (monthFilter) {
+      const [y, m] = monthFilter.split("-");
+      const start = new Date(y, m - 1, 1);
+      const end = new Date(y, m, 0);
+      opts.start = start.toISOString().slice(0, 10);
+      opts.end = end.toISOString().slice(0, 10);
+    }
+    getMenus(opts);
+    fetchFiches();
   };
 
-  // Récupération initiale des menus et fiches
+  // Chargement initial et à chaque filtre
   useEffect(() => {
     if (!authLoading && mama_id) {
-      getMenus();
-      fetchFiches();
+      loadMenus();
     }
-  }, [authLoading, mama_id, getMenus, fetchFiches]);
+  }, [authLoading, mama_id, search, dateFilter, weekFilter, monthFilter, page, getMenus, fetchFiches]);
 
-  const menusFiltres = menus.filter(m => {
-    if (search && !m.nom?.toLowerCase().includes(search.toLowerCase())) return false;
-    if (dateFilter && m.date !== dateFilter) return false;
-    if (weekFilter && getWeek(m.date) !== weekFilter) return false;
-    if (monthFilter && m.date.slice(0, 7) !== monthFilter) return false;
-    return true;
-  });
-  const perPage = 10;
-  const pageCount = Math.ceil(menusFiltres.length / perPage);
-  const paginatedMenus = menusFiltres.slice((page - 1) * perPage, page * perPage);
+  const pageCount = Math.ceil(total / perPage);
+  const paginatedMenus = menus;
 
   const exportExcel = () => {
     const wb = XLSX.utils.book_new();
@@ -64,7 +76,7 @@ export default function Menus() {
   const handleDelete = async (menu) => {
     if (window.confirm(`Supprimer le menu "${menu.nom}" ?`)) {
       await deleteMenu(menu.id);
-      await getMenus();
+      loadMenus();
       toast.success("Menu supprimé.");
     }
   };
@@ -190,7 +202,7 @@ export default function Menus() {
         <MenuForm
           menu={selected}
           fiches={fiches}
-          onClose={() => { setShowForm(false); setSelected(null); getMenus(); }}
+          onClose={() => { setShowForm(false); setSelected(null); loadMenus(); }}
         />
       )}
       {showDetail && selected && (

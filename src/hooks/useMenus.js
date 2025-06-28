@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
+import { useAuditLog } from "@/hooks/useAuditLog";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
 export function useMenus() {
   const { mama_id } = useAuth();
+  const { log } = useAuditLog();
   const [menus, setMenus] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -18,6 +20,8 @@ export function useMenus() {
     start = "",
     end = "",
     actif = null,
+    offset = 0,
+    limit = 50,
   } = {}) {
     if (!mama_id) return [];
     setLoading(true);
@@ -25,10 +29,10 @@ export function useMenus() {
     let query = supabase
       .from("menus")
       .select(
-        "*, fiches:menu_fiches(fiche_id, fiche: fiches(id, nom))"
+        "*, fiches:menu_fiches(fiche_id, fiche: fiches(id, nom))",
+        { count: "exact" }
       )
-      .eq("mama_id", mama_id)
-      .order("date", { ascending: false });
+      .eq("mama_id", mama_id);
 
     if (search) query = query.ilike("nom", `%${search}%`);
     if (date) query = query.eq("date", date);
@@ -36,9 +40,11 @@ export function useMenus() {
     if (end) query = query.lte("date", end);
     if (typeof actif === "boolean") query = query.eq("actif", actif);
 
-    const { data, error } = await query;
+    const { data, count, error } = await query
+      .order("date", { ascending: false })
+      .range(offset, offset + limit - 1);
     setMenus(Array.isArray(data) ? data : []);
-    setTotal(Array.isArray(data) ? data.length : 0);
+    setTotal(typeof count === "number" ? count : Array.isArray(data) ? data.length : 0);
     setLoading(false);
     if (error) setError(error);
     return data || [];
@@ -66,6 +72,7 @@ export function useMenus() {
       await supabase.from("menu_fiches").insert(fichesWithFk);
     }
     setLoading(false);
+    if (!error) await log("Ajout menu", { id: data?.id, ...entete });
     await getMenus();
     return data;
   }
@@ -98,7 +105,7 @@ export function useMenus() {
       }
     }
     setLoading(false);
-    if (errorMenu) setError(errorMenu);
+    if (errorMenu) setError(errorMenu); else await log("Modification menu", { id, ...entete });
     await getMenus();
   }
 
@@ -130,7 +137,7 @@ export function useMenus() {
       .eq("id", id)
       .eq("mama_id", mama_id);
     setLoading(false);
-    if (error) setError(error);
+    if (error) setError(error); else await log("Désactivation menu", { id });
     await getMenus();
   }
 
@@ -145,7 +152,7 @@ export function useMenus() {
       .eq("id", id)
       .eq("mama_id", mama_id);
     setLoading(false);
-    if (error) setError(error);
+    if (error) setError(error); else await log("Changement actif menu", { id, actif });
     await getMenus();
   }
 

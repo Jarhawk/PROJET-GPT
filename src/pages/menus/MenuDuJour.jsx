@@ -22,10 +22,10 @@ export default function MenuDuJour() {
 
   useEffect(() => {
     if (!authLoading && mama_id) {
-      fetchMenusDuJour();
+      fetchMenusDuJour({ search, date: dateFilter || undefined });
       fetchFiches();
     }
-  }, [authLoading, mama_id, fetchMenusDuJour, fetchFiches]);
+  }, [authLoading, mama_id, search, dateFilter, fetchMenusDuJour, fetchFiches]);
 
   const menusFiltres = menusDuJour.filter(m =>
     (!search || m.nom?.toLowerCase().includes(search.toLowerCase())) &&
@@ -46,7 +46,7 @@ export default function MenuDuJour() {
   const handleDelete = async (menu) => {
     if (window.confirm(`Supprimer le menu du jour "${menu.nom}" ?`)) {
       await deleteMenuDuJour(menu.id);
-      await fetchMenusDuJour();
+      fetchMenusDuJour({ search, date: dateFilter || undefined });
       toast.success("Menu du jour supprimé.");
     }
   };
@@ -128,7 +128,7 @@ export default function MenuDuJour() {
         <MenuDuJourForm
           menu={selected}
           fiches={fiches}
-          onClose={() => { setShowForm(false); setSelected(null); fetchMenusDuJour(); }}
+          onClose={() => { setShowForm(false); setSelected(null); fetchMenusDuJour({ search, date: dateFilter || undefined }); }}
         />
       )}
       {showDetail && selected && (

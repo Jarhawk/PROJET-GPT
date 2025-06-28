@@ -43,7 +43,7 @@ export default function InventaireForm() {
       date,
       zone,
       lignes: lignes.map(l => ({
-        produit_id: l.product_id,
+        product_id: l.product_id,
         quantite_physique: Number(l.quantite_physique || 0),
         quantite_theorique: getTheo(l.product_id),
         prix_unitaire: getPrice(l.product_id),

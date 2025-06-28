@@ -25,7 +25,7 @@ export default function MobileInventaire() {
     for (const produitId in stockFinal) {
       await supabase.from("inventaire_lignes").insert([
         {
-          produit_id: produitId,
+          product_id: produitId,
           stock_final: parseFloat(stockFinal[produitId]),
           periode: "2025-05",
           mama_id,

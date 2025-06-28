@@ -10,8 +10,8 @@ export function useMouvementsStock() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // 1. Charger les mouvements (filtre, type, période, produit, search)
-  async function fetchMouvements({ type = "", produit = "", date_debut = "", date_fin = "", search = "" } = {}) {
+  // 1. Charger les mouvements (filtre, type, période, produit)
+  async function fetchMouvements({ type = "", produit = "", date_debut = "", date_fin = "" } = {}) {
     setLoading(true);
     setError(null);
     let query = supabase

@@ -25,13 +25,13 @@ export default function InviteUser({ onClose, onInvited }) {
           .select("id, nom, ville")
           .order("nom");
         setMamas(mData || []);
-      } else {
+      } else if (myMama) {
         const { data: mData } = await supabase
-          .from("users_mamas")
-          .select("mamas(id, nom, ville)")
-          .eq("user_id", user_id)
-          .eq("actif", true);
-        setMamas((mData || []).map(r => r.mamas));
+          .from("mamas")
+          .select("id, nom, ville")
+          .eq("id", myMama)
+          .maybeSingle();
+        setMamas(mData ? [mData] : []);
       }
 
       let query = supabase.from("roles").select("*");

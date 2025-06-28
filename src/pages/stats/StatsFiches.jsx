@@ -24,7 +24,11 @@ export default function StatsFiches() {
     setLoading(true);
     Promise.all([
       supabase.from("fiches_techniques").select("*").eq("mama_id", mama_id),
-      supabase.from("familles").select("nom").eq("mama_id", mama_id),
+      supabase
+        .from("familles")
+        .select("nom")
+        .eq("mama_id", mama_id)
+        .eq("actif", true),
     ]).then(([ficheRes, familleRes]) => {
       if (ficheRes.error) toast.error("Erreur chargement : " + ficheRes.error.message);
       else setFiches(ficheRes.data || []);

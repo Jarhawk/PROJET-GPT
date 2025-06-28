@@ -84,8 +84,31 @@ export function useProducts() {
   async function duplicateProduct(id, { refresh = true } = {}) {
     const orig = products.find(p => p.id === id);
     if (!orig) return;
-    const copy = { ...orig, nom: `${orig.nom} (copie)` };
-    delete copy.id;
+    const {
+      famille,
+      unite,
+      main_supplier_id,
+      pmp,
+      stock_reel,
+      stock_min,
+      actif,
+      code,
+      allergenes,
+      image,
+    } = orig;
+    const copy = {
+      nom: `${orig.nom} (copie)`,
+      famille,
+      unite,
+      main_supplier_id,
+      pmp,
+      stock_reel,
+      stock_min,
+      actif,
+      code,
+      allergenes,
+      image,
+    };
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);

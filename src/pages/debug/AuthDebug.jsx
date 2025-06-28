@@ -8,15 +8,13 @@ export default function AuthDebug() {
     <div className="p-4 text-sm text-white bg-black space-y-2">
       <h2 className="text-lg font-bold">Debug Auth</h2>
       <div>
-        <strong>Session:</strong>
-        <pre>{JSON.stringify(session, null, 2)}</pre>
+        <strong>Email:</strong> {session?.user?.email || "-"}
       </div>
       <div>
-        <strong>UserData:</strong>
-        <pre>{JSON.stringify(userData, null, 2)}</pre>
+        <strong>User ID:</strong> {session?.user?.id || "-"}
       </div>
       <div>
-        <strong>Role:</strong> {role || "-"}
+        <strong>Role:</strong> {userData?.role || role || "-"}
       </div>
       <div>
         <strong>Mama ID:</strong> {mama_id || "-"}

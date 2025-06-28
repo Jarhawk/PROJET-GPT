@@ -19,7 +19,7 @@ export default function Login() {
     session,
     userData,
     login,
-    isLoading,
+    loading: authLoading,
   } = useAuth();
 
   const [totp, setTotp] = useState("");
@@ -27,7 +27,7 @@ export default function Login() {
 
   // Redirection après authentification une fois les données chargées
   useEffect(() => {
-    if (!session || isLoading) return;
+    if (!session || authLoading) return;
     if (!userData) {
       toast("Compte en cours de création");
       navigate("/pending");
@@ -43,7 +43,7 @@ export default function Login() {
     }
     toast.success(`Bienvenue ${session.user.email}`);
     navigate("/dashboard");
-  }, [session, userData, isLoading, navigate]);
+  }, [session, userData, authLoading, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();

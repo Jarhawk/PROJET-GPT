@@ -6,14 +6,17 @@ export default function ProtectedRoute({ children, accessKey }) {
   const {
     session,
     userData,
-    isLoading,
+    loading,
+    pending,
     access_rights,
     isSuperadmin,
     isAuthenticated,
   } = useAuth();
 
-  if (isLoading || access_rights === null)
+  if (loading || access_rights === null)
     return <LoadingSpinner message="Chargement..." />;
+
+  if (pending) return <Navigate to="/pending" />;
 
   if (!session || !isAuthenticated || !userData) return <Navigate to="/login" />;
 

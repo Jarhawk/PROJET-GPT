@@ -69,9 +69,9 @@ const Logout = lazy(() => import("@/pages/auth/Logout.jsx"));
 
 
 function RootRoute() {
-  const { session, user, loading } = useAuth();
+  const { session, loading } = useAuth();
   if (loading) return <LoadingSpinner message="Chargement..." />;
-  if (session && user) return <Navigate to="/dashboard" replace />;
+  if (session && session.user) return <Navigate to="/dashboard" replace />;
   return <Navigate to="/accueil" replace />;
 }
 

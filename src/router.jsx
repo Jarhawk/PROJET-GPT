@@ -42,6 +42,7 @@ const AccessRights = lazy(() => import("@/pages/parametrage/AccessRights.jsx"));
 const Onboarding = lazy(() => import("@/pages/public/Onboarding.jsx"));
 const Accueil = lazy(() => import("@/pages/Accueil.jsx"));
 const Signup = lazy(() => import("@/pages/public/Signup.jsx"));
+const Rgpd = lazy(() => import("@/pages/Rgpd.jsx"));
 const PagePrivacy = lazy(() => import("@/pages/public/PagePrivacy.jsx"));
 const PageMentions = lazy(() => import("@/pages/public/PageMentions.jsx"));
 const AideContextuelle = lazy(() => import("@/pages/AideContextuelle.jsx"));
@@ -88,6 +89,7 @@ export default function Router() {
         <Route path="/pending" element={<Pending />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/blocked" element={<Blocked />} />
+        <Route path="/rgpd" element={<Rgpd />} />
         <Route path="/privacy" element={<PagePrivacy />} />
         <Route path="/mentions" element={<PageMentions />} />
         <Route path="/" element={<Layout />}>

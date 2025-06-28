@@ -2,6 +2,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "@/layout/Sidebar";
 import useAuth from "@/hooks/useAuth";
 import toast from "react-hot-toast";
+import Footer from "@/components/Footer";
 
 export default function Layout() {
   const { pathname } = useLocation();
@@ -11,8 +12,9 @@ export default function Layout() {
   return (
     <div className="flex h-screen overflow-auto text-shadow">
       <Sidebar />
-      <main className="flex-1 p-4">
-        <div className="flex justify-end items-center gap-2 mb-4">
+      <div className="flex flex-col flex-1">
+        <main className="flex-1 p-4 overflow-auto">
+          <div className="flex justify-end items-center gap-2 mb-4">
           {user && (
             <>
               <span>{user.email}</span>
@@ -32,9 +34,11 @@ export default function Layout() {
               </button>
             </>
           )}
-        </div>
-        <Outlet />
-      </main>
+          </div>
+          <Outlet />
+        </main>
+        <Footer />
+      </div>
     </div>
   );
 }

@@ -15,9 +15,14 @@ export function useInvoiceLines() {
       .from('facture_lignes')
       .select('*, produit: products(nom, famille, unite)')
       .eq('facture_id', invoice_id)
-      .eq('mama_id', mama_id);
+      .eq('mama_id', mama_id)
+      .order('id');
     setLoading(false);
-    if (error) setError(error);
+    if (error) {
+      setError(error);
+      console.error('fetchLines error', error);
+    }
+    console.log('Fetched invoice lines', data?.length || 0);
     return data || [];
   }
 
@@ -48,6 +53,7 @@ export function useInvoiceLines() {
       console.error('addLine error', error);
       return { error };
     }
+    console.log('Added invoice line', data?.id);
     return { data };
   }
 
@@ -68,6 +74,7 @@ export function useInvoiceLines() {
       console.error('updateLine error', error);
       return { error };
     }
+    console.log('Updated invoice line', id);
     return { data };
   }
 
@@ -86,6 +93,7 @@ export function useInvoiceLines() {
       console.error('deleteLine error', error);
       return { error };
     }
+    console.log('Deleted invoice line', id);
     return { success: true };
   }
 

@@ -24,6 +24,7 @@ const ProduitDetail = lazy(() => import("@/pages/produits/ProduitDetail.jsx"));
 const Inventaire = lazy(() => import("@/pages/inventaire/Inventaire.jsx"));
 const InventaireForm = lazy(() => import("@/pages/inventaire/InventaireForm.jsx"));
 const InventaireDetail = lazy(() => import("@/pages/inventaire/InventaireDetail.jsx"));
+const InventaireZones = lazy(() => import("@/pages/inventaire/InventaireZones.jsx"));
 const Mouvements = lazy(() => import("@/pages/mouvements/Mouvements.jsx"));
 const Alertes = lazy(() => import("@/pages/Alertes.jsx"));
 const Taches = lazy(() => import("@/pages/taches/Taches.jsx"));
@@ -164,6 +165,10 @@ export default function Router() {
           <Route
             path="/inventaire"
             element={<ProtectedRoute accessKey="inventaires"><Inventaire /></ProtectedRoute>}
+          />
+          <Route
+            path="/inventaire/zones"
+            element={<ProtectedRoute accessKey="inventaires"><InventaireZones /></ProtectedRoute>}
           />
           <Route
             path="/inventaire/new"

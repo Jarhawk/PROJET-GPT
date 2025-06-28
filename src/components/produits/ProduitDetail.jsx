@@ -1,7 +1,7 @@
 // src/components/produits/ProduitDetail.jsx
 import { useEffect, useState } from "react";
 import { useProducts } from "@/hooks/useProducts";
-import { Dialog, DialogContent } from "@radix-ui/react-dialog";
+import ModalGlass from "@/components/ui/ModalGlass";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import * as XLSX from "xlsx";
@@ -33,8 +33,7 @@ export default function ProduitDetail({ produitId, open, onClose }) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="bg-white/80 backdrop-blur-2xl border border-mamastockGold/20 rounded-2xl shadow-2xl p-8 max-w-2xl w-full">
+    <ModalGlass open={open} onClose={onClose}>
         <h2 className="text-lg font-bold text-mamastockGold mb-3">Historique des prix d’achat</h2>
         {loading ? (
           <div className="flex justify-center py-6">
@@ -83,7 +82,6 @@ export default function ProduitDetail({ produitId, open, onClose }) {
           <button onClick={exportExcel} className="btn btn-secondary">Export Excel</button>
           <button onClick={onClose} className="btn">Fermer</button>
         </div>
-      </DialogContent>
-    </Dialog>
+    </ModalGlass>
   );
 }

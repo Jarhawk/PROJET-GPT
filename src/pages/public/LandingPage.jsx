@@ -3,6 +3,12 @@ import { useEffect } from "react";
 import GlassCard from "@/components/ui/GlassCard";
 import PageIntro from "@/components/ui/PageIntro";
 import useAuth from "@/hooks/useAuth";
+import {
+  LiquidBackground,
+  WavesBackground,
+  MouseLight,
+  TouchLight,
+} from "@/components/LiquidBackground";
 
 export default function LandingPage() {
   const { isAuthenticated, loading } = useAuth();
@@ -13,8 +19,12 @@ export default function LandingPage() {
   }, [isAuthenticated, loading, navigate]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#0f1c2e] via-[#232a34] to-[#bfa14d] text-white p-4">
-      <GlassCard className="w-full max-w-2xl p-8 space-y-8 text-center">
+    <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden text-white p-4">
+      <LiquidBackground showParticles />
+      <WavesBackground className="opacity-40" />
+      <MouseLight />
+      <TouchLight />
+      <GlassCard className="w-full max-w-2xl p-8 space-y-8 text-center relative z-10">
         <PageIntro />
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link to="/login" className="px-6 py-3 rounded-xl bg-white/20 hover:bg-white/30 transition">
@@ -41,7 +51,7 @@ export default function LandingPage() {
           </p>
         </section>
       </GlassCard>
-      <footer className="mt-6 text-sm text-white/70">© MamaStock 2025</footer>
+      <footer className="mt-6 text-sm text-white/70 relative z-10">© MamaStock 2025</footer>
     </div>
   );
 }

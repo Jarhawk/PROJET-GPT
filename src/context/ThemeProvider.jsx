@@ -32,8 +32,14 @@ export function ThemeProvider({ children }) {
   }, [settings.primary_color, settings.secondary_color]);
 
   useEffect(() => {
-    if (settings.dark_mode) document.documentElement.classList.add("dark");
-    else document.documentElement.classList.remove("dark");
+    if (typeof settings.dark_mode === "boolean") {
+      if (settings.dark_mode) document.documentElement.classList.add("dark");
+      else document.documentElement.classList.remove("dark");
+    } else {
+      const prefers = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      if (prefers) document.documentElement.classList.add("dark");
+      else document.documentElement.classList.remove("dark");
+    }
   }, [settings.dark_mode]);
 
   const value = {

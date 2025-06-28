@@ -1,5 +1,6 @@
 import { useUnites } from "@/hooks/useUnites";
 import { Button } from "@/components/ui/button";
+import TableContainer from "@/components/ui/TableContainer";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Toaster, toast } from "react-hot-toast";
@@ -88,25 +89,27 @@ export default function ParamUnites() {
         )}
       </form>
       <Button variant="outline" className="mb-2" onClick={exportExcel}>Export Excel</Button>
-      <table className="min-w-full bg-white rounded-xl shadow-md text-xs">
-        <thead>
-          <tr>
-            <th>Nom</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {unites.map(u => (
-            <tr key={u.id}>
-              <td>{u.nom}</td>
-              <td>
-                <Button size="sm" variant="outline" onClick={() => handleEdit(u)}>Modifier</Button>
-                <Button size="sm" variant="outline" onClick={() => handleDelete(u.id)}>Supprimer</Button>
-              </td>
+      <TableContainer className="mt-2">
+        <table className="min-w-full text-xs">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {unites.map(u => (
+              <tr key={u.id}>
+                <td>{u.nom}</td>
+                <td>
+                  <Button size="sm" variant="outline" onClick={() => handleEdit(u)}>Modifier</Button>
+                  <Button size="sm" variant="outline" onClick={() => handleDelete(u.id)}>Supprimer</Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </TableContainer>
     </div>
   );
 }

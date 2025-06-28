@@ -3,6 +3,7 @@ import { usePertes } from "@/hooks/usePertes";
 import { useProducts } from "@/hooks/useProducts";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
+import TableContainer from "@/components/ui/TableContainer";
 import { Toaster, toast } from "react-hot-toast";
 
 export default function Pertes() {
@@ -69,8 +70,9 @@ export default function Pertes() {
         <input name="motif" className="input flex-1" placeholder="Motif" value={form.motif} onChange={handleChange} />
         <Button type="submit" disabled={saving}>Ajouter</Button>
       </form>
-      <table className="min-w-full text-xs bg-white rounded-xl shadow-md">
-        <thead>
+      <TableContainer className="mt-4">
+        <table className="min-w-full text-xs">
+          <thead>
           <tr>
             <th className="px-2 py-1">Date</th>
             <th className="px-2 py-1">Produit</th>
@@ -91,8 +93,9 @@ export default function Pertes() {
               </td>
             </tr>
           ))}
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </TableContainer>
     </div>
   );
 }

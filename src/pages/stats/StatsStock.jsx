@@ -3,6 +3,7 @@ import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { useAuth } from "@/context/AuthContext";
 import { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
+import TableContainer from "@/components/ui/TableContainer";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import * as XLSX from "xlsx";
 
@@ -38,7 +39,7 @@ export default function StatsStock() {
       <Button variant="outline" className="mb-2" onClick={exportExcel}>
         Export Excel
       </Button>
-      <div className="overflow-x-auto bg-white rounded-xl shadow-md">
+      <TableContainer className="mt-2">
         <table className="min-w-full text-xs">
           <thead>
             <tr>
@@ -71,7 +72,7 @@ export default function StatsStock() {
             )}
           </tbody>
         </table>
-      </div>
+      </TableContainer>
     </div>
   );
 }

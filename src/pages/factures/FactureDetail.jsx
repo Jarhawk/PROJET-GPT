@@ -6,6 +6,7 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import TableContainer from "@/components/ui/TableContainer";
 import { useInvoiceItems } from "@/hooks/useInvoiceItems";
 import { useFactures } from "@/hooks/useFactures";
 
@@ -66,8 +67,8 @@ export default function FactureDetail({ facture: factureProp, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-lg p-8 min-w-[400px] max-w-[95vw] flex flex-col gap-2 relative">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-glass backdrop-blur-lg border border-borderGlass rounded-xl shadow-lg p-8 min-w-[400px] max-w-[95vw] flex flex-col gap-2 relative">
         <Button variant="outline" className="absolute top-2 right-2" onClick={onClose}>Fermer</Button>
         <h2 className="font-bold text-xl mb-4">Détail de la facture #{facture.id}</h2>
         <div><b>Date :</b> {facture.date}</div>
@@ -81,9 +82,10 @@ export default function FactureDetail({ facture: factureProp, onClose }) {
           }
         </div>
         {produitsFacture.length > 0 && (
-          <table className="mt-4 text-sm w-full border">
-            <thead>
-              <tr className="bg-gray-100">
+          <TableContainer className="mt-4">
+            <table className="min-w-full text-sm">
+            <thead className="bg-glass border-b border-borderGlass">
+              <tr>
                 <th className="px-2 py-1 border">Produit</th>
                 <th className="px-2 py-1 border">Quantité</th>
                 <th className="px-2 py-1 border">PU</th>
@@ -100,7 +102,8 @@ export default function FactureDetail({ facture: factureProp, onClose }) {
                 </tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </TableContainer>
         )}
         <div className="flex gap-2 mt-4">
           <Button variant="outline" onClick={exportExcel}>Export Excel</Button>

@@ -3,6 +3,7 @@ import { useRequisitions } from "@/hooks/useRequisitions";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import GlassCard from "@/components/ui/GlassCard";
 
 function RequisitionDetailPage() {
   const { id } = useParams();
@@ -23,7 +24,7 @@ function RequisitionDetailPage() {
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold text-mamastock-gold mb-6">Détail de la réquisition</h1>
-      <div className="bg-white p-4 rounded shadow space-y-2">
+      <GlassCard className="p-4 space-y-2">
         <div>
           <strong>Type :</strong> {requisition.type}
         </div>
@@ -46,7 +47,7 @@ function RequisitionDetailPage() {
             ))}
           </ul>
         </div>
-      </div>
+      </GlassCard>
     </div>
   );
 }

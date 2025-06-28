@@ -30,7 +30,7 @@ export default function InventaireDetail({ inventaire, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-lg p-8 min-w-[400px] max-w-[95vw] flex flex-col gap-2 relative">
+      <div className="bg-glass border border-borderGlass backdrop-blur rounded-2xl shadow-lg p-8 min-w-[400px] max-w-[95vw] flex flex-col gap-2 relative">
         <Button variant="outline" className="absolute top-2 right-2" onClick={onClose}>Fermer</Button>
         <h2 className="font-bold text-xl mb-4">{inventaire.nom}</h2>
         <div><b>Date :</b> {inventaire.date}</div>
@@ -43,7 +43,7 @@ export default function InventaireDetail({ inventaire, onClose }) {
         </div>
         <div className="my-4">
           <h3 className="font-bold mb-2">Lignes d’inventaire</h3>
-          <table className="min-w-full bg-gray-50 rounded">
+          <table className="min-w-full bg-glass border border-borderGlass rounded backdrop-blur">
             <thead>
               <tr>
                 <th>Produit</th>
@@ -72,7 +72,7 @@ export default function InventaireDetail({ inventaire, onClose }) {
         </div>
         <div className="my-4">
           <h3 className="font-bold mb-2">Mouvements liés</h3>
-          <table className="min-w-full bg-gray-50 rounded">
+          <table className="min-w-full bg-glass border border-borderGlass rounded backdrop-blur">
             <thead>
               <tr>
                 <th>Date</th>

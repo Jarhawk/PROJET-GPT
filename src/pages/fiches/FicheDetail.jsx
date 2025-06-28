@@ -66,7 +66,7 @@ export default function FicheDetail({ fiche: ficheProp, onClose }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-glass backdrop-blur-lg text-white rounded-xl shadow-lg p-8 min-w-[400px] max-w-[95vw] flex flex-col gap-2 relative text-shadow">
         <Button variant="outline" className="absolute top-2 right-2" onClick={onClose}>Fermer</Button>
         <h2 className="font-bold text-xl mb-4">{fiche.nom}</h2>
@@ -95,7 +95,7 @@ export default function FicheDetail({ fiche: ficheProp, onClose }) {
         </div>
         <div className="mt-6">
           <h3 className="font-semibold mb-2">Analyse rentabilité</h3>
-          <div className="h-32 bg-white rounded mb-2">
+          <div className="h-32 bg-glass border border-borderGlass backdrop-blur rounded mb-2">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={(history || []).map(h => ({ date: new Date(h.date).toLocaleDateString('fr-FR'), marge: h.prix_vente && h.cout_portion ? ((h.prix_vente - h.cout_portion) / h.prix_vente) * 100 : null }))}>
                 <XAxis dataKey="date" hide />

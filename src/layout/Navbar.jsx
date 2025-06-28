@@ -38,7 +38,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-white/5 backdrop-blur-xl text-white px-6 py-4 flex items-center justify-between shadow-md text-shadow">
+    <nav className="glass-panel border-b border-white/10 backdrop-blur-xl text-white px-6 py-4 flex items-center justify-between shadow-md text-shadow">
       {/* Logo / Titre */}
       <div className="flex items-center gap-4">
         <button onClick={toggleSidebar} className="md:hidden text-mamastock-gold text-2xl" aria-label="Ouvrir le menu">
@@ -55,13 +55,16 @@ export default function Navbar() {
           <input
             type="text"
             value={term}
-            onChange={e => { setTerm(e.target.value); search(e.target.value); }}
+            onChange={(e) => {
+              setTerm(e.target.value);
+              search(e.target.value);
+            }}
             placeholder={t('search')}
-            className="input input-bordered text-black w-48"
+            className="input w-48"
             aria-label={t('search')}
           />
           {results.length > 0 && (
-            <div className="absolute z-10 bg-white text-black w-full shadow-lg mt-1 text-xs rounded">
+            <div className="absolute z-10 bg-glass backdrop-blur border border-borderGlass text-white w-full shadow-lg mt-1 text-xs rounded">
               {results.map(r => (
                 <div key={r.type + r.id} className="px-2 py-1 border-b last:border-0">
                   {r.type}: {r.nom}
@@ -73,7 +76,7 @@ export default function Navbar() {
         <LanguageSelector />
         <button
           onClick={toggleDark}
-          className="bg-mamastock-gold text-black px-3 py-1 rounded-md text-sm"
+          className="btn px-3 py-1 text-sm"
           title={t('toggleTheme')}
           aria-label={t('toggleTheme')}
           aria-pressed={dark}

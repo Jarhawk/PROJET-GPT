@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
+import TableContainer from "@/components/ui/TableContainer";
+import InputField from "@/components/ui/InputField";
 
 function EcartInventairePage() {
   const params = new URLSearchParams(window.location.search);
@@ -115,37 +117,39 @@ function EcartInventairePage() {
   }, [mode, zone, date, mois, fetchEcarts, renderPDF, mama_id]);
 
   return (
-    <div className="p-6 bg-mamastock-bg min-h-screen">
+    <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold text-mamastock-gold mb-4">Écarts d'inventaire</h1>
 
       <div className="flex gap-4 mb-6">
-        <input
+        <InputField
+          label="Date"
           type="date"
           value={date}
           onChange={(e) => {
             setDate(e.target.value);
             setMois("");
           }}
-          className="border px-3 py-2 rounded"
+          className="flex-1"
         />
-        <input
+        <InputField
+          label="Zone"
           type="text"
           placeholder="Zone (ex: bar, cuisine...)"
           value={zone}
           onChange={(e) => setZone(e.target.value)}
-          className="border px-3 py-2 rounded"
+          className="flex-1"
         />
         <button
           onClick={renderPDF}
-          className="bg-mamastock-gold text-white font-bold px-4 py-2 rounded"
+          className="bg-mamastock-gold text-white font-bold px-4 py-2 rounded self-end h-10"
         >
           📄 Export PDF
         </button>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full bg-white rounded-xl shadow text-sm">
-          <thead className="bg-gray-100 text-gray-600">
+      <TableContainer className="mt-4">
+        <table className="w-full text-sm">
+          <thead className="bg-glass border-b border-borderGlass text-white">
             <tr>
               <th className="p-3 text-left">Date</th>
               <th className="p-3 text-left">Produit</th>
@@ -157,7 +161,7 @@ function EcartInventairePage() {
           </thead>
           <tbody>
             {ecarts.map((e, idx) => (
-              <tr key={idx} className="border-b hover:bg-gray-50">
+              <tr key={idx} className="border-b hover:bg-white/5">
                 <td className="p-3">{e.date}</td>
                 <td className="p-3">{e.produit}</td>
                 <td className="p-3">{e.stock_theorique}</td>
@@ -170,7 +174,7 @@ function EcartInventairePage() {
             ))}
           </tbody>
         </table>
-      </div>
+      </TableContainer>
     </div>
   );
 }

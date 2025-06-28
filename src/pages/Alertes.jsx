@@ -4,6 +4,7 @@ import { useProducts } from "@/hooks/useProducts";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
+import TableContainer from "@/components/ui/TableContainer";
 import { Search } from "lucide-react";
 import { Toaster, toast } from "react-hot-toast";
 
@@ -88,7 +89,9 @@ export default function Alertes() {
         />
         <Search className="absolute left-2 top-2.5 text-white" size={18} />
       </div>
-      <table className="min-w-full bg-white rounded-xl shadow-md">
+      <div className="mt-4">
+        <TableContainer>
+          <table className="min-w-full text-sm">
         <thead>
           <tr>
             <th className="px-2 py-1">Produit</th>
@@ -117,8 +120,10 @@ export default function Alertes() {
               </td>
             </tr>
           )}
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+        </TableContainer>
+      </div>
     </div>
   );
 }

@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import useFormErrors from "@/hooks/useFormErrors";
 import GlassCard from "@/components/ui/GlassCard";
 import PageWrapper from "@/components/ui/PageWrapper";
+import PreviewBanner from "@/components/ui/PreviewBanner";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { login as loginUser } from "../../lib/loginUser";
 
@@ -67,6 +68,7 @@ export default function Login() {
 
   return (
     <PageWrapper>
+      <PreviewBanner />
       <GlassCard className="flex flex-col items-center">
         <div className="mb-6">
           <MamaLogo width={96} />

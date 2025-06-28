@@ -9,6 +9,7 @@ import { Toaster, toast } from "react-hot-toast";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import { motion as Motion } from "framer-motion";
+import TableContainer from "@/components/ui/TableContainer";
 
 export default function Menus() {
   const { menus, total, getMenus, deleteMenu } = useMenus();
@@ -115,11 +116,12 @@ export default function Menus() {
         </Button>
         <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
       </div>
-      <Motion.table
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="min-w-full bg-white rounded-xl shadow-md"
-      >
+      <TableContainer className="mt-4">
+        <Motion.table
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="min-w-full"
+        >
         <thead>
           <tr>
             <th className="px-4 py-2">Date</th>
@@ -180,7 +182,8 @@ export default function Menus() {
             </tr>
           ))}
         </tbody>
-      </Motion.table>
+        </Motion.table>
+      </TableContainer>
       <div className="flex justify-center gap-2 my-4">
         <Button
           variant="outline"

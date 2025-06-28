@@ -3,6 +3,7 @@ import useNotifications from "@/hooks/useNotifications";
 import { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import TableContainer from "@/components/ui/TableContainer";
 
 export default function NotificationsInbox() {
   const {
@@ -41,7 +42,8 @@ export default function NotificationsInbox() {
       </div>
       {loading && <LoadingSpinner message="Chargement..." />}
       {error && <div className="text-red-600">{error}</div>}
-      <table className="min-w-full">
+      <TableContainer className="mt-4">
+        <table className="min-w-full text-sm">
         <thead>
           <tr>
             <th className="px-2 py-1 text-left">Titre</th>
@@ -75,7 +77,8 @@ export default function NotificationsInbox() {
             </tr>
           )}
         </tbody>
-      </table>
+        </table>
+      </TableContainer>
     </div>
   );
 }

@@ -151,7 +151,7 @@ export default function Requisitions() {
         <Button onClick={handleExportPDF}>Export PDF</Button>
         <Button onClick={() => setShowCreate(true)}>+ Nouvelle réquisition</Button>
       </div>
-      <div className="bg-white shadow rounded-xl overflow-x-auto">
+      <div className="bg-glass border border-borderGlass backdrop-blur shadow rounded-xl overflow-x-auto">
         <table className="min-w-full table-auto text-center">
           <thead>
             <tr>
@@ -179,7 +179,7 @@ export default function Requisitions() {
       </div>
       {/* Modal création réquisition */}
       <Dialog open={showCreate} onOpenChange={v => !v && setShowCreate(false)}>
-        <DialogContent className="bg-white rounded-xl shadow-lg p-6 max-w-md">
+        <DialogContent className="bg-glass border border-borderGlass backdrop-blur rounded-2xl shadow-lg p-6 max-w-md">
           <h2 className="font-bold mb-2">Nouvelle réquisition</h2>
           <form
             onSubmit={handleCreateReq}

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useLogs } from "@/hooks/useLogs";
 import { Button } from "@/components/ui/button";
+import TableContainer from "@/components/ui/TableContainer";
 import { Toaster } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
@@ -25,9 +26,9 @@ export default function Journal() {
   };
 
   return (
-    <div className="p-6 container mx-auto">
+    <div className="p-6 container mx-auto space-y-4">
       <Toaster position="top-right" />
-      <form onSubmit={handleSubmit} className="flex gap-2 mb-4">
+      <form onSubmit={handleSubmit} className="flex gap-2 mb-4 flex-wrap items-end">
         <input
           className="input"
           placeholder="Recherche action"
@@ -53,26 +54,28 @@ export default function Journal() {
           Export Excel
         </Button>
       </form>
-      <table className="min-w-full bg-white rounded-xl shadow-md text-xs">
-        <thead>
-          <tr>
-            <th className="px-2 py-1">Date</th>
-            <th className="px-2 py-1">Action</th>
-            <th className="px-2 py-1">Utilisateur</th>
-          </tr>
-        </thead>
-        <tbody>
-          {logs.map(l => (
-            <tr key={l.id}>
-              <td className="px-2 py-1">
-                {new Date(l.created_at).toLocaleString()}
-              </td>
-              <td className="px-2 py-1">{l.action}</td>
-              <td className="px-2 py-1">{l.utilisateurs?.email || l.done_by}</td>
+      <TableContainer>
+        <table className="min-w-full text-xs">
+          <thead>
+            <tr>
+              <th className="px-2 py-1">Date</th>
+              <th className="px-2 py-1">Action</th>
+              <th className="px-2 py-1">Utilisateur</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {logs.map(l => (
+              <tr key={l.id}>
+                <td className="border px-2 py-1">
+                  {new Date(l.created_at).toLocaleString()}
+                </td>
+                <td className="border px-2 py-1">{l.action}</td>
+                <td className="border px-2 py-1">{l.utilisateurs?.email || l.done_by}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </TableContainer>
     </div>
   );
 }

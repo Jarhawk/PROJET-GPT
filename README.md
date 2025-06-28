@@ -26,6 +26,25 @@ The default router redirects unauthenticated visitors from `/` to `/login` and
 shows the dashboard when logged in. `index.html` contains PWA metadata with the
 favicon, manifest and splash screen so you can install the app on mobile.
 
+### Liquid glass theme
+
+The UI uses an animated "liquid glass" look across every page. Waves and
+bubble particles are rendered behind glass panels and dialogs, with a glow that
+follows the mouse on desktop and a ripple effect on mobile. A preview of the
+theme can be enabled by appending `?preview` to the URL on the home or login
+pages. Colours adapt automatically to light or dark mode through the
+`ThemeProvider`.
+
+Background animations accept an optional `intensity` prop so pages can tune
+the opacity of the glow. When previewing, you can also append
+`&intensity=1.5` (for example) to the URL to increase or decrease the
+transparency.
+
+Reusable components `LiquidBackground`, `WavesBackground`, `MouseLight` and
+`TouchLight` are available under `src/components/LiquidBackground`. Include
+them at the root of a page or layout to display the animated waves, bubble
+particles and interactive lights.
+
 Le script `src/registerSW.js` enregistre automatiquement un service worker pour activer l'usage hors ligne. Lancez `npm run preview` ou servez le dossier `dist` pour vérifier que l'enregistrement fonctionne.
 ### Database
 

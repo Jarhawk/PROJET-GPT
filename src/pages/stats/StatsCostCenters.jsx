@@ -3,6 +3,7 @@ import { useCostCenterStats } from "@/hooks/useCostCenterStats";
 import { useAuth } from "@/context/AuthContext";
 import { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
+import TableContainer from "@/components/ui/TableContainer";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import * as XLSX from "xlsx";
 
@@ -36,8 +37,9 @@ export default function StatsCostCenters() {
       <Button variant="outline" className="mb-2" onClick={exportExcel}>
         Export Excel
       </Button>
-      <table className="min-w-full text-xs bg-white rounded-xl shadow-md">
-        <thead>
+      <TableContainer className="mt-2">
+        <table className="min-w-full text-xs">
+          <thead>
           <tr>
             <th className="px-2 py-1">Cost Center</th>
             <th className="px-2 py-1">Quantité</th>
@@ -60,8 +62,9 @@ export default function StatsCostCenters() {
               </tr>
             ))
           )}
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </TableContainer>
     </div>
   );
 }

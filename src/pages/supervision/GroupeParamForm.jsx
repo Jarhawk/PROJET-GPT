@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
+import GlassCard from "@/components/ui/GlassCard";
 import toast from "react-hot-toast";
 
 export default function GroupeParamForm({ groupe, onClose, onSaved }) {
@@ -84,25 +85,26 @@ export default function GroupeParamForm({ groupe, onClose, onSaved }) {
   };
 
   return (
-    <form className="space-y-3 p-4" onSubmit={handleSubmit}>
-      <div>
+    <GlassCard className="p-4">
+      <form className="space-y-3" onSubmit={handleSubmit}>
+        <div>
         <label>Nom du groupe</label>
         <input
-          className="input input-bordered w-full"
+          className="input w-full"
           value={values.nom}
           onChange={(e) => setValues({ ...values, nom: e.target.value })}
           required
         />
       </div>
-      <div>
+        <div>
         <label>Description</label>
         <textarea
-          className="textarea textarea-bordered w-full"
+          className="textarea w-full"
           value={values.description}
           onChange={(e) => setValues({ ...values, description: e.target.value })}
         />
-      </div>
-      <div>
+        </div>
+        <div>
         <label className="block mb-1">Établissements</label>
         <div className="flex flex-col gap-1 max-h-40 overflow-y-auto border p-2 rounded">
           {mamas.map((m) => (
@@ -116,15 +118,16 @@ export default function GroupeParamForm({ groupe, onClose, onSaved }) {
             </label>
           ))}
         </div>
-      </div>
-      <div className="flex gap-4 mt-4">
-        <Button type="submit" disabled={saving}>
-          {saving ? "Enregistrement…" : "Enregistrer"}
-        </Button>
-        <Button type="button" variant="secondary" onClick={onClose} disabled={saving}>
-          Annuler
-        </Button>
-      </div>
-    </form>
+        </div>
+        <div className="flex gap-4 mt-4">
+          <Button type="submit" disabled={saving}>
+            {saving ? "Enregistrement…" : "Enregistrer"}
+          </Button>
+          <Button type="button" variant="secondary" onClick={onClose} disabled={saving}>
+            Annuler
+          </Button>
+        </div>
+      </form>
+    </GlassCard>
   );
 }

@@ -9,7 +9,7 @@ export default function FicheExportView({ fiches = [] }) {
           )}
           <table className="w-full text-sm border mb-4">
             <thead>
-              <tr className="bg-gray-100">
+              <tr className="bg-white/10">
                 <th className="border px-2 py-1">Ingrédient</th>
                 <th className="border px-2 py-1">Qté</th>
                 <th className="border px-2 py-1">Unité</th>

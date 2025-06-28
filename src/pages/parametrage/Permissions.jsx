@@ -6,6 +6,7 @@ import { Dialog, DialogContent } from "@radix-ui/react-dialog";
 import PermissionsForm from "./PermissionsForm";
 import toast, { Toaster } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import TableContainer from "@/components/ui/TableContainer";
 
 export default function Permissions() {
   const { mama_id } = useAuth();
@@ -38,13 +39,13 @@ export default function Permissions() {
     <div className="p-8 max-w-4xl mx-auto">
       <Toaster />
       <h1 className="text-2xl font-bold text-mamastock-gold mb-4">Permissions des rôles</h1>
-      <div className="bg-white shadow rounded-xl overflow-x-auto mb-6">
+      <TableContainer className="mb-6">
         {loading ? (
           <div className="text-center py-8 text-gray-500">
             <LoadingSpinner message="Chargement…" />
           </div>
         ) : (
-          <table className="min-w-full table-auto text-center">
+          <table className="min-w-full table-auto text-center text-sm">
             <thead>
               <tr>
                 <th className="px-2 py-1">Rôle</th>
@@ -91,9 +92,9 @@ export default function Permissions() {
             </tbody>
           </table>
         )}
-      </div>
+      </TableContainer>
       <Dialog open={!!editRole} onOpenChange={v => !v && setEditRole(null)}>
-        <DialogContent className="bg-white rounded-xl shadow-lg p-6 max-w-xl">
+        <DialogContent className="bg-glass backdrop-blur-lg border border-borderGlass rounded-xl shadow-lg p-6 max-w-xl">
           {editRole && (
             <PermissionsForm
               role={editRole}

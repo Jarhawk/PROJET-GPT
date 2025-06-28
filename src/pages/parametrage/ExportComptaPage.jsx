@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Select } from '@/components/ui/select';
+import TableContainer from '@/components/ui/TableContainer';
 import { Toaster } from 'react-hot-toast';
 import useExportCompta from '@/hooks/useExportCompta';
 
@@ -31,21 +33,21 @@ export default function ExportComptaPage() {
             type="month"
             value={mois}
             onChange={(e) => setMois(e.target.value)}
-            className="input input-bordered"
+            className="input"
           />
         </div>
         <div>
           <label className="block text-sm">Format</label>
-          <select
+          <Select
             value={format}
             onChange={(e) => setFormat(e.target.value)}
-            className="select select-bordered"
+            className="w-32"
           >
             <option value="csv">📄 CSV</option>
             <option value="xml">🧾 XML</option>
             <option value="json">JSON</option>
             <option value="txt">TXT</option>
-          </select>
+          </Select>
         </div>
         <Button onClick={handlePreview} disabled={loading}>
           Aperçu
@@ -56,13 +58,13 @@ export default function ExportComptaPage() {
       </div>
       <div className="flex gap-4 items-end">
         <input
-          className="input input-bordered flex-1"
+          className="input flex-1"
           placeholder="Endpoint ERP"
           value={endpoint}
           onChange={(e) => setEndpoint(e.target.value)}
         />
         <input
-          className="input input-bordered"
+          className="input"
           placeholder="Token"
           value={token}
           onChange={(e) => setToken(e.target.value)}
@@ -72,9 +74,9 @@ export default function ExportComptaPage() {
         </Button>
       </div>
       {preview.length > 0 && (
-        <div className="bg-white shadow rounded-xl overflow-x-auto">
+        <TableContainer>
           <table className="min-w-full table-auto text-sm">
-            <thead>
+            <thead className="bg-glass border-b border-borderGlass">
               <tr>
                 <th className="px-2 py-1">Date</th>
                 <th className="px-2 py-1">Fournisseur</th>
@@ -85,7 +87,7 @@ export default function ExportComptaPage() {
             </thead>
             <tbody>
               {preview.map((row, i) => (
-                <tr key={i} className="odd:bg-gray-50">
+                <tr key={i} className="odd:bg-white/5">
                   <td className="px-2 py-1">{row.date}</td>
                   <td className="px-2 py-1">{row.fournisseur}</td>
                   <td className="px-2 py-1 text-right">{row.ht.toFixed(2)}</td>
@@ -95,7 +97,7 @@ export default function ExportComptaPage() {
               ))}
             </tbody>
           </table>
-        </div>
+        </TableContainer>
       )}
     </div>
   );

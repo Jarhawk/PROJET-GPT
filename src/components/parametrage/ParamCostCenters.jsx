@@ -2,6 +2,7 @@ import { useCostCenters } from "@/hooks/useCostCenters";
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
+import TableContainer from "@/components/ui/TableContainer";
 import { Toaster, toast } from "react-hot-toast";
 import * as XLSX from "xlsx";
 
@@ -144,27 +145,29 @@ export default function ParamCostCenters() {
           data-testid="import-cc-input"
         />
       </div>
-      <table className="min-w-full bg-white rounded-xl shadow-md text-xs">
-        <thead>
-          <tr>
-            <th>Nom</th>
-            <th>Actif</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filtered.map(c => (
-            <tr key={c.id}>
-              <td>{c.nom}</td>
-              <td>{c.actif ? "✅" : "❌"}</td>
-              <td>
-                <Button size="sm" variant="outline" onClick={() => handleEdit(c)}>Éditer</Button>
-                <Button size="sm" variant="ghost" onClick={() => handleDelete(c.id)}>Supprimer</Button>
-              </td>
+      <TableContainer className="mt-2">
+        <table className="min-w-full text-xs">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Actif</th>
+              <th>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {filtered.map(c => (
+              <tr key={c.id}>
+                <td>{c.nom}</td>
+                <td>{c.actif ? "✅" : "❌"}</td>
+                <td>
+                  <Button size="sm" variant="outline" onClick={() => handleEdit(c)}>Éditer</Button>
+                  <Button size="sm" variant="ghost" onClick={() => handleDelete(c.id)}>Supprimer</Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </TableContainer>
     </div>
   );
 }

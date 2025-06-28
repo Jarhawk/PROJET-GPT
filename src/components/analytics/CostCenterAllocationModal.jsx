@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Dialog, DialogContent, DialogOverlay } from "@radix-ui/react-dialog";
+import ModalGlass from "@/components/ui/ModalGlass";
 import { Button } from "@/components/ui/button";
 import { useCostCenters } from "@/hooks/useCostCenters";
 import { useMouvementCostCenters } from "@/hooks/useMouvementCostCenters";
@@ -75,13 +75,11 @@ export default function CostCenterAllocationModal({ mouvementId, productId, open
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogOverlay className="fixed inset-0 bg-black/40" />
-      <DialogContent className="glass-liquid rounded-xl p-6 max-w-lg">
+    <ModalGlass open={open} onClose={() => onOpenChange(false)}>
         <h3 className="font-bold mb-4 text-lg">Ventilation cost centers</h3>
         <form onSubmit={handleSubmit} className="space-y-2">
           {suggestions.length > 0 && (
-            <div className="text-xs mb-2 p-2 bg-gray-50 rounded">
+            <div className="text-xs mb-2 p-2 bg-glass border border-borderGlass backdrop-blur rounded">
               Suggestions:
               <ul className="list-disc list-inside">
                 {suggestions.map(s => (
@@ -127,7 +125,6 @@ export default function CostCenterAllocationModal({ mouvementId, productId, open
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Annuler</Button>
           </div>
         </form>
-      </DialogContent>
-    </Dialog>
+    </ModalGlass>
   );
 }

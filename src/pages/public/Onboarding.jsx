@@ -2,6 +2,13 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion as Motion } from "framer-motion";
 import { useOnboarding } from "@/hooks/useOnboarding";
+import GlassCard from "@/components/ui/GlassCard";
+import {
+  LiquidBackground,
+  WavesBackground,
+  MouseLight,
+  TouchLight,
+} from "@/components/LiquidBackground";
 
 const steps = [
   "Choisissez votre type d'établissement",
@@ -32,8 +39,12 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-gradient-to-br from-[#0f1c2e] via-[#232a34] to-[#bfa14d] text-white">
-      <div className="max-w-lg w-full text-center space-y-8">
+    <div className="relative min-h-screen flex items-center justify-center text-white overflow-hidden">
+      <LiquidBackground showParticles />
+      <WavesBackground className="opacity-40" />
+      <MouseLight />
+      <TouchLight />
+      <GlassCard className="w-full max-w-lg text-center space-y-8 relative z-10">
         <Motion.div
           key={step}
           initial={{ opacity: 0, y: 20 }}
@@ -51,19 +62,19 @@ export default function Onboarding() {
             {step < steps.length - 1 ? 'Suivant' : 'Terminer'}
           </button>
           <button
-            className="px-5 py-2 rounded bg-white/20 hover:bg-white/30 transition"
+            className="px-5 py-2 rounded bg-glass border border-borderGlass backdrop-blur hover:bg-white/20 transition"
             onClick={handleSkip}
           >
             Passer
           </button>
         </div>
-        <div className="h-2 bg-white/30 rounded-full overflow-hidden">
+        <div className="h-2 bg-white/20 rounded-full overflow-hidden">
           <div
             className="h-full bg-mamastockGold"
             style={{ width: `${((step + 1) / steps.length) * 100}%` }}
           />
         </div>
-      </div>
+      </GlassCard>
     </div>
   );
 }

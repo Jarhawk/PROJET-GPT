@@ -69,17 +69,28 @@ a:hover {
   @apply bg-blue-600 text-white;
 }
 .badge-user {
-  @apply bg-gray-400 text-white;
+  @apply bg-white/20 text-white backdrop-blur;
 }
 
 /* Input custom */
 .input {
   @apply px-3 py-2 rounded-lg border border-white/20 bg-white/10 text-white placeholder-white/70 focus:outline-none;
 }
+.textarea {
+  @apply px-3 py-2 rounded-lg border border-white/20 bg-white/10 text-white placeholder-white/70 focus:outline-none;
+}
+.select {
+  @apply px-3 py-2 rounded-lg border border-white/20 bg-white/10 text-white backdrop-blur focus:outline-none;
+}
 
 /* Dark mode auto */
 html.dark body {
   @apply bg-background text-text;
+}
+@media (prefers-color-scheme: dark) {
+  html:not(.dark) body {
+    @apply bg-background text-text;
+  }
 }
 /* Animations LiquidGlass & glass panel */
 .animate-liquid { animation: glassMove 12s ease-in-out infinite alternate; }
@@ -139,3 +150,44 @@ html.dark body {
   border-color: var(--primary-color);
 }
 
+
+/* Liquid bubbles */
+.bubble {
+  position: absolute;
+  bottom: -2rem;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+  animation-name: bubble-rise;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+@keyframes bubble-rise {
+  from { transform: translateY(0) scale(1); opacity: 0; }
+  50% { opacity: 0.6; }
+  to { transform: translateY(-110vh) scale(1.2); opacity: 0; }
+}
+
+/* Waves */
+.wave {
+  position: absolute;
+  left: 0;
+  width: 200%;
+  height: 100%;
+  animation: wave-slide 12s linear infinite;
+}
+.wave:nth-child(2) {
+  top: -10%;
+  opacity: 0.6;
+  animation-duration: 18s;
+}
+@keyframes wave-slide {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* Touch ripple animation */
+@keyframes touch-fade {
+  from { transform: scale(0); opacity: 0.6; }
+  to { transform: scale(1.2); opacity: 0; }
+}
+.animate-touch-fade { animation: touch-fade 0.6s ease-out forwards; }

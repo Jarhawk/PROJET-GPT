@@ -5,6 +5,7 @@ import { useProducts } from "@/hooks/useProducts";
 import { useAuth } from "@/context/AuthContext";
 import { Toaster, toast } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import GlassCard from "@/components/ui/GlassCard";
 
 function RequisitionFormPage() {
   const navigate = useNavigate();
@@ -62,10 +63,11 @@ function RequisitionFormPage() {
   }
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
+    <div className="p-6 space-y-6">
       <Toaster position="top-right" />
       <h1 className="text-3xl font-bold text-mamastock-gold mb-6">Nouvelle réquisition</h1>
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow space-y-4">
+      <GlassCard className="p-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
 
         <div>
           <label className="block text-sm font-medium mb-1">Type</label>
@@ -149,7 +151,8 @@ function RequisitionFormPage() {
             Enregistrer
           </button>
         </div>
-      </form>
+        </form>
+      </GlassCard>
     </div>
   );
 }

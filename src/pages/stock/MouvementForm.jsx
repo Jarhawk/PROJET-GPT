@@ -29,8 +29,11 @@ export default function MouvementForm({ onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/20 flex items-center justify-center">
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow w-80">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-glass border border-borderGlass backdrop-blur p-6 rounded-2xl shadow-lg w-80"
+      >
         <h2 className="font-bold mb-2">Nouveau mouvement</h2>
         <input
           className="input mb-2 w-full"

@@ -25,8 +25,8 @@ export default function MenuDuJourDetail({ menu, onClose }) {
   ];
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-lg p-8 min-w-[400px] max-w-[95vw] flex flex-col gap-2 relative">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-glass border border-borderGlass backdrop-blur rounded-2xl shadow-lg p-8 min-w-[400px] max-w-[95vw] flex flex-col gap-2 relative">
         <Button variant="outline" className="absolute top-2 right-2" onClick={onClose}>Fermer</Button>
         <h2 className="font-bold text-xl mb-4">{menu.nom}</h2>
         <div><b>Date :</b> {menu.date}</div>

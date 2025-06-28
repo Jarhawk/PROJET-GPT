@@ -4,6 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Toaster, toast } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import TableContainer from "@/components/ui/TableContainer";
 
 export default function Validations() {
   const { isAdmin, mama_id } = useAuth();
@@ -75,7 +76,8 @@ export default function Validations() {
           {saving ? "Envoi…" : "Demander"}
         </Button>
       </form>
-      <table className="min-w-full bg-white rounded-xl shadow-md">
+      <TableContainer className="mt-4">
+        <table className="min-w-full text-sm">
         <thead>
           <tr>
             <th className="px-2 py-1">Module</th>
@@ -103,7 +105,8 @@ export default function Validations() {
             </tr>
           ))}
         </tbody>
-      </table>
+        </table>
+      </TableContainer>
     </div>
   );
 }

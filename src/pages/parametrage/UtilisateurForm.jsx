@@ -49,7 +49,10 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md max-w-xl mx-auto">
+    <form
+      onSubmit={handleSubmit}
+      className="bg-glass border border-borderGlass backdrop-blur p-6 rounded-2xl shadow-lg max-w-xl mx-auto"
+    >
       <h2 className="text-lg font-bold mb-4">
         {utilisateur ? "Modifier l’utilisateur" : "Ajouter un utilisateur"}
       </h2>

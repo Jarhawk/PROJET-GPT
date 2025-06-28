@@ -31,7 +31,7 @@ export default function SmartDialog({ open, onClose, title, children }) {
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ type: "spring", stiffness: 260, damping: 20 }}
               >
-                <div className="relative bg-white dark:bg-[#202638] rounded-xl shadow-xl p-6 w-full max-w-lg">
+                <div className="relative bg-glass border border-borderGlass backdrop-blur rounded-2xl shadow-xl p-6 w-full max-w-lg">
                   {title && (
                     <DialogTitle className="text-lg font-semibold mb-4">
                       {title}

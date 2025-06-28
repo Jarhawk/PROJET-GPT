@@ -2,11 +2,21 @@ import { Link } from "react-router-dom";
 import { motion as Motion } from "framer-motion";
 import GlassCard from "@/components/ui/GlassCard";
 import Footer from "@/components/Footer";
+import {
+  LiquidBackground,
+  WavesBackground,
+  MouseLight,
+  TouchLight,
+} from "@/components/LiquidBackground";
 
 export default function Rgpd() {
   return (
-    <div className="flex flex-col min-h-screen bg-[#1E3A8A] text-white">
-      <div className="flex-grow flex flex-col items-center px-4 py-16">
+    <div className="relative flex flex-col min-h-screen text-white overflow-hidden">
+      <LiquidBackground showParticles />
+      <WavesBackground className="opacity-40" />
+      <MouseLight />
+      <TouchLight />
+      <div className="flex-grow flex flex-col items-center px-4 py-16 relative z-10">
         <Motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -73,7 +83,7 @@ export default function Rgpd() {
               <Motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Link
                   to="/"
-                  className="inline-block px-6 py-2 rounded-xl bg-white/20 hover:bg-white/30 transition backdrop-blur"
+                  className="inline-block px-6 py-2 rounded-xl bg-glass border border-borderGlass hover:bg-white/20 transition backdrop-blur"
                 >
                   Retour à l’accueil
                 </Link>

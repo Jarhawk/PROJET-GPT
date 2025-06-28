@@ -372,7 +372,7 @@ export default function CostBoissons() {
                             <br />
                             ID : {b.id}
                             <br />
-                            Dernière mise à jour : {b.updated_at || "-"}
+                            Dernière mise à jour : {b.created_at?.slice(0, 10) || "-"}
                           </p>
                         </DialogContent>
                       </Dialog>

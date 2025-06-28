@@ -27,7 +27,7 @@ export function useFactures() {
       .order("date", { ascending: false })
       .range((page - 1) * pageSize, page * pageSize - 1);
 
-    if (search) query = query.ilike("numero", `%${search}%`);
+    if (search) query = query.ilike("reference", `%${search}%`);
     if (fournisseur) query = query.eq("fournisseur_id", fournisseur);
     if (statut) query = query.eq("statut", statut);
     if (mois) query = query.ilike("date", `${mois}%`);
@@ -128,12 +128,16 @@ export function useFactures() {
     if (!error && ligne.product_id && ligne.fournisseur_id) {
       await supabase
         .from("supplier_products")
-        .upsert({
-          product_id: ligne.product_id,
-          fournisseur_id: ligne.fournisseur_id,
-          price: ligne.prix_unitaire,
-          mama_id,
-        }, { onConflict: ["product_id", "fournisseur_id"] });
+        .upsert(
+          {
+            product_id: ligne.product_id,
+            fournisseur_id: ligne.fournisseur_id,
+            prix_achat: ligne.prix_unitaire,
+            date_livraison: ligne.date || new Date().toISOString().slice(0, 10),
+            mama_id,
+          },
+          { onConflict: ["product_id", "fournisseur_id", "date_livraison"] }
+        );
     }
     setLoading(false);
     if (error) {

@@ -41,7 +41,7 @@ export function useFournisseurAPI() {
       for (const ft of factures) {
         await supabase
           .from("factures")
-          .upsert({ ...ft, fournisseur_id, mama_id }, { onConflict: "numero" });
+          .upsert({ ...ft, fournisseur_id, mama_id }, { onConflict: "reference" });
       }
       toast.success("Factures importées");
       return factures;
@@ -67,22 +67,30 @@ export function useFournisseurAPI() {
       for (const p of produits) {
         const { data: existing } = await supabase
           .from("supplier_products")
-          .select("price")
+          .select("prix_achat")
           .eq("product_id", p.product_id)
           .eq("fournisseur_id", fournisseur_id)
           .eq("mama_id", mama_id)
+          .order("date_livraison", { ascending: false })
+          .limit(1)
           .maybeSingle();
-        await supabase.from("supplier_products").upsert({
-          product_id: p.product_id,
-          fournisseur_id,
-          price: p.price,
-          mama_id,
-        });
-        if (existing && existing.price !== p.price) {
+        await supabase
+          .from("supplier_products")
+          .upsert(
+            {
+              product_id: p.product_id,
+              fournisseur_id,
+              prix_achat: p.price,
+              date_livraison: new Date().toISOString().slice(0, 10),
+              mama_id,
+            },
+            { onConflict: ["product_id", "fournisseur_id", "date_livraison"] }
+          );
+        if (existing && existing.prix_achat !== p.price) {
           await supabase.from("catalogue_updates").insert({
             fournisseur_id,
             produit_id: p.product_id,
-            ancienne_valeur: existing.price,
+            ancienne_valeur: existing.prix_achat,
             nouvelle_valeur: p.price,
             modification: p,
             mama_id,

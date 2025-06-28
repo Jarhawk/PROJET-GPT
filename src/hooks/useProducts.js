@@ -143,7 +143,7 @@ export function useProducts() {
       )
       .eq("product_id", productId)
       .eq("mama_id", mama_id)
-      .order("updated_at", { ascending: false });
+      .order("date_livraison", { ascending: false });
     setLoading(false);
     if (error) {
       setError(error);

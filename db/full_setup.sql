@@ -2099,6 +2099,25 @@ language sql as $$
 $$;
 grant execute on function fn_calc_budgets to authenticated;
 
+-- Configuration API fournisseurs
+create table if not exists fournisseurs_api_config (
+  fournisseur_id uuid references fournisseurs(id) on delete cascade,
+  mama_id uuid not null references mamas(id),
+  url text,
+  type_api text default 'rest',
+  token text,
+  format_facture text default 'json',
+  actif boolean default true,
+  created_at timestamptz default now(),
+  primary key(fournisseur_id, mama_id)
+);
+alter table fournisseurs_api_config enable row level security;
+alter table fournisseurs_api_config force row level security;
+drop policy if exists fournisseurs_api_config_all on fournisseurs_api_config;
+create policy fournisseurs_api_config_all on fournisseurs_api_config
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+
 -- Manual signup now inserts into utilisateurs so no trigger on auth.users is required
 -- Function kept for reference but trigger creation removed for compatibility
 create or replace function handle_new_user()

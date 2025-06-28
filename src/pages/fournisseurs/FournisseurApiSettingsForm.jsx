@@ -43,7 +43,10 @@ export default function FournisseurApiSettingsForm({ fournisseur_id }) {
       setSaving(true);
       const { data, error } = await supabase
         .from("fournisseurs_api_config")
-        .upsert([{ ...config, fournisseur_id, mama_id }], { onConflict: "fournisseur_id" })
+        .upsert(
+          [{ ...config, fournisseur_id, mama_id }],
+          { onConflict: ["fournisseur_id", "mama_id"] }
+        )
         .select()
         .single();
       if (error) throw error;

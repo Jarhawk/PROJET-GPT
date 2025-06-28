@@ -55,7 +55,7 @@ export default function ProduitDetail({ produitId, open, onClose }) {
                 <tr><td colSpan={4} className="text-center py-4">Aucune donnée</td></tr>
               ) : historique.map((h, i) => (
                 <tr key={i}>
-                  <td>{h.updated_at?.slice(0, 10) || "-"}</td>
+                  <td>{h.created_at?.slice(0, 10) || "-"}</td>
                   <td>{h.supplier?.nom || "-"}</td>
                   <td>{h.prix_achat ?? "-"}</td>
                   <td>{h.derniere_livraison?.slice(0, 10) || "-"}</td>

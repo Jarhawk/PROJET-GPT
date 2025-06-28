@@ -85,3 +85,7 @@
 - Ajout des fonctions `editInventaire`, `clotureInventaire`, `fetchMouvementsForPeriod` et `fetchLastClosedInventaire` dans `useInventaires.js`.
 - Formulaire d'inventaire et page mobile mis a jour pour utiliser ces fonctions.
 - `npm install`, `npm run lint` et `npm test` passent.
+
+## Etape 21 - Verification audit inventaire_lignes
+- Installation des packages manquants puis execution de `npm run lint` et `npm test` pour valider le module.
+- Controle manuel de la FK `inventaire_lignes.inventaire_id` et des index dont `inventaire_lignes` depend.

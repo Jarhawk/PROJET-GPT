@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
+import { useInventaires } from "@/hooks/useInventaires";
 
 export default function MobileInventaire() {
   const { mama_id, loading: authLoading } = useAuth();
+  const { createInventaire } = useInventaires();
   const [produits, setProduits] = useState([]);
   const [stockFinal, setStockFinal] = useState({});
 
@@ -22,16 +24,17 @@ export default function MobileInventaire() {
 
   const handleSave = async () => {
     if (authLoading || !mama_id) return;
-    for (const produitId in stockFinal) {
-      await supabase.from("inventaire_lignes").insert([
-        {
-          product_id: produitId,
-          stock_final: parseFloat(stockFinal[produitId]),
-          periode: "2025-05",
-          mama_id,
-        },
-      ]);
-    }
+    const lignes = Object.entries(stockFinal).map(([product_id, q]) => ({
+      product_id,
+      quantite: parseFloat(q),
+    }));
+    if (!lignes.length) return;
+    await createInventaire({
+      date: new Date().toISOString().slice(0, 10),
+      zone: "mobile",
+      lignes,
+    });
+    setStockFinal({});
   };
 
   return (

@@ -7,40 +7,21 @@ import { supabase } from "@/lib/supabase";
 import { loginUser } from "@/lib/loginUser";
 import toast from "react-hot-toast";
 
-function parseRights(input) {
-  if (!input) return {};
-  if (Array.isArray(input)) {
-    return input.reduce((acc, key) => {
-      if (typeof key === 'string') acc[key] = true;
-      return acc;
-    }, {});
-  }
-  if (typeof input === 'object') return input;
-  return {};
-}
-
 // Contexte global Auth
 // Exported separately for hooks like src/hooks/useAuth.js
 // eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [session, setSession] = useState(null); // Session Supabase
-  const [userData, setUserData] = useState({
-    role: null,
-    mama_id: null,
-    access_rights: {},
-    auth_id: null,
-    actif: true,
-    user_id: null,
-  });
   const [loading, setLoading] = useState(true); // Chargement initial/refresh
+  const [session, setSession] = useState(null); // Session Supabase
+  const [userData, setUserData] = useState(null);
   const [pending, setPending] = useState(false); // ligne utilisateurs manquante
   const navigate = useNavigate();
 
   async function refreshUser(sessionParam) {
     const current = sessionParam || session;
-    if (current) await fetchUserData(current);
+    if (current?.user) await fetchUserData(current.user.id);
   }
 
   // Login utilisateur avec gestion 2FA
@@ -69,7 +50,7 @@ export function AuthProvider({ children }) {
     }
 
     setSession(newSession);
-    await fetchUserData(newSession);
+    if (newSession?.user) await fetchUserData(newSession.user.id);
     return { data: newSession };
   };
 
@@ -92,7 +73,7 @@ export function AuthProvider({ children }) {
 
       if (data.session) {
         setSession(data.session);
-        await fetchUserData(data.session);
+        if (data.session.user) await fetchUserData(data.session.user.id);
       }
 
       return { data };
@@ -102,112 +83,59 @@ export function AuthProvider({ children }) {
     }
   };
 
-  async function fetchUserData(session, retry = 0) {
-    if (!session?.user) {
-      setUserData({
-        role: null,
-        mama_id: null,
-        access_rights: {},
-        auth_id: null,
-        actif: true,
-        user_id: null,
-      });
-      setPending(false);
-      return;
-    }
-
-    const meta = session.user.user_metadata || {};
-    let data, error, status;
+  const fetchUserData = async (userId) => {
     try {
-      const res = await supabase
+      const { data, error } = await supabase
         .from("utilisateurs")
         .select("role, mama_id, access_rights, actif")
-        .eq("auth_id", session.user.id)
-        .maybeSingle();
-      data = res.data;
-      error = res.error;
-      status = res.status;
-    } catch (err) {
-      error = err;
-    }
+        .eq("auth_id", userId)
+        .single();
 
-    if (error && status !== 406) {
-      if (status === 400) navigate("/unauthorized");
-      if (retry < 3) {
-        toast.error(error.message);
-        setTimeout(() => fetchUserData(session, retry + 1), 3000);
-      } else {
-        toast.error("Impossible de charger les infos utilisateur");
+      if (error || !data) throw error || new Error("User not found");
+
+      if (data.actif === false) {
+        await supabase.auth.signOut();
+        setSession(null);
+        setUserData({ ...data, auth_id: userId, user_id: userId });
+        window.location.href = "/blocked";
+        return;
       }
-      return;
-    }
 
-    if (!data) {
-      setPending(true);
-      setUserData({
-        role: meta.role ?? null,
-        mama_id: meta.mama_id ?? null,
-        access_rights: parseRights(meta.access_rights),
-        auth_id: session.user.id,
-        actif: true,
-        user_id: session.user.id,
-      });
-      return;
-    }
-
-    setPending(false);
-
-    if (data && data.actif === false) {
-      await supabase.auth.signOut();
+      setUserData({ ...data, auth_id: userId, user_id: userId });
+    } catch (error) {
+      console.error("Erreur récupération utilisateur:", error);
+      setUserData(null);
       setSession(null);
-      setUserData({
-        role: null,
-        mama_id: null,
-        access_rights: {},
-        auth_id: session.user.id,
-        actif: false,
-        user_id: session.user.id,
-      });
-      window.location.href = "/blocked";
-      return;
+      try {
+        await supabase.auth.signOut();
+      } catch (e) {
+        console.error("Sign out error:", e);
+      }
     }
-
-    setUserData({
-      role: data?.role ?? meta.role ?? null,
-      mama_id: data?.mama_id ?? meta.mama_id ?? null,
-      access_rights: parseRights(data?.access_rights ?? meta.access_rights),
-      auth_id: session.user.id,
-      actif: data?.actif ?? true,
-      user_id: session.user.id,
-    });
-  }
+  };
 
   // Initialisation / listener session Supabase
   useEffect(() => {
     setLoading(true);
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      if (session) await fetchUserData(session);
-      setLoading(false);
+      if (session?.user) {
+        fetchUserData(session.user.id).finally(() => setLoading(false));
+      } else {
+        setLoading(false);
+      }
     });
 
-    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      if (session) {
+      if (session?.user) {
         setLoading(true);
-        await fetchUserData(session);
-        setLoading(false);
+        fetchUserData(session.user.id).finally(() => setLoading(false));
       } else {
-        setUserData({
-          role: null,
-          mama_id: null,
-          access_rights: {},
-          auth_id: null,
-          actif: true,
-          user_id: null,
-        });
+        setUserData(null);
         setPending(false);
+        setLoading(false);
       }
     });
 
@@ -227,21 +155,14 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     await supabase.auth.signOut();
     setSession(null);
-    setUserData({
-      role: null,
-      mama_id: null,
-      access_rights: {},
-      auth_id: null,
-      actif: true,
-      user_id: null,
-    });
+    setUserData(null);
     setPending(false);
     navigate("/login");
   };
 
   // Exporte le contexte
   const value = {
-    ...userData,
+    ...(userData || {}),
     session,
     user: session?.user || null,
     loading,
@@ -251,8 +172,8 @@ export function AuthProvider({ children }) {
     logout,
     refreshUser,
     isAuthenticated: !!session,
-    isAdmin: userData.role === "admin" || userData.role === "superadmin",
-    isSuperadmin: userData.role === "superadmin",
+    isAdmin: userData?.role === "admin" || userData?.role === "superadmin",
+    isSuperadmin: userData?.role === "superadmin",
   };
 
   useEffect(() => {

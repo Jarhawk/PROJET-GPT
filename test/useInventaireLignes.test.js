@@ -10,6 +10,7 @@ const query = {
   update: vi.fn(() => query),
   delete: vi.fn(() => query),
   single: vi.fn(() => query),
+  maybeSingle: vi.fn(() => Promise.resolve({ data: { id: 'inv1' }, error: null })),
   then: fn => Promise.resolve(fn({ data: [], count: 0, error: null })),
 };
 const fromMock = vi.fn(() => query);
@@ -48,6 +49,7 @@ test('createLigne inserts with mama_id', async () => {
   await act(async () => {
     await result.current.createLigne({ inventaire_id: 'inv1', product_id: 'p1', quantite: 1 });
   });
+  expect(fromMock).toHaveBeenCalledWith('inventaires');
   expect(query.insert).toHaveBeenCalledWith([{ inventaire_id: 'inv1', product_id: 'p1', quantite: 1, mama_id: 'm1' }]);
 });
 
@@ -68,5 +70,16 @@ test('deleteLigne deletes with id and mama_id', async () => {
   });
   expect(query.delete).toHaveBeenCalled();
   expect(query.eq).toHaveBeenCalledWith('id', 'l1');
+  expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1');
+});
+
+test('getLigne selects by id', async () => {
+  const { result } = renderHook(() => useInventaireLignes());
+  await act(async () => {
+    await result.current.getLigne('l2');
+  });
+  expect(fromMock).toHaveBeenCalledWith('inventaire_lignes');
+  expect(query.select).toHaveBeenCalledWith('*');
+  expect(query.eq).toHaveBeenCalledWith('id', 'l2');
   expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1');
 });

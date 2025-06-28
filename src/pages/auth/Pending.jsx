@@ -1,10 +1,17 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import GlassCard from "@/components/ui/GlassCard";
 import PageWrapper from "@/components/ui/PageWrapper";
 import PrimaryButton from "@/components/ui/PrimaryButton";
+import useAuth from "@/hooks/useAuth";
 
 export default function Pending() {
   const navigate = useNavigate();
+  const { userData } = useAuth();
+
+  useEffect(() => {
+    if (userData) navigate("/dashboard");
+  }, [userData, navigate]);
   return (
     <PageWrapper>
       <GlassCard className="flex flex-col items-center text-center gap-4">

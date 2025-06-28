@@ -1,6 +1,6 @@
 // src/context/AuthContext.jsx
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authenticator } from "otplib";
 import { supabase } from "@/lib/supabase";
@@ -18,6 +18,7 @@ export function AuthProvider({ children }) {
   const [userData, setUserData] = useState(null);
   const [pending, setPending] = useState(false); // ligne utilisateurs manquante
   const navigate = useNavigate();
+  const retryRef = useRef(null);
 
   async function refreshUser(sessionParam) {
     const current = sessionParam || session;
@@ -40,7 +41,7 @@ export function AuthProvider({ children }) {
       .from("two_factor_auth")
       .select("secret, enabled")
       .eq("id", user.id)
-      .single();
+      .maybeSingle();
 
     if (twoFA?.enabled) {
       if (!totp || !authenticator.check(totp, twoFA.secret)) {
@@ -122,6 +123,33 @@ export function AuthProvider({ children }) {
       }
     }
   };
+
+  // Retry fetching user data if account creation is pending
+  useEffect(() => {
+    if (!pending) {
+      if (retryRef.current) {
+        clearInterval(retryRef.current);
+        retryRef.current = null;
+      }
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      if (!retryRef.current) {
+        retryRef.current = setInterval(() => {
+          if (session?.user) fetchUserData(session.user.id);
+        }, 3000);
+      }
+    }, 5000);
+
+    return () => {
+      clearTimeout(timeout);
+      if (retryRef.current) {
+        clearInterval(retryRef.current);
+        retryRef.current = null;
+      }
+    };
+  }, [pending, session]);
 
   // Initialisation / listener session Supabase
   useEffect(() => {

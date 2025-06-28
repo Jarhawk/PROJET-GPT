@@ -2111,6 +2111,8 @@ create table if not exists fournisseurs_api_config (
   created_at timestamptz default now(),
   primary key(fournisseur_id, mama_id)
 );
+create index if not exists idx_fournisseurs_api_config_fourn on fournisseurs_api_config(fournisseur_id);
+create index if not exists idx_fournisseurs_api_config_mama on fournisseurs_api_config(mama_id);
 alter table fournisseurs_api_config enable row level security;
 alter table fournisseurs_api_config force row level security;
 drop policy if exists fournisseurs_api_config_all on fournisseurs_api_config;

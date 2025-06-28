@@ -1046,6 +1046,8 @@ create or replace view v_products_last_price as
 select
   p.id,
   p.nom,
+  coalesce(p.famille, f.nom) as famille,
+  coalesce(p.unite, u.nom) as unite,
   p.famille_id,
   p.unite_id,
   p.pmp,
@@ -1063,6 +1065,8 @@ select
   sp.date_livraison as dernier_prix_date,
   sp.fournisseur_id as dernier_fournisseur_id
 from products p
+left join familles f on f.id = p.famille_id and f.mama_id = p.mama_id
+left join unites u on u.id = p.unite_id and u.mama_id = p.mama_id
 left join lateral (
   select prix_achat, date_livraison, fournisseur_id
   from supplier_products sp
@@ -1147,6 +1151,17 @@ BEGIN
     WHERE table_name='products' AND column_name='unite'
   ) THEN
     ALTER TABLE products ADD COLUMN unite text;
+  END IF;
+END $$;
+
+-- Ensure unique constraint on (mama_id, nom, unite)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'products_mama_id_nom_unite_key'
+  ) THEN
+    ALTER TABLE products
+      ADD CONSTRAINT products_mama_id_nom_unite_key UNIQUE (mama_id, nom, unite);
   END IF;
 END $$;
 

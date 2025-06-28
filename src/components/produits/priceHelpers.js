@@ -2,7 +2,7 @@ export function buildPriceData(historique = []) {
   const suppliers = {};
   const dates = new Set();
   historique.forEach(h => {
-    const date = h.updated_at?.slice(0, 10);
+    const date = h.derniere_livraison?.slice(0, 10) || h.created_at?.slice(0, 10);
     if (!date) return;
     const key = h.supplier?.nom || '';
     if (!suppliers[key]) suppliers[key] = {};

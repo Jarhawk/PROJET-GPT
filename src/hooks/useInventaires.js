@@ -107,7 +107,7 @@ export function useInventaires() {
     setError(null);
     const { error } = await supabase
       .from("inventaires")
-      .update({ actif: false })
+      .delete()
       .eq("id", id)
       .eq("mama_id", mama_id);
     setLoading(false);

@@ -143,7 +143,8 @@ export function useFournisseurAPI() {
       await supabase
         .from("commandes")
         .update({ statut: body.statut || "envoyee" })
-        .eq("id", commande_id);
+        .eq("id", commande_id)
+        .eq("mama_id", mama_id);
       toast.success("Commande envoyée");
       return { data: body };
     } catch (err) {

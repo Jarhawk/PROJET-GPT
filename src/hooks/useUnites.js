@@ -95,6 +95,11 @@ export function useUnites() {
     await fetchUnites();
   }
 
+  // Convenience wrapper for single deletion
+  async function deleteUnite(id) {
+    return batchDeleteUnites([id]);
+  }
+
   // 5. Export Excel
   function exportUnitesToExcel() {
     const datas = (unites || []).map(u => ({
@@ -132,6 +137,7 @@ export function useUnites() {
     fetchUnites,
     addUnite,
     updateUnite,
+    deleteUnite,
     batchDeleteUnites,
     exportUnitesToExcel,
     importUnitesFromExcel,

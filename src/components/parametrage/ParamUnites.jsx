@@ -7,7 +7,7 @@ import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 
 export default function ParamUnites() {
-  const { unites, fetchUnites, addUnite, editUnite, deleteUnite } = useUnites();
+  const { unites, fetchUnites, addUnite, updateUnite, deleteUnite } = useUnites();
   const { mama_id } = useAuth();
   const [form, setForm] = useState({ nom: "", id: null });
   const [editMode, setEditMode] = useState(false);
@@ -38,10 +38,10 @@ export default function ParamUnites() {
     setLoading(true);
     try {
       if (editMode) {
-        await editUnite(form.id, { nom: form.nom });
+        await updateUnite(form.id, form.nom);
         toast.success("Unité modifiée !");
       } else {
-        await addUnite({ nom: form.nom });
+        await addUnite(form.nom);
         toast.success("Unité ajoutée !");
       }
       setEditMode(false);

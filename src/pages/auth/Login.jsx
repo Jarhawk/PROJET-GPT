@@ -28,11 +28,7 @@ export default function Login() {
   // Redirection après authentification une fois les données chargées
   useEffect(() => {
     if (!session || authLoading) return;
-    if (!userData) {
-      toast("Compte en cours de création");
-      navigate("/pending");
-      return;
-    }
+    if (!userData) return;
     if (userData.actif === false) {
       navigate("/blocked");
       return;

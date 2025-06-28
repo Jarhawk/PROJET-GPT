@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authenticator } from "otplib";
 import { supabase } from "@/lib/supabase";
-import { loginUser } from "@/lib/loginUser";
+import { login as loginUser } from "@/lib/loginUser";
 import toast from "react-hot-toast";
 
 // Contexte global Auth
@@ -90,13 +90,14 @@ export function AuthProvider({ children }) {
         .from("utilisateurs")
         .select("role, mama_id, access_rights, actif")
         .eq("auth_id", userId)
-        .maybeSingle();
+        .single();
 
       if (error) throw error;
 
       if (!data) {
-        setPending(true);
+        setPending(false);
         setUserData(null);
+        navigate("/unauthorized");
         return;
       }
 
@@ -116,6 +117,10 @@ export function AuthProvider({ children }) {
       setUserData(null);
       setSession(null);
       setPending(false);
+      if (error?.code === "PGRST116" || error?.status === 406) {
+        toast.error("Utilisateur introuvable");
+        navigate("/unauthorized");
+      }
       try {
         await supabase.auth.signOut();
       } catch (e) {

@@ -41,7 +41,7 @@
 ## 2025-06-20 Step 7
 - Audited facture pages and related hooks.
 - Added `useAuth` dependency in `Factures.jsx` so invoice fetches trigger only after authentication.
-- Updated `useInvoices.js` and `useFactureProduits.js` to skip queries when `mama_id` is missing.
+- Updated `useInvoices.js` and `useInvoiceItems.js` (formerly `useFactureProduits.js`) to skip queries when `mama_id` is missing.
 - Lint and tests pass locally.
 - Next: continue auditing other modules (e.g., reporting pages).
 

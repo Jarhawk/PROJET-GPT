@@ -517,7 +517,7 @@ TwoFactorSetup.jsx : configuration de la double authentification
 - Liste : useAdvancedStats, useAlerts, useAuditLog, useAuditTrail, useCarte,
   useComparatif, useConsolidatedStats, useCostCenterMonthlyStats,
   useCostCenterStats, useCostCenterSuggestions, useCostCenters, useDashboard,
-  useDashboardStats, useDocuments, useEnrichedProducts, useFactureProduits,
+  useDashboardStats, useDocuments, useEnrichedProducts, useInvoiceItems,
   useFamilles, useFicheCoutHistory, useFiches, useFichesTechniques,
   useFournisseurNotes, useFournisseurStats, useFournisseurs,
   useFournisseursInactifs, useGlobalSearch, useGraphiquesMultiZone,

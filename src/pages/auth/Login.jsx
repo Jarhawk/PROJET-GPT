@@ -71,7 +71,7 @@ export default function Login() {
         return;
       }
 
-      if (!Array.isArray(access_rights) || access_rights.length === 0) {
+      if (!pending && Object.keys(access_rights || {}).length === 0) {
         navigate("/unauthorized");
         return;
       }

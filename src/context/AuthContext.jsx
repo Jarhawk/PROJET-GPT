@@ -7,6 +7,18 @@ import { supabase } from "@/lib/supabase";
 import { loginUser } from "@/lib/loginUser";
 import toast from "react-hot-toast";
 
+function parseRights(input) {
+  if (!input) return {};
+  if (Array.isArray(input)) {
+    return input.reduce((acc, key) => {
+      if (typeof key === 'string') acc[key] = true;
+      return acc;
+    }, {});
+  }
+  if (typeof input === 'object') return input;
+  return {};
+}
+
 // Contexte global Auth
 // Exported separately for hooks like src/hooks/useAuth.js
 // eslint-disable-next-line react-refresh/only-export-components
@@ -17,7 +29,7 @@ export function AuthProvider({ children }) {
   const [userData, setUserData] = useState({
     role: null,
     mama_id: null,
-    access_rights: null,
+    access_rights: {},
     auth_id: null,
     actif: true,
     user_id: null,
@@ -95,7 +107,7 @@ export function AuthProvider({ children }) {
       setUserData({
         role: null,
         mama_id: null,
-        access_rights: null,
+        access_rights: {},
         auth_id: null,
         actif: true,
         user_id: null,
@@ -135,7 +147,7 @@ export function AuthProvider({ children }) {
       setUserData({
         role: meta.role ?? null,
         mama_id: meta.mama_id ?? null,
-        access_rights: Array.isArray(meta.access_rights) ? meta.access_rights : null,
+        access_rights: parseRights(meta.access_rights),
         auth_id: session.user.id,
         actif: true,
         user_id: session.user.id,
@@ -151,7 +163,7 @@ export function AuthProvider({ children }) {
       setUserData({
         role: null,
         mama_id: null,
-        access_rights: null,
+        access_rights: {},
         auth_id: session.user.id,
         actif: false,
         user_id: session.user.id,
@@ -163,11 +175,7 @@ export function AuthProvider({ children }) {
     setUserData({
       role: data?.role ?? meta.role ?? null,
       mama_id: data?.mama_id ?? meta.mama_id ?? null,
-      access_rights: Array.isArray(data?.access_rights)
-        ? data.access_rights
-        : Array.isArray(meta.access_rights)
-        ? meta.access_rights
-        : [],
+      access_rights: parseRights(data?.access_rights ?? meta.access_rights),
       auth_id: session.user.id,
       actif: data?.actif ?? true,
       user_id: session.user.id,
@@ -194,7 +202,7 @@ export function AuthProvider({ children }) {
         setUserData({
           role: null,
           mama_id: null,
-          access_rights: null,
+          access_rights: {},
           auth_id: null,
           actif: true,
           user_id: null,
@@ -222,7 +230,7 @@ export function AuthProvider({ children }) {
     setUserData({
       role: null,
       mama_id: null,
-      access_rights: null,
+      access_rights: {},
       auth_id: null,
       actif: true,
       user_id: null,
@@ -246,6 +254,10 @@ export function AuthProvider({ children }) {
     isAdmin: userData.role === "admin" || userData.role === "superadmin",
     isSuperadmin: userData.role === "superadmin",
   };
+
+  useEffect(() => {
+    console.log("[AUTH DEBUG]", { session, userData });
+  }, [session, userData]);
 
   return (
     <AuthContext.Provider value={value}>

@@ -6,7 +6,7 @@ import LanguageSelector from "@/components/ui/LanguageSelector";
 
 export default function Navbar() {
   const { t } = useTranslation();
-  const { session, role } = useAuth();
+  const { session, role, mama_id } = useAuth();
   const [term, setTerm] = useState("");
   const { results, search } = useGlobalSearch();
   const [dark, setDark] = useState(false);
@@ -88,6 +88,11 @@ export default function Navbar() {
             <span className="text-xs bg-mamastock-gold text-black px-3 py-1 rounded-full capitalize shadow">
               {role || "chargement..."}
             </span>
+            {mama_id && (
+              <span className="text-xs bg-sky-600 text-white px-3 py-1 rounded-full shadow">
+                {mama_id}
+              </span>
+            )}
             <button
               onClick={handleLogout}
               className="text-sm bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded-md transition"

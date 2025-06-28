@@ -89,9 +89,17 @@ export function AuthProvider({ children }) {
         .from("utilisateurs")
         .select("role, mama_id, access_rights, actif")
         .eq("auth_id", userId)
-        .single();
+        .maybeSingle();
 
-      if (error || !data) throw error || new Error("User not found");
+      if (error) throw error;
+
+      if (!data) {
+        setPending(true);
+        setUserData(null);
+        return;
+      }
+
+      setPending(false);
 
       if (data.actif === false) {
         await supabase.auth.signOut();
@@ -106,6 +114,7 @@ export function AuthProvider({ children }) {
       console.error("Erreur récupération utilisateur:", error);
       setUserData(null);
       setSession(null);
+      setPending(false);
       try {
         await supabase.auth.signOut();
       } catch (e) {
@@ -163,9 +172,11 @@ export function AuthProvider({ children }) {
   // Exporte le contexte
   const value = {
     ...(userData || {}),
+    userData,
     session,
     user: session?.user || null,
     loading,
+    isLoading: loading,
     pending,
     login,
     signup,

@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
+import { useAuditLog } from "@/hooks/useAuditLog";
 
 export function useFactures() {
   const { mama_id } = useAuth();
+  const { log } = useAuditLog();
   const [factures, setFactures] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -81,6 +83,7 @@ export function useFactures() {
       return { error };
     }
     setFactures(f => [inserted, ...f]);
+    await log("Ajout facture", inserted);
     return { data: inserted };
   }
 
@@ -101,6 +104,7 @@ export function useFactures() {
       return { error };
     }
     setFactures(f => f.map(ft => (ft.id === id ? updated : ft)));
+    await log("Modification facture", { id, ...fields });
     return { data: updated };
   }
 
@@ -108,6 +112,23 @@ export function useFactures() {
     if (!mama_id) return { error: "no mama_id" };
     setLoading(true);
     setError(null);
+    const { count, error: countErr } = await supabase
+      .from("facture_lignes")
+      .select("id", { count: "exact", head: true })
+      .eq("facture_id", id)
+      .eq("mama_id", mama_id);
+    if (countErr) {
+      setLoading(false);
+      setError(countErr);
+      return { error: countErr };
+    }
+    if (count > 0) {
+      setLoading(false);
+      const msg = "Facture comporte des lignes";
+      setError(msg);
+      await log("Suppression facture bloquee", { id });
+      return { error: msg };
+    }
     const { error } = await supabase
       .from("factures")
       .delete()
@@ -119,6 +140,7 @@ export function useFactures() {
       return { error };
     }
     setFactures(f => f.filter(ft => ft.id !== id));
+    await log("Suppression facture", { id });
     return { success: true };
   }
 
@@ -167,6 +189,7 @@ export function useFactures() {
       setError(error);
       return { error };
     }
+    await log("Ajout ligne facture", { facture_id, product_id, quantite });
     return { data: inserted };
   }
 

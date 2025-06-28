@@ -149,7 +149,7 @@ create table if not exists factures (
 
 create table if not exists facture_lignes (
     id uuid primary key default uuid_generate_v4(),
-    facture_id uuid references factures(id) on delete cascade,
+    facture_id uuid not null references factures(id) on delete restrict,
     product_id uuid references products(id) on delete set null,
     quantite numeric not null,
     prix_unitaire numeric not null,
@@ -398,6 +398,8 @@ create index if not exists idx_supplier_products_product_date on supplier_produc
 create index if not exists idx_facture_lignes_mama on facture_lignes(mama_id);
 create index if not exists idx_facture_lignes_facture on facture_lignes(facture_id);
 create index if not exists idx_facture_lignes_product on facture_lignes(product_id);
+-- ensure explicit index for primary key access
+create unique index if not exists invoice_lines_pkey on facture_lignes(id);
 create index if not exists idx_fiche_lignes_mama on fiche_lignes(mama_id);
 create index if not exists idx_fiche_lignes_fiche on fiche_lignes(fiche_id);
 create index if not exists idx_fiche_lignes_product on fiche_lignes(product_id);

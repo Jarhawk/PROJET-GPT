@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
+import { useAuditLog } from "@/hooks/useAuditLog";
 
 // Hook managing invoice line items (facture_lignes)
 export function useInvoiceItems() {
   const { mama_id } = useAuth();
+  const { log } = useAuditLog();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -51,6 +53,7 @@ export function useInvoiceItems() {
       .select()
       .single();
     if (error) setError(error);
+    else await log("Ajout ligne facture", { invoiceId, ...item });
     return { data, error };
   }
 
@@ -65,6 +68,7 @@ export function useInvoiceItems() {
       .select()
       .single();
     if (error) setError(error);
+    else await log("Modification ligne facture", { id, ...fields });
     return { data, error };
   }
 
@@ -77,6 +81,7 @@ export function useInvoiceItems() {
       .eq("id", id)
       .eq("mama_id", mama_id);
     if (error) setError(error);
+    else await log("Suppression ligne facture", { id });
     return { error };
   }
 

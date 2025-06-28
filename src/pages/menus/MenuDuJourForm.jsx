@@ -8,7 +8,9 @@ export default function MenuDuJourForm({ menu, fiches = [], onClose }) {
   const { addMenuDuJour, editMenuDuJour } = useMenuDuJour();
   const [nom, setNom] = useState(menu?.nom || "");
   const [date, setDate] = useState(menu?.date || "");
-  const [selectedFiches, setSelectedFiches] = useState(menu?.fiches?.map(f => f.id) || []);
+  const [selectedFiches, setSelectedFiches] = useState(
+    menu?.fiches?.map(f => f.fiche_id) || []
+  );
   const [file, setFile] = useState(null);
   const [fileUrl, setFileUrl] = useState(menu?.document || "");
   const [loading, setLoading] = useState(false);

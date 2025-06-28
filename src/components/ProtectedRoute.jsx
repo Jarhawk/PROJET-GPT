@@ -18,7 +18,8 @@ export default function ProtectedRoute({ children, accessKey }) {
 
   if (pending) return <Navigate to="/pending" />;
 
-  if (!session || !isAuthenticated || !userData) return <Navigate to="/login" />;
+  if (!session || !isAuthenticated) return <Navigate to="/login" />;
+  if (!userData) return <Navigate to="/unauthorized" />;
 
   if (userData?.actif === false) return <Navigate to="/blocked" />;
 

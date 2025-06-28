@@ -8,7 +8,7 @@ import { supabase } from './supabase';
  * @param {string} password - User password
  * @returns {Promise<{user: object, access_token: string, refresh_token: string}|{errorCode: string|number, errorMessage: string}>}
  */
-export async function loginUser(email, password) {
+export async function login(email, password) {
   try {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {

@@ -10,7 +10,7 @@ const SEUIL_ECART = 0.5; // Unité
 
 export default function InventaireForm({ inventaire, onClose }) {
   const {
-    addInventaire,
+    createInventaire,
     editInventaire,
     clotureInventaire,
     fetchMouvementsForPeriod,
@@ -121,7 +121,7 @@ export default function InventaireForm({ inventaire, onClose }) {
         await editInventaire(inventaire.id, invData);
         toast.success("Inventaire modifié !");
       } else {
-        await addInventaire(invData);
+        await createInventaire(invData);
         toast.success("Inventaire ajouté !");
       }
       onClose?.();

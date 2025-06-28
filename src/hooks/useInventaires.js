@@ -42,6 +42,37 @@ export function useInventaires() {
     return data || [];
   }
 
+  async function fetchMouvementsForPeriod(start, end) {
+    if (!mama_id) return [];
+    let query = supabase
+      .from("mouvements_stock")
+      .select("*")
+      .eq("mama_id", mama_id)
+      .order("date", { ascending: true });
+    if (start) query = query.gte("date", start);
+    if (end) query = query.lte("date", end);
+    const { data, error } = await query;
+    if (error) {
+      setError(error);
+      return [];
+    }
+    return data || [];
+  }
+
+  async function fetchLastClosedInventaire(beforeDate) {
+    if (!mama_id) return null;
+    let query = supabase
+      .from("inventaires")
+      .select("*")
+      .eq("mama_id", mama_id)
+      .eq("cloture", true)
+      .order("date", { ascending: false })
+      .limit(1);
+    if (beforeDate) query = query.lt("date", beforeDate);
+    const { data } = await query.single();
+    return data || null;
+  }
+
   async function validateInventaireStock(inventaireId) {
     if (!mama_id || !inventaireId) return false;
     const inv = await getInventaireById(inventaireId);
@@ -84,6 +115,53 @@ export function useInventaires() {
     return data;
   }
 
+  async function editInventaire(id, inv) {
+    if (!mama_id || !id) return null;
+    setLoading(true);
+    setError(null);
+    const { lignes = [], ...entete } = inv;
+    const { error } = await supabase
+      .from("inventaires")
+      .update(entete)
+      .eq("id", id)
+      .eq("mama_id", mama_id);
+    if (error) {
+      setLoading(false);
+      setError(error);
+      return null;
+    }
+    // Replace existing lines
+    await supabase
+      .from("inventaire_lignes")
+      .delete()
+      .eq("inventaire_id", id)
+      .eq("mama_id", mama_id);
+    if (lignes.length) {
+      const toInsert = lignes.map(l => ({ ...l, inventaire_id: id, mama_id }));
+      const { error: errLines } = await supabase
+        .from("inventaire_lignes")
+        .insert(toInsert);
+      if (errLines) setError(errLines);
+    }
+    setLoading(false);
+    await getInventaires();
+    return true;
+  }
+
+  async function clotureInventaire(id) {
+    if (!mama_id || !id) return;
+    setLoading(true);
+    setError(null);
+    const { error } = await supabase
+      .from("inventaires")
+      .update({ cloture: true })
+      .eq("id", id)
+      .eq("mama_id", mama_id);
+    setLoading(false);
+    if (error) setError(error);
+    await getInventaires();
+  }
+
   async function getInventaireById(id) {
     if (!mama_id || !id) return null;
     setLoading(true);
@@ -122,7 +200,11 @@ export function useInventaires() {
     error,
     getInventaires,
     createInventaire,
+    editInventaire,
     getInventaireById,
+    clotureInventaire,
+    fetchMouvementsForPeriod,
+    fetchLastClosedInventaire,
     deleteInventaire,
     fetchMouvementsInventaire,
     validateInventaireStock,

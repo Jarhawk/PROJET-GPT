@@ -80,3 +80,8 @@
 - Ajout de la page `NotFound` dans le routeur.
 - La route `*` affiche maintenant `NotFound.jsx` au lieu de rediriger.
 - Nouvelle installation des dépendances et vérification des commandes lint, test et build.
+
+## Etape 20 - Audit inventaire_lignes : ✅
+- Ajout des fonctions `editInventaire`, `clotureInventaire`, `fetchMouvementsForPeriod` et `fetchLastClosedInventaire` dans `useInventaires.js`.
+- Formulaire d'inventaire et page mobile mis a jour pour utiliser ces fonctions.
+- `npm install`, `npm run lint` et `npm test` passent.

@@ -6,7 +6,7 @@ export default function Sidebar() {
   const { access_rights, role, loading } = useAuth();
   const { pathname } = useLocation();
 
-  if (loading) return null;
+  if (loading || access_rights === null) return null;
   const showAll = role === "superadmin";
   const rights = Array.isArray(access_rights) ? access_rights : [];
   const has = (key) => showAll || rights.includes(key);

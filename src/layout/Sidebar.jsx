@@ -24,7 +24,7 @@ export default function Sidebar() {
   const { access_rights, loading, user, logout, session } = useAuth();
   const { pathname } = useLocation();
 
-  if (loading || !access_rights) {
+  if (loading || access_rights === null) {
     return <aside className="w-64 p-4" />;
   }
 

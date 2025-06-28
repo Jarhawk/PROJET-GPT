@@ -2,7 +2,17 @@
 import useAuth from "@/hooks/useAuth";
 
 export default function AuthDebug() {
-  const { user_id, role, mama_id, access_rights, session } = useAuth();
+  const {
+    user_id,
+    role,
+    mama_id,
+    access_rights,
+    session,
+    loading,
+    pending,
+    isAdmin,
+    isSuperadmin,
+  } = useAuth();
 
   return (
     <div className="p-4 text-sm text-white bg-black space-y-2">
@@ -13,6 +23,10 @@ export default function AuthDebug() {
         role,
         mama_id,
         access_rights,
+        loading,
+        pending,
+        isAdmin,
+        isSuperadmin,
         claims: session?.user,
       }, null, 2)}</pre>
     </div>

@@ -1,34 +1,86 @@
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { motion as Motion } from "framer-motion";
+import GlassCard from "@/components/ui/GlassCard";
 import Footer from "@/components/Footer";
 
 export default function Rgpd() {
   return (
-    <div className="flex flex-col min-h-[100vh] bg-[#f8f8fa]">
-      <div className="flex-grow flex flex-col items-center px-4 pt-16">
-        <Card className="max-w-2xl w-full mx-auto p-8 rounded-2xl shadow-xl bg-white">
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#2e2e3a] mb-4">
-            Données &amp; Confidentialité
-          </h1>
-          <p className="text-[#2e2e3a]/80 mb-4">
-            MamaStock attache une grande importance à la protection de vos données personnelles.<br />
-            <br />
-            <b>Quels types de données&nbsp;?</b> <br />
-            Les données collectées (emails, identifiants, informations de gestion F&amp;B) servent uniquement à faire fonctionner l’application, à améliorer votre expérience, et à sécuriser l’accès.
-            <br /><br />
-            <b>Confidentialité&nbsp;:</b><br />
-            Les données ne sont ni vendues, ni partagées à des tiers extérieurs à l’application.<br />
-            Seules les personnes autorisées au sein de votre établissement y ont accès.
-            <br /><br />
-            <b>Droits&nbsp;:</b><br />
-            À tout moment, vous pouvez demander la consultation, la modification ou la suppression de vos données en contactant votre administrateur ou l’équipe MamaStock.<br />
-            Pour toute question&nbsp;: <a href="mailto:support@mamastock.com" className="underline text-[#ff5a5f]">support@mamastock.com</a>
-          </p>
-          <Button className="bg-[#ff5a5f] text-white rounded-xl px-6 py-2 mt-4 hover:bg-[#e04b50]">
-            <Link to="/">Retour à l’accueil</Link>
-          </Button>
-        </Card>
+    <div className="flex flex-col min-h-screen bg-[#1E3A8A] text-white">
+      <div className="flex-grow flex flex-col items-center px-4 py-16">
+        <Motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-3xl"
+        >
+          <GlassCard className="space-y-6 text-white">
+            <h1 className="text-3xl font-bold text-center">Données &amp; Confidentialité</h1>
+            <Motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              <p className="leading-relaxed">
+                MamaStock attache une grande importance à la protection de vos données personnelles.
+              </p>
+            </Motion.section>
+            <Motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="space-y-2"
+            >
+              <h2 className="text-xl font-semibold">Traitement des données</h2>
+              <p>
+                Les données collectées (emails, identifiants, informations de gestion F&amp;B) servent uniquement à
+                faire fonctionner l’application, à améliorer votre expérience et à sécuriser l’accès.
+              </p>
+            </Motion.section>
+            <Motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="space-y-2"
+            >
+              <h2 className="text-xl font-semibold">Confidentialité</h2>
+              <p>
+                Les données ne sont ni vendues, ni partagées à des tiers extérieurs à l’application. Seules les personnes
+                autorisées au sein de votre établissement y ont accès.
+              </p>
+            </Motion.section>
+            <Motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="space-y-2"
+            >
+              <h2 className="text-xl font-semibold">Droits des utilisateurs</h2>
+              <p>
+                À tout moment, vous pouvez demander la consultation, la modification ou la suppression de vos données en
+                contactant votre administrateur ou l’équipe MamaStock.
+              </p>
+              <p>
+                Pour toute question&nbsp;:
+                {' '}
+                <a href="mailto:support@mamastock.com" className="underline text-mamastockGold">support@mamastock.com</a>
+              </p>
+            </Motion.section>
+            <div className="text-center pt-2">
+              <Motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Link
+                  to="/"
+                  className="inline-block px-6 py-2 rounded-xl bg-white/20 hover:bg-white/30 transition backdrop-blur"
+                >
+                  Retour à l’accueil
+                </Link>
+              </Motion.div>
+            </div>
+          </GlassCard>
+        </Motion.div>
       </div>
       <Footer />
     </div>

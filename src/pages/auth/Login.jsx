@@ -7,6 +7,7 @@ import useFormErrors from "@/hooks/useFormErrors";
 import GlassCard from "@/components/ui/GlassCard";
 import PageWrapper from "@/components/ui/PageWrapper";
 import PrimaryButton from "@/components/ui/PrimaryButton";
+import { login as loginUser } from "../../lib/loginUser";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -15,12 +16,7 @@ export default function Login() {
   const { errors, setError, clearErrors } = useFormErrors();
   const navigate = useNavigate();
 
-  const {
-    session,
-    userData,
-    login,
-    loading: authLoading,
-  } = useAuth();
+  const { session, userData, loading: authLoading } = useAuth();
 
   const [totp, setTotp] = useState("");
   const [twoFA, setTwoFA] = useState(false);
@@ -51,20 +47,10 @@ export default function Login() {
 
     setLoading(true);
     try {
-      const { error, twofaRequired } = await login({
-        email: email.trim(),
-        password,
-        totp,
-      });
-
+      const { error } = await loginUser(email.trim(), password);
       if (error) {
-        if (twofaRequired) {
-          setTwoFA(true);
-          setError("totp", error);
-        } else {
-          setError("password", error);
-        }
-        toast.error(error?.message || error || "Échec de la connexion");
+        setError("password", error.message || error);
+        toast.error(error.message || "Échec de la connexion");
         return;
       }
 

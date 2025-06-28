@@ -34,7 +34,8 @@ export default function FournisseurDetail({ id }) {
             const { count } = await supabase
               .from("facture_lignes")
               .select("id", { count: "exact", head: true })
-              .eq("facture_id", f.id);
+              .eq("facture_id", f.id)
+              .eq("mama_id", mama_id);
             return { ...f, nb_produits: count || 0 };
           })
         );

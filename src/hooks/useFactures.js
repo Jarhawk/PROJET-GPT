@@ -30,7 +30,13 @@ export function useFactures() {
     if (search) query = query.ilike("reference", `%${search}%`);
     if (fournisseur) query = query.eq("fournisseur_id", fournisseur);
     if (statut) query = query.eq("statut", statut);
-    if (mois) query = query.ilike("date", `${mois}%`);
+    if (mois) {
+      const start = `${mois}-01`;
+      const end = new Date(start);
+      end.setMonth(end.getMonth() + 1);
+      const endStr = end.toISOString().slice(0, 10);
+      query = query.gte("date", start).lt("date", endStr);
+    }
 
     const { data, error, count } = await query;
     if (!error) {
@@ -120,20 +126,37 @@ export function useFactures() {
     if (!mama_id) return { error: "no mama_id" };
     setLoading(true);
     setError(null);
+    const {
+      fournisseur_id,
+      product_id,
+      quantite,
+      prix_unitaire,
+      tva,
+      date,
+    } = ligne || {};
     const { data: inserted, error } = await supabase
       .from("facture_lignes")
-      .insert([{ ...ligne, facture_id, mama_id }])
+      .insert([
+        {
+          product_id,
+          quantite,
+          prix_unitaire,
+          tva,
+          facture_id,
+          mama_id,
+        },
+      ])
       .select()
       .single();
-    if (!error && ligne.product_id && ligne.fournisseur_id) {
+    if (!error && product_id && fournisseur_id) {
       await supabase
         .from("supplier_products")
         .upsert(
           {
-            product_id: ligne.product_id,
-            fournisseur_id: ligne.fournisseur_id,
-            prix_achat: ligne.prix_unitaire,
-            date_livraison: ligne.date || new Date().toISOString().slice(0, 10),
+            product_id,
+            fournisseur_id,
+            prix_achat: prix_unitaire,
+            date_livraison: date || new Date().toISOString().slice(0, 10),
             mama_id,
           },
           { onConflict: ["product_id", "fournisseur_id", "date_livraison"] }

@@ -14,7 +14,7 @@ export function useInventaires() {
     setError(null);
     const { data, error } = await supabase
       .from("inventaires")
-      .select("*, lignes:inventaire_lignes(*)")
+      .select("*, lignes:inventaire_lignes(*, product:products(id, nom, unite, stock_theorique, pmp))")
       .eq("mama_id", mama_id)
       .eq("actif", true)
       .order("date", { ascending: false });
@@ -85,7 +85,7 @@ export function useInventaires() {
         .eq("mama_id", mama_id)
         .single();
       if (error || !data) return false;
-      if (Number(data.stock_reel) !== Number(line.quantite_physique)) return false;
+      if (Number(data.stock_reel) !== Number(line.quantite)) return false;
     }
     return true;
   }
@@ -168,7 +168,7 @@ export function useInventaires() {
     setError(null);
     const { data, error } = await supabase
       .from("inventaires")
-      .select("*, lignes:inventaire_lignes(*)")
+      .select("*, lignes:inventaire_lignes(*, product:products(id, nom, unite, stock_theorique, pmp))")
       .eq("id", id)
       .eq("mama_id", mama_id)
       .single();

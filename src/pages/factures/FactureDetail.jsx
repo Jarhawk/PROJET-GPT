@@ -6,20 +6,20 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import { useFactureProduits } from "@/hooks/useFactureProduits";
+import { useInvoiceItems } from "@/hooks/useInvoiceItems";
 import { useFactures } from "@/hooks/useFactures";
 
 export default function FactureDetail({ facture: factureProp, onClose }) {
   const { id } = useParams();
   const { fetchFactureById, createFacture, addLigneFacture, calculateTotals } = useFactures();
-  const { produitsFacture, fetchProduitsByFacture } = useFactureProduits();
+  const { items: produitsFacture, fetchItemsByInvoice } = useInvoiceItems();
   const [facture, setFacture] = useState(factureProp);
 
   useEffect(() => {
     const fid = factureProp?.id || id;
     if (fid) {
       if (!factureProp) fetchFactureById(fid).then(setFacture);
-      fetchProduitsByFacture(fid);
+      fetchItemsByInvoice(fid);
     }
   }, [factureProp, id]);
 

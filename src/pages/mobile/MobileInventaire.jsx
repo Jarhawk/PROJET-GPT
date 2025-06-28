@@ -31,6 +31,14 @@ export default function MobileInventaire() {
     await createInventaire({
       nom: "Inventaire mobile",
       date: new Date().toISOString().slice(0, 10),
+    const lignes = Object.entries(stockFinal).map(([product_id, q]) => ({
+      product_id,
+      quantite: parseFloat(q),
+    }));
+    if (!lignes.length) return;
+    await createInventaire({
+      date: new Date().toISOString().slice(0, 10),
+      zone: "mobile",
       lignes,
     });
     setStockFinal({});

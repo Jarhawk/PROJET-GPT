@@ -6,9 +6,9 @@ const query = {
   eq: vi.fn(() => query),
   order: vi.fn(() => Promise.resolve({ data: [], error: null })),
   single: vi.fn(() => Promise.resolve({ data: { id: 'i1' }, error: null })),
-  insert: vi.fn(() => Promise.resolve({ data: { id: 'i1' }, error: null })),
+  insert: vi.fn(() => query),
   update: vi.fn(() => query),
-  delete: vi.fn(() => Promise.resolve({ error: null })),
+  delete: vi.fn(() => query),
 };
 const fromMock = vi.fn(() => query);
 

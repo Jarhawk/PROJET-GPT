@@ -43,7 +43,7 @@ export function useInvoices() {
     setError(null);
     const { data, error } = await supabase
       .from("factures")
-      .select("id, date_facture:date, numero_facture:numero, montant_total:montant, statut")
+      .select("id, date_facture:date, numero_facture:reference, montant_total:montant, statut")
       .eq("mama_id", mama_id)
       .eq("fournisseur_id", fournisseur_id)
       .order("date", { ascending: false });

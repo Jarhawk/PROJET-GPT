@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 
 export default function GroupeParamForm({ groupe, onClose, onSaved }) {
-  const { role, user_id } = useAuth();
+  const { role, mama_id: myMama } = useAuth();
   const [values, setValues] = useState({
     nom: groupe?.nom || "",
     description: groupe?.description || "",
@@ -25,13 +25,13 @@ export default function GroupeParamForm({ groupe, onClose, onSaved }) {
         .select("id, nom")
         .order("nom");
       setMamas(data || []);
-    } else {
+    } else if (myMama) {
       const { data } = await supabase
-        .from("users_mamas")
-        .select("mamas(id, nom)")
-        .eq("user_id", user_id)
-        .eq("actif", true);
-      setMamas((data || []).map((r) => r.mamas));
+        .from("mamas")
+        .select("id, nom")
+        .eq("id", myMama)
+        .maybeSingle();
+      setMamas(data ? [data] : []);
     }
   }
 

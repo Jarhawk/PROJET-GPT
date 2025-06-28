@@ -7,7 +7,7 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 const MultiMamaContext = createContext();
 
 export function MultiMamaProvider({ children }) {
-  const { user_id, role, mama_id: authMamaId } = useAuth();
+  const { role, mama_id: authMamaId } = useAuth();
   const [mamas, setMamas] = useState([]);
   const [loading, setLoading] = useState(false);
   const [mamaActif, setMamaActifState] = useState(
@@ -21,8 +21,8 @@ export function MultiMamaProvider({ children }) {
   }, [authMamaId]);
 
   useEffect(() => {
-    if (user_id) fetchMamas();
-  }, [user_id, role]);
+    if (authMamaId || role === "superadmin") fetchMamas();
+  }, [authMamaId, role]);
 
   async function fetchMamas() {
     setLoading(true);
@@ -35,14 +35,14 @@ export function MultiMamaProvider({ children }) {
           .order("nom");
         if (error) throw error;
         data = rows || [];
-      } else {
-        const { data: rows, error } = await supabase
-          .from("users_mamas")
-          .select("mamas(id, nom)")
-          .eq("user_id", user_id)
-          .eq("actif", true);
+      } else if (authMamaId) {
+        const { data: row, error } = await supabase
+          .from("mamas")
+          .select("id, nom")
+          .eq("id", authMamaId)
+          .maybeSingle();
         if (error) throw error;
-        data = (rows || []).map((r) => r.mamas);
+        data = row ? [row] : [];
       }
     } catch (err) {
       toast.error(err.message || "Erreur chargement établissements");

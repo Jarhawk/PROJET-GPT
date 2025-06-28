@@ -11,7 +11,7 @@ export function useMouvementsStock() {
   const [error, setError] = useState(null);
 
   // 1. Charger les mouvements (filtre, type, période, produit)
-  async function fetchMouvements({ type = "", produit = "", date_debut = "", date_fin = "" } = {}) {
+  async function fetchMouvements({ type = "", produit = "", zone = "", date_debut = "", date_fin = "" } = {}) {
     setLoading(true);
     setError(null);
     let query = supabase
@@ -21,6 +21,7 @@ export function useMouvementsStock() {
 
     if (type) query = query.eq("type", type);
     if (produit) query = query.eq("product_id", produit);
+    if (zone) query = query.ilike("zone", `%${zone}%`);
     if (date_debut) query = query.gte("date", date_debut);
     if (date_fin) query = query.lte("date", date_fin);
 
@@ -94,8 +95,8 @@ export function useMouvementsStock() {
       type: m.type,
       product_id: m.product_id,
       quantite: m.quantite,
-      zone_source: m.zone_source,
-      zone_destination: m.zone_destination,
+      zone: m.zone,
+      motif: m.motif,
       mama_id: m.mama_id,
     }));
     const wb = XLSX.utils.book_new();

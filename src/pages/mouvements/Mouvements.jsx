@@ -104,9 +104,9 @@ export default function Mouvements() {
             {mouvements.map(m => (
               <tr key={m.id}>
                 <td className="p-2">{m.date}</td>
-                <td className="p-2">{products.find(p => p.id === m.produit_id)?.nom || ""}</td>
+                <td className="p-2">{products.find(p => p.id === m.product_id)?.nom || ""}</td>
                 <td className="p-2">{m.quantite}</td>
-                <td className="p-2">{m.zone_destination || m.zone_origine || ""}</td>
+                <td className="p-2">{m.zone || ""}</td>
                 <td className="p-2">{m.type}</td>
                 <td className="p-2">{Number(m.valeur || 0).toFixed(2)}</td>
               </tr>

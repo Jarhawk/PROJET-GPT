@@ -1,8 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import GlassCard from "@/components/ui/GlassCard";
-import PageWrapper from "@/components/ui/PageWrapper";
-import PrimaryButton from "@/components/ui/PrimaryButton";
 import useAuth from "@/hooks/useAuth";
 
 export default function Pending() {
@@ -12,13 +10,13 @@ export default function Pending() {
   useEffect(() => {
     if (userData) navigate("/dashboard");
   }, [userData, navigate]);
+
   return (
-    <PageWrapper>
-      <GlassCard className="flex flex-col items-center text-center gap-4">
-        <h1 className="text-3xl font-bold text-gold">Compte en cours de création…</h1>
-        <p>Votre compte est en cours de création, merci de patienter...</p>
-        <PrimaryButton onClick={() => navigate("/logout")}>Se déconnecter</PrimaryButton>
+    <div className="flex items-center justify-center min-h-screen bg-blue-100 backdrop-blur-md bg-opacity-40">
+      <GlassCard>
+        <h2 className="text-xl font-semibold text-center text-mamastock">Compte en cours de création…</h2>
+        <p className="text-center mt-2">Merci de patienter pendant l'initialisation de votre compte.</p>
       </GlassCard>
-    </PageWrapper>
+    </div>
   );
 }

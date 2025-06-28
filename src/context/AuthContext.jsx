@@ -22,37 +22,43 @@ export function AuthProvider({ children }) {
 
   async function refreshUser(sessionParam) {
     const current = sessionParam || session;
-    if (current?.user) await fetchUserData(current.user.id);
+    if (current?.user?.id) await fetchUserData(current.user.id);
   }
 
   // Login utilisateur avec gestion 2FA
   const login = async ({ email, password, totp }) => {
-    const result = await loginUser(email, password);
-    if (result.errorCode) {
-      if (result.errorMessage) toast.error(result.errorMessage);
-      if (result.errorCode === 500) toast.error("Erreur serveur Supabase (500)");
-      return { error: result.errorMessage || "Erreur" };
-    }
-    const { user } = result;
-    const {
-      data: { session: newSession },
-    } = await supabase.auth.getSession();
-    const { data: twoFA } = await supabase
-      .from("two_factor_auth")
-      .select("secret, enabled")
-      .eq("id", user.id)
-      .maybeSingle();
+    try {
+      const { data, error } = await loginUser(email, password);
+      if (error) throw error;
 
-    if (twoFA?.enabled) {
-      if (!totp || !authenticator.check(totp, twoFA.secret)) {
-        await supabase.auth.signOut();
-        return { error: "Code 2FA invalide", twofaRequired: true };
+      const {
+        data: { session: newSession },
+      } = await supabase.auth.getSession();
+
+      if (!newSession?.user?.id) {
+        return { error: "Session invalide" };
       }
-    }
 
-    setSession(newSession);
-    if (newSession?.user) await fetchUserData(newSession.user.id);
-    return { data: newSession };
+      const { data: twoFA } = await supabase
+        .from("two_factor_auth")
+        .select("secret, enabled")
+        .eq("id", newSession.user.id)
+        .maybeSingle();
+
+      if (twoFA?.enabled) {
+        if (!totp || !authenticator.check(totp, twoFA.secret)) {
+          await supabase.auth.signOut();
+          return { error: "Code 2FA invalide", twofaRequired: true };
+        }
+      }
+
+      setSession(newSession);
+      await fetchUserData(newSession.user.id);
+      return { data: newSession };
+    } catch (err) {
+      toast.error(err?.message || "Erreur");
+      return { error: err?.message || "Erreur" };
+    }
   };
 
   // Création de compte
@@ -86,46 +92,36 @@ export function AuthProvider({ children }) {
 
   const fetchUserData = async (userId) => {
     try {
-      const { data, error } = await supabase
+      const { data: userData, error } = await supabase
         .from("utilisateurs")
         .select("role, mama_id, access_rights, actif")
         .eq("auth_id", userId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
 
-      if (!data) {
-        setPending(false);
+      if (!userData) {
+        setPending(true);
         setUserData(null);
-        navigate("/unauthorized");
         return;
       }
 
       setPending(false);
 
-      if (data.actif === false) {
+      if (userData.actif === false) {
         await supabase.auth.signOut();
         setSession(null);
-        setUserData({ ...data, auth_id: userId, user_id: userId });
+        setUserData({ ...userData, auth_id: userId, user_id: userId });
         window.location.href = "/blocked";
         return;
       }
 
-      setUserData({ ...data, auth_id: userId, user_id: userId });
+      setUserData({ ...userData, auth_id: userId, user_id: userId });
     } catch (error) {
       console.error("Erreur récupération utilisateur:", error);
       setUserData(null);
       setSession(null);
       setPending(false);
-      if (error?.code === "PGRST116" || error?.status === 406) {
-        toast.error("Utilisateur introuvable");
-        navigate("/unauthorized");
-      }
-      try {
-        await supabase.auth.signOut();
-      } catch (e) {
-        console.error("Sign out error:", e);
-      }
     }
   };
 
@@ -161,24 +157,26 @@ export function AuthProvider({ children }) {
     setLoading(true);
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session?.user) {
-        fetchUserData(session.user.id).finally(() => setLoading(false));
-      } else {
+      if (!session?.user?.id) {
+        setSession(null);
         setLoading(false);
+        return;
       }
+      setSession(session);
+      fetchUserData(session.user.id).finally(() => setLoading(false));
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (session?.user) {
-        setLoading(true);
-        fetchUserData(session.user.id).finally(() => setLoading(false));
-      } else {
+      if (!session?.user?.id) {
+        setSession(null);
         setUserData(null);
         setPending(false);
         setLoading(false);
+        return;
       }
+      setSession(session);
+      setLoading(true);
+      fetchUserData(session.user.id).finally(() => setLoading(false));
     });
 
     const refreshInterval = setInterval(() => {
@@ -215,7 +213,7 @@ export function AuthProvider({ children }) {
     signup,
     logout,
     refreshUser,
-    isAuthenticated: !!session,
+    isAuthenticated: !!session?.user?.id,
     isAdmin: userData?.role === "admin" || userData?.role === "superadmin",
     isSuperadmin: userData?.role === "superadmin",
   };

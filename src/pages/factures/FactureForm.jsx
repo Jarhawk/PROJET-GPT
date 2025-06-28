@@ -12,7 +12,6 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
   const [date, setDate] = useState(facture?.date || "");
   const [fournisseur_id, setFournisseurId] = useState(facture?.fournisseur_id || "");
   const [reference, setReference] = useState(facture?.reference || "");
-  const [commentaire, setCommentaire] = useState(facture?.commentaire || "");
   const [statut, setStatut] = useState(facture?.statut || "en attente");
   const [lignes, setLignes] = useState(facture?.lignes || [
     { product_id: "", quantite: 1, prix_unitaire: 0, tva: 20 }
@@ -54,7 +53,6 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
       date,
       fournisseur_id,
       reference,
-      commentaire,
       statut,
       total_ht,
       total_tva,
@@ -104,13 +102,6 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
         placeholder="Numéro"
         value={reference}
         onChange={e => setReference(e.target.value)}
-      />
-      <input
-        className="input mb-2"
-        type="text"
-        placeholder="Commentaire"
-        value={commentaire}
-        onChange={e => setCommentaire(e.target.value)}
       />
       <select
         className="input mb-2"

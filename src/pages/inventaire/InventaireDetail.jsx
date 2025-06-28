@@ -22,14 +22,14 @@ export default function InventaireDetail() {
 
   const exportCSV = () => {
     const rows = (inventaire.lignes || []).map(l => ({
-      Produit: l.produit_nom || l.nom,
-      Unite: l.unite,
-      Physique: l.quantite_physique,
-      Theorique: l.quantite_theorique,
-      Prix: l.prix_unitaire,
-      Valeur: l.quantite_physique * l.prix_unitaire,
-      Ecart: l.quantite_physique - l.quantite_theorique,
-      ValeurEcart: (l.quantite_physique - l.quantite_theorique) * l.prix_unitaire,
+      Produit: l.product?.nom,
+      Unite: l.product?.unite,
+      Physique: l.quantite,
+      Theorique: l.product?.stock_theorique,
+      Prix: l.product?.pmp,
+      Valeur: l.quantite * (l.product?.pmp || 0),
+      Ecart: l.quantite - (l.product?.stock_theorique || 0),
+      ValeurEcart: (l.quantite - (l.product?.stock_theorique || 0)) * (l.product?.pmp || 0),
     }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "inventaire");
@@ -43,14 +43,14 @@ export default function InventaireDetail() {
       startY: 20,
       head: [["Produit", "Unité", "Physique", "Théorique", "Prix", "Valeur", "Écart", "Valeur écart"]],
       body: (inventaire.lignes || []).map(l => [
-        l.produit_nom || l.nom,
-        l.unite,
-        l.quantite_physique,
-        l.quantite_theorique,
-        l.prix_unitaire,
-        (l.quantite_physique * l.prix_unitaire).toFixed(2),
-        (l.quantite_physique - l.quantite_theorique).toFixed(2),
-        ((l.quantite_physique - l.quantite_theorique) * l.prix_unitaire).toFixed(2),
+        l.product?.nom,
+        l.product?.unite,
+        l.quantite,
+        l.product?.stock_theorique,
+        l.product?.pmp,
+        (l.quantite * (l.product?.pmp || 0)).toFixed(2),
+        (l.quantite - (l.product?.stock_theorique || 0)).toFixed(2),
+        ((l.quantite - (l.product?.stock_theorique || 0)) * (l.product?.pmp || 0)).toFixed(2),
       ]),
       styles: { fontSize: 9 },
     });
@@ -58,12 +58,12 @@ export default function InventaireDetail() {
   };
 
   const totalValeur = (inventaire.lignes || []).reduce(
-    (s, l) => s + Number(l.quantite_physique || 0) * Number(l.prix_unitaire || 0),
+    (s, l) => s + Number(l.quantite || 0) * Number(l.product?.pmp || 0),
     0
   );
   const totalEcart = (inventaire.lignes || []).reduce(
     (s, l) =>
-      s + (Number(l.quantite_physique || 0) - Number(l.quantite_theorique || 0)) * Number(l.prix_unitaire || 0),
+      s + (Number(l.quantite || 0) - Number(l.product?.stock_theorique || 0)) * Number(l.product?.pmp || 0),
     0
   );
 
@@ -89,18 +89,18 @@ export default function InventaireDetail() {
           </thead>
           <tbody>
             {(inventaire.lignes || []).map((l, idx) => {
-              const valeur = Number(l.quantite_physique || 0) * Number(l.prix_unitaire || 0);
-              const ecart = Number(l.quantite_physique || 0) - Number(l.quantite_theorique || 0);
+              const valeur = Number(l.quantite || 0) * Number(l.product?.pmp || 0);
+              const ecart = Number(l.quantite || 0) - Number(l.product?.stock_theorique || 0);
               return (
                 <tr key={idx} className="border-b last:border-none">
-                  <td className="p-2">{l.produit_nom || l.nom}</td>
-                  <td className="p-2">{l.unite}</td>
-                  <td className="p-2">{l.quantite_physique}</td>
-                  <td className="p-2">{l.quantite_theorique}</td>
-                  <td className="p-2">{l.prix_unitaire}</td>
+                  <td className="p-2">{l.product?.nom}</td>
+                  <td className="p-2">{l.product?.unite}</td>
+                  <td className="p-2">{l.quantite}</td>
+                  <td className="p-2">{l.product?.stock_theorique}</td>
+                  <td className="p-2">{l.product?.pmp}</td>
                   <td className="p-2">{valeur.toFixed(2)}</td>
                   <td className={`p-2 ${ecart < 0 ? 'text-red-600' : ecart > 0 ? 'text-green-600' : ''}`}>{ecart.toFixed(2)}</td>
-                  <td className={`p-2 ${(ecart * l.prix_unitaire) < 0 ? 'text-red-600' : (ecart * l.prix_unitaire) > 0 ? 'text-green-600' : ''}`}>{(ecart * l.prix_unitaire).toFixed(2)}</td>
+                  <td className={`p-2 ${(ecart * (l.product?.pmp || 0)) < 0 ? 'text-red-600' : (ecart * (l.product?.pmp || 0)) > 0 ? 'text-green-600' : ''}`}>{(ecart * (l.product?.pmp || 0)).toFixed(2)}</td>
                 </tr>
               );
             })}

@@ -18,7 +18,7 @@ export default function InventaireForm() {
 
   const zoneSuggestions = Array.from(new Set(inventaires.map(i => i.zone).filter(Boolean)));
 
-  const addLine = () => setLignes([...lignes, { product_id: "", quantite_physique: "" }]);
+  const addLine = () => setLignes([...lignes, { product_id: "", quantite: "" }]);
   const updateLine = (idx, field, val) => {
     setLignes(lignes.map((l, i) => (i === idx ? { ...l, [field]: val } : l)));
   };
@@ -28,8 +28,8 @@ export default function InventaireForm() {
   const getTheo = id => Number(getProduct(id).stock_theorique || 0);
   const getPrice = id => Number(getProduct(id).pmp || getProduct(id).dernier_prix || 0);
 
-  const totalValeur = lignes.reduce((s, l) => s + Number(l.quantite_physique || 0) * getPrice(l.product_id), 0);
-  const totalEcart = lignes.reduce((s, l) => s + (Number(l.quantite_physique || 0) - getTheo(l.product_id)) * getPrice(l.product_id), 0);
+  const totalValeur = lignes.reduce((s, l) => s + Number(l.quantite || 0) * getPrice(l.product_id), 0);
+  const totalEcart = lignes.reduce((s, l) => s + (Number(l.quantite || 0) - getTheo(l.product_id)) * getPrice(l.product_id), 0);
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -44,9 +44,7 @@ export default function InventaireForm() {
       zone,
       lignes: lignes.map(l => ({
         product_id: l.product_id,
-        quantite_physique: Number(l.quantite_physique || 0),
-        quantite_theorique: getTheo(l.product_id),
-        prix_unitaire: getPrice(l.product_id),
+        quantite: Number(l.quantite || 0),
       })),
     };
     try {
@@ -87,7 +85,7 @@ export default function InventaireForm() {
           <thead>
             <tr>
               <th className="p-2">Produit</th>
-              <th className="p-2">Quantité physique</th>
+              <th className="p-2">Quantité</th>
               <th className="p-2">Théorique</th>
               <th className="p-2">Prix</th>
               <th className="p-2">Écart</th>
@@ -99,7 +97,7 @@ export default function InventaireForm() {
             {lignes.map((l, idx) => {
               const theo = getTheo(l.product_id);
               const price = getPrice(l.product_id);
-              const ecart = Number(l.quantite_physique || 0) - theo;
+              const ecart = Number(l.quantite || 0) - theo;
               return (
                 <tr key={idx} className="border-b last:border-none">
                   <td className="p-2">
@@ -118,8 +116,8 @@ export default function InventaireForm() {
                     <input
                       type="number"
                       className="input w-24"
-                      value={l.quantite_physique}
-                      onChange={e => updateLine(idx, "quantite_physique", e.target.value)}
+                    value={l.quantite}
+                    onChange={e => updateLine(idx, "quantite", e.target.value)}
                     />
                   </td>
                   <td className="p-2">{theo}</td>

@@ -18,8 +18,6 @@ export default function Login() {
 
   const { session, userData, loading: authLoading } = useAuth();
 
-  const [totp, setTotp] = useState("");
-  const [twoFA, setTwoFA] = useState(false);
 
   // Redirection après authentification une fois les données chargées
   useEffect(() => {
@@ -47,15 +45,20 @@ export default function Login() {
 
     setLoading(true);
     try {
-      const { error } = await loginUser(email.trim(), password);
+      const { data, error } = await loginUser(email.trim(), password);
       if (error) {
+        console.error(error);
         setError("password", error.message || error);
         toast.error(error.message || "Échec de la connexion");
         return;
       }
 
-      // La redirection se fera automatiquement lorsque userData sera chargé
+      if (data) {
+        toast.success("Connexion réussie");
+        navigate("/");
+      }
     } catch (err) {
+      console.error(err);
       toast.error(err?.message || "Échec de la connexion");
     } finally {
       setLoading(false);
@@ -102,25 +105,10 @@ export default function Login() {
                 <p className="text-sm text-red-500 mt-1">{errors.password}</p>
               )}
             </div>
-            {twoFA && (
-              <div>
-              <label className="block text-xs font-semibold text-white/90 mb-1">Code 2FA</label>
-                <input
-                  className="w-full rounded-xl border border-gold/30 bg-white/70 dark:bg-[#202638]/50 py-2 px-4 text-background dark:text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-gold/30 backdrop-blur transition"
-                  type="text"
-                  value={totp}
-                  onChange={e => setTotp(e.target.value)}
-                  placeholder="000000"
-                />
-                {errors.totp && (
-                  <p className="text-sm text-red-500 mt-1">{errors.totp}</p>
-                )}
-              </div>
-            )}
             <PrimaryButton
               type="submit"
               className="w-full mt-3 flex items-center justify-center gap-2 disabled:opacity-50"
-              disabled={!email || !password || loading || (twoFA && !totp)}
+              disabled={!email || !password || loading}
             >
               {loading ? (
                 <>

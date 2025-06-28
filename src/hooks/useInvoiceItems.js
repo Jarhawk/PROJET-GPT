@@ -47,9 +47,7 @@ export function useInvoiceItems() {
     if (!invoiceId || !mama_id) return { error: "no mama_id" };
     const { data, error } = await supabase
       .from("facture_lignes")
-      .insert([{ ...item, facture_id: invoiceId, mama_id }])
-      .select()
-      .single();
+      .insert([{ ...item, facture_id: invoiceId, mama_id }]);
     if (error) setError(error);
     return { data, error };
   }
@@ -61,9 +59,7 @@ export function useInvoiceItems() {
       .from("facture_lignes")
       .update(fields)
       .eq("id", id)
-      .eq("mama_id", mama_id)
-      .select()
-      .single();
+      .eq("mama_id", mama_id);
     if (error) setError(error);
     return { data, error };
   }
@@ -73,9 +69,9 @@ export function useInvoiceItems() {
     if (!id || !mama_id) return { error: "no mama_id" };
     const { error } = await supabase
       .from("facture_lignes")
-      .delete()
       .eq("id", id)
-      .eq("mama_id", mama_id);
+      .eq("mama_id", mama_id)
+      .delete();
     if (error) setError(error);
     return { error };
   }

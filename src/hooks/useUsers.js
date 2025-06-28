@@ -34,12 +34,13 @@ export function useUsers() {
 
   // 2. Ajouter un utilisateur (invitation)
   async function addUser(user) {
-    if (!mama_id) return { error: "Aucun mama_id" };
+    const targetMama = role === "superadmin" ? user.mama_id : mama_id;
+    if (!targetMama) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
       .from("utilisateurs")
-      .insert([{ ...user, mama_id }]);
+      .insert([{ ...user, mama_id: targetMama }]);
     if (error) setError(error);
     setLoading(false);
     await fetchUsers();
@@ -50,11 +51,13 @@ export function useUsers() {
     if (!mama_id && role !== "superadmin") return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { error } = await supabase
+    let fields = updateFields;
+    let query = supabase
       .from("utilisateurs")
-      .update(updateFields)
-      .eq("id", id)
-      .eq("mama_id", mama_id);
+      .update(fields)
+      .eq("id", id);
+    if (role !== "superadmin") query = query.eq("mama_id", mama_id);
+    const { error } = await query;
     if (error) setError(error);
     setLoading(false);
     await fetchUsers();
@@ -65,11 +68,12 @@ export function useUsers() {
     if (!mama_id && role !== "superadmin") return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { error } = await supabase
+    let query = supabase
       .from("utilisateurs")
       .update({ actif })
-      .eq("id", id)
-      .eq("mama_id", mama_id);
+      .eq("id", id);
+    if (role !== "superadmin") query = query.eq("mama_id", mama_id);
+    const { error } = await query;
     if (error) setError(error);
     setLoading(false);
     await fetchUsers();
@@ -80,11 +84,12 @@ export function useUsers() {
     if (!mama_id && role !== "superadmin") return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { error } = await supabase
+    let query = supabase
       .from("utilisateurs")
       .update({ actif: false })
-      .eq("id", id)
-      .eq("mama_id", mama_id);
+      .eq("id", id);
+    if (role !== "superadmin") query = query.eq("mama_id", mama_id);
+    const { error } = await query;
     if (error) setError(error);
     setLoading(false);
     await fetchUsers();

@@ -1963,6 +1963,20 @@ create table if not exists public.utilisateurs (
     created_at timestamptz default now()
 );
 
+-- Ensure unique constraint on auth_id and indexes for performant lookups
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'utilisateurs_auth_id_key'
+  ) THEN
+    ALTER TABLE public.utilisateurs
+      ADD CONSTRAINT utilisateurs_auth_id_key UNIQUE (auth_id);
+  END IF;
+END $$;
+
+create index if not exists idx_utilisateurs_auth_id on public.utilisateurs(auth_id);
+create index if not exists idx_utilisateurs_mama_id on public.utilisateurs(mama_id);
+
 alter table public.utilisateurs enable row level security;
 drop policy if exists utilisateurs_select on public.utilisateurs;
 create policy utilisateurs_select on public.utilisateurs

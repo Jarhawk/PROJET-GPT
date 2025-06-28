@@ -17,21 +17,33 @@ export default function Login() {
 
   const {
     session,
-    user,
+    userData,
     login,
-    pending,
-    access_rights,
-    actif,
+    isLoading,
   } = useAuth();
+
   const [totp, setTotp] = useState("");
   const [twoFA, setTwoFA] = useState(false);
 
-  // Redirection après authentification
+  // Redirection après authentification une fois les données chargées
   useEffect(() => {
-    if (session && user) {
-      navigate("/dashboard");
+    if (!session || isLoading) return;
+    if (!userData) {
+      toast("Compte en cours de création");
+      navigate("/pending");
+      return;
     }
-  }, [session, user, navigate]);
+    if (userData.actif === false) {
+      navigate("/blocked");
+      return;
+    }
+    if (Object.keys(userData.access_rights || {}).length === 0) {
+      navigate("/unauthorized");
+      return;
+    }
+    toast.success(`Bienvenue ${session.user.email}`);
+    navigate("/dashboard");
+  }, [session, userData, isLoading, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -60,24 +72,7 @@ export default function Login() {
         return;
       }
 
-      if (pending) {
-        toast("Compte en cours de création");
-        navigate("/pending");
-        return;
-      }
-
-      if (actif === false) {
-        navigate("/blocked");
-        return;
-      }
-
-      if (!pending && Object.keys(access_rights || {}).length === 0) {
-        navigate("/unauthorized");
-        return;
-      }
-
-      toast.success("Connecté !");
-      navigate("/dashboard");
+      // La redirection se fera automatiquement lorsque userData sera chargé
     } catch (err) {
       toast.error(err?.message || "Échec de la connexion");
     } finally {

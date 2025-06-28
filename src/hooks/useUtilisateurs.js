@@ -34,12 +34,13 @@ export function useUtilisateurs() {
 
   // 2. Ajouter un utilisateur (invitation)
   async function addUser(user) {
-    if (!mama_id) return { error: "Aucun mama_id" };
+    const targetMama = role === "superadmin" ? user.mama_id : mama_id;
+    if (!targetMama) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
       .from("utilisateurs")
-      .insert([{ ...user, mama_id }]);
+      .insert([{ ...user, mama_id: targetMama }]);
     if (error) setError(error);
     setLoading(false);
     await fetchUsers();

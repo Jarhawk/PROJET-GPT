@@ -25,11 +25,10 @@ export default function MobileMouvement() {
       return;
     }
 
-    const { error } = await supabase.from("movements").insert([
+    const { error } = await supabase.from("mouvements_stock").insert([
       {
-        produit_id: selectedId,
-        zone_source: "Cave",
-        zone_destination: "Bar",
+        product_id: selectedId,
+        zone: "Bar",
         quantite,
         date: new Date(),
         mama_id,

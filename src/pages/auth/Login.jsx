@@ -71,7 +71,7 @@ export default function Login() {
         return;
       }
 
-      if (!access_rights || access_rights.length === 0) {
+      if (!Array.isArray(access_rights) || access_rights.length === 0) {
         navigate("/unauthorized");
         return;
       }

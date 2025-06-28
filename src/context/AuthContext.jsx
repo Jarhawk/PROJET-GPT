@@ -17,7 +17,7 @@ export function AuthProvider({ children }) {
   const [userData, setUserData] = useState({
     role: null,
     mama_id: null,
-    access_rights: [],
+    access_rights: null,
     auth_id: null,
     actif: true,
     user_id: null,
@@ -95,7 +95,7 @@ export function AuthProvider({ children }) {
       setUserData({
         role: null,
         mama_id: null,
-        access_rights: [],
+        access_rights: null,
         auth_id: null,
         actif: true,
         user_id: null,
@@ -151,7 +151,7 @@ export function AuthProvider({ children }) {
       setUserData({
         role: null,
         mama_id: null,
-        access_rights: [],
+        access_rights: null,
         auth_id: session.user.id,
         actif: false,
         user_id: session.user.id,
@@ -194,7 +194,7 @@ export function AuthProvider({ children }) {
         setUserData({
           role: null,
           mama_id: null,
-          access_rights: [],
+          access_rights: null,
           auth_id: null,
           actif: true,
           user_id: null,
@@ -222,7 +222,7 @@ export function AuthProvider({ children }) {
     setUserData({
       role: null,
       mama_id: null,
-      access_rights: [],
+      access_rights: null,
       auth_id: null,
       actif: true,
       user_id: null,

@@ -7,6 +7,16 @@ export function useInventaireLignes() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  async function checkInventaire(inventaire_id) {
+    const { data } = await supabase
+      .from("inventaires")
+      .select("id")
+      .eq("id", inventaire_id)
+      .eq("mama_id", mama_id)
+      .maybeSingle();
+    return !!data;
+  }
+
   async function fetchLignes({
     inventaireId,
     page = 1,
@@ -42,6 +52,10 @@ export function useInventaireLignes() {
     if (!mama_id || !inventaire_id || !product_id) {
       throw new Error("missing reference");
     }
+    if (!(await checkInventaire(inventaire_id))) {
+      console.warn("inventaire_id invalid or not owned", inventaire_id);
+      throw new Error("invalid reference");
+    }
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
@@ -59,6 +73,10 @@ export function useInventaireLignes() {
 
   async function updateLigne(id, values) {
     if (!mama_id || !id) return null;
+    if (values?.inventaire_id && !(await checkInventaire(values.inventaire_id))) {
+      console.warn("inventaire_id invalid or not owned", values.inventaire_id);
+      throw new Error("invalid reference");
+    }
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
@@ -89,5 +107,20 @@ export function useInventaireLignes() {
     if (error) setError(error);
   }
 
-  return { fetchLignes, createLigne, updateLigne, deleteLigne, loading, error };
+  async function getLigne(id) {
+    if (!mama_id || !id) return null;
+    const { data, error } = await supabase
+      .from("inventaire_lignes")
+      .select("*")
+      .eq("id", id)
+      .eq("mama_id", mama_id)
+      .single();
+    if (error) {
+      setError(error);
+      return null;
+    }
+    return data;
+  }
+
+  return { fetchLignes, createLigne, updateLigne, deleteLigne, getLigne, loading, error };
 }

@@ -16,6 +16,10 @@ const query = {
   insert: vi.fn(() => afterInsert),
   update: vi.fn(() => updateReturn),
   delete: vi.fn(() => deleteReturn),
+  single: vi.fn(() => Promise.resolve({ data: { id: 'i1' }, error: null })),
+  insert: vi.fn(() => query),
+  update: vi.fn(() => query),
+  delete: vi.fn(() => query),
 };
 const fromMock = vi.fn(() => query);
 

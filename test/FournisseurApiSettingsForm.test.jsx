@@ -27,6 +27,7 @@ test('submits config with composite conflict keys', async () => {
   fireEvent.change(screen.getAllByRole('textbox')[0], { target: { value: 'http://api' } });
   await fireEvent.click(btn);
   expect(fromMock).toHaveBeenCalledWith('fournisseurs_api_config');
+  expect(fromMock.mock.calls.length).toBeGreaterThanOrEqual(2);
   await waitFor(() => {
     expect(upsertMock).toHaveBeenCalledWith(
       [

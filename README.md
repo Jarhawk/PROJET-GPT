@@ -351,6 +351,15 @@ SQL associé dans `sql/mama_stock_patch.sql` :
   pour les rôles autorisés
 - Droits `SELECT/INSERT/UPDATE/DELETE` pour le rôle `authenticated`.
 
+## Module API fournisseurs
+
+Ce module gère les paramètres de connexion aux API des fournisseurs
+(`fournisseurs_api_config`). Chaque configuration est liée à un fournisseur et à
+un `mama`. Les données sont protégées par RLS et les index sur
+`fournisseur_id` et `mama_id` accélèrent les requêtes. Le hook React
+`useFournisseurApiConfig` permet de charger, enregistrer ou supprimer cette
+configuration depuis l'interface.
+
 ## Module Analytique avancée
 
 La page `/stats/advanced` affiche des graphiques d'évolution mensuelle des achats

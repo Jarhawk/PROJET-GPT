@@ -17,8 +17,10 @@ create table if not exists fournisseurs_api_config (
   created_at timestamptz default now(),
   primary key(fournisseur_id, mama_id)
 );
-create index if not exists idx_fournisseurs_api_config_fourn on fournisseurs_api_config(fournisseur_id);
-create index if not exists idx_fournisseurs_api_config_mama on fournisseurs_api_config(mama_id);
+create index if not exists idx_fournisseurs_api_config_fournisseur_id
+  on fournisseurs_api_config(fournisseur_id);
+create index if not exists idx_fournisseurs_api_config_mama_id
+  on fournisseurs_api_config(mama_id);
 ```
 
 Les politiques RLS garantissent que chaque utilisateur n'accède qu'aux données
@@ -33,6 +35,7 @@ create policy fournisseurs_api_config_all on fournisseurs_api_config
 ```
 
 Côté front, le hook `useFournisseurApiConfig` permet de charger, enregistrer ou
-supprimer la configuration via Supabase JS. Le formulaire
+supprimer la configuration via Supabase JS. Il expose aussi `listConfigs` pour
+rechercher et paginer les entrées par fournisseur et statut. Le formulaire
 `FournisseurApiSettingsForm` s'appuie sur ce hook et pré‑remplit la configuration
 existante.

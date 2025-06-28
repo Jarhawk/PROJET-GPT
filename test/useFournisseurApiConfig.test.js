@@ -4,6 +4,8 @@ import { vi, beforeEach, test, expect } from 'vitest';
 const queryObj = {
   select: vi.fn(() => queryObj),
   eq: vi.fn(() => queryObj),
+  order: vi.fn(() => queryObj),
+  range: vi.fn(() => queryObj),
   maybeSingle: vi.fn(() => Promise.resolve({ data: { id: 'c1' }, error: null })),
   upsert: vi.fn(() => ({ select: () => ({ single: vi.fn(() => Promise.resolve({ data: { id: 'c1' }, error: null })) }) })),
   delete: vi.fn(() => queryObj),
@@ -50,4 +52,16 @@ test('deleteConfig filters by keys', async () => {
   expect(queryObj.delete).toHaveBeenCalled();
   expect(queryObj.eq).toHaveBeenCalledWith('fournisseur_id', 'f1');
   expect(queryObj.eq).toHaveBeenCalledWith('mama_id', 'm1');
+});
+
+test('listConfigs applies filters and pagination', async () => {
+  const { result } = renderHook(() => useFournisseurApiConfig());
+  await act(async () => {
+    await result.current.listConfigs({ actif: true, page: 2, limit: 10 });
+  });
+  expect(fromMock).toHaveBeenCalledWith('fournisseurs_api_config');
+  expect(queryObj.select).toHaveBeenCalledWith('*', { count: 'exact' });
+  expect(queryObj.eq).toHaveBeenCalledWith('mama_id', 'm1');
+  expect(queryObj.eq).toHaveBeenCalledWith('actif', true);
+  expect(queryObj.range).toHaveBeenCalledWith(10, 19);
 });

@@ -1002,3 +1002,13 @@
 ## 2025-06-28 Step 189
 - Reconfirmed removal of `users_mamas` after latest review; grep found nothing.
 - Reinstalled dependencies and executed `npm run lint` and `npm test` successfully.
+
+## 2025-06-28 Step 190
+- Audited fiches techniques module for SQL integrity and mama_id filtering.
+- Added error propagation in `useFiches` create/update functions to surface Supabase issues.
+- Ran `npm run lint` and `npm test` successfully after modifications.
+
+## 2025-06-28 Step 191
+- Continued audit of fiches techniques module.
+- Hardened deletion and advanced fiche operations with explicit error propagation.
+- `npm run lint` and `npm test` executed successfully after changes.

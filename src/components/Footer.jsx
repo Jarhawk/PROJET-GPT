@@ -1,6 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { Link } from "react-router-dom";
-import { watermark } from "@/license";
 
 export default function Footer() {
   return (
@@ -25,9 +24,6 @@ export default function Footer() {
         <span className="italic opacity-80">
           Simplifiez la gestion, concentrez-vous sur l’essentiel.
         </span>
-      </span>
-      <span className="text-xs opacity-70 mt-2 sm:mt-0">
-        {watermark(import.meta.env.VITE_LICENSE_KEY)}
       </span>
     </footer>
   );

@@ -1,3 +1,12 @@
 {
-  "licenses": []
+  "licenses": [
+    {
+      "id": "7cf63967-7daf-4e15-bf24-631b226284a1",
+      "client": "Placeholder",
+      "email": "contact@example.com",
+      "expires": "2099-12-31",
+      "key": "6c8706202f0663e8040a517658de8dbcb5d0f89b5d6a04eba58b6fe3796c3971",
+      "revoked": false
+    }
+  ]
 }

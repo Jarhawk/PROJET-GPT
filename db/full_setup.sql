@@ -1,35 +1,12 @@
+-- SCRIPT COMPATIBLE SUPABASE — AUCUNE OPÉRATION INTERDITE — PRÊT À L’IMPORT
 -- baseprojet.sql - Full MamaStock schema for Supabase
 -- Standalone script combining initialization, RLS, and patches
--- Safe to re-run; includes a stub auth.uid() for local Postgres use
 
 -- init.sql - Complete database setup for MamaStock
 -- Extension
 create extension if not exists "uuid-ossp";
 create extension if not exists "pgcrypto";
-create schema if not exists auth;
-create or replace function auth.uid() returns uuid language sql stable as $$ select gen_random_uuid() $$;
-do $$
-begin
-  create role authenticated;
-exception when duplicate_object then null;
-end$$;
-do $$
-begin
-  create role service_role;
-exception when duplicate_object then null;
-end$$;
 
--- Optional pg_cron extension for scheduled tasks
-do $$
-begin
-  if exists (select 1 from pg_available_extensions where name = 'pg_cron') then
-    create extension if not exists pg_cron;
-  else
-    raise notice 'pg_cron extension not available';
-  end if;
-exception when others then
-  raise notice 'pg_cron extension could not be installed: %', SQLERRM;
-end$$;
 
 -- ------------------
 -- Base tables

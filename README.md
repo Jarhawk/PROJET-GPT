@@ -428,3 +428,4 @@ SQL associé dans `sql/mama_stock_patch.sql` :
 - Droits `SELECT/INSERT/UPDATE/DELETE` pour le rôle `authenticated`
 
 Toutes les nouvelles fonctionnalités reposent sur des policies RLS filtrées par `mama_id`, garantissant une séparation stricte des données entre établissements.
+\n## License\n\nThis project is released under the MIT License. See the [LICENSE](LICENSE) file for details.

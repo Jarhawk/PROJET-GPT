@@ -14,12 +14,14 @@ export default function ProtectedRoute({ children, accessKey }) {
     error,
   } = useAuth();
   const location = useLocation();
-  console.log("ProtectedRoute", {
-    path: location.pathname,
-    session: !!session,
-    userDataLoaded: !!userData,
-    pending,
-  });
+  if (import.meta.env.DEV) {
+    console.log("ProtectedRoute", {
+      path: location.pathname,
+      session: !!session,
+      userDataLoaded: !!userData,
+      pending,
+    });
+  }
 
   if (error) {
     console.error("Auth error:", error);
@@ -54,12 +56,14 @@ export default function ProtectedRoute({ children, accessKey }) {
       return <Navigate to="/unauthorized" replace />;
   }
 
-  console.log("ProtectedRoute: access granted", {
-    path: location.pathname,
-    session: !!session,
-    userDataLoaded: !!userData,
-    pending,
-  });
+  if (import.meta.env.DEV) {
+    console.log("ProtectedRoute: access granted", {
+      path: location.pathname,
+      session: !!session,
+      userDataLoaded: !!userData,
+      pending,
+    });
+  }
 
   return children;
 }

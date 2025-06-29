@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import toast from "react-hot-toast";
 import {
   Boxes,
@@ -21,11 +22,17 @@ import {
 } from "lucide-react";
 
 export default function Sidebar() {
-  const { access_rights, loading, user, logout, session } = useAuth();
+  const { access_rights, loading, user, role, mama_id, logout, session } =
+    useAuth();
   const { pathname } = useLocation();
+  console.log("Sidebar", { user, role, mama_id, access_rights });
 
   if (loading || access_rights === null) {
-    return <aside className="w-64 p-4" />;
+    return (
+      <aside className="w-64 p-4">
+        <LoadingSpinner message="Chargement menu..." />
+      </aside>
+    );
   }
 
   const rights = typeof access_rights === "object" ? access_rights : {};

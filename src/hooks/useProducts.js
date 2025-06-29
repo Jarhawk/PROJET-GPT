@@ -7,6 +7,11 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { toast } from "react-hot-toast";
 
+// Weighted average price (PMP) is maintained by Supabase.
+// Trigger `update_product_pmp` updates the `pmp` column when invoice lines are
+// inserted. The front end only reads this value through the
+// `v_products_last_price` view and never tries to compute or update it.
+
 export function useProducts() {
   const { mama_id } = useAuth();
   const [products, setProducts] = useState([]);

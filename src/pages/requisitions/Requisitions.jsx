@@ -22,7 +22,7 @@ export default function Requisitions() {
 
   useEffect(() => {
     if (!mama_id || authLoading) return;
-    supabase.from("products").select("*").eq("mama_id", mama_id)
+    supabase.from("produits").select("*").eq("mama_id", mama_id)
       .then(({ data }) => setProduits(data || []));
   }, [mama_id, authLoading]);
 

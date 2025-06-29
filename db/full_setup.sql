@@ -986,27 +986,27 @@ for each row execute function log_pertes_changes();
 
 
 -- Function suggesting cost center allocations based on historical data
-create or replace function suggest_cost_centers(p_product_id uuid)
-returns table(cost_center_id uuid, nom text, ratio numeric)
+create or replace function suggest_cost_centers(p_produit_id uuid)
+returns table(centre_de_cout_id uuid, nom text, ratio numeric)
 language sql stable security definer as $$
   select
-    mcc.cost_center_id,
+    mcc.centre_de_cout_id,
     cc.nom,
     sum(mcc.quantite)::numeric / greatest(sum(sum_mcc.quantite),1) as ratio
-  from mouvement_cost_centers mcc
+  from mouvements_centres_cout mcc
   join mouvements_stock ms on ms.id = mcc.mouvement_id
-  join cost_centers cc on cc.id = mcc.cost_center_id
+  join centres_de_cout cc on cc.id = mcc.centre_de_cout_id
   join (
     select sum(abs(m.quantite)) as quantite
     from mouvements_stock m
-    where m.product_id = p_product_id
+    where m.produit_id = p_produit_id
       and m.mama_id = current_user_mama_id()
       and m.quantite < 0
   ) sum_mcc on true
-  where ms.product_id = p_product_id
+  where ms.produit_id = p_produit_id
     and ms.mama_id = current_user_mama_id()
     and ms.quantite < 0
-  group by mcc.cost_center_id, cc.nom;
+  group by mcc.centre_de_cout_id, cc.nom;
 $$;
 grant execute on function suggest_cost_centers(uuid) to authenticated;
 

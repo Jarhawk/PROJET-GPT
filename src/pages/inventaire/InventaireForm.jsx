@@ -19,7 +19,7 @@ export default function InventaireForm() {
 
   const zoneSuggestions = Array.from(new Set(inventaires.map(i => i.zone).filter(Boolean)));
 
-  const addLine = () => setLignes([...lignes, { product_id: "", quantite: "" }]);
+  const addLine = () => setLignes([...lignes, { produit_id: "", quantite: "" }]);
   const updateLine = (idx, field, val) => {
     setLignes(lignes.map((l, i) => (i === idx ? { ...l, [field]: val } : l)));
   };
@@ -29,8 +29,8 @@ export default function InventaireForm() {
   const getTheo = id => Number(getProduct(id).stock_theorique || 0);
   const getPrice = id => Number(getProduct(id).pmp || getProduct(id).dernier_prix || 0);
 
-  const totalValeur = lignes.reduce((s, l) => s + Number(l.quantite || 0) * getPrice(l.product_id), 0);
-  const totalEcart = lignes.reduce((s, l) => s + (Number(l.quantite || 0) - getTheo(l.product_id)) * getPrice(l.product_id), 0);
+  const totalValeur = lignes.reduce((s, l) => s + Number(l.quantite || 0) * getPrice(l.produit_id), 0);
+  const totalEcart = lignes.reduce((s, l) => s + (Number(l.quantite || 0) - getTheo(l.produit_id)) * getPrice(l.produit_id), 0);
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -44,7 +44,7 @@ export default function InventaireForm() {
       date,
       zone,
       lignes: lignes.map(l => ({
-        product_id: l.product_id,
+        produit_id: l.produit_id,
         quantite: Number(l.quantite || 0),
       })),
     };
@@ -96,16 +96,16 @@ export default function InventaireForm() {
           </thead>
           <tbody>
             {lignes.map((l, idx) => {
-              const theo = getTheo(l.product_id);
-              const price = getPrice(l.product_id);
+              const theo = getTheo(l.produit_id);
+              const price = getPrice(l.produit_id);
               const ecart = Number(l.quantite || 0) - theo;
               return (
                 <tr key={idx} className="border-b last:border-none">
                   <td className="p-2">
                     <select
                       className="input"
-                      value={l.product_id}
-                      onChange={e => updateLine(idx, "product_id", e.target.value)}
+                      value={l.produit_id}
+                      onChange={e => updateLine(idx, "produit_id", e.target.value)}
                     >
                       <option value="">-- produit --</option>
                       {products.map(p => (

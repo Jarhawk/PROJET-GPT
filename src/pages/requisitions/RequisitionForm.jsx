@@ -17,7 +17,7 @@ function RequisitionFormPage() {
   const [type, setType] = useState("");
   const [motif, setMotif] = useState("");
   const [zone, setZone] = useState("");
-  const [articles, setArticles] = useState([{ product_id: "", quantite: 1 }]);
+  const [articles, setArticles] = useState([{ produit_id: "", quantite: 1 }]);
   const [submitting, setSubmitting] = useState(false);
 
   const handleChangeArticle = (index, field, value) => {
@@ -27,12 +27,12 @@ function RequisitionFormPage() {
   };
 
   const handleAddArticle = () => {
-    setArticles([...articles, { product_id: "", quantite: 1 }]);
+    setArticles([...articles, { produit_id: "", quantite: 1 }]);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!type || !zone || articles.some(a => !a.product_id || !a.quantite)) {
+    if (!type || !zone || articles.some(a => !a.produit_id || !a.quantite)) {
       toast.error("Tous les champs sont obligatoires");
       return;
     }
@@ -41,7 +41,7 @@ function RequisitionFormPage() {
       zone,
       type,
       motif,
-      lignes: articles.map(a => ({ product_id: a.product_id, quantite: Number(a.quantite) })),
+      lignes: articles.map(a => ({ produit_id: a.produit_id, quantite: Number(a.quantite) })),
     };
     try {
       setSubmitting(true);
@@ -113,9 +113,9 @@ function RequisitionFormPage() {
                 </div>
               ) : (
                 <select
-                  value={article.product_id}
+                  value={article.produit_id}
                   onChange={(e) =>
-                    handleChangeArticle(index, "product_id", e.target.value)
+                    handleChangeArticle(index, "produit_id", e.target.value)
                   }
                   className="flex-1 border rounded px-3 py-2"
                   required

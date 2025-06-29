@@ -15,7 +15,7 @@ export default function MobileMouvement() {
   useEffect(() => {
     if (authLoading || !mama_id) return;
     supabase
-      .from("products")
+      .from("produits")
       .select("id, nom")
       .eq("mama_id", mama_id)
       .then(({ data }) => setProduits(data || []));
@@ -30,7 +30,7 @@ export default function MobileMouvement() {
 
     const { error } = await supabase.from("mouvements_stock").insert([
       {
-        product_id: selectedId,
+        produit_id: selectedId,
         zone: "Bar",
         quantite,
         date: new Date(),

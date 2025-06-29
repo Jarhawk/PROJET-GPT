@@ -14,7 +14,7 @@ export function useCostCenterSuggestions() {
     }
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase.rpc("suggest_cost_centers", { p_product_id: product_id });
+    const { data, error } = await supabase.rpc("suggest_cost_centers", { p_produit_id: product_id });
     setLoading(false);
     if (error) {
       setError(error);

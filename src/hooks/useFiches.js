@@ -41,7 +41,7 @@ export function useFiches() {
     setLoading(true);
     const { data, error } = await supabase
       .from("fiches")
-      .select("*, famille:familles(id, nom), lignes:fiche_lignes(*, product:products(id, nom, unite, pmp))")
+      .select("*, famille:familles(id, nom), lignes:fiche_lignes(*, produit:produits(id, nom, unite, pmp))")
       .eq("id", id)
       .eq("mama_id", mama_id)
       .single();
@@ -67,7 +67,7 @@ export function useFiches() {
     }
     const ficheId = data.id;
     if (lignes.length > 0) {
-      const toInsert = lignes.map(l => ({ fiche_id: ficheId, product_id: l.product_id, quantite: l.quantite, mama_id }));
+      const toInsert = lignes.map(l => ({ fiche_id: ficheId, produit_id: l.produit_id, quantite: l.quantite, mama_id }));
       const { error: lignesError } = await supabase.from("fiche_lignes").insert(toInsert);
       if (lignesError) {
         setLoading(false);
@@ -106,7 +106,7 @@ export function useFiches() {
       throw deleteError;
     }
     if (lignes.length > 0) {
-      const toInsert = lignes.map(l => ({ fiche_id: id, product_id: l.product_id, quantite: l.quantite, mama_id }));
+      const toInsert = lignes.map(l => ({ fiche_id: id, produit_id: l.produit_id, quantite: l.quantite, mama_id }));
       const { error: insertError } = await supabase.from("fiche_lignes").insert(toInsert);
       if (insertError) {
         setLoading(false);

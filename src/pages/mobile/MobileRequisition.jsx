@@ -15,7 +15,7 @@ export default function MobileRequisition() {
   useEffect(() => {
     if (authLoading || !mama_id) return;
     supabase
-      .from("products")
+      .from("produits")
       .select("id, nom")
       .eq("mama_id", mama_id)
       .then(({ data }) => setProduits(data || []));

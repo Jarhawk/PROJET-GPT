@@ -43,7 +43,7 @@ export default function Transferts() {
   useEffect(() => {
     if (!mama_id) return;
     supabase
-      .from("products")
+      .from("produits")
       .select("*")
       .eq("mama_id", mama_id)
       .then(({ data }) => setProduits(data || []));

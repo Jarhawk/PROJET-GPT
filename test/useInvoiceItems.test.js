@@ -36,7 +36,7 @@ test('fetchItemsByInvoice queries with invoice id and mama_id', async () => {
     await result.current.fetchItemsByInvoice('f1');
   });
   expect(fromMock).toHaveBeenCalledWith('facture_lignes');
-  expect(query.select).toHaveBeenCalledWith('*, product: products(nom, famille, unite)');
+  expect(query.select).toHaveBeenCalledWith('*, produit: produits(nom, famille, unite)');
   expect(query.eq).toHaveBeenNthCalledWith(1, 'facture_id', 'f1');
   expect(query.eq).toHaveBeenNthCalledWith(2, 'mama_id', 'm1');
   expect(query.order).toHaveBeenCalledWith('id');
@@ -45,10 +45,10 @@ test('fetchItemsByInvoice queries with invoice id and mama_id', async () => {
 test('addItem inserts row with invoice_id and mama_id', async () => {
   const { result } = renderHook(() => useInvoiceItems());
   await act(async () => {
-    await result.current.addItem('f1', { product_id: 'p1' });
+    await result.current.addItem('f1', { produit_id: 'p1' });
   });
   expect(fromMock).toHaveBeenCalledWith('facture_lignes');
-  expect(query.insert).toHaveBeenCalledWith([{ product_id: 'p1', facture_id: 'f1', mama_id: 'm1' }]);
+  expect(query.insert).toHaveBeenCalledWith([{ produit_id: 'p1', facture_id: 'f1', mama_id: 'm1' }]);
 });
 
 test('updateItem and deleteItem filter by id and mama_id', async () => {

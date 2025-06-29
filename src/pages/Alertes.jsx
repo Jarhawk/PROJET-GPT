@@ -13,7 +13,7 @@ export default function Alertes() {
   const { rules, fetchRules, addRule, deleteRule } = useAlerts();
   const { products, fetchProducts } = useProducts();
   const { mama_id, loading: authLoading } = useAuth();
-  const [form, setForm] = useState({ product_id: "", threshold: "" });
+  const [form, setForm] = useState({ produit_id: "", threshold: "" });
   const [search, setSearch] = useState("");
 
   useEffect(() => {
@@ -25,7 +25,7 @@ export default function Alertes() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.product_id) {
+    if (!form.produit_id) {
       toast.error("Produit requis");
       return;
     }
@@ -33,7 +33,7 @@ export default function Alertes() {
       await addRule({ ...form, threshold: Number(form.threshold) });
       toast.success("Règle ajoutée");
       await fetchRules({ search });
-      setForm({ product_id: "", threshold: "" });
+      setForm({ produit_id: "", threshold: "" });
     } catch (err) {
       console.error("Erreur ajout règle:", err);
       toast.error("Erreur lors de l'enregistrement.");
@@ -60,8 +60,8 @@ export default function Alertes() {
       <h1 className="text-2xl font-bold mb-4">Alertes avancées</h1>
       <form onSubmit={handleSubmit} className="flex gap-2 mb-4 items-end">
         <Select
-          value={form.product_id}
-          onChange={(e) => setForm(f => ({ ...f, product_id: e.target.value }))}
+          value={form.produit_id}
+          onChange={(e) => setForm(f => ({ ...f, produit_id: e.target.value }))}
           className="w-64"
           required
         >
@@ -104,7 +104,7 @@ export default function Alertes() {
           {rules.map(r => (
             <tr key={r.id} className="border-t">
               <td className="px-2 py-1">
-                {products.find(p => p.id === r.product_id)?.nom || r.product_id}
+                {products.find(p => p.id === r.produit_id)?.nom || r.produit_id}
               </td>
               <td className="px-2 py-1">{r.threshold}</td>
               <td className="px-2 py-1 text-right">

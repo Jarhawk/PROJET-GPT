@@ -5,7 +5,7 @@ import { vi, beforeEach, test, expect } from 'vitest';
 const query = {
   select: vi.fn(() => query),
   eq: vi.fn(() => query),
-  then: fn => Promise.resolve(fn({ data: [{ product_id: 'p1', quantite: 1, valeur: 2 }], error: null }))
+  then: fn => Promise.resolve(fn({ data: [{ produit_id: 'p1', quantite: 1, valeur: 2 }], error: null }))
 };
 const fromMock = vi.fn(() => query);
 
@@ -47,7 +47,7 @@ test('simulerBudget aggregates scenario', async () => {
 test('proposerCommandes maps consommation', async () => {
   const { result } = renderHook(() => useSimulation());
   const out = await result.current.proposerCommandes([
-    { product_id: 'p1', quantite: 3 },
+    { produit_id: 'p1', quantite: 3 },
   ]);
-  expect(out).toEqual([{ product_id: 'p1', quantite: 3 }]);
+  expect(out).toEqual([{ produit_id: 'p1', quantite: 3 }]);
 });

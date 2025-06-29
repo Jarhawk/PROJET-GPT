@@ -133,7 +133,7 @@ export function useFactures() {
     setError(null);
     const {
       fournisseur_id,
-      product_id,
+      produit_id,
       quantite,
       prix_unitaire,
       tva,
@@ -143,7 +143,7 @@ export function useFactures() {
       .from("facture_lignes")
       .insert([
         {
-          product_id,
+          produit_id,
           quantite,
           prix_unitaire,
           tva,
@@ -153,18 +153,18 @@ export function useFactures() {
       ])
       .select()
       .single();
-    if (!error && product_id && fournisseur_id) {
+    if (!error && produit_id && fournisseur_id) {
       await supabase
-        .from("supplier_products")
+        .from("fournisseur_produits")
         .upsert(
           {
-            product_id,
+            produit_id,
             fournisseur_id,
             prix_achat: prix_unitaire,
             date_livraison: date || new Date().toISOString().slice(0, 10),
             mama_id,
           },
-          { onConflict: ["product_id", "fournisseur_id", "date_livraison"] }
+          { onConflict: ["produit_id", "fournisseur_id", "date_livraison"] }
         );
     }
     setLoading(false);

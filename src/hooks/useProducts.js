@@ -27,9 +27,9 @@ export function useProducts() {
     setLoading(true);
     setError(null);
       let query = supabase
-        .from("v_products_last_price")
+        .from("v_produits_dernier_prix")
         .select(
-          "*, fournisseurs:supplier_products(*, fournisseur: fournisseurs(nom)), main_supplier: fournisseurs!products_main_supplier_id_fkey(id, nom)",
+          "*, fournisseurs:fournisseur_produits(*, fournisseur: fournisseurs(nom)), main_supplier: fournisseurs!produits_fournisseur_principal_id_fkey(id, nom)",
           { count: "exact" }
         )
       .eq("mama_id", mama_id)
@@ -56,7 +56,16 @@ export function useProducts() {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { error } = await supabase.from("products").insert([{ ...product, mama_id }]);
+    const {
+      main_supplier_id,
+      ...rest
+    } = product || {};
+    const payload = {
+      ...rest,
+      fournisseur_principal_id: main_supplier_id || null,
+      mama_id,
+    };
+    const { error } = await supabase.from("produits").insert([payload]);
     setLoading(false);
     if (error) {
       setError(error);
@@ -69,9 +78,16 @@ export function useProducts() {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
+    const { main_supplier_id, ...rest } = updateFields || {};
+    const payload = {
+      ...rest,
+      ...(main_supplier_id !== undefined && {
+        fournisseur_principal_id: main_supplier_id,
+      }),
+    };
     const { error } = await supabase
-      .from("products")
-      .update(updateFields)
+      .from("produits")
+      .update(payload)
       .eq("id", id)
       .eq("mama_id", mama_id);
     setLoading(false);
@@ -100,7 +116,7 @@ export function useProducts() {
       nom: `${orig.nom} (copie)`,
       famille,
       unite,
-      main_supplier_id,
+      fournisseur_principal_id: main_supplier_id,
       stock_reel,
       stock_min,
       actif,
@@ -111,7 +127,7 @@ export function useProducts() {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { error } = await supabase.from("products").insert([{ ...copy, mama_id }]);
+    const { error } = await supabase.from("produits").insert([{ ...copy, mama_id }]);
     setLoading(false);
     if (error) {
       setError(error);
@@ -125,7 +141,7 @@ export function useProducts() {
     setLoading(true);
     setError(null);
     const { error } = await supabase
-      .from("products")
+      .from("produits")
       .update({ actif })
       .eq("id", id)
       .eq("mama_id", mama_id);
@@ -142,7 +158,7 @@ export function useProducts() {
     setLoading(true);
     setError(null);
     const { error } = await supabase
-      .from("products")
+      .from("produits")
       .update({ actif: false })
       .eq("id", id)
       .eq("mama_id", mama_id);
@@ -159,11 +175,11 @@ export function useProducts() {
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
-      .from("supplier_products")
+      .from("fournisseur_produits")
       .select(
         "*, fournisseur: fournisseurs(id, nom), derniere_livraison:date_livraison"
       )
-      .eq("product_id", productId)
+      .eq("produit_id", productId)
       .eq("mama_id", mama_id)
       .order("date_livraison", { ascending: false });
     setLoading(false);

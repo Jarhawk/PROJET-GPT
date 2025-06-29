@@ -21,7 +21,7 @@ export function useMouvementsStock() {
       .eq("mama_id", mama_id);
 
     if (type) query = query.eq("type", type);
-    if (produit) query = query.eq("product_id", produit);
+    if (produit) query = query.eq("produit_id", produit);
     if (zone) query = query.ilike("zone", `%${zone}%`);
     if (date_debut) query = query.gte("date", date_debut);
     if (date_fin) query = query.lte("date", date_fin);
@@ -94,7 +94,7 @@ export function useMouvementsStock() {
       id: m.id,
       date: m.date,
       type: m.type,
-      product_id: m.product_id,
+      produit_id: m.produit_id,
       quantite: m.quantite,
       zone: m.zone,
       motif: m.motif,

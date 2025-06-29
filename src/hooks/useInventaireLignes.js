@@ -36,7 +36,7 @@ export function useInventaireLignes() {
       .eq("inventaire_id", inventaireId)
       .order(sort, { ascending });
     if (search) {
-      query = query.eq("product_id", search);
+      query = query.eq("produit_id", search);
     }
     const from = (page - 1) * limit;
     query = query.range(from, from + limit - 1);
@@ -49,8 +49,8 @@ export function useInventaireLignes() {
     return { data: data || [], count: count || 0 };
   }
 
-  async function createLigne({ inventaire_id, product_id, quantite }) {
-    if (!mama_id || !inventaire_id || !product_id) {
+  async function createLigne({ inventaire_id, produit_id, quantite }) {
+    if (!mama_id || !inventaire_id || !produit_id) {
       throw new Error("missing reference");
     }
     if (!(await checkInventaire(inventaire_id))) {
@@ -61,7 +61,7 @@ export function useInventaireLignes() {
     setError(null);
     const { data, error } = await supabase
       .from("inventaire_lignes")
-      .insert([{ inventaire_id, product_id, quantite, mama_id }])
+      .insert([{ inventaire_id, produit_id, quantite, mama_id }])
       .select()
       .single();
     setLoading(false);

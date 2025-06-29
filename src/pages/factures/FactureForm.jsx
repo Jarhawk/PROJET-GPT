@@ -16,7 +16,7 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
   const [reference, setReference] = useState(facture?.reference || "");
   const [statut, setStatut] = useState(facture?.statut || "en attente");
   const [lignes, setLignes] = useState(facture?.lignes || [
-    { product_id: "", quantite: 1, prix_unitaire: 0, tva: 20 }
+    { produit_id: "", quantite: 1, prix_unitaire: 0, tva: 20 }
   ]);
   const [file, setFile] = useState(null);
   const [fileUrl, setFileUrl] = useState(facture?.justificatif || "");
@@ -72,7 +72,7 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
       }
 
       for (const ligne of lignes) {
-        if (ligne.product_id) {
+        if (ligne.produit_id) {
           await addLigneFacture(fid, { ...ligne, fournisseur_id });
         }
       }
@@ -134,8 +134,8 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
                 <input
                   list="products"
                   className="input"
-                  value={l.product_id}
-                  onChange={e => setLignes(ls => ls.map((it,i) => i===idx ? { ...it, product_id: e.target.value } : it))}
+                  value={l.produit_id}
+                  onChange={e => setLignes(ls => ls.map((it,i) => i===idx ? { ...it, produit_id: e.target.value } : it))}
                 />
               </td>
               <td>
@@ -154,7 +154,7 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
           ))}
         </tbody>
       </table>
-      <Button type="button" variant="outline" onClick={() => setLignes(ls => [...ls, { product_id: "", quantite:1, prix_unitaire:0, tva:20 }])}>Ajouter ligne</Button>
+      <Button type="button" variant="outline" onClick={() => setLignes(ls => [...ls, { produit_id: "", quantite:1, prix_unitaire:0, tva:20 }])}>Ajouter ligne</Button>
       <datalist id="products">
         {products.map(p => <option key={p.id} value={p.id}>{p.nom}</option>)}
       </datalist>

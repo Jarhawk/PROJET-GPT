@@ -34,7 +34,7 @@ export default function MouvementsPage() {
             {mouvements.map((m) => (
               <tr key={m.id}>
                 <td className="p-2 text-center">{m.date}</td>
-                <td className="p-2 text-center">{m.product_id}</td>
+                <td className="p-2 text-center">{m.produit_id}</td>
                 <td className="p-2 text-center">{m.quantite}</td>
                 <td className="p-2 text-center">{m.type}</td>
                 <td className="p-2 text-center">{m.created_by || "-"}</td>

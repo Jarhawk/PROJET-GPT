@@ -67,25 +67,25 @@ export function useFournisseurAPI() {
       const updates = [];
       for (const p of produits) {
         const { data: existing } = await supabase
-          .from("supplier_products")
+          .from("fournisseur_produits")
           .select("prix_achat")
-          .eq("product_id", p.product_id)
+          .eq("produit_id", p.product_id)
           .eq("fournisseur_id", fournisseur_id)
           .eq("mama_id", mama_id)
           .order("date_livraison", { ascending: false })
           .limit(1)
           .maybeSingle();
         await supabase
-          .from("supplier_products")
+          .from("fournisseur_produits")
           .upsert(
             {
-              product_id: p.product_id,
+              produit_id: p.product_id,
               fournisseur_id,
               prix_achat: p.price,
               date_livraison: new Date().toISOString().slice(0, 10),
               mama_id,
             },
-            { onConflict: ["product_id", "fournisseur_id", "date_livraison"] }
+            { onConflict: ["produit_id", "fournisseur_id", "date_livraison"] }
           );
         if (existing && existing.prix_achat !== p.price) {
           await supabase.from("catalogue_updates").insert({

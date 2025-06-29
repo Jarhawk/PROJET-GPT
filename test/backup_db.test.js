@@ -28,13 +28,13 @@ beforeEach(async () => {
 test('backupDb fetches tables and writes file', async () => {
   await backupDb('out.json');
   const tables = [
-    'products',
+    'produits',
     'fournisseurs',
     'factures',
     'facture_lignes',
     'inventaires',
     'inventaire_lignes',
-    'supplier_products',
+    'fournisseur_produits',
     'taches',
     'tache_instances',
     'mouvements_stock',

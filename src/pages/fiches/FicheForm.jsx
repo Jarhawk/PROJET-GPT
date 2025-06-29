@@ -20,14 +20,14 @@ export default function FicheForm({ fiche, onClose }) {
 
   useEffect(() => { fetchProducts(); fetchFamilles(); }, [fetchProducts, fetchFamilles]);
 
-  const addLigne = () => setLignes([...lignes, { product_id: "", quantite: 1 }]);
+  const addLigne = () => setLignes([...lignes, { produit_id: "", quantite: 1 }]);
   const updateLigne = (i, field, val) => {
     setLignes(lignes.map((l, idx) => idx === i ? { ...l, [field]: val } : l));
   };
   const removeLigne = (i) => setLignes(lignes.filter((_, idx) => idx !== i));
 
   const cout_total = lignes.reduce((sum, l) => {
-    const prod = products.find(p => p.id === l.product_id);
+    const prod = products.find(p => p.id === l.produit_id);
     return sum + (prod?.pmp ? Number(l.quantite) * Number(prod.pmp) : 0);
   }, 0);
   const cout_par_portion = portions > 0 ? cout_total / portions : 0;
@@ -36,7 +36,7 @@ export default function FicheForm({ fiche, onClose }) {
     e.preventDefault();
     if (!nom.trim()) return toast.error("Nom obligatoire");
     if (!portions || portions <= 0) return toast.error("Portions > 0");
-    if (lignes.some(l => !l.product_id || !l.quantite)) {
+    if (lignes.some(l => !l.produit_id || !l.quantite)) {
       return toast.error("Ligne incomplète");
     }
     if (loading) return;
@@ -92,11 +92,11 @@ export default function FicheForm({ fiche, onClose }) {
             </thead>
             <tbody>
               {lignes.map((l, i) => {
-                const prod = products.find(p => p.id === l.product_id);
+                const prod = products.find(p => p.id === l.produit_id);
                 return (
                   <tr key={i}>
                     <td>
-                      <select className="input" value={l.product_id} onChange={e => updateLigne(i, 'product_id', e.target.value)} required>
+                      <select className="input" value={l.produit_id} onChange={e => updateLigne(i, 'produit_id', e.target.value)} required>
                         <option value="">Sélectionner</option>
                         {products.map(p => <option key={p.id} value={p.id}>{p.nom}</option>)}
                       </select>

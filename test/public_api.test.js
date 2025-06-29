@@ -65,7 +65,7 @@ describe('public API router', () => {
     const res = await request(app).get('/produits?mama_id=m1').set('x-api-key', 'dev_key');
     expect(res.status).toBe(200);
     expect(res.body).toEqual(data);
-    expect(fromMock).toHaveBeenCalledWith('products');
+    expect(fromMock).toHaveBeenCalledWith('produits');
   });
 
   it('applies famille filter when provided', async () => {
@@ -89,7 +89,7 @@ describe('public API router', () => {
     expect(res.status).toBe(200);
     expect(res.body).toEqual(data);
     expect(getUserMock).toHaveBeenCalledWith('tok');
-    expect(fromMock).toHaveBeenCalledWith('products');
+    expect(fromMock).toHaveBeenCalledWith('produits');
   });
 
   it('handles Supabase error for produits', async () => {

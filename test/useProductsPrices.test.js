@@ -23,6 +23,6 @@ test('fetchProductPrices selects fields with last delivery alias', async () => {
   await act(async () => {
     await result.current.fetchProductPrices('p1');
   });
-  expect(fromMock).toHaveBeenCalledWith('supplier_products');
+  expect(fromMock).toHaveBeenCalledWith('fournisseur_produits');
   expect(selectMock).toHaveBeenCalledWith('*, fournisseur: fournisseurs(id, nom), derniere_livraison:date_livraison');
 });

@@ -59,7 +59,7 @@ export default function StatsStock() {
               </tr>
             ) : (
               rows.map((r) => (
-                <tr key={r.product_id}>
+                <tr key={r.produit_id}>
                   <td className="px-2 py-1">{r.nom}</td>
                   <td className="px-2 py-1 text-right">{Number(r.stock_reel ?? 0).toLocaleString()}</td>
                   <td className="px-2 py-1 text-right">{Number(r.pmp ?? 0).toLocaleString()}</td>

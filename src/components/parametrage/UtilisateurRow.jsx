@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
 import toast from "react-hot-toast";

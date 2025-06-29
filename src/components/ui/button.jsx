@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 export function Button({ children, className = '', ...props }) {
   return (
     <button

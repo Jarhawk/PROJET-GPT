@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import { Reorder } from "framer-motion";
 import { useDashboards } from "@/hooks/useDashboards";

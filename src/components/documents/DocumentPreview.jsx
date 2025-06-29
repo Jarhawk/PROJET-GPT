@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import SmartDialog from "@/components/ui/SmartDialog";
 
 export default function DocumentPreview({ url, type = "", open, onClose }) {

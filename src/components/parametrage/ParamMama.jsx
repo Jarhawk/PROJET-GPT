@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useMama } from "@/hooks/useMama";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";

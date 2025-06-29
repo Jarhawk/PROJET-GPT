@@ -1,0 +1,10 @@
+Dépôt légal MamaStock
+
+Date de création : 2025
+Auteur : MamaStock SAS
+Version : 1.0
+
+Procédure de dépôt à l’INPI/APP :
+- Préparer les sources et la documentation
+- Remplir le formulaire de dépôt logiciel de l’INPI ou l'enveloppe Soleau
+- Joindre cette notice interne

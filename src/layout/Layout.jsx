@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "@/layout/Sidebar";
 import useAuth from "@/hooks/useAuth";

@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { buildPriceData } from '@/components/produits/priceHelpers.js';
 import { expect, test } from 'vitest';
 

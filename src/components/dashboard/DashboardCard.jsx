@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { motion as Motion } from "framer-motion";
 
 export default function DashboardCard({ title, value, icon, type = "default", progress = null, children }) {

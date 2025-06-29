@@ -1,4 +1,6 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { Link } from "react-router-dom";
+import { watermark } from "@/license";
 
 export default function Footer() {
   return (
@@ -14,9 +16,18 @@ export default function Footer() {
         <Link to="/mentions" className="underline hover:text-mamastockGold transition">
           Mentions légales
         </Link>
+        <Link to="/cgu" className="underline hover:text-mamastockGold transition">
+          CGU
+        </Link>
+        <Link to="/cgv" className="underline hover:text-mamastockGold transition">
+          CGV
+        </Link>
         <span className="italic opacity-80">
           Simplifiez la gestion, concentrez-vous sur l’essentiel.
         </span>
+      </span>
+      <span className="text-xs opacity-70 mt-2 sm:mt-0">
+        {watermark(import.meta.env.VITE_LICENSE_KEY)}
       </span>
     </footer>
   );

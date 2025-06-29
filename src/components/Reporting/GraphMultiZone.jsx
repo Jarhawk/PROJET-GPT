@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 // src/components/Reporting/GraphMultiZone.jsx
 import {
   LineChart,

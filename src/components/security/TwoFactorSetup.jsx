@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
 import { QRCode } from "qrcode.react";
 import { useTwoFactorAuth } from "@/hooks/useTwoFactorAuth";

@@ -447,6 +447,36 @@ $$;
 create or replace trigger trg_facture_ligne after insert on facture_lignes
 for each row execute procedure update_product_pmp();
 
+-- Keep last known purchase price in sync
+create or replace function update_product_prix()
+returns trigger language plpgsql as $$
+declare
+  supp uuid;
+  d date;
+begin
+  if new.facture_id is null then
+    return new;
+  end if;
+  select fournisseur_id, date into supp, d from factures where id = new.facture_id;
+  if supp is null then
+    return new;
+  end if;
+  insert into supplier_products(product_id, fournisseur_id, prix_achat, date_livraison, mama_id)
+    values (new.product_id, supp, new.prix_unitaire, d, new.mama_id)
+    on conflict (product_id, fournisseur_id, date_livraison)
+    do update set prix_achat = excluded.prix_achat, updated_at = now();
+  update products
+     set dernier_prix = new.prix_unitaire,
+         main_supplier_id = coalesce(main_supplier_id, supp)
+   where id = new.product_id;
+  return new;
+end;
+$$;
+
+create or replace trigger trg_update_prix_produit
+after insert on facture_lignes
+for each row execute procedure update_product_prix();
+
 -- Trigger to keep invoice total in sync with its lines
 create or replace function refresh_facture_total()
 returns trigger language plpgsql as $$

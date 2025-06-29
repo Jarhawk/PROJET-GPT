@@ -3,9 +3,12 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import GlassCard from "@/components/ui/GlassCard";
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { session, userData, loading } = useAuth();
+  const user = session?.user;
 
-  if (!user) return <LoadingSpinner message="Chargement..." />;
+  if (loading || !user || !userData) {
+    return <LoadingSpinner message="Chargement..." />;
+  }
 
   return (
     <div className="p-6 flex justify-center">

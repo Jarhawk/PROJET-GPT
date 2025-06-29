@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import MamaLogo from "@/components/ui/MamaLogo";
 import useAuth from "@/hooks/useAuth";
@@ -21,9 +21,12 @@ export default function Login() {
 
 
   // Redirection après authentification une fois les données chargées
+  const redirectedRef = useRef(false);
   useEffect(() => {
+    if (redirectedRef.current) return;
     if (!session || authLoading) return;
     if (!userData) return;
+    redirectedRef.current = true;
     if (userData.actif === false) {
       navigate("/blocked");
       return;

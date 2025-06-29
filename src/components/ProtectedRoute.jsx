@@ -29,14 +29,14 @@ export default function ProtectedRoute({ children, accessKey }) {
   if (loading || access_rights === null)
     return <LoadingSpinner message="Chargement..." />;
 
-  if (pending && location.pathname !== "/pending")
-    return <Navigate to="/pending" replace />;
+  if (pending === true) return <LoadingSpinner message="Chargement..." />;
 
   if (!session || !isAuthenticated) {
     if (location.pathname !== "/login")
       return <Navigate to="/login" replace />;
     return null;
   }
+
   if (!userData) {
     if (location.pathname !== "/unauthorized")
       return <Navigate to="/unauthorized" replace />;
@@ -53,6 +53,13 @@ export default function ProtectedRoute({ children, accessKey }) {
     if (!isAllowed && location.pathname !== "/unauthorized")
       return <Navigate to="/unauthorized" replace />;
   }
+
+  console.log("ProtectedRoute: access granted", {
+    path: location.pathname,
+    session: !!session,
+    userDataLoaded: !!userData,
+    pending,
+  });
 
   return children;
 }

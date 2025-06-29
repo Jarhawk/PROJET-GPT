@@ -41,7 +41,6 @@ export default function Produits() {
         nom: row.nom,
         famille: row.famille,
         unite: row.unite,
-        pmp: Number(row.pmp) || 0,
         stock_reel: Number(row.stock_reel) || 0,
         stock_min: Number(row.stock_min) || 0,
         actif: row.actif !== false,

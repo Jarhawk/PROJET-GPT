@@ -20,7 +20,7 @@ create table if not exists mamas (
 );
 
 create table if not exists roles (
-    id serial primary key,
+    id uuid primary key default uuid_generate_v4(),
     nom text not null unique,
     description text
 );
@@ -29,7 +29,7 @@ create table if not exists users (
     id uuid primary key default uuid_generate_v4(),
     email text not null unique,
     password text,
-    role_id integer references roles(id),
+    role_id uuid references roles(id),
     access_rights jsonb default '[]',
     actif boolean default true,
     mama_id uuid not null references mamas(id),
@@ -241,7 +241,7 @@ create table if not exists fournisseur_notes (
 -- Permissions
 create table if not exists permissions (
     id uuid primary key default uuid_generate_v4(),
-    role_id integer references roles(id) on delete cascade,
+    role_id uuid references roles(id) on delete cascade,
     user_id uuid references users(id) on delete cascade,
     module text not null,
     droit text not null,

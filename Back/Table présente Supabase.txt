@@ -1,0 +1,819 @@
+Table présente Supabase
+
+| table_schema | table_name                  | column_name             | data_type                   | is_nullable | column_default                                  |
+| ------------ | --------------------------- | ----------------------- | --------------------------- | ----------- | ----------------------------------------------- |
+| public       | access_rights_templates     | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | access_rights_templates     | nom                     | text                        | NO          | null                                            |
+| public       | access_rights_templates     | droits                  | jsonb                       | NO          | null                                            |
+| public       | access_rights_templates     | created_at              | timestamp without time zone | YES         | now()                                           |
+| public       | access_rights_templates     | mama_id                 | uuid                        | YES         | null                                            |
+| public       | achats                      | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | achats                      | supplier_product_id     | uuid                        | YES         | null                                            |
+| public       | achats                      | quantite                | numeric                     | YES         | null                                            |
+| public       | achats                      | prix                    | numeric                     | YES         | null                                            |
+| public       | achats                      | date_achat              | date                        | YES         | null                                            |
+| public       | achats                      | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | admin_cleanup_log           | id                      | integer                     | NO          | nextval('admin_cleanup_log_id_seq'::regclass)   |
+| public       | admin_cleanup_log           | object_type             | text                        | YES         | null                                            |
+| public       | admin_cleanup_log           | object_name             | text                        | YES         | null                                            |
+| public       | admin_cleanup_log           | detail                  | text                        | YES         | null                                            |
+| public       | admin_cleanup_log           | deleted_at              | timestamp without time zone | YES         | now()                                           |
+| public       | aide_modules                | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | aide_modules                | mama_id                 | uuid                        | NO          | null                                            |
+| public       | aide_modules                | module                  | text                        | NO          | null                                            |
+| public       | aide_modules                | contenu                 | text                        | YES         | null                                            |
+| public       | aide_modules                | ordre                   | integer                     | YES         | 0                                               |
+| public       | aide_modules                | actif                   | boolean                     | YES         | true                                            |
+| public       | aide_modules                | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | alertes                     | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | alertes                     | mama_id                 | uuid                        | NO          | null                                            |
+| public       | alertes                     | type                    | text                        | NO          | null                                            |
+| public       | alertes                     | message                 | text                        | YES         | null                                            |
+| public       | alertes                     | niveau                  | text                        | YES         | 'info'::text                                    |
+| public       | alertes                     | lu                      | boolean                     | YES         | false                                           |
+| public       | alertes                     | actif                   | boolean                     | YES         | true                                            |
+| public       | alertes                     | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | api_logs                    | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | api_logs                    | token_id                | uuid                        | YES         | null                                            |
+| public       | api_logs                    | endpoint                | text                        | YES         | null                                            |
+| public       | api_logs                    | methode                 | text                        | YES         | null                                            |
+| public       | api_logs                    | statut_code             | integer                     | YES         | null                                            |
+| public       | api_logs                    | message                 | text                        | YES         | null                                            |
+| public       | api_logs                    | date_call               | timestamp with time zone    | YES         | now()                                           |
+| public       | api_tokens                  | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | api_tokens                  | user_id                 | uuid                        | YES         | null                                            |
+| public       | api_tokens                  | mama_id                 | uuid                        | NO          | null                                            |
+| public       | api_tokens                  | label                   | text                        | YES         | null                                            |
+| public       | api_tokens                  | token                   | text                        | NO          | null                                            |
+| public       | api_tokens                  | scopes                  | ARRAY                       | YES         | null                                            |
+| public       | api_tokens                  | actif                   | boolean                     | YES         | true                                            |
+| public       | api_tokens                  | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | attachments                 | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | attachments                 | parent_table            | text                        | NO          | null                                            |
+| public       | attachments                 | parent_id               | uuid                        | NO          | null                                            |
+| public       | attachments                 | url                     | text                        | NO          | null                                            |
+| public       | attachments                 | mime_type               | text                        | YES         | null                                            |
+| public       | attachments                 | mama_id                 | uuid                        | NO          | null                                            |
+| public       | attachments                 | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | audit_log                   | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | audit_log                   | table_name              | text                        | NO          | null                                            |
+| public       | audit_log                   | action                  | text                        | NO          | null                                            |
+| public       | audit_log                   | record_id               | uuid                        | YES         | null                                            |
+| public       | audit_log                   | user_id                 | uuid                        | YES         | null                                            |
+| public       | audit_log                   | mama_id                 | uuid                        | NO          | null                                            |
+| public       | audit_log                   | data                    | jsonb                       | YES         | null                                            |
+| public       | audit_log                   | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | audit_logs                  | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | audit_logs                  | mama_id                 | uuid                        | NO          | null                                            |
+| public       | audit_logs                  | user_id                 | uuid                        | YES         | null                                            |
+| public       | audit_logs                  | action                  | text                        | NO          | null                                            |
+| public       | audit_logs                  | cible                   | text                        | YES         | null                                            |
+| public       | audit_logs                  | description             | text                        | YES         | null                                            |
+| public       | audit_logs                  | date_action             | timestamp with time zone    | YES         | now()                                           |
+| public       | boissons                    | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | boissons                    | nom                     | character varying           | YES         | null                                            |
+| public       | boissons                    | type                    | character varying           | YES         | null                                            |
+| public       | boissons                    | ingredients             | jsonb                       | YES         | null                                            |
+| public       | boissons                    | prix_vente              | numeric                     | YES         | null                                            |
+| public       | boissons                    | user_id                 | uuid                        | YES         | null                                            |
+| public       | boissons                    | mama_id                 | uuid                        | YES         | null                                            |
+| public       | bon_de_commande_items       | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | bon_de_commande_items       | commande_id             | uuid                        | NO          | null                                            |
+| public       | bon_de_commande_items       | product_id              | uuid                        | YES         | null                                            |
+| public       | bon_de_commande_items       | quantite                | numeric                     | YES         | null                                            |
+| public       | bon_de_commande_items       | mama_id                 | uuid                        | YES         | null                                            |
+| public       | bon_de_commandes            | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | bon_de_commandes            | mama_id                 | uuid                        | NO          | null                                            |
+| public       | bon_de_commandes            | supplier_id             | uuid                        | YES         | null                                            |
+| public       | bon_de_commandes            | date_commande           | date                        | YES         | null                                            |
+| public       | bon_de_commandes            | statut                  | text                        | YES         | null                                            |
+| public       | bon_livraison               | id                      | integer                     | NO          | nextval('bon_livraison_id_seq'::regclass)       |
+| public       | bon_livraison               | numero                  | text                        | NO          | null                                            |
+| public       | bon_livraison               | date                    | date                        | NO          | null                                            |
+| public       | bon_livraison               | facture_id              | integer                     | YES         | null                                            |
+| public       | bon_livraison               | created_at              | timestamp without time zone | YES         | now()                                           |
+| public       | bon_livraison               | fournisseur_id          | uuid                        | YES         | null                                            |
+| public       | bon_livraison               | mama_id                 | uuid                        | YES         | null                                            |
+| public       | categories                  | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | categories                  | nom                     | text                        | NO          | null                                            |
+| public       | categories                  | description             | text                        | YES         | null                                            |
+| public       | categories                  | mama_id                 | uuid                        | NO          | null                                            |
+| public       | categories                  | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | categories                  | updated_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | categories                  | user_id                 | uuid                        | YES         | null                                            |
+| public       | centres_de_cout             | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | centres_de_cout             | name                    | text                        | NO          | null                                            |
+| public       | centres_de_cout             | mama_id                 | uuid                        | YES         | null                                            |
+| public       | cost_boisson                | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | cost_boisson                | mama_id                 | uuid                        | NO          | null                                            |
+| public       | cost_boisson                | periode                 | text                        | YES         | null                                            |
+| public       | cost_boisson                | ca_boisson              | numeric                     | YES         | null                                            |
+| public       | cost_boisson                | cout_boisson            | numeric                     | YES         | null                                            |
+| public       | cost_centers                | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | cost_centers                | mama_id                 | uuid                        | NO          | null                                            |
+| public       | cost_centers                | nom                     | text                        | NO          | null                                            |
+| public       | cost_centers                | actif                   | boolean                     | YES         | true                                            |
+| public       | cost_centers                | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | cost_stats                  | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | cost_stats                  | periode                 | text                        | YES         | null                                            |
+| public       | cost_stats                  | food_cost               | numeric                     | YES         | null                                            |
+| public       | cost_stats                  | boisson_cost            | numeric                     | YES         | null                                            |
+| public       | cost_stats                  | mama_id                 | uuid                        | YES         | null                                            |
+| public       | documents                   | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | documents                   | mama_id                 | uuid                        | NO          | null                                            |
+| public       | documents                   | type                    | text                        | NO          | null                                            |
+| public       | documents                   | chemin                  | text                        | NO          | null                                            |
+| public       | documents                   | nom_fichier             | text                        | YES         | null                                            |
+| public       | documents                   | commentaire             | text                        | YES         | null                                            |
+| public       | documents                   | actif                   | boolean                     | YES         | true                                            |
+| public       | documents                   | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | ecarts                      | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | ecarts                      | mama_id                 | uuid                        | NO          | null                                            |
+| public       | ecarts                      | periode                 | text                        | YES         | null                                            |
+| public       | ecarts                      | type                    | text                        | YES         | null                                            |
+| public       | ecarts                      | valeur                  | numeric                     | YES         | null                                            |
+| public       | facture_lignes              | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | facture_lignes              | mama_id                 | uuid                        | NO          | null                                            |
+| public       | facture_lignes              | facture_id              | uuid                        | YES         | null                                            |
+| public       | facture_lignes              | product_id              | uuid                        | YES         | null                                            |
+| public       | facture_lignes              | quantite                | numeric                     | YES         | null                                            |
+| public       | facture_lignes              | prix_unitaire           | numeric                     | YES         | null                                            |
+| public       | facture_lignes              | total                   | numeric                     | YES         | null                                            |
+| public       | facture_lignes              | actif                   | boolean                     | YES         | true                                            |
+| public       | facture_lignes              | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | facture_lignes              | produit_id              | uuid                        | YES         | null                                            |
+| public       | facture_lignes              | tva                     | numeric                     | YES         | 20                                              |
+| public       | factures                    | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | factures                    | mama_id                 | uuid                        | NO          | null                                            |
+| public       | factures                    | fournisseur_id          | uuid                        | YES         | null                                            |
+| public       | factures                    | numero                  | text                        | YES         | null                                            |
+| public       | factures                    | date                    | date                        | YES         | null                                            |
+| public       | factures                    | statut                  | text                        | YES         | 'brouillon'::text                               |
+| public       | factures                    | montant                 | numeric                     | YES         | 0                                               |
+| public       | factures                    | actif                   | boolean                     | YES         | true                                            |
+| public       | factures                    | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | factures                    | total_ht                | numeric                     | YES         | null                                            |
+| public       | factures                    | total_tva               | numeric                     | YES         | null                                            |
+| public       | factures                    | total_ttc               | numeric                     | YES         | null                                            |
+| public       | familles                    | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | familles                    | mama_id                 | uuid                        | NO          | null                                            |
+| public       | familles                    | nom                     | text                        | NO          | null                                            |
+| public       | familles                    | actif                   | boolean                     | YES         | true                                            |
+| public       | fiche_cout_history          | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | fiche_cout_history          | fiche_id                | uuid                        | YES         | null                                            |
+| public       | fiche_cout_history          | mama_id                 | uuid                        | YES         | null                                            |
+| public       | fiche_cout_history          | date_cout               | date                        | NO          | CURRENT_DATE                                    |
+| public       | fiche_cout_history          | cout_total              | numeric                     | YES         | null                                            |
+| public       | fiche_cout_history          | cout_portion            | numeric                     | YES         | null                                            |
+| public       | fiche_cout_history          | updated_by              | uuid                        | YES         | null                                            |
+| public       | fiche_cout_history          | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | fiche_items                 | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | fiche_items                 | fiche_id                | uuid                        | YES         | null                                            |
+| public       | fiche_items                 | produit_id              | uuid                        | YES         | null                                            |
+| public       | fiche_items                 | quantite                | numeric                     | YES         | null                                            |
+| public       | fiche_items                 | mama_id                 | uuid                        | YES         | null                                            |
+| public       | fiche_lignes                | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | fiche_lignes                | fiche_id                | uuid                        | YES         | null                                            |
+| public       | fiche_lignes                | product_id              | uuid                        | YES         | null                                            |
+| public       | fiche_lignes                | quantite                | numeric                     | NO          | null                                            |
+| public       | fiche_lignes                | mama_id                 | uuid                        | NO          | null                                            |
+| public       | fiche_lignes                | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | fiche_produits              | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | fiche_produits              | fiche_id                | uuid                        | YES         | null                                            |
+| public       | fiche_produits              | produit_id              | uuid                        | YES         | null                                            |
+| public       | fiche_produits              | quantite                | numeric                     | YES         | null                                            |
+| public       | fiche_produits              | unite                   | text                        | YES         | null                                            |
+| public       | fiche_produits              | mama_id                 | uuid                        | YES         | null                                            |
+| public       | fiche_produits              | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | fiches                      | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | fiches                      | nom                     | text                        | YES         | null                                            |
+| public       | fiches                      | type                    | text                        | YES         | null                                            |
+| public       | fiches                      | categorie               | text                        | YES         | null                                            |
+| public       | fiches                      | mama_id                 | uuid                        | YES         | null                                            |
+| public       | fiches_ingredients          | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | fiches_ingredients          | fiche_id                | uuid                        | YES         | null                                            |
+| public       | fiches_ingredients          | produit_id              | integer                     | YES         | null                                            |
+| public       | fiches_ingredients          | sous_recette_id         | uuid                        | YES         | null                                            |
+| public       | fiches_ingredients          | quantite_utilisee       | numeric                     | NO          | null                                            |
+| public       | fiches_ingredients          | unite                   | text                        | YES         | null                                            |
+| public       | fiches_ingredients          | type                    | text                        | NO          | null                                            |
+| public       | fiches_ingredients          | created_at              | timestamp without time zone | YES         | now()                                           |
+| public       | fiches_ingredients          | quantite                | numeric                     | YES         | null                                            |
+| public       | fiches_ingredients          | mama_id                 | uuid                        | YES         | null                                            |
+| public       | fiches_menu_jour            | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | fiches_menu_jour            | nom                     | character varying           | YES         | null                                            |
+| public       | fiches_menu_jour            | type                    | character varying           | YES         | null                                            |
+| public       | fiches_menu_jour            | ingredients             | jsonb                       | YES         | null                                            |
+| public       | fiches_menu_jour            | prix_vente              | numeric                     | YES         | null                                            |
+| public       | fiches_menu_jour            | user_id                 | uuid                        | YES         | null                                            |
+| public       | fiches_menu_jour            | mama_id                 | uuid                        | YES         | null                                            |
+| public       | fiches_techniques           | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | fiches_techniques           | nom                     | text                        | NO          | null                                            |
+| public       | fiches_techniques           | portions                | numeric                     | NO          | 1                                               |
+| public       | fiches_techniques           | prix_vente_ttc          | numeric                     | NO          | null                                            |
+| public       | fiches_techniques           | tva                     | numeric                     | YES         | 5.5                                             |
+| public       | fiches_techniques           | active                  | boolean                     | YES         | false                                           |
+| public       | fiches_techniques           | created_at              | timestamp without time zone | YES         | now()                                           |
+| public       | fiches_techniques           | type                    | text                        | YES         | 'plat'::text                                    |
+| public       | fiches_techniques           | categorie               | text                        | YES         | null                                            |
+| public       | fiches_techniques           | mama_id                 | uuid                        | YES         | null                                            |
+| public       | fiches_techniques           | prix_vente              | numeric                     | YES         | null                                            |
+| public       | fournisseur_contacts        | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | fournisseur_contacts        | fournisseur_id          | uuid                        | YES         | null                                            |
+| public       | fournisseur_contacts        | nom                     | text                        | YES         | null                                            |
+| public       | fournisseur_contacts        | email                   | text                        | YES         | null                                            |
+| public       | fournisseur_contacts        | telephone               | text                        | YES         | null                                            |
+| public       | fournisseur_contacts        | mama_id                 | uuid                        | YES         | null                                            |
+| public       | fournisseur_notes           | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | fournisseur_notes           | fournisseur_id          | uuid                        | YES         | null                                            |
+| public       | fournisseur_notes           | note                    | integer                     | YES         | null                                            |
+| public       | fournisseur_notes           | created_at              | timestamp without time zone | YES         | now()                                           |
+| public       | fournisseur_notes           | mama_id                 | uuid                        | YES         | null                                            |
+| public       | fournisseurs                | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | fournisseurs                | mama_id                 | uuid                        | NO          | null                                            |
+| public       | fournisseurs                | nom                     | text                        | NO          | null                                            |
+| public       | fournisseurs                | ville                   | text                        | YES         | null                                            |
+| public       | fournisseurs                | actif                   | boolean                     | YES         | true                                            |
+| public       | fournisseurs                | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | fournisseurs_api_config     | fournisseur_id          | uuid                        | NO          | null                                            |
+| public       | fournisseurs_api_config     | mama_id                 | uuid                        | NO          | null                                            |
+| public       | fournisseurs_api_config     | url                     | text                        | YES         | null                                            |
+| public       | fournisseurs_api_config     | type_api                | text                        | YES         | 'rest'::text                                    |
+| public       | fournisseurs_api_config     | token                   | text                        | YES         | null                                            |
+| public       | fournisseurs_api_config     | format_facture          | text                        | YES         | 'json'::text                                    |
+| public       | fournisseurs_api_config     | actif                   | boolean                     | YES         | true                                            |
+| public       | fournisseurs_api_config     | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | imports_fournisseurs        | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | imports_fournisseurs        | mama_id                 | uuid                        | NO          | null                                            |
+| public       | imports_fournisseurs        | fournisseur_id          | uuid                        | YES         | null                                            |
+| public       | imports_fournisseurs        | nom_fichier             | text                        | YES         | null                                            |
+| public       | imports_fournisseurs        | type_fichier            | text                        | YES         | null                                            |
+| public       | imports_fournisseurs        | contenu                 | jsonb                       | YES         | null                                            |
+| public       | imports_fournisseurs        | statut                  | text                        | YES         | 'en_attente'::text                              |
+| public       | imports_fournisseurs        | date_import             | timestamp with time zone    | YES         | now()                                           |
+| public       | imports_fournisseurs        | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | imports_fournisseurs        | actif                   | boolean                     | YES         | true                                            |
+| public       | imports_lignes              | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | imports_lignes              | import_id               | uuid                        | YES         | null                                            |
+| public       | imports_lignes              | produit_nom             | text                        | YES         | null                                            |
+| public       | imports_lignes              | quantite                | numeric                     | YES         | null                                            |
+| public       | imports_lignes              | unite                   | text                        | YES         | null                                            |
+| public       | imports_lignes              | prix_unitaire           | numeric                     | YES         | null                                            |
+| public       | imports_lignes              | tva                     | numeric                     | YES         | null                                            |
+| public       | imports_lignes              | ligne_complete          | jsonb                       | YES         | null                                            |
+| public       | imports_lignes              | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | inventaire                  | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | inventaire                  | product_id              | uuid                        | YES         | null                                            |
+| public       | inventaire                  | quantite                | numeric                     | YES         | null                                            |
+| public       | inventaire                  | mama_id                 | uuid                        | YES         | null                                            |
+| public       | inventaire_items            | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | inventaire_items            | inventaire_id           | uuid                        | NO          | null                                            |
+| public       | inventaire_items            | product_id              | uuid                        | YES         | null                                            |
+| public       | inventaire_items            | quantite                | numeric                     | YES         | null                                            |
+| public       | inventaire_items            | mama_id                 | uuid                        | YES         | null                                            |
+| public       | inventaire_lignes           | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | inventaire_lignes           | produit_id              | uuid                        | YES         | null                                            |
+| public       | inventaire_lignes           | stock_final             | numeric                     | YES         | null                                            |
+| public       | inventaire_lignes           | periode                 | text                        | YES         | null                                            |
+| public       | inventaire_lignes           | zone                    | text                        | YES         | null                                            |
+| public       | inventaire_lignes           | mama_id                 | uuid                        | YES         | null                                            |
+| public       | inventaire_lignes           | created_at              | timestamp without time zone | YES         | now()                                           |
+| public       | inventaire_zones            | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | inventaire_zones            | mama_id                 | uuid                        | NO          | null                                            |
+| public       | inventaire_zones            | nom                     | text                        | NO          | null                                            |
+| public       | inventaires                 | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | inventaires                 | date                    | date                        | YES         | null                                            |
+| public       | inventaires                 | zone                    | text                        | YES         | null                                            |
+| public       | inventaires                 | utilisateur             | text                        | YES         | null                                            |
+| public       | inventaires                 | etat                    | text                        | YES         | null                                            |
+| public       | inventaires                 | mama_id                 | uuid                        | YES         | null                                            |
+| public       | inventaires                 | commentaire             | text                        | YES         | null                                            |
+| public       | inventory_sheet_lines       | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | inventory_sheet_lines       | inventory_sheet_id      | uuid                        | NO          | null                                            |
+| public       | inventory_sheet_lines       | product_id              | uuid                        | NO          | null                                            |
+| public       | inventory_sheet_lines       | quantite_theorique      | numeric                     | YES         | null                                            |
+| public       | inventory_sheet_lines       | quantite_reelle         | numeric                     | NO          | null                                            |
+| public       | inventory_sheet_lines       | unite                   | text                        | YES         | null                                            |
+| public       | inventory_sheet_lines       | ecart                   | numeric                     | YES         | null                                            |
+| public       | inventory_sheet_lines       | valeur_ecart            | numeric                     | YES         | null                                            |
+| public       | inventory_sheet_lines       | notes                   | text                        | YES         | null                                            |
+| public       | inventory_sheet_lines       | mama_id                 | uuid                        | NO          | null                                            |
+| public       | inventory_sheet_lines       | user_id                 | uuid                        | YES         | null                                            |
+| public       | inventory_sheet_lines       | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | inventory_sheet_lines       | updated_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | inventory_sheets            | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | inventory_sheets            | date_inventaire         | date                        | NO          | CURRENT_DATE                                    |
+| public       | inventory_sheets            | zone_id                 | uuid                        | YES         | null                                            |
+| public       | inventory_sheets            | responsable_id          | uuid                        | YES         | null                                            |
+| public       | inventory_sheets            | statut                  | text                        | YES         | 'en_cours'::text                                |
+| public       | inventory_sheets            | notes                   | text                        | YES         | null                                            |
+| public       | inventory_sheets            | type_inventaire         | text                        | YES         | 'complet'::text                                 |
+| public       | inventory_sheets            | mama_id                 | uuid                        | NO          | null                                            |
+| public       | inventory_sheets            | user_id                 | uuid                        | YES         | null                                            |
+| public       | inventory_sheets            | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | inventory_sheets            | updated_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | invoice_comments            | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | invoice_comments            | invoice_id              | uuid                        | YES         | null                                            |
+| public       | invoice_comments            | user_id                 | uuid                        | YES         | null                                            |
+| public       | invoice_comments            | mama_id                 | uuid                        | YES         | null                                            |
+| public       | invoice_comments            | comment                 | text                        | YES         | null                                            |
+| public       | invoice_comments            | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | invoice_items               | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | invoice_items               | invoice_id              | uuid                        | NO          | null                                            |
+| public       | invoice_items               | product_id              | uuid                        | YES         | null                                            |
+| public       | invoice_items               | quantite                | numeric                     | YES         | null                                            |
+| public       | invoice_items               | prix_unitaire           | numeric                     | YES         | null                                            |
+| public       | invoice_items               | mama_id                 | uuid                        | YES         | null                                            |
+| public       | invoice_lines               | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | invoice_lines               | invoice_id              | uuid                        | NO          | null                                            |
+| public       | invoice_lines               | product_id              | uuid                        | YES         | null                                            |
+| public       | invoice_lines               | description             | text                        | YES         | null                                            |
+| public       | invoice_lines               | quantite                | numeric                     | NO          | null                                            |
+| public       | invoice_lines               | prix_unitaire_ht        | numeric                     | NO          | null                                            |
+| public       | invoice_lines               | total_ht                | numeric                     | YES         | null                                            |
+| public       | invoice_lines               | taux_tva                | numeric                     | YES         | null                                            |
+| public       | invoice_lines               | montant_tva             | numeric                     | YES         | null                                            |
+| public       | invoice_lines               | total_ttc               | numeric                     | YES         | null                                            |
+| public       | invoice_lines               | mama_id                 | uuid                        | NO          | null                                            |
+| public       | invoice_lines               | user_id                 | uuid                        | YES         | null                                            |
+| public       | invoice_lines               | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | invoice_lines               | updated_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | invoices                    | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | invoices                    | numero_facture          | text                        | NO          | null                                            |
+| public       | invoices                    | supplier_id             | uuid                        | YES         | null                                            |
+| public       | invoices                    | date_facture            | date                        | NO          | null                                            |
+| public       | invoices                    | date_reception          | date                        | YES         | null                                            |
+| public       | invoices                    | montant_ht              | numeric                     | YES         | null                                            |
+| public       | invoices                    | montant_tva             | numeric                     | YES         | null                                            |
+| public       | invoices                    | montant_ttc             | numeric                     | YES         | null                                            |
+| public       | invoices                    | statut                  | text                        | YES         | 'non payée'::text                               |
+| public       | invoices                    | notes                   | text                        | YES         | null                                            |
+| public       | invoices                    | fichier_url             | text                        | YES         | null                                            |
+| public       | invoices                    | mama_id                 | uuid                        | NO          | null                                            |
+| public       | invoices                    | user_id                 | uuid                        | YES         | null                                            |
+| public       | invoices                    | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | invoices                    | updated_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | lignes_factures             | id                      | integer                     | NO          | nextval('lignes_factures_id_seq'::regclass)     |
+| public       | lignes_factures             | facture_id              | integer                     | YES         | null                                            |
+| public       | lignes_factures             | produit_id              | integer                     | YES         | null                                            |
+| public       | lignes_factures             | quantite                | numeric                     | NO          | null                                            |
+| public       | lignes_factures             | prix_unitaire           | numeric                     | YES         | null                                            |
+| public       | lignes_factures             | total                   | numeric                     | YES         | null                                            |
+| public       | lignes_factures             | created_at              | timestamp without time zone | YES         | now()                                           |
+| public       | lignes_factures             | mama_id                 | uuid                        | YES         | null                                            |
+| public       | lignes_requisitions         | id                      | integer                     | NO          | nextval('lignes_requisitions_id_seq'::regclass) |
+| public       | lignes_requisitions         | requisition_id          | integer                     | YES         | null                                            |
+| public       | lignes_requisitions         | produit_id              | integer                     | YES         | null                                            |
+| public       | lignes_requisitions         | quantite                | numeric                     | NO          | null                                            |
+| public       | lignes_requisitions         | zone                    | text                        | YES         | null                                            |
+| public       | lignes_requisitions         | created_at              | timestamp without time zone | YES         | now()                                           |
+| public       | lignes_requisitions         | mama_id                 | uuid                        | YES         | null                                            |
+| public       | livraison_items             | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | livraison_items             | livraison_id            | uuid                        | NO          | null                                            |
+| public       | livraison_items             | product_id              | uuid                        | YES         | null                                            |
+| public       | livraison_items             | quantite                | numeric                     | YES         | null                                            |
+| public       | livraison_items             | mama_id                 | uuid                        | YES         | null                                            |
+| public       | livraisons                  | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | livraisons                  | mama_id                 | uuid                        | NO          | null                                            |
+| public       | livraisons                  | supplier_id             | uuid                        | YES         | null                                            |
+| public       | livraisons                  | date                    | date                        | YES         | null                                            |
+| public       | livraisons                  | reference               | text                        | YES         | null                                            |
+| public       | logs                        | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | logs                        | user_email              | character varying           | YES         | null                                            |
+| public       | logs                        | action                  | character varying           | YES         | null                                            |
+| public       | logs                        | module                  | character varying           | YES         | null                                            |
+| public       | logs                        | timestamp               | timestamp without time zone | YES         | now()                                           |
+| public       | logs                        | mama_id                 | uuid                        | YES         | null                                            |
+| public       | mamas                       | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | mamas                       | nom                     | text                        | NO          | null                                            |
+| public       | mamas                       | actif                   | boolean                     | YES         | true                                            |
+| public       | mamas                       | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | menu_fiches                 | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | menu_fiches                 | menu_id                 | uuid                        | YES         | null                                            |
+| public       | menu_fiches                 | fiche_id                | uuid                        | YES         | null                                            |
+| public       | menu_fiches                 | mama_id                 | uuid                        | YES         | null                                            |
+| public       | menu_items                  | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | menu_items                  | menu_id                 | uuid                        | YES         | null                                            |
+| public       | menu_items                  | recipe_id               | uuid                        | YES         | null                                            |
+| public       | menu_items                  | mama_id                 | uuid                        | YES         | null                                            |
+| public       | menu_items                  | created_at              | timestamp without time zone | YES         | now()                                           |
+| public       | menus                       | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | menus                       | nom                     | text                        | YES         | null                                            |
+| public       | menus                       | date                    | date                        | YES         | null                                            |
+| public       | menus                       | mama_id                 | uuid                        | YES         | null                                            |
+| public       | menus_du_jour               | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | menus_du_jour               | nom                     | text                        | NO          | null                                            |
+| public       | menus_du_jour               | date                    | date                        | NO          | null                                            |
+| public       | menus_du_jour               | prix_vente_ttc          | numeric                     | YES         | null                                            |
+| public       | menus_du_jour               | tva                     | numeric                     | YES         | 5.5                                             |
+| public       | menus_du_jour               | created_at              | timestamp without time zone | YES         | now()                                           |
+| public       | menus_du_jour               | mama_id                 | uuid                        | YES         | null                                            |
+| public       | menus_fiches                | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | menus_fiches                | menu_id                 | uuid                        | YES         | null                                            |
+| public       | menus_fiches                | fiche_id                | uuid                        | YES         | null                                            |
+| public       | menus_fiches                | quantite                | numeric                     | NO          | 1                                               |
+| public       | menus_fiches                | mama_id                 | uuid                        | YES         | null                                            |
+| public       | menus_journaliers           | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | menus_journaliers           | date                    | date                        | YES         | null                                            |
+| public       | menus_journaliers           | entree_id               | uuid                        | YES         | null                                            |
+| public       | menus_journaliers           | plat_id                 | uuid                        | YES         | null                                            |
+| public       | menus_journaliers           | dessert_id              | uuid                        | YES         | null                                            |
+| public       | menus_journaliers           | cost_total              | numeric                     | YES         | null                                            |
+| public       | menus_journaliers           | prix_total              | numeric                     | YES         | null                                            |
+| public       | menus_journaliers           | food_cost               | numeric                     | YES         | null                                            |
+| public       | menus_journaliers           | user_id                 | uuid                        | YES         | null                                            |
+| public       | menus_journaliers           | mama_id                 | uuid                        | YES         | null                                            |
+| public       | mouvement_cost_centers      | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | mouvement_cost_centers      | mouvement_id            | uuid                        | YES         | null                                            |
+| public       | mouvement_cost_centers      | cost_center_id          | uuid                        | YES         | null                                            |
+| public       | mouvement_cost_centers      | quantite                | numeric                     | YES         | null                                            |
+| public       | mouvement_cost_centers      | valeur                  | numeric                     | YES         | null                                            |
+| public       | mouvement_cost_centers      | mama_id                 | uuid                        | NO          | null                                            |
+| public       | mouvement_items             | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | mouvement_items             | mouvement_id            | uuid                        | NO          | null                                            |
+| public       | mouvement_items             | product_id              | uuid                        | YES         | null                                            |
+| public       | mouvement_items             | quantite                | numeric                     | YES         | null                                            |
+| public       | mouvement_items             | mama_id                 | uuid                        | YES         | null                                            |
+| public       | mouvements                  | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | mouvements                  | produit_id              | uuid                        | YES         | null                                            |
+| public       | mouvements                  | inventaire_id           | uuid                        | YES         | null                                            |
+| public       | mouvements                  | quantite                | numeric                     | YES         | null                                            |
+| public       | mouvements                  | type                    | text                        | YES         | null                                            |
+| public       | mouvements                  | date                    | timestamp without time zone | YES         | now()                                           |
+| public       | mouvements                  | mama_id                 | uuid                        | YES         | null                                            |
+| public       | mouvements_stock            | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | mouvements_stock            | date                    | timestamp without time zone | YES         | null                                            |
+| public       | mouvements_stock            | quantite                | numeric                     | YES         | null                                            |
+| public       | mouvements_stock            | produit_id              | uuid                        | YES         | null                                            |
+| public       | mouvements_stock            | zone_source             | text                        | YES         | null                                            |
+| public       | mouvements_stock            | zone_destination        | text                        | YES         | null                                            |
+| public       | mouvements_stock            | mama_id                 | uuid                        | YES         | null                                            |
+| public       | mouvements_stock            | type                    | text                        | YES         | null                                            |
+| public       | mouvements_stock            | product_id              | uuid                        | YES         | null                                            |
+| public       | mouvements_stock            | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | movements                   | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | movements                   | produit_id              | uuid                        | YES         | null                                            |
+| public       | movements                   | zone_source             | text                        | YES         | null                                            |
+| public       | movements                   | zone_destination        | text                        | YES         | null                                            |
+| public       | movements                   | quantite                | numeric                     | YES         | null                                            |
+| public       | movements                   | mama_id                 | uuid                        | YES         | null                                            |
+| public       | movements                   | date                    | timestamp without time zone | YES         | null                                            |
+| public       | movements                   | created_at              | timestamp without time zone | YES         | now()                                           |
+| public       | notations                   | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | notations                   | fournisseur_id          | uuid                        | YES         | null                                            |
+| public       | notations                   | note                    | numeric                     | YES         | null                                            |
+| public       | notations                   | commentaire             | text                        | YES         | null                                            |
+| public       | notations                   | mama_id                 | uuid                        | YES         | null                                            |
+| public       | notations                   | created_at              | timestamp without time zone | YES         | now()                                           |
+| public       | notifications               | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | notifications               | user_id                 | uuid                        | NO          | null                                            |
+| public       | notifications               | type_notification       | text                        | NO          | null                                            |
+| public       | notifications               | message                 | text                        | NO          | null                                            |
+| public       | notifications               | lien_associe            | text                        | YES         | null                                            |
+| public       | notifications               | lu                      | boolean                     | YES         | false                                           |
+| public       | notifications               | severite                | text                        | YES         | 'info'::text                                    |
+| public       | notifications               | module                  | text                        | YES         | null                                            |
+| public       | notifications               | mama_id                 | uuid                        | NO          | null                                            |
+| public       | notifications               | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | onboarding                  | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | onboarding                  | user_id                 | uuid                        | NO          | null                                            |
+| public       | onboarding                  | etape                   | text                        | NO          | null                                            |
+| public       | onboarding                  | complete                | boolean                     | YES         | false                                           |
+| public       | onboarding                  | completed_at            | timestamp with time zone    | YES         | null                                            |
+| public       | onboarding                  | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | parametres                  | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | parametres                  | mama_id                 | uuid                        | NO          | null                                            |
+| public       | parametres                  | nom                     | text                        | YES         | null                                            |
+| public       | parametres                  | logo                    | text                        | YES         | null                                            |
+| public       | parametres                  | contacts                | jsonb                       | YES         | null                                            |
+| public       | parametres                  | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | permissions                 | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | permissions                 | user_id                 | uuid                        | YES         | null                                            |
+| public       | permissions                 | droit                   | text                        | YES         | null                                            |
+| public       | permissions                 | module                  | text                        | YES         | null                                            |
+| public       | permissions                 | mama_id                 | uuid                        | YES         | null                                            |
+| public       | product_families            | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | product_families            | mama_id                 | uuid                        | NO          | null                                            |
+| public       | product_families            | nom                     | text                        | NO          | null                                            |
+| public       | product_unites              | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | product_unites              | mama_id                 | uuid                        | NO          | null                                            |
+| public       | product_unites              | nom                     | text                        | NO          | null                                            |
+| public       | products                    | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | products                    | mama_id                 | uuid                        | NO          | null                                            |
+| public       | products                    | nom                     | text                        | NO          | null                                            |
+| public       | products                    | famille                 | text                        | YES         | null                                            |
+| public       | products                    | unite                   | text                        | YES         | null                                            |
+| public       | products                    | actif                   | boolean                     | YES         | true                                            |
+| public       | products                    | stock_reel              | numeric                     | YES         | 0                                               |
+| public       | products                    | stock_theorique         | numeric                     | YES         | 0                                               |
+| public       | products                    | pmp                     | numeric                     | YES         | 0                                               |
+| public       | products                    | dernier_prix            | numeric                     | YES         | null                                            |
+| public       | products                    | main_supplier_id        | uuid                        | YES         | null                                            |
+| public       | products                    | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | profiles                    | id                      | uuid                        | NO          | null                                            |
+| public       | profiles                    | username                | text                        | YES         | null                                            |
+| public       | profiles                    | created_at              | timestamp without time zone | YES         | now()                                           |
+| public       | profiles                    | nom                     | text                        | YES         | null                                            |
+| public       | profiles                    | role                    | text                        | YES         | 'manager'::text                                 |
+| public       | profiles                    | mama_id                 | uuid                        | YES         | null                                            |
+| public       | promotions                  | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | promotions                  | mama_id                 | uuid                        | NO          | null                                            |
+| public       | promotions                  | nom                     | text                        | NO          | null                                            |
+| public       | promotions                  | date_debut              | date                        | YES         | null                                            |
+| public       | promotions                  | date_fin                | date                        | YES         | null                                            |
+| public       | promotions                  | description             | text                        | YES         | null                                            |
+| public       | promotions                  | actif                   | boolean                     | YES         | true                                            |
+| public       | promotions                  | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | recipe_items                | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | recipe_items                | recipe_id               | uuid                        | YES         | null                                            |
+| public       | recipe_items                | product_id              | uuid                        | YES         | null                                            |
+| public       | recipe_items                | quantite                | numeric                     | YES         | null                                            |
+| public       | recipe_items                | mama_id                 | uuid                        | YES         | null                                            |
+| public       | recipe_items                | created_at              | timestamp without time zone | YES         | now()                                           |
+| public       | recipes                     | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | recipes                     | nom                     | text                        | YES         | null                                            |
+| public       | recipes                     | type                    | text                        | YES         | null                                            |
+| public       | recipes                     | portions                | numeric                     | YES         | null                                            |
+| public       | recipes                     | cout_total              | numeric                     | YES         | null                                            |
+| public       | recipes                     | mama_id                 | uuid                        | YES         | null                                            |
+| public       | recipes                     | created_at              | timestamp without time zone | YES         | now()                                           |
+| public       | requisition_items           | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | requisition_items           | requisition_id          | uuid                        | NO          | null                                            |
+| public       | requisition_items           | product_id              | uuid                        | YES         | null                                            |
+| public       | requisition_items           | quantite                | numeric                     | YES         | null                                            |
+| public       | requisition_items           | mama_id                 | uuid                        | YES         | null                                            |
+| public       | requisition_lignes          | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | requisition_lignes          | mama_id                 | uuid                        | NO          | null                                            |
+| public       | requisition_lignes          | requisition_id          | uuid                        | NO          | null                                            |
+| public       | requisition_lignes          | product_id              | uuid                        | NO          | null                                            |
+| public       | requisition_lignes          | quantite                | numeric                     | YES         | null                                            |
+| public       | requisition_lignes          | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | requisition_lines           | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | requisition_lines           | requisition_id          | uuid                        | NO          | null                                            |
+| public       | requisition_lines           | product_id              | uuid                        | NO          | null                                            |
+| public       | requisition_lines           | quantite_demandee       | numeric                     | NO          | null                                            |
+| public       | requisition_lines           | quantite_approuvee      | numeric                     | YES         | null                                            |
+| public       | requisition_lines           | quantite_fournie        | numeric                     | YES         | null                                            |
+| public       | requisition_lines           | unite                   | text                        | YES         | null                                            |
+| public       | requisition_lines           | notes                   | text                        | YES         | null                                            |
+| public       | requisition_lines           | mama_id                 | uuid                        | NO          | null                                            |
+| public       | requisition_lines           | user_id                 | uuid                        | YES         | null                                            |
+| public       | requisition_lines           | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | requisition_lines           | updated_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | requisitions                | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | requisitions                | requisition_number      | text                        | YES         | null                                            |
+| public       | requisitions                | date_requisition        | date                        | NO          | CURRENT_DATE                                    |
+| public       | requisitions                | demandeur_id            | uuid                        | YES         | null                                            |
+| public       | requisitions                | zone_source_id          | uuid                        | YES         | null                                            |
+| public       | requisitions                | zone_destination_id     | uuid                        | YES         | null                                            |
+| public       | requisitions                | statut                  | text                        | YES         | 'en_attente'::text                              |
+| public       | requisitions                | notes                   | text                        | YES         | null                                            |
+| public       | requisitions                | mama_id                 | uuid                        | NO          | null                                            |
+| public       | requisitions                | user_id                 | uuid                        | YES         | null                                            |
+| public       | requisitions                | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | requisitions                | updated_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | roles                       | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | roles                       | mama_id                 | uuid                        | YES         | null                                            |
+| public       | roles                       | nom                     | text                        | NO          | null                                            |
+| public       | roles                       | actif                   | boolean                     | YES         | true                                            |
+| public       | signalements                | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | signalements                | produit_id              | uuid                        | YES         | null                                            |
+| public       | signalements                | type                    | text                        | YES         | null                                            |
+| public       | signalements                | commentaire             | text                        | YES         | null                                            |
+| public       | signalements                | mama_id                 | uuid                        | YES         | null                                            |
+| public       | signalements                | created_at              | timestamp without time zone | YES         | now()                                           |
+| public       | sous_recette_ingredients    | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | sous_recette_ingredients    | sous_recette_id         | uuid                        | YES         | null                                            |
+| public       | sous_recette_ingredients    | produit_id              | integer                     | YES         | null                                            |
+| public       | sous_recette_ingredients    | quantite                | numeric                     | NO          | null                                            |
+| public       | sous_recette_ingredients    | unite                   | text                        | YES         | null                                            |
+| public       | sous_recette_ingredients    | created_at              | timestamp without time zone | YES         | now()                                           |
+| public       | sous_recette_ingredients    | mama_id                 | uuid                        | YES         | null                                            |
+| public       | sous_recettes               | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | sous_recettes               | nom                     | text                        | NO          | null                                            |
+| public       | sous_recettes               | poids_total             | numeric                     | NO          | null                                            |
+| public       | sous_recettes               | created_at              | timestamp without time zone | YES         | now()                                           |
+| public       | sous_recettes               | total_poids             | numeric                     | YES         | null                                            |
+| public       | sous_recettes               | mama_id                 | uuid                        | YES         | null                                            |
+| public       | stock_movements             | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | stock_movements             | product_id              | uuid                        | NO          | null                                            |
+| public       | stock_movements             | type_mouvement          | text                        | NO          | null                                            |
+| public       | stock_movements             | quantite                | numeric                     | NO          | null                                            |
+| public       | stock_movements             | zone_id                 | uuid                        | YES         | null                                            |
+| public       | stock_movements             | date_mouvement          | timestamp with time zone    | YES         | now()                                           |
+| public       | stock_movements             | reference_document_id   | uuid                        | YES         | null                                            |
+| public       | stock_movements             | reference_document_type | text                        | YES         | null                                            |
+| public       | stock_movements             | notes                   | text                        | YES         | null                                            |
+| public       | stock_movements             | user_id                 | uuid                        | YES         | null                                            |
+| public       | stock_movements             | mama_id                 | uuid                        | NO          | null                                            |
+| public       | stock_movements             | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | stock_movements             | updated_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | stocks_boisson              | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | stocks_boisson              | date                    | date                        | NO          | null                                            |
+| public       | stocks_boisson              | type                    | text                        | NO          | null                                            |
+| public       | stocks_boisson              | categorie               | text                        | NO          | null                                            |
+| public       | stocks_boisson              | montant                 | numeric                     | NO          | null                                            |
+| public       | stocks_boisson              | created_at              | timestamp without time zone | YES         | now()                                           |
+| public       | stocks_boisson              | mama_id                 | uuid                        | YES         | null                                            |
+| public       | supplier_products           | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | supplier_products           | product_id              | uuid                        | YES         | null                                            |
+| public       | supplier_products           | supplier_id             | uuid                        | YES         | null                                            |
+| public       | supplier_products           | mama_id                 | uuid                        | NO          | null                                            |
+| public       | supplier_products           | created_at              | timestamp without time zone | YES         | now()                                           |
+| public       | supplier_products           | prix_achat              | numeric                     | YES         | null                                            |
+| public       | supplier_products           | updated_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | suppliers                   | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | suppliers                   | nom                     | text                        | NO          | null                                            |
+| public       | suppliers                   | contact_person          | text                        | YES         | null                                            |
+| public       | suppliers                   | email                   | text                        | YES         | null                                            |
+| public       | suppliers                   | telephone               | text                        | YES         | null                                            |
+| public       | suppliers                   | adresse                 | text                        | YES         | null                                            |
+| public       | suppliers                   | ville                   | text                        | YES         | null                                            |
+| public       | suppliers                   | code_postal             | text                        | YES         | null                                            |
+| public       | suppliers                   | pays                    | text                        | YES         | null                                            |
+| public       | suppliers                   | notes                   | text                        | YES         | null                                            |
+| public       | suppliers                   | mama_id                 | uuid                        | NO          | null                                            |
+| public       | suppliers                   | user_id                 | uuid                        | YES         | null                                            |
+| public       | suppliers                   | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | suppliers                   | updated_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | tache_assignations          | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | tache_assignations          | mama_id                 | uuid                        | NO          | null                                            |
+| public       | tache_assignations          | tache_id                | uuid                        | NO          | null                                            |
+| public       | tache_assignations          | user_id                 | uuid                        | NO          | null                                            |
+| public       | tache_assignations          | statut                  | text                        | YES         | 'à faire'::text                                 |
+| public       | tache_assignations          | commentaire             | text                        | YES         | null                                            |
+| public       | tache_assignations          | date_realisation        | timestamp with time zone    | YES         | null                                            |
+| public       | tache_assignations          | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | taches                      | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | taches                      | mama_id                 | uuid                        | NO          | null                                            |
+| public       | taches                      | titre                   | text                        | NO          | null                                            |
+| public       | taches                      | description             | text                        | YES         | null                                            |
+| public       | taches                      | type                    | text                        | YES         | null                                            |
+| public       | taches                      | date_debut              | date                        | YES         | null                                            |
+| public       | taches                      | date_fin                | date                        | YES         | null                                            |
+| public       | taches                      | actif                   | boolean                     | YES         | true                                            |
+| public       | taches                      | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | tasks                       | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | tasks                       | titre                   | text                        | NO          | null                                            |
+| public       | tasks                       | description             | text                        | YES         | null                                            |
+| public       | tasks                       | date_echeance           | date                        | YES         | null                                            |
+| public       | tasks                       | heure_echeance          | time without time zone      | YES         | null                                            |
+| public       | tasks                       | priorite                | text                        | YES         | 'moyenne'::text                                 |
+| public       | tasks                       | statut                  | text                        | YES         | 'a_faire'::text                                 |
+| public       | tasks                       | assigne_a_id            | uuid                        | YES         | null                                            |
+| public       | tasks                       | cree_par_id             | uuid                        | YES         | null                                            |
+| public       | tasks                       | module_associe          | text                        | YES         | null                                            |
+| public       | tasks                       | reference_module_id     | uuid                        | YES         | null                                            |
+| public       | tasks                       | recurrence_rule         | text                        | YES         | null                                            |
+| public       | tasks                       | recurrence_end_date     | date                        | YES         | null                                            |
+| public       | tasks                       | parent_task_id          | uuid                        | YES         | null                                            |
+| public       | tasks                       | mama_id                 | uuid                        | NO          | null                                            |
+| public       | tasks                       | user_id                 | uuid                        | YES         | null                                            |
+| public       | tasks                       | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | tasks                       | updated_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | technical_sheet_ingredients | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | technical_sheet_ingredients | technical_sheet_id      | uuid                        | NO          | null                                            |
+| public       | technical_sheet_ingredients | product_id              | uuid                        | YES         | null                                            |
+| public       | technical_sheet_ingredients | sub_sheet_id            | uuid                        | YES         | null                                            |
+| public       | technical_sheet_ingredients | quantite_brute          | numeric                     | NO          | null                                            |
+| public       | technical_sheet_ingredients | unite_ingredient        | text                        | NO          | null                                            |
+| public       | technical_sheet_ingredients | pertes_parage_percent   | numeric                     | YES         | 0                                               |
+| public       | technical_sheet_ingredients | quantite_nette          | numeric                     | YES         | null                                            |
+| public       | technical_sheet_ingredients | cout_ingredient         | numeric                     | YES         | null                                            |
+| public       | technical_sheet_ingredients | notes                   | text                        | YES         | null                                            |
+| public       | technical_sheet_ingredients | ordre                   | integer                     | YES         | 0                                               |
+| public       | technical_sheet_ingredients | mama_id                 | uuid                        | NO          | null                                            |
+| public       | technical_sheet_ingredients | user_id                 | uuid                        | YES         | null                                            |
+| public       | technical_sheet_ingredients | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | technical_sheet_ingredients | updated_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | technical_sheet_lignes      | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | technical_sheet_lignes      | mama_id                 | uuid                        | NO          | null                                            |
+| public       | technical_sheet_lignes      | fiche_id                | uuid                        | NO          | null                                            |
+| public       | technical_sheet_lignes      | product_id              | uuid                        | NO          | null                                            |
+| public       | technical_sheet_lignes      | quantite                | numeric                     | NO          | null                                            |
+| public       | technical_sheet_lignes      | actif                   | boolean                     | YES         | true                                            |
+| public       | technical_sheet_lignes      | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | technical_sheets            | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | technical_sheets            | nom                     | text                        | NO          | null                                            |
+| public       | technical_sheets            | reference               | text                        | YES         | null                                            |
+| public       | technical_sheets            | type_fiche              | text                        | NO          | 'recette'::text                                 |
+| public       | technical_sheets            | category_id             | uuid                        | YES         | null                                            |
+| public       | technical_sheets            | description             | text                        | YES         | null                                            |
+| public       | technical_sheets            | instructions            | text                        | YES         | null                                            |
+| public       | technical_sheets            | nombre_portions         | numeric                     | YES         | 1                                               |
+| public       | technical_sheets            | prix_vente_ht           | numeric                     | YES         | null                                            |
+| public       | technical_sheets            | tva_vente               | numeric                     | YES         | 10.0                                            |
+| public       | technical_sheets            | cout_matiere_total      | numeric                     | YES         | null                                            |
+| public       | technical_sheets            | food_cost_percent       | numeric                     | YES         | null                                            |
+| public       | technical_sheets            | temps_preparation_min   | integer                     | YES         | null                                            |
+| public       | technical_sheets            | actif                   | boolean                     | YES         | true                                            |
+| public       | technical_sheets            | image_url               | text                        | YES         | null                                            |
+| public       | technical_sheets            | notes_internes          | text                        | YES         | null                                            |
+| public       | technical_sheets            | mama_id                 | uuid                        | NO          | null                                            |
+| public       | technical_sheets            | user_id                 | uuid                        | YES         | null                                            |
+| public       | technical_sheets            | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | technical_sheets            | updated_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | transferts                  | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | transferts                  | mama_id                 | uuid                        | YES         | null                                            |
+| public       | transferts                  | produit_id              | uuid                        | YES         | null                                            |
+| public       | transferts                  | date_transfert          | date                        | NO          | null                                            |
+| public       | transferts                  | zone_depart             | character varying           | NO          | null                                            |
+| public       | transferts                  | zone_arrivee            | character varying           | NO          | null                                            |
+| public       | transferts                  | quantite                | numeric                     | NO          | null                                            |
+| public       | transferts                  | motif                   | text                        | YES         | null                                            |
+| public       | transferts                  | created_by              | uuid                        | YES         | null                                            |
+| public       | transferts                  | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | two_factor_auth             | id                      | uuid                        | NO          | null                                            |
+| public       | two_factor_auth             | secret                  | text                        | YES         | null                                            |
+| public       | two_factor_auth             | enabled                 | boolean                     | YES         | false                                           |
+| public       | two_factor_auth             | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | types_mouvements            | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | types_mouvements            | mama_id                 | uuid                        | NO          | null                                            |
+| public       | types_mouvements            | nom                     | text                        | NO          | null                                            |
+| public       | types_mouvements            | type                    | text                        | NO          | null                                            |
+| public       | types_mouvements            | actif                   | boolean                     | YES         | true                                            |
+| public       | types_mouvements            | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | unites                      | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | unites                      | mama_id                 | uuid                        | NO          | null                                            |
+| public       | unites                      | nom                     | text                        | NO          | null                                            |
+| public       | unites                      | actif                   | boolean                     | YES         | true                                            |
+| public       | user_logs                   | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | user_logs                   | mama_id                 | uuid                        | YES         | null                                            |
+| public       | user_logs                   | user_id                 | uuid                        | YES         | null                                            |
+| public       | user_logs                   | action                  | text                        | NO          | null                                            |
+| public       | user_logs                   | details                 | jsonb                       | YES         | null                                            |
+| public       | user_logs                   | done_by                 | uuid                        | YES         | null                                            |
+| public       | user_logs                   | done_at                 | timestamp with time zone    | YES         | now()                                           |
+| public       | users                       | id                      | uuid                        | NO          | null                                            |
+| public       | users                       | email                   | text                        | YES         | null                                            |
+| public       | users                       | mama_id                 | uuid                        | YES         | null                                            |
+| public       | users                       | role                    | text                        | YES         | null                                            |
+| public       | users                       | actif                   | boolean                     | YES         | true                                            |
+| public       | users                       | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | utilisateurs                | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | utilisateurs                | auth_id                 | uuid                        | NO          | null                                            |
+| public       | utilisateurs                | email                   | text                        | YES         | null                                            |
+| public       | utilisateurs                | role                    | text                        | YES         | 'utilisateur'::text                             |
+| public       | utilisateurs                | mama_id                 | uuid                        | YES         | null                                            |
+| public       | utilisateurs                | actif                   | boolean                     | YES         | true                                            |
+| public       | utilisateurs                | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | utilisateurs                | updated_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | utilisateurs                | access_rights           | jsonb                       | YES         | '{}'::jsonb                                     |
+| public       | v_cost_center_monthly       | mama_id                 | uuid                        | YES         | null                                            |
+| public       | v_cost_center_monthly       | mois                    | timestamp with time zone    | YES         | null                                            |
+| public       | v_cost_center_monthly       | total                   | numeric                     | YES         | null                                            |
+| public       | v_cost_center_totals        | mama_id                 | uuid                        | YES         | null                                            |
+| public       | v_cost_center_totals        | total                   | numeric                     | YES         | null                                            |
+| public       | v_fournisseurs_inactifs     | id                      | uuid                        | YES         | null                                            |
+| public       | v_fournisseurs_inactifs     | mama_id                 | uuid                        | YES         | null                                            |
+| public       | v_fournisseurs_inactifs     | nom                     | text                        | YES         | null                                            |
+| public       | v_fournisseurs_inactifs     | ville                   | text                        | YES         | null                                            |
+| public       | v_fournisseurs_inactifs     | actif                   | boolean                     | YES         | null                                            |
+| public       | v_fournisseurs_inactifs     | created_at              | timestamp with time zone    | YES         | null                                            |
+| public       | v_product_price_trend       | product_id              | uuid                        | YES         | null                                            |
+| public       | v_product_price_trend       | mois                    | timestamp with time zone    | YES         | null                                            |
+| public       | v_product_price_trend       | prix_moyen              | numeric                     | YES         | null                                            |
+| public       | v_products_last_price       | product_id              | uuid                        | YES         | null                                            |
+| public       | v_products_last_price       | product_name            | text                        | YES         | null                                            |
+| public       | v_products_last_price       | famille                 | text                        | YES         | null                                            |
+| public       | v_products_last_price       | unite                   | text                        | YES         | null                                            |
+| public       | v_products_last_price       | supplier_id             | uuid                        | YES         | null                                            |
+| public       | v_products_last_price       | supplier_name           | text                        | YES         | null                                            |
+| public       | v_products_last_price       | last_price              | numeric                     | YES         | null                                            |
+| public       | v_products_last_price       | created_at              | timestamp without time zone | YES         | null                                            |
+| public       | v_products_last_price       | mama_id                 | uuid                        | YES         | null                                            |
+| public       | ventes_boisson              | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | ventes_boisson              | date                    | date                        | NO          | null                                            |
+| public       | ventes_boisson              | categorie               | text                        | NO          | null                                            |
+| public       | ventes_boisson              | montant_ht              | numeric                     | NO          | null                                            |
+| public       | ventes_boisson              | created_at              | timestamp without time zone | YES         | now()                                           |
+| public       | ventes_boisson              | mama_id                 | uuid                        | YES         | null                                            |
+| public       | ventes_boissons             | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | ventes_boissons             | mama_id                 | uuid                        | YES         | null                                            |
+| public       | ventes_boissons             | boisson_id              | uuid                        | YES         | null                                            |
+| public       | ventes_boissons             | date_vente              | date                        | NO          | CURRENT_DATE                                    |
+| public       | ventes_boissons             | quantite                | integer                     | NO          | null                                            |
+| public       | ventes_boissons             | created_by              | uuid                        | YES         | null                                            |
+| public       | ventes_boissons             | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | ventes_menu                 | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | ventes_menu                 | produit_id              | integer                     | YES         | null                                            |
+| public       | ventes_menu                 | nom_produit             | text                        | NO          | null                                            |
+| public       | ventes_menu                 | type_produit            | text                        | YES         | null                                            |
+| public       | ventes_menu                 | date                    | date                        | NO          | CURRENT_DATE                                    |
+| public       | ventes_menu                 | nombre_ventes           | integer                     | NO          | null                                            |
+| public       | ventes_menu                 | prix_vente              | numeric                     | NO          | null                                            |
+| public       | ventes_menu                 | cout_matiere            | numeric                     | NO          | null                                            |
+| public       | ventes_menu                 | marge                   | numeric                     | YES         | null                                            |
+| public       | ventes_menu                 | food_cost               | numeric                     | YES         | null                                            |
+| public       | ventes_menu                 | created_at              | timestamp with time zone    | YES         | timezone('utc'::text, now())                    |
+| public       | ventes_menu                 | mama_id                 | uuid                        | YES         | null                                            |
+| public       | zones                       | id                      | uuid                        | NO          | uuid_generate_v4()                              |
+| public       | zones                       | nom                     | text                        | NO          | null                                            |
+| public       | zones                       | description             | text                        | YES         | null                                            |
+| public       | zones                       | mama_id                 | uuid                        | NO          | null                                            |
+| public       | zones                       | created_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | zones                       | updated_at              | timestamp with time zone    | YES         | now()                                           |
+| public       | zones                       | user_id                 | uuid                        | YES         | null                                            |
+| public       | zones_stock                 | id                      | uuid                        | NO          | gen_random_uuid()                               |
+| public       | zones_stock                 | nom                     | text                        | YES         | null                                            |
+| public       | zones_stock                 | mama_id                 | uuid                        | YES         | null                                            |

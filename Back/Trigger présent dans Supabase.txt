@@ -1,0 +1,52 @@
+Trigger présent dans Supabase 
+
+| table_name             | trigger_name                          | event  | timing | action_statement                                    |
+| ---------------------- | ------------------------------------- | ------ | ------ | --------------------------------------------------- |
+| aide_modules           | trg_audit_aide_modules                | INSERT | AFTER  | EXECUTE FUNCTION insert_audit_log()                 |
+| aide_modules           | trg_audit_aide_modules                | UPDATE | AFTER  | EXECUTE FUNCTION insert_audit_log()                 |
+| aide_modules           | trg_audit_aide_modules                | DELETE | AFTER  | EXECUTE FUNCTION insert_audit_log()                 |
+| alertes                | trg_audit_alertes                     | UPDATE | AFTER  | EXECUTE FUNCTION insert_audit_log()                 |
+| alertes                | trg_audit_alertes                     | DELETE | AFTER  | EXECUTE FUNCTION insert_audit_log()                 |
+| alertes                | trg_audit_alertes                     | INSERT | AFTER  | EXECUTE FUNCTION insert_audit_log()                 |
+| api_logs               | trg_audit_api_logs                    | DELETE | AFTER  | EXECUTE FUNCTION insert_audit_log()                 |
+| api_logs               | trg_audit_api_logs                    | INSERT | AFTER  | EXECUTE FUNCTION insert_audit_log()                 |
+| api_logs               | trg_audit_api_logs                    | UPDATE | AFTER  | EXECUTE FUNCTION insert_audit_log()                 |
+| api_tokens             | trg_audit_api_tokens                  | INSERT | AFTER  | EXECUTE FUNCTION insert_audit_log()                 |
+| api_tokens             | trg_audit_api_tokens                  | DELETE | AFTER  | EXECUTE FUNCTION insert_audit_log()                 |
+| api_tokens             | trg_audit_api_tokens                  | UPDATE | AFTER  | EXECUTE FUNCTION insert_audit_log()                 |
+| boissons               | trg_user_id_default_boissons          | INSERT | BEFORE | EXECUTE FUNCTION set_user_id_boissons()             |
+| documents              | trg_audit_documents                   | UPDATE | AFTER  | EXECUTE FUNCTION insert_audit_log()                 |
+| documents              | trg_audit_documents                   | INSERT | AFTER  | EXECUTE FUNCTION insert_audit_log()                 |
+| documents              | trg_audit_documents                   | DELETE | AFTER  | EXECUTE FUNCTION insert_audit_log()                 |
+| facture_lignes         | trg_facture_ligne                     | INSERT | AFTER  | EXECUTE FUNCTION update_product_pmp()               |
+| facture_lignes         | trg_facture_total                     | DELETE | AFTER  | EXECUTE FUNCTION refresh_facture_total()            |
+| facture_lignes         | trg_facture_total                     | UPDATE | AFTER  | EXECUTE FUNCTION refresh_facture_total()            |
+| facture_lignes         | trg_facture_total                     | INSERT | AFTER  | EXECUTE FUNCTION refresh_facture_total()            |
+| facture_lignes         | trg_update_prix_produit               | INSERT | AFTER  | EXECUTE FUNCTION update_product_prix()              |
+| fiche_lignes           | trg_fiche_lignes_cost                 | INSERT | AFTER  | EXECUTE FUNCTION refresh_fiche_cost()               |
+| fiche_lignes           | trg_fiche_lignes_cost                 | UPDATE | AFTER  | EXECUTE FUNCTION refresh_fiche_cost()               |
+| fiche_lignes           | trg_fiche_lignes_cost                 | DELETE | AFTER  | EXECUTE FUNCTION refresh_fiche_cost()               |
+| fiches                 | trg_fiche_update_cost                 | UPDATE | AFTER  | EXECUTE FUNCTION refresh_fiche_cost()               |
+| fiches_menu_jour       | trg_user_id_default_fiches_menu_jour  | INSERT | BEFORE | EXECUTE FUNCTION set_user_id_fiches_menu_jour()     |
+| imports_fournisseurs   | trg_audit_imports                     | DELETE | AFTER  | EXECUTE FUNCTION insert_audit_log()                 |
+| imports_fournisseurs   | trg_audit_imports                     | INSERT | AFTER  | EXECUTE FUNCTION insert_audit_log()                 |
+| imports_fournisseurs   | trg_audit_imports                     | UPDATE | AFTER  | EXECUTE FUNCTION insert_audit_log()                 |
+| inventaire_lignes      | trg_inventaire                        | INSERT | AFTER  | EXECUTE FUNCTION appliquer_inventaire()             |
+| inventaire_lignes      | trg_inventaire                        | UPDATE | AFTER  | EXECUTE FUNCTION appliquer_inventaire()             |
+| inventaire_lignes      | trg_inventaire_ligne                  | INSERT | AFTER  | EXECUTE FUNCTION apply_inventaire_line()            |
+| menus_journaliers      | trg_user_id_default_menus_journaliers | INSERT | BEFORE | EXECUTE FUNCTION set_user_id_menus_journaliers()    |
+| mouvements_stock       | trg_mouvement_stock                   | INSERT | AFTER  | EXECUTE FUNCTION update_stock_theorique()           |
+| mouvements_stock       | trg_update_stock                      | INSERT | AFTER  | EXECUTE FUNCTION update_stock_apres_mouvement()     |
+| onboarding             | trg_audit_onboarding                  | UPDATE | AFTER  | EXECUTE FUNCTION insert_audit_log()                 |
+| onboarding             | trg_audit_onboarding                  | INSERT | AFTER  | EXECUTE FUNCTION insert_audit_log()                 |
+| onboarding             | trg_audit_onboarding                  | DELETE | AFTER  | EXECUTE FUNCTION insert_audit_log()                 |
+| promotions             | trg_audit_promotions                  | INSERT | AFTER  | EXECUTE FUNCTION insert_audit_log()                 |
+| promotions             | trg_audit_promotions                  | UPDATE | AFTER  | EXECUTE FUNCTION insert_audit_log()                 |
+| promotions             | trg_audit_promotions                  | DELETE | AFTER  | EXECUTE FUNCTION insert_audit_log()                 |
+| supplier_products      | trg_updated_at_supplier_products      | UPDATE | BEFORE | EXECUTE FUNCTION set_updated_at_supplier_products() |
+| technical_sheet_lignes | trg_update_cout_total_fiche           | UPDATE | AFTER  | EXECUTE FUNCTION update_cout_total_fiche()          |
+| technical_sheet_lignes | trg_update_cout_total_fiche           | DELETE | AFTER  | EXECUTE FUNCTION update_cout_total_fiche()          |
+| technical_sheet_lignes | trg_update_cout_total_fiche           | INSERT | AFTER  | EXECUTE FUNCTION update_cout_total_fiche()          |
+| utilisateurs           | trg_sync_auth_id                      | UPDATE | BEFORE | EXECUTE FUNCTION sync_auth_id()                     |
+| utilisateurs           | trg_sync_auth_id                      | INSERT | BEFORE | EXECUTE FUNCTION sync_auth_id()                     |
+| utilisateurs           | trg_updated_at_utilisateurs           | UPDATE | BEFORE | EXECUTE FUNCTION set_updated_at_utilisateurs()      |

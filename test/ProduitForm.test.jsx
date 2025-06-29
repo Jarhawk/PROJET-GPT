@@ -35,3 +35,26 @@ test('renders additional product inputs', () => {
   expect(screen.getByLabelText(/Allergènes/)).toBeInTheDocument();
   expect(screen.getByLabelText(/Stock minimum/)).toBeInTheDocument();
 });
+
+test('PMP input read-only or hidden', () => {
+  mockHook = () => ({ addProduct: vi.fn(), updateProduct: vi.fn(), loading: false });
+  // create mode: no PMP field
+  const { rerender } = render(
+    <ProduitForm familles={[]} unites={[]} onSuccess={vi.fn()} onClose={vi.fn()} />
+  );
+  expect(screen.queryByLabelText(/PMP/)).toBeNull();
+
+  // edit mode: PMP displayed but disabled
+  rerender(
+    <ProduitForm
+      produit={{ id: '1', nom: 'p', famille: 'f', unite: 'u', pmp: 5 }}
+      familles={[]}
+      unites={[]}
+      onSuccess={vi.fn()}
+      onClose={vi.fn()}
+    />
+  );
+  const input = screen.getByDisplayValue('5');
+  expect(input).toBeDisabled();
+  expect(input).toHaveValue(5);
+});

@@ -48,10 +48,10 @@ test('fetchLignes applies filters and pagination', async () => {
 test('createLigne inserts with mama_id', async () => {
   const { result } = renderHook(() => useInventaireLignes());
   await act(async () => {
-    await result.current.createLigne({ inventaire_id: 'inv1', product_id: 'p1', quantite: 1 });
+    await result.current.createLigne({ inventaire_id: 'inv1', produit_id: 'p1', quantite: 1 });
   });
   expect(fromMock).toHaveBeenCalledWith('inventaires');
-  expect(query.insert).toHaveBeenCalledWith([{ inventaire_id: 'inv1', product_id: 'p1', quantite: 1, mama_id: 'm1' }]);
+  expect(query.insert).toHaveBeenCalledWith([{ inventaire_id: 'inv1', produit_id: 'p1', quantite: 1, mama_id: 'm1' }]);
 });
 
 test('updateLigne updates with id and mama_id', async () => {

@@ -16,7 +16,7 @@ export function useStock() {
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
-      .from("products")
+      .from("produits")
       .select("*")
       .eq("mama_id", mama_id);
     setLoading(false);
@@ -42,11 +42,11 @@ export function useStock() {
   }, [mama_id]);
 
   // 3. Ajouter mouvement de stock
-  async function addMouvementStock({ product_id, type, quantite, zone, motif }) {
+  async function addMouvementStock({ produit_id, type, quantite, zone, motif }) {
     setLoading(true);
     setError(null);
     const { error } = await supabase.from("mouvements_stock").insert([{ 
-      product_id,
+      produit_id,
       type,
       quantite: Number(quantite),
       zone,
@@ -59,10 +59,10 @@ export function useStock() {
     // On ne met pas à jour ici, c’est fait au fetchStocks/fetchMouvements
   }
 
-  async function fetchRotationStats(product_id) {
+  async function fetchRotationStats(produit_id) {
     const { data, error } = await supabase.rpc('stats_rotation_produit', {
       mama_id_param: mama_id,
-      product_id_param: product_id,
+      produit_id_param: produit_id,
     });
     if (error) return [];
     return data || [];
@@ -70,13 +70,13 @@ export function useStock() {
 
   // ----- New helpers for stock module -----
   const getStockTheorique = useCallback(
-      async (product_id) => {
-        if (!mama_id || !product_id) return 0;
+      async (produit_id) => {
+        if (!mama_id || !produit_id) return 0;
         const { data, error } = await supabase
-          .from("products")
+          .from("produits")
           .select("stock_theorique")
           .eq("mama_id", mama_id)
-          .eq("id", product_id)
+          .eq("id", produit_id)
           .single();
       if (error) return 0;
       return data?.stock_theorique ?? 0;

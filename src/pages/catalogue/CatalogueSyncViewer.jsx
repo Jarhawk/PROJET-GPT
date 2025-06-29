@@ -29,16 +29,16 @@ export default function CatalogueSyncViewer({ fournisseur_id }) {
 
   const acceptUpdate = async (row) => {
     await supabase
-      .from("supplier_products")
+      .from("fournisseur_produits")
       .upsert(
         {
-          product_id: row.produit_id,
+          produit_id: row.produit_id,
           fournisseur_id: row.fournisseur_id,
           prix_achat: row.nouvelle_valeur,
           date_livraison: new Date().toISOString().slice(0, 10),
           mama_id,
         },
-        { onConflict: ["product_id", "fournisseur_id", "date_livraison"] }
+        { onConflict: ["produit_id", "fournisseur_id", "date_livraison"] }
       );
     await supabase
       .from("catalogue_updates")

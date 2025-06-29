@@ -33,8 +33,8 @@ export default function useExport() {
         data = res.data || [];
       } else if (type === 'produits') {
         const res = await supabase
-          .from('products')
-          .select('*, supplier_products(*, fournisseur:fournisseurs(nom))')
+          .from('produits')
+          .select('*, fournisseur_produits(*, fournisseur:fournisseurs(nom))')
           .eq('mama_id', mama_id);
         data = res.data || [];
       } else if (type === 'factures') {

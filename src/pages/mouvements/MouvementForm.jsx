@@ -11,7 +11,7 @@ export default function MouvementForm({ onClose }) {
   const [produitInput, setProduitInput] = useState("");
   const [form, setForm] = useState({
     type: "entrée",
-    product_id: "",
+    produit_id: "",
     quantite: 0,
     zone: "",
     motif: "",
@@ -27,7 +27,7 @@ export default function MouvementForm({ onClose }) {
   const handleSubmit = async e => {
     e.preventDefault();
     if (loading) return;
-    if (!form.product_id || !form.quantite) {
+    if (!form.produit_id || !form.quantite) {
       toast.error("Produit et quantité requis");
       return;
     }
@@ -47,7 +47,7 @@ export default function MouvementForm({ onClose }) {
   const handleProduitChange = val => {
     setProduitInput(val);
     const found = products.find(p => p.nom === val);
-    setForm(f => ({ ...f, product_id: found ? found.id : "" }));
+    setForm(f => ({ ...f, produit_id: found ? found.id : "" }));
   };
 
   return (

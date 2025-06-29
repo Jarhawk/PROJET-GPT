@@ -15,7 +15,7 @@ export default function MobileInventaire() {
   useEffect(() => {
     if (authLoading || !mama_id) return;
     supabase
-      .from("products")
+      .from("produits")
       .select("*")
       .eq("mama_id", mama_id)
       .then(({ data }) => setProduits(data || []));
@@ -27,8 +27,8 @@ export default function MobileInventaire() {
 
   const handleSave = async () => {
     if (authLoading || !mama_id) return;
-    const lignes = Object.entries(stockFinal).map(([product_id, q]) => ({
-      product_id,
+    const lignes = Object.entries(stockFinal).map(([produit_id, q]) => ({
+      produit_id,
       quantite: parseFloat(q),
     }));
     if (!lignes.length) return;

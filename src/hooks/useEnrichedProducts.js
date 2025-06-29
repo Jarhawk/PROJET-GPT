@@ -14,10 +14,10 @@ export function useEnrichedProducts() {
     setError(null);
     try {
       const { data, error } = await supabase
-        .from("products")
+        .from("produits")
         .select(`
           *,
-          suppliers:supplier_products(*, fournisseur: fournisseurs(*))
+          suppliers:fournisseur_produits(*, fournisseur: fournisseurs(*))
         `)
         .eq("mama_id", mama_id);
 

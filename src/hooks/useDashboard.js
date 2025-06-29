@@ -30,7 +30,7 @@ export function useDashboard() {
     let mouvements = [];
     try {
       const { data: produitsRaw, error: errorProd } = await supabase
-        .from("products")
+        .from("produits")
         .select("id, nom, famille, unite, pmp, stock_reel, stock_min")
         .eq("mama_id", mama_id);
       if (errorProd) throw errorProd;
@@ -45,7 +45,7 @@ export function useDashboard() {
     try {
       const { data: mouvementsRaw, error: errorMouv } = await supabase
         .from("mouvements_stock")
-        .select("type, quantite, product_id, date")
+        .select("type, quantite, produit_id, date")
         .eq("mama_id", mama_id);
       if (errorMouv) throw errorMouv;
       mouvements = Array.isArray(mouvementsRaw) ? mouvementsRaw : [];
@@ -81,7 +81,7 @@ export function useDashboard() {
     familles.forEach(fam => {
       const ids = produits.filter(p => p.famille === fam).map(p => p.id);
       const total = mouvements
-        .filter(m => ids.includes(m.product_id) && m.date?.startsWith(moisCourant) && m.type === "sortie")
+        .filter(m => ids.includes(m.produit_id) && m.date?.startsWith(moisCourant) && m.type === "sortie")
         .reduce((sum, m) => sum + (Number(m.quantite) || 0), 0);
       consoByFamille[fam] = total;
     });

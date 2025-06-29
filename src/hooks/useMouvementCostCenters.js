@@ -16,8 +16,8 @@ export function useMouvementCostCenters() {
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
-      .from("mouvement_cost_centers")
-      .select("id, mouvement_id, cost_center_id, quantite, valeur, cost_centers:cost_center_id(nom)")
+      .from("mouvements_centres_cout")
+      .select("id, mouvement_id, cost_center_id, quantite, valeur, centres_de_cout:cost_center_id(nom)")
       .eq("mouvement_id", mouvement_id)
       .eq("mama_id", mama_id)
       .order("created_at");
@@ -36,7 +36,7 @@ export function useMouvementCostCenters() {
     setLoading(true);
     setError(null);
     await supabase
-      .from("mouvement_cost_centers")
+      .from("mouvements_centres_cout")
       .delete()
       .eq("mouvement_id", mouvement_id)
       .eq("mama_id", mama_id);
@@ -49,7 +49,7 @@ export function useMouvementCostCenters() {
     }));
     if (prepared.length > 0) {
       const { error } = await supabase
-        .from("mouvement_cost_centers")
+        .from("mouvements_centres_cout")
         .insert(prepared);
       if (error) setError(error);
     }

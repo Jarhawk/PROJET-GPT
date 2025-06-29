@@ -21,7 +21,7 @@ export default function StockMouvementForm({ produit, onClose }) {
     }
     setLoading(true);
     const payload = {
-      product_id: produit?.id,
+      produit_id: produit?.id,
       type,
       quantite: Number(quantite),
       zone,

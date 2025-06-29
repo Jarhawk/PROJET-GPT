@@ -24,6 +24,6 @@ test('fetchProducts queries view with mama_id filter', async () => {
   await act(async () => {
     await result.current.fetchProducts();
   });
-  expect(fromMock).toHaveBeenCalledWith('v_products_last_price');
+  expect(fromMock).toHaveBeenCalledWith('v_produits_dernier_prix');
   expect(selectMock).toHaveBeenCalled();
 });

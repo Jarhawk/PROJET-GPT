@@ -13,7 +13,7 @@ export function useStats() {
     setLoading(true);
 
     const queries = [
-      supabase.from("products").select("id").eq("mama_id", mama_id),
+      supabase.from("produits").select("id").eq("mama_id", mama_id),
       supabase.from("fiches_techniques").select("cout_total").eq("mama_id", mama_id),
       supabase.from("stock_mouvements").select("quantite").eq("mama_id", mama_id),
     ];

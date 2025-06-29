@@ -129,7 +129,7 @@ export default function Stock() {
       {showDetail && selected && (
         <StockDetail
           produit={selected}
-          mouvements={mouvements.filter(m => m.product_id === selected.id)}
+          mouvements={mouvements.filter(m => m.produit_id === selected.id)}
           onClose={() => { setShowDetail(false); setSelected(null); }}
         />
       )}

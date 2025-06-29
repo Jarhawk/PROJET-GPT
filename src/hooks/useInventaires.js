@@ -15,7 +15,7 @@ export function useInventaires() {
     setError(null);
     const { data, error } = await supabase
       .from("inventaires")
-      .select("*, lignes:inventaire_lignes(*, product:products(id, nom, unite, stock_theorique, pmp))")
+      .select("*, lignes:inventaire_lignes(*, produit:produits(id, nom, unite, stock_theorique, pmp))")
       .eq("mama_id", mama_id)
       .eq("actif", true)
       .order("date", { ascending: false });
@@ -49,9 +49,9 @@ export function useInventaires() {
     if (!inv) return false;
     for (const line of inv.lignes || []) {
       const { data, error } = await supabase
-        .from("products")
+        .from("produits")
         .select("stock_reel")
-        .eq("id", line.product_id)
+        .eq("id", line.produit_id)
         .eq("mama_id", mama_id)
         .single();
       if (error || !data) return false;
@@ -76,7 +76,12 @@ export function useInventaires() {
       return null;
     }
     if (lignes.length) {
-      const toInsert = lignes.map(l => ({ ...l, inventaire_id: data.id, mama_id }));
+      const toInsert = lignes.map(l => ({
+        ...l,
+        produit_id: l.produit_id,
+        inventaire_id: data.id,
+        mama_id,
+      }));
       const { error: errLines } = await supabase.from("inventaire_lignes").insert(toInsert);
       if (errLines) setError(errLines);
     }
@@ -91,7 +96,7 @@ export function useInventaires() {
     setError(null);
     const { data, error } = await supabase
       .from("inventaires")
-      .select("*, lignes:inventaire_lignes(*, product:products(id, nom, unite, stock_theorique, pmp))")
+      .select("*, lignes:inventaire_lignes(*, produit:produits(id, nom, unite, stock_theorique, pmp))")
       .eq("id", id)
       .eq("mama_id", mama_id)
       .single();

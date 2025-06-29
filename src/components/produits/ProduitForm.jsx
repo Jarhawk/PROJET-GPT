@@ -18,7 +18,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
   const [nom, setNom] = useState(produit?.nom || "");
   const [famille, setFamille] = useState(produit?.famille || "");
   const [unite, setUnite] = useState(produit?.unite || "");
-  const [mainSupplierId, setMainSupplierId] = useState(produit?.main_supplier_id || "");
+  const [mainSupplierId, setMainSupplierId] = useState(produit?.fournisseur_principal_id || "");
   const [stock_reel, setStockReel] = useState(produit?.stock_reel || 0);
   const [stock_min, setStockMin] = useState(produit?.stock_min || 0);
   const [actif, setActif] = useState(produit?.actif ?? true);
@@ -42,7 +42,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
       setNom(produit.nom || "");
       setFamille(produit.famille || "");
       setUnite(produit.unite || "");
-      setMainSupplierId(produit.main_supplier_id || "");
+      setMainSupplierId(produit.fournisseur_principal_id || "");
       setStockReel(produit.stock_reel || 0);
       setStockMin(produit.stock_min || 0);
       setActif(produit.actif ?? true);
@@ -68,7 +68,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
       nom,
       famille,
       unite,
-      main_supplier_id: mainSupplierId || null,
+      fournisseur_principal_id: mainSupplierId || null,
       stock_reel: Number(stock_reel),
       stock_min: Number(stock_min),
       actif,

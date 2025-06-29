@@ -17,7 +17,7 @@ export function usePertes() {
     setError(null);
     let query = supabase
       .from("pertes")
-      .select("*, produit:product_id(nom)")
+      .select("*, produit:produit_id(nom)")
       .eq("mama_id", mama_id)
       .order("date_perte", { ascending: false });
     if (debut) query = query.gte("date_perte", debut);

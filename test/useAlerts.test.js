@@ -32,15 +32,15 @@ test('fetchRules queries alert_rules with filters', async () => {
   const { result } = renderHook(() => useAlerts());
   await act(async () => { await result.current.fetchRules({ search: 'foo', actif: true }); });
   expect(fromMock).toHaveBeenCalledWith('alert_rules');
-  expect(queryObj.select).toHaveBeenCalledWith('*, product:products(id, nom)');
+  expect(queryObj.select).toHaveBeenCalledWith('*, produit:produits(id, nom)');
   expect(queryObj.eq).toHaveBeenCalledWith('mama_id', 'm1');
   expect(queryObj.eq).toHaveBeenCalledWith('enabled', true);
-  expect(queryObj.ilike).toHaveBeenCalledWith('product.nom', '%foo%');
+  expect(queryObj.ilike).toHaveBeenCalledWith('produit.nom', '%foo%');
   expect(queryObj.order).toHaveBeenCalledWith('created_at', { ascending: false });
 });
 
 test('addRule inserts row with mama_id', async () => {
   const { result } = renderHook(() => useAlerts());
-  await act(async () => { await result.current.addRule({ product_id: 'p1', threshold: 2 }); });
-  expect(queryObj.insert).toHaveBeenCalledWith([{ product_id: 'p1', threshold: 2, mama_id: 'm1' }]);
+  await act(async () => { await result.current.addRule({ produit_id: 'p1', threshold: 2 }); });
+  expect(queryObj.insert).toHaveBeenCalledWith([{ produit_id: 'p1', threshold: 2, mama_id: 'm1' }]);
 });

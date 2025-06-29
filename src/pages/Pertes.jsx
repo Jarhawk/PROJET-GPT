@@ -11,7 +11,7 @@ export default function Pertes() {
   const { mama_id } = useAuth();
   const { pertes, fetchPertes, addPerte, deletePerte } = usePertes();
   const { products, fetchProducts } = useProducts();
-  const [form, setForm] = useState({ product_id: "", quantite: 0, motif: "", date_perte: "" });
+  const [form, setForm] = useState({ produit_id: "", quantite: 0, motif: "", date_perte: "" });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -25,7 +25,7 @@ export default function Pertes() {
 
   const handleSubmit = async e => {
     e.preventDefault();
-    if (!form.product_id || !form.quantite) {
+    if (!form.produit_id || !form.quantite) {
       toast.error("Produit et quantité requis !");
       return;
     }
@@ -33,7 +33,7 @@ export default function Pertes() {
       setSaving(true);
       await addPerte(form);
       toast.success("Perte enregistrée !");
-      setForm({ product_id: "", quantite: 0, motif: "", date_perte: "" });
+      setForm({ produit_id: "", quantite: 0, motif: "", date_perte: "" });
     } catch (err) {
       console.error("Erreur ajout perte:", err);
       toast.error("Erreur lors de l'enregistrement.");
@@ -58,7 +58,7 @@ export default function Pertes() {
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold mb-4">Pertes / Casses / Dons</h1>
       <form onSubmit={handleSubmit} className="flex gap-2 mb-4 flex-wrap">
-        <select name="product_id" className="input" value={form.product_id} onChange={handleChange} required>
+        <select name="produit_id" className="input" value={form.produit_id} onChange={handleChange} required>
           <option value="">Produit…</option>
           {products.map(p => (
             <option key={p.id} value={p.id}>{p.nom}</option>
@@ -86,7 +86,7 @@ export default function Pertes() {
           {pertes.map(p => (
             <tr key={p.id}>
               <td className="px-2 py-1">{p.date_perte}</td>
-              <td className="px-2 py-1">{p.produit?.nom || p.product_id}</td>
+              <td className="px-2 py-1">{p.produit?.nom || p.produit_id}</td>
               <td className="px-2 py-1 text-right">{Number(p.quantite).toLocaleString()}</td>
               <td className="px-2 py-1">{p.motif}</td>
               <td className="px-2 py-1">

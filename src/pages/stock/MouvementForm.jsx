@@ -6,13 +6,13 @@ import toast from "react-hot-toast";
 
 export default function MouvementForm({ onClose }) {
   const { createMouvement } = useStock();
-  const [form, setForm] = useState({ product_id: "", quantite: 0, type: "entree", commentaire: "" });
+  const [form, setForm] = useState({ produit_id: "", quantite: 0, type: "entree", commentaire: "" });
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (loading) return;
-    if (!form.product_id || !form.quantite) {
+    if (!form.produit_id || !form.quantite) {
       toast.error("Produit et quantité requis");
       return;
     }
@@ -39,8 +39,8 @@ export default function MouvementForm({ onClose }) {
         <input
           className="input mb-2 w-full"
           placeholder="Produit ID"
-          value={form.product_id}
-          onChange={(e) => setForm({ ...form, product_id: e.target.value })}
+          value={form.produit_id}
+          onChange={(e) => setForm({ ...form, produit_id: e.target.value })}
         />
         <input
           className="input mb-2 w-full"

@@ -60,7 +60,7 @@ export default function FactureDetail({ facture: factureProp, onClose }) {
     const { data } = await createFacture({ ...payload, reference: `${facture.reference || facture.id}-copie` });
     if (data) {
       for (const l of produitsFacture) {
-        await addLigneFacture(data.id, { product_id: l.product_id, quantite: l.quantite, prix_unitaire: l.prix_unitaire, tva: l.tva, fournisseur_id: facture.fournisseur_id });
+        await addLigneFacture(data.id, { produit_id: l.produit_id, quantite: l.quantite, prix_unitaire: l.prix_unitaire, tva: l.tva, fournisseur_id: facture.fournisseur_id });
       }
       await calculateTotals(data.id);
       onClose?.();

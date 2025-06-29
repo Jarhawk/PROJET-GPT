@@ -89,7 +89,7 @@ export default function Fournisseurs() {
       for (const f of fournisseurs) {
         const ps = await getProductsBySupplier(f.id);
         ps.forEach(p => {
-          statsProduits[p.product_id] = (statsProduits[p.product_id] || 0) + (p.total_achat || 0);
+          statsProduits[p.produit_id] = (statsProduits[p.produit_id] || 0) + (p.total_achat || 0);
         });
       }
       setTopProducts(

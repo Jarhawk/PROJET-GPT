@@ -20,7 +20,7 @@ export function useMouvements() {
       .order("date", { ascending: false });
 
     if (type) query = query.eq("type", type);
-    if (produit) query = query.eq("product_id", produit);
+    if (produit) query = query.eq("produit_id", produit);
     if (debut) query = query.gte("date", debut);
     if (fin) query = query.lte("date", fin);
     if (zone) query = query.ilike("zone", `%${zone}%`);

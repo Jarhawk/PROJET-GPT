@@ -17,9 +17,9 @@ export async function reallocateHistory(limit = 100) {
   }
 
   for (const m of mouvements || []) {
-    const { data: suggestions } = await supabase.rpc('suggest_cost_centers', { p_product_id: m.product_id });
+    const { data: suggestions } = await supabase.rpc('suggest_cost_centers', { p_produit_id: m.produit_id });
     for (const s of suggestions || []) {
-      await supabase.from('mouvement_cost_centers').insert({
+      await supabase.from('mouvements_centres_cout').insert({
         mouvement_id: m.id,
         cost_center_id: s.cost_center_id,
         quantite: Math.round(Math.abs(m.quantite) * Number(s.ratio) * 100) / 100,

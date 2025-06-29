@@ -33,7 +33,7 @@ export default function SimulationDetailsModal({ open, onClose, result }) {
           <tbody>
             {(result?.produits || []).map((p, idx) => (
               <tr key={idx}>
-                <td className="px-2">{p.product_nom || p.product_id}</td>
+                <td className="px-2">{p.product_nom || p.produit_id}</td>
                 <td className="px-2">{p.quantite}</td>
                 <td className="px-2">{p.valeur}</td>
               </tr>

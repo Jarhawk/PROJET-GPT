@@ -12,13 +12,13 @@ export async function backupDb(output = null) {
   const supabase = createClient(supabaseUrl, supabaseKey);
   const mama_id = process.env.MAMA_ID || null;
   const tables = [
-    'products',
+    'produits',
     'fournisseurs',
     'factures',
     'facture_lignes',
     'inventaires',
     'inventaire_lignes',
-    'supplier_products',
+    'fournisseur_produits',
     'taches',
     'tache_instances',
     'mouvements_stock'

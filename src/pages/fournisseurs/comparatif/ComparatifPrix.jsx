@@ -20,7 +20,7 @@ export default function ComparatifPrix() {
       setError(null);
       try {
         const { data, error } = await supabase
-          .from("products")
+          .from("produits")
           .select("id, nom")
           .eq("mama_id", mama_id)
           .order("nom", { ascending: true });

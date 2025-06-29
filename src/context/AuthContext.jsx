@@ -1,5 +1,5 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { login as loginUser } from "@/lib/loginUser";
 import toast from "react-hot-toast";
@@ -10,9 +10,16 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const lastUserIdRef = useRef(null);
+  const fetchingRef = useRef(false);
 
   async function fetchUserData(userId) {
+    if (fetchingRef.current && lastUserIdRef.current === userId) return;
+    fetchingRef.current = true;
+    console.log("fetchUserData", userId);
     const { data, error } = await supabase
       .from("utilisateurs")
       .select("role, mama_id, access_rights, actif")
@@ -21,21 +28,28 @@ export function AuthProvider({ children }) {
 
     if (error) {
       console.error("Erreur récupération utilisateur:", error);
+      setError(error.message || "Erreur inconnue");
       setUserData(null);
+      fetchingRef.current = false;
       return;
     }
 
     if (!data) {
       setUserData(null);
-      navigate("/pending");
+      if (pathname !== "/pending") navigate("/pending");
+      fetchingRef.current = false;
       return;
     }
 
+    lastUserIdRef.current = userId;
+    setError(null);
     setUserData({ ...data, auth_id: userId, user_id: userId });
+    fetchingRef.current = false;
   }
 
   async function loadSession() {
     const { data: { session } } = await supabase.auth.getSession();
+    console.log("loadSession", session?.user?.id);
     setSession(session);
     if (session?.user?.id) {
       await fetchUserData(session.user.id);
@@ -48,6 +62,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     loadSession();
     const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      console.log("auth state change", newSession?.user?.id);
       setSession(newSession);
       if (newSession?.user?.id) {
         fetchUserData(newSession.user.id);
@@ -92,6 +107,7 @@ export function AuthProvider({ children }) {
     userData,
     session,
     loading,
+    error,
     pending: !!session && !userData,
     login,
     signup,

@@ -1,4 +1,4 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import useAuth from "@/hooks/useAuth";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
@@ -11,23 +11,47 @@ export default function ProtectedRoute({ children, accessKey }) {
     access_rights,
     isSuperadmin,
     isAuthenticated,
+    error,
   } = useAuth();
+  const location = useLocation();
+  console.log("ProtectedRoute", {
+    path: location.pathname,
+    session: !!session,
+    userDataLoaded: !!userData,
+    pending,
+  });
+
+  if (error) {
+    console.error("Auth error:", error);
+    return <div className="text-red-500 p-4">{error}</div>;
+  }
 
   if (loading || access_rights === null)
     return <LoadingSpinner message="Chargement..." />;
 
-  if (pending) return <Navigate to="/pending" />;
+  if (pending && location.pathname !== "/pending")
+    return <Navigate to="/pending" replace />;
 
-  if (!session || !isAuthenticated) return <Navigate to="/login" />;
-  if (!userData) return <Navigate to="/unauthorized" />;
+  if (!session || !isAuthenticated) {
+    if (location.pathname !== "/login")
+      return <Navigate to="/login" replace />;
+    return null;
+  }
+  if (!userData) {
+    if (location.pathname !== "/unauthorized")
+      return <Navigate to="/unauthorized" replace />;
+    return null;
+  }
 
-  if (userData?.actif === false) return <Navigate to="/blocked" />;
+  if (userData?.actif === false && location.pathname !== "/blocked")
+    return <Navigate to="/blocked" replace />;
 
   // Vérifie les droits si une clé est fournie
   if (accessKey) {
     const rights = typeof access_rights === "object" ? access_rights : {};
     const isAllowed = isSuperadmin || rights[accessKey];
-    if (!isAllowed) return <Navigate to="/unauthorized" />;
+    if (!isAllowed && location.pathname !== "/unauthorized")
+      return <Navigate to="/unauthorized" replace />;
   }
 
   return children;

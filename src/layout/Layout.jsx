@@ -3,6 +3,7 @@ import Sidebar from "@/layout/Sidebar";
 import useAuth from "@/hooks/useAuth";
 import toast from "react-hot-toast";
 import Footer from "@/components/Footer";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import {
   LiquidBackground,
   WavesBackground,
@@ -12,8 +13,24 @@ import {
 
 export default function Layout() {
   const { pathname } = useLocation();
-  const { user, role, logout } = useAuth();
+  const {
+    session,
+    userData,
+    role,
+    mama_id,
+    access_rights,
+    loading,
+    logout,
+  } = useAuth();
+  console.log("Layout", { session, userData, role, mama_id, access_rights });
+
   if (pathname === "/login" || pathname === "/unauthorized") return <Outlet />;
+
+  if (loading) return <LoadingSpinner message="Chargement..." />;
+  if (!session || !userData)
+    return <LoadingSpinner message="Chargement utilisateur..." />;
+
+  const user = session.user;
 
   return (
     <div className="relative flex h-screen overflow-auto text-shadow">

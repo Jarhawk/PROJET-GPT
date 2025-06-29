@@ -105,13 +105,25 @@ export function AuthProvider({ children }) {
 
   const value = {
     userData,
+    /** Authenticated user object from Supabase */
+    user: session?.user || null,
+    /** Convenience alias for `session?.user?.id` */
+    user_id: session?.user?.id ?? null,
+    /** Direct session object returned by Supabase */
     session,
+    /** Authentication state */
     loading,
     error,
+    /** Indicates the session is available but userData has not been fetched yet */
     pending: !!session && !userData,
+    /** Selected fields from userData for easy access */
+    role: userData?.role,
+    mama_id: userData?.mama_id,
+    access_rights: userData?.access_rights,
     login,
     signup,
     logout,
+    /** Helpers */
     isAuthenticated: !!session?.user?.id,
     isAdmin: userData?.role === "admin" || userData?.role === "superadmin",
     isSuperadmin: userData?.role === "superadmin",

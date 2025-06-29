@@ -19,7 +19,7 @@ export function AuthProvider({ children }) {
   async function fetchUserData(userId) {
     if (fetchingRef.current && lastUserIdRef.current === userId) return;
     fetchingRef.current = true;
-    console.log("fetchUserData", userId);
+    if (import.meta.env.DEV) console.log("fetchUserData", userId);
     const { data, error } = await supabase
       .from("utilisateurs")
       .select("role, mama_id, access_rights, actif")
@@ -49,7 +49,7 @@ export function AuthProvider({ children }) {
 
   async function loadSession() {
     const { data: { session } } = await supabase.auth.getSession();
-    console.log("loadSession", session?.user?.id);
+    if (import.meta.env.DEV) console.log("loadSession", session?.user?.id);
     setSession(session);
     if (session?.user?.id) {
       await fetchUserData(session.user.id);
@@ -62,7 +62,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     loadSession();
     const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      console.log("auth state change", newSession?.user?.id);
+      if (import.meta.env.DEV) console.log("auth state change", newSession?.user?.id);
       setSession(newSession);
       if (newSession?.user?.id) {
         fetchUserData(newSession.user.id);

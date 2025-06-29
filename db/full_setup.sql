@@ -1237,19 +1237,6 @@ create or replace trigger trg_fiche_prix_change
 after update on fiches_techniques
 for each row execute procedure log_fiche_prix_change();
 
-DO $$
-BEGIN
-  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='mouvements_stock' AND column_name='sous_type') THEN
-    CREATE INDEX IF NOT EXISTS idx_mouvements_stock_sous_type ON mouvements_stock(sous_type);
-  END IF;
-  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='mouvements_stock' AND column_name='zone') THEN
-    CREATE INDEX IF NOT EXISTS idx_mouvements_stock_zone ON mouvements_stock(zone);
-  END IF;
-  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='mouvements_stock' AND column_name='motif') THEN
-    CREATE INDEX IF NOT EXISTS idx_mouvements_stock_motif ON mouvements_stock(motif);
-  END IF;
-END $$;
-
 -- Indexes to speed up movement queries
 create index if not exists idx_mouvements_stock_mama on mouvements_stock(mama_id);
 create index if not exists idx_mouvements_stock_product on mouvements_stock(product_id);
@@ -1372,6 +1359,19 @@ BEGIN
     WHERE table_name='mouvements_stock' AND column_name='motif'
   ) THEN
     ALTER TABLE mouvements_stock ADD COLUMN motif text;
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='mouvements_stock' AND column_name='sous_type') THEN
+    CREATE INDEX IF NOT EXISTS idx_mouvements_stock_sous_type ON mouvements_stock(sous_type);
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='mouvements_stock' AND column_name='zone') THEN
+    CREATE INDEX IF NOT EXISTS idx_mouvements_stock_zone ON mouvements_stock(zone);
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='mouvements_stock' AND column_name='motif') THEN
+    CREATE INDEX IF NOT EXISTS idx_mouvements_stock_motif ON mouvements_stock(motif);
   END IF;
 END $$;
 

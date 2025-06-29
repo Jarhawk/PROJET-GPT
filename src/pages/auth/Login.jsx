@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import MamaLogo from "@/components/ui/MamaLogo";
 import useAuth from "@/hooks/useAuth";
 import toast from "react-hot-toast";
@@ -16,6 +16,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const { errors, setError, clearErrors } = useFormErrors();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
 
   const { session, userData, loading: authLoading } = useAuth();
 
@@ -27,17 +28,20 @@ export default function Login() {
     if (!session || authLoading) return;
     if (!userData) return;
     redirectedRef.current = true;
-    if (userData.actif === false) {
+    if (userData.actif === false && pathname !== "/blocked") {
       navigate("/blocked");
       return;
     }
-    if (Object.keys(userData.access_rights || {}).length === 0) {
+    if (
+      Object.keys(userData.access_rights || {}).length === 0 &&
+      pathname !== "/unauthorized"
+    ) {
       navigate("/unauthorized");
       return;
     }
     toast.success(`Bienvenue ${session.user.email}`);
-    navigate("/dashboard");
-  }, [session, userData, authLoading, navigate]);
+    if (pathname !== "/dashboard") navigate("/dashboard");
+  }, [session, userData, authLoading, navigate, pathname]);
 
   const handleLogin = async (e) => {
     e.preventDefault();

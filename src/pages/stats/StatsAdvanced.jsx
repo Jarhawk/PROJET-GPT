@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect } from "react";
 import { useAdvancedStats } from "@/hooks/useAdvancedStats";
 import { useAuth } from "@/context/AuthContext";

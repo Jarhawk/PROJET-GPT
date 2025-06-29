@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { renderHook } from '@testing-library/react';
 import { vi, test, expect } from 'vitest';
 import { useSwipe } from '@/hooks/useSwipe';

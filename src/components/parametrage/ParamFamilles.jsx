@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useFamilles } from "@/hooks/useFamilles";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";

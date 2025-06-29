@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 // src/hooks/useProducts.js
 import { useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";

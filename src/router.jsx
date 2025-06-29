@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { Suspense, lazy } from "react";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
@@ -46,6 +47,8 @@ const Signup = lazy(() => import("@/pages/public/Signup.jsx"));
 const Rgpd = lazy(() => import("@/pages/Rgpd.jsx"));
 const PagePrivacy = lazy(() => import("@/pages/public/PagePrivacy.jsx"));
 const PageMentions = lazy(() => import("@/pages/public/PageMentions.jsx"));
+const PageCgu = lazy(() => import("@/pages/public/PageCgu.jsx"));
+const PageCgv = lazy(() => import("@/pages/public/PageCgv.jsx"));
 const AideContextuelle = lazy(() => import("@/pages/AideContextuelle.jsx"));
 const SupervisionGroupe = lazy(() => import("@/pages/supervision/SupervisionGroupe.jsx"));
 const ComparateurFiches = lazy(() => import("@/pages/supervision/ComparateurFiches.jsx"));
@@ -93,6 +96,8 @@ export default function Router() {
         <Route path="/rgpd" element={<Rgpd />} />
         <Route path="/privacy" element={<PagePrivacy />} />
         <Route path="/mentions" element={<PageMentions />} />
+        <Route path="/cgu" element={<PageCgu />} />
+        <Route path="/cgv" element={<PageCgv />} />
         <Route path="/" element={<Layout />}>
           <Route
             path="dashboard"

@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { renderHook, act } from '@testing-library/react';
 import { beforeAll, afterEach, test, expect, vi } from 'vitest';
 import fs from 'fs';

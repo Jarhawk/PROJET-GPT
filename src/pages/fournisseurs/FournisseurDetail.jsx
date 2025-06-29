@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 // src/pages/FournisseurDetail.jsx
 import { useState, useEffect } from "react";
 import { useFournisseurStats } from "@/hooks/useFournisseurStats";

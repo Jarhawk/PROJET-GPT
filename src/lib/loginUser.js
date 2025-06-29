@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { supabase } from "./supabase";
 
 // Simple wrapper used by the AuthContext and auth pages

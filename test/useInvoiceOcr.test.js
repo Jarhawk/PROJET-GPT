@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { vi, expect, test } from 'vitest';
 import { act, renderHook } from '@testing-library/react';
 import { useInvoiceOcr } from '@/hooks/useInvoiceOcr';

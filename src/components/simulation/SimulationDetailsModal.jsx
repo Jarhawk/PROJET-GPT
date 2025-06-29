@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import ModalGlass from "@/components/ui/ModalGlass";
 import Button from "@/components/ui/Button";
 import TableContainer from "@/components/ui/TableContainer";

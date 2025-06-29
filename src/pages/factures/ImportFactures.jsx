@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
 import { useInvoiceImport } from "@/hooks/useInvoiceImport";
 import { Button } from "@/components/ui/button";

@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 export default function StatCard({ label, value, variation = null, icon: Icon }) {
   return (
     <div className="bg-glass border border-borderGlass backdrop-blur rounded-xl shadow p-4 flex items-center gap-3">

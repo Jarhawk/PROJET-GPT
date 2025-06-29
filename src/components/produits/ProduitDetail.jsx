@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 // src/components/produits/ProduitDetail.jsx
 import { useEffect, useState } from "react";
 import { useProducts } from "@/hooks/useProducts";

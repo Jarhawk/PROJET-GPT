@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useParams } from 'react-router-dom';
 import GlassCard from '@/components/ui/GlassCard';
 import { LiquidBackground } from '@/components/LiquidBackground';

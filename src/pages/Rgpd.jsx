@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { Link } from "react-router-dom";
 import { motion as Motion } from "framer-motion";
 import GlassCard from "@/components/ui/GlassCard";

@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 // src/pages/fournisseurs/comparatif/PrixFournisseurs.jsx
 import { useComparatif } from "@/hooks/useComparatif";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";

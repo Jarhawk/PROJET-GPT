@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { motion as Motion } from "framer-motion";
 import logoMamaStock from "@/assets/logo-mamastock.png";
 import { Link, useNavigate, useLocation } from "react-router-dom";

@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import Router from "@/router";
 import { HelpProvider } from "@/context/HelpProvider";
 import { MultiMamaProvider } from "@/context/MultiMamaContext";

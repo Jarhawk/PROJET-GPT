@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 // src/pages/debug/AuthDebug.jsx
 import useAuth from "@/hooks/useAuth";
 import GlassCard from "@/components/ui/GlassCard";

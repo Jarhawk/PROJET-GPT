@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 

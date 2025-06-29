@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 // src/pages/fournisseurs/comparatif/ComparatifPrix.jsx
 import { useEffect, useState } from "react";
 import PrixFournisseurs from "./PrixFournisseurs";

@@ -12,6 +12,12 @@ create schema public;
 grant usage on schema public to authenticated;
 grant usage on schema public to anon;
 grant all privileges on schema public to service_role;
+alter default privileges in schema public
+  grant select, insert, update, delete on tables to authenticated;
+alter default privileges for role supabase_admin in schema public
+  grant select, insert, update, delete on tables to authenticated;
+alter default privileges for role postgres in schema public
+  grant select, insert, update, delete on tables to authenticated;
 -- Ensure extension functions are visible
 set search_path = public, extensions;
 -- Extension
@@ -76,7 +82,10 @@ language sql
 stable
 security definer
 as $$
-  select mama_id from users where id = auth.uid();
+  select coalesce(
+    (select mama_id from public.utilisateurs where auth_id = auth.uid() limit 1),
+    (select mama_id from users where id = auth.uid() limit 1)
+  );
 $$;
 
 -- Families / Units
@@ -1746,8 +1755,15 @@ grant select, insert, update, delete on documents to authenticated;
 
 -- Gestion fine des droits avec validations
 create or replace function current_user_role()
-returns text language sql stable security definer as $$
-  select r.nom from users u join roles r on r.id = u.role_id where u.id = auth.uid();
+returns text
+language sql
+stable
+security definer
+as $$
+  select coalesce(
+    (select role from public.utilisateurs where auth_id = auth.uid() limit 1),
+    (select r.nom from users u join roles r on r.id = u.role_id where u.id = auth.uid() limit 1)
+  );
 $$;
 grant execute on function current_user_role() to authenticated;
 
@@ -2036,7 +2052,37 @@ create index if not exists idx_utilisateurs_mama_id on public.utilisateurs(mama_
 alter table public.utilisateurs enable row level security;
 drop policy if exists utilisateurs_select on public.utilisateurs;
 create policy utilisateurs_select on public.utilisateurs
-  for select using (auth.uid() = auth_id);
+  for select using (
+    auth.uid() = auth_id
+    or current_user_role() = 'superadmin'
+    or (current_user_role() = 'admin' and mama_id = current_user_mama_id())
+  );
+drop policy if exists utilisateurs_insert on public.utilisateurs;
+create policy utilisateurs_insert on public.utilisateurs
+  for insert with check (
+    auth.uid() = auth_id
+    or current_user_role() = 'superadmin'
+    or (current_user_role() = 'admin' and mama_id = current_user_mama_id())
+  );
+drop policy if exists utilisateurs_update on public.utilisateurs;
+create policy utilisateurs_update on public.utilisateurs
+  for update using (
+    auth.uid() = auth_id
+    or current_user_role() = 'superadmin'
+    or (current_user_role() = 'admin' and mama_id = current_user_mama_id())
+  ) with check (
+    auth.uid() = auth_id
+    or current_user_role() = 'superadmin'
+    or (current_user_role() = 'admin' and mama_id = current_user_mama_id())
+  );
+drop policy if exists utilisateurs_delete on public.utilisateurs;
+create policy utilisateurs_delete on public.utilisateurs
+  for delete using (
+    auth.uid() = auth_id
+    or current_user_role() = 'superadmin'
+    or (current_user_role() = 'admin' and mama_id = current_user_mama_id())
+  );
+grant select, insert, update, delete on public.utilisateurs to authenticated;
 
 create table if not exists public.two_factor_auth (
     id uuid primary key references auth.users(id) on delete cascade,

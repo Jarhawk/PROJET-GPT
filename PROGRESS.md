@@ -1,8 +1,7 @@
 # Progress Tracker
 
-## 2025-06-20 Step 1
 - Created initial tracker.
-- Verified SQL base scripts (`init.sql` and `mama_stock_patch.sql` triggers).
+- Verified SQL base scripts (now consolidated in `db/full_setup.sql`).
 - Added `drop trigger if exists` for idempotent trigger creation.
 - Next: review policies for idempotence and start frontend module checks.
 
@@ -94,7 +93,7 @@
 - Reviewed promotions module (hooks, page and SQL policies).
 - Added `mama_id` guards in `usePromotions.js` to avoid unauthenticated queries.
 - Updated `Promotions.jsx` to wait for authentication before loading data.
-- Made RLS policies for promotions idempotent in `mama_stock_patch.sql` and `rls.sql`.
+- Made RLS policies for promotions idempotent in the consolidated `db/full_setup.sql`.
 - Installed Node dependencies and confirmed `npm run lint` and `npm run test` succeed.
 - Next: continue reviewing remaining modules (documents, logs...).
 ## 2025-06-20 Step 15
@@ -140,9 +139,9 @@
 - Next: continue auditing remaining modules and SQL patch.
 
 
-## 2025-06-20 Step 21
+-## 2025-06-20 Step 21
 - Reviewed SQL patch for missing `drop policy` statements.
-- Added drops before creating policies in `mama_stock_patch.sql` for idempotence.
+- Added drops before creating policies in what is now `db/full_setup.sql` for idempotence.
 - Verified `npm run lint` and `npm run test` succeed after SQL patch updates.
 - Next: continue auditing remaining modules if any.
 
@@ -157,7 +156,7 @@
 ## 2025-06-20 Step 23
 - Reviewed requisition, signalement and simulation modules for auth context usage.
 - Added missing mama_id guards and auth loading checks in their hooks and pages.
-- Created a new `signalements` table and extended `requisitions` schema in `mama_stock_patch.sql`.
+- Created a new `signalements` table and extended `requisitions` schema in `db/full_setup.sql`.
 - Updated SignalementForm to use hook instead of direct supabase insert.
 - Patched Simulation components to filter fiches by mama_id.
 - Next: run lint and unit tests to validate all modules.
@@ -195,7 +194,7 @@
 - Next: finalize integration and review SQL patch.
 
 ## 2025-06-20 Step 30
-- Reviewed `mama_stock_patch.sql` ensuring all tables, policies and triggers are idempotent.
+- Reviewed consolidated SQL ensuring all tables, policies and triggers are idempotent in `db/full_setup.sql`.
 - Reinstalled Node dependencies because lint initially failed.
 - Verified integration by running `npm run lint` and `npm test`, both succeeded.
 - Next: continue auditing remaining modules or finalize docs.
@@ -625,7 +624,7 @@
 - `npm run test:e2e` reste ignoré car les navigateurs Playwright ne sont pas installés.
 
 ## 2025-06-25 Step 108
-- Vérification finale de la configuration RLS via `sql/rls.sql` et validation de la redirection automatique du login.
+- Vérification finale de la configuration RLS via `db/full_setup.sql` et validation de la redirection automatique du login.
 - Exécuté `npm run lint`, `npm test`, `npm run build` et `npm run preview` pour confirmer un environnement opérationnel avant déploiement.
 - `npm run test:e2e` toujours ignoré faute de navigateurs.
 ## 2025-06-25 Step 109

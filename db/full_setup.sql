@@ -2179,7 +2179,7 @@ returns trigger language plpgsql security definer set search_path=public as $$
 begin
   insert into public.utilisateurs(auth_id, email, mama_id, role, access_rights)
   values (new.id, new.email,
-          (select id from public.mamas where actif limit 1),
+          (select id from public.mamas limit 1),
           'user', '{}'::jsonb)
   on conflict do nothing;
   return new;

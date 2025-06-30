@@ -25,6 +25,9 @@ create table if not exists roles (
     description text
 );
 
+-- Drop Supabase default view if present so we can create our own users table
+drop view if exists public.users cascade;
+drop table if exists users cascade;
 create table if not exists users (
     id uuid primary key default uuid_generate_v4(),
     email text not null unique,

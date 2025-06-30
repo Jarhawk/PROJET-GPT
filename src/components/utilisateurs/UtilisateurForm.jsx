@@ -1,6 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
-import { useUsers } from "@/hooks/useUsers";
+import { useUtilisateurs } from "@/hooks/useUtilisateurs";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 
@@ -11,7 +11,7 @@ const ROLES = [
 ];
 
 export default function UtilisateurForm({ utilisateur, onClose }) {
-  const { addUser, updateUser } = useUsers();
+  const { addUser, updateUser } = useUtilisateurs();
   const [email, setEmail] = useState(utilisateur?.email || "");
   const [role, setRole] = useState(utilisateur?.role || "user");
   const [actif, setActif] = useState(utilisateur?.actif ?? true);

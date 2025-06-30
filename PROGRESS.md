@@ -61,7 +61,7 @@
 ## 2025-06-20 Step 10
 - Audited task and menu modules for authentication readiness.
 - Added `useAuth` checks in `Taches.jsx`, `TacheDetail.jsx`, `Menus.jsx` and `MenuDuJour.jsx`.
-- Updated `useMenus.js`, `useFiches.js` and `useUsers.js` to skip queries when `mama_id` is absent.
+ - Updated `useMenus.js`, `useFiches.js` and `useUtilisateurs.js` to skip queries when `mama_id` is absent.
 - Installed Node dependencies so lint and tests run.
 - Verified `npm run lint` and `npm run test` succeed.
 - Next: continue reviewing remaining modules.

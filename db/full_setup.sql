@@ -3,6 +3,12 @@
 -- Standalone script combining initialization, RLS, and patches
 
 -- init.sql - Complete database setup for MamaStock
+-- ------------------
+-- Cleanup existing schema
+-- ------------------
+drop schema if exists public cascade;
+create schema public;
+set search_path = public;
 -- Extension
 create extension if not exists "uuid-ossp";
 create extension if not exists "pgcrypto";
@@ -2214,3 +2220,31 @@ $$;
 -- ----------------------------------------------------
 
 -- Summary: unified schema for MamaStock
+
+-- ----------------------------------------------------
+-- Seed initial admin account
+-- ----------------------------------------------------
+
+-- Ensure required roles exist
+insert into roles (nom, description) values
+  ('superadmin', 'Super administrateur'),
+  ('admin', 'Administrateur'),
+  ('user', 'Utilisateur')
+  on conflict (nom) do nothing;
+
+-- Ensure Mama de Lyon exists
+insert into mamas(id, nom, created_at)
+values ('29c992df-f6b0-47c5-9afa-c965b789aa07', 'Mama de Lyon', now())
+on conflict (id) do nothing;
+
+-- Create admin user with full rights for Mama de Lyon
+insert into users(id, email, password, role_id, access_rights, actif, mama_id)
+values (
+  'a49aeafd-6f60-4f68-a267-d7d27c1a1381',
+  'admin@mamastock.com',
+  'vegeta',
+  (select id from roles where nom = 'admin'),
+  '[]',
+  true,
+  '29c992df-f6b0-47c5-9afa-c965b789aa07'
+) on conflict (id) do nothing;

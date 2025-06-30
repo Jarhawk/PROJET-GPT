@@ -35,6 +35,9 @@ create table if not exists users (
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now()
 );
+alter table users
+  add column if not exists access_rights jsonb default '[]',
+  add column if not exists actif boolean default true;
 
 create or replace function current_user_mama_id()
 returns uuid
@@ -75,6 +78,8 @@ create table if not exists fournisseurs (
     created_at timestamptz default now(),
     unique(mama_id, nom)
 );
+alter table fournisseurs
+  add column if not exists actif boolean default true;
 
 -- Products
 create table if not exists products (
@@ -95,6 +100,8 @@ create table if not exists products (
     created_at timestamptz default now(),
     unique(mama_id, nom)
 );
+alter table products
+  add column if not exists actif boolean default true;
 
 -- Supplier prices history
 create table if not exists supplier_products (
@@ -150,6 +157,8 @@ create table if not exists fiches (
     created_at timestamptz default now(),
     unique(mama_id, nom)
 );
+alter table fiches
+  add column if not exists actif boolean default true;
 
 create table if not exists fiche_lignes (
     id uuid primary key default uuid_generate_v4(),
@@ -1411,6 +1420,8 @@ create table if not exists promotions (
     created_at timestamptz default now(),
     unique (mama_id, nom, date_debut)
 );
+alter table promotions
+  add column if not exists actif boolean default true;
 
 create table if not exists promotion_products (
     id uuid primary key default uuid_generate_v4(),
@@ -1954,6 +1965,9 @@ create table if not exists public.utilisateurs (
     actif boolean default true,
     created_at timestamptz default now()
 );
+alter table public.utilisateurs
+  add column if not exists access_rights jsonb default '{}'::jsonb,
+  add column if not exists actif boolean default true;
 
 -- Ensure unique constraint on auth_id and indexes for performant lookups
 DO $$

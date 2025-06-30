@@ -86,7 +86,7 @@
 ### Known Issues
 - `xlsx` package has a high severity vulnerability that cannot be fixed automatically.
 
-- Confirmed all RLS policies using `sql/rls.sql` and verified login redirects to `/dashboard` when already authenticated.
+- Confirmed all RLS policies using `db/full_setup.sql` and verified login redirects to `/dashboard` when already authenticated.
 - Validation finale Step 110 : `npm install`, lint, tests, build et preview avec `.env.production.example`.
 - Validation finale Step 111 : verification complete apres `npm install`.
 

@@ -13,7 +13,7 @@ Ce module permet de gérer les fiches de production :
 - `src/hooks/useFiches.js`
 - `src/hooks/useFicheCoutHistory.js`
 
-Les données sont sécurisées par RLS avec le `mama_id` dans `sql/rls.sql`.
+Les données sont sécurisées par RLS avec le `mama_id` dans `db/full_setup.sql`.
 Des triggers (`refresh_fiche_cost`) calculent automatiquement `cout_total` et `cout_par_portion` (voir `db/full_setup.sql`).
 
 ## Reprise

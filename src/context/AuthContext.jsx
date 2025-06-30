@@ -91,6 +91,28 @@ export function AuthProvider({ children }) {
       toast.error(error.message || "Erreur");
       return { error };
     }
+
+    const user = data.user;
+    if (user) {
+      try {
+        const { data: mama } = await supabase
+          .from("mamas")
+          .select("id")
+          .order("created_at")
+          .limit(1)
+          .maybeSingle();
+        await supabase.from("utilisateurs").insert({
+          auth_id: user.id,
+          email: user.email,
+          mama_id: mama?.id,
+          role: "user",
+          access_rights: {},
+        });
+      } catch (e) {
+        console.error("Erreur création profil utilisateur:", e);
+      }
+    }
+
     if (data.session) {
       setSession(data.session);
       if (data.session.user) await fetchUserData(data.session.user.id);

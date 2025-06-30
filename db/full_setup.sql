@@ -2289,12 +2289,22 @@ insert into users(id, email, password, role_id, access_rights, actif, mama_id)
 values (
   'a49aeafd-6f60-4f68-a267-d7d27c1a1381',
   'admin@mamastock.com',
-  'vegeta',
+  crypt('vegeta', gen_salt('bf')),
   (select id from roles where nom = 'admin'),
   '[]',
   true,
   '29c992df-f6b0-47c5-9afa-c965b789aa07'
 ) on conflict (id) do nothing;
+
+-- Also create matching profile in public.utilisateurs for Supabase auth
+insert into public.utilisateurs(auth_id, email, mama_id, role, access_rights)
+values (
+  'a49aeafd-6f60-4f68-a267-d7d27c1a1381',
+  'admin@mamastock.com',
+  '29c992df-f6b0-47c5-9afa-c965b789aa07',
+  'admin',
+  '{}'::jsonb
+) on conflict (auth_id) do nothing;
 
 -- ----------------------------------------------------
 -- Patch migrating roles integer IDs to UUID

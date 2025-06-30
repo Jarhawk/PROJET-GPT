@@ -205,8 +205,8 @@ TwoFactorSetup.jsx : configuration de la double authentification
 - Route : /parametrage/utilisateurs
 - Objectif : gestion des comptes utilisateurs
 - Fonctions : recherche email, filtre actif/inactif, export Excel, activation/désactivation
-- Sécurité : hook useUsers applique RLS par mama_id (admins seulement)
-- Dépendances : useUsers, AuthContext
+ - Sécurité : hook useUtilisateurs applique RLS par mama_id (admins seulement)
+ - Dépendances : useUtilisateurs, AuthContext
 
 === ✅ MODULE : HelpCenter / AideContextuelle ===
 - Route : /aide
@@ -528,7 +528,7 @@ TwoFactorSetup.jsx : configuration de la double authentification
   useProducts, usePromotions, useReporting, useRequisitions, useRoles,
   useSignalements, useSimulation, useStats, useStock, useStorage,
   useSupplierProducts, useSuppliers, useSwipe, useTasks, useTopProducts,
-  useTwoFactorAuth, useUnites, useUsers, useUtilisateurs, useValidations
+  useTwoFactorAuth, useUnites, useUtilisateurs, useValidations
 - Tous appliquent le filtre `mama_id` et encapsulent les requêtes Supabase
 
 === 🎁 PRIORITÉS & SUGGESTIONS ===

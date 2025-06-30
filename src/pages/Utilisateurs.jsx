@@ -1,6 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
-import { useUsers } from "@/hooks/useUsers";
+import { useUtilisateurs } from "@/hooks/useUtilisateurs";
 import { useAuth } from "@/context/AuthContext";
 import UtilisateurForm from "@/components/utilisateurs/UtilisateurForm";
 import UtilisateurDetail from "@/components/utilisateurs/UtilisateurDetail";
@@ -15,7 +15,7 @@ import { motion as Motion } from "framer-motion";
 const PAGE_SIZE = 20;
 
 export default function Utilisateurs() {
-  const { users, fetchUsers, toggleUserActive, deleteUser } = useUsers();
+  const { users, fetchUsers, toggleUserActive, deleteUser } = useUtilisateurs();
   const { mama_id, loading: authLoading } = useAuth();
   const [search, setSearch] = useState("");
   const [actifFilter, setActifFilter] = useState("all");

@@ -964,15 +964,15 @@ for each row execute function log_pertes_changes();
 
 -- Function suggesting cost center allocations based on historical data
 create or replace function suggest_cost_centers(p_produit_id uuid)
-returns table(centre_de_cout_id uuid, nom text, ratio numeric)
+returns table(cost_center_id uuid, nom text, ratio numeric)
 language sql stable security definer as $$
   select
-    mcc.centre_de_cout_id,
+    mcc.cost_center_id,
     cc.nom,
     sum(mcc.quantite)::numeric / greatest(sum(sum_mcc.quantite),1) as ratio
-  from mouvements_centres_cout mcc
+  from mouvement_cost_centers mcc
   join mouvements_stock ms on ms.id = mcc.mouvement_id
-  join centres_de_cout cc on cc.id = mcc.centre_de_cout_id
+  join cost_centers cc on cc.id = mcc.cost_center_id
   join (
     select sum(abs(m.quantite)) as quantite
     from mouvements_stock m
@@ -983,7 +983,7 @@ language sql stable security definer as $$
   where ms.produit_id = p_produit_id
     and ms.mama_id = current_user_mama_id()
     and ms.quantite < 0
-  group by mcc.centre_de_cout_id, cc.nom;
+  group by mcc.cost_center_id, cc.nom;
 $$;
 grant execute on function suggest_cost_centers(uuid) to authenticated;
 
@@ -1038,8 +1038,8 @@ create or replace view v_products_last_price as
 select
   p.id,
   p.nom,
-  coalesce(p.famille, f.nom) as famille,
-  coalesce(p.unite, u.nom) as unite,
+  f.nom as famille,
+  u.nom as unite,
   p.famille_id,
   p.unite_id,
   p.pmp,
@@ -1995,7 +1995,7 @@ create or replace view v_analytique_stock as
 select
   m.date,
   m.product_id,
-  p.famille,
+  f.nom as famille,
   mc.cost_center_id,
   c.nom as cost_center_nom,
   m.quantite,
@@ -2004,7 +2004,8 @@ select
 from mouvements_stock m
 left join mouvement_cost_centers mc on mc.mouvement_id = m.id
 left join cost_centers c on c.id = mc.cost_center_id
-left join products p on p.id = m.product_id;
+left join products p on p.id = m.product_id
+left join familles f on f.id = p.famille_id and f.mama_id = p.mama_id;
 grant select on v_analytique_stock to authenticated;
 
 create or replace view v_reco_rotation as

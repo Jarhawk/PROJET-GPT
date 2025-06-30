@@ -14,10 +14,6 @@ grant usage on schema public to anon;
 grant all privileges on schema public to service_role;
 alter default privileges in schema public
   grant select, insert, update, delete on tables to authenticated;
-alter default privileges for role supabase_admin in schema public
-  grant select, insert, update, delete on tables to authenticated;
-alter default privileges for role postgres in schema public
-  grant select, insert, update, delete on tables to authenticated;
 -- Ensure extension functions are visible
 set search_path = public, extensions;
 -- Extension

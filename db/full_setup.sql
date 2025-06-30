@@ -25,9 +25,29 @@ create table if not exists roles (
     description text
 );
 
--- Drop Supabase default view if present so we can create our own users table
-drop view if exists public.users cascade;
-drop table if exists users cascade;
+-- Drop Supabase default users relation if it exists as a view or table
+DO $$
+BEGIN
+  -- remove Supabase generated view
+  IF EXISTS (
+    SELECT 1
+    FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public' AND c.relname = 'users' AND c.relkind = 'v'
+  ) THEN
+    EXECUTE 'DROP VIEW public.users CASCADE';
+  END IF;
+
+  -- remove table variant if present
+  IF EXISTS (
+    SELECT 1
+    FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public' AND c.relname = 'users' AND c.relkind IN (''r'',''p'')
+  ) THEN
+    EXECUTE 'DROP TABLE public.users CASCADE';
+  END IF;
+END$$;
 create table if not exists users (
     id uuid primary key default uuid_generate_v4(),
     email text not null unique,

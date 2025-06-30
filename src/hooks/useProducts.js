@@ -58,11 +58,13 @@ export function useProducts() {
     setError(null);
     const {
       main_supplier_id,
+      fournisseur_principal_id,
       ...rest
     } = product || {};
     const payload = {
       ...rest,
-      fournisseur_principal_id: main_supplier_id || null,
+      fournisseur_principal_id:
+        fournisseur_principal_id ?? main_supplier_id ?? null,
       mama_id,
     };
     const { error } = await supabase.from("produits").insert([payload]);
@@ -78,12 +80,18 @@ export function useProducts() {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { main_supplier_id, ...rest } = updateFields || {};
+    const {
+      main_supplier_id,
+      fournisseur_principal_id,
+      ...rest
+    } = updateFields || {};
     const payload = {
       ...rest,
-      ...(main_supplier_id !== undefined && {
-        fournisseur_principal_id: main_supplier_id,
-      }),
+      ...(fournisseur_principal_id !== undefined
+        ? { fournisseur_principal_id }
+        : main_supplier_id !== undefined
+          ? { fournisseur_principal_id: main_supplier_id }
+          : {}),
     };
     const { error } = await supabase
       .from("produits")
@@ -105,6 +113,7 @@ export function useProducts() {
       famille,
       unite,
       main_supplier_id,
+      fournisseur_principal_id,
       stock_reel,
       stock_min,
       actif,
@@ -116,7 +125,8 @@ export function useProducts() {
       nom: `${orig.nom} (copie)`,
       famille,
       unite,
-      fournisseur_principal_id: main_supplier_id,
+      fournisseur_principal_id:
+        fournisseur_principal_id ?? main_supplier_id,
       stock_reel,
       stock_min,
       actif,

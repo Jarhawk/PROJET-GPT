@@ -285,6 +285,23 @@ Ensure the `.env` file contains valid Supabase credentials and that you have an 
 
 Run `npm install` to ensure dependencies like `vitest`, `@eslint/js` and `playwright` are available before running lint or test commands.
 
+**"permission denied for table utilisateurs" after login**
+
+Ensure the database schema is up to date by reapplying `db/full_setup.sql`:
+
+```bash
+supabase db reset --file db/full_setup.sql
+```
+This recreates RLS policies and grants on `utilisateurs` so authenticated requests succeed.
+
+After resetting the schema, verify the frontend still builds and tests pass:
+
+```bash
+npm run lint
+npm test
+npm run build && npm run preview
+```
+
 ## Module Promotions
 
 Un nouvel écran permet de gérer les promotions et opérations commerciales (route `/promotions`).

@@ -976,11 +976,11 @@ language sql stable security definer as $$
   join (
     select sum(abs(m.quantite)) as quantite
     from mouvements_stock m
-    where m.produit_id = p_produit_id
+    where m.product_id = p_produit_id
       and m.mama_id = current_user_mama_id()
       and m.quantite < 0
   ) sum_mcc on true
-  where ms.produit_id = p_produit_id
+  where ms.product_id = p_produit_id
     and ms.mama_id = current_user_mama_id()
     and ms.quantite < 0
   group by mcc.cost_center_id, cc.nom;

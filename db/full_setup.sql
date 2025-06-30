@@ -8,6 +8,10 @@
 -- ------------------
 drop schema if exists public cascade;
 create schema public;
+-- Allow access to objects inside the schema
+grant usage on schema public to authenticated;
+grant usage on schema public to anon;
+grant all privileges on schema public to service_role;
 -- Ensure extension functions are visible
 set search_path = public, extensions;
 -- Extension

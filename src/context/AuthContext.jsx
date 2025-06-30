@@ -29,6 +29,7 @@ export function AuthProvider({ children }) {
 
     if (error) {
       console.error("Erreur récupération utilisateur:", error);
+      toast.error(error.message || "Erreur récupération utilisateur");
       setError(error.message || "Erreur inconnue");
       setUserData(null);
       fetchingRef.current = false;

@@ -43,11 +43,11 @@ BEGIN
     SELECT 1
     FROM pg_class c
     JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE n.nspname = 'public' AND c.relname = 'users' AND c.relkind IN (''r'',''p'')
+    WHERE n.nspname = 'public' AND c.relname = 'users' AND c.relkind IN ('r','p')
   ) THEN
     EXECUTE 'DROP TABLE public.users CASCADE';
   END IF;
-END$$;
+END $$;
 create table if not exists users (
     id uuid primary key default uuid_generate_v4(),
     email text not null unique,
@@ -2135,7 +2135,7 @@ begin
   else
     raise notice 'cron.schedule not available';
   end if;
-end$$;
+END $$;
 
 create or replace function fn_calc_budgets(mama_id_param uuid, periode_param text)
 returns table(famille text, budget_prevu numeric, total_reel numeric, ecart_pct numeric)

@@ -54,7 +54,7 @@ SQL scripts are stored in [`sql/`](./sql). To initialise a local Supabase instan
 
 ```bash
 supabase start
-supabase db reset --file sql/full_setup.sql --seed sql/seed.sql
+supabase db reset --file db/full_setup.sql --seed sql/seed.sql
 # Optionally switch the schema to French names
 supabase db execute < db/rename_to_french.sql
 ```

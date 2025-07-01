@@ -26,7 +26,9 @@ export default function Sidebar() {
   const { access_rights, loading, user, role, mama_id, logout, session } =
     useAuth();
   const { pathname } = useLocation();
-  console.log("Sidebar", { user, role, mama_id, access_rights });
+  if (import.meta.env.DEV) {
+    console.log("Sidebar", { user, role, mama_id, access_rights });
+  }
 
   if (loading || access_rights === null) {
     return (

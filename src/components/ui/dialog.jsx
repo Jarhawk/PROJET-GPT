@@ -5,6 +5,7 @@ import {
   DialogContent as RadixDialogContent,
   DialogOverlay as RadixDialogOverlay,
   DialogTitle as RadixDialogTitle,
+  DialogDescription as RadixDialogDescription,
   DialogClose as RadixDialogClose,
 } from "@radix-ui/react-dialog";
 
@@ -28,6 +29,10 @@ export function DialogContent({ asChild = false, className = "", ...props }) {
 
 export function DialogTitle(props) {
   return <RadixDialogTitle {...props} />;
+}
+
+export function DialogDescription(props) {
+  return <RadixDialogDescription {...props} />;
 }
 
 export function DialogClose(props) {

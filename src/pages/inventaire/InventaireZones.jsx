@@ -2,7 +2,12 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
-import { Dialog, DialogContent } from "@radix-ui/react-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from "@radix-ui/react-dialog";
 import { Toaster, toast } from "react-hot-toast";
 import { useInventaireZones } from "@/hooks/useInventaireZones";
 
@@ -81,13 +86,18 @@ export default function InventaireZones() {
         </table>
       </TableContainer>
       <Dialog open={!!editZone} onOpenChange={v => !v && setEditZone(null)}>
-        <DialogContent className="bg-glass backdrop-blur-lg text-white rounded-xl shadow-lg p-6 max-w-sm">
-          <h2 className="font-bold mb-2">{editZone?.id ? "Modifier la zone" : "Nouvelle zone"}</h2>
-          <form
-            onSubmit={e => {
-              e.preventDefault();
-              handleSave();
-            }}
+      <DialogContent className="bg-glass backdrop-blur-lg text-white rounded-xl shadow-lg p-6 max-w-sm">
+        <DialogTitle className="font-bold mb-2">
+          {editZone?.id ? "Modifier la zone" : "Nouvelle zone"}
+        </DialogTitle>
+        <DialogDescription className="sr-only">
+          Formulaire de zone d'inventaire
+        </DialogDescription>
+        <form
+          onSubmit={e => {
+            e.preventDefault();
+            handleSave();
+          }}
             className="space-y-3"
           >
             <input

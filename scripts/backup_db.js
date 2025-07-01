@@ -1,16 +1,20 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 /* eslint-env node */
-import { createClient } from '@supabase/supabase-js';
 import { writeFileSync } from 'fs';
+import { getSupabaseClient } from '../src/api/shared/supabaseClient.js';
+import { shouldShowHelp } from './cli_utils.js';
 
-export async function backupDb(output = null) {
-  const supabaseUrl = process.env.VITE_SUPABASE_URL;
-  const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
-  if (!supabaseUrl || !supabaseKey) {
-    throw new Error('Missing Supabase credentials');
-  }
-  const supabase = createClient(supabaseUrl, supabaseKey);
-  const mama_id = process.env.MAMA_ID || null;
+export const USAGE =
+  'Usage: node scripts/backup_db.js [FILE] [MAMA_ID] [SUPABASE_URL] [SUPABASE_KEY]';
+
+export async function backupDb(
+  output = null,
+  mamaId = process.env.MAMA_ID || null,
+  supabaseUrl = null,
+  supabaseKey = null
+) {
+  const supabase = getSupabaseClient(supabaseUrl, supabaseKey);
+  const mama_id = mamaId;
   const tables = [
     'produits',
     'fournisseurs',
@@ -38,7 +42,13 @@ export async function backupDb(output = null) {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  backupDb(process.argv[2]).catch(err => {
+  const args = process.argv.slice(2);
+  if (shouldShowHelp(args)) {
+    console.log(USAGE);
+    process.exit(0);
+  }
+  const [outputArg, mamaIdArg, urlArg, keyArg] = args;
+  backupDb(outputArg, mamaIdArg, urlArg, keyArg).catch((err) => {
     console.error(err);
     process.exit(1);
   });

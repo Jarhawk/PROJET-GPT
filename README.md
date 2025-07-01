@@ -85,6 +85,19 @@ en production, copiez `.env.production.example` vers `.env.production` puis
 renseignez `VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY`. Ce fichier
 `\.env.production` est également ignoré par Git afin de protéger les clés
 sensibles.
+
+Scripts Node.js et API reconnaissent aussi les variables d'environnement
+`SUPABASE_URL` et `SUPABASE_ANON_KEY`. Utilisez-les si vous disposez déjà de ces
+noms dans votre infrastructure, elles sont prises en charge comme alternative
+à `VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY`.
+Un utilitaire `getSupabaseClient` centralise la création du client Supabase
+et combine éventuellement un paramètre passé en ligne de commande avec les
+variables d'environnement lorsque l'une des deux valeurs manque.
+Le client Supabase utilisé dans l'application frontend déclenche
+désormais une erreur si ces variables sont absentes afin d'éviter des
+plantages silencieux.
+Lorsque la variable `MAMA_ID` est définie, les scripts Node filtrent leurs
+opérations sur cet établissement uniquement.
 Le fichier d'exemple indique également l'URL du projet Supabase et contient
 la clé anonyme fournie
 `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`. Vérifiez que ces valeurs
@@ -143,6 +156,8 @@ const produits = await getProduits(sdk, { mamaId: 'm1', famille: 'dessert' });
 `getStock` follows the same pattern and supports a `since` option to filter
 movements from a given date. These filters mirror the Express routes of the
 public API.
+
+For more examples and authentication details, see [docs/sdk_usage.md](docs/sdk_usage.md).
 
 ## Features
 - Dashboard overview at `/dashboard` (root `/` redirects here) with KPI widgets,
@@ -236,19 +251,26 @@ prête à utiliser avec Netlify (nécessite `netlify-cli`).
 ## Reporting
 
 Generate a weekly cost center report with `node scripts/weekly_report.js` which outputs `weekly_cost_centers.xlsx`.
+Set `MAMA_ID` (or pass it as the second argument) to restrict the report to a specific establishment. You may also provide Supabase credentials as additional arguments: `node scripts/weekly_report.js [MAMA_ID] [SUPABASE_URL] [SUPABASE_KEY]`.
 
 Export monthly invoices for your accounting system using
-`node scripts/export_accounting.js 2024-01` which creates
+`node scripts/export_accounting.js 2024-01 [MAMA_ID] [SUPABASE_URL] [SUPABASE_KEY]` which creates
 `invoices_YYYY-MM.csv`.
 
-Automatically allocate historic stock movements to cost centers with
-`node scripts/reallocate_history.js`. The script analyses past consumption and
-creates missing allocations based on historical ratios.
+Use `--help` or `-h` anywhere in the command to display a usage summary.
+All scripts rely on a common `shouldShowHelp` helper located in `scripts/cli_utils.js`.
 
-Create JSON backups of core tables using `node scripts/backup_db.js`. The script
+Automatically allocate historic stock movements to cost centers with
+`node scripts/reallocate_history.js [LIMIT] [MAMA_ID] [SUPABASE_URL] [SUPABASE_KEY]`. The optional `LIMIT`
+controls how many movements are processed, defaulting to `100`. When `MAMA_ID`
+is provided (or set via the environment variable of the same name) only
+movements for that establishment are allocated. You can also pass Supabase credentials directly via the last two arguments.
+The script analyses past consumption and creates missing allocations based on historical ratios.
+
+Create JSON backups of core tables using `node scripts/backup_db.js [FILE] [MAMA_ID] [SUPABASE_URL] [SUPABASE_KEY]`. The script
 exports products, suppliers, supplier product links, invoices, invoice lines,
 inventories, inventory lines, tasks and stock movements into a dated file such
-as `backup_20250101.json`.
+as `backup_20250101.json`. Credentials passed on the command line override the environment.
 
 ## Gestion de la carte
 

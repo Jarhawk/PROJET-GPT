@@ -4,12 +4,15 @@
 import express from 'express';
 import produitsRouter from './produits.js';
 import stockRouter from './stock.js';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseClient } from '../shared/supabaseClient.js';
 
 // Supabase client used to validate Bearer tokens when provided
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
-const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
+let supabase = null;
+try {
+  supabase = getSupabaseClient();
+} catch {
+  // Supabase credentials missing; JWT auth disabled
+}
 
 const router = express.Router();
 

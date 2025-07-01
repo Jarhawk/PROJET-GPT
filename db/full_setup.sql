@@ -72,6 +72,67 @@ create table if not exists users (
     created_at timestamptz default now()
 );
 
+create table if not exists utilisateurs (
+    id uuid primary key default uuid_generate_v4(),
+    auth_id uuid references auth.users(id) on delete cascade,
+    email text,
+    role text default 'user',
+    mama_id uuid references public.mamas(id),
+    access_rights jsonb default '{}'::jsonb,
+    actif boolean default true,
+    created_at timestamptz default now()
+);
+
+-- Ensure unique constraint on auth_id and indexes for performant lookups
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'utilisateurs_auth_id_key'
+  ) THEN
+    ALTER TABLE utilisateurs
+      ADD CONSTRAINT utilisateurs_auth_id_key UNIQUE (auth_id);
+  END IF;
+END $$;
+
+create index if not exists idx_utilisateurs_auth_id on utilisateurs(auth_id);
+create index if not exists idx_utilisateurs_mama_id on utilisateurs(mama_id);
+
+alter table utilisateurs enable row level security;
+alter table utilisateurs force row level security;
+drop policy if exists utilisateurs_select on utilisateurs;
+create policy utilisateurs_select on utilisateurs
+  for select using (
+    auth.uid() = auth_id
+    or current_user_role() = 'superadmin'
+    or (current_user_role() = 'admin' and mama_id = current_user_mama_id())
+  );
+drop policy if exists utilisateurs_insert on utilisateurs;
+create policy utilisateurs_insert on utilisateurs
+  for insert with check (
+    auth.uid() = auth_id
+    or current_user_role() = 'superadmin'
+    or (current_user_role() = 'admin' and mama_id = current_user_mama_id())
+  );
+drop policy if exists utilisateurs_update on utilisateurs;
+create policy utilisateurs_update on utilisateurs
+  for update using (
+    auth.uid() = auth_id
+    or current_user_role() = 'superadmin'
+    or (current_user_role() = 'admin' and mama_id = current_user_mama_id())
+  ) with check (
+    auth.uid() = auth_id
+    or current_user_role() = 'superadmin'
+    or (current_user_role() = 'admin' and mama_id = current_user_mama_id())
+  );
+drop policy if exists utilisateurs_delete on utilisateurs;
+create policy utilisateurs_delete on utilisateurs
+  for delete using (
+    auth.uid() = auth_id
+    or current_user_role() = 'superadmin'
+    or (current_user_role() = 'admin' and mama_id = current_user_mama_id())
+  );
+grant select, insert, update, delete on utilisateurs to authenticated;
+
 create or replace function current_user_mama_id()
 returns uuid
 language sql
@@ -79,7 +140,7 @@ stable
 security definer
 as $$
   select coalesce(
-    (select mama_id from public.utilisateurs where auth_id = auth.uid() limit 1),
+    (select mama_id from utilisateurs where auth_id = auth.uid() limit 1),
     (select mama_id from users where id = auth.uid() limit 1)
   );
 $$;
@@ -1757,7 +1818,7 @@ stable
 security definer
 as $$
   select coalesce(
-    (select role from public.utilisateurs where auth_id = auth.uid() limit 1),
+    (select role from utilisateurs where auth_id = auth.uid() limit 1),
     (select r.nom from users u join roles r on r.id = u.role_id where u.id = auth.uid() limit 1)
   );
 $$;
@@ -2020,65 +2081,6 @@ drop policy if exists user_own_consent on consentements_utilisateur;
 create policy user_own_consent on consentements_utilisateur
   for all using (user_id = auth.uid()) with check (user_id = auth.uid());
 
-create table if not exists public.utilisateurs (
-    id uuid primary key default uuid_generate_v4(),
-    auth_id uuid references auth.users(id) on delete cascade,
-    email text,
-    role text default 'user',
-    mama_id uuid references public.mamas(id),
-    access_rights jsonb default '{}'::jsonb,
-    actif boolean default true,
-    created_at timestamptz default now()
-);
-
--- Ensure unique constraint on auth_id and indexes for performant lookups
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_constraint WHERE conname = 'utilisateurs_auth_id_key'
-  ) THEN
-    ALTER TABLE public.utilisateurs
-      ADD CONSTRAINT utilisateurs_auth_id_key UNIQUE (auth_id);
-  END IF;
-END $$;
-
-create index if not exists idx_utilisateurs_auth_id on public.utilisateurs(auth_id);
-create index if not exists idx_utilisateurs_mama_id on public.utilisateurs(mama_id);
-
-alter table public.utilisateurs enable row level security;
-drop policy if exists utilisateurs_select on public.utilisateurs;
-create policy utilisateurs_select on public.utilisateurs
-  for select using (
-    auth.uid() = auth_id
-    or current_user_role() = 'superadmin'
-    or (current_user_role() = 'admin' and mama_id = current_user_mama_id())
-  );
-drop policy if exists utilisateurs_insert on public.utilisateurs;
-create policy utilisateurs_insert on public.utilisateurs
-  for insert with check (
-    auth.uid() = auth_id
-    or current_user_role() = 'superadmin'
-    or (current_user_role() = 'admin' and mama_id = current_user_mama_id())
-  );
-drop policy if exists utilisateurs_update on public.utilisateurs;
-create policy utilisateurs_update on public.utilisateurs
-  for update using (
-    auth.uid() = auth_id
-    or current_user_role() = 'superadmin'
-    or (current_user_role() = 'admin' and mama_id = current_user_mama_id())
-  ) with check (
-    auth.uid() = auth_id
-    or current_user_role() = 'superadmin'
-    or (current_user_role() = 'admin' and mama_id = current_user_mama_id())
-  );
-drop policy if exists utilisateurs_delete on public.utilisateurs;
-create policy utilisateurs_delete on public.utilisateurs
-  for delete using (
-    auth.uid() = auth_id
-    or current_user_role() = 'superadmin'
-    or (current_user_role() = 'admin' and mama_id = current_user_mama_id())
-  );
-grant select, insert, update, delete on public.utilisateurs to authenticated;
 
 create table if not exists public.two_factor_auth (
     id uuid primary key references auth.users(id) on delete cascade,
@@ -2253,7 +2255,7 @@ create policy fournisseurs_api_config_all on fournisseurs_api_config
 create or replace function handle_new_user()
 returns trigger language plpgsql security definer set search_path=public as $$
 begin
-  insert into public.utilisateurs(auth_id, email, mama_id, role, access_rights)
+  insert into utilisateurs(auth_id, email, mama_id, role, access_rights)
   values (new.id, new.email,
           (select id from public.mamas limit 1),
           'user', '{}'::jsonb)
@@ -2296,8 +2298,8 @@ values (
   '29c992df-f6b0-47c5-9afa-c965b789aa07'
 ) on conflict (id) do nothing;
 
--- Also create matching profile in public.utilisateurs for Supabase auth
-insert into public.utilisateurs(auth_id, email, mama_id, role, access_rights)
+ -- Also create matching profile in utilisateurs for Supabase auth
+insert into utilisateurs(auth_id, email, mama_id, role, access_rights)
 values (
   'a49aeafd-6f60-4f68-a267-d7d27c1a1381',
   'admin@mamastock.com',

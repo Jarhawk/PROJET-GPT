@@ -10,7 +10,13 @@ import TableContainer from "@/components/ui/TableContainer";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
-import { Dialog, DialogContent, DialogTrigger } from "@radix-ui/react-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+  DialogTitle,
+  DialogDescription,
+} from "@radix-ui/react-dialog";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { motion as Motion, AnimatePresence } from "framer-motion";
 
@@ -295,7 +301,12 @@ export default function CostBoissons() {
                         <DialogContent
                           className="bg-glass backdrop-blur-lg border border-borderGlass rounded-xl shadow-lg p-6 max-w-md z-[1000]"
                         >
-                          <h2 className="font-bold text-xl mb-2">{b.nom}</h2>
+                          <DialogTitle className="font-bold text-xl mb-2">
+                            {b.nom}
+                          </DialogTitle>
+                          <DialogDescription className="sr-only">
+                            Détails du produit
+                          </DialogDescription>
                           <p>
                             <b>Type&nbsp;:</b> {b.type || b.famille || "-"}
                             <br />
@@ -369,7 +380,12 @@ export default function CostBoissons() {
                         <DialogContent
                           className="bg-glass backdrop-blur-lg border border-borderGlass rounded-xl shadow-lg p-6 max-w-md z-[1000]"
                         >
-                          <h2 className="font-bold text-xl mb-2">{b.nom}</h2>
+                          <DialogTitle className="font-bold text-xl mb-2">
+                            {b.nom}
+                          </DialogTitle>
+                          <DialogDescription className="sr-only">
+                            Fiche technique
+                          </DialogDescription>
                           <p>
                             <b>Détails techniques :</b>
                             <br />

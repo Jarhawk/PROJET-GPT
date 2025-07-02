@@ -8,7 +8,8 @@ export interface StockOptions {
 
 export async function getStock(sdk: MamaStockSDK, options: StockOptions = {}) {
   const params: Record<string, string> = {};
-  if (options.mamaId) params.mama_id = options.mamaId;
+  const mamaId = options.mamaId ?? sdk.mamaId;
+  if (mamaId) params.mama_id = mamaId;
   if (options.since) params.since = options.since;
   return sdk.fetchData('/api/public/v1/stock', params);
 }

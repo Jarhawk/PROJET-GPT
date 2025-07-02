@@ -20,11 +20,12 @@ const fromMock = vi.fn(() => ({ select: selectMock }));
 const getUserMock = vi.fn();
 const limitMock = chain.limit;
 
+let createClientMock;
 vi.mock('@supabase/supabase-js', () => ({
-  createClient: vi.fn(() => ({
+  createClient: (createClientMock = vi.fn(() => ({
     from: fromMock,
     auth: { getUser: getUserMock },
-  })),
+  }))),
 }));
 
 let router;
@@ -159,6 +160,27 @@ describe('public API router', () => {
     const res = await request(app).get('/stock?mama_id=m1').set('x-api-key', 'dev_key');
     expect(res.status).toBe(500);
     expect(res.body).toEqual({ error: 'boom' });
+  });
+
+  it('works with generic env variables', async () => {
+    const url = process.env.VITE_SUPABASE_URL;
+    const key = process.env.VITE_SUPABASE_ANON_KEY;
+    delete process.env.VITE_SUPABASE_URL;
+    delete process.env.VITE_SUPABASE_ANON_KEY;
+    process.env.SUPABASE_URL = 'https://generic.supabase.co';
+    process.env.SUPABASE_ANON_KEY = 'gen';
+    vi.resetModules();
+    const altRouter = (await import('../src/api/public/index.js')).default;
+    const app = express();
+    app.use(altRouter);
+    const res = await request(app).get('/produits?mama_id=m1').set('x-api-key', 'dev_key');
+    expect(res.status).toBe(200);
+    expect(createClientMock).toHaveBeenCalledWith('https://generic.supabase.co', 'gen');
+    process.env.VITE_SUPABASE_URL = url;
+    process.env.VITE_SUPABASE_ANON_KEY = key;
+    delete process.env.SUPABASE_URL;
+    delete process.env.SUPABASE_ANON_KEY;
+    vi.resetModules();
   });
 
   it('returns 500 when Supabase credentials are missing on produits', async () => {

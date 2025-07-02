@@ -4,7 +4,12 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
-import { Dialog, DialogContent } from "@radix-ui/react-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from "@radix-ui/react-dialog";
 import MamaForm from "./MamaForm";
 import toast, { Toaster } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
@@ -157,6 +162,12 @@ export default function Mamas() {
       </TableContainer>
       <Dialog open={!!editMama} onOpenChange={v => !v && setEditMama(null)}>
         <DialogContent className="bg-glass backdrop-blur-lg text-white rounded-xl shadow-lg p-6 max-w-md">
+          <DialogTitle className="font-bold mb-2">
+            {editMama?.id ? "Modifier l'établissement" : "Nouvel établissement"}
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            Formulaire établissement
+          </DialogDescription>
           <MamaForm
             mama={editMama}
             onSaved={() => {

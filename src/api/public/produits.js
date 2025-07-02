@@ -1,12 +1,14 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 /* eslint-env node */
-/* global process */
 import express from 'express';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseClient } from '../shared/supabaseClient.js';
 
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
-const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
+let supabase = null;
+try {
+  supabase = getSupabaseClient();
+} catch {
+  // Supabase credentials missing; routes will return error
+}
 
 const router = express.Router();
 

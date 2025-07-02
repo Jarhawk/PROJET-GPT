@@ -5,11 +5,12 @@ import {
   DialogOverlay,
   DialogContent,
   DialogTitle,
+  DialogDescription,
   DialogClose,
 } from "@radix-ui/react-dialog";
 import { AnimatePresence, motion as Motion } from "framer-motion";
 
-export default function SmartDialog({ open, onClose, title, children }) {
+export default function SmartDialog({ open, onClose, title, description, children }) {
   return (
     <RadixDialog open={open} onOpenChange={(v) => !v && onClose?.()}>
       <AnimatePresence>
@@ -37,6 +38,11 @@ export default function SmartDialog({ open, onClose, title, children }) {
                     <DialogTitle className="text-lg font-semibold mb-4">
                       {title}
                     </DialogTitle>
+                  )}
+                  {description && (
+                    <DialogDescription className="sr-only">
+                      {description}
+                    </DialogDescription>
                   )}
                   <DialogClose
                     asChild

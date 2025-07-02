@@ -3,7 +3,12 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@radix-ui/react-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from "@radix-ui/react-dialog";
 import PermissionsForm from "./PermissionsForm";
 import toast, { Toaster } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
@@ -141,6 +146,12 @@ export default function PermissionsAdmin() {
       </TableContainer>
       <Dialog open={!!editRole} onOpenChange={v => !v && setEditRole(null)}>
         <DialogContent className="bg-glass backdrop-blur-lg border border-borderGlass rounded-xl shadow-lg p-6 max-w-xl">
+          <DialogTitle className="font-bold mb-2">
+            {editRole?.id ? "Modifier le rôle" : "Nouveau rôle"}
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            Gestion des permissions administrateur
+          </DialogDescription>
           {editRole && (
             <PermissionsForm
               role={editRole}

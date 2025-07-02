@@ -8,7 +8,8 @@ export interface ProduitsOptions {
 
 export async function getProduits(sdk: MamaStockSDK, options: ProduitsOptions = {}) {
   const params: Record<string, string> = {};
-  if (options.mamaId) params.mama_id = options.mamaId;
+  const mamaId = options.mamaId ?? sdk.mamaId;
+  if (mamaId) params.mama_id = mamaId;
   if (options.famille) params.famille = options.famille;
   return sdk.fetchData('/api/public/v1/produits', params);
 }

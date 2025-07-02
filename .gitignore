@@ -27,3 +27,4 @@ dist-ssr
 test-results
 weekly_cost_centers.xlsx
 backup_*.json
+invoices_*.xlsx

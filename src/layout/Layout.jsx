@@ -23,7 +23,15 @@ export default function Layout() {
     loading,
     logout,
   } = useAuth();
-  console.log("Layout", { session, userData, role, mama_id, access_rights });
+  if (import.meta.env.DEV) {
+    console.log("Layout", {
+      session,
+      userData,
+      role,
+      mama_id,
+      access_rights,
+    });
+  }
 
   if (pathname === "/login" || pathname === "/unauthorized") return <Outlet />;
 

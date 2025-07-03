@@ -23,11 +23,11 @@
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.14",
-    "@supabase/supabase-js": "^2.50.0",
+    "@supabase/supabase-js": "^2.50.2",
     "@tailwindcss/cli": "^4.1.7",
     "@tailwindcss/vite": "^4.1.7",
     "file-saver": "^2.0.5",
-    "framer-motion": "^12.18.1",
+    "framer-motion": "^12.19.1",
     "html2canvas": "^1.4.1",
     "i18next": "^25.2.1",
     "jspdf": "^3.0.1",
@@ -42,8 +42,8 @@
     "react-router-dom": "^7.6.2",
     "react-to-print": "^3.1.0",
     "react-toastify": "^11.0.5",
-    "recharts": "^2.15.3",
-    "tesseract.js": "6.0.1",
+    "recharts": "^2.15.4",
+    "tesseract.js": "^6.0.1",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

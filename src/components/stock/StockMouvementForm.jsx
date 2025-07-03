@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
 import { useStock } from "@/hooks/useStock";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,7 @@ export default function StockMouvementForm({ produit, onClose }) {
     }
     setLoading(true);
     const payload = {
-      product_id: produit?.id,
+      produit_id: produit?.id,
       type,
       quantite: Number(quantite),
       zone,
@@ -40,7 +41,10 @@ export default function StockMouvementForm({ produit, onClose }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md max-w-md mx-auto">
+    <form
+      onSubmit={handleSubmit}
+      className="bg-glass border border-borderGlass backdrop-blur p-6 rounded-2xl shadow-lg max-w-md mx-auto"
+    >
       <h2 className="text-lg font-bold mb-4">Mouvement de stock</h2>
       <div className="mb-2">Produit : <b>{produit?.nom}</b></div>
       <select

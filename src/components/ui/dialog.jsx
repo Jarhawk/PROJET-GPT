@@ -1,9 +1,11 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import React from "react";
 import {
   Dialog as RadixDialog,
   DialogContent as RadixDialogContent,
   DialogOverlay as RadixDialogOverlay,
   DialogTitle as RadixDialogTitle,
+  DialogDescription as RadixDialogDescription,
   DialogClose as RadixDialogClose,
 } from "@radix-ui/react-dialog";
 
@@ -27,6 +29,10 @@ export function DialogContent({ asChild = false, className = "", ...props }) {
 
 export function DialogTitle(props) {
   return <RadixDialogTitle {...props} />;
+}
+
+export function DialogDescription(props) {
+  return <RadixDialogDescription {...props} />;
 }
 
 export function DialogClose(props) {

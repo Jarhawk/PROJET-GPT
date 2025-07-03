@@ -1,8 +1,10 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useTasks } from "@/hooks/useTasks";
 import { useAuth } from "@/context/AuthContext";
 import TacheForm from "@/components/taches/TacheForm";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function TacheDetail() {
   const { id } = useParams();
@@ -16,7 +18,7 @@ export default function TacheDetail() {
     }
   }, [authLoading, mama_id, fetchTaskById, id]);
 
-  if (!task) return <div className="p-8">Chargement...</div>;
+  if (!task) return <LoadingSpinner message="Chargement..." />;
 
   return (
     <div className="p-8">

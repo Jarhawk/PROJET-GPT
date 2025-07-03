@@ -1,9 +1,12 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useMenus } from "@/hooks/useMenus";
 import { useSimulation } from "@/hooks/useSimulation";
 import SimulationDetailsModal from "@/components/simulation/SimulationDetailsModal";
 import Button from "@/components/ui/Button";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import TableContainer from "@/components/ui/TableContainer";
 
 export default function SimulationPlanner() {
   const { mama_id, loading: authLoading } = useAuth();
@@ -34,7 +37,7 @@ export default function SimulationPlanner() {
     setResult(res);
   };
 
-  if (authLoading) return <div className="p-6">Chargement...</div>;
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
 
   return (
     <div className="p-6 text-white">
@@ -68,7 +71,8 @@ export default function SimulationPlanner() {
       </div>
       {result && (
         <div className="mt-4">
-          <table className="min-w-full bg-white text-black text-sm rounded mb-2">
+          <TableContainer>
+            <table className="min-w-full text-sm">
             <thead>
               <tr>
                 <th className="px-2">Produit</th>
@@ -79,13 +83,14 @@ export default function SimulationPlanner() {
             <tbody>
               {result.produits.map((p, idx) => (
                 <tr key={idx}>
-                  <td className="px-2">{p.product_nom || p.product_id}</td>
+                  <td className="px-2">{p.product_nom || p.produit_id}</td>
                   <td className="px-2">{p.quantite}</td>
                   <td className="px-2">{p.valeur}</td>
                 </tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </TableContainer>
           <div className="font-semibold">Total : {result.total} €</div>
           <Button className="mt-2" onClick={() => setOpen(true)}>
             Détails

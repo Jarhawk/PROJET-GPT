@@ -1,10 +1,12 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
-import { useUsers } from "@/hooks/useUsers";
+import { useUtilisateurs } from "@/hooks/useUtilisateurs";
 import { useAuth } from "@/context/AuthContext";
 import UtilisateurForm from "@/components/utilisateurs/UtilisateurForm";
 import UtilisateurDetail from "@/components/utilisateurs/UtilisateurDetail";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
+import GlassCard from "@/components/ui/GlassCard";
 import { Toaster, toast } from "react-hot-toast";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
@@ -13,7 +15,7 @@ import { motion as Motion } from "framer-motion";
 const PAGE_SIZE = 20;
 
 export default function Utilisateurs() {
-  const { users, fetchUsers, toggleUserActive, deleteUser } = useUsers();
+  const { users, fetchUsers, toggleUserActive, deleteUser } = useUtilisateurs();
   const { mama_id, loading: authLoading } = useAuth();
   const [search, setSearch] = useState("");
   const [actifFilter, setActifFilter] = useState("all");
@@ -58,24 +60,26 @@ export default function Utilisateurs() {
   return (
     <div className="p-6 container mx-auto text-shadow">
       <Toaster position="top-right" />
-      <div className="flex flex-wrap gap-4 items-center mb-4">
-        <input
-          type="search"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="input"
-          placeholder="Recherche email"
-        />
-        <select className="input" value={actifFilter} onChange={e => setActifFilter(e.target.value)}>
-          <option value="all">Tous</option>
-          <option value="true">Actif</option>
-          <option value="false">Inactif</option>
-        </select>
-        <Button onClick={() => { setSelected(null); setShowForm(true); }}>
-          Ajouter un utilisateur
-        </Button>
-        <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
-      </div>
+      <GlassCard className="p-4 mb-4">
+        <div className="flex flex-wrap gap-4 items-end">
+          <input
+            type="search"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="input"
+            placeholder="Recherche email"
+          />
+          <select className="input" value={actifFilter} onChange={e => setActifFilter(e.target.value)}>
+            <option value="all">Tous</option>
+            <option value="true">Actif</option>
+            <option value="false">Inactif</option>
+          </select>
+          <Button onClick={() => { setSelected(null); setShowForm(true); }}>
+            Ajouter un utilisateur
+          </Button>
+          <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
+        </div>
+      </GlassCard>
       <TableContainer className="mb-4">
         <Motion.table
           initial={{ opacity: 0 }}

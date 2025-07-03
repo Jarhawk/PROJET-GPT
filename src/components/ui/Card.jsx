@@ -1,6 +1,9 @@
-export function Card({ title, children }) {
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+export function Card({ title, children, className = '' }) {
   return (
-    <div className="bg-zinc-800 text-white rounded-2xl shadow-lg">
+    <div
+      className={`bg-glass border border-borderGlass backdrop-blur rounded-2xl shadow-lg ${className}`}
+    >
       {title && <h2 className="text-xl font-bold mb-4 p-6 pb-0">{title}</h2>}
       {children}
     </div>

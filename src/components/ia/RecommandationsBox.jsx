@@ -1,4 +1,5 @@
-import { Loader } from "lucide-react";
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { useRecommendations } from "@/hooks/useRecommendations";
 
 export default function RecommandationsBox({ filter }) {
@@ -10,7 +11,7 @@ export default function RecommandationsBox({ filter }) {
   if (loading) {
     return (
       <div className="p-4 text-center text-sm text-gray-500">
-        <Loader className="animate-spin inline-block" />
+        <LoadingSpinner message="Chargement..." />
       </div>
     );
   }
@@ -27,7 +28,7 @@ export default function RecommandationsBox({ filter }) {
         <div
           key={idx}
           onClick={() => rec.onClick?.(rec) || refresh()}
-          className="flex items-center gap-2 bg-white rounded-lg p-2 shadow cursor-pointer hover:bg-gray-50 text-sm"
+          className="flex items-center gap-2 bg-glass border border-borderGlass backdrop-blur rounded-lg p-2 shadow cursor-pointer hover:bg-white/20 text-sm"
         >
           <span>{rec.type === 'alert' ? '🔍' : '🧠'}</span>
           <span className="flex-1">{rec.message}</span>

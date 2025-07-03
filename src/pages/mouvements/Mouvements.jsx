@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 // src/pages/mouvements/Mouvements.jsx
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -106,7 +107,7 @@ export default function Mouvements() {
                 <td className="p-2">{m.date}</td>
                 <td className="p-2">{products.find(p => p.id === m.produit_id)?.nom || ""}</td>
                 <td className="p-2">{m.quantite}</td>
-                <td className="p-2">{m.zone_destination || m.zone_origine || ""}</td>
+                <td className="p-2">{m.zone || ""}</td>
                 <td className="p-2">{m.type}</td>
                 <td className="p-2">{Number(m.valeur || 0).toFixed(2)}</td>
               </tr>

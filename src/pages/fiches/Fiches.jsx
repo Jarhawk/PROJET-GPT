@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import { useFiches } from "@/hooks/useFiches";
 import { useAuth } from "@/context/AuthContext";
@@ -7,11 +8,20 @@ import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
 import { Toaster } from "react-hot-toast";
 import { motion as Motion } from "framer-motion";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 const PAGE_SIZE = 20;
 
 export default function Fiches() {
-  const { fiches, total, getFiches, deleteFiche, exportFichesToExcel } = useFiches();
+  const {
+    fiches,
+    total,
+    loading,
+    getFiches,
+    deleteFiche,
+    exportFichesToExcel,
+    exportFichesToPDF,
+  } = useFiches();
   const { mama_id, loading: authLoading } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
@@ -27,8 +37,13 @@ export default function Fiches() {
   }, [authLoading, mama_id, search, page, getFiches]);
 
   const exportExcel = () => exportFichesToExcel();
+  const exportPdf = () => exportFichesToPDF();
 
   const fichesFiltres = fiches;
+  if (authLoading || loading) {
+    return <LoadingSpinner message="Chargement..." />;
+  }
+
 
 
   return (
@@ -47,6 +62,7 @@ export default function Fiches() {
           Ajouter une fiche
         </Button>
         <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
+        <Button variant="outline" onClick={exportPdf}>Export PDF</Button>
       </div>
       <TableContainer className="mb-4">
         <Motion.table
@@ -76,7 +92,7 @@ export default function Fiches() {
                   {fiche.nom}
                 </Button>
               </td>
-              <td className="border px-4 py-2">{fiche.famille_id || '-'}</td>
+              <td className="border px-4 py-2">{fiche.famille?.nom || '-'}</td>
               <td className="border px-4 py-2">{Number(fiche.cout_par_portion).toFixed(2)} €</td>
               <td className="border px-4 py-2">{fiche.lignes?.length || 0}</td>
               <td className="border px-4 py-2">{fiche.actif ? '✅' : '❌'}</td>

@@ -1,7 +1,9 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
 import { useFactures } from "@/hooks/useFactures";
 import { useProducts } from "@/hooks/useProducts";
 import { Button } from "@/components/ui/button";
+import GlassCard from "@/components/ui/GlassCard";
 import toast from "react-hot-toast";
 import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
 import { useInvoiceOcr } from "@/hooks/useInvoiceOcr";
@@ -12,10 +14,9 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
   const [date, setDate] = useState(facture?.date || "");
   const [fournisseur_id, setFournisseurId] = useState(facture?.fournisseur_id || "");
   const [reference, setReference] = useState(facture?.reference || "");
-  const [commentaire, setCommentaire] = useState(facture?.commentaire || "");
   const [statut, setStatut] = useState(facture?.statut || "en attente");
   const [lignes, setLignes] = useState(facture?.lignes || [
-    { product_id: "", quantite: 1, prix_unitaire: 0, tva: 20 }
+    { produit_id: "", quantite: 1, prix_unitaire: 0, tva: 20 }
   ]);
   const [file, setFile] = useState(null);
   const [fileUrl, setFileUrl] = useState(facture?.justificatif || "");
@@ -54,7 +55,6 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
       date,
       fournisseur_id,
       reference,
-      commentaire,
       statut,
       total_ht,
       total_tva,
@@ -72,7 +72,7 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
       }
 
       for (const ligne of lignes) {
-        if (ligne.product_id) {
+        if (ligne.produit_id) {
           await addLigneFacture(fid, { ...ligne, fournisseur_id });
         }
       }
@@ -87,10 +87,11 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-lg font-bold mb-4">
-        {facture ? "Modifier la facture" : "Ajouter une facture"}
-      </h2>
+    <GlassCard className="p-6">
+      <form onSubmit={handleSubmit} className="space-y-2">
+        <h2 className="text-lg font-bold mb-4">
+          {facture ? "Modifier la facture" : "Ajouter une facture"}
+        </h2>
       <input
         className="input mb-2"
         type="date"
@@ -104,13 +105,6 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
         placeholder="Numéro"
         value={reference}
         onChange={e => setReference(e.target.value)}
-      />
-      <input
-        className="input mb-2"
-        type="text"
-        placeholder="Commentaire"
-        value={commentaire}
-        onChange={e => setCommentaire(e.target.value)}
       />
       <select
         className="input mb-2"
@@ -140,8 +134,8 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
                 <input
                   list="products"
                   className="input"
-                  value={l.product_id}
-                  onChange={e => setLignes(ls => ls.map((it,i) => i===idx ? { ...it, product_id: e.target.value } : it))}
+                  value={l.produit_id}
+                  onChange={e => setLignes(ls => ls.map((it,i) => i===idx ? { ...it, produit_id: e.target.value } : it))}
                 />
               </td>
               <td>
@@ -160,7 +154,7 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
           ))}
         </tbody>
       </table>
-      <Button type="button" variant="outline" onClick={() => setLignes(ls => [...ls, { product_id: "", quantite:1, prix_unitaire:0, tva:20 }])}>Ajouter ligne</Button>
+      <Button type="button" variant="outline" onClick={() => setLignes(ls => [...ls, { produit_id: "", quantite:1, prix_unitaire:0, tva:20 }])}>Ajouter ligne</Button>
       <datalist id="products">
         {products.map(p => <option key={p.id} value={p.id}>{p.nom}</option>)}
       </datalist>
@@ -193,13 +187,14 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
           {ocrText}
         </div>
       )}
-      <div className="mt-4 p-2 bg-gray-100 rounded">
+      <div className="mt-4 p-2 bg-glass backdrop-blur rounded border border-borderGlass">
         Total HT: {lignes.reduce((s,l)=>s+l.quantite*l.prix_unitaire,0).toFixed(2)} € - TVA: {lignes.reduce((s,l)=>s+l.quantite*l.prix_unitaire*(l.tva||0)/100,0).toFixed(2)} € - TTC: {(lignes.reduce((s,l)=>s+l.quantite*l.prix_unitaire,0)+lignes.reduce((s,l)=>s+l.quantite*l.prix_unitaire*(l.tva||0)/100,0)).toFixed(2)} €
       </div>
       <div className="flex gap-2 mt-4">
         <Button type="submit" disabled={loading}>{facture ? "Modifier" : "Ajouter"}</Button>
         <Button variant="outline" type="button" onClick={onClose}>Annuler</Button>
       </div>
-    </form>
+      </form>
+    </GlassCard>
   );
 }

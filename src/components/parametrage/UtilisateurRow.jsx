@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -68,7 +69,7 @@ export default function UtilisateurRow({ utilisateur, onEdit, onToggleActive }) 
       </tr>
       {showHistory && (
         <tr>
-          <td colSpan={4} className="bg-gray-50">
+          <td colSpan={4} className="bg-glass border border-borderGlass backdrop-blur">
             <div>
               <b>Connexions récentes :</b>
               <ul>

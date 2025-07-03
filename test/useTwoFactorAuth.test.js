@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { describe, it, expect, vi } from "vitest";
 import { useTwoFactorAuth } from "../src/hooks/useTwoFactorAuth";
 import { renderHook, act } from "@testing-library/react";

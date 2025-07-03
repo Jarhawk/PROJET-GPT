@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
@@ -45,12 +46,12 @@ export default function MamaForm({ mama, onClose, onSaved }) {
       let error = null;
       let saved = null;
       if (mama?.id) {
-        const res = await supabase
+        let query = supabase
           .from("mamas")
           .update(values)
-          .eq("id", mama.id)
-          .select()
-          .single();
+          .eq("id", mama.id);
+        if (role !== "superadmin") query = query.eq("id", myMama);
+        const res = await query.select().single();
         error = res.error;
         saved = res.data;
       } else {

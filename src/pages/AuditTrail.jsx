@@ -1,8 +1,11 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import { useAuditTrail } from "@/hooks/useAuditTrail";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
+import TableContainer from "@/components/ui/TableContainer";
 import { Toaster } from "react-hot-toast";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function AuditTrail() {
   const { entries, fetchEntries, loading, error } = useAuditTrail();
@@ -23,7 +26,7 @@ export default function AuditTrail() {
     await fetchEntries({ table, start: start || null, end: end || null });
   };
 
-  if (loading) return <div className="p-8">Chargement...</div>;
+  if (loading) return <LoadingSpinner message="Chargement..." />;
   if (error) return <div className="p-8 text-red-600">{error}</div>;
 
   return (
@@ -53,36 +56,38 @@ export default function AuditTrail() {
         />
         <Button type="submit">Filtrer</Button>
       </form>
-      <table className="min-w-full bg-white rounded-xl shadow-md">
-        <thead>
-          <tr>
-            <th className="px-2 py-1">Date</th>
-            <th className="px-2 py-1">Table</th>
-            <th className="px-2 py-1">Opération</th>
-            <th className="px-2 py-1">Utilisateur</th>
-            <th className="px-2 py-1">Ancien</th>
-            <th className="px-2 py-1">Nouveau</th>
-          </tr>
-        </thead>
-        <tbody>
-          {entries.map((e) => (
-            <tr key={e.id} className="align-top">
-              <td className="px-2 py-1 whitespace-nowrap">
-                {new Date(e.changed_at).toLocaleString()}
-              </td>
-              <td className="px-2 py-1">{e.table_name}</td>
-              <td className="px-2 py-1">{e.operation}</td>
-              <td className="px-2 py-1">{e.utilisateurs?.email || e.changed_by}</td>
-              <td className="px-2 py-1 font-mono break-all">
-                {JSON.stringify(e.old_data)}
-              </td>
-              <td className="px-2 py-1 font-mono break-all">
-                {JSON.stringify(e.new_data)}
-              </td>
+      <TableContainer className="mt-4">
+        <table className="min-w-full text-xs">
+          <thead>
+            <tr>
+              <th className="px-2 py-1">Date</th>
+              <th className="px-2 py-1">Table</th>
+              <th className="px-2 py-1">Opération</th>
+              <th className="px-2 py-1">Utilisateur</th>
+              <th className="px-2 py-1">Ancien</th>
+              <th className="px-2 py-1">Nouveau</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {entries.map((e) => (
+              <tr key={e.id} className="align-top">
+                <td className="border px-2 py-1 whitespace-nowrap">
+                  {new Date(e.changed_at).toLocaleString()}
+                </td>
+                <td className="border px-2 py-1">{e.table_name}</td>
+                <td className="border px-2 py-1">{e.operation}</td>
+                <td className="border px-2 py-1">{e.utilisateurs?.email || e.changed_by}</td>
+                <td className="border px-2 py-1 font-mono break-all">
+                  {JSON.stringify(e.old_data)}
+                </td>
+                <td className="border px-2 py-1 font-mono break-all">
+                  {JSON.stringify(e.new_data)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </TableContainer>
     </div>
   );
 }

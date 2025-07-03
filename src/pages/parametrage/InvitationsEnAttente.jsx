@@ -1,11 +1,15 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
 import toast, { Toaster } from "react-hot-toast";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 // Suppose que tu as un hook ou un cache des MAMA/roles
 // Sinon tu peux les fetch en plus simple comme plus haut
 export default function InvitationsEnAttente() {
+  const { mama_id } = useAuth();
   const [invites, setInvites] = useState([]);
   const [mamas, setMamas] = useState([]);
   const [roles, setRoles] = useState([]);
@@ -13,19 +17,29 @@ export default function InvitationsEnAttente() {
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   useEffect(() => {
-    supabase.from("mamas").select("*").then(({ data }) => setMamas(data || []));
-    supabase.from("roles").select("*").then(({ data }) => setRoles(data || []));
+    if (!mama_id) return;
+    supabase
+      .from("mamas")
+      .select("id, nom")
+      .eq("id", mama_id)
+      .then(({ data }) => setMamas(data || []));
+    supabase
+      .from("roles")
+      .select("*")
+      .eq("mama_id", mama_id)
+      .then(({ data }) => setRoles(data || []));
     setLoading(true);
     supabase
       .from("utilisateurs")
       .select("id, email, mama_id, role, invite_pending, actif, created_at")
       .eq("invite_pending", true)
+      .eq("mama_id", mama_id)
       .order("created_at", { ascending: false })
       .then(({ data }) => {
         setInvites(data || []);
         setLoading(false);
       });
-  }, []);
+  }, [mama_id]);
 
   const mamaNom = id => mamas.find(m => m.id === id)?.nom || id;
   const roleNom = nom => roles.find(r => r.nom === nom)?.nom || nom;
@@ -44,13 +58,17 @@ export default function InvitationsEnAttente() {
   };
 
   const handleCancel = async (userId) => {
-    await supabase.from("utilisateurs").delete().eq("id", userId);
+    await supabase
+      .from("utilisateurs")
+      .delete()
+      .eq("id", userId)
+      .eq("mama_id", mama_id);
     setInvites(invites => invites.filter(u => u.id !== userId));
     setConfirmDeleteId(null);
     toast.success("Invitation annulée !");
   };
 
-  if (loading) return <div>Chargement…</div>;
+  if (loading) return <LoadingSpinner message="Chargement…" />;
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
@@ -58,7 +76,7 @@ export default function InvitationsEnAttente() {
       <h1 className="text-2xl font-bold text-mamastock-gold mb-4">
         Invitations en attente
       </h1>
-      <div className="bg-white shadow rounded-xl overflow-x-auto">
+      <div className="bg-glass border border-borderGlass backdrop-blur shadow rounded-xl overflow-x-auto">
         <table className="min-w-full table-auto text-center">
           <thead>
             <tr>

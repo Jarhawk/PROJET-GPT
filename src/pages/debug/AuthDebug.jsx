@@ -1,20 +1,16 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 // src/pages/debug/AuthDebug.jsx
 import useAuth from "@/hooks/useAuth";
+import GlassCard from "@/components/ui/GlassCard";
 
 export default function AuthDebug() {
-  const { user_id, role, mama_id, access_rights, session } = useAuth();
+  const { session, userData } = useAuth();
 
   return (
-    <div className="p-4 text-sm text-white bg-black space-y-2">
-      <h2 className="text-lg font-bold">Debug Auth</h2>
-      <pre>{JSON.stringify({
-        user_id,
-        email: session?.user?.email,
-        role,
-        mama_id,
-        access_rights,
-        claims: session?.user,
-      }, null, 2)}</pre>
+    <div className="p-6 flex justify-center">
+      <GlassCard className="w-full max-w-xl overflow-auto text-xs">
+        <pre>{JSON.stringify({ session, userData }, null, 2)}</pre>
+      </GlassCard>
     </div>
   );
 }

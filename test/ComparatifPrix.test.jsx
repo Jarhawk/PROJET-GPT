@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { vi, beforeEach } from 'vitest';
@@ -22,11 +23,11 @@ beforeEach(async () => {
 test('shows loader while fetching products', async () => {
   let resolve;
   orderMock.mockReturnValue(new Promise((r) => { resolve = r; }));
-  const { container } = render(<ComparatifPrix />);
-  expect(container.querySelector('.loader')).toBeInTheDocument();
+  const { queryByRole } = render(<ComparatifPrix />);
+  expect(queryByRole('status')).toBeInTheDocument();
   resolve({ data: [], error: null });
   await waitFor(() => {
-    expect(container.querySelector('.loader')).not.toBeInTheDocument();
+    expect(queryByRole('status')).not.toBeInTheDocument();
   });
 });
 

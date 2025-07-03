@@ -1,13 +1,17 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import toast, { Toaster } from "react-hot-toast";
 import * as XLSX from "xlsx";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogTrigger } from "@radix-ui/react-dialog";
+import TableContainer from "@/components/ui/TableContainer";
 import { motion as Motion, AnimatePresence } from "framer-motion";
 
 const FOOD_COST_SEUIL = 28;
@@ -146,7 +150,7 @@ export default function BarManager() {
     toast.success("Export PDF généré !");
   };
 
-  if (authLoading) return <div className="p-8">Chargement...</div>;
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
   if (!mama_id) return null;
 
   return (
@@ -155,31 +159,31 @@ export default function BarManager() {
       <h1 className="text-2xl font-bold text-blue-700 mb-4">Bar Manager — Analyses avancées</h1>
       {/* Période, recherche, export */}
       <div className="flex flex-wrap gap-2 mb-4 items-end">
-        <select
-          className="select select-bordered"
+        <Select
           value={periode}
           onChange={e => setPeriode(e.target.value)}
+          className="w-32"
         >
           {PERIODES.map(p => (
             <option key={p.value} value={p.value}>{p.label}</option>
           ))}
-        </select>
+        </Select>
         <input
           type="date"
-          className="input input-bordered"
+          className="input"
           value={dates.debut}
           onChange={e => setDates(d => ({ ...d, debut: e.target.value }))}
           disabled={periode !== "custom"}
         />
         <input
           type="date"
-          className="input input-bordered"
+          className="input"
           value={dates.fin}
           onChange={e => setDates(d => ({ ...d, fin: e.target.value }))}
           disabled={periode !== "custom"}
         />
         <input
-          className="input input-bordered w-64"
+          className="input w-64"
           placeholder="Recherche (nom/type/contenance)"
           value={search}
           onChange={e => setSearch(e.target.value)}
@@ -188,7 +192,7 @@ export default function BarManager() {
         <Button onClick={handleExportPDF}>Export PDF</Button>
       </div>
       {/* Stat globales */}
-      <div className="bg-white shadow rounded-xl p-4 mb-6 flex flex-wrap gap-6">
+      <div className="bg-glass backdrop-blur border border-borderGlass rounded-xl shadow p-4 mb-6 flex flex-wrap gap-6">
         <div>
           <span className="font-semibold text-blue-700">Ventes totales :</span>
           <span className="font-bold"> {ventesTot} </span>
@@ -212,7 +216,7 @@ export default function BarManager() {
         </div>
       </div>
       {/* Graphe top ventes */}
-      <div className="bg-white shadow rounded-xl p-4 mb-6">
+      <div className="bg-glass backdrop-blur border border-borderGlass rounded-xl shadow p-4 mb-6">
         <h2 className="font-bold mb-2">Top 10 ventes (période sélectionnée)</h2>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={topVentes}>
@@ -226,7 +230,7 @@ export default function BarManager() {
         </ResponsiveContainer>
       </div>
       {/* Graphe top marges */}
-      <div className="bg-white shadow rounded-xl p-4 mb-6">
+      <div className="bg-glass backdrop-blur border border-borderGlass rounded-xl shadow p-4 mb-6">
         <h2 className="font-bold mb-2">Top 10 marges boissons</h2>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={topMarge}>
@@ -240,7 +244,7 @@ export default function BarManager() {
         </ResponsiveContainer>
       </div>
       {/* Tableau interactif */}
-      <div className="bg-white shadow rounded-xl overflow-x-auto">
+      <TableContainer className="mt-4">
         <table className="min-w-full table-auto">
           <thead>
             <tr>
@@ -264,7 +268,7 @@ export default function BarManager() {
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <td className="px-2 py-1">
+                  <td className="border px-2 py-1">
                     <Dialog>
                       <DialogTrigger asChild>
                         <Button variant="link" className="text-blue-700 p-0 h-auto min-w-0 underline">
@@ -272,7 +276,7 @@ export default function BarManager() {
                         </Button>
                       </DialogTrigger>
                       <DialogContent
-                        className="bg-white rounded-xl shadow-lg p-6 max-w-md z-[1000]"
+                        className="bg-glass backdrop-blur-lg border border-borderGlass rounded-xl shadow-lg p-6 max-w-md z-[1000]"
                       >
                         <h2 className="font-bold text-xl mb-2">{b.nom}</h2>
                         <p>
@@ -308,18 +312,18 @@ export default function BarManager() {
                   <td className="px-2 py-1">{b.type || b.famille || "-"}</td>
                   <td className="px-2 py-1">{b.cout_portion ? Number(b.cout_portion).toFixed(2) : "-"}</td>
                   <td className="px-2 py-1">{b.prix_vente ? Number(b.prix_vente).toFixed(2) : "-"}</td>
-                  <td className={"px-2 py-1 font-semibold " + (b.foodCost > FOOD_COST_SEUIL ? "text-red-600" : "")}>
+                  <td className={"border px-2 py-1 font-semibold " + (b.foodCost > FOOD_COST_SEUIL ? "text-red-600" : "")}>
                     {b.foodCost ? b.foodCost.toFixed(1) : "-"}
                   </td>
-                  <td className="px-2 py-1">{b.quantiteVendue}</td>
-                  <td className="px-2 py-1">{b.totalMarge ? b.totalMarge.toFixed(2) : "-"}</td>
-                  <td className="px-2 py-1">{b.totalCA ? b.totalCA.toFixed(2) : "-"}</td>
+                  <td className="border px-2 py-1">{b.quantiteVendue}</td>
+                  <td className="border px-2 py-1">{b.totalMarge ? b.totalMarge.toFixed(2) : "-"}</td>
+                  <td className="border px-2 py-1">{b.totalCA ? b.totalCA.toFixed(2) : "-"}</td>
                 </Motion.tr>
               ))}
             </AnimatePresence>
           </tbody>
         </table>
-      </div>
+      </TableContainer>
     </div>
   );
 }

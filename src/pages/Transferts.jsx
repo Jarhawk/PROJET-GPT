@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
@@ -7,6 +8,9 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger, DialogContent } from "@radix-ui/react-dialog";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import GlassCard from "@/components/ui/GlassCard";
+import TableContainer from "@/components/ui/TableContainer";
 import {
   ResponsiveContainer,
   BarChart,
@@ -39,7 +43,7 @@ export default function Transferts() {
   useEffect(() => {
     if (!mama_id) return;
     supabase
-      .from("products")
+      .from("produits")
       .select("*")
       .eq("mama_id", mama_id)
       .then(({ data }) => setProduits(data || []));
@@ -231,18 +235,18 @@ export default function Transferts() {
 
   const today = new Date().toISOString().slice(0, 10);
 
-  if (authLoading) return <div className="p-8">Chargement...</div>;
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
   if (!isAuthenticated) return null;
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
+    <div className="p-8 max-w-7xl mx-auto space-y-6">
       <Toaster />
       <h1 className="text-2xl font-bold text-mamastock-gold mb-4">
         Transferts de stock inter-zones
       </h1>
       {/* Graphiques */}
       <div className="grid md:grid-cols-2 gap-6 mb-6">
-        <div className="bg-white shadow rounded-xl p-4">
+        <GlassCard className="p-4">
           <h2 className="font-bold mb-2">Top produits transférés (€)</h2>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={topProduits}>
@@ -253,8 +257,8 @@ export default function Transferts() {
               <Bar dataKey="Euro" fill="#2196f3" name="Coût (€)" />
             </BarChart>
           </ResponsiveContainer>
-        </div>
-        <div className="bg-white shadow rounded-xl p-4">
+        </GlassCard>
+        <GlassCard className="p-4">
           <h2 className="font-bold mb-2">Valeur (€) par couple de zones</h2>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={transfertsParZone}>
@@ -265,7 +269,7 @@ export default function Transferts() {
               <Bar dataKey="Euro" fill="#e53935" name="Total (€)" />
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </GlassCard>
       </div>
       {/* Total général */}
       <div className="mb-4 font-bold text-lg text-mamastock-gold">
@@ -305,7 +309,7 @@ export default function Transferts() {
         <Button onClick={handleExportPDF}>Export PDF</Button>
         <Button onClick={() => setShowCreate(true)}>+ Nouveau transfert</Button>
       </div>
-      <div className="bg-white shadow rounded-xl overflow-x-auto">
+      <TableContainer>
         <table className="min-w-full table-auto text-center">
           <thead>
             <tr>
@@ -342,12 +346,12 @@ export default function Transferts() {
                         Timeline
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="bg-white rounded-xl shadow-lg p-6 max-w-lg">
+                    <DialogContent className="bg-glass backdrop-blur-lg rounded-xl shadow-lg p-6 max-w-lg">
                       <h3 className="font-bold mb-2">
                         Timeline transferts : {t.nom}
                       </h3>
                       {loadingTimeline ? (
-                        <div>Chargement…</div>
+                        <LoadingSpinner message="Chargement..." />
                       ) : (
                         <table className="w-full text-xs">
                           <thead>
@@ -379,13 +383,13 @@ export default function Transferts() {
             ))}
           </tbody>
         </table>
-      </div>
+      </TableContainer>
       {/* Modal création transfert */}
       <Dialog
         open={showCreate}
         onOpenChange={(v) => !v && setShowCreate(false)}
       >
-        <DialogContent className="bg-white rounded-xl shadow-lg p-6 max-w-md">
+        <DialogContent className="bg-glass backdrop-blur-lg rounded-xl shadow-lg p-6 max-w-md">
           <h2 className="font-bold mb-2">Nouveau transfert de stock</h2>
           <form onSubmit={handleCreateTf} className="space-y-3">
             <div>

@@ -1,7 +1,9 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useStock } from "@/hooks/useStock";
 import { Button } from "@/components/ui/button";
+import TableContainer from "@/components/ui/TableContainer";
 
 export default function InventairePage() {
   const { getInventaires } = useStock();
@@ -19,28 +21,30 @@ export default function InventairePage() {
           <Link to="/stock/inventaires/new">Créer un nouvel inventaire</Link>
         </Button>
       </div>
-      <table className="min-w-full text-sm bg-white rounded shadow">
-        <thead>
-          <tr>
-            <th className="p-2 text-left">Nom</th>
-            <th className="p-2">Date</th>
-            <th className="p-2">Utilisateur</th>
-            <th className="p-2">État</th>
-            <th className="p-2">Écart total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {inventaires.map((inv) => (
-            <tr key={inv.id}>
-              <td className="p-2">{inv.nom || inv.reference}</td>
-              <td className="p-2 text-center">{inv.date}</td>
-              <td className="p-2 text-center">{inv.utilisateurs?.username || "-"}</td>
-              <td className="p-2 text-center">{inv.cloture ? "validé" : "en cours"}</td>
-              <td className="p-2 text-center">{inv.ecart_total ?? "-"}</td>
+      <TableContainer className="mt-2">
+        <table className="min-w-full text-sm">
+          <thead>
+            <tr>
+              <th className="p-2 text-left">Nom</th>
+              <th className="p-2">Date</th>
+              <th className="p-2">Utilisateur</th>
+              <th className="p-2">État</th>
+              <th className="p-2">Écart total</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {inventaires.map((inv) => (
+              <tr key={inv.id}>
+                <td className="p-2">{inv.nom || inv.reference}</td>
+                <td className="p-2 text-center">{inv.date}</td>
+                <td className="p-2 text-center">{inv.utilisateurs?.username || "-"}</td>
+                <td className="p-2 text-center">{inv.cloture ? "validé" : "en cours"}</td>
+                <td className="p-2 text-center">{inv.ecart_total ?? "-"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </TableContainer>
     </div>
   );
 }

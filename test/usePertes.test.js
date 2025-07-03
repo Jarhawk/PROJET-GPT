@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { renderHook, act } from '@testing-library/react';
 import { vi, beforeEach, test, expect } from 'vitest';
 
@@ -28,7 +29,7 @@ test('fetchPertes retrieves data', async () => {
   const { result } = renderHook(() => usePertes());
   await act(async () => { await result.current.fetchPertes(); });
   expect(fromMock).toHaveBeenCalledWith('pertes');
-  expect(selectMock).toHaveBeenCalledWith('*, produit:product_id(nom)');
+  expect(selectMock).toHaveBeenCalledWith('*, produit:produit_id(nom)');
   expect(eqMock).toHaveBeenCalledWith('mama_id', 'm1');
   expect(orderMock).toHaveBeenCalledWith('date_perte', { ascending: false });
   expect(result.current.pertes).toEqual([{ id: 'p1' }]);

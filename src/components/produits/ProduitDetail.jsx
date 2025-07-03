@@ -1,8 +1,9 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 // src/components/produits/ProduitDetail.jsx
 import { useEffect, useState } from "react";
 import { useProducts } from "@/hooks/useProducts";
-import { Dialog, DialogContent } from "@radix-ui/react-dialog";
-import { Loader } from "lucide-react";
+import ModalGlass from "@/components/ui/ModalGlass";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
@@ -33,11 +34,12 @@ export default function ProduitDetail({ produitId, open, onClose }) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="bg-white/80 backdrop-blur-2xl border border-mamastockGold/20 rounded-2xl shadow-2xl p-8 max-w-2xl w-full">
+    <ModalGlass open={open} onClose={onClose}>
         <h2 className="text-lg font-bold text-mamastockGold mb-3">Historique des prix d’achat</h2>
         {loading ? (
-          <div className="flex justify-center py-6"><Loader className="animate-spin" /></div>
+          <div className="flex justify-center py-6">
+            <LoadingSpinner message="Chargement..." />
+          </div>
         ) : (
           <table className="min-w-full text-sm">
             <thead>
@@ -53,7 +55,7 @@ export default function ProduitDetail({ produitId, open, onClose }) {
                 <tr><td colSpan={4} className="text-center py-4">Aucune donnée</td></tr>
               ) : historique.map((h, i) => (
                 <tr key={i}>
-                  <td>{h.updated_at?.slice(0, 10) || "-"}</td>
+                  <td>{h.created_at?.slice(0, 10) || "-"}</td>
                   <td>{h.supplier?.nom || "-"}</td>
                   <td>{h.prix_achat ?? "-"}</td>
                   <td>{h.derniere_livraison?.slice(0, 10) || "-"}</td>
@@ -81,7 +83,6 @@ export default function ProduitDetail({ produitId, open, onClose }) {
           <button onClick={exportExcel} className="btn btn-secondary">Export Excel</button>
           <button onClick={onClose} className="btn">Fermer</button>
         </div>
-      </DialogContent>
-    </Dialog>
+    </ModalGlass>
   );
 }

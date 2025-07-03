@@ -1,11 +1,18 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import toast, { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
-import { Dialog, DialogContent } from "@radix-ui/react-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from "@radix-ui/react-dialog";
 import PermissionsForm from "./PermissionsForm"; // adapte le chemin si besoin
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function Roles() {
   const { mama_id, user_id, loading: authLoading } = useAuth();
@@ -106,7 +113,7 @@ export default function Roles() {
   );
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  if (authLoading) return <div className="p-8">Chargement...</div>;
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
   if (!mama_id) return null;
 
   return (
@@ -204,9 +211,10 @@ export default function Roles() {
       {/* Modale création/édition */}
       <Dialog open={!!editRole} onOpenChange={v => !v && setEditRole(null)}>
         <DialogContent className="bg-glass backdrop-blur-lg text-white rounded-xl shadow-lg p-6 max-w-md">
-          <h2 className="font-bold mb-2">
+          <DialogTitle className="font-bold mb-2">
             {editRole?.id ? "Modifier le rôle" : "Nouveau rôle"}
-          </h2>
+          </DialogTitle>
+          <DialogDescription className="sr-only">Formulaire rôle</DialogDescription>
           <form
             onSubmit={e => {
               e.preventDefault();
@@ -252,6 +260,12 @@ export default function Roles() {
       {editPermsRole && (
         <Dialog open={!!editPermsRole} onOpenChange={v => !v && setEditPermsRole(null)}>
           <DialogContent className="bg-glass backdrop-blur-lg text-white rounded-xl shadow-lg p-6 max-w-xl">
+            <DialogTitle className="font-bold mb-2">
+              Permissions - {editPermsRole.nom}
+            </DialogTitle>
+            <DialogDescription className="sr-only">
+              Formulaire permissions
+            </DialogDescription>
               {/* Passe bien tout l'objet ici */}
               <PermissionsForm
                 role={editPermsRole}

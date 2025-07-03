@@ -1,6 +1,7 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 export default function StatCard({ label, value, variation = null, icon: Icon }) {
   return (
-    <div className="bg-zinc-800 text-white rounded-xl shadow p-4 flex items-center gap-3">
+    <div className="bg-glass border border-borderGlass backdrop-blur rounded-xl shadow p-4 flex items-center gap-3">
       {Icon && <Icon className="w-5 h-5 text-mamastock-gold" />}
       <div className="flex flex-col">
         <span className="text-xs text-gray-400">{label}</span>

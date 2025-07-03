@@ -1,7 +1,9 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import useNotifications from "@/hooks/useNotifications";
 import { Toaster, toast } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function NotificationSettingsForm() {
   const { fetchPreferences, updatePreferences } = useNotifications();
@@ -36,7 +38,7 @@ export default function NotificationSettingsForm() {
     }
   };
 
-  if (loading) return <div className="p-6">Chargement...</div>;
+  if (loading) return <LoadingSpinner message="Chargement..." />;
 
   return (
     <div className="p-6 text-sm">

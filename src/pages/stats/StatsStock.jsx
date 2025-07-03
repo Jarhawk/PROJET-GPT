@@ -1,8 +1,11 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { useAuth } from "@/context/AuthContext";
 import { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
+import TableContainer from "@/components/ui/TableContainer";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import * as XLSX from "xlsx";
 
 export default function StatsStock() {
@@ -27,7 +30,7 @@ export default function StatsStock() {
     XLSX.writeFile(wb, "stocks_dashboard.xlsx");
   };
 
-  if (loading) return <div className="p-8">Chargement...</div>;
+  if (loading) return <LoadingSpinner message="Chargement..." />;
   if (error) return <div className="p-8 text-red-600">{error}</div>;
 
   return (
@@ -37,7 +40,7 @@ export default function StatsStock() {
       <Button variant="outline" className="mb-2" onClick={exportExcel}>
         Export Excel
       </Button>
-      <div className="overflow-x-auto bg-white rounded-xl shadow-md">
+      <TableContainer className="mt-2">
         <table className="min-w-full text-xs">
           <thead>
             <tr>
@@ -56,7 +59,7 @@ export default function StatsStock() {
               </tr>
             ) : (
               rows.map((r) => (
-                <tr key={r.product_id}>
+                <tr key={r.produit_id}>
                   <td className="px-2 py-1">{r.nom}</td>
                   <td className="px-2 py-1 text-right">{Number(r.stock_reel ?? 0).toLocaleString()}</td>
                   <td className="px-2 py-1 text-right">{Number(r.pmp ?? 0).toLocaleString()}</td>
@@ -70,7 +73,7 @@ export default function StatsStock() {
             )}
           </tbody>
         </table>
-      </div>
+      </TableContainer>
     </div>
   );
 }

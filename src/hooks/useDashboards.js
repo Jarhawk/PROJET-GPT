@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
@@ -13,8 +14,8 @@ export function useDashboards() {
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
-      .from("dashboards")
-      .select("*, widgets:widgets(*)")
+      .from("tableaux_de_bord")
+      .select("*, gadgets:gadgets(*)")
       .eq("user_id", user_id)
       .eq("mama_id", mama_id)
       .order("created_at", { ascending: true });
@@ -33,7 +34,7 @@ export function useDashboards() {
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
-      .from("dashboards")
+      .from("tableaux_de_bord")
       .insert([{ nom, user_id, mama_id }])
       .select()
       .single();
@@ -51,7 +52,7 @@ export function useDashboards() {
     setLoading(true);
     setError(null);
     const { data: ordreData } = await supabase
-      .from("widgets")
+      .from("gadgets")
       .select("ordre")
       .eq("dashboard_id", dashboardId)
       .order("ordre", { ascending: false })
@@ -59,7 +60,7 @@ export function useDashboards() {
       .single();
     const ordre = ordreData ? (ordreData.ordre || 0) + 1 : 0;
     const { data, error } = await supabase
-      .from("widgets")
+      .from("gadgets")
       .insert([{ dashboard_id: dashboardId, config, ordre }])
       .select()
       .single();
@@ -78,14 +79,15 @@ export function useDashboards() {
     return data;
   }
 
-  async function updateWidget(id, values) {
-    if (!id) return null;
+  async function updateWidget(dashboardId, id, values) {
+    if (!dashboardId || !id) return null;
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
-      .from("widgets")
+      .from("gadgets")
       .update(values)
       .eq("id", id)
+      .eq("dashboard_id", dashboardId)
       .select()
       .single();
     setLoading(false);
@@ -102,11 +104,15 @@ export function useDashboards() {
     return data;
   }
 
-  async function deleteWidget(id) {
-    if (!id) return;
+  async function deleteWidget(dashboardId, id) {
+    if (!dashboardId || !id) return;
     setLoading(true);
     setError(null);
-    const { error } = await supabase.from("widgets").delete().eq("id", id);
+    const { error } = await supabase
+      .from("gadgets")
+      .delete()
+      .eq("id", id)
+      .eq("dashboard_id", dashboardId);
     setLoading(false);
     if (error) {
       setError(error.message || error);

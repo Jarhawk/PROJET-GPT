@@ -1,7 +1,9 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import { usePromotions } from "@/hooks/usePromotions";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
+import TableContainer from "@/components/ui/TableContainer";
 import { Toaster, toast } from "react-hot-toast";
 
 export default function Promotions() {
@@ -42,7 +44,8 @@ export default function Promotions() {
         />
         <Button onClick={() => setShowForm(true)}>Nouvelle promotion</Button>
       </div>
-      <table className="min-w-full bg-white rounded-xl shadow-md text-sm">
+      <TableContainer className="mt-2">
+        <table className="min-w-full text-sm">
         <thead>
           <tr>
             <th className="px-4 py-2">Nom</th>
@@ -70,7 +73,8 @@ export default function Promotions() {
             </tr>
           ))}
         </tbody>
-      </table>
+        </table>
+      </TableContainer>
       {showForm && (
         <PromotionForm
           promotion={editRow}
@@ -112,8 +116,8 @@ function PromotionForm({ promotion = {}, onClose, onSave, saving }) {
   });
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 shadow-lg w-96">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-glass border border-borderGlass backdrop-blur rounded-2xl p-6 shadow-lg w-96">
         <h2 className="text-lg font-bold mb-4">{promotion.id ? "Modifier" : "Nouvelle"} promotion</h2>
         <form className="space-y-3" onSubmit={e => { e.preventDefault(); onSave(form); }}>
           <div>

@@ -1,8 +1,10 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import { Reorder } from "framer-motion";
 import { useDashboards } from "@/hooks/useDashboards";
 import WidgetRenderer from "@/components/dashboard/WidgetRenderer";
 import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function DashboardBuilder() {
   const {
@@ -12,6 +14,7 @@ export default function DashboardBuilder() {
     addWidget,
     updateWidget,
     deleteWidget,
+    loading,
   } = useDashboards();
   const [current, setCurrent] = useState(null);
   const [newName, setNewName] = useState("");
@@ -24,6 +27,10 @@ export default function DashboardBuilder() {
   useEffect(() => {
     if (current) setOrdered(current.widgets || []);
   }, [current]);
+
+  if (loading && dashboards.length === 0) {
+    return <LoadingSpinner message="Chargement..." />;
+  }
 
   if (!current) {
     return (
@@ -62,7 +69,7 @@ export default function DashboardBuilder() {
   const saveOrder = async () => {
     for (let i = 0; i < ordered.length; i++) {
       if (ordered[i].ordre !== i) {
-        await updateWidget(ordered[i].id, { ordre: i });
+        await updateWidget(current.id, ordered[i].id, { ordre: i });
       }
     }
     const list = await getDashboards();
@@ -83,10 +90,10 @@ export default function DashboardBuilder() {
         className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6"
       >
         {ordered.map((w) => (
-          <Reorder.Item key={w.id} value={w} className="bg-white rounded-xl p-4 relative">
+          <Reorder.Item key={w.id} value={w} className="bg-glass backdrop-blur border border-borderGlass rounded-xl p-4 relative">
             <button
               className="absolute top-2 right-2 text-red-600"
-              onClick={() => deleteWidget(w.id)}
+              onClick={() => deleteWidget(current.id, w.id)}
             >
               ✕
             </button>

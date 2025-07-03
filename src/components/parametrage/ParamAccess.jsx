@@ -1,6 +1,8 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { usePermissions } from "@/hooks/usePermissions";
 import { useRoles } from "@/hooks/useRoles";
 import { Button } from "@/components/ui/button";
+import TableContainer from "@/components/ui/TableContainer";
 import { useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Toaster, toast } from "react-hot-toast";
@@ -34,16 +36,17 @@ export default function ParamAccess() {
     <div>
       <Toaster position="top-right" />
       <h2 className="font-bold text-xl mb-4">Grille d’accès par rôle</h2>
-      <table className="min-w-full bg-white rounded-xl shadow-md text-xs">
-        <thead>
-          <tr>
-            <th>Rôle</th>
-            {modules.map(m => <th key={m}>{m}</th>)}
-          </tr>
-        </thead>
-        <tbody>
-          {roles.map(r => (
-            <tr key={r.id}>
+      <TableContainer className="mt-2">
+        <table className="min-w-full text-xs">
+          <thead>
+            <tr>
+              <th>Rôle</th>
+              {modules.map(m => <th key={m}>{m}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {roles.map(r => (
+              <tr key={r.id}>
               <td>{r.nom}</td>
               {modules.map(m => {
                 const current = permissions.find(p => p.role_id === r.id && p.module === m);
@@ -60,7 +63,8 @@ export default function ParamAccess() {
             </tr>
           ))}
         </tbody>
-      </table>
+        </table>
+      </TableContainer>
     </div>
   );
 }

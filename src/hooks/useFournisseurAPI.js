@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
@@ -66,23 +67,31 @@ export function useFournisseurAPI() {
       const updates = [];
       for (const p of produits) {
         const { data: existing } = await supabase
-          .from("supplier_products")
-          .select("price")
-          .eq("product_id", p.product_id)
+          .from("fournisseur_produits")
+          .select("prix_achat")
+          .eq("produit_id", p.product_id)
           .eq("fournisseur_id", fournisseur_id)
           .eq("mama_id", mama_id)
+          .order("date_livraison", { ascending: false })
+          .limit(1)
           .maybeSingle();
-        await supabase.from("supplier_products").upsert({
-          product_id: p.product_id,
-          fournisseur_id,
-          price: p.price,
-          mama_id,
-        });
-        if (existing && existing.price !== p.price) {
+        await supabase
+          .from("fournisseur_produits")
+          .upsert(
+            {
+              produit_id: p.product_id,
+              fournisseur_id,
+              prix_achat: p.price,
+              date_livraison: new Date().toISOString().slice(0, 10),
+              mama_id,
+            },
+            { onConflict: ["produit_id", "fournisseur_id", "date_livraison"] }
+          );
+        if (existing && existing.prix_achat !== p.price) {
           await supabase.from("catalogue_updates").insert({
             fournisseur_id,
             produit_id: p.product_id,
-            ancienne_valeur: existing.price,
+            ancienne_valeur: existing.prix_achat,
             nouvelle_valeur: p.price,
             modification: p,
             mama_id,
@@ -135,7 +144,8 @@ export function useFournisseurAPI() {
       await supabase
         .from("commandes")
         .update({ statut: body.statut || "envoyee" })
-        .eq("id", commande_id);
+        .eq("id", commande_id)
+        .eq("mama_id", mama_id);
       toast.success("Commande envoyée");
       return { data: body };
     } catch (err) {

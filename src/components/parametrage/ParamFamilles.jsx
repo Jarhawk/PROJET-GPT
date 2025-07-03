@@ -1,5 +1,7 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useFamilles } from "@/hooks/useFamilles";
 import { Button } from "@/components/ui/button";
+import TableContainer from "@/components/ui/TableContainer";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Toaster, toast } from "react-hot-toast";
@@ -105,25 +107,27 @@ export default function ParamFamilles() {
         onChange={e => setSearch(e.target.value)}
       />
       <Button variant="outline" className="mb-2" onClick={exportExcel}>Export Excel</Button>
-      <table className="min-w-full bg-white rounded-xl shadow-md text-xs">
-        <thead>
-          <tr>
-            <th>Nom</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filtered.map(f => (
-            <tr key={f.id}>
-              <td>{f.nom}</td>
-              <td>
-                <Button size="sm" variant="outline" onClick={() => handleEdit(f)}>Modifier</Button>
-                <Button size="sm" variant="outline" onClick={() => handleDelete(f.id)}>Supprimer</Button>
-              </td>
+      <TableContainer className="mt-2">
+        <table className="min-w-full text-xs">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {filtered.map(f => (
+              <tr key={f.id}>
+                <td>{f.nom}</td>
+                <td>
+                  <Button size="sm" variant="outline" onClick={() => handleEdit(f)}>Modifier</Button>
+                  <Button size="sm" variant="outline" onClick={() => handleDelete(f.id)}>Supprimer</Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </TableContainer>
     </div>
   );
 }

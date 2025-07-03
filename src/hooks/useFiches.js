@@ -1,8 +1,11 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 export function useFiches() {
   const { mama_id } = useAuth();
@@ -18,7 +21,7 @@ export function useFiches() {
     setError(null);
     let query = supabase
       .from("fiches")
-      .select("*, lignes:fiche_lignes(id)", { count: "exact" })
+      .select("*, famille:familles(id, nom), lignes:fiche_lignes(id)", { count: "exact" })
       .eq("mama_id", mama_id)
       .order("nom", { ascending: true })
       .range((page - 1) * limit, page * limit - 1);
@@ -38,7 +41,7 @@ export function useFiches() {
     setLoading(true);
     const { data, error } = await supabase
       .from("fiches")
-      .select("*, lignes:fiche_lignes(*, product:products(id, nom, unite, pmp))")
+      .select("*, famille:familles(id, nom), lignes:fiche_lignes(*, produit:produits(id, nom, unite, pmp))")
       .eq("id", id)
       .eq("mama_id", mama_id)
       .single();
@@ -52,16 +55,25 @@ export function useFiches() {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase
+    const { data, error: insertError } = await supabase
       .from("fiches")
       .insert([{ ...fiche, mama_id }])
       .select("id")
       .single();
-    if (error) { setLoading(false); setError(error); return { error }; }
+    if (insertError) {
+      setLoading(false);
+      setError(insertError);
+      throw insertError;
+    }
     const ficheId = data.id;
     if (lignes.length > 0) {
-      const toInsert = lignes.map(l => ({ fiche_id: ficheId, product_id: l.product_id, quantite: l.quantite, mama_id }));
-      await supabase.from("fiche_lignes").insert(toInsert);
+      const toInsert = lignes.map(l => ({ fiche_id: ficheId, produit_id: l.produit_id, quantite: l.quantite, mama_id }));
+      const { error: lignesError } = await supabase.from("fiche_lignes").insert(toInsert);
+      if (lignesError) {
+        setLoading(false);
+        setError(lignesError);
+        throw lignesError;
+      }
     }
     setLoading(false);
     await getFiches();
@@ -73,14 +85,38 @@ export function useFiches() {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    await supabase.from("fiches").update(fiche).eq("id", id).eq("mama_id", mama_id);
-    await supabase.from("fiche_lignes").delete().eq("fiche_id", id);
+    const { error: updateError } = await supabase
+      .from("fiches")
+      .update(fiche)
+      .eq("id", id)
+      .eq("mama_id", mama_id);
+    if (updateError) {
+      setLoading(false);
+      setError(updateError);
+      throw updateError;
+    }
+    const { error: deleteError } = await supabase
+      .from("fiche_lignes")
+      .delete()
+      .eq("fiche_id", id)
+      .eq("mama_id", mama_id);
+    if (deleteError) {
+      setLoading(false);
+      setError(deleteError);
+      throw deleteError;
+    }
     if (lignes.length > 0) {
-      const toInsert = lignes.map(l => ({ fiche_id: id, product_id: l.product_id, quantite: l.quantite, mama_id }));
-      await supabase.from("fiche_lignes").insert(toInsert);
+      const toInsert = lignes.map(l => ({ fiche_id: id, produit_id: l.produit_id, quantite: l.quantite, mama_id }));
+      const { error: insertError } = await supabase.from("fiche_lignes").insert(toInsert);
+      if (insertError) {
+        setLoading(false);
+        setError(insertError);
+        throw insertError;
+      }
     }
     setLoading(false);
     await getFiches();
+    return { data: id };
   }
 
   // Désactivation logique
@@ -88,9 +124,19 @@ export function useFiches() {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    await supabase.from("fiches").update({ actif: false }).eq("id", id).eq("mama_id", mama_id);
+    const { error: deleteError } = await supabase
+      .from("fiches")
+      .update({ actif: false })
+      .eq("id", id)
+      .eq("mama_id", mama_id);
+    if (deleteError) {
+      setLoading(false);
+      setError(deleteError);
+      throw deleteError;
+    }
     setLoading(false);
     await getFiches();
+    return { data: id };
   }
 
   function exportFichesToExcel() {
@@ -108,5 +154,17 @@ export function useFiches() {
     saveAs(new Blob([buf]), "fiches_mamastock.xlsx");
   }
 
-  return { fiches, total, loading, error, getFiches, getFicheById, createFiche, updateFiche, deleteFiche, exportFichesToExcel };
+  function exportFichesToPDF() {
+    const doc = new jsPDF();
+    const rows = (fiches || []).map(f => [
+      f.nom,
+      f.famille?.nom || "",
+      f.portions,
+      f.cout_par_portion,
+    ]);
+    doc.autoTable({ head: [["Nom", "Famille", "Portions", "Coût/portion"]], body: rows });
+    doc.save("fiches_mamastock.pdf");
+  }
+
+  return { fiches, total, loading, error, getFiches, getFicheById, createFiche, updateFiche, deleteFiche, exportFichesToExcel, exportFichesToPDF };
 }

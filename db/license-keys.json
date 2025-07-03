@@ -1,0 +1,25 @@
+{
+  "licenses": [
+    {
+      "id": "172ca1c7-0a92-45a0-8ba5-fb88a9c08e67",
+      "client": "Gestion",
+      "email": "admin@mamastock.com",
+      "expires": "2025-12-31",
+      "key": "36a62f868c201acc837b1c8298eea231da0dd09fc9c916b64e42112436791a7f",
+      "revoked": true
+    },
+    {
+      "id": "842d22ee-5b4e-4697-bfe0-802d18c12a16",
+      "client": "Gestion",
+      "email": "admin@mamastock.com",
+      "expires": "2025-12-31",
+
+      "key": "6c8706202f0663e8040a517658de8dbcb5d0f89b5d6a04eba58b6fe3796c3971",
+      "revoked": false
+    }
+  ]
+
+}
+
+
+

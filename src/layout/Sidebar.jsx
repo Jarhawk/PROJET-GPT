@@ -1,5 +1,7 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import toast from "react-hot-toast";
 import {
   Boxes,
@@ -21,14 +23,23 @@ import {
 } from "lucide-react";
 
 export default function Sidebar() {
-  const { access_rights, loading, user, logout, session } = useAuth();
+  const { access_rights, loading, user, role, mama_id, logout, session } =
+    useAuth();
   const { pathname } = useLocation();
-
-  if (loading || !access_rights) {
-    return <aside className="w-64 p-4" />;
+  if (import.meta.env.DEV) {
+    console.log("Sidebar", { user, role, mama_id, access_rights });
   }
 
-  const has = (key) => access_rights.includes(key);
+  if (loading || access_rights === null) {
+    return (
+      <aside className="w-64 p-4">
+        <LoadingSpinner message="Chargement menu..." />
+      </aside>
+    );
+  }
+
+  const rights = typeof access_rights === "object" ? access_rights : {};
+  const has = (key) => rights[key];
 
   const Item = ({ to, icon, label }) => (
     <Link
@@ -43,7 +54,7 @@ export default function Sidebar() {
   );
 
   return (
-    <aside className="w-64 bg-white/5 backdrop-blur-xl text-white p-4 h-screen shadow-md text-shadow hidden md:block animate-fade-in-down">
+    <aside className="w-64 bg-glass border border-white/10 backdrop-blur-xl text-white p-4 h-screen shadow-md text-shadow hidden md:block animate-fade-in-down">
       <nav className="flex flex-col gap-4 text-sm">
         {has("dashboard") && (
           <Item to="/dashboard" icon={<Home size={16} />} label="Dashboard" />

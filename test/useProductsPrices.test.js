@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { renderHook, act } from '@testing-library/react';
 import { vi, beforeEach, test, expect } from 'vitest';
 
@@ -22,6 +23,6 @@ test('fetchProductPrices selects fields with last delivery alias', async () => {
   await act(async () => {
     await result.current.fetchProductPrices('p1');
   });
-  expect(fromMock).toHaveBeenCalledWith('supplier_products');
+  expect(fromMock).toHaveBeenCalledWith('fournisseur_produits');
   expect(selectMock).toHaveBeenCalledWith('*, fournisseur: fournisseurs(id, nom), derniere_livraison:date_livraison');
 });

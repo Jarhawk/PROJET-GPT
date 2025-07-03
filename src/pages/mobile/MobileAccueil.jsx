@@ -1,9 +1,13 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { Link } from "react-router-dom";
+import { LiquidBackground, TouchLight } from "@/components/LiquidBackground";
 
 export default function MobileAccueil() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-mamastock-bg text-white px-4 animate-fade-in">
-      <div className="w-full max-w-sm space-y-6 text-center">
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden text-white px-4">
+      <LiquidBackground showParticles />
+      <TouchLight />
+      <div className="w-full max-w-sm space-y-6 text-center relative z-10">
         <h2 className="text-2xl font-bold text-mamastockGold">📱 Menu Mobile</h2>
 
         <div className="flex flex-col gap-4">

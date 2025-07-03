@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { renderHook, act } from '@testing-library/react';
 import { beforeAll, afterEach, test, expect, vi } from 'vitest';
 import fs from 'fs';
@@ -54,7 +55,7 @@ async function log(msg) {
 let useProducts;
 
 test('produits creation and disable refresh list', async () => {
-  setup('products', []);
+  setup('produits', []);
   ({ useProducts } = await import('@/hooks/useProducts'));
   const { result } = renderHook(() => useProducts());
 
@@ -68,7 +69,7 @@ test('produits creation and disable refresh list', async () => {
   });
 
   const afterDisable = result.current.products[0].actif === false;
-  const fetchCount = fromMock.mock.calls.filter(c => c[0].includes('v_products')).length;
+  const fetchCount = fromMock.mock.calls.filter(c => c[0].includes('v_produits')).length;
   await log(`Produits: creation ${afterCreate ? 'OK' : 'FAIL'}, disable ${afterDisable ? 'OK' : 'FAIL'}, refresh calls=${fetchCount}`);
 
   expect(afterCreate).toBe(true);

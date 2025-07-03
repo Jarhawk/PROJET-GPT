@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import MamaLogo from "@/components/ui/MamaLogo";
 import useAuth from "@/hooks/useAuth";
 import toast from "react-hot-toast";
 import useFormErrors from "@/hooks/useFormErrors";
 import GlassCard from "@/components/ui/GlassCard";
 import PageWrapper from "@/components/ui/PageWrapper";
+import PreviewBanner from "@/components/ui/PreviewBanner";
 import PrimaryButton from "@/components/ui/PrimaryButton";
+import { login as loginUser } from "../../lib/loginUser";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -14,24 +17,32 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const { errors, setError, clearErrors } = useFormErrors();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
 
-  const {
-    session,
-    user,
-    login,
-    pending,
-    access_rights,
-    actif,
-  } = useAuth();
-  const [totp, setTotp] = useState("");
-  const [twoFA, setTwoFA] = useState(false);
+  const { session, userData, loading: authLoading } = useAuth();
 
-  // Redirection après authentification
+
+  // Redirection après authentification une fois les données chargées
+  const redirectedRef = useRef(false);
   useEffect(() => {
-    if (session && user) {
-      navigate("/dashboard");
+    if (redirectedRef.current) return;
+    if (!session || authLoading) return;
+    if (!userData) return;
+    redirectedRef.current = true;
+    if (userData.actif === false && pathname !== "/blocked") {
+      navigate("/blocked");
+      return;
     }
-  }, [session, user, navigate]);
+    if (
+      Object.keys(userData.access_rights || {}).length === 0 &&
+      pathname !== "/unauthorized"
+    ) {
+      navigate("/unauthorized");
+      return;
+    }
+    toast.success(`Bienvenue ${session.user.email}`);
+    if (pathname !== "/dashboard") navigate("/dashboard");
+  }, [session, userData, authLoading, navigate, pathname]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -43,42 +54,20 @@ export default function Login() {
 
     setLoading(true);
     try {
-      const { error, twofaRequired } = await login({
-        email: email.trim(),
-        password,
-        totp,
-      });
-
+      const { data, error } = await loginUser(email.trim(), password);
       if (error) {
-        if (twofaRequired) {
-          setTwoFA(true);
-          setError("totp", error);
-        } else {
-          setError("password", error);
-        }
-        toast.error(error?.message || error || "Échec de la connexion");
+        console.error(error);
+        setError("password", error.message || error);
+        toast.error(error.message || "Échec de la connexion");
         return;
       }
 
-      if (pending) {
-        toast("Compte en cours de création");
-        navigate("/pending");
-        return;
+      if (data) {
+        toast.success("Connexion réussie");
+        navigate("/");
       }
-
-      if (actif === false) {
-        navigate("/blocked");
-        return;
-      }
-
-      if (!access_rights || access_rights.length === 0) {
-        navigate("/unauthorized");
-        return;
-      }
-
-      toast.success("Connecté !");
-      navigate("/dashboard");
     } catch (err) {
+      console.error(err);
       toast.error(err?.message || "Échec de la connexion");
     } finally {
       setLoading(false);
@@ -87,6 +76,7 @@ export default function Login() {
 
   return (
     <PageWrapper>
+      <PreviewBanner />
       <GlassCard className="flex flex-col items-center">
         <div className="mb-6">
           <MamaLogo width={96} />
@@ -125,25 +115,10 @@ export default function Login() {
                 <p className="text-sm text-red-500 mt-1">{errors.password}</p>
               )}
             </div>
-            {twoFA && (
-              <div>
-              <label className="block text-xs font-semibold text-white/90 mb-1">Code 2FA</label>
-                <input
-                  className="w-full rounded-xl border border-gold/30 bg-white/70 dark:bg-[#202638]/50 py-2 px-4 text-background dark:text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-gold/30 backdrop-blur transition"
-                  type="text"
-                  value={totp}
-                  onChange={e => setTotp(e.target.value)}
-                  placeholder="000000"
-                />
-                {errors.totp && (
-                  <p className="text-sm text-red-500 mt-1">{errors.totp}</p>
-                )}
-              </div>
-            )}
             <PrimaryButton
               type="submit"
               className="w-full mt-3 flex items-center justify-center gap-2 disabled:opacity-50"
-              disabled={!email || !password || loading || (twoFA && !totp)}
+              disabled={!email || !password || loading}
             >
               {loading ? (
                 <>

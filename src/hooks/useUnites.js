@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
@@ -95,6 +96,11 @@ export function useUnites() {
     await fetchUnites();
   }
 
+  // Convenience wrapper for single deletion
+  async function deleteUnite(id) {
+    return batchDeleteUnites([id]);
+  }
+
   // 5. Export Excel
   function exportUnitesToExcel() {
     const datas = (unites || []).map(u => ({
@@ -132,6 +138,7 @@ export function useUnites() {
     fetchUnites,
     addUnite,
     updateUnite,
+    deleteUnite,
     batchDeleteUnites,
     exportUnitesToExcel,
     importUnitesFromExcel,

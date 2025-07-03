@@ -1,12 +1,22 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import toast, { Toaster } from "react-hot-toast";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import GlassCard from "@/components/ui/GlassCard";
+import TableContainer from "@/components/ui/TableContainer";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
-import { Dialog, DialogContent, DialogTrigger } from "@radix-ui/react-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+  DialogTitle,
+  DialogDescription,
+} from "@radix-ui/react-dialog";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { motion as Motion, AnimatePresence } from "framer-motion";
 
@@ -177,7 +187,7 @@ export default function CostBoissons() {
       "Marge (€)": b.prix_vente && b.cout_portion ? (b.prix_vente - b.cout_portion).toFixed(2) : 0
     }));
 
-  if (authLoading) return <div className="p-8">Chargement...</div>;
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
   if (!mama_id) return null;
 
   return (
@@ -214,7 +224,7 @@ export default function CostBoissons() {
         <Button onClick={handleExportPDF}>Exporter PDF</Button>
       </div>
       {/* Stats avancées */}
-      <div className="bg-white shadow rounded-xl p-4 mb-6 flex flex-wrap gap-6">
+      <GlassCard className="p-4 mb-6 flex flex-wrap gap-6">
         <div>
           <span className="font-semibold text-blue-700">Food cost moyen&nbsp;:</span>
           <span className={avgFC > FOOD_COST_SEUIL ? "text-red-600 font-bold" : "font-bold"}>
@@ -236,9 +246,9 @@ export default function CostBoissons() {
           <span className="font-semibold">Total boissons actives&nbsp;: </span>
           {filtered.length}
         </div>
-      </div>
+      </GlassCard>
       {/* Graphique top ventes */}
-      <div className="bg-white shadow rounded-xl p-4 mb-6">
+      <GlassCard className="p-4 mb-6">
         <h2 className="font-bold mb-2">Top 10 ventes boissons (période)</h2>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={chartData}>
@@ -250,9 +260,9 @@ export default function CostBoissons() {
             <Bar dataKey="Marge (€)" fill="#e0a800" />
           </BarChart>
         </ResponsiveContainer>
-      </div>
+      </GlassCard>
       {/* Tableau interactif */}
-      <div className="bg-white shadow rounded-xl overflow-x-auto">
+      <TableContainer>
         <table className="min-w-full table-auto">
           <thead>
             <tr>
@@ -289,9 +299,14 @@ export default function CostBoissons() {
                           </Button>
                         </DialogTrigger>
                         <DialogContent
-                          className="bg-white rounded-xl shadow-lg p-6 max-w-md z-[1000]"
+                          className="bg-glass backdrop-blur-lg border border-borderGlass rounded-xl shadow-lg p-6 max-w-md z-[1000]"
                         >
-                          <h2 className="font-bold text-xl mb-2">{b.nom}</h2>
+                          <DialogTitle className="font-bold text-xl mb-2">
+                            {b.nom}
+                          </DialogTitle>
+                          <DialogDescription className="sr-only">
+                            Détails du produit
+                          </DialogDescription>
                           <p>
                             <b>Type&nbsp;:</b> {b.type || b.famille || "-"}
                             <br />
@@ -363,15 +378,20 @@ export default function CostBoissons() {
                           <Button variant="ghost" className="text-sm">Voir fiche</Button>
                         </DialogTrigger>
                         <DialogContent
-                          className="bg-white rounded-xl shadow-lg p-6 max-w-md z-[1000]"
+                          className="bg-glass backdrop-blur-lg border border-borderGlass rounded-xl shadow-lg p-6 max-w-md z-[1000]"
                         >
-                          <h2 className="font-bold text-xl mb-2">{b.nom}</h2>
+                          <DialogTitle className="font-bold text-xl mb-2">
+                            {b.nom}
+                          </DialogTitle>
+                          <DialogDescription className="sr-only">
+                            Fiche technique
+                          </DialogDescription>
                           <p>
                             <b>Détails techniques :</b>
                             <br />
                             ID : {b.id}
                             <br />
-                            Dernière mise à jour : {b.updated_at || "-"}
+                            Dernière mise à jour : {b.created_at?.slice(0, 10) || "-"}
                           </p>
                         </DialogContent>
                       </Dialog>
@@ -382,7 +402,7 @@ export default function CostBoissons() {
             </AnimatePresence>
           </tbody>
         </table>
-      </div>
+      </TableContainer>
     </div>
   );
 }

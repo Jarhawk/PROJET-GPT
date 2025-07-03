@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
@@ -14,12 +15,12 @@ export function useAlerts() {
     setError(null);
     let query = supabase
       .from("alert_rules")
-      .select("*, product:products(id, nom)")
+      .select("*, produit:produits(id, nom)")
       .eq("mama_id", mama_id)
       .order("created_at", { ascending: false });
 
     if (typeof actif === "boolean") query = query.eq("enabled", actif);
-    if (search) query = query.ilike("product.nom", `%${search}%`);
+    if (search) query = query.ilike("produit.nom", `%${search}%`);
 
     const { data, error } = await query;
     setLoading(false);

@@ -1,20 +1,23 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRequisitions } from "@/hooks/useRequisitions";
 import { useProducts } from "@/hooks/useProducts";
 import { useAuth } from "@/context/AuthContext";
 import { Toaster, toast } from "react-hot-toast";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import GlassCard from "@/components/ui/GlassCard";
 
 function RequisitionFormPage() {
   const navigate = useNavigate();
   const { loading: authLoading } = useAuth();
   const { createRequisition } = useRequisitions();
-  const { data: products, loading: loadingProducts } = useProducts();
+  const { products, loading: loadingProducts } = useProducts();
 
   const [type, setType] = useState("");
   const [motif, setMotif] = useState("");
   const [zone, setZone] = useState("");
-  const [articles, setArticles] = useState([{ product_id: "", quantite: 1 }]);
+  const [articles, setArticles] = useState([{ produit_id: "", quantite: 1 }]);
   const [submitting, setSubmitting] = useState(false);
 
   const handleChangeArticle = (index, field, value) => {
@@ -24,12 +27,12 @@ function RequisitionFormPage() {
   };
 
   const handleAddArticle = () => {
-    setArticles([...articles, { product_id: "", quantite: 1 }]);
+    setArticles([...articles, { produit_id: "", quantite: 1 }]);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!type || !zone || articles.some(a => !a.product_id || !a.quantite)) {
+    if (!type || !zone || articles.some(a => !a.produit_id || !a.quantite)) {
       toast.error("Tous les champs sont obligatoires");
       return;
     }
@@ -38,7 +41,7 @@ function RequisitionFormPage() {
       zone,
       type,
       motif,
-      lignes: articles.map(a => ({ product_id: a.product_id, quantite: Number(a.quantite) })),
+      lignes: articles.map(a => ({ produit_id: a.produit_id, quantite: Number(a.quantite) })),
     };
     try {
       setSubmitting(true);
@@ -57,14 +60,15 @@ function RequisitionFormPage() {
   };
 
   if (authLoading) {
-    return <div className="p-6">Chargement...</div>;
+    return <LoadingSpinner message="Chargement..." />;
   }
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
+    <div className="p-6 space-y-6">
       <Toaster position="top-right" />
       <h1 className="text-3xl font-bold text-mamastock-gold mb-6">Nouvelle réquisition</h1>
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow space-y-4">
+      <GlassCard className="p-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
 
         <div>
           <label className="block text-sm font-medium mb-1">Type</label>
@@ -103,23 +107,27 @@ function RequisitionFormPage() {
           <h2 className="text-lg font-semibold mb-2">Articles</h2>
           {articles.map((article, index) => (
             <div key={index} className="flex gap-4 mb-2">
-              <select
-                value={article.product_id}
-                onChange={(e) => handleChangeArticle(index, "product_id", e.target.value)}
-                className="flex-1 border rounded px-3 py-2"
-                required
-              >
-                <option value="">Sélectionner un produit</option>
-                {loadingProducts ? (
-                  <option disabled>Chargement...</option>
-                ) : (
-                  products.map((p) => (
+              {loadingProducts ? (
+                <div className="flex-1 flex items-center justify-center py-2">
+                  <LoadingSpinner message="Chargement produits..." />
+                </div>
+              ) : (
+                <select
+                  value={article.produit_id}
+                  onChange={(e) =>
+                    handleChangeArticle(index, "produit_id", e.target.value)
+                  }
+                  className="flex-1 border rounded px-3 py-2"
+                  required
+                >
+                  <option value="">Sélectionner un produit</option>
+                  {products.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.nom}
                     </option>
-                  ))
-                )}
-              </select>
+                  ))}
+                </select>
+              )}
               <input
                 type="number"
                 value={article.quantite}
@@ -144,7 +152,8 @@ function RequisitionFormPage() {
             Enregistrer
           </button>
         </div>
-      </form>
+        </form>
+      </GlassCard>
     </div>
   );
 }

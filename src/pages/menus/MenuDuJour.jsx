@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import { useMenuDuJour } from "@/hooks/useMenuDuJour";
 import { useFiches } from "@/hooks/useFiches";
@@ -5,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import MenuDuJourForm from "./MenuDuJourForm.jsx";
 import MenuDuJourDetail from "./MenuDuJourDetail.jsx";
 import { Button } from "@/components/ui/button";
+import TableContainer from "@/components/ui/TableContainer";
 import { Toaster, toast } from "react-hot-toast";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
@@ -22,10 +24,10 @@ export default function MenuDuJour() {
 
   useEffect(() => {
     if (!authLoading && mama_id) {
-      fetchMenusDuJour();
+      fetchMenusDuJour({ search, date: dateFilter || undefined });
       fetchFiches();
     }
-  }, [authLoading, mama_id, fetchMenusDuJour, fetchFiches]);
+  }, [authLoading, mama_id, search, dateFilter, fetchMenusDuJour, fetchFiches]);
 
   const menusFiltres = menusDuJour.filter(m =>
     (!search || m.nom?.toLowerCase().includes(search.toLowerCase())) &&
@@ -46,7 +48,7 @@ export default function MenuDuJour() {
   const handleDelete = async (menu) => {
     if (window.confirm(`Supprimer le menu du jour "${menu.nom}" ?`)) {
       await deleteMenuDuJour(menu.id);
-      await fetchMenusDuJour();
+      fetchMenusDuJour({ search, date: dateFilter || undefined });
       toast.success("Menu du jour supprimé.");
     }
   };
@@ -73,11 +75,8 @@ export default function MenuDuJour() {
         </Button>
         <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
       </div>
-      <Motion.table
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="min-w-full bg-white rounded-xl shadow-md"
-      >
+      <TableContainer as={Motion.table} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-2">
+        <table className="min-w-full text-sm">
         <thead>
           <tr>
             <th className="px-4 py-2">Date</th>
@@ -123,12 +122,13 @@ export default function MenuDuJour() {
             </tr>
           ))}
         </tbody>
-      </Motion.table>
+        </table>
+      </TableContainer>
       {showForm && (
         <MenuDuJourForm
           menu={selected}
           fiches={fiches}
-          onClose={() => { setShowForm(false); setSelected(null); fetchMenusDuJour(); }}
+          onClose={() => { setShowForm(false); setSelected(null); fetchMenusDuJour({ search, date: dateFilter || undefined }); }}
         />
       )}
       {showDetail && selected && (

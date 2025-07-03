@@ -1,5 +1,7 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useUnites } from "@/hooks/useUnites";
 import { Button } from "@/components/ui/button";
+import TableContainer from "@/components/ui/TableContainer";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Toaster, toast } from "react-hot-toast";
@@ -7,7 +9,7 @@ import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 
 export default function ParamUnites() {
-  const { unites, fetchUnites, addUnite, editUnite, deleteUnite } = useUnites();
+  const { unites, fetchUnites, addUnite, updateUnite, deleteUnite } = useUnites();
   const { mama_id } = useAuth();
   const [form, setForm] = useState({ nom: "", id: null });
   const [editMode, setEditMode] = useState(false);
@@ -38,10 +40,10 @@ export default function ParamUnites() {
     setLoading(true);
     try {
       if (editMode) {
-        await editUnite(form.id, { nom: form.nom });
+        await updateUnite(form.id, form.nom);
         toast.success("Unité modifiée !");
       } else {
-        await addUnite({ nom: form.nom });
+        await addUnite(form.nom);
         toast.success("Unité ajoutée !");
       }
       setEditMode(false);
@@ -88,25 +90,27 @@ export default function ParamUnites() {
         )}
       </form>
       <Button variant="outline" className="mb-2" onClick={exportExcel}>Export Excel</Button>
-      <table className="min-w-full bg-white rounded-xl shadow-md text-xs">
-        <thead>
-          <tr>
-            <th>Nom</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {unites.map(u => (
-            <tr key={u.id}>
-              <td>{u.nom}</td>
-              <td>
-                <Button size="sm" variant="outline" onClick={() => handleEdit(u)}>Modifier</Button>
-                <Button size="sm" variant="outline" onClick={() => handleDelete(u.id)}>Supprimer</Button>
-              </td>
+      <TableContainer className="mt-2">
+        <table className="min-w-full text-xs">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {unites.map(u => (
+              <tr key={u.id}>
+                <td>{u.nom}</td>
+                <td>
+                  <Button size="sm" variant="outline" onClick={() => handleEdit(u)}>Modifier</Button>
+                  <Button size="sm" variant="outline" onClick={() => handleDelete(u.id)}>Supprimer</Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </TableContainer>
     </div>
   );
 }

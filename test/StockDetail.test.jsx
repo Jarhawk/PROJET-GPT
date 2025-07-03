@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { buildRotationData } from '@/components/stock/StockDetail.jsx';
 import { expect, test } from 'vitest';
 

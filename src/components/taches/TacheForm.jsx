@@ -1,13 +1,14 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
 import { useTasks } from "@/hooks/useTasks";
-import { useUsers } from "@/hooks/useUsers";
+import { useUtilisateurs } from "@/hooks/useUtilisateurs";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 
 export default function TacheForm({ task }) {
   const { addTask, updateTask } = useTasks();
-  const { users, fetchUsers } = useUsers();
+  const { users, fetchUsers } = useUtilisateurs();
   const navigate = useNavigate();
   const [form, setForm] = useState({
     titre: task?.titre || "",

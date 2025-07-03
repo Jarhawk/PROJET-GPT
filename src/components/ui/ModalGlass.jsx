@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { motion as Motion, AnimatePresence } from "framer-motion";
 
 // Modal glassy avec overlay et anims

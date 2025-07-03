@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 // src/components/ui/select.jsx
 
 export function Select({
@@ -13,7 +14,7 @@ export function Select({
       value={value}
       onChange={onChange}
       aria-label={ariaLabel || "Sélection"}
-      className={`w-full p-2 border border-mamastock-gold rounded-md bg-white text-mamastock-text focus:outline-none focus:ring-2 focus:ring-mamastock-gold ${className}`}
+      className={`w-full p-2 border border-white/30 rounded-md bg-white/10 text-white backdrop-blur focus:outline-none focus:ring-2 focus:ring-mamastockGold ${className}`}
       {...props}
     >
       {children}

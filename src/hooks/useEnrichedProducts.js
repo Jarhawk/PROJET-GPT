@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
@@ -13,10 +14,10 @@ export function useEnrichedProducts() {
     setError(null);
     try {
       const { data, error } = await supabase
-        .from("products")
+        .from("produits")
         .select(`
           *,
-          suppliers:supplier_products(*, fournisseur: fournisseurs(*))
+          suppliers:fournisseur_produits(*, fournisseur: fournisseurs(*))
         `)
         .eq("mama_id", mama_id);
 

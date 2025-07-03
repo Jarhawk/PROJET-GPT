@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
@@ -14,7 +15,7 @@ export function usePriceTrends(productIdInitial) {
       .from('v_product_price_trend')
       .select('mois, prix_moyen')
       .eq('mama_id', mama_id)
-      .eq('product_id', prodId)
+      .eq('produit_id', prodId)
       .order('mois');
     setLoading(false);
     if (error) return [];

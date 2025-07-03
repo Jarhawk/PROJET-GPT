@@ -1,8 +1,11 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 // src/pages/fournisseurs/comparatif/ComparatifPrix.jsx
 import { useEffect, useState } from "react";
 import PrixFournisseurs from "./PrixFournisseurs";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { Select } from "@/components/ui/select";
 
 export default function ComparatifPrix() {
   const { mama_id } = useAuth();
@@ -17,7 +20,7 @@ export default function ComparatifPrix() {
       setError(null);
       try {
         const { data, error } = await supabase
-          .from("products")
+          .from("produits")
           .select("id, nom")
           .eq("mama_id", mama_id)
           .order("nom", { ascending: true });
@@ -37,7 +40,7 @@ export default function ComparatifPrix() {
   }, [mama_id]);
 
   if (loading) {
-    return <div className="loader mx-auto my-16" />;
+    return <LoadingSpinner message="Chargement..." />;
   }
 
   return (
@@ -52,12 +55,12 @@ export default function ComparatifPrix() {
           {error.message || "Erreur de chargement"}
         </p>
       )}
-      <select
+      <Select
         id="produit-select"
         value={produitId}
         onChange={(e) => setProduitId(e.target.value)}
-        className="border px-3 py-2 rounded w-full mb-4"
-        aria-label="Sélection produit"
+        className="mb-4"
+        ariaLabel="Sélection produit"
       >
         <option value="">-- Choisir un produit --</option>
         {produits.map((p) => (
@@ -65,7 +68,7 @@ export default function ComparatifPrix() {
             {p.nom}
           </option>
         ))}
-      </select>
+      </Select>
 
       {produitId && <PrixFournisseurs produitId={produitId} />}
     </div>

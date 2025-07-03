@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { renderHook, act } from '@testing-library/react';
 import { vi, beforeEach, test, expect } from 'vitest';
 
@@ -23,7 +24,7 @@ test('fetchDashboard queries products and mouvements and calls RPC', async () =>
   await act(async () => {
     await result.current.fetchDashboard(1000);
   });
-  expect(fromMock).toHaveBeenCalledWith('products');
+  expect(fromMock).toHaveBeenCalledWith('produits');
   expect(fromMock).toHaveBeenCalledWith('mouvements_stock');
   expect(rpcMock).toHaveBeenCalledWith('top_products', expect.any(Object));
 });

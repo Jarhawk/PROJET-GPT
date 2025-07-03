@@ -1,5 +1,8 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useSignalements } from "@/hooks/useSignalements";
 import { useAuth } from "@/context/AuthContext";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import GlassCard from "@/components/ui/GlassCard";
 
 export default function Signalements() {
   const { loading: authLoading } = useAuth();
@@ -7,8 +10,8 @@ export default function Signalements() {
 
   if (loading || authLoading) {
     return (
-      <div className="p-6 text-white text-center">
-        ⏳ Chargement des signalements...
+      <div className="p-6 text-center">
+        <LoadingSpinner message="Chargement des signalements..." />
       </div>
     );
   }
@@ -35,15 +38,12 @@ export default function Signalements() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {signalements.map((sig) => (
-          <div
-            key={sig.id}
-            className="bg-white/10 border border-mamastock-gold rounded-xl p-4 hover:bg-white/20 transition"
-          >
+          <GlassCard key={sig.id} className="p-4">
             <h2 className="text-lg font-semibold">{sig.titre}</h2>
             <p className="text-sm text-gray-300">
               {sig.commentaire || "Sans commentaire"}
             </p>
-          </div>
+          </GlassCard>
         ))}
       </div>
     </div>

@@ -1,8 +1,11 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect } from "react";
 import { useConsolidatedStats } from "@/hooks/useConsolidatedStats";
 import { useAuth } from "@/context/AuthContext";
 import { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
+import TableContainer from "@/components/ui/TableContainer";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import * as XLSX from "xlsx";
 
 export default function StatsConsolidation() {
@@ -20,7 +23,7 @@ export default function StatsConsolidation() {
     fetchStats();
   }, [fetchStats, isAuthenticated, authLoading]);
 
-  if (loading) return <div className="p-8">Chargement...</div>;
+  if (loading) return <LoadingSpinner message="Chargement..." />;
   if (error) return <div className="p-8 text-red-600">{error}</div>;
 
   return (
@@ -30,8 +33,9 @@ export default function StatsConsolidation() {
       <Button variant="outline" className="mb-2" onClick={exportExcel}>
         Export Excel
       </Button>
-      <table className="min-w-full text-xs bg-white rounded-xl shadow-md">
-        <thead>
+      <TableContainer className="mt-2">
+        <table className="min-w-full text-xs">
+          <thead>
           <tr>
             <th className="px-2 py-1">Établissement</th>
             <th className="px-2 py-1">Stock valorisé (€)</th>
@@ -56,8 +60,9 @@ export default function StatsConsolidation() {
               </tr>
             ))
           )}
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </TableContainer>
     </div>
   );
 }

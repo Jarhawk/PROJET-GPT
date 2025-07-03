@@ -1,5 +1,9 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 // src/pages/fournisseurs/comparatif/PrixFournisseurs.jsx
 import { useComparatif } from "@/hooks/useComparatif";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import GlassCard from "@/components/ui/GlassCard";
+import TableContainer from "@/components/ui/TableContainer";
 
 // Affiche le comparatif des prix par fournisseur pour un produit
 
@@ -7,7 +11,7 @@ export default function PrixFournisseurs({ produitId }) {
   const { lignes, loading, error } = useComparatif(produitId);
 
   if (loading) {
-    return <div className="loader mx-auto my-8" />;
+    return <LoadingSpinner message="Chargement..." />;
   }
 
   if (error) {
@@ -23,9 +27,11 @@ export default function PrixFournisseurs({ produitId }) {
   }
 
   return (
-    <div className="border p-4 rounded text-sm bg-white shadow">
-      <table className="w-full text-left border-collapse">
-        <thead className="bg-gray-100">
+    <div className="text-sm">
+      <GlassCard className="p-4">
+        <TableContainer>
+          <table className="w-full text-left border-collapse">
+        <thead className="bg-glass border-b border-borderGlass">
           <tr>
             <th className="px-2 py-1">Fournisseur</th>
             <th className="px-2 py-1 text-right">Dernier prix</th>
@@ -43,7 +49,9 @@ export default function PrixFournisseurs({ produitId }) {
             </tr>
           ))}
         </tbody>
-      </table>
+          </table>
+        </TableContainer>
+      </GlassCard>
     </div>
   );
 }

@@ -1,14 +1,16 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import React from "react";
 import {
   Dialog as RadixDialog,
   DialogOverlay,
   DialogContent,
   DialogTitle,
+  DialogDescription,
   DialogClose,
 } from "@radix-ui/react-dialog";
 import { AnimatePresence, motion as Motion } from "framer-motion";
 
-export default function SmartDialog({ open, onClose, title, children }) {
+export default function SmartDialog({ open, onClose, title, description, children }) {
   return (
     <RadixDialog open={open} onOpenChange={(v) => !v && onClose?.()}>
       <AnimatePresence>
@@ -31,11 +33,16 @@ export default function SmartDialog({ open, onClose, title, children }) {
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ type: "spring", stiffness: 260, damping: 20 }}
               >
-                <div className="relative bg-white dark:bg-[#202638] rounded-xl shadow-xl p-6 w-full max-w-lg">
+                <div className="relative bg-glass border border-borderGlass backdrop-blur rounded-2xl shadow-xl p-6 w-full max-w-lg">
                   {title && (
                     <DialogTitle className="text-lg font-semibold mb-4">
                       {title}
                     </DialogTitle>
+                  )}
+                  {description && (
+                    <DialogDescription className="sr-only">
+                      {description}
+                    </DialogDescription>
                   )}
                   <DialogClose
                     asChild

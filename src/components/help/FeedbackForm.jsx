@@ -1,5 +1,6 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
-import { Dialog, DialogContent, DialogOverlay } from "@/components/ui/dialog";
+import ModalGlass from "@/components/ui/ModalGlass";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
@@ -31,9 +32,7 @@ export default function FeedbackForm({ open, onOpenChange }) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogOverlay className="fixed inset-0 bg-black/40" />
-      <DialogContent className="glass-liquid rounded-xl p-6 max-w-md">
+    <ModalGlass open={open} onClose={() => onOpenChange(false)}>
         <h3 className="text-lg font-semibold mb-4">Besoin d'aide ?</h3>
         <form onSubmit={handleSubmit} className="space-y-2">
           <input
@@ -70,8 +69,7 @@ export default function FeedbackForm({ open, onOpenChange }) {
             </Button>
           </div>
         </form>
-      </DialogContent>
-    </Dialog>
+    </ModalGlass>
   );
 }
 

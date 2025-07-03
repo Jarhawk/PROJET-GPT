@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 // src/hooks/useRequisitions.js
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
@@ -11,6 +12,7 @@ export const useRequisitions = () => {
       .from("requisitions")
       .select("*, requisition_lines(*)")
       .eq("mama_id", mama_id)
+      .eq("requisition_lines.mama_id", mama_id)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -28,6 +30,7 @@ export const useRequisitions = () => {
       .select("*, requisition_lines(*)")
       .eq("id", id)
       .eq("mama_id", mama_id)
+      .eq("requisition_lines.mama_id", mama_id)
       .single();
     if (error) {
       console.error("❌ Erreur getRequisitionById:", error.message);
@@ -51,14 +54,20 @@ export const useRequisitions = () => {
         return { success: false, message: "Erreur création réquisition" };
       }
 
-      for (const ligne of lignes) {
-        const { error: ligneError } = await supabase
+      if (lignes.length) {
+        const { error: linesError } = await supabase
           .from("requisition_lines")
-          .insert([{ requisition_id: req.id, ...ligne }]);
+          .insert(
+            lignes.map((ligne) => ({
+              requisition_id: req.id,
+              mama_id,
+              ...ligne,
+            }))
+          );
 
-        if (ligneError) {
-          console.error("❌ Erreur ligne réquisition :", ligneError);
-          return { success: false, message: "Erreur ajout ligne" };
+        if (linesError) {
+          console.error("❌ Erreur lignes réquisition :", linesError);
+          return { success: false, message: "Erreur ajout lignes" };
         }
       }
 

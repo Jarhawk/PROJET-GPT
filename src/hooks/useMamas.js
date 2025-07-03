@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
@@ -27,6 +28,7 @@ export function useMamas() {
 
   // 2. Ajouter un établissement
   async function addMama(mama) {
+    if (role !== "superadmin") return { error: "Action non autorisée" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
@@ -39,6 +41,9 @@ export function useMamas() {
 
   // 3. Modifier un établissement
   async function updateMama(id, updateFields) {
+    if (role !== "superadmin" && id !== mama_id) {
+      return { error: "Action non autorisée" };
+    }
     setLoading(true);
     setError(null);
     const { error } = await supabase

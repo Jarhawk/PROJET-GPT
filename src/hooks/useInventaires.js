@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
@@ -14,8 +15,9 @@ export function useInventaires() {
     setError(null);
     const { data, error } = await supabase
       .from("inventaires")
-      .select("*, lignes:inventaire_lignes(*)")
+      .select("*, lignes:inventaire_lignes(*, produit:produits(id, nom, unite, stock_theorique, pmp))")
       .eq("mama_id", mama_id)
+      .eq("actif", true)
       .order("date", { ascending: false });
     setLoading(false);
     if (error) {
@@ -26,6 +28,38 @@ export function useInventaires() {
     return data || [];
   }
 
+  async function fetchMouvementsInventaire(inventaireId) {
+    if (!mama_id || !inventaireId) return [];
+    const { data, error } = await supabase
+      .from("mouvements_stock")
+      .select("*")
+      .eq("inventaire_id", inventaireId)
+      .eq("mama_id", mama_id)
+      .order("date", { ascending: true });
+    if (error) {
+      setError(error);
+      return [];
+    }
+    return data || [];
+  }
+
+  async function validateInventaireStock(inventaireId) {
+    if (!mama_id || !inventaireId) return false;
+    const inv = await getInventaireById(inventaireId);
+    if (!inv) return false;
+    for (const line of inv.lignes || []) {
+      const { data, error } = await supabase
+        .from("produits")
+        .select("stock_reel")
+        .eq("id", line.produit_id)
+        .eq("mama_id", mama_id)
+        .single();
+      if (error || !data) return false;
+      if (Number(data.stock_reel) !== Number(line.quantite)) return false;
+    }
+    return true;
+  }
+
   async function createInventaire(inv) {
     if (!mama_id) return null;
     setLoading(true);
@@ -33,7 +67,7 @@ export function useInventaires() {
     const { lignes = [], ...entete } = inv;
     const { data, error } = await supabase
       .from("inventaires")
-      .insert([{ ...entete, mama_id }])
+      .insert([{ ...entete, mama_id, actif: true }])
       .select()
       .single();
     if (error) {
@@ -42,7 +76,12 @@ export function useInventaires() {
       return null;
     }
     if (lignes.length) {
-      const toInsert = lignes.map(l => ({ ...l, inventaire_id: data.id, mama_id }));
+      const toInsert = lignes.map(l => ({
+        ...l,
+        produit_id: l.produit_id,
+        inventaire_id: data.id,
+        mama_id,
+      }));
       const { error: errLines } = await supabase.from("inventaire_lignes").insert(toInsert);
       if (errLines) setError(errLines);
     }
@@ -57,7 +96,7 @@ export function useInventaires() {
     setError(null);
     const { data, error } = await supabase
       .from("inventaires")
-      .select("*, lignes:inventaire_lignes(*)")
+      .select("*, lignes:inventaire_lignes(*, produit:produits(id, nom, unite, stock_theorique, pmp))")
       .eq("id", id)
       .eq("mama_id", mama_id)
       .single();
@@ -91,5 +130,7 @@ export function useInventaires() {
     createInventaire,
     getInventaireById,
     deleteInventaire,
+    fetchMouvementsInventaire,
+    validateInventaireStock,
   };
 }

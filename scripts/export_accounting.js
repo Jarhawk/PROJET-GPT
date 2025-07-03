@@ -1,25 +1,34 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 /* eslint-env node */
-import { createClient } from '@supabase/supabase-js';
 import { writeFileSync } from 'fs';
+import { join } from 'path';
+import * as XLSX from 'xlsx';
+import { getSupabaseClient } from '../src/api/shared/supabaseClient.js';
+import {
+  runScript,
+  isMainModule,
+  parseOutputFlag,
+  parseMamaIdFlag,
+  parseSupabaseFlags,
+  parseFormatFlag,
+  toCsv,
+  ensureDirForFile,
+} from './cli_utils.js';
 
-function toCsv(rows) {
-  if (!rows.length) return '';
-  const cols = Object.keys(rows[0]);
-  const lines = [cols.join(',')];
-  for (const row of rows) {
-    lines.push(cols.map(c => `"${String(row[c] ?? '').replace(/"/g,'""')}"`).join(','));
-  }
-  return lines.join('\n');
-}
+export const USAGE =
+  'Usage: node scripts/export_accounting.js YYYY-MM [MAMA_ID] [SUPABASE_URL] [SUPABASE_KEY] [--output FILE] [--format csv|xlsx|json] [--url URL] [--key KEY]';
 
-export async function exportAccounting(month) {
-  const supabaseUrl = process.env.VITE_SUPABASE_URL;
-  const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
-  if (!supabaseUrl || !supabaseKey) {
-    throw new Error('Missing Supabase credentials');
-  }
-  const supabase = createClient(supabaseUrl, supabaseKey);
-  const mama_id = process.env.MAMA_ID || null;
+
+export async function exportAccounting(
+  month,
+  mamaId = process.env.MAMA_ID || null,
+  supabaseUrl = null,
+  supabaseKey = null,
+  output = null,
+  format = process.env.ACCOUNTING_FORMAT || 'csv'
+) {
+  const supabase = getSupabaseClient(supabaseUrl, supabaseKey);
+  const mama_id = mamaId;
   const m = month || new Date().toISOString().slice(0,7);
   const start = `${m}-01`;
   const end = new Date(start);
@@ -40,15 +49,53 @@ export async function exportAccounting(month) {
     prix_unitaire: r.prix_unitaire,
     total: r.total,
   }));
+  if (format === 'xlsx') {
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Invoices');
+    let file = output || `invoices_${m}.xlsx`;
+    if (!output && process.env.ACCOUNTING_DIR) {
+      file = join(process.env.ACCOUNTING_DIR, file);
+    }
+    ensureDirForFile(file);
+    XLSX.writeFile(wb, file);
+    console.log(`Exported ${rows.length} rows to ${file}`);
+    return file;
+  } else if (format === 'json') {
+    let file = output || `invoices_${m}.json`;
+    if (!output && process.env.ACCOUNTING_DIR) {
+      file = join(process.env.ACCOUNTING_DIR, file);
+    }
+    ensureDirForFile(file);
+    writeFileSync(file, JSON.stringify(rows, null, 2));
+    console.log(`Exported ${rows.length} rows to ${file}`);
+    return file;
+  }
   const csv = toCsv(rows);
-  const file = `invoices_${m}.csv`;
+  let file = output || `invoices_${m}.csv`;
+  if (!output && process.env.ACCOUNTING_DIR) {
+    file = join(process.env.ACCOUNTING_DIR, file);
+  }
+  ensureDirForFile(file);
   writeFileSync(file, csv);
   console.log(`Exported ${rows.length} rows to ${file}`);
+  return file;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
-  exportAccounting(process.argv[2]).catch(err => {
-    console.error(err);
-    process.exit(1);
-  });
+if (isMainModule(import.meta.url)) {
+  runScript(
+    exportAccounting,
+    USAGE,
+    (args) => {
+      const out = parseOutputFlag(args);
+      args = out.args;
+      const id = parseMamaIdFlag(args);
+      args = id.args;
+      const fmt = parseFormatFlag(args);
+      args = fmt.args;
+      const creds = parseSupabaseFlags(args);
+      args = creds.args;
+      return [args[0], id.mamaId ?? args[1], creds.url ?? args[2], creds.key ?? args[3], out.output, fmt.format];
+    }
+  );
 }

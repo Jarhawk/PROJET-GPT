@@ -1,7 +1,10 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import TableContainer from "@/components/ui/TableContainer";
 
 export default function AuditViewer() {
   const { mama_id } = useAuth();
@@ -72,9 +75,10 @@ export default function AuditViewer() {
         <Button type="submit">Filtrer</Button>
       </form>
       {loading ? (
-        <div>Chargement...</div>
+        <LoadingSpinner message="Chargement..." />
       ) : (
-        <table className="min-w-full bg-white rounded-xl shadow-md">
+        <TableContainer className="mt-4">
+          <table className="min-w-full text-sm">
           <thead>
             <tr>
               <th className="px-2 py-1">Date</th>
@@ -99,7 +103,8 @@ export default function AuditViewer() {
               </tr>
             ))}
           </tbody>
-        </table>
+          </table>
+        </TableContainer>
       )}
     </div>
   );

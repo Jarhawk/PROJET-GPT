@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
@@ -20,9 +21,9 @@ export function useComparatif(productId) {
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
-      .from("supplier_products")
+      .from("fournisseur_produits")
       .select("prix_achat, date_livraison, fournisseur_id, fournisseurs(nom)")
-      .eq("product_id", id)
+      .eq("produit_id", id)
       .eq("mama_id", mama_id)
       .order("date_livraison", { ascending: false });
 

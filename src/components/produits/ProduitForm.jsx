@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 // src/components/produits/ProduitForm.jsx
 import { useState, useEffect } from "react";
 import { useProducts } from "@/hooks/useProducts";
@@ -17,8 +18,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
   const [nom, setNom] = useState(produit?.nom || "");
   const [famille, setFamille] = useState(produit?.famille || "");
   const [unite, setUnite] = useState(produit?.unite || "");
-  const [mainSupplierId, setMainSupplierId] = useState(produit?.main_supplier_id || "");
-  const [pmp, setPmp] = useState(produit?.pmp || "");
+  const [mainSupplierId, setMainSupplierId] = useState(produit?.fournisseur_principal_id || "");
   const [stock_reel, setStockReel] = useState(produit?.stock_reel || 0);
   const [stock_min, setStockMin] = useState(produit?.stock_min || 0);
   const [actif, setActif] = useState(produit?.actif ?? true);
@@ -42,8 +42,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
       setNom(produit.nom || "");
       setFamille(produit.famille || "");
       setUnite(produit.unite || "");
-      setMainSupplierId(produit.main_supplier_id || "");
-      setPmp(produit.pmp || "");
+      setMainSupplierId(produit.fournisseur_principal_id || "");
       setStockReel(produit.stock_reel || 0);
       setStockMin(produit.stock_min || 0);
       setActif(produit.actif ?? true);
@@ -69,8 +68,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
       nom,
       famille,
       unite,
-      main_supplier_id: mainSupplierId || null,
-      pmp: Number(pmp),
+      fournisseur_principal_id: mainSupplierId || null,
       stock_reel: Number(stock_reel),
       stock_min: Number(stock_min),
       actif,
@@ -81,11 +79,11 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
     try {
       setSaving(true);
       if (editing) {
-        const res = await updateProduct(produit.id, newProd);
+        const res = await updateProduct(produit.id, newProd, { refresh: false });
         if (res?.error) throw res.error;
         toast.success("Produit mis à jour !");
       } else {
-        const res = await addProduct(newProd);
+        const res = await addProduct(newProd, { refresh: false });
         if (res?.error) throw res.error;
         toast.success("Produit ajouté !");
       }
@@ -205,17 +203,18 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
           Upload
         </button>
       </div>
-      <div>
-        <label className="block text-sm mb-1 font-medium">PMP (€)</label>
-        <input
-          type="number"
-          className="input input-bordered w-28"
-          value={pmp}
-          onChange={e => setPmp(e.target.value)}
-          min={0}
-          step="0.01"
-        />
-      </div>
+      {editing && (
+        <div>
+          <label className="block text-sm mb-1 font-medium">PMP (€)</label>
+          <input
+            type="number"
+            className="input input-bordered w-28"
+            value={produit?.pmp || 0}
+            readOnly
+            disabled
+          />
+        </div>
+      )}
       <div>
         <label className="block text-sm mb-1 font-medium">Stock réel</label>
         <input

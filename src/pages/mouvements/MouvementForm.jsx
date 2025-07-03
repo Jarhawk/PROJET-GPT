@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useMouvements } from "@/hooks/useMouvements";
@@ -12,9 +13,9 @@ export default function MouvementForm({ onClose }) {
     type: "entrée",
     produit_id: "",
     quantite: 0,
-    zone_origine: "",
-    zone_destination: "",
-    prix_unitaire: 0,
+    zone: "",
+    motif: "",
+    sous_type: "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -22,7 +23,6 @@ export default function MouvementForm({ onClose }) {
     fetchProducts({ limit: 1000 });
   }, [fetchProducts]);
 
-  const valeur = Number(form.quantite) * Number(form.prix_unitaire);
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -51,8 +51,11 @@ export default function MouvementForm({ onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-[60]">
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow w-80 text-black">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60]">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-glass border border-borderGlass backdrop-blur p-6 rounded-2xl shadow-lg w-80"
+      >
         <h2 className="font-bold mb-2">Nouveau mouvement</h2>
         <select
           className="input mb-2 w-full"
@@ -86,33 +89,24 @@ export default function MouvementForm({ onClose }) {
           value={form.quantite}
           onChange={e => setForm(f => ({ ...f, quantite: e.target.value }))}
         />
-        {(form.type === "sortie" || form.type === "transfert") && (
-          <input
-            className="input mb-2 w-full"
-            placeholder="Zone d'origine"
-            value={form.zone_origine}
-            onChange={e => setForm(f => ({ ...f, zone_origine: e.target.value }))}
-          />
-        )}
-        {(form.type === "entrée" || form.type === "transfert" || form.type === "inventaire") && (
-          <input
-            className="input mb-2 w-full"
-            placeholder="Zone de destination"
-            value={form.zone_destination}
-            onChange={e => setForm(f => ({ ...f, zone_destination: e.target.value }))}
-          />
-        )}
-        {(form.type === "entrée" || form.type === "sortie") && (
-          <input
-            className="input mb-2 w-full"
-            type="number"
-            step="0.01"
-            placeholder="Prix unitaire"
-            value={form.prix_unitaire}
-            onChange={e => setForm(f => ({ ...f, prix_unitaire: e.target.value }))}
-          />
-        )}
-        <div className="mb-2 text-right text-sm">Valeur : {valeur.toFixed(2)}</div>
+        <input
+          className="input mb-2 w-full"
+          placeholder="Zone"
+          value={form.zone}
+          onChange={e => setForm(f => ({ ...f, zone: e.target.value }))}
+        />
+        <input
+          className="input mb-2 w-full"
+          placeholder="Sous-type (optionnel)"
+          value={form.sous_type}
+          onChange={e => setForm(f => ({ ...f, sous_type: e.target.value }))}
+        />
+        <input
+          className="input mb-2 w-full"
+          placeholder="Motif"
+          value={form.motif}
+          onChange={e => setForm(f => ({ ...f, motif: e.target.value }))}
+        />
         <div className="flex gap-2 justify-end mt-4">
           <Button type="submit" disabled={loading}>Valider</Button>
           <Button type="button" variant="outline" onClick={onClose} disabled={loading}>Annuler</Button>

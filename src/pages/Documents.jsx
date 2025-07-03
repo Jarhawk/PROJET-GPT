@@ -1,9 +1,12 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import { useDocuments } from "@/hooks/useDocuments";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
+import GlassCard from "@/components/ui/GlassCard";
 import { Search } from "lucide-react";
 import toast from "react-hot-toast";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function Documents() {
   const { docs, loading, error, fetchDocs, addDoc } = useDocuments();
@@ -37,20 +40,21 @@ export default function Documents() {
   };
 
 
-  if (loading) return <div className="p-8">Chargement...</div>;
+  if (loading) return <LoadingSpinner message="Chargement..." />;
   if (error) return <div className="p-8 text-red-600">{error}</div>;
 
   return (
-    <div className="p-8 container mx-auto">
+    <div className="p-8 container mx-auto space-y-6">
       <h1 className="text-2xl font-bold mb-4">Documents</h1>
-      <form onSubmit={handleAdd} className="flex gap-2 mb-4 items-end">
-        <input
-          className="input"
-          placeholder="Titre"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-        />
+      <GlassCard className="p-4">
+        <form onSubmit={handleAdd} className="flex flex-wrap gap-2 items-end">
+          <input
+            className="input"
+            placeholder="Titre"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
         <input
           className="input flex-1"
           placeholder="URL"
@@ -59,7 +63,8 @@ export default function Documents() {
           required
         />
         <Button type="submit">Ajouter</Button>
-      </form>
+        </form>
+      </GlassCard>
       <div className="relative w-64 mb-4">
         <input
           type="search"
@@ -70,23 +75,25 @@ export default function Documents() {
         />
         <Search className="absolute left-2 top-2.5 text-white" size={18} />
       </div>
-      <ul className="list-disc pl-6">
-        {docs.map((d) => (
-          <li key={d.id} className="mb-1">
-            <a
-              href={d.file_url}
-              target="_blank"
-              rel="noreferrer"
-              className="text-mamastock-gold underline"
-            >
-              {d.title}
-            </a>
-          </li>
-        ))}
-        {docs.length === 0 && (
-          <li className="text-gray-400">Aucun résultat trouvé.</li>
-        )}
-      </ul>
+      <GlassCard className="p-4">
+        <ul className="list-disc pl-6 space-y-1">
+          {docs.map((d) => (
+            <li key={d.id} className="mb-1">
+              <a
+                href={d.file_url}
+                target="_blank"
+                rel="noreferrer"
+                className="text-mamastock-gold underline"
+              >
+                {d.title}
+              </a>
+            </li>
+          ))}
+          {docs.length === 0 && (
+            <li className="text-gray-400">Aucun résultat trouvé.</li>
+          )}
+        </ul>
+      </GlassCard>
     </div>
   );
 }

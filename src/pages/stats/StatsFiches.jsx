@@ -1,9 +1,13 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import toast, { Toaster } from "react-hot-toast";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Legend, LineChart, Line } from "recharts";
 import { Button } from "@/components/ui/button";
+import TableContainer from "@/components/ui/TableContainer";
+import GlassCard from "@/components/ui/GlassCard";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import * as XLSX from "xlsx";
 import { useFicheCoutHistory } from "@/hooks/useFicheCoutHistory";
 
@@ -23,7 +27,11 @@ export default function StatsFiches() {
     setLoading(true);
     Promise.all([
       supabase.from("fiches_techniques").select("*").eq("mama_id", mama_id),
-      supabase.from("familles").select("nom").eq("mama_id", mama_id),
+      supabase
+        .from("familles")
+        .select("nom")
+        .eq("mama_id", mama_id)
+        .eq("actif", true),
     ]).then(([ficheRes, familleRes]) => {
       if (ficheRes.error) toast.error("Erreur chargement : " + ficheRes.error.message);
       else setFiches(ficheRes.data || []);
@@ -90,14 +98,7 @@ export default function StatsFiches() {
   };
 
   if (authLoading || loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Toaster />
-        <span className="text-mamastock-gold animate-pulse">
-          Chargement statistiques fiches...
-        </span>
-      </div>
-    );
+    return <LoadingSpinner message="Chargement statistiques fiches..." />;
   }
 
   if (!isAuthenticated) return null;
@@ -113,7 +114,7 @@ export default function StatsFiches() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
         {/* Répartition par famille */}
-        <div className="bg-white shadow rounded-xl p-4">
+        <GlassCard className="p-4">
           <h2 className="text-lg font-bold mb-2">Répartition par famille</h2>
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
@@ -126,9 +127,9 @@ export default function StatsFiches() {
               <Legend />
             </PieChart>
           </ResponsiveContainer>
-        </div>
+        </GlassCard>
         {/* Top coût matière */}
-        <div className="bg-white shadow rounded-xl p-4">
+        <GlassCard className="p-4">
           <h2 className="text-lg font-bold mb-2">Top 10 fiches par coût matière</h2>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={fichesSortedByCout}>
@@ -138,9 +139,9 @@ export default function StatsFiches() {
               <Bar dataKey="cout" fill="#bfa14d" />
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </GlassCard>
         {/* Actives/inactives */}
-        <div className="bg-white shadow rounded-xl p-4">
+        <GlassCard className="p-4">
           <h2 className="text-lg font-bold mb-2">Fiches actives/inactives</h2>
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
@@ -153,7 +154,7 @@ export default function StatsFiches() {
               <Legend />
             </PieChart>
           </ResponsiveContainer>
-        </div>
+        </GlassCard>
       </div>
 
       {/* Recherche & liste */}
@@ -165,7 +166,7 @@ export default function StatsFiches() {
           onChange={e => setSearch(e.target.value)}
         />
       </div>
-      <div className="bg-white shadow rounded-xl p-4 mb-8">
+      <TableContainer className="mb-8">
         <table className="min-w-full table-auto">
           <thead>
             <tr>
@@ -203,11 +204,11 @@ export default function StatsFiches() {
               ))}
           </tbody>
         </table>
-      </div>
+      </TableContainer>
 
       {/* Historique coût réel */}
       {selectedFiche && (
-        <div className="bg-white shadow rounded-xl p-4 mb-8">
+        <GlassCard className="p-4 mb-8">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-mamastock-gold mb-2">
               Historique coût matière : {selectedFiche.nom}
@@ -231,7 +232,7 @@ export default function StatsFiches() {
               ⚠️ Hausse du coût matière supérieure à 15% sur la période !
             </div>
           )}
-        </div>
+        </GlassCard>
       )}
 
       {/* Alertes générales */}

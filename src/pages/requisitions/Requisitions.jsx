@@ -1,9 +1,11 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import toast, { Toaster } from "react-hot-toast";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import "jspdf-autotable";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger, DialogContent } from "@radix-ui/react-dialog";
@@ -20,7 +22,7 @@ export default function Requisitions() {
 
   useEffect(() => {
     if (!mama_id || authLoading) return;
-    supabase.from("products").select("*").eq("mama_id", mama_id)
+    supabase.from("produits").select("*").eq("mama_id", mama_id)
       .then(({ data }) => setProduits(data || []));
   }, [mama_id, authLoading]);
 
@@ -113,7 +115,7 @@ export default function Requisitions() {
 
   const today = new Date().toISOString().slice(0, 10);
 
-  if (authLoading) return <div className="p-8">Chargement...</div>;
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
   if (!mama_id) return null;
 
   return (
@@ -150,7 +152,7 @@ export default function Requisitions() {
         <Button onClick={handleExportPDF}>Export PDF</Button>
         <Button onClick={() => setShowCreate(true)}>+ Nouvelle réquisition</Button>
       </div>
-      <div className="bg-white shadow rounded-xl overflow-x-auto">
+      <div className="bg-glass border border-borderGlass backdrop-blur shadow rounded-xl overflow-x-auto">
         <table className="min-w-full table-auto text-center">
           <thead>
             <tr>
@@ -178,7 +180,7 @@ export default function Requisitions() {
       </div>
       {/* Modal création réquisition */}
       <Dialog open={showCreate} onOpenChange={v => !v && setShowCreate(false)}>
-        <DialogContent className="bg-white rounded-xl shadow-lg p-6 max-w-md">
+        <DialogContent className="bg-glass border border-borderGlass backdrop-blur rounded-2xl shadow-lg p-6 max-w-md">
           <h2 className="font-bold mb-2">Nouvelle réquisition</h2>
           <form
             onSubmit={handleCreateReq}

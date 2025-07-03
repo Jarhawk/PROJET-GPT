@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
 import { useInventaires } from "@/hooks/useInventaires";
 import { useProducts } from "@/hooks/useProducts";
@@ -50,15 +51,15 @@ export default function InventaireForm({ inventaire, onClose }) {
   }, [date, inventaire?.date]);
 
   // Ajout/suppression de lignes
-  const addLigne = () => setLignes([...lignes, { product_id: "", quantite: 0 }]);
+  const addLigne = () => setLignes([...lignes, { produit_id: "", quantite: 0 }]);
   const updateLigne = (i, field, val) => {
     setLignes(lignes.map((l, idx) => idx === i ? { ...l, [field]: val } : l));
   };
   const removeLigne = (i) => setLignes(lignes.filter((_, idx) => idx !== i));
 
   // Calcul consommation/mouvement par produit
-  const getConsommationProduit = (product_id, quantite_inventaire) => {
-    const mvts = mouvementsProduits.filter(m => m.product_id === product_id);
+  const getConsommationProduit = (produit_id, quantite_inventaire) => {
+    const mvts = mouvementsProduits.filter(m => m.produit_id === produit_id);
     const entrees = mvts.filter(m => m.type === "entree").reduce((sum, m) => sum + m.quantite, 0);
     const sorties = mvts.filter(m => m.type === "sortie").reduce((sum, m) => sum + m.quantite, 0);
     // Stock de début : à définir selon la base (dernier inventaire clôturé, ou 0 si pas trouvé)
@@ -107,7 +108,7 @@ export default function InventaireForm({ inventaire, onClose }) {
     e.preventDefault();
     if (!nom.trim()) return toast.error("Nom requis");
     if (!date) return toast.error("Date requise");
-    if (lignes.some(l => !l.product_id)) return toast.error("Produit manquant");
+    if (lignes.some(l => !l.produit_id)) return toast.error("Produit manquant");
     setLoading(true);
     const invData = {
       nom,
@@ -133,7 +134,10 @@ export default function InventaireForm({ inventaire, onClose }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md max-w-2xl mx-auto">
+    <form
+      onSubmit={handleSubmit}
+      className="bg-glass border border-borderGlass backdrop-blur p-6 rounded-2xl shadow-lg max-w-2xl mx-auto"
+    >
       <h2 className="text-lg font-bold mb-4">
         {inventaire ? "Modifier l’inventaire" : "Ajouter un inventaire"}
       </h2>
@@ -174,14 +178,14 @@ export default function InventaireForm({ inventaire, onClose }) {
           </thead>
           <tbody>
             {lignes.map((l, i) => {
-              const prod = products.find(p => p.id === l.product_id);
+              const prod = products.find(p => p.id === l.produit_id);
               const {
                 stock_debut,
                 entrees,
                 sorties,
                 stock_fin,
                 conso_theorique
-              } = getConsommationProduit(l.product_id, l.quantite);
+              } = getConsommationProduit(l.produit_id, l.quantite);
 
               const ecart = -conso_theorique; // Si tu veux comparer à la conso constatée
               return (
@@ -189,8 +193,8 @@ export default function InventaireForm({ inventaire, onClose }) {
                   <td>
                     <select
                       className="input"
-                      value={l.product_id}
-                      onChange={e => updateLigne(i, "product_id", e.target.value)}
+                      value={l.produit_id}
+                      onChange={e => updateLigne(i, "produit_id", e.target.value)}
                       required
                     >
                       <option value="">Sélectionner</option>

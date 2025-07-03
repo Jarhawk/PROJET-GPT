@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { renderHook, act } from '@testing-library/react';
 import { vi, beforeEach, test, expect } from 'vitest';
 
@@ -30,13 +31,13 @@ beforeEach(async () => {
 test('fetchEntries queries audit_entries with filters', async () => {
   const { result } = renderHook(() => useAuditTrail());
   await act(async () => {
-    await result.current.fetchEntries({ table: 'products', start: '2024-01-01', end: '2024-01-31' });
+    await result.current.fetchEntries({ table: 'produits', start: '2024-01-01', end: '2024-01-31' });
   });
   expect(fromMock).toHaveBeenCalledWith('audit_entries');
   expect(queryObj.select).toHaveBeenCalledWith('*, utilisateurs:changed_by(email)');
   expect(queryObj.order).toHaveBeenCalledWith('changed_at', { ascending: false });
   expect(queryObj.limit).toHaveBeenCalledWith(100);
-  expect(queryObj.eq).toHaveBeenCalledWith('table_name', 'products');
+  expect(queryObj.eq).toHaveBeenCalledWith('table_name', 'produits');
   expect(queryObj.gte).toHaveBeenCalledWith('changed_at', '2024-01-01');
   expect(queryObj.lte).toHaveBeenCalledWith('changed_at', '2024-01-31');
 });

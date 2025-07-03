@@ -1,4 +1,7 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { Suspense, lazy } from "react";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { Routes, Route, Navigate } from "react-router-dom";
 import useAuth from "@/hooks/useAuth";
 import Layout from "@/layout/Layout";
@@ -7,6 +10,7 @@ import Unauthorized from "@/pages/auth/Unauthorized";
 import Pending from "@/pages/auth/Pending";
 import Blocked from "@/pages/auth/Blocked";
 import AuthDebug from "@/pages/debug/AuthDebug";
+import NotFound from "@/pages/NotFound";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 const Dashboard = lazy(() => import("@/pages/Dashboard.jsx"));
@@ -21,6 +25,7 @@ const ProduitDetail = lazy(() => import("@/pages/produits/ProduitDetail.jsx"));
 const Inventaire = lazy(() => import("@/pages/inventaire/Inventaire.jsx"));
 const InventaireForm = lazy(() => import("@/pages/inventaire/InventaireForm.jsx"));
 const InventaireDetail = lazy(() => import("@/pages/inventaire/InventaireDetail.jsx"));
+const InventaireZones = lazy(() => import("@/pages/inventaire/InventaireZones.jsx"));
 const Mouvements = lazy(() => import("@/pages/mouvements/Mouvements.jsx"));
 const Alertes = lazy(() => import("@/pages/Alertes.jsx"));
 const Taches = lazy(() => import("@/pages/taches/Taches.jsx"));
@@ -39,8 +44,11 @@ const AccessRights = lazy(() => import("@/pages/parametrage/AccessRights.jsx"));
 const Onboarding = lazy(() => import("@/pages/public/Onboarding.jsx"));
 const Accueil = lazy(() => import("@/pages/Accueil.jsx"));
 const Signup = lazy(() => import("@/pages/public/Signup.jsx"));
+const Rgpd = lazy(() => import("@/pages/Rgpd.jsx"));
 const PagePrivacy = lazy(() => import("@/pages/public/PagePrivacy.jsx"));
 const PageMentions = lazy(() => import("@/pages/public/PageMentions.jsx"));
+const PageCgu = lazy(() => import("@/pages/public/PageCgu.jsx"));
+const PageCgv = lazy(() => import("@/pages/public/PageCgv.jsx"));
 const AideContextuelle = lazy(() => import("@/pages/AideContextuelle.jsx"));
 const SupervisionGroupe = lazy(() => import("@/pages/supervision/SupervisionGroupe.jsx"));
 const ComparateurFiches = lazy(() => import("@/pages/supervision/ComparateurFiches.jsx"));
@@ -64,15 +72,17 @@ const Logout = lazy(() => import("@/pages/auth/Logout.jsx"));
 
 
 function RootRoute() {
-  const { session, user } = useAuth();
-  if (session && user) return <Navigate to="/dashboard" replace />;
+  const { session, loading } = useAuth();
+  if (loading) return <LoadingSpinner message="Chargement..." />;
+  if (session && session.user) return <Navigate to="/dashboard" replace />;
   return <Navigate to="/accueil" replace />;
 }
 
 export default function Router() {
   return (
-    <Suspense fallback={null}>
-      <Routes>
+    <ErrorBoundary>
+      <Suspense fallback={<LoadingSpinner message="Chargement..." />}>
+        <Routes>
         <Route path="/" element={<RootRoute />} />
         <Route path="/accueil" element={<Accueil />} />
         <Route path="/signup" element={<Signup />} />
@@ -83,8 +93,11 @@ export default function Router() {
         <Route path="/pending" element={<Pending />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/blocked" element={<Blocked />} />
+        <Route path="/rgpd" element={<Rgpd />} />
         <Route path="/privacy" element={<PagePrivacy />} />
         <Route path="/mentions" element={<PageMentions />} />
+        <Route path="/cgu" element={<PageCgu />} />
+        <Route path="/cgv" element={<PageCgv />} />
         <Route path="/" element={<Layout />}>
           <Route
             path="dashboard"
@@ -157,6 +170,10 @@ export default function Router() {
           <Route
             path="/inventaire"
             element={<ProtectedRoute accessKey="inventaires"><Inventaire /></ProtectedRoute>}
+          />
+          <Route
+            path="/inventaire/zones"
+            element={<ProtectedRoute accessKey="inventaires"><InventaireZones /></ProtectedRoute>}
           />
           <Route
             path="/inventaire/new"
@@ -274,9 +291,10 @@ export default function Router() {
             path="/debug/auth"
             element={<ProtectedRoute accessKey="dashboard"><AuthDebug /></ProtectedRoute>}
           />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
-    </Suspense>
+      </Suspense>
+    </ErrorBoundary>
   );
 }

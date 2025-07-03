@@ -1,8 +1,10 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from 'react';
 import { useMenuEngineering } from '@/hooks/useMenuEngineering';
 import { Toaster, toast } from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 function classify(items) {
   const ventes = items.map(i => i.ventes).sort((a,b)=>a-b);
@@ -41,7 +43,7 @@ export default function MenuEngineering() {
     setRows(classify(res));
   };
 
-  if (authLoading) return <div className="p-8">Chargement...</div>;
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
   if (!mama_id) return null;
 
   return (

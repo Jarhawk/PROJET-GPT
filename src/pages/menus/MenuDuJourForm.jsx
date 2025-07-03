@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
 import { useMenuDuJour } from "@/hooks/useMenuDuJour";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,9 @@ export default function MenuDuJourForm({ menu, fiches = [], onClose }) {
   const { addMenuDuJour, editMenuDuJour } = useMenuDuJour();
   const [nom, setNom] = useState(menu?.nom || "");
   const [date, setDate] = useState(menu?.date || "");
-  const [selectedFiches, setSelectedFiches] = useState(menu?.fiches?.map(f => f.id) || []);
+  const [selectedFiches, setSelectedFiches] = useState(
+    menu?.fiches?.map(f => f.fiche_id) || []
+  );
   const [file, setFile] = useState(null);
   const [fileUrl, setFileUrl] = useState(menu?.document || "");
   const [loading, setLoading] = useState(false);
@@ -65,7 +68,10 @@ export default function MenuDuJourForm({ menu, fiches = [], onClose }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md max-w-xl mx-auto">
+    <form
+      onSubmit={handleSubmit}
+      className="bg-glass border border-borderGlass backdrop-blur p-6 rounded-2xl shadow-lg max-w-xl mx-auto"
+    >
       <h2 className="text-lg font-bold mb-4">
         {menu ? "Modifier le menu du jour" : "Ajouter un menu du jour"}
       </h2>
@@ -85,7 +91,7 @@ export default function MenuDuJourForm({ menu, fiches = [], onClose }) {
       />
       <div className="mb-4">
         <label className="block font-semibold mb-2">Fiches du menu :</label>
-        <div className="max-h-48 overflow-auto border rounded p-2 bg-gray-50">
+        <div className="max-h-48 overflow-auto border border-borderGlass rounded p-2 bg-glass backdrop-blur">
           {fiches.map(f => (
             <label key={f.id} className="block">
               <input

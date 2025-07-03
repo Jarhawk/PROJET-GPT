@@ -1,6 +1,6 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 // src/components/produits/ProduitFormModal.jsx
-import { motion as Motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import ModalGlass from "@/components/ui/ModalGlass";
 import ProduitForm from "./ProduitForm";
 import { useEffect } from "react";
 
@@ -15,38 +15,14 @@ export default function ProduitFormModal({ open, produit, familles, unites, onCl
   }, [open, onClose]);
 
   return (
-    <AnimatePresence>
-      {open && (
-        <Motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px]"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
-          <Motion.div
-            className="relative bg-white/80 dark:bg-[#181f31]/90 rounded-2xl shadow-2xl border border-mamastockGold/30 p-0 overflow-hidden min-w-[350px] max-w-lg w-full backdrop-blur-[8px] shadow-[0_8px_42px_0_#bfa14d33,0_2px_16px_0_#0f1c2e22]"
-            initial={{ y: 80, opacity: 0, scale: 0.94 }}
-            animate={{ y: 0, opacity: 1, scale: 1 }}
-            exit={{ y: 60, opacity: 0, scale: 0.95 }}
-            transition={{ type: "spring", duration: 0.37 }}
-          >
-            <button
-              onClick={onClose}
-              className="absolute top-3 right-3 z-10 p-2 bg-white/40 rounded-full shadow hover:bg-mamastockGold/70 transition"
-              title="Fermer"
-            >
-              <X size={18} />
-            </button>
-            <ProduitForm
-              produit={produit}
-              familles={familles}
-              unites={unites}
-              onSuccess={onSuccess}
-              onClose={onClose}
-            />
-          </Motion.div>
-        </Motion.div>
-      )}
-    </AnimatePresence>
+    <ModalGlass open={open} onClose={onClose}>
+      <ProduitForm
+        produit={produit}
+        familles={familles}
+        unites={unites}
+        onSuccess={onSuccess}
+        onClose={onClose}
+      />
+    </ModalGlass>
   );
 }

@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -39,7 +40,7 @@ export default function AutoCompleteField({
         list={`list-${label}`}
         value={inputValue}
         onChange={handleInputChange}
-        className={`bg-white text-black ${isValid ? "border-2 border-mamastockGold shadow" : ""}`}
+        className={`bg-white/20 dark:bg-[#202638]/50 backdrop-blur rounded-lg border border-white/30 text-white ${isValid ? "border-mamastockGold shadow" : ""}`}
         aria-label={label}
         aria-autocomplete="list"
         role="combobox"

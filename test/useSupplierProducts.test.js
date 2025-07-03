@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { renderHook, act } from '@testing-library/react';
 import { vi, beforeEach, test, expect } from 'vitest';
 
@@ -25,7 +26,7 @@ test('getProductsBySupplier fetches and caches results', async () => {
   await act(async () => {
     res1 = await result.current.getProductsBySupplier('f1');
   });
-  expect(fromMock).toHaveBeenCalledWith('supplier_products');
+  expect(fromMock).toHaveBeenCalledWith('fournisseur_produits');
   expect(selectMock).toHaveBeenCalled();
   expect(eq1Mock).toHaveBeenCalledWith('fournisseur_id', 'f1');
   expect(eq2Mock).toHaveBeenCalledWith('mama_id', 'm1');

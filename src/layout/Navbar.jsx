@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
 import { useTranslation } from 'react-i18next';
 import { useAuth } from "@/context/AuthContext";
@@ -6,7 +7,7 @@ import LanguageSelector from "@/components/ui/LanguageSelector";
 
 export default function Navbar() {
   const { t } = useTranslation();
-  const { session, role } = useAuth();
+  const { session, role, mama_id } = useAuth();
   const [term, setTerm] = useState("");
   const { results, search } = useGlobalSearch();
   const [dark, setDark] = useState(false);
@@ -38,7 +39,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-white/5 backdrop-blur-xl text-white px-6 py-4 flex items-center justify-between shadow-md text-shadow">
+    <nav className="glass-panel border-b border-white/10 backdrop-blur-xl text-white px-6 py-4 flex items-center justify-between shadow-md text-shadow">
       {/* Logo / Titre */}
       <div className="flex items-center gap-4">
         <button onClick={toggleSidebar} className="md:hidden text-mamastock-gold text-2xl" aria-label="Ouvrir le menu">
@@ -55,13 +56,16 @@ export default function Navbar() {
           <input
             type="text"
             value={term}
-            onChange={e => { setTerm(e.target.value); search(e.target.value); }}
+            onChange={(e) => {
+              setTerm(e.target.value);
+              search(e.target.value);
+            }}
             placeholder={t('search')}
-            className="input input-bordered text-black w-48"
+            className="input w-48"
             aria-label={t('search')}
           />
           {results.length > 0 && (
-            <div className="absolute z-10 bg-white text-black w-full shadow-lg mt-1 text-xs rounded">
+            <div className="absolute z-10 bg-glass backdrop-blur border border-borderGlass text-white w-full shadow-lg mt-1 text-xs rounded">
               {results.map(r => (
                 <div key={r.type + r.id} className="px-2 py-1 border-b last:border-0">
                   {r.type}: {r.nom}
@@ -73,7 +77,7 @@ export default function Navbar() {
         <LanguageSelector />
         <button
           onClick={toggleDark}
-          className="bg-mamastock-gold text-black px-3 py-1 rounded-md text-sm"
+          className="btn px-3 py-1 text-sm"
           title={t('toggleTheme')}
           aria-label={t('toggleTheme')}
           aria-pressed={dark}
@@ -88,6 +92,11 @@ export default function Navbar() {
             <span className="text-xs bg-mamastock-gold text-black px-3 py-1 rounded-full capitalize shadow">
               {role || "chargement..."}
             </span>
+            {mama_id && (
+              <span className="text-xs bg-sky-600 text-white px-3 py-1 rounded-full shadow">
+                {mama_id}
+              </span>
+            )}
             <button
               onClick={handleLogout}
               className="text-sm bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded-md transition"

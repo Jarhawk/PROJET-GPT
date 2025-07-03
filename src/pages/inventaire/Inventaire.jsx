@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useInventaires } from "@/hooks/useInventaires";
@@ -63,12 +64,12 @@ export default function Inventaire() {
           <tbody>
             {filtered.map(inv => {
               const total = (inv.lignes || []).reduce(
-                (sum, l) => sum + Number(l.quantite_physique || 0) * Number(l.prix_unitaire || 0),
+                (sum, l) => sum + Number(l.quantite || 0) * Number(l.product?.pmp || 0),
                 0
               );
               const ecart = (inv.lignes || []).reduce(
                 (sum, l) =>
-                  sum + (Number(l.quantite_physique || 0) - Number(l.quantite_theorique || 0)) * Number(l.prix_unitaire || 0),
+                  sum + (Number(l.quantite || 0) - Number(l.product?.stock_theorique || 0)) * Number(l.product?.pmp || 0),
                 0
               );
               return (

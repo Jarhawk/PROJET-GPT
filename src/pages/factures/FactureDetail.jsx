@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { saveAs } from "file-saver";
@@ -5,24 +6,26 @@ import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { Button } from "@/components/ui/button";
-import { useFactureProduits } from "@/hooks/useFactureProduits";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import TableContainer from "@/components/ui/TableContainer";
+import { useInvoiceItems } from "@/hooks/useInvoiceItems";
 import { useFactures } from "@/hooks/useFactures";
 
 export default function FactureDetail({ facture: factureProp, onClose }) {
   const { id } = useParams();
   const { fetchFactureById, createFacture, addLigneFacture, calculateTotals } = useFactures();
-  const { produitsFacture, fetchProduitsByFacture } = useFactureProduits();
+  const { items: produitsFacture, fetchItemsByInvoice } = useInvoiceItems();
   const [facture, setFacture] = useState(factureProp);
 
   useEffect(() => {
     const fid = factureProp?.id || id;
     if (fid) {
       if (!factureProp) fetchFactureById(fid).then(setFacture);
-      fetchProduitsByFacture(fid);
+      fetchItemsByInvoice(fid);
     }
   }, [factureProp, id]);
 
-  if (!facture) return <div className="p-8">Chargement...</div>;
+  if (!facture) return <LoadingSpinner message="Chargement..." />;
 
   // Export Excel d'une seule facture
   const exportExcel = () => {
@@ -57,7 +60,7 @@ export default function FactureDetail({ facture: factureProp, onClose }) {
     const { data } = await createFacture({ ...payload, reference: `${facture.reference || facture.id}-copie` });
     if (data) {
       for (const l of produitsFacture) {
-        await addLigneFacture(data.id, { product_id: l.product_id, quantite: l.quantite, prix_unitaire: l.prix_unitaire, tva: l.tva, fournisseur_id: facture.fournisseur_id });
+        await addLigneFacture(data.id, { produit_id: l.produit_id, quantite: l.quantite, prix_unitaire: l.prix_unitaire, tva: l.tva, fournisseur_id: facture.fournisseur_id });
       }
       await calculateTotals(data.id);
       onClose?.();
@@ -65,13 +68,13 @@ export default function FactureDetail({ facture: factureProp, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-lg p-8 min-w-[400px] max-w-[95vw] flex flex-col gap-2 relative">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-glass backdrop-blur-lg border border-borderGlass rounded-xl shadow-lg p-8 min-w-[400px] max-w-[95vw] flex flex-col gap-2 relative">
         <Button variant="outline" className="absolute top-2 right-2" onClick={onClose}>Fermer</Button>
         <h2 className="font-bold text-xl mb-4">Détail de la facture #{facture.id}</h2>
         <div><b>Date :</b> {facture.date}</div>
         <div><b>Fournisseur :</b> {facture.fournisseur?.nom}</div>
-        <div><b>Montant :</b> {facture.montant?.toFixed(2)} €</div>
+        <div><b>Montant :</b> {facture.total_ttc?.toFixed(2)} €</div>
         <div><b>Statut :</b> {facture.statut}</div>
         <div>
           <b>Justificatif :</b> {facture.justificatif ?
@@ -80,9 +83,10 @@ export default function FactureDetail({ facture: factureProp, onClose }) {
           }
         </div>
         {produitsFacture.length > 0 && (
-          <table className="mt-4 text-sm w-full border">
-            <thead>
-              <tr className="bg-gray-100">
+          <TableContainer className="mt-4">
+            <table className="min-w-full text-sm">
+            <thead className="bg-glass border-b border-borderGlass">
+              <tr>
                 <th className="px-2 py-1 border">Produit</th>
                 <th className="px-2 py-1 border">Quantité</th>
                 <th className="px-2 py-1 border">PU</th>
@@ -99,7 +103,8 @@ export default function FactureDetail({ facture: factureProp, onClose }) {
                 </tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </TableContainer>
         )}
         <div className="flex gap-2 mt-4">
           <Button variant="outline" onClick={exportExcel}>Export Excel</Button>

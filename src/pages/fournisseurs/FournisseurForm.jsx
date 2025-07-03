@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
@@ -5,16 +6,16 @@ import toast from "react-hot-toast";
 export default function FournisseurForm({ fournisseur = {}, onSubmit, onCancel, saving }) {
   const [nom, setNom] = useState(fournisseur.nom || "");
   const [ville, setVille] = useState(fournisseur.ville || "");
-  const [telephone, setTelephone] = useState(fournisseur.telephone || "");
-  const [email, setEmail] = useState(fournisseur.email || "");
+  const [tel, setTel] = useState(fournisseur.tel || "");
+  const [contact, setContact] = useState(fournisseur.contact || "");
   const [actif, setActif] = useState(fournisseur.actif ?? true);
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
     setNom(fournisseur.nom || "");
     setVille(fournisseur.ville || "");
-    setTelephone(fournisseur.telephone || "");
-    setEmail(fournisseur.email || "");
+    setTel(fournisseur.tel || "");
+    setContact(fournisseur.contact || "");
     setActif(fournisseur.actif ?? true);
     setErrors({});
   }, [fournisseur]);
@@ -24,13 +25,13 @@ export default function FournisseurForm({ fournisseur = {}, onSubmit, onCancel, 
     if (saving) return;
     const errs = {};
     if (!nom.trim()) errs.nom = "Nom requis";
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = "Email invalide";
+    if (contact && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact)) errs.contact = "Email invalide";
     setErrors(errs);
     if (Object.keys(errs).length) {
       toast.error("Veuillez corriger les erreurs");
       return;
     }
-    const data = { nom, ville, telephone, email, actif };
+    const data = { nom, ville, tel, contact, actif };
     try {
       onSubmit?.(data);
     } catch (err) {
@@ -61,18 +62,18 @@ export default function FournisseurForm({ fournisseur = {}, onSubmit, onCancel, 
         <label className="block font-semibold mb-1">Téléphone</label>
         <input
           className="input input-bordered w-full"
-          value={telephone}
-          onChange={(e) => setTelephone(e.target.value)}
+          value={tel}
+          onChange={(e) => setTel(e.target.value)}
         />
       </div>
       <div>
         <label className="block font-semibold mb-1">Email</label>
         <input
           className="input input-bordered w-full"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={contact}
+          onChange={(e) => setContact(e.target.value)}
         />
-        {errors.email && <p className="text-red-600 text-sm mt-1">{errors.email}</p>}
+        {errors.contact && <p className="text-red-600 text-sm mt-1">{errors.contact}</p>}
       </div>
       <label className="flex items-center gap-2">
         <input type="checkbox" checked={actif} onChange={(e) => setActif(e.target.checked)} />

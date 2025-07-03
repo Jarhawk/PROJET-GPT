@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { renderHook, act } from '@testing-library/react';
 import { vi, beforeEach, test, expect } from 'vitest';
 
@@ -17,6 +18,6 @@ test('fetchSuggestions calls RPC', async () => {
   await act(async () => {
     await result.current.fetchSuggestions('p1');
   });
-  expect(rpcMock).toHaveBeenCalledWith('suggest_cost_centers', { p_product_id: 'p1' });
+  expect(rpcMock).toHaveBeenCalledWith('suggest_cost_centers', { p_produit_id: 'p1' });
   expect(result.current.suggestions).toEqual([{ cost_center_id: 'c1', nom: 'Food', ratio: 0.7 }]);
 });

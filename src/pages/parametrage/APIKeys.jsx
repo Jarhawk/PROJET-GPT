@@ -1,7 +1,10 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useApiKeys } from '@/hooks/useApiKeys';
 import { Toaster, toast } from 'react-hot-toast';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import TableContainer from '@/components/ui/TableContainer';
 
 export default function APIKeys() {
   const { keys, loading, listKeys, createKey, revokeKey } = useApiKeys();
@@ -47,7 +50,7 @@ export default function APIKeys() {
           <Button type="submit">Créer</Button>
         </form>
       )}
-      <div className="bg-white shadow rounded-xl mt-6 overflow-x-auto">
+      <TableContainer className="mt-6">
         <table className="min-w-full table-auto text-center">
           <thead>
             <tr>
@@ -62,14 +65,14 @@ export default function APIKeys() {
           </thead>
           <tbody>
             {keys.map(k => (
-              <tr key={k.id} className="border-t">
-                <td>{k.name}</td>
-                <td>{k.scopes}</td>
-                <td>{k.role}</td>
-                <td>{k.created_at?.slice(0,16).replace('T',' ')}</td>
-                <td>{k.expiration?.slice(0,10) || '-'}</td>
-                <td>{k.revoked ? 'Révoquée' : 'Active'}</td>
-                <td>
+              <tr key={k.id}>
+                <td className="border px-2 py-1">{k.name}</td>
+                <td className="border px-2 py-1">{k.scopes}</td>
+                <td className="border px-2 py-1">{k.role}</td>
+                <td className="border px-2 py-1">{k.created_at?.slice(0,16).replace('T',' ')}</td>
+                <td className="border px-2 py-1">{k.expiration?.slice(0,10) || '-'}</td>
+                <td className="border px-2 py-1">{k.revoked ? 'Révoquée' : 'Active'}</td>
+                <td className="border px-2 py-1">
                   {!k.revoked && (
                     <Button size="sm" variant="destructive" onClick={() => revokeKey(k.id)}>Révoquer</Button>
                   )}
@@ -83,12 +86,14 @@ export default function APIKeys() {
             )}
             {loading && (
               <tr>
-                <td colSpan={7} className="py-4">Chargement…</td>
+                <td colSpan={7} className="py-4">
+                  <LoadingSpinner message="Chargement…" />
+                </td>
               </tr>
             )}
           </tbody>
         </table>
-      </div>
+      </TableContainer>
     </div>
   );
 }

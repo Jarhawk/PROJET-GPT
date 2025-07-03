@@ -1,5 +1,7 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useRoles } from "@/hooks/useRoles";
 import { Button } from "@/components/ui/button";
+import TableContainer from "@/components/ui/TableContainer";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Toaster, toast } from "react-hot-toast";
@@ -77,25 +79,27 @@ export default function ParamRoles() {
           </Button>
         )}
       </form>
-      <table className="min-w-full bg-white rounded-xl shadow-md text-xs">
-        <thead>
-          <tr>
-            <th>Nom</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {roles.map(r => (
-            <tr key={r.id}>
-              <td>{r.nom}</td>
-              <td>
-                <Button size="sm" variant="outline" onClick={() => handleEdit(r)}>Modifier</Button>
-                <Button size="sm" variant="outline" onClick={() => handleDelete(r.id)}>Supprimer</Button>
-              </td>
+      <TableContainer className="mt-2">
+        <table className="min-w-full text-xs">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {roles.map(r => (
+              <tr key={r.id}>
+                <td>{r.nom}</td>
+                <td>
+                  <Button size="sm" variant="outline" onClick={() => handleEdit(r)}>Modifier</Button>
+                  <Button size="sm" variant="outline" onClick={() => handleDelete(r.id)}>Supprimer</Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </TableContainer>
     </div>
   );
 }

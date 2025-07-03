@@ -1,13 +1,16 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import React from "react";
 import { useAuth } from "@/context/AuthContext";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import GlassCard from "@/components/ui/GlassCard";
 
 export default function Debug() {
   const { session, role, mama_id, access_rights, loading: authLoading } = useAuth();
-  if (authLoading) return (<div className="p-8 text-center">⏳ Chargement...</div>);
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <div className="max-w-3xl mx-auto bg-white shadow-md rounded-lg p-6">
+    <div className="p-8 flex justify-center">
+      <GlassCard className="max-w-3xl w-full">
         <h1 className="text-2xl font-bold mb-4 text-mamastock-gold">🧪 Debug AuthContext</h1>
 
         <div className="space-y-3">
@@ -25,12 +28,12 @@ export default function Debug() {
           </div>
           <div>
             <strong>Access Rights :</strong>
-            <pre className="bg-gray-100 text-sm border rounded p-3 mt-2">
+            <pre className="bg-glass text-sm border border-borderGlass backdrop-blur rounded p-3 mt-2">
               {JSON.stringify(access_rights, null, 2)}
             </pre>
           </div>
         </div>
-      </div>
+      </GlassCard>
     </div>
   );
 }

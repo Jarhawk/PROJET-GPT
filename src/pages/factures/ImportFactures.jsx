@@ -1,6 +1,8 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
 import { useInvoiceImport } from "@/hooks/useInvoiceImport";
 import { Button } from "@/components/ui/button";
+import GlassCard from "@/components/ui/GlassCard";
 import { Toaster, toast } from "react-hot-toast";
 
 export default function ImportFactures() {
@@ -16,14 +18,20 @@ export default function ImportFactures() {
   };
 
   return (
-    <div className="p-8 container mx-auto">
+    <div className="p-8 container mx-auto space-y-6">
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold mb-4">Import e-facture</h1>
-      <form onSubmit={handleSubmit} className="flex gap-2 items-end">
-        <input type="file" accept="application/json,application/xml" onChange={(e) => setFile(e.target.files[0])} />
-        <Button type="submit" disabled={loading}>Importer</Button>
-      </form>
-      {error && <p className="text-red-600 mt-2">{error}</p>}
+      <GlassCard>
+        <form onSubmit={handleSubmit} className="flex gap-2 items-end">
+          <input
+            type="file"
+            accept="application/json,application/xml"
+            onChange={(e) => setFile(e.target.files[0])}
+          />
+          <Button type="submit" disabled={loading}>Importer</Button>
+        </form>
+        {error && <p className="text-red-500 mt-2">{error}</p>}
+      </GlassCard>
     </div>
   );
 }

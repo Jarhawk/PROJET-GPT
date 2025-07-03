@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
 import { useMenus } from "@/hooks/useMenus";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,9 @@ export default function MenuForm({ menu, fiches = [], onClose }) {
   const { createMenu, updateMenu } = useMenus();
   const [nom, setNom] = useState(menu?.nom || "");
   const [date, setDate] = useState(menu?.date || "");
-  const [selectedFiches, setSelectedFiches] = useState(menu?.fiches?.map(f => f.id) || []);
+  const [selectedFiches, setSelectedFiches] = useState(
+    menu?.fiches?.map(f => f.fiche_id) || []
+  );
   const [ficheInput, setFicheInput] = useState("");
   const [file, setFile] = useState(null);
   const [fileUrl, setFileUrl] = useState(menu?.document || "");
@@ -93,7 +96,10 @@ export default function MenuForm({ menu, fiches = [], onClose }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md max-w-xl mx-auto">
+    <form
+      onSubmit={handleSubmit}
+      className="bg-glass border border-borderGlass backdrop-blur p-6 rounded-2xl shadow-lg max-w-xl mx-auto"
+    >
       <h2 className="text-lg font-bold mb-4">
         {menu ? "Modifier le menu" : "Ajouter un menu"}
       </h2>

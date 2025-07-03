@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import SimulationForm from "./SimulationForm";
 import SimulationResult from "./SimulationResult";
 import { useSimulation } from "@/hooks/useSimulation";

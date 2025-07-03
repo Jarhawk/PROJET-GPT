@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
@@ -16,7 +17,7 @@ export async function getRecommendations(user_id, mama_id) {
     recos.push({
       type: 'alert',
       category: 'rotation',
-      product_id: r.product_id,
+      produit_id: r.produit_id,
       message: `Stock mort: ${r.nom} inactif depuis ${r.jours_inactif} jours`,
     });
   });
@@ -32,14 +33,14 @@ export async function getRecommendations(user_id, mama_id) {
     recos.push({
       type: 'alert',
       category: 'coût',
-      product_id: r.product_id,
+      produit_id: r.produit_id,
       message: `Coût excessif pour ${r.nom} : +${Number(r.variation_pct).toFixed(1)}%`,
     });
   });
 
   // 3. Suggest reorder when stock below minimum
   const { data: produits } = await supabase
-    .from('products')
+    .from('produits')
     .select('id, nom, stock_reel, stock_min, actif')
     .eq('mama_id', mama_id);
 
@@ -49,7 +50,7 @@ export async function getRecommendations(user_id, mama_id) {
       recos.push({
         type: 'suggestion',
         category: 'stock',
-        product_id: p.id,
+        produit_id: p.id,
         message: `Passer commande: ${p.nom} (stock ${p.stock_reel} < ${p.stock_min})`,
       });
     });

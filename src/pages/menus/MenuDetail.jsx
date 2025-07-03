@@ -1,6 +1,8 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import { Button } from "@/components/ui/button";
+import TableContainer from "@/components/ui/TableContainer";
 import toast from "react-hot-toast";
 
 export default function MenuDetail({ menu, onClose, onDuplicate }) {
@@ -30,31 +32,33 @@ export default function MenuDetail({ menu, onClose, onDuplicate }) {
   ];
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-lg p-8 min-w-[400px] max-w-[95vw] flex flex-col gap-2 relative">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-glass backdrop-blur-lg border border-borderGlass rounded-xl shadow-lg p-8 min-w-[400px] max-w-[95vw] flex flex-col gap-2 relative">
         <Button variant="outline" className="absolute top-2 right-2" onClick={onClose}>Fermer</Button>
         <h2 className="font-bold text-xl mb-4">{menu.nom}</h2>
         <div><b>Date :</b> {menu.date}</div>
         <div>
           <b>Fiches :</b>
-          <table className="min-w-full text-sm mt-1">
-            <thead>
-              <tr>
-                <th className="px-2">Nom</th>
-                <th className="px-2">Portions</th>
-                <th className="px-2">Coût</th>
-              </tr>
-            </thead>
-            <tbody>
-              {fiches.map((f, i) => (
-                <tr key={i}>
-                  <td className="border px-2">{f.fiche?.nom}</td>
-                  <td className="border px-2 text-center">{f.fiche?.portions}</td>
-                  <td className="border px-2">{Number(f.fiche?.cout_total || 0).toFixed(2)} €</td>
+          <TableContainer className="mt-1">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr>
+                  <th className="px-2">Nom</th>
+                  <th className="px-2">Portions</th>
+                  <th className="px-2">Coût</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {fiches.map((f, i) => (
+                  <tr key={i}>
+                    <td className="border px-2">{f.fiche?.nom}</td>
+                    <td className="border px-2 text-center">{f.fiche?.portions}</td>
+                    <td className="border px-2">{Number(f.fiche?.cout_total || 0).toFixed(2)} €</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </TableContainer>
         </div>
         <div className="mt-2 flex gap-4">
           <div><b>Total :</b> {totalCout.toFixed(2)} €</div>

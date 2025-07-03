@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
@@ -10,7 +11,7 @@ export function useGlobalSearch() {
     if (!term) return setResults([]);
     const [prod, fournisseurs] = await Promise.all([
       supabase
-        .from('products')
+        .from('produits')
         .select('id, nom')
         .ilike('nom', `%${term}%`)
         .eq('mama_id', mama_id)

@@ -1,11 +1,14 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
+import toast from "react-hot-toast";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 const MultiMamaContext = createContext();
 
 export function MultiMamaProvider({ children }) {
-  const { user_id, role, mama_id: authMamaId } = useAuth();
+  const { role, mama_id: authMamaId } = useAuth();
   const [mamas, setMamas] = useState([]);
   const [loading, setLoading] = useState(false);
   const [mamaActif, setMamaActifState] = useState(
@@ -19,24 +22,36 @@ export function MultiMamaProvider({ children }) {
   }, [authMamaId]);
 
   useEffect(() => {
-    if (user_id) fetchMamas();
-  }, [user_id, role]);
+    if (authMamaId || role === "superadmin") fetchMamas();
+  }, [authMamaId, role]);
 
   async function fetchMamas() {
     setLoading(true);
     let data = [];
-    if (role === "superadmin") {
-      const res = await supabase.from("mamas").select("id, nom").order("nom");
-      if (!res.error) data = res.data;
-    } else {
-      const res = await supabase
-        .from("users_mamas")
-        .select("mamas(id, nom)")
-        .eq("user_id", user_id)
-        .eq("actif", true);
-      if (!res.error) data = (res.data || []).map((r) => r.mamas);
+    try {
+      if (role === "superadmin") {
+        const { data: rows, error } = await supabase
+          .from("mamas")
+          .select("id, nom")
+          .order("nom");
+        if (error) throw error;
+        data = rows || [];
+      } else if (authMamaId) {
+        const { data: row, error } = await supabase
+          .from("mamas")
+          .select("id, nom")
+          .eq("id", authMamaId)
+          .maybeSingle();
+        if (error) throw error;
+        data = row ? [row] : [];
+      }
+    } catch (err) {
+      toast.error(err.message || "Erreur chargement établissements");
     }
     setMamas(Array.isArray(data) ? data : []);
+    if (!mamaActif && Array.isArray(data) && data.length > 0) {
+      changeMama(data[0].id);
+    }
     setLoading(false);
   }
 
@@ -46,6 +61,10 @@ export function MultiMamaProvider({ children }) {
   };
 
   const value = { mamas, mamaActif, setMamaActif: changeMama, loading };
+
+  if (loading && mamas.length === 0) {
+    return <LoadingSpinner message="Chargement établissements..." />;
+  }
 
   return (
     <MultiMamaContext.Provider value={value}>{children}</MultiMamaContext.Provider>

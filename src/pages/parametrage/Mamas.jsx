@@ -1,11 +1,18 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
-import { Dialog, DialogContent } from "@radix-ui/react-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from "@radix-ui/react-dialog";
 import MamaForm from "./MamaForm";
 import toast, { Toaster } from "react-hot-toast";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function Mamas() {
   const { mama_id: myMama, role } = useAuth();
@@ -22,16 +29,22 @@ export default function Mamas() {
 
   const fetchMamas = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("mamas")
-      .select("*")
-      .order("nom", { ascending: true });
+    let query = supabase.from("mamas").select("*");
+    if (role !== "superadmin") query = query.eq("id", myMama);
+    const { data, error } = await query.order("nom", { ascending: true });
     if (!error) setMamas(data || []);
     setLoading(false);
   };
 
   const handleDelete = async id => {
-    const { error } = await supabase.from("mamas").delete().eq("id", id);
+    if (role !== "superadmin" && id !== myMama) {
+      toast.error("Action non autorisée");
+      return;
+    }
+    const { error } = await supabase
+      .from("mamas")
+      .delete()
+      .eq("id", id);
     if (!error) {
       toast.success("Établissement supprimé.");
       fetchMamas();
@@ -68,9 +81,7 @@ export default function Mamas() {
       </div>
       <TableContainer className="mb-6">
         {loading ? (
-          <div className="text-center py-8 text-gray-500">
-            <span className="animate-spin mr-2">⏳</span>Chargement…
-          </div>
+          <LoadingSpinner message="Chargement…" />
         ) : (
           <table className="min-w-full table-auto text-center">
             <thead>
@@ -151,6 +162,12 @@ export default function Mamas() {
       </TableContainer>
       <Dialog open={!!editMama} onOpenChange={v => !v && setEditMama(null)}>
         <DialogContent className="bg-glass backdrop-blur-lg text-white rounded-xl shadow-lg p-6 max-w-md">
+          <DialogTitle className="font-bold mb-2">
+            {editMama?.id ? "Modifier l'établissement" : "Nouvel établissement"}
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            Formulaire établissement
+          </DialogDescription>
           <MamaForm
             mama={editMama}
             onSaved={() => {

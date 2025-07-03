@@ -1,11 +1,20 @@
-export default function InputField({ label, value, onChange, error, ...props }) {
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+export default function InputField({
+  label,
+  value,
+  onChange,
+  error,
+  className = "",
+  inputClass = "",
+  ...props
+}) {
   return (
-    <div className="mb-4">
-      <label className="block text-sm text-gray-300 mb-1">{label}</label>
+    <div className={`mb-4 ${className}`}>
+      <label className="block text-sm text-white mb-1">{label}</label>
       <input
         value={value}
         onChange={onChange}
-        className={`w-full p-2 bg-zinc-900 border rounded-xl ${error ? "border-red-500" : "border-zinc-600"}`}
+        className={`input w-full ${error ? "border-red-500" : "border-white/20"} ${inputClass}`}
         {...props}
       />
       {error && <p className="text-red-500 text-sm mt-1">{error}</p>}

@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 // src/pages/Produits.jsx
 import { useEffect, useState, useRef } from "react";
 import { useProducts } from "@/hooks/useProducts";
@@ -40,14 +41,13 @@ export default function Produits() {
         nom: row.nom,
         famille: row.famille,
         unite: row.unite,
-        pmp: Number(row.pmp) || 0,
         stock_reel: Number(row.stock_reel) || 0,
         stock_min: Number(row.stock_min) || 0,
         actif: row.actif !== false,
         code: row.code || "",
         allergenes: row.allergenes || "",
         image: row.image || "",
-      });
+      }, { refresh: false });
     }
     fetchProducts();
     e.target.value = null;

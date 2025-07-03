@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
@@ -10,8 +11,8 @@ export function useMouvementsStock() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // 1. Charger les mouvements (filtre, type, période, produit, search)
-  async function fetchMouvements({ type = "", produit = "", date_debut = "", date_fin = "", search = "" } = {}) {
+  // 1. Charger les mouvements (filtre, type, période, produit)
+  async function fetchMouvements({ type = "", produit = "", zone = "", date_debut = "", date_fin = "" } = {}) {
     setLoading(true);
     setError(null);
     let query = supabase
@@ -20,10 +21,11 @@ export function useMouvementsStock() {
       .eq("mama_id", mama_id);
 
     if (type) query = query.eq("type", type);
-    if (produit) query = query.eq("product_id", produit);
+    if (produit) query = query.eq("produit_id", produit);
+    if (zone) query = query.ilike("zone", `%${zone}%`);
     if (date_debut) query = query.gte("date", date_debut);
     if (date_fin) query = query.lte("date", date_fin);
-    if (search) query = query.ilike("reference", `%${search}%`);
+
 
     const { data, error } = await query.order("date", { ascending: false });
     setMouvements(Array.isArray(data) ? data : []);
@@ -92,10 +94,10 @@ export function useMouvementsStock() {
       id: m.id,
       date: m.date,
       type: m.type,
-      product_id: m.product_id,
+      produit_id: m.produit_id,
       quantite: m.quantite,
-      reference: m.reference,
-      inventaire_id: m.inventaire_id,
+      zone: m.zone,
+      motif: m.motif,
       mama_id: m.mama_id,
     }));
     const wb = XLSX.utils.book_new();

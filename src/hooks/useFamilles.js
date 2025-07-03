@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
@@ -11,11 +12,12 @@ export function useFamilles() {
   const [error, setError] = useState(null);
 
   // 1. Charger toutes les familles (recherche, batch)
-  async function fetchFamilles({ search = "" } = {}) {
+  async function fetchFamilles({ search = "", includeInactive = false } = {}) {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
     let query = supabase.from("familles").select("*").eq("mama_id", mama_id);
+    if (!includeInactive) query = query.eq("actif", true);
     if (search) query = query.ilike("nom", `%${search}%`);
     const { data, error } = await query.order("nom", { ascending: true });
     setFamilles(Array.isArray(data) ? data : []);
@@ -48,7 +50,7 @@ export function useFamilles() {
     }
     const { data, error } = await supabase
       .from("familles")
-      .insert([{ nom, mama_id }])
+      .insert([{ nom, mama_id, actif: true }])
       .select()
       .single();
     setLoading(false);
@@ -87,7 +89,7 @@ export function useFamilles() {
     setError(null);
     const { error } = await supabase
       .from("familles")
-      .delete()
+      .update({ actif: false })
       .in("id", ids)
       .eq("mama_id", mama_id);
     if (error) setError(error);
@@ -101,6 +103,7 @@ export function useFamilles() {
       id: f.id,
       nom: f.nom,
       mama_id: f.mama_id,
+      actif: f.actif,
     }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Familles");

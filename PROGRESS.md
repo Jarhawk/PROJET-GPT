@@ -1,8 +1,7 @@
 # Progress Tracker
 
-## 2025-06-20 Step 1
 - Created initial tracker.
-- Verified SQL base scripts (`init.sql` and `mama_stock_patch.sql` triggers).
+- Verified SQL base scripts (now consolidated in `db/full_setup.sql`).
 - Added `drop trigger if exists` for idempotent trigger creation.
 - Next: review policies for idempotence and start frontend module checks.
 
@@ -41,7 +40,7 @@
 ## 2025-06-20 Step 7
 - Audited facture pages and related hooks.
 - Added `useAuth` dependency in `Factures.jsx` so invoice fetches trigger only after authentication.
-- Updated `useInvoices.js` and `useFactureProduits.js` to skip queries when `mama_id` is missing.
+- Updated `useInvoices.js` and `useInvoiceItems.js` (formerly `useFactureProduits.js`) to skip queries when `mama_id` is missing.
 - Lint and tests pass locally.
 - Next: continue auditing other modules (e.g., reporting pages).
 
@@ -62,7 +61,7 @@
 ## 2025-06-20 Step 10
 - Audited task and menu modules for authentication readiness.
 - Added `useAuth` checks in `Taches.jsx`, `TacheDetail.jsx`, `Menus.jsx` and `MenuDuJour.jsx`.
-- Updated `useMenus.js`, `useFiches.js` and `useUsers.js` to skip queries when `mama_id` is absent.
+ - Updated `useMenus.js`, `useFiches.js` and `useUtilisateurs.js` to skip queries when `mama_id` is absent.
 - Installed Node dependencies so lint and tests run.
 - Verified `npm run lint` and `npm run test` succeed.
 - Next: continue reviewing remaining modules.
@@ -94,7 +93,7 @@
 - Reviewed promotions module (hooks, page and SQL policies).
 - Added `mama_id` guards in `usePromotions.js` to avoid unauthenticated queries.
 - Updated `Promotions.jsx` to wait for authentication before loading data.
-- Made RLS policies for promotions idempotent in `mama_stock_patch.sql` and `rls.sql`.
+- Made RLS policies for promotions idempotent in the consolidated `db/full_setup.sql`.
 - Installed Node dependencies and confirmed `npm run lint` and `npm run test` succeed.
 - Next: continue reviewing remaining modules (documents, logs...).
 ## 2025-06-20 Step 15
@@ -140,9 +139,9 @@
 - Next: continue auditing remaining modules and SQL patch.
 
 
-## 2025-06-20 Step 21
+-## 2025-06-20 Step 21
 - Reviewed SQL patch for missing `drop policy` statements.
-- Added drops before creating policies in `mama_stock_patch.sql` for idempotence.
+- Added drops before creating policies in what is now `db/full_setup.sql` for idempotence.
 - Verified `npm run lint` and `npm run test` succeed after SQL patch updates.
 - Next: continue auditing remaining modules if any.
 
@@ -157,7 +156,7 @@
 ## 2025-06-20 Step 23
 - Reviewed requisition, signalement and simulation modules for auth context usage.
 - Added missing mama_id guards and auth loading checks in their hooks and pages.
-- Created a new `signalements` table and extended `requisitions` schema in `mama_stock_patch.sql`.
+- Created a new `signalements` table and extended `requisitions` schema in `db/full_setup.sql`.
 - Updated SignalementForm to use hook instead of direct supabase insert.
 - Patched Simulation components to filter fiches by mama_id.
 - Next: run lint and unit tests to validate all modules.
@@ -195,7 +194,7 @@
 - Next: finalize integration and review SQL patch.
 
 ## 2025-06-20 Step 30
-- Reviewed `mama_stock_patch.sql` ensuring all tables, policies and triggers are idempotent.
+- Reviewed consolidated SQL ensuring all tables, policies and triggers are idempotent in `db/full_setup.sql`.
 - Reinstalled Node dependencies because lint initially failed.
 - Verified integration by running `npm run lint` and `npm test`, both succeeded.
 - Next: continue auditing remaining modules or finalize docs.
@@ -474,7 +473,7 @@
 - Final review confirms baseprojet.sql defines 48 tables, 14 views, 28 functions.
 - Verification across all modules completed.
 
-\n## 2025-06-23 Step 78
+## 2025-06-23 Step 78
 - Updated useProducts to fetch from v_products_last_price for dernier_prix info.
 - npm install, npm run lint, and npm test all succeed.
 - Added step 78 to progress tracker.
@@ -483,11 +482,11 @@
 - Reinstalled npm dependencies after missing @eslint/js during lint.
 - `npm run lint` warns only and `npm test` passes (81).
 - Continuing overall verification.
-\n## 2025-06-23 Step 80
+## 2025-06-23 Step 80
 - Reinstalled npm dependencies so lint and tests succeed again.
 - `npm run lint` shows warnings only.
 - `npm test` reports all 81 tests passing.
-\n## 2025-06-23 Step 81
+## 2025-06-23 Step 81
 - Ran npm install to restore packages for lint and tests.
 - Confirmed npm run lint warns only and npm test reports 81 passing.
 - Continuing verification of modules and SQL schema.
@@ -519,7 +518,7 @@
 - `npm run lint` shows warnings only.
 - `npm test` reports all 81 tests passing.
 - Verified `v_cost_center_month`, `v_ventilation`, and `v_products_last_price` grant SELECT and index `idx_supplier_products_product_date` exists.
-\n## 2025-06-23 Step 87
+## 2025-06-23 Step 87
 - Reinstalled dependencies after environment reset.
 - `npm run lint` shows warnings only and `npm test` passes with 81 tests.
 - Confirmed summary line shows 48 tables, 14 views, 28 functions and useProducts reads from `v_products_last_price`.
@@ -625,7 +624,7 @@
 - `npm run test:e2e` reste ignoré car les navigateurs Playwright ne sont pas installés.
 
 ## 2025-06-25 Step 108
-- Vérification finale de la configuration RLS via `sql/rls.sql` et validation de la redirection automatique du login.
+- Vérification finale de la configuration RLS via `db/full_setup.sql` et validation de la redirection automatique du login.
 - Exécuté `npm run lint`, `npm test`, `npm run build` et `npm run preview` pour confirmer un environnement opérationnel avant déploiement.
 - `npm run test:e2e` toujours ignoré faute de navigateurs.
 ## 2025-06-25 Step 109
@@ -649,3 +648,844 @@
 - Confirmed service worker registration via `npm run preview`.
 - `npm run lint`, `npm test`, `npm run build` et `npm run preview` passent sans erreur.
 - `npm run test:e2e` toujours ignore faute de navigateurs.
+- Ajout des champs de totaux aux factures et calcul automatique via trigger SQL.
+
+## 2025-06-26 Step 113
+- Ajout du filtre mama_id dans la page Alertes des taches.
+- `npm run lint` et `npm test` passent apres `npm install`.
+
+## 2025-06-26 Step 114
+- Filtre mama_id ajoute pour la suppression des mises a jour de catalogue.
+- Correction dependance du hook dans `EcartInventaire`.
+- `npm run lint` et `npm test` passent.
+
+## 2025-06-26 Step 115
+- Filtre mama_id ajoute dans FournisseurDetail.
+- `npm run lint` et `npm test` passent apres `npm install`.
+## 2025-06-26 Step 116\n- Filtre mama_id ajoute dans InvitationsEnAttente pour la suppression et le chargement des invitations.\n- npm run lint et npm test passent.
+
+## 2025-06-26 Step 117
+- Ajout du composant `ErrorBoundary` et remplacement de tous les messages "Chargement" par `LoadingSpinner`.
+- Sélection automatique du premier établissement disponible dans `MultiMamaProvider` et gestion d'erreur avec toast.
+- Mise à jour de `ProtectedRoute` pour afficher le spinner pendant l'authentification.
+- `npm run lint` et `npm test` passent après installation des dépendances.
+
+## 2025-06-26 Step 118
+- Remplacé le placeholder "Chargement..." dans `RequisitionForm` par le composant `LoadingSpinner`.
+- `npm run lint` et `npm test` passent après `npm install`.
+
+## 2025-06-27 Step 119
+- Ajout d'un spinner dans `DashboardBuilder` lors du chargement initial des dashboards.
+- `npm run lint` et `npm test` passent.
+
+## 2025-06-27 Step 120
+- Affichage d'un spinner dans la route racine pendant le chargement de l'authentification.
+- `npm run lint` et `npm test` passent après `npm install`.
+
+## 2025-06-27 Step 121
+- Uniformisé les derniers indicateurs de chargement en remplaçant les icônes `Loader` par le composant `LoadingSpinner` dans les écrans de recommandations et de détail produit.
+- `npm run lint` et `npm test` échouent car `@eslint/js` et `vitest` sont manquants.
+
+## 2025-06-27 Step 122
+- Removed old Loader component and CSS. Updated comparatif pages to use `LoadingSpinner` instead.
+- Updated related tests to check spinner via `role` attribute.
+- `npm run lint` and `npm test` pass.
+
+## 2025-06-27 Step 123
+- Fixed incorrect destructuring in `RequisitionForm` to use `products` from `useProducts`.
+- Installed missing Node dependencies so `npm run lint` and `npm test` succeed again.
+
+## 2025-06-27 Step 124
+- Verified spinner usage across pages and ensured mama_id checks in hooks.
+- Installed dependencies so `npm run lint` and `npm test` pass locally.
+## 2025-06-27 Step 125
+- Installed node modules to run lint and tests.
+- Confirmed `npm run lint` and `npm test` pass.
+
+## 2025-06-27 Step 126
+- Reinstalled node packages to resolve missing @eslint/js.
+- Confirmed `npm run lint` and `npm test` pass after installation.
+- Reviewed data-fetching hooks and pages to verify `mama_id` filtering for all Supabase queries.
+## 2025-06-27 Step 127
+- Ran `npm install` to restore missing lint/test dependencies.
+- Confirmed `npm run lint` and `npm test` now pass.
+- Continued verifying React pages use `LoadingSpinner` and enforce `mama_id` filtering.
+
+## 2025-06-27 Step 128
+- Ajout du spinner sur la page `Fiches` pour éviter un écran vide pendant le chargement.
+- `npm run lint` et `npm test` passent.
+
+
+## 2025-06-27 Step 129
+- Nouvelle installation des dépendances pour rétablir eslint et vitest.
+- Vérifié les hooks et pages restants pour s'assurer de la présence du filtre `mama_id` et de l'affichage du `LoadingSpinner`.
+- `npm run lint` et `npm test` passent sans erreur.
+
+## 2025-06-27 Step 130
+- Reinstalled node modules after container reset so lint and tests run.
+- Verified hooks like usePlanning, useFournisseurAPI, useStock, etc. all apply mama_id and show LoadingSpinner while fetching.
+- Confirmed routing uses ErrorBoundary and ProtectedRoute spinner.
+- `npm run lint` and `npm test` succeed.
+## 2025-06-27 Step 131
+- Reinstalled npm packages to fix missing @eslint/js when lint failed.
+- Searched the codebase for old Loader components and replaced remaining placeholders with `LoadingSpinner`.
+- Confirmed updated `MultiMamaProvider` selects first mama automatically and displays spinner during loading.
+- Ran `npm run lint` and `npm test` successfully after reinstall.
+## 2025-06-27 Step 132
+- Verified spinner usage across pages and ensured all Supabase calls include mama_id where required.
+- Installed missing dependencies so lint and tests run.
+- Ran 'npm run lint' and 'npm test' successfully.
+## 2025-06-27 Step 133
+- Installed @eslint/js and vitest so lint and tests run.
+- Verified spinner usage across pages and mama_id filtering in hooks.
+- `npm run lint` and `npm test` succeed.
+## 2025-06-27 Step 134
+- Reinstalled dependencies to resolve ESLint module missing.
+- Confirmed `npm run lint` and `npm test` succeed.
+- Removed unused `index.css` file to avoid duplicate loader styles.
+
+## 2025-06-27 Step 135
+- Reinstalled npm dependencies to restore missing `@eslint/js`.
+- Verified lint and tests pass.
+- Reviewed latest code to ensure spinner components show during loading across pages and mama_id is enforced in hooks.
+## 2025-06-27 Step 136
+- Reviewed additional React modules for mama_id checks and spinner usage.
+- Lint and test tasks fail due to missing @eslint/js and vitest packages.
+
+## 2025-06-27 Step 137
+- Reinstalled missing packages so ESLint and Vitest run successfully.
+- Fixed task management hooks: switched `taches_recurrentes` to `taches` table and corrected occurrence validation to use `tache_instances` with `statut` and `done_by` fields.
+- Confirmed `npm run lint` and `npm test` both pass.
+## 2025-06-27 Step 138
+- Improved task validation to record the current user and prevent stale user_id.
+- Documented update after verifying lint and tests run successfully.
+
+## 2025-06-27 Step 139
+- Reinstalled npm packages to ensure @eslint/js and vitest are available.
+- Confirmed `npm run lint` and `npm test` succeed after installation.
+
+## 2025-06-27 Step 140
+- Reinstalled dependencies after lint failure due to missing @eslint/js.
+- Verified `npm run lint` and `npm test` succeed.
+- Continue verifying React modules for mama_id and spinner usage.
+
+## 2025-06-27 Step 141
+- Reinstalled node packages after lint failed to load @eslint/js
+- Confirmed `npm run lint` and `npm test` both succeed
+- Continued auditing React files for proper mama_id filtering and loading spinners
+
+## 2025-06-27 Step 142
+- Reinstalled missing dependencies to fix ESLint error.
+- Verified `npm run lint` and `npm test` pass after reinstall.
+- Continue reviewing React modules for mama_id enforcement and error boundaries.
+
+
+## 2025-06-27 Step 143
+- Installed missing packages to resolve ESLint module error.
+- Verified `npm run lint` and `npm test` succeed.
+- Reviewed React hooks for mama_id enforcement and spinner usage.
+
+
+## 2025-06-27 Step 144
+- Reinstalled node modules to resolve missing packages for lint/test.
+- Verified `npm run lint` and `npm test` succeed.
+- Continue verifying React components for proper mama_id filtering and loading spinners.
+
+## 2025-06-27 Step 145
+- Reinstalled npm packages so lint and tests run again after environment reset.
+- Verified `npm run lint` and `npm test` succeed.
+
+
+## 2025-06-27 Step 146
+- Installed missing eslint dependency to run lint successfully.
+- Verified `npm run lint` and `npm test` pass after reinstall.
+
+## 2025-06-27 Step 147
+- Reinstalled Node modules so ESLint could run after environment reset.
+- Verified InviteUser and RequisitionForm handle mama_id and loading spinners correctly.
+- Confirmed `npm run lint` and `npm test` both succeed.
+
+## 2025-06-27 Step 148
+- Reinstalled dependencies again so ESLint could find @eslint/js after environment reset.
+- Verified all hooks enforce mama_id and pages show LoadingSpinner.
+- Confirmed `npm run lint` and `npm test` succeed.
+## 2025-06-27 Step 149
+- Reinstalled npm packages to resolve missing @eslint/js again and verified lint and tests pass.
+- Reviewed remaining stats modules to ensure LoadingSpinner is shown during fetches and mama_id filters apply.
+
+
+## 2025-06-27 Step 150
+- Reinstalled dependencies so ESLint could find @eslint/js.
+- Verified lint and tests pass after auditing hooks for mama_id filters.
+
+## 2025-06-27 Step 151
+- Reinstalled dependencies so Vitest could run after environment reset.
+- Confirmed all stats and requisition pages display LoadingSpinner and enforce mama_id.
+- `npm run lint` and `npm test` succeed.
+## 2025-06-27 Step 152
+- Reinstalled node modules so ESLint and tests run after environment reset.
+- Confirmed all hooks continue to enforce mama_id and pages show LoadingSpinner while data loads.
+- `npm run lint` and `npm test` succeed.
+## 2025-06-27 Step 153
+- Added missing mama_id checks when updating ventes_fiches and when managing users.
+- Reinstalled npm packages so ESLint can run.
+- `npm run lint` and `npm test` succeed.
+
+## 2025-06-27 Step 154
+- Added mama_id dependency to validerTache callback to avoid stale values.
+- Reinstalled npm packages and verified lint and tests succeed.
+## 2025-06-27 Step 155
+- Reinstalled npm dependencies so ESLint can load @eslint/js after environment reset.
+- Confirmed lint and tests pass after verifying spinner usage in root route.
+
+## 2025-06-27 Step 156
+- Reinstalled dependencies so ESLint could load @eslint/js and Vitest ran.
+- Restricted GroupeParamForm to fetch mamas only for the current user unless superadmin.
+- Verified lint and tests pass after the update.
+## 2025-06-27 Step 157
+- Reinstalled npm packages so ESLint could run after missing package error.
+- Verified GroupeParamForm shows only mamas managed by the current user if not superadmin.
+- Ran lint and tests successfully after reinstall.
+
+## 2025-06-27 Step 158
+- Reinstalled dependencies so ESLint and Vitest run after environment cleanup.
+- Verified new LoadingSpinner component across pages and added mama_id filters in requisition hooks.
+- `npm run lint` and `npm test` pass.
+
+## 2025-06-27 Step 159
+- Reinstalled npm packages to resolve missing @eslint/js and vitest errors.
+- Verified hooks still enforce mama_id and pages show LoadingSpinner.
+- `npm run lint` and `npm test` pass.
+
+## 2025-06-27 Step 160
+- Reinstalled dependencies again so ESLint and Vitest can run after container reset.
+- Confirmed Auth and MultiMama contexts show spinners while loading.
+- Verified requisition forms and other hooks enforce mama_id filtering.
+- `npm run lint` and `npm test` pass.
+## 2025-06-27 Step 161
+- Reinstalled npm packages to resolve missing @eslint/js after environment cleanup.
+- Verified all pages display LoadingSpinner when data or auth is loading.
+- Confirmed Supabase hooks still filter by mama_id for tenant isolation.
+- `npm run lint` and `npm test` pass.
+## 2025-06-27 Step 162
+- Reinstalled dependencies to fix missing packages.
+- Confirmed lint and tests run successfully after verifying `mama_id` usage.
+- Checked remaining pages show LoadingSpinner during data fetches.
+- Verified router still wraps routes with ErrorBoundary for safety.
+- `npm run lint` and `npm test` pass.
+
+## 2025-06-27 Step 163
+- Reinstalled missing packages for ESLint after container restart.
+- Confirmed all hooks still enforce mama_id filtering and pages show LoadingSpinner.
+- `npm run lint` and `npm test` pass.
+
+## 2025-06-27 Step 164
+- Reinstalled dependencies again to restore ESLint and Vitest after environment reset.
+- Confirmed all pages still use LoadingSpinner when auth or data is loading.
+- Verified Supabase hooks enforce mama_id filtering for tenant isolation.
+- `npm run lint` and `npm test` pass.
+## 2025-06-27 Step 165
+- Reinstalled packages so ESLint could load @eslint/js.
+- Confirmed `npm run lint` and `npm test` succeed again.
+- Verified spinners still show during loading and hooks filter by mama_id.
+- Ready to continue auditing remaining modules.
+
+## 2025-06-27 Step 166
+- Reinstalled dependencies after missing packages triggered lint failure.
+- Confirmed `npm run lint` and `npm test` pass again.
+- Continuing review of frontend modules for mama_id checks and spinner usage.
+
+## 2025-06-27 Step 167
+- Reinstalled npm packages to restore ESLint and Vitest after container reset.
+- Verified MultiMamaContext and RequisitionForm enforce mama_id and display LoadingSpinner when loading.
+- `npm run lint` and `npm test` now succeed after reinstalling dependencies.
+
+## 2025-06-27 Step 168
+- Reinstalled dependencies so ESLint could find @eslint/js again.
+- Confirmed lint and tests succeed after reinstalling packages.
+- Checked remaining hooks and pages still enforce mama_id filtering and show LoadingSpinner during fetches.
+
+## 2025-06-27 Step 169
+- Installed missing @eslint/js so lint can run
+- Ran `npm run lint` and `npm test` successfully after reinstall
+- Verified Utilisateurs page displays <LoadingSpinner> while authentication loads
+## 2025-06-27 Step 170
+- Reinstalled node modules to restore missing packages and ensure lint/test succeed.
+- Reviewed useDashboards hook to confirm widgets operations rely on RLS for dashboard ownership.
+- Checked additional hooks for missing mama_id filters; none found.
+- `npm run lint` and `npm test` both pass.
+## 2025-06-27 Step 171
+- Installed @eslint/js to resolve missing dependency.
+- Confirmed `npm run lint` and `npm test` succeed.
+
+
+## 2025-06-27 Step 172
+- Reinstalled node modules so ESLint could load @eslint/js
+- Verified no missing mama_id filters in hooks and pages
+- `npm run lint` and `npm test` both pass after reinstall
+## 2025-06-27 Step 173
+- Added Supertest coverage for /stock route with API key and bearer token.
+- Tested Supabase error handling on produits endpoint.
+- Lint and unit tests now pass with 95 tests.
+## 2025-06-27 Step 174
+- Added stock error scenario and invalid token check in public API tests.
+- Introduced sdk_headers test to verify MamaStockSDK header injection.
+- Updated README documentation.
+- Lint and tests pass with 98 passing.
+## 2025-06-27 Step 175
+- SDK updated to accept `mama_id` parameter so API key requests work
+  without manual query building.
+- Adjusted sdk_headers test and README example accordingly.
+- `npm run lint` and `npm test` both succeed with 98 tests.
+
+## 2025-06-27 Step 176
+- Added `famille` and `since` filters to public API routes and updated SDK helpers
+  to accept option objects.
+- Extended Supertest suite with filter checks and adapted mocks.
+- Documented the new options in README and improvement log.
+- Lint and tests pass with updated coverage.
+
+## 2025-06-27 Step 177
+- Added tests for missing Supabase credentials on public routes.
+- README now notes these error scenarios.
+- Updated improvement log accordingly.
+- Lint and tests pass with 102 checks.
+
+## 2025-06-27 Step 178
+- Added invalid API key checks on both public routes.
+- Documented this scenario in README and improvement log.
+- Lint and tests pass with 104 tests.
+## 2025-06-27 Step 179
+- Rechecked entire codebase for any reference to `users_mamas`.
+- Confirmed no remaining join table usage; all queries rely on mama_id directly.
+- Ran `npm install`, `npm run lint` and `npm test` successfully.
+- Verified multi-mama context and hooks now fetch data using the authenticated mama_id only.
+- Lint and tests confirm integrity across all modules.
+
+## 2025-06-27 Step 180
+- Final verification of `users_mamas` removal across docs and SQL.
+- `npm run lint` and `npm test` confirm clean state.
+## 2025-06-27 Step 181
+- Re-ran npm install, lint and test after verifying codebase.
+- Confirmed no references to 'users_mamas' remain.
+- Lint and tests succeed.
+
+## 2025-06-27 Step 182
+- Additional verification after user request; confirmed no `users_mamas` references remain.
+- `npm run lint` and `npm test` pass after reinstall.
+
+## 2025-06-28 Step 183
+- Verified again that no `users_mamas` references remain after final review.
+- Reinstalled dependencies then ran `npm run lint` and `npm test` successfully.
+
+## 2025-06-28 Step 184
+- Re-verified codebase with grep to confirm no `users_mamas` references.
+- Reinstalled dependencies and ran `npm run lint` and `npm test` successfully.
+
+## 2025-06-28 Step 185
+- Continued verification on user request. Ran `grep -R users_mamas` to ensure nothing remains.
+- Reinstalled dependencies and confirmed `npm run lint` and `npm test` succeed.
+
+## 2025-06-28 Step 186
+- Ran `npm install`, `npm run lint` and `npm test` to reconfirm removal of `users_mamas`.
+- All checks pass with no references found.
+## 2025-06-28 Step 187
+- Verified once more that no 'users_mamas' references remain after npm install.
+- Ran 'npm run lint' and 'npm test' successfully.
+
+## 2025-06-28 Step 188
+- Searched the entire codebase again for `users_mamas` after the latest changes but found none.
+- Reinstalled dependencies and reran `npm run lint` and `npm test` to confirm everything still passes.
+
+
+## 2025-06-28 Step 189
+- Reconfirmed removal of `users_mamas` after latest review; grep found nothing.
+- Reinstalled dependencies and executed `npm run lint` and `npm test` successfully.
+
+## 2025-06-28 Step 190
+- Audited fiches techniques module for SQL integrity and mama_id filtering.
+- Added error propagation in `useFiches` create/update functions to surface Supabase issues.
+- Ran `npm run lint` and `npm test` successfully after modifications.
+
+## 2025-06-28 Step 191
+- Continued audit of fiches techniques module.
+- Hardened deletion and advanced fiche operations with explicit error propagation.
+- `npm run lint` and `npm test` executed successfully after changes.
+
+## 2025-07-01 Step 192
+- Added helper `getSupabaseEnv` and updated Node scripts and public API routes to support generic `SUPABASE_URL` and `SUPABASE_ANON_KEY` environment variables.
+- Updated example env files and README to document the alternative variables.
+- Logging in `Layout` and `Sidebar` now only occurs in development mode.
+- Added ESLint exceptions to silence React Refresh warnings.
+- New tests verify fallback to generic Supabase variables across scripts and API.
+- Ran `npm run lint` and `npm test` successfully after the changes.
+
+
+## 2025-07-01 Step 193
+- Added test verifying supabase.js uses generic SUPABASE_URL and SUPABASE_ANON_KEY when Vite variables are absent.
+- npm run lint and npm test both succeed after adding the new test.
+
+## 2025-07-01 Step 194
+- Added tests for getSupabaseEnv ensuring fallback to generic SUPABASE_URL and SUPABASE_ANON_KEY and error when missing.
+- npm run lint and npm test pass after adding the tests.
+## 2025-07-01 Step 195
+- lib/supabase now throws when credentials are missing, matching Node helper
+- Added corresponding test supabase_env to ensure the error is raised
+- npm run lint and npm test succeed
+
+## 2025-07-01 Step 196
+- weekly_report script now accepts MAMA_ID via env and passes it to Supabase RPC
+- Example env files document MAMA_ID variable
+- README documents filtering Node scripts by MAMA_ID
+- Added test verifying MAMA_ID is forwarded by weekly_report
+- `npm run lint` and `npm test` pass after changes
+
+## 2025-07-01 Step 197
+- Node scripts now accept an optional `mamaId` CLI argument overriding the `MAMA_ID` env
+- Tests verify the new parameter for weekly_report, backup_db and export_accounting
+- README documents the additional command arguments
+- `npm run lint` and `npm test` succeed
+
+## 2025-07-01 Step 198
+- `reallocate_history.js` now accepts an optional `mamaId` argument and reads `MAMA_ID`
+  from the environment
+- Movements are filtered by `mama_id` when provided and the CLI supports a limit
+  argument
+- README updated with usage details, and tests ensure filtering works
+- `npm run lint` and `npm test` pass after the update
+
+## 2025-07-01 Step 199
+- Node scripts now accept optional Supabase credentials as additional command arguments
+- README documents the new `[SUPABASE_URL] [SUPABASE_KEY]` parameters
+- Tests updated to verify explicit credential handling
+- `npm run lint` and `npm test` succeed after changes
+
+## 2025-07-01 Step 200
+- Introduced `getSupabaseClient` helper to create a Supabase client from either explicit credentials or environment variables
+- Updated API routes and Node scripts to use this helper
+- Added unit tests for the new helper
+- `npm run lint` and `npm test` pass after refactoring
+
+## 2025-07-01 Step 201
+- `getSupabaseClient` now merges CLI parameters with environment variables
+  when only one of them is provided
+- README documents the new partial override behavior
+- Added test verifying this mixing of credentials
+- `npm run lint` and `npm test` still pass
+
+## 2025-07-01 Step 202
+- Resolved intermittent failure in router test by resetting mocked auth state
+  before each test
+- All tests pass consistently
+- `npm run lint` and `npm test` succeed
+
+## 2025-07-01 Step 203
+- Added documentation file `docs/sdk_usage.md` describing how to authenticate when using `MamaStockSDK`
+- README links to this new guide for additional examples
+- `npm run lint` and `npm test` continue to pass
+
+## 2025-07-01 Step 204
+- Node scripts print a usage message when run with `--help`
+- README mentions the new help option
+- Added `cli_help.test.js` covering all scripts
+- `npm run lint` and `npm test` pass
+
+## 2025-07-01 Step 205
+- CLI scripts detect `--help` or `-h` anywhere in the argument list
+- Extended tests verify the help flag works regardless of position
+- README clarifies that help flags can appear in any position
+- `npm run lint` and `npm test` succeed
+
+## 2025-07-01 Step 206
+- Created `scripts/cli_utils.js` with a reusable `shouldShowHelp` helper
+- All Node scripts use this function to detect help flags
+- Added `cli_utils.test.js` covering the new helper
+- `npm run lint` and `npm test` continue to pass
+
+## 2025-07-01 Step 207
+- Introduced `runScript` helper to standardize Node CLI entrypoints
+- Scripts now call `runScript` instead of duplicating argument handling
+- Extended `cli_utils.test.js` to cover this new helper
+- README mentions `runScript`
+- `npm run lint` and `npm test` pass
+## 2025-07-01 Step 208
+- Added isMainModule helper to reliably detect when a Node script is run directly
+- Node scripts now use this function instead of comparing paths manually
+- Updated tests to cover isMainModule and modified script imports
+- npm run lint and npm test pass
+
+## 2025-07-01 Step 209
+- Added `--version` flag handling to the `runScript` helper
+- All CLI scripts print the package version when invoked with `-v` or `--version`
+- Documented the new option in README
+- Created `cli_version.test.js` and extended unit tests for the new utilities
+- `npm run lint` and `npm test` pass
+
+## 2025-07-01 Step 210
+- Added `--env-file` (`-e`) option to `runScript` for loading environment variables
+  from a specified file before parsing other arguments
+- Documented the new option in README
+- Extended `cli_utils.test.js` with a unit test checking that variables from the
+  file are loaded
+- `npm run lint` and `npm test` pass
+
+## 2025-07-01 Step 211
+- `runScript` now loads `.env` automatically when present
+- README documents the implicit `.env` loading behavior
+- Added a unit test verifying auto `.env` support in `runScript`
+- `npm run lint` and `npm test` pass
+
+## 2025-07-01 Step 212
+- `runScript` also loads `.env.local` after `.env` if it exists
+- README notes the additional override file
+- Added a unit test ensuring `.env.local` overrides variables from `.env`
+- `npm run lint` and `npm test` pass
+
+## 2025-07-01 Step 213
+- `runScript` can now load a custom env file pointed by `ENV_FILE`
+- README and env examples mention the variable
+- Added a unit test for this behavior in `cli_utils.test.js`
+- `npm run lint` and `npm test` pass
+
+## 2025-07-01 Step 214
+- `runScript` falls back to `.env` and `.env.local` in the script directory when not found in the current working directory
+- README documents this additional search location
+- Added a unit test checking env files relative to `scriptPath`
+- `npm run lint` and `npm test` pass
+
+## 2025-07-01 Step 215
+- Added `--dry-run` flag to `reallocate_history.js` to preview allocations without modifying the database
+- README documents the new option
+- Updated tests to verify dry-run skips inserts
+- `npm run lint` and `npm test` pass
+
+## 2025-07-01 Step 216
+- `weekly_report.js` accepts `--start` and `--end` to set a custom date range
+- README explains the new options
+- Added a unit test covering the date range parameters
+- `npm run lint` and `npm test` pass
+
+
+## 2025-07-01 Step 217
+- weekly_report.js and export_accounting.js support --output to choose the file name
+- Updated README with the new option
+- Added unit tests covering custom output paths
+- `npm run lint` and `npm test` pass
+
+## 2025-07-01 Step 218
+- backup_db.js supports --output/-o and returns the file name
+- README documents the new option
+- `npm run lint` and `npm test` pass
+
+## 2025-07-01 Step 219
+- Documented the `-d` alias for the `--dry-run` option in `reallocate_history.js`
+- Added a unit test ensuring the CLI parser recognises `-d`
+- `npm run lint` and `npm test` pass
+
+## 2025-07-01 Step 220
+- `fetchData` in the SDK now retries up to three times on 429/503 errors
+- README and `docs/sdk_usage.md` mention the automatic retry behaviour
+- Added `sdk_rate_limit.test.js` validating the retry logic
+- `npm run lint` and `npm test` pass
+
+## 2025-07-01 Step 221
+- Added `retryAttempts` option to `MamaStockSDK` to configure automatic retries
+- Updated documentation to explain customisation of retry count
+- New unit test covers the option behaviour
+- `npm run lint` and `npm test` pass
+
+## 2025-07-01 Step 222
+- Added `retryDelayMs` option to `MamaStockSDK` to control wait time between retries
+- Documentation updated to describe custom delay and per-call override
+- New unit test verifies `handleRateLimit` receives the configured delay
+- `npm run lint` and `npm test` pass
+
+## 2025-07-01 Step 223
+- `MamaStockSDK` accepts a `fetch` option for custom implementations
+- README and sdk_usage docs mention injecting a fetch function
+- Unit test covers using a custom fetch when calling the SDK
+- `npm run lint` and `npm test` pass
+
+## 2025-07-01 Step 224
+- Added `timeoutMs` option to `MamaStockSDK` to abort slow requests
+- README and SDK usage guide explain the new timeout feature
+- New unit test verifies the request is aborted when exceeding the timeout
+- `npm run lint` and `npm test` pass
+
+## 2025-07-01 Step 225
+- Introduced `parseOutputFlag` helper to extract `--output`/`-o` options
+- Backup, export and weekly report scripts use the new parser
+- README documents the helper alongside `runScript`
+- Added unit tests for `parseOutputFlag`
+- `npm run lint` and `npm test` pass
+
+## 2025-07-01 Step 226
+- Added parseDateRangeFlags helper to parse --start and --end options for scripts
+- weekly_report.js now uses this shared parser
+- README documents parseDateRangeFlags in the CLI utilities section
+- Tests cover the new helper
+- npm run lint and npm test pass
+
+## 2025-07-02 Step 227
+- Added parseDryRunFlag helper to detect `--dry-run`/`-d` options
+- reallocate_history.js now uses parseDryRunFlag for argument parsing
+- README mentions the new helper in the CLI utilities section
+- Unit tests added for parseDryRunFlag and updated CLI parsing logic
+- `npm run lint` and `npm test` pass
+
+## 2025-07-02 Step 228
+- Introduced `parseMamaIdFlag` to read `--mama-id`/`-m` values
+- All CLI scripts can now specify the establishment id via this flag
+- README updated with the new option and usage examples
+- Added comprehensive tests for the parser and script integrations
+- `npm run lint` and `npm test` pass
+
+## 2025-07-02 Step 229
+- Added `parseSupabaseFlags` to read `--url`/`-u` and `--key`/`-k` arguments
+- CLI scripts now support these flags as alternatives to positional credentials
+- Updated README with flag usage examples and helper documentation
+- Tests verify parsing logic and integration with each script
+- `npm run lint` and `npm test` pass
+
+## 2025-07-02 Step 230
+- Introduced `parseLimitFlag` to read `--limit` or `-l`
+- `reallocate_history.js` uses this flag to override the positional limit
+- README documents the new option and helper
+- Added tests for `parseLimitFlag` and updated script parsing tests
+- `npm run lint` and `npm test` pass
+
+
+
+## 2025-07-02 Step 231
+- Added `parseFormatFlag` to read `--format`/`-f` arguments
+- Weekly report script can now output CSV when `--format csv` is specified
+- Moved `toCsv` utility to `cli_utils.js` for reuse and updated accounting export
+- README documents the new option and helper
+- `npm run lint` and `npm test` pass
+
+## 2025-07-02 Step 232
+- `export_accounting.js` now accepts `--format csv|xlsx` like the weekly report
+- README updated with the new option
+- Tests cover CSV and Excel export modes and parsing via runScript
+- `npm run lint` and `npm test` pass
+
+## 2025-07-02 Step 233
+- `getSupabaseClient` now caches clients per credential pair to avoid
+  redundant connections
+- README mentions the caching behavior
+- Added tests verifying the cache and updated existing ones
+- `npm run lint` and `npm test` pass
+
+## 2025-07-02 Step 234
+- `getSupabaseEnv` prefers `SUPABASE_SERVICE_ROLE_KEY` when defined
+- Example env files list this variable for API/CLI usage
+- README documents the service role key support
+- Added unit test covering the new variable
+- `npm run lint` and `npm test` pass
+
+## 2025-07-02 Step 235
+- `backup_db.js` now accepts `--tables`/`-t` to export selected tables
+- Added `parseTablesFlag` in `cli_utils.js` and documented it
+- README updated with the new option
+- Tests cover the new flag and custom table list
+- `npm run lint` and `npm test` pass
+
+## 2025-07-02 Step 236
+- Added tests for `loadEnvFile` verifying variables load and override correctly
+- README lists `loadEnvFile` among CLI helpers
+- `npm run lint` and `npm test` pass
+
+## 2025-07-02 Step 237
+- SDK accepts a `mamaId` option applied to all requests
+- Docs now show the `token` option and default `mamaId`
+- Added test ensuring `getProduits` uses the SDK-level id
+- `npm run lint` and `npm test` pass
+
+
+## 2025-07-02 Step 238
+- `loadEnvFile` now parses `export` prefixes, quoted values and ignores comments after unquoted assignments
+- README documents the extended syntax
+- Added tests covering quoted values and inline comments
+- `npm run lint` and `npm test` pass
+
+## 2025-07-02 Step 239
+- `MamaStockSDK` reads `MAMASTOCK_BASE_URL` when `baseUrl` is not provided
+- Example env files include this variable
+- README and SDK guide explain the fallback
+- Added tests verifying the environment-based base URL
+- `npm run lint` and `npm test` pass
+
+## 2025-07-02 Step 240
+- `loadEnvFile` now expands `$VAR` and `${VAR}` using existing environment values
+- README documents variable expansion in env files
+- Added unit test covering the feature
+- `npm run lint` and `npm test` pass
+
+## 2025-07-02 Step 241
+- `fetchData` now increases the delay after each retry for better backoff
+- README updated to mention the growing wait time
+- Added test checking consecutive delays in `sdk_rate_limit`
+- `npm run lint` and `npm test` pass
+
+## 2025-07-02 Step 242
+- `MamaStockSDK` now includes a `userAgent` option and sends the value as a
+  `User-Agent` header
+- README documents the `userAgent` setting
+- Updated header tests to verify the default value
+- `npm run lint` and `npm test` pass
+
+
+## 2025-07-02 Step 243
+- `MamaStockSDK` reads `MAMASTOCK_USER_AGENT` when no userAgent option is given
+- Example env files include this variable
+- README updated to document the setting
+- Added unit test verifying the header
+- `npm run lint` and `npm test` pass
+
+## 2025-07-02 Step 244
+- `MamaStockSDK` now loads `apiKey` and `token` from `MAMASTOCK_API_KEY` and
+  `MAMASTOCK_TOKEN` when options are omitted
+- Example env files document these credentials
+- README and docs mention the new variables
+- Added unit test covering environment-based authentication
+- `npm run lint` and `npm test` pass
+
+## 2025-07-02 Step 245
+- `MamaStockSDK` reads `MAMASTOCK_RETRY_ATTEMPTS` and `MAMASTOCK_RETRY_DELAY_MS`
+  when `retryAttempts` or `retryDelayMs` options are missing
+- Example env files show the new variables
+- README and docs document these defaults
+- New unit test verifies environment-based retry configuration
+- `npm run lint` and `npm test` pass
+
+## 2025-07-02 Step 246
+- `MamaStockSDK` reads `MAMASTOCK_TIMEOUT_MS` when `timeoutMs` is omitted
+- Example env files and README document the variable
+- docs updated to mention the environment fallback for timeouts
+- Added unit test verifying `timeoutMs` from the environment
+- `npm run lint` and `npm test` pass
+
+## 2025-07-02 Step 247
+- `MamaStockSDK` reads `MAMASTOCK_MAMA_ID` when `mamaId` is omitted
+- Example env files include the new variable
+- README and docs mention the fallback
+- Added unit test verifying `mamaId` from the environment
+- `npm run lint` and `npm test` pass
+
+## 2025-07-02 Step 248
+- `backup_db.js` reads `BACKUP_TABLES` to choose default tables when `--tables` is missing
+- Example env files document the variable
+- README explains using `BACKUP_TABLES` to change the default list
+- Added unit test covering the env-based table selection
+- `npm run lint` and `npm test` pass
+
+## 2025-07-02 Step 249
+- `export_accounting.js` reads `ACCOUNTING_FORMAT` when no `--format` flag is provided
+- `weekly_report.js` reads `WEEKLY_REPORT_FORMAT` when no `--format` flag is provided
+- Example env files document these variables
+- README explains using them to override the default format
+- Added unit tests for both scripts verifying the env-based default
+- `npm run lint` and `npm test` pass
+
+## 2025-07-02 Step 250
+- `reallocate_history.js` reads `REALLOCATE_LIMIT` when the limit argument is omitted
+- Example env files document the variable
+- README explains using `REALLOCATE_LIMIT` to change the default limit
+- Added unit tests verifying the env-based limit
+- `npm run lint` and `npm test` pass
+
+## 2025-07-02 Step 251
+- `backup_db.js` writes backups to `BACKUP_DIR` when no output file is provided
+- Example env files document this variable
+- README explains the default directory behaviour
+- Added unit test verifying `BACKUP_DIR` usage
+- `npm run lint` and `npm test` pass
+
+## 2025-07-02 Step 252
+- `export_accounting.js` writes exports to `ACCOUNTING_DIR` when no output is given
+- `weekly_report.js` writes reports to `REPORT_DIR` by default
+- Example env files document both variables
+- README explains the new default directories
+- Added unit tests for these behaviours
+- `npm run lint` and `npm test` pass
+
+## 2025-07-02 Step 253
+- Default directories are created automatically for backups and reports
+- New helper `ensureDirForFile` manages directory creation
+- Tests verify that each script invokes `mkdirSync`
+- README notes the directories are created when missing
+- `npm run lint` and `npm test` pass
+
+## 2025-07-02 Step 254
+- Both report scripts now support `--format json` and environment variables `ACCOUNTING_FORMAT` and `WEEKLY_REPORT_FORMAT` accept `json`
+- Example env files document the new option
+- README updated with usage instructions
+- Added unit tests covering JSON output
+- `npm run lint` and `npm test` pass
+
+## 2025-07-02 Step 255
+- `generateWeeklyCostCenterReport` now returns the output filename for easier scripting
+- Tests cover the returned value when using the default and custom paths
+- `npm run lint` and `npm test` pass
+
+
+\n## 2025-07-02 Step 256
+- Backup script now supports gzip compression via --gzip flag or BACKUP_GZIP variable
+- Added parseGzipFlag helper and updated README/env examples accordingly
+- Tests verify gzip option and env variable
+- npm run lint and npm test pass
+\n## 2025-07-02 Step 257
+- `backup_db.js` fetches tables concurrently for faster exports
+- README notes the improved performance
+- `npm run lint` and `npm test` pass
+
+## 2025-07-02 Step 258
+- backup script optionally pretty prints JSON via --pretty or BACKUP_PRETTY
+- added parsePrettyFlag helper and documented in README
+- example env files list BACKUP_PRETTY
+- npm run lint and npm test pass
+\n## 2025-07-02 Step 259
+- fetchData accepts an AbortSignal parameter to manually cancel requests
+- README and SDK usage docs mention the new argument
+- lint and tests pass
+\n## 2025-07-02 Step 260
+- backup script accepts `--concurrency` flag and `BACKUP_CONCURRENCY` env variable
+- README documents the option and default examples
+- CLI utilities expose new `parseConcurrencyFlag`
+- tests updated for the flag and environment variable
+- `npm run lint` and `npm test` pass
+\n## 2025-07-02 Step 261\n- parseConcurrencyFlag now validates positive integers\n- backup_db ignores invalid BACKUP_CONCURRENCY values\n- README clarifies that non-positive values disable the limit\n- npm run lint and npm test pass
+\n## 2025-07-02 Step 262\n- parseLimitFlag now requires positive integers\n- reallocate_history ignores invalid REALLOCATE_LIMIT and --limit values\n- README documents this requirement\n- npm run lint and npm test pass
+
+## 2025-07-02 Step 263
+- SDK validates numeric env variables for retry and timeout
+- Invalid MAMASTOCK_RETRY_ATTEMPTS, MAMASTOCK_RETRY_DELAY_MS or MAMASTOCK_TIMEOUT_MS fall back to defaults
+- README and env examples document the positive integer requirement
+- npm run lint and npm test pass
+
+## 2025-07-02 Step 264
+- SDK rejects a base URL that doesn't start with http or https
+- README clarifies the requirement and env examples mention it
+- npm run lint and npm test pass
+
+## 2025-07-02 Step 265
+- CLI flag parsers accept `--name=value` and `-n=value`
+- README documents the new syntax
+- Added tests covering the equals form for each parser
+- npm run lint and npm test pass
+
+## 2025-07-02 Step 266
+- parseFormatFlag validates csv|xlsx|json values and ignores others
+- README notes invalid formats are ignored
+- New test covers invalid format case
+- npm run lint and npm test pass
+
+## 2025-07-02 Step 267
+- parseTablesFlag now removes duplicate names while preserving order
+- README notes duplicates are ignored in the --tables list
+- Added a unit test covering the deduplication logic
+- npm run lint and npm test pass
+
+## 2025-07-02 Step 268
+- Added `@eslint/js` to devDependencies so ESLint works without additional setup
+- npm run lint and npm test pass

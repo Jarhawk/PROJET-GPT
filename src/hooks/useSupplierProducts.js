@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
@@ -18,9 +19,9 @@ export function useSupplierProducts() {
       setLoading(true);
       setError(null);
       const { data, error } = await supabase
-        .from("supplier_products")
+        .from("fournisseur_produits")
         .select(
-          "*, product:products(nom, famille, unite), achats:factures(date_facture:date, numero_facture:reference, montant_total:montant)"
+        "*, produit:produits(nom, famille, unite), achats:factures(date_facture:date, numero_facture:reference, montant_total:total_ttc)"
         )
         .eq("fournisseur_id", fournisseur_id)
         .eq("mama_id", mama_id);
@@ -37,9 +38,9 @@ export function useSupplierProducts() {
     if (!mama_id || !fournisseur_id) return [];
     if (cache[fournisseur_id]) return cache[fournisseur_id];
     const { data } = await supabase
-      .from("supplier_products")
+      .from("fournisseur_produits")
       .select(
-        "*, product:products(nom, famille, unite), achats:factures(date_facture:date, numero_facture:reference, montant_total:montant)"
+        "*, produit:produits(nom, famille, unite), achats:factures(date_facture:date, numero_facture:reference, montant_total:total_ttc)"
       )
       .eq("fournisseur_id", fournisseur_id)
       .eq("mama_id", mama_id);
@@ -47,5 +48,15 @@ export function useSupplierProducts() {
     return data || [];
   }
 
-  return { useProductsBySupplier, getProductsBySupplier };
+  async function countProductsBySupplier(fournisseur_id) {
+    if (!mama_id || !fournisseur_id) return 0;
+    const { count } = await supabase
+      .from("fournisseur_produits")
+      .select("id", { count: "exact", head: true })
+      .eq("fournisseur_id", fournisseur_id)
+      .eq("mama_id", mama_id);
+    return count || 0;
+  }
+
+  return { useProductsBySupplier, getProductsBySupplier, countProductsBySupplier };
 }

@@ -1,7 +1,10 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
+import PageWrapper from "@/components/ui/PageWrapper";
+import GlassCard from "@/components/ui/GlassCard";
 
 export default function Logout() {
   const navigate = useNavigate();
@@ -11,5 +14,9 @@ export default function Logout() {
       navigate("/login");
     });
   }, [navigate]);
-  return <div className="p-8 text-center">Déconnexion…</div>;
+  return (
+    <PageWrapper>
+      <GlassCard className="text-center">Déconnexion…</GlassCard>
+    </PageWrapper>
+  );
 }

@@ -1,9 +1,12 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function InviteUser({ onClose, onInvited }) {
+  const { role, mama_id: myMama, user_id } = useAuth();
   const [mamas, setMamas] = useState([]);
   const [roles, setRoles] = useState([]);
   const [values, setValues] = useState({
@@ -14,9 +17,33 @@ export default function InviteUser({ onClose, onInvited }) {
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
-    supabase.from("mamas").select("*").then(({ data }) => setMamas(data || []));
-    supabase.from("roles").select("*").then(({ data }) => setRoles(data || []));
-  }, []);
+    async function fetchData() {
+      if (!user_id) return;
+
+      if (role === "superadmin") {
+        const { data: mData } = await supabase
+          .from("mamas")
+          .select("id, nom, ville")
+          .order("nom");
+        setMamas(mData || []);
+      } else if (myMama) {
+        const { data: mData } = await supabase
+          .from("mamas")
+          .select("id, nom, ville")
+          .eq("id", myMama)
+          .maybeSingle();
+        setMamas(mData ? [mData] : []);
+      }
+
+      let query = supabase.from("roles").select("*");
+      if (role !== "superadmin") query = query.eq("mama_id", myMama);
+      query = query.eq("actif", true);
+      const { data: rData } = await query.order("nom", { ascending: true });
+      setRoles(rData || []);
+    }
+
+    fetchData();
+  }, [role, user_id, myMama]);
 
   const handleChange = e =>
     setValues(v => ({ ...v, [e.target.name]: e.target.value }));

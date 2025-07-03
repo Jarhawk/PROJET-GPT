@@ -1,6 +1,12 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@radix-ui/react-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from "@radix-ui/react-dialog";
 import { AnimatePresence, motion as Motion } from "framer-motion";
 import toast from "react-hot-toast";
 
@@ -90,9 +96,12 @@ export default function MouvementFormModal({
               <span className="absolute -bottom-14 -right-20 w-60 h-40 bg-[#0f1c2e]/20 blur-2xl rounded-full z-0 opacity-40 animate-pulse" />
 
               <form onSubmit={handleSubmit} className="relative z-10 flex flex-col gap-4 p-8 min-w-[330px]">
-                <h2 className="text-2xl font-bold text-mamastockGold drop-shadow mb-1 text-center">
+                <DialogTitle className="text-2xl font-bold text-mamastockGold drop-shadow mb-1 text-center">
                   {editMode ? "Éditer le mouvement" : "Nouveau mouvement"}
-                </h2>
+                </DialogTitle>
+                <DialogDescription className="sr-only">
+                  Formulaire de mouvement de stock
+                </DialogDescription>
                 {/* Produit */}
                 <div>
                   <label className="block font-semibold mb-1">

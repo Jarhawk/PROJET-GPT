@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
@@ -29,31 +30,58 @@ export function useFichesTechniques() {
   }
 
   async function addFicheTechnique(ft) {
+    if (!mama_id) return { error: "Aucun mama_id" };
+    setLoading(true);
+    setError(null);
     const { error } = await supabase
       .from("fiches_techniques")
       .insert([{ ...ft, mama_id }]);
-    if (error) throw error;
+    if (error) {
+      setLoading(false);
+      setError(error);
+      throw error;
+    }
     await fetchFichesTechniques();
+    setLoading(false);
+    return { data: true };
   }
 
   async function updateFicheTechnique(id, updateFields) {
+    if (!mama_id) return { error: "Aucun mama_id" };
+    setLoading(true);
+    setError(null);
     const { error } = await supabase
       .from("fiches_techniques")
       .update(updateFields)
       .eq("id", id)
       .eq("mama_id", mama_id);
-    if (error) throw error;
+    if (error) {
+      setLoading(false);
+      setError(error);
+      throw error;
+    }
     await fetchFichesTechniques();
+    setLoading(false);
+    return { data: id };
   }
 
   async function deleteFicheTechnique(id) {
+    if (!mama_id) return { error: "Aucun mama_id" };
+    setLoading(true);
+    setError(null);
     const { error } = await supabase
       .from("fiches_techniques")
       .update({ actif: false })
       .eq("id", id)
       .eq("mama_id", mama_id);
-    if (error) throw error;
+    if (error) {
+      setLoading(false);
+      setError(error);
+      throw error;
+    }
     await fetchFichesTechniques();
+    setLoading(false);
+    return { data: id };
   }
 
   return {

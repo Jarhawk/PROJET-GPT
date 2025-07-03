@@ -1,11 +1,14 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { useFournisseurApiConfig } from "@/hooks/useFournisseurApiConfig";
 
 export default function FournisseurApiSettingsForm({ fournisseur_id }) {
   const { mama_id } = useAuth();
+  const { fetchConfig, saveConfig } = useFournisseurApiConfig();
   const [config, setConfig] = useState({
     url: "",
     type_api: "rest",
@@ -18,17 +21,11 @@ export default function FournisseurApiSettingsForm({ fournisseur_id }) {
 
   useEffect(() => {
     if (!mama_id || !fournisseur_id) return;
-    supabase
-      .from("fournisseurs_api_config")
-      .select("*")
-      .eq("mama_id", mama_id)
-      .eq("fournisseur_id", fournisseur_id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data) setConfig(c => ({ ...c, ...data }));
-        setLoading(false);
-      });
-  }, [mama_id, fournisseur_id]);
+    fetchConfig(fournisseur_id).then(data => {
+      if (data) setConfig(c => ({ ...c, ...data }));
+      setLoading(false);
+    });
+  }, [mama_id, fournisseur_id, fetchConfig]);
 
   const handleChange = e => {
     const { name, value, type, checked } = e.target;
@@ -40,14 +37,10 @@ export default function FournisseurApiSettingsForm({ fournisseur_id }) {
     if (!mama_id || !fournisseur_id || saving) return;
     try {
       setSaving(true);
-      const { data, error } = await supabase
-        .from("fournisseurs_api_config")
-        .upsert([{ ...config, fournisseur_id, mama_id }], { onConflict: "fournisseur_id" })
-        .select()
-        .single();
+      const { data, error } = await saveConfig(fournisseur_id, config);
       if (error) throw error;
       toast.success("Configuration sauvegardée");
-      setConfig(data);
+      if (data) setConfig(data);
     } catch (err) {
       toast.error(err.message || "Erreur lors de la sauvegarde");
     } finally {
@@ -55,7 +48,7 @@ export default function FournisseurApiSettingsForm({ fournisseur_id }) {
     }
   };
 
-  if (loading) return <div className="p-4">Chargement...</div>;
+  if (loading) return <LoadingSpinner message="Chargement..." />;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 p-4 text-sm">

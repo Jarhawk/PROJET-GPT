@@ -1,237 +1,162 @@
-// src/context/AuthContext.jsx
-
-import { createContext, useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { authenticator } from "otplib";
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
+import { login as loginUser } from "@/lib/loginUser";
 import toast from "react-hot-toast";
 
-// Contexte global Auth
-// Exported separately for hooks like src/hooks/useAuth.js
 // eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [session, setSession] = useState(null); // Session Supabase
-  const [userData, setUserData] = useState({
-    role: null,
-    mama_id: null,
-    access_rights: [],
-    auth_id: null,
-    actif: true,
-    user_id: null,
-  });
-  const [loading, setLoading] = useState(true); // Chargement initial/refresh
-  const [pending, setPending] = useState(false); // ligne utilisateurs manquante
+  const [session, setSession] = useState(null);
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const lastUserIdRef = useRef(null);
+  const fetchingRef = useRef(false);
 
-  async function refreshUser(sessionParam) {
-    const current = sessionParam || session;
-    if (current) await fetchUserData(current);
-  }
-
-  // Login utilisateur avec gestion 2FA
-  const login = async ({ email, password, totp }) => {
-    let authData;
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error) throw error;
-      authData = data;
-    } catch (err) {
-      if (err?.message) toast.error(err.message);
-      if (err?.status === 500) toast.error("Erreur serveur Supabase (500)");
-      return { error: err?.message || "Erreur" };
-    }
-    const { session: newSession, user } = authData;
-    const { data: twoFA } = await supabase
-      .from("two_factor_auth")
-      .select("secret, enabled")
-      .eq("id", user.id)
-      .single();
-
-    if (twoFA?.enabled) {
-      if (!totp || !authenticator.check(totp, twoFA.secret)) {
-        await supabase.auth.signOut();
-        return { error: "Code 2FA invalide", twofaRequired: true };
-      }
-    }
-
-    setSession(newSession);
-    await fetchUserData(newSession);
-    return { data: newSession };
-  };
-
-  // Création de compte
-  const signup = async ({ email, password }) => {
-    try {
-      const { data, error } = await supabase.auth.signUp({ email, password });
-      if (error) throw error;
-      if (data.session) {
-        setSession(data.session);
-        await fetchUserData(data.session);
-      }
-      return { data };
-    } catch (err) {
-      toast.error(err?.message || "Erreur");
-      return { error: err?.message || "Erreur" };
-    }
-  };
-
-  async function fetchUserData(session) {
-    if (!session?.user) {
-      setUserData({
-        role: null,
-        mama_id: null,
-        access_rights: [],
-        auth_id: null,
-        actif: true,
-        user_id: null,
-      });
-      setPending(false);
-      return;
-    }
-
-    const meta = session.user.user_metadata || {};
-    const { data, error, status } = await supabase
+  async function fetchUserData(userId) {
+    if (fetchingRef.current && lastUserIdRef.current === userId) return;
+    fetchingRef.current = true;
+    if (import.meta.env.DEV) console.log("fetchUserData", userId);
+    const { data, error } = await supabase
       .from("utilisateurs")
       .select("role, mama_id, access_rights, actif")
-      .eq("auth_id", session.user.id)
+      .eq("auth_id", userId)
       .maybeSingle();
 
-    if (error && status !== 406) {
-      if (status === 400) navigate("/unauthorized");
-      toast.error(error.message);
+    if (error) {
+      console.error("Erreur récupération utilisateur:", error);
+      toast.error(error.message || "Erreur récupération utilisateur");
+      setError(error.message || "Erreur inconnue");
+      setUserData(null);
+      fetchingRef.current = false;
       return;
     }
 
     if (!data) {
-      setPending(true);
-      setUserData({
-        role: meta.role ?? null,
-        mama_id: meta.mama_id ?? null,
-        access_rights: Array.isArray(meta.access_rights) ? meta.access_rights : null,
-        auth_id: session.user.id,
-        actif: true,
-        user_id: session.user.id,
-      });
+      setUserData(null);
+      if (pathname !== "/pending") navigate("/pending");
+      fetchingRef.current = false;
       return;
     }
 
-    setPending(false);
-
-    if (data && data.actif === false) {
-      await supabase.auth.signOut();
-      setSession(null);
-      setUserData({
-        role: null,
-        mama_id: null,
-        access_rights: [],
-        auth_id: session.user.id,
-        actif: false,
-        user_id: session.user.id,
-      });
-      window.location.href = "/blocked";
-      return;
-    }
-
-    setUserData({
-      role: data?.role ?? meta.role ?? null,
-      mama_id: data?.mama_id ?? meta.mama_id ?? null,
-      access_rights: Array.isArray(data?.access_rights)
-        ? data.access_rights
-        : Array.isArray(meta.access_rights)
-        ? meta.access_rights
-        : [],
-      auth_id: session.user.id,
-      actif: data?.actif ?? true,
-      user_id: session.user.id,
-    });
+    lastUserIdRef.current = userId;
+    setError(null);
+    setUserData({ ...data, auth_id: userId, user_id: userId });
+    fetchingRef.current = false;
   }
 
-  // Initialisation / listener session Supabase
+  async function loadSession() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (import.meta.env.DEV) console.log("loadSession", session?.user?.id);
+    setSession(session);
+    if (session?.user?.id) {
+      await fetchUserData(session.user.id);
+    } else {
+      setUserData(null);
+    }
+    setLoading(false);
+  }
+
   useEffect(() => {
-    setLoading(true);
-
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      if (session) await fetchUserData(session);
-      setLoading(false);
-    });
-
-    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setSession(session);
-      if (session) {
-        setLoading(true);
-        await fetchUserData(session);
-        setLoading(false);
+    loadSession();
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      if (import.meta.env.DEV) console.log("auth state change", newSession?.user?.id);
+      setSession(newSession);
+      if (newSession?.user?.id) {
+        fetchUserData(newSession.user.id);
       } else {
-        setUserData({
-          role: null,
-          mama_id: null,
-          access_rights: [],
-          auth_id: null,
-          actif: true,
-          user_id: null,
-        });
-        setPending(false);
+        setUserData(null);
       }
     });
-
-    const refreshInterval = setInterval(() => {
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session) setSession(session);
-      });
-    }, 1000 * 60 * 10);
-
-    return () => {
-      listener?.subscription?.unsubscribe();
-      clearInterval(refreshInterval);
-    };
+    return () => listener.subscription.unsubscribe();
   }, []);
 
-  // Déconnexion utilisateur
+  const login = async ({ email, password }) => {
+    const { data, error } = await loginUser(email, password);
+    if (error) {
+      toast.error(error.message || "Erreur");
+      return { error };
+    }
+    await loadSession();
+    return { data };
+  };
+
+  const signup = async ({ email, password }) => {
+    const { data, error } = await supabase.auth.signUp({ email, password });
+    if (error) {
+      toast.error(error.message || "Erreur");
+      return { error };
+    }
+
+    const user = data.user;
+    if (user) {
+      try {
+        const { data: mama } = await supabase
+          .from("mamas")
+          .select("id")
+          .order("created_at")
+          .limit(1)
+          .maybeSingle();
+        await supabase.from("utilisateurs").insert({
+          auth_id: user.id,
+          email: user.email,
+          mama_id: mama?.id,
+          role: "user",
+          access_rights: {},
+        });
+      } catch (e) {
+        console.error("Erreur création profil utilisateur:", e);
+      }
+    }
+
+    if (data.session) {
+      setSession(data.session);
+      if (data.session.user) await fetchUserData(data.session.user.id);
+    }
+    return { data };
+  };
+
   const logout = async () => {
     await supabase.auth.signOut();
     setSession(null);
-    setUserData({
-      role: null,
-      mama_id: null,
-      access_rights: [],
-      auth_id: null,
-      actif: true,
-      user_id: null,
-    });
-    setPending(false);
+    setUserData(null);
     navigate("/login");
   };
 
-  // Exporte le contexte
   const value = {
-    ...userData,
-    session,
+    userData,
+    /** Authenticated user object from Supabase */
     user: session?.user || null,
+    /** Convenience alias for `session?.user?.id` */
+    user_id: session?.user?.id ?? null,
+    /** Direct session object returned by Supabase */
+    session,
+    /** Authentication state */
     loading,
-    pending,
+    error,
+    /** Indicates the session is available but userData has not been fetched yet */
+    pending: !!session && !userData,
+    /** Selected fields from userData for easy access */
+    role: userData?.role,
+    mama_id: userData?.mama_id,
+    access_rights: userData?.access_rights,
     login,
     signup,
     logout,
-    refreshUser,
-    isAuthenticated: !!session,
-    isAdmin: userData.role === "admin" || userData.role === "superadmin",
-    isSuperadmin: userData.role === "superadmin",
+    /** Helpers */
+    isAuthenticated: !!session?.user?.id,
+    isAdmin: userData?.role === "admin" || userData?.role === "superadmin",
+    isSuperadmin: userData?.role === "superadmin",
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-// Hook d'accès au contexte Auth
 // eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   return useContext(AuthContext) || {};

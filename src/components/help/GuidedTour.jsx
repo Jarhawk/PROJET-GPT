@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import { motion as Motion, AnimatePresence } from "framer-motion";
 import { useHelp } from "@/context/HelpProvider";
@@ -35,7 +36,7 @@ export default function GuidedTour({ steps = [], module }) {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed z-50 bg-white text-black p-4 rounded shadow-xl"
+          className="fixed z-50 bg-glass border border-borderGlass backdrop-blur text-white p-4 rounded-xl shadow-xl"
           style={{ top: coords.top, left: coords.left }}
         >
           <p className="mb-2 text-sm">{step.content}</p>

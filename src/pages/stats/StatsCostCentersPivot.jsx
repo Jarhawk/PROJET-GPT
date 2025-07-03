@@ -1,8 +1,10 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import { useCostCenterMonthlyStats } from "@/hooks/useCostCenterMonthlyStats";
 import { useAuth } from "@/context/AuthContext";
 import { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
+import TableContainer from "@/components/ui/TableContainer";
 import * as XLSX from "xlsx";
 
 export default function StatsCostCentersPivot() {
@@ -44,7 +46,7 @@ export default function StatsCostCentersPivot() {
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold mb-4">Ventilation mensuelle par Cost Center</h1>
       <Button variant="outline" className="mb-2" onClick={exportExcel}>Export Excel</Button>
-      <div className="overflow-x-auto bg-white rounded-xl shadow-md">
+      <TableContainer className="mt-2">
         <table className="min-w-full text-xs">
           <thead>
             <tr>
@@ -73,7 +75,7 @@ export default function StatsCostCentersPivot() {
             )}
           </tbody>
         </table>
-      </div>
+      </TableContainer>
     </div>
   );
 }

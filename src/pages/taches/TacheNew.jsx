@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import TacheForm from "@/components/taches/TacheForm";
 
 export default function TacheNew() {

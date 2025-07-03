@@ -1,0 +1,43 @@
+View présent dans Supabase
+
+| view_name               | view_definition                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| v_cost_center_monthly   |  SELECT factures.mama_id,
+    date_trunc('month'::text, (factures.date)::timestamp with time zone) AS mois,
+    sum(factures.montant) AS total
+   FROM factures
+  GROUP BY factures.mama_id, (date_trunc('month'::text, (factures.date)::timestamp with time zone));                                                                                                                                                                                                                                                                 |
+| v_cost_center_totals    |  SELECT factures.mama_id,
+    sum(factures.montant) AS total
+   FROM factures
+  GROUP BY factures.mama_id;                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| v_fournisseurs_inactifs |  SELECT fournisseurs.id,
+    fournisseurs.mama_id,
+    fournisseurs.nom,
+    fournisseurs.ville,
+    fournisseurs.actif,
+    fournisseurs.created_at
+   FROM fournisseurs
+  WHERE (fournisseurs.actif IS FALSE);                                                                                                                                                                                                                                                                                                                     |
+| v_product_price_trend   |  SELECT fl.product_id,
+    date_trunc('month'::text, (f.date)::timestamp with time zone) AS mois,
+    avg(fl.prix_unitaire) AS prix_moyen
+   FROM (facture_lignes fl
+     JOIN factures f ON ((fl.facture_id = f.id)))
+  WHERE ((fl.actif IS TRUE) AND (f.actif IS TRUE))
+  GROUP BY fl.product_id, (date_trunc('month'::text, (f.date)::timestamp with time zone));                                                                                                                                                                 |
+| v_products_last_price   |  SELECT sp.product_id,
+    p.nom AS product_name,
+    p.famille,
+    p.unite,
+    sp.supplier_id,
+    s.nom AS supplier_name,
+    sp.prix_achat AS last_price,
+    sp.created_at,
+    p.mama_id
+   FROM ((supplier_products sp
+     JOIN products p ON ((sp.product_id = p.id)))
+     JOIN suppliers s ON ((sp.supplier_id = s.id)))
+  WHERE (sp.created_at = ( SELECT max(sp2.created_at) AS max
+           FROM supplier_products sp2
+          WHERE ((sp2.product_id = sp.product_id) AND (sp2.supplier_id = sp.supplier_id)))); |

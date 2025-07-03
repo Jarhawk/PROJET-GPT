@@ -1,8 +1,11 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import { useValidations } from "@/hooks/useValidations";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Toaster, toast } from "react-hot-toast";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import TableContainer from "@/components/ui/TableContainer";
 
 export default function Validations() {
   const { isAdmin, mama_id } = useAuth();
@@ -42,7 +45,7 @@ export default function Validations() {
 
   const { items, loading, error } = validations;
 
-  if (loading) return <div className="p-8">Chargement...</div>;
+  if (loading) return <LoadingSpinner message="Chargement..." />;
   if (error) return <div className="p-8 text-red-600">{error}</div>;
 
   return (
@@ -74,7 +77,8 @@ export default function Validations() {
           {saving ? "Envoi…" : "Demander"}
         </Button>
       </form>
-      <table className="min-w-full bg-white rounded-xl shadow-md">
+      <TableContainer className="mt-4">
+        <table className="min-w-full text-sm">
         <thead>
           <tr>
             <th className="px-2 py-1">Module</th>
@@ -102,7 +106,8 @@ export default function Validations() {
             </tr>
           ))}
         </tbody>
-      </table>
+        </table>
+      </TableContainer>
     </div>
   );
 }

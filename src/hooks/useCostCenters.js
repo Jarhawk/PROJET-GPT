@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
@@ -16,7 +17,7 @@ export function useCostCenters() {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
-    let query = supabase.from("cost_centers").select("*").eq("mama_id", mama_id);
+    let query = supabase.from("centres_de_cout").select("*").eq("mama_id", mama_id);
     if (search) query = query.ilike("nom", `%${search}%`);
     const { data, error } = await query.order("nom", { ascending: true });
     setCostCenters(Array.isArray(data) ? data : []);
@@ -30,7 +31,7 @@ export function useCostCenters() {
     setLoading(true);
     setError(null);
     const { error } = await supabase
-      .from("cost_centers")
+      .from("centres_de_cout")
       .insert([{ ...values, mama_id }]);
     if (error) setError(error);
     setLoading(false);
@@ -43,7 +44,7 @@ export function useCostCenters() {
     setLoading(true);
     setError(null);
     const { error } = await supabase
-      .from("cost_centers")
+      .from("centres_de_cout")
       .update(values)
       .eq("id", id)
       .eq("mama_id", mama_id);
@@ -58,7 +59,7 @@ export function useCostCenters() {
     setLoading(true);
     setError(null);
     const { error } = await supabase
-      .from("cost_centers")
+      .from("centres_de_cout")
       .update({ actif: false })
       .eq("id", id)
       .eq("mama_id", mama_id);
@@ -76,7 +77,7 @@ export function useCostCenters() {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "CostCenters");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([buf]), "cost_centers.xlsx");
+    saveAs(new Blob([buf]), "centres_de_cout.xlsx");
   }
 
   async function importCostCentersFromExcel(file) {

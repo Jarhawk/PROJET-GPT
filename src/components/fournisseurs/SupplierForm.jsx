@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
 import { useFournisseurs } from "@/hooks/useFournisseurs";
 import { Button } from "@/components/ui/button";
@@ -5,7 +6,7 @@ import toast from "react-hot-toast";
 import { motion as Motion } from "framer-motion";
 
 export default function SupplierForm({ supplier, onClose, glass }) {
-  const { addFournisseur, updateFournisseur } = useFournisseurs();
+  const { createFournisseur, updateFournisseur } = useFournisseurs();
   const [form, setForm] = useState({
     nom: supplier?.nom || "",
     ville: supplier?.ville || "",
@@ -33,7 +34,7 @@ export default function SupplierForm({ supplier, onClose, glass }) {
       if (supplier) {
         res = await updateFournisseur(supplier.id, form);
       } else {
-        res = await addFournisseur(form);
+        res = await createFournisseur(form);
       }
       if (res?.error) throw res.error;
       toast.success("Fournisseur sauvegardé");

@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import { useFactures } from "@/hooks/useFactures";
 import { useSuppliers } from "@/hooks/useSuppliers";
@@ -6,6 +7,7 @@ import FactureForm from "./FactureForm.jsx";
 import FactureDetail from "./FactureDetail.jsx";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
+import GlassCard from "@/components/ui/GlassCard";
 import { Toaster, toast } from "react-hot-toast";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
@@ -77,9 +79,9 @@ export default function Factures() {
   };
 
   return (
-    <div className="p-6 container mx-auto text-shadow">
+    <div className="p-6 container mx-auto text-shadow space-y-6">
       <Toaster position="top-right" />
-      <div className="flex flex-wrap gap-4 items-center mb-4">
+      <GlassCard className="flex flex-wrap gap-4 items-end">
         <input
           type="search"
           value={search}
@@ -107,7 +109,7 @@ export default function Factures() {
           Ajouter une facture
         </Button>
         <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
-      </div>
+      </GlassCard>
       <TableContainer className="mb-4">
         <Motion.table
           initial={{ opacity: 0 }}
@@ -130,7 +132,7 @@ export default function Factures() {
               <td className="border px-4 py-2">{facture.reference || facture.id}</td>
               <td className="border px-4 py-2">{facture.date}</td>
               <td className="border px-4 py-2">{facture.fournisseur?.nom}</td>
-              <td className="border px-4 py-2">{(facture.total_ttc || facture.montant)?.toFixed(2)} €</td>
+              <td className="border px-4 py-2">{facture.total_ttc?.toFixed(2)} €</td>
               <td className="border px-4 py-2">
                 <span className={STATUTS[facture.statut] || "badge"}>{facture.statut}</span>
               </td>

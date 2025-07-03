@@ -71,6 +71,11 @@
 - Fonctions : création complète avec lignes, clôture, export Excel, mouvements liés
 - Sécurité : vérification mama_id dans useInventaires
 - Dépendances : hook useInventaires, composants InventaireForm
+- Audit 2025-06-15 : navigation testée sur /inventaire, /inventaire/new et
+  /inventaire/:id. Filtres date et zone fonctionnent avec pagination 30
+  entrées. Nouveau helper fetchMouvementsInventaire pour l'historique et
+  validateInventaireStock pour contrôler la mise à jour des stocks après
+  clôture.
 
 === ✅ MODULE : Mouvements.jsx ===
 - Route : /mouvements
@@ -200,8 +205,8 @@ TwoFactorSetup.jsx : configuration de la double authentification
 - Route : /parametrage/utilisateurs
 - Objectif : gestion des comptes utilisateurs
 - Fonctions : recherche email, filtre actif/inactif, export Excel, activation/désactivation
-- Sécurité : hook useUsers applique RLS par mama_id (admins seulement)
-- Dépendances : useUsers, AuthContext
+ - Sécurité : hook useUtilisateurs applique RLS par mama_id (admins seulement)
+ - Dépendances : useUtilisateurs, AuthContext
 
 === ✅ MODULE : HelpCenter / AideContextuelle ===
 - Route : /aide
@@ -512,7 +517,7 @@ TwoFactorSetup.jsx : configuration de la double authentification
 - Liste : useAdvancedStats, useAlerts, useAuditLog, useAuditTrail, useCarte,
   useComparatif, useConsolidatedStats, useCostCenterMonthlyStats,
   useCostCenterStats, useCostCenterSuggestions, useCostCenters, useDashboard,
-  useDashboardStats, useDocuments, useEnrichedProducts, useFactureProduits,
+  useDashboardStats, useDocuments, useEnrichedProducts, useInvoiceItems,
   useFamilles, useFicheCoutHistory, useFiches, useFichesTechniques,
   useFournisseurNotes, useFournisseurStats, useFournisseurs,
   useFournisseursInactifs, useGlobalSearch, useGraphiquesMultiZone,
@@ -523,7 +528,7 @@ TwoFactorSetup.jsx : configuration de la double authentification
   useProducts, usePromotions, useReporting, useRequisitions, useRoles,
   useSignalements, useSimulation, useStats, useStock, useStorage,
   useSupplierProducts, useSuppliers, useSwipe, useTasks, useTopProducts,
-  useTwoFactorAuth, useUnites, useUsers, useUtilisateurs, useValidations
+  useTwoFactorAuth, useUnites, useUtilisateurs, useValidations
 - Tous appliquent le filtre `mama_id` et encapsulent les requêtes Supabase
 
 === 🎁 PRIORITÉS & SUGGESTIONS ===

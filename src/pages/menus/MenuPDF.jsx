@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
@@ -12,19 +13,16 @@ export default function MenuPDF({ id }) {
       if (!mama_id) return;
       const { data: menuData } = await supabase
         .from("menus")
-        .select("*")
+        .select(
+          "*, fiches:menu_fiches(fiche_id, fiche:fiches(id, nom, type, categorie))"
+        )
         .eq("id", id)
         .eq("mama_id", mama_id)
         .single();
 
       if (menuData) {
         setMenu(menuData);
-        const { data: fichesData } = await supabase
-          .from("fiches")
-          .select("*")
-          .in("id", menuData.fiches || [])
-          .eq("mama_id", mama_id);
-        setFiches(fichesData || []);
+        setFiches(menuData.fiches?.map(f => f.fiche) || []);
       }
     };
 

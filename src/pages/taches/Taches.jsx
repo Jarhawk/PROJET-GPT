@@ -1,7 +1,10 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTaches } from "@/hooks/useTaches";
 import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import TableContainer from "@/components/ui/TableContainer";
 
 export default function Taches() {
   const { taches, loading, error, getTaches } = useTaches();
@@ -17,7 +20,7 @@ export default function Taches() {
     <div className="p-6 text-sm">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Tâches planifiées</h1>
-        <Link to="/taches/new" className="bg-white/10 backdrop-blur-lg text-white font-semibold py-2 px-4 rounded-xl shadow-md hover:shadow-lg">Créer une tâche</Link>
+        <Link to="/taches/new" className="btn">Créer une tâche</Link>
       </div>
       <div className="flex gap-2 mb-4">
         <select name="type" value={filters.type} onChange={handleChange} className="input">
@@ -37,8 +40,9 @@ export default function Taches() {
         <input type="date" name="end" value={filters.end} onChange={handleChange} className="input" />
         <Button onClick={() => getTaches(filters)}>Filtrer</Button>
       </div>
-      {loading && <div>Chargement...</div>}
+      {loading && <LoadingSpinner message="Chargement..." />}
       {error && <div className="text-red-600">{error}</div>}
+      <TableContainer>
       <table className="min-w-full text-white">
         <thead>
           <tr>
@@ -64,6 +68,7 @@ export default function Taches() {
           )}
         </tbody>
       </table>
+      </TableContainer>
     </div>
   );
 }

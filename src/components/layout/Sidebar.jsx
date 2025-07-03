@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import MamaLogo from "@/components/ui/MamaLogo";
@@ -6,13 +7,13 @@ export default function Sidebar() {
   const { access_rights, role, loading } = useAuth();
   const { pathname } = useLocation();
 
-  if (loading) return null;
+  if (loading || access_rights === null) return null;
   const showAll = role === "superadmin";
-  const rights = Array.isArray(access_rights) ? access_rights : [];
-  const has = (key) => showAll || rights.includes(key);
+  const rights = typeof access_rights === "object" ? access_rights : {};
+  const has = (key) => showAll || rights[key];
 
   return (
-    <aside className="w-64 bg-white/5 backdrop-blur-xl text-white p-4 h-screen shadow-md text-shadow">
+    <aside className="w-64 bg-glass border border-white/10 backdrop-blur-xl text-white p-4 h-screen shadow-md text-shadow">
       <div className="mb-6">
         <MamaLogo width={140} />
       </div>

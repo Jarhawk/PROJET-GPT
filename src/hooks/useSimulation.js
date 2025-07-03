@@ -1,3 +1,4 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 // src/hooks/useSimulation.js
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
@@ -78,7 +79,7 @@ export const useSimulation = () => {
   async function proposerCommandes(consommationProjetee = []) {
     if (!mama_id) return [];
     const commandes = consommationProjetee.map((p) => ({
-      product_id: p.product_id,
+      produit_id: p.produit_id,
       quantite: p.quantite,
     }));
     return commandes;

@@ -1,0 +1,6 @@
+MamaStock © 2025 – Tous droits réservés
+Ce logiciel est la propriété exclusive de MamaStock. Toute reproduction, distribution, modification, même partielle, sans autorisation écrite préalable, est strictement interdite.
+Pour tout usage commercial ou acquisition de licence : contact@mamastock.com
+
+
+node tools/generate_license.js add "Gestion" "admin@mamastock.com" 2025-12-31  

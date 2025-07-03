@@ -1,7 +1,9 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { watermark } from '@/license';
 
 export function exportToPDF(data = [], config = {}) {
   const { filename = 'export.pdf', columns = [] } = config;
@@ -16,6 +18,9 @@ export function exportToPDF(data = [], config = {}) {
       : Object.values(item)
   );
   doc.autoTable({ head: headers, body: rows, styles: { fontSize: 9 } });
+  doc.setFontSize(10);
+  doc.setTextColor(150);
+  doc.text(watermark(import.meta.env.VITE_LICENSE_KEY), 10, doc.internal.pageSize.getHeight() - 10);
   doc.save(filename);
 }
 
@@ -38,6 +43,7 @@ export function exportToExcel(data = [], config = {}) {
   });
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.json_to_sheet(arr);
+  XLSX.utils.sheet_add_aoa(ws, [[watermark(import.meta.env.VITE_LICENSE_KEY)]], { origin: -1 });
   XLSX.utils.book_append_sheet(wb, ws, sheet);
   const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
   saveAs(new Blob([buf]), filename);
@@ -54,7 +60,7 @@ export function exportToCSV(data = [], config = {}) {
       ? columns.map((c) => item[c.key]).join(',')
       : Object.values(item).join(',')
   );
-  const csv = [header, ...rows].join('\n');
+  const csv = [header, ...rows, watermark(import.meta.env.VITE_LICENSE_KEY)].join('\n');
   saveAs(new Blob([csv], { type: 'text/csv;charset=utf-8;' }), filename);
 }
 

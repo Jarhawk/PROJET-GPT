@@ -23,6 +23,14 @@
       "expires": "2025-12-31",
       "key": "30d92a3530acaaf0e6bb4858bc53cef146b175d96e967d6432551ff12ec0cc35",
       "revoked": false
+    },
+    {
+      "id": "d29482c6-81ca-4ba5-997b-f78b83ab83dc",
+      "client": "PC test",
+      "email": "user@mamastock.com",
+      "expires": "2025-12-31",
+      "key": "8b431fe68abb7b9742d4846ec85fc8d1b0244f7a4cf40e08fdd08a55f36d1bfa",
+      "revoked": false
     }
   ]
 }

@@ -13,13 +13,16 @@
       "client": "Gestion",
       "email": "admin@mamastock.com",
       "expires": "2025-12-31",
-
       "key": "6c8706202f0663e8040a517658de8dbcb5d0f89b5d6a04eba58b6fe3796c3971",
+      "revoked": false
+    },
+    {
+      "id": "aedd10d7-8a68-4765-a24d-6c10a2f98883",
+      "client": "Pc Portable",
+      "email": "admin@mamastock.com",
+      "expires": "2025-12-31",
+      "key": "30d92a3530acaaf0e6bb4858bc53cef146b175d96e967d6432551ff12ec0cc35",
       "revoked": false
     }
   ]
-
 }
-
-
-

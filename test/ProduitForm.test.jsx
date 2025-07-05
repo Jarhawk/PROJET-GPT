@@ -18,6 +18,9 @@ vi.mock('@/hooks/useFamilles', () => ({
 vi.mock('@/hooks/useUnites', () => ({
   useUnites: () => ({ unites: [], fetchUnites: vi.fn(), addUnite: vi.fn() })
 }));
+vi.mock('@/hooks/useZones', () => ({
+  useZones: () => ({ zones: [], fetchZones: vi.fn() })
+}));
 vi.mock('@/hooks/useFournisseurs', () => ({
   useFournisseurs: () => ({ fournisseurs: [], fetchFournisseurs: vi.fn() })
 }));

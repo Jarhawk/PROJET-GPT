@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useFactures } from "@/hooks/useFactures";
 import { useProducts } from "@/hooks/useProducts";
+import { useFournisseursAutocomplete } from "@/hooks/useFournisseursAutocomplete";
 import { Button } from "@/components/ui/button";
 import GlassCard from "@/components/ui/GlassCard";
 import toast from "react-hot-toast";
@@ -11,8 +12,13 @@ import { useInvoiceOcr } from "@/hooks/useInvoiceOcr";
 export default function FactureForm({ facture, suppliers = [], onClose }) {
   const { createFacture, updateFacture, addLigneFacture, calculateTotals } = useFactures();
   const { products, fetchProducts } = useProducts();
+  const {
+    results: fournisseurOptions,
+    searchFournisseurs,
+  } = useFournisseursAutocomplete();
   const [date, setDate] = useState(facture?.date || "");
   const [fournisseur_id, setFournisseurId] = useState(facture?.fournisseur_id || "");
+  const [fournisseurName, setFournisseurName] = useState("");
   const [reference, setReference] = useState(facture?.reference || "");
   const [statut, setStatut] = useState(facture?.statut || "en attente");
   const [lignes, setLignes] = useState(facture?.lignes || [
@@ -24,6 +30,14 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
   const { scan, text: ocrText } = useInvoiceOcr();
 
   useEffect(() => { fetchProducts({ limit: 1000 }); }, [fetchProducts]);
+  useEffect(() => {
+    if (facture?.fournisseur_id && suppliers.length) {
+      const found = suppliers.find(s => s.id === facture.fournisseur_id);
+      setFournisseurName(found?.nom || "");
+    }
+  }, [facture?.fournisseur_id, suppliers]);
+
+  useEffect(() => { searchFournisseurs(fournisseurName); }, [fournisseurName, searchFournisseurs]);
 
   // Upload PDF réel : à brancher à ton backend ou Supabase Storage
   const handleUpload = async () => {
@@ -106,17 +120,26 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
         value={reference}
         onChange={e => setReference(e.target.value)}
       />
-      <select
+      <input
+        list="fournisseurs-list"
         className="input mb-2"
-        value={fournisseur_id}
-        onChange={e => setFournisseurId(e.target.value)}
+        value={fournisseurName}
+        onChange={e => {
+          const val = e.target.value;
+          setFournisseurName(val);
+          const found = fournisseurOptions.find(
+            f => f.nom.toLowerCase() === val.toLowerCase()
+          );
+          setFournisseurId(found ? found.id : "");
+        }}
+        placeholder="Fournisseur"
         required
-      >
-        <option value="">Fournisseur</option>
-        {suppliers.map(s => (
-          <option key={s.id} value={s.id}>{s.nom}</option>
+      />
+      <datalist id="fournisseurs-list">
+        {fournisseurOptions.map(f => (
+          <option key={f.id} value={f.nom}>{`${f.nom} (${f.ville || ""})`}</option>
         ))}
-      </select>
+      </datalist>
       <table className="w-full text-sm mb-2">
         <thead>
           <tr>

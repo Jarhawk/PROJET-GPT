@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import React from 'react';
 import { vi } from 'vitest';
 
@@ -20,9 +20,16 @@ test('save calls createZone', async () => {
     updateZone: vi.fn(),
     deleteZone: vi.fn(),
   });
-  render(<InventaireZones />);
-  fireEvent.click(screen.getByText('+ Nouvelle zone'));
-  fireEvent.change(screen.getByPlaceholderText('Nom de la zone'), { target: { value: 'Cuisine' } });
-  fireEvent.click(screen.getByText('Enregistrer'));
+  await act(async () => {
+    render(<InventaireZones />);
+  });
+  await act(async () => {
+    fireEvent.click(screen.getByText('+ Nouvelle zone'));
+  });
+  const input = await screen.findByPlaceholderText('Nom de la zone');
+  await act(async () => {
+    fireEvent.change(input, { target: { value: 'Cuisine' } });
+    fireEvent.click(screen.getByText('Enregistrer'));
+  });
   expect(createZone).toHaveBeenCalledWith({ nom: 'Cuisine' });
 });

@@ -33,20 +33,16 @@ function RequisitionDetailPage() {
           <strong>Date :</strong> {requisition.date}
         </div>
         <div>
-          <strong>Motif :</strong> {requisition.motif}
+          <strong>Zone :</strong> {requisition.zone_id}
         </div>
         <div>
-          <strong>Zone :</strong> {requisition.zone}
+          <strong>Produit :</strong> {requisition.produit_id}
         </div>
         <div>
-          <strong>Articles :</strong>
-          <ul className="list-disc list-inside">
-            {requisition.lignes?.map((ligne, index) => (
-              <li key={index}>
-                {ligne.nom} – {ligne.quantite} {ligne.unite}
-              </li>
-            ))}
-          </ul>
+          <strong>Quantité :</strong> {requisition.quantite}
+        </div>
+        <div>
+          <strong>Commentaire :</strong> {requisition.commentaire}
         </div>
       </GlassCard>
     </div>

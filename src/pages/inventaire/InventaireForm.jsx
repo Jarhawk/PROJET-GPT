@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useInventaires } from "@/hooks/useInventaires";
-import { useProducts } from "@/hooks/useProducts";
+import { useProduitsInventaire } from "@/hooks/useProduitsInventaire";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
@@ -10,7 +10,7 @@ import toast from "react-hot-toast";
 export default function InventaireForm() {
   const navigate = useNavigate();
   const { createInventaire, inventaires } = useInventaires();
-  const { products } = useProducts();
+  const { produits, fetchProduits } = useProduitsInventaire();
 
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [zone, setZone] = useState("");
@@ -18,6 +18,14 @@ export default function InventaireForm() {
   const [loading, setLoading] = useState(false);
 
   const zoneSuggestions = Array.from(new Set(inventaires.map(i => i.zone).filter(Boolean)));
+  const [familleFilter, setFamilleFilter] = useState("");
+  const [search, setSearch] = useState("");
+
+  const products = produits;
+
+  useEffect(() => {
+    fetchProduits({ zone, famille: familleFilter, search });
+  }, [zone, familleFilter, search, fetchProduits]);
 
   const addLine = () => setLignes([...lignes, { produit_id: "", quantite: "" }]);
   const updateLine = (idx, field, val) => {
@@ -80,6 +88,26 @@ export default function InventaireForm() {
           ))}
         </datalist>
       </div>
+      <div className="flex gap-4">
+        <input
+          className="input flex-1"
+          placeholder="Recherche produit"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
+        <input
+          list="familles"
+          className="input"
+          placeholder="Famille"
+          value={familleFilter}
+          onChange={e => setFamilleFilter(e.target.value)}
+        />
+        <datalist id="familles">
+          {Array.from(new Set(products.map(p => p.famille).filter(Boolean))).map(f => (
+            <option key={f} value={f} />
+          ))}
+        </datalist>
+      </div>
 
       <TableContainer>
         <table className="min-w-full text-sm text-center">
@@ -91,6 +119,9 @@ export default function InventaireForm() {
               <th className="p-2">Prix</th>
               <th className="p-2">Écart</th>
               <th className="p-2">Valeur écart</th>
+              <th className="p-2">Conso mens.</th>
+              <th className="p-2">Réquisition</th>
+              <th className="p-2">Écart req.</th>
               <th className="p-2" />
             </tr>
           </thead>
@@ -99,6 +130,9 @@ export default function InventaireForm() {
               const theo = getTheo(l.produit_id);
               const price = getPrice(l.produit_id);
               const ecart = Number(l.quantite || 0) - theo;
+              const conso = Number(getProduct(l.produit_id).conso_calculee || 0);
+              const requisition = zone === 'Boisson' ? Number(getProduct(l.produit_id).requisition_mensuelle || 0) : 0;
+              const ecartReq = zone === 'Boisson' ? requisition - conso : 0;
               return (
                 <tr key={idx} className="border-b last:border-none">
                   <td className="p-2">
@@ -125,6 +159,9 @@ export default function InventaireForm() {
                   <td className="p-2">{price}</td>
                   <td className={`p-2 ${ecart < 0 ? 'text-red-600' : ecart > 0 ? 'text-green-600' : ''}`}>{ecart.toFixed(2)}</td>
                   <td className={`p-2 ${ecart * price < 0 ? 'text-red-600' : ecart * price > 0 ? 'text-green-600' : ''}`}>{(ecart * price).toFixed(2)}</td>
+                  <td className="p-2">{conso.toFixed(2)}</td>
+                  <td className="p-2">{zone === 'Boisson' ? requisition.toFixed(2) : '-'}</td>
+                  <td className="p-2">{zone === 'Boisson' ? ecartReq.toFixed(2) : '-'}</td>
                   <td className="p-2">
                     <Button size="sm" variant="ghost" type="button" onClick={() => removeLine(idx)}>✕</Button>
                   </td>

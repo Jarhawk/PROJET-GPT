@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
+import { useZones } from "@/hooks/useZones";
 import toast, { Toaster } from "react-hot-toast";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
@@ -12,18 +13,20 @@ import { Dialog, DialogTrigger, DialogContent } from "@radix-ui/react-dialog";
 
 export default function Requisitions() {
   const { mama_id, user_id, loading: authLoading } = useAuth();
+  const { zones, fetchZones } = useZones();
   const [requisitions, setRequisitions] = useState([]);
   const [produits, setProduits] = useState([]);
   const [search, setSearch] = useState("");
   const [periode, setPeriode] = useState({ debut: "", fin: "" });
   const [showCreate, setShowCreate] = useState(false);
-  const [createReq, setCreateReq] = useState({ produit_id: "", quantite: 0, zone: "", motif: "" });
+  const [createReq, setCreateReq] = useState({ produit_id: "", quantite: 0, zone_id: "", commentaire: "", type: "" });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!mama_id || authLoading) return;
     supabase.from("produits").select("*").eq("mama_id", mama_id)
       .then(({ data }) => setProduits(data || []));
+    fetchZones();
   }, [mama_id, authLoading]);
 
   useEffect(() => {
@@ -32,17 +35,17 @@ export default function Requisitions() {
       .from("requisitions")
       .select("*")
       .eq("mama_id", mama_id)
-      .gte("date_requisition", periode.debut)
-      .lte("date_requisition", periode.fin)
-      .order("date_requisition", { ascending: false })
+      .gte("date", periode.debut)
+      .lte("date", periode.fin)
+      .order("date", { ascending: false })
       .then(({ data }) => setRequisitions(data || []));
   }, [mama_id, authLoading, periode]);
 
   const filtered = requisitions.filter(
     r =>
       produits.find(p => p.id === r.produit_id)?.nom?.toLowerCase().includes(search.toLowerCase()) ||
-      r.zone?.toLowerCase().includes(search.toLowerCase()) ||
-      r.motif?.toLowerCase().includes(search.toLowerCase())
+      zones.find(z => z.id === r.zone_id)?.nom?.toLowerCase().includes(search.toLowerCase()) ||
+      (r.commentaire || "").toLowerCase().includes(search.toLowerCase())
   );
 
   // Saisie
@@ -59,15 +62,19 @@ export default function Requisitions() {
     setSaving(true);
     const { error } = await supabase.from("requisitions").insert([
       {
-        ...createReq,
+        produit_id: createReq.produit_id,
+        quantite: Number(createReq.quantite),
+        zone_id: createReq.zone_id,
+        commentaire: createReq.commentaire,
         mama_id,
-        date_requisition: new Date().toISOString().slice(0, 10),
-        created_by: user_id,
+        auteur_id: user_id,
+        date: new Date().toISOString().slice(0, 10),
+        type: createReq.type || "",
       },
     ]);
     if (!error) {
       setShowCreate(false);
-      setCreateReq({ produit_id: "", quantite: 0, zone: "", motif: "" });
+      setCreateReq({ produit_id: "", quantite: 0, zone_id: "", commentaire: "", type: "" });
       toast.success("Réquisition créée !");
       setPeriode(p => ({ ...p }));
     } else {
@@ -81,10 +88,10 @@ export default function Requisitions() {
     const ws = XLSX.utils.json_to_sheet(
       filtered.map(r => ({
         Produit: produits.find(p => p.id === r.produit_id)?.nom || "-",
-        Date: r.date_requisition,
+        Date: r.date,
         Quantité: r.quantite,
-        Zone: r.zone,
-        Motif: r.motif,
+        Zone: zones.find(z => z.id === r.zone_id)?.nom || "-",
+        Commentaire: r.commentaire,
       }))
     );
     const wb = XLSX.utils.book_new();
@@ -99,13 +106,13 @@ export default function Requisitions() {
     doc.text("Historique Réquisitions", 10, 12);
     doc.autoTable({
       startY: 20,
-      head: [["Produit", "Date", "Quantité", "Zone", "Motif"]],
+      head: [["Produit", "Date", "Quantité", "Zone", "Commentaire"]],
       body: filtered.map(r => [
         produits.find(p => p.id === r.produit_id)?.nom || "-",
-        r.date_requisition,
+        r.date,
         r.quantite,
-        r.zone,
-        r.motif,
+        zones.find(z => z.id === r.zone_id)?.nom || "-",
+        r.commentaire,
       ]),
       styles: { fontSize: 9 },
     });
@@ -144,7 +151,7 @@ export default function Requisitions() {
         </div>
         <input
           className="input input-bordered w-64"
-          placeholder="Recherche produit, zone ou motif"
+          placeholder="Recherche produit, zone ou commentaire"
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
@@ -160,19 +167,19 @@ export default function Requisitions() {
               <th className="px-2 py-1">Produit</th>
               <th className="px-2 py-1">Quantité</th>
               <th className="px-2 py-1">Zone</th>
-              <th className="px-2 py-1">Motif</th>
+              <th className="px-2 py-1">Commentaire</th>
             </tr>
           </thead>
           <tbody>
             {filtered.map(r => (
               <tr key={r.id}>
-                <td className="px-2 py-1">{r.date_requisition}</td>
+                <td className="px-2 py-1">{r.date}</td>
                 <td className="px-2 py-1">
                   {produits.find(p => p.id === r.produit_id)?.nom || "-"}
                 </td>
                 <td className="px-2 py-1">{r.quantite}</td>
-                <td className="px-2 py-1">{r.zone}</td>
-                <td className="px-2 py-1">{r.motif}</td>
+                <td className="px-2 py-1">{zones.find(z => z.id === r.zone_id)?.nom || '-'}</td>
+                <td className="px-2 py-1">{r.commentaire}</td>
               </tr>
             ))}
           </tbody>
@@ -217,22 +224,33 @@ export default function Requisitions() {
             </div>
             <div>
               <label>Zone</label>
+              <select
+                className="input input-bordered w-full"
+                value={createReq.zone_id}
+                onChange={e => setCreateReq(r => ({ ...r, zone_id: e.target.value }))}
+              >
+                <option value="">Sélectionner…</option>
+                {zones.map(z => (
+                  <option key={z.id} value={z.id}>{z.nom}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label>Type de service</label>
               <input
                 className="input input-bordered w-full"
-                value={createReq.zone}
-                onChange={e =>
-                  setCreateReq(r => ({ ...r, zone: e.target.value }))
-                }
+                value={createReq.type}
+                onChange={e => setCreateReq(r => ({ ...r, type: e.target.value }))}
               />
             </div>
             <div>
-              <label>Motif</label>
+              <label>Commentaire</label>
               <textarea
                 className="input input-bordered w-full"
-                value={createReq.motif}
+                value={createReq.commentaire}
                 rows={2}
                 onChange={e =>
-                  setCreateReq(r => ({ ...r, motif: e.target.value }))
+                  setCreateReq(r => ({ ...r, commentaire: e.target.value }))
                 }
               />
             </div>

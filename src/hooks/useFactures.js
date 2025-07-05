@@ -10,6 +10,27 @@ export function useFactures() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  async function getBonsLivraison({ search = "", page = 1, limit = 50 } = {}) {
+    if (!mama_id) return [];
+    setLoading(true);
+    setError(null);
+    let q = supabase
+      .from("bons_livraison")
+      .select("*", { count: "exact" })
+      .eq("mama_id", mama_id)
+      .order("date_livraison", { ascending: false });
+    if (search) q = q.ilike("numero_bl", `%${search}%`);
+    q = q.range((page - 1) * limit, page * limit - 1);
+    const { data, error, count } = await q;
+    if (!error) {
+      setFactures(data || []);
+      setTotal(count || 0);
+    }
+    setLoading(false);
+    if (error) setError(error);
+    return data || [];
+  }
+
   async function getFactures({
     search = "",
     fournisseur = "",
@@ -175,6 +196,41 @@ export function useFactures() {
     return { data: inserted };
   }
 
+  async function createBonLivraison(bl) {
+    if (!mama_id) return { error: "no mama_id" };
+    const { lignes, ...entete } = bl || {};
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("bons_livraison")
+      .insert([{ ...entete, mama_id }])
+      .select("id")
+      .single();
+    if (!error && data?.id && Array.isArray(lignes) && lignes.length) {
+      const rows = lignes.map(l => ({ ...l, bl_id: data.id, mama_id }));
+      await supabase.from("lignes_bl").insert(rows);
+    }
+    setLoading(false);
+    if (error) {
+      setError(error);
+      return { error };
+    }
+    return { data };
+  }
+
+  async function updateStock(id, type) {
+    if (!mama_id) return { error: "no mama_id" };
+    setLoading(true);
+    const table = type === "facture" ? "factures" : "bons_livraison";
+    const { error } = await supabase.rpc("apply_stock_from_achat", {
+      achat_id: id,
+      achat_table: table,
+      mama_id,
+    });
+    setLoading(false);
+    if (error) setError(error);
+    return { error };
+  }
+
   async function calculateTotals(facture_id) {
     if (!mama_id) return { ht: 0, tva: 0, ttc: 0 };
     const { data: lignes } = await supabase
@@ -198,12 +254,15 @@ export function useFactures() {
     total,
     loading,
     error,
+    getBonsLivraison,
     getFactures,
     fetchFactureById,
     createFacture,
+    createBonLivraison,
     updateFacture,
     deleteFacture,
     addLigneFacture,
+    updateStock,
     calculateTotals,
   };
 }

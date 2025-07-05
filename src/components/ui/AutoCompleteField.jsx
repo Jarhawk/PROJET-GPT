@@ -10,12 +10,14 @@ export default function AutoCompleteField({
   options,
   onAddOption,
   required = false,
+  disabledOptions = [],
 }) {
   const [inputValue, setInputValue] = useState(value || "");
   const [showAdd, setShowAdd] = useState(false);
 
   const optionsSafe = options ?? []; // Évite le crash si options est undefined
   const isValid = inputValue && optionsSafe.includes(inputValue);
+  const filtered = optionsSafe.filter(opt => !disabledOptions.includes(opt));
 
   const handleInputChange = e => {
     const val = e.target.value;
@@ -47,7 +49,7 @@ export default function AutoCompleteField({
         aria-expanded={showAdd ? "true" : "false"}
       />
       <datalist id={`list-${label}`}>
-        {optionsSafe.map((opt, idx) => (
+        {filtered.map((opt, idx) => (
           <option key={idx} value={opt} />
         ))}
       </datalist>

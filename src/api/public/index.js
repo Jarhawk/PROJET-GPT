@@ -4,6 +4,7 @@
 import express from 'express';
 import produitsRouter from './produits.js';
 import stockRouter from './stock.js';
+import promotionsRouter from './promotions.js';
 import { getSupabaseClient } from '../shared/supabaseClient.js';
 
 // Supabase client used to validate Bearer tokens when provided
@@ -44,5 +45,6 @@ router.use(async (req, res, next) => {
 
 router.use('/produits', produitsRouter);
 router.use('/stock', stockRouter);
+router.use('/promotions', promotionsRouter);
 
 export default router;

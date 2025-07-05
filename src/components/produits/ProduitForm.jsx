@@ -8,6 +8,7 @@ import { useFournisseurs } from "@/hooks/useFournisseurs";
 import { toast } from "react-hot-toast";
 import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
 import AutoCompleteField from "@/components/ui/AutoCompleteField";
+import AutoCompleteZoneField from "@/components/ui/AutoCompleteZoneField";
 
 export default function ProduitForm({ produit, familles = [], unites = [], onSuccess, onClose }) {
   const editing = !!produit;
@@ -18,6 +19,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
   const [nom, setNom] = useState(produit?.nom || "");
   const [famille, setFamille] = useState(produit?.famille || "");
   const [unite, setUnite] = useState(produit?.unite || "");
+  const [zoneStockage, setZoneStockage] = useState(produit?.zone_stockage || "");
   const [mainSupplierId, setMainSupplierId] = useState(produit?.fournisseur_principal_id || "");
   const [stock_reel, setStockReel] = useState(produit?.stock_reel || 0);
   const [stock_min, setStockMin] = useState(produit?.stock_min || 0);
@@ -42,6 +44,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
       setNom(produit.nom || "");
       setFamille(produit.famille || "");
       setUnite(produit.unite || "");
+      setZoneStockage(produit.zone_stockage || "");
       setMainSupplierId(produit.fournisseur_principal_id || "");
       setStockReel(produit.stock_reel || 0);
       setStockMin(produit.stock_min || 0);
@@ -68,6 +71,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
       nom,
       famille,
       unite,
+      zone_stockage: zoneStockage || null,
       fournisseur_principal_id: mainSupplierId || null,
       stock_reel: Number(stock_reel),
       stock_min: Number(stock_min),
@@ -150,6 +154,11 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
         required
       />
       {errors.unite && <p className="text-red-500 text-sm">{errors.unite}</p>}
+      <AutoCompleteZoneField
+        label="Zone de stockage"
+        value={zoneStockage}
+        onChange={setZoneStockage}
+      />
       <div>
         <label className="block text-sm mb-1 font-medium">Fournisseur principal</label>
         <select

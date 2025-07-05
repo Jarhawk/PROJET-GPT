@@ -6,13 +6,13 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
 export function useMouvementsStock() {
-  const { mama_id } = useAuth();
+  const { mama_id, user_id } = useAuth();
   const [mouvements, setMouvements] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   // 1. Charger les mouvements (filtre, type, période, produit)
-  async function fetchMouvements({ type = "", produit = "", zone = "", date_debut = "", date_fin = "" } = {}) {
+  async function fetchMouvements({ type = "", produit = "", zone_source = "", zone_destination = "", date_debut = "", date_fin = "" } = {}) {
     setLoading(true);
     setError(null);
     let query = supabase
@@ -22,7 +22,8 @@ export function useMouvementsStock() {
 
     if (type) query = query.eq("type", type);
     if (produit) query = query.eq("produit_id", produit);
-    if (zone) query = query.ilike("zone", `%${zone}%`);
+    if (zone_source) query = query.eq("zone_source_id", zone_source);
+    if (zone_destination) query = query.eq("zone_destination_id", zone_destination);
     if (date_debut) query = query.gte("date", date_debut);
     if (date_fin) query = query.lte("date", date_fin);
 
@@ -40,7 +41,7 @@ export function useMouvementsStock() {
     setError(null);
     const { error } = await supabase
       .from("mouvements_stock")
-      .insert([{ ...mouvement, mama_id }]);
+      .insert([{ ...mouvement, mama_id, auteur_id: user_id }]);
     if (error) setError(error);
     setLoading(false);
     await fetchMouvements();
@@ -96,8 +97,9 @@ export function useMouvementsStock() {
       type: m.type,
       produit_id: m.produit_id,
       quantite: m.quantite,
-      zone: m.zone,
-      motif: m.motif,
+      zone_source_id: m.zone_source_id,
+      zone_destination_id: m.zone_destination_id,
+      commentaire: m.commentaire,
       mama_id: m.mama_id,
     }));
     const wb = XLSX.utils.book_new();

@@ -4,7 +4,12 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { supabase } from "@/lib/supabase";
 
-export default function UtilisateurRow({ utilisateur, onEdit, onToggleActive }) {
+export default function UtilisateurRow({
+  utilisateur,
+  onEdit,
+  onToggleActive,
+  onDelete,
+}) {
   const { isAdmin, mama_id } = useAuth();
   const [showHistory, setShowHistory] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -60,6 +65,14 @@ export default function UtilisateurRow({ utilisateur, onEdit, onToggleActive }) 
               <button className="btn btn-sm mr-2" onClick={resetPassword} disabled={loading}>
                 Reset MDP
               </button>
+              {onDelete && (
+                <button
+                  className="btn btn-sm mr-2"
+                  onClick={() => onDelete(utilisateur)}
+                >
+                  Supprimer
+                </button>
+              )}
               <button className="btn btn-sm" onClick={() => setShowHistory(!showHistory)}>
                 {showHistory ? "Masquer historique" : "Connexions"}
               </button>

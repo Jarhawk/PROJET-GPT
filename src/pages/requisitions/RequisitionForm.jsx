@@ -1,8 +1,9 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRequisitions } from "@/hooks/useRequisitions";
 import { useProducts } from "@/hooks/useProducts";
+import { useZones } from "@/hooks/useZones";
 import { useAuth } from "@/context/AuthContext";
 import { Toaster, toast } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
@@ -13,12 +14,15 @@ function RequisitionFormPage() {
   const { loading: authLoading } = useAuth();
   const { createRequisition } = useRequisitions();
   const { products, loading: loadingProducts } = useProducts();
+  const { zones, fetchZones } = useZones();
 
   const [type, setType] = useState("");
-  const [motif, setMotif] = useState("");
-  const [zone, setZone] = useState("");
+  const [commentaire, setCommentaire] = useState("");
+  const [zone_id, setZone] = useState("");
   const [articles, setArticles] = useState([{ produit_id: "", quantite: 1 }]);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => { fetchZones(); }, [fetchZones]);
 
   const handleChangeArticle = (index, field, value) => {
     const updated = [...articles];
@@ -32,26 +36,26 @@ function RequisitionFormPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!type || !zone || articles.some(a => !a.produit_id || !a.quantite)) {
+    if (!type || !zone_id || articles.some(a => !a.produit_id || !a.quantite)) {
       toast.error("Tous les champs sont obligatoires");
       return;
     }
     if (submitting) return;
-    const payload = {
-      zone,
+    const payloads = articles.map(a => ({
+      produit_id: a.produit_id,
+      quantite: Number(a.quantite),
+      zone_id,
       type,
-      motif,
-      lignes: articles.map(a => ({ produit_id: a.produit_id, quantite: Number(a.quantite) })),
-    };
+      commentaire,
+    }));
     try {
       setSubmitting(true);
-      const { success, message } = await createRequisition(payload);
-      if (success) {
-        toast.success("Réquisition créée !");
-        navigate("/requisitions");
-      } else {
-        throw new Error(message);
+      for (const p of payloads) {
+        const { error } = await createRequisition(p);
+        if (error) throw new Error(error.message);
       }
+      toast.success("Réquisition créée !");
+      navigate("/requisitions");
     } catch (err) {
       toast.error(err.message || "Erreur lors de la création");
     } finally {
@@ -82,25 +86,30 @@ function RequisitionFormPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Motif</label>
+          <label className="block text-sm font-medium mb-1">Commentaire</label>
           <input
             type="text"
-            value={motif}
-            onChange={(e) => setMotif(e.target.value)}
+            value={commentaire}
+            onChange={(e) => setCommentaire(e.target.value)}
             className="w-full border rounded px-3 py-2"
-            required
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium mb-1">Zone</label>
-          <input
-            type="text"
-            value={zone}
+          <select
+            value={zone_id}
             onChange={(e) => setZone(e.target.value)}
             className="w-full border rounded px-3 py-2"
             required
-          />
+          >
+            <option value="">Sélectionner…</option>
+            {zones.map((z) => (
+              <option key={z.id} value={z.id}>
+                {z.nom}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div>

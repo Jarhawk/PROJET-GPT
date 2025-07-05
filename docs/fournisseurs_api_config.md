@@ -39,3 +39,19 @@ supprimer la configuration via Supabase JS. Il expose aussi `listConfigs` pour
 rechercher et paginer les entrées par fournisseur et statut. Le formulaire
 `FournisseurApiSettingsForm` s'appuie sur ce hook et pré‑remplit la configuration
 existante.
+
+## useFournisseurAPI
+
+Le hook `useFournisseurAPI` facilite les échanges avec les services des
+fournisseurs. Il s'appuie sur la configuration enregistrée dans
+`fournisseurs_api_config` et propose plusieurs fonctions :
+
+- `importFacturesFournisseur(id)` pour récupérer les factures depuis l'API et les
+  enregistrer dans Supabase
+- `syncCatalogue(id)` pour importer le catalogue et consigner les changements de
+  prix dans `catalogue_updates`
+- `envoyerCommande(id)` pour transmettre une commande existante au fournisseur
+- `testConnection(id)` pour vérifier que l'API est joignable via un appel
+  `GET /ping`
+- `getCommandeStatus(id)` pour connaître le statut d'une commande envoyée
+- `cancelCommande(id)` pour annuler une commande déjà transmise

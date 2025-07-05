@@ -6,23 +6,30 @@ import { useRoles } from "@/hooks/useRoles";
 import { useMamas } from "@/hooks/useMamas";
 import UtilisateurForm from "./UtilisateurForm";
 import UtilisateurDetail from "@/components/utilisateurs/UtilisateurDetail";
+import UtilisateurRow from "@/components/parametrage/UtilisateurRow";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
 import { Toaster, toast } from "react-hot-toast";
-import { saveAs } from "file-saver";
-import * as XLSX from "xlsx";
 import { motion as Motion } from "framer-motion";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 50;
 
 export default function Utilisateurs() {
-  const { users, fetchUsers, toggleUserActive, deleteUser } = useUtilisateurs();
+  const {
+    users,
+    fetchUsers,
+    toggleUserActive,
+    deleteUser,
+    exportUsersToExcel,
+    exportUsersToCSV,
+  } = useUtilisateurs();
   const { mama_id, loading: authLoading } = useAuth();
   const { roles, fetchRoles } = useRoles();
   const { mamas, fetchMamas } = useMamas();
   const [search, setSearch] = useState("");
   const [actifFilter, setActifFilter] = useState("all");
+  const [roleFilter, setRoleFilter] = useState("all");
   const [sortBy, setSortBy] = useState("email");
   const [page, setPage] = useState(1);
   const [showForm, setShowForm] = useState(false);
@@ -45,7 +52,8 @@ export default function Utilisateurs() {
   }));
   const filtres = mapped.filter(u =>
     (!search || u.email?.toLowerCase().includes(search.toLowerCase())) &&
-    (actifFilter === "all" || (actifFilter === "true" ? u.actif : !u.actif))
+    (actifFilter === "all" || (actifFilter === "true" ? u.actif : !u.actif)) &&
+    (roleFilter === "all" || u.role === roleFilter)
   ).sort((a, b) => {
     if (sortBy === "mama") return a.mamaNom.localeCompare(b.mamaNom);
     if (sortBy === "role") return a.roleNom.localeCompare(b.roleNom);
@@ -54,13 +62,6 @@ export default function Utilisateurs() {
   const nbPages = Math.ceil(filtres.length / PAGE_SIZE);
   const paged = filtres.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  const exportExcel = () => {
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(filtres);
-    XLSX.utils.book_append_sheet(wb, ws, "Utilisateurs");
-    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([buf]), "utilisateurs.xlsx");
-  };
 
   const handleToggleActive = async (u) => {
     await toggleUserActive(u.id, !u.actif);
@@ -92,6 +93,12 @@ export default function Utilisateurs() {
           <option value="true">Actif</option>
           <option value="false">Inactif</option>
         </select>
+        <select className="input" value={roleFilter} onChange={e => setRoleFilter(e.target.value)}>
+          <option value="all">Tous rôles</option>
+          {roles.map(r => (
+            <option key={r.nom} value={r.nom}>{r.nom}</option>
+          ))}
+        </select>
         <Button onClick={() => { setSelected(null); setShowForm(true); }}>
           Ajouter un utilisateur
         </Button>
@@ -100,7 +107,8 @@ export default function Utilisateurs() {
           <option value="mama">Tri Mama</option>
           <option value="role">Tri rôle</option>
         </select>
-        <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
+        <Button variant="outline" onClick={() => exportUsersToExcel(filtres)}>Export Excel</Button>
+        <Button variant="outline" onClick={() => exportUsersToCSV(filtres)}>Export CSV</Button>
       </div>
       <TableContainer className="mb-4">
         <Motion.table
@@ -119,31 +127,13 @@ export default function Utilisateurs() {
         </thead>
         <tbody>
           {paged.map(u => (
-            <tr key={u.id}>
-              <td className="border px-4 py-2">
-                <Button
-                  variant="link"
-                  className="font-semibold text-white"
-                  onClick={() => { setSelected(u); setShowDetail(true); }}
-                >
-                  {u.email}
-                </Button>
-              </td>
-              <td className="border px-4 py-2">{u.roleNom}</td>
-              <td className="border px-4 py-2">{u.mamaNom}</td>
-              <td className="border px-4 py-2">
-                <span className={u.actif ? "badge badge-admin" : "badge badge-user"}>
-                  {u.actif ? "Actif" : "Inactif"}
-                </span>
-              </td>
-              <td className="border px-4 py-2 flex gap-2">
-                <Button size="sm" variant="outline" onClick={() => { setSelected(u); setShowForm(true); }}>Modifier</Button>
-                <Button size="sm" variant="outline" onClick={() => handleToggleActive(u)}>
-                  {u.actif ? "Désactiver" : "Réactiver"}
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => handleDelete(u)}>Supprimer</Button>
-              </td>
-            </tr>
+            <UtilisateurRow
+              key={u.id}
+              utilisateur={u}
+              onEdit={(user) => { setSelected(user); setShowForm(true); }}
+              onToggleActive={() => handleToggleActive(u)}
+              onDelete={() => handleDelete(u)}
+            />
           ))}
         </tbody>
         </Motion.table>

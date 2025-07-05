@@ -4,17 +4,21 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
 import { useProducts } from "@/hooks/useProducts";
+import { useZones } from "@/hooks/useZones";
 import { useMouvements } from "@/hooks/useMouvements";
+import AutoCompleteZoneField from "@/components/ui/AutoCompleteZoneField";
 import MouvementForm from "./MouvementForm";
 
 export default function Mouvements() {
   const { products, fetchProducts } = useProducts();
+  const { zones, fetchZones } = useZones();
   const { mouvements, getMouvements } = useMouvements();
   const [filters, setFilters] = useState({
     type: "",
     product: "",
     productName: "",
-    zone: "",
+    zone_source: "",
+    zone_destination: "",
     debut: "",
     fin: "",
   });
@@ -22,13 +26,15 @@ export default function Mouvements() {
 
   useEffect(() => {
     fetchProducts({ limit: 1000 });
-  }, [fetchProducts]);
+    fetchZones();
+  }, [fetchProducts, fetchZones]);
 
   useEffect(() => {
     getMouvements({
       type: filters.type,
       produit: filters.product,
-      zone: filters.zone,
+      zone_source: filters.zone_source,
+      zone_destination: filters.zone_destination,
       debut: filters.debut,
       fin: filters.fin,
     });
@@ -81,11 +87,21 @@ export default function Mouvements() {
           value={filters.fin}
           onChange={e => setFilters(f => ({ ...f, fin: e.target.value }))}
         />
-        <input
-          className="input"
-          placeholder="Zone"
-          value={filters.zone}
-          onChange={e => setFilters(f => ({ ...f, zone: e.target.value }))}
+        <AutoCompleteZoneField
+          value={zones.find(z => z.id === filters.zone_source)?.nom || ''}
+          onChange={val => {
+            const found = zones.find(z => z.nom === val);
+            setFilters(f => ({ ...f, zone_source: found ? found.id : '' }));
+          }}
+          placeholder="Zone source"
+        />
+        <AutoCompleteZoneField
+          value={zones.find(z => z.id === filters.zone_destination)?.nom || ''}
+          onChange={val => {
+            const found = zones.find(z => z.nom === val);
+            setFilters(f => ({ ...f, zone_destination: found ? found.id : '' }));
+          }}
+          placeholder="Zone destination"
         />
         <Button onClick={() => setShowForm(true)}>Ajouter un mouvement</Button>
       </div>
@@ -96,7 +112,8 @@ export default function Mouvements() {
               <th className="p-2">Date</th>
               <th className="p-2">Produit</th>
               <th className="p-2">Quantité</th>
-              <th className="p-2">Zone</th>
+              <th className="p-2">Zone source</th>
+              <th className="p-2">Zone destination</th>
               <th className="p-2">Type</th>
               <th className="p-2">Valeur</th>
             </tr>
@@ -107,7 +124,8 @@ export default function Mouvements() {
                 <td className="p-2">{m.date}</td>
                 <td className="p-2">{products.find(p => p.id === m.produit_id)?.nom || ""}</td>
                 <td className="p-2">{m.quantite}</td>
-                <td className="p-2">{m.zone || ""}</td>
+                <td className="p-2">{zones.find(z => z.id === m.zone_source_id)?.nom || ''}</td>
+                <td className="p-2">{zones.find(z => z.id === m.zone_destination_id)?.nom || ''}</td>
                 <td className="p-2">{m.type}</td>
                 <td className="p-2">{Number(m.valeur || 0).toFixed(2)}</td>
               </tr>

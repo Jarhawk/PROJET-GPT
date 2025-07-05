@@ -17,8 +17,12 @@ export function useTaches() {
       .from("taches")
       .select("*")
       .eq("mama_id", mama_id)
-      .order("date_debut", { ascending: true });
-    if (filters.type) query = query.eq("type", filters.type);
+      .order("date_echeance", { ascending: true });
+    if (filters.statut) query = query.eq("statut", filters.statut);
+    if (filters.priorite) query = query.eq("priorite", filters.priorite);
+    if (filters.assigne) query = query.contains("assignes", [filters.assigne]);
+    if (filters.start) query = query.gte("date_debut", filters.start);
+    if (filters.end) query = query.lte("date_echeance", filters.end);
     const { data, error } = await query;
     setLoading(false);
     if (error) {
@@ -30,44 +34,88 @@ export function useTaches() {
     return data || [];
   }, [mama_id]);
 
-  const createTache = useCallback(async (values) => {
-    if (!mama_id) return { error: "Aucun mama_id" };
-    setLoading(true);
-    setError(null);
-    const { error } = await supabase
-      .from("taches")
-      .insert([{ ...values, mama_id }]);
-    setLoading(false);
-    if (error) {
-      setError(error.message || error);
-      return { error };
+  const computeDue = values => {
+    if (values.delai_jours && !values.date_echeance) {
+      const start = new Date(values.date_debut);
+      if (!Number.isNaN(start)) {
+        start.setDate(start.getDate() + Number(values.delai_jours));
+        return start.toISOString().slice(0, 10);
+      }
     }
-    await getTaches();
-    return {};
-  }, [mama_id, getTaches]);
+    return values.date_echeance;
+  };
 
-  const validerTache = useCallback(
-    async (id) => {
-      if (!id || !user_id) return;
+  const createTache = useCallback(
+    async values => {
+      if (!mama_id || !user_id) return { error: "no_mama" };
       setLoading(true);
+      setError(null);
+      const payload = {
+        ...values,
+        date_echeance: computeDue(values),
+        mama_id,
+        created_by: user_id,
+      };
+      const { error } = await supabase.from("taches").insert([payload]);
+      setLoading(false);
+      if (error) {
+        setError(error.message || error);
+        return { error };
+      }
+      await getTaches();
+      return {};
+    },
+    [mama_id, user_id, getTaches]
+  );
+
+  const updateTache = useCallback(
+    async (id, values) => {
+      setLoading(true);
+      setError(null);
+      const payload = { ...values, date_echeance: computeDue(values), updated_at: new Date().toISOString() };
       const { error } = await supabase
-        .from("tache_instances")
-        .update({ statut: "fait", done_by: user_id })
+        .from("taches")
+        .update(payload)
         .eq("id", id)
         .eq("mama_id", mama_id);
       setLoading(false);
       if (error) {
         setError(error.message || error);
-        return;
+        return { error };
       }
       await getTaches();
+      return {};
     },
-    [getTaches, user_id, mama_id]
+    [mama_id, getTaches]
   );
 
-  const generateOccurrences = useCallback(async () => {
-    await supabase.rpc("generate_occurrences");
-  }, []);
+  const deleteTache = useCallback(
+    async id => {
+      setLoading(true);
+      setError(null);
+      const { error } = await supabase
+        .from("taches")
+        .delete()
+        .eq("id", id)
+        .eq("mama_id", mama_id);
+      setLoading(false);
+      if (error) {
+        setError(error.message || error);
+        return { error };
+      }
+      await getTaches();
+      return {};
+    },
+    [mama_id, getTaches]
+  );
 
-  return { taches, loading, error, getTaches, createTache, validerTache, generateOccurrences };
+  return {
+    taches,
+    loading,
+    error,
+    getTaches,
+    createTache,
+    updateTache,
+    deleteTache,
+  };
 }

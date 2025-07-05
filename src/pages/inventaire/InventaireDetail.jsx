@@ -21,19 +21,30 @@ export default function InventaireDetail() {
 
   if (!inventaire) return <LoadingSpinner message="Chargement..." />;
 
-  const exportCSV = () => {
-    const rows = (inventaire.lignes || []).map(l => ({
-      Produit: l.product?.nom,
-      Unite: l.product?.unite,
-      Physique: l.quantite,
-      Theorique: l.product?.stock_theorique,
-      Prix: l.product?.pmp,
-      Valeur: l.quantite * (l.product?.pmp || 0),
-      Ecart: l.quantite - (l.product?.stock_theorique || 0),
-      ValeurEcart: (l.quantite - (l.product?.stock_theorique || 0)) * (l.product?.pmp || 0),
-    }));
+  const exportExcel = () => {
+    const rows = (inventaire.lignes || []).map(l => {
+      const ecart = l.quantite - (l.product?.stock_theorique || 0);
+      const valeurEcart = ecart * (l.product?.pmp || 0);
+      const conso = l.conso_calculee || 0;
+      const requisition = l.requisition_mensuelle || 0;
+      const ecartReq = l.ecart_requisition || requisition - conso;
+      return {
+        Produit: l.product?.nom,
+        Famille: l.product?.famille,
+        Quantite: l.quantite,
+        StockTheorique: l.product?.stock_theorique,
+        PMP: l.product?.pmp,
+        Ecart: ecart,
+        ValeurEcart: valeurEcart,
+        Conso: conso,
+        Requisition: requisition,
+        EcartRequisition: ecartReq,
+        Mois_1: l.mois_m1,
+        Mois_2: l.mois_m2,
+      };
+    });
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "inventaire");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "Inventaire");
     XLSX.writeFile(wb, `inventaire_${id}.xlsx`);
   };
 
@@ -114,7 +125,7 @@ export default function InventaireDetail() {
       </div>
 
       <div className="flex gap-4">
-        <Button variant="outline" onClick={exportCSV}>Export CSV</Button>
+        <Button variant="outline" onClick={exportExcel}>Exporter Excel</Button>
         <Button variant="outline" onClick={exportPDF}>Export PDF</Button>
       </div>
     </div>

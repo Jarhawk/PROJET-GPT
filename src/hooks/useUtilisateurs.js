@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { exportToCSV } from "@/lib/export/exportHelpers";
 
 export function useUtilisateurs() {
   const { mama_id, role } = useAuth();
@@ -96,8 +97,8 @@ export function useUtilisateurs() {
   }
 
   // 6. Export Excel
-  function exportUsersToExcel() {
-    const datas = (users || []).map(u => ({
+  function exportUsersToExcel(data = users) {
+    const datas = (data || []).map(u => ({
       id: u.id,
       email: u.email,
       actif: u.actif,
@@ -109,6 +110,18 @@ export function useUtilisateurs() {
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Utilisateurs");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     saveAs(new Blob([buf]), "utilisateurs_mamastock.xlsx");
+  }
+
+  function exportUsersToCSV(data = users) {
+    const datas = (data || []).map(u => ({
+      id: u.id,
+      email: u.email,
+      actif: u.actif,
+      mama_id: u.mama_id,
+      role: u.role,
+      access_rights: JSON.stringify(u.access_rights),
+    }));
+    exportToCSV(datas, { filename: "utilisateurs_mamastock.csv" });
   }
 
   // 7. Import Excel
@@ -138,6 +151,7 @@ export function useUtilisateurs() {
     toggleUserActive,
     deleteUser,
     exportUsersToExcel,
+    exportUsersToCSV,
     importUsersFromExcel,
   };
 }

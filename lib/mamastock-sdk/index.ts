@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 export * from './produits';
 export * from './stock';
+export * from './promotions';
 
 export interface SDKOptions {
   /** Base URL of the public API. If omitted, MAMASTOCK_BASE_URL env is used */
@@ -28,6 +29,7 @@ export class MamaStockSDK {
   timeoutMs: number;
   fetch: typeof fetch;
   userAgent: string;
+  extraHeaders: Record<string, string> = {};
   constructor(options: SDKOptions = { baseUrl: undefined }) {
     const envUrl =
       (typeof process !== 'undefined' && process.env.MAMASTOCK_BASE_URL) || '';
@@ -74,6 +76,51 @@ export class MamaStockSDK {
     this.userAgent = (options.userAgent ?? envAgent) || 'MamaStockSDK';
   }
 
+  updateOptions(options: Partial<SDKOptions>) {
+    if (options.baseUrl) {
+      if (!/^https?:\/\//.test(options.baseUrl)) {
+        throw new Error('Invalid baseUrl');
+      }
+      this.baseUrl = options.baseUrl.replace(/\/$/, '');
+    }
+    if (options.apiKey !== undefined) this.apiKey = options.apiKey;
+    if (options.token !== undefined) this.token = options.token;
+    if (options.mamaId !== undefined) this.mamaId = options.mamaId;
+    if (options.retryAttempts !== undefined) this.retryAttempts = options.retryAttempts;
+    if (options.retryDelayMs !== undefined) this.retryDelayMs = options.retryDelayMs;
+    if (options.timeoutMs !== undefined) this.timeoutMs = options.timeoutMs;
+    if (options.fetch) {
+      if (typeof options.fetch !== 'function') {
+        throw new Error('fetch must be a function');
+      }
+      this.fetch = options.fetch;
+    }
+    if (options.userAgent) this.userAgent = options.userAgent;
+    return this;
+  }
+
+  setAuth({ apiKey, token }: { apiKey?: string; token?: string }) {
+    if (apiKey !== undefined) this.apiKey = apiKey;
+    if (token !== undefined) this.token = token;
+    return this;
+  }
+
+  clearAuth() {
+    this.apiKey = undefined;
+    this.token = undefined;
+    return this;
+  }
+
+  setHeaders(headers: Record<string, string>) {
+    Object.assign(this.extraHeaders, headers);
+    return this;
+  }
+
+  removeHeaders(...keys: string[]) {
+    for (const key of keys) delete this.extraHeaders[key];
+    return this;
+  }
+
   async fetchData(
     endpoint: string,
     params: Record<string, string> = {},
@@ -86,6 +133,7 @@ export class MamaStockSDK {
     const headers: Record<string, string> = { 'User-Agent': this.userAgent };
     if (this.apiKey) headers['x-api-key'] = this.apiKey;
     if (this.token) headers['Authorization'] = `Bearer ${this.token}`;
+    Object.assign(headers, this.extraHeaders);
 
     const query = Object.keys(params).length
       ? `?${new URLSearchParams(params).toString()}`

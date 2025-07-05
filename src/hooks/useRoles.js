@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { exportToCSV } from "@/lib/export/exportHelpers";
 
 export function useRoles() {
   const { mama_id, role } = useAuth();
@@ -12,13 +13,16 @@ export function useRoles() {
   const [error, setError] = useState(null);
 
   // 1. Charger les rôles
-  async function fetchRoles({ search = "" } = {}) {
+  async function fetchRoles({ search = "", actif = null } = {}) {
     if (role !== "superadmin" && !mama_id) return [];
     setLoading(true);
     setError(null);
-    let query = supabase.from("roles").select("*");
+    let query = supabase
+      .from("roles")
+      .select("id, nom, description, actif, mama_id, access_rights");
     if (role !== "superadmin") query = query.eq("mama_id", mama_id);
     if (search) query = query.ilike("nom", `%${search}%`);
+    if (typeof actif === "boolean") query = query.eq("actif", actif);
 
     const { data, error } = await query.order("nom", { ascending: true });
     setRoles(Array.isArray(data) ? data : []);
@@ -57,9 +61,16 @@ export function useRoles() {
   }
 
   // 4. Désactiver/réactiver un rôle
-  // Placeholder to maintain compatibility (no-op as roles have no 'actif')
-  async function toggleRoleActive() {
-    return { error: "Not supported" };
+  async function toggleRoleActive(id, actif) {
+    if (!mama_id && role !== "superadmin") return { error: "Aucun mama_id" };
+    setLoading(true);
+    setError(null);
+    let query = supabase.from("roles").update({ actif }).eq("id", id);
+    if (role !== "superadmin") query = query.eq("mama_id", mama_id);
+    const { error } = await query;
+    if (error) setError(error);
+    setLoading(false);
+    await fetchRoles();
   }
 
   // 5. Export Excel
@@ -73,6 +84,10 @@ export function useRoles() {
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Roles");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     saveAs(new Blob([buf]), "roles_mamastock.xlsx");
+  }
+
+  function exportRolesToCSV(data = roles) {
+    exportToCSV(data, { filename: "roles_mamastock.csv" });
   }
 
   // 6. Import Excel
@@ -101,6 +116,7 @@ export function useRoles() {
     updateRole,
     toggleRoleActive,
     exportRolesToExcel,
+    exportRolesToCSV,
     importRolesFromExcel,
   };
 }

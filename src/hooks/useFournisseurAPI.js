@@ -30,6 +30,24 @@ export function useFournisseurAPI() {
     return data;
   }
 
+  async function testConnection(fournisseur_id) {
+    const config = await getConfig(fournisseur_id);
+    if (!config) return false;
+    setLoading(true);
+    try {
+      const res = await fetch(`${config.url}/ping`, {
+        headers: { Authorization: `Bearer ${config.token}` },
+      });
+      return res.ok;
+    } catch (err) {
+      setError(err);
+      toast.error("Erreur test connexion");
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function importFacturesFournisseur(fournisseur_id) {
     const config = await getConfig(fournisseur_id);
     if (!config) return [];
@@ -157,5 +175,102 @@ export function useFournisseurAPI() {
     }
   }
 
-  return { loading, error, importFacturesFournisseur, syncCatalogue, envoyerCommande };
+  async function getCommandeStatus(commande_id) {
+    if (!mama_id || !commande_id) return { error: "missing data" };
+    setLoading(true);
+    setError(null);
+    const { data: cmd, error } = await supabase
+      .from("commandes")
+      .select("fournisseur_id")
+      .eq("id", commande_id)
+      .eq("mama_id", mama_id)
+      .single();
+    if (error) {
+      setLoading(false);
+      setError(error);
+      toast.error(error.message || "Erreur récupération commande");
+      return { error };
+    }
+    const config = await getConfig(cmd.fournisseur_id);
+    if (!config) {
+      setLoading(false);
+      return { error: "config" };
+    }
+    try {
+      const res = await fetch(
+        `${config.url}/commandes/${commande_id}/status`,
+        {
+          headers: { Authorization: `Bearer ${config.token}` },
+        }
+      );
+      const body = await res.json();
+      return { data: body };
+    } catch (err) {
+      setError(err);
+      toast.error("Erreur statut commande");
+      return { error: err };
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function cancelCommande(commande_id) {
+    if (!mama_id || !commande_id) return { error: "missing data" };
+    setLoading(true);
+    setError(null);
+    const { data: cmd, error } = await supabase
+      .from("commandes")
+      .select("fournisseur_id")
+      .eq("id", commande_id)
+      .eq("mama_id", mama_id)
+      .single();
+    if (error) {
+      setLoading(false);
+      setError(error);
+      toast.error(error.message || "Erreur récupération commande");
+      return { error };
+    }
+    const config = await getConfig(cmd.fournisseur_id);
+    if (!config) {
+      setLoading(false);
+      return { error: "config" };
+    }
+    try {
+      const res = await fetch(
+        `${config.url}/commandes/${commande_id}/cancel`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${config.token}`,
+          },
+        }
+      );
+      const body = await res.json();
+      await supabase
+        .from("commandes")
+        .update({ statut: body.statut || "annulee" })
+        .eq("id", commande_id)
+        .eq("mama_id", mama_id);
+      toast.success("Commande annulée");
+      return { data: body };
+    } catch (err) {
+      setError(err);
+      toast.error("Erreur annulation commande");
+      return { error: err };
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return {
+    loading,
+    error,
+    importFacturesFournisseur,
+    syncCatalogue,
+    envoyerCommande,
+    getCommandeStatus,
+    cancelCommande,
+    testConnection,
+  };
 }

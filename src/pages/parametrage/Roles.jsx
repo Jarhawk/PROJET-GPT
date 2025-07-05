@@ -11,18 +11,17 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@radix-ui/react-dialog";
-import PermissionsForm from "./PermissionsForm"; // adapte le chemin si besoin
+import RoleForm from "./RoleForm";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function Roles() {
-  const { mama_id, user_id, loading: authLoading } = useAuth();
+  const { mama_id, loading: authLoading } = useAuth();
   const [roles, setRoles] = useState([]);
   const [search, setSearch] = useState("");
   const [editRole, setEditRole] = useState(null);
-  const [editPermsRole, setEditPermsRole] = useState(null);
+  const [filterActif, setFilterActif] = useState("all");
   const [page, setPage] = useState(1);
-  const [saving, setSaving] = useState(false);
-  const PAGE_SIZE = 20;
+  const PAGE_SIZE = 50;
 
   useEffect(() => {
     if (!mama_id || authLoading) return;
@@ -35,60 +34,9 @@ export default function Roles() {
   }, [mama_id, authLoading]);
 
   // Sauvegarde (création/édition)
-  const handleSave = async () => {
-    if (!editRole.nom) {
-      toast.error("Le nom est obligatoire.");
-      return;
-    }
-    setSaving(true);
-    // Anti-doublon sur création
-    if (!editRole.id) {
-      const { data: existing } = await supabase
-        .from("roles")
-        .select("id")
-        .eq("mama_id", mama_id)
-        .eq("nom", editRole.nom)
-        .maybeSingle();
-      if (existing) {
-        toast.error("Un rôle avec ce nom existe déjà !");
-        setSaving(false);
-        return;
-      }
-    }
-    if (editRole.id) {
-      // update
-      const { error } = await supabase
-        .from("roles")
-        .update(editRole)
-        .eq("id", editRole.id)
-        .eq("mama_id", mama_id);
-      if (!error) {
-        setRoles(rs => rs.map(r => (r.id === editRole.id ? editRole : r)));
-        setEditRole(null);
-        toast.success("Rôle modifié !");
-      } else {
-        toast.error(error.message);
-      }
-    } else {
-      // insert
-      const { data, error } = await supabase
-        .from("roles")
-        .insert([{ ...editRole, mama_id, actif: true }])
-        .select()
-        .single();
-      if (!error && data) {
-        setRoles(rs => [...rs, data]);
-        setEditRole(null);
-        toast.success("Rôle créé !");
-      } else {
-        toast.error(error.message);
-      }
-    }
-    setSaving(false);
-  };
 
   // Activer/désactiver
-  const handleToggleActive = async (role) => {
+  const handleToggleActive = async role => {
     const { error } = await supabase
       .from("roles")
       .update({ actif: !role.actif })
@@ -106,11 +54,15 @@ export default function Roles() {
     }
   };
 
-  const filtered = roles.filter(
-    r =>
+  const filtered = roles.filter(r => {
+    const matchSearch =
       r.nom?.toLowerCase().includes(search.toLowerCase()) ||
-      r.description?.toLowerCase().includes(search.toLowerCase())
-  );
+      r.description?.toLowerCase().includes(search.toLowerCase());
+    const matchActif =
+      filterActif === "all" ||
+      r.actif === (filterActif === "actif");
+    return matchSearch && matchActif;
+  });
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   if (authLoading) return <LoadingSpinner message="Chargement..." />;
@@ -129,6 +81,15 @@ export default function Roles() {
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
+        <select
+          className="input input-bordered"
+          value={filterActif}
+          onChange={e => setFilterActif(e.target.value)}
+        >
+          <option value="all">Tous</option>
+          <option value="actif">Actifs</option>
+          <option value="inactif">Inactifs</option>
+        </select>
         <Button onClick={() => setEditRole({ nom: "", description: "", actif: true })}>
           + Nouveau rôle
         </Button>
@@ -141,7 +102,7 @@ export default function Roles() {
               <th className="px-2 py-1">Description</th>
               <th className="px-2 py-1">Actif</th>
               <th className="px-2 py-1">Actions</th>
-              <th className="px-2 py-1">Permissions</th>
+              <th className="px-2 py-1">Droits</th>
             </tr>
           </thead>
           <tbody>
@@ -178,13 +139,16 @@ export default function Roles() {
                   </Button>
                 </td>
                 <td className="px-2 py-1">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setEditPermsRole(r)}
-                  >
-                    Permissions
-                  </Button>
+                  {Object.entries(r.access_rights || {})
+                    .filter(([, v]) => v)
+                    .map(([k]) => (
+                      <span
+                        key={k}
+                        className="inline-block bg-gray-200 text-gray-800 text-xs px-1 mr-1 rounded"
+                      >
+                        {k}
+                      </span>
+                    ))}
                 </td>
               </tr>
             ))}
@@ -208,82 +172,32 @@ export default function Roles() {
           Suivant
         </Button>
       </div>
-      {/* Modale création/édition */}
       <Dialog open={!!editRole} onOpenChange={v => !v && setEditRole(null)}>
-        <DialogContent className="bg-glass backdrop-blur-lg text-white rounded-xl shadow-lg p-6 max-w-md">
+        <DialogContent className="bg-glass backdrop-blur-lg text-white rounded-xl shadow-lg p-6 max-w-xl">
           <DialogTitle className="font-bold mb-2">
             {editRole?.id ? "Modifier le rôle" : "Nouveau rôle"}
           </DialogTitle>
           <DialogDescription className="sr-only">Formulaire rôle</DialogDescription>
-          <form
-            onSubmit={e => {
-              e.preventDefault();
-              handleSave();
-            }}
-            className="space-y-3"
-          >
-            <div>
-              <label>Nom</label>
-              <input
-                className="input input-bordered w-full"
-                value={editRole?.nom || ""}
-                onChange={e =>
-                  setEditRole(r => ({ ...r, nom: e.target.value }))
-                }
-                required
-              />
-            </div>
-            <div>
-              <label>Description</label>
-              <textarea
-                className="input input-bordered w-full"
-                value={editRole?.description || ""}
-                rows={2}
-                onChange={e =>
-                  setEditRole(r => ({ ...r, description: e.target.value }))
-                }
-              />
-            </div>
-            <Button type="submit" disabled={saving}>
-              {saving ? (
-                <span>
-                  <span className="animate-spin mr-2">⏳</span>Enregistrement…
-                </span>
-              ) : (
-                "Enregistrer"
-              )}
-            </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
-      {/* Modale permissions */}
-      {editPermsRole && (
-        <Dialog open={!!editPermsRole} onOpenChange={v => !v && setEditPermsRole(null)}>
-          <DialogContent className="bg-glass backdrop-blur-lg text-white rounded-xl shadow-lg p-6 max-w-xl">
-            <DialogTitle className="font-bold mb-2">
-              Permissions - {editPermsRole.nom}
-            </DialogTitle>
-            <DialogDescription className="sr-only">
-              Formulaire permissions
-            </DialogDescription>
-              {/* Passe bien tout l'objet ici */}
-              <PermissionsForm
-                role={editPermsRole}
-                onClose={() => setEditPermsRole(null)}
-              afterSaveLog={async () => {
-                // Log en base le changement de permissions
-                await supabase.from("user_logs").insert([{
-                  mama_id,
-                  user_id: null,
-                  action: "Modification permissions",
-                  details: { role: editPermsRole.nom, by: user_id },
-                  done_by: user_id,
-                }]);
+          {editRole && (
+            <RoleForm
+              role={editRole}
+              onClose={() => setEditRole(null)}
+              onSaved={saved => {
+                setEditRole(null);
+                setRoles(rs => {
+                  const idx = rs.findIndex(r => r.id === saved.id);
+                  if (idx > -1) {
+                    const arr = [...rs];
+                    arr[idx] = saved;
+                    return arr;
+                  }
+                  return [...rs, saved];
+                });
               }}
             />
-          </DialogContent>
-        </Dialog>
-      )}
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

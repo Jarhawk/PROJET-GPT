@@ -180,7 +180,9 @@ export function useMenus() {
     try {
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data, { type: "array" });
-      const arr = XLSX.utils.sheet_to_json(workbook.Sheets["Menus"]);
+      const sheet =
+        workbook.Sheets["Menus"] || workbook.Sheets[workbook.SheetNames[0]];
+      const arr = XLSX.utils.sheet_to_json(sheet);
       return arr;
     } catch (error) {
       setError(error);
@@ -188,6 +190,29 @@ export function useMenus() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function subscribeToMenus(handler) {
+    if (!mama_id) return () => {};
+    const channel = supabase
+      .channel('menus')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'menus',
+          filter: `mama_id=eq.${mama_id}`,
+        },
+        (payload) => {
+          setMenus((ms) => [payload.new, ...ms]);
+          if (handler) handler(payload.new);
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }
 
   return {
@@ -208,5 +233,6 @@ export function useMenus() {
     toggleMenuActive,
     exportMenusToExcel,
     importMenusFromExcel,
+    subscribeToMenus,
   };
 }

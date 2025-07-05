@@ -5,6 +5,16 @@ import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import toast, { Toaster } from "react-hot-toast";
 
+const MODULES = [
+  { label: "Produits", key: "produits" },
+  { label: "Fournisseurs", key: "fournisseurs" },
+  { label: "Factures", key: "factures" },
+  { label: "Inventaire", key: "inventaire" },
+  { label: "Menus", key: "menus" },
+  { label: "Reporting", key: "reporting" },
+  { label: "Paramétrage", key: "parametrage" },
+];
+
 export default function RoleForm({ role, onClose, onSaved }) {
   const { mama_id } = useAuth();
   const [values, setValues] = useState({
@@ -12,10 +22,16 @@ export default function RoleForm({ role, onClose, onSaved }) {
     description: role?.description || "",
     actif: role?.actif ?? true,
   });
+  const [rights, setRights] = useState(() => ({
+    ...MODULES.reduce((acc, m) => ({ ...acc, [m.key]: !!role?.access_rights?.[m.key] }), {}),
+  }));
   const [saving, setSaving] = useState(false);
 
   const handleChange = e =>
     setValues(v => ({ ...v, [e.target.name]: e.target.value }));
+
+  const toggleRight = key =>
+    setRights(r => ({ ...r, [key]: !r[key] }));
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -40,10 +56,11 @@ export default function RoleForm({ role, onClose, onSaved }) {
     try {
       let error = null;
       let saved = null;
+      const payload = { ...values, access_rights: rights };
       if (role?.id) {
         const res = await supabase
           .from("roles")
-          .update(values)
+          .update(payload)
           .eq("id", role.id)
           .select()
           .single();
@@ -52,7 +69,7 @@ export default function RoleForm({ role, onClose, onSaved }) {
       } else {
         const res = await supabase
           .from("roles")
-          .insert([{ ...values, mama_id }])
+          .insert([{ ...payload, mama_id }])
           .select()
           .single();
         error = res.error;
@@ -106,6 +123,18 @@ export default function RoleForm({ role, onClose, onSaved }) {
           Actif
         </label>
       </div>
+      <fieldset className="grid grid-cols-2 gap-2">
+        {MODULES.map(m => (
+          <label key={m.key} className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={!!rights[m.key]}
+              onChange={() => toggleRight(m.key)}
+            />
+            {m.label}
+          </label>
+        ))}
+      </fieldset>
       <div className="flex gap-4 mt-4">
         <Button type="submit" disabled={saving}>
           {saving ? (

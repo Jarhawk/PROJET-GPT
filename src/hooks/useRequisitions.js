@@ -3,87 +3,96 @@
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 
-export const useRequisitions = () => {
-  const { mama_id } = useAuth();
+export function useRequisitions() {
+  const { mama_id, user_id } = useAuth();
 
-  const getRequisitions = async () => {
+  async function getRequisitions({ produit = "", zone = "", type = "", debut = "", fin = "" } = {}) {
     if (!mama_id) return [];
-    const { data, error } = await supabase
+    let query = supabase
       .from("requisitions")
-      .select("*, requisition_lines(*)")
+      .select("*", { count: "exact" })
       .eq("mama_id", mama_id)
-      .eq("requisition_lines.mama_id", mama_id)
-      .order("created_at", { ascending: false });
-
+      .order("date", { ascending: false });
+    if (produit) query = query.eq("produit_id", produit);
+    if (zone) query = query.eq("zone_id", zone);
+    if (type) query = query.eq("type", type);
+    if (debut) query = query.gte("date", debut);
+    if (fin) query = query.lte("date", fin);
+    const { data, error } = await query;
     if (error) {
       console.error("❌ Erreur getRequisitions:", error.message);
       return [];
     }
-
     return data || [];
-  };
+  }
 
-  const getRequisitionById = async (id) => {
+  async function getRequisitionById(id) {
     if (!id || !mama_id) return null;
     const { data, error } = await supabase
       .from("requisitions")
-      .select("*, requisition_lines(*)")
+      .select("*")
       .eq("id", id)
       .eq("mama_id", mama_id)
-      .eq("requisition_lines.mama_id", mama_id)
       .single();
     if (error) {
       console.error("❌ Erreur getRequisitionById:", error.message);
       return null;
     }
     return data || null;
-  };
+  }
 
-  const createRequisition = async ({ zone, type = "", motif = "", lignes = [], status = "en_attente" }) => {
-    if (!mama_id) return { success: false, message: "mama_id manquant" };
-
-    try {
-      const { data: req, error: reqError } = await supabase
-        .from("requisitions")
-        .insert([{ zone, type, motif, mama_id, status }])
-        .select()
-        .single();
-
-      if (reqError || !req?.id) {
-        console.error("❌ Erreur création réquisition :", reqError);
-        return { success: false, message: "Erreur création réquisition" };
-      }
-
-      if (lignes.length) {
-        const { error: linesError } = await supabase
-          .from("requisition_lines")
-          .insert(
-            lignes.map((ligne) => ({
-              requisition_id: req.id,
-              mama_id,
-              ...ligne,
-            }))
-          );
-
-        if (linesError) {
-          console.error("❌ Erreur lignes réquisition :", linesError);
-          return { success: false, message: "Erreur ajout lignes" };
-        }
-      }
-
-      return { success: true, requisition: req };
-    } catch (err) {
-      console.error("❌ Exception requisition :", err.message);
-      return { success: false, message: "Erreur système" };
+  async function createRequisition({ produit_id, zone_id, quantite, date = new Date().toISOString().slice(0, 10), type = "", commentaire = "" }) {
+    if (!mama_id) return { error: "mama_id manquant" };
+    const { data, error } = await supabase
+      .from("requisitions")
+      .insert([{ produit_id, zone_id, quantite, date, type, commentaire, mama_id, auteur_id: user_id }])
+      .select()
+      .single();
+    if (error) {
+      console.error("❌ Erreur creation requisition:", error.message);
+      return { error };
     }
-  };
+    return { data };
+  }
+
+  async function updateRequisition(id, fields) {
+    if (!mama_id) return { error: "mama_id manquant" };
+    const { data, error } = await supabase
+      .from("requisitions")
+      .update(fields)
+      .eq("id", id)
+      .eq("mama_id", mama_id)
+      .select()
+      .single();
+    if (error) {
+      console.error("❌ Erreur update requisition:", error.message);
+      return { error };
+    }
+    return { data };
+  }
+
+  async function deleteRequisition(id) {
+    if (!mama_id) return { error: "mama_id manquant" };
+    const { error } = await supabase
+      .from("requisitions")
+      .delete()
+      .eq("id", id)
+      .eq("mama_id", mama_id);
+    if (error) {
+      console.error("❌ Erreur delete requisition:", error.message);
+      return { error };
+    }
+    return { data: true };
+  }
 
   return {
     getRequisitions,
     getRequisitionById,
     createRequisition,
+    updateRequisition,
+    deleteRequisition,
     refetch: getRequisitions,
   };
-};
+}
 
 export default useRequisitions;

@@ -22,6 +22,9 @@ vi.mock('@/hooks/useUnites', () => ({
 vi.mock('@/hooks/useFournisseurs', () => ({
   useFournisseurs: () => ({ fournisseurs: [], fetchFournisseurs: vi.fn() })
 }));
+vi.mock('@/hooks/useZones', () => ({
+  useZones: () => ({ zones: [], fetchZones: vi.fn() })
+}));
 
 import Produits from '@/pages/produits/Produits.jsx';
 

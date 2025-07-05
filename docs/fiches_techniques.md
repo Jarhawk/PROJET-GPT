@@ -12,9 +12,13 @@ Ce module permet de gérer les fiches de production :
 - `src/pages/fiches/FicheDetail.jsx`
 - `src/hooks/useFiches.js`
 - `src/hooks/useFicheCoutHistory.js`
+- `src/hooks/useProduitsAutocomplete.js`
+- `src/hooks/useFichesAutocomplete.js`
 
 Les données sont sécurisées par RLS avec le `mama_id` dans `db/full_setup.sql`.
 Des triggers (`refresh_fiche_cost`) calculent automatiquement `cout_total` et `cout_par_portion` (voir `db/full_setup.sql`).
+
+Le formulaire permet d'ajouter des lignes de type produit ou sous-fiche via les hooks d'autocomplétion. Le ratio matière est affiché quand un prix de vente HT est renseigné.
 
 ## Reprise
 Pour reprendre le développement :

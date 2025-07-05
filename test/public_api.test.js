@@ -14,11 +14,13 @@ const chain = {
   gte: vi.fn(() => chain),
   order: vi.fn(() => chain),
   limit: vi.fn(() => Promise.resolve({ data, error: null })),
+  ilike: vi.fn(() => chain),
+  range: vi.fn(() => Promise.resolve({ data, error: null })),
 };
 const selectMock = vi.fn(() => chain);
 const fromMock = vi.fn(() => ({ select: selectMock }));
 const getUserMock = vi.fn();
-const limitMock = chain.limit;
+const rangeMock = chain.range;
 
 let createClientMock;
 vi.mock('@supabase/supabase-js', () => ({
@@ -38,6 +40,8 @@ beforeEach(async () => {
   chain.gte.mockClear();
   chain.order.mockClear();
   chain.limit.mockClear();
+  chain.ilike.mockClear();
+  chain.range.mockClear();
   getUserMock.mockClear();
 });
 
@@ -66,14 +70,25 @@ describe('public API router', () => {
     const res = await request(app).get('/produits?mama_id=m1').set('x-api-key', 'dev_key');
     expect(res.status).toBe(200);
     expect(res.body).toEqual(data);
-    expect(fromMock).toHaveBeenCalledWith('produits');
+    expect(fromMock).toHaveBeenCalledWith('v_produits_dernier_prix');
   });
 
   it('applies famille filter when provided', async () => {
     const app = express();
     app.use(router);
     await request(app).get('/produits?mama_id=m1&famille=bio').set('x-api-key', 'dev_key');
-    expect(chain.eq).toHaveBeenCalledWith('famille', 'bio');
+    expect(chain.ilike).toHaveBeenCalledWith('famille', '%bio%');
+  });
+
+  it('supports search and actif filters with pagination', async () => {
+    const app = express();
+    app.use(router);
+    await request(app)
+      .get('/produits?mama_id=m1&search=choc&actif=false&page=2&limit=20')
+      .set('x-api-key', 'dev_key');
+    expect(chain.ilike).toHaveBeenCalledWith('nom', '%choc%');
+    expect(chain.eq).toHaveBeenCalledWith('actif', false);
+    expect(chain.range).toHaveBeenCalledWith(20, 39);
   });
 
   it('returns 400 when mama_id is missing', async () => {
@@ -90,16 +105,35 @@ describe('public API router', () => {
     expect(res.status).toBe(200);
     expect(res.body).toEqual(data);
     expect(getUserMock).toHaveBeenCalledWith('tok');
-    expect(fromMock).toHaveBeenCalledWith('produits');
+    expect(fromMock).toHaveBeenCalledWith('v_produits_dernier_prix');
   });
 
   it('handles Supabase error for produits', async () => {
-    limitMock.mockResolvedValueOnce({ data: null, error: new Error('boom') });
+    rangeMock.mockResolvedValueOnce({ data: null, error: new Error('boom') });
     const app = express();
     app.use(router);
     const res = await request(app).get('/produits?mama_id=m1').set('x-api-key', 'dev_key');
     expect(res.status).toBe(500);
     expect(res.body).toEqual({ error: 'boom' });
+  });
+
+  it('fetches promotions with valid API key', async () => {
+    const app = express();
+    app.use(router);
+    const res = await request(app).get('/promotions?mama_id=m1').set('x-api-key', 'dev_key');
+    expect(res.status).toBe(200);
+    expect(fromMock).toHaveBeenCalledWith('promotions');
+  });
+
+  it('supports search and actif filters on promotions', async () => {
+    const app = express();
+    app.use(router);
+    await request(app)
+      .get('/promotions?mama_id=m1&search=summer&actif=true&page=2&limit=10')
+      .set('x-api-key', 'dev_key');
+    expect(chain.ilike).toHaveBeenCalledWith('nom', '%summer%');
+    expect(chain.eq).toHaveBeenCalledWith('actif', true);
+    expect(chain.range).toHaveBeenCalledWith(10, 19);
   });
 
   it('returns 401 when missing API key on stock', async () => {
@@ -136,6 +170,18 @@ describe('public API router', () => {
     expect(chain.gte).toHaveBeenCalledWith('date', '2024-01-01');
   });
 
+  it('supports type, zone and pagination filters', async () => {
+    const app = express();
+    app.use(router);
+    await request(app)
+      .get('/stock?mama_id=m1&type=entree&zone=frigo&page=2&limit=50&sortBy=type&order=asc')
+      .set('x-api-key', 'dev_key');
+    expect(chain.eq).toHaveBeenCalledWith('type', 'entree');
+    expect(chain.eq).toHaveBeenCalledWith('zone', 'frigo');
+    expect(chain.order).toHaveBeenCalledWith('type', { ascending: true });
+    expect(chain.range).toHaveBeenCalledWith(50, 99);
+  });
+
   it('returns 400 when mama_id is missing on stock', async () => {
     const app = express();
     app.use(router);
@@ -154,7 +200,7 @@ describe('public API router', () => {
   });
 
   it('handles Supabase error for stock', async () => {
-    limitMock.mockResolvedValueOnce({ data: null, error: new Error('boom') });
+    rangeMock.mockResolvedValueOnce({ data: null, error: new Error('boom') });
     const app = express();
     app.use(router);
     const res = await request(app).get('/stock?mama_id=m1').set('x-api-key', 'dev_key');

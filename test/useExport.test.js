@@ -16,12 +16,26 @@ vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ mama_id: 'm1' }) }))
 const pdfMock = vi.fn();
 const excelMock = vi.fn();
 const csvMock = vi.fn();
+const tsvMock = vi.fn();
+const jsonMock = vi.fn();
+const xmlMock = vi.fn();
+const htmlMock = vi.fn();
+const mdMock = vi.fn();
+const yamlMock = vi.fn();
+const txtMock = vi.fn();
 const printMock = vi.fn();
 
 vi.mock('@/lib/export/exportHelpers', () => ({
   exportToPDF: pdfMock,
   exportToExcel: excelMock,
   exportToCSV: csvMock,
+  exportToTSV: tsvMock,
+  exportToJSON: jsonMock,
+  exportToXML: xmlMock,
+  exportToHTML: htmlMock,
+  exportToMarkdown: mdMock,
+  exportToYAML: yamlMock,
+  exportToTXT: txtMock,
   printView: printMock,
 }));
 
@@ -37,6 +51,13 @@ beforeEach(async () => {
   pdfMock.mockClear();
   excelMock.mockClear();
   csvMock.mockClear();
+  tsvMock.mockClear();
+  jsonMock.mockClear();
+  xmlMock.mockClear();
+  htmlMock.mockClear();
+  mdMock.mockClear();
+  yamlMock.mockClear();
+  txtMock.mockClear();
   printMock.mockClear();
 });
 
@@ -55,4 +76,24 @@ test('exportData queries factures with dates and calls Excel export', async () =
   expect(queryObj.gte).toHaveBeenCalledWith('date', '2024-01-01');
   expect(queryObj.lte).toHaveBeenCalledWith('date', '2024-12-31');
   expect(excelMock).toHaveBeenCalled();
+});
+
+test('exportData handles all formats', async () => {
+  const { result } = renderHook(() => useExport());
+  await act(async () => {
+    await result.current.exportData({ type: 'fiches', format: 'tsv' });
+    await result.current.exportData({ type: 'fiches', format: 'json' });
+    await result.current.exportData({ type: 'fiches', format: 'xml' });
+    await result.current.exportData({ type: 'fiches', format: 'html' });
+    await result.current.exportData({ type: 'fiches', format: 'markdown' });
+    await result.current.exportData({ type: 'fiches', format: 'yaml' });
+    await result.current.exportData({ type: 'fiches', format: 'txt' });
+  });
+  expect(tsvMock).toHaveBeenCalled();
+  expect(jsonMock).toHaveBeenCalled();
+  expect(xmlMock).toHaveBeenCalled();
+  expect(htmlMock).toHaveBeenCalled();
+  expect(mdMock).toHaveBeenCalled();
+  expect(yamlMock).toHaveBeenCalled();
+  expect(txtMock).toHaveBeenCalled();
 });

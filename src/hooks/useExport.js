@@ -6,6 +6,14 @@ import {
   exportToPDF,
   exportToExcel,
   exportToCSV,
+  exportToTSV,
+  exportToJSON,
+  exportToXML,
+  exportToHTML,
+  exportToMarkdown,
+  exportToYAML,
+  exportToTXT,
+  exportToClipboard,
   printView,
 } from '@/lib/export/exportHelpers';
 import toast from 'react-hot-toast';
@@ -51,6 +59,14 @@ export default function useExport() {
       if (format === 'pdf') exportToPDF(data, options);
       else if (format === 'excel') exportToExcel(data, options);
       else if (format === 'csv') exportToCSV(data, options);
+      else if (format === 'tsv') exportToTSV(data, options);
+      else if (format === 'json') exportToJSON(data, options);
+      else if (format === 'xml') exportToXML(data, options);
+      else if (format === 'html') exportToHTML(data, options);
+      else if (format === 'markdown') exportToMarkdown(data, options);
+      else if (format === 'yaml') exportToYAML(data, options);
+      else if (format === 'txt') exportToTXT(data, options);
+      else if (format === 'clipboard') await exportToClipboard(data, options);
       else if (format === 'print') printView(options.content);
 
       toast.success('Export effectué');

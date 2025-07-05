@@ -3,25 +3,29 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useMouvements } from "@/hooks/useMouvements";
 import { useProducts } from "@/hooks/useProducts";
+import { useZones } from "@/hooks/useZones";
+import AutoCompleteZoneField from "@/components/ui/AutoCompleteZoneField";
 import toast from "react-hot-toast";
 
 export default function MouvementForm({ onClose }) {
   const { createMouvement } = useMouvements();
   const { products, fetchProducts } = useProducts();
+  const { zones, fetchZones } = useZones();
   const [produitInput, setProduitInput] = useState("");
   const [form, setForm] = useState({
     type: "entrée",
     produit_id: "",
     quantite: 0,
-    zone: "",
-    motif: "",
-    sous_type: "",
+    zone_source_id: "",
+    zone_destination_id: "",
+    commentaire: "",
   });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchProducts({ limit: 1000 });
-  }, [fetchProducts]);
+    fetchZones();
+  }, [fetchProducts, fetchZones]);
 
 
   const handleSubmit = async e => {
@@ -87,25 +91,33 @@ export default function MouvementForm({ onClose }) {
           step="0.01"
           placeholder="Quantité"
           value={form.quantite}
-          onChange={e => setForm(f => ({ ...f, quantite: e.target.value }))}
+          onChange={e => setForm(f => ({ ...f, quantite: parseFloat(e.target.value) }))}
         />
-        <input
+        {form.type !== "entrée" && (
+          <AutoCompleteZoneField
+            placeholder="Zone source"
+            value={zones.find(z => z.id === form.zone_source_id)?.nom || ""}
+            onChange={val => {
+              const found = zones.find(z => z.nom === val);
+              setForm(f => ({ ...f, zone_source_id: found ? found.id : "" }));
+            }}
+          />
+        )}
+        {form.type !== "sortie" && form.type !== "correction" && (
+          <AutoCompleteZoneField
+            placeholder="Zone destination"
+            value={zones.find(z => z.id === form.zone_destination_id)?.nom || ""}
+            onChange={val => {
+              const found = zones.find(z => z.nom === val);
+              setForm(f => ({ ...f, zone_destination_id: found ? found.id : "" }));
+            }}
+          />
+        )}
+        <textarea
           className="input mb-2 w-full"
-          placeholder="Zone"
-          value={form.zone}
-          onChange={e => setForm(f => ({ ...f, zone: e.target.value }))}
-        />
-        <input
-          className="input mb-2 w-full"
-          placeholder="Sous-type (optionnel)"
-          value={form.sous_type}
-          onChange={e => setForm(f => ({ ...f, sous_type: e.target.value }))}
-        />
-        <input
-          className="input mb-2 w-full"
-          placeholder="Motif"
-          value={form.motif}
-          onChange={e => setForm(f => ({ ...f, motif: e.target.value }))}
+          placeholder="Commentaire"
+          value={form.commentaire}
+          onChange={e => setForm(f => ({ ...f, commentaire: e.target.value }))}
         />
         <div className="flex gap-2 justify-end mt-4">
           <Button type="submit" disabled={loading}>Valider</Button>

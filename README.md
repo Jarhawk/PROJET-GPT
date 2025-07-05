@@ -185,9 +185,11 @@ The Playwright configuration automatically starts the dev server.
 
 The lightweight SDK in `lib/mamastock-sdk` provides helper functions to call the
 public API. Instantiate `MamaStockSDK` with your base URL, API key and/or bearer
-token and use `getProduits` or `getStock` to fetch data. If you omit `baseUrl`,
+token and use `getProduits`, `getStock` or `getPromotions` to fetch data. If you omit `baseUrl`,
 the SDK falls back to the `MAMASTOCK_BASE_URL` environment variable. It also reads `MAMASTOCK_API_KEY` and `MAMASTOCK_TOKEN` when the corresponding options are missing. You may set `MAMASTOCK_USER_AGENT` to change the default `User-Agent` header. You may also provide a `mamaId` when creating the SDK so it applies to every request by default; otherwise `MAMASTOCK_MAMA_ID` sets the fallback establishment id. The variables `MAMASTOCK_RETRY_ATTEMPTS` and `MAMASTOCK_RETRY_DELAY_MS` let you tune retry behaviour when options are omitted. Both helpers accept an options object to override the `mama_id` and add optional
-filters. When authenticating via API key, provide the `mama_id`:
+filters. You can search by name with `search`, filter by `famille` and `actif`,
+and control pagination using `page`, `limit`, `sortBy` and `order`. When
+authenticating via API key, provide the `mama_id`:
 
 ```ts
 const sdk = new MamaStockSDK({
@@ -196,12 +198,37 @@ const sdk = new MamaStockSDK({
   token: 'supabase_jwt',
   mamaId: 'm1',
 });
-const produits = await getProduits(sdk, { famille: 'dessert' });
+const produits = await getProduits(sdk, {
+  famille: 'dessert',
+  search: 'choco',
+  actif: true,
+  page: 1,
+  limit: 50,
+  sortBy: 'nom',
+});
 ```
 
-`getStock` follows the same pattern and supports a `since` option to filter
-movements from a given date. These filters mirror the Express routes of the
-public API.
+`getStock` follows the same pattern and accepts filters for `since`, `type` and
+`zone`. Pagination works with `page` and `limit`, and results can be sorted with
+`sortBy` and `order`. These options mirror the Express routes of the public API.
+Each helper also accepts an optional third `AbortSignal` argument to cancel the request.
+
+`getPromotions` exposes similar filters:
+
+```ts
+import { getPromotions } from '../lib/mamastock-sdk';
+
+const promos = await getPromotions(sdk, {
+  search: 'spring',
+  actif: true,
+  page: 1,
+  limit: 20,
+  sortBy: 'date_debut',
+  order: 'desc',
+});
+```
+
+`getPromotions` accepts `search`, `actif`, `page`, `limit`, `sortBy` and `order` parameters.
 
 `fetchData` automatically retries when the server responds with a 429 or 503
 status. Set `retryAttempts` when creating the SDK to control the maximum
@@ -218,17 +245,52 @@ sixth argument accepts an `AbortSignal` so you can cancel a request manually.
 Use `userAgent` to override the `User-Agent` header sent with each request
 (default `"MamaStockSDK"`).
 
+Call `sdk.updateOptions()` at any time to modify these settings dynamically.
+Use `sdk.clearAuth()` to remove the stored API key and token.
+Use `sdk.setAuth()` to replace the API key or token later on.
+Call `sdk.setHeaders()` to add custom headers sent with every request.
+Call `sdk.removeHeaders()` to delete previously added headers.
+
 For more examples and authentication details, see [docs/sdk_usage.md](docs/sdk_usage.md).
+Simple login helpers are documented in [docs/auth_helpers.md](docs/auth_helpers.md).
+Notification utilities are covered in [docs/notifications.md](docs/notifications.md).
+Storage helpers are described in [docs/storage_helpers.md](docs/storage_helpers.md).
+Menu helpers are described in [docs/menus.md](docs/menus.md).
+Autocomplete hooks are described in [docs/autocomplete_hooks.md](docs/autocomplete_hooks.md).
+The advanced inventory process is explained in [docs/inventaire_avance.md](docs/inventaire_avance.md).
+Requisition helpers are described in [docs/requisitions.md](docs/requisitions.md).
+Task management is documented in [docs/taches.md](docs/taches.md).
 
 ## Features
 - Dashboard overview at `/dashboard` (root `/` redirects here) with KPI widgets,
   stock alerts and trend charts
 - Supplier price comparison with average and latest purchase metrics
 - Comparison page available at `/fournisseurs/comparatif` and linked from the sidebar
-- Upload and delete files via Supabase Storage using `useStorage`, with automatic cleanup of replaced uploads
+- Upload, delete, download or replace files via Supabase Storage using `useStorage`; `replaceFile` handles cleanup of previous uploads
 - Daily menu handling provided by `useMenuDuJour`
+- Simple auth helpers `login()`, `signUp()`, `resetPassword()`,
+  `updateEmail()`, `updatePassword()`, `updateProfile()`, `sendMagicLink()`,
+  `loginWithProvider()`, `sendPhoneOtp()`, `verifyOtp()`, `getCurrentUser()`,
+  `getSession()`, `refreshSession()`, `onAuthStateChange()`,
+  `getAccessToken()`, `enableTwoFa()`, `disableTwoFa()`,
+  `resendEmailVerification()` and `logout()`
 - Menu planning with recipe associations, production planning and automatic stock decrement
+- Menus can be imported or exported via Excel (the importer falls back to the first sheet if no "Menus" sheet is present)
+- Realtime updates available via `subscribeToMenus()`
 - PDF export for invoices and fiches techniques using jsPDF
+  - Accepts an optional `orientation` setting for portrait or landscape layouts
+  - CSV export supports custom `delimiter` and `quoteValues` options
+  - Fiche form lets you combine products and sub-recipes with autocomplete helpers
+  - TSV export via `exportToTSV`
+  - XML export via `exportToXML`
+  - HTML export via `exportToHTML`
+  - JSON export with optional pretty formatting
+  - YAML export via `exportToYAML`
+  - Markdown export via `exportToMarkdown`
+  - TXT export via `exportToTXT`
+  - Clipboard export via `exportToClipboard`
+  - `useExport` hook handles TSV, JSON, XML, HTML, Markdown, YAML, TXT and clipboard formats
+  - All exports support `includeWatermark: false` to remove the footer
 - Forms display links to preview uploaded documents immediately
 - Product management supports codes, allergens and photo upload
 - Products track a minimum stock level for dashboard alerts
@@ -242,6 +304,8 @@ For more examples and authentication details, see [docs/sdk_usage.md](docs/sdk_u
 - Stock detail charts show monthly product rotation
 - Stock movement management available at `/mouvements`
 - Indexes on `mouvements_stock.type`, `zone`, `sous_type` and `motif` speed up filtering
+- Public stock API supports filters on `type`, `zone`, pagination and sorting
+- Public promotions API supports `search`, `actif`, pagination and sorting
 - Audit log viewer with date and text filters plus Excel export, accessible from the sidebar
 - Cost center management with allocation modal and dedicated settings page
 - Cost centers can be imported or exported via Excel in the settings page (the importer falls back to the first sheet if no "CostCenters" sheet is present)
@@ -253,10 +317,13 @@ For more examples and authentication details, see [docs/sdk_usage.md](docs/sdk_u
 - Dashboard chart showing monthly purchase price trends per product
 - Dashboard pie chart highlights top consumed products over the last month
 - Inventory management with start/end dates accessible from `/inventaire` and `/inventaire/nouveau`; indexes speed up lookups on `date` and `date_debut`
+- Advanced inventory form filters products by zone and family, calculates consumption and requisitions with Excel export in the detail view
+- Requisitions module lets teams declare needs without impacting real stock and export them to Excel
+- Storage zones can be managed from the settings with activation toggles and pagination; products use an autocomplete field listing active zones
 - Inventory integrity can be verified with the `validateInventaireStock` helper which compares product stock after closing an inventory
 - Stock statistics page `/stats/stocks` uses the `dashboard_stats` RPC and offers Excel export from the sidebar
-- Simple task manager available at `/taches` with creation and detail pages at `/taches/nouveau` and `/taches/:id`
-- Indexes on `taches.next_echeance` and `tache_instances.done_by` speed up task queries
+- Task management available at `/taches` with creation and list pages
+- Tasks support manual or delayed due dates, priorities and recurring schedules
 - Invoice form supports OCR scanning of uploaded documents
 - Manage invoices from `/factures` with pages `/factures/nouveau` and `/factures/:id`
 - Index on `factures.reference` speeds up invoice search queries
@@ -271,6 +338,8 @@ For more examples and authentication details, see [docs/sdk_usage.md](docs/sdk_u
 - Command `npm run allocate:history` applies those suggestions to past movements
 - Global search bar in the navbar to quickly find products or suppliers
 - Live search on documents, alerts and suppliers lists with server-side filtering
+- Autocomplete hooks help pick suppliers and invoices securely
+- Notifications hook provides `markAllAsRead()`, `fetchUnreadCount()`, `updateNotification()`, `deleteNotification()` and `subscribeToNotifications()` helpers
 - Built-in dark mode toggle for better accessibility
 - Password reset link on the login form points to `/reset-password` and the flow continues on `/update-password`
 - Optional two-factor authentication (TOTP) for user accounts, verified via QR code before activation
@@ -489,6 +558,16 @@ SQL associé dans `db/full_setup.sql` :
   pour les rôles autorisés
 - Droits `SELECT/INSERT/UPDATE/DELETE` pour le rôle `authenticated`.
 
+## Module Factures et bons de livraison
+
+Ce module unique gère à la fois les factures fournisseur et les bons de
+livraison. Un sélecteur dans le formulaire permet de choisir le mode "Bon de
+livraison" ou "Facture". La case "Mettre à jour le stock maintenant" détermine
+si les produits sont ajoutés immédiatement au stock. Les factures peuvent être
+créées manuellement ou à partir de bons de livraison existants. La liste est
+paginée et indique si le stock a déjà été impacté. Un bouton "Ajouter au stock"
+s'affiche pour les enregistrements créés sans mise à jour immédiate.
+
 ## Module API fournisseurs
 
 Ce module gère les paramètres de connexion aux API des fournisseurs
@@ -496,7 +575,9 @@ Ce module gère les paramètres de connexion aux API des fournisseurs
 un `mama`. Les données sont protégées par RLS et les index sur
 `fournisseur_id` et `mama_id` accélèrent les requêtes. Le hook React
 `useFournisseurApiConfig` permet de charger, enregistrer, lister ou supprimer ces
-configurations depuis l'interface.
+configurations depuis l'interface. Le hook `useFournisseurAPI` expose quant à lui
+`importFacturesFournisseur`, `syncCatalogue`, `envoyerCommande`, `getCommandeStatus`,
+`cancelCommande` et `testConnection` pour interagir avec les services externes.
 
 ## Module Analytique avancée
 

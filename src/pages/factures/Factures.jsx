@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useFactures } from "@/hooks/useFactures";
 import { useSuppliers } from "@/hooks/useSuppliers";
 import { useAuth } from "@/context/AuthContext";
+import { useFacturesAutocomplete } from "@/hooks/useFacturesAutocomplete";
 import FactureForm from "./FactureForm.jsx";
 import FactureDetail from "./FactureDetail.jsx";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ export default function Factures() {
   const { factures, total, getFactures, deleteFacture } = useFactures();
   const { suppliers } = useSuppliers();
   const { mama_id } = useAuth();
+  const { results: factureOptions, searchFactures } = useFacturesAutocomplete();
   const [showForm, setShowForm] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected] = useState(null);
@@ -33,6 +35,8 @@ export default function Factures() {
   const [page, setPage] = useState(1);
   const pageSize = 10;
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => { searchFactures(search); }, [search, searchFactures]);
 
   useEffect(() => {
     if (mama_id) getFactures({
@@ -83,12 +87,20 @@ export default function Factures() {
       <Toaster position="top-right" />
       <GlassCard className="flex flex-wrap gap-4 items-end">
         <input
+          list="factures-list"
           type="search"
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="input"
-          placeholder="Recherche (nom fournisseur, n°)"
+          placeholder="Recherche (numéro)"
         />
+        <datalist id="factures-list">
+          {factureOptions.map(f => (
+            <option key={f.id} value={f.numero || f.id}>
+              {`n°${f.numero || f.id} - ${f.fournisseurs?.nom || ""}`}
+            </option>
+          ))}
+        </datalist>
         <select className="input" value={supplierFilter} onChange={e => setSupplierFilter(e.target.value)}>
           <option value="">Tous fournisseurs</option>
           {suppliers.map(s => <option key={s.id} value={s.id}>{s.nom}</option>)}

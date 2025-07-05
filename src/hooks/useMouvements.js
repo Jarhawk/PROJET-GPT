@@ -4,12 +4,12 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 
 export function useMouvements() {
-  const { mama_id } = useAuth();
+  const { mama_id, user_id } = useAuth();
   const [mouvements, setMouvements] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  async function getMouvements({ type = "", produit = "", zone = "", debut = "", fin = "" } = {}) {
+  async function getMouvements({ type = "", produit = "", zone_source = "", zone_destination = "", debut = "", fin = "" } = {}) {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
@@ -23,7 +23,8 @@ export function useMouvements() {
     if (produit) query = query.eq("produit_id", produit);
     if (debut) query = query.gte("date", debut);
     if (fin) query = query.lte("date", fin);
-    if (zone) query = query.ilike("zone", `%${zone}%`);
+    if (zone_source) query = query.eq("zone_source_id", zone_source);
+    if (zone_destination) query = query.eq("zone_destination_id", zone_destination);
 
     const { data, error } = await query;
     if (!error) setMouvements(data || []);
@@ -38,7 +39,7 @@ export function useMouvements() {
     setError(null);
     const { data, error } = await supabase
       .from("mouvements_stock")
-      .insert([{ ...payload, mama_id }])
+      .insert([{ ...payload, mama_id, auteur_id: user_id }])
       .select()
       .single();
     setLoading(false);

@@ -80,6 +80,9 @@ export default function FicheDetail({ fiche: ficheProp, onClose }) {
         <div><b>Portions :</b> {fiche.portions}</div>
         <div><b>Coût total :</b> {Number(fiche.cout_total).toFixed(2)} €</div>
         <div><b>Coût/portion :</b> {Number(fiche.cout_par_portion).toFixed(2)} €</div>
+        {fiche.prix_vente && (
+          <div><b>Ratio :</b> {((Number(fiche.cout_par_portion) / Number(fiche.prix_vente)) * 100).toFixed(1)}%</div>
+        )}
         <div className="my-2">
           <b>Ingrédients :</b>
           <ul className="list-disc pl-6">

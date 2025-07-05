@@ -61,6 +61,45 @@ BEGIN
     EXECUTE 'DROP TABLE public.users CASCADE';
   END IF;
 END $$;
+
+-- Additional fields for mouvements_stock with zone tracking
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='mouvements_stock' AND column_name='zone_source_id'
+  ) THEN
+    ALTER TABLE mouvements_stock ADD COLUMN zone_source_id uuid references zones_stock(id);
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='mouvements_stock' AND column_name='zone_destination_id'
+  ) THEN
+    ALTER TABLE mouvements_stock ADD COLUMN zone_destination_id uuid references zones_stock(id);
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='mouvements_stock' AND column_name='commentaire'
+  ) THEN
+    ALTER TABLE mouvements_stock ADD COLUMN commentaire text;
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='mouvements_stock' AND column_name='auteur_id'
+  ) THEN
+    ALTER TABLE mouvements_stock ADD COLUMN auteur_id uuid references utilisateurs(id);
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='mouvements_stock' AND column_name='zone_source_id') THEN
+    CREATE INDEX IF NOT EXISTS idx_mouvements_stock_zone_source ON mouvements_stock(zone_source_id);
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='mouvements_stock' AND column_name='zone_destination_id') THEN
+    CREATE INDEX IF NOT EXISTS idx_mouvements_stock_zone_destination ON mouvements_stock(zone_destination_id);
+  END IF;
+END $$;
 create table if not exists users (
     id uuid primary key default uuid_generate_v4(),
     email text not null unique,
@@ -309,10 +348,14 @@ create table if not exists inventaire_lignes (
 
 create table if not exists mouvements_stock (
     id uuid primary key default uuid_generate_v4(),
-    product_id uuid references products(id) on delete set null,
-    date date default current_date,
+    produit_id uuid references produits(id) on delete set null,
+    quantite numeric not null,
     type text check (type in ('entree','sortie','correction','transfert')),
-    quantite numeric,
+    zone_source_id uuid references zones_stock(id),
+    zone_destination_id uuid references zones_stock(id),
+    date date default current_date,
+    commentaire text,
+    auteur_id uuid references utilisateurs(id),
     inventaire_id uuid references inventaires(id) on delete set null,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now()
@@ -373,18 +416,14 @@ create table if not exists menu_fiches (
 -- Réquisitions
 create table if not exists requisitions (
     id uuid primary key default uuid_generate_v4(),
-    zone text,
-    status text,
     mama_id uuid not null references mamas(id),
-    created_at timestamptz default now()
-);
-
-create table if not exists requisition_lines (
-    id uuid primary key default uuid_generate_v4(),
-    requisition_id uuid references requisitions(id) on delete cascade,
-    produit_id uuid references products(id) on delete set null,
-    quantite numeric,
-    mama_id uuid not null references mamas(id),
+    produit_id uuid references products(id),
+    zone_id uuid references zones_stock(id),
+    date date default current_date,
+    quantite numeric not null,
+    type text,
+    commentaire text,
+    auteur_id uuid references utilisateurs(id),
     created_at timestamptz default now()
 );
 
@@ -407,6 +446,7 @@ create table if not exists zones_stock (
     id uuid primary key default uuid_generate_v4(),
     nom text not null,
     mama_id uuid not null references mamas(id),
+    actif boolean default true,
     created_at timestamptz default now(),
     unique(mama_id, nom)
 );
@@ -496,11 +536,13 @@ create index if not exists idx_menus_date on menus(date);
 create index if not exists idx_menu_fiches_menu on menu_fiches(menu_id);
 create index if not exists idx_menu_fiches_fiche on menu_fiches(fiche_id);
 create index if not exists idx_requisitions_mama on requisitions(mama_id);
-create index if not exists idx_requisition_lines_requisition on requisition_lines(requisition_id);
-create index if not exists idx_requisition_lines_produit on requisition_lines(produit_id);
+create index if not exists idx_requisitions_produit on requisitions(produit_id);
+create index if not exists idx_requisitions_zone on requisitions(zone_id);
+create index if not exists idx_requisitions_date on requisitions(date);
 create index if not exists idx_transferts_mama on transferts(mama_id);
 create index if not exists idx_transferts_produit on transferts(produit_id);
 create index if not exists idx_zones_stock_mama on zones_stock(mama_id);
+create index if not exists idx_zones_stock_actif on zones_stock(actif);
 create index if not exists idx_inventaire_zones_mama on inventaire_zones(mama_id);
 create index if not exists idx_ventes_boissons_mama on ventes_boissons(mama_id);
 create index if not exists idx_ventes_boissons_boisson on ventes_boissons(boisson_id);
@@ -771,7 +813,24 @@ create policy inventaire_lignes_all on inventaire_lignes for all using (mama_id 
 alter table mouvements_stock enable row level security;
 alter table mouvements_stock force row level security;
 drop policy if exists mouvements_stock_all on mouvements_stock;
-create policy mouvements_stock_all on mouvements_stock for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+drop policy if exists mouvements_stock_select on mouvements_stock;
+drop policy if exists mouvements_stock_insert on mouvements_stock;
+drop policy if exists mouvements_stock_update on mouvements_stock;
+drop policy if exists mouvements_stock_delete on mouvements_stock;
+create policy mouvements_stock_select on mouvements_stock for select using (
+  mama_id = current_user_mama_id()
+);
+create policy mouvements_stock_insert on mouvements_stock for insert with check (
+  mama_id = current_user_mama_id() and auteur_id = auth.uid()
+);
+create policy mouvements_stock_update on mouvements_stock for update using (
+  mama_id = current_user_mama_id() and auteur_id = auth.uid() and created_at >= now() - interval '24 hours'
+) with check (
+  mama_id = current_user_mama_id() and auteur_id = auth.uid()
+);
+create policy mouvements_stock_delete on mouvements_stock for delete using (
+  mama_id = current_user_mama_id() and auteur_id = auth.uid() and created_at >= now() - interval '24 hours'
+);
 
 alter table familles enable row level security;
 alter table familles force row level security;
@@ -816,12 +875,24 @@ create policy menu_fiches_all on menu_fiches for all using (mama_id = current_us
 alter table requisitions enable row level security;
 alter table requisitions force row level security;
 drop policy if exists requisitions_all on requisitions;
-create policy requisitions_all on requisitions for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+drop policy if exists requisitions_insert on requisitions;
+drop policy if exists requisitions_update on requisitions;
+drop policy if exists requisitions_delete on requisitions;
+create policy requisitions_all on requisitions for select using (
+  mama_id = current_user_mama_id()
+);
+create policy requisitions_insert on requisitions for insert with check (
+  mama_id = current_user_mama_id() and auteur_id = auth.uid()
+);
+create policy requisitions_update on requisitions for update using (
+  mama_id = current_user_mama_id() and auteur_id = auth.uid() and created_at > now() - interval '24 hours'
+) with check (
+  mama_id = current_user_mama_id() and auteur_id = auth.uid()
+);
+create policy requisitions_delete on requisitions for delete using (
+  mama_id = current_user_mama_id() and auteur_id = auth.uid() and created_at > now() - interval '24 hours'
+);
 
-alter table requisition_lines enable row level security;
-alter table requisition_lines force row level security;
-drop policy if exists requisition_lines_all on requisition_lines;
-create policy requisition_lines_all on requisition_lines for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
 
 alter table transferts enable row level security;
 alter table transferts force row level security;
@@ -1415,27 +1486,38 @@ create table if not exists taches (
     mama_id uuid not null references mamas(id) on delete cascade,
     titre text not null,
     description text,
-    type text not null check (type in ('unique','quotidienne','hebdomadaire','mensuelle')),
+    assignes uuid[] not null default '{}',
     date_debut date not null,
-    date_fin date,
-    next_echeance date,
-    assigned_to uuid references users(id),
-    statut text not null default 'a_faire' check (statut in ('a_faire','en_cours','fait','reporte','annule')),
-    created_at timestamptz default now()
+    delai_jours integer,
+    date_echeance date not null,
+    recurrente boolean not null default false,
+    frequence text check (frequence in ('quotidien','hebdomadaire','mensuel')),
+    priorite text not null default 'moyenne' check (priorite in ('basse','moyenne','haute')),
+    statut text not null default 'a_faire' check (statut in ('a_faire','en_cours','terminee')),
+    created_by uuid references utilisateurs(id),
+    created_at timestamptz default now(),
+    updated_at timestamptz default now()
 );
 create index if not exists idx_taches_mama on taches(mama_id);
-create index if not exists idx_taches_assigned on taches(assigned_to);
-create index if not exists idx_taches_echeance on taches(next_echeance);
+create index if not exists idx_taches_echeance on taches(date_echeance);
 create index if not exists idx_taches_statut on taches(statut);
-create index if not exists idx_taches_debut on taches(date_debut);
-create index if not exists idx_taches_fin on taches(date_fin);
+create index if not exists idx_taches_priorite on taches(priorite);
 
 alter table taches enable row level security;
 alter table taches force row level security;
-drop policy if exists taches_all on taches;
-create policy taches_all on taches
-  for all using (mama_id = current_user_mama_id())
+drop policy if exists taches_select on taches;
+create policy taches_select on taches
+  for select using (mama_id = current_user_mama_id());
+drop policy if exists taches_insert on taches;
+create policy taches_insert on taches
+  for insert with check (mama_id = current_user_mama_id() and created_by = auth.uid());
+drop policy if exists taches_update on taches;
+create policy taches_update on taches
+  for update using (mama_id = current_user_mama_id() and (created_by = auth.uid() or auth.uid() = any(assignes)))
   with check (mama_id = current_user_mama_id());
+drop policy if exists taches_delete on taches;
+create policy taches_delete on taches
+  for delete using (mama_id = current_user_mama_id() and created_by = auth.uid());
 grant select, insert, update, delete on taches to authenticated;
 
 create table if not exists tache_instances (

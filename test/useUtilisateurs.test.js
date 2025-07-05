@@ -14,6 +14,8 @@ const query = {
 };
 const fromMock = vi.fn(() => query);
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
+const csvMock = vi.fn();
+vi.mock('@/lib/export/exportHelpers', () => ({ exportToCSV: csvMock }));
 
 const authMock = vi.fn(() => ({ mama_id: 'm1', role: 'admin' }));
 vi.mock('@/context/AuthContext', () => ({ useAuth: authMock }));
@@ -66,4 +68,10 @@ test('superadmin bypasses mama filter', async () => {
   expect(query.update).toHaveBeenCalledWith({ role: 'user' });
   expect(query.eq).toHaveBeenCalledWith('id', 'id1');
   expect(query.eq.mock.calls.some(c => c[0] === 'mama_id')).toBe(false);
+});
+
+test('exportUsersToCSV calls helper', () => {
+  const { result } = renderHook(() => useUtilisateurs());
+  result.current.exportUsersToCSV([{ id: 1 }]);
+  expect(csvMock).toHaveBeenCalledWith([{ id: 1 }], { filename: 'utilisateurs_mamastock.csv' });
 });

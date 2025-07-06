@@ -11,11 +11,13 @@ beforeAll(() => {
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
 
 let fromMock;
-let query;
 let data = {};
+const alias = { v_produits_dernier_prix: 'produits' };
 
-function setup(table, initial = []) {
-  data[table] = [...initial];
+function createQuery(table) {
+  const target = alias[table] || table;
+  let query;
+  if (!data[target]) data[target] = [];
   query = {
     select: vi.fn(() => query),
     eq: vi.fn(() => query),
@@ -26,20 +28,28 @@ function setup(table, initial = []) {
     gte: vi.fn(() => query),
     lte: vi.fn(() => query),
     insert: vi.fn(rows => {
-      rows.forEach(r => data[table].push({ id: String(data[table].length + 1), actif: true, ...r }));
+      rows.forEach(r => data[target].push({ id: String(data[target].length + 1), actif: true, ...r }));
       return query;
     }),
     update: vi.fn(fields => {
-      if (data[table][0]) Object.assign(data[table][0], fields);
+      if (data[target][0]) Object.assign(data[target][0], fields);
       return query;
     }),
     delete: vi.fn(() => {
-      if (data[table][0]) data[table][0].actif = false;
+      if (data[target].length > 0) data[target].splice(0, 1);
       return query;
     }),
-    then: cb => Promise.resolve(cb({ data: [...data[table]], count: data[table].length, error: null })),
+    then: cb => Promise.resolve(cb({ data: [...data[target]], count: data[target].length, error: null })),
   };
-  fromMock = vi.fn(() => query);
+  return query;
+}
+
+function setup(tables) {
+  data = {};
+  Object.entries(tables).forEach(([table, initial]) => {
+    data[table] = [...initial];
+  });
+  fromMock = vi.fn(table => createQuery(table));
   vi.mock('@/lib/supabase', () => ({ supabase: { from: (...args) => fromMock(...args) } }), { overwrite: true });
 }
 
@@ -55,7 +65,7 @@ async function log(msg) {
 let useProducts;
 
 test('produits creation and disable refresh list', async () => {
-  setup('produits', []);
+  setup({ produits: [], v_produits_dernier_prix: [] });
   ({ useProducts } = await import('@/hooks/useProducts'));
   const { result } = renderHook(() => useProducts());
 
@@ -80,7 +90,7 @@ test('produits creation and disable refresh list', async () => {
 let useFournisseurs;
 
 test('fournisseurs update name refresh list', async () => {
-  setup('fournisseurs', [{ id: '1', nom: 'Old', actif: true }]);
+  setup({ fournisseurs: [{ id: '1', nom: 'Old', actif: true }] });
   ({ useFournisseurs } = await import('@/hooks/useFournisseurs'));
   const { result } = renderHook(() => useFournisseurs());
 
@@ -97,7 +107,7 @@ test('fournisseurs update name refresh list', async () => {
 let useInvoices;
 
 test('factures add and update total refresh list', async () => {
-  setup('factures', []);
+  setup({ factures: [] });
   ({ useInvoices } = await import('@/hooks/useInvoices'));
   const { result } = renderHook(() => useInvoices());
 
@@ -119,7 +129,7 @@ test('factures add and update total refresh list', async () => {
 let useFiches;
 
 test('fiches add and update portions refresh list', async () => {
-  setup('fiches', []);
+  setup({ fiches: [], fiche_lignes: [] });
   ({ useFiches } = await import('@/hooks/useFiches'));
   const { result } = renderHook(() => useFiches());
 
@@ -141,7 +151,7 @@ test('fiches add and update portions refresh list', async () => {
 let useInventaires;
 
 test('inventaires add and archive refresh list', async () => {
-  setup('inventaires', []);
+  setup({ inventaires: [] });
   ({ useInventaires } = await import('@/hooks/useInventaires'));
   const { result } = renderHook(() => useInventaires());
 
@@ -153,8 +163,8 @@ test('inventaires add and archive refresh list', async () => {
   await act(async () => {
     await result.current.deleteInventaire('1');
   });
-  const archived = result.current.inventaires[0].actif === false;
-  await log(`Inventaires: create ${created ? 'OK' : 'FAIL'}, archive ${archived ? 'OK' : 'FAIL'}`);
+  const deleted = result.current.inventaires.length === 0;
+  await log(`Inventaires: create ${created ? 'OK' : 'FAIL'}, delete ${deleted ? 'OK' : 'FAIL'}`);
   expect(created).toBe(true);
-  expect(archived).toBe(true);
+  expect(deleted).toBe(true);
 });

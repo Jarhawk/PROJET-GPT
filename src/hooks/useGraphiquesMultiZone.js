@@ -21,12 +21,12 @@ export function useGraphiquesMultiZone() {
       if (error) throw error;
 
       let allData = [];
-      for (const zone of (zones || [])) {
+      for (const zone of zones || []) {
         const { data: inventaires, error: errorInv } = await supabase
           .from("inventaires")
-          .select("date, stock_valorise")
+          .select("date")
           .eq("mama_id", mama_id)
-          .eq("zone_id", zone.id)
+          .eq("zone", zone.nom)
           .order("date", { ascending: true });
 
         if (errorInv) throw errorInv;
@@ -35,7 +35,6 @@ export function useGraphiquesMultiZone() {
           zone: zone.nom,
           points: (inventaires || []).map(inv => ({
             date: inv.date,
-            stock_valorise: inv.stock_valorise,
           })),
         });
       }

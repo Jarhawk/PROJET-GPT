@@ -32,7 +32,9 @@ export function useStock() {
     setError(null);
     const { data, error } = await supabase
       .from("mouvements_stock")
-      .select("*")
+      .select(
+        "*, zone_source:zones_stock!mouvements_stock_zone_source_id_fkey(id, nom), zone_destination:zones_stock!mouvements_stock_zone_destination_id_fkey(id, nom)"
+      )
       .eq("mama_id", mama_id)
       .order("date", { ascending: false });
     setLoading(false);
@@ -42,21 +44,36 @@ export function useStock() {
   }, [mama_id]);
 
   // 3. Ajouter mouvement de stock
-  async function addMouvementStock({ produit_id, type, quantite, zone, motif }) {
+  async function addMouvementStock({
+    produit_id,
+    type,
+    quantite,
+    zone_source_id = null,
+    zone_destination_id = null,
+    commentaire = "",
+  }) {
     setLoading(true);
     setError(null);
-    const { error } = await supabase.from("mouvements_stock").insert([{ 
+    const payload = {
       produit_id,
       type,
       quantite: Number(quantite),
-      zone,
-      motif,
       mama_id,
       date: new Date().toISOString(),
-    }]);
+      commentaire,
+    };
+    if (type === "entree") {
+      payload.zone_destination_id = zone_destination_id ?? zone_source_id;
+    } else if (type === "sortie") {
+      payload.zone_source_id = zone_source_id ?? zone_destination_id;
+    } else if (type === "transfert") {
+      payload.zone_source_id = zone_source_id;
+      payload.zone_destination_id = zone_destination_id;
+    }
+    const { error } = await supabase.from("mouvements_stock").insert([payload]);
     setLoading(false);
     if (error) setError(error);
-    // On ne met pas à jour ici, c’est fait au fetchStocks/fetchMouvements
+    // Les listes seront rafraîchies via fetchStocks/fetchMouvements
   }
 
   async function fetchRotationStats(produit_id) {
@@ -88,7 +105,7 @@ export function useStock() {
     if (!mama_id) return [];
     const { data, error } = await supabase
       .from("inventaires")
-      .select("*, utilisateurs:created_by(email)")
+      .select("*")
       .eq("mama_id", mama_id)
       .order("date", { ascending: false });
     if (error) return [];
@@ -100,7 +117,7 @@ export function useStock() {
       if (!mama_id) return null;
       const { data, error } = await supabase
         .from("inventaires")
-        .insert([{ ...payload, mama_id, created_by: user_id }])
+        .insert([{ ...payload, mama_id }])
         .select()
         .single();
       if (error) return null;
@@ -114,7 +131,7 @@ export function useStock() {
       if (!mama_id) return null;
       const { data, error } = await supabase
         .from("mouvements_stock")
-        .insert([{ ...payload, mama_id, created_by: user_id }])
+        .insert([{ ...payload, mama_id, auteur_id: user_id }])
         .select()
         .single();
       if (error) return null;

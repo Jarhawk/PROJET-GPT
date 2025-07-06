@@ -30,7 +30,6 @@ export default function StockDetail({ produit, mouvements, onClose }) {
       <div className="bg-glass border border-borderGlass backdrop-blur rounded-2xl shadow-lg p-8 min-w-[400px] max-w-[95vw] flex flex-col gap-2 relative">
         <Button variant="outline" className="absolute top-2 right-2" onClick={onClose}>Fermer</Button>
         <h2 className="font-bold text-xl mb-4">{produit.nom} — Mouvements</h2>
-        <div className="mb-2">Zone : {produit.zone || "N/A"}</div>
         <div className="mb-2">Stock réel : {produit.stock_reel} {produit.unite}</div>
         <div className="mb-2">Valorisation : {(produit.pmp * produit.stock_reel).toFixed(2)} €</div>
         <div>
@@ -40,8 +39,9 @@ export default function StockDetail({ produit, mouvements, onClose }) {
                 <th>Date</th>
                 <th>Type</th>
                 <th>Quantité</th>
-                <th>Motif</th>
-                <th>Zone</th>
+                <th>Commentaire</th>
+                <th>Zone source</th>
+                <th>Zone destination</th>
               </tr>
             </thead>
             <tbody>
@@ -50,8 +50,9 @@ export default function StockDetail({ produit, mouvements, onClose }) {
                   <td>{m.date?.slice(0, 10)}</td>
                   <td>{m.type}</td>
                   <td>{m.quantite}</td>
-                  <td>{m.motif}</td>
-                  <td>{m.zone}</td>
+                  <td>{m.commentaire}</td>
+                  <td>{m.zone_source?.nom || m.zone_source_id || '-'}</td>
+                  <td>{m.zone_destination?.nom || m.zone_destination_id || '-'}</td>
                 </tr>
               )) : (
                 <tr><td colSpan={5} className="text-gray-400">Aucun mouvement</td></tr>

@@ -5,53 +5,52 @@ import { useAuth } from "@/context/AuthContext";
 export function useReporting() {
   const { mama_id } = useAuth();
 
+  // Applique uniquement les filtres existant dans les vues utilisées
   const applyFilters = (query, filters = {}) => {
     if (filters.date_start) query = query.gte("date", filters.date_start);
     if (filters.date_end) query = query.lte("date", filters.date_end);
-    if (filters.fournisseur) query = query.eq("fournisseur", filters.fournisseur);
     if (filters.famille) query = query.eq("famille", filters.famille);
-    if (filters.fiche) query = query.eq("fiche_id", filters.fiche);
     if (filters.cost_center) query = query.eq("cost_center_id", filters.cost_center);
     return query;
   };
 
-  async function getIndicators({ date_start, date_end } = {}) {
+  async function getIndicators() {
     if (!mama_id) return {};
-    const { data, error } = await supabase
-      .from("v_stock_valorise")
-      .select("cout_matiere_total, evolution_pmp, food_cost, ecart_inventaire")
-      .eq("mama_id", mama_id)
-      .gte("date", date_start)
-      .lte("date", date_end)
-      .single();
+    const { data, error } = await supabase.rpc('consolidated_stats');
     if (error) {
-      console.error("getIndicators", error);
+      console.error('getIndicators', error);
       return {};
     }
-    return data || {};
+    return Array.isArray(data) && data.length > 0 ? data[0] : {};
   }
 
   async function getGraphData(type, filters = {}) {
     if (!mama_id) return [];
     let query;
     switch (type) {
-      case "achats":
-        query = supabase.from("v_achats_par_mois").select("*");
+      case 'achats':
+        query = supabase.from('v_monthly_purchases').select('*').eq('mama_id', mama_id);
+        query = applyFilters(query, filters);
         break;
-      case "pmp":
-        query = supabase.from("v_stock_valorise").select("*");
+      case 'pmp':
+        query = supabase.from('v_pmp').select('*').eq('mama_id', mama_id);
         break;
-      case "familles":
-        query = supabase.from("v_fiches_techniques_cout").select("*");
+      case 'familles':
+        query = supabase
+          .from('v_analytique_stock')
+          .select('famille, sumv:valeur')
+          .eq('mama_id', mama_id)
+          .group('famille');
+        query = applyFilters(query, filters);
         break;
-      case "cost_center":
-        query = supabase.from("v_cost_center_month").select("*");
+      case 'cost_center':
+        query = supabase.from('v_cost_center_month').select('*').eq('mama_id', mama_id);
+        if (filters.date_start) query = query.gte('mois', filters.date_start);
+        if (filters.date_end) query = query.lte('mois', filters.date_end);
         break;
       default:
         return [];
     }
-    query = query.eq("mama_id", mama_id);
-    query = applyFilters(query, filters);
     const { data, error } = await query;
     if (error) {
       console.error("getGraphData", error);
@@ -62,11 +61,15 @@ export function useReporting() {
 
   async function getEcartInventaire(filters = {}) {
     if (!mama_id) return [];
-    let query = supabase.from("v_ecarts_inventaire").select("*").eq("mama_id", mama_id);
+    let query = supabase
+      .from('v_analytique_stock')
+      .select('produit_id, sumv:valeur')
+      .eq('mama_id', mama_id)
+      .group('produit_id');
     query = applyFilters(query, filters);
     const { data, error } = await query;
     if (error) {
-      console.error("getEcartInventaire", error);
+      console.error('getEcartInventaire', error);
       return [];
     }
     return data || [];

@@ -22,16 +22,15 @@ beforeEach(async () => {
   orderMock.mockClear();
 });
 
-test('fetchProduits filters by zone, family and search', async () => {
+test('fetchProduits filters by family and search', async () => {
   const { result } = renderHook(() => useProduitsInventaire());
   await act(async () => {
-    await result.current.fetchProduits({ zone: 'Cuisine', famille: 'Viande', search: 'boeuf' });
+    await result.current.fetchProduits({ famille: 'Viande', search: 'boeuf' });
   });
   expect(fromMock).toHaveBeenCalledWith('v_produits_dernier_prix');
-  expect(selectMock).toHaveBeenCalledWith('id, nom, unite, pmp, famille, zone_stockage, stock_theorique');
+  expect(selectMock).toHaveBeenCalledWith('id, nom, unite, pmp, famille, stock_theorique');
   expect(eqMock).toHaveBeenCalledWith('mama_id', 'm1');
   expect(eqMock).toHaveBeenCalledWith('actif', true);
-  expect(eqMock).toHaveBeenCalledWith('zone_stockage', 'Cuisine');
   expect(ilikeMock).toHaveBeenCalledWith('famille', '%Viande%');
   expect(ilikeMock).toHaveBeenCalledWith('nom', '%boeuf%');
   expect(orderMock).toHaveBeenCalledWith('nom', { ascending: true });

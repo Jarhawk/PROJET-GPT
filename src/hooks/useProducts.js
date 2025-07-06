@@ -26,12 +26,12 @@ export function useProducts() {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
-      let query = supabase
-        .from("v_produits_dernier_prix")
-        .select(
-          "*, fournisseurs:fournisseur_produits(*, fournisseur: fournisseurs(nom)), main_supplier: fournisseurs!produits_fournisseur_principal_id_fkey(id, nom)",
-          { count: "exact" }
-        )
+    let query = supabase
+      .from("v_produits_dernier_prix")
+      .select(
+        "*, fournisseurs:fournisseur_produits(*, fournisseur: fournisseurs(nom)), main_supplier: fournisseurs!produits_main_supplier_id_fkey(id, nom)",
+        { count: "exact" }
+      )
       .eq("mama_id", mama_id)
       .order(sortBy, { ascending: order === "asc" })
       .order("nom", { ascending: true })
@@ -56,15 +56,10 @@ export function useProducts() {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const {
-      main_supplier_id,
-      fournisseur_principal_id,
-      ...rest
-    } = product || {};
+    const { main_supplier_id, ...rest } = product || {};
     const payload = {
       ...rest,
-      fournisseur_principal_id:
-        fournisseur_principal_id ?? main_supplier_id ?? null,
+      main_supplier_id: main_supplier_id ?? null,
       mama_id,
     };
     const { error } = await supabase.from("produits").insert([payload]);
@@ -80,19 +75,11 @@ export function useProducts() {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const {
-      main_supplier_id,
-      fournisseur_principal_id,
-      ...rest
-    } = updateFields || {};
-    const payload = {
-      ...rest,
-      ...(fournisseur_principal_id !== undefined
-        ? { fournisseur_principal_id }
-        : main_supplier_id !== undefined
-          ? { fournisseur_principal_id: main_supplier_id }
-          : {}),
-    };
+    const { main_supplier_id, ...rest } = updateFields || {};
+    const payload = { ...rest };
+    if (main_supplier_id !== undefined) {
+      payload.main_supplier_id = main_supplier_id;
+    }
     const { error } = await supabase
       .from("produits")
       .update(payload)
@@ -113,7 +100,6 @@ export function useProducts() {
       famille,
       unite,
       main_supplier_id,
-      fournisseur_principal_id,
       stock_reel,
       stock_min,
       actif,
@@ -125,8 +111,7 @@ export function useProducts() {
       nom: `${orig.nom} (copie)`,
       famille,
       unite,
-      fournisseur_principal_id:
-        fournisseur_principal_id ?? main_supplier_id,
+      main_supplier_id,
       stock_reel,
       stock_min,
       actif,

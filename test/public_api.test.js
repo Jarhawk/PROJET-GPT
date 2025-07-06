@@ -13,6 +13,7 @@ const chain = {
   eq: vi.fn(() => chain),
   gte: vi.fn(() => chain),
   order: vi.fn(() => chain),
+  or: vi.fn(() => chain),
   limit: vi.fn(() => Promise.resolve({ data, error: null })),
   ilike: vi.fn(() => chain),
   range: vi.fn(() => Promise.resolve({ data, error: null })),
@@ -39,6 +40,7 @@ beforeEach(async () => {
   chain.eq.mockClear();
   chain.gte.mockClear();
   chain.order.mockClear();
+  chain.or.mockClear();
   chain.limit.mockClear();
   chain.ilike.mockClear();
   chain.range.mockClear();
@@ -177,7 +179,7 @@ describe('public API router', () => {
       .get('/stock?mama_id=m1&type=entree&zone=frigo&page=2&limit=50&sortBy=type&order=asc')
       .set('x-api-key', 'dev_key');
     expect(chain.eq).toHaveBeenCalledWith('type', 'entree');
-    expect(chain.eq).toHaveBeenCalledWith('zone', 'frigo');
+    expect(chain.or).toHaveBeenCalledWith('zone_source_id.eq.frigo,zone_destination_id.eq.frigo');
     expect(chain.order).toHaveBeenCalledWith('type', { ascending: true });
     expect(chain.range).toHaveBeenCalledWith(50, 99);
   });

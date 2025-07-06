@@ -42,6 +42,92 @@ BEGIN
 END $$;
 
 
+-- Harmonisation des anciens noms de colonnes
+-- Renomme product_id en produit_id si nécessaire
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='facture_lignes' AND column_name='product_id'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='facture_lignes' AND column_name='produit_id'
+  ) THEN
+    ALTER TABLE facture_lignes RENAME COLUMN product_id TO produit_id;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='fiche_lignes' AND column_name='product_id'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='fiche_lignes' AND column_name='produit_id'
+  ) THEN
+    ALTER TABLE fiche_lignes RENAME COLUMN product_id TO produit_id;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='inventaire_lignes' AND column_name='product_id'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='inventaire_lignes' AND column_name='produit_id'
+  ) THEN
+    ALTER TABLE inventaire_lignes RENAME COLUMN product_id TO produit_id;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='mouvements_stock' AND column_name='product_id'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='mouvements_stock' AND column_name='produit_id'
+  ) THEN
+    ALTER TABLE mouvements_stock RENAME COLUMN product_id TO produit_id;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='requisitions' AND column_name='product_id'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='requisitions' AND column_name='produit_id'
+  ) THEN
+    ALTER TABLE requisitions RENAME COLUMN product_id TO produit_id;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='transferts' AND column_name='product_id'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='transferts' AND column_name='produit_id'
+  ) THEN
+    ALTER TABLE transferts RENAME COLUMN product_id TO produit_id;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='pertes' AND column_name='product_id'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='pertes' AND column_name='produit_id'
+  ) THEN
+    ALTER TABLE pertes RENAME COLUMN product_id TO produit_id;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='promotion_produits' AND column_name='product_id'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='promotion_produits' AND column_name='produit_id'
+  ) THEN
+    ALTER TABLE promotion_produits RENAME COLUMN product_id TO produit_id;
+  END IF;
+END $$;
+
+
 -- ------------------
 -- Tables de base
 -- ------------------

@@ -65,29 +65,34 @@ END $$;
 -- Additional fields for mouvements_stock with zone tracking
 DO $$
 BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='mouvements_stock' AND column_name='zone_source_id'
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'mouvements_stock'
   ) THEN
-    ALTER TABLE mouvements_stock ADD COLUMN zone_source_id uuid references zones_stock(id);
-  END IF;
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='mouvements_stock' AND column_name='zone_destination_id'
-  ) THEN
-    ALTER TABLE mouvements_stock ADD COLUMN zone_destination_id uuid references zones_stock(id);
-  END IF;
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='mouvements_stock' AND column_name='commentaire'
-  ) THEN
-    ALTER TABLE mouvements_stock ADD COLUMN commentaire text;
-  END IF;
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='mouvements_stock' AND column_name='auteur_id'
-  ) THEN
-    ALTER TABLE mouvements_stock ADD COLUMN auteur_id uuid references utilisateurs(id);
+    IF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name='mouvements_stock' AND column_name='zone_source_id'
+    ) THEN
+      ALTER TABLE mouvements_stock ADD COLUMN zone_source_id uuid references zones_stock(id);
+    END IF;
+    IF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name='mouvements_stock' AND column_name='zone_destination_id'
+    ) THEN
+      ALTER TABLE mouvements_stock ADD COLUMN zone_destination_id uuid references zones_stock(id);
+    END IF;
+    IF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name='mouvements_stock' AND column_name='commentaire'
+    ) THEN
+      ALTER TABLE mouvements_stock ADD COLUMN commentaire text;
+    END IF;
+    IF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name='mouvements_stock' AND column_name='auteur_id'
+    ) THEN
+      ALTER TABLE mouvements_stock ADD COLUMN auteur_id uuid references utilisateurs(id);
+    END IF;
   END IF;
 END $$;
 

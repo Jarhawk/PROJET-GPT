@@ -1,28 +1,28 @@
 -- SCRIPT COMPATIBLE SUPABASE — AUCUNE OPÉRATION INTERDITE — PRÊT À L’IMPORT
--- baseprojet.sql - Full MamaStock schema for Supabase
--- Standalone script combining initialization, RLS, and patches
+-- baseprojet.sql - Schéma complet MamaStock pour Supabase
+-- Script autonome combinant initialisation, RLS et correctifs
 
--- init.sql - Complete database setup for MamaStock
+-- init.sql - Installation complète de la base MamaStock
 -- ------------------
--- Cleanup existing schema
+-- Nettoyage du schéma existant
 -- ------------------
 drop schema if exists public cascade;
 create schema public;
--- Allow access to objects inside the schema
+-- Autoriser l'accès aux objets du schéma
 grant usage on schema public to authenticated;
 grant usage on schema public to anon;
 grant all privileges on schema public to service_role;
 alter default privileges in schema public
   grant select, insert, update, delete on tables to authenticated;
--- Ensure extension functions are visible
+-- S'assurer que les fonctions d'extension sont visibles
 set search_path = public, extensions;
--- Extension
+-- Extensions
 create extension if not exists "uuid-ossp";
 create extension if not exists "pgcrypto";
 
 
 -- ------------------
--- Base tables
+-- Tables de base
 -- ------------------
 create table if not exists mamas (
     id uuid primary key default uuid_generate_v4(),
@@ -38,73 +38,6 @@ create table if not exists roles (
     description text
 );
 
--- Drop Supabase default users relation if it exists as a view or table
-DO $$
-BEGIN
-  -- remove Supabase generated view
-  IF EXISTS (
-    SELECT 1
-    FROM pg_class c
-    JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE n.nspname = 'public' AND c.relname = 'users' AND c.relkind = 'v'
-  ) THEN
-    EXECUTE 'DROP VIEW public.users CASCADE';
-  END IF;
-
-  -- remove table variant if present
-  IF EXISTS (
-    SELECT 1
-    FROM pg_class c
-    JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE n.nspname = 'public' AND c.relname = 'users' AND c.relkind IN ('r','p')
-  ) THEN
-    EXECUTE 'DROP TABLE public.users CASCADE';
-  END IF;
-END $$;
-
--- Additional fields for mouvements_stock with zone tracking
-DO $$
-BEGIN
-  IF EXISTS (
-    SELECT 1 FROM information_schema.tables
-    WHERE table_schema = 'public' AND table_name = 'mouvements_stock'
-  ) THEN
-    IF NOT EXISTS (
-      SELECT 1 FROM information_schema.columns
-      WHERE table_name='mouvements_stock' AND column_name='zone_source_id'
-    ) THEN
-      ALTER TABLE mouvements_stock ADD COLUMN zone_source_id uuid references zones_stock(id);
-    END IF;
-    IF NOT EXISTS (
-      SELECT 1 FROM information_schema.columns
-      WHERE table_name='mouvements_stock' AND column_name='zone_destination_id'
-    ) THEN
-      ALTER TABLE mouvements_stock ADD COLUMN zone_destination_id uuid references zones_stock(id);
-    END IF;
-    IF NOT EXISTS (
-      SELECT 1 FROM information_schema.columns
-      WHERE table_name='mouvements_stock' AND column_name='commentaire'
-    ) THEN
-      ALTER TABLE mouvements_stock ADD COLUMN commentaire text;
-    END IF;
-    IF NOT EXISTS (
-      SELECT 1 FROM information_schema.columns
-      WHERE table_name='mouvements_stock' AND column_name='auteur_id'
-    ) THEN
-      ALTER TABLE mouvements_stock ADD COLUMN auteur_id uuid references utilisateurs(id);
-    END IF;
-  END IF;
-END $$;
-
-DO $$
-BEGIN
-  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='mouvements_stock' AND column_name='zone_source_id') THEN
-    CREATE INDEX IF NOT EXISTS idx_mouvements_stock_zone_source ON mouvements_stock(zone_source_id);
-  END IF;
-  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='mouvements_stock' AND column_name='zone_destination_id') THEN
-    CREATE INDEX IF NOT EXISTS idx_mouvements_stock_zone_destination ON mouvements_stock(zone_destination_id);
-  END IF;
-END $$;
 create table if not exists users (
     id uuid primary key default uuid_generate_v4(),
     email text not null unique,
@@ -127,7 +60,7 @@ create table if not exists utilisateurs (
     created_at timestamptz default now()
 );
 
--- Ensure unique constraint on auth_id and indexes for performant lookups
+-- S'assurer de la contrainte unique sur auth_id et des index pour des recherches performantes
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -140,6 +73,32 @@ END $$;
 
 create index if not exists idx_utilisateurs_auth_id on utilisateurs(auth_id);
 create index if not exists idx_utilisateurs_mama_id on utilisateurs(mama_id);
+
+-- Helper functions used in RLS policies
+create or replace function current_user_mama_id()
+returns uuid
+language sql
+stable
+security definer
+as $$
+  select coalesce(
+    (select mama_id from utilisateurs where auth_id = auth.uid() limit 1),
+    (select mama_id from users where id = auth.uid() limit 1)
+  );
+$$;
+
+create or replace function current_user_role()
+returns text
+language sql
+stable
+security definer
+as $$
+  select coalesce(
+    (select role from utilisateurs where auth_id = auth.uid() limit 1),
+    (select r.nom from users u join roles r on r.id = u.role_id where u.id = auth.uid() limit 1)
+  );
+$$;
+grant execute on function current_user_role() to authenticated;
 
 alter table utilisateurs enable row level security;
 alter table utilisateurs force row level security;
@@ -177,19 +136,8 @@ create policy utilisateurs_delete on utilisateurs
   );
 grant select, insert, update, delete on utilisateurs to authenticated;
 
-create or replace function current_user_mama_id()
-returns uuid
-language sql
-stable
-security definer
-as $$
-  select coalesce(
-    (select mama_id from utilisateurs where auth_id = auth.uid() limit 1),
-    (select mama_id from users where id = auth.uid() limit 1)
-  );
-$$;
 
--- Families / Units
+-- Familles / Unités
 create table if not exists familles (
     id uuid primary key default uuid_generate_v4(),
     nom text not null,
@@ -207,7 +155,7 @@ create table if not exists unites (
     unique(mama_id, nom)
 );
 
--- Suppliers
+-- Fournisseurs
 create table if not exists fournisseurs (
     id uuid primary key default uuid_generate_v4(),
     nom text not null,
@@ -220,8 +168,8 @@ create table if not exists fournisseurs (
     unique(mama_id, nom)
 );
 
--- Products
-create table if not exists products (
+-- Produits
+create table if not exists produits (
     id uuid primary key default uuid_generate_v4(),
     nom text not null,
     famille_id uuid references familles(id) on delete set null,
@@ -240,16 +188,16 @@ create table if not exists products (
     unique(mama_id, nom)
 );
 
--- Supplier prices history
-create table if not exists supplier_products (
+-- Historique des prix fournisseurs
+create table if not exists fournisseur_produits (
     id uuid primary key default uuid_generate_v4(),
-    product_id uuid references products(id) on delete cascade,
+    produit_id uuid references produits(id) on delete cascade,
     fournisseur_id uuid references fournisseurs(id) on delete cascade,
     prix_achat numeric not null,
     date_livraison date default current_date,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
-    unique(product_id, fournisseur_id, date_livraison)
+    unique(produit_id, fournisseur_id, date_livraison)
 );
 
 -- Factures
@@ -271,7 +219,7 @@ create table if not exists factures (
 create table if not exists facture_lignes (
     id uuid primary key default uuid_generate_v4(),
     facture_id uuid references factures(id) on delete cascade,
-    product_id uuid references products(id) on delete set null,
+    produit_id uuid references produits(id) on delete set null,
     quantite numeric not null,
     prix_unitaire numeric not null,
     tva numeric default 0,
@@ -298,7 +246,7 @@ create table if not exists fiches (
 create table if not exists fiche_lignes (
     id uuid primary key default uuid_generate_v4(),
     fiche_id uuid references fiches(id) on delete cascade,
-    product_id uuid references products(id) on delete set null,
+    produit_id uuid references produits(id) on delete set null,
     quantite numeric not null,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now()
@@ -345,7 +293,7 @@ create table if not exists inventaires (
 create table if not exists inventaire_lignes (
     id uuid primary key default uuid_generate_v4(),
     inventaire_id uuid references inventaires(id) on delete cascade,
-    product_id uuid references products(id) on delete set null,
+    produit_id uuid references produits(id) on delete set null,
     quantite numeric,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now()
@@ -366,7 +314,31 @@ create table if not exists mouvements_stock (
     created_at timestamptz default now()
 );
 
--- Supplier contacts & notes
+-- Supprimer la relation users par défaut de Supabase si elle existe (vue ou table)
+DO $$
+BEGIN
+  -- supprimer la vue générée par Supabase
+  IF EXISTS (
+    SELECT 1
+    FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public' AND c.relname = 'users' AND c.relkind = 'v'
+  ) THEN
+    EXECUTE 'DROP VIEW public.users CASCADE';
+  END IF;
+
+  -- supprimer la table si elle existe
+  IF EXISTS (
+    SELECT 1
+    FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public' AND c.relname = 'users' AND c.relkind IN ('r','p')
+  ) THEN
+    EXECUTE 'DROP TABLE public.users CASCADE';
+  END IF;
+END $$;
+
+-- Contacts et notes fournisseurs
 create table if not exists fournisseur_contacts (
     id uuid primary key default uuid_generate_v4(),
     fournisseur_id uuid references fournisseurs(id) on delete cascade,
@@ -422,7 +394,7 @@ create table if not exists menu_fiches (
 create table if not exists requisitions (
     id uuid primary key default uuid_generate_v4(),
     mama_id uuid not null references mamas(id),
-    produit_id uuid references products(id),
+    produit_id uuid references produits(id),
     zone_id uuid references zones_stock(id),
     date date default current_date,
     quantite numeric not null,
@@ -435,7 +407,7 @@ create table if not exists requisitions (
 -- Transferts de stock
 create table if not exists transferts (
     id uuid primary key default uuid_generate_v4(),
-    produit_id uuid references products(id) on delete set null,
+    produit_id uuid references produits(id) on delete set null,
     quantite numeric,
     zone_depart text,
     zone_arrivee text,
@@ -494,12 +466,12 @@ create index if not exists idx_fournisseurs_mama on fournisseurs(mama_id);
 create index if not exists idx_fournisseurs_nom on fournisseurs(nom);
 create index if not exists idx_fournisseurs_ville on fournisseurs(ville);
 create index if not exists idx_fournisseurs_actif on fournisseurs(actif);
-create index if not exists idx_products_mama on products(mama_id);
-create index if not exists idx_products_nom on products(nom);
-create index if not exists idx_products_actif on products(actif);
-create index if not exists idx_products_famille on products(famille_id);
-create index if not exists idx_products_unite on products(unite_id);
-create index if not exists idx_products_main_supplier on products(main_supplier_id);
+create index if not exists idx_produits_mama on produits(mama_id);
+create index if not exists idx_produits_nom on produits(nom);
+create index if not exists idx_produits_actif on produits(actif);
+create index if not exists idx_produits_famille on produits(famille_id);
+create index if not exists idx_produits_unite on produits(unite_id);
+create index if not exists idx_produits_main_supplier on produits(main_supplier_id);
 create index if not exists idx_factures_mama on factures(mama_id);
 create index if not exists idx_factures_date on factures(date);
 create index if not exists idx_factures_fournisseur on factures(fournisseur_id);
@@ -509,25 +481,23 @@ create index if not exists idx_fiches_nom on fiches(nom);
 create index if not exists idx_fiches_actif on fiches(actif);
 create index if not exists idx_fiches_famille on fiches(famille_id);
 create index if not exists idx_inventaires_mama on inventaires(mama_id);
-create index if not exists idx_mouvements_mama on mouvements_stock(mama_id);
-create index if not exists idx_mouvements_product on mouvements_stock(product_id);
 create index if not exists idx_familles_mama on familles(mama_id);
 create index if not exists idx_unites_mama on unites(mama_id);
-create index if not exists idx_supplier_products_mama on supplier_products(mama_id);
-create index if not exists idx_supplier_products_product on supplier_products(product_id);
-create index if not exists idx_supplier_products_fournisseur on supplier_products(fournisseur_id);
-create index if not exists idx_supplier_products_product_date on supplier_products(product_id, date_livraison desc);
+create index if not exists idx_fournisseur_produits_mama on fournisseur_produits(mama_id);
+create index if not exists idx_fournisseur_produits_produit on fournisseur_produits(produit_id);
+create index if not exists idx_fournisseur_produits_fournisseur on fournisseur_produits(fournisseur_id);
+create index if not exists idx_fournisseur_produits_produit_date on fournisseur_produits(produit_id, date_livraison desc);
 create index if not exists idx_facture_lignes_mama on facture_lignes(mama_id);
 create index if not exists idx_facture_lignes_facture on facture_lignes(facture_id);
-create index if not exists idx_facture_lignes_product on facture_lignes(product_id);
+create index if not exists idx_facture_lignes_produit on facture_lignes(produit_id);
 create index if not exists idx_fiche_lignes_mama on fiche_lignes(mama_id);
 create index if not exists idx_fiche_lignes_fiche on fiche_lignes(fiche_id);
-create index if not exists idx_fiche_lignes_product on fiche_lignes(product_id);
+create index if not exists idx_fiche_lignes_produit on fiche_lignes(produit_id);
 create index if not exists idx_fiche_cout_history_mama on fiche_cout_history(mama_id);
 create index if not exists idx_fiche_cout_history_fiche on fiche_cout_history(fiche_id);
 create index if not exists idx_inventaire_lignes_mama on inventaire_lignes(mama_id);
 create index if not exists idx_inventaire_lignes_inventaire on inventaire_lignes(inventaire_id);
-create index if not exists idx_inventaire_lignes_product on inventaire_lignes(product_id);
+create index if not exists idx_inventaire_lignes_produit on inventaire_lignes(produit_id);
 create index if not exists idx_parametres_mama on parametres(mama_id);
 create index if not exists idx_fournisseur_contacts_mama on fournisseur_contacts(mama_id);
 create index if not exists idx_fournisseur_contacts_fournisseur on fournisseur_contacts(fournisseur_id);
@@ -548,6 +518,9 @@ create index if not exists idx_transferts_mama on transferts(mama_id);
 create index if not exists idx_transferts_produit on transferts(produit_id);
 create index if not exists idx_zones_stock_mama on zones_stock(mama_id);
 create index if not exists idx_zones_stock_actif on zones_stock(actif);
+-- Index pour accélérer la recherche par zone dans les mouvements de stock
+create index if not exists idx_mouvements_stock_zone_source on mouvements_stock(zone_source_id);
+create index if not exists idx_mouvements_stock_zone_destination on mouvements_stock(zone_destination_id);
 create index if not exists idx_inventaire_zones_mama on inventaire_zones(mama_id);
 create index if not exists idx_ventes_boissons_mama on ventes_boissons(mama_id);
 create index if not exists idx_ventes_boissons_boisson on ventes_boissons(boisson_id);
@@ -556,23 +529,23 @@ grant select on stock_mouvements to authenticated;
 create or replace view stocks as select * from mouvements_stock;
 grant select on stocks to authenticated;
 
--- Trigger to update product PMP and stock on facture line insert
-create or replace function update_product_pmp()
+-- Trigger de mise à jour du PMP produit et du stock lors de l'insertion de ligne de facture
+create or replace function mettre_a_jour_pmp_produit()
 returns trigger language plpgsql as $$
 begin
-  update products
+  update produits
     set pmp = ((coalesce(pmp,0) * stock_reel) + (new.quantite * new.prix_unitaire)) / nullif(stock_reel + new.quantite,0),
         stock_reel = stock_reel + new.quantite
-  where id = new.product_id;
+  where id = new.produit_id;
   return new;
 end;
 $$;
 
 create or replace trigger trg_facture_ligne after insert on facture_lignes
-for each row execute procedure update_product_pmp();
+for each row execute procedure mettre_a_jour_pmp_produit();
 
--- Keep last known purchase price in sync
-create or replace function update_product_prix()
+-- Maintien du dernier prix d'achat enregistré
+create or replace function mettre_a_jour_prix_produit()
 returns trigger language plpgsql as $$
 declare
   supp uuid;
@@ -585,23 +558,23 @@ begin
   if supp is null then
     return new;
   end if;
-  insert into supplier_products(product_id, fournisseur_id, prix_achat, date_livraison, mama_id)
-    values (new.product_id, supp, new.prix_unitaire, d, new.mama_id)
-    on conflict (product_id, fournisseur_id, date_livraison)
+  insert into fournisseur_produits(produit_id, fournisseur_id, prix_achat, date_livraison, mama_id)
+    values (new.produit_id, supp, new.prix_unitaire, d, new.mama_id)
+    on conflict (produit_id, fournisseur_id, date_livraison)
     do update set prix_achat = excluded.prix_achat, updated_at = now();
-  update products
+  update produits
      set dernier_prix = new.prix_unitaire,
          main_supplier_id = coalesce(main_supplier_id, supp)
-   where id = new.product_id;
+   where id = new.produit_id;
   return new;
 end;
 $$;
 
 create or replace trigger trg_update_prix_produit
 after insert on facture_lignes
-for each row execute procedure update_product_prix();
+for each row execute procedure mettre_a_jour_prix_produit();
 
--- Trigger to keep invoice total in sync with its lines
+-- Trigger pour maintenir le total de la facture en phase avec ses lignes
 create or replace function refresh_facture_total()
 returns trigger language plpgsql as $$
 declare
@@ -628,14 +601,14 @@ create or replace trigger trg_facture_total
 after insert or update or delete on facture_lignes
 for each row execute procedure refresh_facture_total();
 
--- Trigger to update theoretical stock when stock movements are recorded
+-- Trigger de mise à jour du stock théorique lors de l'enregistrement des mouvements
 create or replace function update_stock_theorique()
 returns trigger language plpgsql as $$
 begin
   if new.type = 'entree' or new.type = 'correction' or new.type = 'transfert' then
-    update products set stock_theorique = stock_theorique + new.quantite where id = new.product_id;
+    update produits set stock_theorique = stock_theorique + new.quantite where id = new.produit_id;
   elsif new.type = 'sortie' then
-    update products set stock_theorique = stock_theorique - new.quantite where id = new.product_id;
+    update produits set stock_theorique = stock_theorique - new.quantite where id = new.produit_id;
   end if;
   return new;
 end;
@@ -644,11 +617,11 @@ $$;
 create or replace trigger trg_mouvement_stock after insert on mouvements_stock
 for each row execute procedure update_stock_theorique();
 
--- Trigger to apply inventory lines to real stock
+-- Trigger pour appliquer les lignes d'inventaire au stock réel
 create or replace function apply_inventaire_line()
 returns trigger language plpgsql as $$
 begin
-  update products set stock_reel = new.quantite where id = new.product_id;
+  update produits set stock_reel = new.quantite where id = new.produit_id;
   return new;
 end;
 $$;
@@ -656,7 +629,7 @@ $$;
 create or replace trigger trg_inventaire_ligne after insert on inventaire_lignes
 for each row execute procedure apply_inventaire_line();
 
--- Trigger to refresh fiche costs whenever lines or portions change
+-- Trigger de rafraîchissement du coût des fiches lors des modifications
 create or replace function refresh_fiche_cost()
 returns trigger language plpgsql as $$
 declare
@@ -669,7 +642,7 @@ begin
     into total, portions, mid
     from fiches f
       left join fiche_lignes fl on fl.fiche_id = f.id
-      left join products p on fl.product_id = p.id
+      left join produits p on fl.produit_id = p.id
     where f.id = fid
     group by f.portions, f.mama_id;
 
@@ -693,7 +666,7 @@ create or replace trigger trg_fiche_update_cost
 after update on fiches
 for each row execute procedure refresh_fiche_cost();
 
--- Stats: total purchases per month for all suppliers
+-- Statistiques : total des achats par mois pour tous les fournisseurs
 create or replace function stats_achats_fournisseurs(mama_id_param uuid)
 returns table(mois text, total_achats numeric)
 language sql as $$
@@ -707,7 +680,7 @@ language sql as $$
 $$;
 grant execute on function stats_achats_fournisseurs(uuid) to authenticated;
 
--- Stats: total purchases per month for one supplier
+-- Statistiques : total des achats par mois pour un fournisseur
 create or replace function stats_achats_fournisseur(mama_id_param uuid, fournisseur_id_param uuid)
 returns table(mois text, total_achats numeric)
 language sql as $$
@@ -721,15 +694,15 @@ language sql as $$
   order by 1;
 $$;
 grant execute on function stats_achats_fournisseur(uuid, uuid) to authenticated;
--- Stats: product rotation per month
-create or replace function stats_rotation_produit(mama_id_param uuid, product_id_param uuid)
+-- Statistiques : rotation du produit par mois
+create or replace function stats_rotation_produit(mama_id_param uuid, produit_id_param uuid)
 returns table(mois text, quantite_sortie numeric)
 language sql as $$
   select to_char(date, 'YYYY-MM') as mois,
          sum(quantite) as quantite_sortie
   from mouvements_stock
   where mama_id = mama_id_param
-    and product_id = product_id_param
+    and produit_id = produit_id_param
     and type = 'sortie'
   group by 1
   order by 1;
@@ -739,7 +712,7 @@ grant execute on function stats_rotation_produit(uuid, uuid) to authenticated;
 
 -- Helper function current_user_mama_id() defined above
 
--- Users table
+-- Table des utilisateurs
 alter table if exists users enable row level security;
 alter table if exists users force row level security;
 drop policy if exists users_select on users;
@@ -751,7 +724,7 @@ create policy users_insert on users for insert with check (
   id = auth.uid() and mama_id = current_user_mama_id()
 );
 
--- Roles table (read-only for now)
+-- Table des rôles (lecture seule pour l'instant)
 alter table roles enable row level security;
 alter table roles force row level security;
 drop policy if exists roles_select on roles;
@@ -770,15 +743,15 @@ alter table fournisseurs force row level security;
 drop policy if exists fournisseurs_all on fournisseurs;
 create policy fournisseurs_all on fournisseurs for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
 
-alter table products enable row level security;
-alter table products force row level security;
-drop policy if exists products_all on products;
-create policy products_all on products for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+alter table produits enable row level security;
+alter table produits force row level security;
+drop policy if exists produits_all on produits;
+create policy produits_all on produits for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
 
-alter table supplier_products enable row level security;
-alter table supplier_products force row level security;
-drop policy if exists supplier_products_all on supplier_products;
-create policy supplier_products_all on supplier_products for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+alter table fournisseur_produits enable row level security;
+alter table fournisseur_produits force row level security;
+drop policy if exists fournisseur_produits_all on fournisseur_produits;
+create policy fournisseur_produits_all on fournisseur_produits for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
 
 alter table factures enable row level security;
 alter table factures force row level security;
@@ -919,13 +892,13 @@ alter table ventes_boissons force row level security;
 drop policy if exists ventes_boissons_all on ventes_boissons;
 create policy ventes_boissons_all on ventes_boissons for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
 
--- Grants
+-- Droits d'accès
 grant select, insert, update, delete on all tables in schema public to authenticated;
 grant all privileges on all tables in schema public to service_role;
--- Additional tables for analytic cost center management (from mama_stock_patch.sql)
+-- Tables supplémentaires pour la gestion analytique des centres de coût (issue du patch mama_stock)
 
--- Table of cost centers per mama
-create table if not exists cost_centers (
+-- Table des centres de coût par mama
+create table if not exists centres_de_cout (
     id uuid primary key default uuid_generate_v4(),
     mama_id uuid not null references mamas(id) on delete cascade,
     nom text not null,
@@ -934,55 +907,55 @@ create table if not exists cost_centers (
     unique (mama_id, nom)
 );
 
--- Table linking stock movements to cost centers (ventilation)
-create table if not exists mouvement_cost_centers (
+-- Table de liaison des mouvements de stock aux centres de coût (ventilation)
+create table if not exists mouvements_centres_cout (
     id uuid primary key default uuid_generate_v4(),
     mouvement_id uuid references mouvements_stock(id) on delete cascade,
-    cost_center_id uuid references cost_centers(id) on delete cascade,
+    cost_center_id uuid references centres_de_cout(id) on delete cascade,
     quantite numeric,
     valeur numeric,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now()
 );
 
--- Indexes for faster queries
-create index if not exists idx_cost_centers_mama on cost_centers(mama_id);
-create index if not exists idx_cost_centers_nom on cost_centers(nom);
-create index if not exists idx_mouvement_cc_mama on mouvement_cost_centers(mama_id);
-create index if not exists idx_mouvement_cc_mouvement on mouvement_cost_centers(mouvement_id);
-create index if not exists idx_mouvement_cc_cc on mouvement_cost_centers(cost_center_id);
+-- Index pour des requêtes plus rapides
+create index if not exists idx_centres_de_cout_mama on centres_de_cout(mama_id);
+create index if not exists idx_centres_de_cout_nom on centres_de_cout(nom);
+create index if not exists idx_mouvements_cc_mama on mouvements_centres_cout(mama_id);
+create index if not exists idx_mouvements_cc_mouvement on mouvements_centres_cout(mouvement_id);
+create index if not exists idx_mouvements_cc_centre on mouvements_centres_cout(cost_center_id);
 
--- Row level security policies
-alter table cost_centers enable row level security;
-alter table cost_centers force row level security;
-drop policy if exists cost_centers_all on cost_centers;
-create policy cost_centers_all on cost_centers
+-- Politiques de sécurité au niveau des lignes
+alter table centres_de_cout enable row level security;
+alter table centres_de_cout force row level security;
+drop policy if exists centres_de_cout_all on centres_de_cout;
+create policy centres_de_cout_all on centres_de_cout
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
-grant select, insert, update, delete on cost_centers to authenticated;
+grant select, insert, update, delete on centres_de_cout to authenticated;
 
-alter table mouvement_cost_centers enable row level security;
-alter table mouvement_cost_centers force row level security;
-drop policy if exists mouvement_cost_centers_all on mouvement_cost_centers;
-create policy mouvement_cost_centers_all on mouvement_cost_centers
+alter table mouvements_centres_cout enable row level security;
+alter table mouvements_centres_cout force row level security;
+drop policy if exists mouvements_centres_cout_all on mouvements_centres_cout;
+create policy mouvements_centres_cout_all on mouvements_centres_cout
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
-grant select, insert, update, delete on mouvement_cost_centers to authenticated;
+grant select, insert, update, delete on mouvements_centres_cout to authenticated;
 
--- Optional default cost centers
-insert into cost_centers (id, mama_id, nom)
+-- Centres de coût par défaut optionnels
+insert into centres_de_cout (id, mama_id, nom)
 select '00000000-0000-0000-0000-000000009001', id, 'Food'
 from mamas where not exists (
-  select 1 from cost_centers where mama_id = mamas.id and nom = 'Food'
+  select 1 from centres_de_cout where mama_id = mamas.id and nom = 'Food'
 );
-insert into cost_centers (id, mama_id, nom)
+insert into centres_de_cout (id, mama_id, nom)
 select '00000000-0000-0000-0000-000000009002', id, 'Beverage'
 from mamas where not exists (
-  select 1 from cost_centers where mama_id = mamas.id and nom = 'Beverage'
+  select 1 from centres_de_cout where mama_id = mamas.id and nom = 'Beverage'
 );
 
 -- Table for audit logs
-create table if not exists user_logs (
+create table if not exists journaux_utilisateur (
     id uuid primary key default uuid_generate_v4(),
     mama_id uuid not null references mamas(id) on delete cascade,
     user_id uuid references users(id) on delete set null,
@@ -992,20 +965,20 @@ create table if not exists user_logs (
     created_at timestamptz default now()
 );
 
-create index if not exists idx_user_logs_mama on user_logs(mama_id);
-create index if not exists idx_user_logs_user on user_logs(user_id);
-create index if not exists idx_user_logs_done on user_logs(done_by);
-create index if not exists idx_user_logs_date on user_logs(created_at);
+create index if not exists idx_journaux_utilisateur_mama on journaux_utilisateur(mama_id);
+create index if not exists idx_journaux_utilisateur_user on journaux_utilisateur(user_id);
+create index if not exists idx_journaux_utilisateur_done on journaux_utilisateur(done_by);
+create index if not exists idx_journaux_utilisateur_date on journaux_utilisateur(created_at);
 
-alter table user_logs enable row level security;
-alter table user_logs force row level security;
-drop policy if exists user_logs_all on user_logs;
-create policy user_logs_all on user_logs
+alter table journaux_utilisateur enable row level security;
+alter table journaux_utilisateur force row level security;
+drop policy if exists journaux_utilisateur_all on journaux_utilisateur;
+create policy journaux_utilisateur_all on journaux_utilisateur
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
-grant select, insert, update, delete on user_logs to authenticated;
+grant select, insert, update, delete on journaux_utilisateur to authenticated;
 
--- View summarising cost center consumption
+-- Vue récapitulative de la consommation par centre de coût
 create or replace view v_cost_center_totals as
 select
   c.mama_id,
@@ -1013,12 +986,12 @@ select
   c.nom,
   coalesce(sum(m.quantite),0) as quantite_totale,
   coalesce(sum(m.valeur),0) as valeur_totale
-from cost_centers c
-left join mouvement_cost_centers m on m.cost_center_id = c.id
+from centres_de_cout c
+left join mouvements_centres_cout m on m.cost_center_id = c.id
 group by c.mama_id, c.id, c.nom;
 grant select on v_cost_center_totals to authenticated;
 
--- View summarising cost center consumption per month
+-- Vue mensuelle de la consommation par centre de coût
 create or replace view v_cost_center_monthly as
 select
   c.mama_id,
@@ -1027,42 +1000,42 @@ select
   c.nom,
   coalesce(sum(m.quantite),0) as quantite,
   coalesce(sum(m.valeur),0) as valeur
-from cost_centers c
-left join mouvement_cost_centers m on m.cost_center_id = c.id
+from centres_de_cout c
+left join mouvements_centres_cout m on m.cost_center_id = c.id
 group by c.mama_id, c.id, mois, c.nom;
 grant select on v_cost_center_monthly to authenticated;
 
--- Alias view for monthly cost center totals
+-- Vue alias pour les totaux mensuels par centre de coût
 create or replace view v_cost_center_month as
 select * from v_cost_center_monthly;
 grant select on v_cost_center_month to authenticated;
 
--- Function returning stats per cost center for a date range
-create or replace function stats_cost_centers(mama_id_param uuid, debut_param date default null, fin_param date default null)
+-- Fonction retournant les statistiques par centre de coût pour une période donnée
+create or replace function stats_centres_de_cout(mama_id_param uuid, debut_param date default null, fin_param date default null)
 returns table(cost_center_id uuid, nom text, quantite numeric, valeur numeric)
 language plpgsql security definer as $$
 begin
   return query
     select c.id, c.nom, sum(coalesce(m.quantite,0)), sum(coalesce(m.valeur,0))
-    from cost_centers c
-    left join mouvement_cost_centers m on m.cost_center_id = c.id
+    from centres_de_cout c
+    left join mouvements_centres_cout m on m.cost_center_id = c.id
       and (debut_param is null or m.created_at >= debut_param)
       and (fin_param is null or m.created_at < fin_param + interval '1 day')
     where c.mama_id = mama_id_param
     group by c.id, c.nom;
 end;
 $$;
-grant execute on function stats_cost_centers(uuid, date, date) to authenticated;
+grant execute on function stats_centres_de_cout(uuid, date, date) to authenticated;
 
--- Trigger function to log cost center changes
-create or replace function log_cost_centers_changes()
+-- Fonction déclenchée pour journaliser les changements de centre de coût
+create or replace function log_centres_de_cout_changes()
 returns trigger language plpgsql as $$
 begin
-  insert into user_logs(mama_id, user_id, action, details, done_by)
+  insert into journaux_utilisateur(mama_id, user_id, action, details, done_by)
   values(
     coalesce(new.mama_id, old.mama_id),
     auth.uid(),
-    'cost_centers ' || tg_op,
+    'centres_de_cout ' || tg_op,
     jsonb_build_object('id_old', old.id, 'id_new', new.id, 'nom_old', old.nom, 'nom_new', new.nom),
     auth.uid()
   );
@@ -1070,20 +1043,20 @@ begin
 end;
 $$;
 
-create or replace trigger trg_log_cost_centers
-after insert or update or delete on cost_centers
-for each row execute function log_cost_centers_changes();
-grant execute on function log_cost_centers_changes() to authenticated;
+create or replace trigger trg_log_centres_de_cout
+after insert or update or delete on centres_de_cout
+for each row execute function log_centres_de_cout_changes();
+grant execute on function log_centres_de_cout_changes() to authenticated;
 
--- Trigger function to log mouvement cost center allocations
+-- Fonction déclenchée pour journaliser l'affectation des mouvements aux centres de coût
 create or replace function log_mouvement_cc_changes()
 returns trigger language plpgsql as $$
 begin
-  insert into user_logs(mama_id, user_id, action, details, done_by)
+  insert into journaux_utilisateur(mama_id, user_id, action, details, done_by)
   values(
     coalesce(new.mama_id, old.mama_id),
     auth.uid(),
-    'mouvement_cost_centers ' || tg_op,
+    'mouvements_centres_cout ' || tg_op,
     jsonb_build_object('mouvement_id', coalesce(new.mouvement_id, old.mouvement_id)),
     auth.uid()
   );
@@ -1092,27 +1065,27 @@ end;
 $$;
 
 create or replace trigger trg_log_mouvement_cc
-after insert or update or delete on mouvement_cost_centers
+after insert or update or delete on mouvements_centres_cout
 for each row execute function log_mouvement_cc_changes();
 grant execute on function log_mouvement_cc_changes() to authenticated;
 
--- Detailed view of stock movement allocations
+-- Vue détaillée des affectations de mouvements de stock
 create or replace view v_ventilation as
 select
   mc.mama_id,
   mc.mouvement_id,
   m.date,
-  m.product_id,
+  m.produit_id,
   mc.cost_center_id,
   cc.nom as cost_center,
   mc.quantite,
   mc.valeur
-from mouvement_cost_centers mc
+from mouvements_centres_cout mc
 join mouvements_stock m on m.id = mc.mouvement_id
-join cost_centers cc on cc.id = mc.cost_center_id;
+join centres_de_cout cc on cc.id = mc.cost_center_id;
 grant select on v_ventilation to authenticated;
 
--- View of suppliers with no invoices in the last 6 months
+-- Vue des fournisseurs sans facture depuis 6 mois
 create or replace view v_fournisseurs_inactifs as
 select
   f.mama_id,
@@ -1127,12 +1100,12 @@ where f.mama_id is not null
   having coalesce(max(fc.date), current_date - interval '999 months') < current_date - interval '6 months';
 grant select on v_fournisseurs_inactifs to authenticated;
 
--- Table for product losses (pertes)
+-- Table des pertes produits
 create table if not exists pertes (
     id uuid primary key default uuid_generate_v4(),
     mama_id uuid not null references mamas(id) on delete cascade,
-    product_id uuid not null references products(id) on delete cascade,
-    cost_center_id uuid references cost_centers(id),
+    produit_id uuid not null references produits(id) on delete cascade,
+    cost_center_id uuid references centres_de_cout(id),
     date_perte date not null default current_date,
     quantite numeric not null,
     motif text,
@@ -1140,9 +1113,9 @@ create table if not exists pertes (
     created_by uuid references users(id)
 );
 create index if not exists idx_pertes_mama on pertes(mama_id);
-create index if not exists idx_pertes_product on pertes(product_id);
+create index if not exists idx_pertes_produit on pertes(produit_id);
 
--- RLS for pertes
+-- RLS pour la table pertes
 alter table pertes enable row level security;
 alter table pertes force row level security;
 drop policy if exists pertes_all on pertes;
@@ -1152,13 +1125,13 @@ create policy pertes_all on pertes
 grant select, insert, update, delete on pertes to authenticated;
 
 
--- Trigger logging pertes
+-- Trigger de journalisation des pertes
 create or replace function log_pertes_changes()
 returns trigger language plpgsql as $$
 begin
-  insert into user_logs(mama_id, user_id, action, details, done_by)
+  insert into journaux_utilisateur(mama_id, user_id, action, details, done_by)
   values(new.mama_id, auth.uid(), 'pertes ' || tg_op,
-         jsonb_build_object('id', new.id, 'product_id', new.product_id),
+         jsonb_build_object('id', new.id, 'produit_id', new.produit_id),
          auth.uid());
   return new;
 end;
@@ -1168,51 +1141,51 @@ after insert or update or delete on pertes
 for each row execute function log_pertes_changes();
 
 
--- Function suggesting cost center allocations based on historical data
-create or replace function suggest_cost_centers(p_produit_id uuid)
+-- Fonction suggérant les allocations de centre de coût selon l'historique
+create or replace function suggest_centres_de_cout(p_produit_id uuid)
 returns table(cost_center_id uuid, nom text, ratio numeric)
 language sql stable security definer as $$
   select
     mcc.cost_center_id,
     cc.nom,
     sum(mcc.quantite)::numeric / greatest(sum(sum_mcc.quantite),1) as ratio
-  from mouvement_cost_centers mcc
+  from mouvements_centres_cout mcc
   join mouvements_stock ms on ms.id = mcc.mouvement_id
-  join cost_centers cc on cc.id = mcc.cost_center_id
+  join centres_de_cout cc on cc.id = mcc.cost_center_id
   join (
     select sum(abs(m.quantite)) as quantite
     from mouvements_stock m
-    where m.product_id = p_produit_id
+    where m.produit_id = p_produit_id
       and m.mama_id = current_user_mama_id()
       and m.quantite < 0
   ) sum_mcc on true
-  where ms.product_id = p_produit_id
+  where ms.produit_id = p_produit_id
     and ms.mama_id = current_user_mama_id()
     and ms.quantite < 0
   group by mcc.cost_center_id, cc.nom;
 $$;
-grant execute on function suggest_cost_centers(uuid) to authenticated;
+grant execute on function suggest_centres_de_cout(uuid) to authenticated;
 
--- View of monthly average purchase price per product
-create or replace view v_product_price_trend as
+-- Vue du prix moyen d'achat mensuel par produit
+create or replace view v_tendance_prix_produit as
 select
   fl.mama_id,
-  fl.product_id,
+  fl.produit_id,
   date_trunc('month', f.date) as mois,
   avg(fl.prix_unitaire) as prix_moyen
 from facture_lignes fl
   join factures f on f.id = fl.facture_id
-  group by fl.mama_id, fl.product_id, mois;
-grant select on v_product_price_trend to authenticated;
+  group by fl.mama_id, fl.produit_id, mois;
+grant select on v_tendance_prix_produit to authenticated;
 
 -- PMP moyen pondere
 create or replace view v_pmp as
 select
   p.mama_id,
-  p.id as product_id,
+  p.id as produit_id,
   coalesce(avg(sp.prix_achat),0) as pmp
-from products p
-left join supplier_products sp on sp.product_id = p.id and sp.mama_id = p.mama_id
+from produits p
+left join fournisseur_produits sp on sp.produit_id = p.id and sp.mama_id = p.mama_id
 group by p.mama_id, p.id;
 grant select on v_pmp to authenticated;
 
@@ -1221,10 +1194,10 @@ create or replace view v_reco_surcout as
 select
   sp.mama_id,
   sp.fournisseur_id,
-  sp.product_id,
+  sp.produit_id,
   max(sp.prix_achat) - min(sp.prix_achat) as variation
-from supplier_products sp
-group by sp.mama_id, sp.fournisseur_id, sp.product_id;
+from fournisseur_produits sp
+group by sp.mama_id, sp.fournisseur_id, sp.produit_id;
 grant select on v_reco_surcout to authenticated;
 
 -- Nombre d'achats par fournisseur
@@ -1239,8 +1212,8 @@ left join factures fc on fc.fournisseur_id = f.id
 group by f.mama_id, f.id, f.nom;
 grant select on v_fournisseur_stats to authenticated;
 
--- View of products with latest supplier price
-create or replace view v_products_last_price as
+-- Vue des produits avec leur dernier prix fournisseur
+create or replace view v_produits_dernier_prix as
 select
   p.id,
   p.nom,
@@ -1262,27 +1235,27 @@ select
   sp.prix_achat as dernier_prix,
   sp.date_livraison as dernier_prix_date,
   sp.fournisseur_id as dernier_fournisseur_id
-from products p
+from produits p
 left join familles f on f.id = p.famille_id and f.mama_id = p.mama_id
 left join unites u on u.id = p.unite_id and u.mama_id = p.mama_id
 left join lateral (
   select prix_achat, date_livraison, fournisseur_id
-  from supplier_products sp
-  where sp.product_id = p.id
+  from fournisseur_produits sp
+  where sp.produit_id = p.id
     and sp.mama_id = p.mama_id
   order by sp.date_livraison desc
   limit 1
 ) sp on true;
-grant select on v_products_last_price to authenticated;
+grant select on v_produits_dernier_prix to authenticated;
 
--- 2FA columns for users
+-- Colonnes 2FA pour les utilisateurs
 alter table users
   add column if not exists two_fa_enabled boolean default false,
   add column if not exists two_fa_secret text;
 comment on column users.two_fa_enabled is 'Whether TOTP 2FA is enabled';
 comment on column users.two_fa_secret is 'TOTP secret for 2FA';
 
--- Allow users to enable/disable 2FA
+-- Permettre aux utilisateurs d'activer ou désactiver la 2FA
 create or replace function enable_two_fa(p_secret text)
 returns void language sql security definer as $$
   update users set two_fa_enabled = true, two_fa_secret = p_secret
@@ -1296,18 +1269,18 @@ returns void language sql security definer as $$
 $$;
 grant execute on function enable_two_fa(text) to authenticated;
 grant execute on function disable_two_fa() to authenticated;
--- Function returning top consumed products for a date range
-create or replace function top_products(
+-- Fonction retournant les produits les plus consommés sur une période
+create or replace function top_produits(
   mama_id_param uuid,
   debut_param date default null,
   fin_param date default null,
   limit_param integer default 5
 )
-returns table(product_id uuid, nom text, total numeric)
+returns table(produit_id uuid, nom text, total numeric)
 language sql stable security definer as $$
   select p.id, p.nom, sum(abs(m.quantite)) as total
   from mouvements_stock m
-  join products p on p.id = m.product_id
+  join produits p on p.id = m.produit_id
   where m.mama_id = mama_id_param
     and m.quantite < 0
     and (debut_param is null or m.created_at >= debut_param)
@@ -1317,54 +1290,54 @@ language sql stable security definer as $$
   limit limit_param
 $$;
 
--- Movements lacking cost center allocations
+-- Mouvements sans affectation de centre de coût
 create or replace function mouvements_without_alloc(limit_param integer default 100)
-returns table(id uuid, product_id uuid, quantite numeric, created_at timestamptz, mama_id uuid)
+returns table(id uuid, produit_id uuid, quantite numeric, created_at timestamptz, mama_id uuid)
 language sql stable security definer as $$
-  select m.id, m.product_id, m.quantite, m.created_at, m.mama_id
+  select m.id, m.produit_id, m.quantite, m.created_at, m.mama_id
   from mouvements_stock m
   where m.mama_id = current_user_mama_id()
     and m.quantite < 0
     and not exists (
-      select 1 from mouvement_cost_centers mc where mc.mouvement_id = m.id
+      select 1 from mouvements_centres_cout mc where mc.mouvement_id = m.id
     )
   order by m.created_at
   limit limit_param;
 $$;
 
--- Index for user login by email
+-- Index pour la connexion utilisateur par email
 create index if not exists idx_users_email on users(email);
 
--- Optional famille/unite text columns for products
+-- Colonnes texte optionnelles famille/unité pour les produits
 DO $$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM information_schema.columns
-    WHERE table_name='products' AND column_name='famille'
+    WHERE table_name='produits' AND column_name='famille'
   ) THEN
-    ALTER TABLE products ADD COLUMN famille text;
+    ALTER TABLE produits ADD COLUMN famille text;
   END IF;
   IF NOT EXISTS (
     SELECT 1 FROM information_schema.columns
-    WHERE table_name='products' AND column_name='unite'
+    WHERE table_name='produits' AND column_name='unite'
   ) THEN
-    ALTER TABLE products ADD COLUMN unite text;
+    ALTER TABLE produits ADD COLUMN unite text;
   END IF;
 END $$;
 
--- Ensure unique constraint on (mama_id, nom, unite)
+-- Contraintes uniques sur (mama_id, nom, unite)
 DO $$
 BEGIN
   IF NOT EXISTS (
-    SELECT 1 FROM pg_constraint WHERE conname = 'products_mama_id_nom_unite_key'
+    SELECT 1 FROM pg_constraint WHERE conname = 'produits_mama_id_nom_unite_key'
   ) THEN
-    ALTER TABLE products
-      ADD CONSTRAINT products_mama_id_nom_unite_key UNIQUE (mama_id, nom, unite);
+    ALTER TABLE produits
+      ADD CONSTRAINT produits_mama_id_nom_unite_key UNIQUE (mama_id, nom, unite);
   END IF;
 END $$;
 
 -- ---------------------------------------
--- Module Carte - additional fields
+-- Module Carte - champs additionnels
 -- ---------------------------------------
 DO $$
 BEGIN
@@ -1406,7 +1379,7 @@ create policy fiches_techniques_all on fiches_techniques
   with check (mama_id = current_user_mama_id());
 grant select, insert, update, delete on fiches_techniques to authenticated;
 
--- Audit table for price changes
+-- Table d'audit des changements de prix
 create table if not exists fiche_prix_history (
     id uuid primary key default uuid_generate_v4(),
     fiche_id uuid references fiches_techniques(id) on delete cascade,
@@ -1443,13 +1416,13 @@ create or replace trigger trg_fiche_prix_change
 after update on fiches_techniques
 for each row execute procedure log_fiche_prix_change();
 
--- Indexes to speed up movement queries
+-- Index pour accélérer les requêtes de mouvements
 create index if not exists idx_mouvements_stock_mama on mouvements_stock(mama_id);
-create index if not exists idx_mouvements_stock_product on mouvements_stock(product_id);
+create index if not exists idx_mouvements_stock_produit on mouvements_stock(produit_id);
 create index if not exists idx_mouvements_stock_date on mouvements_stock(date);
 create index if not exists idx_mouvements_stock_type on mouvements_stock(type);
 
--- Add starting date column for inventaires
+-- Ajout de la colonne date_debut pour les inventaires
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -1463,21 +1436,21 @@ END $$;
 create index if not exists idx_inventaires_date on inventaires(date);
 create index if not exists idx_inventaires_date_debut on inventaires(date_debut);
 
-create index if not exists idx_products_famille_txt on products(famille);
-create index if not exists idx_products_unite_txt on products(unite);
-create index if not exists idx_products_code on products(code);
+create index if not exists idx_produits_famille_txt on produits(famille);
+create index if not exists idx_produits_unite_txt on produits(unite);
+create index if not exists idx_produits_code on produits(code);
 
--- Dashboard stats function
+-- Fonction de statistiques pour le tableau de bord
 create or replace function dashboard_stats(
   mama_id_param uuid,
   page_param integer default 1,
   page_size_param integer default 30
 )
-returns table(product_id uuid, nom text, stock_reel numeric, pmp numeric, last_purchase timestamptz)
+returns table(produit_id uuid, nom text, stock_reel numeric, pmp numeric, last_purchase timestamptz)
 language sql stable security definer as $$
   select p.id, p.nom, p.stock_reel, p.pmp, max(f.date) as last_purchase
-  from products p
-  left join facture_lignes fl on fl.product_id = p.id
+  from produits p
+  left join facture_lignes fl on fl.produit_id = p.id
   left join factures f on f.id = fl.facture_id
   where p.mama_id = mama_id_param
   group by p.id, p.nom, p.stock_reel, p.pmp
@@ -1546,17 +1519,15 @@ create policy tache_instances_all on tache_instances
   with check (exists (select 1 from taches where taches.id = tache_instances.tache_id and taches.mama_id = current_user_mama_id()));
 grant select, insert, update, delete on tache_instances to authenticated;
 
--- Grant execution of helper functions
+-- Autoriser l'exécution des fonctions utilitaires
 grant execute on function dashboard_stats(uuid, integer, integer) to authenticated;
-grant execute on function top_products(uuid, date, date, integer) to authenticated;
+grant execute on function top_produits(uuid, date, date, integer) to authenticated;
 grant execute on function mouvements_without_alloc(integer) to authenticated;
 
--- Index to speed up invoice search
+-- Index pour accélérer la recherche de factures
 create index if not exists idx_factures_reference on factures(reference);
 
--- Table mapping suppliers to products with purchase history
-
--- Optional columns for mouvements_stock to store details
+-- Colonnes optionnelles sur mouvements_stock pour stocker les détails
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -1592,7 +1563,7 @@ BEGIN
   END IF;
 END $$;
 
--- Menu engineering sales table
+-- Table des ventes pour l'ingénierie de menu
 create table if not exists ventes_fiches_carte (
   id uuid primary key default uuid_generate_v4(),
   fiche_id uuid references fiches_techniques(id) on delete cascade,
@@ -1615,7 +1586,7 @@ create policy ventes_fiches_carte_all on ventes_fiches_carte
 grant select, insert, update, delete on ventes_fiches_carte to authenticated;
 
 
--- Module Promotions / Operations commerciales
+-- Module Promotions / Opérations commerciales
 
 create table if not exists promotions (
     id uuid primary key default uuid_generate_v4(),
@@ -1629,22 +1600,22 @@ create table if not exists promotions (
     unique (mama_id, nom, date_debut)
 );
 
-create table if not exists promotion_products (
+create table if not exists promotion_produits (
     id uuid primary key default uuid_generate_v4(),
     promotion_id uuid references promotions(id) on delete cascade,
-    product_id uuid references products(id) on delete cascade,
+    produit_id uuid references produits(id) on delete cascade,
     discount numeric,
     prix_promo numeric,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
-    unique (promotion_id, product_id)
+    unique (promotion_id, produit_id)
 );
 
 create index if not exists idx_promotions_mama on promotions(mama_id);
 create index if not exists idx_promotions_actif on promotions(actif);
-create index if not exists idx_promo_prod_mama on promotion_products(mama_id);
-create index if not exists idx_promo_prod_promotion on promotion_products(promotion_id);
-create index if not exists idx_promo_prod_product on promotion_products(product_id);
+create index if not exists idx_promo_prod_mama on promotion_produits(mama_id);
+create index if not exists idx_promo_prod_promotion on promotion_produits(promotion_id);
+create index if not exists idx_promo_prod_produit on promotion_produits(produit_id);
 
 alter table promotions enable row level security;
 alter table promotions force row level security;
@@ -1654,18 +1625,18 @@ create policy promotions_all on promotions
   with check (mama_id = current_user_mama_id());
 grant select, insert, update, delete on promotions to authenticated;
 
-alter table promotion_products enable row level security;
-alter table promotion_products force row level security;
-drop policy if exists promotion_products_all on promotion_products;
-create policy promotion_products_all on promotion_products
+alter table promotion_produits enable row level security;
+alter table promotion_produits force row level security;
+drop policy if exists promotion_produits_all on promotion_produits;
+create policy promotion_produits_all on promotion_produits
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
-grant select, insert, update, delete on promotion_products to authenticated;
+grant select, insert, update, delete on promotion_produits to authenticated;
 
 create or replace function log_promotions_changes()
 returns trigger language plpgsql as $$
 begin
-  insert into user_logs(mama_id, user_id, action, details, done_by)
+  insert into journaux_utilisateur(mama_id, user_id, action, details, done_by)
   values(coalesce(new.mama_id, old.mama_id), auth.uid(), 'promotions ' || tg_op,
          jsonb_build_object('id_new', new.id, 'id_old', old.id), auth.uid());
   return new;
@@ -1676,7 +1647,7 @@ create or replace trigger trg_log_promotions
 after insert or update or delete on promotions
 for each row execute function log_promotions_changes();
 
--- View and function for consolidated multi-site stats
+-- Vue et fonction pour les statistiques consolidées multi-sites
 create or replace view v_consolidated_stats as
 select
   m.id as mama_id,
@@ -1687,7 +1658,7 @@ select
       where ms.mama_id = m.id and ms.type='sortie'
         and date_trunc('month', ms.date) = date_trunc('month', current_date)) as conso_mois
 from mamas m
-left join products p on p.mama_id = m.id
+left join produits p on p.mama_id = m.id
 group by m.id, m.nom;
 grant select on v_consolidated_stats to authenticated;
 
@@ -1709,7 +1680,7 @@ $$;
 
 grant execute on function consolidated_stats() to authenticated;
 
--- Advanced audit trail for legal compliance
+-- Journal avancé conforme aux obligations légales
 create table if not exists audit_entries (
     id serial primary key,
     mama_id uuid not null references mamas(id) on delete cascade,
@@ -1744,8 +1715,8 @@ end;
 $$;
 grant execute on function add_audit_entry() to authenticated;
 
-create or replace trigger trg_audit_products
-after insert or update or delete on products
+create or replace trigger trg_audit_produits
+after insert or update or delete on produits
 for each row execute function add_audit_entry();
 create or replace trigger trg_audit_factures
 after insert or update or delete on factures
@@ -1776,7 +1747,7 @@ for each row execute function add_audit_entry();
 create table if not exists alert_rules (
     id uuid primary key default uuid_generate_v4(),
     mama_id uuid not null references mamas(id) on delete cascade,
-    product_id uuid references products(id) on delete cascade,
+    produit_id uuid references produits(id) on delete cascade,
     threshold numeric not null,
     message text,
     enabled boolean default true,
@@ -1795,7 +1766,7 @@ create table if not exists alert_logs (
     id uuid primary key default uuid_generate_v4(),
     rule_id uuid references alert_rules(id) on delete cascade,
     mama_id uuid not null references mamas(id) on delete cascade,
-    product_id uuid references products(id) on delete cascade,
+    produit_id uuid references produits(id) on delete cascade,
     stock_reel numeric,
     created_at timestamptz default now()
 );
@@ -1816,10 +1787,10 @@ begin
   for r in
     select * from alert_rules
     where enabled and mama_id = new.mama_id
-      and (product_id is null or product_id = new.id)
+      and (produit_id is null or produit_id = new.id)
   loop
     if new.stock_reel < r.threshold then
-      insert into alert_logs(rule_id, mama_id, product_id, stock_reel)
+      insert into alert_logs(rule_id, mama_id, produit_id, stock_reel)
         values (r.id, new.mama_id, new.id, new.stock_reel);
     end if;
   end loop;
@@ -1830,7 +1801,7 @@ $$;
 grant execute on function check_stock_alert() to authenticated;
 
 create or replace trigger trg_stock_alert
-after update of stock_reel on products
+after update of stock_reel on produits
 for each row execute function check_stock_alert();
 
 
@@ -1867,10 +1838,10 @@ begin
     values (payload->>'reference', (payload->>'date')::date, supp_id,
             (payload->>'total')::numeric, 'en attente', current_user_mama_id())
     returning id into fac_id;
-  insert into facture_lignes(facture_id, product_id, quantite, prix_unitaire, mama_id)
+  insert into facture_lignes(facture_id, produit_id, quantite, prix_unitaire, mama_id)
   select fac_id, p.id, (l->>'quantity')::numeric, (l->>'unit_price')::numeric, current_user_mama_id()
   from jsonb_array_elements(payload->'lines') as l
-  left join products p on p.code = l->>'product_code' and p.mama_id = current_user_mama_id();
+  left join produits p on p.code = l->>'product_code' and p.mama_id = current_user_mama_id();
   return fac_id;
 end;
 $$;
@@ -1898,18 +1869,6 @@ create policy documents_all on documents
 grant select, insert, update, delete on documents to authenticated;
 
 -- Gestion fine des droits avec validations
-create or replace function current_user_role()
-returns text
-language sql
-stable
-security definer
-as $$
-  select coalesce(
-    (select role from utilisateurs where auth_id = auth.uid() limit 1),
-    (select r.nom from users u join roles r on r.id = u.role_id where u.id = auth.uid() limit 1)
-  );
-$$;
-grant execute on function current_user_role() to authenticated;
 
 create table if not exists validation_requests (
     id uuid primary key default uuid_generate_v4(),
@@ -2053,9 +2012,9 @@ grant select, insert, update, delete on help_articles to authenticated;
 
 
 -- ----------------------------------------------------
--- Additional Supabase tables
+-- Tables Supabase supplémentaires
 -- ----------------------------------------------------
-create table if not exists audit_logs (
+create table if not exists journaux_audit (
     id uuid primary key default uuid_generate_v4(),
     user_id uuid,
     mama_id uuid,
@@ -2064,9 +2023,9 @@ create table if not exists audit_logs (
     created_at timestamptz default now()
 );
 
-alter table audit_logs enable row level security;
-drop policy if exists select_own_or_admin on audit_logs;
-create policy select_own_or_admin on audit_logs
+alter table journaux_audit enable row level security;
+drop policy if exists select_own_or_admin on journaux_audit;
+create policy select_own_or_admin on journaux_audit
   for select using (
     user_id = auth.uid() or
     exists (
@@ -2076,7 +2035,7 @@ create policy select_own_or_admin on audit_logs
     )
   );
 
-create table if not exists dashboards (
+create table if not exists tableaux_de_bord (
     id uuid primary key default uuid_generate_v4(),
     user_id uuid references users(id) on delete cascade,
     mama_id uuid references mamas(id) on delete cascade,
@@ -2084,44 +2043,44 @@ create table if not exists dashboards (
     created_at timestamptz default now()
 );
 
-alter table dashboards enable row level security;
-alter table dashboards force row level security;
-drop policy if exists dashboards_owner on dashboards;
-create policy dashboards_owner on dashboards
+alter table tableaux_de_bord enable row level security;
+alter table tableaux_de_bord force row level security;
+drop policy if exists tableaux_de_bord_owner on tableaux_de_bord;
+create policy tableaux_de_bord_owner on tableaux_de_bord
   for all using (
     user_id = auth.uid() and mama_id = current_user_mama_id()
   ) with check (
     user_id = auth.uid() and mama_id = current_user_mama_id()
   );
-grant select, insert, update, delete on dashboards to authenticated;
+grant select, insert, update, delete on tableaux_de_bord to authenticated;
 
-create table if not exists widgets (
+create table if not exists gadgets (
     id uuid primary key default uuid_generate_v4(),
-    dashboard_id uuid references dashboards(id) on delete cascade,
+    dashboard_id uuid references tableaux_de_bord(id) on delete cascade,
     config jsonb,
     ordre int default 0
 );
 
-alter table widgets enable row level security;
-alter table widgets force row level security;
-drop policy if exists widgets_owner on widgets;
-create policy widgets_owner on widgets
+alter table gadgets enable row level security;
+alter table gadgets force row level security;
+drop policy if exists gadgets_owner on gadgets;
+create policy gadgets_owner on gadgets
   for all using (
     exists (
-      select 1 from dashboards d
-      where d.id = widgets.dashboard_id
+      select 1 from tableaux_de_bord d
+      where d.id = gadgets.dashboard_id
         and d.user_id = auth.uid()
         and d.mama_id = current_user_mama_id()
     )
   ) with check (
     exists (
-      select 1 from dashboards d
-      where d.id = widgets.dashboard_id
+      select 1 from tableaux_de_bord d
+      where d.id = gadgets.dashboard_id
         and d.user_id = auth.uid()
         and d.mama_id = current_user_mama_id()
     )
   );
-grant select, insert, update, delete on widgets to authenticated;
+grant select, insert, update, delete on gadgets to authenticated;
 
 create table if not exists compta_mapping (
     id uuid primary key default uuid_generate_v4(),
@@ -2184,12 +2143,12 @@ create policy two_factor_upsert on public.two_factor_auth
   for all using (auth.uid() = id) with check (auth.uid() = id);
 
 -- ----------------------------------------------------
--- Additional Supabase views
+-- Vues Supabase supplémentaires
 -- ----------------------------------------------------
 create or replace view v_analytique_stock as
 select
   m.date,
-  m.product_id,
+  m.produit_id,
   f.nom as famille,
   mc.cost_center_id,
   c.nom as cost_center_nom,
@@ -2197,20 +2156,20 @@ select
   mc.valeur,
   m.mama_id
 from mouvements_stock m
-left join mouvement_cost_centers mc on mc.mouvement_id = m.id
-left join cost_centers c on c.id = mc.cost_center_id
-left join products p on p.id = m.product_id
+left join mouvements_centres_cout mc on mc.mouvement_id = m.id
+left join centres_de_cout c on c.id = mc.cost_center_id
+left join produits p on p.id = m.produit_id
 left join familles f on f.id = p.famille_id and f.mama_id = p.mama_id;
 grant select on v_analytique_stock to authenticated;
 
 create or replace view v_reco_rotation as
 select
-  p.id as product_id,
+  p.id as produit_id,
   p.nom,
   p.mama_id,
   current_date - coalesce(max(m.date), current_date) as jours_inactif
-from products p
-left join mouvements_stock m on m.product_id = p.id
+from produits p
+left join mouvements_stock m on m.produit_id = p.id
 where p.actif = true
 group by p.id, p.nom, p.mama_id;
 grant select on v_reco_rotation to authenticated;
@@ -2224,35 +2183,35 @@ create or replace view v_besoins_previsionnels as
 select
   m.mama_id,
   m.id as menu_id,
-  fl.product_id,
+  fl.produit_id,
   sum(fl.quantite * coalesce(f.portions,1)) as quantite,
   sum(fl.quantite * coalesce(f.portions,1) * coalesce(p.pmp,0)) as valeur,
-  p.nom as product_nom
+  p.nom as nom_produit
 from menus m
 join menu_fiches mf on mf.menu_id = m.id
 join fiches f on f.id = mf.fiche_id
 join fiche_lignes fl on fl.fiche_id = f.id
-left join products p on p.id = fl.product_id
-group by m.mama_id, m.id, fl.product_id, p.nom, p.pmp;
+left join produits p on p.id = fl.produit_id
+group by m.mama_id, m.id, fl.produit_id, p.nom, p.pmp;
 grant select on v_besoins_previsionnels to authenticated;
 
 create or replace view v_reco_surcoût as
-select distinct on (sp.product_id)
-  sp.product_id,
+select distinct on (sp.produit_id)
+  sp.produit_id,
   p.nom,
   p.mama_id,
   sp.prix_achat as dernier_prix,
-  lag(sp.prix_achat) over (partition by sp.product_id order by sp.date_livraison) as prix_precedent,
-  (sp.prix_achat - lag(sp.prix_achat) over (partition by sp.product_id order by sp.date_livraison))
-    / nullif(lag(sp.prix_achat) over (partition by sp.product_id order by sp.date_livraison),0) * 100 as variation_pct
-from supplier_products sp
-join products p on p.id = sp.product_id
+  lag(sp.prix_achat) over (partition by sp.produit_id order by sp.date_livraison) as prix_precedent,
+  (sp.prix_achat - lag(sp.prix_achat) over (partition by sp.produit_id order by sp.date_livraison))
+    / nullif(lag(sp.prix_achat) over (partition by sp.produit_id order by sp.date_livraison),0) * 100 as variation_pct
+from fournisseur_produits sp
+join produits p on p.id = sp.produit_id
 where p.actif = true
-order by sp.product_id, sp.date_livraison desc;
+order by sp.produit_id, sp.date_livraison desc;
 grant select on v_reco_surcoût to authenticated;
 
 -- ----------------------------------------------------
--- Additional Supabase functions
+-- Fonctions Supabase supplémentaires
 -- ----------------------------------------------------
 create or replace function cron_purge_inactive_users()
 returns void
@@ -2288,7 +2247,7 @@ language sql as $$
            sum(fl.total) as total
     from factures f
       join facture_lignes fl on fl.facture_id = f.id
-      left join products p on p.id = fl.product_id
+      left join produits p on p.id = fl.produit_id
       left join familles fam on fam.id = p.famille_id
     where f.mama_id = mama_id_param
     group by 1,2
@@ -2337,8 +2296,8 @@ create policy fournisseurs_api_config_all on fournisseurs_api_config
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
 
--- Manual signup now inserts into utilisateurs so no trigger on auth.users is required
--- Function kept for reference but trigger creation removed for compatibility
+-- L'inscription manuelle renseigne désormais la table utilisateurs, aucun trigger sur auth.users n'est nécessaire
+-- Fonction conservée à titre de référence sans création de trigger pour compatibilité
 create or replace function handle_new_user()
 returns trigger language plpgsql security definer set search_path=public as $$
 begin
@@ -2352,28 +2311,28 @@ end;
 $$;
 
 -- ----------------------------------------------------
--- End of schema
+-- Fin du schéma
 -- ----------------------------------------------------
 
--- Summary: unified schema for MamaStock
+-- Résumé : schéma unifié pour MamaStock
 
 -- ----------------------------------------------------
--- Seed initial admin account
+-- Création du compte admin initial
 -- ----------------------------------------------------
 
--- Ensure required roles exist
+-- S'assurer de l'existence des rôles requis
 insert into roles (nom, description) values
   ('superadmin', 'Super administrateur'),
   ('admin', 'Administrateur'),
   ('user', 'Utilisateur')
   on conflict (nom) do nothing;
 
--- Ensure Mama de Lyon exists
+-- S'assurer que la Mama de Lyon existe
 insert into mamas(id, nom, created_at)
 values ('29c992df-f6b0-47c5-9afa-c965b789aa07', 'Mama de Lyon', now())
 on conflict (id) do nothing;
 
--- Create admin user with full rights for Mama de Lyon
+-- Création de l'utilisateur admin avec tous les droits pour la Mama de Lyon
 insert into users(id, email, password, role_id, access_rights, actif, mama_id)
 values (
   'a49aeafd-6f60-4f68-a267-d7d27c1a1381',
@@ -2385,7 +2344,7 @@ values (
   '29c992df-f6b0-47c5-9afa-c965b789aa07'
 ) on conflict (id) do nothing;
 
- -- Also create matching profile in utilisateurs for Supabase auth
+-- Création également du profil correspondant dans utilisateurs pour l'auth Supabase
 insert into utilisateurs(auth_id, email, mama_id, role, access_rights)
 values (
   'a49aeafd-6f60-4f68-a267-d7d27c1a1381',
@@ -2396,7 +2355,7 @@ values (
 ) on conflict (auth_id) do nothing;
 
 -- ----------------------------------------------------
--- Patch migrating roles integer IDs to UUID
+-- Patch de migration des identifiants de rôle (entier → UUID)
 -- ----------------------------------------------------
 create extension if not exists "uuid-ossp";
 set search_path = public, extensions;

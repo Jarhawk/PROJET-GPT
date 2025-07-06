@@ -1,13 +1,10 @@
 -- SCRIPT COMPATIBLE SUPABASE — AUCUNE OPÉRATION INTERDITE — PRÊT À L’IMPORT
--- baseprojet.sql - Schéma complet MamaStock pour Supabase
+-- full_setup.sql - Schéma complet MamaStock pour Supabase
 -- Script autonome combinant initialisation, RLS et correctifs
+-- ------------------
 
--- init.sql - Installation complète de la base MamaStock
--- ------------------
--- Nettoyage du schéma existant
--- ------------------
-drop schema if exists public cascade;
-create schema public;
+-- Création du schéma public si nécessaire (jamais supprimé)
+create schema if not exists public;
 -- Autoriser l'accès aux objets du schéma
 grant usage on schema public to authenticated;
 grant usage on schema public to anon;
@@ -19,6 +16,30 @@ set search_path = public, extensions;
 -- Extensions
 create extension if not exists "uuid-ossp";
 create extension if not exists "pgcrypto";
+
+-- Supprimer la relation users par défaut de Supabase si elle existe (vue ou table)
+DO $$
+BEGIN
+  -- supprimer la vue générée par Supabase
+  IF EXISTS (
+    SELECT 1
+    FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public' AND c.relname = 'users' AND c.relkind = 'v'
+  ) THEN
+    EXECUTE 'DROP VIEW public.users CASCADE';
+  END IF;
+
+  -- supprimer la table si elle existe
+  IF EXISTS (
+    SELECT 1
+    FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public' AND c.relname = 'users' AND c.relkind IN ('r','p')
+  ) THEN
+    EXECUTE 'DROP TABLE public.users CASCADE';
+  END IF;
+END $$;
 
 
 -- ------------------
@@ -299,6 +320,25 @@ create table if not exists inventaire_lignes (
     created_at timestamptz default now()
 );
 
+-- Zones de stock
+create table if not exists zones_stock (
+    id uuid primary key default uuid_generate_v4(),
+    nom text not null,
+    mama_id uuid not null references mamas(id),
+    actif boolean default true,
+    created_at timestamptz default now(),
+    unique(mama_id, nom)
+);
+
+-- Inventaire zones
+create table if not exists inventaire_zones (
+    id uuid primary key default uuid_generate_v4(),
+    nom text not null,
+    mama_id uuid not null references mamas(id),
+    created_at timestamptz default now(),
+    unique(mama_id, nom)
+);
+
 create table if not exists mouvements_stock (
     id uuid primary key default uuid_generate_v4(),
     produit_id uuid references produits(id) on delete set null,
@@ -314,29 +354,6 @@ create table if not exists mouvements_stock (
     created_at timestamptz default now()
 );
 
--- Supprimer la relation users par défaut de Supabase si elle existe (vue ou table)
-DO $$
-BEGIN
-  -- supprimer la vue générée par Supabase
-  IF EXISTS (
-    SELECT 1
-    FROM pg_class c
-    JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE n.nspname = 'public' AND c.relname = 'users' AND c.relkind = 'v'
-  ) THEN
-    EXECUTE 'DROP VIEW public.users CASCADE';
-  END IF;
-
-  -- supprimer la table si elle existe
-  IF EXISTS (
-    SELECT 1
-    FROM pg_class c
-    JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE n.nspname = 'public' AND c.relname = 'users' AND c.relkind IN ('r','p')
-  ) THEN
-    EXECUTE 'DROP TABLE public.users CASCADE';
-  END IF;
-END $$;
 
 -- Contacts et notes fournisseurs
 create table if not exists fournisseur_contacts (
@@ -418,24 +435,6 @@ create table if not exists transferts (
     created_at timestamptz default now()
 );
 
--- Zones de stock
-create table if not exists zones_stock (
-    id uuid primary key default uuid_generate_v4(),
-    nom text not null,
-    mama_id uuid not null references mamas(id),
-    actif boolean default true,
-    created_at timestamptz default now(),
-    unique(mama_id, nom)
-);
-
--- Inventaire zones
-create table if not exists inventaire_zones (
-    id uuid primary key default uuid_generate_v4(),
-    nom text not null,
-    mama_id uuid not null references mamas(id),
-    created_at timestamptz default now(),
-    unique(mama_id, nom)
-);
 
 -- Ventes de boissons
 create table if not exists ventes_boissons (
@@ -541,8 +540,9 @@ begin
 end;
 $$;
 
-create or replace trigger trg_facture_ligne after insert on facture_lignes
-for each row execute procedure mettre_a_jour_pmp_produit();
+drop trigger if exists trg_facture_ligne on facture_lignes;
+create trigger trg_facture_ligne after insert on facture_lignes
+  for each row execute procedure mettre_a_jour_pmp_produit();
 
 -- Maintien du dernier prix d'achat enregistré
 create or replace function mettre_a_jour_prix_produit()
@@ -570,9 +570,10 @@ begin
 end;
 $$;
 
-create or replace trigger trg_update_prix_produit
-after insert on facture_lignes
-for each row execute procedure mettre_a_jour_prix_produit();
+drop trigger if exists trg_update_prix_produit on facture_lignes;
+create trigger trg_update_prix_produit
+  after insert on facture_lignes
+  for each row execute procedure mettre_a_jour_prix_produit();
 
 -- Trigger pour maintenir le total de la facture en phase avec ses lignes
 create or replace function refresh_facture_total()
@@ -597,9 +598,10 @@ begin
 end;
 $$;
 
-create or replace trigger trg_facture_total
-after insert or update or delete on facture_lignes
-for each row execute procedure refresh_facture_total();
+drop trigger if exists trg_facture_total on facture_lignes;
+create trigger trg_facture_total
+  after insert or update or delete on facture_lignes
+  for each row execute procedure refresh_facture_total();
 
 -- Trigger de mise à jour du stock théorique lors de l'enregistrement des mouvements
 create or replace function update_stock_theorique()
@@ -614,8 +616,9 @@ begin
 end;
 $$;
 
-create or replace trigger trg_mouvement_stock after insert on mouvements_stock
-for each row execute procedure update_stock_theorique();
+drop trigger if exists trg_mouvement_stock on mouvements_stock;
+create trigger trg_mouvement_stock after insert on mouvements_stock
+  for each row execute procedure update_stock_theorique();
 
 -- Trigger pour appliquer les lignes d'inventaire au stock réel
 create or replace function apply_inventaire_line()
@@ -626,8 +629,9 @@ begin
 end;
 $$;
 
-create or replace trigger trg_inventaire_ligne after insert on inventaire_lignes
-for each row execute procedure apply_inventaire_line();
+drop trigger if exists trg_inventaire_ligne on inventaire_lignes;
+create trigger trg_inventaire_ligne after insert on inventaire_lignes
+  for each row execute procedure apply_inventaire_line();
 
 -- Trigger de rafraîchissement du coût des fiches lors des modifications
 create or replace function refresh_fiche_cost()
@@ -658,13 +662,15 @@ begin
 end;
 $$;
 
-create or replace trigger trg_fiche_lignes_cost
-after insert or update or delete on fiche_lignes
-for each row execute procedure refresh_fiche_cost();
+drop trigger if exists trg_fiche_lignes_cost on fiche_lignes;
+create trigger trg_fiche_lignes_cost
+  after insert or update or delete on fiche_lignes
+  for each row execute procedure refresh_fiche_cost();
 
-create or replace trigger trg_fiche_update_cost
-after update on fiches
-for each row execute procedure refresh_fiche_cost();
+drop trigger if exists trg_fiche_update_cost on fiches;
+create trigger trg_fiche_update_cost
+  after update on fiches
+  for each row execute procedure refresh_fiche_cost();
 
 -- Statistiques : total des achats par mois pour tous les fournisseurs
 create or replace function stats_achats_fournisseurs(mama_id_param uuid)
@@ -707,7 +713,7 @@ language sql as $$
   group by 1
   order by 1;
 $$;
--- rls.sql - Row Level Security policies for MamaStock
+-- Politiques RLS pour MamaStock
 grant execute on function stats_rotation_produit(uuid, uuid) to authenticated;
 
 -- Helper function current_user_mama_id() defined above
@@ -790,7 +796,6 @@ create policy inventaire_lignes_all on inventaire_lignes for all using (mama_id 
 
 alter table mouvements_stock enable row level security;
 alter table mouvements_stock force row level security;
-drop policy if exists mouvements_stock_all on mouvements_stock;
 drop policy if exists mouvements_stock_select on mouvements_stock;
 drop policy if exists mouvements_stock_insert on mouvements_stock;
 drop policy if exists mouvements_stock_update on mouvements_stock;
@@ -1043,9 +1048,10 @@ begin
 end;
 $$;
 
-create or replace trigger trg_log_centres_de_cout
-after insert or update or delete on centres_de_cout
-for each row execute function log_centres_de_cout_changes();
+drop trigger if exists trg_log_centres_de_cout on centres_de_cout;
+create trigger trg_log_centres_de_cout
+  after insert or update or delete on centres_de_cout
+  for each row execute function log_centres_de_cout_changes();
 grant execute on function log_centres_de_cout_changes() to authenticated;
 
 -- Fonction déclenchée pour journaliser l'affectation des mouvements aux centres de coût
@@ -1064,9 +1070,10 @@ begin
 end;
 $$;
 
-create or replace trigger trg_log_mouvement_cc
-after insert or update or delete on mouvements_centres_cout
-for each row execute function log_mouvement_cc_changes();
+drop trigger if exists trg_log_mouvement_cc on mouvements_centres_cout;
+create trigger trg_log_mouvement_cc
+  after insert or update or delete on mouvements_centres_cout
+  for each row execute function log_mouvement_cc_changes();
 grant execute on function log_mouvement_cc_changes() to authenticated;
 
 -- Vue détaillée des affectations de mouvements de stock
@@ -1136,9 +1143,10 @@ begin
   return new;
 end;
 $$;
-create or replace trigger trg_log_pertes
-after insert or update or delete on pertes
-for each row execute function log_pertes_changes();
+drop trigger if exists trg_log_pertes on pertes;
+create trigger trg_log_pertes
+  after insert or update or delete on pertes
+  for each row execute function log_pertes_changes();
 
 
 -- Fonction suggérant les allocations de centre de coût selon l'historique
@@ -1412,7 +1420,7 @@ end;
 $$;
 
 drop trigger if exists trg_fiche_prix_change on fiches_techniques;
-create or replace trigger trg_fiche_prix_change
+create trigger trg_fiche_prix_change
 after update on fiches_techniques
 for each row execute procedure log_fiche_prix_change();
 
@@ -1643,9 +1651,10 @@ begin
 end;
 $$;
 
-create or replace trigger trg_log_promotions
-after insert or update or delete on promotions
-for each row execute function log_promotions_changes();
+drop trigger if exists trg_log_promotions on promotions;
+create trigger trg_log_promotions
+  after insert or update or delete on promotions
+  for each row execute function log_promotions_changes();
 
 -- Vue et fonction pour les statistiques consolidées multi-sites
 create or replace view v_consolidated_stats as
@@ -1715,12 +1724,14 @@ end;
 $$;
 grant execute on function add_audit_entry() to authenticated;
 
-create or replace trigger trg_audit_produits
-after insert or update or delete on produits
-for each row execute function add_audit_entry();
-create or replace trigger trg_audit_factures
-after insert or update or delete on factures
-for each row execute function add_audit_entry();
+drop trigger if exists trg_audit_produits on produits;
+create trigger trg_audit_produits
+  after insert or update or delete on produits
+  for each row execute function add_audit_entry();
+drop trigger if exists trg_audit_factures on factures;
+create trigger trg_audit_factures
+  after insert or update or delete on factures
+  for each row execute function add_audit_entry();
 
 -- Planning prévisionnel des besoins
 create table if not exists planning_previsionnel (
@@ -1739,9 +1750,10 @@ create policy planning_previsionnel_all on planning_previsionnel
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
 grant select, insert, update, delete on planning_previsionnel to authenticated;
-create or replace trigger trg_audit_planning
-after insert or update or delete on planning_previsionnel
-for each row execute function add_audit_entry();
+drop trigger if exists trg_audit_planning on planning_previsionnel;
+create trigger trg_audit_planning
+  after insert or update or delete on planning_previsionnel
+  for each row execute function add_audit_entry();
 
 -- Alertes avancees automatique
 create table if not exists alert_rules (
@@ -1800,9 +1812,10 @@ $$;
 
 grant execute on function check_stock_alert() to authenticated;
 
-create or replace trigger trg_stock_alert
-after update of stock_reel on produits
-for each row execute function check_stock_alert();
+drop trigger if exists trg_stock_alert on produits;
+create trigger trg_stock_alert
+  after update of stock_reel on produits
+  for each row execute function check_stock_alert();
 
 
 -- Import automatique des factures electroniques
@@ -2024,6 +2037,7 @@ create table if not exists journaux_audit (
 );
 
 alter table journaux_audit enable row level security;
+alter table journaux_audit force row level security;
 drop policy if exists select_own_or_admin on journaux_audit;
 create policy select_own_or_admin on journaux_audit
   for select using (
@@ -2034,6 +2048,10 @@ create policy select_own_or_admin on journaux_audit
       where u.id = auth.uid() and r.nom in ('admin','superadmin')
     )
   );
+create index if not exists idx_journaux_audit_mama on journaux_audit(mama_id);
+create index if not exists idx_journaux_audit_user on journaux_audit(user_id);
+create index if not exists idx_journaux_audit_date on journaux_audit(created_at);
+grant select on journaux_audit to authenticated;
 
 create table if not exists tableaux_de_bord (
     id uuid primary key default uuid_generate_v4(),
@@ -2123,6 +2141,7 @@ create table if not exists consentements_utilisateur (
 );
 
 alter table consentements_utilisateur enable row level security;
+alter table consentements_utilisateur force row level security;
 drop policy if exists user_own_consent on consentements_utilisateur;
 create policy user_own_consent on consentements_utilisateur
   for all using (user_id = auth.uid()) with check (user_id = auth.uid());
@@ -2135,6 +2154,7 @@ create table if not exists public.two_factor_auth (
     created_at timestamptz default now()
 );
 alter table public.two_factor_auth enable row level security;
+alter table public.two_factor_auth force row level security;
 drop policy if exists two_factor_select on public.two_factor_auth;
 create policy two_factor_select on public.two_factor_auth
   for select using (auth.uid() = id);
@@ -2355,47 +2375,5 @@ values (
 ) on conflict (auth_id) do nothing;
 
 -- ----------------------------------------------------
--- Patch de migration des identifiants de rôle (entier → UUID)
--- ----------------------------------------------------
-create extension if not exists "uuid-ossp";
-set search_path = public, extensions;
 
-DO $$
-BEGIN
-  IF EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='roles' AND column_name='id' AND data_type <> 'uuid'
-  ) THEN
-    DROP INDEX IF EXISTS idx_users_role;
-    DROP INDEX IF EXISTS idx_permissions_role;
-    ALTER TABLE IF EXISTS permissions DROP CONSTRAINT IF EXISTS permissions_role_id_fkey;
-    ALTER TABLE IF EXISTS users DROP CONSTRAINT IF EXISTS users_role_id_fkey;
-
-    ALTER TABLE roles ADD COLUMN IF NOT EXISTS id_uuid uuid;
-    UPDATE roles SET id_uuid = uuid_generate_v4() WHERE id_uuid IS NULL;
-
-    ALTER TABLE users ADD COLUMN IF NOT EXISTS role_id_uuid uuid;
-    UPDATE users SET role_id_uuid = r.id_uuid FROM roles r WHERE users.role_id = r.id;
-
-    ALTER TABLE permissions ADD COLUMN IF NOT EXISTS role_id_uuid uuid;
-    UPDATE permissions SET role_id_uuid = r.id_uuid FROM roles r WHERE permissions.role_id = r.id;
-
-    ALTER TABLE users DROP COLUMN IF EXISTS role_id;
-    ALTER TABLE permissions DROP COLUMN IF EXISTS role_id;
-    ALTER TABLE roles DROP COLUMN IF EXISTS id;
-
-    ALTER TABLE roles RENAME COLUMN id_uuid TO id;
-    ALTER TABLE users RENAME COLUMN role_id_uuid TO role_id;
-    ALTER TABLE permissions RENAME COLUMN role_id_uuid TO role_id;
-
-    ALTER TABLE roles ALTER COLUMN id SET DEFAULT uuid_generate_v4();
-    ALTER TABLE roles ALTER COLUMN id SET NOT NULL;
-    ALTER TABLE roles ADD PRIMARY KEY (id);
-
-    ALTER TABLE users ADD CONSTRAINT users_role_id_fkey FOREIGN KEY (role_id) REFERENCES roles(id);
-    ALTER TABLE permissions ADD CONSTRAINT permissions_role_id_fkey FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE;
-
-    CREATE INDEX IF NOT EXISTS idx_users_role ON users(role_id);
-    CREATE INDEX IF NOT EXISTS idx_permissions_role ON permissions(role_id);
-  END IF;
-END $$;
+-- Fin du script

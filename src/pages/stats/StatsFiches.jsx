@@ -30,8 +30,7 @@ export default function StatsFiches() {
       supabase
         .from("familles")
         .select("nom")
-        .eq("mama_id", mama_id)
-        .eq("actif", true),
+        .eq("mama_id", mama_id),
     ]).then(([ficheRes, familleRes]) => {
       if (ficheRes.error) toast.error("Erreur chargement : " + ficheRes.error.message);
       else setFiches(ficheRes.data || []);

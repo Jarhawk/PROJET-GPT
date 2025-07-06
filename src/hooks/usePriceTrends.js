@@ -11,8 +11,9 @@ export function usePriceTrends(productIdInitial) {
   async function fetchTrends(prodId = productIdInitial) {
     if (!prodId) return [];
     setLoading(true);
+    // Vue renommée v_tendance_prix_produit dans le schéma final
     const { data, error } = await supabase
-      .from('v_product_price_trend')
+      .from('v_tendance_prix_produit')
       .select('mois, prix_moyen')
       .eq('mama_id', mama_id)
       .eq('produit_id', prodId)

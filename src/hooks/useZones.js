@@ -88,11 +88,6 @@ export function useZones() {
     if (!mama_id) return { error: 'Aucun mama_id' };
     setLoading(true);
     setError(null);
-    const { count: prodCount } = await supabase
-      .from('produits')
-      .select('id', { count: 'exact', head: true })
-      .eq('zone_stockage', id)
-      .eq('mama_id', mama_id);
     const { count: reqCount } = await supabase
       .from('requisitions')
       .select('id', { count: 'exact', head: true })
@@ -103,7 +98,7 @@ export function useZones() {
       .select('id', { count: 'exact', head: true })
       .or(`zone_source_id.eq.${id},zone_destination_id.eq.${id}`)
       .eq('mama_id', mama_id);
-    if ((prodCount || 0) > 0 || (reqCount || 0) > 0 || (mouvCount || 0) > 0) {
+    if ((reqCount || 0) > 0 || (mouvCount || 0) > 0) {
       const err = 'Zone liée à des données, suppression impossible';
       setLoading(false);
       setError(err);

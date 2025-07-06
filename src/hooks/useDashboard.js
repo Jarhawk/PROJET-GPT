@@ -66,7 +66,8 @@ export function useDashboard() {
     setStats({ stock_valorise, conso_mois, nb_mouvements, ca_fnb: caFnbInput });
 
     // 4. Top produits consommés via RPC
-    const { data: topData, error: topErr } = await supabase.rpc('top_products', {
+    // Fonction SQL renommée top_produits dans le schéma final
+    const { data: topData, error: topErr } = await supabase.rpc('top_produits', {
       mama_id_param: mama_id,
       debut_param: null,
       fin_param: null,

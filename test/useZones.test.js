@@ -48,6 +48,6 @@ test('deleteZone stops when data exists', async () => {
   const { result } = renderHook(() => useZones());
   let res;
   await act(async () => { res = await result.current.deleteZone('z'); });
-  expect(fromMock).toHaveBeenCalledWith('produits');
+  expect(fromMock).toHaveBeenCalledWith('requisitions');
   expect(res.error).toBeDefined();
 });

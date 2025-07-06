@@ -12,12 +12,12 @@ export function useFamilles() {
   const [error, setError] = useState(null);
 
   // 1. Charger toutes les familles (recherche, batch)
-  async function fetchFamilles({ search = "", includeInactive = false } = {}) {
+  // Charge la liste des familles avec option de recherche
+  async function fetchFamilles({ search = "" } = {}) {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
     let query = supabase.from("familles").select("*").eq("mama_id", mama_id);
-    if (!includeInactive) query = query.eq("actif", true);
     if (search) query = query.ilike("nom", `%${search}%`);
     const { data, error } = await query.order("nom", { ascending: true });
     setFamilles(Array.isArray(data) ? data : []);
@@ -50,7 +50,7 @@ export function useFamilles() {
     }
     const { data, error } = await supabase
       .from("familles")
-      .insert([{ nom, mama_id, actif: true }])
+      .insert([{ nom, mama_id }])
       .select()
       .single();
     setLoading(false);
@@ -89,7 +89,7 @@ export function useFamilles() {
     setError(null);
     const { error } = await supabase
       .from("familles")
-      .update({ actif: false })
+      .delete()
       .in("id", ids)
       .eq("mama_id", mama_id);
     if (error) setError(error);
@@ -103,7 +103,6 @@ export function useFamilles() {
       id: f.id,
       nom: f.nom,
       mama_id: f.mama_id,
-      actif: f.actif,
     }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Familles");

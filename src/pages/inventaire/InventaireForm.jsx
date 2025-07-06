@@ -24,8 +24,10 @@ export default function InventaireForm() {
   const products = produits;
 
   useEffect(() => {
-    fetchProduits({ zone, famille: familleFilter, search });
-  }, [zone, familleFilter, search, fetchProduits]);
+    // Le filtrage des produits se fait par famille et terme de recherche
+    // La zone n'est plus utilisée côté front pour restreindre la liste
+    fetchProduits({ famille: familleFilter, search });
+  }, [familleFilter, search, fetchProduits]);
 
   const addLine = () => setLignes([...lignes, { produit_id: "", quantite: "" }]);
   const updateLine = (idx, field, val) => {

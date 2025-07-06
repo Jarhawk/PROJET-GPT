@@ -10,16 +10,15 @@ export function useProduitsInventaire() {
   const [error, setError] = useState(null);
 
   const fetchProduits = useCallback(
-    async ({ zone = '', famille = '', search = '' } = {}) => {
+    async ({ famille = '', search = '' } = {}) => {
       if (!mama_id) return [];
       setLoading(true);
       setError(null);
       let query = supabase
         .from('v_produits_dernier_prix')
-        .select('id, nom, unite, pmp, famille, zone_stockage, stock_theorique')
+        .select('id, nom, unite, pmp, famille, stock_theorique')
         .eq('mama_id', mama_id)
         .eq('actif', true);
-      if (zone) query = query.eq('zone_stockage', zone);
       if (famille) query = query.ilike('famille', `%${famille}%`);
       if (search) query = query.ilike('nom', `%${search}%`);
       const { data, error } = await query.order('nom', { ascending: true });

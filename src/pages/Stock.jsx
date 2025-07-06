@@ -17,7 +17,6 @@ export default function Stock() {
   const { stocks, fetchStocks, fetchMouvements, mouvements } = useStock();
   const { mama_id, loading: authLoading } = useAuth();
   const [search, setSearch] = useState("");
-  const [zoneFilter, setZoneFilter] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [selected, setSelected] = useState(null);
   const [showDetail, setShowDetail] = useState(false);
@@ -30,10 +29,8 @@ export default function Stock() {
     }
   }, [authLoading, mama_id, fetchStocks, fetchMouvements]);
 
-  const filtered = stocks.filter(
-    s =>
-      (!search || s.nom.toLowerCase().includes(search.toLowerCase())) &&
-      (!zoneFilter || s.zone === zoneFilter)
+  const filtered = stocks.filter(s =>
+    !search || s.nom.toLowerCase().includes(search.toLowerCase())
   );
   const nbPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -57,12 +54,6 @@ export default function Stock() {
           className="input"
           placeholder="Recherche produit"
         />
-        <select className="input" value={zoneFilter} onChange={e => setZoneFilter(e.target.value)}>
-          <option value="">Toutes zones</option>
-          {[...new Set(stocks.map(s => s.zone))].filter(Boolean).map(z =>
-            <option key={z} value={z}>{z}</option>
-          )}
-        </select>
         <Button onClick={() => { setSelected(null); setShowForm(true); }}>
           Mouvement stock
         </Button>
@@ -77,7 +68,6 @@ export default function Stock() {
         <thead>
           <tr>
             <th className="px-4 py-2">Produit</th>
-            <th className="px-4 py-2">Zone</th>
             <th className="px-4 py-2">Stock réel</th>
             <th className="px-4 py-2">Unité</th>
             <th className="px-4 py-2">PMP</th>
@@ -97,7 +87,6 @@ export default function Stock() {
                   {s.nom}
                 </Button>
               </td>
-              <td className="border px-4 py-2">{s.zone || "-"}</td>
               <td className="border px-4 py-2">{s.stock_reel}</td>
               <td className="border px-4 py-2">{s.unite}</td>
               <td className="border px-4 py-2">{s.pmp?.toFixed(2)}</td>

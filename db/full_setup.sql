@@ -588,6 +588,22 @@ BEGIN
       ALTER TABLE promotion_produits ADD COLUMN produit_id uuid references produits(id) on delete cascade;
     END IF;
   END IF;
+
+  -- Harmonisation de la colonne zone_id dans requisitions
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='requisitions' AND column_name='zone'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='requisitions' AND column_name='zone_id'
+  ) THEN
+    ALTER TABLE requisitions RENAME COLUMN zone TO zone_id;
+  ELSIF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='requisitions' AND column_name='zone_id'
+  ) THEN
+    ALTER TABLE requisitions ADD COLUMN zone_id uuid references zones_stock(id);
+  END IF;
 END $$;
 
 -- Indexes
@@ -644,7 +660,15 @@ create index if not exists idx_menu_fiches_menu on menu_fiches(menu_id);
 create index if not exists idx_menu_fiches_fiche on menu_fiches(fiche_id);
 create index if not exists idx_requisitions_mama on requisitions(mama_id);
 create index if not exists idx_requisitions_produit on requisitions(produit_id);
-create index if not exists idx_requisitions_zone on requisitions(zone_id);
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='requisitions' AND column_name='zone_id'
+  ) THEN
+    CREATE INDEX IF NOT EXISTS idx_requisitions_zone ON requisitions(zone_id);
+  END IF;
+END $$;
 create index if not exists idx_requisitions_date on requisitions(date);
 create index if not exists idx_transferts_mama on transferts(mama_id);
 create index if not exists idx_transferts_produit on transferts(produit_id);

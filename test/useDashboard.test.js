@@ -24,7 +24,7 @@ test('fetchDashboard queries products and mouvements and calls RPC', async () =>
   await act(async () => {
     await result.current.fetchDashboard(1000);
   });
-  expect(fromMock).toHaveBeenCalledWith('produits');
+  expect(fromMock).toHaveBeenCalledWith('v_produits_dernier_prix');
   expect(fromMock).toHaveBeenCalledWith('mouvements_stock');
-  expect(rpcMock).toHaveBeenCalledWith('top_products', expect.any(Object));
+  expect(rpcMock).toHaveBeenCalledWith('top_produits', expect.any(Object));
 });

@@ -30,7 +30,7 @@ export default function useExport() {
       if (type === 'fiches') {
         const res = await supabase
           .from('fiches_techniques')
-          .select('*, lignes:fiche_lignes(*)')
+          .select('*')
           .eq('mama_id', mama_id);
         data = res.data || [];
       } else if (type === 'inventaire') {

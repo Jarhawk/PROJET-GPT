@@ -30,7 +30,7 @@ export function useDashboard() {
     let mouvements = [];
     try {
       const { data: produitsRaw, error: errorProd } = await supabase
-        .from("produits")
+        .from("v_produits_dernier_prix")
         .select("id, nom, famille, unite, pmp, stock_reel, stock_min")
         .eq("mama_id", mama_id);
       if (errorProd) throw errorProd;

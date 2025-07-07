@@ -16,7 +16,7 @@ export function useInventaires() {
     const { data, error } = await supabase
       .from("inventaires")
       .select(
-        "*, lignes:inventaire_lignes(*, produit:produits(id, nom, unite, stock_theorique, pmp))"
+        "*, lignes:inventaire_lignes(*, produit:produits(id, nom, unite:unites(nom), stock_theorique, pmp))"
       )
       .eq("mama_id", mama_id)
       .order("date", { ascending: false });
@@ -97,7 +97,9 @@ export function useInventaires() {
     setError(null);
     const { data, error } = await supabase
       .from("inventaires")
-      .select("*, lignes:inventaire_lignes(*, produit:produits(id, nom, unite, stock_theorique, pmp))")
+      .select(
+        "*, lignes:inventaire_lignes(*, produit:produits(id, nom, unite:unites(nom), stock_theorique, pmp))"
+      )
       .eq("id", id)
       .eq("mama_id", mama_id)
       .single();

@@ -34,12 +34,11 @@ test('fetchData queries fiches and ventes', async () => {
   await act(async () => {
     await result.current.fetchData()
   })
-  expect(fromMock).toHaveBeenCalledWith('fiches')
+  expect(fromMock).toHaveBeenCalledWith('fiches_techniques')
   expect(query.select).toHaveBeenCalledWith('*')
   expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1')
   expect(query.order).toHaveBeenCalledWith('nom')
-  expect(fromMock).toHaveBeenCalledWith('ventes_fiches')
-  expect(fromMock).toHaveBeenCalledWith('prix_vente')
+  expect(fromMock).toHaveBeenCalledWith('ventes_fiches_carte')
 })
 
 test('fetchData skips when no mama_id', async () => {

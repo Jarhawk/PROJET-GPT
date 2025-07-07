@@ -1489,3 +1489,8 @@
 ## 2025-07-02 Step 268
 - Added `@eslint/js` to devDependencies so ESLint works without additional setup
 - npm run lint and npm test pass
+
+## 2025-07-07 Step 269
+- Aligned hooks with French DB schema: produits view, fiches_techniques, ventes_fiches_carte
+- Updated tests to match new queries
+- npm install executed; lint and tests pass

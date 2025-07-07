@@ -6,7 +6,7 @@ export function useTopProducts() {
   const { mama_id } = useAuth();
 
   async function fetchTop({ debut = null, fin = null, limit = 5 } = {}) {
-    const { data, error } = await supabase.rpc('top_products', {
+    const { data, error } = await supabase.rpc('top_produits', {
       mama_id_param: mama_id,
       debut_param: debut,
       fin_param: fin,

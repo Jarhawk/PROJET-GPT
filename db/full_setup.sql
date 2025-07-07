@@ -3,6 +3,33 @@
 -- Script autonome combinant initialisation, RLS et correctifs
 -- ------------------
 
+-- Le script peut être relancé sur une base vide ou déjà partiellement
+-- configurée : chaque étape vérifie l'existence des objets avant de les créer
+-- ou de les modifier.
+
+-- Créer les rôles Supabase manquants pour exécution sur une instance vierge
+do $$
+begin
+  if not exists (select 1 from pg_roles where rolname='authenticated') then
+    create role authenticated;
+  end if;
+  if not exists (select 1 from pg_roles where rolname='anon') then
+    create role anon;
+  end if;
+  if not exists (select 1 from pg_roles where rolname='service_role') then
+    create role service_role;
+  end if;
+end $$;
+
+-- Schéma et fonction auth minimaux si absents
+create schema if not exists auth;
+create table if not exists auth.users (
+  id uuid primary key,
+  email text
+);
+create or replace function auth.uid()
+returns uuid language sql stable as $$ select null::uuid $$;
+
 -- Création du schéma public si nécessaire (jamais supprimé)
 create schema if not exists public;
 -- Autoriser l'accès aux objets du schéma
@@ -552,18 +579,26 @@ BEGIN
   END IF;
 
   IF EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='pertes' AND column_name='product_id'
-  ) AND NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='pertes' AND column_name='produit_id'
+    SELECT 1 FROM pg_class c
+      JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public'
+      AND c.relname = 'pertes'
+      AND c.relkind IN ('r','p')
   ) THEN
-    ALTER TABLE pertes RENAME COLUMN product_id TO produit_id;
-  ELSIF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='pertes' AND column_name='produit_id'
-  ) THEN
-    ALTER TABLE pertes ADD COLUMN produit_id uuid references produits(id);
+    IF EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name='pertes' AND column_name='product_id'
+    ) AND NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name='pertes' AND column_name='produit_id'
+    ) THEN
+      ALTER TABLE pertes RENAME COLUMN product_id TO produit_id;
+    ELSIF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name='pertes' AND column_name='produit_id'
+    ) THEN
+      ALTER TABLE pertes ADD COLUMN produit_id uuid references produits(id);
+    END IF;
   END IF;
 
   IF EXISTS (
@@ -812,7 +847,7 @@ begin
     cout_par_portion = coalesce(total,0)/nullif(portions,0)
   where id = fid;
 
-  insert into fiche_cout_history (fiche_id, date, cout_total, cout_par_portion, mama_id)
+  insert into fiche_cout_history (fiche_id, "date", cout_total, cout_par_portion, mama_id)
   values (fid, current_date, coalesce(total,0), coalesce(total,0)/nullif(portions,0), mid);
 
   return new;
@@ -1238,7 +1273,7 @@ create or replace view v_ventilation as
 select
   mc.mama_id,
   mc.mouvement_id,
-  m.date,
+  m."date",
   m.produit_id,
   mc.cost_center_id,
   cc.nom as cost_center,
@@ -1822,7 +1857,7 @@ select
   (select count(*) from mouvements_stock ms where ms.mama_id = m.id) as nb_mouvements,
   (select sum(abs(ms.quantite)) from mouvements_stock ms
       where ms.mama_id = m.id and ms.type='sortie'
-        and date_trunc('month', ms.date) = date_trunc('month', current_date)) as conso_mois
+        and date_trunc('month', ms."date") = date_trunc('month', current_date)) as conso_mois
 from mamas m
 left join produits p on p.mama_id = m.id
 group by m.id, m.nom;
@@ -2324,7 +2359,7 @@ create policy two_factor_upsert on public.two_factor_auth
 -- ----------------------------------------------------
 create or replace view v_analytique_stock as
 select
-  m.date,
+  m."date",
   m.produit_id,
   f.nom as famille,
   mc.cost_center_id,
@@ -2344,7 +2379,7 @@ select
   p.id as produit_id,
   p.nom,
   p.mama_id,
-  current_date - coalesce(max(m.date), current_date) as jours_inactif
+  current_date - coalesce(max(m."date"), current_date) as jours_inactif
 from produits p
 left join mouvements_stock m on m.produit_id = p.id
 where p.actif = true
@@ -2507,6 +2542,11 @@ insert into roles (nom, description) values
 -- S'assurer que la Mama de Lyon existe
 insert into mamas(id, nom, created_at)
 values ('29c992df-f6b0-47c5-9afa-c965b789aa07', 'Mama de Lyon', now())
+on conflict (id) do nothing;
+
+-- Enregistrer aussi cet utilisateur dans auth.users pour la FK
+insert into auth.users(id, email)
+values ('a49aeafd-6f60-4f68-a267-d7d27c1a1381', 'admin@mamastock.com')
 on conflict (id) do nothing;
 
 -- Création de l'utilisateur admin avec tous les droits pour la Mama de Lyon

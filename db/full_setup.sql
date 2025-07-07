@@ -7,28 +7,16 @@
 -- configurée : chaque étape vérifie l'existence des objets avant de les créer
 -- ou de les modifier.
 
--- Créer les rôles Supabase manquants pour exécution sur une instance vierge
-do $$
-begin
-  if not exists (select 1 from pg_roles where rolname='authenticated') then
-    create role authenticated;
-  end if;
-  if not exists (select 1 from pg_roles where rolname='anon') then
-    create role anon;
-  end if;
-  if not exists (select 1 from pg_roles where rolname='service_role') then
-    create role service_role;
-  end if;
-end $$;
+-- Les rôles `authenticated`, `anon` et `service_role` sont déjà
+-- présents sur Supabase. Aucune création de rôle n'est donc réalisée
+-- afin d'éviter des erreurs de privilèges lors de l'exécution du script.
 
--- Schéma et fonction auth minimaux si absents
-create schema if not exists auth;
-create table if not exists auth.users (
-  id uuid primary key,
-  email text
-);
-create or replace function auth.uid()
-returns uuid language sql stable as $$ select null::uuid $$;
+-- L'environnement Supabase fournit déjà le schéma `auth`, la table `users`
+-- et la fonction `auth.uid()`
+-- Ces objets ne sont donc pas créés ici afin d'éviter les erreurs de droits
+-- lors de l'exécution sur Supabase.
+-- Assurez-vous donc d'exécuter ce script sur une instance Supabase
+-- préconfigurée avec ces rôles et le schéma `auth` existants.
 
 -- Création du schéma public si nécessaire (jamais supprimé)
 create schema if not exists public;

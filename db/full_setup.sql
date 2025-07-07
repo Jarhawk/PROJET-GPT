@@ -629,6 +629,59 @@ BEGIN
   END IF;
 END $$;
 
+-- S'assure de la présence des colonnes "date" sur les tables clés
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='factures' AND column_name='date'
+  ) THEN
+    ALTER TABLE factures ADD COLUMN "date" date;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='fiche_cout_history' AND column_name='date'
+  ) THEN
+    ALTER TABLE fiche_cout_history ADD COLUMN "date" date;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='inventaires' AND column_name='date'
+  ) THEN
+    ALTER TABLE inventaires ADD COLUMN "date" date;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='mouvements_stock' AND column_name='date'
+  ) THEN
+    ALTER TABLE mouvements_stock ADD COLUMN "date" date;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='fournisseur_notes' AND column_name='date'
+  ) THEN
+    ALTER TABLE fournisseur_notes ADD COLUMN "date" date;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='menus' AND column_name='date'
+  ) THEN
+    ALTER TABLE menus ADD COLUMN "date" date;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='requisitions' AND column_name='date'
+  ) THEN
+    ALTER TABLE requisitions ADD COLUMN "date" date;
+  END IF;
+END $$;
+
 -- Indexes
 create index if not exists idx_users_mama on users(mama_id);
 create index if not exists idx_users_role on users(role_id);

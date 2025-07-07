@@ -567,18 +567,26 @@ BEGIN
   END IF;
 
   IF EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='promotion_produits' AND column_name='product_id'
-  ) AND NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='promotion_produits' AND column_name='produit_id'
+    SELECT 1 FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public'
+      AND c.relname = 'promotion_produits'
+      AND c.relkind IN ('r','p')
   ) THEN
-    ALTER TABLE promotion_produits RENAME COLUMN product_id TO produit_id;
-  ELSIF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='promotion_produits' AND column_name='produit_id'
-  ) THEN
-    ALTER TABLE promotion_produits ADD COLUMN produit_id uuid references produits(id) on delete cascade;
+    IF EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name='promotion_produits' AND column_name='product_id'
+    ) AND NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name='promotion_produits' AND column_name='produit_id'
+    ) THEN
+      ALTER TABLE promotion_produits RENAME COLUMN product_id TO produit_id;
+    ELSIF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name='promotion_produits' AND column_name='produit_id'
+    ) THEN
+      ALTER TABLE promotion_produits ADD COLUMN produit_id uuid references produits(id) on delete cascade;
+    END IF;
   END IF;
 END $$;
 

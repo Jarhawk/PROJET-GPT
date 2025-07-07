@@ -334,7 +334,7 @@ Task management is documented in [docs/taches.md](docs/taches.md).
 - Cost center allocation modal offers suggestions based on historical data
 - SQL function `suggest_cost_centers` is granted to authenticated users for these recommendations
 - SQL function `stats_cost_centers` can be executed by any authenticated user for cost center analytics
-- Dashboard analytics functions `dashboard_stats`, `top_products` and `mouvements_without_alloc` are also executable by authenticated users
+- Dashboard analytics functions `dashboard_stats`, `top_produits` and `mouvements_without_alloc` are also executable by authenticated users
 - Command `npm run allocate:history` applies those suggestions to past movements
 - Global search bar in the navbar to quickly find products or suppliers
 - Live search on documents, alerts and suppliers lists with server-side filtering

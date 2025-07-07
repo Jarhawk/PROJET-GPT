@@ -41,7 +41,9 @@ export function useFiches() {
     setLoading(true);
     const { data, error } = await supabase
       .from("fiches")
-      .select("*, famille:familles(id, nom), lignes:fiche_lignes(*, produit:produits(id, nom, unite, pmp))")
+      .select(
+        "*, famille:familles(id, nom), lignes:fiche_lignes(*, produit:produits(id, nom, unite:unites(nom), pmp))"
+      )
       .eq("id", id)
       .eq("mama_id", mama_id)
       .single();

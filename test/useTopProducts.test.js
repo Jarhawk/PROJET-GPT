@@ -18,7 +18,7 @@ test('fetchTop calls RPC with params', async () => {
   await act(async () => {
     await result.current.fetchTop({ debut: '2024-01-01', fin: '2024-01-31', limit: 3 });
   });
-  expect(rpcMock).toHaveBeenCalledWith('top_products', {
+  expect(rpcMock).toHaveBeenCalledWith('top_produits', {
     mama_id_param: 'm1',
     debut_param: '2024-01-01',
     fin_param: '2024-01-31',

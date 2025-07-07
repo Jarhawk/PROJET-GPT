@@ -8,51 +8,53 @@ export function useMenuEngineering() {
   const [data, setData] = useState([])
 
   const fetchData = useCallback(
-    async (filters = {}) => {
+    async (periode) => {
       if (!mama_id) return []
-      let q = supabase.from('fiches').select('*').eq('mama_id', mama_id).order('nom')
-      if (filters.famille) q = q.eq('famille', filters.famille)
-      if (filters.saison) q = q.eq('saison', filters.saison)
-      if (filters.chef) q = q.eq('chef', filters.chef)
-      const { data: fiches } = await q
-      const { data: ventes } = await supabase.from('ventes_fiches').select('*').eq('mama_id', mama_id)
-      const { data: prix } = await supabase.from('prix_vente').select('*').eq('mama_id', mama_id)
+      const { data: fiches } = await supabase
+        .from('fiches_techniques')
+        .select('*')
+        .eq('mama_id', mama_id)
+        .order('nom')
+
+      const { data: ventes } = await supabase
+        .from('ventes_fiches_carte')
+        .select('fiche_id, ventes, periode')
+        .eq('mama_id', mama_id)
+        .eq('periode', periode)
 
       const ventesMap = {}
       ;(ventes || []).forEach(v => {
-        ventesMap[v.fiche_id] = (ventesMap[v.fiche_id] || 0) + (v.quantite || 0)
-      })
-      const prixMap = {}
-      ;(prix || []).forEach(p => {
-        prixMap[p.fiche_id] = p.prix
+        ventesMap[v.fiche_id] = v.ventes || 0
       })
 
       const totalVentes = Object.values(ventesMap).reduce((a, b) => a + b, 0)
 
       const rows = (fiches || []).map(f => {
-        const cout = f.cout_total && f.portions ? f.cout_total / f.portions : 0
-        const p = prixMap[f.id] ?? f.prix_vente ?? 0
+        const cout = f.cout_portion ?? (f.cout_total && f.portions ? f.cout_total / f.portions : 0)
+        const p = f.prix_vente ?? 0
         const qty = ventesMap[f.id] || 0
         const pop = totalVentes > 0 ? qty / totalVentes : 0
+        const foodCost = p > 0 ? (cout / p) * 100 : null
         const marge = p > 0 ? ((p - cout) / p) * 100 : 0
         return {
           ...f,
           prix_vente: p,
           cout_portion: cout,
-          quantite: qty,
+          ventes: qty,
           popularite: pop,
+          foodCost,
           marge,
           x: pop * 100,
           y: marge,
         }
       })
 
-      const medPop = median(rows.map(r => r.quantite))
+      const medPop = median(rows.map(r => r.ventes))
       const medMarge = median(rows.map(r => r.marge))
       rows.forEach(r => {
-        if (r.quantite >= medPop && r.marge >= medMarge) r.classement = 'Star'
-        else if (r.quantite >= medPop && r.marge < medMarge) r.classement = 'Plowhorse'
-        else if (r.quantite < medPop && r.marge >= medMarge) r.classement = 'Puzzle'
+        if (r.ventes >= medPop && r.marge >= medMarge) r.classement = 'Star'
+        else if (r.ventes >= medPop && r.marge < medMarge) r.classement = 'Plowhorse'
+        else if (r.ventes < medPop && r.marge >= medMarge) r.classement = 'Puzzle'
         else r.classement = 'Dog'
         r.score_calc = Math.round(r.marge + r.popularite * 100)
       })
@@ -69,25 +71,26 @@ export function useMenuEngineering() {
   }
 
   const saveVente = useCallback(
-    async (fiche_id, quantite, prix_vente) => {
+    async (fiche_id, periode, ventes) => {
       if (!mama_id) return
       const { data: existing } = await supabase
-        .from('ventes_fiches')
+        .from('ventes_fiches_carte')
         .select('id')
         .eq('fiche_id', fiche_id)
+        .eq('periode', periode)
         .eq('mama_id', mama_id)
         .maybeSingle()
       let error
       if (existing) {
         ;({ error } = await supabase
-          .from('ventes_fiches')
-          .update({ quantite, prix_vente })
+          .from('ventes_fiches_carte')
+          .update({ ventes })
           .eq('id', existing.id)
           .eq('mama_id', mama_id))
       } else {
         ;({ error } = await supabase
-          .from('ventes_fiches')
-          .insert({ fiche_id, quantite, prix_vente, mama_id }))
+          .from('ventes_fiches_carte')
+          .insert({ fiche_id, periode, ventes, mama_id }))
       }
       if (error) throw error
     },

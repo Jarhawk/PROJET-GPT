@@ -17,7 +17,9 @@ export function useInvoiceItems() {
     setError(null);
     const { data, error } = await supabase
       .from("facture_lignes")
-      .select("*, produit: produits(nom, famille, unite)")
+      .select(
+        "*, produit:produits(id, nom, famille:familles(nom), unite:unites(nom))"
+      )
       .eq("facture_id", invoiceId)
       .eq("mama_id", mama_id)
       .order("id");
@@ -32,7 +34,9 @@ export function useInvoiceItems() {
     if (!id || !mama_id) return null;
     const { data, error } = await supabase
       .from("facture_lignes")
-      .select("*, produit: produits(nom, famille, unite)")
+      .select(
+        "*, produit:produits(id, nom, famille:familles(nom), unite:unites(nom))"
+      )
       .eq("id", id)
       .eq("mama_id", mama_id)
       .single();

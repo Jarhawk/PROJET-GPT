@@ -1152,6 +1152,11 @@ language sql as $$
   order by 1;
 $$;
 grant execute on function stats_achats_fournisseur(uuid, uuid) to authenticated;
+--
+-- Assure la compatibilité lors d'une réexécution du script en supprimant
+-- l'ancienne version utilisant le paramètre product_id_param si elle existe
+--
+drop function if exists stats_rotation_produit(uuid, uuid);
 -- Statistiques : rotation du produit par mois
 create or replace function stats_rotation_produit(mama_id_param uuid, produit_id_param uuid)
 returns table(mois text, quantite_sortie numeric)

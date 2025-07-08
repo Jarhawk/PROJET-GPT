@@ -190,7 +190,7 @@ begin
     exception when others then
       return;
     end;
-  exception when undefined_column or duplicate_column then
+  when undefined_column or duplicate_column then
     return;
   end;
 end;

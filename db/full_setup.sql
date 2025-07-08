@@ -682,6 +682,94 @@ BEGIN
   END IF;
 END $$;
 
+-- S'assure de la présence des colonnes "actif" sur les tables clés
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='users' AND column_name='actif'
+  ) THEN
+    ALTER TABLE users ADD COLUMN actif boolean default true;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='utilisateurs' AND column_name='actif'
+  ) THEN
+    ALTER TABLE utilisateurs ADD COLUMN actif boolean default true;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='fournisseurs' AND column_name='actif'
+  ) THEN
+    ALTER TABLE fournisseurs ADD COLUMN actif boolean default true;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='produits' AND column_name='actif'
+  ) THEN
+    ALTER TABLE produits ADD COLUMN actif boolean default true;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='fiches' AND column_name='actif'
+  ) THEN
+    ALTER TABLE fiches ADD COLUMN actif boolean default true;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='fiches_techniques' AND column_name='actif'
+  ) THEN
+    ALTER TABLE fiches_techniques ADD COLUMN actif boolean default true;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='zones_stock' AND column_name='actif'
+  ) THEN
+    ALTER TABLE zones_stock ADD COLUMN actif boolean default true;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='permissions' AND column_name='actif'
+  ) THEN
+    ALTER TABLE permissions ADD COLUMN actif boolean default true;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='menus' AND column_name='actif'
+  ) THEN
+    ALTER TABLE menus ADD COLUMN actif boolean default true;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='centres_de_cout' AND column_name='actif'
+  ) THEN
+    ALTER TABLE centres_de_cout ADD COLUMN actif boolean default true;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='promotions' AND column_name='actif'
+  ) THEN
+    ALTER TABLE promotions ADD COLUMN actif boolean default true;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='fournisseurs_api_config' AND column_name='actif'
+  ) THEN
+    ALTER TABLE fournisseurs_api_config ADD COLUMN actif boolean default true;
+  END IF;
+END $$;
+
 -- Indexes
 create index if not exists idx_users_mama on users(mama_id);
 create index if not exists idx_users_role on users(role_id);

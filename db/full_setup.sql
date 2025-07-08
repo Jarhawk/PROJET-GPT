@@ -748,21 +748,30 @@ BEGIN
     ALTER TABLE menus ADD COLUMN actif boolean default true;
   END IF;
 
-  IF NOT EXISTS (
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_name='centres_de_cout'
+  ) AND NOT EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_name='centres_de_cout' AND column_name='actif'
   ) THEN
     ALTER TABLE centres_de_cout ADD COLUMN actif boolean default true;
   END IF;
 
-  IF NOT EXISTS (
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_name='promotions'
+  ) AND NOT EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_name='promotions' AND column_name='actif'
   ) THEN
     ALTER TABLE promotions ADD COLUMN actif boolean default true;
   END IF;
 
-  IF NOT EXISTS (
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_name='fournisseurs_api_config'
+  ) AND NOT EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_name='fournisseurs_api_config' AND column_name='actif'
   ) THEN

@@ -159,7 +159,11 @@ begin
       -- relation is a table or partition
       execute format('ALTER TABLE public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
     end if;
-  exception when invalid_table_definition then
+  -- handle cases where a relation was misidentified
+  -- invalid_table_definition (42P16) occurs if a view is altered as a table
+  -- wrong_object_type (42809) or feature_not_supported (0A000) may be raised
+  -- depending on the Postgres version
+  exception when invalid_table_definition or wrong_object_type or feature_not_supported then
     -- fallback if the relation kind was misidentified
     begin
       if kind = 'v' or kind = 'm' then

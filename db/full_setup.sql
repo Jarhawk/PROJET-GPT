@@ -141,32 +141,48 @@ create or replace function rename_column_public(rel text, old_col text, new_col 
 returns void language plpgsql as $$
 declare
   kind char;
+  old_exists boolean;
+  new_exists boolean;
 begin
-  select c.relkind into kind
-  from pg_class c
-  join pg_namespace n on n.oid = c.relnamespace
-  where n.nspname = 'public' and c.relname = rel;
+  select c.relkind
+    into kind
+    from pg_class c
+    join pg_namespace n on n.oid = c.relnamespace
+   where n.nspname = 'public' and c.relname = rel;
 
   if kind is null then
     return;
   end if;
 
+  select exists (
+           select 1 from information_schema.columns
+            where table_schema = 'public'
+              and table_name = rel
+              and column_name = old_col
+         ) into old_exists;
+
+  select exists (
+           select 1 from information_schema.columns
+            where table_schema = 'public'
+              and table_name = rel
+              and column_name = new_col
+         ) into new_exists;
+
+  -- Nothing to do if the old column does not exist or the new one already exists
+  if not old_exists or new_exists then
+    return;
+  end if;
+
   begin
-    if kind = 'v' or kind = 'm' then
-      -- relation is a view or materialized view
+    if kind in ('v','m') then
       execute format('ALTER VIEW public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
-    elsif kind in ('r','p') then
-      -- relation is a table or partition
+    else
       execute format('ALTER TABLE public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
     end if;
-  -- handle cases where a relation was misidentified
-  -- invalid_table_definition (42P16) occurs if a view is altered as a table
-  -- wrong_object_type (42809) or feature_not_supported (0A000) may be raised
-  -- depending on the Postgres version
   exception when invalid_table_definition or wrong_object_type or feature_not_supported then
     -- fallback if the relation kind was misidentified
     begin
-      if kind = 'v' or kind = 'm' then
+      if kind in ('v','m') then
         execute format('ALTER TABLE public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
       else
         execute format('ALTER VIEW public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
@@ -174,6 +190,8 @@ begin
     exception when others then
       return;
     end;
+  exception when undefined_column or duplicate_column then
+    return;
   end;
 end;
 $$;

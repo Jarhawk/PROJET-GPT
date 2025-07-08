@@ -147,11 +147,30 @@ begin
   join pg_namespace n on n.oid = c.relnamespace
   where n.nspname = 'public' and c.relname = rel;
 
-  if kind = 'v' then
-    execute format('ALTER VIEW public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
-  elsif kind in ('r','p') then
-    execute format('ALTER TABLE public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
+  if kind is null then
+    return;
   end if;
+
+  begin
+    if kind = 'v' or kind = 'm' then
+      -- relation is a view or materialized view
+      execute format('ALTER VIEW public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
+    elsif kind in ('r','p') then
+      -- relation is a table or partition
+      execute format('ALTER TABLE public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
+    end if;
+  exception when invalid_table_definition then
+    -- fallback if the relation kind was misidentified
+    begin
+      if kind = 'v' or kind = 'm' then
+        execute format('ALTER TABLE public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
+      else
+        execute format('ALTER VIEW public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
+      end if;
+    exception when others then
+      return;
+    end;
+  end;
 end;
 $$;
 
@@ -2664,7 +2683,7 @@ language sql as $$
   from moy m
   full join courant c on c.famille = m.famille;
 $$;
-grant execute on function fn_calc_budgets to authenticated;
+grant execute on function fn_calc_budgets(uuid, text) to authenticated;
 
 -- Configuration API fournisseurs
 create table if not exists fournisseurs_api_config (

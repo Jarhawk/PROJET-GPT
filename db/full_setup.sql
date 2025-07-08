@@ -136,22 +136,36 @@ as $$
 $$;
 grant execute on function current_user_role() to authenticated;
 
--- Utility to rename a column whether the relation is a table or a view
 create or replace function rename_column_public(rel text, old_col text, new_col text)
 returns void language plpgsql as $$
-declare
-  kind char;
 begin
-  select c.relkind into kind
-  from pg_class c
-  join pg_namespace n on n.oid = c.relnamespace
-  where n.nspname = 'public' and c.relname = rel;
-
-  if kind = 'v' then
-    execute format('ALTER VIEW public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
-  elsif kind in ('r','p') then
+  -- Try to rename assuming it's a regular table first
+  begin
     execute format('ALTER TABLE public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
-  end if;
+    return;
+  exception when undefined_table or wrong_object_type or feature_not_supported or invalid_table_definition then
+    -- Fall through to try the next relation kind
+  when undefined_column or duplicate_column then
+    return;
+  end;
+
+  -- Try as a view
+  begin
+    execute format('ALTER VIEW public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
+    return;
+  exception when undefined_table or wrong_object_type or feature_not_supported or invalid_table_definition then
+    -- Fall through to materialized view
+  when undefined_column or duplicate_column then
+    return;
+  end;
+
+  -- Finally try as a materialized view
+  begin
+    execute format('ALTER MATERIALIZED VIEW public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
+  exception when undefined_column or duplicate_column or undefined_table or wrong_object_type or feature_not_supported or invalid_table_definition then
+    -- Ignore if relation or column doesn't exist
+    return;
+  end;
 end;
 $$;
 
@@ -2664,7 +2678,7 @@ language sql as $$
   from moy m
   full join courant c on c.famille = m.famille;
 $$;
-grant execute on function fn_calc_budgets to authenticated;
+grant execute on function fn_calc_budgets(uuid, text) to authenticated;
 
 -- Configuration API fournisseurs
 create table if not exists fournisseurs_api_config (

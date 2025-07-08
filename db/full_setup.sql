@@ -136,40 +136,21 @@ as $$
 $$;
 grant execute on function current_user_role() to authenticated;
 
--- Utility to rename a column whether the relation is a table or a view
 create or replace function rename_column_public(rel text, old_col text, new_col text)
 returns void language plpgsql as $$
-declare
-  kind char;
 begin
-  select c.relkind into kind
-  from pg_class c
-  join pg_namespace n on n.oid = c.relnamespace
-  where n.nspname = 'public' and c.relname = rel;
-
-  if kind is null then
-    return;
-  end if;
-
+  -- Try renaming as a table first
   begin
-    if kind = 'v' or kind = 'm' then
-      -- relation is a view or materialized view
-      execute format('ALTER VIEW public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
-    elsif kind in ('r','p') then
-      -- relation is a table or partition
-      execute format('ALTER TABLE public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
-    end if;
+    execute format('ALTER TABLE public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
   exception when invalid_table_definition then
-    -- fallback if the relation kind was misidentified
+    -- If that fails, attempt as a view
     begin
-      if kind = 'v' or kind = 'm' then
-        execute format('ALTER TABLE public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
-      else
-        execute format('ALTER VIEW public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
-      end if;
-    exception when others then
+      execute format('ALTER VIEW public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
+    exception when undefined_table or undefined_column then
       return;
     end;
+  when undefined_table or undefined_column then
+    return;
   end;
 end;
 $$;

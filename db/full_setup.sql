@@ -136,6 +136,25 @@ as $$
 $$;
 grant execute on function current_user_role() to authenticated;
 
+-- Utility to rename a column whether the relation is a table or a view
+create or replace function rename_column_public(rel text, old_col text, new_col text)
+returns void language plpgsql as $$
+declare
+  kind char;
+begin
+  select c.relkind into kind
+  from pg_class c
+  join pg_namespace n on n.oid = c.relnamespace
+  where n.nspname = 'public' and c.relname = rel;
+
+  if kind = 'v' then
+    execute format('ALTER VIEW public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
+  elsif kind in ('r','p') then
+    execute format('ALTER TABLE public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
+  end if;
+end;
+$$;
+
 alter table utilisateurs enable row level security;
 alter table utilisateurs force row level security;
 drop policy if exists utilisateurs_select on utilisateurs;
@@ -483,7 +502,7 @@ BEGIN
     SELECT 1 FROM information_schema.columns
     WHERE table_name='facture_lignes' AND column_name='produit_id'
   ) THEN
-    ALTER TABLE facture_lignes RENAME COLUMN product_id TO produit_id;
+    PERFORM rename_column_public('facture_lignes','product_id','produit_id');
   ELSIF NOT EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_name='facture_lignes' AND column_name='produit_id'
@@ -498,7 +517,7 @@ BEGIN
     SELECT 1 FROM information_schema.columns
     WHERE table_name='fiche_lignes' AND column_name='produit_id'
   ) THEN
-    ALTER TABLE fiche_lignes RENAME COLUMN product_id TO produit_id;
+    PERFORM rename_column_public('fiche_lignes','product_id','produit_id');
   ELSIF NOT EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_name='fiche_lignes' AND column_name='produit_id'
@@ -513,7 +532,7 @@ BEGIN
     SELECT 1 FROM information_schema.columns
     WHERE table_name='inventaire_lignes' AND column_name='produit_id'
   ) THEN
-    ALTER TABLE inventaire_lignes RENAME COLUMN product_id TO produit_id;
+    PERFORM rename_column_public('inventaire_lignes','product_id','produit_id');
   ELSIF NOT EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_name='inventaire_lignes' AND column_name='produit_id'
@@ -528,7 +547,7 @@ BEGIN
     SELECT 1 FROM information_schema.columns
     WHERE table_name='mouvements_stock' AND column_name='produit_id'
   ) THEN
-    ALTER TABLE mouvements_stock RENAME COLUMN product_id TO produit_id;
+    PERFORM rename_column_public('mouvements_stock','product_id','produit_id');
   ELSIF NOT EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_name='mouvements_stock' AND column_name='produit_id'
@@ -543,7 +562,7 @@ BEGIN
     SELECT 1 FROM information_schema.columns
     WHERE table_name='requisitions' AND column_name='produit_id'
   ) THEN
-    ALTER TABLE requisitions RENAME COLUMN product_id TO produit_id;
+    PERFORM rename_column_public('requisitions','product_id','produit_id');
   ELSIF NOT EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_name='requisitions' AND column_name='produit_id'
@@ -558,7 +577,7 @@ BEGIN
     SELECT 1 FROM information_schema.columns
     WHERE table_name='transferts' AND column_name='produit_id'
   ) THEN
-    ALTER TABLE transferts RENAME COLUMN product_id TO produit_id;
+    PERFORM rename_column_public('transferts','product_id','produit_id');
   ELSIF NOT EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_name='transferts' AND column_name='produit_id'
@@ -580,7 +599,7 @@ BEGIN
       SELECT 1 FROM information_schema.columns
       WHERE table_name='pertes' AND column_name='produit_id'
     ) THEN
-      ALTER TABLE pertes RENAME COLUMN product_id TO produit_id;
+      PERFORM rename_column_public('pertes','product_id','produit_id');
     ELSIF NOT EXISTS (
       SELECT 1 FROM information_schema.columns
       WHERE table_name='pertes' AND column_name='produit_id'
@@ -603,7 +622,7 @@ BEGIN
       SELECT 1 FROM information_schema.columns
       WHERE table_name='promotion_produits' AND column_name='produit_id'
     ) THEN
-      ALTER TABLE promotion_produits RENAME COLUMN product_id TO produit_id;
+      PERFORM rename_column_public('promotion_produits','product_id','produit_id');
     ELSIF NOT EXISTS (
       SELECT 1 FROM information_schema.columns
       WHERE table_name='promotion_produits' AND column_name='produit_id'
@@ -620,7 +639,7 @@ BEGIN
     SELECT 1 FROM information_schema.columns
     WHERE table_name='requisitions' AND column_name='zone_id'
   ) THEN
-    ALTER TABLE requisitions RENAME COLUMN zone TO zone_id;
+    PERFORM rename_column_public('requisitions','zone','zone_id');
   ELSIF NOT EXISTS (
       SELECT 1 FROM information_schema.columns
       WHERE table_name='requisitions' AND column_name='zone_id'

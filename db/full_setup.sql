@@ -190,6 +190,7 @@ begin
     exception when others then
       return;
     end;
+  -- Ignore missing or already renamed columns
   when undefined_column or duplicate_column then
     return;
   end;

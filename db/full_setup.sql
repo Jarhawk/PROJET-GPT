@@ -955,7 +955,7 @@ $$;
 
 drop trigger if exists trg_facture_ligne on facture_lignes;
 create trigger trg_facture_ligne after insert on facture_lignes
-  for each row execute procedure mettre_a_jour_pmp_produit();
+  for each row execute function mettre_a_jour_pmp_produit();
 
 -- Maintien du dernier prix d'achat enregistré
 create or replace function mettre_a_jour_prix_produit()
@@ -986,7 +986,7 @@ $$;
 drop trigger if exists trg_update_prix_produit on facture_lignes;
 create trigger trg_update_prix_produit
   after insert on facture_lignes
-  for each row execute procedure mettre_a_jour_prix_produit();
+  for each row execute function mettre_a_jour_prix_produit();
 
 -- Trigger pour maintenir le total de la facture en phase avec ses lignes
 create or replace function refresh_facture_total()
@@ -1014,7 +1014,7 @@ $$;
 drop trigger if exists trg_facture_total on facture_lignes;
 create trigger trg_facture_total
   after insert or update or delete on facture_lignes
-  for each row execute procedure refresh_facture_total();
+  for each row execute function refresh_facture_total();
 
 -- Trigger de mise à jour du stock théorique lors de l'enregistrement des mouvements
 create or replace function update_stock_theorique()
@@ -1031,7 +1031,7 @@ $$;
 
 drop trigger if exists trg_mouvement_stock on mouvements_stock;
 create trigger trg_mouvement_stock after insert on mouvements_stock
-  for each row execute procedure update_stock_theorique();
+  for each row execute function update_stock_theorique();
 
 -- Trigger pour appliquer les lignes d'inventaire au stock réel
 create or replace function apply_inventaire_line()
@@ -1044,7 +1044,7 @@ $$;
 
 drop trigger if exists trg_inventaire_ligne on inventaire_lignes;
 create trigger trg_inventaire_ligne after insert on inventaire_lignes
-  for each row execute procedure apply_inventaire_line();
+  for each row execute function apply_inventaire_line();
 
 -- Trigger de rafraîchissement du coût des fiches lors des modifications
 create or replace function refresh_fiche_cost()
@@ -1078,12 +1078,12 @@ $$;
 drop trigger if exists trg_fiche_lignes_cost on fiche_lignes;
 create trigger trg_fiche_lignes_cost
   after insert or update or delete on fiche_lignes
-  for each row execute procedure refresh_fiche_cost();
+  for each row execute function refresh_fiche_cost();
 
 drop trigger if exists trg_fiche_update_cost on fiches;
 create trigger trg_fiche_update_cost
   after update on fiches
-  for each row execute procedure refresh_fiche_cost();
+  for each row execute function refresh_fiche_cost();
 
 -- Statistiques : total des achats par mois pour tous les fournisseurs
 create or replace function stats_achats_fournisseurs(mama_id_param uuid)
@@ -1835,7 +1835,7 @@ $$;
 drop trigger if exists trg_fiche_prix_change on fiches_techniques;
 create trigger trg_fiche_prix_change
 after update on fiches_techniques
-for each row execute procedure log_fiche_prix_change();
+for each row execute function log_fiche_prix_change();
 
 -- Index pour accélérer les requêtes de mouvements
 create index if not exists idx_mouvements_stock_mama on mouvements_stock(mama_id);

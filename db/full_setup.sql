@@ -1008,9 +1008,9 @@ create index if not exists idx_mouvements_stock_zone_destination on mouvements_s
 create index if not exists idx_inventaire_zones_mama on inventaire_zones(mama_id);
 create index if not exists idx_ventes_boissons_mama on ventes_boissons(mama_id);
 create index if not exists idx_ventes_boissons_boisson on ventes_boissons(boisson_id);
-create view if not exists stock_mouvements as select * from mouvements_stock;
+create or replace view stock_mouvements as select * from mouvements_stock;
 grant select on stock_mouvements to authenticated;
-create view if not exists stocks as select * from mouvements_stock;
+create or replace view stocks as select * from mouvements_stock;
 grant select on stocks to authenticated;
 
 -- Trigger de mise à jour du PMP produit et du stock lors de l'insertion de ligne de facture
@@ -1475,7 +1475,7 @@ create policy journaux_utilisateur_all on journaux_utilisateur
 grant select, insert, update, delete on journaux_utilisateur to authenticated;
 
 -- Vue récapitulative de la consommation par centre de coût
-create view if not exists v_cost_center_totals as
+create or replace view v_cost_center_totals as
 select
   c.mama_id,
   c.id as cost_center_id,
@@ -1488,7 +1488,7 @@ group by c.mama_id, c.id, c.nom;
 grant select on v_cost_center_totals to authenticated;
 
 -- Vue mensuelle de la consommation par centre de coût
-create view if not exists v_cost_center_monthly as
+create or replace view v_cost_center_monthly as
 select
   c.mama_id,
   c.id as cost_center_id,
@@ -1502,7 +1502,7 @@ group by c.mama_id, c.id, mois, c.nom;
 grant select on v_cost_center_monthly to authenticated;
 
 -- Vue alias pour les totaux mensuels par centre de coût
-create view if not exists v_cost_center_month as
+create or replace view v_cost_center_month as
 select * from v_cost_center_monthly;
 grant select on v_cost_center_month to authenticated;
 
@@ -1568,7 +1568,7 @@ create trigger trg_log_mouvement_cc
 grant execute on function log_mouvement_cc_changes() to authenticated;
 
 -- Vue détaillée des affectations de mouvements de stock
-create view if not exists v_ventilation as
+create or replace view v_ventilation as
 select
   mc.mama_id,
   mc.mouvement_id,
@@ -1584,7 +1584,7 @@ join centres_de_cout cc on cc.id = mc.cost_center_id;
 grant select on v_ventilation to authenticated;
 
 -- Vue des fournisseurs sans facture depuis 6 mois
-create view if not exists v_fournisseurs_inactifs as
+create or replace view v_fournisseurs_inactifs as
 select
   f.mama_id,
   f.id as fournisseur_id,
@@ -1666,7 +1666,7 @@ $$;
 grant execute on function suggest_centres_de_cout(uuid) to authenticated;
 
 -- Vue du prix moyen d'achat mensuel par produit
-create view if not exists v_tendance_prix_produit as
+create or replace view v_tendance_prix_produit as
 select
   fl.mama_id,
   fl.produit_id,
@@ -1678,7 +1678,7 @@ from facture_lignes fl
 grant select on v_tendance_prix_produit to authenticated;
 
 -- PMP moyen pondere
-create view if not exists v_pmp as
+create or replace view v_pmp as
 select
   p.mama_id,
   p.id as produit_id,
@@ -1689,7 +1689,7 @@ group by p.mama_id, p.id;
 grant select on v_pmp to authenticated;
 
 -- Variation de prix fournisseurs
-create view if not exists v_reco_surcout as
+create or replace view v_reco_surcout as
 select
   sp.mama_id,
   sp.fournisseur_id,
@@ -1700,7 +1700,7 @@ group by sp.mama_id, sp.fournisseur_id, sp.produit_id;
 grant select on v_reco_surcout to authenticated;
 
 -- Nombre d'achats par fournisseur
-create view if not exists v_fournisseur_stats as
+create or replace view v_fournisseur_stats as
 select
   f.mama_id,
   f.id as fournisseur_id,
@@ -1712,7 +1712,7 @@ group by f.mama_id, f.id, f.nom;
 grant select on v_fournisseur_stats to authenticated;
 
 -- Vue des produits avec leur dernier prix fournisseur
-create view if not exists v_produits_dernier_prix as
+create or replace view v_produits_dernier_prix as
 select
   p.id,
   p.nom,
@@ -2148,7 +2148,7 @@ create trigger trg_log_promotions
   for each row execute function log_promotions_changes();
 
 -- Vue et fonction pour les statistiques consolidées multi-sites
-create view if not exists v_consolidated_stats as
+create or replace view v_consolidated_stats as
 select
   m.id as mama_id,
   m.nom,
@@ -2415,7 +2415,7 @@ create policy validation_requests_delete on validation_requests
 grant select, insert, update, delete on validation_requests to authenticated;
 
 -- Vue pour l'analytique avancée
-create view if not exists v_monthly_purchases as
+create or replace view v_monthly_purchases as
 select
   f.mama_id,
   date_trunc('month', f."date") as month,
@@ -2656,7 +2656,7 @@ create policy two_factor_upsert on public.two_factor_auth
 -- ----------------------------------------------------
 -- Vues Supabase supplémentaires
 -- ----------------------------------------------------
-create view if not exists v_analytique_stock as
+create or replace view v_analytique_stock as
 select
   m."date",
   m.produit_id,
@@ -2673,7 +2673,7 @@ left join produits p on p.id = m.produit_id
 left join familles f on f.id = p.famille_id and f.mama_id = p.mama_id;
 grant select on v_analytique_stock to authenticated;
 
-create view if not exists v_reco_rotation as
+create or replace view v_reco_rotation as
 select
   p.id as produit_id,
   p.nom,
@@ -2685,12 +2685,12 @@ where p.actif = true
 group by p.id, p.nom, p.mama_id;
 grant select on v_reco_rotation to authenticated;
 
-create view if not exists v_reco_stockmort as
+create or replace view v_reco_stockmort as
 select * from v_reco_rotation
 where jours_inactif > 30;
 grant select on v_reco_stockmort to authenticated;
 
-create view if not exists v_besoins_previsionnels as
+create or replace view v_besoins_previsionnels as
 select
   m.mama_id,
   m.id as menu_id,
@@ -2706,7 +2706,7 @@ left join produits p on p.id = fl.produit_id
 group by m.mama_id, m.id, fl.produit_id, p.nom, p.pmp;
 grant select on v_besoins_previsionnels to authenticated;
 
-create view if not exists v_reco_surcoût as
+create or replace view v_reco_surcoût as
 select distinct on (sp.produit_id)
   sp.produit_id,
   p.nom,

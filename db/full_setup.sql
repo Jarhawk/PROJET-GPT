@@ -26,6 +26,8 @@ grant usage on schema public to anon;
 grant all privileges on schema public to service_role;
 alter default privileges in schema public
   grant select, insert, update, delete on tables to authenticated;
+alter default privileges in schema public
+  grant all privileges on tables to service_role;
 -- S'assurer que les fonctions d'extension sont visibles
 set search_path = public, extensions;
 -- Extensions
@@ -80,6 +82,818 @@ BEGIN
     WHERE n.nspname = 'public' AND c.relname = 'users' AND c.relkind IN ('r','p')
   ) THEN
     EXECUTE 'DROP TABLE public.users CASCADE';
+  END IF;
+END $$;
+-- Harmonisation des anciens noms de colonnes
+-- Suppression des vues héritées avant renommage pour éviter les conflits
+drop view if exists v_product_price_trend;
+drop view if exists v_products_last_price;
+drop view if exists stock_mouvements;
+drop view if exists stocks;
+drop view if exists v_cost_center_totals;
+drop view if exists v_cost_center_monthly;
+drop view if exists v_cost_center_month;
+-- Renomme product_id en produit_id si nécessaire
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='facture_lignes' AND column_name='product_id'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='facture_lignes' AND column_name='produit_id'
+  ) THEN
+    PERFORM rename_column_public('facture_lignes','product_id','produit_id');
+  ELSIF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='facture_lignes' AND column_name='produit_id'
+  ) THEN
+    ALTER TABLE facture_lignes ADD COLUMN IF NOT EXISTS produit_id uuid references produits(id) on delete set null;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='fiche_lignes' AND column_name='product_id'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='fiche_lignes' AND column_name='produit_id'
+  ) THEN
+    PERFORM rename_column_public('fiche_lignes','product_id','produit_id');
+  ELSIF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='fiche_lignes' AND column_name='produit_id'
+  ) THEN
+    ALTER TABLE fiche_lignes ADD COLUMN IF NOT EXISTS produit_id uuid references produits(id) on delete set null;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='inventaire_lignes' AND column_name='product_id'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='inventaire_lignes' AND column_name='produit_id'
+  ) THEN
+    PERFORM rename_column_public('inventaire_lignes','product_id','produit_id');
+  ELSIF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='inventaire_lignes' AND column_name='produit_id'
+  ) THEN
+    ALTER TABLE inventaire_lignes ADD COLUMN IF NOT EXISTS produit_id uuid references produits(id) on delete set null;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='mouvements_stock' AND column_name='product_id'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='mouvements_stock' AND column_name='produit_id'
+  ) THEN
+    PERFORM rename_column_public('mouvements_stock','product_id','produit_id');
+  ELSIF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='mouvements_stock' AND column_name='produit_id'
+  ) THEN
+    ALTER TABLE mouvements_stock ADD COLUMN IF NOT EXISTS produit_id uuid references produits(id) on delete set null;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='requisitions' AND column_name='product_id'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='requisitions' AND column_name='produit_id'
+  ) THEN
+    PERFORM rename_column_public('requisitions','product_id','produit_id');
+  ELSIF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='requisitions' AND column_name='produit_id'
+  ) THEN
+    ALTER TABLE requisitions ADD COLUMN IF NOT EXISTS produit_id uuid references produits(id);
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='transferts' AND column_name='product_id'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='transferts' AND column_name='produit_id'
+  ) THEN
+    PERFORM rename_column_public('transferts','product_id','produit_id');
+  ELSIF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='transferts' AND column_name='produit_id'
+  ) THEN
+    ALTER TABLE transferts ADD COLUMN IF NOT EXISTS produit_id uuid references produits(id) on delete set null;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM pg_class c
+      JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public'
+      AND c.relname = 'pertes'
+      AND c.relkind IN ('r','p')
+  ) THEN
+    IF EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name='pertes' AND column_name='product_id'
+    ) AND NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name='pertes' AND column_name='produit_id'
+    ) THEN
+      PERFORM rename_column_public('pertes','product_id','produit_id');
+    ELSIF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name='pertes' AND column_name='produit_id'
+    ) THEN
+      ALTER TABLE pertes ADD COLUMN IF NOT EXISTS produit_id uuid references produits(id);
+    END IF;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public'
+      AND c.relname = 'promotion_produits'
+      AND c.relkind IN ('r','p')
+  ) THEN
+    IF EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name='promotion_produits' AND column_name='product_id'
+    ) AND NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name='promotion_produits' AND column_name='produit_id'
+    ) THEN
+      PERFORM rename_column_public('promotion_produits','product_id','produit_id');
+    ELSIF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name='promotion_produits' AND column_name='produit_id'
+    ) THEN
+      ALTER TABLE promotion_produits ADD COLUMN IF NOT EXISTS produit_id uuid references produits(id) on delete cascade;
+    END IF;
+  END IF;
+
+  -- Harmonisation de la colonne zone_id dans requisitions
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='requisitions' AND column_name='zone'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='requisitions' AND column_name='zone_id'
+  ) THEN
+    PERFORM rename_column_public('requisitions','zone','zone_id');
+  ELSIF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name='requisitions' AND column_name='zone_id'
+  ) THEN
+      ALTER TABLE requisitions ADD COLUMN IF NOT EXISTS zone_id uuid references zones_stock(id);
+  END IF;
+END $$;
+
+-- Harmonisation des colonnes encore en anglais
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='produits' AND column_name='main_supplier_id'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='produits' AND column_name='fournisseur_principal_id'
+  ) THEN
+    PERFORM rename_column_public('produits','main_supplier_id','fournisseur_principal_id');
+  ELSIF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='produits' AND column_name='fournisseur_principal_id'
+  ) THEN
+    ALTER TABLE produits ADD COLUMN IF NOT EXISTS fournisseur_principal_id uuid references fournisseurs(id) on delete set null;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='mouvements_centres_cout' AND column_name='cost_center_id'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='mouvements_centres_cout' AND column_name='centre_cout_id'
+  ) THEN
+    PERFORM rename_column_public('mouvements_centres_cout','cost_center_id','centre_cout_id');
+  ELSIF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='mouvements_centres_cout' AND column_name='centre_cout_id'
+  ) THEN
+    ALTER TABLE mouvements_centres_cout ADD COLUMN IF NOT EXISTS centre_cout_id uuid references centres_de_cout(id) on delete cascade;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='pertes' AND column_name='cost_center_id'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='pertes' AND column_name='centre_cout_id'
+  ) THEN
+    PERFORM rename_column_public('pertes','cost_center_id','centre_cout_id');
+  ELSIF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='pertes' AND column_name='centre_cout_id'
+  ) THEN
+    ALTER TABLE pertes ADD COLUMN IF NOT EXISTS centre_cout_id uuid references centres_de_cout(id);
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public'
+      AND c.relname = 'v_product_price_trend'
+      AND c.relkind IN ('v','m')
+  ) AND EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'v_product_price_trend'
+      AND column_name = 'product_id'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'v_product_price_trend'
+      AND column_name = 'produit_id'
+  ) THEN
+    PERFORM rename_column_public('v_product_price_trend','product_id','produit_id');
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public'
+      AND c.relname = 'v_products_last_price'
+      AND c.relkind IN ('v','m')
+  ) AND EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'v_products_last_price'
+      AND column_name = 'product_id'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'v_products_last_price'
+      AND column_name = 'produit_id'
+  ) THEN
+    PERFORM rename_column_public('v_products_last_price','product_id','produit_id');
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public'
+      AND c.relname = 'stock_mouvements'
+      AND c.relkind IN ('v','m')
+  ) AND EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'stock_mouvements'
+      AND column_name = 'product_id'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'stock_mouvements'
+      AND column_name = 'produit_id'
+  ) THEN
+    PERFORM rename_column_public('stock_mouvements','product_id','produit_id');
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public'
+      AND c.relname = 'stocks'
+      AND c.relkind IN ('v','m')
+  ) AND EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'stocks'
+      AND column_name = 'product_id'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'stocks'
+      AND column_name = 'produit_id'
+  ) THEN
+    PERFORM rename_column_public('stocks','product_id','produit_id');
+  END IF;
+END $$;
+-- Ajout des colonnes zone_source_id et zone_destination_id si absentes
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_name='mouvements_stock'
+  ) THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name='mouvements_stock' AND column_name='zone_source_id'
+    ) THEN
+      ALTER TABLE mouvements_stock ADD COLUMN IF NOT EXISTS zone_source_id uuid references zones_stock(id);
+    END IF;
+    IF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name='mouvements_stock' AND column_name='zone_destination_id'
+    ) THEN
+      ALTER TABLE mouvements_stock ADD COLUMN IF NOT EXISTS zone_destination_id uuid references zones_stock(id);
+    END IF;
+  END IF;
+END $$;
+
+-- Ajout de la colonne auteur_id sur mouvements_stock et requisitions si absente
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_name='mouvements_stock'
+  ) THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name='mouvements_stock' AND column_name='auteur_id'
+    ) THEN
+      ALTER TABLE mouvements_stock ADD COLUMN IF NOT EXISTS auteur_id uuid references utilisateurs(id);
+    END IF;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_name='requisitions'
+  ) THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name='requisitions' AND column_name='auteur_id'
+    ) THEN
+      ALTER TABLE requisitions ADD COLUMN IF NOT EXISTS auteur_id uuid references utilisateurs(id);
+    END IF;
+  END IF;
+END $$;
+
+-- S'assure de la présence des colonnes "date" sur les tables clés
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='factures' AND column_name='date'
+  ) THEN
+    ALTER TABLE factures ADD COLUMN IF NOT EXISTS "date" date;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='fiche_cout_history' AND column_name='date'
+  ) THEN
+    ALTER TABLE fiche_cout_history ADD COLUMN IF NOT EXISTS "date" date;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='inventaires' AND column_name='date'
+  ) THEN
+    ALTER TABLE inventaires ADD COLUMN IF NOT EXISTS "date" date;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='mouvements_stock' AND column_name='date'
+  ) THEN
+    ALTER TABLE mouvements_stock ADD COLUMN IF NOT EXISTS "date" date;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='fournisseur_notes' AND column_name='date'
+  ) THEN
+    ALTER TABLE fournisseur_notes ADD COLUMN IF NOT EXISTS "date" date;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='menus' AND column_name='date'
+  ) THEN
+    ALTER TABLE menus ADD COLUMN IF NOT EXISTS "date" date;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='requisitions' AND column_name='date'
+  ) THEN
+    ALTER TABLE requisitions ADD COLUMN IF NOT EXISTS "date" date;
+  END IF;
+END $$;
+
+-- S'assure de la présence des colonnes "actif" sur les tables clés
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='users' AND column_name='actif'
+  ) THEN
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS actif boolean default true;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='utilisateurs' AND column_name='actif'
+  ) THEN
+    ALTER TABLE utilisateurs ADD COLUMN IF NOT EXISTS actif boolean default true;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='fournisseurs' AND column_name='actif'
+  ) THEN
+    ALTER TABLE fournisseurs ADD COLUMN IF NOT EXISTS actif boolean default true;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='produits' AND column_name='actif'
+  ) THEN
+    ALTER TABLE produits ADD COLUMN IF NOT EXISTS actif boolean default true;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='fiches' AND column_name='actif'
+  ) THEN
+    ALTER TABLE fiches ADD COLUMN IF NOT EXISTS actif boolean default true;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='fiches_techniques' AND column_name='actif'
+  ) THEN
+    ALTER TABLE fiches_techniques ADD COLUMN IF NOT EXISTS actif boolean default true;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='zones_stock' AND column_name='actif'
+  ) THEN
+    ALTER TABLE zones_stock ADD COLUMN IF NOT EXISTS actif boolean default true;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='permissions' AND column_name='actif'
+  ) THEN
+    ALTER TABLE permissions ADD COLUMN IF NOT EXISTS actif boolean default true;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='menus' AND column_name='actif'
+  ) THEN
+    ALTER TABLE menus ADD COLUMN IF NOT EXISTS actif boolean default true;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_name='centres_de_cout'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='centres_de_cout' AND column_name='actif'
+  ) THEN
+    ALTER TABLE centres_de_cout ADD COLUMN IF NOT EXISTS actif boolean default true;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_name='promotions'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='promotions' AND column_name='actif'
+  ) THEN
+    ALTER TABLE promotions ADD COLUMN IF NOT EXISTS actif boolean default true;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_name='fournisseurs_api_config'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='fournisseurs_api_config' AND column_name='actif'
+  ) THEN
+    ALTER TABLE fournisseurs_api_config ADD COLUMN IF NOT EXISTS actif boolean default true;
+  END IF;
+END $$;
+
+-- Indexes
+create index if not exists idx_users_mama on users(mama_id);
+create index if not exists idx_users_role on users(role_id);
+create index if not exists idx_users_actif on users(actif);
+create index if not exists idx_fournisseurs_mama on fournisseurs(mama_id);
+create index if not exists idx_fournisseurs_nom on fournisseurs(nom);
+create index if not exists idx_fournisseurs_ville on fournisseurs(ville);
+create index if not exists idx_fournisseurs_actif on fournisseurs(actif);
+create index if not exists idx_produits_mama on produits(mama_id);
+create index if not exists idx_produits_nom on produits(nom);
+create index if not exists idx_produits_actif on produits(actif);
+create index if not exists idx_produits_famille on produits(famille_id);
+create index if not exists idx_produits_unite on produits(unite_id);
+create index if not exists idx_produits_fournisseur_principal on produits(fournisseur_principal_id);
+create index if not exists idx_factures_mama on factures(mama_id);
+create index if not exists idx_factures_date on factures("date");
+create index if not exists idx_factures_fournisseur on factures(fournisseur_id);
+create index if not exists idx_factures_statut on factures(statut);
+create index if not exists idx_fiches_mama on fiches(mama_id);
+create index if not exists idx_fiches_nom on fiches(nom);
+create index if not exists idx_fiches_actif on fiches(actif);
+create index if not exists idx_fiches_famille on fiches(famille_id);
+create index if not exists idx_inventaires_mama on inventaires(mama_id);
+create index if not exists idx_familles_mama on familles(mama_id);
+create index if not exists idx_unites_mama on unites(mama_id);
+create index if not exists idx_fournisseur_produits_mama on fournisseur_produits(mama_id);
+create index if not exists idx_fournisseur_produits_produit on fournisseur_produits(produit_id);
+create index if not exists idx_fournisseur_produits_fournisseur on fournisseur_produits(fournisseur_id);
+create index if not exists idx_fournisseur_produits_produit_date on fournisseur_produits(produit_id, date_livraison desc);
+create index if not exists idx_facture_lignes_mama on facture_lignes(mama_id);
+create index if not exists idx_facture_lignes_facture on facture_lignes(facture_id);
+create index if not exists idx_facture_lignes_produit on facture_lignes(produit_id);
+create index if not exists idx_fiche_lignes_mama on fiche_lignes(mama_id);
+create index if not exists idx_fiche_lignes_fiche on fiche_lignes(fiche_id);
+create index if not exists idx_fiche_lignes_produit on fiche_lignes(produit_id);
+create index if not exists idx_fiche_cout_history_mama on fiche_cout_history(mama_id);
+create index if not exists idx_fiche_cout_history_fiche on fiche_cout_history(fiche_id);
+create index if not exists idx_inventaire_lignes_mama on inventaire_lignes(mama_id);
+create index if not exists idx_inventaire_lignes_inventaire on inventaire_lignes(inventaire_id);
+create index if not exists idx_inventaire_lignes_produit on inventaire_lignes(produit_id);
+create index if not exists idx_parametres_mama on parametres(mama_id);
+create index if not exists idx_fournisseur_contacts_mama on fournisseur_contacts(mama_id);
+create index if not exists idx_fournisseur_contacts_fournisseur on fournisseur_contacts(fournisseur_id);
+create index if not exists idx_fournisseur_notes_mama on fournisseur_notes(mama_id);
+create index if not exists idx_fournisseur_notes_fournisseur on fournisseur_notes(fournisseur_id);
+create index if not exists idx_permissions_mama on permissions(mama_id);
+create index if not exists idx_permissions_role on permissions(role_id);
+create index if not exists idx_permissions_user on permissions(user_id);
+create index if not exists idx_menus_mama on menus(mama_id);
+create index if not exists idx_menus_date on menus("date");
+create index if not exists idx_menu_fiches_menu on menu_fiches(menu_id);
+create index if not exists idx_menu_fiches_fiche on menu_fiches(fiche_id);
+create index if not exists idx_requisitions_mama on requisitions(mama_id);
+create index if not exists idx_requisitions_produit on requisitions(produit_id);
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='requisitions' AND column_name='zone_id'
+  ) THEN
+    CREATE INDEX IF NOT EXISTS idx_requisitions_zone ON requisitions(zone_id);
+  END IF;
+END $$;
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='produits' AND column_name='famille'
+  ) THEN
+    ALTER TABLE produits ADD COLUMN IF NOT EXISTS famille text;
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='produits' AND column_name='unite'
+  ) THEN
+    ALTER TABLE produits ADD COLUMN IF NOT EXISTS unite text;
+  END IF;
+END $$;
+
+-- Contraintes uniques sur (mama_id, nom, unite)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'produits_mama_id_nom_unite_key'
+  ) THEN
+    ALTER TABLE produits
+      ADD CONSTRAINT produits_mama_id_nom_unite_key UNIQUE (mama_id, nom, unite);
+  END IF;
+END $$;
+
+-- ---------------------------------------
+-- Module Carte - champs additionnels
+-- ---------------------------------------
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='fiches_techniques' AND column_name='carte_actuelle'
+  ) THEN
+    ALTER TABLE fiches_techniques ADD COLUMN IF NOT EXISTS carte_actuelle boolean DEFAULT false;
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='fiches_techniques' AND column_name='type_carte'
+  ) THEN
+    ALTER TABLE fiches_techniques ADD COLUMN IF NOT EXISTS type_carte text;
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='fiches_techniques' AND column_name='sous_type_carte'
+  ) THEN
+    ALTER TABLE fiches_techniques ADD COLUMN IF NOT EXISTS sous_type_carte text;
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='fiches_techniques' AND column_name='prix_vente'
+  ) THEN
+    ALTER TABLE fiches_techniques ADD COLUMN IF NOT EXISTS prix_vente numeric;
+  END IF;
+END $$;
+
+create index if not exists idx_ft_carte on fiches_techniques(carte_actuelle, type_carte, sous_type_carte);
+create index if not exists idx_ft_prix on fiches_techniques(prix_vente);
+create index if not exists idx_ft_nom on fiches_techniques(nom);
+
+alter table fiches_techniques enable row level security;
+alter table fiches_techniques force row level security;
+drop policy if exists fiches_techniques_all on fiches_techniques;
+create policy fiches_techniques_all on fiches_techniques
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+grant select, insert, update, delete on fiches_techniques to authenticated;
+
+-- Table d'audit des changements de prix
+create table if not exists fiche_prix_history (
+    id uuid primary key default uuid_generate_v4(),
+    fiche_id uuid references fiches_techniques(id) on delete cascade,
+    old_prix numeric,
+    new_prix numeric,
+    changed_by uuid references users(id),
+    mama_id uuid not null references mamas(id),
+    created_at timestamptz default now(),
+    changed_at timestamptz default now()
+);
+create index if not exists idx_fiche_prix_history_fiche on fiche_prix_history(fiche_id);
+
+alter table fiche_prix_history enable row level security;
+alter table fiche_prix_history force row level security;
+drop policy if exists fiche_prix_history_all on fiche_prix_history;
+create policy fiche_prix_history_all on fiche_prix_history
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+grant select, insert, update, delete on fiche_prix_history to authenticated;
+
+create or replace function log_fiche_prix_change()
+returns trigger language plpgsql as $$
+begin
+  if new.prix_vente is distinct from old.prix_vente or new.carte_actuelle is distinct from old.carte_actuelle then
+    insert into fiche_prix_history (fiche_id, old_prix, new_prix, changed_by, mama_id)
+    values (new.id, old.prix_vente, new.prix_vente, auth.uid(), new.mama_id);
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_fiche_prix_change on fiches_techniques;
+create trigger trg_fiche_prix_change
+after update on fiches_techniques
+for each row execute function log_fiche_prix_change();
+
+-- Index pour accélérer les requêtes de mouvements
+create index if not exists idx_mouvements_stock_mama on mouvements_stock(mama_id);
+create index if not exists idx_mouvements_stock_produit on mouvements_stock(produit_id);
+create index if not exists idx_mouvements_stock_date on mouvements_stock("date");
+create index if not exists idx_mouvements_stock_type on mouvements_stock(type);
+
+-- Ajout de la colonne date_debut pour les inventaires
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='inventaires' AND column_name='date_debut'
+  ) THEN
+    ALTER TABLE inventaires ADD COLUMN IF NOT EXISTS date_debut date;
+  END IF;
+END $$;
+
+create index if not exists idx_inventaires_date on inventaires("date");
+create index if not exists idx_inventaires_date_debut on inventaires(date_debut);
+
+create index if not exists idx_produits_famille_txt on produits(famille);
+create index if not exists idx_produits_unite_txt on produits(unite);
+create index if not exists idx_produits_code on produits(code);
+
+-- Fonction de statistiques pour le tableau de bord
+create or replace function dashboard_stats(
+  mama_id_param uuid,
+  page_param integer default 1,
+  page_size_param integer default 30
+)
+returns table(produit_id uuid, nom text, stock_reel numeric, pmp numeric, last_purchase timestamptz)
+language sql stable security definer as $$
+  select p.id, p.nom, p.stock_reel, p.pmp, max(f."date") as last_purchase
+  from produits p
+  left join facture_lignes fl on fl.produit_id = p.id
+  left join factures f on f.id = fl.facture_id
+  where p.mama_id = mama_id_param
+  group by p.id, p.nom, p.stock_reel, p.pmp
+  order by p.nom
+  limit page_size_param offset greatest((page_param - 1) * page_size_param, 0);
+$$;
+
+-- Tables pour le gestionnaire de taches
+create table if not exists taches (
+    id uuid primary key default uuid_generate_v4(),
+    mama_id uuid not null references mamas(id) on delete cascade,
+    titre text not null,
+    description text,
+    assignes uuid[] not null default '{}',
+    date_debut date not null,
+    delai_jours integer,
+    date_echeance date not null,
+    recurrente boolean not null default false,
+    frequence text check (frequence in ('quotidien','hebdomadaire','mensuel')),
+    priorite text not null default 'moyenne' check (priorite in ('basse','moyenne','haute')),
+    statut text not null default 'a_faire' check (statut in ('a_faire','en_cours','terminee')),
+    created_by uuid references utilisateurs(id),
+    created_at timestamptz default now(),
+    updated_at timestamptz default now()
+);
+create index if not exists idx_taches_mama on taches(mama_id);
+create index if not exists idx_taches_echeance on taches(date_echeance);
+create index if not exists idx_taches_statut on taches(statut);
+create index if not exists idx_taches_priorite on taches(priorite);
+
+alter table taches enable row level security;
+alter table taches force row level security;
+drop policy if exists taches_select on taches;
+create policy taches_select on taches
+  for select using (mama_id = current_user_mama_id());
+drop policy if exists taches_insert on taches;
+create policy taches_insert on taches
+  for insert with check (mama_id = current_user_mama_id() and created_by = auth.uid());
+drop policy if exists taches_update on taches;
+create policy taches_update on taches
+  for update using (mama_id = current_user_mama_id() and (created_by = auth.uid() or auth.uid() = any(assignes)))
+  with check (mama_id = current_user_mama_id());
+drop policy if exists taches_delete on taches;
+create policy taches_delete on taches
+  for delete using (mama_id = current_user_mama_id() and created_by = auth.uid());
+grant select, insert, update, delete on taches to authenticated;
+
+create table if not exists tache_instances (
+    id uuid primary key default uuid_generate_v4(),
+    tache_id uuid not null references taches(id) on delete cascade,
+    date_echeance date not null,
+    statut text not null default 'a_faire' check (statut in ('a_faire','en_cours','fait','reporte','annule')),
+    done_by uuid references users(id),
+    created_at timestamptz default now()
+);
+create index if not exists idx_tache_instances_tache on tache_instances(tache_id);
+create index if not exists idx_tache_instances_date on tache_instances(date_echeance);
+create index if not exists idx_tache_instances_statut on tache_instances(statut);
+create index if not exists idx_tache_instances_done on tache_instances(done_by);
+
+alter table tache_instances enable row level security;
+alter table tache_instances force row level security;
+drop policy if exists tache_instances_all on tache_instances;
+create policy tache_instances_all on tache_instances
+  for all using (exists (select 1 from taches where taches.id = tache_instances.tache_id and taches.mama_id = current_user_mama_id()))
+  with check (exists (select 1 from taches where taches.id = tache_instances.tache_id and taches.mama_id = current_user_mama_id()));
+grant select, insert, update, delete on tache_instances to authenticated;
+
+-- Autoriser l'exécution des fonctions utilitaires
+grant execute on function dashboard_stats(uuid, integer, integer) to authenticated;
+grant execute on function top_produits(uuid, date, date, integer) to authenticated;
+grant execute on function mouvements_without_alloc(integer) to authenticated;
+
+-- Index pour accélérer la recherche de factures
+create index if not exists idx_factures_reference on factures(reference);
+
+-- Colonnes optionnelles sur mouvements_stock pour stocker les détails
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='mouvements_stock' AND column_name='sous_type'
+  ) THEN
+    ALTER TABLE mouvements_stock ADD COLUMN IF NOT EXISTS sous_type text;
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='mouvements_stock' AND column_name='zone'
+  ) THEN
+    ALTER TABLE mouvements_stock ADD COLUMN IF NOT EXISTS zone text;
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='mouvements_stock' AND column_name='motif'
+  ) THEN
+    ALTER TABLE mouvements_stock ADD COLUMN IF NOT EXISTS motif text;
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='mouvements_stock' AND column_name='sous_type') THEN
+    CREATE INDEX IF NOT EXISTS idx_mouvements_stock_sous_type ON mouvements_stock(sous_type);
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='mouvements_stock' AND column_name='zone') THEN
+    CREATE INDEX IF NOT EXISTS idx_mouvements_stock_zone ON mouvements_stock(zone);
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='mouvements_stock' AND column_name='motif') THEN
+    CREATE INDEX IF NOT EXISTS idx_mouvements_stock_motif ON mouvements_stock(motif);
   END IF;
 END $$;
 
@@ -149,6 +963,7 @@ as $$
     (select mama_id from users where id = auth.uid() limit 1)
   );
 $$;
+grant execute on function current_user_mama_id() to authenticated;
 
 create or replace function current_user_role()
 returns text
@@ -237,6 +1052,8 @@ create table if not exists produits (
     nom text not null,
     famille_id uuid references familles(id) on delete set null,
     unite_id uuid references unites(id) on delete set null,
+    famille text,
+    unite text,
     pmp numeric default 0,
     stock_theorique numeric default 0,
     stock_reel numeric default 0,
@@ -245,10 +1062,10 @@ create table if not exists produits (
     code text,
     allergenes text,
     image text,
-    main_supplier_id uuid references fournisseurs(id) on delete set null,
+    fournisseur_principal_id uuid references fournisseurs(id) on delete set null,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
-    unique(mama_id, nom)
+    unique(mama_id, nom, unite)
 );
 
 -- Historique des prix fournisseurs
@@ -349,6 +1166,7 @@ create table if not exists inventaires (
     reference text,
     cloture boolean default false,
     zone text,
+    date_debut date,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now()
 );
@@ -388,6 +1206,9 @@ create table if not exists mouvements_stock (
     type text check (type in ('entree','sortie','correction','transfert')),
     zone_source_id uuid references zones_stock(id),
     zone_destination_id uuid references zones_stock(id),
+    sous_type text,
+    zone text,
+    motif text,
     "date" date default current_date,
     commentaire text,
     auteur_id uuid references utilisateurs(id),
@@ -499,513 +1320,6 @@ create table if not exists parametres (
     created_at timestamptz default now()
 );
 
--- Harmonisation des anciens noms de colonnes
--- Suppression des vues héritées avant renommage pour éviter les conflits
-drop view if exists v_product_price_trend;
-drop view if exists v_products_last_price;
-drop view if exists stock_mouvements;
-drop view if exists stocks;
--- Renomme product_id en produit_id si nécessaire
-DO $$
-BEGIN
-  IF EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='facture_lignes' AND column_name='product_id'
-  ) AND NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='facture_lignes' AND column_name='produit_id'
-  ) THEN
-    PERFORM rename_column_public('facture_lignes','product_id','produit_id');
-  ELSIF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='facture_lignes' AND column_name='produit_id'
-  ) THEN
-    ALTER TABLE facture_lignes ADD COLUMN produit_id uuid references produits(id) on delete set null;
-  END IF;
-
-  IF EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='fiche_lignes' AND column_name='product_id'
-  ) AND NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='fiche_lignes' AND column_name='produit_id'
-  ) THEN
-    PERFORM rename_column_public('fiche_lignes','product_id','produit_id');
-  ELSIF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='fiche_lignes' AND column_name='produit_id'
-  ) THEN
-    ALTER TABLE fiche_lignes ADD COLUMN produit_id uuid references produits(id) on delete set null;
-  END IF;
-
-  IF EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='inventaire_lignes' AND column_name='product_id'
-  ) AND NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='inventaire_lignes' AND column_name='produit_id'
-  ) THEN
-    PERFORM rename_column_public('inventaire_lignes','product_id','produit_id');
-  ELSIF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='inventaire_lignes' AND column_name='produit_id'
-  ) THEN
-    ALTER TABLE inventaire_lignes ADD COLUMN produit_id uuid references produits(id) on delete set null;
-  END IF;
-
-  IF EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='mouvements_stock' AND column_name='product_id'
-  ) AND NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='mouvements_stock' AND column_name='produit_id'
-  ) THEN
-    PERFORM rename_column_public('mouvements_stock','product_id','produit_id');
-  ELSIF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='mouvements_stock' AND column_name='produit_id'
-  ) THEN
-    ALTER TABLE mouvements_stock ADD COLUMN produit_id uuid references produits(id) on delete set null;
-  END IF;
-
-  IF EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='requisitions' AND column_name='product_id'
-  ) AND NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='requisitions' AND column_name='produit_id'
-  ) THEN
-    PERFORM rename_column_public('requisitions','product_id','produit_id');
-  ELSIF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='requisitions' AND column_name='produit_id'
-  ) THEN
-    ALTER TABLE requisitions ADD COLUMN produit_id uuid references produits(id);
-  END IF;
-
-  IF EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='transferts' AND column_name='product_id'
-  ) AND NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='transferts' AND column_name='produit_id'
-  ) THEN
-    PERFORM rename_column_public('transferts','product_id','produit_id');
-  ELSIF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='transferts' AND column_name='produit_id'
-  ) THEN
-    ALTER TABLE transferts ADD COLUMN produit_id uuid references produits(id) on delete set null;
-  END IF;
-
-  IF EXISTS (
-    SELECT 1 FROM pg_class c
-      JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE n.nspname = 'public'
-      AND c.relname = 'pertes'
-      AND c.relkind IN ('r','p')
-  ) THEN
-    IF EXISTS (
-      SELECT 1 FROM information_schema.columns
-      WHERE table_name='pertes' AND column_name='product_id'
-    ) AND NOT EXISTS (
-      SELECT 1 FROM information_schema.columns
-      WHERE table_name='pertes' AND column_name='produit_id'
-    ) THEN
-      PERFORM rename_column_public('pertes','product_id','produit_id');
-    ELSIF NOT EXISTS (
-      SELECT 1 FROM information_schema.columns
-      WHERE table_name='pertes' AND column_name='produit_id'
-    ) THEN
-      ALTER TABLE pertes ADD COLUMN produit_id uuid references produits(id);
-    END IF;
-  END IF;
-
-  IF EXISTS (
-    SELECT 1 FROM pg_class c
-    JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE n.nspname = 'public'
-      AND c.relname = 'promotion_produits'
-      AND c.relkind IN ('r','p')
-  ) THEN
-    IF EXISTS (
-      SELECT 1 FROM information_schema.columns
-      WHERE table_name='promotion_produits' AND column_name='product_id'
-    ) AND NOT EXISTS (
-      SELECT 1 FROM information_schema.columns
-      WHERE table_name='promotion_produits' AND column_name='produit_id'
-    ) THEN
-      PERFORM rename_column_public('promotion_produits','product_id','produit_id');
-    ELSIF NOT EXISTS (
-      SELECT 1 FROM information_schema.columns
-      WHERE table_name='promotion_produits' AND column_name='produit_id'
-    ) THEN
-      ALTER TABLE promotion_produits ADD COLUMN produit_id uuid references produits(id) on delete cascade;
-    END IF;
-  END IF;
-
-  -- Harmonisation de la colonne zone_id dans requisitions
-  IF EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='requisitions' AND column_name='zone'
-  ) AND NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='requisitions' AND column_name='zone_id'
-  ) THEN
-    PERFORM rename_column_public('requisitions','zone','zone_id');
-  ELSIF NOT EXISTS (
-      SELECT 1 FROM information_schema.columns
-      WHERE table_name='requisitions' AND column_name='zone_id'
-    ) THEN
-      ALTER TABLE requisitions ADD COLUMN zone_id uuid references zones_stock(id);
-  END IF;
-END $$;
-
-DO $$
-BEGIN
-  IF EXISTS (
-    SELECT 1 FROM pg_class c
-    JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE n.nspname = 'public'
-      AND c.relname = 'v_product_price_trend'
-      AND c.relkind IN ('v','m')
-  ) AND EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_schema = 'public'
-      AND table_name = 'v_product_price_trend'
-      AND column_name = 'product_id'
-  ) AND NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_schema = 'public'
-      AND table_name = 'v_product_price_trend'
-      AND column_name = 'produit_id'
-  ) THEN
-    PERFORM rename_column_public('v_product_price_trend','product_id','produit_id');
-  END IF;
-
-  IF EXISTS (
-    SELECT 1 FROM pg_class c
-    JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE n.nspname = 'public'
-      AND c.relname = 'v_products_last_price'
-      AND c.relkind IN ('v','m')
-  ) AND EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_schema = 'public'
-      AND table_name = 'v_products_last_price'
-      AND column_name = 'product_id'
-  ) AND NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_schema = 'public'
-      AND table_name = 'v_products_last_price'
-      AND column_name = 'produit_id'
-  ) THEN
-    PERFORM rename_column_public('v_products_last_price','product_id','produit_id');
-  END IF;
-
-  IF EXISTS (
-    SELECT 1 FROM pg_class c
-    JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE n.nspname = 'public'
-      AND c.relname = 'stock_mouvements'
-      AND c.relkind IN ('v','m')
-  ) AND EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_schema = 'public'
-      AND table_name = 'stock_mouvements'
-      AND column_name = 'product_id'
-  ) AND NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_schema = 'public'
-      AND table_name = 'stock_mouvements'
-      AND column_name = 'produit_id'
-  ) THEN
-    PERFORM rename_column_public('stock_mouvements','product_id','produit_id');
-  END IF;
-
-  IF EXISTS (
-    SELECT 1 FROM pg_class c
-    JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE n.nspname = 'public'
-      AND c.relname = 'stocks'
-      AND c.relkind IN ('v','m')
-  ) AND EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_schema = 'public'
-      AND table_name = 'stocks'
-      AND column_name = 'product_id'
-  ) AND NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_schema = 'public'
-      AND table_name = 'stocks'
-      AND column_name = 'produit_id'
-  ) THEN
-    PERFORM rename_column_public('stocks','product_id','produit_id');
-  END IF;
-END $$;
--- Ajout des colonnes zone_source_id et zone_destination_id si absentes
-DO $$
-BEGIN
-  IF EXISTS (
-    SELECT 1 FROM information_schema.tables
-    WHERE table_name='mouvements_stock'
-  ) THEN
-    IF NOT EXISTS (
-      SELECT 1 FROM information_schema.columns
-      WHERE table_name='mouvements_stock' AND column_name='zone_source_id'
-    ) THEN
-      ALTER TABLE mouvements_stock ADD COLUMN zone_source_id uuid references zones_stock(id);
-    END IF;
-    IF NOT EXISTS (
-      SELECT 1 FROM information_schema.columns
-      WHERE table_name='mouvements_stock' AND column_name='zone_destination_id'
-    ) THEN
-      ALTER TABLE mouvements_stock ADD COLUMN zone_destination_id uuid references zones_stock(id);
-    END IF;
-  END IF;
-END $$;
-
--- Ajout de la colonne auteur_id sur mouvements_stock et requisitions si absente
-DO $$
-BEGIN
-  IF EXISTS (
-    SELECT 1 FROM information_schema.tables
-    WHERE table_name='mouvements_stock'
-  ) THEN
-    IF NOT EXISTS (
-      SELECT 1 FROM information_schema.columns
-      WHERE table_name='mouvements_stock' AND column_name='auteur_id'
-    ) THEN
-      ALTER TABLE mouvements_stock ADD COLUMN auteur_id uuid references utilisateurs(id);
-    END IF;
-  END IF;
-
-  IF EXISTS (
-    SELECT 1 FROM information_schema.tables
-    WHERE table_name='requisitions'
-  ) THEN
-    IF NOT EXISTS (
-      SELECT 1 FROM information_schema.columns
-      WHERE table_name='requisitions' AND column_name='auteur_id'
-    ) THEN
-      ALTER TABLE requisitions ADD COLUMN auteur_id uuid references utilisateurs(id);
-    END IF;
-  END IF;
-END $$;
-
--- S'assure de la présence des colonnes "date" sur les tables clés
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='factures' AND column_name='date'
-  ) THEN
-    ALTER TABLE factures ADD COLUMN "date" date;
-  END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='fiche_cout_history' AND column_name='date'
-  ) THEN
-    ALTER TABLE fiche_cout_history ADD COLUMN "date" date;
-  END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='inventaires' AND column_name='date'
-  ) THEN
-    ALTER TABLE inventaires ADD COLUMN "date" date;
-  END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='mouvements_stock' AND column_name='date'
-  ) THEN
-    ALTER TABLE mouvements_stock ADD COLUMN "date" date;
-  END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='fournisseur_notes' AND column_name='date'
-  ) THEN
-    ALTER TABLE fournisseur_notes ADD COLUMN "date" date;
-  END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='menus' AND column_name='date'
-  ) THEN
-    ALTER TABLE menus ADD COLUMN "date" date;
-  END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='requisitions' AND column_name='date'
-  ) THEN
-    ALTER TABLE requisitions ADD COLUMN "date" date;
-  END IF;
-END $$;
-
--- S'assure de la présence des colonnes "actif" sur les tables clés
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='users' AND column_name='actif'
-  ) THEN
-    ALTER TABLE users ADD COLUMN actif boolean default true;
-  END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='utilisateurs' AND column_name='actif'
-  ) THEN
-    ALTER TABLE utilisateurs ADD COLUMN actif boolean default true;
-  END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='fournisseurs' AND column_name='actif'
-  ) THEN
-    ALTER TABLE fournisseurs ADD COLUMN actif boolean default true;
-  END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='produits' AND column_name='actif'
-  ) THEN
-    ALTER TABLE produits ADD COLUMN actif boolean default true;
-  END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='fiches' AND column_name='actif'
-  ) THEN
-    ALTER TABLE fiches ADD COLUMN actif boolean default true;
-  END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='fiches_techniques' AND column_name='actif'
-  ) THEN
-    ALTER TABLE fiches_techniques ADD COLUMN actif boolean default true;
-  END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='zones_stock' AND column_name='actif'
-  ) THEN
-    ALTER TABLE zones_stock ADD COLUMN actif boolean default true;
-  END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='permissions' AND column_name='actif'
-  ) THEN
-    ALTER TABLE permissions ADD COLUMN actif boolean default true;
-  END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='menus' AND column_name='actif'
-  ) THEN
-    ALTER TABLE menus ADD COLUMN actif boolean default true;
-  END IF;
-
-  IF EXISTS (
-    SELECT 1 FROM information_schema.tables
-    WHERE table_name='centres_de_cout'
-  ) AND NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='centres_de_cout' AND column_name='actif'
-  ) THEN
-    ALTER TABLE centres_de_cout ADD COLUMN actif boolean default true;
-  END IF;
-
-  IF EXISTS (
-    SELECT 1 FROM information_schema.tables
-    WHERE table_name='promotions'
-  ) AND NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='promotions' AND column_name='actif'
-  ) THEN
-    ALTER TABLE promotions ADD COLUMN actif boolean default true;
-  END IF;
-
-  IF EXISTS (
-    SELECT 1 FROM information_schema.tables
-    WHERE table_name='fournisseurs_api_config'
-  ) AND NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='fournisseurs_api_config' AND column_name='actif'
-  ) THEN
-    ALTER TABLE fournisseurs_api_config ADD COLUMN actif boolean default true;
-  END IF;
-END $$;
-
--- Indexes
-create index if not exists idx_users_mama on users(mama_id);
-create index if not exists idx_users_role on users(role_id);
-create index if not exists idx_users_actif on users(actif);
-create index if not exists idx_fournisseurs_mama on fournisseurs(mama_id);
-create index if not exists idx_fournisseurs_nom on fournisseurs(nom);
-create index if not exists idx_fournisseurs_ville on fournisseurs(ville);
-create index if not exists idx_fournisseurs_actif on fournisseurs(actif);
-create index if not exists idx_produits_mama on produits(mama_id);
-create index if not exists idx_produits_nom on produits(nom);
-create index if not exists idx_produits_actif on produits(actif);
-create index if not exists idx_produits_famille on produits(famille_id);
-create index if not exists idx_produits_unite on produits(unite_id);
-create index if not exists idx_produits_main_supplier on produits(main_supplier_id);
-create index if not exists idx_factures_mama on factures(mama_id);
-create index if not exists idx_factures_date on factures("date");
-create index if not exists idx_factures_fournisseur on factures(fournisseur_id);
-create index if not exists idx_factures_statut on factures(statut);
-create index if not exists idx_fiches_mama on fiches(mama_id);
-create index if not exists idx_fiches_nom on fiches(nom);
-create index if not exists idx_fiches_actif on fiches(actif);
-create index if not exists idx_fiches_famille on fiches(famille_id);
-create index if not exists idx_inventaires_mama on inventaires(mama_id);
-create index if not exists idx_familles_mama on familles(mama_id);
-create index if not exists idx_unites_mama on unites(mama_id);
-create index if not exists idx_fournisseur_produits_mama on fournisseur_produits(mama_id);
-create index if not exists idx_fournisseur_produits_produit on fournisseur_produits(produit_id);
-create index if not exists idx_fournisseur_produits_fournisseur on fournisseur_produits(fournisseur_id);
-create index if not exists idx_fournisseur_produits_produit_date on fournisseur_produits(produit_id, date_livraison desc);
-create index if not exists idx_facture_lignes_mama on facture_lignes(mama_id);
-create index if not exists idx_facture_lignes_facture on facture_lignes(facture_id);
-create index if not exists idx_facture_lignes_produit on facture_lignes(produit_id);
-create index if not exists idx_fiche_lignes_mama on fiche_lignes(mama_id);
-create index if not exists idx_fiche_lignes_fiche on fiche_lignes(fiche_id);
-create index if not exists idx_fiche_lignes_produit on fiche_lignes(produit_id);
-create index if not exists idx_fiche_cout_history_mama on fiche_cout_history(mama_id);
-create index if not exists idx_fiche_cout_history_fiche on fiche_cout_history(fiche_id);
-create index if not exists idx_inventaire_lignes_mama on inventaire_lignes(mama_id);
-create index if not exists idx_inventaire_lignes_inventaire on inventaire_lignes(inventaire_id);
-create index if not exists idx_inventaire_lignes_produit on inventaire_lignes(produit_id);
-create index if not exists idx_parametres_mama on parametres(mama_id);
-create index if not exists idx_fournisseur_contacts_mama on fournisseur_contacts(mama_id);
-create index if not exists idx_fournisseur_contacts_fournisseur on fournisseur_contacts(fournisseur_id);
-create index if not exists idx_fournisseur_notes_mama on fournisseur_notes(mama_id);
-create index if not exists idx_fournisseur_notes_fournisseur on fournisseur_notes(fournisseur_id);
-create index if not exists idx_permissions_mama on permissions(mama_id);
-create index if not exists idx_permissions_role on permissions(role_id);
-create index if not exists idx_permissions_user on permissions(user_id);
-create index if not exists idx_menus_mama on menus(mama_id);
-create index if not exists idx_menus_date on menus("date");
-create index if not exists idx_menu_fiches_menu on menu_fiches(menu_id);
-create index if not exists idx_menu_fiches_fiche on menu_fiches(fiche_id);
-create index if not exists idx_requisitions_mama on requisitions(mama_id);
-create index if not exists idx_requisitions_produit on requisitions(produit_id);
-DO $$
-BEGIN
-  IF EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='requisitions' AND column_name='zone_id'
-  ) THEN
-    CREATE INDEX IF NOT EXISTS idx_requisitions_zone ON requisitions(zone_id);
-  END IF;
-END $$;
 create index if not exists idx_requisitions_date on requisitions("date");
 create index if not exists idx_transferts_mama on transferts(mama_id);
 create index if not exists idx_transferts_produit on transferts(produit_id);
@@ -1014,6 +1328,9 @@ create index if not exists idx_zones_stock_actif on zones_stock(actif);
 -- Index pour accélérer la recherche par zone dans les mouvements de stock
 create index if not exists idx_mouvements_stock_zone_source on mouvements_stock(zone_source_id);
 create index if not exists idx_mouvements_stock_zone_destination on mouvements_stock(zone_destination_id);
+create index if not exists idx_mouvements_stock_sous_type on mouvements_stock(sous_type);
+create index if not exists idx_mouvements_stock_zone on mouvements_stock(zone);
+create index if not exists idx_mouvements_stock_motif on mouvements_stock(motif);
 create index if not exists idx_inventaire_zones_mama on inventaire_zones(mama_id);
 create index if not exists idx_ventes_boissons_mama on ventes_boissons(mama_id);
 create index if not exists idx_ventes_boissons_boisson on ventes_boissons(boisson_id);
@@ -1058,7 +1375,7 @@ begin
     do update set prix_achat = excluded.prix_achat, updated_at = now();
   update produits
      set dernier_prix = new.prix_unitaire,
-         main_supplier_id = coalesce(main_supplier_id, supp)
+        fournisseur_principal_id = coalesce(fournisseur_principal_id, supp)
    where id = new.produit_id;
   return new;
 end;
@@ -1416,7 +1733,7 @@ create table if not exists centres_de_cout (
 create table if not exists mouvements_centres_cout (
     id uuid primary key default uuid_generate_v4(),
     mouvement_id uuid references mouvements_stock(id) on delete cascade,
-    cost_center_id uuid references centres_de_cout(id) on delete cascade,
+    centre_cout_id uuid references centres_de_cout(id) on delete cascade,
     quantite numeric,
     valeur numeric,
     mama_id uuid not null references mamas(id),
@@ -1428,7 +1745,7 @@ create index if not exists idx_centres_de_cout_mama on centres_de_cout(mama_id);
 create index if not exists idx_centres_de_cout_nom on centres_de_cout(nom);
 create index if not exists idx_mouvements_cc_mama on mouvements_centres_cout(mama_id);
 create index if not exists idx_mouvements_cc_mouvement on mouvements_centres_cout(mouvement_id);
-create index if not exists idx_mouvements_cc_centre on mouvements_centres_cout(cost_center_id);
+create index if not exists idx_mouvements_cc_centre on mouvements_centres_cout(centre_cout_id);
 
 -- Politiques de sécurité au niveau des lignes
 alter table centres_de_cout enable row level security;
@@ -1484,46 +1801,46 @@ create policy journaux_utilisateur_all on journaux_utilisateur
 grant select, insert, update, delete on journaux_utilisateur to authenticated;
 
 -- Vue récapitulative de la consommation par centre de coût
-create or replace view v_cost_center_totals as
+create or replace view v_totaux_centres_cout as
 select
   c.mama_id,
-  c.id as cost_center_id,
+  c.id as centre_cout_id,
   c.nom,
   coalesce(sum(m.quantite),0) as quantite_totale,
   coalesce(sum(m.valeur),0) as valeur_totale
 from centres_de_cout c
-left join mouvements_centres_cout m on m.cost_center_id = c.id
+left join mouvements_centres_cout m on m.centre_cout_id = c.id
 group by c.mama_id, c.id, c.nom;
-grant select on v_cost_center_totals to authenticated;
+grant select on v_totaux_centres_cout to authenticated;
 
 -- Vue mensuelle de la consommation par centre de coût
-create or replace view v_cost_center_monthly as
+create or replace view v_centres_cout_mensuel as
 select
   c.mama_id,
-  c.id as cost_center_id,
+  c.id as centre_cout_id,
   date_trunc('month', m.created_at) as mois,
   c.nom,
   coalesce(sum(m.quantite),0) as quantite,
   coalesce(sum(m.valeur),0) as valeur
 from centres_de_cout c
-left join mouvements_centres_cout m on m.cost_center_id = c.id
+left join mouvements_centres_cout m on m.centre_cout_id = c.id
 group by c.mama_id, c.id, mois, c.nom;
-grant select on v_cost_center_monthly to authenticated;
+grant select on v_centres_cout_mensuel to authenticated;
 
 -- Vue alias pour les totaux mensuels par centre de coût
-create or replace view v_cost_center_month as
-select * from v_cost_center_monthly;
-grant select on v_cost_center_month to authenticated;
+create or replace view v_centres_cout_mois as
+select * from v_centres_cout_mensuel;
+grant select on v_centres_cout_mois to authenticated;
 
 -- Fonction retournant les statistiques par centre de coût pour une période donnée
 create or replace function stats_centres_de_cout(mama_id_param uuid, debut_param date default null, fin_param date default null)
-returns table(cost_center_id uuid, nom text, quantite numeric, valeur numeric)
+returns table(centre_cout_id uuid, nom text, quantite numeric, valeur numeric)
 language plpgsql security definer as $$
 begin
   return query
     select c.id, c.nom, sum(coalesce(m.quantite,0)), sum(coalesce(m.valeur,0))
     from centres_de_cout c
-    left join mouvements_centres_cout m on m.cost_center_id = c.id
+    left join mouvements_centres_cout m on m.centre_cout_id = c.id
       and (debut_param is null or m.created_at >= debut_param)
       and (fin_param is null or m.created_at < fin_param + interval '1 day')
     where c.mama_id = mama_id_param
@@ -1583,13 +1900,13 @@ select
   mc.mouvement_id,
   m."date",
   m.produit_id,
-  mc.cost_center_id,
-  cc.nom as cost_center,
+  mc.centre_cout_id,
+  cc.nom as centre_cout,
   mc.quantite,
   mc.valeur
 from mouvements_centres_cout mc
 join mouvements_stock m on m.id = mc.mouvement_id
-join centres_de_cout cc on cc.id = mc.cost_center_id;
+join centres_de_cout cc on cc.id = mc.centre_cout_id;
 grant select on v_ventilation to authenticated;
 
 -- Vue des fournisseurs sans facture depuis 6 mois
@@ -1612,7 +1929,7 @@ create table if not exists pertes (
     id uuid primary key default uuid_generate_v4(),
     mama_id uuid not null references mamas(id) on delete cascade,
     produit_id uuid not null references produits(id) on delete cascade,
-    cost_center_id uuid references centres_de_cout(id),
+    centre_cout_id uuid references centres_de_cout(id),
     date_perte date not null default current_date,
     quantite numeric not null,
     motif text,
@@ -1651,15 +1968,15 @@ create trigger trg_log_pertes
 
 -- Fonction suggérant les allocations de centre de coût selon l'historique
 create or replace function suggest_centres_de_cout(p_produit_id uuid)
-returns table(cost_center_id uuid, nom text, ratio numeric)
+returns table(centre_cout_id uuid, nom text, ratio numeric)
 language sql stable security definer as $$
   select
-    mcc.cost_center_id,
+    mcc.centre_cout_id,
     cc.nom,
     sum(mcc.quantite)::numeric / greatest(sum(sum_mcc.quantite),1) as ratio
   from mouvements_centres_cout mcc
   join mouvements_stock ms on ms.id = mcc.mouvement_id
-  join centres_de_cout cc on cc.id = mcc.cost_center_id
+  join centres_de_cout cc on cc.id = mcc.centre_cout_id
   join (
     select sum(abs(m.quantite)) as quantite
     from mouvements_stock m
@@ -1670,7 +1987,7 @@ language sql stable security definer as $$
   where ms.produit_id = p_produit_id
     and ms.mama_id = current_user_mama_id()
     and ms.quantite < 0
-  group by mcc.cost_center_id, cc.nom;
+  group by mcc.centre_cout_id, cc.nom;
 $$;
 grant execute on function suggest_centres_de_cout(uuid) to authenticated;
 
@@ -1737,7 +2054,7 @@ select
   p.code,
   p.allergenes,
   p.image,
-  p.main_supplier_id,
+  p.fournisseur_principal_id,
   p.mama_id,
   p.created_at,
   sp.prix_achat as dernier_prix,
@@ -1816,76 +2133,6 @@ $$;
 -- Index pour la connexion utilisateur par email
 create index if not exists idx_users_email on users(email);
 
--- Colonnes texte optionnelles famille/unité pour les produits
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='produits' AND column_name='famille'
-  ) THEN
-    ALTER TABLE produits ADD COLUMN famille text;
-  END IF;
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='produits' AND column_name='unite'
-  ) THEN
-    ALTER TABLE produits ADD COLUMN unite text;
-  END IF;
-END $$;
-
--- Contraintes uniques sur (mama_id, nom, unite)
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_constraint WHERE conname = 'produits_mama_id_nom_unite_key'
-  ) THEN
-    ALTER TABLE produits
-      ADD CONSTRAINT produits_mama_id_nom_unite_key UNIQUE (mama_id, nom, unite);
-  END IF;
-END $$;
-
--- ---------------------------------------
--- Module Carte - champs additionnels
--- ---------------------------------------
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='fiches_techniques' AND column_name='carte_actuelle'
-  ) THEN
-    ALTER TABLE fiches_techniques ADD COLUMN carte_actuelle boolean DEFAULT false;
-  END IF;
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='fiches_techniques' AND column_name='type_carte'
-  ) THEN
-    ALTER TABLE fiches_techniques ADD COLUMN type_carte text;
-  END IF;
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='fiches_techniques' AND column_name='sous_type_carte'
-  ) THEN
-    ALTER TABLE fiches_techniques ADD COLUMN sous_type_carte text;
-  END IF;
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='fiches_techniques' AND column_name='prix_vente'
-  ) THEN
-    ALTER TABLE fiches_techniques ADD COLUMN prix_vente numeric;
-  END IF;
-END $$;
-
-create index if not exists idx_ft_carte on fiches_techniques(carte_actuelle, type_carte, sous_type_carte);
-create index if not exists idx_ft_prix on fiches_techniques(prix_vente);
-create index if not exists idx_ft_nom on fiches_techniques(nom);
-
-alter table fiches_techniques enable row level security;
-alter table fiches_techniques force row level security;
-drop policy if exists fiches_techniques_all on fiches_techniques;
-create policy fiches_techniques_all on fiches_techniques
-  for all using (mama_id = current_user_mama_id())
-  with check (mama_id = current_user_mama_id());
-grant select, insert, update, delete on fiches_techniques to authenticated;
 
 -- Table d'audit des changements de prix
 create table if not exists fiche_prix_history (
@@ -1930,23 +2177,6 @@ create index if not exists idx_mouvements_stock_produit on mouvements_stock(prod
 create index if not exists idx_mouvements_stock_date on mouvements_stock("date");
 create index if not exists idx_mouvements_stock_type on mouvements_stock(type);
 
--- Ajout de la colonne date_debut pour les inventaires
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='inventaires' AND column_name='date_debut'
-  ) THEN
-    ALTER TABLE inventaires ADD COLUMN date_debut date;
-  END IF;
-END $$;
-
-create index if not exists idx_inventaires_date on inventaires("date");
-create index if not exists idx_inventaires_date_debut on inventaires(date_debut);
-
-create index if not exists idx_produits_famille_txt on produits(famille);
-create index if not exists idx_produits_unite_txt on produits(unite);
-create index if not exists idx_produits_code on produits(code);
 
 -- Fonction de statistiques pour le tableau de bord
 create or replace function dashboard_stats(
@@ -2035,41 +2265,6 @@ grant execute on function mouvements_without_alloc(integer) to authenticated;
 -- Index pour accélérer la recherche de factures
 create index if not exists idx_factures_reference on factures(reference);
 
--- Colonnes optionnelles sur mouvements_stock pour stocker les détails
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='mouvements_stock' AND column_name='sous_type'
-  ) THEN
-    ALTER TABLE mouvements_stock ADD COLUMN sous_type text;
-  END IF;
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='mouvements_stock' AND column_name='zone'
-  ) THEN
-    ALTER TABLE mouvements_stock ADD COLUMN zone text;
-  END IF;
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='mouvements_stock' AND column_name='motif'
-  ) THEN
-    ALTER TABLE mouvements_stock ADD COLUMN motif text;
-  END IF;
-END $$;
-
-DO $$
-BEGIN
-  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='mouvements_stock' AND column_name='sous_type') THEN
-    CREATE INDEX IF NOT EXISTS idx_mouvements_stock_sous_type ON mouvements_stock(sous_type);
-  END IF;
-  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='mouvements_stock' AND column_name='zone') THEN
-    CREATE INDEX IF NOT EXISTS idx_mouvements_stock_zone ON mouvements_stock(zone);
-  END IF;
-  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='mouvements_stock' AND column_name='motif') THEN
-    CREATE INDEX IF NOT EXISTS idx_mouvements_stock_motif ON mouvements_stock(motif);
-  END IF;
-END $$;
 
 -- Table des ventes pour l'ingénierie de menu
 create table if not exists ventes_fiches_carte (
@@ -2376,259 +2571,6 @@ alter table documents enable row level security;
 alter table documents force row level security;
 drop policy if exists documents_all on documents;
 create policy documents_all on documents
-  for all using (mama_id = current_user_mama_id())
-  with check (mama_id = current_user_mama_id());
-
-grant select, insert, update, delete on documents to authenticated;
-
--- Gestion fine des droits avec validations
-
-create table if not exists validation_requests (
-    id uuid primary key default uuid_generate_v4(),
-    mama_id uuid not null references mamas(id) on delete cascade,
-    module text not null,
-    entity_id uuid,
-    action text not null,
-    status text default 'pending',
-    requested_by uuid references users(id) on delete set null,
-    reviewed_by uuid references users(id) on delete set null,
-    reviewed_at timestamptz,
-    comment text,
-    created_at timestamptz default now()
-);
-create index if not exists idx_validation_requests_mama on validation_requests(mama_id);
-create index if not exists idx_validation_requests_status on validation_requests(status);
-
-alter table validation_requests enable row level security;
-alter table validation_requests force row level security;
-drop policy if exists validation_requests_select on validation_requests;
-create policy validation_requests_select on validation_requests
-  for select using (mama_id = current_user_mama_id());
-drop policy if exists validation_requests_insert on validation_requests;
-create policy validation_requests_insert on validation_requests
-  for insert with check (
-    mama_id = current_user_mama_id() and requested_by = auth.uid()
-  );
-drop policy if exists validation_requests_update on validation_requests;
-create policy validation_requests_update on validation_requests
-  for update using (
-    mama_id = current_user_mama_id() and
-    current_user_role() in ('admin','superadmin')
-  ) with check (mama_id = current_user_mama_id());
-drop policy if exists validation_requests_delete on validation_requests;
-create policy validation_requests_delete on validation_requests
-  for delete using (
-    mama_id = current_user_mama_id() and current_user_role() in ('admin','superadmin')
-  );
-
-grant select, insert, update, delete on validation_requests to authenticated;
-
--- Vue pour l'analytique avancée
-create or replace view v_monthly_purchases as
-select
-  f.mama_id,
-  date_trunc('month', f."date") as month,
-  sum(fl.total) as purchases
-from factures f
-join facture_lignes fl on fl.facture_id = f.id
-group by f.mama_id, month;
-grant select on v_monthly_purchases to authenticated;
-
-create or replace function advanced_stats(start_date date default null, end_date date default null)
-returns table(month date, purchases numeric)
-language sql security definer as $$
-  select month, purchases
-  from v_monthly_purchases
-  where mama_id = current_user_mama_id()
-    and (start_date is null or month >= date_trunc('month', start_date))
-    and (end_date is null or month <= date_trunc('month', end_date))
-  order by month;
-$$;
-grant execute on function advanced_stats(date, date) to authenticated;
-
--- Suivi de l'onboarding par utilisateur
-create table if not exists onboarding_progress (
-    user_id uuid references users(id) on delete cascade,
-    mama_id uuid not null references mamas(id) on delete cascade,
-    step integer default 0,
-    created_at timestamptz default now(),
-    updated_at timestamptz default now(),
-    primary key(user_id, mama_id)
-);
-create index if not exists idx_onboarding_mama on onboarding_progress(mama_id);
-alter table onboarding_progress enable row level security;
-alter table onboarding_progress force row level security;
-drop policy if exists onboarding_progress_select on onboarding_progress;
-create policy onboarding_progress_select on onboarding_progress
-  for select to authenticated
-  using (user_id = auth.uid());
-drop policy if exists onboarding_progress_insert on onboarding_progress;
-create policy onboarding_progress_insert on onboarding_progress
-  for insert to authenticated
-  with check (user_id = auth.uid() and mama_id = current_user_mama_id());
-drop policy if exists onboarding_progress_update on onboarding_progress;
-create policy onboarding_progress_update on onboarding_progress
-  for update to authenticated
-  using (user_id = auth.uid())
-  with check (user_id = auth.uid());
-grant select, insert, update on onboarding_progress to authenticated;
-
--- Historique détaillé des étapes d'onboarding
-create table if not exists etapes_onboarding (
-    id uuid primary key default uuid_generate_v4(),
-    user_id uuid references users(id) on delete cascade,
-    etape text,
-    statut text check (statut in ('en cours','terminé','sauté')),
-    mama_id uuid not null references mamas(id) on delete cascade,
-    created_at timestamptz default now()
-);
-create index if not exists idx_etapes_onboarding_mama on etapes_onboarding(mama_id);
-alter table etapes_onboarding enable row level security;
-alter table etapes_onboarding force row level security;
-drop policy if exists etapes_onboarding_select on etapes_onboarding;
-create policy etapes_onboarding_select on etapes_onboarding
-  for select to authenticated
-  using (mama_id = current_user_mama_id());
-drop policy if exists etapes_onboarding_insert on etapes_onboarding;
-create policy etapes_onboarding_insert on etapes_onboarding
-  for insert to authenticated
-  with check (mama_id = current_user_mama_id() and user_id = auth.uid());
-drop policy if exists etapes_onboarding_update on etapes_onboarding;
-create policy etapes_onboarding_update on etapes_onboarding
-  for update to authenticated
-  using (user_id = auth.uid() and mama_id = current_user_mama_id())
-  with check (user_id = auth.uid() and mama_id = current_user_mama_id());
-grant select, insert, update on etapes_onboarding to authenticated;
-
--- Articles d'aide et FAQ
-create table if not exists help_articles (
-    id uuid primary key default uuid_generate_v4(),
-    mama_id uuid not null references mamas(id) on delete cascade,
-    title text not null,
-    content text not null,
-    role text default 'all',
-    created_at timestamptz default now()
-);
-create index if not exists idx_help_articles_mama on help_articles(mama_id);
-alter table help_articles enable row level security;
-alter table help_articles force row level security;
-drop policy if exists help_articles_select on help_articles;
-create policy help_articles_select on help_articles
-  for select to authenticated
-  using (mama_id = current_user_mama_id());
-drop policy if exists help_articles_mutation on help_articles;
-create policy help_articles_mutation on help_articles
-  for all to authenticated
-  using (mama_id = current_user_mama_id())
-  with check (mama_id = current_user_mama_id());
-grant select, insert, update, delete on help_articles to authenticated;
-
-
--- ----------------------------------------------------
--- Tables Supabase supplémentaires
--- ----------------------------------------------------
-create table if not exists journaux_audit (
-    id uuid primary key default uuid_generate_v4(),
-    user_id uuid,
-    mama_id uuid,
-    action text,
-    table_name text,
-    created_at timestamptz default now()
-);
-
-alter table journaux_audit enable row level security;
-alter table journaux_audit force row level security;
-drop policy if exists select_own_or_admin on journaux_audit;
-create policy select_own_or_admin on journaux_audit
-  for select using (
-    user_id = auth.uid() or
-    exists (
-      select 1 from users u
-      join roles r on u.role_id = r.id
-      where u.id = auth.uid() and r.nom in ('admin','superadmin')
-    )
-  );
-create index if not exists idx_journaux_audit_mama on journaux_audit(mama_id);
-create index if not exists idx_journaux_audit_user on journaux_audit(user_id);
-create index if not exists idx_journaux_audit_date on journaux_audit(created_at);
-grant select on journaux_audit to authenticated;
-
-create table if not exists tableaux_de_bord (
-    id uuid primary key default uuid_generate_v4(),
-    user_id uuid references users(id) on delete cascade,
-    mama_id uuid references mamas(id) on delete cascade,
-    nom text,
-    created_at timestamptz default now()
-);
-
-alter table tableaux_de_bord enable row level security;
-alter table tableaux_de_bord force row level security;
-drop policy if exists tableaux_de_bord_owner on tableaux_de_bord;
-create policy tableaux_de_bord_owner on tableaux_de_bord
-  for all using (
-    user_id = auth.uid() and mama_id = current_user_mama_id()
-  ) with check (
-    user_id = auth.uid() and mama_id = current_user_mama_id()
-  );
-grant select, insert, update, delete on tableaux_de_bord to authenticated;
-
-create table if not exists gadgets (
-    id uuid primary key default uuid_generate_v4(),
-    dashboard_id uuid references tableaux_de_bord(id) on delete cascade,
-    config jsonb,
-    ordre int default 0
-);
-
-alter table gadgets enable row level security;
-alter table gadgets force row level security;
-drop policy if exists gadgets_owner on gadgets;
-create policy gadgets_owner on gadgets
-  for all using (
-    exists (
-      select 1 from tableaux_de_bord d
-      where d.id = gadgets.dashboard_id
-        and d.user_id = auth.uid()
-        and d.mama_id = current_user_mama_id()
-    )
-  ) with check (
-    exists (
-      select 1 from tableaux_de_bord d
-      where d.id = gadgets.dashboard_id
-        and d.user_id = auth.uid()
-        and d.mama_id = current_user_mama_id()
-    )
-  );
-grant select, insert, update, delete on gadgets to authenticated;
-
-create table if not exists compta_mapping (
-    id uuid primary key default uuid_generate_v4(),
-    mama_id uuid not null references mamas(id) on delete cascade,
-    type text not null,
-    cle text not null,
-    compte text not null,
-    created_at timestamptz default now(),
-    unique(mama_id, type, cle)
-);
-
-alter table compta_mapping enable row level security;
-alter table compta_mapping force row level security;
-drop policy if exists compta_mapping_admin on compta_mapping;
-create policy compta_mapping_admin on compta_mapping
-  for all using (
-    mama_id = current_user_mama_id() and
-    exists (
-      select 1 from users u
-      join roles r on u.role_id = r.id
-      where u.id = auth.uid() and r.nom in ('admin','superadmin','compta')
-    )
-  )
-  with check (
-    mama_id = current_user_mama_id() and
-    exists (
-      select 1 from users u
-      join roles r on u.role_id = r.id
-      where u.id = auth.uid() and r.nom in ('admin','superadmin','compta')
-    )
   );
 grant select, insert, update, delete on compta_mapping to authenticated;
 
@@ -2670,14 +2612,14 @@ select
   m."date",
   m.produit_id,
   f.nom as famille,
-  mc.cost_center_id,
-  c.nom as cost_center_nom,
+  mc.centre_cout_id,
+  c.nom as centre_cout_nom,
   m.quantite,
   mc.valeur,
   m.mama_id
 from mouvements_stock m
 left join mouvements_centres_cout mc on mc.mouvement_id = m.id
-left join centres_de_cout c on c.id = mc.cost_center_id
+left join centres_de_cout c on c.id = mc.centre_cout_id
 left join produits p on p.id = m.produit_id
 left join familles f on f.id = p.famille_id and f.mama_id = p.mama_id;
 grant select on v_analytique_stock to authenticated;

@@ -91,8 +91,8 @@ drop view if exists v_products_last_price;
 drop view if exists stock_mouvements;
 drop view if exists stocks;
 drop view if exists v_cost_center_totals;
-drop view if exists v_cost_center_monthly;
-drop view if exists v_cost_center_month;
+drop view if exists v_cost_center_month cascade;
+drop view if exists v_cost_center_monthly cascade;
 -- Renomme product_id en produit_id si nécessaire
 DO $$
 BEGIN

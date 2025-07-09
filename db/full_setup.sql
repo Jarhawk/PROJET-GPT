@@ -498,6 +498,11 @@ create table if not exists parametres (
 );
 
 -- Harmonisation des anciens noms de colonnes
+-- Suppression des vues héritées avant renommage pour éviter les conflits
+drop view if exists v_product_price_trend;
+drop view if exists v_products_last_price;
+drop view if exists stock_mouvements;
+drop view if exists stocks;
 -- Renomme product_id en produit_id si nécessaire
 DO $$
 BEGIN

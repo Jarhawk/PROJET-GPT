@@ -690,44 +690,12 @@ BEGIN
   END IF;
 END $$;
 
--- Renommer la colonne product_id en produit_id dans les vues existantes
 DO $$
 BEGIN
-  IF EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_schema = 'public'
-      AND table_name = 'v_product_price_trend'
-      AND column_name = 'product_id'
-  ) THEN
-    EXECUTE 'ALTER VIEW v_product_price_trend RENAME COLUMN product_id TO produit_id';
-  END IF;
-
-  IF EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_schema = 'public'
-      AND table_name = 'v_products_last_price'
-      AND column_name = 'product_id'
-  ) THEN
-    EXECUTE 'ALTER VIEW v_products_last_price RENAME COLUMN product_id TO produit_id';
-  END IF;
-
-  IF EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_schema = 'public'
-      AND table_name = 'stock_mouvements'
-      AND column_name = 'product_id'
-  ) THEN
-    EXECUTE 'ALTER VIEW stock_mouvements RENAME COLUMN product_id TO produit_id';
-  END IF;
-
-  IF EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_schema = 'public'
-      AND table_name = 'stocks'
-      AND column_name = 'product_id'
-  ) THEN
-    EXECUTE 'ALTER VIEW stocks RENAME COLUMN product_id TO produit_id';
-  END IF;
+  PERFORM rename_column_public('v_product_price_trend', 'product_id', 'produit_id');
+  PERFORM rename_column_public('v_products_last_price', 'product_id', 'produit_id');
+  PERFORM rename_column_public('stock_mouvements', 'product_id', 'produit_id');
+  PERFORM rename_column_public('stocks', 'product_id', 'produit_id');
 END $$;
 -- Ajout des colonnes zone_source_id et zone_destination_id si absentes
 DO $$

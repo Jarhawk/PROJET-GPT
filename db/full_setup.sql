@@ -751,6 +751,34 @@ BEGIN
   END IF;
 END $$;
 
+-- Ajout de la colonne auteur_id sur mouvements_stock et requisitions si absente
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_name='mouvements_stock'
+  ) THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name='mouvements_stock' AND column_name='auteur_id'
+    ) THEN
+      ALTER TABLE mouvements_stock ADD COLUMN auteur_id uuid references utilisateurs(id);
+    END IF;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_name='requisitions'
+  ) THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name='requisitions' AND column_name='auteur_id'
+    ) THEN
+      ALTER TABLE requisitions ADD COLUMN auteur_id uuid references utilisateurs(id);
+    END IF;
+  END IF;
+END $$;
+
 -- S'assure de la présence des colonnes "date" sur les tables clés
 DO $$
 BEGIN

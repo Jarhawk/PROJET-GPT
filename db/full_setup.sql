@@ -692,10 +692,85 @@ END $$;
 
 DO $$
 BEGIN
-  PERFORM rename_column_public('v_product_price_trend', 'product_id', 'produit_id');
-  PERFORM rename_column_public('v_products_last_price', 'product_id', 'produit_id');
-  PERFORM rename_column_public('stock_mouvements', 'product_id', 'produit_id');
-  PERFORM rename_column_public('stocks', 'product_id', 'produit_id');
+  IF EXISTS (
+    SELECT 1 FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public'
+      AND c.relname = 'v_product_price_trend'
+      AND c.relkind IN ('v','m')
+  ) AND EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'v_product_price_trend'
+      AND column_name = 'product_id'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'v_product_price_trend'
+      AND column_name = 'produit_id'
+  ) THEN
+    EXECUTE 'ALTER VIEW public.v_product_price_trend RENAME COLUMN product_id TO produit_id';
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public'
+      AND c.relname = 'v_products_last_price'
+      AND c.relkind IN ('v','m')
+  ) AND EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'v_products_last_price'
+      AND column_name = 'product_id'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'v_products_last_price'
+      AND column_name = 'produit_id'
+  ) THEN
+    EXECUTE 'ALTER VIEW public.v_products_last_price RENAME COLUMN product_id TO produit_id';
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public'
+      AND c.relname = 'stock_mouvements'
+      AND c.relkind IN ('v','m')
+  ) AND EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'stock_mouvements'
+      AND column_name = 'product_id'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'stock_mouvements'
+      AND column_name = 'produit_id'
+  ) THEN
+    EXECUTE 'ALTER VIEW public.stock_mouvements RENAME COLUMN product_id TO produit_id';
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public'
+      AND c.relname = 'stocks'
+      AND c.relkind IN ('v','m')
+  ) AND EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'stocks'
+      AND column_name = 'product_id'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'stocks'
+      AND column_name = 'produit_id'
+  ) THEN
+    EXECUTE 'ALTER VIEW public.stocks RENAME COLUMN product_id TO produit_id';
+  END IF;
 END $$;
 -- Ajout des colonnes zone_source_id et zone_destination_id si absentes
 DO $$

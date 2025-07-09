@@ -29,8 +29,31 @@ alter default privileges in schema public
 -- S'assurer que les fonctions d'extension sont visibles
 set search_path = public, extensions;
 -- Extensions
+
 create extension if not exists "uuid-ossp";
 create extension if not exists "pgcrypto";
+
+-- Fonction utilitaire pour renommer une colonne d'une table ou d'une vue
+-- Utilisée dans les blocs DO afin d'éviter les ALTER TABLE/VIEW directs
+create or replace function rename_column_public(rel text, old_col text, new_col text)
+returns void language plpgsql as $$
+declare
+  kind char;
+begin
+  select c.relkind into kind
+    from pg_class c
+    join pg_namespace n on n.oid = c.relnamespace
+    where n.nspname = 'public' and c.relname = rel;
+
+  if kind = 'v' then
+    execute format('ALTER VIEW public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
+  elsif kind = 'r' then
+    execute format('ALTER TABLE public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
+  end if;
+exception when others then
+  null;
+end;
+$$;
 
 -- Supprimer la relation users par défaut de Supabase si elle existe (vue ou table)
 DO $$
@@ -135,67 +158,6 @@ as $$
   );
 $$;
 grant execute on function current_user_role() to authenticated;
-
--- Utility to rename a column whether the relation is a table or a view
-create or replace function rename_column_public(rel text, old_col text, new_col text)
-returns void language plpgsql as $$
-declare
-  kind char;
-  old_exists boolean;
-  new_exists boolean;
-begin
-  select c.relkind
-    into kind
-    from pg_class c
-    join pg_namespace n on n.oid = c.relnamespace
-   where n.nspname = 'public' and c.relname = rel;
-
-  if kind is null then
-    return;
-  end if;
-
-  select exists (
-           select 1 from information_schema.columns
-            where table_schema = 'public'
-              and table_name = rel
-              and column_name = old_col
-         ) into old_exists;
-
-  select exists (
-           select 1 from information_schema.columns
-            where table_schema = 'public'
-              and table_name = rel
-              and column_name = new_col
-         ) into new_exists;
-
-  -- Nothing to do if the old column does not exist or the new one already exists
-  if not old_exists or new_exists then
-    return;
-  end if;
-
-  begin
-    if kind in ('v','m') then
-      execute format('ALTER VIEW public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
-    else
-      execute format('ALTER TABLE public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
-    end if;
-  exception when invalid_table_definition or wrong_object_type or feature_not_supported then
-    -- fallback if the relation kind was misidentified
-    begin
-      if kind in ('v','m') then
-        execute format('ALTER TABLE public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
-      else
-        execute format('ALTER VIEW public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
-      end if;
-    exception when others then
-      return;
-    end;
-  -- Ignore missing or already renamed columns
-  when undefined_column or duplicate_column then
-    return;
-  end;
-end;
-$$;
 
 alter table utilisateurs enable row level security;
 alter table utilisateurs force row level security;
@@ -709,7 +671,7 @@ BEGIN
       AND table_name = 'v_product_price_trend'
       AND column_name = 'produit_id'
   ) THEN
-    EXECUTE 'ALTER VIEW public.v_product_price_trend RENAME COLUMN product_id TO produit_id';
+    PERFORM rename_column_public('v_product_price_trend','product_id','produit_id');
   END IF;
 
   IF EXISTS (
@@ -729,7 +691,7 @@ BEGIN
       AND table_name = 'v_products_last_price'
       AND column_name = 'produit_id'
   ) THEN
-    EXECUTE 'ALTER VIEW public.v_products_last_price RENAME COLUMN product_id TO produit_id';
+    PERFORM rename_column_public('v_products_last_price','product_id','produit_id');
   END IF;
 
   IF EXISTS (
@@ -749,7 +711,7 @@ BEGIN
       AND table_name = 'stock_mouvements'
       AND column_name = 'produit_id'
   ) THEN
-    EXECUTE 'ALTER VIEW public.stock_mouvements RENAME COLUMN product_id TO produit_id';
+    PERFORM rename_column_public('stock_mouvements','product_id','produit_id');
   END IF;
 
   IF EXISTS (
@@ -769,7 +731,7 @@ BEGIN
       AND table_name = 'stocks'
       AND column_name = 'produit_id'
   ) THEN
-    EXECUTE 'ALTER VIEW public.stocks RENAME COLUMN product_id TO produit_id';
+    PERFORM rename_column_public('stocks','product_id','produit_id');
   END IF;
 END $$;
 -- Ajout des colonnes zone_source_id et zone_destination_id si absentes
@@ -1046,9 +1008,9 @@ create index if not exists idx_mouvements_stock_zone_destination on mouvements_s
 create index if not exists idx_inventaire_zones_mama on inventaire_zones(mama_id);
 create index if not exists idx_ventes_boissons_mama on ventes_boissons(mama_id);
 create index if not exists idx_ventes_boissons_boisson on ventes_boissons(boisson_id);
-create or replace view stock_mouvements as select * from mouvements_stock;
+create view if not exists stock_mouvements as select * from mouvements_stock;
 grant select on stock_mouvements to authenticated;
-create or replace view stocks as select * from mouvements_stock;
+create view if not exists stocks as select * from mouvements_stock;
 grant select on stocks to authenticated;
 
 -- Trigger de mise à jour du PMP produit et du stock lors de l'insertion de ligne de facture
@@ -1513,7 +1475,7 @@ create policy journaux_utilisateur_all on journaux_utilisateur
 grant select, insert, update, delete on journaux_utilisateur to authenticated;
 
 -- Vue récapitulative de la consommation par centre de coût
-create or replace view v_cost_center_totals as
+create view if not exists v_cost_center_totals as
 select
   c.mama_id,
   c.id as cost_center_id,
@@ -1526,7 +1488,7 @@ group by c.mama_id, c.id, c.nom;
 grant select on v_cost_center_totals to authenticated;
 
 -- Vue mensuelle de la consommation par centre de coût
-create or replace view v_cost_center_monthly as
+create view if not exists v_cost_center_monthly as
 select
   c.mama_id,
   c.id as cost_center_id,
@@ -1540,7 +1502,7 @@ group by c.mama_id, c.id, mois, c.nom;
 grant select on v_cost_center_monthly to authenticated;
 
 -- Vue alias pour les totaux mensuels par centre de coût
-create or replace view v_cost_center_month as
+create view if not exists v_cost_center_month as
 select * from v_cost_center_monthly;
 grant select on v_cost_center_month to authenticated;
 
@@ -1606,7 +1568,7 @@ create trigger trg_log_mouvement_cc
 grant execute on function log_mouvement_cc_changes() to authenticated;
 
 -- Vue détaillée des affectations de mouvements de stock
-create or replace view v_ventilation as
+create view if not exists v_ventilation as
 select
   mc.mama_id,
   mc.mouvement_id,
@@ -1622,7 +1584,7 @@ join centres_de_cout cc on cc.id = mc.cost_center_id;
 grant select on v_ventilation to authenticated;
 
 -- Vue des fournisseurs sans facture depuis 6 mois
-create or replace view v_fournisseurs_inactifs as
+create view if not exists v_fournisseurs_inactifs as
 select
   f.mama_id,
   f.id as fournisseur_id,
@@ -1704,7 +1666,7 @@ $$;
 grant execute on function suggest_centres_de_cout(uuid) to authenticated;
 
 -- Vue du prix moyen d'achat mensuel par produit
-create or replace view v_tendance_prix_produit as
+create view if not exists v_tendance_prix_produit as
 select
   fl.mama_id,
   fl.produit_id,
@@ -1716,7 +1678,7 @@ from facture_lignes fl
 grant select on v_tendance_prix_produit to authenticated;
 
 -- PMP moyen pondere
-create or replace view v_pmp as
+create view if not exists v_pmp as
 select
   p.mama_id,
   p.id as produit_id,
@@ -1727,7 +1689,7 @@ group by p.mama_id, p.id;
 grant select on v_pmp to authenticated;
 
 -- Variation de prix fournisseurs
-create or replace view v_reco_surcout as
+create view if not exists v_reco_surcout as
 select
   sp.mama_id,
   sp.fournisseur_id,
@@ -1738,7 +1700,7 @@ group by sp.mama_id, sp.fournisseur_id, sp.produit_id;
 grant select on v_reco_surcout to authenticated;
 
 -- Nombre d'achats par fournisseur
-create or replace view v_fournisseur_stats as
+create view if not exists v_fournisseur_stats as
 select
   f.mama_id,
   f.id as fournisseur_id,
@@ -1750,7 +1712,7 @@ group by f.mama_id, f.id, f.nom;
 grant select on v_fournisseur_stats to authenticated;
 
 -- Vue des produits avec leur dernier prix fournisseur
-create or replace view v_produits_dernier_prix as
+create view if not exists v_produits_dernier_prix as
 select
   p.id,
   p.nom,
@@ -2186,7 +2148,7 @@ create trigger trg_log_promotions
   for each row execute function log_promotions_changes();
 
 -- Vue et fonction pour les statistiques consolidées multi-sites
-create or replace view v_consolidated_stats as
+create view if not exists v_consolidated_stats as
 select
   m.id as mama_id,
   m.nom,
@@ -2453,7 +2415,7 @@ create policy validation_requests_delete on validation_requests
 grant select, insert, update, delete on validation_requests to authenticated;
 
 -- Vue pour l'analytique avancée
-create or replace view v_monthly_purchases as
+create view if not exists v_monthly_purchases as
 select
   f.mama_id,
   date_trunc('month', f."date") as month,
@@ -2694,7 +2656,7 @@ create policy two_factor_upsert on public.two_factor_auth
 -- ----------------------------------------------------
 -- Vues Supabase supplémentaires
 -- ----------------------------------------------------
-create or replace view v_analytique_stock as
+create view if not exists v_analytique_stock as
 select
   m."date",
   m.produit_id,
@@ -2711,7 +2673,7 @@ left join produits p on p.id = m.produit_id
 left join familles f on f.id = p.famille_id and f.mama_id = p.mama_id;
 grant select on v_analytique_stock to authenticated;
 
-create or replace view v_reco_rotation as
+create view if not exists v_reco_rotation as
 select
   p.id as produit_id,
   p.nom,
@@ -2723,12 +2685,12 @@ where p.actif = true
 group by p.id, p.nom, p.mama_id;
 grant select on v_reco_rotation to authenticated;
 
-create or replace view v_reco_stockmort as
+create view if not exists v_reco_stockmort as
 select * from v_reco_rotation
 where jours_inactif > 30;
 grant select on v_reco_stockmort to authenticated;
 
-create or replace view v_besoins_previsionnels as
+create view if not exists v_besoins_previsionnels as
 select
   m.mama_id,
   m.id as menu_id,
@@ -2744,7 +2706,7 @@ left join produits p on p.id = fl.produit_id
 group by m.mama_id, m.id, fl.produit_id, p.nom, p.pmp;
 grant select on v_besoins_previsionnels to authenticated;
 
-create or replace view v_reco_surcoût as
+create view if not exists v_reco_surcoût as
 select distinct on (sp.produit_id)
   sp.produit_id,
   p.nom,

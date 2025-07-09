@@ -2571,8 +2571,9 @@ alter table documents enable row level security;
 alter table documents force row level security;
 drop policy if exists documents_all on documents;
 create policy documents_all on documents
-  );
-grant select, insert, update, delete on compta_mapping to authenticated;
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+grant select, insert, update, delete on documents to authenticated;
 
 create table if not exists consentements_utilisateur (
     id uuid primary key default uuid_generate_v4(),

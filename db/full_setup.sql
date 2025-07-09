@@ -45,9 +45,11 @@ begin
     join pg_namespace n on n.oid = c.relnamespace
     where n.nspname = 'public' and c.relname = rel;
 
-  if kind = 'v' then
+  if kind in ('v','m') then
+    -- Views and materialized views
     execute format('ALTER VIEW public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
-  elsif kind = 'r' then
+  elsif kind in ('r','p') then
+    -- Ordinary or partitioned tables
     execute format('ALTER TABLE public.%I RENAME COLUMN %I TO %I', rel, old_col, new_col);
   end if;
 exception when others then

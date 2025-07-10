@@ -283,7 +283,7 @@ create table if not exists fournisseur_produits (
 create table if not exists factures (
     id uuid primary key default uuid_generate_v4(),
     reference text,
-    "date" date not null,
+    date_facture date not null,
     fournisseur_id uuid references fournisseurs(id) on delete set null,
     montant numeric,
     total_ht numeric default 0,
@@ -334,7 +334,7 @@ create table if not exists fiche_lignes (
 create table if not exists fiche_cout_history (
     id uuid primary key default uuid_generate_v4(),
     fiche_id uuid references fiches(id) on delete cascade,
-    "date" date default current_date,
+    date_cout date default current_date,
     cout_total numeric,
     cout_par_portion numeric,
     mama_id uuid not null references mamas(id),
@@ -361,7 +361,7 @@ create table if not exists fiches_techniques (
 -- Inventaires et mouvements
 create table if not exists inventaires (
     id uuid primary key default uuid_generate_v4(),
-    "date" date not null,
+    date_inventaire date not null,
     reference text,
     cloture boolean default false,
     zone text,
@@ -408,7 +408,7 @@ create table if not exists mouvements_stock (
     sous_type text,
     zone text,
     motif text,
-    "date" date default current_date,
+    date_mouvement date default current_date,
     commentaire text,
     auteur_id uuid references utilisateurs(id),
     inventaire_id uuid references inventaires(id) on delete set null,
@@ -475,7 +475,7 @@ create table if not exists requisitions (
     mama_id uuid not null references mamas(id),
     produit_id uuid references produits(id),
     zone_id uuid references zones_stock(id),
-    "date" date default current_date,
+    date_requisition date default current_date,
     quantite numeric not null,
     type text,
     commentaire text,
@@ -520,7 +520,7 @@ create table if not exists parametres (
 );
 
 DROP INDEX IF EXISTS idx_requisitions_date;
-CREATE INDEX idx_requisitions_date ON requisitions("date");
+CREATE INDEX idx_requisitions_date ON requisitions(date_requisition);
 DROP INDEX IF EXISTS idx_transferts_mama;
 CREATE INDEX idx_transferts_mama ON transferts(mama_id);
 DROP INDEX IF EXISTS idx_transferts_produit;
@@ -571,7 +571,7 @@ begin
   if new.facture_id is null then
     return new;
   end if;
-  select fournisseur_id, "date" into supp, d from factures where id = new.facture_id;
+  select fournisseur_id, date_facture into supp, d from factures where id = new.facture_id;
   if supp is null then
     return new;
   end if;
@@ -672,7 +672,7 @@ begin
     cout_par_portion = coalesce(total,0)/nullif(portions,0)
   where id = fid;
 
-  insert into fiche_cout_history (fiche_id, "date", cout_total, cout_par_portion, mama_id)
+  insert into fiche_cout_history (fiche_id, date_cout, cout_total, cout_par_portion, mama_id)
   values (fid, current_date, coalesce(total,0), coalesce(total,0)/nullif(portions,0), mid);
 
   return new;
@@ -693,7 +693,7 @@ create trigger trg_fiche_update_cost
 create or replace function stats_achats_fournisseurs(mama_id_param uuid)
 returns table(mois text, total_achats numeric)
 language sql as $$
-  select to_char(f."date", 'YYYY-MM') as mois,
+  select to_char(f.date_facture, 'YYYY-MM') as mois,
          sum(fl.total) as total_achats
   from factures f
     join facture_lignes fl on fl.facture_id = f.id
@@ -707,7 +707,7 @@ grant execute on function stats_achats_fournisseurs(uuid) to authenticated;
 create or replace function stats_achats_fournisseur(mama_id_param uuid, fournisseur_id_param uuid)
 returns table(mois text, total_achats numeric)
 language sql as $$
-  select to_char(f."date", 'YYYY-MM') as mois,
+  select to_char(f.date_facture, 'YYYY-MM') as mois,
          sum(fl.total) as total_achats
   from factures f
     join facture_lignes fl on fl.facture_id = f.id
@@ -727,7 +727,7 @@ drop function if exists stats_rotation_produit(uuid, uuid) cascade;
 create or replace function stats_rotation_produit(mama_id_param uuid, produit_id_param uuid)
 returns table(mois text, quantite_sortie numeric)
 language sql as $$
-  select to_char("date", 'YYYY-MM') as mois,
+  select to_char(date_mouvement, 'YYYY-MM') as mois,
          sum(quantite) as quantite_sortie
   from mouvements_stock
   where mama_id = mama_id_param
@@ -1113,7 +1113,7 @@ create or replace view v_ventilation as
 select
   mc.mama_id,
   mc.mouvement_id,
-  m."date",
+  m.date_mouvement,
   m.produit_id,
   mc.centre_cout_id,
   cc.nom as centre_cout,
@@ -1130,13 +1130,13 @@ select
   f.mama_id,
   f.id as fournisseur_id,
   f.nom,
-  max(fc."date") as last_invoice_date,
-  date_part('month', age(current_date, max(fc."date"))) as months_since_last_invoice
+  max(fc.date_facture) as last_invoice_date,
+  date_part('month', age(current_date, max(fc.date_facture))) as months_since_last_invoice
 from fournisseurs f
 left join factures fc on fc.fournisseur_id = f.id
 where f.mama_id is not null
   group by f.mama_id, f.id, f.nom
-  having coalesce(max(fc."date"), current_date - interval '999 months') < current_date - interval '6 months';
+  having coalesce(max(fc.date_facture), current_date - interval '999 months') < current_date - interval '6 months';
 grant select on v_fournisseurs_inactifs to authenticated;
 
 -- Table des pertes produits
@@ -1213,7 +1213,7 @@ create or replace view v_tendance_prix_produit as
 select
   fl.mama_id,
   fl.produit_id,
-  date_trunc('month', f."date") as mois,
+  date_trunc('month', f.date_facture) as mois,
   avg(fl.prix_unitaire) as prix_moyen
 from facture_lignes fl
   join factures f on f.id = fl.facture_id
@@ -1401,7 +1401,7 @@ create or replace function dashboard_stats(
 )
 returns table(produit_id uuid, nom text, stock_reel numeric, pmp numeric, last_purchase timestamptz)
 language sql stable security definer as $$
-  select p.id, p.nom, p.stock_reel, p.pmp, max(f."date") as last_purchase
+  select p.id, p.nom, p.stock_reel, p.pmp, max(f.date_facture) as last_purchase
   from produits p
   left join facture_lignes fl on fl.produit_id = p.id
   left join factures f on f.id = fl.facture_id
@@ -1589,7 +1589,7 @@ select
   (select count(*) from mouvements_stock ms where ms.mama_id = m.id) as nb_mouvements,
   (select sum(abs(ms.quantite)) from mouvements_stock ms
       where ms.mama_id = m.id and ms.type='sortie'
-        and date_trunc('month', ms."date") = date_trunc('month', current_date)) as conso_mois
+        and date_trunc('month', ms.date_mouvement) = date_trunc('month', current_date)) as conso_mois
 from mamas m
 left join produits p on p.mama_id = m.id
 group by m.id, m.nom;
@@ -1778,7 +1778,7 @@ begin
     where nom = payload->>'supplier_name'
       and mama_id = current_user_mama_id()
     limit 1;
-  insert into factures(reference, "date", fournisseur_id, montant, statut, mama_id)
+  insert into factures(reference, date_facture, fournisseur_id, montant, statut, mama_id)
     values (payload->>'reference', (payload->>'date')::date, supp_id,
             (payload->>'total')::numeric, 'en attente', current_user_mama_id())
     returning id into fac_id;
@@ -1847,7 +1847,7 @@ create policy two_factor_upsert on public.two_factor_auth
 -- ----------------------------------------------------
 create or replace view v_analytique_stock as
 select
-  m."date",
+  m.date_mouvement,
   m.produit_id,
   f.nom as famille,
   mc.centre_cout_id,
@@ -1867,7 +1867,7 @@ select
   p.id as produit_id,
   p.nom,
   p.mama_id,
-  current_date - coalesce(max(m."date"), current_date) as jours_inactif
+  current_date - coalesce(max(m.date_mouvement), current_date) as jours_inactif
 from produits p
 left join mouvements_stock m on m.produit_id = p.id
 where p.actif = true
@@ -1942,7 +1942,7 @@ create or replace function fn_calc_budgets(mama_id_param uuid, periode_param tex
 returns table(famille text, budget_prevu numeric, total_reel numeric, ecart_pct numeric)
 language sql as $$
   with hist as (
-    select to_char(f."date",'YYYY-MM') as mois,
+  select to_char(f.date_facture,'YYYY-MM') as mois,
            fam.nom as famille,
            sum(fl.total) as total
     from factures f
@@ -2324,56 +2324,57 @@ BEGIN
   END IF;
 END $$;
 
--- S'assure de la présence des colonnes "date" sur les tables clés
+-- Harmonisation des noms de colonnes date
 DO $$
 BEGIN
-  IF NOT EXISTS (
+  IF EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_name='factures' AND column_name='date'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='factures' AND column_name='date_facture'
   ) THEN
-    ALTER TABLE factures ADD COLUMN IF NOT EXISTS "date" date;
+    PERFORM rename_column_public('factures','date','date_facture');
   END IF;
 
-  IF NOT EXISTS (
+  IF EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_name='fiche_cout_history' AND column_name='date'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='fiche_cout_history' AND column_name='date_cout'
   ) THEN
-    ALTER TABLE fiche_cout_history ADD COLUMN IF NOT EXISTS "date" date;
+    PERFORM rename_column_public('fiche_cout_history','date','date_cout');
   END IF;
 
-  IF NOT EXISTS (
+  IF EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_name='inventaires' AND column_name='date'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='inventaires' AND column_name='date_inventaire'
   ) THEN
-    ALTER TABLE inventaires ADD COLUMN IF NOT EXISTS "date" date;
+    PERFORM rename_column_public('inventaires','date','date_inventaire');
   END IF;
 
-  IF NOT EXISTS (
+  IF EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_name='mouvements_stock' AND column_name='date'
-  ) THEN
-    ALTER TABLE mouvements_stock ADD COLUMN IF NOT EXISTS "date" date;
-  END IF;
-
-  IF NOT EXISTS (
+  ) AND NOT EXISTS (
     SELECT 1 FROM information_schema.columns
-    WHERE table_name='fournisseur_notes' AND column_name='date'
+    WHERE table_name='mouvements_stock' AND column_name='date_mouvement'
   ) THEN
-    ALTER TABLE fournisseur_notes ADD COLUMN IF NOT EXISTS "date" date;
+    PERFORM rename_column_public('mouvements_stock','date','date_mouvement');
   END IF;
 
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='menus' AND column_name='date'
-  ) THEN
-    ALTER TABLE menus ADD COLUMN IF NOT EXISTS "date" date;
-  END IF;
-
-  IF NOT EXISTS (
+  IF EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_name='requisitions' AND column_name='date'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='requisitions' AND column_name='date_requisition'
   ) THEN
-    ALTER TABLE requisitions ADD COLUMN IF NOT EXISTS "date" date;
+    PERFORM rename_column_public('requisitions','date','date_requisition');
   END IF;
 END $$;
 
@@ -2515,7 +2516,7 @@ CREATE INDEX idx_produits_fournisseur_principal ON produits(fournisseur_principa
 DROP INDEX IF EXISTS idx_factures_mama;
 CREATE INDEX idx_factures_mama ON factures(mama_id);
 DROP INDEX IF EXISTS idx_factures_date;
-CREATE INDEX idx_factures_date ON factures("date");
+CREATE INDEX idx_factures_date ON factures(date_facture);
 DROP INDEX IF EXISTS idx_factures_fournisseur;
 CREATE INDEX idx_factures_fournisseur ON factures(fournisseur_id);
 DROP INDEX IF EXISTS idx_factures_statut;
@@ -2730,7 +2731,7 @@ CREATE INDEX idx_mouvements_stock_mama ON mouvements_stock(mama_id);
 DROP INDEX IF EXISTS idx_mouvements_stock_produit;
 CREATE INDEX idx_mouvements_stock_produit ON mouvements_stock(produit_id);
 DROP INDEX IF EXISTS idx_mouvements_stock_date;
-CREATE INDEX idx_mouvements_stock_date ON mouvements_stock("date");
+CREATE INDEX idx_mouvements_stock_date ON mouvements_stock(date_mouvement);
 DROP INDEX IF EXISTS idx_mouvements_stock_type;
 CREATE INDEX idx_mouvements_stock_type ON mouvements_stock(type);
 
@@ -2746,7 +2747,7 @@ BEGIN
 END $$;
 
 DROP INDEX IF EXISTS idx_inventaires_date;
-CREATE INDEX idx_inventaires_date ON inventaires("date");
+CREATE INDEX idx_inventaires_date ON inventaires(date_inventaire);
 DROP INDEX IF EXISTS idx_inventaires_date_debut;
 CREATE INDEX idx_inventaires_date_debut ON inventaires(date_debut);
 

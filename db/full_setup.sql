@@ -103,6 +103,7 @@ create table if not exists mamas (
     nom text not null,
     logo text,
     contact text,
+    actif boolean default true,
     created_at timestamptz default now()
 );
 
@@ -220,6 +221,7 @@ create table if not exists familles (
     id uuid primary key default uuid_generate_v4(),
     nom text not null,
     mama_id uuid not null references mamas(id),
+    actif boolean default true,
     created_at timestamptz default now(),
     unique(mama_id, nom)
 );
@@ -1426,6 +1428,7 @@ create table if not exists taches (
     frequence text check (frequence in ('quotidien','hebdomadaire','mensuel')),
     priorite text not null default 'moyenne' check (priorite in ('basse','moyenne','haute')),
     statut text not null default 'a_faire' check (statut in ('a_faire','en_cours','terminee')),
+    actif boolean default true,
     created_by uuid references utilisateurs(id),
     created_at timestamptz default now(),
     updated_at timestamptz default now()
@@ -2409,6 +2412,13 @@ BEGIN
 
   IF NOT EXISTS (
     SELECT 1 FROM information_schema.columns
+    WHERE table_name='familles' AND column_name='actif'
+  ) THEN
+    ALTER TABLE familles ADD COLUMN IF NOT EXISTS actif boolean default true;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
     WHERE table_name='fiches' AND column_name='actif'
   ) THEN
     ALTER TABLE fiches ADD COLUMN IF NOT EXISTS actif boolean default true;
@@ -2440,6 +2450,13 @@ BEGIN
     WHERE table_name='menus' AND column_name='actif'
   ) THEN
     ALTER TABLE menus ADD COLUMN IF NOT EXISTS actif boolean default true;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='mamas' AND column_name='actif'
+  ) THEN
+    ALTER TABLE mamas ADD COLUMN IF NOT EXISTS actif boolean default true;
   END IF;
 
   IF NOT EXISTS (
@@ -2486,6 +2503,16 @@ BEGIN
       EXECUTE 'UPDATE alert_rules SET actif = COALESCE(actif, enabled)';
       ALTER TABLE alert_rules DROP COLUMN enabled;
     END IF;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_name='taches'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='taches' AND column_name='actif'
+  ) THEN
+    ALTER TABLE taches ADD COLUMN IF NOT EXISTS actif boolean default true;
   END IF;
 
   IF EXISTS (

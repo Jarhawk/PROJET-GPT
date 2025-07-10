@@ -463,6 +463,10 @@ supabase db reset --file db/full_setup.sql
 ```
 This recreates RLS policies and grants on `utilisateurs` so authenticated requests succeed.
 
+The file [`db/full_setup.sql`](./db/full_setup.sql) now adds the `actif` column
+on every table using simple `ALTER TABLE` statements. Reapply it if you still
+see `column "actif" does not exist` errors.
+
 After resetting the schema, verify the frontend still builds and tests pass:
 
 ```bash

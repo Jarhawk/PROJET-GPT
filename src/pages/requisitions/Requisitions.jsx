@@ -35,9 +35,9 @@ export default function Requisitions() {
       .from("requisitions")
       .select("*")
       .eq("mama_id", mama_id)
-      .gte("date", periode.debut)
-      .lte("date", periode.fin)
-      .order("date", { ascending: false })
+      .gte("date_requisition", periode.debut)
+      .lte("date_requisition", periode.fin)
+      .order("date_requisition", { ascending: false })
       .then(({ data }) => setRequisitions(data || []));
   }, [mama_id, authLoading, periode]);
 
@@ -68,7 +68,7 @@ export default function Requisitions() {
         commentaire: createReq.commentaire,
         mama_id,
         auteur_id: user_id,
-        date: new Date().toISOString().slice(0, 10),
+        date_requisition: new Date().toISOString().slice(0, 10),
         type: createReq.type || "",
       },
     ]);
@@ -88,7 +88,7 @@ export default function Requisitions() {
     const ws = XLSX.utils.json_to_sheet(
       filtered.map(r => ({
         Produit: produits.find(p => p.id === r.produit_id)?.nom || "-",
-        Date: r.date,
+        Date: r.date_requisition,
         Quantité: r.quantite,
         Zone: zones.find(z => z.id === r.zone_id)?.nom || "-",
         Commentaire: r.commentaire,
@@ -109,7 +109,7 @@ export default function Requisitions() {
       head: [["Produit", "Date", "Quantité", "Zone", "Commentaire"]],
       body: filtered.map(r => [
         produits.find(p => p.id === r.produit_id)?.nom || "-",
-        r.date,
+        r.date_requisition,
         r.quantite,
         zones.find(z => z.id === r.zone_id)?.nom || "-",
         r.commentaire,
@@ -173,7 +173,7 @@ export default function Requisitions() {
           <tbody>
             {filtered.map(r => (
               <tr key={r.id}>
-                <td className="px-2 py-1">{r.date}</td>
+                <td className="px-2 py-1">{r.date_requisition}</td>
                 <td className="px-2 py-1">
                   {produits.find(p => p.id === r.produit_id)?.nom || "-"}
                 </td>

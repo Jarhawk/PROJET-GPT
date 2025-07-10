@@ -30,7 +30,7 @@ function RequisitionDetailPage() {
           <strong>Type :</strong> {requisition.type}
         </div>
         <div>
-          <strong>Date :</strong> {requisition.date}
+          <strong>Date :</strong> {requisition.date_requisition}
         </div>
         <div>
           <strong>Zone :</strong> {requisition.zone_id}

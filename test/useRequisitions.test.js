@@ -42,8 +42,8 @@ test('getRequisitions applies filters', async () => {
   expect(query.eq).toHaveBeenCalledWith('produit_id', 'p1');
   expect(query.eq).toHaveBeenCalledWith('zone_id', 'z1');
   expect(query.eq).toHaveBeenCalledWith('type', 'service');
-  expect(query.gte).toHaveBeenCalledWith('date', '2025-01-01');
-  expect(query.lte).toHaveBeenCalledWith('date', '2025-01-31');
+  expect(query.gte).toHaveBeenCalledWith('date_requisition', '2025-01-01');
+  expect(query.lte).toHaveBeenCalledWith('date_requisition', '2025-01-31');
 });
 
 test('createRequisition injects ids', async () => {

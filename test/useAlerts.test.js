@@ -34,7 +34,7 @@ test('fetchRules queries alert_rules with filters', async () => {
   expect(fromMock).toHaveBeenCalledWith('alert_rules');
   expect(queryObj.select).toHaveBeenCalledWith('*, produit:produits(id, nom)');
   expect(queryObj.eq).toHaveBeenCalledWith('mama_id', 'm1');
-  expect(queryObj.eq).toHaveBeenCalledWith('enabled', true);
+  expect(queryObj.eq).toHaveBeenCalledWith('actif', true);
   expect(queryObj.ilike).toHaveBeenCalledWith('produit.nom', '%foo%');
   expect(queryObj.order).toHaveBeenCalledWith('created_at', { ascending: false });
 });

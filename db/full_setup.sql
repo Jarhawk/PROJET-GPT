@@ -1691,7 +1691,7 @@ create table if not exists alert_rules (
     produit_id uuid references produits(id) on delete cascade,
     threshold numeric not null,
     message text,
-    enabled boolean default true,
+    actif boolean default true,
     created_at timestamptz default now()
 );
 DROP INDEX IF EXISTS idx_alert_rules_mama;
@@ -1729,7 +1729,7 @@ declare
 begin
   for r in
     select * from alert_rules
-    where enabled and mama_id = new.mama_id
+    where actif and mama_id = new.mama_id
       and (produit_id is null or produit_id = new.id)
   loop
     if new.stock_reel < r.threshold then
@@ -2467,6 +2467,25 @@ BEGIN
     WHERE table_name='promotions' AND column_name='actif'
   ) THEN
     ALTER TABLE promotions ADD COLUMN IF NOT EXISTS actif boolean default true;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_name='alert_rules'
+  ) THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name='alert_rules' AND column_name='actif'
+    ) THEN
+      ALTER TABLE alert_rules ADD COLUMN IF NOT EXISTS actif boolean default true;
+    END IF;
+    IF EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name='alert_rules' AND column_name='enabled'
+    ) THEN
+      EXECUTE 'UPDATE alert_rules SET actif = COALESCE(actif, enabled)';
+      ALTER TABLE alert_rules DROP COLUMN enabled;
+    END IF;
   END IF;
 
   IF EXISTS (

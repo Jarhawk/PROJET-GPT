@@ -19,7 +19,7 @@ export function useAlerts() {
       .eq("mama_id", mama_id)
       .order("created_at", { ascending: false });
 
-    if (typeof actif === "boolean") query = query.eq("enabled", actif);
+    if (typeof actif === "boolean") query = query.eq("actif", actif);
     if (search) query = query.ilike("produit.nom", `%${search}%`);
 
     const { data, error } = await query;

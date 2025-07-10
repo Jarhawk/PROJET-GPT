@@ -109,7 +109,8 @@ create table if not exists mamas (
 create table if not exists roles (
     id uuid primary key default uuid_generate_v4(),
     nom text not null unique,
-    description text
+    description text,
+    actif boolean default true
 );
 
 create table if not exists users (
@@ -2439,6 +2440,13 @@ BEGIN
     WHERE table_name='menus' AND column_name='actif'
   ) THEN
     ALTER TABLE menus ADD COLUMN IF NOT EXISTS actif boolean default true;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='roles' AND column_name='actif'
+  ) THEN
+    ALTER TABLE roles ADD COLUMN IF NOT EXISTS actif boolean default true;
   END IF;
 
   IF EXISTS (

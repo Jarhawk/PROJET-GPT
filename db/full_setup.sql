@@ -2370,11 +2370,8 @@ BEGIN
   IF EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_name='requisitions' AND column_name='date'
-  ) AND NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='requisitions' AND column_name='date_requisition'
   ) THEN
-    PERFORM rename_column_public('requisitions','date','date_requisition');
+    ALTER TABLE requisitions RENAME COLUMN date TO date_requisition;
   END IF;
 END $$;
 

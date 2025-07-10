@@ -12,12 +12,12 @@ export function useRequisitions() {
       .from("requisitions")
       .select("*", { count: "exact" })
       .eq("mama_id", mama_id)
-      .order("date", { ascending: false });
+      .order("date_requisition", { ascending: false });
     if (produit) query = query.eq("produit_id", produit);
     if (zone) query = query.eq("zone_id", zone);
     if (type) query = query.eq("type", type);
-    if (debut) query = query.gte("date", debut);
-    if (fin) query = query.lte("date", fin);
+    if (debut) query = query.gte("date_requisition", debut);
+    if (fin) query = query.lte("date_requisition", fin);
     const { data, error } = await query;
     if (error) {
       console.error("❌ Erreur getRequisitions:", error.message);
@@ -41,11 +41,11 @@ export function useRequisitions() {
     return data || null;
   }
 
-  async function createRequisition({ produit_id, zone_id, quantite, date = new Date().toISOString().slice(0, 10), type = "", commentaire = "" }) {
+  async function createRequisition({ produit_id, zone_id, quantite, date_requisition = new Date().toISOString().slice(0, 10), type = "", commentaire = "" }) {
     if (!mama_id) return { error: "mama_id manquant" };
     const { data, error } = await supabase
       .from("requisitions")
-      .insert([{ produit_id, zone_id, quantite, date, type, commentaire, mama_id, auteur_id: user_id }])
+      .insert([{ produit_id, zone_id, quantite, date_requisition, type, commentaire, mama_id, auteur_id: user_id }])
       .select()
       .single();
     if (error) {

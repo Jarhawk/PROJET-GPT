@@ -2379,152 +2379,28 @@ BEGIN
   END IF;
 END $$;
 
--- S'assure de la présence des colonnes "actif" sur les tables clés
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='users' AND column_name='actif'
-  ) THEN
-    ALTER TABLE users ADD COLUMN IF NOT EXISTS actif boolean default true;
-  END IF;
+ALTER TABLE IF EXISTS users ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
+ALTER TABLE IF EXISTS utilisateurs ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
+ALTER TABLE IF EXISTS fournisseurs ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
+ALTER TABLE IF EXISTS produits ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
+ALTER TABLE IF EXISTS familles ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
+ALTER TABLE IF EXISTS fiches ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
+ALTER TABLE IF EXISTS fiches_techniques ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
+ALTER TABLE IF EXISTS zones_stock ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
+ALTER TABLE IF EXISTS permissions ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
+ALTER TABLE IF EXISTS menus ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
+ALTER TABLE IF EXISTS mamas ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
+ALTER TABLE IF EXISTS roles ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
+ALTER TABLE IF EXISTS centres_de_cout ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
+ALTER TABLE IF EXISTS promotions ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
+ALTER TABLE IF EXISTS alert_rules ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
+ALTER TABLE IF EXISTS taches ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
+ALTER TABLE IF EXISTS fournisseurs_api_config ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
 
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='utilisateurs' AND column_name='actif'
-  ) THEN
-    ALTER TABLE utilisateurs ADD COLUMN IF NOT EXISTS actif boolean default true;
-  END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='fournisseurs' AND column_name='actif'
-  ) THEN
-    ALTER TABLE fournisseurs ADD COLUMN IF NOT EXISTS actif boolean default true;
-  END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='produits' AND column_name='actif'
-  ) THEN
-    ALTER TABLE produits ADD COLUMN IF NOT EXISTS actif boolean default true;
-  END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='familles' AND column_name='actif'
-  ) THEN
-    ALTER TABLE familles ADD COLUMN IF NOT EXISTS actif boolean default true;
-  END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='fiches' AND column_name='actif'
-  ) THEN
-    ALTER TABLE fiches ADD COLUMN IF NOT EXISTS actif boolean default true;
-  END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='fiches_techniques' AND column_name='actif'
-  ) THEN
-    ALTER TABLE fiches_techniques ADD COLUMN IF NOT EXISTS actif boolean default true;
-  END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='zones_stock' AND column_name='actif'
-  ) THEN
-    ALTER TABLE zones_stock ADD COLUMN IF NOT EXISTS actif boolean default true;
-  END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='permissions' AND column_name='actif'
-  ) THEN
-    ALTER TABLE permissions ADD COLUMN IF NOT EXISTS actif boolean default true;
-  END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='menus' AND column_name='actif'
-  ) THEN
-    ALTER TABLE menus ADD COLUMN IF NOT EXISTS actif boolean default true;
-  END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='mamas' AND column_name='actif'
-  ) THEN
-    ALTER TABLE mamas ADD COLUMN IF NOT EXISTS actif boolean default true;
-  END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='roles' AND column_name='actif'
-  ) THEN
-    ALTER TABLE roles ADD COLUMN IF NOT EXISTS actif boolean default true;
-  END IF;
-
-  IF EXISTS (
-    SELECT 1 FROM information_schema.tables
-    WHERE table_name='centres_de_cout'
-  ) AND NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='centres_de_cout' AND column_name='actif'
-  ) THEN
-    ALTER TABLE centres_de_cout ADD COLUMN IF NOT EXISTS actif boolean default true;
-  END IF;
-
-  IF EXISTS (
-    SELECT 1 FROM information_schema.tables
-    WHERE table_name='promotions'
-  ) AND NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='promotions' AND column_name='actif'
-  ) THEN
-    ALTER TABLE promotions ADD COLUMN IF NOT EXISTS actif boolean default true;
-  END IF;
-
-  IF EXISTS (
-    SELECT 1 FROM information_schema.tables
-    WHERE table_name='alert_rules'
-  ) THEN
-    IF NOT EXISTS (
-      SELECT 1 FROM information_schema.columns
-      WHERE table_name='alert_rules' AND column_name='actif'
-    ) THEN
-      ALTER TABLE alert_rules ADD COLUMN IF NOT EXISTS actif boolean default true;
-    END IF;
-    IF EXISTS (
-      SELECT 1 FROM information_schema.columns
-      WHERE table_name='alert_rules' AND column_name='enabled'
-    ) THEN
-      EXECUTE 'UPDATE alert_rules SET actif = COALESCE(actif, enabled)';
-      ALTER TABLE alert_rules DROP COLUMN enabled;
-    END IF;
-  END IF;
-
-  IF EXISTS (
-    SELECT 1 FROM information_schema.tables
-    WHERE table_name='taches'
-  ) AND NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='taches' AND column_name='actif'
-  ) THEN
-    ALTER TABLE taches ADD COLUMN IF NOT EXISTS actif boolean default true;
-  END IF;
-
-  IF EXISTS (
-    SELECT 1 FROM information_schema.tables
-    WHERE table_name='fournisseurs_api_config'
-  ) AND NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='fournisseurs_api_config' AND column_name='actif'
-  ) THEN
-    ALTER TABLE fournisseurs_api_config ADD COLUMN IF NOT EXISTS actif boolean default true;
-  END IF;
-END $$;
+-- Migrate old alert_rules.enabled column when present
+ALTER TABLE IF EXISTS alert_rules ADD COLUMN IF NOT EXISTS enabled boolean;
+UPDATE alert_rules SET actif = COALESCE(actif, enabled);
+ALTER TABLE IF EXISTS alert_rules DROP COLUMN IF EXISTS enabled;
 DROP INDEX IF EXISTS idx_fournisseurs_api_config_fourn;
 CREATE INDEX idx_fournisseurs_api_config_fourn ON fournisseurs_api_config(fournisseur_id);
 DROP INDEX IF EXISTS idx_fournisseurs_api_config_mama;

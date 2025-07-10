@@ -27,7 +27,8 @@ export default function ParamAccess() {
   // Modification rapide
   const handleChange = async (role_id, module) => {
     const current = permissions.find(p => p.role_id === role_id && p.module === module);
-    await updatePermission(role_id, module, !current?.enabled);
+    if (!current) return;
+    await updatePermission(current.id, { actif: !current.actif });
     await fetchPermissions();
     toast.success("Droits modifiés !");
   };
@@ -54,7 +55,7 @@ export default function ParamAccess() {
                   <td key={m}>
                     <input
                       type="checkbox"
-                      checked={!!current?.enabled}
+                      checked={!!current?.actif}
                       onChange={() => handleChange(r.id, m)}
                     />
                   </td>

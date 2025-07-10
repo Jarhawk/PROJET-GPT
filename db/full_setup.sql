@@ -534,12 +534,6 @@ DROP INDEX IF EXISTS idx_mouvements_stock_zone_source;
 CREATE INDEX idx_mouvements_stock_zone_source ON mouvements_stock(zone_source_id);
 DROP INDEX IF EXISTS idx_mouvements_stock_zone_destination;
 CREATE INDEX idx_mouvements_stock_zone_destination ON mouvements_stock(zone_destination_id);
-DROP INDEX IF EXISTS idx_mouvements_stock_sous_type;
-CREATE INDEX idx_mouvements_stock_sous_type ON mouvements_stock(sous_type);
-DROP INDEX IF EXISTS idx_mouvements_stock_zone;
-CREATE INDEX idx_mouvements_stock_zone ON mouvements_stock(zone);
-DROP INDEX IF EXISTS idx_mouvements_stock_motif;
-CREATE INDEX idx_mouvements_stock_motif ON mouvements_stock(motif);
 DROP INDEX IF EXISTS idx_inventaire_zones_mama;
 CREATE INDEX idx_inventaire_zones_mama ON inventaire_zones(mama_id);
 DROP INDEX IF EXISTS idx_ventes_boissons_mama;
@@ -1397,14 +1391,6 @@ after update on fiches_techniques
 for each row execute function log_fiche_prix_change();
 
 -- Index pour accélérer les requêtes de mouvements
-DROP INDEX IF EXISTS idx_mouvements_stock_mama;
-CREATE INDEX idx_mouvements_stock_mama ON mouvements_stock(mama_id);
-DROP INDEX IF EXISTS idx_mouvements_stock_produit;
-CREATE INDEX idx_mouvements_stock_produit ON mouvements_stock(produit_id);
-DROP INDEX IF EXISTS idx_mouvements_stock_date;
-CREATE INDEX idx_mouvements_stock_date ON mouvements_stock("date");
-DROP INDEX IF EXISTS idx_mouvements_stock_type;
-CREATE INDEX idx_mouvements_stock_type ON mouvements_stock(type);
 
 
 -- Fonction de statistiques pour le tableau de bord
@@ -1500,8 +1486,6 @@ grant execute on function top_produits(uuid, date, date, integer) to authenticat
 grant execute on function mouvements_without_alloc(integer) to authenticated;
 
 -- Index pour accélérer la recherche de factures
-DROP INDEX IF EXISTS idx_factures_reference;
-CREATE INDEX idx_factures_reference ON factures(reference);
 
 
 -- Table des ventes pour l'ingénierie de menu
@@ -2674,6 +2658,10 @@ DROP INDEX IF EXISTS idx_ft_prix;
 CREATE INDEX idx_ft_prix ON fiches_techniques(prix_vente);
 DROP INDEX IF EXISTS idx_ft_nom;
 CREATE INDEX idx_ft_nom ON fiches_techniques(nom);
+DROP INDEX IF EXISTS idx_ft_mama;
+CREATE INDEX idx_ft_mama ON fiches_techniques(mama_id);
+DROP INDEX IF EXISTS idx_ft_actif;
+CREATE INDEX idx_ft_actif ON fiches_techniques(actif);
 
 alter table fiches_techniques enable row level security;
 alter table fiches_techniques force row level security;
@@ -2730,6 +2718,13 @@ values (
   'a49aeafd-6f60-4f68-a267-d7d27c1a1381',
   'admin@mamastock.com',
   crypt('vegeta', gen_salt('bf')),
+  (select id from roles where nom = 'admin'),
+  '[]',
+  true,
+  '29c992df-f6b0-47c5-9afa-c965b789aa07'
+) on conflict (id) do nothing;
+
+-- Index pour accélérer la gestion du stock
 DROP INDEX IF EXISTS idx_mouvements_stock_mama;
 CREATE INDEX idx_mouvements_stock_mama ON mouvements_stock(mama_id);
 DROP INDEX IF EXISTS idx_mouvements_stock_produit;
@@ -2761,30 +2756,6 @@ DROP INDEX IF EXISTS idx_produits_unite_txt;
 CREATE INDEX idx_produits_unite_txt ON produits(unite);
 DROP INDEX IF EXISTS idx_produits_code;
 CREATE INDEX idx_produits_code ON produits(code);
-
--- Fonction de statistiques pour le tableau de bord
-create or replace function dashboard_stats(
-  mama_id_param uuid,
-  page_param integer default 1,
-  page_size_param integer default 30
-)
-returns table(produit_id uuid, nom text, stock_reel numeric, pmp numeric, last_purchase timestamptz)
-language sql stable security definer as $$
-  select p.id, p.nom, p.stock_reel, p.pmp, max(f."date") as last_purchase
-  from produits p
-  left join facture_lignes fl on fl.produit_id = p.id
-  left join factures f on f.id = fl.facture_id
-  where p.mama_id = mama_id_param
-  group by p.id, p.nom, p.stock_reel, p.pmp
-  order by p.nom
-  limit page_size_param offset greatest((page_param - 1) * page_size_param, 0);
-$$;
-
-
--- Autoriser l'exécution des fonctions utilitaires
-grant execute on function dashboard_stats(uuid, integer, integer) to authenticated;
-grant execute on function top_produits(uuid, date, date, integer) to authenticated;
-grant execute on function mouvements_without_alloc(integer) to authenticated;
 
 -- Index pour accélérer la recherche de factures
 DROP INDEX IF EXISTS idx_factures_reference;
@@ -2819,20 +2790,15 @@ DROP INDEX IF EXISTS idx_mouvements_stock_zone;
 CREATE INDEX idx_mouvements_stock_zone ON mouvements_stock(zone);
 DROP INDEX IF EXISTS idx_mouvements_stock_motif;
 CREATE INDEX idx_mouvements_stock_motif ON mouvements_stock(motif);
-  (select id from roles where nom = 'admin'),
-  '[]',
-  true,
-  '29c992df-f6b0-47c5-9afa-c965b789aa07'
-) on conflict (id) do nothing;
-
 -- Création également du profil correspondant dans utilisateurs pour l'auth Supabase
-insert into utilisateurs(auth_id, email, mama_id, role, access_rights)
+insert into utilisateurs(auth_id, email, mama_id, role, access_rights, actif)
 values (
   'a49aeafd-6f60-4f68-a267-d7d27c1a1381',
   'admin@mamastock.com',
   '29c992df-f6b0-47c5-9afa-c965b789aa07',
   'admin',
-  '{}'::jsonb
+  '{}'::jsonb,
+  true
 ) on conflict (auth_id) do nothing;
 
 -- ----------------------------------------------------

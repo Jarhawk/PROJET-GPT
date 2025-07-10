@@ -145,24 +145,10 @@ BEGIN
   END IF;
 END $$;
 
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_utilisateurs_auth_id' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_utilisateurs_auth_id ON utilisateurs(auth_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_utilisateurs_mama_id' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_utilisateurs_mama_id ON utilisateurs(mama_id);
-  END IF;
-END $$;
+DROP INDEX IF EXISTS idx_utilisateurs_auth_id;
+CREATE INDEX idx_utilisateurs_auth_id ON utilisateurs(auth_id);
+DROP INDEX IF EXISTS idx_utilisateurs_mama_id;
+CREATE INDEX idx_utilisateurs_mama_id ON utilisateurs(mama_id);
 
 -- Helper functions used in RLS policies
 create or replace function current_user_mama_id()
@@ -533,124 +519,33 @@ create table if not exists parametres (
     created_at timestamptz default now()
 );
 
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_requisitions_date' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_requisitions_date ON requisitions("date");
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_transferts_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_transferts_mama ON transferts(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_transferts_produit' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_transferts_produit ON transferts(produit_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_zones_stock_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_zones_stock_mama ON zones_stock(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_zones_stock_actif' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_zones_stock_actif ON zones_stock(actif);
-  END IF;
-END $$;
+DROP INDEX IF EXISTS idx_requisitions_date;
+CREATE INDEX idx_requisitions_date ON requisitions("date");
+DROP INDEX IF EXISTS idx_transferts_mama;
+CREATE INDEX idx_transferts_mama ON transferts(mama_id);
+DROP INDEX IF EXISTS idx_transferts_produit;
+CREATE INDEX idx_transferts_produit ON transferts(produit_id);
+DROP INDEX IF EXISTS idx_zones_stock_mama;
+CREATE INDEX idx_zones_stock_mama ON zones_stock(mama_id);
+DROP INDEX IF EXISTS idx_zones_stock_actif;
+CREATE INDEX idx_zones_stock_actif ON zones_stock(actif);
 -- Index pour accélérer la recherche par zone dans les mouvements de stock
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_mouvements_stock_zone_source' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_mouvements_stock_zone_source ON mouvements_stock(zone_source_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_mouvements_stock_zone_destination' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_mouvements_stock_zone_destination ON mouvements_stock(zone_destination_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_mouvements_stock_sous_type' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_mouvements_stock_sous_type ON mouvements_stock(sous_type);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_mouvements_stock_zone' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_mouvements_stock_zone ON mouvements_stock(zone);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_mouvements_stock_motif' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_mouvements_stock_motif ON mouvements_stock(motif);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_inventaire_zones_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_inventaire_zones_mama ON inventaire_zones(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_ventes_boissons_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_ventes_boissons_mama ON ventes_boissons(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_ventes_boissons_boisson' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_ventes_boissons_boisson ON ventes_boissons(boisson_id);
-  END IF;
-END $$;
+DROP INDEX IF EXISTS idx_mouvements_stock_zone_source;
+CREATE INDEX idx_mouvements_stock_zone_source ON mouvements_stock(zone_source_id);
+DROP INDEX IF EXISTS idx_mouvements_stock_zone_destination;
+CREATE INDEX idx_mouvements_stock_zone_destination ON mouvements_stock(zone_destination_id);
+DROP INDEX IF EXISTS idx_mouvements_stock_sous_type;
+CREATE INDEX idx_mouvements_stock_sous_type ON mouvements_stock(sous_type);
+DROP INDEX IF EXISTS idx_mouvements_stock_zone;
+CREATE INDEX idx_mouvements_stock_zone ON mouvements_stock(zone);
+DROP INDEX IF EXISTS idx_mouvements_stock_motif;
+CREATE INDEX idx_mouvements_stock_motif ON mouvements_stock(motif);
+DROP INDEX IF EXISTS idx_inventaire_zones_mama;
+CREATE INDEX idx_inventaire_zones_mama ON inventaire_zones(mama_id);
+DROP INDEX IF EXISTS idx_ventes_boissons_mama;
+CREATE INDEX idx_ventes_boissons_mama ON ventes_boissons(mama_id);
+DROP INDEX IF EXISTS idx_ventes_boissons_boisson;
+CREATE INDEX idx_ventes_boissons_boisson ON ventes_boissons(boisson_id);
 create or replace view stock_mouvements as select * from mouvements_stock;
 grant select on stock_mouvements to authenticated;
 create or replace view stocks as select * from mouvements_stock;
@@ -1058,51 +953,16 @@ create table if not exists mouvements_centres_cout (
 );
 
 -- Index pour des requêtes plus rapides
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_centres_de_cout_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_centres_de_cout_mama ON centres_de_cout(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_centres_de_cout_nom' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_centres_de_cout_nom ON centres_de_cout(nom);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_mouvements_cc_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_mouvements_cc_mama ON mouvements_centres_cout(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_mouvements_cc_mouvement' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_mouvements_cc_mouvement ON mouvements_centres_cout(mouvement_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_mouvements_cc_centre' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_mouvements_cc_centre ON mouvements_centres_cout(centre_cout_id);
-  END IF;
-END $$;
+DROP INDEX IF EXISTS idx_centres_de_cout_mama;
+CREATE INDEX idx_centres_de_cout_mama ON centres_de_cout(mama_id);
+DROP INDEX IF EXISTS idx_centres_de_cout_nom;
+CREATE INDEX idx_centres_de_cout_nom ON centres_de_cout(nom);
+DROP INDEX IF EXISTS idx_mouvements_cc_mama;
+CREATE INDEX idx_mouvements_cc_mama ON mouvements_centres_cout(mama_id);
+DROP INDEX IF EXISTS idx_mouvements_cc_mouvement;
+CREATE INDEX idx_mouvements_cc_mouvement ON mouvements_centres_cout(mouvement_id);
+DROP INDEX IF EXISTS idx_mouvements_cc_centre;
+CREATE INDEX idx_mouvements_cc_centre ON mouvements_centres_cout(centre_cout_id);
 
 -- Politiques de sécurité au niveau des lignes
 alter table centres_de_cout enable row level security;
@@ -1144,42 +1004,14 @@ create table if not exists journaux_utilisateur (
     created_at timestamptz default now()
 );
 
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_journaux_utilisateur_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_journaux_utilisateur_mama ON journaux_utilisateur(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_journaux_utilisateur_user' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_journaux_utilisateur_user ON journaux_utilisateur(user_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_journaux_utilisateur_done' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_journaux_utilisateur_done ON journaux_utilisateur(done_by);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_journaux_utilisateur_date' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_journaux_utilisateur_date ON journaux_utilisateur(created_at);
-  END IF;
-END $$;
+DROP INDEX IF EXISTS idx_journaux_utilisateur_mama;
+CREATE INDEX idx_journaux_utilisateur_mama ON journaux_utilisateur(mama_id);
+DROP INDEX IF EXISTS idx_journaux_utilisateur_user;
+CREATE INDEX idx_journaux_utilisateur_user ON journaux_utilisateur(user_id);
+DROP INDEX IF EXISTS idx_journaux_utilisateur_done;
+CREATE INDEX idx_journaux_utilisateur_done ON journaux_utilisateur(done_by);
+DROP INDEX IF EXISTS idx_journaux_utilisateur_date;
+CREATE INDEX idx_journaux_utilisateur_date ON journaux_utilisateur(created_at);
 
 alter table journaux_utilisateur enable row level security;
 alter table journaux_utilisateur force row level security;
@@ -1325,24 +1157,10 @@ create table if not exists pertes (
     created_at timestamptz default now(),
     created_by uuid references users(id)
 );
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_pertes_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_pertes_mama ON pertes(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_pertes_produit' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_pertes_produit ON pertes(produit_id);
-  END IF;
-END $$;
+DROP INDEX IF EXISTS idx_pertes_mama;
+CREATE INDEX idx_pertes_mama ON pertes(mama_id);
+DROP INDEX IF EXISTS idx_pertes_produit;
+CREATE INDEX idx_pertes_produit ON pertes(produit_id);
 
 -- RLS pour la table pertes
 alter table pertes enable row level security;
@@ -1536,15 +1354,8 @@ language sql stable security definer as $$
 $$;
 
 -- Index pour la connexion utilisateur par email
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_users_email' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_users_email ON users(email);
-  END IF;
-END $$;
+DROP INDEX IF EXISTS idx_users_email;
+CREATE INDEX idx_users_email ON users(email);
 
 
 -- Table d'audit des changements de prix
@@ -1558,15 +1369,8 @@ create table if not exists fiche_prix_history (
     created_at timestamptz default now(),
     changed_at timestamptz default now()
 );
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_fiche_prix_history_fiche' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_fiche_prix_history_fiche ON fiche_prix_history(fiche_id);
-  END IF;
-END $$;
+DROP INDEX IF EXISTS idx_fiche_prix_history_fiche;
+CREATE INDEX idx_fiche_prix_history_fiche ON fiche_prix_history(fiche_id);
 
 alter table fiche_prix_history enable row level security;
 alter table fiche_prix_history force row level security;
@@ -1593,42 +1397,14 @@ after update on fiches_techniques
 for each row execute function log_fiche_prix_change();
 
 -- Index pour accélérer les requêtes de mouvements
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_mouvements_stock_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_mouvements_stock_mama ON mouvements_stock(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_mouvements_stock_produit' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_mouvements_stock_produit ON mouvements_stock(produit_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_mouvements_stock_date' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_mouvements_stock_date ON mouvements_stock("date");
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_mouvements_stock_type' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_mouvements_stock_type ON mouvements_stock(type);
-  END IF;
-END $$;
+DROP INDEX IF EXISTS idx_mouvements_stock_mama;
+CREATE INDEX idx_mouvements_stock_mama ON mouvements_stock(mama_id);
+DROP INDEX IF EXISTS idx_mouvements_stock_produit;
+CREATE INDEX idx_mouvements_stock_produit ON mouvements_stock(produit_id);
+DROP INDEX IF EXISTS idx_mouvements_stock_date;
+CREATE INDEX idx_mouvements_stock_date ON mouvements_stock("date");
+DROP INDEX IF EXISTS idx_mouvements_stock_type;
+CREATE INDEX idx_mouvements_stock_type ON mouvements_stock(type);
 
 
 -- Fonction de statistiques pour le tableau de bord
@@ -1667,42 +1443,14 @@ create table if not exists taches (
     created_at timestamptz default now(),
     updated_at timestamptz default now()
 );
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_taches_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_taches_mama ON taches(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_taches_echeance' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_taches_echeance ON taches(date_echeance);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_taches_statut' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_taches_statut ON taches(statut);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_taches_priorite' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_taches_priorite ON taches(priorite);
-  END IF;
-END $$;
+DROP INDEX IF EXISTS idx_taches_mama;
+CREATE INDEX idx_taches_mama ON taches(mama_id);
+DROP INDEX IF EXISTS idx_taches_echeance;
+CREATE INDEX idx_taches_echeance ON taches(date_echeance);
+DROP INDEX IF EXISTS idx_taches_statut;
+CREATE INDEX idx_taches_statut ON taches(statut);
+DROP INDEX IF EXISTS idx_taches_priorite;
+CREATE INDEX idx_taches_priorite ON taches(priorite);
 
 alter table taches enable row level security;
 alter table taches force row level security;
@@ -1729,42 +1477,14 @@ create table if not exists tache_instances (
     done_by uuid references users(id),
     created_at timestamptz default now()
 );
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_tache_instances_tache' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_tache_instances_tache ON tache_instances(tache_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_tache_instances_date' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_tache_instances_date ON tache_instances(date_echeance);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_tache_instances_statut' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_tache_instances_statut ON tache_instances(statut);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_tache_instances_done' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_tache_instances_done ON tache_instances(done_by);
-  END IF;
-END $$;
+DROP INDEX IF EXISTS idx_tache_instances_tache;
+CREATE INDEX idx_tache_instances_tache ON tache_instances(tache_id);
+DROP INDEX IF EXISTS idx_tache_instances_date;
+CREATE INDEX idx_tache_instances_date ON tache_instances(date_echeance);
+DROP INDEX IF EXISTS idx_tache_instances_statut;
+CREATE INDEX idx_tache_instances_statut ON tache_instances(statut);
+DROP INDEX IF EXISTS idx_tache_instances_done;
+CREATE INDEX idx_tache_instances_done ON tache_instances(done_by);
 
 alter table tache_instances enable row level security;
 alter table tache_instances force row level security;
@@ -1780,15 +1500,8 @@ grant execute on function top_produits(uuid, date, date, integer) to authenticat
 grant execute on function mouvements_without_alloc(integer) to authenticated;
 
 -- Index pour accélérer la recherche de factures
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_factures_reference' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_factures_reference ON factures(reference);
-  END IF;
-END $$;
+DROP INDEX IF EXISTS idx_factures_reference;
+CREATE INDEX idx_factures_reference ON factures(reference);
 
 
 -- Table des ventes pour l'ingénierie de menu
@@ -1802,24 +1515,10 @@ create table if not exists ventes_fiches_carte (
   updated_at timestamptz default now(),
   unique (fiche_id, periode, mama_id)
 );
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_vfc_fiche_periode_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_vfc_fiche_periode_mama ON ventes_fiches_carte(fiche_id, periode, mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_vfc_periode' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_vfc_periode ON ventes_fiches_carte(periode);
-  END IF;
-END $$;
+DROP INDEX IF EXISTS idx_vfc_fiche_periode_mama;
+CREATE INDEX idx_vfc_fiche_periode_mama ON ventes_fiches_carte(fiche_id, periode, mama_id);
+DROP INDEX IF EXISTS idx_vfc_periode;
+CREATE INDEX idx_vfc_periode ON ventes_fiches_carte(periode);
 
 alter table ventes_fiches_carte enable row level security;
 alter table ventes_fiches_carte force row level security;
@@ -1855,51 +1554,16 @@ create table if not exists promotion_produits (
     unique (promotion_id, produit_id)
 );
 
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_promotions_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_promotions_mama ON promotions(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_promotions_actif' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_promotions_actif ON promotions(actif);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_promo_prod_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_promo_prod_mama ON promotion_produits(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_promo_prod_promotion' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_promo_prod_promotion ON promotion_produits(promotion_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_promo_prod_produit' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_promo_prod_produit ON promotion_produits(produit_id);
-  END IF;
-END $$;
+DROP INDEX IF EXISTS idx_promotions_mama;
+CREATE INDEX idx_promotions_mama ON promotions(mama_id);
+DROP INDEX IF EXISTS idx_promotions_actif;
+CREATE INDEX idx_promotions_actif ON promotions(actif);
+DROP INDEX IF EXISTS idx_promo_prod_mama;
+CREATE INDEX idx_promo_prod_mama ON promotion_produits(mama_id);
+DROP INDEX IF EXISTS idx_promo_prod_promotion;
+CREATE INDEX idx_promo_prod_promotion ON promotion_produits(promotion_id);
+DROP INDEX IF EXISTS idx_promo_prod_produit;
+CREATE INDEX idx_promo_prod_produit ON promotion_produits(produit_id);
 
 alter table promotions enable row level security;
 alter table promotions force row level security;
@@ -1978,33 +1642,12 @@ create table if not exists audit_entries (
     created_at timestamptz default now(),
     changed_at timestamptz default now()
 );
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_audit_entries_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_audit_entries_mama ON audit_entries(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_audit_entries_table' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_audit_entries_table ON audit_entries(table_name);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_audit_entries_date' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_audit_entries_date ON audit_entries(changed_at);
-  END IF;
-END $$;
+DROP INDEX IF EXISTS idx_audit_entries_mama;
+CREATE INDEX idx_audit_entries_mama ON audit_entries(mama_id);
+DROP INDEX IF EXISTS idx_audit_entries_table;
+CREATE INDEX idx_audit_entries_table ON audit_entries(table_name);
+DROP INDEX IF EXISTS idx_audit_entries_date;
+CREATE INDEX idx_audit_entries_date ON audit_entries(changed_at);
 
 alter table audit_entries enable row level security;
 alter table audit_entries force row level security;
@@ -2042,15 +1685,8 @@ create table if not exists planning_previsionnel (
     created_by uuid references users(id) on delete set null,
     created_at timestamptz default now()
 );
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_planning_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_planning_mama ON planning_previsionnel(mama_id, date_prevue);
-  END IF;
-END $$;
+DROP INDEX IF EXISTS idx_planning_mama;
+CREATE INDEX idx_planning_mama ON planning_previsionnel(mama_id, date_prevue);
 alter table planning_previsionnel enable row level security;
 alter table planning_previsionnel force row level security;
 drop policy if exists planning_previsionnel_all on planning_previsionnel;
@@ -2073,15 +1709,8 @@ create table if not exists alert_rules (
     enabled boolean default true,
     created_at timestamptz default now()
 );
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_alert_rules_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_alert_rules_mama ON alert_rules(mama_id);
-  END IF;
-END $$;
+DROP INDEX IF EXISTS idx_alert_rules_mama;
+CREATE INDEX idx_alert_rules_mama ON alert_rules(mama_id);
 alter table alert_rules enable row level security;
 alter table alert_rules force row level security;
 drop policy if exists alert_rules_all on alert_rules;
@@ -2098,15 +1727,8 @@ create table if not exists alert_logs (
     stock_reel numeric,
     created_at timestamptz default now()
 );
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_alert_logs_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_alert_logs_mama ON alert_logs(mama_id);
-  END IF;
-END $$;
+DROP INDEX IF EXISTS idx_alert_logs_mama;
+CREATE INDEX idx_alert_logs_mama ON alert_logs(mama_id);
 alter table alert_logs enable row level security;
 alter table alert_logs force row level security;
 drop policy if exists alert_logs_all on alert_logs;
@@ -2151,15 +1773,8 @@ create table if not exists incoming_invoices (
     processed boolean default false,
     created_at timestamptz default now()
 );
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_incoming_invoices_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_incoming_invoices_mama ON incoming_invoices(mama_id);
-  END IF;
-END $$;
+DROP INDEX IF EXISTS idx_incoming_invoices_mama;
+CREATE INDEX idx_incoming_invoices_mama ON incoming_invoices(mama_id);
 
 alter table incoming_invoices enable row level security;
 alter table incoming_invoices force row level security;
@@ -2202,15 +1817,8 @@ create table if not exists documents (
     uploaded_by uuid references users(id) on delete set null,
     created_at timestamptz default now()
 );
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_documents_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_documents_mama ON documents(mama_id);
-  END IF;
-END $$;
+DROP INDEX IF EXISTS idx_documents_mama;
+CREATE INDEX idx_documents_mama ON documents(mama_id);
 
 alter table documents enable row level security;
 alter table documents force row level security;
@@ -2881,24 +2489,10 @@ BEGIN
     ALTER TABLE fournisseurs_api_config ADD COLUMN IF NOT EXISTS actif boolean default true;
   END IF;
 END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_fournisseurs_api_config_fourn' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_fournisseurs_api_config_fourn ON fournisseurs_api_config(fournisseur_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_fournisseurs_api_config_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_fournisseurs_api_config_mama ON fournisseurs_api_config(mama_id);
-  END IF;
-END $$;
+DROP INDEX IF EXISTS idx_fournisseurs_api_config_fourn;
+CREATE INDEX idx_fournisseurs_api_config_fourn ON fournisseurs_api_config(fournisseur_id);
+DROP INDEX IF EXISTS idx_fournisseurs_api_config_mama;
+CREATE INDEX idx_fournisseurs_api_config_mama ON fournisseurs_api_config(mama_id);
 alter table fournisseurs_api_config enable row level security;
 alter table fournisseurs_api_config force row level security;
 drop policy if exists fournisseurs_api_config_all on fournisseurs_api_config;
@@ -2908,497 +2502,114 @@ create policy fournisseurs_api_config_all on fournisseurs_api_config
 
 -- L'inscription manuelle renseigne désormais la table utilisateurs, aucun trigger sur auth.users n'est nécessaire
 -- Indexes
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_users_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_users_mama ON users(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_users_role' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_users_role ON users(role_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_users_actif' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_users_actif ON users(actif);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_fournisseurs_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_fournisseurs_mama ON fournisseurs(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_fournisseurs_nom' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_fournisseurs_nom ON fournisseurs(nom);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_fournisseurs_ville' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_fournisseurs_ville ON fournisseurs(ville);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_fournisseurs_actif' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_fournisseurs_actif ON fournisseurs(actif);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_produits_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_produits_mama ON produits(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_produits_nom' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_produits_nom ON produits(nom);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_produits_actif' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_produits_actif ON produits(actif);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_produits_famille' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_produits_famille ON produits(famille_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_produits_unite' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_produits_unite ON produits(unite_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_produits_fournisseur_principal' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_produits_fournisseur_principal ON produits(fournisseur_principal_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_factures_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_factures_mama ON factures(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_factures_date' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_factures_date ON factures("date");
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_factures_fournisseur' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_factures_fournisseur ON factures(fournisseur_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_factures_statut' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_factures_statut ON factures(statut);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_fiches_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_fiches_mama ON fiches(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_fiches_nom' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_fiches_nom ON fiches(nom);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_fiches_actif' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_fiches_actif ON fiches(actif);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_fiches_famille' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_fiches_famille ON fiches(famille_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_inventaires_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_inventaires_mama ON inventaires(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_familles_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_familles_mama ON familles(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_unites_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_unites_mama ON unites(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_fournisseur_produits_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_fournisseur_produits_mama ON fournisseur_produits(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_fournisseur_produits_produit' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_fournisseur_produits_produit ON fournisseur_produits(produit_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_fournisseur_produits_fournisseur' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_fournisseur_produits_fournisseur ON fournisseur_produits(fournisseur_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_fournisseur_produits_produit_date' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_fournisseur_produits_produit_date ON fournisseur_produits(produit_id, date_livraison desc);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_facture_lignes_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_facture_lignes_mama ON facture_lignes(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_facture_lignes_facture' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_facture_lignes_facture ON facture_lignes(facture_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_facture_lignes_produit' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_facture_lignes_produit ON facture_lignes(produit_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_fiche_lignes_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_fiche_lignes_mama ON fiche_lignes(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_fiche_lignes_fiche' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_fiche_lignes_fiche ON fiche_lignes(fiche_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_fiche_lignes_produit' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_fiche_lignes_produit ON fiche_lignes(produit_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_fiche_cout_history_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_fiche_cout_history_mama ON fiche_cout_history(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_fiche_cout_history_fiche' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_fiche_cout_history_fiche ON fiche_cout_history(fiche_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_inventaire_lignes_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_inventaire_lignes_mama ON inventaire_lignes(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_inventaire_lignes_inventaire' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_inventaire_lignes_inventaire ON inventaire_lignes(inventaire_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_inventaire_lignes_produit' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_inventaire_lignes_produit ON inventaire_lignes(produit_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_parametres_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_parametres_mama ON parametres(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_fournisseur_contacts_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_fournisseur_contacts_mama ON fournisseur_contacts(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_fournisseur_contacts_fournisseur' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_fournisseur_contacts_fournisseur ON fournisseur_contacts(fournisseur_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_fournisseur_notes_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_fournisseur_notes_mama ON fournisseur_notes(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_fournisseur_notes_fournisseur' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_fournisseur_notes_fournisseur ON fournisseur_notes(fournisseur_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_permissions_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_permissions_mama ON permissions(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_permissions_role' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_permissions_role ON permissions(role_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_permissions_user' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_permissions_user ON permissions(user_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_menus_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_menus_mama ON menus(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_menus_date' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_menus_date ON menus("date");
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_menu_fiches_menu' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_menu_fiches_menu ON menu_fiches(menu_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_menu_fiches_fiche' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_menu_fiches_fiche ON menu_fiches(fiche_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_requisitions_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_requisitions_mama ON requisitions(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_requisitions_produit' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_requisitions_produit ON requisitions(produit_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name='requisitions' AND column_name='zone_id'
-  ) THEN
-    IF NOT EXISTS (
-      SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-      WHERE c.relkind = 'i' AND c.relname = 'idx_requisitions_zone' AND n.nspname = 'public'
-    ) THEN
-      CREATE INDEX idx_requisitions_zone ON requisitions(zone_id);
-    END IF;
-  END IF;
-END $$;
+DROP INDEX IF EXISTS idx_users_mama;
+CREATE INDEX idx_users_mama ON users(mama_id);
+DROP INDEX IF EXISTS idx_users_role;
+CREATE INDEX idx_users_role ON users(role_id);
+DROP INDEX IF EXISTS idx_users_actif;
+CREATE INDEX idx_users_actif ON users(actif);
+DROP INDEX IF EXISTS idx_fournisseurs_mama;
+CREATE INDEX idx_fournisseurs_mama ON fournisseurs(mama_id);
+DROP INDEX IF EXISTS idx_fournisseurs_nom;
+CREATE INDEX idx_fournisseurs_nom ON fournisseurs(nom);
+DROP INDEX IF EXISTS idx_fournisseurs_ville;
+CREATE INDEX idx_fournisseurs_ville ON fournisseurs(ville);
+DROP INDEX IF EXISTS idx_fournisseurs_actif;
+CREATE INDEX idx_fournisseurs_actif ON fournisseurs(actif);
+DROP INDEX IF EXISTS idx_produits_mama;
+CREATE INDEX idx_produits_mama ON produits(mama_id);
+DROP INDEX IF EXISTS idx_produits_nom;
+CREATE INDEX idx_produits_nom ON produits(nom);
+DROP INDEX IF EXISTS idx_produits_actif;
+CREATE INDEX idx_produits_actif ON produits(actif);
+DROP INDEX IF EXISTS idx_produits_famille;
+CREATE INDEX idx_produits_famille ON produits(famille_id);
+DROP INDEX IF EXISTS idx_produits_unite;
+CREATE INDEX idx_produits_unite ON produits(unite_id);
+DROP INDEX IF EXISTS idx_produits_fournisseur_principal;
+CREATE INDEX idx_produits_fournisseur_principal ON produits(fournisseur_principal_id);
+DROP INDEX IF EXISTS idx_factures_mama;
+CREATE INDEX idx_factures_mama ON factures(mama_id);
+DROP INDEX IF EXISTS idx_factures_date;
+CREATE INDEX idx_factures_date ON factures("date");
+DROP INDEX IF EXISTS idx_factures_fournisseur;
+CREATE INDEX idx_factures_fournisseur ON factures(fournisseur_id);
+DROP INDEX IF EXISTS idx_factures_statut;
+CREATE INDEX idx_factures_statut ON factures(statut);
+DROP INDEX IF EXISTS idx_fiches_mama;
+CREATE INDEX idx_fiches_mama ON fiches(mama_id);
+DROP INDEX IF EXISTS idx_fiches_nom;
+CREATE INDEX idx_fiches_nom ON fiches(nom);
+DROP INDEX IF EXISTS idx_fiches_actif;
+CREATE INDEX idx_fiches_actif ON fiches(actif);
+DROP INDEX IF EXISTS idx_fiches_famille;
+CREATE INDEX idx_fiches_famille ON fiches(famille_id);
+DROP INDEX IF EXISTS idx_inventaires_mama;
+CREATE INDEX idx_inventaires_mama ON inventaires(mama_id);
+DROP INDEX IF EXISTS idx_familles_mama;
+CREATE INDEX idx_familles_mama ON familles(mama_id);
+DROP INDEX IF EXISTS idx_unites_mama;
+CREATE INDEX idx_unites_mama ON unites(mama_id);
+DROP INDEX IF EXISTS idx_fournisseur_produits_mama;
+CREATE INDEX idx_fournisseur_produits_mama ON fournisseur_produits(mama_id);
+DROP INDEX IF EXISTS idx_fournisseur_produits_produit;
+CREATE INDEX idx_fournisseur_produits_produit ON fournisseur_produits(produit_id);
+DROP INDEX IF EXISTS idx_fournisseur_produits_fournisseur;
+CREATE INDEX idx_fournisseur_produits_fournisseur ON fournisseur_produits(fournisseur_id);
+DROP INDEX IF EXISTS idx_fournisseur_produits_produit_date;
+CREATE INDEX idx_fournisseur_produits_produit_date ON fournisseur_produits(produit_id, date_livraison desc);
+DROP INDEX IF EXISTS idx_facture_lignes_mama;
+CREATE INDEX idx_facture_lignes_mama ON facture_lignes(mama_id);
+DROP INDEX IF EXISTS idx_facture_lignes_facture;
+CREATE INDEX idx_facture_lignes_facture ON facture_lignes(facture_id);
+DROP INDEX IF EXISTS idx_facture_lignes_produit;
+CREATE INDEX idx_facture_lignes_produit ON facture_lignes(produit_id);
+DROP INDEX IF EXISTS idx_fiche_lignes_mama;
+CREATE INDEX idx_fiche_lignes_mama ON fiche_lignes(mama_id);
+DROP INDEX IF EXISTS idx_fiche_lignes_fiche;
+CREATE INDEX idx_fiche_lignes_fiche ON fiche_lignes(fiche_id);
+DROP INDEX IF EXISTS idx_fiche_lignes_produit;
+CREATE INDEX idx_fiche_lignes_produit ON fiche_lignes(produit_id);
+DROP INDEX IF EXISTS idx_fiche_cout_history_mama;
+CREATE INDEX idx_fiche_cout_history_mama ON fiche_cout_history(mama_id);
+DROP INDEX IF EXISTS idx_fiche_cout_history_fiche;
+CREATE INDEX idx_fiche_cout_history_fiche ON fiche_cout_history(fiche_id);
+DROP INDEX IF EXISTS idx_inventaire_lignes_mama;
+CREATE INDEX idx_inventaire_lignes_mama ON inventaire_lignes(mama_id);
+DROP INDEX IF EXISTS idx_inventaire_lignes_inventaire;
+CREATE INDEX idx_inventaire_lignes_inventaire ON inventaire_lignes(inventaire_id);
+DROP INDEX IF EXISTS idx_inventaire_lignes_produit;
+CREATE INDEX idx_inventaire_lignes_produit ON inventaire_lignes(produit_id);
+DROP INDEX IF EXISTS idx_parametres_mama;
+CREATE INDEX idx_parametres_mama ON parametres(mama_id);
+DROP INDEX IF EXISTS idx_fournisseur_contacts_mama;
+CREATE INDEX idx_fournisseur_contacts_mama ON fournisseur_contacts(mama_id);
+DROP INDEX IF EXISTS idx_fournisseur_contacts_fournisseur;
+CREATE INDEX idx_fournisseur_contacts_fournisseur ON fournisseur_contacts(fournisseur_id);
+DROP INDEX IF EXISTS idx_fournisseur_notes_mama;
+CREATE INDEX idx_fournisseur_notes_mama ON fournisseur_notes(mama_id);
+DROP INDEX IF EXISTS idx_fournisseur_notes_fournisseur;
+CREATE INDEX idx_fournisseur_notes_fournisseur ON fournisseur_notes(fournisseur_id);
+DROP INDEX IF EXISTS idx_permissions_mama;
+CREATE INDEX idx_permissions_mama ON permissions(mama_id);
+DROP INDEX IF EXISTS idx_permissions_role;
+CREATE INDEX idx_permissions_role ON permissions(role_id);
+DROP INDEX IF EXISTS idx_permissions_user;
+CREATE INDEX idx_permissions_user ON permissions(user_id);
+DROP INDEX IF EXISTS idx_menus_mama;
+CREATE INDEX idx_menus_mama ON menus(mama_id);
+DROP INDEX IF EXISTS idx_menus_date;
+CREATE INDEX idx_menus_date ON menus("date");
+DROP INDEX IF EXISTS idx_menu_fiches_menu;
+CREATE INDEX idx_menu_fiches_menu ON menu_fiches(menu_id);
+DROP INDEX IF EXISTS idx_menu_fiches_fiche;
+CREATE INDEX idx_menu_fiches_fiche ON menu_fiches(fiche_id);
+DROP INDEX IF EXISTS idx_requisitions_mama;
+CREATE INDEX idx_requisitions_mama ON requisitions(mama_id);
+DROP INDEX IF EXISTS idx_requisitions_produit;
+CREATE INDEX idx_requisitions_produit ON requisitions(produit_id);
+DROP INDEX IF EXISTS idx_requisitions_zone;
+CREATE INDEX idx_requisitions_zone ON requisitions(zone_id);
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -3457,33 +2668,12 @@ BEGIN
   END IF;
 END $$;
 
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_ft_carte' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_ft_carte ON fiches_techniques(carte_actuelle, type_carte, sous_type_carte);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_ft_prix' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_ft_prix ON fiches_techniques(prix_vente);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_ft_nom' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_ft_nom ON fiches_techniques(nom);
-  END IF;
-END $$;
+DROP INDEX IF EXISTS idx_ft_carte;
+CREATE INDEX idx_ft_carte ON fiches_techniques(carte_actuelle, type_carte, sous_type_carte);
+DROP INDEX IF EXISTS idx_ft_prix;
+CREATE INDEX idx_ft_prix ON fiches_techniques(prix_vente);
+DROP INDEX IF EXISTS idx_ft_nom;
+CREATE INDEX idx_ft_nom ON fiches_techniques(nom);
 
 alter table fiches_techniques enable row level security;
 alter table fiches_techniques force row level security;
@@ -3540,42 +2730,14 @@ values (
   'a49aeafd-6f60-4f68-a267-d7d27c1a1381',
   'admin@mamastock.com',
   crypt('vegeta', gen_salt('bf')),
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_mouvements_stock_mama' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_mouvements_stock_mama ON mouvements_stock(mama_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_mouvements_stock_produit' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_mouvements_stock_produit ON mouvements_stock(produit_id);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_mouvements_stock_date' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_mouvements_stock_date ON mouvements_stock("date");
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_mouvements_stock_type' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_mouvements_stock_type ON mouvements_stock(type);
-  END IF;
-END $$;
+DROP INDEX IF EXISTS idx_mouvements_stock_mama;
+CREATE INDEX idx_mouvements_stock_mama ON mouvements_stock(mama_id);
+DROP INDEX IF EXISTS idx_mouvements_stock_produit;
+CREATE INDEX idx_mouvements_stock_produit ON mouvements_stock(produit_id);
+DROP INDEX IF EXISTS idx_mouvements_stock_date;
+CREATE INDEX idx_mouvements_stock_date ON mouvements_stock("date");
+DROP INDEX IF EXISTS idx_mouvements_stock_type;
+CREATE INDEX idx_mouvements_stock_type ON mouvements_stock(type);
 
 -- Ajout de la colonne date_debut pour les inventaires
 DO $$
@@ -3588,52 +2750,17 @@ BEGIN
   END IF;
 END $$;
 
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_inventaires_date' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_inventaires_date ON inventaires("date");
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_inventaires_date_debut' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_inventaires_date_debut ON inventaires(date_debut);
-  END IF;
-END $$;
+DROP INDEX IF EXISTS idx_inventaires_date;
+CREATE INDEX idx_inventaires_date ON inventaires("date");
+DROP INDEX IF EXISTS idx_inventaires_date_debut;
+CREATE INDEX idx_inventaires_date_debut ON inventaires(date_debut);
 
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_produits_famille_txt' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_produits_famille_txt ON produits(famille);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_produits_unite_txt' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_produits_unite_txt ON produits(unite);
-  END IF;
-END $$;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_produits_code' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_produits_code ON produits(code);
-  END IF;
-END $$;
+DROP INDEX IF EXISTS idx_produits_famille_txt;
+CREATE INDEX idx_produits_famille_txt ON produits(famille);
+DROP INDEX IF EXISTS idx_produits_unite_txt;
+CREATE INDEX idx_produits_unite_txt ON produits(unite);
+DROP INDEX IF EXISTS idx_produits_code;
+CREATE INDEX idx_produits_code ON produits(code);
 
 -- Fonction de statistiques pour le tableau de bord
 create or replace function dashboard_stats(
@@ -3660,15 +2787,8 @@ grant execute on function top_produits(uuid, date, date, integer) to authenticat
 grant execute on function mouvements_without_alloc(integer) to authenticated;
 
 -- Index pour accélérer la recherche de factures
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relkind = 'i' AND c.relname = 'idx_factures_reference' AND n.nspname = 'public'
-  ) THEN
-    CREATE INDEX idx_factures_reference ON factures(reference);
-  END IF;
-END $$;
+DROP INDEX IF EXISTS idx_factures_reference;
+CREATE INDEX idx_factures_reference ON factures(reference);
 
 -- Colonnes optionnelles sur mouvements_stock pour stocker les détails
 DO $$
@@ -3693,33 +2813,12 @@ BEGIN
   END IF;
 END $$;
 
-DO $$
-BEGIN
-  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='mouvements_stock' AND column_name='sous_type') THEN
-    IF NOT EXISTS (
-      SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-      WHERE c.relkind = 'i' AND c.relname = 'idx_mouvements_stock_sous_type' AND n.nspname = 'public'
-    ) THEN
-      CREATE INDEX idx_mouvements_stock_sous_type ON mouvements_stock(sous_type);
-    END IF;
-  END IF;
-  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='mouvements_stock' AND column_name='zone') THEN
-    IF NOT EXISTS (
-      SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-      WHERE c.relkind = 'i' AND c.relname = 'idx_mouvements_stock_zone' AND n.nspname = 'public'
-    ) THEN
-      CREATE INDEX idx_mouvements_stock_zone ON mouvements_stock(zone);
-    END IF;
-  END IF;
-  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='mouvements_stock' AND column_name='motif') THEN
-    IF NOT EXISTS (
-      SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-      WHERE c.relkind = 'i' AND c.relname = 'idx_mouvements_stock_motif' AND n.nspname = 'public'
-    ) THEN
-      CREATE INDEX idx_mouvements_stock_motif ON mouvements_stock(motif);
-    END IF;
-  END IF;
-END $$;
+DROP INDEX IF EXISTS idx_mouvements_stock_sous_type;
+CREATE INDEX idx_mouvements_stock_sous_type ON mouvements_stock(sous_type);
+DROP INDEX IF EXISTS idx_mouvements_stock_zone;
+CREATE INDEX idx_mouvements_stock_zone ON mouvements_stock(zone);
+DROP INDEX IF EXISTS idx_mouvements_stock_motif;
+CREATE INDEX idx_mouvements_stock_motif ON mouvements_stock(motif);
   (select id from roles where nom = 'admin'),
   '[]',
   true,

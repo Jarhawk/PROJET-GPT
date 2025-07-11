@@ -18,8 +18,14 @@
 -- Assurez-vous donc d'exécuter ce script sur une instance Supabase
 -- préconfigurée avec ces rôles et le schéma `auth` existants.
 
+-- Désactiver la vérification des corps de fonctions pour permettre la création
+-- avant toutes les tables dépendantes
+set check_function_bodies = off;
+
 -- Création du schéma public si nécessaire (jamais supprimé)
 create schema if not exists public;
+-- Retirer les privilèges génériques
+revoke all on schema public from public;
 -- Autoriser l'accès aux objets du schéma
 grant usage on schema public to authenticated;
 grant usage on schema public to anon;
@@ -28,16 +34,22 @@ alter default privileges in schema public
   grant select, insert, update, delete on tables to authenticated;
 alter default privileges in schema public
   grant all privileges on tables to service_role;
+-- Préparer le schéma des extensions pour Supabase
+create schema if not exists extensions;
+revoke all on schema extensions from public;
+grant usage on schema extensions to authenticated;
+grant usage on schema extensions to anon;
+grant all privileges on schema extensions to service_role;
 -- S'assurer que les fonctions d'extension sont visibles
 set search_path = public, extensions;
--- Extensions
-
-create extension if not exists "uuid-ossp";
-create extension if not exists "pgcrypto";
+-- Extensions installées dans le schéma dédié
+create extension if not exists "uuid-ossp" with schema extensions;
+create extension if not exists "pgcrypto" with schema extensions;
+create extension if not exists "pg_cron" with schema extensions;
 
 -- Fonction utilitaire pour renommer une colonne d'une table ou d'une vue
 -- Utilisée dans les blocs DO afin d'éviter les ALTER TABLE/VIEW directs
-create or replace function rename_column_public(rel text, old_col text, new_col text)
+create or replace function renommer_colonne_public(rel text, old_col text, new_col text)
 returns void language plpgsql as $$
 declare
   kind char;
@@ -158,6 +170,7 @@ returns uuid
 language sql
 stable
 security definer
+set search_path = public
 as $$
   select coalesce(
     (select mama_id from utilisateurs where auth_id = auth.uid() limit 1),
@@ -171,6 +184,7 @@ returns text
 language sql
 stable
 security definer
+set search_path = public
 as $$
   select coalesce(
     (select role from utilisateurs where auth_id = auth.uid() limit 1),
@@ -560,8 +574,9 @@ begin
 end;
 $$;
 
+drop trigger if exists trg_ligne_facture on facture_lignes;
 drop trigger if exists trg_facture_ligne on facture_lignes;
-create trigger trg_facture_ligne after insert on facture_lignes
+create trigger trg_ligne_facture after insert on facture_lignes
   for each row execute function mettre_a_jour_pmp_produit();
 
 -- Maintien du dernier prix d'achat enregistré
@@ -590,13 +605,14 @@ begin
 end;
 $$;
 
+drop trigger if exists trg_maj_prix_produit on facture_lignes;
 drop trigger if exists trg_update_prix_produit on facture_lignes;
-create trigger trg_update_prix_produit
+create trigger trg_maj_prix_produit
   after insert on facture_lignes
   for each row execute function mettre_a_jour_prix_produit();
 
 -- Trigger pour maintenir le total de la facture en phase avec ses lignes
-create or replace function refresh_facture_total()
+create or replace function rafraichir_total_facture()
 returns trigger language plpgsql as $$
 declare
   fid uuid := coalesce(new.facture_id, old.facture_id);
@@ -618,13 +634,14 @@ begin
 end;
 $$;
 
+drop trigger if exists trg_total_facture on facture_lignes;
 drop trigger if exists trg_facture_total on facture_lignes;
-create trigger trg_facture_total
+create trigger trg_total_facture
   after insert or update or delete on facture_lignes
-  for each row execute function refresh_facture_total();
+  for each row execute function rafraichir_total_facture();
 
 -- Trigger de mise à jour du stock théorique lors de l'enregistrement des mouvements
-create or replace function update_stock_theorique()
+create or replace function maj_stock_theorique()
 returns trigger language plpgsql as $$
 begin
   if new.type = 'entree' or new.type = 'correction' or new.type = 'transfert' then
@@ -638,10 +655,10 @@ $$;
 
 drop trigger if exists trg_mouvement_stock on mouvements_stock;
 create trigger trg_mouvement_stock after insert on mouvements_stock
-  for each row execute function update_stock_theorique();
+  for each row execute function maj_stock_theorique();
 
 -- Trigger pour appliquer les lignes d'inventaire au stock réel
-create or replace function apply_inventaire_line()
+create or replace function appliquer_ligne_inventaire()
 returns trigger language plpgsql as $$
 begin
   update produits set stock_reel = new.quantite where id = new.produit_id;
@@ -649,12 +666,13 @@ begin
 end;
 $$;
 
+drop trigger if exists trg_ligne_inventaire on inventaire_lignes;
 drop trigger if exists trg_inventaire_ligne on inventaire_lignes;
-create trigger trg_inventaire_ligne after insert on inventaire_lignes
-  for each row execute function apply_inventaire_line();
+create trigger trg_ligne_inventaire after insert on inventaire_lignes
+  for each row execute function appliquer_ligne_inventaire();
 
 -- Trigger de rafraîchissement du coût des fiches lors des modifications
-create or replace function refresh_fiche_cost()
+create or replace function rafraichir_cout_fiche()
 returns trigger language plpgsql as $$
 declare
   fid uuid := coalesce(new.fiche_id, new.id, old.fiche_id, old.id);
@@ -682,15 +700,17 @@ begin
 end;
 $$;
 
+drop trigger if exists trg_cout_ligne_fiche on fiche_lignes;
 drop trigger if exists trg_fiche_lignes_cost on fiche_lignes;
-create trigger trg_fiche_lignes_cost
+create trigger trg_cout_ligne_fiche
   after insert or update or delete on fiche_lignes
-  for each row execute function refresh_fiche_cost();
+  for each row execute function rafraichir_cout_fiche();
 
+drop trigger if exists trg_cout_fiche on fiches;
 drop trigger if exists trg_fiche_update_cost on fiches;
-create trigger trg_fiche_update_cost
+create trigger trg_cout_fiche
   after update on fiches
-  for each row execute function refresh_fiche_cost();
+  for each row execute function rafraichir_cout_fiche();
 
 -- Statistiques : total des achats par mois pour tous les fournisseurs
 create or replace function stats_achats_fournisseurs(mama_id_param uuid)
@@ -1053,7 +1073,8 @@ grant select on v_centres_cout_mois to authenticated;
 -- Fonction retournant les statistiques par centre de coût pour une période donnée
 create or replace function stats_centres_de_cout(mama_id_param uuid, debut_param date default null, fin_param date default null)
 returns table(centre_cout_id uuid, nom text, quantite numeric, valeur numeric)
-language plpgsql security definer as $$
+language plpgsql security definer
+set search_path = public as $$
 begin
   return query
     select c.id, c.nom, sum(coalesce(m.quantite,0)), sum(coalesce(m.valeur,0))
@@ -1068,7 +1089,7 @@ $$;
 grant execute on function stats_centres_de_cout(uuid, date, date) to authenticated;
 
 -- Fonction déclenchée pour journaliser les changements de centre de coût
-create or replace function log_centres_de_cout_changes()
+create or replace function journaliser_modifs_centres_cout()
 returns trigger language plpgsql as $$
 begin
   insert into journaux_utilisateur(mama_id, user_id, action, details, done_by)
@@ -1083,14 +1104,15 @@ begin
 end;
 $$;
 
+drop trigger if exists trg_journal_centres_cout on centres_de_cout;
 drop trigger if exists trg_log_centres_de_cout on centres_de_cout;
-create trigger trg_log_centres_de_cout
+create trigger trg_journal_centres_cout
   after insert or update or delete on centres_de_cout
-  for each row execute function log_centres_de_cout_changes();
-grant execute on function log_centres_de_cout_changes() to authenticated;
+  for each row execute function journaliser_modifs_centres_cout();
+grant execute on function journaliser_modifs_centres_cout() to authenticated;
 
 -- Fonction déclenchée pour journaliser l'affectation des mouvements aux centres de coût
-create or replace function log_mouvement_cc_changes()
+create or replace function journaliser_modifs_mouvement_cc()
 returns trigger language plpgsql as $$
 begin
   insert into journaux_utilisateur(mama_id, user_id, action, details, done_by)
@@ -1105,11 +1127,12 @@ begin
 end;
 $$;
 
+drop trigger if exists trg_journal_mouvement_cc on mouvements_centres_cout;
 drop trigger if exists trg_log_mouvement_cc on mouvements_centres_cout;
-create trigger trg_log_mouvement_cc
+create trigger trg_journal_mouvement_cc
   after insert or update or delete on mouvements_centres_cout
-  for each row execute function log_mouvement_cc_changes();
-grant execute on function log_mouvement_cc_changes() to authenticated;
+  for each row execute function journaliser_modifs_mouvement_cc();
+grant execute on function journaliser_modifs_mouvement_cc() to authenticated;
 
 -- Vue détaillée des affectations de mouvements de stock
 create or replace view v_ventilation as
@@ -1170,7 +1193,7 @@ grant select, insert, update, delete on pertes to authenticated;
 
 
 -- Trigger de journalisation des pertes
-create or replace function log_pertes_changes()
+create or replace function journaliser_modifs_pertes()
 returns trigger language plpgsql as $$
 begin
   insert into journaux_utilisateur(mama_id, user_id, action, details, done_by)
@@ -1180,16 +1203,19 @@ begin
   return new;
 end;
 $$;
+grant execute on function journaliser_modifs_pertes() to authenticated;
+drop trigger if exists trg_journal_pertes on pertes;
 drop trigger if exists trg_log_pertes on pertes;
-create trigger trg_log_pertes
+create trigger trg_journal_pertes
   after insert or update or delete on pertes
-  for each row execute function log_pertes_changes();
+  for each row execute function journaliser_modifs_pertes();
 
 
 -- Fonction suggérant les allocations de centre de coût selon l'historique
 create or replace function suggest_centres_de_cout(p_produit_id uuid)
 returns table(centre_cout_id uuid, nom text, ratio numeric)
-language sql stable security definer as $$
+language sql stable security definer
+set search_path = public as $$
   select
     mcc.centre_cout_id,
     cc.nom,
@@ -1301,28 +1327,31 @@ comment on column users.two_fa_enabled is 'Whether TOTP 2FA is enabled';
 comment on column users.two_fa_secret is 'TOTP secret for 2FA';
 
 -- Permettre aux utilisateurs d'activer ou désactiver la 2FA
-create or replace function enable_two_fa(p_secret text)
-returns void language sql security definer as $$
+create or replace function activer_2fa(p_secret text)
+returns void language sql security definer
+set search_path = public as $$
   update users set two_fa_enabled = true, two_fa_secret = p_secret
   where id = auth.uid();
 $$;
 
-create or replace function disable_two_fa()
-returns void language sql security definer as $$
+create or replace function desactiver_2fa()
+returns void language sql security definer
+set search_path = public as $$
   update users set two_fa_enabled = false, two_fa_secret = null
   where id = auth.uid();
 $$;
-grant execute on function enable_two_fa(text) to authenticated;
-grant execute on function disable_two_fa() to authenticated;
+grant execute on function activer_2fa(text) to authenticated;
+grant execute on function desactiver_2fa() to authenticated;
 -- Fonction retournant les produits les plus consommés sur une période
-create or replace function top_produits(
+create or replace function produits_les_plus_vendus(
   mama_id_param uuid,
   debut_param date default null,
   fin_param date default null,
   limit_param integer default 5
 )
 returns table(produit_id uuid, nom text, total numeric)
-language sql stable security definer as $$
+language sql stable security definer
+set search_path = public as $$
   select p.id, p.nom, sum(abs(m.quantite)) as total
   from mouvements_stock m
   join produits p on p.id = m.produit_id
@@ -1336,9 +1365,10 @@ language sql stable security definer as $$
 $$;
 
 -- Mouvements sans affectation de centre de coût
-create or replace function mouvements_without_alloc(limit_param integer default 100)
+create or replace function mouvements_sans_affectation(limit_param integer default 100)
 returns table(id uuid, produit_id uuid, quantite numeric, created_at timestamptz, mama_id uuid)
-language sql stable security definer as $$
+language sql stable security definer
+set search_path = public as $$
   select m.id, m.produit_id, m.quantite, m.created_at, m.mama_id
   from mouvements_stock m
   where m.mama_id = current_user_mama_id()
@@ -1377,7 +1407,7 @@ create policy fiche_prix_history_all on fiche_prix_history
   with check (mama_id = current_user_mama_id());
 grant select, insert, update, delete on fiche_prix_history to authenticated;
 
-create or replace function log_fiche_prix_change()
+create or replace function journaliser_modif_prix_fiche()
 returns trigger language plpgsql as $$
 begin
   if new.prix_vente is distinct from old.prix_vente or new.carte_actuelle is distinct from old.carte_actuelle then
@@ -1387,23 +1417,26 @@ begin
   return new;
 end;
 $$;
+grant execute on function journaliser_modif_prix_fiche() to authenticated;
 
+drop trigger if exists trg_prix_fiche on fiches_techniques;
 drop trigger if exists trg_fiche_prix_change on fiches_techniques;
-create trigger trg_fiche_prix_change
+create trigger trg_prix_fiche
 after update on fiches_techniques
-for each row execute function log_fiche_prix_change();
+for each row execute function journaliser_modif_prix_fiche();
 
 -- Index pour accélérer les requêtes de mouvements
 
 
 -- Fonction de statistiques pour le tableau de bord
-create or replace function dashboard_stats(
+create or replace function stats_tableau_bord(
   mama_id_param uuid,
   page_param integer default 1,
   page_size_param integer default 30
 )
 returns table(produit_id uuid, nom text, stock_reel numeric, pmp numeric, last_purchase timestamptz)
-language sql stable security definer as $$
+language sql stable security definer
+set search_path = public as $$
   select p.id, p.nom, p.stock_reel, p.pmp, max(f.date_facture) as last_purchase
   from produits p
   left join facture_lignes fl on fl.produit_id = p.id
@@ -1485,9 +1518,9 @@ create policy tache_instances_all on tache_instances
 grant select, insert, update, delete on tache_instances to authenticated;
 
 -- Autoriser l'exécution des fonctions utilitaires
-grant execute on function dashboard_stats(uuid, integer, integer) to authenticated;
-grant execute on function top_produits(uuid, date, date, integer) to authenticated;
-grant execute on function mouvements_without_alloc(integer) to authenticated;
+grant execute on function stats_tableau_bord(uuid, integer, integer) to authenticated;
+grant execute on function produits_les_plus_vendus(uuid, date, date, integer) to authenticated;
+grant execute on function mouvements_sans_affectation(integer) to authenticated;
 
 -- Index pour accélérer la recherche de factures
 
@@ -1569,7 +1602,7 @@ create policy promotion_produits_all on promotion_produits
   with check (mama_id = current_user_mama_id());
 grant select, insert, update, delete on promotion_produits to authenticated;
 
-create or replace function log_promotions_changes()
+create or replace function journaliser_modifs_promotions()
 returns trigger language plpgsql as $$
 begin
   insert into journaux_utilisateur(mama_id, user_id, action, details, done_by)
@@ -1578,14 +1611,16 @@ begin
   return new;
 end;
 $$;
+grant execute on function journaliser_modifs_promotions() to authenticated;
 
+drop trigger if exists trg_journal_promotions on promotions;
 drop trigger if exists trg_log_promotions on promotions;
-create trigger trg_log_promotions
+create trigger trg_journal_promotions
   after insert or update or delete on promotions
-  for each row execute function log_promotions_changes();
+  for each row execute function journaliser_modifs_promotions();
 
 -- Vue et fonction pour les statistiques consolidées multi-sites
-create or replace view v_consolidated_stats as
+create or replace view v_stats_consolidees as
 select
   m.id as mama_id,
   m.nom,
@@ -1597,9 +1632,9 @@ select
 from mamas m
 left join produits p on p.mama_id = m.id
 group by m.id, m.nom;
-grant select on v_consolidated_stats to authenticated;
+grant select on v_stats_consolidees to authenticated;
 
-create or replace function consolidated_stats()
+create or replace function stats_consolidees()
 returns table(
   mama_id uuid,
   nom text,
@@ -1608,18 +1643,22 @@ returns table(
   nb_mouvements bigint
 )
 language sql
-security definer as $$
-  select * from v_consolidated_stats
+security definer
+set search_path = public as $$
+  select * from v_stats_consolidees
   where (
     select r.nom from users u join roles r on r.id = u.role_id where u.id = auth.uid()
   ) = 'superadmin' or mama_id = current_user_mama_id();
 $$;
 
-grant execute on function consolidated_stats() to authenticated;
+grant execute on function stats_consolidees() to authenticated;
+
+-- Nettoyer l'ancienne table d'audit éventuelle
+drop table if exists audit_entries cascade;
 
 -- Journal avancé conforme aux obligations légales
-create table if not exists audit_entries (
-    id serial primary key,
+create table if not exists journal_audit (
+    id uuid primary key default uuid_generate_v4(),
     mama_id uuid not null references mamas(id) on delete cascade,
     table_name text not null,
     row_id uuid,
@@ -1630,39 +1669,40 @@ create table if not exists audit_entries (
     created_at timestamptz default now(),
     changed_at timestamptz default now()
 );
-DROP INDEX IF EXISTS idx_audit_entries_mama;
-CREATE INDEX idx_audit_entries_mama ON audit_entries(mama_id);
-DROP INDEX IF EXISTS idx_audit_entries_table;
-CREATE INDEX idx_audit_entries_table ON audit_entries(table_name);
-DROP INDEX IF EXISTS idx_audit_entries_date;
-CREATE INDEX idx_audit_entries_date ON audit_entries(changed_at);
+DROP INDEX IF EXISTS idx_journal_audit_mama;
+CREATE INDEX idx_journal_audit_mama ON journal_audit(mama_id);
+DROP INDEX IF EXISTS idx_journal_audit_table;
+CREATE INDEX idx_journal_audit_table ON journal_audit(table_name);
+DROP INDEX IF EXISTS idx_journal_audit_date;
+CREATE INDEX idx_journal_audit_date ON journal_audit(changed_at);
 
-alter table audit_entries enable row level security;
-alter table audit_entries force row level security;
-drop policy if exists audit_entries_all on audit_entries;
-create policy audit_entries_all on audit_entries
+alter table journal_audit enable row level security;
+alter table journal_audit force row level security;
+drop policy if exists journal_audit_all on journal_audit;
+create policy journal_audit_all on journal_audit
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
-grant select on audit_entries to authenticated;
+grant select on journal_audit to authenticated;
 
-create or replace function add_audit_entry()
-returns trigger language plpgsql security definer as $$
+create or replace function ajouter_entree_audit()
+returns trigger language plpgsql security definer
+set search_path = public as $$
 begin
-  insert into audit_entries(mama_id, table_name, row_id, operation, old_data, new_data, changed_by)
+  insert into journal_audit(mama_id, table_name, row_id, operation, old_data, new_data, changed_by)
   values(coalesce(new.mama_id, old.mama_id), TG_TABLE_NAME, coalesce(new.id, old.id), TG_OP, to_jsonb(old), to_jsonb(new), auth.uid());
   return new;
 end;
 $$;
-grant execute on function add_audit_entry() to authenticated;
+grant execute on function ajouter_entree_audit() to authenticated;
 
 drop trigger if exists trg_audit_produits on produits;
 create trigger trg_audit_produits
   after insert or update or delete on produits
-  for each row execute function add_audit_entry();
+  for each row execute function ajouter_entree_audit();
 drop trigger if exists trg_audit_factures on factures;
 create trigger trg_audit_factures
   after insert or update or delete on factures
-  for each row execute function add_audit_entry();
+  for each row execute function ajouter_entree_audit();
 
 -- Planning prévisionnel des besoins
 create table if not exists planning_previsionnel (
@@ -1685,10 +1725,12 @@ grant select, insert, update, delete on planning_previsionnel to authenticated;
 drop trigger if exists trg_audit_planning on planning_previsionnel;
 create trigger trg_audit_planning
   after insert or update or delete on planning_previsionnel
-  for each row execute function add_audit_entry();
+  for each row execute function ajouter_entree_audit();
 
--- Alertes avancees automatique
-create table if not exists alert_rules (
+-- Alertes avancées automatique
+drop table if exists alert_rules cascade;
+drop table if exists alert_logs cascade;
+create table if not exists regles_alertes (
     id uuid primary key default uuid_generate_v4(),
     mama_id uuid not null references mamas(id) on delete cascade,
     produit_id uuid references produits(id) on delete cascade,
@@ -1697,46 +1739,46 @@ create table if not exists alert_rules (
     actif boolean default true,
     created_at timestamptz default now()
 );
-DROP INDEX IF EXISTS idx_alert_rules_mama;
-CREATE INDEX idx_alert_rules_mama ON alert_rules(mama_id);
-alter table alert_rules enable row level security;
-alter table alert_rules force row level security;
-drop policy if exists alert_rules_all on alert_rules;
-create policy alert_rules_all on alert_rules
+DROP INDEX IF EXISTS idx_regles_alertes_mama;
+CREATE INDEX idx_regles_alertes_mama ON regles_alertes(mama_id);
+alter table regles_alertes enable row level security;
+alter table regles_alertes force row level security;
+drop policy if exists regles_alertes_all on regles_alertes;
+create policy regles_alertes_all on regles_alertes
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
-grant select, insert, update, delete on alert_rules to authenticated;
+  grant select, insert, update, delete on regles_alertes to authenticated;
 
-create table if not exists alert_logs (
+create table if not exists journaux_alertes (
     id uuid primary key default uuid_generate_v4(),
-    rule_id uuid references alert_rules(id) on delete cascade,
+  regle_id uuid references regles_alertes(id) on delete cascade,
     mama_id uuid not null references mamas(id) on delete cascade,
     produit_id uuid references produits(id) on delete cascade,
     stock_reel numeric,
     created_at timestamptz default now()
 );
-DROP INDEX IF EXISTS idx_alert_logs_mama;
-CREATE INDEX idx_alert_logs_mama ON alert_logs(mama_id);
-alter table alert_logs enable row level security;
-alter table alert_logs force row level security;
-drop policy if exists alert_logs_all on alert_logs;
-create policy alert_logs_all on alert_logs
+DROP INDEX IF EXISTS idx_journaux_alertes_mama;
+CREATE INDEX idx_journaux_alertes_mama ON journaux_alertes(mama_id);
+alter table journaux_alertes enable row level security;
+alter table journaux_alertes force row level security;
+drop policy if exists journaux_alertes_all on journaux_alertes;
+create policy journaux_alertes_all on journaux_alertes
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
-grant select on alert_logs to authenticated;
+  grant select on journaux_alertes to authenticated;
 
-create or replace function check_stock_alert()
+create or replace function verifier_alerte_stock()
 returns trigger language plpgsql as $$
 declare
   r record;
 begin
   for r in
-    select * from alert_rules
+    select * from regles_alertes
     where actif and mama_id = new.mama_id
       and (produit_id is null or produit_id = new.id)
   loop
     if new.stock_reel < r.threshold then
-      insert into alert_logs(rule_id, mama_id, produit_id, stock_reel)
+      insert into journaux_alertes(regle_id, mama_id, produit_id, stock_reel)
         values (r.id, new.mama_id, new.id, new.stock_reel);
     end if;
   end loop;
@@ -1744,16 +1786,18 @@ begin
 end;
 $$;
 
-grant execute on function check_stock_alert() to authenticated;
+grant execute on function verifier_alerte_stock() to authenticated;
 
+drop trigger if exists trg_alerte_stock on produits;
 drop trigger if exists trg_stock_alert on produits;
-create trigger trg_stock_alert
+create trigger trg_alerte_stock
   after update of stock_reel on produits
-  for each row execute function check_stock_alert();
+  for each row execute function verifier_alerte_stock();
 
 
 -- Import automatique des factures electroniques
-create table if not exists incoming_invoices (
+drop table if exists incoming_invoices cascade;
+create table if not exists factures_importees (
     id uuid primary key default uuid_generate_v4(),
     mama_id uuid not null references mamas(id) on delete cascade,
     fournisseur_id uuid references fournisseurs(id) on delete set null,
@@ -1761,19 +1805,20 @@ create table if not exists incoming_invoices (
     processed boolean default false,
     created_at timestamptz default now()
 );
-DROP INDEX IF EXISTS idx_incoming_invoices_mama;
-CREATE INDEX idx_incoming_invoices_mama ON incoming_invoices(mama_id);
+DROP INDEX IF EXISTS idx_factures_importees_mama;
+CREATE INDEX idx_factures_importees_mama ON factures_importees(mama_id);
 
-alter table incoming_invoices enable row level security;
-alter table incoming_invoices force row level security;
-drop policy if exists incoming_invoices_all on incoming_invoices;
-create policy incoming_invoices_all on incoming_invoices
+alter table factures_importees enable row level security;
+alter table factures_importees force row level security;
+drop policy if exists factures_importees_all on factures_importees;
+create policy factures_importees_all on factures_importees
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
-grant select, insert, update, delete on incoming_invoices to authenticated;
+grant select, insert, update, delete on factures_importees to authenticated;
 
-create or replace function import_invoice(payload jsonb)
-returns uuid language plpgsql security definer as $$
+create or replace function importer_facture(payload jsonb)
+returns uuid language plpgsql security definer
+set search_path = public as $$
 declare
   fac_id uuid;
   supp_id uuid;
@@ -1794,7 +1839,7 @@ begin
 end;
 $$;
 
-grant execute on function import_invoice(jsonb) to authenticated;
+grant execute on function importer_facture(jsonb) to authenticated;
 
 -- Gestion documentaire avancée
 create table if not exists documents (
@@ -1831,19 +1876,20 @@ create policy user_own_consent on consentements_utilisateur
   for all using (user_id = auth.uid()) with check (user_id = auth.uid());
 
 
-create table if not exists public.two_factor_auth (
+drop table if exists public.two_factor_auth cascade;
+create table if not exists public.auth_double_facteur (
     id uuid primary key references auth.users(id) on delete cascade,
     secret text,
     enabled boolean default false,
     created_at timestamptz default now()
 );
-alter table public.two_factor_auth enable row level security;
-alter table public.two_factor_auth force row level security;
-drop policy if exists two_factor_select on public.two_factor_auth;
-create policy two_factor_select on public.two_factor_auth
+alter table public.auth_double_facteur enable row level security;
+alter table public.auth_double_facteur force row level security;
+drop policy if exists two_factor_select on public.auth_double_facteur;
+create policy two_factor_select on public.auth_double_facteur
   for select using (auth.uid() = id);
-drop policy if exists two_factor_upsert on public.two_factor_auth;
-create policy two_factor_upsert on public.two_factor_auth
+drop policy if exists two_factor_upsert on public.auth_double_facteur;
+create policy two_factor_upsert on public.auth_double_facteur
   for all using (auth.uid() = id) with check (auth.uid() = id);
 
 -- ----------------------------------------------------
@@ -1917,7 +1963,7 @@ grant select on v_reco_surcoût to authenticated;
 -- ----------------------------------------------------
 -- Fonctions Supabase supplémentaires
 -- ----------------------------------------------------
-create or replace function cron_purge_inactive_users()
+create or replace function purger_utilisateurs_inactifs()
 returns void
 language plpgsql
 security definer
@@ -1936,13 +1982,15 @@ begin
     join pg_namespace n on n.oid = p.pronamespace
     where p.proname = 'schedule' and n.nspname = 'cron'
   ) then
-    perform cron.schedule('purge_inactive_users', '0 3 * * *', 'call cron_purge_inactive_users();');
+    if not exists (select 1 from cron.job where jobname = 'purge_utilisateurs_inactifs') then
+      perform cron.schedule('purge_utilisateurs_inactifs', '0 3 * * *', 'call purger_utilisateurs_inactifs();');
+    end if;
   else
     raise notice 'cron.schedule not available';
   end if;
 END $$;
 
-create or replace function fn_calc_budgets(mama_id_param uuid, periode_param text)
+create or replace function calculer_budgets(mama_id_param uuid, periode_param text)
 returns table(famille text, budget_prevu numeric, total_reel numeric, ecart_pct numeric)
 language sql as $$
   with hist as (
@@ -1977,7 +2025,7 @@ language sql as $$
   from moy m
   full join courant c on c.famille = m.famille;
 $$;
-grant execute on function fn_calc_budgets(uuid, text) to authenticated;
+grant execute on function calculer_budgets(uuid, text) to authenticated;
 
 -- Configuration API fournisseurs
 create table if not exists fournisseurs_api_config (
@@ -2001,7 +2049,7 @@ BEGIN
     SELECT 1 FROM information_schema.columns
     WHERE table_name='facture_lignes' AND column_name='produit_id'
   ) THEN
-    PERFORM rename_column_public('facture_lignes','product_id','produit_id');
+    PERFORM renommer_colonne_public('facture_lignes','product_id','produit_id');
   ELSIF NOT EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_name='facture_lignes' AND column_name='produit_id'
@@ -2016,7 +2064,7 @@ BEGIN
     SELECT 1 FROM information_schema.columns
     WHERE table_name='fiche_lignes' AND column_name='produit_id'
   ) THEN
-    PERFORM rename_column_public('fiche_lignes','product_id','produit_id');
+    PERFORM renommer_colonne_public('fiche_lignes','product_id','produit_id');
   ELSIF NOT EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_name='fiche_lignes' AND column_name='produit_id'
@@ -2031,7 +2079,7 @@ BEGIN
     SELECT 1 FROM information_schema.columns
     WHERE table_name='inventaire_lignes' AND column_name='produit_id'
   ) THEN
-    PERFORM rename_column_public('inventaire_lignes','product_id','produit_id');
+    PERFORM renommer_colonne_public('inventaire_lignes','product_id','produit_id');
   ELSIF NOT EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_name='inventaire_lignes' AND column_name='produit_id'
@@ -2046,7 +2094,7 @@ BEGIN
     SELECT 1 FROM information_schema.columns
     WHERE table_name='mouvements_stock' AND column_name='produit_id'
   ) THEN
-    PERFORM rename_column_public('mouvements_stock','product_id','produit_id');
+    PERFORM renommer_colonne_public('mouvements_stock','product_id','produit_id');
   ELSIF NOT EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_name='mouvements_stock' AND column_name='produit_id'
@@ -2061,7 +2109,7 @@ BEGIN
     SELECT 1 FROM information_schema.columns
     WHERE table_name='requisitions' AND column_name='produit_id'
   ) THEN
-    PERFORM rename_column_public('requisitions','product_id','produit_id');
+    PERFORM renommer_colonne_public('requisitions','product_id','produit_id');
   ELSIF NOT EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_name='requisitions' AND column_name='produit_id'
@@ -2076,7 +2124,7 @@ BEGIN
     SELECT 1 FROM information_schema.columns
     WHERE table_name='transferts' AND column_name='produit_id'
   ) THEN
-    PERFORM rename_column_public('transferts','product_id','produit_id');
+    PERFORM renommer_colonne_public('transferts','product_id','produit_id');
   ELSIF NOT EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_name='transferts' AND column_name='produit_id'
@@ -2098,7 +2146,7 @@ BEGIN
       SELECT 1 FROM information_schema.columns
       WHERE table_name='pertes' AND column_name='produit_id'
     ) THEN
-      PERFORM rename_column_public('pertes','product_id','produit_id');
+      PERFORM renommer_colonne_public('pertes','product_id','produit_id');
     ELSIF NOT EXISTS (
       SELECT 1 FROM information_schema.columns
       WHERE table_name='pertes' AND column_name='produit_id'
@@ -2121,7 +2169,7 @@ BEGIN
       SELECT 1 FROM information_schema.columns
       WHERE table_name='promotion_produits' AND column_name='produit_id'
     ) THEN
-      PERFORM rename_column_public('promotion_produits','product_id','produit_id');
+      PERFORM renommer_colonne_public('promotion_produits','product_id','produit_id');
     ELSIF NOT EXISTS (
       SELECT 1 FROM information_schema.columns
       WHERE table_name='promotion_produits' AND column_name='produit_id'
@@ -2138,7 +2186,7 @@ BEGIN
     SELECT 1 FROM information_schema.columns
     WHERE table_name='requisitions' AND column_name='zone_id'
   ) THEN
-    PERFORM rename_column_public('requisitions','zone','zone_id');
+    PERFORM renommer_colonne_public('requisitions','zone','zone_id');
   ELSIF NOT EXISTS (
       SELECT 1 FROM information_schema.columns
       WHERE table_name='requisitions' AND column_name='zone_id'
@@ -2157,7 +2205,7 @@ BEGIN
     SELECT 1 FROM information_schema.columns
     WHERE table_name='produits' AND column_name='fournisseur_principal_id'
   ) THEN
-    PERFORM rename_column_public('produits','main_supplier_id','fournisseur_principal_id');
+    PERFORM renommer_colonne_public('produits','main_supplier_id','fournisseur_principal_id');
   ELSIF NOT EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_name='produits' AND column_name='fournisseur_principal_id'
@@ -2172,7 +2220,7 @@ BEGIN
     SELECT 1 FROM information_schema.columns
     WHERE table_name='mouvements_centres_cout' AND column_name='centre_cout_id'
   ) THEN
-    PERFORM rename_column_public('mouvements_centres_cout','cost_center_id','centre_cout_id');
+    PERFORM renommer_colonne_public('mouvements_centres_cout','cost_center_id','centre_cout_id');
   ELSIF NOT EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_name='mouvements_centres_cout' AND column_name='centre_cout_id'
@@ -2187,7 +2235,7 @@ BEGIN
     SELECT 1 FROM information_schema.columns
     WHERE table_name='pertes' AND column_name='centre_cout_id'
   ) THEN
-    PERFORM rename_column_public('pertes','cost_center_id','centre_cout_id');
+    PERFORM renommer_colonne_public('pertes','cost_center_id','centre_cout_id');
   ELSIF NOT EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_name='pertes' AND column_name='centre_cout_id'
@@ -2215,7 +2263,7 @@ BEGIN
       AND table_name = 'v_product_price_trend'
       AND column_name = 'produit_id'
   ) THEN
-    PERFORM rename_column_public('v_product_price_trend','product_id','produit_id');
+    PERFORM renommer_colonne_public('v_product_price_trend','product_id','produit_id');
   END IF;
 
   IF EXISTS (
@@ -2235,7 +2283,7 @@ BEGIN
       AND table_name = 'v_products_last_price'
       AND column_name = 'produit_id'
   ) THEN
-    PERFORM rename_column_public('v_products_last_price','product_id','produit_id');
+    PERFORM renommer_colonne_public('v_products_last_price','product_id','produit_id');
   END IF;
 
   IF EXISTS (
@@ -2255,7 +2303,7 @@ BEGIN
       AND table_name = 'stock_mouvements'
       AND column_name = 'produit_id'
   ) THEN
-    PERFORM rename_column_public('stock_mouvements','product_id','produit_id');
+    PERFORM renommer_colonne_public('stock_mouvements','product_id','produit_id');
   END IF;
 
   IF EXISTS (
@@ -2275,7 +2323,7 @@ BEGIN
       AND table_name = 'stocks'
       AND column_name = 'produit_id'
   ) THEN
-    PERFORM rename_column_public('stocks','product_id','produit_id');
+    PERFORM renommer_colonne_public('stocks','product_id','produit_id');
   END IF;
 END $$;
 -- Ajout des colonnes zone_source_id et zone_destination_id si absentes
@@ -2338,7 +2386,7 @@ BEGIN
     SELECT 1 FROM information_schema.columns
     WHERE table_name='factures' AND column_name='date_facture'
   ) THEN
-    PERFORM rename_column_public('factures','date','date_facture');
+    PERFORM renommer_colonne_public('factures','date','date_facture');
   END IF;
 
   IF EXISTS (
@@ -2348,7 +2396,7 @@ BEGIN
     SELECT 1 FROM information_schema.columns
     WHERE table_name='fiche_cout_history' AND column_name='date_cout'
   ) THEN
-    PERFORM rename_column_public('fiche_cout_history','date','date_cout');
+    PERFORM renommer_colonne_public('fiche_cout_history','date','date_cout');
   END IF;
 
   IF EXISTS (
@@ -2358,7 +2406,7 @@ BEGIN
     SELECT 1 FROM information_schema.columns
     WHERE table_name='inventaires' AND column_name='date_inventaire'
   ) THEN
-    PERFORM rename_column_public('inventaires','date','date_inventaire');
+    PERFORM renommer_colonne_public('inventaires','date','date_inventaire');
   END IF;
 
   IF EXISTS (
@@ -2368,7 +2416,7 @@ BEGIN
     SELECT 1 FROM information_schema.columns
     WHERE table_name='mouvements_stock' AND column_name='date_mouvement'
   ) THEN
-    PERFORM rename_column_public('mouvements_stock','date','date_mouvement');
+    PERFORM renommer_colonne_public('mouvements_stock','date','date_mouvement');
   END IF;
 
   IF EXISTS (
@@ -2393,14 +2441,14 @@ ALTER TABLE IF EXISTS mamas ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
 ALTER TABLE IF EXISTS roles ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
 ALTER TABLE IF EXISTS centres_de_cout ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
 ALTER TABLE IF EXISTS promotions ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
-ALTER TABLE IF EXISTS alert_rules ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
+ALTER TABLE IF EXISTS regles_alertes ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
 ALTER TABLE IF EXISTS taches ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
 ALTER TABLE IF EXISTS fournisseurs_api_config ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
 
--- Migrate old alert_rules.enabled column when present
-ALTER TABLE IF EXISTS alert_rules ADD COLUMN IF NOT EXISTS enabled boolean;
-UPDATE alert_rules SET actif = COALESCE(actif, enabled);
-ALTER TABLE IF EXISTS alert_rules DROP COLUMN IF EXISTS enabled;
+-- Migration de l'ancienne colonne enabled de regles_alertes si présente
+ALTER TABLE IF EXISTS regles_alertes ADD COLUMN IF NOT EXISTS enabled boolean;
+UPDATE regles_alertes SET actif = COALESCE(actif, enabled);
+ALTER TABLE IF EXISTS regles_alertes DROP COLUMN IF EXISTS enabled;
 DROP INDEX IF EXISTS idx_fournisseurs_api_config_fourn;
 CREATE INDEX idx_fournisseurs_api_config_fourn ON fournisseurs_api_config(fournisseur_id);
 DROP INDEX IF EXISTS idx_fournisseurs_api_config_mama;
@@ -2597,22 +2645,8 @@ drop policy if exists fiches_techniques_all on fiches_techniques;
 create policy fiches_techniques_all on fiches_techniques
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
+
 grant select, insert, update, delete on fiches_techniques to authenticated;
-
--- Table d'audit des changements de prix
--- Fonction conservée à titre de référence sans création de trigger pour compatibilité
-create or replace function handle_new_user()
-returns trigger language plpgsql security definer set search_path=public as $$
-begin
-  insert into utilisateurs(auth_id, email, mama_id, role, access_rights)
-  values (new.id, new.email,
-          (select id from public.mamas limit 1),
-          'user', '{}'::jsonb)
-  on conflict do nothing;
-  return new;
-end;
-$$;
-
 -- ----------------------------------------------------
 -- Fin du schéma
 -- ----------------------------------------------------
@@ -2731,4 +2765,6 @@ values (
 
 -- ----------------------------------------------------
 
+-- Rétablir la vérification des corps de fonctions
+set check_function_bodies = on;
 -- Fin du script

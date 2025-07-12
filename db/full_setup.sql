@@ -270,6 +270,7 @@ create table if not exists unites (
     id uuid primary key default uuid_generate_v4(),
     nom text not null,
     abbr text,
+    actif boolean default true,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
     unique(mama_id, nom)
@@ -604,8 +605,7 @@ DROP INDEX IF EXISTS idx_transferts_produit;
 CREATE INDEX idx_transferts_produit ON transferts(produit_id);
 DROP INDEX IF EXISTS idx_zones_stock_mama;
 CREATE INDEX idx_zones_stock_mama ON zones_stock(mama_id);
-DROP INDEX IF EXISTS idx_zones_stock_actif;
-CREATE INDEX idx_zones_stock_actif ON zones_stock(actif);
+CREATE INDEX IF NOT EXISTS idx_zones_stock_actif ON zones_stock(actif);
 -- Index pour accélérer la recherche par zone dans les mouvements de stock
 DROP INDEX IF EXISTS idx_mouvements_stock_zone_source;
 CREATE INDEX idx_mouvements_stock_zone_source ON mouvements_stock(zone_source_id);
@@ -1635,8 +1635,7 @@ create table if not exists promotion_produits (
 
 DROP INDEX IF EXISTS idx_promotions_mama;
 CREATE INDEX idx_promotions_mama ON promotions(mama_id);
-DROP INDEX IF EXISTS idx_promotions_actif;
-CREATE INDEX idx_promotions_actif ON promotions(actif);
+CREATE INDEX IF NOT EXISTS idx_promotions_actif ON promotions(actif);
 DROP INDEX IF EXISTS idx_promo_prod_mama;
 CREATE INDEX idx_promo_prod_mama ON promotion_produits(mama_id);
 DROP INDEX IF EXISTS idx_promo_prod_promotion;
@@ -2519,6 +2518,7 @@ ALTER TABLE IF EXISTS utilisateurs ADD COLUMN IF NOT EXISTS actif boolean DEFAUL
 ALTER TABLE IF EXISTS fournisseurs ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
 ALTER TABLE IF EXISTS produits ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
 ALTER TABLE IF EXISTS familles ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
+ALTER TABLE IF EXISTS unites ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
 ALTER TABLE IF EXISTS fiches ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
 ALTER TABLE IF EXISTS fiches_techniques ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
 ALTER TABLE IF EXISTS zones_stock ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
@@ -2583,6 +2583,7 @@ DROP INDEX IF EXISTS idx_fournisseurs_api_config_fourn;
 CREATE INDEX idx_fournisseurs_api_config_fourn ON fournisseurs_api_config(fournisseur_id);
 DROP INDEX IF EXISTS idx_fournisseurs_api_config_mama;
 CREATE INDEX idx_fournisseurs_api_config_mama ON fournisseurs_api_config(mama_id);
+CREATE INDEX IF NOT EXISTS idx_fournisseurs_api_config_actif ON fournisseurs_api_config(actif);
 alter table fournisseurs_api_config enable row level security;
 alter table fournisseurs_api_config force row level security;
 drop policy if exists fournisseurs_api_config_all on fournisseurs_api_config;
@@ -2596,22 +2597,21 @@ DROP INDEX IF EXISTS idx_users_mama;
 CREATE INDEX idx_users_mama ON users(mama_id);
 DROP INDEX IF EXISTS idx_users_role;
 CREATE INDEX idx_users_role ON users(role_id);
-DROP INDEX IF EXISTS idx_users_actif;
-CREATE INDEX idx_users_actif ON users(actif);
+CREATE INDEX IF NOT EXISTS idx_users_actif ON users(actif);
+CREATE INDEX IF NOT EXISTS idx_roles_actif ON roles(actif);
+CREATE INDEX IF NOT EXISTS idx_utilisateurs_actif ON utilisateurs(actif);
 DROP INDEX IF EXISTS idx_fournisseurs_mama;
 CREATE INDEX idx_fournisseurs_mama ON fournisseurs(mama_id);
 DROP INDEX IF EXISTS idx_fournisseurs_nom;
 CREATE INDEX idx_fournisseurs_nom ON fournisseurs(nom);
 DROP INDEX IF EXISTS idx_fournisseurs_ville;
 CREATE INDEX idx_fournisseurs_ville ON fournisseurs(ville);
-DROP INDEX IF EXISTS idx_fournisseurs_actif;
-CREATE INDEX idx_fournisseurs_actif ON fournisseurs(actif);
+CREATE INDEX IF NOT EXISTS idx_fournisseurs_actif ON fournisseurs(actif);
 DROP INDEX IF EXISTS idx_produits_mama;
 CREATE INDEX idx_produits_mama ON produits(mama_id);
 DROP INDEX IF EXISTS idx_produits_nom;
 CREATE INDEX idx_produits_nom ON produits(nom);
-DROP INDEX IF EXISTS idx_produits_actif;
-CREATE INDEX idx_produits_actif ON produits(actif);
+CREATE INDEX IF NOT EXISTS idx_produits_actif ON produits(actif);
 DROP INDEX IF EXISTS idx_produits_famille;
 CREATE INDEX idx_produits_famille ON produits(famille_id);
 DROP INDEX IF EXISTS idx_produits_unite;
@@ -2630,16 +2630,17 @@ DROP INDEX IF EXISTS idx_fiches_mama;
 CREATE INDEX idx_fiches_mama ON fiches(mama_id);
 DROP INDEX IF EXISTS idx_fiches_nom;
 CREATE INDEX idx_fiches_nom ON fiches(nom);
-DROP INDEX IF EXISTS idx_fiches_actif;
-CREATE INDEX idx_fiches_actif ON fiches(actif);
+CREATE INDEX IF NOT EXISTS idx_fiches_actif ON fiches(actif);
 DROP INDEX IF EXISTS idx_fiches_famille;
 CREATE INDEX idx_fiches_famille ON fiches(famille_id);
 DROP INDEX IF EXISTS idx_inventaires_mama;
 CREATE INDEX idx_inventaires_mama ON inventaires(mama_id);
 DROP INDEX IF EXISTS idx_familles_mama;
 CREATE INDEX idx_familles_mama ON familles(mama_id);
+CREATE INDEX IF NOT EXISTS idx_familles_actif ON familles(actif);
 DROP INDEX IF EXISTS idx_unites_mama;
 CREATE INDEX idx_unites_mama ON unites(mama_id);
+CREATE INDEX IF NOT EXISTS idx_unites_actif ON unites(actif);
 DROP INDEX IF EXISTS idx_fournisseur_produits_mama;
 CREATE INDEX idx_fournisseur_produits_mama ON fournisseur_produits(mama_id);
 DROP INDEX IF EXISTS idx_fournisseur_produits_produit;
@@ -2690,6 +2691,7 @@ DROP INDEX IF EXISTS idx_menus_mama;
 CREATE INDEX idx_menus_mama ON menus(mama_id);
 DROP INDEX IF EXISTS idx_menus_date;
 CREATE INDEX idx_menus_date ON menus("date");
+CREATE INDEX IF NOT EXISTS idx_menus_actif ON menus(actif);
 DROP INDEX IF EXISTS idx_menu_fiches_menu;
 CREATE INDEX idx_menu_fiches_menu ON menu_fiches(menu_id);
 DROP INDEX IF EXISTS idx_menu_fiches_fiche;
@@ -2700,6 +2702,7 @@ DROP INDEX IF EXISTS idx_requisitions_produit;
 CREATE INDEX idx_requisitions_produit ON requisitions(produit_id);
 DROP INDEX IF EXISTS idx_requisitions_zone;
 CREATE INDEX idx_requisitions_zone ON requisitions(zone_id);
+CREATE INDEX IF NOT EXISTS idx_regles_alertes_actif ON regles_alertes(actif);
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -2766,8 +2769,7 @@ DROP INDEX IF EXISTS idx_ft_nom;
 CREATE INDEX idx_ft_nom ON fiches_techniques(nom);
 DROP INDEX IF EXISTS idx_ft_mama;
 CREATE INDEX idx_ft_mama ON fiches_techniques(mama_id);
-DROP INDEX IF EXISTS idx_ft_actif;
-CREATE INDEX idx_ft_actif ON fiches_techniques(actif);
+CREATE INDEX IF NOT EXISTS idx_ft_actif ON fiches_techniques(actif);
 
 alter table fiches_techniques enable row level security;
 alter table fiches_techniques force row level security;
@@ -2882,6 +2884,16 @@ DROP INDEX IF EXISTS idx_mouvements_stock_zone;
 CREATE INDEX idx_mouvements_stock_zone ON mouvements_stock(zone);
 DROP INDEX IF EXISTS idx_mouvements_stock_motif;
 CREATE INDEX idx_mouvements_stock_motif ON mouvements_stock(motif);
+-- Correction rétroactive : ajout colonne actif si absente
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'unites' AND column_name = 'actif'
+  ) THEN
+    ALTER TABLE unites ADD COLUMN IF NOT EXISTS actif boolean DEFAULT true;
+  END IF;
+END $$;
 -- Création également du profil correspondant dans utilisateurs pour l'auth Supabase
 insert into utilisateurs(auth_id, email, mama_id, role, access_rights, actif)
 values (

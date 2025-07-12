@@ -74,7 +74,7 @@ BEGIN
   ) THEN
     ALTER EXTENSION pg_cron SET SCHEMA pg_catalog;
   END IF;
-END $$;
+END $$ LANGUAGE plpgsql;
 
 -- Fonction utilitaire pour renommer une colonne d'une table ou d'une vue
 -- Utilisée dans les blocs DO afin d'éviter les ALTER TABLE/VIEW directs
@@ -124,7 +124,7 @@ BEGIN
   ) THEN
     EXECUTE 'DROP TABLE public.users CASCADE';
   END IF;
-END $$;
+END $$ LANGUAGE plpgsql;
 -- Harmonisation des anciens noms de colonnes
 -- Suppression des vues héritées avant renommage pour éviter les conflits
 drop view if exists v_product_price_trend;
@@ -185,7 +185,7 @@ BEGIN
     ALTER TABLE utilisateurs
       ADD CONSTRAINT utilisateurs_auth_id_key UNIQUE (auth_id);
   END IF;
-END $$;
+END $$ LANGUAGE plpgsql;
 
 DROP INDEX IF EXISTS idx_utilisateurs_auth_id;
 CREATE INDEX idx_utilisateurs_auth_id ON utilisateurs(auth_id);
@@ -514,6 +514,7 @@ create table if not exists fournisseur_contacts (
     email text,
     tel text,
     mama_id uuid not null references mamas(id),
+    actif boolean default true,
     created_at timestamptz default now()
 );
 
@@ -523,6 +524,7 @@ create table if not exists fournisseur_notes (
     note text,
     "date" date default current_date,
     mama_id uuid not null references mamas(id),
+    actif boolean default true,
     created_at timestamptz default now()
 );
 
@@ -608,6 +610,7 @@ create table if not exists parametres (
     nom text,
     logo text,
     contacts jsonb,
+    actif boolean default true,
     created_at timestamptz default now()
 );
 
@@ -633,13 +636,47 @@ CREATE INDEX idx_ventes_boissons_mama ON ventes_boissons(mama_id);
 DROP INDEX IF EXISTS idx_ventes_boissons_boisson;
 CREATE INDEX idx_ventes_boissons_boisson ON ventes_boissons(boisson_id);
 CREATE INDEX IF NOT EXISTS idx_ventes_boissons_actif ON ventes_boissons(actif);
-create or replace view stock_mouvements as select * from mouvements_stock;
+create or replace view stock_mouvements as
+select
+  id,
+  produit_id,
+  quantite,
+  type,
+  zone_source_id,
+  zone_destination_id,
+  sous_type,
+  zone,
+  motif,
+  date_mouvement,
+  commentaire,
+  auteur_id,
+  inventaire_id,
+  mama_id,
+  created_at,
+  actif
+from mouvements_stock
+where mama_id = current_user_mama_id();
 grant select on stock_mouvements to authenticated;
 create or replace view stocks as
 select
-  m.*,
+  m.id,
+  m.produit_id,
+  m.quantite,
+  m.type,
+  m.zone_source_id,
+  m.zone_destination_id,
+  m.sous_type,
+  m.zone,
+  m.motif,
+  m.date_mouvement,
+  m.commentaire,
+  m.auteur_id,
+  m.inventaire_id,
+  m.mama_id,
+  m.created_at,
   m.actif as mouvements_stock_actif
-from mouvements_stock m;
+from mouvements_stock m
+where m.mama_id = current_user_mama_id();
 create or replace function mettre_a_jour_pmp_produit()
 returns trigger language plpgsql as $$
 begin
@@ -972,16 +1009,19 @@ alter table parametres enable row level security;
 alter table parametres force row level security;
 drop policy if exists parametres_all on parametres;
 create policy parametres_all on parametres for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+grant select, insert, update, delete on parametres to authenticated;
 
 alter table fournisseur_contacts enable row level security;
 alter table fournisseur_contacts force row level security;
 drop policy if exists fournisseur_contacts_all on fournisseur_contacts;
 create policy fournisseur_contacts_all on fournisseur_contacts for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+grant select, insert, update, delete on fournisseur_contacts to authenticated;
 
 alter table fournisseur_notes enable row level security;
 alter table fournisseur_notes force row level security;
 drop policy if exists fournisseur_notes_all on fournisseur_notes;
 create policy fournisseur_notes_all on fournisseur_notes for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+grant select, insert, update, delete on fournisseur_notes to authenticated;
 
 alter table permissions enable row level security;
 alter table permissions force row level security;
@@ -1170,7 +1210,16 @@ grant select on v_centres_cout_mensuel to authenticated;
 
 -- Vue alias pour les totaux mensuels par centre de coût
 create or replace view v_centres_cout_mois as
-select * from v_centres_cout_mensuel;
+select
+  mama_id,
+  centre_cout_id,
+  mois,
+  nom,
+  centre_cout_actif,
+  mouvements_cc_actifs,
+  quantite,
+  valeur
+from v_centres_cout_mensuel;
 grant select on v_centres_cout_mois to authenticated;
 
 -- Fonction retournant les statistiques par centre de coût pour une période donnée
@@ -1594,6 +1643,8 @@ DROP INDEX IF EXISTS idx_taches_statut;
 CREATE INDEX idx_taches_statut ON taches(statut);
 DROP INDEX IF EXISTS idx_taches_priorite;
 CREATE INDEX idx_taches_priorite ON taches(priorite);
+CREATE INDEX IF NOT EXISTS idx_taches_actif ON taches(actif);
+CREATE INDEX IF NOT EXISTS idx_taches_created_at ON taches(created_at);
 
 alter table taches enable row level security;
 alter table taches force row level security;
@@ -1610,7 +1661,12 @@ create policy taches_update on taches
 drop policy if exists taches_delete on taches;
 create policy taches_delete on taches
   for delete using (mama_id = current_user_mama_id() and created_by = auth.uid());
-grant select, insert, update, delete on taches to authenticated;
+  grant select, insert, update, delete on taches to authenticated;
+
+drop trigger if exists trg_maj_taches on taches;
+create trigger trg_maj_taches
+  before update on taches
+  for each row execute function maj_updated_at();
 
 create table if not exists tache_instances (
     id uuid primary key default uuid_generate_v4(),
@@ -1630,6 +1686,7 @@ CREATE INDEX idx_tache_instances_statut ON tache_instances(statut);
 DROP INDEX IF EXISTS idx_tache_instances_done;
 CREATE INDEX idx_tache_instances_done ON tache_instances(done_by);
 CREATE INDEX IF NOT EXISTS idx_tache_instances_actif ON tache_instances(actif);
+CREATE INDEX IF NOT EXISTS idx_tache_instances_created_at ON tache_instances(created_at);
 
 alter table tache_instances enable row level security;
 alter table tache_instances force row level security;
@@ -1664,6 +1721,7 @@ CREATE INDEX idx_vfc_fiche_periode_mama ON ventes_fiches_carte(fiche_id, periode
 DROP INDEX IF EXISTS idx_vfc_periode;
 CREATE INDEX idx_vfc_periode ON ventes_fiches_carte(periode);
 CREATE INDEX IF NOT EXISTS idx_ventes_fiches_carte_actif ON ventes_fiches_carte(actif);
+CREATE INDEX IF NOT EXISTS idx_vfc_created_at ON ventes_fiches_carte(created_at);
 
 alter table ventes_fiches_carte enable row level security;
 alter table ventes_fiches_carte force row level security;
@@ -1672,6 +1730,11 @@ create policy ventes_fiches_carte_all on ventes_fiches_carte
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
 grant select, insert, update, delete on ventes_fiches_carte to authenticated;
+
+drop trigger if exists trg_maj_vfc on ventes_fiches_carte;
+create trigger trg_maj_vfc
+  before update on ventes_fiches_carte
+  for each row execute function maj_updated_at();
 
 
 -- Module Promotions / Opérations commerciales
@@ -1743,8 +1806,9 @@ create trigger trg_journal_promotions
   after insert or update or delete on promotions
   for each row execute function journaliser_modifs_promotions();
 
--- Vue et fonction pour les statistiques consolidées multi-sites
-create or replace view v_stats_consolidees as
+-- Vue matérialisée pour les statistiques consolidées multi-sites
+drop materialized view if exists v_stats_consolidees;
+create materialized view v_stats_consolidees as
 select
   m.id as mama_id,
   m.nom,
@@ -1758,6 +1822,7 @@ select
 from mamas m
 left join produits p on p.mama_id = m.id
 group by m.id, m.nom, m.actif;
+create unique index if not exists idx_v_stats_consolidees_mama on v_stats_consolidees(mama_id);
 grant select on v_stats_consolidees to authenticated;
 
 create or replace function stats_consolidees()
@@ -1771,7 +1836,13 @@ returns table(
 language sql
 security definer
 set search_path = public as $$
-  select * from v_stats_consolidees
+  select
+    mama_id,
+    nom,
+    stock_valorise,
+    conso_mois,
+    nb_mouvements
+  from v_stats_consolidees
   where (
     select r.nom from users u join roles r on r.id = u.role_id where u.id = auth.uid()
   ) = 'superadmin' or mama_id = current_user_mama_id();
@@ -1786,7 +1857,7 @@ BEGIN
      AND to_regclass('public.audit_entries') IS NOT NULL THEN
     ALTER TABLE audit_entries RENAME TO journal_audit;
   END IF;
-END $$;
+END $$ LANGUAGE plpgsql;
 
 -- Journal avancé conforme aux obligations légales
 create table if not exists journal_audit (
@@ -1844,10 +1915,13 @@ create table if not exists planning_previsionnel (
     date_prevue date not null,
     notes text,
     created_by uuid references users(id) on delete set null,
+    actif boolean default true,
     created_at timestamptz default now()
 );
 DROP INDEX IF EXISTS idx_planning_mama;
 CREATE INDEX idx_planning_mama ON planning_previsionnel(mama_id, date_prevue);
+CREATE INDEX IF NOT EXISTS idx_planning_previsionnel_actif ON planning_previsionnel(actif);
+CREATE INDEX IF NOT EXISTS idx_planning_previsionnel_created_at ON planning_previsionnel(created_at);
 alter table planning_previsionnel enable row level security;
 alter table planning_previsionnel force row level security;
 drop policy if exists planning_previsionnel_all on planning_previsionnel;
@@ -1871,7 +1945,7 @@ BEGIN
      AND to_regclass('public.alert_logs') IS NOT NULL THEN
     ALTER TABLE alert_logs RENAME TO journaux_alertes;
   END IF;
-END $$;
+END $$ LANGUAGE plpgsql;
 create table if not exists regles_alertes (
     id uuid primary key default uuid_generate_v4(),
     mama_id uuid not null references mamas(id) on delete cascade,
@@ -1914,7 +1988,7 @@ declare
   r record;
 begin
   for r in
-    select * from regles_alertes
+    select id, produit_id, threshold from regles_alertes
     where actif and mama_id = new.mama_id
       and (produit_id is null or produit_id = new.id)
   loop
@@ -1944,17 +2018,20 @@ BEGIN
      AND to_regclass('public.incoming_invoices') IS NOT NULL THEN
     ALTER TABLE incoming_invoices RENAME TO factures_importees;
   END IF;
-END $$;
+END $$ LANGUAGE plpgsql;
 create table if not exists factures_importees (
     id uuid primary key default uuid_generate_v4(),
     mama_id uuid not null references mamas(id) on delete cascade,
     fournisseur_id uuid references fournisseurs(id) on delete set null,
     payload jsonb not null,
     processed boolean default false,
+    actif boolean default true,
     created_at timestamptz default now()
 );
 DROP INDEX IF EXISTS idx_factures_importees_mama;
 CREATE INDEX idx_factures_importees_mama ON factures_importees(mama_id);
+CREATE INDEX IF NOT EXISTS idx_factures_importees_actif ON factures_importees(actif);
+CREATE INDEX IF NOT EXISTS idx_factures_importees_created_at ON factures_importees(created_at);
 
 alter table factures_importees enable row level security;
 alter table factures_importees force row level security;
@@ -1996,10 +2073,13 @@ create table if not exists documents (
     title text not null,
     file_url text not null,
     uploaded_by uuid references users(id) on delete set null,
+    actif boolean default true,
     created_at timestamptz default now()
 );
 DROP INDEX IF EXISTS idx_documents_mama;
 CREATE INDEX idx_documents_mama ON documents(mama_id);
+CREATE INDEX IF NOT EXISTS idx_documents_actif ON documents(actif);
+CREATE INDEX IF NOT EXISTS idx_documents_created_at ON documents(created_at);
 
 alter table documents enable row level security;
 alter table documents force row level security;
@@ -2014,8 +2094,13 @@ create table if not exists consentements_utilisateur (
     user_id uuid references users(id) on delete cascade,
     mama_id uuid,
     consentement boolean,
+    actif boolean default true,
     date_consentement timestamptz default now()
 );
+CREATE INDEX IF NOT EXISTS idx_consentements_utilisateur_user ON consentements_utilisateur(user_id);
+CREATE INDEX IF NOT EXISTS idx_consentements_utilisateur_mama ON consentements_utilisateur(mama_id);
+CREATE INDEX IF NOT EXISTS idx_consentements_utilisateur_actif ON consentements_utilisateur(actif);
+CREATE INDEX IF NOT EXISTS idx_consentements_utilisateur_date ON consentements_utilisateur(date_consentement);
 
 alter table consentements_utilisateur enable row level security;
 alter table consentements_utilisateur force row level security;
@@ -2031,7 +2116,7 @@ BEGIN
      AND to_regclass('public.two_factor_auth') IS NOT NULL THEN
     ALTER TABLE public.two_factor_auth RENAME TO auth_double_facteur;
   END IF;
-END $$;
+END $$ LANGUAGE plpgsql;
 create table if not exists public.auth_double_facteur (
     id uuid primary key references auth.users(id) on delete cascade,
     secret text,
@@ -2086,7 +2171,13 @@ group by p.id, p.nom, p.mama_id, p.actif;
 grant select on v_reco_rotation to authenticated;
 
 create or replace view v_reco_stockmort as
-select * from v_reco_rotation
+select
+  produit_id,
+  nom,
+  mama_id,
+  produit_actif,
+  jours_inactif
+from v_reco_rotation
 where jours_inactif > 30;
 grant select on v_reco_stockmort to authenticated;
 
@@ -2156,7 +2247,7 @@ begin
   else
     raise notice 'cron.schedule not available';
   end if;
-END $$;
+END $$ LANGUAGE plpgsql;
 
 create or replace function calculer_budgets(mama_id_param uuid, periode_param text)
 returns table(famille text, budget_prevu numeric, total_reel numeric, ecart_pct numeric)
@@ -2361,7 +2452,7 @@ BEGIN
   ) THEN
       ALTER TABLE requisitions ADD COLUMN IF NOT EXISTS zone_id uuid references zones_stock(id);
   END IF;
-END $$;
+END $$ LANGUAGE plpgsql;
 
 -- Harmonisation des colonnes encore en anglais
 DO $$
@@ -2410,7 +2501,7 @@ BEGIN
   ) THEN
     ALTER TABLE pertes ADD COLUMN IF NOT EXISTS centre_cout_id uuid references centres_de_cout(id);
   END IF;
-END $$;
+END $$ LANGUAGE plpgsql;
 
 DO $$
 BEGIN
@@ -2493,7 +2584,7 @@ BEGIN
   ) THEN
     PERFORM renommer_colonne_public('stocks','product_id','produit_id');
   END IF;
-END $$;
+END $$ LANGUAGE plpgsql;
 -- Ajout des colonnes zone_source_id et zone_destination_id si absentes
 DO $$
 BEGIN
@@ -2514,7 +2605,7 @@ BEGIN
       ALTER TABLE mouvements_stock ADD COLUMN IF NOT EXISTS zone_destination_id uuid references zones_stock(id);
     END IF;
   END IF;
-END $$;
+END $$ LANGUAGE plpgsql;
 
 -- Ajout de la colonne auteur_id sur mouvements_stock et requisitions si absente
 DO $$
@@ -2542,7 +2633,7 @@ BEGIN
       ALTER TABLE requisitions ADD COLUMN IF NOT EXISTS auteur_id uuid references utilisateurs(id);
     END IF;
   END IF;
-END $$;
+END $$ LANGUAGE plpgsql;
 
 -- Harmonisation des noms de colonnes date
 DO $$
@@ -2593,7 +2684,7 @@ BEGIN
   ) THEN
     ALTER TABLE requisitions RENAME COLUMN date TO date_requisition;
   END IF;
-END $$;
+END $$ LANGUAGE plpgsql;
 
 ALTER TABLE IF EXISTS users ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
 ALTER TABLE IF EXISTS utilisateurs ADD COLUMN IF NOT EXISTS actif boolean DEFAULT TRUE;
@@ -2660,7 +2751,7 @@ BEGIN
    WHERE p.id = fp.produit_id
      AND p.mama_id = fp.mama_id
      AND p.dernier_prix IS NULL;
-END $$;
+END $$ LANGUAGE plpgsql;
 DROP INDEX IF EXISTS idx_fournisseurs_api_config_fourn;
 CREATE INDEX idx_fournisseurs_api_config_fourn ON fournisseurs_api_config(fournisseur_id);
 DROP INDEX IF EXISTS idx_fournisseurs_api_config_mama;
@@ -2709,6 +2800,7 @@ CREATE INDEX idx_factures_fournisseur ON factures(fournisseur_id);
 DROP INDEX IF EXISTS idx_factures_statut;
 CREATE INDEX idx_factures_statut ON factures(statut);
 CREATE INDEX IF NOT EXISTS idx_factures_actif ON factures(actif);
+CREATE INDEX IF NOT EXISTS idx_factures_created_at ON factures(created_at);
 DROP INDEX IF EXISTS idx_fiches_mama;
 CREATE INDEX idx_fiches_mama ON fiches(mama_id);
 DROP INDEX IF EXISTS idx_fiches_nom;
@@ -2762,14 +2854,20 @@ CREATE INDEX idx_inventaire_lignes_produit ON inventaire_lignes(produit_id);
 CREATE INDEX IF NOT EXISTS idx_inventaire_lignes_actif ON inventaire_lignes(actif);
 DROP INDEX IF EXISTS idx_parametres_mama;
 CREATE INDEX idx_parametres_mama ON parametres(mama_id);
+CREATE INDEX IF NOT EXISTS idx_parametres_actif ON parametres(actif);
+CREATE INDEX IF NOT EXISTS idx_parametres_created_at ON parametres(created_at);
 DROP INDEX IF EXISTS idx_fournisseur_contacts_mama;
 CREATE INDEX idx_fournisseur_contacts_mama ON fournisseur_contacts(mama_id);
 DROP INDEX IF EXISTS idx_fournisseur_contacts_fournisseur;
 CREATE INDEX idx_fournisseur_contacts_fournisseur ON fournisseur_contacts(fournisseur_id);
+CREATE INDEX IF NOT EXISTS idx_fournisseur_contacts_actif ON fournisseur_contacts(actif);
+CREATE INDEX IF NOT EXISTS idx_fournisseur_contacts_created_at ON fournisseur_contacts(created_at);
 DROP INDEX IF EXISTS idx_fournisseur_notes_mama;
 CREATE INDEX idx_fournisseur_notes_mama ON fournisseur_notes(mama_id);
 DROP INDEX IF EXISTS idx_fournisseur_notes_fournisseur;
 CREATE INDEX idx_fournisseur_notes_fournisseur ON fournisseur_notes(fournisseur_id);
+CREATE INDEX IF NOT EXISTS idx_fournisseur_notes_actif ON fournisseur_notes(actif);
+CREATE INDEX IF NOT EXISTS idx_fournisseur_notes_created_at ON fournisseur_notes(created_at);
 DROP INDEX IF EXISTS idx_permissions_mama;
 CREATE INDEX idx_permissions_mama ON permissions(mama_id);
 DROP INDEX IF EXISTS idx_permissions_role;
@@ -2803,7 +2901,7 @@ BEGIN
   IF EXISTS (SELECT 1 FROM pg_class WHERE relname='access_rights_templates' AND relkind IN (''r'',''p'')) THEN
     EXECUTE 'CREATE INDEX IF NOT EXISTS idx_access_rights_templates_actif ON access_rights_templates(actif)';
   END IF;
-END $$;
+END $$ LANGUAGE plpgsql;
 CREATE INDEX IF NOT EXISTS idx_regles_alertes_actif ON regles_alertes(actif);
 DO $$
 BEGIN
@@ -2819,7 +2917,7 @@ BEGIN
   ) THEN
     ALTER TABLE produits ADD COLUMN IF NOT EXISTS unite text;
   END IF;
-END $$;
+END $$ LANGUAGE plpgsql;
 
 -- Contraintes uniques sur (mama_id, nom, unite)
 DO $$
@@ -2830,7 +2928,7 @@ BEGIN
     ALTER TABLE produits
       ADD CONSTRAINT produits_mama_id_nom_unite_key UNIQUE (mama_id, nom, unite);
   END IF;
-END $$;
+END $$ LANGUAGE plpgsql;
 
 -- ---------------------------------------
 -- Module Carte - champs additionnels
@@ -2861,7 +2959,7 @@ BEGIN
   ) THEN
     ALTER TABLE fiches_techniques ADD COLUMN IF NOT EXISTS prix_vente numeric;
   END IF;
-END $$;
+END $$ LANGUAGE plpgsql;
 
 DROP INDEX IF EXISTS idx_ft_carte;
 CREATE INDEX idx_ft_carte ON fiches_techniques(carte_actuelle, type_carte, sous_type_carte);
@@ -2930,6 +3028,7 @@ CREATE INDEX idx_mouvements_stock_date ON mouvements_stock(date_mouvement);
 DROP INDEX IF EXISTS idx_mouvements_stock_type;
 CREATE INDEX idx_mouvements_stock_type ON mouvements_stock(type);
 CREATE INDEX IF NOT EXISTS idx_mouvements_stock_actif ON mouvements_stock(actif);
+CREATE INDEX IF NOT EXISTS idx_mouvements_stock_created_at ON mouvements_stock(created_at);
 
 -- Ajout de la colonne date_debut pour les inventaires
 DO $$
@@ -2940,7 +3039,7 @@ BEGIN
   ) THEN
     ALTER TABLE inventaires ADD COLUMN IF NOT EXISTS date_debut date;
   END IF;
-END $$;
+END $$ LANGUAGE plpgsql;
 
 DROP INDEX IF EXISTS idx_inventaires_date;
 CREATE INDEX idx_inventaires_date ON inventaires(date_inventaire);
@@ -2979,7 +3078,7 @@ BEGIN
   ) THEN
     ALTER TABLE mouvements_stock ADD COLUMN IF NOT EXISTS motif text;
   END IF;
-END $$;
+END $$ LANGUAGE plpgsql;
 
 DROP INDEX IF EXISTS idx_mouvements_stock_sous_type;
 CREATE INDEX idx_mouvements_stock_sous_type ON mouvements_stock(sous_type);
@@ -3021,6 +3120,27 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'boissons' AND column_name = 'actif') THEN
     ALTER TABLE boissons ADD COLUMN actif boolean DEFAULT true;
   END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'fournisseur_contacts' AND column_name = 'actif') THEN
+    ALTER TABLE fournisseur_contacts ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'fournisseur_notes' AND column_name = 'actif') THEN
+    ALTER TABLE fournisseur_notes ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'parametres' AND column_name = 'actif') THEN
+    ALTER TABLE parametres ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'planning_previsionnel' AND column_name = 'actif') THEN
+    ALTER TABLE planning_previsionnel ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'factures_importees' AND column_name = 'actif') THEN
+    ALTER TABLE factures_importees ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'documents' AND column_name = 'actif') THEN
+    ALTER TABLE documents ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'consentements_utilisateur' AND column_name = 'actif') THEN
+    ALTER TABLE consentements_utilisateur ADD COLUMN actif boolean DEFAULT true;
+  END IF;
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'roles' AND column_name = 'actif') THEN
     ALTER TABLE roles ADD COLUMN actif boolean DEFAULT true;
   END IF;
@@ -3030,7 +3150,7 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'produits' AND column_name = 'actif') THEN
     ALTER TABLE produits ADD COLUMN actif boolean DEFAULT true;
   END IF;
-END $$;
+END $$ LANGUAGE plpgsql;
 -- Création également du profil correspondant dans utilisateurs pour l'auth Supabase
 insert into utilisateurs(auth_id, email, mama_id, role, access_rights, actif)
 values (
@@ -3165,7 +3285,7 @@ BEGIN
   ) THEN
     ALTER TABLE tache_instances ADD COLUMN actif boolean DEFAULT true;
   END IF;
-END $$;
+END $$ LANGUAGE plpgsql;
 
 -- Rétablir la vérification des corps de fonctions
 set check_function_bodies = on;

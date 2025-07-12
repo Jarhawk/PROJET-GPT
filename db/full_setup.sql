@@ -2142,7 +2142,7 @@ create table if not exists fournisseurs_api_config (
   token text,
   format_facture text default 'json',
   created_at timestamptz default now(),
-    actif boolean default true
+    actif boolean default true,
   primary key(fournisseur_id, mama_id)
 );
 -- Renomme product_id en produit_id si nécessaire

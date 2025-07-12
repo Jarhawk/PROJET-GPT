@@ -140,9 +140,10 @@ drop view if exists v_cost_center_month;
 -- Tables de base
 -- ------------------
 create table if not exists mamas (
-    id uuid primary key default uuid_generate_v4(),
+id uuid primary key default uuid_generate_v4(),
     nom text not null,
     logo text,
+  actif boolean default true,
     contact text,
     created_at timestamptz default now()
 );
@@ -634,10 +635,17 @@ CREATE INDEX idx_ventes_boissons_boisson ON ventes_boissons(boisson_id);
 CREATE INDEX IF NOT EXISTS idx_ventes_boissons_actif ON ventes_boissons(actif);
 create or replace view stock_mouvements as select * from mouvements_stock;
 grant select on stock_mouvements to authenticated;
-create or replace view stocks as select * from mouvements_stock;
-grant select on stocks to authenticated;
-
--- Trigger de mise à jour du PMP produit et du stock lors de l'insertion de ligne de facture
+create or replace view stocks as select *, w.actif as factures_actif,
+  w.actif as facture_lignes_actif,
+  f.actif as factures_actif,
+  f.actif as factures_actif,
+  w.actif as mouvements_stock_actif,
+  w.actif as mamas_actif,
+create or replace view stocks as
+select
+  m.*,
+  m.actif as mouvements_stock_actif
+from mouvements_stock m;
 create or replace function mettre_a_jour_pmp_produit()
 returns trigger language plpgsql as $$
 begin
@@ -1264,7 +1272,8 @@ select
   bool_or(fc.actif) as facture_actif,
   max(fc.date_facture) as last_invoice_date,
   date_part('month', age(current_date, max(fc.date_facture))) as months_since_last_invoice
-from fournisseurs f
+m.actif as mouvements_stock_actif,
+  from fournisseurs f
 left join factures fc on fc.fournisseur_id = f.id
 where f.mama_id is not null
   group by f.mama_id, f.id, f.nom
@@ -1423,7 +1432,11 @@ select
   sp.date_livraison as dernier_prix_date,
   sp.fournisseur_id as dernier_fournisseur_id,
   sp.actif as fournisseur_produit_actif
-from produits p
+m.actif as mouvements_stock_actif,
+  m.actif as mouvements_stock_actif,
+  w.actif as taches_actif,
+  w.actif as taches_actif,
+  from produits p
 left join familles f on f.id = p.famille_id and f.mama_id = p.mama_id
 left join unites u on u.id = p.unite_id and u.mama_id = p.mama_id
 left join lateral (
@@ -1749,7 +1762,8 @@ select
   m.actif as mama_actif,
   bool_or(p.actif) as produits_actifs,
   coalesce(sum(p.stock_reel * p.pmp),0) as stock_valorise,
-  (select count(*) from mouvements_stock ms where ms.mama_id = m.id) as nb_mouvements,
+  (select count(*) w.actif as fournisseurs_actif,
+  from mouvements_stock ms where ms.mama_id = m.id) as nb_mouvements,
   (select sum(abs(ms.quantite)) from mouvements_stock ms
       where ms.mama_id = m.id and ms.type='sortie'
         and date_trunc('month', ms.date_mouvement) = date_trunc('month', current_date)) as conso_mois
@@ -2120,7 +2134,11 @@ select distinct on (sp.produit_id)
   lag(sp.prix_achat) over (partition by sp.produit_id order by sp.date_livraison) as prix_precedent,
   (sp.prix_achat - lag(sp.prix_achat) over (partition by sp.produit_id order by sp.date_livraison))
     / nullif(lag(sp.prix_achat) over (partition by sp.produit_id order by sp.date_livraison),0) * 100 as variation_pct
-from fournisseur_produits sp
+f.actif as factures_actif,
+  w.actif as roles_actif,
+  w.actif as mouvements_stock_actif,
+  w.actif as mouvements_stock_actif,
+  from fournisseur_produits sp
 join produits p on p.id = sp.produit_id
 where p.actif = true
 order by sp.produit_id, sp.date_livraison desc;

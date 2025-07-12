@@ -168,7 +168,8 @@ create table if not exists utilisateurs (
     role text default 'user',
     mama_id uuid references public.mamas(id),
     access_rights jsonb default '{}'::jsonb,
-    created_at timestamptz default now()
+    created_at timestamptz default now(),
+    actif boolean default true
 );
 
 -- S'assurer de la contrainte unique sur auth_id et des index pour des recherches performantes
@@ -2979,6 +2980,15 @@ BEGIN
   END IF;
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'boissons' AND column_name = 'actif') THEN
     ALTER TABLE boissons ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'roles' AND column_name = 'actif') THEN
+    ALTER TABLE roles ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'utilisateurs' AND column_name = 'actif') THEN
+    ALTER TABLE utilisateurs ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'produits' AND column_name = 'actif') THEN
+    ALTER TABLE produits ADD COLUMN actif boolean DEFAULT true;
   END IF;
 END $$;
 -- Création également du profil correspondant dans utilisateurs pour l'auth Supabase

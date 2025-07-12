@@ -31,6 +31,9 @@
 -- Assurez-vous donc d'exécuter ce script sur une instance Supabase
 -- préconfigurée avec ces rôles et le schéma `auth` existants.
 
+-- Vérification : tous les blocs CREATE TABLE comportent les virgules
+-- nécessaires avant les PRIMARY KEY et contraintes
+
 -- Désactiver la vérification des corps de fonctions pour permettre la création
 -- avant toutes les tables dépendantes
 set check_function_bodies = off;
@@ -681,6 +684,27 @@ create trigger trg_maj_prix_produit
   after insert on facture_lignes
   for each row execute function mettre_a_jour_prix_produit();
 
+-- Mise à jour du PMP lors de la modification d'un achat
+create or replace function maj_pmp_produit_update()
+returns trigger language plpgsql as $$
+begin
+  update produits
+     set stock_reel = stock_reel - old.quantite + new.quantite,
+         pmp = (
+           (coalesce(pmp,0) * stock_reel)
+           - coalesce(old.quantite,0) * coalesce(old.prix_unitaire,0)
+           + new.quantite * new.prix_unitaire
+         ) / nullif(stock_reel - old.quantite + new.quantite, 0)
+   where id = new.produit_id;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_maj_pmp_achat on facture_lignes;
+create trigger trg_maj_pmp_achat
+  after update on facture_lignes
+  for each row execute function maj_pmp_produit_update();
+
 -- Trigger pour maintenir le total de la facture en phase avec ses lignes
 create or replace function rafraichir_total_facture()
 returns trigger language plpgsql as $$
@@ -711,7 +735,7 @@ create trigger trg_total_facture
   for each row execute function rafraichir_total_facture();
 
 -- Trigger de mise à jour du stock théorique lors de l'enregistrement des mouvements
-create or replace function maj_stock_theorique()
+create or replace function maj_stock_produit()
 returns trigger language plpgsql as $$
 begin
   if new.type = 'entree' or new.type = 'correction' or new.type = 'transfert' then
@@ -724,11 +748,12 @@ end;
 $$;
 
 drop trigger if exists trg_mouvement_stock on mouvements_stock;
-create trigger trg_mouvement_stock after insert on mouvements_stock
-  for each row execute function maj_stock_theorique();
+drop trigger if exists trg_maj_stock on mouvements_stock;
+create trigger trg_maj_stock after insert on mouvements_stock
+  for each row execute function maj_stock_produit();
 
--- Trigger pour appliquer les lignes d'inventaire au stock réel
-create or replace function appliquer_ligne_inventaire()
+-- Mise à jour du stock réel depuis l'inventaire
+create or replace function maj_stock_reel()
 returns trigger language plpgsql as $$
 begin
   update produits set stock_reel = new.quantite where id = new.produit_id;
@@ -737,9 +762,9 @@ end;
 $$;
 
 drop trigger if exists trg_ligne_inventaire on inventaire_lignes;
-drop trigger if exists trg_inventaire_ligne on inventaire_lignes;
-create trigger trg_ligne_inventaire after insert on inventaire_lignes
-  for each row execute function appliquer_ligne_inventaire();
+drop trigger if exists trg_maj_stock_reel on inventaire_lignes;
+create trigger trg_maj_stock_reel after insert on inventaire_lignes
+  for each row execute function maj_stock_reel();
 
 -- Trigger de rafraîchissement du coût des fiches lors des modifications
 create or replace function rafraichir_cout_fiche()
@@ -2936,20 +2961,11 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'factures' AND column_name = 'actif') THEN
     ALTER TABLE factures ADD COLUMN actif boolean DEFAULT true;
   END IF;
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'facture_lignes' AND column_name = 'actif') THEN
-    ALTER TABLE facture_lignes ADD COLUMN actif boolean DEFAULT true;
-  END IF;
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'fiche_lignes' AND column_name = 'actif') THEN
-    ALTER TABLE fiche_lignes ADD COLUMN actif boolean DEFAULT true;
-  END IF;
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'fournisseur_produits' AND column_name = 'actif') THEN
     ALTER TABLE fournisseur_produits ADD COLUMN actif boolean DEFAULT true;
   END IF;
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'inventaires' AND column_name = 'actif') THEN
     ALTER TABLE inventaires ADD COLUMN actif boolean DEFAULT true;
-  END IF;
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'inventaire_lignes' AND column_name = 'actif') THEN
-    ALTER TABLE inventaire_lignes ADD COLUMN actif boolean DEFAULT true;
   END IF;
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'requisitions' AND column_name = 'actif') THEN
     ALTER TABLE requisitions ADD COLUMN actif boolean DEFAULT true;
@@ -2960,20 +2976,8 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'mouvements_stock' AND column_name = 'actif') THEN
     ALTER TABLE mouvements_stock ADD COLUMN actif boolean DEFAULT true;
   END IF;
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'tache_instances' AND column_name = 'actif') THEN
-    ALTER TABLE tache_instances ADD COLUMN actif boolean DEFAULT true;
-  END IF;
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'ventes_boissons' AND column_name = 'actif') THEN
-    ALTER TABLE ventes_boissons ADD COLUMN actif boolean DEFAULT true;
-  END IF;
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'ventes_fiches_carte' AND column_name = 'actif') THEN
-    ALTER TABLE ventes_fiches_carte ADD COLUMN actif boolean DEFAULT true;
-  END IF;
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'fiche_cout_history' AND column_name = 'actif') THEN
     ALTER TABLE fiche_cout_history ADD COLUMN actif boolean DEFAULT true;
-  END IF;
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'fiche_produits' AND column_name = 'actif') THEN
-    ALTER TABLE fiche_produits ADD COLUMN actif boolean DEFAULT true;
   END IF;
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'access_rights_templates' AND column_name = 'actif') THEN
     ALTER TABLE access_rights_templates ADD COLUMN actif boolean DEFAULT true;
@@ -3003,6 +3007,122 @@ values (
 ) on conflict (auth_id) do nothing;
 
 -- ----------------------------------------------------
+-- Vues analytiques supplémentaires
+-- ----------------------------------------------------
+create or replace view vue_stock_actuel as
+with mouvements as (
+  select zone_destination_id as zone_id, produit_id, quantite, mama_id
+    from mouvements_stock
+   where zone_destination_id is not null
+  union all
+  select zone_source_id as zone_id, produit_id, -quantite as quantite, mama_id
+    from mouvements_stock
+   where zone_source_id is not null
+)
+select
+  mama_id,
+  zone_id,
+  produit_id,
+  sum(quantite) as stock_theorique
+from mouvements
+group by mama_id, zone_id, produit_id;
+grant select on vue_stock_actuel to authenticated;
+
+create or replace view vue_achats_par_fournisseur as
+select
+  fp.mama_id,
+  fp.fournisseur_id,
+  fp.produit_id,
+  avg(fp.prix_achat) as prix_moyen,
+  (
+    select prix_achat
+      from fournisseur_produits fp2
+     where fp2.fournisseur_id = fp.fournisseur_id
+       and fp2.produit_id = fp.produit_id
+       and fp2.mama_id = fp.mama_id
+     order by fp2.date_livraison desc
+     limit 1
+  ) as dernier_prix,
+  count(*) as nb_achats
+from fournisseur_produits fp
+group by fp.mama_id, fp.fournisseur_id, fp.produit_id;
+grant select on vue_achats_par_fournisseur to authenticated;
+
+create or replace view vue_cout_fiche as
+select
+  f.id as fiche_id,
+  f.mama_id,
+  sum(fl.quantite * coalesce(p.pmp, 0)) as cout_total
+from fiches f
+  left join fiche_lignes fl on fl.fiche_id = f.id
+  left join produits p on p.id = fl.produit_id
+group by f.id, f.mama_id;
+grant select on vue_cout_fiche to authenticated;
+
+create or replace view vue_fiches_ventes as
+select
+  v.fiche_id,
+  ft.nom as fiche_nom,
+  v.mama_id,
+  sum(v.ventes) as total_ventes
+from ventes_fiches_carte v
+  left join fiches_techniques ft on ft.id = v.fiche_id
+group by v.fiche_id, ft.nom, v.mama_id;
+grant select on vue_fiches_ventes to authenticated;
+
+-- ----------------------------------------------------
+-- Ajout conditionnel de la colonne actif pour les tables manquantes
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'facture_lignes' AND column_name = 'actif'
+  ) THEN
+    ALTER TABLE facture_lignes ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'fiche_lignes' AND column_name = 'actif'
+  ) THEN
+    ALTER TABLE fiche_lignes ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'fiche_produits' AND column_name = 'actif'
+  ) THEN
+    ALTER TABLE fiche_produits ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'inventaire_lignes' AND column_name = 'actif'
+  ) THEN
+    ALTER TABLE inventaire_lignes ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'ventes_boissons' AND column_name = 'actif'
+  ) THEN
+    ALTER TABLE ventes_boissons ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'ventes_fiches_carte' AND column_name = 'actif'
+  ) THEN
+    ALTER TABLE ventes_fiches_carte ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'tache_instances' AND column_name = 'actif'
+  ) THEN
+    ALTER TABLE tache_instances ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+END $$;
 
 -- Rétablir la vérification des corps de fonctions
 set check_function_bodies = on;

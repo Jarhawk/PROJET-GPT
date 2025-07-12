@@ -141,7 +141,6 @@ create table if not exists mamas (
     nom text not null,
     logo text,
     contact text,
-    actif boolean default true,
     created_at timestamptz default now()
 );
 
@@ -158,7 +157,6 @@ create table if not exists users (
     password text,
     role_id uuid references roles(id),
     access_rights jsonb default '[]',
-    actif boolean default true,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now()
 );
@@ -170,7 +168,6 @@ create table if not exists utilisateurs (
     role text default 'user',
     mama_id uuid references public.mamas(id),
     access_rights jsonb default '{}'::jsonb,
-    actif boolean default true,
     created_at timestamptz default now()
 );
 
@@ -261,7 +258,6 @@ create table if not exists familles (
     id uuid primary key default uuid_generate_v4(),
     nom text not null,
     mama_id uuid not null references mamas(id),
-    actif boolean default true,
     created_at timestamptz default now(),
     unique(mama_id, nom)
 );
@@ -270,7 +266,6 @@ create table if not exists unites (
     id uuid primary key default uuid_generate_v4(),
     nom text not null,
     abbr text,
-    actif boolean default true,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
     unique(mama_id, nom)
@@ -283,7 +278,6 @@ create table if not exists fournisseurs (
     ville text,
     tel text,
     contact text,
-    actif boolean default true,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
     unique(mama_id, nom)
@@ -301,7 +295,6 @@ create table if not exists produits (
     stock_theorique numeric default 0,
     stock_reel numeric default 0,
     stock_min numeric default 0,
-    actif boolean default true,
     code text,
     allergenes text,
     image text,
@@ -319,6 +312,7 @@ create table if not exists fournisseur_produits (
     fournisseur_id uuid references fournisseurs(id) on delete cascade,
     prix_achat numeric not null,
     date_livraison date default current_date,
+    actif boolean default true,
     mama_id uuid not null references mamas(id),
     updated_at timestamptz default now(),
     created_at timestamptz default now(),
@@ -369,6 +363,7 @@ create table if not exists factures (
     total_ttc numeric default 0,
     statut text,
     justificatif text,
+    actif boolean default true,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now()
 );
@@ -378,8 +373,10 @@ create table if not exists facture_lignes (
     facture_id uuid references factures(id) on delete cascade,
     produit_id uuid references produits(id) on delete set null,
     quantite numeric not null,
+    actif boolean default true,
     prix_unitaire numeric not null,
     tva numeric default 0,
+    actif boolean default true,
     total numeric generated always as (quantite * prix_unitaire) stored,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now()
@@ -405,6 +402,7 @@ create table if not exists fiche_lignes (
     fiche_id uuid references fiches(id) on delete cascade,
     produit_id uuid references produits(id) on delete set null,
     quantite numeric not null,
+    actif boolean default true,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now()
 );
@@ -415,6 +413,7 @@ create table if not exists fiche_cout_history (
     date_cout date default current_date,
     cout_total numeric,
     cout_par_portion numeric,
+    actif boolean default true,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now()
 );
@@ -427,7 +426,6 @@ create table if not exists fiches_techniques (
     portions integer,
     cout_total numeric,
     cout_portion numeric,
-    actif boolean default true,
     carte_actuelle boolean default false,
     type_carte text,
     sous_type_carte text,
@@ -443,6 +441,7 @@ create table if not exists inventaires (
     reference text,
     cloture boolean default false,
     zone text,
+    actif boolean default true,
     date_debut date,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now()
@@ -453,6 +452,7 @@ create table if not exists inventaire_lignes (
     inventaire_id uuid references inventaires(id) on delete cascade,
     produit_id uuid references produits(id) on delete set null,
     quantite numeric,
+    actif boolean default true,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now()
 );
@@ -462,7 +462,6 @@ create table if not exists zones_stock (
     id uuid primary key default uuid_generate_v4(),
     nom text not null,
     mama_id uuid not null references mamas(id),
-    actif boolean default true,
     created_at timestamptz default now(),
     unique(mama_id, nom)
 );
@@ -480,11 +479,13 @@ create table if not exists mouvements_stock (
     id uuid primary key default uuid_generate_v4(),
     produit_id uuid references produits(id) on delete set null,
     quantite numeric not null,
+    actif boolean default true,
     type text check (type in ('entree','sortie','correction','transfert')),
     zone_source_id uuid references zones_stock(id),
     zone_destination_id uuid references zones_stock(id),
     sous_type text,
     zone text,
+    actif boolean default true,
     motif text,
     date_mouvement date default current_date,
     commentaire text,
@@ -522,7 +523,6 @@ create table if not exists permissions (
     user_id uuid references users(id) on delete cascade,
     module text not null,
     droit text not null,
-    actif boolean default true,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now()
 );
@@ -532,7 +532,6 @@ create table if not exists menus (
     id uuid primary key default uuid_generate_v4(),
     nom text not null,
     "date" date,
-    actif boolean default true,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
     unique(mama_id, nom, "date")
@@ -555,6 +554,7 @@ create table if not exists requisitions (
     zone_id uuid references zones_stock(id),
     date_requisition date default current_date,
     quantite numeric not null,
+    actif boolean default true,
     type text,
     commentaire text,
     auteur_id uuid references utilisateurs(id),
@@ -566,6 +566,7 @@ create table if not exists transferts (
     id uuid primary key default uuid_generate_v4(),
     produit_id uuid references produits(id) on delete set null,
     quantite numeric,
+    actif boolean default true,
     zone_depart text,
     zone_arrivee text,
     motif text,
@@ -581,6 +582,7 @@ create table if not exists ventes_boissons (
     id uuid primary key default uuid_generate_v4(),
     boisson_id uuid references fiches(id) on delete set null,
     quantite numeric,
+    actif boolean default true,
     date_vente date default current_date,
     created_by uuid references users(id) on delete set null,
     mama_id uuid not null references mamas(id),
@@ -603,6 +605,7 @@ DROP INDEX IF EXISTS idx_transferts_mama;
 CREATE INDEX idx_transferts_mama ON transferts(mama_id);
 DROP INDEX IF EXISTS idx_transferts_produit;
 CREATE INDEX idx_transferts_produit ON transferts(produit_id);
+CREATE INDEX IF NOT EXISTS idx_transferts_actif ON transferts(actif);
 DROP INDEX IF EXISTS idx_zones_stock_mama;
 CREATE INDEX idx_zones_stock_mama ON zones_stock(mama_id);
 CREATE INDEX IF NOT EXISTS idx_zones_stock_actif ON zones_stock(actif);
@@ -617,6 +620,7 @@ DROP INDEX IF EXISTS idx_ventes_boissons_mama;
 CREATE INDEX idx_ventes_boissons_mama ON ventes_boissons(mama_id);
 DROP INDEX IF EXISTS idx_ventes_boissons_boisson;
 CREATE INDEX idx_ventes_boissons_boisson ON ventes_boissons(boisson_id);
+CREATE INDEX IF NOT EXISTS idx_ventes_boissons_actif ON ventes_boissons(actif);
 create or replace view stock_mouvements as select * from mouvements_stock;
 grant select on stock_mouvements to authenticated;
 create or replace view stocks as select * from mouvements_stock;
@@ -1011,7 +1015,6 @@ create table if not exists centres_de_cout (
     id uuid primary key default uuid_generate_v4(),
     mama_id uuid not null references mamas(id) on delete cascade,
     nom text not null,
-    actif boolean default true,
     created_at timestamptz default now(),
     unique (mama_id, nom)
 );
@@ -1022,6 +1025,7 @@ create table if not exists mouvements_centres_cout (
     mouvement_id uuid references mouvements_stock(id) on delete cascade,
     centre_cout_id uuid references centres_de_cout(id) on delete cascade,
     quantite numeric,
+    actif boolean default true,
     valeur numeric,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now()
@@ -1076,6 +1080,7 @@ create table if not exists journaux_utilisateur (
     action text not null,
     details jsonb,
     done_by uuid references users(id) on delete set null,
+    actif boolean default true,
     created_at timestamptz default now()
 );
 
@@ -1131,6 +1136,7 @@ grant select on v_centres_cout_mois to authenticated;
 -- Fonction retournant les statistiques par centre de coût pour une période donnée
 create or replace function stats_centres_de_cout(mama_id_param uuid, debut_param date default null, fin_param date default null)
 returns table(centre_cout_id uuid, nom text, quantite numeric, valeur numeric)
+    actif boolean default true,
 language plpgsql security definer
 set search_path = public as $$
 begin
@@ -1231,6 +1237,7 @@ create table if not exists pertes (
     centre_cout_id uuid references centres_de_cout(id),
     date_perte date not null default current_date,
     quantite numeric not null,
+    actif boolean default true,
     motif text,
     created_at timestamptz default now(),
     created_by uuid references users(id)
@@ -1425,6 +1432,7 @@ $$;
 -- Mouvements sans affectation de centre de coût
 create or replace function mouvements_sans_affectation(limit_param integer default 100)
 returns table(id uuid, produit_id uuid, quantite numeric, created_at timestamptz, mama_id uuid)
+    actif boolean default true,
 language sql stable security definer
 set search_path = public as $$
   select m.id, m.produit_id, m.quantite, m.created_at, m.mama_id
@@ -1519,7 +1527,6 @@ create table if not exists taches (
     frequence text check (frequence in ('quotidien','hebdomadaire','mensuel')),
     priorite text not null default 'moyenne' check (priorite in ('basse','moyenne','haute')),
     statut text not null default 'a_faire' check (statut in ('a_faire','en_cours','terminee')),
-    actif boolean default true,
     created_by uuid references utilisateurs(id),
     created_at timestamptz default now(),
     updated_at timestamptz default now()
@@ -1556,6 +1563,7 @@ create table if not exists tache_instances (
     date_echeance date not null,
     statut text not null default 'a_faire' check (statut in ('a_faire','en_cours','fait','reporte','annule')),
     done_by uuid references users(id),
+    actif boolean default true,
     created_at timestamptz default now()
 );
 DROP INDEX IF EXISTS idx_tache_instances_tache;
@@ -1566,6 +1574,7 @@ DROP INDEX IF EXISTS idx_tache_instances_statut;
 CREATE INDEX idx_tache_instances_statut ON tache_instances(statut);
 DROP INDEX IF EXISTS idx_tache_instances_done;
 CREATE INDEX idx_tache_instances_done ON tache_instances(done_by);
+CREATE INDEX IF NOT EXISTS idx_tache_instances_actif ON tache_instances(actif);
 
 alter table tache_instances enable row level security;
 alter table tache_instances force row level security;
@@ -1590,6 +1599,7 @@ create table if not exists ventes_fiches_carte (
   periode date not null,
   ventes integer not null,
   mama_id uuid references mamas(id) not null,
+  actif boolean default true,
   created_at timestamptz default now(),
   updated_at timestamptz default now(),
   unique (fiche_id, periode, mama_id)
@@ -1598,6 +1608,7 @@ DROP INDEX IF EXISTS idx_vfc_fiche_periode_mama;
 CREATE INDEX idx_vfc_fiche_periode_mama ON ventes_fiches_carte(fiche_id, periode, mama_id);
 DROP INDEX IF EXISTS idx_vfc_periode;
 CREATE INDEX idx_vfc_periode ON ventes_fiches_carte(periode);
+CREATE INDEX IF NOT EXISTS idx_ventes_fiches_carte_actif ON ventes_fiches_carte(actif);
 
 alter table ventes_fiches_carte enable row level security;
 alter table ventes_fiches_carte force row level security;
@@ -1617,7 +1628,6 @@ create table if not exists promotions (
     description text,
     date_debut date not null,
     date_fin date,
-    actif boolean default true,
     created_at timestamptz default now(),
     unique (mama_id, nom, date_debut)
 );
@@ -1808,7 +1818,6 @@ create table if not exists regles_alertes (
     produit_id uuid references produits(id) on delete cascade,
     threshold numeric not null,
     message text,
-    actif boolean default true,
     created_at timestamptz default now()
 );
 DROP INDEX IF EXISTS idx_regles_alertes_mama;
@@ -2121,7 +2130,6 @@ create table if not exists fournisseurs_api_config (
   type_api text default 'rest',
   token text,
   format_facture text default 'json',
-  actif boolean default true,
   created_at timestamptz default now(),
   primary key(fournisseur_id, mama_id)
 );
@@ -2626,6 +2634,7 @@ DROP INDEX IF EXISTS idx_factures_fournisseur;
 CREATE INDEX idx_factures_fournisseur ON factures(fournisseur_id);
 DROP INDEX IF EXISTS idx_factures_statut;
 CREATE INDEX idx_factures_statut ON factures(statut);
+CREATE INDEX IF NOT EXISTS idx_factures_actif ON factures(actif);
 DROP INDEX IF EXISTS idx_fiches_mama;
 CREATE INDEX idx_fiches_mama ON fiches(mama_id);
 DROP INDEX IF EXISTS idx_fiches_nom;
@@ -2635,6 +2644,7 @@ DROP INDEX IF EXISTS idx_fiches_famille;
 CREATE INDEX idx_fiches_famille ON fiches(famille_id);
 DROP INDEX IF EXISTS idx_inventaires_mama;
 CREATE INDEX idx_inventaires_mama ON inventaires(mama_id);
+CREATE INDEX IF NOT EXISTS idx_inventaires_actif ON inventaires(actif);
 DROP INDEX IF EXISTS idx_familles_mama;
 CREATE INDEX idx_familles_mama ON familles(mama_id);
 CREATE INDEX IF NOT EXISTS idx_familles_actif ON familles(actif);
@@ -2649,28 +2659,33 @@ DROP INDEX IF EXISTS idx_fournisseur_produits_fournisseur;
 CREATE INDEX idx_fournisseur_produits_fournisseur ON fournisseur_produits(fournisseur_id);
 DROP INDEX IF EXISTS idx_fournisseur_produits_produit_date;
 CREATE INDEX idx_fournisseur_produits_produit_date ON fournisseur_produits(produit_id, date_livraison desc);
+CREATE INDEX IF NOT EXISTS idx_fournisseur_produits_actif ON fournisseur_produits(actif);
 DROP INDEX IF EXISTS idx_facture_lignes_mama;
 CREATE INDEX idx_facture_lignes_mama ON facture_lignes(mama_id);
 DROP INDEX IF EXISTS idx_facture_lignes_facture;
 CREATE INDEX idx_facture_lignes_facture ON facture_lignes(facture_id);
 DROP INDEX IF EXISTS idx_facture_lignes_produit;
 CREATE INDEX idx_facture_lignes_produit ON facture_lignes(produit_id);
+CREATE INDEX IF NOT EXISTS idx_facture_lignes_actif ON facture_lignes(actif);
 DROP INDEX IF EXISTS idx_fiche_lignes_mama;
 CREATE INDEX idx_fiche_lignes_mama ON fiche_lignes(mama_id);
 DROP INDEX IF EXISTS idx_fiche_lignes_fiche;
 CREATE INDEX idx_fiche_lignes_fiche ON fiche_lignes(fiche_id);
 DROP INDEX IF EXISTS idx_fiche_lignes_produit;
 CREATE INDEX idx_fiche_lignes_produit ON fiche_lignes(produit_id);
+CREATE INDEX IF NOT EXISTS idx_fiche_lignes_actif ON fiche_lignes(actif);
 DROP INDEX IF EXISTS idx_fiche_cout_history_mama;
 CREATE INDEX idx_fiche_cout_history_mama ON fiche_cout_history(mama_id);
 DROP INDEX IF EXISTS idx_fiche_cout_history_fiche;
 CREATE INDEX idx_fiche_cout_history_fiche ON fiche_cout_history(fiche_id);
+CREATE INDEX IF NOT EXISTS idx_fiche_cout_history_actif ON fiche_cout_history(actif);
 DROP INDEX IF EXISTS idx_inventaire_lignes_mama;
 CREATE INDEX idx_inventaire_lignes_mama ON inventaire_lignes(mama_id);
 DROP INDEX IF EXISTS idx_inventaire_lignes_inventaire;
 CREATE INDEX idx_inventaire_lignes_inventaire ON inventaire_lignes(inventaire_id);
 DROP INDEX IF EXISTS idx_inventaire_lignes_produit;
 CREATE INDEX idx_inventaire_lignes_produit ON inventaire_lignes(produit_id);
+CREATE INDEX IF NOT EXISTS idx_inventaire_lignes_actif ON inventaire_lignes(actif);
 DROP INDEX IF EXISTS idx_parametres_mama;
 CREATE INDEX idx_parametres_mama ON parametres(mama_id);
 DROP INDEX IF EXISTS idx_fournisseur_contacts_mama;
@@ -2702,6 +2717,7 @@ DROP INDEX IF EXISTS idx_requisitions_produit;
 CREATE INDEX idx_requisitions_produit ON requisitions(produit_id);
 DROP INDEX IF EXISTS idx_requisitions_zone;
 CREATE INDEX idx_requisitions_zone ON requisitions(zone_id);
+CREATE INDEX IF NOT EXISTS idx_requisitions_actif ON requisitions(actif);
 CREATE INDEX IF NOT EXISTS idx_regles_alertes_actif ON regles_alertes(actif);
 DO $$
 BEGIN
@@ -2827,6 +2843,7 @@ DROP INDEX IF EXISTS idx_mouvements_stock_date;
 CREATE INDEX idx_mouvements_stock_date ON mouvements_stock(date_mouvement);
 DROP INDEX IF EXISTS idx_mouvements_stock_type;
 CREATE INDEX idx_mouvements_stock_type ON mouvements_stock(type);
+CREATE INDEX IF NOT EXISTS idx_mouvements_stock_actif ON mouvements_stock(actif);
 
 -- Ajout de la colonne date_debut pour les inventaires
 DO $$
@@ -2884,14 +2901,59 @@ DROP INDEX IF EXISTS idx_mouvements_stock_zone;
 CREATE INDEX idx_mouvements_stock_zone ON mouvements_stock(zone);
 DROP INDEX IF EXISTS idx_mouvements_stock_motif;
 CREATE INDEX idx_mouvements_stock_motif ON mouvements_stock(motif);
--- Correction rétroactive : ajout colonne actif si absente
+-- 🔧 Patch rétroactif pour les bases déjà existantes
 DO $$
 BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name = 'unites' AND column_name = 'actif'
-  ) THEN
-    ALTER TABLE unites ADD COLUMN IF NOT EXISTS actif boolean DEFAULT true;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'unites' AND column_name = 'actif') THEN
+    ALTER TABLE unites ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'factures' AND column_name = 'actif') THEN
+    ALTER TABLE factures ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'facture_lignes' AND column_name = 'actif') THEN
+    ALTER TABLE facture_lignes ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'fiche_lignes' AND column_name = 'actif') THEN
+    ALTER TABLE fiche_lignes ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'fournisseur_produits' AND column_name = 'actif') THEN
+    ALTER TABLE fournisseur_produits ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'inventaires' AND column_name = 'actif') THEN
+    ALTER TABLE inventaires ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'inventaire_lignes' AND column_name = 'actif') THEN
+    ALTER TABLE inventaire_lignes ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'requisitions' AND column_name = 'actif') THEN
+    ALTER TABLE requisitions ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'transferts' AND column_name = 'actif') THEN
+    ALTER TABLE transferts ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'mouvements_stock' AND column_name = 'actif') THEN
+    ALTER TABLE mouvements_stock ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'tache_instances' AND column_name = 'actif') THEN
+    ALTER TABLE tache_instances ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'ventes_boissons' AND column_name = 'actif') THEN
+    ALTER TABLE ventes_boissons ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'ventes_fiches_carte' AND column_name = 'actif') THEN
+    ALTER TABLE ventes_fiches_carte ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'fiche_cout_history' AND column_name = 'actif') THEN
+    ALTER TABLE fiche_cout_history ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'fiche_produits' AND column_name = 'actif') THEN
+    ALTER TABLE fiche_produits ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'access_rights_templates' AND column_name = 'actif') THEN
+    ALTER TABLE access_rights_templates ADD COLUMN actif boolean DEFAULT true;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'boissons' AND column_name = 'actif') THEN
+    ALTER TABLE boissons ADD COLUMN actif boolean DEFAULT true;
   END IF;
 END $$;
 -- Création également du profil correspondant dans utilisateurs pour l'auth Supabase

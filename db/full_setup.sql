@@ -259,6 +259,7 @@ create table if not exists familles (
     nom text not null,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
+    actif boolean default true,
     unique(mama_id, nom)
 );
 
@@ -268,6 +269,7 @@ create table if not exists unites (
     abbr text,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
+    actif boolean default true,
     unique(mama_id, nom)
 );
 
@@ -280,6 +282,7 @@ create table if not exists fournisseurs (
     contact text,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
+    actif boolean default true,
     unique(mama_id, nom)
 );
 
@@ -302,6 +305,7 @@ create table if not exists produits (
     fournisseur_principal_id uuid references fournisseurs(id) on delete set null,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
+    actif boolean default true,
     unique(mama_id, nom, unite)
 );
 
@@ -312,10 +316,10 @@ create table if not exists fournisseur_produits (
     fournisseur_id uuid references fournisseurs(id) on delete cascade,
     prix_achat numeric not null,
     date_livraison date default current_date,
-    actif boolean default true,
     mama_id uuid not null references mamas(id),
     updated_at timestamptz default now(),
     created_at timestamptz default now(),
+    actif boolean default true,
     unique(produit_id, fournisseur_id, date_livraison)
 );
 
@@ -363,9 +367,9 @@ create table if not exists factures (
     total_ttc numeric default 0,
     statut text,
     justificatif text,
-    actif boolean default true,
     mama_id uuid not null references mamas(id),
-    created_at timestamptz default now()
+    created_at timestamptz default now(),
+    actif boolean default true
 );
 
 create table if not exists facture_lignes (
@@ -373,13 +377,12 @@ create table if not exists facture_lignes (
     facture_id uuid references factures(id) on delete cascade,
     produit_id uuid references produits(id) on delete set null,
     quantite numeric not null,
-    actif boolean default true,
     prix_unitaire numeric not null,
     tva numeric default 0,
-    actif boolean default true,
     total numeric generated always as (quantite * prix_unitaire) stored,
     mama_id uuid not null references mamas(id),
-    created_at timestamptz default now()
+    created_at timestamptz default now(),
+    actif boolean default true
 );
 
 -- Fiches techniques
@@ -391,9 +394,9 @@ create table if not exists fiches (
     portions integer,
     cout_total numeric,
     cout_par_portion numeric,
-    actif boolean default true,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
+    actif boolean default true,
     unique(mama_id, nom)
 );
 
@@ -402,9 +405,10 @@ create table if not exists fiche_lignes (
     fiche_id uuid references fiches(id) on delete cascade,
     produit_id uuid references produits(id) on delete set null,
     quantite numeric not null,
-    actif boolean default true,
     mama_id uuid not null references mamas(id),
-    created_at timestamptz default now()
+    created_at timestamptz default now(),
+    actif boolean default true,
+    actif boolean default true
 );
 
 create table if not exists fiche_cout_history (
@@ -413,9 +417,10 @@ create table if not exists fiche_cout_history (
     date_cout date default current_date,
     cout_total numeric,
     cout_par_portion numeric,
-    actif boolean default true,
     mama_id uuid not null references mamas(id),
-    created_at timestamptz default now()
+    created_at timestamptz default now(),
+    actif boolean default true,
+    actif boolean default true
 );
 
 -- Fiches techniques avancees
@@ -432,6 +437,7 @@ create table if not exists fiches_techniques (
     prix_vente numeric,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
+    actif boolean default true,
     unique(mama_id, nom)
 );
 -- Inventaires et mouvements
@@ -441,10 +447,11 @@ create table if not exists inventaires (
     reference text,
     cloture boolean default false,
     zone text,
-    actif boolean default true,
     date_debut date,
     mama_id uuid not null references mamas(id),
-    created_at timestamptz default now()
+    created_at timestamptz default now(),
+    actif boolean default true,
+    actif boolean default true
 );
 
 create table if not exists inventaire_lignes (
@@ -452,9 +459,10 @@ create table if not exists inventaire_lignes (
     inventaire_id uuid references inventaires(id) on delete cascade,
     produit_id uuid references produits(id) on delete set null,
     quantite numeric,
-    actif boolean default true,
     mama_id uuid not null references mamas(id),
-    created_at timestamptz default now()
+    created_at timestamptz default now(),
+    actif boolean default true,
+    actif boolean default true
 );
 
 -- Zones de stock
@@ -463,6 +471,7 @@ create table if not exists zones_stock (
     nom text not null,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
+    actif boolean default true,
     unique(mama_id, nom)
 );
 
@@ -472,6 +481,7 @@ create table if not exists inventaire_zones (
     nom text not null,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
+    actif boolean default true,
     unique(mama_id, nom)
 );
 
@@ -479,20 +489,19 @@ create table if not exists mouvements_stock (
     id uuid primary key default uuid_generate_v4(),
     produit_id uuid references produits(id) on delete set null,
     quantite numeric not null,
-    actif boolean default true,
     type text check (type in ('entree','sortie','correction','transfert')),
     zone_source_id uuid references zones_stock(id),
     zone_destination_id uuid references zones_stock(id),
     sous_type text,
     zone text,
-    actif boolean default true,
     motif text,
     date_mouvement date default current_date,
     commentaire text,
     auteur_id uuid references utilisateurs(id),
     inventaire_id uuid references inventaires(id) on delete set null,
     mama_id uuid not null references mamas(id),
-    created_at timestamptz default now()
+    created_at timestamptz default now(),
+    actif boolean default true
 );
 
 
@@ -534,6 +543,7 @@ create table if not exists menus (
     "date" date,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
+    actif boolean default true,
     unique(mama_id, nom, "date")
 );
 
@@ -543,6 +553,7 @@ create table if not exists menu_fiches (
     fiche_id uuid references fiches(id) on delete cascade,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
+    actif boolean default true,
     unique(menu_id, fiche_id)
 );
 
@@ -554,11 +565,12 @@ create table if not exists requisitions (
     zone_id uuid references zones_stock(id),
     date_requisition date default current_date,
     quantite numeric not null,
-    actif boolean default true,
     type text,
     commentaire text,
     auteur_id uuid references utilisateurs(id),
-    created_at timestamptz default now()
+    created_at timestamptz default now(),
+    actif boolean default true,
+    actif boolean default true
 );
 
 -- Transferts de stock
@@ -566,14 +578,15 @@ create table if not exists transferts (
     id uuid primary key default uuid_generate_v4(),
     produit_id uuid references produits(id) on delete set null,
     quantite numeric,
-    actif boolean default true,
     zone_depart text,
     zone_arrivee text,
     motif text,
     date_transfert date default current_date,
     created_by uuid references users(id) on delete set null,
     mama_id uuid not null references mamas(id),
-    created_at timestamptz default now()
+    created_at timestamptz default now(),
+    actif boolean default true,
+    actif boolean default true
 );
 
 
@@ -582,11 +595,12 @@ create table if not exists ventes_boissons (
     id uuid primary key default uuid_generate_v4(),
     boisson_id uuid references fiches(id) on delete set null,
     quantite numeric,
-    actif boolean default true,
     date_vente date default current_date,
     created_by uuid references users(id) on delete set null,
     mama_id uuid not null references mamas(id),
-    created_at timestamptz default now()
+    created_at timestamptz default now(),
+    actif boolean default true,
+    actif boolean default true
 );
 
 -- Parametres generaux
@@ -1016,6 +1030,7 @@ create table if not exists centres_de_cout (
     mama_id uuid not null references mamas(id) on delete cascade,
     nom text not null,
     created_at timestamptz default now(),
+    actif boolean default true,
     unique (mama_id, nom)
 );
 
@@ -1025,10 +1040,11 @@ create table if not exists mouvements_centres_cout (
     mouvement_id uuid references mouvements_stock(id) on delete cascade,
     centre_cout_id uuid references centres_de_cout(id) on delete cascade,
     quantite numeric,
-    actif boolean default true,
     valeur numeric,
     mama_id uuid not null references mamas(id),
-    created_at timestamptz default now()
+    created_at timestamptz default now(),
+    actif boolean default true,
+    actif boolean default true
 );
 
 -- Index pour des requêtes plus rapides
@@ -1080,8 +1096,9 @@ create table if not exists journaux_utilisateur (
     action text not null,
     details jsonb,
     done_by uuid references users(id) on delete set null,
+    created_at timestamptz default now(),
     actif boolean default true,
-    created_at timestamptz default now()
+    actif boolean default true
 );
 
 DROP INDEX IF EXISTS idx_journaux_utilisateur_mama;
@@ -1136,7 +1153,6 @@ grant select on v_centres_cout_mois to authenticated;
 -- Fonction retournant les statistiques par centre de coût pour une période donnée
 create or replace function stats_centres_de_cout(mama_id_param uuid, debut_param date default null, fin_param date default null)
 returns table(centre_cout_id uuid, nom text, quantite numeric, valeur numeric)
-    actif boolean default true,
 language plpgsql security definer
 set search_path = public as $$
 begin
@@ -1237,10 +1253,11 @@ create table if not exists pertes (
     centre_cout_id uuid references centres_de_cout(id),
     date_perte date not null default current_date,
     quantite numeric not null,
-    actif boolean default true,
     motif text,
     created_at timestamptz default now(),
-    created_by uuid references users(id)
+    actif boolean default true,
+    created_by uuid references users(id),
+    actif boolean default true
 );
 DROP INDEX IF EXISTS idx_pertes_mama;
 CREATE INDEX idx_pertes_mama ON pertes(mama_id);
@@ -1432,7 +1449,6 @@ $$;
 -- Mouvements sans affectation de centre de coût
 create or replace function mouvements_sans_affectation(limit_param integer default 100)
 returns table(id uuid, produit_id uuid, quantite numeric, created_at timestamptz, mama_id uuid)
-    actif boolean default true,
 language sql stable security definer
 set search_path = public as $$
   select m.id, m.produit_id, m.quantite, m.created_at, m.mama_id
@@ -1460,6 +1476,7 @@ create table if not exists fiche_prix_history (
     changed_by uuid references users(id),
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
+    actif boolean default true,
     changed_at timestamptz default now()
 );
 DROP INDEX IF EXISTS idx_fiche_prix_history_fiche;
@@ -1529,6 +1546,7 @@ create table if not exists taches (
     statut text not null default 'a_faire' check (statut in ('a_faire','en_cours','terminee')),
     created_by uuid references utilisateurs(id),
     created_at timestamptz default now(),
+    actif boolean default true,
     updated_at timestamptz default now()
 );
 DROP INDEX IF EXISTS idx_taches_mama;
@@ -1563,8 +1581,9 @@ create table if not exists tache_instances (
     date_echeance date not null,
     statut text not null default 'a_faire' check (statut in ('a_faire','en_cours','fait','reporte','annule')),
     done_by uuid references users(id),
+    created_at timestamptz default now(),
     actif boolean default true,
-    created_at timestamptz default now()
+    actif boolean default true
 );
 DROP INDEX IF EXISTS idx_tache_instances_tache;
 CREATE INDEX idx_tache_instances_tache ON tache_instances(tache_id);
@@ -1599,8 +1618,8 @@ create table if not exists ventes_fiches_carte (
   periode date not null,
   ventes integer not null,
   mama_id uuid references mamas(id) not null,
-  actif boolean default true,
   created_at timestamptz default now(),
+    actif boolean default true,
   updated_at timestamptz default now(),
   unique (fiche_id, periode, mama_id)
 );
@@ -1629,6 +1648,7 @@ create table if not exists promotions (
     date_debut date not null,
     date_fin date,
     created_at timestamptz default now(),
+    actif boolean default true,
     unique (mama_id, nom, date_debut)
 );
 
@@ -1640,6 +1660,7 @@ create table if not exists promotion_produits (
     prix_promo numeric,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
+    actif boolean default true,
     unique (promotion_id, produit_id)
 );
 
@@ -1740,6 +1761,7 @@ create table if not exists journal_audit (
     new_data jsonb,
     changed_by uuid references users(id) on delete set null,
     created_at timestamptz default now(),
+    actif boolean default true,
     changed_at timestamptz default now()
 );
 DROP INDEX IF EXISTS idx_journal_audit_mama;
@@ -2131,6 +2153,7 @@ create table if not exists fournisseurs_api_config (
   token text,
   format_facture text default 'json',
   created_at timestamptz default now(),
+    actif boolean default true,
   primary key(fournisseur_id, mama_id)
 );
 -- Renomme product_id en produit_id si nécessaire

@@ -1141,6 +1141,8 @@ select
   c.mama_id,
   c.id as centre_cout_id,
   c.nom,
+  c.actif as centre_cout_actif,
+  bool_or(m.actif) as mouvements_cc_actifs,
   coalesce(sum(m.quantite),0) as quantite_totale,
   coalesce(sum(m.valeur),0) as valeur_totale
 from centres_de_cout c
@@ -1155,6 +1157,8 @@ select
   c.id as centre_cout_id,
   date_trunc('month', m.created_at) as mois,
   c.nom,
+  c.actif as centre_cout_actif,
+  bool_or(m.actif) as mouvements_cc_actifs,
   coalesce(sum(m.quantite),0) as quantite,
   coalesce(sum(m.valeur),0) as valeur
 from centres_de_cout c
@@ -1240,6 +1244,9 @@ select
   m.produit_id,
   mc.centre_cout_id,
   cc.nom as centre_cout,
+  mc.actif as mouvement_centre_cout_actif,
+  m.actif as mouvement_actif,
+  cc.actif as centre_cout_actif,
   mc.quantite,
   mc.valeur
 from mouvements_centres_cout mc
@@ -1253,6 +1260,8 @@ select
   f.mama_id,
   f.id as fournisseur_id,
   f.nom,
+  f.actif as fournisseur_actif,
+  bool_or(fc.actif) as facture_actif,
   max(fc.date_facture) as last_invoice_date,
   date_part('month', age(current_date, max(fc.date_facture))) as months_since_last_invoice
 from fournisseurs f
@@ -1341,6 +1350,8 @@ select
   fl.mama_id,
   fl.produit_id,
   date_trunc('month', f.date_facture) as mois,
+  bool_or(fl.actif) as facture_ligne_actif,
+  bool_or(f.actif) as facture_actif,
   avg(fl.prix_unitaire) as prix_moyen
 from facture_lignes fl
   join factures f on f.id = fl.facture_id
@@ -1352,10 +1363,12 @@ create or replace view v_pmp as
 select
   p.mama_id,
   p.id as produit_id,
+  p.actif as produit_actif,
+  bool_or(sp.actif) as fournisseur_produit_actif,
   coalesce(avg(sp.prix_achat),0) as pmp
 from produits p
 left join fournisseur_produits sp on sp.produit_id = p.id and sp.mama_id = p.mama_id
-group by p.mama_id, p.id;
+group by p.mama_id, p.id, p.actif;
 grant select on v_pmp to authenticated;
 
 -- Variation de prix fournisseurs
@@ -1364,6 +1377,7 @@ select
   sp.mama_id,
   sp.fournisseur_id,
   sp.produit_id,
+  bool_or(sp.actif) as fournisseur_produit_actif,
   max(sp.prix_achat) - min(sp.prix_achat) as variation
 from fournisseur_produits sp
 group by sp.mama_id, sp.fournisseur_id, sp.produit_id;
@@ -1375,10 +1389,12 @@ select
   f.mama_id,
   f.id as fournisseur_id,
   f.nom,
+  f.actif as fournisseur_actif,
+  bool_or(fc.actif) as facture_actif,
   count(fc.id) as nb_factures
 from fournisseurs f
 left join factures fc on fc.fournisseur_id = f.id
-group by f.mama_id, f.id, f.nom;
+group by f.mama_id, f.id, f.nom, f.actif;
 grant select on v_fournisseur_stats to authenticated;
 
 -- Vue des produits avec leur dernier prix fournisseur
@@ -1388,6 +1404,8 @@ select
   p.nom,
   f.nom as famille,
   u.nom as unite,
+  f.actif as famille_actif,
+  u.actif as unite_actif,
   p.famille_id,
   p.unite_id,
   p.pmp,
@@ -1403,12 +1421,13 @@ select
   p.created_at,
   p.dernier_prix,
   sp.date_livraison as dernier_prix_date,
-  sp.fournisseur_id as dernier_fournisseur_id
+  sp.fournisseur_id as dernier_fournisseur_id,
+  sp.actif as fournisseur_produit_actif
 from produits p
 left join familles f on f.id = p.famille_id and f.mama_id = p.mama_id
 left join unites u on u.id = p.unite_id and u.mama_id = p.mama_id
 left join lateral (
-  select date_livraison, fournisseur_id
+  select date_livraison, fournisseur_id, actif
     from fournisseur_produits sp
    where sp.produit_id = p.id
      and sp.mama_id = p.mama_id
@@ -1727,6 +1746,8 @@ create or replace view v_stats_consolidees as
 select
   m.id as mama_id,
   m.nom,
+  m.actif as mama_actif,
+  bool_or(p.actif) as produits_actifs,
   coalesce(sum(p.stock_reel * p.pmp),0) as stock_valorise,
   (select count(*) from mouvements_stock ms where ms.mama_id = m.id) as nb_mouvements,
   (select sum(abs(ms.quantite)) from mouvements_stock ms
@@ -1734,7 +1755,7 @@ select
         and date_trunc('month', ms.date_mouvement) = date_trunc('month', current_date)) as conso_mois
 from mamas m
 left join produits p on p.mama_id = m.id
-group by m.id, m.nom;
+group by m.id, m.nom, m.actif;
 grant select on v_stats_consolidees to authenticated;
 
 create or replace function stats_consolidees()
@@ -2032,11 +2053,16 @@ select
   m.date_mouvement,
   m.produit_id,
   f.nom as famille,
+  f.actif as famille_actif,
   mc.centre_cout_id,
   c.nom as centre_cout_nom,
+  c.actif as centre_cout_actif,
   m.quantite,
   mc.valeur,
-  m.mama_id
+  m.mama_id,
+  m.actif as mouvement_actif,
+  mc.actif as mouvement_centre_cout_actif,
+  p.actif as produit_actif
 from mouvements_stock m
 left join mouvements_centres_cout mc on mc.mouvement_id = m.id
 left join centres_de_cout c on c.id = mc.centre_cout_id
@@ -2049,11 +2075,12 @@ select
   p.id as produit_id,
   p.nom,
   p.mama_id,
+  p.actif as produit_actif,
   current_date - coalesce(max(m.date_mouvement), current_date) as jours_inactif
 from produits p
 left join mouvements_stock m on m.produit_id = p.id
 where p.actif = true
-group by p.id, p.nom, p.mama_id;
+group by p.id, p.nom, p.mama_id, p.actif;
 grant select on v_reco_rotation to authenticated;
 
 create or replace view v_reco_stockmort as
@@ -2068,7 +2095,12 @@ select
   fl.produit_id,
   sum(fl.quantite * coalesce(f.portions,1)) as quantite,
   sum(fl.quantite * coalesce(f.portions,1) * coalesce(p.pmp,0)) as valeur,
-  p.nom as nom_produit
+  p.nom as nom_produit,
+  bool_or(m.actif) as menu_actif,
+  bool_or(mf.actif) as menu_fiche_actif,
+  bool_or(f.actif) as fiche_actif,
+  bool_or(fl.actif) as fiche_ligne_actif,
+  bool_or(p.actif) as produit_actif
 from menus m
 join menu_fiches mf on mf.menu_id = m.id
 join fiches f on f.id = mf.fiche_id
@@ -2082,6 +2114,8 @@ select distinct on (sp.produit_id)
   sp.produit_id,
   p.nom,
   p.mama_id,
+  p.actif as produit_actif,
+  sp.actif as fournisseur_produit_actif,
   sp.prix_achat as dernier_prix,
   lag(sp.prix_achat) over (partition by sp.produit_id order by sp.date_livraison) as prix_precedent,
   (sp.prix_achat - lag(sp.prix_achat) over (partition by sp.produit_id order by sp.date_livraison))
@@ -3011,11 +3045,11 @@ values (
 -- ----------------------------------------------------
 create or replace view vue_stock_actuel as
 with mouvements as (
-  select zone_destination_id as zone_id, produit_id, quantite, mama_id
+  select zone_destination_id as zone_id, produit_id, quantite, mama_id, actif
     from mouvements_stock
    where zone_destination_id is not null
   union all
-  select zone_source_id as zone_id, produit_id, -quantite as quantite, mama_id
+  select zone_source_id as zone_id, produit_id, -quantite as quantite, mama_id, actif
     from mouvements_stock
    where zone_source_id is not null
 )
@@ -3023,7 +3057,8 @@ select
   mama_id,
   zone_id,
   produit_id,
-  sum(quantite) as stock_theorique
+  sum(quantite) as stock_theorique,
+  bool_or(actif) as mouvement_actif
 from mouvements
 group by mama_id, zone_id, produit_id;
 grant select on vue_stock_actuel to authenticated;
@@ -3033,6 +3068,7 @@ select
   fp.mama_id,
   fp.fournisseur_id,
   fp.produit_id,
+  fp.actif as fournisseur_produit_actif,
   avg(fp.prix_achat) as prix_moyen,
   (
     select prix_achat
@@ -3045,18 +3081,21 @@ select
   ) as dernier_prix,
   count(*) as nb_achats
 from fournisseur_produits fp
-group by fp.mama_id, fp.fournisseur_id, fp.produit_id;
+group by fp.mama_id, fp.fournisseur_id, fp.produit_id, fp.actif;
 grant select on vue_achats_par_fournisseur to authenticated;
 
 create or replace view vue_cout_fiche as
 select
   f.id as fiche_id,
   f.mama_id,
+  f.actif as fiche_actif,
+  bool_or(fl.actif) as fiche_ligne_actif,
+  bool_or(p.actif) as produit_actif,
   sum(fl.quantite * coalesce(p.pmp, 0)) as cout_total
 from fiches f
   left join fiche_lignes fl on fl.fiche_id = f.id
   left join produits p on p.id = fl.produit_id
-group by f.id, f.mama_id;
+group by f.id, f.mama_id, f.actif;
 grant select on vue_cout_fiche to authenticated;
 
 create or replace view vue_fiches_ventes as
@@ -3064,10 +3103,12 @@ select
   v.fiche_id,
   ft.nom as fiche_nom,
   v.mama_id,
+  v.actif as ventes_fiche_actif,
+  ft.actif as fiche_technique_actif,
   sum(v.ventes) as total_ventes
 from ventes_fiches_carte v
   left join fiches_techniques ft on ft.id = v.fiche_id
-group by v.fiche_id, ft.nom, v.mama_id;
+group by v.fiche_id, ft.nom, v.mama_id, v.actif, ft.actif;
 grant select on vue_fiches_ventes to authenticated;
 
 -- ----------------------------------------------------

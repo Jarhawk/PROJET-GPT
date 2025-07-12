@@ -408,7 +408,6 @@ create table if not exists fiche_lignes (
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
     actif boolean default true,
-    actif boolean default true
 );
 
 create table if not exists fiche_cout_history (
@@ -420,7 +419,6 @@ create table if not exists fiche_cout_history (
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
     actif boolean default true,
-    actif boolean default true
 );
 
 -- Fiches techniques avancees
@@ -451,7 +449,6 @@ create table if not exists inventaires (
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
     actif boolean default true,
-    actif boolean default true
 );
 
 create table if not exists inventaire_lignes (
@@ -462,7 +459,6 @@ create table if not exists inventaire_lignes (
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
     actif boolean default true,
-    actif boolean default true
 );
 
 -- Zones de stock
@@ -570,7 +566,6 @@ create table if not exists requisitions (
     auteur_id uuid references utilisateurs(id),
     created_at timestamptz default now(),
     actif boolean default true,
-    actif boolean default true
 );
 
 -- Transferts de stock
@@ -586,7 +581,6 @@ create table if not exists transferts (
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
     actif boolean default true,
-    actif boolean default true
 );
 
 
@@ -600,7 +594,6 @@ create table if not exists ventes_boissons (
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
     actif boolean default true,
-    actif boolean default true
 );
 
 -- Parametres generaux
@@ -1044,7 +1037,6 @@ create table if not exists mouvements_centres_cout (
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
     actif boolean default true,
-    actif boolean default true
 );
 
 -- Index pour des requêtes plus rapides
@@ -1098,7 +1090,6 @@ create table if not exists journaux_utilisateur (
     done_by uuid references users(id) on delete set null,
     created_at timestamptz default now(),
     actif boolean default true,
-    actif boolean default true
 );
 
 DROP INDEX IF EXISTS idx_journaux_utilisateur_mama;
@@ -1257,7 +1248,6 @@ create table if not exists pertes (
     created_at timestamptz default now(),
     actif boolean default true,
     created_by uuid references users(id),
-    actif boolean default true
 );
 DROP INDEX IF EXISTS idx_pertes_mama;
 CREATE INDEX idx_pertes_mama ON pertes(mama_id);
@@ -1583,7 +1573,6 @@ create table if not exists tache_instances (
     done_by uuid references users(id),
     created_at timestamptz default now(),
     actif boolean default true,
-    actif boolean default true
 );
 DROP INDEX IF EXISTS idx_tache_instances_tache;
 CREATE INDEX idx_tache_instances_tache ON tache_instances(tache_id);

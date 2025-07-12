@@ -407,7 +407,7 @@ create table if not exists fiche_lignes (
     quantite numeric not null,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
-    actif boolean default true,
+    actif boolean default true
 );
 
 create table if not exists fiche_cout_history (
@@ -418,7 +418,7 @@ create table if not exists fiche_cout_history (
     cout_par_portion numeric,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
-    actif boolean default true,
+    actif boolean default true
 );
 
 -- Fiches techniques avancees
@@ -448,7 +448,7 @@ create table if not exists inventaires (
     date_debut date,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
-    actif boolean default true,
+    actif boolean default true
 );
 
 create table if not exists inventaire_lignes (
@@ -458,7 +458,7 @@ create table if not exists inventaire_lignes (
     quantite numeric,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
-    actif boolean default true,
+    actif boolean default true
 );
 
 -- Zones de stock
@@ -565,7 +565,7 @@ create table if not exists requisitions (
     commentaire text,
     auteur_id uuid references utilisateurs(id),
     created_at timestamptz default now(),
-    actif boolean default true,
+    actif boolean default true
 );
 
 -- Transferts de stock
@@ -580,7 +580,7 @@ create table if not exists transferts (
     created_by uuid references users(id) on delete set null,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
-    actif boolean default true,
+    actif boolean default true
 );
 
 
@@ -593,7 +593,7 @@ create table if not exists ventes_boissons (
     created_by uuid references users(id) on delete set null,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
-    actif boolean default true,
+    actif boolean default true
 );
 
 -- Parametres generaux
@@ -1036,7 +1036,7 @@ create table if not exists mouvements_centres_cout (
     valeur numeric,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
-    actif boolean default true,
+    actif boolean default true
 );
 
 -- Index pour des requêtes plus rapides
@@ -1089,7 +1089,7 @@ create table if not exists journaux_utilisateur (
     details jsonb,
     done_by uuid references users(id) on delete set null,
     created_at timestamptz default now(),
-    actif boolean default true,
+    actif boolean default true
 );
 
 DROP INDEX IF EXISTS idx_journaux_utilisateur_mama;
@@ -1247,7 +1247,7 @@ create table if not exists pertes (
     motif text,
     created_at timestamptz default now(),
     actif boolean default true,
-    created_by uuid references users(id),
+    created_by uuid references users(id)
 );
 DROP INDEX IF EXISTS idx_pertes_mama;
 CREATE INDEX idx_pertes_mama ON pertes(mama_id);
@@ -1572,7 +1572,7 @@ create table if not exists tache_instances (
     statut text not null default 'a_faire' check (statut in ('a_faire','en_cours','fait','reporte','annule')),
     done_by uuid references users(id),
     created_at timestamptz default now(),
-    actif boolean default true,
+    actif boolean default true
 );
 DROP INDEX IF EXISTS idx_tache_instances_tache;
 CREATE INDEX idx_tache_instances_tache ON tache_instances(tache_id);
@@ -2142,7 +2142,7 @@ create table if not exists fournisseurs_api_config (
   token text,
   format_facture text default 'json',
   created_at timestamptz default now(),
-    actif boolean default true,
+    actif boolean default true
   primary key(fournisseur_id, mama_id)
 );
 -- Renomme product_id en produit_id si nécessaire
@@ -2730,6 +2730,18 @@ CREATE INDEX idx_requisitions_produit ON requisitions(produit_id);
 DROP INDEX IF EXISTS idx_requisitions_zone;
 CREATE INDEX idx_requisitions_zone ON requisitions(zone_id);
 CREATE INDEX IF NOT EXISTS idx_requisitions_actif ON requisitions(actif);
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_class WHERE relname='fiche_produits' AND relkind IN ('r','p')) THEN
+    EXECUTE 'CREATE INDEX IF NOT EXISTS idx_fiche_produits_actif ON fiche_produits(actif)';
+  END IF;
+  IF EXISTS (SELECT 1 FROM pg_class WHERE relname='boissons' AND relkind IN ('r','p')) THEN
+    EXECUTE 'CREATE INDEX IF NOT EXISTS idx_boissons_actif ON boissons(actif)';
+  END IF;
+  IF EXISTS (SELECT 1 FROM pg_class WHERE relname='access_rights_templates' AND relkind IN (''r'',''p'')) THEN
+    EXECUTE 'CREATE INDEX IF NOT EXISTS idx_access_rights_templates_actif ON access_rights_templates(actif)';
+  END IF;
+END $$;
 CREATE INDEX IF NOT EXISTS idx_regles_alertes_actif ON regles_alertes(actif);
 DO $$
 BEGIN
@@ -2914,6 +2926,7 @@ CREATE INDEX idx_mouvements_stock_zone ON mouvements_stock(zone);
 DROP INDEX IF EXISTS idx_mouvements_stock_motif;
 CREATE INDEX idx_mouvements_stock_motif ON mouvements_stock(motif);
 -- 🔧 Patch rétroactif pour les bases déjà existantes
+-- Ensure all tables have an "actif" column used by frontend filters
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'unites' AND column_name = 'actif') THEN

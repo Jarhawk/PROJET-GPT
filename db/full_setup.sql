@@ -2,11 +2,24 @@
 -- full_setup.sql - Schéma complet MamaStock pour Supabase
 -- Script autonome combinant initialisation, RLS et correctifs
 -- ------------------
+-- Dernière mise à jour : triggers enregistrant automatiquement
+--   updated_at et dernier_prix lors des insertions et mises à jour
+--   avec un bloc de migration pour créer ces colonnes et les remplir
+--   lors des relances du script
+--   Les produits sont automatiquement mis à jour avec le dernier prix
+-- Les anciennes tables d'audit, d'alertes, d'import et de 2FA sont
+--   désormais renommées pour conserver l'historique lors des mises à jour
+-- L'extension pg_cron est forcée dans pg_catalog pour éviter les conflits
+-- Les triggers 'trg_mise_a_jour_fournisseur_produits' et 'trg_maj_dernier_prix'
+--   sont systématiquement supprimés puis recréés afin de garantir la cohérence
+--   Ils se déclenchent sur INSERT et UPDATE pour dater chaque ligne et
+--   propager le dernier prix du fournisseur vers le produit correspondant.
 
 -- Le script peut être relancé sur une base vide ou déjà partiellement
 -- configurée : chaque étape vérifie l'existence des objets avant de les créer
 -- ou de les modifier.
-
+-- Toutes les créations sont conditionnelles pour garantir l'idempotence et permettre une relance en production sans interruption.
+-- Les blocs DO conditionnent chaque création ou modification afin d'assurer la reprise après interruption.
 -- Les rôles `authenticated`, `anon` et `service_role` sont déjà
 -- présents sur Supabase. Aucune création de rôle n'est donc réalisée
 -- afin d'éviter des erreurs de privilèges lors de l'exécution du script.
@@ -45,7 +58,20 @@ set search_path = public, extensions;
 -- Extensions installées dans le schéma dédié
 create extension if not exists "uuid-ossp" with schema extensions;
 create extension if not exists "pgcrypto" with schema extensions;
-create extension if not exists "pg_cron" with schema extensions;
+-- pg_cron doit rester dans pg_catalog
+create extension if not exists "pg_cron" with schema pg_catalog;
+-- S'assurer qu'elle n'est pas dans le schema extensions
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_extension e
+    JOIN pg_namespace n ON n.oid = e.extnamespace
+    WHERE e.extname = 'pg_cron'
+      AND n.nspname <> 'pg_catalog'
+  ) THEN
+    ALTER EXTENSION pg_cron SET SCHEMA pg_catalog;
+  END IF;
+END $$;
 
 -- Fonction utilitaire pour renommer une colonne d'une table ou d'une vue
 -- Utilisée dans les blocs DO afin d'éviter les ALTER TABLE/VIEW directs
@@ -278,6 +304,7 @@ create table if not exists produits (
     code text,
     allergenes text,
     image text,
+    dernier_prix numeric,
     fournisseur_principal_id uuid references fournisseurs(id) on delete set null,
     mama_id uuid not null references mamas(id),
     created_at timestamptz default now(),
@@ -292,9 +319,42 @@ create table if not exists fournisseur_produits (
     prix_achat numeric not null,
     date_livraison date default current_date,
     mama_id uuid not null references mamas(id),
+    updated_at timestamptz default now(),
     created_at timestamptz default now(),
     unique(produit_id, fournisseur_id, date_livraison)
 );
+
+create or replace function maj_updated_at()
+returns trigger language plpgsql as $$
+begin
+  new.updated_at := now();
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_mise_a_jour_fournisseur_produits on fournisseur_produits;
+create trigger trg_mise_a_jour_fournisseur_produits
+  before insert or update on fournisseur_produits
+  for each row execute function maj_updated_at();
+
+-- Maintenir le dernier prix connu dans la table produits
+create or replace function maj_dernier_prix_produit()
+returns trigger language plpgsql as $$
+begin
+  -- mettre à jour le produit correspondant dans la même mama
+  update produits
+     set dernier_prix = new.prix_achat,
+         fournisseur_principal_id = coalesce(fournisseur_principal_id, new.fournisseur_id)
+   where id = new.produit_id
+     and mama_id = new.mama_id;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_maj_dernier_prix on fournisseur_produits;
+create trigger trg_maj_dernier_prix
+  after insert or update on fournisseur_produits
+  for each row execute function maj_dernier_prix_produit();
 
 -- Factures
 create table if not exists factures (
@@ -597,10 +657,8 @@ begin
     values (new.produit_id, supp, new.prix_unitaire, d, new.mama_id)
     on conflict (produit_id, fournisseur_id, date_livraison)
     do update set prix_achat = excluded.prix_achat, updated_at = now();
-  update produits
-     set dernier_prix = new.prix_unitaire,
-        fournisseur_principal_id = coalesce(fournisseur_principal_id, supp)
-   where id = new.produit_id;
+  -- La mise à jour du dernier prix du produit est assurée par un trigger
+  -- sur la table fournisseur_produits
   return new;
 end;
 $$;
@@ -1303,19 +1361,19 @@ select
   p.fournisseur_principal_id,
   p.mama_id,
   p.created_at,
-  sp.prix_achat as dernier_prix,
+  p.dernier_prix,
   sp.date_livraison as dernier_prix_date,
   sp.fournisseur_id as dernier_fournisseur_id
 from produits p
 left join familles f on f.id = p.famille_id and f.mama_id = p.mama_id
 left join unites u on u.id = p.unite_id and u.mama_id = p.mama_id
 left join lateral (
-  select prix_achat, date_livraison, fournisseur_id
-  from fournisseur_produits sp
-  where sp.produit_id = p.id
-    and sp.mama_id = p.mama_id
-  order by sp.date_livraison desc
-  limit 1
+  select date_livraison, fournisseur_id
+    from fournisseur_produits sp
+   where sp.produit_id = p.id
+     and sp.mama_id = p.mama_id
+   order by sp.date_livraison desc
+   limit 1
 ) sp on true;
 grant select on v_produits_dernier_prix to authenticated;
 
@@ -1653,8 +1711,14 @@ $$;
 
 grant execute on function stats_consolidees() to authenticated;
 
--- Nettoyer l'ancienne table d'audit éventuelle
-drop table if exists audit_entries cascade;
+-- Renommer l'ancienne table d'audit si elle existe afin de conserver l'historique
+DO $$
+BEGIN
+  IF to_regclass('public.journal_audit') IS NULL
+     AND to_regclass('public.audit_entries') IS NOT NULL THEN
+    ALTER TABLE audit_entries RENAME TO journal_audit;
+  END IF;
+END $$;
 
 -- Journal avancé conforme aux obligations légales
 create table if not exists journal_audit (
@@ -1727,9 +1791,18 @@ create trigger trg_audit_planning
   after insert or update or delete on planning_previsionnel
   for each row execute function ajouter_entree_audit();
 
--- Alertes avancées automatique
-drop table if exists alert_rules cascade;
-drop table if exists alert_logs cascade;
+-- Conserver les anciennes tables si elles existent en les renommant
+DO $$
+BEGIN
+  IF to_regclass('public.regles_alertes') IS NULL
+     AND to_regclass('public.alert_rules') IS NOT NULL THEN
+    ALTER TABLE alert_rules RENAME TO regles_alertes;
+  END IF;
+  IF to_regclass('public.journaux_alertes') IS NULL
+     AND to_regclass('public.alert_logs') IS NOT NULL THEN
+    ALTER TABLE alert_logs RENAME TO journaux_alertes;
+  END IF;
+END $$;
 create table if not exists regles_alertes (
     id uuid primary key default uuid_generate_v4(),
     mama_id uuid not null references mamas(id) on delete cascade,
@@ -1796,7 +1869,14 @@ create trigger trg_alerte_stock
 
 
 -- Import automatique des factures electroniques
-drop table if exists incoming_invoices cascade;
+-- Renommer l'ancienne table d'import si elle existe pour conserver les données
+DO $$
+BEGIN
+  IF to_regclass('public.factures_importees') IS NULL
+     AND to_regclass('public.incoming_invoices') IS NOT NULL THEN
+    ALTER TABLE incoming_invoices RENAME TO factures_importees;
+  END IF;
+END $$;
 create table if not exists factures_importees (
     id uuid primary key default uuid_generate_v4(),
     mama_id uuid not null references mamas(id) on delete cascade,
@@ -1876,7 +1956,14 @@ create policy user_own_consent on consentements_utilisateur
   for all using (user_id = auth.uid()) with check (user_id = auth.uid());
 
 
-drop table if exists public.two_factor_auth cascade;
+-- Renommer l'ancienne table 2FA si nécessaire
+DO $$
+BEGIN
+  IF to_regclass('public.auth_double_facteur') IS NULL
+     AND to_regclass('public.two_factor_auth') IS NOT NULL THEN
+    ALTER TABLE public.two_factor_auth RENAME TO auth_double_facteur;
+  END IF;
+END $$;
 create table if not exists public.auth_double_facteur (
     id uuid primary key references auth.users(id) on delete cascade,
     secret text,
@@ -2449,6 +2536,49 @@ ALTER TABLE IF EXISTS fournisseurs_api_config ADD COLUMN IF NOT EXISTS actif boo
 ALTER TABLE IF EXISTS regles_alertes ADD COLUMN IF NOT EXISTS enabled boolean;
 UPDATE regles_alertes SET actif = COALESCE(actif, enabled);
 ALTER TABLE IF EXISTS regles_alertes DROP COLUMN IF EXISTS enabled;
+
+-- Bloc de migration pour les bases deja existantes :
+-- ajoute les nouvelles colonnes et renseigne les valeurs manquantes
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name   = 'produits'
+      AND column_name  = 'dernier_prix'
+  ) THEN
+    ALTER TABLE produits ADD COLUMN IF NOT EXISTS dernier_prix numeric;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name   = 'fournisseur_produits'
+      AND column_name  = 'updated_at'
+  ) THEN
+    ALTER TABLE fournisseur_produits
+      ADD COLUMN updated_at timestamptz DEFAULT now();
+  END IF;
+
+  ALTER TABLE fournisseur_produits
+    ALTER COLUMN updated_at SET DEFAULT now();
+  UPDATE fournisseur_produits
+     SET updated_at = now()
+   WHERE updated_at IS NULL;
+
+  -- Renseigner le dernier prix des produits manquants
+  UPDATE produits p
+     SET dernier_prix = fp.prix_achat,
+         fournisseur_principal_id = coalesce(p.fournisseur_principal_id, fp.fournisseur_id)
+    FROM (
+      SELECT DISTINCT ON (produit_id) produit_id, prix_achat, fournisseur_id, mama_id
+        FROM fournisseur_produits
+       ORDER BY produit_id, date_livraison DESC
+    ) fp
+   WHERE p.id = fp.produit_id
+     AND p.mama_id = fp.mama_id
+     AND p.dernier_prix IS NULL;
+END $$;
 DROP INDEX IF EXISTS idx_fournisseurs_api_config_fourn;
 CREATE INDEX idx_fournisseurs_api_config_fourn ON fournisseurs_api_config(fournisseur_id);
 DROP INDEX IF EXISTS idx_fournisseurs_api_config_mama;

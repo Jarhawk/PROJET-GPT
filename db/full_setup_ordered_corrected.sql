@@ -146,9 +146,9 @@ create table if not exists mamas (
 id uuid primary key default uuid_generate_v4(),
     nom text not null,
     logo text,
-  actif boolean default true,
     contact text,
-    created_at timestamptz default now()
+    created_at timestamptz default now(),
+    actif boolean default true
 );
 
 create table if not exists roles (
@@ -525,8 +525,8 @@ create table if not exists fournisseur_contacts (
     email text,
     tel text,
     mama_id uuid not null references mamas(id),
-    actif boolean default true,
-    created_at timestamptz default now()
+    created_at timestamptz default now(),
+    actif boolean default true
 );
 
 create table if not exists fournisseur_notes (
@@ -1665,8 +1665,8 @@ create table if not exists taches (
     statut text not null default 'a_faire' check (statut in ('a_faire','en_cours','terminee')),
     created_by uuid references utilisateurs(id),
     created_at timestamptz default now(),
-    actif boolean default true,
-    updated_at timestamptz default now()
+    updated_at timestamptz default now(),
+    actif boolean default true
 );
 DROP INDEX IF EXISTS idx_taches_mama;
 CREATE INDEX idx_taches_mama ON taches(mama_id);
@@ -1991,7 +1991,8 @@ create table if not exists regles_alertes (
     produit_id uuid references produits(id) on delete cascade,
     threshold numeric not null,
     message text,
-    created_at timestamptz default now()
+    created_at timestamptz default now(),
+    actif boolean default true
 );
 DROP INDEX IF EXISTS idx_regles_alertes_mama;
 CREATE INDEX idx_regles_alertes_mama ON regles_alertes(mama_id);
@@ -2114,8 +2115,8 @@ create table if not exists documents (
     title text not null,
     file_url text not null,
     uploaded_by uuid references users(id) on delete set null,
-    actif boolean default true,
-    created_at timestamptz default now()
+    created_at timestamptz default now(),
+    actif boolean default true
 );
 DROP INDEX IF EXISTS idx_documents_mama;
 CREATE INDEX idx_documents_mama ON documents(mama_id);

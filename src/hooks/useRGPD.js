@@ -16,7 +16,7 @@ export function useRGPD() {
     if (!userId) return null;
     const { data: profil } = await supabase
       .from("utilisateurs")
-      .select("id,email,created_at")
+      .select("id,created_at")
       .eq("auth_id", userId)
       .single();
     const { data: logs } = await supabase

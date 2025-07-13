@@ -31,7 +31,7 @@ export default function InvitationsEnAttente() {
     setLoading(true);
     supabase
       .from("utilisateurs")
-      .select("id, email, mama_id, role, invite_pending, actif, created_at")
+      .select("id, nom, mama_id, role, invite_pending, actif, created_at")
       .eq("invite_pending", true)
       .eq("mama_id", mama_id)
       .order("created_at", { ascending: false })
@@ -44,17 +44,8 @@ export default function InvitationsEnAttente() {
   const mamaNom = id => mamas.find(m => m.id === id)?.nom || id;
   const roleNom = nom => roles.find(r => r.nom === nom)?.nom || nom;
 
-  const handleResend = async (user) => {
-    const resp = await fetch("https://jhpfdeolleprmvtchoxt.supabase.co/functions/v1/send-invite", {
-      method: "POST",
-      body: JSON.stringify({
-        email: user.email,
-        mama_nom: mamaNom(user.mama_id),
-      }),
-      headers: { "Content-Type": "application/json" },
-    });
-    if (resp.ok) toast.success("Invitation relancée !");
-    else toast.error("Erreur lors de l'envoi");
+  const handleResend = async () => {
+    toast.error("Impossible de renvoyer l'invitation sans email");
   };
 
   const handleCancel = async (userId) => {
@@ -91,7 +82,7 @@ export default function InvitationsEnAttente() {
           <tbody>
             {invites.map(u => (
               <tr key={u.id}>
-                <td>{u.email}</td>
+                <td>{u.nom}</td>
                 <td>{mamaNom(u.mama_id)}</td>
                 <td>{roleNom(u.role)}</td>
                 <td>{u.created_at?.slice(0, 16).replace("T", " ")}</td>

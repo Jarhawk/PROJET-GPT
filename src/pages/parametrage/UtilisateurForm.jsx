@@ -12,7 +12,7 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
   const { roles, fetchRoles } = useRoles();
   const { mamas, fetchMamas } = useMamas();
   const { mama_id: myMama, role: myRole } = useAuth();
-  const [email, setEmail] = useState(utilisateur?.email || "");
+  const [nom, setNom] = useState(utilisateur?.nom || "");
   const [role, setRole] = useState(utilisateur?.role || "user");
   const [mama, setMama] = useState(utilisateur?.mama_id || myMama);
   const [actif, setActif] = useState(utilisateur?.actif ?? true);
@@ -28,7 +28,7 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
     if (loading) return;
     setLoading(true);
     const data = {
-      email,
+      nom,
       role,
       actif,
       mama_id: mama,
@@ -59,12 +59,11 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
       </h2>
       <input
         className="input mb-2"
-        type="email"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        placeholder="Email"
+        type="text"
+        value={nom}
+        onChange={e => setNom(e.target.value)}
+        placeholder="Nom"
         required
-        disabled={!!utilisateur?.id}
       />
       <select
         className="input mb-2"

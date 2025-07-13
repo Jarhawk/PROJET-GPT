@@ -24,9 +24,7 @@ export function AuthProvider({ children }) {
     if (import.meta.env.DEV) console.log("fetchUserData", userId);
     const { data, error } = await supabase
       .from("utilisateurs")
-      .select(
-        "id, email, mama_id, role_id, role:roles(nom), access_rights, actif"
-      )
+      .select("id, mama_id, role_id, role:roles(nom), access_rights, actif")
       .eq("auth_id", userId)
       .maybeSingle();
 
@@ -53,6 +51,7 @@ export function AuthProvider({ children }) {
       auth_id: userId,
       user_id: userId,
       role: data.role?.nom ?? data.role,
+      email: session.user.email,
     });
     fetchingRef.current = false;
   }
@@ -116,7 +115,6 @@ export function AuthProvider({ children }) {
           .maybeSingle();
         await supabase.from("utilisateurs").insert({
           auth_id: user.id,
-          email: user.email,
           mama_id: mama?.id,
           role_id: roleRow?.id,
           access_rights: {},

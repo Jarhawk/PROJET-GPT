@@ -108,7 +108,7 @@ export default function TacheForm({ task }) {
         <span>Assignés</span>
         <select multiple name="assignes" value={form.assignes} onChange={handleChange} className="input w-full">
           {users.map(u => (
-            <option key={u.id} value={u.id}>{u.email}</option>
+            <option key={u.id} value={u.id}>{u.nom}</option>
           ))}
         </select>
       </label>

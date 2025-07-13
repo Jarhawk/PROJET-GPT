@@ -29,7 +29,7 @@ export default function Utilisateurs() {
   }, [authLoading, mama_id, fetchUsers]);
 
   const filtres = users.filter(u =>
-    (!search || u.email?.toLowerCase().includes(search.toLowerCase())) &&
+    (!search || u.nom?.toLowerCase().includes(search.toLowerCase())) &&
     (actifFilter === "all" || (actifFilter === "true" ? u.actif : !u.actif))
   );
   const nbPages = Math.ceil(filtres.length / PAGE_SIZE);
@@ -50,7 +50,7 @@ export default function Utilisateurs() {
   };
 
   const handleDelete = async (u) => {
-    if (window.confirm(`Supprimer l'utilisateur ${u.email} ?`)) {
+    if (window.confirm(`Supprimer l'utilisateur ${u.nom} ?`)) {
       await deleteUser(u.id);
       await fetchUsers();
       toast.success("Utilisateur supprimé.");
@@ -67,7 +67,7 @@ export default function Utilisateurs() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="input"
-            placeholder="Recherche email"
+            placeholder="Recherche nom"
           />
           <select className="input" value={actifFilter} onChange={e => setActifFilter(e.target.value)}>
             <option value="all">Tous</option>
@@ -88,7 +88,7 @@ export default function Utilisateurs() {
         >
         <thead>
           <tr>
-            <th className="px-4 py-2">Email</th>
+            <th className="px-4 py-2">Nom</th>
             <th className="px-4 py-2">Rôle</th>
             <th className="px-4 py-2">Actif</th>
             <th className="px-4 py-2">Actions</th>
@@ -103,7 +103,7 @@ export default function Utilisateurs() {
                   className="font-semibold text-white"
                   onClick={() => { setSelected(u); setShowDetail(true); }}
                 >
-                  {u.email}
+                  {u.nom}
                 </Button>
               </td>
               <td className="border px-4 py-2">{u.role}</td>

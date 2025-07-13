@@ -20,7 +20,7 @@ export function useLogs() {
     setError(null);
     let query = supabase
       .from("user_logs")
-      .select("*, utilisateurs:done_by(email)")
+      .select("*, utilisateurs:done_by(nom)")
       .eq("mama_id", mama_id)
       .order("created_at", { ascending: false })
       .range((page - 1) * limit, page * limit - 1);
@@ -42,7 +42,7 @@ export function useLogs() {
     const rows = (logs || []).map(l => ({
       date: l.created_at,
       action: l.action,
-      utilisateur: l.utilisateurs?.email || l.done_by,
+      utilisateur: l.utilisateurs?.nom || l.done_by,
     }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "Logs");

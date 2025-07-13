@@ -129,7 +129,7 @@ export default function TacheForm({ task }) {
         >
           <option value="">--</option>
           {users.map(u => (
-            <option key={u.id} value={u.id}>{u.email}</option>
+            <option key={u.id} value={u.id}>{u.nom}</option>
           ))}
         </select>
       </label>

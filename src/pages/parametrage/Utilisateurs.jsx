@@ -51,13 +51,13 @@ export default function Utilisateurs() {
     roleNom: roles.find(r => r.id === u.role_id)?.nom || u.role,
   }));
   const filtres = mapped.filter(u =>
-    (!search || u.email?.toLowerCase().includes(search.toLowerCase())) &&
+    (!search || u.nom?.toLowerCase().includes(search.toLowerCase())) &&
     (actifFilter === "all" || (actifFilter === "true" ? u.actif : !u.actif)) &&
     (roleFilter === "all" || u.role === roleFilter)
   ).sort((a, b) => {
     if (sortBy === "mama") return a.mamaNom.localeCompare(b.mamaNom);
     if (sortBy === "role") return a.roleNom.localeCompare(b.roleNom);
-    return a.email.localeCompare(b.email);
+    return a.nom.localeCompare(b.nom);
   });
   const nbPages = Math.ceil(filtres.length / PAGE_SIZE);
   const paged = filtres.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -70,7 +70,7 @@ export default function Utilisateurs() {
   };
 
   const handleDelete = async (u) => {
-    if (window.confirm(`Supprimer l'utilisateur ${u.email} ?`)) {
+    if (window.confirm(`Supprimer l'utilisateur ${u.nom} ?`)) {
       await deleteUser(u.id);
       await fetchUsers();
       toast.success("Utilisateur supprimé.");

@@ -20,12 +20,12 @@ export function useUtilisateurs() {
     let query = supabase
       .from("utilisateurs")
       .select(
-        "id, email, actif, mama_id, role_id, role:roles(nom), access_rights"
+        "id, nom, actif, mama_id, role_id, role:roles(nom), access_rights"
       )
-      .order("email", { ascending: true });
+      .order("nom", { ascending: true });
 
     if (role !== "superadmin") query = query.eq("mama_id", mama_id);
-    if (search) query = query.ilike("email", `%${search}%`);
+    if (search) query = query.ilike("nom", `%${search}%`);
     if (filterRole) query = query.eq("roles.nom", filterRole);
     if (typeof actif === "boolean") query = query.eq("actif", actif);
 
@@ -106,7 +106,7 @@ export function useUtilisateurs() {
   function exportUsersToExcel(data = users) {
     const datas = (data || []).map(u => ({
       id: u.id,
-      email: u.email,
+      nom: u.nom,
       actif: u.actif,
       mama_id: u.mama_id,
       role: u.role,
@@ -121,7 +121,7 @@ export function useUtilisateurs() {
   function exportUsersToCSV(data = users) {
     const datas = (data || []).map(u => ({
       id: u.id,
-      email: u.email,
+      nom: u.nom,
       actif: u.actif,
       mama_id: u.mama_id,
       role: u.role,

@@ -21,7 +21,7 @@ export default function UtilisateurRow({
   ];
 
   const resetPassword = async () => {
-    if (loading) return;
+    if (!utilisateur.email || loading) return;
     setLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(utilisateur.email, {
@@ -39,7 +39,7 @@ export default function UtilisateurRow({
   return (
     <>
       <tr className={utilisateur.actif ? "" : "opacity-60"}>
-        <td>{utilisateur.email}</td>
+        <td>{utilisateur.nom || utilisateur.email}</td>
         <td>
           <span className={
             utilisateur.role === "superadmin"

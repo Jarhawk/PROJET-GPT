@@ -19,13 +19,13 @@ export default function AuditViewer() {
     setLoading(true);
     const { data: audit } = await supabase
       .from("logs_audit")
-      .select("*, utilisateurs:user_id(email)")
+      .select("*, utilisateurs:user_id(nom)")
       .eq("mama_id", mama_id)
       .order("created_at", { ascending: false })
       .limit(200);
     const { data: security } = await supabase
       .from("logs_securite")
-      .select("*, utilisateurs:user_id(email)")
+      .select("*, utilisateurs:user_id(nom)")
       .eq("mama_id", mama_id)
       .order("created_at", { ascending: false })
       .limit(200);
@@ -93,7 +93,7 @@ export default function AuditViewer() {
                 <td className="px-2 py-1 whitespace-nowrap">
                   {new Date(l.created_at).toLocaleString()}
                 </td>
-                <td className="px-2 py-1">{l.utilisateurs?.email || l.user_id}</td>
+                <td className="px-2 py-1">{l.utilisateurs?.nom || l.user_id}</td>
                 <td className="px-2 py-1">
                   {l._source === "security" ? "🛡️" : "✏️"} {l.action || l.type}
                 </td>

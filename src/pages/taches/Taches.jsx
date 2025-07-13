@@ -44,7 +44,7 @@ export default function Taches() {
         <select name="assigne" value={filters.assigne} onChange={handleChange} className="input">
           <option value="">-- Assigné --</option>
           {users.map(u => (
-            <option key={u.id} value={u.id}>{u.email}</option>
+            <option key={u.id} value={u.id}>{u.nom}</option>
           ))}
         </select>
         <input type="date" name="start" value={filters.start} onChange={handleChange} className="input" />

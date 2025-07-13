@@ -10,7 +10,7 @@ process.env.VITE_SUPABASE_ANON_KEY = 'key';
 
 const authState = {
   isAuthenticated: false,
-  access_rights: { dashboard: true },
+  access_rights: ['dashboard'],
   loading: false,
 };
 vi.mock('@/context/AuthContext', () => ({

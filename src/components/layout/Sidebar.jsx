@@ -9,8 +9,8 @@ export default function Sidebar() {
 
   if (loading || access_rights === null) return null;
   const showAll = role === "superadmin";
-  const rights = typeof access_rights === "object" ? access_rights : {};
-  const has = (key) => showAll || rights[key];
+  const rights = Array.isArray(access_rights) ? access_rights : [];
+  const has = (key) => showAll || rights.includes(key);
 
   return (
     <aside className="w-64 bg-glass border border-white/10 backdrop-blur-xl text-white p-4 h-screen shadow-md text-shadow">

@@ -56,8 +56,8 @@ export default function ProtectedRoute({ children, accessKey }) {
 
   // Vérifie les droits si une clé est fournie
   if (accessKey) {
-    const rights = typeof access_rights === "object" ? access_rights : {};
-    const isAllowed = isSuperadmin || rights[accessKey];
+    const rights = Array.isArray(access_rights) ? access_rights : [];
+    const isAllowed = isSuperadmin || rights.includes(accessKey);
     if (!isAllowed && location.pathname !== "/unauthorized")
       return <Navigate to="/unauthorized" replace />;
   }

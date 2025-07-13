@@ -139,16 +139,14 @@ export default function Roles() {
                   </Button>
                 </td>
                 <td className="px-2 py-1">
-                  {Object.entries(r.access_rights || {})
-                    .filter(([, v]) => v)
-                    .map(([k]) => (
-                      <span
-                        key={k}
-                        className="inline-block bg-gray-200 text-gray-800 text-xs px-1 mr-1 rounded"
-                      >
-                        {k}
-                      </span>
-                    ))}
+                  {(r.access_rights || []).map(k => (
+                    <span
+                      key={k}
+                      className="inline-block bg-gray-200 text-gray-800 text-xs px-1 mr-1 rounded"
+                    >
+                      {k}
+                    </span>
+                  ))}
                 </td>
               </tr>
             ))}

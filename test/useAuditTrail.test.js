@@ -28,13 +28,13 @@ beforeEach(async () => {
   queryObj.lte.mockClear();
 });
 
-test('fetchEntries queries audit_entries with filters', async () => {
+test('fetchEntries queries journal_audit with filters', async () => {
   const { result } = renderHook(() => useAuditTrail());
   await act(async () => {
     await result.current.fetchEntries({ table: 'produits', start: '2024-01-01', end: '2024-01-31' });
   });
-  expect(fromMock).toHaveBeenCalledWith('audit_entries');
-  expect(queryObj.select).toHaveBeenCalledWith('*, utilisateurs:changed_by(email)');
+  expect(fromMock).toHaveBeenCalledWith('journal_audit');
+  expect(queryObj.select).toHaveBeenCalledWith('*, utilisateurs:changed_by(nom)');
   expect(queryObj.order).toHaveBeenCalledWith('changed_at', { ascending: false });
   expect(queryObj.limit).toHaveBeenCalledWith(100);
   expect(queryObj.eq).toHaveBeenCalledWith('table_name', 'produits');

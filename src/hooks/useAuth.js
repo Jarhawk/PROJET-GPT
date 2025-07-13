@@ -11,6 +11,8 @@ export default function useAuth() {
     mama_id: ctx.userData?.mama_id ?? ctx.mama_id,
     access_rights: ctx.userData?.access_rights ?? ctx.access_rights,
     role: ctx.userData?.role ?? ctx.role,
+    email: ctx.userData?.email ?? ctx.email,
+    actif: ctx.userData?.actif ?? ctx.actif,
     loading,
     pending: ctx.pending,
     isAuthenticated: ctx.isAuthenticated,

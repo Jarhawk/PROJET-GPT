@@ -24,7 +24,9 @@ export function AuthProvider({ children }) {
     if (import.meta.env.DEV) console.log("fetchUserData", userId);
     const { data, error } = await supabase
       .from("utilisateurs")
-      .select("role, mama_id, access_rights, actif")
+      .select(
+        "id, email, mama_id, access_rights, actif, role:roles(nom)"
+      )
       .eq("auth_id", userId)
       .maybeSingle();
 
@@ -144,6 +146,8 @@ export function AuthProvider({ children }) {
     /** Selected fields from userData for easy access */
     role: userData?.role,
     mama_id: userData?.mama_id,
+    email: userData?.email,
+    actif: userData?.actif,
     access_rights: userData?.access_rights,
     login,
     signup,

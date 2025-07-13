@@ -48,7 +48,7 @@ export default function Utilisateurs() {
   const mapped = users.map(u => ({
     ...u,
     mamaNom: mamas.find(m => m.id === u.mama_id)?.nom || u.mama_id,
-    roleNom: roles.find(r => r.nom === u.role)?.nom || u.role,
+    roleNom: roles.find(r => r.id === u.role_id)?.nom || u.role,
   }));
   const filtres = mapped.filter(u =>
     (!search || u.email?.toLowerCase().includes(search.toLowerCase())) &&

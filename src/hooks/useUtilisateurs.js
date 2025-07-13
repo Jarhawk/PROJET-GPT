@@ -19,7 +19,9 @@ export function useUtilisateurs() {
     setError(null);
     let query = supabase
       .from("utilisateurs")
-      .select("id, email, actif, mama_id, access_rights, role:roles(nom)")
+      .select(
+        "id, email, actif, mama_id, role_id, role:roles(nom), access_rights"
+      )
       .order("email", { ascending: true });
 
     if (role !== "superadmin") query = query.eq("mama_id", mama_id);
@@ -28,7 +30,11 @@ export function useUtilisateurs() {
     if (typeof actif === "boolean") query = query.eq("actif", actif);
 
     const { data, error } = await query;
-    setUsers(Array.isArray(data) ? data : []);
+    const cleaned = (Array.isArray(data) ? data : []).map(u => ({
+      ...u,
+      role: u.role?.nom ?? u.role,
+    }));
+    setUsers(cleaned);
     setLoading(false);
     if (error) setError(error);
     return data || [];

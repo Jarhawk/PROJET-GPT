@@ -25,7 +25,7 @@ export function AuthProvider({ children }) {
     const { data, error } = await supabase
       .from("utilisateurs")
       .select(
-        "id, email, mama_id, access_rights, actif, role:roles(nom)"
+        "id, email, mama_id, role_id, role:roles(nom), access_rights, actif"
       )
       .eq("auth_id", userId)
       .maybeSingle();
@@ -48,7 +48,12 @@ export function AuthProvider({ children }) {
 
     lastUserIdRef.current = userId;
     setError(null);
-    setUserData({ ...data, auth_id: userId, user_id: userId });
+    setUserData({
+      ...data,
+      auth_id: userId,
+      user_id: userId,
+      role: data.role?.nom ?? data.role,
+    });
     fetchingRef.current = false;
   }
 
@@ -104,11 +109,16 @@ export function AuthProvider({ children }) {
           .order("created_at")
           .limit(1)
           .maybeSingle();
+        const { data: roleRow } = await supabase
+          .from("roles")
+          .select("id")
+          .eq("nom", "user")
+          .maybeSingle();
         await supabase.from("utilisateurs").insert({
           auth_id: user.id,
           email: user.email,
           mama_id: mama?.id,
-          role: "user",
+          role_id: roleRow?.id,
           access_rights: {},
         });
       } catch (e) {
@@ -145,6 +155,7 @@ export function AuthProvider({ children }) {
     pending: !!session && !userData,
     /** Selected fields from userData for easy access */
     role: userData?.role,
+    role_id: userData?.role_id,
     mama_id: userData?.mama_id,
     email: userData?.email,
     actif: userData?.actif,

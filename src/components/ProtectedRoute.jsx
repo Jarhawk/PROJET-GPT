@@ -46,6 +46,11 @@ export default function ProtectedRoute({ children, accessKey }) {
     return null;
   }
 
+  if ((userData.role == null || userData.mama_id == null) &&
+      location.pathname !== "/pending") {
+    return <Navigate to="/pending" replace />;
+  }
+
   if (userData?.actif === false && location.pathname !== "/blocked")
     return <Navigate to="/blocked" replace />;
 

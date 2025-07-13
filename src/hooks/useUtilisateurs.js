@@ -19,12 +19,12 @@ export function useUtilisateurs() {
     setError(null);
     let query = supabase
       .from("utilisateurs")
-      .select("id, email, actif, mama_id, role, access_rights")
+      .select("id, email, actif, mama_id, access_rights, role:roles(nom)")
       .order("email", { ascending: true });
 
     if (role !== "superadmin") query = query.eq("mama_id", mama_id);
     if (search) query = query.ilike("email", `%${search}%`);
-    if (filterRole) query = query.eq("role", filterRole);
+    if (filterRole) query = query.eq("roles.nom", filterRole);
     if (typeof actif === "boolean") query = query.eq("actif", actif);
 
     const { data, error } = await query;

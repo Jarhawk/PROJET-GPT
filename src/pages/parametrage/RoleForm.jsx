@@ -9,7 +9,7 @@ const MODULES = [
   { label: "Produits", key: "produits" },
   { label: "Fournisseurs", key: "fournisseurs" },
   { label: "Factures", key: "factures" },
-  { label: "Inventaire", key: "inventaire" },
+  { label: "Inventaire", key: "inventaires" },
   { label: "Menus", key: "menus" },
   { label: "Reporting", key: "reporting" },
   { label: "Paramétrage", key: "parametrage" },
@@ -22,16 +22,18 @@ export default function RoleForm({ role, onClose, onSaved }) {
     description: role?.description || "",
     actif: role?.actif ?? true,
   });
-  const [rights, setRights] = useState(() => ({
-    ...MODULES.reduce((acc, m) => ({ ...acc, [m.key]: !!role?.access_rights?.[m.key] }), {}),
-  }));
+  const [rights, setRights] = useState(() => (
+    Array.isArray(role?.access_rights) ? role.access_rights : []
+  ));
   const [saving, setSaving] = useState(false);
 
   const handleChange = e =>
     setValues(v => ({ ...v, [e.target.name]: e.target.value }));
 
   const toggleRight = key =>
-    setRights(r => ({ ...r, [key]: !r[key] }));
+    setRights(r =>
+      r.includes(key) ? r.filter(k => k !== key) : [...r, key]
+    );
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -128,7 +130,7 @@ export default function RoleForm({ role, onClose, onSaved }) {
           <label key={m.key} className="flex items-center gap-2">
             <input
               type="checkbox"
-              checked={!!rights[m.key]}
+              checked={rights.includes(m.key)}
               onChange={() => toggleRight(m.key)}
             />
             {m.label}

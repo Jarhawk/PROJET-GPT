@@ -33,10 +33,10 @@ export default function Login() {
       navigate("/blocked");
       return;
     }
-    if (
-      Object.keys(userData.access_rights || {}).length === 0 &&
-      pathname !== "/unauthorized"
-    ) {
+    const rights = Array.isArray(userData.access_rights)
+      ? userData.access_rights
+      : [];
+    if (rights.length === 0 && pathname !== "/unauthorized") {
       navigate("/unauthorized");
       return;
     }

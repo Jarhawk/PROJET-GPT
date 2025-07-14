@@ -117,7 +117,7 @@ export function AuthProvider({ children }) {
           auth_id: user.id,
           mama_id: mama?.id,
           role_id: roleRow?.id,
-          access_rights: {},
+          access_rights: [],
         });
       } catch (e) {
         console.error("Erreur création profil utilisateur:", e);

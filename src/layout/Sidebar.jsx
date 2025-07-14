@@ -23,8 +23,16 @@ import {
 } from "lucide-react";
 
 export default function Sidebar() {
-  const { access_rights, loading, user, role, mama_id, logout, session } =
-    useAuth();
+  const {
+    access_rights,
+    loading,
+    user,
+    role,
+    mama_id,
+    logout,
+    session,
+    isSuperadmin,
+  } = useAuth();
   const { pathname } = useLocation();
   if (import.meta.env.DEV) {
     console.log("Sidebar", { user, role, mama_id, access_rights });
@@ -38,8 +46,8 @@ export default function Sidebar() {
     );
   }
 
-  const rights = typeof access_rights === "object" ? access_rights : {};
-  const has = (key) => rights[key];
+  const rights = Array.isArray(access_rights) ? access_rights : [];
+  const has = (key) => isSuperadmin || rights.includes(key);
 
   const Item = ({ to, icon, label }) => (
     <Link

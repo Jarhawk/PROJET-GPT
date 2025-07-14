@@ -1,0 +1,545 @@
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+
+CREATE TABLE public.access_rights (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  role_id uuid NOT NULL,
+  module text NOT NULL,
+  peut_voir boolean NOT NULL DEFAULT false,
+  peut_modifier boolean NOT NULL DEFAULT false,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT access_rights_pkey PRIMARY KEY (id),
+  CONSTRAINT access_rights_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id),
+  CONSTRAINT access_rights_role_id_fkey FOREIGN KEY (role_id) REFERENCES public.roles(id)
+);
+CREATE TABLE public.centres_de_cout (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  nom text NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT centres_de_cout_pkey PRIMARY KEY (id),
+  CONSTRAINT centres_de_cout_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id)
+);
+CREATE TABLE public.facture_lignes (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  facture_id uuid NOT NULL,
+  produit_id uuid NOT NULL,
+  quantite numeric,
+  prix numeric,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT facture_lignes_pkey PRIMARY KEY (id),
+  CONSTRAINT facture_lignes_facture_id_fkey FOREIGN KEY (facture_id) REFERENCES public.factures(id),
+  CONSTRAINT facture_lignes_produit_id_fkey FOREIGN KEY (produit_id) REFERENCES public.produits(id),
+  CONSTRAINT facture_lignes_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id)
+);
+CREATE TABLE public.factures (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  fournisseur_id uuid,
+  numero text,
+  date_facture date,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT factures_pkey PRIMARY KEY (id),
+  CONSTRAINT factures_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id),
+  CONSTRAINT factures_fournisseur_id_fkey FOREIGN KEY (fournisseur_id) REFERENCES public.fournisseurs(id)
+);
+CREATE TABLE public.familles (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  nom text NOT NULL,
+  mama_id uuid NOT NULL,
+  actif boolean DEFAULT true,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT familles_pkey PRIMARY KEY (id),
+  CONSTRAINT familles_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id)
+);
+CREATE TABLE public.fiche_cout_history (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  fiche_id uuid NOT NULL,
+  old_cout numeric,
+  new_cout numeric,
+  changed_by uuid,
+  changed_at timestamp with time zone,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT fiche_cout_history_pkey PRIMARY KEY (id),
+  CONSTRAINT fiche_cout_history_fiche_id_fkey FOREIGN KEY (fiche_id) REFERENCES public.fiches(id),
+  CONSTRAINT fk_fiche_cout_history_changed_by FOREIGN KEY (changed_by) REFERENCES public.users(id),
+  CONSTRAINT fiche_cout_history_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id)
+);
+CREATE TABLE public.fiche_lignes (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  fiche_id uuid NOT NULL,
+  description text,
+  quantite numeric,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT fiche_lignes_pkey PRIMARY KEY (id),
+  CONSTRAINT fiche_lignes_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id),
+  CONSTRAINT fiche_lignes_fiche_id_fkey FOREIGN KEY (fiche_id) REFERENCES public.fiches(id)
+);
+CREATE TABLE public.fiche_prix_history (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  fiche_id uuid NOT NULL,
+  old_prix numeric,
+  new_prix numeric,
+  changed_by uuid,
+  changed_at timestamp with time zone,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT fiche_prix_history_pkey PRIMARY KEY (id),
+  CONSTRAINT fiche_prix_history_fiche_id_fkey FOREIGN KEY (fiche_id) REFERENCES public.fiches(id),
+  CONSTRAINT fk_fiche_prix_history_changed_by FOREIGN KEY (changed_by) REFERENCES public.users(id),
+  CONSTRAINT fiche_prix_history_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id)
+);
+CREATE TABLE public.fiches (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  titre text NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT fiches_pkey PRIMARY KEY (id),
+  CONSTRAINT fiches_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id)
+);
+CREATE TABLE public.fiches_techniques (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  fiche_id uuid NOT NULL,
+  technique text,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT fiches_techniques_pkey PRIMARY KEY (id),
+  CONSTRAINT fiches_techniques_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id),
+  CONSTRAINT fiches_techniques_fiche_id_fkey FOREIGN KEY (fiche_id) REFERENCES public.fiches(id)
+);
+CREATE TABLE public.fournisseur_contacts (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  fournisseur_id uuid NOT NULL,
+  nom text,
+  email text,
+  tel text,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT fournisseur_contacts_pkey PRIMARY KEY (id),
+  CONSTRAINT fournisseur_contacts_fournisseur_id_fkey FOREIGN KEY (fournisseur_id) REFERENCES public.fournisseurs(id),
+  CONSTRAINT fournisseur_contacts_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id)
+);
+CREATE TABLE public.fournisseur_notes (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  fournisseur_id uuid NOT NULL,
+  note text,
+  date date,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT fournisseur_notes_pkey PRIMARY KEY (id),
+  CONSTRAINT fournisseur_notes_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id),
+  CONSTRAINT fournisseur_notes_fournisseur_id_fkey FOREIGN KEY (fournisseur_id) REFERENCES public.fournisseurs(id)
+);
+CREATE TABLE public.fournisseur_produits (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  fournisseur_id uuid NOT NULL,
+  produit_id uuid NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT fournisseur_produits_pkey PRIMARY KEY (id),
+  CONSTRAINT fournisseur_produits_fournisseur_id_fkey FOREIGN KEY (fournisseur_id) REFERENCES public.fournisseurs(id),
+  CONSTRAINT fournisseur_produits_produit_id_fkey FOREIGN KEY (produit_id) REFERENCES public.produits(id),
+  CONSTRAINT fournisseur_produits_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id)
+);
+CREATE TABLE public.fournisseurs (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  nom text NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT fournisseurs_pkey PRIMARY KEY (id),
+  CONSTRAINT fournisseurs_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id)
+);
+CREATE TABLE public.inventaire_lignes (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  inventaire_id uuid NOT NULL,
+  produit_id uuid NOT NULL,
+  quantite numeric,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT inventaire_lignes_pkey PRIMARY KEY (id),
+  CONSTRAINT inventaire_lignes_produit_id_fkey FOREIGN KEY (produit_id) REFERENCES public.produits(id),
+  CONSTRAINT inventaire_lignes_inventaire_id_fkey FOREIGN KEY (inventaire_id) REFERENCES public.inventaires(id),
+  CONSTRAINT inventaire_lignes_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id)
+);
+CREATE TABLE public.inventaires (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  date_inventaire date,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT inventaires_pkey PRIMARY KEY (id),
+  CONSTRAINT inventaires_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id)
+);
+CREATE TABLE public.journal_audit (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  table_name text,
+  row_id uuid,
+  operation text,
+  old_data jsonb,
+  new_data jsonb,
+  changed_by uuid,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  changed_at timestamp with time zone,
+  CONSTRAINT journal_audit_pkey PRIMARY KEY (id),
+  CONSTRAINT journal_audit_changed_by_fkey FOREIGN KEY (changed_by) REFERENCES public.users(id),
+  CONSTRAINT journal_audit_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id)
+);
+CREATE TABLE public.journaux_utilisateur (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  user_id uuid NOT NULL,
+  action text,
+  details jsonb,
+  done_by uuid,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT journaux_utilisateur_pkey PRIMARY KEY (id),
+  CONSTRAINT journaux_utilisateur_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id),
+  CONSTRAINT journaux_utilisateur_done_by_fkey FOREIGN KEY (done_by) REFERENCES public.users(id),
+  CONSTRAINT journaux_utilisateur_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.mamas (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT mamas_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.menu_fiches (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  menu_id uuid NOT NULL,
+  fiche_id uuid NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT menu_fiches_pkey PRIMARY KEY (id),
+  CONSTRAINT menu_fiches_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id),
+  CONSTRAINT menu_fiches_menu_id_fkey FOREIGN KEY (menu_id) REFERENCES public.menus(id),
+  CONSTRAINT menu_fiches_fiche_id_fkey FOREIGN KEY (fiche_id) REFERENCES public.fiches(id)
+);
+CREATE TABLE public.menus (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  nom text NOT NULL,
+  date date,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT menus_pkey PRIMARY KEY (id),
+  CONSTRAINT menus_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id)
+);
+CREATE TABLE public.mouvements_centres_cout (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  mouvement_id uuid,
+  centre_cout_id uuid NOT NULL,
+  quantite numeric,
+  valeur numeric,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT mouvements_centres_cout_pkey PRIMARY KEY (id),
+  CONSTRAINT mouvements_centres_cout_centre_cout_id_fkey FOREIGN KEY (centre_cout_id) REFERENCES public.centres_de_cout(id),
+  CONSTRAINT mouvements_centres_cout_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id)
+);
+CREATE TABLE public.parametres (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  nom text,
+  logo text,
+  contacts jsonb,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT parametres_pkey PRIMARY KEY (id),
+  CONSTRAINT parametres_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id)
+);
+CREATE TABLE public.permissions (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  role_id uuid NOT NULL,
+  user_id uuid,
+  module text,
+  droit text,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT permissions_pkey PRIMARY KEY (id),
+  CONSTRAINT fk_permissions_role FOREIGN KEY (role_id) REFERENCES public.roles(id),
+  CONSTRAINT permissions_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id),
+  CONSTRAINT fk_permissions_user FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.pertes (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  produit_id uuid NOT NULL,
+  centre_cout_id uuid,
+  date_perte date,
+  quantite numeric,
+  motif text,
+  created_by uuid,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT pertes_pkey PRIMARY KEY (id),
+  CONSTRAINT pertes_produit_id_fkey FOREIGN KEY (produit_id) REFERENCES public.produits(id),
+  CONSTRAINT pertes_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(id),
+  CONSTRAINT pertes_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id),
+  CONSTRAINT pertes_centre_cout_id_fkey FOREIGN KEY (centre_cout_id) REFERENCES public.centres_de_cout(id)
+);
+CREATE TABLE public.produits (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  nom text NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  famille_id uuid,
+  unite_id uuid,
+  CONSTRAINT produits_pkey PRIMARY KEY (id),
+  CONSTRAINT produits_famille_id_fkey FOREIGN KEY (famille_id) REFERENCES public.familles(id),
+  CONSTRAINT produits_unite_id_fkey FOREIGN KEY (unite_id) REFERENCES public.unites(id),
+  CONSTRAINT produits_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id)
+);
+CREATE TABLE public.promotion_produits (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  promotion_id uuid NOT NULL,
+  produit_id uuid NOT NULL,
+  discount numeric,
+  prix_promo numeric,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT promotion_produits_pkey PRIMARY KEY (id),
+  CONSTRAINT promotion_produits_produit_id_fkey FOREIGN KEY (produit_id) REFERENCES public.produits(id),
+  CONSTRAINT promotion_produits_promotion_id_fkey FOREIGN KEY (promotion_id) REFERENCES public.promotions(id),
+  CONSTRAINT promotion_produits_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id)
+);
+CREATE TABLE public.promotions (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  nom text,
+  description text,
+  date_debut date,
+  date_fin date,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT promotions_pkey PRIMARY KEY (id),
+  CONSTRAINT promotions_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id)
+);
+CREATE TABLE public.requisitions (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  produit_id uuid NOT NULL,
+  zone_id uuid NOT NULL,
+  date_requisition date,
+  quantite numeric,
+  type text,
+  commentaire text,
+  auteur_id uuid,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT requisitions_pkey PRIMARY KEY (id),
+  CONSTRAINT requisitions_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id),
+  CONSTRAINT requisitions_auteur_id_fkey FOREIGN KEY (auteur_id) REFERENCES public.users(id),
+  CONSTRAINT requisitions_zone_id_fkey FOREIGN KEY (zone_id) REFERENCES public.zones_stock(id),
+  CONSTRAINT requisitions_produit_id_fkey FOREIGN KEY (produit_id) REFERENCES public.produits(id)
+);
+CREATE TABLE public.roles (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  nom text NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  mama_id uuid,
+  CONSTRAINT roles_pkey PRIMARY KEY (id),
+  CONSTRAINT roles_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id)
+);
+CREATE TABLE public.stock_mouvements (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  inventaire_id uuid NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT stock_mouvements_pkey PRIMARY KEY (id),
+  CONSTRAINT stock_mouvements_inventaire_id_fkey FOREIGN KEY (inventaire_id) REFERENCES public.inventaires(id),
+  CONSTRAINT stock_mouvements_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id)
+);
+CREATE TABLE public.stocks (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  zone_id uuid NOT NULL,
+  produit_id uuid NOT NULL,
+  quantite numeric,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT stocks_pkey PRIMARY KEY (id),
+  CONSTRAINT stocks_produit_id_fkey FOREIGN KEY (produit_id) REFERENCES public.produits(id),
+  CONSTRAINT stocks_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id),
+  CONSTRAINT stocks_zone_id_fkey FOREIGN KEY (zone_id) REFERENCES public.zones_stock(id)
+);
+CREATE TABLE public.tache_instances (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  tache_id uuid NOT NULL,
+  date_echeance date,
+  statut text,
+  done_by uuid,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT tache_instances_pkey PRIMARY KEY (id),
+  CONSTRAINT tache_instances_done_by_fkey FOREIGN KEY (done_by) REFERENCES public.users(id),
+  CONSTRAINT tache_instances_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id),
+  CONSTRAINT tache_instances_tache_id_fkey FOREIGN KEY (tache_id) REFERENCES public.taches(id)
+);
+CREATE TABLE public.taches (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  titre text NOT NULL,
+  description text,
+  assignes ARRAY,
+  date_debut date,
+  delai_jours integer,
+  date_echeance date,
+  recurrente boolean,
+  frequence text,
+  priorite text,
+  statut text,
+  created_by uuid,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT taches_pkey PRIMARY KEY (id),
+  CONSTRAINT taches_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id),
+  CONSTRAINT taches_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(id)
+);
+CREATE TABLE public.transferts (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  produit_id uuid NOT NULL,
+  quantite numeric,
+  zone_depart text,
+  zone_arrivee text,
+  motif text,
+  date_transfert date,
+  created_by uuid,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT transferts_pkey PRIMARY KEY (id),
+  CONSTRAINT transferts_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id),
+  CONSTRAINT transferts_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(id),
+  CONSTRAINT transferts_produit_id_fkey FOREIGN KEY (produit_id) REFERENCES public.produits(id)
+);
+CREATE TABLE public.unites (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  nom text NOT NULL,
+  mama_id uuid NOT NULL,
+  actif boolean DEFAULT true,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT unites_pkey PRIMARY KEY (id),
+  CONSTRAINT unites_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id)
+);
+CREATE TABLE public.users (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  username text NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT users_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.utilisateurs (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  nom text,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  role_id uuid,
+  access_rights jsonb DEFAULT '[]'::jsonb,
+  auth_id uuid,
+  CONSTRAINT utilisateurs_pkey PRIMARY KEY (id),
+  CONSTRAINT utilisateurs_auth_id_fkey FOREIGN KEY (auth_id) REFERENCES auth.users(id),
+  CONSTRAINT utilisateurs_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id),
+  CONSTRAINT utilisateurs_role_id_fkey FOREIGN KEY (role_id) REFERENCES public.roles(id)
+);
+CREATE TABLE public.ventes_boissons (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  boisson_id uuid,
+  quantite numeric,
+  date_vente date,
+  created_by uuid,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT ventes_boissons_pkey PRIMARY KEY (id),
+  CONSTRAINT ventes_boissons_boisson_id_fkey FOREIGN KEY (boisson_id) REFERENCES public.produits(id),
+  CONSTRAINT ventes_boissons_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id),
+  CONSTRAINT ventes_boissons_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(id)
+);
+CREATE TABLE public.ventes_fiches_carte (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  fiche_id uuid NOT NULL,
+  periode date,
+  ventes integer,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT ventes_fiches_carte_pkey PRIMARY KEY (id),
+  CONSTRAINT ventes_fiches_carte_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id),
+  CONSTRAINT ventes_fiches_carte_fiche_id_fkey FOREIGN KEY (fiche_id) REFERENCES public.fiches(id)
+);
+CREATE TABLE public.zones_stock (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL,
+  nom text NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  CONSTRAINT zones_stock_pkey PRIMARY KEY (id),
+  CONSTRAINT zones_stock_mama_id_fkey FOREIGN KEY (mama_id) REFERENCES public.mamas(id)
+);

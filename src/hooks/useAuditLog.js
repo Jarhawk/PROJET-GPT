@@ -7,7 +7,7 @@ export function useAuditLog() {
 
   async function log(action, details = null) {
     if (!mama_id) return;
-    await supabase.from("user_logs").insert([
+    await supabase.from("journaux_utilisateur").insert([
       {
         mama_id,
         user_id: user?.id || null,
@@ -20,14 +20,14 @@ export function useAuditLog() {
 
   async function logAction({ module, action, cible_id = null, details = null }) {
     if (!mama_id) return;
-    await supabase.from("logs_audit").insert([
+    await supabase.from("journal_audit").insert([
       {
         mama_id,
-        user_id: user?.id || null,
-        module,
-        action,
-        cible_id,
-        details,
+        table_name: module,
+        operation: action,
+        row_id: cible_id,
+        new_data: details,
+        changed_by: user?.id || null,
       },
     ]);
   }

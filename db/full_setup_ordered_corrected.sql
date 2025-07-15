@@ -2248,7 +2248,7 @@ left join produits p on p.id = fl.produit_id
 group by m.mama_id, m.id, fl.produit_id, p.nom, p.pmp;
 grant select on v_besoins_previsionnels to authenticated;
 
-create or replace view v_reco_surcoût as
+create or replace view v_reco_surcout as
 select distinct on (sp.produit_id)
   sp.produit_id,
   p.nom,
@@ -2263,7 +2263,7 @@ select distinct on (sp.produit_id)
 join produits p on p.id = sp.produit_id
 where p.actif = true
 order by sp.produit_id, sp.date_livraison desc;
-grant select on v_reco_surcoût to authenticated;
+grant select on v_reco_surcout to authenticated;
 
 -- ----------------------------------------------------
 -- Fonctions Supabase supplémentaires

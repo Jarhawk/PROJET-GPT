@@ -73,8 +73,8 @@ test('exportData queries factures with dates and calls Excel export', async () =
   expect(fromMock).toHaveBeenCalledWith('factures');
   expect(queryObj.select).toHaveBeenCalled();
   expect(queryObj.eq).toHaveBeenCalledWith('mama_id', 'm1');
-  expect(queryObj.gte).toHaveBeenCalledWith('date', '2024-01-01');
-  expect(queryObj.lte).toHaveBeenCalledWith('date', '2024-12-31');
+  expect(queryObj.gte).toHaveBeenCalledWith('date_facture', '2024-01-01');
+  expect(queryObj.lte).toHaveBeenCalledWith('date_facture', '2024-12-31');
   expect(excelMock).toHaveBeenCalled();
 });
 

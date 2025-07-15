@@ -94,7 +94,7 @@ export function useZones() {
       .eq('zone_id', id)
       .eq('mama_id', mama_id);
     const { count: mouvCount } = await supabase
-      .from('mouvements_stock')
+      .from('stock_mouvements')
       .select('id', { count: 'exact', head: true })
       .or(`zone_source_id.eq.${id},zone_destination_id.eq.${id}`)
       .eq('mama_id', mama_id);

@@ -112,7 +112,7 @@ test('factures add and update total refresh list', async () => {
   const { result } = renderHook(() => useInvoices());
 
   await act(async () => {
-    await result.current.addInvoice({ montant: 10, fournisseur_id: '1', reference: 'A1', date: '2024-01-01' });
+    await result.current.addInvoice({ montant: 10, fournisseur_id: '1', numero: 'A1', date_facture: '2024-01-01' });
   });
   const created = result.current.invoices.length === 1;
 

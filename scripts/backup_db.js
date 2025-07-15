@@ -50,7 +50,7 @@ export async function backupDb(
         'fournisseur_produits',
         'taches',
         'tache_instances',
-        'mouvements_stock',
+        'stock_mouvements',
       ];
   const list = tables || defaultTables;
   const entries = [];

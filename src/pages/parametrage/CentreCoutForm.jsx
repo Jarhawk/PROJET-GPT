@@ -29,14 +29,14 @@ export default function CentreCoutForm({ centre, onClose, onSaved }) {
       let res;
       if (centre?.id) {
         res = await supabase
-          .from("cost_centers")
+          .from("centres_de_cout")
           .update(values)
           .eq("id", centre.id)
           .select()
           .single();
       } else {
         res = await supabase
-          .from("cost_centers")
+          .from("centres_de_cout")
           .insert([{ ...values, mama_id }])
           .select()
           .single();

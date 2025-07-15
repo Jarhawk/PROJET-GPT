@@ -93,7 +93,7 @@ export default function ParamCostCenters() {
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(filtered);
     XLSX.utils.book_append_sheet(wb, ws, "CostCenters");
-    XLSX.writeFile(wb, "cost_centers.xlsx");
+    XLSX.writeFile(wb, "centres_de_cout.xlsx");
   };
 
   return (

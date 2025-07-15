@@ -14,7 +14,7 @@ export function useMouvements() {
     setLoading(true);
     setError(null);
     let query = supabase
-      .from("mouvements_stock")
+      .from("stock_mouvements")
       .select("*", { count: "exact" })
       .eq("mama_id", mama_id)
       .order("date", { ascending: false });
@@ -38,7 +38,7 @@ export function useMouvements() {
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
-      .from("mouvements_stock")
+      .from("stock_mouvements")
       .insert([{ ...payload, mama_id, auteur_id: user_id }])
       .select()
       .single();
@@ -56,7 +56,7 @@ export function useMouvements() {
     setLoading(true);
     setError(null);
     const { error } = await supabase
-      .from("mouvements_stock")
+      .from("stock_mouvements")
       .delete()
       .eq("id", id)
       .eq("mama_id", mama_id);

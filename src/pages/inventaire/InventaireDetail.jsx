@@ -50,7 +50,7 @@ export default function InventaireDetail() {
 
   const exportPDF = () => {
     const doc = new jsPDF();
-    doc.text(`Inventaire ${inventaire.date}`, 10, 10);
+    doc.text(`Inventaire ${inventaire.date_inventaire}`, 10, 10);
     doc.autoTable({
       startY: 20,
       head: [["Produit", "Unité", "Physique", "Théorique", "Prix", "Valeur", "Écart", "Valeur écart"]],
@@ -82,7 +82,7 @@ export default function InventaireDetail() {
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-4">
       <Button variant="outline" onClick={() => navigate(-1)}>Retour</Button>
-      <h1 className="text-xl font-bold">Inventaire du {inventaire.date}</h1>
+      <h1 className="text-xl font-bold">Inventaire du {inventaire.date_inventaire}</h1>
       <div>Zone : {inventaire.zone || '-'}</div>
 
       <TableContainer>

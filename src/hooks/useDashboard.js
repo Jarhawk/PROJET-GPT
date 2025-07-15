@@ -44,7 +44,7 @@ export function useDashboard() {
     // 2. Récupère mouvements
     try {
       const { data: mouvementsRaw, error: errorMouv } = await supabase
-        .from("mouvements_stock")
+        .from("stock_mouvements")
         .select("type, quantite, produit_id, date")
         .eq("mama_id", mama_id);
       if (errorMouv) throw errorMouv;

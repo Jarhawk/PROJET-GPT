@@ -35,7 +35,7 @@ test('getMouvements applies filters', async () => {
       fin: '2025-01-31',
     });
   });
-  expect(fromMock).toHaveBeenCalledWith('mouvements_stock');
+  expect(fromMock).toHaveBeenCalledWith('stock_mouvements');
   expect(query.select).toHaveBeenCalledWith('*', { count: 'exact' });
   expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1');
   expect(query.eq).toHaveBeenCalledWith('type', 'entree');
@@ -51,6 +51,6 @@ test('createMouvement injects mama_id and auteur_id', async () => {
   await act(async () => {
     await result.current.createMouvement({ produit_id: 'p1', quantite: 1 });
   });
-  expect(fromMock).toHaveBeenCalledWith('mouvements_stock');
+  expect(fromMock).toHaveBeenCalledWith('stock_mouvements');
   expect(query.insert).toHaveBeenCalledWith([{ produit_id: 'p1', quantite: 1, mama_id: 'm1', auteur_id: 'u1' }]);
 });

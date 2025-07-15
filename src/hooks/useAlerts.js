@@ -14,7 +14,7 @@ export function useAlerts() {
     setLoading(true);
     setError(null);
     let query = supabase
-      .from("alert_rules")
+      .from("regles_alertes")
       .select("*, produit:produits(id, nom)")
       .eq("mama_id", mama_id)
       .order("created_at", { ascending: false });
@@ -38,7 +38,7 @@ export function useAlerts() {
     setLoading(true);
     setError(null);
     const { error } = await supabase
-      .from("alert_rules")
+      .from("regles_alertes")
       .insert([{ ...values, mama_id }]);
     setLoading(false);
     if (error) {
@@ -52,7 +52,7 @@ export function useAlerts() {
     setLoading(true);
     setError(null);
     const { error } = await supabase
-      .from("alert_rules")
+      .from("regles_alertes")
       .update(values)
       .eq("id", id)
       .eq("mama_id", mama_id);
@@ -68,7 +68,7 @@ export function useAlerts() {
     setLoading(true);
     setError(null);
     const { error } = await supabase
-      .from("alert_rules")
+      .from("regles_alertes")
       .delete()
       .eq("id", id)
       .eq("mama_id", mama_id);

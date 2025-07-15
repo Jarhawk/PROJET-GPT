@@ -40,7 +40,7 @@ export default function FactureDetail({ facture: factureProp, onClose }) {
     const doc = new jsPDF();
     doc.text(`Facture #${facture.id}`, 10, 12);
     doc.text(`Fournisseur: ${facture.fournisseur?.nom}`, 10, 20);
-    doc.text(`Date: ${facture.date}`, 10, 28);
+    doc.text(`Date: ${facture.date_facture}`, 10, 28);
     doc.autoTable({
       startY: 36,
       head: [["Produit", "Quantité", "PU", "Total"]],
@@ -57,10 +57,10 @@ export default function FactureDetail({ facture: factureProp, onClose }) {
 
   const duplicate = async () => {
     const { id: _id, ...payload } = facture;
-    const { data } = await createFacture({ ...payload, reference: `${facture.reference || facture.id}-copie` });
+    const { data } = await createFacture({ ...payload, numero: `${facture.numero || facture.id}-copie` });
     if (data) {
       for (const l of produitsFacture) {
-        await addLigneFacture(data.id, { produit_id: l.produit_id, quantite: l.quantite, prix_unitaire: l.prix_unitaire, tva: l.tva, fournisseur_id: facture.fournisseur_id });
+        await addLigneFacture(data.id, { produit_id: l.produit_id, quantite: l.quantite, prix: l.prix_unitaire, tva: l.tva, fournisseur_id: facture.fournisseur_id });
       }
       await calculateTotals(data.id);
       onClose?.();
@@ -72,7 +72,7 @@ export default function FactureDetail({ facture: factureProp, onClose }) {
       <div className="bg-glass backdrop-blur-lg border border-borderGlass rounded-xl shadow-lg p-8 min-w-[400px] max-w-[95vw] flex flex-col gap-2 relative">
         <Button variant="outline" className="absolute top-2 right-2" onClick={onClose}>Fermer</Button>
         <h2 className="font-bold text-xl mb-4">Détail de la facture #{facture.id}</h2>
-        <div><b>Date :</b> {facture.date}</div>
+        <div><b>Date :</b> {facture.date_facture}</div>
         <div><b>Fournisseur :</b> {facture.fournisseur?.nom}</div>
         <div><b>Montant :</b> {facture.total_ttc?.toFixed(2)} €</div>
         <div><b>Statut :</b> {facture.statut}</div>

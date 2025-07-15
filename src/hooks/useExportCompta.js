@@ -18,11 +18,11 @@ export default function useExportCompta() {
     const { data, error } = await supabase
       .from('facture_lignes')
       .select(
-        'quantite, prix_unitaire, tva, factures(date, fournisseur:fournisseurs(nom))'
+        'quantite, prix, tva, factures(date_facture, fournisseur:fournisseurs(nom))'
       )
       .eq('mama_id', mama_id)
-      .gte('factures.date', start)
-      .lt('factures.date', endStr);
+      .gte('factures.date_facture', start)
+      .lt('factures.date_facture', endStr);
     if (error) {
       console.error(error);
       return [];
@@ -34,10 +34,10 @@ export default function useExportCompta() {
     setLoading(true);
     const lignes = await fetchJournalLines(month);
     const rows = lignes.map((l) => {
-      const ht = l.quantite * l.prix_unitaire;
+      const ht = l.quantite * l.prix;
       const tva = ht * ((l.tva || 0) / 100);
       return {
-        date: l.factures?.date,
+        date: l.factures?.date_facture,
         fournisseur: l.factures?.fournisseur?.nom || '',
         ht,
         tva,

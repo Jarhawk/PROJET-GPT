@@ -19,7 +19,7 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
   const [date, setDate] = useState(facture?.date || "");
   const [fournisseur_id, setFournisseurId] = useState(facture?.fournisseur_id || "");
   const [fournisseurName, setFournisseurName] = useState("");
-  const [reference, setReference] = useState(facture?.reference || "");
+  const [numero, setNumero] = useState(facture?.numero || "");
   const [statut, setStatut] = useState(facture?.statut || "en attente");
   const [lignes, setLignes] = useState(facture?.lignes || [
     { produit_id: "", quantite: 1, prix_unitaire: 0, tva: 20 }
@@ -66,9 +66,9 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
     const total_ht = lignes.reduce((s,l) => s + l.quantite * l.prix_unitaire, 0);
     const total_tva = lignes.reduce((s,l) => s + l.quantite * l.prix_unitaire * (l.tva || 0) / 100, 0);
     const invoice = {
-      date,
+      date_facture: date,
       fournisseur_id,
-      reference,
+      numero,
       statut,
       total_ht,
       total_tva,
@@ -87,7 +87,7 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
 
       for (const ligne of lignes) {
         if (ligne.produit_id) {
-          await addLigneFacture(fid, { ...ligne, fournisseur_id });
+          await addLigneFacture(fid, { ...ligne, prix: ligne.prix_unitaire, fournisseur_id });
         }
       }
       await calculateTotals(fid);
@@ -117,8 +117,8 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
         className="input mb-2"
         type="text"
         placeholder="Numéro"
-        value={reference}
-        onChange={e => setReference(e.target.value)}
+        value={numero}
+        onChange={e => setNumero(e.target.value)}
       />
       <input
         list="fournisseurs-list"

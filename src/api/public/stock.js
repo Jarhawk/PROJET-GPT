@@ -28,7 +28,7 @@ router.get('/', async (req, res) => {
   try {
     if (!supabase) throw new Error('Missing Supabase credentials');
     let query = supabase
-      .from('mouvements_stock')
+      .from('stock_mouvements')
       .select('*')
       .eq('mama_id', mama_id);
     if (since) query = query.gte('date', since);

@@ -50,8 +50,8 @@ export default function useExport() {
           .from('factures')
           .select('*, lignes:facture_lignes(*)')
           .eq('mama_id', mama_id);
-        if (options.start) query = query.gte('date', options.start);
-        if (options.end) query = query.lte('date', options.end);
+        if (options.start) query = query.gte('date_facture', options.start);
+        if (options.end) query = query.lte('date_facture', options.end);
         const res = await query;
         data = res.data || [];
       }

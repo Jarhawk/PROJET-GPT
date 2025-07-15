@@ -33,8 +33,8 @@ export default function InventaireDetail({ inventaire, onClose }) {
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
       <div className="bg-glass border border-borderGlass backdrop-blur rounded-2xl shadow-lg p-8 min-w-[400px] max-w-[95vw] flex flex-col gap-2 relative">
         <Button variant="outline" className="absolute top-2 right-2" onClick={onClose}>Fermer</Button>
-        <h2 className="font-bold text-xl mb-4">{inventaire.nom}</h2>
-        <div><b>Date :</b> {inventaire.date}</div>
+        <h2 className="font-bold text-xl mb-4">{inventaire.reference}</h2>
+        <div><b>Date :</b> {inventaire.date_inventaire}</div>
         <div><b>Clôture :</b> {inventaire.cloture ? "Oui" : "Non"}</div>
         <div>
           <b>Document :</b> {inventaire.document ?

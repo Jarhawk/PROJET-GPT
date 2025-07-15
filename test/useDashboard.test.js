@@ -25,6 +25,6 @@ test('fetchDashboard queries products and mouvements and calls RPC', async () =>
     await result.current.fetchDashboard(1000);
   });
   expect(fromMock).toHaveBeenCalledWith('v_produits_dernier_prix');
-  expect(fromMock).toHaveBeenCalledWith('mouvements_stock');
+  expect(fromMock).toHaveBeenCalledWith('stock_mouvements');
   expect(rpcMock).toHaveBeenCalledWith('top_produits', expect.any(Object));
 });

@@ -16,12 +16,12 @@ beforeEach(async () => {
   insertMock.mockClear();
 });
 
-test('log inserts into user_logs', async () => {
+test('log inserts into journaux_utilisateur', async () => {
   const { result } = renderHook(() => useAuditLog());
   await act(async () => {
     await result.current.log('TEST', { foo: 'bar' });
   });
-  expect(fromMock).toHaveBeenCalledWith('user_logs');
+  expect(fromMock).toHaveBeenCalledWith('journaux_utilisateur');
   expect(insertMock).toHaveBeenCalledWith([
     { mama_id: 'm1', user_id: 'u1', action: 'TEST', details: { foo: 'bar' }, done_by: 'u1' },
   ]);

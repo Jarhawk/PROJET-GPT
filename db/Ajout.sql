@@ -315,6 +315,13 @@ CREATE INDEX IF NOT EXISTS idx_fournisseurs_api_config_fournisseur_id
 CREATE INDEX IF NOT EXISTS idx_fournisseurs_api_config_mama_id
   ON fournisseurs_api_config(mama_id);
 
+CREATE TABLE IF NOT EXISTS tableaux_de_bord (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  mama_id uuid REFERENCES mamas(id),
+  nom text,
+  created_at timestamp with time zone DEFAULT now()
+);
+
 CREATE TABLE IF NOT EXISTS gadgets (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   tableau_id uuid REFERENCES tableaux_de_bord(id),
@@ -384,7 +391,7 @@ ALTER TABLE factures
   ADD COLUMN IF NOT EXISTS statut text;
 
 ALTER TABLE factures
-  ADD CONSTRAINT IF NOT EXISTS uniq_factures_numero UNIQUE (mama_id, fournisseur_id, numero, date_facture);
+  ADD CONSTRAINT uniq_factures_numero UNIQUE (mama_id, fournisseur_id, numero, date_facture);
 
 -- Colonnes supplémentaires utilisées côté front sur la table produits
 ALTER TABLE produits
@@ -464,19 +471,36 @@ SELECT
   NULL::text AS mois,
   NULL::numeric AS pmp;
 -- Vue pour derniers prix produits utilisée dans plusieurs hooks
+
+-- Correction de la vue v_produits_dernier_prix pour éviter l'erreur "date_livraison does not exist"
+
+DROP VIEW IF EXISTS v_produits_dernier_prix;
+
+-- Sécurité : s'assurer que date_livraison et prix_achat existent dans fournisseur_produits
+ALTER TABLE fournisseur_produits
+  ADD COLUMN IF NOT EXISTS prix_achat numeric,
+  ADD COLUMN IF NOT EXISTS date_livraison date;
+
+
 CREATE OR REPLACE VIEW v_produits_dernier_prix AS
 SELECT p.id, p.mama_id, p.nom, f.nom AS famille, u.nom AS unite,
        p.pmp, p.stock_reel, p.stock_min, p.stock_theorique,
-       fp.prix AS dernier_prix, fp.date_livraison AS date_dernier_modification
+       fp.prix_achat AS dernier_prix, fp.date_livraison AS date_dernier_modification
 FROM produits p
 LEFT JOIN familles f ON f.id = p.famille_id
 LEFT JOIN unites u ON u.id = p.unite_id
 LEFT JOIN (
-  SELECT produit_id, MAX(date_livraison) AS date_livraison,
-         FIRST_VALUE(prix) OVER (PARTITION BY produit_id ORDER BY date_livraison DESC) AS prix
-  FROM fournisseur_produits
-  GROUP BY produit_id
+  SELECT produit_id, date_livraison, prix_achat
+  FROM (
+    SELECT produit_id, date_livraison, prix_achat,
+           ROW_NUMBER() OVER (PARTITION BY produit_id ORDER BY date_livraison DESC) AS rn
+    FROM fournisseur_produits
+  ) sub
+  WHERE rn = 1
 ) fp ON fp.produit_id = p.id;
+
+
+
 CREATE OR REPLACE VIEW v_tendance_prix_produit AS
 SELECT
   NULL::uuid AS mama_id,
@@ -503,6 +527,18 @@ CREATE TABLE IF NOT EXISTS feedback (
 );
 
 -- Colonnes supplémentaires pour l'historique des prix fournisseurs
+
+-- Création minimale de la table fournisseur_produits si elle n'existe pas encore
+CREATE TABLE IF NOT EXISTS fournisseur_produits (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  produit_id uuid REFERENCES produits(id),
+  fournisseur_id uuid REFERENCES fournisseurs(id),
+  prix numeric,
+  date_livraison date,
+  created_at timestamp with time zone DEFAULT now()
+);
+
+
 ALTER TABLE fournisseur_produits
   ADD COLUMN IF NOT EXISTS prix_achat numeric,
   ADD COLUMN IF NOT EXISTS date_livraison date;

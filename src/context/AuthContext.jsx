@@ -17,8 +17,13 @@ export function AuthProvider({ children }) {
   const { pathname } = useLocation();
   const lastUserIdRef = useRef(null);
   const fetchingRef = useRef(false);
+  const sessionLoadedRef = useRef(false);
 
-  async function fetchUserData(userId) {
+  async function fetchUserData(userId, email) {
+    if (!userId) {
+      console.warn("fetchUserData called without userId");
+      return;
+    }
     if (fetchingRef.current && lastUserIdRef.current === userId) return;
     fetchingRef.current = true;
     if (import.meta.env.DEV) console.log("fetchUserData", userId);
@@ -38,6 +43,7 @@ export function AuthProvider({ children }) {
     }
 
     if (!data) {
+      console.warn("user not loaded", userId);
       setUserData(null);
       if (pathname !== "/pending") navigate("/pending");
       fetchingRef.current = false;
@@ -51,36 +57,44 @@ export function AuthProvider({ children }) {
       auth_id: userId,
       user_id: userId,
       role: data.role?.nom ?? data.role,
-      email: session.user.email,
+      email,
     });
+    if (!data.mama_id) console.warn("missing mama_id for user", userId);
     fetchingRef.current = false;
   }
 
   async function loadSession() {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (import.meta.env.DEV) console.log("loadSession", session?.user?.id);
-    setSession(session);
-    if (session?.user?.id) {
-      await fetchUserData(session.user.id);
-    } else {
-      setUserData(null);
-    }
-    setLoading(false);
+    setLoading(true);
+    const { data, error } = await supabase.auth.getSession();
+    if (error) console.warn("loadSession error", error.message);
+    const current = data?.session ?? null;
+    sessionLoadedRef.current = true;
+    setSession(current);
   }
 
   useEffect(() => {
     loadSession();
     const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
       if (import.meta.env.DEV) console.log("auth state change", newSession?.user?.id);
+      sessionLoadedRef.current = true;
       setSession(newSession);
-      if (newSession?.user?.id) {
-        fetchUserData(newSession.user.id);
-      } else {
-        setUserData(null);
-      }
     });
     return () => listener.subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!sessionLoadedRef.current) return;
+    if (!session || !session.user) {
+      if (!session) console.warn("session is null");
+      setUserData(null);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    fetchUserData(session.user.id, session.user.email).finally(() => {
+      setLoading(false);
+    });
+  }, [session]);
 
   const login = async ({ email, password }) => {
     const { data, error } = await loginUser(email, password);
@@ -125,8 +139,8 @@ export function AuthProvider({ children }) {
     }
 
     if (data.session) {
+      sessionLoadedRef.current = true;
       setSession(data.session);
-      if (data.session.user) await fetchUserData(data.session.user.id);
     }
     return { data };
   };

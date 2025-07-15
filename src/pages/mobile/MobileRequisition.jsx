@@ -40,7 +40,7 @@ export default function MobileRequisition() {
     }
 
     const { error: lineError } = await supabase
-      .from("requisition_lines")
+      .from("requisitions")
       .insert([{ requisition_id: data.id, produit_id: selectedId, quantite, mama_id }]);
 
     if (lineError) {

@@ -28,7 +28,7 @@ export default function MobileMouvement() {
       return;
     }
 
-    const { error } = await supabase.from("mouvements_stock").insert([
+    const { error } = await supabase.from("stock_mouvements").insert([
       {
         produit_id: selectedId,
         zone: "Bar",

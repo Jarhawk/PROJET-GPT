@@ -46,12 +46,12 @@ export function useFactures() {
       .from("factures")
       .select("*, fournisseur:fournisseurs(id, nom)", { count: "exact" })
       .eq("mama_id", mama_id)
-      .order("date", { ascending: false })
+      .order("date_facture", { ascending: false })
       .range((page - 1) * pageSize, page * pageSize - 1);
 
     if (search) {
       query = query.or(
-        `reference.ilike.%${search}%,fournisseurs.nom.ilike.%${search}%`
+        `numero.ilike.%${search}%,fournisseurs.nom.ilike.%${search}%`
       );
     }
     if (fournisseur) query = query.eq("fournisseur_id", fournisseur);
@@ -61,7 +61,7 @@ export function useFactures() {
       const end = new Date(start);
       end.setMonth(end.getMonth() + 1);
       const endStr = end.toISOString().slice(0, 10);
-      query = query.gte("date", start).lt("date", endStr);
+      query = query.gte("date_facture", start).lt("date_facture", endStr);
     }
 
     const { data, error, count } = await query;
@@ -156,7 +156,7 @@ export function useFactures() {
       fournisseur_id,
       produit_id,
       quantite,
-      prix_unitaire,
+      prix,
       tva,
       date,
     } = ligne || {};
@@ -166,7 +166,7 @@ export function useFactures() {
         {
           produit_id,
           quantite,
-          prix_unitaire,
+          prix,
           tva,
           facture_id,
           mama_id,
@@ -181,7 +181,7 @@ export function useFactures() {
           {
             produit_id,
             fournisseur_id,
-            prix_achat: prix_unitaire,
+            prix_achat: prix,
             date_livraison: date || new Date().toISOString().slice(0, 10),
             mama_id,
           },
@@ -235,11 +235,11 @@ export function useFactures() {
     if (!mama_id) return { ht: 0, tva: 0, ttc: 0 };
     const { data: lignes } = await supabase
       .from("facture_lignes")
-      .select("quantite, prix_unitaire, tva")
+      .select("quantite, prix, tva")
       .eq("facture_id", facture_id)
       .eq("mama_id", mama_id);
-    const ht = (lignes || []).reduce((s,l) => s + l.quantite * l.prix_unitaire, 0);
-    const tva = (lignes || []).reduce((s,l) => s + l.quantite * l.prix_unitaire * (l.tva || 0) / 100, 0);
+    const ht = (lignes || []).reduce((s,l) => s + l.quantite * l.prix, 0);
+    const tva = (lignes || []).reduce((s,l) => s + l.quantite * l.prix * (l.tva || 0) / 100, 0);
     const ttc = ht + tva;
     await supabase
       .from("factures")

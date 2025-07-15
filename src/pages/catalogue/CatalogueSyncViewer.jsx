@@ -17,7 +17,7 @@ export default function CatalogueSyncViewer({ fournisseur_id }) {
     setLoading(true);
     let query = supabase
       .from("catalogue_updates")
-      .select("*, produit:products(nom)")
+      .select("*, produit:produits(nom)")
       .eq("mama_id", mama_id)
       .order("created_at", { ascending: false });
     if (fournisseur_id) query = query.eq("fournisseur_id", fournisseur_id);

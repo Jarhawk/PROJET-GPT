@@ -23,12 +23,12 @@ export function useInvoices() {
         fournisseur: fournisseurs (id, nom)
       `)
       .eq("mama_id", mama_id)
-      .order("date", { ascending: false });
+      .order("date_facture", { ascending: false });
 
-    if (search) query = query.ilike("reference", `%${search}%`);
+    if (search) query = query.ilike("numero", `%${search}%`);
     if (fournisseur) query = query.eq("fournisseur_id", fournisseur);
     if (statut) query = query.eq("statut", statut);
-    if (date) query = query.eq("date", date);
+    if (date) query = query.eq("date_facture", date);
 
     const { data, error } = await query;
     setInvoices(data || []);
@@ -44,10 +44,10 @@ export function useInvoices() {
     setError(null);
     const { data, error } = await supabase
       .from("factures")
-      .select("id, date_facture:date, numero_facture:reference, montant_total:total_ttc, statut")
+      .select("id, date_facture, numero, total_ttc, statut")
       .eq("mama_id", mama_id)
       .eq("fournisseur_id", fournisseur_id)
-      .order("date", { ascending: false });
+      .order("date_facture", { ascending: false });
     setLoading(false);
     if (error) {
       setError(error);
@@ -136,8 +136,8 @@ export function useInvoices() {
   function exportInvoicesToExcel() {
     const datas = (invoices || []).map(f => ({
       id: f.id,
-      numero: f.reference,
-      date: f.date,
+      numero: f.numero,
+      date: f.date_facture,
       fournisseur: f.fournisseur?.nom,
       montant: f.total_ttc,
       statut: f.statut,

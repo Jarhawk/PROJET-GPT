@@ -27,16 +27,16 @@ export function useGraphiquesMultiZone() {
           .select("date")
           .eq("mama_id", mama_id)
           .eq("zone", zone.nom)
-          .order("date", { ascending: true });
+          .order("date_inventaire", { ascending: true });
 
         if (errorInv) throw errorInv;
 
-        allData.push({
-          zone: zone.nom,
-          points: (inventaires || []).map(inv => ({
-            date: inv.date,
-          })),
-        });
+          allData.push({
+            zone: zone.nom,
+            points: (inventaires || []).map(inv => ({
+              date: inv.date_inventaire,
+            })),
+          });
       }
       setData(allData);
     } catch (err) {

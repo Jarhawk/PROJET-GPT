@@ -25,7 +25,7 @@ export default function InventairePage() {
         <table className="min-w-full text-sm">
           <thead>
             <tr>
-              <th className="p-2 text-left">Nom</th>
+              <th className="p-2 text-left">Référence</th>
               <th className="p-2">Date</th>
               <th className="p-2">Utilisateur</th>
               <th className="p-2">État</th>
@@ -33,10 +33,10 @@ export default function InventairePage() {
             </tr>
           </thead>
           <tbody>
-            {inventaires.map((inv) => (
-              <tr key={inv.id}>
-                <td className="p-2">{inv.nom || inv.reference}</td>
-                <td className="p-2 text-center">{inv.date}</td>
+              {inventaires.map((inv) => (
+                <tr key={inv.id}>
+                  <td className="p-2">{inv.reference}</td>
+                  <td className="p-2 text-center">{inv.date_inventaire}</td>
                 <td className="p-2 text-center">{inv.utilisateurs?.username || "-"}</td>
                 <td className="p-2 text-center">{inv.cloture ? "validé" : "en cours"}</td>
                 <td className="p-2 text-center">{inv.ecart_total ?? "-"}</td>

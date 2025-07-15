@@ -19,7 +19,7 @@ export function useLogs() {
     setLoading(true);
     setError(null);
     let query = supabase
-      .from("user_logs")
+      .from("journaux_utilisateur")
       .select("*, utilisateurs:done_by(nom)")
       .eq("mama_id", mama_id)
       .order("created_at", { ascending: false })
@@ -47,7 +47,7 @@ export function useLogs() {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "Logs");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([buf]), "audit_logs.xlsx");
+    saveAs(new Blob([buf]), "journal_audit.xlsx");
   }
 
   return { logs, loading, error, fetchLogs, exportLogsToExcel };

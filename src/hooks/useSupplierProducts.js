@@ -21,7 +21,7 @@ export function useSupplierProducts() {
       const { data, error } = await supabase
         .from("fournisseur_produits")
         .select(
-          "*, produit:produits(id, nom, famille:familles(nom), unite:unites(nom)), achats:factures(date_facture:date, numero_facture:reference, montant_total:total_ttc)"
+          "*, produit:produits(id, nom, famille:familles(nom), unite:unites(nom)), achats:factures(date_facture, numero, total_ttc)"
         )
         .eq("fournisseur_id", fournisseur_id)
         .eq("mama_id", mama_id);
@@ -40,7 +40,7 @@ export function useSupplierProducts() {
     const { data } = await supabase
       .from("fournisseur_produits")
       .select(
-        "*, produit:produits(id, nom, famille:familles(nom), unite:unites(nom)), achats:factures(date_facture:date, numero_facture:reference, montant_total:total_ttc)"
+        "*, produit:produits(id, nom, famille:familles(nom), unite:unites(nom)), achats:factures(date_facture, numero, total_ttc)"
       )
       .eq("fournisseur_id", fournisseur_id)
       .eq("mama_id", mama_id);

@@ -162,7 +162,7 @@ describe('public API router', () => {
     const res = await request(app).get('/stock?mama_id=m1').set('x-api-key', 'dev_key');
     expect(res.status).toBe(200);
     expect(res.body).toEqual(data);
-    expect(fromMock).toHaveBeenCalledWith('mouvements_stock');
+    expect(fromMock).toHaveBeenCalledWith('stock_mouvements');
   });
 
   it('applies since filter on stock', async () => {
@@ -198,7 +198,7 @@ describe('public API router', () => {
     expect(res.status).toBe(200);
     expect(res.body).toEqual(data);
     expect(getUserMock).toHaveBeenCalledWith('tok');
-    expect(fromMock).toHaveBeenCalledWith('mouvements_stock');
+    expect(fromMock).toHaveBeenCalledWith('stock_mouvements');
   });
 
   it('handles Supabase error for stock', async () => {

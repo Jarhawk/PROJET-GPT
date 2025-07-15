@@ -25,8 +25,8 @@ test('fetchInvoicesBySupplier selects fields with aliases', async () => {
     await result.current.fetchInvoicesBySupplier('s1');
   });
   expect(fromMock).toHaveBeenCalledWith('factures');
-  expect(queryChain.select).toHaveBeenCalledWith('id, date_facture:date, numero_facture:reference, montant_total:total_ttc, statut');
+  expect(queryChain.select).toHaveBeenCalledWith('id, date_facture, numero, total_ttc, statut');
   expect(queryChain.eq).toHaveBeenNthCalledWith(1, 'mama_id', 'm1');
   expect(queryChain.eq).toHaveBeenNthCalledWith(2, 'fournisseur_id', 's1');
-  expect(orderMock).toHaveBeenCalledWith('date', { ascending: false });
+  expect(orderMock).toHaveBeenCalledWith('date_facture', { ascending: false });
 });

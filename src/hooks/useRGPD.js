@@ -7,7 +7,7 @@ export function useRGPD() {
 
   async function logAccess(userId, action, table) {
     if (!userId) return;
-    await supabase.from("audit_logs").insert([
+    await supabase.from("journal_audit").insert([
       { user_id: userId, mama_id, action, table_name: table },
     ]);
   }
@@ -20,7 +20,7 @@ export function useRGPD() {
       .eq("auth_id", userId)
       .single();
     const { data: logs } = await supabase
-      .from("audit_logs")
+      .from("journal_audit")
       .select("action, table_name, created_at")
       .eq("user_id", userId)
       .order("created_at", { ascending: false });

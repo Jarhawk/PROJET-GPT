@@ -73,8 +73,8 @@ export default function Inventaire() {
                 0
               );
               return (
-                <tr key={inv.id} className="border-b last:border-none">
-                  <td className="p-2">{inv.date}</td>
+                  <tr key={inv.id} className="border-b last:border-none">
+                    <td className="p-2">{inv.date_inventaire}</td>
                   <td className="p-2">{inv.zone || '-'}</td>
                   <td className="p-2">{inv.lignes?.length || 0}</td>
                   <td className="p-2">{total.toFixed(2)} €</td>

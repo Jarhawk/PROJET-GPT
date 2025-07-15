@@ -24,7 +24,7 @@ export async function getRecommendations(user_id, mama_id) {
 
   // 2. Surcoût
   const { data: surcout } = await supabase
-    .from('v_reco_surcoût')
+    .from('v_reco_surcout')
     .select('*')
     .eq('mama_id', mama_id)
     .gte('variation_pct', 20);

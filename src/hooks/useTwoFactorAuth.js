@@ -14,7 +14,7 @@ export function useTwoFactorAuth() {
     setError(null);
     const { data: userData } = await supabase.auth.getUser();
     const { data, error } = await supabase
-      .from("two_factor_auth")
+      .from("auth_double_facteur")
       .select("enabled, secret")
       .eq("id", userData.user.id)
       .single();
@@ -39,7 +39,7 @@ export function useTwoFactorAuth() {
     setError(null);
     const { data: userData } = await supabase.auth.getUser();
     const { error } = await supabase
-      .from("two_factor_auth")
+      .from("auth_double_facteur")
       .upsert({ id: userData.user.id, secret, enabled: true });
     if (error) setError(error);
     else setEnabled(true);
@@ -50,7 +50,7 @@ export function useTwoFactorAuth() {
     setLoading(true);
     const { data: userData } = await supabase.auth.getUser();
     const { error } = await supabase
-      .from("two_factor_auth")
+      .from("auth_double_facteur")
       .update({ enabled: false, secret: null })
       .eq("id", userData.user.id);
     if (error) setError(error);

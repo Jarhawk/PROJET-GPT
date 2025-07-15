@@ -19,8 +19,8 @@ export default function InventaireForm({ inventaire, onClose }) {
   } = useInventaires();
   const { products, fetchProducts } = useProducts();
 
-  const [nom, setNom] = useState(inventaire?.nom || "");
-  const [date, setDate] = useState(inventaire?.date || "");
+  const [reference, setReference] = useState(inventaire?.reference || "");
+  const [dateInventaire, setDateInventaire] = useState(inventaire?.date_inventaire || "");
   const [dateDebut, setDateDebut] = useState(inventaire?.date_debut || ""); // Pour la période
   const [lignes, setLignes] = useState(inventaire?.lignes || []);
   const [mouvementsProduits, setMouvementsProduits] = useState([]);
@@ -32,23 +32,23 @@ export default function InventaireForm({ inventaire, onClose }) {
   useEffect(() => {
     async function init() {
       await fetchProducts();
-      let date_debut = dateDebut;
-      if (!date_debut && inventaire?.date) {
-        const prev = await fetchLastClosedInventaire(inventaire.date);
-        if (prev?.date) date_debut = prev.date;
-      }
+        let date_debut = dateDebut;
+        if (!date_debut && inventaire?.date_inventaire) {
+          const prev = await fetchLastClosedInventaire(inventaire.date_inventaire);
+          if (prev?.date) date_debut = prev.date;
+        }
       if (!date_debut) {
         const prev = await fetchLastClosedInventaire();
         date_debut = prev?.date || "2024-06-01"; // fallback
       }
-      setDateDebut(date_debut);
-      if (date) {
-        const mouvements = await fetchMouvementsForPeriod(date_debut, date);
-        setMouvementsProduits(mouvements);
-      }
+        setDateDebut(date_debut);
+        if (dateInventaire) {
+          const mouvements = await fetchMouvementsForPeriod(date_debut, dateInventaire);
+          setMouvementsProduits(mouvements);
+        }
     }
     init();
-  }, [date, inventaire?.date]);
+  }, [dateInventaire, inventaire?.date_inventaire]);
 
   // Ajout/suppression de lignes
   const addLigne = () => setLignes([...lignes, { produit_id: "", quantite: 0 }]);
@@ -106,13 +106,13 @@ export default function InventaireForm({ inventaire, onClose }) {
   // Submit CRUD
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!nom.trim()) return toast.error("Nom requis");
-    if (!date) return toast.error("Date requise");
+      if (!reference.trim()) return toast.error("Nom requis");
+      if (!dateInventaire) return toast.error("Date requise");
     if (lignes.some(l => !l.produit_id)) return toast.error("Produit manquant");
     setLoading(true);
     const invData = {
-      nom,
-      date,
+        reference,
+        date_inventaire: dateInventaire,
       lignes,
       document: fileUrl || inventaire?.document,
       date_debut: dateDebut,
@@ -143,21 +143,21 @@ export default function InventaireForm({ inventaire, onClose }) {
       </h2>
       <input
         className="input mb-2"
-        value={nom}
-        onChange={e => setNom(e.target.value)}
+          value={reference}
+          onChange={e => setReference(e.target.value)}
         placeholder="Nom de l’inventaire"
         required
       />
       <input
         className="input mb-2"
         type="date"
-        value={date}
-        onChange={e => setDate(e.target.value)}
+          value={dateInventaire}
+          onChange={e => setDateInventaire(e.target.value)}
         required
       />
       {/* Optionnel : affichage période analysée */}
       <div className="mb-4 text-xs">
-        <b>Période d’analyse mouvements :</b> {dateDebut} → {date || "?"}
+        <b>Période d’analyse mouvements :</b> {dateDebut} → {dateInventaire || "?"}
       </div>
       <div className="mb-4">
         <label className="block font-semibold mb-2">Produits inventoriés :</label>

@@ -18,7 +18,7 @@ export default function AuditViewer() {
     if (!mama_id) return;
     setLoading(true);
     const { data: audit } = await supabase
-      .from("logs_audit")
+      .from("journal_audit")
       .select("*, utilisateurs:user_id(nom)")
       .eq("mama_id", mama_id)
       .order("created_at", { ascending: false })

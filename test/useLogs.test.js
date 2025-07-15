@@ -30,10 +30,10 @@ beforeEach(async () => {
   rangeMock.mockClear();
 });
 
-test('fetchLogs queries user_logs', async () => {
+test('fetchLogs queries journaux_utilisateur', async () => {
   const { result } = renderHook(() => useLogs());
   await act(async () => { await result.current.fetchLogs({ search: 'TEST' }); });
-  expect(fromMock).toHaveBeenCalledWith('user_logs');
+  expect(fromMock).toHaveBeenCalledWith('journaux_utilisateur');
   expect(selectMock).toHaveBeenCalledWith('*, utilisateurs:done_by(nom)');
   expect(eqMock).toHaveBeenCalledWith('mama_id', 'm1');
   expect(orderMock).toHaveBeenCalledWith('created_at', { ascending: false });

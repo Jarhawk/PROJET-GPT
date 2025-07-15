@@ -141,8 +141,8 @@ export default function Factures() {
         <tbody>
           {facturesFiltres.map((facture) => (
             <tr key={facture.id}>
-              <td className="border px-4 py-2">{facture.reference || facture.id}</td>
-              <td className="border px-4 py-2">{facture.date}</td>
+              <td className="border px-4 py-2">{facture.numero || facture.id}</td>
+              <td className="border px-4 py-2">{facture.date_facture}</td>
               <td className="border px-4 py-2">{facture.fournisseur?.nom}</td>
               <td className="border px-4 py-2">{facture.total_ttc?.toFixed(2)} €</td>
               <td className="border px-4 py-2">

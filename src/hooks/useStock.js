@@ -31,12 +31,12 @@ export function useStock() {
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
-      .from("mouvements_stock")
+      .from("stock_mouvements")
       .select(
-        "*, zone_source:zones_stock!mouvements_stock_zone_source_id_fkey(id, nom), zone_destination:zones_stock!mouvements_stock_zone_destination_id_fkey(id, nom)"
+        "*, zone_source:zones_stock!stock_mouvements_zone_source_id_fkey(id, nom), zone_destination:zones_stock!stock_mouvements_zone_destination_id_fkey(id, nom)"
       )
       .eq("mama_id", mama_id)
-      .order("date", { ascending: false });
+      .order("created_at", { ascending: false });
     setLoading(false);
     if (error) setError(error);
     setMouvements(data || []);
@@ -70,7 +70,7 @@ export function useStock() {
       payload.zone_source_id = zone_source_id;
       payload.zone_destination_id = zone_destination_id;
     }
-    const { error } = await supabase.from("mouvements_stock").insert([payload]);
+    const { error } = await supabase.from("stock_mouvements").insert([payload]);
     setLoading(false);
     if (error) setError(error);
     // Les listes seront rafraîchies via fetchStocks/fetchMouvements
@@ -107,7 +107,7 @@ export function useStock() {
       .from("inventaires")
       .select("*")
       .eq("mama_id", mama_id)
-      .order("date", { ascending: false });
+      .order("date_inventaire", { ascending: false });
     if (error) return [];
     return data || [];
   }, [mama_id]);
@@ -130,7 +130,7 @@ export function useStock() {
     async (payload) => {
       if (!mama_id) return null;
       const { data, error } = await supabase
-        .from("mouvements_stock")
+        .from("stock_mouvements")
         .insert([{ ...payload, mama_id, auteur_id: user_id }])
         .select()
         .single();

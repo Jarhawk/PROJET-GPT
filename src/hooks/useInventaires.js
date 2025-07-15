@@ -19,7 +19,7 @@ export function useInventaires() {
         "*, lignes:inventaire_lignes(*, produit:produits(id, nom, unite:unites(nom), stock_theorique, pmp))"
       )
       .eq("mama_id", mama_id)
-      .order("date", { ascending: false });
+      .order("date_inventaire", { ascending: false });
     setLoading(false);
     if (error) {
       setError(error);
@@ -32,11 +32,11 @@ export function useInventaires() {
   async function fetchMouvementsInventaire(inventaireId) {
     if (!mama_id || !inventaireId) return [];
     const { data, error } = await supabase
-      .from("mouvements_stock")
+      .from("stock_mouvements")
       .select("*")
       .eq("inventaire_id", inventaireId)
       .eq("mama_id", mama_id)
-      .order("date", { ascending: true });
+      .order("created_at", { ascending: true });
     if (error) {
       setError(error);
       return [];
@@ -65,10 +65,10 @@ export function useInventaires() {
     if (!mama_id) return null;
     setLoading(true);
     setError(null);
-    const { lignes = [], ...entete } = inv;
+    const { lignes = [], date, ...entete } = inv;
     const { data, error } = await supabase
       .from("inventaires")
-      .insert([{ ...entete, mama_id }])
+      .insert([{ ...entete, date_inventaire: date, mama_id }])
       .select()
       .single();
     if (error) {

@@ -16,7 +16,7 @@ export function useMouvementsStock() {
     setLoading(true);
     setError(null);
     let query = supabase
-      .from("mouvements_stock")
+      .from("stock_mouvements")
       .select("*")
       .eq("mama_id", mama_id);
 
@@ -40,7 +40,7 @@ export function useMouvementsStock() {
     setLoading(true);
     setError(null);
     const { error } = await supabase
-      .from("mouvements_stock")
+      .from("stock_mouvements")
       .insert([{ ...mouvement, mama_id, auteur_id: user_id }]);
     if (error) setError(error);
     setLoading(false);
@@ -52,7 +52,7 @@ export function useMouvementsStock() {
     setLoading(true);
     setError(null);
     const { error } = await supabase
-      .from("mouvements_stock")
+      .from("stock_mouvements")
       .update(updateFields)
       .eq("id", id)
       .eq("mama_id", mama_id);
@@ -66,7 +66,7 @@ export function useMouvementsStock() {
     setLoading(true);
     setError(null);
     const { error } = await supabase
-      .from("mouvements_stock")
+      .from("stock_mouvements")
       .delete()
       .eq("id", id)
       .eq("mama_id", mama_id);
@@ -80,7 +80,7 @@ export function useMouvementsStock() {
     setLoading(true);
     setError(null);
     const { error } = await supabase
-      .from("mouvements_stock")
+      .from("stock_mouvements")
       .delete()
       .in("id", ids)
       .eq("mama_id", mama_id);
@@ -105,7 +105,7 @@ export function useMouvementsStock() {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Mouvements");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([buf]), "mouvements_stock_mamastock.xlsx");
+    saveAs(new Blob([buf]), "stock_mouvements_mamastock.xlsx");
   }
 
   // 7. Import Excel (lecture, insertion à valider manuellement)

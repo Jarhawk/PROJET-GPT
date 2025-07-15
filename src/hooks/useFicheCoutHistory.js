@@ -19,7 +19,7 @@ export function useFicheCoutHistory() {
         .select("*")
         .eq("fiche_id", fiche_id)
         .eq("mama_id", mama_id)
-        .order("date", { ascending: false });
+        .order("changed_at", { ascending: false });
 
       if (error) throw error;
       setHistory(Array.isArray(data) ? data : []);

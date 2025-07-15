@@ -28,10 +28,10 @@ beforeEach(async () => {
   queryObj.insert.mockClear();
 });
 
-test('fetchRules queries alert_rules with filters', async () => {
+test('fetchRules queries regles_alertes with filters', async () => {
   const { result } = renderHook(() => useAlerts());
   await act(async () => { await result.current.fetchRules({ search: 'foo', actif: true }); });
-  expect(fromMock).toHaveBeenCalledWith('alert_rules');
+  expect(fromMock).toHaveBeenCalledWith('regles_alertes');
   expect(queryObj.select).toHaveBeenCalledWith('*, produit:produits(id, nom)');
   expect(queryObj.eq).toHaveBeenCalledWith('mama_id', 'm1');
   expect(queryObj.eq).toHaveBeenCalledWith('actif', true);

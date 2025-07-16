@@ -13,7 +13,7 @@ const query = {
 };
 const fromMock = vi.fn(() => query);
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
-vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({}) }));
 
 let useHelpArticles;
 
@@ -31,28 +31,25 @@ test('fetchArticles queries table', async () => {
   await act(async () => { await result.current.fetchArticles(); });
   expect(fromMock).toHaveBeenCalledWith('help_articles');
   expect(query.select).toHaveBeenCalledWith('*');
-  expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1');
   expect(query.order).toHaveBeenCalledWith('created_at', { ascending: false });
 });
 
-test('addArticle inserts with mama_id', async () => {
+test('addArticle inserts article', async () => {
   const { result } = renderHook(() => useHelpArticles());
-  await act(async () => { await result.current.addArticle({ title: 't', content: 'c' }); });
-  expect(query.insert).toHaveBeenCalledWith([{ title: 't', content: 'c', mama_id: 'm1' }]);
+  await act(async () => { await result.current.addArticle({ titre: 't', contenu: 'c' }); });
+  expect(query.insert).toHaveBeenCalledWith([{ titre: 't', contenu: 'c' }]);
 });
 
-test('updateArticle sends update with mama_id filter', async () => {
+test('updateArticle sends update query', async () => {
   const { result } = renderHook(() => useHelpArticles());
-  await act(async () => { await result.current.updateArticle('id1', { title: 'u' }); });
-  expect(query.update).toHaveBeenCalledWith({ title: 'u' });
+  await act(async () => { await result.current.updateArticle('id1', { titre: 'u' }); });
+  expect(query.update).toHaveBeenCalledWith({ titre: 'u' });
   expect(query.eq).toHaveBeenCalledWith('id', 'id1');
-  expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1');
 });
 
-test('deleteArticle removes row with mama_id filter', async () => {
+test('deleteArticle removes row', async () => {
   const { result } = renderHook(() => useHelpArticles());
   await act(async () => { await result.current.deleteArticle('id2'); });
   expect(query.delete).toHaveBeenCalled();
   expect(query.eq).toHaveBeenCalledWith('id', 'id2');
-  expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1');
 });

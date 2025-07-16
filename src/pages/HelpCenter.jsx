@@ -1,17 +1,15 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect } from "react";
 import { useHelpArticles } from "@/hooks/useHelpArticles";
-import { useAuth } from "@/context/AuthContext";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import GlassCard from "@/components/ui/GlassCard";
 
 export default function HelpCenter() {
-  const { mama_id } = useAuth();
-  const { items, fetchArticles, loading, error } = useHelpArticles();
+  const { fetchArticles, items, loading, error } = useHelpArticles();
 
   useEffect(() => {
-    if (mama_id) fetchArticles();
-  }, [fetchArticles, mama_id]);
+    fetchArticles();
+  }, [fetchArticles]);
 
   return (
     <div className="p-8 space-y-6">
@@ -22,8 +20,8 @@ export default function HelpCenter() {
         {items.map((a) => (
           <li key={a.id} className="list-none">
             <GlassCard>
-              <h2 className="font-semibold text-lg mb-2">{a.title}</h2>
-              <p className="whitespace-pre-line text-sm">{a.content}</p>
+              <h2 className="font-semibold text-lg mb-2">{a.titre}</h2>
+              <p className="whitespace-pre-line text-sm">{a.contenu}</p>
             </GlassCard>
           </li>
         ))}

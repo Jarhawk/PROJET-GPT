@@ -11,7 +11,7 @@ const queryObj = {
 };
 const fromMock = vi.fn(() => queryObj);
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
-vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ mama_id: 'm1', user: { id: 'u1' } }) }));
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
 
 let useOnboarding;
 
@@ -28,8 +28,7 @@ test('fetchProgress queries table', async () => {
   const { result } = renderHook(() => useOnboarding());
   await act(async () => { await result.current.fetchProgress(); });
   expect(fromMock).toHaveBeenCalledWith('etapes_onboarding');
-  expect(queryObj.select).toHaveBeenCalledWith('etape, statut');
-  expect(queryObj.eq).toHaveBeenCalledWith('user_id', 'u1');
+  expect(queryObj.select).toHaveBeenCalledWith('etape, terminee');
   expect(queryObj.eq).toHaveBeenCalledWith('mama_id', 'm1');
   expect(queryObj.order).toHaveBeenCalledWith('created_at', { ascending: true });
 });
@@ -37,5 +36,5 @@ test('fetchProgress queries table', async () => {
 test('startOnboarding inserts row', async () => {
   const { result } = renderHook(() => useOnboarding());
   await act(async () => { await result.current.startOnboarding(); });
-  expect(queryObj.insert).toHaveBeenCalledWith([{ user_id: 'u1', mama_id: 'm1', etape: '0', statut: 'en cours' }]);
+  expect(queryObj.insert).toHaveBeenCalledWith([{ mama_id: 'm1', etape: '0', terminee: false }]);
 });

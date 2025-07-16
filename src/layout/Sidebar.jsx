@@ -20,6 +20,12 @@ import {
   Building2,
   Home,
   Bug,
+  Key,
+  Calendar,
+  CheckSquare,
+  HelpCircle,
+  Gift,
+  Bell,
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -90,6 +96,44 @@ export default function Sidebar() {
           </div>
         )}
 
+        {has("documents") && (
+          <div>
+            <p className="uppercase text-xs font-semibold text-mamastockGold mb-1">Documents</p>
+            <div className="flex flex-col gap-1 ml-2">
+              <Item to="/documents" icon={<FileText size={16} />} label="Documents" />
+            </div>
+          </div>
+        )}
+
+        {has("notifications") && (
+          <div>
+            <p className="uppercase text-xs font-semibold text-mamastockGold mb-1">Notifications</p>
+            <div className="flex flex-col gap-1 ml-2">
+              <Item to="/notifications" icon={<Bell size={16} />} label="Notifications" />
+            </div>
+          </div>
+        )}
+
+        {has("planning") && (
+          <div>
+            <p className="uppercase text-xs font-semibold text-mamastockGold mb-1">Planning</p>
+            <div className="flex flex-col gap-1 ml-2">
+              <Item to="/planning/simulation" icon={<Calendar size={16} />} label="Simulation" />
+            </div>
+          </div>
+        )}
+
+        {(has("taches") || has("alertes") || has("promotions")) && (
+          <div>
+            <p className="uppercase text-xs font-semibold text-mamastockGold mb-1">Tâches</p>
+            <div className="flex flex-col gap-1 ml-2">
+              {has("taches") && <Item to="/taches" icon={<CheckSquare size={16} />} label="Tâches" />}
+              {has("alertes") && <Item to="/taches/alertes" icon={<ClipboardList size={16} />} label="Alertes" />}
+              {has("promotions") && <Item to="/promotions" icon={<Gift size={16} />} label="Promotions" />}
+            </div>
+          </div>
+        )}
+
         {(has("fiches") || has("menus") || has("carte") || has("recettes") || has("requisitions")) && (
           <div>
             <p className="uppercase text-xs font-semibold text-mamastockGold mb-1">Cuisine</p>
@@ -131,7 +175,30 @@ export default function Sidebar() {
                   label="Permissions"
                 />
               )}
+              {has("access") && (
+                <Item
+                  to="/parametrage/access"
+                  icon={<Shield size={16} />}
+                  label="Accès"
+                />
+              )}
+              {has("apikeys") && (
+                <Item
+                  to="/parametrage/api-keys"
+                  icon={<Key size={16} />}
+                  label="API Keys"
+                />
+              )}
               {has("settings") && <Item to="/parametrage/settings" icon={<Settings size={16} />} label="Autres" />}
+            </div>
+          </div>
+        )}
+
+        {has("aide") && (
+          <div>
+            <p className="uppercase text-xs font-semibold text-mamastockGold mb-1">Aide</p>
+            <div className="flex flex-col gap-1 ml-2">
+              <Item to="/aide" icon={<HelpCircle size={16} />} label="Aide" />
             </div>
           </div>
         )}

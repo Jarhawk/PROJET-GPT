@@ -4,16 +4,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import toast, { Toaster } from "react-hot-toast";
-
-const MODULES = [
-  { label: "Produits", key: "produits" },
-  { label: "Fournisseurs", key: "fournisseurs" },
-  { label: "Factures", key: "factures" },
-  { label: "Inventaire", key: "inventaires" },
-  { label: "Menus", key: "menus" },
-  { label: "Reporting", key: "reporting" },
-  { label: "Paramétrage", key: "parametrage" },
-];
+import { MODULES } from "@/config/modules";
 
 export default function RoleForm({ role, onClose, onSaved }) {
   const { mama_id } = useAuth();

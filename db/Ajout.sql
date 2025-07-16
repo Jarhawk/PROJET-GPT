@@ -1,4 +1,3 @@
--- Fonctions manquantes creees pour correspondance avec le front-end
 
 -- Permet la creation des fonctions meme si les tables references ne sont pas encore presentes
 -- lors de l'import sur Supabase. Ce parametre sera remis a 'on' a la fin du fichier

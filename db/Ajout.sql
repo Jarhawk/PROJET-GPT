@@ -11,7 +11,9 @@ alter table if exists documents
   add column if not exists uploaded_by uuid references utilisateurs(id),
   add column if not exists actif boolean default true;
 
-update documents set url = coalesce(url, chemin);
+update documents
+  set url = coalesce(url, chemin),
+      nom = coalesce(nom, split_part(coalesce(url, chemin), '/', -1));
 
 -- Table help_articles : aucune modification necessaire, on conserve
 -- les colonnes `titre` et `contenu` deja utilisees par le front-end
@@ -29,3 +31,16 @@ alter table if exists mamas
   add column if not exists timezone text,
   add column if not exists rgpd_text text,
   add column if not exists mentions_legales text;
+
+-- Colonnes de base attendues par le front
+alter table if exists mamas
+  add column if not exists nom text,
+  add column if not exists ville text,
+  add column if not exists email text,
+  add column if not exists telephone text;
+
+-- Table fournisseurs : alignement avec les formulaires du front
+alter table if exists fournisseurs
+  add column if not exists ville text,
+  add column if not exists tel text,
+  add column if not exists contact text;

@@ -12,9 +12,11 @@ import {
   ChefHat,
   Menu as MenuIcon,
   BookOpen,
+  Calendar,
   BarChart2,
   FileBarChart,
   Settings,
+  Key,
   Users as UsersIcon,
   Shield,
   Building2,
@@ -75,6 +77,8 @@ export default function Sidebar() {
               {has("produits") && <Item to="/produits" icon={<Boxes size={16} />} label="Produits" />}
               {has("inventaires") && <Item to="/inventaire" icon={<ClipboardList size={16} />} label="Inventaire" />}
               {has("mouvements") && <Item to="/mouvements" icon={<History size={16} />} label="Mouvements" />}
+              {has("pertes") && <Item to="/pertes" icon={<FileText size={16} />} label="Pertes" />}
+              {has("transferts") && <Item to="/transferts" icon={<History size={16} />} label="Transferts" />}
             </div>
           </div>
         )}
@@ -86,6 +90,15 @@ export default function Sidebar() {
               {has("fournisseurs") && <Item to="/fournisseurs" icon={<Truck size={16} />} label="Fournisseurs" />}
               {has("factures") && <Item to="/factures" icon={<FileText size={16} />} label="Factures" />}
               {has("receptions") && <Item to="/receptions" icon={<FileText size={16} />} label="Réceptions" />}
+            </div>
+          </div>
+        )}
+
+        {has("planning") && (
+          <div>
+            <p className="uppercase text-xs font-semibold text-mamastockGold mb-1">Planning</p>
+            <div className="flex flex-col gap-1 ml-2">
+              <Item to="/planning" icon={<Calendar size={16} />} label="Planning" />
             </div>
           </div>
         )}
@@ -112,7 +125,14 @@ export default function Sidebar() {
               {has("analyse") && <Item to="/tableaux-de-bord" icon={<BarChart2 size={16} />} label="Tableaux de bord" />}
               {has("analyse") && <Item to="/comparatif" icon={<BarChart2 size={16} />} label="Comparatif" />}
               {has("analyse") && <Item to="/surcouts" icon={<FileBarChart size={16} />} label="Surcoûts" />}
+              {has("promotions") && (
+                <Item to="/promotions" icon={<FileText size={16} />} label="Promotions" />
+              )}
               {has("alertes") && <Item to="/alertes" icon={<FileText size={16} />} label="Alertes" />}
+              {has("signalements") && <Item to="/signalements" icon={<FileText size={16} />} label="Signalements" />}
+              {has("taches") && <Item to="/taches" icon={<ClipboardList size={16} />} label="Tâches" />}
+              {has("notifications") && <Item to="/notifications" icon={<FileText size={16} />} label="Notifications" />}
+              {has("documents") && <Item to="/documents" icon={<FileText size={16} />} label="Documents" />}
             </div>
           </div>
         )}
@@ -131,7 +151,37 @@ export default function Sidebar() {
                   label="Permissions"
                 />
               )}
+              {has("access") && (
+                <Item
+                  to="/parametrage/access"
+                  icon={<Shield size={16} />}
+                  label="Accès"
+                />
+              )}
+              {has("validations") && (
+                <Item
+                  to="/validations"
+                  icon={<ClipboardList size={16} />}
+                  label="Validations"
+                />
+              )}
+              {has("api_keys") && (
+                <Item
+                  to="/parametrage/api-keys"
+                  icon={<Key size={16} />}
+                  label="API Keys"
+                />
+              )}
               {has("settings") && <Item to="/parametrage/settings" icon={<Settings size={16} />} label="Autres" />}
+            </div>
+          </div>
+        )}
+
+        {has("aide") && (
+          <div>
+            <p className="uppercase text-xs font-semibold text-mamastockGold mb-1">Aide</p>
+            <div className="flex flex-col gap-1 ml-2">
+              <Item to="/aide" icon={<BookOpen size={16} />} label="Aide" />
             </div>
           </div>
         )}
@@ -140,6 +190,8 @@ export default function Sidebar() {
           <div>
             <p className="uppercase text-xs font-semibold text-mamastockGold mb-1">Debug</p>
             <div className="flex flex-col gap-1 ml-2">
+              {has("journal") && <Item to="/journal" icon={<FileText size={16} />} label="Journal" />}
+              {has("audit") && <Item to="/audit" icon={<FileText size={16} />} label="Audit" />}
               <Item to="/debug/auth" icon={<Bug size={16} />} label="Debug Auth" />
             </div>
           </div>

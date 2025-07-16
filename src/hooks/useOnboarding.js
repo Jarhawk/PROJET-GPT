@@ -4,22 +4,21 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 
 export function useOnboarding() {
-  const { mama_id, user } = useAuth();
+  const { mama_id } = useAuth();
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!user || !mama_id) return;
+    if (!mama_id) return;
     fetchProgress();
-  }, [user?.id, mama_id]);
+  }, [mama_id]);
 
   async function fetchProgress() {
-    if (!user || !mama_id) return [];
+    if (!mama_id) return [];
     setLoading(true);
     const { data } = await supabase
       .from("etapes_onboarding")
-      .select("etape, statut")
-      .eq("user_id", user.id)
+      .select("etape, terminee")
       .eq("mama_id", mama_id)
       .order("created_at", { ascending: true });
     setLoading(false);
@@ -31,34 +30,34 @@ export function useOnboarding() {
   }
 
   async function startOnboarding() {
-    if (!user || !mama_id) return;
+    if (!mama_id) return;
     setStep(0);
-    await supabase.from("etapes_onboarding").insert([
-      { user_id: user.id, mama_id, etape: "0", statut: "en cours" },
-    ]);
+    await supabase
+      .from("etapes_onboarding")
+      .insert([{ mama_id, etape: "0", terminee: false }]);
   }
 
   async function nextStep() {
-    if (!user || !mama_id) return;
+    if (!mama_id) return;
     const next = step + 1;
     setStep(next);
-    await supabase.from("etapes_onboarding").insert([
-      { user_id: user.id, mama_id, etape: String(next), statut: "en cours" },
-    ]);
+    await supabase
+      .from("etapes_onboarding")
+      .insert([{ mama_id, etape: String(next), terminee: false }]);
   }
 
   async function skip() {
-    if (!user || !mama_id) return;
-    await supabase.from("etapes_onboarding").insert([
-      { user_id: user.id, mama_id, etape: String(step), statut: "sauté" },
-    ]);
+    if (!mama_id) return;
+    await supabase
+      .from("etapes_onboarding")
+      .insert([{ mama_id, etape: String(step), terminee: true }]);
   }
 
   async function complete() {
-    if (!user || !mama_id) return;
-    await supabase.from("etapes_onboarding").insert([
-      { user_id: user.id, mama_id, etape: String(step), statut: "terminé" },
-    ]);
+    if (!mama_id) return;
+    await supabase
+      .from("etapes_onboarding")
+      .insert([{ mama_id, etape: String(step), terminee: true }]);
   }
 
   return {

@@ -39,9 +39,9 @@ export default function Signalements() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {signalements.map((sig) => (
           <GlassCard key={sig.id} className="p-4">
-            <h2 className="text-lg font-semibold">{sig.titre}</h2>
+            <h2 className="text-lg font-semibold">{sig.type}</h2>
             <p className="text-sm text-gray-300">
-              {sig.commentaire || "Sans commentaire"}
+              {sig.description || "Sans description"}
             </p>
           </GlassCard>
         ))}

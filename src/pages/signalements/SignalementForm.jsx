@@ -7,25 +7,23 @@ import toast from "react-hot-toast";
 export default function SignalementForm({ onCreated }) {
   const { loading: authLoading } = useAuth();
   const { addSignalement } = useSignalements();
-  const [titre, setTitre] = useState("");
-  const [commentaire, setCommentaire] = useState("");
-  const [statut, setStatut] = useState("ouvert");
+  const [type, setType] = useState("");
+  const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (authLoading || submitting) return;
-    if (!titre.trim()) {
-      toast.error("Le titre est requis.");
+    if (!type.trim()) {
+      toast.error("Le type est requis.");
       return;
     }
     try {
       setSubmitting(true);
-      await addSignalement({ titre, commentaire, statut });
+      await addSignalement({ type, description });
       toast.success("Signalement ajouté !");
-      setTitre("");
-      setCommentaire("");
-      setStatut("ouvert");
+      setType("");
+      setDescription("");
       onCreated?.();
     } catch (err) {
       console.error("Erreur enregistrement signalement:", err);
@@ -43,27 +41,18 @@ export default function SignalementForm({ onCreated }) {
       <h3 className="text-lg font-bold mb-2">Nouveau signalement</h3>
       <input
         type="text"
-        placeholder="Titre"
+        placeholder="Type"
         className="border px-2 py-1 w-full mb-2"
-        value={titre}
-        onChange={(e) => setTitre(e.target.value)}
+        value={type}
+        onChange={(e) => setType(e.target.value)}
       />
       <textarea
         placeholder="Description"
         className="border px-2 py-1 w-full mb-2"
         rows={3}
-        value={commentaire}
-        onChange={(e) => setCommentaire(e.target.value)}
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
       />
-      <select
-        value={statut}
-        onChange={(e) => setStatut(e.target.value)}
-        className="border px-2 py-1 w-full mb-2"
-      >
-        <option value="ouvert">Ouvert</option>
-        <option value="en cours">En cours</option>
-        <option value="résolu">Résolu</option>
-      </select>
       <button
         type="submit"
         disabled={authLoading || submitting}

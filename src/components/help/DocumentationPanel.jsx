@@ -34,8 +34,8 @@ export default function DocumentationPanel({ open, onOpenChange }) {
         <ul className="space-y-4">
           {docs.map((d) => (
             <li key={d.id} className="text-sm">
-              <h4 className="font-semibold mb-1">{d.titre}</h4>
-              <div dangerouslySetInnerHTML={{ __html: d.contenu }} />
+              <h4 className="font-semibold mb-1">{d.title}</h4>
+              <div dangerouslySetInnerHTML={{ __html: d.content }} />
             </li>
           ))}
         </ul>

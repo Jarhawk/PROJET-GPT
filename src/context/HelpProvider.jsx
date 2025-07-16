@@ -39,10 +39,10 @@ export function HelpProvider({ children }) {
     setLoading(true);
     let query = supabase
       .from("documentation")
-      .select("id, titre, contenu, categorie")
+      .select("id, title, content, categorie")
       .eq("mama_id", mama_id);
-    if (search) query = query.ilike("titre", `%${search}%`);
-    const { data } = await query.order("titre", { ascending: true });
+    if (search) query = query.ilike("title", `%${search}%`);
+    const { data } = await query.order("title", { ascending: true });
     setLoading(false);
     setDocs(Array.isArray(data) ? data : []);
     return data || [];

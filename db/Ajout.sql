@@ -304,7 +304,17 @@ ALTER TABLE mamas
   ADD COLUMN IF NOT EXISTS nom text,
   ADD COLUMN IF NOT EXISTS ville text,
   ADD COLUMN IF NOT EXISTS contact text,
-  ADD COLUMN IF NOT EXISTS logo text;
+  ADD COLUMN IF NOT EXISTS logo_url text,
+  ADD COLUMN IF NOT EXISTS primary_color text,
+  ADD COLUMN IF NOT EXISTS secondary_color text,
+  ADD COLUMN IF NOT EXISTS email_envoi text,
+  ADD COLUMN IF NOT EXISTS email_alertes text,
+  ADD COLUMN IF NOT EXISTS dark_mode boolean DEFAULT false,
+  ADD COLUMN IF NOT EXISTS langue text,
+  ADD COLUMN IF NOT EXISTS monnaie text,
+  ADD COLUMN IF NOT EXISTS timezone text,
+  ADD COLUMN IF NOT EXISTS rgpd_text text,
+  ADD COLUMN IF NOT EXISTS mentions_legales text;
 
 -- Colonnes supplémentaires pour centres_de_cout
 ALTER TABLE centres_de_cout
@@ -391,6 +401,39 @@ CREATE TABLE IF NOT EXISTS logs_securite (
   created_at timestamp with time zone DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_logs_securite_mama ON logs_securite(mama_id);
+
+CREATE TABLE IF NOT EXISTS journaux_utilisateur (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  mama_id uuid REFERENCES mamas(id),
+  user_id uuid REFERENCES utilisateurs(id),
+  action text,
+  details jsonb,
+  done_by uuid REFERENCES utilisateurs(id),
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true
+);
+CREATE INDEX IF NOT EXISTS idx_journaux_utilisateur_mama ON journaux_utilisateur(mama_id);
+CREATE INDEX IF NOT EXISTS idx_journaux_utilisateur_user ON journaux_utilisateur(user_id);
+CREATE INDEX IF NOT EXISTS idx_journaux_utilisateur_done ON journaux_utilisateur(done_by);
+CREATE INDEX IF NOT EXISTS idx_journaux_utilisateur_date ON journaux_utilisateur(created_at);
+
+CREATE TABLE IF NOT EXISTS journal_audit (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  mama_id uuid REFERENCES mamas(id),
+  table_name text NOT NULL,
+  row_id uuid,
+  operation text NOT NULL,
+  old_data jsonb,
+  new_data jsonb,
+  changed_by uuid REFERENCES utilisateurs(id),
+  created_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true,
+  changed_at timestamp with time zone DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_journal_audit_mama ON journal_audit(mama_id);
+CREATE INDEX IF NOT EXISTS idx_journal_audit_table ON journal_audit(table_name);
+CREATE INDEX IF NOT EXISTS idx_journal_audit_date ON journal_audit(changed_at);
 
 -- Vues manquantes
 DROP VIEW IF EXISTS v_analytique_stock;
@@ -568,11 +611,32 @@ CREATE INDEX IF NOT EXISTS idx_commandes_fournisseur ON commandes(fournisseur_id
 CREATE TABLE IF NOT EXISTS documents (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   mama_id uuid REFERENCES mamas(id),
-  chemin text,
+  nom text,
   type text,
+  taille integer,
+  categorie text,
+  url text,
+  entite_liee_type text,
+  entite_liee_id uuid,
   created_at timestamp with time zone DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_documents_mama ON documents(mama_id);
+ALTER TABLE documents
+  ADD COLUMN IF NOT EXISTS nom text,
+  ADD COLUMN IF NOT EXISTS taille integer,
+  ADD COLUMN IF NOT EXISTS categorie text,
+  ADD COLUMN IF NOT EXISTS url text,
+  ADD COLUMN IF NOT EXISTS entite_liee_type text,
+  ADD COLUMN IF NOT EXISTS entite_liee_id uuid;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'documents' AND column_name = 'chemin'
+  ) THEN
+    ALTER TABLE documents RENAME COLUMN chemin TO url;
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS etapes_onboarding (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -602,19 +666,31 @@ CREATE INDEX IF NOT EXISTS idx_fournisseurs_api_config_mama_id
 CREATE TABLE IF NOT EXISTS tableaux_de_bord (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   mama_id uuid REFERENCES mamas(id),
+  user_id uuid REFERENCES utilisateurs(id),
   nom text,
   created_at timestamp with time zone DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_tableaux_de_bord_mama ON tableaux_de_bord(mama_id);
+CREATE INDEX IF NOT EXISTS idx_tableaux_de_bord_user ON tableaux_de_bord(user_id);
 
 CREATE TABLE IF NOT EXISTS gadgets (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  tableau_id uuid REFERENCES tableaux_de_bord(id),
+  dashboard_id uuid REFERENCES tableaux_de_bord(id),
   type text,
   config jsonb,
+  ordre integer DEFAULT 0,
   created_at timestamp with time zone DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS idx_gadgets_tableau ON gadgets(tableau_id);
+CREATE INDEX IF NOT EXISTS idx_gadgets_dashboard ON gadgets(dashboard_id);
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'gadgets' AND column_name = 'tableau_id'
+  ) THEN
+    ALTER TABLE gadgets RENAME COLUMN tableau_id TO dashboard_id;
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS help_articles (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -624,6 +700,25 @@ CREATE TABLE IF NOT EXISTS help_articles (
   created_at timestamp with time zone DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_help_articles_mama ON help_articles(mama_id);
+ALTER TABLE help_articles
+  ADD COLUMN IF NOT EXISTS mama_id uuid REFERENCES mamas(id),
+  ADD COLUMN IF NOT EXISTS title text,
+  ADD COLUMN IF NOT EXISTS content text;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'help_articles' AND column_name = 'titre'
+  ) THEN
+    ALTER TABLE help_articles RENAME COLUMN titre TO title;
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'help_articles' AND column_name = 'contenu'
+  ) THEN
+    ALTER TABLE help_articles RENAME COLUMN contenu TO content;
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS lignes_bl (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -647,6 +742,8 @@ CREATE TABLE IF NOT EXISTS planning_previsionnel (
 );
 CREATE INDEX IF NOT EXISTS idx_planning_previsionnel_mama ON planning_previsionnel(mama_id);
 CREATE INDEX IF NOT EXISTS idx_planning_previsionnel_produit ON planning_previsionnel(produit_id);
+ALTER TABLE planning_previsionnel
+  ADD COLUMN IF NOT EXISTS notes text;
 
 CREATE TABLE IF NOT EXISTS signalements (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -662,13 +759,51 @@ CREATE INDEX IF NOT EXISTS idx_signalements_mama ON signalements(mama_id);
 CREATE TABLE IF NOT EXISTS validation_requests (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   mama_id uuid REFERENCES mamas(id),
-  user_id uuid REFERENCES utilisateurs(id),
+  requested_by uuid REFERENCES utilisateurs(id),
   module text,
   payload jsonb,
-  statut text,
+  status text,
+  reviewed_by uuid REFERENCES utilisateurs(id),
+  reviewed_at timestamp with time zone,
   created_at timestamp with time zone DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_validation_requests_mama ON validation_requests(mama_id);
+ALTER TABLE validation_requests
+  ADD COLUMN IF NOT EXISTS requested_by uuid REFERENCES utilisateurs(id),
+  ADD COLUMN IF NOT EXISTS reviewed_by uuid REFERENCES utilisateurs(id),
+  ADD COLUMN IF NOT EXISTS reviewed_at timestamp with time zone,
+  ADD COLUMN IF NOT EXISTS status text;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'validation_requests' AND column_name = 'user_id'
+  ) THEN
+    ALTER TABLE validation_requests RENAME COLUMN user_id TO requested_by;
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'validation_requests' AND column_name = 'statut'
+  ) THEN
+    ALTER TABLE validation_requests RENAME COLUMN statut TO status;
+  END IF;
+END $$;
+
+CREATE TABLE IF NOT EXISTS transferts (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  mama_id uuid REFERENCES mamas(id),
+  produit_id uuid REFERENCES produits(id),
+  quantite numeric,
+  zone_depart text,
+  zone_arrivee text,
+  motif text,
+  date_transfert date,
+  created_by uuid REFERENCES utilisateurs(id),
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  actif boolean DEFAULT true
+);
+CREATE INDEX IF NOT EXISTS idx_transferts_mama_id ON transferts(mama_id);
 
 -- Colonnes manquantes pour factures
 ALTER TABLE factures
@@ -907,6 +1042,25 @@ CREATE TABLE IF NOT EXISTS documentation (
 );
 CREATE INDEX IF NOT EXISTS idx_documentation_mama ON documentation(mama_id);
 
+ALTER TABLE documentation
+  ADD COLUMN IF NOT EXISTS title text,
+  ADD COLUMN IF NOT EXISTS content text;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'documentation' AND column_name = 'titre'
+  ) THEN
+    ALTER TABLE documentation RENAME COLUMN titre TO title;
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'documentation' AND column_name = 'contenu'
+  ) THEN
+    ALTER TABLE documentation RENAME COLUMN contenu TO content;
+  END IF;
+END $$;
+
 CREATE TABLE IF NOT EXISTS guides_seen (
   user_id uuid REFERENCES utilisateurs(id),
   mama_id uuid REFERENCES mamas(id),
@@ -932,6 +1086,28 @@ CREATE INDEX IF NOT EXISTS idx_consentements_utilisateur_user
   ON consentements_utilisateur(user_id);
 CREATE INDEX IF NOT EXISTS idx_consentements_utilisateur_mama
   ON consentements_utilisateur(mama_id);
+ALTER TABLE roles ADD COLUMN IF NOT EXISTS access_rights jsonb DEFAULT '[]';
+ALTER TABLE roles ADD COLUMN IF NOT EXISTS description text;
+
+-- Table des groupes d'établissements pour la supervision multi-mama
+CREATE TABLE IF NOT EXISTS groupes (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  nom text,
+  description text,
+  created_at timestamp with time zone DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_groupes_nom ON groupes(nom);
+ALTER TABLE mamas ADD COLUMN IF NOT EXISTS groupe_id uuid REFERENCES groupes(id);
+
+-- Historique des alertes liées aux tâches et actions système
+CREATE TABLE IF NOT EXISTS alertes (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  mama_id uuid REFERENCES mamas(id),
+  titre text,
+  type text,
+  created_at timestamp with time zone DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_alertes_mama ON alertes(mama_id);
 
 -- Réactivation des contrôles sur le corps des fonctions pour
 -- sécuriser les exécutions suivantes

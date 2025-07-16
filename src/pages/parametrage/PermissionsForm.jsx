@@ -4,18 +4,7 @@ import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import toast, { Toaster } from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
-
-const MODULES = [
-  { nom: "Factures", cle: "factures" },
-  { nom: "Fiches techniques", cle: "fiches" },
-  { nom: "Produits", cle: "produits" },
-  { nom: "Fournisseurs", cle: "fournisseurs" },
-  { nom: "Inventaire", cle: "inventaire" },
-  { nom: "Requisitions", cle: "requisitions" },
-  { nom: "Menus", cle: "menus" },
-  { nom: "Reporting", cle: "reporting" },
-  { nom: "Paramétrage", cle: "parametrage" },
-];
+import { MODULES } from "@/lib/modules";
 
 const DROITS = [
   { nom: "Lecture", cle: "read" },
@@ -48,25 +37,25 @@ export default function PermissionsForm({ role, onClose, onSaved }) {
     }
   };
 
-  const hasPermission = (module_cle, droit_cle) => {
+  const hasPermission = (moduleKey, droitKey) => {
     return permissions.some(
-      p => p.module === module_cle && p.droit === droit_cle
+      p => p.module === moduleKey && p.droit === droitKey
     );
   };
 
-  const togglePermission = async (module_cle, droit_cle) => {
+  const togglePermission = async (moduleKey, droitKey) => {
     if (saving) return;
     try {
       setSaving(true);
-      const exists = hasPermission(module_cle, droit_cle);
+      const exists = hasPermission(moduleKey, droitKey);
       let error = null;
       if (exists) {
         let query = supabase
           .from("permissions")
           .delete()
           .eq("role_id", role.id)
-          .eq("module", module_cle)
-          .eq("droit", droit_cle);
+          .eq("module", moduleKey)
+          .eq("droit", droitKey);
         if (myRole !== "superadmin") query = query.eq("mama_id", mama_id);
         const { error: err } = await query;
         error = err;
@@ -74,8 +63,8 @@ export default function PermissionsForm({ role, onClose, onSaved }) {
         const { error: err } = await supabase.from("permissions").insert([
           {
             role_id: role.id,
-            module: module_cle,
-            droit: droit_cle,
+            module: moduleKey,
+            droit: droitKey,
             mama_id,
           },
         ]);
@@ -110,15 +99,15 @@ export default function PermissionsForm({ role, onClose, onSaved }) {
           </thead>
           <tbody>
             {MODULES.map(module => (
-              <tr key={module.cle}>
-                <td className="px-2 py-1 text-left">{module.nom}</td>
+              <tr key={module.key}>
+                <td className="px-2 py-1 text-left">{module.label}</td>
                 {DROITS.map(droit => (
                   <td key={droit.cle} className="px-2 py-1">
                     <input
                       type="checkbox"
-                      checked={hasPermission(module.cle, droit.cle)}
+                      checked={hasPermission(module.key, droit.cle)}
                       disabled={saving}
-                      onChange={() => togglePermission(module.cle, droit.cle)}
+                      onChange={() => togglePermission(module.key, droit.cle)}
                     />
                   </td>
                 ))}

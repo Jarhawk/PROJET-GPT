@@ -29,7 +29,7 @@ export function AuthProvider({ children }) {
     if (import.meta.env.DEV) console.log("fetchUserData", userId);
     const { data, error } = await supabase
       .from("utilisateurs")
-      .select("id, mama_id, role_id, role:roles(nom), access_rights, actif")
+      .select("id, mama_id, role_id, role:roles(nom, access_rights), access_rights, actif")
       .eq("auth_id", userId)
       .maybeSingle();
 
@@ -57,6 +57,7 @@ export function AuthProvider({ children }) {
       auth_id: userId,
       user_id: userId,
       role: data.role?.nom ?? data.role,
+      access_rights: data.role?.access_rights ?? data.access_rights,
       email,
     });
     if (!data.mama_id) console.warn("missing mama_id for user", userId);

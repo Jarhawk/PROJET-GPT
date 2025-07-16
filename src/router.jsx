@@ -27,20 +27,31 @@ const InventaireForm = lazy(() => import("@/pages/inventaire/InventaireForm.jsx"
 const InventaireDetail = lazy(() => import("@/pages/inventaire/InventaireDetail.jsx"));
 const InventaireZones = lazy(() => import("@/pages/inventaire/InventaireZones.jsx"));
 const Mouvements = lazy(() => import("@/pages/mouvements/Mouvements.jsx"));
+const Pertes = lazy(() => import("@/pages/Pertes.jsx"));
+const Transferts = lazy(() => import("@/pages/Transferts.jsx"));
 const Alertes = lazy(() => import("@/pages/Alertes.jsx"));
 const Taches = lazy(() => import("@/pages/taches/Taches.jsx"));
 const TacheForm = lazy(() => import("@/pages/taches/TacheForm.jsx"));
 const AlertesTaches = lazy(() => import("@/pages/taches/Alertes.jsx"));
 const Promotions = lazy(() => import("@/pages/promotions/Promotions.jsx"));
 const Documents = lazy(() => import("@/pages/documents/Documents.jsx"));
+const Carte = lazy(() => import("@/pages/carte/Carte.jsx"));
 const Analyse = lazy(() => import("@/pages/analyse/Analyse.jsx"));
 const AnalyseCostCenter = lazy(() => import("@/pages/analyse/AnalyseCostCenter.jsx"));
 const AnalytiqueDashboard = lazy(() => import("@/pages/analytique/AnalytiqueDashboard.jsx"));
+const Reporting = lazy(() => import("@/pages/reporting/Reporting.jsx"));
+const StatsDashboard = lazy(() => import("@/pages/admin/StatsDashboard.jsx"));
 const Utilisateurs = lazy(() => import("@/pages/parametrage/Utilisateurs.jsx"));
 const Roles = lazy(() => import("@/pages/parametrage/Roles.jsx"));
 const Mamas = lazy(() => import("@/pages/parametrage/Mamas.jsx"));
 const Permissions = lazy(() => import("@/pages/parametrage/Permissions.jsx"));
 const AccessRights = lazy(() => import("@/pages/parametrage/AccessRights.jsx"));
+const APIKeys = lazy(() => import("@/pages/parametrage/APIKeys.jsx"));
+const MamaSettingsForm = lazy(() => import("@/pages/parametrage/MamaSettingsForm.jsx"));
+const Validations = lazy(() => import("@/pages/Validations.jsx"));
+const Signalements = lazy(() => import("@/pages/signalements/Signalements.jsx"));
+const Journal = lazy(() => import("@/pages/Journal.jsx"));
+const AuditViewer = lazy(() => import("@/pages/admin/AuditViewer.jsx"));
 const Onboarding = lazy(() => import("@/pages/public/Onboarding.jsx"));
 const Accueil = lazy(() => import("@/pages/Accueil.jsx"));
 const Signup = lazy(() => import("@/pages/public/Signup.jsx"));
@@ -57,6 +68,7 @@ const NotificationSettingsForm = lazy(() => import("@/pages/notifications/Notifi
 const FournisseurApiSettingsForm = lazy(() => import("@/pages/fournisseurs/FournisseurApiSettingsForm.jsx"));
 const CatalogueSyncViewer = lazy(() => import("@/pages/catalogue/CatalogueSyncViewer.jsx"));
 const CommandesEnvoyees = lazy(() => import("@/pages/commandes/CommandesEnvoyees.jsx"));
+const Planning = lazy(() => import("@/pages/Planning.jsx"));
 const SimulationPlanner = lazy(() => import("@/pages/planning/SimulationPlanner.jsx"));
 const DashboardBuilder = lazy(() => import("@/pages/dashboard/DashboardBuilder.jsx"));
 const CreateMama = lazy(() => import("@/pages/auth/CreateMama.jsx"));
@@ -144,6 +156,10 @@ export default function Router() {
             element={<ProtectedRoute accessKey="menus"><Menus /></ProtectedRoute>}
           />
           <Route
+            path="/carte"
+            element={<ProtectedRoute accessKey="carte"><Carte /></ProtectedRoute>}
+          />
+          <Route
             path="/recettes"
             element={<ProtectedRoute accessKey="recettes"><Recettes /></ProtectedRoute>}
           />
@@ -188,6 +204,14 @@ export default function Router() {
             element={<ProtectedRoute accessKey="mouvements"><Mouvements /></ProtectedRoute>}
           />
           <Route
+            path="/pertes"
+            element={<ProtectedRoute accessKey="pertes"><Pertes /></ProtectedRoute>}
+          />
+          <Route
+            path="/transferts"
+            element={<ProtectedRoute accessKey="transferts"><Transferts /></ProtectedRoute>}
+          />
+          <Route
             path="/taches"
             element={<ProtectedRoute accessKey="taches"><Taches /></ProtectedRoute>}
           />
@@ -202,6 +226,10 @@ export default function Router() {
           <Route
             path="/alertes"
             element={<ProtectedRoute accessKey="alertes"><Alertes /></ProtectedRoute>}
+          />
+          <Route
+            path="/signalements"
+            element={<ProtectedRoute accessKey="signalements"><Signalements /></ProtectedRoute>}
           />
           <Route
             path="/promotions"
@@ -228,8 +256,20 @@ export default function Router() {
             element={<ProtectedRoute accessKey="fournisseurs"><CommandesEnvoyees /></ProtectedRoute>}
           />
           <Route
+            path="/planning"
+            element={<ProtectedRoute accessKey="planning"><Planning /></ProtectedRoute>}
+          />
+          <Route
             path="/planning/simulation"
             element={<ProtectedRoute accessKey="planning"><SimulationPlanner /></ProtectedRoute>}
+          />
+          <Route
+            path="/stats"
+            element={<ProtectedRoute accessKey="stats"><StatsDashboard /></ProtectedRoute>}
+          />
+          <Route
+            path="/reporting"
+            element={<ProtectedRoute accessKey="reporting"><Reporting /></ProtectedRoute>}
           />
           <Route
             path="/analyse"
@@ -256,6 +296,10 @@ export default function Router() {
             element={<ProtectedRoute accessKey="analyse"><Surcouts /></ProtectedRoute>}
           />
           <Route
+            path="/validations"
+            element={<ProtectedRoute accessKey="validations"><Validations /></ProtectedRoute>}
+          />
+          <Route
             path="/parametrage/utilisateurs"
             element={<ProtectedRoute accessKey="utilisateurs"><Utilisateurs /></ProtectedRoute>}
           />
@@ -276,6 +320,14 @@ export default function Router() {
             element={<ProtectedRoute accessKey="access"><AccessRights /></ProtectedRoute>}
           />
           <Route
+            path="/parametrage/api-keys"
+            element={<ProtectedRoute accessKey="api_keys"><APIKeys /></ProtectedRoute>}
+          />
+          <Route
+            path="/parametrage/settings"
+            element={<ProtectedRoute accessKey="settings"><MamaSettingsForm /></ProtectedRoute>}
+          />
+          <Route
             path="/aide"
             element={<ProtectedRoute accessKey="aide"><AideContextuelle /></ProtectedRoute>}
           />
@@ -286,6 +338,14 @@ export default function Router() {
           <Route
             path="/supervision/comparateur"
             element={<ProtectedRoute accessKey="fiches"><ComparateurFiches /></ProtectedRoute>}
+          />
+          <Route
+            path="/journal"
+            element={<ProtectedRoute accessKey="journal"><Journal /></ProtectedRoute>}
+          />
+          <Route
+            path="/audit"
+            element={<ProtectedRoute accessKey="audit"><AuditViewer /></ProtectedRoute>}
           />
           <Route
             path="/debug/auth"

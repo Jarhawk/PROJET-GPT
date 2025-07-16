@@ -8,5 +8,6 @@ Les composants et contextes gérant la navigation et les droits d'accès se trou
 - `src/layout/Sidebar.jsx` : menu latéral affichant les liens en fonction des `access_rights`.
 - `src/layout/Layout.jsx` : agencement général des pages protégées avec barre latérale.
 - `src/components/layout/Sidebar.jsx` : ancienne version de la sidebar utilisée par `AdminLayout`.
+- `src/lib/modules.js` : liste centralisée des modules. Les formulaires de rôles et de permissions réutilisent ces clés pour rester cohérents.
 
 Les tests liés se trouvent dans `test/router.test.jsx`.

@@ -19,6 +19,7 @@ const Factures = lazy(() => import("@/pages/factures/Factures.jsx"));
 const FactureDetail = lazy(() => import("@/pages/factures/FactureDetail.jsx"));
 const Fiches = lazy(() => import("@/pages/fiches/Fiches.jsx"));
 const FicheDetail = lazy(() => import("@/pages/fiches/FicheDetail.jsx"));
+const Carte = lazy(() => import("@/pages/carte/Carte.jsx"));
 const Menus = lazy(() => import("@/pages/menus/Menus.jsx"));
 const Produits = lazy(() => import("@/pages/produits/Produits.jsx"));
 const ProduitDetail = lazy(() => import("@/pages/produits/ProduitDetail.jsx"));
@@ -41,6 +42,8 @@ const Roles = lazy(() => import("@/pages/parametrage/Roles.jsx"));
 const Mamas = lazy(() => import("@/pages/parametrage/Mamas.jsx"));
 const Permissions = lazy(() => import("@/pages/parametrage/Permissions.jsx"));
 const AccessRights = lazy(() => import("@/pages/parametrage/AccessRights.jsx"));
+const APIKeys = lazy(() => import("@/pages/parametrage/APIKeys.jsx"));
+const MamaSettingsForm = lazy(() => import("@/pages/parametrage/MamaSettingsForm.jsx"));
 const Onboarding = lazy(() => import("@/pages/public/Onboarding.jsx"));
 const Accueil = lazy(() => import("@/pages/Accueil.jsx"));
 const Signup = lazy(() => import("@/pages/public/Signup.jsx"));
@@ -59,6 +62,7 @@ const CatalogueSyncViewer = lazy(() => import("@/pages/catalogue/CatalogueSyncVi
 const CommandesEnvoyees = lazy(() => import("@/pages/commandes/CommandesEnvoyees.jsx"));
 const SimulationPlanner = lazy(() => import("@/pages/planning/SimulationPlanner.jsx"));
 const DashboardBuilder = lazy(() => import("@/pages/dashboard/DashboardBuilder.jsx"));
+const Reporting = lazy(() => import("@/pages/reporting/Reporting.jsx"));
 const CreateMama = lazy(() => import("@/pages/auth/CreateMama.jsx"));
 const Requisitions = lazy(() => import("@/pages/requisitions/Requisitions.jsx"));
 const RequisitionForm = lazy(() => import("@/pages/requisitions/RequisitionForm.jsx"));
@@ -142,6 +146,10 @@ export default function Router() {
           <Route
             path="/menus"
             element={<ProtectedRoute accessKey="menus"><Menus /></ProtectedRoute>}
+          />
+          <Route
+            path="/carte"
+            element={<ProtectedRoute accessKey="carte"><Carte /></ProtectedRoute>}
           />
           <Route
             path="/recettes"
@@ -256,6 +264,10 @@ export default function Router() {
             element={<ProtectedRoute accessKey="analyse"><Surcouts /></ProtectedRoute>}
           />
           <Route
+            path="/reporting"
+            element={<ProtectedRoute accessKey="reporting"><Reporting /></ProtectedRoute>}
+          />
+          <Route
             path="/parametrage/utilisateurs"
             element={<ProtectedRoute accessKey="utilisateurs"><Utilisateurs /></ProtectedRoute>}
           />
@@ -270,6 +282,14 @@ export default function Router() {
           <Route
             path="/parametrage/permissions"
             element={<ProtectedRoute accessKey="permissions"><Permissions /></ProtectedRoute>}
+          />
+          <Route
+            path="/parametrage/api-keys"
+            element={<ProtectedRoute accessKey="apikeys"><APIKeys /></ProtectedRoute>}
+          />
+          <Route
+            path="/parametrage/settings"
+            element={<ProtectedRoute accessKey="settings"><MamaSettingsForm /></ProtectedRoute>}
           />
           <Route
             path="/parametrage/access"

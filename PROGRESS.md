@@ -1494,3 +1494,69 @@
 - Aligned hooks with French DB schema: produits view, fiches_techniques, ventes_fiches_carte
 - Updated tests to match new queries
 - npm install executed; lint and tests pass
+## 2025-07-16 Step 270
+- added missing document metadata columns and mama settings fields in Ajout.sql
+- created shared module list for roles/permissions
+- updated help articles hook to omit mama_id
+- registered API keys and settings in router and sidebar
+- added documents and aide sections in menu
+- updated tests accordingly
+- npm run lint and npm test pass
+
+## 2025-07-16 Step 271
+- added reporting route and planning/tâches menu
+- npm run lint and npm test pass
+
+## 2025-07-16 Step 272
+- verified front-end alignment with database schema
+- ensured lint and tests pass after dependency install
+
+## 2025-07-16 Step 273
+- restored \`/carte\` route with carte module access
+- npm install to run lint/tests
+
+
+## 2025-07-16 Step 274
+- verified help articles and documents modules align with DB
+- npm install to restore eslint deps; lint and tests pass
+
+## 2025-07-16 Step 275
+- reviewed DB schema and ensured front-end modules match
+- npm install executed so lint/tests run successfully
+- all lint, unit tests pass
+
+## 2025-07-16 Step 276
+- installed dependencies to run eslint and unit tests
+- all lint and tests pass
+
+## 2025-07-16 Step 277
+- updated packages to restore eslint
+- lint and unit tests succeeded again
+
+## 2025-07-16 Step 278
+- dependency install for lint/test
+- lint, unit tests pass again
+## 2025-07-16 Step 279
+- updated audit record for Documents page path
+- npm install executed so lint and tests run
+
+## 2025-07-16 Step 280
+- verified documents and help articles against DB schema
+- ran npm install to restore eslint and run lint/tests
+- all checks pass
+
+## 2025-07-16 Step 281
+- validated modules list and router paths
+- npm install then lint and tests pass
+
+## 2025-07-16 Step 282
+- added missing sidebar links for promotions, notifications and access rights
+- npm install then lint and tests pass
+
+## 2025-07-16 Step 283
+- verified help center uses titre/contenu fields and documents page works with new metadata columns
+- npm install so lint and tests succeed again
+## 2025-07-16 Step 284
+- installed missing dependencies to run eslint
+- lint and all tests pass after verifying modules and documents page
+

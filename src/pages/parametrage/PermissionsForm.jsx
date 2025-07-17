@@ -4,18 +4,9 @@ import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import toast, { Toaster } from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
+import { MODULES as MODULE_LIST } from "@/config/modules";
 
-const MODULES = [
-  { nom: "Factures", cle: "factures" },
-  { nom: "Fiches techniques", cle: "fiches" },
-  { nom: "Produits", cle: "produits" },
-  { nom: "Fournisseurs", cle: "fournisseurs" },
-  { nom: "Inventaire", cle: "inventaire" },
-  { nom: "Requisitions", cle: "requisitions" },
-  { nom: "Menus", cle: "menus" },
-  { nom: "Reporting", cle: "reporting" },
-  { nom: "Paramétrage", cle: "parametrage" },
-];
+const MODULES = MODULE_LIST.map(m => ({ nom: m.label, cle: m.key }));
 
 const DROITS = [
   { nom: "Lecture", cle: "read" },

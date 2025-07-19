@@ -1,7 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import toast from "react-hot-toast";
 import {
   Boxes,
@@ -46,16 +45,12 @@ export default function Sidebar() {
     console.log("Sidebar", { user, role, mama_id, access_rights });
   }
 
-  if (loading || access_rights === null) {
-    return (
-      <aside className="w-64 p-4">
-        <LoadingSpinner message="Chargement menu..." />
-      </aside>
-    );
+  if (loading || !user || !access_rights) {
+    return null;
   }
 
-  const rights = Array.isArray(access_rights) ? access_rights : [];
-  const has = (key) => isSuperadmin || rights.includes(key);
+  const peutVoir = (module) =>
+    isSuperadmin || access_rights?.[module]?.peut_voir === true;
 
   const Item = ({ to, icon, label }) => (
     <Link
@@ -69,166 +64,124 @@ export default function Sidebar() {
     </Link>
   );
 
+  const groups = [
+    {
+      title: "Stock",
+      items: [
+        { module: "produits", to: "/produits", label: "Produits", icon: <Boxes size={16} /> },
+        { module: "inventaires", to: "/inventaire", label: "Inventaire", icon: <ClipboardList size={16} /> },
+        { module: "mouvements", to: "/mouvements", label: "Mouvements", icon: <History size={16} /> },
+      ],
+    },
+    {
+      title: "Achats",
+      items: [
+        { module: "fournisseurs", to: "/fournisseurs", label: "Fournisseurs", icon: <Truck size={16} /> },
+        { module: "factures", to: "/factures", label: "Factures", icon: <FileText size={16} /> },
+        { module: "factures", to: "/factures/import", label: "Import e-factures", icon: <FileText size={16} /> },
+        { module: "receptions", to: "/receptions", label: "Réceptions", icon: <FileText size={16} /> },
+      ],
+    },
+    {
+      title: "Documents",
+      items: [
+        { module: "documents", to: "/documents", label: "Documents", icon: <FileText size={16} /> },
+      ],
+    },
+    {
+      title: "Notifications",
+      items: [
+        { module: "notifications", to: "/notifications", label: "Notifications", icon: <Bell size={16} /> },
+      ],
+    },
+    {
+      title: "Planning",
+      items: [
+        { module: "planning", to: "/planning", label: "Prévisionnel", icon: <Calendar size={16} /> },
+        { module: "planning", to: "/planning/simulation", label: "Simulation", icon: <Calendar size={16} /> },
+      ],
+    },
+    {
+      title: "Tâches",
+      items: [
+        { module: "taches", to: "/taches", label: "Tâches", icon: <CheckSquare size={16} /> },
+        { module: "alertes", to: "/taches/alertes", label: "Alertes", icon: <ClipboardList size={16} /> },
+        { module: "promotions", to: "/promotions", label: "Promotions", icon: <Gift size={16} /> },
+      ],
+    },
+    {
+      title: "Cuisine",
+      items: [
+        { module: "fiches_techniques", to: "/fiches", label: "Fiches", icon: <ChefHat size={16} /> },
+        { module: "menus", to: "/menus", label: "Menus", icon: <MenuIcon size={16} /> },
+        { module: "carte", to: "/carte", label: "Carte", icon: <BookOpen size={16} /> },
+        { module: "recettes", to: "/recettes", label: "Recettes", icon: <BookOpen size={16} /> },
+        { module: "requisitions", to: "/requisitions", label: "Réquisitions", icon: <ClipboardList size={16} /> },
+      ],
+    },
+    {
+      title: "Analyse",
+      items: [
+        { module: "stats", to: "/stats", label: "Stats", icon: <BarChart2 size={16} /> },
+        { module: "reporting", to: "/reporting", label: "Reporting", icon: <FileBarChart size={16} /> },
+        { module: "analyse", to: "/tableaux-de-bord", label: "Tableaux de bord", icon: <BarChart2 size={16} /> },
+        { module: "analyse", to: "/comparatif", label: "Comparatif", icon: <BarChart2 size={16} /> },
+        { module: "analyse", to: "/surcouts", label: "Surcoûts", icon: <FileBarChart size={16} /> },
+        { module: "alertes", to: "/alertes", label: "Alertes", icon: <FileText size={16} /> },
+      ],
+    },
+    {
+      title: "Paramètres",
+      items: [
+        { module: "utilisateurs", to: "/parametrage/utilisateurs", label: "Utilisateurs", icon: <UsersIcon size={16} /> },
+        { module: "roles", to: "/parametrage/roles", label: "Rôles", icon: <Shield size={16} /> },
+        { module: "mamas", to: "/parametrage/mamas", label: "Mamas", icon: <Building2 size={16} /> },
+        { module: "permissions", to: "/parametrage/permissions", label: "Permissions", icon: <Shield size={16} /> },
+        { module: "access", to: "/parametrage/access", label: "Accès", icon: <Shield size={16} /> },
+        { module: "apikeys", to: "/parametrage/api-keys", label: "API Keys", icon: <Key size={16} /> },
+        { module: "fournisseurs", to: "/parametrage/api-fournisseurs", label: "API Fournisseurs", icon: <Plug size={16} /> },
+        { module: "settings", to: "/parametrage/settings", label: "Autres", icon: <Settings size={16} /> },
+        { module: "zones_stock", to: "/parametrage/zones-stock", label: "Zones de stock", icon: <Boxes size={16} /> },
+        { module: "licences", to: "/parametrage/licences", label: "Licences", icon: <Key size={16} /> },
+      ],
+    },
+    {
+      title: "Aide",
+      items: [
+        { module: "aide", to: "/aide", label: "Aide", icon: <HelpCircle size={16} /> },
+        { module: "feedback", to: "/feedback", label: "Feedback", icon: <MessageCircle size={16} /> },
+      ],
+    },
+  ];
+
   return (
     <aside className="w-64 bg-glass border border-white/10 backdrop-blur-xl text-white p-4 h-screen shadow-md text-shadow hidden md:block animate-fade-in-down">
       <nav className="flex flex-col gap-4 text-sm">
-        {has("dashboard") && (
+        {peutVoir("dashboard") && (
           <Item to="/dashboard" icon={<Home size={16} />} label="Dashboard" />
         )}
 
-        {(has("produits") || has("inventaires") || has("mouvements")) && (
-          <div>
-            <p className="uppercase text-xs font-semibold text-mamastockGold mb-1">Stock</p>
-            <div className="flex flex-col gap-1 ml-2">
-              {has("produits") && <Item to="/produits" icon={<Boxes size={16} />} label="Produits" />}
-              {has("inventaires") && <Item to="/inventaire" icon={<ClipboardList size={16} />} label="Inventaire" />}
-              {has("mouvements") && <Item to="/mouvements" icon={<History size={16} />} label="Mouvements" />}
+        {groups.map((group) => {
+          const visible = group.items.filter((i) => peutVoir(i.module));
+          if (visible.length === 0) return null;
+          return (
+            <div key={group.title}>
+              <p className="uppercase text-xs font-semibold text-mamastockGold mb-1">
+                {group.title}
+              </p>
+              <div className="flex flex-col gap-1 ml-2">
+                {visible.map((item) => (
+                  <Item
+                    key={item.to}
+                    to={item.to}
+                    icon={item.icon}
+                    label={item.label}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        )}
-
-        {(has("fournisseurs") || has("factures") || has("receptions")) && (
-          <div>
-            <p className="uppercase text-xs font-semibold text-mamastockGold mb-1">Achats</p>
-            <div className="flex flex-col gap-1 ml-2">
-              {has("fournisseurs") && <Item to="/fournisseurs" icon={<Truck size={16} />} label="Fournisseurs" />}
-              {has("factures") && (
-                <>
-                  <Item to="/factures" icon={<FileText size={16} />} label="Factures" />
-                  <Item to="/factures/import" icon={<FileText size={16} />} label="Import e-factures" />
-                </>
-              )}
-              {has("receptions") && <Item to="/receptions" icon={<FileText size={16} />} label="Réceptions" />}
-            </div>
-          </div>
-        )}
-
-        {has("documents") && (
-          <div>
-            <p className="uppercase text-xs font-semibold text-mamastockGold mb-1">Documents</p>
-            <div className="flex flex-col gap-1 ml-2">
-              <Item to="/documents" icon={<FileText size={16} />} label="Documents" />
-            </div>
-          </div>
-        )}
-
-        {has("notifications") && (
-          <div>
-            <p className="uppercase text-xs font-semibold text-mamastockGold mb-1">Notifications</p>
-            <div className="flex flex-col gap-1 ml-2">
-              <Item to="/notifications" icon={<Bell size={16} />} label="Notifications" />
-            </div>
-          </div>
-        )}
-
-        {has("planning") && (
-          <div>
-            <p className="uppercase text-xs font-semibold text-mamastockGold mb-1">Planning</p>
-            <div className="flex flex-col gap-1 ml-2">
-              <Item to="/planning" icon={<Calendar size={16} />} label="Prévisionnel" />
-              <Item to="/planning/simulation" icon={<Calendar size={16} />} label="Simulation" />
-            </div>
-          </div>
-        )}
-
-        {(has("taches") || has("alertes") || has("promotions")) && (
-          <div>
-            <p className="uppercase text-xs font-semibold text-mamastockGold mb-1">Tâches</p>
-            <div className="flex flex-col gap-1 ml-2">
-              {has("taches") && <Item to="/taches" icon={<CheckSquare size={16} />} label="Tâches" />}
-              {has("alertes") && <Item to="/taches/alertes" icon={<ClipboardList size={16} />} label="Alertes" />}
-              {has("promotions") && <Item to="/promotions" icon={<Gift size={16} />} label="Promotions" />}
-            </div>
-          </div>
-        )}
-
-        {(has("fiches") || has("menus") || has("carte") || has("recettes") || has("requisitions")) && (
-          <div>
-            <p className="uppercase text-xs font-semibold text-mamastockGold mb-1">Cuisine</p>
-            <div className="flex flex-col gap-1 ml-2">
-              {has("fiches") && <Item to="/fiches" icon={<ChefHat size={16} />} label="Fiches" />}
-              {has("menus") && <Item to="/menus" icon={<MenuIcon size={16} />} label="Menus" />}
-              {has("carte") && <Item to="/carte" icon={<BookOpen size={16} />} label="Carte" />}
-              {has("recettes") && <Item to="/recettes" icon={<BookOpen size={16} />} label="Recettes" />}
-              {has("requisitions") && <Item to="/requisitions" icon={<ClipboardList size={16} />} label="Réquisitions" />}
-            </div>
-          </div>
-        )}
-
-        {(has("analyse") || has("stats") || has("reporting")) && (
-          <div>
-            <p className="uppercase text-xs font-semibold text-mamastockGold mb-1">Analyse</p>
-            <div className="flex flex-col gap-1 ml-2">
-              {has("stats") && <Item to="/stats" icon={<BarChart2 size={16} />} label="Stats" />}
-              {has("reporting") && <Item to="/reporting" icon={<FileBarChart size={16} />} label="Reporting" />}
-              {has("analyse") && <Item to="/tableaux-de-bord" icon={<BarChart2 size={16} />} label="Tableaux de bord" />}
-              {has("analyse") && <Item to="/comparatif" icon={<BarChart2 size={16} />} label="Comparatif" />}
-              {has("analyse") && <Item to="/surcouts" icon={<FileBarChart size={16} />} label="Surcoûts" />}
-              {has("alertes") && <Item to="/alertes" icon={<FileText size={16} />} label="Alertes" />}
-            </div>
-          </div>
-        )}
-
-        {(has("utilisateurs") || has("roles") || has("mamas") || has("permissions")) && (
-          <div>
-            <p className="uppercase text-xs font-semibold text-mamastockGold mb-1">Paramètres</p>
-            <div className="flex flex-col gap-1 ml-2">
-              {has("utilisateurs") && <Item to="/parametrage/utilisateurs" icon={<UsersIcon size={16} />} label="Utilisateurs" />}
-              {has("roles") && <Item to="/parametrage/roles" icon={<Shield size={16} />} label="Rôles" />}
-              {has("mamas") && <Item to="/parametrage/mamas" icon={<Building2 size={16} />} label="Mamas" />}
-              {has("permissions") && (
-                <Item
-                  to="/parametrage/permissions"
-                  icon={<Shield size={16} />}
-                  label="Permissions"
-                />
-              )}
-              {has("access") && (
-                <Item
-                  to="/parametrage/access"
-                  icon={<Shield size={16} />}
-                  label="Accès"
-                />
-              )}
-              {has("apikeys") && (
-                <Item
-                  to="/parametrage/api-keys"
-                  icon={<Key size={16} />}
-                  label="API Keys"
-                />
-              )}
-              {has("fournisseurs") && (
-                <Item
-                  to="/parametrage/api-fournisseurs"
-                  icon={<Plug size={16} />}
-                  label="API Fournisseurs"
-                />
-              )}
-              {has("settings") && <Item to="/parametrage/settings" icon={<Settings size={16} />} label="Autres" />}
-            </div>
-          </div>
-        )}
-
-        {has("aide") && (
-          <div>
-            <p className="uppercase text-xs font-semibold text-mamastockGold mb-1">Aide</p>
-            <div className="flex flex-col gap-1 ml-2">
-              <Item to="/aide" icon={<HelpCircle size={16} />} label="Aide" />
-              {has("feedback") && (
-                <Item to="/feedback" icon={<MessageCircle size={16} />} label="Feedback" />
-              )}
-            </div>
-          </div>
-        )}
-
-        {has("dashboard") && (
-          <div>
-            <p className="uppercase text-xs font-semibold text-mamastockGold mb-1">Debug</p>
-            <div className="flex flex-col gap-1 ml-2">
-              <Item to="/debug/auth" icon={<Bug size={16} />} label="Debug Auth" />
-            </div>
-          </div>
-        )}
+          );
+        })}
       </nav>
       {session && (
         <div className="mt-6 border-t border-white/20 pt-4 text-sm flex flex-col gap-2">

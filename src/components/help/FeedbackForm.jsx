@@ -1,13 +1,12 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
 import ModalGlass from "@/components/ui/ModalGlass";
-import { supabase } from "@/lib/supabase";
+import { useFeedback } from "@/hooks/useFeedback";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/context/AuthContext";
 import { toast } from "react-hot-toast";
 
 export default function FeedbackForm({ open, onOpenChange }) {
-  const { user_id, mama_id } = useAuth();
+  const { addFeedback } = useFeedback();
   const [message, setMessage] = useState("");
   const [module, setModule] = useState("");
   const [urgence, setUrgence] = useState("normal");
@@ -17,9 +16,9 @@ export default function FeedbackForm({ open, onOpenChange }) {
     e.preventDefault();
     if (sending) return;
     setSending(true);
-    const payload = { user_id, mama_id, module, message, urgence };
+    const payload = { module, message, urgence };
     try {
-      const { error } = await supabase.from("feedback").insert([payload]);
+      const { error } = await addFeedback(payload);
       if (error) throw error;
       toast.success("Message envoyé !");
       setMessage("");

@@ -17,6 +17,7 @@ export function usePlanning() {
       .from("planning_previsionnel")
       .select("*")
       .eq("mama_id", mama_id)
+      .eq("actif", true)
       .order("date_prevue", { ascending: true });
     if (start) query = query.gte("date_prevue", start);
     if (end) query = query.lte("date_prevue", end);
@@ -37,7 +38,7 @@ export function usePlanning() {
     setError(null);
     const { error } = await supabase
       .from("planning_previsionnel")
-      .insert([{ ...values, mama_id }]);
+      .insert([{ ...values, mama_id, actif: true }]);
     setLoading(false);
     if (error) {
       setError(error.message || error);

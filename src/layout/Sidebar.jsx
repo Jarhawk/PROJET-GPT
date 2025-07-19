@@ -26,6 +26,8 @@ import {
   HelpCircle,
   Gift,
   Bell,
+  MessageCircle,
+  Plug,
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -90,7 +92,12 @@ export default function Sidebar() {
             <p className="uppercase text-xs font-semibold text-mamastockGold mb-1">Achats</p>
             <div className="flex flex-col gap-1 ml-2">
               {has("fournisseurs") && <Item to="/fournisseurs" icon={<Truck size={16} />} label="Fournisseurs" />}
-              {has("factures") && <Item to="/factures" icon={<FileText size={16} />} label="Factures" />}
+              {has("factures") && (
+                <>
+                  <Item to="/factures" icon={<FileText size={16} />} label="Factures" />
+                  <Item to="/factures/import" icon={<FileText size={16} />} label="Import e-factures" />
+                </>
+              )}
               {has("receptions") && <Item to="/receptions" icon={<FileText size={16} />} label="Réceptions" />}
             </div>
           </div>
@@ -118,6 +125,7 @@ export default function Sidebar() {
           <div>
             <p className="uppercase text-xs font-semibold text-mamastockGold mb-1">Planning</p>
             <div className="flex flex-col gap-1 ml-2">
+              <Item to="/planning" icon={<Calendar size={16} />} label="Prévisionnel" />
               <Item to="/planning/simulation" icon={<Calendar size={16} />} label="Simulation" />
             </div>
           </div>
@@ -189,6 +197,13 @@ export default function Sidebar() {
                   label="API Keys"
                 />
               )}
+              {has("fournisseurs") && (
+                <Item
+                  to="/parametrage/api-fournisseurs"
+                  icon={<Plug size={16} />}
+                  label="API Fournisseurs"
+                />
+              )}
               {has("settings") && <Item to="/parametrage/settings" icon={<Settings size={16} />} label="Autres" />}
             </div>
           </div>
@@ -199,6 +214,9 @@ export default function Sidebar() {
             <p className="uppercase text-xs font-semibold text-mamastockGold mb-1">Aide</p>
             <div className="flex flex-col gap-1 ml-2">
               <Item to="/aide" icon={<HelpCircle size={16} />} label="Aide" />
+              {has("feedback") && (
+                <Item to="/feedback" icon={<MessageCircle size={16} />} label="Feedback" />
+              )}
             </div>
           </div>
         )}

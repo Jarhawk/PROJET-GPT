@@ -17,6 +17,7 @@ const Dashboard = lazy(() => import("@/pages/Dashboard.jsx"));
 const Fournisseurs = lazy(() => import("@/pages/fournisseurs/Fournisseurs.jsx"));
 const Factures = lazy(() => import("@/pages/factures/Factures.jsx"));
 const FactureDetail = lazy(() => import("@/pages/factures/FactureDetail.jsx"));
+const ImportFactures = lazy(() => import("@/pages/factures/ImportFactures.jsx"));
 const Fiches = lazy(() => import("@/pages/fiches/Fiches.jsx"));
 const FicheDetail = lazy(() => import("@/pages/fiches/FicheDetail.jsx"));
 const Carte = lazy(() => import("@/pages/carte/Carte.jsx"));
@@ -58,12 +59,15 @@ const ComparateurFiches = lazy(() => import("@/pages/supervision/ComparateurFich
 const NotificationsInbox = lazy(() => import("@/pages/notifications/NotificationsInbox.jsx"));
 const NotificationSettingsForm = lazy(() => import("@/pages/notifications/NotificationSettingsForm.jsx"));
 const FournisseurApiSettingsForm = lazy(() => import("@/pages/fournisseurs/FournisseurApiSettingsForm.jsx"));
+const ApiFournisseurs = lazy(() => import("@/pages/fournisseurs/ApiFournisseurs.jsx"));
 const CatalogueSyncViewer = lazy(() => import("@/pages/catalogue/CatalogueSyncViewer.jsx"));
 const CommandesEnvoyees = lazy(() => import("@/pages/commandes/CommandesEnvoyees.jsx"));
 const SimulationPlanner = lazy(() => import("@/pages/planning/SimulationPlanner.jsx"));
+const Planning = lazy(() => import("@/pages/Planning.jsx"));
 const DashboardBuilder = lazy(() => import("@/pages/dashboard/DashboardBuilder.jsx"));
 const Reporting = lazy(() => import("@/pages/reporting/Reporting.jsx"));
 const CreateMama = lazy(() => import("@/pages/auth/CreateMama.jsx"));
+const Feedback = lazy(() => import("@/pages/Feedback.jsx"));
 const Requisitions = lazy(() => import("@/pages/requisitions/Requisitions.jsx"));
 const RequisitionForm = lazy(() => import("@/pages/requisitions/RequisitionForm.jsx"));
 const RequisitionDetail = lazy(() => import("@/pages/requisitions/RequisitionDetail.jsx"));
@@ -72,6 +76,7 @@ const Recettes = lazy(() => import("@/pages/recettes/Recettes.jsx"));
 const Surcouts = lazy(() => import("@/pages/surcouts/Surcouts.jsx"));
 const TableauxDeBord = lazy(() => import("@/pages/analyse/TableauxDeBord.jsx"));
 const Comparatif = lazy(() => import("@/pages/fournisseurs/comparatif/ComparatifPrix.jsx"));
+const MenuEngineering = lazy(() => import("@/pages/MenuEngineering.jsx"));
 const Logout = lazy(() => import("@/pages/auth/Logout.jsx"));
 
 
@@ -130,6 +135,10 @@ export default function Router() {
           <Route
             path="/factures/:id"
             element={<ProtectedRoute accessKey="factures"><FactureDetail /></ProtectedRoute>}
+          />
+          <Route
+            path="/factures/import"
+            element={<ProtectedRoute accessKey="factures"><ImportFactures /></ProtectedRoute>}
           />
           <Route
             path="/receptions"
@@ -236,6 +245,10 @@ export default function Router() {
             element={<ProtectedRoute accessKey="fournisseurs"><CommandesEnvoyees /></ProtectedRoute>}
           />
           <Route
+            path="/planning"
+            element={<ProtectedRoute accessKey="planning"><Planning /></ProtectedRoute>}
+          />
+          <Route
             path="/planning/simulation"
             element={<ProtectedRoute accessKey="planning"><SimulationPlanner /></ProtectedRoute>}
           />
@@ -250,6 +263,10 @@ export default function Router() {
           <Route
             path="/analyse/analytique"
             element={<ProtectedRoute accessKey="analyse"><AnalytiqueDashboard /></ProtectedRoute>}
+          />
+          <Route
+            path="/analyse/menu-engineering"
+            element={<ProtectedRoute accessKey="analyse"><MenuEngineering /></ProtectedRoute>}
           />
           <Route
             path="/tableaux-de-bord"
@@ -288,6 +305,10 @@ export default function Router() {
             element={<ProtectedRoute accessKey="apikeys"><APIKeys /></ProtectedRoute>}
           />
           <Route
+            path="/parametrage/api-fournisseurs"
+            element={<ProtectedRoute accessKey="fournisseurs"><ApiFournisseurs /></ProtectedRoute>}
+          />
+          <Route
             path="/parametrage/settings"
             element={<ProtectedRoute accessKey="settings"><MamaSettingsForm /></ProtectedRoute>}
           />
@@ -298,6 +319,10 @@ export default function Router() {
           <Route
             path="/aide"
             element={<ProtectedRoute accessKey="aide"><AideContextuelle /></ProtectedRoute>}
+          />
+          <Route
+            path="/feedback"
+            element={<ProtectedRoute accessKey="feedback"><Feedback /></ProtectedRoute>}
           />
           <Route
             path="/supervision"

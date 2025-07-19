@@ -258,6 +258,17 @@ Storage helpers are described in [docs/storage_helpers.md](docs/storage_helpers.
 Menu helpers are described in [docs/menus.md](docs/menus.md).
 Autocomplete hooks are described in [docs/autocomplete_hooks.md](docs/autocomplete_hooks.md).
 The advanced inventory process is explained in [docs/inventaire_avance.md](docs/inventaire_avance.md).
+The Feedback module is documented in [docs/feedback.md](docs/feedback.md).
+Quick usage example:
+
+```js
+import { useFeedback } from "@/hooks/useFeedback";
+
+const { addFeedback } = useFeedback();
+
+addFeedback({ module: "Inventaire", message: "Erreur interface", urgence: "elevee" });
+```
+The e-invoice import feature is described in [docs/import_factures.md](docs/import_factures.md).
 Requisition helpers are described in [docs/requisitions.md](docs/requisitions.md).
 Task management is documented in [docs/taches.md](docs/taches.md).
 
@@ -275,6 +286,10 @@ Task management is documented in [docs/taches.md](docs/taches.md).
   `getAccessToken()`, `enableTwoFa()`, `disableTwoFa()`,
   `resendEmailVerification()` and `logout()`
 - Menu planning with recipe associations, production planning and automatic stock decrement
+- Forecast planning page `/planning` to record upcoming needs with notes
+  (see [docs/planning_previsionnel.md](docs/planning_previsionnel.md))
+- Electronic invoice import page `/factures/import` for JSON or UBL files
+  (see [docs/import_factures.md](docs/import_factures.md))
 - Menus can be imported or exported via Excel (the importer falls back to the first sheet if no "Menus" sheet is present)
 - Realtime updates available via `subscribeToMenus()`
 - PDF export for invoices and fiches techniques using jsPDF
@@ -340,7 +355,8 @@ Task management is documented in [docs/taches.md](docs/taches.md).
 - Live search on documents, alerts and suppliers lists with server-side filtering
 - Autocomplete hooks help pick suppliers and invoices securely
 - Notifications hook provides `markAllAsRead()`, `fetchUnreadCount()`, `updateNotification()`, `deleteNotification()` and `subscribeToNotifications()` helpers
-- Built-in dark mode toggle for better accessibility
+- Feedback page `/feedback` lets users send comments with urgency level (see [docs/feedback.md](docs/feedback.md))
+- Supplier API configuration list at `/parametrage/api-fournisseurs` (see [docs/fournisseurs_api_config.md](docs/fournisseurs_api_config.md))
 - Password reset link on the login form points to `/reset-password` and the flow continues on `/update-password`
 - Optional two-factor authentication (TOTP) for user accounts, verified via QR code before activation
 - Functions `enable_two_fa` and `disable_two_fa` can be executed by any authenticated user for self-service 2FA
@@ -430,6 +446,8 @@ que seules les fiches rattachées à la `mama_id` de l'utilisateur sont visibles
 
 ## Menu Engineering
 
+Pour plus de details, voir [docs/menu_engineering.md](docs/menu_engineering.md).
+
 La page **Menu Engineering** analyse la performance des plats à la carte. Les
 ventes par fiche sont saisies mensuellement et stockées dans la table
 `ventes_fiches_carte`. Pour chaque période, l'application calcule le food cost,
@@ -513,6 +531,8 @@ Le rôle `authenticated` dispose du droit `SELECT` et peut exécuter la fonction
 Cette page `/planning` permet de préparer les commandes ou besoins à venir.
 Chaque entrée comporte une date prévue et des notes libres.
 
+Pour plus de détails, voir [docs/planning_previsionnel.md](docs/planning_previsionnel.md).
+
 SQL associé dans `db/full_setup.sql` :
 - Table `planning_previsionnel` stockant les plannings par `mama`
 - Politique RLS filtrée par `mama_id`
@@ -554,6 +574,7 @@ SQL associé dans `db/full_setup.sql` :
 Certaines opérations sensibles nécessitent une validation par un responsable.
 La page `/validations` liste les demandes en attente et permet aux rôles
 `admin` ou `superadmin` de les approuver ou les refuser.
+Pour en savoir plus, consultez [docs/validation_requests.md](docs/validation_requests.md).
 
 SQL associé dans `db/full_setup.sql` :
 - Table `validation_requests` enregistrant l'action à valider
@@ -582,6 +603,7 @@ un `mama`. Les données sont protégées par RLS et les index sur
 configurations depuis l'interface. Le hook `useFournisseurAPI` expose quant à lui
 `importFacturesFournisseur`, `syncCatalogue`, `envoyerCommande`, `getCommandeStatus`,
 `cancelCommande` et `testConnection` pour interagir avec les services externes.
+La page `/parametrage/api-fournisseurs` liste ces configurations et permet d'accéder au formulaire d'édition pour chaque fournisseur.
 
 ## Module Analytique avancée
 

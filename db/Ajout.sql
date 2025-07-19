@@ -180,3 +180,39 @@ begin
 end;
 $$;
 grant execute on function import_invoice(payload jsonb) to authenticated;
+
+-- Sécurité pour les modules utilisateurs et rôles
+alter table if exists utilisateurs enable row level security;
+alter table if exists utilisateurs force row level security;
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public'
+      and tablename = 'utilisateurs'
+      and policyname = 'utilisateurs_all'
+  ) then
+    create policy utilisateurs_all on utilisateurs
+      for all using (mama_id = current_user_mama_id())
+      with check (mama_id = current_user_mama_id());
+  end if;
+end$$;
+
+alter table if exists roles enable row level security;
+alter table if exists roles force row level security;
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public'
+      and tablename = 'roles'
+      and policyname = 'roles_all'
+  ) then
+    create policy roles_all on roles
+      for all using (mama_id = current_user_mama_id())
+      with check (mama_id = current_user_mama_id());
+  end if;
+end$$;
+
+grant select, insert, update on table utilisateurs to authenticated;
+grant select, insert, update on table roles to authenticated;

@@ -26,19 +26,21 @@ export default function FicheForm({ fiche, onClose }) {
   const [prixVente, setPrixVente] = useState(fiche?.prix_vente || 0);
   const [loading, setLoading] = useState(false);
 
-  if (!access_rights?.fiches_techniques?.peut_voir) {
-    return <Navigate to="/unauthorized" replace />;
-  }
-
+  const allowed = access_rights?.fiches_techniques?.peut_voir;
   const { results: prodOptions, searchProduits } = useProduitsAutocomplete();
   const { results: ficheOptions, searchFiches } = useFichesAutocomplete();
 
   useEffect(() => {
+    if (!allowed) return;
     fetchProducts();
     fetchFamilles();
     searchProduits();
     searchFiches({ excludeId: fiche?.id });
-  }, [fetchProducts, fetchFamilles, searchProduits, searchFiches, fiche?.id]);
+  }, [allowed, fetchProducts, fetchFamilles, searchProduits, searchFiches, fiche?.id]);
+
+  if (!allowed) {
+    return <Navigate to="/unauthorized" replace />;
+  }
 
   const addLigne = (type = "produit") =>
     setLignes([...lignes, { type, produit_id: "", sous_fiche_id: "", quantite: 1 }]);

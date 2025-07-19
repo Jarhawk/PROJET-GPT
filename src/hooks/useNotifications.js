@@ -111,6 +111,34 @@ export default function useNotifications() {
     return count || 0;
   }, [mama_id, user_id]);
 
+  const fetchPreferences = useCallback(async () => {
+    if (!mama_id || !user_id) return null;
+    const { data, error } = await supabase
+      .from('notification_preferences')
+      .select('*')
+      .eq('mama_id', mama_id)
+      .eq('utilisateur_id', user_id)
+      .single();
+    if (error) return null;
+    return data || null;
+  }, [mama_id, user_id]);
+
+  const updatePreferences = useCallback(
+    async (values = {}) => {
+      if (!mama_id || !user_id) return { error: 'missing ids' };
+      const { data, error } = await supabase
+        .from('notification_preferences')
+        .upsert(
+          { mama_id, utilisateur_id: user_id, ...values },
+          { onConflict: ['utilisateur_id', 'mama_id'] }
+        )
+        .select()
+        .single();
+      return { data, error };
+    },
+    [mama_id, user_id]
+  );
+
   const deleteNotification = useCallback(
     async (id) => {
       if (!mama_id || !user_id || !id) return;
@@ -204,6 +232,8 @@ export default function useNotifications() {
     markAsRead,
     markAllAsRead,
     fetchUnreadCount,
+    fetchPreferences,
+    updatePreferences,
     updateNotification,
     getNotification,
     deleteNotification,

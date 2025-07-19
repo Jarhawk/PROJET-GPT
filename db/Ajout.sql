@@ -619,3 +619,29 @@ alter table if exists consentements_utilisateur
   rename column if exists consentement to donne;
 alter table if exists consentements_utilisateur
   add column if not exists type_consentement text;
+
+-- Table notifications pour le module Notifications
+create table if not exists notifications (
+  id uuid primary key default gen_random_uuid(),
+  utilisateur_id uuid references utilisateurs(id),
+  mama_id uuid references mamas(id),
+  titre text,
+  message text,
+  lu boolean default false,
+  date_envoi timestamptz default now()
+);
+create index if not exists idx_notifications_mama_id on notifications(mama_id);
+create index if not exists idx_notifications_user on notifications(utilisateur_id);
+
+-- Préférences de notification par utilisateur
+create table if not exists notification_preferences (
+  id uuid primary key default gen_random_uuid(),
+  utilisateur_id uuid references utilisateurs(id),
+  mama_id uuid references mamas(id),
+  email_enabled boolean default true,
+  webhook_enabled boolean default false,
+  webhook_url text,
+  webhook_token text,
+  updated_at timestamptz default now()
+);
+create unique index if not exists uniq_notif_prefs_user on notification_preferences(utilisateur_id, mama_id);

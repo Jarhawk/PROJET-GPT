@@ -92,3 +92,19 @@ const unsubscribe = subscribeToNotifications((notif) => {
 
 Registers a realtime listener for new notifications of the current user. The
 callback receives the inserted row. Call the returned function to unsubscribe.
+
+## fetchPreferences
+
+```js
+const prefs = await fetchPreferences();
+```
+
+Loads the notification preferences for the current user. Returns `null` if none exist.
+
+## updatePreferences
+
+```js
+await updatePreferences({ email_enabled: true });
+```
+
+Creates or updates the user's notification preferences.

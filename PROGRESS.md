@@ -662,7 +662,9 @@
 ## 2025-06-26 Step 115
 - Filtre mama_id ajoute dans FournisseurDetail.
 - `npm run lint` et `npm test` passent apres `npm install`.
-## 2025-06-26 Step 116\n- Filtre mama_id ajoute dans InvitationsEnAttente pour la suppression et le chargement des invitations.\n- npm run lint et npm test passent.
+## 2025-06-26 Step 116
+- Filtre mama_id ajoute dans InvitationsEnAttente pour la suppression et le chargement des invitations.
+- npm run lint et npm test passent.
 
 ## 2025-06-26 Step 117
 - Ajout du composant `ErrorBoundary` et remplacement de tous les messages "Chargement" par `LoadingSpinner`.
@@ -1429,12 +1431,14 @@
 - `npm run lint` and `npm test` pass
 
 
-\n## 2025-07-02 Step 256
+
+## 2025-07-02 Step 256
 - Backup script now supports gzip compression via --gzip flag or BACKUP_GZIP variable
 - Added parseGzipFlag helper and updated README/env examples accordingly
 - Tests verify gzip option and env variable
 - npm run lint and npm test pass
-\n## 2025-07-02 Step 257
+
+## 2025-07-02 Step 257
 - `backup_db.js` fetches tables concurrently for faster exports
 - README notes the improved performance
 - `npm run lint` and `npm test` pass
@@ -1444,18 +1448,30 @@
 - added parsePrettyFlag helper and documented in README
 - example env files list BACKUP_PRETTY
 - npm run lint and npm test pass
-\n## 2025-07-02 Step 259
+
+## 2025-07-02 Step 259
 - fetchData accepts an AbortSignal parameter to manually cancel requests
 - README and SDK usage docs mention the new argument
 - lint and tests pass
-\n## 2025-07-02 Step 260
+
+## 2025-07-02 Step 260
 - backup script accepts `--concurrency` flag and `BACKUP_CONCURRENCY` env variable
 - README documents the option and default examples
 - CLI utilities expose new `parseConcurrencyFlag`
 - tests updated for the flag and environment variable
 - `npm run lint` and `npm test` pass
-\n## 2025-07-02 Step 261\n- parseConcurrencyFlag now validates positive integers\n- backup_db ignores invalid BACKUP_CONCURRENCY values\n- README clarifies that non-positive values disable the limit\n- npm run lint and npm test pass
-\n## 2025-07-02 Step 262\n- parseLimitFlag now requires positive integers\n- reallocate_history ignores invalid REALLOCATE_LIMIT and --limit values\n- README documents this requirement\n- npm run lint and npm test pass
+
+## 2025-07-02 Step 261
+- parseConcurrencyFlag now validates positive integers
+- backup_db ignores invalid BACKUP_CONCURRENCY values
+- README clarifies that non-positive values disable the limit
+- npm run lint and npm test pass
+
+## 2025-07-02 Step 262
+- parseLimitFlag now requires positive integers
+- reallocate_history ignores invalid REALLOCATE_LIMIT and --limit values
+- README documents this requirement
+- npm run lint and npm test pass
 
 ## 2025-07-02 Step 263
 - SDK validates numeric env variables for retry and timeout
@@ -1641,4 +1657,16 @@
 
 ## 2025-07-18 Step 314
 - ran npm install, lint and tests one more time to confirm repo consistency
-\n## 2025-07-18 Step 315\n- final check: lint and tests pass after updating dependencies
+
+## 2025-07-18 Step 315
+- final check: lint and tests pass after updating dependencies
+
+## 2025-07-19 Step 316
+- enabled Menu Engineering and Feedback modules; npm test confirms all 397 tests pass
+
+## 2025-07-19 Step 317
+- validated Promotions page with create/edit/delete and active filter; all tests pass after npm install
+
+## 2025-07-19 Step 318
+- reviewed and confirmed completion of all remaining modules with full feature coverage
+- npm install, lint and tests executed again to ensure consistency

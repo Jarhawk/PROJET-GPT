@@ -16,9 +16,10 @@ function RequisitionFormPage() {
   const { products, loading: loadingProducts } = useProducts();
   const { zones, fetchZones } = useZones();
 
-  const [type, setType] = useState("");
+  const [statut, setStatut] = useState("");
   const [commentaire, setCommentaire] = useState("");
-  const [zone_id, setZone] = useState("");
+  const [zone_source_id, setZoneSource] = useState("");
+  const [zone_destination_id, setZoneDest] = useState("");
   const [articles, setArticles] = useState([{ produit_id: "", quantite: 1 }]);
   const [submitting, setSubmitting] = useState(false);
 
@@ -36,24 +37,22 @@ function RequisitionFormPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!type || !zone_id || articles.some(a => !a.produit_id || !a.quantite)) {
+    if (!statut || !zone_destination_id || articles.some(a => !a.produit_id || !a.quantite)) {
       toast.error("Tous les champs sont obligatoires");
       return;
     }
     if (submitting) return;
-    const payloads = articles.map(a => ({
-      produit_id: a.produit_id,
-      quantite: Number(a.quantite),
-      zone_id,
-      type,
+    const payload = {
+      statut,
       commentaire,
-    }));
+      zone_source_id: zone_source_id || null,
+      zone_destination_id,
+      lignes: articles.map(a => ({ produit_id: a.produit_id, quantite: a.quantite })),
+    };
     try {
       setSubmitting(true);
-      for (const p of payloads) {
-        const { error } = await createRequisition(p);
-        if (error) throw new Error(error.message);
-      }
+      const { error } = await createRequisition(payload);
+      if (error) throw new Error(error.message);
       toast.success("Réquisition créée !");
       navigate("/requisitions");
     } catch (err) {
@@ -75,11 +74,11 @@ function RequisitionFormPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
 
         <div>
-          <label className="block text-sm font-medium mb-1">Type</label>
+          <label className="block text-sm font-medium mb-1">Statut</label>
           <input
             type="text"
-            value={type}
-            onChange={(e) => setType(e.target.value)}
+            value={statut}
+            onChange={(e) => setStatut(e.target.value)}
             className="w-full border rounded px-3 py-2"
             required
           />
@@ -95,21 +94,34 @@ function RequisitionFormPage() {
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">Zone</label>
-          <select
-            value={zone_id}
-            onChange={(e) => setZone(e.target.value)}
-            className="w-full border rounded px-3 py-2"
-            required
-          >
-            <option value="">Sélectionner…</option>
-            {zones.map((z) => (
-              <option key={z.id} value={z.id}>
-                {z.nom}
-              </option>
-            ))}
-          </select>
+        <div className="flex gap-4">
+          <div className="flex-1">
+            <label className="block text-sm font-medium mb-1">Zone source</label>
+            <select
+              value={zone_source_id}
+              onChange={(e) => setZoneSource(e.target.value)}
+              className="w-full border rounded px-3 py-2"
+            >
+              <option value="">Sélectionner…</option>
+              {zones.map((z) => (
+                <option key={z.id} value={z.id}>{z.nom}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex-1">
+            <label className="block text-sm font-medium mb-1">Zone destination</label>
+            <select
+              value={zone_destination_id}
+              onChange={(e) => setZoneDest(e.target.value)}
+              className="w-full border rounded px-3 py-2"
+              required
+            >
+              <option value="">Sélectionner…</option>
+              {zones.map((z) => (
+                <option key={z.id} value={z.id}>{z.nom}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div>

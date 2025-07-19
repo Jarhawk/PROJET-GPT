@@ -3,7 +3,7 @@
     "/receptions",
     "/recettes",
     "/requisitions",
-    "/requisitions/new",
+    "/requisitions/nouvelle",
     "/requisitions/:id",
     "/tableaux-de-bord",
     "/comparatif",

@@ -1,7 +1,10 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import Sidebar from "@/layout/Sidebar";
 import useAuth from "@/hooks/useAuth";
+import { Badge } from "@/components/ui/badge";
+import { Bell } from "lucide-react";
 import toast from "react-hot-toast";
 import Footer from "@/components/Footer";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
@@ -23,6 +26,27 @@ export default function Layout() {
     loading,
     logout,
   } = useAuth();
+  const placeholder = () => ({
+    fetchUnreadCount: async () => 0,
+    subscribeToNotifications: () => () => {},
+  });
+  const [useNotif, setUseNotif] = useState(() => placeholder);
+  const { fetchUnreadCount, subscribeToNotifications } = useNotif();
+  const [unread, setUnread] = useState(0);
+
+  useEffect(() => {
+    import("@/hooks/useNotifications").then((mod) => {
+      setUseNotif(() => mod.default);
+    });
+  }, []);
+
+  useEffect(() => {
+    fetchUnreadCount().then(setUnread);
+    const unsub = subscribeToNotifications(() => {
+      fetchUnreadCount().then(setUnread);
+    });
+    return unsub;
+  }, [fetchUnreadCount, subscribeToNotifications]);
   if (import.meta.env.DEV) {
     console.log("Layout", {
       session,
@@ -53,6 +77,14 @@ export default function Layout() {
           <div className="flex justify-end items-center gap-2 mb-4">
           {user && (
             <>
+              <Link to="/notifications" className="relative">
+                <Bell size={20} />
+                {unread > 0 && (
+                  <Badge color="red" className="absolute -top-1 -right-1">
+                    {unread}
+                  </Badge>
+                )}
+              </Link>
               <span>{user.email}</span>
               {role && (
                 <span className="text-xs bg-white/10 px-2 py-1 rounded capitalize">

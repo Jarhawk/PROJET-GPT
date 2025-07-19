@@ -675,3 +675,38 @@ create table if not exists tableaux_de_bord (
 );
 create unique index if not exists uniq_tableaux_de_bord_user on tableaux_de_bord(utilisateur_id, mama_id);
 create index if not exists idx_tableaux_de_bord_mama_id on tableaux_de_bord(mama_id);
+
+-- Journaux utilisateur (logs activite)
+create table if not exists journaux_utilisateur (
+  id uuid primary key default gen_random_uuid(),
+  utilisateur_id uuid references utilisateurs(id),
+  action text,
+  page text,
+  ip text,
+  date_action timestamptz default now(),
+  mama_id uuid references mamas(id)
+);
+create index if not exists idx_journaux_utilisateur_mama on journaux_utilisateur(mama_id);
+alter table if exists journaux_utilisateur
+  add column if not exists utilisateur_id uuid references utilisateurs(id),
+  add column if not exists page text,
+  add column if not exists ip text,
+  add column if not exists date_action timestamptz;
+
+-- Logs securite
+create table if not exists logs_securite (
+  id uuid primary key default gen_random_uuid(),
+  type_evenement text,
+  details jsonb,
+  date_evenement timestamptz default now(),
+  niveau_criticite text,
+  utilisateur_id uuid references utilisateurs(id),
+  mama_id uuid references mamas(id)
+);
+create index if not exists idx_logs_securite_mama on logs_securite(mama_id);
+alter table if exists logs_securite
+  add column if not exists type_evenement text,
+  add column if not exists details jsonb,
+  add column if not exists date_evenement timestamptz,
+  add column if not exists niveau_criticite text,
+  add column if not exists utilisateur_id uuid references utilisateurs(id);

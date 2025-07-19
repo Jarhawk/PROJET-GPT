@@ -152,6 +152,7 @@ export default function Sidebar() {
       title: "Audit",
       items: [
         { module: "audit", to: "/audit", label: "Audit", icon: <History size={16} /> },
+        { module: "logs", to: "/logs", label: "Logs", icon: <History size={16} /> },
       ],
     },
     {

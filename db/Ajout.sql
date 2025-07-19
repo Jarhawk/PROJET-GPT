@@ -455,3 +455,49 @@ join requisitions on requisitions.id = requisition_lignes.requisition_id
 where requisitions.actif is true
 group by produit_id, mama_id;
 
+-- Module Planning prévisionnel
+create table if not exists planning_previsionnel (
+  id uuid primary key default gen_random_uuid(),
+  nom text,
+  date_prevue date,
+  commentaire text,
+  statut text default 'prévu',
+  mama_id uuid references mamas(id),
+  actif boolean default true,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+create index if not exists idx_planning_prev_mama on planning_previsionnel(mama_id);
+create index if not exists idx_planning_prev_date on planning_previsionnel(date_prevue);
+create index if not exists idx_planning_prev_statut on planning_previsionnel(statut);
+create index if not exists idx_planning_prev_actif on planning_previsionnel(actif);
+create index if not exists idx_planning_prev_updated on planning_previsionnel(updated_at);
+alter table if exists planning_previsionnel enable row level security;
+alter table if exists planning_previsionnel force row level security;
+drop policy if exists planning_previsionnel_all on planning_previsionnel;
+create policy planning_previsionnel_all on planning_previsionnel
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+create trigger if not exists trg_set_updated_at_planning_prev
+  before update on planning_previsionnel
+  for each row execute procedure set_updated_at();
+
+create table if not exists planning_lignes (
+  id uuid primary key default gen_random_uuid(),
+  planning_id uuid references planning_previsionnel(id) on delete cascade,
+  produit_id uuid references produits(id),
+  quantite numeric,
+  observation text,
+  mama_id uuid references mamas(id),
+  actif boolean default true,
+  created_at timestamptz default now()
+);
+create index if not exists idx_planning_lignes_planning on planning_lignes(planning_id);
+create index if not exists idx_planning_lignes_mama on planning_lignes(mama_id);
+alter table if exists planning_lignes enable row level security;
+alter table if exists planning_lignes force row level security;
+drop policy if exists planning_lignes_all on planning_lignes;
+create policy planning_lignes_all on planning_lignes
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+

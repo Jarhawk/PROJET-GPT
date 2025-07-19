@@ -68,6 +68,8 @@ const CatalogueSyncViewer = lazy(() => import("@/pages/catalogue/CatalogueSyncVi
 const CommandesEnvoyees = lazy(() => import("@/pages/commandes/CommandesEnvoyees.jsx"));
 const SimulationPlanner = lazy(() => import("@/pages/planning/SimulationPlanner.jsx"));
 const Planning = lazy(() => import("@/pages/Planning.jsx"));
+const PlanningForm = lazy(() => import("@/pages/PlanningForm.jsx"));
+const PlanningDetail = lazy(() => import("@/pages/PlanningDetail.jsx"));
 const DashboardBuilder = lazy(() => import("@/pages/dashboard/DashboardBuilder.jsx"));
 const Reporting = lazy(() => import("@/pages/reporting/Reporting.jsx"));
 const CreateMama = lazy(() => import("@/pages/auth/CreateMama.jsx"));
@@ -282,11 +284,19 @@ export default function Router() {
           />
           <Route
             path="/planning"
-            element={<ProtectedRoute accessKey="planning"><Planning /></ProtectedRoute>}
+            element={<ProtectedRoute accessKey="planning_previsionnel"><Planning /></ProtectedRoute>}
+          />
+          <Route
+            path="/planning/nouveau"
+            element={<ProtectedRoute accessKey="planning_previsionnel"><PlanningForm /></ProtectedRoute>}
+          />
+          <Route
+            path="/planning/:id"
+            element={<ProtectedRoute accessKey="planning_previsionnel"><PlanningDetail /></ProtectedRoute>}
           />
           <Route
             path="/planning/simulation"
-            element={<ProtectedRoute accessKey="planning"><SimulationPlanner /></ProtectedRoute>}
+            element={<ProtectedRoute accessKey="planning_previsionnel"><SimulationPlanner /></ProtectedRoute>}
           />
           <Route
             path="/analyse"

@@ -1,88 +1,70 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { usePlanning } from "@/hooks/usePlanning";
-import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Toaster, toast } from "react-hot-toast";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import GlassCard from "@/components/ui/GlassCard";
 import TableContainer from "@/components/ui/TableContainer";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function Planning() {
-  const { mama_id } = useAuth();
-  const { items, loading, error, fetchPlanning, addPlanning } = usePlanning();
-  const [date, setDate] = useState("");
-  const [notes, setNotes] = useState("");
-  const [saving, setSaving] = useState(false);
+  const { getPlannings } = usePlanning();
+  const [items, setItems] = useState([]);
+  const [statut, setStatut] = useState("");
+  const [debut, setDebut] = useState("");
+  const [fin, setFin] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (mama_id) fetchPlanning();
-  }, [fetchPlanning, mama_id]);
-
-  const handleAdd = async (e) => {
-    e.preventDefault();
-    if (!date) {
-      toast.error("Date requise");
-      return;
-    }
-    try {
-      setSaving(true);
-      await addPlanning({ date_prevue: date, notes });
-      toast.success("Entrée ajoutée !");
-      setDate("");
-      setNotes("");
-      fetchPlanning();
-    } catch (err) {
-      console.error("Erreur ajout planning:", err);
-      toast.error("Erreur lors de l'enregistrement.");
-    } finally {
-      setSaving(false);
-    }
+  const fetchData = async () => {
+    setLoading(true);
+    const { data } = await getPlannings({ statut, debut, fin });
+    setItems(data || []);
+    setLoading(false);
   };
 
-  if (loading) return <LoadingSpinner message="Chargement..." />;
-  if (error) return <div className="p-8 text-red-600">{error}</div>;
+  useEffect(() => { fetchData(); }, [statut, debut, fin]);
 
   return (
-    <div className="p-8 container mx-auto space-y-6">
-      <Toaster position="top-right" />
-      <GlassCard className="p-6 space-y-4">
-        <h1 className="text-2xl font-bold">Planning prévisionnel</h1>
-        <form onSubmit={handleAdd} className="flex gap-2 items-end">
-          <input
-            type="date"
-            className="input"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            required
-          />
-          <input
-            className="input flex-1"
-            placeholder="Notes"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
-          <Button type="submit" disabled={saving}>Ajouter</Button>
-        </form>
-      </GlassCard>
-      <TableContainer>
-        <table className="min-w-full text-sm">
-          <thead>
-            <tr>
-              <th className="px-2 py-1">Date</th>
-              <th className="px-2 py-1">Notes</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((p) => (
-              <tr key={p.id}>
-                <td className="px-2 py-1 whitespace-nowrap">{p.date_prevue}</td>
-                <td className="px-2 py-1">{p.notes}</td>
+    <div className="p-6 space-y-4">
+      <div className="flex justify-between items-end gap-4">
+        <div className="flex gap-2">
+          <select className="input" value={statut} onChange={e => setStatut(e.target.value)}>
+            <option value="">Tous statuts</option>
+            <option value="prévu">Prévu</option>
+            <option value="confirmé">Confirmé</option>
+          </select>
+          <input type="date" className="input" value={debut} onChange={e => setDebut(e.target.value)} />
+          <input type="date" className="input" value={fin} onChange={e => setFin(e.target.value)} />
+        </div>
+        <Link to="/planning/nouveau"><Button>Nouvelle entrée</Button></Link>
+      </div>
+      {loading ? (
+        <LoadingSpinner message="Chargement..." />
+      ) : (
+        <TableContainer>
+          <table className="min-w-full text-sm">
+            <thead>
+              <tr>
+                <th className="px-2 py-1 text-left">Date</th>
+                <th className="px-2 py-1 text-left">Nom</th>
+                <th className="px-2 py-1 text-left">Statut</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </TableContainer>
+            </thead>
+            <tbody>
+              {items.map(p => (
+                <tr key={p.id} className="hover:bg-white/5">
+                  <td className="px-2 py-1 whitespace-nowrap">
+                    <Link to={`/planning/${p.id}`} className="text-mamastockGold hover:underline">
+                      {p.date_prevue}
+                    </Link>
+                  </td>
+                  <td className="px-2 py-1">{p.nom}</td>
+                  <td className="px-2 py-1">{p.statut}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </TableContainer>
+      )}
     </div>
   );
 }

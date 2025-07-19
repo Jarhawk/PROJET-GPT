@@ -98,8 +98,8 @@ export default function Sidebar() {
     {
       title: "Planning",
       items: [
-        { module: "planning", to: "/planning", label: "Prévisionnel", icon: <Calendar size={16} /> },
-        { module: "planning", to: "/planning/simulation", label: "Simulation", icon: <Calendar size={16} /> },
+        { module: "planning_previsionnel", to: "/planning", label: "Prévisionnel", icon: <Calendar size={16} /> },
+        { module: "planning_previsionnel", to: "/planning/simulation", label: "Simulation", icon: <Calendar size={16} /> },
       ],
     },
     {

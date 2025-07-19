@@ -653,3 +653,25 @@ create table if not exists notification_preferences (
   updated_at timestamptz default now()
 );
 create unique index if not exists uniq_notif_prefs_user on notification_preferences(utilisateur_id, mama_id);
+-- Module Tableau de bord gadgets personnalisable
+create table if not exists gadgets (
+  id uuid primary key default gen_random_uuid(),
+  type text,
+  nom text,
+  configuration_json jsonb,
+  mama_id uuid references mamas(id),
+  actif boolean default true,
+  created_at timestamptz default now()
+);
+create index if not exists idx_gadgets_mama_id on gadgets(mama_id);
+create index if not exists idx_gadgets_actif on gadgets(actif);
+
+create table if not exists tableaux_de_bord (
+  id uuid primary key default gen_random_uuid(),
+  utilisateur_id uuid references utilisateurs(id),
+  liste_gadgets_json jsonb,
+  mama_id uuid references mamas(id),
+  created_at timestamptz default now()
+);
+create unique index if not exists uniq_tableaux_de_bord_user on tableaux_de_bord(utilisateur_id, mama_id);
+create index if not exists idx_tableaux_de_bord_mama_id on tableaux_de_bord(mama_id);

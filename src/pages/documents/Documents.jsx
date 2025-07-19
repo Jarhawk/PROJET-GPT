@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useDocuments } from "@/hooks/useDocuments";
-import DocumentUpload from "@/components/documents/DocumentUpload";
+import DocumentForm from "./DocumentForm.jsx";
 import DocumentPreview from "@/components/documents/DocumentPreview";
 import TableContainer from "@/components/ui/TableContainer";
 import { Button } from "@/components/ui/button";
@@ -12,12 +12,19 @@ export default function Documents() {
   const { documents, listDocuments, uploadDocument, deleteDocument } = useDocuments();
   const [showUpload, setShowUpload] = useState(false);
   const [preview, setPreview] = useState(null);
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
+  const [categorieFilter, setCategorieFilter] = useState("");
 
   useEffect(() => {
     if (!authLoading && mama_id) {
-      listDocuments();
+      listDocuments({
+        search,
+        type: typeFilter || undefined,
+        categorie: categorieFilter || undefined,
+      });
     }
-  }, [authLoading, mama_id, listDocuments]);
+  }, [authLoading, mama_id, listDocuments, search, typeFilter, categorieFilter]);
 
   const handleUploaded = async (file, meta) => {
     await uploadDocument(file, meta);
@@ -38,12 +45,32 @@ export default function Documents() {
       </div>
       {showUpload && (
         <div className="mb-4">
-          <DocumentUpload
+          <DocumentForm
             onUploaded={handleUploaded}
             categories={["Contrat fournisseur", "Spécification produit"]}
           />
         </div>
       )}
+      <div className="flex flex-wrap gap-2 mb-4">
+        <input
+          className="input"
+          placeholder="Recherche"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <input
+          className="input"
+          placeholder="Type"
+          value={typeFilter}
+          onChange={(e) => setTypeFilter(e.target.value)}
+        />
+        <input
+          className="input"
+          placeholder="Catégorie"
+          value={categorieFilter}
+          onChange={(e) => setCategorieFilter(e.target.value)}
+        />
+      </div>
       <TableContainer>
         <table className="min-w-full text-sm">
           <thead>
@@ -59,7 +86,7 @@ export default function Documents() {
           <tbody>
             {documents.map((doc) => (
               <tr key={doc.id}>
-                <td className="p-2">{doc.nom}</td>
+                <td className="p-2">{doc.titre || doc.nom}</td>
                 <td className="p-2">
                   {doc.categorie && (
                     <span className="bg-blue-800/50 text-white px-2 py-0.5 rounded-full text-xs">

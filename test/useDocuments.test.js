@@ -7,6 +7,7 @@ const queryObj = {
   order: vi.fn(() => queryObj),
   eq: vi.fn(() => queryObj),
   ilike: vi.fn(() => queryObj),
+  or: vi.fn(() => queryObj),
   insert: vi.fn(() => queryObj),
   delete: vi.fn(() => queryObj),
   single: vi.fn(() => Promise.resolve({ data: { url: '/f' }, error: null })),
@@ -35,7 +36,7 @@ test('listDocuments queries documents with search', async () => {
   expect(fromMock).toHaveBeenCalledWith('documents');
   expect(queryObj.select).toHaveBeenCalledWith('*');
   expect(queryObj.eq).toHaveBeenCalledWith('mama_id', 'm1');
-  expect(queryObj.ilike).toHaveBeenCalledWith('nom', '%foo%');
+  expect(queryObj.or).toHaveBeenCalledWith('nom.ilike.%foo%,titre.ilike.%foo%');
 });
 
 test('uploadDocument inserts row with metadata', async () => {

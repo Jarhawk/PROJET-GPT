@@ -216,3 +216,11 @@ end$$;
 
 grant select, insert, update on table utilisateurs to authenticated;
 grant select, insert, update on table roles to authenticated;
+
+-- RLS pour la table fournisseurs_api_config
+alter table if exists fournisseurs_api_config enable row level security;
+alter table if exists fournisseurs_api_config force row level security;
+drop policy if exists fournisseurs_api_config_all on fournisseurs_api_config;
+create policy fournisseurs_api_config_all on fournisseurs_api_config
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());

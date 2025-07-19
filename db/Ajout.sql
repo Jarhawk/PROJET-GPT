@@ -4,6 +4,9 @@
 alter table if exists documents
   add column if not exists nom text,
   add column if not exists url text,
+  add column if not exists titre text,
+  add column if not exists fichier_url text,
+  add column if not exists commentaire text,
   add column if not exists taille numeric,
   add column if not exists categorie text,
   add column if not exists entite_liee_type text,
@@ -13,6 +16,8 @@ alter table if exists documents
 
 update documents
   set url = coalesce(url, chemin),
+      fichier_url = coalesce(fichier_url, coalesce(url, chemin)),
+      titre = coalesce(titre, nom),
       nom = coalesce(nom, split_part(coalesce(url, chemin), '/', -1));
 
 -- Table help_articles : aucune modification necessaire, on conserve

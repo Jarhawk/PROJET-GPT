@@ -26,7 +26,11 @@ export function useDocuments() {
       query = query.eq("entite_liee_id", filters.entite_liee_id);
     if (filters.categorie) query = query.eq("categorie", filters.categorie);
     if (filters.type) query = query.eq("type", filters.type);
-    if (filters.search) query = query.ilike("nom", `%${filters.search}%`);
+    if (filters.search) {
+      query = query.or(
+        `nom.ilike.%${filters.search}%,titre.ilike.%${filters.search}%`
+      );
+    }
 
     const { data, error } = await query;
     setLoading(false);
@@ -58,6 +62,9 @@ export function useDocuments() {
               taille: file.size,
               categorie: metadata.categorie || null,
               url,
+              fichier_url: url,
+              titre: metadata.titre || file.name,
+              commentaire: metadata.commentaire || null,
               entite_liee_type: metadata.entite_liee_type || null,
               entite_liee_id: metadata.entite_liee_id || null,
               mama_id,
@@ -86,7 +93,7 @@ export function useDocuments() {
       if (!id || !mama_id) return null;
       const { data, error } = await supabase
         .from("documents")
-        .select("url")
+        .select("fichier_url, url")
         .eq("id", id)
         .eq("mama_id", mama_id)
         .single();
@@ -94,7 +101,7 @@ export function useDocuments() {
         setError(error.message || error);
         return null;
       }
-      return data?.url || null;
+      return data?.fichier_url || data?.url || null;
     },
     [mama_id]
   );
@@ -106,7 +113,7 @@ export function useDocuments() {
       setError(null);
       const { data: doc, error: fetchError } = await supabase
         .from("documents")
-        .select("url")
+        .select("fichier_url, url")
         .eq("id", id)
         .eq("mama_id", mama_id)
         .single();
@@ -115,7 +122,7 @@ export function useDocuments() {
         setError(fetchError.message || fetchError);
         return { error: fetchError };
       }
-      const path = pathFromUrl(doc.url);
+      const path = pathFromUrl(doc.fichier_url || doc.url);
       try {
         await deleteFile("mamastock-documents", path);
       } catch {

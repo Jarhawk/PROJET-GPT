@@ -148,6 +148,12 @@ export default function Sidebar() {
       ],
     },
     {
+      title: "Audit",
+      items: [
+        { module: "audit", to: "/audit", label: "Audit", icon: <History size={16} /> },
+      ],
+    },
+    {
       title: "Aide",
       items: [
         { module: "aide", to: "/aide", label: "Aide", icon: <HelpCircle size={16} /> },

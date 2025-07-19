@@ -34,12 +34,12 @@ test('fetchEntries queries journal_audit with filters', async () => {
     await result.current.fetchEntries({ table: 'produits', start: '2024-01-01', end: '2024-01-31' });
   });
   expect(fromMock).toHaveBeenCalledWith('journal_audit');
-  expect(queryObj.select).toHaveBeenCalledWith('*, utilisateurs:changed_by(nom)');
-  expect(queryObj.order).toHaveBeenCalledWith('changed_at', { ascending: false });
+  expect(queryObj.select).toHaveBeenCalledWith('*, utilisateurs:utilisateur_id(nom)');
+  expect(queryObj.order).toHaveBeenCalledWith('date_action', { ascending: false });
   expect(queryObj.limit).toHaveBeenCalledWith(100);
-  expect(queryObj.eq).toHaveBeenCalledWith('table_name', 'produits');
-  expect(queryObj.gte).toHaveBeenCalledWith('changed_at', '2024-01-01');
-  expect(queryObj.lte).toHaveBeenCalledWith('changed_at', '2024-01-31');
+  expect(queryObj.eq).toHaveBeenCalledWith('table_modifiee', 'produits');
+  expect(queryObj.gte).toHaveBeenCalledWith('date_action', '2024-01-01');
+  expect(queryObj.lte).toHaveBeenCalledWith('date_action', '2024-01-31');
 });
 
 test('fetchEntries returns empty array on error', async () => {

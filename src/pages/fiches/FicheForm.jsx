@@ -1,5 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
+import { Navigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 import { useFiches } from "@/hooks/useFiches";
 import { useProducts } from "@/hooks/useProducts";
 import { useFamilles } from "@/hooks/useFamilles";
@@ -10,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 
 export default function FicheForm({ fiche, onClose }) {
+  const { access_rights } = useAuth();
   const { createFiche, updateFiche } = useFiches();
   const { products, fetchProducts } = useProducts();
   const { familles, fetchFamilles } = useFamilles();
@@ -22,6 +25,10 @@ export default function FicheForm({ fiche, onClose }) {
   );
   const [prixVente, setPrixVente] = useState(fiche?.prix_vente || 0);
   const [loading, setLoading] = useState(false);
+
+  if (!access_rights?.fiches_techniques?.peut_voir) {
+    return <Navigate to="/unauthorized" replace />;
+  }
 
   const { results: prodOptions, searchProduits } = useProduitsAutocomplete();
   const { results: ficheOptions, searchFiches } = useFichesAutocomplete();

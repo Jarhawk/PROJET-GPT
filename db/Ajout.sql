@@ -59,6 +59,19 @@ create policy feedback_all on feedback
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
 
+-- Table fiches_techniques : alignement avec le front
+alter table if exists fiches_techniques
+  add column if not exists nom text,
+  add column if not exists famille_id uuid references familles(id),
+  add column if not exists portions numeric default 1,
+  add column if not exists rendement numeric,
+  add column if not exists prix_vente numeric,
+  add column if not exists carte_actuelle boolean default false,
+  add column if not exists type_carte text,
+  add column if not exists sous_type_carte text,
+  add column if not exists cout_total numeric,
+  add column if not exists cout_par_portion numeric;
+
 -- Table planning_previsionnel : alignement avec le front
 alter table if exists planning_previsionnel
   add column if not exists notes text,

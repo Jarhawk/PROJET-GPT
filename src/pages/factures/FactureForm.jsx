@@ -1,7 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
 import { useFactures } from "@/hooks/useFactures";
-import { useProducts } from "@/hooks/useProducts";
+import { useProduitsAutocomplete } from "@/hooks/useProduitsAutocomplete";
+import AutoCompleteField from "@/components/ui/AutoCompleteField";
 import { useFournisseursAutocomplete } from "@/hooks/useFournisseursAutocomplete";
 import { Button } from "@/components/ui/button";
 import GlassCard from "@/components/ui/GlassCard";
@@ -11,7 +12,7 @@ import { useInvoiceOcr } from "@/hooks/useInvoiceOcr";
 
 export default function FactureForm({ facture, suppliers = [], onClose }) {
   const { createFacture, updateFacture, addLigneFacture, calculateTotals } = useFactures();
-  const { products, fetchProducts } = useProducts();
+  const { results: produitOptions, searchProduits } = useProduitsAutocomplete();
   const {
     results: fournisseurOptions,
     searchFournisseurs,
@@ -21,15 +22,19 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
   const [fournisseurName, setFournisseurName] = useState("");
   const [numero, setNumero] = useState(facture?.numero || "");
   const [statut, setStatut] = useState(facture?.statut || "en attente");
-  const [lignes, setLignes] = useState(facture?.lignes || [
-    { produit_id: "", quantite: 1, prix_unitaire: 0, tva: 20 }
-  ]);
+  const [lignes, setLignes] = useState(
+    facture?.lignes?.map(l => ({
+      ...l,
+      produit_nom: l.produit?.nom || "",
+    })) || [
+      { produit_id: "", produit_nom: "", quantite: 1, prix_unitaire: 0, tva: 20 },
+    ]
+  );
   const [file, setFile] = useState(null);
   const [fileUrl, setFileUrl] = useState(facture?.justificatif || "");
   const [loading, setLoading] = useState(false);
   const { scan, text: ocrText } = useInvoiceOcr();
 
-  useEffect(() => { fetchProducts({ limit: 1000 }); }, [fetchProducts]);
   useEffect(() => {
     if (facture?.fournisseur_id && suppliers.length) {
       const found = suppliers.find(s => s.id === facture.fournisseur_id);
@@ -87,7 +92,8 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
 
       for (const ligne of lignes) {
         if (ligne.produit_id) {
-          await addLigneFacture(fid, { ...ligne, prix: ligne.prix_unitaire, fournisseur_id });
+          const { produit_nom, ...rest } = ligne;
+          await addLigneFacture(fid, { ...rest, prix: ligne.prix_unitaire, fournisseur_id });
         }
       }
       await calculateTotals(fid);
@@ -153,12 +159,21 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
         <tbody>
           {lignes.map((l, idx) => (
             <tr key={idx}>
-              <td>
-                <input
-                  list="products"
-                  className="input"
-                  value={l.produit_id}
-                  onChange={e => setLignes(ls => ls.map((it,i) => i===idx ? { ...it, produit_id: e.target.value } : it))}
+              <td className="min-w-[150px]">
+                <AutoCompleteField
+                  label=""
+                  value={l.produit_nom}
+                  onChange={val => {
+                    setLignes(ls => ls.map((it,i) =>
+                      i===idx ? {
+                        ...it,
+                        produit_nom: val,
+                        produit_id: produitOptions.find(p => p.nom === val)?.id || ""
+                      } : it
+                    ));
+                    if (val.length >= 2) searchProduits(val);
+                  }}
+                  options={produitOptions.map(p => p.nom)}
                 />
               </td>
               <td>
@@ -177,10 +192,18 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
           ))}
         </tbody>
       </table>
-      <Button type="button" variant="outline" onClick={() => setLignes(ls => [...ls, { produit_id: "", quantite:1, prix_unitaire:0, tva:20 }])}>Ajouter ligne</Button>
-      <datalist id="products">
-        {products.map(p => <option key={p.id} value={p.id}>{p.nom}</option>)}
-      </datalist>
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() =>
+          setLignes(ls => [
+            ...ls,
+            { produit_id: "", produit_nom: "", quantite: 1, prix_unitaire: 0, tva: 20 },
+          ])
+        }
+      >
+        Ajouter ligne
+      </Button>
       <select
         className="input mb-2"
         value={statut}

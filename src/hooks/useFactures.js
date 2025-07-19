@@ -36,6 +36,7 @@ export function useFactures() {
     fournisseur = "",
     statut = "",
     mois = "",
+    actif = true,
     page = 1,
     pageSize = 20,
   } = {}) {
@@ -44,7 +45,10 @@ export function useFactures() {
     setError(null);
     let query = supabase
       .from("factures")
-      .select("*, fournisseur:fournisseurs(id, nom)", { count: "exact" })
+      .select(
+        "*, fournisseur:fournisseurs(id, nom), lignes:facture_lignes(id, produit:produits(nom))",
+        { count: "exact" }
+      )
       .eq("mama_id", mama_id)
       .order("date_facture", { ascending: false })
       .range((page - 1) * pageSize, page * pageSize - 1);
@@ -56,6 +60,7 @@ export function useFactures() {
     }
     if (fournisseur) query = query.eq("fournisseur_id", fournisseur);
     if (statut) query = query.eq("statut", statut);
+    if (actif !== null) query = query.eq("actif", actif);
     if (mois) {
       const start = `${mois}-01`;
       const end = new Date(start);
@@ -231,6 +236,19 @@ export function useFactures() {
     return { error };
   }
 
+  async function toggleFactureActive(id, actif) {
+    if (!mama_id) return { error: "no mama_id" };
+    setLoading(true);
+    const { error } = await supabase
+      .from("factures")
+      .update({ actif })
+      .eq("id", id)
+      .eq("mama_id", mama_id);
+    setLoading(false);
+    if (error) setError(error);
+    return { error };
+  }
+
   async function calculateTotals(facture_id) {
     if (!mama_id) return { ht: 0, tva: 0, ttc: 0 };
     const { data: lignes } = await supabase
@@ -263,6 +281,7 @@ export function useFactures() {
     deleteFacture,
     addLigneFacture,
     updateStock,
+    toggleFactureActive,
     calculateTotals,
   };
 }

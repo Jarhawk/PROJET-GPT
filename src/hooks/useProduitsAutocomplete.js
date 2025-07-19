@@ -16,7 +16,8 @@ export function useProduitsAutocomplete() {
     let q = supabase
       .from("v_produits_dernier_prix")
       .select("id, nom, unite, pmp")
-      .eq("mama_id", mama_id);
+      .eq("mama_id", mama_id)
+      .eq("actif", true);
     if (query) q = q.ilike("nom", `%${query}%`);
     q = q.order("nom", { ascending: true }).limit(10);
     const { data, error } = await q;

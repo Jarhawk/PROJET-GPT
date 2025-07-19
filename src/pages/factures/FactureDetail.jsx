@@ -13,7 +13,7 @@ import { useFactures } from "@/hooks/useFactures";
 
 export default function FactureDetail({ facture: factureProp, onClose }) {
   const { id } = useParams();
-  const { fetchFactureById, createFacture, addLigneFacture, calculateTotals } = useFactures();
+  const { fetchFactureById, createFacture, addLigneFacture, calculateTotals, toggleFactureActive } = useFactures();
   const { items: produitsFacture, fetchItemsByInvoice } = useInvoiceItems();
   const [facture, setFacture] = useState(factureProp);
 
@@ -76,6 +76,21 @@ export default function FactureDetail({ facture: factureProp, onClose }) {
         <div><b>Fournisseur :</b> {facture.fournisseur?.nom}</div>
         <div><b>Montant :</b> {facture.total_ttc?.toFixed(2)} €</div>
         <div><b>Statut :</b> {facture.statut}</div>
+        <div>
+          <b>Actif :</b> {facture.actif ? "Oui" : "Non"}
+          <Button
+            size="sm"
+            variant="outline"
+            className="ml-2"
+            onClick={async () => {
+              await toggleFactureActive(facture.id, !facture.actif);
+              const f = await fetchFactureById(facture.id);
+              setFacture(f);
+            }}
+          >
+            {facture.actif ? "Désactiver" : "Réactiver"}
+          </Button>
+        </div>
         <div>
           <b>Justificatif :</b> {facture.justificatif ?
             <a href={facture.justificatif} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">Voir PDF</a> :

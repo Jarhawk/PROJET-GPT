@@ -62,7 +62,7 @@ export default function Sidebar() {
         )}
 
         {(has("documents") || has("analyse")) && (
-          <details open={pathname.startsWith("/documents") || pathname.startsWith("/analyse")}>
+          <details open={pathname.startsWith("/documents") || pathname.startsWith("/analyse") || pathname.startsWith("/engineering")}>
             <summary className="cursor-pointer">Documents / Analyse</summary>
             <div className="ml-4 flex flex-col gap-1 mt-1">
               {has("documents") && <Link to="/documents">Documents</Link>}
@@ -70,6 +70,7 @@ export default function Sidebar() {
                 <>
                   <Link to="/analyse">Analyse</Link>
                   <Link to="/analyse/menu-engineering">Menu Engineering</Link>
+                  <Link to="/engineering">Engineering</Link>
                 </>
               )}
             </div>

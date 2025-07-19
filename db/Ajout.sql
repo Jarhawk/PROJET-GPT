@@ -224,3 +224,28 @@ drop policy if exists fournisseurs_api_config_all on fournisseurs_api_config;
 create policy fournisseurs_api_config_all on fournisseurs_api_config
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
+
+-- Vue performance fiches : popularité, volume et coût
+create or replace view v_performance_fiches as
+with ventes as (
+  select mama_id, fiche_id, sum(ventes) as volume
+  from ventes_fiches_carte
+  where actif = true
+  group by mama_id, fiche_id
+), totals as (
+  select mama_id, sum(ventes) as total_volume
+  from ventes_fiches_carte
+  where actif = true
+  group by mama_id
+)
+select
+  f.mama_id,
+  f.id as fiche_id,
+  f.nom,
+  coalesce(f.cout_portion, case when f.portions > 0 then f.cout_total / f.portions else null end) as cout,
+  coalesce(v.volume, 0) as volume,
+  case when t.total_volume > 0 then coalesce(v.volume,0)::numeric / t.total_volume else 0 end as popularite
+from fiches_techniques f
+left join ventes v on v.fiche_id = f.id and v.mama_id = f.mama_id
+left join totals t on t.mama_id = f.mama_id
+where f.actif = true;

@@ -21,7 +21,7 @@ const STATUTS = {
 };
 
 export default function Factures() {
-  const { factures, total, getFactures, deleteFacture } = useFactures();
+  const { factures, total, getFactures, deleteFacture, toggleFactureActive } = useFactures();
   const { suppliers } = useSuppliers();
   const { mama_id } = useAuth();
   const { results: factureOptions, searchFactures } = useFacturesAutocomplete();
@@ -32,6 +32,7 @@ export default function Factures() {
   const [statutFilter, setStatutFilter] = useState("");
   const [supplierFilter, setSupplierFilter] = useState("");
   const [monthFilter, setMonthFilter] = useState("");
+  const [actifFilter, setActifFilter] = useState("true");
   const [page, setPage] = useState(1);
   const pageSize = 10;
   const [loading, setLoading] = useState(false);
@@ -44,10 +45,11 @@ export default function Factures() {
       fournisseur: supplierFilter,
       statut: statutFilter,
       mois: monthFilter,
+      actif: actifFilter === "all" ? null : actifFilter === "true",
       page,
       pageSize,
     });
-  }, [mama_id, search, statutFilter, supplierFilter, monthFilter, page]);
+  }, [mama_id, search, statutFilter, supplierFilter, monthFilter, actifFilter, page]);
 
   // Export Excel/XLSX
   const exportExcel = () => {
@@ -74,6 +76,7 @@ export default function Factures() {
         fournisseur: supplierFilter,
         statut: statutFilter,
         mois: monthFilter,
+        actif: actifFilter === "all" ? null : actifFilter === "true",
         page,
         pageSize,
       });
@@ -117,6 +120,15 @@ export default function Factures() {
           value={monthFilter}
           onChange={e => { setMonthFilter(e.target.value); setPage(1); }}
         />
+        <select
+          className="input"
+          value={actifFilter}
+          onChange={e => setActifFilter(e.target.value)}
+        >
+          <option value="true">Actives</option>
+          <option value="false">Inactives</option>
+          <option value="all">Toutes</option>
+        </select>
         <Button onClick={() => { setSelected(null); setShowForm(true); }}>
           Ajouter une facture
         </Button>
@@ -135,6 +147,7 @@ export default function Factures() {
             <th className="px-4 py-2">Fournisseur</th>
             <th className="px-4 py-2">Montant TTC</th>
             <th className="px-4 py-2">Statut</th>
+            <th className="px-4 py-2">Actif</th>
             <th className="px-4 py-2">Actions</th>
           </tr>
         </thead>
@@ -148,6 +161,7 @@ export default function Factures() {
               <td className="border px-4 py-2">
                 <span className={STATUTS[facture.statut] || "badge"}>{facture.statut}</span>
               </td>
+              <td className="border px-4 py-2">{facture.actif ? "✅" : "❌"}</td>
               <td className="border px-4 py-2">
                 <Button
                   size="sm"
@@ -164,6 +178,25 @@ export default function Factures() {
                   onClick={() => { setSelected(facture); setShowDetail(true); }}
                 >
                   Détail
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="mr-2"
+                  onClick={async () => {
+                    await toggleFactureActive(facture.id, !facture.actif);
+                    await getFactures({
+                      search,
+                      fournisseur: supplierFilter,
+                      statut: statutFilter,
+                      mois: monthFilter,
+                      actif: actifFilter === "all" ? null : actifFilter === "true",
+                      page,
+                      pageSize,
+                    });
+                  }}
+                >
+                  {facture.actif ? "Désactiver" : "Réactiver"}
                 </Button>
                 <Button
                   size="sm"
@@ -210,6 +243,7 @@ export default function Factures() {
               fournisseur: supplierFilter,
               statut: statutFilter,
               mois: monthFilter,
+              actif: actifFilter === "all" ? null : actifFilter === "true",
               page,
               pageSize,
             });

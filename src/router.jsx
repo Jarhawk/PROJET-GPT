@@ -20,6 +20,7 @@ const FournisseurDetailPage = lazy(() => import("@/pages/fournisseurs/Fournisseu
 const Factures = lazy(() => import("@/pages/factures/Factures.jsx"));
 const FactureDetail = lazy(() => import("@/pages/factures/FactureDetail.jsx"));
 const ImportFactures = lazy(() => import("@/pages/factures/ImportFactures.jsx"));
+const FactureCreate = lazy(() => import("@/pages/factures/FactureCreate.jsx"));
 const Fiches = lazy(() => import("@/pages/fiches/Fiches.jsx"));
 const FicheDetail = lazy(() => import("@/pages/fiches/FicheDetail.jsx"));
 const Carte = lazy(() => import("@/pages/carte/Carte.jsx"));
@@ -143,6 +144,10 @@ export default function Router() {
           <Route
             path="/factures"
             element={<ProtectedRoute accessKey="factures"><Factures /></ProtectedRoute>}
+          />
+          <Route
+            path="/factures/nouveau"
+            element={<ProtectedRoute accessKey="factures"><FactureCreate /></ProtectedRoute>}
           />
           <Route
             path="/factures/:id"

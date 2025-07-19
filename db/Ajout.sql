@@ -320,6 +320,24 @@ create policy fournisseur_produits_all on fournisseur_produits
   for all using (mama_id = (select mama_id FROM utilisateurs WHERE auth_id = auth.uid()))
   with check (mama_id = (select mama_id FROM utilisateurs WHERE auth_id = auth.uid()));
 
+-- Alignement tables Factures et lignes
+alter table if exists factures
+  add column if not exists montant_total numeric;
+update factures set montant_total = coalesce(total_ttc, 0)
+  where montant_total is null;
+
+alter table if exists facture_lignes
+  add column if not exists prix_unitaire numeric,
+  add column if not exists tva numeric,
+  add column if not exists total numeric;
+update facture_lignes
+  set prix_unitaire = coalesce(prix, 0),
+      total = coalesce(quantite * coalesce(prix,0), 0)
+  where prix_unitaire is null;
+create trigger if not exists trg_set_updated_at_facture_lignes
+  before update on facture_lignes
+  for each row execute procedure set_updated_at();
+
 alter table if exists factures enable row level security;
 alter table if exists factures force row level security;
 drop policy if exists factures_all on factures;

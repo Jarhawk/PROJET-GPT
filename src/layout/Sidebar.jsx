@@ -124,6 +124,7 @@ export default function Sidebar() {
       title: "Analyse",
       items: [
         { module: "stats", to: "/stats", label: "Stats", icon: <BarChart2 size={16} /> },
+        { module: "consolidation", to: "/consolidation", label: "Consolidation", icon: <FileBarChart size={16} /> },
         { module: "reporting", to: "/reporting", label: "Reporting", icon: <FileBarChart size={16} /> },
         { module: "analyse", to: "/tableaux-de-bord", label: "Tableaux de bord", icon: <BarChart2 size={16} /> },
         { module: "analyse", to: "/comparatif", label: "Comparatif", icon: <BarChart2 size={16} /> },

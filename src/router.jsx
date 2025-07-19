@@ -72,6 +72,7 @@ const PlanningForm = lazy(() => import("@/pages/PlanningForm.jsx"));
 const PlanningDetail = lazy(() => import("@/pages/PlanningDetail.jsx"));
 const DashboardBuilder = lazy(() => import("@/pages/dashboard/DashboardBuilder.jsx"));
 const Reporting = lazy(() => import("@/pages/reporting/Reporting.jsx"));
+const Consolidation = lazy(() => import("@/pages/Consolidation.jsx"));
 const CreateMama = lazy(() => import("@/pages/auth/CreateMama.jsx"));
 const Feedback = lazy(() => import("@/pages/Feedback.jsx"));
 const Requisitions = lazy(() => import("@/pages/requisitions/Requisitions.jsx"));
@@ -330,6 +331,10 @@ export default function Router() {
           <Route
             path="/reporting"
             element={<ProtectedRoute accessKey="reporting"><Reporting /></ProtectedRoute>}
+          />
+          <Route
+            path="/consolidation"
+            element={<ProtectedRoute accessKey="consolidation"><Consolidation /></ProtectedRoute>}
           />
           <Route
             path="/parametrage/utilisateurs"

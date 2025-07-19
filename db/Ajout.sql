@@ -501,3 +501,10 @@ create policy planning_lignes_all on planning_lignes
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
 
+
+-- Consolidation multi-sites
+create or replace view v_consolidated_stats as
+select mama_id, count(*) as total_produits, sum(stock) as stock_total
+from produits
+where actif is true
+group by mama_id;

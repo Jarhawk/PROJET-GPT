@@ -312,8 +312,8 @@ export default function Router() {
             element={<ProtectedRoute accessKey="analyse"><AnalytiqueDashboard /></ProtectedRoute>}
           />
           <Route
-            path="/analyse/menu-engineering"
-            element={<ProtectedRoute accessKey="analyse"><MenuEngineering /></ProtectedRoute>}
+            path="/menu-engineering"
+            element={<ProtectedRoute accessKey="menu_engineering"><MenuEngineering /></ProtectedRoute>}
           />
           <Route path="/engineering" element={<EngineeringMenu />} />
           <Route

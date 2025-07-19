@@ -4,33 +4,34 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 
 export function useRequisitions() {
-  const { mama_id, user_id } = useAuth();
+  const { mama_id } = useAuth();
 
-  async function getRequisitions({ produit = "", zone = "", type = "", debut = "", fin = "" } = {}) {
-    if (!mama_id) return [];
+  async function getRequisitions({ zone = "", statut = "", debut = "", fin = "", page = 1, limit = 10 } = {}) {
+    if (!mama_id) return { data: [], count: 0 };
     let query = supabase
       .from("requisitions")
       .select("*", { count: "exact" })
       .eq("mama_id", mama_id)
-      .order("date_requisition", { ascending: false });
-    if (produit) query = query.eq("produit_id", produit);
-    if (zone) query = query.eq("zone_id", zone);
-    if (type) query = query.eq("type", type);
-    if (debut) query = query.gte("date_requisition", debut);
-    if (fin) query = query.lte("date_requisition", fin);
-    const { data, error } = await query;
+      .eq("actif", true)
+      .order("date", { ascending: false })
+      .range((page - 1) * limit, page * limit - 1);
+    if (zone) query = query.eq("zone_destination_id", zone);
+    if (statut) query = query.eq("statut", statut);
+    if (debut) query = query.gte("date", debut);
+    if (fin) query = query.lte("date", fin);
+    const { data, count, error } = await query;
     if (error) {
       console.error("❌ Erreur getRequisitions:", error.message);
-      return [];
+      return { data: [], count: 0 };
     }
-    return data || [];
+    return { data: data || [], count: count || 0 };
   }
 
   async function getRequisitionById(id) {
     if (!id || !mama_id) return null;
     const { data, error } = await supabase
       .from("requisitions")
-      .select("*")
+      .select("*, lignes:requisition_lignes(*)")
       .eq("id", id)
       .eq("mama_id", mama_id)
       .single();
@@ -41,18 +42,30 @@ export function useRequisitions() {
     return data || null;
   }
 
-  async function createRequisition({ produit_id, zone_id, quantite, date_requisition = new Date().toISOString().slice(0, 10), type = "", commentaire = "" }) {
+  async function createRequisition({ numero = null, date = new Date().toISOString().slice(0,10), zone_source_id = null, zone_destination_id = null, commentaire = "", statut = "", lignes = [] }) {
     if (!mama_id) return { error: "mama_id manquant" };
     const { data, error } = await supabase
       .from("requisitions")
-      .insert([{ produit_id, zone_id, quantite, date_requisition, type, commentaire, mama_id, auteur_id: user_id }])
+      .insert([{ numero, date, zone_source_id, zone_destination_id, commentaire, statut, mama_id }])
       .select()
       .single();
     if (error) {
       console.error("❌ Erreur creation requisition:", error.message);
       return { error };
     }
-    return { data };
+    const requisition = data;
+    if (lignes.length) {
+      const toInsert = lignes.map(l => ({
+        requisition_id: requisition.id,
+        produit_id: l.produit_id,
+        quantite: Number(l.quantite),
+        commentaire: l.commentaire || "",
+        mama_id,
+      }));
+      const { error: lineErr } = await supabase.from("requisition_lignes").insert(toInsert);
+      if (lineErr) console.error("❌ Erreur lignes requisition:", lineErr.message);
+    }
+    return { data: requisition };
   }
 
   async function updateRequisition(id, fields) {

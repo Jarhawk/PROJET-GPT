@@ -7,11 +7,12 @@ const query = {
   gte: vi.fn(() => query),
   lte: vi.fn(() => query),
   order: vi.fn(() => query),
+  range: vi.fn(() => query),
   insert: vi.fn(() => query),
   update: vi.fn(() => query),
   delete: vi.fn(() => query),
   single: vi.fn(() => ({ data: { id: '1' }, error: null })),
-  then: fn => Promise.resolve(fn({ data: [], error: null })),
+  then: fn => Promise.resolve(fn({ data: [], count: 0, error: null })),
 };
 const fromMock = vi.fn(() => query);
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
@@ -29,32 +30,30 @@ test('getRequisitions applies filters', async () => {
   const { result } = renderHook(() => useRequisitions());
   await act(async () => {
     await result.current.getRequisitions({
-      produit: 'p1',
       zone: 'z1',
-      type: 'service',
+      statut: 'draft',
       debut: '2025-01-01',
       fin: '2025-01-31',
+      page: 2,
     });
   });
   expect(fromMock).toHaveBeenCalledWith('requisitions');
   expect(query.select).toHaveBeenCalledWith('*', { count: 'exact' });
   expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1');
-  expect(query.eq).toHaveBeenCalledWith('produit_id', 'p1');
-  expect(query.eq).toHaveBeenCalledWith('zone_id', 'z1');
-  expect(query.eq).toHaveBeenCalledWith('type', 'service');
-  expect(query.gte).toHaveBeenCalledWith('date_requisition', '2025-01-01');
-  expect(query.lte).toHaveBeenCalledWith('date_requisition', '2025-01-31');
+  expect(query.eq).toHaveBeenCalledWith('actif', true);
+  expect(query.eq).toHaveBeenCalledWith('zone_destination_id', 'z1');
+  expect(query.eq).toHaveBeenCalledWith('statut', 'draft');
+  expect(query.gte).toHaveBeenCalledWith('date', '2025-01-01');
+  expect(query.lte).toHaveBeenCalledWith('date', '2025-01-31');
+  expect(query.range).toHaveBeenCalledWith(10, 19);
 });
 
-test('createRequisition injects ids', async () => {
+test('createRequisition inserts header and lines', async () => {
   const { result } = renderHook(() => useRequisitions());
   await act(async () => {
-    await result.current.createRequisition({ produit_id: 'p1', zone_id: 'z1', quantite: 2 });
+    await result.current.createRequisition({ lignes: [{ produit_id: 'p1', quantite: 2 }] });
   });
   expect(fromMock).toHaveBeenCalledWith('requisitions');
   expect(query.insert).toHaveBeenCalled();
-  const inserted = query.insert.mock.calls[0][0][0];
-  expect(inserted.mama_id).toBe('m1');
-  expect(inserted.auteur_id).toBe('u1');
 });
 

@@ -201,7 +201,7 @@ export default function Router() {
             element={<ProtectedRoute accessKey="requisitions"><Requisitions /></ProtectedRoute>}
           />
           <Route
-            path="/requisitions/new"
+            path="/requisitions/nouvelle"
             element={<ProtectedRoute accessKey="requisitions"><RequisitionForm /></ProtectedRoute>}
           />
           <Route

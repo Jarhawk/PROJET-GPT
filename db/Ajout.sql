@@ -420,3 +420,38 @@ create policy bons_livraison_lignes_all on bons_livraison_lignes
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
 
+-- Module Réquisitions
+alter table if exists requisitions
+  add column if not exists numero text,
+  add column if not exists date date,
+  add column if not exists zone_source_id uuid references zones_stock(id),
+  add column if not exists zone_destination_id uuid references zones_stock(id),
+  add column if not exists statut text,
+  add column if not exists actif boolean default true;
+
+create table if not exists requisition_lignes (
+  id uuid primary key default gen_random_uuid(),
+  requisition_id uuid references requisitions(id) on delete cascade,
+  produit_id uuid references produits(id),
+  quantite numeric,
+  commentaire text,
+  mama_id uuid references mamas(id),
+  actif boolean default true,
+  created_at timestamptz default now()
+);
+create index if not exists idx_requisition_lignes_requisition on requisition_lignes(requisition_id);
+create index if not exists idx_requisition_lignes_mama on requisition_lignes(mama_id);
+alter table if exists requisition_lignes enable row level security;
+alter table if exists requisition_lignes force row level security;
+drop policy if exists requisition_lignes_all on requisition_lignes;
+create policy requisition_lignes_all on requisition_lignes
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+
+create or replace view v_stock_requisitionne as
+select produit_id, sum(quantite) as total_requisitionne, mama_id
+from requisition_lignes
+join requisitions on requisitions.id = requisition_lignes.requisition_id
+where requisitions.actif is true
+group by produit_id, mama_id;
+

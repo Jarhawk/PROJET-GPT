@@ -508,3 +508,51 @@ select mama_id, count(*) as total_produits, sum(stock) as stock_total
 from produits
 where actif is true
 group by mama_id;
+-- Table journal_audit pour audit avancé
+create table if not exists journal_audit (
+  id uuid primary key default gen_random_uuid(),
+  table_modifiee text,
+  operation text,
+  utilisateur_id uuid references utilisateurs(id),
+  mama_id uuid references mamas(id),
+  date_action timestamptz default now(),
+  donnees_avant jsonb,
+  donnees_apres jsonb
+);
+create index if not exists idx_journal_audit_mama on journal_audit(mama_id);
+
+create or replace function insert_journal_audit() returns trigger as $$
+begin
+  insert into journal_audit(
+    table_modifiee,
+    operation,
+    utilisateur_id,
+    mama_id,
+    date_action,
+    donnees_avant,
+    donnees_apres
+  ) values (
+    TG_TABLE_NAME,
+    TG_OP,
+    auth.uid(),
+    coalesce(new.mama_id, old.mama_id),
+    now(),
+    row_to_json(old),
+    row_to_json(new)
+  );
+  if TG_OP = 'DELETE' then
+    return old;
+  else
+    return new;
+  end if;
+end;
+$$ language plpgsql;
+
+create trigger trg_audit_produits
+  after insert or update or delete on produits
+  for each row execute procedure insert_journal_audit();
+
+create trigger trg_audit_factures
+  after insert or update or delete on factures
+  for each row execute procedure insert_journal_audit();
+

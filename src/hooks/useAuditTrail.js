@@ -14,12 +14,12 @@ export function useAuditTrail() {
     setLoading(true);
     let query = supabase
       .from("journal_audit")
-      .select("*, utilisateurs:changed_by(nom)")
-      .order("changed_at", { ascending: false })
+      .select("*, utilisateurs:utilisateur_id(nom)")
+      .order("date_action", { ascending: false })
       .limit(100);
-    if (table) query = query.eq("table_name", table);
-    if (start) query = query.gte("changed_at", start);
-    if (end) query = query.lte("changed_at", end);
+    if (table) query = query.eq("table_modifiee", table);
+    if (start) query = query.gte("date_action", start);
+    if (end) query = query.lte("date_action", end);
     const { data, error } = await query;
     setLoading(false);
     if (error) {

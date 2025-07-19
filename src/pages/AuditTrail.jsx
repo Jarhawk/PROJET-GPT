@@ -72,16 +72,16 @@ export default function AuditTrail() {
             {entries.map((e) => (
               <tr key={e.id} className="align-top">
                 <td className="border px-2 py-1 whitespace-nowrap">
-                  {new Date(e.changed_at).toLocaleString()}
+                  {new Date(e.date_action).toLocaleString()}
                 </td>
-                <td className="border px-2 py-1">{e.table_name}</td>
+                <td className="border px-2 py-1">{e.table_modifiee}</td>
                 <td className="border px-2 py-1">{e.operation}</td>
-                <td className="border px-2 py-1">{e.utilisateurs?.nom || e.changed_by}</td>
+                <td className="border px-2 py-1">{e.utilisateurs?.nom || e.utilisateur_id}</td>
                 <td className="border px-2 py-1 font-mono break-all">
-                  {JSON.stringify(e.old_data)}
+                  {JSON.stringify(e.donnees_avant)}
                 </td>
                 <td className="border px-2 py-1 font-mono break-all">
-                  {JSON.stringify(e.new_data)}
+                  {JSON.stringify(e.donnees_apres)}
                 </td>
               </tr>
             ))}

@@ -39,6 +39,7 @@ supprimer la configuration via Supabase JS. Il expose aussi `listConfigs` pour
 rechercher et paginer les entrées par fournisseur et statut. Le formulaire
 `FournisseurApiSettingsForm` s'appuie sur ce hook et pré‑remplit la configuration
 existante.
+La page `/parametrage/api-fournisseurs` affiche la liste des configurations pour chaque fournisseur.
 
 ## useFournisseurAPI
 

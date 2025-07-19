@@ -66,7 +66,12 @@ export default function Sidebar() {
             <summary className="cursor-pointer">Documents / Analyse</summary>
             <div className="ml-4 flex flex-col gap-1 mt-1">
               {has("documents") && <Link to="/documents">Documents</Link>}
-              {has("analyse") && <Link to="/analyse">Analyse</Link>}
+              {has("analyse") && (
+                <>
+                  <Link to="/analyse">Analyse</Link>
+                  <Link to="/analyse/menu-engineering">Menu Engineering</Link>
+                </>
+              )}
             </div>
           </details>
         )}
@@ -88,6 +93,7 @@ export default function Sidebar() {
 
         <Link to="/onboarding">Onboarding</Link>
         <Link to="/aide">Aide</Link>
+        {has("feedback") && <Link to="/feedback">Feedback</Link>}
       </nav>
     </aside>
   );

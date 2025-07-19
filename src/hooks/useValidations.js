@@ -17,6 +17,7 @@ export function useValidations() {
       .from("validation_requests")
       .select("*")
       .eq("mama_id", mama_id)
+      .eq("actif", true)
       .order("created_at", { ascending: false });
     setLoading(false);
     if (error) {
@@ -34,7 +35,7 @@ export function useValidations() {
     setError(null);
     const { error } = await supabase
       .from("validation_requests")
-      .insert([{ ...values, mama_id, requested_by: user.id }]);
+      .insert([{ ...values, mama_id, requested_by: user.id, actif: true }]);
     setLoading(false);
     if (error) {
       setError(error.message || error);
@@ -51,7 +52,8 @@ export function useValidations() {
       .from("validation_requests")
       .update({ status, reviewed_by: user.id, reviewed_at: new Date().toISOString() })
       .eq("id", id)
-      .eq("mama_id", mama_id);
+      .eq("mama_id", mama_id)
+      .eq("actif", true);
     setLoading(false);
     if (error) {
       setError(error.message || error);

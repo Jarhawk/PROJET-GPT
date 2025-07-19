@@ -96,6 +96,12 @@ export default function Sidebar() {
       ],
     },
     {
+      title: "Validations",
+      items: [
+        { module: "validations", to: "/validations", label: "Validations", icon: <CheckSquare size={16} /> },
+      ],
+    },
+    {
       title: "Planning",
       items: [
         { module: "planning_previsionnel", to: "/planning", label: "Prévisionnel", icon: <Calendar size={16} /> },

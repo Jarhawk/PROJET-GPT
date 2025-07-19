@@ -76,6 +76,8 @@ const Consolidation = lazy(() => import("@/pages/Consolidation.jsx"));
 const CreateMama = lazy(() => import("@/pages/auth/CreateMama.jsx"));
 const Feedback = lazy(() => import("@/pages/Feedback.jsx"));
 const AuditTrail = lazy(() => import("@/pages/AuditTrail.jsx"));
+const Validations = lazy(() => import("@/pages/Validations.jsx"));
+const ValidationDetail = lazy(() => import("@/pages/ValidationDetail.jsx"));
 const Consentements = lazy(() => import("@/pages/Consentements.jsx"));
 const Requisitions = lazy(() => import("@/pages/requisitions/Requisitions.jsx"));
 const RequisitionForm = lazy(() => import("@/pages/requisitions/RequisitionForm.jsx"));
@@ -381,6 +383,14 @@ export default function Router() {
           <Route
             path="/feedback"
             element={<ProtectedRoute accessKey="feedback"><Feedback /></ProtectedRoute>}
+          />
+          <Route
+            path="/validations"
+            element={<ProtectedRoute accessKey="validations"><Validations /></ProtectedRoute>}
+          />
+          <Route
+            path="/validations/:id"
+            element={<ProtectedRoute accessKey="validations"><ValidationDetail /></ProtectedRoute>}
           />
           <Route
             path="/audit"

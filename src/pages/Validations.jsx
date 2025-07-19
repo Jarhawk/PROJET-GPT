@@ -10,7 +10,7 @@ import TableContainer from "@/components/ui/TableContainer";
 export default function Validations() {
   const { isAdmin, mama_id } = useAuth();
   const validations = useValidations();
-  const [form, setForm] = useState({ module: "", entity_id: "", action: "" });
+  const [form, setForm] = useState({ action_type: "", table_cible: "", element_id: "" });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -26,7 +26,7 @@ export default function Validations() {
       toast.error(validations.error);
     } else {
       toast.success("Demande envoyée");
-      setForm({ module: "", entity_id: "", action: "" });
+      setForm({ action_type: "", table_cible: "", element_id: "" });
     }
     setSaving(false);
   };
@@ -55,23 +55,23 @@ export default function Validations() {
       <form onSubmit={handleSubmit} className="flex gap-2 mb-4 items-end">
         <input
           className="input"
-          placeholder="Module"
-          value={form.module}
-          onChange={(e) => setForm(f => ({ ...f, module: e.target.value }))}
+          placeholder="Type d'action"
+          value={form.action_type}
+          onChange={(e) => setForm(f => ({ ...f, action_type: e.target.value }))}
           required
         />
         <input
           className="input"
-          placeholder="Action"
-          value={form.action}
-          onChange={(e) => setForm(f => ({ ...f, action: e.target.value }))}
+          placeholder="Table cible"
+          value={form.table_cible}
+          onChange={(e) => setForm(f => ({ ...f, table_cible: e.target.value }))}
           required
         />
         <input
           className="input"
-          placeholder="Entité"
-          value={form.entity_id}
-          onChange={(e) => setForm(f => ({ ...f, entity_id: e.target.value }))}
+          placeholder="Element ID"
+          value={form.element_id}
+          onChange={(e) => setForm(f => ({ ...f, element_id: e.target.value }))}
         />
         <Button type="submit" disabled={saving}>
           {saving ? "Envoi…" : "Demander"}
@@ -81,8 +81,9 @@ export default function Validations() {
         <table className="min-w-full text-sm">
         <thead>
           <tr>
-            <th className="px-2 py-1">Module</th>
             <th className="px-2 py-1">Action</th>
+            <th className="px-2 py-1">Table</th>
+            <th className="px-2 py-1">Element</th>
             <th className="px-2 py-1">Statut</th>
             {isAdmin && <th className="px-2 py-1"></th>}
           </tr>
@@ -90,9 +91,10 @@ export default function Validations() {
         <tbody>
           {items.map(v => (
             <tr key={v.id} className="border-t">
-              <td className="px-2 py-1">{v.module}</td>
-              <td className="px-2 py-1">{v.action}</td>
-              <td className="px-2 py-1">{v.status}</td>
+              <td className="px-2 py-1">{v.action_type}</td>
+              <td className="px-2 py-1">{v.table_cible}</td>
+              <td className="px-2 py-1">{v.element_id}</td>
+              <td className="px-2 py-1">{v.statut}</td>
               {isAdmin && (
                 <td className="px-2 py-1 space-x-1 text-right">
                   <Button size="sm" disabled={saving} onClick={() => handleUpdate(v.id, 'approved')}>

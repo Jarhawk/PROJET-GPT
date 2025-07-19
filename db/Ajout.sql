@@ -556,3 +556,49 @@ create trigger trg_audit_factures
   after insert or update or delete on factures
   for each row execute procedure insert_journal_audit();
 
+
+-- Vues pour le module d'analyse avancée
+create or replace view v_monthly_purchases as
+select f.mama_id,
+       to_char(date_trunc('month', f.date_facture), 'YYYY-MM') as mois,
+       sum(fl.prix_unitaire * fl.quantite) as total
+from factures f
+join facture_lignes fl on fl.facture_id = f.id
+where f.actif = true
+  and fl.actif = true
+group by f.mama_id, to_char(date_trunc('month', f.date_facture), 'YYYY-MM');
+
+create or replace view v_pmp as
+select p.mama_id,
+       p.id as produit_id,
+       p.actif as produit_actif,
+       bool_or(fp.actif) as fournisseur_produit_actif,
+       coalesce(avg(fp.prix_achat), 0) as pmp
+from produits p
+left join fournisseur_produits fp on fp.produit_id = p.id and fp.mama_id = p.mama_id
+group by p.mama_id, p.id, p.actif;
+
+create or replace view v_ecarts_inventaire as
+select i.mama_id,
+       l.produit_id,
+       i.date as date,
+       l.zone_id as zone,
+       l.quantite_theorique as stock_theorique,
+       l.quantite_reelle as stock_reel,
+       l.quantite_reelle - l.quantite_theorique as ecart,
+       l.motif
+from inventaires i
+join inventaire_lignes l on l.inventaire_id = i.id
+where i.actif = true
+  and l.actif = true;
+
+create or replace view v_evolution_achats as
+select f.mama_id,
+       fl.produit_id,
+       to_char(date_trunc('month', f.date_facture), 'YYYY-MM') as mois,
+       sum(fl.prix_unitaire * fl.quantite) as montant
+from facture_lignes fl
+join factures f on f.id = fl.facture_id
+where f.actif = true
+  and fl.actif = true
+group by f.mama_id, fl.produit_id, to_char(date_trunc('month', f.date_facture), 'YYYY-MM');

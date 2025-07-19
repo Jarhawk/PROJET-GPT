@@ -15,6 +15,8 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 
 const Dashboard = lazy(() => import("@/pages/Dashboard.jsx"));
 const Fournisseurs = lazy(() => import("@/pages/fournisseurs/Fournisseurs.jsx"));
+const FournisseurCreate = lazy(() => import("@/pages/fournisseurs/FournisseurCreate.jsx"));
+const FournisseurDetailPage = lazy(() => import("@/pages/fournisseurs/FournisseurDetailPage.jsx"));
 const Factures = lazy(() => import("@/pages/factures/Factures.jsx"));
 const FactureDetail = lazy(() => import("@/pages/factures/FactureDetail.jsx"));
 const ImportFactures = lazy(() => import("@/pages/factures/ImportFactures.jsx"));
@@ -125,6 +127,14 @@ export default function Router() {
           <Route
             path="/fournisseurs"
             element={<ProtectedRoute accessKey="fournisseurs"><Fournisseurs /></ProtectedRoute>}
+          />
+          <Route
+            path="/fournisseurs/nouveau"
+            element={<ProtectedRoute accessKey="fournisseurs"><FournisseurCreate /></ProtectedRoute>}
+          />
+          <Route
+            path="/fournisseurs/:id"
+            element={<ProtectedRoute accessKey="fournisseurs"><FournisseurDetailPage /></ProtectedRoute>}
           />
           <Route
             path="/fournisseurs/:id/api"

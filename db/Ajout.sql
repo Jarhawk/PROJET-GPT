@@ -43,7 +43,14 @@ alter table if exists mamas
 alter table if exists fournisseurs
   add column if not exists ville text,
   add column if not exists tel text,
+  add column if not exists email text,
   add column if not exists contact text;
+alter table if exists fournisseurs enable row level security;
+alter table if exists fournisseurs force row level security;
+drop policy if exists fournisseurs_all on fournisseurs;
+create policy fournisseurs_all on fournisseurs
+  for all using (mama_id = (select mama_id FROM utilisateurs WHERE auth_id = auth.uid()))
+  with check (mama_id = (select mama_id FROM utilisateurs WHERE auth_id = auth.uid()));
 
 -- Table feedback : alignement avec les besoins du front
 alter table if exists feedback
@@ -310,6 +317,20 @@ alter table if exists fournisseur_produits enable row level security;
 alter table if exists fournisseur_produits force row level security;
 drop policy if exists fournisseur_produits_all on fournisseur_produits;
 create policy fournisseur_produits_all on fournisseur_produits
+  for all using (mama_id = (select mama_id FROM utilisateurs WHERE auth_id = auth.uid()))
+  with check (mama_id = (select mama_id FROM utilisateurs WHERE auth_id = auth.uid()));
+
+alter table if exists factures enable row level security;
+alter table if exists factures force row level security;
+drop policy if exists factures_all on factures;
+create policy factures_all on factures
+  for all using (mama_id = (select mama_id FROM utilisateurs WHERE auth_id = auth.uid()))
+  with check (mama_id = (select mama_id FROM utilisateurs WHERE auth_id = auth.uid()));
+
+alter table if exists facture_lignes enable row level security;
+alter table if exists facture_lignes force row level security;
+drop policy if exists facture_lignes_all on facture_lignes;
+create policy facture_lignes_all on facture_lignes
   for all using (mama_id = (select mama_id FROM utilisateurs WHERE auth_id = auth.uid()))
   with check (mama_id = (select mama_id FROM utilisateurs WHERE auth_id = auth.uid()));
 

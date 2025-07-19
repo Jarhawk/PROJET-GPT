@@ -2,6 +2,7 @@
 import { Navigate, useLocation } from "react-router-dom";
 import useAuth from "@/hooks/useAuth";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import useConsentements from "@/hooks/useConsentements";
 
 export default function ProtectedRoute({ children, accessKey }) {
   const {
@@ -14,6 +15,11 @@ export default function ProtectedRoute({ children, accessKey }) {
     isAuthenticated,
     error,
   } = useAuth();
+  const {
+    consentements,
+    loaded: consentLoaded,
+    fetchConsentements,
+  } = useConsentements();
   const location = useLocation();
   if (import.meta.env.DEV) {
     console.log("ProtectedRoute", {
@@ -27,6 +33,10 @@ export default function ProtectedRoute({ children, accessKey }) {
   if (error) {
     console.error("Auth error:", error);
     return <div className="text-red-500 p-4">{error}</div>;
+  }
+
+  if (userData && !consentLoaded) {
+    fetchConsentements();
   }
 
   if (loading || access_rights === null)
@@ -44,6 +54,14 @@ export default function ProtectedRoute({ children, accessKey }) {
     if (location.pathname !== "/unauthorized")
       return <Navigate to="/unauthorized" replace />;
     return null;
+  }
+
+  if (
+    consentLoaded &&
+    consentements.length === 0 &&
+    location.pathname !== "/consentements"
+  ) {
+    return <Navigate to="/consentements" replace />;
   }
 
   if ((userData.role == null || userData.mama_id == null) &&

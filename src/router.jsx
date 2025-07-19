@@ -76,6 +76,7 @@ const Consolidation = lazy(() => import("@/pages/Consolidation.jsx"));
 const CreateMama = lazy(() => import("@/pages/auth/CreateMama.jsx"));
 const Feedback = lazy(() => import("@/pages/Feedback.jsx"));
 const AuditTrail = lazy(() => import("@/pages/AuditTrail.jsx"));
+const Consentements = lazy(() => import("@/pages/Consentements.jsx"));
 const Requisitions = lazy(() => import("@/pages/requisitions/Requisitions.jsx"));
 const RequisitionForm = lazy(() => import("@/pages/requisitions/RequisitionForm.jsx"));
 const RequisitionDetail = lazy(() => import("@/pages/requisitions/RequisitionDetail.jsx"));
@@ -368,6 +369,10 @@ export default function Router() {
           <Route
             path="/parametrage/access"
             element={<ProtectedRoute accessKey="access"><AccessRights /></ProtectedRoute>}
+          />
+          <Route
+            path="/consentements"
+            element={<ProtectedRoute accessKey="parametrage"><Consentements /></ProtectedRoute>}
           />
           <Route
             path="/aide"

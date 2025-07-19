@@ -602,3 +602,20 @@ join factures f on f.id = fl.facture_id
 where f.actif = true
   and fl.actif = true
 group by f.mama_id, fl.produit_id, to_char(date_trunc('month', f.date_facture), 'YYYY-MM');
+
+-- Table consentements_utilisateur pour RGPD
+create table if not exists consentements_utilisateur (
+  id uuid primary key default gen_random_uuid(),
+  utilisateur_id uuid references utilisateurs(id),
+  mama_id uuid references mamas(id),
+  type_consentement text,
+  donne boolean,
+  date_consentement timestamptz default now()
+);
+
+alter table if exists consentements_utilisateur
+  rename column if exists user_id to utilisateur_id;
+alter table if exists consentements_utilisateur
+  rename column if exists consentement to donne;
+alter table if exists consentements_utilisateur
+  add column if not exists type_consentement text;

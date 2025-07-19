@@ -5,17 +5,17 @@ La table `validation_requests` conserve les actions sensibles à approuver avant
 ```sql
 create table if not exists validation_requests (
   id uuid primary key default gen_random_uuid(),
+  action_type text,
+  table_cible text,
+  element_id uuid,
+  statut text,
+  demandeur_id uuid references utilisateurs(id),
+  valideur_id uuid references utilisateurs(id),
+  commentaire text,
+  date_demande timestamptz default now(),
+  date_validation timestamptz,
   mama_id uuid references mamas(id),
-  user_id uuid references utilisateurs(id),
-  module text,
-  action text,
-  entity_id uuid,
-  status text default 'pending',
-  requested_by uuid references utilisateurs(id),
-  reviewed_by uuid references utilisateurs(id),
-  reviewed_at timestamptz,
   actif boolean default true,
-  created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
 create index if not exists idx_validation_requests_mama_id on validation_requests(mama_id);

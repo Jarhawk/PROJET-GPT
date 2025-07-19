@@ -112,6 +112,21 @@ create trigger if not exists trg_set_updated_at_planning
   before update on planning_previsionnel
   for each row execute procedure set_updated_at();
 
+-- Table validation_requests : suivi des actions à valider
+create table if not exists validation_requests (
+  id uuid primary key default gen_random_uuid(),
+  action_type text,
+  table_cible text,
+  element_id uuid,
+  statut text,
+  demandeur_id uuid references utilisateurs(id),
+  valideur_id uuid references utilisateurs(id),
+  commentaire text,
+  date_demande timestamptz default now(),
+  date_validation timestamptz,
+  mama_id uuid references mamas(id)
+);
+
 -- Table validation_requests : alignement avec le front
 alter table if exists validation_requests
   add column if not exists actif boolean default true,

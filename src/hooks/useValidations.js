@@ -18,7 +18,7 @@ export function useValidations() {
       .select("*")
       .eq("mama_id", mama_id)
       .eq("actif", true)
-      .order("created_at", { ascending: false });
+      .order("date_demande", { ascending: false });
     setLoading(false);
     if (error) {
       setError(error.message || error);
@@ -35,7 +35,7 @@ export function useValidations() {
     setError(null);
     const { error } = await supabase
       .from("validation_requests")
-      .insert([{ ...values, mama_id, requested_by: user.id, actif: true }]);
+      .insert([{ ...values, mama_id, demandeur_id: user.id, actif: true }]);
     setLoading(false);
     if (error) {
       setError(error.message || error);
@@ -44,13 +44,31 @@ export function useValidations() {
     await fetchRequests();
   }
 
+  async function fetchRequestById(id) {
+    if (!mama_id) return null;
+    setLoading(true);
+    setError(null);
+    const { data, error } = await supabase
+      .from("validation_requests")
+      .select("*")
+      .eq("id", id)
+      .eq("mama_id", mama_id)
+      .single();
+    setLoading(false);
+    if (error) {
+      setError(error.message || error);
+      return null;
+    }
+    return data;
+  }
+
   async function updateStatus(id, status) {
     if (!mama_id || !user) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
       .from("validation_requests")
-      .update({ status, reviewed_by: user.id, reviewed_at: new Date().toISOString() })
+      .update({ statut: status, valideur_id: user.id, date_validation: new Date().toISOString() })
       .eq("id", id)
       .eq("mama_id", mama_id)
       .eq("actif", true);
@@ -62,5 +80,5 @@ export function useValidations() {
     await fetchRequests();
   }
 
-  return { items, loading, error, fetchRequests, addRequest, updateStatus };
+  return { items, loading, error, fetchRequests, fetchRequestById, addRequest, updateStatus };
 }

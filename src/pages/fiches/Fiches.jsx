@@ -1,5 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
+import { Navigate } from "react-router-dom";
 import { useFiches } from "@/hooks/useFiches";
 import { useAuth } from "@/context/AuthContext";
 import FicheForm from "./FicheForm.jsx";
@@ -22,19 +23,20 @@ export default function Fiches() {
     exportFichesToExcel,
     exportFichesToPDF,
   } = useFiches();
-  const { mama_id, loading: authLoading } = useAuth();
+  const { mama_id, loading: authLoading, access_rights } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [sortBy, setSortBy] = useState("nom");
 
   // Chargement
   useEffect(() => {
     if (!authLoading && mama_id) {
-      getFiches({ search, page, limit: PAGE_SIZE });
+      getFiches({ search, page, limit: PAGE_SIZE, sortBy });
     }
-  }, [authLoading, mama_id, search, page, getFiches]);
+  }, [authLoading, mama_id, search, page, sortBy, getFiches]);
 
   const exportExcel = () => exportFichesToExcel();
   const exportPdf = () => exportFichesToPDF();
@@ -42,6 +44,10 @@ export default function Fiches() {
   const fichesFiltres = fiches;
   if (authLoading || loading) {
     return <LoadingSpinner message="Chargement..." />;
+  }
+
+  if (!access_rights?.fiches_techniques?.peut_voir) {
+    return <Navigate to="/unauthorized" replace />;
   }
 
 
@@ -57,6 +63,14 @@ export default function Fiches() {
           className="input"
           placeholder="Recherche fiche"
         />
+        <select
+          className="input"
+          value={sortBy}
+          onChange={e => setSortBy(e.target.value)}
+        >
+          <option value="nom">Tri: Nom</option>
+          <option value="cout_par_portion">Tri: Coût/portion</option>
+        </select>
         {/* Ajout d’un filtre famille si besoin */}
         <Button onClick={() => { setSelected(null); setShowForm(true); }}>
           Ajouter une fiche

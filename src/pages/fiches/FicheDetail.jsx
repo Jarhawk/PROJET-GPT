@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Navigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
@@ -13,6 +14,7 @@ import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from "rec
 export default function FicheDetail({ fiche: ficheProp, onClose }) {
   const { id: routeId } = useParams();
   const { getFicheById } = useFiches();
+  const { access_rights } = useAuth();
   const [fiche, setFiche] = useState(ficheProp || null);
   const { history, fetchFicheCoutHistory } = useFicheCoutHistory();
   const [simPrix, setSimPrix] = useState(null);
@@ -32,6 +34,10 @@ export default function FicheDetail({ fiche: ficheProp, onClose }) {
   }, [fiche?.id, fetchFicheCoutHistory, fiche?.prix_vente]);
 
   if (!fiche) return <LoadingSpinner message="Chargement..." />;
+
+  if (!access_rights?.fiches_techniques?.peut_voir) {
+    return <Navigate to="/unauthorized" replace />;
+  }
 
   function exportExcel() {
     const rows = fiche.lignes?.map(l => ({

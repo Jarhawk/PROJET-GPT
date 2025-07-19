@@ -14,16 +14,17 @@ export function useFiches() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Liste paginée des fiches
-  async function getFiches({ search = "", actif = null, page = 1, limit = 20 } = {}) {
+  // Liste paginée des fiches techniques
+  async function getFiches({ search = "", actif = null, page = 1, limit = 20, sortBy = "nom", asc = true } = {}) {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
+    const sortField = ["nom", "cout_par_portion"].includes(sortBy) ? sortBy : "nom";
     let query = supabase
-      .from("fiches")
+      .from("fiches_techniques")
       .select("*, famille:familles(id, nom), lignes:fiche_lignes(id)", { count: "exact" })
       .eq("mama_id", mama_id)
-      .order("nom", { ascending: true })
+      .order(sortField, { ascending: asc })
       .range((page - 1) * limit, page * limit - 1);
     if (search) query = query.ilike("nom", `%${search}%`);
     if (typeof actif === "boolean") query = query.eq("actif", actif);
@@ -40,7 +41,7 @@ export function useFiches() {
     if (!id || !mama_id) return null;
     setLoading(true);
     const { data, error } = await supabase
-      .from("fiches")
+      .from("fiches_techniques")
       .select(
         "*, famille:familles(id, nom), lignes:fiche_lignes(*, produit:produits(id, nom, unite:unites(nom), pmp))"
       )
@@ -58,7 +59,7 @@ export function useFiches() {
     setLoading(true);
     setError(null);
     const { data, error: insertError } = await supabase
-      .from("fiches")
+      .from("fiches_techniques")
       .insert([{ ...fiche, mama_id }])
       .select("id")
       .single();
@@ -88,7 +89,7 @@ export function useFiches() {
     setLoading(true);
     setError(null);
     const { error: updateError } = await supabase
-      .from("fiches")
+      .from("fiches_techniques")
       .update(fiche)
       .eq("id", id)
       .eq("mama_id", mama_id);
@@ -127,7 +128,7 @@ export function useFiches() {
     setLoading(true);
     setError(null);
     const { error: deleteError } = await supabase
-      .from("fiches")
+      .from("fiches_techniques")
       .update({ actif: false })
       .eq("id", id)
       .eq("mama_id", mama_id);

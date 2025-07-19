@@ -11,6 +11,8 @@ export default function Sidebar() {
   const showAll = role === "superadmin";
   const rights = Array.isArray(access_rights) ? access_rights : [];
   const has = (key) => showAll || rights.includes(key);
+  const canAnalyse =
+    showAll || rights.includes("analyse") || access_rights?.analyse?.peut_voir;
 
   return (
     <aside className="w-64 bg-glass border border-white/10 backdrop-blur-xl text-white p-4 h-screen shadow-md text-shadow">
@@ -61,16 +63,16 @@ export default function Sidebar() {
           </details>
         )}
 
-        {(has("documents") || has("analyse") || has("menu_engineering")) && (
+        {(has("documents") || canAnalyse || has("menu_engineering")) && (
           <details open={pathname.startsWith("/documents") || pathname.startsWith("/analyse") || pathname.startsWith("/engineering") || pathname.startsWith("/menu-engineering")}>
             <summary className="cursor-pointer">Documents / Analyse</summary>
             <div className="ml-4 flex flex-col gap-1 mt-1">
               {has("documents") && <Link to="/documents">Documents</Link>}
-              {has("analyse") && <Link to="/analyse">Analyse</Link>}
+              {canAnalyse && <Link to="/analyse">Analyse</Link>}
               {has("menu_engineering") && (
                 <Link to="/menu-engineering">Menu Engineering</Link>
               )}
-              {has("analyse") && <Link to="/engineering">Engineering</Link>}
+              {canAnalyse && <Link to="/engineering">Engineering</Link>}
             </div>
           </details>
         )}

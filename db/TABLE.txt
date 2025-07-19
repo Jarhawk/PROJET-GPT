@@ -528,6 +528,10 @@
 | public       | v_ecarts_inventaire                      | stock_reel                | numeric                  | YES         | null               |
 | public       | v_ecarts_inventaire                      | ecart                     | numeric                  | YES         | null               |
 | public       | v_ecarts_inventaire                      | motif                     | text                     | YES         | null               |
+| public       | v_evolution_achats                       | mama_id          | uuid                     | YES         | null               |
+| public       | v_evolution_achats                       | produit_id       | uuid                     | YES         | null               |
+| public       | v_evolution_achats                       | mois             | text                     | YES         | null               |
+| public       | v_evolution_achats                       | montant          | numeric                  | YES         | null               |
 | public       | v_fournisseurs_inactifs                  | mama_id                   | uuid                     | YES         | null               |
 | public       | v_fournisseurs_inactifs                  | fournisseur_id            | uuid                     | YES         | null               |
 | public       | v_fournisseurs_inactifs                  | nom                       | text                     | YES         | null               |
@@ -1282,3 +1286,11 @@ END;
 | taches              | trg_set_updated_at_taches              | BEFORE        | UPDATE             | EXECUTE FUNCTION set_updated_at()             |
 | ventes_fiches_carte | trg_set_updated_at_ventes_fiches_carte | BEFORE        | UPDATE             | EXECUTE FUNCTION set_updated_at()             |
 
+| v_evolution_achats                      |  SELECT f.mama_id,
+    fl.produit_id,
+    to_char(date_trunc('month', f.date_facture), 'YYYY-MM') AS mois,
+    sum(fl.prix_unitaire * fl.quantite) AS montant
+   FROM (facture_lignes fl
+     JOIN factures f ON ((fl.facture_id = f.id)))
+  WHERE ((fl.actif = true) AND (f.actif = true))
+  GROUP BY f.mama_id, fl.produit_id, to_char(date_trunc('month', f.date_facture), 'YYYY-MM');

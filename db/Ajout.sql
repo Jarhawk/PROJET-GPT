@@ -296,3 +296,44 @@ create policy promotion_produits_all on promotion_produits
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
 
+-- Alignement module Produits
+alter table if exists produits
+  add column if not exists dernier_prix numeric;
+alter table if exists produits enable row level security;
+alter table if exists produits force row level security;
+drop policy if exists produits_all on produits;
+create policy produits_all on produits
+  for all using (mama_id = (select mama_id FROM utilisateurs WHERE auth_id = auth.uid()))
+  with check (mama_id = (select mama_id FROM utilisateurs WHERE auth_id = auth.uid()));
+
+alter table if exists fournisseur_produits enable row level security;
+alter table if exists fournisseur_produits force row level security;
+drop policy if exists fournisseur_produits_all on fournisseur_produits;
+create policy fournisseur_produits_all on fournisseur_produits
+  for all using (mama_id = (select mama_id FROM utilisateurs WHERE auth_id = auth.uid()))
+  with check (mama_id = (select mama_id FROM utilisateurs WHERE auth_id = auth.uid()));
+
+-- Table achats pour historique des prix
+create table if not exists achats (
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid references mamas(id),
+  produit_id uuid references produits(id),
+  supplier_id uuid references fournisseurs(id),
+  prix numeric,
+  quantite numeric,
+  date_achat date,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+create index if not exists idx_achats_mama_id on achats(mama_id);
+create index if not exists idx_achats_date on achats(date_achat);
+create trigger if not exists trg_set_updated_at_achats
+  before update on achats
+  for each row execute procedure set_updated_at();
+alter table if exists achats enable row level security;
+alter table if exists achats force row level security;
+drop policy if exists achats_all on achats;
+create policy achats_all on achats
+  for all using (mama_id = (select mama_id FROM utilisateurs WHERE auth_id = auth.uid()))
+  with check (mama_id = (select mama_id FROM utilisateurs WHERE auth_id = auth.uid()));
+

@@ -106,7 +106,7 @@ export default function Sidebar() {
       items: [
         { module: "taches", to: "/taches", label: "Tâches", icon: <CheckSquare size={16} /> },
         { module: "alertes", to: "/taches/alertes", label: "Alertes", icon: <ClipboardList size={16} /> },
-        { module: "promotions", to: "/promotions", label: "Promotions", icon: <Gift size={16} /> },
+        { module: "produits", to: "/promotions", label: "Promotions", icon: <Gift size={16} /> },
       ],
     },
     {

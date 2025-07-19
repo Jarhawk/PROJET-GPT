@@ -249,3 +249,50 @@ from fiches_techniques f
 left join ventes v on v.fiche_id = f.id and v.mama_id = f.mama_id
 left join totals t on t.mama_id = f.mama_id
 where f.actif = true;
+
+-- Tables promotions et promotion_produits pour le module Promotions
+create table if not exists promotions (
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid references mamas(id),
+  nom text,
+  description text,
+  date_debut date,
+  date_fin date,
+  actif boolean default true,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+create index if not exists idx_promotions_mama_id on promotions(mama_id);
+create index if not exists idx_promotions_created_at on promotions(created_at);
+create trigger if not exists trg_set_updated_at_promotions
+  before update on promotions
+  for each row execute procedure set_updated_at();
+alter table if exists promotions enable row level security;
+alter table if exists promotions force row level security;
+drop policy if exists promotions_all on promotions;
+create policy promotions_all on promotions
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+
+create table if not exists promotion_produits (
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid references mamas(id),
+  promotion_id uuid references promotions(id),
+  produit_id uuid references produits(id),
+  discount numeric,
+  prix_promo numeric,
+  actif boolean default true,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+create index if not exists idx_promotion_produits_mama_id on promotion_produits(mama_id);
+create trigger if not exists trg_set_updated_at_promotion_produits
+  before update on promotion_produits
+  for each row execute procedure set_updated_at();
+alter table if exists promotion_produits enable row level security;
+alter table if exists promotion_produits force row level security;
+drop policy if exists promotion_produits_all on promotion_produits;
+create policy promotion_produits_all on promotion_produits
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+

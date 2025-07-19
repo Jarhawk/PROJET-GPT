@@ -77,6 +77,7 @@ const Surcouts = lazy(() => import("@/pages/surcouts/Surcouts.jsx"));
 const TableauxDeBord = lazy(() => import("@/pages/analyse/TableauxDeBord.jsx"));
 const Comparatif = lazy(() => import("@/pages/fournisseurs/comparatif/ComparatifPrix.jsx"));
 const MenuEngineering = lazy(() => import("@/pages/MenuEngineering.jsx"));
+const EngineeringMenu = lazy(() => import("@/pages/EngineeringMenu.jsx"));
 const Logout = lazy(() => import("@/pages/auth/Logout.jsx"));
 
 
@@ -268,6 +269,7 @@ export default function Router() {
             path="/analyse/menu-engineering"
             element={<ProtectedRoute accessKey="analyse"><MenuEngineering /></ProtectedRoute>}
           />
+          <Route path="/engineering" element={<EngineeringMenu />} />
           <Route
             path="/tableaux-de-bord"
             element={<ProtectedRoute accessKey="analyse"><TableauxDeBord /></ProtectedRoute>}

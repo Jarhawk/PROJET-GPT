@@ -376,3 +376,47 @@ create policy achats_all on achats
   for all using (mama_id = (select mama_id FROM utilisateurs WHERE auth_id = auth.uid()))
   with check (mama_id = (select mama_id FROM utilisateurs WHERE auth_id = auth.uid()));
 
+-- Module Bons de Livraison
+alter table if exists bons_livraison
+  add column if not exists date_reception date,
+  add column if not exists commentaire text,
+  add column if not exists actif boolean default true,
+  add column if not exists updated_at timestamptz default now();
+
+update bons_livraison set date_reception = coalesce(date_reception, date_livraison);
+
+create index if not exists idx_bons_livraison_actif on bons_livraison(actif);
+create trigger if not exists trg_set_updated_at_bons_livraison
+  before update on bons_livraison
+  for each row execute procedure set_updated_at();
+alter table if exists bons_livraison enable row level security;
+alter table if exists bons_livraison force row level security;
+drop policy if exists bons_livraison_all on bons_livraison;
+create policy bons_livraison_all on bons_livraison
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+
+create table if not exists bons_livraison_lignes (
+  id uuid primary key default gen_random_uuid(),
+  bon_livraison_id uuid references bons_livraison(id) on delete cascade,
+  produit_id uuid references produits(id),
+  quantite_recue numeric,
+  prix_unitaire numeric,
+  tva numeric,
+  mama_id uuid references mamas(id),
+  actif boolean default true,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+create index if not exists idx_bons_livraison_lignes_bl on bons_livraison_lignes(bon_livraison_id);
+create index if not exists idx_bons_livraison_lignes_mama on bons_livraison_lignes(mama_id);
+create trigger if not exists trg_set_updated_at_bl_lignes
+  before update on bons_livraison_lignes
+  for each row execute procedure set_updated_at();
+alter table if exists bons_livraison_lignes enable row level security;
+alter table if exists bons_livraison_lignes force row level security;
+drop policy if exists bons_livraison_lignes_all on bons_livraison_lignes;
+create policy bons_livraison_lignes_all on bons_livraison_lignes
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+

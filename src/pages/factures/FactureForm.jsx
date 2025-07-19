@@ -92,7 +92,7 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
 
       for (const ligne of lignes) {
         if (ligne.produit_id) {
-          const { produit_nom, ...rest } = ligne;
+          const { produit_nom: _unused, ...rest } = ligne;
           await addLigneFacture(fid, { ...rest, prix: ligne.prix_unitaire, fournisseur_id });
         }
       }

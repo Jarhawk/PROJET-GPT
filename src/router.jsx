@@ -76,6 +76,9 @@ const Requisitions = lazy(() => import("@/pages/requisitions/Requisitions.jsx"))
 const RequisitionForm = lazy(() => import("@/pages/requisitions/RequisitionForm.jsx"));
 const RequisitionDetail = lazy(() => import("@/pages/requisitions/RequisitionDetail.jsx"));
 const Receptions = lazy(() => import("@/pages/receptions/Receptions.jsx"));
+const BonsLivraison = lazy(() => import("@/pages/bons_livraison/BonsLivraison.jsx"));
+const BLCreate = lazy(() => import("@/pages/bons_livraison/BLCreate.jsx"));
+const BLDetail = lazy(() => import("@/pages/bons_livraison/BLDetail.jsx"));
 const Recettes = lazy(() => import("@/pages/recettes/Recettes.jsx"));
 const Surcouts = lazy(() => import("@/pages/surcouts/Surcouts.jsx"));
 const TableauxDeBord = lazy(() => import("@/pages/analyse/TableauxDeBord.jsx"));
@@ -160,6 +163,18 @@ export default function Router() {
           <Route
             path="/receptions"
             element={<ProtectedRoute accessKey="receptions"><Receptions /></ProtectedRoute>}
+          />
+          <Route
+            path="/bons-livraison"
+            element={<ProtectedRoute accessKey="bons_livraison"><BonsLivraison /></ProtectedRoute>}
+          />
+          <Route
+            path="/bons-livraison/nouveau"
+            element={<ProtectedRoute accessKey="bons_livraison"><BLCreate /></ProtectedRoute>}
+          />
+          <Route
+            path="/bons-livraison/:id"
+            element={<ProtectedRoute accessKey="bons_livraison"><BLDetail /></ProtectedRoute>}
           />
           <Route
             path="/fiches"

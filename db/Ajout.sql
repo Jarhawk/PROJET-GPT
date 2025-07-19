@@ -20,8 +20,11 @@ update documents
       titre = coalesce(titre, nom),
       nom = coalesce(nom, split_part(coalesce(url, chemin), '/', -1));
 
--- Table help_articles : aucune modification necessaire, on conserve
--- les colonnes `titre` et `contenu` deja utilisees par le front-end
+-- Table help_articles : ajout des colonnes pour l'aide contextuelle
+alter table if exists help_articles
+  add column if not exists categorie text,
+  add column if not exists lien_page text,
+  add column if not exists mama_id uuid;
 
 -- Table mamas : ajout des colonnes de parametrage utilisees par le front
 alter table if exists mamas

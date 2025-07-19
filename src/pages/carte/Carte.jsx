@@ -1,5 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useCarte } from "@/hooks/useCarte";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -75,10 +76,13 @@ function CarteTable({ type }) {
 }
 
 export default function Carte() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, access_rights } = useAuth();
   const [tab, setTab] = useState("nourriture");
 
   if (!isAuthenticated) return null;
+  if (!access_rights?.menus?.peut_voir) {
+    return <Navigate to="/unauthorized" replace />;
+  }
 
   return (
     <div className="p-6 max-w-4xl mx-auto">

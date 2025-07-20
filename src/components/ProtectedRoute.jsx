@@ -74,14 +74,18 @@ export default function ProtectedRoute({ children, accessKey }) {
 
   // Vérifie les droits si une clé est fournie
   if (accessKey) {
-    const rights = Array.isArray(access_rights) ? access_rights : [];
     const required = Array.isArray(accessKey) ? accessKey : [accessKey];
-    const isAllowed =
+    const hasRight = (key) =>
       isSuperadmin ||
-      rights.includes("parametrage") ||
-      required.some(k => rights.includes(k));
-    if (!isAllowed && location.pathname !== "/unauthorized")
+      (Array.isArray(access_rights) && access_rights.includes(key)) ||
+      access_rights?.[key]?.peut_voir === true;
+
+    const isAllowed =
+      hasRight("parametrage") || required.some((k) => hasRight(k));
+
+    if (!isAllowed && location.pathname !== "/unauthorized") {
       return <Navigate to="/unauthorized" replace />;
+    }
   }
 
   if (import.meta.env.DEV) {

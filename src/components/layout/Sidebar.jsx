@@ -9,10 +9,14 @@ export default function Sidebar() {
 
   if (loading || access_rights === null) return null;
   const showAll = role === "superadmin";
-  const rights = Array.isArray(access_rights) ? access_rights : [];
-  const has = (key) => showAll || rights.includes(key);
-  const canAnalyse =
-    showAll || rights.includes("analyse") || access_rights?.analyse?.peut_voir;
+  const rights = Array.isArray(access_rights)
+    ? access_rights
+    : Object.entries(access_rights || {})
+        .filter(([, v]) => v?.peut_voir)
+        .map(([k]) => k);
+  const has = (key) =>
+    showAll || rights.includes(key) || access_rights?.[key]?.peut_voir === true;
+  const canAnalyse = has("analyse");
 
   return (
     <aside className="w-64 bg-glass border border-white/10 backdrop-blur-xl text-white p-4 h-screen shadow-md text-shadow">

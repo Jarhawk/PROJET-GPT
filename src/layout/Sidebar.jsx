@@ -50,7 +50,9 @@ export default function Sidebar() {
   }
 
   const peutVoir = (module) =>
-    isSuperadmin || access_rights?.[module]?.peut_voir === true;
+    isSuperadmin ||
+    (Array.isArray(access_rights) && access_rights.includes(module)) ||
+    access_rights?.[module]?.peut_voir === true;
 
   const Item = ({ to, icon, label }) => (
     <Link

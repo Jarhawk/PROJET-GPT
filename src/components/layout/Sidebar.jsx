@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { normalizeRights } from "@/lib/access";
 import MamaLogo from "@/components/ui/MamaLogo";
 
 export default function Sidebar() {
@@ -9,13 +10,8 @@ export default function Sidebar() {
 
   if (loading || access_rights === null) return null;
   const showAll = role === "superadmin";
-  const rights = Array.isArray(access_rights)
-    ? access_rights
-    : Object.entries(access_rights || {})
-        .filter(([, v]) => v?.peut_voir)
-        .map(([k]) => k);
-  const has = (key) =>
-    showAll || rights.includes(key) || access_rights?.[key]?.peut_voir === true;
+  const rights = normalizeRights(access_rights);
+  const has = (key) => showAll || rights.includes(key);
   const canAnalyse = has("analyse");
 
   return (

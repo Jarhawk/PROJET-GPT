@@ -3,6 +3,7 @@ import { Outlet, useLocation, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Sidebar from "@/layout/Sidebar";
 import useAuth from "@/hooks/useAuth";
+import useNotifications from "@/hooks/useNotifications";
 import { Badge } from "@/components/ui/badge";
 import { Bell } from "lucide-react";
 import toast from "react-hot-toast";
@@ -26,19 +27,8 @@ export default function Layout() {
     loading,
     logout,
   } = useAuth();
-  const placeholder = () => ({
-    fetchUnreadCount: async () => 0,
-    subscribeToNotifications: () => () => {},
-  });
-  const [useNotif, setUseNotif] = useState(() => placeholder);
-  const { fetchUnreadCount, subscribeToNotifications } = useNotif();
+  const { fetchUnreadCount, subscribeToNotifications } = useNotifications();
   const [unread, setUnread] = useState(0);
-
-  useEffect(() => {
-    import("@/hooks/useNotifications").then((mod) => {
-      setUseNotif(() => mod.default);
-    });
-  }, []);
 
   useEffect(() => {
     fetchUnreadCount().then(setUnread);

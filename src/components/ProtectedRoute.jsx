@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { Navigate, useLocation } from "react-router-dom";
 import useAuth from "@/hooks/useAuth";
+import { normalizeRights } from "@/lib/access";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import useConsentements from "@/hooks/useConsentements";
 
@@ -75,13 +76,10 @@ export default function ProtectedRoute({ children, accessKey }) {
   // Vérifie les droits si une clé est fournie
   if (accessKey) {
     const required = Array.isArray(accessKey) ? accessKey : [accessKey];
-    const hasRight = (key) =>
-      isSuperadmin ||
-      (Array.isArray(access_rights) && access_rights.includes(key)) ||
-      access_rights?.[key]?.peut_voir === true;
+    const rights = normalizeRights(access_rights);
+    const hasRight = (key) => isSuperadmin || rights.includes(key);
 
-    const isAllowed =
-      hasRight("parametrage") || required.some((k) => hasRight(k));
+    const isAllowed = hasRight("parametrage") || required.some((k) => hasRight(k));
 
     if (!isAllowed && location.pathname !== "/unauthorized") {
       return <Navigate to="/unauthorized" replace />;

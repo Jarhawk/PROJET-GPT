@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { login as loginUser } from "@/lib/loginUser";
+import { normalizeRights } from "@/lib/access";
 import toast from "react-hot-toast";
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -52,12 +53,15 @@ export function AuthProvider({ children }) {
 
     lastUserIdRef.current = userId;
     setError(null);
+    const rawRights = data.access_rights;
+    const access_rights = normalizeRights(rawRights);
     setUserData({
       ...data,
       auth_id: userId,
       user_id: userId,
       role: data.role?.nom ?? data.role,
       email,
+      access_rights,
     });
     if (!data.mama_id) console.warn("missing mama_id for user", userId);
     fetchingRef.current = false;
@@ -152,6 +156,12 @@ export function AuthProvider({ children }) {
     navigate("/login");
   };
 
+  const hasAccess = (key) => {
+    if (!key) return false;
+    if (userData?.role === "superadmin") return true;
+    return normalizeRights(userData?.access_rights).includes(key);
+  };
+
   const value = {
     userData,
     /** Authenticated user object from Supabase */
@@ -172,6 +182,7 @@ export function AuthProvider({ children }) {
     email: userData?.email,
     actif: userData?.actif,
     access_rights: userData?.access_rights,
+    hasAccess,
     login,
     signup,
     logout,

@@ -106,6 +106,13 @@ export function AuthProvider({ children }) {
     });
   }, [session]);
 
+  useEffect(() => {
+    if (!userData) return;
+    if (userData.actif === false && pathname !== "/blocked") {
+      navigate("/blocked");
+    }
+  }, [userData, pathname, navigate]);
+
   const login = async ({ email, password }) => {
     const { data, error } = await loginUser(email, password);
     if (error) {
@@ -187,7 +194,7 @@ export function AuthProvider({ children }) {
     mama_id: userData?.mama_id,
     email: userData?.email,
     actif: userData?.actif,
-    access_rights: userData?.access_rights,
+    access_rights: userData ? normalizeRights(userData.access_rights) : [],
     hasAccess,
     login,
     signup,

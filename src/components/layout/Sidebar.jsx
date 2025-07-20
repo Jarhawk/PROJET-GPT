@@ -2,6 +2,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { normalizeRights } from "@/lib/access";
+import { hasAccess } from "@/lib/utils";
 import MamaLogo from "@/components/ui/MamaLogo";
 
 export default function Sidebar() {
@@ -11,7 +12,7 @@ export default function Sidebar() {
   if (loading || access_rights === null) return null;
   const showAll = role === "superadmin";
   const rights = normalizeRights(access_rights);
-  const has = (key) => showAll || rights.includes(key);
+  const has = (key) => showAll || hasAccess(key, rights);
   const canAnalyse = has("analyse");
 
   return (

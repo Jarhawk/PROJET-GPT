@@ -612,6 +612,66 @@ where f.actif = true
   and fl.actif = true
 group by f.mama_id, fl.produit_id, to_char(date_trunc('month', f.date_facture), 'YYYY-MM');
 
+-- Recommandations : produits en stock mort
+create or replace view v_reco_stockmort as
+select p.mama_id,
+       p.id as produit_id,
+       p.nom,
+       coalesce(date_part('day', now() - max(sm.date)), 9999) as jours_inactif
+from produits p
+left join stock_mouvements sm on sm.produit_id = p.id
+  and sm.mama_id = p.mama_id and sm.actif is true
+where p.mama_id = current_user_mama_id()
+group by p.mama_id, p.id, p.nom;
+
+-- Recommandations : surcoût produits
+create or replace view v_reco_surcout as
+with prix as (
+    select fp.mama_id,
+           fp.produit_id,
+           fp.prix_achat,
+           row_number() over (partition by fp.produit_id order by fp.date_livraison desc) rn
+    from fournisseur_produits fp
+    where fp.actif is true
+      and fp.mama_id = current_user_mama_id()
+)
+select p.mama_id,
+       p.id as produit_id,
+       p.nom,
+       case when prev.prix_achat is null then null
+            else round(100 * (last.prix_achat - prev.prix_achat) / prev.prix_achat, 2)
+       end as variation_pct
+from produits p
+join prix last on last.produit_id = p.id and last.rn = 1
+left join prix prev on prev.produit_id = p.id and prev.rn = 2
+where p.mama_id = current_user_mama_id();
+
+-- Tendance prix par produit
+create or replace view v_tendance_prix_produit as
+select f.mama_id,
+       fl.produit_id,
+       to_char(date_trunc('month', f.date_facture),'YYYY-MM') as mois,
+       avg(fl.prix_unitaire) as prix_moyen
+from factures f
+join facture_lignes fl on fl.facture_id = f.id
+where f.actif = true
+  and fl.actif = true
+  and f.mama_id = current_user_mama_id()
+group by f.mama_id, fl.produit_id, to_char(date_trunc('month', f.date_facture),'YYYY-MM');
+
+-- Agrégation mensuelle par centre de coût
+create or replace view v_cost_center_monthly as
+select mc.mama_id,
+       cc.nom,
+       to_char(date_trunc('month', mc.created_at),'YYYY-MM') as mois,
+       sum(coalesce(mc.valeur,0)) as montant
+from mouvements_centres_cout mc
+join centres_de_cout cc on cc.id = mc.centre_cout_id
+where mc.actif = true
+  and cc.actif = true
+  and mc.mama_id = current_user_mama_id()
+group by mc.mama_id, cc.nom, to_char(date_trunc('month', mc.created_at),'YYYY-MM');
+
 -- Table consentements_utilisateur pour RGPD
 create table if not exists consentements_utilisateur (
   id uuid primary key default gen_random_uuid(),

@@ -87,16 +87,16 @@ export function useStock() {
 
   // ----- New helpers for stock module -----
   const getStockTheorique = useCallback(
-      async (produit_id) => {
-        if (!mama_id || !produit_id) return 0;
-        const { data, error } = await supabase
-          .from("produits")
-          .select("stock_theorique")
-          .eq("mama_id", mama_id)
-          .eq("id", produit_id)
-          .single();
+    async (produit_id) => {
+      if (!mama_id || !produit_id) return 0;
+      const { data, error } = await supabase
+        .from("v_stocks")
+        .select("stock")
+        .eq("mama_id", mama_id)
+        .eq("produit_id", produit_id)
+        .single();
       if (error) return 0;
-      return data?.stock_theorique ?? 0;
+      return data?.stock ?? 0;
     },
     [mama_id]
   );

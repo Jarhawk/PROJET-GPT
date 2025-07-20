@@ -28,7 +28,9 @@ test('fetchProduits filters by family and search', async () => {
     await result.current.fetchProduits({ famille: 'Viande', search: 'boeuf' });
   });
   expect(fromMock).toHaveBeenCalledWith('v_produits_dernier_prix');
-  expect(selectMock).toHaveBeenCalledWith('id, nom, unite, pmp, famille, stock_theorique');
+  expect(fromMock).toHaveBeenCalledWith('v_pmp');
+  expect(fromMock).toHaveBeenCalledWith('v_stocks');
+  expect(selectMock).toHaveBeenCalledWith('id, nom, unite, famille');
   expect(eqMock).toHaveBeenCalledWith('mama_id', 'm1');
   expect(eqMock).toHaveBeenCalledWith('actif', true);
   expect(ilikeMock).toHaveBeenCalledWith('famille', '%Viande%');

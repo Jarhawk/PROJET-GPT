@@ -75,7 +75,7 @@ export default function Transferts() {
   const filtered = transferts
     .map((t) => {
       const prod = produits.find((p) => p.id === t.produit_id) || {};
-      const prix = prod.pmp || prod.dernier_prix || 0;
+      const prix = prod.pmp || 0;
       const cout = Math.round(t.quantite * prix * 100) / 100;
       return { ...t, nom: prod.nom || "-", prix, cout };
     })

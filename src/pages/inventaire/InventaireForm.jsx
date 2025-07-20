@@ -37,7 +37,7 @@ export default function InventaireForm() {
 
   const getProduct = id => products.find(p => p.id === id) || {};
   const getTheo = id => Number(getProduct(id).stock_theorique || 0);
-  const getPrice = id => Number(getProduct(id).pmp || getProduct(id).dernier_prix || 0);
+  const getPrice = id => Number(getProduct(id).pmp || 0);
 
   const totalValeur = lignes.reduce((s, l) => s + Number(l.quantite || 0) * getPrice(l.produit_id), 0);
   const totalEcart = lignes.reduce((s, l) => s + (Number(l.quantite || 0) - getTheo(l.produit_id)) * getPrice(l.produit_id), 0);

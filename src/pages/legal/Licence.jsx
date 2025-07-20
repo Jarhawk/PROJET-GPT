@@ -1,10 +1,10 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
+import LegalLayout from "@/layout/LegalLayout";
 
 export default function Licence() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center text-white p-8">
+    <LegalLayout title="Licence" description="Informations sur la licence MamaStock">
       <h1 className="text-3xl font-bold mb-4">Licence et abonnement</h1>
       <p className="mb-4 max-w-xl text-center">
         MamaStock est proposé sous forme d'abonnement SaaS. Chaque licence donne
@@ -22,9 +22,6 @@ export default function Licence() {
       >
         Retour à l'accueil
       </Link>
-      <div className="mt-auto w-full">
-        <Footer />
-      </div>
-    </div>
+    </LegalLayout>
   );
 }

@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
+import LegalLayout from "@/layout/LegalLayout";
 
 export default function MentionsLegales() {
   const [params] = useSearchParams();
@@ -10,20 +11,26 @@ export default function MentionsLegales() {
 
   useEffect(() => {
     async function fetchText() {
-      if (!mamaId) return;
-      const { data } = await supabase
-        .from("mamas")
-        .select("mentions_legales")
-        .eq("id", mamaId)
-        .single();
-      setText(data?.mentions_legales || "");
+      if (mamaId) {
+        const { data } = await supabase
+          .from("mamas")
+          .select("mentions_legales")
+          .eq("id", mamaId)
+          .single();
+        if (data?.mentions_legales) {
+          setText(data.mentions_legales);
+          return;
+        }
+      }
+      const res = await fetch("/legal/mentions_legales.md");
+      setText(await res.text());
     }
     fetchText();
   }, [mamaId]);
 
   return (
-    <div className="p-8 max-w-3xl mx-auto prose">
-      <div dangerouslySetInnerHTML={{ __html: text }} />
-    </div>
+    <LegalLayout title="Mentions légales" description="Informations légales MamaStock">
+      <div className="p-8 max-w-3xl mx-auto prose prose-invert whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: text }} />
+    </LegalLayout>
   );
 }

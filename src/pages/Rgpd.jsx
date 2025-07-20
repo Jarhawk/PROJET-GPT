@@ -2,24 +2,21 @@
 import { Link } from "react-router-dom";
 import { motion as Motion } from "framer-motion";
 import GlassCard from "@/components/ui/GlassCard";
-import Footer from "@/components/Footer";
 import ExportUserData from "@/pages/parametrage/ExportUserData";
 import DeleteAccountButton from "@/components/DeleteAccountButton";
-import {
-  LiquidBackground,
-  WavesBackground,
-  MouseLight,
-  TouchLight,
-} from "@/components/LiquidBackground";
+import LegalLayout from "@/layout/LegalLayout";
 
 export default function Rgpd() {
   return (
-    <div className="relative flex flex-col min-h-screen text-white overflow-hidden">
-      <LiquidBackground showParticles />
-      <WavesBackground className="opacity-40" />
-      <MouseLight />
-      <TouchLight />
-      <div className="flex-grow flex flex-col items-center px-4 py-16 relative z-10">
+    <LegalLayout title="Données & Confidentialité" description="Informations sur la protection des données personnelles par MamaStock">
+      <Motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-3xl"
+      >
+        <GlassCard className="space-y-6 text-white">
+          <h1 className="text-3xl font-bold text-center">Données &amp; Confidentialité</h1>
         <Motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -97,8 +94,6 @@ export default function Rgpd() {
             </div>
           </GlassCard>
         </Motion.div>
-      </div>
-      <Footer />
-    </div>
+    </LegalLayout>
   );
 }

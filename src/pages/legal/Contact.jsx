@@ -1,10 +1,10 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
+import LegalLayout from "@/layout/LegalLayout";
 
 export default function Contact() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center text-white p-8">
+    <LegalLayout title="Contact" description="Support et assistance MamaStock">
       <h1 className="text-3xl font-bold mb-4">Nous contacter</h1>
       <p className="mb-6 max-w-xl text-center">
         Pour toute question sur l'application ou l'utilisation de vos données, vous pouvez
@@ -18,9 +18,6 @@ export default function Contact() {
       >
         Retour à l'accueil
       </Link>
-      <div className="mt-auto w-full">
-        <Footer />
-      </div>
-    </div>
+    </LegalLayout>
   );
 }

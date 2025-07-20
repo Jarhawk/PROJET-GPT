@@ -8,7 +8,18 @@ export function normalizeRights(rights) {
   return [];
 }
 
-export function hasAccess(rights, key, isSuperadmin = false) {
-  if (!key) return false;
-  return isSuperadmin || normalizeRights(rights).includes(key);
+export function hasAccess(accessRights, module, right = "peut_voir", isSuperadmin = false) {
+  if (!module) return false;
+  if (isSuperadmin) return true;
+  if (!accessRights || typeof accessRights !== "object") return false;
+  const mod = accessRights[module];
+  if (!mod || typeof mod !== "object") return false;
+  return mod[right] === true;
+}
+
+export function getAuthorizedModules(accessRights, right = "peut_voir") {
+  if (!accessRights || typeof accessRights !== "object") return [];
+  return Object.entries(accessRights)
+    .filter(([, v]) => v && v[right] === true)
+    .map(([k]) => k);
 }

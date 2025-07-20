@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { hasAccess } from "@/lib/utils";
+import { hasAccess } from "@/lib/access";
 import LoadingScreen from "@/components/ui/LoadingScreen";
 
 export default function ProtectedRoute({ children, accessKey }) {
@@ -16,7 +16,10 @@ export default function ProtectedRoute({ children, accessKey }) {
       return;
     }
 
-    if (accessKey && !hasAccess(accessKey, userData.access_rights)) {
+    if (
+      accessKey &&
+      !hasAccess(userData.access_rights, accessKey, "peut_voir", userData.role === "superadmin")
+    ) {
       navigate("/unauthorized", { replace: true });
     }
   }, [session, userData, pending, accessKey, navigate]);

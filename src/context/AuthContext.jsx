@@ -3,6 +3,10 @@ import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { login as loginUser } from "@/lib/loginUser";
+import {
+  hasAccess as checkAccess,
+  getAuthorizedModules as listModules,
+} from "@/lib/access";
 import toast from "react-hot-toast";
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -19,15 +23,6 @@ export function AuthProvider({ children }) {
   const fetchingRef = useRef(false);
   const sessionLoadedRef = useRef(false);
 
-  const normalizeRights = (input) => {
-    if (Array.isArray(input)) return input;
-    if (typeof input === "object") {
-      return Object.entries(input)
-        .filter(([, v]) => v === true)
-        .map(([k]) => k);
-    }
-    return [];
-  };
 
   async function fetchUserData(userId, email) {
     if (!userId) {
@@ -67,7 +62,7 @@ export function AuthProvider({ children }) {
       auth_id: userId,
       email,
       role: data.role?.nom ?? data.role,
-      access_rights: normalizeRights(data.access_rights),
+      access_rights: data.access_rights || null,
     });
     if (!data.mama_id) console.warn("missing mama_id for user", userId);
     fetchingRef.current = false;
@@ -93,6 +88,10 @@ export function AuthProvider({ children }) {
   }, []);
 
   useEffect(() => {
+    if (import.meta.env.DEV) console.log("userData", userData);
+  }, [userData]);
+
+  useEffect(() => {
     if (!sessionLoadedRef.current) return;
     if (!session || !session.user) {
       if (!session) console.warn("session is null");
@@ -109,6 +108,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (!userData) return;
     if (userData.actif === false && pathname !== "/blocked") {
+      supabase.auth.signOut().catch(() => {});
       navigate("/blocked");
     }
   }, [userData, pathname, navigate]);
@@ -169,10 +169,20 @@ export function AuthProvider({ children }) {
     navigate("/login");
   };
 
-  const hasAccess = (key) => {
-    if (!key) return false;
-    if (userData?.role === "superadmin") return true;
-    return normalizeRights(userData?.access_rights).includes(key);
+  const hasAccess = (module, droit = "peut_voir") => {
+    return checkAccess(
+      userData?.access_rights,
+      module,
+      droit,
+      userData?.role === "superadmin"
+    );
+  };
+
+  const getAuthorizedModules = (droit = "peut_voir") => {
+    if (userData?.role === "superadmin") {
+      return Object.keys(userData?.access_rights || {});
+    }
+    return listModules(userData?.access_rights, droit);
   };
 
   const value = {
@@ -194,8 +204,9 @@ export function AuthProvider({ children }) {
     mama_id: userData?.mama_id,
     email: userData?.email,
     actif: userData?.actif,
-    access_rights: userData ? normalizeRights(userData.access_rights) : [],
+    access_rights: userData?.access_rights ?? null,
     hasAccess,
+    getAuthorizedModules,
     login,
     signup,
     logout,

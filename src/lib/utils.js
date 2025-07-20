@@ -1,8 +1,6 @@
 export function hasAccess(module, access_rights) {
-  if (!access_rights) return false;
-  if (Array.isArray(access_rights)) return access_rights.includes(module);
-  if (typeof access_rights === "object") {
-    return Boolean(access_rights[module]);
-  }
-  return false;
+  if (!access_rights || typeof access_rights !== "object") return false;
+  const mod = access_rights[module];
+  if (!mod || typeof mod !== "object") return false;
+  return mod.peut_voir === true || mod === true;
 }

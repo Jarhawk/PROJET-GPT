@@ -18,6 +18,8 @@ export default function useAuth() {
     pending: ctx.pending,
     isAuthenticated: ctx.isAuthenticated,
     isSuperadmin: ctx.isSuperadmin,
+    hasAccess: ctx.hasAccess,
+    getAuthorizedModules: ctx.getAuthorizedModules,
     error: ctx.error,
   };
 }

@@ -19,7 +19,7 @@ export default function Login() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  const { session, userData, loading: authLoading } = useAuth();
+  const { session, userData, loading: authLoading, getAuthorizedModules } = useAuth();
 
 
   // Redirection après authentification une fois les données chargées
@@ -33,9 +33,7 @@ export default function Login() {
       navigate("/blocked");
       return;
     }
-    const rights = Array.isArray(userData.access_rights)
-      ? userData.access_rights
-      : [];
+    const rights = getAuthorizedModules();
     if (rights.length === 0 && pathname !== "/unauthorized") {
       navigate("/unauthorized");
       return;

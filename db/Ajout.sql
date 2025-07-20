@@ -1,4 +1,5 @@
 -- Mise à niveau du schéma pour correspondre au front-end
+-- RLS policies use `current_user_mama_id()` for tenant isolation
 
 -- Table documents : ajout des colonnes manquantes
 alter table if exists documents
@@ -57,8 +58,8 @@ alter table if exists fournisseurs enable row level security;
 alter table if exists fournisseurs force row level security;
 drop policy if exists fournisseurs_all on fournisseurs;
 create policy fournisseurs_all on fournisseurs
-  for all using (mama_id = (select mama_id FROM utilisateurs WHERE auth_id = auth.uid()))
-  with check (mama_id = (select mama_id FROM utilisateurs WHERE auth_id = auth.uid()));
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
 
 -- Table feedback : alignement avec les besoins du front
 alter table if exists feedback
@@ -318,15 +319,15 @@ alter table if exists produits enable row level security;
 alter table if exists produits force row level security;
 drop policy if exists produits_all on produits;
 create policy produits_all on produits
-  for all using (mama_id = (select mama_id FROM utilisateurs WHERE auth_id = auth.uid()))
-  with check (mama_id = (select mama_id FROM utilisateurs WHERE auth_id = auth.uid()));
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
 
 alter table if exists fournisseur_produits enable row level security;
 alter table if exists fournisseur_produits force row level security;
 drop policy if exists fournisseur_produits_all on fournisseur_produits;
 create policy fournisseur_produits_all on fournisseur_produits
-  for all using (mama_id = (select mama_id FROM utilisateurs WHERE auth_id = auth.uid()))
-  with check (mama_id = (select mama_id FROM utilisateurs WHERE auth_id = auth.uid()));
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
 
 -- Alignement tables Factures et lignes
 alter table if exists factures

@@ -11,6 +11,7 @@ export default function SupplierForm({ supplier, onClose, glass }) {
     nom: supplier?.nom || "",
     ville: supplier?.ville || "",
     tel: supplier?.tel || "",
+    contact: supplier?.contact || "",
     email: supplier?.email || "",
     actif: supplier?.actif ?? true,
   });
@@ -26,6 +27,11 @@ export default function SupplierForm({ supplier, onClose, glass }) {
     setLoading(true);
     if (!form.nom) {
       toast.error("Le nom est obligatoire");
+      setLoading(false);
+      return;
+    }
+    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      toast.error("Email invalide");
       setLoading(false);
       return;
     }
@@ -69,7 +75,11 @@ export default function SupplierForm({ supplier, onClose, glass }) {
       </div>
       <div>
         <label>Téléphone</label>
-        <input className="input input-bordered w-full" name="tel" value={form.tel} onChange={handleChange} />
+        <input className="input input-bordered w-full" name="tel" type="tel" value={form.tel} onChange={handleChange} />
+      </div>
+      <div>
+        <label>Contact</label>
+        <input className="input input-bordered w-full" name="contact" value={form.contact} onChange={handleChange} />
       </div>
       <div>
         <label className="flex items-center gap-2">
@@ -83,7 +93,7 @@ export default function SupplierForm({ supplier, onClose, glass }) {
       </div>
       <div className="flex gap-2 justify-end">
         <Button type="button" variant="outline" onClick={onClose} disabled={loading}>Annuler</Button>
-        <Button type="submit" loading={loading} disabled={loading}>{supplier ? "Enregistrer" : "Ajouter"}</Button>
+        <Button type="submit" disabled={loading}>{supplier ? "Enregistrer" : "Ajouter"}</Button>
       </div>
     </Motion.form>
   );

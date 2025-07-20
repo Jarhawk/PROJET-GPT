@@ -1,4 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+/* eslint-env node */
+/* global process */
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl =

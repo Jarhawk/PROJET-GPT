@@ -13,6 +13,7 @@
 - Objectif : afficher la liste des produits stockés avec pagination
 - Fonctions : recherche, filtre famille, filtre actif/inactif, tri par colonnes, import/export Excel, création/duplication de produit
 - Sécurité : supabase policies sur table products (mama_id)
+- Policies produits et fournisseur_produits utilisent `current_user_mama_id()`
 - Tests simulés : duplication via test/Produits.test.jsx
 - Routes : privé /produits et /produits/:id
 - Stats : historique prix via ProduitDetail modal
@@ -41,6 +42,9 @@
 - Sécurité : RLS fournisseurs via mama_id
 - Routes : /fournisseurs et detail
 - Dépendances : hook useFournisseurs
+- Tables : fournisseurs (id, mama_id, nom, ville, tel, email, contact, actif, created_at, updated_at)
+- Ajout.sql ajoute les colonnes ville/tel/email/contact et active RLS fournisseurs_produits
+- TABLE.txt à jour avec les colonnes ville/tel/email/contact
 
 === ✅ MODULE : Factures.jsx ===
 - Route : /factures
@@ -414,6 +418,7 @@ TwoFactorSetup.jsx : configuration de la double authentification
   - StatsFiches.jsx : suivi des fiches techniques et coûts
   - StatsConsolidation.jsx : consolidation multi-sites
   - StatsAdvanced.jsx : analyses personnalisées via options avancées
+  - Anciennes pages admin StatsDashboard et AuditViewer supprimées
 
 === ✅ MODULE : StatsStock.jsx ===
 - Route : /stats/stock
@@ -574,6 +579,7 @@ TwoFactorSetup.jsx : configuration de la double authentification
 - `supabase/config.toml` expose l'API locale sur le port 54321
 - `.github/workflows/ci.yml` exécute lint, tests et e2e sur Node 18
 - `vite.config.js` active le plugin PWA pour générer le service worker
+- `src/lib/supabase.js` déclare les variables Node `process.env` pour ESLint
 
 
 === ✅ FONCTIONNALITÉS TRANSVERSES ===

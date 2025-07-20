@@ -103,6 +103,7 @@ export function useFournisseurs() {
       ville: f.ville,
       tel: f.tel,
       contact: f.contact,
+      email: f.email,
       actif: f.actif,
     }));
     const wb = XLSX.utils.book_new();

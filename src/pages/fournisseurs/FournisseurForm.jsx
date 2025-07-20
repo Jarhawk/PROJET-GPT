@@ -7,6 +7,7 @@ export default function FournisseurForm({ fournisseur = {}, onSubmit, onCancel, 
   const [nom, setNom] = useState(fournisseur.nom || "");
   const [ville, setVille] = useState(fournisseur.ville || "");
   const [tel, setTel] = useState(fournisseur.tel || "");
+  const [email, setEmail] = useState(fournisseur.email || "");
   const [contact, setContact] = useState(fournisseur.contact || "");
   const [actif, setActif] = useState(fournisseur.actif ?? true);
   const [errors, setErrors] = useState({});
@@ -15,6 +16,7 @@ export default function FournisseurForm({ fournisseur = {}, onSubmit, onCancel, 
     setNom(fournisseur.nom || "");
     setVille(fournisseur.ville || "");
     setTel(fournisseur.tel || "");
+    setEmail(fournisseur.email || "");
     setContact(fournisseur.contact || "");
     setActif(fournisseur.actif ?? true);
     setErrors({});
@@ -25,13 +27,13 @@ export default function FournisseurForm({ fournisseur = {}, onSubmit, onCancel, 
     if (saving) return;
     const errs = {};
     if (!nom.trim()) errs.nom = "Nom requis";
-    if (contact && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact)) errs.contact = "Email invalide";
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = "Email invalide";
     setErrors(errs);
     if (Object.keys(errs).length) {
       toast.error("Veuillez corriger les erreurs");
       return;
     }
-    const data = { nom, ville, tel, contact, actif };
+    const data = { nom, ville, tel, email, contact, actif };
     try {
       onSubmit?.(data);
     } catch (err) {
@@ -61,19 +63,29 @@ export default function FournisseurForm({ fournisseur = {}, onSubmit, onCancel, 
       <div>
         <label className="block font-semibold mb-1">Téléphone</label>
         <input
+          type="tel"
           className="input input-bordered w-full"
           value={tel}
           onChange={(e) => setTel(e.target.value)}
         />
       </div>
       <div>
-        <label className="block font-semibold mb-1">Email</label>
+        <label className="block font-semibold mb-1">Contact</label>
         <input
           className="input input-bordered w-full"
           value={contact}
           onChange={(e) => setContact(e.target.value)}
         />
-        {errors.contact && <p className="text-red-600 text-sm mt-1">{errors.contact}</p>}
+      </div>
+      <div>
+        <label className="block font-semibold mb-1">Email</label>
+        <input
+          type="email"
+          className="input input-bordered w-full"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        {errors.email && <p className="text-red-600 text-sm mt-1">{errors.email}</p>}
       </div>
       <label className="flex items-center gap-2">
         <input type="checkbox" checked={actif} onChange={(e) => setActif(e.target.checked)} />

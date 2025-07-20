@@ -42,7 +42,22 @@ export function useProducts() {
     if (typeof actif === "boolean") query = query.eq("actif", actif);
 
     const { data, error, count } = await query;
-    setProducts(Array.isArray(data) ? data : []);
+    const { data: pmpData } = await supabase
+      .from('v_pmp')
+      .select('produit_id, pmp')
+      .eq('mama_id', mama_id);
+    const { data: stockData } = await supabase
+      .from('v_stocks')
+      .select('produit_id, stock')
+      .eq('mama_id', mama_id);
+    const pmpMap = Object.fromEntries((pmpData || []).map(p => [p.produit_id, p.pmp]));
+    const stockMap = Object.fromEntries((stockData || []).map(s => [s.produit_id, s.stock]));
+    const final = (Array.isArray(data) ? data : []).map(p => ({
+      ...p,
+      pmp: pmpMap[p.id] ?? p.pmp,
+      stock_theorique: stockMap[p.id] ?? p.stock_theorique,
+    }));
+    setProducts(final);
     setTotal(count || 0);
     setLoading(false);
     if (error) {

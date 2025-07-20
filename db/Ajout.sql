@@ -464,6 +464,15 @@ join requisitions on requisitions.id = requisition_lignes.requisition_id
 where requisitions.actif is true
 group by produit_id, mama_id;
 
+-- Vue cumulée des stocks théoriques par produit
+create or replace view v_stocks as
+select s.mama_id,
+       s.produit_id,
+       sum(s.quantite) as stock
+from stocks s
+where s.actif is true
+group by s.mama_id, s.produit_id;
+
 -- Module Planning prévisionnel
 create table if not exists planning_previsionnel (
   id uuid primary key default gen_random_uuid(),
@@ -590,7 +599,7 @@ group by p.mama_id, p.id, p.actif;
 create or replace view v_ecarts_inventaire as
 select i.mama_id,
        l.produit_id,
-       i.date as date,
+       i.date_inventaire as date,
        l.zone_id as zone,
        l.quantite_theorique as stock_theorique,
        l.quantite_reelle as stock_reel,

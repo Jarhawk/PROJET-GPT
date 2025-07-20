@@ -17,14 +17,6 @@ export default function Rgpd() {
       >
         <GlassCard className="space-y-6 text-white">
           <h1 className="text-3xl font-bold text-center">Données &amp; Confidentialité</h1>
-        <Motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-3xl"
-        >
-          <GlassCard className="space-y-6 text-white">
-            <h1 className="text-3xl font-bold text-center">Données &amp; Confidentialité</h1>
             <Motion.section
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}

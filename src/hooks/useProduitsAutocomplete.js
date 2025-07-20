@@ -15,7 +15,7 @@ export function useProduitsAutocomplete() {
     setError(null);
     let q = supabase
       .from("v_produits_dernier_prix")
-      .select("id, nom, unite, pmp")
+      .select("id, nom, unite")
       .eq("mama_id", mama_id)
       .eq("actif", true);
     if (query) q = q.ilike("nom", `%${query}%`);
@@ -26,8 +26,17 @@ export function useProduitsAutocomplete() {
       setError(error);
       return [];
     }
-    setResults(Array.isArray(data) ? data : []);
-    return data || [];
+    const { data: pmpData } = await supabase
+      .from('v_pmp')
+      .select('produit_id, pmp')
+      .eq('mama_id', mama_id);
+    const pmpMap = Object.fromEntries((pmpData || []).map(p => [p.produit_id, p.pmp]));
+    const final = (Array.isArray(data) ? data : []).map(p => ({
+      ...p,
+      pmp: pmpMap[p.id] ?? 0,
+    }));
+    setResults(final);
+    return final;
   }, [mama_id]);
 
   return { results, loading, error, searchProduits };

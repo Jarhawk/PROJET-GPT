@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 
-export default function PageMentions() {
+export default function MentionsLegales() {
   const [params] = useSearchParams();
   const [text, setText] = useState("");
   const mamaId = params.get("mama");

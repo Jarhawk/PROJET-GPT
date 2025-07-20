@@ -10,10 +10,10 @@ export default function Footer() {
         <Link to="/rgpd" className="underline hover:text-mamastockGold transition">
           Données &amp; Confidentialité
         </Link>
-        <Link to="/privacy" className="underline hover:text-mamastockGold transition">
+        <Link to="/confidentialite" className="underline hover:text-mamastockGold transition">
           Politique de confidentialité
         </Link>
-        <Link to="/mentions" className="underline hover:text-mamastockGold transition">
+        <Link to="/mentions-legales" className="underline hover:text-mamastockGold transition">
           Mentions légales
         </Link>
         <Link to="/cgu" className="underline hover:text-mamastockGold transition">
@@ -21,6 +21,12 @@ export default function Footer() {
         </Link>
         <Link to="/cgv" className="underline hover:text-mamastockGold transition">
           CGV
+        </Link>
+        <Link to="/contact" className="underline hover:text-mamastockGold transition">
+          Contact
+        </Link>
+        <Link to="/licence" className="underline hover:text-mamastockGold transition">
+          Licence
         </Link>
         <span className="italic opacity-80">
           Simplifiez la gestion, concentrez-vous sur l’essentiel.

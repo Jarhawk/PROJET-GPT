@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { motion as Motion } from "framer-motion";
 import GlassCard from "@/components/ui/GlassCard";
 import Footer from "@/components/Footer";
+import ExportUserData from "@/pages/parametrage/ExportUserData";
+import DeleteAccountButton from "@/components/DeleteAccountButton";
 import {
   LiquidBackground,
   WavesBackground,
@@ -75,10 +77,13 @@ export default function Rgpd() {
                 contactant votre administrateur ou l’équipe MamaStock.
               </p>
               <p>
-                Pour toute question&nbsp;:
-                {' '}
+                Pour toute question&nbsp;:{' '}
                 <a href="mailto:support@mamastock.com" className="underline text-mamastockGold">support@mamastock.com</a>
               </p>
+              <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                <ExportUserData />
+                <DeleteAccountButton />
+              </div>
             </Motion.section>
             <div className="text-center pt-2">
               <Motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>

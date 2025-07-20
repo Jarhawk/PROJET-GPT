@@ -3,7 +3,6 @@ import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { login as loginUser } from "@/lib/loginUser";
-import { normalizeRights } from "@/lib/access";
 import toast from "react-hot-toast";
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -19,6 +18,16 @@ export function AuthProvider({ children }) {
   const lastUserIdRef = useRef(null);
   const fetchingRef = useRef(false);
   const sessionLoadedRef = useRef(false);
+
+  const normalizeRights = (input) => {
+    if (Array.isArray(input)) return input;
+    if (typeof input === "object") {
+      return Object.entries(input)
+        .filter(([, v]) => v === true)
+        .map(([k]) => k);
+    }
+    return [];
+  };
 
   async function fetchUserData(userId, email) {
     if (!userId) {
@@ -53,15 +62,12 @@ export function AuthProvider({ children }) {
 
     lastUserIdRef.current = userId;
     setError(null);
-    const rawRights = data.access_rights;
-    const access_rights = normalizeRights(rawRights);
     setUserData({
       ...data,
       auth_id: userId,
-      user_id: userId,
-      role: data.role?.nom ?? data.role,
       email,
-      access_rights,
+      role: data.role?.nom ?? data.role,
+      access_rights: normalizeRights(data.access_rights),
     });
     if (!data.mama_id) console.warn("missing mama_id for user", userId);
     fetchingRef.current = false;

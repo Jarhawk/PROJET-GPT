@@ -1,69 +1,25 @@
-import { useState } from "react";
-import { getSupabaseClient } from "@/api/shared/supabaseClient.js";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabaseClient";
 import { useAuth } from "@/context/AuthContext";
 
-export function useConsentements() {
-  const { user_id, mama_id } = useAuth();
-  const [consentements, setConsentements] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [loaded, setLoaded] = useState(false);
+export default function useConsentements() {
+  const { userData } = useAuth();
+  const [data, setData] = useState([]);
+  const supabase = createClient();
 
-  async function fetchConsentements() {
-    if (!user_id || !mama_id) return [];
-    setLoading(true);
-    const supabase = getSupabaseClient();
-    const { data, error } = await supabase
-      .from("consentements_utilisateur")
-      .select("*")
-      .eq("utilisateur_id", user_id)
-      .eq("mama_id", mama_id)
-      .order("date_consentement", { ascending: false });
-    setLoading(false);
-    if (error) {
-      setError(error);
-      setLoaded(true);
-      return [];
-    }
-    setConsentements(Array.isArray(data) ? data : []);
-    setLoaded(true);
-    return data || [];
-  }
+  useEffect(() => {
+    if (!supabase || !userData?.mama_id) return;
 
-  async function enregistrerConsentement(type_consentement, donne) {
-    if (!user_id || !mama_id) return { error: "no user" };
-    setLoading(true);
-    const supabase = getSupabaseClient();
-    const { data, error } = await supabase
-      .from("consentements_utilisateur")
-      .insert([
-        {
-          utilisateur_id: user_id,
-          mama_id,
-          type_consentement,
-          donne,
-          date_consentement: new Date().toISOString(),
-        },
-      ])
-      .select()
-      .single();
-    setLoading(false);
-    if (error) {
-      setError(error);
-      return { error };
-    }
-    await fetchConsentements();
-    return { data };
-  }
+    const fetchConsentements = async () => {
+      const { data, error } = await supabase
+        .from("consentements_utilisateur")
+        .select("*")
+        .eq("mama_id", userData.mama_id);
+      if (!error) setData(data);
+    };
 
-  return {
-    consentements,
-    loading,
-    error,
-    loaded,
-    fetchConsentements,
-    enregistrerConsentement,
-  };
+    fetchConsentements();
+  }, [userData]);
+
+  return { data };
 }
-
-export default useConsentements;

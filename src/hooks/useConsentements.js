@@ -19,7 +19,7 @@ export default function useConsentements() {
     };
 
     fetchConsentements();
-  }, [userData]);
+  }, [userData, supabase]);
 
   return { data };
 }

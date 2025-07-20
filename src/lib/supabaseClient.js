@@ -1,13 +1,20 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+let supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+let supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error("Missing Supabase credentials");
+let supabase = null;
+try {
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error("Missing Supabase credentials");
+  }
+  supabase = createSupabaseClient(supabaseUrl, supabaseKey);
+} catch (e) {
+  console.error(e.message || e);
+  supabase = null;
 }
 
-export const supabase = createSupabaseClient(supabaseUrl, supabaseKey);
+export { supabase };
 export function createClient() {
   return supabase;
 }

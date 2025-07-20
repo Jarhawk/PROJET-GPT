@@ -53,10 +53,12 @@ const Onboarding = lazy(() => import("@/pages/public/Onboarding.jsx"));
 const Accueil = lazy(() => import("@/pages/Accueil.jsx"));
 const Signup = lazy(() => import("@/pages/public/Signup.jsx"));
 const Rgpd = lazy(() => import("@/pages/Rgpd.jsx"));
-const PagePrivacy = lazy(() => import("@/pages/public/PagePrivacy.jsx"));
-const PageMentions = lazy(() => import("@/pages/public/PageMentions.jsx"));
-const PageCgu = lazy(() => import("@/pages/public/PageCgu.jsx"));
-const PageCgv = lazy(() => import("@/pages/public/PageCgv.jsx"));
+const Confidentialite = lazy(() => import("@/pages/legal/Confidentialite.jsx"));
+const MentionsLegales = lazy(() => import("@/pages/legal/MentionsLegales.jsx"));
+const Cgu = lazy(() => import("@/pages/legal/Cgu.jsx"));
+const Cgv = lazy(() => import("@/pages/legal/Cgv.jsx"));
+const Contact = lazy(() => import("@/pages/legal/Contact.jsx"));
+const Licence = lazy(() => import("@/pages/legal/Licence.jsx"));
 const AideContextuelle = lazy(() => import("@/pages/AideContextuelle.jsx"));
 const SupervisionGroupe = lazy(() => import("@/pages/supervision/SupervisionGroupe.jsx"));
 const ComparateurFiches = lazy(() => import("@/pages/supervision/ComparateurFiches.jsx"));
@@ -117,10 +119,12 @@ export default function Router() {
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/blocked" element={<Blocked />} />
         <Route path="/rgpd" element={<Rgpd />} />
-        <Route path="/privacy" element={<PagePrivacy />} />
-        <Route path="/mentions" element={<PageMentions />} />
-        <Route path="/cgu" element={<PageCgu />} />
-        <Route path="/cgv" element={<PageCgv />} />
+        <Route path="/confidentialite" element={<Confidentialite />} />
+        <Route path="/mentions-legales" element={<MentionsLegales />} />
+        <Route path="/cgu" element={<Cgu />} />
+        <Route path="/cgv" element={<Cgv />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/licence" element={<Licence />} />
         <Route path="/" element={<Layout />}>
           <Route
             path="dashboard"

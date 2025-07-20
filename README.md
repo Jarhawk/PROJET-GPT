@@ -137,6 +137,9 @@ de nouvelles connexions inutiles.
 Le client Supabase utilisé dans l'application frontend déclenche
 désormais une erreur si ces variables sont absentes afin d'éviter des
 plantages silencieux.
+Pour faciliter le linting côté Node, `src/lib/supabase.js` déclare
+l'environnement Node via `/* eslint-env node */`, donnant accès à
+`process.env`.
 Lorsque la variable `MAMA_ID` est définie, les scripts Node filtrent leurs
 opérations sur cet établissement uniquement.
 Le fichier d'exemple indique également l'URL du projet Supabase et contient
@@ -345,6 +348,12 @@ Task management is documented in [docs/taches.md](docs/taches.md).
 - Columns `total_ht`, `total_tva` and `total_ttc` are computed automatically via triggers
 - Index on `products.code` speeds up lookups by internal product code
 - Index on `fournisseurs.nom` speeds up supplier search queries
+- RLS policies on `produits`, `fournisseur_produits` and `fournisseurs` rely on `current_user_mama_id()` for isolation
+- Supplier form collects a contact name and an email address. Supplier lists,
+  PDF exports and Excel exports all include the columns `ville`, `tel`, `email`
+  and `contact` for coherence with `db/TABLE.txt`.
+- Obsolete admin dashboards `StatsDashboard` and `AuditViewer` were removed as
+  they were no longer routed anywhere.
 - Automatic audit triggers log cost center changes and allocations
 - Cost center allocation modal offers suggestions based on historical data
 - SQL function `suggest_cost_centers` is granted to authenticated users for these recommendations

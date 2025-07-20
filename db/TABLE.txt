@@ -180,6 +180,10 @@
 | public       | fournisseurs                             | id                        | uuid                     | NO          | gen_random_uuid()  |
 | public       | fournisseurs                             | mama_id                   | uuid                     | NO          | null               |
 | public       | fournisseurs                             | nom                       | text                     | NO          | null               |
+| public       | fournisseurs                             | ville                   | text                     | YES         | null               |
+| public       | fournisseurs                             | tel                     | text                     | YES         | null               |
+| public       | fournisseurs                             | email                   | text                     | YES         | null               |
+| public       | fournisseurs                             | contact                 | text                     | YES         | null               |
 | public       | fournisseurs                             | created_at                | timestamp with time zone | YES         | now()              |
 | public       | fournisseurs                             | updated_at                | timestamp with time zone | YES         | now()              |
 | public       | fournisseurs                             | actif                     | boolean                  | YES         | true               |

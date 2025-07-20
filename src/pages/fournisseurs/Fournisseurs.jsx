@@ -52,8 +52,8 @@ export default function Fournisseurs() {
     doc.text("Liste Fournisseurs", 10, 12);
     doc.autoTable({
       startY: 20,
-      head: [["Nom", "Ville", "Téléphone", "Contact"]],
-      body: fournisseurs.map(f => [f.nom, f.ville || "", f.tel || "", f.contact || ""]),
+      head: [["Nom", "Ville", "Téléphone", "Contact", "Email"]],
+      body: fournisseurs.map(f => [f.nom, f.ville || "", f.tel || "", f.contact || "", f.email || ""]),
       styles: { fontSize: 9 },
     });
     doc.save("fournisseurs.pdf");
@@ -171,6 +171,7 @@ export default function Fournisseurs() {
               <th className="py-2 px-3">Ville</th>
               <th className="py-2 px-3">Téléphone</th>
               <th className="py-2 px-3">Contact</th>
+              <th className="py-2 px-3">Email</th>
               <th className="py-2 px-3">Nb Produits</th>
               <th className="py-2 px-3"></th>
               <th className="py-2 px-3"></th>
@@ -190,6 +191,7 @@ export default function Fournisseurs() {
                   <td>{f.ville}</td>
                   <td>{f.tel}</td>
                   <td>{f.contact}</td>
+                  <td>{f.email}</td>
                   <td>{productCounts[f.id] ?? 0}</td>
                   <td>
                     <Button size="sm" variant="outline" onClick={() => setSelected(f.id)}>

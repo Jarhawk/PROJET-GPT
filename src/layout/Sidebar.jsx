@@ -1,7 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { normalizeRights } from "@/lib/access";
 import toast from "react-hot-toast";
 import {
   Boxes,
@@ -40,6 +39,7 @@ export default function Sidebar() {
     logout,
     session,
     isSuperadmin,
+    hasAccess,
   } = useAuth();
   const { pathname } = useLocation();
   if (import.meta.env.DEV) {
@@ -50,8 +50,8 @@ export default function Sidebar() {
     return null;
   }
 
-  const rights = normalizeRights(access_rights);
-  const peutVoir = (module) => isSuperadmin || rights.includes(module);
+  const peutVoir = (module) =>
+    isSuperadmin || hasAccess(module, "peut_voir");
 
   const Item = ({ to, icon, label }) => (
     <Link

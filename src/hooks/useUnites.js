@@ -12,11 +12,12 @@ export function useUnites() {
   const [error, setError] = useState(null);
 
   // 1. Charger toutes les unités (filtrage recherche, batch)
-  async function fetchUnites({ search = "" } = {}) {
+  async function fetchUnites({ search = "", includeInactive = false } = {}) {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
     let query = supabase.from("unites").select("*").eq("mama_id", mama_id);
+    if (!includeInactive) query = query.eq("actif", true);
     if (search) query = query.ilike("nom", `%${search}%`);
     const { data, error } = await query.order("nom", { ascending: true });
     setUnites(Array.isArray(data) ? data : []);
@@ -88,7 +89,7 @@ export function useUnites() {
     setError(null);
     const { error } = await supabase
       .from("unites")
-      .delete()
+      .update({ actif: false })
       .in("id", ids)
       .eq("mama_id", mama_id);
     if (error) setError(error);

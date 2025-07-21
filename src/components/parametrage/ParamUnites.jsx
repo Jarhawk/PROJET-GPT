@@ -21,11 +21,11 @@ export default function ParamUnites() {
 
   const handleEdit = u => { setForm(u); setEditMode(true); };
   const handleDelete = async id => {
-    if (window.confirm("Supprimer l’unité ?")) {
+    if (window.confirm("Désactiver l’unité ?")) {
       try {
         await deleteUnite(id);
         await fetchUnites();
-        toast.success("Unité supprimée.");
+        toast.success("Unité désactivée.");
       } catch (err) {
         console.error("Erreur suppression unité:", err);
         toast.error("Échec suppression");
@@ -104,7 +104,7 @@ export default function ParamUnites() {
                 <td>{u.nom}</td>
                 <td>
                   <Button size="sm" variant="outline" onClick={() => handleEdit(u)}>Modifier</Button>
-                  <Button size="sm" variant="outline" onClick={() => handleDelete(u.id)}>Supprimer</Button>
+                  <Button size="sm" variant="outline" onClick={() => handleDelete(u.id)}>Archiver</Button>
                 </td>
               </tr>
             ))}

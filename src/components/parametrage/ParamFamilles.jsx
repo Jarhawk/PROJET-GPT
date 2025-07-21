@@ -32,11 +32,11 @@ export default function ParamFamilles() {
 
   const handleEdit = f => { setForm(f); setEditMode(true); };
   const handleDelete = async id => {
-    if (window.confirm("Supprimer la famille ?")) {
+    if (window.confirm("Désactiver la famille ?")) {
       try {
         await batchDeleteFamilles([id]);
         await fetchFamilles();
-        toast.success("Famille supprimée.");
+        toast.success("Famille désactivée.");
       } catch (err) {
         console.error("Erreur suppression famille:", err);
         toast.error("Échec suppression");
@@ -121,7 +121,7 @@ export default function ParamFamilles() {
                 <td>{f.nom}</td>
                 <td>
                   <Button size="sm" variant="outline" onClick={() => handleEdit(f)}>Modifier</Button>
-                  <Button size="sm" variant="outline" onClick={() => handleDelete(f.id)}>Supprimer</Button>
+                  <Button size="sm" variant="outline" onClick={() => handleDelete(f.id)}>Archiver</Button>
                 </td>
               </tr>
             ))}

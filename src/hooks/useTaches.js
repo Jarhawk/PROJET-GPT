@@ -21,6 +21,7 @@ export function useTaches() {
     if (filters.statut) query = query.eq("statut", filters.statut);
     if (filters.priorite) query = query.eq("priorite", filters.priorite);
     if (filters.assigne) query = query.contains("assignes", [filters.assigne]);
+    if (filters.utilisateur_id) query = query.eq("utilisateur_id", filters.utilisateur_id);
     if (filters.start) query = query.gte("date_debut", filters.start);
     if (filters.end) query = query.lte("date_echeance", filters.end);
     const { data, error } = await query;
@@ -55,7 +56,11 @@ export function useTaches() {
         date_echeance: computeDue(values),
         mama_id,
         created_by: user_id,
+        utilisateur_id: values.utilisateur_id || user_id,
       };
+      if (!payload.assignes || payload.assignes.length === 0) {
+        payload.assignes = [user_id];
+      }
       const { error } = await supabase.from("taches").insert([payload]);
       setLoading(false);
       if (error) {
@@ -73,6 +78,9 @@ export function useTaches() {
       setLoading(true);
       setError(null);
       const payload = { ...values, date_echeance: computeDue(values), updated_at: new Date().toISOString() };
+      if (!payload.assignes || payload.assignes.length === 0) {
+        payload.assignes = [user_id];
+      }
       const { error } = await supabase
         .from("taches")
         .update(payload)

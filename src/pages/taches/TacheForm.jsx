@@ -14,6 +14,7 @@ export default function TacheForm({ task }) {
     titre: task?.titre || "",
     description: task?.description || "",
     assignes: task?.assignes || [],
+    utilisateur_id: task?.utilisateur_id || "",
     date_debut: task?.date_debut || "",
     delai_jours: task?.delai_jours || "",
     date_echeance: task?.date_echeance || "",
@@ -107,6 +108,15 @@ export default function TacheForm({ task }) {
       <label className="block">
         <span>Assignés</span>
         <select multiple name="assignes" value={form.assignes} onChange={handleChange} className="input w-full">
+          {users.map(u => (
+            <option key={u.id} value={u.id}>{u.nom}</option>
+          ))}
+        </select>
+      </label>
+      <label className="block">
+        <span>Responsable</span>
+        <select name="utilisateur_id" value={form.utilisateur_id} onChange={handleChange} className="input w-full">
+          <option value="">--</option>
           {users.map(u => (
             <option key={u.id} value={u.id}>{u.nom}</option>
           ))}

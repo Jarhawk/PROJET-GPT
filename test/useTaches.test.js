@@ -49,4 +49,6 @@ test('createTache injects ids and computes due date', async () => {
   expect(inserted.mama_id).toBe('m1');
   expect(inserted.created_by).toBe('u1');
   expect(inserted.date_echeance).toBe('2025-05-04');
+  expect(inserted.utilisateur_id).toBe('u1');
+  expect(inserted.assignes).toEqual(['u1']);
 });

@@ -10,9 +10,9 @@ export default function SupplierForm({ supplier, onClose, glass }) {
   const [form, setForm] = useState({
     nom: supplier?.nom || "",
     ville: supplier?.ville || "",
-    tel: supplier?.tel || "",
-    contact: supplier?.contact || "",
-    email: supplier?.email || "",
+    tel: supplier?.contact?.tel || "",
+    contact: supplier?.contact?.nom || "",
+    email: supplier?.contact?.email || "",
     actif: supplier?.actif ?? true,
   });
   const [loading, setLoading] = useState(false);

@@ -21,7 +21,10 @@ export function useFournisseurs() {
     setError(null);
     let query = supabase
       .from("fournisseurs")
-      .select("*", { count: "exact" })
+      .select(
+        "id, nom, ville, actif, created_at, updated_at, contact:fournisseur_contacts(nom,email,tel)",
+        { count: "exact" }
+      )
       .eq("mama_id", mama_id)
       .order("nom", { ascending: true })
       .range((page - 1) * limit, page * limit - 1);
@@ -30,7 +33,11 @@ export function useFournisseurs() {
     if (typeof actif === "boolean") query = query.eq("actif", actif);
 
     const { data, error, count } = await query;
-    setFournisseurs(Array.isArray(data) ? data : []);
+    const list = (Array.isArray(data) ? data : []).map(d => ({
+      ...d,
+      contact: Array.isArray(d.contact) ? d.contact[0] : d.contact,
+    }));
+    setFournisseurs(list);
     setTotal(count || 0);
     setLoading(false);
     if (error) {
@@ -45,9 +52,21 @@ export function useFournisseurs() {
     if (!mama_id) return;
     setLoading(true);
     setError(null);
-    const { error } = await supabase
+    const { nom, ville, actif = true, tel, email, contact } = fournisseur;
+    const { data, error } = await supabase
       .from("fournisseurs")
-      .insert([{ ...fournisseur, mama_id }]);
+      .insert([{ nom, ville, actif, mama_id }])
+      .select()
+      .single();
+    if (!error && data && (tel || email || contact)) {
+      await supabase.from("fournisseur_contacts").insert({
+        fournisseur_id: data.id,
+        mama_id,
+        nom: contact,
+        email,
+        tel,
+      });
+    }
     setLoading(false);
     if (error) {
       setError(error);
@@ -62,11 +81,20 @@ export function useFournisseurs() {
     if (!mama_id) return;
     setLoading(true);
     setError(null);
+    const { tel, email, contact, ...fields } = updateFields;
     const { error } = await supabase
       .from("fournisseurs")
-      .update(updateFields)
+      .update(fields)
       .eq("id", id)
       .eq("mama_id", mama_id);
+    if (!error && (tel || email || contact)) {
+      await supabase
+        .from("fournisseur_contacts")
+        .upsert(
+          [{ fournisseur_id: id, mama_id, nom: contact, email, tel }],
+          { onConflict: ["fournisseur_id", "mama_id"] }
+        );
+    }
     setLoading(false);
     if (error) {
       setError(error);
@@ -101,9 +129,9 @@ export function useFournisseurs() {
       id: f.id,
       nom: f.nom,
       ville: f.ville,
-      tel: f.tel,
-      contact: f.contact,
-      email: f.email,
+      tel: f.contact?.tel || "",
+      contact: f.contact?.nom || "",
+      email: f.contact?.email || "",
       actif: f.actif,
     }));
     const wb = XLSX.utils.book_new();

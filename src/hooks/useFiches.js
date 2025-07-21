@@ -15,7 +15,7 @@ export function useFiches() {
   const [error, setError] = useState(null);
 
   // Liste paginée des fiches techniques
-  async function getFiches({ search = "", actif = null, page = 1, limit = 20, sortBy = "nom", asc = true } = {}) {
+  async function getFiches({ search = "", actif = null, famille = null, page = 1, limit = 20, sortBy = "nom", asc = true } = {}) {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
@@ -28,6 +28,7 @@ export function useFiches() {
       .range((page - 1) * limit, page * limit - 1);
     if (search) query = query.ilike("nom", `%${search}%`);
     if (typeof actif === "boolean") query = query.eq("actif", actif);
+    if (famille) query = query.eq("famille_id", famille);
     const { data, error, count } = await query;
     setLoading(false);
     if (error) { setError(error); return []; }
@@ -43,7 +44,7 @@ export function useFiches() {
     const { data, error } = await supabase
       .from("fiches_techniques")
       .select(
-        "*, famille:familles(id, nom), lignes:fiche_lignes(*, produit:produits(id, nom, unite:unites(nom), pmp))"
+        "*, famille:familles(id, nom), lignes:fiche_lignes(*, produit:produits(id, nom, unite:unites(nom), pmp), sous_fiche:fiches_techniques(id, nom, cout_par_portion))"
       )
       .eq("id", id)
       .eq("mama_id", mama_id)
@@ -70,7 +71,13 @@ export function useFiches() {
     }
     const ficheId = data.id;
     if (lignes.length > 0) {
-      const toInsert = lignes.map(l => ({ fiche_id: ficheId, produit_id: l.produit_id, quantite: l.quantite, mama_id }));
+      const toInsert = lignes.map(l => ({
+        fiche_id: ficheId,
+        produit_id: l.produit_id || null,
+        sous_fiche_id: l.sous_fiche_id || null,
+        quantite: l.quantite,
+        mama_id,
+      }));
       const { error: lignesError } = await supabase.from("fiche_lignes").insert(toInsert);
       if (lignesError) {
         setLoading(false);
@@ -109,7 +116,13 @@ export function useFiches() {
       throw deleteError;
     }
     if (lignes.length > 0) {
-      const toInsert = lignes.map(l => ({ fiche_id: id, produit_id: l.produit_id, quantite: l.quantite, mama_id }));
+      const toInsert = lignes.map(l => ({
+        fiche_id: id,
+        produit_id: l.produit_id || null,
+        sous_fiche_id: l.sous_fiche_id || null,
+        quantite: l.quantite,
+        mama_id,
+      }));
       const { error: insertError } = await supabase.from("fiche_lignes").insert(toInsert);
       if (insertError) {
         setLoading(false);
@@ -142,6 +155,53 @@ export function useFiches() {
     return { data: id };
   }
 
+  async function duplicateFiche(id) {
+    if (!mama_id) return { error: "Aucun mama_id" };
+    setLoading(true);
+    setError(null);
+    const { data: fiche, error: fetchError } = await supabase
+      .from("fiches_techniques")
+      .select("*, lignes:fiche_lignes(*)")
+      .eq("id", id)
+      .eq("mama_id", mama_id)
+      .single();
+    if (fetchError) {
+      setLoading(false);
+      setError(fetchError);
+      throw fetchError;
+    }
+    const { lignes = [], ...rest } = fiche || {};
+    const { data: inserted, error: insertError } = await supabase
+      .from("fiches_techniques")
+      .insert([{ ...rest, nom: `${rest.nom} (copie)`, mama_id }])
+      .select("id")
+      .single();
+    if (insertError) {
+      setLoading(false);
+      setError(insertError);
+      throw insertError;
+    }
+    const newId = inserted.id;
+    if (lignes.length) {
+      const toInsert = lignes.map(l => ({
+        fiche_id: newId,
+        produit_id: l.produit_id || null,
+        sous_fiche_id: l.sous_fiche_id || null,
+        quantite: l.quantite,
+        mama_id,
+      }));
+      const { error: lineErr } = await supabase.from("fiche_lignes").insert(toInsert);
+      if (lineErr) {
+        setLoading(false);
+        setError(lineErr);
+        throw lineErr;
+      }
+    }
+    setLoading(false);
+    await getFiches();
+    return { data: newId };
+  }
+
   function exportFichesToExcel() {
     const datas = (fiches || []).map(f => ({
       id: f.id,
@@ -169,5 +229,5 @@ export function useFiches() {
     doc.save("fiches_mamastock.pdf");
   }
 
-  return { fiches, total, loading, error, getFiches, getFicheById, createFiche, updateFiche, deleteFiche, exportFichesToExcel, exportFichesToPDF };
+  return { fiches, total, loading, error, getFiches, getFicheById, createFiche, updateFiche, deleteFiche, duplicateFiche, exportFichesToExcel, exportFichesToPDF };
 }

@@ -14,7 +14,7 @@ export function useFichesAutocomplete() {
     setLoading(true);
     setError(null);
     let q = supabase
-      .from("fiches")
+      .from("fiches_techniques")
       .select("id, nom, cout_par_portion, actif")
       .eq("mama_id", mama_id)
       .eq("actif", true);

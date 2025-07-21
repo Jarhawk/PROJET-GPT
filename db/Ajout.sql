@@ -474,3 +474,43 @@ drop policy if exists menus_jour_fiches_all on menus_jour_fiches;
 create policy menus_jour_fiches_all on menus_jour_fiches
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
+-- Module Taches : liaison utilisateurs et RLS
+alter table if exists taches
+  add column if not exists utilisateur_id uuid references utilisateurs(id);
+create index if not exists idx_taches_utilisateur_id on taches(utilisateur_id);
+
+create table if not exists tache_assignations (
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid not null references mamas(id),
+  tache_id uuid not null references taches(id),
+  utilisateur_id uuid not null references utilisateurs(id),
+  statut text default 'a_faire',
+  commentaire text,
+  date_realisation timestamp with time zone,
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now(),
+  actif boolean default true
+);
+create index if not exists idx_tache_assignations_mama_id on tache_assignations(mama_id);
+create index if not exists idx_tache_assignations_tache_id on tache_assignations(tache_id);
+
+alter table if exists taches enable row level security;
+alter table if exists taches force row level security;
+drop policy if exists taches_all on taches;
+create policy taches_all on taches
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+
+alter table if exists tache_assignations enable row level security;
+alter table if exists tache_assignations force row level security;
+drop policy if exists tache_assignations_all on tache_assignations;
+create policy tache_assignations_all on tache_assignations
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+
+alter table if exists tache_instances enable row level security;
+alter table if exists tache_instances force row level security;
+drop policy if exists tache_instances_all on tache_instances;
+create policy tache_instances_all on tache_instances
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());

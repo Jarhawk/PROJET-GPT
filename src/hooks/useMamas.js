@@ -55,6 +55,22 @@ export function useMamas() {
     await fetchMamas();
   }
 
+  // 4. Activer/désactiver un établissement
+  async function toggleMamaActive(id, actif) {
+    if (role !== "superadmin" && id !== mama_id) {
+      return { error: "Action non autorisée" };
+    }
+    setLoading(true);
+    setError(null);
+    const { error } = await supabase
+      .from("mamas")
+      .update({ actif })
+      .eq("id", id);
+    if (error) setError(error);
+    setLoading(false);
+    await fetchMamas();
+  }
+
 
 
   // 5. Export Excel
@@ -95,6 +111,7 @@ export function useMamas() {
     fetchMamas,
     addMama,
     updateMama,
+    toggleMamaActive,
     exportMamasToExcel,
     importMamasFromExcel,
   };

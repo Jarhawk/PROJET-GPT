@@ -20,7 +20,7 @@ export default function Mamas() {
   const [search, setSearch] = useState("");
   const [editMama, setEditMama] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [confirmId, setConfirmId] = useState(null);
 
   useEffect(() => {
     fetchMamas();
@@ -36,22 +36,22 @@ export default function Mamas() {
     setLoading(false);
   };
 
-  const handleDelete = async id => {
+  const handleToggleActive = async (id, actif) => {
     if (role !== "superadmin" && id !== myMama) {
       toast.error("Action non autorisée");
       return;
     }
     const { error } = await supabase
       .from("mamas")
-      .delete()
+      .update({ actif })
       .eq("id", id);
     if (!error) {
-      toast.success("Établissement supprimé.");
+      toast.success(actif ? "Établissement réactivé." : "Établissement désactivé.");
       fetchMamas();
     } else {
-      toast.error("Erreur lors de la suppression.");
+      toast.error("Erreur lors de la mise à jour.");
     }
-    setConfirmDeleteId(null);
+    setConfirmId(null);
   };
 
   const filtered = mamas.filter(
@@ -117,12 +117,12 @@ export default function Mamas() {
                     >
                       Éditer
                     </Button>
-                    {confirmDeleteId === m.id ? (
+                    {confirmId === m.id ? (
                       <>
                         <Button
                           size="sm"
                           variant="destructive"
-                          onClick={() => handleDelete(m.id)}
+                          onClick={() => handleToggleActive(m.id, !m.actif)}
                           disabled={loading || (role !== "superadmin" && m.id !== myMama)}
                         >
                           Confirmer
@@ -130,7 +130,7 @@ export default function Mamas() {
                         <Button
                           size="sm"
                           variant="secondary"
-                          onClick={() => setConfirmDeleteId(null)}
+                          onClick={() => setConfirmId(null)}
                           disabled={loading}
                         >
                           Annuler
@@ -140,10 +140,10 @@ export default function Mamas() {
                       <Button
                         size="sm"
                         variant="destructive"
-                        onClick={() => setConfirmDeleteId(m.id)}
+                        onClick={() => setConfirmId(m.id)}
                         disabled={loading || (role !== "superadmin" && m.id !== myMama)}
                       >
-                        Supprimer
+                        {m.actif ? "Désactiver" : "Activer"}
                       </Button>
                     )}
                   </td>

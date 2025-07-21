@@ -13,7 +13,7 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
   const { mamas, fetchMamas } = useMamas();
   const { mama_id: myMama, role: myRole } = useAuth();
   const [nom, setNom] = useState(utilisateur?.nom || "");
-  const [role, setRole] = useState(utilisateur?.role || "user");
+  const [roleId, setRoleId] = useState(utilisateur?.role_id || "");
   const [mama, setMama] = useState(utilisateur?.mama_id || myMama);
   const [actif, setActif] = useState(utilisateur?.actif ?? true);
   const [loading, setLoading] = useState(false);
@@ -29,7 +29,7 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
     setLoading(true);
     const data = {
       nom,
-      role,
+      role_id: roleId,
       actif,
       mama_id: mama,
     };
@@ -67,12 +67,12 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
       />
       <select
         className="input mb-2"
-        value={role}
-        onChange={e => setRole(e.target.value)}
+        value={roleId}
+        onChange={e => setRoleId(e.target.value)}
         required
       >
         {roles.map(r => (
-          <option key={r.id} value={r.nom}>{r.nom}</option>
+          <option key={r.id} value={r.id}>{r.nom}</option>
         ))}
       </select>
       {myRole === "superadmin" && (

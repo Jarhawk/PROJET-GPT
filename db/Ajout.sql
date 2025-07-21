@@ -71,3 +71,11 @@ drop policy if exists inventaire_zones_all on inventaire_zones;
 create policy inventaire_zones_all on inventaire_zones
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
+
+-- Sécurisation des établissements
+alter table if exists mamas enable row level security;
+alter table if exists mamas force row level security;
+drop policy if exists mamas_all on mamas;
+create policy mamas_all on mamas
+  for all using (id = current_user_mama_id())
+  with check (id = current_user_mama_id());

@@ -663,3 +663,65 @@ drop policy if exists transfert_lignes_all on transfert_lignes;
 create policy transfert_lignes_all on transfert_lignes
   for all using (exists (select 1 from transferts t where t.id = transfert_id and t.mama_id = current_user_mama_id()))
   with check (exists (select 1 from transferts t where t.id = transfert_id and t.mama_id = current_user_mama_id()));
+
+-- Module Commandes fournisseurs
+alter table if exists commandes
+  add column if not exists date_commande date,
+  add column if not exists date_livraison_prevue date,
+  add column if not exists montant_total numeric,
+  add column if not exists commentaire text,
+  add column if not exists updated_at timestamp with time zone default now(),
+  add column if not exists actif boolean default true,
+  add column if not exists bl_id uuid references bons_livraison(id),
+  add column if not exists facture_id uuid references factures(id);
+create index if not exists idx_commandes_fournisseur_id on commandes(fournisseur_id);
+create index if not exists idx_commandes_statut on commandes(statut);
+create index if not exists idx_commandes_date_commande on commandes(date_commande);
+
+create table if not exists commande_lignes (
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid not null references mamas(id),
+  commande_id uuid not null references commandes(id) on delete cascade,
+  produit_id uuid not null references produits(id),
+  quantite numeric,
+  unite text,
+  prix_unitaire numeric,
+  tva numeric,
+  total numeric,
+  commentaire text,
+  part_livree numeric,
+  rupture boolean,
+  actif boolean default true,
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now()
+);
+create index if not exists idx_commande_lignes_mama_id on commande_lignes(mama_id);
+create index if not exists idx_commande_lignes_commande_id on commande_lignes(commande_id);
+
+create or replace function update_commande_totals() returns trigger as $$
+begin
+  update commandes
+  set montant_total = coalesce((select sum(quantite * prix_unitaire * (1 + coalesce(tva,0)/100)) from commande_lignes where commande_id = coalesce(new.commande_id, old.commande_id) and actif = true),0),
+      updated_at = now()
+  where id = coalesce(new.commande_id, old.commande_id);
+  return new;
+end;
+$$ language plpgsql;
+
+create trigger trg_commande_lignes_totals
+  after insert or update or delete on commande_lignes
+  for each row execute procedure update_commande_totals();
+
+alter table if exists commandes enable row level security;
+alter table if exists commandes force row level security;
+drop policy if exists commandes_all on commandes;
+create policy commandes_all on commandes
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+
+alter table if exists commande_lignes enable row level security;
+alter table if exists commande_lignes force row level security;
+drop policy if exists commande_lignes_all on commande_lignes;
+create policy commande_lignes_all on commande_lignes
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());

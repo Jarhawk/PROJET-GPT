@@ -58,6 +58,74 @@ create policy inventaires_all on inventaires
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
 
+-- Module Requisitions Simulation
+alter table if exists requisitions
+  add column if not exists utilisateur_id uuid references utilisateurs(id),
+  add column if not exists zone_id uuid references zones_stock(id),
+  add column if not exists date_demande date,
+  add column if not exists statut text default 'brouillon';
+
+alter table if exists requisitions enable row level security;
+alter table if exists requisitions force row level security;
+drop policy if exists requisitions_all on requisitions;
+create policy requisitions_all on requisitions
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+
+create table if not exists requisition_lignes (
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid not null references mamas(id),
+  requisition_id uuid not null references requisitions(id),
+  produit_id uuid not null references produits(id),
+  quantite_demandee numeric,
+  stock_theorique_avant numeric,
+  stock_theorique_apres numeric,
+  commentaire text,
+  actif boolean default true,
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now()
+);
+create index if not exists idx_requisition_lignes_mama_id on requisition_lignes(mama_id);
+create index if not exists idx_requisition_lignes_requisition_id on requisition_lignes(requisition_id);
+
+alter table if exists requisition_lignes enable row level security;
+alter table if exists requisition_lignes force row level security;
+drop policy if exists requisition_lignes_all on requisition_lignes;
+create policy requisition_lignes_all on requisition_lignes
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+
+create or replace function set_requisition_stock_theorique() returns trigger as $$
+declare
+  current_stock numeric;
+  zid uuid;
+begin
+  select zone_id into zid from requisitions where id = new.requisition_id;
+  select quantite into current_stock from stocks
+    where mama_id = new.mama_id and zone_id = zid and produit_id = new.produit_id;
+  new.stock_theorique_avant := coalesce(current_stock,0);
+  new.stock_theorique_apres := coalesce(current_stock,0) - coalesce(new.quantite_demandee,0);
+  return new;
+end;
+$$ language plpgsql;
+
+create trigger trg_requisition_lignes_stock
+  before insert on requisition_lignes
+  for each row execute procedure set_requisition_stock_theorique();
+
+create or replace view v_requisition_stock as
+select rl.id as ligne_id,
+       rl.requisition_id,
+       r.zone_id,
+       rl.produit_id,
+       rl.stock_theorique_avant as stock_reel,
+       rl.quantite_demandee,
+       rl.stock_theorique_apres as stock_apres,
+       rl.mama_id
+from requisition_lignes rl
+join requisitions r on r.id = rl.requisition_id
+where rl.actif is true and r.actif is true;
+
 alter table if exists inventaire_lignes enable row level security;
 alter table if exists inventaire_lignes force row level security;
 drop policy if exists inventaire_lignes_all on inventaire_lignes;

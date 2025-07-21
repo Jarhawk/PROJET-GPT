@@ -41,9 +41,9 @@ export default function Requisitions() {
     const ws = XLSX.utils.json_to_sheet(
       filtered.map(r => ({
         Numero: r.numero,
-        Date: r.date,
+        Date: r.date_demande,
         Statut: r.statut,
-        Zone: zones.find(z => z.id === r.zone_destination_id)?.nom || "-",
+        Zone: zones.find(z => z.id === r.zone_id)?.nom || "-",
       }))
     );
     const wb = XLSX.utils.book_new();
@@ -61,9 +61,9 @@ export default function Requisitions() {
       head: [["Numero", "Date", "Statut", "Zone"]],
       body: filtered.map(r => [
         r.numero,
-        r.date,
+        r.date_demande,
         r.statut,
-        zones.find(z => z.id === r.zone_destination_id)?.nom || "-",
+        zones.find(z => z.id === r.zone_id)?.nom || "-",
       ]),
       styles: { fontSize: 9 },
     });
@@ -132,16 +132,16 @@ export default function Requisitions() {
               <th className="px-2 py-1">Numéro</th>
               <th className="px-2 py-1">Date</th>
               <th className="px-2 py-1">Statut</th>
-              <th className="px-2 py-1">Zone destination</th>
+              <th className="px-2 py-1">Zone</th>
             </tr>
           </thead>
           <tbody>
             {filtered.map(r => (
               <tr key={r.id}>
                 <td className="px-2 py-1">{r.numero}</td>
-                <td className="px-2 py-1">{r.date}</td>
+                <td className="px-2 py-1">{r.date_demande}</td>
                 <td className="px-2 py-1">{r.statut}</td>
-                <td className="px-2 py-1">{zones.find(z => z.id === r.zone_destination_id)?.nom || '-'}</td>
+                <td className="px-2 py-1">{zones.find(z => z.id === r.zone_id)?.nom || '-'}</td>
               </tr>
             ))}
           </tbody>

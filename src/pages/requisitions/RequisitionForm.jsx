@@ -5,39 +5,59 @@ import { useRequisitions } from "@/hooks/useRequisitions";
 import { useProducts } from "@/hooks/useProducts";
 import { useZones } from "@/hooks/useZones";
 import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/lib/supabase";
 import { Toaster, toast } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import GlassCard from "@/components/ui/GlassCard";
 
 function RequisitionFormPage() {
   const navigate = useNavigate();
-  const { loading: authLoading } = useAuth();
+  const { mama_id, loading: authLoading } = useAuth();
   const { createRequisition } = useRequisitions();
   const { products, loading: loadingProducts } = useProducts();
   const { zones, fetchZones } = useZones();
 
   const [statut, setStatut] = useState("");
   const [commentaire, setCommentaire] = useState("");
-  const [zone_source_id, setZoneSource] = useState("");
-  const [zone_destination_id, setZoneDest] = useState("");
-  const [articles, setArticles] = useState([{ produit_id: "", quantite: 1 }]);
+  const [zone_id, setZone] = useState("");
+  const [articles, setArticles] = useState([{ produit_id: "", quantite: 1, stock_avant: 0, stock_apres: 0 }]);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => { fetchZones(); }, [fetchZones]);
 
-  const handleChangeArticle = (index, field, value) => {
+  const fetchStock = async (produitId) => {
+    if (!produitId || !zone_id || !mama_id) return 0;
+    const { data } = await supabase
+      .from('stocks')
+      .select('quantite')
+      .eq('mama_id', mama_id)
+      .eq('zone_id', zone_id)
+      .eq('produit_id', produitId)
+      .maybeSingle();
+    return Number(data?.quantite || 0);
+  };
+
+  const handleChangeArticle = async (index, field, value) => {
     const updated = [...articles];
     updated[index][field] = value;
+    if (field === 'produit_id') {
+      const stock = await fetchStock(value);
+      updated[index].stock_avant = stock;
+      updated[index].stock_apres = stock - (Number(updated[index].quantite) || 0);
+    }
+    if (field === 'quantite') {
+      updated[index].stock_apres = (Number(updated[index].stock_avant) || 0) - Number(value);
+    }
     setArticles(updated);
   };
 
   const handleAddArticle = () => {
-    setArticles([...articles, { produit_id: "", quantite: 1 }]);
+    setArticles([...articles, { produit_id: "", quantite: 1, stock_avant: 0, stock_apres: 0 }]);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!statut || !zone_destination_id || articles.some(a => !a.produit_id || !a.quantite)) {
+    if (!statut || !zone_id || articles.some(a => !a.produit_id || !a.quantite)) {
       toast.error("Tous les champs sont obligatoires");
       return;
     }
@@ -45,9 +65,13 @@ function RequisitionFormPage() {
     const payload = {
       statut,
       commentaire,
-      zone_source_id: zone_source_id || null,
-      zone_destination_id,
-      lignes: articles.map(a => ({ produit_id: a.produit_id, quantite: a.quantite })),
+      zone_id,
+      lignes: articles.map(a => ({
+        produit_id: a.produit_id,
+        quantite_demandee: a.quantite,
+        stock_theorique_avant: a.stock_avant,
+        stock_theorique_apres: a.stock_apres,
+      })),
     };
     try {
       setSubmitting(true);
@@ -94,40 +118,25 @@ function RequisitionFormPage() {
           />
         </div>
 
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <label className="block text-sm font-medium mb-1">Zone source</label>
-            <select
-              value={zone_source_id}
-              onChange={(e) => setZoneSource(e.target.value)}
-              className="w-full border rounded px-3 py-2"
-            >
-              <option value="">Sélectionner…</option>
-              {zones.map((z) => (
-                <option key={z.id} value={z.id}>{z.nom}</option>
-              ))}
-            </select>
-          </div>
-          <div className="flex-1">
-            <label className="block text-sm font-medium mb-1">Zone destination</label>
-            <select
-              value={zone_destination_id}
-              onChange={(e) => setZoneDest(e.target.value)}
-              className="w-full border rounded px-3 py-2"
-              required
-            >
-              <option value="">Sélectionner…</option>
-              {zones.map((z) => (
-                <option key={z.id} value={z.id}>{z.nom}</option>
-              ))}
-            </select>
-          </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Zone de stock</label>
+          <select
+            value={zone_id}
+            onChange={(e) => setZone(e.target.value)}
+            className="w-full border rounded px-3 py-2"
+            required
+          >
+            <option value="">Sélectionner…</option>
+            {zones.map((z) => (
+              <option key={z.id} value={z.id}>{z.nom}</option>
+            ))}
+          </select>
         </div>
 
         <div>
           <h2 className="text-lg font-semibold mb-2">Articles</h2>
           {articles.map((article, index) => (
-            <div key={index} className="flex gap-4 mb-2">
+            <div key={index} className="flex gap-4 mb-2 items-end">
               {loadingProducts ? (
                 <div className="flex-1 flex items-center justify-center py-2">
                   <LoadingSpinner message="Chargement produits..." />
@@ -157,6 +166,10 @@ function RequisitionFormPage() {
                 min="1"
                 required
               />
+              <div className="text-sm">
+                <div>Stock: {article.stock_avant}</div>
+                <div className="text-xs text-muted">Après: {article.stock_apres}</div>
+              </div>
             </div>
           ))}
           <button

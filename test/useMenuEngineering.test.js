@@ -29,16 +29,16 @@ beforeEach(async () => {
   query.update.mockClear()
 })
 
-test('fetchData queries fiches and ventes', async () => {
+test('fetchData queries analytic view', async () => {
   const { result } = renderHook(() => useMenuEngineering())
   await act(async () => {
-    await result.current.fetchData()
+    await result.current.fetchData('2025-06-01')
   })
-  expect(fromMock).toHaveBeenCalledWith('fiches_techniques')
+  expect(fromMock).toHaveBeenCalledWith('v_menu_engineering')
   expect(query.select).toHaveBeenCalledWith('*')
   expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1')
+  expect(query.eq).toHaveBeenCalledWith('periode', '2025-06-01')
   expect(query.order).toHaveBeenCalledWith('nom')
-  expect(fromMock).toHaveBeenCalledWith('ventes_fiches_carte')
 })
 
 test('fetchData skips when no mama_id', async () => {

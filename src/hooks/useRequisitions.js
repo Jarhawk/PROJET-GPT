@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 
 export function useRequisitions() {
-  const { mama_id } = useAuth();
+  const { mama_id, user_id } = useAuth();
 
   async function getRequisitions({ zone = "", statut = "", debut = "", fin = "", page = 1, limit = 10 } = {}) {
     if (!mama_id) return { data: [], count: 0 };
@@ -13,12 +13,12 @@ export function useRequisitions() {
       .select("*", { count: "exact" })
       .eq("mama_id", mama_id)
       .eq("actif", true)
-      .order("date", { ascending: false })
+      .order("date_demande", { ascending: false })
       .range((page - 1) * limit, page * limit - 1);
-    if (zone) query = query.eq("zone_destination_id", zone);
+    if (zone) query = query.eq("zone_id", zone);
     if (statut) query = query.eq("statut", statut);
-    if (debut) query = query.gte("date", debut);
-    if (fin) query = query.lte("date", fin);
+    if (debut) query = query.gte("date_demande", debut);
+    if (fin) query = query.lte("date_demande", fin);
     const { data, count, error } = await query;
     if (error) {
       console.error("❌ Erreur getRequisitions:", error.message);
@@ -42,11 +42,11 @@ export function useRequisitions() {
     return data || null;
   }
 
-  async function createRequisition({ numero = null, date = new Date().toISOString().slice(0,10), zone_source_id = null, zone_destination_id = null, commentaire = "", statut = "", lignes = [] }) {
-    if (!mama_id) return { error: "mama_id manquant" };
+  async function createRequisition({ date_demande = new Date().toISOString().slice(0,10), zone_id = null, commentaire = "", statut = "brouillon", lignes = [] }) {
+    if (!mama_id || !zone_id) return { error: "mama_id manquant" };
     const { data, error } = await supabase
       .from("requisitions")
-      .insert([{ numero, date, zone_source_id, zone_destination_id, commentaire, statut, mama_id }])
+      .insert([{ date_demande, zone_id, commentaire, statut, mama_id, utilisateur_id: user_id }])
       .select()
       .single();
     if (error) {
@@ -58,7 +58,9 @@ export function useRequisitions() {
       const toInsert = lignes.map(l => ({
         requisition_id: requisition.id,
         produit_id: l.produit_id,
-        quantite: Number(l.quantite),
+        quantite_demandee: Number(l.quantite_demandee),
+        stock_theorique_avant: l.stock_theorique_avant,
+        stock_theorique_apres: l.stock_theorique_apres,
         commentaire: l.commentaire || "",
         mama_id,
       }));

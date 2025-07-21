@@ -30,13 +30,10 @@ function RequisitionDetailPage() {
           <strong>Statut :</strong> {requisition.statut}
         </div>
         <div>
-          <strong>Date :</strong> {requisition.date}
+          <strong>Date :</strong> {requisition.date_demande}
         </div>
         <div>
-          <strong>Zone source :</strong> {requisition.zone_source_id}
-        </div>
-        <div>
-          <strong>Zone destination :</strong> {requisition.zone_destination_id}
+          <strong>Zone :</strong> {requisition.zone_id}
         </div>
         <div>
           <strong>Commentaire :</strong> {requisition.commentaire}
@@ -45,7 +42,9 @@ function RequisitionDetailPage() {
           <strong>Lignes :</strong>
           <ul className="list-disc ml-5">
             {(requisition.lignes || []).map((l) => (
-              <li key={l.id}>{l.produit_id} - {l.quantite}</li>
+              <li key={l.id}>
+                {l.produit_id} - {l.quantite_demandee} (stock {l.stock_theorique_avant} → {l.stock_theorique_apres})
+              </li>
             ))}
           </ul>
         </div>

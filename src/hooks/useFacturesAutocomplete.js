@@ -14,12 +14,12 @@ export function useFacturesAutocomplete() {
     setError(null);
     let q = supabase
       .from("factures")
-      .select("id, numero, date, fournisseurs(nom)")
+      .select("id, numero, date_facture, fournisseurs(nom)")
       .eq("mama_id", mama_id);
     if (query) {
       q = q.ilike("numero", `%${query}%`);
     }
-    q = q.order("date", { ascending: false }).limit(10);
+    q = q.order("date_facture", { ascending: false }).limit(10);
     const { data, error } = await q;
     setLoading(false);
     if (error) {

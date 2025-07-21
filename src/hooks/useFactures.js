@@ -141,7 +141,7 @@ export function useFactures() {
     setError(null);
     const { error } = await supabase
       .from("factures")
-      .delete()
+      .update({ actif: false })
       .eq("id", id)
       .eq("mama_id", mama_id);
     setLoading(false);
@@ -149,7 +149,7 @@ export function useFactures() {
       setError(error);
       return { error };
     }
-    setFactures(f => f.filter(ft => ft.id !== id));
+    setFactures(f => f.map(ft => (ft.id === id ? { ...ft, actif: false } : ft)));
     return { success: true };
   }
 
@@ -161,7 +161,7 @@ export function useFactures() {
       fournisseur_id,
       produit_id,
       quantite,
-      prix,
+      prix_unitaire,
       tva,
       date,
     } = ligne || {};
@@ -171,8 +171,9 @@ export function useFactures() {
         {
           produit_id,
           quantite,
-          prix,
+          prix_unitaire,
           tva,
+          total: quantite * (prix_unitaire || 0),
           facture_id,
           mama_id,
         },
@@ -186,12 +187,24 @@ export function useFactures() {
           {
             produit_id,
             fournisseur_id,
-            prix_achat: prix,
+            prix_achat: prix_unitaire,
             date_livraison: date || new Date().toISOString().slice(0, 10),
             mama_id,
           },
           { onConflict: ["produit_id", "fournisseur_id", "date_livraison"] }
         );
+      await supabase
+        .from("achats")
+        .insert([
+          {
+            produit_id,
+            supplier_id: fournisseur_id,
+            mama_id,
+            prix: prix_unitaire,
+            quantite,
+            date_achat: date || new Date().toISOString().slice(0, 10),
+          },
+        ]);
     }
     setLoading(false);
     if (error) {
@@ -253,15 +266,15 @@ export function useFactures() {
     if (!mama_id) return { ht: 0, tva: 0, ttc: 0 };
     const { data: lignes } = await supabase
       .from("facture_lignes")
-      .select("quantite, prix, tva")
+      .select("quantite, prix_unitaire, tva")
       .eq("facture_id", facture_id)
       .eq("mama_id", mama_id);
-    const ht = (lignes || []).reduce((s,l) => s + l.quantite * l.prix, 0);
-    const tva = (lignes || []).reduce((s,l) => s + l.quantite * l.prix * (l.tva || 0) / 100, 0);
+    const ht = (lignes || []).reduce((s,l) => s + l.quantite * (l.prix_unitaire || 0), 0);
+    const tva = (lignes || []).reduce((s,l) => s + l.quantite * (l.prix_unitaire || 0) * (l.tva || 0) / 100, 0);
     const ttc = ht + tva;
     await supabase
       .from("factures")
-      .update({ total_ht: ht, total_tva: tva, total_ttc: ttc })
+      .update({ total_ht: ht, total_tva: tva, total_ttc: ttc, montant_total: ttc })
       .eq("id", facture_id)
       .eq("mama_id", mama_id);
     return { ht, tva, ttc };

@@ -15,9 +15,13 @@ import * as XLSX from "xlsx";
 import { motion as Motion } from "framer-motion";
 
 const STATUTS = {
+  brouillon: "badge",
   "en attente": "badge badge-user",
-  "payée": "badge badge-admin",
-  "refusée": "badge badge-superadmin"
+  validée: "badge badge-admin",
+  payée: "badge badge-admin",
+  refusée: "badge badge-superadmin",
+  annulée: "badge badge-superadmin",
+  archivée: "badge"
 };
 
 export default function Factures() {
@@ -68,7 +72,7 @@ export default function Factures() {
 
   // Suppression avec confirmation
   const handleDelete = async (facture) => {
-    if (window.confirm(`Supprimer la facture n°${facture.id} ?`)) {
+    if (window.confirm(`Archiver la facture n°${facture.id} ?`)) {
       setLoading(true);
       await deleteFacture(facture.id);
       await getFactures({
@@ -81,7 +85,7 @@ export default function Factures() {
         pageSize,
       });
       setLoading(false);
-      toast.success("Facture supprimée.");
+      toast.success("Facture archivée.");
     }
   };
 
@@ -110,9 +114,9 @@ export default function Factures() {
         </select>
         <select className="input" value={statutFilter} onChange={e => setStatutFilter(e.target.value)}>
           <option value="">Tous statuts</option>
-          <option value="en attente">En attente</option>
-          <option value="payée">Payée</option>
-          <option value="refusée">Refusée</option>
+          {Object.keys(STATUTS).map(s => (
+            <option key={s} value={s}>{s}</option>
+          ))}
         </select>
         <input
           type="month"
@@ -205,7 +209,7 @@ export default function Factures() {
                   onClick={() => handleDelete(facture)}
                   disabled={loading}
                 >
-                  Supprimer
+                  Archiver
                 </Button>
               </td>
             </tr>

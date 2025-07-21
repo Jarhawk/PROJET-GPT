@@ -6,18 +6,18 @@ import toast from "react-hot-toast";
 export default function FournisseurForm({ fournisseur = {}, onSubmit, onCancel, saving }) {
   const [nom, setNom] = useState(fournisseur.nom || "");
   const [ville, setVille] = useState(fournisseur.ville || "");
-  const [tel, setTel] = useState(fournisseur.tel || "");
-  const [email, setEmail] = useState(fournisseur.email || "");
-  const [contact, setContact] = useState(fournisseur.contact || "");
+  const [tel, setTel] = useState(fournisseur.contact?.tel || "");
+  const [email, setEmail] = useState(fournisseur.contact?.email || "");
+  const [contact, setContact] = useState(fournisseur.contact?.nom || "");
   const [actif, setActif] = useState(fournisseur.actif ?? true);
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
     setNom(fournisseur.nom || "");
     setVille(fournisseur.ville || "");
-    setTel(fournisseur.tel || "");
-    setEmail(fournisseur.email || "");
-    setContact(fournisseur.contact || "");
+    setTel(fournisseur.contact?.tel || "");
+    setEmail(fournisseur.contact?.email || "");
+    setContact(fournisseur.contact?.nom || "");
     setActif(fournisseur.actif ?? true);
     setErrors({});
   }, [fournisseur]);

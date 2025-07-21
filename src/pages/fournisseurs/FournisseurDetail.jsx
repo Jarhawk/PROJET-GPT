@@ -46,11 +46,17 @@ export default function FournisseurDetail({ id }) {
       }),
       supabase
         .from("fournisseurs")
-        .select("*")
+        .select("id, nom, ville, actif, created_at, contact:fournisseur_contacts(nom,email,tel)")
         .eq("id", id)
         .eq("mama_id", mama_id)
         .single()
-        .then(({ data }) => setFournisseur(data)),
+        .then(({ data }) => {
+          if (data)
+            setFournisseur({
+              ...data,
+              contact: Array.isArray(data.contact) ? data.contact[0] : data.contact,
+            });
+        }),
     ]).finally(() => setLoading(false));
   }, [id, mama_id]);
 
@@ -74,15 +80,29 @@ export default function FournisseurDetail({ id }) {
     <div className="space-y-8">
       <h2 className="text-xl font-bold text-mamastockGold mb-2">Détail fournisseur</h2>
       {fournisseur && (
-        <Button
-          size="sm"
-          onClick={async () => {
-            await updateFournisseur(fournisseur.id, { actif: !fournisseur.actif });
-            setFournisseur({ ...fournisseur, actif: !fournisseur.actif });
-          }}
-        >
-          {fournisseur.actif ? "Désactiver" : "Réactiver"}
-        </Button>
+        <div className="space-y-2 mb-2">
+          <Button
+            size="sm"
+            onClick={async () => {
+              await updateFournisseur(fournisseur.id, { actif: !fournisseur.actif });
+              setFournisseur({ ...fournisseur, actif: !fournisseur.actif });
+            }}
+          >
+            {fournisseur.actif ? "Désactiver" : "Réactiver"}
+          </Button>
+          <div className="text-sm">
+            {fournisseur.ville && <div>Ville : {fournisseur.ville}</div>}
+            {fournisseur.contact && (
+              <div>
+                Contact : {fournisseur.contact.nom || ""}
+                {fournisseur.contact.tel && ` - ${fournisseur.contact.tel}`}
+                {fournisseur.contact.email && (
+                  <span className="ml-1">({fournisseur.contact.email})</span>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       )}
       {/* Stats d’achats/factures */}
       <div className="grid md:grid-cols-2 gap-6">

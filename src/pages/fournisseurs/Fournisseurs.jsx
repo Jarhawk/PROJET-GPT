@@ -34,7 +34,11 @@ export default function Fournisseurs() {
   const [actifFilter, setActifFilter] = useState("all");
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 20;
-  const inactifs = fournisseurs.filter(f => !f.actif);
+  const listWithContact = fournisseurs.map(f => ({
+    ...f,
+    contact: Array.isArray(f.contact) ? f.contact[0] : f.contact,
+  }));
+  const inactifs = listWithContact.filter(f => !f.actif);
 
   useEffect(() => {
     async function fetchCounts() {
@@ -53,7 +57,13 @@ export default function Fournisseurs() {
     doc.autoTable({
       startY: 20,
       head: [["Nom", "Ville", "Téléphone", "Contact", "Email"]],
-      body: fournisseurs.map(f => [f.nom, f.ville || "", f.tel || "", f.contact || "", f.email || ""]),
+      body: listWithContact.map(f => [
+        f.nom,
+        f.ville || "",
+        f.contact?.tel || "",
+        f.contact?.nom || "",
+        f.contact?.email || "",
+      ]),
       styles: { fontSize: 9 },
     });
     doc.save("fournisseurs.pdf");
@@ -76,7 +86,7 @@ export default function Fournisseurs() {
   }, [search, actifFilter, page]);
 
   // Recherche live
-  const fournisseursFiltrés = fournisseurs.filter(f =>
+  const fournisseursFiltrés = listWithContact.filter(f =>
     f.nom?.toLowerCase().includes(search.toLowerCase()) ||
     f.ville?.toLowerCase().includes(search.toLowerCase())
   );
@@ -189,9 +199,9 @@ export default function Fournisseurs() {
                 <tr key={f.id} className={f.actif ? '' : 'opacity-50'}>
                   <td className="py-1 px-3 font-semibold text-white">{f.nom}</td>
                   <td>{f.ville}</td>
-                  <td>{f.tel}</td>
-                  <td>{f.contact}</td>
-                  <td>{f.email}</td>
+                  <td>{f.contact?.tel}</td>
+                  <td>{f.contact?.nom}</td>
+                  <td>{f.contact?.email}</td>
                   <td>{productCounts[f.id] ?? 0}</td>
                   <td>
                     <Button size="sm" variant="outline" onClick={() => setSelected(f.id)}>

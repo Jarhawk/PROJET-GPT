@@ -21,6 +21,7 @@ const Factures = lazy(() => import("@/pages/factures/Factures.jsx"));
 const FactureDetail = lazy(() => import("@/pages/factures/FactureDetail.jsx"));
 const ImportFactures = lazy(() => import("@/pages/factures/ImportFactures.jsx"));
 const FactureCreate = lazy(() => import("@/pages/factures/FactureCreate.jsx"));
+const Achats = lazy(() => import("@/pages/achats/Achats.jsx"));
 const Fiches = lazy(() => import("@/pages/fiches/Fiches.jsx"));
 const FicheDetail = lazy(() => import("@/pages/fiches/FicheDetail.jsx"));
 const Carte = lazy(() => import("@/pages/carte/Carte.jsx"));
@@ -171,13 +172,17 @@ export default function Router() {
             element={<ProtectedRoute accessKey="factures"><ImportFactures /></ProtectedRoute>}
           />
           <Route
-            path="/receptions"
-            element={<ProtectedRoute accessKey="receptions"><Receptions /></ProtectedRoute>}
-          />
-          <Route
-            path="/bons-livraison"
-            element={<ProtectedRoute accessKey="bons_livraison"><BonsLivraison /></ProtectedRoute>}
-          />
+          path="/receptions"
+          element={<ProtectedRoute accessKey="receptions"><Receptions /></ProtectedRoute>}
+        />
+        <Route
+          path="/achats"
+          element={<ProtectedRoute accessKey="achats"><Achats /></ProtectedRoute>}
+        />
+        <Route
+          path="/bons-livraison"
+          element={<ProtectedRoute accessKey="bons_livraison"><BonsLivraison /></ProtectedRoute>}
+        />
           <Route
             path="/bons-livraison/nouveau"
             element={<ProtectedRoute accessKey="bons_livraison"><BLCreate /></ProtectedRoute>}

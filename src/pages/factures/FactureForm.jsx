@@ -17,7 +17,8 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
     results: fournisseurOptions,
     searchFournisseurs,
   } = useFournisseursAutocomplete();
-  const [date, setDate] = useState(facture?.date || "");
+  // Utilise la date de facture existante si présente
+  const [date, setDate] = useState(facture?.date_facture || "");
   const [fournisseur_id, setFournisseurId] = useState(facture?.fournisseur_id || "");
   const [fournisseurName, setFournisseurName] = useState("");
   const [numero, setNumero] = useState(facture?.numero || "");

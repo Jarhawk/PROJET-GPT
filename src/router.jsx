@@ -50,6 +50,7 @@ const Permissions = lazy(() => import("@/pages/parametrage/Permissions.jsx"));
 const AccessRights = lazy(() => import("@/pages/parametrage/AccessRights.jsx"));
 const APIKeys = lazy(() => import("@/pages/parametrage/APIKeys.jsx"));
 const MamaSettingsForm = lazy(() => import("@/pages/parametrage/MamaSettingsForm.jsx"));
+const Zones = lazy(() => import("@/pages/parametrage/Zones.jsx"));
 const Onboarding = lazy(() => import("@/pages/public/Onboarding.jsx"));
 const Accueil = lazy(() => import("@/pages/Accueil.jsx"));
 const Signup = lazy(() => import("@/pages/public/Signup.jsx"));
@@ -375,6 +376,10 @@ export default function Router() {
           <Route
             path="/parametrage/settings"
             element={<ProtectedRoute accessKey="settings"><MamaSettingsForm /></ProtectedRoute>}
+          />
+          <Route
+            path="/parametrage/zones-stock"
+            element={<ProtectedRoute accessKey="zones_stock"><Zones /></ProtectedRoute>}
           />
           <Route
             path="/parametrage/access"

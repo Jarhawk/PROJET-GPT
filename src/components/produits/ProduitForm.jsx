@@ -16,8 +16,8 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
   const { fournisseurs, fetchFournisseurs } = useFournisseurs();
 
   const [nom, setNom] = useState(produit?.nom || "");
-  const [famille, setFamille] = useState(produit?.famille || "");
-  const [unite, setUnite] = useState(produit?.unite || "");
+  const [familleId, setFamilleId] = useState(produit?.famille_id || "");
+  const [uniteId, setUniteId] = useState(produit?.unite_id || "");
   // Utilise la colonne main_supplier_id définie dans le schéma SQL
   const [mainSupplierId, setMainSupplierId] = useState(produit?.main_supplier_id || "");
   const [stock_reel, setStockReel] = useState(produit?.stock_reel || 0);
@@ -41,8 +41,8 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
   useEffect(() => {
     if (editing && produit) {
       setNom(produit.nom || "");
-      setFamille(produit.famille || "");
-      setUnite(produit.unite || "");
+      setFamilleId(produit.famille_id || "");
+      setUniteId(produit.unite_id || "");
       setMainSupplierId(produit.main_supplier_id || "");
       setStockReel(produit.stock_reel || 0);
       setStockMin(produit.stock_min || 0);
@@ -58,8 +58,8 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
     if (saving) return;
     const errs = {};
     if (!nom.trim()) errs.nom = "Nom requis";
-    if (!famille.trim()) errs.famille = "Famille requise";
-    if (!unite.trim()) errs.unite = "Unité requise";
+    if (!familleId) errs.famille = "Famille requise";
+    if (!uniteId) errs.unite = "Unité requise";
     setErrors(errs);
     if (Object.keys(errs).length) {
       toast.error("Veuillez remplir les champs obligatoires.");
@@ -67,8 +67,8 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
     }
     const newProd = {
       nom,
-      famille,
-      unite,
+      famille_id: familleId || null,
+      unite_id: uniteId || null,
       main_supplier_id: mainSupplierId || null,
       stock_reel: Number(stock_reel),
       stock_min: Number(stock_min),
@@ -129,24 +129,26 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
       </div>
       <AutoCompleteField
         label="Famille"
-        value={famille}
-        onChange={setFamille}
-        options={[...famillesHook.map(f => f.nom), ...familles]}
+        value={familleId}
+        onChange={setFamilleId}
+        options={[...famillesHook, ...familles].map(f => ({ value: f.id, label: f.nom }))}
         onAddOption={async val => {
-          const { error } = await addFamille(val);
+          const { data, error } = await addFamille(val);
           if (error) toast.error(error.message || error);
+          else return { id: data.id, label: data.nom };
         }}
         required
       />
       {errors.famille && <p className="text-red-500 text-sm">{errors.famille}</p>}
       <AutoCompleteField
         label="Unité"
-        value={unite}
-        onChange={setUnite}
-        options={[...unitesHook.map(u => u.nom), ...unites]}
+        value={uniteId}
+        onChange={setUniteId}
+        options={[...unitesHook, ...unites].map(u => ({ value: u.id, label: u.nom }))}
         onAddOption={async val => {
-          const { error } = await addUnite(val);
+          const { data, error } = await addUnite(val);
           if (error) toast.error(error.message || error);
+          else return { id: data.id, label: data.nom };
         }}
         required
       />

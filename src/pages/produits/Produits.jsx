@@ -2,6 +2,8 @@
 // src/pages/Produits.jsx
 import { useEffect, useState, useRef } from "react";
 import { useProducts } from "@/hooks/useProducts";
+import { useFamilles } from "@/hooks/useFamilles";
+import { useUnites } from "@/hooks/useUnites";
 import ProduitFormModal from "@/components/produits/ProduitFormModal";
 import ProduitDetail from "@/components/produits/ProduitDetail";
 import { Button } from "@/components/ui/button";
@@ -20,6 +22,8 @@ export default function Produits() {
     addProduct,
     duplicateProduct,
   } = useProducts();
+  const { familles: famillesHook, fetchFamilles } = useFamilles();
+  const { unites: unitesHook, fetchUnites } = useUnites();
 
   const [showForm, setShowForm] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -32,15 +36,22 @@ export default function Produits() {
   const [sortOrder, setSortOrder] = useState("asc");
   const fileRef = useRef();
 
+  useEffect(() => {
+    fetchFamilles();
+    fetchUnites();
+  }, [fetchFamilles, fetchUnites]);
+
   async function handleImport(e) {
     const file = e.target.files[0];
     if (!file) return;
     const rows = await importProductsFromExcel(file);
+    const famMap = Object.fromEntries(familles.map(f => [f.nom.toLowerCase(), f.id]));
+    const uniteMap = Object.fromEntries(unites.map(u => [u.nom.toLowerCase(), u.id]));
     for (const row of rows) {
       await addProduct({
         nom: row.nom,
-        famille: row.famille,
-        unite: row.unite,
+        famille_id: famMap[row.famille?.toLowerCase()] || null,
+        unite_id: uniteMap[row.unite?.toLowerCase()] || null,
         stock_reel: Number(row.stock_reel) || 0,
         stock_min: Number(row.stock_min) || 0,
         actif: row.actif !== false,
@@ -68,8 +79,8 @@ export default function Produits() {
   }
 
   // Filtre et familles/unites dynamiques
-  const familles = [...new Set(products.map(p => p.famille).filter(Boolean))];
-  const unites = [...new Set(products.map(p => p.unite).filter(Boolean))];
+  const familles = famillesHook;
+  const unites = unitesHook;
 
   useEffect(() => {
     fetchProducts({
@@ -101,7 +112,9 @@ export default function Produits() {
           onChange={e => { setPage(1); setFamilleFilter(e.target.value); }}
         >
           <option value="">Toutes familles</option>
-          {familles.map(f => <option key={f} value={f}>{f}</option>)}
+          {familles.map(f => (
+            <option key={f.id} value={f.id}>{f.nom}</option>
+          ))}
         </select>
         <select
           className="input"

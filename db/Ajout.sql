@@ -159,3 +159,17 @@ drop policy if exists access_rights_all on access_rights;
 create policy access_rights_all on access_rights
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
+
+-- Mise à jour Zones de stock : colonnes et sécurité RLS
+alter table if exists zones_stock
+  add column if not exists description text,
+  add column if not exists type_zone text;
+
+create index if not exists idx_zones_stock_nom on zones_stock(nom);
+
+alter table if exists zones_stock enable row level security;
+alter table if exists zones_stock force row level security;
+drop policy if exists zones_stock_all on zones_stock;
+create policy zones_stock_all on zones_stock
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());

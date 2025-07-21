@@ -725,3 +725,40 @@ drop policy if exists commande_lignes_all on commande_lignes;
 create policy commande_lignes_all on commande_lignes
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
+
+-- Module Bons de Livraison
+alter table if exists bons_livraison
+  add column if not exists date_reception date,
+  add column if not exists commentaire text,
+  add column if not exists statut text default 'recu',
+  add column if not exists actif boolean default true,
+  add column if not exists updated_at timestamp with time zone default now(),
+  add column if not exists commande_id uuid references commandes(id),
+  add column if not exists facture_id uuid references factures(id);
+create index if not exists idx_bons_livraison_fournisseur_id on bons_livraison(fournisseur_id);
+create index if not exists idx_bons_livraison_date_reception on bons_livraison(date_reception);
+create index if not exists idx_bons_livraison_statut on bons_livraison(statut);
+
+alter table if exists lignes_bl
+  add column if not exists mama_id uuid references mamas(id),
+  add column if not exists quantite_recue numeric,
+  add column if not exists prix_unitaire numeric,
+  add column if not exists commentaire text,
+  add column if not exists actif boolean default true,
+  add column if not exists updated_at timestamp with time zone default now();
+create index if not exists idx_lignes_bl_mama_id on lignes_bl(mama_id);
+create index if not exists idx_lignes_bl_bl_id on lignes_bl(bl_id);
+
+alter table if exists bons_livraison enable row level security;
+alter table if exists bons_livraison force row level security;
+drop policy if exists bons_livraison_all on bons_livraison;
+create policy bons_livraison_all on bons_livraison
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+
+alter table if exists lignes_bl enable row level security;
+alter table if exists lignes_bl force row level security;
+drop policy if exists lignes_bl_all on lignes_bl;
+create policy lignes_bl_all on lignes_bl
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());

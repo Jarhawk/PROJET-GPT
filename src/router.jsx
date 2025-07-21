@@ -72,6 +72,7 @@ const ApiFournisseurs = lazy(() => import("@/pages/fournisseurs/ApiFournisseurs.
 const CatalogueSyncViewer = lazy(() => import("@/pages/catalogue/CatalogueSyncViewer.jsx"));
 const CommandesEnvoyees = lazy(() => import("@/pages/commandes/CommandesEnvoyees.jsx"));
 const SimulationPlanner = lazy(() => import("@/pages/planning/SimulationPlanner.jsx"));
+const Commandes = lazy(() => import("@/pages/commandes/Commandes.jsx"));
 const Planning = lazy(() => import("@/pages/Planning.jsx"));
 const PlanningForm = lazy(() => import("@/pages/PlanningForm.jsx"));
 const PlanningDetail = lazy(() => import("@/pages/PlanningDetail.jsx"));
@@ -296,6 +297,10 @@ export default function Router() {
           <Route
             path="/catalogue/sync"
             element={<ProtectedRoute accessKey="produits"><CatalogueSyncViewer /></ProtectedRoute>}
+          />
+          <Route
+            path="/commandes"
+            element={<ProtectedRoute accessKey="fournisseurs"><Commandes /></ProtectedRoute>}
           />
           <Route
             path="/commandes/envoyees"

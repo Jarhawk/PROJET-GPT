@@ -37,6 +37,10 @@ export default function MenuDuJourDetail({ menu, onClose }) {
             {menu.fiches?.map((f, i) => <li key={i}>{f.nom}</li>)}
           </ul>
         </div>
+        <div><b>Coût total :</b> {menu.cout_total?.toFixed(2)} €</div>
+        {menu.marge != null && (
+          <div><b>Marge :</b> {menu.marge.toFixed(1)}%</div>
+        )}
         <div>
           <b>Document :</b> {menu.document ?
             <a href={menu.document} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">Voir document</a> :

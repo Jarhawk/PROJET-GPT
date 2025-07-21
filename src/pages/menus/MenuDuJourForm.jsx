@@ -9,12 +9,18 @@ export default function MenuDuJourForm({ menu, fiches = [], onClose }) {
   const { addMenuDuJour, editMenuDuJour } = useMenuDuJour();
   const [nom, setNom] = useState(menu?.nom || "");
   const [date, setDate] = useState(menu?.date || "");
+  const [prixVente, setPrixVente] = useState(menu?.prix_vente_ttc || 0);
+  const [tva, setTva] = useState(menu?.tva || 5.5);
   const [selectedFiches, setSelectedFiches] = useState(
     menu?.fiches?.map(f => f.fiche_id) || []
   );
   const [file, setFile] = useState(null);
   const [fileUrl, setFileUrl] = useState(menu?.document || "");
   const [loading, setLoading] = useState(false);
+
+  const selectedObjects = fiches.filter(f => selectedFiches.includes(f.id));
+  const coutTotal = selectedObjects.reduce((sum, f) => sum + (Number(f.cout_total) || 0), 0);
+  const marge = prixVente > 0 ? ((prixVente - coutTotal) / prixVente) * 100 : 0;
 
   const handleSelectFiche = id => {
     setSelectedFiches(selectedFiches.includes(id)
@@ -50,7 +56,9 @@ export default function MenuDuJourForm({ menu, fiches = [], onClose }) {
       nom,
       date,
       fiches: selectedFiches,
-      document: fileUrl || menu?.document
+      document: fileUrl || menu?.document,
+      prix_vente_ttc: prixVente || null,
+      tva: tva || null
     };
     try {
       if (menu?.id) {
@@ -89,6 +97,26 @@ export default function MenuDuJourForm({ menu, fiches = [], onClose }) {
         onChange={e => setDate(e.target.value)}
         required
       />
+      <div className="flex gap-2 mb-2">
+        <input
+          type="number"
+          className="input"
+          placeholder="Prix vente TTC"
+          min={0}
+          step="0.01"
+          value={prixVente}
+          onChange={e => setPrixVente(Number(e.target.value))}
+        />
+        <input
+          type="number"
+          className="input"
+          placeholder="TVA %"
+          min={0}
+          step="0.1"
+          value={tva}
+          onChange={e => setTva(Number(e.target.value))}
+        />
+      </div>
       <div className="mb-4">
         <label className="block font-semibold mb-2">Fiches du menu :</label>
         <div className="max-h-48 overflow-auto border border-borderGlass rounded p-2 bg-glass backdrop-blur">
@@ -119,6 +147,12 @@ export default function MenuDuJourForm({ menu, fiches = [], onClose }) {
           </a>
         )}
       </label>
+      <div className="my-2 flex gap-4">
+        <div><b>Coût total :</b> {coutTotal.toFixed(2)} €</div>
+        {prixVente > 0 && (
+          <div><b>Marge :</b> {marge.toFixed(1)}%</div>
+        )}
+      </div>
       <div className="flex gap-2 mt-4">
         <Button type="submit" disabled={loading}>{menu ? "Modifier" : "Ajouter"}</Button>
         <Button variant="outline" type="button" onClick={onClose}>Annuler</Button>

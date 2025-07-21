@@ -428,3 +428,49 @@ left join unites u on u.id = p.unite_id
 left join fiches_techniques ft on ft.id = p.fiche_technique_id
 where p.actif = true
   and (coalesce(ft.famille, fam.nom) ilike '%boisson%');
+
+-- ===========================================================================
+-- Module Menu du Jour : tables dédiées et RLS
+
+create table if not exists menus_jour (
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid not null references mamas(id),
+  nom text not null,
+  date date not null,
+  prix_vente_ttc numeric,
+  tva numeric default 5.5,
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now(),
+  actif boolean default true
+);
+
+create index if not exists idx_menus_jour_mama_id on menus_jour(mama_id);
+
+create table if not exists menus_jour_fiches (
+  id uuid primary key default gen_random_uuid(),
+  menu_jour_id uuid not null references menus_jour(id),
+  fiche_id uuid not null references fiches_techniques(id),
+  mama_id uuid not null references mamas(id),
+  quantite numeric default 1,
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now(),
+  actif boolean default true
+);
+
+create index if not exists idx_menus_jour_fiches_menu_id on menus_jour_fiches(menu_jour_id);
+create index if not exists idx_menus_jour_fiches_fiche_id on menus_jour_fiches(fiche_id);
+create index if not exists idx_menus_jour_fiches_mama_id on menus_jour_fiches(mama_id);
+
+alter table if exists menus_jour enable row level security;
+alter table if exists menus_jour force row level security;
+drop policy if exists menus_jour_all on menus_jour;
+create policy menus_jour_all on menus_jour
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+
+alter table if exists menus_jour_fiches enable row level security;
+alter table if exists menus_jour_fiches force row level security;
+drop policy if exists menus_jour_fiches_all on menus_jour_fiches;
+create policy menus_jour_fiches_all on menus_jour_fiches
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());

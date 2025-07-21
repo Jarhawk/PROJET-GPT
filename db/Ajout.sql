@@ -111,3 +111,51 @@ end;
 $$ language plpgsql security definer;
 
 grant execute on function apply_stock_from_achat(uuid, text, uuid) to authenticated;
+
+-- ============================================================================
+-- Alignement module Paramétrage & Utilisateurs
+
+-- Ajout des colonnes manquantes pour la table utilisateurs
+alter table if exists utilisateurs
+  add column if not exists email text,
+  add column if not exists role text,
+  add column if not exists invite_pending boolean default false;
+create index if not exists idx_utilisateurs_email on utilisateurs(email);
+
+-- Ajout des colonnes manquantes pour la table roles
+alter table if exists roles
+  add column if not exists description text,
+  add column if not exists access_rights jsonb default '[]'::jsonb;
+
+-- Ajout colonne ville pour les établissements
+alter table if exists mamas
+  add column if not exists ville text;
+
+-- Activation RLS et policies pour les tables sensibles
+alter table if exists utilisateurs enable row level security;
+alter table if exists utilisateurs force row level security;
+drop policy if exists utilisateurs_all on utilisateurs;
+create policy utilisateurs_all on utilisateurs
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+
+alter table if exists roles enable row level security;
+alter table if exists roles force row level security;
+drop policy if exists roles_all on roles;
+create policy roles_all on roles
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+
+alter table if exists permissions enable row level security;
+alter table if exists permissions force row level security;
+drop policy if exists permissions_all on permissions;
+create policy permissions_all on permissions
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+
+alter table if exists access_rights enable row level security;
+alter table if exists access_rights force row level security;
+drop policy if exists access_rights_all on access_rights;
+create policy access_rights_all on access_rights
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());

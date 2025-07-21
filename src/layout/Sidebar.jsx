@@ -80,6 +80,7 @@ export default function Sidebar() {
         { module: "fournisseurs", to: "/fournisseurs", label: "Fournisseurs", icon: <Truck size={16} /> },
         { module: "factures", to: "/factures", label: "Factures", icon: <FileText size={16} /> },
         { module: "factures", to: "/factures/import", label: "Import e-factures", icon: <FileText size={16} /> },
+        { module: "achats", to: "/achats", label: "Achats", icon: <FileText size={16} /> },
         { module: "receptions", to: "/receptions", label: "Réceptions", icon: <FileText size={16} /> },
         { module: "bons_livraison", to: "/bons-livraison", label: "Bons de Livraison", icon: <FileText size={16} /> },
       ],

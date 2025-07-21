@@ -79,3 +79,35 @@ drop policy if exists mamas_all on mamas;
 create policy mamas_all on mamas
   for all using (id = current_user_mama_id())
   with check (id = current_user_mama_id());
+
+-- Création du RPC pour appliquer les mouvements de stock à partir d'un achat
+create or replace function apply_stock_from_achat(achat_id uuid, achat_table text, mama uuid)
+returns void as $$
+declare
+  r record;
+begin
+  if achat_table = 'factures' then
+    for r in
+      select fl.produit_id, fl.quantite
+      from facture_lignes fl
+      join factures f on f.id = fl.facture_id
+      where f.id = achat_id and f.mama_id = mama and fl.actif is true
+    loop
+      insert into stock_mouvements(mama_id, date, type, quantite, produit_id)
+      values (mama, now(), 'entree_achat', r.quantite, r.produit_id);
+    end loop;
+  elsif achat_table = 'bons_livraison' then
+    for r in
+      select l.produit_id, l.quantite_recue as quantite
+      from lignes_bl l
+      join bons_livraison b on b.id = l.bl_id
+      where b.id = achat_id and b.mama_id = mama
+    loop
+      insert into stock_mouvements(mama_id, date, type, quantite, produit_id)
+      values (mama, now(), 'entree_achat', r.quantite, r.produit_id);
+    end loop;
+  end if;
+end;
+$$ language plpgsql security definer;
+
+grant execute on function apply_stock_from_achat(uuid, text, uuid) to authenticated;

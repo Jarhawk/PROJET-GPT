@@ -30,8 +30,8 @@ test('fetchMenusDuJour retrieves menus', async () => {
   await act(async () => {
     await result.current.fetchMenusDuJour();
   });
-  expect(fromMock).toHaveBeenCalledWith('menus');
-  expect(selectMock).toHaveBeenCalledWith('*, fiches:menu_fiches(fiche_id, fiche: fiches(id, nom))', { count: 'exact' });
+  expect(fromMock).toHaveBeenCalledWith('menus_jour');
+  expect(selectMock).toHaveBeenCalledWith('*, fiches:menus_jour_fiches(fiche_id, quantite, fiche:fiches_techniques(id, nom, cout_par_portion))', { count: 'exact' });
   expect(eqMock).toHaveBeenCalledWith('mama_id', 'm1');
   expect(orderMock).toHaveBeenCalledWith('date', { ascending: false });
   expect(rangeMock).toHaveBeenCalledWith(0, 49);

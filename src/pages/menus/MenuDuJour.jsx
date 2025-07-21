@@ -8,12 +8,10 @@ import MenuDuJourDetail from "./MenuDuJourDetail.jsx";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
 import { Toaster, toast } from "react-hot-toast";
-import { saveAs } from "file-saver";
-import * as XLSX from "xlsx";
 import { motion as Motion } from "framer-motion";
 
 export default function MenuDuJour() {
-  const { menusDuJour, fetchMenusDuJour, deleteMenuDuJour } = useMenuDuJour();
+  const { menusDuJour, fetchMenusDuJour, deleteMenuDuJour, exportMenusDuJourToExcel } = useMenuDuJour();
   const { fiches, fetchFiches } = useFiches();
   const { mama_id, loading: authLoading } = useAuth();
   const [showForm, setShowForm] = useState(false);
@@ -35,14 +33,7 @@ export default function MenuDuJour() {
   );
 
   const exportExcel = () => {
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(menusDuJour.map(m => ({
-      ...m,
-      fiches: m.fiches?.map(f => f.nom).join(", ")
-    })));
-    XLSX.utils.book_append_sheet(wb, ws, "MenusDuJour");
-    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([buf]), "menus_du_jour.xlsx");
+    exportMenusDuJourToExcel();
   };
 
   const handleDelete = async (menu) => {
@@ -82,6 +73,8 @@ export default function MenuDuJour() {
             <th className="px-4 py-2">Date</th>
             <th className="px-4 py-2">Nom</th>
             <th className="px-4 py-2">Fiches</th>
+            <th className="px-4 py-2">Coût</th>
+            <th className="px-4 py-2">Marge</th>
             <th className="px-4 py-2">Actions</th>
           </tr>
         </thead>
@@ -101,6 +94,8 @@ export default function MenuDuJour() {
               <td className="border px-4 py-2">
                 {menu.fiches?.map(f => f.nom).join(", ")}
               </td>
+              <td className="border px-4 py-2">{menu.cout_total?.toFixed(2)} €</td>
+              <td className="border px-4 py-2">{menu.marge != null ? `${menu.marge.toFixed(1)}%` : '-'}</td>
               <td className="border px-4 py-2">
                 <Button
                   size="sm"

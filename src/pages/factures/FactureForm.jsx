@@ -21,7 +21,7 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
   const [fournisseur_id, setFournisseurId] = useState(facture?.fournisseur_id || "");
   const [fournisseurName, setFournisseurName] = useState("");
   const [numero, setNumero] = useState(facture?.numero || "");
-  const [statut, setStatut] = useState(facture?.statut || "en attente");
+  const [statut, setStatut] = useState(facture?.statut || "brouillon");
   const [lignes, setLignes] = useState(
     facture?.lignes?.map(l => ({
       ...l,
@@ -93,7 +93,7 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
       for (const ligne of lignes) {
         if (ligne.produit_id) {
           const { produit_nom: _unused, ...rest } = ligne;
-          await addLigneFacture(fid, { ...rest, prix: ligne.prix_unitaire, fournisseur_id });
+          await addLigneFacture(fid, { ...rest, fournisseur_id });
         }
       }
       await calculateTotals(fid);
@@ -209,9 +209,13 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
         value={statut}
         onChange={e => setStatut(e.target.value)}
       >
+        <option value="brouillon">Brouillon</option>
         <option value="en attente">En attente</option>
+        <option value="validée">Validée</option>
         <option value="payée">Payée</option>
         <option value="refusée">Refusée</option>
+        <option value="annulée">Annulée</option>
+        <option value="archivée">Archivée</option>
       </select>
       <label>
         Justificatif PDF : <input type="file" accept="application/pdf,image/*" onChange={e => setFile(e.target.files[0])} />

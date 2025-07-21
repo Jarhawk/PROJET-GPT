@@ -762,3 +762,38 @@ drop policy if exists lignes_bl_all on lignes_bl;
 create policy lignes_bl_all on lignes_bl
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
+
+-- ===========================================================================
+-- Vues et fonctions d'analyses avancées
+
+create or replace view v_monthly_purchases as
+select
+  f.mama_id,
+  to_char(date_trunc('month', f.date_facture), 'YYYY-MM') as mois,
+  sum(fl.quantite * fl.prix_unitaire) as total
+from factures f
+join facture_lignes fl on fl.facture_id = f.id
+where f.mama_id = current_user_mama_id()
+group by f.mama_id, mois;
+
+grant select on v_monthly_purchases to authenticated;
+
+create or replace function advanced_stats(
+  start_date date default null,
+  end_date date default null
+) returns table(month text, purchases numeric)
+language sql
+security definer
+as $$
+  select to_char(date_trunc('month', f.date_facture), 'YYYY-MM') as month,
+         sum(fl.quantite * fl.prix_unitaire) as purchases
+  from factures f
+  join facture_lignes fl on fl.facture_id = f.id
+  where f.mama_id = current_user_mama_id()
+    and (start_date is null or f.date_facture >= start_date)
+    and (end_date is null or f.date_facture <= end_date)
+  group by month
+  order by month;
+$$;
+
+grant execute on function advanced_stats(date, date) to authenticated;

@@ -173,3 +173,175 @@ drop policy if exists zones_stock_all on zones_stock;
 create policy zones_stock_all on zones_stock
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
+
+-- Module Dashboard : tables, vues et fonctions complementaires
+
+-- Colonnes manquantes pour la table gadgets
+alter table if exists gadgets
+  add column if not exists nom text,
+  add column if not exists ordre integer default 0,
+  add column if not exists configuration_json jsonb;
+
+-- RLS pour gadgets
+alter table if exists gadgets enable row level security;
+alter table if exists gadgets force row level security;
+drop policy if exists gadgets_all on gadgets;
+create policy gadgets_all on gadgets
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+
+-- RLS pour tableaux_de_bord
+alter table if exists tableaux_de_bord enable row level security;
+alter table if exists tableaux_de_bord force row level security;
+drop policy if exists tableaux_de_bord_all on tableaux_de_bord;
+create policy tableaux_de_bord_all on tableaux_de_bord
+  for all using (
+    mama_id = current_user_mama_id() and
+    utilisateur_id = (select id from utilisateurs where auth_id = auth.uid())
+  )
+  with check (
+    mama_id = current_user_mama_id() and
+    utilisateur_id = (select id from utilisateurs where auth_id = auth.uid())
+  );
+
+-- RLS pour notifications
+alter table if exists notifications enable row level security;
+alter table if exists notifications force row level security;
+drop policy if exists notifications_all on notifications;
+create policy notifications_all on notifications
+  for all using (
+    mama_id = current_user_mama_id() and
+    (user_id = auth.uid() or utilisateur_id = (select id from utilisateurs where auth_id = auth.uid()))
+  )
+  with check (
+    mama_id = current_user_mama_id() and
+    (user_id = auth.uid() or utilisateur_id = (select id from utilisateurs where auth_id = auth.uid()))
+  );
+
+-- RLS pour journaux_utilisateur
+alter table if exists journaux_utilisateur enable row level security;
+alter table if exists journaux_utilisateur force row level security;
+drop policy if exists journaux_utilisateur_all on journaux_utilisateur;
+create policy journaux_utilisateur_all on journaux_utilisateur
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+
+-- RLS pour logs_securite
+alter table if exists logs_securite enable row level security;
+alter table if exists logs_securite force row level security;
+drop policy if exists logs_securite_all on logs_securite;
+create policy logs_securite_all on logs_securite
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+
+-- Vue produits avec dernier prix et informations stock
+create or replace view v_produits_dernier_prix as
+select
+  p.id,
+  p.nom,
+  p.famille,
+  p.unite,
+  p.stock_reel,
+  p.stock_min,
+  fp.fournisseur_id,
+  f.nom as fournisseur,
+  fp.prix_achat as dernier_prix,
+  fp.date_livraison,
+  p.mama_id
+from produits p
+left join lateral (
+  select fp2.fournisseur_id, fp2.prix_achat, fp2.date_livraison
+  from fournisseur_produits fp2
+  where fp2.produit_id = p.id and fp2.mama_id = p.mama_id
+  order by fp2.date_livraison desc
+  limit 1
+) fp on true
+left join fournisseurs f on f.id = fp.fournisseur_id;
+
+-- Fonction de calcul budget mensuel simplifie
+create or replace function fn_calc_budgets(mama_id_param uuid, periode_param text)
+returns table(famille text, budget numeric, reel numeric, ecart_pct numeric)
+as $$
+declare
+  d1 date := to_date(periode_param || '-01', 'YYYY-MM-DD');
+  d2 date := (d1 + interval '1 month');
+begin
+  return query
+  select p.famille,
+         0::numeric as budget,
+         sum(fl.prix_unitaire * fl.quantite) as reel,
+         null::numeric as ecart_pct
+  from factures f
+  join facture_lignes fl on fl.facture_id = f.id
+  join produits p on p.id = fl.produit_id
+  where f.mama_id = mama_id_param
+    and f.date_facture >= d1
+    and f.date_facture < d2
+    and f.actif is true
+    and fl.actif is true
+  group by p.famille;
+end;
+$$ language plpgsql security definer;
+grant execute on function fn_calc_budgets(uuid, text) to authenticated;
+
+-- Fonction dashboard_stats pour page Stocks
+create or replace function dashboard_stats(
+  mama_id_param uuid,
+  page_param integer default 1,
+  page_size_param integer default 30
+) returns table(produit_id uuid, nom text, stock_reel numeric, pmp numeric, last_purchase date)
+as $$
+begin
+  return query
+  select p.id, p.nom, p.stock_reel,
+         coalesce(vp.pmp,0) as pmp,
+         (select max(f.date_facture)
+            from factures f
+            join facture_lignes fl on fl.facture_id = f.id and fl.produit_id = p.id
+           where f.mama_id = mama_id_param) as last_purchase
+  from produits p
+  left join v_pmp vp on vp.produit_id = p.id and vp.mama_id = mama_id_param
+  where p.mama_id = mama_id_param
+  order by p.nom
+  limit page_size_param offset (page_param-1)*page_size_param;
+end;
+$$ language plpgsql security definer;
+grant execute on function dashboard_stats(uuid, integer, integer) to authenticated;
+
+-- Fonction top_produits pour recommandations
+create or replace function top_produits(
+  mama_id_param uuid,
+  debut_param date default null,
+  fin_param date default null,
+  limit_param integer default 5
+) returns table(produit_id uuid, nom text, total numeric)
+as $$
+begin
+  return query
+  select p.id, p.nom,
+         sum(sm.quantite) as total
+  from stock_mouvements sm
+  join produits p on p.id = sm.produit_id
+  where sm.mama_id = mama_id_param
+    and sm.type = 'sortie'
+    and (debut_param is null or sm.date >= debut_param)
+    and (fin_param is null or sm.date < fin_param + interval '1 day')
+  group by p.id, p.nom
+  order by total desc
+  limit limit_param;
+end;
+$$ language plpgsql security definer;
+grant execute on function top_produits(uuid, date, date, integer) to authenticated;
+
+-- Mouvements sans centre de cout
+create or replace function mouvements_without_alloc(limit_param integer)
+returns table(id uuid, produit_id uuid, quantite numeric, valeur numeric, mama_id uuid, date timestamp with time zone)
+language sql security definer as $$
+  select sm.id, sm.produit_id, sm.quantite, sm.valeur, sm.mama_id, sm.date
+  from stock_mouvements sm
+  left join mouvements_centres_cout mc on mc.mouvement_id = sm.id
+  where mc.id is null
+  order by sm.date desc
+  limit limit_param
+$$;
+grant execute on function mouvements_without_alloc(integer) to authenticated;

@@ -9,7 +9,7 @@ export default function GadgetConfigForm({ gadget, onSave, onCancel }) {
   const [nom, setNom] = useState(gadget?.nom || '');
   const [type, setType] = useState(gadget?.type || 'indicator');
   const [config, setConfig] = useState(
-    JSON.stringify(gadget?.configuration_json || {}, null, 2)
+    JSON.stringify(gadget?.config || {}, null, 2)
   );
   const { addGadget, updateGadget } = useGadgets();
 
@@ -26,10 +26,10 @@ export default function GadgetConfigForm({ gadget, onSave, onCancel }) {
       await updateGadget(gadget.id, {
         nom,
         type,
-        configuration_json: json,
+        config: json,
       });
     } else {
-      await addGadget({ nom, type, configuration_json: json });
+      await addGadget({ nom, type, config: json });
     }
     onSave?.();
   };

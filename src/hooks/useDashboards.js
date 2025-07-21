@@ -16,7 +16,7 @@ export function useDashboards() {
     const { data, error } = await supabase
       .from("tableaux_de_bord")
       .select("*, gadgets:gadgets(*)")
-      .eq("user_id", user_id)
+      .eq("utilisateur_id", user_id)
       .eq("mama_id", mama_id)
       .order("created_at", { ascending: true });
     setLoading(false);
@@ -35,7 +35,7 @@ export function useDashboards() {
     setError(null);
     const { data, error } = await supabase
       .from("tableaux_de_bord")
-      .insert([{ nom, user_id, mama_id }])
+      .insert([{ nom, utilisateur_id: user_id, mama_id }])
       .select()
       .single();
     setLoading(false);
@@ -54,14 +54,14 @@ export function useDashboards() {
     const { data: ordreData } = await supabase
       .from("gadgets")
       .select("ordre")
-      .eq("dashboard_id", dashboardId)
+      .eq("tableau_id", dashboardId)
       .order("ordre", { ascending: false })
       .limit(1)
       .single();
     const ordre = ordreData ? (ordreData.ordre || 0) + 1 : 0;
     const { data, error } = await supabase
       .from("gadgets")
-      .insert([{ dashboard_id: dashboardId, config, ordre }])
+      .insert([{ tableau_id: dashboardId, config, ordre, mama_id }])
       .select()
       .single();
     setLoading(false);
@@ -87,7 +87,8 @@ export function useDashboards() {
       .from("gadgets")
       .update(values)
       .eq("id", id)
-      .eq("dashboard_id", dashboardId)
+      .eq("tableau_id", dashboardId)
+      .eq("mama_id", mama_id)
       .select()
       .single();
     setLoading(false);
@@ -112,7 +113,8 @@ export function useDashboards() {
       .from("gadgets")
       .delete()
       .eq("id", id)
-      .eq("dashboard_id", dashboardId);
+      .eq("tableau_id", dashboardId)
+      .eq("mama_id", mama_id);
     setLoading(false);
     if (error) {
       setError(error.message || error);

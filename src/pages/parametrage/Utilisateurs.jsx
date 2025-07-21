@@ -30,7 +30,7 @@ export default function Utilisateurs() {
   const [search, setSearch] = useState("");
   const [actifFilter, setActifFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
-  const [sortBy, setSortBy] = useState("email");
+  const [sortBy, setSortBy] = useState("nom");
   const [page, setPage] = useState(1);
   const [showForm, setShowForm] = useState(false);
   const [selected, setSelected] = useState(null);
@@ -48,12 +48,13 @@ export default function Utilisateurs() {
   const mapped = users.map(u => ({
     ...u,
     mamaNom: mamas.find(m => m.id === u.mama_id)?.nom || u.mama_id,
-    roleNom: roles.find(r => r.id === u.role_id)?.nom || u.role,
+    roleNom: roles.find(r => r.id === u.role_id)?.nom || u.role?.nom || "",
+    role: roles.find(r => r.id === u.role_id)?.nom || u.role?.nom || "",
   }));
   const filtres = mapped.filter(u =>
     (!search || u.nom?.toLowerCase().includes(search.toLowerCase())) &&
     (actifFilter === "all" || (actifFilter === "true" ? u.actif : !u.actif)) &&
-    (roleFilter === "all" || u.role === roleFilter)
+    (roleFilter === "all" || u.roleNom === roleFilter)
   ).sort((a, b) => {
     if (sortBy === "mama") return a.mamaNom.localeCompare(b.mamaNom);
     if (sortBy === "role") return a.roleNom.localeCompare(b.roleNom);
@@ -86,7 +87,7 @@ export default function Utilisateurs() {
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="input"
-          placeholder="Recherche email"
+          placeholder="Recherche nom"
         />
         <select className="input" value={actifFilter} onChange={e => setActifFilter(e.target.value)}>
           <option value="all">Tous</option>
@@ -103,7 +104,7 @@ export default function Utilisateurs() {
           Ajouter un utilisateur
         </Button>
         <select className="input" value={sortBy} onChange={e => setSortBy(e.target.value)}>
-          <option value="email">Tri email</option>
+          <option value="nom">Tri nom</option>
           <option value="mama">Tri Mama</option>
           <option value="role">Tri rôle</option>
         </select>
@@ -118,7 +119,7 @@ export default function Utilisateurs() {
         >
         <thead>
           <tr>
-            <th className="px-4 py-2">Email</th>
+            <th className="px-4 py-2">Nom</th>
             <th className="px-4 py-2">Rôle</th>
             <th className="px-4 py-2">Mama</th>
             <th className="px-4 py-2">Actif</th>

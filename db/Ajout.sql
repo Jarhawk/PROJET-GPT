@@ -376,3 +376,26 @@ from fiches_techniques f
 left join ventes_fiches_carte v
   on v.fiche_id = f.id and v.mama_id = f.mama_id
 where f.actif = true;
+
+-- ===========================================================================
+-- Mise a jour module Carte : colonnes manquantes et RLS
+
+alter table if exists fiches_techniques
+  add column if not exists famille text,
+  add column if not exists type_carte text,
+  add column if not exists sous_type_carte text,
+  add column if not exists prix_vente numeric,
+  add column if not exists carte_actuelle boolean default false,
+  add column if not exists cout_total numeric,
+  add column if not exists cout_portion numeric,
+  add column if not exists rendement numeric default 1;
+
+create index if not exists idx_fiches_techniques_carte_actuelle
+  on fiches_techniques(carte_actuelle);
+
+alter table if exists fiches_techniques enable row level security;
+alter table if exists fiches_techniques force row level security;
+drop policy if exists fiches_techniques_all on fiches_techniques;
+create policy fiches_techniques_all on fiches_techniques
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());

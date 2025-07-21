@@ -20,26 +20,33 @@ export function useProducts() {
     actif = null,
     page = 1,
     limit = 100,
-    sortBy = "famille",
+    sortBy = "nom",
     order = "asc",
   } = {}) => {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
     let query = supabase
-      .from("v_produits_dernier_prix")
+      .from("produits")
       .select(
-        "*, fournisseurs:fournisseur_produits(*, fournisseur: fournisseurs(nom)), main_supplier: fournisseurs!produits_main_supplier_id_fkey(id, nom)",
+        "*, famille:familles(nom), unite:unites(nom), main_supplier:fournisseurs(id, nom)",
         { count: "exact" }
       )
-      .eq("mama_id", mama_id)
-      .order(sortBy, { ascending: order === "asc" })
-      .order("nom", { ascending: true })
-      .range((page - 1) * limit, page * limit - 1);
+      .eq("mama_id", mama_id);
 
     if (search) query = query.ilike("nom", `%${search}%`);
-    if (famille) query = query.ilike("famille", `%${famille}%`);
+    if (famille) query = query.eq("famille_id", famille);
     if (typeof actif === "boolean") query = query.eq("actif", actif);
+
+    if (sortBy === "famille") {
+      query = query.order("nom", { foreignTable: "familles", ascending: order === "asc" });
+    } else if (sortBy === "unite") {
+      query = query.order("nom", { foreignTable: "unites", ascending: order === "asc" });
+    } else {
+      query = query.order(sortBy, { ascending: order === "asc" });
+    }
+    query = query.order("nom", { ascending: true });
+    query = query.range((page - 1) * limit, page * limit - 1);
 
     const { data, error, count } = await query;
     const { data: pmpData } = await supabase
@@ -54,6 +61,8 @@ export function useProducts() {
     const stockMap = Object.fromEntries((stockData || []).map(s => [s.produit_id, s.stock]));
     const final = (Array.isArray(data) ? data : []).map(p => ({
       ...p,
+      famille: p.famille?.nom || "",
+      unite: p.unite?.nom || "",
       pmp: pmpMap[p.id] ?? p.pmp,
       stock_theorique: stockMap[p.id] ?? p.stock_theorique,
     }));
@@ -112,8 +121,8 @@ export function useProducts() {
     const orig = products.find(p => p.id === id);
     if (!orig) return;
     const {
-      famille,
-      unite,
+      famille_id,
+      unite_id,
       main_supplier_id,
       stock_reel,
       stock_min,
@@ -124,8 +133,8 @@ export function useProducts() {
     } = orig;
     const copy = {
       nom: `${orig.nom} (copie)`,
-      famille,
-      unite,
+      famille_id,
+      unite_id,
       main_supplier_id,
       stock_reel,
       stock_min,

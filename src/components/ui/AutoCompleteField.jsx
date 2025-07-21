@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -12,23 +12,43 @@ export default function AutoCompleteField({
   required = false,
   disabledOptions = [],
 }) {
-  const [inputValue, setInputValue] = useState(value || "");
+  const resolved = (options || []).map(opt =>
+    typeof opt === "string" ? { value: opt, label: opt } : opt
+  );
+  const [inputValue, setInputValue] = useState(() => {
+    const match = resolved.find(o => o.value === value);
+    return match ? match.label : "";
+  });
   const [showAdd, setShowAdd] = useState(false);
 
-  const optionsSafe = options ?? []; // Évite le crash si options est undefined
-  const isValid = inputValue && optionsSafe.includes(inputValue);
-  const filtered = optionsSafe.filter(opt => !disabledOptions.includes(opt));
+  useEffect(() => {
+    const match = resolved.find(o => o.value === value);
+    setInputValue(match ? match.label : "");
+  }, [value, resolved]);
+
+  const disabledIds = disabledOptions.map(d =>
+    typeof d === "string" ? d : d.value
+  );
+
+  const isValid =
+    inputValue && resolved.some(o => o.label === inputValue && !disabledIds.includes(o.value));
+  const filtered = resolved.filter(o => !disabledIds.includes(o.value));
 
   const handleInputChange = e => {
     const val = e.target.value;
     setInputValue(val);
-    onChange(val);
-    setShowAdd(val && !optionsSafe.includes(val));
+    const match = resolved.find(o => o.label === val);
+    onChange(match ? match.value : null);
+    setShowAdd(val && !match);
   };
 
   const handleAddOption = async () => {
     if (inputValue && onAddOption) {
-      await onAddOption(inputValue);
+      const res = await onAddOption(inputValue);
+      if (res && res.id) {
+        onChange(res.id);
+        setInputValue(res.label || inputValue);
+      }
       setShowAdd(false);
     }
   };
@@ -50,7 +70,7 @@ export default function AutoCompleteField({
       />
       <datalist id={`list-${label}`}>
         {filtered.map((opt, idx) => (
-          <option key={idx} value={opt} />
+          <option key={idx} value={opt.label} />
         ))}
       </datalist>
       {showAdd && (

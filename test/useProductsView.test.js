@@ -19,11 +19,11 @@ beforeEach(async () => {
   selectMock.mockClear();
 });
 
-test('fetchProducts queries view with mama_id filter', async () => {
+test('fetchProducts queries table with mama_id filter', async () => {
   const { result } = renderHook(() => useProducts());
   await act(async () => {
     await result.current.fetchProducts();
   });
-  expect(fromMock).toHaveBeenCalledWith('v_produits_dernier_prix');
+  expect(fromMock).toHaveBeenCalledWith('produits');
   expect(selectMock).toHaveBeenCalled();
 });

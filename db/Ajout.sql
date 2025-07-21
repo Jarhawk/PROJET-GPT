@@ -33,3 +33,9 @@ $$ language plpgsql;
 create trigger trg_facture_lignes_achats
   after insert on facture_lignes
   for each row execute procedure insert_achat_from_facture_line();
+
+-- Module fiches techniques : support des sous-fiches
+alter table if exists fiche_lignes
+  add column if not exists sous_fiche_id uuid references fiches_techniques(id);
+create index if not exists idx_fiche_lignes_sous_fiche_id
+  on fiche_lignes(sous_fiche_id);

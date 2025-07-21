@@ -41,10 +41,14 @@ export default function FicheDetail({ fiche: ficheProp, onClose }) {
 
   function exportExcel() {
     const rows = fiche.lignes?.map(l => ({
-      Produit: l.product?.nom,
+      Produit: l.produit?.nom || l.sous_fiche?.nom,
       Quantite: l.quantite,
-      Unite: l.product?.unite,
-      Cout: l.product?.pmp ? (l.product.pmp * l.quantite).toFixed(2) : "",
+      Unite: l.produit?.unite || (l.sous_fiche ? "portion" : ""),
+      Cout: l.produit?.pmp
+        ? (l.produit.pmp * l.quantite).toFixed(2)
+        : l.sous_fiche?.cout_par_portion
+          ? (l.sous_fiche.cout_par_portion * l.quantite).toFixed(2)
+          : "",
     })) || [];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "Fiche");
@@ -55,10 +59,14 @@ export default function FicheDetail({ fiche: ficheProp, onClose }) {
     const doc = new jsPDF();
     doc.text(fiche.nom, 10, 10);
     const rows = fiche.lignes?.map(l => [
-      l.product?.nom,
+      l.produit?.nom || l.sous_fiche?.nom,
       l.quantite,
-      l.product?.unite || "",
-      l.product?.pmp ? (l.product.pmp * l.quantite).toFixed(2) : "",
+      l.produit?.unite || (l.sous_fiche ? "portion" : ""),
+      l.produit?.pmp
+        ? (l.produit.pmp * l.quantite).toFixed(2)
+        : l.sous_fiche?.cout_par_portion
+          ? (l.sous_fiche.cout_par_portion * l.quantite).toFixed(2)
+          : "",
     ]) || [];
     doc.autoTable({
       head: [["Produit", "Quantité", "Unité", "Coût"]],
@@ -94,7 +102,14 @@ export default function FicheDetail({ fiche: ficheProp, onClose }) {
           <ul className="list-disc pl-6">
             {fiche.lignes?.map((l, i) => (
               <li key={i}>
-                {l.product?.nom} — {l.quantite} {l.product?.unite} — {l.product?.pmp ? (l.product.pmp * l.quantite).toFixed(2) : "-"} €
+                {l.produit?.nom || l.sous_fiche?.nom} — {l.quantite}{" "}
+                {l.produit?.unite || (l.sous_fiche ? "portion" : "")} —{" "}
+                {l.produit?.pmp
+                  ? (l.produit.pmp * l.quantite).toFixed(2)
+                  : l.sous_fiche?.cout_par_portion
+                    ? (l.sous_fiche.cout_par_portion * l.quantite).toFixed(2)
+                    : "-"}
+                {" €"}
               </li>
             ))}
           </ul>

@@ -7,6 +7,7 @@ import FicheForm from "./FicheForm.jsx";
 import FicheDetail from "./FicheDetail.jsx";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
+import { useFamilles } from "@/hooks/useFamilles";
 import { Toaster } from "react-hot-toast";
 import { motion as Motion } from "framer-motion";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
@@ -20,6 +21,7 @@ export default function Fiches() {
     loading,
     getFiches,
     deleteFiche,
+    duplicateFiche,
     exportFichesToExcel,
     exportFichesToPDF,
   } = useFiches();
@@ -30,13 +32,17 @@ export default function Fiches() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState("nom");
+  const [actif, setActif] = useState("true");
+  const [familleFilter, setFamilleFilter] = useState("");
+  const { familles, fetchFamilles } = useFamilles();
 
   // Chargement
   useEffect(() => {
     if (!authLoading && mama_id) {
-      getFiches({ search, page, limit: PAGE_SIZE, sortBy });
+      getFiches({ search, actif: actif === "all" ? null : actif === "true", famille: familleFilter || null, page, limit: PAGE_SIZE, sortBy });
+      fetchFamilles();
     }
-  }, [authLoading, mama_id, search, page, sortBy, getFiches]);
+  }, [authLoading, mama_id, search, actif, familleFilter, page, sortBy, getFiches, fetchFamilles]);
 
   const exportExcel = () => exportFichesToExcel();
   const exportPdf = () => exportFichesToPDF();
@@ -71,7 +77,20 @@ export default function Fiches() {
           <option value="nom">Tri: Nom</option>
           <option value="cout_par_portion">Tri: Coût/portion</option>
         </select>
-        {/* Ajout d’un filtre famille si besoin */}
+        <select className="input" value={actif} onChange={e => setActif(e.target.value)}>
+          <option value="true">Actives</option>
+          <option value="false">Inactives</option>
+          <option value="all">Toutes</option>
+        </select>
+        <select className="input" value={familleFilter} onChange={e => setFamilleFilter(e.target.value)}>
+          <option value="">-- Famille --</option>
+          {familles.map(f => <option key={f.id} value={f.id}>{f.nom}</option>)}
+        </select>
+        <Button onClick={() => { setSelected(null); setShowForm(true); }}>
+          Ajouter une fiche
+        </Button>
+        <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
+        <Button variant="outline" onClick={exportPdf}>Export PDF</Button>
         <Button onClick={() => { setSelected(null); setShowForm(true); }}>
           Ajouter une fiche
         </Button>
@@ -129,6 +148,14 @@ export default function Fiches() {
                 </Button>
                 <Button
                   size="sm"
+                  variant="outline"
+                  className="mr-2"
+                  onClick={() => duplicateFiche(fiche.id)}
+                >
+                  Dupliquer
+                </Button>
+                <Button
+                  size="sm"
                   variant="destructive"
                   onClick={() => deleteFiche(fiche.id)}
                 >
@@ -155,7 +182,11 @@ export default function Fiches() {
       {showForm && (
         <FicheForm
           fiche={selected}
-          onClose={() => { setShowForm(false); setSelected(null); getFiches({ search, page, limit: PAGE_SIZE }); }}
+          onClose={() => {
+            setShowForm(false);
+            setSelected(null);
+            getFiches({ search, actif: actif === "all" ? null : actif === "true", famille: familleFilter || null, page, limit: PAGE_SIZE });
+          }}
         />
       )}
       {showDetail && selected && (

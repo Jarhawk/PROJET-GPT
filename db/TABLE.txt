@@ -1,12 +1,18 @@
+-- Pour extraire la structure complète de toutes les tables du schéma "public"
 SELECT
     table_name,
     column_name,
     data_type,
     is_nullable,
     column_default
-FROM information_schema.columns
-WHERE table_schema = 'public'
-ORDER BY table_name, ordinal_position;
+FROM
+    information_schema.columns
+WHERE
+    table_schema = 'public'
+ORDER BY
+    table_name,
+    ordinal_position;
+
 
 | table_name                               | column_name               | data_type                | is_nullable | column_default       |
 | ---------------------------------------- | ------------------------- | ------------------------ | ----------- | -------------------- |
@@ -46,6 +52,13 @@ ORDER BY table_name, ordinal_position;
 | bons_livraison                           | numero_bl                 | text                     | YES         | null                 |
 | bons_livraison                           | date_livraison            | date                     | YES         | null                 |
 | bons_livraison                           | created_at                | timestamp with time zone | YES         | now()                |
+| bons_livraison                           | date_reception            | date                     | YES         | null                 |
+| bons_livraison                           | commentaire               | text                     | YES         | null                 |
+| bons_livraison                           | statut                    | text                     | YES         | 'recu'::text         |
+| bons_livraison                           | actif                     | boolean                  | YES         | true                 |
+| bons_livraison                           | updated_at                | timestamp with time zone | YES         | now()                |
+| bons_livraison                           | commande_id               | uuid                     | YES         | null                 |
+| bons_livraison                           | facture_id                | uuid                     | YES         | null                 |
 | catalogue_updates                        | id                        | uuid                     | NO          | gen_random_uuid()    |
 | catalogue_updates                        | mama_id                   | uuid                     | YES         | null                 |
 | catalogue_updates                        | fournisseur_id            | uuid                     | YES         | null                 |
@@ -61,11 +74,34 @@ ORDER BY table_name, ordinal_position;
 | centres_de_cout                          | updated_at                | timestamp with time zone | YES         | now()                |
 | centres_de_cout                          | actif                     | boolean                  | YES         | true                 |
 | centres_de_cout                          | activite                  | text                     | YES         | null                 |
+| commande_lignes                          | id                        | uuid                     | NO          | gen_random_uuid()    |
+| commande_lignes                          | mama_id                   | uuid                     | NO          | null                 |
+| commande_lignes                          | commande_id               | uuid                     | NO          | null                 |
+| commande_lignes                          | produit_id                | uuid                     | NO          | null                 |
+| commande_lignes                          | quantite                  | numeric                  | YES         | null                 |
+| commande_lignes                          | unite                     | text                     | YES         | null                 |
+| commande_lignes                          | prix_unitaire             | numeric                  | YES         | null                 |
+| commande_lignes                          | tva                       | numeric                  | YES         | null                 |
+| commande_lignes                          | total                     | numeric                  | YES         | null                 |
+| commande_lignes                          | commentaire               | text                     | YES         | null                 |
+| commande_lignes                          | part_livree               | numeric                  | YES         | null                 |
+| commande_lignes                          | rupture                   | boolean                  | YES         | null                 |
+| commande_lignes                          | actif                     | boolean                  | YES         | true                 |
+| commande_lignes                          | created_at                | timestamp with time zone | YES         | now()                |
+| commande_lignes                          | updated_at                | timestamp with time zone | YES         | now()                |
 | commandes                                | id                        | uuid                     | NO          | gen_random_uuid()    |
 | commandes                                | mama_id                   | uuid                     | YES         | null                 |
 | commandes                                | fournisseur_id            | uuid                     | YES         | null                 |
 | commandes                                | statut                    | text                     | YES         | null                 |
 | commandes                                | created_at                | timestamp with time zone | YES         | now()                |
+| commandes                                | date_commande             | date                     | YES         | null                 |
+| commandes                                | date_livraison_prevue     | date                     | YES         | null                 |
+| commandes                                | montant_total             | numeric                  | YES         | null                 |
+| commandes                                | commentaire               | text                     | YES         | null                 |
+| commandes                                | updated_at                | timestamp with time zone | YES         | now()                |
+| commandes                                | actif                     | boolean                  | YES         | true                 |
+| commandes                                | bl_id                     | uuid                     | YES         | null                 |
+| commandes                                | facture_id                | uuid                     | YES         | null                 |
 | compta_mapping                           | id                        | uuid                     | NO          | gen_random_uuid()    |
 | compta_mapping                           | mama_id                   | uuid                     | YES         | null                 |
 | compta_mapping                           | cle                       | text                     | YES         | null                 |
@@ -127,6 +163,9 @@ ORDER BY table_name, ordinal_position;
 | familles                                 | mama_id                   | uuid                     | NO          | null                 |
 | familles                                 | actif                     | boolean                  | YES         | true                 |
 | familles                                 | created_at                | timestamp with time zone | YES         | now()                |
+| familles                                 | parent_id                 | uuid                     | YES         | null                 |
+| familles                                 | populaire                 | boolean                  | YES         | false                |
+| familles                                 | updated_at                | timestamp with time zone | YES         | now()                |
 | feedback                                 | id                        | uuid                     | NO          | gen_random_uuid()    |
 | feedback                                 | mama_id                   | uuid                     | YES         | null                 |
 | feedback                                 | user_id                   | uuid                     | YES         | null                 |
@@ -153,6 +192,7 @@ ORDER BY table_name, ordinal_position;
 | fiche_lignes                             | updated_at                | timestamp with time zone | YES         | now()                |
 | fiche_lignes                             | actif                     | boolean                  | YES         | true                 |
 | fiche_lignes                             | produit_id                | uuid                     | YES         | null                 |
+| fiche_lignes                             | sous_fiche_id             | uuid                     | YES         | null                 |
 | fiche_prix_history                       | id                        | uuid                     | NO          | gen_random_uuid()    |
 | fiche_prix_history                       | mama_id                   | uuid                     | NO          | null                 |
 | fiche_prix_history                       | fiche_id                  | uuid                     | NO          | null                 |
@@ -180,6 +220,14 @@ ORDER BY table_name, ordinal_position;
 | fiches_techniques                        | nom                       | text                     | YES         | null                 |
 | fiches_techniques                        | cout_par_portion          | numeric                  | YES         | null                 |
 | fiches_techniques                        | portions                  | numeric                  | YES         | 1                    |
+| fiches_techniques                        | famille                   | text                     | YES         | null                 |
+| fiches_techniques                        | prix_vente                | numeric                  | YES         | null                 |
+| fiches_techniques                        | type_carte                | text                     | YES         | null                 |
+| fiches_techniques                        | sous_type_carte           | text                     | YES         | null                 |
+| fiches_techniques                        | carte_actuelle            | boolean                  | YES         | false                |
+| fiches_techniques                        | cout_total                | numeric                  | YES         | null                 |
+| fiches_techniques                        | cout_portion              | numeric                  | YES         | null                 |
+| fiches_techniques                        | rendement                 | numeric                  | YES         | 1                    |
 | fournisseur_contacts                     | id                        | uuid                     | NO          | gen_random_uuid()    |
 | fournisseur_contacts                     | mama_id                   | uuid                     | NO          | null                 |
 | fournisseur_contacts                     | fournisseur_id            | uuid                     | NO          | null                 |
@@ -227,6 +275,9 @@ ORDER BY table_name, ordinal_position;
 | gadgets                                  | created_at                | timestamp with time zone | YES         | now()                |
 | gadgets                                  | mama_id                   | uuid                     | YES         | null                 |
 | gadgets                                  | actif                     | boolean                  | YES         | true                 |
+| gadgets                                  | nom                       | text                     | YES         | null                 |
+| gadgets                                  | ordre                     | integer                  | YES         | 0                    |
+| gadgets                                  | configuration_json        | jsonb                    | YES         | null                 |
 | guides_seen                              | user_id                   | uuid                     | NO          | null                 |
 | guides_seen                              | mama_id                   | uuid                     | YES         | null                 |
 | guides_seen                              | module                    | text                     | NO          | null                 |
@@ -251,6 +302,7 @@ ORDER BY table_name, ordinal_position;
 | inventaire_zones                         | mama_id                   | uuid                     | YES         | null                 |
 | inventaire_zones                         | nom                       | text                     | YES         | null                 |
 | inventaire_zones                         | created_at                | timestamp with time zone | YES         | now()                |
+| inventaire_zones                         | actif                     | boolean                  | YES         | true                 |
 | inventaires                              | id                        | uuid                     | NO          | gen_random_uuid()    |
 | inventaires                              | mama_id                   | uuid                     | NO          | null                 |
 | inventaires                              | date_inventaire           | date                     | YES         | null                 |
@@ -294,6 +346,12 @@ ORDER BY table_name, ordinal_position;
 | lignes_bl                                | prix                      | numeric                  | YES         | null                 |
 | lignes_bl                                | tva                       | numeric                  | YES         | null                 |
 | lignes_bl                                | created_at                | timestamp with time zone | YES         | now()                |
+| lignes_bl                                | mama_id                   | uuid                     | YES         | null                 |
+| lignes_bl                                | quantite_recue            | numeric                  | YES         | null                 |
+| lignes_bl                                | prix_unitaire             | numeric                  | YES         | null                 |
+| lignes_bl                                | commentaire               | text                     | YES         | null                 |
+| lignes_bl                                | actif                     | boolean                  | YES         | true                 |
+| lignes_bl                                | updated_at                | timestamp with time zone | YES         | now()                |
 | logs_securite                            | id                        | uuid                     | NO          | gen_random_uuid()    |
 | logs_securite                            | mama_id                   | uuid                     | YES         | null                 |
 | logs_securite                            | user_id                   | uuid                     | YES         | null                 |
@@ -323,6 +381,7 @@ ORDER BY table_name, ordinal_position;
 | mamas                                    | timezone                  | text                     | YES         | 'Europe/Paris'::text |
 | mamas                                    | rgpd_text                 | text                     | YES         | null                 |
 | mamas                                    | mentions_legales          | text                     | YES         | null                 |
+| mamas                                    | ville                     | text                     | YES         | null                 |
 | menu_fiches                              | id                        | uuid                     | NO          | gen_random_uuid()    |
 | menu_fiches                              | mama_id                   | uuid                     | NO          | null                 |
 | menu_fiches                              | menu_id                   | uuid                     | NO          | null                 |
@@ -337,6 +396,23 @@ ORDER BY table_name, ordinal_position;
 | menus                                    | created_at                | timestamp with time zone | YES         | now()                |
 | menus                                    | updated_at                | timestamp with time zone | YES         | now()                |
 | menus                                    | actif                     | boolean                  | YES         | true                 |
+| menus_jour                               | id                        | uuid                     | NO          | gen_random_uuid()    |
+| menus_jour                               | mama_id                   | uuid                     | NO          | null                 |
+| menus_jour                               | nom                       | text                     | NO          | null                 |
+| menus_jour                               | date                      | date                     | NO          | null                 |
+| menus_jour                               | prix_vente_ttc            | numeric                  | YES         | null                 |
+| menus_jour                               | tva                       | numeric                  | YES         | 5.5                  |
+| menus_jour                               | created_at                | timestamp with time zone | YES         | now()                |
+| menus_jour                               | updated_at                | timestamp with time zone | YES         | now()                |
+| menus_jour                               | actif                     | boolean                  | YES         | true                 |
+| menus_jour_fiches                        | id                        | uuid                     | NO          | gen_random_uuid()    |
+| menus_jour_fiches                        | menu_jour_id              | uuid                     | NO          | null                 |
+| menus_jour_fiches                        | fiche_id                  | uuid                     | NO          | null                 |
+| menus_jour_fiches                        | mama_id                   | uuid                     | NO          | null                 |
+| menus_jour_fiches                        | quantite                  | numeric                  | YES         | 1                    |
+| menus_jour_fiches                        | created_at                | timestamp with time zone | YES         | now()                |
+| menus_jour_fiches                        | updated_at                | timestamp with time zone | YES         | now()                |
+| menus_jour_fiches                        | actif                     | boolean                  | YES         | true                 |
 | mouvements_centres_cout                  | id                        | uuid                     | NO          | gen_random_uuid()    |
 | mouvements_centres_cout                  | mama_id                   | uuid                     | NO          | null                 |
 | mouvements_centres_cout                  | mouvement_id              | uuid                     | YES         | null                 |
@@ -416,6 +492,8 @@ ORDER BY table_name, ordinal_position;
 | produits                                 | stock_theorique           | numeric                  | YES         | null                 |
 | produits                                 | main_supplier_id          | uuid                     | YES         | null                 |
 | produits                                 | dernier_prix              | numeric                  | YES         | null                 |
+| produits                                 | fiche_technique_id        | uuid                     | YES         | null                 |
+| produits                                 | prix_vente                | numeric                  | YES         | null                 |
 | promotion_produits                       | id                        | uuid                     | NO          | gen_random_uuid()    |
 | promotion_produits                       | mama_id                   | uuid                     | NO          | null                 |
 | promotion_produits                       | promotion_id              | uuid                     | NO          | null                 |
@@ -441,6 +519,17 @@ ORDER BY table_name, ordinal_position;
 | regles_alertes                           | seuil                     | numeric                  | YES         | null                 |
 | regles_alertes                           | actif                     | boolean                  | YES         | true                 |
 | regles_alertes                           | created_at                | timestamp with time zone | YES         | now()                |
+| requisition_lignes                       | id                        | uuid                     | NO          | gen_random_uuid()    |
+| requisition_lignes                       | mama_id                   | uuid                     | NO          | null                 |
+| requisition_lignes                       | requisition_id            | uuid                     | NO          | null                 |
+| requisition_lignes                       | produit_id                | uuid                     | NO          | null                 |
+| requisition_lignes                       | quantite_demandee         | numeric                  | YES         | null                 |
+| requisition_lignes                       | stock_theorique_avant     | numeric                  | YES         | null                 |
+| requisition_lignes                       | stock_theorique_apres     | numeric                  | YES         | null                 |
+| requisition_lignes                       | commentaire               | text                     | YES         | null                 |
+| requisition_lignes                       | actif                     | boolean                  | YES         | true                 |
+| requisition_lignes                       | created_at                | timestamp with time zone | YES         | now()                |
+| requisition_lignes                       | updated_at                | timestamp with time zone | YES         | now()                |
 | requisitions                             | id                        | uuid                     | NO          | gen_random_uuid()    |
 | requisitions                             | mama_id                   | uuid                     | NO          | null                 |
 | requisitions                             | produit_id                | uuid                     | NO          | null                 |
@@ -453,12 +542,17 @@ ORDER BY table_name, ordinal_position;
 | requisitions                             | created_at                | timestamp with time zone | YES         | now()                |
 | requisitions                             | updated_at                | timestamp with time zone | YES         | now()                |
 | requisitions                             | actif                     | boolean                  | YES         | true                 |
+| requisitions                             | utilisateur_id            | uuid                     | YES         | null                 |
+| requisitions                             | date_demande              | date                     | YES         | null                 |
+| requisitions                             | statut                    | text                     | YES         | 'brouillon'::text    |
 | roles                                    | id                        | uuid                     | NO          | gen_random_uuid()    |
 | roles                                    | nom                       | text                     | NO          | null                 |
 | roles                                    | created_at                | timestamp with time zone | YES         | now()                |
 | roles                                    | updated_at                | timestamp with time zone | YES         | now()                |
 | roles                                    | actif                     | boolean                  | YES         | true                 |
 | roles                                    | mama_id                   | uuid                     | YES         | null                 |
+| roles                                    | description               | text                     | YES         | null                 |
+| roles                                    | access_rights             | jsonb                    | YES         | '[]'::jsonb          |
 | signalements                             | id                        | uuid                     | NO          | gen_random_uuid()    |
 | signalements                             | mama_id                   | uuid                     | YES         | null                 |
 | signalements                             | created_by                | uuid                     | YES         | null                 |
@@ -480,6 +574,7 @@ ORDER BY table_name, ordinal_position;
 | stock_mouvements                         | zone_destination_id       | uuid                     | YES         | null                 |
 | stock_mouvements                         | commentaire               | text                     | YES         | null                 |
 | stock_mouvements                         | auteur_id                 | uuid                     | YES         | null                 |
+| stock_mouvements                         | zone_id                   | uuid                     | YES         | null                 |
 | stocks                                   | id                        | uuid                     | NO          | gen_random_uuid()    |
 | stocks                                   | mama_id                   | uuid                     | NO          | null                 |
 | stocks                                   | zone_id                   | uuid                     | NO          | null                 |
@@ -493,6 +588,16 @@ ORDER BY table_name, ordinal_position;
 | tableaux_de_bord                         | nom                       | text                     | YES         | null                 |
 | tableaux_de_bord                         | created_at                | timestamp with time zone | YES         | now()                |
 | tableaux_de_bord                         | utilisateur_id            | uuid                     | YES         | null                 |
+| tache_assignations                       | id                        | uuid                     | NO          | gen_random_uuid()    |
+| tache_assignations                       | mama_id                   | uuid                     | NO          | null                 |
+| tache_assignations                       | tache_id                  | uuid                     | NO          | null                 |
+| tache_assignations                       | utilisateur_id            | uuid                     | NO          | null                 |
+| tache_assignations                       | statut                    | text                     | YES         | 'a_faire'::text      |
+| tache_assignations                       | commentaire               | text                     | YES         | null                 |
+| tache_assignations                       | date_realisation          | timestamp with time zone | YES         | null                 |
+| tache_assignations                       | created_at                | timestamp with time zone | YES         | now()                |
+| tache_assignations                       | updated_at                | timestamp with time zone | YES         | now()                |
+| tache_assignations                       | actif                     | boolean                  | YES         | true                 |
 | tache_instances                          | id                        | uuid                     | NO          | gen_random_uuid()    |
 | tache_instances                          | mama_id                   | uuid                     | NO          | null                 |
 | tache_instances                          | tache_id                  | uuid                     | NO          | null                 |
@@ -518,28 +623,47 @@ ORDER BY table_name, ordinal_position;
 | taches                                   | created_at                | timestamp with time zone | YES         | now()                |
 | taches                                   | updated_at                | timestamp with time zone | YES         | now()                |
 | taches                                   | actif                     | boolean                  | YES         | true                 |
+| taches                                   | utilisateur_id            | uuid                     | YES         | null                 |
 | tooltips                                 | id                        | uuid                     | NO          | gen_random_uuid()    |
 | tooltips                                 | mama_id                   | uuid                     | YES         | null                 |
 | tooltips                                 | champ                     | text                     | YES         | null                 |
 | tooltips                                 | texte                     | text                     | YES         | null                 |
 | tooltips                                 | created_at                | timestamp with time zone | YES         | now()                |
+| transfert_lignes                         | id                        | uuid                     | NO          | gen_random_uuid()    |
+| transfert_lignes                         | transfert_id              | uuid                     | NO          | null                 |
+| transfert_lignes                         | produit_id                | uuid                     | NO          | null                 |
+| transfert_lignes                         | quantite                  | numeric                  | NO          | null                 |
+| transfert_lignes                         | commentaire               | text                     | YES         | null                 |
+| transfert_lignes                         | actif                     | boolean                  | YES         | true                 |
 | transferts                               | id                        | uuid                     | NO          | gen_random_uuid()    |
 | transferts                               | mama_id                   | uuid                     | NO          | null                 |
 | transferts                               | produit_id                | uuid                     | NO          | null                 |
 | transferts                               | quantite                  | numeric                  | YES         | null                 |
-| transferts                               | zone_depart               | text                     | YES         | null                 |
-| transferts                               | zone_arrivee              | text                     | YES         | null                 |
 | transferts                               | motif                     | text                     | YES         | null                 |
 | transferts                               | date_transfert            | date                     | YES         | null                 |
 | transferts                               | created_by                | uuid                     | YES         | null                 |
 | transferts                               | created_at                | timestamp with time zone | YES         | now()                |
 | transferts                               | updated_at                | timestamp with time zone | YES         | now()                |
 | transferts                               | actif                     | boolean                  | YES         | true                 |
+| transferts                               | zone_source_id            | uuid                     | YES         | null                 |
+| transferts                               | zone_dest_id              | uuid                     | YES         | null                 |
+| transferts                               | commentaire               | text                     | YES         | null                 |
+| transferts                               | utilisateur_id            | uuid                     | YES         | null                 |
 | unites                                   | id                        | uuid                     | NO          | uuid_generate_v4()   |
 | unites                                   | nom                       | text                     | NO          | null                 |
 | unites                                   | mama_id                   | uuid                     | NO          | null                 |
 | unites                                   | actif                     | boolean                  | YES         | true                 |
 | unites                                   | created_at                | timestamp with time zone | YES         | now()                |
+| unites                                   | populaire                 | boolean                  | YES         | false                |
+| unites                                   | updated_at                | timestamp with time zone | YES         | now()                |
+| unites_equivalentes                      | id                        | uuid                     | NO          | gen_random_uuid()    |
+| unites_equivalentes                      | mama_id                   | uuid                     | NO          | null                 |
+| unites_equivalentes                      | unite_src                 | uuid                     | NO          | null                 |
+| unites_equivalentes                      | unite_dst                 | uuid                     | NO          | null                 |
+| unites_equivalentes                      | coefficient               | numeric                  | NO          | null                 |
+| unites_equivalentes                      | actif                     | boolean                  | YES         | true                 |
+| unites_equivalentes                      | created_at                | timestamp with time zone | YES         | now()                |
+| unites_equivalentes                      | updated_at                | timestamp with time zone | YES         | now()                |
 | usage_stats                              | id                        | uuid                     | NO          | gen_random_uuid()    |
 | usage_stats                              | mama_id                   | uuid                     | YES         | null                 |
 | usage_stats                              | user_id                   | uuid                     | YES         | null                 |
@@ -559,6 +683,9 @@ ORDER BY table_name, ordinal_position;
 | utilisateurs                             | role_id                   | uuid                     | YES         | null                 |
 | utilisateurs                             | access_rights             | jsonb                    | YES         | '[]'::jsonb          |
 | utilisateurs                             | auth_id                   | uuid                     | YES         | null                 |
+| utilisateurs                             | email                     | text                     | YES         | null                 |
+| utilisateurs                             | role                      | text                     | YES         | null                 |
+| utilisateurs                             | invite_pending            | boolean                  | YES         | false                |
 | utilisateurs_complets                    | id                        | uuid                     | YES         | null                 |
 | utilisateurs_complets                    | nom                       | text                     | YES         | null                 |
 | utilisateurs_complets                    | mama_id                   | uuid                     | YES         | null                 |
@@ -580,6 +707,15 @@ ORDER BY table_name, ordinal_position;
 | v_besoins_previsionnels                  | produit_id                | uuid                     | YES         | null                 |
 | v_besoins_previsionnels                  | quantite                  | numeric                  | YES         | null                 |
 | v_besoins_previsionnels                  | valeur                    | numeric                  | YES         | null                 |
+| v_boissons                               | id                        | uuid                     | YES         | null                 |
+| v_boissons                               | nom                       | text                     | YES         | null                 |
+| v_boissons                               | prix_vente                | numeric                  | YES         | null                 |
+| v_boissons                               | created_at                | timestamp with time zone | YES         | null                 |
+| v_boissons                               | mama_id                   | uuid                     | YES         | null                 |
+| v_boissons                               | famille                   | text                     | YES         | null                 |
+| v_boissons                               | unite                     | text                     | YES         | null                 |
+| v_boissons                               | fiche_id                  | uuid                     | YES         | null                 |
+| v_boissons                               | cout_portion              | numeric                  | YES         | null                 |
 | v_cost_center_month                      | mama_id                   | uuid                     | YES         | null                 |
 | v_cost_center_month                      | cost_center_id            | uuid                     | YES         | null                 |
 | v_cost_center_month                      | nom                       | text                     | YES         | null                 |
@@ -601,12 +737,30 @@ ORDER BY table_name, ordinal_position;
 | v_evolution_achats                       | produit_id                | uuid                     | YES         | null                 |
 | v_evolution_achats                       | mois                      | text                     | YES         | null                 |
 | v_evolution_achats                       | montant                   | numeric                  | YES         | null                 |
+| v_familles_orphelines                    | id                        | uuid                     | YES         | null                 |
+| v_familles_orphelines                    | nom                       | text                     | YES         | null                 |
+| v_familles_orphelines                    | mama_id                   | uuid                     | YES         | null                 |
+| v_familles_orphelines                    | actif                     | boolean                  | YES         | null                 |
+| v_familles_orphelines                    | created_at                | timestamp with time zone | YES         | null                 |
+| v_familles_orphelines                    | parent_id                 | uuid                     | YES         | null                 |
+| v_familles_orphelines                    | populaire                 | boolean                  | YES         | null                 |
+| v_familles_orphelines                    | updated_at                | timestamp with time zone | YES         | null                 |
 | v_fournisseurs_inactifs                  | mama_id                   | uuid                     | YES         | null                 |
 | v_fournisseurs_inactifs                  | fournisseur_id            | uuid                     | YES         | null                 |
 | v_fournisseurs_inactifs                  | nom                       | text                     | YES         | null                 |
 | v_fournisseurs_inactifs                  | fournisseur_actif         | boolean                  | YES         | null                 |
 | v_fournisseurs_inactifs                  | facture_actif             | boolean                  | YES         | null                 |
 | v_fournisseurs_inactifs                  | dernier_achat             | date                     | YES         | null                 |
+| v_menu_engineering                       | fiche_id                  | uuid                     | YES         | null                 |
+| v_menu_engineering                       | nom                       | text                     | YES         | null                 |
+| v_menu_engineering                       | famille                   | text                     | YES         | null                 |
+| v_menu_engineering                       | prix_vente                | numeric                  | YES         | null                 |
+| v_menu_engineering                       | cout_portion              | numeric                  | YES         | null                 |
+| v_menu_engineering                       | periode                   | date                     | YES         | null                 |
+| v_menu_engineering                       | ventes                    | integer                  | YES         | null                 |
+| v_menu_engineering                       | popularite                | numeric                  | YES         | null                 |
+| v_menu_engineering                       | marge                     | numeric                  | YES         | null                 |
+| v_menu_engineering                       | mama_id                   | uuid                     | YES         | null                 |
 | v_monthly_purchases                      | mama_id                   | uuid                     | YES         | null                 |
 | v_monthly_purchases                      | mois                      | text                     | YES         | null                 |
 | v_monthly_purchases                      | total                     | numeric                  | YES         | null                 |
@@ -645,12 +799,19 @@ ORDER BY table_name, ordinal_position;
 | v_produits_actifs                        | stock_theorique           | numeric                  | YES         | null                 |
 | v_produits_actifs                        | main_supplier_id          | uuid                     | YES         | null                 |
 | v_produits_actifs                        | dernier_prix              | numeric                  | YES         | null                 |
-| v_produits_dernier_prix                  | produit_id                | uuid                     | YES         | null                 |
-| v_produits_dernier_prix                  | produit                   | text                     | YES         | null                 |
+| v_produits_dernier_prix                  | id                        | uuid                     | YES         | null                 |
+| v_produits_dernier_prix                  | nom                       | text                     | YES         | null                 |
+| v_produits_dernier_prix                  | famille_id                | uuid                     | YES         | null                 |
+| v_produits_dernier_prix                  | famille                   | text                     | YES         | null                 |
+| v_produits_dernier_prix                  | unite_id                  | uuid                     | YES         | null                 |
+| v_produits_dernier_prix                  | unite                     | text                     | YES         | null                 |
+| v_produits_dernier_prix                  | stock_reel                | numeric                  | YES         | null                 |
+| v_produits_dernier_prix                  | stock_min                 | numeric                  | YES         | null                 |
 | v_produits_dernier_prix                  | fournisseur_id            | uuid                     | YES         | null                 |
 | v_produits_dernier_prix                  | fournisseur               | text                     | YES         | null                 |
 | v_produits_dernier_prix                  | dernier_prix              | numeric                  | YES         | null                 |
 | v_produits_dernier_prix                  | date_livraison            | date                     | YES         | null                 |
+| v_produits_dernier_prix                  | mama_id                   | uuid                     | YES         | null                 |
 | v_produits_inactifs                      | id                        | uuid                     | YES         | null                 |
 | v_produits_inactifs                      | mama_id                   | uuid                     | YES         | null                 |
 | v_produits_inactifs                      | nom                       | text                     | YES         | null                 |
@@ -676,6 +837,14 @@ ORDER BY table_name, ordinal_position;
 | v_reco_surcout                           | produit_id                | uuid                     | YES         | null                 |
 | v_reco_surcout                           | nom                       | text                     | YES         | null                 |
 | v_reco_surcout                           | variation_pct             | numeric                  | YES         | null                 |
+| v_requisition_stock                      | ligne_id                  | uuid                     | YES         | null                 |
+| v_requisition_stock                      | requisition_id            | uuid                     | YES         | null                 |
+| v_requisition_stock                      | zone_id                   | uuid                     | YES         | null                 |
+| v_requisition_stock                      | produit_id                | uuid                     | YES         | null                 |
+| v_requisition_stock                      | stock_reel                | numeric                  | YES         | null                 |
+| v_requisition_stock                      | quantite_demandee         | numeric                  | YES         | null                 |
+| v_requisition_stock                      | stock_apres               | numeric                  | YES         | null                 |
+| v_requisition_stock                      | mama_id                   | uuid                     | YES         | null                 |
 | v_stocks                                 | mama_id                   | uuid                     | YES         | null                 |
 | v_stocks                                 | produit_id                | uuid                     | YES         | null                 |
 | v_stocks                                 | stock                     | numeric                  | YES         | null                 |
@@ -683,6 +852,25 @@ ORDER BY table_name, ordinal_position;
 | v_tendance_prix_produit                  | produit_id                | uuid                     | YES         | null                 |
 | v_tendance_prix_produit                  | mois                      | text                     | YES         | null                 |
 | v_tendance_prix_produit                  | prix_moyen                | numeric                  | YES         | null                 |
+| v_transferts_historique                  | transfert_id              | uuid                     | YES         | null                 |
+| v_transferts_historique                  | date_transfert            | date                     | YES         | null                 |
+| v_transferts_historique                  | zone_source_id            | uuid                     | YES         | null                 |
+| v_transferts_historique                  | zone_source               | text                     | YES         | null                 |
+| v_transferts_historique                  | zone_dest_id              | uuid                     | YES         | null                 |
+| v_transferts_historique                  | zone_dest                 | text                     | YES         | null                 |
+| v_transferts_historique                  | produit_id                | uuid                     | YES         | null                 |
+| v_transferts_historique                  | produit                   | text                     | YES         | null                 |
+| v_transferts_historique                  | quantite                  | numeric                  | YES         | null                 |
+| v_transferts_historique                  | commentaire               | text                     | YES         | null                 |
+| v_transferts_historique                  | utilisateur_id            | uuid                     | YES         | null                 |
+| v_transferts_historique                  | created_at                | timestamp with time zone | YES         | null                 |
+| v_unites_orphelines                      | id                        | uuid                     | YES         | null                 |
+| v_unites_orphelines                      | nom                       | text                     | YES         | null                 |
+| v_unites_orphelines                      | mama_id                   | uuid                     | YES         | null                 |
+| v_unites_orphelines                      | actif                     | boolean                  | YES         | null                 |
+| v_unites_orphelines                      | created_at                | timestamp with time zone | YES         | null                 |
+| v_unites_orphelines                      | populaire                 | boolean                  | YES         | null                 |
+| v_unites_orphelines                      | updated_at                | timestamp with time zone | YES         | null                 |
 | validation_requests                      | id                        | uuid                     | NO          | gen_random_uuid()    |
 | validation_requests                      | mama_id                   | uuid                     | YES         | null                 |
 | validation_requests                      | user_id                   | uuid                     | YES         | null                 |
@@ -722,62 +910,75 @@ ORDER BY table_name, ordinal_position;
 | zones_stock                              | created_at                | timestamp with time zone | YES         | now()                |
 | zones_stock                              | updated_at                | timestamp with time zone | YES         | now()                |
 | zones_stock                              | actif                     | boolean                  | YES         | true                 |
+| zones_stock                              | description               | text                     | YES         | null                 |
+| zones_stock                              | type_zone                 | text                     | YES         | null                 |
 
 
 SELECT
-    tc.table_name, kcu.column_name,
+    tc.table_name,
+    kcu.column_name,
     ccu.table_name AS foreign_table_name,
     ccu.column_name AS foreign_column_name
 FROM
     information_schema.table_constraints AS tc
     JOIN information_schema.key_column_usage AS kcu
       ON tc.constraint_name = kcu.constraint_name
-      AND tc.table_schema = kcu.table_schema
+     AND tc.table_schema = kcu.table_schema
     JOIN information_schema.constraint_column_usage AS ccu
       ON ccu.constraint_name = tc.constraint_name
-      AND ccu.table_schema = tc.table_schema
-WHERE tc.constraint_type = 'FOREIGN KEY' AND tc.table_schema = 'public'
-ORDER BY tc.table_name;
+     AND ccu.table_schema = tc.table_schema
+WHERE tc.constraint_type = 'FOREIGN KEY'
+  AND tc.table_schema = 'public'
+ORDER BY tc.table_name, kcu.column_name;
 
 
 | table_name                | column_name         | foreign_table_name | foreign_column_name |
 | ------------------------- | ------------------- | ------------------ | ------------------- |
 | access_rights             | mama_id             | mamas              | id                  |
 | access_rights             | role_id             | roles              | id                  |
-| achats                    | produit_id          | produits           | id                  |
 | achats                    | mama_id             | mamas              | id                  |
+| achats                    | produit_id          | produits           | id                  |
 | achats                    | supplier_id         | fournisseurs       | id                  |
 | api_keys                  | mama_id             | mamas              | id                  |
 | api_keys                  | user_id             | utilisateurs       | id                  |
+| bons_livraison            | commande_id         | commandes          | id                  |
+| bons_livraison            | facture_id          | factures           | id                  |
 | bons_livraison            | fournisseur_id      | fournisseurs       | id                  |
 | bons_livraison            | mama_id             | mamas              | id                  |
-| catalogue_updates         | mama_id             | mamas              | id                  |
 | catalogue_updates         | fournisseur_id      | fournisseurs       | id                  |
+| catalogue_updates         | mama_id             | mamas              | id                  |
 | catalogue_updates         | produit_id          | produits           | id                  |
 | centres_de_cout           | mama_id             | mamas              | id                  |
-| commandes                 | mama_id             | mamas              | id                  |
+| commande_lignes           | commande_id         | commandes          | id                  |
+| commande_lignes           | mama_id             | mamas              | id                  |
+| commande_lignes           | produit_id          | produits           | id                  |
+| commandes                 | bl_id               | bons_livraison     | id                  |
+| commandes                 | facture_id          | factures           | id                  |
 | commandes                 | fournisseur_id      | fournisseurs       | id                  |
+| commandes                 | mama_id             | mamas              | id                  |
 | compta_mapping            | mama_id             | mamas              | id                  |
-| consentements_utilisateur | utilisateur_id      | utilisateurs       | id                  |
 | consentements_utilisateur | mama_id             | mamas              | id                  |
 | consentements_utilisateur | user_id             | utilisateurs       | id                  |
+| consentements_utilisateur | utilisateur_id      | utilisateurs       | id                  |
 | documentation             | mama_id             | mamas              | id                  |
 | documents                 | mama_id             | mamas              | id                  |
 | etapes_onboarding         | mama_id             | mamas              | id                  |
+| facture_lignes            | facture_id          | factures           | id                  |
 | facture_lignes            | mama_id             | mamas              | id                  |
 | facture_lignes            | produit_id          | produits           | id                  |
-| facture_lignes            | facture_id          | factures           | id                  |
-| factures                  | mama_id             | mamas              | id                  |
 | factures                  | fournisseur_id      | fournisseurs       | id                  |
+| factures                  | mama_id             | mamas              | id                  |
 | familles                  | mama_id             | mamas              | id                  |
+| familles                  | parent_id           | familles           | id                  |
 | feedback                  | mama_id             | mamas              | id                  |
 | feedback                  | user_id             | utilisateurs       | id                  |
+| fiche_cout_history        | changed_by          | users              | id                  |
 | fiche_cout_history        | fiche_id            | fiches             | id                  |
 | fiche_cout_history        | mama_id             | mamas              | id                  |
-| fiche_cout_history        | changed_by          | users              | id                  |
+| fiche_lignes              | fiche_id            | fiches             | id                  |
 | fiche_lignes              | mama_id             | mamas              | id                  |
 | fiche_lignes              | produit_id          | produits           | id                  |
-| fiche_lignes              | fiche_id            | fiches             | id                  |
+| fiche_lignes              | sous_fiche_id       | fiches_techniques  | id                  |
 | fiche_prix_history        | changed_by          | users              | id                  |
 | fiche_prix_history        | fiche_id            | fiches             | id                  |
 | fiche_prix_history        | mama_id             | mamas              | id                  |
@@ -786,292 +987,128 @@ ORDER BY tc.table_name;
 | fiches_techniques         | mama_id             | mamas              | id                  |
 | fournisseur_contacts      | fournisseur_id      | fournisseurs       | id                  |
 | fournisseur_contacts      | mama_id             | mamas              | id                  |
-| fournisseur_notes         | mama_id             | mamas              | id                  |
 | fournisseur_notes         | fournisseur_id      | fournisseurs       | id                  |
-| fournisseur_produits      | produit_id          | produits           | id                  |
+| fournisseur_notes         | mama_id             | mamas              | id                  |
+| fournisseur_produits      | fournisseur_id      | fournisseurs       | id                  |
+| fournisseur_produits      | fournisseur_id      | fournisseurs       | id                  |
 | fournisseur_produits      | mama_id             | mamas              | id                  |
-| fournisseur_produits      | fournisseur_id      | fournisseurs       | id                  |
-| fournisseur_produits      | fournisseur_id      | fournisseurs       | id                  |
+| fournisseur_produits      | produit_id          | produits           | id                  |
 | fournisseur_produits      | produit_id          | produits           | id                  |
 | fournisseurs              | mama_id             | mamas              | id                  |
-| fournisseurs_api_config   | mama_id             | mamas              | id                  |
 | fournisseurs_api_config   | fournisseur_id      | fournisseurs       | id                  |
+| fournisseurs_api_config   | mama_id             | mamas              | id                  |
 | gadgets                   | tableau_id          | tableaux_de_bord   | id                  |
-| guides_seen               | user_id             | utilisateurs       | id                  |
 | guides_seen               | mama_id             | mamas              | id                  |
-| inventaire_lignes         | mama_id             | mamas              | id                  |
+| guides_seen               | user_id             | utilisateurs       | id                  |
 | inventaire_lignes         | inventaire_id       | inventaires        | id                  |
-| inventaire_lignes         | zone_id             | zones_stock        | id                  |
+| inventaire_lignes         | mama_id             | mamas              | id                  |
 | inventaire_lignes         | produit_id          | produits           | id                  |
+| inventaire_lignes         | zone_id             | zones_stock        | id                  |
 | inventaire_zones          | mama_id             | mamas              | id                  |
 | inventaires               | mama_id             | mamas              | id                  |
-| journal_audit             | utilisateur_id      | utilisateurs       | id                  |
-| journal_audit             | mama_id             | mamas              | id                  |
 | journal_audit             | changed_by          | users              | id                  |
-| journaux_utilisateur      | user_id             | users              | id                  |
+| journal_audit             | mama_id             | mamas              | id                  |
+| journal_audit             | utilisateur_id      | utilisateurs       | id                  |
 | journaux_utilisateur      | done_by             | users              | id                  |
-| journaux_utilisateur      | utilisateur_id      | utilisateurs       | id                  |
 | journaux_utilisateur      | mama_id             | mamas              | id                  |
-| lignes_bl                 | produit_id          | produits           | id                  |
+| journaux_utilisateur      | user_id             | users              | id                  |
+| journaux_utilisateur      | utilisateur_id      | utilisateurs       | id                  |
 | lignes_bl                 | bl_id               | bons_livraison     | id                  |
+| lignes_bl                 | mama_id             | mamas              | id                  |
+| lignes_bl                 | produit_id          | produits           | id                  |
+| logs_securite             | mama_id             | mamas              | id                  |
 | logs_securite             | user_id             | utilisateurs       | id                  |
 | logs_securite             | utilisateur_id      | utilisateurs       | id                  |
-| logs_securite             | mama_id             | mamas              | id                  |
-| menu_fiches               | mama_id             | mamas              | id                  |
 | menu_fiches               | fiche_id            | fiches             | id                  |
+| menu_fiches               | mama_id             | mamas              | id                  |
 | menu_fiches               | menu_id             | menus              | id                  |
 | menus                     | mama_id             | mamas              | id                  |
-| mouvements_centres_cout   | mama_id             | mamas              | id                  |
+| menus_jour                | mama_id             | mamas              | id                  |
+| menus_jour_fiches         | fiche_id            | fiches_techniques  | id                  |
+| menus_jour_fiches         | mama_id             | mamas              | id                  |
+| menus_jour_fiches         | menu_jour_id        | menus_jour         | id                  |
 | mouvements_centres_cout   | centre_cout_id      | centres_de_cout    | id                  |
+| mouvements_centres_cout   | mama_id             | mamas              | id                  |
 | notification_preferences  | mama_id             | mamas              | id                  |
 | notification_preferences  | utilisateur_id      | utilisateurs       | id                  |
 | notifications             | mama_id             | mamas              | id                  |
-| notifications             | utilisateur_id      | utilisateurs       | id                  |
 | notifications             | user_id             | utilisateurs       | id                  |
+| notifications             | utilisateur_id      | utilisateurs       | id                  |
 | parametres                | mama_id             | mamas              | id                  |
 | permissions               | mama_id             | mamas              | id                  |
 | permissions               | role_id             | roles              | id                  |
 | permissions               | user_id             | users              | id                  |
 | pertes                    | centre_cout_id      | centres_de_cout    | id                  |
-| pertes                    | produit_id          | produits           | id                  |
-| pertes                    | mama_id             | mamas              | id                  |
 | pertes                    | created_by          | users              | id                  |
-| planning_previsionnel     | produit_id          | produits           | id                  |
+| pertes                    | mama_id             | mamas              | id                  |
+| pertes                    | produit_id          | produits           | id                  |
 | planning_previsionnel     | mama_id             | mamas              | id                  |
-| produits                  | unite_id            | unites             | id                  |
+| planning_previsionnel     | produit_id          | produits           | id                  |
 | produits                  | famille_id          | familles           | id                  |
+| produits                  | fiche_technique_id  | fiches_techniques  | id                  |
 | produits                  | main_supplier_id    | fournisseurs       | id                  |
 | produits                  | mama_id             | mamas              | id                  |
-| promotion_produits        | promotion_id        | promotions         | id                  |
+| produits                  | unite_id            | unites             | id                  |
 | promotion_produits        | mama_id             | mamas              | id                  |
 | promotion_produits        | produit_id          | produits           | id                  |
+| promotion_produits        | promotion_id        | promotions         | id                  |
 | promotions                | mama_id             | mamas              | id                  |
-| regles_alertes            | produit_id          | produits           | id                  |
 | regles_alertes            | mama_id             | mamas              | id                  |
-| requisitions              | mama_id             | mamas              | id                  |
-| requisitions              | zone_id             | zones_stock        | id                  |
-| requisitions              | produit_id          | produits           | id                  |
+| regles_alertes            | produit_id          | produits           | id                  |
+| requisition_lignes        | mama_id             | mamas              | id                  |
+| requisition_lignes        | produit_id          | produits           | id                  |
+| requisition_lignes        | requisition_id      | requisitions       | id                  |
 | requisitions              | auteur_id           | users              | id                  |
+| requisitions              | mama_id             | mamas              | id                  |
+| requisitions              | produit_id          | produits           | id                  |
+| requisitions              | utilisateur_id      | utilisateurs       | id                  |
+| requisitions              | zone_id             | zones_stock        | id                  |
 | roles                     | mama_id             | mamas              | id                  |
-| signalements              | mama_id             | mamas              | id                  |
 | signalements              | created_by          | utilisateurs       | id                  |
+| signalements              | mama_id             | mamas              | id                  |
+| stock_mouvements          | auteur_id           | utilisateurs       | id                  |
+| stock_mouvements          | inventaire_id       | inventaires        | id                  |
+| stock_mouvements          | mama_id             | mamas              | id                  |
 | stock_mouvements          | produit_id          | produits           | id                  |
 | stock_mouvements          | zone_destination_id | zones_stock        | id                  |
+| stock_mouvements          | zone_id             | zones_stock        | id                  |
 | stock_mouvements          | zone_source_id      | zones_stock        | id                  |
-| stock_mouvements          | inventaire_id       | inventaires        | id                  |
-| stock_mouvements          | auteur_id           | utilisateurs       | id                  |
-| stock_mouvements          | mama_id             | mamas              | id                  |
-| stocks                    | zone_id             | zones_stock        | id                  |
 | stocks                    | mama_id             | mamas              | id                  |
 | stocks                    | produit_id          | produits           | id                  |
+| stocks                    | zone_id             | zones_stock        | id                  |
 | tableaux_de_bord          | mama_id             | mamas              | id                  |
 | tableaux_de_bord          | utilisateur_id      | utilisateurs       | id                  |
-| tache_instances           | mama_id             | mamas              | id                  |
+| tache_assignations        | mama_id             | mamas              | id                  |
+| tache_assignations        | tache_id            | taches             | id                  |
+| tache_assignations        | utilisateur_id      | utilisateurs       | id                  |
 | tache_instances           | done_by             | users              | id                  |
+| tache_instances           | mama_id             | mamas              | id                  |
 | tache_instances           | tache_id            | taches             | id                  |
 | taches                    | created_by          | users              | id                  |
 | taches                    | mama_id             | mamas              | id                  |
+| taches                    | utilisateur_id      | utilisateurs       | id                  |
 | tooltips                  | mama_id             | mamas              | id                  |
+| transfert_lignes          | produit_id          | produits           | id                  |
+| transfert_lignes          | transfert_id        | transferts         | id                  |
 | transferts                | created_by          | users              | id                  |
 | transferts                | mama_id             | mamas              | id                  |
 | transferts                | produit_id          | produits           | id                  |
+| transferts                | utilisateur_id      | utilisateurs       | id                  |
+| transferts                | zone_dest_id        | zones_stock        | id                  |
+| transferts                | zone_source_id      | zones_stock        | id                  |
 | unites                    | mama_id             | mamas              | id                  |
-| usage_stats               | user_id             | utilisateurs       | id                  |
+| unites_equivalentes       | mama_id             | mamas              | id                  |
+| unites_equivalentes       | unite_dst           | unites             | id                  |
+| unites_equivalentes       | unite_src           | unites             | id                  |
 | usage_stats               | mama_id             | mamas              | id                  |
-| utilisateurs              | role_id             | roles              | id                  |
+| usage_stats               | user_id             | utilisateurs       | id                  |
 | utilisateurs              | mama_id             | mamas              | id                  |
-| validation_requests       | user_id             | utilisateurs       | id                  |
+| utilisateurs              | role_id             | roles              | id                  |
 | validation_requests       | mama_id             | mamas              | id                  |
+| validation_requests       | user_id             | utilisateurs       | id                  |
+| ventes_boissons           | boisson_id          | produits           | id                  |
 | ventes_boissons           | created_by          | users              | id                  |
 | ventes_boissons           | mama_id             | mamas              | id                  |
-| ventes_boissons           | boisson_id          | produits           | id                  |
 | ventes_fiches_carte       | fiche_id            | fiches             | id                  |
 | ventes_fiches_carte       | mama_id             | mamas              | id                  |
 | zones_stock               | mama_id             | mamas              | id                  |
-
-
-
-SELECT
-    tablename, indexname, indexdef
-FROM
-    pg_indexes
-WHERE
-    schemaname = 'public'
-ORDER BY tablename, indexname;
-
-| tablename                 | indexname                                  | indexdef                                                                                                                              |
-| ------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| access_rights             | access_rights_pkey                         | CREATE UNIQUE INDEX access_rights_pkey ON public.access_rights USING btree (id)                                                       |
-| access_rights             | idx_access_rights_mama_id                  | CREATE INDEX idx_access_rights_mama_id ON public.access_rights USING btree (mama_id)                                                  |
-| access_rights             | idx_access_rights_mama_role_module         | CREATE INDEX idx_access_rights_mama_role_module ON public.access_rights USING btree (mama_id, role_id, module)                        |
-| access_rights             | uniq_access_rights_mama_role_module        | CREATE UNIQUE INDEX uniq_access_rights_mama_role_module ON public.access_rights USING btree (mama_id, role_id, module)                |
-| achats                    | achats_pkey                                | CREATE UNIQUE INDEX achats_pkey ON public.achats USING btree (id)                                                                     |
-| achats                    | idx_achats_date                            | CREATE INDEX idx_achats_date ON public.achats USING btree (date_achat)                                                                |
-| achats                    | idx_achats_mama_id                         | CREATE INDEX idx_achats_mama_id ON public.achats USING btree (mama_id)                                                                |
-| api_keys                  | api_keys_pkey                              | CREATE UNIQUE INDEX api_keys_pkey ON public.api_keys USING btree (id)                                                                 |
-| api_keys                  | idx_api_keys_mama_id                       | CREATE INDEX idx_api_keys_mama_id ON public.api_keys USING btree (mama_id)                                                            |
-| auth_double_facteur       | auth_double_facteur_pkey                   | CREATE UNIQUE INDEX auth_double_facteur_pkey ON public.auth_double_facteur USING btree (id)                                           |
-| bons_livraison            | bons_livraison_pkey                        | CREATE UNIQUE INDEX bons_livraison_pkey ON public.bons_livraison USING btree (id)                                                     |
-| bons_livraison            | idx_bons_livraison_mama_id                 | CREATE INDEX idx_bons_livraison_mama_id ON public.bons_livraison USING btree (mama_id)                                                |
-| catalogue_updates         | catalogue_updates_pkey                     | CREATE UNIQUE INDEX catalogue_updates_pkey ON public.catalogue_updates USING btree (id)                                               |
-| catalogue_updates         | idx_catalogue_updates_mama_id              | CREATE INDEX idx_catalogue_updates_mama_id ON public.catalogue_updates USING btree (mama_id)                                          |
-| centres_de_cout           | centres_de_cout_pkey                       | CREATE UNIQUE INDEX centres_de_cout_pkey ON public.centres_de_cout USING btree (id)                                                   |
-| centres_de_cout           | idx_centres_de_cout_created_at             | CREATE INDEX idx_centres_de_cout_created_at ON public.centres_de_cout USING btree (created_at)                                        |
-| centres_de_cout           | idx_centres_de_cout_mama_id                | CREATE INDEX idx_centres_de_cout_mama_id ON public.centres_de_cout USING btree (mama_id)                                              |
-| commandes                 | commandes_pkey                             | CREATE UNIQUE INDEX commandes_pkey ON public.commandes USING btree (id)                                                               |
-| commandes                 | idx_commandes_mama_id                      | CREATE INDEX idx_commandes_mama_id ON public.commandes USING btree (mama_id)                                                          |
-| compta_mapping            | compta_mapping_pkey                        | CREATE UNIQUE INDEX compta_mapping_pkey ON public.compta_mapping USING btree (id)                                                     |
-| compta_mapping            | idx_compta_mapping_mama_id                 | CREATE INDEX idx_compta_mapping_mama_id ON public.compta_mapping USING btree (mama_id)                                                |
-| consentements_utilisateur | consentements_utilisateur_pkey             | CREATE UNIQUE INDEX consentements_utilisateur_pkey ON public.consentements_utilisateur USING btree (id)                               |
-| consentements_utilisateur | idx_consentements_utilisateur_mama         | CREATE INDEX idx_consentements_utilisateur_mama ON public.consentements_utilisateur USING btree (mama_id)                             |
-| consentements_utilisateur | idx_consentements_utilisateur_mama_id      | CREATE INDEX idx_consentements_utilisateur_mama_id ON public.consentements_utilisateur USING btree (mama_id)                          |
-| consentements_utilisateur | idx_consentements_utilisateur_user         | CREATE INDEX idx_consentements_utilisateur_user ON public.consentements_utilisateur USING btree (user_id)                             |
-| documentation             | documentation_pkey                         | CREATE UNIQUE INDEX documentation_pkey ON public.documentation USING btree (id)                                                       |
-| documentation             | idx_documentation_mama_id                  | CREATE INDEX idx_documentation_mama_id ON public.documentation USING btree (mama_id)                                                  |
-| documents                 | documents_pkey                             | CREATE UNIQUE INDEX documents_pkey ON public.documents USING btree (id)                                                               |
-| documents                 | idx_documents_mama_id                      | CREATE INDEX idx_documents_mama_id ON public.documents USING btree (mama_id)                                                          |
-| etapes_onboarding         | etapes_onboarding_pkey                     | CREATE UNIQUE INDEX etapes_onboarding_pkey ON public.etapes_onboarding USING btree (id)                                               |
-| etapes_onboarding         | idx_etapes_onboarding_mama_id              | CREATE INDEX idx_etapes_onboarding_mama_id ON public.etapes_onboarding USING btree (mama_id)                                          |
-| facture_lignes            | facture_lignes_pkey                        | CREATE UNIQUE INDEX facture_lignes_pkey ON public.facture_lignes USING btree (id)                                                     |
-| facture_lignes            | idx_facture_lignes_mama_id                 | CREATE INDEX idx_facture_lignes_mama_id ON public.facture_lignes USING btree (mama_id)                                                |
-| factures                  | factures_pkey                              | CREATE UNIQUE INDEX factures_pkey ON public.factures USING btree (id)                                                                 |
-| factures                  | idx_factures_created_at                    | CREATE INDEX idx_factures_created_at ON public.factures USING btree (created_at)                                                      |
-| factures                  | idx_factures_fournisseur_id                | CREATE INDEX idx_factures_fournisseur_id ON public.factures USING btree (fournisseur_id)                                              |
-| factures                  | idx_factures_mama_id                       | CREATE INDEX idx_factures_mama_id ON public.factures USING btree (mama_id)                                                            |
-| factures                  | uniq_factures_numero                       | CREATE UNIQUE INDEX uniq_factures_numero ON public.factures USING btree (mama_id, fournisseur_id, numero, date_facture)               |
-| familles                  | familles_pkey                              | CREATE UNIQUE INDEX familles_pkey ON public.familles USING btree (id)                                                                 |
-| familles                  | idx_familles_mama_id                       | CREATE INDEX idx_familles_mama_id ON public.familles USING btree (mama_id)                                                            |
-| feedback                  | feedback_pkey                              | CREATE UNIQUE INDEX feedback_pkey ON public.feedback USING btree (id)                                                                 |
-| feedback                  | idx_feedback_mama_id                       | CREATE INDEX idx_feedback_mama_id ON public.feedback USING btree (mama_id)                                                            |
-| fiche_cout_history        | fiche_cout_history_pkey                    | CREATE UNIQUE INDEX fiche_cout_history_pkey ON public.fiche_cout_history USING btree (id)                                             |
-| fiche_cout_history        | idx_fiche_cout_history_mama_id             | CREATE INDEX idx_fiche_cout_history_mama_id ON public.fiche_cout_history USING btree (mama_id)                                        |
-| fiche_lignes              | fiche_lignes_pkey                          | CREATE UNIQUE INDEX fiche_lignes_pkey ON public.fiche_lignes USING btree (id)                                                         |
-| fiche_lignes              | idx_fiche_lignes_mama_id                   | CREATE INDEX idx_fiche_lignes_mama_id ON public.fiche_lignes USING btree (mama_id)                                                    |
-| fiche_lignes              | idx_fiche_lignes_produit_id                | CREATE INDEX idx_fiche_lignes_produit_id ON public.fiche_lignes USING btree (produit_id)                                              |
-| fiche_prix_history        | fiche_prix_history_pkey                    | CREATE UNIQUE INDEX fiche_prix_history_pkey ON public.fiche_prix_history USING btree (id)                                             |
-| fiche_prix_history        | idx_fiche_prix_history_mama_id             | CREATE INDEX idx_fiche_prix_history_mama_id ON public.fiche_prix_history USING btree (mama_id)                                        |
-| fiches                    | fiches_pkey                                | CREATE UNIQUE INDEX fiches_pkey ON public.fiches USING btree (id)                                                                     |
-| fiches                    | idx_fiches_created_at                      | CREATE INDEX idx_fiches_created_at ON public.fiches USING btree (created_at)                                                          |
-| fiches                    | idx_fiches_mama_id                         | CREATE INDEX idx_fiches_mama_id ON public.fiches USING btree (mama_id)                                                                |
-| fiches_techniques         | fiches_techniques_pkey                     | CREATE UNIQUE INDEX fiches_techniques_pkey ON public.fiches_techniques USING btree (id)                                               |
-| fiches_techniques         | idx_fiches_techniques_mama_id              | CREATE INDEX idx_fiches_techniques_mama_id ON public.fiches_techniques USING btree (mama_id)                                          |
-| fournisseur_contacts      | fournisseur_contacts_pkey                  | CREATE UNIQUE INDEX fournisseur_contacts_pkey ON public.fournisseur_contacts USING btree (id)                                         |
-| fournisseur_contacts      | idx_fournisseur_contacts_mama_id           | CREATE INDEX idx_fournisseur_contacts_mama_id ON public.fournisseur_contacts USING btree (mama_id)                                    |
-| fournisseur_notes         | fournisseur_notes_pkey                     | CREATE UNIQUE INDEX fournisseur_notes_pkey ON public.fournisseur_notes USING btree (id)                                               |
-| fournisseur_notes         | idx_fournisseur_notes_mama_id              | CREATE INDEX idx_fournisseur_notes_mama_id ON public.fournisseur_notes USING btree (mama_id)                                          |
-| fournisseur_produits      | fournisseur_produits_pkey                  | CREATE UNIQUE INDEX fournisseur_produits_pkey ON public.fournisseur_produits USING btree (id)                                         |
-| fournisseur_produits      | idx_fournisseur_produits_mama_id           | CREATE INDEX idx_fournisseur_produits_mama_id ON public.fournisseur_produits USING btree (mama_id)                                    |
-| fournisseur_produits      | idx_fp_date                                | CREATE INDEX idx_fp_date ON public.fournisseur_produits USING btree (date_livraison)                                                  |
-| fournisseur_produits      | idx_fp_fournisseur                         | CREATE INDEX idx_fp_fournisseur ON public.fournisseur_produits USING btree (fournisseur_id)                                           |
-| fournisseur_produits      | idx_fp_produit                             | CREATE INDEX idx_fp_produit ON public.fournisseur_produits USING btree (produit_id)                                                   |
-| fournisseur_produits      | uniq_fournisseur_produits                  | CREATE UNIQUE INDEX uniq_fournisseur_produits ON public.fournisseur_produits USING btree (produit_id, fournisseur_id, date_livraison) |
-| fournisseurs              | fournisseurs_pkey                          | CREATE UNIQUE INDEX fournisseurs_pkey ON public.fournisseurs USING btree (id)                                                         |
-| fournisseurs              | idx_fournisseurs_created_at                | CREATE INDEX idx_fournisseurs_created_at ON public.fournisseurs USING btree (created_at)                                              |
-| fournisseurs              | idx_fournisseurs_mama_id                   | CREATE INDEX idx_fournisseurs_mama_id ON public.fournisseurs USING btree (mama_id)                                                    |
-| fournisseurs_api_config   | fournisseurs_api_config_pkey               | CREATE UNIQUE INDEX fournisseurs_api_config_pkey ON public.fournisseurs_api_config USING btree (fournisseur_id, mama_id)              |
-| fournisseurs_api_config   | idx_fournisseurs_api_config_fournisseur_id | CREATE INDEX idx_fournisseurs_api_config_fournisseur_id ON public.fournisseurs_api_config USING btree (fournisseur_id)                |
-| fournisseurs_api_config   | idx_fournisseurs_api_config_mama_id        | CREATE INDEX idx_fournisseurs_api_config_mama_id ON public.fournisseurs_api_config USING btree (mama_id)                              |
-| gadgets                   | gadgets_pkey                               | CREATE UNIQUE INDEX gadgets_pkey ON public.gadgets USING btree (id)                                                                   |
-| gadgets                   | idx_gadgets_actif                          | CREATE INDEX idx_gadgets_actif ON public.gadgets USING btree (actif)                                                                  |
-| gadgets                   | idx_gadgets_mama_id                        | CREATE INDEX idx_gadgets_mama_id ON public.gadgets USING btree (mama_id)                                                              |
-| guides_seen               | guides_seen_pkey                           | CREATE UNIQUE INDEX guides_seen_pkey ON public.guides_seen USING btree (user_id, module)                                              |
-| guides_seen               | idx_guides_seen_mama_id                    | CREATE INDEX idx_guides_seen_mama_id ON public.guides_seen USING btree (mama_id)                                                      |
-| help_articles             | help_articles_pkey                         | CREATE UNIQUE INDEX help_articles_pkey ON public.help_articles USING btree (id)                                                       |
-| inventaire_lignes         | idx_inventaire_lignes_mama_id              | CREATE INDEX idx_inventaire_lignes_mama_id ON public.inventaire_lignes USING btree (mama_id)                                          |
-| inventaire_lignes         | inventaire_lignes_pkey                     | CREATE UNIQUE INDEX inventaire_lignes_pkey ON public.inventaire_lignes USING btree (id)                                               |
-| inventaire_zones          | idx_inventaire_zones_mama_id               | CREATE INDEX idx_inventaire_zones_mama_id ON public.inventaire_zones USING btree (mama_id)                                            |
-| inventaire_zones          | inventaire_zones_pkey                      | CREATE UNIQUE INDEX inventaire_zones_pkey ON public.inventaire_zones USING btree (id)                                                 |
-| inventaires               | idx_inventaires_created_at                 | CREATE INDEX idx_inventaires_created_at ON public.inventaires USING btree (created_at)                                                |
-| inventaires               | idx_inventaires_mama_id                    | CREATE INDEX idx_inventaires_mama_id ON public.inventaires USING btree (mama_id)                                                      |
-| inventaires               | inventaires_pkey                           | CREATE UNIQUE INDEX inventaires_pkey ON public.inventaires USING btree (id)                                                           |
-| journal_audit             | idx_journal_audit_mama                     | CREATE INDEX idx_journal_audit_mama ON public.journal_audit USING btree (mama_id)                                                     |
-| journal_audit             | idx_journal_audit_mama_id                  | CREATE INDEX idx_journal_audit_mama_id ON public.journal_audit USING btree (mama_id)                                                  |
-| journal_audit             | journal_audit_pkey                         | CREATE UNIQUE INDEX journal_audit_pkey ON public.journal_audit USING btree (id)                                                       |
-| journaux_utilisateur      | idx_journaux_utilisateur_mama              | CREATE INDEX idx_journaux_utilisateur_mama ON public.journaux_utilisateur USING btree (mama_id)                                       |
-| journaux_utilisateur      | idx_journaux_utilisateur_mama_id           | CREATE INDEX idx_journaux_utilisateur_mama_id ON public.journaux_utilisateur USING btree (mama_id)                                    |
-| journaux_utilisateur      | journaux_utilisateur_pkey                  | CREATE UNIQUE INDEX journaux_utilisateur_pkey ON public.journaux_utilisateur USING btree (id)                                         |
-| lignes_bl                 | lignes_bl_pkey                             | CREATE UNIQUE INDEX lignes_bl_pkey ON public.lignes_bl USING btree (id)                                                               |
-| logs_securite             | idx_logs_securite_mama                     | CREATE INDEX idx_logs_securite_mama ON public.logs_securite USING btree (mama_id)                                                     |
-| logs_securite             | idx_logs_securite_mama_id                  | CREATE INDEX idx_logs_securite_mama_id ON public.logs_securite USING btree (mama_id)                                                  |
-| logs_securite             | logs_securite_pkey                         | CREATE UNIQUE INDEX logs_securite_pkey ON public.logs_securite USING btree (id)                                                       |
-| mamas                     | mamas_pkey                                 | CREATE UNIQUE INDEX mamas_pkey ON public.mamas USING btree (id)                                                                       |
-| menu_fiches               | idx_menu_fiches_fiche_id                   | CREATE INDEX idx_menu_fiches_fiche_id ON public.menu_fiches USING btree (fiche_id)                                                    |
-| menu_fiches               | idx_menu_fiches_mama_id                    | CREATE INDEX idx_menu_fiches_mama_id ON public.menu_fiches USING btree (mama_id)                                                      |
-| menu_fiches               | menu_fiches_pkey                           | CREATE UNIQUE INDEX menu_fiches_pkey ON public.menu_fiches USING btree (id)                                                           |
-| menus                     | idx_menus_mama_id                          | CREATE INDEX idx_menus_mama_id ON public.menus USING btree (mama_id)                                                                  |
-| menus                     | menus_pkey                                 | CREATE UNIQUE INDEX menus_pkey ON public.menus USING btree (id)                                                                       |
-| mouvements_centres_cout   | idx_mouvements_centres_cout_mama_id        | CREATE INDEX idx_mouvements_centres_cout_mama_id ON public.mouvements_centres_cout USING btree (mama_id)                              |
-| mouvements_centres_cout   | mouvements_centres_cout_pkey               | CREATE UNIQUE INDEX mouvements_centres_cout_pkey ON public.mouvements_centres_cout USING btree (id)                                   |
-| notification_preferences  | notification_preferences_pkey              | CREATE UNIQUE INDEX notification_preferences_pkey ON public.notification_preferences USING btree (id)                                 |
-| notification_preferences  | uniq_notif_prefs_user                      | CREATE UNIQUE INDEX uniq_notif_prefs_user ON public.notification_preferences USING btree (utilisateur_id, mama_id)                    |
-| notifications             | idx_notifications_mama_id                  | CREATE INDEX idx_notifications_mama_id ON public.notifications USING btree (mama_id)                                                  |
-| notifications             | idx_notifications_user                     | CREATE INDEX idx_notifications_user ON public.notifications USING btree (utilisateur_id)                                              |
-| notifications             | notifications_pkey                         | CREATE UNIQUE INDEX notifications_pkey ON public.notifications USING btree (id)                                                       |
-| parametres                | idx_parametres_mama_id                     | CREATE INDEX idx_parametres_mama_id ON public.parametres USING btree (mama_id)                                                        |
-| parametres                | parametres_pkey                            | CREATE UNIQUE INDEX parametres_pkey ON public.parametres USING btree (id)                                                             |
-| permissions               | idx_permissions_mama_id                    | CREATE INDEX idx_permissions_mama_id ON public.permissions USING btree (mama_id)                                                      |
-| permissions               | permissions_pkey                           | CREATE UNIQUE INDEX permissions_pkey ON public.permissions USING btree (id)                                                           |
-| pertes                    | idx_pertes_mama_id                         | CREATE INDEX idx_pertes_mama_id ON public.pertes USING btree (mama_id)                                                                |
-| pertes                    | pertes_pkey                                | CREATE UNIQUE INDEX pertes_pkey ON public.pertes USING btree (id)                                                                     |
-| planning_previsionnel     | idx_planning_previsionnel_mama_id          | CREATE INDEX idx_planning_previsionnel_mama_id ON public.planning_previsionnel USING btree (mama_id)                                  |
-| planning_previsionnel     | planning_previsionnel_pkey                 | CREATE UNIQUE INDEX planning_previsionnel_pkey ON public.planning_previsionnel USING btree (id)                                       |
-| produits                  | idx_produits_created_at                    | CREATE INDEX idx_produits_created_at ON public.produits USING btree (created_at)                                                      |
-| produits                  | idx_produits_famille_id                    | CREATE INDEX idx_produits_famille_id ON public.produits USING btree (famille_id)                                                      |
-| produits                  | idx_produits_main_supplier                 | CREATE INDEX idx_produits_main_supplier ON public.produits USING btree (main_supplier_id)                                             |
-| produits                  | idx_produits_mama_id                       | CREATE INDEX idx_produits_mama_id ON public.produits USING btree (mama_id)                                                            |
-| produits                  | idx_produits_unite_id                      | CREATE INDEX idx_produits_unite_id ON public.produits USING btree (unite_id)                                                          |
-| produits                  | produits_pkey                              | CREATE UNIQUE INDEX produits_pkey ON public.produits USING btree (id)                                                                 |
-| promotion_produits        | idx_promotion_produits_mama_id             | CREATE INDEX idx_promotion_produits_mama_id ON public.promotion_produits USING btree (mama_id)                                        |
-| promotion_produits        | promotion_produits_pkey                    | CREATE UNIQUE INDEX promotion_produits_pkey ON public.promotion_produits USING btree (id)                                             |
-| promotions                | idx_promotions_created_at                  | CREATE INDEX idx_promotions_created_at ON public.promotions USING btree (created_at)                                                  |
-| promotions                | idx_promotions_mama_id                     | CREATE INDEX idx_promotions_mama_id ON public.promotions USING btree (mama_id)                                                        |
-| promotions                | promotions_pkey                            | CREATE UNIQUE INDEX promotions_pkey ON public.promotions USING btree (id)                                                             |
-| regles_alertes            | idx_regles_alertes_mama_id                 | CREATE INDEX idx_regles_alertes_mama_id ON public.regles_alertes USING btree (mama_id)                                                |
-| regles_alertes            | regles_alertes_pkey                        | CREATE UNIQUE INDEX regles_alertes_pkey ON public.regles_alertes USING btree (id)                                                     |
-| requisitions              | idx_requisitions_mama_id                   | CREATE INDEX idx_requisitions_mama_id ON public.requisitions USING btree (mama_id)                                                    |
-| requisitions              | requisitions_pkey                          | CREATE UNIQUE INDEX requisitions_pkey ON public.requisitions USING btree (id)                                                         |
-| roles                     | idx_roles_mama_id                          | CREATE INDEX idx_roles_mama_id ON public.roles USING btree (mama_id)                                                                  |
-| roles                     | roles_pkey                                 | CREATE UNIQUE INDEX roles_pkey ON public.roles USING btree (id)                                                                       |
-| signalements              | idx_signalements_mama_id                   | CREATE INDEX idx_signalements_mama_id ON public.signalements USING btree (mama_id)                                                    |
-| signalements              | signalements_pkey                          | CREATE UNIQUE INDEX signalements_pkey ON public.signalements USING btree (id)                                                         |
-| stock_mouvements          | idx_stock_mouvements_created_at            | CREATE INDEX idx_stock_mouvements_created_at ON public.stock_mouvements USING btree (created_at)                                      |
-| stock_mouvements          | idx_stock_mouvements_date                  | CREATE INDEX idx_stock_mouvements_date ON public.stock_mouvements USING btree (date)                                                  |
-| stock_mouvements          | idx_stock_mouvements_mama_id               | CREATE INDEX idx_stock_mouvements_mama_id ON public.stock_mouvements USING btree (mama_id)                                            |
-| stock_mouvements          | idx_stock_mouvements_produit               | CREATE INDEX idx_stock_mouvements_produit ON public.stock_mouvements USING btree (produit_id)                                         |
-| stock_mouvements          | stock_mouvements_pkey                      | CREATE UNIQUE INDEX stock_mouvements_pkey ON public.stock_mouvements USING btree (id)                                                 |
-| stocks                    | idx_stocks_mama_id                         | CREATE INDEX idx_stocks_mama_id ON public.stocks USING btree (mama_id)                                                                |
-| stocks                    | stocks_pkey                                | CREATE UNIQUE INDEX stocks_pkey ON public.stocks USING btree (id)                                                                     |
-| tableaux_de_bord          | idx_tableaux_de_bord_mama_id               | CREATE INDEX idx_tableaux_de_bord_mama_id ON public.tableaux_de_bord USING btree (mama_id)                                            |
-| tableaux_de_bord          | tableaux_de_bord_pkey                      | CREATE UNIQUE INDEX tableaux_de_bord_pkey ON public.tableaux_de_bord USING btree (id)                                                 |
-| tableaux_de_bord          | uniq_tableaux_de_bord_user                 | CREATE UNIQUE INDEX uniq_tableaux_de_bord_user ON public.tableaux_de_bord USING btree (utilisateur_id, mama_id)                       |
-| tache_instances           | idx_tache_instances_mama_id                | CREATE INDEX idx_tache_instances_mama_id ON public.tache_instances USING btree (mama_id)                                              |
-| tache_instances           | tache_instances_pkey                       | CREATE UNIQUE INDEX tache_instances_pkey ON public.tache_instances USING btree (id)                                                   |
-| taches                    | idx_taches_created_at                      | CREATE INDEX idx_taches_created_at ON public.taches USING btree (created_at)                                                          |
-| taches                    | idx_taches_mama_id                         | CREATE INDEX idx_taches_mama_id ON public.taches USING btree (mama_id)                                                                |
-| taches                    | taches_pkey                                | CREATE UNIQUE INDEX taches_pkey ON public.taches USING btree (id)                                                                     |
-| tooltips                  | idx_tooltips_mama_id                       | CREATE INDEX idx_tooltips_mama_id ON public.tooltips USING btree (mama_id)                                                            |
-| tooltips                  | tooltips_pkey                              | CREATE UNIQUE INDEX tooltips_pkey ON public.tooltips USING btree (id)                                                                 |
-| transferts                | idx_transferts_mama_id                     | CREATE INDEX idx_transferts_mama_id ON public.transferts USING btree (mama_id)                                                        |
-| transferts                | transferts_pkey                            | CREATE UNIQUE INDEX transferts_pkey ON public.transferts USING btree (id)                                                             |
-| unites                    | idx_unites_mama_id                         | CREATE INDEX idx_unites_mama_id ON public.unites USING btree (mama_id)                                                                |
-| unites                    | unites_pkey                                | CREATE UNIQUE INDEX unites_pkey ON public.unites USING btree (id)                                                                     |
-| usage_stats               | idx_usage_stats_mama_id                    | CREATE INDEX idx_usage_stats_mama_id ON public.usage_stats USING btree (mama_id)                                                      |
-| usage_stats               | usage_stats_pkey                           | CREATE UNIQUE INDEX usage_stats_pkey ON public.usage_stats USING btree (id)                                                           |
-| users                     | users_pkey                                 | CREATE UNIQUE INDEX users_pkey ON public.users USING btree (id)                                                                       |
-| utilisateurs              | idx_utilisateurs_auth_id                   | CREATE INDEX idx_utilisateurs_auth_id ON public.utilisateurs USING btree (auth_id)                                                    |
-| utilisateurs              | idx_utilisateurs_mama_id                   | CREATE INDEX idx_utilisateurs_mama_id ON public.utilisateurs USING btree (mama_id)                                                    |
-| utilisateurs              | utilisateurs_pkey                          | CREATE UNIQUE INDEX utilisateurs_pkey ON public.utilisateurs USING btree (id)                                                         |
-| validation_requests       | idx_validation_requests_actif              | CREATE INDEX idx_validation_requests_actif ON public.validation_requests USING btree (actif)                                          |
-| validation_requests       | idx_validation_requests_mama_id            | CREATE INDEX idx_validation_requests_mama_id ON public.validation_requests USING btree (mama_id)                                      |
-| validation_requests       | idx_validation_requests_updated            | CREATE INDEX idx_validation_requests_updated ON public.validation_requests USING btree (updated_at)                                   |
-| validation_requests       | validation_requests_pkey                   | CREATE UNIQUE INDEX validation_requests_pkey ON public.validation_requests USING btree (id)                                           |
-| ventes_boissons           | idx_ventes_boissons_mama_id                | CREATE INDEX idx_ventes_boissons_mama_id ON public.ventes_boissons USING btree (mama_id)                                              |
-| ventes_boissons           | ventes_boissons_pkey                       | CREATE UNIQUE INDEX ventes_boissons_pkey ON public.ventes_boissons USING btree (id)                                                   |
-| ventes_fiches_carte       | idx_ventes_fiches_carte_mama_id            | CREATE INDEX idx_ventes_fiches_carte_mama_id ON public.ventes_fiches_carte USING btree (mama_id)                                      |
-| ventes_fiches_carte       | ventes_fiches_carte_pkey                   | CREATE UNIQUE INDEX ventes_fiches_carte_pkey ON public.ventes_fiches_carte USING btree (id)                                           |
-| zones_stock               | idx_zones_stock_mama_id                    | CREATE INDEX idx_zones_stock_mama_id ON public.zones_stock USING btree (mama_id)                                                      |
-| zones_stock               | zones_stock_pkey                           | CREATE UNIQUE INDEX zones_stock_pkey ON public.zones_stock USING btree (id)                                                           |
-
-
-
-

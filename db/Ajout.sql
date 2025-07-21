@@ -399,3 +399,32 @@ drop policy if exists fiches_techniques_all on fiches_techniques;
 create policy fiches_techniques_all on fiches_techniques
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
+
+-- ===========================================================================
+-- Module Cost Boisson : liaison produits <-> fiches techniques et vue dediee
+
+alter table if exists produits
+  add column if not exists fiche_technique_id uuid references fiches_techniques(id),
+  add column if not exists prix_vente numeric;
+
+create index if not exists idx_produits_fiche_technique_id
+  on produits(fiche_technique_id);
+
+create or replace view v_boissons as
+select p.id,
+       p.nom,
+       p.prix_vente,
+       p.created_at,
+       p.mama_id,
+       coalesce(ft.famille, fam.nom) as famille,
+       u.nom as unite,
+       p.fiche_technique_id as fiche_id,
+       case when p.fiche_technique_id is not null
+            then ft.cout_par_portion
+            else p.pmp end as cout_portion
+from produits p
+left join familles fam on fam.id = p.famille_id
+left join unites u on u.id = p.unite_id
+left join fiches_techniques ft on ft.id = p.fiche_technique_id
+where p.actif = true
+  and (coalesce(ft.famille, fam.nom) ilike '%boisson%');

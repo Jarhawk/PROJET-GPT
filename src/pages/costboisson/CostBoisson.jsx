@@ -35,11 +35,9 @@ export default function CostBoissons() {
   useEffect(() => {
     if (!mama_id || authLoading) return;
     supabase
-      .from("fiches_techniques")
+      .from("v_boissons")
       .select("*")
       .eq("mama_id", mama_id)
-      .eq("actif", true)
-      .ilike("famille", "%boisson%")
       .then(({ data }) => setBoissons(data || []));
   }, [mama_id, authLoading]);
 
@@ -60,11 +58,25 @@ export default function CostBoissons() {
   const handleChangePV = async (boisson, newPV) => {
     if (!mama_id) return;
     setSavingId(boisson.id);
-    const { error } = await supabase
-      .from("fiches_techniques")
-      .update({ prix_vente: newPV })
-      .eq("id", boisson.id)
-      .eq("mama_id", mama_id);
+    const updates = [];
+    updates.push(
+      supabase
+        .from("produits")
+        .update({ prix_vente: newPV })
+        .eq("id", boisson.id)
+        .eq("mama_id", mama_id)
+    );
+    if (boisson.fiche_id) {
+      updates.push(
+        supabase
+          .from("fiches_techniques")
+          .update({ prix_vente: newPV })
+          .eq("id", boisson.fiche_id)
+          .eq("mama_id", mama_id)
+      );
+    }
+    const results = await Promise.all(updates);
+    const error = results.find(r => r.error)?.error;
     if (!error) {
       setBoissons(prev =>
         prev.map(b =>
@@ -389,7 +401,7 @@ export default function CostBoissons() {
                           <p>
                             <b>Détails techniques :</b>
                             <br />
-                            ID : {b.id}
+                            ID : {b.fiche_id || b.id}
                             <br />
                             Dernière mise à jour : {b.created_at?.slice(0, 10) || "-"}
                           </p>

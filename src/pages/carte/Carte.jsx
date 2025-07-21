@@ -13,7 +13,7 @@ const FOOD_COST_SEUIL = 35;
 
 function CarteTable({ type }) {
   const { fetchCarte, updatePrixVente, toggleCarte } = useCarte();
-  const { familles: famillesHook, fetchFamilles } = useFamilles();
+  const { familles: _famillesHook, fetchFamilles } = useFamilles();
   const [fiches, setFiches] = useState([]);
   const [familles, setFamilles] = useState([]);
   const [search, setSearch] = useState("");

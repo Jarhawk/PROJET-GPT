@@ -39,3 +39,35 @@ alter table if exists fiche_lignes
   add column if not exists sous_fiche_id uuid references fiches_techniques(id);
 create index if not exists idx_fiche_lignes_sous_fiche_id
   on fiche_lignes(sous_fiche_id);
+
+-- Inventaire : ajout colonne actif manquante et RLS
+alter table if exists inventaire_zones
+  add column if not exists actif boolean default true;
+
+create index if not exists idx_inventaires_date_inventaire
+  on inventaires(date_inventaire);
+create index if not exists idx_inventaires_date_debut
+  on inventaires(date_debut);
+create index if not exists idx_inventaire_lignes_inventaire_id
+  on inventaire_lignes(inventaire_id);
+
+alter table if exists inventaires enable row level security;
+alter table if exists inventaires force row level security;
+drop policy if exists inventaires_all on inventaires;
+create policy inventaires_all on inventaires
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+
+alter table if exists inventaire_lignes enable row level security;
+alter table if exists inventaire_lignes force row level security;
+drop policy if exists inventaire_lignes_all on inventaire_lignes;
+create policy inventaire_lignes_all on inventaire_lignes
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+
+alter table if exists inventaire_zones enable row level security;
+alter table if exists inventaire_zones force row level security;
+drop policy if exists inventaire_zones_all on inventaire_zones;
+create policy inventaire_zones_all on inventaire_zones
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());

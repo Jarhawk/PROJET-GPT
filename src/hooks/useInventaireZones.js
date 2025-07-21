@@ -18,6 +18,7 @@ export function useInventaireZones() {
       .from("inventaire_zones")
       .select("*")
       .eq("mama_id", mama_id)
+      .eq("actif", true)
       .order("nom", { ascending: true });
     setLoading(false);
     if (error) {
@@ -35,7 +36,7 @@ export function useInventaireZones() {
     setError(null);
     const { error } = await supabase
       .from("inventaire_zones")
-      .insert([{ ...zone, mama_id }]);
+      .insert([{ ...zone, mama_id, actif: true }]);
     setLoading(false);
     if (error) {
       setError(error);
@@ -69,7 +70,7 @@ export function useInventaireZones() {
     setError(null);
     const { error } = await supabase
       .from("inventaire_zones")
-      .delete()
+      .update({ actif: false })
       .eq("id", id)
       .eq("mama_id", mama_id);
     setLoading(false);
@@ -81,6 +82,16 @@ export function useInventaireZones() {
     }
   }
 
+  async function reactivateZone(id) {
+    if (!mama_id || !id) return;
+    const { error } = await supabase
+      .from("inventaire_zones")
+      .update({ actif: true })
+      .eq("id", id)
+      .eq("mama_id", mama_id);
+    if (!error) await getZones();
+  }
+
   return {
     zones,
     loading,
@@ -89,5 +100,6 @@ export function useInventaireZones() {
     createZone,
     updateZone,
     deleteZone,
+    reactivateZone,
   };
 }

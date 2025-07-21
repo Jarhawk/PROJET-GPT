@@ -9,24 +9,29 @@ export function useInventaires() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  async function getInventaires() {
+  async function getInventaires({ includeArchives = false } = {}) {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase
+    let query = supabase
       .from("inventaires")
       .select(
         "*, lignes:inventaire_lignes(*, produit:produits(id, nom, unite:unites(nom), stock_theorique, pmp))"
       )
-      .eq("mama_id", mama_id)
-      .order("date_inventaire", { ascending: false });
+      .eq("mama_id", mama_id);
+    if (!includeArchives) query = query.eq("actif", true);
+    const { data, error } = await query.order("date_inventaire", { ascending: false });
     setLoading(false);
     if (error) {
       setError(error);
       return [];
     }
-    setInventaires(data || []);
-    return data || [];
+    const cleaned = (data || []).map(inv => ({
+      ...inv,
+      lignes: (inv.lignes || []).filter(l => l.actif !== false),
+    }));
+    setInventaires(cleaned);
+    return cleaned;
   }
 
   async function fetchMouvementsInventaire(inventaireId) {
@@ -108,7 +113,10 @@ export function useInventaires() {
       setError(error);
       return null;
     }
-    return data;
+    const inv = data
+      ? { ...data, lignes: (data.lignes || []).filter(l => l.actif !== false) }
+      : null;
+    return inv;
   }
 
   async function deleteInventaire(id) {
@@ -117,12 +125,22 @@ export function useInventaires() {
     setError(null);
     const { error } = await supabase
       .from("inventaires")
-      .delete()
+      .update({ actif: false })
       .eq("id", id)
       .eq("mama_id", mama_id);
     setLoading(false);
     if (error) setError(error);
     await getInventaires();
+  }
+
+  async function reactivateInventaire(id) {
+    if (!mama_id || !id) return;
+    const { error } = await supabase
+      .from("inventaires")
+      .update({ actif: true })
+      .eq("id", id)
+      .eq("mama_id", mama_id);
+    if (!error) await getInventaires();
   }
 
   return {
@@ -133,6 +151,7 @@ export function useInventaires() {
     createInventaire,
     getInventaireById,
     deleteInventaire,
+    reactivateInventaire,
     fetchMouvementsInventaire,
     validateInventaireStock,
   };

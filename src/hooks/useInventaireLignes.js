@@ -25,6 +25,7 @@ export function useInventaireLignes() {
     search = "",
     sort = "created_at",
     ascending = false,
+    includeArchives = false,
   } = {}) {
     if (!mama_id || !inventaireId) return [];
     setLoading(true);
@@ -35,6 +36,7 @@ export function useInventaireLignes() {
       .eq("mama_id", mama_id)
       .eq("inventaire_id", inventaireId)
       .order(sort, { ascending });
+    if (!includeArchives) query = query.eq("actif", true);
     if (search) {
       query = query.eq("produit_id", search);
     }
@@ -101,7 +103,7 @@ export function useInventaireLignes() {
     setError(null);
     const { error } = await supabase
       .from("inventaire_lignes")
-      .delete()
+      .update({ actif: false })
       .eq("id", id)
       .eq("mama_id", mama_id);
     setLoading(false);

@@ -582,3 +582,84 @@ drop policy if exists tache_instances_all on tache_instances;
 create policy tache_instances_all on tache_instances
   for all using (mama_id = current_user_mama_id())
   with check (mama_id = current_user_mama_id());
+
+-- ============================================================================
+-- Module Transferts de stock
+
+create table if not exists transferts (
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid not null references mamas(id),
+  utilisateur_id uuid references utilisateurs(id),
+  zone_source_id uuid references zones_stock(id),
+  zone_dest_id uuid references zones_stock(id),
+  date_transfert date not null default current_date,
+  commentaire text,
+  actif boolean default true,
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now()
+);
+create index if not exists idx_transferts_mama_id on transferts(mama_id);
+
+create table if not exists transfert_lignes (
+  id uuid primary key default gen_random_uuid(),
+  transfert_id uuid not null references transferts(id) on delete cascade,
+  produit_id uuid not null references produits(id),
+  quantite numeric,
+  commentaire text,
+  actif boolean default true
+);
+create index if not exists idx_transfert_lignes_transfert_id on transfert_lignes(transfert_id);
+create index if not exists idx_transfert_lignes_produit_id on transfert_lignes(produit_id);
+
+create or replace function insert_stock_from_transfert_ligne() returns trigger as $$
+declare
+  tr record;
+  com text;
+begin
+  select * into tr from transferts where id = new.transfert_id;
+  com := coalesce(new.commentaire, tr.commentaire);
+  insert into stock_mouvements(mama_id, produit_id, quantite, type, date, zone_source_id, auteur_id, commentaire)
+    values(tr.mama_id, new.produit_id, -new.quantite, 'transfert', tr.date_transfert, tr.zone_source_id, tr.utilisateur_id, com);
+  insert into stock_mouvements(mama_id, produit_id, quantite, type, date, zone_destination_id, auteur_id, commentaire)
+    values(tr.mama_id, new.produit_id, new.quantite, 'transfert', tr.date_transfert, tr.zone_dest_id, tr.utilisateur_id, com);
+  return new;
+end;
+$$ language plpgsql security definer;
+grant execute on function insert_stock_from_transfert_ligne() to authenticated;
+
+create trigger trg_transfert_lignes_stock
+  after insert on transfert_lignes
+  for each row execute procedure insert_stock_from_transfert_ligne();
+
+create or replace view v_transferts_historique as
+select t.id as transfert_id,
+       t.date_transfert,
+       t.zone_source_id,
+       zs1.nom as zone_source,
+       t.zone_dest_id,
+       zs2.nom as zone_dest,
+       l.produit_id,
+       p.nom as produit,
+       l.quantite,
+       coalesce(l.commentaire, t.commentaire) as commentaire,
+       t.utilisateur_id,
+       t.created_at
+from transferts t
+join transfert_lignes l on l.transfert_id = t.id
+join produits p on p.id = l.produit_id
+left join zones_stock zs1 on zs1.id = t.zone_source_id
+left join zones_stock zs2 on zs2.id = t.zone_dest_id;
+
+alter table if exists transferts enable row level security;
+alter table if exists transferts force row level security;
+drop policy if exists transferts_all on transferts;
+create policy transferts_all on transferts
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+
+alter table if exists transfert_lignes enable row level security;
+alter table if exists transfert_lignes force row level security;
+drop policy if exists transfert_lignes_all on transfert_lignes;
+create policy transfert_lignes_all on transfert_lignes
+  for all using (exists (select 1 from transferts t where t.id = transfert_id and t.mama_id = current_user_mama_id()))
+  with check (exists (select 1 from transferts t where t.id = transfert_id and t.mama_id = current_user_mama_id()));

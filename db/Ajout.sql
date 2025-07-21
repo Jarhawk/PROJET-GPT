@@ -797,3 +797,111 @@ as $$
 $$;
 
 grant execute on function advanced_stats(date, date) to authenticated;
+
+-- ===========================================================================
+-- Module Unités & Familles dynamiques
+
+create or replace function set_updated_at() returns trigger as $$
+begin
+  new.updated_at := now();
+  return new;
+end;
+$$ language plpgsql;
+
+alter table if exists unites
+  add column if not exists populaire boolean default false,
+  add column if not exists updated_at timestamp with time zone default now();
+
+alter table if exists familles
+  add column if not exists parent_id uuid references familles(id),
+  add column if not exists populaire boolean default false,
+  add column if not exists updated_at timestamp with time zone default now();
+
+create unique index if not exists uniq_unites_nom on unites(mama_id, nom);
+create unique index if not exists uniq_familles_nom on familles(mama_id, nom);
+create index if not exists idx_unites_actif on unites(actif);
+create index if not exists idx_familles_actif on familles(actif);
+
+drop trigger if exists trg_unites_updated_at on unites;
+create trigger trg_unites_updated_at
+  before update on unites
+  for each row execute procedure set_updated_at();
+
+drop trigger if exists trg_familles_updated_at on familles;
+create trigger trg_familles_updated_at
+  before update on familles
+  for each row execute procedure set_updated_at();
+
+alter table if exists unites enable row level security;
+alter table if exists unites force row level security;
+drop policy if exists unites_all on unites;
+create policy unites_all on unites
+  for all using (mama_id = current_user_mama_id() and actif = true)
+  with check (mama_id = current_user_mama_id());
+
+alter table if exists familles enable row level security;
+alter table if exists familles force row level security;
+drop policy if exists familles_all on familles;
+create policy familles_all on familles
+  for all using (mama_id = current_user_mama_id() and actif = true)
+  with check (mama_id = current_user_mama_id());
+
+create table if not exists unites_equivalentes (
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid not null references mamas(id),
+  unite_src uuid not null references unites(id),
+  unite_dst uuid not null references unites(id),
+  coefficient numeric not null,
+  actif boolean default true,
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now(),
+  unique(mama_id, unite_src, unite_dst)
+);
+create index if not exists idx_unites_equiv_mama_id on unites_equivalentes(mama_id);
+alter table if exists unites_equivalentes enable row level security;
+alter table if exists unites_equivalentes force row level security;
+drop policy if exists unites_equivalentes_all on unites_equivalentes;
+create policy unites_equivalentes_all on unites_equivalentes
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+
+create or replace function prevent_unite_delete() returns trigger as $$
+begin
+  if exists (select 1 from produits where unite_id = old.id and actif is true) then
+    raise exception 'Unité utilisée par des produits';
+  end if;
+  return old;
+end;
+$$ language plpgsql;
+drop trigger if exists trg_unite_delete on unites;
+create trigger trg_unite_delete
+  before delete on unites
+  for each row execute procedure prevent_unite_delete();
+
+create or replace function prevent_famille_delete() returns trigger as $$
+begin
+  if exists (select 1 from produits where famille_id = old.id and actif is true) then
+    raise exception 'Famille utilisée par des produits';
+  end if;
+  return old;
+end;
+$$ language plpgsql;
+drop trigger if exists trg_famille_delete on familles;
+create trigger trg_famille_delete
+  before delete on familles
+  for each row execute procedure prevent_famille_delete();
+
+create or replace view v_unites_orphelines as
+  select u.*
+  from unites u
+  left join produits p on p.unite_id = u.id and p.actif = true
+  where p.id is null and u.actif = true;
+
+create or replace view v_familles_orphelines as
+  select f.*
+  from familles f
+  left join produits p on p.famille_id = f.id and p.actif = true
+  where p.id is null and f.actif = true;
+
+grant select on v_unites_orphelines to authenticated;
+grant select on v_familles_orphelines to authenticated;

@@ -13,11 +13,12 @@ export function useFamilles() {
 
   // 1. Charger toutes les familles (recherche, batch)
   // Charge la liste des familles avec option de recherche
-  async function fetchFamilles({ search = "" } = {}) {
+  async function fetchFamilles({ search = "", includeInactive = false } = {}) {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
     let query = supabase.from("familles").select("*").eq("mama_id", mama_id);
+    if (!includeInactive) query = query.eq("actif", true);
     if (search) query = query.ilike("nom", `%${search}%`);
     const { data, error } = await query.order("nom", { ascending: true });
     setFamilles(Array.isArray(data) ? data : []);
@@ -89,7 +90,7 @@ export function useFamilles() {
     setError(null);
     const { error } = await supabase
       .from("familles")
-      .delete()
+      .update({ actif: false })
       .in("id", ids)
       .eq("mama_id", mama_id);
     if (error) setError(error);

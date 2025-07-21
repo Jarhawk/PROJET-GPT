@@ -345,3 +345,34 @@ language sql security definer as $$
   limit limit_param
 $$;
 grant execute on function mouvements_without_alloc(integer) to authenticated;
+
+-- ===========================================================================
+-- Menu Engineering: index, RLS and analytical view
+
+create index if not exists idx_ventes_fiches_carte_periode
+  on ventes_fiches_carte(periode);
+
+alter table if exists ventes_fiches_carte enable row level security;
+alter table if exists ventes_fiches_carte force row level security;
+drop policy if exists ventes_fiches_carte_all on ventes_fiches_carte;
+create policy ventes_fiches_carte_all on ventes_fiches_carte
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+
+create or replace view v_menu_engineering as
+select f.id as fiche_id,
+       f.nom,
+       f.famille,
+       f.prix_vente,
+       coalesce(f.cout_par_portion, 0) as cout_portion,
+       v.periode,
+       coalesce(v.ventes, 0) as ventes,
+       round(coalesce(v.ventes,0)::numeric /
+             nullif(sum(v.ventes) over(partition by f.mama_id, v.periode),0), 4) as popularite,
+       round(100 * (f.prix_vente - coalesce(f.cout_par_portion,0)) /
+             nullif(f.prix_vente,0), 2) as marge,
+       f.mama_id
+from fiches_techniques f
+left join ventes_fiches_carte v
+  on v.fiche_id = f.id and v.mama_id = f.mama_id
+where f.actif = true;

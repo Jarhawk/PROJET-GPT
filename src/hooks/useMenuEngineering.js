@@ -10,30 +10,19 @@ export function useMenuEngineering() {
   const fetchData = useCallback(
     async (periode) => {
       if (!mama_id) return []
-      const { data: fiches } = await supabase
-        .from('fiches_techniques')
+      const { data: fiches, error } = await supabase
+        .from('v_menu_engineering')
         .select('*')
         .eq('mama_id', mama_id)
-        .order('nom')
-
-      const { data: ventes } = await supabase
-        .from('ventes_fiches_carte')
-        .select('fiche_id, ventes, periode')
-        .eq('mama_id', mama_id)
         .eq('periode', periode)
-
-      const ventesMap = {}
-      ;(ventes || []).forEach(v => {
-        ventesMap[v.fiche_id] = v.ventes || 0
-      })
-
-      const totalVentes = Object.values(ventesMap).reduce((a, b) => a + b, 0)
+        .order('nom')
+      if (error) throw error
 
       const rows = (fiches || []).map(f => {
-        const cout = f.cout_portion ?? (f.cout_total && f.portions ? f.cout_total / f.portions : 0)
+        const cout = f.cout_portion ?? 0
         const p = f.prix_vente ?? 0
-        const qty = ventesMap[f.id] || 0
-        const pop = totalVentes > 0 ? qty / totalVentes : 0
+        const qty = f.ventes ?? 0
+        const pop = f.popularite ?? 0
         const foodCost = p > 0 ? (cout / p) * 100 : null
         const marge = p > 0 ? ((p - cout) / p) * 100 : 0
         return {
@@ -58,7 +47,6 @@ export function useMenuEngineering() {
         else r.classement = 'Dog'
         r.score_calc = Math.round(r.marge + r.popularite * 100)
       })
-
       setData(rows)
       return rows
     },

@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useInventaires } from "@/hooks/useInventaires";
 import { useProduitsInventaire } from "@/hooks/useProduitsInventaire";
+import { useInventaireZones } from "@/hooks/useInventaireZones";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
@@ -9,19 +10,24 @@ import toast from "react-hot-toast";
 
 export default function InventaireForm() {
   const navigate = useNavigate();
-  const { createInventaire, inventaires } = useInventaires();
+  const { createInventaire } = useInventaires();
   const { produits, fetchProduits } = useProduitsInventaire();
+  const { zones, getZones } = useInventaireZones();
 
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [zone, setZone] = useState("");
   const [lignes, setLignes] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const zoneSuggestions = Array.from(new Set(inventaires.map(i => i.zone).filter(Boolean)));
+  const zoneSuggestions = zones.map(z => z.nom);
   const [familleFilter, setFamilleFilter] = useState("");
   const [search, setSearch] = useState("");
 
   const products = produits;
+
+  useEffect(() => {
+    getZones();
+  }, [getZones]);
 
   useEffect(() => {
     // Le filtrage des produits se fait par famille et terme de recherche

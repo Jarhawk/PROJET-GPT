@@ -9,15 +9,16 @@ export default function Inventaire() {
   const { inventaires, getInventaires } = useInventaires();
   const [zoneFilter, setZoneFilter] = useState("");
   const [dateFilter, setDateFilter] = useState("");
+  const [showArchives, setShowArchives] = useState(false);
 
   useEffect(() => {
-    getInventaires();
-  }, []);
+    getInventaires({ includeArchives: showArchives });
+  }, [showArchives]);
 
   const filtered = inventaires
     .filter(i => !zoneFilter || i.zone === zoneFilter)
-    .filter(i => !dateFilter || i.date === dateFilter)
-    .sort((a, b) => new Date(b.date) - new Date(a.date));
+    .filter(i => !dateFilter || i.date_inventaire === dateFilter)
+    .sort((a, b) => new Date(b.date_inventaire) - new Date(a.date_inventaire));
 
   const zones = Array.from(new Set(inventaires.map(i => i.zone).filter(Boolean)));
 
@@ -30,7 +31,7 @@ export default function Inventaire() {
         </Button>
       </div>
 
-      <div className="flex gap-4 mb-4">
+      <div className="flex gap-4 mb-4 items-center">
         <input
           type="date"
           className="input"
@@ -47,6 +48,14 @@ export default function Inventaire() {
             <option key={z} value={z}>{z}</option>
           ))}
         </select>
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={showArchives}
+            onChange={e => setShowArchives(e.target.checked)}
+          />
+          Archivés
+        </label>
       </div>
 
       <TableContainer>

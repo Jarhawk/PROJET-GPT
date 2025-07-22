@@ -1,6 +1,9 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import SecondaryButton from "@/components/ui/SecondaryButton";
+import { Input } from "@/components/ui/input";
 import toast from "react-hot-toast";
 
 export default function FournisseurForm({ fournisseur = {}, onSubmit, onCancel, saving }) {
@@ -43,37 +46,37 @@ export default function FournisseurForm({ fournisseur = {}, onSubmit, onCancel, 
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label className="block font-semibold mb-1">Nom *</label>
-        <input
+        <Input
           className="input input-bordered w-full"
           value={nom}
-          onChange={(e) => setNom(e.target.value)}
+          onChange={e => setNom(e.target.value)}
         />
         {errors.nom && <p className="text-red-600 text-sm mt-1">{errors.nom}</p>}
       </div>
       <div>
         <label className="block font-semibold mb-1">Téléphone</label>
-        <input
+        <Input
           type="tel"
           className="input input-bordered w-full"
           value={tel}
-          onChange={(e) => setTel(e.target.value)}
+          onChange={e => setTel(e.target.value)}
         />
       </div>
       <div>
         <label className="block font-semibold mb-1">Contact</label>
-        <input
+        <Input
           className="input input-bordered w-full"
           value={contact}
-          onChange={(e) => setContact(e.target.value)}
+          onChange={e => setContact(e.target.value)}
         />
       </div>
       <div>
         <label className="block font-semibold mb-1">Email</label>
-        <input
+        <Input
           type="email"
           className="input input-bordered w-full"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={e => setEmail(e.target.value)}
         />
         {errors.email && <p className="text-red-600 text-sm mt-1">{errors.email}</p>}
       </div>
@@ -82,8 +85,10 @@ export default function FournisseurForm({ fournisseur = {}, onSubmit, onCancel, 
         Actif
       </label>
       <div className="flex gap-2">
-        <Button type="submit" disabled={saving}>Enregistrer</Button>
-        <Button type="button" variant="outline" disabled={saving} onClick={onCancel}>Annuler</Button>
+        <PrimaryButton type="submit" disabled={saving} className="min-w-[120px]">
+          {saving ? "Enregistrement..." : "Enregistrer"}
+        </PrimaryButton>
+        <SecondaryButton type="button" disabled={saving} onClick={onCancel}>Annuler</SecondaryButton>
       </div>
     </form>
   );

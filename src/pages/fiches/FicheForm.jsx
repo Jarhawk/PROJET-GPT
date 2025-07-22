@@ -9,6 +9,9 @@ import { useProduitsAutocomplete } from "@/hooks/useProduitsAutocomplete";
 import { useFichesAutocomplete } from "@/hooks/useFichesAutocomplete";
 import TableContainer from "@/components/ui/TableContainer";
 import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import SecondaryButton from "@/components/ui/SecondaryButton";
+import { Input } from "@/components/ui/input";
 import toast from "react-hot-toast";
 
 export default function FicheForm({ fiche, onClose }) {
@@ -183,8 +186,10 @@ export default function FicheForm({ fiche, onClose }) {
         )}
       </div>
       <div className="flex gap-2 mt-4">
-        <Button type="submit" disabled={loading}>{fiche ? "Modifier" : "Créer"}</Button>
-        <Button variant="outline" type="button" onClick={onClose}>Annuler</Button>
+        <PrimaryButton type="submit" disabled={loading} className="min-w-[120px]">
+          {loading ? "Enregistrement..." : fiche ? "Modifier" : "Créer"}
+        </PrimaryButton>
+        <SecondaryButton type="button" onClick={onClose}>Annuler</SecondaryButton>
       </div>
     </form>
   );

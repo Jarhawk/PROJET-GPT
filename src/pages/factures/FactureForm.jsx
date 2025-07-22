@@ -5,6 +5,9 @@ import { useProduitsAutocomplete } from "@/hooks/useProduitsAutocomplete";
 import AutoCompleteField from "@/components/ui/AutoCompleteField";
 import { useFournisseursAutocomplete } from "@/hooks/useFournisseursAutocomplete";
 import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import SecondaryButton from "@/components/ui/SecondaryButton";
+import { Input } from "@/components/ui/input";
 import GlassCard from "@/components/ui/GlassCard";
 import toast from "react-hot-toast";
 import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
@@ -113,23 +116,25 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
         <h2 className="text-lg font-bold mb-4">
           {facture ? "Modifier la facture" : "Ajouter une facture"}
         </h2>
-      <input
-        className="input mb-2"
+      <label className="block text-sm mb-1">Date *</label>
+      <Input
         type="date"
         value={date}
         onChange={e => setDate(e.target.value)}
         required
+        className="mb-2"
       />
-      <input
-        className="input mb-2"
+      <label className="block text-sm mb-1">Numéro</label>
+      <Input
         type="text"
         placeholder="Numéro"
         value={numero}
         onChange={e => setNumero(e.target.value)}
+        className="mb-2"
       />
-      <input
+      <label className="block text-sm mb-1">Fournisseur *</label>
+      <Input
         list="fournisseurs-list"
-        className="input mb-2"
         value={fournisseurName}
         onChange={e => {
           const val = e.target.value;
@@ -141,6 +146,7 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
         }}
         placeholder="Fournisseur"
         required
+        className="mb-2"
       />
       <datalist id="fournisseurs-list">
         {fournisseurOptions.map(f => (
@@ -195,7 +201,6 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
       </table>
       <Button
         type="button"
-        variant="outline"
         onClick={() =>
           setLignes(ls => [
             ...ls,
@@ -218,10 +223,27 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
         <option value="annulée">Annulée</option>
         <option value="archivée">Archivée</option>
       </select>
-      <label>
-        Justificatif PDF : <input type="file" accept="application/pdf,image/*" onChange={e => setFile(e.target.files[0])} />
-        <Button type="button" size="sm" variant="outline" className="ml-2" onClick={handleUpload}>Upload</Button>
-        <Button type="button" size="sm" variant="secondary" className="ml-2" onClick={() => scan(file)}>OCR</Button>
+      <label className="block text-sm mb-1">Justificatif PDF</label>
+      <div className="flex items-center gap-2">
+        <Input
+          type="file"
+          accept="application/pdf,image/*"
+          onChange={e => setFile(e.target.files[0])}
+          className="flex-1"
+        />
+        <Button type="button" size="sm" onClick={handleUpload}>Upload</Button>
+        <Button type="button" size="sm" onClick={() => scan(file)} className="bg-white/20">OCR</Button>
+        {fileUrl && (
+          <a
+            href={fileUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 underline text-sm"
+          >
+            Voir
+          </a>
+        )}
+      </div>
         {fileUrl && (
           <a
             href={fileUrl}
@@ -242,8 +264,10 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
         Total HT: {lignes.reduce((s,l)=>s+l.quantite*l.prix_unitaire,0).toFixed(2)} € - TVA: {lignes.reduce((s,l)=>s+l.quantite*l.prix_unitaire*(l.tva||0)/100,0).toFixed(2)} € - TTC: {(lignes.reduce((s,l)=>s+l.quantite*l.prix_unitaire,0)+lignes.reduce((s,l)=>s+l.quantite*l.prix_unitaire*(l.tva||0)/100,0)).toFixed(2)} €
       </div>
       <div className="flex gap-2 mt-4">
-        <Button type="submit" disabled={loading}>{facture ? "Modifier" : "Ajouter"}</Button>
-        <Button variant="outline" type="button" onClick={onClose}>Annuler</Button>
+        <PrimaryButton type="submit" disabled={loading} className="min-w-[120px]">
+          {loading ? "Enregistrement..." : facture ? "Modifier" : "Ajouter"}
+        </PrimaryButton>
+        <SecondaryButton type="button" onClick={onClose}>Annuler</SecondaryButton>
       </div>
       </form>
     </GlassCard>

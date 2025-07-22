@@ -5,6 +5,9 @@ import { useProduitsInventaire } from "@/hooks/useProduitsInventaire";
 import { useInventaireZones } from "@/hooks/useInventaireZones";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import SecondaryButton from "@/components/ui/SecondaryButton";
+import { Input } from "@/components/ui/input";
 import TableContainer from "@/components/ui/TableContainer";
 import toast from "react-hot-toast";
 
@@ -179,15 +182,17 @@ export default function InventaireForm() {
           </tbody>
         </table>
       </TableContainer>
-      <Button type="button" variant="outline" onClick={addLine}>Ajouter produit</Button>
+      <Button type="button" onClick={addLine} className="mt-2">Ajouter produit</Button>
 
       <div className="text-right font-semibold">
         Valeur totale : {totalValeur.toFixed(2)} € – Écart global : {totalEcart.toFixed(2)} €
       </div>
 
       <div className="flex gap-4">
-        <Button type="submit" disabled={loading}>Enregistrer</Button>
-        <Button type="button" variant="outline" onClick={() => navigate(-1)} disabled={loading}>Annuler</Button>
+        <PrimaryButton type="submit" disabled={loading} className="min-w-[120px]">
+          {loading ? "Enregistrement..." : "Enregistrer"}
+        </PrimaryButton>
+        <SecondaryButton type="button" onClick={() => navigate(-1)} disabled={loading}>Annuler</SecondaryButton>
       </div>
     </form>
   );

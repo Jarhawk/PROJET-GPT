@@ -5,6 +5,9 @@ import { useProduitsAutocomplete } from "@/hooks/useProduitsAutocomplete";
 import { useFournisseursAutocomplete } from "@/hooks/useFournisseursAutocomplete";
 import AutoCompleteField from "@/components/ui/AutoCompleteField";
 import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import SecondaryButton from "@/components/ui/SecondaryButton";
+import { Input } from "@/components/ui/input";
 import GlassCard from "@/components/ui/GlassCard";
 import toast from "react-hot-toast";
 
@@ -59,10 +62,16 @@ export default function CommandeForm({ commande, fournisseurs = [], onClose }) {
       <GlassCard className="p-6 min-w-[400px] space-y-2">
         <h2 className="text-lg font-bold mb-2">{commande ? "Modifier" : "Nouvelle"} commande</h2>
         <form onSubmit={handleSubmit} className="space-y-2">
-          <input type="date" className="input" value={date_commande} onChange={e => setDateCommande(e.target.value)} required />
-          <input
+          <label className="block text-sm mb-1">Date de commande *</label>
+          <Input
+            type="date"
+            value={date_commande}
+            onChange={e => setDateCommande(e.target.value)}
+            required
+          />
+          <label className="block text-sm mb-1">Fournisseur *</label>
+          <Input
             list="fournisseurs-list"
-            className="input"
             value={fournisseurName}
             onChange={e => {
               const val = e.target.value;
@@ -78,8 +87,17 @@ export default function CommandeForm({ commande, fournisseurs = [], onClose }) {
               <option key={f.id} value={f.nom}>{f.nom}</option>
             ))}
           </datalist>
+          <select
+            className="input mb-2"
+            value={statut}
+            onChange={e => setStatut(e.target.value)}
+          >
+            <option value="a_valider">À valider</option>
+            <option value="envoyee">Envoyée</option>
+            <option value="receptionnee">Réceptionnée</option>
+            <option value="cloturee">Clôturée</option>
+          </select>
           <table className="w-full text-sm mb-2">
-          <select className="input" value={statut} onChange={e => setStatut(e.target.value)}><option value="a_valider">À valider</option><option value="envoyee">Envoyée</option><option value="receptionnee">Réceptionnée</option><option value="cloturee">Clôturée</option></select>
             <thead><tr><th>Produit</th><th>Qté</th><th>PU</th><th>TVA</th><th></th></tr></thead>
             <tbody>
               {lignes.map((l, idx) => (
@@ -103,10 +121,23 @@ export default function CommandeForm({ commande, fournisseurs = [], onClose }) {
               ))}
             </tbody>
           </table>
-          <Button type="button" variant="outline" onClick={() => setLignes(ls => [...ls, { produit_id: "", produit_nom: "", quantite: 1, prix_unitaire: 0, tva: 20 }])}>Ajouter ligne</Button>
+          <Button
+            type="button"
+            onClick={() =>
+              setLignes(ls => [
+                ...ls,
+                { produit_id: "", produit_nom: "", quantite: 1, prix_unitaire: 0, tva: 20 },
+              ])
+            }
+            className="mt-2"
+          >
+            Ajouter ligne
+          </Button>
           <div className="flex gap-2 justify-end mt-2">
-            <Button type="submit" disabled={loading}>{commande ? "Modifier" : "Ajouter"}</Button>
-            <Button type="button" variant="outline" onClick={onClose}>Annuler</Button>
+            <PrimaryButton type="submit" disabled={loading} className="min-w-[120px]">
+              {loading ? "Enregistrement..." : commande ? "Modifier" : "Ajouter"}
+            </PrimaryButton>
+            <SecondaryButton type="button" onClick={onClose}>Annuler</SecondaryButton>
           </div>
         </form>
       </GlassCard>

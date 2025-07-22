@@ -9,6 +9,7 @@ import GlassCard from "@/components/ui/GlassCard";
 import PageWrapper from "@/components/ui/PageWrapper";
 import PreviewBanner from "@/components/ui/PreviewBanner";
 import PrimaryButton from "@/components/ui/PrimaryButton";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { login as loginUser } from "../../lib/loginUser";
 
 export default function Login() {
@@ -19,7 +20,16 @@ export default function Login() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  const { session, userData, loading: authLoading, getAuthorizedModules } = useAuth();
+  const {
+    session,
+    userData,
+    loading: authLoading,
+    getAuthorizedModules,
+  } = useAuth();
+
+  if (authLoading || (session && !userData)) {
+    return <LoadingSpinner message="Chargement..." />;
+  }
 
 
   // Redirection après authentification une fois les données chargées
@@ -28,6 +38,13 @@ export default function Login() {
     if (redirectedRef.current) return;
     if (!session || authLoading) return;
     if (!userData) return;
+    if (!userData.role) {
+      toast.error(
+        "Erreur de permission – rôle utilisateur non trouvé. Merci de contacter l’administrateur."
+      );
+      navigate("/login");
+      return;
+    }
     redirectedRef.current = true;
     if (userData.actif === false && pathname !== "/blocked") {
       navigate("/blocked");
@@ -40,7 +57,7 @@ export default function Login() {
     }
     toast.success(`Bienvenue ${session.user.email}`);
     if (pathname !== "/dashboard") navigate("/dashboard");
-  }, [session, userData, authLoading, navigate, pathname]);
+  }, [session, userData, authLoading, navigate, pathname, getAuthorizedModules]);
 
   const handleLogin = async (e) => {
     e.preventDefault();

@@ -12,9 +12,9 @@ import {
 import toast from "react-hot-toast";
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const AuthContext = createContext();
+export const AuthContext = createContext(null);
 
-export function AuthProvider({ children }) {
+export const AuthProvider = ({ children }) => {
   const [session, setSession] = useState(null);
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -37,7 +37,7 @@ export function AuthProvider({ children }) {
     const { data, error } = await supabase
       .from("utilisateurs")
       .select(
-        "id, mama_id, role_id, role:roles(id, nom, access_rights), role, access_rights, actif, email"
+        "id, mama_id, role_id, role:roles(nom), role, access_rights, actif, email"
       )
       .eq("auth_id", userId)
       .maybeSingle();
@@ -246,9 +246,11 @@ export function AuthProvider({ children }) {
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
+};
 
 // eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   return useContext(AuthContext) || {};
 }
+
+export default AuthProvider;

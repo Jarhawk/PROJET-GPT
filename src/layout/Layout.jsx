@@ -53,6 +53,15 @@ export default function Layout() {
   if (!session || !userData)
     return <LoadingSpinner message="Chargement utilisateur..." />;
 
+  if (!role) {
+    return (
+      <div className="p-4 text-red-400">
+        Erreur de permission : rôle utilisateur non trouvé. Merci de contacter
+        l’administrateur.
+      </div>
+    );
+  }
+
   const user = session.user;
 
   return (

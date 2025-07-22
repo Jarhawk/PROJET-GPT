@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "react-toastify";
-import { useAuth } from "@/context/AuthContext";
+import useAuth from "@/hooks/useAuth";
 import { LiquidBackground, TouchLight } from "@/components/LiquidBackground";
 import GlassCard from "@/components/ui/GlassCard";
 

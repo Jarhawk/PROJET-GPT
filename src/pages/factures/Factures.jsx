@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useFactures } from "@/hooks/useFactures";
 import { useSuppliers } from "@/hooks/useSuppliers";
-import { useAuth } from "@/context/AuthContext";
+import useAuth from "@/hooks/useAuth";
 import { useFacturesAutocomplete } from "@/hooks/useFacturesAutocomplete";
 import FactureForm from "./FactureForm.jsx";
 import FactureDetail from "./FactureDetail.jsx";

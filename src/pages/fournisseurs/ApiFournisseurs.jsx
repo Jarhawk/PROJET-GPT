@@ -1,6 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
-import { useAuth } from "@/context/AuthContext";
+import useAuth from "@/hooks/useAuth";
 import { useFournisseurApiConfig } from "@/hooks/useFournisseurApiConfig";
 import { Link } from "react-router-dom";
 import TableContainer from "@/components/ui/TableContainer";

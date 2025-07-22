@@ -3,8 +3,8 @@ import { renderHook, act } from '@testing-library/react';
 vi.mock('@/lib/supabase', () => ({
   supabase: { from: vi.fn() }
 }));
-vi.mock('@/context/AuthContext', () => ({
-  useAuth: () => ({ mama_id: 'm1' })
+vi.mock('@/hooks/useAuth', () => ({
+  default: () => ({ mama_id: 'm1' })
 }));
 import { usePriceTrends } from '@/hooks/usePriceTrends';
 import { supabase } from '@/lib/supabase';

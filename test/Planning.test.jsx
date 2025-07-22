@@ -8,8 +8,8 @@ let hook;
 vi.mock('@/hooks/usePlanning', () => ({
   usePlanning: () => hook,
 }));
-vi.mock('@/context/AuthContext', () => ({
-  useAuth: () => ({ mama_id: '1' }),
+vi.mock('@/hooks/useAuth', () => ({
+  default: () => ({ mama_id: '1' }),
 }));
 vi.mock('@/hooks/useProducts', () => ({
   useProducts: () => ({ products: [{ id: 'p1', nom: 'Prod' }], fetchProducts: vi.fn() }),

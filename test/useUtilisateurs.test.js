@@ -18,7 +18,7 @@ const csvMock = vi.fn();
 vi.mock('@/lib/export/exportHelpers', () => ({ exportToCSV: csvMock }));
 
 const authMock = vi.fn(() => ({ mama_id: 'm1', role: 'admin' }));
-vi.mock('@/context/AuthContext', () => ({ useAuth: authMock }));
+vi.mock('@/hooks/useAuth', () => ({ default: authMock }));
 
 let useUtilisateurs;
 

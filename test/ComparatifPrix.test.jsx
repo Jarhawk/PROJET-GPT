@@ -3,8 +3,8 @@ import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { vi, beforeEach } from 'vitest';
 
-vi.mock('@/context/AuthContext', () => ({
-  useAuth: () => ({ mama_id: 1 }),
+vi.mock('@/hooks/useAuth', () => ({
+  default: () => ({ mama_id: 1 }),
 }));
 
 const orderMock = vi.fn();

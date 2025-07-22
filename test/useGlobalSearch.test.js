@@ -7,7 +7,7 @@ const fourQuery = { ilike: vi.fn(() => fourQuery), eq: vi.fn(() => fourQuery), s
 const fromMock = vi.fn(source => ({ select: source === 'produits' ? prodQuery.select : fourQuery.select }));
 
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
-vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
+vi.mock('@/hooks/useAuth', () => ({ default: () => ({ mama_id: 'm1' }) }));
 
 let useGlobalSearch;
 

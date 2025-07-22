@@ -4,6 +4,7 @@ import { AuthContext } from "@/context/AuthContext";
 
 export default function useAuth() {
   const ctx = useContext(AuthContext) || {};
+  if (import.meta.env.DEV) console.log('useAuth hook', ctx);
   const loading = ctx.loading ?? ctx.isLoading;
   return {
     session: ctx.session,
@@ -22,5 +23,8 @@ export default function useAuth() {
     getAuthorizedModules: ctx.getAuthorizedModules,
     error: ctx.error,
     resetAuth: ctx.resetAuth,
+    login: ctx.login,
+    signup: ctx.signup,
+    logout: ctx.logout,
   };
 }

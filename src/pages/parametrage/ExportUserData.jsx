@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import toast, { Toaster } from "react-hot-toast";
-import { useAuth } from "@/context/AuthContext";
+import useAuth from "@/hooks/useAuth";
 import { useRGPD } from "@/hooks/useRGPD";
 
 export default function ExportUserData({ userId = null }) {

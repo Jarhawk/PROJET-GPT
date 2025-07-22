@@ -2,7 +2,7 @@
 // src/hooks/useStats.js
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
-import { useAuth } from "@/context/AuthContext";
+import useAuth from "@/hooks/useAuth";
 
 export function useStats() {
   const { mama_id } = useAuth();

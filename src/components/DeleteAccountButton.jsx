@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useRGPD } from "@/hooks/useRGPD";
-import { useAuth } from "@/context/AuthContext";
+import useAuth from "@/hooks/useAuth";
 import toast from "react-hot-toast";
 
 export default function DeleteAccountButton() {

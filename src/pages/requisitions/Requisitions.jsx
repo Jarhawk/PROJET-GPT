@@ -1,6 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
-import { useAuth } from "@/context/AuthContext";
+import useAuth from "@/hooks/useAuth";
 import { useZones } from "@/hooks/useZones";
 import { useRequisitions } from "@/hooks/useRequisitions";
 import toast, { Toaster } from "react-hot-toast";

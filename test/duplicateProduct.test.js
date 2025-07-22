@@ -19,7 +19,7 @@ function setup(initial = []) {
   };
   fromMock = vi.fn(() => query);
   vi.mock('@/lib/supabase', () => ({ supabase: { from: (...args) => fromMock(...args) } }), { overwrite: true });
-  vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
+  vi.mock('@/hooks/useAuth', () => ({ default: () => ({ mama_id: 'm1' }) }));
 }
 
 let useProducts;

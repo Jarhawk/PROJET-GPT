@@ -1,7 +1,12 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { Suspense, lazy } from "react";
+/* eslint-disable react-refresh/only-export-components */
+import { Suspense, useEffect } from "react";
+import lazyWithPreload from "@/lib/lazyWithPreload";
+import nprogress from 'nprogress';
+import { useLocation } from 'react-router-dom';
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import PageSkeleton from "@/components/ui/PageSkeleton";
 import { Routes, Route, Navigate } from "react-router-dom";
 import useAuth from "@/hooks/useAuth";
 import Layout from "@/layout/Layout";
@@ -13,91 +18,136 @@ import AuthDebug from "@/pages/debug/AuthDebug";
 import NotFound from "@/pages/NotFound";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
-const Dashboard = lazy(() => import("@/pages/Dashboard.jsx"));
-const Fournisseurs = lazy(() => import("@/pages/fournisseurs/Fournisseurs.jsx"));
-const FournisseurCreate = lazy(() => import("@/pages/fournisseurs/FournisseurCreate.jsx"));
-const FournisseurDetailPage = lazy(() => import("@/pages/fournisseurs/FournisseurDetailPage.jsx"));
-const Factures = lazy(() => import("@/pages/factures/Factures.jsx"));
-const FactureDetail = lazy(() => import("@/pages/factures/FactureDetail.jsx"));
-const ImportFactures = lazy(() => import("@/pages/factures/ImportFactures.jsx"));
-const FactureCreate = lazy(() => import("@/pages/factures/FactureCreate.jsx"));
-const Achats = lazy(() => import("@/pages/achats/Achats.jsx"));
-const Fiches = lazy(() => import("@/pages/fiches/Fiches.jsx"));
-const FicheDetail = lazy(() => import("@/pages/fiches/FicheDetail.jsx"));
-const Carte = lazy(() => import("@/pages/carte/Carte.jsx"));
-const Menus = lazy(() => import("@/pages/menus/Menus.jsx"));
-const Produits = lazy(() => import("@/pages/produits/Produits.jsx"));
-const ProduitDetail = lazy(() => import("@/pages/produits/ProduitDetail.jsx"));
-const ProduitForm = lazy(() => import("@/pages/produits/ProduitForm.jsx"));
-const Inventaire = lazy(() => import("@/pages/inventaire/Inventaire.jsx"));
-const InventaireForm = lazy(() => import("@/pages/inventaire/InventaireForm.jsx"));
-const InventaireDetail = lazy(() => import("@/pages/inventaire/InventaireDetail.jsx"));
-const InventaireZones = lazy(() => import("@/pages/inventaire/InventaireZones.jsx"));
-const Mouvements = lazy(() => import("@/pages/mouvements/Mouvements.jsx"));
-const StockTransferts = lazy(() => import("@/pages/stock/Transferts.jsx"));
-const Alertes = lazy(() => import("@/pages/Alertes.jsx"));
-const Taches = lazy(() => import("@/pages/taches/Taches.jsx"));
-const TacheForm = lazy(() => import("@/pages/taches/TacheForm.jsx"));
-const AlertesTaches = lazy(() => import("@/pages/taches/Alertes.jsx"));
-const Promotions = lazy(() => import("@/pages/promotions/Promotions.jsx"));
-const Documents = lazy(() => import("@/pages/documents/Documents.jsx"));
-const Analyse = lazy(() => import("@/pages/analyse/Analyse.jsx"));
-const AnalyseCostCenter = lazy(() => import("@/pages/analyse/AnalyseCostCenter.jsx"));
-const AnalytiqueDashboard = lazy(() => import("@/pages/analytique/AnalytiqueDashboard.jsx"));
-const Utilisateurs = lazy(() => import("@/pages/parametrage/Utilisateurs.jsx"));
-const Roles = lazy(() => import("@/pages/parametrage/Roles.jsx"));
-const Mamas = lazy(() => import("@/pages/parametrage/Mamas.jsx"));
-const Permissions = lazy(() => import("@/pages/parametrage/Permissions.jsx"));
-const AccessRights = lazy(() => import("@/pages/parametrage/AccessRights.jsx"));
-const APIKeys = lazy(() => import("@/pages/parametrage/APIKeys.jsx"));
-const MamaSettingsForm = lazy(() => import("@/pages/parametrage/MamaSettingsForm.jsx"));
-const Zones = lazy(() => import("@/pages/parametrage/Zones.jsx"));
-const Onboarding = lazy(() => import("@/pages/public/Onboarding.jsx"));
-const Accueil = lazy(() => import("@/pages/Accueil.jsx"));
-const Signup = lazy(() => import("@/pages/public/Signup.jsx"));
-const Rgpd = lazy(() => import("@/pages/Rgpd.jsx"));
-const Confidentialite = lazy(() => import("@/pages/legal/Confidentialite.jsx"));
-const MentionsLegales = lazy(() => import("@/pages/legal/MentionsLegales.jsx"));
-const Cgu = lazy(() => import("@/pages/legal/Cgu.jsx"));
-const Cgv = lazy(() => import("@/pages/legal/Cgv.jsx"));
-const Contact = lazy(() => import("@/pages/legal/Contact.jsx"));
-const Licence = lazy(() => import("@/pages/legal/Licence.jsx"));
-const AideContextuelle = lazy(() => import("@/pages/AideContextuelle.jsx"));
-const SupervisionGroupe = lazy(() => import("@/pages/supervision/SupervisionGroupe.jsx"));
-const ComparateurFiches = lazy(() => import("@/pages/supervision/ComparateurFiches.jsx"));
-const NotificationsInbox = lazy(() => import("@/pages/notifications/NotificationsInbox.jsx"));
-const NotificationSettingsForm = lazy(() => import("@/pages/notifications/NotificationSettingsForm.jsx"));
-const FournisseurApiSettingsForm = lazy(() => import("@/pages/fournisseurs/FournisseurApiSettingsForm.jsx"));
-const ApiFournisseurs = lazy(() => import("@/pages/fournisseurs/ApiFournisseurs.jsx"));
-const CatalogueSyncViewer = lazy(() => import("@/pages/catalogue/CatalogueSyncViewer.jsx"));
-const CommandesEnvoyees = lazy(() => import("@/pages/commandes/CommandesEnvoyees.jsx"));
-const SimulationPlanner = lazy(() => import("@/pages/planning/SimulationPlanner.jsx"));
-const Commandes = lazy(() => import("@/pages/commandes/Commandes.jsx"));
-const Planning = lazy(() => import("@/pages/Planning.jsx"));
-const PlanningForm = lazy(() => import("@/pages/PlanningForm.jsx"));
-const PlanningDetail = lazy(() => import("@/pages/PlanningDetail.jsx"));
-const DashboardBuilder = lazy(() => import("@/pages/dashboard/DashboardBuilder.jsx"));
-const Reporting = lazy(() => import("@/pages/reporting/Reporting.jsx"));
-const Consolidation = lazy(() => import("@/pages/Consolidation.jsx"));
-const CreateMama = lazy(() => import("@/pages/auth/CreateMama.jsx"));
-const Feedback = lazy(() => import("@/pages/Feedback.jsx"));
-const AuditTrail = lazy(() => import("@/pages/AuditTrail.jsx"));
-const Logs = lazy(() => import("@/pages/Logs.jsx"));
-const Consentements = lazy(() => import("@/pages/Consentements.jsx"));
-const Requisitions = lazy(() => import("@/pages/requisitions/Requisitions.jsx"));
-const RequisitionForm = lazy(() => import("@/pages/requisitions/RequisitionForm.jsx"));
-const RequisitionDetail = lazy(() => import("@/pages/requisitions/RequisitionDetail.jsx"));
-const Receptions = lazy(() => import("@/pages/receptions/Receptions.jsx"));
-const BonsLivraison = lazy(() => import("@/pages/bons_livraison/BonsLivraison.jsx"));
-const BLCreate = lazy(() => import("@/pages/bons_livraison/BLCreate.jsx"));
-const BLDetail = lazy(() => import("@/pages/bons_livraison/BLDetail.jsx"));
-const Recettes = lazy(() => import("@/pages/recettes/Recettes.jsx"));
-const Surcouts = lazy(() => import("@/pages/surcouts/Surcouts.jsx"));
-const TableauxDeBord = lazy(() => import("@/pages/analyse/TableauxDeBord.jsx"));
-const Comparatif = lazy(() => import("@/pages/fournisseurs/comparatif/ComparatifPrix.jsx"));
-const MenuEngineering = lazy(() => import("@/pages/MenuEngineering.jsx"));
-const EngineeringMenu = lazy(() => import("@/pages/EngineeringMenu.jsx"));
-const Logout = lazy(() => import("@/pages/auth/Logout.jsx"));
+const Dashboard = lazyWithPreload(() => import("@/pages/Dashboard.jsx"));
+const Fournisseurs = lazyWithPreload(() => import("@/pages/fournisseurs/Fournisseurs.jsx"));
+const FournisseurCreate = lazyWithPreload(() => import("@/pages/fournisseurs/FournisseurCreate.jsx"));
+const FournisseurDetailPage = lazyWithPreload(() => import("@/pages/fournisseurs/FournisseurDetailPage.jsx"));
+const Factures = lazyWithPreload(() => import("@/pages/factures/Factures.jsx"));
+const FactureDetail = lazyWithPreload(() => import("@/pages/factures/FactureDetail.jsx"));
+const ImportFactures = lazyWithPreload(() => import("@/pages/factures/ImportFactures.jsx"));
+const FactureCreate = lazyWithPreload(() => import("@/pages/factures/FactureCreate.jsx"));
+const Achats = lazyWithPreload(() => import("@/pages/achats/Achats.jsx"));
+const Fiches = lazyWithPreload(() => import("@/pages/fiches/Fiches.jsx"));
+const FicheDetail = lazyWithPreload(() => import("@/pages/fiches/FicheDetail.jsx"));
+const Carte = lazyWithPreload(() => import("@/pages/carte/Carte.jsx"));
+const Menus = lazyWithPreload(() => import("@/pages/menus/Menus.jsx"));
+const Produits = lazyWithPreload(() => import("@/pages/produits/Produits.jsx"));
+const ProduitDetail = lazyWithPreload(() => import("@/pages/produits/ProduitDetail.jsx"));
+const ProduitForm = lazyWithPreload(() => import("@/pages/produits/ProduitForm.jsx"));
+const Inventaire = lazyWithPreload(() => import("@/pages/inventaire/Inventaire.jsx"));
+const InventaireForm = lazyWithPreload(() => import("@/pages/inventaire/InventaireForm.jsx"));
+const InventaireDetail = lazyWithPreload(() => import("@/pages/inventaire/InventaireDetail.jsx"));
+const InventaireZones = lazyWithPreload(() => import("@/pages/inventaire/InventaireZones.jsx"));
+const Mouvements = lazyWithPreload(() => import("@/pages/mouvements/Mouvements.jsx"));
+const StockTransferts = lazyWithPreload(() => import("@/pages/stock/Transferts.jsx"));
+const Alertes = lazyWithPreload(() => import("@/pages/Alertes.jsx"));
+const Taches = lazyWithPreload(() => import("@/pages/taches/Taches.jsx"));
+const TacheForm = lazyWithPreload(() => import("@/pages/taches/TacheForm.jsx"));
+const AlertesTaches = lazyWithPreload(() => import("@/pages/taches/Alertes.jsx"));
+const Promotions = lazyWithPreload(() => import("@/pages/promotions/Promotions.jsx"));
+const Documents = lazyWithPreload(() => import("@/pages/documents/Documents.jsx"));
+const Analyse = lazyWithPreload(() => import("@/pages/analyse/Analyse.jsx"));
+const AnalyseCostCenter = lazyWithPreload(() => import("@/pages/analyse/AnalyseCostCenter.jsx"));
+const AnalytiqueDashboard = lazyWithPreload(() => import("@/pages/analytique/AnalytiqueDashboard.jsx"));
+const Utilisateurs = lazyWithPreload(() => import("@/pages/parametrage/Utilisateurs.jsx"));
+const Roles = lazyWithPreload(() => import("@/pages/parametrage/Roles.jsx"));
+const Mamas = lazyWithPreload(() => import("@/pages/parametrage/Mamas.jsx"));
+const Permissions = lazyWithPreload(() => import("@/pages/parametrage/Permissions.jsx"));
+const AccessRights = lazyWithPreload(() => import("@/pages/parametrage/AccessRights.jsx"));
+const APIKeys = lazyWithPreload(() => import("@/pages/parametrage/APIKeys.jsx"));
+const MamaSettingsForm = lazyWithPreload(() => import("@/pages/parametrage/MamaSettingsForm.jsx"));
+const Zones = lazyWithPreload(() => import("@/pages/parametrage/Zones.jsx"));
+const Onboarding = lazyWithPreload(() => import("@/pages/public/Onboarding.jsx"));
+const Accueil = lazyWithPreload(() => import("@/pages/Accueil.jsx"));
+const Signup = lazyWithPreload(() => import("@/pages/public/Signup.jsx"));
+const Rgpd = lazyWithPreload(() => import("@/pages/Rgpd.jsx"));
+const Confidentialite = lazyWithPreload(() => import("@/pages/legal/Confidentialite.jsx"));
+const MentionsLegales = lazyWithPreload(() => import("@/pages/legal/MentionsLegales.jsx"));
+const Cgu = lazyWithPreload(() => import("@/pages/legal/Cgu.jsx"));
+const Cgv = lazyWithPreload(() => import("@/pages/legal/Cgv.jsx"));
+const Contact = lazyWithPreload(() => import("@/pages/legal/Contact.jsx"));
+const Licence = lazyWithPreload(() => import("@/pages/legal/Licence.jsx"));
+const AideContextuelle = lazyWithPreload(() => import("@/pages/AideContextuelle.jsx"));
+const SupervisionGroupe = lazyWithPreload(() => import("@/pages/supervision/SupervisionGroupe.jsx"));
+const ComparateurFiches = lazyWithPreload(() => import("@/pages/supervision/ComparateurFiches.jsx"));
+const NotificationsInbox = lazyWithPreload(() => import("@/pages/notifications/NotificationsInbox.jsx"));
+const NotificationSettingsForm = lazyWithPreload(() => import("@/pages/notifications/NotificationSettingsForm.jsx"));
+const FournisseurApiSettingsForm = lazyWithPreload(() => import("@/pages/fournisseurs/FournisseurApiSettingsForm.jsx"));
+const ApiFournisseurs = lazyWithPreload(() => import("@/pages/fournisseurs/ApiFournisseurs.jsx"));
+const CatalogueSyncViewer = lazyWithPreload(() => import("@/pages/catalogue/CatalogueSyncViewer.jsx"));
+const CommandesEnvoyees = lazyWithPreload(() => import("@/pages/commandes/CommandesEnvoyees.jsx"));
+const SimulationPlanner = lazyWithPreload(() => import("@/pages/planning/SimulationPlanner.jsx"));
+const Commandes = lazyWithPreload(() => import("@/pages/commandes/Commandes.jsx"));
+const Planning = lazyWithPreload(() => import("@/pages/Planning.jsx"));
+const PlanningForm = lazyWithPreload(() => import("@/pages/PlanningForm.jsx"));
+const PlanningDetail = lazyWithPreload(() => import("@/pages/PlanningDetail.jsx"));
+const DashboardBuilder = lazyWithPreload(() => import("@/pages/dashboard/DashboardBuilder.jsx"));
+const Reporting = lazyWithPreload(() => import("@/pages/reporting/Reporting.jsx"));
+const Consolidation = lazyWithPreload(() => import("@/pages/Consolidation.jsx"));
+const CreateMama = lazyWithPreload(() => import("@/pages/auth/CreateMama.jsx"));
+const Feedback = lazyWithPreload(() => import("@/pages/Feedback.jsx"));
+const AuditTrail = lazyWithPreload(() => import("@/pages/AuditTrail.jsx"));
+const Logs = lazyWithPreload(() => import("@/pages/Logs.jsx"));
+const Consentements = lazyWithPreload(() => import("@/pages/Consentements.jsx"));
+const Requisitions = lazyWithPreload(() => import("@/pages/requisitions/Requisitions.jsx"));
+const RequisitionForm = lazyWithPreload(() => import("@/pages/requisitions/RequisitionForm.jsx"));
+const RequisitionDetail = lazyWithPreload(() => import("@/pages/requisitions/RequisitionDetail.jsx"));
+const Receptions = lazyWithPreload(() => import("@/pages/receptions/Receptions.jsx"));
+const BonsLivraison = lazyWithPreload(() => import("@/pages/bons_livraison/BonsLivraison.jsx"));
+const BLCreate = lazyWithPreload(() => import("@/pages/bons_livraison/BLCreate.jsx"));
+const BLDetail = lazyWithPreload(() => import("@/pages/bons_livraison/BLDetail.jsx"));
+const Recettes = lazyWithPreload(() => import("@/pages/recettes/Recettes.jsx"));
+const Surcouts = lazyWithPreload(() => import("@/pages/surcouts/Surcouts.jsx"));
+const TableauxDeBord = lazyWithPreload(() => import("@/pages/analyse/TableauxDeBord.jsx"));
+const Comparatif = lazyWithPreload(() => import("@/pages/fournisseurs/comparatif/ComparatifPrix.jsx"));
+const MenuEngineering = lazyWithPreload(() => import("@/pages/MenuEngineering.jsx"));
+const EngineeringMenu = lazyWithPreload(() => import("@/pages/EngineeringMenu.jsx"));
+const Logout = lazyWithPreload(() => import("@/pages/auth/Logout.jsx"));
+
+export const routePreloadMap = {
+  '/dashboard': Dashboard.preload,
+  '/produits': Produits.preload,
+  '/inventaire': Inventaire.preload,
+  '/mouvements': Mouvements.preload,
+  '/fournisseurs': Fournisseurs.preload,
+  '/factures': Factures.preload,
+  '/factures/import': ImportFactures.preload,
+  '/achats': Achats.preload,
+  '/receptions': Receptions.preload,
+  '/bons-livraison': BonsLivraison.preload,
+  '/documents': Documents.preload,
+  '/notifications': NotificationsInbox.preload,
+  '/planning': Planning.preload,
+  '/planning/simulation': SimulationPlanner.preload,
+  '/taches': Taches.preload,
+  '/taches/alertes': AlertesTaches.preload,
+  '/promotions': Promotions.preload,
+  '/fiches': Fiches.preload,
+  '/menus': Menus.preload,
+  '/carte': Carte.preload,
+  '/recettes': Recettes.preload,
+  '/requisitions': Requisitions.preload,
+  '/consolidation': Consolidation.preload,
+  '/reporting': Reporting.preload,
+  '/tableaux-de-bord': TableauxDeBord.preload,
+  '/comparatif': Comparatif.preload,
+  '/surcouts': Surcouts.preload,
+  '/alertes': Alertes.preload,
+  '/parametrage/utilisateurs': Utilisateurs.preload,
+  '/parametrage/roles': Roles.preload,
+  '/parametrage/mamas': Mamas.preload,
+  '/parametrage/permissions': Permissions.preload,
+  '/parametrage/access': AccessRights.preload,
+  '/parametrage/api-keys': APIKeys.preload,
+  '/parametrage/api-fournisseurs': ApiFournisseurs.preload,
+  '/parametrage/settings': MamaSettingsForm.preload,
+  '/parametrage/zones-stock': Zones.preload,
+  '/consentements': Consentements.preload,
+  '/audit': AuditTrail.preload,
+  '/logs': Logs.preload,
+  '/aide': AideContextuelle.preload,
+  '/feedback': Feedback.preload,
+};
 
 
 function RootRoute() {
@@ -108,9 +158,16 @@ function RootRoute() {
 }
 
 export default function Router() {
+  const location = useLocation();
+  useEffect(() => {
+    nprogress.start();
+    return () => {
+      nprogress.done();
+    };
+  }, [location.pathname]);
   return (
     <ErrorBoundary>
-      <Suspense fallback={<LoadingSpinner message="Chargement..." />}>
+      <Suspense fallback={<PageSkeleton />}>
         <Routes>
         <Route path="/" element={<RootRoute />} />
         <Route path="/accueil" element={<Accueil />} />
@@ -434,3 +491,5 @@ export default function Router() {
     </ErrorBoundary>
   );
 }
+
+/* eslint-enable react-refresh/only-export-components */

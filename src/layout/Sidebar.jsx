@@ -1,5 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { Link, useLocation } from "react-router-dom";
+import { routePreloadMap } from "@/router";
 import { useAuth } from "@/context/AuthContext";
 import toast from "react-hot-toast";
 import {
@@ -53,17 +54,26 @@ export default function Sidebar() {
   const peutVoir = (module) =>
     isSuperadmin || hasAccess(module, "peut_voir");
 
-  const Item = ({ to, icon, label }) => (
-    <Link
-      to={to}
-      className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-white/10 ${
-        pathname.startsWith(to) ? "bg-white/10 text-mamastockGold" : ""
-      }`}
-    >
-      {icon}
-      <span>{label}</span>
-    </Link>
-  );
+  const Item = ({ to, icon, label }) => {
+    const prefetch = () => {
+      const fn = routePreloadMap[to];
+      if (fn) fn();
+    };
+    return (
+      <Link
+        to={to}
+        onMouseEnter={prefetch}
+        onFocus={prefetch}
+        onClick={prefetch}
+        className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-white/10 ${
+          pathname.startsWith(to) ? "bg-white/10 text-mamastockGold" : ""
+        }`}
+      >
+        {icon}
+        <span>{label}</span>
+      </Link>
+    );
+  };
 
   const groups = [
     {

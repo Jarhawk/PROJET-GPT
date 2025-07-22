@@ -1,15 +1,14 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
-import { hasAccess } from "@/lib/access";
+import useAuth from "@/hooks/useAuth";
 import LoadingScreen from "@/components/ui/LoadingScreen";
 
 export default function ProtectedRoute({ children, accessKey }) {
-  const { session, userData, pending } = useAuth();
+  const { session, userData, pending, loading, hasAccess } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!session || !userData || pending) return;
+    if (!session || !userData || pending || loading) return;
 
     if (userData.actif === false) {
       navigate("/blocked", { replace: true });
@@ -22,8 +21,7 @@ export default function ProtectedRoute({ children, accessKey }) {
     ) {
       navigate("/unauthorized", { replace: true });
     }
-  }, [session, userData, pending, accessKey, navigate]);
-
-  if (!session || pending || !userData) return <LoadingScreen />;
+  }, [session, userData, pending, loading, accessKey, navigate, hasAccess]);
+  if (!session || pending || loading || !userData) return <LoadingScreen />;
   return children;
 }

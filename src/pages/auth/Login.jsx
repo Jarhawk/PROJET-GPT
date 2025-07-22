@@ -2,16 +2,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import MamaLogo from "@/components/ui/MamaLogo";
-import useAuth from "@/hooks/useAuth";
 import ResetAuthButton from "@/components/ResetAuthButton";
 import toast from "react-hot-toast";
+import useAuth from "@/hooks/useAuth";
 import useFormErrors from "@/hooks/useFormErrors";
 import GlassCard from "@/components/ui/GlassCard";
 import PageWrapper from "@/components/ui/PageWrapper";
 import PreviewBanner from "@/components/ui/PreviewBanner";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import { login as loginUser } from "../../lib/loginUser";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -26,6 +25,7 @@ export default function Login() {
     userData,
     loading: authLoading,
     getAuthorizedModules,
+    login,
     error: authError,
     resetAuth,
   } = useAuth();
@@ -70,14 +70,13 @@ export default function Login() {
 
     setLoading(true);
     try {
-      const { data, error } = await loginUser(email.trim(), password);
+      const { data, error } = await login({ email: email.trim(), password });
       if (error) {
         console.error(error);
         setError("password", error.message || error);
         toast.error(error.message || "Échec de la connexion");
         return;
       }
-
       if (data) {
         toast.success("Connexion réussie");
         // redirection handled once user data is loaded

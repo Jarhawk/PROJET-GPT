@@ -25,6 +25,7 @@ export default function Layout() {
     mama_id,
     access_rights,
     loading,
+    pending,
     logout,
   } = useAuth();
   const { fetchUnreadCount, subscribeToNotifications } = useNotifications();
@@ -49,7 +50,7 @@ export default function Layout() {
 
   if (pathname === "/login" || pathname === "/unauthorized") return <Outlet />;
 
-  if (loading) return <LoadingSpinner message="Chargement..." />;
+  if (loading || pending) return <LoadingSpinner message="Chargement..." />;
   if (!session || !userData)
     return <LoadingSpinner message="Chargement utilisateur..." />;
 

@@ -123,18 +123,25 @@ export const AuthProvider = ({ children }) => {
 
   async function loadSession() {
     setLoading(true);
-    const { data, error } = await supabase.auth.getSession();
-    if (error) {
-      console.warn("loadSession error", error.message);
-      setError(error.message);
-      if (/invalid.*token/i.test(error.message)) {
-        purgeLocalAuth();
+    try {
+      const { data, error } = await supabase.auth.getSession();
+      if (error) {
+        console.warn("loadSession error", error.message);
+        setError(error.message);
+        if (/invalid.*token/i.test(error.message)) {
+          purgeLocalAuth();
+        }
       }
+      const current = data?.session ?? null;
+      if (import.meta.env.DEV) console.log("loadSession", current?.user?.id);
+      sessionLoadedRef.current = true;
+      setSession(current);
+    } catch (e) {
+      console.error("loadSession failure", e);
+      setError(e.message || "loadSession error");
+    } finally {
+      setLoading(false);
     }
-    const current = data?.session ?? null;
-    if (import.meta.env.DEV) console.log("loadSession", current?.user?.id);
-    sessionLoadedRef.current = true;
-    setSession(current);
   }
 
   useEffect(() => {

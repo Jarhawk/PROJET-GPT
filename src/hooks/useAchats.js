@@ -10,18 +10,22 @@ export function useAchats() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  async function getAchats({ fournisseur = "", produit = "", debut = "", fin = "", page = 1, pageSize = 50 } = {}) {
+  async function getAchats({ fournisseur = "", produit = "", debut = "", fin = "", actif = true, page = 1, pageSize = 50 } = {}) {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
     let q = supabase
       .from("achats")
-      .select("*, fournisseur:fournisseurs(id, nom), produit:produits(id, nom)", { count: "exact" })
+      .select(
+        "*, fournisseur:fournisseurs(id, nom), produit:produits(id, nom)",
+        { count: "exact" },
+      )
       .eq("mama_id", mama_id)
       .order("date_achat", { ascending: false })
       .range((page - 1) * pageSize, page * pageSize - 1);
     if (fournisseur) q = q.eq("supplier_id", fournisseur);
     if (produit) q = q.eq("produit_id", produit);
+    if (actif !== null) q = q.eq("actif", actif);
     if (debut) q = q.gte("date_achat", debut);
     if (fin) q = q.lte("date_achat", fin);
     const { data, error, count } = await q;

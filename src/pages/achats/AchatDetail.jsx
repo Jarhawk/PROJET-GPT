@@ -11,8 +11,12 @@ export default function AchatDetail({ achat: achatProp, onClose }) {
 
   useEffect(() => {
     if (!achatProp?.id) return;
-    if (!achatProp) fetchAchatById(achatProp.id).then(setAchat);
-  }, [achatProp]);
+    if (!achatProp.fournisseur || !achatProp.produit) {
+      fetchAchatById(achatProp.id).then(setAchat);
+    } else {
+      setAchat(achatProp);
+    }
+  }, [achatProp, fetchAchatById]);
 
   if (!achat) return <LoadingSpinner message="Chargement..." />;
 

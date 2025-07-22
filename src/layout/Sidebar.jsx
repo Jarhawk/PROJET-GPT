@@ -36,33 +36,21 @@ export default function Sidebar() {
     loading,
     user,
     userData,
-    role,
     mama_id,
     logout,
     session,
-    isSuperadmin,
     hasAccess,
   } = useAuth();
   const { pathname } = useLocation();
   if (import.meta.env.DEV) {
-    console.log("Sidebar", { user, role, mama_id, access_rights });
+    console.log("Sidebar", { user, mama_id, access_rights });
   }
 
   if (loading || !user || !userData || !access_rights) {
     return null;
   }
-  if (!role) {
-    return (
-      <aside className="w-64 p-4 text-white">
-        <p className="text-red-400 text-sm">
-          Erreur de permission : rôle utilisateur non trouvé. Merci de contacter l’administrateur.
-        </p>
-      </aside>
-    );
-  }
 
-  const peutVoir = (module) =>
-    isSuperadmin || hasAccess(module, "peut_voir");
+  const peutVoir = (module) => hasAccess(module, "peut_voir");
 
   const Item = ({ to, icon, label }) => {
     const prefetch = () => {
@@ -158,7 +146,6 @@ export default function Sidebar() {
       title: "Paramètres",
       items: [
         { module: "utilisateurs", to: "/parametrage/utilisateurs", label: "Utilisateurs", icon: <UsersIcon size={16} /> },
-        { module: "roles", to: "/parametrage/roles", label: "Rôles", icon: <Shield size={16} /> },
         { module: "mamas", to: "/parametrage/mamas", label: "Mamas", icon: <Building2 size={16} /> },
         { module: "permissions", to: "/parametrage/permissions", label: "Permissions", icon: <Shield size={16} /> },
         { module: "access", to: "/parametrage/access", label: "Accès", icon: <Shield size={16} /> },
@@ -217,7 +204,7 @@ export default function Sidebar() {
       </nav>
       {session && (
         <div className="mt-6 border-t border-white/20 pt-4 text-sm flex flex-col gap-2">
-          <span>Bienvenue, {user?.email}</span>
+          <span>Bienvenue, {userData.nom || user?.email}</span>
           <button
             onClick={() => {
               logout();

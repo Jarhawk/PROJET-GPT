@@ -11,7 +11,7 @@ export default function Unauthorized() {
     <PageWrapper>
       <GlassCard className="flex flex-col items-center text-center gap-4">
         <h1 className="text-3xl font-bold text-gold">🚫 Accès refusé</h1>
-        <p>Vous n'avez pas les droits nécessaires pour accéder à cette page.</p>
+        <p>Aucun accès attribué, contactez l'administrateur.</p>
         <PrimaryButton onClick={() => navigate("/")}>Retour à l'accueil</PrimaryButton>
       </GlassCard>
     </PageWrapper>

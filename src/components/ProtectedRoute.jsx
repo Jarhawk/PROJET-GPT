@@ -15,6 +15,15 @@ export default function ProtectedRoute({ children, accessKey }) {
       return;
     }
 
+    const noRights =
+      !userData.access_rights ||
+      (typeof userData.access_rights === "object" &&
+        Object.keys(userData.access_rights).length === 0);
+    if (noRights) {
+      navigate("/unauthorized", { replace: true });
+      return;
+    }
+
     if (accessKey && !hasAccess(accessKey, "peut_voir")) {
       navigate("/unauthorized", { replace: true });
     }

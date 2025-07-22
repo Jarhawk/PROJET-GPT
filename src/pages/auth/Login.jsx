@@ -35,13 +35,6 @@ export default function Login() {
     if (redirectedRef.current) return;
     if (!session || authLoading) return;
     if (!userData) return;
-    if (!userData.role) {
-      toast.error(
-        "Erreur de permission – rôle utilisateur non trouvé. Merci de contacter l’administrateur."
-      );
-      navigate("/login");
-      return;
-    }
     redirectedRef.current = true;
     if (userData.actif === false && pathname !== "/blocked") {
       navigate("/blocked");

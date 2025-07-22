@@ -21,7 +21,6 @@ export default function Layout() {
   const {
     session,
     userData,
-    role,
     mama_id,
     access_rights,
     loading,
@@ -42,7 +41,6 @@ export default function Layout() {
     console.log("Layout", {
       session,
       userData,
-      role,
       mama_id,
       access_rights,
     });
@@ -54,14 +52,6 @@ export default function Layout() {
   if (!session || !userData)
     return <LoadingSpinner message="Chargement utilisateur..." />;
 
-  if (!role) {
-    return (
-      <div className="p-4 text-red-400">
-        Erreur de permission : rôle utilisateur non trouvé. Merci de contacter
-        l’administrateur.
-      </div>
-    );
-  }
 
   const user = session.user;
 
@@ -86,9 +76,9 @@ export default function Layout() {
                 )}
               </Link>
               <span>{user.email}</span>
-              {role && (
+              {userData.nom && (
                 <span className="text-xs bg-white/10 px-2 py-1 rounded capitalize">
-                  {role}
+                  {userData.nom}
                 </span>
               )}
               <button

@@ -102,6 +102,7 @@ export const AuthProvider = ({ children }) => {
     const { data, error } = await supabase.auth.getSession();
     if (error) console.warn("loadSession error", error.message);
     const current = data?.session ?? null;
+    if (import.meta.env.DEV) console.log("loadSession", current?.user?.id);
     sessionLoadedRef.current = true;
     setSession(current);
   }
@@ -117,12 +118,16 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
+    if (import.meta.env.DEV) console.log("session", session);
+  }, [session]);
+
+  useEffect(() => {
     if (import.meta.env.DEV) console.log("userData", userData);
   }, [userData]);
 
   useEffect(() => {
     if (!sessionLoadedRef.current) return;
-    if (!session || !session.user) {
+    if (!session?.user?.id) {
       if (!session) console.warn("session is null");
       setUserData(null);
       setLoading(false);
@@ -215,25 +220,24 @@ export const AuthProvider = ({ children }) => {
   };
 
   const value = {
+    /** Direct session object returned by Supabase */
+    session,
     userData,
+    role: userData?.role,
+    access_rights: userData?.access_rights ?? null,
+    mama_id: userData?.mama_id,
+    /** Authentication state */
+    loading,
+    error,
     /** Authenticated user object from Supabase */
     user: session?.user || null,
     /** Convenience alias for `session?.user?.id` */
     user_id: session?.user?.id ?? null,
-    /** Direct session object returned by Supabase */
-    session,
-    /** Authentication state */
-    loading,
-    error,
     /** Indicates the session is available but userData has not been fetched yet */
     pending: !!session && !userData,
-    /** Selected fields from userData for easy access */
-    role: userData?.role,
     role_id: userData?.role_id,
-    mama_id: userData?.mama_id,
     email: userData?.email,
     actif: userData?.actif,
-    access_rights: userData?.access_rights ?? null,
     hasAccess,
     getAuthorizedModules,
     login,

@@ -19,3 +19,9 @@ test('login is available via useAuth', () => {
   const { result } = renderHook(() => useAuth(), { wrapper });
   expect(typeof result.current.login).toBe('function');
 });
+
+test('useAuth throws if provider missing', () => {
+  expect(() => renderHook(() => useAuth())).toThrow(
+    "useAuth n’est pas correctement initialisé (provider absent ou mal injecté) !"
+  );
+});

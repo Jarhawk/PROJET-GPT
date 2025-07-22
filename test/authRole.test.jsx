@@ -2,7 +2,8 @@ import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest';
-import { AuthProvider, useAuth } from '../src/context/AuthContext.jsx';
+import { AuthProvider } from '../src/context/AuthContext.jsx';
+import useAuth from '../src/hooks/useAuth.js';
 
 const getSession = vi.fn(() => Promise.resolve({ data: { session: { user: { id: 'u1', email: 'u@x.com' } } }, error: null }));
 const onAuthStateChange = vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } }));

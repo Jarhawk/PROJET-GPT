@@ -5,6 +5,11 @@ import { AuthContext } from "@/context/AuthContext";
 export default function useAuth() {
   const ctx = useContext(AuthContext) || {};
   if (import.meta.env.DEV) console.log('useAuth hook', ctx);
+  if (!ctx || typeof ctx.login !== 'function') {
+    throw new Error(
+      "useAuth n’est pas correctement initialisé (provider absent ou mal injecté) !"
+    );
+  }
   const loading = ctx.loading ?? ctx.isLoading;
   return {
     session: ctx.session,

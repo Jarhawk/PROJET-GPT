@@ -9,6 +9,10 @@ import { supabase } from "@/lib/supabase";
 import { Toaster, toast } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import GlassCard from "@/components/ui/GlassCard";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import PrimaryButton from "@/components/ui/PrimaryButton";
 
 function RequisitionFormPage() {
   const navigate = useNavigate();
@@ -98,39 +102,42 @@ function RequisitionFormPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
 
         <div>
-          <label className="block text-sm font-medium mb-1">Statut</label>
-          <input
+          <Label htmlFor="statut">Statut</Label>
+          <Input
+            id="statut"
             type="text"
             value={statut}
             onChange={(e) => setStatut(e.target.value)}
-            className="w-full border rounded px-3 py-2"
             required
+            className="w-full"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Commentaire</label>
-          <input
+          <Label htmlFor="commentaire">Commentaire</Label>
+          <Input
+            id="commentaire"
             type="text"
             value={commentaire}
             onChange={(e) => setCommentaire(e.target.value)}
-            className="w-full border rounded px-3 py-2"
+            className="w-full"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Zone de stock</label>
-          <select
+          <Label htmlFor="zone">Zone de stock</Label>
+          <Select
+            id="zone"
             value={zone_id}
             onChange={(e) => setZone(e.target.value)}
-            className="w-full border rounded px-3 py-2"
             required
+            className="w-full"
           >
             <option value="">Sélectionner…</option>
             {zones.map((z) => (
               <option key={z.id} value={z.id}>{z.nom}</option>
             ))}
-          </select>
+          </Select>
         </div>
 
         <div>
@@ -142,12 +149,12 @@ function RequisitionFormPage() {
                   <LoadingSpinner message="Chargement produits..." />
                 </div>
               ) : (
-                <select
+                <Select
                   value={article.produit_id}
                   onChange={(e) =>
                     handleChangeArticle(index, "produit_id", e.target.value)
                   }
-                  className="flex-1 border rounded px-3 py-2"
+                  className="flex-1"
                   required
                 >
                   <option value="">Sélectionner un produit</option>
@@ -156,13 +163,13 @@ function RequisitionFormPage() {
                       {p.nom}
                     </option>
                   ))}
-                </select>
+                </Select>
               )}
-              <input
+              <Input
                 type="number"
                 value={article.quantite}
                 onChange={(e) => handleChangeArticle(index, "quantite", e.target.value)}
-                className="w-24 border rounded px-2 py-2"
+                className="w-24"
                 min="1"
                 required
               />
@@ -182,9 +189,9 @@ function RequisitionFormPage() {
         </div>
 
         <div className="text-right">
-          <button type="submit" disabled={submitting} className="bg-mamastock-gold text-white px-4 py-2 rounded disabled:opacity-50">
+          <PrimaryButton type="submit" disabled={submitting}">
             Enregistrer
-          </button>
+          </PrimaryButton>
         </div>
         </form>
       </GlassCard>

@@ -4,7 +4,11 @@ import { useUtilisateurs } from "@/hooks/useUtilisateurs";
 import { useRoles } from "@/hooks/useRoles";
 import { useMamas } from "@/hooks/useMamas";
 import { useAuth } from "@/context/AuthContext";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import SecondaryButton from "@/components/ui/SecondaryButton";
 import toast from "react-hot-toast";
 
 export default function UtilisateurForm({ utilisateur, onClose }) {
@@ -57,16 +61,19 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
       <h2 className="text-lg font-bold mb-4">
         {utilisateur ? "Modifier l’utilisateur" : "Ajouter un utilisateur"}
       </h2>
-      <input
-        className="input mb-2"
+      <Label htmlFor="nom">Nom</Label>
+      <Input
+        id="nom"
+        className="mb-2"
         type="text"
         value={nom}
         onChange={e => setNom(e.target.value)}
-        placeholder="Nom"
         required
       />
-      <select
-        className="input mb-2"
+      <Label htmlFor="role">Rôle</Label>
+      <Select
+        id="role"
+        className="mb-2"
         value={roleId}
         onChange={e => setRoleId(e.target.value)}
         required
@@ -74,10 +81,12 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
         {roles.map(r => (
           <option key={r.id} value={r.id}>{r.nom}</option>
         ))}
-      </select>
+      </Select>
       {myRole === "superadmin" && (
-        <select
-          className="input mb-2"
+        <Label htmlFor="mama">Établissement</Label>
+        <Select
+          id="mama"
+          className="mb-2"
           value={mama}
           onChange={e => setMama(e.target.value)}
           required
@@ -85,15 +94,15 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
           {mamas.map(m => (
             <option key={m.id} value={m.id}>{m.nom}</option>
           ))}
-        </select>
+        </Select>
       )}
       <label className="flex items-center gap-2 mb-2">
-        <input type="checkbox" checked={actif} onChange={e => setActif(e.target.checked)} />
-        Actif
+        <input id="actif" type="checkbox" checked={actif} onChange={e => setActif(e.target.checked)} />
+        <Label htmlFor="actif" className="!mb-0">Actif</Label>
       </label>
       <div className="flex gap-2 mt-4">
-        <Button type="submit" disabled={loading}>{utilisateur ? "Modifier" : "Ajouter"}</Button>
-        <Button variant="outline" type="button" onClick={onClose}>Annuler</Button>
+        <PrimaryButton type="submit" disabled={loading}>{utilisateur ? "Modifier" : "Ajouter"}</PrimaryButton>
+        <SecondaryButton type="button" onClick={onClose}>Annuler</SecondaryButton>
       </div>
     </form>
   );

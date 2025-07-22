@@ -2,7 +2,8 @@
 import { useEffect, useState } from "react";
 import useNotifications from "@/hooks/useNotifications";
 import { Toaster, toast } from "react-hot-toast";
-import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import { Input } from "@/components/ui/input";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function NotificationSettingsForm() {
@@ -69,16 +70,16 @@ export default function NotificationSettingsForm() {
         </label>
         {prefs.webhook_enabled && (
           <>
-            <input
-              className="input w-full"
+            <Input
+              className="w-full"
               placeholder="Webhook URL"
               value={prefs.webhook_url || ""}
               onChange={(e) =>
                 setPrefs((p) => ({ ...p, webhook_url: e.target.value }))
               }
             />
-            <input
-              className="input w-full"
+            <Input
+              className="w-full"
               placeholder="Webhook token"
               value={prefs.webhook_token || ""}
               onChange={(e) =>
@@ -87,9 +88,9 @@ export default function NotificationSettingsForm() {
             />
           </>
         )}
-        <Button type="submit" disabled={saving}>
+        <PrimaryButton type="submit" disabled={saving}>
           {saving ? "Enregistrement…" : "Enregistrer"}
-        </Button>
+        </PrimaryButton>
       </form>
     </div>
   );

@@ -1,7 +1,9 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
 import { useMenus } from "@/hooks/useMenus";
-import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import SecondaryButton from "@/components/ui/SecondaryButton";
+import { Input } from "@/components/ui/input";
 import toast from "react-hot-toast";
 import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
 
@@ -103,15 +105,15 @@ export default function MenuForm({ menu, fiches = [], onClose }) {
       <h2 className="text-lg font-bold mb-4">
         {menu ? "Modifier le menu" : "Ajouter un menu"}
       </h2>
-      <input
-        className="input mb-2"
+      <Input
+        className="mb-2"
         value={nom}
         onChange={e => setNom(e.target.value)}
         placeholder="Nom du menu"
         required
       />
-      <input
-        className="input mb-2"
+      <Input
+        className="mb-2"
         type="date"
         value={date}
         onChange={e => setDate(e.target.value)}
@@ -120,9 +122,9 @@ export default function MenuForm({ menu, fiches = [], onClose }) {
       <div className="mb-4">
         <label className="block font-semibold mb-2">Fiches du menu :</label>
         <div className="flex gap-2 mb-2">
-          <input
+          <Input
             list="fiches-list"
-            className="input flex-1"
+            className="flex-1"
             value={ficheInput}
             onChange={e => setFicheInput(e.target.value)}
             placeholder="Rechercher une fiche"
@@ -132,12 +134,19 @@ export default function MenuForm({ menu, fiches = [], onClose }) {
               <option key={f.id} value={f.nom} />
             ))}
           </datalist>
-          <Button type="button" variant="outline" onClick={handleAddFiche}>Ajouter</Button>
+          <SecondaryButton type="button" onClick={handleAddFiche}>
+            Ajouter
+          </SecondaryButton>
         </div>
         {selectedObjects.map(f => (
           <div key={f.id} className="flex items-center gap-2 mb-1">
             <span className="flex-1">{f.nom}</span>
-            <Button size="sm" variant="outline" onClick={() => handleSelectFiche(f.id)}>Retirer</Button>
+            <SecondaryButton
+              size="sm"
+              onClick={() => handleSelectFiche(f.id)}
+            >
+              Retirer
+            </SecondaryButton>
           </div>
         ))}
       </div>
@@ -147,7 +156,9 @@ export default function MenuForm({ menu, fiches = [], onClose }) {
       </div>
       <label>
         Document/PDF menu : <input type="file" onChange={e => setFile(e.target.files[0])} />
-        <Button type="button" size="sm" variant="outline" className="ml-2" onClick={handleUpload}>Upload</Button>
+        <SecondaryButton type="button" className="ml-2" onClick={handleUpload}>
+          Upload
+        </SecondaryButton>
         {fileUrl && (
           <a
             href={fileUrl}
@@ -160,8 +171,12 @@ export default function MenuForm({ menu, fiches = [], onClose }) {
         )}
       </label>
       <div className="flex gap-2 mt-4">
-        <Button type="submit" disabled={loading}>{menu ? "Modifier" : "Ajouter"}</Button>
-        <Button variant="outline" type="button" onClick={onClose}>Annuler</Button>
+        <PrimaryButton type="submit" disabled={loading}>
+          {menu ? "Modifier" : "Ajouter"}
+        </PrimaryButton>
+        <SecondaryButton type="button" onClick={onClose}>
+          Annuler
+        </SecondaryButton>
       </div>
     </form>
   );

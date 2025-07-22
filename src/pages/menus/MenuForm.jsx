@@ -2,6 +2,8 @@
 import { useState } from "react";
 import { useMenus } from "@/hooks/useMenus";
 import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import SecondaryButton from "@/components/ui/SecondaryButton";
 import toast from "react-hot-toast";
 import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
 
@@ -103,30 +105,40 @@ export default function MenuForm({ menu, fiches = [], onClose }) {
       <h2 className="text-lg font-bold mb-4">
         {menu ? "Modifier le menu" : "Ajouter un menu"}
       </h2>
-      <input
-        className="input mb-2"
-        value={nom}
-        onChange={e => setNom(e.target.value)}
-        placeholder="Nom du menu"
-        required
-      />
-      <input
-        className="input mb-2"
-        type="date"
-        value={date}
-        onChange={e => setDate(e.target.value)}
-        required
-      />
+      <label className="block mb-2">
+        <span className="text-sm font-semibold">Nom</span>
+        <input
+          className="input mt-1 w-full"
+          value={nom}
+          onChange={e => setNom(e.target.value)}
+          placeholder="Nom du menu"
+          required
+          autoFocus
+        />
+      </label>
+      <label className="block mb-2">
+        <span className="text-sm font-semibold">Date</span>
+        <input
+          className="input mt-1 w-full"
+          type="date"
+          value={date}
+          onChange={e => setDate(e.target.value)}
+          required
+        />
+      </label>
       <div className="mb-4">
         <label className="block font-semibold mb-2">Fiches du menu :</label>
         <div className="flex gap-2 mb-2">
-          <input
-            list="fiches-list"
-            className="input flex-1"
-            value={ficheInput}
-            onChange={e => setFicheInput(e.target.value)}
-            placeholder="Rechercher une fiche"
-          />
+          <label className="flex-1">
+            <span className="sr-only">Rechercher une fiche</span>
+            <input
+              list="fiches-list"
+              className="input w-full"
+              value={ficheInput}
+              onChange={e => setFicheInput(e.target.value)}
+              placeholder="Rechercher une fiche"
+            />
+          </label>
           <datalist id="fiches-list">
             {fiches.map(f => (
               <option key={f.id} value={f.nom} />
@@ -145,8 +157,14 @@ export default function MenuForm({ menu, fiches = [], onClose }) {
         <div><b>Coût total :</b> {coutTotal.toFixed(2)} €</div>
         <div><b>Coût moyen/portion :</b> {coutPortion.toFixed(2)} €</div>
       </div>
-      <label>
-        Document/PDF menu : <input type="file" onChange={e => setFile(e.target.files[0])} />
+      <label className="block mb-2">
+        <span className="text-sm font-semibold">Document/PDF menu</span>
+        <input
+          type="file"
+          onChange={e => setFile(e.target.files[0])}
+          aria-label="Document du menu"
+          className="mt-1"
+        />
         <Button type="button" size="sm" variant="outline" className="ml-2" onClick={handleUpload}>Upload</Button>
         {fileUrl && (
           <a
@@ -160,8 +178,12 @@ export default function MenuForm({ menu, fiches = [], onClose }) {
         )}
       </label>
       <div className="flex gap-2 mt-4">
-        <Button type="submit" disabled={loading}>{menu ? "Modifier" : "Ajouter"}</Button>
-        <Button variant="outline" type="button" onClick={onClose}>Annuler</Button>
+        <PrimaryButton type="submit" disabled={loading} className="flex-1">
+          {loading ? "Enregistrement…" : menu ? "Modifier" : "Ajouter"}
+        </PrimaryButton>
+        <SecondaryButton type="button" onClick={onClose} disabled={loading} className="flex-1">
+          Annuler
+        </SecondaryButton>
       </div>
     </form>
   );

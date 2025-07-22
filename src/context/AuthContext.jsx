@@ -40,7 +40,11 @@ export const AuthProvider = ({ children }) => {
   }
 
   const resetAuth = async () => {
-    try { await supabase.auth.signOut(); } catch {}
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.error(err);
+    }
     purgeLocalAuth();
     window.location.reload();
   };

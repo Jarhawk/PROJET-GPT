@@ -1,6 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import PrimaryButton from '@/components/ui/PrimaryButton';
+import SecondaryButton from '@/components/ui/SecondaryButton';
 import { useApiKeys } from '@/hooks/useApiKeys';
 import { Toaster, toast } from 'react-hot-toast';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
@@ -28,7 +30,7 @@ export default function APIKeys() {
     <div className="p-6 max-w-4xl mx-auto">
       <Toaster />
       <h1 className="text-2xl font-bold mb-4">Clés API</h1>
-      <Button onClick={() => setFormOpen(o => !o)}>Nouvelle clé</Button>
+      <PrimaryButton onClick={() => setFormOpen(o => !o)}>Nouvelle clé</PrimaryButton>
       {formOpen && (
         <form className="space-y-2 mt-4" onSubmit={handleSubmit}>
           <div>
@@ -47,7 +49,7 @@ export default function APIKeys() {
             <label>Expiration</label>
             <input type="date" className="input input-bordered" value={form.expiration} onChange={e => setForm(f => ({ ...f, expiration: e.target.value }))} />
           </div>
-          <Button type="submit">Créer</Button>
+          <PrimaryButton type="submit" className="mt-2">Créer</PrimaryButton>
         </form>
       )}
       <TableContainer className="mt-6">

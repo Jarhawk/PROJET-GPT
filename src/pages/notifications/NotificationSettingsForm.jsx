@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import useNotifications from "@/hooks/useNotifications";
 import { Toaster, toast } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function NotificationSettingsForm() {
@@ -87,9 +88,9 @@ export default function NotificationSettingsForm() {
             />
           </>
         )}
-        <Button type="submit" disabled={saving}>
+        <PrimaryButton type="submit" disabled={saving} className="mt-2">
           {saving ? "Enregistrement…" : "Enregistrer"}
-        </Button>
+        </PrimaryButton>
       </form>
     </div>
   );

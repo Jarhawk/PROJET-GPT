@@ -248,6 +248,9 @@ export const AuthProvider = ({ children }) => {
     return listModules(userData?.access_rights, droit);
   };
 
+  const isSuperadmin = hasAccess(userData?.access_rights, 'superadmin', 'peut_voir', false);
+  const isAdmin = isSuperadmin || hasAccess(userData?.access_rights, 'admin', 'peut_voir', false);
+
   const value = {
     /** Direct session object returned by Supabase */
     session,
@@ -266,6 +269,8 @@ export const AuthProvider = ({ children }) => {
     pending: !!session && !userData,
     email: userData?.email,
     actif: userData?.actif,
+    isSuperadmin,
+    isAdmin,
     hasAccess,
     getAuthorizedModules,
     login,

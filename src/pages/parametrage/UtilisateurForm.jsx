@@ -83,18 +83,20 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
         ))}
       </Select>
       {myRole === "superadmin" && (
-        <Label htmlFor="mama">Établissement</Label>
-        <Select
-          id="mama"
-          className="mb-2"
-          value={mama}
-          onChange={e => setMama(e.target.value)}
-          required
-        >
-          {mamas.map(m => (
-            <option key={m.id} value={m.id}>{m.nom}</option>
-          ))}
-        </Select>
+        <>
+          <Label htmlFor="mama">Établissement</Label>
+          <Select
+            id="mama"
+            className="mb-2"
+            value={mama}
+            onChange={e => setMama(e.target.value)}
+            required
+          >
+            {mamas.map(m => (
+              <option key={m.id} value={m.id}>{m.nom}</option>
+            ))}
+          </Select>
+        </>
       )}
       <label className="flex items-center gap-2 mb-2">
         <input id="actif" type="checkbox" checked={actif} onChange={e => setActif(e.target.checked)} />

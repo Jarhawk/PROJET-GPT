@@ -254,7 +254,6 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
             Voir
           </a>
         )}
-      </label>
       {ocrText && (
         <div className="text-xs text-gray-600 whitespace-pre-wrap mt-2 border rounded p-2 max-h-32 overflow-auto">
           {ocrText}

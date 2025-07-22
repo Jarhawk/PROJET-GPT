@@ -50,7 +50,10 @@ export default function ParamMama() {
           <input className="input mb-2" value={form.email || ""} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="Email" />
           <input className="input mb-2" value={form.telephone || ""} onChange={e => setForm(f => ({ ...f, telephone: e.target.value }))} placeholder="Téléphone" />
           {/* Ajout d'un upload logo possible ici */}
-          <Button type="submit" disabled={loading}>Valider</Button>
+          <Button type="submit" disabled={loading} className="flex items-center gap-2">
+            {loading && <span className="loader-glass" />}
+            Valider
+          </Button>
           <Button
             variant="outline"
             type="button"

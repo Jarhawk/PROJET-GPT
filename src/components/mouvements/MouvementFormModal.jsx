@@ -188,6 +188,7 @@ export default function MouvementFormModal({
                   }`}
                   disabled={loading || submitting}
                 >
+                  {(loading || submitting) && <span className="loader-glass" />}
                   {loading || submitting ? "Enregistrement…" : (editMode ? "Enregistrer" : "Créer")}
                 </Button>
               </form>

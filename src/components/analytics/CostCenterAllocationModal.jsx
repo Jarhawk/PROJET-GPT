@@ -94,8 +94,11 @@ export default function CostCenterAllocationModal({ mouvementId, productId, open
           )}
           {rows.map((row, idx) => (
             <div key={idx} className="flex gap-2 items-center">
+              <label className="sr-only" htmlFor={`cc-${idx}`}>Cost center</label>
               <select
+                id={`cc-${idx}`}
                 className="input"
+                aria-label="Cost center"
                 value={row.cost_center_id}
                 onChange={e => handleChange(idx, "cost_center_id", e.target.value)}
               >
@@ -103,16 +106,22 @@ export default function CostCenterAllocationModal({ mouvementId, productId, open
                   <option key={c.id} value={c.id}>{c.nom}</option>
                 ))}
               </select>
+              <label className="sr-only" htmlFor={`qt-${idx}`}>Quantité</label>
               <input
+                id={`qt-${idx}`}
                 type="number"
                 className="input w-24"
+                aria-label="Quantité"
                 value={row.quantite}
                 onChange={e => handleChange(idx, "quantite", e.target.value)}
                 placeholder="Quantité"
               />
+              <label className="sr-only" htmlFor={`val-${idx}`}>Valeur</label>
               <input
+                id={`val-${idx}`}
                 type="number"
                 className="input w-24"
+                aria-label="Valeur"
                 value={row.valeur ?? ""}
                 onChange={e => handleChange(idx, "valeur", e.target.value)}
                 placeholder="Valeur €"
@@ -122,7 +131,9 @@ export default function CostCenterAllocationModal({ mouvementId, productId, open
           ))}
           <Button type="button" variant="outline" onClick={handleAdd}>+ Ajouter</Button>
           <div className="mt-4 flex gap-2">
-            <Button type="submit" disabled={saving}>Enregistrer</Button>
+            <Button type="submit" disabled={saving} className="flex items-center gap-2">
+              {saving && <span className="loader-glass" />}Enregistrer
+            </Button>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Annuler</Button>
           </div>
         </form>

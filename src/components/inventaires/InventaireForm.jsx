@@ -250,7 +250,10 @@ export default function InventaireForm({ inventaire, onClose }) {
         )}
       </label>
       <div className="flex gap-2 mt-4">
-        <Button type="submit" disabled={loading}>{inventaire ? "Modifier" : "Ajouter"}</Button>
+        <Button type="submit" disabled={loading} className="flex items-center gap-2">
+          {loading && <span className="loader-glass" />}
+          {inventaire ? "Modifier" : "Ajouter"}
+        </Button>
         <Button variant="outline" type="button" onClick={onClose}>Annuler</Button>
         {inventaire && !inventaire.cloture &&
           <Button type="button" variant="destructive" onClick={handleCloture}>Clôturer</Button>

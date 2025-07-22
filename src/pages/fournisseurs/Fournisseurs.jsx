@@ -56,10 +56,9 @@ export default function Fournisseurs() {
     doc.text("Liste Fournisseurs", 10, 12);
     doc.autoTable({
       startY: 20,
-      head: [["Nom", "Ville", "Téléphone", "Contact", "Email"]],
+      head: [["Nom", "Téléphone", "Contact", "Email"]],
       body: listWithContact.map(f => [
         f.nom,
-        f.ville || "",
         f.contact?.tel || "",
         f.contact?.nom || "",
         f.contact?.email || "",
@@ -87,8 +86,7 @@ export default function Fournisseurs() {
 
   // Recherche live
   const fournisseursFiltrés = listWithContact.filter(f =>
-    f.nom?.toLowerCase().includes(search.toLowerCase()) ||
-    f.ville?.toLowerCase().includes(search.toLowerCase())
+    f.nom?.toLowerCase().includes(search.toLowerCase())
   );
 
   // Top produits global recalculé lorsqu'on reçoit les données
@@ -120,7 +118,7 @@ export default function Fournisseurs() {
         <div className="relative flex-1">
           <input
             className="input input-bordered w-full pl-8"
-            placeholder="Recherche fournisseur ou ville"
+            placeholder="Recherche fournisseur"
             value={search}
             onChange={e => { setPage(1); setSearch(e.target.value); }}
           />
@@ -178,7 +176,6 @@ export default function Fournisseurs() {
           <thead>
             <tr>
               <th className="py-2 px-3">Nom</th>
-              <th className="py-2 px-3">Ville</th>
               <th className="py-2 px-3">Téléphone</th>
               <th className="py-2 px-3">Contact</th>
               <th className="py-2 px-3">Email</th>
@@ -198,7 +195,6 @@ export default function Fournisseurs() {
               fournisseursFiltrés.map(f => (
                 <tr key={f.id} className={f.actif ? '' : 'opacity-50'}>
                   <td className="py-1 px-3 font-semibold text-white">{f.nom}</td>
-                  <td>{f.ville}</td>
                   <td>{f.contact?.tel}</td>
                   <td>{f.contact?.nom}</td>
                   <td>{f.contact?.email}</td>

@@ -4,6 +4,8 @@ import { usePertes } from "@/hooks/usePertes";
 import { useProducts } from "@/hooks/useProducts";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import { Input } from "@/components/ui/input";
 import TableContainer from "@/components/ui/TableContainer";
 import { Toaster, toast } from "react-hot-toast";
 
@@ -21,7 +23,13 @@ export default function Pertes() {
     }
   }, [fetchPertes, fetchProducts, mama_id]);
 
-  const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setForm(f => ({
+      ...f,
+      [name]: name === "quantite" ? Number(value) : value,
+    }));
+  };
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -57,19 +65,49 @@ export default function Pertes() {
     <div className="p-6 container mx-auto">
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold mb-4">Pertes / Casses / Dons</h1>
-      <form onSubmit={handleSubmit} className="flex gap-2 mb-4 flex-wrap">
-        <select name="produit_id" className="input" value={form.produit_id} onChange={handleChange} required>
+      <form onSubmit={handleSubmit} className="flex gap-2 mb-4 flex-wrap items-end">
+        <label className="sr-only" htmlFor="produit_id">Produit</label>
+        <select
+          id="produit_id"
+          name="produit_id"
+          className="input"
+          value={form.produit_id}
+          onChange={handleChange}
+          required
+        >
           <option value="">Produit…</option>
-          {products.map(p => (
-            <option key={p.id} value={p.id}>{p.nom}</option>
+          {products.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.nom}
+            </option>
           ))}
         </select>
-        <input type="number" name="quantite" className="input w-24" value={form.quantite}
-               onChange={handleChange} placeholder="Quantité" required />
-        <input type="date" name="date_perte" className="input" value={form.date_perte}
-               onChange={handleChange} />
-        <input name="motif" className="input flex-1" placeholder="Motif" value={form.motif} onChange={handleChange} />
-        <Button type="submit" disabled={saving}>Ajouter</Button>
+        <Input
+          type="number"
+          name="quantite"
+          className="w-24"
+          min={0}
+          value={form.quantite}
+          onChange={handleChange}
+          placeholder="Quantité"
+          required
+        />
+        <Input
+          type="date"
+          name="date_perte"
+          value={form.date_perte}
+          onChange={handleChange}
+        />
+        <Input
+          name="motif"
+          className="flex-1"
+          placeholder="Motif"
+          value={form.motif}
+          onChange={handleChange}
+        />
+        <PrimaryButton type="submit" disabled={saving} className="h-10">
+          {saving ? "Ajout..." : "Ajouter"}
+        </PrimaryButton>
       </form>
       <TableContainer className="mt-4">
         <table className="min-w-full text-xs">

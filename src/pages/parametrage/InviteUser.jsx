@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import SecondaryButton from "@/components/ui/SecondaryButton";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function InviteUser({ onClose, onInvited }) {
@@ -154,12 +156,12 @@ export default function InviteUser({ onClose, onInvited }) {
         </select>
       </div>
       <div className="flex gap-4 mt-4">
-        <Button type="submit" disabled={sending}>
+        <PrimaryButton type="submit" disabled={sending} className="flex-1">
           {sending ? "Envoi…" : "Envoyer l'invitation"}
-        </Button>
-        <Button type="button" variant="secondary" onClick={onClose}>
+        </PrimaryButton>
+        <SecondaryButton type="button" onClick={onClose} className="flex-1">
           Annuler
-        </Button>
+        </SecondaryButton>
       </div>
     </form>
   );

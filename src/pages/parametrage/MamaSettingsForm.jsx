@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
 import useMamaSettings from "@/hooks/useMamaSettings";
 import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
 import { useAuth } from "@/context/AuthContext";
@@ -123,9 +124,9 @@ export default function MamaSettingsForm() {
         />
       </div>
       <div className="flex gap-4">
-        <Button type="submit" disabled={saving}>
+        <PrimaryButton type="submit" disabled={saving} className="flex-1">
           {saving ? "Enregistrement…" : "Enregistrer"}
-        </Button>
+        </PrimaryButton>
       </div>
     </form>
   );

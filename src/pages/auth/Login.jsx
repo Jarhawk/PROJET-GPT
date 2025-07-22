@@ -29,14 +29,9 @@ export default function Login() {
     error: authError,
     resetAuth,
   } = useAuth();
-
-  if (authLoading || (session && !userData)) {
-    return <LoadingSpinner message="Chargement..." />;
-  }
-
+  const redirectedRef = useRef(false);
 
   // Redirection après authentification une fois les données chargées
-  const redirectedRef = useRef(false);
   useEffect(() => {
     if (redirectedRef.current) return;
     if (!session || authLoading) return;
@@ -61,6 +56,10 @@ export default function Login() {
     toast.success(`Bienvenue ${session.user.email}`);
     if (pathname !== "/dashboard") navigate("/dashboard");
   }, [session, userData, authLoading, navigate, pathname, getAuthorizedModules]);
+
+  if (authLoading || (session && !userData)) {
+    return <LoadingSpinner message="Chargement..." />;
+  }
 
   const handleLogin = async (e) => {
     e.preventDefault();

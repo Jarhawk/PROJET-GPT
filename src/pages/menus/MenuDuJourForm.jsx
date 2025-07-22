@@ -2,6 +2,8 @@
 import { useState } from "react";
 import { useMenuDuJour } from "@/hooks/useMenuDuJour";
 import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import SecondaryButton from "@/components/ui/SecondaryButton";
 import toast from "react-hot-toast";
 import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
 
@@ -83,39 +85,52 @@ export default function MenuDuJourForm({ menu, fiches = [], onClose }) {
       <h2 className="text-lg font-bold mb-4">
         {menu ? "Modifier le menu du jour" : "Ajouter un menu du jour"}
       </h2>
-      <input
-        className="input mb-2"
-        value={nom}
-        onChange={e => setNom(e.target.value)}
-        placeholder="Nom du menu du jour"
-        required
-      />
-      <input
-        className="input mb-2"
-        type="date"
-        value={date}
-        onChange={e => setDate(e.target.value)}
-        required
-      />
+      <label className="block mb-2">
+        <span className="text-sm font-semibold">Nom</span>
+        <input
+          className="input mt-1 w-full"
+          value={nom}
+          onChange={e => setNom(e.target.value)}
+          placeholder="Nom du menu du jour"
+          required
+          autoFocus
+        />
+      </label>
+      <label className="block mb-2">
+        <span className="text-sm font-semibold">Date</span>
+        <input
+          className="input mt-1 w-full"
+          type="date"
+          value={date}
+          onChange={e => setDate(e.target.value)}
+          required
+        />
+      </label>
       <div className="flex gap-2 mb-2">
-        <input
-          type="number"
-          className="input"
-          placeholder="Prix vente TTC"
-          min={0}
-          step="0.01"
-          value={prixVente}
-          onChange={e => setPrixVente(Number(e.target.value))}
-        />
-        <input
-          type="number"
-          className="input"
-          placeholder="TVA %"
-          min={0}
-          step="0.1"
-          value={tva}
-          onChange={e => setTva(Number(e.target.value))}
-        />
+        <label className="flex-1">
+          <span className="text-sm font-semibold">Prix vente TTC</span>
+          <input
+            type="number"
+            className="input mt-1 w-full"
+            placeholder="Prix vente TTC"
+            min={0}
+            step="0.01"
+            value={prixVente}
+            onChange={e => setPrixVente(Number(e.target.value))}
+          />
+        </label>
+        <label className="flex-1">
+          <span className="text-sm font-semibold">TVA %</span>
+          <input
+            type="number"
+            className="input mt-1 w-full"
+            placeholder="TVA %"
+            min={0}
+            step="0.1"
+            value={tva}
+            onChange={e => setTva(Number(e.target.value))}
+          />
+        </label>
       </div>
       <div className="mb-4">
         <label className="block font-semibold mb-2">Fiches du menu :</label>
@@ -133,8 +148,14 @@ export default function MenuDuJourForm({ menu, fiches = [], onClose }) {
           ))}
         </div>
       </div>
-      <label>
-        Document/PDF du menu : <input type="file" onChange={e => setFile(e.target.files[0])} />
+      <label className="block mb-2">
+        <span className="text-sm font-semibold">Document/PDF du menu</span>
+        <input
+          type="file"
+          onChange={e => setFile(e.target.files[0])}
+          aria-label="Document du menu du jour"
+          className="mt-1"
+        />
         <Button type="button" size="sm" variant="outline" className="ml-2" onClick={handleUpload}>Upload</Button>
         {fileUrl && (
           <a
@@ -154,8 +175,12 @@ export default function MenuDuJourForm({ menu, fiches = [], onClose }) {
         )}
       </div>
       <div className="flex gap-2 mt-4">
-        <Button type="submit" disabled={loading}>{menu ? "Modifier" : "Ajouter"}</Button>
-        <Button variant="outline" type="button" onClick={onClose}>Annuler</Button>
+        <PrimaryButton type="submit" disabled={loading} className="flex-1">
+          {loading ? "Enregistrement…" : menu ? "Modifier" : "Ajouter"}
+        </PrimaryButton>
+        <SecondaryButton type="button" onClick={onClose} disabled={loading} className="flex-1">
+          Annuler
+        </SecondaryButton>
       </div>
     </form>
   );

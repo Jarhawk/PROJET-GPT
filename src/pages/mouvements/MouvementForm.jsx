@@ -1,6 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import SecondaryButton from "@/components/ui/SecondaryButton";
 import { useMouvements } from "@/hooks/useMouvements";
 import { useProducts } from "@/hooks/useProducts";
 import { useZones } from "@/hooks/useZones";
@@ -120,8 +122,12 @@ export default function MouvementForm({ onClose }) {
           onChange={e => setForm(f => ({ ...f, commentaire: e.target.value }))}
         />
         <div className="flex gap-2 justify-end mt-4">
-          <Button type="submit" disabled={loading}>Valider</Button>
-          <Button type="button" variant="outline" onClick={onClose} disabled={loading}>Annuler</Button>
+          <PrimaryButton type="submit" disabled={loading} className="flex-1">
+            {loading ? "Enregistrement…" : "Valider"}
+          </PrimaryButton>
+          <SecondaryButton type="button" onClick={onClose} disabled={loading} className="flex-1">
+            Annuler
+          </SecondaryButton>
         </div>
       </form>
     </div>

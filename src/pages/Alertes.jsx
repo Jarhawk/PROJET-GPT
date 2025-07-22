@@ -4,7 +4,10 @@ import { useAlerts } from "@/hooks/useAlerts";
 import { useProducts } from "@/hooks/useProducts";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import SecondaryButton from "@/components/ui/SecondaryButton";
 import { Select } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import TableContainer from "@/components/ui/TableContainer";
 import { Search } from "lucide-react";
 import { Toaster, toast } from "react-hot-toast";
@@ -70,20 +73,20 @@ export default function Alertes() {
             <option key={p.id} value={p.id}>{p.nom}</option>
           ))}
         </Select>
-        <input
+        <Input
           type="number"
-          className="input w-32"
+          className="w-32"
           placeholder="Seuil"
           value={form.threshold}
           onChange={(e) => setForm(f => ({ ...f, threshold: e.target.value }))}
           required
         />
-        <Button type="submit">Ajouter</Button>
+        <PrimaryButton type="submit">Ajouter</PrimaryButton>
       </form>
       <div className="relative w-64 mb-4">
-        <input
+        <Input
           type="search"
-          className="input w-full pl-8"
+          className="w-full pl-8"
           placeholder="Recherche produit"
           value={search}
           onChange={e => setSearch(e.target.value)}

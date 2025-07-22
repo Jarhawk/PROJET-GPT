@@ -1,6 +1,9 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import PrimaryButton from '@/components/ui/PrimaryButton';
+import SecondaryButton from '@/components/ui/SecondaryButton';
+import { Input } from '@/components/ui/input';
 
 export default function ZoneForm({ zone, onSave, onCancel }) {
   const [nom, setNom] = useState(zone?.nom || '');
@@ -20,9 +23,10 @@ export default function ZoneForm({ zone, onSave, onCancel }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-3 p-4">
       <div>
-        <label className="block text-sm mb-1 font-medium">Nom</label>
-        <input
-          className="input w-full"
+        <label className="block text-sm mb-1 font-medium" htmlFor="zone-nom">Nom</label>
+        <Input
+          id="zone-nom"
+          className="w-full"
           placeholder="Nom de la zone"
           value={nom}
           onChange={e => setNom(e.target.value)}
@@ -40,10 +44,8 @@ export default function ZoneForm({ zone, onSave, onCancel }) {
         <label htmlFor="actif-checkbox">Zone active</label>
       </div>
       <div className="flex gap-2">
-        <Button type="submit">Enregistrer</Button>
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Annuler
-        </Button>
+        <PrimaryButton type="submit" className="flex items-center gap-2">Enregistrer</PrimaryButton>
+        <SecondaryButton type="button" onClick={onCancel}>Annuler</SecondaryButton>
       </div>
     </form>
   );

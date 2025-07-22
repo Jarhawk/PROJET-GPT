@@ -3,6 +3,9 @@ import { useEffect, useState } from "react";
 import { useFeedback } from "@/hooks/useFeedback";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import TableContainer from "@/components/ui/TableContainer";
 import { Toaster, toast } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
@@ -31,8 +34,8 @@ export default function Feedback() {
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold">Feedback utilisateur</h1>
       <form onSubmit={handleSubmit} className="space-y-2 max-w-md">
-        <input
-          className="input w-full"
+        <Input
+          className="w-full"
           placeholder="Module concerné"
           value={form.module}
           onChange={(e) => setForm((f) => ({ ...f, module: e.target.value }))}
@@ -45,16 +48,19 @@ export default function Feedback() {
           onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
           required
         />
-        <select
-          className="input w-full"
+        <Select
+          className="w-full"
           value={form.urgence}
           onChange={(e) => setForm((f) => ({ ...f, urgence: e.target.value }))}
         >
           <option value="faible">Faible</option>
           <option value="normal">Normal</option>
           <option value="elevee">Élevée</option>
-        </select>
-        <Button type="submit" disabled={loading}>Envoyer</Button>
+        </Select>
+        <PrimaryButton type="submit" disabled={loading} className="flex items-center gap-2">
+          {loading && <span className="loader-glass" />}
+          Envoyer
+        </PrimaryButton>
       </form>
       {error && <div className="text-red-600">{error}</div>}
       <TableContainer>

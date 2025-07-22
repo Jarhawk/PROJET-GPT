@@ -3,6 +3,10 @@ import { useState, useEffect } from "react";
 import { useStock } from "@/hooks/useStock";
 import { useZones } from "@/hooks/useZones";
 import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import SecondaryButton from "@/components/ui/SecondaryButton";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import toast from "react-hot-toast";
 
 export default function StockMouvementForm({ produit, onClose }) {
@@ -55,18 +59,18 @@ export default function StockMouvementForm({ produit, onClose }) {
     >
       <h2 className="text-lg font-bold mb-4">Mouvement de stock</h2>
       <div className="mb-2">Produit : <b>{produit?.nom}</b></div>
-      <select
-        className="input mb-2"
+      <Select
         value={type}
         onChange={e => setType(e.target.value)}
+        className="mb-2"
         required
       >
         <option value="entree">Entrée (réception, retour…)</option>
         <option value="sortie">Sortie (perte, conso, correction…)</option>
         <option value="transfert">Transfert</option>
-      </select>
-      <input
-        className="input mb-2"
+      </Select>
+      <Input
+        className="mb-2"
         type="number"
         step="0.01"
         value={quantite}
@@ -75,8 +79,8 @@ export default function StockMouvementForm({ produit, onClose }) {
         required
       />
       {type === "sortie" && (
-        <select
-          className="input mb-2"
+        <Select
+          className="mb-2"
           value={zoneSource}
           onChange={e => setZoneSource(e.target.value)}
         >
@@ -84,11 +88,11 @@ export default function StockMouvementForm({ produit, onClose }) {
           {zones.map(z => (
             <option key={z.id} value={z.id}>{z.nom}</option>
           ))}
-        </select>
+        </Select>
       )}
       {type === "entree" && (
-        <select
-          className="input mb-2"
+        <Select
+          className="mb-2"
           value={zoneDestination}
           onChange={e => setZoneDestination(e.target.value)}
         >
@@ -96,12 +100,12 @@ export default function StockMouvementForm({ produit, onClose }) {
           {zones.map(z => (
             <option key={z.id} value={z.id}>{z.nom}</option>
           ))}
-        </select>
+        </Select>
       )}
       {type === "transfert" && (
         <div className="flex gap-2 mb-2">
-          <select
-            className="input flex-1"
+          <Select
+            className="flex-1"
             value={zoneSource}
             onChange={e => setZoneSource(e.target.value)}
           >
@@ -109,9 +113,9 @@ export default function StockMouvementForm({ produit, onClose }) {
             {zones.map(z => (
               <option key={z.id} value={z.id}>{z.nom}</option>
             ))}
-          </select>
-          <select
-            className="input flex-1"
+          </Select>
+          <Select
+            className="flex-1"
             value={zoneDestination}
             onChange={e => setZoneDestination(e.target.value)}
           >
@@ -119,18 +123,21 @@ export default function StockMouvementForm({ produit, onClose }) {
             {zones.map(z => (
               <option key={z.id} value={z.id}>{z.nom}</option>
             ))}
-          </select>
+          </Select>
         </div>
       )}
-      <input
-        className="input mb-2"
+      <Input
+        className="mb-2"
         value={commentaire}
         onChange={e => setCommentaire(e.target.value)}
         placeholder="Commentaire (optionnel)"
       />
       <div className="flex gap-2 mt-4">
-        <Button type="submit" disabled={loading}>Valider</Button>
-        <Button variant="outline" type="button" onClick={onClose} disabled={loading}>Annuler</Button>
+        <PrimaryButton type="submit" disabled={loading} className="flex items-center gap-2">
+          {loading && <span className="loader-glass" />}
+          Valider
+        </PrimaryButton>
+        <SecondaryButton type="button" onClick={onClose} disabled={loading}>Annuler</SecondaryButton>
       </div>
     </form>
   );

@@ -4,6 +4,9 @@ import { useTasks } from "@/hooks/useTasks";
 import { useUtilisateurs } from "@/hooks/useUtilisateurs";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import toast from "react-hot-toast";
 
 export default function TacheForm({ task }) {
@@ -57,8 +60,8 @@ export default function TacheForm({ task }) {
     <form onSubmit={handleSubmit} className="space-y-2 max-w-md">
       <label className="block">
         <span>Titre</span>
-        <input
-          className="input w-full"
+        <Input
+          className="w-full"
           name="titre"
           value={form.titre}
           onChange={handleChange}
@@ -76,8 +79,8 @@ export default function TacheForm({ task }) {
       </label>
       <label className="block">
         <span>Type</span>
-        <select
-          className="input w-full"
+        <Select
+          className="w-full"
           name="type"
           value={form.type}
           onChange={handleChange}
@@ -86,12 +89,12 @@ export default function TacheForm({ task }) {
           <option value="quotidienne">Quotidienne</option>
           <option value="hebdomadaire">Hebdomadaire</option>
           <option value="mensuelle">Mensuelle</option>
-        </select>
+        </Select>
       </label>
       <label className="block">
         <span>Date début</span>
-        <input
-          className="input w-full"
+        <Input
+          className="w-full"
           type="date"
           name="date_debut"
           value={form.date_debut}
@@ -101,8 +104,8 @@ export default function TacheForm({ task }) {
       </label>
       <label className="block">
         <span>Date fin</span>
-        <input
-          className="input w-full"
+        <Input
+          className="w-full"
           type="date"
           name="date_fin"
           value={form.date_fin}
@@ -111,8 +114,8 @@ export default function TacheForm({ task }) {
       </label>
       <label className="block">
         <span>Prochaine échéance</span>
-        <input
-          className="input w-full"
+        <Input
+          className="w-full"
           type="date"
           name="next_echeance"
           value={form.next_echeance}
@@ -121,8 +124,8 @@ export default function TacheForm({ task }) {
       </label>
       <label className="block">
         <span>Assignée à</span>
-        <select
-          className="input w-full"
+        <Select
+          className="w-full"
           name="assigned_to"
           value={form.assigned_to}
           onChange={handleChange}
@@ -131,12 +134,12 @@ export default function TacheForm({ task }) {
           {users.map(u => (
             <option key={u.id} value={u.id}>{u.nom}</option>
           ))}
-        </select>
+        </Select>
       </label>
       <label className="block">
         <span>Statut</span>
-        <select
-          className="input w-full"
+        <Select
+          className="w-full"
           name="statut"
           value={form.statut}
           onChange={handleChange}
@@ -146,11 +149,12 @@ export default function TacheForm({ task }) {
           <option value="fait">Fait</option>
           <option value="reporte">Reporté</option>
           <option value="annule">Annulé</option>
-        </select>
+        </Select>
       </label>
-      <Button type="submit" disabled={loading} className="mt-2">
+      <PrimaryButton type="submit" disabled={loading} className="mt-2 flex items-center gap-2">
+        {loading && <span className="loader-glass" />}
         {task ? "Mettre à jour" : "Ajouter"}
-      </Button>
+      </PrimaryButton>
     </form>
   );
 }

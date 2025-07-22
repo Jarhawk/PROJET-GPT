@@ -7,8 +7,14 @@ import { AuthProvider, useAuth } from '../src/context/AuthContext.jsx';
 const getSession = vi.fn(() => Promise.resolve({ data: { session: { user: { id: 'u1', email: 'u@x.com' } } }, error: null }));
 const onAuthStateChange = vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } }));
 const signOut = vi.fn(() => Promise.resolve({ error: null }));
-const maybeSingle = vi.fn(() => Promise.resolve({ data: { id: '1', mama_id: 1, role_id: 1, role: { nom: 'admin' }, access_rights: {} }, error: null }));
-const from = vi.fn(() => ({ select: () => ({ eq: () => ({ maybeSingle }) }) }));
+const maybeSingle = vi.fn(() => Promise.resolve({ data: { id: '1', mama_id: 1, role_id: 1, role: { id: 'r1', nom: 'admin', access_rights: {} }, access_rights: {} }, error: null }));
+const accessSelect = vi.fn(() => ({ eq: vi.fn(() => Promise.resolve({ data: [] })) }));
+const from = vi.fn((table) => {
+  if (table === 'access_rights') {
+    return { select: accessSelect };
+  }
+  return { select: () => ({ eq: () => ({ maybeSingle }) }) };
+});
 
 vi.mock('../src/lib/supabase.js', () => ({
   supabase: { auth: { getSession, onAuthStateChange, signOut }, from }

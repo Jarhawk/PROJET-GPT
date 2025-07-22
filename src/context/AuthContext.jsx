@@ -6,6 +6,8 @@ import { login as loginUser } from "@/lib/loginUser";
 import {
   hasAccess as checkAccess,
   getAuthorizedModules as listModules,
+  mergeRights,
+  rowsToRights,
 } from "@/lib/access";
 import toast from "react-hot-toast";
 
@@ -34,7 +36,9 @@ export function AuthProvider({ children }) {
     if (import.meta.env.DEV) console.log("fetchUserData", userId);
     const { data, error } = await supabase
       .from("utilisateurs")
-      .select("id, mama_id, role_id, role:roles(nom), access_rights, actif")
+      .select(
+        "id, mama_id, role_id, role:roles(id, nom, access_rights), role, access_rights, actif, email"
+      )
       .eq("auth_id", userId)
       .maybeSingle();
 
@@ -67,6 +71,18 @@ export function AuthProvider({ children }) {
       return;
     }
 
+    let tableRights = {};
+    if (data.role_id) {
+      const { data: rows } = await supabase
+        .from("access_rights")
+        .select("module, peut_voir, peut_modifier")
+        .eq("role_id", data.role_id);
+      tableRights = rowsToRights(rows);
+    }
+    const roleRights = data.role?.access_rights || {};
+    const userRights = data.access_rights || {};
+    const rights = mergeRights(tableRights, roleRights, userRights);
+
     lastUserIdRef.current = userId;
     setError(null);
     setUserData({
@@ -74,7 +90,7 @@ export function AuthProvider({ children }) {
       auth_id: userId,
       email,
       role: roleName,
-      access_rights: data.access_rights || null,
+      access_rights: rights,
     });
     if (!data.mama_id) console.warn("missing mama_id for user", userId);
     fetchingRef.current = false;
@@ -160,7 +176,7 @@ export function AuthProvider({ children }) {
           auth_id: user.id,
           mama_id: mama?.id,
           role_id: roleRow?.id,
-          access_rights: [],
+          access_rights: {},
         });
       } catch (e) {
         console.error("Erreur création profil utilisateur:", e);

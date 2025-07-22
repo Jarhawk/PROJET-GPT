@@ -40,7 +40,7 @@ test('fetchUsers applies filters', async () => {
     await result.current.fetchUsers({ search: 'foo', actif: true, filterRole: 'admin' });
   });
   expect(fromMock).toHaveBeenCalledWith('utilisateurs');
-  expect(query.select).toHaveBeenCalledWith('id, nom, actif, mama_id, role_id, role:roles(nom), access_rights');
+  expect(query.select).toHaveBeenCalledWith('id, nom, actif, mama_id, role_id, role:roles(nom, access_rights), access_rights');
   expect(query.order).toHaveBeenCalledWith('nom', { ascending: true });
   expect(query.eq.mock.calls).toContainEqual(['mama_id', 'm1']);
   expect(query.ilike).toHaveBeenCalledWith('nom', '%foo%');

@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import SecondaryButton from "@/components/ui/SecondaryButton";
 
 export default function PromotionForm({ promotion = {}, onClose, onSave, saving }) {
   const [form, setForm] = useState({
@@ -16,21 +19,21 @@ export default function PromotionForm({ promotion = {}, onClose, onSave, saving 
         <h2 className="text-lg font-bold mb-4">{promotion.id ? "Modifier" : "Nouvelle"} promotion</h2>
         <form className="space-y-3" onSubmit={e => { e.preventDefault(); onSave(form); }}>
           <div>
-            <label className="block text-sm font-semibold">Nom</label>
-            <input className="input w-full" value={form.nom} onChange={e => setForm(f => ({ ...f, nom: e.target.value }))} required />
+            <Label htmlFor="nom-promo">Nom</Label>
+            <Input id="nom-promo" className="w-full" value={form.nom} onChange={e => setForm(f => ({ ...f, nom: e.target.value }))} required />
           </div>
           <div>
-            <label className="block text-sm font-semibold">Description</label>
-            <textarea className="input w-full" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
+            <Label htmlFor="desc-promo">Description</Label>
+            <textarea id="desc-promo" className="input w-full" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
           </div>
           <div className="flex gap-2">
             <div className="flex-1">
-              <label className="block text-sm font-semibold">Début</label>
-              <input type="date" className="input w-full" value={form.date_debut} onChange={e => setForm(f => ({ ...f, date_debut: e.target.value }))} required />
+              <Label htmlFor="debut-promo">Début</Label>
+              <Input id="debut-promo" type="date" className="w-full" value={form.date_debut} onChange={e => setForm(f => ({ ...f, date_debut: e.target.value }))} required />
             </div>
             <div className="flex-1">
-              <label className="block text-sm font-semibold">Fin</label>
-              <input type="date" className="input w-full" value={form.date_fin} onChange={e => setForm(f => ({ ...f, date_fin: e.target.value }))} />
+              <Label htmlFor="fin-promo">Fin</Label>
+              <Input id="fin-promo" type="date" className="w-full" value={form.date_fin} onChange={e => setForm(f => ({ ...f, date_fin: e.target.value }))} />
             </div>
           </div>
           <div>
@@ -40,8 +43,8 @@ export default function PromotionForm({ promotion = {}, onClose, onSave, saving 
             </label>
           </div>
           <div className="flex gap-4 justify-end pt-2">
-            <Button type="submit" disabled={saving}>Enregistrer</Button>
-            <Button type="button" variant="secondary" onClick={onClose}>Annuler</Button>
+            <PrimaryButton type="submit" disabled={saving}>Enregistrer</PrimaryButton>
+            <SecondaryButton type="button" onClick={onClose}>Annuler</SecondaryButton>
           </div>
         </form>
       </div>

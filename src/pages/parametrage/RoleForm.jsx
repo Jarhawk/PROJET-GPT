@@ -2,7 +2,10 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import SecondaryButton from "@/components/ui/SecondaryButton";
 import toast, { Toaster } from "react-hot-toast";
 import { MODULES } from "@/config/modules";
 
@@ -86,9 +89,9 @@ export default function RoleForm({ role, onClose, onSaved }) {
     <form className="space-y-3 p-4" onSubmit={handleSubmit}>
       <Toaster />
       <div>
-        <label>Nom du rôle</label>
-        <input
-          className="input input-bordered w-full"
+        <Label htmlFor="nom">Nom du rôle</Label>
+        <Input
+          id="nom"
           name="nom"
           value={values.nom}
           onChange={handleChange}
@@ -97,50 +100,43 @@ export default function RoleForm({ role, onClose, onSaved }) {
         />
       </div>
       <div>
-        <label>Description</label>
-        <input
-          className="input input-bordered w-full"
+        <Label htmlFor="description">Description</Label>
+        <Input
+          id="description"
           name="description"
           value={values.description}
           onChange={handleChange}
         />
       </div>
-      <div>
-        <label>
-          <input
-            type="checkbox"
-            name="actif"
-            checked={!!values.actif}
-            onChange={e => setValues(v => ({ ...v, actif: e.target.checked }))}
-          />{" "}
-          Actif
-        </label>
+      <div className="flex items-center gap-2">
+        <input
+          id="actif"
+          type="checkbox"
+          name="actif"
+          checked={!!values.actif}
+          onChange={e => setValues(v => ({ ...v, actif: e.target.checked }))}
+        />
+        <Label htmlFor="actif" className="!mb-0">Actif</Label>
       </div>
       <fieldset className="grid grid-cols-2 gap-2">
-        {MODULES.map(m => (
+        {MODULES.map((m) => (
           <label key={m.key} className="flex items-center gap-2">
             <input
               type="checkbox"
               checked={rights.includes(m.key)}
               onChange={() => toggleRight(m.key)}
             />
-            {m.label}
+            <span className="text-sm">{m.label}</span>
           </label>
         ))}
       </fieldset>
       <div className="flex gap-4 mt-4">
-        <Button type="submit" disabled={saving}>
-          {saving ? (
-            <span>
-              <span className="animate-spin mr-2">⏳</span>Enregistrement…
-            </span>
-          ) : (
-            "Enregistrer"
-          )}
-        </Button>
-        <Button type="button" variant="secondary" onClick={onClose} disabled={saving}>
+        <PrimaryButton type="submit" disabled={saving} className="flex items-center gap-2">
+          {saving && <span className="loader-glass" />}Enregistrer
+        </PrimaryButton>
+        <SecondaryButton type="button" onClick={onClose} disabled={saving}>
           Annuler
-        </Button>
+        </SecondaryButton>
       </div>
     </form>
   );

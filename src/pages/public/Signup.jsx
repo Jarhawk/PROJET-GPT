@@ -6,6 +6,9 @@ import toast from "react-hot-toast";
 import useAuth from "@/hooks/useAuth";
 import PageWrapper from "@/components/ui/PageWrapper";
 import GlassCard from "@/components/ui/GlassCard";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import PrimaryButton from "@/components/ui/PrimaryButton";
 
 export default function Signup() {
   const [email, setEmail] = useState("");
@@ -41,31 +44,30 @@ export default function Signup() {
           <h1 className="text-xl font-bold text-white">Créer un compte</h1>
         </div>
         <div>
-          <label className="block text-sm text-white mb-1">Email</label>
-          <input
-            className="w-full rounded border border-white/30 bg-white/20 py-2 px-3 text-white placeholder-white/70"
+          <Label htmlFor="signup-email" className="text-white mb-1">Email</Label>
+          <Input
+            id="signup-email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            className="w-full"
           />
         </div>
         <div>
-          <label className="block text-sm text-white mb-1">Mot de passe</label>
-          <input
-            className="w-full rounded border border-white/30 bg-white/20 py-2 px-3 text-white placeholder-white/70"
+          <Label htmlFor="signup-pass" className="text-white mb-1">Mot de passe</Label>
+          <Input
+            id="signup-pass"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            className="w-full"
           />
         </div>
-        <button
-          className="w-full py-2 rounded bg-mamastockGold text-mamastockBg font-semibold hover:bg-mamastockGoldHover transition"
-          disabled={loading}
-        >
+        <PrimaryButton type="submit" className="w-full" disabled={loading}>
           {loading ? "Création..." : "S'inscrire"}
-        </button>
+        </PrimaryButton>
         </form>
       </GlassCard>
     </PageWrapper>

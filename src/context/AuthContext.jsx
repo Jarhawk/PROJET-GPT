@@ -14,6 +14,10 @@ import toast from "react-hot-toast";
 // eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext(null);
 
+export function useAuth() {
+  return useContext(AuthContext);
+}
+
 export const AuthProvider = ({ children }) => {
   const [session, setSession] = useState(null);
   const [userData, setUserData] = useState(null);
@@ -24,6 +28,22 @@ export const AuthProvider = ({ children }) => {
   const lastUserIdRef = useRef(null);
   const fetchingRef = useRef(false);
   const sessionLoadedRef = useRef(false);
+
+  function purgeLocalAuth() {
+    try { localStorage.clear(); } catch { /* ignore */ }
+    try { sessionStorage.clear(); } catch { /* ignore */ }
+    try {
+      document.cookie.split(';').forEach(c => {
+        document.cookie = c.replace(/^ +/, '').replace(/=.*/, '=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/');
+      });
+    } catch { /* ignore */ }
+  }
+
+  const resetAuth = async () => {
+    try { await supabase.auth.signOut(); } catch {}
+    purgeLocalAuth();
+    window.location.reload();
+  };
 
 
   async function fetchUserData(userId, email) {
@@ -100,7 +120,13 @@ export const AuthProvider = ({ children }) => {
   async function loadSession() {
     setLoading(true);
     const { data, error } = await supabase.auth.getSession();
-    if (error) console.warn("loadSession error", error.message);
+    if (error) {
+      console.warn("loadSession error", error.message);
+      setError(error.message);
+      if (/invalid.*token/i.test(error.message)) {
+        purgeLocalAuth();
+      }
+    }
     const current = data?.session ?? null;
     if (import.meta.env.DEV) console.log("loadSession", current?.user?.id);
     sessionLoadedRef.current = true;
@@ -119,6 +145,13 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (import.meta.env.DEV) console.log("session", session);
+  }, [session]);
+
+  useEffect(() => {
+    if (!sessionLoadedRef.current) return;
+    if (!session) {
+      purgeLocalAuth();
+    }
   }, [session]);
 
   useEffect(() => {
@@ -243,6 +276,7 @@ export const AuthProvider = ({ children }) => {
     login,
     signup,
     logout,
+    resetAuth,
     /** Helpers */
     isAuthenticated: !!session?.user?.id,
     isAdmin: userData?.role === "admin" || userData?.role === "superadmin",
@@ -251,10 +285,5 @@ export const AuthProvider = ({ children }) => {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
-
-// eslint-disable-next-line react-refresh/only-export-components
-export function useAuth() {
-  return useContext(AuthContext) || {};
-}
 
 export default AuthProvider;

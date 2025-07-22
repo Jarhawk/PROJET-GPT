@@ -21,5 +21,6 @@ export default function useAuth() {
     hasAccess: ctx.hasAccess,
     getAuthorizedModules: ctx.getAuthorizedModules,
     error: ctx.error,
+    resetAuth: ctx.resetAuth,
   };
 }

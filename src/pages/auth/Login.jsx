@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import MamaLogo from "@/components/ui/MamaLogo";
 import useAuth from "@/hooks/useAuth";
+import ResetAuthButton from "@/components/ResetAuthButton";
 import toast from "react-hot-toast";
 import useFormErrors from "@/hooks/useFormErrors";
 import GlassCard from "@/components/ui/GlassCard";
@@ -25,6 +26,8 @@ export default function Login() {
     userData,
     loading: authLoading,
     getAuthorizedModules,
+    error: authError,
+    resetAuth,
   } = useAuth();
 
   if (authLoading || (session && !userData)) {
@@ -92,6 +95,16 @@ export default function Login() {
   return (
     <PageWrapper>
       <PreviewBanner />
+      {authError && (
+        <div className="text-red-500 text-center mb-2 text-sm">
+          {authError}
+          {resetAuth && (
+            <div className="mt-1">
+              <ResetAuthButton className="underline" />
+            </div>
+          )}
+        </div>
+      )}
       <GlassCard className="flex flex-col items-center">
         <div className="mb-6">
           <MamaLogo width={96} />

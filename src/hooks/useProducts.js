@@ -34,7 +34,11 @@ export function useProducts() {
       )
       .eq("mama_id", mama_id);
 
-    if (search) query = query.ilike("nom", `%${search}%`);
+    if (search) {
+      query = query.or(
+        `nom.ilike.%${search}%,main_supplier.nom.ilike.%${search}%`
+      );
+    }
     if (famille) query = query.eq("famille_id", famille);
     if (typeof actif === "boolean") query = query.eq("actif", actif);
 
@@ -219,8 +223,11 @@ export function useProducts() {
       allergenes: p.allergenes,
       image: p.image,
       pmp: p.pmp,
+      stock_theorique: p.stock_theorique,
       stock_reel: p.stock_reel,
       stock_min: p.stock_min,
+      dernier_prix: p.dernier_prix,
+      main_supplier: p.main_supplier?.nom || "",
       actif: p.actif,
       mama_id: p.mama_id,
     }));

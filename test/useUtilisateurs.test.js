@@ -17,7 +17,7 @@ vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
 const csvMock = vi.fn();
 vi.mock('@/lib/export/exportHelpers', () => ({ exportToCSV: csvMock }));
 
-const authMock = vi.fn(() => ({ mama_id: 'm1', role: 'admin' }));
+const authMock = vi.fn(() => ({ mama_id: 'm1', isSuperadmin: false }));
 vi.mock('@/hooks/useAuth', () => ({ default: authMock }));
 
 let useUtilisateurs;
@@ -37,14 +37,13 @@ beforeEach(async () => {
 test('fetchUsers applies filters', async () => {
   const { result } = renderHook(() => useUtilisateurs());
   await act(async () => {
-    await result.current.fetchUsers({ search: 'foo', actif: true, filterRole: 'admin' });
+    await result.current.fetchUsers({ search: 'foo', actif: true });
   });
   expect(fromMock).toHaveBeenCalledWith('utilisateurs');
-  expect(query.select).toHaveBeenCalledWith('id, nom, actif, mama_id, role_id, role:roles(nom, access_rights), access_rights');
+  expect(query.select).toHaveBeenCalledWith('id, nom, actif, mama_id, access_rights');
   expect(query.order).toHaveBeenCalledWith('nom', { ascending: true });
   expect(query.eq.mock.calls).toContainEqual(['mama_id', 'm1']);
   expect(query.ilike).toHaveBeenCalledWith('nom', '%foo%');
-  expect(query.eq.mock.calls).toContainEqual(['roles.nom', 'admin']);
   expect(query.eq.mock.calls).toContainEqual(['actif', true]);
 });
 
@@ -57,7 +56,7 @@ test('addUser inserts with current mama_id', async () => {
 });
 
 test('superadmin bypasses mama filter', async () => {
-  authMock.mockReturnValueOnce({ mama_id: null, role: 'superadmin' });
+  authMock.mockReturnValueOnce({ mama_id: null, isSuperadmin: true });
   ({ useUtilisateurs } = await import('@/hooks/useUtilisateurs'));
   const { result } = renderHook(() => useUtilisateurs());
   await act(async () => {

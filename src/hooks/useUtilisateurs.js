@@ -7,33 +7,29 @@ import { saveAs } from "file-saver";
 import { exportToCSV } from "@/lib/export/exportHelpers";
 
 export function useUtilisateurs() {
-  const { mama_id, role } = useAuth();
+  const { mama_id, isSuperadmin } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   // 1. Charger les utilisateurs (superadmin : tous, sinon par mama_id)
-  async function fetchUsers({ search = "", actif = null, filterRole = "" } = {}) {
-    if (role !== "superadmin" && !mama_id) return [];
+  async function fetchUsers({ search = "", actif = null } = {}) {
+    if (!isSuperadmin && !mama_id) return [];
     setLoading(true);
     setError(null);
     let query = supabase
       .from("utilisateurs")
       .select(
-        "id, nom, actif, mama_id, role_id, role:roles(nom), access_rights"
+        "id, nom, actif, mama_id, access_rights"
       )
       .order("nom", { ascending: true });
 
-    if (role !== "superadmin") query = query.eq("mama_id", mama_id);
+    if (!isSuperadmin) query = query.eq("mama_id", mama_id);
     if (search) query = query.ilike("nom", `%${search}%`);
-    if (filterRole) query = query.eq("roles.nom", filterRole);
     if (typeof actif === "boolean") query = query.eq("actif", actif);
 
     const { data, error } = await query;
-    const cleaned = (Array.isArray(data) ? data : []).map(u => ({
-      ...u,
-      role: u.role?.nom ?? u.role,
-    }));
+    const cleaned = (Array.isArray(data) ? data : []);
     setUsers(cleaned);
     setLoading(false);
     if (error) setError(error);
@@ -42,7 +38,7 @@ export function useUtilisateurs() {
 
   // 2. Ajouter un utilisateur (invitation)
   async function addUser(user) {
-    const targetMama = role === "superadmin" ? user.mama_id : mama_id;
+    const targetMama = isSuperadmin ? user.mama_id : mama_id;
     if (!targetMama) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
@@ -56,14 +52,14 @@ export function useUtilisateurs() {
 
   // 3. Modifier un utilisateur (rôle, droits, etc.)
   async function updateUser(id, updateFields) {
-    if (!mama_id && role !== "superadmin") return { error: "Aucun mama_id" };
+    if (!mama_id && !isSuperadmin) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     let query = supabase
       .from("utilisateurs")
       .update(updateFields)
       .eq("id", id);
-    if (role !== "superadmin") query = query.eq("mama_id", mama_id);
+    if (!isSuperadmin) query = query.eq("mama_id", mama_id);
     const { error } = await query;
     if (error) setError(error);
     setLoading(false);
@@ -72,14 +68,14 @@ export function useUtilisateurs() {
 
   // 4. Activer/désactiver un utilisateur
   async function toggleUserActive(id, actif) {
-    if (!mama_id && role !== "superadmin") return { error: "Aucun mama_id" };
+    if (!mama_id && !isSuperadmin) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     let query = supabase
       .from("utilisateurs")
       .update({ actif })
       .eq("id", id);
-    if (role !== "superadmin") query = query.eq("mama_id", mama_id);
+    if (!isSuperadmin) query = query.eq("mama_id", mama_id);
     const { error } = await query;
     if (error) setError(error);
     setLoading(false);
@@ -88,14 +84,14 @@ export function useUtilisateurs() {
 
   // 5. Supprimer un utilisateur (optionnel)
   async function deleteUser(id) {
-    if (!mama_id && role !== "superadmin") return { error: "Aucun mama_id" };
+    if (!mama_id && !isSuperadmin) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     let query = supabase
       .from("utilisateurs")
       .update({ actif: false })
       .eq("id", id);
-    if (role !== "superadmin") query = query.eq("mama_id", mama_id);
+    if (!isSuperadmin) query = query.eq("mama_id", mama_id);
     const { error } = await query;
     if (error) setError(error);
     setLoading(false);
@@ -109,7 +105,6 @@ export function useUtilisateurs() {
       nom: u.nom,
       actif: u.actif,
       mama_id: u.mama_id,
-      role: u.role,
       access_rights: JSON.stringify(u.access_rights),
     }));
     const wb = XLSX.utils.book_new();
@@ -124,7 +119,6 @@ export function useUtilisateurs() {
       nom: u.nom,
       actif: u.actif,
       mama_id: u.mama_id,
-      role: u.role,
       access_rights: JSON.stringify(u.access_rights),
     }));
     exportToCSV(datas, { filename: "utilisateurs_mamastock.csv" });

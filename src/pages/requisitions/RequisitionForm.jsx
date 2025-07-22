@@ -189,7 +189,7 @@ function RequisitionFormPage() {
         </div>
 
         <div className="text-right">
-          <PrimaryButton type="submit" disabled={submitting}">
+          <PrimaryButton type="submit" disabled={submitting}>
             Enregistrer
           </PrimaryButton>
         </div>

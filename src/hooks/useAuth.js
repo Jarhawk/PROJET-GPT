@@ -2,7 +2,7 @@
 import { useContext } from "react";
 import { AuthContext } from "@/context/AuthContext";
 
-export default function useAuth() {
+export function useAuth() {
   const ctx = useContext(AuthContext) || {};
   if (import.meta.env.DEV) console.log('useAuth hook', ctx);
   if (!ctx || typeof ctx.login !== 'function') {
@@ -19,6 +19,8 @@ export default function useAuth() {
     access_rights: ctx.userData?.access_rights ?? ctx.access_rights,
     email: ctx.userData?.email ?? ctx.email,
     actif: ctx.userData?.actif ?? ctx.actif,
+    isSuperadmin: ctx.isSuperadmin,
+    isAdmin: ctx.isAdmin,
     loading,
     pending: ctx.pending,
     isAuthenticated: ctx.isAuthenticated,
@@ -31,3 +33,5 @@ export default function useAuth() {
     logout: ctx.logout,
   };
 }
+
+export default useAuth;

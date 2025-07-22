@@ -5,6 +5,9 @@ import { useProduitsAutocomplete } from "@/hooks/useProduitsAutocomplete";
 import { useFournisseursAutocomplete } from "@/hooks/useFournisseursAutocomplete";
 import AutoCompleteField from "@/components/ui/AutoCompleteField";
 import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import SecondaryButton from "@/components/ui/SecondaryButton";
+import { Input } from "@/components/ui/input";
 import GlassCard from "@/components/ui/GlassCard";
 import toast from "react-hot-toast";
 
@@ -60,11 +63,22 @@ export default function BLForm({ bon, fournisseurs = [], onClose }) {
       <GlassCard className="p-6 min-w-[400px] space-y-2">
         <h2 className="text-lg font-bold mb-2">{bon ? "Modifier" : "Nouveau"} BL</h2>
         <form onSubmit={handleSubmit} className="space-y-2">
-          <input type="text" className="input" placeholder="Numéro" value={numero_bl} onChange={e => setNumero(e.target.value)} />
-          <input type="date" className="input" value={date_reception} onChange={e => setDateReception(e.target.value)} required />
-          <input
+          <label className="block text-sm mb-1">Numéro</label>
+          <Input
+            value={numero_bl}
+            onChange={e => setNumero(e.target.value)}
+            placeholder="Numéro"
+          />
+          <label className="block text-sm mb-1">Date de réception *</label>
+          <Input
+            type="date"
+            value={date_reception}
+            onChange={e => setDateReception(e.target.value)}
+            required
+          />
+          <label className="block text-sm mb-1">Fournisseur *</label>
+          <Input
             list="fournisseurs-list"
-            className="input"
             value={fournisseurName}
             onChange={e => {
               const val = e.target.value;
@@ -80,7 +94,13 @@ export default function BLForm({ bon, fournisseurs = [], onClose }) {
               <option key={f.id} value={f.nom}>{f.nom}</option>
             ))}
           </datalist>
-          <textarea className="input" placeholder="Commentaire" value={commentaire} onChange={e => setCommentaire(e.target.value)} />
+          <label className="block text-sm mb-1">Commentaire</label>
+          <textarea
+            className="input w-full"
+            placeholder="Commentaire"
+            value={commentaire}
+            onChange={e => setCommentaire(e.target.value)}
+          />
           <table className="w-full text-sm mb-2">
             <thead>
               <tr>
@@ -113,10 +133,29 @@ export default function BLForm({ bon, fournisseurs = [], onClose }) {
               ))}
             </tbody>
           </table>
-          <Button type="button" variant="outline" onClick={() => setLignes(ls => [...ls, { produit_id: "", produit_nom: "", quantite_recue: 1, prix_unitaire: 0, tva: 20 }])}>Ajouter ligne</Button>
+          <Button
+            type="button"
+            onClick={() =>
+              setLignes(ls => [
+                ...ls,
+                {
+                  produit_id: "",
+                  produit_nom: "",
+                  quantite_recue: 1,
+                  prix_unitaire: 0,
+                  tva: 20,
+                },
+              ])
+            }
+            className="mt-2"
+          >
+            Ajouter ligne
+          </Button>
           <div className="flex gap-2 justify-end mt-2">
-            <Button type="submit" disabled={loading}>{bon ? "Modifier" : "Ajouter"}</Button>
-            <Button type="button" variant="outline" onClick={onClose}>Annuler</Button>
+            <PrimaryButton type="submit" disabled={loading} className="min-w-[120px]">
+              {loading ? "Enregistrement..." : bon ? "Modifier" : "Ajouter"}
+            </PrimaryButton>
+            <SecondaryButton type="button" onClick={onClose}>Annuler</SecondaryButton>
           </div>
         </form>
       </GlassCard>

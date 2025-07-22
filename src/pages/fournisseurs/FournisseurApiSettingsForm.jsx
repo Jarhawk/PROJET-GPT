@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import { Input } from "@/components/ui/input";
 import toast from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { useFournisseurApiConfig } from "@/hooks/useFournisseurApiConfig";
@@ -54,7 +56,7 @@ export default function FournisseurApiSettingsForm({ fournisseur_id }) {
     <form onSubmit={handleSubmit} className="space-y-4 p-4 text-sm">
       <div>
         <label className="block font-medium mb-1">URL API</label>
-        <input
+        <Input
           className="input input-bordered w-full"
           name="url"
           value={config.url || ""}
@@ -77,7 +79,7 @@ export default function FournisseurApiSettingsForm({ fournisseur_id }) {
       </div>
       <div>
         <label className="block font-medium mb-1">Token / Credentials</label>
-        <input
+        <Input
           className="input input-bordered w-full"
           name="token"
           value={config.token || ""}
@@ -108,9 +110,9 @@ export default function FournisseurApiSettingsForm({ fournisseur_id }) {
         />
         Actif
       </label>
-      <Button type="submit" disabled={saving} className="mt-2">
+      <PrimaryButton type="submit" disabled={saving} className="mt-2 min-w-[120px]">
         {saving ? "Enregistrement…" : "Enregistrer"}
-      </Button>
+      </PrimaryButton>
     </form>
   );
 }

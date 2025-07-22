@@ -1,6 +1,9 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import SecondaryButton from "@/components/ui/SecondaryButton";
+import { Input } from "@/components/ui/input";
 import TableContainer from "@/components/ui/TableContainer";
 import {
   Dialog,
@@ -40,13 +43,13 @@ export default function InventaireZones() {
       <Toaster />
       <h1 className="text-2xl font-bold mb-4">Zones d'inventaire</h1>
       <div className="flex gap-2 mb-4 items-end">
-        <input
+        <Input
           className="input flex-1"
           placeholder="Recherche zone"
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
-        <Button onClick={() => setEditZone({ nom: "" })}>+ Nouvelle zone</Button>
+        <PrimaryButton type="button" onClick={() => setEditZone({ nom: "" })}>+ Nouvelle zone</PrimaryButton>
       </div>
       <TableContainer>
         <table className="min-w-full text-center text-sm">
@@ -61,13 +64,12 @@ export default function InventaireZones() {
               <tr key={z.id} className="border-b last:border-none">
                 <td className="px-2 py-1">{z.nom}</td>
                 <td className="px-2 py-1">
-                  <Button size="sm" variant="secondary" onClick={() => setEditZone(z)}>
+                  <SecondaryButton size="sm" onClick={() => setEditZone(z)}>
                     Éditer
-                  </Button>
+                  </SecondaryButton>
                   <Button
                     size="sm"
-                    variant="destructive"
-                    className="ml-2"
+                    className="ml-2 bg-red-600 hover:bg-red-700 text-white"
                     onClick={() => deleteZone(z.id)}
                   >
                     Supprimer
@@ -100,14 +102,16 @@ export default function InventaireZones() {
           }}
             className="space-y-3"
           >
-            <input
+            <Input
               className="input w-full"
               placeholder="Nom de la zone"
               value={editZone?.nom || ""}
               onChange={e => setEditZone(z => ({ ...z, nom: e.target.value }))}
               required
             />
-            <Button type="submit" disabled={loading}>Enregistrer</Button>
+            <PrimaryButton type="submit" disabled={loading} className="min-w-[120px]">
+              {loading ? "Enregistrement..." : "Enregistrer"}
+            </PrimaryButton>
           </form>
         </DialogContent>
       </Dialog>

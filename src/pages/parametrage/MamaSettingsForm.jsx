@@ -1,7 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import { Input } from "@/components/ui/input";
 import useMamaSettings from "@/hooks/useMamaSettings";
 import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
 import { useAuth } from "@/context/AuthContext";
@@ -79,8 +80,8 @@ export default function MamaSettingsForm() {
       </div>
       <div>
         <label className="block text-sm mb-1">Email expéditeur</label>
-        <input
-          className="input w-full"
+        <Input
+          className="w-full"
           name="email_envoi"
           value={form.email_envoi || ""}
           onChange={handleChange}
@@ -88,8 +89,8 @@ export default function MamaSettingsForm() {
       </div>
       <div>
         <label className="block text-sm mb-1">Email alertes</label>
-        <input
-          className="input w-full"
+        <Input
+          className="w-full"
           name="email_alertes"
           value={form.email_alertes || ""}
           onChange={handleChange}
@@ -123,9 +124,9 @@ export default function MamaSettingsForm() {
         />
       </div>
       <div className="flex gap-4">
-        <Button type="submit" disabled={saving}>
+        <PrimaryButton type="submit" disabled={saving}>
           {saving ? "Enregistrement…" : "Enregistrer"}
-        </Button>
+        </PrimaryButton>
       </div>
     </form>
   );

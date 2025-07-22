@@ -2,7 +2,9 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
-import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import SecondaryButton from "@/components/ui/SecondaryButton";
+import { Input } from "@/components/ui/input";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function InviteUser({ onClose, onInvited }) {
@@ -110,8 +112,8 @@ export default function InviteUser({ onClose, onInvited }) {
       <h2 className="font-bold text-lg mb-2">Inviter un utilisateur</h2>
       <div>
         <label>Email</label>
-        <input
-          className="input input-bordered w-full"
+        <Input
+          className="w-full"
           name="email"
           type="email"
           required
@@ -122,7 +124,7 @@ export default function InviteUser({ onClose, onInvited }) {
       <div>
         <label>Établissement (MAMA)</label>
         <select
-          className="input input-bordered w-full"
+          className="input w-full"
           name="mama_id"
           required
           value={values.mama_id}
@@ -139,7 +141,7 @@ export default function InviteUser({ onClose, onInvited }) {
       <div>
         <label>Rôle</label>
         <select
-          className="input input-bordered w-full"
+          className="input w-full"
           name="role"
           required
           value={values.role}
@@ -154,12 +156,12 @@ export default function InviteUser({ onClose, onInvited }) {
         </select>
       </div>
       <div className="flex gap-4 mt-4">
-        <Button type="submit" disabled={sending}>
+        <PrimaryButton type="submit" disabled={sending}>
           {sending ? "Envoi…" : "Envoyer l'invitation"}
-        </Button>
-        <Button type="button" variant="secondary" onClick={onClose}>
+        </PrimaryButton>
+        <SecondaryButton type="button" onClick={onClose}>
           Annuler
-        </Button>
+        </SecondaryButton>
       </div>
     </form>
   );

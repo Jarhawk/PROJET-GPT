@@ -1,6 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import SecondaryButton from "@/components/ui/SecondaryButton";
+import { Input } from "@/components/ui/input";
 import { useMouvements } from "@/hooks/useMouvements";
 import { useProducts } from "@/hooks/useProducts";
 import { useZones } from "@/hooks/useZones";
@@ -72,9 +74,9 @@ export default function MouvementForm({ onClose }) {
           <option value="inventaire">Ajustement</option>
         </select>
         <div className="mb-2">
-          <input
-            className="input w-full"
+          <Input
             list="liste-produits"
+            className="w-full"
             value={produitInput}
             onChange={e => handleProduitChange(e.target.value)}
             placeholder="Produit"
@@ -85,8 +87,8 @@ export default function MouvementForm({ onClose }) {
             ))}
           </datalist>
         </div>
-        <input
-          className="input mb-2 w-full"
+        <Input
+          className="mb-2 w-full"
           type="number"
           step="0.01"
           placeholder="Quantité"
@@ -120,8 +122,12 @@ export default function MouvementForm({ onClose }) {
           onChange={e => setForm(f => ({ ...f, commentaire: e.target.value }))}
         />
         <div className="flex gap-2 justify-end mt-4">
-          <Button type="submit" disabled={loading}>Valider</Button>
-          <Button type="button" variant="outline" onClick={onClose} disabled={loading}>Annuler</Button>
+          <PrimaryButton type="submit" disabled={loading}>
+            Valider
+          </PrimaryButton>
+          <SecondaryButton type="button" onClick={onClose} disabled={loading}>
+            Annuler
+          </SecondaryButton>
         </div>
       </form>
     </div>

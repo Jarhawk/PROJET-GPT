@@ -2,7 +2,9 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
-import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import SecondaryButton from "@/components/ui/SecondaryButton";
+import { Input } from "@/components/ui/input";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function MamaForm({ mama, onClose, onSaved }) {
@@ -82,8 +84,8 @@ export default function MamaForm({ mama, onClose, onSaved }) {
       <Toaster />
       <div>
         <label>Nom</label>
-        <input
-          className="input input-bordered w-full"
+        <Input
+          className="w-full"
           name="nom"
           value={values.nom}
           onChange={handleChange}
@@ -93,8 +95,8 @@ export default function MamaForm({ mama, onClose, onSaved }) {
       </div>
       <div>
         <label>Ville</label>
-        <input
-          className="input input-bordered w-full"
+        <Input
+          className="w-full"
           name="ville"
           value={values.ville}
           onChange={handleChange}
@@ -112,7 +114,7 @@ export default function MamaForm({ mama, onClose, onSaved }) {
         </label>
       </div>
       <div className="flex gap-4 mt-4">
-        <Button type="submit" disabled={saving}>
+        <PrimaryButton type="submit" disabled={saving}>
           {saving ? (
             <span>
               <span className="animate-spin mr-2">⏳</span>Enregistrement…
@@ -120,10 +122,10 @@ export default function MamaForm({ mama, onClose, onSaved }) {
           ) : (
             "Enregistrer"
           )}
-        </Button>
-        <Button type="button" variant="secondary" onClick={onClose} disabled={saving}>
+        </PrimaryButton>
+        <SecondaryButton type="button" onClick={onClose} disabled={saving}>
           Annuler
-        </Button>
+        </SecondaryButton>
       </div>
     </form>
   );

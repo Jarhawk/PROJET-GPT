@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
-import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function RGPDConsentForm() {
@@ -53,9 +53,9 @@ export default function RGPDConsentForm() {
         <input type="checkbox" name="tiers" checked={values.tiers} onChange={handleChange} />
         J'accepte le partage avec des tiers
       </label>
-      <Button type="submit" disabled={loading || !(values.cookies && values.interne && values.tiers)}>
+      <PrimaryButton type="submit" disabled={loading || !(values.cookies && values.interne && values.tiers)}>
         {loading ? "Enregistrement..." : "Valider"}
-      </Button>
+      </PrimaryButton>
     </form>
   );
 }

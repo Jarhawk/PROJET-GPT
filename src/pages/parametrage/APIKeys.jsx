@@ -1,6 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
+import PrimaryButton from '@/components/ui/PrimaryButton';
+import SecondaryButton from '@/components/ui/SecondaryButton';
+import { Input } from '@/components/ui/input';
 import { useApiKeys } from '@/hooks/useApiKeys';
 import { Toaster, toast } from 'react-hot-toast';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
@@ -28,26 +30,26 @@ export default function APIKeys() {
     <div className="p-6 max-w-4xl mx-auto">
       <Toaster />
       <h1 className="text-2xl font-bold mb-4">Clés API</h1>
-      <Button onClick={() => setFormOpen(o => !o)}>Nouvelle clé</Button>
+      <PrimaryButton onClick={() => setFormOpen(o => !o)}>Nouvelle clé</PrimaryButton>
       {formOpen && (
         <form className="space-y-2 mt-4" onSubmit={handleSubmit}>
           <div>
             <label>Nom</label>
-            <input className="input input-bordered w-full" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
+            <Input className="w-full" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
           </div>
           <div>
             <label>Scopes</label>
-            <input className="input input-bordered w-full" value={form.scopes} onChange={e => setForm(f => ({ ...f, scopes: e.target.value }))} required />
+            <Input className="w-full" value={form.scopes} onChange={e => setForm(f => ({ ...f, scopes: e.target.value }))} required />
           </div>
           <div>
             <label>Rôle</label>
-            <input className="input input-bordered w-full" value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))} />
+            <Input className="w-full" value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))} />
           </div>
           <div>
             <label>Expiration</label>
-            <input type="date" className="input input-bordered" value={form.expiration} onChange={e => setForm(f => ({ ...f, expiration: e.target.value }))} />
+            <Input type="date" className="" value={form.expiration} onChange={e => setForm(f => ({ ...f, expiration: e.target.value }))} />
           </div>
-          <Button type="submit">Créer</Button>
+          <PrimaryButton type="submit">Créer</PrimaryButton>
         </form>
       )}
       <TableContainer className="mt-6">
@@ -74,7 +76,9 @@ export default function APIKeys() {
                 <td className="border px-2 py-1">{k.revoked ? 'Révoquée' : 'Active'}</td>
                 <td className="border px-2 py-1">
                   {!k.revoked && (
-                    <Button size="sm" variant="destructive" onClick={() => revokeKey(k.id)}>Révoquer</Button>
+                    <SecondaryButton size="sm" onClick={() => revokeKey(k.id)}>
+                      Révoquer
+                    </SecondaryButton>
                   )}
                 </td>
               </tr>

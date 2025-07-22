@@ -5,7 +5,6 @@ import toast from "react-hot-toast";
 
 export default function FournisseurForm({ fournisseur = {}, onSubmit, onCancel, saving }) {
   const [nom, setNom] = useState(fournisseur.nom || "");
-  const [ville, setVille] = useState(fournisseur.ville || "");
   const [tel, setTel] = useState(fournisseur.contact?.tel || "");
   const [email, setEmail] = useState(fournisseur.contact?.email || "");
   const [contact, setContact] = useState(fournisseur.contact?.nom || "");
@@ -14,7 +13,6 @@ export default function FournisseurForm({ fournisseur = {}, onSubmit, onCancel, 
 
   useEffect(() => {
     setNom(fournisseur.nom || "");
-    setVille(fournisseur.ville || "");
     setTel(fournisseur.contact?.tel || "");
     setEmail(fournisseur.contact?.email || "");
     setContact(fournisseur.contact?.nom || "");
@@ -33,7 +31,7 @@ export default function FournisseurForm({ fournisseur = {}, onSubmit, onCancel, 
       toast.error("Veuillez corriger les erreurs");
       return;
     }
-    const data = { nom, ville, tel, email, contact, actif };
+    const data = { nom, tel, email, contact, actif };
     try {
       onSubmit?.(data);
     } catch (err) {
@@ -51,14 +49,6 @@ export default function FournisseurForm({ fournisseur = {}, onSubmit, onCancel, 
           onChange={(e) => setNom(e.target.value)}
         />
         {errors.nom && <p className="text-red-600 text-sm mt-1">{errors.nom}</p>}
-      </div>
-      <div>
-        <label className="block font-semibold mb-1">Ville</label>
-        <input
-          className="input input-bordered w-full"
-          value={ville}
-          onChange={(e) => setVille(e.target.value)}
-        />
       </div>
       <div>
         <label className="block font-semibold mb-1">Téléphone</label>

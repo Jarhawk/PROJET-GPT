@@ -9,7 +9,6 @@ export default function SupplierForm({ supplier, onClose, glass }) {
   const { createFournisseur, updateFournisseur } = useFournisseurs();
   const [form, setForm] = useState({
     nom: supplier?.nom || "",
-    ville: supplier?.ville || "",
     tel: supplier?.contact?.tel || "",
     contact: supplier?.contact?.nom || "",
     email: supplier?.contact?.email || "",
@@ -64,10 +63,6 @@ export default function SupplierForm({ supplier, onClose, glass }) {
       <div>
         <label>Nom</label>
         <input className="input input-bordered w-full" name="nom" value={form.nom} onChange={handleChange} required />
-      </div>
-      <div>
-        <label>Ville</label>
-        <input className="input input-bordered w-full" name="ville" value={form.ville} onChange={handleChange} />
       </div>
       <div>
         <label>Email</label>

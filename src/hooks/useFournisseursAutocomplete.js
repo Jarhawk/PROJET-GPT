@@ -14,10 +14,10 @@ export function useFournisseursAutocomplete() {
     setError(null);
     let q = supabase
       .from("fournisseurs")
-      .select("id, nom, ville")
+      .select("id, nom")
       .eq("mama_id", mama_id);
     if (query) {
-      q = q.or(`nom.ilike.%${query}%,ville.ilike.%${query}%`);
+      q = q.ilike("nom", `%${query}%`);
     }
     q = q.order("nom", { ascending: true }).limit(10);
     const { data, error } = await q;

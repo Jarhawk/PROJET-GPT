@@ -46,7 +46,7 @@ export default function FournisseurDetail({ id }) {
       }),
       supabase
         .from("fournisseurs")
-        .select("id, nom, ville, actif, created_at, contact:fournisseur_contacts(nom,email,tel)")
+        .select("id, nom, actif, created_at, contact:fournisseur_contacts(nom,email,tel)")
         .eq("id", id)
         .eq("mama_id", mama_id)
         .single()
@@ -91,7 +91,6 @@ export default function FournisseurDetail({ id }) {
             {fournisseur.actif ? "Désactiver" : "Réactiver"}
           </Button>
           <div className="text-sm">
-            {fournisseur.ville && <div>Ville : {fournisseur.ville}</div>}
             {fournisseur.contact && (
               <div>
                 Contact : {fournisseur.contact.nom || ""}

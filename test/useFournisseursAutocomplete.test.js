@@ -28,7 +28,7 @@ test('searchFournisseurs filters by mama_id and query', async () => {
     await result.current.searchFournisseurs('paris');
   });
   expect(fromMock).toHaveBeenCalledWith('fournisseurs');
-  expect(selectMock).toHaveBeenCalledWith('id, nom, ville');
+  expect(selectMock).toHaveBeenCalledWith('id, nom');
   expect(eqMock).toHaveBeenCalledWith('mama_id', 'm1');
-  expect(orMock).toHaveBeenCalledWith('nom.ilike.%paris%,ville.ilike.%paris%');
+  expect(orMock).toHaveBeenCalledWith('nom.ilike.%paris%');
 });

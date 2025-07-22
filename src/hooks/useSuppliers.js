@@ -17,7 +17,6 @@ export function useSuppliers() {
   const fetchSuppliers = useCallback(
     async ({
       search = "",
-      ville = "",
       actif = null,
       page = 1,
       pageSize = 20,
@@ -31,9 +30,6 @@ export function useSuppliers() {
 
       if (search) {
         query = query.ilike("nom", `%${search}%`);
-      }
-      if (ville) {
-        query = query.ilike("ville", `%${ville}%`);
       }
       if (actif !== null) {
         query = query.eq("actif", !!actif);

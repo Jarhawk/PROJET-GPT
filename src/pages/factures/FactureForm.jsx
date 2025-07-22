@@ -144,7 +144,7 @@ export default function FactureForm({ facture, suppliers = [], onClose }) {
       />
       <datalist id="fournisseurs-list">
         {fournisseurOptions.map(f => (
-          <option key={f.id} value={f.nom}>{`${f.nom} (${f.ville || ""})`}</option>
+          <option key={f.id} value={f.nom}>{f.nom}</option>
         ))}
       </datalist>
       <table className="w-full text-sm mb-2">

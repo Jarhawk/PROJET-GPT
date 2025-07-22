@@ -16,6 +16,7 @@ import Pending from "@/pages/auth/Pending";
 import Blocked from "@/pages/auth/Blocked";
 import RoleError from "@/pages/auth/RoleError";
 import AuthDebug from "@/pages/debug/AuthDebug";
+import AccessExample from "@/pages/debug/AccessExample";
 import NotFound from "@/pages/NotFound";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
@@ -487,6 +488,10 @@ export default function Router() {
           <Route
             path="/debug/auth"
             element={<ProtectedRoute accessKey="dashboard"><AuthDebug /></ProtectedRoute>}
+          />
+          <Route
+            path="/debug/access"
+            element={<ProtectedRoute accessKey="dashboard"><AccessExample /></ProtectedRoute>}
           />
           <Route path="*" element={<NotFound />} />
         </Route>

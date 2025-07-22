@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { useAuditTrail } from "@/hooks/useAuditTrail";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import { Input } from "@/components/ui/input";
 import TableContainer from "@/components/ui/TableContainer";
 import { Toaster } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
@@ -34,27 +36,27 @@ export default function AuditTrail() {
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold mb-4">Audit avancé</h1>
       <form onSubmit={handleSubmit} className="flex gap-2 mb-4 items-end">
-        <input
-          className="input"
+        <Input
           placeholder="Table"
           value={table}
           onChange={(e) => setTable(e.target.value)}
+          className="w-32"
         />
-        <input
+        <Input
           type="date"
-          className="input"
           value={start}
           onChange={(e) => setStart(e.target.value)}
           aria-label="Date début"
+          className="w-40"
         />
-        <input
+        <Input
           type="date"
-          className="input"
           value={end}
           onChange={(e) => setEnd(e.target.value)}
           aria-label="Date fin"
+          className="w-40"
         />
-        <Button type="submit">Filtrer</Button>
+        <PrimaryButton type="submit">Filtrer</PrimaryButton>
       </form>
       <TableContainer className="mt-4">
         <table className="min-w-full text-xs">

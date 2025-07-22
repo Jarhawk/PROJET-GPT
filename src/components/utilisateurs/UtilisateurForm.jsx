@@ -2,6 +2,10 @@
 import { useState } from "react";
 import { useUtilisateurs } from "@/hooks/useUtilisateurs";
 import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import SecondaryButton from "@/components/ui/SecondaryButton";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import toast from "react-hot-toast";
 
 const ROLES = [
@@ -52,16 +56,16 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
       <h2 className="text-lg font-bold mb-4">
         {utilisateur ? "Modifier l’utilisateur" : "Ajouter un utilisateur"}
       </h2>
-      <input
-        className="input mb-2"
+      <Input
+        className="mb-2"
         type="text"
         value={nom}
         onChange={e => setNom(e.target.value)}
         placeholder="Nom"
         required
       />
-      <select
-        className="input mb-2"
+      <Select
+        className="mb-2"
         value={role}
         onChange={e => setRole(e.target.value)}
         required
@@ -69,14 +73,14 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
         {ROLES.map(r => (
           <option key={r.value} value={r.value}>{r.label}</option>
         ))}
-      </select>
+      </Select>
       <label className="flex items-center gap-2 mb-2">
         <input type="checkbox" checked={actif} onChange={e => setActif(e.target.checked)} />
         Actif
       </label>
       {!utilisateur && (
-        <input
-          className="input mb-2"
+        <Input
+          className="mb-2"
           type="password"
           value={password}
           onChange={e => setPassword(e.target.value)}
@@ -86,8 +90,8 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
         />
       )}
       {utilisateur && (
-        <input
-          className="input mb-2"
+        <Input
+          className="mb-2"
           type="password"
           value={password}
           onChange={e => setPassword(e.target.value)}
@@ -96,8 +100,11 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
         />
       )}
       <div className="flex gap-2 mt-4">
-        <Button type="submit" disabled={loading}>{utilisateur ? "Modifier" : "Ajouter"}</Button>
-        <Button variant="outline" type="button" onClick={onClose}>Annuler</Button>
+        <PrimaryButton type="submit" disabled={loading} className="flex items-center gap-2">
+          {loading && <span className="loader-glass" />}
+          {utilisateur ? "Modifier" : "Ajouter"}
+        </PrimaryButton>
+        <SecondaryButton type="button" onClick={onClose}>Annuler</SecondaryButton>
       </div>
     </form>
   );

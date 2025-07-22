@@ -3,6 +3,9 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useLogs } from "@/hooks/useLogs";
 import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import SecondaryButton from "@/components/ui/SecondaryButton";
+import { Input } from "@/components/ui/input";
 import TableContainer from "@/components/ui/TableContainer";
 import { Toaster } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
@@ -30,30 +33,28 @@ export default function Journal() {
     <div className="p-6 container mx-auto space-y-4">
       <Toaster position="top-right" />
       <form onSubmit={handleSubmit} className="flex gap-2 mb-4 flex-wrap items-end">
-        <input
-          className="input"
+        <Input
           placeholder="Recherche action"
           value={search}
           onChange={e => setSearch(e.target.value)}
+          className="w-40"
         />
-        <input
+        <Input
           type="date"
-          className="input"
           value={startDate}
           onChange={e => setStartDate(e.target.value)}
           aria-label="Date début"
         />
-        <input
+        <Input
           type="date"
-          className="input"
           value={endDate}
           onChange={e => setEndDate(e.target.value)}
           aria-label="Date fin"
         />
-        <Button type="submit">Filtrer</Button>
-        <Button variant="outline" type="button" onClick={exportLogsToExcel}>
+        <PrimaryButton type="submit">Filtrer</PrimaryButton>
+        <SecondaryButton type="button" onClick={exportLogsToExcel}>
           Export Excel
-        </Button>
+        </SecondaryButton>
       </form>
       <TableContainer>
         <table className="min-w-full text-xs">

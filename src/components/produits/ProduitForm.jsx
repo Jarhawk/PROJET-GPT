@@ -8,6 +8,10 @@ import { useFournisseurs } from "@/hooks/useFournisseurs";
 import { toast } from "react-hot-toast";
 import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
 import AutoCompleteField from "@/components/ui/AutoCompleteField";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import SecondaryButton from "@/components/ui/SecondaryButton";
 
 export default function ProduitForm({ produit, familles = [], unites = [], onSuccess, onClose }) {
   const editing = !!produit;
@@ -117,10 +121,9 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
         {editing ? "Éditer le produit" : "Nouveau produit"}
       </h2>
       <div>
-        <label className="block text-sm mb-1 font-medium">Nom</label>
-        <input
-          type="text"
-          className="input input-bordered w-full"
+        <label className="block text-sm mb-1 font-medium" htmlFor="prod-nom">Nom</label>
+        <Input
+          id="prod-nom"
           value={nom}
           onChange={e => setNom(e.target.value)}
           required
@@ -154,34 +157,27 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
       />
       {errors.unite && <p className="text-red-500 text-sm">{errors.unite}</p>}
       <div>
-        <label className="block text-sm mb-1 font-medium">Fournisseur principal</label>
-        <select
-          className="input input-bordered w-full"
+        <label className="block text-sm mb-1 font-medium" htmlFor="prod-supplier">Fournisseur principal</label>
+        <Select
+          id="prod-supplier"
           value={mainSupplierId}
           onChange={e => setMainSupplierId(e.target.value)}
+          className="w-full"
         >
           <option value="">Aucun</option>
           {fournisseurs.map(f => (
             <option key={f.id} value={f.id}>{f.nom}</option>
           ))}
-        </select>
+        </Select>
       </div>
       <div>
         <label htmlFor="prod-code" className="block text-sm mb-1 font-medium">Code interne</label>
-        <input
-          id="prod-code"
-          type="text"
-          className="input input-bordered w-full"
-          value={code}
-          onChange={e => setCode(e.target.value)}
-        />
+        <Input id="prod-code" value={code} onChange={e => setCode(e.target.value)} />
       </div>
       <div>
         <label htmlFor="prod-allerg" className="block text-sm mb-1 font-medium">Allergènes</label>
-        <input
+        <Input
           id="prod-allerg"
-          type="text"
-          className="input input-bordered w-full"
           value={allergenes}
           onChange={e => setAllergenes(e.target.value)}
           placeholder="Ex: gluten, lait"
@@ -209,9 +205,9 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
       {editing && (
         <div>
           <label className="block text-sm mb-1 font-medium">PMP (€)</label>
-          <input
+          <Input
             type="number"
-            className="input input-bordered w-28"
+            className="w-28"
             value={produit?.pmp || 0}
             readOnly
             disabled
@@ -220,9 +216,9 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
       )}
       <div>
         <label className="block text-sm mb-1 font-medium">Stock réel</label>
-        <input
+        <Input
           type="number"
-          className="input input-bordered w-28"
+          className="w-28"
           value={stock_reel}
           onChange={e => setStockReel(e.target.value)}
           min={0}
@@ -230,10 +226,10 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
       </div>
       <div>
         <label htmlFor="prod-min" className="block text-sm mb-1 font-medium">Stock minimum</label>
-        <input
+        <Input
           id="prod-min"
           type="number"
-          className="input input-bordered w-28"
+          className="w-28"
           value={stock_min}
           onChange={e => setStockMin(e.target.value)}
           min={0}
@@ -249,10 +245,11 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
         <label htmlFor="prod-actif" className="text-sm">Produit actif</label>
       </div>
       <div className="flex gap-2 justify-end mt-4">
-        <button type="button" onClick={onClose} className="btn">Annuler</button>
-        <button type="submit" disabled={loading || saving} className="btn btn-primary">
+        <SecondaryButton type="button" onClick={onClose}>Annuler</SecondaryButton>
+        <PrimaryButton type="submit" disabled={loading || saving} className="flex items-center gap-2">
+          {(loading || saving) && <span className="loader-glass" />}
           {editing ? "Enregistrer" : "Créer"}
-        </button>
+        </PrimaryButton>
       </div>
     </form>
   );

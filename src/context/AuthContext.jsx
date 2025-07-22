@@ -55,13 +55,25 @@ export function AuthProvider({ children }) {
       return;
     }
 
+    const roleName = data.role?.nom ?? data.role;
+    if (!roleName) {
+      toast.error(
+        "Erreur de permission : rôle utilisateur non trouvé. Merci de contacter l’administrateur."
+      );
+      setUserData(null);
+      fetchingRef.current = false;
+      await supabase.auth.signOut().catch(() => {});
+      navigate("/no-role");
+      return;
+    }
+
     lastUserIdRef.current = userId;
     setError(null);
     setUserData({
       ...data,
       auth_id: userId,
       email,
-      role: data.role?.nom ?? data.role,
+      role: roleName,
       access_rights: data.access_rights || null,
     });
     if (!data.mama_id) console.warn("missing mama_id for user", userId);

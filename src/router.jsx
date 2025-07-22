@@ -14,6 +14,7 @@ import Login from "@/pages/auth/Login";
 import Unauthorized from "@/pages/auth/Unauthorized";
 import Pending from "@/pages/auth/Pending";
 import Blocked from "@/pages/auth/Blocked";
+import RoleError from "@/pages/auth/RoleError";
 import AuthDebug from "@/pages/debug/AuthDebug";
 import NotFound from "@/pages/NotFound";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -177,6 +178,7 @@ export default function Router() {
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/create-mama" element={<CreateMama />} />
         <Route path="/pending" element={<Pending />} />
+        <Route path="/no-role" element={<RoleError />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/blocked" element={<Blocked />} />
         <Route path="/rgpd" element={<Rgpd />} />

@@ -50,6 +50,15 @@ export default function Sidebar() {
   if (loading || !user || !access_rights) {
     return null;
   }
+  if (!role) {
+    return (
+      <aside className="w-64 p-4 text-white">
+        <p className="text-red-400 text-sm">
+          Erreur de permission : rôle utilisateur non trouvé. Merci de contacter l’administrateur.
+        </p>
+      </aside>
+    );
+  }
 
   const peutVoir = (module) =>
     isSuperadmin || hasAccess(module, "peut_voir");

@@ -152,9 +152,11 @@ export const routePreloadMap = {
 
 
 function RootRoute() {
-  const { session, loading } = useAuth();
-  if (loading) return <LoadingSpinner message="Chargement..." />;
-  if (session && session.user) return <Navigate to="/dashboard" replace />;
+  const { session, loading, pending, userData } = useAuth();
+  if (loading || pending) return <LoadingSpinner message="Chargement..." />;
+  if (session && session.user && userData && userData.actif !== false) {
+    return <Navigate to="/dashboard" replace />;
+  }
   return <Navigate to="/accueil" replace />;
 }
 

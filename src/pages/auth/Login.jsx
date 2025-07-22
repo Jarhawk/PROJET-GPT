@@ -62,7 +62,7 @@ export default function Login() {
 
       if (data) {
         toast.success("Connexion réussie");
-        navigate("/");
+        // redirection handled once user data is loaded
       }
     } catch (err) {
       console.error(err);

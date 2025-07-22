@@ -12,6 +12,8 @@ const authState = {
   isAuthenticated: false,
   access_rights: ['dashboard'],
   loading: false,
+  pending: false,
+  userData: null,
 };
 vi.mock('@/context/AuthContext', () => ({
   useAuth: () => authState
@@ -62,13 +64,15 @@ test('root path shows landing when unauthenticated', async () => {
   expect(await screen.findByText(/Simplifiez votre gestion/)).toBeInTheDocument();
 });
 
-test('root path shows landing even when authenticated', async () => {
+test('root path redirects to dashboard when authenticated', async () => {
   authState.isAuthenticated = true;
+  authState.userData = { actif: true };
   render(
     <MemoryRouter initialEntries={["/"]}>
       <RouterConfig />
     </MemoryRouter>
   );
-  expect(await screen.findByText(/Simplifiez votre gestion/)).toBeInTheDocument();
+  expect(await screen.findByText(/Dashboard Stock/)).toBeInTheDocument();
   authState.isAuthenticated = false;
+  authState.userData = null;
 });

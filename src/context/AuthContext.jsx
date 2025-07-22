@@ -41,6 +41,7 @@ export function AuthProvider({ children }) {
       )
       .eq("auth_id", userId)
       .maybeSingle();
+    if (import.meta.env.DEV) console.log("fetchUserData result", data);
 
     if (error) {
       console.error("Erreur récupération utilisateur:", error);

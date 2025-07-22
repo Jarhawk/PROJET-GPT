@@ -15,10 +15,7 @@ export default function ProtectedRoute({ children, accessKey }) {
       return;
     }
 
-    if (
-      accessKey &&
-      !hasAccess(userData.access_rights, accessKey, "peut_voir", userData.role === "superadmin")
-    ) {
+    if (accessKey && !hasAccess(accessKey, "peut_voir")) {
       navigate("/unauthorized", { replace: true });
     }
   }, [session, userData, pending, loading, accessKey, navigate, hasAccess]);

@@ -58,13 +58,25 @@ export const AuthProvider = ({ children }) => {
     if (fetchingRef.current && lastUserIdRef.current === userId) return;
     fetchingRef.current = true;
     if (import.meta.env.DEV) console.log("fetchUserData", userId);
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from("utilisateurs")
       .select(
-        "id, mama_id, role_id, role:roles(nom), role, access_rights, actif, email"
+        "id, mama_id, role_id, role:roles(nom, access_rights), role, access_rights, actif, email"
       )
       .eq("auth_id", userId)
       .maybeSingle();
+
+    if (!data && !error && email) {
+      const res = await supabase
+        .from("utilisateurs")
+        .select(
+          "id, mama_id, role_id, role:roles(nom, access_rights), role, access_rights, actif, email"
+        )
+        .eq("email", email)
+        .maybeSingle();
+      data = res.data;
+      error = res.error;
+    }
     if (import.meta.env.DEV) console.log("fetchUserData result", data);
 
     if (error) {
@@ -161,13 +173,21 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (!sessionLoadedRef.current) return;
     if (!session) {
+      setUserData(null);
       purgeLocalAuth();
+      if (pathname !== "/login") {
+        navigate("/login");
+      }
     }
   }, [session]);
 
   useEffect(() => {
     if (import.meta.env.DEV) console.log("userData", userData);
   }, [userData]);
+
+  useEffect(() => {
+    if (import.meta.env.DEV) console.debug('auth state', { session, userData });
+  }, [session, userData]);
 
   useEffect(() => {
     if (!sessionLoadedRef.current) return;

@@ -145,8 +145,10 @@ export default function Produits() {
               <th className="cursor-pointer" onClick={() => toggleSort("famille")}>Famille{renderArrow("famille")}</th>
               <th>Unité</th>
               <th className="cursor-pointer" onClick={() => toggleSort("pmp")}>PMP (€){renderArrow("pmp")}</th>
-              <th className="cursor-pointer" onClick={() => toggleSort("stock_reel")}>Stock{renderArrow("stock_reel")}</th>
+              <th className="cursor-pointer" onClick={() => toggleSort("stock_theorique")}>Stock théorique{renderArrow("stock_theorique")}</th>
               <th className="cursor-pointer" onClick={() => toggleSort("stock_min")}>Min{renderArrow("stock_min")}</th>
+              <th>Fournisseur</th>
+              <th className="cursor-pointer" onClick={() => toggleSort("dernier_prix")}>Dernier prix (€){renderArrow("dernier_prix")}</th>
               <th>Actif</th>
               <th>Actions</th>
             </tr>
@@ -154,7 +156,7 @@ export default function Produits() {
           <tbody>
           {products.length === 0 ? (
             <tr>
-              <td colSpan={8} className="py-4 text-muted-foreground">
+              <td colSpan={10} className="py-4 text-muted-foreground">
                 Aucun produit trouvé
               </td>
             </tr>
@@ -165,8 +167,10 @@ export default function Produits() {
                   <td>{p.famille}</td>
                   <td>{p.unite}</td>
                   <td>{p.pmp}</td>
-                  <td>{p.stock_reel}</td>
+                  <td>{p.stock_theorique}</td>
                   <td>{p.stock_min}</td>
+                  <td>{p.main_supplier?.nom || "-"}</td>
+                  <td>{p.dernier_prix ?? "-"}</td>
                   <td>{p.actif ? "✅" : "❌"}</td>
                   <td>
                     <Button size="sm" variant="outline" onClick={() => { setSelectedProduct(p); setShowForm(true); }}>

@@ -2,7 +2,7 @@
 import { useParams } from "react-router-dom";
 import { useRequisitions } from "@/hooks/useRequisitions";
 import { useEffect, useState } from "react";
-import { useAuth } from "@/context/AuthContext";
+import useAuth from "@/hooks/useAuth";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import GlassCard from "@/components/ui/GlassCard";
 

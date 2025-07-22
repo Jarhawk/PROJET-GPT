@@ -14,7 +14,7 @@ const query = {
 };
 const fromMock = vi.fn(() => query);
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
-vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
+vi.mock('@/hooks/useAuth', () => ({ default: () => ({ mama_id: 'm1' }) }));
 
 let usePromotions;
 

@@ -9,7 +9,7 @@ const selectMock = vi.fn(() => ({ eq: eqMock, order: orderMock }));
 const fromMock = vi.fn(() => ({ select: selectMock }));
 
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
-vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
+vi.mock('@/hooks/useAuth', () => ({ default: () => ({ mama_id: 'm1' }) }));
 const sheetToJson = vi.fn(() => [{ nom: 'Food' }]);
 let readMock = vi.fn(() => ({ SheetNames: ['CostCenters'], Sheets: { CostCenters: {} } }));
 vi.mock('xlsx', () => ({ read: (...args) => readMock(...args), utils: { sheet_to_json: sheetToJson } }), { virtual: true });

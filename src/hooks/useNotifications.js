@@ -2,7 +2,7 @@
 import { useState, useCallback } from "react";
 import toast from "react-hot-toast";
 import { supabase } from "@/lib/supabase";
-import { useAuth } from "@/context/AuthContext";
+import useAuth from "@/hooks/useAuth";
 
 export default function useNotifications() {
   const { mama_id, user_id } = useAuth();

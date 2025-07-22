@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { usePertes } from "@/hooks/usePertes";
 import { useProducts } from "@/hooks/useProducts";
-import { useAuth } from "@/context/AuthContext";
+import useAuth from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { Input } from "@/components/ui/input";

@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
-import { useAuth } from "@/context/AuthContext";
+import useAuth from "@/hooks/useAuth";
 import { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";

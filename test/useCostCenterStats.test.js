@@ -7,7 +7,7 @@ const rpcMock = vi.fn(() => Promise.resolve({ data: [], error: null }));
 vi.mock('@/lib/supabase', () => ({
   supabase: { rpc: rpcMock }
 }));
-vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
+vi.mock('@/hooks/useAuth', () => ({ default: () => ({ mama_id: 'm1' }) }));
 
 let useCostCenterStats;
 

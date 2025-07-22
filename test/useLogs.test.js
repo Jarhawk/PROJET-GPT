@@ -14,7 +14,7 @@ const fromMock = vi.fn(() => ({ select: selectMock }));
 
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
 const authMock = vi.fn(() => ({ mama_id: 'm1' }));
-vi.mock('@/context/AuthContext', () => ({ useAuth: authMock }));
+vi.mock('@/hooks/useAuth', () => ({ default: authMock }));
 vi.mock('file-saver', () => ({ saveAs: vi.fn() }));
 vi.mock('xlsx', () => ({ utils: { book_new: vi.fn(() => ({})), book_append_sheet: vi.fn(), json_to_sheet: vi.fn(() => ({})) }, write: vi.fn(() => new ArrayBuffer(10)) }));
 

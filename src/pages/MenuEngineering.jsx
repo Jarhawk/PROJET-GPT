@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { useMenuEngineering } from '@/hooks/useMenuEngineering'
 import { Toaster, toast } from 'react-hot-toast'
 import { Button } from '@/components/ui/button'
-import { useAuth } from '@/context/AuthContext'
+import useAuth from '@/hooks/useAuth'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import {
   ResponsiveContainer,

@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
 import { Navigate, Link } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
+import useAuth from "@/hooks/useAuth";
 import { useCarte } from "@/hooks/useCarte";
 import { useFamilles } from "@/hooks/useFamilles";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";

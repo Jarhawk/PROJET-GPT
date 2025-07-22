@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useRequisitions } from "@/hooks/useRequisitions";
 import { useProducts } from "@/hooks/useProducts";
 import { useZones } from "@/hooks/useZones";
-import { useAuth } from "@/context/AuthContext";
+import useAuth from "@/hooks/useAuth";
 import { supabase } from "@/lib/supabase";
 import { Toaster, toast } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";

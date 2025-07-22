@@ -2,7 +2,7 @@
 import { useMama } from "@/hooks/useMama";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
-import { useAuth } from "@/context/AuthContext";
+import useAuth from "@/hooks/useAuth";
 import { Toaster, toast } from "react-hot-toast";
 
 export default function ParamMama() {

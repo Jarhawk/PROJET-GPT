@@ -12,7 +12,7 @@ const selectMock = vi.fn(() => ({ eq: eqMock, ilike: ilikeMock, gte: gteMock, lt
 const fromMock = vi.fn(() => ({ select: selectMock }));
 
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
-vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
+vi.mock('@/hooks/useAuth', () => ({ default: () => ({ mama_id: 'm1' }) }));
 
 let useMenuDuJour;
 

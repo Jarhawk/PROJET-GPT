@@ -7,7 +7,7 @@ const selectMock = vi.fn(() => ({ eq: eqMock }));
 const fromMock = vi.fn(() => ({ select: selectMock }));
 const rpcMock = vi.fn(() => Promise.resolve({ data: [], error: null }));
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock, rpc: rpcMock } }));
-vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ mama_id: 'm1', loading: false }) }));
+vi.mock('@/hooks/useAuth', () => ({ default: () => ({ mama_id: 'm1', loading: false }) }));
 
 let useDashboard;
 

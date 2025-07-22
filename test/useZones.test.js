@@ -13,7 +13,7 @@ const queryObj = {
 };
 const fromMock = vi.fn(() => queryObj);
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
-vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
+vi.mock('@/hooks/useAuth', () => ({ default: () => ({ mama_id: 'm1' }) }));
 vi.mock('react-hot-toast', () => ({ toast: { error: vi.fn() } }));
 
 let useZones;

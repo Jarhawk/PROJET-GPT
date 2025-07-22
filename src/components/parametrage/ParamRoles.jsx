@@ -3,7 +3,7 @@ import { useRoles } from "@/hooks/useRoles";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
 import { useState, useEffect } from "react";
-import { useAuth } from "@/context/AuthContext";
+import useAuth from "@/hooks/useAuth";
 import { Toaster, toast } from "react-hot-toast";
 
 export default function ParamRoles() {

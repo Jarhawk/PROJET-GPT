@@ -14,7 +14,7 @@ const query = {
 const fromMock = vi.fn(() => query)
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }))
 const authMock = vi.fn(() => ({ mama_id: 'm1' }))
-vi.mock('@/context/AuthContext', () => ({ useAuth: authMock }))
+vi.mock('@/hooks/useAuth', () => ({ default: authMock }))
 
 let useMenuEngineering
 

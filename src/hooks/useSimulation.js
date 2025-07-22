@@ -2,7 +2,7 @@
 // src/hooks/useSimulation.js
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { useAuth } from "@/context/AuthContext";
+import useAuth from "@/hooks/useAuth";
 
 export const useSimulation = () => {
   const { mama_id } = useAuth();

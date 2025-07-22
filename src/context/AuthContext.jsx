@@ -192,6 +192,7 @@ export const AuthProvider = ({ children }) => {
   }, [userData, pathname, navigate]);
 
   const login = async ({ email, password }) => {
+    if (import.meta.env.DEV) console.log('login', email);
     const { data, error } = await loginUser(email, password);
     if (error) {
       toast.error(error.message || "Erreur");
@@ -241,6 +242,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
+    if (import.meta.env.DEV) console.log('logout');
     await supabase.auth.signOut();
     setSession(null);
     setUserData(null);

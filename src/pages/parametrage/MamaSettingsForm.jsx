@@ -5,7 +5,7 @@ import PrimaryButton from "@/components/ui/PrimaryButton";
 import { Input } from "@/components/ui/input";
 import useMamaSettings from "@/hooks/useMamaSettings";
 import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
-import { useAuth } from "@/context/AuthContext";
+import useAuth from "@/hooks/useAuth";
 
 export default function MamaSettingsForm() {
   const { mama_id } = useAuth();

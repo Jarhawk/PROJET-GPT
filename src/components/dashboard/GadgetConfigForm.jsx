@@ -12,9 +12,11 @@ export default function GadgetConfigForm({ gadget, onSave, onCancel }) {
     JSON.stringify(gadget?.config || {}, null, 2)
   );
   const { addGadget, updateGadget } = useGadgets();
+  const [saving, setSaving] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (saving) return;
     let json;
     try {
       json = config ? JSON.parse(config) : {};
@@ -22,16 +24,21 @@ export default function GadgetConfigForm({ gadget, onSave, onCancel }) {
       toast.error('JSON invalide');
       return;
     }
-    if (editing) {
-      await updateGadget(gadget.id, {
-        nom,
-        type,
-        config: json,
-      });
-    } else {
-      await addGadget({ nom, type, config: json });
+    try {
+      setSaving(true);
+      if (editing) {
+        await updateGadget(gadget.id, {
+          nom,
+          type,
+          config: json,
+        });
+      } else {
+        await addGadget({ nom, type, config: json });
+      }
+      onSave?.();
+    } finally {
+      setSaving(false);
     }
-    onSave?.();
   };
 
   return (
@@ -58,7 +65,10 @@ export default function GadgetConfigForm({ gadget, onSave, onCancel }) {
       </div>
       <div className="flex justify-end gap-2">
         <Button type="button" onClick={onCancel}>Annuler</Button>
-        <Button type="submit">{editing ? 'Enregistrer' : 'Ajouter'}</Button>
+        <Button type="submit" className="flex items-center gap-2" disabled={saving}>
+          {saving && <span className="loader-glass" />}
+          {editing ? 'Enregistrer' : 'Ajouter'}
+        </Button>
       </div>
     </form>
   );

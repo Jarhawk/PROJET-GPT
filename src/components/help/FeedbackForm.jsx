@@ -34,21 +34,27 @@ export default function FeedbackForm({ open, onOpenChange }) {
     <ModalGlass open={open} onClose={() => onOpenChange(false)}>
         <h3 className="text-lg font-semibold mb-4">Besoin d'aide ?</h3>
         <form onSubmit={handleSubmit} className="space-y-2">
+          <label className="sr-only" htmlFor="module">Module</label>
           <input
+            id="module"
             className="input input-bordered w-full"
             placeholder="Module"
             value={module}
             onChange={(e) => setModule(e.target.value)}
             required
           />
+          <label className="sr-only" htmlFor="message">Message</label>
           <textarea
+            id="message"
             className="input input-bordered w-full h-24"
             placeholder="Votre message"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             required
           />
+          <label className="sr-only" htmlFor="urgence">Urgence</label>
           <select
+            id="urgence"
             className="input input-bordered w-full"
             value={urgence}
             onChange={(e) => setUrgence(e.target.value)}
@@ -58,7 +64,9 @@ export default function FeedbackForm({ open, onOpenChange }) {
             <option value="elevee">Élevée</option>
           </select>
           <div className="flex gap-2 pt-2">
-            <Button type="submit" disabled={sending}>Envoyer</Button>
+            <Button type="submit" disabled={sending} className="flex items-center gap-2">
+              {sending && <span className="loader-glass" />}Envoyer
+            </Button>
             <Button
               type="button"
               onClick={() => onOpenChange(false)}

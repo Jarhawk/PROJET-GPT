@@ -67,7 +67,10 @@ export default function ParamRoles() {
           onChange={e => setForm(f => ({ ...f, nom: e.target.value }))}
           required
         />
-        <Button type="submit" disabled={loading}>{editMode ? "Modifier" : "Ajouter"}</Button>
+        <Button type="submit" disabled={loading} className="flex items-center gap-2">
+          {loading && <span className="loader-glass" />}
+          {editMode ? "Modifier" : "Ajouter"}
+        </Button>
         {editMode && (
           <Button
             variant="outline"

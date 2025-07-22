@@ -55,7 +55,7 @@ export default function Sidebar() {
     return (
       <aside className="w-64 p-4 text-white">
         <p className="text-red-400 text-sm">
-          Erreur de permission : rôle utilisateur non trouvé. Merci de contacter l’administrateur.
+          Erreur de permission : rôle utilisateur non trouvé. Merci de contacter l’administrateur.
         </p>
       </aside>
     );

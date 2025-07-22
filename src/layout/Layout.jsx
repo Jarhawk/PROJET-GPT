@@ -56,7 +56,7 @@ export default function Layout() {
   if (!role) {
     return (
       <div className="p-4 text-red-400">
-        Erreur de permission : rôle utilisateur non trouvé. Merci de contacter
+        Erreur de permission : rôle utilisateur non trouvé. Merci de contacter
         l’administrateur.
       </div>
     );

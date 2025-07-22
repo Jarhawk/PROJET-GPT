@@ -14,7 +14,6 @@ import Login from "@/pages/auth/Login";
 import Unauthorized from "@/pages/auth/Unauthorized";
 import Pending from "@/pages/auth/Pending";
 import Blocked from "@/pages/auth/Blocked";
-import RoleError from "@/pages/auth/RoleError";
 import AuthDebug from "@/pages/debug/AuthDebug";
 import AccessExample from "@/pages/debug/AccessExample";
 import NotFound from "@/pages/NotFound";
@@ -52,7 +51,6 @@ const Analyse = lazyWithPreload(() => import("@/pages/analyse/Analyse.jsx"));
 const AnalyseCostCenter = lazyWithPreload(() => import("@/pages/analyse/AnalyseCostCenter.jsx"));
 const AnalytiqueDashboard = lazyWithPreload(() => import("@/pages/analytique/AnalytiqueDashboard.jsx"));
 const Utilisateurs = lazyWithPreload(() => import("@/pages/parametrage/Utilisateurs.jsx"));
-const Roles = lazyWithPreload(() => import("@/pages/parametrage/Roles.jsx"));
 const Mamas = lazyWithPreload(() => import("@/pages/parametrage/Mamas.jsx"));
 const Permissions = lazyWithPreload(() => import("@/pages/parametrage/Permissions.jsx"));
 const AccessRights = lazyWithPreload(() => import("@/pages/parametrage/AccessRights.jsx"));
@@ -136,7 +134,6 @@ export const routePreloadMap = {
   '/surcouts': Surcouts.preload,
   '/alertes': Alertes.preload,
   '/parametrage/utilisateurs': Utilisateurs.preload,
-  '/parametrage/roles': Roles.preload,
   '/parametrage/mamas': Mamas.preload,
   '/parametrage/permissions': Permissions.preload,
   '/parametrage/access': AccessRights.preload,
@@ -181,7 +178,6 @@ export default function Router() {
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/create-mama" element={<CreateMama />} />
         <Route path="/pending" element={<Pending />} />
-        <Route path="/no-role" element={<RoleError />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/blocked" element={<Blocked />} />
         <Route path="/rgpd" element={<Rgpd />} />
@@ -424,10 +420,6 @@ export default function Router() {
           <Route
             path="/parametrage/utilisateurs"
             element={<ProtectedRoute accessKey="utilisateurs"><Utilisateurs /></ProtectedRoute>}
-          />
-          <Route
-            path="/parametrage/roles"
-            element={<ProtectedRoute accessKey="roles"><Roles /></ProtectedRoute>}
           />
           <Route
             path="/parametrage/mamas"

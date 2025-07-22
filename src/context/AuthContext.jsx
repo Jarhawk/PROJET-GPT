@@ -6,8 +6,6 @@ import { login as loginUser } from "@/lib/loginUser";
 import {
   hasAccess as checkAccess,
   getAuthorizedModules as listModules,
-  mergeRights,
-  rowsToRights,
 } from "@/lib/access";
 import toast from "react-hot-toast";
 
@@ -60,18 +58,14 @@ export const AuthProvider = ({ children }) => {
     if (import.meta.env.DEV) console.log("fetchUserData", userId);
     let { data, error } = await supabase
       .from("utilisateurs")
-      .select(
-        "id, mama_id, role_id, role:roles(nom, access_rights), role, access_rights, actif, email"
-      )
+      .select("id, mama_id, nom, access_rights, actif, email")
       .eq("auth_id", userId)
       .maybeSingle();
 
     if (!data && !error && email) {
       const res = await supabase
         .from("utilisateurs")
-        .select(
-          "id, mama_id, role_id, role:roles(nom, access_rights), role, access_rights, actif, email"
-        )
+        .select("id, mama_id, nom, access_rights, actif, email")
         .eq("email", email)
         .maybeSingle();
       data = res.data;
@@ -96,39 +90,21 @@ export const AuthProvider = ({ children }) => {
       return;
     }
 
-    const roleName = data.role?.nom ?? data.role;
-    if (!roleName) {
-      toast.error(
-        "Erreur de permission : rôle utilisateur non trouvé. Merci de contacter l’administrateur."
-      );
-      setUserData(null);
-      fetchingRef.current = false;
-      await supabase.auth.signOut().catch(() => {});
-      navigate("/no-role");
-      return;
-    }
-
-    let tableRights = {};
-    if (data.role_id) {
-      const { data: rows } = await supabase
-        .from("access_rights")
-        .select("module, peut_voir, peut_modifier")
-        .eq("role_id", data.role_id);
-      tableRights = rowsToRights(rows);
-    }
-    const roleRights = data.role?.access_rights || {};
-    const userRights = data.access_rights || {};
-    const rights = mergeRights(tableRights, roleRights, userRights);
+    const rights = data.access_rights || {};
 
     lastUserIdRef.current = userId;
     setError(null);
-    setUserData({
+    const newData = {
       ...data,
       auth_id: userId,
       email,
-      role: roleName,
+      nom: data.nom,
       access_rights: rights,
-    });
+    };
+    if (import.meta.env.DEV) {
+      console.log('Loaded user', { nom: newData.nom, rights: newData.access_rights });
+    }
+    setUserData(newData);
     if (!data.mama_id) console.warn("missing mama_id for user", userId);
     fetchingRef.current = false;
   }
@@ -238,15 +214,10 @@ export const AuthProvider = ({ children }) => {
           .order("created_at")
           .limit(1)
           .maybeSingle();
-        const { data: roleRow } = await supabase
-          .from("roles")
-          .select("id")
-          .eq("nom", "user")
-          .maybeSingle();
         await supabase.from("utilisateurs").insert({
           auth_id: user.id,
           mama_id: mama?.id,
-          role_id: roleRow?.id,
+          nom: user.email,
           access_rights: {},
         });
       } catch (e) {
@@ -270,18 +241,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   const hasAccess = (module, droit = "peut_voir") => {
-    return checkAccess(
-      userData?.access_rights,
-      module,
-      droit,
-      userData?.role === "superadmin"
-    );
+    return checkAccess(userData?.access_rights, module, droit, false);
   };
 
   const getAuthorizedModules = (droit = "peut_voir") => {
-    if (userData?.role === "superadmin") {
-      return Object.keys(userData?.access_rights || {});
-    }
     return listModules(userData?.access_rights, droit);
   };
 
@@ -289,7 +252,7 @@ export const AuthProvider = ({ children }) => {
     /** Direct session object returned by Supabase */
     session,
     userData,
-    role: userData?.role,
+    nom: userData?.nom,
     access_rights: userData?.access_rights ?? null,
     mama_id: userData?.mama_id,
     /** Authentication state */
@@ -301,7 +264,6 @@ export const AuthProvider = ({ children }) => {
     user_id: session?.user?.id ?? null,
     /** Indicates the session is available but userData has not been fetched yet */
     pending: !!session && !userData,
-    role_id: userData?.role_id,
     email: userData?.email,
     actif: userData?.actif,
     hasAccess,
@@ -312,8 +274,6 @@ export const AuthProvider = ({ children }) => {
     resetAuth,
     /** Helpers */
     isAuthenticated: !!session?.user?.id,
-    isAdmin: userData?.role === "admin" || userData?.role === "superadmin",
-    isSuperadmin: userData?.role === "superadmin",
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

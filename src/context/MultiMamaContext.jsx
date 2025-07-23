@@ -8,7 +8,7 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 const MultiMamaContext = createContext();
 
 export function MultiMamaProvider({ children }) {
-  const { role, mama_id: authMamaId } = useAuth();
+  const { isSuperadmin, mama_id: authMamaId } = useAuth();
   const [mamas, setMamas] = useState([]);
   const [loading, setLoading] = useState(false);
   const [mamaActif, setMamaActifState] = useState(
@@ -22,14 +22,14 @@ export function MultiMamaProvider({ children }) {
   }, [authMamaId]);
 
   useEffect(() => {
-    if (authMamaId || role === "superadmin") fetchMamas();
-  }, [authMamaId, role]);
+    if (authMamaId || isSuperadmin) fetchMamas();
+  }, [authMamaId, isSuperadmin]);
 
   async function fetchMamas() {
     setLoading(true);
     let data = [];
     try {
-      if (role === "superadmin") {
+      if (isSuperadmin) {
         const { data: rows, error } = await supabase
           .from("mamas")
           .select("id, nom")

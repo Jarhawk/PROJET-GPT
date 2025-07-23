@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useProducts } from "@/hooks/useProducts";
 import { useFamilles } from "@/hooks/useFamilles";
 import { useUnites } from "@/hooks/useUnites";
+import useAuth from "@/hooks/useAuth";
 import ProduitFormModal from "@/components/produits/ProduitFormModal";
 import ProduitDetail from "@/components/produits/ProduitDetail";
 import { Button } from "@/components/ui/button";
@@ -21,9 +22,13 @@ export default function Produits() {
     importProductsFromExcel,
     addProduct,
     duplicateProduct,
+    deleteProduct,
+    toggleProductActive,
   } = useProducts();
   const { familles: famillesHook, fetchFamilles } = useFamilles();
   const { unites: unitesHook, fetchUnites } = useUnites();
+  const { access_rights, isSuperadmin } = useAuth();
+  const canEdit = isSuperadmin || access_rights?.produits?.peut_modifier;
 
   const [showForm, setShowForm] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -35,6 +40,16 @@ export default function Produits() {
   const [sortField, setSortField] = useState("famille");
   const [sortOrder, setSortOrder] = useState("asc");
   const fileRef = useRef();
+
+  const getParams = () => ({
+    search,
+    famille: familleFilter,
+    actif: actifFilter === "all" ? null : actifFilter === "true",
+    page,
+    limit: PAGE_SIZE,
+    sortBy: sortField,
+    order: sortOrder,
+  });
 
   useEffect(() => {
     fetchFamilles();
@@ -60,7 +75,7 @@ export default function Produits() {
         image: row.image || "",
       }, { refresh: false });
     }
-    fetchProducts();
+    fetchProducts(getParams());
     e.target.value = null;
   }
 
@@ -83,15 +98,7 @@ export default function Produits() {
   const unites = unitesHook;
 
   useEffect(() => {
-    fetchProducts({
-      search,
-      famille: familleFilter,
-      actif: actifFilter === "all" ? null : actifFilter === "true",
-      page,
-      limit: PAGE_SIZE,
-      sortBy: sortField,
-      order: sortOrder,
-    });
+    fetchProducts(getParams());
   }, [fetchProducts, search, familleFilter, actifFilter, page, sortField, sortOrder]);
 
   return (
@@ -125,9 +132,15 @@ export default function Produits() {
           <option value="true">Actif</option>
           <option value="false">Inactif</option>
         </select>
-        <Button onClick={() => { setShowForm(true); setSelectedProduct(null); }}>+ Nouveau produit</Button>
-        <Button onClick={exportProductsToExcel}>Export Excel</Button>
-        <Button onClick={() => fileRef.current.click()}>Import Excel</Button>
+        {canEdit && (
+          <Button onClick={() => { setShowForm(true); setSelectedProduct(null); }}>+ Nouveau produit</Button>
+        )}
+        {canEdit && (
+          <Button onClick={exportProductsToExcel}>Export Excel</Button>
+        )}
+        {canEdit && (
+          <Button onClick={() => fileRef.current.click()}>Import Excel</Button>
+        )}
         <input
           type="file"
           accept=".xlsx"
@@ -173,15 +186,46 @@ export default function Produits() {
                   <td>{p.dernier_prix ?? "-"}</td>
                   <td>{p.actif ? "✅" : "❌"}</td>
                   <td>
-                    <Button size="sm" variant="outline" onClick={() => { setSelectedProduct(p); setShowForm(true); }}>
-                      Éditer
-                    </Button>
+                    {canEdit && (
+                      <Button size="sm" variant="outline" onClick={() => { setSelectedProduct(p); setShowForm(true); }}>
+                        Éditer
+                      </Button>
+                    )}
                     <Button size="sm" variant="secondary" onClick={() => { setSelectedProduct(p); setShowDetail(true); }}>
                       Historique prix
                     </Button>
-                    <Button size="sm" variant="ghost" onClick={() => duplicateProduct(p.id)}>
-                      Dupliquer
-                    </Button>
+                    {canEdit && (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => duplicateProduct(p.id, { params: getParams() })}
+                        >
+                          Dupliquer
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={async () => {
+                            await toggleProductActive(p.id, !p.actif, {
+                              params: getParams(),
+                            });
+                          }}
+                        >
+                          {p.actif ? "Désactiver" : "Activer"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={async () => {
+                            if (!window.confirm("Supprimer ce produit ?")) return;
+                            await deleteProduct(p.id, { params: getParams() });
+                          }}
+                        >
+                          Supprimer
+                        </Button>
+                      </>
+                    )}
                   </td>
                 </tr>
             ))
@@ -207,8 +251,8 @@ export default function Produits() {
         produit={selectedProduct}
         familles={familles}
         unites={unites}
-        onClose={() => { setShowForm(false); setSelectedProduct(null); fetchProducts(); }}
-        onSuccess={() => { fetchProducts(); }}
+        onClose={() => { setShowForm(false); setSelectedProduct(null); fetchProducts(getParams()); }}
+        onSuccess={() => { fetchProducts(getParams()); }}
       />
       {/* Modale détail historique */}
       <ProduitDetail

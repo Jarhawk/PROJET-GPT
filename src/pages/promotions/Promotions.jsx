@@ -2,24 +2,38 @@
 import { useEffect, useState } from "react";
 import { usePromotions } from "@/hooks/usePromotions";
 import useAuth from "@/hooks/useAuth";
+import { Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
 import { Toaster, toast } from "react-hot-toast";
 import PromotionForm from "./PromotionForm.jsx";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function Promotions() {
   const { promotions, fetchPromotions, addPromotion, updatePromotion, deletePromotion } = usePromotions();
-  const { mama_id, loading: authLoading } = useAuth();
+  const {
+    mama_id,
+    loading: authLoading,
+    access_rights,
+    isSuperadmin,
+  } = useAuth();
+  const canEdit = isSuperadmin || access_rights?.promotions?.peut_modifier;
   const [showForm, setShowForm] = useState(false);
   const [editRow, setEditRow] = useState(null);
   const [search, setSearch] = useState("");
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    if (!authLoading && mama_id) fetchPromotions();
-  }, [authLoading, mama_id, fetchPromotions]);
+  const getParams = () => ({ search });
 
-  if (authLoading || !mama_id) return null;
+  useEffect(() => {
+    if (!authLoading && mama_id) fetchPromotions(getParams());
+  }, [authLoading, mama_id, fetchPromotions, search]);
+
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
+  if (!access_rights?.promotions?.peut_voir) {
+    return <Navigate to="/unauthorized" replace />;
+  }
+  if (!mama_id) return null;
 
   const filtered = promotions.filter(p =>
     !search || p.nom.toLowerCase().includes(search.toLowerCase())
@@ -27,7 +41,7 @@ export default function Promotions() {
 
   const handleDelete = async id => {
     if (window.confirm("Supprimer cette promotion ?")) {
-      await deletePromotion(id);
+      await deletePromotion(id, { refreshParams: getParams() });
       toast.success("Promotion supprimée");
     }
   };
@@ -43,7 +57,9 @@ export default function Promotions() {
           className="input"
           placeholder="Recherche promotion"
         />
-        <Button onClick={() => setShowForm(true)}>Nouvelle promotion</Button>
+        {canEdit && (
+          <Button onClick={() => setShowForm(true)}>Nouvelle promotion</Button>
+        )}
       </div>
       <TableContainer className="mt-2">
         <table className="min-w-full text-sm">
@@ -64,36 +80,48 @@ export default function Promotions() {
               <td className="px-4 py-1">{p.date_fin || "-"}</td>
               <td className="px-4 py-1">{p.actif ? "Oui" : "Non"}</td>
               <td className="px-4 py-1 text-right">
-                <Button size="sm" variant="outline" className="mr-2" onClick={() => { setEditRow(p); setShowForm(true); }}>
-                  Modifier
-                </Button>
-                <Button size="sm" variant="destructive" onClick={() => handleDelete(p.id)}>
-                  Supprimer
-                </Button>
+                {canEdit && (
+                  <>
+                    <Button size="sm" variant="outline" className="mr-2" onClick={() => { setEditRow(p); setShowForm(true); }}>
+                      Modifier
+                    </Button>
+                    <Button size="sm" variant="destructive" onClick={() => handleDelete(p.id)}>
+                      Supprimer
+                    </Button>
+                  </>
+                )}
               </td>
             </tr>
           ))}
         </tbody>
         </table>
       </TableContainer>
-      {showForm && (
+      {canEdit && showForm && (
         <PromotionForm
           promotion={editRow}
           saving={saving}
-          onClose={() => { setShowForm(false); setEditRow(null); }}
+          onClose={() => {
+            setShowForm(false);
+            setEditRow(null);
+            fetchPromotions(getParams());
+          }}
           onSave={async values => {
             try {
               setSaving(true);
               if (editRow) {
-                await updatePromotion(editRow.id, values);
+                await updatePromotion(editRow.id, values, {
+                  refreshParams: getParams(),
+                });
                 toast.success("Promotion modifiée !");
               } else {
-                await addPromotion(values);
+                await addPromotion(values, {
+                  refreshParams: getParams(),
+                });
                 toast.success("Promotion ajoutée !");
               }
               setShowForm(false);
               setEditRow(null);
-              fetchPromotions();
+              fetchPromotions(getParams());
             } catch (err) {
               console.error("Erreur enregistrement promotion:", err);
               toast.error("Erreur lors de l'enregistrement.");

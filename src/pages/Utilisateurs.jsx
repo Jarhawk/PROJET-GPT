@@ -6,17 +6,25 @@ import UtilisateurForm from "@/components/utilisateurs/UtilisateurForm";
 import UtilisateurDetail from "@/components/utilisateurs/UtilisateurDetail";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
+import { Navigate } from "react-router-dom";
 import GlassCard from "@/components/ui/GlassCard";
 import { Toaster, toast } from "react-hot-toast";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import { motion as Motion } from "framer-motion";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 const PAGE_SIZE = 20;
 
 export default function Utilisateurs() {
   const { users, fetchUsers, toggleUserActive, deleteUser } = useUtilisateurs();
-  const { mama_id, loading: authLoading } = useAuth();
+  const {
+    mama_id,
+    loading: authLoading,
+    access_rights,
+    isSuperadmin,
+  } = useAuth();
+  const canEdit = isSuperadmin || access_rights?.utilisateurs?.peut_modifier;
   const [search, setSearch] = useState("");
   const [actifFilter, setActifFilter] = useState("all");
   const [page, setPage] = useState(1);
@@ -24,9 +32,14 @@ export default function Utilisateurs() {
   const [selected, setSelected] = useState(null);
   const [showDetail, setShowDetail] = useState(false);
 
+  const getParams = () => ({
+    search,
+    actif: actifFilter === "all" ? null : actifFilter === "true",
+  });
+
   useEffect(() => {
-    if (!authLoading && mama_id) fetchUsers();
-  }, [authLoading, mama_id, fetchUsers]);
+    if (!authLoading && mama_id) fetchUsers(getParams());
+  }, [authLoading, mama_id, fetchUsers, search, actifFilter]);
 
   const filtres = users.filter(u =>
     (!search || u.nom?.toLowerCase().includes(search.toLowerCase())) &&
@@ -44,18 +57,23 @@ export default function Utilisateurs() {
   };
 
   const handleToggleActive = async (u) => {
-    await toggleUserActive(u.id, !u.actif);
-    await fetchUsers();
+    await toggleUserActive(u.id, !u.actif, { params: getParams() });
+    await fetchUsers(getParams());
     toast.success(u.actif ? "Utilisateur désactivé" : "Utilisateur réactivé");
   };
 
   const handleDelete = async (u) => {
     if (window.confirm(`Supprimer l'utilisateur ${u.nom} ?`)) {
-      await deleteUser(u.id);
-      await fetchUsers();
+      await deleteUser(u.id, { params: getParams() });
+      await fetchUsers(getParams());
       toast.success("Utilisateur supprimé.");
     }
   };
+
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
+  if (!access_rights?.utilisateurs?.peut_voir) {
+    return <Navigate to="/unauthorized" replace />;
+  }
 
   return (
     <div className="p-6 container mx-auto text-shadow">
@@ -74,10 +92,14 @@ export default function Utilisateurs() {
             <option value="true">Actif</option>
             <option value="false">Inactif</option>
           </select>
-          <Button onClick={() => { setSelected(null); setShowForm(true); }}>
-            Ajouter un utilisateur
-          </Button>
-          <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
+          {canEdit && (
+            <Button onClick={() => { setSelected(null); setShowForm(true); }}>
+              Ajouter un utilisateur
+            </Button>
+          )}
+          {canEdit && (
+            <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
+          )}
         </div>
       </GlassCard>
       <TableContainer className="mb-4">
@@ -113,11 +135,15 @@ export default function Utilisateurs() {
                 </span>
               </td>
               <td className="border px-4 py-2 flex gap-2">
-                <Button size="sm" variant="outline" onClick={() => { setSelected(u); setShowForm(true); }}>Modifier</Button>
-                <Button size="sm" variant="outline" onClick={() => handleToggleActive(u)}>
-                  {u.actif ? "Désactiver" : "Réactiver"}
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => handleDelete(u)}>Supprimer</Button>
+                {canEdit && (
+                  <>
+                    <Button size="sm" variant="outline" onClick={() => { setSelected(u); setShowForm(true); }}>Modifier</Button>
+                    <Button size="sm" variant="outline" onClick={() => handleToggleActive(u)}>
+                      {u.actif ? "Désactiver" : "Réactiver"}
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => handleDelete(u)}>Supprimer</Button>
+                  </>
+                )}
               </td>
             </tr>
           ))}
@@ -134,10 +160,10 @@ export default function Utilisateurs() {
           >{i + 1}</Button>
         ))}
       </div>
-      {showForm && (
+      {canEdit && showForm && (
         <UtilisateurForm
           utilisateur={selected}
-          onClose={() => { setShowForm(false); setSelected(null); fetchUsers(); }}
+          onClose={() => { setShowForm(false); setSelected(null); fetchUsers(getParams()); }}
         />
       )}
       {showDetail && selected && (

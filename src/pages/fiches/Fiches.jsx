@@ -25,7 +25,13 @@ export default function Fiches() {
     exportFichesToExcel,
     exportFichesToPDF,
   } = useFiches();
-  const { mama_id, loading: authLoading, access_rights } = useAuth();
+  const {
+    mama_id,
+    loading: authLoading,
+    access_rights,
+    isSuperadmin,
+  } = useAuth();
+  const canEdit = isSuperadmin || access_rights?.fiches_techniques?.peut_modifier;
   const [showForm, setShowForm] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected] = useState(null);
@@ -65,37 +71,38 @@ export default function Fiches() {
         <input
           type="search"
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={e => { setPage(1); setSearch(e.target.value); }}
           className="input"
           placeholder="Recherche fiche"
         />
         <select
           className="input"
           value={sortBy}
-          onChange={e => setSortBy(e.target.value)}
+          onChange={e => { setPage(1); setSortBy(e.target.value); }}
         >
           <option value="nom">Tri: Nom</option>
           <option value="cout_par_portion">Tri: Coût/portion</option>
         </select>
-        <select className="input" value={actif} onChange={e => setActif(e.target.value)}>
+        <select className="input" value={actif} onChange={e => { setPage(1); setActif(e.target.value); }}>
           <option value="true">Actives</option>
           <option value="false">Inactives</option>
           <option value="all">Toutes</option>
         </select>
-        <select className="input" value={familleFilter} onChange={e => setFamilleFilter(e.target.value)}>
+        <select className="input" value={familleFilter} onChange={e => { setPage(1); setFamilleFilter(e.target.value); }}>
           <option value="">-- Famille --</option>
           {familles.map(f => <option key={f.id} value={f.id}>{f.nom}</option>)}
         </select>
-        <Button onClick={() => { setSelected(null); setShowForm(true); }}>
-          Ajouter une fiche
-        </Button>
-        <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
-        <Button variant="outline" onClick={exportPdf}>Export PDF</Button>
-        <Button onClick={() => { setSelected(null); setShowForm(true); }}>
-          Ajouter une fiche
-        </Button>
-        <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
-        <Button variant="outline" onClick={exportPdf}>Export PDF</Button>
+        {canEdit && (
+          <Button onClick={() => { setSelected(null); setShowForm(true); }}>
+            Ajouter une fiche
+          </Button>
+        )}
+        {canEdit && (
+          <>
+            <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
+            <Button variant="outline" onClick={exportPdf}>Export PDF</Button>
+          </>
+        )}
       </div>
       <TableContainer className="mb-4">
         <Motion.table
@@ -130,14 +137,16 @@ export default function Fiches() {
               <td className="border px-4 py-2">{fiche.lignes?.length || 0}</td>
               <td className="border px-4 py-2">{fiche.actif ? '✅' : '❌'}</td>
               <td className="border px-4 py-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="mr-2"
-                  onClick={() => { setSelected(fiche); setShowForm(true); }}
-                >
-                  Modifier
-                </Button>
+                {canEdit && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="mr-2"
+                    onClick={() => { setSelected(fiche); setShowForm(true); }}
+                  >
+                    Modifier
+                  </Button>
+                )}
                 <Button
                   size="sm"
                   variant="outline"
@@ -146,21 +155,46 @@ export default function Fiches() {
                 >
                   Voir
                 </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="mr-2"
-                  onClick={() => duplicateFiche(fiche.id)}
-                >
-                  Dupliquer
-                </Button>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={() => deleteFiche(fiche.id)}
-                >
-                  Désactiver
-                </Button>
+                {canEdit && (
+                  <>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="mr-2"
+                      onClick={() =>
+                        duplicateFiche(fiche.id, {
+                          refreshParams: {
+                            search,
+                            actif: actif === "all" ? null : actif === "true",
+                            famille: familleFilter || null,
+                            page,
+                            limit: PAGE_SIZE,
+                            sortBy,
+                          },
+                        })
+                      }
+                    >
+                      Dupliquer
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => {
+                        if (!window.confirm('Désactiver cette fiche ?')) return;
+                        deleteFiche(fiche.id, {
+                          search,
+                          actif: actif === "all" ? null : actif === "true",
+                          famille: familleFilter || null,
+                          page,
+                          limit: PAGE_SIZE,
+                          sortBy,
+                        });
+                      }}
+                    >
+                      Désactiver
+                    </Button>
+                  </>
+                )}
               </td>
             </tr>
           ))}
@@ -182,10 +216,17 @@ export default function Fiches() {
       {showForm && (
         <FicheForm
           fiche={selected}
+          refreshParams={{
+            search,
+            actif: actif === "all" ? null : actif === "true",
+            famille: familleFilter || null,
+            page,
+            limit: PAGE_SIZE,
+            sortBy,
+          }}
           onClose={() => {
             setShowForm(false);
             setSelected(null);
-            getFiches({ search, actif: actif === "all" ? null : actif === "true", famille: familleFilter || null, page, limit: PAGE_SIZE });
           }}
         />
       )}

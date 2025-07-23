@@ -55,7 +55,7 @@ export function useFiches() {
   }
 
   // Création fiche + lignes
-  async function createFiche({ lignes = [], ...fiche }) {
+  async function createFiche({ lignes = [], ...fiche }, { refreshParams = {} } = {}) {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
@@ -86,12 +86,12 @@ export function useFiches() {
       }
     }
     setLoading(false);
-    await getFiches();
+    await getFiches(refreshParams);
     return { data: ficheId };
   }
 
   // Mise à jour fiche + lignes
-  async function updateFiche(id, { lignes = [], ...fiche }) {
+  async function updateFiche(id, { lignes = [], ...fiche }, { refreshParams = {} } = {}) {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
@@ -131,12 +131,12 @@ export function useFiches() {
       }
     }
     setLoading(false);
-    await getFiches();
+    await getFiches(refreshParams);
     return { data: id };
   }
 
   // Désactivation logique
-  async function deleteFiche(id) {
+  async function deleteFiche(id, options = {}) {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
@@ -151,11 +151,11 @@ export function useFiches() {
       throw deleteError;
     }
     setLoading(false);
-    await getFiches();
+    await getFiches(options);
     return { data: id };
   }
 
-  async function duplicateFiche(id) {
+  async function duplicateFiche(id, { refreshParams = {} } = {}) {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
@@ -198,7 +198,7 @@ export function useFiches() {
       }
     }
     setLoading(false);
-    await getFiches();
+    await getFiches(refreshParams);
     return { data: newId };
   }
 

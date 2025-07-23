@@ -10,12 +10,20 @@ import { Toaster } from "react-hot-toast";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import { motion as Motion } from "framer-motion";
+import { Navigate } from "react-router-dom";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 const PAGE_SIZE = 20;
 
 export default function Stock() {
   const { stocks, fetchStocks, fetchMouvements, mouvements } = useStock();
-  const { mama_id, loading: authLoading } = useAuth();
+  const {
+    mama_id,
+    loading: authLoading,
+    access_rights,
+    isSuperadmin,
+  } = useAuth();
+  const canEdit = isSuperadmin || access_rights?.mouvements?.peut_modifier;
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [selected, setSelected] = useState(null);
@@ -43,6 +51,12 @@ export default function Stock() {
     saveAs(new Blob([buf]), "stock.xlsx");
   };
 
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
+  if (!access_rights?.mouvements?.peut_voir) {
+    return <Navigate to="/unauthorized" replace />;
+  }
+  if (!mama_id) return null;
+
   return (
     <div className="p-6 container mx-auto">
       <Toaster position="top-right" />
@@ -54,10 +68,14 @@ export default function Stock() {
           className="input"
           placeholder="Recherche produit"
         />
-        <Button onClick={() => { setSelected(null); setShowForm(true); }}>
-          Mouvement stock
-        </Button>
-        <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
+        {canEdit && (
+          <Button onClick={() => { setSelected(null); setShowForm(true); }}>
+            Mouvement stock
+          </Button>
+        )}
+        {canEdit && (
+          <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
+        )}
       </div>
       <TableContainer className="mt-4">
         <Motion.table
@@ -72,7 +90,7 @@ export default function Stock() {
             <th className="px-4 py-2">Unité</th>
             <th className="px-4 py-2">PMP</th>
             <th className="px-4 py-2">Valorisation</th>
-            <th className="px-4 py-2">Actions</th>
+            {canEdit && <th className="px-4 py-2">Actions</th>}
           </tr>
         </thead>
         <tbody>
@@ -91,9 +109,20 @@ export default function Stock() {
               <td className="border px-4 py-2">{s.unite}</td>
               <td className="border px-4 py-2">{s.pmp?.toFixed(2)}</td>
               <td className="border px-4 py-2">{(s.pmp * s.stock_reel).toFixed(2)} €</td>
-              <td className="border px-4 py-2">
-                <Button size="sm" variant="outline" onClick={() => { setSelected(s); setShowForm(true); }}>Mouvement</Button>
-              </td>
+              {canEdit && (
+                <td className="border px-4 py-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setSelected(s);
+                      setShowForm(true);
+                    }}
+                  >
+                    Mouvement
+                  </Button>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
@@ -109,7 +138,7 @@ export default function Stock() {
           >{i + 1}</Button>
         )}
       </div>
-      {showForm && (
+      {canEdit && showForm && (
         <StockMouvementForm
           produit={selected}
           onClose={() => { setShowForm(false); setSelected(null); fetchStocks(); fetchMouvements(); }}

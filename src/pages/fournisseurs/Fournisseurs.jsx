@@ -6,8 +6,11 @@ import { useFournisseurStats } from "@/hooks/useFournisseurStats";
 import { useSupplierProducts } from "@/hooks/useSupplierProducts";
 import { useProducts } from "@/hooks/useProducts";
 import { useFournisseursInactifs } from "@/hooks/useFournisseursInactifs";
+import useAuth from "@/hooks/useAuth";
+import { Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { Dialog, DialogContent } from "@radix-ui/react-dialog";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -23,6 +26,8 @@ export default function Fournisseurs() {
   const { getProductsBySupplier, countProductsBySupplier } = useSupplierProducts();
   const { products } = useProducts();
   const { fournisseurs: inactiveByInvoices, fetchInactifs } = useFournisseursInactifs();
+  const { mama_id, loading: authLoading, access_rights, isSuperadmin } = useAuth();
+  const canEdit = isSuperadmin || access_rights?.fournisseurs?.peut_modifier;
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(null);
   const [showCreate, setShowCreate] = useState(false);
@@ -76,13 +81,15 @@ export default function Fournisseurs() {
 
   // Rafraîchissement selon la recherche ou filtre
   useEffect(() => {
-    getFournisseurs({
-      search,
-      actif: actifFilter === "all" ? null : actifFilter === "true",
-      page,
-      limit: PAGE_SIZE,
-    });
-  }, [search, actifFilter, page]);
+    if (!authLoading && mama_id) {
+      getFournisseurs({
+        search,
+        actif: actifFilter === "all" ? null : actifFilter === "true",
+        page,
+        limit: PAGE_SIZE,
+      });
+    }
+  }, [authLoading, mama_id, search, actifFilter, page]);
 
   // Recherche live
   const fournisseursFiltrés = listWithContact.filter(f =>
@@ -110,6 +117,11 @@ export default function Fournisseurs() {
     computeTop();
   }, [fournisseurs, products]);
 
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
+  if (!access_rights?.fournisseurs?.peut_voir) {
+    return <Navigate to="/unauthorized" replace />;
+  }
+
   return (
     <div className="max-w-7xl mx-auto p-8 text-shadow">
       <Toaster />
@@ -129,9 +141,17 @@ export default function Fournisseurs() {
           <option value="true">Actif</option>
           <option value="false">Inactif</option>
         </select>
-        <Button onClick={() => setShowCreate(true)}><PlusCircle className="mr-2" /> Ajouter fournisseur</Button>
-        <Button variant="outline" onClick={exportFournisseursToExcel}>Export Excel</Button>
-        <Button variant="outline" onClick={exportPDF}>Export PDF</Button>
+        {canEdit && (
+          <Button onClick={() => setShowCreate(true)}>
+            <PlusCircle className="mr-2" /> Ajouter fournisseur
+          </Button>
+        )}
+        {canEdit && (
+          <Button variant="outline" onClick={exportFournisseursToExcel}>Export Excel</Button>
+        )}
+        {canEdit && (
+          <Button variant="outline" onClick={exportPDF}>Export PDF</Button>
+        )}
       </div>
       {inactifs.length > 0 && (
         <div className="mb-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded px-2 py-1">
@@ -199,23 +219,38 @@ export default function Fournisseurs() {
                   <td>{f.contact?.nom}</td>
                   <td>{f.contact?.email}</td>
                   <td>{productCounts[f.id] ?? 0}</td>
-                  <td>
+                  <td className="flex gap-2 justify-center">
+                    {canEdit && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setEditRow(f)}
+                      >
+                        Modifier
+                      </Button>
+                    )}
                     <Button size="sm" variant="outline" onClick={() => setSelected(f.id)}>
                       Voir détails
                     </Button>
-                  </td>
-                  <td>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={async () => {
-                        if (!window.confirm('Désactiver ce fournisseur ?')) return;
-                        await disableFournisseur(f.id);
-                        getFournisseurs({ search });
-                      }}
-                    >
-                      Supprimer
-                    </Button>
+                    {canEdit && (
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={async () => {
+                          if (!window.confirm('Désactiver ce fournisseur ?')) return;
+                          await disableFournisseur(f.id, {
+                            refreshParams: {
+                              search,
+                              actif: actifFilter === "all" ? null : actifFilter === "true",
+                              page,
+                              limit: PAGE_SIZE,
+                            },
+                          });
+                        }}
+                      >
+                        Supprimer
+                      </Button>
+                    )}
                   </td>
                 </tr>
               ))
@@ -237,34 +272,55 @@ export default function Fournisseurs() {
       </TableContainer>
 
       {/* Modal création/édition */}
-      <Dialog open={showCreate || !!editRow} onOpenChange={v => { if (!v) { setShowCreate(false); setEditRow(null); } }}>
-        <DialogContent className="bg-glass backdrop-blur-lg rounded-2xl shadow-xl max-w-lg w-full p-8">
-          <FournisseurForm
-            fournisseur={editRow}
-            saving={saving}
-            onCancel={() => { setShowCreate(false); setEditRow(null); }}
-            onSubmit={async (data) => {
-              if (saving) return;
-              setSaving(true);
-              try {
-                if (editRow) {
-                  await updateFournisseur(editRow.id, data);
-                  toast.success("Fournisseur modifié !");
-                } else {
-                  await createFournisseur(data);
-                  toast.success("Fournisseur ajouté !");
+      {canEdit && (
+        <Dialog open={showCreate || !!editRow} onOpenChange={v => { if (!v) { setShowCreate(false); setEditRow(null); } }}>
+          <DialogContent className="bg-glass backdrop-blur-lg rounded-2xl shadow-xl max-w-lg w-full p-8">
+            <FournisseurForm
+              fournisseur={editRow}
+              saving={saving}
+              onCancel={() => { setShowCreate(false); setEditRow(null); }}
+              onSubmit={async (data) => {
+                if (saving) return;
+                setSaving(true);
+                try {
+                  if (editRow) {
+                    await updateFournisseur(editRow.id, data, {
+                      refreshParams: {
+                        search,
+                        actif: actifFilter === "all" ? null : actifFilter === "true",
+                        page,
+                        limit: PAGE_SIZE,
+                      },
+                    });
+                    toast.success("Fournisseur modifié !");
+                  } else {
+                    await createFournisseur(data, {
+                      refreshParams: {
+                        search,
+                        actif: actifFilter === "all" ? null : actifFilter === "true",
+                        page,
+                        limit: PAGE_SIZE,
+                      },
+                    });
+                    toast.success("Fournisseur ajouté !");
+                  }
+                  setShowCreate(false);
+                  setEditRow(null);
+                  getFournisseurs({
+                    search,
+                    actif: actifFilter === "all" ? null : actifFilter === "true",
+                    page,
+                    limit: PAGE_SIZE,
+                  });
+                } catch (err) {
+                  toast.error(err?.message || "Erreur enregistrement");
                 }
-                setShowCreate(false);
-                setEditRow(null);
-                getFournisseurs({ search });
-              } catch (err) {
-                toast.error(err?.message || "Erreur enregistrement");
-              }
-              setSaving(false);
-            }}
-          />
-        </DialogContent>
-      </Dialog>
+                setSaving(false);
+              }}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Modal détail */}
       <Dialog open={!!selected} onOpenChange={v => !v && setSelected(null)}>

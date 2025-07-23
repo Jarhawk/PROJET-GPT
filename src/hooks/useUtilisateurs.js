@@ -37,7 +37,7 @@ export function useUtilisateurs() {
   }
 
   // 2. Ajouter un utilisateur (invitation)
-  async function addUser(user) {
+  async function addUser(user, { refresh = true, params = {} } = {}) {
     const targetMama = isSuperadmin ? user.mama_id : mama_id;
     if (!targetMama) return { error: "Aucun mama_id" };
     setLoading(true);
@@ -47,11 +47,11 @@ export function useUtilisateurs() {
       .insert([{ ...user, mama_id: targetMama }]);
     if (error) setError(error);
     setLoading(false);
-    await fetchUsers();
+    if (refresh) await fetchUsers(params);
   }
 
   // 3. Modifier un utilisateur (rôle, droits, etc.)
-  async function updateUser(id, updateFields) {
+  async function updateUser(id, updateFields, { refresh = true, params = {} } = {}) {
     if (!mama_id && !isSuperadmin) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
@@ -63,11 +63,11 @@ export function useUtilisateurs() {
     const { error } = await query;
     if (error) setError(error);
     setLoading(false);
-    await fetchUsers();
+    if (refresh) await fetchUsers(params);
   }
 
   // 4. Activer/désactiver un utilisateur
-  async function toggleUserActive(id, actif) {
+  async function toggleUserActive(id, actif, { refresh = true, params = {} } = {}) {
     if (!mama_id && !isSuperadmin) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
@@ -79,11 +79,11 @@ export function useUtilisateurs() {
     const { error } = await query;
     if (error) setError(error);
     setLoading(false);
-    await fetchUsers();
+    if (refresh) await fetchUsers(params);
   }
 
   // 5. Supprimer un utilisateur (optionnel)
-  async function deleteUser(id) {
+  async function deleteUser(id, { refresh = true, params = {} } = {}) {
     if (!mama_id && !isSuperadmin) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
@@ -95,7 +95,7 @@ export function useUtilisateurs() {
     const { error } = await query;
     if (error) setError(error);
     setLoading(false);
-    await fetchUsers();
+    if (refresh) await fetchUsers(params);
   }
 
   // 6. Export Excel

@@ -10,7 +10,8 @@ export default function UtilisateurRow({
   onToggleActive,
   onDelete,
 }) {
-  const { isAdmin, mama_id } = useAuth();
+  const { isSuperadmin, access_rights, mama_id } = useAuth();
+  const canEdit = isSuperadmin || access_rights?.utilisateurs?.peut_modifier;
   const [showHistory, setShowHistory] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -53,7 +54,7 @@ export default function UtilisateurRow({
         </td>
         <td>{utilisateur.mama_id}</td>
         <td>
-          {isAdmin && utilisateur.mama_id === mama_id && (
+          {canEdit && (isSuperadmin || utilisateur.mama_id === mama_id) && (
             <>
               <button className="btn btn-sm mr-2" onClick={() => onEdit(utilisateur)}>Éditer</button>
               <button

@@ -80,7 +80,7 @@ export function useProducts() {
     return data || [];
   }, [mama_id]);
 
-  async function addProduct(product, { refresh = true } = {}) {
+  async function addProduct(product, { refresh = true, params = {} } = {}) {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
@@ -96,10 +96,10 @@ export function useProducts() {
       setError(error);
       toast.error(error.message);
     }
-    if (refresh) await fetchProducts();
+    if (refresh) await fetchProducts(params);
   }
 
-  async function updateProduct(id, updateFields, { refresh = true } = {}) {
+  async function updateProduct(id, updateFields, { refresh = true, params = {} } = {}) {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
@@ -118,10 +118,10 @@ export function useProducts() {
       setError(error);
       toast.error(error.message);
     }
-    if (refresh) await fetchProducts();
+    if (refresh) await fetchProducts(params);
   }
 
-  async function duplicateProduct(id, { refresh = true } = {}) {
+  async function duplicateProduct(id, { refresh = true, params = {} } = {}) {
     const orig = products.find(p => p.id === id);
     if (!orig) return;
     const {
@@ -156,10 +156,10 @@ export function useProducts() {
       setError(error);
       toast.error(error.message);
     }
-    if (refresh) await fetchProducts();
+    if (refresh) await fetchProducts(params);
   }
 
-  async function toggleProductActive(id, actif, { refresh = true } = {}) {
+  async function toggleProductActive(id, actif, { refresh = true, params = {} } = {}) {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
@@ -173,10 +173,10 @@ export function useProducts() {
       setError(error);
       toast.error(error.message);
     }
-    if (refresh) await fetchProducts();
+    if (refresh) await fetchProducts(params);
   }
 
-  async function deleteProduct(id, { refresh = true } = {}) {
+  async function deleteProduct(id, { refresh = true, params = {} } = {}) {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
@@ -190,7 +190,7 @@ export function useProducts() {
       setError(error);
       toast.error(error.message);
     }
-    if (refresh) await fetchProducts();
+    if (refresh) await fetchProducts(params);
   }
 
   async function fetchProductPrices(productId) {

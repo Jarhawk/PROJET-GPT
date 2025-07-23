@@ -9,6 +9,7 @@ import UtilisateurDetail from "@/components/utilisateurs/UtilisateurDetail";
 import UtilisateurRow from "@/components/parametrage/UtilisateurRow";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
+import { Navigate } from "react-router-dom";
 import { Toaster, toast } from "react-hot-toast";
 import { motion as Motion } from "framer-motion";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
@@ -24,7 +25,13 @@ export default function Utilisateurs() {
     exportUsersToExcel,
     exportUsersToCSV,
   } = useUtilisateurs();
-  const { mama_id, loading: authLoading } = useAuth();
+  const {
+    mama_id,
+    loading: authLoading,
+    access_rights,
+    isSuperadmin,
+  } = useAuth();
+  const canEdit = isSuperadmin || access_rights?.utilisateurs?.peut_modifier;
   const { roles, fetchRoles } = useRoles();
   const { mamas, fetchMamas } = useMamas();
   const [search, setSearch] = useState("");
@@ -36,13 +43,21 @@ export default function Utilisateurs() {
   const [selected, setSelected] = useState(null);
   const [showDetail, setShowDetail] = useState(false);
 
+  const getParams = () => ({
+    search,
+    actif: actifFilter === "all" ? null : actifFilter === "true",
+  });
+
   useEffect(() => {
-    if (!authLoading && mama_id) fetchUsers();
+    if (!authLoading && mama_id) fetchUsers(getParams());
     fetchRoles();
     fetchMamas();
-  }, [authLoading, mama_id, fetchUsers, fetchRoles, fetchMamas]);
+  }, [authLoading, mama_id, fetchUsers, fetchRoles, fetchMamas, search, actifFilter]);
 
   if (authLoading) return <LoadingSpinner message="Chargement..." />;
+  if (!access_rights?.utilisateurs?.peut_voir) {
+    return <Navigate to="/unauthorized" replace />;
+  }
   if (!mama_id) return null;
 
   const mapped = users.map(u => ({
@@ -65,15 +80,15 @@ export default function Utilisateurs() {
 
 
   const handleToggleActive = async (u) => {
-    await toggleUserActive(u.id, !u.actif);
-    await fetchUsers();
+    await toggleUserActive(u.id, !u.actif, { params: getParams() });
+    await fetchUsers(getParams());
     toast.success(u.actif ? "Utilisateur désactivé" : "Utilisateur réactivé");
   };
 
   const handleDelete = async (u) => {
     if (window.confirm(`Supprimer l'utilisateur ${u.nom} ?`)) {
-      await deleteUser(u.id);
-      await fetchUsers();
+      await deleteUser(u.id, { params: getParams() });
+      await fetchUsers(getParams());
       toast.success("Utilisateur supprimé.");
     }
   };
@@ -100,16 +115,22 @@ export default function Utilisateurs() {
             <option key={r.nom} value={r.nom}>{r.nom}</option>
           ))}
         </select>
-        <Button onClick={() => { setSelected(null); setShowForm(true); }}>
-          Ajouter un utilisateur
-        </Button>
+        {canEdit && (
+          <Button onClick={() => { setSelected(null); setShowForm(true); }}>
+            Ajouter un utilisateur
+          </Button>
+        )}
         <select className="input" value={sortBy} onChange={e => setSortBy(e.target.value)}>
           <option value="nom">Tri nom</option>
           <option value="mama">Tri Mama</option>
           <option value="role">Tri rôle</option>
         </select>
-        <Button variant="outline" onClick={() => exportUsersToExcel(filtres)}>Export Excel</Button>
-        <Button variant="outline" onClick={() => exportUsersToCSV(filtres)}>Export CSV</Button>
+        {canEdit && (
+          <Button variant="outline" onClick={() => exportUsersToExcel(filtres)}>Export Excel</Button>
+        )}
+        {canEdit && (
+          <Button variant="outline" onClick={() => exportUsersToCSV(filtres)}>Export CSV</Button>
+        )}
       </div>
       <TableContainer className="mb-4">
         <Motion.table
@@ -149,10 +170,10 @@ export default function Utilisateurs() {
           >{i + 1}</Button>
         ))}
       </div>
-      {showForm && (
+      {canEdit && showForm && (
         <UtilisateurForm
           utilisateur={selected}
-          onClose={() => { setShowForm(false); setSelected(null); fetchUsers(); }}
+          onClose={() => { setShowForm(false); setSelected(null); fetchUsers(getParams()); }}
         />
       )}
       {showDetail && selected && (

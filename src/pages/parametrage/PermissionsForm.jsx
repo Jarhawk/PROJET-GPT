@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import toast, { Toaster } from "react-hot-toast";
 import useAuth from "@/hooks/useAuth";
 import { MODULES as MODULE_LIST } from "@/config/modules";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 const MODULES = MODULE_LIST.map(m => ({ nom: m.label, cle: m.key }));
 
@@ -16,13 +17,15 @@ const DROITS = [
 ];
 
 export default function PermissionsForm({ role, onClose, onSaved }) {
-  const { mama_id, role: myRole } = useAuth();
+  const { mama_id, role: myRole, loading: authLoading } = useAuth();
   const [permissions, setPermissions] = useState([]);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     fetchPermissions();
   }, [role]);
+
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
 
   const fetchPermissions = async () => {
     try {

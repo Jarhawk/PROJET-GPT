@@ -3,16 +3,19 @@ import { useEffect } from "react";
 import { useUtilisateurs } from "@/hooks/useUtilisateurs";
 import useAuth from "@/hooks/useAuth";
 import { MODULES } from "@/config/modules";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { toast, Toaster } from "react-hot-toast";
 import TableContainer from "@/components/ui/TableContainer";
 
 export default function AccessRights() {
   const { users, fetchUsers, updateUser } = useUtilisateurs();
-  const { mama_id } = useAuth();
+  const { mama_id, loading: authLoading } = useAuth();
 
   useEffect(() => {
     if (mama_id) fetchUsers();
   }, [mama_id, fetchUsers]);
+
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
 
   const toggle = async (user, moduleKey, field) => {
     const current = user.access_rights && typeof user.access_rights === 'object'

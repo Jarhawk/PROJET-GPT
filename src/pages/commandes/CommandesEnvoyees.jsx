@@ -9,14 +9,14 @@ import GlassCard from "@/components/ui/GlassCard";
 import TableContainer from "@/components/ui/TableContainer";
 
 export default function CommandesEnvoyees() {
-  const { mama_id } = useAuth();
+  const { mama_id, loading: authLoading } = useAuth();
   const { envoyerCommande } = useFournisseurAPI();
   const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [pageLoading, setPageLoading] = useState(true);
 
   useEffect(() => {
     if (!mama_id) return;
-    setLoading(true);
+    setPageLoading(true);
     supabase
       .from("commandes")
       .select("*, fournisseur:fournisseurs(nom)")
@@ -24,7 +24,7 @@ export default function CommandesEnvoyees() {
       .order("created_at", { ascending: false })
       .then(({ data }) => {
         setItems(data || []);
-        setLoading(false);
+        setPageLoading(false);
       });
   }, [mama_id]);
 
@@ -32,7 +32,7 @@ export default function CommandesEnvoyees() {
     await envoyerCommande(id);
   };
 
-  if (loading) return <LoadingSpinner message="Chargement..." />;
+  if (authLoading || pageLoading) return <LoadingSpinner message="Chargement..." />;
 
   return (
     <div className="p-6">

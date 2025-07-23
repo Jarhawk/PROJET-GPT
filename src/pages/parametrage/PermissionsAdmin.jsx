@@ -15,7 +15,7 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import TableContainer from "@/components/ui/TableContainer";
 
 export default function PermissionsAdmin() {
-  const { role } = useAuth();
+  const { role, loading: authLoading } = useAuth();
   const [roles, setRoles] = useState([]);
   const [mamas, setMamas] = useState([]);
   const [editRole, setEditRole] = useState(null);
@@ -46,6 +46,8 @@ export default function PermissionsAdmin() {
   useEffect(() => {
     if (role === "superadmin") fetchRoles();
   }, [filterMama]);
+
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
 
   const handlePermissionsSaved = () => {
     toast.success("Permissions mises à jour !");

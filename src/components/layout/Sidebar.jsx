@@ -31,11 +31,11 @@ export default function Sidebar() {
           </details>
         )}
 
-        {(has("fiches") || has("menus")) && (
-          <details open={pathname.startsWith("/fiches") || pathname.startsWith("/menus")}> 
+        {(has("fiches_techniques") || has("menus")) && (
+          <details open={pathname.startsWith("/fiches") || pathname.startsWith("/menus")}>
             <summary className="cursor-pointer">Cuisine</summary>
             <div className="ml-4 flex flex-col gap-1 mt-1">
-              {has("fiches") && <Link to="/fiches">Fiches</Link>}
+              {has("fiches_techniques") && <Link to="/fiches">Fiches</Link>}
               {has("menus") && <Link to="/menus">Menus</Link>}
             </div>
           </details>

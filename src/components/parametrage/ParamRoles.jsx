@@ -4,11 +4,12 @@ import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
 import { useState, useEffect } from "react";
 import useAuth from "@/hooks/useAuth";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { Toaster, toast } from "react-hot-toast";
 
 export default function ParamRoles() {
   const { roles, fetchRoles, addRole, editRole, deleteRole } = useRoles();
-  const { mama_id, role } = useAuth();
+  const { mama_id, role, loading: authLoading } = useAuth();
   const [form, setForm] = useState({ nom: "", id: null });
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -16,6 +17,8 @@ export default function ParamRoles() {
   useEffect(() => {
     if (mama_id || role === "superadmin") fetchRoles();
   }, [mama_id, role]);
+
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
 
   const handleEdit = r => { setForm(r); setEditMode(true); };
   const handleDelete = async id => {

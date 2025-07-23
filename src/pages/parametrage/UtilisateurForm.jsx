@@ -4,6 +4,7 @@ import { useUtilisateurs } from "@/hooks/useUtilisateurs";
 import { useRoles } from "@/hooks/useRoles";
 import { useMamas } from "@/hooks/useMamas";
 import useAuth from "@/hooks/useAuth";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -15,7 +16,7 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
   const { addUser, updateUser } = useUtilisateurs();
   const { roles, fetchRoles } = useRoles();
   const { mamas, fetchMamas } = useMamas();
-  const { mama_id: myMama, role: myRole } = useAuth();
+  const { mama_id: myMama, role: myRole, loading: authLoading } = useAuth();
   const [nom, setNom] = useState(utilisateur?.nom || "");
   const [roleId, setRoleId] = useState(utilisateur?.role_id || "");
   const [mama, setMama] = useState(utilisateur?.mama_id || myMama);
@@ -26,6 +27,8 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
     fetchRoles();
     fetchMamas();
   }, [fetchRoles, fetchMamas]);
+
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
 
   const handleSubmit = async (e) => {
     e.preventDefault();

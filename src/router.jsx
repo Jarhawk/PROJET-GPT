@@ -254,11 +254,11 @@ export default function Router() {
           />
           <Route
             path="/fiches"
-            element={<ProtectedRoute accessKey="fiches"><Fiches /></ProtectedRoute>}
+            element={<ProtectedRoute accessKey="fiches_techniques"><Fiches /></ProtectedRoute>}
           />
           <Route
             path="/fiches/:id"
-            element={<ProtectedRoute accessKey="fiches"><FicheDetail /></ProtectedRoute>}
+            element={<ProtectedRoute accessKey="fiches_techniques"><FicheDetail /></ProtectedRoute>}
           />
           <Route
             path="/menus"
@@ -475,7 +475,7 @@ export default function Router() {
           />
           <Route
             path="/supervision/comparateur"
-            element={<ProtectedRoute accessKey="fiches"><ComparateurFiches /></ProtectedRoute>}
+            element={<ProtectedRoute accessKey="fiches_techniques"><ComparateurFiches /></ProtectedRoute>}
           />
           <Route
             path="/debug/auth"

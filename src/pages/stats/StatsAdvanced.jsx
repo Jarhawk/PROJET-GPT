@@ -28,7 +28,7 @@ export default function StatsAdvanced() {
     XLSX.writeFile(wb, 'advanced_stats.xlsx');
   };
 
-  if (loading) return <LoadingSpinner message="Chargement..." />;
+  if (authLoading || loading) return <LoadingSpinner message="Chargement..." />;
   if (error) return <div className="p-8 text-red-600">{error}</div>;
 
   return (

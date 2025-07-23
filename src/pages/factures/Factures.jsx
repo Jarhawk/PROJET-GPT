@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useFactures } from "@/hooks/useFactures";
 import { useSuppliers } from "@/hooks/useSuppliers";
 import useAuth from "@/hooks/useAuth";
@@ -14,6 +14,7 @@ import { Toaster, toast } from "react-hot-toast";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import { motion as Motion } from "framer-motion";
+import FactureRow from "@/components/factures/FactureRow.jsx";
 
 const STATUTS = {
   brouillon: "badge",
@@ -28,7 +29,7 @@ const STATUTS = {
 export default function Factures() {
   const { factures, total, getFactures, deleteFacture, toggleFactureActive } = useFactures();
   const { suppliers } = useSuppliers();
-  const { mama_id, loading: authLoading } = useAuth();
+  const { mama_id, loading: authLoading, hasAccess } = useAuth();
   const { results: factureOptions, searchFactures } = useFacturesAutocomplete();
   const [showForm, setShowForm] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
@@ -41,11 +42,9 @@ export default function Factures() {
   const [page, setPage] = useState(1);
   const pageSize = 10;
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => { searchFactures(search); }, [search, searchFactures]);
-
-  useEffect(() => {
-    if (mama_id) getFactures({
+  const refreshList = useCallback(() => {
+    if (!mama_id) return;
+    getFactures({
       search,
       fournisseur: supplierFilter,
       statut: statutFilter,
@@ -54,7 +53,14 @@ export default function Factures() {
       page,
       pageSize,
     });
-  }, [mama_id, search, statutFilter, supplierFilter, monthFilter, actifFilter, page]);
+  }, [mama_id, getFactures, search, supplierFilter, statutFilter, monthFilter, actifFilter, page]);
+  const canEdit = hasAccess("factures", "peut_modifier");
+
+  useEffect(() => { searchFactures(search); }, [search, searchFactures]);
+
+  useEffect(() => {
+    refreshList();
+  }, [refreshList]);
 
   // Export Excel/XLSX
   const exportExcel = () => {
@@ -76,15 +82,7 @@ export default function Factures() {
     if (window.confirm(`Archiver la facture n°${facture.id} ?`)) {
       setLoading(true);
       await deleteFacture(facture.id);
-      await getFactures({
-        search,
-        fournisseur: supplierFilter,
-        statut: statutFilter,
-        mois: monthFilter,
-        actif: actifFilter === "all" ? null : actifFilter === "true",
-        page,
-        pageSize,
-      });
+      await refreshList();
       setLoading(false);
       toast.success("Facture archivée.");
     }
@@ -111,11 +109,25 @@ export default function Factures() {
             </option>
           ))}
         </datalist>
-        <select className="input" value={supplierFilter} onChange={e => setSupplierFilter(e.target.value)}>
+        <select
+          className="input"
+          value={supplierFilter}
+          onChange={(e) => {
+            setSupplierFilter(e.target.value);
+            setPage(1);
+          }}
+        >
           <option value="">Tous fournisseurs</option>
           {suppliers.map(s => <option key={s.id} value={s.id}>{s.nom}</option>)}
         </select>
-        <select className="input" value={statutFilter} onChange={e => setStatutFilter(e.target.value)}>
+        <select
+          className="input"
+          value={statutFilter}
+          onChange={(e) => {
+            setStatutFilter(e.target.value);
+            setPage(1);
+          }}
+        >
           <option value="">Tous statuts</option>
           {Object.keys(STATUTS).map(s => (
             <option key={s} value={s}>{s}</option>
@@ -130,15 +142,25 @@ export default function Factures() {
         <select
           className="input"
           value={actifFilter}
-          onChange={e => setActifFilter(e.target.value)}
+          onChange={(e) => {
+            setActifFilter(e.target.value);
+            setPage(1);
+          }}
         >
           <option value="true">Actives</option>
           <option value="false">Inactives</option>
           <option value="all">Toutes</option>
         </select>
-        <Button onClick={() => { setSelected(null); setShowForm(true); }}>
-          Ajouter une facture
-        </Button>
+        {canEdit && (
+          <Button
+            onClick={() => {
+              setSelected(null);
+              setShowForm(true);
+            }}
+          >
+            Ajouter une facture
+          </Button>
+        )}
         <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
       </GlassCard>
       <TableContainer className="mb-4">
@@ -160,62 +182,24 @@ export default function Factures() {
         </thead>
         <tbody>
           {facturesFiltres.map((facture) => (
-            <tr key={facture.id}>
-              <td className="border px-4 py-2">{facture.numero || facture.id}</td>
-              <td className="border px-4 py-2">{facture.date_facture}</td>
-              <td className="border px-4 py-2">{facture.fournisseur?.nom}</td>
-              <td className="border px-4 py-2">{facture.total_ttc?.toFixed(2)} €</td>
-              <td className="border px-4 py-2">
-                <span className={STATUTS[facture.statut] || "badge"}>{facture.statut}</span>
-              </td>
-              <td className="border px-4 py-2">{facture.actif ? "✅" : "❌"}</td>
-              <td className="border px-4 py-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="mr-2"
-                  onClick={() => { setSelected(facture); setShowForm(true); }}
-                >
-                  Modifier
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="mr-2"
-                  onClick={() => { setSelected(facture); setShowDetail(true); }}
-                >
-                  Détail
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="mr-2"
-                  onClick={async () => {
-                    await toggleFactureActive(facture.id, !facture.actif);
-                    await getFactures({
-                      search,
-                      fournisseur: supplierFilter,
-                      statut: statutFilter,
-                      mois: monthFilter,
-                      actif: actifFilter === "all" ? null : actifFilter === "true",
-                      page,
-                      pageSize,
-                    });
-                  }}
-                >
-                  {facture.actif ? "Désactiver" : "Réactiver"}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="mr-2"
-                  onClick={() => handleDelete(facture)}
-                  disabled={loading}
-                >
-                  Archiver
-                </Button>
-              </td>
-            </tr>
+            <FactureRow
+              key={facture.id}
+              facture={facture}
+              canEdit={canEdit}
+              onEdit={(f) => {
+                setSelected(f);
+                setShowForm(true);
+              }}
+              onDetail={(f) => {
+                setSelected(f);
+                setShowDetail(true);
+              }}
+              onToggleActive={async (id, actif) => {
+                await toggleFactureActive(id, actif);
+                refreshList();
+              }}
+              onArchive={handleDelete}
+            />
           ))}
         </tbody>
         </Motion.table>
@@ -245,15 +229,7 @@ export default function Factures() {
           onClose={() => {
             setShowForm(false);
             setSelected(null);
-            getFactures({
-              search,
-              fournisseur: supplierFilter,
-              statut: statutFilter,
-              mois: monthFilter,
-              actif: actifFilter === "all" ? null : actifFilter === "true",
-              page,
-              pageSize,
-            });
+            refreshList();
           }}
         />
       )}

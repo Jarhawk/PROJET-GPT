@@ -9,10 +9,9 @@ import {
 } from "@/lib/access";
 import toast from "react-hot-toast";
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const AuthContext = createContext(null);
+export const AuthContext = createContext(null); // eslint-disable-line react-refresh/only-export-components
 
-export function useAuth() {
+export function useAuth() { // eslint-disable-line react-refresh/only-export-components
   return useContext(AuthContext);
 }
 

@@ -6,22 +6,27 @@ import useAuth from "@/hooks/useAuth";
 export function usePromotions() {
   const { mama_id } = useAuth();
   const [promotions, setPromotions] = useState([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  async function fetchPromotions({ search = "", actif = null } = {}) {
+  async function fetchPromotions({ search = "", actif = null, page = 1, limit = 20 } = {}) {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
     let query = supabase
       .from("promotions")
-      .select("*")
+      .select("*", { count: "exact" })
       .eq("mama_id", mama_id)
       .order("date_debut", { ascending: false });
+    if (typeof query.range === "function") {
+      query = query.range((page - 1) * limit, page * limit - 1);
+    }
     if (search) query = query.ilike("nom", `%${search}%`);
     if (typeof actif === "boolean") query = query.eq("actif", actif);
-    const { data, error } = await query;
+    const { data, error, count } = await query;
     setPromotions(Array.isArray(data) ? data : []);
+    setTotal(count || 0);
     setLoading(false);
     if (error) setError(error.message || error);
     return data || [];
@@ -69,6 +74,7 @@ export function usePromotions() {
 
   return {
     promotions,
+    total,
     loading,
     error,
     fetchPromotions,

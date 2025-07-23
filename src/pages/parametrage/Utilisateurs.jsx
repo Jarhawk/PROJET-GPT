@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useUtilisateurs } from "@/hooks/useUtilisateurs";
 import useAuth from "@/hooks/useAuth";
 import { useRoles } from "@/hooks/useRoles";
@@ -24,7 +24,7 @@ export default function Utilisateurs() {
     exportUsersToExcel,
     exportUsersToCSV,
   } = useUtilisateurs();
-  const { mama_id, loading: authLoading } = useAuth();
+  const { mama_id, loading: authLoading, hasAccess } = useAuth();
   const { roles, fetchRoles } = useRoles();
   const { mamas, fetchMamas } = useMamas();
   const [search, setSearch] = useState("");
@@ -35,12 +35,22 @@ export default function Utilisateurs() {
   const [showForm, setShowForm] = useState(false);
   const [selected, setSelected] = useState(null);
   const [showDetail, setShowDetail] = useState(false);
+  const canEdit = hasAccess("utilisateurs", "peut_modifier");
+
+  const refreshList = useCallback(() => {
+    fetchUsers({
+      search,
+      actif: actifFilter === "all" ? null : actifFilter === "true",
+    });
+  }, [fetchUsers, search, actifFilter]);
 
   useEffect(() => {
-    if (!authLoading && mama_id) fetchUsers();
-    fetchRoles();
-    fetchMamas();
-  }, [authLoading, mama_id, fetchUsers, fetchRoles, fetchMamas]);
+    if (!authLoading && mama_id) {
+      refreshList();
+      fetchRoles();
+      fetchMamas();
+    }
+  }, [authLoading, mama_id, refreshList, fetchRoles, fetchMamas]);
 
   if (authLoading) return <LoadingSpinner message="Chargement..." />;
   if (!mama_id) return null;
@@ -66,14 +76,14 @@ export default function Utilisateurs() {
 
   const handleToggleActive = async (u) => {
     await toggleUserActive(u.id, !u.actif);
-    await fetchUsers();
+    await refreshList();
     toast.success(u.actif ? "Utilisateur désactivé" : "Utilisateur réactivé");
   };
 
   const handleDelete = async (u) => {
     if (window.confirm(`Supprimer l'utilisateur ${u.nom} ?`)) {
       await deleteUser(u.id);
-      await fetchUsers();
+      await refreshList();
       toast.success("Utilisateur supprimé.");
     }
   };
@@ -85,25 +95,56 @@ export default function Utilisateurs() {
         <input
           type="search"
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={e => {
+            setPage(1);
+            setSearch(e.target.value);
+          }}
           className="input"
           placeholder="Recherche nom"
         />
-        <select className="input" value={actifFilter} onChange={e => setActifFilter(e.target.value)}>
+        <select
+          className="input"
+          value={actifFilter}
+          onChange={e => {
+            setPage(1);
+            setActifFilter(e.target.value);
+          }}
+        >
           <option value="all">Tous</option>
           <option value="true">Actif</option>
           <option value="false">Inactif</option>
         </select>
-        <select className="input" value={roleFilter} onChange={e => setRoleFilter(e.target.value)}>
+        <select
+          className="input"
+          value={roleFilter}
+          onChange={e => {
+            setPage(1);
+            setRoleFilter(e.target.value);
+          }}
+        >
           <option value="all">Tous rôles</option>
           {roles.map(r => (
             <option key={r.nom} value={r.nom}>{r.nom}</option>
           ))}
         </select>
-        <Button onClick={() => { setSelected(null); setShowForm(true); }}>
-          Ajouter un utilisateur
-        </Button>
-        <select className="input" value={sortBy} onChange={e => setSortBy(e.target.value)}>
+        {canEdit && (
+          <Button
+            onClick={() => {
+              setSelected(null);
+              setShowForm(true);
+            }}
+          >
+            Ajouter un utilisateur
+          </Button>
+        )}
+        <select
+          className="input"
+          value={sortBy}
+          onChange={e => {
+            setPage(1);
+            setSortBy(e.target.value);
+          }}
+        >
           <option value="nom">Tri nom</option>
           <option value="mama">Tri Mama</option>
           <option value="role">Tri rôle</option>
@@ -127,11 +168,15 @@ export default function Utilisateurs() {
           </tr>
         </thead>
         <tbody>
-          {paged.map(u => (
+          {paged.map((u) => (
             <UtilisateurRow
               key={u.id}
               utilisateur={u}
-              onEdit={(user) => { setSelected(user); setShowForm(true); }}
+              canEdit={canEdit}
+              onEdit={(user) => {
+                setSelected(user);
+                setShowForm(true);
+              }}
               onToggleActive={() => handleToggleActive(u)}
               onDelete={() => handleDelete(u)}
             />
@@ -152,7 +197,11 @@ export default function Utilisateurs() {
       {showForm && (
         <UtilisateurForm
           utilisateur={selected}
-          onClose={() => { setShowForm(false); setSelected(null); fetchUsers(); }}
+          onClose={() => {
+            setShowForm(false);
+            setSelected(null);
+            refreshList();
+          }}
         />
       )}
       {showDetail && selected && (

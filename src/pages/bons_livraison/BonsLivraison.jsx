@@ -8,10 +8,14 @@ import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
 import GlassCard from "@/components/ui/GlassCard";
 import { Toaster } from "react-hot-toast";
+import BonLivraisonRow from "@/components/bons_livraison/BonLivraisonRow";
+import useAuth from "@/hooks/useAuth";
 
 export default function BonsLivraison() {
   const { bons, total, getBonsLivraison, toggleBonActif } = useBonsLivraison();
   const { fournisseurs, getFournisseurs } = useFournisseurs();
+  const { hasAccess } = useAuth();
+  const canEdit = hasAccess("bons_livraison", "peut_modifier");
   const [showForm, setShowForm] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected] = useState(null);
@@ -23,7 +27,7 @@ export default function BonsLivraison() {
 
   useEffect(() => { getFournisseurs(); }, [getFournisseurs]);
 
-  useEffect(() => {
+  const refreshList = useCallback(() => {
     const debut = monthFilter ? `${monthFilter}-01` : "";
     const fin = monthFilter ? `${monthFilter}-31` : "";
     getBonsLivraison({
@@ -34,7 +38,11 @@ export default function BonsLivraison() {
       page,
       pageSize: PAGE_SIZE,
     });
-  }, [fournisseurFilter, monthFilter, actifFilter, page]);
+  }, [getBonsLivraison, fournisseurFilter, monthFilter, actifFilter, page]);
+
+  useEffect(() => {
+    refreshList();
+  }, [refreshList]);
 
   const rows = bons.map(b => ({
     ...b,
@@ -56,7 +64,11 @@ export default function BonsLivraison() {
           <option value="false">Inactifs</option>
           <option value="all">Tous</option>
         </select>
-        <Button onClick={() => { setSelected(null); setShowForm(true); }}>Créer BL</Button>
+        {canEdit && (
+          <Button onClick={() => { setSelected(null); setShowForm(true); }}>
+            Créer BL
+          </Button>
+        )}
       </GlassCard>
       <TableContainer>
         <table className="min-w-full text-sm text-white">
@@ -72,20 +84,24 @@ export default function BonsLivraison() {
             </tr>
           </thead>
           <tbody>
-            {rows.map(bl => (
-              <tr key={bl.id}>
-                <td className="border px-2 py-1">{bl.numero_bl}</td>
-                <td className="border px-2 py-1">{bl.fournisseur?.nom}</td>
-                <td className="border px-2 py-1">{bl.date_reception}</td>
-                <td className="border px-2 py-1 text-right">{bl.lignes_count}</td>
-                <td className="border px-2 py-1 text-right">{bl.montant.toFixed(2)} €</td>
-                <td className="border px-2 py-1">{bl.actif ? "✅" : "❌"}</td>
-                <td className="border px-2 py-1 space-x-1">
-                  <Button size="sm" variant="outline" onClick={() => { setSelected(bl); setShowForm(true); }}>Éditer</Button>
-                  <Button size="sm" variant="outline" onClick={() => { setSelected(bl); setShowDetail(true); }}>Détail</Button>
-                  <Button size="sm" variant="outline" onClick={() => toggleBonActif(bl.id, !bl.actif)}>{bl.actif ? "Désactiver" : "Réactiver"}</Button>
-                </td>
-              </tr>
+            {rows.map((bl) => (
+              <BonLivraisonRow
+                key={bl.id}
+                bon={bl}
+                canEdit={canEdit}
+                onEdit={(b) => {
+                  setSelected(b);
+                  setShowForm(true);
+                }}
+                onDetail={(b) => {
+                  setSelected(b);
+                  setShowDetail(true);
+                }}
+                onToggleActive={async (id, actif) => {
+                  await toggleBonActif(id, actif);
+                  refreshList();
+                }}
+              />
             ))}
           </tbody>
         </table>
@@ -99,7 +115,11 @@ export default function BonsLivraison() {
         <BLForm
           bon={selected}
           fournisseurs={fournisseurs}
-          onClose={() => { setShowForm(false); setSelected(null); getBonsLivraison({ fournisseur: fournisseurFilter, actif: actifFilter === "all" ? null : actifFilter === "true", debut: monthFilter ? `${monthFilter}-01` : "", fin: monthFilter ? `${monthFilter}-31` : "", page, pageSize: PAGE_SIZE }); }}
+          onClose={() => {
+            setShowForm(false);
+            setSelected(null);
+            refreshList();
+          }}
         />
       )}
       {showDetail && selected && (

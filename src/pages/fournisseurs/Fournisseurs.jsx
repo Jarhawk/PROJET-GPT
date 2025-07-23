@@ -8,6 +8,7 @@ import { useProducts } from "@/hooks/useProducts";
 import { useFournisseursInactifs } from "@/hooks/useFournisseursInactifs";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
+import FournisseurRow from "@/components/fournisseurs/FournisseurRow";
 import { Dialog, DialogContent } from "@radix-ui/react-dialog";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -16,6 +17,7 @@ import { ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, Tool
 import FournisseurDetail from "./FournisseurDetail";
 import FournisseurForm from "./FournisseurForm";
 import { PlusCircle, Search } from "lucide-react";
+import useAuth from "@/hooks/useAuth";
 
 export default function Fournisseurs() {
   const { fournisseurs, total, getFournisseurs, createFournisseur, updateFournisseur, disableFournisseur, exportFournisseursToExcel } = useFournisseurs();
@@ -23,6 +25,8 @@ export default function Fournisseurs() {
   const { getProductsBySupplier, countProductsBySupplier } = useSupplierProducts();
   const { products } = useProducts();
   const { fournisseurs: inactiveByInvoices, fetchInactifs } = useFournisseursInactifs();
+  const { hasAccess } = useAuth();
+  const canEdit = hasAccess("fournisseurs", "peut_modifier");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(null);
   const [showCreate, setShowCreate] = useState(false);
@@ -34,6 +38,15 @@ export default function Fournisseurs() {
   const [actifFilter, setActifFilter] = useState("all");
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 20;
+
+  function refreshList() {
+    getFournisseurs({
+      search,
+      actif: actifFilter === "all" ? null : actifFilter === "true",
+      page,
+      limit: PAGE_SIZE,
+    });
+  }
   const listWithContact = fournisseurs.map(f => ({
     ...f,
     contact: Array.isArray(f.contact) ? f.contact[0] : f.contact,
@@ -76,12 +89,7 @@ export default function Fournisseurs() {
 
   // Rafraîchissement selon la recherche ou filtre
   useEffect(() => {
-    getFournisseurs({
-      search,
-      actif: actifFilter === "all" ? null : actifFilter === "true",
-      page,
-      limit: PAGE_SIZE,
-    });
+    refreshList();
   }, [search, actifFilter, page]);
 
   // Recherche live
@@ -129,7 +137,11 @@ export default function Fournisseurs() {
           <option value="true">Actif</option>
           <option value="false">Inactif</option>
         </select>
-        <Button onClick={() => setShowCreate(true)}><PlusCircle className="mr-2" /> Ajouter fournisseur</Button>
+        {canEdit && (
+          <Button onClick={() => setShowCreate(true)}>
+            <PlusCircle className="mr-2" /> Ajouter fournisseur
+          </Button>
+        )}
         <Button variant="outline" onClick={exportFournisseursToExcel}>Export Excel</Button>
         <Button variant="outline" onClick={exportPDF}>Export PDF</Button>
       </div>
@@ -193,31 +205,20 @@ export default function Fournisseurs() {
               </tr>
             ) : (
               fournisseursFiltrés.map(f => (
-                <tr key={f.id} className={f.actif ? '' : 'opacity-50'}>
-                  <td className="py-1 px-3 font-semibold text-white">{f.nom}</td>
-                  <td>{f.contact?.tel}</td>
-                  <td>{f.contact?.nom}</td>
-                  <td>{f.contact?.email}</td>
-                  <td>{productCounts[f.id] ?? 0}</td>
-                  <td>
-                    <Button size="sm" variant="outline" onClick={() => setSelected(f.id)}>
-                      Voir détails
-                    </Button>
-                  </td>
-                  <td>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={async () => {
-                        if (!window.confirm('Désactiver ce fournisseur ?')) return;
-                        await disableFournisseur(f.id);
-                        getFournisseurs({ search });
-                      }}
-                    >
-                      Supprimer
-                    </Button>
-                  </td>
-                </tr>
+                <FournisseurRow
+                  key={f.id}
+                  fournisseur={f}
+                  productCount={productCounts[f.id] ?? 0}
+                  canEdit={canEdit}
+                  onDetail={() => setSelected(f.id)}
+                  onEdit={() => setEditRow(f)}
+                  onDelete={async (id) => {
+                    if (!window.confirm('Désactiver ce fournisseur ?')) return;
+                    await disableFournisseur(id);
+                    toast.success('Fournisseur désactivé');
+                    refreshList();
+                  }}
+                />
               ))
             )}
           </tbody>
@@ -256,7 +257,7 @@ export default function Fournisseurs() {
                 }
                 setShowCreate(false);
                 setEditRow(null);
-                getFournisseurs({ search });
+                refreshList();
               } catch (err) {
                 toast.error(err?.message || "Erreur enregistrement");
               }

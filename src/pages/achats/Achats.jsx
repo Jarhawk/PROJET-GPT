@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAchats } from "@/hooks/useAchats";
 import { useSuppliers } from "@/hooks/useSuppliers";
 import { useProduitsAutocomplete } from "@/hooks/useProduitsAutocomplete";
@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
 import GlassCard from "@/components/ui/GlassCard";
 import { Toaster } from "react-hot-toast";
+import AchatRow from "@/components/achats/AchatRow.jsx";
+import useAuth from "@/hooks/useAuth";
 
 export default function Achats() {
   const { achats, total, getAchats, deleteAchat } = useAchats();
@@ -23,10 +25,10 @@ export default function Achats() {
   const [selected, setSelected] = useState(null);
   const [actifFilter, setActifFilter] = useState("true");
   const PAGE_SIZE = 20;
+  const { hasAccess } = useAuth();
+  const canEdit = hasAccess("achats", "peut_modifier");
 
-  useEffect(() => { searchProduits(""); }, [searchProduits]);
-
-  useEffect(() => {
+  const refreshList = useCallback(() => {
     const debut = month ? `${month}-01` : "";
     const fin = month ? `${month}-31` : "";
     getAchats({
@@ -38,7 +40,13 @@ export default function Achats() {
       page,
       pageSize: PAGE_SIZE,
     });
-  }, [produit, fournisseur, month, actifFilter, page]);
+  }, [getAchats, produit, fournisseur, month, actifFilter, page]);
+
+  useEffect(() => { searchProduits(""); }, [searchProduits]);
+
+  useEffect(() => {
+    refreshList();
+  }, [refreshList]);
 
   return (
     <div className="p-6 container mx-auto text-shadow space-y-4">
@@ -77,7 +85,16 @@ export default function Achats() {
           <option value="false">Inactifs</option>
           <option value="all">Tous</option>
         </select>
-        <Button onClick={() => { setSelected(null); setShowForm(true); }}>Ajouter</Button>
+        {canEdit && (
+          <Button
+            onClick={() => {
+              setSelected(null);
+              setShowForm(true);
+            }}
+          >
+            Ajouter
+          </Button>
+        )}
       </GlassCard>
       <TableContainer>
         <table className="min-w-full text-sm text-white">
@@ -92,56 +109,26 @@ export default function Achats() {
             </tr>
           </thead>
           <tbody>
-            {achats.map(a => (
-              <tr key={a.id}>
-                <td className="border px-2 py-1">{a.date_achat}</td>
-                <td className="border px-2 py-1">{a.produit?.nom}</td>
-                <td className="border px-2 py-1">{a.fournisseur?.nom}</td>
-                <td className="border px-2 py-1 text-right">{a.quantite}</td>
-                <td className="border px-2 py-1 text-right">{Number(a.prix || 0).toFixed(2)} €</td>
-                <td className="border px-2 py-1 space-x-1">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      setSelected(a);
-                      setShowForm(true);
-                    }}
-                  >
-                    Éditer
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      setSelected(a);
-                      setShowDetail(true);
-                    }}
-                  >
-                    Détail
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={async () => {
-                      await deleteAchat(a.id);
-                      const debut = month ? `${month}-01` : "";
-                      const fin = month ? `${month}-31` : "";
-                      getAchats({
-                        produit,
-                        fournisseur,
-                        debut,
-                        fin,
-                        actif: actifFilter === "all" ? null : actifFilter === "true",
-                        page,
-                        pageSize: PAGE_SIZE,
-                      });
-                    }}
-                  >
-                    Archiver
-                  </Button>
-                </td>
-              </tr>
+            {achats.map((a) => (
+              <AchatRow
+                key={a.id}
+                achat={a}
+                canEdit={canEdit}
+                onEdit={(ac) => {
+                  setSelected(ac);
+                  setShowForm(true);
+                }}
+                onDetail={(ac) => {
+                  setSelected(ac);
+                  setShowDetail(true);
+                }}
+                onArchive={async (id) => {
+                  if (window.confirm("Archiver cet achat ?")) {
+                    await deleteAchat(id);
+                    refreshList();
+                  }
+                }}
+              />
             ))}
           </tbody>
         </table>
@@ -158,17 +145,7 @@ export default function Achats() {
           onClose={() => {
             setShowForm(false);
             setSelected(null);
-            const debut = month ? `${month}-01` : "";
-            const fin = month ? `${month}-31` : "";
-            getAchats({
-              produit,
-              fournisseur,
-              debut,
-              fin,
-              actif: actifFilter === "all" ? null : actifFilter === "true",
-              page,
-              pageSize: PAGE_SIZE,
-            });
+            refreshList();
           }}
         />
       )}

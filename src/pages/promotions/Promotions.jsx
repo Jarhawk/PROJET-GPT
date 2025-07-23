@@ -1,34 +1,69 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { Navigate } from "react-router-dom";
 import { usePromotions } from "@/hooks/usePromotions";
 import useAuth from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
+import PromotionRow from "@/components/promotions/PromotionRow";
 import { Toaster, toast } from "react-hot-toast";
 import PromotionForm from "./PromotionForm.jsx";
 
 export default function Promotions() {
-  const { promotions, fetchPromotions, addPromotion, updatePromotion, deletePromotion } = usePromotions();
-  const { mama_id, loading: authLoading } = useAuth();
+  const {
+    promotions,
+    total,
+    fetchPromotions,
+    addPromotion,
+    updatePromotion,
+    deletePromotion,
+  } = usePromotions();
+  const { mama_id, loading: authLoading, access_rights, hasAccess } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [editRow, setEditRow] = useState(null);
   const [search, setSearch] = useState("");
+  const [actifFilter, setActifFilter] = useState("all");
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 20;
   const [saving, setSaving] = useState(false);
+  const canEdit = hasAccess("promotions", "peut_modifier");
+
+  const refreshList = useCallback(() => {
+    fetchPromotions({
+      search,
+      actif: actifFilter === "all" ? null : actifFilter === "true",
+      page,
+      limit: PAGE_SIZE,
+    });
+  }, [fetchPromotions, search, actifFilter, page]);
 
   useEffect(() => {
-    if (!authLoading && mama_id) fetchPromotions();
-  }, [authLoading, mama_id, fetchPromotions]);
+    if (!authLoading && mama_id) {
+      refreshList();
+    }
+  }, [authLoading, mama_id, refreshList]);
 
-  if (authLoading || !mama_id) return null;
+  if (authLoading) return null;
+  if (!mama_id) return null;
+  if (!access_rights?.promotions?.peut_voir) {
+    return <Navigate to="/unauthorized" replace />;
+  }
 
-  const filtered = promotions.filter(p =>
-    !search || p.nom.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = promotions.filter((p) => {
+    if (search && !p.nom.toLowerCase().includes(search.toLowerCase())) return false;
+    if (
+      actifFilter !== "all" &&
+      (actifFilter === "true" ? !p.actif : p.actif)
+    )
+      return false;
+    return true;
+  });
 
-  const handleDelete = async id => {
+  const handleDelete = async (id) => {
     if (window.confirm("Supprimer cette promotion ?")) {
       await deletePromotion(id);
       toast.success("Promotion supprimée");
+      refreshList();
     }
   };
 
@@ -39,11 +74,28 @@ export default function Promotions() {
         <input
           type="search"
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={(e) => {
+            setPage(1);
+            setSearch(e.target.value);
+          }}
           className="input"
           placeholder="Recherche promotion"
         />
-        <Button onClick={() => setShowForm(true)}>Nouvelle promotion</Button>
+        <select
+          className="input"
+          value={actifFilter}
+          onChange={(e) => {
+            setPage(1);
+            setActifFilter(e.target.value);
+          }}
+        >
+          <option value="all">Toutes</option>
+          <option value="true">Actives</option>
+          <option value="false">Inactives</option>
+        </select>
+        {canEdit && (
+          <Button onClick={() => setShowForm(true)}>Nouvelle promotion</Button>
+        )}
       </div>
       <TableContainer className="mt-2">
         <table className="min-w-full text-sm">
@@ -57,31 +109,46 @@ export default function Promotions() {
           </tr>
         </thead>
         <tbody>
-          {filtered.map(p => (
-            <tr key={p.id} className="border-t">
-              <td className="px-4 py-1 font-semibold text-mamastockGold">{p.nom}</td>
-              <td className="px-4 py-1">{p.date_debut}</td>
-              <td className="px-4 py-1">{p.date_fin || "-"}</td>
-              <td className="px-4 py-1">{p.actif ? "Oui" : "Non"}</td>
-              <td className="px-4 py-1 text-right">
-                <Button size="sm" variant="outline" className="mr-2" onClick={() => { setEditRow(p); setShowForm(true); }}>
-                  Modifier
-                </Button>
-                <Button size="sm" variant="destructive" onClick={() => handleDelete(p.id)}>
-                  Supprimer
-                </Button>
-              </td>
-            </tr>
+          {filtered.map((p) => (
+            <PromotionRow
+              key={p.id}
+              promotion={p}
+              canEdit={canEdit}
+              onEdit={() => {
+                setEditRow(p);
+                setShowForm(true);
+              }}
+              onDelete={handleDelete}
+            />
           ))}
         </tbody>
         </table>
+        <div className="mt-4 flex gap-2 justify-center">
+          {Array.from(
+            { length: Math.max(1, Math.ceil(total / PAGE_SIZE)) },
+            (_, i) => (
+              <Button
+                key={i + 1}
+                size="sm"
+                variant={page === i + 1 ? "default" : "outline"}
+                onClick={() => setPage(i + 1)}
+              >
+                {i + 1}
+              </Button>
+            ),
+          )}
+        </div>
       </TableContainer>
       {showForm && (
         <PromotionForm
           promotion={editRow}
           saving={saving}
-          onClose={() => { setShowForm(false); setEditRow(null); }}
-          onSave={async values => {
+          onClose={() => {
+            setShowForm(false);
+            setEditRow(null);
+            refreshList();
+          }}
+          onSave={async (values) => {
             try {
               setSaving(true);
               if (editRow) {
@@ -93,7 +160,7 @@ export default function Promotions() {
               }
               setShowForm(false);
               setEditRow(null);
-              fetchPromotions();
+              refreshList();
             } catch (err) {
               console.error("Erreur enregistrement promotion:", err);
               toast.error("Erreur lors de l'enregistrement.");

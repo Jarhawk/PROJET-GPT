@@ -1,5 +1,4 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import useAuth from "@/hooks/useAuth";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { supabase } from "@/lib/supabase";
@@ -9,8 +8,8 @@ export default function UtilisateurRow({
   onEdit,
   onToggleActive,
   onDelete,
+  canEdit,
 }) {
-  const { isAdmin, mama_id } = useAuth();
   const [showHistory, setShowHistory] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -53,7 +52,7 @@ export default function UtilisateurRow({
         </td>
         <td>{utilisateur.mama_id}</td>
         <td>
-          {isAdmin && utilisateur.mama_id === mama_id && (
+          {canEdit && (
             <>
               <button className="btn btn-sm mr-2" onClick={() => onEdit(utilisateur)}>Éditer</button>
               <button
@@ -73,11 +72,11 @@ export default function UtilisateurRow({
                   Supprimer
                 </button>
               )}
-              <button className="btn btn-sm" onClick={() => setShowHistory(!showHistory)}>
-                {showHistory ? "Masquer historique" : "Connexions"}
-              </button>
             </>
           )}
+          <button className="btn btn-sm" onClick={() => setShowHistory(!showHistory)}>
+            {showHistory ? "Masquer historique" : "Connexions"}
+          </button>
         </td>
       </tr>
       {showHistory && (

@@ -2,19 +2,22 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import useAuth from "@/hooks/useAuth";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import { Input } from "@/components/ui/input";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function MamaForm({ mama, onClose, onSaved }) {
-  const { mama_id: myMama, role } = useAuth();
+  const { mama_id: myMama, role, loading: authLoading } = useAuth();
   const [values, setValues] = useState({
     nom: mama?.nom || "",
     ville: mama?.ville || "",
     actif: mama?.actif ?? true,
   });
   const [saving, setSaving] = useState(false);
+
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
 
   const handleChange = e =>
     setValues(v => ({ ...v, [e.target.name]: e.target.value }));

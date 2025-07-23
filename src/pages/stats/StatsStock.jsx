@@ -30,7 +30,7 @@ export default function StatsStock() {
     XLSX.writeFile(wb, "stocks_dashboard.xlsx");
   };
 
-  if (loading) return <LoadingSpinner message="Chargement..." />;
+  if (authLoading || loading) return <LoadingSpinner message="Chargement..." />;
   if (error) return <div className="p-8 text-red-600">{error}</div>;
 
   return (

@@ -16,7 +16,10 @@ export function useCostCenterMonthlyStats() {
     if (debut) query = query.gte('mois', debut);
     if (fin) query = query.lte('mois', fin);
     const { data, error } = await query;
-    if (error) return [];
+    if (error) {
+      console.error('Erreur fetchMonthly:', error);
+      return [];
+    }
     return data || [];
   }
 

@@ -29,7 +29,7 @@ test('searchFiches filters by mama_id and excludeId', async () => {
   await act(async () => {
     await result.current.searchFiches({ query: 's', excludeId: 'f1' });
   });
-  expect(fromMock).toHaveBeenCalledWith('fiches');
+  expect(fromMock).toHaveBeenCalledWith('fiches_techniques');
   expect(selectMock).toHaveBeenCalledWith('id, nom, cout_par_portion, actif');
   expect(eqMock).toHaveBeenCalledWith('mama_id', 'm1');
   expect(eqMock).toHaveBeenCalledWith('actif', true);

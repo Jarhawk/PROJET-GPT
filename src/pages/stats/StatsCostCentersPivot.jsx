@@ -5,6 +5,7 @@ import useAuth from "@/hooks/useAuth";
 import { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import * as XLSX from "xlsx";
 
 export default function StatsCostCentersPivot() {
@@ -40,6 +41,8 @@ export default function StatsCostCentersPivot() {
       setRows(Object.values(grouped));
     });
   }, [fetchMonthly, mama_id, authLoading]);
+
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
 
   return (
     <div className="p-8 container mx-auto">

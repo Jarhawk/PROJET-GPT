@@ -47,6 +47,7 @@ export function useDashboardStats(options = {}) {
       setStats(data);
       retries.current = 0; // Reset retry si succès
     } catch (err) {
+      console.error('Erreur dashboard_stats:', err);
       setError(err.message || "Erreur récupération stats dashboard.");
       setStats(null);
       // Retry intelligent

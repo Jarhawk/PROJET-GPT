@@ -3,17 +3,20 @@ import { useMama } from "@/hooks/useMama";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import useAuth from "@/hooks/useAuth";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { Toaster, toast } from "react-hot-toast";
 
 export default function ParamMama() {
   const { mama, fetchMama, updateMama } = useMama();
-  const { mama_id } = useAuth();
+  const { mama_id, loading: authLoading } = useAuth();
   const [edit, setEdit] = useState(false);
   const [form, setForm] = useState({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => { if (mama_id) fetchMama(); }, [mama_id]);
   useEffect(() => { setForm(mama || {}); }, [mama]);
+
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
 
   const handleSubmit = async e => {
     e.preventDefault();

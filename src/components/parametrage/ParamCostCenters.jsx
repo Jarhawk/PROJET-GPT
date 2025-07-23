@@ -2,6 +2,7 @@
 import { useCostCenters } from "@/hooks/useCostCenters";
 import { useState, useEffect, useRef } from "react";
 import useAuth from "@/hooks/useAuth";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
 import { Toaster, toast } from "react-hot-toast";
@@ -16,7 +17,7 @@ export default function ParamCostCenters() {
     deleteCostCenter,
     importCostCentersFromExcel,
   } = useCostCenters();
-  const { mama_id } = useAuth();
+  const { mama_id, loading: authLoading } = useAuth();
   const [search, setSearch] = useState("");
   const [form, setForm] = useState({ nom: "", actif: true, id: null });
   const [editMode, setEditMode] = useState(false);
@@ -26,6 +27,8 @@ export default function ParamCostCenters() {
   useEffect(() => {
     if (mama_id) fetchCostCenters();
   }, [mama_id]);
+
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
 
   const filtered = costCenters.filter(c =>
     !search || c.nom.toLowerCase().includes(search.toLowerCase())

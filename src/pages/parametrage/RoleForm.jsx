@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import useAuth from "@/hooks/useAuth";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import PrimaryButton from "@/components/ui/PrimaryButton";
@@ -10,7 +11,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { MODULES } from "@/config/modules";
 
 export default function RoleForm({ role, onClose, onSaved }) {
-  const { mama_id } = useAuth();
+  const { mama_id, loading: authLoading } = useAuth();
   const [values, setValues] = useState({
     nom: role?.nom || "",
     description: role?.description || "",
@@ -20,6 +21,8 @@ export default function RoleForm({ role, onClose, onSaved }) {
     Array.isArray(role?.access_rights) ? role.access_rights : []
   ));
   const [saving, setSaving] = useState(false);
+
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
 
   const handleChange = e =>
     setValues(v => ({ ...v, [e.target.name]: e.target.value }));

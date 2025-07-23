@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import useAuth from "@/hooks/useAuth";
 import { useFiches } from "@/hooks/useFiches";
 import { useProducts } from "@/hooks/useProducts";
@@ -15,7 +16,8 @@ import { Input } from "@/components/ui/input";
 import toast from "react-hot-toast";
 
 export default function FicheForm({ fiche, onClose, refreshParams = {} }) {
-  const { access_rights } = useAuth();
+const { access_rights, loading: authLoading } = useAuth();
+
   const { createFiche, updateFiche } = useFiches();
   const { products, fetchProducts } = useProducts();
   const { familles, fetchFamilles } = useFamilles();
@@ -40,6 +42,10 @@ export default function FicheForm({ fiche, onClose, refreshParams = {} }) {
     searchProduits();
     searchFiches({ excludeId: fiche?.id });
   }, [allowed, fetchProducts, fetchFamilles, searchProduits, searchFiches, fiche?.id]);
+
+  if (authLoading) {
+    return <LoadingSpinner message="Chargement..." />;
+  }
 
   if (!allowed) {
     return <Navigate to="/unauthorized" replace />;

@@ -5,6 +5,7 @@ import { useDocuments } from "@/hooks/useDocuments";
 import DocumentForm from "./DocumentForm.jsx";
 import DocumentPreview from "@/components/documents/DocumentPreview";
 import TableContainer from "@/components/ui/TableContainer";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 
 export default function Documents() {
@@ -36,6 +37,8 @@ export default function Documents() {
     await deleteDocument(id);
     await listDocuments();
   };
+
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
 
   return (
     <div className="p-6 container mx-auto">

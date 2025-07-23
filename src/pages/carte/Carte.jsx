@@ -7,6 +7,7 @@ import { useFamilles } from "@/hooks/useFamilles";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Toaster, toast } from "react-hot-toast";
 import TableContainer from "@/components/ui/TableContainer";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import * as XLSX from "xlsx";
 
 const FOOD_COST_SEUIL = 35;
@@ -124,9 +125,10 @@ function CarteTable({ type }) {
 }
 
 export default function Carte() {
-  const { isAuthenticated, access_rights } = useAuth();
+  const { isAuthenticated, access_rights, loading: authLoading } = useAuth();
   const [tab, setTab] = useState("nourriture");
 
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
   if (!isAuthenticated) return null;
   if (!access_rights?.menus?.peut_voir) {
     return <Navigate to="/unauthorized" replace />;

@@ -14,7 +14,7 @@ import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from "rec
 export default function FicheDetail({ fiche: ficheProp, onClose }) {
   const { id: routeId } = useParams();
   const { getFicheById } = useFiches();
-  const { access_rights } = useAuth();
+  const { access_rights, loading: authLoading } = useAuth();
   const [fiche, setFiche] = useState(ficheProp || null);
   const { history, fetchFicheCoutHistory } = useFicheCoutHistory();
   const [simPrix, setSimPrix] = useState(null);
@@ -33,7 +33,7 @@ export default function FicheDetail({ fiche: ficheProp, onClose }) {
     }
   }, [fiche?.id, fetchFicheCoutHistory, fiche?.prix_vente]);
 
-  if (!fiche) return <LoadingSpinner message="Chargement..." />;
+  if (authLoading || !fiche) return <LoadingSpinner message="Chargement..." />;
 
   if (!access_rights?.fiches_techniques?.peut_voir) {
     return <Navigate to="/unauthorized" replace />;

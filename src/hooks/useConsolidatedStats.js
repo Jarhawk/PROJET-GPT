@@ -12,6 +12,7 @@ export function useConsolidatedStats() {
     const { data, error } = await supabase.rpc("consolidated_stats");
     setLoading(false);
     if (error) {
+      console.error('Erreur consolidated_stats:', error);
       setError(error.message || error);
       setStats([]);
       return [];

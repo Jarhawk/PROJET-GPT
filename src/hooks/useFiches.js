@@ -31,7 +31,11 @@ export function useFiches() {
     if (famille) query = query.eq("famille_id", famille);
     const { data, error, count } = await query;
     setLoading(false);
-    if (error) { setError(error); return []; }
+    if (error) {
+      console.error('getFiches error:', error);
+      setError(error);
+      return [];
+    }
     setFiches(Array.isArray(data) ? data : []);
     setTotal(count || 0);
     return data || [];
@@ -50,7 +54,11 @@ export function useFiches() {
       .eq("mama_id", mama_id)
       .single();
     setLoading(false);
-    if (error) { setError(error); return null; }
+    if (error) {
+      console.error('getFicheById error:', error);
+      setError(error);
+      return null;
+    }
     return data;
   }
 
@@ -65,6 +73,7 @@ export function useFiches() {
       .select("id")
       .single();
     if (insertError) {
+      console.error('createFiche error:', insertError);
       setLoading(false);
       setError(insertError);
       throw insertError;
@@ -80,6 +89,7 @@ export function useFiches() {
       }));
       const { error: lignesError } = await supabase.from("fiche_lignes").insert(toInsert);
       if (lignesError) {
+        console.error('createFiche lignes error:', lignesError);
         setLoading(false);
         setError(lignesError);
         throw lignesError;
@@ -101,6 +111,7 @@ export function useFiches() {
       .eq("id", id)
       .eq("mama_id", mama_id);
     if (updateError) {
+      console.error('updateFiche error:', updateError);
       setLoading(false);
       setError(updateError);
       throw updateError;
@@ -111,6 +122,7 @@ export function useFiches() {
       .eq("fiche_id", id)
       .eq("mama_id", mama_id);
     if (deleteError) {
+      console.error('updateFiche delete lines error:', deleteError);
       setLoading(false);
       setError(deleteError);
       throw deleteError;
@@ -125,6 +137,7 @@ export function useFiches() {
       }));
       const { error: insertError } = await supabase.from("fiche_lignes").insert(toInsert);
       if (insertError) {
+        console.error('updateFiche lines insert error:', insertError);
         setLoading(false);
         setError(insertError);
         throw insertError;
@@ -146,6 +159,7 @@ export function useFiches() {
       .eq("id", id)
       .eq("mama_id", mama_id);
     if (deleteError) {
+      console.error('deleteFiche error:', deleteError);
       setLoading(false);
       setError(deleteError);
       throw deleteError;
@@ -166,6 +180,7 @@ export function useFiches() {
       .eq("mama_id", mama_id)
       .single();
     if (fetchError) {
+      console.error('duplicateFiche fetch error:', fetchError);
       setLoading(false);
       setError(fetchError);
       throw fetchError;
@@ -177,6 +192,7 @@ export function useFiches() {
       .select("id")
       .single();
     if (insertError) {
+      console.error('duplicateFiche insert error:', insertError);
       setLoading(false);
       setError(insertError);
       throw insertError;
@@ -192,6 +208,7 @@ export function useFiches() {
       }));
       const { error: lineErr } = await supabase.from("fiche_lignes").insert(toInsert);
       if (lineErr) {
+        console.error('duplicateFiche lines insert error:', lineErr);
         setLoading(false);
         setError(lineErr);
         throw lineErr;

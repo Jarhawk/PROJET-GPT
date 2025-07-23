@@ -15,7 +15,11 @@ export default function useConsentements() {
         .from("consentements_utilisateur")
         .select("*")
         .eq("mama_id", userData.mama_id);
-      if (!error) setData(data);
+      if (error) {
+        console.error("Erreur chargement consentements:", error);
+      } else {
+        setData(data);
+      }
     };
 
     fetchConsentements();

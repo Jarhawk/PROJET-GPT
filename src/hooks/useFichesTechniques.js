@@ -22,6 +22,7 @@ export function useFichesTechniques() {
       if (error) throw error;
       setFichesTechniques(Array.isArray(data) ? data : []);
     } catch (err) {
+      console.error('fetchFichesTechniques error:', err);
       setError(err.message || "Erreur chargement fiches techniques.");
       setFichesTechniques([]);
     } finally {
@@ -37,6 +38,7 @@ export function useFichesTechniques() {
       .from("fiches_techniques")
       .insert([{ ...ft, mama_id }]);
     if (error) {
+      console.error('addFicheTechnique error:', error);
       setLoading(false);
       setError(error);
       throw error;
@@ -56,6 +58,7 @@ export function useFichesTechniques() {
       .eq("id", id)
       .eq("mama_id", mama_id);
     if (error) {
+      console.error('updateFicheTechnique error:', error);
       setLoading(false);
       setError(error);
       throw error;
@@ -75,6 +78,7 @@ export function useFichesTechniques() {
       .eq("id", id)
       .eq("mama_id", mama_id);
     if (error) {
+      console.error('deleteFicheTechnique error:', error);
       setLoading(false);
       setError(error);
       throw error;

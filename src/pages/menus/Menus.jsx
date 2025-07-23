@@ -15,7 +15,7 @@ import TableContainer from "@/components/ui/TableContainer";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function Menus() {
-  const { menus, total, getMenus, deleteMenu } = useMenus();
+  const { menus, total, getMenus, deleteMenu, loading } = useMenus();
   const { fiches, fetchFiches } = useFiches();
   const {
     mama_id,
@@ -71,6 +71,10 @@ export default function Menus() {
 
   const pageCount = Math.ceil(total / perPage);
   const paginatedMenus = menus;
+
+  if (authLoading || loading) {
+    return <LoadingSpinner message="Chargement..." />;
+  }
 
   const exportExcel = () => {
     const wb = XLSX.utils.book_new();

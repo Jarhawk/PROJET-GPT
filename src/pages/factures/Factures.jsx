@@ -7,6 +7,7 @@ import { useFacturesAutocomplete } from "@/hooks/useFacturesAutocomplete";
 import FactureForm from "./FactureForm.jsx";
 import FactureDetail from "./FactureDetail.jsx";
 import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import TableContainer from "@/components/ui/TableContainer";
 import GlassCard from "@/components/ui/GlassCard";
 import { Toaster, toast } from "react-hot-toast";
@@ -27,7 +28,7 @@ const STATUTS = {
 export default function Factures() {
   const { factures, total, getFactures, deleteFacture, toggleFactureActive } = useFactures();
   const { suppliers } = useSuppliers();
-  const { mama_id } = useAuth();
+  const { mama_id, loading: authLoading } = useAuth();
   const { results: factureOptions, searchFactures } = useFacturesAutocomplete();
   const [showForm, setShowForm] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
@@ -88,6 +89,8 @@ export default function Factures() {
       toast.success("Facture archivée.");
     }
   };
+
+  if (authLoading || loading) return <LoadingSpinner message="Chargement..." />;
 
   return (
     <div className="p-6 container mx-auto text-shadow space-y-6">

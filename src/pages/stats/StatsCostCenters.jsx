@@ -29,7 +29,7 @@ export default function StatsCostCenters() {
     });
   }, [fetchStats, mama_id, authLoading]);
 
-  if (loading) return <LoadingSpinner message="Chargement..." />;
+  if (authLoading || loading) return <LoadingSpinner message="Chargement..." />;
 
   return (
     <div className="p-8 container mx-auto">

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
 import { useState, useEffect } from "react";
 import useAuth from "@/hooks/useAuth";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { Toaster, toast } from "react-hot-toast";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
@@ -16,7 +17,7 @@ export default function ParamFamilles() {
     updateFamille,
     batchDeleteFamilles,
   } = useFamilles();
-  const { mama_id } = useAuth();
+  const { mama_id, loading: authLoading } = useAuth();
   const [search, setSearch] = useState("");
   const [form, setForm] = useState({ nom: "", id: null });
   const [editMode, setEditMode] = useState(false);
@@ -25,6 +26,8 @@ export default function ParamFamilles() {
   useEffect(() => {
     if (mama_id) fetchFamilles();
   }, [mama_id]);
+
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
 
   const filtered = familles.filter(f =>
     !search || f.nom.toLowerCase().includes(search.toLowerCase())

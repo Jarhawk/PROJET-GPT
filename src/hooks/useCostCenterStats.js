@@ -12,7 +12,10 @@ export function useCostCenterStats() {
       debut_param: debut,
       fin_param: fin,
     });
-    if (error) return [];
+    if (error) {
+      console.error('Erreur stats_cost_centers:', error);
+      return [];
+    }
     return data || [];
   }
 

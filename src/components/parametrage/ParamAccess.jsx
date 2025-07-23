@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
 import { useEffect } from "react";
 import useAuth from "@/hooks/useAuth";
+import { MODULES as MODULE_LIST } from "@/config/modules";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { Toaster, toast } from "react-hot-toast";
 
 export default function ParamAccess() {
   const { permissions, fetchPermissions, updatePermission } = usePermissions();
   const { roles, fetchRoles } = useRoles();
-  const { mama_id, role } = useAuth();
+  const { mama_id, role, loading: authLoading } = useAuth();
 
   useEffect(() => {
     if (mama_id || role === "superadmin") {
@@ -19,10 +21,10 @@ export default function ParamAccess() {
     }
   }, [mama_id, role]);
 
-  // Accès disponibles (hardcodés ou via table 'modules')
-  const modules = [
-    "stock", "factures", "produits", "menus", "fiches", "inventaires", "parametrage"
-  ];
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
+
+  // Liste des modules disponibles
+  const modules = MODULE_LIST.map((m) => m.key);
 
   // Modification rapide
   const handleChange = async (role_id, module) => {

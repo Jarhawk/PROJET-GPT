@@ -27,7 +27,7 @@ export function usePromotions() {
     return data || [];
   }
 
-  async function addPromotion(values) {
+  async function addPromotion(values, { refreshParams = {} } = {}) {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
@@ -36,10 +36,10 @@ export function usePromotions() {
       .insert([{ ...values, mama_id }]);
     setLoading(false);
     if (error) setError(error.message || error);
-    await fetchPromotions();
+    await fetchPromotions(refreshParams);
   }
 
-  async function updatePromotion(id, values) {
+  async function updatePromotion(id, values, { refreshParams = {} } = {}) {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
@@ -50,10 +50,10 @@ export function usePromotions() {
       .eq("mama_id", mama_id);
     setLoading(false);
     if (error) setError(error.message || error);
-    await fetchPromotions();
+    await fetchPromotions(refreshParams);
   }
 
-  async function deletePromotion(id) {
+  async function deletePromotion(id, { refreshParams = {} } = {}) {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
@@ -64,7 +64,7 @@ export function usePromotions() {
       .eq("mama_id", mama_id);
     setLoading(false);
     if (error) setError(error.message || error);
-    await fetchPromotions();
+    await fetchPromotions(refreshParams);
   }
 
   return {

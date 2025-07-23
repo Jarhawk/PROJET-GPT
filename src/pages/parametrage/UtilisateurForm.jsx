@@ -42,10 +42,10 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
     };
     try {
       if (utilisateur?.id) {
-        await updateUser(utilisateur.id, data);
+        await updateUser(utilisateur.id, data, { refresh: false });
         toast.success("Utilisateur modifié !");
       } else {
-        await addUser(data);
+        await addUser(data, { refresh: false });
         toast.success("Utilisateur ajouté !");
       }
       onClose?.();

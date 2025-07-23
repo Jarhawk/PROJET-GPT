@@ -15,8 +15,9 @@ import SecondaryButton from "@/components/ui/SecondaryButton";
 import { Input } from "@/components/ui/input";
 import toast from "react-hot-toast";
 
-export default function FicheForm({ fiche, onClose }) {
-  const { access_rights, loading: authLoading } = useAuth();
+export default function FicheForm({ fiche, onClose, refreshParams = {} }) {
+const { access_rights, loading: authLoading } = useAuth();
+
   const { createFiche, updateFiche } = useFiches();
   const { products, fetchProducts } = useProducts();
   const { familles, fetchFamilles } = useFamilles();
@@ -98,10 +99,10 @@ export default function FicheForm({ fiche, onClose }) {
     };
     try {
       if (fiche?.id) {
-        await updateFiche(fiche.id, payload);
+        await updateFiche(fiche.id, payload, { refreshParams });
         toast.success("Fiche mise à jour");
       } else {
-        await createFiche(payload);
+        await createFiche(payload, { refreshParams });
         toast.success("Fiche créée");
       }
       onClose?.();

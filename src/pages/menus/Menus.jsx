@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useMenus } from "@/hooks/useMenus";
 import { useFiches } from "@/hooks/useFiches";
 import useAuth from "@/hooks/useAuth";
+import { Navigate } from "react-router-dom";
 import MenuForm from "./MenuForm.jsx";
 import MenuDetail from "./MenuDetail.jsx";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,13 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 export default function Menus() {
   const { menus, total, getMenus, deleteMenu, loading } = useMenus();
   const { fiches, fetchFiches } = useFiches();
-  const { mama_id, loading: authLoading } = useAuth();
+  const {
+    mama_id,
+    loading: authLoading,
+    access_rights,
+    isSuperadmin,
+  } = useAuth();
+  const canEdit = isSuperadmin || access_rights?.menus?.peut_modifier;
   const [showForm, setShowForm] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected] = useState(null);
@@ -88,6 +95,11 @@ export default function Menus() {
     }
   };
 
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
+  if (!access_rights?.menus?.peut_voir) {
+    return <Navigate to="/unauthorized" replace />;
+  }
+
   return (
     <div className="p-6 container mx-auto">
       <Toaster position="top-right" />
@@ -117,10 +129,14 @@ export default function Menus() {
           onChange={e => setMonthFilter(e.target.value)}
           className="input"
         />
-        <Button onClick={() => { setSelected(null); setShowForm(true); }}>
-          Ajouter un menu
-        </Button>
-        <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
+        {canEdit && (
+          <Button onClick={() => { setSelected(null); setShowForm(true); }}>
+            Ajouter un menu
+          </Button>
+        )}
+        {canEdit && (
+          <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
+        )}
       </div>
       <TableContainer className="mt-4">
         <Motion.table
@@ -160,30 +176,34 @@ export default function Menus() {
               } €</td>
               <td className="border px-4 py-2 text-center">{menu.actif ? "✔" : "✖"}</td>
               <td className="border px-4 py-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="mr-2"
-                  onClick={() => { setSelected(menu); setShowForm(true); }}
-                >
-                  Modifier
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="mr-2"
-                  onClick={() => { setSelected({ ...menu, date: "" }); setShowForm(true); }}
-                >
-                  Dupliquer
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="mr-2"
-                  onClick={() => handleDelete(menu)}
-                >
-                  Supprimer
-                </Button>
+                {canEdit && (
+                  <>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="mr-2"
+                      onClick={() => { setSelected(menu); setShowForm(true); }}
+                    >
+                      Modifier
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="mr-2"
+                      onClick={() => { setSelected({ ...menu, date: "" }); setShowForm(true); }}
+                    >
+                      Dupliquer
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="mr-2"
+                      onClick={() => handleDelete(menu)}
+                    >
+                      Supprimer
+                    </Button>
+                  </>
+                )}
               </td>
             </tr>
           ))}
@@ -207,7 +227,7 @@ export default function Menus() {
           Suivant
         </Button>
       </div>
-      {showForm && (
+      {canEdit && showForm && (
         <MenuForm
           menu={selected}
           fiches={fiches}

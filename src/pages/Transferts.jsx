@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import useAuth from "@/hooks/useAuth";
+import { Navigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
@@ -22,7 +23,15 @@ import {
 } from "recharts";
 
 export default function Transferts() {
-  const { isAuthenticated, mama_id, user_id, loading: authLoading } = useAuth();
+  const {
+    isAuthenticated,
+    mama_id,
+    user_id,
+    loading: authLoading,
+    access_rights,
+    isSuperadmin,
+  } = useAuth();
+  const canEdit = isSuperadmin || access_rights?.mouvements?.peut_modifier;
   const [transferts, setTransferts] = useState([]);
   const [produits, setProduits] = useState([]);
   const [zones, setZones] = useState([]);
@@ -236,6 +245,9 @@ export default function Transferts() {
   const today = new Date().toISOString().slice(0, 10);
 
   if (authLoading) return <LoadingSpinner message="Chargement..." />;
+  if (!access_rights?.mouvements?.peut_voir) {
+    return <Navigate to="/unauthorized" replace />;
+  }
   if (!isAuthenticated) return null;
 
   return (
@@ -305,9 +317,15 @@ export default function Transferts() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <Button onClick={handleExportExcel}>Export Excel</Button>
-        <Button onClick={handleExportPDF}>Export PDF</Button>
-        <Button onClick={() => setShowCreate(true)}>+ Nouveau transfert</Button>
+        {canEdit && (
+          <Button onClick={handleExportExcel}>Export Excel</Button>
+        )}
+        {canEdit && (
+          <Button onClick={handleExportPDF}>Export PDF</Button>
+        )}
+        {canEdit && (
+          <Button onClick={() => setShowCreate(true)}>+ Nouveau transfert</Button>
+        )}
       </div>
       <TableContainer>
         <table className="min-w-full table-auto text-center">
@@ -385,12 +403,13 @@ export default function Transferts() {
         </table>
       </TableContainer>
       {/* Modal création transfert */}
-      <Dialog
-        open={showCreate}
-        onOpenChange={(v) => !v && setShowCreate(false)}
-      >
-        <DialogContent className="bg-glass backdrop-blur-lg rounded-xl shadow-lg p-6 max-w-md">
-          <h2 className="font-bold mb-2">Nouveau transfert de stock</h2>
+      {canEdit && (
+        <Dialog
+          open={showCreate}
+          onOpenChange={(v) => !v && setShowCreate(false)}
+        >
+          <DialogContent className="bg-glass backdrop-blur-lg rounded-xl shadow-lg p-6 max-w-md">
+            <h2 className="font-bold mb-2">Nouveau transfert de stock</h2>
           <form onSubmit={handleCreateTf} className="space-y-3">
             <div>
               <label>Produit</label>
@@ -471,7 +490,8 @@ export default function Transferts() {
             </Button>
           </form>
         </DialogContent>
-      </Dialog>
+        </Dialog>
+      )}
     </div>
   );
 }

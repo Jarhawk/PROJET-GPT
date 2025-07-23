@@ -48,7 +48,7 @@ export function useFournisseurs() {
   }
 
   // 2. Ajouter un fournisseur
-  async function createFournisseur(fournisseur) {
+  async function createFournisseur(fournisseur, { refreshParams = {} } = {}) {
     if (!mama_id) return;
     setLoading(true);
     setError(null);
@@ -72,12 +72,12 @@ export function useFournisseurs() {
       setError(error);
       toast.error(error.message);
     } else {
-      await getFournisseurs();
+      await getFournisseurs(refreshParams);
     }
   }
 
   // 3. Modifier un fournisseur
-  async function updateFournisseur(id, updateFields) {
+  async function updateFournisseur(id, updateFields, { refreshParams = {} } = {}) {
     if (!mama_id) return;
     setLoading(true);
     setError(null);
@@ -100,12 +100,12 @@ export function useFournisseurs() {
       setError(error);
       toast.error(error.message);
     } else {
-      await getFournisseurs();
+      await getFournisseurs(refreshParams);
     }
   }
 
   // 4. Désactiver un fournisseur (soft delete)
-  async function disableFournisseur(id) {
+  async function disableFournisseur(id, { refreshParams = {} } = {}) {
     if (!mama_id) return;
     setLoading(true);
     setError(null);
@@ -119,7 +119,7 @@ export function useFournisseurs() {
       setError(error);
       toast.error(error.message);
     } else {
-      await getFournisseurs();
+      await getFournisseurs(refreshParams);
     }
   }
 

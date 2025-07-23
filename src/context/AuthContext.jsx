@@ -58,14 +58,14 @@ export const AuthProvider = ({ children }) => {
     if (import.meta.env.DEV) console.log("fetchUserData", userId);
     let { data, error } = await supabase
       .from("utilisateurs")
-      .select("id, mama_id, nom, access_rights, actif, email")
+      .select("id, mama_id, nom, access_rights, actif, email, role_id, role:roles(nom)")
       .eq("auth_id", userId)
       .maybeSingle();
 
     if (!data && !error && email) {
       const res = await supabase
         .from("utilisateurs")
-        .select("id, mama_id, nom, access_rights, actif, email")
+        .select("id, mama_id, nom, access_rights, actif, email, role_id, role:roles(nom)")
         .eq("email", email)
         .maybeSingle();
       data = res.data;
@@ -100,6 +100,7 @@ export const AuthProvider = ({ children }) => {
       email,
       nom: data.nom,
       access_rights: rights,
+      role: data.role?.nom || null,
     };
     if (import.meta.env.DEV) {
       console.log('Loaded user', { nom: newData.nom, rights: newData.access_rights });
@@ -258,6 +259,7 @@ export const AuthProvider = ({ children }) => {
     nom: userData?.nom,
     access_rights: userData?.access_rights ?? null,
     mama_id: userData?.mama_id,
+    role: userData?.role,
     /** Authentication state */
     loading,
     error,

@@ -29,14 +29,14 @@ export function useProducts() {
     let query = supabase
       .from("produits")
       .select(
-        "*, famille:familles(nom), unite:unites(nom), main_supplier:fournisseurs(id, nom)",
+        "*, famille:familles(nom), unite:unites(nom), fournisseur:fournisseurs(id, nom)", // ✅ Correction Codex
         { count: "exact" }
       )
       .eq("mama_id", mama_id);
 
     if (search) {
       query = query.or(
-        `nom.ilike.%${search}%,main_supplier.nom.ilike.%${search}%`
+        `nom.ilike.%${search}%,fournisseur.nom.ilike.%${search}%` // ✅ Correction Codex
       );
     }
     if (famille) query = query.eq("famille_id", famille);
@@ -84,10 +84,10 @@ export function useProducts() {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { main_supplier_id, ...rest } = product || {};
+    const { fournisseur_id, ...rest } = product || {}; // ✅ Correction Codex
     const payload = {
       ...rest,
-      main_supplier_id: main_supplier_id ?? null,
+      fournisseur_id: fournisseur_id ?? null, // ✅ Correction Codex
       mama_id,
     };
     const { error } = await supabase.from("produits").insert([payload]);
@@ -103,10 +103,10 @@ export function useProducts() {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { main_supplier_id, ...rest } = updateFields || {};
+    const { fournisseur_id, ...rest } = updateFields || {}; // ✅ Correction Codex
     const payload = { ...rest };
-    if (main_supplier_id !== undefined) {
-      payload.main_supplier_id = main_supplier_id;
+    if (fournisseur_id !== undefined) {
+      payload.fournisseur_id = fournisseur_id; // ✅ Correction Codex
     }
     const { error } = await supabase
       .from("produits")
@@ -127,7 +127,7 @@ export function useProducts() {
     const {
       famille_id,
       unite_id,
-      main_supplier_id,
+      fournisseur_id, // ✅ Correction Codex
       stock_reel,
       stock_min,
       actif,
@@ -139,7 +139,7 @@ export function useProducts() {
       nom: `${orig.nom} (copie)`,
       famille_id,
       unite_id,
-      main_supplier_id,
+      fournisseur_id, // ✅ Correction Codex
       stock_reel,
       stock_min,
       actif,
@@ -227,7 +227,7 @@ export function useProducts() {
       stock_reel: p.stock_reel,
       stock_min: p.stock_min,
       dernier_prix: p.dernier_prix,
-      main_supplier: p.main_supplier?.nom || "",
+      fournisseur: p.fournisseur?.nom || "", // ✅ Correction Codex
       actif: p.actif,
       mama_id: p.mama_id,
     }));

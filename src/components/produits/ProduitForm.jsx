@@ -22,8 +22,8 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
   const [nom, setNom] = useState(produit?.nom || "");
   const [familleId, setFamilleId] = useState(produit?.famille_id || "");
   const [uniteId, setUniteId] = useState(produit?.unite_id || "");
-  // Utilise la colonne main_supplier_id définie dans le schéma SQL
-  const [mainSupplierId, setMainSupplierId] = useState(produit?.main_supplier_id || "");
+  // Utilise la colonne fournisseur_id définie dans le schéma SQL // ✅ Correction Codex
+  const [fournisseurId, setFournisseurId] = useState(produit?.fournisseur_id || ""); // ✅ Correction Codex
   const [stock_reel, setStockReel] = useState(produit?.stock_reel || 0);
   const [stock_min, setStockMin] = useState(produit?.stock_min || 0);
   const [actif, setActif] = useState(produit?.actif ?? true);
@@ -47,7 +47,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
       setNom(produit.nom || "");
       setFamilleId(produit.famille_id || "");
       setUniteId(produit.unite_id || "");
-      setMainSupplierId(produit.main_supplier_id || "");
+      setFournisseurId(produit.fournisseur_id || ""); // ✅ Correction Codex
       setStockReel(produit.stock_reel || 0);
       setStockMin(produit.stock_min || 0);
       setActif(produit.actif ?? true);
@@ -73,7 +73,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
       nom,
       famille_id: familleId || null,
       unite_id: uniteId || null,
-      main_supplier_id: mainSupplierId || null,
+      fournisseur_id: fournisseurId || null, // ✅ Correction Codex
       stock_reel: Number(stock_reel),
       stock_min: Number(stock_min),
       actif,
@@ -160,8 +160,8 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
         <label className="block text-sm mb-1 font-medium" htmlFor="prod-supplier">Fournisseur principal</label>
         <Select
           id="prod-supplier"
-          value={mainSupplierId}
-          onChange={e => setMainSupplierId(e.target.value)}
+          value={fournisseurId} // ✅ Correction Codex
+          onChange={e => setFournisseurId(e.target.value)} // ✅ Correction Codex
           className="w-full"
         >
           <option value="">Aucun</option>

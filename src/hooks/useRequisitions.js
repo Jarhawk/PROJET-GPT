@@ -49,7 +49,7 @@ export function useRequisitions() {
     const { data, error } = await supabase
       .from("requisitions")
       .select(
-        "*, lignes:requisition_lignes(*, produit:produits(id, nom, photo_url))"
+        "*, lignes:requisition_lignes(*, produit:produits(id, nom, image))" // ✅ Correction Codex
       )
       .eq("id", id)
       .eq("mama_id", mama_id)

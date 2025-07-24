@@ -23,6 +23,7 @@ export default function useBudgetMensuel() {
         cible += Number(b.budget || b.cible || 0);
         reel += Number(b.reel || b.depense || b.total || 0);
       });
+      console.log('Chargement dashboard terminé');
       return { cible, reel };
     },
     staleTime: 1000 * 60 * 5,

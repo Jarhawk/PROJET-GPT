@@ -31,6 +31,7 @@ export default function useTachesUrgentes() {
       return [];
     }
     setData(data || []);
+    console.log('Chargement dashboard terminé');
     return data || [];
   }, [mama_id, supabase]);
 

@@ -22,12 +22,7 @@ export default function GadgetTopFournisseurs() {
       <Motion.ul initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-2 text-sm">
         {data.map((f) => (
           <li key={f.id} className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {f.logo_url && (
-                <img src={f.logo_url} alt={f.nom} className="w-6 h-6 rounded-full object-cover" />
-              )}
-              <span>{f.nom}</span>
-            </div>
+            <span>{f.nom}</span>
             <span className="font-semibold">{f.total.toFixed(2)} €</span>
           </li>
         ))}

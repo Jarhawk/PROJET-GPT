@@ -14,7 +14,7 @@ export default function useDerniersAcces() {
     const { data, error } = await supabase
       .from('logs_securite')
       .select(
-        'user_id, created_at, utilisateur:utilisateurs(email, auth_id)'
+        'utilisateur_id, created_at, utilisateur:utilisateurs!logs_securite_utilisateur_id_fkey(email, auth_id)'
       )
       .eq('mama_id', mama_id)
       .order('created_at', { ascending: false })
@@ -28,10 +28,10 @@ export default function useDerniersAcces() {
     const seen = {};
     const list = [];
     for (const row of data || []) {
-      if (!row.user_id || seen[row.user_id]) continue;
-      seen[row.user_id] = true;
+      if (!row.utilisateur_id || seen[row.utilisateur_id]) continue;
+      seen[row.utilisateur_id] = true;
       list.push({
-        id: row.user_id,
+        id: row.utilisateur_id,
         email: row.utilisateur?.email,
         date: row.created_at,
       });

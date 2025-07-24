@@ -198,7 +198,7 @@ export function useFactures() {
         .insert([
           {
             produit_id,
-            supplier_id: fournisseur_id,
+            fournisseur_id,
             mama_id,
             prix: prix_unitaire,
             quantite,

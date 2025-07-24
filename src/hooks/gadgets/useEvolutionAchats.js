@@ -15,7 +15,7 @@ export default function useEvolutionAchats() {
     start.setMonth(start.getMonth() - 12);
     const { data, error } = await supabase
       .from('v_evolution_achats')
-      .select('mois, montant')
+      .select('mama_id, mois, montant')
       .eq('mama_id', mama_id)
       .gte('mois', start.toISOString().slice(0, 7))
       .order('mois', { ascending: true });

@@ -18,7 +18,7 @@ export default function AchatForm({ achat, suppliers = [], onClose }) {
   const [date_achat, setDateAchat] = useState(achat?.date_achat || "");
   const [produit_id, setProduitId] = useState(achat?.produit_id || "");
   const [produitNom, setProduitNom] = useState("");
-  const [supplier_id, setSupplierId] = useState(achat?.supplier_id || "");
+  const [fournisseur_id, setFournisseurId] = useState(achat?.fournisseur_id || "");
   const [quantite, setQuantite] = useState(achat?.quantite || 1);
   const [prix, setPrix] = useState(achat?.prix || 0);
   const [loading, setLoading] = useState(false);
@@ -33,10 +33,10 @@ export default function AchatForm({ achat, suppliers = [], onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!produit_id || !supplier_id) return toast.error("Produit et fournisseur requis");
+    if (!produit_id || !fournisseur_id) return toast.error("Produit et fournisseur requis");
     setLoading(true);
     try {
-      const payload = { produit_id, supplier_id, quantite, prix, date_achat };
+      const payload = { produit_id, fournisseur_id, quantite, prix, date_achat };
       if (achat?.id) {
         await updateAchat(achat.id, payload);
         toast.success("Achat modifié");
@@ -67,7 +67,7 @@ export default function AchatForm({ achat, suppliers = [], onClose }) {
             }}
             options={produitOptions.map(p => p.nom)}
           />
-          <select className="input" value={supplier_id} onChange={e => setSupplierId(e.target.value)} required>
+          <select className="input" value={fournisseur_id} onChange={e => setFournisseurId(e.target.value)} required>
             <option value="">Fournisseur</option>
             {suppliers.map(s => <option key={s.id} value={s.id}>{s.nom}</option>)}
           </select>

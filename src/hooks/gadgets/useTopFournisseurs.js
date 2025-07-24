@@ -18,7 +18,7 @@ export default function useTopFournisseurs() {
     const { data, error } = await supabase
       .from('achats')
       .select(
-        'prix, quantite, fournisseur_id, fournisseurs(id, nom, logo_url)'
+        'prix, quantite, fournisseur_id, fournisseurs(id, nom)'
       )
       .eq('mama_id', mama_id)
       .gte('date_achat', start.toISOString().slice(0, 10))
@@ -36,7 +36,6 @@ export default function useTopFournisseurs() {
         totals[id] = {
           id,
           nom: a.fournisseurs?.nom,
-          logo_url: a.fournisseurs?.logo_url,
           total: 0,
         };
       }
@@ -46,6 +45,7 @@ export default function useTopFournisseurs() {
       .sort((a, b) => b.total - a.total)
       .slice(0, 3);
     setData(list);
+    if (import.meta.env.DEV) console.log('Chargement dashboard terminé');
     return list;
   }, [mama_id, supabase]);
 

@@ -30,6 +30,7 @@ export default function useAlerteStockFaible() {
       )
       .slice(0, 5);
     setData(list);
+    if (import.meta.env.DEV) console.log('Chargement dashboard terminé');
     return list;
   }, [mama_id, supabase]);
 

@@ -23,9 +23,6 @@ export default function GadgetTopFournisseurs() {
         {data.map((f) => (
           <li key={f.id} className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              {f.logo_url && (
-                <img src={f.logo_url} alt={f.nom} className="w-6 h-6 rounded-full object-cover" />
-              )}
               <span>{f.nom}</span>
             </div>
             <span className="font-semibold">{f.total.toFixed(2)} €</span>

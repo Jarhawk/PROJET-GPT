@@ -1674,3 +1674,19 @@
 ## 2025-07-19 Step 319
 - fixed progress log formatting and revalidated environment
 - npm run lint and npm test pass
+## 2025-07-23 Step 320
+- cross-checked modules with pages and router; generated `module_audit_report.md`
+- placeholder pages ensure complete coverage
+- npm test still shows 10 failing tests but 98 passing after `npm install`
+
+
+## 2025-07-23 Step 321
+- generated machine-readable mapping files to track modules/pages and routes
+- added placeholder pages for Stats, Roles, Licences and Planning module
+- registered new protected routes and preload entries in `src/router.jsx`
+- npm test still fails with 10 failing tests after `npm install`
+
+## 2025-07-24 Step 322
+- reinstalled node modules to run tests reliably
+- confirmed router routes and access rights align with modules list
+- npm test continues to show 10 failing tests out of 108

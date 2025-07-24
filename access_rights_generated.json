@@ -1,0 +1,242 @@
+{
+  "achats": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "bons_livraison": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "planning_previsionnel": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "fiches_techniques": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "stats": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "consolidation": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "menu_engineering": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "zones_stock": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "licences": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "parametrage": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "feedback": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "logs": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "audit": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "dashboard": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "produits": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "fournisseurs": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "factures": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "receptions": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "inventaires": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "mouvements": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "menus": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "carte": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "recettes": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "requisitions": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "promotions": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "notifications": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "documents": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "planning": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "taches": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "alertes": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "analyse": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "reporting": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "utilisateurs": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "roles": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "mamas": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "permissions": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "settings": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "apikeys": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "access": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "aide": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  }
+}

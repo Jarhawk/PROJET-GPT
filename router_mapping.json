@@ -1,0 +1,306 @@
+[
+  {
+    "route": "/dashboard/builder",
+    "module": "dashboard"
+  },
+  {
+    "route": "/fournisseurs",
+    "module": "fournisseurs"
+  },
+  {
+    "route": "/fournisseurs/nouveau",
+    "module": "fournisseurs"
+  },
+  {
+    "route": "/fournisseurs/:id",
+    "module": "fournisseurs"
+  },
+  {
+    "route": "/fournisseurs/:id/api",
+    "module": "fournisseurs"
+  },
+  {
+    "route": "/factures",
+    "module": "factures"
+  },
+  {
+    "route": "/factures/nouveau",
+    "module": "factures"
+  },
+  {
+    "route": "/factures/:id",
+    "module": "factures"
+  },
+  {
+    "route": "/factures/import",
+    "module": "factures"
+  },
+  {
+    "route": "/receptions",
+    "module": "receptions"
+  },
+  {
+    "route": "/achats",
+    "module": "achats"
+  },
+  {
+    "route": "/bons-livraison",
+    "module": "bons_livraison"
+  },
+  {
+    "route": "/bons-livraison/nouveau",
+    "module": "bons_livraison"
+  },
+  {
+    "route": "/bons-livraison/:id",
+    "module": "bons_livraison"
+  },
+  {
+    "route": "/fiches",
+    "module": "fiches_techniques"
+  },
+  {
+    "route": "/fiches/:id",
+    "module": "fiches_techniques"
+  },
+  {
+    "route": "/menus",
+    "module": "menus"
+  },
+  {
+    "route": "/carte",
+    "module": "carte"
+  },
+  {
+    "route": "/recettes",
+    "module": "recettes"
+  },
+  {
+    "route": "/requisitions",
+    "module": "requisitions"
+  },
+  {
+    "route": "/requisitions/nouvelle",
+    "module": "requisitions"
+  },
+  {
+    "route": "/requisitions/:id",
+    "module": "requisitions"
+  },
+  {
+    "route": "/produits",
+    "module": "produits"
+  },
+  {
+    "route": "/produits/nouveau",
+    "module": "produits"
+  },
+  {
+    "route": "/produits/:id",
+    "module": "produits"
+  },
+  {
+    "route": "/inventaire",
+    "module": "inventaires"
+  },
+  {
+    "route": "/inventaire/zones",
+    "module": "inventaires"
+  },
+  {
+    "route": "/inventaire/new",
+    "module": "inventaires"
+  },
+  {
+    "route": "/inventaire/:id",
+    "module": "inventaires"
+  },
+  {
+    "route": "/mouvements",
+    "module": "mouvements"
+  },
+  {
+    "route": "/transferts",
+    "module": "mouvements"
+  },
+  {
+    "route": "/taches",
+    "module": "taches"
+  },
+  {
+    "route": "/taches/new",
+    "module": "taches"
+  },
+  {
+    "route": "/taches/alertes",
+    "module": "alertes"
+  },
+  {
+    "route": "/alertes",
+    "module": "alertes"
+  },
+  {
+    "route": "/promotions",
+    "module": "promotions"
+  },
+  {
+    "route": "/notifications",
+    "module": "notifications"
+  },
+  {
+    "route": "/notifications/settings",
+    "module": "notifications"
+  },
+  {
+    "route": "/documents",
+    "module": "documents"
+  },
+  {
+    "route": "/catalogue/sync",
+    "module": "produits"
+  },
+  {
+    "route": "/commandes",
+    "module": "fournisseurs"
+  },
+  {
+    "route": "/commandes/envoyees",
+    "module": "fournisseurs"
+  },
+  {
+    "route": "/planning",
+    "module": "planning_previsionnel"
+  },
+  {
+    "route": "/planning/nouveau",
+    "module": "planning_previsionnel"
+  },
+  {
+    "route": "/planning/:id",
+    "module": "planning_previsionnel"
+  },
+  {
+    "route": "/planning/simulation",
+    "module": "planning_previsionnel"
+  },
+  {
+    "route": "/analyse",
+    "module": "analyse"
+  },
+  {
+    "route": "/analyse/cost-centers",
+    "module": "analyse"
+  },
+  {
+    "route": "/analyse/analytique",
+    "module": "analyse"
+  },
+  {
+    "route": "/menu-engineering",
+    "module": "menu_engineering"
+  },
+  {
+    "route": "/tableaux-de-bord",
+    "module": "analyse"
+  },
+  {
+    "route": "/comparatif",
+    "module": "analyse"
+  },
+  {
+    "route": "/surcouts",
+    "module": "analyse"
+  },
+  {
+    "route": "/reporting",
+    "module": "reporting"
+  },
+  {
+    "route": "/consolidation",
+    "module": "consolidation"
+  },
+  {
+    "route": "/parametrage/utilisateurs",
+    "module": "utilisateurs"
+  },
+  {
+    "route": "/parametrage/mamas",
+    "module": "mamas"
+  },
+  {
+    "route": "/parametrage/permissions",
+    "module": "permissions"
+  },
+  {
+    "route": "/parametrage/api-keys",
+    "module": "apikeys"
+  },
+  {
+    "route": "/parametrage/api-fournisseurs",
+    "module": "fournisseurs"
+  },
+  {
+    "route": "/parametrage/settings",
+    "module": "settings"
+  },
+  {
+    "route": "/parametrage/zones-stock",
+    "module": "zones_stock"
+  },
+  {
+    "route": "/parametrage/access",
+    "module": "access"
+  },
+  {
+    "route": "/consentements",
+    "module": "parametrage"
+  },
+  {
+    "route": "/aide",
+    "module": "aide"
+  },
+  {
+    "route": "/feedback",
+    "module": "feedback"
+  },
+  {
+    "route": "/stats",
+    "module": "stats"
+  },
+  {
+    "route": "/planning-module",
+    "module": "planning"
+  },
+  {
+    "route": "/parametrage/roles",
+    "module": "roles"
+  },
+  {
+    "route": "/licences",
+    "module": "licences"
+  },
+  {
+    "route": "/logs",
+    "module": "logs"
+  },
+  {
+    "route": "/audit",
+    "module": "audit"
+  },
+  {
+    "route": "/supervision",
+    "module": "dashboard"
+  },
+  {
+    "route": "/supervision/comparateur",
+    "module": "fiches_techniques"
+  },
+  {
+    "route": "/debug/auth",
+    "module": "dashboard"
+  },
+  {
+    "route": "/debug/access",
+    "module": "dashboard"
+  }
+]

@@ -15,7 +15,7 @@ export default function useProduitsUtilises() {
     start.setDate(start.getDate() - 30);
     const { data, error } = await supabase
       .from('requisitions')
-      .select('quantite, produit:produits(id, nom, photo_url)')
+      .select(`quantite, date_requisition, produit:produits(id, nom, photo_url)`) 
       .eq('mama_id', mama_id)
       .gte('date_requisition', start.toISOString().slice(0, 10));
     setLoading(false);

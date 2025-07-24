@@ -31,7 +31,9 @@ export function useRequisitions() {
     if (!id || !mama_id) return null;
     const { data, error } = await supabase
       .from("requisitions")
-      .select("*, lignes:requisition_lignes(*)")
+      .select(
+        "*, lignes:requisition_lignes(*, produit:produits(id, nom, photo_url))"
+      )
       .eq("id", id)
       .eq("mama_id", mama_id)
       .single();

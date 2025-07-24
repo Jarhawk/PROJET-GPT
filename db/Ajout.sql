@@ -133,3 +133,20 @@ LEFT JOIN familles f2 ON f2.id = p.famille_id
 LEFT JOIN unites u ON u.id = p.unite_id
 WHERE p.actif = true;
 
+-- Ajout colonne photo_url pour stocker l'URL de la photo produit
+ALTER TABLE produits ADD COLUMN IF NOT EXISTS photo_url text;
+
+-- Vue simplifiée pour les réquisitions avec informations produit
+DROP VIEW IF EXISTS v_requisitions;
+CREATE VIEW v_requisitions AS
+SELECT
+  r.id,
+  r.quantite,
+  r.date_requisition,
+  r.mama_id,
+  r.produit_id,
+  p.nom AS produit_nom,
+  p.photo_url
+FROM requisitions r
+JOIN produits p ON p.id = r.produit_id;
+

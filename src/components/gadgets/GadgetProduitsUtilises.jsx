@@ -20,9 +20,11 @@ export default function GadgetProduitsUtilises() {
         {data.map((p) => (
           <li key={p.id} className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              {p.photo_url && (
-                <img src={p.photo_url} alt={p.nom} className="w-6 h-6 rounded object-cover" />
-              )}
+              <img
+                src={p.photo_url || "/icons/icon-128x128.png"}
+                alt={p.nom}
+                className="w-6 h-6 rounded object-cover"
+              />
               <span>{p.nom}</span>
             </div>
             <span className="font-semibold">{p.total}</span>

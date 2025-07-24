@@ -18,9 +18,10 @@ const PAGE_SIZE = 50;
 export default function Utilisateurs() {
   const {
     users,
+    loading,
+    error,
     fetchUsers,
     toggleUserActive,
-    deleteUser,
     exportUsersToExcel,
     exportUsersToCSV,
   } = useUtilisateurs();
@@ -83,13 +84,6 @@ export default function Utilisateurs() {
     toast.success(u.actif ? "Utilisateur désactivé" : "Utilisateur réactivé");
   };
 
-  const handleDelete = async (u) => {
-    if (window.confirm(`Supprimer l'utilisateur ${u.nom} ?`)) {
-      await deleteUser(u.id);
-      await refreshList();
-      toast.success("Utilisateur supprimé.");
-    }
-  };
 
   return (
     <div className="p-6 container mx-auto text-shadow">
@@ -156,6 +150,10 @@ export default function Utilisateurs() {
         <Button variant="outline" onClick={() => exportUsersToExcel(filtres)}>Export Excel</Button>
         <Button variant="outline" onClick={() => exportUsersToCSV(filtres)}>Export CSV</Button>
       </div>
+      {error && (
+        <div className="text-red-500 mb-2">{error.message}</div>
+      )}
+      {loading && <LoadingSpinner message="Chargement..." />}
       <TableContainer className="mb-4">
         <Motion.table
           initial={{ opacity: 0 }}
@@ -183,9 +181,15 @@ export default function Utilisateurs() {
                 setShowForm(true);
               }}
               onToggleActive={() => handleToggleActive(u)}
-              onDelete={() => handleDelete(u)}
             />
           ))}
+          {paged.length === 0 && (
+            <tr>
+              <td colSpan={6} className="py-4 text-center text-gray-400">
+                Aucun utilisateur.
+              </td>
+            </tr>
+          )}
         </tbody>
         </Motion.table>
       </TableContainer>

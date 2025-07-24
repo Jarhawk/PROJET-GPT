@@ -199,7 +199,7 @@ export default function Router() {
           <Route
             path="dashboard"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute accessKey="dashboard">
                 <Dashboard />
               </ProtectedRoute>
             }

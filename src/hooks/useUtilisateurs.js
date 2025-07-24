@@ -9,6 +9,7 @@ import { exportToCSV } from "@/lib/export/exportHelpers";
 export function useUtilisateurs() {
   const { mama_id, isSuperadmin } = useAuth();
   const [users, setUsers] = useState([]);
+  const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -18,10 +19,8 @@ export function useUtilisateurs() {
     setLoading(true);
     setError(null);
     let query = supabase
-      .from("utilisateurs")
-      .select(
-        `id, nom, email, auth_id, role_id, actif, mama_id, access_rights, role:roles!fk_utilisateurs_role_id(nom, access_rights)`
-      )
+      .from("utilisateurs_complets")
+      .select("*")
       .order("nom", { ascending: true });
 
     if (!isSuperadmin) query = query.eq("mama_id", mama_id);
@@ -31,6 +30,18 @@ export function useUtilisateurs() {
     const { data, error } = await query;
     const cleaned = (Array.isArray(data) ? data : []);
     setUsers(cleaned);
+    setLoading(false);
+    if (error) setError(error);
+    return data || [];
+  }
+
+  async function fetchRoles() {
+    setLoading(true);
+    setError(null);
+    let query = supabase.from("roles").select("id, nom").order("nom", { ascending: true });
+    if (!isSuperadmin) query = query.eq("mama_id", mama_id);
+    const { data, error } = await query;
+    setRoles(Array.isArray(data) ? data : []);
     setLoading(false);
     if (error) setError(error);
     return data || [];
@@ -46,7 +57,6 @@ export function useUtilisateurs() {
     if (user.auth_id === undefined) user.auth_id = null;
     setLoading(true);
     setError(null);
-    // charge les droits associés au rôle
     let rights = {};
     const { data: roleData } = await supabase
       .from("roles")
@@ -58,9 +68,15 @@ export function useUtilisateurs() {
       return { error: "Rôle interdit" };
     }
     rights = roleData?.access_rights || {};
+    const now = new Date().toISOString();
     const { error } = await supabase
       .from("utilisateurs")
-      .insert([{ ...user, mama_id: targetMama, access_rights: rights }]);
+      .upsert({
+        ...user,
+        mama_id: targetMama,
+        access_rights: rights,
+        updated_at: now,
+      });
     if (error) setError(error);
     setLoading(false);
     await fetchUsers();
@@ -89,12 +105,15 @@ export function useUtilisateurs() {
       }
       rights = roleData?.access_rights ?? null;
     }
-    let query = supabase
+    const now = new Date().toISOString();
+    const { error } = await supabase
       .from("utilisateurs")
-      .update({ ...updateFields, ...(rights ? { access_rights: rights } : {}) })
-      .eq("id", id);
-    if (!isSuperadmin) query = query.eq("mama_id", mama_id);
-    const { error } = await query;
+      .upsert({
+        id,
+        ...updateFields,
+        ...(rights ? { access_rights: rights } : {}),
+        updated_at: now,
+      });
     if (error) setError(error);
     setLoading(false);
     await fetchUsers();
@@ -181,9 +200,11 @@ export function useUtilisateurs() {
 
   return {
     users,
+    roles,
     loading,
     error,
     fetchUsers,
+    fetchRoles,
     addUser,
     updateUser,
     toggleUserActive,

@@ -9,6 +9,7 @@ const query = {
   ilike: vi.fn(() => query),
   insert: vi.fn(() => query),
   update: vi.fn(() => query),
+  upsert: vi.fn(() => query),
   delete: vi.fn(() => query),
   then: (fn) => Promise.resolve(fn({ data: [], error: null })),
 };
@@ -31,6 +32,7 @@ beforeEach(async () => {
   query.ilike.mockClear();
   query.insert.mockClear();
   query.update.mockClear();
+  query.upsert.mockClear();
   query.delete.mockClear();
 });
 
@@ -39,8 +41,8 @@ test('fetchUsers applies filters', async () => {
   await act(async () => {
     await result.current.fetchUsers({ search: 'foo', actif: true });
   });
-  expect(fromMock).toHaveBeenCalledWith('utilisateurs');
-  expect(query.select).toHaveBeenCalledWith('id, nom, actif, mama_id, access_rights');
+  expect(fromMock).toHaveBeenCalledWith('utilisateurs_complets');
+  expect(query.select).toHaveBeenCalledWith('*');
   expect(query.order).toHaveBeenCalledWith('nom', { ascending: true });
   expect(query.eq.mock.calls).toContainEqual(['mama_id', 'm1']);
   expect(query.ilike).toHaveBeenCalledWith('nom', '%foo%');
@@ -52,7 +54,7 @@ test('addUser inserts with current mama_id', async () => {
   await act(async () => {
     await result.current.addUser({ email: 'a' });
   });
-  expect(query.insert).toHaveBeenCalledWith([{ email: 'a', mama_id: 'm1' }]);
+  expect(query.upsert).toHaveBeenCalledWith(expect.objectContaining({ email: 'a', mama_id: 'm1' }));
 });
 
 test('superadmin bypasses mama filter', async () => {
@@ -63,10 +65,8 @@ test('superadmin bypasses mama filter', async () => {
     await result.current.addUser({ email: 'b', mama_id: 'm2' });
     await result.current.updateUser('id1', { role: 'user' });
   });
-  expect(query.insert).toHaveBeenCalledWith([{ email: 'b', mama_id: 'm2' }]);
-  expect(query.update).toHaveBeenCalledWith({ role: 'user' });
-  expect(query.eq).toHaveBeenCalledWith('id', 'id1');
-  expect(query.eq.mock.calls.some(c => c[0] === 'mama_id')).toBe(false);
+  expect(query.upsert).toHaveBeenCalledWith(expect.objectContaining({ email: 'b', mama_id: 'm2' }));
+  expect(query.upsert).toHaveBeenCalledTimes(2);
 });
 
 test('exportUsersToCSV calls helper', () => {

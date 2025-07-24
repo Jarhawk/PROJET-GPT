@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import toast from "react-hot-toast";
+import { MODULES } from "@/config/modules";
 
 export default function UtilisateurForm({ utilisateur, onClose }) {
   const { addUser, updateUser } = useUtilisateurs();
@@ -22,6 +23,9 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
   const [roleId, setRoleId] = useState(utilisateur?.role_id || "");
   const [mama, setMama] = useState(utilisateur?.mama_id || myMama);
   const [actif, setActif] = useState(utilisateur?.actif ?? true);
+  const [rightsText, setRightsText] = useState(
+    JSON.stringify(utilisateur?.access_rights || {}, null, 2)
+  );
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -41,6 +45,13 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
       role_id: roleId,
       actif,
       mama_id: mama,
+      access_rights: (() => {
+        try {
+          return JSON.parse(rightsText || "{}") || {};
+        } catch {
+          return {};
+        }
+      })(),
     };
     try {
       if (utilisateur?.id) {
@@ -119,6 +130,14 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
         <input id="actif" type="checkbox" checked={actif} onChange={e => setActif(e.target.checked)} />
         <Label htmlFor="actif" className="!mb-0">Actif</Label>
       </label>
+      <Label htmlFor="rights">Droits personnalisés (JSON)</Label>
+      <textarea
+        id="rights"
+        className="input w-full font-mono mb-2"
+        value={rightsText}
+        onChange={e => setRightsText(e.target.value)}
+        rows={MODULES.length / 2}
+      />
       <div className="flex gap-2 mt-4">
         <PrimaryButton type="submit" disabled={loading}>{utilisateur ? "Modifier" : "Ajouter"}</PrimaryButton>
         <SecondaryButton type="button" onClick={onClose}>Annuler</SecondaryButton>

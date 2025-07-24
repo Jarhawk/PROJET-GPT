@@ -14,6 +14,14 @@ export default function UtilisateurDetail({ utilisateur, onClose }) {
         <h2 className="font-bold text-xl mb-4">{utilisateur.nom || utilisateur.email}</h2>
         <div><b>Rôle :</b> {utilisateur.role}</div>
         <div><b>Actif :</b> {utilisateur.actif ? "Oui" : "Non"}</div>
+        {utilisateur.access_rights && (
+          <div>
+            <b>Droits :</b>
+            <pre className="text-xs whitespace-pre-wrap max-h-40 overflow-auto bg-black/20 p-2 rounded">
+              {JSON.stringify(utilisateur.access_rights, null, 2)}
+            </pre>
+          </div>
+        )}
         <div>
           <b>Historique :</b>
           <ul className="list-disc pl-6">

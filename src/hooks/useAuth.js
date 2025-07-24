@@ -15,6 +15,7 @@ export function useAuth() {
   return {
     session: ctx.session,
     userData: ctx.userData,
+    user_id: ctx.user_id ?? ctx.session?.user?.id ?? null,
     mama_id: ctx.userData?.mama_id ?? ctx.mama_id ?? null,
     nom: ctx.userData?.nom ?? ctx.nom,
     access_rights: ctx.userData?.access_rights ?? ctx.access_rights ?? {},

@@ -68,7 +68,7 @@ export const AuthProvider = ({ children }) => {
       .from("utilisateurs")
       .select(
         `id, nom, mama_id, email, actif, access_rights, role_id, auth_id,
-        role:roles!fk_utilisateurs_role_id(id, nom, access_rights)`
+        role:roles!fk_utilisateurs_role_id(nom, access_rights)`
       )
       .eq("auth_id", userId)
       .maybeSingle();
@@ -78,7 +78,7 @@ export const AuthProvider = ({ children }) => {
         .from("utilisateurs")
         .select(
           `id, nom, mama_id, email, actif, access_rights, role_id, auth_id,
-          role:roles!fk_utilisateurs_role_id(id, nom, access_rights)`
+          role:roles!fk_utilisateurs_role_id(nom, access_rights)`
         )
         .eq("email", email)
         .maybeSingle();

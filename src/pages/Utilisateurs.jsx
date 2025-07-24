@@ -29,7 +29,9 @@ export default function Utilisateurs() {
   }, [authLoading, mama_id, fetchUsers]);
 
   const filtres = users.filter(u =>
-    (!search || u.nom?.toLowerCase().includes(search.toLowerCase())) &&
+    (!search ||
+      u.nom?.toLowerCase().includes(search.toLowerCase()) ||
+      u.email?.toLowerCase().includes(search.toLowerCase())) &&
     (actifFilter === "all" || (actifFilter === "true" ? u.actif : !u.actif))
   );
   const nbPages = Math.ceil(filtres.length / PAGE_SIZE);
@@ -106,7 +108,7 @@ export default function Utilisateurs() {
                   {u.nom}
                 </Button>
               </td>
-              <td className="border px-4 py-2">{u.role}</td>
+              <td className="border px-4 py-2">{u.role?.nom || u.role}</td>
               <td className="border px-4 py-2">
                 <span className={u.actif ? "badge badge-admin" : "badge badge-user"}>
                   {u.actif ? "Actif" : "Inactif"}

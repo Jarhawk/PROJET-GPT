@@ -11,7 +11,7 @@ export default function useDerniersAcces() {
   const fetchData = useCallback(async () => {
     if (!mama_id) return [];
     setLoading(true);
-    const { data, error } = await supabase
+    const { data, error, status } = await supabase
       .from('logs_securite')
       .select(
         'utilisateur_id, created_at, utilisateur:utilisateurs!logs_securite_utilisateur_id_fkey(email, auth_id)'
@@ -19,12 +19,13 @@ export default function useDerniersAcces() {
       .eq('mama_id', mama_id)
       .order('created_at', { ascending: false })
       .limit(50);
-    setLoading(false);
     if (error) {
-      console.error(error);
+      console.warn('useDerniersAcces', { status, error, data }); // ✅ Correction Codex
       setData([]);
+      setLoading(false);
       return [];
     }
+    setLoading(false);
     const seen = {};
     const list = [];
     for (const row of data || []) {

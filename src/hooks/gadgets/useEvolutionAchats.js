@@ -13,19 +13,21 @@ export default function useEvolutionAchats() {
     setLoading(true);
     const start = new Date();
     start.setMonth(start.getMonth() - 12);
-    const { data, error } = await supabase
+    const filterDate = new Date(start.getFullYear(), start.getMonth(), 1).toISOString(); // ✅ Correction Codex
+    const { data, error, status } = await supabase
       .from('v_evolution_achats')
       .select('mama_id, mois, montant')
       .eq('mama_id', mama_id)
-      .gte('mois', start.toISOString().slice(0, 7))
+      .gte('mois', filterDate) // ✅ Correction Codex
       .order('mois', { ascending: true });
-    setLoading(false);
     if (error) {
-      console.error(error);
+      console.warn('useEvolutionAchats', { status, error, data }); // ✅ Correction Codex
       setData([]);
+      setLoading(false);
       return [];
     }
     setData(data || []);
+    setLoading(false);
     if (import.meta.env.DEV) console.log('Chargement dashboard terminé');
     return data || [];
   }, [mama_id, supabase]);

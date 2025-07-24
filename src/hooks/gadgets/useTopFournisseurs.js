@@ -15,23 +15,31 @@ export default function useTopFournisseurs() {
     start.setDate(1);
     const end = new Date(start);
     end.setMonth(start.getMonth() + 1);
-    const { data, error } = await supabase
+    const { data, error, status } = await supabase
       .from('v_top_fournisseurs')
-      .select('fournisseur_id, montant, fournisseurs(id, nom)')
+      .select('fournisseur_id, montant') // ✅ Correction Codex
       .eq('mama_id', mama_id)
       .order('montant', { ascending: false })
       .limit(3);
-    setLoading(false);
     if (error) {
-      console.error(error);
+      console.warn('useTopFournisseurs', { status, error, data }); // ✅ Correction Codex
       setData([]);
+      setLoading(false);
       return [];
     }
+    const ids = (data || []).map((r) => r.fournisseur_id);
+    const { data: names } = await supabase
+      .from('fournisseurs')
+      .select('id, nom')
+      .eq('mama_id', mama_id)
+      .in('id', ids);
+    const nameMap = Object.fromEntries((names || []).map((n) => [n.id, n.nom]));
     const list = (data || []).map((row) => ({
       id: row.fournisseur_id,
-      nom: row.fournisseurs?.nom,
+      nom: nameMap[row.fournisseur_id] || '',
       total: Number(row.montant || 0),
-    }));
+    })); // ✅ Correction Codex
+    setLoading(false);
     setData(list);
     if (import.meta.env.DEV) console.log('Chargement dashboard terminé');
     return list;

@@ -13,17 +13,18 @@ export default function useProduitsUtilises() {
     setLoading(true);
     const start = new Date();
     start.setDate(start.getDate() - 30);
-    const { data, error } = await supabase
+    const { data, error, status } = await supabase
       .from('requisitions')
       .select(`quantite, date_requisition, produit:produit_id(id, nom, image)`)
       .eq('mama_id', mama_id)
       .gte('date_requisition', start.toISOString().slice(0, 10));
-    setLoading(false);
     if (error) {
-      console.error(error);
+      console.warn('useProduitsUtilises', { status, error, data }); // ✅ Correction Codex
       setData([]);
+      setLoading(false);
       return [];
     }
+    setLoading(false);
     const totals = {};
     (data || []).forEach((r) => {
       const id = r.produit?.id;

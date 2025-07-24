@@ -13,7 +13,7 @@ export default function useConsoMoyenne() {
     setLoading(true);
     const start = new Date();
     start.setDate(start.getDate() - 7);
-    const { data, error } = await supabase
+    const { data, error, status } = await supabase
       .from('stock_mouvements')
       .select('date, quantite')
       .eq('mama_id', mama_id)
@@ -22,7 +22,7 @@ export default function useConsoMoyenne() {
       .order('date', { ascending: true });
     setLoading(false);
     if (error) {
-      console.error(error);
+      console.warn('useConsoMoyenne', { status, error, data }); // ✅ Correction Codex
       setAvg(0);
       return 0;
     }

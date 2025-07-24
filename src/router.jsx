@@ -195,6 +195,9 @@ export default function Router() {
         <Route path="/cgv" element={<Cgv />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/licence" element={<Licence />} />
+        {/* Routes internes protégées par les droits utilisateurs.
+            Chaque sous-route est enveloppée dans <ProtectedRoute accessKey="...">.
+            La clé correspond au module autorisé dans access_rights. */}
         <Route path="/" element={<Layout />}>
           <Route
             path="dashboard"

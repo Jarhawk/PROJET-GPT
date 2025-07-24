@@ -49,6 +49,13 @@ export const AuthProvider = ({ children }) => {
   };
 
 
+  // Chargement des données utilisateur et de son rôle depuis Supabase.
+  // On récupère d'abord l'utilisateur via son auth_id, en forçant
+  // la relation explicite vers la table `roles` pour obtenir les droits.
+  // Les droits effectifs sont la fusion de ceux du rôle et de ceux
+  // éventuellement stockés dans `utilisateurs.access_rights`.
+  // Si aucun rôle n'est relié (role null), on logge un warning et
+  // on continue avec des droits vides pour éviter un crash de l'app.
   async function fetchUserData(userId, email) {
     if (!userId) {
       console.warn("fetchUserData called without userId");
@@ -59,14 +66,18 @@ export const AuthProvider = ({ children }) => {
     if (import.meta.env.DEV) console.log("fetchUserData", userId);
     let { data, error } = await supabase
       .from("utilisateurs")
-      .select("id, nom, mama_id, role_id, access_rights, actif, email, role:roles(id, nom, access_rights)")
+      .select(
+        "id, nom, mama_id, role_id, access_rights, actif, email, role:roles!fk_utilisateurs_role_id(id, nom, access_rights)"
+      )
       .eq("auth_id", userId)
       .maybeSingle();
 
     if (!data && !error && email) {
       const res = await supabase
         .from("utilisateurs")
-        .select("id, nom, mama_id, role_id, access_rights, actif, email, role:roles(id, nom, access_rights)")
+        .select(
+          "id, nom, mama_id, role_id, access_rights, actif, email, role:roles!fk_utilisateurs_role_id(id, nom, access_rights)"
+        )
         .eq("email", email)
         .maybeSingle();
       data = res.data;
@@ -91,13 +102,15 @@ export const AuthProvider = ({ children }) => {
       return;
     }
 
-    if (data.role === null) {
-      console.error(
+    let roleData = data.role;
+    if (roleData === null) {
+      console.warn(
         "fetchUserData: missing role relationship for user",
         data.id
       );
+      roleData = { nom: "inconnu", access_rights: {} };
     }
-    const roleRights = extractAccessRightsFromRole(data.role);
+    const roleRights = extractAccessRightsFromRole(roleData);
     const userRights = data.access_rights || {};
     const rights = mergeRights(roleRights, userRights);
 
@@ -110,7 +123,7 @@ export const AuthProvider = ({ children }) => {
       nom: data.nom,
       access_rights: rights,
       role_id: data.role_id,
-      role: data.role,
+      role: roleData,
     };
     if (import.meta.env.DEV) {
       console.log('Loaded user', { nom: newData.nom, rights: newData.access_rights });

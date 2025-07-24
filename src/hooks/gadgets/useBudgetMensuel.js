@@ -8,9 +8,9 @@ export default function useBudgetMensuel() {
 
   const periode = new Date().toISOString().slice(0, 7);
 
-  const { data, isLoading, refetch } = useQuery(
-    ['budgetMensuel', mama_id, periode],
-    async () => {
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ['budgetMensuel', mama_id, periode],
+    queryFn: async () => {
       if (!mama_id) return { cible: 0, reel: 0 };
       const { data, error } = await supabase.rpc('fn_calc_budgets', {
         mama_id_param: mama_id,
@@ -25,8 +25,8 @@ export default function useBudgetMensuel() {
       });
       return { cible, reel };
     },
-    { staleTime: 1000 * 60 * 5 }
-  );
+    staleTime: 1000 * 60 * 5,
+  });
 
   return { ...(data || { cible: 0, reel: 0 }), loading: isLoading, refresh: refetch };
 }

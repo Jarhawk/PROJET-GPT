@@ -8,7 +8,7 @@ export default function ProtectedRoute({ children, accessKey }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!session || !userData || !userData.role || pending || loading) return;
+    if (!session || !userData || pending || loading) return;
 
     if (userData.actif === false) {
       navigate("/blocked", { replace: true });
@@ -28,6 +28,6 @@ export default function ProtectedRoute({ children, accessKey }) {
       navigate("/unauthorized", { replace: true });
     }
   }, [session, userData, pending, loading, accessKey, navigate, hasAccess]);
-  if (!session || pending || loading || !userData || !userData.role) return <LoadingScreen />;
+  if (!session || pending || loading || !userData) return <LoadingScreen />;
   return children;
 }

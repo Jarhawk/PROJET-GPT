@@ -11,13 +11,15 @@ export function useAuth() {
     );
   }
   const loading = ctx.loading ?? ctx.isLoading;
+  const roleName = ctx.userData?.role?.nom ?? ctx.role?.nom ?? ctx.role ?? null;
   return {
     session: ctx.session,
     userData: ctx.userData,
     mama_id: ctx.userData?.mama_id ?? ctx.mama_id ?? null,
     nom: ctx.userData?.nom ?? ctx.nom,
     access_rights: ctx.userData?.access_rights ?? ctx.access_rights ?? {},
-    role: ctx.userData?.role ?? ctx.role ?? null,
+    role: roleName,
+    roleData: ctx.userData?.role ?? ctx.roleData ?? null,
     email: ctx.userData?.email ?? ctx.email,
     actif: ctx.userData?.actif ?? ctx.actif,
     isSuperadmin: ctx.isSuperadmin,

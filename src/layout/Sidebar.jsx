@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { routePreloadMap } from "@/router";
 import useAuth from "@/hooks/useAuth";
 import toast from "react-hot-toast";
+import { Badge } from "@/components/ui/badge";
 import {
   Boxes,
   ClipboardList,
@@ -36,6 +37,7 @@ export default function Sidebar() {
     loading,
     user,
     userData,
+    role,
     mama_id,
     logout,
     session,
@@ -46,7 +48,7 @@ export default function Sidebar() {
     console.log("Sidebar", { user, mama_id, access_rights });
   }
 
-  if (loading || !user || !userData || !access_rights || !userData.role) {
+  if (loading || !user || !userData || !access_rights) {
     return null;
   }
 
@@ -205,6 +207,11 @@ export default function Sidebar() {
       {session && (
         <div className="mt-6 border-t border-white/20 pt-4 text-sm flex flex-col gap-2">
           <span>Bienvenue, {userData.nom || user?.email}</span>
+          {role ? (
+            <Badge color="gray">{role}</Badge>
+          ) : (
+            <Badge color="red">[Rôle inconnu]</Badge>
+          )}
           <button
             onClick={() => {
               logout();

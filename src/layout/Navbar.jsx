@@ -90,7 +90,7 @@ export default function Navbar() {
               {session.user.email}
             </span>
             <span className="text-xs bg-mamastock-gold text-black px-3 py-1 rounded-full capitalize shadow">
-              {role || "chargement..."}
+              {role || '[Rôle inconnu]'}
             </span>
             {mama_id && (
               <span className="text-xs bg-sky-600 text-white px-3 py-1 rounded-full shadow">

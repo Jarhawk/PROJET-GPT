@@ -1,26 +1,28 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUtilisateurs } from "@/hooks/useUtilisateurs";
-import { Button } from "@/components/ui/button";
+import { useRoles } from "@/hooks/useRoles";
+import useAuth from "@/hooks/useAuth";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import toast from "react-hot-toast";
 
-const ROLES = [
-  { value: "superadmin", label: "Superadmin" },
-  { value: "admin", label: "Admin" },
-  { value: "user", label: "Utilisateur" },
-];
-
 export default function UtilisateurForm({ utilisateur, onClose }) {
   const { addUser, updateUser } = useUtilisateurs();
+  const { roles, fetchRoles } = useRoles();
+  const { mama_id } = useAuth();
   const [nom, setNom] = useState(utilisateur?.nom || "");
-  const [role, setRole] = useState(utilisateur?.role || "user");
+  const [email, setEmail] = useState(utilisateur?.email || "");
+  const [roleId, setRoleId] = useState(utilisateur?.role_id || "");
   const [actif, setActif] = useState(utilisateur?.actif ?? true);
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchRoles();
+  }, [fetchRoles]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,8 +30,10 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
     setLoading(true);
     const data = {
       nom,
-      role,
+      email,
+      role_id: roleId,
       actif,
+      mama_id,
       ...(password && { password }),
     };
     try {
@@ -64,14 +68,22 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
         placeholder="Nom"
         required
       />
+      <Input
+        className="mb-2"
+        type="email"
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+        placeholder="Email"
+        required
+      />
       <Select
         className="mb-2"
-        value={role}
-        onChange={e => setRole(e.target.value)}
+        value={roleId}
+        onChange={e => setRoleId(e.target.value)}
         required
       >
-        {ROLES.map(r => (
-          <option key={r.value} value={r.value}>{r.label}</option>
+        {roles.map(r => (
+          <option key={r.id} value={r.id}>{r.nom}</option>
         ))}
       </Select>
       <label className="flex items-center gap-2 mb-2">

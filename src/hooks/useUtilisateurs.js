@@ -20,7 +20,7 @@ export function useUtilisateurs() {
     let query = supabase
       .from("utilisateurs")
       .select(
-        `id, nom, email, auth_id, role_id, actif, mama_id, access_rights, role:roles!fk_utilisateurs_role_id(id, nom)`
+        `id, nom, email, auth_id, role_id, actif, mama_id, access_rights, role:roles!fk_utilisateurs_role_id(nom, access_rights)`
       )
       .order("nom", { ascending: true });
 
@@ -41,6 +41,9 @@ export function useUtilisateurs() {
     const targetMama = isSuperadmin ? user.mama_id : mama_id;
     if (!targetMama) return { error: "Aucun mama_id" };
     if (!user.role_id) return { error: "Rôle manquant" };
+    if (!user.email) return { error: "Email manquant" };
+    if (user.actif === undefined) user.actif = true;
+    if (user.auth_id === undefined) user.auth_id = null;
     setLoading(true);
     setError(null);
     // charge les droits associés au rôle
@@ -68,6 +71,11 @@ export function useUtilisateurs() {
     if (!mama_id && !isSuperadmin) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
+    if (updateFields.email !== undefined && !updateFields.email) {
+      setLoading(false);
+      return { error: "Email manquant" };
+    }
+    if (updateFields.auth_id === undefined) updateFields.auth_id = null;
     let rights = null;
     if (updateFields.role_id) {
       const { data: roleData } = await supabase

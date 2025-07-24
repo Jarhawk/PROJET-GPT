@@ -103,6 +103,10 @@ const Comparatif = lazyWithPreload(() => import("@/pages/fournisseurs/comparatif
 const MenuEngineering = lazyWithPreload(() => import("@/pages/MenuEngineering.jsx"));
 const EngineeringMenu = lazyWithPreload(() => import("@/pages/EngineeringMenu.jsx"));
 const Logout = lazyWithPreload(() => import("@/pages/auth/Logout.jsx"));
+const Stats = lazyWithPreload(() => import("@/pages/stats/Stats.jsx"));
+const Licences = lazyWithPreload(() => import("@/pages/Licences.jsx"));
+const Roles = lazyWithPreload(() => import("@/pages/parametrage/Roles.jsx"));
+const PlanningModule = lazyWithPreload(() => import("@/pages/PlanningModule.jsx"));
 
 export const routePreloadMap = {
   '/dashboard': Dashboard.preload,
@@ -146,6 +150,10 @@ export const routePreloadMap = {
   '/logs': Logs.preload,
   '/aide': AideContextuelle.preload,
   '/feedback': Feedback.preload,
+  '/stats': Stats.preload,
+  '/planning-module': PlanningModule.preload,
+  '/parametrage/roles': Roles.preload,
+  '/licences': Licences.preload,
 };
 
 
@@ -460,6 +468,22 @@ export default function Router() {
           <Route
             path="/feedback"
             element={<ProtectedRoute accessKey="feedback"><Feedback /></ProtectedRoute>}
+          />
+          <Route
+            path="/stats"
+            element={<ProtectedRoute accessKey="stats"><Stats /></ProtectedRoute>}
+          />
+          <Route
+            path="/planning-module"
+            element={<ProtectedRoute accessKey="planning"><PlanningModule /></ProtectedRoute>}
+          />
+          <Route
+            path="/parametrage/roles"
+            element={<ProtectedRoute accessKey="roles"><Roles /></ProtectedRoute>}
+          />
+          <Route
+            path="/licences"
+            element={<ProtectedRoute accessKey="licences"><Licences /></ProtectedRoute>}
           />
           <Route
             path="/logs"

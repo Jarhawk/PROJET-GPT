@@ -1,0 +1,256 @@
+{
+  "achats": [
+    "achats/AchatDetail.jsx",
+    "achats/AchatForm.jsx",
+    "achats/Achats.jsx"
+  ],
+  "bons_livraison": [
+    "bons_livraison/BLCreate.jsx",
+    "bons_livraison/BLDetail.jsx",
+    "bons_livraison/BLForm.jsx",
+    "bons_livraison/BonsLivraison.jsx"
+  ],
+  "planning_previsionnel": [
+    "Planning.jsx",
+    "PlanningDetail.jsx",
+    "PlanningForm.jsx",
+    "PlanningModule.jsx",
+    "planning/SimulationPlanner.jsx"
+  ],
+  "fiches_techniques": [
+    "fiches/FicheDetail.jsx",
+    "fiches/FicheForm.jsx",
+    "fiches/Fiches.jsx",
+    "stats/StatsFiches.jsx",
+    "supervision/ComparateurFiches.jsx"
+  ],
+  "stats": [
+    "stats/Stats.jsx",
+    "stats/StatsAdvanced.jsx",
+    "stats/StatsConsolidation.jsx",
+    "stats/StatsCostCenters.jsx",
+    "stats/StatsCostCentersPivot.jsx",
+    "stats/StatsFiches.jsx",
+    "stats/StatsStock.jsx"
+  ],
+  "consolidation": [
+    "Consolidation.jsx",
+    "stats/StatsConsolidation.jsx"
+  ],
+  "menu_engineering": [
+    "EngineeringMenu.jsx",
+    "MenuEngineering.jsx",
+    "analyse/MenuEngineering.jsx",
+    "menus/MenuDetail.jsx",
+    "menus/MenuDuJour.jsx",
+    "menus/MenuDuJourDetail.jsx",
+    "menus/MenuDuJourForm.jsx",
+    "menus/MenuForm.jsx",
+    "menus/MenuPDF.jsx",
+    "menus/Menus.jsx",
+    "simulation/SimulationMenu.jsx"
+  ],
+  "zones_stock": [
+    "Stock.jsx",
+    "inventaire/InventaireZones.jsx",
+    "parametrage/Zones.jsx",
+    "stats/StatsStock.jsx",
+    "stock/Inventaire.jsx",
+    "stock/InventaireForm.jsx",
+    "stock/MouvementForm.jsx",
+    "stock/Mouvements.jsx",
+    "stock/Transferts.jsx"
+  ],
+  "licences": [
+    "Licences.jsx",
+    "legal/Licence.jsx"
+  ],
+  "parametrage": [
+    "parametrage/APIKeys.jsx",
+    "parametrage/AccessRights.jsx",
+    "parametrage/CentreCoutForm.jsx",
+    "parametrage/ExportComptaPage.jsx",
+    "parametrage/ExportUserData.jsx",
+    "parametrage/InvitationsEnAttente.jsx",
+    "parametrage/InviteUser.jsx",
+    "parametrage/MamaForm.jsx",
+    "parametrage/MamaSettingsForm.jsx",
+    "parametrage/Mamas.jsx",
+    "parametrage/Parametrage.jsx",
+    "parametrage/Permissions.jsx",
+    "parametrage/PermissionsAdmin.jsx",
+    "parametrage/PermissionsForm.jsx",
+    "parametrage/RGPDConsentForm.jsx",
+    "parametrage/RoleForm.jsx",
+    "parametrage/Roles.jsx",
+    "parametrage/UtilisateurForm.jsx",
+    "parametrage/Utilisateurs.jsx",
+    "parametrage/Zones.jsx"
+  ],
+  "feedback": [
+    "Feedback.jsx"
+  ],
+  "logs": [
+    "Logs.jsx",
+    "auth/Login.jsx",
+    "auth/Logout.jsx",
+    "catalogue/CatalogueSyncViewer.jsx"
+  ],
+  "audit": [
+    "AuditTrail.jsx"
+  ],
+  "dashboard": [
+    "Dashboard.jsx",
+    "analytique/AnalytiqueDashboard.jsx",
+    "dashboard/DashboardBuilder.jsx"
+  ],
+  "produits": [
+    "produits/ProduitDetail.jsx",
+    "produits/ProduitForm.jsx",
+    "produits/Produits.jsx"
+  ],
+  "fournisseurs": [
+    "fournisseurs/ApiFournisseurForm.jsx",
+    "fournisseurs/ApiFournisseurs.jsx",
+    "fournisseurs/FournisseurApiSettingsForm.jsx",
+    "fournisseurs/FournisseurCreate.jsx",
+    "fournisseurs/FournisseurDetail.jsx",
+    "fournisseurs/FournisseurDetailPage.jsx",
+    "fournisseurs/FournisseurForm.jsx",
+    "fournisseurs/Fournisseurs.jsx",
+    "fournisseurs/comparatif/ComparatifPrix.jsx",
+    "fournisseurs/comparatif/PrixFournisseurs.jsx"
+  ],
+  "factures": [
+    "factures/FactureCreate.jsx",
+    "factures/FactureDetail.jsx",
+    "factures/FactureForm.jsx",
+    "factures/Factures.jsx",
+    "factures/ImportFactures.jsx"
+  ],
+  "receptions": [
+    "receptions/Receptions.jsx"
+  ],
+  "inventaires": [
+    "inventaire/EcartInventaire.jsx",
+    "inventaire/Inventaire.jsx",
+    "inventaire/InventaireDetail.jsx",
+    "inventaire/InventaireForm.jsx",
+    "inventaire/InventaireZones.jsx",
+    "mobile/MobileInventaire.jsx",
+    "stock/Inventaire.jsx",
+    "stock/InventaireForm.jsx"
+  ],
+  "mouvements": [
+    "mobile/MobileMouvement.jsx",
+    "mouvements/MouvementForm.jsx",
+    "mouvements/Mouvements.jsx",
+    "stock/MouvementForm.jsx",
+    "stock/Mouvements.jsx"
+  ],
+  "menus": [
+    "EngineeringMenu.jsx",
+    "MenuEngineering.jsx",
+    "analyse/MenuEngineering.jsx",
+    "menus/MenuDetail.jsx",
+    "menus/MenuDuJour.jsx",
+    "menus/MenuDuJourDetail.jsx",
+    "menus/MenuDuJourForm.jsx",
+    "menus/MenuForm.jsx",
+    "menus/MenuPDF.jsx",
+    "menus/Menus.jsx",
+    "simulation/SimulationMenu.jsx"
+  ],
+  "carte": [
+    "CartePlats.jsx",
+    "carte/Carte.jsx"
+  ],
+  "recettes": [
+    "recettes/Recettes.jsx"
+  ],
+  "requisitions": [
+    "mobile/MobileRequisition.jsx",
+    "requisitions/RequisitionDetail.jsx",
+    "requisitions/RequisitionForm.jsx",
+    "requisitions/Requisitions.jsx"
+  ],
+  "promotions": [
+    "promotions/PromotionForm.jsx",
+    "promotions/Promotions.jsx"
+  ],
+  "notifications": [
+    "notifications/NotificationSettingsForm.jsx",
+    "notifications/NotificationsInbox.jsx"
+  ],
+  "documents": [
+    "documents/DocumentForm.jsx",
+    "documents/Documents.jsx"
+  ],
+  "planning": [
+    "Planning.jsx",
+    "PlanningDetail.jsx",
+    "PlanningForm.jsx",
+    "PlanningModule.jsx",
+    "planning/SimulationPlanner.jsx"
+  ],
+  "taches": [
+    "taches/Alertes.jsx",
+    "taches/TacheDetail.jsx",
+    "taches/TacheForm.jsx",
+    "taches/TacheNew.jsx",
+    "taches/Taches.jsx"
+  ],
+  "alertes": [
+    "Alertes.jsx",
+    "taches/Alertes.jsx"
+  ],
+  "analyse": [
+    "analyse/Analyse.jsx",
+    "analyse/AnalyseCostCenter.jsx",
+    "analyse/MenuEngineering.jsx",
+    "analyse/TableauxDeBord.jsx"
+  ],
+  "reporting": [
+    "reporting/GraphCost.jsx",
+    "reporting/Reporting.jsx",
+    "reporting/ReportingPDF.jsx"
+  ],
+  "utilisateurs": [
+    "Utilisateurs.jsx",
+    "parametrage/UtilisateurForm.jsx",
+    "parametrage/Utilisateurs.jsx"
+  ],
+  "roles": [
+    "auth/RoleError.jsx",
+    "parametrage/RoleForm.jsx",
+    "parametrage/Roles.jsx"
+  ],
+  "mamas": [
+    "auth/CreateMama.jsx",
+    "parametrage/MamaForm.jsx",
+    "parametrage/MamaSettingsForm.jsx",
+    "parametrage/Mamas.jsx"
+  ],
+  "permissions": [
+    "parametrage/Permissions.jsx",
+    "parametrage/PermissionsAdmin.jsx",
+    "parametrage/PermissionsForm.jsx"
+  ],
+  "settings": [
+    "fournisseurs/FournisseurApiSettingsForm.jsx",
+    "notifications/NotificationSettingsForm.jsx",
+    "parametrage/MamaSettingsForm.jsx"
+  ],
+  "apikeys": [
+    "parametrage/APIKeys.jsx"
+  ],
+  "access": [
+    "debug/AccessExample.jsx",
+    "parametrage/AccessRights.jsx"
+  ],
+  "aide": [
+    "AideContextuelle.jsx",
+    "aide/Aide.jsx",
+    "aide/AideForm.jsx"
+  ]
+}

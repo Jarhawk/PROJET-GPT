@@ -1,16 +1,16 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { Link, useLocation } from "react-router-dom";
 import useAuth from "@/hooks/useAuth";
+import { Badge } from "@/components/ui/badge";
 
 import MamaLogo from "@/components/ui/MamaLogo";
 
 export default function Sidebar() {
-  const { access_rights, role, loading, hasAccess } = useAuth();
+  const { access_rights, role, isSuperadmin, loading, hasAccess } = useAuth();
   const { pathname } = useLocation();
 
   if (loading || access_rights === null) return null;
-  const showAll = role === "superadmin";
-  const has = (key) => showAll || hasAccess(key, "peut_voir");
+  const has = (key) => isSuperadmin || hasAccess(key, "peut_voir");
   const canAnalyse = has("analyse");
 
   return (

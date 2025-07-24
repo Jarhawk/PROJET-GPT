@@ -8,6 +8,7 @@ import {
   getAuthorizedModules as listModules,
   mergeRights,
 } from "@/lib/access";
+import { extractAccessRightsFromRole } from "@/lib/roleUtils";
 import toast from "react-hot-toast";
 
 export const AuthContext = createContext(null); // eslint-disable-line react-refresh/only-export-components
@@ -58,14 +59,14 @@ export const AuthProvider = ({ children }) => {
     if (import.meta.env.DEV) console.log("fetchUserData", userId);
     let { data, error } = await supabase
       .from("utilisateurs")
-      .select("id, mama_id, nom, access_rights, actif, email, role_id, role:roles(id, nom, access_rights)")
+      .select("id, nom, mama_id, role_id, access_rights, actif, email, role:roles(id, nom, access_rights)")
       .eq("auth_id", userId)
       .maybeSingle();
 
     if (!data && !error && email) {
       const res = await supabase
         .from("utilisateurs")
-        .select("id, mama_id, nom, access_rights, actif, email, role_id, role:roles(id, nom, access_rights)")
+        .select("id, nom, mama_id, role_id, access_rights, actif, email, role:roles(id, nom, access_rights)")
         .eq("email", email)
         .maybeSingle();
       data = res.data;
@@ -90,7 +91,13 @@ export const AuthProvider = ({ children }) => {
       return;
     }
 
-    const roleRights = data.role?.access_rights || {};
+    if (data.role === null) {
+      console.error(
+        "fetchUserData: missing role relationship for user",
+        data.id
+      );
+    }
+    const roleRights = extractAccessRightsFromRole(data.role);
     const userRights = data.access_rights || {};
     const rights = mergeRights(roleRights, userRights);
 
@@ -103,7 +110,7 @@ export const AuthProvider = ({ children }) => {
       nom: data.nom,
       access_rights: rights,
       role_id: data.role_id,
-      role: data.role?.nom || null,
+      role: data.role,
     };
     if (import.meta.env.DEV) {
       console.log('Loaded user', { nom: newData.nom, rights: newData.access_rights });

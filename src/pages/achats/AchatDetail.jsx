@@ -4,10 +4,14 @@ import { Button } from "@/components/ui/button";
 import GlassCard from "@/components/ui/GlassCard";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { useAchats } from "@/hooks/useAchats";
+import useAuth from "@/hooks/useAuth";
+import Unauthorized from "@/pages/auth/Unauthorized";
 
 export default function AchatDetail({ achat: achatProp, onClose }) {
   const { fetchAchatById } = useAchats();
   const [achat, setAchat] = useState(achatProp);
+  const { hasAccess, loading: authLoading } = useAuth();
+  const allowed = hasAccess("achats", "peut_voir");
 
   useEffect(() => {
     if (!achatProp?.id) return;
@@ -17,6 +21,9 @@ export default function AchatDetail({ achat: achatProp, onClose }) {
       setAchat(achatProp);
     }
   }, [achatProp, fetchAchatById]);
+
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
+  if (!allowed) return <Unauthorized />;
 
   if (!achat) return <LoadingSpinner message="Chargement..." />;
 

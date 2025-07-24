@@ -5,20 +5,22 @@ import { useBonsLivraison } from "@/hooks/useBonsLivraison";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import useAuth from "@/hooks/useAuth";
 
 export default function BLDetail({ bon: bonProp, onClose }) {
   const { id } = useParams();
   const { fetchBonLivraisonById, toggleBonActif } = useBonsLivraison();
   const [bon, setBon] = useState(bonProp);
+  const { mama_id, loading: authLoading } = useAuth();
 
   useEffect(() => {
     const bid = bonProp?.id || id;
-    if (bid && !bonProp) {
+    if (!authLoading && mama_id && bid && !bonProp) {
       fetchBonLivraisonById(bid).then(setBon);
     }
-  }, [bonProp, id]);
+  }, [bonProp, id, mama_id, authLoading, fetchBonLivraisonById]);
 
-  if (!bon) return <LoadingSpinner message="Chargement..." />;
+  if (authLoading || !bon) return <LoadingSpinner message="Chargement..." />;
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">

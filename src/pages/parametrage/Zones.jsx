@@ -6,16 +6,23 @@ import { Button } from '@/components/ui/button';
 import { useZones } from '@/hooks/useZones';
 import ZoneRow from '@/components/parametrage/ZoneRow';
 import ZoneForm from '@/forms/ZoneForm';
+import useAuth from '@/hooks/useAuth';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import Unauthorized from '@/pages/auth/Unauthorized';
 
 export default function Zones() {
   const { zones, total, fetchZones, addZone, updateZone, deleteZone } = useZones();
+  const { mama_id, hasAccess, loading: authLoading } = useAuth();
+  const canEdit = hasAccess('zones_stock', 'peut_modifier');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [edit, setEdit] = useState(null);
 
   useEffect(() => {
-    fetchZones({ search, page });
-  }, [fetchZones, search, page]);
+    if (!authLoading && mama_id) {
+      fetchZones({ search, page });
+    }
+  }, [fetchZones, search, page, authLoading, mama_id]);
 
   const handleSave = async values => {
     if (edit?.id) await updateZone(edit.id, values);
@@ -36,6 +43,9 @@ export default function Zones() {
   };
 
   const pages = Math.ceil(total / 50) || 1;
+
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
+  if (!canEdit) return <Unauthorized />;
 
   return (
     <div className="p-6 max-w-2xl mx-auto">

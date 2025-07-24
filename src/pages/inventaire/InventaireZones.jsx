@@ -13,17 +13,28 @@ import {
 } from "@radix-ui/react-dialog";
 import { Toaster, toast } from "react-hot-toast";
 import { useInventaireZones } from "@/hooks/useInventaireZones";
+import useAuth from "@/hooks/useAuth";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import Unauthorized from "@/pages/auth/Unauthorized";
 
 export default function InventaireZones() {
-  const { zones, loading, getZones, createZone, updateZone, deleteZone } = useInventaireZones();
+  const { zones, loading, getZones, createZone, updateZone, deleteZone } =
+    useInventaireZones();
+  const { mama_id, hasAccess, loading: authLoading } = useAuth();
+  const canEdit = hasAccess("inventaires", "peut_modifier");
   const [search, setSearch] = useState("");
   const [editZone, setEditZone] = useState(null);
 
   useEffect(() => {
-    getZones();
-  }, [getZones]);
+    if (!authLoading && mama_id) {
+      getZones();
+    }
+  }, [getZones, authLoading, mama_id]);
 
   const filtered = zones.filter(z => z.nom?.toLowerCase().includes(search.toLowerCase()));
+
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
+  if (!canEdit) return <Unauthorized />;
 
   const handleSave = async () => {
     if (!editZone.nom) {

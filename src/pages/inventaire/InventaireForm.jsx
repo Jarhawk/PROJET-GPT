@@ -10,12 +10,17 @@ import SecondaryButton from "@/components/ui/SecondaryButton";
 import { Input } from "@/components/ui/input";
 import TableContainer from "@/components/ui/TableContainer";
 import toast from "react-hot-toast";
+import useAuth from "@/hooks/useAuth";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import Unauthorized from "@/pages/auth/Unauthorized";
 
 export default function InventaireForm() {
   const navigate = useNavigate();
   const { createInventaire } = useInventaires();
   const { produits, fetchProduits } = useProduitsInventaire();
   const { zones, getZones } = useInventaireZones();
+  const { mama_id, hasAccess, loading: authLoading } = useAuth();
+  const canEdit = hasAccess("inventaires", "peut_modifier");
 
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [zone, setZone] = useState("");
@@ -29,14 +34,26 @@ export default function InventaireForm() {
   const products = produits;
 
   useEffect(() => {
-    getZones();
-  }, [getZones]);
+    if (mama_id) {
+      getZones();
+    }
+  }, [getZones, mama_id]);
 
   useEffect(() => {
-    // Le filtrage des produits se fait par famille et terme de recherche
-    // La zone n'est plus utilisée côté front pour restreindre la liste
-    fetchProduits({ famille: familleFilter, search });
-  }, [familleFilter, search, fetchProduits]);
+    if (mama_id) {
+      // Le filtrage des produits se fait par famille et terme de recherche
+      // La zone n'est plus utilisée côté front pour restreindre la liste
+      fetchProduits({ famille: familleFilter, search });
+    }
+  }, [familleFilter, search, fetchProduits, mama_id]);
+
+  if (authLoading) {
+    return <LoadingSpinner message="Chargement..." />;
+  }
+
+  if (!canEdit) {
+    return <Unauthorized />;
+  }
 
   const addLine = () => setLignes([...lignes, { produit_id: "", quantite: "" }]);
   const updateLine = (idx, field, val) => {

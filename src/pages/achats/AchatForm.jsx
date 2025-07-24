@@ -6,10 +6,15 @@ import AutoCompleteField from "@/components/ui/AutoCompleteField";
 import { Button } from "@/components/ui/button";
 import GlassCard from "@/components/ui/GlassCard";
 import toast from "react-hot-toast";
+import useAuth from "@/hooks/useAuth";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import Unauthorized from "@/pages/auth/Unauthorized";
 
 export default function AchatForm({ achat, suppliers = [], onClose }) {
   const { createAchat, updateAchat } = useAchats();
   const { results: produitOptions, searchProduits } = useProduitsAutocomplete();
+  const { hasAccess, loading: authLoading } = useAuth();
+  const canEdit = hasAccess("achats", "peut_modifier");
   const [date_achat, setDateAchat] = useState(achat?.date_achat || "");
   const [produit_id, setProduitId] = useState(achat?.produit_id || "");
   const [produitNom, setProduitNom] = useState("");
@@ -22,6 +27,9 @@ export default function AchatForm({ achat, suppliers = [], onClose }) {
     const p = produitOptions.find(p => p.id === achat.produit_id);
     setProduitNom(p?.nom || "");
   } }, [achat?.produit_id, produitOptions]);
+
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
+  if (!canEdit) return <Unauthorized />;
 
   const handleSubmit = async (e) => {
     e.preventDefault();

@@ -4,10 +4,18 @@ import { useFournisseurs } from "@/hooks/useFournisseurs";
 import BLForm from "./BLForm.jsx";
 import GlassCard from "@/components/ui/GlassCard";
 import { LiquidBackground } from "@/components/LiquidBackground";
+import useAuth from "@/hooks/useAuth";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import Unauthorized from "@/pages/auth/Unauthorized";
 
 export default function BLCreate() {
   const navigate = useNavigate();
   const { fournisseurs } = useFournisseurs();
+  const { hasAccess, loading: authLoading } = useAuth();
+  const canEdit = hasAccess("bons_livraison", "peut_modifier");
+
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
+  if (!canEdit) return <Unauthorized />;
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden p-6 text-white">
       <LiquidBackground showParticles />

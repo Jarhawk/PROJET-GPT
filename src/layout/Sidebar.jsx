@@ -46,7 +46,7 @@ export default function Sidebar() {
     console.log("Sidebar", { user, mama_id, access_rights });
   }
 
-  if (loading || !user || !userData || !access_rights) {
+  if (loading || !user || !userData || !access_rights || !userData.role) {
     return null;
   }
 

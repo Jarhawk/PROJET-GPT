@@ -6,6 +6,7 @@ import { login as loginUser } from "@/lib/loginUser";
 import {
   hasAccess as checkAccess,
   getAuthorizedModules as listModules,
+  mergeRights,
 } from "@/lib/access";
 import toast from "react-hot-toast";
 
@@ -57,14 +58,14 @@ export const AuthProvider = ({ children }) => {
     if (import.meta.env.DEV) console.log("fetchUserData", userId);
     let { data, error } = await supabase
       .from("utilisateurs")
-      .select("id, mama_id, nom, access_rights, actif, email, role_id, role:roles(nom)")
+      .select("id, mama_id, nom, access_rights, actif, email, role_id, role:roles(id, nom, access_rights)")
       .eq("auth_id", userId)
       .maybeSingle();
 
     if (!data && !error && email) {
       const res = await supabase
         .from("utilisateurs")
-        .select("id, mama_id, nom, access_rights, actif, email, role_id, role:roles(nom)")
+        .select("id, mama_id, nom, access_rights, actif, email, role_id, role:roles(id, nom, access_rights)")
         .eq("email", email)
         .maybeSingle();
       data = res.data;
@@ -89,7 +90,9 @@ export const AuthProvider = ({ children }) => {
       return;
     }
 
-    const rights = data.access_rights || {};
+    const roleRights = data.role?.access_rights || {};
+    const userRights = data.access_rights || {};
+    const rights = mergeRights(roleRights, userRights);
 
     lastUserIdRef.current = userId;
     setError(null);
@@ -99,6 +102,7 @@ export const AuthProvider = ({ children }) => {
       email,
       nom: data.nom,
       access_rights: rights,
+      role_id: data.role_id,
       role: data.role?.nom || null,
     };
     if (import.meta.env.DEV) {

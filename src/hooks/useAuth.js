@@ -14,10 +14,10 @@ export function useAuth() {
   return {
     session: ctx.session,
     userData: ctx.userData,
-    mama_id: ctx.userData?.mama_id ?? ctx.mama_id,
+    mama_id: ctx.userData?.mama_id ?? ctx.mama_id ?? null,
     nom: ctx.userData?.nom ?? ctx.nom,
-    access_rights: ctx.userData?.access_rights ?? ctx.access_rights,
-    role: ctx.userData?.role ?? ctx.role,
+    access_rights: ctx.userData?.access_rights ?? ctx.access_rights ?? {},
+    role: ctx.userData?.role ?? ctx.role ?? null,
     email: ctx.userData?.email ?? ctx.email,
     actif: ctx.userData?.actif ?? ctx.actif,
     isSuperadmin: ctx.isSuperadmin,

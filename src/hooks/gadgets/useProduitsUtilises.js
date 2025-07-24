@@ -15,7 +15,7 @@ export default function useProduitsUtilises() {
     start.setDate(start.getDate() - 30);
     const { data, error } = await supabase
       .from('requisitions')
-      .select(`quantite, date_requisition, produit:produits(id, nom, photo_url)`) 
+      .select(`quantite, date_requisition, produit:produit_id(id, nom, photo_url)`)
       .eq('mama_id', mama_id)
       .gte('date_requisition', start.toISOString().slice(0, 10));
     setLoading(false);
@@ -34,6 +34,7 @@ export default function useProduitsUtilises() {
     });
     const list = Object.values(totals).sort((a, b) => b.total - a.total).slice(0, 5);
     setData(list);
+    if (import.meta.env.DEV) console.log('Chargement dashboard terminé');
     return list;
   }, [mama_id, supabase]);
 

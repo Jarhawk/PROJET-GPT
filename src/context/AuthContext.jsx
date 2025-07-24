@@ -67,7 +67,8 @@ export const AuthProvider = ({ children }) => {
     let { data, error } = await supabase
       .from("utilisateurs")
       .select(
-        "id, nom, mama_id, role_id, access_rights, actif, email, role:roles!fk_utilisateurs_role_id(id, nom, access_rights)"
+        `id, nom, mama_id, email, actif, access_rights, role_id, auth_id,
+        role:roles!fk_utilisateurs_role_id(id, nom, access_rights)`
       )
       .eq("auth_id", userId)
       .maybeSingle();
@@ -76,7 +77,8 @@ export const AuthProvider = ({ children }) => {
       const res = await supabase
         .from("utilisateurs")
         .select(
-          "id, nom, mama_id, role_id, access_rights, actif, email, role:roles!fk_utilisateurs_role_id(id, nom, access_rights)"
+          `id, nom, mama_id, email, actif, access_rights, role_id, auth_id,
+          role:roles!fk_utilisateurs_role_id(id, nom, access_rights)`
         )
         .eq("email", email)
         .maybeSingle();
@@ -105,8 +107,7 @@ export const AuthProvider = ({ children }) => {
     let roleData = data.role;
     if (roleData === null) {
       console.warn(
-        "fetchUserData: missing role relationship for user",
-        data.id
+        `fetchUserData: role missing for user ${data.id}`
       );
       roleData = { nom: "inconnu", access_rights: {} };
     }

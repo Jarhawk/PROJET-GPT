@@ -12,13 +12,13 @@ export default function useEvolutionAchats() {
     if (!mama_id) return [];
     setLoading(true);
     const start = new Date();
-    start.setDate(start.getDate() - 7 * 12);
+    start.setMonth(start.getMonth() - 12);
     const { data, error } = await supabase
       .from('v_evolution_achats')
-      .select('semaine, montant')
+      .select('mois, montant')
       .eq('mama_id', mama_id)
-      .gte('semaine', start.toISOString().slice(0, 10))
-      .order('semaine', { ascending: true });
+      .gte('mois', start.toISOString().slice(0, 7))
+      .order('mois', { ascending: true });
     setLoading(false);
     if (error) {
       console.error(error);
@@ -26,6 +26,7 @@ export default function useEvolutionAchats() {
       return [];
     }
     setData(data || []);
+    if (import.meta.env.DEV) console.log('Chargement dashboard terminé');
     return data || [];
   }, [mama_id, supabase]);
 

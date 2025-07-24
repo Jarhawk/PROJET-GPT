@@ -13,7 +13,9 @@ export default function useDerniersAcces() {
     setLoading(true);
     const { data, error } = await supabase
       .from('logs_securite')
-      .select('user_id, created_at, users:users(email)')
+      .select(
+        'user_id, created_at, utilisateur:utilisateurs!auth_id(email, auth_id)'
+      )
       .eq('mama_id', mama_id)
       .order('created_at', { ascending: false })
       .limit(50);
@@ -30,12 +32,13 @@ export default function useDerniersAcces() {
       seen[row.user_id] = true;
       list.push({
         id: row.user_id,
-        email: row.users?.email,
+        email: row.utilisateur?.email,
         date: row.created_at,
       });
       if (list.length >= 5) break;
     }
     setData(list);
+    if (import.meta.env.DEV) console.log('Chargement dashboard terminé');
     return list;
   }, [mama_id, supabase]);
 

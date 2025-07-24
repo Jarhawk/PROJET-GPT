@@ -14,7 +14,7 @@ export default function useDerniersAcces() {
     const { data, error } = await supabase
       .from('logs_securite')
       .select(
-        'user_id, created_at, utilisateur:utilisateurs!auth_id(email, auth_id)'
+        'user_id, created_at, utilisateur:utilisateurs(email, auth_id)'
       )
       .eq('mama_id', mama_id)
       .order('created_at', { ascending: false })

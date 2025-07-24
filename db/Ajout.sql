@@ -137,6 +137,7 @@ WHERE p.actif = true;
 ALTER TABLE produits ADD COLUMN IF NOT EXISTS photo_url text;
 
 -- Vue simplifiée pour les réquisitions avec informations produit
+-- AJOUT POUR DASHBOARD
 DROP VIEW IF EXISTS v_requisitions;
 CREATE VIEW v_requisitions AS
 SELECT

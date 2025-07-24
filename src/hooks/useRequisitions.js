@@ -6,6 +6,23 @@ import useAuth from "@/hooks/useAuth";
 export function useRequisitions() {
   const { mama_id, user_id } = useAuth();
 
+  async function fetchRequisitions({ search = "", page = 1, limit = 20 } = {}) {
+    if (!mama_id) return { data: [], count: 0 };
+    let query = supabase
+      .from("v_requisitions")
+      .select("*", { count: "exact" })
+      .eq("mama_id", mama_id)
+      .order("date_requisition", { ascending: false })
+      .range((page - 1) * limit, page * limit - 1);
+    if (search) query = query.ilike("produit_nom", `%${search}%`);
+    const { data, count, error } = await query;
+    if (error) {
+      console.error("❌ Erreur fetchRequisitions:", error.message);
+      return { data: [], count: 0 };
+    }
+    return { data: data || [], count: count || 0 };
+  }
+
   async function getRequisitions({ zone = "", statut = "", debut = "", fin = "", page = 1, limit = 10 } = {}) {
     if (!mama_id) return { data: [], count: 0 };
     let query = supabase
@@ -103,6 +120,7 @@ export function useRequisitions() {
   }
 
   return {
+    fetchRequisitions,
     getRequisitions,
     getRequisitionById,
     createRequisition,

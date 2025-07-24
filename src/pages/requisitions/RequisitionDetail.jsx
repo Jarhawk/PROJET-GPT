@@ -43,9 +43,9 @@ function RequisitionDetailPage() {
           <ul className="list-disc ml-5 space-y-1">
             {(requisition.lignes || []).map((l) => (
               <li key={l.id} className="flex items-center gap-2">
-                {l.produit?.photo_url ? (
+                {l.produit?.image ? ( // ✅ Correction Codex
                   <img
-                    src={l.produit.photo_url}
+                    src={l.produit.image}
                     alt={l.produit.nom}
                     className="w-6 h-6 rounded object-cover"
                   />

@@ -3,6 +3,12 @@ import { useNavigate } from "react-router-dom";
 import useAuth from "@/hooks/useAuth";
 import LoadingScreen from "@/components/ui/LoadingScreen";
 
+// Ce composant protège une route selon les droits retournés par useAuth().
+// Il redirige vers /unauthorized si l'utilisateur n'a pas le droit de voir
+// le module (accessKey) ou si aucun droit n'est défini. Les états de chargement
+// ou l'absence de session affichent un écran de chargement pour éviter les
+// boucles d'effet.
+
 export default function ProtectedRoute({ children, accessKey }) {
   const { session, userData, pending, loading, hasAccess } = useAuth();
   const navigate = useNavigate();

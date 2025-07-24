@@ -1,12 +1,15 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { Link, useLocation } from "react-router-dom";
+// Le menu latéral n'affiche que les modules pour lesquels
+// l'utilisateur possède le droit "peut_voir". Les droits proviennent
+// du contexte d'authentification (merge utilisateur + rôle).
 import useAuth from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
 
 import MamaLogo from "@/components/ui/MamaLogo";
 
 export default function Sidebar() {
-  const { access_rights, role, isSuperadmin, loading, hasAccess } = useAuth();
+  const { access_rights, isSuperadmin, loading, hasAccess } = useAuth();
   const { pathname } = useLocation();
 
   if (loading || access_rights === null) return null;

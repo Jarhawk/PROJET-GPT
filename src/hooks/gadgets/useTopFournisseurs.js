@@ -16,34 +16,22 @@ export default function useTopFournisseurs() {
     const end = new Date(start);
     end.setMonth(start.getMonth() + 1);
     const { data, error } = await supabase
-      .from('achats')
-      .select(
-        'prix, quantite, supplier_id, fournisseurs(id, nom)'
-      )
+      .from('v_top_fournisseurs')
+      .select('fournisseur_id, montant, fournisseurs(id, nom)')
       .eq('mama_id', mama_id)
-      .gte('date_achat', start.toISOString().slice(0, 10))
-      .lt('date_achat', end.toISOString().slice(0, 10));
+      .order('montant', { ascending: false })
+      .limit(3);
     setLoading(false);
     if (error) {
       console.error(error);
       setData([]);
       return [];
     }
-    const totals = {};
-    (data || []).forEach((a) => {
-      const id = a.supplier_id;
-      if (!totals[id]) {
-        totals[id] = {
-          id,
-          nom: a.fournisseurs?.nom,
-          total: 0,
-        };
-      }
-      totals[id].total += Number(a.prix || 0) * Number(a.quantite || 1);
-    });
-    const list = Object.values(totals)
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 3);
+    const list = (data || []).map((row) => ({
+      id: row.fournisseur_id,
+      nom: row.fournisseurs?.nom,
+      total: Number(row.montant || 0),
+    }));
     setData(list);
     if (import.meta.env.DEV) console.log('Chargement dashboard terminé');
     return list;

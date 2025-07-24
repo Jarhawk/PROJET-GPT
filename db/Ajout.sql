@@ -159,3 +159,15 @@ CREATE POLICY IF NOT EXISTS utilisateurs_insert ON utilisateurs FOR INSERT WITH 
 CREATE POLICY IF NOT EXISTS utilisateurs_update ON utilisateurs FOR UPDATE USING (mama_id = current_user_mama_id()) WITH CHECK (mama_id = current_user_mama_id());
 CREATE POLICY IF NOT EXISTS utilisateurs_delete ON utilisateurs FOR DELETE USING (mama_id = current_user_mama_id());
 
+-- Vue d'évolution des achats (par mois)
+DROP VIEW IF EXISTS v_evolution_achats;
+CREATE VIEW v_evolution_achats AS
+SELECT
+  a.mama_id,
+  date_trunc('month', a.date_achat)::date AS mois,
+  SUM(a.prix * a.quantite) AS montant
+FROM achats a
+WHERE a.actif IS TRUE
+GROUP BY a.mama_id, mois
+ORDER BY mois;
+

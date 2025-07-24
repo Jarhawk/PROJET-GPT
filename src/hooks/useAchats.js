@@ -23,7 +23,7 @@ export function useAchats() {
       .eq("mama_id", mama_id)
       .order("date_achat", { ascending: false })
       .range((page - 1) * pageSize, page * pageSize - 1);
-    if (fournisseur) q = q.eq("supplier_id", fournisseur);
+    if (fournisseur) q = q.eq("fournisseur_id", fournisseur);
     if (produit) q = q.eq("produit_id", produit);
     if (actif !== null) q = q.eq("actif", actif);
     if (debut) q = q.gte("date_achat", debut);

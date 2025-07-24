@@ -29,7 +29,7 @@ export function useReporting() {
     let query;
     switch (type) {
       case 'achats':
-        query = supabase.from('v_monthly_purchases').select('*').eq('mama_id', mama_id);
+        query = supabase.from('v_achats_mensuels').select('*').eq('mama_id', mama_id);
         query = applyFilters(query, filters);
         break;
       case 'pmp':

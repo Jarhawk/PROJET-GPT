@@ -14,7 +14,7 @@ export function useAnalyse() {
   async function getMonthlyPurchases(filters = {}) {
     if (!mama_id) return [];
     let query = supabase
-      .from("v_monthly_purchases")
+      .from("v_achats_mensuels")
       .select("mois, total")
       .eq("mama_id", mama_id)
       .order("mois", { ascending: true });
@@ -31,10 +31,9 @@ export function useAnalyse() {
     if (!mama_id) return [];
     let query = supabase
       .from("v_evolution_achats")
-      .select("mois, montant")
+      .select("mama_id, mois, montant")
       .eq("mama_id", mama_id)
       .order("mois", { ascending: true });
-    if (filters.produit_id) query = query.eq("produit_id", filters.produit_id);
     query = applyPeriode(query, filters);
     const { data, error } = await query;
     if (error) {

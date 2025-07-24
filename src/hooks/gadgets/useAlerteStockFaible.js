@@ -11,16 +11,17 @@ export default function useAlerteStockFaible() {
   const fetchData = useCallback(async () => {
     if (!mama_id) return [];
     setLoading(true);
-    const { data, error } = await supabase
+    const { data, error, status } = await supabase
       .from('v_produits_dernier_prix')
       .select('id, nom, stock_reel, stock_min')
       .eq('mama_id', mama_id);
-    setLoading(false);
     if (error) {
-      console.error(error);
+      console.warn('useAlerteStockFaible', { status, error, data }); // ✅ Correction Codex
       setData([]);
+      setLoading(false);
       return [];
     }
+    setLoading(false);
     const list = (data || [])
       .filter(
         (p) =>

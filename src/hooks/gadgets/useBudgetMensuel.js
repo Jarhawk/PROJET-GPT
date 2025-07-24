@@ -12,11 +12,14 @@ export default function useBudgetMensuel() {
     queryKey: ['budgetMensuel', mama_id, periode],
     queryFn: async () => {
       if (!mama_id) return { cible: 0, reel: 0 };
-      const { data, error } = await supabase.rpc('fn_calc_budgets', {
+      const { data, error, status } = await supabase.rpc('fn_calc_budgets', {
         mama_id_param: mama_id,
         periode_param: periode,
       });
-      if (error) throw error;
+      if (error) {
+        console.warn('useBudgetMensuel', { status, error, data }); // ✅ Correction Codex
+        return { cible: 0, reel: 0 };
+      }
       let cible = 0;
       let reel = 0;
       (data || []).forEach((b) => {

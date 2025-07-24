@@ -14,7 +14,7 @@ export default function useTachesUrgentes() {
     const today = new Date();
     const limitDate = new Date();
     limitDate.setDate(today.getDate() + 7);
-    const { data, error } = await supabase
+    const { data, error, status } = await supabase
       .from('taches')
       .select('id, titre, date_echeance')
       .eq('mama_id', mama_id)
@@ -24,12 +24,13 @@ export default function useTachesUrgentes() {
       .lte('date_echeance', limitDate.toISOString().slice(0, 10))
       .order('date_echeance', { ascending: true })
       .limit(5);
-    setLoading(false);
     if (error) {
-      console.error(error);
+      console.warn('useTachesUrgentes', { status, error, data }); // ✅ Correction Codex
       setData([]);
+      setLoading(false);
       return [];
     }
+    setLoading(false);
     setData(data || []);
     if (import.meta.env.DEV) console.log('Chargement dashboard terminé');
     return data || [];

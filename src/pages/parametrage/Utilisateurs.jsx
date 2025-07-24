@@ -62,12 +62,15 @@ export default function Utilisateurs() {
     role: roles.find(r => r.id === u.role_id)?.nom || u.role?.nom || "",
   }));
   const filtres = mapped.filter(u =>
-    (!search || u.nom?.toLowerCase().includes(search.toLowerCase())) &&
+    (!search ||
+      u.nom?.toLowerCase().includes(search.toLowerCase()) ||
+      u.email?.toLowerCase().includes(search.toLowerCase())) &&
     (actifFilter === "all" || (actifFilter === "true" ? u.actif : !u.actif)) &&
     (roleFilter === "all" || u.roleNom === roleFilter)
   ).sort((a, b) => {
     if (sortBy === "mama") return a.mamaNom.localeCompare(b.mamaNom);
     if (sortBy === "role") return a.roleNom.localeCompare(b.roleNom);
+    if (sortBy === "email") return (a.email || "").localeCompare(b.email || "");
     return a.nom.localeCompare(b.nom);
   });
   const nbPages = Math.ceil(filtres.length / PAGE_SIZE);
@@ -148,6 +151,7 @@ export default function Utilisateurs() {
           <option value="nom">Tri nom</option>
           <option value="mama">Tri Mama</option>
           <option value="role">Tri rôle</option>
+          <option value="email">Tri email</option>
         </select>
         <Button variant="outline" onClick={() => exportUsersToExcel(filtres)}>Export Excel</Button>
         <Button variant="outline" onClick={() => exportUsersToCSV(filtres)}>Export CSV</Button>
@@ -161,6 +165,7 @@ export default function Utilisateurs() {
         <thead>
           <tr>
             <th className="px-4 py-2">Nom</th>
+            <th className="px-4 py-2">Email</th>
             <th className="px-4 py-2">Rôle</th>
             <th className="px-4 py-2">Mama</th>
             <th className="px-4 py-2">Actif</th>

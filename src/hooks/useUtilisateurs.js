@@ -20,12 +20,12 @@ export function useUtilisateurs() {
     let query = supabase
       .from("utilisateurs")
       .select(
-        "id, nom, actif, mama_id, access_rights"
+        `id, nom, email, auth_id, role_id, actif, mama_id, access_rights, role:roles!fk_utilisateurs_role_id(id, nom)`
       )
       .order("nom", { ascending: true });
 
     if (!isSuperadmin) query = query.eq("mama_id", mama_id);
-    if (search) query = query.ilike("nom", `%${search}%`);
+    if (search) query = query.or(`nom.ilike.%${search}%,email.ilike.%${search}%`);
     if (typeof actif === "boolean") query = query.eq("actif", actif);
 
     const { data, error } = await query;
@@ -40,11 +40,24 @@ export function useUtilisateurs() {
   async function addUser(user) {
     const targetMama = isSuperadmin ? user.mama_id : mama_id;
     if (!targetMama) return { error: "Aucun mama_id" };
+    if (!user.role_id) return { error: "Rôle manquant" };
     setLoading(true);
     setError(null);
+    // charge les droits associés au rôle
+    let rights = {};
+    const { data: roleData } = await supabase
+      .from("roles")
+      .select("nom, access_rights")
+      .eq("id", user.role_id)
+      .maybeSingle();
+    if (roleData?.nom === "superadmin" && !isSuperadmin) {
+      setLoading(false);
+      return { error: "Rôle interdit" };
+    }
+    rights = roleData?.access_rights || {};
     const { error } = await supabase
       .from("utilisateurs")
-      .insert([{ ...user, mama_id: targetMama }]);
+      .insert([{ ...user, mama_id: targetMama, access_rights: rights }]);
     if (error) setError(error);
     setLoading(false);
     await fetchUsers();
@@ -55,9 +68,22 @@ export function useUtilisateurs() {
     if (!mama_id && !isSuperadmin) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
+    let rights = null;
+    if (updateFields.role_id) {
+      const { data: roleData } = await supabase
+        .from("roles")
+        .select("nom, access_rights")
+        .eq("id", updateFields.role_id)
+        .maybeSingle();
+      if (roleData?.nom === "superadmin" && !isSuperadmin) {
+        setLoading(false);
+        return { error: "Rôle interdit" };
+      }
+      rights = roleData?.access_rights ?? null;
+    }
     let query = supabase
       .from("utilisateurs")
-      .update(updateFields)
+      .update({ ...updateFields, ...(rights ? { access_rights: rights } : {}) })
       .eq("id", id);
     if (!isSuperadmin) query = query.eq("mama_id", mama_id);
     const { error } = await query;
@@ -103,6 +129,8 @@ export function useUtilisateurs() {
     const datas = (data || []).map(u => ({
       id: u.id,
       nom: u.nom,
+      email: u.email,
+      role_id: u.role_id,
       actif: u.actif,
       mama_id: u.mama_id,
       access_rights: JSON.stringify(u.access_rights),
@@ -117,6 +145,8 @@ export function useUtilisateurs() {
     const datas = (data || []).map(u => ({
       id: u.id,
       nom: u.nom,
+      email: u.email,
+      role_id: u.role_id,
       actif: u.actif,
       mama_id: u.mama_id,
       access_rights: JSON.stringify(u.access_rights),

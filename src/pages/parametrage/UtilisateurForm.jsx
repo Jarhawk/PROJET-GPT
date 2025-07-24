@@ -18,6 +18,7 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
   const { mamas, fetchMamas } = useMamas();
   const { mama_id: myMama, role: myRole, loading: authLoading } = useAuth();
   const [nom, setNom] = useState(utilisateur?.nom || "");
+  const [email, setEmail] = useState(utilisateur?.email || "");
   const [roleId, setRoleId] = useState(utilisateur?.role_id || "");
   const [mama, setMama] = useState(utilisateur?.mama_id || myMama);
   const [actif, setActif] = useState(utilisateur?.actif ?? true);
@@ -36,6 +37,7 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
     setLoading(true);
     const data = {
       nom,
+      email,
       role_id: roleId,
       actif,
       mama_id: mama,
@@ -73,6 +75,16 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
         onChange={e => setNom(e.target.value)}
         required
       />
+      <Label htmlFor="email">Email</Label>
+      <Input
+        id="email"
+        className="mb-2"
+        type="email"
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+        required
+        readOnly={!!utilisateur?.id}
+      />
       <Label htmlFor="role">Rôle</Label>
       <Select
         id="role"
@@ -81,9 +93,11 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
         onChange={e => setRoleId(e.target.value)}
         required
       >
-        {roles.map(r => (
-          <option key={r.id} value={r.id}>{r.nom}</option>
-        ))}
+        {roles
+          .filter(r => myRole === "superadmin" || r.nom !== "superadmin")
+          .map(r => (
+            <option key={r.id} value={r.id}>{r.nom}</option>
+          ))}
       </Select>
       {myRole === "superadmin" && (
         <>

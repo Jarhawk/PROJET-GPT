@@ -38,7 +38,8 @@ export default function UtilisateurRow({
   return (
     <>
       <tr className={utilisateur.actif ? "" : "opacity-60"}>
-        <td>{utilisateur.nom || utilisateur.email}</td>
+        <td>{utilisateur.nom}</td>
+        <td>{utilisateur.email}</td>
         <td>
           <span className={
             utilisateur.role === "superadmin"
@@ -50,7 +51,8 @@ export default function UtilisateurRow({
             {utilisateur.role}
           </span>
         </td>
-        <td>{utilisateur.mama_id}</td>
+        <td>{utilisateur.mamaNom || utilisateur.mama_id}</td>
+        <td>{utilisateur.actif ? "Oui" : "Non"}</td>
         <td>
           {canEdit && (
             <>
@@ -81,7 +83,7 @@ export default function UtilisateurRow({
       </tr>
       {showHistory && (
         <tr>
-          <td colSpan={4} className="bg-glass border border-borderGlass backdrop-blur">
+          <td colSpan={6} className="bg-glass border border-borderGlass backdrop-blur">
             <div>
               <b>Connexions récentes :</b>
               <ul>

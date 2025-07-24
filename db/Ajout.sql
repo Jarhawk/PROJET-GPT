@@ -151,3 +151,11 @@ SELECT
 FROM requisitions r
 JOIN produits p ON p.id = r.produit_id;
 
+
+-- Politiques RLS pour la table utilisateurs
+ALTER TABLE utilisateurs ENABLE ROW LEVEL SECURITY;
+CREATE POLICY IF NOT EXISTS utilisateurs_select ON utilisateurs FOR SELECT USING (mama_id = current_user_mama_id());
+CREATE POLICY IF NOT EXISTS utilisateurs_insert ON utilisateurs FOR INSERT WITH CHECK (mama_id = current_user_mama_id());
+CREATE POLICY IF NOT EXISTS utilisateurs_update ON utilisateurs FOR UPDATE USING (mama_id = current_user_mama_id()) WITH CHECK (mama_id = current_user_mama_id());
+CREATE POLICY IF NOT EXISTS utilisateurs_delete ON utilisateurs FOR DELETE USING (mama_id = current_user_mama_id());
+

@@ -4,16 +4,26 @@ import { Link } from "react-router-dom";
 import { useInventaires } from "@/hooks/useInventaires";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import useAuth from "@/hooks/useAuth";
 
 export default function Inventaire() {
   const { inventaires, getInventaires } = useInventaires();
+  const { mama_id, hasAccess, loading: authLoading } = useAuth();
+  const canEdit = hasAccess("inventaires", "peut_modifier");
   const [zoneFilter, setZoneFilter] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [showArchives, setShowArchives] = useState(false);
 
   useEffect(() => {
-    getInventaires({ includeArchives: showArchives });
-  }, [showArchives]);
+    if (!authLoading && mama_id) {
+      getInventaires({ includeArchives: showArchives });
+    }
+  }, [showArchives, mama_id, authLoading, getInventaires]);
+
+  if (authLoading) {
+    return <LoadingSpinner message="Chargement..." />;
+  }
 
   const filtered = inventaires
     .filter(i => !zoneFilter || i.zone === zoneFilter)
@@ -26,9 +36,11 @@ export default function Inventaire() {
     <div className="p-6 max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold">Inventaires</h1>
-        <Button asChild>
-          <Link to="/inventaire/new">Créer un nouvel inventaire</Link>
-        </Button>
+        {canEdit && (
+          <Button asChild>
+            <Link to="/inventaire/new">Créer un nouvel inventaire</Link>
+          </Button>
+        )}
       </div>
 
       <div className="flex gap-4 mb-4 items-center">

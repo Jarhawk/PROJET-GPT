@@ -5,17 +5,21 @@ import { usePlanning } from "@/hooks/usePlanning";
 import TableContainer from "@/components/ui/TableContainer";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { Button } from "@/components/ui/button";
+import useAuth from "@/hooks/useAuth";
 
 export default function PlanningDetail() {
   const { id } = useParams();
   const { getPlanningById } = usePlanning();
   const [planning, setPlanning] = useState(null);
+  const { mama_id, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    if (id) getPlanningById(id).then(setPlanning);
-  }, [id, getPlanningById]);
+    if (!authLoading && mama_id && id) {
+      getPlanningById(id).then(setPlanning);
+    }
+  }, [id, mama_id, authLoading, getPlanningById]);
 
-  if (!planning) return <LoadingSpinner message="Chargement..." />;
+  if (authLoading || !planning) return <LoadingSpinner message="Chargement..." />;
 
   return (
     <div className="p-6 space-y-4">

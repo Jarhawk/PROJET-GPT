@@ -10,11 +10,16 @@ import SecondaryButton from "@/components/ui/SecondaryButton";
 import { Input } from "@/components/ui/input";
 import GlassCard from "@/components/ui/GlassCard";
 import toast from "react-hot-toast";
+import useAuth from "@/hooks/useAuth";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import Unauthorized from "@/pages/auth/Unauthorized";
 
 export default function BLForm({ bon, fournisseurs = [], onClose }) {
   const { insertBonLivraison, updateBonLivraison } = useBonsLivraison();
   const { results: produitOptions, searchProduits } = useProduitsAutocomplete();
   const { results: fournisseurOptions, searchFournisseurs } = useFournisseursAutocomplete();
+  const { hasAccess, loading: authLoading } = useAuth();
+  const canEdit = hasAccess("bons_livraison", "peut_modifier");
   const [date_reception, setDateReception] = useState(bon?.date_reception || "");
   const [fournisseur_id, setFournisseurId] = useState(bon?.fournisseur_id || "");
   const [fournisseurName, setFournisseurName] = useState("");
@@ -35,6 +40,9 @@ export default function BLForm({ bon, fournisseurs = [], onClose }) {
   }, [bon?.fournisseur_id, fournisseurs]);
 
   useEffect(() => { searchFournisseurs(fournisseurName); }, [fournisseurName]);
+
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
+  if (!canEdit) return <Unauthorized />;
 
   const handleSubmit = async (e) => {
     e.preventDefault();

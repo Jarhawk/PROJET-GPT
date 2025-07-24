@@ -7,11 +7,15 @@ import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
 import { Toaster, toast } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import useAuth from "@/hooks/useAuth";
+import Unauthorized from "@/pages/auth/Unauthorized";
 
 export default function PlanningForm() {
   const navigate = useNavigate();
   const { createPlanning } = usePlanning();
   const { products, fetchProducts } = useProducts();
+  const { mama_id, hasAccess, loading: authLoading } = useAuth();
+  const canEdit = hasAccess("planning_previsionnel", "peut_modifier");
   const [nom, setNom] = useState("");
   const [date_prevue, setDatePrevue] = useState("");
   const [commentaire, setCommentaire] = useState("");
@@ -19,7 +23,17 @@ export default function PlanningForm() {
   const [lignes, setLignes] = useState([{ produit_id: "", quantite: 1, observation: "" }]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => { fetchProducts({ limit: 200 }); }, [fetchProducts]);
+  useEffect(() => {
+    if (mama_id) fetchProducts({ limit: 200 });
+  }, [fetchProducts, mama_id]);
+
+  if (authLoading) {
+    return <LoadingSpinner message="Chargement..." />;
+  }
+
+  if (!canEdit) {
+    return <Unauthorized />;
+  }
 
   const updateLine = (idx, field, val) => {
     setLignes(l => l.map((li, i) => (i === idx ? { ...li, [field]: val } : li)));

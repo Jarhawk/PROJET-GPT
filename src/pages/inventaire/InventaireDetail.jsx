@@ -8,16 +8,22 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import useAuth from "@/hooks/useAuth";
 
 export default function InventaireDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { getInventaireById } = useInventaires();
   const [inventaire, setInventaire] = useState(null);
+  const { mama_id, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    if (id) getInventaireById(id).then(setInventaire);
-  }, [id]);
+    if (!authLoading && mama_id && id) {
+      getInventaireById(id).then(setInventaire);
+    }
+  }, [id, mama_id, authLoading, getInventaireById]);
+
+  if (authLoading) return <LoadingSpinner message="Chargement..." />;
 
   if (!inventaire) return <LoadingSpinner message="Chargement..." />;
 

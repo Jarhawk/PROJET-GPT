@@ -5,9 +5,12 @@ import { usePlanning } from "@/hooks/usePlanning";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import useAuth from "@/hooks/useAuth";
 
 export default function Planning() {
   const { getPlannings } = usePlanning();
+  const { mama_id, hasAccess, loading: authLoading } = useAuth();
+  const canEdit = hasAccess("planning_previsionnel", "peut_modifier");
   const [items, setItems] = useState([]);
   const [statut, setStatut] = useState("");
   const [debut, setDebut] = useState("");
@@ -15,13 +18,18 @@ export default function Planning() {
   const [loading, setLoading] = useState(false);
 
   const fetchData = async () => {
+    if (!mama_id) return;
     setLoading(true);
     const { data } = await getPlannings({ statut, debut, fin });
     setItems(data || []);
     setLoading(false);
   };
 
-  useEffect(() => { fetchData(); }, [statut, debut, fin]);
+  useEffect(() => {
+    if (!authLoading && mama_id) {
+      fetchData();
+    }
+  }, [statut, debut, fin, authLoading, mama_id]);
 
   return (
     <div className="p-6 space-y-4">
@@ -35,9 +43,11 @@ export default function Planning() {
           <input type="date" className="input" value={debut} onChange={e => setDebut(e.target.value)} />
           <input type="date" className="input" value={fin} onChange={e => setFin(e.target.value)} />
         </div>
-        <Link to="/planning/nouveau"><Button>Nouvelle entrée</Button></Link>
+        {canEdit && (
+          <Link to="/planning/nouveau"><Button>Nouvelle entrée</Button></Link>
+        )}
       </div>
-      {loading ? (
+      {authLoading || loading ? (
         <LoadingSpinner message="Chargement..." />
       ) : (
         <TableContainer>

@@ -80,3 +80,11 @@
 - Ajout de la page `NotFound` dans le routeur.
 - La route `*` affiche maintenant `NotFound.jsx` au lieu de rediriger.
 - Nouvelle installation des dépendances et vérification des commandes lint, test et build.
+\n## Étape 20 – Sécurisation planning et inventaire : ✅
+- Ajout des vérifications useAuth sur les pages de planning, inventaires, bons de livraison et achats.
+- Création des tables planning_lignes et vues pour dernier prix produits.
+- Mise à jour du tracker codex_progress.json.
+\n## Étape 21 – Dépendances ESLint : ✅\n- Installation des packages manquants pour ESLint (@eslint/js)\n- "npm run lint" passe sans erreur.\n- "npm test" échoue toujours faute de credentials Supabase.
+\n## Étape 22 – Installation des dépendances et exécution des tests : ✅\n- `npm install` pour récupérer toutes les dépendances.\n- `npm run lint` réussit.\n- `npm test` échoue toujours faute de credentials Supabase.
+\n## Étape 23 – Audit final modules fiches et achats : ✅\n- Documentation des pages BL, achats, planning et inventaire dans codex_progress.json.\n- Ajout de la vue v_produits_dernier_prix et RLS planning dans Ajout.sql.\n- `npm run lint` OK.\n- `npm test` échoue faute de credentials Supabase.
+\n## Étape 24 – Mise à jour ESLint et tests\n- Installation des dépendances manquantes.\n- "npm run lint" passe.\n- "npm test" échoue faute de credentials Supabase.

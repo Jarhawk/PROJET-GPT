@@ -18,7 +18,7 @@ export default function useTopFournisseurs() {
     const { data, error } = await supabase
       .from('achats')
       .select(
-        'prix, quantite, fournisseur_id, fournisseurs(id, nom)'
+        'prix, quantite, supplier_id, fournisseurs(id, nom)'
       )
       .eq('mama_id', mama_id)
       .gte('date_achat', start.toISOString().slice(0, 10))
@@ -31,7 +31,7 @@ export default function useTopFournisseurs() {
     }
     const totals = {};
     (data || []).forEach((a) => {
-      const id = a.fournisseur_id;
+      const id = a.supplier_id;
       if (!totals[id]) {
         totals[id] = {
           id,

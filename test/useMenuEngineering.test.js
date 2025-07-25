@@ -19,7 +19,7 @@ vi.mock('@/hooks/useAuth', () => ({ default: authMock }))
 let useMenuEngineering
 
 beforeEach(async () => {
-  ;({ useMenuEngineering } = await import('@/hooks/useMenuEngineering'))
+  ({ useMenuEngineering } = await import('@/hooks/useMenuEngineering'))
   fromMock.mockClear()
   query.select.mockClear()
   query.eq.mockClear()
@@ -42,8 +42,8 @@ test('fetchData queries analytic view', async () => {
 })
 
 test('fetchData skips when no mama_id', async () => {
-  authMock.mockReturnValueOnce({ mama_id: null })
-  ;({ useMenuEngineering } = await import('@/hooks/useMenuEngineering'))
+  authMock.mockReturnValueOnce({ mama_id: null });
+  ({ useMenuEngineering } = await import('@/hooks/useMenuEngineering'))
   const { result } = renderHook(() => useMenuEngineering())
   await act(async () => {
     const data = await result.current.fetchData('2025-06-01')

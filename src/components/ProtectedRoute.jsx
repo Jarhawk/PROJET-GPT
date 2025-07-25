@@ -14,12 +14,16 @@ export default function ProtectedRoute({ children, accessKey }) {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // on patiente tant que userData n'est pas chargé pour éviter
+    // une redirection prématurée si le rôle est encore null
+    // (le rôle est parfois chargé avec un léger délai via Supabase)
     if (!session || !userData || pending || loading) return;
 
     if (userData.actif === false) {
       navigate("/blocked", { replace: true });
       return;
     }
+
 
     const noRights =
       !userData.access_rights ||

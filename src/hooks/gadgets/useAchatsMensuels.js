@@ -13,20 +13,23 @@ export default function useAchatsMensuels() {
 
     const fetchData = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('v_achats_mensuels')
-        .select('mama_id, mois, montant_total, nombre_achats')
-        .eq('mama_id', mama_id)
-        .order('mois', { ascending: true });
+      setError(null);
+      try {
+        const { data, error } = await supabase
+          .from('v_achats_mensuels')
+          .select('mois, montant_total')
+          .eq('mama_id', mama_id)
+          .order('mois', { ascending: true });
 
-      if (error) {
-        setError(error);
-        setData([]);
-      } else {
+        if (error) throw error;
+
         setData(data || []);
+      } catch (e) {
+        setError(e);
+        setData([]);
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     };
 
     fetchData();

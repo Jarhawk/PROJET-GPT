@@ -13,21 +13,27 @@ export default function useTopFournisseurs() {
 
     const fetchData = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('v_top_fournisseurs')
-        .select(
-          'fournisseur_id, fournisseur, montant_total, nombre_achats, mama_id'
-        )
-        .eq('mama_id', mama_id);
+      setError(null);
+      try {
+        const { data, error } = await supabase
+          .from('v_top_fournisseurs')
+          .select('fournisseur_id, nom, montant_total')
+          .eq('mama_id', mama_id);
 
-      if (error) {
-        setError(error);
+        if (error) throw error;
+
+        const rows = (data || []).map((r) => ({
+          id: r.fournisseur_id,
+          nom: r.nom,
+          total: r.montant_total,
+        }));
+        setData(rows);
+      } catch (e) {
+        setError(e);
         setData([]);
-      } else {
-        setData(data || []);
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     };
 
     fetchData();

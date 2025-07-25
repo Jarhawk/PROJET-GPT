@@ -8,18 +8,15 @@ export default function useBudgetMensuel() {
 
   const periode = new Date().toISOString().slice(0, 7);
 
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['budgetMensuel', mama_id, periode],
     queryFn: async () => {
       if (!mama_id) return { cible: 0, reel: 0 };
-      const { data, error, status } = await supabase.rpc('fn_calc_budgets', {
+      const { data, error } = await supabase.rpc('fn_calc_budgets', {
         mama_id_param: mama_id,
         periode_param: periode,
       });
-      if (error) {
-        console.warn('useBudgetMensuel', { status, error, data }); // ✅ Correction Codex
-        return { cible: 0, reel: 0 };
-      }
+      if (error) throw error;
       let cible = 0;
       let reel = 0;
       (data || []).forEach((b) => {
@@ -32,5 +29,5 @@ export default function useBudgetMensuel() {
     staleTime: 1000 * 60 * 5,
   });
 
-  return { ...(data || { cible: 0, reel: 0 }), loading: isLoading, refresh: refetch };
+  return { ...(data || { cible: 0, reel: 0 }), loading: isLoading, error, refresh: refetch };
 }

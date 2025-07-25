@@ -15,7 +15,7 @@ export function useAnalyse() {
     if (!mama_id) return [];
     let query = supabase
       .from("v_achats_mensuels")
-      .select("mois, total")
+      .select("mois, montant_total")
       .eq("mama_id", mama_id)
       .order("mois", { ascending: true });
     query = applyPeriode(query, filters);
@@ -31,7 +31,7 @@ export function useAnalyse() {
     if (!mama_id) return [];
     let query = supabase
       .from("v_evolution_achats")
-      .select("mama_id, mois, montant")
+      .select("mois, montant")
       .eq("mama_id", mama_id)
       .order("mois", { ascending: true });
     query = applyPeriode(query, filters);

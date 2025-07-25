@@ -13,24 +13,27 @@ export default function useEvolutionAchats() {
 
     const fetchData = async () => {
       setLoading(true);
-      const start = new Date();
-      start.setMonth(start.getMonth() - 12);
-      const filterDate = new Date(start.getFullYear(), start.getMonth(), 1).toISOString();
-      const { data, error } = await supabase
-        .from('v_evolution_achats')
-        .select('mama_id, mois, montant_total')
-        .eq('mama_id', mama_id)
-        .gte('mois', filterDate)
-        .order('mois', { ascending: true });
+      setError(null);
+      try {
+        const start = new Date();
+        start.setMonth(start.getMonth() - 12);
+        const filterDate = new Date(start.getFullYear(), start.getMonth(), 1).toISOString();
+        const { data, error } = await supabase
+          .from('v_evolution_achats')
+          .select('mois, montant')
+          .eq('mama_id', mama_id)
+          .gte('mois', filterDate)
+          .order('mois', { ascending: true });
 
-      if (error) {
-        setError(error);
-        setData([]);
-      } else {
+        if (error) throw error;
+
         setData(data || []);
+      } catch (e) {
+        setError(e);
+        setData([]);
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     };
 
     fetchData();

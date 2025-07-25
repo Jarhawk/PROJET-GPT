@@ -24,7 +24,7 @@ ORDER BY
 | achats                                   | id                        | uuid                     | NO          | gen_random_uuid()    |
 | achats                                   | mama_id                   | uuid                     | YES         | null                 |
 | achats                                   | produit_id                | uuid                     | YES         | null                 |
-| achats                                   | supplier_id               | uuid                     | YES         | null                 |
+| achats                                   | fournisseur_id            | uuid                     | YES         | null                 | // ✅ Correction Codex
 | achats                                   | prix                      | numeric                  | YES         | null                 |
 | achats                                   | quantite                  | numeric                  | YES         | null                 |
 | achats                                   | date_achat                | date                     | YES         | null                 |
@@ -482,13 +482,13 @@ ORDER BY
 | produits                                 | famille_id                | uuid                     | YES         | null                 |
 | produits                                 | unite_id                  | uuid                     | YES         | null                 |
 | produits                                 | code                      | text                     | YES         | null                 |
-| produits                                 | image                     | text                     | YES         | null                 |
+| produits                                 | url_photo                 | text                     | YES         | null                 | // ✅ Correction Codex
 | produits                                 | allergenes                | text                     | YES         | null                 |
 | produits                                 | pmp                       | numeric                  | YES         | null                 |
 | produits                                 | stock_reel                | numeric                  | YES         | null                 |
 | produits                                 | stock_min                 | numeric                  | YES         | null                 |
 | produits                                 | stock_theorique           | numeric                  | YES         | null                 |
-| produits                                 | main_supplier_id          | uuid                     | YES         | null                 |
+| produits                                 | fournisseur_principal_id          | uuid                     | YES         | null                 |
 | produits                                 | dernier_prix              | numeric                  | YES         | null                 |
 | produits                                 | fiche_technique_id        | uuid                     | YES         | null                 |
 | produits                                 | prix_vente                | numeric                  | YES         | null                 |
@@ -789,13 +789,13 @@ ORDER BY
 | v_produits_actifs                        | famille_id                | uuid                     | YES         | null                 |
 | v_produits_actifs                        | unite_id                  | uuid                     | YES         | null                 |
 | v_produits_actifs                        | code                      | text                     | YES         | null                 |
-| v_produits_actifs                        | image                     | text                     | YES         | null                 |
+| v_produits_actifs                        | url_photo                 | text                     | YES         | null                 | // ✅ Correction Codex
 | v_produits_actifs                        | allergenes                | text                     | YES         | null                 |
 | v_produits_actifs                        | pmp                       | numeric                  | YES         | null                 |
 | v_produits_actifs                        | stock_reel                | numeric                  | YES         | null                 |
 | v_produits_actifs                        | stock_min                 | numeric                  | YES         | null                 |
 | v_produits_actifs                        | stock_theorique           | numeric                  | YES         | null                 |
-| v_produits_actifs                        | main_supplier_id          | uuid                     | YES         | null                 |
+| v_produits_actifs                        | fournisseur_principal_id          | uuid                     | YES         | null                 |
 | v_produits_actifs                        | dernier_prix              | numeric                  | YES         | null                 |
 | v_produits_dernier_prix                  | id                        | uuid                     | YES         | null                 |
 | v_produits_dernier_prix                  | nom                       | text                     | YES         | null                 |
@@ -819,13 +819,13 @@ ORDER BY
 | v_produits_inactifs                      | famille_id                | uuid                     | YES         | null                 |
 | v_produits_inactifs                      | unite_id                  | uuid                     | YES         | null                 |
 | v_produits_inactifs                      | code                      | text                     | YES         | null                 |
-| v_produits_inactifs                      | image                     | text                     | YES         | null                 |
+| v_produits_inactifs                      | url_photo                 | text                     | YES         | null                 | // ✅ Correction Codex
 | v_produits_inactifs                      | allergenes                | text                     | YES         | null                 |
 | v_produits_inactifs                      | pmp                       | numeric                  | YES         | null                 |
 | v_produits_inactifs                      | stock_reel                | numeric                  | YES         | null                 |
 | v_produits_inactifs                      | stock_min                 | numeric                  | YES         | null                 |
 | v_produits_inactifs                      | stock_theorique           | numeric                  | YES         | null                 |
-| v_produits_inactifs                      | main_supplier_id          | uuid                     | YES         | null                 |
+| v_produits_inactifs                      | fournisseur_principal_id          | uuid                     | YES         | null                 |
 | v_produits_inactifs                      | dernier_prix              | numeric                  | YES         | null                 |
 | v_reco_stockmort                         | mama_id                   | uuid                     | YES         | null                 |
 | v_reco_stockmort                         | produit_id                | uuid                     | YES         | null                 |
@@ -936,7 +936,7 @@ ORDER BY tc.table_name, kcu.column_name;
 | access_rights             | role_id             | roles              | id                  |
 | achats                    | mama_id             | mamas              | id                  |
 | achats                    | produit_id          | produits           | id                  |
-| achats                    | supplier_id         | fournisseurs       | id                  |
+| achats                    | fournisseur_id      | fournisseurs       | id                  | // ✅ Correction Codex
 | api_keys                  | mama_id             | mamas              | id                  |
 | api_keys                  | user_id             | utilisateurs       | id                  |
 | bons_livraison            | commande_id         | commandes          | id                  |
@@ -1044,7 +1044,7 @@ ORDER BY tc.table_name, kcu.column_name;
 | planning_previsionnel     | produit_id          | produits           | id                  |
 | produits                  | famille_id          | familles           | id                  |
 | produits                  | fiche_technique_id  | fiches_techniques  | id                  |
-| produits                  | main_supplier_id    | fournisseurs       | id                  |
+| produits                  | fournisseur_principal_id    | fournisseurs       | id                  |
 | produits                  | mama_id             | mamas              | id                  |
 | produits                  | unite_id            | unites             | id                  |
 | promotion_produits        | mama_id             | mamas              | id                  |
@@ -1277,7 +1277,7 @@ ORDER BY t.relname, i.relname;
 | produits                  | idx_produits_created_at                             | created_at                                    | false     | false      |
 | produits                  | idx_produits_famille_id                             | famille_id                                    | false     | false      |
 | produits                  | idx_produits_fiche_technique_id                     | fiche_technique_id                            | false     | false      |
-| produits                  | idx_produits_main_supplier                          | main_supplier_id                              | false     | false      |
+| produits                  | idx_produits_fournisseur_principal                          | fournisseur_principal_id                              | false     | false | // ✅ Correction Codex      |
 | produits                  | idx_produits_mama_id                                | mama_id                                       | false     | false      |
 | produits                  | idx_produits_unite_id                               | unite_id                                      | false     | false      |
 | produits                  | produits_pkey                                       | id                                            | true      | true       |
@@ -1547,13 +1547,13 @@ ORDER BY table_name;
     produits.famille_id,
     produits.unite_id,
     produits.code,
-    produits.image,
+    produits.url_photo,
     produits.allergenes,
     produits.pmp,
     produits.stock_reel,
     produits.stock_min,
     produits.stock_theorique,
-    produits.main_supplier_id,
+    produits.fournisseur_principal_id,
     produits.dernier_prix
    FROM produits
   WHERE (produits.actif = true);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
@@ -1590,13 +1590,13 @@ ORDER BY table_name;
     produits.famille_id,
     produits.unite_id,
     produits.code,
-    produits.image,
+    produits.url_photo,
     produits.allergenes,
     produits.pmp,
     produits.stock_reel,
     produits.stock_min,
     produits.stock_theorique,
-    produits.main_supplier_id,
+    produits.fournisseur_principal_id,
     produits.dernier_prix
    FROM produits
   WHERE (produits.actif = false);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
@@ -1859,7 +1859,7 @@ DECLARE
 BEGIN
   SELECT id INTO supp_id
     FROM fournisseurs
-   WHERE nom = payload->>'supplier_name'
+   WHERE nom = payload->>'fournisseur_nom' // ✅ Correction Codex
      AND mama_id = current_user_mama_id()
    LIMIT 1;
 
@@ -1891,7 +1891,7 @@ END;
 | insert_achat_from_facture_line    | FUNCTION     | trigger   | 
 begin
   if tg_op = 'INSERT' then
-    insert into achats(mama_id, produit_id, supplier_id, prix, quantite, date_achat)
+    insert into achats(mama_id, produit_id, fournisseur_id, prix, quantite, date_achat) // ✅ Correction Codex
     values(new.mama_id, new.produit_id,
            (select fournisseur_id from factures where id = new.facture_id),
            new.prix_unitaire, new.quantite,
@@ -2141,7 +2141,7 @@ ORDER BY tc.table_name, tc.constraint_type;
 | access_rights             | FOREIGN KEY     | mama_id             | id                  | mamas                     |
 | access_rights             | PRIMARY KEY     | id                  | id                  | access_rights             |
 | achats                    | CHECK           | null                | null                | null                      |
-| achats                    | FOREIGN KEY     | supplier_id         | id                  | fournisseurs              |
+| achats                    | FOREIGN KEY     | fournisseur_id      | id               | fournisseurs | // ✅ Correction Codex              |
 | achats                    | FOREIGN KEY     | produit_id          | id                  | produits                  |
 | achats                    | FOREIGN KEY     | mama_id             | id                  | mamas                     |
 | achats                    | PRIMARY KEY     | id                  | id                  | achats                    |
@@ -2428,7 +2428,7 @@ ORDER BY tc.table_name, tc.constraint_type;
 | produits                  | CHECK           | null                | null                | null                      |
 | produits                  | CHECK           | null                | null                | null                      |
 | produits                  | CHECK           | null                | null                | null                      |
-| produits                  | FOREIGN KEY     | main_supplier_id    | id                  | fournisseurs              |
+| produits                  | FOREIGN KEY     | fournisseur_principal_id    | id                  | fournisseurs | // ✅ Correction Codex              |
 | produits                  | FOREIGN KEY     | famille_id          | id                  | familles                  |
 | produits                  | FOREIGN KEY     | mama_id             | id                  | mamas                     |
 | produits                  | FOREIGN KEY     | unite_id            | id                  | unites                    |

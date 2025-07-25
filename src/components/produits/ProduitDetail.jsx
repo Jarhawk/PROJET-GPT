@@ -56,7 +56,7 @@ export default function ProduitDetail({ produitId, open, onClose }) {
               ) : historique.map((h, i) => (
                 <tr key={i}>
                   <td>{h.created_at?.slice(0, 10) || "-"}</td>
-                  <td>{h.supplier?.nom || "-"}</td>
+                  <td>{h.fournisseur?.nom || "-"}</td> // ✅ Correction Codex
                   <td>{h.prix_achat ?? "-"}</td>
                   <td>{h.derniere_livraison?.slice(0, 10) || "-"}</td>
                 </tr>

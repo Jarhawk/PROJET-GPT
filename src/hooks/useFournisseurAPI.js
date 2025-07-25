@@ -90,7 +90,7 @@ export function useFournisseurAPI() {
         const { data: existing } = await supabase
           .from("fournisseur_produits")
           .select("prix_achat")
-          .eq("produit_id", p.product_id)
+          .eq("produit_id", p.produit_id) // ✅ Correction Codex
           .eq("fournisseur_id", fournisseur_id)
           .eq("mama_id", mama_id)
           .order("date_livraison", { ascending: false })
@@ -100,7 +100,7 @@ export function useFournisseurAPI() {
           .from("fournisseur_produits")
           .upsert(
             {
-              produit_id: p.product_id,
+              produit_id: p.produit_id, // ✅ Correction Codex
               fournisseur_id,
               prix_achat: p.price,
               date_livraison: new Date().toISOString().slice(0, 10),
@@ -111,7 +111,7 @@ export function useFournisseurAPI() {
         if (existing && existing.prix_achat !== p.price) {
           await supabase.from("catalogue_updates").insert({
             fournisseur_id,
-            produit_id: p.product_id,
+            produit_id: p.produit_id, // ✅ Correction Codex
             ancienne_valeur: existing.prix_achat,
             nouvelle_valeur: p.price,
             modification: p,

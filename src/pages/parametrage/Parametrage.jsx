@@ -20,7 +20,7 @@ export default function Parametrage() {
           { name: "Unités", content: <ParamUnites /> },
           { name: "Rôles", content: <ParamRoles /> },
           { name: "Accès", content: <ParamAccess /> },
-          { name: "Cost centers", content: <ParamCostCenters /> },
+          { name: "Centres de coûts", content: <ParamCostCenters /> }, // ✅ Correction Codex
           { name: "Établissement", content: <ParamMama /> },
           { name: "Sécurité", content: <ParamSecurity /> },
         ]}

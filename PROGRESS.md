@@ -114,7 +114,7 @@
 
 ## 2025-06-20 Step 17
 - Audited cartes and fournisseurs modules.
-- Added early returns when `mama_id` is missing in hooks (`useCarte`, `useFournisseurs`, `useFournisseurStats`, `useSupplierProducts`, `useFournisseursInactifs`, `useFournisseurNotes`).
+ - Added early returns when `mama_id` is missing in hooks (`useCarte`, `useFournisseurs`, `useFournisseurStats`, `useProduitsFournisseur`, `useFournisseursInactifs`, `useFournisseurNotes`). // ✅ Correction Codex
 - Updated `CostBoisson.jsx` to guard updates and ventes when not authenticated.
 - Installed Node dependencies so lint and tests run.
 - Next: continue reviewing stock transfer and remaining modules.
@@ -149,7 +149,7 @@
 - Audited remaining modules (roles, carte plats, réquisitions, inventaire principal, mouvements stock, cost boissons) for new auth context usage.
 - Replaced legacy `claims` references with `mama_id` and `user_id` from `useAuth`.
 - Added auth loading guards so pages wait for authentication before querying.
-- Updated `useSuppliers` hook accordingly.
+- Updated `useFournisseurs` hook accordingly. // ✅ Correction Codex
 - Lint and tests to run next.
 - Next: verify requisition, signalement & simulation modules if needed then finalize.
 
@@ -246,7 +246,7 @@
 - Ready for final validation.
 
 ## 2025-06-23 Step 40
-- Added view v_products_last_price with explicit fields and index on supplier_products(product_id, date_livraison desc).
+- Added view v_products_last_price with explicit fields and index on fournisseur_produits(produit_id, date_livraison desc) // ✅ Correction Codex
 - Ran npm install to restore dependencies after environment reset.
 - Confirmed npm run lint (warnings only) and npm test pass.
 - Continuing overall verification.
@@ -284,7 +284,7 @@
 ## 2025-06-23 Step 47
 - Reinstalled npm dependencies after environment reset.
 - Ran `npm run lint` (warnings only) and `npm test` (81 passing) to confirm integrity.
-- Verified presence of new index `idx_supplier_products_product_date` and view `v_products_last_price`.
+- Verified presence of new index `idx_fournisseur_produits_produit_date` and view `v_products_last_price`.
 
 ## 2025-06-23 Step 48
 - Ran `npm install` to restore eslint and vitest.
@@ -303,7 +303,7 @@
 ## 2025-06-23 Step 51
 - Reinstalled npm dependencies to restore eslint and vitest.
 - Confirmed `npm run lint` only warns and `npm test` passes all 81 tests.
-- Validated SQL schema now includes `v_products_last_price` with proper grants and index `idx_supplier_products_product_date`.
+- Validated SQL schema now includes `v_products_last_price` with proper grants and index `idx_fournisseur_produits_produit_date`.
 
 
 ## 2025-06-23 Step 52
@@ -517,7 +517,7 @@
 - Reinstalled npm packages to restore eslint and vitest.
 - `npm run lint` shows warnings only.
 - `npm test` reports all 81 tests passing.
-- Verified `v_cost_center_month`, `v_ventilation`, and `v_products_last_price` grant SELECT and index `idx_supplier_products_product_date` exists.
+- Verified `v_cost_center_month`, `v_ventilation`, and `v_products_last_price` grant SELECT and index `idx_fournisseur_produits_produit_date` exists.
 ## 2025-06-23 Step 87
 - Reinstalled dependencies after environment reset.
 - `npm run lint` shows warnings only and `npm test` passes with 81 tests.

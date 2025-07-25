@@ -2,11 +2,11 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import useAuth from "@/hooks/useAuth";
-export function useSupplierProducts() {
+export function useProduitsFournisseur() { // ✅ Correction Codex
   const { mama_id } = useAuth();
   const [cache, setCache] = useState({});
 
-  function useProductsBySupplier(fournisseur_id) {
+  function useProduitsDuFournisseur(fournisseur_id) { // ✅ Correction Codex
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -31,10 +31,10 @@ export function useSupplierProducts() {
       return data || [];
     }
 
-    return { products, loading, error, fetch };
+    return { products, loading, error, fetch }; // ✅ Correction Codex (no rename for object keys to keep usage)
   }
 
-  async function getProductsBySupplier(fournisseur_id) {
+  async function getProduitsDuFournisseur(fournisseur_id) { // ✅ Correction Codex
     if (!mama_id || !fournisseur_id) return [];
     if (cache[fournisseur_id]) return cache[fournisseur_id];
     const { data } = await supabase
@@ -48,7 +48,7 @@ export function useSupplierProducts() {
     return data || [];
   }
 
-  async function countProductsBySupplier(fournisseur_id) {
+  async function countProduitsDuFournisseur(fournisseur_id) { // ✅ Correction Codex
     if (!mama_id || !fournisseur_id) return 0;
     const { count } = await supabase
       .from("fournisseur_produits")
@@ -58,5 +58,9 @@ export function useSupplierProducts() {
     return count || 0;
   }
 
-  return { useProductsBySupplier, getProductsBySupplier, countProductsBySupplier };
+  return { // ✅ Correction Codex
+    useProduitsDuFournisseur,
+    getProduitsDuFournisseur,
+    countProduitsDuFournisseur,
+  };
 }

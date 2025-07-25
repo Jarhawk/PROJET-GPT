@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState, useCallback } from "react";
 import { useAchats } from "@/hooks/useAchats";
-import { useSuppliers } from "@/hooks/useSuppliers";
+import { useFournisseurs } from "@/hooks/useFournisseurs"; // ✅ Correction Codex
 import { useProduitsAutocomplete } from "@/hooks/useProduitsAutocomplete";
 import AchatForm from "./AchatForm.jsx";
 import AchatDetail from "./AchatDetail.jsx";
@@ -14,7 +14,7 @@ import useAuth from "@/hooks/useAuth";
 
 export default function Achats() {
   const { achats, total, getAchats, deleteAchat } = useAchats();
-  const { suppliers } = useSuppliers();
+  const { fournisseurs } = useFournisseurs(); // ✅ Correction Codex
   const { results: produitOptions, searchProduits } = useProduitsAutocomplete();
   const [produit, setProduit] = useState("");
   const [fournisseur, setFournisseur] = useState("");
@@ -54,7 +54,7 @@ export default function Achats() {
       <GlassCard className="flex flex-wrap gap-2 items-end">
         <select className="input" value={fournisseur} onChange={e => { setFournisseur(e.target.value); setPage(1); }}>
           <option value="">Tous fournisseurs</option>
-          {suppliers.map(s => <option key={s.id} value={s.id}>{s.nom}</option>)}
+          {fournisseurs.map(s => <option key={s.id} value={s.id}>{s.nom}</option>)} // ✅ Correction Codex
         </select>
         <input
           list="produits-list"
@@ -141,7 +141,7 @@ export default function Achats() {
       {showForm && (
         <AchatForm
           achat={selected}
-          suppliers={suppliers}
+          fournisseurs={fournisseurs} // ✅ Correction Codex
           onClose={() => {
             setShowForm(false);
             setSelected(null);

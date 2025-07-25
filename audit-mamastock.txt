@@ -51,7 +51,7 @@
 - Objectif : suivi des factures fournisseurs
 - Fonctions : filtres statut/fournisseur, export Excel, création, consultation détail
 - Sécurité : policies factures et lignes filtrées sur mama_id
-- Dépendances : hooks useInvoices, useSuppliers
+- Dépendances : hooks useInvoices, useFournisseurs
 
 === ✅ MODULE : Fiches.jsx ===
 - Route : /fiches
@@ -532,7 +532,7 @@ TwoFactorSetup.jsx : configuration de la double authentification
   useOnboarding, usePermissions, usePertes, usePlanning, usePriceTrends,
   useProducts, usePromotions, useReporting, useRequisitions, useRoles,
   useSignalements, useSimulation, useStats, useStock, useStorage,
-  useSupplierProducts, useSuppliers, useSwipe, useTasks, useTopProducts,
+  useProduitsFournisseur, useFournisseurs, useSwipe, useTasks, useTopProducts, // ✅ Correction Codex
   useTwoFactorAuth, useUnites, useUtilisateurs, useValidations
 - Tous appliquent le filtre `mama_id` et encapsulent les requêtes Supabase
 

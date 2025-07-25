@@ -16,7 +16,7 @@ Suggests recipe sheets excluding inactive ones.
 
 ## useFournisseursAutocomplete
 
-Fetches suppliers matching a name or city. Results are limited to the current `mama_id`.
+Recherche des fournisseurs par nom ou ville. Les résultats sont filtrés par `mama_id`.
 
 ```
 const { results, searchFournisseurs } = useFournisseursAutocomplete();
@@ -24,7 +24,7 @@ const { results, searchFournisseurs } = useFournisseursAutocomplete();
 
 ## useFacturesAutocomplete
 
-Returns invoices filtered by number with their supplier name.
+Retourne les factures filtrées par numéro avec le nom du fournisseur associé.
 
 ```
 const { results, searchFactures } = useFacturesAutocomplete();

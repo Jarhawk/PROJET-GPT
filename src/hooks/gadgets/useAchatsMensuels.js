@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 
-export default function useEvolutionAchats() {
+export default function useAchatsMensuels() {
   const { mama_id } = useAuth();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,14 +13,10 @@ export default function useEvolutionAchats() {
 
     const fetchData = async () => {
       setLoading(true);
-      const start = new Date();
-      start.setMonth(start.getMonth() - 12);
-      const filterDate = new Date(start.getFullYear(), start.getMonth(), 1).toISOString();
       const { data, error } = await supabase
-        .from('v_evolution_achats')
-        .select('mama_id, mois, montant_total')
+        .from('v_achats_mensuels')
+        .select('mama_id, mois, montant_total, nombre_achats')
         .eq('mama_id', mama_id)
-        .gte('mois', filterDate)
         .order('mois', { ascending: true });
 
       if (error) {

@@ -15,10 +15,10 @@ vi.mock('react-hot-toast', () => ({
   __esModule: true,
   default: { error: vi.fn(), success: vi.fn() },
 }));
-import SupplierForm from '@/components/fournisseurs/SupplierForm.jsx';
+import FournisseurFormModal from '@/components/fournisseurs/FournisseurFormModal.jsx'; // ✅ Correction Codex
 
 it('validates email before submit', async () => {
-  render(<SupplierForm />);
+  render(<FournisseurFormModal />); // ✅ Correction Codex
   const emailInput = screen.getAllByRole('textbox')[2];
   fireEvent.change(screen.getAllByRole('textbox')[0], { target: { value: 'Nom', name: 'nom' } });
   fireEvent.change(emailInput, {

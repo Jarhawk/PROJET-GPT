@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState, useCallback } from "react";
 import { useFactures } from "@/hooks/useFactures";
-import { useSuppliers } from "@/hooks/useSuppliers";
+import { useFournisseurs } from "@/hooks/useFournisseurs"; // ✅ Correction Codex
 import useAuth from "@/hooks/useAuth";
 import { useFacturesAutocomplete } from "@/hooks/useFacturesAutocomplete";
 import FactureForm from "./FactureForm.jsx";
@@ -28,7 +28,7 @@ const STATUTS = {
 
 export default function Factures() {
   const { factures, total, getFactures, deleteFacture, toggleFactureActive } = useFactures();
-  const { suppliers } = useSuppliers();
+  const { fournisseurs } = useFournisseurs(); // ✅ Correction Codex
   const { mama_id, loading: authLoading, hasAccess } = useAuth();
   const { results: factureOptions, searchFactures } = useFacturesAutocomplete();
   const [showForm, setShowForm] = useState(false);
@@ -36,7 +36,7 @@ export default function Factures() {
   const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState("");
   const [statutFilter, setStatutFilter] = useState("");
-  const [supplierFilter, setSupplierFilter] = useState("");
+  const [fournisseurFilter, setFournisseurFilter] = useState(""); // ✅ Correction Codex
   const [monthFilter, setMonthFilter] = useState("");
   const [actifFilter, setActifFilter] = useState("true");
   const [page, setPage] = useState(1);
@@ -46,14 +46,14 @@ export default function Factures() {
     if (!mama_id) return;
     getFactures({
       search,
-      fournisseur: supplierFilter,
+      fournisseur: fournisseurFilter, // ✅ Correction Codex
       statut: statutFilter,
       mois: monthFilter,
       actif: actifFilter === "all" ? null : actifFilter === "true",
       page,
       pageSize,
     });
-  }, [mama_id, getFactures, search, supplierFilter, statutFilter, monthFilter, actifFilter, page]);
+  }, [mama_id, getFactures, search, fournisseurFilter, statutFilter, monthFilter, actifFilter, page]); // ✅ Correction Codex
   const canEdit = hasAccess("factures", "peut_modifier");
 
   useEffect(() => { searchFactures(search); }, [search, searchFactures]);
@@ -67,7 +67,7 @@ export default function Factures() {
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(factures.map(f => ({
       ...f,
-      fournisseur_nom: suppliers.find(s => s.id === f.fournisseur_id)?.nom || f.fournisseur?.nom
+      fournisseur_nom: fournisseurs.find(s => s.id === f.fournisseur_id)?.nom || f.fournisseur?.nom // ✅ Correction Codex
     })));
     XLSX.utils.book_append_sheet(wb, ws, "Factures");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
@@ -105,20 +105,20 @@ export default function Factures() {
         <datalist id="factures-list">
           {factureOptions.map(f => (
             <option key={f.id} value={f.numero || f.id}>
-              {`n°${f.numero || f.id} - ${f.fournisseurs?.nom || ""}`}
+              {`n°${f.numero || f.id} - ${f.fournisseur?.nom || ""}`} // ✅ Correction Codex
             </option>
           ))}
         </datalist>
         <select
           className="input"
-          value={supplierFilter}
+          value={fournisseurFilter} // ✅ Correction Codex
           onChange={(e) => {
-            setSupplierFilter(e.target.value);
+            setFournisseurFilter(e.target.value); // ✅ Correction Codex
             setPage(1);
           }}
         >
           <option value="">Tous fournisseurs</option>
-          {suppliers.map(s => <option key={s.id} value={s.id}>{s.nom}</option>)}
+          {fournisseurs.map(s => <option key={s.id} value={s.id}>{s.nom}</option>)} // ✅ Correction Codex
         </select>
         <select
           className="input"
@@ -225,7 +225,7 @@ export default function Factures() {
       {showForm && (
         <FactureForm
           facture={selected}
-          suppliers={suppliers}
+          fournisseurs={fournisseurs} // ✅ Correction Codex
           onClose={() => {
             setShowForm(false);
             setSelected(null);

@@ -156,9 +156,9 @@
     "status": "corrected"
   },
   {
-    "form": "src/components/fournisseurs/SupplierForm.jsx",
+    "form": "src/components/fournisseurs/FournisseurFormModal.jsx",
     "status": "corrected"
-  },
+  }, // ✅ Correction Codex
   {
     "form": "src/pages/parametrage/PermissionsForm.jsx",
     "status": "corrected"

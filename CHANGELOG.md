@@ -15,9 +15,9 @@
 - Product price trend chart on the dashboard
 - Top products function for the dashboard with React hook
 - Excel export for cost center analytics
-- Global search bar in the navbar to quickly find products or suppliers
+- Barre de recherche globale dans la barre de navigation pour trouver rapidement produits ou fournisseurs // ✅ Correction Codex
 - Losses management page with Supabase table and audit logging
-- Alerts for suppliers with no invoices in the last 6 months
+- Alertes pour les fournisseurs sans facture depuis 6 mois // ✅ Correction Codex
 - Docker deployment instructions and Dockerfile
 - Unit tests for the cost center hook
 - Unit tests for the audit log hook
@@ -52,11 +52,11 @@
   `mouvements_stock.motif` help filter movements by these columns
 - Index `idx_mouvements_stock_type` accelerates queries by movement type
 - Stock statistics page `/stats/stocks` linked from the sidebar with Excel export
-- Backup script now exports the `supplier_products` table alongside other core data
+- Le script de sauvegarde exporte désormais la table `fournisseur_produits` avec les autres données principales // ✅ Correction Codex
 - Index on `factures.reference` accelerates invoice searches
 - Index on `products.code` makes product lookups by internal code faster
-- Index on `fournisseurs.nom` speeds up supplier search queries
-- Index on `supplier_products.date_livraison` speeds price history lookups
+- Index sur `fournisseurs.nom` pour accélérer les recherches fournisseur // ✅ Correction Codex
+- Index sur `fournisseur_produits.date_livraison` pour accélérer l'historique des prix // ✅ Correction Codex
 - Inventaires store a start date (`date_debut`) with indexes on `date` and `date_debut`
 - Index on `users.email` for faster authentication queries
 - Root path `/` now redirects to `/dashboard` for convenience

@@ -278,7 +278,7 @@ Task management is documented in [docs/taches.md](docs/taches.md).
 ## Features
 - Dashboard overview at `/dashboard` (root `/` redirects here) with KPI widgets,
   stock alerts and trend charts
-- Supplier price comparison with average and latest purchase metrics
+- Comparatif des prix fournisseurs avec moyenne et dernier achat // ✅ Correction Codex
 - Comparison page available at `/fournisseurs/comparatif` and linked from the sidebar
 - Upload, delete, download or replace files via Supabase Storage using `useStorage`; `replaceFile` handles cleanup of previous uploads
 - Daily menu handling provided by `useMenuDuJour`
@@ -315,10 +315,10 @@ Task management is documented in [docs/taches.md](docs/taches.md).
 - Product list features pagination, sortable columns, filters, quick duplication of existing entries and Excel import/export (the importer reads the first sheet if no "Produits" sheet is found)
 - Manage products from `/produits` with creation and detail pages at
   `/produits/nouveau` and `/produits/:id`
-- Each product records supplier prices and automatically updates its PMP
+- Chaque produit enregistre les prix fournisseurs et met automatiquement a jour son PMP // ✅ Correction Codex
 - Stock and movement history available from the product detail modal
-- Supplier list supports Excel/PDF export and highlights inactive suppliers
-- Alerts for suppliers with no invoices in the last 6 months
+- La liste des fournisseurs est exportable en Excel/PDF et met en avant les fournisseurs inactifs // ✅ Correction Codex
+- Alertes pour les fournisseurs sans facture depuis 6 mois // ✅ Correction Codex
 - Stock detail charts show monthly product rotation
 - Stock movement management available at `/mouvements`
 - Indexes on `mouvements_stock.type`, `zone`, `sous_type` and `motif` speed up filtering
@@ -347,9 +347,9 @@ Task management is documented in [docs/taches.md](docs/taches.md).
 - Index on `factures.reference` speeds up invoice search queries
 - Columns `total_ht`, `total_tva` and `total_ttc` are computed automatically via triggers
 - Index on `products.code` speeds up lookups by internal product code
-- Index on `fournisseurs.nom` speeds up supplier search queries
+- Index sur `fournisseurs.nom` pour accélérer les recherches fournisseur // ✅ Correction Codex
 - RLS policies on `produits`, `fournisseur_produits` and `fournisseurs` rely on `current_user_mama_id()` for isolation
-- Supplier form collects a contact name and an email address. Supplier lists,
+- Le formulaire fournisseur enregistre un nom de contact et une adresse email. Les listes de fournisseurs, // ✅ Correction Codex
   PDF exports and Excel exports all include the columns `ville`, `tel`, `email`
   and `contact` for coherence with `db/TABLE.txt`.
 - Obsolete admin dashboards `StatsDashboard` and `AuditViewer` were removed as
@@ -360,12 +360,12 @@ Task management is documented in [docs/taches.md](docs/taches.md).
 - SQL function `stats_cost_centers` can be executed by any authenticated user for cost center analytics
 - Dashboard analytics functions `dashboard_stats`, `top_produits` and `mouvements_without_alloc` are also executable by authenticated users
 - Command `npm run allocate:history` applies those suggestions to past movements
-- Global search bar in the navbar to quickly find products or suppliers
-- Live search on documents, alerts and suppliers lists with server-side filtering
-- Autocomplete hooks help pick suppliers and invoices securely
+- Barre de recherche globale pour trouver rapidement produits ou fournisseurs // ✅ Correction Codex
+- Recherche instantanee sur documents, alertes et listes de fournisseurs avec filtrage serveur // ✅ Correction Codex
+- Des hooks d'autocompletion facilitent la selection des fournisseurs et des factures en toute securite // ✅ Correction Codex
 - Notifications hook provides `markAllAsRead()`, `fetchUnreadCount()`, `updateNotification()`, `deleteNotification()` and `subscribeToNotifications()` helpers
 - Feedback page `/feedback` lets users send comments with urgency level (see [docs/feedback.md](docs/feedback.md))
-- Supplier API configuration list at `/parametrage/api-fournisseurs` (see [docs/fournisseurs_api_config.md](docs/fournisseurs_api_config.md))
+- La configuration API fournisseur est disponible a /parametrage/api-fournisseurs (see [docs/fournisseurs_api_config.md](docs/fournisseurs_api_config.md)) // ✅ Correction Codex
 - Password reset link on the login form points to `/reset-password` and the flow continues on `/update-password`
 - Optional two-factor authentication (TOTP) for user accounts, verified via QR code before activation
 - Functions `enable_two_fa` and `disable_two_fa` can be executed by any authenticated user for self-service 2FA
@@ -433,7 +433,7 @@ the positional argument nor `--limit` is provided. The value must be a positive
 integer; invalid values are ignored and the default of `100` is used instead.
 
 Create JSON backups of core tables using `node scripts/backup_db.js [FILE] [MAMA_ID] [SUPABASE_URL] [SUPABASE_KEY] [--tables list] [--output FILE] [--gzip] [--url URL --key KEY]`. The script
-exports products, suppliers, supplier product links, invoices, invoice lines,
+exporte les produits, fournisseurs, liaisons produit-fournisseur, factures, lignes de facture, // ✅ Correction Codex
 inventories, inventory lines, tasks and stock movements into a dated file such
 as `backup_20250101.json`. Pass `--output` or `-o` to choose the destination file. Provide the `MAMA_ID` as the second argument or with `--mama-id ID`.
 Use `--tables` (or `-t`) with a comma-separated list to export only certain tables. Duplicate names in the list are ignored.

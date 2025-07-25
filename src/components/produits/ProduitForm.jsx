@@ -30,7 +30,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
   const [code, setCode] = useState(produit?.code || "");
   const [allergenes, setAllergenes] = useState(produit?.allergenes || "");
   const [image, setImage] = useState(null);
-  const [imageUrl, setImageUrl] = useState(produit?.image || "");
+  const [photoUrl, setPhotoUrl] = useState(produit?.url_photo || ""); // ✅ Correction Codex
   const [errors, setErrors] = useState({});
 
   const { addProduct, updateProduct, loading } = useProducts();
@@ -53,7 +53,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
       setActif(produit.actif ?? true);
       setCode(produit.code || "");
       setAllergenes(produit.allergenes || "");
-      setImageUrl(produit.image || "");
+      setPhotoUrl(produit.url_photo || ""); // ✅ Correction Codex
     }
   }, [editing, produit]);
 
@@ -79,7 +79,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
       actif,
       code,
       allergenes,
-      image: imageUrl || produit?.image,
+      url_photo: photoUrl || produit?.url_photo, // ✅ Correction Codex
     };
     try {
       setSaving(true);
@@ -105,9 +105,9 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
   async function handleUpload() {
     if (!image) return toast.error("Sélectionnez une image");
     try {
-      if (imageUrl) await deleteFile("products", pathFromUrl(imageUrl));
+      if (photoUrl) await deleteFile("products", pathFromUrl(photoUrl));
       const url = await uploadFile("products", image);
-      setImageUrl(url);
+      setPhotoUrl(url); // ✅ Correction Codex
       toast.success("Image uploadée !");
     } catch (err) {
       console.error(err);
@@ -157,9 +157,9 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
       />
       {errors.unite && <p className="text-red-500 text-sm">{errors.unite}</p>}
       <div>
-        <label className="block text-sm mb-1 font-medium" htmlFor="prod-supplier">Fournisseur principal</label>
+        <label className="block text-sm mb-1 font-medium" htmlFor="prod-fournisseur">Fournisseur principal</label> // ✅ Correction Codex
         <Select
-          id="prod-supplier"
+          id="prod-fournisseur" // ✅ Correction Codex
           value={fournisseurId} // ✅ Correction Codex
           onChange={e => setFournisseurId(e.target.value)} // ✅ Correction Codex
           className="w-full"
@@ -185,8 +185,8 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
       </div>
       <div>
         <label htmlFor="prod-photo" className="block text-sm mb-1 font-medium">Photo</label>
-        {imageUrl && (
-          <img src={imageUrl} alt="aperçu" className="h-20 mb-2 rounded" />
+        {photoUrl && (
+          <img src={photoUrl} alt="aperçu" className="h-20 mb-2 rounded" />
         )}
         <input
           id="prod-photo"

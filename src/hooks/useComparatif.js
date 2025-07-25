@@ -22,7 +22,7 @@ export function useComparatif(productId) {
     setError(null);
     const { data, error } = await supabase
       .from("fournisseur_produits")
-      .select("prix_achat, date_livraison, fournisseur_id, fournisseurs(nom)")
+      .select("prix_achat, date_livraison, fournisseur_id, fournisseur: fournisseurs(nom)") // ✅ Correction Codex
       .eq("produit_id", id)
       .eq("mama_id", mama_id)
       .order("date_livraison", { ascending: false });
@@ -39,7 +39,7 @@ export function useComparatif(productId) {
       const fid = row.fournisseur_id;
       if (!grouped[fid]) {
         grouped[fid] = {
-          fournisseur: row.fournisseurs?.nom || "-",
+          fournisseur: row.fournisseur?.nom || "-", // ✅ Correction Codex
           dernierPrix: parseFloat(row.prix_achat),
           total: parseFloat(row.prix_achat),
           nb: 1,

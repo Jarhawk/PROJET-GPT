@@ -11,20 +11,20 @@ const fromMock = vi.fn(() => ({ select: selectMock }));
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
 vi.mock('@/hooks/useAuth', () => ({ default: () => ({ mama_id: 'm1' }) }));
 
-let useSupplierProducts;
+let useProduitsFournisseur; // ✅ Correction Codex
 beforeEach(async () => {
-  ({ useSupplierProducts } = await import('@/hooks/useSupplierProducts'));
+  ({ useProduitsFournisseur } = await import('@/hooks/useProduitsFournisseur.js'));
   fromMock.mockClear();
   selectMock.mockClear();
   eq1Mock.mockClear();
   eq2Mock.mockClear();
 });
 
-test('getProductsBySupplier fetches and caches results', async () => {
-  const { result } = renderHook(() => useSupplierProducts());
+test('getProduitsDuFournisseur récupère et met en cache les résultats', async () => { // ✅ Correction Codex
+  const { result } = renderHook(() => useProduitsFournisseur()); // ✅ Correction Codex
   let res1;
   await act(async () => {
-    res1 = await result.current.getProductsBySupplier('f1');
+    res1 = await result.current.getProduitsDuFournisseur('f1'); // ✅ Correction Codex
   });
   expect(fromMock).toHaveBeenCalledWith('fournisseur_produits');
   expect(selectMock).toHaveBeenCalled();
@@ -33,7 +33,7 @@ test('getProductsBySupplier fetches and caches results', async () => {
   expect(res1).toEqual(final.data);
   let res2;
   await act(async () => {
-    res2 = await result.current.getProductsBySupplier('f1');
+    res2 = await result.current.getProduitsDuFournisseur('f1'); // ✅ Correction Codex
   });
   expect(fromMock).toHaveBeenCalledTimes(1);
   expect(res2).toEqual(final.data);

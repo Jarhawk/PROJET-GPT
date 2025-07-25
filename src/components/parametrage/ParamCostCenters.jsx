@@ -40,7 +40,7 @@ export default function ParamCostCenters() {
       try {
         await deleteCostCenter(id);
         await fetchCostCenters();
-        toast.success("Cost center supprimé.");
+        toast.success("Centre de coût supprimé."); // ✅ Correction Codex
       } catch (err) {
         console.error("Erreur suppression cost center:", err);
         toast.error("Échec suppression");
@@ -56,10 +56,10 @@ export default function ParamCostCenters() {
     try {
       if (editMode) {
         await updateCostCenter(form.id, { nom: form.nom, actif: form.actif });
-        toast.success("Cost center modifié !");
+        toast.success("Centre de coût modifié !"); // ✅ Correction Codex
       } else {
         await addCostCenter({ nom: form.nom, actif: form.actif });
-        toast.success("Cost center ajouté !");
+        toast.success("Centre de coût ajouté !"); // ✅ Correction Codex
       }
       setEditMode(false);
       setForm({ nom: "", actif: true, id: null });
@@ -82,7 +82,7 @@ export default function ParamCostCenters() {
         await addCostCenter({ nom: row.nom, actif: row.actif !== false });
       }
       await fetchCostCenters();
-      toast.success("Cost centers importés");
+      toast.success("Centres de coûts importés"); // ✅ Correction Codex
     } catch (err) {
       console.error("Erreur import cost centers:", err);
       toast.error("Échec import");
@@ -102,7 +102,7 @@ export default function ParamCostCenters() {
   return (
     <div>
       <Toaster position="top-right" />
-      <h2 className="font-bold text-xl mb-4">Cost Centers</h2>
+      <h2 className="font-bold text-xl mb-4">Centres de coûts</h2> // ✅ Correction Codex
       <form onSubmit={handleSubmit} className="flex gap-2 mb-4">
         <input
           className="input"

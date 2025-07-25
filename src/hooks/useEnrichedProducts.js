@@ -17,7 +17,7 @@ export function useEnrichedProducts() {
         .from("produits")
         .select(`
           *,
-          suppliers:fournisseur_produits(*, fournisseur: fournisseurs(*))
+          liaisons: fournisseur_produits(*, fournisseur: fournisseurs(*)) // ✅ Correction Codex
         `)
         .eq("mama_id", mama_id);
 

@@ -17,18 +17,18 @@ export default function useProduitsUtilises() {
       const start = new Date();
       start.setDate(start.getDate() - 30);
       const { data, error } = await supabase
-        .from('requisitions')
-        .select(`quantite, date_requisition, produit:produit_id(id, nom, url_photo)`)
-        .eq('mama_id', mama_id)
-        .gte('date_requisition', start.toISOString().slice(0, 10));
+        .from('v_produits_utilises') // ✅ Correction Codex
+        .select('produit_id, produit_nom, quantite, date_utilisation') // ✅ Correction Codex
+        .eq('mama_id', mama_id) // ✅ Correction Codex
+        .gte('date_utilisation', start.toISOString().slice(0, 10)); // ✅ Correction Codex
       if (error) throw error;
       const totals = {};
       (data || []).forEach((r) => {
-        const id = r.produit?.id;
+        const id = r.produit_id; // ✅ Correction Codex
         if (!totals[id]) {
-          totals[id] = { id, nom: r.produit?.nom, url_photo: r.produit?.url_photo, total: 0 }; // ✅ Correction Codex
+          totals[id] = { id, nom: r.produit_nom, total: 0 }; // ✅ Correction Codex
         }
-        totals[id].total += Number(r.quantite || 0);
+        totals[id].total += Number(r.quantite || 0); // ✅ Correction Codex
       });
       const list = Object.values(totals).sort((a, b) => b.total - a.total).slice(0, 5);
       setData(list);

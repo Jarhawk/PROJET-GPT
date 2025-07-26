@@ -16,9 +16,9 @@ export default function useAchatsMensuels() {
       setError(null);
       try {
         const { data, error } = await supabase
-          .from('v_achats_mensuels')
-          .select('mois, montant_total')
-          .eq('mama_id', mama_id)
+          .from('v_achats_mensuels') // ✅ Correction Codex
+          .select('mois, montant') // ✅ Correction Codex
+          .eq('mama_id', mama_id) // ✅ Correction Codex
           .order('mois', { ascending: true });
 
         if (error) throw error;

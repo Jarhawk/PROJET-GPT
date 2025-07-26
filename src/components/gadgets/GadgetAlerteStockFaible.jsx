@@ -18,7 +18,7 @@ export default function GadgetAlerteStockFaible() {
       <h3 className="font-bold mb-2">Alerte stock faible</h3>
       <Motion.ul initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-2 text-sm">
         {data.map((p) => (
-          <li key={p.id} className="flex items-center justify-between">
+          <li key={p.produit_id} className="flex items-center justify-between"> // ✅ Correction Codex
             <span>{p.nom}</span>
             <span className="text-red-300">
               {p.stock_reel} / {p.stock_min}

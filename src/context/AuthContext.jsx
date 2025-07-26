@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react"; // ✅ Correction Codex
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { login as loginUser } from "@/lib/loginUser";
@@ -69,7 +69,7 @@ export const AuthProvider = ({ children }) => {
       const { data, error } = await supabase
         .from("utilisateurs_complets")
         .select(
-          "id, nom, mama_id, actif, access_rights, role_id"
+          "id, nom, mama_id, actif, access_rights, role_id, role_nom, role_access_rights"
         )
         .eq("id", userId)
         .maybeSingle();
@@ -80,18 +80,22 @@ export const AuthProvider = ({ children }) => {
       }
 
       if (error) {
+        if (error.message && error.message.includes("column")) {
+          console.error("fetchUserData column error", error.message); // ✅ Correction Codex
+          setError(error.message);
+          setUserData(null);
+          return;
+        }
         throw error;
       }
 
       if (import.meta.env.DEV) console.log("fetchUserData result", data);
 
-      const { data: roleData } = await supabase
-        .from("roles")
-        .select("id, nom, access_rights")
-        .eq("id", data.role_id)
-        .maybeSingle();
-
-      const roleInfo = roleData || { id: data.role_id, nom: null, access_rights: {} };
+      const roleInfo = {
+        id: data.role_id,
+        nom: data.role_nom,
+        access_rights: data.role_access_rights || {},
+      };
 
       const rights = mergeRights(
         extractAccessRightsFromRole(roleInfo),
@@ -287,7 +291,7 @@ export const AuthProvider = ({ children }) => {
     /** Convenience alias for `session?.user?.id` */
     user_id: session?.user?.id ?? null,
     /** Indicates the session is available but userData has not been fetched yet */
-    pending: !!session && !userData,
+    pending: !!session && !loading && !userData && !error, // ✅ Correction Codex
     email: userData?.email,
     actif: userData?.actif,
     isSuperadmin,

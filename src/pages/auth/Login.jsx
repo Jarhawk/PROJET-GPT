@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react"; // ✅ Correction Codex
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import MamaLogo from "@/components/ui/MamaLogo";
 import ResetAuthButton from "@/components/ResetAuthButton";
@@ -29,12 +29,18 @@ export default function Login() {
     error: authError,
     resetAuth,
   } = useAuth();
+  const rightsLoaded =
+    userData &&
+    userData.mama_id &&
+    userData.access_rights &&
+    Object.keys(userData.access_rights).length > 0; // ✅ Correction Codex
 
   const redirectedRef = useRef(false);
   useEffect(() => {
     if (redirectedRef.current) return;
     if (!session || authLoading) return;
     if (!userData) return;
+    if (!rightsLoaded) return;
     redirectedRef.current = true;
     if (userData.actif === false && pathname !== "/blocked") {
       navigate("/blocked");
@@ -94,6 +100,9 @@ export default function Login() {
             </div>
           )}
         </div>
+      )}
+      {userData && !rightsLoaded && (
+        <div className="text-red-500 text-center mb-2 text-sm">Droits utilisateur incomplets. Rechargez la page ou contactez le support.</div>
       )}
       <GlassCard className="flex flex-col items-center">
         <div className="mb-6">

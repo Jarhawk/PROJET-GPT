@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useContext } from "react";
+import { useContext } from "react"; // ✅ Correction Codex
 import { AuthContext } from "@/context/AuthContext";
 
 export function useAuth() {
@@ -16,13 +16,15 @@ export function useAuth() {
     ctx.userData?.roleData?.nom ??
     ctx.roleData?.nom ??
     null;
+  const rights = ctx.access_rights ?? ctx.userData?.access_rights ?? {};
+  const mamaId = ctx.userData?.mama_id ?? ctx.mama_id ?? null; // ✅ Correction Codex
   return {
     session: ctx.session,
     userData: ctx.userData,
     user_id: ctx.user_id ?? ctx.session?.user?.id ?? null,
-    mama_id: ctx.userData?.mama_id ?? ctx.mama_id ?? null,
+    mama_id: mamaId,
     nom: ctx.userData?.nom ?? ctx.nom,
-    access_rights: ctx.userData?.access_rights ?? ctx.access_rights ?? {},
+    access_rights: rights,
     role: roleName,
     roleData: ctx.userData?.roleData ?? ctx.roleData ?? null,
     email: ctx.userData?.email ?? ctx.email,

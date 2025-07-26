@@ -10,34 +10,34 @@ export function useAuth() {
       "useAuth n’est pas correctement initialisé (provider absent ou mal injecté) !"
     );
   }
-  const loading = ctx.loading ?? ctx.isLoading;
+  const loading = ctx.loading ?? ctx.isLoading ?? false;
   const roleName =
     ctx.role ??
     ctx.userData?.roleData?.nom ??
     ctx.roleData?.nom ??
     null;
   const rights = ctx.access_rights ?? ctx.userData?.access_rights ?? {};
-  const mamaId = ctx.userData?.mama_id ?? ctx.mama_id ?? null; // ✅ Correction Codex
+  const mamaId = ctx.userData?.mama_id ?? ctx.mama_id ?? null;
   return {
-    session: ctx.session,
-    userData: ctx.userData,
+    session: ctx.session ?? null,
+    userData: ctx.userData ?? null,
     user_id: ctx.user_id ?? ctx.session?.user?.id ?? null,
     mama_id: mamaId,
-    nom: ctx.userData?.nom ?? ctx.nom,
+    nom: ctx.userData?.nom ?? ctx.nom ?? null,
     access_rights: rights,
     role: roleName,
     roleData: ctx.userData?.roleData ?? ctx.roleData ?? null,
-    email: ctx.userData?.email ?? ctx.email,
-    actif: ctx.userData?.actif ?? ctx.actif,
-    isSuperadmin: ctx.isSuperadmin,
-    isAdmin: ctx.isAdmin,
+    email: ctx.userData?.email ?? ctx.email ?? null,
+    actif: ctx.userData?.actif ?? ctx.actif ?? null,
+    isSuperadmin: ctx.isSuperadmin ?? false,
+    isAdmin: ctx.isAdmin ?? false,
     loading,
-    pending: ctx.pending,
-    isAuthenticated: ctx.isAuthenticated,
-    hasAccess: ctx.hasAccess,
-    getAuthorizedModules: ctx.getAuthorizedModules,
-    error: ctx.error,
-    resetAuth: ctx.resetAuth,
+    pending: ctx.pending ?? false,
+    isAuthenticated: ctx.isAuthenticated ?? !!ctx.session?.user?.id,
+    hasAccess: ctx.hasAccess ?? (() => false),
+    getAuthorizedModules: ctx.getAuthorizedModules ?? (() => []),
+    error: ctx.error ?? null,
+    resetAuth: ctx.resetAuth ?? (() => {}),
     login: ctx.login,
     signup: ctx.signup,
     logout: ctx.logout,

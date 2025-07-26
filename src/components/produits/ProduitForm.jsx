@@ -28,7 +28,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
   const [actif, setActif] = useState(produit?.actif ?? true);
   const [code, setCode] = useState(produit?.code || "");
   const [allergenes, setAllergenes] = useState(produit?.allergenes || "");
-  const [image, setImage] = useState(null); // ✅ Correction Codex
+  const [_image, setImage] = useState(null); // ✅ Correction Codex
   const [errors, setErrors] = useState({});
 
   const { addProduct, updateProduct, loading } = useProducts();

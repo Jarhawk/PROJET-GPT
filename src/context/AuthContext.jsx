@@ -69,7 +69,7 @@ export const AuthProvider = ({ children }) => {
       const { data, error } = await supabase
         .from("utilisateurs_complets")
         .select(
-          "id, nom, mama_id, actif, access_rights, role:role_id(id, nom, access_rights)"
+          "id, nom, mama_id, actif, access_rights, role_id"
         )
         .eq("id", userId)
         .maybeSingle();
@@ -85,12 +85,16 @@ export const AuthProvider = ({ children }) => {
 
       if (import.meta.env.DEV) console.log("fetchUserData result", data);
 
-      const roleData =
-        data.role ||
-        (data.role_nom ? { nom: data.role_nom, access_rights: {} } : { nom: data.role, access_rights: {} });
+      const { data: roleData } = await supabase
+        .from("roles")
+        .select("id, nom, access_rights")
+        .eq("id", data.role_id)
+        .maybeSingle();
+
+      const roleInfo = roleData || { id: data.role_id, nom: null, access_rights: {} };
 
       const rights = mergeRights(
-        extractAccessRightsFromRole(roleData),
+        extractAccessRightsFromRole(roleInfo),
         data.access_rights
       );
 
@@ -103,7 +107,7 @@ export const AuthProvider = ({ children }) => {
         email,
         nom: data.nom,
         access_rights: rights,
-        role: roleData,
+        roleData: roleInfo,
       };
 
       if (import.meta.env.DEV) {
@@ -273,8 +277,8 @@ export const AuthProvider = ({ children }) => {
     nom: userData?.nom,
     access_rights: userData?.access_rights ?? null,
     mama_id: userData?.mama_id,
-    role: userData?.role?.nom ?? null,
-    roleData: userData?.role ?? null,
+    role: userData?.roleData?.nom ?? null,
+    roleData: userData?.roleData ?? null,
     /** Authentication state */
     loading,
     error,

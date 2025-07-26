@@ -13,7 +13,7 @@ export function useAuth() {
   const loading = ctx.loading ?? ctx.isLoading;
   const roleName =
     ctx.role ??
-    ctx.userData?.role?.nom ??
+    ctx.userData?.roleData?.nom ??
     ctx.roleData?.nom ??
     null;
   return {
@@ -24,7 +24,7 @@ export function useAuth() {
     nom: ctx.userData?.nom ?? ctx.nom,
     access_rights: ctx.userData?.access_rights ?? ctx.access_rights ?? {},
     role: roleName,
-    roleData: ctx.userData?.role ?? ctx.roleData ?? null,
+    roleData: ctx.userData?.roleData ?? ctx.roleData ?? null,
     email: ctx.userData?.email ?? ctx.email,
     actif: ctx.userData?.actif ?? ctx.actif,
     isSuperadmin: ctx.isSuperadmin,

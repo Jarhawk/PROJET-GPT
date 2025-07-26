@@ -8,8 +8,15 @@ import useAuth from '../src/hooks/useAuth.js';
 const getSession = vi.fn(() => Promise.resolve({ data: { session: { user: { id: 'u1', email: 'u@x.com' } } }, error: null }));
 const onAuthStateChange = vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } }));
 const signOut = vi.fn(() => Promise.resolve({ error: null }));
-const maybeSingle = vi.fn(() => Promise.resolve({ data: { id: '1', nom: 'User', mama_id: 1, role_id: 'r1', access_rights: {}, role: { id: 'r1', nom: 'superadmin', access_rights: {} } }, error: null }));
-const from = vi.fn(() => ({ select: () => ({ eq: () => ({ maybeSingle }) }) }));
+const maybeUser = vi.fn(() => Promise.resolve({ data: { id: '1', nom: 'User', mama_id: 1, role_id: 'r1', access_rights: {} }, error: null }));
+const maybeRole = vi.fn(() => Promise.resolve({ data: { id: 'r1', nom: 'superadmin', access_rights: {} }, error: null }));
+const from = vi.fn((table) => ({
+  select: () => ({
+    eq: () => ({
+      maybeSingle: table === 'roles' ? maybeRole : maybeUser,
+    }),
+  }),
+}));
 
 vi.mock('../src/lib/supabase.js', () => ({
   supabase: { auth: { getSession, onAuthStateChange, signOut }, from }

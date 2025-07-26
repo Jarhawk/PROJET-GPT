@@ -11,7 +11,11 @@ export function useAuth() {
     );
   }
   const loading = ctx.loading ?? ctx.isLoading;
-  const roleName = ctx.userData?.role?.nom ?? ctx.role?.nom ?? ctx.role ?? null;
+  const roleName =
+    ctx.role ??
+    ctx.userData?.role?.nom ??
+    ctx.roleData?.nom ??
+    null;
   return {
     session: ctx.session,
     userData: ctx.userData,

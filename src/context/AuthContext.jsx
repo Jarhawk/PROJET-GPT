@@ -64,49 +64,63 @@ export const AuthProvider = ({ children }) => {
     if (fetchingRef.current && lastUserIdRef.current === userId) return;
     fetchingRef.current = true;
     if (import.meta.env.DEV) console.log("fetchUserData", userId);
-    let { data, error } = await supabase
-      .from("utilisateurs_complets") // ✅ Correction Codex
-      .select("id, nom, role, mama_id, actif") // ✅ Correction Codex
-      .eq("id", userId) // ✅ Correction Codex
-      .maybeSingle();
 
-    if (!data && !error) {
-      console.warn("user not loaded", userId); // ✅ Correction Codex
-      fetchingRef.current = false;
-      return;
-    }
-    if (import.meta.env.DEV) console.log("fetchUserData result", data);
+    try {
+      const { data, error } = await supabase
+        .from("utilisateurs_complets")
+        .select(
+          "id, nom, mama_id, actif, access_rights, role:role_id(id, nom, access_rights)"
+        )
+        .eq("id", userId)
+        .maybeSingle();
 
-    if (error) {
-      console.error("Erreur récupération utilisateur:", error);
-      toast.error(error.message || "Erreur récupération utilisateur");
-      setError(error.message || "Erreur inconnue");
+      if (!data && !error) {
+        console.warn("user not loaded", userId);
+        return;
+      }
+
+      if (error) {
+        throw error;
+      }
+
+      if (import.meta.env.DEV) console.log("fetchUserData result", data);
+
+      const roleData =
+        data.role ||
+        (data.role_nom ? { nom: data.role_nom, access_rights: {} } : { nom: data.role, access_rights: {} });
+
+      const rights = mergeRights(
+        extractAccessRightsFromRole(roleData),
+        data.access_rights
+      );
+
+      lastUserIdRef.current = userId;
+      setError(null);
+
+      const newData = {
+        ...data,
+        auth_id: userId,
+        email,
+        nom: data.nom,
+        access_rights: rights,
+        role: roleData,
+      };
+
+      if (import.meta.env.DEV) {
+        console.log("Loaded user", { nom: newData.nom, rights: newData.access_rights });
+      }
+
+      setUserData(newData);
+
+      if (!data.mama_id) console.warn("missing mama_id for user", userId);
+    } catch (err) {
+      console.error("Erreur récupération utilisateur:", err);
+      toast.error(err.message || "Erreur récupération utilisateur");
+      setError(err.message || "Erreur inconnue");
       setUserData(null);
+    } finally {
       fetchingRef.current = false;
-      return;
     }
-
-
-
-    const roleData = { nom: data.role, access_rights: {} }; // ✅ Correction Codex
-    const rights = extractAccessRightsFromRole(roleData); // ✅ Correction Codex
-
-    lastUserIdRef.current = userId;
-    setError(null);
-    const newData = {
-      ...data,
-      auth_id: userId,
-      email,
-      nom: data.nom,
-      access_rights: rights, // ✅ Correction Codex
-      role: roleData,
-    };
-    if (import.meta.env.DEV) {
-      console.log('Loaded user', { nom: newData.nom, rights: newData.access_rights });
-    }
-    setUserData(newData);
-    if (!data.mama_id) console.warn("missing mama_id for user", userId);
-    fetchingRef.current = false;
   }
 
   async function loadSession() {
@@ -259,7 +273,8 @@ export const AuthProvider = ({ children }) => {
     nom: userData?.nom,
     access_rights: userData?.access_rights ?? null,
     mama_id: userData?.mama_id,
-    role: userData?.role,
+    role: userData?.role?.nom ?? null,
+    roleData: userData?.role ?? null,
     /** Authentication state */
     loading,
     error,

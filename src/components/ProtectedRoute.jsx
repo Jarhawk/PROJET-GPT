@@ -26,6 +26,7 @@ export default function ProtectedRoute({ children, accessKey }) {
 
 
     const noRights =
+      !userData.mama_id ||
       !userData.access_rights ||
       (typeof userData.access_rights === "object" &&
         Object.keys(userData.access_rights).length === 0);

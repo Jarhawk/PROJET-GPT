@@ -18,7 +18,7 @@ export default function useProduitsUtilises() {
       start.setDate(start.getDate() - 30);
       const { data, error } = await supabase
         .from('requisitions')
-        .select(`quantite, date_requisition, produit:produit_id(id, nom, url_photo)`)
+        .select(`quantite, date_requisition, produit:produit_id(id, nom)`)
         .eq('mama_id', mama_id)
         .gte('date_requisition', start.toISOString().slice(0, 10));
       if (error) throw error;
@@ -26,7 +26,7 @@ export default function useProduitsUtilises() {
       (data || []).forEach((r) => {
         const id = r.produit?.id;
         if (!totals[id]) {
-          totals[id] = { id, nom: r.produit?.nom, url_photo: r.produit?.url_photo, total: 0 }; // ✅ Correction Codex
+          totals[id] = { id, nom: r.produit?.nom, total: 0 };
         }
         totals[id].total += Number(r.quantite || 0);
       });

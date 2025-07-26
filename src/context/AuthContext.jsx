@@ -76,17 +76,25 @@ export const AuthProvider = ({ children }) => {
 
       if (!data && !error) {
         console.warn("user not loaded", userId);
+        setError("Utilisateur introuvable");
+        setUserData(null);
         return;
       }
 
       if (error) {
         if (error.message && error.message.includes("column")) {
-          console.error("fetchUserData column error", error.message); // ✅ Correction Codex
+          console.error("fetchUserData column error", error.message);
           setError(error.message);
           setUserData(null);
           return;
         }
         throw error;
+      }
+
+      if (!data) {
+        setError("Utilisateur introuvable");
+        setUserData(null);
+        return;
       }
 
       if (import.meta.env.DEV) console.log("fetchUserData result", data);
@@ -262,15 +270,15 @@ export const AuthProvider = ({ children }) => {
     navigate("/login");
   };
 
+  const isSuperadmin = checkAccess(userData?.access_rights, 'superadmin', 'peut_voir');
+
   const hasAccess = (module, droit = "peut_voir") => {
-    return checkAccess(userData?.access_rights, module, droit, false);
+    return checkAccess(userData?.access_rights, module, droit, isSuperadmin);
   };
 
   const getAuthorizedModules = (droit = "peut_voir") => {
     return listModules(userData?.access_rights, droit);
   };
-
-  const isSuperadmin = checkAccess(userData?.access_rights, 'superadmin', 'peut_voir');
   const isAdmin =
     isSuperadmin || checkAccess(userData?.access_rights, 'admin', 'peut_voir');
 

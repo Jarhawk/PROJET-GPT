@@ -14,10 +14,13 @@ export default function ProtectedRoute({ children, accessKey }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // on patiente tant que userData n'est pas chargé pour éviter
-    // une redirection prématurée si le rôle est encore null
-    // (le rôle est parfois chargé avec un léger délai via Supabase)
-    if (!session || !userData || pending || loading) return;
+    // On patiente tant que les données ne sont pas chargées
+    if (!session || pending || loading) return;
+
+    if (!userData) {
+      navigate('/unauthorized', { replace: true });
+      return;
+    }
 
     if (userData.actif === false) {
       navigate("/blocked", { replace: true });
@@ -38,6 +41,12 @@ export default function ProtectedRoute({ children, accessKey }) {
       navigate("/unauthorized", { replace: true });
     }
   }, [session, userData, pending, loading, accessKey, navigate, hasAccess]);
-  if (!session || pending || loading || !userData) return <LoadingScreen />;
+
+  if (!session && !loading && !pending) {
+    navigate('/login', { replace: true });
+    return null;
+  }
+  if (!session || pending || loading) return <LoadingScreen />;
+  if (!userData) return <LoadingScreen />;
   return children;
 }

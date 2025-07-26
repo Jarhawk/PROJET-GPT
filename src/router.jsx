@@ -161,10 +161,11 @@ function RootRoute() {
   const { session, loading, pending, userData, error } = useAuth();
   if (loading || pending) return <LoadingSpinner message="Chargement..." />;
   if (error) {
-    console.error('Auth error', error); // ✅ Correction Codex
+    console.error('Auth error', error);
     return <Navigate to="/login" replace />;
   }
-  if (session && session.user && userData && userData.actif !== false) {
+  if (session && userData) {
+    if (userData.actif === false) return <Navigate to="/blocked" replace />;
     return <Navigate to="/dashboard" replace />;
   }
   return <Navigate to="/accueil" replace />;

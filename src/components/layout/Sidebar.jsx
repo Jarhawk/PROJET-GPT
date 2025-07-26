@@ -9,10 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import MamaLogo from "@/components/ui/MamaLogo";
 
 export default function Sidebar() {
-  const { access_rights, isSuperadmin, loading, hasAccess } = useAuth();
+  const { access_rights, isSuperadmin, loading, pending, hasAccess } = useAuth();
   const { pathname } = useLocation();
 
-  if (loading || access_rights === null) return null;
+  if (loading || pending || access_rights === null) return null;
   const has = (key) => isSuperadmin || hasAccess(key, "peut_voir");
   const canAnalyse = has("analyse");
 

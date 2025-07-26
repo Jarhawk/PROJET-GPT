@@ -36,7 +36,7 @@ test('access rights are loaded from supabase', async () => {
 });
 
 test('user not found keeps userData null', async () => {
-  maybeSingle.mockResolvedValueOnce({ data: null, error: null });
+  maybeUser.mockResolvedValueOnce({ data: null, error: null });
   const wrapper = ({ children }) => (
     <MemoryRouter>
       <AuthProvider>{children}</AuthProvider>

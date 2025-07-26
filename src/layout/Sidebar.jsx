@@ -35,7 +35,6 @@ export default function Sidebar() {
   const {
     access_rights,
     loading,
-    user,
     userData,
     role,
     mama_id,
@@ -45,10 +44,10 @@ export default function Sidebar() {
   } = useAuth();
   const { pathname } = useLocation();
   if (import.meta.env.DEV) {
-    console.log("Sidebar", { user, mama_id, access_rights });
+    console.log("Sidebar", { session, mama_id, access_rights });
   }
 
-  if (loading || !user || !userData || !access_rights) {
+  if (loading || !session || !userData || !access_rights) {
     return null;
   }
 
@@ -206,7 +205,7 @@ export default function Sidebar() {
       </nav>
       {session && (
         <div className="mt-6 border-t border-white/20 pt-4 text-sm flex flex-col gap-2">
-          <span>Bienvenue, {userData.nom || user?.email}</span>
+          <span>Bienvenue, {userData.nom || session?.user?.email}</span>
           {role ? (
             <Badge color="gray">{role}</Badge>
           ) : (

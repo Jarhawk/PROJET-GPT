@@ -6,7 +6,6 @@ import { useFamilles } from "@/hooks/useFamilles";
 import { useUnites } from "@/hooks/useUnites";
 import { useFournisseurs } from "@/hooks/useFournisseurs";
 import { toast } from "react-hot-toast";
-import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
 import AutoCompleteField from "@/components/ui/AutoCompleteField";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -29,8 +28,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
   const [actif, setActif] = useState(produit?.actif ?? true);
   const [code, setCode] = useState(produit?.code || "");
   const [allergenes, setAllergenes] = useState(produit?.allergenes || "");
-  const [image, setImage] = useState(null);
-  const [photoUrl, setPhotoUrl] = useState(produit?.url_photo || ""); // ✅ Correction Codex
+  const [image, setImage] = useState(null); // ✅ Correction Codex
   const [errors, setErrors] = useState({});
 
   const { addProduct, updateProduct, loading } = useProducts();
@@ -52,8 +50,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
       setStockMin(produit.stock_min || 0);
       setActif(produit.actif ?? true);
       setCode(produit.code || "");
-      setAllergenes(produit.allergenes || "");
-      setPhotoUrl(produit.url_photo || ""); // ✅ Correction Codex
+      setAllergenes(produit.allergenes || ""); // ✅ Correction Codex
     }
   }, [editing, produit]);
 
@@ -79,7 +76,6 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
       actif,
       code,
       allergenes,
-      url_photo: photoUrl || produit?.url_photo, // ✅ Correction Codex
     };
     try {
       setSaving(true);
@@ -102,17 +98,8 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
     }
   };
 
-  async function handleUpload() {
-    if (!image) return toast.error("Sélectionnez une image");
-    try {
-      if (photoUrl) await deleteFile("products", pathFromUrl(photoUrl));
-      const url = await uploadFile("products", image);
-      setPhotoUrl(url); // ✅ Correction Codex
-      toast.success("Image uploadée !");
-    } catch (err) {
-      console.error(err);
-      toast.error("Échec upload");
-    }
+  async function handleUpload() { // ✅ Correction Codex
+    toast.error("Upload désactivé");
   }
 
   return (
@@ -184,21 +171,14 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
         />
       </div>
       <div>
-        <label htmlFor="prod-photo" className="block text-sm mb-1 font-medium">Photo</label>
-        {photoUrl && (
-          <img src={photoUrl} alt="aperçu" className="h-20 mb-2 rounded" />
-        )}
+        <label className="block text-sm mb-1 font-medium">Photo</label>
         <input
           id="prod-photo"
           type="file"
           accept="image/*"
           onChange={e => setImage(e.target.files[0])}
         />
-        <button
-          type="button"
-          className="btn btn-secondary mt-1"
-          onClick={handleUpload}
-        >
+        <button type="button" className="btn btn-secondary mt-1" onClick={handleUpload}>
           Upload
         </button>
       </div>

@@ -21,8 +21,8 @@ export default function GadgetProduitsUtilises() {
           <li key={p.id} className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <img
-                src={p.url_photo || "/icons/icon-128x128.png"} // ✅ Correction Codex
-                alt={p.nom}
+                src="/icons/icon-128x128.png" // ✅ Correction Codex
+                alt=""
                 className="w-6 h-6 rounded object-cover"
               />
               <span>{p.nom}</span>

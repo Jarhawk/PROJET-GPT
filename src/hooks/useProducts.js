@@ -133,7 +133,6 @@ export function useProducts() {
       actif,
       code,
       allergenes,
-      url_photo,
     } = orig;
     const copy = {
       nom: `${orig.nom} (copie)`,
@@ -145,7 +144,6 @@ export function useProducts() {
       actif,
       code,
       allergenes,
-      url_photo,
     };
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
@@ -221,7 +219,6 @@ export function useProducts() {
       unite: p.unite,
       code: p.code,
       allergenes: p.allergenes,
-      url_photo: p.url_photo,
       pmp: p.pmp,
       stock_theorique: p.stock_theorique,
       stock_reel: p.stock_reel,

@@ -87,7 +87,6 @@ export default function Produits() {
           actif: row.actif !== false,
           code: row.code || "",
           allergenes: row.allergenes || "",
-          url_photo: row.url_photo || "", // ✅ Correction Codex
         },
         { refresh: false },
       );

@@ -15,9 +15,9 @@ export default function useAlerteStockFaible() {
     setError(null);
     try {
       const { data, error } = await supabase
-        .from('v_produits_dernier_prix')
-        .select('id, nom, stock_reel, stock_min')
-        .eq('mama_id', mama_id);
+        .from('v_produits_dernier_prix') // ✅ Correction Codex
+        .select('produit_id, nom, stock_reel, stock_min') // ✅ Correction Codex
+        .eq('mama_id', mama_id); // ✅ Correction Codex
 
       if (error) throw error;
 

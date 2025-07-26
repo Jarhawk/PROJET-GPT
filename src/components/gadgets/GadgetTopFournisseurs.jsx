@@ -21,11 +21,11 @@ export default function GadgetTopFournisseurs() {
       <h3 className="font-bold mb-2">Top fournisseurs du mois</h3>
       <Motion.ul initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-2 text-sm">
         {data.map((f) => (
-          <li key={f.id} className="flex items-center justify-between">
+          <li key={f.id} className="flex items-center justify-between">{/* ✅ Correction Codex */}
             <div className="flex items-center gap-2">
-              <span>{f.nom}</span>
+              <span>Fournisseur {f.id}</span>{/* ✅ Correction Codex */}
             </div>
-            <span className="font-semibold">{f.total.toFixed(2)} €</span>
+            <span className="font-semibold">{f.montant.toFixed(2)} €</span>{/* ✅ Correction Codex */}
           </li>
         ))}
       </Motion.ul>

@@ -65,25 +65,15 @@ export const AuthProvider = ({ children }) => {
     fetchingRef.current = true;
     if (import.meta.env.DEV) console.log("fetchUserData", userId);
     let { data, error } = await supabase
-      .from("utilisateurs")
-      .select(
-        `id, nom, mama_id, email, actif, access_rights, role_id, auth_id,
-        role:roles!fk_utilisateurs_role_id(nom, access_rights)`
-      )
-      .eq("auth_id", userId)
+      .from("utilisateurs_complets") // ✅ Correction Codex
+      .select("id, nom, role, mama_id, actif") // ✅ Correction Codex
+      .eq("id", userId) // ✅ Correction Codex
       .maybeSingle();
 
-    if (!data && !error && email) {
-      const res = await supabase
-        .from("utilisateurs")
-        .select(
-          `id, nom, mama_id, email, actif, access_rights, role_id, auth_id,
-          role:roles!fk_utilisateurs_role_id(nom, access_rights)`
-        )
-        .eq("email", email)
-        .maybeSingle();
-      data = res.data;
-      error = res.error;
+    if (!data && !error) {
+      console.warn("user not loaded", userId); // ✅ Correction Codex
+      fetchingRef.current = false;
+      return;
     }
     if (import.meta.env.DEV) console.log("fetchUserData result", data);
 
@@ -96,24 +86,10 @@ export const AuthProvider = ({ children }) => {
       return;
     }
 
-    if (!data) {
-      console.warn("user not loaded", userId);
-      setUserData(null);
-      if (pathname !== "/pending") navigate("/pending");
-      fetchingRef.current = false;
-      return;
-    }
 
-    let roleData = data.role;
-    if (roleData === null) {
-      console.warn(
-        `fetchUserData: role missing for user ${data.id}`
-      );
-      roleData = { nom: "inconnu", access_rights: {} };
-    }
-    const roleRights = extractAccessRightsFromRole(roleData);
-    const userRights = data.access_rights || {};
-    const rights = mergeRights(roleRights, userRights);
+
+    const roleData = { nom: data.role, access_rights: {} }; // ✅ Correction Codex
+    const rights = extractAccessRightsFromRole(roleData); // ✅ Correction Codex
 
     lastUserIdRef.current = userId;
     setError(null);
@@ -122,8 +98,7 @@ export const AuthProvider = ({ children }) => {
       auth_id: userId,
       email,
       nom: data.nom,
-      access_rights: rights,
-      role_id: data.role_id,
+      access_rights: rights, // ✅ Correction Codex
       role: roleData,
     };
     if (import.meta.env.DEV) {

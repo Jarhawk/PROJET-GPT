@@ -10,7 +10,7 @@ import LoadingScreen from "@/components/ui/LoadingScreen";
 // boucles d'effet.
 
 export default function ProtectedRoute({ children, accessKey }) {
-  const { session, userData, pending, loading, hasAccess } = useAuth();
+  const { session, userData, pending, loading, hasAccess, error } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -18,7 +18,11 @@ export default function ProtectedRoute({ children, accessKey }) {
     if (!session || pending || loading) return;
 
     if (!userData) {
-      navigate('/unauthorized', { replace: true });
+      if (error === 'Utilisateur introuvable') {
+        navigate('/onboarding-utilisateur', { replace: true });
+      } else {
+        navigate('/unauthorized', { replace: true });
+      }
       return;
     }
 
@@ -40,7 +44,7 @@ export default function ProtectedRoute({ children, accessKey }) {
     if (accessKey && !hasAccess(accessKey, "peut_voir")) {
       navigate("/unauthorized", { replace: true });
     }
-  }, [session, userData, pending, loading, accessKey, navigate, hasAccess]);
+  }, [session, userData, pending, loading, accessKey, navigate, hasAccess, error]);
 
   if (!session && !loading && !pending) {
     navigate('/login', { replace: true });

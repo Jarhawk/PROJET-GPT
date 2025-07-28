@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabase";
 import useAuth from "@/hooks/useAuth";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import * as XLSX from "xlsx";
+import { safeImportXLSX } from "@/lib/xlsx/safeImportXLSX";
 import { saveAs } from "file-saver";
 
 export function useCostCenters() {
@@ -84,13 +85,7 @@ export function useCostCenters() {
     setLoading(true);
     setError(null);
     try {
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data, { type: "array" });
-      const sheet =
-        workbook.SheetNames.includes("CostCenters")
-          ? "CostCenters"
-          : workbook.SheetNames[0];
-      const arr = XLSX.utils.sheet_to_json(workbook.Sheets[sheet]);
+      const arr = await safeImportXLSX(file, "CostCenters");
       return arr;
     } catch (err) {
       setError(err);

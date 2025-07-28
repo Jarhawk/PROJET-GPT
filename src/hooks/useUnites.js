@@ -3,6 +3,7 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import useAuth from "@/hooks/useAuth";
 import * as XLSX from "xlsx";
+import { safeImportXLSX } from "@/lib/xlsx/safeImportXLSX";
 import { saveAs } from "file-saver";
 
 export function useUnites() {
@@ -120,9 +121,7 @@ export function useUnites() {
     setLoading(true);
     setError(null);
     try {
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data, { type: "array" });
-      const arr = XLSX.utils.sheet_to_json(workbook.Sheets["Unites"]);
+      const arr = await safeImportXLSX(file, "Unites");
       return arr;
     } catch (error) {
       setError(error);

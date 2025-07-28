@@ -3,6 +3,7 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import useAuth from "@/hooks/useAuth";
 import * as XLSX from "xlsx";
+import { safeImportXLSX } from "@/lib/xlsx/safeImportXLSX";
 import { saveAs } from "file-saver";
 
 export function useMamas() {
@@ -92,9 +93,7 @@ export function useMamas() {
     setLoading(true);
     setError(null);
     try {
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data, { type: "array" });
-      const arr = XLSX.utils.sheet_to_json(workbook.Sheets["Mamas"]);
+      const arr = await safeImportXLSX(file, "Mamas");
       return arr;
     } catch (error) {
       setError(error);

@@ -20,6 +20,7 @@ export function useAuth() {
   const mamaId = ctx.userData?.mama_id ?? ctx.mama_id ?? null;
   return {
     session: ctx.session ?? null,
+    user: ctx.user ?? ctx.session?.user ?? null,
     userData: ctx.userData ?? null,
     user_id: ctx.user_id ?? ctx.session?.user?.id ?? null,
     mama_id: mamaId,

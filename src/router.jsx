@@ -14,6 +14,7 @@ import Login from "@/pages/auth/Login";
 import Unauthorized from "@/pages/auth/Unauthorized";
 import Pending from "@/pages/auth/Pending";
 import Blocked from "@/pages/auth/Blocked";
+import OnboardingUtilisateur from "@/pages/onboarding/OnboardingUtilisateur";
 import AuthDebug from "@/pages/debug/AuthDebug";
 import AccessExample from "@/pages/debug/AccessExample";
 import NotFound from "@/pages/NotFound";
@@ -160,6 +161,9 @@ export const routePreloadMap = {
 function RootRoute() {
   const { session, loading, pending, userData, error } = useAuth();
   if (loading || pending) return <LoadingSpinner message="Chargement..." />;
+  if (error === 'Utilisateur introuvable') {
+    return <Navigate to="/onboarding-utilisateur" replace />;
+  }
   if (error) {
     console.error('Auth error', error);
     return <Navigate to="/login" replace />;
@@ -193,6 +197,7 @@ export default function Router() {
         <Route path="/pending" element={<Pending />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/blocked" element={<Blocked />} />
+        <Route path="/onboarding-utilisateur" element={<OnboardingUtilisateur />} />
         <Route path="/rgpd" element={<Rgpd />} />
         <Route path="/confidentialite" element={<Confidentialite />} />
         <Route path="/mentions-legales" element={<MentionsLegales />} />

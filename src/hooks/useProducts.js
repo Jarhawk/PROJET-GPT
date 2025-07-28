@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import useAuth from "@/hooks/useAuth";
 import * as XLSX from "xlsx";
+import { safeImportXLSX } from "@/lib/xlsx/safeImportXLSX";
 import { saveAs } from "file-saver";
 import { toast } from "react-hot-toast";
 
@@ -239,11 +240,7 @@ export function useProducts() {
     setLoading(true);
     setError(null);
     try {
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data, { type: "array" });
-      const sheet =
-        workbook.Sheets["Produits"] || workbook.Sheets[workbook.SheetNames[0]];
-      const arr = XLSX.utils.sheet_to_json(sheet);
+      const arr = await safeImportXLSX(file, "Produits");
       return arr;
     } catch (error) {
       setError(error);

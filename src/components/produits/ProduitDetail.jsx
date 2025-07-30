@@ -15,13 +15,18 @@ export default function ProduitDetail({ produitId, open, onClose }) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    let active = true;
     if (open && produitId) {
       setLoading(true);
       fetchProductPrices(produitId).then(h => {
+        if (!active) return;
         setHistorique(h || []);
         setLoading(false);
       });
     }
+    return () => {
+      active = false;
+    };
   }, [open, produitId, fetchProductPrices]);
 
   const chartData = buildPriceData(historique);
@@ -56,7 +61,7 @@ export default function ProduitDetail({ produitId, open, onClose }) {
               ) : historique.map((h, i) => (
                 <tr key={i}>
                   <td>{h.created_at?.slice(0, 10) || "-"}</td>
-                  <td>{h.fournisseur?.nom || "-"}</td> // ✅ Correction Codex
+                  <td>{h.fournisseur?.nom || "-"}</td>
                   <td>{h.prix_achat ?? "-"}</td>
                   <td>{h.derniere_livraison?.slice(0, 10) || "-"}</td>
                 </tr>

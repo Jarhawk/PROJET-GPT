@@ -81,7 +81,9 @@ export default function InventaireZones() {
                   <Button
                     size="sm"
                     className="ml-2 bg-red-600 hover:bg-red-700 text-white"
-                    onClick={() => deleteZone(z.id)}
+                    onClick={async () => {
+                      await deleteZone(z.id);
+                    }}
                   >
                     Supprimer
                   </Button>

@@ -15,9 +15,9 @@ export default function useAlerteStockFaible() {
     setError(null);
     try {
       const { data, error } = await supabase
-        .from('v_produits_dernier_prix') // ✅ Correction Codex
-        .select('produit_id, nom, stock_reel, stock_min') // ✅ Correction Codex
-        .eq('mama_id', mama_id); // ✅ Correction Codex
+        .from('v_produits_dernier_prix')
+        .select('produit_id, nom, stock_reel, stock_min')
+        .eq('mama_id', mama_id);
 
       if (error) throw error;
 
@@ -30,7 +30,9 @@ export default function useAlerteStockFaible() {
         )
         .slice(0, 5);
       setData(list);
-      if (import.meta.env.DEV) console.log('Chargement dashboard terminé');
+      if (import.meta.env.DEV) {
+        console.debug('Chargement dashboard terminé');
+      }
       return list;
     } catch (e) {
       console.warn('useAlerteStockFaible', e);

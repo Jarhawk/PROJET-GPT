@@ -29,7 +29,9 @@ export default function useTachesUrgentes() {
         .limit(5);
       if (error) throw error;
       setData(data || []);
-      if (import.meta.env.DEV) console.log('Chargement dashboard terminé');
+      if (import.meta.env.DEV) {
+        console.debug('Chargement dashboard terminé');
+      }
       return data || [];
     } catch (e) {
       console.warn('useTachesUrgentes', e);

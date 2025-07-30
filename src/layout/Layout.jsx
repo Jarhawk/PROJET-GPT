@@ -38,7 +38,7 @@ export default function Layout() {
     return unsub;
   }, [fetchUnreadCount, subscribeToNotifications]);
   if (import.meta.env.DEV) {
-    console.log("Layout", {
+    console.debug("Layout", {
       session,
       userData,
       mama_id,

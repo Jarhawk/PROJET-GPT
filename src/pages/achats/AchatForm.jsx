@@ -10,7 +10,7 @@ import useAuth from "@/hooks/useAuth";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import Unauthorized from "@/pages/auth/Unauthorized";
 
-export default function AchatForm({ achat, fournisseurs = [], onClose }) { // ✅ Correction Codex
+export default function AchatForm({ achat, fournisseurs = [], onClose }) {
   const { createAchat, updateAchat } = useAchats();
   const { results: produitOptions, searchProduits } = useProduitsAutocomplete();
   const { hasAccess, loading: authLoading } = useAuth();
@@ -69,7 +69,7 @@ export default function AchatForm({ achat, fournisseurs = [], onClose }) { // �
           />
           <select className="input" value={fournisseur_id} onChange={e => setFournisseurId(e.target.value)} required>
             <option value="">Fournisseur</option>
-            {fournisseurs.map(s => <option key={s.id} value={s.id}>{s.nom}</option>)} // ✅ Correction Codex
+            {fournisseurs.map(s => <option key={s.id} value={s.id}>{s.nom}</option>)}
           </select>
           <input type="number" className="input" value={quantite} onChange={e => setQuantite(Number(e.target.value))} />
           <input type="number" className="input" value={prix} onChange={e => setPrix(Number(e.target.value))} />

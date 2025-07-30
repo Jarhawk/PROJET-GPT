@@ -21,14 +21,14 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
   const [nom, setNom] = useState(produit?.nom || "");
   const [familleId, setFamilleId] = useState(produit?.famille_id || "");
   const [uniteId, setUniteId] = useState(produit?.unite_id || "");
-  // Utilise la colonne fournisseur_id définie dans le schéma SQL // ✅ Correction Codex
-  const [fournisseurId, setFournisseurId] = useState(produit?.fournisseur_id || ""); // ✅ Correction Codex
+  const [fournisseurId, setFournisseurId] = useState(
+    produit?.fournisseur_principal_id || ""
+  );
   const [stock_reel, setStockReel] = useState(produit?.stock_reel || 0);
   const [stock_min, setStockMin] = useState(produit?.stock_min || 0);
   const [actif, setActif] = useState(produit?.actif ?? true);
   const [code, setCode] = useState(produit?.code || "");
   const [allergenes, setAllergenes] = useState(produit?.allergenes || "");
-  const [_image, setImage] = useState(null); // ✅ Correction Codex
   const [errors, setErrors] = useState({});
 
   const { addProduct, updateProduct, loading } = useProducts();
@@ -45,12 +45,12 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
       setNom(produit.nom || "");
       setFamilleId(produit.famille_id || "");
       setUniteId(produit.unite_id || "");
-      setFournisseurId(produit.fournisseur_id || ""); // ✅ Correction Codex
+      setFournisseurId(produit.fournisseur_principal_id || "");
       setStockReel(produit.stock_reel || 0);
       setStockMin(produit.stock_min || 0);
       setActif(produit.actif ?? true);
       setCode(produit.code || "");
-      setAllergenes(produit.allergenes || ""); // ✅ Correction Codex
+      setAllergenes(produit.allergenes || "");
     }
   }, [editing, produit]);
 
@@ -70,7 +70,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
       nom,
       famille_id: familleId || null,
       unite_id: uniteId || null,
-      fournisseur_id: fournisseurId || null, // ✅ Correction Codex
+      fournisseur_principal_id: fournisseurId || null,
       stock_reel: Number(stock_reel),
       stock_min: Number(stock_min),
       actif,
@@ -98,9 +98,6 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
     }
   };
 
-  async function handleUpload() { // ✅ Correction Codex
-    toast.error("Upload désactivé");
-  }
 
   return (
     <form onSubmit={handleSubmit} className="p-8 space-y-4 animate-fade-in">
@@ -144,11 +141,11 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
       />
       {errors.unite && <p className="text-red-500 text-sm">{errors.unite}</p>}
       <div>
-        <label className="block text-sm mb-1 font-medium" htmlFor="prod-fournisseur">Fournisseur principal</label> // ✅ Correction Codex
+        <label className="block text-sm mb-1 font-medium" htmlFor="prod-fournisseur">Fournisseur principal</label>
         <Select
-          id="prod-fournisseur" // ✅ Correction Codex
-          value={fournisseurId} // ✅ Correction Codex
-          onChange={e => setFournisseurId(e.target.value)} // ✅ Correction Codex
+          id="prod-fournisseur"
+          value={fournisseurId}
+          onChange={e => setFournisseurId(e.target.value)}
           className="w-full"
         >
           <option value="">Aucun</option>
@@ -172,15 +169,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
       </div>
       <div>
         <label className="block text-sm mb-1 font-medium">Photo</label>
-        <input
-          id="prod-photo"
-          type="file"
-          accept="image/*"
-          onChange={e => setImage(e.target.files[0])}
-        />
-        <button type="button" className="btn btn-secondary mt-1" onClick={handleUpload}>
-          Upload
-        </button>
+        <input id="prod-photo" type="file" accept="image/*" disabled />
       </div>
       {editing && (
         <div>

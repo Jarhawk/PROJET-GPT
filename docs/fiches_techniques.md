@@ -15,8 +15,8 @@ Ce module permet de gérer les fiches de production :
 - `src/hooks/useProduitsAutocomplete.js`
 - `src/hooks/useFichesAutocomplete.js`
 
-Les données sont sécurisées par RLS avec le `mama_id` dans `db/full_setup.sql`.
-Des triggers (`refresh_fiche_cost`) calculent automatiquement `cout_total` et `cout_par_portion` (voir `db/full_setup.sql`).
+Les données sont sécurisées par RLS avec le `mama_id` dans `db/Ajout.sql`.
+Des triggers (`refresh_fiche_cost`) calculent automatiquement `cout_total` et `cout_par_portion` (voir `db/Ajout.sql`).
 
 Le formulaire permet d'ajouter des lignes de type produit ou sous-fiche via les hooks d'autocomplétion. Le ratio matière est affiché quand un prix de vente HT est renseigné.
 

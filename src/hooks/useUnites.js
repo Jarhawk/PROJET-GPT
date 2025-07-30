@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import useAuth from "@/hooks/useAuth";
 import * as XLSX from "xlsx";
@@ -13,19 +13,22 @@ export function useUnites() {
   const [error, setError] = useState(null);
 
   // 1. Charger toutes les unités (filtrage recherche, batch)
-  async function fetchUnites({ search = "", includeInactive = false } = {}) {
-    if (!mama_id) return [];
-    setLoading(true);
-    setError(null);
-    let query = supabase.from("unites").select("*").eq("mama_id", mama_id);
-    if (!includeInactive) query = query.eq("actif", true);
-    if (search) query = query.ilike("nom", `%${search}%`);
-    const { data, error } = await query.order("nom", { ascending: true });
-    setUnites(Array.isArray(data) ? data : []);
-    setLoading(false);
-    if (error) setError(error);
-    return data || [];
-  }
+  const fetchUnites = useCallback(
+    async ({ search = "", includeInactive = false } = {}) => {
+      if (!mama_id) return [];
+      setLoading(true);
+      setError(null);
+      let query = supabase.from("unites").select("*").eq("mama_id", mama_id);
+      if (!includeInactive) query = query.eq("actif", true);
+      if (search) query = query.ilike("nom", `%${search}%`);
+      const { data, error } = await query.order("nom", { ascending: true });
+      setUnites(Array.isArray(data) ? data : []);
+      setLoading(false);
+      if (error) setError(error);
+      return data || [];
+    },
+    [mama_id]
+  );
 
   // 2. Ajouter une unité (avec vérif unicité)
   async function addUnite(nom) {

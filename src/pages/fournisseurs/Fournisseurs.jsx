@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useFournisseurs } from "@/hooks/useFournisseurs";
 import { useFournisseurStats } from "@/hooks/useFournisseurStats";
-import { useProduitsFournisseur } from "@/hooks/useProduitsFournisseur"; // ✅ Correction Codex
+import { useProduitsFournisseur } from "@/hooks/useProduitsFournisseur";
 import { useProducts } from "@/hooks/useProducts";
 import { useFournisseursInactifs } from "@/hooks/useFournisseursInactifs";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,7 @@ import useAuth from "@/hooks/useAuth";
 export default function Fournisseurs() {
   const { fournisseurs, total, getFournisseurs, createFournisseur, updateFournisseur, disableFournisseur, exportFournisseursToExcel } = useFournisseurs();
   const { fetchStatsAll } = useFournisseurStats();
-  const { getProduitsDuFournisseur, countProduitsDuFournisseur } = useProduitsFournisseur(); // ✅ Correction Codex
+  const { getProduitsDuFournisseur, countProduitsDuFournisseur } = useProduitsFournisseur();
   const { products } = useProducts();
   const { fournisseurs: inactiveByInvoices, fetchInactifs } = useFournisseursInactifs();
   const { hasAccess } = useAuth();
@@ -57,7 +57,7 @@ export default function Fournisseurs() {
     async function fetchCounts() {
       const counts = {};
       for (const f of fournisseurs) {
-        counts[f.id] = await countProduitsDuFournisseur(f.id); // ✅ Correction Codex
+        counts[f.id] = await countProduitsDuFournisseur(f.id);
       }
       setProductCounts(counts);
     }
@@ -103,7 +103,7 @@ export default function Fournisseurs() {
       if (!fournisseurs.length || !products.length) return;
       const statsProduits = {};
       for (const f of fournisseurs) {
-        const ps = await getProduitsDuFournisseur(f.id); // ✅ Correction Codex
+        const ps = await getProduitsDuFournisseur(f.id);
         ps.forEach(p => {
           statsProduits[p.produit_id] = (statsProduits[p.produit_id] || 0) + (p.total_achat || 0);
         });

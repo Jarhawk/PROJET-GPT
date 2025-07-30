@@ -3,10 +3,10 @@ import { renderHook, act } from '@testing-library/react';
 import { vi, beforeEach, test, expect } from 'vitest';
 
 const selectAfterInsert = vi.fn(() => ({ single: vi.fn(() => Promise.resolve({ data: { id: 'f1' }, error: null })) }));
-const insertFournisseur = vi.fn(() => ({ select: selectAfterInsert })); // ✅ Correction Codex
+const insertFournisseur = vi.fn(() => ({ select: selectAfterInsert }));
 const insertContact = vi.fn(() => Promise.resolve({ data: {}, error: null }));
 const upsertContact = vi.fn(() => Promise.resolve({ data: {}, error: null }));
-const updateFournisseur = vi.fn(() => ({ eq: vi.fn(() => ({ eq: vi.fn(() => Promise.resolve({ error: null })) })) })); // ✅ Correction Codex
+const updateFournisseur = vi.fn(() => ({ eq: vi.fn(() => ({ eq: vi.fn(() => Promise.resolve({ error: null })) })) }));
 
 const fetchQuery = {
   select: vi.fn(() => fetchQuery),
@@ -19,7 +19,7 @@ const fetchQuery = {
 
 const fromMock = vi.fn((table) => {
   if (table === 'fournisseurs') {
-    return { insert: insertFournisseur, update: updateFournisseur, select: fetchQuery.select, eq: fetchQuery.eq, order: fetchQuery.order, range: fetchQuery.range, ilike: fetchQuery.ilike }; // ✅ Correction Codex
+    return { insert: insertFournisseur, update: updateFournisseur, select: fetchQuery.select, eq: fetchQuery.eq, order: fetchQuery.order, range: fetchQuery.range, ilike: fetchQuery.ilike };
   }
   if (table === 'fournisseur_contacts') {
     return { insert: insertContact, upsert: upsertContact };
@@ -43,7 +43,7 @@ test('createFournisseur insère un contact lié', async () => {
     await result.current.createFournisseur({ nom: 'Test', tel: '1', email: 'a@b.com', contact: 'T' });
   });
   expect(fromMock).toHaveBeenCalledWith('fournisseurs');
-  expect(insertFournisseur).toHaveBeenCalledWith([{ nom: 'Test', actif: true, mama_id: 'm1' }]); // ✅ Correction Codex
+  expect(insertFournisseur).toHaveBeenCalledWith([{ nom: 'Test', actif: true, mama_id: 'm1' }]);
   expect(fromMock).toHaveBeenCalledWith('fournisseur_contacts');
   expect(insertContact).toHaveBeenCalledWith({ fournisseur_id: 'f1', mama_id: 'm1', nom: 'T', email: 'a@b.com', tel: '1' });
 });
@@ -53,7 +53,7 @@ test('updateFournisseur met à jour le contact', async () => {
   await act(async () => {
     await result.current.updateFournisseur('f1', { actif: false, tel: '2', email: 'b@b.com', contact: 'B' });
   });
-  expect(updateFournisseur).toHaveBeenCalledWith({ actif: false }); // ✅ Correction Codex
+  expect(updateFournisseur).toHaveBeenCalledWith({ actif: false });
   expect(fromMock).toHaveBeenCalledWith('fournisseur_contacts');
   expect(upsertContact).toHaveBeenCalledWith([
     { fournisseur_id: 'f1', mama_id: 'm1', nom: 'B', email: 'b@b.com', tel: '2' }

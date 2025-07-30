@@ -16,7 +16,7 @@ export default function ProduitRow({
       <td>{produit.pmp != null ? Number(produit.pmp).toFixed(2) : '-'}</td>
       <td>{produit.stock_theorique}</td>
       <td>{produit.stock_min}</td>
-      <td>{produit.fournisseur?.nom || "-"}</td> // ✅ Correction Codex
+      <td>{produit.fournisseur?.nom || "-"}</td>
       <td>
         {produit.dernier_prix != null
           ? Number(produit.dernier_prix).toFixed(2)

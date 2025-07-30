@@ -17,6 +17,11 @@ if (!valid) {
   throw new Error(message);
 }
 
+// Avoid noisy output in production by disabling debug logs
+if (!import.meta.env.DEV) {
+  console.debug = () => {};
+}
+
 // Option sentry/reporting
 // import * as Sentry from "@sentry/react";
 // Sentry.init({ dsn: "https://xxx.ingest.sentry.io/xxx" });

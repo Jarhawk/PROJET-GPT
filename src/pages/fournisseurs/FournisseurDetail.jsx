@@ -2,7 +2,7 @@
 // src/pages/FournisseurDetail.jsx
 import { useState, useEffect } from "react";
 import { useFournisseurStats } from "@/hooks/useFournisseurStats";
-import { useProduitsFournisseur } from "@/hooks/useProduitsFournisseur"; // ✅ Correction Codex
+import { useProduitsFournisseur } from "@/hooks/useProduitsFournisseur";
 import { useInvoices } from "@/hooks/useInvoices";
 import { useFournisseurs } from "@/hooks/useFournisseurs";
 import { supabase } from "@/lib/supabase";
@@ -16,8 +16,8 @@ import TableContainer from "@/components/ui/TableContainer";
 export default function FournisseurDetail({ id }) {
   const { mama_id } = useAuth();
   const { fetchStatsForFournisseur } = useFournisseurStats();
-  const { getProduitsDuFournisseur } = useProduitsFournisseur(); // ✅ Correction Codex
-  const { fetchFacturesByFournisseur } = useInvoices(); // ✅ Correction Codex
+  const { getProduitsDuFournisseur } = useProduitsFournisseur();
+  const { fetchFacturesByFournisseur } = useInvoices();
   const { updateFournisseur } = useFournisseurs();
   const [stats, setStats] = useState([]);
   const [invoices, setInvoices] = useState([]);
@@ -31,7 +31,7 @@ export default function FournisseurDetail({ id }) {
     setLoading(true);
     Promise.all([
       fetchStatsForFournisseur(id).then(setStats),
-      fetchFacturesByFournisseur(id).then(async (arr) => { // ✅ Correction Codex
+      fetchFacturesByFournisseur(id).then(async (arr) => {
         const withCount = await Promise.all(
           (arr || []).map(async (f) => {
             const { count } = await supabase
@@ -63,10 +63,10 @@ export default function FournisseurDetail({ id }) {
   // Met à jour le top produits lors du changement d'id
   useEffect(() => {
     async function loadTop() {
-      const ps = await getProduitsDuFournisseur(id); // ✅ Correction Codex
+      const ps = await getProduitsDuFournisseur(id);
       setTopProducts(
         ps
-          .map(p => ({ nom: p.produit_nom, total: p.total_achat })) // ✅ Correction Codex
+          .map(p => ({ nom: p.produit_nom, total: p.total_achat }))
           .sort((a, b) => b.total - a.total)
           .slice(0, 8)
       );

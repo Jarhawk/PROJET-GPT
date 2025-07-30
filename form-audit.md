@@ -2,7 +2,7 @@
 
 | Fichier | Statut |
 | --- | --- |
-| src/components/fournisseurs/FournisseurFormModal.jsx | ✅ | // ✅ Correction Codex
+| src/components/fournisseurs/FournisseurFormModal.jsx | ✅ |
 | src/components/help/FeedbackForm.jsx | ✅ |
 | src/components/inventaires/InventaireForm.jsx | ✅ |
 | src/components/mouvements/MouvementFormModal.jsx | ✅ |

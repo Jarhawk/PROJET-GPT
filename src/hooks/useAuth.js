@@ -1,10 +1,12 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useContext } from "react"; // ✅ Correction Codex
+import { useContext } from "react";
 import { AuthContext } from "@/context/AuthContext";
 
 export function useAuth() {
   const ctx = useContext(AuthContext) || {};
-  if (import.meta.env.DEV) console.log('useAuth hook', ctx);
+  if (import.meta.env.DEV) {
+    console.debug('useAuth hook', ctx);
+  }
   if (!ctx || typeof ctx.login !== 'function') {
     throw new Error(
       "useAuth n’est pas correctement initialisé (provider absent ou mal injecté) !"

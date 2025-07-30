@@ -16,16 +16,16 @@ export default function useTopFournisseurs() {
       setError(null);
       try {
         const { data, error } = await supabase
-          .from('v_top_fournisseurs') // ✅ Correction Codex
-          .select('fournisseur_id, montant, mois') // ✅ Correction Codex
-          .eq('mama_id', mama_id); // ✅ Correction Codex
+          .from('v_top_fournisseurs')
+          .select('fournisseur_id, montant, mois')
+          .eq('mama_id', mama_id);
 
         if (error) throw error;
 
         const rows = (data || []).map((r) => ({
-          id: r.fournisseur_id, // ✅ Correction Codex
-          montant: r.montant, // ✅ Correction Codex
-          mois: r.mois, // ✅ Correction Codex
+          id: r.fournisseur_id,
+          montant: r.montant,
+          mois: r.mois,
         }));
         setData(rows);
       } catch (e) {

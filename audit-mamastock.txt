@@ -532,7 +532,7 @@ TwoFactorSetup.jsx : configuration de la double authentification
   useOnboarding, usePermissions, usePertes, usePlanning, usePriceTrends,
   useProducts, usePromotions, useReporting, useRequisitions, useRoles,
   useSignalements, useSimulation, useStats, useStock, useStorage,
-  useProduitsFournisseur, useFournisseurs, useSwipe, useTasks, useTopProducts, // ✅ Correction Codex
+  useProduitsFournisseur, useFournisseurs, useSwipe, useTasks, useTopProducts,
   useTwoFactorAuth, useUnites, useUtilisateurs, useValidations
 - Tous appliquent le filtre `mama_id` et encapsulent les requêtes Supabase
 
@@ -589,7 +589,7 @@ TwoFactorSetup.jsx : configuration de la double authentification
 - Gestes tactiles sur mobile gérés par useSwipe pour ouvrir la sidebar
 
 === ⚙️ INDEXES & OPTIMISATIONS ===
-- Plus de 100 index dans full_setup.sql pour accélérer les filtres sur produits, factures, mouvements et tâches
+- Plus de 100 index définis dans Ajout.sql pour accélérer les filtres sur produits, factures, mouvements et tâches
 - Triggers update_product_pmp et refresh_facture_total maintiennent les totaux calculés
 - apply_inventaire_line() et update_stock_theorique() ajustent automatiquement les stocks
 

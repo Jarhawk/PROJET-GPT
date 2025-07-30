@@ -35,6 +35,8 @@ export default function InventaireDetail() {
       const requisition = l.requisition_mensuelle || 0;
       const ecartReq = l.ecart_requisition || requisition - conso;
       return {
+        Date: inventaire.date_inventaire,
+        Zone: inventaire.zone || "",
         Produit: l.product?.nom,
         Famille: l.product?.famille,
         Quantite: l.quantite,
@@ -56,7 +58,11 @@ export default function InventaireDetail() {
 
   const exportPDF = () => {
     const doc = new jsPDF();
-    doc.text(`Inventaire ${inventaire.date_inventaire}`, 10, 10);
+    doc.text(
+      `Inventaire ${inventaire.date_inventaire} – Zone ${inventaire.zone || ''}`,
+      10,
+      10
+    );
     doc.autoTable({
       startY: 20,
       head: [["Produit", "Unité", "Physique", "Théorique", "Prix", "Valeur", "Écart", "Valeur écart"]],

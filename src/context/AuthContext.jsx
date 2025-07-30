@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { createContext, useContext, useEffect, useRef, useState } from "react"; // ✅ Correction Codex
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { login as loginUser } from "@/lib/loginUser";
@@ -63,7 +63,9 @@ export const AuthProvider = ({ children }) => {
     }
     if (fetchingRef.current && lastUserIdRef.current === userId) return;
     fetchingRef.current = true;
-    if (import.meta.env.DEV) console.log("fetchUserData", userId);
+    if (import.meta.env.DEV) {
+      console.debug("fetchUserData", userId);
+    }
 
     try {
       const { data, error } = await supabase
@@ -97,7 +99,9 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
-      if (import.meta.env.DEV) console.log("fetchUserData result", data);
+      if (import.meta.env.DEV) {
+        console.debug("fetchUserData result", data);
+      }
 
       const roleInfo = {
         id: data.role_id,
@@ -123,7 +127,7 @@ export const AuthProvider = ({ children }) => {
       };
 
       if (import.meta.env.DEV) {
-        console.log("Loaded user", { nom: newData.nom, rights: newData.access_rights });
+        console.debug("Loaded user", { nom: newData.nom, rights: newData.access_rights });
       }
 
       setUserData(newData);
@@ -151,7 +155,9 @@ export const AuthProvider = ({ children }) => {
         }
       }
       const current = data?.session ?? null;
-      if (import.meta.env.DEV) console.log("loadSession", current?.user?.id);
+      if (import.meta.env.DEV) {
+        console.debug("loadSession", current?.user?.id);
+      }
       sessionLoadedRef.current = true;
       setSession(current);
     } catch (e) {
@@ -165,7 +171,9 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     loadSession();
     const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      if (import.meta.env.DEV) console.log("auth state change", newSession?.user?.id);
+      if (import.meta.env.DEV) {
+        console.debug("auth state change", newSession?.user?.id);
+      }
       sessionLoadedRef.current = true;
       setSession(newSession);
     });
@@ -173,7 +181,9 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    if (import.meta.env.DEV) console.log("session", session);
+    if (import.meta.env.DEV) {
+      console.debug("session", session);
+    }
   }, [session]);
 
   useEffect(() => {
@@ -188,7 +198,9 @@ export const AuthProvider = ({ children }) => {
   }, [session]);
 
   useEffect(() => {
-    if (import.meta.env.DEV) console.log("userData", userData);
+    if (import.meta.env.DEV) {
+      console.debug("userData", userData);
+    }
   }, [userData]);
 
   useEffect(() => {
@@ -218,7 +230,9 @@ export const AuthProvider = ({ children }) => {
   }, [userData, pathname, navigate]);
 
   const login = async ({ email, password }) => {
-    if (import.meta.env.DEV) console.log('login', email);
+    if (import.meta.env.DEV) {
+      console.debug('login', email);
+    }
     const { data, error } = await loginUser(email, password);
     if (error) {
       toast.error(error.message || "Erreur");
@@ -263,7 +277,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    if (import.meta.env.DEV) console.log('logout');
+    if (import.meta.env.DEV) {
+      console.debug('logout');
+    }
     await supabase.auth.signOut();
     setSession(null);
     setUserData(null);
@@ -299,7 +315,7 @@ export const AuthProvider = ({ children }) => {
     /** Convenience alias for `session?.user?.id` */
     user_id: session?.user?.id ?? null,
     /** Indicates the session is available but userData has not been fetched yet */
-    pending: !!session && !loading && !userData && !error, // ✅ Correction Codex
+    pending: !!session && !loading && !userData && !error,
     email: userData?.email,
     actif: userData?.actif,
     isSuperadmin,

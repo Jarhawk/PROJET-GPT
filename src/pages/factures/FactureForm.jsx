@@ -13,7 +13,7 @@ import toast from "react-hot-toast";
 import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
 import { useInvoiceOcr } from "@/hooks/useInvoiceOcr";
 
-export default function FactureForm({ facture, fournisseurs = [], onClose }) { // ✅ Correction Codex
+export default function FactureForm({ facture, fournisseurs = [], onClose }) {
   const { createFacture, updateFacture, addLigneFacture, calculateTotals } = useFactures();
   const { results: produitOptions, searchProduits } = useProduitsAutocomplete();
   const {
@@ -41,10 +41,10 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) { /
 
   useEffect(() => {
     if (facture?.fournisseur_id && fournisseurs.length) {
-      const found = fournisseurs.find(s => s.id === facture.fournisseur_id); // ✅ Correction Codex
+      const found = fournisseurs.find(s => s.id === facture.fournisseur_id);
       setFournisseurName(found?.nom || "");
     }
-  }, [facture?.fournisseur_id, fournisseurs]); // ✅ Correction Codex
+  }, [facture?.fournisseur_id, fournisseurs]);
 
   useEffect(() => { searchFournisseurs(fournisseurName); }, [fournisseurName, searchFournisseurs]);
 

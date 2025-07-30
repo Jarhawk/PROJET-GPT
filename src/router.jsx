@@ -159,20 +159,19 @@ export const routePreloadMap = {
 
 
 function RootRoute() {
-  const { session, loading, pending, userData, error } = useAuth();
-  if (loading || pending) return <LoadingSpinner message="Chargement..." />;
-  if (error === 'Utilisateur introuvable') {
-    return <Navigate to="/onboarding-utilisateur" replace />;
-  }
+  const { session, loading, userData, error } = useAuth();
+
+  if (!session) return <Navigate to="/login" replace />;
+  if (loading) return <LoadingSpinner message="Chargement..." />;
   if (error) {
-    console.error('Auth error', error);
+    if (error === 'Utilisateur introuvable') {
+      return <Navigate to="/onboarding-utilisateur" replace />;
+    }
     return <Navigate to="/login" replace />;
   }
-  if (session && userData) {
-    if (userData.actif === false) return <Navigate to="/blocked" replace />;
-    return <Navigate to="/dashboard" replace />;
-  }
-  return <Navigate to="/accueil" replace />;
+  if (!userData) return <LoadingSpinner message="Chargement..." />;
+  if (userData.actif === false) return <Navigate to="/blocked" replace />;
+  return <Navigate to="/dashboard" replace />;
 }
 
 export default function Router() {

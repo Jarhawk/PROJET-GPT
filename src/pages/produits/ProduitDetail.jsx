@@ -10,18 +10,42 @@ import { buildPriceData } from '@/components/produits/priceHelpers';
 
 export default function ProduitDetailPage() {
   const { id } = useParams();
-  const { fetchProductPrices } = useProducts();
+  const { fetchProductPrices, getProduct } = useProducts();
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [productName, setProductName] = useState("");
 
   useEffect(() => {
+    let active = true;
+    if (id) {
+      getProduct(id).then((p) => {
+        if (!active) return;
+        setProductName(p?.nom || "");
+        document.title = p?.nom
+          ? `Historique produit - ${p.nom}`
+          : "Historique produit";
+      });
+    } else {
+      document.title = "Historique produit";
+    }
+    return () => {
+      active = false;
+    };
+  }, [id, getProduct]);
+
+  useEffect(() => {
+    let active = true;
     if (id) {
       setLoading(true);
       fetchProductPrices(id).then((h) => {
+        if (!active) return;
         setHistory(h || []);
         setLoading(false);
       });
     }
+    return () => {
+      active = false;
+    };
   }, [id, fetchProductPrices]);
 
   const chartData = buildPriceData(history);
@@ -30,7 +54,9 @@ export default function ProduitDetailPage() {
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden p-6 text-white">
       <LiquidBackground showParticles />
       <GlassCard className="relative z-10 w-full max-w-3xl">
-        <h1 className="text-xl font-bold mb-4">Historique des prix</h1>
+        <h1 className="text-xl font-bold mb-4">
+          Historique des prix {productName && `- ${productName}`}
+        </h1>
         {loading ? (
           <div className="flex justify-center py-6">
             <LoadingSpinner message="Chargement..." />
@@ -54,7 +80,7 @@ export default function ProduitDetailPage() {
                 history.map((h, i) => (
                   <tr key={i}>
                     <td>{h.created_at?.slice(0, 10) || '-'}</td>
-                    <td>{h.fournisseur?.nom || '-'} </td> // ✅ Correction Codex
+                    <td>{h.fournisseur?.nom || '-'}</td>
                     <td>{h.prix_achat ?? '-'}</td>
                     <td>{h.derniere_livraison?.slice(0, 10) || '-'}</td>
                   </tr>

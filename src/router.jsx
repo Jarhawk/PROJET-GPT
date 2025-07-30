@@ -8,7 +8,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import PageSkeleton from "@/components/ui/PageSkeleton";
 import { Routes, Route, Navigate } from "react-router-dom";
-import useAuth from "@/hooks/useAuth"; // ✅ Correction Codex
+import useAuth from "@/hooks/useAuth";
 import Layout from "@/layout/Layout";
 import Login from "@/pages/auth/Login";
 import Unauthorized from "@/pages/auth/Unauthorized";

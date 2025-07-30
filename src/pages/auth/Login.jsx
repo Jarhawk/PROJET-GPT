@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import React, { useState, useEffect, useRef } from "react"; // ✅ Correction Codex
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import MamaLogo from "@/components/ui/MamaLogo";
 import ResetAuthButton from "@/components/ResetAuthButton";
@@ -33,7 +33,7 @@ export default function Login() {
     userData &&
     userData.mama_id &&
     userData.access_rights &&
-    Object.keys(userData.access_rights).length > 0; // ✅ Correction Codex
+    Object.keys(userData.access_rights).length > 0;
 
   const redirectedRef = useRef(false);
   useEffect(() => {

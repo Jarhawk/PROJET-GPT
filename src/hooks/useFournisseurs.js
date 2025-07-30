@@ -1,6 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 // src/hooks/useFournisseurs.js
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import useAuth from "@/hooks/useAuth";
 import * as XLSX from "xlsx";
@@ -16,37 +16,40 @@ export function useFournisseurs() {
   const [error, setError] = useState(null);
 
   // 1. Charger les fournisseurs (filtrage par mama_id automatiquement)
-  async function fetchFournisseurs({ search = "", actif = null, page = 1, limit = 20 } = {}) {
-    if (!mama_id) return [];
-    setLoading(true);
-    setError(null);
-    let query = supabase
-      .from("fournisseurs")
-      .select(
-        "id, nom, actif, created_at, updated_at, contact:fournisseur_contacts(nom,email,tel)",
-        { count: "exact" }
-      )
-      .eq("mama_id", mama_id)
-      .order("nom", { ascending: true })
-      .range((page - 1) * limit, page * limit - 1);
+  const fetchFournisseurs = useCallback(
+    async ({ search = "", actif = null, page = 1, limit = 20 } = {}) => {
+      if (!mama_id) return [];
+      setLoading(true);
+      setError(null);
+      let query = supabase
+        .from("fournisseurs")
+        .select(
+          "id, nom, actif, created_at, updated_at, contact:fournisseur_contacts(nom,email,tel)",
+          { count: "exact" }
+        )
+        .eq("mama_id", mama_id)
+        .order("nom", { ascending: true })
+        .range((page - 1) * limit, page * limit - 1);
 
-    if (search) query = query.ilike("nom", `%${search}%`);
-    if (typeof actif === "boolean") query = query.eq("actif", actif);
+      if (search) query = query.ilike("nom", `%${search}%`);
+      if (typeof actif === "boolean") query = query.eq("actif", actif);
 
-    const { data, error, count } = await query;
-    const list = (Array.isArray(data) ? data : []).map(d => ({
-      ...d,
-      contact: Array.isArray(d.contact) ? d.contact[0] : d.contact,
-    }));
-    setFournisseurs(list);
-    setTotal(count || 0);
-    setLoading(false);
-    if (error) {
-      setError(error);
-      toast.error(error.message);
-    }
-    return data || [];
-  }
+      const { data, error, count } = await query;
+      const list = (Array.isArray(data) ? data : []).map(d => ({
+        ...d,
+        contact: Array.isArray(d.contact) ? d.contact[0] : d.contact,
+      }));
+      setFournisseurs(list);
+      setTotal(count || 0);
+      setLoading(false);
+      if (error) {
+        setError(error);
+        toast.error(error.message);
+      }
+      return data || [];
+    },
+    [mama_id]
+  );
 
   // 2. Ajouter un fournisseur
   async function createFournisseur(fournisseur) {

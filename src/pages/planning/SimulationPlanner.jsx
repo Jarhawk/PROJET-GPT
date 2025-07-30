@@ -83,7 +83,7 @@ export default function SimulationPlanner() {
             <tbody>
               {result.produits.map((p, idx) => (
                 <tr key={idx}>
-                  <td className="px-2">{p.produit_nom || p.produit_id}</td> // ✅ Correction Codex
+                  <td className="px-2">{p.produit_nom || p.produit_id}</td>
                   <td className="px-2">{p.quantite}</td>
                   <td className="px-2">{p.valeur}</td>
                 </tr>

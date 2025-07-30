@@ -1,12 +1,12 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import useAuth from "@/hooks/useAuth";
-export function useProduitsFournisseur() { // ✅ Correction Codex
+export function useProduitsFournisseur() {
   const { mama_id } = useAuth();
   const [cache, setCache] = useState({});
 
-  function useProduitsDuFournisseur(fournisseur_id) { // ✅ Correction Codex
+  function useProduitsDuFournisseur(fournisseur_id) {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -21,7 +21,7 @@ export function useProduitsFournisseur() { // ✅ Correction Codex
       const { data, error } = await supabase
         .from("fournisseur_produits")
         .select(
-          "*, produit:produits(id, nom, famille:familles(nom), unite:unites(nom)), achats:factures(date_facture, numero, total_ttc)"
+          "*, produit:produits(id, nom, famille:familles(nom), unite:unites(nom))"
         )
         .eq("fournisseur_id", fournisseur_id)
         .eq("mama_id", mama_id);
@@ -31,34 +31,40 @@ export function useProduitsFournisseur() { // ✅ Correction Codex
       return data || [];
     }
 
-    return { products, loading, error, fetch }; // ✅ Correction Codex (no rename for object keys to keep usage)
+    return { products, loading, error, fetch };
   }
 
-  async function getProduitsDuFournisseur(fournisseur_id) { // ✅ Correction Codex
-    if (!mama_id || !fournisseur_id) return [];
-    if (cache[fournisseur_id]) return cache[fournisseur_id];
-    const { data } = await supabase
-      .from("fournisseur_produits")
-      .select(
-        "*, produit:produits(id, nom, famille:familles(nom), unite:unites(nom)), achats:factures(date_facture, numero, total_ttc)"
-      )
-      .eq("fournisseur_id", fournisseur_id)
-      .eq("mama_id", mama_id);
-    setCache(c => ({ ...c, [fournisseur_id]: data || [] }));
-    return data || [];
-  }
+  const getProduitsDuFournisseur = useCallback(
+    async (fournisseur_id) => {
+      if (!mama_id || !fournisseur_id) return [];
+      if (cache[fournisseur_id]) return cache[fournisseur_id];
+      const { data } = await supabase
+        .from("fournisseur_produits")
+        .select(
+          "*, produit:produits(id, nom, famille:familles(nom), unite:unites(nom))"
+        )
+        .eq("fournisseur_id", fournisseur_id)
+        .eq("mama_id", mama_id);
+      setCache((c) => ({ ...c, [fournisseur_id]: data || [] }));
+      return data || [];
+    },
+    [mama_id, cache]
+  );
 
-  async function countProduitsDuFournisseur(fournisseur_id) { // ✅ Correction Codex
-    if (!mama_id || !fournisseur_id) return 0;
-    const { count } = await supabase
-      .from("fournisseur_produits")
-      .select("id", { count: "exact", head: true })
-      .eq("fournisseur_id", fournisseur_id)
-      .eq("mama_id", mama_id);
-    return count || 0;
-  }
+  const countProduitsDuFournisseur = useCallback(
+    async (fournisseur_id) => {
+      if (!mama_id || !fournisseur_id) return 0;
+      const { count } = await supabase
+        .from("fournisseur_produits")
+        .select("id", { count: "exact", head: true })
+        .eq("fournisseur_id", fournisseur_id)
+        .eq("mama_id", mama_id);
+      return count || 0;
+    },
+    [mama_id]
+  );
 
-  return { // ✅ Correction Codex
+  return {
     useProduitsDuFournisseur,
     getProduitsDuFournisseur,
     countProduitsDuFournisseur,

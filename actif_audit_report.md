@@ -3,7 +3,7 @@
 This project uses an `actif` boolean field on many tables. Some environments were missing the column, resulting in `42703: column "actif" does not exist` errors.
 
 ## Checked tables
-The following tables are used in queries with the `actif` column. If any column is missing, reapply `db/full_setup.sql`:
+The following tables are used in queries with the `actif` column. If any column is missing, reapply `db/Ajout.sql`:
 - users
 - utilisateurs
 - fournisseurs
@@ -22,7 +22,7 @@ The following tables are used in queries with the `actif` column. If any column 
 - taches
 - fournisseurs_api_config
 
-All `ALTER TABLE` statements ensuring the column exists are included directly in `db/full_setup.sql` without `DO $$` blocks for maximum compatibility.
+All `ALTER TABLE` statements ensuring the column exists are included directly in `db/Ajout.sql` without `DO $$` blocks for maximum compatibility.
 
 ## Status
 
@@ -46,4 +46,4 @@ All `ALTER TABLE` statements ensuring the column exists are included directly in
 | taches | AJOUTÉE |
 | fournisseurs_api_config | OK |
 
-`db/full_setup.sql` also migrates the old `alert_rules.enabled` column when present before dropping it.
+`db/Ajout.sql` also migrates the old `alert_rules.enabled` column when present before dropping it.

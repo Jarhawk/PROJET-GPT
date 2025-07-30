@@ -7,7 +7,7 @@ import { useMouvementCostCenters } from "@/hooks/useMouvementCostCenters";
 import { useCostCenterSuggestions } from "@/hooks/useCostCenterSuggestions";
 import toast from "react-hot-toast";
 
-export default function CostCenterAllocationModal({ mouvementId, produitId, open, onOpenChange }) { // ✅ Correction Codex
+export default function CostCenterAllocationModal({ mouvementId, produitId, open, onOpenChange }) {
   const { costCenters, fetchCostCenters } = useCostCenters();
   const { fetchAllocations, saveAllocations } = useMouvementCostCenters();
   const { suggestions, fetchSuggestions } = useCostCenterSuggestions();
@@ -27,7 +27,7 @@ export default function CostCenterAllocationModal({ mouvementId, produitId, open
               valeur: a.valeur,
             }));
           }),
-          fetchSuggestions(produitId), // ✅ Correction Codex
+          fetchSuggestions(produitId),
         ]);
         setRows(allocs);
       } catch (err) {
@@ -35,7 +35,7 @@ export default function CostCenterAllocationModal({ mouvementId, produitId, open
         toast.error("Erreur de chargement");
       }
     })();
-  }, [open, mouvementId, produitId]); // ✅ Correction Codex
+  }, [open, mouvementId, produitId]);
 
   const handleAdd = () => setRows(r => [...r, { cost_center_id: costCenters[0]?.id || "", quantite: 0, valeur: 0 }]);
 
@@ -77,7 +77,7 @@ export default function CostCenterAllocationModal({ mouvementId, produitId, open
 
   return (
     <ModalGlass open={open} onClose={() => onOpenChange(false)}>
-        <h3 className="font-bold mb-4 text-lg">Ventilation centres de coûts</h3> // ✅ Correction Codex
+        <h3 className="font-bold mb-4 text-lg">Ventilation centres de coûts</h3>
         <form onSubmit={handleSubmit} className="space-y-2">
           {suggestions.length > 0 && (
             <div className="text-xs mb-2 p-2 bg-glass border border-borderGlass backdrop-blur rounded">
@@ -94,11 +94,11 @@ export default function CostCenterAllocationModal({ mouvementId, produitId, open
           )}
           {rows.map((row, idx) => (
             <div key={idx} className="flex gap-2 items-center">
-              <label className="sr-only" htmlFor={`cc-${idx}`}>Centre de coût</label> // ✅ Correction Codex
+              <label className="sr-only" htmlFor={`cc-${idx}`}>Centre de coût</label>
               <select
                 id={`cc-${idx}`}
                 className="input"
-                aria-label="Centre de coût" // ✅ Correction Codex
+                aria-label="Centre de coût"
                 value={row.cost_center_id}
                 onChange={e => handleChange(idx, "cost_center_id", e.target.value)}
               >

@@ -36,7 +36,9 @@ export default function useDerniersAcces() {
         if (list.length >= 5) break;
       }
       setData(list);
-      if (import.meta.env.DEV) console.log('Chargement dashboard terminé');
+      if (import.meta.env.DEV) {
+        console.debug('Chargement dashboard terminé');
+      }
       return list;
     } catch (e) {
       console.warn('useDerniersAcces', e);

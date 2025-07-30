@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState, useCallback } from "react";
 import { useFactures } from "@/hooks/useFactures";
-import { useFournisseurs } from "@/hooks/useFournisseurs"; // ✅ Correction Codex
+import { useFournisseurs } from "@/hooks/useFournisseurs";
 import useAuth from "@/hooks/useAuth";
 import { useFacturesAutocomplete } from "@/hooks/useFacturesAutocomplete";
 import FactureForm from "./FactureForm.jsx";
@@ -28,7 +28,7 @@ const STATUTS = {
 
 export default function Factures() {
   const { factures, total, getFactures, deleteFacture, toggleFactureActive } = useFactures();
-  const { fournisseurs } = useFournisseurs(); // ✅ Correction Codex
+  const { fournisseurs } = useFournisseurs();
   const { mama_id, loading: authLoading, hasAccess } = useAuth();
   const { results: factureOptions, searchFactures } = useFacturesAutocomplete();
   const [showForm, setShowForm] = useState(false);
@@ -36,7 +36,7 @@ export default function Factures() {
   const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState("");
   const [statutFilter, setStatutFilter] = useState("");
-  const [fournisseurFilter, setFournisseurFilter] = useState(""); // ✅ Correction Codex
+  const [fournisseurFilter, setFournisseurFilter] = useState("");
   const [monthFilter, setMonthFilter] = useState("");
   const [actifFilter, setActifFilter] = useState("true");
   const [page, setPage] = useState(1);
@@ -46,14 +46,14 @@ export default function Factures() {
     if (!mama_id) return;
     getFactures({
       search,
-      fournisseur: fournisseurFilter, // ✅ Correction Codex
+      fournisseur: fournisseurFilter,
       statut: statutFilter,
       mois: monthFilter,
       actif: actifFilter === "all" ? null : actifFilter === "true",
       page,
       pageSize,
     });
-  }, [mama_id, getFactures, search, fournisseurFilter, statutFilter, monthFilter, actifFilter, page]); // ✅ Correction Codex
+  }, [mama_id, getFactures, search, fournisseurFilter, statutFilter, monthFilter, actifFilter, page]);
   const canEdit = hasAccess("factures", "peut_modifier");
 
   useEffect(() => { searchFactures(search); }, [search, searchFactures]);
@@ -67,7 +67,7 @@ export default function Factures() {
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(factures.map(f => ({
       ...f,
-      fournisseur_nom: fournisseurs.find(s => s.id === f.fournisseur_id)?.nom || f.fournisseur?.nom // ✅ Correction Codex
+      fournisseur_nom: fournisseurs.find(s => s.id === f.fournisseur_id)?.nom || f.fournisseur?.nom
     })));
     XLSX.utils.book_append_sheet(wb, ws, "Factures");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
@@ -105,20 +105,20 @@ export default function Factures() {
         <datalist id="factures-list">
           {factureOptions.map(f => (
             <option key={f.id} value={f.numero || f.id}>
-              {`n°${f.numero || f.id} - ${f.fournisseur?.nom || ""}`} // ✅ Correction Codex
+              {`n°${f.numero || f.id} - ${f.fournisseur?.nom || ""}`}
             </option>
           ))}
         </datalist>
         <select
           className="input"
-          value={fournisseurFilter} // ✅ Correction Codex
+          value={fournisseurFilter}
           onChange={(e) => {
-            setFournisseurFilter(e.target.value); // ✅ Correction Codex
+            setFournisseurFilter(e.target.value);
             setPage(1);
           }}
         >
           <option value="">Tous fournisseurs</option>
-          {fournisseurs.map(s => <option key={s.id} value={s.id}>{s.nom}</option>)} // ✅ Correction Codex
+          {fournisseurs.map(s => <option key={s.id} value={s.id}>{s.nom}</option>)}
         </select>
         <select
           className="input"
@@ -225,7 +225,7 @@ export default function Factures() {
       {showForm && (
         <FactureForm
           facture={selected}
-          fournisseurs={fournisseurs} // ✅ Correction Codex
+          fournisseurs={fournisseurs}
           onClose={() => {
             setShowForm(false);
             setSelected(null);

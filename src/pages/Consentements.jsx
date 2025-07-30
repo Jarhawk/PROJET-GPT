@@ -27,7 +27,7 @@ export default function Consentements() {
                 {new Date(c.date_consentement).toLocaleString()}
               </td>
               <td className="p-2">{c.type_consentement || "-"}</td>
-              <td className="p-2">{c.donne ? "Oui" : "Non"}</td>
+              <td className="p-2">{c.consentement ? "Oui" : "Non"}</td>
             </tr>
           ))}
           {consentements.length === 0 && (

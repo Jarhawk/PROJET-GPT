@@ -18,9 +18,10 @@ export default function RGPDConsentForm() {
     if (loading) return;
     const payload = {
       utilisateur_id: user_id,
+      user_id,
       mama_id,
       type_consentement: "global",
-      donne: values.cookies && values.interne && values.tiers,
+      consentement: values.cookies && values.interne && values.tiers,
       date_consentement: new Date().toISOString(),
     };
     try {

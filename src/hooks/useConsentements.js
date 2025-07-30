@@ -3,27 +3,28 @@ import { createClient } from "@/lib/supabaseClient";
 import useAuth from "@/hooks/useAuth";
 
 export default function useConsentements() {
-  const { userData } = useAuth();
-  const [data, setData] = useState([]);
+  const { user_id, mama_id } = useAuth();
+  const [consentements, setConsentements] = useState([]);
   const supabase = createClient();
 
+  const fetchConsentements = async (utilisateurId = user_id) => {
+    if (!supabase || !mama_id || !utilisateurId) return [];
+    const { data, error } = await supabase
+      .from("consentements_utilisateur")
+      .select("*")
+      .eq("mama_id", mama_id)
+      .eq("utilisateur_id", utilisateurId)
+      .order("date_consentement", { ascending: false });
+    if (error) {
+      console.error("Erreur chargement consentements:", error);
+    }
+    setConsentements(data || []);
+    return data || [];
+  };
+
   useEffect(() => {
-    if (!supabase || !userData?.mama_id) return;
-
-    const fetchConsentements = async () => {
-      const { data, error } = await supabase
-        .from("consentements_utilisateur")
-        .select("*")
-        .eq("mama_id", userData.mama_id);
-      if (error) {
-        console.error("Erreur chargement consentements:", error);
-      } else {
-        setData(data);
-      }
-    };
-
     fetchConsentements();
-  }, [userData, supabase]);
+  }, [user_id, mama_id]);
 
-  return { data };
+  return { consentements, fetchConsentements };
 }

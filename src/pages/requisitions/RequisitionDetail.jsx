@@ -44,7 +44,7 @@ function RequisitionDetailPage() {
             {(requisition.lignes || []).map((l) => (
               <li key={l.id} className="flex items-center gap-2">
                 <img
-                  src="/icons/icon-128x128.png" // ✅ Correction Codex
+                  src="/icons/icon-128x128.png"
                   alt=""
                   className="w-6 h-6 rounded object-cover"
                 />

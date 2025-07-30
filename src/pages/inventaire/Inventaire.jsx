@@ -106,6 +106,13 @@ export default function Inventaire() {
                 </tr>
               );
             })}
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan="6" className="p-4">
+                  Aucun inventaire
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </TableContainer>

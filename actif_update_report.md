@@ -1,6 +1,6 @@
 # Actif column audit
 
-The project uses an `actif` boolean across many modules to enable or disable records. All SQL tables, hooks and API routes were audited. Missing columns were added in `db/full_setup.sql` and within the migration block.
+The project uses an `actif` boolean across many modules to enable or disable records. All SQL tables, hooks and API routes were audited. Missing columns were added in `db/Ajout.sql` and within the migration block.
 
 ## Tables updated or verified
 - **mamas**: added `actif` column (line ~106)

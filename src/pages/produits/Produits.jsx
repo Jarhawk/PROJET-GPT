@@ -1,9 +1,9 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-// src/pages/Produits.jsx
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useProducts } from "@/hooks/useProducts";
 import { useFamilles } from "@/hooks/useFamilles";
 import { useUnites } from "@/hooks/useUnites";
+import { useFournisseurs } from "@/hooks/useFournisseurs";
 import ProduitFormModal from "@/components/produits/ProduitFormModal";
 import ProduitDetail from "@/components/produits/ProduitDetail";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,9 @@ import ProduitRow from "@/components/produits/ProduitRow";
 const PAGE_SIZE = 20;
 
 export default function Produits() {
+  useEffect(() => {
+    document.title = "Produits";
+  }, []);
   const {
     products,
     total,
@@ -27,6 +30,10 @@ export default function Produits() {
   } = useProducts();
   const { familles: famillesHook, fetchFamilles } = useFamilles();
   const { unites: unitesHook, fetchUnites } = useUnites();
+  const { fournisseurs, fetchFournisseurs } = useFournisseurs();
+  const familles = famillesHook;
+  const unites = unitesHook;
+  const fournisseursList = fournisseurs;
 
   const [showForm, setShowForm] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -37,7 +44,7 @@ export default function Produits() {
   const [page, setPage] = useState(1);
   const [sortField, setSortField] = useState("famille");
   const [sortOrder, setSortOrder] = useState("asc");
-  const fileRef = useRef();
+  const fileRef = useRef(null);
   const { hasAccess } = useAuth();
   const canEdit = hasAccess("produits", "peut_modifier");
 
@@ -61,27 +68,34 @@ export default function Produits() {
     sortOrder,
   ]);
 
+  // Load dropdown data once on mount
   useEffect(() => {
     fetchFamilles();
     fetchUnites();
-  }, [fetchFamilles, fetchUnites]);
+    fetchFournisseurs();
+  }, [fetchFamilles, fetchUnites, fetchFournisseurs]);
 
   async function handleImport(e) {
     const file = e.target.files[0];
     if (!file) return;
     const rows = await importProductsFromExcel(file);
     const famMap = Object.fromEntries(
-      familles.map((f) => [f.nom.toLowerCase(), f.id]),
+      familles.map((f) => [f.nom.toLowerCase().trim(), f.id]),
     );
     const uniteMap = Object.fromEntries(
-      unites.map((u) => [u.nom.toLowerCase(), u.id]),
+      unites.map((u) => [u.nom.toLowerCase().trim(), u.id]),
+    );
+    const fournisseurMap = Object.fromEntries(
+      fournisseursList.map((f) => [f.nom.toLowerCase().trim(), f.id])
     );
     for (const row of rows) {
       await addProduct(
         {
           nom: row.nom,
-          famille_id: famMap[row.famille?.toLowerCase()] || null,
-          unite_id: uniteMap[row.unite?.toLowerCase()] || null,
+          famille_id: famMap[row.famille?.toLowerCase().trim()] || null,
+          unite_id: uniteMap[row.unite?.toLowerCase().trim()] || null,
+          fournisseur_principal_id:
+            fournisseurMap[row.fournisseur?.toLowerCase().trim()] || null,
           stock_reel: Number(row.stock_reel) || 0,
           stock_min: Number(row.stock_min) || 0,
           actif: row.actif !== false,
@@ -91,8 +105,10 @@ export default function Produits() {
         { refresh: false },
       );
     }
-    fetchProducts();
-    e.target.value = null;
+    // refresh list with current filters after batch import
+    refreshList();
+    toast.success(`${rows.length} produits importés`);
+    if (fileRef.current) fileRef.current.value = "";
   }
 
   function toggleSort(field) {
@@ -115,11 +131,6 @@ export default function Produits() {
     toast.success("Produit désactivé");
     refreshList();
   }
-
-  // Filtre et familles/unites dynamiques
-  const familles = famillesHook;
-  const unites = unitesHook;
-
   useEffect(() => {
     refreshList();
   }, [refreshList]);

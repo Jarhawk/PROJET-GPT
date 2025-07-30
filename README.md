@@ -21,6 +21,11 @@ If linting or tests fail because required packages are missing, simply run
 `npm install` again. This ensures `tesseract.js`, `vitest`, `@eslint/js` and
 `playwright` are available before running the commands above.
 
+During production builds, `console.debug` output is automatically disabled so
+the browser console stays clean. Use the `DEV` mode if you need verbose debug information.
+
+Product pages also set the browser tab title automatically for easier navigation.
+
 ### Branding & PWA
 
 The interface uses a reusable `MamaLogo` component for consistent branding.
@@ -50,19 +55,15 @@ particles and interactive lights.
 Le script `src/registerSW.js` enregistre automatiquement un service worker pour activer l'usage hors ligne. Lancez `npm run preview` ou servez le dossier `dist` pour vérifier que l'enregistrement fonctionne.
 ### Database
 
-SQL scripts are stored in [`db/full_setup.sql`](./db/full_setup.sql). To initialise a local Supabase instance:
+SQL migrations are stored in [`db/Ajout.sql`](./db/Ajout.sql). To initialise a
+local Supabase instance:
 
 ```bash
 supabase start
-supabase db reset --file db/full_setup.sql
-# Optionally switch the schema to French names
-supabase db execute < db/rename_to_french.sql
+supabase db reset --file db/Ajout.sql
 ```
-`full_setup.sql` is idempotent and bundles the entire schema, policies and
-patches (including the `two_factor_auth` table and `access_rights`/`actif`
-columns on `utilisateurs`) so you can run it safely multiple times.
-
-Adjust configuration in `supabase/config.toml` as required.
+This script adds any missing columns, views and policies so the schema matches
+the application. Adjust configuration in `supabase/config.toml` as required.
 
 ### Environment variables
 
@@ -278,7 +279,7 @@ Task management is documented in [docs/taches.md](docs/taches.md).
 ## Features
 - Dashboard overview at `/dashboard` (root `/` redirects here) with KPI widgets,
   stock alerts and trend charts
-- Comparatif des prix fournisseurs avec moyenne et dernier achat // ✅ Correction Codex
+- Comparatif des prix fournisseurs avec moyenne et dernier achat
 - Comparison page available at `/fournisseurs/comparatif` and linked from the sidebar
 - Upload, delete, download or replace files via Supabase Storage using `useStorage`; `replaceFile` handles cleanup of previous uploads
 - Daily menu handling provided by `useMenuDuJour`
@@ -315,10 +316,10 @@ Task management is documented in [docs/taches.md](docs/taches.md).
 - Product list features pagination, sortable columns, filters, quick duplication of existing entries and Excel import/export (the importer reads the first sheet if no "Produits" sheet is found)
 - Manage products from `/produits` with creation and detail pages at
   `/produits/nouveau` and `/produits/:id`
-- Chaque produit enregistre les prix fournisseurs et met automatiquement a jour son PMP // ✅ Correction Codex
+- Chaque produit enregistre les prix fournisseurs et met automatiquement a jour son PMP
 - Stock and movement history available from the product detail modal
-- La liste des fournisseurs est exportable en Excel/PDF et met en avant les fournisseurs inactifs // ✅ Correction Codex
-- Alertes pour les fournisseurs sans facture depuis 6 mois // ✅ Correction Codex
+- La liste des fournisseurs est exportable en Excel/PDF et met en avant les fournisseurs inactifs
+- Alertes pour les fournisseurs sans facture depuis 6 mois
 - Stock detail charts show monthly product rotation
 - Stock movement management available at `/mouvements`
 - Indexes on `mouvements_stock.type`, `zone`, `sous_type` and `motif` speed up filtering
@@ -347,9 +348,9 @@ Task management is documented in [docs/taches.md](docs/taches.md).
 - Index on `factures.reference` speeds up invoice search queries
 - Columns `total_ht`, `total_tva` and `total_ttc` are computed automatically via triggers
 - Index on `products.code` speeds up lookups by internal product code
-- Index sur `fournisseurs.nom` pour accélérer les recherches fournisseur // ✅ Correction Codex
+- Index sur `fournisseurs.nom` pour accélérer les recherches fournisseur
 - RLS policies on `produits`, `fournisseur_produits` and `fournisseurs` rely on `current_user_mama_id()` for isolation
-- Le formulaire fournisseur enregistre un nom de contact et une adresse email. Les listes de fournisseurs, // ✅ Correction Codex
+- Le formulaire fournisseur enregistre un nom de contact et une adresse email. Les listes de fournisseurs,
   PDF exports and Excel exports all include the columns `ville`, `tel`, `email`
   and `contact` for coherence with `db/TABLE.txt`.
 - Obsolete admin dashboards `StatsDashboard` and `AuditViewer` were removed as
@@ -360,12 +361,12 @@ Task management is documented in [docs/taches.md](docs/taches.md).
 - SQL function `stats_cost_centers` can be executed by any authenticated user for cost center analytics
 - Dashboard analytics functions `dashboard_stats`, `top_produits` and `mouvements_without_alloc` are also executable by authenticated users
 - Command `npm run allocate:history` applies those suggestions to past movements
-- Barre de recherche globale pour trouver rapidement produits ou fournisseurs // ✅ Correction Codex
-- Recherche instantanee sur documents, alertes et listes de fournisseurs avec filtrage serveur // ✅ Correction Codex
-- Des hooks d'autocompletion facilitent la selection des fournisseurs et des factures en toute securite // ✅ Correction Codex
+- Barre de recherche globale pour trouver rapidement produits ou fournisseurs
+- Recherche instantanee sur documents, alertes et listes de fournisseurs avec filtrage serveur
+- Des hooks d'autocompletion facilitent la selection des fournisseurs et des factures en toute securite
 - Notifications hook provides `markAllAsRead()`, `fetchUnreadCount()`, `updateNotification()`, `deleteNotification()` and `subscribeToNotifications()` helpers
 - Feedback page `/feedback` lets users send comments with urgency level (see [docs/feedback.md](docs/feedback.md))
-- La configuration API fournisseur est disponible a /parametrage/api-fournisseurs (see [docs/fournisseurs_api_config.md](docs/fournisseurs_api_config.md)) // ✅ Correction Codex
+- La configuration API fournisseur est disponible a /parametrage/api-fournisseurs (see [docs/fournisseurs_api_config.md](docs/fournisseurs_api_config.md))
 - Password reset link on the login form points to `/reset-password` and the flow continues on `/update-password`
 - Optional two-factor authentication (TOTP) for user accounts, verified via QR code before activation
 - Functions `enable_two_fa` and `disable_two_fa` can be executed by any authenticated user for self-service 2FA
@@ -401,7 +402,7 @@ prête à utiliser avec Netlify (nécessite `netlify-cli`).
 2. Exécutez `npm install && npm run lint && npm test` pour s'assurer que l'environnement est sain.
 3. Lancez `npm run build` puis `npm run preview` afin de vérifier le bundle généré.
 4. Une fois le rendu validé, déployez avec `npm run deploy`.
-5. Les politiques RLS sont intégrées dans `db/full_setup.sql`. Réexécutez ce script en cas de besoin.
+5. Les politiques RLS sont intégrées dans `db/Ajout.sql`. Réexécutez ce script en cas de besoin.
 
 ## Reporting
 
@@ -433,7 +434,7 @@ the positional argument nor `--limit` is provided. The value must be a positive
 integer; invalid values are ignored and the default of `100` is used instead.
 
 Create JSON backups of core tables using `node scripts/backup_db.js [FILE] [MAMA_ID] [SUPABASE_URL] [SUPABASE_KEY] [--tables list] [--output FILE] [--gzip] [--url URL --key KEY]`. The script
-exporte les produits, fournisseurs, liaisons produit-fournisseur, factures, lignes de facture, // ✅ Correction Codex
+exporte les produits, fournisseurs, liaisons produit-fournisseur, factures, lignes de facture,
 inventories, inventory lines, tasks and stock movements into a dated file such
 as `backup_20250101.json`. Pass `--output` or `-o` to choose the destination file. Provide the `MAMA_ID` as the second argument or with `--mama-id ID`.
 Use `--tables` (or `-t`) with a comma-separated list to export only certain tables. Duplicate names in the list are ignored.
@@ -483,16 +484,16 @@ Run `npm install` to ensure dependencies like `vitest`, `@eslint/js` and `playwr
 
 **"permission denied for table utilisateurs" after login**
 
-Ensure the database schema is up to date by reapplying `db/full_setup.sql`:
+Ensure the database schema is up to date by reapplying `db/Ajout.sql`:
 
 ```bash
-supabase db reset --file db/full_setup.sql
+supabase db reset --file db/Ajout.sql
 ```
 This recreates RLS policies and grants on `utilisateurs` so authenticated requests succeed.
 
-The file [`db/full_setup.sql`](./db/full_setup.sql) now adds the `actif` column
-on every table using simple `ALTER TABLE` statements. Reapply it if you still
-see `column "actif" does not exist` errors.
+The file [`db/Ajout.sql`](./db/Ajout.sql) adds missing columns such as `actif`
+across tables. Reapply it if you still see `column "actif" does not exist`
+errors.
 
 After resetting the schema, verify the frontend still builds and tests pass:
 
@@ -507,7 +508,7 @@ npm run build && npm run preview
 Un nouvel écran permet de gérer les promotions et opérations commerciales (route `/promotions`).
 Les promotions possèdent un nom, une période de validité et un indicateur d'activation.
 Le stockage est assuré via les tables `promotions` et `promotion_products` définies dans
-`db/full_setup.sql`.
+`db/Ajout.sql`.
 
 ## Module Consolidation multi-sites
 
@@ -516,7 +517,7 @@ La page `/stats/consolidation` affiche pour chaque `mama` le stock valorisé, la
 et le nombre de mouvements enregistrés. Les utilisateurs non `superadmin` ne voient que
 leur établissement grâce à la fonction SQL `consolidated_stats` filtrée par `mama_id`.
 
-SQL associé dans `db/full_setup.sql` :
+ SQL associé dans `db/Ajout.sql` :
 - Vue `v_consolidated_stats` regroupant les indicateurs par `mama`
 - Fonction `consolidated_stats()` avec filtrage selon le rôle
 
@@ -529,7 +530,7 @@ sur les tables sensibles (produits, factures…).
 La page `/audit-trail` permet de filtrer par table et période
 et d'afficher les valeurs avant et après modification.
 
-SQL associé dans `db/full_setup.sql` :
+ SQL associé dans `db/Ajout.sql` :
 - Table `audit_entries` avec politiques RLS filtrées par `mama_id`
 - Fonction `add_audit_entry()` et triggers sur `products` et `factures`
 
@@ -542,7 +543,7 @@ Chaque entrée comporte une date prévue et des notes libres.
 
 Pour plus de détails, voir [docs/planning_previsionnel.md](docs/planning_previsionnel.md).
 
-SQL associé dans `db/full_setup.sql` :
+ SQL associé dans `db/Ajout.sql` :
 - Table `planning_previsionnel` stockant les plannings par `mama`
 - Politique RLS filtrée par `mama_id`
 - Trigger d'audit `trg_audit_planning`
@@ -553,7 +554,7 @@ Les utilisateurs disposant du droit `planning` peuvent consulter et modifier ces
 
 Ce module permet de configurer des règles de seuil sur les produits afin d'être notifié automatiquement lorsque le stock passe sous la limite définie. La page `/alertes` liste les règles existantes et permet d'en créer de nouvelles. Chaque alerte déclenchée est enregistrée pour consultation.
 
-SQL associé dans `db/full_setup.sql` :
+ SQL associé dans `db/Ajout.sql` :
 - Table `alert_rules` pour les paramètres des seuils
 - Table `alert_logs` historisant chaque notification
 - Fonction `check_stock_alert()` déclenchée par un trigger sur `products`
@@ -563,7 +564,7 @@ Les droits `SELECT/INSERT/UPDATE/DELETE` sont accordés au rôle `authenticated`
 
 Cette fonctionnalité facilite l'import des factures fournisseurs au format électronique (JSON ou UBL). La page `/factures/import` permet de téléverser un fichier qui sera analysé puis converti en facture et lignes de facture.
 
-SQL associé dans `db/full_setup.sql` :
+ SQL associé dans `db/Ajout.sql` :
 - Table `incoming_invoices` stockant les fichiers bruts à traiter
 - Fonction `import_invoice(payload jsonb)` créant les enregistrements dans `factures` et `facture_lignes`
 
@@ -573,7 +574,7 @@ Le rôle `authenticated` dispose du droit `INSERT` sur `incoming_invoices` et pe
 
 Ce module permet de centraliser les documents importants de chaque établissement (procédures internes, contrats, fiches techniques…). La page `/documents` affiche la liste des fichiers enregistrés et permet d'en ajouter ou d'en supprimer. Chaque document possède un titre, une URL de stockage et est lié à un `mama`.
 
-SQL associé dans `db/full_setup.sql` :
+ SQL associé dans `db/Ajout.sql` :
 - Table `documents` avec `title` et `file_url`
 - Policies RLS filtrées par `mama_id`
 - Droits `SELECT/INSERT/UPDATE/DELETE` pour le rôle `authenticated`.
@@ -585,7 +586,7 @@ La page `/validations` liste les demandes en attente et permet aux rôles
 `admin` ou `superadmin` de les approuver ou les refuser.
 Pour en savoir plus, consultez [docs/validation_requests.md](docs/validation_requests.md).
 
-SQL associé dans `db/full_setup.sql` :
+ SQL associé dans `db/Ajout.sql` :
 - Table `validation_requests` enregistrant l'action à valider
 - Fonction `current_user_role()` pour vérifier le rôle courant
 - Policies RLS filtrées par `mama_id`; les mises à jour ne sont possibles que
@@ -620,7 +621,7 @@ La page `/stats/advanced` affiche des graphiques d'évolution mensuelle des acha
 par établissement. Les données sont fournies par la vue `v_monthly_purchases`
 et la fonction `advanced_stats()` filtrée par `mama_id`.
 
-SQL associé dans `db/full_setup.sql` :
+ SQL associé dans `db/Ajout.sql` :
 - Vue `v_monthly_purchases` résumant les totaux mensuels de factures
 - Fonction `advanced_stats(start_date date, end_date date)` retournant les
   chiffres de l'établissement courant
@@ -634,7 +635,7 @@ Un tutoriel guidé s'affiche lors de la première connexion afin d'accompagner
 l'utilisateur. La table `onboarding_progress` conserve la dernière étape validée
 par chaque utilisateur.
 
-SQL associé dans `db/full_setup.sql` :
+ SQL associé dans `db/Ajout.sql` :
 - Table `onboarding_progress` avec `user_id`, `mama_id` et `step`
 - Policies RLS limitant l'accès à l'utilisateur courant
 - Droits `SELECT/INSERT/UPDATE` pour le rôle `authenticated`.
@@ -657,7 +658,7 @@ restant compatible desktop.
 
 Ce module fournit une page d'aide et FAQ consultable depuis la barre latérale. Les articles sont filtrés par `mama_id` pour s'adapter à chaque établissement.
 
-SQL associé dans `db/full_setup.sql` :
+ SQL associé dans `db/Ajout.sql` :
 - Table `help_articles` stockant `title`, `content` et `mama_id`
 - Policies RLS restreignant l'accès à l'établissement courant
 - Droits `SELECT/INSERT/UPDATE/DELETE` pour le rôle `authenticated`

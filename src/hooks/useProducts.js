@@ -30,14 +30,14 @@ export function useProducts() {
     let query = supabase
       .from("produits")
       .select(
-        "*, famille:familles(nom), unite:unites(nom), fournisseur:fournisseurs(id, nom)", // ✅ Correction Codex
+        "*, famille:familles(nom), unite:unites(nom), fournisseur:fournisseurs!fournisseur_principal_id(id, nom)",
         { count: "exact" }
       )
       .eq("mama_id", mama_id);
 
     if (search) {
       query = query.or(
-        `nom.ilike.%${search}%,fournisseur.nom.ilike.%${search}%` // ✅ Correction Codex
+        `nom.ilike.%${search}%,fournisseur.nom.ilike.%${search}%`
       );
     }
     if (famille) query = query.eq("famille_id", famille);
@@ -85,10 +85,10 @@ export function useProducts() {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { fournisseur_id, ...rest } = product || {}; // ✅ Correction Codex
+    const { fournisseur_principal_id, ...rest } = product || {};
     const payload = {
       ...rest,
-      fournisseur_id: fournisseur_id ?? null, // ✅ Correction Codex
+      fournisseur_principal_id: fournisseur_principal_id ?? null,
       mama_id,
     };
     const { error } = await supabase.from("produits").insert([payload]);
@@ -104,10 +104,10 @@ export function useProducts() {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { fournisseur_id, ...rest } = updateFields || {}; // ✅ Correction Codex
+    const { fournisseur_principal_id, ...rest } = updateFields || {};
     const payload = { ...rest };
-    if (fournisseur_id !== undefined) {
-      payload.fournisseur_id = fournisseur_id; // ✅ Correction Codex
+    if (fournisseur_principal_id !== undefined) {
+      payload.fournisseur_principal_id = fournisseur_principal_id;
     }
     const { error } = await supabase
       .from("produits")
@@ -128,7 +128,7 @@ export function useProducts() {
     const {
       famille_id,
       unite_id,
-      fournisseur_id, // ✅ Correction Codex
+      fournisseur_principal_id,
       stock_reel,
       stock_min,
       actif,
@@ -139,7 +139,7 @@ export function useProducts() {
       nom: `${orig.nom} (copie)`,
       famille_id,
       unite_id,
-      fournisseur_id, // ✅ Correction Codex
+      fournisseur_principal_id,
       stock_reel,
       stock_min,
       actif,
@@ -192,7 +192,7 @@ export function useProducts() {
     if (refresh) await fetchProducts();
   }
 
-  async function fetchProductPrices(productId) {
+  const fetchProductPrices = useCallback(async (productId) => {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
@@ -210,7 +210,28 @@ export function useProducts() {
       toast.error(error.message);
     }
     return data || [];
-  }
+  }, [mama_id]);
+
+  const getProduct = useCallback(
+    async (id) => {
+      if (!mama_id) return null;
+      const { data, error } = await supabase
+        .from("produits")
+        .select(
+          "*, fournisseur:fournisseurs!fournisseur_principal_id(id, nom), famille:familles(nom), unite:unites(nom)"
+        )
+        .eq("id", id)
+        .eq("mama_id", mama_id)
+        .single();
+      if (error) {
+        setError(error);
+        toast.error(error.message);
+        return null;
+      }
+      return data;
+    },
+    [mama_id]
+  );
 
   function exportProductsToExcel() {
     const datas = (products || []).map(p => ({
@@ -225,9 +246,9 @@ export function useProducts() {
       stock_reel: p.stock_reel,
       stock_min: p.stock_min,
       dernier_prix: p.dernier_prix,
-      fournisseur: p.fournisseur?.nom || "", // ✅ Correction Codex
+      fournisseur: p.fournisseur?.nom || "",
+      fournisseur_principal_id: p.fournisseur_principal_id || "",
       actif: p.actif,
-      mama_id: p.mama_id,
     }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Produits");
@@ -263,6 +284,7 @@ export function useProducts() {
     toggleProductActive,
     deleteProduct,
     fetchProductPrices,
+    getProduct,
     exportProductsToExcel,
     importProductsFromExcel,
   };

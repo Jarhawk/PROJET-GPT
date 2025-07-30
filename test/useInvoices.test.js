@@ -19,10 +19,10 @@ beforeEach(async () => {
   orderMock.mockClear();
 });
 
-test('fetchFacturesByFournisseur selects fields with aliases', async () => { // ✅ Correction Codex
+test('fetchFacturesByFournisseur selects fields with aliases', async () => {
   const { result } = renderHook(() => useInvoices());
   await act(async () => {
-    await result.current.fetchFacturesByFournisseur('s1'); // ✅ Correction Codex
+    await result.current.fetchFacturesByFournisseur('s1');
   });
   expect(fromMock).toHaveBeenCalledWith('factures');
   expect(queryChain.select).toHaveBeenCalledWith('id, date_facture, numero, total_ttc, statut');

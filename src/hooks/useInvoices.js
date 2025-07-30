@@ -22,7 +22,7 @@ export function useInvoices() {
       .select(`
         *,
         fournisseur: fournisseurs(id, nom)
-      `) // ✅ Correction Codex
+      `)
       .eq("mama_id", mama_id)
       .order("date_facture", { ascending: false });
 
@@ -39,7 +39,7 @@ export function useInvoices() {
   }
 
   // 2. Factures par fournisseur
-  async function fetchFacturesByFournisseur(fournisseur_id) { // ✅ Correction Codex
+  async function fetchFacturesByFournisseur(fournisseur_id) {
     if (!fournisseur_id || !mama_id) return [];
     setLoading(true);
     setError(null);
@@ -170,7 +170,7 @@ export function useInvoices() {
     loading,
     error,
     fetchInvoices,
-    fetchFacturesByFournisseur, // ✅ Correction Codex
+    fetchFacturesByFournisseur,
     fetchInvoiceById,
     addInvoice,
     updateInvoice,

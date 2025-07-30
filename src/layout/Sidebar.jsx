@@ -45,7 +45,7 @@ export default function Sidebar() {
   } = useAuth();
   const { pathname } = useLocation();
   if (import.meta.env.DEV) {
-    console.log("Sidebar", { user, mama_id, access_rights });
+    console.debug("Sidebar", { user, mama_id, access_rights });
   }
 
   if (loading || !user || !userData || !access_rights) {

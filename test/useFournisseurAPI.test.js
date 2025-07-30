@@ -82,7 +82,7 @@ test('testConnection hits ping endpoint', async () => {
   );
 });
 
-test("getCommandeStatus appelle l'API fournisseur avec l'auth", async () => { // ✅ Correction Codex
+test("getCommandeStatus appelle l'API fournisseur avec l'auth", async () => {
   fromMock.mockReset();
   fromMock
     .mockImplementationOnce(() => ({ select: selectMock }))

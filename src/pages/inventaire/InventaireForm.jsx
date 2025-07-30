@@ -31,7 +31,6 @@ export default function InventaireForm() {
   const [familleFilter, setFamilleFilter] = useState("");
   const [search, setSearch] = useState("");
 
-  const products = produits;
 
   useEffect(() => {
     if (mama_id) {
@@ -61,7 +60,7 @@ export default function InventaireForm() {
   };
   const removeLine = idx => setLignes(lignes.filter((_, i) => i !== idx));
 
-  const getProduct = id => products.find(p => p.id === id) || {};
+  const getProduct = id => produits.find(p => p.id === id) || {};
   const getTheo = id => Number(getProduct(id).stock_theorique || 0);
   const getPrice = id => Number(getProduct(id).pmp || 0);
 
@@ -131,7 +130,7 @@ export default function InventaireForm() {
           onChange={e => setFamilleFilter(e.target.value)}
         />
         <datalist id="familles">
-          {Array.from(new Set(products.map(p => p.famille).filter(Boolean))).map(f => (
+          {Array.from(new Set(produits.map(p => p.famille).filter(Boolean))).map(f => (
             <option key={f} value={f} />
           ))}
         </datalist>
@@ -170,7 +169,7 @@ export default function InventaireForm() {
                       onChange={e => updateLine(idx, "produit_id", e.target.value)}
                     >
                       <option value="">-- produit --</option>
-                      {products.map(p => (
+                      {produits.map(p => (
                         <option key={p.id} value={p.id}>{p.nom}</option>
                       ))}
                     </select>

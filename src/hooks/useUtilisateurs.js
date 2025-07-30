@@ -25,7 +25,11 @@ export function useUtilisateurs() {
       .order("nom", { ascending: true });
 
     if (!isSuperadmin) query = query.eq("mama_id", mama_id);
-    if (search) query = query.or(`nom.ilike.%${search}%,email.ilike.%${search}%`);
+    if (search) {
+      query = query
+        .ilike("nom", `%${search}%`)
+        .ilike("email", `%${search}%`);
+    }
     if (typeof actif === "boolean") query = query.eq("actif", actif);
 
     const { data, error } = await query;
@@ -52,30 +56,31 @@ export function useUtilisateurs() {
   async function addUser(user) {
     const targetMama = isSuperadmin ? user.mama_id : mama_id;
     if (!targetMama) return { error: "Aucun mama_id" };
-    if (!user.role_id) return { error: "Rôle manquant" };
     if (!user.email) return { error: "Email manquant" };
     if (user.actif === undefined) user.actif = true;
     if (user.auth_id === undefined) user.auth_id = null;
     setLoading(true);
     setError(null);
     let rights = {};
-    const { data: roleData } = await supabase
-      .from("roles")
-      .select("nom, access_rights")
-      .eq("id", user.role_id)
-      .maybeSingle();
-    if (roleData?.nom === "superadmin" && !isSuperadmin) {
-      setLoading(false);
-      return { error: "Rôle interdit" };
+    if (user.role_id) {
+      const { data: roleData } = await supabase
+        .from("roles")
+        .select("nom, access_rights")
+        .eq("id", user.role_id)
+        .maybeSingle();
+      if (roleData?.nom === "superadmin" && !isSuperadmin) {
+        setLoading(false);
+        return { error: "Rôle interdit" };
+      }
+      rights = roleData?.access_rights || {};
     }
-    rights = roleData?.access_rights || {};
     const now = new Date().toISOString();
     const { error } = await supabase
       .from("utilisateurs")
       .upsert({
         ...user,
         mama_id: targetMama,
-        access_rights: rights,
+        ...(Object.keys(rights).length ? { access_rights: rights } : {}),
         updated_at: now,
       });
     if (error) setError(error);

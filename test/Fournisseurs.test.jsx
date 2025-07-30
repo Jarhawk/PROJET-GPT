@@ -13,13 +13,13 @@ vi.mock('@/hooks/useFournisseurStats', () => ({
 }));
 vi.mock('@/hooks/useProduitsFournisseur', () => ({
   useProduitsFournisseur: () => ({ getProduitsDuFournisseur: () => [] }),
-})); // ✅ Correction Codex
+}));
 vi.mock('@/hooks/useProducts', () => ({
   useProducts: () => ({ products: [] }),
 }));
 vi.mock('@/hooks/useInvoices', () => ({
   useInvoices: () => ({ fetchFacturesByFournisseur: vi.fn() }),
-})); // ✅ Correction Codex
+}));
 vi.mock('@/hooks/useFournisseursInactifs', () => ({
   useFournisseursInactifs: () => ({ fournisseurs: [], fetchInactifs: vi.fn() }),
 }));

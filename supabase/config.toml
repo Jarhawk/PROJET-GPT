@@ -53,7 +53,7 @@ schema_paths = []
 [db.seed]
 # If enabled, seeds the database after migrations during a db reset.
 enabled = false
-# Seeds are now embedded in db/full_setup.sql
+# Seeds are now embedded in db/Ajout.sql
 sql_paths = []
 
 [realtime]

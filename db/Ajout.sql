@@ -133,8 +133,8 @@ LEFT JOIN familles f2 ON f2.id = p.famille_id
 LEFT JOIN unites u ON u.id = p.unite_id
 WHERE p.actif = true;
 
--- Ajout colonne url_photo pour stocker l'URL de la photo produit // ✅ Correction Codex
-ALTER TABLE produits ADD COLUMN IF NOT EXISTS url_photo text; // ✅ Correction Codex
+-- Ajout colonne url_photo pour stocker l'URL de la photo produit
+ALTER TABLE produits ADD COLUMN IF NOT EXISTS url_photo text;
 
 -- Vue simplifiée pour les réquisitions avec informations produit
 -- AJOUT POUR DASHBOARD
@@ -147,7 +147,7 @@ SELECT
   r.mama_id,
   r.produit_id,
   p.nom AS produit_nom,
-  p.url_photo // ✅ Correction Codex
+  p.url_photo
 FROM requisitions r
 JOIN produits p ON p.id = r.produit_id;
 

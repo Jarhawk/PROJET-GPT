@@ -33,7 +33,9 @@ export default function useConsoMoyenne() {
       const values = Object.values(daily);
       const avgValue = values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0;
       setAvg(avgValue);
-      if (import.meta.env.DEV) console.log('Chargement dashboard terminé');
+      if (import.meta.env.DEV) {
+        console.debug('Chargement dashboard terminé');
+      }
       return avgValue;
     } catch (e) {
       console.warn('useConsoMoyenne', e);

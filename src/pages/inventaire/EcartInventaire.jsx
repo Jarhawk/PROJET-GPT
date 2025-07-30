@@ -2,12 +2,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import useAuth from "@/hooks/useAuth";
+import { useInventaireZones } from "@/hooks/useInventaireZones";
 import TableContainer from "@/components/ui/TableContainer";
 import InputField from "@/components/ui/InputField";
 
 function EcartInventairePage() {
   const params = new URLSearchParams(window.location.search);
   const { mama_id, isAuthenticated } = useAuth();
+  const { zones, getZones } = useInventaireZones();
   const [date, setDate] = useState(params.get("date") || "");
   const [zone, setZone] = useState(params.get("zone") || "");
   const [mois, setMois] = useState(params.get("mois") || "");
@@ -108,6 +110,12 @@ function EcartInventairePage() {
   }, [ecarts, zone]);
 
   useEffect(() => {
+    if (mama_id) {
+      getZones();
+    }
+  }, [mama_id, getZones]);
+
+  useEffect(() => {
     if (isAuthenticated && mama_id) fetchEcarts();
   }, [fetchEcarts, isAuthenticated, mama_id]);
 
@@ -132,14 +140,22 @@ function EcartInventairePage() {
           }}
           className="flex-1"
         />
-        <InputField
-          label="Zone"
-          type="text"
-          placeholder="Zone (ex: bar, cuisine...)"
-          value={zone}
-          onChange={(e) => setZone(e.target.value)}
-          className="flex-1"
-        />
+        <div className="flex-1">
+          <InputField
+            label="Zone"
+            type="text"
+            list="zones"
+            placeholder="Zone (ex: bar, cuisine...)"
+            value={zone}
+            onChange={(e) => setZone(e.target.value)}
+            className="w-full"
+          />
+          <datalist id="zones">
+            {zones.map(z => (
+              <option key={z.id} value={z.nom} />
+            ))}
+          </datalist>
+        </div>
         <button
           onClick={renderPDF}
           className="bg-mamastock-gold text-white font-bold px-4 py-2 rounded self-end h-10"

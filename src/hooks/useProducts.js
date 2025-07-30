@@ -44,9 +44,11 @@ export function useProducts() {
     if (typeof actif === "boolean") query = query.eq("actif", actif);
 
     if (sortBy === "famille") {
-      query = query.order("nom", { foreignTable: "familles", ascending: order === "asc" });
+      // order by the joined famille alias
+      query = query.order("nom", { foreignTable: "famille", ascending: order === "asc" });
     } else if (sortBy === "unite") {
-      query = query.order("nom", { foreignTable: "unites", ascending: order === "asc" });
+      // order by the joined unite alias
+      query = query.order("nom", { foreignTable: "unite", ascending: order === "asc" });
     } else {
       query = query.order(sortBy, { ascending: order === "asc" });
     }

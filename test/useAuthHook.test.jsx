@@ -22,6 +22,6 @@ test('login is available via useAuth', () => {
 
 test('useAuth throws if provider missing', () => {
   expect(() => renderHook(() => useAuth())).toThrow(
-    "useAuth n’est pas correctement initialisé (provider absent ou mal injecté) !"
+    'useAuth must be used within AuthProvider'
   );
 });

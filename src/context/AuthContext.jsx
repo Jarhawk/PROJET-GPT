@@ -22,6 +22,11 @@ export const AuthProvider = ({ children }) => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [mamaId, setMamaId] = useState(null);
+  const [accessRights, setAccessRights] = useState(null);
+  const [role, setRole] = useState(null);
+  const [roleData, setRoleData] = useState(null);
+  const [nom, setNom] = useState(null);
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const lastUserIdRef = useRef(null);
@@ -70,11 +75,9 @@ export const AuthProvider = ({ children }) => {
     try {
       const { data, error } = await supabase
         .from("utilisateurs_complets")
-        .select(
-          "id, nom, mama_id, actif, access_rights, role_id, role_nom, role_access_rights"
-        )
-        .eq("id", userId)
-        .maybeSingle();
+        .select("*")
+        .eq("auth_id", userId)
+        .single();
 
       if (!data && !error) {
         console.warn("user not loaded", userId);
@@ -131,6 +134,11 @@ export const AuthProvider = ({ children }) => {
       }
 
       setUserData(newData);
+      setMamaId(data.mama_id);
+      setAccessRights(rights);
+      setRole(roleInfo.nom);
+      setRoleData(roleInfo);
+      setNom(data.nom);
 
       if (!data.mama_id) console.warn("missing mama_id for user", userId);
     } catch (err) {
@@ -138,6 +146,11 @@ export const AuthProvider = ({ children }) => {
       toast.error(err.message || "Erreur récupération utilisateur");
       setError(err.message || "Erreur inconnue");
       setUserData(null);
+      setMamaId(null);
+      setAccessRights(null);
+      setRole(null);
+      setRoleData(null);
+      setNom(null);
     } finally {
       fetchingRef.current = false;
     }
@@ -190,6 +203,11 @@ export const AuthProvider = ({ children }) => {
     if (!sessionLoadedRef.current) return;
     if (!session) {
       setUserData(null);
+      setMamaId(null);
+      setAccessRights(null);
+      setRole(null);
+      setRoleData(null);
+      setNom(null);
       purgeLocalAuth();
       if (pathname !== "/login") {
         navigate("/login");
@@ -239,6 +257,9 @@ export const AuthProvider = ({ children }) => {
       return { error };
     }
     await loadSession();
+    if (data.session?.user?.id) {
+      await fetchUserData(data.session.user.id, data.session.user.email);
+    }
     return { data };
   };
 
@@ -272,6 +293,7 @@ export const AuthProvider = ({ children }) => {
     if (data.session) {
       sessionLoadedRef.current = true;
       setSession(data.session);
+      await fetchUserData(data.session.user.id, data.session.user.email);
     }
     return { data };
   };
@@ -283,30 +305,35 @@ export const AuthProvider = ({ children }) => {
     await supabase.auth.signOut();
     setSession(null);
     setUserData(null);
+    setMamaId(null);
+    setAccessRights(null);
+    setRole(null);
+    setRoleData(null);
+    setNom(null);
     navigate("/login");
   };
 
-  const isSuperadmin = checkAccess(userData?.access_rights, 'superadmin', 'peut_voir');
+  const isSuperadmin = checkAccess(accessRights, 'superadmin', 'peut_voir');
 
   const hasAccess = (module, droit = "peut_voir") => {
-    return checkAccess(userData?.access_rights, module, droit, isSuperadmin);
+    return checkAccess(accessRights, module, droit, isSuperadmin);
   };
 
   const getAuthorizedModules = (droit = "peut_voir") => {
-    return listModules(userData?.access_rights, droit);
+    return listModules(accessRights, droit);
   };
   const isAdmin =
-    isSuperadmin || checkAccess(userData?.access_rights, 'admin', 'peut_voir');
+    isSuperadmin || checkAccess(accessRights, 'admin', 'peut_voir');
 
   const value = {
     /** Direct session object returned by Supabase */
     session,
     userData,
-    nom: userData?.nom,
-    access_rights: userData?.access_rights ?? null,
-    mama_id: userData?.mama_id,
-    role: userData?.roleData?.nom ?? null,
-    roleData: userData?.roleData ?? null,
+    nom,
+    access_rights: accessRights,
+    mama_id: mamaId,
+    role,
+    roleData,
     /** Authentication state */
     loading,
     error,

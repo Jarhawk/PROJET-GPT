@@ -21,15 +21,15 @@ export function useUnites() {
       setError(null);
       let query = supabase
         .from("unites")
-        .select("id, nom", { count: "exact" })
+        .select("id, nom")
         .eq("mama_id", mama_id)
         .order("nom", { ascending: true });
       if (!includeInactive) query = query.eq("actif", true);
       if (search) query = query.ilike("nom", `%${search}%`);
       if (limit) query = query.range((page - 1) * limit, page * limit - 1);
-      const { data, error, count } = await query;
+      const { data, error } = await query;
       setUnites(Array.isArray(data) ? data : []);
-      setTotal(count || (data ? data.length : 0));
+      setTotal(data ? data.length : 0);
       setLoading(false);
       if (error) setError(error);
       return data || [];

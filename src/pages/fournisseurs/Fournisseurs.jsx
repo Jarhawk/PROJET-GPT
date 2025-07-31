@@ -6,8 +6,7 @@ import { useFournisseurStats } from "@/hooks/useFournisseurStats";
 import { useProduitsFournisseur } from "@/hooks/useProduitsFournisseur";
 import { useProducts } from "@/hooks/useProducts";
 import { useFournisseursInactifs } from "@/hooks/useFournisseursInactifs";
-import { Button } from "@/components/ui/button";
-import TableContainer from "@/components/ui/TableContainer";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import FournisseurRow from "@/components/fournisseurs/FournisseurRow";
 import { Dialog, DialogContent } from "@radix-ui/react-dialog";
 import jsPDF from "jspdf";
@@ -119,32 +118,58 @@ export default function Fournisseurs() {
   }, [fournisseurs, products]);
 
   return (
-    <div className="max-w-7xl mx-auto p-8 text-shadow">
+    <div className="max-w-7xl mx-auto p-8 text-shadow space-y-6">
       <Toaster />
-      <h1 className="text-2xl font-bold mb-6">Gestion des fournisseurs</h1>
-      <div className="flex flex-wrap gap-4 mb-6 items-end">
-        <div className="relative flex-1">
-          <input
-            className="input input-bordered w-full pl-8"
-            placeholder="Recherche fournisseur"
-            value={search}
-            onChange={e => { setPage(1); setSearch(e.target.value); }}
-          />
-          <Search className="absolute left-2 top-2.5 text-white" size={18} />
-        </div>
-        <select className="input" value={actifFilter} onChange={e => { setPage(1); setActifFilter(e.target.value); }}>
-          <option value="all">Tous</option>
-          <option value="true">Actif</option>
-          <option value="false">Inactif</option>
-        </select>
-        {canEdit && (
-          <Button onClick={() => setShowCreate(true)}>
-            <PlusCircle className="mr-2" /> Ajouter fournisseur
-          </Button>
-        )}
-        <Button variant="outline" onClick={exportFournisseursToExcel}>Export Excel</Button>
-        <Button variant="outline" onClick={exportPDF}>Export PDF</Button>
-      </div>
+      <h1 className="text-2xl font-bold">Gestion des fournisseurs</h1>
+
+      <Card className="bg-white/10 border border-white/20 shadow-lg backdrop-blur-xl rounded-2xl">
+        <CardHeader className="pb-4">
+          <div className="flex flex-wrap gap-4 items-end">
+            <div className="relative flex-1">
+              <input
+                className="input w-full pl-8"
+                placeholder="Recherche fournisseur"
+                value={search}
+                onChange={e => { setPage(1); setSearch(e.target.value); }}
+              />
+              <Search className="absolute left-2 top-2.5 text-white" size={18} />
+            </div>
+            <select
+              className="input w-32"
+              value={actifFilter}
+              onChange={e => { setPage(1); setActifFilter(e.target.value); }}
+            >
+              <option value="all">Tous</option>
+              <option value="true">Actif</option>
+              <option value="false">Inactif</option>
+            </select>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-4">
+          <div className="flex flex-wrap gap-4">
+            {canEdit && (
+              <button
+                className="bg-white/20 hover:bg-white/30 text-white font-semibold px-4 py-2 rounded-xl flex items-center"
+                onClick={() => setShowCreate(true)}
+              >
+                <PlusCircle className="mr-2" size={18} /> Ajouter fournisseur
+              </button>
+            )}
+            <button
+              className="bg-white/20 hover:bg-white/30 text-white font-semibold px-4 py-2 rounded-xl"
+              onClick={exportFournisseursToExcel}
+            >
+              Export Excel
+            </button>
+            <button
+              className="bg-white/20 hover:bg-white/30 text-white font-semibold px-4 py-2 rounded-xl"
+              onClick={exportPDF}
+            >
+              Export PDF
+            </button>
+          </div>
+        </CardContent>
+      </Card>
       {inactifs.length > 0 && (
         <div className="mb-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded px-2 py-1">
           {inactifs.length} fournisseur(s) inactif(s)
@@ -156,86 +181,112 @@ export default function Fournisseurs() {
         </div>
       )}
       {/* Statistiques générales */}
-      <div className="grid md:grid-cols-2 gap-8 mb-10">
-        <div className="bg-glass backdrop-blur-lg p-4 rounded-xl shadow-md">
-          <h2 className="font-semibold mb-2">Évolution des achats (tous fournisseurs)</h2>
-          <ResponsiveContainer width="100%" height={180}>
-            <LineChart data={stats}>
-              <XAxis dataKey="mois" fontSize={11} />
-              <YAxis fontSize={11} />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="total_achats" stroke="#bfa14d" name="Total Achats" />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-        <div className="bg-glass backdrop-blur-lg p-4 rounded-xl shadow-md">
-          <h2 className="font-semibold mb-2">Top produits achetés</h2>
-          <ResponsiveContainer width="100%" height={180}>
-            <BarChart data={topProducts}>
-              <XAxis dataKey="nom" fontSize={11} />
-              <YAxis fontSize={11} />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="total" fill="#0f1c2e" name="Quantité achetée" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+      <div className="grid md:grid-cols-2 gap-6 mb-10">
+        <Card className="bg-white/10 border border-white/20 shadow-lg backdrop-blur-xl rounded-2xl">
+          <CardHeader>
+            <h2 className="font-semibold">Évolution des achats (tous fournisseurs)</h2>
+          </CardHeader>
+          <CardContent>
+            {stats.length === 0 ? (
+              <div className="min-h-[180px] bg-white/5 rounded-xl flex items-center justify-center text-white/50">
+                Aucune donnée disponible pour le moment
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={180}>
+                <LineChart data={stats}>
+                  <XAxis dataKey="mois" fontSize={11} />
+                  <YAxis fontSize={11} />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="total_achats" stroke="#bfa14d" name="Total Achats" />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+        <Card className="bg-white/10 border border-white/20 shadow-lg backdrop-blur-xl rounded-2xl">
+          <CardHeader>
+            <h2 className="font-semibold">Top produits achetés</h2>
+          </CardHeader>
+          <CardContent>
+            {topProducts.length === 0 ? (
+              <div className="min-h-[180px] bg-white/5 rounded-xl flex items-center justify-center text-white/50">
+                Aucune donnée disponible pour le moment
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={180}>
+                <BarChart data={topProducts}>
+                  <XAxis dataKey="nom" fontSize={11} />
+                  <YAxis fontSize={11} />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="total" fill="#0f1c2e" name="Quantité achetée" />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
       </div>
       {/* Tableau fournisseurs */}
-      <TableContainer className="mb-6 shadow-xl rounded-2xl">
-        <table className="min-w-full text-center">
-          <thead>
-            <tr>
-              <th className="py-2 px-3">Nom</th>
-              <th className="py-2 px-3">Téléphone</th>
-              <th className="py-2 px-3">Contact</th>
-              <th className="py-2 px-3">Email</th>
-              <th className="py-2 px-3">Nb Produits</th>
-              <th className="py-2 px-3"></th>
-              <th className="py-2 px-3"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {fournisseursFiltrés.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="py-4 text-muted-foreground">
-                  Aucun fournisseur trouvé
-                </td>
-              </tr>
-            ) : (
-              fournisseursFiltrés.map(f => (
-                <FournisseurRow
-                  key={f.id}
-                  fournisseur={f}
-                  productCount={productCounts[f.id] ?? 0}
-                  canEdit={canEdit}
-                  onDetail={() => setSelected(f.id)}
-                  onEdit={() => setEditRow(f)}
-                  onDelete={async (id) => {
-                    if (!window.confirm('Désactiver ce fournisseur ?')) return;
-                    await disableFournisseur(id);
-                    toast.success('Fournisseur désactivé');
-                    refreshList();
-                  }}
-                />
-              ))
-            )}
-          </tbody>
-        </table>
-        <div className="mt-4 flex gap-2 justify-center">
-          {Array.from({ length: Math.max(1, Math.ceil(total / PAGE_SIZE)) }, (_, i) => (
-            <Button
-              key={i + 1}
-              size="sm"
-              variant={page === i + 1 ? "default" : "outline"}
-              onClick={() => setPage(i + 1)}
-            >
-              {i + 1}
-            </Button>
-          ))}
-        </div>
-      </TableContainer>
+      <Card className="bg-white/10 border border-white/20 shadow-lg backdrop-blur-xl rounded-2xl mb-6">
+        <CardHeader>
+          <h2 className="font-semibold">Liste des fournisseurs</h2>
+        </CardHeader>
+        <CardContent className="pt-2">
+          <div className="overflow-x-auto rounded-xl backdrop-blur">
+            <table className="min-w-full text-sm text-white text-center whitespace-nowrap">
+              <thead>
+                <tr>
+                  <th className="py-2 px-3">Nom</th>
+                  <th className="py-2 px-3">Téléphone</th>
+                  <th className="py-2 px-3">Contact</th>
+                  <th className="py-2 px-3">Email</th>
+                  <th className="py-2 px-3">Nb Produits</th>
+                  <th className="py-2 px-3"></th>
+                  <th className="py-2 px-3"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {fournisseursFiltrés.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-4 text-muted-foreground">
+                      Aucun fournisseur trouvé
+                    </td>
+                  </tr>
+                ) : (
+                  fournisseursFiltrés.map(f => (
+                    <FournisseurRow
+                      key={f.id}
+                      fournisseur={f}
+                      productCount={productCounts[f.id] ?? 0}
+                      canEdit={canEdit}
+                      onDetail={() => setSelected(f.id)}
+                      onEdit={() => setEditRow(f)}
+                      onDelete={async (id) => {
+                        if (!window.confirm('Désactiver ce fournisseur ?')) return;
+                        await disableFournisseur(id);
+                        toast.success('Fournisseur désactivé');
+                        refreshList();
+                      }}
+                    />
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+          <div className="mt-4 flex gap-2 justify-center">
+            {Array.from({ length: Math.max(1, Math.ceil(total / PAGE_SIZE)) }, (_, i) => (
+              <button
+                key={i + 1}
+                className={`px-3 py-1 rounded-xl font-semibold text-white ${page === i + 1 ? 'bg-white/30' : 'bg-white/20 hover:bg-white/30'}`}
+                onClick={() => setPage(i + 1)}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Modal création/édition */}
       <Dialog open={showCreate || !!editRow} onOpenChange={v => { if (!v) { setShowCreate(false); setEditRow(null); } }}>

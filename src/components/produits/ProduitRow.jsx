@@ -5,7 +5,7 @@ export default function ProduitRow({
   onEdit,
   onDetail,
   onDuplicate,
-  onDelete,
+  onToggleActive,
   canEdit,
 }) {
   return (
@@ -44,18 +44,19 @@ export default function ProduitRow({
             </Button>
             <Button
               size="sm"
+              variant="destructive"
+              className="mr-2"
+              onClick={() => onToggleActive(produit.id, !produit.actif)}
+            >
+              {produit.actif ? "Désactiver" : "Activer"}
+            </Button>
+            <Button
+              size="sm"
               variant="ghost"
               className="mr-2"
               onClick={() => onDuplicate(produit.id)}
             >
               Dupliquer
-            </Button>
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={() => onDelete(produit.id)}
-            >
-              Supprimer
             </Button>
           </>
         )}

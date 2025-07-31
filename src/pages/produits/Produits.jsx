@@ -16,7 +16,7 @@ import { Toaster, toast } from "react-hot-toast";
 import useAuth from "@/hooks/useAuth";
 import ProduitRow from "@/components/produits/ProduitRow";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 50;
 
 export default function Produits() {
   useEffect(() => {
@@ -30,7 +30,7 @@ export default function Produits() {
     importProductsFromExcel,
     addProduct,
     duplicateProduct,
-    deleteProduct,
+    toggleProductActive,
   } = useProducts();
   const { familles: famillesHook, fetchFamilles } = useFamilles();
   const { unites: unitesHook, fetchUnites } = useUnites();
@@ -129,10 +129,9 @@ export default function Produits() {
     return sortOrder === "asc" ? " ↑" : " ↓";
   }
 
-  async function handleDelete(id) {
-    if (!window.confirm("Désactiver ce produit ?")) return;
-    await deleteProduct(id);
-    toast.success("Produit désactivé");
+  async function handleToggleActive(id, actif) {
+    await toggleProductActive(id, actif);
+    toast.success(actif ? "Produit activé" : "Produit désactivé");
     refreshList();
   }
   useEffect(() => {
@@ -280,7 +279,7 @@ export default function Produits() {
                     setShowDetail(true);
                   }}
                   onDuplicate={duplicateProduct}
-                  onDelete={handleDelete}
+                  onToggleActive={handleToggleActive}
                   canEdit={canEdit}
                 />
               ))

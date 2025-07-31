@@ -118,7 +118,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
               <AutoCompleteField
                 label="Famille"
                 value={familleId}
-                onChange={setFamilleId}
+                onChange={obj => setFamilleId(obj?.id || "")}
                 options={[...famillesHook, ...familles].map(f => ({ value: f.id, label: f.nom }))}
                 onAddOption={async val => {
                   const { data, error } = await addFamille(val);
@@ -133,7 +133,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
               <AutoCompleteField
                 label="Unité"
                 value={uniteId}
-                onChange={setUniteId}
+                onChange={obj => setUniteId(obj?.id || "")}
                 options={[...unitesHook, ...unites].map(u => ({ value: u.id, label: u.nom }))}
                 onAddOption={async val => {
                   const { data, error } = await addUnite(val);

@@ -38,7 +38,8 @@ export default function AutoCompleteField({
     const val = e.target.value;
     setInputValue(val);
     const match = resolved.find(o => o.label === val);
-    onChange(match ? match.value : null);
+    if (match) onChange({ id: match.value, nom: match.label });
+    else onChange(val ? { id: null, nom: val } : null);
     setShowAdd(val && !match);
   };
 
@@ -46,8 +47,10 @@ export default function AutoCompleteField({
     if (inputValue && onAddOption) {
       const res = await onAddOption(inputValue);
       if (res && res.id) {
-        onChange(res.id);
+        onChange({ id: res.id, nom: res.nom || inputValue });
         setInputValue(res.nom || inputValue);
+      } else {
+        onChange({ id: null, nom: inputValue });
       }
       setShowAdd(false);
     }

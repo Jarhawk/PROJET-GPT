@@ -21,7 +21,7 @@ export function useUnites() {
       setError(null);
       let query = supabase
         .from("unites")
-        .select("*", { count: "exact" })
+        .select("id, nom", { count: "exact" })
         .eq("mama_id", mama_id)
         .order("nom", { ascending: true });
       if (!includeInactive) query = query.eq("actif", true);

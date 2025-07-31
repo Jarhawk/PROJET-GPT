@@ -122,7 +122,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
                 onAddOption={async val => {
                   const { data, error } = await addFamille(val);
                   if (error) toast.error(error.message || error);
-                  else return { id: data.id, label: data.nom };
+                  else return { id: data.id, nom: data.nom };
                 }}
                 required
               />
@@ -137,7 +137,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
                 onAddOption={async val => {
                   const { data, error } = await addUnite(val);
                   if (error) toast.error(error.message || error);
-                  else return { id: data.id, label: data.nom };
+                  else return { id: data.id, nom: data.nom };
                 }}
                 required
               />

@@ -47,7 +47,7 @@ export default function AutoCompleteField({
       const res = await onAddOption(inputValue);
       if (res && res.id) {
         onChange(res.id);
-        setInputValue(res.label || inputValue);
+        setInputValue(res.nom || inputValue);
       }
       setShowAdd(false);
     }

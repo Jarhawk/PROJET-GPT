@@ -63,7 +63,7 @@ export function useFamilles() {
     const { data, error } = await supabase
       .from("familles")
       .insert([{ nom, mama_id }])
-      .select()
+      .select("id, nom")
       .single();
     setLoading(false);
     if (error) {

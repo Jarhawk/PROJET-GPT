@@ -94,7 +94,7 @@ export default function Produits() {
           nom: row.nom,
           famille_id: famMap[row.famille?.toLowerCase().trim()] || null,
           unite_id: uniteMap[row.unite?.toLowerCase().trim()] || null,
-          fournisseur_principal_id:
+          fournisseur_id:
             fournisseurMap[row.fournisseur?.toLowerCase().trim()] || null,
           stock_reel: Number(row.stock_reel) || 0,
           stock_min: Number(row.stock_min) || 0,

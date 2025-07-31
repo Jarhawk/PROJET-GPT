@@ -22,7 +22,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
   const [familleId, setFamilleId] = useState(produit?.famille_id || "");
   const [uniteId, setUniteId] = useState(produit?.unite_id || "");
   const [fournisseurId, setFournisseurId] = useState(
-    produit?.fournisseur_principal_id || ""
+    produit?.fournisseur_id || ""
   );
   const [stock_reel, setStockReel] = useState(produit?.stock_reel || 0);
   const [stock_min, setStockMin] = useState(produit?.stock_min || 0);
@@ -45,7 +45,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
       setNom(produit.nom || "");
       setFamilleId(produit.famille_id || "");
       setUniteId(produit.unite_id || "");
-      setFournisseurId(produit.fournisseur_principal_id || "");
+      setFournisseurId(produit.fournisseur_id || "");
       setStockReel(produit.stock_reel || 0);
       setStockMin(produit.stock_min || 0);
       setActif(produit.actif ?? true);
@@ -70,7 +70,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
       nom,
       famille_id: familleId || null,
       unite_id: uniteId || null,
-      fournisseur_principal_id: fournisseurId || null,
+      fournisseur_id: fournisseurId || null,
       stock_reel: Number(stock_reel),
       stock_min: Number(stock_min),
       actif,

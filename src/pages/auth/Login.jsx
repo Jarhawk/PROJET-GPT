@@ -10,6 +10,7 @@ import GlassCard from "@/components/ui/GlassCard";
 import PageWrapper from "@/components/ui/PageWrapper";
 import PreviewBanner from "@/components/ui/PreviewBanner";
 import PrimaryButton from "@/components/ui/PrimaryButton";
+import { Input } from "@/components/ui/input";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function Login() {
@@ -112,8 +113,7 @@ export default function Login() {
         <form onSubmit={handleLogin} className="w-full flex flex-col gap-4">
             <div>
               <label className="block text-xs font-semibold text-white/90 mb-1">Email</label>
-              <input
-                className="w-full px-4 py-2 bg-white/20 text-white placeholder-white/70 rounded-md border border-white/30 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50"
+              <Input
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
@@ -128,8 +128,7 @@ export default function Login() {
             </div>
             <div>
               <label className="block text-xs font-semibold text-white/90 mb-1">Mot de passe</label>
-              <input
-                className="w-full px-4 py-2 bg-white/20 text-white placeholder-white/70 rounded-md border border-white/30 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50"
+              <Input
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}

@@ -1,0 +1,23 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import { Button } from '@/components/ui/button';
+
+export default function FamilleRow({ famille, onEdit, onDelete, onToggle }) {
+  return (
+    <tr>
+      <td className="px-2 py-1">{famille.nom}</td>
+      <td className="px-2 py-1">{famille.actif ? '🟢' : '🔴'}</td>
+      <td className="px-2 py-1">{new Date(famille.created_at).toLocaleDateString()}</td>
+      <td className="px-2 py-1 flex gap-2 justify-center">
+        <Button size="sm" variant="secondary" onClick={() => onEdit(famille)}>
+          Modifier
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => onToggle(famille)}>
+          {famille.actif ? 'Désactiver' : 'Activer'}
+        </Button>
+        <Button size="sm" variant="destructive" onClick={() => onDelete(famille)}>
+          Supprimer
+        </Button>
+      </td>
+    </tr>
+  );
+}

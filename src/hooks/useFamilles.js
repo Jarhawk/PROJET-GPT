@@ -9,21 +9,28 @@ import { saveAs } from "file-saver";
 export function useFamilles() {
   const { mama_id } = useAuth();
   const [familles, setFamilles] = useState([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   // 1. Charger toutes les familles (recherche, batch)
   // Charge la liste des familles avec option de recherche
   const fetchFamilles = useCallback(
-    async ({ search = "", includeInactive = false } = {}) => {
+    async ({ search = "", includeInactive = false, page, limit } = {}) => {
       if (!mama_id) return [];
       setLoading(true);
       setError(null);
-      let query = supabase.from("familles").select("*").eq("mama_id", mama_id);
+      let query = supabase
+        .from("familles")
+        .select("*", { count: "exact" })
+        .eq("mama_id", mama_id)
+        .order("nom", { ascending: true });
       if (!includeInactive) query = query.eq("actif", true);
       if (search) query = query.ilike("nom", `%${search}%`);
-      const { data, error } = await query.order("nom", { ascending: true });
+      if (limit) query = query.range((page - 1) * limit, page * limit - 1);
+      const { data, error, count } = await query;
       setFamilles(Array.isArray(data) ? data : []);
+      setTotal(count || (data ? data.length : 0));
       setLoading(false);
       if (error) setError(error);
       return data || [];
@@ -68,18 +75,19 @@ export function useFamilles() {
   }
 
   // 3. Modifier une famille
-  async function updateFamille(id, newNom) {
+  async function updateFamille(id, fields) {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    if (!newNom) {
+    const payload = typeof fields === "string" ? { nom: fields } : fields;
+    if (!payload.nom) {
       setError("Le nom est obligatoire.");
       setLoading(false);
       return;
     }
     const { error } = await supabase
       .from("familles")
-      .update({ nom: newNom })
+      .update(payload)
       .eq("id", id)
       .eq("mama_id", mama_id);
     if (error) setError(error);
@@ -132,6 +140,7 @@ export function useFamilles() {
 
   return {
     familles,
+    total,
     loading,
     error,
     fetchFamilles,

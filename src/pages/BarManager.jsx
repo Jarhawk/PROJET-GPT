@@ -192,7 +192,7 @@ export default function BarManager() {
         <Button onClick={handleExportPDF}>Export PDF</Button>
       </div>
       {/* Stat globales */}
-      <div className="bg-glass backdrop-blur border border-borderGlass rounded-xl shadow p-4 mb-6 flex flex-wrap gap-6">
+      <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow p-4 mb-6 flex flex-wrap gap-6">
         <div>
           <span className="font-semibold text-blue-700">Ventes totales :</span>
           <span className="font-bold"> {ventesTot} </span>
@@ -216,7 +216,7 @@ export default function BarManager() {
         </div>
       </div>
       {/* Graphe top ventes */}
-      <div className="bg-glass backdrop-blur border border-borderGlass rounded-xl shadow p-4 mb-6">
+      <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow p-4 mb-6">
         <h2 className="font-bold mb-2">Top 10 ventes (période sélectionnée)</h2>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={topVentes}>
@@ -230,7 +230,7 @@ export default function BarManager() {
         </ResponsiveContainer>
       </div>
       {/* Graphe top marges */}
-      <div className="bg-glass backdrop-blur border border-borderGlass rounded-xl shadow p-4 mb-6">
+      <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow p-4 mb-6">
         <h2 className="font-bold mb-2">Top 10 marges boissons</h2>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={topMarge}>
@@ -276,7 +276,7 @@ export default function BarManager() {
                         </Button>
                       </DialogTrigger>
                       <DialogContent
-                        className="bg-glass backdrop-blur-lg border border-borderGlass rounded-xl shadow-lg p-6 max-w-md z-[1000]"
+                        className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl shadow-lg p-6 max-w-md z-[1000]"
                       >
                         <h2 className="font-bold text-xl mb-2">{b.nom}</h2>
                         <p>

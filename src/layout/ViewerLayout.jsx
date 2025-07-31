@@ -20,7 +20,7 @@ export default function ViewerLayout({ children }) {
       <TouchLight />
       <Navbar />
       <main className="flex-1 px-4 py-6 flex justify-center items-start overflow-y-auto relative z-10">
-        <div className="w-full max-w-5xl bg-glass backdrop-blur-lg border border-borderGlass rounded-xl shadow-md p-6">
+        <div className="w-full max-w-5xl bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow-md p-6 text-white">
           {children}
         </div>
       </main>

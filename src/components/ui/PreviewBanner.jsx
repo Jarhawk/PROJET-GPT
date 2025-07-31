@@ -10,7 +10,7 @@ export default function PreviewBanner() {
   params.delete('preview');
   const exitUrl = `${window.location.pathname}?${params.toString()}`.replace(/\?$/, '');
   return (
-    <div className="fixed top-2 left-1/2 -translate-x-1/2 bg-glass backdrop-blur border border-borderGlass text-white px-4 py-1 rounded-xl z-50 text-sm shadow">
+    <div className="fixed top-2 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur-xl border border-white/20 text-white px-4 py-1 rounded-xl z-50 text-sm shadow">
       Aperçu du thème actif
       {intensity && ` (intensité ${intensity})`} -{' '}
       <Link to={exitUrl} className="underline">Quitter</Link>

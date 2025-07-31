@@ -114,12 +114,12 @@ export default function MouvementForm({ onClose }) {
           />
         )}
         <textarea
-          className="input mb-2 w-full"
+          className="textarea mb-2 w-full"
           placeholder="Commentaire"
           value={form.commentaire}
           onChange={e => setForm(f => ({ ...f, commentaire: e.target.value }))}
         />
-        <div className="flex gap-2 justify-end mt-4">
+        <div className="flex flex-wrap justify-center gap-4 mt-4">
           <PrimaryButton type="submit" disabled={loading}>
             Valider
           </PrimaryButton>

@@ -28,7 +28,7 @@ export default function RecommandationsBox({ filter }) {
         <div
           key={idx}
           onClick={() => rec.onClick?.(rec) || refresh()}
-          className="flex items-center gap-2 bg-glass border border-borderGlass backdrop-blur rounded-lg p-2 shadow cursor-pointer hover:bg-white/20 text-sm"
+          className="flex items-center gap-2 bg-white/10 border border-white/20 backdrop-blur-xl rounded-lg p-2 shadow cursor-pointer hover:bg-white/20 text-sm"
         >
           <span>{rec.type === 'alert' ? '🔍' : '🧠'}</span>
           <span className="flex-1">{rec.message}</span>

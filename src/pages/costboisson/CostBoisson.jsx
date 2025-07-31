@@ -311,7 +311,7 @@ export default function CostBoissons() {
                           </Button>
                         </DialogTrigger>
                         <DialogContent
-                          className="bg-glass backdrop-blur-lg border border-borderGlass rounded-xl shadow-lg p-6 max-w-md z-[1000]"
+                          className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl shadow-lg p-6 max-w-md z-[1000]"
                         >
                           <DialogTitle className="font-bold text-xl mb-2">
                             {b.nom}
@@ -390,7 +390,7 @@ export default function CostBoissons() {
                           <Button variant="ghost" className="text-sm">Voir fiche</Button>
                         </DialogTrigger>
                         <DialogContent
-                          className="bg-glass backdrop-blur-lg border border-borderGlass rounded-xl shadow-lg p-6 max-w-md z-[1000]"
+                          className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl shadow-lg p-6 max-w-md z-[1000]"
                         >
                           <DialogTitle className="font-bold text-xl mb-2">
                             {b.nom}

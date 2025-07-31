@@ -43,7 +43,7 @@ export default function Accueil() {
           transition={{ duration: 0.8 }}
           className="w-full max-w-md"
         >
-          <div className="bg-glass border border-borderGlass backdrop-blur-lg rounded-3xl shadow-xl p-6 flex flex-col items-center">
+          <div className="bg-white/10 border border-white/20 backdrop-blur-lg rounded-3xl shadow-xl p-6 flex flex-col items-center">
             <img
               src={logoMamaStock}
               alt="MamaStock"

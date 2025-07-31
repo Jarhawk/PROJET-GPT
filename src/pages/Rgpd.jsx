@@ -78,7 +78,7 @@ export default function Rgpd() {
               <Motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Link
                   to="/"
-                  className="inline-block px-6 py-2 rounded-xl bg-glass border border-borderGlass hover:bg-white/20 transition backdrop-blur"
+                  className="inline-block px-6 py-2 rounded-xl bg-white/10 border border-white/20 hover:bg-white/20 transition backdrop-blur-xl"
                 >
                   Retour à l’accueil
                 </Link>

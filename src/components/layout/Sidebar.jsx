@@ -17,7 +17,7 @@ export default function Sidebar() {
   const canAnalyse = has("analyse");
 
   return (
-    <aside className="w-64 bg-glass border border-white/10 backdrop-blur-xl text-white p-4 h-screen shadow-md text-shadow">
+    <aside className="w-64 bg-white/10 border border-white/10 backdrop-blur-xl text-white p-4 h-screen shadow-md text-shadow">
       <div className="mb-6">
         <MamaLogo width={140} />
       </div>

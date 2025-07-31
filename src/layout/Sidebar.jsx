@@ -182,7 +182,7 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="w-64 bg-glass border border-white/10 backdrop-blur-xl text-white p-4 h-screen shadow-md text-shadow hidden md:block animate-fade-in-down">
+    <aside className="w-64 bg-white/10 border border-white/10 backdrop-blur-xl text-white p-4 h-screen shadow-md text-shadow hidden md:block animate-fade-in-down">
       <nav className="flex flex-col gap-4 text-sm">
         {peutVoir("dashboard") && (
           <Item to="/dashboard" icon={<Home size={16} />} label="Dashboard" />

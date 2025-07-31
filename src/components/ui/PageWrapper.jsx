@@ -20,7 +20,7 @@ export default function PageWrapper({ children, className = '', intensity = 1 })
       <WavesBackground className="opacity-40" />
       <MouseLight />
       <TouchLight />
-      <div className={`w-full max-w-md relative z-10 bg-glass border border-borderGlass backdrop-blur p-6 rounded-2xl shadow-lg ${className}`}>{children}</div>
+      <div className={`w-full max-w-md relative z-10 bg-white/10 border border-white/20 backdrop-blur-xl p-6 rounded-2xl shadow-lg ${className}`}>{children}</div>
     </div>
   );
 }

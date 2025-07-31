@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 import { motion as Motion } from "framer-motion";
 
-export default function FournisseurFormModal({ fournisseur, onClose, glass }) {
+export default function FournisseurFormModal({ fournisseur, onClose }) {
   const { createFournisseur, updateFournisseur } = useFournisseurs();
   const [form, setForm] = useState({
     nom: fournisseur?.nom || "",
@@ -57,7 +57,7 @@ export default function FournisseurFormModal({ fournisseur, onClose, glass }) {
       animate={{ scale: 1, opacity: 1 }}
       exit={{ scale: 0.98, opacity: 0 }}
       onSubmit={handleSubmit}
-      className={`rounded-xl p-6 space-y-4 ${glass ? "bg-white/80 backdrop-blur-xl shadow-2xl border border-mamastockGold" : "bg-white shadow"} min-w-[340px]`}
+      className="min-w-[340px] space-y-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow-lg p-6 text-white"
    >
       <h3 className="text-xl font-bold mb-2">{fournisseur ? "Modifier" : "Ajouter"} un fournisseur</h3>
       <div>

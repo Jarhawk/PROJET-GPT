@@ -69,7 +69,7 @@ export default function FactureDetail({ facture: factureProp, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-glass backdrop-blur-lg border border-borderGlass rounded-xl shadow-lg p-8 min-w-[400px] max-w-[95vw] flex flex-col gap-2 relative">
+      <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl shadow-lg p-8 min-w-[400px] max-w-[95vw] flex flex-col gap-2 relative">
         <Button variant="outline" className="absolute top-2 right-2" onClick={onClose}>Fermer</Button>
         <h2 className="font-bold text-xl mb-4">Détail de la facture #{facture.id}</h2>
         <div><b>Date :</b> {facture.date_facture}</div>
@@ -100,7 +100,7 @@ export default function FactureDetail({ facture: factureProp, onClose }) {
         {produitsFacture.length > 0 && (
           <TableContainer className="mt-4">
             <table className="min-w-full text-sm">
-            <thead className="bg-glass border-b border-borderGlass">
+            <thead className="bg-white/10 border-b border-white/20">
               <tr>
                 <th className="px-2 py-1 border">Produit</th>
                 <th className="px-2 py-1 border">Quantité</th>

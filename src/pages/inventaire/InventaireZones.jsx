@@ -104,7 +104,7 @@ export default function InventaireZones() {
         </table>
       </TableContainer>
       <Dialog open={!!editZone} onOpenChange={v => !v && setEditZone(null)}>
-      <DialogContent className="bg-glass backdrop-blur-lg text-white rounded-xl shadow-lg p-6 max-w-sm">
+      <DialogContent className="bg-white/10 backdrop-blur-lg text-white rounded-xl shadow-lg p-6 max-w-sm">
         <DialogTitle className="font-bold mb-2">
           {editZone?.id ? "Modifier la zone" : "Nouvelle zone"}
         </DialogTitle>

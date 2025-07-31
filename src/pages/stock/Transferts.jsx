@@ -131,7 +131,7 @@ export default function Transferts() {
         </table>
       </TableContainer>
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xl flex items-center justify-center z-50">
           <GlassCard title="Nouveau transfert" className="w-96 p-6">
             <form onSubmit={handleSubmit} className="space-y-3">
             <div className="flex gap-2">

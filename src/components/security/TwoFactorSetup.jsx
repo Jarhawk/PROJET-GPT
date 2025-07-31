@@ -41,7 +41,7 @@ export default function TwoFactorSetup() {
   return (
     <div className="space-y-4">
       {!enabled && secret && (
-        <div className="p-4 bg-glass border border-borderGlass backdrop-blur rounded-2xl shadow">
+        <div className="p-4 bg-white/10 border border-white/20 backdrop-blur-xl rounded-2xl shadow">
           <p>Scannez ce QR code dans votre application d'authentification puis entrez le code :</p>
           {secret && (
             <QRCode value={`otpauth://totp/MamaStock?secret=${secret}`} />

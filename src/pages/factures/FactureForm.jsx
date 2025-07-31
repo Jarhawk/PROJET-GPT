@@ -289,7 +289,7 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
           {ocrText}
         </div>
       )}
-      <div className="mt-4 p-2 bg-glass backdrop-blur rounded border border-borderGlass">
+      <div className="mt-4 p-2 bg-white/10 backdrop-blur-xl rounded border border-white/20">
         Total HT: {lignes.reduce((s,l)=>s+l.quantite*l.prix_unitaire,0).toFixed(2)} € - TVA: {lignes.reduce((s,l)=>s+l.quantite*l.prix_unitaire*(l.tva||0)/100,0).toFixed(2)} € - TTC: {(lignes.reduce((s,l)=>s+l.quantite*l.prix_unitaire,0)+lignes.reduce((s,l)=>s+l.quantite*l.prix_unitaire*(l.tva||0)/100,0)).toFixed(2)} €
       </div>
       <div className="flex gap-2 mt-4">

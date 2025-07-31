@@ -16,7 +16,7 @@ export default function GadgetBudgetMensuel() {
   const progress = cible ? Math.min(100, (reel / cible) * 100) : 0;
 
   return (
-    <div className="bg-glass border border-borderGlass backdrop-blur rounded-2xl shadow-md p-4 text-white">
+    <div className="bg-white/10 border border-white/20 backdrop-blur-xl rounded-2xl shadow-md p-4 text-white">
       <h3 className="font-bold mb-2">Budget mensuel</h3>
       <div className="text-sm mb-2">Cible : {cible.toFixed(0)} €</div>
       <div className="text-sm mb-2">Réel : {reel.toFixed(0)} €</div>

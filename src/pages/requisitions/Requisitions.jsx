@@ -125,7 +125,7 @@ export default function Requisitions() {
         <Button onClick={handleExportPDF}>Export PDF</Button>
         <Link to="/requisitions/nouvelle" className="btn">+ Nouvelle réquisition</Link>
       </div>
-      <div className="bg-glass border border-borderGlass backdrop-blur shadow rounded-xl overflow-x-auto">
+      <div className="bg-white/5 text-white border border-white/10 rounded-xl overflow-x-auto">
         <table className="min-w-full table-auto text-center">
           <thead>
             <tr>

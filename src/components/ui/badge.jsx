@@ -4,7 +4,7 @@
 export function Badge({ children, color = "gold", className = "", ariaLabel }) {
   const colorClasses = {
     gold: "bg-mamastock-gold text-white",
-    gray: "bg-white/20 text-white backdrop-blur",
+    gray: "bg-white/20 text-white backdrop-blur-xl",
     red: "bg-red-500 text-white",
     green: "bg-green-500 text-white",
     blue: "bg-blue-500 text-white",

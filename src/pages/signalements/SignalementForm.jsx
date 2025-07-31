@@ -4,6 +4,7 @@ import { useSignalements } from "@/hooks/useSignalements";
 import useAuth from "@/hooks/useAuth";
 import toast from "react-hot-toast";
 import GlassCard from "@/components/ui/GlassCard";
+import PrimaryButton from "@/components/ui/PrimaryButton";
 
 export default function SignalementForm({ onCreated }) {
   const { loading: authLoading } = useAuth();
@@ -62,13 +63,9 @@ export default function SignalementForm({ onCreated }) {
         <option value="en cours">En cours</option>
         <option value="résolu">Résolu</option>
       </select>
-      <button
-        type="submit"
-        disabled={authLoading || submitting}
-        className="w-full py-2 bg-white/30 text-white font-semibold rounded-md hover:bg-white/40 backdrop-blur focus:outline-none focus:ring-2 focus:ring-white/60 disabled:opacity-50"
-      >
+      <PrimaryButton type="submit" disabled={authLoading || submitting} className="w-full">
         Ajouter
-      </button>
+      </PrimaryButton>
       </form>
     </GlassCard>
   );

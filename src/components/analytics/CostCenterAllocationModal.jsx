@@ -80,7 +80,7 @@ export default function CostCenterAllocationModal({ mouvementId, produitId, open
         <h3 className="font-bold mb-4 text-lg">Ventilation centres de coûts</h3>
         <form onSubmit={handleSubmit} className="space-y-2">
           {suggestions.length > 0 && (
-            <div className="text-xs mb-2 p-2 bg-glass border border-borderGlass backdrop-blur rounded">
+            <div className="text-xs mb-2 p-2 bg-white/10 border border-white/20 backdrop-blur-xl rounded">
               Suggestions:
               <ul className="list-disc list-inside">
                 {suggestions.map(s => (

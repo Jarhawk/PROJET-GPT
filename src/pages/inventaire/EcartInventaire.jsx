@@ -166,7 +166,7 @@ function EcartInventairePage() {
 
       <TableContainer className="mt-4">
         <table className="w-full text-sm">
-          <thead className="bg-glass border-b border-borderGlass text-white">
+          <thead className="bg-white/10 border-b border-white/20 text-white">
             <tr>
               <th className="p-3 text-left">Date</th>
               <th className="p-3 text-left">Produit</th>

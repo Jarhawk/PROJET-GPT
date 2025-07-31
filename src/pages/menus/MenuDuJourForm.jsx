@@ -120,7 +120,7 @@ export default function MenuDuJourForm({ menu, fiches = [], onClose }) {
       </div>
       <div className="mb-4">
         <label className="block font-semibold mb-2">Fiches du menu :</label>
-        <div className="max-h-48 overflow-auto border border-borderGlass rounded p-2 bg-glass backdrop-blur">
+        <div className="max-h-48 overflow-auto border border-white/20 rounded p-2 bg-white/10 backdrop-blur-xl text-white">
           {fiches.map(f => (
             <label key={f.id} className="block">
               <input

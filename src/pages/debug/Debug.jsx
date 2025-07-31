@@ -28,7 +28,7 @@ export default function Debug() {
           </div>
           <div>
             <strong>Access Rights :</strong>
-            <pre className="bg-glass text-sm border border-borderGlass backdrop-blur rounded p-3 mt-2">
+            <pre className="bg-white/10 text-sm border border-white/20 backdrop-blur-xl rounded p-3 mt-2">
               {JSON.stringify(access_rights, null, 2)}
             </pre>
           </div>

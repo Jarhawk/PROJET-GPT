@@ -57,13 +57,13 @@ export default function Onboarding() {
         </Motion.div>
         <div className="flex justify-center gap-4">
           <button
-            className="px-5 py-2 rounded bg-mamastockGold text-mamastockBg hover:bg-mamastockGoldHover transition"
+            className="px-5 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition"
             onClick={handleNext}
           >
             {step < steps.length - 1 ? 'Suivant' : 'Terminer'}
           </button>
           <button
-            className="px-5 py-2 rounded bg-glass border border-borderGlass backdrop-blur hover:bg-white/20 transition"
+            className="px-5 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition"
             onClick={handleSkip}
           >
             Passer

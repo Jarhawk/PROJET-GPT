@@ -15,7 +15,7 @@ export default function NotFound() {
       <MouseLight />
       <TouchLight />
 
-      <div className="relative z-10 rounded-2xl shadow-2xl bg-glass border border-borderGlass backdrop-blur-xl px-12 py-16 text-center">
+      <div className="relative z-10 rounded-2xl shadow-2xl bg-white/10 backdrop-blur-xl border border-white/20 px-12 py-16 text-center">
         <h1 className="text-6xl font-bold text-mamastockGold mb-4 drop-shadow-md">404</h1>
         <p className="text-xl text-mamastockText mb-6">Page non trouvée</p>
         <Link

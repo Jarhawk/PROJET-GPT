@@ -28,7 +28,7 @@ export default function LandingPage() {
       <GlassCard className="w-full max-w-2xl p-8 space-y-8 text-center relative z-10">
         <PageIntro />
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link to="/login" className="px-6 py-3 rounded-xl bg-white/20 hover:bg-white/30 transition">
+          <Link to="/login" className="px-6 py-3 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition">
             Se connecter
           </Link>
           <Link to="/signup" className="px-6 py-3 rounded-xl bg-mamastockGold hover:bg-mamastockGoldHover text-mamastockBg transition">

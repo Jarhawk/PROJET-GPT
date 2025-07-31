@@ -20,7 +20,7 @@ export default function DocumentationPanel({ open, onOpenChange }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogOverlay className="fixed inset-0 bg-black/40" />
-      <DialogContent className="fixed right-0 top-0 bottom-0 w-96 bg-glass border border-borderGlass backdrop-blur p-4 overflow-y-auto">
+      <DialogContent className="fixed right-0 top-0 bottom-0 w-96 bg-white/10 border border-white/20 backdrop-blur-xl p-4 overflow-y-auto">
         <DialogTitle className="font-bold mb-2">Documentation</DialogTitle>
         <DialogDescription className="sr-only">
           Documentation interne

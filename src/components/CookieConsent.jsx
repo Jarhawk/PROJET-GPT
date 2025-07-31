@@ -1,5 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
+import Button from "@/components/ui/button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
 
 export default function CookieConsent() {
   const [visible, setVisible] = useState(false);
@@ -27,12 +29,12 @@ export default function CookieConsent() {
         Nous utilisons des cookies pour améliorer votre expérience et réaliser des statistiques d'utilisation.
       </p>
       <div className="flex gap-2">
-        <button onClick={decline} className="px-4 py-1 rounded bg-white/20 hover:bg-white/30">
+        <Button onClick={decline} className="w-auto px-4 py-2" aria-label="Refuser">
           Refuser
-        </button>
-        <button onClick={accept} className="px-4 py-1 rounded bg-mamastockGold text-black hover:bg-mamastockGoldHover">
+        </Button>
+        <PrimaryButton onClick={accept} className="w-auto px-4 py-2" aria-label="Accepter">
           Accepter
-        </button>
+        </PrimaryButton>
       </div>
     </div>
   );

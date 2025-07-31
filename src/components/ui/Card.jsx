@@ -10,6 +10,10 @@ export function Card({ title, children, className = '' }) {
   );
 }
 
+export function CardHeader({ children, className = '' }) {
+  return <div className={`p-4 pb-0 ${className}`}>{children}</div>;
+}
+
 export function CardContent({ children }) {
   return <div className="p-6">{children}</div>;
 }

@@ -1,7 +1,6 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import useAuth from "@/hooks/useAuth";
-import LoadingScreen from "@/components/ui/LoadingScreen";
+import PageSkeleton from "@/components/ui/PageSkeleton";
 
 // Ce composant protège une route selon les droits retournés par useAuth().
 // Il redirige vers /unauthorized si l'utilisateur n'a pas le droit de voir
@@ -9,48 +8,24 @@ import LoadingScreen from "@/components/ui/LoadingScreen";
 // ou l'absence de session affichent un écran de chargement pour éviter les
 // boucles d'effet.
 
-export default function ProtectedRoute({ children, accessKey }) {
-  const { session, userData, pending, loading, hasAccess, error } = useAuth();
-  const navigate = useNavigate();
+export default function ProtectedRoute({ moduleKey, children }) {
+  const { session, loading, userData } = useAuth();
 
-  useEffect(() => {
-    // On patiente tant que les données ne sont pas chargées
-    if (!session || pending || loading) return;
-
-    if (!userData) {
-      if (error === 'Utilisateur introuvable') {
-        navigate('/onboarding-utilisateur', { replace: true });
-      } else {
-        navigate('/unauthorized', { replace: true });
-      }
-      return;
-    }
-
-    if (userData.actif === false) {
-      navigate("/blocked", { replace: true });
-      return;
-    }
-
-
-    const noRights =
-      !userData.access_rights ||
-      (typeof userData.access_rights === "object" &&
-        Object.keys(userData.access_rights).length === 0);
-    if (noRights) {
-      navigate("/unauthorized", { replace: true });
-      return;
-    }
-
-    if (accessKey && !hasAccess(accessKey, "peut_voir")) {
-      navigate("/unauthorized", { replace: true });
-    }
-  }, [session, userData, pending, loading, accessKey, navigate, hasAccess, error]);
-
-  if (!session && !loading && !pending) {
-    navigate('/login', { replace: true });
-    return null;
+  if (loading || !session || !userData) {
+    return <PageSkeleton />;
   }
-  if (!session || pending || loading) return <LoadingScreen />;
-  if (!userData) return <LoadingScreen />;
+
+  if (userData.actif === false) {
+    return <Navigate to="/unauthorized" />;
+  }
+
+  const rights = userData.access_rights || {};
+  const hasAccess =
+    rights[moduleKey]?.peut_voir === true || rights[moduleKey] === true;
+
+  if (!hasAccess) {
+    return <Navigate to="/unauthorized" />;
+  }
+
   return children;
 }

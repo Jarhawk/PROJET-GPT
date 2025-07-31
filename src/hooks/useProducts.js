@@ -30,7 +30,7 @@ export function useProducts() {
     let query = supabase
       .from("produits")
       .select(
-        "*, famille:familles(nom), unite:unites(nom), fournisseur:fournisseurs!fournisseur_principal_id(id, nom)",
+        "*, famille:familles(nom), unite:unites(nom), fournisseur:fournisseurs!fournisseur_id(id, nom)",
         { count: "exact" }
       )
       .eq("mama_id", mama_id);
@@ -86,10 +86,10 @@ export function useProducts() {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { fournisseur_principal_id, ...rest } = product || {};
+    const { fournisseur_id, ...rest } = product || {};
     const payload = {
       ...rest,
-      fournisseur_principal_id: fournisseur_principal_id ?? null,
+      fournisseur_id: fournisseur_id ?? null,
       mama_id,
     };
     const { error } = await supabase.from("produits").insert([payload]);
@@ -105,10 +105,10 @@ export function useProducts() {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { fournisseur_principal_id, ...rest } = updateFields || {};
+    const { fournisseur_id, ...rest } = updateFields || {};
     const payload = { ...rest };
-    if (fournisseur_principal_id !== undefined) {
-      payload.fournisseur_principal_id = fournisseur_principal_id;
+    if (fournisseur_id !== undefined) {
+      payload.fournisseur_id = fournisseur_id;
     }
     const { error } = await supabase
       .from("produits")
@@ -129,7 +129,7 @@ export function useProducts() {
     const {
       famille_id,
       unite_id,
-      fournisseur_principal_id,
+      fournisseur_id,
       stock_reel,
       stock_min,
       actif,
@@ -140,7 +140,7 @@ export function useProducts() {
       nom: `${orig.nom} (copie)`,
       famille_id,
       unite_id,
-      fournisseur_principal_id,
+      fournisseur_id,
       stock_reel,
       stock_min,
       actif,
@@ -219,7 +219,7 @@ export function useProducts() {
       const { data, error } = await supabase
         .from("produits")
         .select(
-          "*, fournisseur:fournisseurs!fournisseur_principal_id(id, nom), famille:familles(nom), unite:unites(nom)"
+          "*, fournisseur:fournisseurs!fournisseur_id(id, nom), famille:familles(nom), unite:unites(nom)"
         )
         .eq("id", id)
         .eq("mama_id", mama_id)
@@ -248,7 +248,7 @@ export function useProducts() {
       stock_min: p.stock_min,
       dernier_prix: p.dernier_prix,
       fournisseur: p.fournisseur?.nom || "",
-      fournisseur_principal_id: p.fournisseur_principal_id || "",
+      fournisseur_id: p.fournisseur_id || "",
       actif: p.actif,
     }));
     const wb = XLSX.utils.book_new();

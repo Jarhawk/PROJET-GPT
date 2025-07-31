@@ -7,7 +7,9 @@ import { useFournisseurs } from "@/hooks/useFournisseurs";
 import ProduitFormModal from "@/components/produits/ProduitFormModal";
 import ProduitDetail from "@/components/produits/ProduitDetail";
 import { Button } from "@/components/ui/button";
+import GlassCard from "@/components/ui/GlassCard";
 import TableContainer from "@/components/ui/TableContainer";
+import { Plus } from "lucide-react";
 import { Toaster, toast } from "react-hot-toast";
 import useAuth from "@/hooks/useAuth";
 import ProduitRow from "@/components/produits/ProduitRow";
@@ -136,70 +138,86 @@ export default function Produits() {
   }, [refreshList]);
 
   return (
-    <div className="p-8 max-w-7xl mx-auto text-shadow">
+    <div className="p-8 max-w-7xl mx-auto text-shadow space-y-6">
       <Toaster />
       <h1 className="text-2xl font-bold mb-4">Produits stock</h1>
-      <div className="flex flex-wrap gap-2 mb-6 items-end">
-        <input
-          type="search"
-          value={search}
-          onChange={(e) => {
-            setPage(1);
-            setSearch(e.target.value);
-          }}
-          className="input"
-          placeholder="Recherche nom"
-        />
-        <select
-          className="input"
-          value={familleFilter}
-          onChange={(e) => {
-            setPage(1);
-            setFamilleFilter(e.target.value);
-          }}
-        >
-          <option value="">Toutes familles</option>
-          {familles.map((f) => (
-            <option key={f.id} value={f.id}>
-              {f.nom}
-            </option>
-          ))}
-        </select>
-        <select
-          className="input"
-          value={actifFilter}
-          onChange={(e) => {
-            setPage(1);
-            setActifFilter(e.target.value);
-          }}
-        >
-          <option value="all">Actif ou non</option>
-          <option value="true">Actif</option>
-          <option value="false">Inactif</option>
-        </select>
-        <Button
-          onClick={() => {
-            setShowForm(true);
-            setSelectedProduct(null);
-          }}
-        >
-          + Nouveau produit
-        </Button>
-        <Button onClick={exportProductsToExcel}>Export Excel</Button>
-        <Button onClick={() => fileRef.current.click()}>Import Excel</Button>
-        <input
-          type="file"
-          accept=".xlsx"
-          ref={fileRef}
-          onChange={handleImport}
-          data-testid="import-input"
-          className="hidden"
-        />
-      </div>
-      <TableContainer>
-        <table className="min-w-full table-auto text-center text-white">
-          <thead>
-            <tr>
+      <GlassCard>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => {
+              setPage(1);
+              setSearch(e.target.value);
+            }}
+            className="w-full max-w-[300px] px-3 py-2 rounded-md bg-white/10 text-white placeholder-white/70 backdrop-blur border border-white/30 focus:ring-white"
+            placeholder="Recherche nom"
+          />
+          <select
+            className="w-full max-w-[300px] px-3 py-2 rounded-md bg-white/10 text-white placeholder-white/70 backdrop-blur border border-white/30 focus:ring-white"
+            value={familleFilter}
+            onChange={(e) => {
+              setPage(1);
+              setFamilleFilter(e.target.value);
+            }}
+          >
+            <option value="">Toutes familles</option>
+            {familles.map((f) => (
+              <option key={f.id} value={f.id}>
+                {f.nom}
+              </option>
+            ))}
+          </select>
+          <select
+            className="w-full max-w-[300px] px-3 py-2 rounded-md bg-white/10 text-white placeholder-white/70 backdrop-blur border border-white/30 focus:ring-white"
+            value={actifFilter}
+            onChange={(e) => {
+              setPage(1);
+              setActifFilter(e.target.value);
+            }}
+          >
+            <option value="all">Actif ou non</option>
+            <option value="true">Actif</option>
+            <option value="false">Inactif</option>
+          </select>
+        </div>
+        <div className="flex flex-wrap gap-4 mt-4">
+          <Button
+            className="w-auto bg-white/20 text-white font-semibold px-4 py-2 rounded-md hover:bg-white/30 transition"
+            onClick={() => {
+              setShowForm(true);
+              setSelectedProduct(null);
+            }}
+          >
+            <Plus className="w-4 h-4 mr-2" /> Nouveau produit
+          </Button>
+          <Button
+            className="w-auto bg-white/20 text-white font-semibold px-4 py-2 rounded-md hover:bg-white/30 transition"
+            onClick={exportProductsToExcel}
+          >
+            Export Excel
+          </Button>
+          <Button
+            className="w-auto bg-white/20 text-white font-semibold px-4 py-2 rounded-md hover:bg-white/30 transition"
+            onClick={() => fileRef.current.click()}
+          >
+            Import Excel
+          </Button>
+          <input
+            type="file"
+            accept=".xlsx"
+            ref={fileRef}
+            onChange={handleImport}
+            data-testid="import-input"
+            className="hidden"
+          />
+        </div>
+      </GlassCard>
+      <GlassCard className="p-0">
+        <TableContainer className="p-0">
+          <table className="min-w-full table-auto text-center text-white">
+            <thead>
+              <tr>
               <th className="cursor-pointer" onClick={() => toggleSort("nom")}>
                 Nom{renderArrow("nom")}
               </th>
@@ -239,8 +257,8 @@ export default function Produits() {
           <tbody>
             {products.length === 0 ? (
               <tr>
-                <td colSpan={10} className="py-4 text-muted-foreground">
-                  Aucun produit trouvé
+                <td colSpan={10} className="py-4 text-center text-muted-foreground">
+                  Aucun produit trouvé. Essayez d’ajouter un produit via le bouton ci-dessus.
                 </td>
               </tr>
             ) : (
@@ -279,7 +297,8 @@ export default function Produits() {
             ),
           )}
         </div>
-      </TableContainer>
+        </TableContainer>
+      </GlassCard>
       {/* Modale création/édition */}
       <ProduitFormModal
         open={showForm}

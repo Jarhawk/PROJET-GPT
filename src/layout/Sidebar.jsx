@@ -2,7 +2,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { routePreloadMap } from "@/router";
 import useAuth from "@/hooks/useAuth";
-import toast from "react-hot-toast";
 import { Badge } from "@/components/ui/badge";
 import {
   Boxes,
@@ -39,7 +38,6 @@ export default function Sidebar() {
     userData,
     role,
     mama_id,
-    logout,
     session,
     hasAccess,
   } = useAuth();
@@ -213,22 +211,12 @@ export default function Sidebar() {
         })}
       </nav>
       {session && (
-        <div className="mt-6 border-t border-white/20 pt-4 text-sm flex flex-col gap-2">
-          <span>Bienvenue, {userData.nom || user?.email}</span>
+        <div className="mt-6 border-t border-white/20 pt-4 text-xs text-center text-white/60">
           {role ? (
             <Badge color="gray">{role}</Badge>
           ) : (
             <Badge color="red">[Rôle inconnu]</Badge>
           )}
-          <button
-            onClick={() => {
-              logout();
-              toast.success('Déconnexion réussie');
-            }}
-            className="text-left text-red-400 hover:underline"
-          >
-            Se déconnecter
-          </button>
         </div>
       )}
     </aside>

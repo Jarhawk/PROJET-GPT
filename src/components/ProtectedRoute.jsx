@@ -11,19 +11,17 @@ import PageSkeleton from "@/components/ui/PageSkeleton";
 export default function ProtectedRoute({ moduleKey, children }) {
   const { session, loading, userData } = useAuth();
 
-  if (loading || !session || !userData) {
+  // Wait for session and user data to be fully loaded
+  if (loading || !session || !userData || !userData.access_rights) {
     return <PageSkeleton />;
   }
 
-  if (userData.actif === false) {
-    return <Navigate to="/unauthorized" />;
-  }
+  const access = userData.access_rights || {};
+  const hasAccess = access[moduleKey]?.peut_voir === true;
 
-  const rights = userData.access_rights || {};
-  const hasAccess =
-    rights[moduleKey]?.peut_voir === true || rights[moduleKey] === true;
-
-  if (!hasAccess) {
+  if (!userData.actif || !hasAccess) {
+    console.warn("🔒 ACCESS DENIED for moduleKey:", moduleKey);
+    console.warn("🔒 access_rights:", access);
     return <Navigate to="/unauthorized" />;
   }
 

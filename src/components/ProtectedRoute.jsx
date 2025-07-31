@@ -4,7 +4,7 @@ import PageSkeleton from "@/components/ui/PageSkeleton";
 
 // Ce composant protège une route selon les droits retournés par useAuth().
 // Il redirige vers /unauthorized si l'utilisateur n'a pas le droit de voir
-// le module (accessKey) ou si aucun droit n'est défini. Les états de chargement
+// le module (moduleKey) ou si aucun droit n'est défini. Les états de chargement
 // ou l'absence de session affichent un écran de chargement pour éviter les
 // boucles d'effet.
 

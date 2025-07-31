@@ -120,8 +120,8 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
                 label="Famille"
                 value={familleId}
                 onChange={obj => setFamilleId(obj?.id || "")}
-                options={[...famillesHook, ...familles].map(f => ({ value: f.id, label: f.nom }))}
-                onAddOption={async val => {
+                options={[...famillesHook, ...familles].map(f => ({ id: f.id, nom: f.nom }))}
+                onAddNewValue={async val => {
                   const { data, error } = await addFamille(val);
                   if (error) toast.error(error.message || error);
                   else return { id: data.id, nom: data.nom };
@@ -135,8 +135,8 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
                 label="Unité"
                 value={uniteId}
                 onChange={obj => setUniteId(obj?.id || "")}
-                options={[...unitesHook, ...unites].map(u => ({ value: u.id, label: u.nom }))}
-                onAddOption={async val => {
+                options={[...unitesHook, ...unites].map(u => ({ id: u.id, nom: u.nom }))}
+                onAddNewValue={async val => {
                   const { data, error } = await addUnite(val);
                   if (error) toast.error(error.message || error);
                   else return { id: data.id, nom: data.nom };

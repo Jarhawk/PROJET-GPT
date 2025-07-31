@@ -6,7 +6,6 @@ export default function FamilleRow({ famille, onEdit, onDelete, onToggle }) {
     <tr>
       <td className="px-2 py-1">{famille.nom}</td>
       <td className="px-2 py-1">{famille.actif ? '🟢' : '🔴'}</td>
-      <td className="px-2 py-1">{new Date(famille.created_at).toLocaleDateString()}</td>
       <td className="px-2 py-1 flex gap-2 justify-center">
         <Button size="sm" variant="secondary" onClick={() => onEdit(famille)}>
           Modifier

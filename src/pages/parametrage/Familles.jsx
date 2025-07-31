@@ -66,7 +66,6 @@ export default function Familles() {
             <tr>
               <th className="px-2 py-1">Nom</th>
               <th className="px-2 py-1">Statut</th>
-              <th className="px-2 py-1">Créée le</th>
               <th className="px-2 py-1">Actions</th>
             </tr>
           </thead>
@@ -76,7 +75,7 @@ export default function Familles() {
             ))}
             {familles.length === 0 && (
               <tr>
-                <td colSpan="4" className="py-2">
+                <td colSpan="3" className="py-2">
                   Aucune famille
                 </td>
               </tr>

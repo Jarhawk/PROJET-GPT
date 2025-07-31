@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAchats } from "@/hooks/useAchats";
 import { useProduitsAutocomplete } from "@/hooks/useProduitsAutocomplete";
 import AutoCompleteField from "@/components/ui/AutoCompleteField";
@@ -17,16 +17,11 @@ export default function AchatForm({ achat, fournisseurs = [], onClose }) {
   const canEdit = hasAccess("achats", "peut_modifier");
   const [date_achat, setDateAchat] = useState(achat?.date_achat || "");
   const [produit_id, setProduitId] = useState(achat?.produit_id || "");
-  const [produitNom, setProduitNom] = useState("");
   const [fournisseur_id, setFournisseurId] = useState(achat?.fournisseur_id || "");
   const [quantite, setQuantite] = useState(achat?.quantite || 1);
   const [prix, setPrix] = useState(achat?.prix || 0);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => { if (achat?.produit_id && produitOptions.length) {
-    const p = produitOptions.find(p => p.id === achat.produit_id);
-    setProduitNom(p?.nom || "");
-  } }, [achat?.produit_id, produitOptions]);
 
   if (authLoading) return <LoadingSpinner message="Chargement..." />;
   if (!canEdit) return <Unauthorized />;
@@ -58,13 +53,12 @@ export default function AchatForm({ achat, fournisseurs = [], onClose }) {
           <input type="date" className="input" value={date_achat} onChange={e => setDateAchat(e.target.value)} required />
           <AutoCompleteField
             label=""
-            value={produitNom}
-            onChange={val => {
-              setProduitNom(val);
-              setProduitId(produitOptions.find(p => p.nom === val)?.id || "");
-              if (val.length >= 2) searchProduits(val);
+            value={produit_id}
+            onChange={obj => {
+              setProduitId(obj?.id || "");
+              if ((obj?.nom || "").length >= 2) searchProduits(obj.nom);
             }}
-            options={produitOptions.map(p => p.nom)}
+            options={produitOptions.map(p => ({ id: p.id, nom: p.nom }))}
           />
           <select className="input" value={fournisseur_id} onChange={e => setFournisseurId(e.target.value)} required>
             <option value="">Fournisseur</option>

@@ -8,44 +8,44 @@ export default function AutoCompleteField({
   value,
   onChange,
   options,
-  onAddOption,
+  onAddNewValue,
   required = false,
   disabledOptions = [],
 }) {
   const resolved = (options || []).map(opt =>
-    typeof opt === "string" ? { value: opt, label: opt } : opt
+    typeof opt === "string" ? { id: opt, nom: opt } : opt
   );
   const [inputValue, setInputValue] = useState(() => {
-    const match = resolved.find(o => o.value === value);
-    return match ? match.label : "";
+    const match = resolved.find(o => o.id === value);
+    return match ? match.nom : "";
   });
   const [showAdd, setShowAdd] = useState(false);
 
   useEffect(() => {
-    const match = resolved.find(o => o.value === value);
-    setInputValue(match ? match.label : "");
+    const match = resolved.find(o => o.id === value);
+    setInputValue(match ? match.nom : "");
   }, [value, resolved]);
 
   const disabledIds = disabledOptions.map(d =>
-    typeof d === "string" ? d : d.value
+    typeof d === "string" ? d : d.id
   );
 
   const isValid =
-    inputValue && resolved.some(o => o.label === inputValue && !disabledIds.includes(o.value));
-  const filtered = resolved.filter(o => !disabledIds.includes(o.value));
+    inputValue && resolved.some(o => o.nom === inputValue && !disabledIds.includes(o.id));
+  const filtered = resolved.filter(o => !disabledIds.includes(o.id));
 
   const handleInputChange = e => {
     const val = e.target.value;
     setInputValue(val);
-    const match = resolved.find(o => o.label === val);
-    if (match) onChange({ id: match.value, nom: match.label });
+    const match = resolved.find(o => o.nom === val);
+    if (match) onChange({ id: match.id, nom: match.nom });
     else onChange(val ? { id: null, nom: val } : { id: "", nom: "" });
     setShowAdd(val && !match);
   };
 
   const handleAddOption = async () => {
-    if (inputValue && onAddOption) {
-      const res = await onAddOption(inputValue);
+    if (inputValue && onAddNewValue) {
+      const res = await onAddNewValue(inputValue);
       if (res && res.id) {
         onChange({ id: res.id, nom: res.nom || inputValue });
         setInputValue(res.nom || inputValue);
@@ -57,8 +57,8 @@ export default function AutoCompleteField({
   };
 
   return (
-    <div className="flex flex-col gap-1 w-full">
-      <label className="text-sm text-black font-medium">
+    <div className="flex flex-col gap-2 w-full">
+      <label className="text-sm text-white font-medium">
         {label} {required && "*"}
       </label>
       <Input
@@ -73,7 +73,7 @@ export default function AutoCompleteField({
       />
       <datalist id={`list-${label}`}>
         {filtered.map((opt, idx) => (
-          <option key={idx} value={opt.label} />
+          <option key={idx} value={opt.nom} />
         ))}
       </datalist>
       {showAdd && (

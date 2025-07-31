@@ -6,7 +6,6 @@ export default function UniteRow({ unite, onEdit, onDelete, onToggle }) {
     <tr>
       <td className="px-2 py-1">{unite.nom}</td>
       <td className="px-2 py-1">{unite.actif ? '🟢' : '🔴'}</td>
-      <td className="px-2 py-1">{new Date(unite.created_at).toLocaleDateString()}</td>
       <td className="px-2 py-1 flex gap-2 justify-center">
         <Button size="sm" variant="secondary" onClick={() => onEdit(unite)}>
           Modifier

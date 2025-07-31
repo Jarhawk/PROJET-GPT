@@ -104,12 +104,12 @@ export default function CommandeForm({ commande, fournisseurs = [], onClose }) {
                   <td className="min-w-[150px]">
                     <AutoCompleteField
                       label=""
-                      value={l.produit_nom}
-                      onChange={val => {
-                        setLignes(ls => ls.map((it,i)=> i===idx ? { ...it, produit_nom: val, produit_id: produitOptions.find(p => p.nom === val)?.id || "" } : it));
-                        if (val.length >= 2) searchProduits(val);
+                      value={l.produit_id}
+                      onChange={obj => {
+                        setLignes(ls => ls.map((it,i)=> i===idx ? { ...it, produit_nom: obj?.nom || "", produit_id: obj?.id || "" } : it));
+                        if ((obj?.nom || "").length >= 2) searchProduits(obj.nom);
                       }}
-                      options={produitOptions.map(p => p.nom)}
+                      options={produitOptions.map(p => ({ id: p.id, nom: p.nom }))}
                     />
                   </td>
                   <td><input type="number" className="input" value={l.quantite} onChange={e => setLignes(ls => ls.map((it,i)=> i===idx ? { ...it, quantite: Number(e.target.value) } : it))} /></td>

@@ -88,18 +88,16 @@ export default function Mouvements() {
           onChange={e => setFilters(f => ({ ...f, fin: e.target.value }))}
         />
         <AutoCompleteZoneField
-          value={zones.find(z => z.id === filters.zone_source)?.nom || ''}
-          onChange={val => {
-            const found = zones.find(z => z.nom === val);
-            setFilters(f => ({ ...f, zone_source: found ? found.id : '' }));
+          value={filters.zone_source}
+          onChange={obj => {
+            setFilters(f => ({ ...f, zone_source: obj?.id || '' }));
           }}
           placeholder="Zone source"
         />
         <AutoCompleteZoneField
-          value={zones.find(z => z.id === filters.zone_destination)?.nom || ''}
-          onChange={val => {
-            const found = zones.find(z => z.nom === val);
-            setFilters(f => ({ ...f, zone_destination: found ? found.id : '' }));
+          value={filters.zone_destination}
+          onChange={obj => {
+            setFilters(f => ({ ...f, zone_destination: obj?.id || '' }));
           }}
           placeholder="Zone destination"
         />

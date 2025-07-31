@@ -13,7 +13,7 @@ import toast from "react-hot-toast";
 export default function MouvementForm({ onClose }) {
   const { createMouvement } = useMouvements();
   const { products, fetchProducts } = useProducts();
-  const { zones, fetchZones } = useZones();
+  const { fetchZones } = useZones();
   const [produitInput, setProduitInput] = useState("");
   const [form, setForm] = useState({
     type: "entrée",
@@ -96,20 +96,18 @@ export default function MouvementForm({ onClose }) {
         {form.type !== "entrée" && (
           <AutoCompleteZoneField
             placeholder="Zone source"
-            value={zones.find(z => z.id === form.zone_source_id)?.nom || ""}
-            onChange={val => {
-              const found = zones.find(z => z.nom === val);
-              setForm(f => ({ ...f, zone_source_id: found ? found.id : "" }));
+            value={form.zone_source_id}
+            onChange={obj => {
+              setForm(f => ({ ...f, zone_source_id: obj?.id || "" }));
             }}
           />
         )}
         {form.type !== "sortie" && form.type !== "correction" && (
           <AutoCompleteZoneField
             placeholder="Zone destination"
-            value={zones.find(z => z.id === form.zone_destination_id)?.nom || ""}
-            onChange={val => {
-              const found = zones.find(z => z.nom === val);
-              setForm(f => ({ ...f, zone_destination_id: found ? found.id : "" }));
+            value={form.zone_destination_id}
+            onChange={obj => {
+              setForm(f => ({ ...f, zone_destination_id: obj?.id || "" }));
             }}
           />
         )}

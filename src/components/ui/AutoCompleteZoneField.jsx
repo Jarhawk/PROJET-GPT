@@ -6,7 +6,7 @@ import { useZones } from '@/hooks/useZones';
 export default function AutoCompleteZoneField({ value, onChange, ...props }) {
   const { zones, fetchZones } = useZones();
   useEffect(() => { fetchZones(); }, [fetchZones]);
-  const options = zones.filter(z => z.actif).map(z => z.nom);
+  const options = zones.filter(z => z.actif).map(z => ({ id: z.id, nom: z.nom }));
   return (
     <AutoCompleteField
       {...props}

@@ -9,6 +9,8 @@ import ProduitDetail from "@/components/produits/ProduitDetail";
 import { Button } from "@/components/ui/button";
 import GlassCard from "@/components/ui/GlassCard";
 import TableContainer from "@/components/ui/TableContainer";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { Plus } from "lucide-react";
 import { Toaster, toast } from "react-hot-toast";
 import useAuth from "@/hooks/useAuth";
@@ -143,23 +145,25 @@ export default function Produits() {
       <h1 className="text-2xl font-bold mb-4">Produits stock</h1>
       <GlassCard>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <input
+          <Input
             type="search"
             value={search}
             onChange={(e) => {
               setPage(1);
               setSearch(e.target.value);
             }}
-            className="w-full max-w-[300px] px-3 py-2 rounded-md bg-white/10 text-white placeholder-white/70 backdrop-blur border border-white/30 focus:ring-white"
+            className="max-w-[300px]"
             placeholder="Recherche nom"
+            ariaLabel="Recherche nom"
           />
-          <select
-            className="w-full max-w-[300px] px-3 py-2 rounded-md bg-white/10 text-white placeholder-white/70 backdrop-blur border border-white/30 focus:ring-white"
+          <Select
+            className="max-w-[300px]"
             value={familleFilter}
             onChange={(e) => {
               setPage(1);
               setFamilleFilter(e.target.value);
             }}
+            ariaLabel="Filtrer par famille"
           >
             <option value="">Toutes familles</option>
             {familles.map((f) => (
@@ -167,19 +171,20 @@ export default function Produits() {
                 {f.nom}
               </option>
             ))}
-          </select>
-          <select
-            className="w-full max-w-[300px] px-3 py-2 rounded-md bg-white/10 text-white placeholder-white/70 backdrop-blur border border-white/30 focus:ring-white"
+          </Select>
+          <Select
+            className="max-w-[300px]"
             value={actifFilter}
             onChange={(e) => {
               setPage(1);
               setActifFilter(e.target.value);
             }}
+            ariaLabel="Filtrer par statut"
           >
             <option value="all">Actif ou non</option>
             <option value="true">Actif</option>
             <option value="false">Inactif</option>
-          </select>
+          </Select>
         </div>
         <div className="flex flex-wrap gap-4 mt-4">
           <Button

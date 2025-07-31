@@ -62,7 +62,7 @@ export function useUnites() {
     const { data, error } = await supabase
       .from("unites")
       .insert([{ nom, mama_id }])
-      .select()
+      .select("id, nom")
       .single();
     setLoading(false);
     if (error) {

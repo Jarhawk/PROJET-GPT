@@ -141,7 +141,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
       />
       {errors.unite && <p className="text-red-500 text-sm">{errors.unite}</p>}
       <div>
-        <label className="block text-sm mb-1 font-medium" htmlFor="prod-fournisseur">Fournisseur principal</label>
+        <label className="block text-sm mb-1 font-medium" htmlFor="prod-fournisseur">Fournisseur</label>
         <Select
           id="prod-fournisseur"
           value={fournisseurId}

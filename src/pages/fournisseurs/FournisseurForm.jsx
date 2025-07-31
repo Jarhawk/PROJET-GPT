@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import { Input } from "@/components/ui/input";
+import GlassCard from "@/components/ui/GlassCard";
 import toast from "react-hot-toast";
 
 export default function FournisseurForm({ fournisseur = {}, onSubmit, onCancel, saving }) {
@@ -43,11 +44,12 @@ export default function FournisseurForm({ fournisseur = {}, onSubmit, onCancel, 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <GlassCard title={fournisseur.id ? "Modifier le fournisseur" : "Nouveau fournisseur"}>
+      <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label className="block font-semibold mb-1">Nom *</label>
         <Input
-          className="input input-bordered w-full"
+          className="w-full"
           value={nom}
           onChange={e => setNom(e.target.value)}
         />
@@ -57,7 +59,7 @@ export default function FournisseurForm({ fournisseur = {}, onSubmit, onCancel, 
         <label className="block font-semibold mb-1">Téléphone</label>
         <Input
           type="tel"
-          className="input input-bordered w-full"
+          className="w-full"
           value={tel}
           onChange={e => setTel(e.target.value)}
         />
@@ -65,7 +67,7 @@ export default function FournisseurForm({ fournisseur = {}, onSubmit, onCancel, 
       <div>
         <label className="block font-semibold mb-1">Contact</label>
         <Input
-          className="input input-bordered w-full"
+          className="w-full"
           value={contact}
           onChange={e => setContact(e.target.value)}
         />
@@ -74,7 +76,7 @@ export default function FournisseurForm({ fournisseur = {}, onSubmit, onCancel, 
         <label className="block font-semibold mb-1">Email</label>
         <Input
           type="email"
-          className="input input-bordered w-full"
+          className="w-full"
           value={email}
           onChange={e => setEmail(e.target.value)}
         />
@@ -90,6 +92,7 @@ export default function FournisseurForm({ fournisseur = {}, onSubmit, onCancel, 
         </PrimaryButton>
         <SecondaryButton type="button" disabled={saving} onClick={onCancel}>Annuler</SecondaryButton>
       </div>
-    </form>
+      </form>
+    </GlassCard>
   );
 }

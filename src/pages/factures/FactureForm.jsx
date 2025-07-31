@@ -111,11 +111,8 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
   };
 
   return (
-    <GlassCard className="p-6">
+    <GlassCard className="p-6" title={facture ? "Modifier la facture" : "Ajouter une facture"}>
       <form onSubmit={handleSubmit} className="space-y-2">
-        <h2 className="text-lg font-bold mb-4">
-          {facture ? "Modifier la facture" : "Ajouter une facture"}
-        </h2>
       <label className="block text-sm mb-1">Date *</label>
       <Input
         type="date"
@@ -184,13 +181,46 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
                 />
               </td>
               <td>
-                <input type="number" className="input" value={l.quantite} onChange={e => setLignes(ls => ls.map((it,i)=> i===idx ? { ...it, quantite: Number(e.target.value) } : it))} />
+                <Input
+                  type="number"
+                  className="w-full"
+                  value={l.quantite}
+                  onChange={e =>
+                    setLignes(ls =>
+                      ls.map((it, i) =>
+                        i === idx ? { ...it, quantite: Number(e.target.value) } : it
+                      )
+                    )
+                  }
+                />
               </td>
               <td>
-                <input type="number" className="input" value={l.prix_unitaire} onChange={e => setLignes(ls => ls.map((it,i)=> i===idx ? { ...it, prix_unitaire: Number(e.target.value) } : it))} />
+                <Input
+                  type="number"
+                  className="w-full"
+                  value={l.prix_unitaire}
+                  onChange={e =>
+                    setLignes(ls =>
+                      ls.map((it, i) =>
+                        i === idx ? { ...it, prix_unitaire: Number(e.target.value) } : it
+                      )
+                    )
+                  }
+                />
               </td>
               <td>
-                <input type="number" className="input" value={l.tva} onChange={e => setLignes(ls => ls.map((it,i)=> i===idx ? { ...it, tva: Number(e.target.value) } : it))} />
+                <Input
+                  type="number"
+                  className="w-full"
+                  value={l.tva}
+                  onChange={e =>
+                    setLignes(ls =>
+                      ls.map((it, i) =>
+                        i === idx ? { ...it, tva: Number(e.target.value) } : it
+                      )
+                    )
+                  }
+                />
               </td>
               <td>
                 <Button type="button" size="sm" variant="outline" onClick={() => setLignes(ls => ls.filter((_,i)=>i!==idx))}>X</Button>
@@ -210,8 +240,8 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
       >
         Ajouter ligne
       </Button>
-      <select
-        className="input mb-2"
+      <Select
+        className="mb-2"
         value={statut}
         onChange={e => setStatut(e.target.value)}
       >
@@ -222,7 +252,7 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
         <option value="refusée">Refusée</option>
         <option value="annulée">Annulée</option>
         <option value="archivée">Archivée</option>
-      </select>
+      </Select>
       <label className="block text-sm mb-1">Justificatif PDF</label>
       <div className="flex items-center gap-2">
         <Input

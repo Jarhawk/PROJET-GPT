@@ -10,7 +10,7 @@ export default function InputField({
 }) {
   return (
     <div className={`mb-4 ${className}`}>
-      <label className="block text-sm text-gray-800 dark:text-white mb-1">{label}</label>
+      <label className="block text-sm text-white/90 mb-1">{label}</label>
       <input
         value={value}
         onChange={onChange}

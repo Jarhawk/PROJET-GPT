@@ -20,7 +20,7 @@ export default function ExportManager({ open, onClose, onExport }) {
       <div className="mb-2">
         <label className="block text-sm mb-1">Format</label>
         <select
-          className="input input-bordered w-full"
+          className="input w-full"
           value={format}
           onChange={(e) => setFormat(e.target.value)}
         >
@@ -33,7 +33,7 @@ export default function ExportManager({ open, onClose, onExport }) {
       <div className="mb-2">
         <label className="block text-sm mb-1">Données</label>
         <select
-          className="input input-bordered w-full"
+          className="input w-full"
           value={type}
           onChange={(e) => setType(e.target.value)}
         >
@@ -47,13 +47,13 @@ export default function ExportManager({ open, onClose, onExport }) {
         <div className="flex gap-2 mb-2">
           <input
             type="date"
-            className="input input-bordered w-full"
+            className="input w-full"
             value={start}
             onChange={(e) => setStart(e.target.value)}
           />
           <input
             type="date"
-            className="input input-bordered w-full"
+            className="input w-full"
             value={end}
             onChange={(e) => setEnd(e.target.value)}
           />

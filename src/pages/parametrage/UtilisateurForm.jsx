@@ -10,6 +10,7 @@ import { Select } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
+import GlassCard from "@/components/ui/GlassCard";
 import toast from "react-hot-toast";
 import { MODULES } from "@/config/modules";
 
@@ -70,13 +71,8 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-glass border border-borderGlass backdrop-blur p-6 rounded-2xl shadow-lg max-w-xl mx-auto"
-    >
-      <h2 className="text-lg font-bold mb-4">
-        {utilisateur ? "Modifier l’utilisateur" : "Ajouter un utilisateur"}
-      </h2>
+    <GlassCard title={utilisateur ? "Modifier l’utilisateur" : "Ajouter un utilisateur"}>
+      <form onSubmit={handleSubmit} className="space-y-2">
       <Label htmlFor="nom">Nom</Label>
       <Input
         id="nom"
@@ -138,10 +134,11 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
         onChange={e => setRightsText(e.target.value)}
         rows={MODULES.length / 2}
       />
-      <div className="flex gap-2 mt-4">
-        <PrimaryButton type="submit" disabled={loading}>{utilisateur ? "Modifier" : "Ajouter"}</PrimaryButton>
-        <SecondaryButton type="button" onClick={onClose}>Annuler</SecondaryButton>
-      </div>
-    </form>
+        <div className="flex gap-2 mt-4">
+          <PrimaryButton type="submit" disabled={loading}>{utilisateur ? "Modifier" : "Ajouter"}</PrimaryButton>
+          <SecondaryButton type="button" onClick={onClose}>Annuler</SecondaryButton>
+        </div>
+      </form>
+    </GlassCard>
   );
 }

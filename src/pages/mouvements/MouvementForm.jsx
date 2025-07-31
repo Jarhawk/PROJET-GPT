@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import { Input } from "@/components/ui/input";
+import GlassCard from "@/components/ui/GlassCard";
 import { useMouvements } from "@/hooks/useMouvements";
 import { useProducts } from "@/hooks/useProducts";
 import { useZones } from "@/hooks/useZones";
@@ -58,11 +59,8 @@ export default function MouvementForm({ onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60]">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-glass border border-borderGlass backdrop-blur p-6 rounded-2xl shadow-lg w-80"
-      >
-        <h2 className="font-bold mb-2">Nouveau mouvement</h2>
+      <GlassCard title="Nouveau mouvement" className="w-80">
+        <form onSubmit={handleSubmit} className="space-y-2">
         <select
           className="input mb-2 w-full"
           value={form.type}
@@ -129,7 +127,8 @@ export default function MouvementForm({ onClose }) {
             Annuler
           </SecondaryButton>
         </div>
-      </form>
+        </form>
+      </GlassCard>
     </div>
   );
 }

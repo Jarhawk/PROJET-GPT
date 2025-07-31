@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import PrimaryButton from '@/components/ui/PrimaryButton';
 import SecondaryButton from '@/components/ui/SecondaryButton';
 import { Input } from '@/components/ui/input';
+import GlassCard from '@/components/ui/GlassCard';
 
 export default function ZoneForm({ zone, onSave, onCancel }) {
   const [nom, setNom] = useState(zone?.nom || '');
@@ -21,7 +22,8 @@ export default function ZoneForm({ zone, onSave, onCancel }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3 p-4">
+    <GlassCard title={zone ? "Modifier la zone" : "Nouvelle zone"}>
+      <form onSubmit={handleSubmit} className="space-y-3">
       <div>
         <label className="block text-sm mb-1 font-medium" htmlFor="zone-nom">Nom</label>
         <Input
@@ -47,6 +49,7 @@ export default function ZoneForm({ zone, onSave, onCancel }) {
         <PrimaryButton type="submit" className="flex items-center gap-2">Enregistrer</PrimaryButton>
         <SecondaryButton type="button" onClick={onCancel}>Annuler</SecondaryButton>
       </div>
-    </form>
+      </form>
+    </GlassCard>
   );
 }

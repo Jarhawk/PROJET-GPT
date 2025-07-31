@@ -2,7 +2,7 @@
 export default function PrimaryButton({ children, className = '', ...props }) {
   return (
     <button
-      className={`bg-mamastockGold hover:bg-mamastockGoldHover text-black font-semibold rounded-xl px-4 py-2 shadow transition ${className}`}
+      className={`w-full py-2 bg-white/30 text-white font-semibold rounded-md hover:bg-white/40 backdrop-blur focus:outline-none focus:ring-2 focus:ring-white/60 ${className}`}
       {...props}
     >
       {children}

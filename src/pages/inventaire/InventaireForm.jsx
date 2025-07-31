@@ -9,6 +9,7 @@ import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import { Input } from "@/components/ui/input";
 import TableContainer from "@/components/ui/TableContainer";
+import GlassCard from "@/components/ui/GlassCard";
 import toast from "react-hot-toast";
 import useAuth from "@/hooks/useAuth";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
@@ -97,8 +98,8 @@ export default function InventaireForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-6 max-w-5xl mx-auto space-y-4">
-      <h1 className="text-xl font-bold">Nouvel inventaire</h1>
+    <GlassCard title="Nouvel inventaire" className="max-w-5xl mx-auto">
+      <form onSubmit={handleSubmit} className="space-y-4">
 
       <div className="flex gap-4">
         <input type="date" className="input" value={date} onChange={e => setDate(e.target.value)} />
@@ -210,6 +211,7 @@ export default function InventaireForm() {
         </PrimaryButton>
         <SecondaryButton type="button" onClick={() => navigate(-1)} disabled={loading}>Annuler</SecondaryButton>
       </div>
-    </form>
+      </form>
+    </GlassCard>
   );
 }

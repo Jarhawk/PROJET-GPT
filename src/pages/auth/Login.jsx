@@ -104,17 +104,16 @@ export default function Login() {
       {userData && !rightsLoaded && (
         <div className="text-red-500 text-center mb-2 text-sm">Droits utilisateur incomplets. Rechargez la page ou contactez le support.</div>
       )}
-      <GlassCard className="flex flex-col items-center">
+      <GlassCard title="Connexion" className="flex flex-col items-center">
         <div className="mb-6">
           <MamaLogo width={96} />
         </div>
-        <h2 className="text-3xl font-bold text-gold text-shadow mb-1 text-center">Connexion</h2>
         <p className="text-xs text-white/70 text-center mb-6">Plateforme F&B<br />by MamaStock</p>
         <form onSubmit={handleLogin} className="w-full flex flex-col gap-4">
             <div>
               <label className="block text-xs font-semibold text-white/90 mb-1">Email</label>
               <input
-                className="w-full rounded-xl border border-gold/30 bg-white/70 dark:bg-[#202638]/50 py-2 px-4 text-background dark:text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-gold/30 backdrop-blur transition"
+                className="w-full px-4 py-2 bg-white/20 text-white placeholder-white/70 rounded-md border border-white/30 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50"
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
@@ -130,7 +129,7 @@ export default function Login() {
             <div>
               <label className="block text-xs font-semibold text-white/90 mb-1">Mot de passe</label>
               <input
-                className="w-full rounded-xl border border-gold/30 bg-white/70 dark:bg-[#202638]/50 py-2 px-4 text-background dark:text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-gold/30 backdrop-blur transition"
+                className="w-full px-4 py-2 bg-white/20 text-white placeholder-white/70 rounded-md border border-white/30 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50"
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
@@ -144,7 +143,7 @@ export default function Login() {
             </div>
             <PrimaryButton
               type="submit"
-              className="w-full mt-3 flex items-center justify-center gap-2 disabled:opacity-50"
+              className="mt-3 flex items-center justify-center gap-2 disabled:opacity-50"
               disabled={!email || !password || loading}
             >
               {loading ? (

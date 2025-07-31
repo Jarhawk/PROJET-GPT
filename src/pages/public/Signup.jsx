@@ -37,11 +37,10 @@ export default function Signup() {
 
   return (
     <PageWrapper>
-      <GlassCard className="space-y-4">
+      <GlassCard title="Créer un compte" className="space-y-4">
         <form onSubmit={handleSignup} className="space-y-4">
         <div className="text-center">
           <MamaLogo width={80} className="mx-auto mb-4" />
-          <h1 className="text-xl font-bold text-white">Créer un compte</h1>
         </div>
         <div>
           <Label htmlFor="signup-email" className="text-white mb-1">Email</Label>

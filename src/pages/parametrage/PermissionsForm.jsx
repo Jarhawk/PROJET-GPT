@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
+import GlassCard from "@/components/ui/GlassCard";
 import toast, { Toaster } from "react-hot-toast";
 import useAuth from "@/hooks/useAuth";
 import { MODULES as MODULE_LIST } from "@/config/modules";
@@ -87,11 +88,8 @@ export default function PermissionsForm({ role, onClose, onSaved }) {
   };
 
   return (
-    <div className="w-full">
+    <GlassCard title={`Permissions pour : ${role.nom}`}>
       <Toaster />
-      <h2 className="font-bold mb-4 text-lg">
-        Permissions pour : <span className="text-mamastock-gold">{role.nom}</span>
-      </h2>
       <div className="overflow-x-auto mb-4">
         <table className="min-w-full table-auto text-center">
           <thead>
@@ -129,6 +127,6 @@ export default function PermissionsForm({ role, onClose, onSaved }) {
           Fermer
         </Button>
       </div>
-    </div>
+    </GlassCard>
   );
 }

@@ -59,8 +59,7 @@ export default function CommandeForm({ commande, fournisseurs = [], onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-      <GlassCard className="p-6 min-w-[400px] space-y-2">
-        <h2 className="text-lg font-bold mb-2">{commande ? "Modifier" : "Nouvelle"} commande</h2>
+      <GlassCard title={commande ? "Modifier commande" : "Nouvelle commande"} className="p-6 min-w-[400px] space-y-2">
         <form onSubmit={handleSubmit} className="space-y-2">
           <label className="block text-sm mb-1">Date de commande *</label>
           <Input

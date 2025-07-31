@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useInventaires } from "@/hooks/useInventaires";
 import { useProducts } from "@/hooks/useProducts";
 import { Button } from "@/components/ui/button";
+import GlassCard from "@/components/ui/GlassCard";
 import toast from "react-hot-toast";
 import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
 
@@ -134,13 +135,8 @@ export default function InventaireForm({ inventaire, onClose }) {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-glass border border-borderGlass backdrop-blur p-6 rounded-2xl shadow-lg max-w-2xl mx-auto"
-    >
-      <h2 className="text-lg font-bold mb-4">
-        {inventaire ? "Modifier l’inventaire" : "Ajouter un inventaire"}
-      </h2>
+    <GlassCard title={inventaire ? "Modifier l’inventaire" : "Ajouter un inventaire"}>
+      <form onSubmit={handleSubmit} className="space-y-2">
       <input
         className="input mb-2"
           value={reference}
@@ -255,10 +251,11 @@ export default function InventaireForm({ inventaire, onClose }) {
           {inventaire ? "Modifier" : "Ajouter"}
         </Button>
         <Button variant="outline" type="button" onClick={onClose}>Annuler</Button>
-        {inventaire && !inventaire.cloture &&
+        {inventaire && !inventaire.cloture && (
           <Button type="button" variant="destructive" onClick={handleCloture}>Clôturer</Button>
-        }
+        )}
       </div>
-    </form>
+      </form>
+    </GlassCard>
   );
 }

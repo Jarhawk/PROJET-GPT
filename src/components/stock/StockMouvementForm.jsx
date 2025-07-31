@@ -5,6 +5,7 @@ import { useZones } from "@/hooks/useZones";
 import { Button } from "@/components/ui/button";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
+import GlassCard from "@/components/ui/GlassCard";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import toast from "react-hot-toast";
@@ -53,11 +54,8 @@ export default function StockMouvementForm({ produit, onClose }) {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-glass border border-borderGlass backdrop-blur p-6 rounded-2xl shadow-lg max-w-md mx-auto"
-    >
-      <h2 className="text-lg font-bold mb-4">Mouvement de stock</h2>
+    <GlassCard title="Mouvement de stock">
+      <form onSubmit={handleSubmit} className="space-y-2">
       <div className="mb-2">Produit : <b>{produit?.nom}</b></div>
       <Select
         value={type}
@@ -139,6 +137,7 @@ export default function StockMouvementForm({ produit, onClose }) {
         </PrimaryButton>
         <SecondaryButton type="button" onClick={onClose} disabled={loading}>Annuler</SecondaryButton>
       </div>
-    </form>
+      </form>
+    </GlassCard>
   );
 }

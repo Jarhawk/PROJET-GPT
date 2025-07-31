@@ -161,6 +161,8 @@ export default function Sidebar() {
         { module: "parametrage", to: "/parametrage/api-fournisseurs", label: "API Fournisseurs", icon: <Plug size={16} /> },
         { module: "settings", to: "/parametrage/settings", label: "Autres", icon: <Settings size={16} /> },
         { module: "zones_stock", to: "/parametrage/zones-stock", label: "Zones de stock", icon: <Boxes size={16} /> },
+        { module: "parametrage", to: "/parametrage/familles", label: "Familles", icon: <Boxes size={16} /> },
+        { module: "parametrage", to: "/parametrage/unites", label: "Unités", icon: <Boxes size={16} /> },
         { module: "licences", to: "/parametrage/licences", label: "Licences", icon: <Key size={16} /> },
         { module: "parametrage", to: "/consentements", label: "Consentements", icon: <CheckSquare size={16} /> },
       ],

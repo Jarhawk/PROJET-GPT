@@ -58,6 +58,8 @@ const AccessRights = lazyWithPreload(() => import("@/pages/parametrage/AccessRig
 const APIKeys = lazyWithPreload(() => import("@/pages/parametrage/APIKeys.jsx"));
 const MamaSettingsForm = lazyWithPreload(() => import("@/pages/parametrage/MamaSettingsForm.jsx"));
 const Zones = lazyWithPreload(() => import("@/pages/parametrage/Zones.jsx"));
+const Familles = lazyWithPreload(() => import("@/pages/parametrage/Familles.jsx"));
+const Unites = lazyWithPreload(() => import("@/pages/parametrage/Unites.jsx"));
 const Onboarding = lazyWithPreload(() => import("@/pages/public/Onboarding.jsx"));
 const Accueil = lazyWithPreload(() => import("@/pages/Accueil.jsx"));
 const Signup = lazyWithPreload(() => import("@/pages/public/Signup.jsx"));
@@ -146,6 +148,8 @@ export const routePreloadMap = {
   '/parametrage/api-fournisseurs': ApiFournisseurs.preload,
   '/parametrage/settings': MamaSettingsForm.preload,
   '/parametrage/zones-stock': Zones.preload,
+  '/parametrage/familles': Familles.preload,
+  '/parametrage/unites': Unites.preload,
   '/consentements': Consentements.preload,
   '/audit': AuditTrail.preload,
   '/logs': Logs.preload,
@@ -464,6 +468,14 @@ export default function Router() {
           <Route
             path="/parametrage/zones-stock"
             element={<ProtectedRoute moduleKey="zones_stock"><Zones /></ProtectedRoute>}
+          />
+          <Route
+            path="/parametrage/familles"
+            element={<ProtectedRoute moduleKey="parametrage"><Familles /></ProtectedRoute>}
+          />
+          <Route
+            path="/parametrage/unites"
+            element={<ProtectedRoute moduleKey="parametrage"><Unites /></ProtectedRoute>}
           />
           <Route
             path="/parametrage/access"

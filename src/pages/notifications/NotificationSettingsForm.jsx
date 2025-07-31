@@ -5,6 +5,7 @@ import { Toaster, toast } from "react-hot-toast";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { Input } from "@/components/ui/input";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import GlassCard from "@/components/ui/GlassCard";
 
 export default function NotificationSettingsForm() {
   const { fetchPreferences, updatePreferences } = useNotifications();
@@ -42,10 +43,9 @@ export default function NotificationSettingsForm() {
   if (loading) return <LoadingSpinner message="Chargement..." />;
 
   return (
-    <div className="p-6 text-sm">
+    <GlassCard title="Paramètres notifications" className="p-6 text-sm max-w-md">
       <Toaster position="top-right" />
-      <h1 className="text-2xl font-bold mb-4">Paramètres notifications</h1>
-      <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <label className="block">
           <input
             type="checkbox"
@@ -92,6 +92,6 @@ export default function NotificationSettingsForm() {
           {saving ? "Enregistrement…" : "Enregistrer"}
         </PrimaryButton>
       </form>
-    </div>
+    </GlassCard>
   );
 }

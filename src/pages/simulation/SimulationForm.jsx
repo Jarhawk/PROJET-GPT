@@ -3,6 +3,10 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import useAuth from "@/hooks/useAuth";
 import toast from "react-hot-toast";
+import GlassCard from "@/components/ui/GlassCard";
+import { Select } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import PrimaryButton from "@/components/ui/PrimaryButton";
 
 export default function SimulationForm({ addRecipe, setPrix }) {
   const { mama_id, loading: authLoading } = useAuth();
@@ -33,16 +37,27 @@ export default function SimulationForm({ addRecipe, setPrix }) {
   };
 
   return (
-    <div className="flex flex-col gap-2 max-w-md">
-      <select value={selectedId} onChange={(e) => setSelectedId(e.target.value)} className="border px-2 py-1">
+    <GlassCard title="Ajouter une fiche" width="max-w-md">
+      <Select value={selectedId} onChange={(e) => setSelectedId(e.target.value)}>
         <option value="">Sélectionner une fiche</option>
-        {recipes.map(r => <option key={r.id} value={r.id}>{r.nom}</option>)}
-      </select>
-      <input type="number" value={prix} onChange={(e) => {
-        setPrixLocal(e.target.value);
-        setPrix(selectedId, parseFloat(e.target.value));
-      }} placeholder="Prix de vente TTC (€)" className="border px-2 py-1" />
-      <button onClick={handleAdd} className="bg-blue-600 text-white px-3 py-1 rounded">Ajouter</button>
-    </div>
+        {recipes.map((r) => (
+          <option key={r.id} value={r.id}>
+            {r.nom}
+          </option>
+        ))}
+      </Select>
+      <Input
+        type="number"
+        value={prix}
+        onChange={(e) => {
+          setPrixLocal(e.target.value);
+          setPrix(selectedId, parseFloat(e.target.value));
+        }}
+        placeholder="Prix de vente TTC (€)"
+      />
+      <PrimaryButton type="button" onClick={handleAdd}>
+        Ajouter
+      </PrimaryButton>
+    </GlassCard>
   );
 }

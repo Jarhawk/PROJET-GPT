@@ -26,7 +26,7 @@ export default function DocumentationPanel({ open, onOpenChange }) {
           Documentation interne
         </DialogDescription>
         <input
-          className="input input-bordered w-full mb-4"
+          className="input w-full mb-4"
           placeholder="Recherche..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}

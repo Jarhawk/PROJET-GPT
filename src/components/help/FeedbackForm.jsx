@@ -2,9 +2,11 @@
 import { useState } from "react";
 import ModalGlass from "@/components/ui/ModalGlass";
 import { useFeedback } from "@/hooks/useFeedback";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import GlassCard from "@/components/ui/GlassCard";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import SecondaryButton from "@/components/ui/SecondaryButton";
 import { toast } from "react-hot-toast";
 
 export default function FeedbackForm({ open, onOpenChange }) {
@@ -34,7 +36,7 @@ export default function FeedbackForm({ open, onOpenChange }) {
 
   return (
     <ModalGlass open={open} onClose={() => onOpenChange(false)}>
-        <h3 className="text-lg font-semibold mb-4">Besoin d'aide ?</h3>
+      <GlassCard title="Besoin d'aide ?">
         <form onSubmit={handleSubmit} className="space-y-2">
           <label className="sr-only" htmlFor="module">Module</label>
           <Input
@@ -47,7 +49,7 @@ export default function FeedbackForm({ open, onOpenChange }) {
           <label className="sr-only" htmlFor="message">Message</label>
           <textarea
             id="message"
-            className="w-full p-2 rounded-lg border border-white/20 bg-white/10 dark:bg-[#202638]/50 backdrop-blur text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-white/70 focus:outline-none h-24"
+            className="w-full px-4 py-2 bg-white/20 text-white placeholder-white/70 rounded-md border border-white/30 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50 h-24"
             placeholder="Votre message"
             value={message}
             onChange={e => setMessage(e.target.value)}
@@ -64,18 +66,15 @@ export default function FeedbackForm({ open, onOpenChange }) {
             <option value="elevee">Élevée</option>
           </Select>
           <div className="flex gap-2 pt-2">
-            <Button type="submit" disabled={sending} className="flex items-center gap-2">
+            <PrimaryButton type="submit" disabled={sending} className="flex items-center gap-2">
               {sending && <span className="loader-glass" />}Envoyer
-            </Button>
-            <Button
-              type="button"
-              onClick={() => onOpenChange(false)}
-              className="bg-transparent border border-white"
-            >
+            </PrimaryButton>
+            <SecondaryButton type="button" onClick={() => onOpenChange(false)}>
               Annuler
-            </Button>
+            </SecondaryButton>
           </div>
         </form>
+      </GlassCard>
     </ModalGlass>
   );
 }

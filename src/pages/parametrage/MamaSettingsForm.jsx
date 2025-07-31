@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { Input } from "@/components/ui/input";
+import GlassCard from "@/components/ui/GlassCard";
 import useMamaSettings from "@/hooks/useMamaSettings";
 import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
 import useAuth from "@/hooks/useAuth";
@@ -56,7 +57,8 @@ export default function MamaSettingsForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4">
+    <GlassCard title="Paramètres établissement">
+      <form onSubmit={handleSubmit} className="space-y-4">
       <Toaster position="top-right" />
       <div>
         <label className="block text-sm mb-1">Logo</label>
@@ -128,6 +130,7 @@ export default function MamaSettingsForm() {
           {saving ? "Enregistrement…" : "Enregistrer"}
         </PrimaryButton>
       </div>
-    </form>
+      </form>
+    </GlassCard>
   );
 }

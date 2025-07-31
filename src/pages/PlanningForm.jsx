@@ -5,6 +5,7 @@ import { usePlanning } from "@/hooks/usePlanning";
 import { useProducts } from "@/hooks/useProducts";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
+import GlassCard from "@/components/ui/GlassCard";
 import { Toaster, toast } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import useAuth from "@/hooks/useAuth";
@@ -57,9 +58,9 @@ export default function PlanningForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-6 space-y-4">
+    <GlassCard title="Nouveau planning">
+      <form onSubmit={handleSubmit} className="space-y-4">
       <Toaster position="top-right" />
-      <h1 className="text-2xl font-bold">Nouveau planning</h1>
       <div className="flex gap-4">
         <input className="input flex-1" placeholder="Nom" value={nom} onChange={e => setNom(e.target.value)} required />
         <input type="date" className="input" value={date_prevue} onChange={e => setDatePrevue(e.target.value)} required />
@@ -106,6 +107,7 @@ export default function PlanningForm() {
         <Button type="submit" disabled={loading}>Enregistrer</Button>
       </div>
       {loading && <LoadingSpinner message="Enregistrement..." />}
-    </form>
+      </form>
+    </GlassCard>
   );
 }

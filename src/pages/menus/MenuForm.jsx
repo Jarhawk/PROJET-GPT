@@ -4,6 +4,7 @@ import { useMenus } from "@/hooks/useMenus";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import { Input } from "@/components/ui/input";
+import GlassCard from "@/components/ui/GlassCard";
 import toast from "react-hot-toast";
 import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
 
@@ -98,10 +99,8 @@ export default function MenuForm({ menu, fiches = [], onClose }) {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-glass border border-borderGlass backdrop-blur p-6 rounded-2xl shadow-lg max-w-xl mx-auto"
-    >
+    <GlassCard title={menu ? "Modifier le menu" : "Ajouter un menu"} className="max-w-xl mx-auto">
+      <form onSubmit={handleSubmit} className="space-y-2">
       <h2 className="text-lg font-bold mb-4">
         {menu ? "Modifier le menu" : "Ajouter un menu"}
       </h2>
@@ -178,6 +177,7 @@ export default function MenuForm({ menu, fiches = [], onClose }) {
           Annuler
         </SecondaryButton>
       </div>
-    </form>
+      </form>
+    </GlassCard>
   );
 }

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import PrimaryButton from '@/components/ui/PrimaryButton';
 import SecondaryButton from '@/components/ui/SecondaryButton';
 import { Input } from '@/components/ui/input';
+import GlassCard from '@/components/ui/GlassCard';
 
 export default function FamilleForm({ famille, onSave, onCancel }) {
   const [nom, setNom] = useState(famille?.nom || '');
@@ -20,7 +21,8 @@ export default function FamilleForm({ famille, onSave, onCancel }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3 p-4">
+    <GlassCard title={famille ? "Modifier la famille" : "Nouvelle famille"}>
+      <form onSubmit={handleSubmit} className="space-y-3">
       <div>
         <label className="block text-sm mb-1 font-medium" htmlFor="famille-nom">Nom</label>
         <Input
@@ -46,6 +48,7 @@ export default function FamilleForm({ famille, onSave, onCancel }) {
         <PrimaryButton type="submit">Enregistrer</PrimaryButton>
         <SecondaryButton type="button" onClick={onCancel}>Annuler</SecondaryButton>
       </div>
-    </form>
+      </form>
+    </GlassCard>
   );
 }

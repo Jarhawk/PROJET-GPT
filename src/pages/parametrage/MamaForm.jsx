@@ -6,6 +6,7 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import { Input } from "@/components/ui/input";
+import GlassCard from "@/components/ui/GlassCard";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function MamaForm({ mama, onClose, onSaved }) {
@@ -83,8 +84,9 @@ export default function MamaForm({ mama, onClose, onSaved }) {
   };
 
   return (
-    <form className="space-y-3 p-4" onSubmit={handleSubmit}>
-      <Toaster />
+    <GlassCard title={mama ? "Modifier l'établissement" : "Nouvel établissement"}>
+      <form className="space-y-3" onSubmit={handleSubmit}>
+        <Toaster />
       <div>
         <label>Nom</label>
         <Input
@@ -116,20 +118,21 @@ export default function MamaForm({ mama, onClose, onSaved }) {
           Actif
         </label>
       </div>
-      <div className="flex gap-4 mt-4">
-        <PrimaryButton type="submit" disabled={saving}>
-          {saving ? (
-            <span>
-              <span className="animate-spin mr-2">⏳</span>Enregistrement…
-            </span>
-          ) : (
-            "Enregistrer"
-          )}
-        </PrimaryButton>
-        <SecondaryButton type="button" onClick={onClose} disabled={saving}>
-          Annuler
-        </SecondaryButton>
-      </div>
-    </form>
+        <div className="flex gap-4 mt-4">
+          <PrimaryButton type="submit" disabled={saving}>
+            {saving ? (
+              <span>
+                <span className="animate-spin mr-2">⏳</span>Enregistrement…
+              </span>
+            ) : (
+              "Enregistrer"
+            )}
+          </PrimaryButton>
+          <SecondaryButton type="button" onClick={onClose} disabled={saving}>
+            Annuler
+          </SecondaryButton>
+        </div>
+      </form>
+    </GlassCard>
   );
 }

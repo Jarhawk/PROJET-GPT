@@ -109,7 +109,7 @@ export default function MouvementFormModal({
                   </label>
                   <select
                     name="produit_id"
-                    className={`input input-bordered w-full rounded-xl ${errors.produit_id ? "border-red-400" : ""}`}
+                    className={`input w-full rounded-xl ${errors.produit_id ? "border-red-400" : ""}`}
                     value={form.produit_id}
                     onChange={handleChange}
                   >
@@ -125,7 +125,7 @@ export default function MouvementFormModal({
                   <label className="block font-semibold mb-1">Type *</label>
                   <select
                     name="type"
-                    className={`input input-bordered w-full rounded-xl ${errors.type ? "border-red-400" : ""}`}
+                    className={`input w-full rounded-xl ${errors.type ? "border-red-400" : ""}`}
                     value={form.type}
                     onChange={handleChange}
                   >
@@ -139,7 +139,7 @@ export default function MouvementFormModal({
                   <label className="block font-semibold mb-1">Sous-type</label>
                   <input
                     name="sous_type"
-                    className="input input-bordered w-full rounded-xl"
+                    className="input w-full rounded-xl"
                     value={form.sous_type}
                     onChange={handleChange}
                     placeholder="Achat, Perte, Inventaire, etc."
@@ -153,7 +153,7 @@ export default function MouvementFormModal({
                     type="number"
                     min="0"
                     step="any"
-                    className={`input input-bordered w-full rounded-xl ${errors.quantite ? "border-red-400" : ""}`}
+                    className={`input w-full rounded-xl ${errors.quantite ? "border-red-400" : ""}`}
                     value={form.quantite}
                     onChange={handleChange}
                   />
@@ -164,7 +164,7 @@ export default function MouvementFormModal({
                   <label className="block font-semibold mb-1">Zone</label>
                   <input
                     name="zone"
-                    className="input input-bordered w-full rounded-xl"
+                    className="input w-full rounded-xl"
                     value={form.zone}
                     onChange={handleChange}
                     placeholder="(ex: Frigo 1, Cave...)"
@@ -175,7 +175,7 @@ export default function MouvementFormModal({
                   <label className="block font-semibold mb-1">Motif / justification</label>
                   <textarea
                     name="motif"
-                    className="input input-bordered w-full rounded-xl"
+                    className="input w-full rounded-xl"
                     rows={2}
                     value={form.motif}
                     onChange={handleChange}

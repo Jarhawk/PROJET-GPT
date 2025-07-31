@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useStock } from "@/hooks/useStock";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
+import GlassCard from "@/components/ui/GlassCard";
 
 export default function MouvementForm({ onClose }) {
   const { createMouvement } = useStock();
@@ -31,11 +32,8 @@ export default function MouvementForm({ onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-glass border border-borderGlass backdrop-blur p-6 rounded-2xl shadow-lg w-80"
-      >
-        <h2 className="font-bold mb-2">Nouveau mouvement</h2>
+      <GlassCard title="Nouveau mouvement" className="w-80">
+        <form onSubmit={handleSubmit} className="space-y-2">
         <input
           className="input mb-2 w-full"
           placeholder="Produit ID"
@@ -70,7 +68,8 @@ export default function MouvementForm({ onClose }) {
           <Button type="submit" disabled={loading}>Valider</Button>
           <Button type="button" variant="outline" onClick={onClose} disabled={loading}>Annuler</Button>
         </div>
-      </form>
+        </form>
+      </GlassCard>
     </div>
   );
 }

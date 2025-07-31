@@ -3,6 +3,7 @@ import { useGadgets } from '@/hooks/useGadgets';
 import InputField from '@/components/ui/InputField';
 import { Button } from '@/components/ui/button';
 import { toast } from 'react-hot-toast';
+import GlassCard from '@/components/ui/GlassCard';
 
 export default function GadgetConfigForm({ gadget, onSave, onCancel }) {
   const editing = !!gadget;
@@ -42,7 +43,8 @@ export default function GadgetConfigForm({ gadget, onSave, onCancel }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <GlassCard title={editing ? 'Modifier le gadget' : 'Nouveau gadget'}>
+      <form onSubmit={handleSubmit} className="space-y-4">
       <InputField label="Nom" value={nom} onChange={(e) => setNom(e.target.value)} required />
       <div>
         <label className="block text-sm text-white mb-1">Type</label>
@@ -70,6 +72,7 @@ export default function GadgetConfigForm({ gadget, onSave, onCancel }) {
           {editing ? 'Enregistrer' : 'Ajouter'}
         </Button>
       </div>
-    </form>
+      </form>
+    </GlassCard>
   );
 }

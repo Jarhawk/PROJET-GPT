@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
+import GlassCard from "@/components/ui/GlassCard";
 import toast, { Toaster } from "react-hot-toast";
 import { MODULES } from "@/config/modules";
 
@@ -89,8 +90,9 @@ export default function RoleForm({ role, onClose, onSaved }) {
   };
 
   return (
-    <form className="space-y-3 p-4" onSubmit={handleSubmit}>
-      <Toaster />
+    <GlassCard title={role ? "Modifier le rôle" : "Nouveau rôle"}>
+      <form className="space-y-3" onSubmit={handleSubmit}>
+        <Toaster />
       <div>
         <Label htmlFor="nom">Nom du rôle</Label>
         <Input
@@ -133,14 +135,15 @@ export default function RoleForm({ role, onClose, onSaved }) {
           </label>
         ))}
       </fieldset>
-      <div className="flex gap-4 mt-4">
-        <PrimaryButton type="submit" disabled={saving} className="flex items-center gap-2">
-          {saving && <span className="loader-glass" />}Enregistrer
-        </PrimaryButton>
-        <SecondaryButton type="button" onClick={onClose} disabled={saving}>
-          Annuler
-        </SecondaryButton>
-      </div>
-    </form>
+        <div className="flex gap-4 mt-4">
+          <PrimaryButton type="submit" disabled={saving} className="flex items-center gap-2">
+            {saving && <span className="loader-glass" />}Enregistrer
+          </PrimaryButton>
+          <SecondaryButton type="button" onClick={onClose} disabled={saving}>
+            Annuler
+          </SecondaryButton>
+        </div>
+      </form>
+    </GlassCard>
   );
 }

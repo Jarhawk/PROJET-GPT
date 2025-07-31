@@ -5,6 +5,7 @@ import { useRoles } from "@/hooks/useRoles";
 import useAuth from "@/hooks/useAuth";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
+import GlassCard from "@/components/ui/GlassCard";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import toast from "react-hot-toast";
@@ -53,13 +54,8 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-glass border border-borderGlass backdrop-blur p-6 rounded-2xl shadow-lg max-w-xl mx-auto"
-    >
-      <h2 className="text-lg font-bold mb-4">
-        {utilisateur ? "Modifier l’utilisateur" : "Ajouter un utilisateur"}
-      </h2>
+    <GlassCard title={utilisateur ? "Modifier l’utilisateur" : "Ajouter un utilisateur"}>
+      <form onSubmit={handleSubmit} className="space-y-2">
       <Input
         className="mb-2"
         type="text"
@@ -118,6 +114,7 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
         </PrimaryButton>
         <SecondaryButton type="button" onClick={onClose}>Annuler</SecondaryButton>
       </div>
-    </form>
+      </form>
+    </GlassCard>
   );
 }

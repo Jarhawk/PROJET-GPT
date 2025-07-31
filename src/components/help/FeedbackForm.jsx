@@ -4,6 +4,7 @@ import ModalGlass from "@/components/ui/ModalGlass";
 import { useFeedback } from "@/hooks/useFeedback";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import GlassCard from "@/components/ui/GlassCard";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
@@ -47,9 +48,9 @@ export default function FeedbackForm({ open, onOpenChange }) {
             required
           />
           <label className="sr-only" htmlFor="message">Message</label>
-          <textarea
+          <Textarea
             id="message"
-            className="w-full px-4 py-2 bg-white/20 text-white placeholder-white/70 rounded-md border border-white/30 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50 h-24"
+            className="h-24"
             placeholder="Votre message"
             value={message}
             onChange={e => setMessage(e.target.value)}

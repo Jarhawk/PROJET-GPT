@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useProducts } from "@/hooks/useProducts";
 import ModalGlass from "@/components/ui/ModalGlass";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { Button } from "@/components/ui/button";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
@@ -85,8 +86,8 @@ export default function ProduitDetail({ produitId, open, onClose }) {
           </div>
         )}
         <div className="flex justify-end gap-2 mt-4">
-          <button onClick={exportExcel} className="btn btn-secondary">Export Excel</button>
-          <button onClick={onClose} className="btn">Fermer</button>
+          <Button onClick={exportExcel} className="w-auto">Export Excel</Button>
+          <Button onClick={onClose} className="w-auto" variant="outline">Fermer</Button>
         </div>
     </ModalGlass>
   );

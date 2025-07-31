@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
 import toast from "react-hot-toast";
 import GlassCard from "@/components/ui/GlassCard";
@@ -72,9 +73,9 @@ export default function TacheForm({ task }) {
       </label>
       <label className="block">
         <span>Description</span>
-        <textarea
-          className="w-full px-4 py-2 bg-white/20 text-white placeholder-white/70 rounded-md border border-white/30 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50"
+        <Textarea
           name="description"
+          className="w-full"
           value={form.description}
           onChange={handleChange}
         />

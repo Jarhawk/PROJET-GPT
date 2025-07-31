@@ -5,6 +5,8 @@ import useAuth from "@/hooks/useAuth";
 import toast, { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -75,21 +77,20 @@ export default function Roles() {
         Gestion des rôles
       </h1>
       <div className="flex gap-4 mb-4 items-end">
-        <input
-          className="input input-bordered w-64"
+        <Input
+          className="w-64"
           placeholder="Recherche nom, description"
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
-        <select
-          className="input input-bordered"
+        <Select
           value={filterActif}
           onChange={e => setFilterActif(e.target.value)}
         >
           <option value="all">Tous</option>
           <option value="actif">Actifs</option>
           <option value="inactif">Inactifs</option>
-        </select>
+        </Select>
         <Button onClick={() => setEditRole({ nom: "", description: "", actif: true })}>
           + Nouveau rôle
         </Button>
@@ -112,13 +113,9 @@ export default function Roles() {
                 <td className="px-2 py-1">{r.description}</td>
                 <td className="px-2 py-1">
                   <span
-                    className={
-                      r.actif
-                        ? "inline-block bg-green-100 text-green-800 px-2 rounded-full"
-                        : "inline-block bg-red-100 text-red-800 px-2 rounded-full"
-                    }
+                    className={`inline-block px-2 rounded-full ${r.actif ? 'bg-green-600/30 text-green-200' : 'bg-red-600/30 text-red-200'}`}
                   >
-                    {r.actif ? "Oui" : "Non"}
+                    {r.actif ? 'Oui' : 'Non'}
                   </span>
                 </td>
                 <td className="px-2 py-1">
@@ -142,7 +139,7 @@ export default function Roles() {
                   {(r.access_rights || []).map(k => (
                     <span
                       key={k}
-                      className="inline-block bg-gray-200 text-gray-800 text-xs px-1 mr-1 rounded"
+                      className="badge bg-white/10 text-white mr-1"
                     >
                       {k}
                     </span>

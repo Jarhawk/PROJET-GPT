@@ -92,7 +92,12 @@ export default function FournisseurForm({ fournisseur: fournisseurProp, onSubmit
         {errors.email && <p className="text-red-600 text-sm mt-1">{errors.email}</p>}
       </div>
       <label className="flex items-center gap-2">
-        <input type="checkbox" checked={actif} onChange={(e) => setActif(e.target.checked)} />
+        <input
+          type="checkbox"
+          className="checkbox"
+          checked={actif}
+          onChange={(e) => setActif(e.target.checked)}
+        />
         Actif
       </label>
       <div className="flex gap-2">

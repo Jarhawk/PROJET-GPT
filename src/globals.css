@@ -74,13 +74,22 @@ a:hover {
 
 /* Input custom */
 .input {
-  @apply w-full px-4 py-2 bg-white/20 text-white placeholder-white/70 rounded-md border border-white/30 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50;
+  @apply w-full px-4 py-2 bg-white/10 text-white placeholder-white/50 font-semibold rounded-xl shadow-lg border border-white/20 backdrop-blur-xl focus:outline-none focus:ring-2 focus:ring-white/50;
 }
 .textarea {
-  @apply w-full px-4 py-2 bg-white/20 text-white placeholder-white/70 rounded-md border border-white/30 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50;
+  @apply w-full px-4 py-2 bg-white/10 text-white placeholder-white/50 font-semibold rounded-xl shadow-lg border border-white/20 backdrop-blur-xl focus:outline-none focus:ring-2 focus:ring-white/50;
 }
 .select {
-  @apply w-full px-4 py-2 bg-white/20 text-white placeholder-white/70 rounded-md border border-white/30 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50;
+  @apply w-full px-4 py-2 bg-white/10 text-white placeholder-white/50 font-semibold rounded-xl shadow-lg border border-white/20 backdrop-blur-xl focus:outline-none focus:ring-2 focus:ring-white/50;
+}
+.input-bordered {
+  @apply border border-white/20;
+}
+.select-bordered {
+  @apply border border-white/20;
+}
+.checkbox {
+  @apply form-checkbox h-4 w-4 text-mamastockGold bg-white/10 border-white/20 rounded backdrop-blur-xl shadow focus:ring-0 focus:ring-offset-0;
 }
 
 /* Dark mode auto */

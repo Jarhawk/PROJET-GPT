@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Toaster, toast } from 'react-hot-toast';
 import TableContainer from '@/components/ui/TableContainer';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useUnites } from '@/hooks/useUnites';
 import UniteRow from '@/components/parametrage/UniteRow';
 import UniteForm from '@/forms/UniteForm';
@@ -52,8 +53,8 @@ export default function Unites() {
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold mb-4">Unités de produits</h1>
       <div className="flex gap-2 mb-4 items-end">
-        <input
-          className="input flex-1"
+        <Input
+          className="flex-1"
           placeholder="Recherche"
           value={search}
           onChange={e => setSearch(e.target.value)}
@@ -96,8 +97,8 @@ export default function Unites() {
         </Button>
       </div>
       {edit && (
-        <div className="modal fixed inset-0 flex items-center justify-center bg-black/50" role="dialog">
-          <div className="bg-white rounded-lg p-4">
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50">
+          <div className="bg-white/10 backdrop-blur-xl rounded-xl shadow-lg border border-white/20 p-6">
             <UniteForm
               unite={edit}
               onCancel={() => setEdit(null)}

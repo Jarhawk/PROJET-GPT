@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useFournisseurs } from "@/hooks/useFournisseurs";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import toast from "react-hot-toast";
 import { motion as Motion } from "framer-motion";
 
@@ -62,24 +63,25 @@ export default function FournisseurFormModal({ fournisseur, onClose, glass }) {
       <h3 className="text-xl font-bold mb-2">{fournisseur ? "Modifier" : "Ajouter"} un fournisseur</h3>
       <div>
         <label>Nom</label>
-        <input className="input w-full" name="nom" value={form.nom} onChange={handleChange} required />
+        <Input className="w-full" name="nom" value={form.nom} onChange={handleChange} required />
       </div>
       <div>
         <label>Email</label>
-        <input className="input w-full" name="email" value={form.email} onChange={handleChange} type="email" />
+        <Input className="w-full" name="email" value={form.email} onChange={handleChange} type="email" />
       </div>
       <div>
         <label>Téléphone</label>
-        <input className="input w-full" name="tel" type="tel" value={form.tel} onChange={handleChange} />
+        <Input className="w-full" name="tel" type="tel" value={form.tel} onChange={handleChange} />
       </div>
       <div>
         <label>Contact</label>
-        <input className="input w-full" name="contact" value={form.contact} onChange={handleChange} />
+        <Input className="w-full" name="contact" value={form.contact} onChange={handleChange} />
       </div>
       <div>
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
+            className="checkbox"
             checked={form.actif}
             onChange={e => setForm(f => ({ ...f, actif: e.target.checked }))}
           />

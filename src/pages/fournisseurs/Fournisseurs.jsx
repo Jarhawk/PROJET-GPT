@@ -8,6 +8,8 @@ import { useProducts } from "@/hooks/useProducts";
 import { useFournisseursInactifs } from "@/hooks/useFournisseursInactifs";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import FournisseurRow from "@/components/fournisseurs/FournisseurRow";
 import { Dialog, DialogContent } from "@radix-ui/react-dialog";
 import jsPDF from "jspdf";
@@ -124,19 +126,19 @@ export default function Fournisseurs() {
       <h1 className="text-2xl font-bold mb-6">Gestion des fournisseurs</h1>
       <div className="flex flex-wrap gap-4 mb-6 items-end">
         <div className="relative flex-1">
-          <input
-            className="input input-bordered w-full pl-8"
+          <Input
+            className="input-bordered pl-8"
             placeholder="Recherche fournisseur"
             value={search}
             onChange={e => { setPage(1); setSearch(e.target.value); }}
           />
           <Search className="absolute left-2 top-2.5 text-white" size={18} />
         </div>
-        <select className="input" value={actifFilter} onChange={e => { setPage(1); setActifFilter(e.target.value); }}>
+        <Select value={actifFilter} onChange={e => { setPage(1); setActifFilter(e.target.value); }}>
           <option value="all">Tous</option>
           <option value="true">Actif</option>
           <option value="false">Inactif</option>
-        </select>
+        </Select>
         {canEdit && (
           <Button onClick={() => setShowCreate(true)}>
             <PlusCircle className="mr-2" /> Ajouter fournisseur

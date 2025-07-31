@@ -188,7 +188,7 @@ export default function Produits() {
         </div>
         <div className="flex flex-wrap gap-4 mt-4">
           <Button
-            className="w-auto bg-white/20 text-white font-semibold px-4 py-2 rounded-md hover:bg-white/30 transition"
+            className="w-auto"
             onClick={() => {
               setShowForm(true);
               setSelectedProduct(null);
@@ -196,16 +196,10 @@ export default function Produits() {
           >
             <Plus className="w-4 h-4 mr-2" /> Nouveau produit
           </Button>
-          <Button
-            className="w-auto bg-white/20 text-white font-semibold px-4 py-2 rounded-md hover:bg-white/30 transition"
-            onClick={exportProductsToExcel}
-          >
+          <Button className="w-auto" onClick={exportProductsToExcel}>
             Export Excel
           </Button>
-          <Button
-            className="w-auto bg-white/20 text-white font-semibold px-4 py-2 rounded-md hover:bg-white/30 transition"
-            onClick={() => fileRef.current.click()}
-          >
+          <Button className="w-auto" onClick={() => fileRef.current.click()}>
             Import Excel
           </Button>
           <input

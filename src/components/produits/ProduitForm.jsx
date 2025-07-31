@@ -206,6 +206,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
       <div className="flex items-center gap-2">
         <input
           type="checkbox"
+          className="checkbox"
           checked={actif}
           onChange={e => setActif(e.target.checked)}
           id="prod-actif"

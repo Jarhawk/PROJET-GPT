@@ -6,6 +6,8 @@ import UtilisateurForm from "@/components/utilisateurs/UtilisateurForm";
 import UtilisateurDetail from "@/components/utilisateurs/UtilisateurDetail";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import GlassCard from "@/components/ui/GlassCard";
 import { Toaster, toast } from "react-hot-toast";
 import { saveAs } from "file-saver";
@@ -64,18 +66,17 @@ export default function Utilisateurs() {
       <Toaster position="top-right" />
       <GlassCard className="p-4 mb-4">
         <div className="flex flex-wrap gap-4 items-end">
-          <input
+          <Input
             type="search"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="input"
             placeholder="Recherche nom"
           />
-          <select className="input" value={actifFilter} onChange={e => setActifFilter(e.target.value)}>
+          <Select value={actifFilter} onChange={e => setActifFilter(e.target.value)}>
             <option value="all">Tous</option>
             <option value="true">Actif</option>
             <option value="false">Inactif</option>
-          </select>
+          </Select>
           <Button onClick={() => { setSelected(null); setShowForm(true); }}>
             Ajouter un utilisateur
           </Button>

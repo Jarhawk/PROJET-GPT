@@ -8,6 +8,8 @@ import FicheDetail from "./FicheDetail.jsx";
 import FicheRow from "@/components/fiches/FicheRow.jsx";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { useFamilles } from "@/hooks/useFamilles";
 import { Toaster, toast } from "react-hot-toast";
 import { motion as Motion } from "framer-motion";
@@ -73,18 +75,16 @@ export default function Fiches() {
     <div className="p-6 container mx-auto text-shadow">
       <Toaster position="top-right" />
       <div className="flex flex-wrap gap-4 items-center mb-4">
-        <input
+        <Input
           type="search"
           value={search}
           onChange={(e) => {
             setPage(1);
             setSearch(e.target.value);
           }}
-          className="input"
           placeholder="Recherche fiche"
         />
-        <select
-          className="input"
+        <Select
           value={sortBy}
           onChange={(e) => {
             setPage(1);
@@ -93,9 +93,8 @@ export default function Fiches() {
         >
           <option value="nom">Tri: Nom</option>
           <option value="cout_par_portion">Tri: Coût/portion</option>
-        </select>
-        <select
-          className="input"
+        </Select>
+        <Select
           value={actif}
           onChange={(e) => {
             setPage(1);
@@ -105,9 +104,8 @@ export default function Fiches() {
           <option value="true">Actives</option>
           <option value="false">Inactives</option>
           <option value="all">Toutes</option>
-        </select>
-        <select
-          className="input"
+        </Select>
+        <Select
           value={familleFilter}
           onChange={(e) => {
             setPage(1);
@@ -120,7 +118,7 @@ export default function Fiches() {
               {f.nom}
             </option>
           ))}
-        </select>
+        </Select>
         {canEdit && (
           <Button
             onClick={() => {

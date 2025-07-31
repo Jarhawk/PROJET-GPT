@@ -4,6 +4,7 @@ import { useRequisitions } from "@/hooks/useRequisitions";
 import useAuth from "@/hooks/useAuth";
 import TableContainer from "@/components/ui/TableContainer";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import RequisitionRow from "@/components/requisitions/RequisitionRow";
 
@@ -39,11 +40,10 @@ export default function RequisitionsPage() {
     <div className="p-6 max-w-3xl mx-auto">
       <h1 className="text-xl font-bold text-mamastock-gold mb-4">Demandes de stock</h1>
       <div className="flex flex-wrap gap-4 items-center mb-4">
-        <input
+        <Input
           type="search"
           value={search}
           onChange={e => { setSearch(e.target.value); setPage(1); }}
-          className="input"
           placeholder="Recherche produit"
         />
       </div>

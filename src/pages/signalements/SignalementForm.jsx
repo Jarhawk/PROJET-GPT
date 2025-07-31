@@ -4,6 +4,9 @@ import { useSignalements } from "@/hooks/useSignalements";
 import useAuth from "@/hooks/useAuth";
 import toast from "react-hot-toast";
 import GlassCard from "@/components/ui/GlassCard";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 
 export default function SignalementForm({ onCreated }) {
   const { loading: authLoading } = useAuth();
@@ -39,10 +42,10 @@ export default function SignalementForm({ onCreated }) {
   return (
     <GlassCard title="Nouveau signalement" className="mb-4">
       <form onSubmit={handleSubmit} className="space-y-2">
-      <input
+      <Input
         type="text"
         placeholder="Titre"
-        className="input w-full"
+        className="w-full"
         value={titre}
         onChange={(e) => setTitre(e.target.value)}
       />
@@ -53,22 +56,18 @@ export default function SignalementForm({ onCreated }) {
         value={commentaire}
         onChange={(e) => setCommentaire(e.target.value)}
       />
-      <select
+      <Select
         value={statut}
         onChange={(e) => setStatut(e.target.value)}
-        className="input w-full"
+        className="w-full"
       >
         <option value="ouvert">Ouvert</option>
         <option value="en cours">En cours</option>
         <option value="résolu">Résolu</option>
-      </select>
-      <button
-        type="submit"
-        disabled={authLoading || submitting}
-        className="w-full py-2 bg-white/30 text-white font-semibold rounded-md hover:bg-white/40 backdrop-blur focus:outline-none focus:ring-2 focus:ring-white/60 disabled:opacity-50"
-      >
+      </Select>
+      <Button type="submit" className="w-full" disabled={authLoading || submitting}>
         Ajouter
-      </button>
+      </Button>
       </form>
     </GlassCard>
   );

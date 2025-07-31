@@ -6,6 +6,8 @@ import { useProducts } from "@/hooks/useProducts";
 import { useZones } from "@/hooks/useZones";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import TableContainer from "@/components/ui/TableContainer";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import GlassCard from "@/components/ui/GlassCard";
@@ -98,11 +100,11 @@ export default function Transferts() {
       <div className="flex gap-4 items-end">
         <div>
           <label>Début</label>
-          <input type="date" className="input" value={periode.debut} onChange={e => setPeriode(p => ({ ...p, debut: e.target.value }))} />
+          <Input type="date" value={periode.debut} onChange={e => setPeriode(p => ({ ...p, debut: e.target.value }))} />
         </div>
         <div>
           <label>Fin</label>
-          <input type="date" className="input" value={periode.fin} onChange={e => setPeriode(p => ({ ...p, fin: e.target.value }))} />
+          <Input type="date" value={periode.fin} onChange={e => setPeriode(p => ({ ...p, fin: e.target.value }))} />
         </div>
         <Button onClick={() => setShowForm(true)}>Nouveau transfert</Button>
       </div>
@@ -131,27 +133,27 @@ export default function Transferts() {
         </table>
       </TableContainer>
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur flex items-center justify-center z-50">
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur">
           <GlassCard title="Nouveau transfert" className="w-96 p-6">
             <form onSubmit={handleSubmit} className="space-y-3">
             <div className="flex gap-2">
-              <select className="input flex-1" value={formHead.zone_source_id} onChange={e => setFormHead(h => ({ ...h, zone_source_id: e.target.value }))}>
+              <Select className="flex-1" value={formHead.zone_source_id} onChange={e => setFormHead(h => ({ ...h, zone_source_id: e.target.value }))}>
                 <option value="">Zone source</option>
                 {zones.map(z => <option key={z.id} value={z.id}>{z.nom}</option>)}
-              </select>
-              <select className="input flex-1" value={formHead.zone_dest_id} onChange={e => setFormHead(h => ({ ...h, zone_dest_id: e.target.value }))}>
+              </Select>
+              <Select className="flex-1" value={formHead.zone_dest_id} onChange={e => setFormHead(h => ({ ...h, zone_dest_id: e.target.value }))}>
                 <option value="">Zone destination</option>
                 {zones.map(z => <option key={z.id} value={z.id}>{z.nom}</option>)}
-              </select>
+              </Select>
             </div>
-            <textarea className="input w-full" rows="2" placeholder="Commentaire" value={formHead.commentaire} onChange={e => setFormHead(h => ({ ...h, commentaire: e.target.value }))} />
+            <textarea className="textarea w-full" rows="2" placeholder="Commentaire" value={formHead.commentaire} onChange={e => setFormHead(h => ({ ...h, commentaire: e.target.value }))} />
             {lignes.map((l, i) => (
               <div key={i} className="flex gap-2 items-end">
-                <select className="input flex-1" value={l.produit_id} onChange={e => handleLineChange(i, 'produit_id', e.target.value)}>
+                <Select className="flex-1" value={l.produit_id} onChange={e => handleLineChange(i, 'produit_id', e.target.value)}>
                   <option value="">Produit</option>
                   {products.map(p => <option key={p.id} value={p.id}>{p.nom}</option>)}
-                </select>
-                <input type="number" className="input w-20" min="0" value={l.quantite} onChange={e => handleLineChange(i, 'quantite', e.target.value)} />
+                </Select>
+                <Input type="number" className="w-20" min="0" value={l.quantite} onChange={e => handleLineChange(i, 'quantite', e.target.value)} />
                 <span className="text-xs">{l.stock_avant}→{l.stock_apres}</span>
               </div>
             ))}

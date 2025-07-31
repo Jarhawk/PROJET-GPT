@@ -83,7 +83,12 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
         ))}
       </Select>
       <label className="flex items-center gap-2 mb-2">
-        <input type="checkbox" checked={actif} onChange={e => setActif(e.target.checked)} />
+        <input
+          type="checkbox"
+          className="checkbox"
+          checked={actif}
+          onChange={e => setActif(e.target.checked)}
+        />
         Actif
       </label>
       {!utilisateur && (

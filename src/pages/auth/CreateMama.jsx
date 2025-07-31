@@ -7,6 +7,8 @@ import PageWrapper from "@/components/ui/PageWrapper";
 import GlassCard from "@/components/ui/GlassCard";
 import MamaLogo from "@/components/ui/MamaLogo";
 import toast from "react-hot-toast";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export default function CreateMama() {
   const [nom, setNom] = useState("");
@@ -51,19 +53,16 @@ export default function CreateMama() {
           </div>
           <div>
             <label className="block text-sm text-white mb-1">Nom du restaurant</label>
-            <input
-              className="w-full rounded border border-white/30 bg-white/20 py-2 px-3 text-white placeholder-white/70"
+            <Input
+              className="w-full"
               value={nom}
               onChange={e => setNom(e.target.value)}
               required
             />
           </div>
-          <button
-            className="w-full py-2 rounded bg-mamastockGold text-mamastockBg font-semibold hover:bg-mamastockGoldHover transition"
-            disabled={loading}
-          >
+          <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Enregistrement..." : "Valider"}
-          </button>
+          </Button>
         </form>
       </GlassCard>
     </PageWrapper>

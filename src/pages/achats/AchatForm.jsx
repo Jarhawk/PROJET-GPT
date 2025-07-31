@@ -53,8 +53,7 @@ export default function AchatForm({ achat, fournisseurs = [], onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-      <GlassCard className="p-6 space-y-2 min-w-[300px]">
-        <h2 className="text-lg font-bold">{achat ? "Modifier l'achat" : "Nouvel achat"}</h2>
+      <GlassCard title={achat ? "Modifier l'achat" : "Nouvel achat"} className="p-6 space-y-2 min-w-[300px]">
         <form onSubmit={handleSubmit} className="space-y-2">
           <input type="date" className="input" value={date_achat} onChange={e => setDateAchat(e.target.value)} required />
           <AutoCompleteField

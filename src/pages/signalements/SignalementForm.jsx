@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useSignalements } from "@/hooks/useSignalements";
 import useAuth from "@/hooks/useAuth";
 import toast from "react-hot-toast";
+import GlassCard from "@/components/ui/GlassCard";
 
 export default function SignalementForm({ onCreated }) {
   const { loading: authLoading } = useAuth();
@@ -36,21 +37,18 @@ export default function SignalementForm({ onCreated }) {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-glass border border-borderGlass backdrop-blur p-4 rounded-2xl shadow-lg mb-4"
-    >
-      <h3 className="text-lg font-bold mb-2">Nouveau signalement</h3>
+    <GlassCard title="Nouveau signalement" className="mb-4">
+      <form onSubmit={handleSubmit} className="space-y-2">
       <input
         type="text"
         placeholder="Titre"
-        className="border px-2 py-1 w-full mb-2"
+        className="input w-full"
         value={titre}
         onChange={(e) => setTitre(e.target.value)}
       />
       <textarea
         placeholder="Description"
-        className="border px-2 py-1 w-full mb-2"
+        className="input w-full"
         rows={3}
         value={commentaire}
         onChange={(e) => setCommentaire(e.target.value)}
@@ -58,7 +56,7 @@ export default function SignalementForm({ onCreated }) {
       <select
         value={statut}
         onChange={(e) => setStatut(e.target.value)}
-        className="border px-2 py-1 w-full mb-2"
+        className="input w-full"
       >
         <option value="ouvert">Ouvert</option>
         <option value="en cours">En cours</option>
@@ -67,10 +65,11 @@ export default function SignalementForm({ onCreated }) {
       <button
         type="submit"
         disabled={authLoading || submitting}
-        className="bg-mamastock-gold text-white px-4 py-2 rounded disabled:opacity-50"
+        className="w-full py-2 bg-white/30 text-white font-semibold rounded-md hover:bg-white/40 backdrop-blur focus:outline-none focus:ring-2 focus:ring-white/60 disabled:opacity-50"
       >
         Ajouter
       </button>
-    </form>
+      </form>
+    </GlassCard>
   );
 }

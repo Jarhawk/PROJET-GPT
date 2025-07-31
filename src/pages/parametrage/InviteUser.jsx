@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabase";
 import useAuth from "@/hooks/useAuth";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
+import GlassCard from "@/components/ui/GlassCard";
 import { Input } from "@/components/ui/input";
 import toast, { Toaster } from "react-hot-toast";
 
@@ -107,9 +108,9 @@ export default function InviteUser({ onClose, onInvited }) {
   };
 
   return (
-    <form className="space-y-3 p-4" onSubmit={handleInvite}>
-      <Toaster />
-      <h2 className="font-bold text-lg mb-2">Inviter un utilisateur</h2>
+    <GlassCard title="Inviter un utilisateur">
+      <form className="space-y-3" onSubmit={handleInvite}>
+        <Toaster />
       <div>
         <label>Email</label>
         <Input
@@ -155,14 +156,15 @@ export default function InviteUser({ onClose, onInvited }) {
           ))}
         </select>
       </div>
-      <div className="flex gap-4 mt-4">
-        <PrimaryButton type="submit" disabled={sending}>
-          {sending ? "Envoi…" : "Envoyer l'invitation"}
-        </PrimaryButton>
-        <SecondaryButton type="button" onClick={onClose}>
-          Annuler
-        </SecondaryButton>
-      </div>
-    </form>
+        <div className="flex gap-4 mt-4">
+          <PrimaryButton type="submit" disabled={sending}>
+            {sending ? "Envoi…" : "Envoyer l'invitation"}
+          </PrimaryButton>
+          <SecondaryButton type="button" onClick={onClose}>
+            Annuler
+          </SecondaryButton>
+        </div>
+      </form>
+    </GlassCard>
   );
 }

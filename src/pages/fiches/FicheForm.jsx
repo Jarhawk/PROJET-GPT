@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import { Input } from "@/components/ui/input";
+import GlassCard from "@/components/ui/GlassCard";
 import toast from "react-hot-toast";
 
 export default function FicheForm({ fiche, onClose }) {
@@ -113,17 +114,51 @@ export default function FicheForm({ fiche, onClose }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-glass backdrop-blur-lg text-white p-6 rounded-lg shadow-md max-w-2xl mx-auto text-shadow">
-      <h2 className="text-lg font-bold mb-4">{fiche ? "Modifier la fiche" : "Nouvelle fiche"}</h2>
-      <input className="input mb-2" value={nom} onChange={e => setNom(e.target.value)} placeholder="Nom" required />
-      <select className="input mb-2" value={famille} onChange={e => setFamille(e.target.value)}>
+    <GlassCard title={fiche ? "Modifier la fiche" : "Nouvelle fiche"}>
+      <form onSubmit={handleSubmit} className="space-y-2">
+      <Input
+        className="mb-2"
+        value={nom}
+        onChange={e => setNom(e.target.value)}
+        placeholder="Nom"
+        required
+      />
+      <Select
+        className="mb-2"
+        value={famille}
+        onChange={e => setFamille(e.target.value)}
+      >
         <option value="">-- Famille --</option>
         {familles.map(f => <option key={f.id} value={f.id}>{f.nom}</option>)}
-      </select>
+      </Select>
       <div className="flex gap-2 mb-2">
-        <input type="number" className="input" min={1} value={portions} onChange={e => setPortions(Number(e.target.value))} placeholder="Portions" required />
-        <input type="number" className="input" min={0} step="0.01" value={rendement} onChange={e => setRendement(Number(e.target.value))} placeholder="Rendement" />
-        <input type="number" className="input" min={0} step="0.01" value={prixVente} onChange={e => setPrixVente(Number(e.target.value))} placeholder="Prix vente HT" />
+        <Input
+          type="number"
+          className="w-full"
+          min={1}
+          value={portions}
+          onChange={e => setPortions(Number(e.target.value))}
+          placeholder="Portions"
+          required
+        />
+        <Input
+          type="number"
+          className="w-full"
+          min={0}
+          step="0.01"
+          value={rendement}
+          onChange={e => setRendement(Number(e.target.value))}
+          placeholder="Rendement"
+        />
+        <Input
+          type="number"
+          className="w-full"
+          min={0}
+          step="0.01"
+          value={prixVente}
+          onChange={e => setPrixVente(Number(e.target.value))}
+          placeholder="Prix vente HT"
+        />
       </div>
       <div className="mb-4">
         <label className="block font-semibold mb-2">Ingrédients :</label>
@@ -147,26 +182,56 @@ export default function FicheForm({ fiche, onClose }) {
                 return (
                   <tr key={i}>
                     <td>
-                      <select className="input" value={l.type} onChange={e => updateLigne(i, 'type', e.target.value)}>
+                      <Select
+                        className="w-full"
+                        value={l.type}
+                        onChange={e => updateLigne(i, 'type', e.target.value)}
+                      >
                         <option value="produit">Produit</option>
                         <option value="sous_fiche">Sous-fiche</option>
-                      </select>
+                      </Select>
                     </td>
                     <td>
                       {l.type === 'produit' ? (
-                        <select className="input" value={l.produit_id} onChange={e => updateLigne(i, 'produit_id', e.target.value)} required>
+                        <Select
+                          className="w-full"
+                          value={l.produit_id}
+                          onChange={e => updateLigne(i, 'produit_id', e.target.value)}
+                          required
+                        >
                           <option value="">Sélectionner</option>
-                          {prodOptions.map(p => <option key={p.id} value={p.id}>{p.nom}</option>)}
-                        </select>
+                          {prodOptions.map(p => (
+                            <option key={p.id} value={p.id}>
+                              {p.nom}
+                            </option>
+                          ))}
+                        </Select>
                       ) : (
-                        <select className="input" value={l.sous_fiche_id} onChange={e => updateLigne(i, 'sous_fiche_id', e.target.value)} required>
+                        <Select
+                          className="w-full"
+                          value={l.sous_fiche_id}
+                          onChange={e => updateLigne(i, 'sous_fiche_id', e.target.value)}
+                          required
+                        >
                           <option value="">Sélectionner</option>
-                          {ficheOptions.map(f => <option key={f.id} value={f.id}>{f.nom}</option>)}
-                        </select>
+                          {ficheOptions.map(f => (
+                            <option key={f.id} value={f.id}>
+                              {f.nom}
+                            </option>
+                          ))}
+                        </Select>
                       )}
                     </td>
                     <td>
-                      <input type="number" className="input" min={0} step="0.01" value={l.quantite} onChange={e => updateLigne(i, 'quantite', Number(e.target.value))} required />
+                      <Input
+                        type="number"
+                        className="w-full"
+                        min={0}
+                        step="0.01"
+                        value={l.quantite}
+                        onChange={e => updateLigne(i, 'quantite', Number(e.target.value))}
+                        required
+                      />
                     </td>
                     <td>{l.type === 'produit' ? prod?.unite || '-' : 'portion'}</td>
                     <td>{l.type === 'produit' ? (prod?.pmp ? prod.pmp.toFixed(2) : '-') : sf?.cout_par_portion?.toFixed(2) || '-'}</td>
@@ -190,12 +255,13 @@ export default function FicheForm({ fiche, onClose }) {
           <div><b>Ratio :</b> {(ratio * 100).toFixed(1)}%</div>
         )}
       </div>
-      <div className="flex gap-2 mt-4">
-        <PrimaryButton type="submit" disabled={loading} className="min-w-[120px]">
-          {loading ? "Enregistrement..." : fiche ? "Modifier" : "Créer"}
-        </PrimaryButton>
-        <SecondaryButton type="button" onClick={onClose}>Annuler</SecondaryButton>
-      </div>
-    </form>
+        <div className="flex gap-2 mt-4">
+          <PrimaryButton type="submit" disabled={loading} className="min-w-[120px]">
+            {loading ? "Enregistrement..." : fiche ? "Modifier" : "Créer"}
+          </PrimaryButton>
+          <SecondaryButton type="button" onClick={onClose}>Annuler</SecondaryButton>
+        </div>
+      </form>
+    </GlassCard>
   );
 }

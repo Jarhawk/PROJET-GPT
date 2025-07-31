@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
+import GlassCard from "@/components/ui/GlassCard";
 
 export default function PromotionForm({ promotion = {}, onClose, onSave, saving }) {
   const [form, setForm] = useState({
@@ -15,8 +16,7 @@ export default function PromotionForm({ promotion = {}, onClose, onSave, saving 
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-glass border border-borderGlass backdrop-blur rounded-2xl p-6 shadow-lg w-96">
-        <h2 className="text-lg font-bold mb-4">{promotion.id ? "Modifier" : "Nouvelle"} promotion</h2>
+      <GlassCard title={`${promotion.id ? "Modifier" : "Nouvelle"} promotion`} className="w-96">
         <form className="space-y-3" onSubmit={e => { e.preventDefault(); onSave(form); }}>
           <div>
             <Label htmlFor="nom-promo">Nom</Label>
@@ -24,7 +24,12 @@ export default function PromotionForm({ promotion = {}, onClose, onSave, saving 
           </div>
           <div>
             <Label htmlFor="desc-promo">Description</Label>
-            <textarea id="desc-promo" className="input w-full" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
+            <textarea
+              id="desc-promo"
+              className="w-full px-4 py-2 bg-white/20 text-white placeholder-white/70 rounded-md border border-white/30 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50"
+              value={form.description}
+              onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+            />
           </div>
           <div className="flex gap-2">
             <div className="flex-1">
@@ -47,7 +52,7 @@ export default function PromotionForm({ promotion = {}, onClose, onSave, saving 
             <SecondaryButton type="button" onClick={onClose}>Annuler</SecondaryButton>
           </div>
         </form>
-      </div>
+      </GlassCard>
     </div>
   );
 }

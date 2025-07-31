@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
+import GlassCard from "@/components/ui/GlassCard";
 
 export default function ProduitForm({ produit, familles = [], unites = [], onSuccess, onClose }) {
   const editing = !!produit;
@@ -100,10 +101,8 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
 
 
   return (
-    <form onSubmit={handleSubmit} className="p-8 space-y-4 animate-fade-in">
-      <h2 className="text-xl font-bold mb-2 text-mamastockGold">
-        {editing ? "Éditer le produit" : "Nouveau produit"}
-      </h2>
+    <GlassCard title={editing ? "Éditer le produit" : "Nouveau produit"}>
+      <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label className="block text-sm mb-1 font-medium" htmlFor="prod-nom">Nom</label>
         <Input
@@ -220,6 +219,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
           {editing ? "Enregistrer" : "Créer"}
         </PrimaryButton>
       </div>
-    </form>
+      </form>
+    </GlassCard>
   );
 }

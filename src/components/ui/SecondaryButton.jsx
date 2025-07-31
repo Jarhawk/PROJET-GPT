@@ -2,7 +2,7 @@
 export default function SecondaryButton({ children, className = '', ...props }) {
   return (
     <button
-      className={`border border-white/40 text-white rounded-xl px-4 py-2 hover:bg-white/10 backdrop-blur transition ${className}`}
+      className={`w-full py-2 bg-white/30 text-white font-semibold rounded-md hover:bg-white/40 backdrop-blur focus:outline-none focus:ring-2 focus:ring-white/60 ${className}`}
       {...props}
     >
       {children}

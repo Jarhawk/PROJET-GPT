@@ -12,28 +12,13 @@ import React from 'react';
  * @param {boolean} [props.dark] Force dark text/background
  * @param {string} [props.className] Additional classes
  */
-export function GlassCard({
-  title,
-  children,
-  footer,
-  width = '',
-  dark = false,
-  className = '',
-  ...props
-}) {
-  const colorClasses = dark
-    ? 'bg-[#202638]/60 text-white'
-    : 'bg-white/10 text-gray-900';
+export function GlassCard({ children, title, footer, className = '', width = 'w-full max-w-lg' }) {
   return (
-    <div
-      className={`border border-white/30 backdrop-blur-md rounded-2xl shadow-lg p-6 ${colorClasses} ${width} ${className}`}
-      {...props}
-    >
-      {title && <h2 className="text-xl font-semibold mb-4">{title}</h2>}
-      {children}
-      {footer && <div className="mt-4">{footer}</div>}
+    <div className={`relative ${width} rounded-2xl p-6 shadow-xl border border-white/20 bg-white/10 backdrop-blur-md text-white ${className}`}> 
+      {title && <h2 className="text-xl font-semibold mb-4 text-white/90">{title}</h2>}
+      <div className="space-y-4">{children}</div>
+      {footer && <div className="mt-6">{footer}</div>}
     </div>
   );
 }
-
 export default GlassCard;

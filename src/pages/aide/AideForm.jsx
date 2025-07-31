@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import ModalGlass from '@/components/ui/ModalGlass';
 import { Button } from '@/components/ui/button';
+import GlassCard from '@/components/ui/GlassCard';
 import { useAide } from '@/hooks/useAide';
 import { Toaster, toast } from 'react-hot-toast';
 
@@ -42,35 +43,36 @@ export default function AideForm({ article, onClose, onSaved }) {
 
   return (
     <ModalGlass open={true} onClose={onClose}>
-      <form onSubmit={handleSubmit} className="space-y-2">
+      <GlassCard title={isEdit ? "Modifier l'article" : 'Nouvel article'}>
+        <form onSubmit={handleSubmit} className="space-y-2">
         <Toaster />
         <h3 className="text-lg font-semibold mb-2">
           {isEdit ? "Modifier l'article" : 'Nouvel article'}
         </h3>
-        <input
-          className="input input-bordered w-full"
+        <Input
+          className="w-full"
           name="titre"
           placeholder="Titre"
           value={values.titre}
           onChange={handleChange}
           required
         />
-        <input
-          className="input input-bordered w-full"
+        <Input
+          className="w-full"
           name="categorie"
           placeholder="Catégorie"
           value={values.categorie}
           onChange={handleChange}
         />
-        <input
-          className="input input-bordered w-full"
+        <Input
+          className="w-full"
           name="lien_page"
           placeholder="Page liée"
           value={values.lien_page}
           onChange={handleChange}
         />
         <textarea
-          className="input input-bordered w-full h-32"
+          className="w-full px-4 py-2 bg-white/20 text-white placeholder-white/70 rounded-md border border-white/30 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50 h-32"
           name="contenu"
           placeholder="Contenu"
           value={values.contenu}
@@ -83,7 +85,8 @@ export default function AideForm({ article, onClose, onSaved }) {
             Annuler
           </Button>
         </div>
-      </form>
+        </form>
+      </GlassCard>
     </ModalGlass>
   );
 }

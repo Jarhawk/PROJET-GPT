@@ -98,7 +98,7 @@ function RequisitionFormPage() {
     <div className="p-6 space-y-6">
       <Toaster position="top-right" />
       <h1 className="text-3xl font-bold text-mamastock-gold mb-6">Nouvelle réquisition</h1>
-      <GlassCard className="p-6">
+      <GlassCard title="Nouvelle réquisition" className="p-6">
         <form onSubmit={handleSubmit} className="space-y-4">
 
         <div>

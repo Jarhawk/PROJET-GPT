@@ -62,19 +62,19 @@ export default function FournisseurFormModal({ fournisseur, onClose, glass }) {
       <h3 className="text-xl font-bold mb-2">{fournisseur ? "Modifier" : "Ajouter"} un fournisseur</h3>
       <div>
         <label>Nom</label>
-        <input className="input input-bordered w-full" name="nom" value={form.nom} onChange={handleChange} required />
+        <input className="input w-full" name="nom" value={form.nom} onChange={handleChange} required />
       </div>
       <div>
         <label>Email</label>
-        <input className="input input-bordered w-full" name="email" value={form.email} onChange={handleChange} type="email" />
+        <input className="input w-full" name="email" value={form.email} onChange={handleChange} type="email" />
       </div>
       <div>
         <label>Téléphone</label>
-        <input className="input input-bordered w-full" name="tel" type="tel" value={form.tel} onChange={handleChange} />
+        <input className="input w-full" name="tel" type="tel" value={form.tel} onChange={handleChange} />
       </div>
       <div>
         <label>Contact</label>
-        <input className="input input-bordered w-full" name="contact" value={form.contact} onChange={handleChange} />
+        <input className="input w-full" name="contact" value={form.contact} onChange={handleChange} />
       </div>
       <div>
         <label className="flex items-center gap-2">

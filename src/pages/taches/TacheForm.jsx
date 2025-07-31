@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useTaches } from "@/hooks/useTaches";
 import { useUtilisateurs } from "@/hooks/useUtilisateurs";
 import { Button } from "@/components/ui/button";
+import GlassCard from "@/components/ui/GlassCard";
 import toast from "react-hot-toast";
 
 export default function TacheForm({ task }) {
@@ -62,7 +63,8 @@ export default function TacheForm({ task }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-2 max-w-md">
+    <GlassCard title={task ? "Modifier la tâche" : "Nouvelle tâche"} className="max-w-md">
+      <form onSubmit={handleSubmit} className="space-y-2">
       <label className="block">
         <span>Titre</span>
         <input className="input w-full" name="titre" value={form.titre} onChange={handleChange} required />
@@ -131,6 +133,7 @@ export default function TacheForm({ task }) {
         </select>
       </label>
       <Button type="submit" disabled={loading}>{task ? "Mettre à jour" : "Créer"}</Button>
-    </form>
+      </form>
+    </GlassCard>
   );
 }

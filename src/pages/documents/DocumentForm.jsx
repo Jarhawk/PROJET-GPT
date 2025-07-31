@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { Input } from "@/components/ui/input";
+import GlassCard from "@/components/ui/GlassCard";
 
 export default function DocumentForm({ onUploaded, entiteType = "", entiteId = null, categories = [] }) {
   const [file, setFile] = useState(null);
@@ -27,7 +28,8 @@ export default function DocumentForm({ onUploaded, entiteType = "", entiteId = n
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-2">
+    <GlassCard title="Ajouter un document">
+      <form onSubmit={handleSubmit} className="space-y-2">
       <label className="block text-sm mb-1">Fichier *</label>
       <Input
         type="file"
@@ -42,14 +44,14 @@ export default function DocumentForm({ onUploaded, entiteType = "", entiteId = n
       />
       <label className="block text-sm mb-1">Commentaire</label>
       <textarea
-        className="input w-full"
+        className="w-full px-4 py-2 bg-white/20 text-white placeholder-white/70 rounded-md border border-white/30 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50"
         placeholder="Commentaire"
         value={commentaire}
         onChange={e => setCommentaire(e.target.value)}
       />
       <label className="block text-sm mb-1">Catégorie</label>
-      <select
-        className="input w-full"
+      <Select
+        className="w-full"
         value={categorie}
         onChange={e => setCategorie(e.target.value)}
       >
@@ -59,8 +61,9 @@ export default function DocumentForm({ onUploaded, entiteType = "", entiteId = n
             {c}
           </option>
         ))}
-      </select>
+      </Select>
       <PrimaryButton type="submit" className="mt-2">Uploader</PrimaryButton>
-    </form>
+      </form>
+    </GlassCard>
   );
 }

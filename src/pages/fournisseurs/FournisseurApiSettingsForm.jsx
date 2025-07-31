@@ -4,6 +4,7 @@ import useAuth from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { Input } from "@/components/ui/input";
+import GlassCard from "@/components/ui/GlassCard";
 import toast from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { useFournisseurApiConfig } from "@/hooks/useFournisseurApiConfig";
@@ -53,11 +54,12 @@ export default function FournisseurApiSettingsForm({ fournisseur_id }) {
   if (loading) return <LoadingSpinner message="Chargement..." />;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 text-sm">
+    <GlassCard title="Configuration API" className="p-4 text-sm">
+      <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label className="block font-medium mb-1">URL API</label>
         <Input
-          className="input input-bordered w-full"
+          className="w-full"
           name="url"
           value={config.url || ""}
           onChange={handleChange}
@@ -67,7 +69,7 @@ export default function FournisseurApiSettingsForm({ fournisseur_id }) {
       <div>
         <label className="block font-medium mb-1">Type</label>
         <select
-          className="input input-bordered w-full"
+          className="input w-full"
           name="type_api"
           value={config.type_api || "rest"}
           onChange={handleChange}
@@ -80,7 +82,7 @@ export default function FournisseurApiSettingsForm({ fournisseur_id }) {
       <div>
         <label className="block font-medium mb-1">Token / Credentials</label>
         <Input
-          className="input input-bordered w-full"
+          className="w-full"
           name="token"
           value={config.token || ""}
           onChange={handleChange}
@@ -89,7 +91,7 @@ export default function FournisseurApiSettingsForm({ fournisseur_id }) {
       <div>
         <label className="block font-medium mb-1">Format factures</label>
         <select
-          className="input input-bordered w-full"
+          className="input w-full"
           name="format_facture"
           value={config.format_facture || "json"}
           onChange={handleChange}
@@ -113,6 +115,7 @@ export default function FournisseurApiSettingsForm({ fournisseur_id }) {
       <PrimaryButton type="submit" disabled={saving} className="mt-2 min-w-[120px]">
         {saving ? "Enregistrement…" : "Enregistrer"}
       </PrimaryButton>
-    </form>
+      </form>
+    </GlassCard>
   );
 }

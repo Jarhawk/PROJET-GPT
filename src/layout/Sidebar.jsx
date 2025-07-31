@@ -52,7 +52,13 @@ export default function Sidebar() {
     return null;
   }
 
-  const peutVoir = (module) => hasAccess(module, "peut_voir");
+  const peutVoir = (module) => {
+    const ok = hasAccess(module, "peut_voir");
+    if (!ok && access_rights && !access_rights[module]) {
+      console.info(`info: module '${module}' absent des access_rights`);
+    }
+    return ok;
+  };
 
   const Item = ({ to, icon, label }) => {
     const prefetch = () => {

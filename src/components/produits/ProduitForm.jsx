@@ -10,6 +10,7 @@ import AutoCompleteField from "@/components/ui/AutoCompleteField";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import SecondaryButton from "@/components/ui/SecondaryButton";
+import PrimaryButton from "@/components/ui/PrimaryButton";
 import GlassCard from "@/components/ui/GlassCard";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -209,14 +210,14 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
         <Card className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl shadow-lg text-white">
           <CardContent className="flex justify-end gap-2">
             <SecondaryButton type="button" onClick={onClose}>Annuler</SecondaryButton>
-            <button
+            <PrimaryButton
               type="submit"
               disabled={loading || saving}
-              className="bg-white/20 hover:bg-white/30 text-white font-bold py-2 px-4 rounded-xl backdrop-blur flex items-center gap-2"
+              className="flex items-center gap-2"
             >
               {(loading || saving) && <span className="loader-glass" />}
               {editing ? "Enregistrer" : "Créer"}
-            </button>
+            </PrimaryButton>
           </CardContent>
         </Card>
       </form>

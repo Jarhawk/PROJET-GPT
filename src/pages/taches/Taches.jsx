@@ -8,6 +8,7 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import TableContainer from "@/components/ui/TableContainer";
 import TachesKanban from "@/components/taches/TachesKanban";
 import GlassCard from "@/components/ui/GlassCard";
+import toast from "react-hot-toast";
 
 export default function Taches() {
   const { taches, loading, error, getTaches, createTache } = useTaches();
@@ -29,8 +30,13 @@ export default function Taches() {
   const handleQuickSubmit = async e => {
     e.preventDefault();
     if (!quick.titre.trim()) return;
-    await createTache(quick);
-    setQuick({ titre: '', date_echeance: '' });
+    try {
+      await createTache(quick);
+      toast.success('Tâche ajoutée');
+      setQuick({ titre: '', date_echeance: '' });
+    } catch (err) {
+      toast.error(err?.message || 'Erreur ajout');
+    }
   };
 
   return (

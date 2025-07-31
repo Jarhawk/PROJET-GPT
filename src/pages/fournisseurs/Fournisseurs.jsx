@@ -7,6 +7,7 @@ import { useProduitsFournisseur } from "@/hooks/useProduitsFournisseur";
 import { useProducts } from "@/hooks/useProducts";
 import { useFournisseursInactifs } from "@/hooks/useFournisseursInactifs";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import FournisseurRow from "@/components/fournisseurs/FournisseurRow";
 import { Dialog, DialogContent } from "@radix-ui/react-dialog";
 import jsPDF from "jspdf";
@@ -122,7 +123,7 @@ export default function Fournisseurs() {
       <Toaster />
       <h1 className="text-2xl font-bold">Gestion des fournisseurs</h1>
 
-      <Card className="bg-white/10 border border-white/20 shadow-lg backdrop-blur-xl rounded-2xl">
+      <Card>
         <CardHeader className="pb-4">
           <div className="flex flex-wrap gap-4 items-end">
             <div className="relative flex-1">
@@ -148,25 +149,16 @@ export default function Fournisseurs() {
         <CardContent className="pt-4">
           <div className="flex flex-wrap gap-4">
             {canEdit && (
-              <button
-                className="bg-white/20 hover:bg-white/30 text-white font-semibold px-4 py-2 rounded-xl flex items-center"
-                onClick={() => setShowCreate(true)}
-              >
+              <Button className="w-auto flex items-center" onClick={() => setShowCreate(true)}>
                 <PlusCircle className="mr-2" size={18} /> Ajouter fournisseur
-              </button>
+              </Button>
             )}
-            <button
-              className="bg-white/20 hover:bg-white/30 text-white font-semibold px-4 py-2 rounded-xl"
-              onClick={exportFournisseursToExcel}
-            >
+            <Button className="w-auto" onClick={exportFournisseursToExcel}>
               Export Excel
-            </button>
-            <button
-              className="bg-white/20 hover:bg-white/30 text-white font-semibold px-4 py-2 rounded-xl"
-              onClick={exportPDF}
-            >
+            </Button>
+            <Button className="w-auto" onClick={exportPDF}>
               Export PDF
-            </button>
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -182,7 +174,7 @@ export default function Fournisseurs() {
       )}
       {/* Statistiques générales */}
       <div className="grid md:grid-cols-2 gap-6 mb-10">
-        <Card className="bg-white/10 border border-white/20 shadow-lg backdrop-blur-xl rounded-2xl">
+        <Card>
           <CardHeader>
             <h2 className="font-semibold">Évolution des achats (tous fournisseurs)</h2>
           </CardHeader>
@@ -204,7 +196,7 @@ export default function Fournisseurs() {
             )}
           </CardContent>
         </Card>
-        <Card className="bg-white/10 border border-white/20 shadow-lg backdrop-blur-xl rounded-2xl">
+        <Card>
           <CardHeader>
             <h2 className="font-semibold">Top produits achetés</h2>
           </CardHeader>
@@ -228,13 +220,13 @@ export default function Fournisseurs() {
         </Card>
       </div>
       {/* Tableau fournisseurs */}
-      <Card className="bg-white/10 border border-white/20 shadow-lg backdrop-blur-xl rounded-2xl mb-6">
+      <Card className="mb-6">
         <CardHeader>
           <h2 className="font-semibold">Liste des fournisseurs</h2>
         </CardHeader>
         <CardContent className="pt-2">
-          <div className="overflow-x-auto rounded-xl backdrop-blur">
-            <table className="min-w-full text-sm text-white text-center whitespace-nowrap">
+          <div className="overflow-x-auto rounded-xl backdrop-blur-xl">
+            <table className="min-w-full text-sm text-white text-center whitespace-nowrap table-striped">
               <thead>
                 <tr>
                   <th className="py-2 px-3">Nom</th>
@@ -274,7 +266,7 @@ export default function Fournisseurs() {
               </tbody>
             </table>
           </div>
-          <div className="mt-4 flex gap-2 justify-center">
+          <div className="mt-6 flex gap-4 justify-center">
             {Array.from({ length: Math.max(1, Math.ceil(total / PAGE_SIZE)) }, (_, i) => (
               <button
                 key={i + 1}
@@ -290,7 +282,7 @@ export default function Fournisseurs() {
 
       {/* Modal création/édition */}
       <Dialog open={showCreate || !!editRow} onOpenChange={v => { if (!v) { setShowCreate(false); setEditRow(null); } }}>
-        <DialogContent className="bg-glass backdrop-blur-lg rounded-2xl shadow-xl max-w-lg w-full p-8">
+        <DialogContent className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl max-w-lg w-full p-8">
           <FournisseurForm
             fournisseur={editRow}
             saving={saving}
@@ -320,7 +312,7 @@ export default function Fournisseurs() {
 
       {/* Modal détail */}
       <Dialog open={!!selected} onOpenChange={v => !v && setSelected(null)}>
-        <DialogContent className="bg-glass backdrop-blur-lg rounded-2xl shadow-xl max-w-2xl w-full p-10">
+        <DialogContent className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl max-w-2xl w-full p-10">
           {selected && <FournisseurDetail id={selected} />}
         </DialogContent>
       </Dialog>

@@ -9,7 +9,7 @@ export default function FournisseurCreate() {
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden p-6 text-white">
       <LiquidBackground showParticles />
       <GlassCard className="relative z-10">
-        <FournisseurFormModal onClose={() => navigate(-1)} glass />
+        <FournisseurFormModal onClose={() => navigate(-1)} />
       </GlassCard>
     </div>
   );

@@ -44,7 +44,7 @@ export default function DocumentForm({ onUploaded, entiteType = "", entiteId = n
       />
       <label className="block text-sm mb-1">Commentaire</label>
       <textarea
-        className="w-full px-4 py-2 bg-white/20 text-white placeholder-white/70 rounded-md border border-white/30 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50"
+        className="w-full px-4 py-2 font-semibold text-white placeholder-white/50 bg-white/10 backdrop-blur-xl rounded-xl shadow-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/50"
         placeholder="Commentaire"
         value={commentaire}
         onChange={e => setCommentaire(e.target.value)}

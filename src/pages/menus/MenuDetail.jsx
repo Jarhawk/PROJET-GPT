@@ -33,7 +33,7 @@ export default function MenuDetail({ menu, onClose, onDuplicate }) {
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-glass backdrop-blur-lg border border-borderGlass rounded-xl shadow-lg p-8 min-w-[400px] max-w-[95vw] flex flex-col gap-2 relative">
+      <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow-lg p-8 min-w-[400px] max-w-[95vw] flex flex-col gap-2 relative text-white">
         <Button variant="outline" className="absolute top-2 right-2" onClick={onClose}>Fermer</Button>
         <h2 className="font-bold text-xl mb-4">{menu.nom}</h2>
         <div><b>Date :</b> {menu.date}</div>

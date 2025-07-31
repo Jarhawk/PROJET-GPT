@@ -161,7 +161,7 @@ export default function Mamas() {
         )}
       </TableContainer>
       <Dialog open={!!editMama} onOpenChange={v => !v && setEditMama(null)}>
-        <DialogContent className="bg-glass backdrop-blur-lg text-white rounded-xl shadow-lg p-6 max-w-md">
+        <DialogContent className="bg-white/10 backdrop-blur-lg text-white rounded-xl shadow-lg p-6 max-w-md">
           <DialogTitle className="font-bold mb-2">
             {editMama?.id ? "Modifier l'établissement" : "Nouvel établissement"}
           </DialogTitle>

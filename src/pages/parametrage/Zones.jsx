@@ -95,17 +95,17 @@ export default function Zones() {
           Suivant
         </Button>
       </div>
-      {edit && (
-        <div className="modal fixed inset-0 flex items-center justify-center bg-black/50" role="dialog">
-          <div className="bg-white rounded-lg p-4">
-            <ZoneForm
-              zone={edit}
-              onCancel={() => setEdit(null)}
-              onSave={handleSave}
-            />
+        {edit && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+            <div className="bg-white/10 backdrop-blur-xl rounded-xl shadow-lg border border-white/20 p-6 animate-fade-in">
+              <ZoneForm
+                zone={edit}
+                onCancel={() => setEdit(null)}
+                onSave={handleSave}
+              />
+            </div>
           </div>
-        </div>
-      )}
+        )}
     </div>
   );
 }

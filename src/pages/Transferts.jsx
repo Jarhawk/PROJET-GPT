@@ -346,7 +346,7 @@ export default function Transferts() {
                         Timeline
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="bg-glass backdrop-blur-lg rounded-xl shadow-lg p-6 max-w-lg">
+                    <DialogContent className="bg-white/10 backdrop-blur-lg rounded-xl shadow-lg p-6 max-w-lg">
                       <h3 className="font-bold mb-2">
                         Timeline transferts : {t.nom}
                       </h3>
@@ -389,7 +389,7 @@ export default function Transferts() {
         open={showCreate}
         onOpenChange={(v) => !v && setShowCreate(false)}
       >
-        <DialogContent className="bg-glass backdrop-blur-lg rounded-xl shadow-lg p-6 max-w-md">
+        <DialogContent className="bg-white/10 backdrop-blur-lg rounded-xl shadow-lg p-6 max-w-md">
           <h2 className="font-bold mb-2">Nouveau transfert de stock</h2>
           <form onSubmit={handleCreateTf} className="space-y-3">
             <div>

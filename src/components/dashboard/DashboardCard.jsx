@@ -15,7 +15,7 @@ export default function DashboardCard({ title, value, icon, type = "default", pr
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`bg-glass border border-borderGlass backdrop-blur rounded-2xl shadow-md p-4 flex flex-col items-center min-w-[180px] ${colorClass}`}
+      className={`bg-white/10 border border-white/20 backdrop-blur-xl rounded-2xl shadow-md p-4 flex flex-col items-center min-w-[180px] ${colorClass}`}
     >
       <div className="flex items-center space-x-2">
         {icon && <span className="text-2xl">{icon}</span>}

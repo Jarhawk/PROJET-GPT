@@ -73,7 +73,7 @@ export default function TacheForm({ task }) {
       <label className="block">
         <span>Description</span>
         <textarea
-          className="w-full px-4 py-2 bg-white/20 text-white placeholder-white/70 rounded-md border border-white/30 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50"
+          className="textarea"
           name="description"
           value={form.description}
           onChange={handleChange}

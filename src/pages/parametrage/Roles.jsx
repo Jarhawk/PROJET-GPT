@@ -95,7 +95,7 @@ export default function Roles() {
         </Button>
       </div>
       <TableContainer className="mb-6">
-        <table className="min-w-full table-auto text-center">
+        <table className="min-w-full table-auto text-center table-striped">
           <thead>
             <tr>
               <th className="px-2 py-1">Nom</th>
@@ -142,7 +142,7 @@ export default function Roles() {
                   {(r.access_rights || []).map(k => (
                     <span
                       key={k}
-                      className="inline-block bg-gray-200 text-gray-800 text-xs px-1 mr-1 rounded"
+                      className="inline-block bg-white/20 text-white text-xs px-1 mr-1 rounded"
                     >
                       {k}
                     </span>
@@ -154,7 +154,7 @@ export default function Roles() {
         </table>
       </TableContainer>
       {/* Pagination */}
-      <div className="flex justify-end gap-2 mb-12">
+      <div className="mt-6 flex justify-center gap-4 mb-12">
         <Button
           size="sm"
           disabled={page <= 1}
@@ -171,7 +171,7 @@ export default function Roles() {
         </Button>
       </div>
       <Dialog open={!!editRole} onOpenChange={v => !v && setEditRole(null)}>
-        <DialogContent className="bg-glass backdrop-blur-lg text-white rounded-xl shadow-lg p-6 max-w-xl">
+        <DialogContent className="bg-white/10 backdrop-blur-lg text-white rounded-xl shadow-lg p-6 max-w-xl">
           <DialogTitle className="font-bold mb-2">
             {editRole?.id ? "Modifier le rôle" : "Nouveau rôle"}
           </DialogTitle>

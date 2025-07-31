@@ -72,7 +72,7 @@ export default function AideForm({ article, onClose, onSaved }) {
           onChange={handleChange}
         />
         <textarea
-          className="w-full px-4 py-2 bg-white/20 text-white placeholder-white/70 rounded-md border border-white/30 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50 h-32"
+          className="textarea h-32"
           name="contenu"
           placeholder="Contenu"
           value={values.contenu}

@@ -14,7 +14,7 @@ import React from 'react';
  */
 export function GlassCard({ children, title, footer, className = '', width = 'w-full max-w-lg' }) {
   return (
-    <div className={`relative ${width} rounded-2xl p-6 shadow-xl border border-white/20 bg-white/10 backdrop-blur-md text-white ${className}`}> 
+    <div className={`relative ${width} rounded-xl p-6 shadow-lg border border-white/20 bg-white/10 backdrop-blur-xl text-white ${className}`}>
       {title && <h2 className="text-xl font-semibold mb-4 text-white/90">{title}</h2>}
       <div className="space-y-4">{children}</div>
       {footer && <div className="mt-6">{footer}</div>}

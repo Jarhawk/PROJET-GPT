@@ -52,7 +52,7 @@ a:hover {
 /* Buttons pro */
 .btn,
 .btn-primary {
-  @apply px-4 py-2 rounded-xl font-bold bg-white/10 text-white shadow hover:shadow-md transition backdrop-blur-lg;
+  @apply px-4 py-2 rounded-xl font-semibold bg-white/10 text-white hover:bg-white/20 transition-all backdrop-blur-xl;
 }
 .btn-sm {
   @apply px-2 py-1 text-sm;
@@ -69,18 +69,23 @@ a:hover {
   @apply bg-blue-600 text-white;
 }
 .badge-user {
-  @apply bg-white/20 text-white backdrop-blur;
+  @apply bg-white/20 text-white backdrop-blur-xl;
 }
 
 /* Input custom */
 .input {
-  @apply w-full px-4 py-2 bg-white/20 text-white placeholder-white/70 rounded-md border border-white/30 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50;
+  @apply w-full px-4 py-2 font-semibold text-white placeholder-white/50 bg-white/10 backdrop-blur-xl rounded-xl shadow-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/50;
 }
 .textarea {
-  @apply w-full px-4 py-2 bg-white/20 text-white placeholder-white/70 rounded-md border border-white/30 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50;
+  @apply w-full px-4 py-2 font-semibold text-white placeholder-white/50 bg-white/10 backdrop-blur-xl rounded-xl shadow-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/50;
 }
 .select {
-  @apply w-full px-4 py-2 bg-white/20 text-white placeholder-white/70 rounded-md border border-white/30 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50;
+  @apply w-full px-4 py-2 font-semibold text-white placeholder-white/50 bg-white/10 backdrop-blur-xl rounded-xl shadow-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/50;
+}
+
+/* Tables */
+.table-striped tbody tr:nth-child(even) {
+  @apply bg-white/5;
 }
 
 /* Dark mode auto */

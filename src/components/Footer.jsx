@@ -4,7 +4,7 @@ import { watermark } from "@/license";
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-glass backdrop-blur-md border-t border-white/10 text-white/90 text-sm py-4 px-6 flex flex-col sm:flex-row items-center justify-between rounded-t-2xl shadow-lg">
+    <footer className="w-full bg-white/10 backdrop-blur-md border-t border-white/10 text-white/90 text-sm py-4 px-6 flex flex-col sm:flex-row items-center justify-between rounded-t-2xl shadow-lg">
       <span className="font-semibold tracking-wide mb-2 sm:mb-0">MamaStock 2025</span>
       <span className="flex items-center gap-4 flex-wrap">
         <Link to="/rgpd" className="underline hover:text-mamastockGold transition">

@@ -18,7 +18,7 @@ export default function Licence() {
       </p>
       <Link
         to="/"
-        className="inline-block px-6 py-2 rounded-xl bg-glass border border-borderGlass hover:bg-white/20 transition backdrop-blur"
+        className="inline-block px-6 py-2 rounded-xl bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-white/20 transition"
       >
         Retour à l'accueil
       </Link>

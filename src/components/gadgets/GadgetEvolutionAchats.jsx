@@ -14,7 +14,7 @@ export default function GadgetEvolutionAchats() {
     );
 
   return (
-    <div className="bg-glass border border-borderGlass backdrop-blur rounded-2xl shadow-md p-4 text-white">
+    <div className="bg-white/10 border border-white/20 backdrop-blur-xl rounded-2xl shadow-md p-4 text-white">
       <h3 className="font-bold mb-2">Évolution des achats</h3>
       <ResponsiveContainer width="100%" height={200}>
         <LineChart data={data} margin={{ left: -10, right: 10 }}>

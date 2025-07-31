@@ -1,4 +1,5 @@
 import { Eye, Edit, Trash2 } from "lucide-react";
+import Button from "@/components/ui/button";
 
 export default function FournisseurRow({ fournisseur, productCount, onDetail, onEdit, onDelete, canEdit }) {
   return (
@@ -9,31 +10,34 @@ export default function FournisseurRow({ fournisseur, productCount, onDetail, on
       <td>{fournisseur.contact?.email}</td>
       <td>{productCount}</td>
       <td className="py-2 px-3">
-        <button
-          className="bg-white/20 hover:bg-white/30 text-white font-semibold px-3 py-1 rounded-xl flex items-center gap-1"
+        <Button
+          className="w-auto flex items-center gap-1"
           onClick={() => onDetail(fournisseur.id)}
+          aria-label="Voir"
         >
           <Eye size={16} />
           <span className="hidden sm:inline">Voir</span>
-        </button>
+        </Button>
       </td>
       <td className="py-2 px-3">
         {canEdit && (
           <div className="flex gap-2">
-            <button
-              className="bg-white/20 hover:bg-white/30 text-white font-semibold px-3 py-1 rounded-xl flex items-center gap-1"
+            <Button
+              className="w-auto flex items-center gap-1"
               onClick={() => onEdit(fournisseur)}
+              aria-label="Modifier"
             >
               <Edit size={16} />
               <span className="hidden sm:inline">Modifier</span>
-            </button>
-            <button
-              className="bg-white/20 hover:bg-white/30 text-white font-semibold px-3 py-1 rounded-xl flex items-center gap-1"
+            </Button>
+            <Button
+              className="w-auto flex items-center gap-1"
               onClick={() => onDelete(fournisseur.id)}
+              aria-label="Désactiver"
             >
               <Trash2 size={16} />
               <span className="hidden sm:inline">Désactiver</span>
-            </button>
+            </Button>
           </div>
         )}
       </td>

@@ -77,7 +77,7 @@ export default function ExportComptaPage() {
       {preview.length > 0 && (
         <TableContainer>
           <table className="min-w-full table-auto text-sm">
-            <thead className="bg-glass border-b border-borderGlass">
+            <thead className="bg-white/10 border-b border-white/20">
               <tr>
                 <th className="px-2 py-1">Date</th>
                 <th className="px-2 py-1">Fournisseur</th>

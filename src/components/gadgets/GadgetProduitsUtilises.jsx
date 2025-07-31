@@ -14,7 +14,7 @@ export default function GadgetProduitsUtilises() {
     );
 
   return (
-    <div className="bg-glass border border-borderGlass backdrop-blur rounded-2xl shadow-md p-4 text-white">
+    <div className="bg-white/10 border border-white/20 backdrop-blur-xl rounded-2xl shadow-md p-4 text-white">
       <h3 className="font-bold mb-2">Produits les plus utilisés</h3>
       <Motion.ul initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-2 text-sm">
         {data.map((p) => (

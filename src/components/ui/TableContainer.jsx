@@ -4,7 +4,7 @@ import React from "react";
 export default function TableContainer({ className = "", children, ...props }) {
   return (
     <div
-      className={`bg-glass border border-borderGlass backdrop-blur-lg rounded-xl shadow-md overflow-x-auto ${className}`}
+      className={`bg-white/5 text-white border border-white/10 rounded-xl overflow-x-auto ${className}`}
       {...props}
     >
       {children}

@@ -31,7 +31,7 @@ export default function PrixFournisseurs({ produitId }) {
       <GlassCard className="p-4">
         <TableContainer>
           <table className="w-full text-left border-collapse">
-        <thead className="bg-glass border-b border-borderGlass">
+        <thead className="bg-white/10 border-b border-white/20">
           <tr>
             <th className="px-2 py-1">Fournisseur</th>
             <th className="px-2 py-1 text-right">Dernier prix</th>

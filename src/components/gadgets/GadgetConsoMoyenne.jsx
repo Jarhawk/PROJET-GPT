@@ -17,7 +17,7 @@ export default function GadgetConsoMoyenne() {
     <Motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-glass border border-borderGlass backdrop-blur rounded-2xl shadow-md p-4 text-center text-white"
+      className="bg-white/10 border border-white/20 backdrop-blur-xl rounded-2xl shadow-md p-4 text-center text-white"
     >
       <h3 className="font-bold mb-2">Consommation moyenne / jour</h3>
       <div className="text-3xl font-extrabold">{avg.toFixed(2)}</div>

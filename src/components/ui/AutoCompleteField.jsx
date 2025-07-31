@@ -62,7 +62,7 @@ export default function AutoCompleteField({
         list={`list-${label}`}
         value={inputValue}
         onChange={handleInputChange}
-        className={`bg-white/70 backdrop-blur text-black rounded-xl shadow-sm border border-white/40 ${isValid ? "border-mamastockGold" : ""}`}
+        className={`${isValid ? "border-mamastockGold" : ""}`}
         aria-label={label}
         aria-autocomplete="list"
         role="combobox"

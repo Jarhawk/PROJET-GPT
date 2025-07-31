@@ -6,6 +6,7 @@ import logo from "@/assets/logo-mamastock.png";
 import toast, { Toaster } from "react-hot-toast";
 import GlassCard from "@/components/ui/GlassCard";
 import PageWrapper from "@/components/ui/PageWrapper";
+import { Input } from "@/components/ui/input";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 
 export default function UpdatePassword() {
@@ -43,16 +44,14 @@ export default function UpdatePassword() {
           <p className="text-center">{message}</p>
         ) : (
           <form onSubmit={handleUpdate} className="w-full flex flex-col gap-4">
-            <input
-              className="w-full rounded-xl border border-gold/30 bg-white/70 dark:bg-[#202638]/50 py-2 px-4 text-background dark:text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-gold/30 backdrop-blur transition"
+            <Input
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder="Nouveau mot de passe"
               required
             />
-            <input
-              className="w-full rounded-xl border border-gold/30 bg-white/70 dark:bg-[#202638]/50 py-2 px-4 text-background dark:text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-gold/30 backdrop-blur transition"
+            <Input
               type="password"
               value={confirm}
               onChange={e => setConfirm(e.target.value)}

@@ -83,7 +83,7 @@ export default function UtilisateurRow({
       </tr>
       {showHistory && (
         <tr>
-          <td colSpan={6} className="bg-glass border border-borderGlass backdrop-blur">
+          <td colSpan={6} className="bg-white/10 border border-white/20 backdrop-blur-xl">
             <div>
               <b>Connexions récentes :</b>
               <ul>

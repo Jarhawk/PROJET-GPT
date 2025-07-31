@@ -9,6 +9,7 @@ import SecondaryButton from "@/components/ui/SecondaryButton";
 import { Select } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import TableContainer from "@/components/ui/TableContainer";
+import GlassCard from "@/components/ui/GlassCard";
 import { Search } from "lucide-react";
 import { Toaster, toast } from "react-hot-toast";
 
@@ -61,12 +62,13 @@ export default function Alertes() {
     <div className="p-6 container mx-auto text-sm">
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold mb-4">Alertes avancées</h1>
-      <form onSubmit={handleSubmit} className="flex gap-2 mb-4 items-end">
-        <Select
-          value={form.produit_id}
-          onChange={(e) => setForm(f => ({ ...f, produit_id: e.target.value }))}
-          className="w-64"
-          required
+      <GlassCard title="Nouvelle alerte" className="mb-4">
+        <form onSubmit={handleSubmit} className="flex flex-wrap gap-2 items-end">
+          <Select
+            value={form.produit_id}
+            onChange={(e) => setForm(f => ({ ...f, produit_id: e.target.value }))}
+            className="w-64"
+            required
         >
           <option value="">-- Produit --</option>
           {products.map(p => (
@@ -82,7 +84,8 @@ export default function Alertes() {
           required
         />
         <PrimaryButton type="submit">Ajouter</PrimaryButton>
-      </form>
+        </form>
+      </GlassCard>
       <div className="relative w-64 mb-4">
         <Input
           type="search"

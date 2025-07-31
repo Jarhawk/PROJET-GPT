@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { Input } from "@/components/ui/input";
 import TableContainer from "@/components/ui/TableContainer";
+import GlassCard from "@/components/ui/GlassCard";
 import { Toaster } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
@@ -33,13 +34,15 @@ export default function Logs() {
     <div className="p-6 container mx-auto space-y-4 text-sm">
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold">Logs sécurité & activité</h1>
-      <form onSubmit={handleSubmit} className="flex gap-2 flex-wrap items-end">
+      <GlassCard title="Filtrer" className="mb-4">
+        <form onSubmit={handleSubmit} className="flex flex-wrap gap-2 items-end">
         <Input placeholder="IP" value={ip} onChange={(e) => setIp(e.target.value)} className="w-32" />
         <Input placeholder="Utilisateur id" value={utilisateur} onChange={(e) => setUtilisateur(e.target.value)} className="w-40" />
         <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         <Input placeholder="Type" value={type} onChange={(e) => setType(e.target.value)} className="w-32" />
         <PrimaryButton type="submit">Filtrer</PrimaryButton>
-      </form>
+        </form>
+      </GlassCard>
       {loading ? (
         <LoadingSpinner message="Chargement..." />
       ) : error ? (

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { Input } from "@/components/ui/input";
 import TableContainer from "@/components/ui/TableContainer";
+import GlassCard from "@/components/ui/GlassCard";
 import { Toaster, toast } from "react-hot-toast";
 
 export default function Pertes() {
@@ -65,12 +66,13 @@ export default function Pertes() {
     <div className="p-6 container mx-auto">
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold mb-4">Pertes / Casses / Dons</h1>
-      <form onSubmit={handleSubmit} className="flex gap-2 mb-4 flex-wrap items-end">
-        <label className="sr-only" htmlFor="produit_id">Produit</label>
-        <select
-          id="produit_id"
-          name="produit_id"
-          className="input"
+      <GlassCard title="Nouvelle perte" className="mb-4">
+        <form onSubmit={handleSubmit} className="flex flex-wrap gap-2 items-end">
+          <label className="sr-only" htmlFor="produit_id">Produit</label>
+          <select
+            id="produit_id"
+            name="produit_id"
+            className="input"
           value={form.produit_id}
           onChange={handleChange}
           required
@@ -105,10 +107,11 @@ export default function Pertes() {
           value={form.motif}
           onChange={handleChange}
         />
-        <PrimaryButton type="submit" disabled={saving} className="h-10">
-          {saving ? "Ajout..." : "Ajouter"}
-        </PrimaryButton>
-      </form>
+          <PrimaryButton type="submit" disabled={saving} className="h-10">
+            {saving ? "Ajout..." : "Ajouter"}
+          </PrimaryButton>
+        </form>
+      </GlassCard>
       <TableContainer className="mt-4">
         <table className="min-w-full text-xs">
           <thead>

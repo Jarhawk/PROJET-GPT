@@ -7,6 +7,7 @@ import { useApiKeys } from '@/hooks/useApiKeys';
 import { Toaster, toast } from 'react-hot-toast';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import TableContainer from '@/components/ui/TableContainer';
+import GlassCard from '@/components/ui/GlassCard';
 
 export default function APIKeys() {
   const { keys, loading, listKeys, createKey, revokeKey } = useApiKeys();
@@ -32,7 +33,8 @@ export default function APIKeys() {
       <h1 className="text-2xl font-bold mb-4">Clés API</h1>
       <PrimaryButton onClick={() => setFormOpen(o => !o)}>Nouvelle clé</PrimaryButton>
       {formOpen && (
-        <form className="space-y-2 mt-4" onSubmit={handleSubmit}>
+        <GlassCard title="Nouvelle clé" className="mt-4">
+          <form className="space-y-2" onSubmit={handleSubmit}>
           <div>
             <label>Nom</label>
             <Input className="w-full" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
@@ -50,7 +52,8 @@ export default function APIKeys() {
             <Input type="date" className="" value={form.expiration} onChange={e => setForm(f => ({ ...f, expiration: e.target.value }))} />
           </div>
           <PrimaryButton type="submit">Créer</PrimaryButton>
-        </form>
+          </form>
+        </GlassCard>
       )}
       <TableContainer className="mt-6">
         <table className="min-w-full table-auto text-center">

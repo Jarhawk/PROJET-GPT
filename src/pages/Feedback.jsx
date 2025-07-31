@@ -7,6 +7,7 @@ import PrimaryButton from "@/components/ui/PrimaryButton";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import TableContainer from "@/components/ui/TableContainer";
+import GlassCard from "@/components/ui/GlassCard";
 import { Toaster, toast } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
@@ -33,14 +34,15 @@ export default function Feedback() {
     <div className="p-6 container mx-auto text-sm space-y-6">
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold">Feedback utilisateur</h1>
-      <form onSubmit={handleSubmit} className="space-y-2 max-w-md">
-        <Input
-          className="w-full"
-          placeholder="Module concerné"
-          value={form.module}
-          onChange={(e) => setForm((f) => ({ ...f, module: e.target.value }))}
-          required
-        />
+      <GlassCard title="Envoyer un message" className="max-w-md">
+        <form onSubmit={handleSubmit} className="space-y-2">
+          <Input
+            className="w-full"
+            placeholder="Module concerné"
+            value={form.module}
+            onChange={(e) => setForm((f) => ({ ...f, module: e.target.value }))}
+            required
+          />
         <textarea
           className="input w-full h-24"
           placeholder="Votre message"
@@ -58,10 +60,10 @@ export default function Feedback() {
           <option value="elevee">Élevée</option>
         </Select>
         <PrimaryButton type="submit" disabled={loading} className="flex items-center gap-2">
-          {loading && <span className="loader-glass" />}
-          Envoyer
+          {loading && <span className="loader-glass" />}Envoyer
         </PrimaryButton>
-      </form>
+        </form>
+      </GlassCard>
       {error && <div className="text-red-600">{error}</div>}
       <TableContainer>
         <table className="min-w-full text-xs">

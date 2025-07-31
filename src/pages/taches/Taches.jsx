@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import TableContainer from "@/components/ui/TableContainer";
 import TachesKanban from "@/components/taches/TachesKanban";
+import GlassCard from "@/components/ui/GlassCard";
 
 export default function Taches() {
   const { taches, loading, error, getTaches, createTache } = useTaches();
@@ -43,18 +44,21 @@ export default function Taches() {
           <Link to="/taches/new" className="btn">Créer une tâche</Link>
         </div>
       </div>
-      <form onSubmit={handleQuickSubmit} className="flex gap-2 mb-4">
-        <input className="input flex-1" name="titre" value={quick.titre} onChange={handleQuickChange} placeholder="Nouvelle tâche" required />
-        <input type="date" className="input" name="date_echeance" value={quick.date_echeance} onChange={handleQuickChange} />
-        <Button type="submit">Ajouter</Button>
-      </form>
-      <div className="flex flex-wrap gap-2 mb-4">
-        <select name="statut" value={filters.statut} onChange={handleChange} className="input">
-          <option value="">-- Statut --</option>
-          <option value="a_faire">À faire</option>
-          <option value="en_cours">En cours</option>
-          <option value="terminee">Terminée</option>
-        </select>
+      <GlassCard title="Ajouter rapidement" className="mb-4">
+        <form onSubmit={handleQuickSubmit} className="flex gap-2 flex-wrap items-end">
+          <input className="input flex-1" name="titre" value={quick.titre} onChange={handleQuickChange} placeholder="Nouvelle tâche" required />
+          <input type="date" className="input" name="date_echeance" value={quick.date_echeance} onChange={handleQuickChange} />
+          <Button type="submit">Ajouter</Button>
+        </form>
+      </GlassCard>
+      <GlassCard title="Filtres" className="mb-4">
+        <div className="flex flex-wrap gap-2">
+          <select name="statut" value={filters.statut} onChange={handleChange} className="input">
+            <option value="">-- Statut --</option>
+            <option value="a_faire">À faire</option>
+            <option value="en_cours">En cours</option>
+            <option value="terminee">Terminée</option>
+          </select>
         <select name="priorite" value={filters.priorite} onChange={handleChange} className="input">
           <option value="">-- Priorité --</option>
           <option value="basse">Basse</option>
@@ -70,7 +74,8 @@ export default function Taches() {
         <input type="date" name="start" value={filters.start} onChange={handleChange} className="input" />
         <input type="date" name="end" value={filters.end} onChange={handleChange} className="input" />
         <Button onClick={() => getTaches(filters)}>Filtrer</Button>
-      </div>
+        </div>
+      </GlassCard>
       {loading && <LoadingSpinner message="Chargement..." />}
       {error && <div className="text-red-600">{error}</div>}
       {view === 'table' ? (

@@ -55,14 +55,14 @@ export default function AutoCompleteField({
 
   return (
     <div className="flex flex-col gap-1 w-full">
-      <label className="text-sm text-white font-medium">
+      <label className="text-sm text-black font-medium">
         {label} {required && "*"}
       </label>
       <Input
         list={`list-${label}`}
         value={inputValue}
         onChange={handleInputChange}
-        className={`bg-white/20 dark:bg-[#202638]/50 backdrop-blur rounded-lg border border-white/30 text-white ${isValid ? "border-mamastockGold shadow" : ""}`}
+        className={`bg-white/70 backdrop-blur text-black rounded-xl shadow-sm border border-white/40 ${isValid ? "border-mamastockGold" : ""}`}
         aria-label={label}
         aria-autocomplete="list"
         role="combobox"

@@ -7,20 +7,29 @@ import { Input } from "@/components/ui/input";
 import GlassCard from "@/components/ui/GlassCard";
 import toast from "react-hot-toast";
 
-export default function FournisseurForm({ fournisseur = {}, onSubmit, onCancel, saving }) {
-  const [nom, setNom] = useState(fournisseur.nom || "");
-  const [tel, setTel] = useState(fournisseur.contact?.tel || "");
-  const [email, setEmail] = useState(fournisseur.contact?.email || "");
-  const [contact, setContact] = useState(fournisseur.contact?.nom || "");
-  const [actif, setActif] = useState(fournisseur.actif ?? true);
+export default function FournisseurForm({ fournisseur: fournisseurProp, onSubmit, onCancel, saving }) {
+  const fournisseur = fournisseurProp || null;
+  const [nom, setNom] = useState(fournisseur?.nom || "");
+  const [tel, setTel] = useState(fournisseur?.contact?.tel || "");
+  const [email, setEmail] = useState(fournisseur?.contact?.email || "");
+  const [contact, setContact] = useState(fournisseur?.contact?.nom || "");
+  const [actif, setActif] = useState(fournisseur?.actif ?? true);
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    setNom(fournisseur.nom || "");
-    setTel(fournisseur.contact?.tel || "");
-    setEmail(fournisseur.contact?.email || "");
-    setContact(fournisseur.contact?.nom || "");
-    setActif(fournisseur.actif ?? true);
+    if (fournisseur) {
+      setNom(fournisseur.nom || "");
+      setTel(fournisseur.contact?.tel || "");
+      setEmail(fournisseur.contact?.email || "");
+      setContact(fournisseur.contact?.nom || "");
+      setActif(fournisseur.actif ?? true);
+    } else {
+      setNom("");
+      setTel("");
+      setEmail("");
+      setContact("");
+      setActif(true);
+    }
     setErrors({});
   }, [fournisseur]);
 
@@ -44,7 +53,7 @@ export default function FournisseurForm({ fournisseur = {}, onSubmit, onCancel, 
   };
 
   return (
-    <GlassCard title={fournisseur.id ? "Modifier le fournisseur" : "Nouveau fournisseur"}>
+    <GlassCard title={fournisseur?.id ? "Modifier le fournisseur" : "Nouveau fournisseur"}>
       <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label className="block font-semibold mb-1">Nom *</label>

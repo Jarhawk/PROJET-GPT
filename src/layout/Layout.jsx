@@ -44,6 +44,7 @@ export default function Layout() {
       mama_id,
       access_rights,
     });
+    console.log("\uD83E\uDDE0 moduleKey access_rights", userData?.access_rights);
   }
 
   if (pathname === "/login" || pathname === "/unauthorized") return <Outlet />;

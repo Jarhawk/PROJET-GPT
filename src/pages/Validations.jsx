@@ -5,6 +5,7 @@ import useAuth from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Toaster, toast } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import GlassCard from "@/components/ui/GlassCard";
 import TableContainer from "@/components/ui/TableContainer";
 
 export default function Validations() {
@@ -52,14 +53,15 @@ export default function Validations() {
     <div className="p-8 container mx-auto text-sm">
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold mb-4">Validations</h1>
-      <form onSubmit={handleSubmit} className="flex gap-2 mb-4 items-end">
-        <input
-          className="input"
-          placeholder="Module"
-          value={form.module}
-          onChange={(e) => setForm(f => ({ ...f, module: e.target.value }))}
-          required
-        />
+      <GlassCard title="Nouvelle demande" className="mb-4">
+        <form onSubmit={handleSubmit} className="flex flex-wrap gap-2 items-end">
+          <input
+            className="input"
+            placeholder="Module"
+            value={form.module}
+            onChange={(e) => setForm(f => ({ ...f, module: e.target.value }))}
+            required
+          />
         <input
           className="input"
           placeholder="Action"
@@ -76,7 +78,8 @@ export default function Validations() {
         <Button type="submit" disabled={saving}>
           {saving ? "Envoi…" : "Demander"}
         </Button>
-      </form>
+        </form>
+      </GlassCard>
       <TableContainer className="mt-4">
         <table className="min-w-full text-sm">
         <thead>

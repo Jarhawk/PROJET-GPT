@@ -5,6 +5,7 @@ import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import { Input } from "@/components/ui/input";
 import TableContainer from "@/components/ui/TableContainer";
+import GlassCard from "@/components/ui/GlassCard";
 import {
   Dialog,
   DialogContent,
@@ -53,15 +54,17 @@ export default function InventaireZones() {
     <div className="p-6 max-w-lg mx-auto text-shadow">
       <Toaster />
       <h1 className="text-2xl font-bold mb-4">Zones d'inventaire</h1>
-      <div className="flex gap-2 mb-4 items-end">
-        <Input
-          className="input flex-1"
-          placeholder="Recherche zone"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
-        <PrimaryButton type="button" onClick={() => setEditZone({ nom: "" })}>+ Nouvelle zone</PrimaryButton>
-      </div>
+      <GlassCard title="Zones" className="mb-4">
+        <form onSubmit={e => e.preventDefault()} className="flex gap-2 items-end">
+          <Input
+            className="input flex-1"
+            placeholder="Recherche zone"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          <PrimaryButton type="button" onClick={() => setEditZone({ nom: "" })}>+ Nouvelle zone</PrimaryButton>
+        </form>
+      </GlassCard>
       <TableContainer>
         <table className="min-w-full text-center text-sm">
           <thead>

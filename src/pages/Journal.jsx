@@ -7,6 +7,7 @@ import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import { Input } from "@/components/ui/input";
 import TableContainer from "@/components/ui/TableContainer";
+import GlassCard from "@/components/ui/GlassCard";
 import { Toaster } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
@@ -32,7 +33,8 @@ export default function Journal() {
   return (
     <div className="p-6 container mx-auto space-y-4">
       <Toaster position="top-right" />
-      <form onSubmit={handleSubmit} className="flex gap-2 mb-4 flex-wrap items-end">
+      <GlassCard title="Filtrer" className="mb-4">
+        <form onSubmit={handleSubmit} className="flex flex-wrap gap-2 items-end">
         <Input
           placeholder="Recherche action"
           value={search}
@@ -55,7 +57,8 @@ export default function Journal() {
         <SecondaryButton type="button" onClick={exportLogsToExcel}>
           Export Excel
         </SecondaryButton>
-      </form>
+        </form>
+      </GlassCard>
       <TableContainer>
         <table className="min-w-full text-xs">
           <thead>

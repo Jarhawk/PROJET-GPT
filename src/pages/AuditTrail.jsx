@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import TableContainer from "@/components/ui/TableContainer";
 import { Toaster } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import GlassCard from "@/components/ui/GlassCard";
 
 export default function AuditTrail() {
   const { entries, fetchEntries, loading, error } = useAuditTrail();
@@ -35,12 +36,13 @@ export default function AuditTrail() {
     <div className="p-8 container mx-auto text-xs">
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold mb-4">Audit avancé</h1>
-      <form onSubmit={handleSubmit} className="flex gap-2 mb-4 items-end">
-        <Input
-          placeholder="Table"
-          value={table}
-          onChange={(e) => setTable(e.target.value)}
-          className="w-32"
+      <GlassCard title="Filtrer" className="mb-4">
+        <form onSubmit={handleSubmit} className="flex flex-wrap gap-2 items-end">
+          <Input
+            placeholder="Table"
+            value={table}
+            onChange={(e) => setTable(e.target.value)}
+            className="w-32"
         />
         <Input
           type="date"
@@ -57,7 +59,8 @@ export default function AuditTrail() {
           className="w-40"
         />
         <PrimaryButton type="submit">Filtrer</PrimaryButton>
-      </form>
+        </form>
+      </GlassCard>
       <TableContainer className="mt-4">
         <table className="min-w-full text-xs">
           <thead>

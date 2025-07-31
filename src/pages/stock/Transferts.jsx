@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import GlassCard from "@/components/ui/GlassCard";
 import toast from "react-hot-toast";
 
 export default function Transferts() {
@@ -131,7 +132,8 @@ export default function Transferts() {
       </TableContainer>
       {showForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur flex items-center justify-center z-50">
-          <form onSubmit={handleSubmit} className="bg-glass p-6 rounded-xl space-y-3 w-96">
+          <GlassCard title="Nouveau transfert" className="w-96 p-6">
+            <form onSubmit={handleSubmit} className="space-y-3">
             <div className="flex gap-2">
               <select className="input flex-1" value={formHead.zone_source_id} onChange={e => setFormHead(h => ({ ...h, zone_source_id: e.target.value }))}>
                 <option value="">Zone source</option>
@@ -158,7 +160,8 @@ export default function Transferts() {
               <Button type="submit" disabled={saving}>Valider</Button>
               <Button type="button" variant="outline" onClick={() => setShowForm(false)}>Annuler</Button>
             </div>
-          </form>
+            </form>
+          </GlassCard>
         </div>
       )}
     </div>

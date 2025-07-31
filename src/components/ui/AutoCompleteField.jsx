@@ -39,7 +39,7 @@ export default function AutoCompleteField({
     setInputValue(val);
     const match = resolved.find(o => o.label === val);
     if (match) onChange({ id: match.value, nom: match.label });
-    else onChange(val ? { id: null, nom: val } : null);
+    else onChange(val ? { id: null, nom: val } : { id: "", nom: "" });
     setShowAdd(val && !match);
   };
 

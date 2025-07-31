@@ -21,6 +21,7 @@ export default function ProduitForm({ produit, familles = [], unites = [], onSuc
   const { fournisseurs, fetchFournisseurs } = useFournisseurs();
 
   const [nom, setNom] = useState(produit?.nom || "");
+  // Stocke uniquement les IDs sélectionnés via l'autocomplétion
   const [familleId, setFamilleId] = useState(produit?.famille_id || "");
   const [uniteId, setUniteId] = useState(produit?.unite_id || "");
   const [fournisseurId, setFournisseurId] = useState(produit?.fournisseur_id || "");

@@ -87,6 +87,15 @@ a:hover {
 .table-striped tbody tr:nth-child(even) {
   @apply bg-white/5;
 }
+.listing-table {
+  @apply w-full min-w-max table-auto text-left whitespace-nowrap;
+}
+.listing-table thead th {
+  @apply bg-white/10 backdrop-blur-md sticky top-0 z-10 px-4 py-2;
+}
+.listing-table tbody tr:nth-child(odd) {
+  @apply bg-white/5;
+}
 
 /* Dark mode auto */
 html.dark body {

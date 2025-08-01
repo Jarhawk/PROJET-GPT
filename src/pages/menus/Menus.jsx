@@ -10,7 +10,9 @@ import { Toaster, toast } from "react-hot-toast";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import { motion as Motion } from "framer-motion";
-import TableContainer from "@/components/ui/TableContainer";
+import ListingContainer from "@/components/ui/ListingContainer";
+import PaginationFooter from "@/components/ui/PaginationFooter";
+import TableHeader from "@/components/ui/TableHeader";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function Menus() {
@@ -91,7 +93,7 @@ export default function Menus() {
   return (
     <div className="p-6 container mx-auto">
       <Toaster position="top-right" />
-      <div className="flex flex-wrap gap-4 items-center mb-4">
+      <TableHeader>
         <input
           type="search"
           value={search}
@@ -121,8 +123,8 @@ export default function Menus() {
           Ajouter un menu
         </Button>
         <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
-      </div>
-      <TableContainer className="mt-4">
+      </TableHeader>
+      <ListingContainer className="mt-4">
         <Motion.table
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -189,24 +191,13 @@ export default function Menus() {
           ))}
         </tbody>
         </Motion.table>
-      </TableContainer>
-      <div className="flex justify-center gap-2 my-4">
-        <Button
-          variant="outline"
-          disabled={page <= 1}
-          onClick={() => setPage(p => Math.max(1, p - 1))}
-        >
-          Précédent
-        </Button>
-        <span className="px-2">Page {page} / {pageCount}</span>
-        <Button
-          variant="outline"
-          disabled={page >= pageCount}
-          onClick={() => setPage(p => Math.min(pageCount, p + 1))}
-        >
-          Suivant
-        </Button>
-      </div>
+      </ListingContainer>
+      <PaginationFooter
+        page={page}
+        pages={pageCount}
+        onPageChange={setPage}
+        className="my-4"
+      />
       {showForm && (
         <MenuForm
           menu={selected}

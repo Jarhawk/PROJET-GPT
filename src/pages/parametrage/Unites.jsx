@@ -2,6 +2,9 @@
 import { useEffect, useState } from 'react';
 import { Toaster, toast } from 'react-hot-toast';
 import TableContainer from '@/components/ui/TableContainer';
+import ListingContainer from '@/components/ui/ListingContainer';
+import PaginationFooter from '@/components/ui/PaginationFooter';
+import TableHeader from '@/components/ui/TableHeader';
 import { Button } from '@/components/ui/button';
 import { useUnites } from '@/hooks/useUnites';
 import UniteRow from '@/components/parametrage/UniteRow';
@@ -51,7 +54,7 @@ export default function Unites() {
     <div className="p-6 max-w-2xl mx-auto">
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold mb-4">Unités de produits</h1>
-      <div className="flex gap-2 mb-4 items-end">
+      <TableHeader className="gap-2">
         <input
           className="input flex-1"
           placeholder="Recherche"
@@ -59,9 +62,9 @@ export default function Unites() {
           onChange={e => setSearch(e.target.value)}
         />
         <Button onClick={() => setEdit({})}>+ Nouvelle unité</Button>
-      </div>
-      <TableContainer>
-        <table className="min-w-full text-sm text-center">
+      </TableHeader>
+      <ListingContainer>
+        <table className="text-sm text-center">
           <thead>
             <tr>
               <th className="px-2 py-1">Nom</th>
@@ -82,18 +85,8 @@ export default function Unites() {
             )}
           </tbody>
         </table>
-      </TableContainer>
-      <div className="flex justify-between mt-2">
-        <Button variant="outline" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>
-          Précédent
-        </Button>
-        <span>
-          Page {page}/{pages}
-        </span>
-        <Button variant="outline" onClick={() => setPage(p => Math.min(pages, p + 1))} disabled={page >= pages}>
-          Suivant
-        </Button>
-      </div>
+      </ListingContainer>
+      <PaginationFooter page={page} pages={pages} onPageChange={setPage} />
       {edit && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <div className="absolute inset-0 bg-black/50" onClick={() => setEdit(null)} />

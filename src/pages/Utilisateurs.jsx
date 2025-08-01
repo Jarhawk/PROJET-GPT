@@ -5,7 +5,9 @@ import useAuth from "@/hooks/useAuth";
 import UtilisateurForm from "@/components/utilisateurs/UtilisateurForm";
 import UtilisateurDetail from "@/components/utilisateurs/UtilisateurDetail";
 import { Button } from "@/components/ui/button";
-import TableContainer from "@/components/ui/TableContainer";
+import ListingContainer from "@/components/ui/ListingContainer";
+import PaginationFooter from "@/components/ui/PaginationFooter";
+import TableHeader from "@/components/ui/TableHeader";
 import GlassCard from "@/components/ui/GlassCard";
 import { Toaster, toast } from "react-hot-toast";
 import { saveAs } from "file-saver";
@@ -63,7 +65,7 @@ export default function Utilisateurs() {
     <div className="p-6 container mx-auto text-shadow">
       <Toaster position="top-right" />
       <GlassCard className="p-4 mb-4">
-        <div className="flex flex-wrap gap-4 items-end">
+        <TableHeader>
           <input
             type="search"
             value={search}
@@ -80,9 +82,9 @@ export default function Utilisateurs() {
             Ajouter un utilisateur
           </Button>
           <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
-        </div>
+        </TableHeader>
       </GlassCard>
-      <TableContainer className="mb-4">
+      <ListingContainer className="mb-4">
         <Motion.table
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -125,17 +127,12 @@ export default function Utilisateurs() {
           ))}
         </tbody>
         </Motion.table>
-      </TableContainer>
-      <div className="mt-4 flex gap-2">
-        {Array.from({ length: nbPages }, (_, i) => (
-          <Button
-            key={i + 1}
-            size="sm"
-            variant={page === i + 1 ? "default" : "outline"}
-            onClick={() => setPage(i + 1)}
-          >{i + 1}</Button>
-        ))}
-      </div>
+      </ListingContainer>
+      <PaginationFooter
+        page={page}
+        pages={nbPages}
+        onPageChange={setPage}
+      />
       {showForm && (
         <UtilisateurForm
           utilisateur={selected}

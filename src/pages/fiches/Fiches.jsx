@@ -7,7 +7,9 @@ import FicheForm from "./FicheForm.jsx";
 import FicheDetail from "./FicheDetail.jsx";
 import FicheRow from "@/components/fiches/FicheRow.jsx";
 import { Button } from "@/components/ui/button";
-import TableContainer from "@/components/ui/TableContainer";
+import ListingContainer from "@/components/ui/ListingContainer";
+import PaginationFooter from "@/components/ui/PaginationFooter";
+import TableHeader from "@/components/ui/TableHeader";
 import { useFamilles } from "@/hooks/useFamilles";
 import { Toaster, toast } from "react-hot-toast";
 import { motion as Motion } from "framer-motion";
@@ -72,7 +74,7 @@ export default function Fiches() {
   return (
     <div className="p-6 container mx-auto text-shadow">
       <Toaster position="top-right" />
-      <div className="flex flex-wrap gap-4 items-center mb-4">
+      <TableHeader>
         <input
           type="search"
           value={search}
@@ -137,8 +139,8 @@ export default function Fiches() {
         <Button variant="outline" onClick={exportPdf}>
           Export PDF
         </Button>
-      </div>
-      <TableContainer className="mb-4">
+      </TableHeader>
+      <ListingContainer className="mb-4">
         <Motion.table
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -184,22 +186,12 @@ export default function Fiches() {
             ))}
           </tbody>
         </Motion.table>
-      </TableContainer>
-      <div className="mt-4 flex gap-2 justify-center">
-        {Array.from(
-          { length: Math.max(1, Math.ceil(total / PAGE_SIZE)) },
-          (_, i) => (
-            <Button
-              key={i + 1}
-              size="sm"
-              variant={page === i + 1 ? "default" : "outline"}
-              onClick={() => setPage(i + 1)}
-            >
-              {i + 1}
-            </Button>
-          ),
-        )}
-      </div>
+      </ListingContainer>
+      <PaginationFooter
+        page={page}
+        pages={Math.max(1, Math.ceil(total / PAGE_SIZE))}
+        onPageChange={setPage}
+      />
       {showForm && (
         <FicheForm
           fiche={selected}

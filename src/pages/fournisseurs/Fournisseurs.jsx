@@ -8,6 +8,9 @@ import { useProducts } from "@/hooks/useProducts";
 import { useFournisseursInactifs } from "@/hooks/useFournisseursInactifs";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import ListingContainer from '@/components/ui/ListingContainer';
+import PaginationFooter from '@/components/ui/PaginationFooter';
+import TableHeader from '@/components/ui/TableHeader';
 import FournisseurRow from "@/components/fournisseurs/FournisseurRow";
 import { Dialog, DialogContent } from "@radix-ui/react-dialog";
 import jsPDF from "jspdf";
@@ -125,7 +128,7 @@ export default function Fournisseurs() {
 
       <Card>
         <CardHeader className="pb-4">
-          <div className="flex flex-wrap gap-4 items-end">
+          <TableHeader>
             <div className="relative flex-1">
               <input
                 className="input w-full pl-8"
@@ -144,10 +147,10 @@ export default function Fournisseurs() {
               <option value="true">Actif</option>
               <option value="false">Inactif</option>
             </select>
-          </div>
+          </TableHeader>
         </CardHeader>
         <CardContent className="pt-4">
-          <div className="flex flex-wrap gap-4">
+          <TableHeader>
             {canEdit && (
               <Button className="w-auto flex items-center" onClick={() => setShowCreate(true)}>
                 <PlusCircle className="mr-2" size={18} /> Ajouter fournisseur
@@ -159,7 +162,7 @@ export default function Fournisseurs() {
             <Button className="w-auto" onClick={exportPDF}>
               Export PDF
             </Button>
-          </div>
+          </TableHeader>
         </CardContent>
       </Card>
       {inactifs.length > 0 && (
@@ -220,65 +223,53 @@ export default function Fournisseurs() {
         </Card>
       </div>
       {/* Tableau fournisseurs */}
-      <Card className="mb-6">
-        <CardHeader>
-          <h2 className="font-semibold">Liste des fournisseurs</h2>
-        </CardHeader>
-        <CardContent className="pt-2">
-          <div className="overflow-x-auto rounded-xl backdrop-blur-xl">
-            <table className="min-w-full text-sm text-white text-center whitespace-nowrap table-striped">
-              <thead>
+      <h2 className="font-semibold mb-2">Liste des fournisseurs</h2>
+      <ListingContainer className="mb-6">
+        <table className="text-sm text-center">
+            <thead>
+              <tr>
+                <th className="py-2 px-3">Nom</th>
+                <th className="py-2 px-3">Téléphone</th>
+                <th className="py-2 px-3">Contact</th>
+                <th className="py-2 px-3">Email</th>
+                <th className="py-2 px-3">Nb Produits</th>
+                <th className="py-2 px-3"></th>
+                <th className="py-2 px-3"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {fournisseursFiltrés.length === 0 ? (
                 <tr>
-                  <th className="py-2 px-3">Nom</th>
-                  <th className="py-2 px-3">Téléphone</th>
-                  <th className="py-2 px-3">Contact</th>
-                  <th className="py-2 px-3">Email</th>
-                  <th className="py-2 px-3">Nb Produits</th>
-                  <th className="py-2 px-3"></th>
-                  <th className="py-2 px-3"></th>
+                  <td colSpan={7} className="py-4 text-muted-foreground">
+                    Aucun fournisseur trouvé
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {fournisseursFiltrés.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="py-4 text-muted-foreground">
-                      Aucun fournisseur trouvé
-                    </td>
-                  </tr>
-                ) : (
-                  fournisseursFiltrés.map(f => (
-                    <FournisseurRow
-                      key={f.id}
-                      fournisseur={f}
-                      productCount={productCounts[f.id] ?? 0}
-                      canEdit={canEdit}
-                      onDetail={() => setSelected(f.id)}
-                      onEdit={() => setEditRow(f)}
-                      onDelete={async (id) => {
-                        if (!window.confirm('Désactiver ce fournisseur ?')) return;
-                        await disableFournisseur(id);
-                        toast.success('Fournisseur désactivé');
-                        refreshList();
-                      }}
-                    />
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-          <div className="mt-6 flex gap-4 justify-center">
-            {Array.from({ length: Math.max(1, Math.ceil(total / PAGE_SIZE)) }, (_, i) => (
-              <button
-                key={i + 1}
-                className={`px-3 py-1 rounded-xl font-semibold text-white ${page === i + 1 ? 'bg-white/30' : 'bg-white/20 hover:bg-white/30'}`}
-                onClick={() => setPage(i + 1)}
-              >
-                {i + 1}
-              </button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              ) : (
+                fournisseursFiltrés.map(f => (
+                  <FournisseurRow
+                    key={f.id}
+                    fournisseur={f}
+                    productCount={productCounts[f.id] ?? 0}
+                    canEdit={canEdit}
+                    onDetail={() => setSelected(f.id)}
+                    onEdit={() => setEditRow(f)}
+                    onDelete={async (id) => {
+                      if (!window.confirm('Désactiver ce fournisseur ?')) return;
+                      await disableFournisseur(id);
+                      toast.success('Fournisseur désactivé');
+                      refreshList();
+                    }}
+                  />
+                ))
+              )}
+            </tbody>
+        </table>
+      </ListingContainer>
+      <PaginationFooter
+        page={page}
+        pages={Math.max(1, Math.ceil(total / PAGE_SIZE))}
+        onPageChange={setPage}
+      />
 
       {/* Modal création/édition */}
       <Dialog open={showCreate || !!editRow} onOpenChange={v => { if (!v) { setShowCreate(false); setEditRow(null); } }}>

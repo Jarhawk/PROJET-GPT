@@ -13,13 +13,13 @@ export default function FicheRow({ fiche, onEdit, onDetail, onDuplicate, onDelet
         </Button>
       </td>
       <td className="border px-4 py-2">{fiche.famille?.nom || "-"}</td>
-      <td className="border px-4 py-2">
+      <td className="border px-4 py-2 text-right">
         {Number(fiche.cout_par_portion).toLocaleString("fr-FR", {
           style: "currency",
           currency: "EUR",
         })}
       </td>
-      <td className="border px-4 py-2">{fiche.lignes?.length || 0}</td>
+      <td className="border px-4 py-2 text-right">{fiche.lignes?.length || 0}</td>
       <td className="border px-4 py-2">{fiche.actif ? "✅" : "❌"}</td>
       <td className="border px-4 py-2">
         {canEdit && (

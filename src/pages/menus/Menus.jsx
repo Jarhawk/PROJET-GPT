@@ -128,14 +128,14 @@ export default function Menus() {
         <Motion.table
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="min-w-full"
+          className="min-w-full text-sm"
         >
         <thead>
           <tr>
             <th className="px-4 py-2">Date</th>
             <th className="px-4 py-2">Nom</th>
-            <th className="px-4 py-2"># Fiches</th>
-            <th className="px-4 py-2">Coût total</th>
+            <th className="px-4 py-2 text-right"># Fiches</th>
+            <th className="px-4 py-2 text-right">Coût total</th>
             <th className="px-4 py-2">Actif</th>
             <th className="px-4 py-2">Actions</th>
           </tr>
@@ -153,8 +153,8 @@ export default function Menus() {
                   {menu.nom}
                 </Button>
               </td>
-              <td className="border px-4 py-2 text-center">{menu.fiches?.length || 0}</td>
-              <td className="border px-4 py-2">{
+              <td className="border px-4 py-2 text-right">{menu.fiches?.length || 0}</td>
+              <td className="border px-4 py-2 text-right">{
                 (menu.fiches || []).reduce((sum, f) => {
                   const fiche = fiches.find(fi => fi.id === f.fiche_id || fi.id === f.fiche?.id);
                   return sum + (Number(fiche?.cout_total) || 0);

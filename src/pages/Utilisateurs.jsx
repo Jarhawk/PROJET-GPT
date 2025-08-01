@@ -88,7 +88,7 @@ export default function Utilisateurs() {
         <Motion.table
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="min-w-full text-white"
+          className="min-w-full text-sm"
         >
         <thead>
           <tr>

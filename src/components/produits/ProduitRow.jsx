@@ -13,11 +13,11 @@ export default function ProduitRow({
       <td>{produit.nom}</td>
       <td>{produit.famille}</td>
       <td>{produit.unite}</td>
-      <td>{produit.pmp != null ? Number(produit.pmp).toFixed(2) : '-'}</td>
-      <td>{produit.stock_theorique}</td>
-      <td>{produit.stock_min}</td>
+      <td className="text-right">{produit.pmp != null ? Number(produit.pmp).toFixed(2) : '-'}</td>
+      <td className="text-right">{produit.stock_theorique}</td>
+      <td className="text-right">{produit.stock_min}</td>
       <td>{produit.fournisseur?.nom || "-"}</td>
-      <td>
+      <td className="text-right">
         {produit.dernier_prix != null
           ? Number(produit.dernier_prix).toFixed(2)
           : "-"}

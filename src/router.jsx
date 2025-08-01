@@ -89,7 +89,6 @@ const Reporting = lazyWithPreload(() => import("@/pages/reporting/Reporting.jsx"
 const Consolidation = lazyWithPreload(() => import("@/pages/Consolidation.jsx"));
 const CreateMama = lazyWithPreload(() => import("@/pages/auth/CreateMama.jsx"));
 const Feedback = lazyWithPreload(() => import("@/pages/Feedback.jsx"));
-const AuditTrail = lazyWithPreload(() => import("@/pages/AuditTrail.jsx"));
 const Logs = lazyWithPreload(() => import("@/pages/Logs.jsx"));
 const Consentements = lazyWithPreload(() => import("@/pages/Consentements.jsx"));
 const Requisitions = lazyWithPreload(() => import("@/pages/requisitions/Requisitions.jsx"));
@@ -151,7 +150,6 @@ export const routePreloadMap = {
   '/parametrage/familles': Familles.preload,
   '/parametrage/unites': Unites.preload,
   '/consentements': Consentements.preload,
-  '/audit': AuditTrail.preload,
   '/logs': Logs.preload,
   '/aide': AideContextuelle.preload,
   '/feedback': Feedback.preload,
@@ -512,10 +510,6 @@ export default function Router() {
           <Route
             path="/logs"
             element={<ProtectedRoute moduleKey="logs"><Logs /></ProtectedRoute>}
-          />
-          <Route
-            path="/audit"
-            element={<ProtectedRoute moduleKey="audit"><AuditTrail /></ProtectedRoute>}
           />
           <Route
             path="/supervision"

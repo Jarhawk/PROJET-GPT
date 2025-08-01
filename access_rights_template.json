@@ -233,10 +233,5 @@
     "edit": false,
     "delete": false
   },
-  "audit": {
-    "view": false,
-    "create": false,
-    "edit": false,
-    "delete": false
-  }
+    
 }

@@ -3,14 +3,7 @@ import { supabase } from "@/lib/supabase";
 import useAuth from "@/hooks/useAuth";
 
 export function useRGPD() {
-  const { user_id, mama_id, role } = useAuth();
-
-  async function logAccess(userId, action, table) {
-    if (!userId) return;
-    await supabase.from("journal_audit").insert([
-      { user_id: userId, mama_id, action, table_name: table },
-    ]);
-  }
+  const { user_id, role } = useAuth();
 
   async function getUserDataExport(userId = user_id) {
     if (!userId) return null;
@@ -19,12 +12,7 @@ export function useRGPD() {
       .select("id,created_at")
       .eq("auth_id", userId)
       .single();
-    const { data: logs } = await supabase
-      .from("journal_audit")
-      .select("action, table_name, created_at")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
-    return { profil, logs };
+    return { profil, logs: [] };
   }
 
   async function purgeUserData(userId) {
@@ -32,5 +20,5 @@ export function useRGPD() {
     return await supabase.from("utilisateurs").delete().eq("auth_id", userId);
   }
 
-  return { logAccess, getUserDataExport, purgeUserData };
+  return { getUserDataExport, purgeUserData };
 }

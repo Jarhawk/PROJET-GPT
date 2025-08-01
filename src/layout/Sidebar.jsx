@@ -166,9 +166,8 @@ export default function Sidebar() {
       ],
     },
     {
-      title: "Audit",
+      title: "Logs",
       items: [
-        { module: "audit", to: "/audit", label: "Audit", icon: <History size={16} /> },
         { module: "logs", to: "/logs", label: "Logs", icon: <History size={16} /> },
       ],
     },

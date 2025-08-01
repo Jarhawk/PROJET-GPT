@@ -18,19 +18,6 @@ export function useAuditLog() {
     ]);
   }
 
-  async function logAction({ module, action, cible_id = null, details = null }) {
-    if (!mama_id) return;
-    await supabase.from("journal_audit").insert([
-      {
-        mama_id,
-        table_name: module,
-        operation: action,
-        row_id: cible_id,
-        new_data: details,
-        changed_by: user?.id || null,
-      },
-    ]);
-  }
 
   async function logSecurityEvent({ type, user_id = null, description = "" }) {
     if (!mama_id) return;
@@ -48,5 +35,5 @@ export function useAuditLog() {
     ]);
   }
 
-  return { log, logAction, logSecurityEvent };
+  return { log, logSecurityEvent };
 }

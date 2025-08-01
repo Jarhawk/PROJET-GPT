@@ -102,10 +102,10 @@ export default function InventaireForm() {
       <form onSubmit={handleSubmit} className="space-y-4">
 
       <div className="flex gap-4">
-        <input type="date" className="input" value={date} onChange={e => setDate(e.target.value)} />
+        <input type="date" className="form-input" value={date} onChange={e => setDate(e.target.value)} />
         <input
           list="zones"
-          className="input"
+          className="form-input"
           placeholder="Zone"
           value={zone}
           onChange={e => setZone(e.target.value)}
@@ -125,7 +125,7 @@ export default function InventaireForm() {
         />
         <input
           list="familles"
-          className="input"
+          className="form-input"
           placeholder="Famille"
           value={familleFilter}
           onChange={e => setFamilleFilter(e.target.value)}
@@ -165,7 +165,7 @@ export default function InventaireForm() {
                 <tr key={idx} className="border-b last:border-none">
                   <td className="p-2">
                     <select
-                      className="input"
+                      className="form-input"
                       value={l.produit_id}
                       onChange={e => updateLine(idx, "produit_id", e.target.value)}
                     >

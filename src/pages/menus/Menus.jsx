@@ -98,26 +98,26 @@ export default function Menus() {
           type="search"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="input"
+          className="form-input"
           placeholder="Recherche menu"
         />
         <input
           type="date"
           value={dateFilter}
           onChange={e => setDateFilter(e.target.value)}
-          className="input"
+          className="form-input"
         />
         <input
           type="week"
           value={weekFilter}
           onChange={e => setWeekFilter(e.target.value)}
-          className="input"
+          className="form-input"
         />
         <input
           type="month"
           value={monthFilter}
           onChange={e => setMonthFilter(e.target.value)}
-          className="input"
+          className="form-input"
         />
         <Button onClick={() => { setSelected(null); setShowForm(true); }}>
           Ajouter un menu

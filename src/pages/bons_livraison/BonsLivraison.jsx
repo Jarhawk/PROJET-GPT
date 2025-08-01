@@ -54,12 +54,12 @@ export default function BonsLivraison() {
     <div className="p-6 container mx-auto text-shadow space-y-4">
       <Toaster />
       <GlassCard className="flex flex-wrap gap-2 items-end">
-        <select className="input" value={fournisseurFilter} onChange={e => { setFournisseurFilter(e.target.value); setPage(1); }}>
+        <select className="form-input" value={fournisseurFilter} onChange={e => { setFournisseurFilter(e.target.value); setPage(1); }}>
           <option value="">Tous fournisseurs</option>
           {fournisseurs.map(f => <option key={f.id} value={f.id}>{f.nom}</option>)}
         </select>
-        <input type="month" className="input" value={monthFilter} onChange={e => { setMonthFilter(e.target.value); setPage(1); }} />
-        <select className="input" value={actifFilter} onChange={e => { setActifFilter(e.target.value); setPage(1); }}>
+        <input type="month" className="form-input" value={monthFilter} onChange={e => { setMonthFilter(e.target.value); setPage(1); }} />
+        <select className="form-input" value={actifFilter} onChange={e => { setActifFilter(e.target.value); setPage(1); }}>
           <option value="true">Actifs</option>
           <option value="false">Inactifs</option>
           <option value="all">Tous</option>

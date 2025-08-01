@@ -45,13 +45,13 @@ export default function SimulationPlanner() {
       <div className="flex gap-2 items-end mb-4">
         <input
           type="date"
-          className="input"
+          className="form-input"
           value={periode.start}
           onChange={(e) => setPeriode((p) => ({ ...p, start: e.target.value }))}
         />
         <input
           type="date"
-          className="input"
+          className="form-input"
           value={periode.end}
           onChange={(e) => setPeriode((p) => ({ ...p, end: e.target.value }))}
         />

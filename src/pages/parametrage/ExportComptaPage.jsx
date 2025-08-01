@@ -34,7 +34,7 @@ export default function ExportComptaPage() {
             type="month"
             value={mois}
             onChange={(e) => setMois(e.target.value)}
-            className="input"
+            className="form-input"
           />
         </div>
         <div>
@@ -65,7 +65,7 @@ export default function ExportComptaPage() {
           onChange={(e) => setEndpoint(e.target.value)}
         />
         <input
-          className="input"
+          className="form-input"
           placeholder="Token"
           value={token}
           onChange={(e) => setToken(e.target.value)}

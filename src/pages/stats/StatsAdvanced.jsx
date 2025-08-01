@@ -38,12 +38,12 @@ export default function StatsAdvanced() {
       <div className="flex items-end gap-2 mb-4">
         <div>
           <label className="block text-xs">Début</label>
-          <input type="month" className="input" value={start}
+          <input type="month" className="form-input" value={start}
             onChange={e => setStart(e.target.value)} />
         </div>
         <div>
           <label className="block text-xs">Fin</label>
-          <input type="month" className="input" value={end}
+          <input type="month" className="form-input" value={end}
             onChange={e => setEnd(e.target.value)} />
         </div>
         <Button onClick={refresh}>Rafraîchir</Button>

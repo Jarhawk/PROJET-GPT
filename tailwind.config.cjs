@@ -25,6 +25,15 @@ module.exports = {
         borderGlass: 'rgba(255,255,255,0.1)',
         gold: '#F6C343',
         text: '#FFFFFF',
+        primary: {
+          DEFAULT: '#4F46E5',
+          90: '#4338CA',
+          50: '#EEF2FF',
+        },
+        secondary: '#F59E0B',
+        success: '#10B981',
+        danger: '#EF4444',
+        muted: '#6B7280',
       },
       backdropBlur: {
         lg: '20px',

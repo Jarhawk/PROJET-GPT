@@ -72,7 +72,7 @@ export default function Pertes() {
           <select
             id="produit_id"
             name="produit_id"
-            className="input"
+            className="form-input"
           value={form.produit_id}
           onChange={handleChange}
           required

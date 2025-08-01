@@ -46,12 +46,12 @@ export default function Inventaire() {
       <div className="flex gap-4 mb-4 items-center">
         <input
           type="date"
-          className="input"
+          className="form-input"
           value={dateFilter}
           onChange={e => setDateFilter(e.target.value)}
         />
         <select
-          className="input"
+          className="form-input"
           value={zoneFilter}
           onChange={e => setZoneFilter(e.target.value)}
         >

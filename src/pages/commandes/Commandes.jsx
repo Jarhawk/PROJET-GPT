@@ -30,11 +30,11 @@ export default function Commandes() {
     <div className="p-6 container mx-auto text-shadow space-y-4">
       <Toaster />
       <GlassCard className="flex flex-wrap gap-2 items-end">
-        <select className="input" value={fournisseurFilter} onChange={e => { setFournisseurFilter(e.target.value); setPage(1); }}>
+        <select className="form-input" value={fournisseurFilter} onChange={e => { setFournisseurFilter(e.target.value); setPage(1); }}>
           <option value="">Tous fournisseurs</option>
           {fournisseurs.map(f => <option key={f.id} value={f.id}>{f.nom}</option>)}
         </select>
-        <select className="input" value={statutFilter} onChange={e => { setStatutFilter(e.target.value); setPage(1); }}>
+        <select className="form-input" value={statutFilter} onChange={e => { setStatutFilter(e.target.value); setPage(1); }}>
           <option value="">Tous statuts</option>
           <option value="a_valider">À valider</option>
           <option value="envoyee">Envoyée</option>

@@ -51,7 +51,7 @@ export default function Mouvements() {
       <h1 className="text-2xl font-bold mb-4">Mouvements de stock</h1>
       <div className="flex flex-wrap gap-4 mb-4 items-end">
         <select
-          className="input"
+          className="form-input"
           value={filters.type}
           onChange={e => setFilters(f => ({ ...f, type: e.target.value }))}
         >
@@ -63,7 +63,7 @@ export default function Mouvements() {
         </select>
         <div>
           <input
-            className="input"
+            className="form-input"
             list="liste-produits-filtre"
             placeholder="Produit"
             value={filters.productName}
@@ -77,13 +77,13 @@ export default function Mouvements() {
         </div>
         <input
           type="date"
-          className="input"
+          className="form-input"
           value={filters.debut}
           onChange={e => setFilters(f => ({ ...f, debut: e.target.value }))}
         />
         <input
           type="date"
-          className="input"
+          className="form-input"
           value={filters.fin}
           onChange={e => setFilters(f => ({ ...f, fin: e.target.value }))}
         />

@@ -36,13 +36,13 @@ export default function Aide() {
       <h1 className="text-2xl font-bold">Aide</h1>
       <div className="flex flex-wrap gap-2 items-end">
         <input
-          className="input"
+          className="form-input"
           placeholder="Recherche"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
         <select
-          className="input"
+          className="form-input"
           value={categorieFilter}
           onChange={(e) => setCategorieFilter(e.target.value)}
         >
@@ -54,7 +54,7 @@ export default function Aide() {
           ))}
         </select>
         <select
-          className="input"
+          className="form-input"
           value={pageFilter}
           onChange={(e) => setPageFilter(e.target.value)}
         >

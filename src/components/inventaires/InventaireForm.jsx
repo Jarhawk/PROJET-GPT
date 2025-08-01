@@ -188,7 +188,7 @@ export default function InventaireForm({ inventaire, onClose }) {
                 <tr key={i}>
                   <td>
                     <select
-                      className="input"
+                      className="form-input"
                       value={l.produit_id}
                       onChange={e => updateLigne(i, "produit_id", e.target.value)}
                       required
@@ -201,7 +201,7 @@ export default function InventaireForm({ inventaire, onClose }) {
                   </td>
                   <td>
                     <input
-                      className="input"
+                      className="form-input"
                       type="number"
                       min={0}
                       step="0.01"

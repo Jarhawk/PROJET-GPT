@@ -82,11 +82,11 @@ export default function Fiches() {
             setPage(1);
             setSearch(e.target.value);
           }}
-          className="input"
+          className="form-input"
           placeholder="Recherche fiche"
         />
         <select
-          className="input"
+          className="form-input"
           value={sortBy}
           onChange={(e) => {
             setPage(1);
@@ -97,7 +97,7 @@ export default function Fiches() {
           <option value="cout_par_portion">Tri: Coût/portion</option>
         </select>
         <select
-          className="input"
+          className="form-input"
           value={actif}
           onChange={(e) => {
             setPage(1);
@@ -109,7 +109,7 @@ export default function Fiches() {
           <option value="all">Toutes</option>
         </select>
         <select
-          className="input"
+          className="form-input"
           value={familleFilter}
           onChange={(e) => {
             setPage(1);

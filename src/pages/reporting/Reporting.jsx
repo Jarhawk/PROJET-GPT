@@ -60,14 +60,14 @@ export default function Reporting() {
       <div className="flex flex-wrap gap-4 mb-6 items-end">
         <div>
           <label className="text-xs mr-2">Début</label>
-          <input type="date" className="input" value={filters.date_start} onChange={e => setFilters(f => ({ ...f, date_start: e.target.value }))} />
+          <input type="date" className="form-input" value={filters.date_start} onChange={e => setFilters(f => ({ ...f, date_start: e.target.value }))} />
         </div>
         <div>
           <label className="text-xs mr-2">Fin</label>
-          <input type="date" className="input" value={filters.date_end} onChange={e => setFilters(f => ({ ...f, date_end: e.target.value }))} />
+          <input type="date" className="form-input" value={filters.date_end} onChange={e => setFilters(f => ({ ...f, date_end: e.target.value }))} />
         </div>
-        <input className="input" placeholder="Fournisseur" value={filters.fournisseur} onChange={e => setFilters(f => ({ ...f, fournisseur: e.target.value }))} />
-        <input className="input" placeholder="Famille" value={filters.famille} onChange={e => setFilters(f => ({ ...f, famille: e.target.value }))} />
+        <input className="form-input" placeholder="Fournisseur" value={filters.fournisseur} onChange={e => setFilters(f => ({ ...f, fournisseur: e.target.value }))} />
+        <input className="form-input" placeholder="Famille" value={filters.famille} onChange={e => setFilters(f => ({ ...f, famille: e.target.value }))} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">

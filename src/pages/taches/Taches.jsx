@@ -53,32 +53,32 @@ export default function Taches() {
       <GlassCard title="Ajouter rapidement" className="mb-4">
         <form onSubmit={handleQuickSubmit} className="flex gap-2 flex-wrap items-end">
           <input className="input flex-1" name="titre" value={quick.titre} onChange={handleQuickChange} placeholder="Nouvelle tâche" required />
-          <input type="date" className="input" name="date_echeance" value={quick.date_echeance} onChange={handleQuickChange} />
+          <input type="date" className="form-input" name="date_echeance" value={quick.date_echeance} onChange={handleQuickChange} />
           <Button type="submit">Ajouter</Button>
         </form>
       </GlassCard>
       <GlassCard title="Filtres" className="mb-4">
         <div className="flex flex-wrap gap-2">
-          <select name="statut" value={filters.statut} onChange={handleChange} className="input">
+          <select name="statut" value={filters.statut} onChange={handleChange} className="form-input">
             <option value="">-- Statut --</option>
             <option value="a_faire">À faire</option>
             <option value="en_cours">En cours</option>
             <option value="terminee">Terminée</option>
           </select>
-        <select name="priorite" value={filters.priorite} onChange={handleChange} className="input">
+        <select name="priorite" value={filters.priorite} onChange={handleChange} className="form-input">
           <option value="">-- Priorité --</option>
           <option value="basse">Basse</option>
           <option value="moyenne">Moyenne</option>
           <option value="haute">Haute</option>
         </select>
-        <select name="assigne" value={filters.assigne} onChange={handleChange} className="input">
+        <select name="assigne" value={filters.assigne} onChange={handleChange} className="form-input">
           <option value="">-- Assigné --</option>
           {users.map(u => (
             <option key={u.id} value={u.id}>{u.nom}</option>
           ))}
         </select>
-        <input type="date" name="start" value={filters.start} onChange={handleChange} className="input" />
-        <input type="date" name="end" value={filters.end} onChange={handleChange} className="input" />
+        <input type="date" name="start" value={filters.start} onChange={handleChange} className="form-input" />
+        <input type="date" name="end" value={filters.end} onChange={handleChange} className="form-input" />
         <Button onClick={() => getTaches(filters)}>Filtrer</Button>
         </div>
       </GlassCard>

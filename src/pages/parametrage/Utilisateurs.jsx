@@ -98,11 +98,11 @@ export default function Utilisateurs() {
             setPage(1);
             setSearch(e.target.value);
           }}
-          className="input"
+          className="form-input"
           placeholder="Recherche nom"
         />
         <select
-          className="input"
+          className="form-input"
           value={actifFilter}
           onChange={e => {
             setPage(1);
@@ -114,7 +114,7 @@ export default function Utilisateurs() {
           <option value="false">Inactif</option>
         </select>
         <select
-          className="input"
+          className="form-input"
           value={roleFilter}
           onChange={e => {
             setPage(1);
@@ -137,7 +137,7 @@ export default function Utilisateurs() {
           </Button>
         )}
         <select
-          className="input"
+          className="form-input"
           value={sortBy}
           onChange={e => {
             setPage(1);

@@ -26,7 +26,7 @@ export default function PromotionForm({ promotion = {}, onClose, onSave, saving 
             <Label htmlFor="desc-promo">Description</Label>
             <textarea
               id="desc-promo"
-              className="textarea"
+              className="form-textarea"
               value={form.description}
               onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
             />

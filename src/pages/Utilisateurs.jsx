@@ -70,10 +70,10 @@ export default function Utilisateurs() {
             type="search"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="input"
+            className="form-input"
             placeholder="Recherche nom"
           />
-          <select className="input" value={actifFilter} onChange={e => setActifFilter(e.target.value)}>
+          <select className="form-input" value={actifFilter} onChange={e => setActifFilter(e.target.value)}>
             <option value="all">Tous</option>
             <option value="true">Actif</option>
             <option value="false">Inactif</option>

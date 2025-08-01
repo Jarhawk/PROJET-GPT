@@ -28,7 +28,7 @@ export default function PeriodFilter({ onChange, initialStart, initialEnd }) {
           type="date"
           value={start}
           onChange={e => update(e.target.value, end)}
-          className="input"
+          className="form-input"
         />
       </label>
       <label>
@@ -37,7 +37,7 @@ export default function PeriodFilter({ onChange, initialStart, initialEnd }) {
           type="date"
           value={end}
           onChange={e => update(start, e.target.value)}
-          className="input"
+          className="form-input"
         />
       </label>
       <button

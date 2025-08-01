@@ -64,7 +64,7 @@ export default function ParamRoles() {
       <h2 className="font-bold text-xl mb-4">Rôles</h2>
       <form onSubmit={handleSubmit} className="flex gap-2 mb-4">
         <input
-          className="input"
+          className="form-input"
           placeholder="Nom du rôle"
           value={form.nom}
           onChange={e => setForm(f => ({ ...f, nom: e.target.value }))}

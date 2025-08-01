@@ -35,9 +35,9 @@ export default function MenuEngineering() {
     <div className="p-6 space-y-4 text-shadow">
       <h1 className="text-2xl font-bold">Menu Engineering</h1>
       <div className="flex flex-wrap gap-2 items-center">
-        <input className="input" placeholder="Famille" value={filters.famille} onChange={e => setFilters(f => ({ ...f, famille: e.target.value }))} />
-        <input className="input" placeholder="Saison" value={filters.saison} onChange={e => setFilters(f => ({ ...f, saison: e.target.value }))} />
-        <input className="input" placeholder="Chef" value={filters.chef} onChange={e => setFilters(f => ({ ...f, chef: e.target.value }))} />
+        <input className="form-input" placeholder="Famille" value={filters.famille} onChange={e => setFilters(f => ({ ...f, famille: e.target.value }))} />
+        <input className="form-input" placeholder="Saison" value={filters.saison} onChange={e => setFilters(f => ({ ...f, saison: e.target.value }))} />
+        <input className="form-input" placeholder="Chef" value={filters.chef} onChange={e => setFilters(f => ({ ...f, chef: e.target.value }))} />
         <Button onClick={() => fetchData(filters)}>Rafraîchir</Button>
         <Button variant="outline" onClick={exportPdf}>Export</Button>
       </div>

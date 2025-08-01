@@ -63,8 +63,8 @@ export default function PlanningForm() {
       <Toaster position="top-right" />
       <div className="flex gap-4">
         <input className="input flex-1" placeholder="Nom" value={nom} onChange={e => setNom(e.target.value)} required />
-        <input type="date" className="input" value={date_prevue} onChange={e => setDatePrevue(e.target.value)} required />
-        <select className="input" value={statut} onChange={e => setStatut(e.target.value)}>
+        <input type="date" className="form-input" value={date_prevue} onChange={e => setDatePrevue(e.target.value)} required />
+        <select className="form-input" value={statut} onChange={e => setStatut(e.target.value)}>
           <option value="prévu">Prévu</option>
           <option value="confirmé">Confirmé</option>
         </select>
@@ -84,7 +84,7 @@ export default function PlanningForm() {
             {lignes.map((l, idx) => (
               <tr key={idx}>
                 <td className="px-2 py-1">
-                  <select className="input" value={l.produit_id} onChange={e => updateLine(idx, "produit_id", e.target.value)} required>
+                  <select className="form-input" value={l.produit_id} onChange={e => updateLine(idx, "produit_id", e.target.value)} required>
                     <option value="">-- produit --</option>
                     {products.map(p => (
                       <option key={p.id} value={p.id}>{p.nom}</option>
@@ -95,7 +95,7 @@ export default function PlanningForm() {
                   <input type="number" min="0" className="input w-24" value={l.quantite} onChange={e => updateLine(idx, "quantite", e.target.value)} required />
                 </td>
                 <td className="px-2 py-1">
-                  <input className="input" value={l.observation} onChange={e => updateLine(idx, "observation", e.target.value)} />
+                  <input className="form-input" value={l.observation} onChange={e => updateLine(idx, "observation", e.target.value)} />
                 </td>
               </tr>
             ))}

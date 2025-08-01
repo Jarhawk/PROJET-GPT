@@ -78,11 +78,11 @@ export default function Promotions() {
             setPage(1);
             setSearch(e.target.value);
           }}
-          className="input"
+          className="form-input"
           placeholder="Recherche promotion"
         />
         <select
-          className="input"
+          className="form-input"
           value={actifFilter}
           onChange={(e) => {
             setPage(1);

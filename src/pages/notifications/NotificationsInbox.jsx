@@ -32,7 +32,7 @@ export default function NotificationsInbox() {
           name="type"
           value={filters.type}
           onChange={handleChange}
-          className="input"
+          className="form-input"
         >
           <option value="">-- Type --</option>
           <option value="info">Info</option>

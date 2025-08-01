@@ -73,14 +73,11 @@ a:hover {
 }
 
 /* Input custom */
-.input {
-  @apply w-full px-4 py-2 font-semibold text-white placeholder-white/50 bg-white/10 backdrop-blur-xl rounded-xl shadow-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/50;
-}
-.textarea {
-  @apply w-full px-4 py-2 font-semibold text-white placeholder-white/50 bg-white/10 backdrop-blur-xl rounded-xl shadow-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/50;
-}
-.select {
-  @apply w-full px-4 py-2 font-semibold text-white placeholder-white/50 bg-white/10 backdrop-blur-xl rounded-xl shadow-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/50;
+.input,
+.textarea,
+.select,
+select {
+  @apply w-full px-4 py-2 font-semibold text-white placeholder-white/50 bg-white/10 backdrop-blur-md rounded-xl shadow-sm border border-white/20 focus:outline-none focus:ring hover:bg-white/20 transition-all;
 }
 
 /* Tables */

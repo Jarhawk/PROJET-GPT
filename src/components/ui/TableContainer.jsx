@@ -14,7 +14,7 @@ export default function TableContainer({ className = "", children, ...props }) {
 
   return (
     <div
-      className={`w-full bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-2xl shadow-lg overflow-x-auto ${className}`}
+      className={`w-full bg-white/5 backdrop-blur p-4 text-white border border-white/10 rounded-xl shadow-lg overflow-x-auto ${className}`}
       {...props}
     >
       {enhanced}

@@ -14,7 +14,7 @@ export function Select({
       value={value}
       onChange={onChange}
       aria-label={ariaLabel || "Sélection"}
-      className={`w-full bg-white/10 text-white p-2 rounded-xl border border-white/20 backdrop-blur-md shadow-sm focus:outline-none focus:ring hover:bg-white/20 transition-all ${className}`}
+      className={`w-full bg-white/10 text-white p-2 rounded-md border border-white/20 ring-1 ring-white/20 backdrop-blur focus:outline-none hover:bg-white/10 transition-colors ${className}`}
       {...props}
     >
       {children}

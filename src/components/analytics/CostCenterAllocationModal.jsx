@@ -110,7 +110,7 @@ export default function CostCenterAllocationModal({ mouvementId, produitId, open
               <input
                 id={`qt-${idx}`}
                 type="number"
-                className="input w-24"
+                className="form-input w-24"
                 aria-label="Quantité"
                 value={row.quantite}
                 onChange={e => handleChange(idx, "quantite", e.target.value)}
@@ -120,7 +120,7 @@ export default function CostCenterAllocationModal({ mouvementId, produitId, open
               <input
                 id={`val-${idx}`}
                 type="number"
-                className="input w-24"
+                className="form-input w-24"
                 aria-label="Valeur"
                 value={row.valeur ?? ""}
                 onChange={e => handleChange(idx, "valeur", e.target.value)}

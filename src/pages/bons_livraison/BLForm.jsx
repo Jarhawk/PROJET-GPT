@@ -103,7 +103,7 @@ export default function BLForm({ bon, fournisseurs = [], onClose }) {
           </datalist>
           <label className="block text-sm mb-1">Commentaire</label>
           <textarea
-            className="input w-full"
+            className="form-textarea w-full"
             placeholder="Commentaire"
             value={commentaire}
             onChange={e => setCommentaire(e.target.value)}

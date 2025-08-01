@@ -57,7 +57,7 @@ export default function InventaireZones() {
       <GlassCard title="Zones" className="mb-4">
         <form onSubmit={e => e.preventDefault()} className="flex gap-2 items-end">
           <Input
-            className="input flex-1"
+            className="form-input flex-1"
             placeholder="Recherche zone"
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -119,7 +119,7 @@ export default function InventaireZones() {
             className="space-y-3"
           >
             <Input
-              className="input w-full"
+              className="form-input w-full"
               placeholder="Nom de la zone"
               value={editZone?.nom || ""}
               onChange={e => setEditZone(z => ({ ...z, nom: e.target.value }))}

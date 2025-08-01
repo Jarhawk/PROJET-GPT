@@ -58,7 +58,7 @@ export default function DocumentUpload({
         )}
       </div>
       <select
-        className="input w-full mb-2"
+        className="form-select w-full mb-2"
         value={categorie}
         onChange={(e) => setCategorie(e.target.value)}
       >

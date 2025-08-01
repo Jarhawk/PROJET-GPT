@@ -138,14 +138,14 @@ export default function InventaireForm({ inventaire, onClose }) {
     <GlassCard title={inventaire ? "Modifier l’inventaire" : "Ajouter un inventaire"}>
       <form onSubmit={handleSubmit} className="space-y-2">
       <input
-        className="input mb-2"
+        className="form-input mb-2"
           value={reference}
           onChange={e => setReference(e.target.value)}
         placeholder="Nom de l’inventaire"
         required
       />
       <input
-        className="input mb-2"
+        className="form-input mb-2"
         type="date"
           value={dateInventaire}
           onChange={e => setDateInventaire(e.target.value)}

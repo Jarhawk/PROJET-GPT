@@ -45,7 +45,7 @@ export default function DashboardBuilder() {
         </ul>
         <div className="flex gap-2">
           <input
-            className="input flex-1"
+            className="form-input flex-1"
             placeholder="Nom du dashboard"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}

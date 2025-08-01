@@ -56,13 +56,13 @@ export default function CartePlats() {
       <h1 className="text-2xl font-bold text-mamastock-gold mb-4">Carte des plats actifs</h1>
       <div className="flex flex-wrap gap-2 mb-4 items-end">
         <input
-          className="input input-bordered"
+          className="form-input"
           placeholder="Recherche"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
         <select
-          className="select select-bordered"
+          className="form-select"
           value={familleFilter}
           onChange={(e) => setFamilleFilter(e.target.value)}
         >

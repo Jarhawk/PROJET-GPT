@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState, useEffect, useId } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -38,7 +38,6 @@ export default function AutoCompleteField({
         o.nom.toLowerCase() === inputValue.toLowerCase() &&
         !disabledIds.includes(o.id),
     );
-  const filtered = resolved.filter((o) => !disabledIds.includes(o.id));
 
   const handleInputChange = (e) => {
     const val = e.target.value;
@@ -64,9 +63,6 @@ export default function AutoCompleteField({
     }
   };
 
-  const reactId = useId();
-  const safeLabel = (label || props.placeholder || reactId).toString();
-  const listId = `list-${safeLabel.toLowerCase().replace(/[^a-z0-9_-]+/g, "")}`;
 
   return (
     <div className="flex flex-col gap-2 w-full">
@@ -74,14 +70,10 @@ export default function AutoCompleteField({
         {label} {required && "*"}
       </label>
       <Input
-        list={listId}
         value={inputValue}
         onChange={handleInputChange}
         className={`${isValid ? "border-mamastockGold" : ""}`}
         aria-label={label}
-        aria-autocomplete="list"
-        role="combobox"
-        aria-expanded={showAdd ? "true" : "false"}
         onKeyDown={(e) => {
           if (e.key === "Enter" && showAdd) {
             e.preventDefault();
@@ -90,11 +82,6 @@ export default function AutoCompleteField({
         }}
         {...props}
       />
-      <datalist id={listId}>
-        {filtered.map((opt, idx) => (
-          <option key={idx} value={opt.nom} />
-        ))}
-      </datalist>
       {showAdd && (
         <Button
           type="button"

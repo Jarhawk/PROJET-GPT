@@ -2,7 +2,7 @@
 export default function PrimaryButton({ children, className = '', ...props }) {
   return (
     <button
-      className={`px-4 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition-all ${className}`}
+      className={`px-4 py-2 rounded-xl text-sm font-semibold bg-primary text-white hover:bg-primary/90 transition-colors ${className}`}
       {...props}
     >
       {children}

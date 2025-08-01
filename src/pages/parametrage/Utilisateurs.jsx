@@ -8,7 +8,9 @@ import UtilisateurForm from "./UtilisateurForm";
 import UtilisateurDetail from "@/components/utilisateurs/UtilisateurDetail";
 import UtilisateurRow from "@/components/parametrage/UtilisateurRow";
 import { Button } from "@/components/ui/button";
-import TableContainer from "@/components/ui/TableContainer";
+import ListingContainer from "@/components/ui/ListingContainer";
+import PaginationFooter from "@/components/ui/PaginationFooter";
+import TableHeader from "@/components/ui/TableHeader";
 import { Toaster, toast } from "react-hot-toast";
 import { motion as Motion } from "framer-motion";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
@@ -88,7 +90,7 @@ export default function Utilisateurs() {
   return (
     <div className="p-6 container mx-auto text-shadow">
       <Toaster position="top-right" />
-      <div className="flex flex-wrap gap-4 items-center mb-4">
+      <TableHeader>
         <input
           type="search"
           value={search}
@@ -149,12 +151,12 @@ export default function Utilisateurs() {
         </select>
         <Button variant="outline" onClick={() => exportUsersToExcel(filtres)}>Export Excel</Button>
         <Button variant="outline" onClick={() => exportUsersToCSV(filtres)}>Export CSV</Button>
-      </div>
+      </TableHeader>
       {error && (
         <div className="text-red-500 mb-2">{error.message}</div>
       )}
       {loading && <LoadingSpinner message="Chargement..." />}
-      <TableContainer className="mb-4">
+      <ListingContainer className="mb-4">
         <Motion.table
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -192,17 +194,12 @@ export default function Utilisateurs() {
           )}
         </tbody>
         </Motion.table>
-      </TableContainer>
-      <div className="mt-4 flex gap-2">
-        {Array.from({ length: nbPages }, (_, i) => (
-          <Button
-            key={i + 1}
-            size="sm"
-            variant={page === i + 1 ? "default" : "outline"}
-            onClick={() => setPage(i + 1)}
-          >{i + 1}</Button>
-        ))}
-      </div>
+      </ListingContainer>
+      <PaginationFooter
+        page={page}
+        pages={nbPages}
+        onPageChange={setPage}
+      />
       {showForm && (
         <UtilisateurForm
           utilisateur={selected}

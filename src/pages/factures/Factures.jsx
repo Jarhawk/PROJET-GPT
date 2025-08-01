@@ -8,7 +8,9 @@ import FactureForm from "./FactureForm.jsx";
 import FactureDetail from "./FactureDetail.jsx";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import TableContainer from "@/components/ui/TableContainer";
+import ListingContainer from "@/components/ui/ListingContainer";
+import PaginationFooter from "@/components/ui/PaginationFooter";
+import TableHeader from "@/components/ui/TableHeader";
 import GlassCard from "@/components/ui/GlassCard";
 import { Toaster, toast } from "react-hot-toast";
 import { saveAs } from "file-saver";
@@ -93,7 +95,8 @@ export default function Factures() {
   return (
     <div className="p-6 container mx-auto text-shadow space-y-6">
       <Toaster position="top-right" />
-      <GlassCard className="flex flex-wrap gap-4 items-end">
+      <GlassCard>
+        <TableHeader className="items-end">
         <input
           list="factures-list"
           type="search"
@@ -162,8 +165,9 @@ export default function Factures() {
           </Button>
         )}
         <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
+        </TableHeader>
       </GlassCard>
-      <TableContainer className="mb-4">
+      <ListingContainer className="mb-4">
         <Motion.table
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -203,24 +207,13 @@ export default function Factures() {
           ))}
         </tbody>
         </Motion.table>
-      </TableContainer>
-      <div className="flex justify-between items-center mb-4">
-        <Button
-          variant="outline"
-          disabled={page === 1}
-          onClick={() => setPage(p => Math.max(1, p - 1))}
-        >
-          Précédent
-        </Button>
-        <span className="px-2">Page {page}</span>
-        <Button
-          variant="outline"
-          disabled={page * pageSize >= total}
-          onClick={() => setPage(p => p + 1)}
-        >
-          Suivant
-        </Button>
-      </div>
+      </ListingContainer>
+      <PaginationFooter
+        page={page}
+        pages={Math.ceil(total / pageSize)}
+        onPageChange={setPage}
+        className="mb-4"
+      />
       {/* Modal d’ajout/modif */}
       {showForm && (
         <FactureForm

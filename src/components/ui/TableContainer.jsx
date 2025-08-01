@@ -2,12 +2,22 @@
 import React from "react";
 
 export default function TableContainer({ className = "", children, ...props }) {
+  const enhanced = React.Children.map(children, child => {
+    if (React.isValidElement(child) && child.type === "table") {
+      const childClass = child.props.className || "";
+      return React.cloneElement(child, {
+        className: `listing-table ${childClass}`.trim(),
+      });
+    }
+    return child;
+  });
+
   return (
     <div
-      className={`bg-white/5 text-white border border-white/10 rounded-xl overflow-x-auto ${className}`}
+      className={`w-full bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-2xl shadow-lg overflow-x-auto ${className}`}
       {...props}
     >
-      {children}
+      {enhanced}
     </div>
   );
 }

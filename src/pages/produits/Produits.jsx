@@ -8,7 +8,9 @@ import ProduitFormModal from "@/components/produits/ProduitFormModal";
 import ProduitDetail from "@/components/produits/ProduitDetail";
 import { Button } from "@/components/ui/button";
 import GlassCard from "@/components/ui/GlassCard";
-import TableContainer from "@/components/ui/TableContainer";
+import ListingContainer from "@/components/ui/ListingContainer";
+import PaginationFooter from "@/components/ui/PaginationFooter";
+import TableHeader from "@/components/ui/TableHeader";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Plus } from "lucide-react";
@@ -185,7 +187,7 @@ export default function Produits() {
             <option value="false">Inactif</option>
           </Select>
         </div>
-        <div className="flex flex-wrap gap-4 mt-4">
+        <TableHeader className="mt-4">
           <Button
             className="w-auto"
             onClick={() => {
@@ -209,11 +211,10 @@ export default function Produits() {
             data-testid="import-input"
             className="hidden"
           />
-        </div>
+        </TableHeader>
       </GlassCard>
-      <GlassCard className="p-0">
-        <TableContainer className="p-0">
-          <table className="min-w-full table-auto text-center text-white">
+      <ListingContainer>
+        <table className="min-w-full table-auto text-center">
             <thead>
               <tr>
               <th className="cursor-pointer" onClick={() => toggleSort("nom")}>
@@ -280,23 +281,12 @@ export default function Produits() {
             )}
           </tbody>
         </table>
-        <div className="mt-4 flex gap-2 justify-center">
-          {Array.from(
-            { length: Math.max(1, Math.ceil(total / PAGE_SIZE)) },
-            (_, i) => (
-              <Button
-                key={i + 1}
-                size="sm"
-                variant={page === i + 1 ? "default" : "outline"}
-                onClick={() => setPage(i + 1)}
-              >
-                {i + 1}
-              </Button>
-            ),
-          )}
-        </div>
-        </TableContainer>
-      </GlassCard>
+      </ListingContainer>
+      <PaginationFooter
+        page={page}
+        pages={Math.max(1, Math.ceil(total / PAGE_SIZE))}
+        onPageChange={setPage}
+      />
       {/* Modale création/édition */}
       <ProduitFormModal
         open={showForm}

@@ -118,7 +118,7 @@ export default function InventaireForm() {
       </div>
       <div className="flex gap-4">
         <input
-          className="input flex-1"
+          className="form-input flex-1"
           placeholder="Recherche produit"
           value={search}
           onChange={e => setSearch(e.target.value)}
@@ -178,7 +178,7 @@ export default function InventaireForm() {
                   <td className="p-2">
                     <input
                       type="number"
-                      className="input w-24"
+                      className="form-input w-24"
                     value={l.quantite}
                     onChange={e => updateLine(idx, "quantite", e.target.value)}
                     />

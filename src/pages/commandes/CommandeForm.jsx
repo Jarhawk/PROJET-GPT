@@ -87,7 +87,7 @@ export default function CommandeForm({ commande, fournisseurs = [], onClose }) {
             ))}
           </datalist>
           <select
-            className="input mb-2"
+            className="form-select mb-2"
             value={statut}
             onChange={e => setStatut(e.target.value)}
           >

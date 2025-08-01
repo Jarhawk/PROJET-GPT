@@ -49,9 +49,9 @@ export default function ParamMama() {
         </div>
       ) : (
         <form onSubmit={handleSubmit}>
-          <input className="input mb-2" value={form.nom || ""} onChange={e => setForm(f => ({ ...f, nom: e.target.value }))} placeholder="Nom" required />
-          <input className="input mb-2" value={form.email || ""} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="Email" />
-          <input className="input mb-2" value={form.telephone || ""} onChange={e => setForm(f => ({ ...f, telephone: e.target.value }))} placeholder="Téléphone" />
+          <input className="form-input mb-2" value={form.nom || ""} onChange={e => setForm(f => ({ ...f, nom: e.target.value }))} placeholder="Nom" required />
+          <input className="form-input mb-2" value={form.email || ""} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="Email" />
+          <input className="form-input mb-2" value={form.telephone || ""} onChange={e => setForm(f => ({ ...f, telephone: e.target.value }))} placeholder="Téléphone" />
           {/* Ajout d'un upload logo possible ici */}
           <Button type="submit" disabled={loading} className="flex items-center gap-2">
             {loading && <span className="loader-glass" />}

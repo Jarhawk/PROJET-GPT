@@ -91,7 +91,7 @@ export default function GroupeParamForm({ groupe, onClose, onSaved }) {
         <div>
         <label>Nom du groupe</label>
         <input
-          className="input w-full"
+          className="form-input w-full"
           value={values.nom}
           onChange={(e) => setValues({ ...values, nom: e.target.value })}
           required

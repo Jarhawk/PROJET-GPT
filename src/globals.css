@@ -56,7 +56,7 @@ a:hover {
   @apply px-4 py-2 rounded-xl font-semibold bg-primary text-white hover:bg-primary-90 transition-colors;
 }
 .btn-sm {
-  @apply px-2 py-1 text-sm;
+  @apply text-sm px-3 py-1;
 }
 
 /* Badges pour rôles */
@@ -79,6 +79,10 @@ a:hover {
 .form-select,
 select {
   @apply w-full px-4 py-2 font-semibold text-white placeholder-white/50 bg-white/10 backdrop-blur rounded-md shadow-sm border border-white/20 ring-1 ring-white/20 focus:outline-none hover:bg-white/10 transition-colors;
+}
+
+.form-label {
+  @apply block text-sm mb-1;
 }
 
 /* Tables */

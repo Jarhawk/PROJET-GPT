@@ -41,7 +41,7 @@ export default function GuidedTour({ steps = [], module }) {
         >
           <p className="mb-2 text-sm">{step.content}</p>
           <button
-            className="btn text-sm bg-mamastockGold px-2 py-1 rounded"
+            className="btn btn-primary btn-sm"
             onClick={() => setCurrent((c) => c + 1)}
           >
             Suivant

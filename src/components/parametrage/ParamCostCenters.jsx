@@ -135,7 +135,7 @@ export default function ParamCostCenters() {
         )}
       </form>
       <input
-        className="input mb-2"
+        className="form-input mb-2"
         placeholder="Recherche"
         value={search}
         onChange={e => setSearch(e.target.value)}

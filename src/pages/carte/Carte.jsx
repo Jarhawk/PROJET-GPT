@@ -68,8 +68,8 @@ function CarteTable({ type }) {
   return (
     <div>
       <div className="flex flex-wrap gap-2 mb-2 items-end">
-        <input className="input input-bordered" placeholder="Recherche" value={search} onChange={e => setSearch(e.target.value)} />
-        <select className="select select-bordered" value={familleFilter} onChange={e => setFamilleFilter(e.target.value)}>
+        <input className="form-input" placeholder="Recherche" value={search} onChange={e => setSearch(e.target.value)} />
+        <select className="form-select" value={familleFilter} onChange={e => setFamilleFilter(e.target.value)}>
           <option value="">Toutes familles</option>
           {familles.map(f => <option key={f.id} value={f.nom}>{f.nom}</option>)}
         </select>
@@ -103,7 +103,7 @@ function CarteTable({ type }) {
                   <td className="px-2 py-1">
                     <input
                       type="number"
-                      className="input input-bordered w-24"
+                      className="form-input w-24"
                       value={f.prix_vente ?? ""}
                       disabled={savingId === f.id}
                       onChange={e => handleChangePV(f, e.target.value ? Number(e.target.value) : null)}

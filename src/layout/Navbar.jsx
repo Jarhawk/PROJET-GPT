@@ -61,7 +61,7 @@ export default function Navbar() {
               search(e.target.value);
             }}
             placeholder={t('search')}
-            className="input w-48"
+            className="form-input w-48"
             aria-label={t('search')}
           />
           {results.length > 0 && (

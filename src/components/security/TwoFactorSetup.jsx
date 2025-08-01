@@ -47,7 +47,7 @@ export default function TwoFactorSetup() {
             <QRCode value={`otpauth://totp/MamaStock?secret=${secret}`} />
           )}
           <input
-            className="input mt-2"
+            className="form-input mt-2"
             value={code}
             onChange={e => setCode(e.target.value)}
             placeholder="123456"

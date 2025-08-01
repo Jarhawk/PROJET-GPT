@@ -2,7 +2,6 @@
 // src/components/produits/ProduitForm.jsx
 import { useState, useEffect } from "react";
 import { useProducts } from "@/hooks/useProducts";
-import AutoCompleteField from "@/components/ui/AutoCompleteField";
 import { useFamilles } from "@/hooks/useFamilles";
 import { useUnites } from "@/hooks/useUnites";
 import { useFournisseurs } from "@/hooks/useFournisseurs";
@@ -21,15 +20,12 @@ export default function ProduitForm({
 }) {
   const editing = !!produit;
   const { fournisseurs, fetchFournisseurs } = useFournisseurs();
-  const { familles, fetchFamilles, addFamille } = useFamilles();
-  const { unites, fetchUnites, addUnite } = useUnites();
+  const { familles, fetchFamilles } = useFamilles();
+  const { unites, fetchUnites } = useUnites();
 
   const [nom, setNom] = useState(produit?.nom || "");
-  const [famille, setFamille] = useState({
-    id: produit?.famille_id || "",
-    nom: "",
-  });
-  const [unite, setUnite] = useState({ id: produit?.unite_id || "", nom: "" });
+  const [familleId, setFamilleId] = useState(produit?.famille_id || "");
+  const [uniteId, setUniteId] = useState(produit?.unite_id || "");
   const [fournisseurId, setFournisseurId] = useState(
     produit?.fournisseur_id || "",
   );
@@ -60,8 +56,8 @@ export default function ProduitForm({
   useEffect(() => {
     if (editing && produit) {
       setNom(produit.nom || "");
-      setFamille({ id: produit.famille_id || "", nom: "" });
-      setUnite({ id: produit.unite_id || "", nom: "" });
+      setFamilleId(produit.famille_id || "");
+      setUniteId(produit.unite_id || "");
       setFournisseurId(produit.fournisseur_id || "");
       setStockReel(produit.stock_reel || 0);
       setStockMin(produit.stock_min || 0);
@@ -76,30 +72,20 @@ export default function ProduitForm({
     if (saving) return;
     const errs = {};
     if (!nom.trim()) errs.nom = "Nom requis";
-    if (!famille.id && !famille.nom) errs.famille = "Famille requise";
-    if (!unite.id && !unite.nom) errs.unite = "Unité requise";
+    if (!familleId) errs.famille = "Famille requise";
+    if (!uniteId) errs.unite = "Unité requise";
     setErrors(errs);
     if (Object.keys(errs).length) {
       toast.error("Veuillez remplir les champs obligatoires.");
       return;
     }
-    let familleId = famille.id;
-    let uniteId = unite.id;
-    if (!familleId && famille.nom) {
-      const { data, error } = await addFamille(famille.nom);
-      if (error) throw error;
-      familleId = data.id;
-    }
-    if (!uniteId && unite.nom) {
-      const { data, error } = await addUnite(unite.nom);
-      if (error) throw error;
-      uniteId = data.id;
-    }
+    const familleIdVal = familleId;
+    const uniteIdVal = uniteId;
 
     const newProd = {
       nom,
-      famille_id: familleId || null,
-      unite_id: uniteId || null,
+      famille_id: familleIdVal || null,
+      unite_id: uniteIdVal || null,
       fournisseur_id: fournisseurId || null,
       stock_reel: Number(stock_reel),
       stock_min: Number(stock_min),
@@ -159,35 +145,41 @@ export default function ProduitForm({
               )}
             </div>
             <div>
-              <AutoCompleteField
-                label="Famille"
-                value={famille.id}
-                onChange={(obj) => setFamille(obj)}
-                options={familleOptions.map((f) => ({ id: f.id, nom: f.nom }))}
-                onAddNewValue={async (val) => {
-                  const { data, error } = await addFamille(val);
-                  if (error) toast.error(error.message || error);
-                  else return { id: data.id, nom: data.nom };
-                }}
+              <label className="text-white text-sm font-semibold mb-1 block">
+                Famille *
+              </label>
+              <Select
+                value={familleId}
+                onChange={(e) => setFamilleId(e.target.value)}
                 required
-              />
+              >
+                <option value="">-- Choisir --</option>
+                {familleOptions.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.nom}
+                  </option>
+                ))}
+              </Select>
               {errors.famille && (
                 <p className="text-red-500 text-sm">{errors.famille}</p>
               )}
             </div>
             <div>
-              <AutoCompleteField
-                label="Unité"
-                value={unite.id}
-                onChange={(obj) => setUnite(obj)}
-                options={uniteOptions.map((u) => ({ id: u.id, nom: u.nom }))}
-                onAddNewValue={async (val) => {
-                  const { data, error } = await addUnite(val);
-                  if (error) toast.error(error.message || error);
-                  else return { id: data.id, nom: data.nom };
-                }}
+              <label className="text-white text-sm font-semibold mb-1 block">
+                Unité *
+              </label>
+              <Select
+                value={uniteId}
+                onChange={(e) => setUniteId(e.target.value)}
                 required
-              />
+              >
+                <option value="">-- Choisir --</option>
+                {uniteOptions.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.nom}
+                  </option>
+                ))}
+              </Select>
               {errors.unite && (
                 <p className="text-red-500 text-sm">{errors.unite}</p>
               )}

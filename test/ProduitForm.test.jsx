@@ -32,7 +32,7 @@ import ProduitForm from '@/components/produits/ProduitForm.jsx';
 test('renders additional product inputs', () => {
   mockHook = () => ({ addProduct: vi.fn(), updateProduct: vi.fn(), loading: false });
   render(
-    <ProduitForm familles={[]} unites={[]} onSuccess={vi.fn()} onClose={vi.fn()} />
+    <ProduitForm onSuccess={vi.fn()} onClose={vi.fn()} />
   );
   expect(screen.getByLabelText(/Code interne/)).toBeInTheDocument();
   expect(screen.getByLabelText(/Allergènes/)).toBeInTheDocument();
@@ -43,7 +43,7 @@ test('PMP input read-only or hidden', () => {
   mockHook = () => ({ addProduct: vi.fn(), updateProduct: vi.fn(), loading: false });
   // create mode: no PMP field
   const { rerender } = render(
-    <ProduitForm familles={[]} unites={[]} onSuccess={vi.fn()} onClose={vi.fn()} />
+    <ProduitForm onSuccess={vi.fn()} onClose={vi.fn()} />
   );
   expect(screen.queryByLabelText(/PMP/)).toBeNull();
 
@@ -51,8 +51,6 @@ test('PMP input read-only or hidden', () => {
   rerender(
     <ProduitForm
       produit={{ id: '1', nom: 'p', famille: 'f', unite: 'u', pmp: 5 }}
-      familles={[]}
-      unites={[]}
       onSuccess={vi.fn()}
       onClose={vi.fn()}
     />

@@ -2,8 +2,7 @@
 // src/components/produits/ProduitForm.jsx
 import { useState, useEffect } from "react";
 import { useProducts } from "@/hooks/useProducts";
-import AutoCompleteFamilleField from "@/components/ui/AutoCompleteFamilleField";
-import AutoCompleteUniteField from "@/components/ui/AutoCompleteUniteField";
+import AutoCompleteField from "@/components/ui/AutoCompleteField";
 import { useFamilles } from "@/hooks/useFamilles";
 import { useUnites } from "@/hooks/useUnites";
 import { useFournisseurs } from "@/hooks/useFournisseurs";
@@ -22,8 +21,8 @@ export default function ProduitForm({
 }) {
   const editing = !!produit;
   const { fournisseurs, fetchFournisseurs } = useFournisseurs();
-  const { addFamille } = useFamilles();
-  const { addUnite } = useUnites();
+  const { familles, fetchFamilles, addFamille } = useFamilles();
+  const { unites, fetchUnites, addUnite } = useUnites();
 
   const [nom, setNom] = useState(produit?.nom || "");
   const [famille, setFamille] = useState({
@@ -44,9 +43,19 @@ export default function ProduitForm({
   const { addProduct, updateProduct, loading } = useProducts();
   const [saving, setSaving] = useState(false);
 
+  const familleOptions = [...familles]
+    .filter((f, idx, arr) => arr.findIndex((ff) => ff.id === f.id) === idx)
+    .sort((a, b) => (a.nom || "").localeCompare(b.nom || ""));
+
+  const uniteOptions = [...unites]
+    .filter((u, idx, arr) => arr.findIndex((uu) => uu.id === u.id) === idx)
+    .sort((a, b) => (a.nom || "").localeCompare(b.nom || ""));
+
   useEffect(() => {
+    fetchFamilles();
+    fetchUnites();
     fetchFournisseurs();
-  }, [fetchFournisseurs]);
+  }, [fetchFamilles, fetchUnites, fetchFournisseurs]);
 
   useEffect(() => {
     if (editing && produit) {
@@ -150,10 +159,16 @@ export default function ProduitForm({
               )}
             </div>
             <div>
-              <AutoCompleteFamilleField
+              <AutoCompleteField
                 label="Famille"
                 value={famille.id}
                 onChange={(obj) => setFamille(obj)}
+                options={familleOptions.map((f) => ({ id: f.id, nom: f.nom }))}
+                onAddNewValue={async (val) => {
+                  const { data, error } = await addFamille(val);
+                  if (error) toast.error(error.message || error);
+                  else return { id: data.id, nom: data.nom };
+                }}
                 required
               />
               {errors.famille && (
@@ -161,10 +176,16 @@ export default function ProduitForm({
               )}
             </div>
             <div>
-              <AutoCompleteUniteField
+              <AutoCompleteField
                 label="Unité"
                 value={unite.id}
                 onChange={(obj) => setUnite(obj)}
+                options={uniteOptions.map((u) => ({ id: u.id, nom: u.nom }))}
+                onAddNewValue={async (val) => {
+                  const { data, error } = await addUnite(val);
+                  if (error) toast.error(error.message || error);
+                  else return { id: data.id, nom: data.nom };
+                }}
                 required
               />
               {errors.unite && (

@@ -171,14 +171,14 @@ export default function Factures() {
         <Motion.table
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="min-w-full text-white"
+          className="min-w-full text-sm"
         >
         <thead>
           <tr>
             <th className="px-4 py-2">Numéro</th>
             <th className="px-4 py-2">Date</th>
             <th className="px-4 py-2">Fournisseur</th>
-            <th className="px-4 py-2">Montant TTC</th>
+            <th className="px-4 py-2 text-right">Montant TTC</th>
             <th className="px-4 py-2">Statut</th>
             <th className="px-4 py-2">Actif</th>
             <th className="px-4 py-2">Actions</th>

@@ -225,14 +225,14 @@ export default function Fournisseurs() {
       {/* Tableau fournisseurs */}
       <h2 className="font-semibold mb-2">Liste des fournisseurs</h2>
       <ListingContainer className="mb-6">
-        <table className="text-sm text-center">
+        <table className="text-sm">
             <thead>
               <tr>
                 <th className="py-2 px-3">Nom</th>
                 <th className="py-2 px-3">Téléphone</th>
                 <th className="py-2 px-3">Contact</th>
                 <th className="py-2 px-3">Email</th>
-                <th className="py-2 px-3">Nb Produits</th>
+                <th className="py-2 px-3 text-right">Nb Produits</th>
                 <th className="py-2 px-3"></th>
                 <th className="py-2 px-3"></th>
               </tr>

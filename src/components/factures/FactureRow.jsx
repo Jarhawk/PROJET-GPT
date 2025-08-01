@@ -16,7 +16,7 @@ export default function FactureRow({ facture, onEdit, onDetail, onToggleActive, 
       <td className="border px-4 py-2">{facture.numero || facture.id}</td>
       <td className="border px-4 py-2">{facture.date_facture}</td>
       <td className="border px-4 py-2">{facture.fournisseur?.nom}</td>
-      <td className="border px-4 py-2">{facture.total_ttc?.toFixed(2)} €</td>
+      <td className="border px-4 py-2 text-right">{facture.total_ttc?.toFixed(2)} €</td>
       <td className="border px-4 py-2">
         <span className={STATUTS[facture.statut] || "badge"}>{facture.statut}</span>
       </td>

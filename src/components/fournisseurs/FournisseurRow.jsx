@@ -8,7 +8,7 @@ export default function FournisseurRow({ fournisseur, productCount, onDetail, on
       <td>{fournisseur.contact?.tel}</td>
       <td>{fournisseur.contact?.nom}</td>
       <td>{fournisseur.contact?.email}</td>
-      <td>{productCount}</td>
+      <td className="text-right">{productCount}</td>
       <td className="py-2 px-3">
         <Button
           className="w-auto flex items-center gap-1"

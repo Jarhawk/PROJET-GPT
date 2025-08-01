@@ -1,7 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from 'react';
 import { Toaster, toast } from 'react-hot-toast';
-import TableContainer from '@/components/ui/TableContainer';
 import ListingContainer from '@/components/ui/ListingContainer';
 import PaginationFooter from '@/components/ui/PaginationFooter';
 import TableHeader from '@/components/ui/TableHeader';
@@ -64,7 +63,7 @@ export default function Unites() {
         <Button onClick={() => setEdit({})}>+ Nouvelle unité</Button>
       </TableHeader>
       <ListingContainer>
-        <table className="text-sm text-center">
+        <table className="text-sm">
           <thead>
             <tr>
               <th className="px-2 py-1">Nom</th>

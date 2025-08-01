@@ -214,7 +214,7 @@ export default function Produits() {
         </TableHeader>
       </GlassCard>
       <ListingContainer>
-        <table className="min-w-full table-auto text-center">
+        <table className="min-w-full table-auto text-sm">
             <thead>
               <tr>
               <th className="cursor-pointer" onClick={() => toggleSort("nom")}>
@@ -227,24 +227,24 @@ export default function Produits() {
                 Famille{renderArrow("famille")}
               </th>
               <th>Unité</th>
-              <th className="cursor-pointer" onClick={() => toggleSort("pmp")}>
+              <th className="cursor-pointer text-right" onClick={() => toggleSort("pmp")}>
                 PMP (€){renderArrow("pmp")}
               </th>
               <th
-                className="cursor-pointer"
+                className="cursor-pointer text-right"
                 onClick={() => toggleSort("stock_theorique")}
               >
                 Stock théorique{renderArrow("stock_theorique")}
               </th>
               <th
-                className="cursor-pointer"
+                className="cursor-pointer text-right"
                 onClick={() => toggleSort("stock_min")}
               >
                 Min{renderArrow("stock_min")}
               </th>
               <th>Fournisseur</th>
               <th
-                className="cursor-pointer"
+                className="cursor-pointer text-right"
                 onClick={() => toggleSort("dernier_prix")}
               >
                 Dernier prix (€){renderArrow("dernier_prix")}

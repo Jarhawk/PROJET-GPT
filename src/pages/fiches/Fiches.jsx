@@ -144,14 +144,14 @@ export default function Fiches() {
         <Motion.table
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="min-w-full text-white"
+          className="min-w-full text-sm"
         >
           <thead>
             <tr>
               <th className="px-4 py-2">Nom</th>
               <th className="px-4 py-2">Famille</th>
-              <th className="px-4 py-2">Coût/portion</th>
-              <th className="px-4 py-2"># Produits</th>
+              <th className="px-4 py-2 text-right">Coût/portion</th>
+              <th className="px-4 py-2 text-right"># Produits</th>
               <th className="px-4 py-2">Actif</th>
               <th className="px-4 py-2">Actions</th>
             </tr>

@@ -2,7 +2,9 @@
 import { useEffect, useState } from "react";
 import { useRequisitions } from "@/hooks/useRequisitions";
 import useAuth from "@/hooks/useAuth";
-import TableContainer from "@/components/ui/TableContainer";
+import ListingContainer from "@/components/ui/ListingContainer";
+import TableHeader from "@/components/ui/TableHeader";
+import PaginationFooter from "@/components/ui/PaginationFooter";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import RequisitionRow from "@/components/requisitions/RequisitionRow";
@@ -22,7 +24,11 @@ export default function RequisitionsPage() {
     if (!mama_id || authLoading) return;
     (async () => {
       setLoading(true);
-      const { data, count } = await fetchRequisitions({ search, page, limit: PAGE_SIZE });
+      const { data, count } = await fetchRequisitions({
+        search,
+        page,
+        limit: PAGE_SIZE,
+      });
       setItems(data);
       setTotal(count);
       setLoading(false);
@@ -37,49 +43,41 @@ export default function RequisitionsPage() {
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-xl font-bold text-mamastock-gold mb-4">Demandes de stock</h1>
-      <div className="flex flex-wrap gap-4 items-center mb-4">
+      <h1 className="text-xl font-bold mb-4">Demandes de stock</h1>
+      <TableHeader className="mb-2">
         <input
           type="search"
           value={search}
-          onChange={e => { setSearch(e.target.value); setPage(1); }}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
           className="input"
           placeholder="Recherche produit"
         />
-      </div>
-      <TableContainer>
-        <table className="min-w-full text-sm text-center">
+      </TableHeader>
+      <ListingContainer>
+        <table className="text-sm">
           <thead>
             <tr>
               <th className="p-2">Date de réquisition</th>
               <th className="p-2">Nom du produit</th>
-              <th className="p-2">Quantité demandée</th>
+              <th className="p-2 text-right">Quantité demandée</th>
             </tr>
           </thead>
           <tbody>
-            {items.map(r => (
+            {items.map((r) => (
               <RequisitionRow key={r.id} requisition={r} />
             ))}
           </tbody>
         </table>
-      </TableContainer>
-      <div className="flex justify-center gap-2 mt-4">
-        <Button
-          variant="outline"
-          disabled={page <= 1}
-          onClick={() => setPage(p => Math.max(1, p - 1))}
-        >
-          Précédent
-        </Button>
-        <span className="px-2">Page {page} / {pageCount}</span>
-        <Button
-          variant="outline"
-          disabled={page >= pageCount}
-          onClick={() => setPage(p => Math.min(pageCount, p + 1))}
-        >
-          Suivant
-        </Button>
-      </div>
+      </ListingContainer>
+      <PaginationFooter
+        page={page}
+        pages={pageCount}
+        onPageChange={setPage}
+        className="mt-4"
+      />
     </div>
   );
 }

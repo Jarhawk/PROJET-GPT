@@ -45,6 +45,14 @@ export default function ProduitForm({
   const { addProduct, updateProduct, loading } = useProducts();
   const [saving, setSaving] = useState(false);
 
+  const familleOptions = [...famillesHook, ...familles]
+    .filter((f, idx, arr) => arr.findIndex((ff) => ff.id === f.id) === idx)
+    .sort((a, b) => (a.nom || "").localeCompare(b.nom || ""));
+
+  const uniteOptions = [...unitesHook, ...unites]
+    .filter((u, idx, arr) => arr.findIndex((uu) => uu.id === u.id) === idx)
+    .sort((a, b) => (a.nom || "").localeCompare(b.nom || ""));
+
   useEffect(() => {
     fetchFamilles();
     fetchUnites();
@@ -157,10 +165,7 @@ export default function ProduitForm({
                 label="Famille"
                 value={famille.id}
                 onChange={(obj) => setFamille(obj)}
-                options={[...famillesHook, ...familles].map((f) => ({
-                  id: f.id,
-                  nom: f.nom,
-                }))}
+                options={familleOptions.map((f) => ({ id: f.id, nom: f.nom }))}
                 onAddNewValue={async (val) => {
                   const { data, error } = await addFamille(val);
                   if (error) toast.error(error.message || error);
@@ -177,10 +182,7 @@ export default function ProduitForm({
                 label="Unité"
                 value={unite.id}
                 onChange={(obj) => setUnite(obj)}
-                options={[...unitesHook, ...unites].map((u) => ({
-                  id: u.id,
-                  nom: u.nom,
-                }))}
+                options={uniteOptions.map((u) => ({ id: u.id, nom: u.nom }))}
                 onAddNewValue={async (val) => {
                   const { data, error } = await addUnite(val);
                   if (error) toast.error(error.message || error);

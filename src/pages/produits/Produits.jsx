@@ -291,8 +291,6 @@ export default function Produits() {
       <ProduitFormModal
         open={showForm}
         produit={selectedProduct}
-        familles={familles}
-        unites={unites}
         onClose={() => {
           setShowForm(false);
           setSelectedProduct(null);

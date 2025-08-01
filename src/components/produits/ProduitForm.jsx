@@ -16,8 +16,6 @@ import { Card, CardContent } from "@/components/ui/card";
 
 export default function ProduitForm({
   produit,
-  familles = [],
-  unites = [],
   onSuccess,
   onClose,
 }) {
@@ -45,11 +43,11 @@ export default function ProduitForm({
   const { addProduct, updateProduct, loading } = useProducts();
   const [saving, setSaving] = useState(false);
 
-  const familleOptions = [...famillesHook, ...familles]
+  const familleOptions = [...famillesHook]
     .filter((f, idx, arr) => arr.findIndex((ff) => ff.id === f.id) === idx)
     .sort((a, b) => (a.nom || "").localeCompare(b.nom || ""));
 
-  const uniteOptions = [...unitesHook, ...unites]
+  const uniteOptions = [...unitesHook]
     .filter((u, idx, arr) => arr.findIndex((uu) => uu.id === u.id) === idx)
     .sort((a, b) => (a.nom || "").localeCompare(b.nom || ""));
 

@@ -4,7 +4,7 @@ import ModalGlass from "@/components/ui/ModalGlass";
 import ProduitForm from "./ProduitForm";
 import { useEffect } from "react";
 
-export default function ProduitFormModal({ open, produit, familles, unites, onClose, onSuccess }) {
+export default function ProduitFormModal({ open, produit, onClose, onSuccess }) {
   // Fermer avec ESC
   useEffect(() => {
     function handleKey(e) {
@@ -16,13 +16,7 @@ export default function ProduitFormModal({ open, produit, familles, unites, onCl
 
   return (
     <ModalGlass open={open} onClose={onClose}>
-      <ProduitForm
-        produit={produit}
-        familles={familles}
-        unites={unites}
-        onSuccess={onSuccess}
-        onClose={onClose}
-      />
+      <ProduitForm produit={produit} onSuccess={onSuccess} onClose={onClose} />
     </ModalGlass>
   );
 }

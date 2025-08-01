@@ -78,7 +78,22 @@ a:hover {
 .form-textarea,
 .form-select,
 select {
-  @apply w-full px-4 py-2 font-semibold text-white placeholder-white/50 bg-white/10 backdrop-blur rounded-md shadow-sm border border-white/20 ring-1 ring-white/20 focus:outline-none hover:bg-white/10 transition-colors;
+  @apply w-full px-4 py-2 font-semibold rounded-md shadow-sm border focus:outline-none transition-colors text-gray-900 bg-white placeholder-gray-400 border-gray-300 hover:bg-gray-100 focus:bg-white dark:text-white dark:bg-gray-800;
+}
+
+.form-select option,
+select option {
+  @apply text-gray-900 bg-white dark:text-white dark:bg-gray-700;
+}
+
+.form-select option:hover,
+select option:hover {
+  @apply bg-gray-100 dark:bg-gray-700;
+}
+
+.form-select option:checked,
+select option:checked {
+  @apply bg-gray-100 dark:bg-gray-700;
 }
 
 .form-label {

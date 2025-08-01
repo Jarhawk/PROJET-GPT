@@ -74,7 +74,7 @@ export default function ParamUnites() {
       <h2 className="font-bold text-xl mb-4">Unités</h2>
       <form onSubmit={handleSubmit} className="flex gap-2 mb-4">
         <input
-          className="input"
+          className="form-input"
           placeholder="Nom de l’unité"
           value={form.nom}
           onChange={e => setForm(f => ({ ...f, nom: e.target.value }))}

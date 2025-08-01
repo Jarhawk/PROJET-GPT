@@ -138,7 +138,7 @@ export default function Transferts() {
           <label>Début</label>
           <input
             type="date"
-            className="input"
+            className="form-input"
             value={periode.debut}
             onChange={(e) =>
               setPeriode((p) => ({ ...p, debut: e.target.value }))
@@ -149,7 +149,7 @@ export default function Transferts() {
           <label>Fin</label>
           <input
             type="date"
-            className="input"
+            className="form-input"
             value={periode.fin}
             onChange={(e) => setPeriode((p) => ({ ...p, fin: e.target.value }))}
           />

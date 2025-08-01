@@ -97,7 +97,7 @@ export default function CostCenterAllocationModal({ mouvementId, produitId, open
               <label className="sr-only" htmlFor={`cc-${idx}`}>Centre de coût</label>
               <select
                 id={`cc-${idx}`}
-                className="input"
+                className="form-input"
                 aria-label="Centre de coût"
                 value={row.cost_center_id}
                 onChange={e => handleChange(idx, "cost_center_id", e.target.value)}

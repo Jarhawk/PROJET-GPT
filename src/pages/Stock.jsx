@@ -51,7 +51,7 @@ export default function Stock() {
           type="search"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="input"
+          className="form-input"
           placeholder="Recherche produit"
         />
         <Button onClick={() => { setSelected(null); setShowForm(true); }}>

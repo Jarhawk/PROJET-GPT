@@ -52,13 +52,13 @@ export default function Achats() {
     <div className="p-6 container mx-auto text-shadow space-y-4">
       <Toaster />
       <GlassCard className="flex flex-wrap gap-2 items-end">
-        <select className="input" value={fournisseur} onChange={e => { setFournisseur(e.target.value); setPage(1); }}>
+        <select className="form-input" value={fournisseur} onChange={e => { setFournisseur(e.target.value); setPage(1); }}>
           <option value="">Tous fournisseurs</option>
           {fournisseurs.map(s => <option key={s.id} value={s.id}>{s.nom}</option>)}
         </select>
         <input
           list="produits-list"
-          className="input"
+          className="form-input"
           value={produit}
           onChange={e => { setProduit(e.target.value); setPage(1); if (e.target.value.length >= 2) searchProduits(e.target.value); }}
           placeholder="Produit"
@@ -66,7 +66,7 @@ export default function Achats() {
         <datalist id="produits-list">{produitOptions.map(p => <option key={p.id} value={p.nom} />)}</datalist>
         <input
           type="month"
-          className="input"
+          className="form-input"
           value={month}
           onChange={e => {
             setMonth(e.target.value);
@@ -74,7 +74,7 @@ export default function Achats() {
           }}
         />
         <select
-          className="input"
+          className="form-input"
           value={actifFilter}
           onChange={e => {
             setActifFilter(e.target.value);

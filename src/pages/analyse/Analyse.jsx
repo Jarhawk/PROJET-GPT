@@ -35,9 +35,9 @@ export default function Analyse() {
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold">Analyse avancée</h1>
       <div className="flex flex-wrap gap-2">
-        <input type="month" className="input" value={filters.debut} onChange={e => setFilters(f => ({ ...f, debut: e.target.value }))} />
-        <input type="month" className="input" value={filters.fin} onChange={e => setFilters(f => ({ ...f, fin: e.target.value }))} />
-        <select className="input" value={filters.produit_id} onChange={e => setFilters(f => ({ ...f, produit_id: e.target.value }))}>
+        <input type="month" className="form-input" value={filters.debut} onChange={e => setFilters(f => ({ ...f, debut: e.target.value }))} />
+        <input type="month" className="form-input" value={filters.fin} onChange={e => setFilters(f => ({ ...f, fin: e.target.value }))} />
+        <select className="form-input" value={filters.produit_id} onChange={e => setFilters(f => ({ ...f, produit_id: e.target.value }))}>
           <option value="">Tous produits</option>
           {results.map(p => (
             <option key={p.id} value={p.id}>{p.nom}</option>

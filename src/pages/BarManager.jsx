@@ -170,14 +170,14 @@ export default function BarManager() {
         </Select>
         <input
           type="date"
-          className="input"
+          className="form-input"
           value={dates.debut}
           onChange={e => setDates(d => ({ ...d, debut: e.target.value }))}
           disabled={periode !== "custom"}
         />
         <input
           type="date"
-          className="input"
+          className="form-input"
           value={dates.fin}
           onChange={e => setDates(d => ({ ...d, fin: e.target.value }))}
           disabled={periode !== "custom"}

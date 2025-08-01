@@ -52,14 +52,14 @@ export default function MenuDuJour() {
           type="search"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="input"
+          className="form-input"
           placeholder="Recherche menu du jour"
         />
         <input
           type="date"
           value={dateFilter}
           onChange={e => setDateFilter(e.target.value)}
-          className="input"
+          className="form-input"
         />
         <Button onClick={() => { setSelected(null); setShowForm(true); }}>
           Ajouter un menu du jour

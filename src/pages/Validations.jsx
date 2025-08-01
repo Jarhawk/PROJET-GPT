@@ -56,21 +56,21 @@ export default function Validations() {
       <GlassCard title="Nouvelle demande" className="mb-4">
         <form onSubmit={handleSubmit} className="flex flex-wrap gap-2 items-end">
           <input
-            className="input"
+            className="form-input"
             placeholder="Module"
             value={form.module}
             onChange={(e) => setForm(f => ({ ...f, module: e.target.value }))}
             required
           />
         <input
-          className="input"
+          className="form-input"
           placeholder="Action"
           value={form.action}
           onChange={(e) => setForm(f => ({ ...f, action: e.target.value }))}
           required
         />
         <input
-          className="input"
+          className="form-input"
           placeholder="Entité"
           value={form.entity_id}
           onChange={(e) => setForm(f => ({ ...f, entity_id: e.target.value }))}

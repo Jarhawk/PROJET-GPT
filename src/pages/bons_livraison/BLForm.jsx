@@ -132,9 +132,9 @@ export default function BLForm({ bon, fournisseurs = [], onClose }) {
                       options={produitOptions.map(p => ({ id: p.id, nom: p.nom }))}
                     />
                   </td>
-                  <td><input type="number" className="input" value={l.quantite_recue} onChange={e => setLignes(ls => ls.map((it,i)=> i===idx ? { ...it, quantite_recue: Number(e.target.value) } : it))} /></td>
-                  <td><input type="number" className="input" value={l.prix_unitaire} onChange={e => setLignes(ls => ls.map((it,i)=> i===idx ? { ...it, prix_unitaire: Number(e.target.value) } : it))} /></td>
-                  <td><input type="number" className="input" value={l.tva} onChange={e => setLignes(ls => ls.map((it,i)=> i===idx ? { ...it, tva: Number(e.target.value) } : it))} /></td>
+                  <td><input type="number" className="form-input" value={l.quantite_recue} onChange={e => setLignes(ls => ls.map((it,i)=> i===idx ? { ...it, quantite_recue: Number(e.target.value) } : it))} /></td>
+                  <td><input type="number" className="form-input" value={l.prix_unitaire} onChange={e => setLignes(ls => ls.map((it,i)=> i===idx ? { ...it, prix_unitaire: Number(e.target.value) } : it))} /></td>
+                  <td><input type="number" className="form-input" value={l.tva} onChange={e => setLignes(ls => ls.map((it,i)=> i===idx ? { ...it, tva: Number(e.target.value) } : it))} /></td>
                   <td><Button type="button" size="sm" variant="outline" onClick={() => setLignes(ls => ls.filter((_,i)=>i!==idx))}>X</Button></td>
                 </tr>
               ))}

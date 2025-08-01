@@ -94,16 +94,16 @@ export default function MenuEngineering() {
           type="month"
           value={periode.slice(0, 7)}
           onChange={e => setPeriode(e.target.value + '-01')}
-          className="input"
+          className="form-input"
         />
         <input
-          className="input"
+          className="form-input"
           placeholder="Catégorie"
           value={filters.categorie}
           onChange={e => setFilters(f => ({ ...f, categorie: e.target.value }))}
         />
         <select
-          className="input"
+          className="form-input"
           value={filters.performance}
           onChange={e => setFilters(f => ({ ...f, performance: e.target.value }))}
         >

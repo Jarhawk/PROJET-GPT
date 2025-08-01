@@ -102,7 +102,7 @@ export default function Factures() {
           type="search"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="input"
+          className="form-input"
           placeholder="Recherche (numéro)"
         />
         <datalist id="factures-list">
@@ -113,7 +113,7 @@ export default function Factures() {
           ))}
         </datalist>
         <select
-          className="input"
+          className="form-input"
           value={fournisseurFilter}
           onChange={(e) => {
             setFournisseurFilter(e.target.value);
@@ -124,7 +124,7 @@ export default function Factures() {
           {fournisseurs.map(s => <option key={s.id} value={s.id}>{s.nom}</option>)}
         </select>
         <select
-          className="input"
+          className="form-input"
           value={statutFilter}
           onChange={(e) => {
             setStatutFilter(e.target.value);
@@ -138,12 +138,12 @@ export default function Factures() {
         </select>
         <input
           type="month"
-          className="input"
+          className="form-input"
           value={monthFilter}
           onChange={e => { setMonthFilter(e.target.value); setPage(1); }}
         />
         <select
-          className="input"
+          className="form-input"
           value={actifFilter}
           onChange={(e) => {
             setActifFilter(e.target.value);

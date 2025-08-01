@@ -52,7 +52,7 @@ export default function RequisitionsPage() {
             setSearch(e.target.value);
             setPage(1);
           }}
-          className="input"
+          className="form-input"
           placeholder="Recherche produit"
         />
       </TableHeader>

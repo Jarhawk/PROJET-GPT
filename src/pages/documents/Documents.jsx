@@ -56,19 +56,19 @@ export default function Documents() {
       )}
       <div className="flex flex-wrap gap-2 mb-4">
         <input
-          className="input"
+          className="form-input"
           placeholder="Recherche"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
         <input
-          className="input"
+          className="form-input"
           placeholder="Type"
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
         />
         <input
-          className="input"
+          className="form-input"
           placeholder="Catégorie"
           value={categorieFilter}
           onChange={(e) => setCategorieFilter(e.target.value)}

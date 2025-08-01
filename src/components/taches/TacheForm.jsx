@@ -73,7 +73,7 @@ export default function TacheForm({ task }) {
       <label className="block">
         <span>Description</span>
         <textarea
-          className="textarea"
+          className="form-textarea"
           name="description"
           value={form.description}
           onChange={handleChange}

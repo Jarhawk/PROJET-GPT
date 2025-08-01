@@ -47,19 +47,19 @@ export default function AnalytiqueDashboard() {
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold mb-4">Dashboard analytique</h1>
       <div className="flex flex-wrap gap-2 mb-4">
-        <select className="input" value={filters.centre} onChange={e => setFilters(f => ({ ...f, centre: e.target.value }))}>
+        <select className="form-input" value={filters.centre} onChange={e => setFilters(f => ({ ...f, centre: e.target.value }))}>
           <option value="">Tous centres</option>
           {costCenters.map(c => (
             <option key={c.id} value={c.id}>{c.nom}</option>
           ))}
         </select>
-        <select className="input" value={filters.famille} onChange={e => setFilters(f => ({ ...f, famille: e.target.value }))}>
+        <select className="form-input" value={filters.famille} onChange={e => setFilters(f => ({ ...f, famille: e.target.value }))}>
           <option value="">Toutes familles</option>
           {familles.map(f => (
             <option key={f.id} value={f.nom}>{f.nom}</option>
           ))}
         </select>
-        <input type="month" className="input" value={filters.debut} onChange={e => setFilters(f => ({ ...f, debut: e.target.value }))} />
+        <input type="month" className="form-input" value={filters.debut} onChange={e => setFilters(f => ({ ...f, debut: e.target.value }))} />
       </div>
       <Button variant="outline" className="mb-4" onClick={exportExcel}>Export Excel</Button>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

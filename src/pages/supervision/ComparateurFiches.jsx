@@ -30,7 +30,7 @@ export default function ComparateurFiches() {
         <h1 className="text-2xl font-bold mb-4">Comparateur de fiches</h1>
         <div className="flex gap-2 mb-4">
           <input
-            className="input"
+            className="form-input"
             placeholder="ID fiche"
             value={ficheId}
             onChange={(e) => setFicheId(e.target.value)}

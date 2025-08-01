@@ -35,13 +35,13 @@ export default function Planning() {
     <div className="p-6 space-y-4">
       <div className="flex justify-between items-end gap-4">
         <div className="flex gap-2">
-          <select className="input" value={statut} onChange={e => setStatut(e.target.value)}>
+          <select className="form-input" value={statut} onChange={e => setStatut(e.target.value)}>
             <option value="">Tous statuts</option>
             <option value="prévu">Prévu</option>
             <option value="confirmé">Confirmé</option>
           </select>
-          <input type="date" className="input" value={debut} onChange={e => setDebut(e.target.value)} />
-          <input type="date" className="input" value={fin} onChange={e => setFin(e.target.value)} />
+          <input type="date" className="form-input" value={debut} onChange={e => setDebut(e.target.value)} />
+          <input type="date" className="form-input" value={fin} onChange={e => setFin(e.target.value)} />
         </div>
         {canEdit && (
           <Link to="/planning/nouveau"><Button>Nouvelle entrée</Button></Link>

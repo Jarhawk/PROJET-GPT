@@ -12,32 +12,39 @@ export default function AutoCompleteField({
   required = false,
   disabledOptions = [],
 }) {
-  const resolved = (options || []).map(opt =>
-    typeof opt === "string" ? { id: opt, nom: opt } : opt
+  const resolved = (options || []).map((opt) =>
+    typeof opt === "string" ? { id: opt, nom: opt } : opt,
   );
   const [inputValue, setInputValue] = useState(() => {
-    const match = resolved.find(o => o.id === value);
+    const match = resolved.find((o) => o.id === value);
     return match ? match.nom : "";
   });
   const [showAdd, setShowAdd] = useState(false);
 
   useEffect(() => {
-    const match = resolved.find(o => o.id === value);
+    const match = resolved.find((o) => o.id === value);
     setInputValue(match ? match.nom : "");
   }, [value, resolved]);
 
-  const disabledIds = disabledOptions.map(d =>
-    typeof d === "string" ? d : d.id
+  const disabledIds = disabledOptions.map((d) =>
+    typeof d === "string" ? d : d.id,
   );
 
   const isValid =
-    inputValue && resolved.some(o => o.nom === inputValue && !disabledIds.includes(o.id));
-  const filtered = resolved.filter(o => !disabledIds.includes(o.id));
+    inputValue &&
+    resolved.some(
+      (o) =>
+        o.nom.toLowerCase() === inputValue.toLowerCase() &&
+        !disabledIds.includes(o.id),
+    );
+  const filtered = resolved.filter((o) => !disabledIds.includes(o.id));
 
-  const handleInputChange = e => {
+  const handleInputChange = (e) => {
     const val = e.target.value;
     setInputValue(val);
-    const match = resolved.find(o => o.nom === val);
+    const match = resolved.find(
+      (o) => o.nom.toLowerCase() === val.toLowerCase(),
+    );
     if (match) onChange({ id: match.id, nom: match.nom });
     else onChange(val ? { id: null, nom: val } : { id: "", nom: "" });
     setShowAdd(val && !match);

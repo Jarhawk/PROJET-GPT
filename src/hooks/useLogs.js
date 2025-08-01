@@ -102,7 +102,7 @@ export function useLogs() {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "Logs");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([buf]), "journal_audit.xlsx");
+    saveAs(new Blob([buf]), "logs.xlsx");
   }
 
   return { logs, loading, error, fetchLogs, exportLogsToExcel };

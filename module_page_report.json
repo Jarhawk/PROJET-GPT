@@ -96,9 +96,6 @@
     "auth/Logout.jsx",
     "catalogue/CatalogueSyncViewer.jsx"
   ],
-  "audit": [
-    "AuditTrail.jsx"
-  ],
   "dashboard": [
     "Dashboard.jsx",
     "analytique/AnalytiqueDashboard.jsx",

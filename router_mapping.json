@@ -284,10 +284,6 @@
     "module": "logs"
   },
   {
-    "route": "/audit",
-    "module": "audit"
-  },
-  {
     "route": "/supervision",
     "module": "dashboard"
   },

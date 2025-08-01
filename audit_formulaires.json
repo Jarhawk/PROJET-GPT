@@ -52,10 +52,6 @@
     "status": "corrected"
   },
   {
-    "form": "src/pages/AuditTrail.jsx",
-    "status": "ok"
-  },
-  {
     "form": "src/pages/documents/Documents.jsx",
     "status": "corrected"
   },

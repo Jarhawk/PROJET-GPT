@@ -16,10 +16,9 @@ import { Plus as PlusIcon } from "lucide-react";
 import { Toaster, toast } from "react-hot-toast";
 import useAuth from "@/hooks/useAuth";
 import ProduitRow from "@/components/produits/ProduitRow";
-import {
-  parseProduitsFile,
-  insertProduits,
-} from "@/utils/importExcelProduits";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import { supabase } from "@/lib/supabase";
 
 const PAGE_SIZE = 50;
 
@@ -31,7 +30,6 @@ export default function Produits() {
     products,
     total,
     fetchProducts,
-    exportProductsToExcel,
     duplicateProduct,
     toggleProductActive,
   } = useProducts();
@@ -82,10 +80,90 @@ export default function Produits() {
     fetchFamilles();
   }, [fetchFamilles]);
 
-  async function handleImport(e) {
+  function parseBoolean(value) {
+    if (typeof value === "boolean") return value;
+    const str = String(value).toLowerCase().trim();
+    if (["true", "vrai", "1", "yes", "oui"].includes(str)) return true;
+    if (["false", "faux", "0", "no", "non"].includes(str)) return false;
+    return false;
+  }
+
+  async function handleImportExcel(e) {
     const file = e.target.files[0];
     if (!file) return;
-    const rows = await parseProduitsFile(file, mama_id);
+    const data = await file.arrayBuffer();
+    const workbook = XLSX.read(data, { type: "array" });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const raw = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+    const [famillesData, sousFamillesData, unitesData, zonesData, fournisseursData] =
+      await Promise.all([
+        supabase.from("familles").select("id, nom").eq("mama_id", mama_id),
+        supabase.from("sous_familles").select("id, nom").eq("mama_id", mama_id),
+        supabase.from("unites").select("id, nom").eq("mama_id", mama_id),
+        supabase.from("zones_stock").select("id, nom").eq("mama_id", mama_id),
+        supabase.from("fournisseurs").select("id, nom").eq("mama_id", mama_id),
+      ]);
+
+    const mapByName = (arr) =>
+      new Map((arr.data || []).map((f) => [f.nom.toLowerCase(), f.id]));
+    const famillesMap = mapByName(famillesData);
+    const sousFamillesMap = mapByName(sousFamillesData);
+    const unitesMap = mapByName(unitesData);
+    const zonesMap = mapByName(zonesData);
+    const fournisseursMap = mapByName(fournisseursData);
+
+    const rows = raw.map((r) => {
+      const n = Object.fromEntries(
+        Object.entries(r).map(([k, v]) => [k.toLowerCase().trim(), v]),
+      );
+      const stockMin = n.stock_minimum !== "" ? Number(n.stock_minimum) : null;
+      const row = {
+        nom: String(n.nom || "").trim(),
+        famille_nom: String(n.famille || "").trim(),
+        sous_famille_nom: String(n.sous_famille || "").trim(),
+        unite_nom: String(n.unite || "").trim(),
+        zone_nom: String(n.zone_stockage || "").trim(),
+        actif: parseBoolean(n.actif),
+        stock_minimum: stockMin,
+        pmp: n.pmp !== "" ? Number(n.pmp) : null,
+        dernier_prix: n.dernier_prix !== "" ? Number(n.dernier_prix) : null,
+        fournisseur_nom: String(n.fournisseur_principal || "").trim(),
+        famille_id: null,
+        sous_famille_id: null,
+        unite_id: null,
+        zone_stock_id: null,
+        fournisseur_id: null,
+        seuil_min: stockMin,
+        mama_id,
+        errors: [],
+      };
+
+      if (!row.nom) row.errors.push("nom manquant");
+
+      row.unite_id = unitesMap.get(row.unite_nom.toLowerCase());
+      if (!row.unite_id) row.errors.push("unite inconnue");
+
+      row.famille_id = famillesMap.get(row.famille_nom.toLowerCase());
+      if (!row.famille_id) row.errors.push("famille inconnue");
+
+      row.sous_famille_id = sousFamillesMap.get(row.sous_famille_nom.toLowerCase());
+      if (!row.sous_famille_id) row.errors.push("sous_famille inconnue");
+
+      row.zone_stock_id = zonesMap.get(row.zone_nom.toLowerCase());
+      if (!row.zone_stock_id) row.errors.push("zone_stockage inconnue");
+
+      if (row.fournisseur_nom) {
+        row.fournisseur_id = fournisseursMap.get(
+          row.fournisseur_nom.toLowerCase(),
+        );
+        if (!row.fournisseur_id)
+          row.errors.push("fournisseur_principal inconnu");
+      }
+
+      return row;
+    });
+
     setImportRows(rows);
     if (fileRef.current) fileRef.current.value = "";
   }
@@ -94,17 +172,66 @@ export default function Produits() {
     const validRows = importRows.filter((r) => r.errors.length === 0);
     if (validRows.length === 0) return;
     setImporting(true);
-    const results = await insertProduits(validRows);
+
+    const results = [];
+    for (const row of validRows) {
+      const {
+        errors: _e,
+        famille_nom: _familleNom,
+        sous_famille_nom: _sousFamilleNom,
+        unite_nom: _uniteNom,
+        zone_nom: _zoneNom,
+        fournisseur_nom: _fournisseurNom,
+        ...payload
+      } = row;
+      delete payload.stock_minimum;
+      try {
+        const { error } = await supabase.from("produits").insert([payload]);
+        if (error) results.push({ ...row, insertError: error.message });
+        else results.push({ ...row, insertError: null });
+      } catch (err) {
+        results.push({ ...row, insertError: err.message });
+      }
+    }
+
     const failed = results.filter((r) => r.insertError);
     const successCount = results.length - failed.length;
-    if (successCount)
-      toast.success(`${successCount} produits importés`);
-    if (failed.length)
-      toast.error(`${failed.length} erreurs d'insertion`);
+    if (successCount) toast.success(`${successCount} produits importés`);
+    if (failed.length) toast.error(`${failed.length} erreurs d'insertion`);
+
     const invalid = importRows.filter((r) => r.errors.length > 0);
     setImportRows([...invalid, ...failed]);
     setImporting(false);
     refreshList();
+  }
+
+  async function handleExportExcel() {
+    const { data, error } = await supabase
+      .from("produits")
+      .select(
+        `nom, famille:familles!fk_produits_famille(nom), sous_famille:sous_familles!fk_produits_sous_famille(nom), unite:unites!fk_produits_unite(nom), zone:zones_stock!fk_produits_zone_stock(nom), actif, seuil_min, pmp, dernier_prix, fournisseur_principal:fournisseur_id(nom)`
+      )
+      .eq("mama_id", mama_id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    const rows = (data || []).map((p) => ({
+      nom: p.nom,
+      famille: p.famille?.nom || "",
+      sous_famille: p.sous_famille?.nom || "",
+      unite: p.unite?.nom || "",
+      zone_stockage: p.zone?.nom || "",
+      actif: p.actif ? "TRUE" : "FALSE",
+      stock_minimum: p.seuil_min ?? null,
+      pmp: p.pmp ?? null,
+      dernier_prix: p.dernier_prix ?? null,
+      fournisseur_principal: p.fournisseur_principal?.nom || "",
+    }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "Produits");
+    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    saveAs(new Blob([buf]), "produits_export_mamastock.xlsx");
   }
 
   const validCount = importRows.filter((r) => r.errors.length === 0).length;
@@ -219,7 +346,7 @@ export default function Produits() {
             Nouveau produit
           </Button>
           <div className="flex gap-2 flex-wrap">
-            <Button className="min-w-[140px]" onClick={exportProductsToExcel}>
+            <Button className="min-w-[140px]" onClick={handleExportExcel}>
               Export Excel
             </Button>
             <Button
@@ -230,9 +357,9 @@ export default function Produits() {
             </Button>
             <input
               type="file"
-              accept=".xlsx,.csv"
+              accept=".xlsx"
               ref={fileRef}
-              onChange={handleImport}
+              onChange={handleImportExcel}
               data-testid="import-input"
               className="hidden"
             />
@@ -248,32 +375,36 @@ export default function Produits() {
                 <tr>
                   <th>Nom</th>
                   <th>Famille</th>
+                  <th>Sous-famille</th>
                   <th>Unité</th>
+                  <th>Zone de stockage</th>
                   <th>Actif</th>
-                  <th>PMP</th>
-                  <th>Stock théorique</th>
                   <th>Stock min</th>
+                  <th>PMP</th>
                   <th>Dernier prix</th>
+                  <th>Fournisseur principal</th>
                   <th>Statut</th>
                 </tr>
               </thead>
               <tbody>
-                {importRows.map((row) => (
-                  <tr key={row.id}>
+                {importRows.map((row, idx) => (
+                  <tr key={idx}>
                     <td>{row.nom}</td>
-                    <td>{row.famille}</td>
-                    <td>{row.unite}</td>
+                    <td>{row.famille_nom}</td>
+                    <td>{row.sous_famille_nom}</td>
+                    <td>{row.unite_nom}</td>
+                    <td>{row.zone_nom}</td>
                     <td>{row.actif ? "Oui" : "Non"}</td>
-                    <td className="text-right">{row.pmp}</td>
-                    <td className="text-right">{row.stock_theorique}</td>
-                    <td className="text-right">{row.stock_min}</td>
-                    <td className="text-right">{row.dernier_prix}</td>
+                    <td className="text-right">{row.stock_minimum ?? ""}</td>
+                    <td className="text-right">{row.pmp ?? ""}</td>
+                    <td className="text-right">{row.dernier_prix ?? ""}</td>
+                    <td>{row.fournisseur_nom}</td>
                     <td>
                       {row.errors.length
                         ? `❌ ${row.errors.join(", ")}`
                         : row.insertError
-                          ? `❌ ${row.insertError}`
-                          : "✅ OK"}
+                        ? `❌ ${row.insertError}`
+                        : "✅ OK"}
                     </td>
                   </tr>
                 ))}

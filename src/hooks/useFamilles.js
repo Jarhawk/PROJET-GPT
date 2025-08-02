@@ -1,10 +1,14 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useCallback } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabaseClient";
 import useAuth from "@/hooks/useAuth";
 import * as XLSX from "xlsx";
 import { safeImportXLSX } from "@/lib/xlsx/safeImportXLSX";
 import { saveAs } from "file-saver";
+
+export async function deleteFamille(id, mama_id) {
+  return await supabase.from("familles").delete().match({ id, mama_id });
+}
 
 export function useFamilles() {
   const { mama_id } = useAuth();
@@ -155,6 +159,7 @@ export function useFamilles() {
     fetchFamilles,
     addFamille,
     updateFamille,
+    deleteFamille,
     batchDeleteFamilles,
     exportFamillesToExcel,
     importFamillesFromExcel,

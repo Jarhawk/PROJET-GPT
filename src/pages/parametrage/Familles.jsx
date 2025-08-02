@@ -11,7 +11,6 @@ import FamilleForm from '@/forms/FamilleForm';
 import useAuth from '@/hooks/useAuth';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import Unauthorized from '@/pages/auth/Unauthorized';
-import { supabase } from '@/lib/supabase';
 
 export default function Familles() {
   const {
@@ -20,6 +19,7 @@ export default function Familles() {
     fetchFamilles,
     addFamille,
     updateFamille,
+    deleteFamille,
     loading,
   } = useFamilles();
   const { mama_id, hasAccess, loading: authLoading } = useAuth();
@@ -37,36 +37,35 @@ export default function Familles() {
 
   const handleSave = async (values) => {
     setActionLoading(true);
-    if (edit?.id) await updateFamille(edit.id, values);
-    else await addFamille(values);
-    await fetchFamilles({ search, page, limit: 50 });
-    setEdit(null);
-    toast.success('Famille enregistrée');
-    setActionLoading(false);
+    try {
+      if (edit?.id) await updateFamille(edit.id, values);
+      else await addFamille(values);
+      await fetchFamilles({ search, page, limit: 50 });
+      setEdit(null);
+      toast.success('Famille enregistrée');
+    } catch (err) {
+      toast.error(err.message || 'Erreur lors de la sauvegarde.');
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const handleDelete = async (famille) => {
     if (!window.confirm('Supprimer cette famille ?')) return;
     setActionLoading(true);
     try {
-      const { error } = await supabase
-        .from('familles')
-        .delete()
-        .eq('id', famille.id)
-        .eq('mama_id', mama_id);
+      const { error } = await deleteFamille(famille.id, mama_id);
       if (error) {
         if (error.code === '23503') {
           toast.error('Cette famille est utilisée par des produits.');
         } else {
           toast.error(error.message || 'Erreur lors de la suppression.');
         }
-        console.error(error);
       } else {
         toast.success('Famille supprimée.');
       }
     } catch (err) {
       toast.error(err.message || 'Erreur lors de la suppression.');
-      console.error(err);
     } finally {
       await fetchFamilles({ search, page, limit: 50 });
       setActionLoading(false);
@@ -90,7 +89,7 @@ export default function Familles() {
   if (!canEdit) return <Unauthorized />;
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
+    <div className="p-6 mx-auto max-w-5xl">
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold mb-4">Familles de produits</h1>
       <TableHeader className="gap-2">
@@ -102,8 +101,8 @@ export default function Familles() {
         />
         <Button onClick={() => setEdit({})}>+ Nouvelle famille</Button>
       </TableHeader>
-      <ListingContainer>
-        <table className="text-sm">
+      <ListingContainer className="min-w-[1000px]">
+        <table className="text-sm w-full">
           <thead>
             <tr>
               <th className="px-2 py-1">Nom</th>

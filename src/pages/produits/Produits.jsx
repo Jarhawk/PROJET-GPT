@@ -20,7 +20,7 @@ import {
   exportExcelProduits,
   downloadProduitsTemplate,
 } from "@/utils/exportExcelProduits";
-import ModalImportProduits from "@/components/produits/ModalImportProduits.jsx";
+import ModalImportProduits from "@/components/produits/ModalImportProduits";
 
 const PAGE_SIZE = 50;
 

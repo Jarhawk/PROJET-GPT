@@ -15,13 +15,13 @@ export function useUnites() {
 
   // 1. Charger toutes les unités (filtrage recherche, batch)
   const fetchUnites = useCallback(
-    async ({ search = "", includeInactive = false, page, limit } = {}) => {
+    async ({ search = "", includeInactive = true, page, limit } = {}) => {
       if (!mama_id) return [];
       setLoading(true);
       setError(null);
       let query = supabase
         .from("unites")
-        .select("id, nom")
+        .select("id, nom, actif")
         .eq("mama_id", mama_id)
         .order("nom", { ascending: true });
       if (!includeInactive) query = query.eq("actif", true);
@@ -101,7 +101,7 @@ export function useUnites() {
     setError(null);
     const { error } = await supabase
       .from("unites")
-      .update({ actif: false })
+      .delete()
       .in("id", ids)
       .eq("mama_id", mama_id);
     if (error) setError(error);

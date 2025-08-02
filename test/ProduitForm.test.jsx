@@ -10,6 +10,15 @@ vi.mock('@/hooks/useProducts', () => ({
 vi.mock('@/hooks/useFamilles', () => ({
   useFamilles: () => ({ familles: [], fetchFamilles: vi.fn(), addFamille: vi.fn() })
 }));
+vi.mock('@/hooks/useSousFamilles', () => ({
+  useSousFamilles: () => ({
+    sousFamilles: [],
+    fetchSousFamilles: vi.fn(),
+    loading: false,
+    error: null,
+    setSousFamilles: vi.fn(),
+  }),
+}));
 vi.mock('@/hooks/useUnites', () => ({
   useUnites: () => ({ unites: [], fetchUnites: vi.fn(), addUnite: vi.fn() })
 }));

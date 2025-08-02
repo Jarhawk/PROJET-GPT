@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import { useProducts } from "@/hooks/useProducts";
 import { useFamilles } from "@/hooks/useFamilles";
+import { useSousFamilles } from "@/hooks/useSousFamilles";
 import { useUnites } from "@/hooks/useUnites";
 import { useFournisseurs } from "@/hooks/useFournisseurs";
-import AutoCompleteField from "@/components/ui/AutoCompleteField";
 import { toast } from "react-hot-toast";
 import GlassCard from "@/components/ui/GlassCard";
 
@@ -16,13 +16,22 @@ export default function ProduitForm({
 }) {
   const editing = !!produit;
   const { fournisseurs, fetchFournisseurs } = useFournisseurs();
-  const { familles, fetchFamilles } = useFamilles();
+  const {
+    familles,
+    fetchFamilles,
+    error: famillesError,
+  } = useFamilles();
+  const {
+    sousFamilles,
+    fetchSousFamilles,
+    loading: sousFamillesLoading,
+    error: sousFamillesError,
+    setSousFamilles,
+  } = useSousFamilles();
   const { unites, fetchUnites } = useUnites();
 
   const [nom, setNom] = useState(produit?.nom || "");
-  const [familleId, setFamilleId] = useState(
-    produit?.sous_famille?.famille_parent_id || "",
-  );
+  const [familleId, setFamilleId] = useState(produit?.famille_id || "");
   const [sousFamilleId, setSousFamilleId] = useState(
     produit?.sous_famille_id || "",
   );
@@ -38,14 +47,6 @@ export default function ProduitForm({
   const { addProduct, updateProduct, loading } = useProducts();
   const [saving, setSaving] = useState(false);
 
-  const familleOptions = [...familles]
-    .filter((f) => !f.famille_parent_id)
-    .sort((a, b) => (a.nom || "").localeCompare(b.nom || ""));
-
-  const sousFamilleOptions = [...familles]
-    .filter((f) => f.famille_parent_id === familleId)
-    .sort((a, b) => (a.nom || "").localeCompare(b.nom || ""));
-
   const uniteOptions = [...unites]
     .filter((u, idx, arr) => arr.findIndex((uu) => uu.id === u.id) === idx)
     .sort((a, b) => (a.nom || "").localeCompare(b.nom || ""));
@@ -57,18 +58,24 @@ export default function ProduitForm({
   }, [fetchFamilles, fetchUnites, fetchFournisseurs]);
 
   useEffect(() => {
-    if (familleId) {
-      const subs = familles.filter((f) => f.famille_parent_id === familleId);
-      if (subs.length === 1) setSousFamilleId(subs[0].id);
-    } else {
-      setSousFamilleId("");
+    if (editing && produit?.famille_id) {
+      fetchSousFamilles(produit.famille_id);
     }
-  }, [familleId, familles]);
+  }, [editing, produit, fetchSousFamilles]);
+
+  useEffect(() => {
+    setSousFamilleId("");
+    if (familleId) {
+      fetchSousFamilles(familleId);
+    } else {
+      setSousFamilles([]);
+    }
+  }, [familleId, fetchSousFamilles, setSousFamilles]);
 
   useEffect(() => {
     if (editing && produit) {
       setNom(produit.nom || "");
-      setFamilleId(produit.sous_famille?.famille_parent_id || "");
+      setFamilleId(produit.famille_id || "");
       setSousFamilleId(produit.sous_famille_id || "");
       setUniteId(produit.unite_id || "");
       setFournisseurId(produit.fournisseur_id || "");
@@ -91,13 +98,12 @@ export default function ProduitForm({
       toast.error("Veuillez remplir les champs obligatoires.");
       return;
     }
-    const sousFamilleIdVal = sousFamilleId;
-    const uniteIdVal = uniteId;
 
     const newProd = {
       nom,
-      sous_famille_id: sousFamilleIdVal || null,
-      unite_id: uniteIdVal || null,
+      famille_id: familleId || null,
+      sous_famille_id: sousFamilleId || null,
+      unite_id: uniteId || null,
       fournisseur_id: fournisseurId || null,
       stock_min: Number(stockMin),
       actif,
@@ -134,7 +140,7 @@ export default function ProduitForm({
         Créer ou modifier un produit
       </h2>
       <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-        {/* Groupe 1 : nom, famille, unité */}
+        {/* Groupe 1 : nom, famille, sous-famille, unité */}
         <div className="flex flex-col gap-1 p-2 rounded-xl">
           <label htmlFor="prod-nom" className="label text-white">
             Nom *
@@ -149,32 +155,71 @@ export default function ProduitForm({
           />
           {errors.nom && <p className="text-red-500 text-sm">{errors.nom}</p>}
         </div>
+
         <div className="flex flex-col gap-1 p-2 rounded-xl">
-          <AutoCompleteField
-            label="Famille *"
+          <label htmlFor="prod-famille" className="label text-white">
+            Famille *
+          </label>
+          <select
+            id="prod-famille"
+            className="input bg-white text-gray-900"
             value={familleId}
-            onChange={(val) => {
-              setFamilleId(val.id || "");
-            }}
-            options={familleOptions}
+            onChange={(e) => setFamilleId(e.target.value)}
             required
-          />
+          >
+            <option value="">-- Choisir --</option>
+            {familles.map((f) => (
+              <option key={f.id} value={f.id}>
+                {f.nom}
+              </option>
+            ))}
+          </select>
           {errors.famille && (
             <p className="text-red-500 text-sm">{errors.famille}</p>
           )}
+          {famillesError && (
+            <p className="text-red-500 text-sm">Erreur chargement familles</p>
+          )}
+          {!famillesError && familles.length === 0 && (
+            <p className="text-red-500 text-sm">Aucune famille disponible</p>
+          )}
         </div>
+
         <div className="flex flex-col gap-1 p-2 rounded-xl">
-          <AutoCompleteField
-            label="Sous-famille *"
+          <label htmlFor="prod-sous-famille" className="label text-white">
+            Sous-famille *
+          </label>
+          <select
+            id="prod-sous-famille"
+            className="input bg-white text-gray-900"
             value={sousFamilleId}
-            onChange={(val) => setSousFamilleId(val.id || "")}
-            options={sousFamilleOptions}
+            onChange={(e) => setSousFamilleId(e.target.value)}
+            disabled={!familleId || sousFamillesLoading}
             required
-          />
+          >
+            <option value="">
+              {sousFamillesLoading ? "Chargement..." : "-- Choisir --"}
+            </option>
+            {sousFamilles.map((sf) => (
+              <option key={sf.id} value={sf.id}>
+                {sf.nom}
+              </option>
+            ))}
+          </select>
           {errors.sous_famille && (
             <p className="text-red-500 text-sm">{errors.sous_famille}</p>
           )}
+          {sousFamillesError && (
+            <p className="text-red-500 text-sm">Erreur chargement sous-familles</p>
+          )}
+          {!sousFamillesError &&
+            familleId &&
+            !sousFamillesLoading &&
+            sousFamilles.length === 0 && (
+              <p className="text-red-500 text-sm">Aucune sous-famille</p>
+            )}
         </div>
+
         <div className="flex flex-col gap-1 p-2 rounded-xl">
           <label htmlFor="prod-unite" className="label text-white">
             Unité *

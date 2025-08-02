@@ -11,6 +11,7 @@ import FamilleForm from '@/forms/FamilleForm';
 import useAuth from '@/hooks/useAuth';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import Unauthorized from '@/pages/auth/Unauthorized';
+import { supabase } from '@/lib/supabase';
 
 export default function Familles() {
   const {
@@ -19,13 +20,14 @@ export default function Familles() {
     fetchFamilles,
     addFamille,
     updateFamille,
-    batchDeleteFamilles,
+    loading,
   } = useFamilles();
   const { mama_id, hasAccess, loading: authLoading } = useAuth();
   const canEdit = hasAccess('parametrage', 'peut_modifier');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [edit, setEdit] = useState(null);
+  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
     if (!authLoading && mama_id) {
@@ -34,26 +36,53 @@ export default function Familles() {
   }, [fetchFamilles, search, page, authLoading, mama_id]);
 
   const handleSave = async (values) => {
+    setActionLoading(true);
     if (edit?.id) await updateFamille(edit.id, values);
     else await addFamille(values);
+    await fetchFamilles({ search, page, limit: 50 });
     setEdit(null);
     toast.success('Famille enregistrée');
+    setActionLoading(false);
   };
 
-  const handleDelete = async famille => {
-    if (window.confirm('Supprimer cette famille ?')) {
-      await batchDeleteFamilles([famille.id]);
-      toast.success('Famille supprimée');
+  const handleDelete = async (famille) => {
+    if (!window.confirm('Supprimer cette famille ?')) return;
+    setActionLoading(true);
+    const { error } = await supabase
+      .from('familles')
+      .delete()
+      .eq('id', famille.id)
+      .eq('mama_id', mama_id);
+    if (error) {
+      if (error.code === '23503') {
+        toast.error(
+          'Cette famille est utilisée par des produits ou des sous-familles.'
+        );
+      } else {
+        toast.error('Erreur lors de la suppression.');
+      }
+      console.error(error);
+    } else {
+      toast.success('Famille supprimée.');
     }
+    await fetchFamilles({ search, page, limit: 50 });
+    setActionLoading(false);
   };
 
-  const handleToggle = async famille => {
-    await updateFamille(famille.id, { actif: !famille.actif, nom: famille.nom });
+  const handleToggle = async (famille) => {
+    setActionLoading(true);
+    await updateFamille(famille.id, {
+      actif: !famille.actif,
+      nom: famille.nom,
+    });
+    await fetchFamilles({ search, page, limit: 50 });
+    setActionLoading(false);
   };
 
   const pages = Math.ceil(total / 50) || 1;
 
-  if (authLoading) return <LoadingSpinner message="Chargement..." />;
+  if (authLoading || loading || actionLoading)
+    return <LoadingSpinner message="Chargement..." />;
   if (!canEdit) return <Unauthorized />;
 
   return (

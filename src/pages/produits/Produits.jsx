@@ -112,7 +112,7 @@ export default function Produits() {
   const invalidCount = importRows.length - validCount;
 
   const filteredProducts = products.filter((p) => {
-    if (zoneFilter && p.zone_id !== zoneFilter) return false;
+    if (zoneFilter && p.zone_stock_id !== zoneFilter) return false;
     return true;
   });
 
@@ -390,9 +390,9 @@ export default function Produits() {
               </th>
               <th
                 className="cursor-pointer"
-                onClick={() => toggleSort("zone")}
+                onClick={() => toggleSort("zone_stock")}
               >
-                Zone{renderArrow("zone")}
+                Zone de stockage{renderArrow("zone_stock")}
               </th>
               <th>Unité</th>
               <th className="cursor-pointer text-right" onClick={() => toggleSort("pmp")}> 
@@ -473,6 +473,9 @@ export default function Produits() {
                 </div>
                 <div className="text-sm text-muted-foreground truncate">
                   {p.famille?.nom} {p.sous_famille ? `> ${p.sous_famille.nom}` : ""}
+                </div>
+                <div className="text-sm text-muted-foreground truncate">
+                  {p.zone_stock?.nom || "Sans zone"}
                 </div>
                 <div className="flex justify-between text-sm mt-1">
                   <span>{p.unite} — {p.pmp != null ? Number(p.pmp).toFixed(2) : "-"}</span>

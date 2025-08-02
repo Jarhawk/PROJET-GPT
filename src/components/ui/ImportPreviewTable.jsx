@@ -1,65 +1,76 @@
-import { Button } from "@/components/ui/button";
+import { validateProduitRow } from "@/utils/importExcelProduits";
 
-export default function ImportPreviewTable({ rows, onImport, importing }) {
-  const allValid = rows.every((r) => r.errors.length === 0);
+export default function ImportPreviewTable({ rows, onUpdate, maps, reference }) {
+  const { familles = [], unites = [], zones = [] } = reference || {};
+
+  function handleChange(index, field, value) {
+    const updated = [...rows];
+    updated[index] = { ...updated[index], [field]: value };
+    if (maps) {
+      updated[index] = validateProduitRow(updated[index], maps);
+    }
+    onUpdate(updated);
+  }
+
+  const renderCell = (row, idx, field, listId) => (
+    <td
+      className={row.errors[field] ? "bg-red-50" : ""}
+      title={row.errors[field] || ""}
+    >
+      <input
+        value={row[field] ?? ""}
+        list={listId}
+        onChange={(e) => handleChange(idx, field, e.target.value)}
+        className={`w-full px-2 py-1 border rounded text-xs bg-transparent ${
+          row.errors[field] ? "border-red-500" : "border-white/20"
+        }`}
+      />
+    </td>
+  );
+
   return (
-    <div className="space-y-2">
-      <div className="overflow-x-auto">
-        <table className="min-w-full table-auto text-sm">
-          <thead>
-            <tr>
-              <th>Nom</th>
-              <th>Famille</th>
-              <th>Sous-famille</th>
-              <th>Unité</th>
-              <th>Zone stock</th>
-              <th>Code</th>
-              <th>Allergènes</th>
-              <th>Actif</th>
-              <th>PMP</th>
-              <th>Stock théorique</th>
-              <th>Stock min</th>
-              <th>Dernier prix</th>
-              <th>Fournisseur ID</th>
-              <th>Statut</th>
+    <>
+      <table className="min-w-full table-auto text-xs">
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Famille</th>
+            <th>Sous-famille</th>
+            <th>Unité</th>
+            <th>Zone stock</th>
+            <th>Stock min</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, idx) => (
+            <tr key={row.id} className={row.status === "error" ? "bg-red-50" : "bg-green-50"}>
+              {renderCell(row, idx, "nom")}
+              {renderCell(row, idx, "famille_nom", "familles-list")}
+              {renderCell(row, idx, "sous_famille_nom")}
+              {renderCell(row, idx, "unite_nom", "unites-list")}
+              {renderCell(row, idx, "zone_stock_nom", "zones-list")}
+              {renderCell(row, idx, "stock_min")}
+              <td className="text-center">{row.status === "ok" ? "✅" : "❌"}</td>
             </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, idx) => (
-              <tr key={idx} className={row.errors.length ? "bg-red-50" : "bg-green-50"}>
-                <td>{row.nom}</td>
-                <td>{row.famille_nom}</td>
-                <td>{row.sous_famille_nom}</td>
-                <td>{row.unite_nom}</td>
-                <td>{row.zone_stock_nom}</td>
-                <td>{row.code}</td>
-                <td>{row.allergenes}</td>
-                <td>{row.actif ? "Oui" : "Non"}</td>
-                <td className="text-right">{row.pmp ?? ""}</td>
-                <td className="text-right">{row.stock_theorique ?? ""}</td>
-                <td className="text-right">{row.stock_min ?? ""}</td>
-                <td className="text-right">{row.dernier_prix ?? ""}</td>
-                <td>{row.fournisseur_id ?? ""}</td>
-                <td>
-                  {row.errors.length
-                    ? `❌ ${row.errors.join(", ")}`
-                    : row.insertError
-                    ? `❌ ${row.insertError}`
-                    : "✅ OK"}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {allValid && (
-        <div className="text-right">
-          <Button onClick={onImport} disabled={importing || rows.length === 0}>
-            Importer maintenant
-          </Button>
-        </div>
-      )}
-    </div>
+          ))}
+        </tbody>
+      </table>
+      <datalist id="familles-list">
+        {familles.map((f) => (
+          <option key={f.id} value={f.nom} />
+        ))}
+      </datalist>
+      <datalist id="unites-list">
+        {unites.map((u) => (
+          <option key={u.id} value={u.nom} />
+        ))}
+      </datalist>
+      <datalist id="zones-list">
+        {zones.map((z) => (
+          <option key={z.id} value={z.nom} />
+        ))}
+      </datalist>
+    </>
   );
 }
-

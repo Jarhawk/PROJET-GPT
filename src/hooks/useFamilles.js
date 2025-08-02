@@ -51,6 +51,21 @@ export function useFamilles() {
     [mama_id]
   );
 
+  const suggestFamilles = useCallback(
+    async (search = "") => {
+      if (!mama_id) return [];
+      const { data } = await supabase
+        .from("familles")
+        .select("id, nom")
+        .eq("mama_id", mama_id)
+        .ilike("nom", `%${search}%`)
+        .order("nom", { ascending: true })
+        .limit(10);
+      return data || [];
+    },
+    [mama_id]
+  );
+
   // Ajout d'une famille
   async function addFamille({ nom, actif = true }) {
     if (!mama_id) return { error: "Aucun mama_id" };
@@ -157,6 +172,7 @@ export function useFamilles() {
     loading,
     error,
     fetchFamilles,
+    suggestFamilles,
     addFamille,
     updateFamille,
     deleteFamille,

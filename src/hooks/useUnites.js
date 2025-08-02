@@ -37,6 +37,21 @@ export function useUnites() {
     [mama_id]
   );
 
+  const suggestUnites = useCallback(
+    async (search = "") => {
+      if (!mama_id) return [];
+      const { data } = await supabase
+        .from("unites")
+        .select("id, nom")
+        .eq("mama_id", mama_id)
+        .ilike("nom", `%${search}%`)
+        .order("nom", { ascending: true })
+        .limit(10);
+      return data || [];
+    },
+    [mama_id]
+  );
+
   // 2. Ajouter une unité (avec vérif unicité)
   async function addUnite(nom) {
     if (!mama_id) return { error: "Aucun mama_id" };
@@ -148,6 +163,7 @@ export function useUnites() {
     loading,
     error,
     fetchUnites,
+    suggestUnites,
     addUnite,
     updateUnite,
     deleteUnite,

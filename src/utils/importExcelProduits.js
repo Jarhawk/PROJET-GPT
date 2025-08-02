@@ -10,6 +10,39 @@ function parseBoolean(value) {
   return false;
 }
 
+export function validateProduitRow(row, maps) {
+  const errors = {};
+  if (!row.nom) errors.nom = "nom manquant";
+
+  const famId = maps.familles.get((row.famille_nom || "").toLowerCase());
+  if (!famId) errors.famille_nom = "famille inconnue";
+
+  const sfName = (row.sous_famille_nom || "").toLowerCase();
+  const sfId = sfName ? maps.sousFamilles.get(sfName) : null;
+  if (row.sous_famille_nom && !sfId) errors.sous_famille_nom = "sous_famille inconnue";
+
+  const uniteId = maps.unites.get((row.unite_nom || "").toLowerCase());
+  if (!uniteId) errors.unite_nom = "unite inconnue";
+
+  const zoneId = maps.zones.get((row.zone_stock_nom || "").toLowerCase());
+  if (!zoneId) errors.zone_stock_nom = "zone_stock inconnue";
+
+  if (row.fournisseur_id && !maps.fournisseurs.has(String(row.fournisseur_id)))
+    errors.fournisseur_id = "fournisseur inconnu";
+
+  const status = Object.keys(errors).length ? "error" : "ok";
+
+  return {
+    ...row,
+    famille_id: famId || null,
+    sous_famille_id: sfId || null,
+    unite_id: uniteId || null,
+    zone_stock_id: zoneId || null,
+    errors,
+    status,
+  };
+}
+
 export async function parseProduitsFile(file, mama_id) {
   const data = await file.arrayBuffer();
   const workbook = XLSX.read(data, { type: "array" });
@@ -19,7 +52,10 @@ export async function parseProduitsFile(file, mama_id) {
   const [famillesRes, sousFamillesRes, unitesRes, zonesRes, fournisseursRes] =
     await Promise.all([
       supabase.from("familles").select("id, nom").eq("mama_id", mama_id),
-      supabase.from("sous_familles").select("id, nom").eq("mama_id", mama_id),
+      supabase
+        .from("sous_familles")
+        .select("id, nom")
+        .eq("mama_id", mama_id),
       supabase.from("unites").select("id, nom").eq("mama_id", mama_id),
       supabase.from("zones_stock").select("id, nom").eq("mama_id", mama_id),
       supabase.from("fournisseurs").select("id").eq("mama_id", mama_id),
@@ -31,14 +67,27 @@ export async function parseProduitsFile(file, mama_id) {
   const sousFamillesMap = mapByName(sousFamillesRes);
   const unitesMap = mapByName(unitesRes);
   const zonesMap = mapByName(zonesRes);
-  const fournisseurIds = new Set((fournisseursRes.data || []).map((f) => String(f.id)));
+  const fournisseurIds = new Set(
+    (fournisseursRes.data || []).map((f) => String(f.id))
+  );
 
-  return raw.map((r) => {
+  const maps = {
+    familles: famillesMap,
+    sousFamilles: sousFamillesMap,
+    unites: unitesMap,
+    zones: zonesMap,
+    fournisseurs: fournisseurIds,
+  };
+
+  const rows = raw.map((r) => {
     const n = Object.fromEntries(
-      Object.entries(r).map(([k, v]) => [k.toLowerCase().trim(), typeof v === "string" ? v.trim() : v])
+      Object.entries(r).map(([k, v]) => [
+        k.toLowerCase().trim(),
+        typeof v === "string" ? v.trim() : v,
+      ])
     );
 
-    const row = {
+    const baseRow = {
       id: uuidv4(),
       nom: String(n.nom || "").trim(),
       famille_nom: String(n.famille || "").trim(),
@@ -49,44 +98,39 @@ export async function parseProduitsFile(file, mama_id) {
       allergenes: String(n.allergenes || "").trim(),
       actif: parseBoolean(n.actif),
       pmp: n.pmp !== "" ? Number(n.pmp) : null,
-      stock_theorique: n.stock_theorique !== "" ? Number(n.stock_theorique) : null,
+      stock_theorique:
+        n.stock_theorique !== "" ? Number(n.stock_theorique) : null,
       stock_min: n.stock_min !== "" ? Number(n.stock_min) : null,
       dernier_prix: n.dernier_prix !== "" ? Number(n.dernier_prix) : null,
       fournisseur_id: String(n.fournisseur_id || "").trim() || null,
-      famille_id: null,
-      sous_famille_id: null,
-      unite_id: null,
-      zone_stock_id: null,
       mama_id,
-      errors: [],
     };
 
-    if (!row.nom) row.errors.push("nom manquant");
-
-    row.famille_id = famillesMap.get(row.famille_nom.toLowerCase());
-    if (!row.famille_id) row.errors.push("famille inconnue");
-
-    row.sous_famille_id = sousFamillesMap.get(row.sous_famille_nom.toLowerCase());
-    if (row.sous_famille_nom && !row.sous_famille_id)
-      row.errors.push("sous_famille inconnue");
-
-    row.unite_id = unitesMap.get(row.unite_nom.toLowerCase());
-    if (!row.unite_id) row.errors.push("unite inconnue");
-
-    row.zone_stock_id = zonesMap.get(row.zone_stock_nom.toLowerCase());
-    if (!row.zone_stock_id) row.errors.push("zone_stock inconnue");
-
-    if (row.fournisseur_id && !fournisseurIds.has(row.fournisseur_id))
-      row.errors.push("fournisseur inconnu");
-
-    return row;
+    return validateProduitRow(baseRow, maps);
   });
+
+  return {
+    rows,
+    maps,
+    familles: famillesRes.data || [],
+    sousFamilles: sousFamillesRes.data || [],
+    unites: unitesRes.data || [],
+    zones: zonesRes.data || [],
+  };
 }
 
 export async function insertProduits(rows) {
   const results = [];
   for (const r of rows) {
-    const { errors: _e, famille_nom: _fa, sous_famille_nom: _sf, unite_nom: _u, zone_stock_nom: _z, ...payload } = r;
+    const {
+      errors: _e,
+      status: _s,
+      famille_nom: _fa,
+      sous_famille_nom: _sf,
+      unite_nom: _u,
+      zone_stock_nom: _z,
+      ...payload
+    } = r;
     payload.seuil_min = payload.stock_min;
     delete payload.stock_min;
     try {

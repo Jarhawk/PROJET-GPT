@@ -30,8 +30,8 @@ export default function Produits() {
     products,
     total,
     fetchProducts,
-    duplicateProduct,
     toggleProductActive,
+    deleteProduct,
   } = useProducts();
   const { familles: famillesHook, fetchFamilles } = useFamilles();
   const { zones } = useZonesStock();
@@ -45,7 +45,7 @@ export default function Produits() {
   const [actifFilter, setActifFilter] = useState("all");
   const [zoneFilter, setZoneFilter] = useState("");
   const [page, setPage] = useState(1);
-  const [sortField, setSortField] = useState("famille");
+  const [sortField, setSortField] = useState("nom");
   const [sortOrder, setSortOrder] = useState("asc");
   const fileRef = useRef(null);
   const { hasAccess, mama_id } = useAuth();
@@ -261,6 +261,13 @@ export default function Produits() {
     toast.success(actif ? "Produit activé" : "Produit désactivé");
     refreshList();
   }
+
+  async function handleDelete(id) {
+    if (!window.confirm("Supprimer ce produit ?")) return;
+    await deleteProduct(id);
+    toast.success("Produit supprimé");
+    refreshList();
+  }
   useEffect(() => {
     refreshList();
   }, [refreshList]);
@@ -428,7 +435,7 @@ export default function Produits() {
         </div>
       )}
       <ListingContainer className="hidden md:block">
-        <table className="min-w-full table-auto text-sm">
+        <table className="w-full table-auto text-sm">
           <thead>
             <tr>
               <th
@@ -436,18 +443,6 @@ export default function Produits() {
                 onClick={() => toggleSort("nom")}
               >
                 Nom{renderArrow("nom")}
-              </th>
-              <th
-                className="px-2 text-left cursor-pointer"
-                onClick={() => toggleSort("famille")}
-              >
-                Famille{renderArrow("famille")}
-              </th>
-              <th
-                className="px-2 text-left cursor-pointer"
-                onClick={() => toggleSort("zone_stock")}
-              >
-                Zone de stockage{renderArrow("zone_stock")}
               </th>
               <th className="px-2 text-center">Unité</th>
               <th
@@ -463,26 +458,18 @@ export default function Produits() {
                 Stock théorique{renderArrow("stock_theorique")}
               </th>
               <th
-                className="px-2 text-right cursor-pointer"
-                onClick={() => toggleSort("seuil_min")}
+                className="px-2 text-left cursor-pointer"
+                onClick={() => toggleSort("zone_stock")}
               >
-                Min{renderArrow("seuil_min")}
+                Zone de stockage{renderArrow("zone_stock")}
               </th>
-              <th className="px-2 text-left">Fournisseur</th>
-              <th
-                className="px-2 text-right cursor-pointer"
-                onClick={() => toggleSort("dernier_prix")}
-              >
-                Dernier prix (€){renderArrow("dernier_prix")}
-              </th>
-              <th className="px-2 text-center">Actif</th>
               <th className="px-2 text-center min-w-[100px]">Actions</th>
             </tr>
           </thead>
           <tbody>
             {filteredProducts.length === 0 ? (
               <tr>
-                <td colSpan={11} className="py-4 text-center text-muted-foreground">
+                <td colSpan={6} className="py-4 text-center text-muted-foreground">
                   Aucun produit trouvé. Essayez d’ajouter un produit via le bouton ci-dessus.
                 </td>
               </tr>
@@ -491,16 +478,12 @@ export default function Produits() {
                 <ProduitRow
                   key={p.id}
                   produit={p}
-                  onEdit={(prod) => {
-                    setSelectedProduct(prod);
-                    setShowForm(true);
-                  }}
                   onDetail={(prod) => {
                     setSelectedProduct(prod);
                     setShowDetail(true);
                   }}
-                  onDuplicate={duplicateProduct}
                   onToggleActive={handleToggleActive}
+                  onDelete={handleDelete}
                   canEdit={canEdit}
                 />
               ))
@@ -509,20 +492,20 @@ export default function Produits() {
         </table>
       </ListingContainer>
       {/* Mobile listing */}
-      <div className="block md:hidden space-y-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:hidden">
         {filteredProducts.length === 0 ? (
           <div className="py-4 text-center text-muted-foreground">
             Aucun produit trouvé. Essayez d’ajouter un produit via le bouton ci-dessus.
           </div>
         ) : (
           filteredProducts.map((produit) => (
-            <Card key={produit.id} className="p-4">
-              <div className="font-bold">{produit.nom}</div>
-              <div className="text-sm">
-                Unité : {produit.unite?.nom ?? produit.unite ?? "-"}
+            <Card key={produit.id} className="p-4 flex flex-col justify-between">
+              <div className="flex justify-between items-start">
+                <div className="font-bold break-words">{produit.nom}</div>
+                <span>{produit.actif ? "✅" : "❌"}</span>
               </div>
-              <div className="text-sm">
-                PMP : {produit.pmp != null ? Number(produit.pmp).toFixed(2) : "0.00"} €
+              <div className="text-sm mt-1">
+                {produit.stock_theorique} {produit.unite?.nom ?? produit.unite ?? ""}
               </div>
               <div className="flex gap-2 mt-2">
                 <Button
@@ -534,14 +517,22 @@ export default function Produits() {
                   Voir
                 </Button>
                 {canEdit && (
-                  <Button
-                    onClick={() => {
-                      setSelectedProduct(produit);
-                      setShowForm(true);
-                    }}
-                  >
-                    Éditer
-                  </Button>
+                  <>
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        handleToggleActive(produit.id, !produit.actif)
+                      }
+                    >
+                      {produit.actif ? "Désactiver" : "Activer"}
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={() => handleDelete(produit.id)}
+                    >
+                      Supprimer
+                    </Button>
+                  </>
                 )}
               </div>
             </Card>

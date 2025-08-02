@@ -46,21 +46,33 @@ import { parseProduitsFile } from '@/utils/importExcelProduits';
 
 import Produits from '@/pages/produits/Produits.jsx';
 
-test('duplicate button calls hook', async () => {
-  const duplicate = vi.fn();
+test('toggle button calls hook', async () => {
+  const toggle = vi.fn();
   mockHook = () => ({
-    products: [{ id: '1', nom: 'Test', famille: { nom: 'F' }, unite: { nom: 'kg' }, pmp: 1, stock_reel: 10, actif: true, zone_stock: { nom: 'Z' }, zone_stock_id: 'z1' }],
+    products: [
+      {
+        id: '1',
+        nom: 'Test',
+        unite: { nom: 'kg' },
+        pmp: 1,
+        stock_theorique: 10,
+        actif: true,
+        zone_stock: { nom: 'Z' },
+        zone_stock_id: 'z1',
+      },
+    ],
     total: 1,
     fetchProducts: vi.fn(),
     exportProductsToExcel: vi.fn(),
     importProductsFromExcel: vi.fn(() => Promise.resolve([])),
     addProduct: vi.fn(),
-    duplicateProduct: duplicate,
+    toggleProductActive: toggle,
+    deleteProduct: vi.fn(),
   });
   render(<Produits />);
-  const button = await screen.findByText('Dupliquer');
+  const button = await screen.findByText('Désactiver');
   fireEvent.click(button);
-  expect(duplicate).toHaveBeenCalledWith('1');
+  expect(toggle).toHaveBeenCalledWith('1', false);
 });
 
 test('import input triggers parsing', async () => {
@@ -70,7 +82,8 @@ test('import input triggers parsing', async () => {
     fetchProducts: vi.fn(),
     exportProductsToExcel: vi.fn(),
     addProduct: vi.fn(),
-    duplicateProduct: vi.fn(),
+    toggleProductActive: vi.fn(),
+    deleteProduct: vi.fn(),
   });
   render(<Produits />);
   const input = screen.getByTestId('import-input');

@@ -31,7 +31,7 @@ export function useProducts() {
     let query = supabase
       .from("produits")
       .select(
-        `*, famille:familles(nom), sous_famille:sous_familles(nom), unite:unites(nom), zone_stock:zones_stock(nom), main_fournisseur:fournisseur_id(nom)`,
+        `*, unite:unites(nom), zone_stock:zones_stock(nom)`,
         { count: "exact" }
       )
       .eq("mama_id", mama_id);

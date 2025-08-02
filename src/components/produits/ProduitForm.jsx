@@ -6,12 +6,7 @@ import { useFamilles } from "@/hooks/useFamilles";
 import { useUnites } from "@/hooks/useUnites";
 import { useFournisseurs } from "@/hooks/useFournisseurs";
 import { toast } from "react-hot-toast";
-import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
-import SecondaryButton from "@/components/ui/SecondaryButton";
-import PrimaryButton from "@/components/ui/PrimaryButton";
 import GlassCard from "@/components/ui/GlassCard";
-import { Card, CardContent } from "@/components/ui/card";
 
 export default function ProduitForm({
   produit,
@@ -123,208 +118,189 @@ export default function ProduitForm({
       <h2 className="text-xl font-bold text-white mb-4">
         Créer ou modifier un produit
       </h2>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Bloc 1: Informations générales */}
-        <Card className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl shadow-lg text-white">
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="md:col-span-2">
-              <label
-                htmlFor="prod-nom"
-                className="text-white text-sm font-semibold mb-1 block"
-              >
-                Nom *
-              </label>
-              <Input
-                id="prod-nom"
-                value={nom}
-                onChange={(e) => setNom(e.target.value)}
-                required
-              />
-              {errors.nom && (
-                <p className="text-red-500 text-sm">{errors.nom}</p>
-              )}
-            </div>
-            <div>
-              <label className="text-white text-sm font-semibold mb-1 block">
-                Famille *
-              </label>
-              <Select
-                value={familleId}
-                onChange={(e) => setFamilleId(e.target.value)}
-                required
-              >
-                <option value="">-- Choisir --</option>
-                {familleOptions.map((f) => (
-                  <option key={f.id} value={f.id}>
-                    {f.nom}
-                  </option>
-                ))}
-              </Select>
-              {errors.famille && (
-                <p className="text-red-500 text-sm">{errors.famille}</p>
-              )}
-            </div>
-            <div>
-              <label className="text-white text-sm font-semibold mb-1 block">
-                Unité *
-              </label>
-              <Select
-                value={uniteId}
-                onChange={(e) => setUniteId(e.target.value)}
-                required
-              >
-                <option value="">-- Choisir --</option>
-                {uniteOptions.map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.nom}
-                  </option>
-                ))}
-              </Select>
-              {errors.unite && (
-                <p className="text-red-500 text-sm">{errors.unite}</p>
-              )}
-            </div>
-            <div>
-              <label
-                htmlFor="prod-code"
-                className="text-white text-sm font-semibold mb-1 block"
-              >
-                Code interne
-              </label>
-              <Input
-                id="prod-code"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="prod-allerg"
-                className="text-white text-sm font-semibold mb-1 block"
-              >
-                Allergènes
-              </label>
-              <Input
-                id="prod-allerg"
-                value={allergenes}
-                onChange={(e) => setAllergenes(e.target.value)}
-                placeholder="Ex: gluten, lait"
-              />
-            </div>
-            <div className="md:col-span-2">
-              <label className="text-white text-sm font-semibold mb-1 block">
-                Photo
-              </label>
-              <input
-                id="prod-photo"
-                type="file"
-                accept="image/*"
-                disabled
-                className="w-full text-white/70"
-              />
-            </div>
-          </CardContent>
-        </Card>
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Groupe 1 : nom, famille, unité */}
+        <div className="md:col-span-2">
+          <label htmlFor="prod-nom" className="label text-white">
+            Nom *
+          </label>
+          <input
+            id="prod-nom"
+            className="input"
+            value={nom}
+            onChange={(e) => setNom(e.target.value)}
+            placeholder="Nom du produit"
+            required
+          />
+          {errors.nom && <p className="text-red-500 text-sm">{errors.nom}</p>}
+        </div>
+        <div>
+          <label htmlFor="prod-famille" className="label text-white">
+            Famille *
+          </label>
+          <select
+            id="prod-famille"
+            className="input bg-white text-gray-900"
+            value={familleId}
+            onChange={(e) => setFamilleId(e.target.value)}
+            required
+          >
+            <option value="">-- Choisir --</option>
+            {familleOptions.map((f) => (
+              <option key={f.id} value={f.id}>
+                {f.nom}
+              </option>
+            ))}
+          </select>
+          {errors.famille && (
+            <p className="text-red-500 text-sm">{errors.famille}</p>
+          )}
+        </div>
+        <div>
+          <label htmlFor="prod-unite" className="label text-white">
+            Unité *
+          </label>
+          <select
+            id="prod-unite"
+            className="input bg-white text-gray-900"
+            value={uniteId}
+            onChange={(e) => setUniteId(e.target.value)}
+            required
+          >
+            <option value="">-- Choisir --</option>
+            {uniteOptions.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.nom}
+              </option>
+            ))}
+          </select>
+          {errors.unite && <p className="text-red-500 text-sm">{errors.unite}</p>}
+        </div>
 
-        {/* Bloc 2: Stock & prix */}
-        <Card className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl shadow-lg text-white">
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {editing && (
-              <div>
-                <label className="text-white text-sm font-semibold mb-1 block">
-                  PMP (€)
-                </label>
-                <Input
-                  type="number"
-                  className="w-full"
-                  value={produit?.pmp || 0}
-                  readOnly
-                  disabled
-                />
-              </div>
-            )}
-            <div>
-              <label className="text-white text-sm font-semibold mb-1 block">
-                Stock réel
-              </label>
-              <Input
-                type="number"
-                value={stock_reel}
-                onChange={(e) => setStockReel(e.target.value)}
-                min={0}
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="prod-min"
-                className="text-white text-sm font-semibold mb-1 block"
-              >
-                Stock minimum
-              </label>
-              <Input
-                id="prod-min"
-                type="number"
-                value={stock_min}
-                onChange={(e) => setStockMin(e.target.value)}
-                min={0}
-              />
-            </div>
-            <label className="flex items-center gap-2 md:col-span-2">
-              <input
-                type="checkbox"
-                checked={actif}
-                onChange={(e) => setActif(e.target.checked)}
-                id="prod-actif"
-                className="accent-white"
-              />
-              Produit actif
-            </label>
-          </CardContent>
-        </Card>
+        {/* Groupe 2 : code interne, allergènes, photo */}
+        <div>
+          <label htmlFor="prod-code" className="label text-white">
+            Code interne
+          </label>
+          <input
+            id="prod-code"
+            className="input"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            placeholder="Code interne"
+          />
+        </div>
+        <div>
+          <label htmlFor="prod-allerg" className="label text-white">
+            Allergènes
+          </label>
+          <input
+            id="prod-allerg"
+            className="input"
+            value={allergenes}
+            onChange={(e) => setAllergenes(e.target.value)}
+            placeholder="Ex: gluten, lait"
+          />
+        </div>
+        <div className="md:col-span-2">
+          <label htmlFor="prod-photo" className="label text-white">
+            Photo
+          </label>
+          <input
+            id="prod-photo"
+            type="file"
+            accept="image/*"
+            disabled
+            className="input text-white/70"
+          />
+        </div>
 
-        {/* Bloc 3: Fournisseurs */}
-        <Card className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl shadow-lg text-white">
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="md:col-span-2">
-              <label
-                htmlFor="prod-fournisseur"
-                className="text-white text-sm font-semibold mb-1 block"
-              >
-                Fournisseur principal
-              </label>
-              <Select
-                id="prod-fournisseur"
-                value={fournisseurId}
-                onChange={(e) => setFournisseurId(e.target.value)}
-                className="w-full"
-              >
-                <option value="">Aucun</option>
-                {fournisseurs.map((f) => (
-                  <option key={f.id} value={f.id}>
-                    {f.nom}
-                  </option>
-                ))}
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Groupe 3 : stock réel, stock minimum, actif */}
+        {editing && (
+          <div>
+            <label className="label text-white">PMP (€)</label>
+            <input
+              type="number"
+              className="input"
+              value={produit?.pmp || 0}
+              readOnly
+              disabled
+            />
+          </div>
+        )}
+        <div>
+          <label htmlFor="prod-stock" className="label text-white">
+            Stock réel
+          </label>
+          <input
+            id="prod-stock"
+            type="number"
+            className="input"
+            value={stock_reel}
+            onChange={(e) => setStockReel(e.target.value)}
+            min={0}
+          />
+        </div>
+        <div>
+          <label htmlFor="prod-min" className="label text-white">
+            Stock minimum
+          </label>
+          <input
+            id="prod-min"
+            type="number"
+            className="input"
+            value={stock_min}
+            onChange={(e) => setStockMin(e.target.value)}
+            min={0}
+          />
+        </div>
+        <div className="md:col-span-2 flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="prod-actif"
+            checked={actif}
+            onChange={(e) => setActif(e.target.checked)}
+            className="rounded border-gray-300 text-primary focus:ring-primary"
+          />
+          <label htmlFor="prod-actif" className="label text-white m-0">
+            Produit actif
+          </label>
+        </div>
 
-        {/* Bloc 4: Actions */}
-        <Card className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl shadow-lg text-white">
-          <CardContent className="flex justify-end gap-2">
-            <SecondaryButton type="button" onClick={onClose}>
-              Annuler
-            </SecondaryButton>
-            <PrimaryButton
-              type="submit"
-              disabled={loading || saving}
-              className="flex items-center gap-2"
-            >
-              {(loading || saving) && <span className="loader-glass" />}
-              {editing ? "Enregistrer" : "Créer"}
-            </PrimaryButton>
-          </CardContent>
-        </Card>
+        {/* Groupe 4 : fournisseur principal */}
+        <div className="md:col-span-2">
+          <label htmlFor="prod-fournisseur" className="label text-white">
+            Fournisseur principal
+          </label>
+          <select
+            id="prod-fournisseur"
+            className="input bg-white text-gray-900"
+            value={fournisseurId}
+            onChange={(e) => setFournisseurId(e.target.value)}
+          >
+            <option value="">Aucun</option>
+            {fournisseurs.map((f) => (
+              <option key={f.id} value={f.id}>
+                {f.nom}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Actions */}
+        <div className="md:col-span-2 flex justify-end space-x-2">
+          <button type="button" onClick={onClose} className="btn btn-outline">
+            Annuler
+          </button>
+          <button
+            type="submit"
+            disabled={loading || saving}
+            className="btn btn-primary flex items-center gap-2"
+          >
+            {(loading || saving) && <span className="loader-glass" />}
+            {editing ? "Enregistrer" : "Créer"}
+          </button>
+        </div>
       </form>
     </GlassCard>
   );

@@ -5,7 +5,6 @@ import { useProducts } from "@/hooks/useProducts";
 import { useFamilles } from "@/hooks/useFamilles";
 import { useUnites } from "@/hooks/useUnites";
 import { useFournisseurs } from "@/hooks/useFournisseurs";
-import { uploadFile, replaceFile } from "@/hooks/useStorage";
 import { toast } from "react-hot-toast";
 import GlassCard from "@/components/ui/GlassCard";
 
@@ -28,8 +27,6 @@ export default function ProduitForm({
   const [stockMin, setStockMin] = useState(produit?.stock_min || 0);
   const [actif, setActif] = useState(produit?.actif ?? true);
   const [allergenes, setAllergenes] = useState(produit?.allergenes || "");
-  const [photoFile, setPhotoFile] = useState(null);
-  const [photoUrl, setPhotoUrl] = useState(produit?.url_photo || "");
   const [errors, setErrors] = useState({});
 
   const { addProduct, updateProduct, loading } = useProducts();
@@ -58,7 +55,6 @@ export default function ProduitForm({
       setStockMin(produit.stock_min || 0);
       setActif(produit.actif ?? true);
       setAllergenes(produit.allergenes || "");
-      setPhotoUrl(produit.url_photo || "");
     }
   }, [editing, produit]);
 
@@ -77,18 +73,6 @@ export default function ProduitForm({
     const familleIdVal = familleId;
     const uniteIdVal = uniteId;
 
-    let finalPhotoUrl = photoUrl;
-    if (photoFile) {
-      try {
-        finalPhotoUrl = editing
-          ? await replaceFile("produits", photoFile, produit?.url_photo)
-          : await uploadFile("produits", photoFile);
-      } catch (err) {
-        console.error("Erreur upload photo:", err);
-        toast.error("Erreur lors de l'upload de la photo");
-      }
-    }
-
     const newProd = {
       nom,
       famille_id: familleIdVal || null,
@@ -97,7 +81,6 @@ export default function ProduitForm({
       stock_min: Number(stockMin),
       actif,
       allergenes,
-      url_photo: finalPhotoUrl || null,
     };
     let toastId;
     try {
@@ -129,9 +112,9 @@ export default function ProduitForm({
       <h2 className="text-xl font-bold text-white mb-4">
         Créer ou modifier un produit
       </h2>
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-2">
         {/* Groupe 1 : nom, famille, unité */}
-        <div className="md:col-span-2">
+        <div className="flex flex-col gap-1 p-2 rounded-xl">
           <label htmlFor="prod-nom" className="label text-white">
             Nom *
           </label>
@@ -145,7 +128,7 @@ export default function ProduitForm({
           />
           {errors.nom && <p className="text-red-500 text-sm">{errors.nom}</p>}
         </div>
-        <div>
+        <div className="flex flex-col gap-1 p-2 rounded-xl">
           <label htmlFor="prod-famille" className="label text-white">
             Famille *
           </label>
@@ -167,7 +150,7 @@ export default function ProduitForm({
             <p className="text-red-500 text-sm">{errors.famille}</p>
           )}
         </div>
-        <div>
+        <div className="flex flex-col gap-1 p-2 rounded-xl">
           <label htmlFor="prod-unite" className="label text-white">
             Unité *
           </label>
@@ -188,8 +171,8 @@ export default function ProduitForm({
           {errors.unite && <p className="text-red-500 text-sm">{errors.unite}</p>}
         </div>
 
-        {/* Groupe 2 : allergènes, photo */}
-        <div>
+        {/* Groupe 2 : allergènes */}
+        <div className="flex flex-col gap-1 p-2 rounded-xl">
           <label htmlFor="prod-allerg" className="label text-white">
             Allergènes
           </label>
@@ -201,33 +184,8 @@ export default function ProduitForm({
             placeholder="Ex: gluten, lait"
           />
         </div>
-        <div className="md:col-span-2">
-          <label htmlFor="prod-photo" className="label text-white">
-            Photo
-          </label>
-          <input
-            id="prod-photo"
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                setPhotoFile(file);
-                setPhotoUrl(URL.createObjectURL(file));
-              }
-            }}
-            className="input text-white"
-          />
-          {photoUrl && (
-            <img
-              src={photoUrl}
-              alt="Aperçu"
-              className="h-24 mt-2 object-cover"
-            />
-          )}
-        </div>
         {/* Groupe 3 : stock minimum, actif */}
-        <div>
+        <div className="flex flex-col gap-1 p-2 rounded-xl">
           <label htmlFor="prod-min" className="label text-white">
             Stock minimum
           </label>
@@ -240,7 +198,7 @@ export default function ProduitForm({
             min={0}
           />
         </div>
-        <div className="md:col-span-2 flex items-center gap-2">
+        <div className="flex items-center gap-2 p-2 rounded-xl">
           <input
             type="checkbox"
             id="prod-actif"
@@ -254,7 +212,7 @@ export default function ProduitForm({
         </div>
 
         {/* Groupe 4 : fournisseur principal */}
-        <div className="md:col-span-2">
+        <div className="flex flex-col gap-1 p-2 rounded-xl">
           <label htmlFor="prod-fournisseur" className="label text-white">
             Fournisseur principal
           </label>
@@ -274,7 +232,7 @@ export default function ProduitForm({
         </div>
 
         {/* Actions */}
-        <div className="md:col-span-2 flex justify-end space-x-2">
+        <div className="flex justify-end gap-2 p-2 rounded-xl">
           <button type="button" onClick={onClose} className="btn btn-outline">
             Annuler
           </button>

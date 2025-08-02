@@ -48,25 +48,38 @@ export default function Familles() {
   const handleDelete = async (famille) => {
     if (!window.confirm('Supprimer cette famille ?')) return;
     setActionLoading(true);
-    const { error } = await supabase
-      .from('familles')
-      .delete()
-      .eq('id', famille.id)
-      .eq('mama_id', mama_id);
-    if (error) {
-      if (error.code === '23503') {
-        toast.error(
-          'Cette famille est utilisée par des produits ou des sous-familles.'
-        );
+    try {
+      await supabase
+        .from('produits')
+        .update({ famille_id: null })
+        .eq('famille_id', famille.id)
+        .eq('mama_id', mama_id);
+      await supabase
+        .from('produits')
+        .update({ sous_famille_id: null })
+        .eq('sous_famille_id', famille.id)
+        .eq('mama_id', mama_id);
+      const { error } = await supabase
+        .from('familles')
+        .delete()
+        .eq('id', famille.id)
+        .eq('mama_id', mama_id);
+      if (error) {
+        if (error.code === '23503') {
+          toast.error(
+            'Cette famille est utilisée par des produits ou des sous-familles.'
+          );
+        } else {
+          toast.error(error.message || 'Erreur lors de la suppression.');
+        }
+        console.error(error);
       } else {
-        toast.error('Erreur lors de la suppression.');
+        toast.success('Famille supprimée.');
       }
-      console.error(error);
-    } else {
-      toast.success('Famille supprimée.');
+    } finally {
+      await fetchFamilles({ search, page, limit: 50 });
+      setActionLoading(false);
     }
-    await fetchFamilles({ search, page, limit: 50 });
-    setActionLoading(false);
   };
 
   const handleToggle = async (famille) => {

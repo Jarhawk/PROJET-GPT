@@ -13,26 +13,33 @@ export function useFamilles() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Chargement des familles actives
+  // Chargement des familles (avec pagination / recherche)
   const fetchFamilles = useCallback(
-    async ({ includeInactive = false } = {}) => {
+    async ({
+      includeInactive = false,
+      search = "",
+      page = 1,
+      limit = 50,
+    } = {}) => {
       if (!mama_id) return [];
       setLoading(true);
       setError(null);
       let query = supabase
         .from("familles")
-        .select("id, nom, actif")
+        .select("id, nom, actif, famille_parent_id", { count: "exact" })
         .eq("mama_id", mama_id)
-        .order("nom", { ascending: true });
+        .order("nom", { ascending: true })
+        .range((page - 1) * limit, page * limit - 1);
       if (!includeInactive) query = query.eq("actif", true);
-      const { data, error } = await query;
+      if (search) query = query.ilike("nom", `%${search}%`);
+      const { data, error, count } = await query;
       if (error) {
         setError(error);
         setFamilles([]);
         setTotal(0);
       } else {
         setFamilles(Array.isArray(data) ? data : []);
-        setTotal(data ? data.length : 0);
+        setTotal(count || 0);
       }
       setLoading(false);
       return data || [];
@@ -41,7 +48,7 @@ export function useFamilles() {
   );
 
   // Ajout d'une famille
-  async function addFamille({ nom, actif = true }) {
+  async function addFamille({ nom, actif = true, famille_parent_id = null }) {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
@@ -64,8 +71,8 @@ export function useFamilles() {
     }
     const { data, error } = await supabase
       .from("familles")
-      .insert([{ nom, actif, mama_id }])
-      .select("id, nom, actif")
+      .insert([{ nom, actif, famille_parent_id, mama_id }])
+      .select("id, nom, actif, famille_parent_id")
       .single();
     setLoading(false);
     if (error) {

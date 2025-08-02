@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import SousFamilleForm from './SousFamilleForm';
 
-export default function SousFamilleRow({ sousFamille, onUpdate, onDelete }) {
+export default function SousFamilleRow({ sousFamille, onUpdate, onDelete, onToggle }) {
   const [editing, setEditing] = useState(false);
 
   if (editing) {
@@ -25,12 +25,19 @@ export default function SousFamilleRow({ sousFamille, onUpdate, onDelete }) {
 
   return (
     <tr>
-      <td className="px-2 py-1">{sousFamille.nom}</td>
-      <td className="px-2 py-1 text-center">{sousFamille.actif ? '✔️' : '❌'}</td>
+      <td className="px-2 py-1 pl-6">{sousFamille.nom}</td>
+      <td className="px-2 py-1 text-center">{sousFamille.actif ? '🟢' : '🔴'}</td>
       <td className="px-2 py-1">
         <div className="flex gap-2 justify-center">
           <Button size="sm" variant="secondary" onClick={() => setEditing(true)}>
             Modifier
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => onToggle(sousFamille)}
+          >
+            {sousFamille.actif ? 'Désactiver' : 'Activer'}
           </Button>
           <Button
             size="sm"

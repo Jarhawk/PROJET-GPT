@@ -81,6 +81,19 @@ export default function SousFamilleList({ famille }) {
     await fetchSousFamilles();
   }
 
+  async function handleToggle(sf) {
+    if (!mama_id) return toast.error('Action non autorisée');
+    const { error } = await supabase
+      .from('sous_familles')
+      .update({ actif: !sf.actif })
+      .match({ id: sf.id, mama_id });
+    if (error) toast.error(error.message);
+    else {
+      toast.success('Sous-famille mise à jour');
+      await fetchSousFamilles();
+    }
+  }
+
   return (
     <Card>
       <CardHeader className="flex items-center justify-between">
@@ -122,6 +135,7 @@ export default function SousFamilleList({ famille }) {
                     sousFamille={sf}
                     onUpdate={handleUpdate}
                     onDelete={handleDelete}
+                    onToggle={handleToggle}
                   />
                 ))}
               </tbody>

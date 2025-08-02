@@ -43,7 +43,7 @@ export default function useExport() {
         const res = await supabase
           .from('produits')
           .select(
-            'id, nom, famille_id, sous_famille_id, familles:fk_produits_famille(nom), sous_familles:fk_produits_sous_famille(nom), fournisseur_produits:produit_id(*, fournisseur:fournisseur_id(nom))'
+            'id, nom, famille_id, sous_famille_id, famille:fk_produits_famille(nom), sous_famille:fk_produits_sous_famille(nom), fournisseur_produits:fournisseur_produits_produit_id_fkey(*, fournisseur:fournisseur_id(nom))'
           )
           .eq('mama_id', mama_id);
         data = res.data || [];

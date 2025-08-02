@@ -30,7 +30,7 @@ export function useProducts() {
     let query = supabase
       .from("produits")
       .select(
-        "*, sous_famille:familles!produits_sous_famille_id_fkey(id, nom, famille_parent_id, parent:familles!familles_famille_parent_id_fkey(id, nom)), unite:unite_id(nom), fournisseur:fournisseurs!fournisseur_id(id, nom)",
+        "*, famille:familles(nom), sous_famille:sous_familles(nom), unite:unite_id(nom), fournisseur:fournisseur_id(id, nom)",
         { count: "exact" }
       )
       .eq("mama_id", mama_id);
@@ -44,11 +44,12 @@ export function useProducts() {
     if (typeof actif === "boolean") query = query.eq("actif", actif);
 
     if (sortBy === "famille") {
-      // order by the joined sous_famille alias
-      query = query.order("nom", {
-        foreignTable: "sous_famille",
-        ascending: order === "asc",
-      });
+      query = query
+        .order("nom", { foreignTable: "famille", ascending: order === "asc" })
+        .order("nom", {
+          foreignTable: "sous_famille",
+          ascending: order === "asc",
+        });
     } else if (sortBy === "unite") {
       // order by the joined unite alias
       query = query.order("nom", { foreignTable: "unite", ascending: order === "asc" });
@@ -71,9 +72,9 @@ export function useProducts() {
     const final = (Array.isArray(data) ? data : []).map((p) => ({
       ...p,
       famille:
-        p.sous_famille?.parent?.nom
-          ? `${p.sous_famille.parent.nom} > ${p.sous_famille.nom}`
-          : p.sous_famille?.nom || "",
+        p.famille?.nom && p.sous_famille?.nom
+          ? `${p.famille.nom} > ${p.sous_famille.nom}`
+          : p.famille?.nom || "",
       unite: p.unite?.nom || "",
       pmp: pmpMap[p.id] ?? p.pmp,
       stock_theorique: stockMap[p.id] ?? p.stock_theorique,
@@ -225,7 +226,7 @@ export function useProducts() {
       const { data, error } = await supabase
         .from("produits")
         .select(
-          "*, fournisseur:fournisseurs!fournisseur_id(id, nom), sous_famille:familles!produits_sous_famille_id_fkey(id, nom, parent:familles!familles_famille_parent_id_fkey(id, nom)), unite:unite_id(nom)"
+          "*, famille:familles(nom), sous_famille:sous_familles(nom), fournisseur:fournisseur_id(id, nom), unite:unite_id(nom)"
         )
         .eq("id", id)
         .eq("mama_id", mama_id)

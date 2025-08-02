@@ -27,8 +27,12 @@ export default function FamilleRow({
         <Button size="sm" variant="outline" onClick={() => onToggle(famille)}>
           {famille.actif ? "Désactiver" : "Activer"}
         </Button>
-        <Button size="sm" variant="destructive" onClick={() => onDelete(famille)}>
-          Supprimer
+        <Button
+          size="sm"
+          className="bg-red-500 hover:bg-red-600 text-white"
+          onClick={() => onDelete(famille)}
+        >
+          🗑 Supprimer
         </Button>
       </td>
     </tr>

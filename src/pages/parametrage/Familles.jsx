@@ -49,16 +49,6 @@ export default function Familles() {
     if (!window.confirm('Supprimer cette famille ?')) return;
     setActionLoading(true);
     try {
-      await supabase
-        .from('produits')
-        .update({ famille_id: null })
-        .eq('famille_id', famille.id)
-        .eq('mama_id', mama_id);
-      await supabase
-        .from('produits')
-        .update({ sous_famille_id: null })
-        .eq('sous_famille_id', famille.id)
-        .eq('mama_id', mama_id);
       const { error } = await supabase
         .from('familles')
         .delete()
@@ -66,9 +56,7 @@ export default function Familles() {
         .eq('mama_id', mama_id);
       if (error) {
         if (error.code === '23503') {
-          toast.error(
-            'Cette famille est utilisée par des produits ou des sous-familles.'
-          );
+          toast.error('Cette famille est utilisée par des produits.');
         } else {
           toast.error(error.message || 'Erreur lors de la suppression.');
         }

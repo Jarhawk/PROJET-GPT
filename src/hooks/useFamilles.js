@@ -30,7 +30,7 @@ export function useFamilles() {
       setError(null);
       let query = supabase
         .from("familles")
-        .select("id, nom, actif, famille_parent_id", { count: "exact" })
+        .select("id, nom, actif", { count: "exact" })
         .eq("mama_id", mama_id)
         .order("nom", { ascending: true })
         .range((page - 1) * limit, page * limit - 1);
@@ -52,7 +52,7 @@ export function useFamilles() {
   );
 
   // Ajout d'une famille
-  async function addFamille({ nom, actif = true, famille_parent_id = null }) {
+  async function addFamille({ nom, actif = true }) {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
@@ -75,8 +75,8 @@ export function useFamilles() {
     }
     const { data, error } = await supabase
       .from("familles")
-      .insert([{ nom, actif, famille_parent_id, mama_id }])
-      .select("id, nom, actif, famille_parent_id")
+      .insert([{ nom, actif, mama_id }])
+      .select("id, nom, actif")
       .single();
     setLoading(false);
     if (error) {

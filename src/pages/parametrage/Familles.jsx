@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { useFamilles } from '@/hooks/useFamilles';
 import FamilleRow from '@/components/parametrage/FamilleRow';
 import FamilleForm from '@/forms/FamilleForm';
+import SousFamilleModal from '@/components/parametrage/SousFamilleModal';
 import useAuth from '@/hooks/useAuth';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import Unauthorized from '@/pages/auth/Unauthorized';
@@ -27,6 +28,7 @@ export default function Familles() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [edit, setEdit] = useState(null);
+  const [subFamille, setSubFamille] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
@@ -111,57 +113,43 @@ export default function Familles() {
             </tr>
           </thead>
           <tbody>
-            {(() => {
-              const map = {};
-              familles.forEach((f) => (map[f.id] = { ...f, children: [] }));
-              Object.values(map).forEach((f) => {
-                if (f.famille_parent_id && map[f.famille_parent_id]) {
-                  map[f.famille_parent_id].children.push(f);
-                }
-              });
-              const roots = Object.values(map).filter(
-                (f) => !f.famille_parent_id,
-              );
-              if (roots.length === 0) {
-                return (
-                  <tr>
-                    <td colSpan="3" className="py-2">
-                      Aucune famille
-                    </td>
-                  </tr>
-                );
-              }
-              return roots
-                .sort((a, b) => (a.nom || '').localeCompare(b.nom || ''))
-                .map((r) => (
-                  <FamilleRow
-                    key={r.id}
-                    famille={r}
-                    level={0}
-                    onEdit={setEdit}
-                    onDelete={handleDelete}
-                    onToggle={handleToggle}
-                    onAddSub={(f) => setEdit({ famille_parent_id: f.id })}
-                  />
-                ));
-            })()}
+            {familles.length === 0 ? (
+              <tr>
+                <td colSpan="3" className="py-2">
+                  Aucune famille
+                </td>
+              </tr>
+            ) : (
+              familles.map((f) => (
+                <FamilleRow
+                  key={f.id}
+                  famille={f}
+                  onEdit={setEdit}
+                  onDelete={handleDelete}
+                  onToggle={handleToggle}
+                  onAddSub={() => setSubFamille(f)}
+                />
+              ))
+            )}
           </tbody>
         </table>
       </ListingContainer>
-      <PaginationFooter page={page} pages={pages} onPageChange={setPage} />
-      {edit && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setEdit(null)} />
-          <div className="relative bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow-lg p-6 w-full max-w-md">
-            <FamilleForm
-              famille={edit}
-              familles={familles}
-              onCancel={() => setEdit(null)}
-              onSave={handleSave}
-            />
+        <PaginationFooter page={page} pages={pages} onPageChange={setPage} />
+        {edit && (
+          <div className="fixed inset-0 flex items-center justify-center z-50">
+            <div className="absolute inset-0 bg-black/50" onClick={() => setEdit(null)} />
+            <div className="relative bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow-lg p-6 w-full max-w-md">
+              <FamilleForm
+                famille={edit}
+                onCancel={() => setEdit(null)}
+                onSave={handleSave}
+              />
+            </div>
           </div>
-        </div>
-      )}
-    </div>
-  );
-}
+        )}
+        {subFamille && (
+          <SousFamilleModal famille={subFamille} onClose={() => setSubFamille(null)} />
+        )}
+      </div>
+    );
+  }

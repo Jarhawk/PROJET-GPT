@@ -12,6 +12,7 @@ export default function ProduitRow({
     <tr className={produit.actif ? "" : "opacity-50"}>
       <td>{produit.nom}</td>
       <td>{produit.famille}</td>
+      <td>{produit.zone_stock?.nom || "-"}</td>
       <td>{produit.unite}</td>
       <td className="text-right">{produit.pmp != null ? Number(produit.pmp).toFixed(2) : '-'}</td>
       <td className="text-right">{produit.stock_theorique}</td>

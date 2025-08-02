@@ -25,6 +25,9 @@ vi.mock('@/hooks/useUnites', () => ({
 vi.mock('@/hooks/useFournisseurs', () => ({
   useFournisseurs: () => ({ fournisseurs: [], fetchFournisseurs: vi.fn() })
 }));
+vi.mock('@/hooks/useZonesStock', () => ({
+  default: () => ({ zones: [], loading: false })
+}));
 
 import ProduitForm from '@/components/produits/ProduitForm.jsx';
 
@@ -35,6 +38,7 @@ test('renders expected product inputs', () => {
   expect(screen.getByLabelText(/Famille/)).toBeInTheDocument();
   expect(screen.getByLabelText(/Sous-famille/)).toBeInTheDocument();
   expect(screen.getByLabelText(/Unité/)).toBeInTheDocument();
+  expect(screen.getByLabelText(/Zone de stockage/)).toBeInTheDocument();
   expect(screen.getByLabelText(/Allergènes/)).toBeInTheDocument();
   expect(screen.queryByLabelText(/Photo/)).toBeNull();
   expect(screen.getByLabelText(/Stock minimum/)).toBeInTheDocument();

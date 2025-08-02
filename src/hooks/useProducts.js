@@ -30,7 +30,7 @@ export function useProducts() {
     let query = supabase
       .from("produits")
       .select(
-        "*, famille:fk_produits_famille(nom), sous_famille:fk_produits_sous_famille(nom), unite:unite_id(nom), fournisseur:fournisseur_id(id, nom)",
+        "*, famille:fk_produits_famille(nom), sous_famille:fk_produits_sous_famille(nom), unite:unite_id(nom), fournisseur:fournisseur_id(id, nom), zone_stock:zone_stock_id(nom)",
         { count: "exact" }
       )
       .eq("mama_id", mama_id);
@@ -43,20 +43,22 @@ export function useProducts() {
     if (sousFamille) query = query.eq("sous_famille_id", sousFamille);
     if (typeof actif === "boolean") query = query.eq("actif", actif);
 
-    if (sortBy === "famille") {
+    if (sortBy === "zone_stock") {
+      query = query
+        .order("nom", { foreignTable: "zone_stock", ascending: order === "asc" })
+        .order("nom", { foreignTable: "famille", ascending: order === "asc" })
+        .order("nom", { ascending: order === "asc" });
+    } else if (sortBy === "famille") {
       query = query
         .order("nom", { foreignTable: "famille", ascending: order === "asc" })
-        .order("nom", {
-          foreignTable: "sous_famille",
-          ascending: order === "asc",
-        });
+        .order("nom", { foreignTable: "sous_famille", ascending: order === "asc" })
+        .order("nom", { ascending: order === "asc" });
     } else if (sortBy === "unite") {
       // order by the joined unite alias
-      query = query.order("nom", { foreignTable: "unite", ascending: order === "asc" });
+      query = query.order("nom", { foreignTable: "unite", ascending: order === "asc" }).order("nom", { ascending: order === "asc" });
     } else {
-      query = query.order(sortBy, { ascending: order === "asc" });
+      query = query.order(sortBy, { ascending: order === "asc" }).order("nom", { ascending: order === "asc" });
     }
-    query = query.order("nom", { ascending: true });
     query = query.range((page - 1) * limit, page * limit - 1);
 
     const { data, error, count } = await query;
@@ -142,6 +144,7 @@ export function useProducts() {
       actif,
       code,
       allergenes,
+      zone_stock_id,
     } = orig;
     const copy = {
       nom: `${orig.nom} (copie)`,
@@ -153,6 +156,7 @@ export function useProducts() {
       actif,
       code,
       allergenes,
+      zone_stock_id,
     };
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);

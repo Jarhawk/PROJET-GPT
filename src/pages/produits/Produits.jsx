@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useProducts } from "@/hooks/useProducts";
 import { useFamilles } from "@/hooks/useFamilles";
+import useZonesStock from "@/hooks/useZonesStock";
 import ProduitFormModal from "@/components/produits/ProduitFormModal";
 import ProduitDetail from "@/components/produits/ProduitDetail";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ export default function Produits() {
     toggleProductActive,
   } = useProducts();
   const { familles: famillesHook, fetchFamilles } = useFamilles();
+  const { zones } = useZonesStock();
   const familles = famillesHook;
 
   const [showForm, setShowForm] = useState(false);
@@ -42,8 +44,9 @@ export default function Produits() {
   const [search, setSearch] = useState("");
   const [sousFamilleFilter, setSousFamilleFilter] = useState("");
   const [actifFilter, setActifFilter] = useState("all");
+  const [zoneFilter, setZoneFilter] = useState("");
   const [page, setPage] = useState(1);
-  const [sortField, setSortField] = useState("famille");
+  const [sortField, setSortField] = useState("zone_stock");
   const [sortOrder, setSortOrder] = useState("asc");
   const fileRef = useRef(null);
   const { hasAccess, mama_id } = useAuth();
@@ -103,6 +106,11 @@ export default function Produits() {
 
   const validCount = importRows.filter((r) => r.errors.length === 0).length;
   const invalidCount = importRows.length - validCount;
+
+  const filteredProducts = products.filter((p) => {
+    if (zoneFilter && p.zone_stock_id !== zoneFilter) return false;
+    return true;
+  });
 
   function toggleSort(field) {
     if (sortField === field) {
@@ -169,6 +177,19 @@ export default function Produits() {
                   </option>
                 );
               })}
+          </Select>
+          <Select
+            className="flex-1 min-w-[150px]"
+            value={zoneFilter}
+            onChange={(e) => setZoneFilter(e.target.value)}
+            ariaLabel="Filtrer par zone"
+          >
+            <option value="">Toutes les zones</option>
+            {zones.map((z) => (
+              <option key={z.id} value={z.id}>
+                {z.nom}
+              </option>
+            ))}
           </Select>
           <Select
             className="flex-1 min-w-[150px]"
@@ -287,6 +308,12 @@ export default function Produits() {
               >
                 Famille{renderArrow("famille")}
               </th>
+              <th
+                className="cursor-pointer"
+                onClick={() => toggleSort("zone_stock")}
+              >
+                Zone{renderArrow("zone_stock")}
+              </th>
               <th>Unité</th>
               <th className="cursor-pointer text-right" onClick={() => toggleSort("pmp")}>
                 PMP (€){renderArrow("pmp")}
@@ -315,14 +342,14 @@ export default function Produits() {
             </tr>
           </thead>
           <tbody>
-            {products.length === 0 ? (
+            {filteredProducts.length === 0 ? (
               <tr>
-                <td colSpan={10} className="py-4 text-center text-muted-foreground">
+                <td colSpan={11} className="py-4 text-center text-muted-foreground">
                   Aucun produit trouvé. Essayez d’ajouter un produit via le bouton ci-dessus.
                 </td>
               </tr>
             ) : (
-              products.map((p) => (
+              filteredProducts.map((p) => (
                 <ProduitRow
                   key={p.id}
                   produit={p}

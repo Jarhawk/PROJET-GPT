@@ -8,6 +8,9 @@ let mockHook;
 vi.mock('@/hooks/useProducts', () => ({
   useProducts: () => mockHook(),
 }));
+vi.mock('@/hooks/useAuth', () => ({
+  default: () => ({ hasAccess: () => true, mama_id: 'm1' })
+}));
 vi.mock('@/hooks/useStorage', () => ({
   uploadFile: vi.fn(),
   deleteFile: vi.fn(),
@@ -22,16 +25,31 @@ vi.mock('@/hooks/useUnites', () => ({
 vi.mock('@/hooks/useFournisseurs', () => ({
   useFournisseurs: () => ({ fournisseurs: [], fetchFournisseurs: vi.fn() })
 }));
-vi.mock('@/hooks/useZones', () => ({
-  useZones: () => ({ zones: [], fetchZones: vi.fn() })
+vi.mock('@/hooks/useSousFamilles', () => ({
+  useSousFamilles: () => ({
+    sousFamilles: [],
+    fetchSousFamilles: vi.fn(),
+    loading: false,
+    error: null,
+    setSousFamilles: vi.fn(),
+  }),
 }));
+vi.mock('@/hooks/useZonesStock', () => ({
+  default: () => ({ zones: [], loading: false })
+}));
+vi.mock('@/utils/importExcelProduits', () => {
+  const parseProduitsFile = vi.fn(() => []);
+  const insertProduits = vi.fn(() => []);
+  return { parseProduitsFile, insertProduits };
+});
+import { parseProduitsFile } from '@/utils/importExcelProduits';
 
 import Produits from '@/pages/produits/Produits.jsx';
 
 test('duplicate button calls hook', async () => {
   const duplicate = vi.fn();
   mockHook = () => ({
-    products: [{ id: '1', nom: 'Test', famille: 'F', unite: 'kg', pmp: 1, stock_reel: 10, actif: true }],
+    products: [{ id: '1', nom: 'Test', famille: 'F', unite: 'kg', pmp: 1, stock_reel: 10, actif: true, zone_stock: { nom: 'Z' }, zone_stock_id: 'z1' }],
     total: 1,
     fetchProducts: vi.fn(),
     exportProductsToExcel: vi.fn(),
@@ -45,22 +63,18 @@ test('duplicate button calls hook', async () => {
   expect(duplicate).toHaveBeenCalledWith('1');
 });
 
-test('import input calls hook and adds products', async () => {
-  const importFn = vi.fn(() => Promise.resolve([{ nom: 'N', famille: 'F', unite: 'kg' }]));
-  const add = vi.fn();
+test('import input triggers parsing', async () => {
   mockHook = () => ({
     products: [],
     total: 0,
     fetchProducts: vi.fn(),
     exportProductsToExcel: vi.fn(),
-    importProductsFromExcel: importFn,
-    addProduct: add,
+    addProduct: vi.fn(),
     duplicateProduct: vi.fn(),
   });
   render(<Produits />);
   const input = screen.getByTestId('import-input');
   const file = new File([''], 'p.xlsx');
   await fireEvent.change(input, { target: { files: [file] } });
-  expect(importFn).toHaveBeenCalledWith(file);
-  await waitFor(() => expect(add).toHaveBeenCalled());
+  expect(parseProduitsFile).toHaveBeenCalledWith(file, 'm1');
 });

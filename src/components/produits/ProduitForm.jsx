@@ -6,6 +6,7 @@ import { useFamilles } from "@/hooks/useFamilles";
 import { useSousFamilles } from "@/hooks/useSousFamilles";
 import { useUnites } from "@/hooks/useUnites";
 import { useFournisseurs } from "@/hooks/useFournisseurs";
+import useZonesStock from "@/hooks/useZonesStock";
 import { toast } from "react-hot-toast";
 import GlassCard from "@/components/ui/GlassCard";
 
@@ -29,6 +30,7 @@ export default function ProduitForm({
     setSousFamilles,
   } = useSousFamilles();
   const { unites, fetchUnites } = useUnites();
+  const { zones } = useZonesStock();
 
   const [nom, setNom] = useState(produit?.nom || "");
   const [familleId, setFamilleId] = useState(produit?.famille_id || "");
@@ -39,6 +41,7 @@ export default function ProduitForm({
   const [fournisseurId, setFournisseurId] = useState(
     produit?.fournisseur_id || "",
   );
+  const [zoneStockId, setZoneStockId] = useState(produit?.zone_stock_id || "");
   const [stockMin, setStockMin] = useState(produit?.stock_min || 0);
   const [actif, setActif] = useState(produit?.actif ?? true);
   const [allergenes, setAllergenes] = useState(produit?.allergenes || "");
@@ -79,6 +82,7 @@ export default function ProduitForm({
       setSousFamilleId(produit.sous_famille_id || "");
       setUniteId(produit.unite_id || "");
       setFournisseurId(produit.fournisseur_id || "");
+      setZoneStockId(produit.zone_stock_id || "");
       setStockMin(produit.stock_min || 0);
       setActif(produit.actif ?? true);
       setAllergenes(produit.allergenes || "");
@@ -105,6 +109,7 @@ export default function ProduitForm({
       sous_famille_id: sousFamilleId || null,
       unite_id: uniteId || null,
       fournisseur_id: fournisseurId || null,
+      zone_stock_id: zoneStockId || null,
       stock_min: Number(stockMin),
       actif,
       allergenes,
@@ -239,6 +244,25 @@ export default function ProduitForm({
             ))}
           </select>
           {errors.unite && <p className="text-red-500 text-sm">{errors.unite}</p>}
+        </div>
+
+        <div className="flex flex-col gap-1 p-2 rounded-xl">
+          <label htmlFor="prod-zone" className="label text-white">
+            Zone de stockage
+          </label>
+          <select
+            id="prod-zone"
+            className="input bg-white text-gray-900"
+            value={zoneStockId}
+            onChange={(e) => setZoneStockId(e.target.value)}
+          >
+            <option value="">Aucune</option>
+            {zones.map((z) => (
+              <option key={z.id} value={z.id}>
+                {z.nom}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Groupe 2 : allergènes */}

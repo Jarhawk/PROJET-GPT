@@ -1,4 +1,16 @@
 -- Ajouts complémentaires pour le back-end Supabase
+-- Gestion des zones de stockage
+create table if not exists zones_stock (
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid not null references mamas(id) on delete cascade,
+  nom text not null,
+  actif boolean default true,
+  created_at timestamptz default now()
+);
+
+alter table produits
+  add column if not exists zone_stock_id uuid references zones_stock(id) on delete set null;
+
 -- Ajout colonne manquante pour stocker la configuration du tableau de bord
 ALTER TABLE tableaux_de_bord ADD COLUMN IF NOT EXISTS liste_gadgets_json jsonb DEFAULT '[]'::jsonb;
 

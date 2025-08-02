@@ -18,6 +18,7 @@ export function useProducts() {
   const fetchProducts = useCallback(async ({
     search = "",
     sousFamille = "",
+    zone = "",
     actif = null,
     page = 1,
     limit = 100,
@@ -30,22 +31,21 @@ export function useProducts() {
     let query = supabase
       .from("produits")
       .select(
-        "*, famille:fk_produits_famille(nom), sous_famille:fk_produits_sous_famille(nom), unite:unite_id(nom), fournisseur:fournisseur_id(id, nom), zone_stock:zone_stock_id(nom)",
+        `*, famille:famille_id(nom), sous_famille:sous_famille_id(nom), unite:unite_id(nom), zone:zone_id(nom), main_fournisseur:fournisseur_id(nom)`,
         { count: "exact" }
       )
       .eq("mama_id", mama_id);
 
     if (search) {
-      query = query.or(
-        `nom.ilike.%${search}%,fournisseur.nom.ilike.%${search}%`
-      );
+      query = query.ilike("nom", `%${search}%`);
     }
     if (sousFamille) query = query.eq("sous_famille_id", sousFamille);
+    if (zone) query = query.eq("zone_id", zone);
     if (typeof actif === "boolean") query = query.eq("actif", actif);
 
-    if (sortBy === "zone_stock") {
+    if (sortBy === "zone") {
       query = query
-        .order("nom", { foreignTable: "zone_stock", ascending: order === "asc" })
+        .order("nom", { foreignTable: "zone", ascending: order === "asc" })
         .order("nom", { foreignTable: "famille", ascending: order === "asc" })
         .order("nom", { ascending: order === "asc" });
     } else if (sortBy === "famille") {
@@ -54,8 +54,9 @@ export function useProducts() {
         .order("nom", { foreignTable: "sous_famille", ascending: order === "asc" })
         .order("nom", { ascending: order === "asc" });
     } else if (sortBy === "unite") {
-      // order by the joined unite alias
-      query = query.order("nom", { foreignTable: "unite", ascending: order === "asc" }).order("nom", { ascending: order === "asc" });
+      query = query
+        .order("nom", { foreignTable: "unite", ascending: order === "asc" })
+        .order("nom", { ascending: order === "asc" });
     } else {
       query = query.order(sortBy, { ascending: order === "asc" }).order("nom", { ascending: order === "asc" });
     }
@@ -73,10 +74,6 @@ export function useProducts() {
     const stockMap = Object.fromEntries((stockData || []).map(s => [s.produit_id, s.stock]));
     const final = (Array.isArray(data) ? data : []).map((p) => ({
       ...p,
-      famille:
-        p.famille?.nom && p.sous_famille?.nom
-          ? `${p.famille.nom} > ${p.sous_famille.nom}`
-          : p.famille?.nom || "",
       unite: p.unite?.nom || "",
       pmp: pmpMap[p.id] ?? p.pmp,
       stock_theorique: stockMap[p.id] ?? p.stock_theorique,
@@ -140,11 +137,11 @@ export function useProducts() {
       unite_id,
       fournisseur_id,
       stock_reel,
-      stock_min,
+      seuil_min,
       actif,
       code,
       allergenes,
-      zone_stock_id,
+      zone_id,
     } = orig;
     const copy = {
       nom: `${orig.nom} (copie)`,
@@ -152,11 +149,11 @@ export function useProducts() {
       unite_id,
       fournisseur_id,
       stock_reel,
-      stock_min,
+      seuil_min,
       actif,
       code,
       allergenes,
-      zone_stock_id,
+      zone_id,
     };
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
@@ -230,7 +227,7 @@ export function useProducts() {
       const { data, error } = await supabase
         .from("produits")
         .select(
-          "*, famille:fk_produits_famille(nom), sous_famille:fk_produits_sous_famille(nom), fournisseur:fournisseur_id(id, nom), unite:unite_id(nom)"
+          "*, famille:famille_id(nom), sous_famille:sous_famille_id(nom), main_fournisseur:fournisseur_id(id, nom), unite:unite_id(nom)"
         )
         .eq("id", id)
         .eq("mama_id", mama_id)
@@ -249,16 +246,16 @@ export function useProducts() {
     const datas = (products || []).map(p => ({
       id: p.id,
       nom: p.nom,
-      famille: p.famille,
+      famille: p.famille?.nom || "",
       unite: p.unite,
       code: p.code,
       allergenes: p.allergenes,
       pmp: p.pmp,
       stock_theorique: p.stock_theorique,
       stock_reel: p.stock_reel,
-      stock_min: p.stock_min,
+      seuil_min: p.seuil_min,
       dernier_prix: p.dernier_prix,
-      fournisseur: p.fournisseur?.nom || "",
+      fournisseur: p.main_fournisseur?.nom || "",
       fournisseur_id: p.fournisseur_id || "",
       actif: p.actif,
     }));

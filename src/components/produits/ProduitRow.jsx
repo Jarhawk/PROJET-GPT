@@ -8,16 +8,24 @@ export default function ProduitRow({
   onToggleActive,
   canEdit,
 }) {
+  const belowMin =
+    produit.stock_theorique != null &&
+    produit.seuil_min != null &&
+    produit.stock_theorique < produit.seuil_min;
+  const rupture = produit.stock_theorique === 0;
   return (
-    <tr className={produit.actif ? "" : "opacity-50"}>
-      <td>{produit.nom}</td>
-      <td>{produit.famille}</td>
-      <td>{produit.zone_stock?.nom || "-"}</td>
+    <tr className={produit.actif ? "" : "opacity-50 bg-muted"}>
+      <td className="truncate max-w-[200px]">{produit.nom}</td>
+      <td>{produit.famille?.nom} {produit.sous_famille ? `> ${produit.sous_famille.nom}` : ""}</td>
+      <td>{produit.zone?.nom || "-"}</td>
       <td>{produit.unite}</td>
-      <td className="text-right">{produit.pmp != null ? Number(produit.pmp).toFixed(2) : '-'}</td>
-      <td className="text-right">{produit.stock_theorique}</td>
-      <td className="text-right">{produit.stock_min}</td>
-      <td>{produit.fournisseur?.nom || "-"}</td>
+      <td className="text-right">{produit.pmp != null ? Number(produit.pmp).toFixed(2) : "-"}</td>
+      <td className={"text-right" + (belowMin ? " text-red-600 font-semibold" : "") }>
+        {produit.stock_theorique}
+        {rupture && <span className="ml-1 text-red-600">⚠️</span>}
+      </td>
+      <td className="text-right">{produit.seuil_min ?? "-"}</td>
+      <td>{produit.main_fournisseur?.nom || "-"}</td>
       <td className="text-right">
         {produit.dernier_prix != null
           ? Number(produit.dernier_prix).toFixed(2)

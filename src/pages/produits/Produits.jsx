@@ -46,8 +46,10 @@ export default function Produits() {
   const [actifFilter, setActifFilter] = useState("all");
   const [zoneFilter, setZoneFilter] = useState("");
   const [page, setPage] = useState(1);
-  const [sortField, setSortField] = useState("zone_stock");
+  const [sortField, setSortField] = useState("famille");
   const [sortOrder, setSortOrder] = useState("asc");
+  const [showSearchMobile, setShowSearchMobile] = useState(false);
+  const [showFiltersMobile, setShowFiltersMobile] = useState(false);
   const fileRef = useRef(null);
   const { hasAccess, mama_id } = useAuth();
   const canEdit = hasAccess("produits", "peut_modifier");
@@ -58,6 +60,7 @@ export default function Produits() {
     fetchProducts({
       search,
       sousFamille: sousFamilleFilter,
+      zone: zoneFilter,
       actif: actifFilter === "all" ? null : actifFilter === "true",
       page,
       limit: PAGE_SIZE,
@@ -68,6 +71,7 @@ export default function Produits() {
     fetchProducts,
     search,
     sousFamilleFilter,
+    zoneFilter,
     actifFilter,
     page,
     sortField,
@@ -108,7 +112,7 @@ export default function Produits() {
   const invalidCount = importRows.length - validCount;
 
   const filteredProducts = products.filter((p) => {
-    if (zoneFilter && p.zone_stock_id !== zoneFilter) return false;
+    if (zoneFilter && p.zone_id !== zoneFilter) return false;
     return true;
   });
 
@@ -140,7 +144,7 @@ export default function Produits() {
       <Toaster />
       <h1 className="text-2xl font-bold mb-4">Produits stock</h1>
       <div className="w-full md:w-4/5 mx-auto space-y-4">
-        <div className="flex flex-wrap md:flex-nowrap items-center gap-4 p-4 rounded-xl bg-muted/30 backdrop-blur">
+        <div className="hidden md:flex flex-wrap md:flex-nowrap items-center gap-4 p-4 rounded-xl bg-muted/30 backdrop-blur">
           <Input
             type="search"
             value={search}
@@ -204,6 +208,82 @@ export default function Produits() {
             <option value="true">Actif</option>
             <option value="false">Inactif</option>
           </Select>
+        </div>
+        {/* Mobile search & filters */}
+        <div className="md:hidden flex flex-col gap-2">
+          <div className="flex gap-2">
+            <Button variant="outline" className="flex-1" onClick={() => setShowSearchMobile(!showSearchMobile)}>
+              🔍 Rechercher
+            </Button>
+            <Button variant="outline" className="flex-1" onClick={() => setShowFiltersMobile(!showFiltersMobile)}>
+              🔽 Filtrer
+            </Button>
+          </div>
+          {showSearchMobile && (
+            <Input
+              type="search"
+              value={search}
+              onChange={(e) => {
+                setPage(1);
+                setSearch(e.target.value);
+              }}
+              placeholder="Recherche nom"
+              ariaLabel="Recherche nom"
+            />
+          )}
+          {showFiltersMobile && (
+            <div className="flex flex-col gap-2">
+              <Select
+                value={sousFamilleFilter}
+                onChange={(e) => {
+                  setPage(1);
+                  setSousFamilleFilter(e.target.value);
+                }}
+                ariaLabel="Filtrer par famille"
+              >
+                <option value="">Toutes familles</option>
+                {familles
+                  .filter((f) => f.famille_parent_id)
+                  .map((f) => {
+                    const parent = familles.find(
+                      (p) => p.id === f.famille_parent_id,
+                    );
+                    const label = parent
+                      ? `${parent.nom} > ${f.nom}`
+                      : f.nom;
+                    return (
+                      <option key={f.id} value={f.id}>
+                        {label}
+                      </option>
+                    );
+                  })}
+              </Select>
+              <Select
+                value={zoneFilter}
+                onChange={(e) => setZoneFilter(e.target.value)}
+                ariaLabel="Filtrer par zone"
+              >
+                <option value="">Toutes les zones</option>
+                {zones.map((z) => (
+                  <option key={z.id} value={z.id}>
+                    {z.nom}
+                  </option>
+                ))}
+              </Select>
+              <Select
+                value={actifFilter}
+                onChange={(e) => {
+                  setPage(1);
+                  setActifFilter(e.target.value);
+                }}
+                ariaLabel="Filtrer par statut"
+              >
+                <option value="all">Actif ou non</option>
+                <option value="true">Actif</option>
+                <option value="false">Inactif</option>
+              </Select>
+            </div>
+          )}
         </div>
         <TableHeader className="justify-between">
           <Button
@@ -295,11 +375,11 @@ export default function Produits() {
           </div>
         </div>
       )}
-      <ListingContainer>
+      <ListingContainer className="hidden md:block">
         <table className="min-w-full table-auto text-sm">
             <thead>
               <tr>
-              <th className="cursor-pointer" onClick={() => toggleSort("nom")}>
+              <th className="cursor-pointer" onClick={() => toggleSort("nom")}> 
                 Nom{renderArrow("nom")}
               </th>
               <th
@@ -310,12 +390,12 @@ export default function Produits() {
               </th>
               <th
                 className="cursor-pointer"
-                onClick={() => toggleSort("zone_stock")}
+                onClick={() => toggleSort("zone")}
               >
-                Zone{renderArrow("zone_stock")}
+                Zone{renderArrow("zone")}
               </th>
               <th>Unité</th>
-              <th className="cursor-pointer text-right" onClick={() => toggleSort("pmp")}>
+              <th className="cursor-pointer text-right" onClick={() => toggleSort("pmp")}> 
                 PMP (€){renderArrow("pmp")}
               </th>
               <th
@@ -326,9 +406,9 @@ export default function Produits() {
               </th>
               <th
                 className="cursor-pointer text-right"
-                onClick={() => toggleSort("stock_min")}
+                onClick={() => toggleSort("seuil_min")}
               >
-                Min{renderArrow("stock_min")}
+                Min{renderArrow("seuil_min")}
               </th>
               <th>Fournisseur</th>
               <th
@@ -370,6 +450,50 @@ export default function Produits() {
           </tbody>
         </table>
       </ListingContainer>
+      {/* Mobile listing */}
+      <div className="md:hidden flex flex-col gap-2">
+        {filteredProducts.length === 0 ? (
+          <div className="py-4 text-center text-muted-foreground">
+            Aucun produit trouvé. Essayez d’ajouter un produit via le bouton ci-dessus.
+          </div>
+        ) : (
+          filteredProducts.map((p) => {
+            const belowMin =
+              p.stock_theorique != null &&
+              p.seuil_min != null &&
+              p.stock_theorique < p.seuil_min;
+            return (
+              <div
+                key={p.id}
+                className={`p-4 rounded-lg border bg-muted/30 ${p.actif ? "" : "opacity-50 bg-muted"}`}
+              >
+                <div className="flex justify-between items-start">
+                  <div className="font-semibold truncate mr-2">{p.nom}</div>
+                  <div>{p.actif ? "✅" : "❌"}</div>
+                </div>
+                <div className="text-sm text-muted-foreground truncate">
+                  {p.famille?.nom} {p.sous_famille ? `> ${p.sous_famille.nom}` : ""}
+                </div>
+                <div className="flex justify-between text-sm mt-1">
+                  <span>{p.unite} — {p.pmp != null ? Number(p.pmp).toFixed(2) : "-"}</span>
+                  <span className={belowMin ? "text-red-600 font-semibold" : ""}>{p.stock_theorique}</span>
+                </div>
+                <div className="mt-2 flex gap-2 flex-wrap">
+                  <Button size="sm" variant="secondary" onClick={() => {setSelectedProduct(p); setShowDetail(true);}}>Voir</Button>
+                  {canEdit && (
+                    <>
+                      <Button size="sm" variant="outline" onClick={() => {setSelectedProduct(p); setShowForm(true);}}>Éditer</Button>
+                      <Button size="sm" variant="destructive" onClick={() => handleToggleActive(p.id, !p.actif)}>
+                        {p.actif ? "Désactiver" : "Activer"}
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
       <PaginationFooter
         page={page}
         pages={Math.max(1, Math.ceil(total / PAGE_SIZE))}

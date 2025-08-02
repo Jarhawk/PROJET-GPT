@@ -150,6 +150,10 @@ WHERE p.actif = true;
 -- Ajout colonne url_photo pour stocker l'URL de la photo produit
 ALTER TABLE produits ADD COLUMN IF NOT EXISTS url_photo text;
 
+-- ⚠️ Pour forcer Supabase à rafraîchir le schema cache
+alter table produits add column if not exists temp_refresh_trigger integer;
+alter table produits drop column if exists temp_refresh_trigger;
+
 -- Vue simplifiée pour les réquisitions avec informations produit
 -- AJOUT POUR DASHBOARD
 DROP VIEW IF EXISTS v_requisitions;

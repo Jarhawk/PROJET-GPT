@@ -17,7 +17,7 @@ export default function MobileInventaire() {
     supabase
       .from("produits")
       .select(
-        "id, nom, famille_id, sous_famille_id, familles:fk_produits_famille(nom), sous_familles:fk_produits_sous_famille(nom)"
+        "id, nom, famille_id, sous_famille_id, famille:fk_produits_famille(nom), sous_famille:fk_produits_sous_famille(nom)"
       )
       .eq("mama_id", mama_id)
       .then(({ data }) => setProduits(data || []));

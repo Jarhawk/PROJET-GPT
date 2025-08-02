@@ -42,7 +42,7 @@ export default function SousFamilleRow({ sousFamille, onUpdate, onDelete, onTogg
           <Button
             size="sm"
             className="bg-red-500 hover:bg-red-600 text-white"
-            onClick={() => onDelete(sousFamille)}
+            onClick={() => onDelete(sousFamille.id)}
           >
             🗑
           </Button>

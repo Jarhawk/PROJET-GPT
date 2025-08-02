@@ -10,6 +10,7 @@ import useAuth from '@/hooks/useAuth';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import Unauthorized from '@/pages/auth/Unauthorized';
 import { useFamillesWithSousFamilles } from '@/hooks/useFamillesWithSousFamilles';
+import { supabase } from '@/lib/supabaseClient';
 
 export default function Familles() {
   const {
@@ -18,10 +19,8 @@ export default function Familles() {
     fetchAll,
     addFamille,
     updateFamille,
-    deleteFamille,
     addSousFamille,
     updateSousFamille,
-    deleteSousFamille,
     toggleFamille,
     toggleSousFamille,
   } = useFamillesWithSousFamilles();
@@ -50,18 +49,16 @@ export default function Familles() {
     setActionLoading(false);
   };
 
-  const handleDelete = async (famille) => {
+  const handleDelete = async (id) => {
     if (!window.confirm('Supprimer cette famille ?')) return;
     setActionLoading(true);
-    const { error } = await deleteFamille(famille.id);
+    const { error } = await supabase.from('familles').delete().eq('id', id);
     if (error) {
-      if (error.code === '23503') {
-        toast.error('Cette famille est utilisée par des produits.');
-      } else {
-        toast.error(error.message || 'Erreur lors de la suppression.');
-      }
+      console.error('Erreur suppression :', error);
+      alert('Erreur lors de la suppression');
     } else {
-      toast.success('Famille supprimée');
+      alert('Famille supprimée');
+      fetchAll();
     }
     setActionLoading(false);
   };
@@ -85,11 +82,16 @@ export default function Familles() {
     else toast.success('Sous-famille mise à jour');
   };
 
-  const handleDeleteSous = async (sf) => {
+  const handleDeleteSous = async (id) => {
     if (!window.confirm('Supprimer cette sous-famille ?')) return;
-    const { error } = await deleteSousFamille(sf.id);
-    if (error) toast.error(error.message || 'Erreur lors de la suppression');
-    else toast.success('Sous-famille supprimée');
+    const { error } = await supabase.from('sous_familles').delete().eq('id', id);
+    if (error) {
+      console.error('Erreur suppression :', error);
+      alert('Erreur lors de la suppression');
+    } else {
+      alert('Sous-famille supprimée');
+      fetchAll();
+    }
   };
 
   const handleToggleSous = async (sf) => {

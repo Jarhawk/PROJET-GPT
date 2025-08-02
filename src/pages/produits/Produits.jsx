@@ -209,7 +209,7 @@ export default function Produits() {
     const { data, error } = await supabase
       .from("produits")
       .select(
-        `nom, famille:familles!fk_produits_famille(nom), sous_famille:sous_familles!fk_produits_sous_famille(nom), unite:unites!fk_produits_unite(nom), zone:zones_stock!fk_produits_zone_stock(nom), actif, seuil_min, pmp, dernier_prix, fournisseur_principal:fournisseur_id(nom)`
+        `nom, famille:familles(nom), sous_famille:sous_familles(nom), unite:unites(nom), zone:zones_stock(nom), actif, seuil_min, pmp, dernier_prix, fournisseur_principal:fournisseur_id(nom)`
       )
       .eq("mama_id", mama_id);
     if (error) {
@@ -432,7 +432,7 @@ export default function Produits() {
           <thead>
             <tr>
               <th
-                className="px-2 text-left cursor-pointer min-w-[240px]"
+                className="px-2 text-left cursor-pointer min-w-[30ch]"
                 onClick={() => toggleSort("nom")}
               >
                 Nom{renderArrow("nom")}
@@ -519,20 +519,10 @@ export default function Produits() {
             <Card key={produit.id} className="p-4">
               <div className="font-bold">{produit.nom}</div>
               <div className="text-sm">
-                Famille : {produit.famille?.nom}
-                {produit.sous_famille ? ` → ${produit.sous_famille.nom}` : ""}
-              </div>
-              <div className="text-sm">
-                Zone : {produit.zone_stock?.nom || "-"}
-              </div>
-              <div className="text-sm">
                 Unité : {produit.unite?.nom ?? produit.unite ?? "-"}
               </div>
               <div className="text-sm">
                 PMP : {produit.pmp != null ? Number(produit.pmp).toFixed(2) : "0.00"} €
-              </div>
-              <div className="text-sm">
-                Stock : {produit.stock ?? produit.stock_theorique ?? 0}
               </div>
               <div className="flex gap-2 mt-2">
                 <Button

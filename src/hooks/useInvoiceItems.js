@@ -18,7 +18,7 @@ export function useInvoiceItems() {
     const { data, error } = await supabase
       .from("facture_lignes")
       .select(
-        "*, produit:produits!facture_lignes_produit_id_fkey(id, nom, famille:familles!fk_produits_famille(id, nom), unite:unites!fk_produits_unite(nom))"
+        "*, produit:produits!facture_lignes_produit_id_fkey(id, nom, famille:familles(nom), unite:unites(nom))"
       )
       .eq("facture_id", invoiceId)
       .eq("mama_id", mama_id)
@@ -35,7 +35,7 @@ export function useInvoiceItems() {
     const { data, error } = await supabase
       .from("facture_lignes")
       .select(
-        "*, produit:produits!facture_lignes_produit_id_fkey(id, nom, famille:familles!fk_produits_famille(id, nom), unite:unites!fk_produits_unite(nom))"
+        "*, produit:produits!facture_lignes_produit_id_fkey(id, nom, famille:familles(nom), unite:unites(nom))"
       )
       .eq("id", id)
       .eq("mama_id", mama_id)

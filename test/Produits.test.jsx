@@ -49,7 +49,7 @@ import Produits from '@/pages/produits/Produits.jsx';
 test('duplicate button calls hook', async () => {
   const duplicate = vi.fn();
   mockHook = () => ({
-    products: [{ id: '1', nom: 'Test', famille: 'F', unite: 'kg', pmp: 1, stock_reel: 10, actif: true, zone_stock: { nom: 'Z' }, zone_stock_id: 'z1' }],
+    products: [{ id: '1', nom: 'Test', famille: { nom: 'F' }, unite: { nom: 'kg' }, pmp: 1, stock_reel: 10, actif: true, zone_stock: { nom: 'Z' }, zone_stock_id: 'z1' }],
     total: 1,
     fetchProducts: vi.fn(),
     exportProductsToExcel: vi.fn(),

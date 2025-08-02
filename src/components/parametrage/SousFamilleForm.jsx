@@ -4,29 +4,27 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 export default function SousFamilleForm({ initialData = { nom: '', actif: true }, onSubmit, onCancel }) {
-  const [form, setForm] = useState(initialData);
+  const [nom, setNom] = useState(initialData.nom ?? '');
+  const [actif, setActif] = useState(initialData.actif ?? true);
 
   useEffect(() => {
-    setForm(initialData);
+    setNom(initialData.nom ?? '');
+    setActif(initialData.actif ?? true);
   }, [initialData]);
-
-  const handleChange = e => {
-    const { name, type, checked, value } = e.target;
-    setForm(f => ({ ...f, [name]: type === 'checkbox' ? checked : value }));
-  };
 
   const handleSubmit = e => {
     e.preventDefault();
-    if (!form.nom.trim()) return;
-    onSubmit({ nom: form.nom.trim(), actif: form.actif });
+    const trimmedNom = nom.trim();
+    if (!trimmedNom) return;
+    onSubmit({ nom: trimmedNom, actif });
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-2">
       <Input
         name="nom"
-        value={form.nom}
-        onChange={handleChange}
+        value={nom}
+        onChange={e => setNom(e.target.value)}
         placeholder="Nom de la sous-famille"
         required
       />
@@ -34,8 +32,8 @@ export default function SousFamilleForm({ initialData = { nom: '', actif: true }
         <input
           type="checkbox"
           name="actif"
-          checked={form.actif}
-          onChange={handleChange}
+          checked={actif}
+          onChange={e => setActif(e.target.checked)}
         />
         Actif
       </label>

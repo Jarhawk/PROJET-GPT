@@ -64,6 +64,9 @@ export default function Familles() {
       } else {
         toast.success('Famille supprimée.');
       }
+    } catch (err) {
+      toast.error(err.message || 'Erreur lors de la suppression.');
+      console.error(err);
     } finally {
       await fetchFamilles({ search, page, limit: 50 });
       setActionLoading(false);

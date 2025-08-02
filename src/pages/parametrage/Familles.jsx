@@ -13,7 +13,14 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import Unauthorized from '@/pages/auth/Unauthorized';
 
 export default function Familles() {
-  const { familles, total, fetchFamilles, addFamille, updateFamille, batchDeleteFamilles } = useFamilles();
+  const {
+    familles,
+    total,
+    fetchFamilles,
+    addFamille,
+    updateFamille,
+    batchDeleteFamilles,
+  } = useFamilles();
   const { mama_id, hasAccess, loading: authLoading } = useAuth();
   const canEdit = hasAccess('parametrage', 'peut_modifier');
   const [search, setSearch] = useState('');
@@ -26,9 +33,9 @@ export default function Familles() {
     }
   }, [fetchFamilles, search, page, authLoading, mama_id]);
 
-  const handleSave = async values => {
+  const handleSave = async (values) => {
     if (edit?.id) await updateFamille(edit.id, values);
-    else await addFamille(values.nom);
+    else await addFamille(values);
     setEdit(null);
     toast.success('Famille enregistrée');
   };
@@ -72,16 +79,48 @@ export default function Familles() {
             </tr>
           </thead>
           <tbody>
-            {familles.map(f => (
-              <FamilleRow key={f.id} famille={f} onEdit={setEdit} onDelete={handleDelete} onToggle={handleToggle} />
-            ))}
-            {familles.length === 0 && (
-              <tr>
-                <td colSpan="3" className="py-2">
-                  Aucune famille
-                </td>
-              </tr>
-            )}
+            {(() => {
+              const map = {};
+              familles.forEach((f) => (map[f.id] = { ...f, children: [] }));
+              Object.values(map).forEach((f) => {
+                if (f.famille_parent_id && map[f.famille_parent_id]) {
+                  map[f.famille_parent_id].children.push(f);
+                }
+              });
+              const roots = Object.values(map).filter(
+                (f) => !f.famille_parent_id,
+              );
+              const rows = [];
+              const walk = (node, level = 0) => {
+                rows.push(
+                  <FamilleRow
+                    key={node.id}
+                    famille={node}
+                    level={level}
+                    onEdit={setEdit}
+                    onDelete={handleDelete}
+                    onToggle={handleToggle}
+                    onAddSub={(f) => setEdit({ famille_parent_id: f.id })}
+                  />,
+                );
+                node.children
+                  .sort((a, b) => (a.nom || '').localeCompare(b.nom || ''))
+                  .forEach((child) => walk(child, level + 1));
+              };
+              roots
+                .sort((a, b) => (a.nom || '').localeCompare(b.nom || ''))
+                .forEach((r) => walk(r, 0));
+              if (rows.length === 0) {
+                return (
+                  <tr>
+                    <td colSpan="3" className="py-2">
+                      Aucune famille
+                    </td>
+                  </tr>
+                );
+              }
+              return rows;
+            })()}
           </tbody>
         </table>
       </ListingContainer>
@@ -92,6 +131,7 @@ export default function Familles() {
           <div className="relative bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow-lg p-6 w-full max-w-md">
             <FamilleForm
               famille={edit}
+              familles={familles}
               onCancel={() => setEdit(null)}
               onSave={handleSave}
             />

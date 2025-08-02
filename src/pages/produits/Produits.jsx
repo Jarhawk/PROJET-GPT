@@ -40,7 +40,7 @@ export default function Produits() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showDetail, setShowDetail] = useState(false);
   const [search, setSearch] = useState("");
-  const [familleFilter, setFamilleFilter] = useState("");
+  const [sousFamilleFilter, setSousFamilleFilter] = useState("");
   const [actifFilter, setActifFilter] = useState("all");
   const [page, setPage] = useState(1);
   const [sortField, setSortField] = useState("famille");
@@ -54,7 +54,7 @@ export default function Produits() {
   const refreshList = useCallback(() => {
     fetchProducts({
       search,
-      famille: familleFilter,
+      sousFamille: sousFamilleFilter,
       actif: actifFilter === "all" ? null : actifFilter === "true",
       page,
       limit: PAGE_SIZE,
@@ -64,7 +64,7 @@ export default function Produits() {
   }, [
     fetchProducts,
     search,
-    familleFilter,
+    sousFamilleFilter,
     actifFilter,
     page,
     sortField,
@@ -146,19 +146,29 @@ export default function Produits() {
           />
           <Select
             className="flex-1 min-w-[150px]"
-            value={familleFilter}
+            value={sousFamilleFilter}
             onChange={(e) => {
               setPage(1);
-              setFamilleFilter(e.target.value);
+              setSousFamilleFilter(e.target.value);
             }}
             ariaLabel="Filtrer par famille"
           >
             <option value="">Toutes familles</option>
-            {familles.map((f) => (
-              <option key={f.id} value={f.id}>
-                {f.nom}
-              </option>
-            ))}
+            {familles
+              .filter((f) => f.famille_parent_id)
+              .map((f) => {
+                const parent = familles.find(
+                  (p) => p.id === f.famille_parent_id,
+                );
+                const label = parent
+                  ? `${parent.nom} > ${f.nom}`
+                  : f.nom;
+                return (
+                  <option key={f.id} value={f.id}>
+                    {label}
+                  </option>
+                );
+              })}
           </Select>
           <Select
             className="flex-1 min-w-[150px]"

@@ -5,6 +5,7 @@ import { useProducts } from "@/hooks/useProducts";
 import { useFamilles } from "@/hooks/useFamilles";
 import { useUnites } from "@/hooks/useUnites";
 import { useFournisseurs } from "@/hooks/useFournisseurs";
+import AutoCompleteField from "@/components/ui/AutoCompleteField";
 import { toast } from "react-hot-toast";
 import GlassCard from "@/components/ui/GlassCard";
 
@@ -19,7 +20,12 @@ export default function ProduitForm({
   const { unites, fetchUnites } = useUnites();
 
   const [nom, setNom] = useState(produit?.nom || "");
-  const [familleId, setFamilleId] = useState(produit?.famille_id || "");
+  const [familleId, setFamilleId] = useState(
+    produit?.sous_famille?.famille_parent_id || "",
+  );
+  const [sousFamilleId, setSousFamilleId] = useState(
+    produit?.sous_famille_id || "",
+  );
   const [uniteId, setUniteId] = useState(produit?.unite_id || "");
   const [fournisseurId, setFournisseurId] = useState(
     produit?.fournisseur_id || "",
@@ -33,7 +39,11 @@ export default function ProduitForm({
   const [saving, setSaving] = useState(false);
 
   const familleOptions = [...familles]
-    .filter((f, idx, arr) => arr.findIndex((ff) => ff.id === f.id) === idx)
+    .filter((f) => !f.famille_parent_id)
+    .sort((a, b) => (a.nom || "").localeCompare(b.nom || ""));
+
+  const sousFamilleOptions = [...familles]
+    .filter((f) => f.famille_parent_id === familleId)
     .sort((a, b) => (a.nom || "").localeCompare(b.nom || ""));
 
   const uniteOptions = [...unites]
@@ -47,9 +57,19 @@ export default function ProduitForm({
   }, [fetchFamilles, fetchUnites, fetchFournisseurs]);
 
   useEffect(() => {
+    if (familleId) {
+      const subs = familles.filter((f) => f.famille_parent_id === familleId);
+      if (subs.length === 1) setSousFamilleId(subs[0].id);
+    } else {
+      setSousFamilleId("");
+    }
+  }, [familleId, familles]);
+
+  useEffect(() => {
     if (editing && produit) {
       setNom(produit.nom || "");
-      setFamilleId(produit.famille_id || "");
+      setFamilleId(produit.sous_famille?.famille_parent_id || "");
+      setSousFamilleId(produit.sous_famille_id || "");
       setUniteId(produit.unite_id || "");
       setFournisseurId(produit.fournisseur_id || "");
       setStockMin(produit.stock_min || 0);
@@ -64,18 +84,19 @@ export default function ProduitForm({
     const errs = {};
     if (!nom.trim()) errs.nom = "Nom requis";
     if (!familleId) errs.famille = "Famille requise";
+    if (!sousFamilleId) errs.sous_famille = "Sous-famille requise";
     if (!uniteId) errs.unite = "Unité requise";
     setErrors(errs);
     if (Object.keys(errs).length) {
       toast.error("Veuillez remplir les champs obligatoires.");
       return;
     }
-    const familleIdVal = familleId;
+    const sousFamilleIdVal = sousFamilleId;
     const uniteIdVal = uniteId;
 
     const newProd = {
       nom,
-      famille_id: familleIdVal || null,
+      sous_famille_id: sousFamilleIdVal || null,
       unite_id: uniteIdVal || null,
       fournisseur_id: fournisseurId || null,
       stock_min: Number(stockMin),
@@ -129,25 +150,29 @@ export default function ProduitForm({
           {errors.nom && <p className="text-red-500 text-sm">{errors.nom}</p>}
         </div>
         <div className="flex flex-col gap-1 p-2 rounded-xl">
-          <label htmlFor="prod-famille" className="label text-white">
-            Famille *
-          </label>
-          <select
-            id="prod-famille"
-            className="input bg-white text-gray-900"
+          <AutoCompleteField
+            label="Famille *"
             value={familleId}
-            onChange={(e) => setFamilleId(e.target.value)}
+            onChange={(val) => {
+              setFamilleId(val.id || "");
+            }}
+            options={familleOptions}
             required
-          >
-            <option value="">-- Choisir --</option>
-            {familleOptions.map((f) => (
-              <option key={f.id} value={f.id}>
-                {f.nom}
-              </option>
-            ))}
-          </select>
+          />
           {errors.famille && (
             <p className="text-red-500 text-sm">{errors.famille}</p>
+          )}
+        </div>
+        <div className="flex flex-col gap-1 p-2 rounded-xl">
+          <AutoCompleteField
+            label="Sous-famille *"
+            value={sousFamilleId}
+            onChange={(val) => setSousFamilleId(val.id || "")}
+            options={sousFamilleOptions}
+            required
+          />
+          {errors.sous_famille && (
+            <p className="text-red-500 text-sm">{errors.sous_famille}</p>
           )}
         </div>
         <div className="flex flex-col gap-1 p-2 rounded-xl">

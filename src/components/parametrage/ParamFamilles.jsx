@@ -54,10 +54,10 @@ export default function ParamFamilles() {
     if (!form.nom.trim()) return toast.error("Nom requis");
     try {
       if (editMode) {
-        await updateFamille(form.id, form.nom);
+        await updateFamille(form.id, { nom: form.nom });
         toast.success("Famille modifiée !");
       } else {
-        await addFamille(form.nom);
+        await addFamille({ nom: form.nom });
         toast.success("Famille ajoutée !");
       }
       setEditMode(false);

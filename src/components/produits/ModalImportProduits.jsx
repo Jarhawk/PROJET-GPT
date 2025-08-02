@@ -5,7 +5,8 @@ import {
   parseProduitsFile,
   insertProduits,
   validateProduitRow,
-} from "@/utils/importExcelProduits";
+  downloadProduitsTemplate,
+} from "@/utils/excelUtils";
 import useAuth from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-hot-toast";
@@ -27,11 +28,7 @@ export default function ModalImportProduits({ open, onClose, onSuccess }) {
     const file = e.target.files[0];
     if (!file) return;
     const parsed = await parseProduitsFile(file, mama_id);
-    const limitedRows = parsed.rows.slice(0, 200);
-    if (parsed.rows.length > 200) {
-      toast("Seules les 200 premières lignes sont affichées");
-    }
-    setRows(limitedRows);
+    setRows(parsed.rows);
     setMaps(parsed.maps);
     setReference({
       familles: parsed.familles,
@@ -52,8 +49,10 @@ export default function ModalImportProduits({ open, onClose, onSuccess }) {
     const results = await insertProduits(validRows);
     const failed = results.filter((r) => r.insertError);
     const successCount = results.length - failed.length;
-    if (successCount) toast.success(`${successCount} produits importés`);
-    if (failed.length) toast.error(`${failed.length} erreurs d'insertion`);
+    toast(
+      `${rows.length} produits analysés · ${successCount} insérés · ${failed.length} ignorés`
+    );
+    if (failed.length) console.error("Erreur d'insertion", failed);
     setImporting(false);
     onSuccess?.();
   }
@@ -65,6 +64,11 @@ export default function ModalImportProduits({ open, onClose, onSuccess }) {
   return (
     <SmartDialog open={open} onClose={onClose} title="Importer Produits via Excel">
       <div className="space-y-4">
+        <div className="flex gap-2">
+          <Button onClick={downloadProduitsTemplate} type="button">
+            Télécharger modèle Excel
+          </Button>
+        </div>
         <input
           type="file"
           accept=".xlsx,.csv"
@@ -72,7 +76,7 @@ export default function ModalImportProduits({ open, onClose, onSuccess }) {
           onChange={handleFileChange}
           className="block"
         />
-        {rows.length > 0 && (
+        {rows.length > 0 ? (
           <>
             <div className="flex justify-between my-2 text-sm">
               <span>{rows.length} lignes chargées</span>
@@ -80,7 +84,7 @@ export default function ModalImportProduits({ open, onClose, onSuccess }) {
                 {validCount} valides / {invalidCount} à corriger
               </span>
             </div>
-            <div className="max-h-[60vh] overflow-y-auto border rounded">
+            <div className="max-h-[500px] overflow-y-auto border rounded">
               <ImportPreviewTable
                 rows={rows}
                 onUpdate={handleUpdate}
@@ -92,9 +96,13 @@ export default function ModalImportProduits({ open, onClose, onSuccess }) {
               disabled={invalidCount > 0 || importing}
               onClick={handleImport}
             >
-              Importer maintenant
+              Tout valider
             </Button>
           </>
+        ) : (
+          <p className="text-sm text-center text-muted-foreground">
+            Aucune ligne importée
+          </p>
         )}
       </div>
     </SmartDialog>

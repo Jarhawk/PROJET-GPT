@@ -6,6 +6,10 @@ import * as XLSX from "xlsx";
 import { safeImportXLSX } from "@/lib/xlsx/safeImportXLSX";
 import { saveAs } from "file-saver";
 
+export async function fetchUnitesForValidation(mama_id) {
+  return await supabase.from("unites").select("id, nom").eq("mama_id", mama_id);
+}
+
 export function useUnites() {
   const { mama_id } = useAuth();
   const [unites, setUnites] = useState([]);

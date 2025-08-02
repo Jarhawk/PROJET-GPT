@@ -31,7 +31,7 @@ export function useProducts() {
     let query = supabase
       .from("produits")
       .select(
-        `*, famille:famille_id(nom), sous_famille:sous_famille_id(nom), unite:unite_id(nom), zone:zone_id(nom), main_fournisseur:fournisseur_id(nom)`,
+        `*, famille:famille_id(nom), sous_famille:sous_famille_id(nom), unite:unite_id(nom), zone_stock:zone_stock_id(nom), main_fournisseur:fournisseur_id(nom)`,
         { count: "exact" }
       )
       .eq("mama_id", mama_id);
@@ -40,12 +40,12 @@ export function useProducts() {
       query = query.ilike("nom", `%${search}%`);
     }
     if (sousFamille) query = query.eq("sous_famille_id", sousFamille);
-    if (zone) query = query.eq("zone_id", zone);
+    if (zone) query = query.eq("zone_stock_id", zone);
     if (typeof actif === "boolean") query = query.eq("actif", actif);
 
-    if (sortBy === "zone") {
+    if (sortBy === "zone_stock") {
       query = query
-        .order("nom", { foreignTable: "zone", ascending: order === "asc" })
+        .order("nom", { foreignTable: "zone_stock", ascending: order === "asc" })
         .order("nom", { foreignTable: "famille", ascending: order === "asc" })
         .order("nom", { ascending: order === "asc" });
     } else if (sortBy === "famille") {
@@ -141,7 +141,7 @@ export function useProducts() {
       actif,
       code,
       allergenes,
-      zone_id,
+      zone_stock_id,
     } = orig;
     const copy = {
       nom: `${orig.nom} (copie)`,
@@ -153,7 +153,7 @@ export function useProducts() {
       actif,
       code,
       allergenes,
-      zone_id,
+      zone_stock_id,
     };
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);

@@ -17,7 +17,7 @@ export default function ProduitRow({
     <tr className={produit.actif ? "" : "opacity-50 bg-muted"}>
       <td className="truncate max-w-[200px]">{produit.nom}</td>
       <td>{produit.famille?.nom} {produit.sous_famille ? `> ${produit.sous_famille.nom}` : ""}</td>
-      <td>{produit.zone?.nom || "-"}</td>
+      <td className="truncate max-w-[160px]">{produit.zone_stock?.nom || "-"}</td>
       <td>{produit.unite}</td>
       <td className="text-right">{produit.pmp != null ? Number(produit.pmp).toFixed(2) : "-"}</td>
       <td className={"text-right" + (belowMin ? " text-red-600 font-semibold" : "") }>

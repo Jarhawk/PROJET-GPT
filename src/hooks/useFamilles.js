@@ -13,43 +13,35 @@ export function useFamilles() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // 1. Charger toutes les familles (recherche, batch)
-  // Charge la liste des familles avec option de recherche
+  // Chargement des familles actives
   const fetchFamilles = useCallback(
-    async ({
-      search = "",
-      includeInactive = false,
-      page,
-      limit,
-      parentId,
-    } = {}) => {
+    async ({ includeInactive = false } = {}) => {
       if (!mama_id) return [];
       setLoading(true);
       setError(null);
       let query = supabase
         .from("familles")
-        .select("id, nom, actif, famille_parent_id")
+        .select("id, nom, actif")
         .eq("mama_id", mama_id)
-        .order("famille_parent_id", { ascending: true })
         .order("nom", { ascending: true });
       if (!includeInactive) query = query.eq("actif", true);
-      if (search) query = query.ilike("nom", `%${search}%`);
-      if (parentId === null) query = query.is("famille_parent_id", null);
-      else if (parentId) query = query.eq("famille_parent_id", parentId);
-      if (limit)
-        query = query.range((page - 1) * limit, page * limit - 1);
       const { data, error } = await query;
-      setFamilles(Array.isArray(data) ? data : []);
-      setTotal(data ? data.length : 0);
+      if (error) {
+        setError(error);
+        setFamilles([]);
+        setTotal(0);
+      } else {
+        setFamilles(Array.isArray(data) ? data : []);
+        setTotal(data ? data.length : 0);
+      }
       setLoading(false);
-      if (error) setError(error);
       return data || [];
     },
     [mama_id]
   );
 
-  // 2. Ajouter une famille (avec vérif unicité)
-  async function addFamille({ nom, famille_parent_id = null, actif = true }) {
+  // Ajout d'une famille
+  async function addFamille({ nom, actif = true }) {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
@@ -72,8 +64,8 @@ export function useFamilles() {
     }
     const { data, error } = await supabase
       .from("familles")
-      .insert([{ nom, famille_parent_id, actif, mama_id }])
-      .select("id, nom, famille_parent_id, actif")
+      .insert([{ nom, actif, mama_id }])
+      .select("id, nom, actif")
       .single();
     setLoading(false);
     if (error) {
@@ -84,7 +76,7 @@ export function useFamilles() {
     return { data };
   }
 
-  // 3. Modifier une famille
+  // Mise à jour d'une famille
   async function updateFamille(id, fields) {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
@@ -105,7 +97,7 @@ export function useFamilles() {
     await fetchFamilles();
   }
 
-  // 4. Batch suppression (désactivation réelle ou suppression selon politique)
+  // Désactivation de familles (batch)
   async function batchDeleteFamilles(ids = []) {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
@@ -120,12 +112,12 @@ export function useFamilles() {
     await fetchFamilles();
   }
 
-  // 5. Export Excel
+  // Export Excel
   function exportFamillesToExcel() {
-    const datas = (familles || []).map(f => ({
+    const datas = (familles || []).map((f) => ({
       id: f.id,
       nom: f.nom,
-      mama_id: f.mama_id,
+      mama_id: mama_id,
     }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Familles");
@@ -133,7 +125,7 @@ export function useFamilles() {
     saveAs(new Blob([buf]), "familles_mamastock.xlsx");
   }
 
-  // 6. Import Excel
+  // Import Excel
   async function importFamillesFromExcel(file) {
     setLoading(true);
     setError(null);

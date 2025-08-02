@@ -17,7 +17,9 @@ export function useStock() {
     setError(null);
     const { data, error } = await supabase
       .from("produits")
-      .select("*")
+      .select(
+        "id, nom, stock_reel, stock_min, pmp, famille_id, sous_famille_id, familles(nom), sous_familles(nom)"
+      )
       .eq("mama_id", mama_id);
     setLoading(false);
     if (error) setError(error);

@@ -154,6 +154,10 @@ ALTER TABLE produits ADD COLUMN IF NOT EXISTS url_photo text;
 alter table produits add column if not exists temp_refresh_trigger integer;
 alter table produits drop column if exists temp_refresh_trigger;
 
+-- Forcer le refresh du cache des relations
+alter table produits alter column famille_id drop not null;
+alter table produits alter column famille_id set not null;
+
 -- Vue simplifiée pour les réquisitions avec informations produit
 -- AJOUT POUR DASHBOARD
 DROP VIEW IF EXISTS v_requisitions;

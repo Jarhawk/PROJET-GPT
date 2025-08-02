@@ -16,7 +16,7 @@ export default function MobileInventaire() {
     if (authLoading || !mama_id) return;
     supabase
       .from("produits")
-      .select("*")
+      .select("id, nom, famille_id, sous_famille_id, familles(nom), sous_familles(nom)")
       .eq("mama_id", mama_id)
       .then(({ data }) => setProduits(data || []));
   }, [mama_id, authLoading]);

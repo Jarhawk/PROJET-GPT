@@ -51,22 +51,29 @@ export default function SousFamilles() {
   async function handleDelete(sf) {
     if (!window.confirm('Supprimer cette sous-famille ?')) return;
     setLoading(true);
-    const { error } = await supabase
-      .from('sous_familles')
-      .delete()
-      .eq('id', sf.id)
-      .eq('mama_id', mama_id);
-    if (error) {
-      if (error.code === '23503') {
-        toast.error('Sous-famille utilisée par des produits.');
+    try {
+      const { error } = await supabase
+        .from('sous_familles')
+        .delete()
+        .eq('id', sf.id)
+        .eq('mama_id', mama_id);
+      if (error) {
+        if (error.code === '23503') {
+          toast.error('Sous-famille utilisée par des produits.');
+        } else {
+          toast.error(error.message || 'Erreur lors de la suppression.');
+        }
+        console.error(error);
       } else {
-        toast.error(error.message || 'Erreur lors de la suppression.');
+        toast.success('Sous-famille supprimée.');
       }
-    } else {
-      toast.success('Sous-famille supprimée.');
+    } catch (err) {
+      toast.error(err.message || 'Erreur lors de la suppression.');
+      console.error(err);
+    } finally {
+      await fetchSousFamilles();
+      setLoading(false);
     }
-    await fetchSousFamilles();
-    setLoading(false);
   }
 
   const pages = Math.ceil(total / PAGE_SIZE) || 1;

@@ -11,9 +11,10 @@ import UniteForm from '@/forms/UniteForm';
 import useAuth from '@/hooks/useAuth';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import Unauthorized from '@/pages/auth/Unauthorized';
+import { supabase } from '@/lib/supabase';
 
 export default function Unites() {
-  const { unites, total, fetchUnites, addUnite, updateUnite, deleteUnite } = useUnites();
+  const { unites, total, fetchUnites, addUnite, updateUnite } = useUnites();
   const { mama_id, hasAccess, loading: authLoading } = useAuth();
   const canEdit = hasAccess('parametrage', 'peut_modifier');
   const [search, setSearch] = useState('');
@@ -31,17 +32,29 @@ export default function Unites() {
     else await addUnite(values.nom);
     setEdit(null);
     toast.success('Unité enregistrée');
+    fetchUnites({ search, page, limit: 50 });
   };
 
   const handleDelete = async unite => {
-    if (window.confirm('Supprimer cette unité ?')) {
-      await deleteUnite(unite.id);
+    if (!window.confirm('Confirmer la suppression ?')) return;
+    const { error } = await supabase.from('unites').delete().eq('id', unite.id);
+    if (error) toast.error('Erreur suppression');
+    else {
       toast.success('Unité supprimée');
+      fetchUnites({ search, page, limit: 50 });
     }
   };
 
   const handleToggle = async unite => {
-    await updateUnite(unite.id, { actif: !unite.actif, nom: unite.nom });
+    const { error } = await supabase
+      .from('unites')
+      .update({ actif: !unite.actif })
+      .eq('id', unite.id);
+    if (error) toast.error('Erreur modification');
+    else {
+      toast.success('Statut mis à jour');
+      fetchUnites({ search, page, limit: 50 });
+    }
   };
 
   const pages = Math.ceil(total / 50) || 1;

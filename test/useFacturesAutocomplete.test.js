@@ -28,7 +28,7 @@ test('searchFactures filters by mama_id and query', async () => {
     await result.current.searchFactures('FA');
   });
   expect(fromMock).toHaveBeenCalledWith('factures');
-  expect(selectMock).toHaveBeenCalledWith('id, numero, date_facture, fournisseurs(nom)');
+  expect(selectMock).toHaveBeenCalledWith('id, numero, date_facture, fournisseur_id, fournisseur:fournisseur_id(nom)');
   expect(eqMock).toHaveBeenCalledWith('mama_id', 'm1');
   expect(ilikeMock).toHaveBeenCalledWith('numero', '%FA%');
 });

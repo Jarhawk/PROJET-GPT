@@ -31,7 +31,7 @@ export function useProducts() {
     let query = supabase
       .from("produits")
       .select(
-        `*, famille:famille_id(nom), sous_famille:sous_famille_id(nom), unite:unite_id(nom), zone_stock:zone_stock_id(nom), main_fournisseur:fournisseur_id(nom)`,
+        `*, famille:familles!fk_produits_famille(nom), sous_famille:sous_familles!fk_produits_sous_famille(nom), unite:unites!fk_produits_unite(nom), zone_stock:zones_stock!fk_produits_zone_stock(nom), main_fournisseur:fournisseur_id(nom)`,
         { count: "exact" }
       )
       .eq("mama_id", mama_id);
@@ -208,7 +208,7 @@ export function useProducts() {
     const { data, error } = await supabase
       .from("fournisseur_produits")
       .select(
-        "*, fournisseur:fournisseur_id(id, nom), derniere_livraison:date_livraison"
+        "*, fournisseur:fournisseurs!fk_fournisseur_produits_fournisseur_id(id, nom), derniere_livraison:date_livraison"
       )
       .eq("produit_id", productId)
       .eq("mama_id", mama_id)
@@ -227,7 +227,7 @@ export function useProducts() {
       const { data, error } = await supabase
         .from("produits")
         .select(
-          "*, famille:famille_id(nom), sous_famille:sous_famille_id(nom), main_fournisseur:fournisseur_id(id, nom), unite:unite_id(nom)"
+          "*, famille:familles!fk_produits_famille(nom), sous_famille:sous_familles!fk_produits_sous_famille(nom), main_fournisseur:fournisseur_id(id, nom), unite:unites!fk_produits_unite(nom)"
         )
         .eq("id", id)
         .eq("mama_id", mama_id)

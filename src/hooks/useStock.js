@@ -18,7 +18,7 @@ export function useStock() {
     const { data, error } = await supabase
       .from("produits")
       .select(
-        "id, nom, stock_reel, stock_min, pmp, famille_id, sous_famille_id, famille:fk_produits_famille(nom), sous_famille:fk_produits_sous_famille(nom)"
+        "id, nom, stock_reel, stock_min, pmp, famille_id, sous_famille_id, famille:familles!fk_produits_famille(nom), sous_famille:sous_familles!fk_produits_sous_famille(nom)"
       )
       .eq("mama_id", mama_id);
     setLoading(false);

@@ -16,7 +16,7 @@ export function useEnrichedProducts() {
       const { data, error } = await supabase
         .from("produits")
         .select(
-          "id, nom, famille_id, sous_famille_id, familles(nom), sous_familles(nom), liaisons:fournisseur_produits:produit_id(*, fournisseur:fournisseur_id(*))"
+          "id, nom, famille_id, sous_famille_id, familles:fk_produits_famille(nom), sous_familles:fk_produits_sous_famille(nom), liaisons:fournisseur_produits:produit_id(*, fournisseur:fournisseur_id(*))"
         )
         .eq("mama_id", mama_id);
 

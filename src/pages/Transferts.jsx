@@ -44,7 +44,9 @@ export default function Transferts() {
     if (!mama_id) return;
     supabase
       .from("produits")
-      .select("id, nom, pmp, famille_id, sous_famille_id, familles(nom), sous_familles(nom)")
+      .select(
+        "id, nom, pmp, famille_id, sous_famille_id, familles:fk_produits_famille(nom), sous_familles:fk_produits_sous_famille(nom)"
+      )
       .eq("mama_id", mama_id)
       .then(({ data }) => setProduits(data || []));
     supabase

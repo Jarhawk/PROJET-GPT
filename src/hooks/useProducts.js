@@ -30,7 +30,7 @@ export function useProducts() {
     let query = supabase
       .from("produits")
       .select(
-        "*, famille:familles(nom), sous_famille:sous_familles(nom), unite:unite_id(nom), fournisseur:fournisseur_id(id, nom)",
+        "*, famille:familles:fk_produits_famille(nom), sous_famille:sous_familles:fk_produits_sous_famille(nom), unite:unite_id(nom), fournisseur:fournisseur_id(id, nom)",
         { count: "exact" }
       )
       .eq("mama_id", mama_id);
@@ -226,7 +226,7 @@ export function useProducts() {
       const { data, error } = await supabase
         .from("produits")
         .select(
-          "*, famille:familles(nom), sous_famille:sous_familles(nom), fournisseur:fournisseur_id(id, nom), unite:unite_id(nom)"
+          "*, famille:familles:fk_produits_famille(nom), sous_famille:sous_familles:fk_produits_sous_famille(nom), fournisseur:fournisseur_id(id, nom), unite:unite_id(nom)"
         )
         .eq("id", id)
         .eq("mama_id", mama_id)

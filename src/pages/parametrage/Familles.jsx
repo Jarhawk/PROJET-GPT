@@ -106,7 +106,7 @@ export default function Familles() {
   if (!canEdit) return <Unauthorized />;
 
   return (
-    <div className="p-6 mx-auto w-full">
+    <div className="p-6 mx-auto w-full max-w-full">
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold mb-4">Familles de produits</h1>
       <TableHeader className="gap-2">
@@ -119,7 +119,7 @@ export default function Familles() {
         <Button onClick={() => setEdit({})}>+ Nouvelle famille</Button>
       </TableHeader>
       <ListingContainer className="w-full overflow-x-auto">
-        <table className="text-sm w-full">
+        <table className="text-sm w-full max-w-full">
           <thead>
             <tr>
               <th className="px-2 py-1">Nom</th>

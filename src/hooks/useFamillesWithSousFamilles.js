@@ -61,7 +61,8 @@ export function useFamillesWithSousFamilles() {
     const { error } = await supabase
       .from('familles')
       .delete()
-      .match({ id, mama_id });
+      .eq('id', id)
+      .eq('mama_id', mama_id);
     if (!error) await fetchAll();
     return { error };
   }
@@ -90,7 +91,8 @@ export function useFamillesWithSousFamilles() {
     const { error } = await supabase
       .from('sous_familles')
       .delete()
-      .match({ id, mama_id });
+      .eq('id', id)
+      .eq('mama_id', mama_id);
     if (!error) await fetchAll();
     return { error };
   }

@@ -2,7 +2,12 @@
 import { motion as Motion, AnimatePresence } from "framer-motion";
 
 // Modal glassy avec overlay et anims
-export default function ModalGlass({ open, onClose, children }) {
+export default function ModalGlass({
+  open,
+  onClose,
+  children,
+  closeOnOverlayClick = false,
+}) {
   return (
     <AnimatePresence>
       {open && (
@@ -13,7 +18,7 @@ export default function ModalGlass({ open, onClose, children }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
+            onClick={closeOnOverlayClick ? onClose : undefined}
           />
           {/* Modale animée */}
           <Motion.div

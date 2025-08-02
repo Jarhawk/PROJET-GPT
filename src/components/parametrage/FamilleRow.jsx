@@ -46,7 +46,7 @@ export default function FamilleRow({
             <Button
               size="sm"
               className="bg-red-500 hover:bg-red-600 text-white"
-              onClick={() => onDelete(famille)}
+              onClick={() => onDelete(famille.id)}
               disabled={hasActiveSous}
             >
               🗑 Supprimer

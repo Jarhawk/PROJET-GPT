@@ -2,8 +2,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useProducts } from "@/hooks/useProducts";
 import { useFamilles } from "@/hooks/useFamilles";
-import { useUnites } from "@/hooks/useUnites";
-import { useFournisseurs } from "@/hooks/useFournisseurs";
 import ProduitFormModal from "@/components/produits/ProduitFormModal";
 import ProduitDetail from "@/components/produits/ProduitDetail";
 import { Button } from "@/components/ui/button";
@@ -16,6 +14,10 @@ import { Plus as PlusIcon } from "lucide-react";
 import { Toaster, toast } from "react-hot-toast";
 import useAuth from "@/hooks/useAuth";
 import ProduitRow from "@/components/produits/ProduitRow";
+import {
+  parseProduitsFile,
+  insertProduits,
+} from "@/utils/importExcelProduits";
 
 const PAGE_SIZE = 50;
 
@@ -28,17 +30,11 @@ export default function Produits() {
     total,
     fetchProducts,
     exportProductsToExcel,
-    importProductsFromExcel,
-    addProduct,
     duplicateProduct,
     toggleProductActive,
   } = useProducts();
   const { familles: famillesHook, fetchFamilles } = useFamilles();
-  const { unites: unitesHook, fetchUnites } = useUnites();
-  const { fournisseurs, fetchFournisseurs } = useFournisseurs();
   const familles = famillesHook;
-  const unites = unitesHook;
-  const fournisseursList = fournisseurs;
 
   const [showForm, setShowForm] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -50,8 +46,10 @@ export default function Produits() {
   const [sortField, setSortField] = useState("famille");
   const [sortOrder, setSortOrder] = useState("asc");
   const fileRef = useRef(null);
-  const { hasAccess } = useAuth();
+  const { hasAccess, mama_id } = useAuth();
   const canEdit = hasAccess("produits", "peut_modifier");
+  const [importRows, setImportRows] = useState([]);
+  const [importing, setImporting] = useState(false);
 
   const refreshList = useCallback(() => {
     fetchProducts({
@@ -76,45 +74,35 @@ export default function Produits() {
   // Load dropdown data once on mount
   useEffect(() => {
     fetchFamilles();
-    fetchUnites();
-    fetchFournisseurs();
-  }, [fetchFamilles, fetchUnites, fetchFournisseurs]);
+  }, [fetchFamilles]);
 
   async function handleImport(e) {
     const file = e.target.files[0];
     if (!file) return;
-    const rows = await importProductsFromExcel(file);
-    const famMap = Object.fromEntries(
-      familles.map((f) => [f.nom.toLowerCase().trim(), f.id]),
-    );
-    const uniteMap = Object.fromEntries(
-      unites.map((u) => [u.nom.toLowerCase().trim(), u.id]),
-    );
-    const fournisseurMap = Object.fromEntries(
-      fournisseursList.map((f) => [f.nom.toLowerCase().trim(), f.id])
-    );
-    for (const row of rows) {
-      await addProduct(
-        {
-          nom: row.nom,
-          famille_id: famMap[row.famille?.toLowerCase().trim()] || null,
-          unite_id: uniteMap[row.unite?.toLowerCase().trim()] || null,
-          fournisseur_id:
-            fournisseurMap[row.fournisseur?.toLowerCase().trim()] || null,
-          stock_reel: Number(row.stock_reel) || 0,
-          stock_min: Number(row.stock_min) || 0,
-          actif: row.actif !== false,
-          code: row.code || "",
-          allergenes: row.allergenes || "",
-        },
-        { refresh: false },
-      );
-    }
-    // refresh list with current filters after batch import
-    refreshList();
-    toast.success(`${rows.length} produits importés`);
+    const rows = await parseProduitsFile(file, mama_id);
+    setImportRows(rows);
     if (fileRef.current) fileRef.current.value = "";
   }
+
+  async function handleConfirmImport() {
+    const validRows = importRows.filter((r) => r.errors.length === 0);
+    if (validRows.length === 0) return;
+    setImporting(true);
+    const results = await insertProduits(validRows);
+    const failed = results.filter((r) => r.insertError);
+    const successCount = results.length - failed.length;
+    if (successCount)
+      toast.success(`${successCount} produits importés`);
+    if (failed.length)
+      toast.error(`${failed.length} erreurs d'insertion`);
+    const invalid = importRows.filter((r) => r.errors.length > 0);
+    setImportRows([...invalid, ...failed]);
+    setImporting(false);
+    refreshList();
+  }
+
+  const validCount = importRows.filter((r) => r.errors.length === 0).length;
+  const invalidCount = importRows.length - validCount;
 
   function toggleSort(field) {
     if (sortField === field) {
@@ -210,7 +198,7 @@ export default function Produits() {
             </Button>
             <input
               type="file"
-              accept=".xlsx"
+              accept=".xlsx,.csv"
               ref={fileRef}
               onChange={handleImport}
               data-testid="import-input"
@@ -219,6 +207,63 @@ export default function Produits() {
           </div>
         </TableHeader>
       </div>
+      {importRows.length > 0 && (
+        <div className="w-full md:w-4/5 mx-auto space-y-2">
+          <h2 className="text-lg font-semibold">Prévisualisation import</h2>
+          <div className="overflow-x-auto">
+            <table className="min-w-full table-auto text-sm">
+              <thead>
+                <tr>
+                  <th>Nom</th>
+                  <th>Famille</th>
+                  <th>Unité</th>
+                  <th>Actif</th>
+                  <th>PMP</th>
+                  <th>Stock théorique</th>
+                  <th>Stock min</th>
+                  <th>Dernier prix</th>
+                  <th>Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                {importRows.map((row) => (
+                  <tr key={row.id}>
+                    <td>{row.nom}</td>
+                    <td>{row.famille}</td>
+                    <td>{row.unite}</td>
+                    <td>{row.actif ? "Oui" : "Non"}</td>
+                    <td className="text-right">{row.pmp}</td>
+                    <td className="text-right">{row.stock_theorique}</td>
+                    <td className="text-right">{row.stock_min}</td>
+                    <td className="text-right">{row.dernier_prix}</td>
+                    <td>
+                      {row.errors.length
+                        ? `❌ ${row.errors.join(", ")}`
+                        : row.insertError
+                          ? `❌ ${row.insertError}`
+                          : "✅ OK"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="flex justify-between items-center">
+            <div>
+              {validCount} lignes valides
+              <br />
+              {invalidCount} lignes invalides
+            </div>
+            <Button
+              className="min-w-[200px]"
+              onClick={handleConfirmImport}
+              disabled={importing || validCount === 0}
+            >
+              Confirmer l’importation
+            </Button>
+          </div>
+        </div>
+      )}
       <ListingContainer>
         <table className="min-w-full table-auto text-sm">
             <thead>

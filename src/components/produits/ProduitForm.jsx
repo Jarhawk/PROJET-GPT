@@ -5,6 +5,7 @@ import { useProducts } from "@/hooks/useProducts";
 import { useFamilles } from "@/hooks/useFamilles";
 import { useUnites } from "@/hooks/useUnites";
 import { useFournisseurs } from "@/hooks/useFournisseurs";
+import { uploadFile, replaceFile } from "@/hooks/useStorage";
 import { toast } from "react-hot-toast";
 import GlassCard from "@/components/ui/GlassCard";
 
@@ -24,11 +25,11 @@ export default function ProduitForm({
   const [fournisseurId, setFournisseurId] = useState(
     produit?.fournisseur_id || "",
   );
-  const [stock_reel, setStockReel] = useState(produit?.stock_reel || 0);
-  const [stock_min, setStockMin] = useState(produit?.stock_min || 0);
+  const [stockMin, setStockMin] = useState(produit?.stock_min || 0);
   const [actif, setActif] = useState(produit?.actif ?? true);
-  const [code, setCode] = useState(produit?.code || "");
   const [allergenes, setAllergenes] = useState(produit?.allergenes || "");
+  const [photoFile, setPhotoFile] = useState(null);
+  const [photoUrl, setPhotoUrl] = useState(produit?.url_photo || "");
   const [errors, setErrors] = useState({});
 
   const { addProduct, updateProduct, loading } = useProducts();
@@ -54,11 +55,10 @@ export default function ProduitForm({
       setFamilleId(produit.famille_id || "");
       setUniteId(produit.unite_id || "");
       setFournisseurId(produit.fournisseur_id || "");
-      setStockReel(produit.stock_reel || 0);
       setStockMin(produit.stock_min || 0);
       setActif(produit.actif ?? true);
-      setCode(produit.code || "");
       setAllergenes(produit.allergenes || "");
+      setPhotoUrl(produit.url_photo || "");
     }
   }, [editing, produit]);
 
@@ -77,16 +77,27 @@ export default function ProduitForm({
     const familleIdVal = familleId;
     const uniteIdVal = uniteId;
 
+    let finalPhotoUrl = photoUrl;
+    if (photoFile) {
+      try {
+        finalPhotoUrl = editing
+          ? await replaceFile("produits", photoFile, produit?.url_photo)
+          : await uploadFile("produits", photoFile);
+      } catch (err) {
+        console.error("Erreur upload photo:", err);
+        toast.error("Erreur lors de l'upload de la photo");
+      }
+    }
+
     const newProd = {
       nom,
       famille_id: familleIdVal || null,
       unite_id: uniteIdVal || null,
       fournisseur_id: fournisseurId || null,
-      stock_reel: Number(stock_reel),
-      stock_min: Number(stock_min),
+      stock_min: Number(stockMin),
       actif,
-      code,
       allergenes,
+      url_photo: finalPhotoUrl || null,
     };
     let toastId;
     try {
@@ -177,19 +188,7 @@ export default function ProduitForm({
           {errors.unite && <p className="text-red-500 text-sm">{errors.unite}</p>}
         </div>
 
-        {/* Groupe 2 : code interne, allergènes, photo */}
-        <div>
-          <label htmlFor="prod-code" className="label text-white">
-            Code interne
-          </label>
-          <input
-            id="prod-code"
-            className="input"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            placeholder="Code interne"
-          />
-        </div>
+        {/* Groupe 2 : allergènes, photo */}
         <div>
           <label htmlFor="prod-allerg" className="label text-white">
             Allergènes
@@ -210,37 +209,24 @@ export default function ProduitForm({
             id="prod-photo"
             type="file"
             accept="image/*"
-            disabled
-            className="input text-white/70"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                setPhotoFile(file);
+                setPhotoUrl(URL.createObjectURL(file));
+              }
+            }}
+            className="input text-white"
           />
-        </div>
-
-        {/* Groupe 3 : stock réel, stock minimum, actif */}
-        {editing && (
-          <div>
-            <label className="label text-white">PMP (€)</label>
-            <input
-              type="number"
-              className="input"
-              value={produit?.pmp || 0}
-              readOnly
-              disabled
+          {photoUrl && (
+            <img
+              src={photoUrl}
+              alt="Aperçu"
+              className="h-24 mt-2 object-cover"
             />
-          </div>
-        )}
-        <div>
-          <label htmlFor="prod-stock" className="label text-white">
-            Stock réel
-          </label>
-          <input
-            id="prod-stock"
-            type="number"
-            className="input"
-            value={stock_reel}
-            onChange={(e) => setStockReel(e.target.value)}
-            min={0}
-          />
+          )}
         </div>
+        {/* Groupe 3 : stock minimum, actif */}
         <div>
           <label htmlFor="prod-min" className="label text-white">
             Stock minimum
@@ -249,7 +235,7 @@ export default function ProduitForm({
             id="prod-min"
             type="number"
             className="input"
-            value={stock_min}
+            value={stockMin}
             onChange={(e) => setStockMin(e.target.value)}
             min={0}
           />

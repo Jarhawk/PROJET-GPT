@@ -9,8 +9,7 @@ vi.mock('@/hooks/useProducts', () => ({
 }));
 vi.mock('@/hooks/useStorage', () => ({
   uploadFile: vi.fn(),
-  deleteFile: vi.fn(),
-  pathFromUrl: () => '',
+  replaceFile: vi.fn(),
 }));
 vi.mock('@/hooks/useFamilles', () => ({
   useFamilles: () => ({ familles: [], fetchFamilles: vi.fn(), addFamille: vi.fn() })
@@ -27,35 +26,27 @@ vi.mock('@/hooks/useFournisseurs', () => ({
 
 import ProduitForm from '@/components/produits/ProduitForm.jsx';
 
-// ensure new fields render
-
-test('renders additional product inputs', () => {
+test('renders expected product inputs', () => {
   mockHook = () => ({ addProduct: vi.fn(), updateProduct: vi.fn(), loading: false });
-  render(
-    <ProduitForm onSuccess={vi.fn()} onClose={vi.fn()} />
-  );
-  expect(screen.getByLabelText(/Code interne/)).toBeInTheDocument();
+  render(<ProduitForm onSuccess={vi.fn()} onClose={vi.fn()} />);
+  expect(screen.getByLabelText(/Nom/)).toBeInTheDocument();
+  expect(screen.getByLabelText(/Famille/)).toBeInTheDocument();
+  expect(screen.getByLabelText(/Unité/)).toBeInTheDocument();
   expect(screen.getByLabelText(/Allergènes/)).toBeInTheDocument();
+  expect(screen.getByLabelText(/Photo/)).toBeInTheDocument();
   expect(screen.getByLabelText(/Stock minimum/)).toBeInTheDocument();
+  expect(screen.getByLabelText(/Produit actif/)).toBeInTheDocument();
+  expect(screen.getByLabelText(/Fournisseur principal/)).toBeInTheDocument();
+  expect(screen.queryByLabelText(/Code interne/)).toBeNull();
+  expect(screen.queryByLabelText(/Stock réel/)).toBeNull();
 });
 
-test('PMP input read-only or hidden', () => {
+test('PMP field is not rendered', () => {
   mockHook = () => ({ addProduct: vi.fn(), updateProduct: vi.fn(), loading: false });
-  // create mode: no PMP field
-  const { rerender } = render(
-    <ProduitForm onSuccess={vi.fn()} onClose={vi.fn()} />
+  const { rerender } = render(<ProduitForm onSuccess={vi.fn()} onClose={vi.fn()} />);
+  expect(screen.queryByLabelText(/PMP/)).toBeNull();
+  rerender(
+    <ProduitForm produit={{ id: '1', nom: 'p' }} onSuccess={vi.fn()} onClose={vi.fn()} />
   );
   expect(screen.queryByLabelText(/PMP/)).toBeNull();
-
-  // edit mode: PMP displayed but disabled
-  rerender(
-    <ProduitForm
-      produit={{ id: '1', nom: 'p', famille: 'f', unite: 'u', pmp: 5 }}
-      onSuccess={vi.fn()}
-      onClose={vi.fn()}
-    />
-  );
-  const input = screen.getByDisplayValue('5');
-  expect(input).toBeDisabled();
-  expect(input).toHaveValue(5);
 });

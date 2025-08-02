@@ -5,6 +5,20 @@ ALTER TABLE tableaux_de_bord ADD COLUMN IF NOT EXISTS liste_gadgets_json jsonb D
 -- Ajout colonne justificatif pour stocker l'URL de la pièce jointe de facture
 ALTER TABLE factures ADD COLUMN IF NOT EXISTS justificatif text;
 
+-- Ajout champ pour hiérarchie Famille / Sous-famille
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'familles' AND column_name = 'parent_id'
+  ) THEN
+    ALTER TABLE familles RENAME COLUMN parent_id TO famille_parent_id;
+  END IF;
+END $$;
+
+ALTER TABLE familles
+  ADD COLUMN IF NOT EXISTS famille_parent_id uuid REFERENCES familles(id);
+
 -- Synchronisation des modules d'accès
 INSERT INTO permissions(module, droit)
 VALUES

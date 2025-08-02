@@ -161,7 +161,7 @@ ORDER BY
 | familles                                 | mama_id                   | uuid                     | NO          | null                 |
 | familles                                 | actif                     | boolean                  | YES         | true                 |
 | familles                                 | created_at                | timestamp with time zone | YES         | now()                |
-| familles                                 | parent_id                 | uuid                     | YES         | null                 |
+| familles                                 | famille_parent_id                 | uuid                     | YES         | null                 |
 | familles                                 | populaire                 | boolean                  | YES         | false                |
 | familles                                 | updated_at                | timestamp with time zone | YES         | now()                |
 | feedback                                 | id                        | uuid                     | NO          | gen_random_uuid()    |
@@ -740,7 +740,7 @@ ORDER BY
 | v_familles_orphelines                    | mama_id                   | uuid                     | YES         | null                 |
 | v_familles_orphelines                    | actif                     | boolean                  | YES         | null                 |
 | v_familles_orphelines                    | created_at                | timestamp with time zone | YES         | null                 |
-| v_familles_orphelines                    | parent_id                 | uuid                     | YES         | null                 |
+| v_familles_orphelines                    | famille_parent_id                 | uuid                     | YES         | null                 |
 | v_familles_orphelines                    | populaire                 | boolean                  | YES         | null                 |
 | v_familles_orphelines                    | updated_at                | timestamp with time zone | YES         | null                 |
 | v_fournisseurs_inactifs                  | mama_id                   | uuid                     | YES         | null                 |
@@ -967,7 +967,7 @@ ORDER BY tc.table_name, kcu.column_name;
 | factures                  | fournisseur_id      | fournisseurs       | id                  |
 | factures                  | mama_id             | mamas              | id                  |
 | familles                  | mama_id             | mamas              | id                  |
-| familles                  | parent_id           | familles           | id                  |
+| familles                  | famille_parent_id           | familles           | id                  |
 | feedback                  | mama_id             | mamas              | id                  |
 | feedback                  | user_id             | utilisateurs       | id                  |
 | fiche_cout_history        | changed_by          | users              | id                  |
@@ -1452,7 +1452,7 @@ ORDER BY table_name;
     f.mama_id,
     f.actif,
     f.created_at,
-    f.parent_id,
+    f.famille_parent_id,
     f.populaire,
     f.updated_at
    FROM (familles f
@@ -2230,7 +2230,7 @@ ORDER BY tc.table_name, tc.constraint_type;
 | familles                  | CHECK           | null                | null                | null                      |
 | familles                  | CHECK           | null                | null                | null                      |
 | familles                  | CHECK           | null                | null                | null                      |
-| familles                  | FOREIGN KEY     | parent_id           | id                  | familles                  |
+| familles                  | FOREIGN KEY     | famille_parent_id           | id                  | familles                  |
 | familles                  | FOREIGN KEY     | mama_id             | id                  | mamas                     |
 | familles                  | PRIMARY KEY     | id                  | id                  | familles                  |
 | feedback                  | CHECK           | null                | null                | null                      |

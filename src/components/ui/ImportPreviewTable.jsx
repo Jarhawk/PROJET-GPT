@@ -1,7 +1,8 @@
 import { validateProduitRow } from "@/utils/importExcelProduits";
 
 export default function ImportPreviewTable({ rows, onUpdate, maps, reference }) {
-  const { familles = [], unites = [], zones = [] } = reference || {};
+  const { familles = [], sousFamilles = [], unites = [], zones = [] } =
+    reference || {};
 
   function handleChange(index, field, value) {
     const updated = [...rows];
@@ -47,7 +48,7 @@ export default function ImportPreviewTable({ rows, onUpdate, maps, reference }) 
             <tr key={row.id} className={row.status === "error" ? "bg-red-50" : "bg-green-50"}>
               {renderCell(row, idx, "nom")}
               {renderCell(row, idx, "famille_nom", "familles-list")}
-              {renderCell(row, idx, "sous_famille_nom")}
+              {renderCell(row, idx, "sous_famille_nom", "sousfamilles-list")}
               {renderCell(row, idx, "unite_nom", "unites-list")}
               {renderCell(row, idx, "zone_stock_nom", "zones-list")}
               {renderCell(row, idx, "stock_min")}
@@ -59,6 +60,11 @@ export default function ImportPreviewTable({ rows, onUpdate, maps, reference }) 
       <datalist id="familles-list">
         {familles.map((f) => (
           <option key={f.id} value={f.nom} />
+        ))}
+      </datalist>
+      <datalist id="sousfamilles-list">
+        {sousFamilles.map((sf) => (
+          <option key={sf.id} value={sf.nom} />
         ))}
       </datalist>
       <datalist id="unites-list">

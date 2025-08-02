@@ -2,7 +2,7 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { supabase } from "@/lib/supabase";
 
-const HEADERS = [
+const EXPORT_HEADERS = [
   "nom",
   "famille",
   "sous_famille",
@@ -16,6 +16,17 @@ const HEADERS = [
   "stock_min",
   "dernier_prix",
   "fournisseur_id",
+];
+
+// Template used for importing new products
+const TEMPLATE_HEADERS = [
+  "nom",
+  "famille",
+  "sous_famille",
+  "unite",
+  "zone_stock",
+  "stock_min",
+  "actif",
 ];
 
 export async function exportExcelProduits(mama_id) {
@@ -45,16 +56,16 @@ export async function exportExcelProduits(mama_id) {
   }));
 
   const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.json_to_sheet(rows, { header: HEADERS });
+  const ws = XLSX.utils.json_to_sheet(rows, { header: EXPORT_HEADERS });
   XLSX.utils.book_append_sheet(wb, ws, "Produits");
   const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
   saveAs(new Blob([buf]), "produits_export_mamastock.xlsx");
 }
 
 export function downloadProduitsTemplate() {
-  const example = Object.fromEntries(HEADERS.map((h) => [h, ""]));
+  const example = Object.fromEntries(TEMPLATE_HEADERS.map((h) => [h, ""]));
   const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.json_to_sheet([example], { header: HEADERS });
+  const ws = XLSX.utils.json_to_sheet([example], { header: TEMPLATE_HEADERS });
   XLSX.utils.book_append_sheet(wb, ws, "Template");
   const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
   saveAs(new Blob([buf]), "produits_template_mamastock.xlsx");

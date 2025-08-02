@@ -15,16 +15,30 @@ export default function ModalImportProduits({ open, onClose, onSuccess }) {
   const fileRef = useRef(null);
   const [rows, setRows] = useState([]);
   const [maps, setMaps] = useState(null);
-  const [reference, setReference] = useState({ familles: [], unites: [], zones: [] });
+  const [reference, setReference] = useState({
+    familles: [],
+    sousFamilles: [],
+    unites: [],
+    zones: [],
+  });
   const [importing, setImporting] = useState(false);
 
   async function handleFileChange(e) {
     const file = e.target.files[0];
     if (!file) return;
     const parsed = await parseProduitsFile(file, mama_id);
-    setRows(parsed.rows);
+    const limitedRows = parsed.rows.slice(0, 200);
+    if (parsed.rows.length > 200) {
+      toast("Seules les 200 premières lignes sont affichées");
+    }
+    setRows(limitedRows);
     setMaps(parsed.maps);
-    setReference({ familles: parsed.familles, unites: parsed.unites, zones: parsed.zones });
+    setReference({
+      familles: parsed.familles,
+      sousFamilles: parsed.sousFamilles,
+      unites: parsed.unites,
+      zones: parsed.zones,
+    });
     if (fileRef.current) fileRef.current.value = "";
   }
 
@@ -66,7 +80,7 @@ export default function ModalImportProduits({ open, onClose, onSuccess }) {
                 {validCount} valides / {invalidCount} à corriger
               </span>
             </div>
-            <div className="max-h-[500px] overflow-y-auto border rounded">
+            <div className="max-h-[60vh] overflow-y-auto border rounded">
               <ImportPreviewTable
                 rows={rows}
                 onUpdate={handleUpdate}

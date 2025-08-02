@@ -7,18 +7,11 @@ let mockHook;
 vi.mock('@/hooks/useProducts', () => ({
   useProducts: () => mockHook(),
 }));
-vi.mock('@/hooks/useStorage', () => ({
-  uploadFile: vi.fn(),
-  replaceFile: vi.fn(),
-}));
 vi.mock('@/hooks/useFamilles', () => ({
   useFamilles: () => ({ familles: [], fetchFamilles: vi.fn(), addFamille: vi.fn() })
 }));
 vi.mock('@/hooks/useUnites', () => ({
   useUnites: () => ({ unites: [], fetchUnites: vi.fn(), addUnite: vi.fn() })
-}));
-vi.mock('@/hooks/useZones', () => ({
-  useZones: () => ({ zones: [], fetchZones: vi.fn() })
 }));
 vi.mock('@/hooks/useFournisseurs', () => ({
   useFournisseurs: () => ({ fournisseurs: [], fetchFournisseurs: vi.fn() })
@@ -33,7 +26,7 @@ test('renders expected product inputs', () => {
   expect(screen.getByLabelText(/Famille/)).toBeInTheDocument();
   expect(screen.getByLabelText(/Unité/)).toBeInTheDocument();
   expect(screen.getByLabelText(/Allergènes/)).toBeInTheDocument();
-  expect(screen.getByLabelText(/Photo/)).toBeInTheDocument();
+  expect(screen.queryByLabelText(/Photo/)).toBeNull();
   expect(screen.getByLabelText(/Stock minimum/)).toBeInTheDocument();
   expect(screen.getByLabelText(/Produit actif/)).toBeInTheDocument();
   expect(screen.getByLabelText(/Fournisseur principal/)).toBeInTheDocument();

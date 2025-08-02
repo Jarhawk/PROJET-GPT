@@ -38,6 +38,7 @@ export default function ProduitForm({
     produit?.sous_famille_id || "",
   );
   const [uniteId, setUniteId] = useState(produit?.unite_id || "");
+  const [uniteName, setUniteName] = useState(produit?.unite?.nom || "");
   const [fournisseurId, setFournisseurId] = useState(
     produit?.fournisseur_id || "",
   );
@@ -81,6 +82,7 @@ export default function ProduitForm({
       setFamilleId(produit.famille_id || "");
       setSousFamilleId(produit.sous_famille_id || "");
       setUniteId(produit.unite_id || "");
+      setUniteName(produit.unite?.nom || "");
       setFournisseurId(produit.fournisseur_id || "");
       setZoneStockId(produit.zone_stock_id || "");
       setStockMin(produit.stock_min || 0);
@@ -229,20 +231,24 @@ export default function ProduitForm({
           <label htmlFor="prod-unite" className="label text-white">
             Unité *
           </label>
-          <select
+          <input
             id="prod-unite"
+            list="unites-list"
             className="input bg-white text-gray-900"
-            value={uniteId}
-            onChange={(e) => setUniteId(e.target.value)}
+            value={uniteName}
+            onChange={(e) => {
+              const val = e.target.value;
+              setUniteName(val);
+              const found = uniteOptions.find((u) => u.nom === val);
+              setUniteId(found ? found.id : "");
+            }}
             required
-          >
-            <option value="">-- Choisir --</option>
+          />
+          <datalist id="unites-list">
             {uniteOptions.map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.nom}
-              </option>
+              <option key={u.id} value={u.nom} />
             ))}
-          </select>
+          </datalist>
           {errors.unite && <p className="text-red-500 text-sm">{errors.unite}</p>}
         </div>
 

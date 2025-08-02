@@ -16,7 +16,7 @@ export default function ProduitRow({
   return (
     <tr className={produit.actif ? "" : "opacity-50 bg-muted"}>
       <td
-        className="px-2 min-w-[240px] truncate"
+        className="px-2 min-w-[30ch] truncate"
         title={produit.nom}
       >
         {produit.nom}
@@ -33,7 +33,7 @@ export default function ProduitRow({
       >
         {produit.zone_stock?.nom || "-"}
       </td>
-      <td className="px-2 text-center">{produit.unite}</td>
+      <td className="px-2 text-center">{produit.unite?.nom ?? produit.unite ?? ""}</td>
       <td className="px-2 text-right">
         {produit.pmp != null ? Number(produit.pmp).toFixed(2) : "-"}
       </td>

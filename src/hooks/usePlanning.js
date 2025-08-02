@@ -28,7 +28,7 @@ export function usePlanning() {
     if (!id || !mama_id) return null;
     const { data, error } = await supabase
       .from("planning_previsionnel")
-      .select("*, lignes:planning_lignes(id, produit_id, quantite, observation, produit:produits(nom))")
+      .select("*, lignes:planning_lignes!planning_id(id, planning_id, produit_id, quantite, observation, produit:produit_id(nom))")
       .eq("id", id)
       .eq("mama_id", mama_id)
       .single();

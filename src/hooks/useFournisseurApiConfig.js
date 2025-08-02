@@ -66,7 +66,7 @@ export function useFournisseurApiConfig() {
     setLoading(true);
     let query = supabase
       .from('fournisseurs_api_config')
-      .select('*, fournisseur:fournisseurs(id, nom)', { count: 'exact' })
+      .select('*, fournisseur:fournisseur_id(id, nom)', { count: 'exact' })
       .eq('mama_id', mama_id)
       .order('fournisseur_id');
     if (fournisseur_id) query = query.eq('fournisseur_id', fournisseur_id);

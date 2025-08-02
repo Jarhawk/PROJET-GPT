@@ -36,19 +36,19 @@ export default function useExport() {
       } else if (type === 'inventaire') {
         const res = await supabase
           .from('inventaires')
-          .select('*, lignes:inventaire_lignes(*)')
+          .select('*, lignes:inventaire_lignes!inventaire_id(*)')
           .eq('mama_id', mama_id);
         data = res.data || [];
       } else if (type === 'produits') {
         const res = await supabase
           .from('produits')
-          .select('*, fournisseur_produits(*, fournisseur:fournisseurs(nom))')
+          .select('*, fournisseur_produits:produit_id(*, fournisseur:fournisseur_id(nom))')
           .eq('mama_id', mama_id);
         data = res.data || [];
       } else if (type === 'factures') {
         let query = supabase
           .from('factures')
-          .select('*, lignes:facture_lignes(*)')
+          .select('*, lignes:facture_lignes!facture_id(*)')
           .eq('mama_id', mama_id);
         if (options.start) query = query.gte('date_facture', options.start);
         if (options.end) query = query.lte('date_facture', options.end);

@@ -14,7 +14,7 @@ export function useFacturesAutocomplete() {
     setError(null);
     let q = supabase
       .from("factures")
-      .select("id, numero, date_facture, fournisseur: fournisseurs(nom)")
+      .select("id, numero, date_facture, fournisseur_id, fournisseur:fournisseur_id(nom)")
       .eq("mama_id", mama_id);
     if (query) {
       q = q.ilike("numero", `%${query}%`);

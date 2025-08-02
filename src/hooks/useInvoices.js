@@ -21,7 +21,7 @@ export function useInvoices() {
       .from("factures")
       .select(`
         *,
-        fournisseur: fournisseurs(id, nom)
+        fournisseur:fournisseur_id(id, nom)
       `)
       .eq("mama_id", mama_id)
       .order("date_facture", { ascending: false });
@@ -64,7 +64,7 @@ export function useInvoices() {
     setError(null);
     const { data, error } = await supabase
       .from("factures")
-      .select("*, fournisseur:fournisseurs(id, nom)")
+      .select("*, fournisseur:fournisseur_id(id, nom)")
       .eq("id", id)
       .eq("mama_id", mama_id)
       .single();

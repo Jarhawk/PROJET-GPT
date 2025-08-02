@@ -46,7 +46,7 @@ export function useFactures() {
     let query = supabase
       .from("factures")
       .select(
-        "*, fournisseur:fournisseurs(id, nom), lignes:facture_lignes(id, produit:produits(nom))",
+        "*, fournisseur:fournisseur_id(id, nom), lignes:facture_lignes!facture_id(id, produit_id, produit:produit_id(nom))",
         { count: "exact" }
       )
       .eq("mama_id", mama_id)
@@ -85,7 +85,7 @@ export function useFactures() {
     setError(null);
     const { data, error } = await supabase
       .from("factures")
-      .select("*, fournisseur:fournisseurs(id, nom)")
+      .select("*, fournisseur:fournisseur_id(id, nom)")
       .eq("id", id)
       .eq("mama_id", mama_id)
       .single();

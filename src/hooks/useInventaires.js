@@ -16,7 +16,7 @@ export function useInventaires() {
     let query = supabase
       .from("inventaires")
       .select(
-        "*, lignes:inventaire_lignes(*, produit:produits(id, nom, unite:unites(nom), stock_theorique, pmp))"
+        "*, lignes:inventaire_lignes!inventaire_id(*, produit:produit_id(id, nom, unite_id, unite:unite_id(nom), stock_theorique, pmp))"
       )
       .eq("mama_id", mama_id);
     if (!includeArchives) query = query.eq("actif", true);
@@ -103,7 +103,7 @@ export function useInventaires() {
     const { data, error } = await supabase
       .from("inventaires")
       .select(
-        "*, lignes:inventaire_lignes(*, produit:produits(id, nom, unite:unites(nom), stock_theorique, pmp))"
+        "*, lignes:inventaire_lignes!inventaire_id(*, produit:produit_id(id, nom, unite_id, unite:unite_id(nom), stock_theorique, pmp))"
       )
       .eq("id", id)
       .eq("mama_id", mama_id)

@@ -22,7 +22,7 @@ export function useComparatif(productId) {
     setError(null);
     const { data, error } = await supabase
       .from("fournisseur_produits")
-      .select("prix_achat, date_livraison, fournisseur_id, fournisseur: fournisseurs(nom)")
+      .select("prix_achat, date_livraison, fournisseur_id, fournisseur:fournisseur_id(nom)")
       .eq("produit_id", id)
       .eq("mama_id", mama_id)
       .order("date_livraison", { ascending: false });

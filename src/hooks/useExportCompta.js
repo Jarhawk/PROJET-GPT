@@ -18,7 +18,7 @@ export default function useExportCompta() {
     const { data, error } = await supabase
       .from('facture_lignes')
       .select(
-        'quantite, prix, tva, factures(date_facture, fournisseur:fournisseurs(nom))'
+        'quantite, prix, tva, facture_id, factures:facture_id(date_facture, fournisseur:fournisseur_id(nom))'
       )
       .eq('mama_id', mama_id)
       .gte('factures.date_facture', start)

@@ -22,7 +22,10 @@ export function useFiches() {
     const sortField = ["nom", "cout_par_portion"].includes(sortBy) ? sortBy : "nom";
     let query = supabase
       .from("fiches_techniques")
-      .select("*, famille:famille_id(id, nom), lignes:fiche_lignes!fiche_id(id)", { count: "exact" })
+      .select(
+        "*, famille:familles!fiches_techniques_famille_id_fkey(id, nom), lignes:fiche_lignes!fiche_id(id)",
+        { count: "exact" }
+      )
       .eq("mama_id", mama_id)
       .order(sortField, { ascending: asc })
       .range((page - 1) * limit, page * limit - 1);
@@ -48,7 +51,7 @@ export function useFiches() {
     const { data, error } = await supabase
       .from("fiches_techniques")
       .select(
-        "*, famille:famille_id(id, nom), lignes:fiche_lignes!fiche_id(*, produit:produit_id(id, nom, unite_id, unite:unite_id(nom), pmp), sous_fiche:sous_fiche_id(id, nom, cout_par_portion))"
+        "*, famille:familles!fiches_techniques_famille_id_fkey(id, nom), lignes:fiche_lignes!fiche_id(*, produit:produit_id(id, nom, unite_id, unite:unite_id(nom), pmp), sous_fiche:sous_fiche_id(id, nom, cout_par_portion))"
       )
       .eq("id", id)
       .eq("mama_id", mama_id)

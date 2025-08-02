@@ -17,7 +17,7 @@ export function useProducts() {
 
   const fetchProducts = useCallback(async ({
     search = "",
-    famille = "",
+    sousFamille = "",
     actif = null,
     page = 1,
     limit = 100,
@@ -30,7 +30,7 @@ export function useProducts() {
     let query = supabase
       .from("produits")
       .select(
-        "*, famille:familles(nom), unite:unites(nom), fournisseur:fournisseurs!fournisseur_id(id, nom)",
+        "*, sous_famille:familles!produits_sous_famille_id_fkey(id, nom, famille_parent_id, parent:familles!familles_famille_parent_id_fkey(id, nom)), unite:unites(nom), fournisseur:fournisseurs!fournisseur_id(id, nom)",
         { count: "exact" }
       )
       .eq("mama_id", mama_id);
@@ -40,12 +40,15 @@ export function useProducts() {
         `nom.ilike.%${search}%,fournisseur.nom.ilike.%${search}%`
       );
     }
-    if (famille) query = query.eq("famille_id", famille);
+    if (sousFamille) query = query.eq("sous_famille_id", sousFamille);
     if (typeof actif === "boolean") query = query.eq("actif", actif);
 
     if (sortBy === "famille") {
-      // order by the joined famille alias
-      query = query.order("nom", { foreignTable: "famille", ascending: order === "asc" });
+      // order by the joined sous_famille alias
+      query = query.order("nom", {
+        foreignTable: "sous_famille",
+        ascending: order === "asc",
+      });
     } else if (sortBy === "unite") {
       // order by the joined unite alias
       query = query.order("nom", { foreignTable: "unite", ascending: order === "asc" });
@@ -65,9 +68,12 @@ export function useProducts() {
     ]);
     const pmpMap = Object.fromEntries((pmpData || []).map(p => [p.produit_id, p.pmp]));
     const stockMap = Object.fromEntries((stockData || []).map(s => [s.produit_id, s.stock]));
-    const final = (Array.isArray(data) ? data : []).map(p => ({
+    const final = (Array.isArray(data) ? data : []).map((p) => ({
       ...p,
-      famille: p.famille?.nom || "",
+      famille:
+        p.sous_famille?.parent?.nom
+          ? `${p.sous_famille.parent.nom} > ${p.sous_famille.nom}`
+          : p.sous_famille?.nom || "",
       unite: p.unite?.nom || "",
       pmp: pmpMap[p.id] ?? p.pmp,
       stock_theorique: stockMap[p.id] ?? p.stock_theorique,
@@ -127,7 +133,7 @@ export function useProducts() {
     const orig = products.find(p => p.id === id);
     if (!orig) return;
     const {
-      famille_id,
+      sous_famille_id,
       unite_id,
       fournisseur_id,
       stock_reel,
@@ -138,7 +144,7 @@ export function useProducts() {
     } = orig;
     const copy = {
       nom: `${orig.nom} (copie)`,
-      famille_id,
+      sous_famille_id,
       unite_id,
       fournisseur_id,
       stock_reel,
@@ -219,7 +225,7 @@ export function useProducts() {
       const { data, error } = await supabase
         .from("produits")
         .select(
-          "*, fournisseur:fournisseurs!fournisseur_id(id, nom), famille:familles(nom), unite:unites(nom)"
+          "*, fournisseur:fournisseurs!fournisseur_id(id, nom), sous_famille:familles!produits_sous_famille_id_fkey(id, nom, parent:familles!familles_famille_parent_id_fkey(id, nom)), unite:unites(nom)"
         )
         .eq("id", id)
         .eq("mama_id", mama_id)

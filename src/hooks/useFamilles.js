@@ -16,18 +16,28 @@ export function useFamilles() {
   // 1. Charger toutes les familles (recherche, batch)
   // Charge la liste des familles avec option de recherche
   const fetchFamilles = useCallback(
-    async ({ search = "", includeInactive = false, page, limit } = {}) => {
+    async ({
+      search = "",
+      includeInactive = false,
+      page,
+      limit,
+      parentId,
+    } = {}) => {
       if (!mama_id) return [];
       setLoading(true);
       setError(null);
       let query = supabase
         .from("familles")
-        .select("id, nom")
+        .select("id, nom, actif, famille_parent_id")
         .eq("mama_id", mama_id)
+        .order("famille_parent_id", { ascending: true })
         .order("nom", { ascending: true });
       if (!includeInactive) query = query.eq("actif", true);
       if (search) query = query.ilike("nom", `%${search}%`);
-      if (limit) query = query.range((page - 1) * limit, page * limit - 1);
+      if (parentId === null) query = query.is("famille_parent_id", null);
+      else if (parentId) query = query.eq("famille_parent_id", parentId);
+      if (limit)
+        query = query.range((page - 1) * limit, page * limit - 1);
       const { data, error } = await query;
       setFamilles(Array.isArray(data) ? data : []);
       setTotal(data ? data.length : 0);
@@ -39,7 +49,7 @@ export function useFamilles() {
   );
 
   // 2. Ajouter une famille (avec vérif unicité)
-  async function addFamille(nom) {
+  async function addFamille({ nom, famille_parent_id = null, actif = true }) {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
@@ -62,8 +72,8 @@ export function useFamilles() {
     }
     const { data, error } = await supabase
       .from("familles")
-      .insert([{ nom, mama_id }])
-      .select("id, nom")
+      .insert([{ nom, famille_parent_id, actif, mama_id }])
+      .select("id, nom, famille_parent_id, actif")
       .single();
     setLoading(false);
     if (error) {

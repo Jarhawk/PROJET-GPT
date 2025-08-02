@@ -24,6 +24,7 @@ test('renders expected product inputs', () => {
   render(<ProduitForm onSuccess={vi.fn()} onClose={vi.fn()} />);
   expect(screen.getByLabelText(/Nom/)).toBeInTheDocument();
   expect(screen.getByLabelText(/Famille/)).toBeInTheDocument();
+  expect(screen.getByLabelText(/Sous-famille/)).toBeInTheDocument();
   expect(screen.getByLabelText(/Unité/)).toBeInTheDocument();
   expect(screen.getByLabelText(/Allergènes/)).toBeInTheDocument();
   expect(screen.queryByLabelText(/Photo/)).toBeNull();

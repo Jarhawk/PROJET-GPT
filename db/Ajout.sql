@@ -205,3 +205,40 @@ WHERE a.actif IS TRUE
 GROUP BY a.mama_id, mois
 ORDER BY mois;
 
+
+-- Gestion des suppressions et politiques RLS pour familles, sous-familles et unités
+alter table familles enable row level security;
+alter table sous_familles enable row level security;
+alter table unites enable row level security;
+
+drop policy if exists delete_familles on familles;
+create policy delete_familles on familles
+for delete to authenticated
+using (mama_id = current_user_mama_id());
+
+drop policy if exists delete_sous_familles on sous_familles;
+create policy delete_sous_familles on sous_familles
+for delete to authenticated
+using (mama_id = current_user_mama_id());
+
+drop policy if exists delete_unites on unites;
+create policy delete_unites on unites
+for delete to authenticated
+using (mama_id = current_user_mama_id());
+
+-- Ajustement des contraintes de clé étrangère pour permettre la suppression
+alter table produits drop constraint if exists fk_produits_famille;
+alter table produits add constraint fk_produits_famille
+  foreign key (famille_id) references familles(id)
+  on delete set null;
+
+alter table produits drop constraint if exists fk_produits_sous_famille;
+alter table produits add constraint fk_produits_sous_famille
+  foreign key (sous_famille_id) references sous_familles(id)
+  on delete set null;
+
+alter table produits drop constraint if exists fk_produits_unite;
+alter table produits add constraint fk_produits_unite
+  foreign key (unite_id) references unites(id)
+  on delete set null;
+

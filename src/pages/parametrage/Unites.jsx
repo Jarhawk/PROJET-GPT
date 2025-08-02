@@ -35,12 +35,13 @@ export default function Unites() {
     fetchUnites({ search, page, limit: 50 });
   };
 
-  const handleDelete = async unite => {
-    if (!window.confirm('Confirmer la suppression ?')) return;
-    const { error } = await supabase.from('unites').delete().eq('id', unite.id);
-    if (error) toast.error('Erreur suppression');
-    else {
-      toast.success('Unité supprimée');
+  const handleDelete = async (id) => {
+    const { error } = await supabase.from('unites').delete().eq('id', id);
+    if (error) {
+      console.error('Erreur suppression :', error);
+      toast.error('Suppression échouée.');
+    } else {
+      toast.success('Élément supprimé !');
       fetchUnites({ search, page, limit: 50 });
     }
   };
@@ -75,18 +76,28 @@ export default function Unites() {
         />
         <Button onClick={() => setEdit({})}>+ Nouvelle unité</Button>
       </TableHeader>
-      <ListingContainer>
-        <table className="text-sm">
+      <ListingContainer className="w-full overflow-x-auto">
+        <table className="text-sm w-full">
           <thead>
             <tr>
-              <th className="px-2 py-1">Nom</th>
-              <th className="px-2 py-1">Statut</th>
-              <th className="px-2 py-1">Actions</th>
+              <th className="px-2 py-1 w-full">Nom</th>
+              <th className="px-2 py-1 w-full">Statut</th>
+              <th className="px-2 py-1 w-full">Actions</th>
             </tr>
           </thead>
           <tbody>
             {unites.map(u => (
-              <UniteRow key={u.id} unite={u} onEdit={setEdit} onDelete={handleDelete} onToggle={handleToggle} />
+              <UniteRow
+                key={u.id}
+                unite={u}
+                onEdit={setEdit}
+                onDelete={(unite) => {
+                  if (confirm('Supprimer cet élément ?')) {
+                    handleDelete(unite.id);
+                  }
+                }}
+                onToggle={handleToggle}
+              />
             ))}
             {unites.length === 0 && (
               <tr>

@@ -48,32 +48,20 @@ export default function SousFamilles() {
     setLoading(false);
   }
 
-  async function handleDelete(sf) {
-    if (!window.confirm('Supprimer cette sous-famille ?')) return;
+  async function handleDelete(id) {
     setLoading(true);
-    try {
-      const { error } = await supabase
-        .from('sous_familles')
-        .delete()
-        .eq('id', sf.id)
-        .eq('mama_id', mama_id);
-      if (error) {
-        if (error.code === '23503') {
-          toast.error('Sous-famille utilisée par des produits.');
-        } else {
-          toast.error(error.message || 'Erreur lors de la suppression.');
-        }
-        console.error(error);
-      } else {
-        toast.success('Sous-famille supprimée.');
-      }
-    } catch (err) {
-      toast.error(err.message || 'Erreur lors de la suppression.');
-      console.error(err);
-    } finally {
-      await fetchSousFamilles();
-      setLoading(false);
+    const { error } = await supabase
+      .from('sous_familles')
+      .delete()
+      .eq('id', id);
+    if (error) {
+      console.error('Erreur suppression :', error);
+      toast.error('Suppression échouée.');
+    } else {
+      toast.success('Élément supprimé !');
     }
+    await fetchSousFamilles();
+    setLoading(false);
   }
 
   const pages = Math.ceil(total / PAGE_SIZE) || 1;
@@ -93,13 +81,13 @@ export default function SousFamilles() {
           onChange={e => setSearch(e.target.value)}
         />
       </TableHeader>
-      <ListingContainer>
+      <ListingContainer className="w-full overflow-x-auto">
         <table className="text-sm w-full">
           <thead>
             <tr>
-              <th className="px-2 py-1">Nom</th>
-              <th className="px-2 py-1">Famille</th>
-              <th className="px-2 py-1">Actions</th>
+              <th className="px-2 py-1 w-full">Nom</th>
+              <th className="px-2 py-1 w-full">Famille</th>
+              <th className="px-2 py-1 w-full">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -116,7 +104,11 @@ export default function SousFamilles() {
                     <Button
                       size="sm"
                       className="bg-red-500 hover:bg-red-600 text-white"
-                      onClick={() => handleDelete(sf)}
+                      onClick={() => {
+                        if (confirm('Supprimer cet élément ?')) {
+                          handleDelete(sf.id);
+                        }
+                      }}
                     >
                       🗑 Supprimer
                     </Button>

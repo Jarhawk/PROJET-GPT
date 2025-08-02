@@ -50,14 +50,13 @@ export default function Familles() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Supprimer cette famille ?')) return;
     setActionLoading(true);
     const { error } = await supabase.from('familles').delete().eq('id', id);
     if (error) {
       console.error('Erreur suppression :', error);
-      alert('Erreur lors de la suppression');
+      toast.error('Suppression échouée.');
     } else {
-      alert('Famille supprimée');
+      toast.success('Élément supprimé !');
       fetchAll();
     }
     setActionLoading(false);
@@ -83,13 +82,12 @@ export default function Familles() {
   };
 
   const handleDeleteSous = async (id) => {
-    if (!window.confirm('Supprimer cette sous-famille ?')) return;
     const { error } = await supabase.from('sous_familles').delete().eq('id', id);
     if (error) {
       console.error('Erreur suppression :', error);
-      alert('Erreur lors de la suppression');
+      toast.error('Suppression échouée.');
     } else {
-      alert('Sous-famille supprimée');
+      toast.success('Élément supprimé !');
       fetchAll();
     }
   };
@@ -124,9 +122,9 @@ export default function Familles() {
         <table className="text-sm w-full max-w-full">
           <thead>
             <tr>
-              <th className="px-2 py-1">Nom</th>
-              <th className="px-2 py-1">Statut</th>
-              <th className="px-2 py-1">Actions</th>
+              <th className="px-2 py-1 w-full">Nom</th>
+              <th className="px-2 py-1 w-full">Statut</th>
+              <th className="px-2 py-1 w-full">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -142,11 +140,19 @@ export default function Familles() {
                   key={f.id}
                   famille={f}
                   onEdit={setEdit}
-                  onDelete={handleDelete}
+                  onDelete={(id) => {
+                    if (confirm('Supprimer cet élément ?')) {
+                      handleDelete(id);
+                    }
+                  }}
                   onToggle={handleToggle}
                   onAddSousFamille={handleAddSous}
                   onUpdateSousFamille={handleUpdateSous}
-                  onDeleteSousFamille={handleDeleteSous}
+                  onDeleteSousFamille={(id) => {
+                    if (confirm('Supprimer cet élément ?')) {
+                      handleDeleteSous(id);
+                    }
+                  }}
                   onToggleSousFamille={handleToggleSous}
                 />
               ))

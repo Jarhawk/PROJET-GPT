@@ -22,7 +22,7 @@ export function useFiches() {
     const sortField = ["nom", "cout_par_portion"].includes(sortBy) ? sortBy : "nom";
     let query = supabase
       .from("fiches_techniques")
-      .select("*, famille:familles(id, nom), lignes:fiche_lignes(id)", { count: "exact" })
+      .select("*, famille:famille_id(id, nom), lignes:fiche_lignes!fiche_id(id)", { count: "exact" })
       .eq("mama_id", mama_id)
       .order(sortField, { ascending: asc })
       .range((page - 1) * limit, page * limit - 1);
@@ -48,7 +48,7 @@ export function useFiches() {
     const { data, error } = await supabase
       .from("fiches_techniques")
       .select(
-        "*, famille:familles(id, nom), lignes:fiche_lignes(*, produit:produits(id, nom, unite:unites(nom), pmp), sous_fiche:fiches_techniques(id, nom, cout_par_portion))"
+        "*, famille:famille_id(id, nom), lignes:fiche_lignes!fiche_id(*, produit:produit_id(id, nom, unite_id, unite:unite_id(nom), pmp), sous_fiche:sous_fiche_id(id, nom, cout_par_portion))"
       )
       .eq("id", id)
       .eq("mama_id", mama_id)
@@ -175,7 +175,7 @@ export function useFiches() {
     setError(null);
     const { data: fiche, error: fetchError } = await supabase
       .from("fiches_techniques")
-      .select("*, lignes:fiche_lignes(*)")
+      .select("*, lignes:fiche_lignes!fiche_id(*)")
       .eq("id", id)
       .eq("mama_id", mama_id)
       .single();

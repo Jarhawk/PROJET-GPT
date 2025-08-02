@@ -17,7 +17,7 @@ export function useAchats() {
     let q = supabase
       .from("achats")
       .select(
-        "*, fournisseur:fournisseurs(id, nom), produit:produits(id, nom)",
+        "*, fournisseur:fournisseur_id(id, nom), produit:produit_id(id, nom)",
         { count: "exact" },
       )
       .eq("mama_id", mama_id)
@@ -42,7 +42,7 @@ export function useAchats() {
     if (!id || !mama_id) return null;
     const { data, error } = await supabase
       .from("achats")
-      .select("*, fournisseur:fournisseurs(id, nom), produit:produits(id, nom)")
+      .select("*, fournisseur:fournisseur_id(id, nom), produit:produit_id(id, nom)")
       .eq("id", id)
       .eq("mama_id", mama_id)
       .single();

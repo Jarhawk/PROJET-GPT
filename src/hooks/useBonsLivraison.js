@@ -16,7 +16,7 @@ export function useBonsLivraison() {
     setError(null);
     let q = supabase
       .from("bons_livraison")
-      .select("id, numero_bl, date_reception, commentaire, actif, fournisseur: fournisseurs(id, nom), lignes: lignes_bl(id)", { count: "exact" })
+      .select("id, numero_bl, date_reception, commentaire, actif, fournisseur_id, fournisseur:fournisseur_id(id, nom), lignes:lignes_bl!bl_id(id)", { count: "exact" })
       .eq("mama_id", mama_id)
       .order("date_reception", { ascending: false })
       .range((page - 1) * pageSize, page * pageSize - 1);
@@ -38,7 +38,7 @@ export function useBonsLivraison() {
     if (!id || !mama_id) return null;
     const { data, error } = await supabase
       .from("bons_livraison")
-      .select("id, numero_bl, date_reception, commentaire, actif, fournisseur:fournisseurs(id, nom), lignes:lignes_bl(id, quantite_recue, prix_unitaire, tva, produit:produits(nom))")
+      .select("id, numero_bl, date_reception, commentaire, actif, fournisseur_id, fournisseur:fournisseur_id(id, nom), lignes:lignes_bl!bl_id(id, bl_id, quantite_recue, prix_unitaire, tva, produit:produit_id(nom))")
       .eq("id", id)
       .eq("mama_id", mama_id)
       .single();

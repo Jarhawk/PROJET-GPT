@@ -19,7 +19,7 @@ export default function CommandesEnvoyees() {
     setPageLoading(true);
     supabase
       .from("commandes")
-      .select("*, fournisseur:fournisseurs(nom)")
+      .select("*, fournisseur:fournisseur_id(nom)")
       .eq("mama_id", mama_id)
       .order("created_at", { ascending: false })
       .then(({ data }) => {

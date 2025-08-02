@@ -46,7 +46,7 @@ export default function FournisseurDetail({ id }) {
       }),
       supabase
         .from("fournisseurs")
-        .select("id, nom, actif, created_at, contact:fournisseur_contacts(nom,email,tel)")
+        .select("id, nom, actif, created_at, contact:fournisseur_contacts!fournisseur_id(nom,email,tel)")
         .eq("id", id)
         .eq("mama_id", mama_id)
         .single()

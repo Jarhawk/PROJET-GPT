@@ -15,7 +15,7 @@ export function useAlerts() {
     setError(null);
     let query = supabase
       .from("regles_alertes")
-      .select("*, produit:produits(id, nom)")
+      .select("*, produit:produit_id(id, nom)")
       .eq("mama_id", mama_id)
       .order("created_at", { ascending: false });
 

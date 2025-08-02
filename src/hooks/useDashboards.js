@@ -15,7 +15,7 @@ export function useDashboards() {
     setError(null);
     const { data, error } = await supabase
       .from("tableaux_de_bord")
-      .select("*, gadgets:gadgets(*)")
+      .select("*, gadgets:gadgets!tableau_id(*)")
       .eq("utilisateur_id", user_id)
       .eq("mama_id", mama_id)
       .order("created_at", { ascending: true });

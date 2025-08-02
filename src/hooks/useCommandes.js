@@ -16,7 +16,7 @@ export function useCommandes() {
     setError(null);
     let q = supabase
       .from("commandes")
-      .select("id, date_commande, statut, actif, fournisseur:fournisseurs(id, nom), lignes:commande_lignes(id)", { count: "exact" })
+      .select("id, date_commande, statut, actif, fournisseur_id, fournisseur:fournisseur_id(id, nom), lignes:commande_lignes!commande_id(id)", { count: "exact" })
       .eq("mama_id", mama_id)
       .order("date_commande", { ascending: false })
       .range((page - 1) * pageSize, page * pageSize - 1);

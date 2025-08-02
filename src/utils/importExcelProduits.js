@@ -1,6 +1,9 @@
 import * as XLSX from "xlsx";
 import { v4 as uuidv4 } from "uuid";
 import { supabase } from "@/lib/supabase";
+import { fetchFamillesForValidation } from "@/hooks/useFamilles";
+import { fetchUnitesForValidation } from "@/hooks/useUnites";
+import { fetchZonesForValidation } from "@/hooks/useZonesStock";
 
 function parseBoolean(value) {
   if (typeof value === "boolean") return value;
@@ -49,17 +52,21 @@ export async function parseProduitsFile(file, mama_id) {
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const raw = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
-  const [famillesRes, sousFamillesRes, unitesRes, zonesRes, fournisseursRes] =
-    await Promise.all([
-      supabase.from("familles").select("id, nom").eq("mama_id", mama_id),
-      supabase
-        .from("sous_familles")
-        .select("id, nom")
-        .eq("mama_id", mama_id),
-      supabase.from("unites").select("id, nom").eq("mama_id", mama_id),
-      supabase.from("zones_stock").select("id, nom").eq("mama_id", mama_id),
-      supabase.from("fournisseurs").select("id").eq("mama_id", mama_id),
-    ]);
+  const [
+    famillesRes,
+    sousFamillesRes,
+    unitesRes,
+    zonesRes,
+    fournisseursRes,
+    produitsRes,
+  ] = await Promise.all([
+    fetchFamillesForValidation(mama_id),
+    supabase.from("sous_familles").select("id, nom").eq("mama_id", mama_id),
+    fetchUnitesForValidation(mama_id),
+    fetchZonesForValidation(mama_id),
+    supabase.from("fournisseurs").select("id").eq("mama_id", mama_id),
+    supabase.from("produits").select("nom").eq("mama_id", mama_id),
+  ]);
 
   const mapByName = (res) =>
     new Map((res.data || []).map((x) => [x.nom.toLowerCase(), x.id]));
@@ -71,6 +78,10 @@ export async function parseProduitsFile(file, mama_id) {
     (fournisseursRes.data || []).map((f) => String(f.id))
   );
 
+  const existingNames = new Set(
+    (produitsRes.data || []).map((p) => p.nom.toLowerCase())
+  );
+
   const maps = {
     familles: famillesMap,
     sousFamilles: sousFamillesMap,
@@ -78,6 +89,8 @@ export async function parseProduitsFile(file, mama_id) {
     zones: zonesMap,
     fournisseurs: fournisseurIds,
   };
+
+  const seenNames = new Set();
 
   const rows = raw.map((r) => {
     const n = Object.fromEntries(
@@ -106,7 +119,16 @@ export async function parseProduitsFile(file, mama_id) {
       mama_id,
     };
 
-    return validateProduitRow(baseRow, maps);
+    let validated = validateProduitRow(baseRow, maps);
+    const lowerName = validated.nom.toLowerCase();
+    if (existingNames.has(lowerName) || seenNames.has(lowerName)) {
+      validated.errors.nom = validated.errors.nom
+        ? `${validated.errors.nom}, déjà existant`
+        : "produit déjà existant";
+      validated.status = "error";
+    }
+    seenNames.add(lowerName);
+    return validated;
   });
 
   return {

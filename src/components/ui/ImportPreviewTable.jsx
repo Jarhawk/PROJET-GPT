@@ -1,4 +1,4 @@
-import { validateProduitRow } from "@/utils/importExcelProduits";
+import { validateProduitRow } from "@/utils/excelUtils";
 
 export default function ImportPreviewTable({ rows, onUpdate, maps, reference }) {
   const { familles = [], sousFamilles = [], unites = [], zones = [] } =
@@ -15,15 +15,15 @@ export default function ImportPreviewTable({ rows, onUpdate, maps, reference }) 
 
   const renderCell = (row, idx, field, listId) => (
     <td
-      className={row.errors[field] ? "bg-red-50" : ""}
+      className={`${row.errors[field] ? "bg-red-50" : ""} text-black`}
       title={row.errors[field] || ""}
     >
       <input
         value={row[field] ?? ""}
         list={listId}
         onChange={(e) => handleChange(idx, field, e.target.value)}
-        className={`w-full px-2 py-1 border rounded text-xs bg-transparent ${
-          row.errors[field] ? "border-red-500" : "border-white/20"
+        className={`w-full px-2 py-1 border rounded text-xs bg-white text-black ${
+          row.errors[field] ? "border-red-500" : "border-gray-300"
         }`}
       />
     </td>
@@ -31,8 +31,8 @@ export default function ImportPreviewTable({ rows, onUpdate, maps, reference }) 
 
   return (
     <>
-      <table className="min-w-full table-auto text-xs">
-        <thead>
+      <table className="min-w-full table-auto text-xs text-black">
+        <thead className="sticky top-0 bg-gray-100">
           <tr>
             <th>Nom</th>
             <th>Famille</th>
@@ -45,7 +45,12 @@ export default function ImportPreviewTable({ rows, onUpdate, maps, reference }) 
         </thead>
         <tbody>
           {rows.map((row, idx) => (
-            <tr key={row.id} className={row.status === "error" ? "bg-red-50" : "bg-green-50"}>
+            <tr
+              key={row.id}
+              className={
+                row.status === "error" ? "bg-red-50 text-black" : "bg-green-50 text-black"
+              }
+            >
               {renderCell(row, idx, "nom")}
               {renderCell(row, idx, "famille_nom", "familles-list")}
               {renderCell(row, idx, "sous_famille_nom", "sousfamilles-list")}

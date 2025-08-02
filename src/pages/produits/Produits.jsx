@@ -19,7 +19,7 @@ import ProduitRow from "@/components/produits/ProduitRow";
 import {
   exportExcelProduits,
   downloadProduitsTemplate,
-} from "@/utils/exportExcelProduits";
+} from "@/utils/excelUtils";
 import ModalImportProduits from "@/components/produits/ModalImportProduits";
 
 const PAGE_SIZE = 50;

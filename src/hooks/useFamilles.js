@@ -10,6 +10,10 @@ export async function deleteFamille(id, mama_id) {
   return await supabase.from("familles").delete().match({ id, mama_id });
 }
 
+export async function fetchFamillesForValidation(mama_id) {
+  return await supabase.from("familles").select("id, nom").eq("mama_id", mama_id);
+}
+
 export function useFamilles() {
   const { mama_id } = useAuth();
   const [familles, setFamilles] = useState([]);

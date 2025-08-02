@@ -2,6 +2,10 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 
+export async function fetchZonesForValidation(mama_id) {
+  return await supabase.from("zones_stock").select("id, nom").eq("mama_id", mama_id);
+}
+
 export default function useZonesStock() {
   const { mama_id } = useAuth();
   const [zones, setZones] = useState([]);

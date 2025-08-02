@@ -36,7 +36,7 @@ test('fetchItemsByInvoice queries with invoice id and mama_id', async () => {
     await result.current.fetchItemsByInvoice('f1');
   });
   expect(fromMock).toHaveBeenCalledWith('facture_lignes');
-  expect(query.select).toHaveBeenCalledWith('*, produit:produit_id(id, nom, famille:fk_produits_famille(id, nom), unite:unite_id(nom))');
+  expect(query.select).toHaveBeenCalledWith('*, produit:produits!facture_lignes_produit_id_fkey(id, nom, famille:familles!fk_produits_famille(id, nom), unite:unites!fk_produits_unite(nom))');
   expect(query.eq).toHaveBeenNthCalledWith(1, 'facture_id', 'f1');
   expect(query.eq).toHaveBeenNthCalledWith(2, 'mama_id', 'm1');
   expect(query.order).toHaveBeenCalledWith('id');

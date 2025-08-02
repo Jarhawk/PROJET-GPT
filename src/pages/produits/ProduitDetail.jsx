@@ -115,6 +115,12 @@ export default function ProduitDetailPage() {
           </div>
         ) : (
           <>
+            {product && (
+              <div className="mb-4 text-sm">
+                <p>Fournisseur : {product.main_fournisseur?.nom || '-'}</p>
+                <p>Stock minimum : {product.seuil_min ?? '-'}</p>
+              </div>
+            )}
             <table className="min-w-full text-sm mb-6">
               <thead>
                 <tr>

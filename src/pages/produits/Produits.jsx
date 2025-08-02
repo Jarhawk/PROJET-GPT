@@ -7,13 +7,12 @@ import { useFournisseurs } from "@/hooks/useFournisseurs";
 import ProduitFormModal from "@/components/produits/ProduitFormModal";
 import ProduitDetail from "@/components/produits/ProduitDetail";
 import { Button } from "@/components/ui/button";
-import GlassCard from "@/components/ui/GlassCard";
 import ListingContainer from "@/components/ui/ListingContainer";
 import PaginationFooter from "@/components/ui/PaginationFooter";
 import TableHeader from "@/components/ui/TableHeader";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { Plus } from "lucide-react";
+import { Plus as PlusIcon } from "lucide-react";
 import { Toaster, toast } from "react-hot-toast";
 import useAuth from "@/hooks/useAuth";
 import ProduitRow from "@/components/produits/ProduitRow";
@@ -144,8 +143,8 @@ export default function Produits() {
     <div className="p-8 max-w-7xl mx-auto text-shadow space-y-6">
       <Toaster />
       <h1 className="text-2xl font-bold mb-4">Produits stock</h1>
-      <GlassCard>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="w-full md:w-4/5 mx-auto space-y-4">
+        <div className="flex flex-wrap md:flex-nowrap items-center gap-4 p-4 rounded-xl bg-muted/30 backdrop-blur">
           <Input
             type="search"
             value={search}
@@ -153,12 +152,12 @@ export default function Produits() {
               setPage(1);
               setSearch(e.target.value);
             }}
-            className="max-w-[300px]"
+            className="flex-1 min-w-[150px]"
             placeholder="Recherche nom"
             ariaLabel="Recherche nom"
           />
           <Select
-            className="max-w-[300px]"
+            className="flex-1 min-w-[150px]"
             value={familleFilter}
             onChange={(e) => {
               setPage(1);
@@ -174,7 +173,7 @@ export default function Produits() {
             ))}
           </Select>
           <Select
-            className="max-w-[300px]"
+            className="flex-1 min-w-[150px]"
             value={actifFilter}
             onChange={(e) => {
               setPage(1);
@@ -187,32 +186,39 @@ export default function Produits() {
             <option value="false">Inactif</option>
           </Select>
         </div>
-        <TableHeader className="mt-4">
+        <TableHeader className="justify-between">
           <Button
-            className="w-auto"
+            variant="primary"
+            icon={PlusIcon}
+            className="btn btn-primary !px-6 !py-3 rounded-xl"
             onClick={() => {
               setShowForm(true);
               setSelectedProduct(null);
             }}
           >
-            <Plus className="w-4 h-4 mr-2" /> Nouveau produit
+            Nouveau produit
           </Button>
-          <Button className="w-auto" onClick={exportProductsToExcel}>
-            Export Excel
-          </Button>
-          <Button className="w-auto" onClick={() => fileRef.current.click()}>
-            Import Excel
-          </Button>
-          <input
-            type="file"
-            accept=".xlsx"
-            ref={fileRef}
-            onChange={handleImport}
-            data-testid="import-input"
-            className="hidden"
-          />
+          <div className="flex gap-2 flex-wrap">
+            <Button className="min-w-[140px]" onClick={exportProductsToExcel}>
+              Export Excel
+            </Button>
+            <Button
+              className="min-w-[140px]"
+              onClick={() => fileRef.current.click()}
+            >
+              Import Excel
+            </Button>
+            <input
+              type="file"
+              accept=".xlsx"
+              ref={fileRef}
+              onChange={handleImport}
+              data-testid="import-input"
+              className="hidden"
+            />
+          </div>
         </TableHeader>
-      </GlassCard>
+      </div>
       <ListingContainer>
         <table className="min-w-full table-auto text-sm">
             <thead>

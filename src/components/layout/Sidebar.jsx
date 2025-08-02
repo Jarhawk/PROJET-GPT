@@ -4,7 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 // l'utilisateur possède le droit "peut_voir". Les droits proviennent
 // du contexte d'authentification (merge utilisateur + rôle).
 import useAuth from "@/hooks/useAuth";
-import MamaLogo from "@/components/ui/MamaLogo";
+import logo from "@/assets/logo-mamastock.png";
 
 export default function Sidebar() {
   const { access_rights, isSuperadmin, loading, pending, hasAccess } = useAuth();
@@ -16,9 +16,7 @@ export default function Sidebar() {
 
   return (
     <aside className="w-64 bg-white/10 border border-white/10 backdrop-blur-xl text-white p-4 h-screen shadow-md text-shadow">
-      <div className="mb-6">
-        <MamaLogo width={140} />
-      </div>
+      <img src={logo} alt="MamaStock" className="h-16 mx-auto mt-4 mb-6" />
       <nav className="flex flex-col gap-2 text-sm">
         {has("dashboard") && <Link to="/dashboard">Dashboard</Link>}
 

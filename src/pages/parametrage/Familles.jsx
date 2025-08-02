@@ -123,27 +123,7 @@ export default function Familles() {
               const roots = Object.values(map).filter(
                 (f) => !f.famille_parent_id,
               );
-              const rows = [];
-              const walk = (node, level = 0) => {
-                rows.push(
-                  <FamilleRow
-                    key={node.id}
-                    famille={node}
-                    level={level}
-                    onEdit={setEdit}
-                    onDelete={handleDelete}
-                    onToggle={handleToggle}
-                    onAddSub={(f) => setEdit({ famille_parent_id: f.id })}
-                  />,
-                );
-                node.children
-                  .sort((a, b) => (a.nom || '').localeCompare(b.nom || ''))
-                  .forEach((child) => walk(child, level + 1));
-              };
-              roots
-                .sort((a, b) => (a.nom || '').localeCompare(b.nom || ''))
-                .forEach((r) => walk(r, 0));
-              if (rows.length === 0) {
+              if (roots.length === 0) {
                 return (
                   <tr>
                     <td colSpan="3" className="py-2">
@@ -152,7 +132,19 @@ export default function Familles() {
                   </tr>
                 );
               }
-              return rows;
+              return roots
+                .sort((a, b) => (a.nom || '').localeCompare(b.nom || ''))
+                .map((r) => (
+                  <FamilleRow
+                    key={r.id}
+                    famille={r}
+                    level={0}
+                    onEdit={setEdit}
+                    onDelete={handleDelete}
+                    onToggle={handleToggle}
+                    onAddSub={(f) => setEdit({ famille_parent_id: f.id })}
+                  />
+                ));
             })()}
           </tbody>
         </table>

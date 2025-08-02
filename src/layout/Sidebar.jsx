@@ -2,7 +2,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { routePreloadMap } from "@/router";
 import useAuth from "@/hooks/useAuth";
-import { Badge } from "@/components/ui/badge";
+import logo from "@/assets/logo-mamastock.svg";
 import {
   Boxes,
   ClipboardList,
@@ -19,7 +19,6 @@ import {
   Shield,
   Building2,
   Home,
-  Bug,
   Key,
   Calendar,
   CheckSquare,
@@ -36,9 +35,7 @@ export default function Sidebar() {
     loading,
     user,
     userData,
-    role,
     mama_id,
-    session,
     hasAccess,
   } = useAuth();
   const { pathname } = useLocation();
@@ -181,8 +178,11 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="w-64 bg-white/10 border border-white/10 backdrop-blur-xl text-white p-4 h-screen shadow-md text-shadow hidden md:block animate-fade-in-down">
-      <nav className="flex flex-col gap-4 text-sm">
+    <aside className="w-64 bg-white/10 border border-white/10 backdrop-blur-xl text-white h-screen shadow-md text-shadow hidden md:flex md:flex-col animate-fade-in-down">
+      <div className="flex justify-center py-4 bg-black/20 border-b border-muted">
+        <img src={logo} alt="MamaStock" className="h-10" />
+      </div>
+      <nav className="flex flex-col gap-4 text-sm p-4 flex-1 overflow-y-auto">
         {peutVoir("dashboard") && (
           <Item to="/dashboard" icon={<Home size={16} />} label="Dashboard" />
         )}
@@ -209,15 +209,6 @@ export default function Sidebar() {
           );
         })}
       </nav>
-      {session && (
-        <div className="mt-6 border-t border-white/20 pt-4 text-xs text-center text-white/60">
-          {role ? (
-            <Badge color="gray">{role}</Badge>
-          ) : (
-            <Badge color="red">[Rôle inconnu]</Badge>
-          )}
-        </div>
-      )}
     </aside>
   );
 }

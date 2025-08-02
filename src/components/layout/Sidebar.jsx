@@ -4,8 +4,6 @@ import { Link, useLocation } from "react-router-dom";
 // l'utilisateur possède le droit "peut_voir". Les droits proviennent
 // du contexte d'authentification (merge utilisateur + rôle).
 import useAuth from "@/hooks/useAuth";
-import { Badge } from "@/components/ui/badge";
-
 import MamaLogo from "@/components/ui/MamaLogo";
 
 export default function Sidebar() {

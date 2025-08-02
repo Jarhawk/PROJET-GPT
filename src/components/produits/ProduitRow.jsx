@@ -15,60 +15,76 @@ export default function ProduitRow({
   const rupture = produit.stock_theorique === 0;
   return (
     <tr className={produit.actif ? "" : "opacity-50 bg-muted"}>
-      <td className="truncate max-w-[200px]">{produit.nom}</td>
-      <td>{produit.famille?.nom} {produit.sous_famille ? `> ${produit.sous_famille.nom}` : ""}</td>
-      <td className="truncate max-w-[160px]">{produit.zone_stock?.nom || "-"}</td>
-      <td>{produit.unite}</td>
-      <td className="text-right">{produit.pmp != null ? Number(produit.pmp).toFixed(2) : "-"}</td>
-      <td className={"text-right" + (belowMin ? " text-red-600 font-semibold" : "") }>
+      <td
+        className="px-2 min-w-[240px] truncate"
+        title={produit.nom}
+      >
+        {produit.nom}
+      </td>
+      <td
+        className="px-2 truncate"
+        title={`${produit.famille?.nom || ""}${produit.sous_famille ? ` > ${produit.sous_famille.nom}` : ""}`}
+      >
+        {produit.famille?.nom} {produit.sous_famille ? `> ${produit.sous_famille.nom}` : ""}
+      </td>
+      <td
+        className="px-2 truncate"
+        title={produit.zone_stock?.nom || "-"}
+      >
+        {produit.zone_stock?.nom || "-"}
+      </td>
+      <td className="px-2 text-center">{produit.unite}</td>
+      <td className="px-2 text-right">
+        {produit.pmp != null ? Number(produit.pmp).toFixed(2) : "-"}
+      </td>
+      <td
+        className={
+          "px-2 text-right" + (belowMin ? " text-red-600 font-semibold" : "")
+        }
+      >
         {produit.stock_theorique}
         {rupture && <span className="ml-1 text-red-600">⚠️</span>}
       </td>
-      <td className="text-right">{produit.seuil_min ?? "-"}</td>
-      <td>{produit.main_fournisseur?.nom || "-"}</td>
-      <td className="text-right">
+      <td className="px-2 text-right">{produit.seuil_min ?? "-"}</td>
+      <td
+        className="px-2 truncate"
+        title={produit.main_fournisseur?.nom || "-"}
+      >
+        {produit.main_fournisseur?.nom || "-"}
+      </td>
+      <td className="px-2 text-right">
         {produit.dernier_prix != null
           ? Number(produit.dernier_prix).toFixed(2)
           : "-"}
       </td>
-      <td>{produit.actif ? "✅" : "❌"}</td>
-      <td>
-        <Button
-          size="sm"
-          variant="secondary"
-          onClick={() => onDetail(produit)}
-          className="mr-2"
-        >
-          Voir
-        </Button>
-        {canEdit && (
-          <>
-            <Button
-              size="sm"
-              variant="outline"
-              className="mr-2"
-              onClick={() => onEdit(produit)}
-            >
-              Éditer
-            </Button>
-            <Button
-              size="sm"
-              variant="destructive"
-              className="mr-2"
-              onClick={() => onToggleActive(produit.id, !produit.actif)}
-            >
-              {produit.actif ? "Désactiver" : "Activer"}
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="mr-2"
-              onClick={() => onDuplicate(produit.id)}
-            >
-              Dupliquer
-            </Button>
-          </>
-        )}
+      <td className="px-2 text-center">{produit.actif ? "✅" : "❌"}</td>
+      <td className="px-2 whitespace-nowrap min-w-[100px]">
+        <div className="flex justify-center gap-2">
+          <Button size="sm" variant="secondary" onClick={() => onDetail(produit)}>
+            Voir
+          </Button>
+          {canEdit && (
+            <>
+              <Button size="sm" variant="outline" onClick={() => onEdit(produit)}>
+                Éditer
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => onToggleActive(produit.id, !produit.actif)}
+              >
+                {produit.actif ? "Désactiver" : "Activer"}
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => onDuplicate(produit.id)}
+              >
+                Dupliquer
+              </Button>
+            </>
+          )}
+        </div>
       </td>
     </tr>
   );

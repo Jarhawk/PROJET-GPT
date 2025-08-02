@@ -11,6 +11,7 @@ import PaginationFooter from "@/components/ui/PaginationFooter";
 import TableHeader from "@/components/ui/TableHeader";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { Card } from "@/components/ui/card";
 import { Plus as PlusIcon } from "lucide-react";
 import { Toaster, toast } from "react-hot-toast";
 import useAuth from "@/hooks/useAuth";
@@ -48,8 +49,6 @@ export default function Produits() {
   const [page, setPage] = useState(1);
   const [sortField, setSortField] = useState("famille");
   const [sortOrder, setSortOrder] = useState("asc");
-  const [showSearchMobile, setShowSearchMobile] = useState(false);
-  const [showFiltersMobile, setShowFiltersMobile] = useState(false);
   const fileRef = useRef(null);
   const { hasAccess, mama_id } = useAuth();
   const canEdit = hasAccess("produits", "peut_modifier");
@@ -144,7 +143,7 @@ export default function Produits() {
       <Toaster />
       <h1 className="text-2xl font-bold mb-4">Produits stock</h1>
       <div className="w-full md:w-4/5 mx-auto space-y-4">
-        <div className="hidden md:flex flex-wrap md:flex-nowrap items-center gap-4 p-4 rounded-xl bg-muted/30 backdrop-blur">
+        <div className="flex flex-col md:flex-row flex-wrap items-center gap-2 p-4 rounded-xl bg-muted/30 backdrop-blur">
           <Input
             type="search"
             value={search}
@@ -172,9 +171,7 @@ export default function Produits() {
                 const parent = familles.find(
                   (p) => p.id === f.famille_parent_id,
                 );
-                const label = parent
-                  ? `${parent.nom} > ${f.nom}`
-                  : f.nom;
+                const label = parent ? `${parent.nom} > ${f.nom}` : f.nom;
                 return (
                   <option key={f.id} value={f.id}>
                     {label}
@@ -208,82 +205,6 @@ export default function Produits() {
             <option value="true">Actif</option>
             <option value="false">Inactif</option>
           </Select>
-        </div>
-        {/* Mobile search & filters */}
-        <div className="md:hidden flex flex-col gap-2">
-          <div className="flex gap-2">
-            <Button variant="outline" className="flex-1" onClick={() => setShowSearchMobile(!showSearchMobile)}>
-              🔍 Rechercher
-            </Button>
-            <Button variant="outline" className="flex-1" onClick={() => setShowFiltersMobile(!showFiltersMobile)}>
-              🔽 Filtrer
-            </Button>
-          </div>
-          {showSearchMobile && (
-            <Input
-              type="search"
-              value={search}
-              onChange={(e) => {
-                setPage(1);
-                setSearch(e.target.value);
-              }}
-              placeholder="Recherche nom"
-              ariaLabel="Recherche nom"
-            />
-          )}
-          {showFiltersMobile && (
-            <div className="flex flex-col gap-2">
-              <Select
-                value={sousFamilleFilter}
-                onChange={(e) => {
-                  setPage(1);
-                  setSousFamilleFilter(e.target.value);
-                }}
-                ariaLabel="Filtrer par famille"
-              >
-                <option value="">Toutes familles</option>
-                {familles
-                  .filter((f) => f.famille_parent_id)
-                  .map((f) => {
-                    const parent = familles.find(
-                      (p) => p.id === f.famille_parent_id,
-                    );
-                    const label = parent
-                      ? `${parent.nom} > ${f.nom}`
-                      : f.nom;
-                    return (
-                      <option key={f.id} value={f.id}>
-                        {label}
-                      </option>
-                    );
-                  })}
-              </Select>
-              <Select
-                value={zoneFilter}
-                onChange={(e) => setZoneFilter(e.target.value)}
-                ariaLabel="Filtrer par zone"
-              >
-                <option value="">Toutes les zones</option>
-                {zones.map((z) => (
-                  <option key={z.id} value={z.id}>
-                    {z.nom}
-                  </option>
-                ))}
-              </Select>
-              <Select
-                value={actifFilter}
-                onChange={(e) => {
-                  setPage(1);
-                  setActifFilter(e.target.value);
-                }}
-                ariaLabel="Filtrer par statut"
-              >
-                <option value="all">Actif ou non</option>
-                <option value="true">Actif</option>
-                <option value="false">Inactif</option>
-              </Select>
-            </div>
-          )}
         </div>
         <TableHeader className="justify-between">
           <Button
@@ -377,48 +298,54 @@ export default function Produits() {
       )}
       <ListingContainer className="hidden md:block">
         <table className="min-w-full table-auto text-sm">
-            <thead>
-              <tr>
-              <th className="cursor-pointer" onClick={() => toggleSort("nom")}> 
+          <thead>
+            <tr>
+              <th
+                className="px-2 text-left cursor-pointer min-w-[240px]"
+                onClick={() => toggleSort("nom")}
+              >
                 Nom{renderArrow("nom")}
               </th>
               <th
-                className="cursor-pointer"
+                className="px-2 text-left cursor-pointer"
                 onClick={() => toggleSort("famille")}
               >
                 Famille{renderArrow("famille")}
               </th>
               <th
-                className="cursor-pointer"
+                className="px-2 text-left cursor-pointer"
                 onClick={() => toggleSort("zone_stock")}
               >
                 Zone de stockage{renderArrow("zone_stock")}
               </th>
-              <th>Unité</th>
-              <th className="cursor-pointer text-right" onClick={() => toggleSort("pmp")}> 
+              <th className="px-2 text-center">Unité</th>
+              <th
+                className="px-2 text-right cursor-pointer"
+                onClick={() => toggleSort("pmp")}
+              >
                 PMP (€){renderArrow("pmp")}
               </th>
               <th
-                className="cursor-pointer text-right"
+                className="px-2 text-right cursor-pointer"
                 onClick={() => toggleSort("stock_theorique")}
               >
                 Stock théorique{renderArrow("stock_theorique")}
               </th>
               <th
-                className="cursor-pointer text-right"
+                className="px-2 text-right cursor-pointer"
                 onClick={() => toggleSort("seuil_min")}
               >
                 Min{renderArrow("seuil_min")}
               </th>
-              <th>Fournisseur</th>
+              <th className="px-2 text-left">Fournisseur</th>
               <th
-                className="cursor-pointer text-right"
+                className="px-2 text-right cursor-pointer"
                 onClick={() => toggleSort("dernier_prix")}
               >
                 Dernier prix (€){renderArrow("dernier_prix")}
               </th>
-              <th>Actif</th>
-              <th>Actions</th>
+              <th className="px-2 text-center">Actif</th>
+              <th className="px-2 text-center min-w-[100px]">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -451,50 +378,53 @@ export default function Produits() {
         </table>
       </ListingContainer>
       {/* Mobile listing */}
-      <div className="md:hidden flex flex-col gap-2">
+      <div className="block md:hidden space-y-2">
         {filteredProducts.length === 0 ? (
           <div className="py-4 text-center text-muted-foreground">
             Aucun produit trouvé. Essayez d’ajouter un produit via le bouton ci-dessus.
           </div>
         ) : (
-          filteredProducts.map((p) => {
-            const belowMin =
-              p.stock_theorique != null &&
-              p.seuil_min != null &&
-              p.stock_theorique < p.seuil_min;
-            return (
-              <div
-                key={p.id}
-                className={`p-4 rounded-lg border bg-muted/30 ${p.actif ? "" : "opacity-50 bg-muted"}`}
-              >
-                <div className="flex justify-between items-start">
-                  <div className="font-semibold truncate mr-2">{p.nom}</div>
-                  <div>{p.actif ? "✅" : "❌"}</div>
-                </div>
-                <div className="text-sm text-muted-foreground truncate">
-                  {p.famille?.nom} {p.sous_famille ? `> ${p.sous_famille.nom}` : ""}
-                </div>
-                <div className="text-sm text-muted-foreground truncate">
-                  {p.zone_stock?.nom || "Sans zone"}
-                </div>
-                <div className="flex justify-between text-sm mt-1">
-                  <span>{p.unite} — {p.pmp != null ? Number(p.pmp).toFixed(2) : "-"}</span>
-                  <span className={belowMin ? "text-red-600 font-semibold" : ""}>{p.stock_theorique}</span>
-                </div>
-                <div className="mt-2 flex gap-2 flex-wrap">
-                  <Button size="sm" variant="secondary" onClick={() => {setSelectedProduct(p); setShowDetail(true);}}>Voir</Button>
-                  {canEdit && (
-                    <>
-                      <Button size="sm" variant="outline" onClick={() => {setSelectedProduct(p); setShowForm(true);}}>Éditer</Button>
-                      <Button size="sm" variant="destructive" onClick={() => handleToggleActive(p.id, !p.actif)}>
-                        {p.actif ? "Désactiver" : "Activer"}
-                      </Button>
-                    </>
-                  )}
-                </div>
+          filteredProducts.map((produit) => (
+            <Card key={produit.id} className="p-4">
+              <div className="font-bold">{produit.nom}</div>
+              <div className="text-sm">
+                Famille : {produit.famille?.nom}
+                {produit.sous_famille ? ` → ${produit.sous_famille.nom}` : ""}
               </div>
-            );
-          })
+              <div className="text-sm">
+                Zone : {produit.zone_stock?.nom || "-"}
+              </div>
+              <div className="text-sm">
+                Unité : {produit.unite?.nom ?? produit.unite ?? "-"}
+              </div>
+              <div className="text-sm">
+                PMP : {produit.pmp != null ? Number(produit.pmp).toFixed(2) : "0.00"} €
+              </div>
+              <div className="text-sm">
+                Stock : {produit.stock ?? produit.stock_theorique ?? 0}
+              </div>
+              <div className="flex gap-2 mt-2">
+                <Button
+                  onClick={() => {
+                    setSelectedProduct(produit);
+                    setShowDetail(true);
+                  }}
+                >
+                  Voir
+                </Button>
+                {canEdit && (
+                  <Button
+                    onClick={() => {
+                      setSelectedProduct(produit);
+                      setShowForm(true);
+                    }}
+                  >
+                    Éditer
+                  </Button>
+                )}
+              </div>
+            </Card>
+          ))
         )}
       </div>
       <PaginationFooter

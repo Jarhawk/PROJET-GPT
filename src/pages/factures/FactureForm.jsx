@@ -50,11 +50,9 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
       },
     ],
   );
-  const [totalHtInput, setTotalHtInput] = useState(
-    facture?.total_ht ? String(facture.total_ht) : "",
-  );
   const [commentaire, setCommentaire] = useState(facture?.commentaire || "");
-  const { autoHt, autoTva, autoTotal, ecart } = useFactureForm(lignes, totalHtInput);
+  const { autoHt, autoTva, autoTotal } = useFactureForm(lignes);
+  const ecart = facture ? facture.total_ht - autoHt : 0;
 
   useEffect(() => {
     if (facture?.fournisseur_id && fournisseurs.length) {
@@ -80,21 +78,15 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
     checkNumero();
   }, [numero, mama_id, facture?.id]);
 
-  const ecartClass = Math.abs(ecart) > 0.01 ? "text-red-500 font-semibold" : "text-green-500";
+  const ecartClass = Math.abs(ecart) > 0.01 ? "text-red-500" : "text-green-500";
 
   const handleSubmit = async e => {
     e.preventDefault();
     if (numeroUsed) return toast.error("Numéro de facture déjà utilisé");
-    if (!date || !fournisseur_id || !totalHtInput) {
+    if (!date || !fournisseur_id) {
       toast.error("Champs requis manquants !");
       formRef.current?.querySelector(":invalid")?.focus();
       return;
-    }
-    const diff = autoHt - Number(totalHtInput);
-    let finalStatut = statut;
-    if (Math.abs(diff) > 1) {
-      finalStatut = "brouillon";
-      toast.error("Total HT différent du calcul automatique. Facture enregistrée en brouillon.");
     }
     try {
       let fid = facture?.id;
@@ -102,7 +94,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
         date_facture: date,
         fournisseur_id,
         numero,
-        statut: finalStatut,
+        statut,
         total_ht: autoHt,
         total_tva: autoTva,
         total_ttc: autoTotal,
@@ -143,7 +135,6 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
             zone_stock_id: "",
           },
         ]);
-        setTotalHtInput("");
       }
     } catch (err) {
       toast.error(err?.message || "Erreur lors de l'enregistrement");
@@ -153,11 +144,22 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
   return (
     <GlassCard className="p-6 w-full" title={facture ? "Modifier la facture" : "Ajouter une facture"}>
       <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <label className="block text-sm mb-1">Date *</label>
+        <section className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="flex flex-col">
+            <label className="text-sm mb-1">Date *</label>
             <Input type="date" value={date} onChange={e => setDate(e.target.value)} required />
-            <label className="block text-sm mb-1">Numéro *</label>
+          </div>
+          <div className="flex flex-col">
+            <label className="text-sm mb-1">État</label>
+            <Select value={statut} onChange={e => setStatut(e.target.value)}>
+              <option value="brouillon">Brouillon</option>
+              <option value="en attente">En attente</option>
+              <option value="validée">Validée</option>
+              <option value="archivée">Archivée</option>
+            </Select>
+          </div>
+          <div className="flex flex-col">
+            <label className="text-sm mb-1">Numéro *</label>
             <Input
               type="text"
               value={numero}
@@ -166,7 +168,20 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
               required
             />
             {numeroUsed && <p className="text-xs text-red-500">Numéro déjà existant</p>}
-            <label className="block text-sm mb-1">Fournisseur *</label>
+          </div>
+          <div className="flex flex-col">
+            <label className="text-sm mb-1">Total HT</label>
+            <Input
+              type="text"
+              readOnly
+              value={autoHt.toFixed(2)}
+              className="font-bold [appearance:textfield]"
+            />
+          </div>
+        </section>
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex flex-col">
+            <label className="text-sm mb-1">Fournisseur *</label>
             <AutoCompleteField
               value={fournisseur_id}
               onChange={obj => {
@@ -177,28 +192,10 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
               options={fournisseurOptions}
               required
             />
-            <label className="block text-sm mb-1">Commentaire</label>
-            <Input type="text" value={commentaire} onChange={e => setCommentaire(e.target.value)} />
           </div>
-          <div className="space-y-4">
-            <label className="block text-sm mb-1">Statut</label>
-            <Select value={statut} onChange={e => setStatut(e.target.value)}>
-              <option value="brouillon">Brouillon</option>
-              <option value="en attente">En attente</option>
-              <option value="validée">Validée</option>
-              <option value="archivée">Archivée</option>
-            </Select>
-            <label className="block text-sm mb-1">Total HT *</label>
-            <Input
-              type="text"
-              inputMode="decimal"
-              value={totalHtInput}
-              onChange={e => setTotalHtInput(e.target.value)}
-              required
-            />
-            <p className={`text-xs mt-1 ${ecartClass}`} title="Écart entre total lignes et HT saisi">
-              Écart : {ecart.toFixed(2)} €
-            </p>
+          <div className="flex flex-col">
+            <label className="text-sm mb-1">Commentaire</label>
+            <Input type="text" value={commentaire} onChange={e => setCommentaire(e.target.value)} />
           </div>
         </section>
 
@@ -212,12 +209,10 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
                   <th>Qté</th>
                   <th>Unité</th>
                   <th>PU</th>
-                  <th>TVA %</th>
+                  <th>TVA</th>
                   <th>Zone</th>
                   <th>MAJ produit</th>
-                  <th>HT</th>
-                  <th>TVA</th>
-                  <th>TTC</th>
+                  <th>Total</th>
                   <th></th>
                 </tr>
               </thead>
@@ -268,8 +263,10 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
         </section>
 
         <section className="p-2 bg-white/10 backdrop-blur-xl rounded border border-white/20">
-          Total HT: {autoHt.toFixed(2)} € - TVA: {autoTva.toFixed(2)} € - TTC: {autoTotal.toFixed(2)} € -
-          <span className={`ml-2 ${ecartClass}`}>Écart HT: {ecart.toFixed(2)} €</span>
+          <span className="font-bold">Total HT: {autoHt.toFixed(2)} €</span> -
+          <span className="font-bold">TVA: {autoTva.toFixed(2)} €</span> -
+          <span className="font-bold">TTC: {autoTotal.toFixed(2)} €</span> -
+          <span className={`ml-2 font-bold ${ecartClass}`}>Écart HT: {ecart.toFixed(2)} €</span>
         </section>
 
         <div className="flex gap-2 mt-4">

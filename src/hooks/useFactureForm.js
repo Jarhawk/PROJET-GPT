@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useMemo } from "react";
 
-export function useFactureForm(lignes = [], totalHtInput = 0) {
+export function useFactureForm(lignes = []) {
   const autoHt = useMemo(
     () => lignes.reduce((s, l) => s + l.quantite * l.prix_unitaire, 0),
     [lignes]
@@ -11,9 +11,5 @@ export function useFactureForm(lignes = [], totalHtInput = 0) {
     [lignes]
   );
   const autoTotal = useMemo(() => autoHt + autoTva, [autoHt, autoTva]);
-  const ecart = useMemo(
-    () => autoHt - Number(totalHtInput || 0),
-    [autoHt, totalHtInput]
-  );
-  return { autoHt, autoTva, autoTotal, ecart };
+  return { autoHt, autoTva, autoTotal };
 }

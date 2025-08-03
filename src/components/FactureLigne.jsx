@@ -15,7 +15,7 @@ export default function FactureLigne({
   produitOptions = [],
   searchProduits,
 }) {
-  const { getProduct, updateProduct } = useProducts();
+  const { getProduct } = useProducts();
   const [loadingProd, setLoadingProd] = useState(false);
 
   async function handleProduit(obj) {
@@ -97,31 +97,10 @@ export default function FactureLigne({
         />
       </td>
       <td className="text-center">
-        <div className="flex items-center justify-center gap-1">
-          <Checkbox
-            checked={ligne.majProduit}
-            onChange={e => update("majProduit", e.target.checked)}
-          />
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            disabled={!ligne.majProduit || !ligne.produit_id}
-            onClick={async () =>
-              await updateProduct(
-                ligne.produit_id,
-                {
-                  dernier_prix: ligne.prix_unitaire,
-                  zone_stock_id: ligne.zone_stock_id,
-                  tva: ligne.tva,
-                },
-                { refresh: false },
-              )
-            }
-          >
-            MAJ
-          </Button>
-        </div>
+        <Checkbox
+          checked={ligne.majProduit}
+          onChange={e => update("majProduit", e.target.checked)}
+        />
       </td>
       <td className="text-right">{(ligne.quantite * ligne.prix_unitaire * (1 + (ligne.tva || 0) / 100)).toFixed(2)}</td>
       <td>

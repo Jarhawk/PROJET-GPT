@@ -186,6 +186,7 @@ export default function Factures() {
           facture={selected}
           fournisseurs={fournisseurs}
           onClose={() => { setShowForm(false); setSelected(null); refreshList(); }}
+          onSaved={refreshList}
         />
       )}
 

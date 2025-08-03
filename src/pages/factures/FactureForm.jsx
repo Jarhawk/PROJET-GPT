@@ -6,6 +6,7 @@ import { useFactures } from "@/hooks/useFactures";
 import { useProduitsAutocomplete } from "@/hooks/useProduitsAutocomplete";
 import { useFournisseursAutocomplete } from "@/hooks/useFournisseursAutocomplete";
 import { useFactureForm } from "@/hooks/useFactureForm";
+import { useProducts } from "@/hooks/useProducts";
 import GlassCard from "@/components/ui/GlassCard";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -14,8 +15,9 @@ import { Button } from "@/components/ui/button";
 import FactureLigne from "@/components/FactureLigne";
 import toast from "react-hot-toast";
 
-export default function FactureForm({ facture = null, fournisseurs = [], onClose }) {
+export default function FactureForm({ facture = null, fournisseurs = [], onClose, onSaved }) {
   const { createFacture, updateFacture, addLigneFacture, calculateTotals } = useFactures();
+  const { updateProduct } = useProducts();
   const { results: fournisseurOptions, searchFournisseurs } = useFournisseursAutocomplete();
   const { results: produitOptions, searchProduits } = useProduitsAutocomplete();
   const { mama_id } = useAuth();
@@ -113,14 +115,31 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
         }
         const { produit_nom: _n, majProduit: _m, unite: _u, ...rest } = ligne;
         await addLigneFacture(fid, { ...rest, fournisseur_id });
+        if (ligne.majProduit) {
+          await updateProduct(
+            ligne.produit_id,
+            {
+              dernier_prix: ligne.prix_unitaire,
+              zone_stock_id: ligne.zone_stock_id,
+              tva: ligne.tva,
+            },
+            { refresh: false },
+          );
+        }
       }
       await calculateTotals(fid);
+      onSaved?.();
       toast.success(facture ? "Facture modifiée !" : "Facture ajoutée !");
       if (facture) {
         onClose?.();
       } else {
-        // reset form for new entry
+        const today = new Date().toISOString().slice(0, 10);
+        setDate(today);
+        setFournisseurId("");
         setNumero("");
+        setNumeroUsed(false);
+        setStatut("brouillon");
+        setCommentaire("");
         setLignes([
           {
             produit_id: "",
@@ -133,6 +152,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
             zone_stock_id: "",
           },
         ]);
+        searchFournisseurs("");
       }
     } catch (err) {
       toast.error(err?.message || "Erreur lors de l'enregistrement");

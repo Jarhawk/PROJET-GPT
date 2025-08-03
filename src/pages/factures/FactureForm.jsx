@@ -78,7 +78,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
     checkNumero();
   }, [numero, mama_id, facture?.id]);
 
-  const ecartClass = Math.abs(ecart) > 0.01 ? "text-red-500" : "text-green-500";
+  const ecartClass = Math.abs(ecart) > 0.01 ? "text-green-500" : "";
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -190,7 +190,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
           <div className="flex flex-col">
             <label className="text-sm mb-1">Total HT</label>
             <Input
-              type="text"
+              type="number"
               readOnly
               value={autoHt.toFixed(2)}
               className="font-bold [appearance:textfield]"
@@ -278,11 +278,13 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
           </Button>
         </section>
 
-        <section className="p-2 bg-white/10 backdrop-blur-xl rounded border border-white/20">
-          <span className="font-bold">Total HT: {autoHt.toFixed(2)} €</span> -
-          <span className="font-bold">TVA: {autoTva.toFixed(2)} €</span> -
-          <span className="font-bold">TTC: {autoTotal.toFixed(2)} €</span> -
-          <span className={`ml-2 font-bold ${ecartClass}`}>Écart HT: {ecart.toFixed(2)} €</span>
+        <section className="p-3 mt-4 bg-white/10 border border-white/20 rounded">
+          <div className="flex flex-wrap gap-4">
+            <span className="font-bold">Total HT: {autoHt.toFixed(2)} €</span>
+            <span className="font-bold">TVA: {autoTva.toFixed(2)} €</span>
+            <span className="font-bold">TTC: {autoTotal.toFixed(2)} €</span>
+            <span className={`font-bold ${ecartClass}`}>Écart HT: {ecart.toFixed(2)} €</span>
+          </div>
         </section>
 
         <div className="flex gap-2 mt-4">

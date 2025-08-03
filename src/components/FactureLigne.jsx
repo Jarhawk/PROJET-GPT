@@ -1,5 +1,4 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import AutoCompleteField from "@/components/ui/AutoCompleteField";
 import AutoCompleteZoneField from "@/components/ui/AutoCompleteZoneField";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -18,20 +17,24 @@ export default function FactureLigne({
   const { getProduct } = useProducts();
   const [loadingProd, setLoadingProd] = useState(false);
 
-  async function handleProduit(obj) {
-    onChange({
-      ...ligne,
-      produit_nom: obj?.nom_simple || obj?.nom || "",
-      produit_id: obj?.id || "",
-      unite: obj?.unite || "",
-      prix_unitaire: obj?.dernier_prix ?? ligne.prix_unitaire,
-      tva: obj?.tva ?? ligne.tva,
-    });
-    if (obj?.id) {
+  async function handleProduitSelection(name) {
+    const match = produitOptions.find(p => p.nom === name);
+    if (match) {
+      onChange({
+        ...ligne,
+        produit_nom: match.nom,
+        produit_id: match.id,
+        unite: match.unite || "",
+        prix_unitaire: match.dernier_prix ?? ligne.prix_unitaire,
+        tva: match.tva ?? ligne.tva,
+      });
       setLoadingProd(true);
-      const prod = await getProduct(obj.id);
+      const prod = await getProduct(match.id);
       onChange({ ...ligne, zone_stock_id: prod?.zone_stock_id || "" });
       setLoadingProd(false);
+    } else {
+      onChange({ ...ligne, produit_nom: name, produit_id: "" });
+      if (name.length >= 2) searchProduits(name);
     }
   }
 
@@ -41,29 +44,25 @@ export default function FactureLigne({
 
   return (
     <tr className="h-10">
-      <td className="min-w-[250px] p-1 align-middle">
-        <AutoCompleteField
-          id={`produit-${index}`}
+      <td className="p-1 align-middle">
+        <Input
+          list={`produits-${index}`}
           required
-          value={ligne.produit_id}
-          onChange={async obj => {
-            if (obj?.id && obj.id !== ligne.produit_id) {
-              handleProduit(obj);
-            } else if (!obj?.id) {
-              onChange({ ...ligne, produit_id: "", produit_nom: obj?.nom || "" });
-              const val = obj?.nom || "";
-              if (val.length >= 2) searchProduits(val);
-            }
-          }}
-          options={produitOptions}
-          className="h-10 min-w-[250px]"
+          value={ligne.produit_nom}
+          onChange={e => handleProduitSelection(e.target.value)}
+          className="h-10 min-w-[30ch] text-black"
         />
+        <datalist id={`produits-${index}`}>
+          {produitOptions.map(p => (
+            <option key={p.id} value={p.nom} />
+          ))}
+        </datalist>
       </td>
       <td className="p-1 align-middle">
         <Input
           type="number"
           required
-          className="h-10 w-full"
+          className="h-10 w-full text-black"
           value={ligne.quantite}
           onChange={e => update("quantite", Number(e.target.value))}
         />
@@ -72,15 +71,15 @@ export default function FactureLigne({
       <td className="p-1 align-middle">
         <Input
           type="number"
-          className="h-10 w-full"
+          className="h-10 w-full text-black"
           value={ligne.prix_unitaire}
           onChange={e => update("prix_unitaire", Number(e.target.value))}
         />
       </td>
-      <td className="p-1 align-middle w-16">
+      <td className="p-1 align-middle w-14">
         <Input
           type="number"
-          className="h-10 w-full"
+          className="h-10 w-full text-black"
           title="Taux de TVA appliqué"
           required
           value={ligne.tva}
@@ -93,7 +92,7 @@ export default function FactureLigne({
           onChange={obj => update("zone_stock_id", obj?.id || "")}
           disabled={loadingProd}
           required
-          className="h-10"
+          className="h-10 text-black"
         />
       </td>
       <td className="p-1 align-middle text-center">

@@ -14,10 +14,9 @@ export function useProduitsAutocomplete() {
     setLoading(true);
     setError(null);
     let q = supabase
-      .from("produits")
-      .select("id, nom, unite, tva, dernier_prix, famille:familles(nom)")
-      .eq("mama_id", mama_id)
-      .eq("actif", true);
+      .from("v_produits_dernier_prix")
+      .select("id, nom, unite, tva, dernier_prix")
+      .eq("mama_id", mama_id);
     if (query) q = q.ilike("nom", `%${query}%`);
     q = q.order("nom", { ascending: true }).limit(10);
     const { data, error } = await q;
@@ -28,8 +27,8 @@ export function useProduitsAutocomplete() {
     }
     const final = (Array.isArray(data) ? data : []).map(p => ({
       id: p.id,
-      nom: `${p.nom} (${p.unite}) [${p.famille?.nom || ""}]`,
-      nom_simple: p.nom,
+      produit_id: p.id,
+      nom: p.nom,
       unite: p.unite,
       tva: p.tva ?? 0,
       dernier_prix: p.dernier_prix ?? 0,

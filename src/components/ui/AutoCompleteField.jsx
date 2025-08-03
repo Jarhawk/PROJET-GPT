@@ -85,9 +85,9 @@ export default function AutoCompleteField({
         className={`${isValid ? "border-mamastockGold" : ""} ${className}`}
         aria-label={label}
         onKeyDown={e => {
-          if (e.key === "Enter" && showAdd) {
+          if (e.key === "Enter") {
             e.preventDefault();
-            handleAddOption();
+            if (showAdd) handleAddOption();
           }
         }}
         {...props}

@@ -1,5 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import AutoCompleteZoneField from "@/components/ui/AutoCompleteZoneField";
+import AutoCompleteField from "@/components/ui/AutoCompleteField";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -17,24 +18,30 @@ export default function FactureLigne({
   const { getProduct } = useProducts();
   const [loadingProd, setLoadingProd] = useState(false);
 
-  async function handleProduitSelection(name) {
-    const match = produitOptions.find(p => p.nom === name);
-    if (match) {
-      onChange({
+  async function handleProduitSelection(obj) {
+    if (obj?.id) {
+      const newLigne = {
         ...ligne,
-        produit_nom: match.nom,
-        produit_id: match.id,
-        unite: match.unite || "",
-        prix_unitaire: match.dernier_prix ?? ligne.prix_unitaire,
-        tva: match.tva ?? ligne.tva,
-      });
+        produit_nom: obj.nom,
+        produit_id: obj.id,
+        unite: obj.unite || "",
+        prix_unitaire: obj.dernier_prix ?? ligne.prix_unitaire,
+        tva: obj.tva ?? ligne.tva,
+      };
+      onChange(newLigne);
       setLoadingProd(true);
-      const prod = await getProduct(match.id);
-      onChange({ ...ligne, zone_stock_id: prod?.zone_stock_id || "" });
+      const prod = await getProduct(obj.id);
+      onChange({ ...newLigne, zone_stock_id: prod?.zone_stock_id || "" });
       setLoadingProd(false);
     } else {
-      onChange({ ...ligne, produit_nom: name, produit_id: "" });
-      if (name.length >= 2) searchProduits(name);
+      onChange({
+        ...ligne,
+        produit_nom: obj?.nom || "",
+        produit_id: "",
+        unite: "",
+        zone_stock_id: "",
+      });
+      if (obj?.nom?.length >= 2) searchProduits(obj.nom);
     }
   }
 
@@ -45,45 +52,44 @@ export default function FactureLigne({
   return (
     <tr className="h-10">
       <td className="p-1 align-middle">
-        <Input
-          list={`produits-${index}`}
-          required
+        <AutoCompleteField
           value={ligne.produit_nom}
-          onChange={e => handleProduitSelection(e.target.value)}
-          className="h-10 min-w-[30ch] text-black"
+          onChange={handleProduitSelection}
+          options={produitOptions}
+          required
+          className="h-10 min-w-[30ch]"
         />
-        <datalist id={`produits-${index}`}>
-          {produitOptions.map(p => (
-            <option key={p.id} value={p.nom} />
-          ))}
-        </datalist>
       </td>
       <td className="p-1 align-middle">
         <Input
           type="number"
           required
-          className="h-10 w-full text-black"
+          className="h-10 w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           value={ligne.quantite}
           onChange={e => update("quantite", Number(e.target.value))}
+          onKeyDown={e => e.key === "Enter" && e.preventDefault()}
         />
       </td>
       <td className="text-center p-1 align-middle">{ligne.unite}</td>
       <td className="p-1 align-middle">
         <Input
           type="number"
-          className="h-10 w-full text-black"
+          className="h-10 w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           value={ligne.prix_unitaire}
           onChange={e => update("prix_unitaire", Number(e.target.value))}
+          onKeyDown={e => e.key === "Enter" && e.preventDefault()}
         />
       </td>
-      <td className="p-1 align-middle w-14">
+      <td className="p-1 align-middle w-16">
         <Input
           type="number"
-          className="h-10 w-full text-black"
+          className="h-10 w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           title="Taux de TVA appliqué"
           required
+          max={9999}
           value={ligne.tva}
           onChange={e => update("tva", Number(e.target.value))}
+          onKeyDown={e => e.key === "Enter" && e.preventDefault()}
         />
       </td>
       <td className="min-w-[120px] p-1 align-middle">
@@ -92,7 +98,7 @@ export default function FactureLigne({
           onChange={obj => update("zone_stock_id", obj?.id || "")}
           disabled={loadingProd}
           required
-          className="h-10 text-black"
+          className="h-10"
         />
       </td>
       <td className="p-1 align-middle text-center">

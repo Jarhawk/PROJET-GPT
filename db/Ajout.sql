@@ -24,6 +24,9 @@ ALTER TABLE factures ADD COLUMN IF NOT EXISTS justificatif text;
 -- Commentaire facultatif sur la facture
 ALTER TABLE factures ADD COLUMN IF NOT EXISTS commentaire text;
 
+-- Numéro de bon de livraison lié à la facture
+ALTER TABLE factures ADD COLUMN IF NOT EXISTS bon_livraison text;
+
 -- Ajout champ pour hiérarchie Famille / Sous-famille
 DO $$
 BEGIN

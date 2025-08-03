@@ -47,7 +47,7 @@ export default function AutoCompleteField({
     );
     if (match) onChange(match);
     else onChange(val ? { id: null, nom: val } : { id: "", nom: "" });
-    setShowAdd(val && !match);
+    setShowAdd(val && !match && !!onAddNewValue);
   };
 
   const handleAddOption = async () => {
@@ -82,7 +82,7 @@ export default function AutoCompleteField({
         }}
         {...props}
       />
-      {showAdd && (
+      {showAdd && onAddNewValue && (
         <Button
           type="button"
           size="sm"

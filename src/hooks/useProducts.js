@@ -17,6 +17,7 @@ export function useProducts() {
 
   const fetchProducts = useCallback(async ({
     search = "",
+    famille = "",
     sousFamille = "",
     zone = "",
     actif = null,
@@ -31,7 +32,7 @@ export function useProducts() {
     let query = supabase
       .from("produits")
       .select(
-        `*, unite:unites(nom), zone_stock:zones_stock(nom)`,
+        `*, unite:unites(nom), zone_stock:zones_stock(nom), famille:familles(nom), sous_famille:sous_familles(nom)`,
         { count: "exact" }
       )
       .eq("mama_id", mama_id);
@@ -39,6 +40,7 @@ export function useProducts() {
     if (search) {
       query = query.ilike("nom", `%${search}%`);
     }
+    if (famille) query = query.eq("famille_id", famille);
     if (sousFamille) query = query.eq("sous_famille_id", sousFamille);
     if (zone) query = query.eq("zone_stock_id", zone);
     if (typeof actif === "boolean") query = query.eq("actif", actif);

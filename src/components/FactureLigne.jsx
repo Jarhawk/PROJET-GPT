@@ -123,8 +123,6 @@ export default function FactureLigne({
           </Button>
         </div>
       </td>
-      <td className="text-right">{(ligne.quantite * (ligne.prix_unitaire || 0)).toFixed(2)}</td>
-      <td className="text-right">{(ligne.quantite * (ligne.prix_unitaire || 0) * (ligne.tva || 0) / 100).toFixed(2)}</td>
       <td className="text-right">{(ligne.quantite * ligne.prix_unitaire * (1 + (ligne.tva || 0) / 100)).toFixed(2)}</td>
       <td>
         <Button

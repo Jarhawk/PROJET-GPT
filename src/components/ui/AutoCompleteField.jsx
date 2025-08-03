@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useId } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -18,15 +18,16 @@ export default function AutoCompleteField({
     [options],
   );
   const [inputValue, setInputValue] = useState(() => {
-    const match = resolved.find((o) => o.id === value);
+    const match = resolved.find(o => o.id === value);
     return match ? match.nom : "";
   });
   const [showAdd, setShowAdd] = useState(false);
+  const listId = useId();
 
   useEffect(() => {
     if (!value) return; // avoid clearing typed text when value is empty
-    const match = resolved.find((o) => o.id === value);
-    setInputValue(match ? match.nom : "");
+    const match = resolved.find(o => o.id === value);
+    if (match) setInputValue(match.nom);
   }, [value, resolved]);
 
   const disabledIds = disabledOptions.map((d) =>
@@ -74,11 +75,12 @@ export default function AutoCompleteField({
         </label>
       )}
       <Input
+        list={listId}
         value={inputValue}
         onChange={handleInputChange}
         className={`${isValid ? "border-mamastockGold" : ""}`}
         aria-label={label}
-        onKeyDown={(e) => {
+        onKeyDown={e => {
           if (e.key === "Enter" && showAdd) {
             e.preventDefault();
             handleAddOption();
@@ -86,6 +88,11 @@ export default function AutoCompleteField({
         }}
         {...props}
       />
+      <datalist id={listId}>
+        {resolved.map(opt => (
+          <option key={opt.id} value={opt.nom} />
+        ))}
+      </datalist>
       {showAdd && onAddNewValue && (
         <Button
           type="button"

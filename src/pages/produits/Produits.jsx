@@ -2,6 +2,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useProducts } from "@/hooks/useProducts";
 import { useFamilles } from "@/hooks/useFamilles";
+import { useSousFamilles } from "@/hooks/useSousFamilles";
 import useZonesStock from "@/hooks/useZonesStock";
 import ProduitFormModal from "@/components/produits/ProduitFormModal";
 import ProduitDetail from "@/components/produits/ProduitDetail";
@@ -16,10 +17,7 @@ import { Plus as PlusIcon } from "lucide-react";
 import { Toaster, toast } from "react-hot-toast";
 import useAuth from "@/hooks/useAuth";
 import ProduitRow from "@/components/produits/ProduitRow";
-import {
-  exportExcelProduits,
-  downloadProduitsTemplate,
-} from "@/utils/excelUtils";
+import { exportExcelProduits } from "@/utils/excelUtils";
 import ModalImportProduits from "@/components/produits/ModalImportProduits";
 
 const PAGE_SIZE = 50;
@@ -36,6 +34,8 @@ export default function Produits() {
     deleteProduct,
   } = useProducts();
   const { familles: famillesHook, fetchFamilles } = useFamilles();
+  const { sousFamilles, fetchSousFamilles, setSousFamilles } =
+    useSousFamilles();
   const { zones } = useZonesStock();
   const familles = famillesHook;
 
@@ -43,11 +43,12 @@ export default function Produits() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showDetail, setShowDetail] = useState(false);
   const [search, setSearch] = useState("");
+  const [familleFilter, setFamilleFilter] = useState("");
   const [sousFamilleFilter, setSousFamilleFilter] = useState("");
   const [actifFilter, setActifFilter] = useState("all");
   const [zoneFilter, setZoneFilter] = useState("");
   const [page, setPage] = useState(1);
-  const [sortField, setSortField] = useState("nom");
+  const [sortField, setSortField] = useState("famille");
   const [sortOrder, setSortOrder] = useState("asc");
   const { hasAccess, mama_id } = useAuth();
   const canEdit = hasAccess("produits", "peut_modifier");
@@ -56,6 +57,7 @@ export default function Produits() {
   const refreshList = useCallback(() => {
     fetchProducts({
       search,
+      famille: familleFilter,
       sousFamille: sousFamilleFilter,
       zone: zoneFilter,
       actif: actifFilter === "all" ? null : actifFilter === "true",
@@ -67,6 +69,7 @@ export default function Produits() {
   }, [
     fetchProducts,
     search,
+    familleFilter,
     sousFamilleFilter,
     zoneFilter,
     actifFilter,
@@ -88,14 +91,24 @@ export default function Produits() {
     }
   }
 
-  function handleDownloadTemplate() {
-    downloadProduitsTemplate();
-  }
+  useEffect(() => {
+    setSousFamilleFilter("");
+    if (familleFilter) {
+      fetchSousFamilles(familleFilter);
+    } else {
+      setSousFamilles([]);
+    }
+  }, [familleFilter, fetchSousFamilles, setSousFamilles]);
 
-  const filteredProducts = products.filter((p) => {
-    if (zoneFilter && p.zone_stock_id !== zoneFilter) return false;
-    return true;
-  });
+  function resetFilters() {
+    setSearch("");
+    setFamilleFilter("");
+    setSousFamilleFilter("");
+    setZoneFilter("");
+    setActifFilter("all");
+    setPage(1);
+    setSousFamilles([]);
+  }
 
   function toggleSort(field) {
     if (sortField === field) {
@@ -146,32 +159,44 @@ export default function Produits() {
           />
           <Select
             className="flex-1 min-w-[150px]"
+            value={familleFilter}
+            onChange={(e) => {
+              setPage(1);
+              setFamilleFilter(e.target.value);
+            }}
+            ariaLabel="Filtrer par famille"
+          >
+            <option value="">Toutes les familles</option>
+            {familles.map((f) => (
+              <option key={f.id} value={f.id}>
+                {f.nom}
+              </option>
+            ))}
+          </Select>
+          <Select
+            className="flex-1 min-w-[150px]"
             value={sousFamilleFilter}
             onChange={(e) => {
               setPage(1);
               setSousFamilleFilter(e.target.value);
             }}
-            ariaLabel="Filtrer par famille"
+            disabled={!familleFilter}
+            ariaLabel="Filtrer par sous-famille"
           >
-            <option value="">Toutes familles</option>
-            {familles
-              .filter((f) => f.famille_parent_id)
-              .map((f) => {
-                const parent = familles.find(
-                  (p) => p.id === f.famille_parent_id,
-                );
-                const label = parent ? `${parent.nom} > ${f.nom}` : f.nom;
-                return (
-                  <option key={f.id} value={f.id}>
-                    {label}
-                  </option>
-                );
-              })}
+            <option value="">Toutes les sous-familles</option>
+            {sousFamilles.map((sf) => (
+              <option key={sf.id} value={sf.id}>
+                {sf.nom}
+              </option>
+            ))}
           </Select>
           <Select
             className="flex-1 min-w-[150px]"
             value={zoneFilter}
-            onChange={(e) => setZoneFilter(e.target.value)}
+            onChange={(e) => {
+              setPage(1);
+              setZoneFilter(e.target.value);
+            }}
             ariaLabel="Filtrer par zone"
           >
             <option value="">Toutes les zones</option>
@@ -194,6 +219,9 @@ export default function Produits() {
             <option value="true">Actif</option>
             <option value="false">Inactif</option>
           </Select>
+          <Button variant="outline" onClick={resetFilters} className="min-w-[140px]">
+            Réinitialiser
+          </Button>
         </div>
         <TableHeader className="justify-between">
           <Button
@@ -210,12 +238,6 @@ export default function Produits() {
           <div className="flex gap-2 flex-wrap">
             <Button className="min-w-[140px]" onClick={handleExportExcel}>
               Exporter tous les produits
-            </Button>
-            <Button
-              className="min-w-[140px]"
-              onClick={handleDownloadTemplate}
-            >
-              Télécharger template Excel
             </Button>
             <Button
               className="min-w-[140px]"
@@ -259,14 +281,14 @@ export default function Produits() {
             </tr>
           </thead>
           <tbody>
-            {filteredProducts.length === 0 ? (
+            {products.length === 0 ? (
               <tr>
                 <td colSpan={6} className="py-4 text-center text-muted-foreground">
                   Aucun produit trouvé. Essayez d’ajouter un produit via le bouton ci-dessus.
                 </td>
               </tr>
             ) : (
-              filteredProducts.map((p) => (
+              products.map((p) => (
                 <ProduitRow
                   key={p.id}
                   produit={p}
@@ -285,19 +307,21 @@ export default function Produits() {
       </ListingContainer>
       {/* Mobile listing */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:hidden">
-        {filteredProducts.length === 0 ? (
+        {products.length === 0 ? (
           <div className="py-4 text-center text-muted-foreground">
             Aucun produit trouvé. Essayez d’ajouter un produit via le bouton ci-dessus.
           </div>
         ) : (
-          filteredProducts.map((produit) => (
+          products.map((produit) => (
             <Card key={produit.id} className="p-4 flex flex-col justify-between">
               <div className="flex justify-between items-start">
                 <div className="font-bold break-words">{produit.nom}</div>
                 <span>{produit.actif ? "✅" : "❌"}</span>
               </div>
-              <div className="text-sm mt-1">
-                {produit.stock_theorique} {produit.unite?.nom ?? produit.unite ?? ""}
+              <div className="text-sm mt-1 flex flex-wrap gap-2">
+                <span>{produit.unite?.nom ?? produit.unite ?? ""}</span>
+                <span>Stock: {produit.stock_theorique}</span>
+                <span>PMP: {produit.pmp != null ? Number(produit.pmp).toFixed(2) : "-"}</span>
               </div>
               <div className="flex gap-2 mt-2">
                 <Button

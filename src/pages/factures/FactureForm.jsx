@@ -162,7 +162,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
   return (
     <GlassCard width="w-full" title={facture ? "Modifier la facture" : "Ajouter une facture"}>
       <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="flex flex-col">
             <label className="text-sm mb-1">Date *</label>
             <Input type="date" value={date} onChange={e => setDate(e.target.value)} required />
@@ -193,10 +193,10 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
               type="number"
               readOnly
               value={autoHt.toFixed(2)}
-              className="font-bold [appearance:textfield]"
+              className="font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col lg:col-span-2">
             <label className="text-sm mb-1">Fournisseur *</label>
             <AutoCompleteField
               value={fournisseur_id}
@@ -209,7 +209,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
               required
             />
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col lg:col-span-2">
             <label className="text-sm mb-1">Commentaire</label>
             <Input type="text" value={commentaire} onChange={e => setCommentaire(e.target.value)} />
           </div>

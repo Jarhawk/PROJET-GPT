@@ -1,7 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useFactures } from "@/hooks/useFactures";
 import { useProduitsAutocomplete } from "@/hooks/useProduitsAutocomplete";
+import { useFactureForm } from "@/hooks/useFactureForm";
 import AutoCompleteField from "@/components/ui/AutoCompleteField";
 import AutoCompleteZoneField from "@/components/ui/AutoCompleteZoneField";
 import { useFournisseursAutocomplete } from "@/hooks/useFournisseursAutocomplete";
@@ -24,6 +25,7 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
     results: fournisseurOptions,
     searchFournisseurs,
   } = useFournisseursAutocomplete();
+  const formRef = useRef(null);
   // Utilise la date de facture existante si présente
   const [date, setDate] = useState(
     facture?.date_facture || new Date().toISOString().slice(0, 10)
@@ -59,20 +61,11 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
   const [file, setFile] = useState(null);
   const [fileUrl, setFileUrl] = useState(facture?.justificatif || "");
   const [loading, setLoading] = useState(false);
-  const autoHt = lignes.reduce(
-    (s, l) => s + l.quantite * l.prix_unitaire,
-    0
+  const { autoHt, autoTva, autoTotal, ecart } = useFactureForm(
+    lignes,
+    totalHtInput
   );
-  const autoTva = lignes.reduce(
-    (s, l) =>
-      s + l.quantite * l.prix_unitaire * (l.tva || 0) / 100,
-    0
-  );
-  const autoTotal = autoHt + autoTva;
-  const ecart = useMemo(
-    () => autoHt - Number(totalHtInput || 0),
-    [autoHt, totalHtInput]
-  );
+  const ecartClass = Math.abs(ecart) > 0.01 ? "text-red-500 font-semibold" : "text-green-500";
   useEffect(() => {
     if (facture?.fournisseur_id && fournisseurs.length) {
       const found = fournisseurs.find(s => s.id === facture.fournisseur_id);
@@ -100,12 +93,9 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!date || !fournisseur_id) {
-      toast.error("Date et fournisseur requis !");
-      return;
-    }
-    if (!totalHtInput) {
-      toast.error("Total HT requis !");
+    if (!date || !fournisseur_id || !totalHtInput) {
+      toast.error("Champs requis manquants !");
+      formRef.current?.querySelector(":invalid")?.focus();
       return;
     }
     if (loading) return;
@@ -140,9 +130,11 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
         fid = data.id;
       }
 
-      for (const ligne of lignes) {
+      for (let i = 0; i < lignes.length; i++) {
+        const ligne = lignes[i];
         if (!ligne.produit_id) {
           toast.error("Produit requis pour chaque ligne");
+          document.getElementById(`produit-${i}`)?.focus();
           setLoading(false);
           return;
         }
@@ -161,6 +153,7 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
         }
       }
       await calculateTotals(fid);
+      console.log("État du formulaire", invoice);
       toast.success(facture ? "Facture modifiée !" : "Facture ajoutée !");
       onClose?.();
     } catch (err) {
@@ -171,10 +164,19 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
   };
 
   return (
-    <GlassCard className="p-6 w-full" title={facture ? "Modifier la facture" : "Ajouter une facture"}>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
+    <GlassCard className="p-6 w-full md:w-[70%] max-w-[1000px] mx-auto" title={facture ? "Modifier la facture" : "Ajouter une facture"}>
+      <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <label className="block text-sm mb-1">État</label>
+          <Select value={statut} onChange={e => setStatut(e.target.value)}>
+            <option value="brouillon">Brouillon</option>
+            <option value="en attente">En attente</option>
+            <option value="validée">Validée</option>
+            <option value="archivée">Archivée</option>
+          </Select>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
             <label className="block text-sm mb-1">Date *</label>
             <Input
               type="date"
@@ -217,16 +219,7 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
               onChange={e => setCommentaire(e.target.value)}
             />
           </div>
-          <div className="space-y-2">
-            <div>
-              <label className="block text-sm mb-1">État</label>
-              <Select value={statut} onChange={e => setStatut(e.target.value)}>
-                <option value="brouillon">Brouillon</option>
-                <option value="en attente">En attente</option>
-                <option value="validée">Validée</option>
-                <option value="archivée">Archivée</option>
-              </Select>
-            </div>
+          <div className="space-y-4">
             <div>
               <label className="block text-sm mb-1">Total HT *</label>
               <Input
@@ -235,7 +228,7 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
                 value={totalHtInput}
                 onChange={e => setTotalHtInput(e.target.value)}
               />
-              <p className="text-xs mt-1">
+              <p className={`text-xs mt-1 ${ecartClass}`}>
                 Total calculé : {autoHt.toFixed(2)} € | Écart : {ecart.toFixed(2)} €
               </p>
             </div>
@@ -283,6 +276,8 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
                 <tr key={idx}>
                   <td className="min-w-[200px]">
                     <AutoCompleteField
+                      id={`produit-${idx}`}
+                      required
                       label=""
                       value={l.produit_id}
                       onChange={async obj => {
@@ -297,7 +292,7 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
                                   produit_nom: obj?.nom || "",
                                   produit_id: obj?.id || "",
                                   unite: obj?.unite || "",
-                                  prix_unitaire: obj?.pmp ?? it.prix_unitaire,
+                                  prix_unitaire: obj?.dernier_prix ?? it.prix_unitaire,
                                   tva: obj?.tva ?? it.tva,
                                 }
                               : it,
@@ -319,6 +314,7 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
                   <td>
                     <Input
                       type="number"
+                      required
                       className="w-full"
                       value={l.quantite}
                       onChange={e =>
@@ -402,8 +398,9 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
             </tbody>
           </table>
         </div>
-            <Button
+        <Button
           type="button"
+          className="mt-4"
           onClick={() =>
             setLignes(ls => [
               ...ls,

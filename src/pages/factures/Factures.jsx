@@ -8,13 +8,12 @@ import FactureForm from "./FactureForm.jsx";
 import FactureDetail from "./FactureDetail.jsx";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import ListingContainer from "@/components/ui/ListingContainer";
-import PaginationFooter from "@/components/ui/PaginationFooter";
 import TableHeader from "@/components/ui/TableHeader";
 import GlassCard from "@/components/ui/GlassCard";
 import { Toaster, toast } from "react-hot-toast";
-import { motion as Motion } from "framer-motion";
-import FactureRow from "@/components/factures/FactureRow.jsx";
+import PaginationFooter from "@/components/ui/PaginationFooter";
+import FactureTable from "@/components/FactureTable";
+import FactureImportModal from "@/components/FactureImportModal";
 
 const STATUTS = {
   brouillon: "badge",
@@ -23,7 +22,7 @@ const STATUTS = {
   payée: "badge badge-admin",
   refusée: "badge badge-superadmin",
   annulée: "badge badge-superadmin",
-  archivée: "badge"
+  archivée: "badge",
 };
 
 export default function Factures() {
@@ -33,6 +32,7 @@ export default function Factures() {
   const { results: factureOptions, searchFactures } = useFacturesAutocomplete();
   const [showForm, setShowForm] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState("");
   const [statutFilter, setStatutFilter] = useState("");
@@ -42,6 +42,7 @@ export default function Factures() {
   const [page, setPage] = useState(1);
   const pageSize = 10;
   const [loading, setLoading] = useState(false);
+
   const refreshList = useCallback(() => {
     if (!mama_id) return;
     getFactures({
@@ -54,19 +55,13 @@ export default function Factures() {
       pageSize,
     });
   }, [mama_id, getFactures, search, fournisseurFilter, statutFilter, monthFilter, actifFilter, page]);
+
   const canEdit = hasAccess("factures", "peut_modifier");
 
   useEffect(() => { searchFactures(search); }, [search, searchFactures]);
+  useEffect(() => { refreshList(); }, [refreshList]);
 
-  useEffect(() => {
-    refreshList();
-  }, [refreshList]);
-
-  // Filtres avancés
-  const facturesFiltres = factures;
-
-  // Suppression avec confirmation
-  const handleDelete = async (facture) => {
+  const handleDelete = async facture => {
     if (window.confirm(`Archiver la facture n°${facture.id} ?`)) {
       setLoading(true);
       await deleteFacture(facture.id);
@@ -83,139 +78,100 @@ export default function Factures() {
       <Toaster position="top-right" />
       <GlassCard width="w-full">
         <TableHeader className="items-end">
-        <input
-          list="factures-list"
-          type="search"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="form-input"
-          placeholder="Recherche (numéro)"
-        />
-        <datalist id="factures-list">
-          {factureOptions.map(f => (
-            <option key={f.id} value={f.numero || f.id}>
-              {`n°${f.numero || f.id} - ${f.fournisseur?.nom || ""}`}
-            </option>
-          ))}
-        </datalist>
-        <select
-          className="form-input"
-          value={fournisseurFilter}
-          onChange={(e) => {
-            setFournisseurFilter(e.target.value);
-            setPage(1);
-          }}
-        >
-          <option value="">Tous fournisseurs</option>
-          {fournisseurs.map(s => <option key={s.id} value={s.id}>{s.nom}</option>)}
-        </select>
-        <select
-          className="form-input"
-          value={statutFilter}
-          onChange={(e) => {
-            setStatutFilter(e.target.value);
-            setPage(1);
-          }}
-        >
-          <option value="">Tous statuts</option>
-          {Object.keys(STATUTS).map(s => (
-            <option key={s} value={s}>{s}</option>
-          ))}
-        </select>
-        <input
-          type="month"
-          className="form-input"
-          value={monthFilter}
-          onChange={e => { setMonthFilter(e.target.value); setPage(1); }}
-        />
-        <select
-          className="form-input"
-          value={actifFilter}
-          onChange={(e) => {
-            setActifFilter(e.target.value);
-            setPage(1);
-          }}
-        >
-          <option value="true">Actives</option>
-          <option value="false">Inactives</option>
-          <option value="all">Toutes</option>
-        </select>
-        {canEdit && (
-          <Button
-            onClick={() => {
-              setSelected(null);
-              setShowForm(true);
-            }}
+          <input
+            list="factures-list"
+            type="search"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="form-input"
+            placeholder="Recherche (numéro)"
+          />
+          <datalist id="factures-list">
+            {factureOptions.map(f => (
+              <option key={f.id} value={f.numero || f.id}>
+                {`n°${f.numero || f.id} - ${f.fournisseur?.nom || ""}`}
+              </option>
+            ))}
+          </datalist>
+          <select
+            className="form-input"
+            value={fournisseurFilter}
+            onChange={e => { setFournisseurFilter(e.target.value); setPage(1); }}
           >
-            Ajouter une facture
-          </Button>
-        )}
+            <option value="">Tous fournisseurs</option>
+            {fournisseurs.map(s => <option key={s.id} value={s.id}>{s.nom}</option>)}
+          </select>
+          <select
+            className="form-input"
+            value={statutFilter}
+            onChange={e => { setStatutFilter(e.target.value); setPage(1); }}
+          >
+            <option value="">Tous statuts</option>
+            {Object.keys(STATUTS).map(s => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+          <input
+            type="month"
+            className="form-input"
+            value={monthFilter}
+            onChange={e => { setMonthFilter(e.target.value); setPage(1); }}
+          />
+          <select
+            className="form-input"
+            value={actifFilter}
+            onChange={e => { setActifFilter(e.target.value); setPage(1); }}
+          >
+            <option value="true">Actives</option>
+            <option value="false">Inactives</option>
+            <option value="all">Toutes</option>
+          </select>
+          {canEdit && (
+            <>
+              <Button onClick={() => { setSelected(null); setShowForm(true); }}>
+                Ajouter une facture
+              </Button>
+              <Button variant="outline" onClick={() => setShowImport(true)}>
+                Importer
+              </Button>
+            </>
+          )}
         </TableHeader>
       </GlassCard>
-      <ListingContainer className="mb-4">
-        <Motion.table
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="min-w-full text-sm"
-        >
-        <thead>
-          <tr>
-            <th className="px-4 py-2">Numéro</th>
-            <th className="px-4 py-2">Date</th>
-            <th className="px-4 py-2">Fournisseur</th>
-            <th className="px-4 py-2 text-right">Montant TTC</th>
-            <th className="px-4 py-2">Statut</th>
-            <th className="px-4 py-2">Actif</th>
-            <th className="px-4 py-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {facturesFiltres.map((facture) => (
-            <FactureRow
-              key={facture.id}
-              facture={facture}
-              canEdit={canEdit}
-              onEdit={(f) => {
-                setSelected(f);
-                setShowForm(true);
-              }}
-              onDetail={(f) => {
-                setSelected(f);
-                setShowDetail(true);
-              }}
-              onToggleActive={async (id, actif) => {
-                await toggleFactureActive(id, actif);
-                refreshList();
-              }}
-              onArchive={handleDelete}
-            />
-          ))}
-        </tbody>
-        </Motion.table>
-      </ListingContainer>
+
+      {showForm && (
+        <FactureForm
+          facture={selected}
+          fournisseurs={fournisseurs}
+          onClose={() => { setShowForm(false); setSelected(null); refreshList(); }}
+        />
+      )}
+
+      <FactureTable
+        factures={factures}
+        canEdit={canEdit}
+        onEdit={f => { setSelected(f); setShowForm(true); }}
+        onDetail={f => { setSelected(f); setShowDetail(true); }}
+        onToggleActive={async (id, actif) => { await toggleFactureActive(id, actif); refreshList(); }}
+        onArchive={handleDelete}
+      />
+
       <PaginationFooter
         page={page}
         pages={Math.ceil(total / pageSize)}
         onPageChange={setPage}
         className="mb-4"
       />
-      {/* Modal d’ajout/modif */}
-      {showForm && (
-        <FactureForm
-          facture={selected}
-          fournisseurs={fournisseurs}
-          onClose={() => {
-            setShowForm(false);
-            setSelected(null);
-            refreshList();
-          }}
-        />
-      )}
-      {/* Modal de détail */}
+
       {showDetail && selected && (
-        <FactureDetail
-          facture={selected}
-          onClose={() => { setShowDetail(false); setSelected(null); }}
+        <FactureDetail facture={selected} onClose={() => { setShowDetail(false); setSelected(null); }} />
+      )}
+
+      {showImport && (
+        <FactureImportModal
+          open={showImport}
+          onClose={() => setShowImport(false)}
+          onImport={() => { setShowImport(false); refreshList(); }}
         />
       )}
     </div>

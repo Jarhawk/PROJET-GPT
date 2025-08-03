@@ -14,9 +14,10 @@ export function useProduitsAutocomplete() {
     setLoading(true);
     setError(null);
     let q = supabase
-      .from("v_produits_dernier_prix")
-      .select("id, nom, unite, tva, dernier_prix")
-      .eq("mama_id", mama_id);
+      .from("produits")
+      .select("id, nom, tva, dernier_prix, unite:unites(nom)")
+      .eq("mama_id", mama_id)
+      .eq("actif", true);
     if (query) q = q.ilike("nom", `%${query}%`);
     q = q.order("nom", { ascending: true }).limit(10);
     const { data, error } = await q;
@@ -29,7 +30,7 @@ export function useProduitsAutocomplete() {
       id: p.id,
       produit_id: p.id,
       nom: p.nom,
-      unite: p.unite,
+      unite: p.unite?.nom || "",
       tva: p.tva ?? 0,
       dernier_prix: p.dernier_prix ?? 0,
     }));

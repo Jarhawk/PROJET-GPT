@@ -7,6 +7,9 @@ import { useFacturesAutocomplete } from "@/hooks/useFacturesAutocomplete";
 import FactureForm from "./FactureForm.jsx";
 import FactureDetail from "./FactureDetail.jsx";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import useExport from "@/hooks/useExport";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import TableHeader from "@/components/ui/TableHeader";
 import GlassCard from "@/components/ui/GlassCard";
@@ -42,6 +45,7 @@ export default function Factures() {
   const [page, setPage] = useState(1);
   const pageSize = 10;
   const [loading, setLoading] = useState(false);
+  const { exportData, loading: exporting } = useExport();
 
   const refreshList = useCallback(() => {
     if (!mama_id) return;
@@ -77,64 +81,64 @@ export default function Factures() {
     <div className="p-6 container mx-auto text-shadow space-y-6">
       <Toaster position="top-right" />
       <GlassCard width="w-full">
-        <TableHeader className="items-end">
-          <input
-            list="factures-list"
-            type="search"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="form-input"
-            placeholder="Recherche (numéro)"
-          />
-          <datalist id="factures-list">
-            {factureOptions.map(f => (
-              <option key={f.id} value={f.numero || f.id}>
-                {`n°${f.numero || f.id} - ${f.fournisseur?.nom || ""}`}
-              </option>
-            ))}
-          </datalist>
-          <select
-            className="form-input"
-            value={fournisseurFilter}
-            onChange={e => { setFournisseurFilter(e.target.value); setPage(1); }}
-          >
-            <option value="">Tous fournisseurs</option>
-            {fournisseurs.map(s => <option key={s.id} value={s.id}>{s.nom}</option>)}
-          </select>
-          <select
-            className="form-input"
-            value={statutFilter}
-            onChange={e => { setStatutFilter(e.target.value); setPage(1); }}
-          >
-            <option value="">Tous statuts</option>
-            {Object.keys(STATUTS).map(s => (
-              <option key={s} value={s}>{s}</option>
-            ))}
-          </select>
-          <input
-            type="month"
-            className="form-input"
-            value={monthFilter}
-            onChange={e => { setMonthFilter(e.target.value); setPage(1); }}
-          />
-          <select
-            className="form-input"
-            value={actifFilter}
-            onChange={e => { setActifFilter(e.target.value); setPage(1); }}
-          >
-            <option value="true">Actives</option>
-            <option value="false">Inactives</option>
-            <option value="all">Toutes</option>
-          </select>
+        <TableHeader className="items-end w-full flex-wrap">
+          <div className="flex flex-wrap gap-2 flex-1">
+            <Input
+              list="factures-list"
+              type="search"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Recherche (numéro)"
+            />
+            <datalist id="factures-list">
+              {factureOptions.map(f => (
+                <option key={f.id} value={f.numero || f.id}>
+                  {`n°${f.numero || f.id} - ${f.fournisseur?.nom || ""}`}
+                </option>
+              ))}
+            </datalist>
+            <Select
+              value={fournisseurFilter}
+              onChange={e => { setFournisseurFilter(e.target.value); setPage(1); }}
+            >
+              <option value="">Tous fournisseurs</option>
+              {fournisseurs.map(s => <option key={s.id} value={s.id}>{s.nom}</option>)}
+            </Select>
+            <Select
+              value={statutFilter}
+              onChange={e => { setStatutFilter(e.target.value); setPage(1); }}
+            >
+              <option value="">Tous statuts</option>
+              {Object.keys(STATUTS).map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </Select>
+            <Input
+              type="month"
+              value={monthFilter}
+              onChange={e => { setMonthFilter(e.target.value); setPage(1); }}
+            />
+            <Select
+              value={actifFilter}
+              onChange={e => { setActifFilter(e.target.value); setPage(1); }}
+            >
+              <option value="true">Actives</option>
+              <option value="false">Inactives</option>
+              <option value="all">Toutes</option>
+            </Select>
+          </div>
           {canEdit && (
-            <>
+            <div className="flex flex-wrap gap-2">
               <Button onClick={() => { setSelected(null); setShowForm(true); }}>
                 Ajouter une facture
+              </Button>
+              <Button variant="outline" onClick={() => exportData({ type: 'factures', format: 'excel' })} disabled={exporting}>
+                Export Excel
               </Button>
               <Button variant="outline" onClick={() => setShowImport(true)}>
                 Importer
               </Button>
-            </>
+            </div>
           )}
         </TableHeader>
       </GlassCard>

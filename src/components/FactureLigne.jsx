@@ -15,7 +15,7 @@ export default function FactureLigne({
   produitOptions = [],
   searchProduits,
 }) {
-  const { getProduct } = useProducts();
+  const { getProduct, updateProduct } = useProducts();
   const [loadingProd, setLoadingProd] = useState(false);
 
   async function handleProduit(obj) {
@@ -33,8 +33,6 @@ export default function FactureLigne({
       onChange({ ...ligne, zone_stock_id: prod?.zone_stock_id || "" });
       setLoadingProd(false);
     }
-    const searchVal = obj?.nom_simple || obj?.nom || "";
-    if (searchVal.length >= 2) searchProduits(searchVal);
   }
 
   function update(field, value) {
@@ -53,7 +51,9 @@ export default function FactureLigne({
             if (obj?.id && obj.id !== ligne.produit_id) {
               handleProduit(obj);
             } else if (!obj?.id) {
-              update("produit_id", "");
+              onChange({ ...ligne, produit_id: "", produit_nom: obj?.nom || "" });
+              const val = obj?.nom || "";
+              if (val.length >= 2) searchProduits(val);
             }
           }}
           options={produitOptions}
@@ -82,6 +82,7 @@ export default function FactureLigne({
           type="number"
           className="w-full"
           title="Taux de TVA appliqué"
+          required
           value={ligne.tva}
           onChange={e => update("tva", Number(e.target.value))}
         />
@@ -92,17 +93,39 @@ export default function FactureLigne({
           value={ligne.zone_stock_id}
           onChange={obj => update("zone_stock_id", obj?.id || "")}
           disabled={loadingProd}
+          required
         />
       </td>
       <td className="text-center">
-        <Checkbox
-          checked={ligne.majProduit}
-          onChange={e => update("majProduit", e.target.checked)}
-        />
+        <div className="flex items-center justify-center gap-1">
+          <Checkbox
+            checked={ligne.majProduit}
+            onChange={e => update("majProduit", e.target.checked)}
+          />
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={!ligne.majProduit || !ligne.produit_id}
+            onClick={async () =>
+              await updateProduct(
+                ligne.produit_id,
+                {
+                  dernier_prix: ligne.prix_unitaire,
+                  zone_stock_id: ligne.zone_stock_id,
+                  tva: ligne.tva,
+                },
+                { refresh: false },
+              )
+            }
+          >
+            MAJ
+          </Button>
+        </div>
       </td>
-      <td className="text-right">
-        {(ligne.quantite * ligne.prix_unitaire * (1 + (ligne.tva || 0) / 100)).toFixed(2)}
-      </td>
+      <td className="text-right">{(ligne.quantite * (ligne.prix_unitaire || 0)).toFixed(2)}</td>
+      <td className="text-right">{(ligne.quantite * (ligne.prix_unitaire || 0) * (ligne.tva || 0) / 100).toFixed(2)}</td>
+      <td className="text-right">{(ligne.quantite * ligne.prix_unitaire * (1 + (ligne.tva || 0) / 100)).toFixed(2)}</td>
       <td>
         <Button
           type="button"

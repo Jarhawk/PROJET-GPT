@@ -2,6 +2,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useFactures } from "@/hooks/useFactures";
 import { useFournisseurs } from "@/hooks/useFournisseurs";
+import { useFournisseursAutocomplete } from "@/hooks/useFournisseursAutocomplete";
 import useAuth from "@/hooks/useAuth";
 import { useFacturesAutocomplete } from "@/hooks/useFacturesAutocomplete";
 import FactureForm from "./FactureForm.jsx";
@@ -9,6 +10,8 @@ import FactureDetail from "./FactureDetail.jsx";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { Menu } from "lucide-react";
 import useExport from "@/hooks/useExport";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import TableHeader from "@/components/ui/TableHeader";
@@ -30,7 +33,8 @@ const STATUTS = {
 
 export default function Factures() {
   const { factures, total, getFactures, deleteFacture, toggleFactureActive } = useFactures();
-  const { fournisseurs } = useFournisseurs();
+  const { fournisseurs, getFournisseurs } = useFournisseurs();
+  const { results: fournisseurOptions, searchFournisseurs } = useFournisseursAutocomplete();
   const { mama_id, loading: authLoading, hasAccess } = useAuth();
   const { results: factureOptions, searchFactures } = useFacturesAutocomplete();
   const [showForm, setShowForm] = useState(false);
@@ -40,7 +44,7 @@ export default function Factures() {
   const [search, setSearch] = useState("");
   const [statutFilter, setStatutFilter] = useState("");
   const [fournisseurFilter, setFournisseurFilter] = useState("");
-  const [monthFilter, setMonthFilter] = useState("");
+  const [fournisseurInput, setFournisseurInput] = useState("");
   const [actifFilter, setActifFilter] = useState("true");
   const [page, setPage] = useState(1);
   const pageSize = 10;
@@ -53,17 +57,26 @@ export default function Factures() {
       search,
       fournisseur: fournisseurFilter,
       statut: statutFilter,
-      mois: monthFilter,
       actif: actifFilter === "all" ? null : actifFilter === "true",
       page,
       pageSize,
     });
-  }, [mama_id, getFactures, search, fournisseurFilter, statutFilter, monthFilter, actifFilter, page]);
+  }, [mama_id, getFactures, search, fournisseurFilter, statutFilter, actifFilter, page]);
 
   const canEdit = hasAccess("factures", "peut_modifier");
 
+  useEffect(() => { getFournisseurs(); }, [getFournisseurs]);
   useEffect(() => { searchFactures(search); }, [search, searchFactures]);
+  useEffect(() => { searchFournisseurs(fournisseurInput); }, [fournisseurInput, searchFournisseurs]);
   useEffect(() => { refreshList(); }, [refreshList]);
+
+  const handleFournisseurInput = e => {
+    const val = e.target.value;
+    setFournisseurInput(val);
+    const match = fournisseurOptions.find(f => f.nom.toLowerCase() === val.toLowerCase());
+    setFournisseurFilter(match ? match.id : "");
+    setPage(1);
+  };
 
   const handleDelete = async facture => {
     if (window.confirm(`Archiver la facture n°${facture.id} ?`)) {
@@ -81,14 +94,15 @@ export default function Factures() {
     <div className="p-6 container mx-auto text-shadow space-y-6">
       <Toaster position="top-right" />
       <GlassCard width="w-full">
-        <TableHeader className="items-end w-full flex-wrap">
-          <div className="flex flex-wrap gap-2 flex-1">
+        <TableHeader className="items-center w-full flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2 flex-1">
             <Input
               list="factures-list"
               type="search"
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Recherche (numéro)"
+              className="flex-1 min-w-[12rem]"
             />
             <datalist id="factures-list">
               {factureOptions.map(f => (
@@ -97,30 +111,34 @@ export default function Factures() {
                 </option>
               ))}
             </datalist>
-            <Select
-              value={fournisseurFilter}
-              onChange={e => { setFournisseurFilter(e.target.value); setPage(1); }}
-            >
-              <option value="">Tous fournisseurs</option>
-              {fournisseurs.map(s => <option key={s.id} value={s.id}>{s.nom}</option>)}
-            </Select>
+            <div className="w-full sm:w-auto">
+              <Input
+                list="fournisseurs-list"
+                value={fournisseurInput}
+                onChange={handleFournisseurInput}
+                placeholder="Tous fournisseurs"
+                className="w-full sm:w-48"
+              />
+              <datalist id="fournisseurs-list">
+                {fournisseurOptions.map(f => (
+                  <option key={f.id} value={f.nom} />
+                ))}
+              </datalist>
+            </div>
             <Select
               value={statutFilter}
               onChange={e => { setStatutFilter(e.target.value); setPage(1); }}
+              className="w-full sm:w-40"
             >
               <option value="">Tous statuts</option>
               {Object.keys(STATUTS).map(s => (
                 <option key={s} value={s}>{s}</option>
               ))}
             </Select>
-            <Input
-              type="month"
-              value={monthFilter}
-              onChange={e => { setMonthFilter(e.target.value); setPage(1); }}
-            />
             <Select
               value={actifFilter}
               onChange={e => { setActifFilter(e.target.value); setPage(1); }}
+              className="w-full sm:w-40"
             >
               <option value="true">Actives</option>
               <option value="false">Inactives</option>
@@ -128,16 +146,36 @@ export default function Factures() {
             </Select>
           </div>
           {canEdit && (
-            <div className="flex flex-wrap gap-2">
-              <Button onClick={() => { setSelected(null); setShowForm(true); }}>
-                Ajouter une facture
-              </Button>
-              <Button variant="outline" onClick={() => exportData({ type: 'factures', format: 'excel' })} disabled={exporting}>
-                Export Excel
-              </Button>
-              <Button variant="outline" onClick={() => setShowImport(true)}>
-                Importer
-              </Button>
+            <div className="flex items-center gap-2 ml-auto">
+              <div className="hidden md:flex gap-2">
+                <Button onClick={() => { setSelected(null); setShowForm(true); }}>
+                  Ajouter une facture
+                </Button>
+                <Button variant="outline" onClick={() => exportData({ type: 'factures', format: 'excel' })} disabled={exporting}>
+                  Export Excel
+                </Button>
+                <Button variant="outline" onClick={() => setShowImport(true)}>
+                  Importer
+                </Button>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="md:hidden">
+                    <Menu className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onSelect={() => { setSelected(null); setShowForm(true); }}>
+                    Ajouter une facture
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => exportData({ type: 'factures', format: 'excel' })} disabled={exporting}>
+                    Export Excel
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => setShowImport(true)}>
+                    Importer
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           )}
         </TableHeader>

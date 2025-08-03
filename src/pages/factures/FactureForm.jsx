@@ -27,6 +27,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
     facture?.date_facture || new Date().toISOString().slice(0, 10),
   );
   const [fournisseur_id, setFournisseurId] = useState(facture?.fournisseur_id || "");
+  const [fournisseurNom, setFournisseurNom] = useState(facture?.fournisseur?.nom || "");
   const [numero, setNumero] = useState(facture?.numero || "");
   const [numeroUsed, setNumeroUsed] = useState(false);
   const [statut, setStatut] = useState(facture?.statut || "brouillon");
@@ -57,8 +58,10 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
   useEffect(() => {
     if (facture?.fournisseur_id && fournisseurs.length) {
       const found = fournisseurs.find(f => f.id === facture.fournisseur_id);
+      setFournisseurNom(found?.nom || "");
       searchFournisseurs(found?.nom || "");
     } else {
+      setFournisseurNom("");
       searchFournisseurs("");
     }
   }, [facture?.fournisseur_id, fournisseurs, searchFournisseurs]);
@@ -136,6 +139,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
         const today = new Date().toISOString().slice(0, 10);
         setDate(today);
         setFournisseurId("");
+        setFournisseurNom("");
         setNumero("");
         setNumeroUsed(false);
         setStatut("brouillon");
@@ -159,17 +163,38 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
     }
   };
 
+  const handleClose = () => {
+    const hasContent =
+      statut === "brouillon" &&
+      (fournisseurNom || numero || commentaire ||
+        lignes.some(l =>
+          l.produit_id ||
+          l.produit_nom ||
+          l.quantite !== 1 ||
+          l.prix_unitaire !== 0 ||
+          l.tva !== 20 ||
+          l.zone_stock_id,
+        ));
+    if (hasContent && !window.confirm("Fermer sans enregistrer ?")) return;
+    onClose?.();
+  };
+
   return (
     <GlassCard width="w-full" title={facture ? "Modifier la facture" : "Ajouter une facture"}>
-      <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
+      <form
+        ref={formRef}
+        onSubmit={handleSubmit}
+        onKeyDown={e => { if (e.key === "Enter") e.preventDefault(); }}
+        className="space-y-6"
+      >
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="flex flex-col">
             <label className="text-sm mb-1">Date *</label>
-            <Input type="date" value={date} onChange={e => setDate(e.target.value)} required className="text-black" />
+            <Input type="date" value={date} onChange={e => setDate(e.target.value)} required />
           </div>
           <div className="flex flex-col">
             <label className="text-sm mb-1">État</label>
-            <Select value={statut} onChange={e => setStatut(e.target.value)} className="text-black">
+            <Select value={statut} onChange={e => setStatut(e.target.value)}>
               <option value="brouillon">Brouillon</option>
               <option value="en attente">En attente</option>
               <option value="validée">Validée</option>
@@ -182,7 +207,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
               type="text"
               value={numero}
               onChange={e => setNumero(e.target.value)}
-              className={`${numeroUsed ? "border-red-500" : ""} text-black`}
+              className={numeroUsed ? "border-red-500" : ""}
               required
             />
             {numeroUsed && <p className="text-xs text-red-500">Numéro déjà existant</p>}
@@ -193,33 +218,33 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
               type="number"
               readOnly
               value={autoHt.toFixed(2)}
-              className="font-bold text-black [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              className="font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
           </div>
           <div className="flex flex-col lg:col-span-2">
             <label className="text-sm mb-1">Fournisseur *</label>
             <AutoCompleteField
-              value={fournisseur_id}
+              value={fournisseurNom}
               onChange={obj => {
                 const val = obj?.nom || "";
+                setFournisseurNom(val);
                 setFournisseurId(obj?.id || "");
                 if (!obj?.id && val.length >= 2) searchFournisseurs(val);
               }}
               options={fournisseurOptions}
               required
-              className="text-black"
             />
           </div>
           <div className="flex flex-col lg:col-span-2">
             <label className="text-sm mb-1">Commentaire</label>
-            <Input type="text" value={commentaire} onChange={e => setCommentaire(e.target.value)} className="text-black" />
+            <Input type="text" value={commentaire} onChange={e => setCommentaire(e.target.value)} />
           </div>
         </section>
 
         <section>
           <h3 className="font-semibold mb-2">Lignes produits</h3>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm text-black">
+            <table className="w-full text-sm">
               <thead>
                 <tr>
                   <th>Produit</th>
@@ -280,7 +305,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
         </section>
 
         <section className="p-3 mt-4 bg-white/10 border border-white/20 rounded">
-          <div className="flex flex-wrap gap-4 text-black">
+          <div className="flex flex-wrap gap-4">
             <span className="font-bold">Total HT: {autoHt.toFixed(2)} €</span>
             <span className="font-bold">TVA: {autoTva.toFixed(2)} €</span>
             <span className="font-bold">TTC: {autoTotal.toFixed(2)} €</span>
@@ -292,7 +317,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
           <Button type="submit" variant="primary" className="min-w-[120px]" disabled={numeroUsed}>
             {facture ? "Modifier" : "Ajouter"}
           </Button>
-          <Button type="button" variant="ghost" onClick={onClose}>
+          <Button type="button" variant="ghost" onClick={handleClose}>
             Fermer
           </Button>
         </div>

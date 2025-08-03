@@ -11,6 +11,7 @@ export default function AutoCompleteField({
   onAddNewValue,
   required = false,
   disabledOptions = [],
+  className = "",
   ...props
 }) {
   const resolved = useMemo(
@@ -18,16 +19,19 @@ export default function AutoCompleteField({
     [options],
   );
   const [inputValue, setInputValue] = useState(() => {
-    const match = resolved.find(o => o.id === value);
-    return match ? match.nom : "";
+    const match = resolved.find(o => o.id === value || o.nom === value);
+    return match ? match.nom : value || "";
   });
   const [showAdd, setShowAdd] = useState(false);
   const listId = useId();
 
   useEffect(() => {
-    if (!value) return; // avoid clearing typed text when value is empty
-    const match = resolved.find(o => o.id === value);
-    if (match) setInputValue(match.nom);
+    const match = resolved.find(o => o.id === value || o.nom === value);
+    if (match) {
+      setInputValue(match.nom);
+    } else if (typeof value === "string") {
+      setInputValue(value);
+    }
   }, [value, resolved]);
 
   const disabledIds = disabledOptions.map((d) =>
@@ -78,7 +82,7 @@ export default function AutoCompleteField({
         list={listId}
         value={inputValue}
         onChange={handleInputChange}
-        className={`${isValid ? "border-mamastockGold" : ""}`}
+        className={`${isValid ? "border-mamastockGold" : ""} ${className}`}
         aria-label={label}
         onKeyDown={e => {
           if (e.key === "Enter" && showAdd) {

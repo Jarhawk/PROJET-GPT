@@ -165,11 +165,11 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="flex flex-col">
             <label className="text-sm mb-1">Date *</label>
-            <Input type="date" value={date} onChange={e => setDate(e.target.value)} required />
+            <Input type="date" value={date} onChange={e => setDate(e.target.value)} required className="text-black" />
           </div>
           <div className="flex flex-col">
             <label className="text-sm mb-1">État</label>
-            <Select value={statut} onChange={e => setStatut(e.target.value)}>
+            <Select value={statut} onChange={e => setStatut(e.target.value)} className="text-black">
               <option value="brouillon">Brouillon</option>
               <option value="en attente">En attente</option>
               <option value="validée">Validée</option>
@@ -182,7 +182,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
               type="text"
               value={numero}
               onChange={e => setNumero(e.target.value)}
-              className={numeroUsed ? "border-red-500" : ""}
+              className={`${numeroUsed ? "border-red-500" : ""} text-black`}
               required
             />
             {numeroUsed && <p className="text-xs text-red-500">Numéro déjà existant</p>}
@@ -193,7 +193,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
               type="number"
               readOnly
               value={autoHt.toFixed(2)}
-              className="font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              className="font-bold text-black [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
           </div>
           <div className="flex flex-col lg:col-span-2">
@@ -207,18 +207,19 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
               }}
               options={fournisseurOptions}
               required
+              className="text-black"
             />
           </div>
           <div className="flex flex-col lg:col-span-2">
             <label className="text-sm mb-1">Commentaire</label>
-            <Input type="text" value={commentaire} onChange={e => setCommentaire(e.target.value)} />
+            <Input type="text" value={commentaire} onChange={e => setCommentaire(e.target.value)} className="text-black" />
           </div>
         </section>
 
         <section>
           <h3 className="font-semibold mb-2">Lignes produits</h3>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm text-black">
               <thead>
                 <tr>
                   <th>Produit</th>
@@ -279,7 +280,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
         </section>
 
         <section className="p-3 mt-4 bg-white/10 border border-white/20 rounded">
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap gap-4 text-black">
             <span className="font-bold">Total HT: {autoHt.toFixed(2)} €</span>
             <span className="font-bold">TVA: {autoTva.toFixed(2)} €</span>
             <span className="font-bold">TTC: {autoTotal.toFixed(2)} €</span>

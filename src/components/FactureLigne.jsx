@@ -40,12 +40,11 @@ export default function FactureLigne({
   }
 
   return (
-    <tr>
-      <td className="min-w-[200px]">
+    <tr className="h-10">
+      <td className="min-w-[250px] p-1 align-middle">
         <AutoCompleteField
           id={`produit-${index}`}
           required
-          label=""
           value={ligne.produit_id}
           onChange={async obj => {
             if (obj?.id && obj.id !== ligne.produit_id) {
@@ -57,58 +56,62 @@ export default function FactureLigne({
             }
           }}
           options={produitOptions}
+          className="h-10 min-w-[250px]"
         />
       </td>
-      <td>
+      <td className="p-1 align-middle">
         <Input
           type="number"
           required
-          className="w-full"
+          className="h-10 w-full"
           value={ligne.quantite}
           onChange={e => update("quantite", Number(e.target.value))}
         />
       </td>
-      <td className="text-center">{ligne.unite}</td>
-      <td>
+      <td className="text-center p-1 align-middle">{ligne.unite}</td>
+      <td className="p-1 align-middle">
         <Input
           type="number"
-          className="w-full"
+          className="h-10 w-full"
           value={ligne.prix_unitaire}
           onChange={e => update("prix_unitaire", Number(e.target.value))}
         />
       </td>
-      <td>
+      <td className="p-1 align-middle w-16">
         <Input
           type="number"
-          className="w-full"
+          className="h-10 w-full"
           title="Taux de TVA appliqué"
           required
           value={ligne.tva}
           onChange={e => update("tva", Number(e.target.value))}
         />
       </td>
-      <td className="min-w-[120px]">
+      <td className="min-w-[120px] p-1 align-middle">
         <AutoCompleteZoneField
-          label=""
           value={ligne.zone_stock_id}
           onChange={obj => update("zone_stock_id", obj?.id || "")}
           disabled={loadingProd}
           required
+          className="h-10"
         />
       </td>
-      <td className="text-center">
+      <td className="p-1 align-middle text-center">
         <Checkbox
           checked={ligne.majProduit}
           onChange={e => update("majProduit", e.target.checked)}
         />
       </td>
-      <td className="text-right">{(ligne.quantite * ligne.prix_unitaire * (1 + (ligne.tva || 0) / 100)).toFixed(2)}</td>
-      <td>
+      <td className="text-right p-1 align-middle">
+        {(ligne.quantite * ligne.prix_unitaire * (1 + (ligne.tva || 0) / 100)).toFixed(2)}
+      </td>
+      <td className="p-1 align-middle">
         <Button
           type="button"
           size="sm"
           variant="outline"
           onClick={() => onRemove?.(index)}
+          className="h-10 px-2"
         >
           X
         </Button>

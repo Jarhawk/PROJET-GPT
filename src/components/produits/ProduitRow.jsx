@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 export default function ProduitRow({
   produit,
   onDetail,
+  onEdit,
   onToggleActive,
-  onDelete,
   canEdit,
 }) {
   const belowMin =
@@ -47,17 +47,16 @@ export default function ProduitRow({
             <>
               <Button
                 size="sm"
+                onClick={() => onEdit(produit)}
+              >
+                Modifier
+              </Button>
+              <Button
+                size="sm"
                 variant="outline"
                 onClick={() => onToggleActive(produit.id, !produit.actif)}
               >
                 {produit.actif ? "Désactiver" : "Activer"}
-              </Button>
-              <Button
-                size="sm"
-                variant="destructive"
-                onClick={() => onDelete(produit.id)}
-              >
-                Supprimer
               </Button>
             </>
           )}

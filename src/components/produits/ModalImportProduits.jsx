@@ -133,7 +133,11 @@ export default function ModalImportProduits({ open, onClose, onSuccess }) {
                 {validCount} valides / {invalidCount} à corriger
               </span>
             </div>
-            <div className="max-h-[500px] overflow-y-auto border rounded">
+            <div
+              className={`${
+                rows.length > 20 ? "max-h-[500px] overflow-y-auto" : ""
+              } border rounded`}
+            >
               <ImportPreviewTable
                 rows={rows}
                 onUpdate={handleUpdate}

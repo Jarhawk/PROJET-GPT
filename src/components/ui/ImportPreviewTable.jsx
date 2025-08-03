@@ -15,7 +15,7 @@ export default function ImportPreviewTable({ rows, onUpdate, maps, reference }) 
 
   const renderCell = (row, idx, field, listId) => (
     <td
-      className={`${row.errors[field] ? "bg-red-50" : ""} text-black`}
+      className={`${row.errors[field] ? "bg-red-50 text-red-600" : "text-black"}`}
       title={row.errors[field] || ""}
     >
       <input

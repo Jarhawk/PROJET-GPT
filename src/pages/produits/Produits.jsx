@@ -31,7 +31,6 @@ export default function Produits() {
     total,
     fetchProducts,
     toggleProductActive,
-    deleteProduct,
   } = useProducts();
   const { familles: famillesHook, fetchFamilles } = useFamilles();
   const { sousFamilles, fetchSousFamilles, setSousFamilles } =
@@ -52,6 +51,7 @@ export default function Produits() {
   const [sortOrder, setSortOrder] = useState("asc");
   const { hasAccess, mama_id } = useAuth();
   const canEdit = hasAccess("produits", "peut_modifier");
+  const canView = hasAccess("produits", "peut_voir");
   const [showImport, setShowImport] = useState(false);
 
   const refreshList = useCallback(() => {
@@ -80,8 +80,8 @@ export default function Produits() {
 
   // Load dropdown data once on mount
   useEffect(() => {
-    fetchFamilles();
-  }, [fetchFamilles]);
+    if (canView) fetchFamilles();
+  }, [fetchFamilles, canView]);
 
   async function handleExportExcel() {
     try {
@@ -93,13 +93,14 @@ export default function Produits() {
   }
 
   useEffect(() => {
+    if (!canView) return;
     setSousFamilleFilter("");
     if (familleFilter) {
       fetchSousFamilles(familleFilter);
     } else {
       setSousFamilles([]);
     }
-  }, [familleFilter, fetchSousFamilles, setSousFamilles]);
+  }, [familleFilter, fetchSousFamilles, setSousFamilles, canView]);
 
   function resetFilters() {
     setSearch("");
@@ -131,15 +132,18 @@ export default function Produits() {
     refreshList();
   }
 
-  async function handleDelete(id) {
-    if (!window.confirm("Supprimer ce produit ?")) return;
-    await deleteProduct(id);
-    toast.success("Produit supprimé");
-    refreshList();
+  function handleEdit(prod) {
+    setSelectedProduct(prod);
+    setShowForm(true);
   }
+
   useEffect(() => {
-    refreshList();
-  }, [refreshList]);
+    if (canView) refreshList();
+  }, [refreshList, canView]);
+
+  if (!canView) {
+    return <div className="p-8">Accès refusé</div>;
+  }
 
   return (
     <div className="p-8 max-w-7xl mx-auto text-shadow space-y-6">
@@ -302,8 +306,8 @@ export default function Produits() {
                     setSelectedProduct(prod);
                     setShowDetail(true);
                   }}
+                  onEdit={handleEdit}
                   onToggleActive={handleToggleActive}
-                  onDelete={handleDelete}
                   canEdit={canEdit}
                 />
               ))
@@ -340,6 +344,7 @@ export default function Produits() {
                 </Button>
                 {canEdit && (
                   <>
+                    <Button onClick={() => handleEdit(produit)}>Modifier</Button>
                     <Button
                       variant="outline"
                       onClick={() =>
@@ -347,12 +352,6 @@ export default function Produits() {
                       }
                     >
                       {produit.actif ? "Désactiver" : "Activer"}
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      onClick={() => handleDelete(produit.id)}
-                    >
-                      Supprimer
                     </Button>
                   </>
                 )}

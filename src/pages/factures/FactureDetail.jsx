@@ -94,12 +94,6 @@ export default function FactureDetail({ facture: factureProp, onClose }) {
             {facture.actif ? "Désactiver" : "Réactiver"}
           </Button>
         </div>
-        <div>
-          <b>Justificatif :</b> {facture.justificatif ?
-            <a href={facture.justificatif} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">Voir PDF</a> :
-            <span className="text-gray-400">Aucun</span>
-          }
-        </div>
         {produitsFacture.length > 0 && (
           <TableContainer className="mt-4">
             <table className="min-w-full text-sm">

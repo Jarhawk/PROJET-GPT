@@ -13,8 +13,6 @@ import PaginationFooter from "@/components/ui/PaginationFooter";
 import TableHeader from "@/components/ui/TableHeader";
 import GlassCard from "@/components/ui/GlassCard";
 import { Toaster, toast } from "react-hot-toast";
-import { saveAs } from "file-saver";
-import * as XLSX from "xlsx";
 import { motion as Motion } from "framer-motion";
 import FactureRow from "@/components/factures/FactureRow.jsx";
 
@@ -64,18 +62,6 @@ export default function Factures() {
     refreshList();
   }, [refreshList]);
 
-  // Export Excel/XLSX
-  const exportExcel = () => {
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(factures.map(f => ({
-      ...f,
-      fournisseur_nom: fournisseurs.find(s => s.id === f.fournisseur_id)?.nom || f.fournisseur?.nom
-    })));
-    XLSX.utils.book_append_sheet(wb, ws, "Factures");
-    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([buf]), "factures.xlsx");
-  };
-
   // Filtres avancés
   const facturesFiltres = factures;
 
@@ -95,7 +81,7 @@ export default function Factures() {
   return (
     <div className="p-6 container mx-auto text-shadow space-y-6">
       <Toaster position="top-right" />
-      <GlassCard>
+      <GlassCard width="w-full">
         <TableHeader className="items-end">
         <input
           list="factures-list"
@@ -164,7 +150,6 @@ export default function Factures() {
             Ajouter une facture
           </Button>
         )}
-        <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
         </TableHeader>
       </GlassCard>
       <ListingContainer className="mb-4">

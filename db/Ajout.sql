@@ -11,11 +11,18 @@ create table if not exists zones_stock (
 alter table produits
   add column if not exists zone_stock_id uuid references zones_stock(id) on delete set null;
 
+-- Ajout du champ TVA sur les produits
+alter table produits
+  add column if not exists tva numeric default 20;
+
 -- Ajout colonne manquante pour stocker la configuration du tableau de bord
 ALTER TABLE tableaux_de_bord ADD COLUMN IF NOT EXISTS liste_gadgets_json jsonb DEFAULT '[]'::jsonb;
 
 -- Ajout colonne justificatif pour stocker l'URL de la pièce jointe de facture
 ALTER TABLE factures ADD COLUMN IF NOT EXISTS justificatif text;
+
+-- Commentaire facultatif sur la facture
+ALTER TABLE factures ADD COLUMN IF NOT EXISTS commentaire text;
 
 -- Ajout champ pour hiérarchie Famille / Sous-famille
 DO $$
@@ -135,6 +142,7 @@ CREATE OR REPLACE VIEW v_produits_dernier_prix AS
 SELECT
   p.id,
   p.nom,
+  p.tva,
   p.famille_id,
   f2.nom AS famille,
   p.unite_id,

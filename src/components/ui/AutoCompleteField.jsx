@@ -45,7 +45,7 @@ export default function AutoCompleteField({
     const match = resolved.find(
       (o) => o.nom.toLowerCase() === val.toLowerCase(),
     );
-    if (match) onChange({ id: match.id, nom: match.nom });
+    if (match) onChange(match);
     else onChange(val ? { id: null, nom: val } : { id: "", nom: "" });
     setShowAdd(val && !match);
   };

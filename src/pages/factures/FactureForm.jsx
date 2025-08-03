@@ -16,7 +16,7 @@ import FactureLigne from "@/components/FactureLigne";
 import toast from "react-hot-toast";
 
 export default function FactureForm({ facture = null, fournisseurs = [], onClose, onSaved }) {
-  const { createFacture, updateFacture, addLigneFacture, calculateTotals } = useFactures();
+  const { createFacture, updateFacture, addLigneFacture } = useFactures();
   const { updateProduct } = useProducts();
   const { results: fournisseurOptions, searchFournisseurs } = useFournisseursAutocomplete();
   const { results: produitOptions, searchProduits } = useProduitsAutocomplete();
@@ -52,8 +52,15 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
     ],
   );
   const [commentaire, setCommentaire] = useState(facture?.commentaire || "");
+  const [totalHt, setTotalHt] = useState(
+    facture?.total_ht !== undefined && facture?.total_ht !== null
+      ? String(facture.total_ht)
+      : ""
+  );
+  const [bonusPro, setBonusPro] = useState(facture?.bonus_pro ?? "");
+  const [maintenance, setMaintenance] = useState(facture?.maintenance ?? "");
   const { autoHt, autoTva, autoTotal } = useFactureForm(lignes);
-  const ecart = facture ? facture.total_ht - autoHt : 0;
+  const ecart = (parseFloat(totalHt) || 0) - autoHt;
 
   useEffect(() => {
     if (facture?.fournisseur_id && fournisseurs.length) {
@@ -81,6 +88,8 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
     checkNumero();
   }, [numero, mama_id, facture?.id]);
 
+  useEffect(() => { searchProduits(""); }, [searchProduits]);
+
   const ecartClass = Math.abs(ecart) > 0.01 ? "text-green-500" : "";
 
   const handleSubmit = async e => {
@@ -98,10 +107,12 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
         fournisseur_id,
         numero,
         statut,
-        total_ht: autoHt,
+        total_ht: parseFloat(totalHt) || 0,
         total_tva: autoTva,
         total_ttc: autoTotal,
         commentaire,
+        bonus_pro: bonusPro === "" ? null : Number(bonusPro),
+        maintenance: maintenance === "" ? null : Number(maintenance),
       };
       if (fid) {
         await updateFacture(fid, invoice);
@@ -130,12 +141,9 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
           );
         }
       }
-      await calculateTotals(fid);
       onSaved?.();
       toast.success(facture ? "Facture modifiée !" : "Facture ajoutée !");
-      if (facture) {
-        onClose?.();
-      } else {
+      if (!facture) {
         const today = new Date().toISOString().slice(0, 10);
         setDate(today);
         setFournisseurId("");
@@ -144,6 +152,9 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
         setNumeroUsed(false);
         setStatut("brouillon");
         setCommentaire("");
+        setTotalHt("");
+        setBonusPro("");
+        setMaintenance("");
         setLignes([
           {
             produit_id: "",
@@ -157,6 +168,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
           },
         ]);
         searchFournisseurs("");
+        searchProduits("");
       }
     } catch (err) {
       toast.error(err?.message || "Erreur lors de l'enregistrement");
@@ -166,7 +178,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
   const handleClose = () => {
     const hasContent =
       statut === "brouillon" &&
-      (fournisseurNom || numero || commentaire ||
+      (fournisseurNom || numero || commentaire || totalHt || bonusPro || maintenance ||
         lignes.some(l =>
           l.produit_id ||
           l.produit_nom ||
@@ -216,8 +228,8 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
             <label className="text-sm mb-1">Total HT</label>
             <Input
               type="number"
-              readOnly
-              value={autoHt.toFixed(2)}
+              value={totalHt}
+              onChange={e => setTotalHt(e.target.value)}
               className="font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
           </div>
@@ -238,6 +250,24 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
           <div className="flex flex-col lg:col-span-2">
             <label className="text-sm mb-1">Commentaire</label>
             <Input type="text" value={commentaire} onChange={e => setCommentaire(e.target.value)} />
+          </div>
+          <div className="flex flex-col lg:col-span-2">
+            <label className="text-sm mb-1">Bonus Pro</label>
+            <Input
+              type="number"
+              value={bonusPro}
+              onChange={e => setBonusPro(e.target.value)}
+              className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            />
+          </div>
+          <div className="flex flex-col lg:col-span-2">
+            <label className="text-sm mb-1">Maintenance</label>
+            <Input
+              type="number"
+              value={maintenance}
+              onChange={e => setMaintenance(e.target.value)}
+              className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            />
           </div>
         </section>
 

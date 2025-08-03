@@ -27,7 +27,6 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
     facture?.date_facture || new Date().toISOString().slice(0, 10),
   );
   const [fournisseur_id, setFournisseurId] = useState(facture?.fournisseur_id || "");
-  const [fournisseurName, setFournisseurName] = useState("");
   const [numero, setNumero] = useState(facture?.numero || "");
   const [numeroUsed, setNumeroUsed] = useState(false);
   const [statut, setStatut] = useState(facture?.statut || "brouillon");
@@ -60,11 +59,11 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
   useEffect(() => {
     if (facture?.fournisseur_id && fournisseurs.length) {
       const found = fournisseurs.find(f => f.id === facture.fournisseur_id);
-      setFournisseurName(found?.nom || "");
+      searchFournisseurs(found?.nom || "");
+    } else {
+      searchFournisseurs("");
     }
-  }, [facture?.fournisseur_id, fournisseurs]);
-
-  useEffect(() => { searchFournisseurs(fournisseurName); }, [fournisseurName, searchFournisseurs]);
+  }, [facture?.fournisseur_id, fournisseurs, searchFournisseurs]);
 
   useEffect(() => {
     const checkNumero = async () => {
@@ -122,7 +121,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
           toast.error("Produit requis pour chaque ligne");
           return;
         }
-        const { produit_nom: _n, majProduit, unite: _u, ...rest } = ligne;
+        const { produit_nom: _n, majProduit: _m, unite: _u, ...rest } = ligne;
         await addLigneFacture(fid, { ...rest, fournisseur_id });
       }
       await calculateTotals(fid);
@@ -172,9 +171,8 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
               value={fournisseur_id}
               onChange={obj => {
                 const val = obj?.nom || "";
-                setFournisseurName(val);
                 setFournisseurId(obj?.id || "");
-                if (val.length >= 2) searchFournisseurs(val);
+                if (!obj?.id && val.length >= 2) searchFournisseurs(val);
               }}
               options={fournisseurOptions}
               required
@@ -217,7 +215,9 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
                   <th>TVA %</th>
                   <th>Zone</th>
                   <th>MAJ produit</th>
-                  <th>Total</th>
+                  <th>HT</th>
+                  <th>TVA</th>
+                  <th>TTC</th>
                   <th></th>
                 </tr>
               </thead>
@@ -268,11 +268,12 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
         </section>
 
         <section className="p-2 bg-white/10 backdrop-blur-xl rounded border border-white/20">
-          Total HT: {autoHt.toFixed(2)} € - TVA: {autoTva.toFixed(2)} € - TTC: {autoTotal.toFixed(2)} €
+          Total HT: {autoHt.toFixed(2)} € - TVA: {autoTva.toFixed(2)} € - TTC: {autoTotal.toFixed(2)} € -
+          <span className={`ml-2 ${ecartClass}`}>Écart HT: {ecart.toFixed(2)} €</span>
         </section>
 
         <div className="flex gap-2 mt-4">
-          <PrimaryButton type="submit" className="min-w-[120px]">
+          <PrimaryButton type="submit" className="min-w-[120px]" disabled={numeroUsed}>
             {facture ? "Modifier" : "Ajouter"}
           </PrimaryButton>
           <SecondaryButton type="button" onClick={onClose}>

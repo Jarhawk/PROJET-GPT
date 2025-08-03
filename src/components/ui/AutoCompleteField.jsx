@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -13,8 +13,9 @@ export default function AutoCompleteField({
   disabledOptions = [],
   ...props
 }) {
-  const resolved = (options || []).map((opt) =>
-    typeof opt === "string" ? { id: opt, nom: opt } : opt,
+  const resolved = useMemo(
+    () => (options || []).map((opt) => (typeof opt === "string" ? { id: opt, nom: opt } : opt)),
+    [options],
   );
   const [inputValue, setInputValue] = useState(() => {
     const match = resolved.find((o) => o.id === value);
@@ -23,6 +24,7 @@ export default function AutoCompleteField({
   const [showAdd, setShowAdd] = useState(false);
 
   useEffect(() => {
+    if (!value) return; // avoid clearing typed text when value is empty
     const match = resolved.find((o) => o.id === value);
     setInputValue(match ? match.nom : "");
   }, [value, resolved]);

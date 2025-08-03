@@ -15,7 +15,8 @@ export function useFournisseursAutocomplete() {
     let q = supabase
       .from("fournisseurs")
       .select("id, nom")
-      .eq("mama_id", mama_id);
+      .eq("mama_id", mama_id)
+      .eq("actif", true);
     if (query) {
       q = q.ilike("nom", `%${query}%`);
     }

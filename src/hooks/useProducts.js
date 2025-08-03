@@ -53,7 +53,6 @@ export function useProducts() {
     } else if (sortBy === "famille") {
       query = query
         .order("nom", { foreignTable: "famille", ascending: order === "asc" })
-        .order("nom", { foreignTable: "sous_famille", ascending: order === "asc" })
         .order("nom", { ascending: order === "asc" });
     } else if (sortBy === "unite") {
       query = query
@@ -96,7 +95,7 @@ export function useProducts() {
     const { fournisseur_id, tva, ...rest } = product || {};
     const payload = {
       ...rest,
-      tva: tva ?? 20,
+      tva: tva ?? 0,
       fournisseur_id: fournisseur_id ?? null,
       mama_id,
     };
@@ -123,46 +122,6 @@ export function useProducts() {
       .update(payload)
       .eq("id", id)
       .eq("mama_id", mama_id);
-    setLoading(false);
-    if (error) {
-      setError(error);
-      toast.error(error.message);
-    }
-    if (refresh) await fetchProducts();
-  }
-
-  async function duplicateProduct(id, { refresh = true } = {}) {
-    const orig = products.find(p => p.id === id);
-    if (!orig) return;
-    const {
-      sous_famille_id,
-      unite_id,
-      fournisseur_id,
-      stock_reel,
-      seuil_min,
-      actif,
-      code,
-      allergenes,
-      zone_stock_id,
-      tva,
-    } = orig;
-    const copy = {
-      nom: `${orig.nom} (copie)`,
-      sous_famille_id,
-      unite_id,
-      fournisseur_id,
-      stock_reel,
-      seuil_min,
-      actif,
-      code,
-      allergenes,
-      zone_stock_id,
-      tva,
-    };
-    if (!mama_id) return { error: "Aucun mama_id" };
-    setLoading(true);
-    setError(null);
-    const { error } = await supabase.from("produits").insert([{ ...copy, mama_id }]);
     setLoading(false);
     if (error) {
       setError(error);
@@ -224,6 +183,46 @@ export function useProducts() {
     }
     return data || [];
   }, [mama_id]);
+
+  const fetchProductStock = useCallback(
+    async (productId) => {
+      if (!mama_id) return null;
+      const { data, error } = await supabase
+        .from('v_stocks')
+        .select('stock')
+        .eq('produit_id', productId)
+        .eq('mama_id', mama_id)
+        .single();
+      if (error) {
+        setError(error);
+        toast.error(error.message);
+        return null;
+      }
+      return data?.stock ?? 0;
+    },
+    [mama_id]
+  );
+
+  const fetchProductMouvements = useCallback(
+    async (productId) => {
+      if (!mama_id) return [];
+      const { data, error } = await supabase
+        .from('stock_mouvements')
+        .select(
+          'id,date,type,quantite, zone_source:zones_stock!stock_mouvements_zone_source_id_fkey(nom), zone_destination:zones_stock!stock_mouvements_zone_destination_id_fkey(nom)'
+        )
+        .eq('produit_id', productId)
+        .eq('mama_id', mama_id)
+        .order('date', { ascending: false });
+      if (error) {
+        setError(error);
+        toast.error(error.message);
+        return [];
+      }
+      return data || [];
+    },
+    [mama_id]
+  );
 
   const getProduct = useCallback(
     async (id) => {
@@ -293,13 +292,14 @@ export function useProducts() {
     fetchProducts,
     addProduct,
     updateProduct,
-    duplicateProduct,
     toggleProductActive,
     deleteProduct,
     fetchProductPrices,
     getProduct,
     exportProductsToExcel,
     importProductsFromExcel,
+    fetchProductStock,
+    fetchProductMouvements,
   };
 }
 

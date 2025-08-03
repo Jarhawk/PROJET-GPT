@@ -46,7 +46,7 @@ export default function ProduitForm({
   );
   const [zoneStockId, setZoneStockId] = useState(produit?.zone_stock_id || "");
   const [stockMin, setStockMin] = useState(produit?.stock_min || 0);
-  const [tva, setTva] = useState(produit?.tva ?? 20);
+  const [tva, setTva] = useState(produit?.tva ?? 0);
   const [actif, setActif] = useState(produit?.actif ?? true);
   const [allergenes, setAllergenes] = useState(produit?.allergenes || "");
   const [errors, setErrors] = useState({});
@@ -89,7 +89,7 @@ export default function ProduitForm({
       setFournisseurId(produit.fournisseur_id || "");
       setZoneStockId(produit.zone_stock_id || "");
       setStockMin(produit.stock_min || 0);
-      setTva(produit.tva ?? 20);
+      setTva(produit.tva ?? 0);
       setActif(produit.actif ?? true);
       setAllergenes(produit.allergenes || "");
     }

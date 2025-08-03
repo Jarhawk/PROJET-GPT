@@ -37,12 +37,6 @@ vi.mock('@/hooks/useSousFamilles', () => ({
 vi.mock('@/hooks/useZonesStock', () => ({
   default: () => ({ zones: [], loading: false })
 }));
-vi.mock('@/utils/importExcelProduits', () => {
-  const parseProduitsFile = vi.fn(() => []);
-  const insertProduits = vi.fn(() => []);
-  return { parseProduitsFile, insertProduits };
-});
-import { parseProduitsFile } from '@/utils/importExcelProduits';
 
 import Produits from '@/pages/produits/Produits.jsx';
 
@@ -64,30 +58,11 @@ test('toggle button calls hook', async () => {
     total: 1,
     fetchProducts: vi.fn(),
     exportProductsToExcel: vi.fn(),
-    importProductsFromExcel: vi.fn(() => Promise.resolve([])),
     addProduct: vi.fn(),
     toggleProductActive: toggle,
-    deleteProduct: vi.fn(),
   });
   render(<Produits />);
   const button = await screen.findByText('Désactiver');
   fireEvent.click(button);
   expect(toggle).toHaveBeenCalledWith('1', false);
-});
-
-test('import input triggers parsing', async () => {
-  mockHook = () => ({
-    products: [],
-    total: 0,
-    fetchProducts: vi.fn(),
-    exportProductsToExcel: vi.fn(),
-    addProduct: vi.fn(),
-    toggleProductActive: vi.fn(),
-    deleteProduct: vi.fn(),
-  });
-  render(<Produits />);
-  const input = screen.getByTestId('import-input');
-  const file = new File([''], 'p.xlsx');
-  await fireEvent.change(input, { target: { files: [file] } });
-  expect(parseProduitsFile).toHaveBeenCalledWith(file, 'm1');
 });

@@ -27,9 +27,9 @@ test('searchProduits filters by mama_id and query', async () => {
   await act(async () => {
     await result.current.searchProduits('car');
   });
-  expect(fromMock).toHaveBeenCalledWith('v_produits_dernier_prix');
-  expect(fromMock).toHaveBeenCalledWith('v_pmp');
-  expect(selectMock).toHaveBeenCalledWith('id, nom, unite');
+  expect(fromMock).toHaveBeenCalledWith('produits');
+  expect(selectMock).toHaveBeenCalledWith('id, nom, unite, tva, dernier_prix, famille:familles(nom)');
   expect(eqMock).toHaveBeenCalledWith('mama_id', 'm1');
+  expect(eqMock).toHaveBeenCalledWith('actif', true);
   expect(ilikeMock).toHaveBeenCalledWith('nom', '%car%');
 });

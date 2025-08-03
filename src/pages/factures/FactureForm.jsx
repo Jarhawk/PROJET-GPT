@@ -9,6 +9,7 @@ import { useFactureForm } from "@/hooks/useFactureForm";
 import GlassCard from "@/components/ui/GlassCard";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import AutoCompleteField from "@/components/ui/AutoCompleteField";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import { Button } from "@/components/ui/button";
@@ -167,23 +168,17 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
             />
             {numeroUsed && <p className="text-xs text-red-500">Numéro déjà existant</p>}
             <label className="block text-sm mb-1">Fournisseur *</label>
-            <Input
-              list="fournisseurs-list"
-              value={fournisseurName}
-              onChange={e => {
-                const val = e.target.value;
+            <AutoCompleteField
+              value={fournisseur_id}
+              onChange={obj => {
+                const val = obj?.nom || "";
                 setFournisseurName(val);
-                const found = fournisseurOptions.find(f => f.nom.toLowerCase() === val.toLowerCase());
-                setFournisseurId(found ? found.id : "");
+                setFournisseurId(obj?.id || "");
+                if (val.length >= 2) searchFournisseurs(val);
               }}
-              placeholder="Fournisseur"
+              options={fournisseurOptions}
               required
             />
-            <datalist id="fournisseurs-list">
-              {fournisseurOptions.map(f => (
-                <option key={f.id} value={f.nom}>{f.nom}</option>
-              ))}
-            </datalist>
             <label className="block text-sm mb-1">Commentaire</label>
             <Input type="text" value={commentaire} onChange={e => setCommentaire(e.target.value)} />
           </div>
@@ -234,7 +229,15 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
                     ligne={l}
                     produitOptions={produitOptions}
                     searchProduits={searchProduits}
-                    onChange={ligne => setLignes(ls => ls.map((it, i) => (i === idx ? ligne : it)))}
+                    onChange={ligne => {
+                      setLignes(ls => {
+                        const newLs = ls.map((it, i) => (i === idx ? ligne : it));
+                        const ids = newLs.map(li => li.produit_id).filter(Boolean);
+                        const hasDup = ids.some((id, i) => ids.indexOf(id) !== i);
+                        if (hasDup) toast.error("Produit déjà ajouté");
+                        return newLs;
+                      });
+                    }}
                     onRemove={i => setLignes(ls => ls.filter((_, j) => j !== i))}
                   />
                 ))}

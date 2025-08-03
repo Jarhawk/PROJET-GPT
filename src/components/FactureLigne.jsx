@@ -21,7 +21,7 @@ export default function FactureLigne({
   async function handleProduit(obj) {
     onChange({
       ...ligne,
-      produit_nom: obj?.nom || "",
+      produit_nom: obj?.nom_simple || obj?.nom || "",
       produit_id: obj?.id || "",
       unite: obj?.unite || "",
       prix_unitaire: obj?.dernier_prix ?? ligne.prix_unitaire,
@@ -33,7 +33,8 @@ export default function FactureLigne({
       onChange({ ...ligne, zone_stock_id: prod?.zone_stock_id || "" });
       setLoadingProd(false);
     }
-    if ((obj?.nom || "").length >= 2) searchProduits(obj.nom);
+    const searchVal = obj?.nom_simple || obj?.nom || "";
+    if (searchVal.length >= 2) searchProduits(searchVal);
   }
 
   function update(field, value) {

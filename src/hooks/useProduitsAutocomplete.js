@@ -15,7 +15,7 @@ export function useProduitsAutocomplete() {
     setError(null);
     let q = supabase
       .from("produits")
-      .select("id, nom, unite, tva, dernier_prix")
+      .select("id, nom, unite, tva, dernier_prix, famille:familles(nom)")
       .eq("mama_id", mama_id)
       .eq("actif", true);
     if (query) q = q.ilike("nom", `%${query}%`);
@@ -27,7 +27,11 @@ export function useProduitsAutocomplete() {
       return [];
     }
     const final = (Array.isArray(data) ? data : []).map(p => ({
-      ...p,
+      id: p.id,
+      nom: `${p.nom} (${p.unite}) [${p.famille?.nom || ""}]`,
+      nom_simple: p.nom,
+      unite: p.unite,
+      tva: p.tva ?? 0,
       dernier_prix: p.dernier_prix ?? 0,
     }));
     setResults(final);

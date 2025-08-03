@@ -9,6 +9,8 @@ import { useFournisseurs } from "@/hooks/useFournisseurs";
 import useZonesStock from "@/hooks/useZonesStock";
 import { toast } from "react-hot-toast";
 import GlassCard from "@/components/ui/GlassCard";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function ProduitForm({
   produit,
@@ -44,6 +46,7 @@ export default function ProduitForm({
   );
   const [zoneStockId, setZoneStockId] = useState(produit?.zone_stock_id || "");
   const [stockMin, setStockMin] = useState(produit?.stock_min || 0);
+  const [tva, setTva] = useState(produit?.tva ?? 20);
   const [actif, setActif] = useState(produit?.actif ?? true);
   const [allergenes, setAllergenes] = useState(produit?.allergenes || "");
   const [errors, setErrors] = useState({});
@@ -86,6 +89,7 @@ export default function ProduitForm({
       setFournisseurId(produit.fournisseur_id || "");
       setZoneStockId(produit.zone_stock_id || "");
       setStockMin(produit.stock_min || 0);
+      setTva(produit.tva ?? 20);
       setActif(produit.actif ?? true);
       setAllergenes(produit.allergenes || "");
     }
@@ -113,6 +117,7 @@ export default function ProduitForm({
       fournisseur_id: fournisseurId || null,
       zone_stock_id: zoneStockId || null,
       stock_min: Number(stockMin),
+      tva: tva === "" ? null : Number(tva),
       actif,
       allergenes,
     };
@@ -289,22 +294,32 @@ export default function ProduitForm({
           <label htmlFor="prod-min" className="label text-white">
             Stock minimum
           </label>
-          <input
+          <Input
             id="prod-min"
             type="number"
-            className="input"
             value={stockMin}
             onChange={(e) => setStockMin(e.target.value)}
             min={0}
           />
         </div>
+        <div className="flex flex-col gap-1 p-2 rounded-xl">
+          <label htmlFor="prod-tva" className="label text-white">
+            TVA (%)
+          </label>
+          <Input
+            id="prod-tva"
+            type="number"
+            value={tva}
+            onChange={(e) => setTva(e.target.value)}
+            min={0}
+            step="0.1"
+          />
+        </div>
         <div className="flex items-center gap-2 p-2 rounded-xl">
-          <input
-            type="checkbox"
+          <Checkbox
             id="prod-actif"
             checked={actif}
             onChange={(e) => setActif(e.target.checked)}
-            className="rounded border-gray-300 text-primary focus:ring-primary"
           />
           <label htmlFor="prod-actif" className="label text-white m-0">
             Produit actif

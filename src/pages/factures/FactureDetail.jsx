@@ -76,6 +76,9 @@ export default function FactureDetail({ facture: factureProp, onClose }) {
         <div><b>Fournisseur :</b> {facture.fournisseur?.nom}</div>
         <div><b>Montant :</b> {facture.total_ttc?.toFixed(2)} €</div>
         <div><b>Statut :</b> {facture.statut}</div>
+        {facture.commentaire && (
+          <div><b>Commentaire :</b> {facture.commentaire}</div>
+        )}
         <div>
           <b>Actif :</b> {facture.actif ? "Oui" : "Non"}
           <Button

@@ -10,12 +10,15 @@ import SecondaryButton from "@/components/ui/SecondaryButton";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import GlassCard from "@/components/ui/GlassCard";
+import { Checkbox } from "@/components/ui/checkbox";
 import toast from "react-hot-toast";
 import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
 import { useInvoiceOcr } from "@/hooks/useInvoiceOcr";
+import { useProducts } from "@/hooks/useProducts";
 
 export default function FactureForm({ facture, fournisseurs = [], onClose }) {
   const { createFacture, updateFacture, addLigneFacture, calculateTotals } = useFactures();
+  const { updateProduct } = useProducts();
   const { results: produitOptions, searchProduits } = useProduitsAutocomplete();
   const {
     results: fournisseurOptions,
@@ -31,10 +34,12 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
     facture?.lignes?.map(l => ({
       ...l,
       produit_nom: l.produit?.nom || "",
+      majProduit: false,
     })) || [
-      { produit_id: "", produit_nom: "", quantite: 1, prix_unitaire: 0, tva: 20 },
+      { produit_id: "", produit_nom: "", quantite: 1, prix_unitaire: 0, tva: 20, majProduit: false },
     ]
   );
+  const [commentaire, setCommentaire] = useState(facture?.commentaire || "");
   const [file, setFile] = useState(null);
   const [fileUrl, setFileUrl] = useState(facture?.justificatif || "");
   const [loading, setLoading] = useState(false);
@@ -84,6 +89,7 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
       total_tva,
       total_ttc: total_ht + total_tva,
       justificatif: fileUrl || facture?.justificatif,
+      commentaire,
     };
     try {
       let fid = facture?.id;
@@ -97,8 +103,11 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
 
       for (const ligne of lignes) {
         if (ligne.produit_id) {
-          const { produit_nom: _unused, ...rest } = ligne;
+          const { produit_nom: _unused, majProduit, ...rest } = ligne;
           await addLigneFacture(fid, { ...rest, fournisseur_id });
+          if (majProduit) {
+            await updateProduct(ligne.produit_id, { tva: ligne.tva }, { refresh: false });
+          }
         }
       }
       await calculateTotals(fid);
@@ -151,6 +160,14 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
           <option key={f.id} value={f.nom}>{f.nom}</option>
         ))}
       </datalist>
+      <label className="block text-sm mb-1">Commentaire</label>
+      <Input
+        type="text"
+        placeholder="Commentaire"
+        value={commentaire}
+        onChange={e => setCommentaire(e.target.value)}
+        className="mb-2"
+      />
       <table className="w-full text-sm mb-2">
         <thead>
           <tr>
@@ -158,6 +175,8 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
             <th>Qté</th>
             <th>PU</th>
             <th>TVA %</th>
+            <th>MAJ produit</th>
+            <th>Total</th>
             <th></th>
           </tr>
         </thead>
@@ -169,16 +188,24 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
                   label=""
                   value={l.produit_id}
                   onChange={obj => {
-                    setLignes(ls => ls.map((it,i) =>
-                      i===idx ? {
-                        ...it,
-                        produit_nom: obj?.nom || "",
-                        produit_id: obj?.id || ""
-                      } : it
-                    ));
+                    setLignes(ls => {
+                      if (obj?.id && ls.some((ln, j) => j !== idx && ln.produit_id === obj.id)) {
+                        toast.error("Produit déjà sélectionné dans une autre ligne");
+                      }
+                      return ls.map((it, i) =>
+                        i === idx
+                          ? {
+                              ...it,
+                              produit_nom: obj?.nom || "",
+                              produit_id: obj?.id || "",
+                              tva: obj?.tva ?? it.tva,
+                            }
+                          : it,
+                      );
+                    });
                     if ((obj?.nom || "").length >= 2) searchProduits(obj.nom);
                   }}
-                  options={produitOptions.map(p => ({ id: p.id, nom: p.nom }))}
+                  options={produitOptions}
                 />
               </td>
               <td>
@@ -189,7 +216,7 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
                   onChange={e =>
                     setLignes(ls =>
                       ls.map((it, i) =>
-                        i === idx ? { ...it, quantite: Number(e.target.value) } : it
+                        i === idx ? { ...it, quantite: Number(e.target.value) } : it,
                       )
                     )
                   }
@@ -203,7 +230,7 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
                   onChange={e =>
                     setLignes(ls =>
                       ls.map((it, i) =>
-                        i === idx ? { ...it, prix_unitaire: Number(e.target.value) } : it
+                        i === idx ? { ...it, prix_unitaire: Number(e.target.value) } : it,
                       )
                     )
                   }
@@ -217,11 +244,26 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
                   onChange={e =>
                     setLignes(ls =>
                       ls.map((it, i) =>
-                        i === idx ? { ...it, tva: Number(e.target.value) } : it
+                        i === idx ? { ...it, tva: Number(e.target.value) } : it,
                       )
                     )
                   }
                 />
+              </td>
+              <td className="text-center">
+                <Checkbox
+                  checked={l.majProduit}
+                  onChange={e =>
+                    setLignes(ls =>
+                      ls.map((it, i) =>
+                        i === idx ? { ...it, majProduit: e.target.checked } : it,
+                      )
+                    )
+                  }
+                />
+              </td>
+              <td className="text-right">
+                {(l.quantite * l.prix_unitaire * (1 + (l.tva || 0) / 100)).toFixed(2)}
               </td>
               <td>
                 <Button type="button" size="sm" variant="outline" onClick={() => setLignes(ls => ls.filter((_,i)=>i!==idx))}>X</Button>
@@ -235,7 +277,7 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
         onClick={() =>
           setLignes(ls => [
             ...ls,
-            { produit_id: "", produit_nom: "", quantite: 1, prix_unitaire: 0, tva: 20 },
+            { produit_id: "", produit_nom: "", quantite: 1, prix_unitaire: 0, tva: 20, majProduit: false },
           ])
         }
       >

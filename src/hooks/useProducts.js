@@ -93,9 +93,10 @@ export function useProducts() {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { fournisseur_id, ...rest } = product || {};
+    const { fournisseur_id, tva, ...rest } = product || {};
     const payload = {
       ...rest,
+      tva: tva ?? 20,
       fournisseur_id: fournisseur_id ?? null,
       mama_id,
     };
@@ -143,6 +144,7 @@ export function useProducts() {
       code,
       allergenes,
       zone_stock_id,
+      tva,
     } = orig;
     const copy = {
       nom: `${orig.nom} (copie)`,
@@ -155,6 +157,7 @@ export function useProducts() {
       code,
       allergenes,
       zone_stock_id,
+      tva,
     };
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);

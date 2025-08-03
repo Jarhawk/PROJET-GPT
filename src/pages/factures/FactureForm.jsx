@@ -162,7 +162,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
   return (
     <GlassCard width="w-full" title={facture ? "Modifier la facture" : "Ajouter une facture"}>
       <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
-        <section className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
           <div className="flex flex-col">
             <label className="text-sm mb-1">Date *</label>
             <Input type="date" value={date} onChange={e => setDate(e.target.value)} required />
@@ -196,8 +196,6 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
               className="font-bold [appearance:textfield]"
             />
           </div>
-        </section>
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex flex-col">
             <label className="text-sm mb-1">Fournisseur *</label>
             <AutoCompleteField

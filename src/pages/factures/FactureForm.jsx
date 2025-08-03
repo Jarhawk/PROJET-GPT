@@ -10,8 +10,6 @@ import GlassCard from "@/components/ui/GlassCard";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import AutoCompleteField from "@/components/ui/AutoCompleteField";
-import PrimaryButton from "@/components/ui/PrimaryButton";
-import SecondaryButton from "@/components/ui/SecondaryButton";
 import { Button } from "@/components/ui/button";
 import FactureLigne from "@/components/FactureLigne";
 import toast from "react-hot-toast";
@@ -142,7 +140,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
   };
 
   return (
-    <GlassCard className="p-6 w-full" title={facture ? "Modifier la facture" : "Ajouter une facture"}>
+    <GlassCard width="w-full" title={facture ? "Modifier la facture" : "Ajouter une facture"}>
       <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
         <section className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="flex flex-col">
@@ -270,12 +268,12 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
         </section>
 
         <div className="flex gap-2 mt-4">
-          <PrimaryButton type="submit" className="min-w-[120px]" disabled={numeroUsed}>
+          <Button type="submit" variant="primary" className="min-w-[120px]" disabled={numeroUsed}>
             {facture ? "Modifier" : "Ajouter"}
-          </PrimaryButton>
-          <SecondaryButton type="button" onClick={onClose}>
+          </Button>
+          <Button type="button" variant="ghost" onClick={onClose}>
             Fermer
-          </SecondaryButton>
+          </Button>
         </div>
       </form>
     </GlassCard>

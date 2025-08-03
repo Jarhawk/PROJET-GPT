@@ -74,6 +74,9 @@ export default function FactureDetail({ facture: factureProp, onClose }) {
         <h2 className="font-bold text-xl mb-4">Détail de la facture #{facture.id}</h2>
         <div><b>Date :</b> {facture.date_facture}</div>
         <div><b>Fournisseur :</b> {facture.fournisseur?.nom}</div>
+        {facture.bon_livraison && (
+          <div><b>Bon de livraison :</b> {facture.bon_livraison}</div>
+        )}
         <div><b>Montant :</b> {facture.total_ttc?.toFixed(2)} €</div>
         <div><b>Statut :</b> {facture.statut}</div>
         {facture.commentaire && (

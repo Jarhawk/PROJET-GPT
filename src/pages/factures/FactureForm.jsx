@@ -29,6 +29,9 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
   const [fournisseur_id, setFournisseurId] = useState(facture?.fournisseur_id || "");
   const [fournisseurNom, setFournisseurNom] = useState(facture?.fournisseur?.nom || "");
   const [numero, setNumero] = useState(facture?.numero || "");
+  const [bonLivraison, setBonLivraison] = useState(
+    facture?.bon_livraison || "",
+  );
   const [numeroUsed, setNumeroUsed] = useState(false);
   const [statut, setStatut] = useState(facture?.statut || "brouillon");
   const [lignes, setLignes] = useState(() =>
@@ -38,13 +41,14 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
       unite: l.produit?.unite || "",
       majProduit: false,
       zone_stock_id: l.zone_stock_id || "",
+      prix_unitaire: l.prix_unitaire != null ? String(l.prix_unitaire) : "",
     })) || [
       {
         produit_id: "",
         produit_nom: "",
         unite: "",
         quantite: 1,
-        prix_unitaire: 0,
+        prix_unitaire: "",
         tva: 20,
         majProduit: false,
         zone_stock_id: "",
@@ -57,8 +61,6 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
       ? String(facture.total_ht)
       : ""
   );
-  const [bonusPro, setBonusPro] = useState(facture?.bonus_pro ?? "");
-  const [maintenance, setMaintenance] = useState(facture?.maintenance ?? "");
   const { autoHt, autoTva, autoTotal } = useFactureForm(lignes);
   const ecart = (parseFloat(totalHt) || 0) - autoHt;
 
@@ -111,8 +113,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
         total_tva: autoTva,
         total_ttc: autoTotal,
         commentaire,
-        bonus_pro: bonusPro === "" ? null : Number(bonusPro),
-        maintenance: maintenance === "" ? null : Number(maintenance),
+        bon_livraison: bonLivraison || null,
       };
       if (fid) {
         await updateFacture(fid, invoice);
@@ -127,13 +128,23 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
           toast.error("Produit requis pour chaque ligne");
           return;
         }
-        const { produit_nom: _n, majProduit: _m, unite: _u, ...rest } = ligne;
-        await addLigneFacture(fid, { ...rest, fournisseur_id });
+        const {
+          produit_nom: _n,
+          majProduit: _m,
+          unite: _u,
+          prix_unitaire,
+          ...rest
+        } = ligne;
+        await addLigneFacture(fid, {
+          ...rest,
+          prix_unitaire: Number(prix_unitaire) || 0,
+          fournisseur_id,
+        });
         if (ligne.majProduit) {
           await updateProduct(
             ligne.produit_id,
             {
-              dernier_prix: ligne.prix_unitaire,
+              dernier_prix: Number(prix_unitaire) || 0,
               zone_stock_id: ligne.zone_stock_id,
               tva: ligne.tva,
             },
@@ -153,15 +164,14 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
         setStatut("brouillon");
         setCommentaire("");
         setTotalHt("");
-        setBonusPro("");
-        setMaintenance("");
+        setBonLivraison("");
         setLignes([
           {
             produit_id: "",
             produit_nom: "",
             unite: "",
             quantite: 1,
-            prix_unitaire: 0,
+            prix_unitaire: "",
             tva: 20,
             majProduit: false,
             zone_stock_id: "",
@@ -178,12 +188,12 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
   const handleClose = () => {
     const hasContent =
       statut === "brouillon" &&
-      (fournisseurNom || numero || commentaire || totalHt || bonusPro || maintenance ||
+      (fournisseurNom || numero || commentaire || totalHt || bonLivraison ||
         lignes.some(l =>
           l.produit_id ||
           l.produit_nom ||
           l.quantite !== 1 ||
-          l.prix_unitaire !== 0 ||
+          l.prix_unitaire !== "" ||
           l.tva !== 20 ||
           l.zone_stock_id,
         ));
@@ -200,6 +210,15 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
         className="space-y-6"
       >
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="flex flex-col lg:col-span-2">
+            <label className="text-sm mb-1">Bon de livraison n°</label>
+            <Input
+              type="text"
+              value={bonLivraison}
+              placeholder="Saisir ou coller un numéro..."
+              onChange={e => setBonLivraison(e.target.value)}
+            />
+          </div>
           <div className="flex flex-col">
             <label className="text-sm mb-1">Date *</label>
             <Input type="date" value={date} onChange={e => setDate(e.target.value)} required />
@@ -250,24 +269,6 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
           <div className="flex flex-col lg:col-span-2">
             <label className="text-sm mb-1">Commentaire</label>
             <Input type="text" value={commentaire} onChange={e => setCommentaire(e.target.value)} />
-          </div>
-          <div className="flex flex-col lg:col-span-2">
-            <label className="text-sm mb-1">Bonus Pro</label>
-            <Input
-              type="number"
-              value={bonusPro}
-              onChange={e => setBonusPro(e.target.value)}
-              className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-            />
-          </div>
-          <div className="flex flex-col lg:col-span-2">
-            <label className="text-sm mb-1">Maintenance</label>
-            <Input
-              type="number"
-              value={maintenance}
-              onChange={e => setMaintenance(e.target.value)}
-              className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-            />
           </div>
         </section>
 
@@ -322,7 +323,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
                   produit_nom: "",
                   unite: "",
                   quantite: 1,
-                  prix_unitaire: 0,
+                  prix_unitaire: "",
                   tva: 20,
                   majProduit: false,
                   zone_stock_id: "",

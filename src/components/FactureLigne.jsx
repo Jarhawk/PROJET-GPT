@@ -1,11 +1,12 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import AutoCompleteZoneField from "@/components/ui/AutoCompleteZoneField";
 import AutoCompleteField from "@/components/ui/AutoCompleteField";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 import { useProducts } from "@/hooks/useProducts";
-import { useState } from "react";
+import { useZones } from "@/hooks/useZones";
+import { useState, useEffect } from "react";
 
 export default function FactureLigne({
   ligne,
@@ -16,7 +17,9 @@ export default function FactureLigne({
   searchProduits,
 }) {
   const { getProduct } = useProducts();
+  const { zones, fetchZones } = useZones();
   const [loadingProd, setLoadingProd] = useState(false);
+  useEffect(() => { fetchZones(); }, [fetchZones]);
 
   async function handleProduitSelection(obj) {
     if (obj?.id) {
@@ -25,7 +28,8 @@ export default function FactureLigne({
         produit_nom: obj.nom,
         produit_id: obj.id,
         unite: obj.unite || "",
-        prix_unitaire: obj.dernier_prix ?? ligne.prix_unitaire,
+        prix_unitaire:
+          obj.dernier_prix != null ? String(obj.dernier_prix) : ligne.prix_unitaire,
         tva: obj.tva ?? ligne.tva,
       };
       onChange(newLigne);
@@ -39,6 +43,7 @@ export default function FactureLigne({
         produit_nom: obj?.nom || "",
         produit_id: "",
         unite: "",
+        prix_unitaire: "",
         zone_stock_id: "",
       });
       if (obj?.nom?.length >= 2) searchProduits(obj.nom);
@@ -76,7 +81,7 @@ export default function FactureLigne({
           type="number"
           className="h-10 w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           value={ligne.prix_unitaire}
-          onChange={e => update("prix_unitaire", Number(e.target.value))}
+          onChange={e => update("prix_unitaire", e.target.value)}
           onKeyDown={e => e.key === "Enter" && e.preventDefault()}
         />
       </td>
@@ -93,13 +98,22 @@ export default function FactureLigne({
         />
       </td>
       <td className="min-w-[120px] p-1 align-middle">
-        <AutoCompleteZoneField
+        <Select
           value={ligne.zone_stock_id}
-          onChange={obj => update("zone_stock_id", obj?.id || "")}
+          onChange={e => update("zone_stock_id", e.target.value)}
           disabled={loadingProd}
           required
-          className="h-10"
-        />
+          className="h-10 w-full"
+        >
+          <option value="">Choisir...</option>
+          {zones
+            .filter(z => z.actif)
+            .map(z => (
+              <option key={z.id} value={z.id}>
+                {z.nom}
+              </option>
+            ))}
+        </Select>
       </td>
       <td className="p-1 align-middle text-center">
         <Checkbox
@@ -108,7 +122,13 @@ export default function FactureLigne({
         />
       </td>
       <td className="text-right p-1 align-middle">
-        {(ligne.quantite * ligne.prix_unitaire * (1 + (ligne.tva || 0) / 100)).toFixed(2)}
+        {
+          (
+            Number(ligne.quantite) *
+            (Number(ligne.prix_unitaire) || 0) *
+            (1 + (Number(ligne.tva) || 0) / 100)
+          ).toFixed(2)
+        }
       </td>
       <td className="p-1 align-middle">
         <Button

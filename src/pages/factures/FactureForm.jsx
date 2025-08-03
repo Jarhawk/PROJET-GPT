@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useFactures } from "@/hooks/useFactures";
 import { useProduitsAutocomplete } from "@/hooks/useProduitsAutocomplete";
 import AutoCompleteField from "@/components/ui/AutoCompleteField";
@@ -25,7 +25,9 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
     searchFournisseurs,
   } = useFournisseursAutocomplete();
   // Utilise la date de facture existante si présente
-  const [date, setDate] = useState(facture?.date_facture || "");
+  const [date, setDate] = useState(
+    facture?.date_facture || new Date().toISOString().slice(0, 10)
+  );
   const [fournisseur_id, setFournisseurId] = useState(facture?.fournisseur_id || "");
   const [fournisseurName, setFournisseurName] = useState("");
   const [numero, setNumero] = useState(facture?.numero || "");
@@ -34,12 +36,14 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
     facture?.lignes?.map(l => ({
       ...l,
       produit_nom: l.produit?.nom || "",
+      unite: l.produit?.unite || "",
       majProduit: false,
       zone_stock_id: l.zone_stock_id || "",
     })) || [
       {
         produit_id: "",
         produit_nom: "",
+        unite: "",
         quantite: 1,
         prix_unitaire: 0,
         tva: 20,
@@ -48,20 +52,27 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
       },
     ]
   );
-  const [totalHtInput, setTotalHtInput] = useState("");
+  const [totalHtInput, setTotalHtInput] = useState(
+    facture?.total_ht ? String(facture.total_ht) : ""
+  );
   const [commentaire, setCommentaire] = useState(facture?.commentaire || "");
   const [file, setFile] = useState(null);
   const [fileUrl, setFileUrl] = useState(facture?.justificatif || "");
   const [loading, setLoading] = useState(false);
-  const autoTotal = lignes.reduce(
-    (s, l) => s + l.quantite * l.prix_unitaire * (1 + (l.tva || 0) / 100),
-    0
-  );
   const autoHt = lignes.reduce(
     (s, l) => s + l.quantite * l.prix_unitaire,
     0
   );
-  const autoTva = autoTotal - autoHt;
+  const autoTva = lignes.reduce(
+    (s, l) =>
+      s + l.quantite * l.prix_unitaire * (l.tva || 0) / 100,
+    0
+  );
+  const autoTotal = autoHt + autoTva;
+  const ecart = useMemo(
+    () => autoHt - Number(totalHtInput || 0),
+    [autoHt, totalHtInput]
+  );
   useEffect(() => {
     if (facture?.fournisseur_id && fournisseurs.length) {
       const found = fournisseurs.find(s => s.id === facture.fournisseur_id);
@@ -100,10 +111,13 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
     if (loading) return;
     setLoading(true);
     const totalManuel = Number(totalHtInput);
+    const diff = autoHt - totalManuel;
     let finalStatut = statut;
-    if (Math.abs(totalManuel - autoTotal) >= 1) {
+    if (Math.abs(diff) > 1) {
       finalStatut = "brouillon";
-      toast.error("Total HT différent du calcul automatique. Facture enregistrée en brouillon.");
+      toast.error(
+        "Total HT différent du calcul automatique. Facture enregistrée en brouillon."
+      );
     }
     const invoice = {
       date_facture: date,
@@ -127,16 +141,23 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
       }
 
       for (const ligne of lignes) {
-        if (ligne.produit_id) {
-          const { produit_nom: _unused, majProduit, ...rest } = ligne;
-          await addLigneFacture(fid, { ...rest, fournisseur_id });
-          if (majProduit) {
-            await updateProduct(
-              ligne.produit_id,
-              { tva: ligne.tva, zone_stock_id: ligne.zone_stock_id },
-              { refresh: false }
-            );
-          }
+        if (!ligne.produit_id) {
+          toast.error("Produit requis pour chaque ligne");
+          setLoading(false);
+          return;
+        }
+        const { produit_nom: _unused, majProduit, unite: _u, ...rest } = ligne;
+        await addLigneFacture(fid, { ...rest, fournisseur_id });
+        if (majProduit) {
+          await updateProduct(
+            ligne.produit_id,
+            {
+              tva: ligne.tva,
+              zone_stock_id: ligne.zone_stock_id,
+              dernier_prix: ligne.prix_unitaire,
+            },
+            { refresh: false }
+          );
         }
       }
       await calculateTotals(fid);
@@ -214,7 +235,9 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
                 value={totalHtInput}
                 onChange={e => setTotalHtInput(e.target.value)}
               />
-              <p className="text-xs text-gray-300 mt-1">Total calculé : {autoTotal.toFixed(2)} €</p>
+              <p className="text-xs mt-1">
+                Total calculé : {autoHt.toFixed(2)} € | Écart : {ecart.toFixed(2)} €
+              </p>
             </div>
             <div>
               <label className="block text-sm mb-1">Justificatif PDF</label>
@@ -246,6 +269,7 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
               <tr>
                 <th>Produit</th>
                 <th>Qté</th>
+                <th>Unité</th>
                 <th>PU</th>
                 <th>TVA %</th>
                 <th>Zone</th>
@@ -257,7 +281,7 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
             <tbody>
               {lignes.map((l, idx) => (
                 <tr key={idx}>
-                  <td className="min-w-[150px]">
+                  <td className="min-w-[200px]">
                     <AutoCompleteField
                       label=""
                       value={l.produit_id}
@@ -272,6 +296,8 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
                                   ...it,
                                   produit_nom: obj?.nom || "",
                                   produit_id: obj?.id || "",
+                                  unite: obj?.unite || "",
+                                  prix_unitaire: obj?.pmp ?? it.prix_unitaire,
                                   tva: obj?.tva ?? it.tva,
                                 }
                               : it,
@@ -304,6 +330,7 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
                       }
                     />
                   </td>
+                  <td className="text-center">{l.unite}</td>
                   <td>
                     <Input
                       type="number"
@@ -375,7 +402,7 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
             </tbody>
           </table>
         </div>
-        <Button
+            <Button
           type="button"
           onClick={() =>
             setLignes(ls => [
@@ -383,6 +410,7 @@ export default function FactureForm({ facture, fournisseurs = [], onClose }) {
               {
                 produit_id: "",
                 produit_nom: "",
+                unite: "",
                 quantite: 1,
                 prix_unitaire: 0,
                 tva: 20,

@@ -70,13 +70,14 @@ export default function FactureLigne({
   function handleQuantite(val) {
     const replaced = String(val).replace(',', '.');
     const qNum = parseFloat(replaced);
-    const isValid = !isNaN(qNum);
-    const pu = parseNum(ligne.pu);
-    let newLine = { ...ligne, quantite: isValid ? qNum : 0 };
-    if (!ligne.manuallyEdited) {
-      newLine.total_ht = isValid ? parseFloat((qNum * pu).toFixed(2)) : 0;
+    if (!isNaN(qNum)) {
+      const pu = parseNum(ligne.pu);
+      const newLine = { ...ligne, quantite: qNum };
+      if (!ligne.manuallyEdited) {
+        newLine.total_ht = parseFloat((qNum * pu).toFixed(2));
+      }
+      onChange(newLine);
     }
-    onChange(newLine);
   }
 
   function handleTotal(val) {
@@ -119,12 +120,8 @@ export default function FactureLigne({
           onKeyDown={e => e.key === "Enter" && e.preventDefault()}
         />
       </td>
-      <td className="p-1 align-middle">
-        <input
-          value={ligne.unite || ""}
-          readOnly
-          style={{ border: "none", background: "transparent", width: "100%", padding: "0.5rem", textAlign: "center" }}
-        />
+      <td className="p-1 align-middle h-10 text-center">
+        <span>{ligne.unite || ""} | TVA {ligne.tva || 0}</span>
       </td>
       <td className="p-1 align-middle">
         <div className="relative">
@@ -140,9 +137,9 @@ export default function FactureLigne({
         </div>
       </td>
       <td className="p-1 align-middle">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span>PU : {puNum.toFixed(2)} €</span>
-          <span style={{ color: "gray", fontSize: "0.85rem" }}>PMP : {pmp.toFixed(2)} €</span>
+        <div style={{ display: "flex", justifyContent: "space-between", padding: "0.25rem 0.5rem" }}>
+          <span><strong>PU:</strong> {puNum.toFixed(2)} €</span>
+          <span style={{ color: "gray" }}><strong>PMP:</strong> {pmp.toFixed(2)} €</span>
         </div>
       </td>
       <td className="min-w-[20ch] p-1 align-middle">
@@ -162,13 +159,6 @@ export default function FactureLigne({
               </option>
             ))}
         </Select>
-      </td>
-      <td className="p-1 align-middle">
-        <input
-          value={ligne.tva ?? 0}
-          readOnly
-          style={{ border: "none", background: "transparent", width: "100%", padding: "0.5rem", textAlign: "center" }}
-        />
       </td>
       <td className="p-1 align-middle">
         <Button

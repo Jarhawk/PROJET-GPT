@@ -41,6 +41,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
       total_ht: l.prix_unitaire != null ? String(l.prix_unitaire * l.quantite) : "",
       tva: l.tva ?? 20,
       zone_stock_id: l.zone_stock_id || "",
+      unite: l.produit?.unite?.nom || l.produit?.unite || "",
     })) || [
       {
         produit_id: "",
@@ -49,6 +50,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
         total_ht: "",
         tva: 20,
         zone_stock_id: "",
+        unite: "",
       },
     ],
   );
@@ -128,7 +130,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
           toast.error("Produit requis pour chaque ligne");
           return;
         }
-        const { produit_nom: _n, total_ht, ...rest } = ligne;
+        const { produit_nom: _n, total_ht, unite: _u, ...rest } = ligne;
         const prix_unitaire =
           Number(total_ht) / (Number(ligne.quantite) || 1);
         await addLigneFacture(fid, {
@@ -157,6 +159,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
             total_ht: "",
             tva: 20,
             zone_stock_id: "",
+            unite: "",
           },
         ]);
         searchFournisseurs("");
@@ -259,11 +262,11 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
                 <tr>
                   <th>Produit</th>
                   <th>Quantité</th>
+                  <th>Unité</th>
                   <th>Total HT</th>
                   <th>PU</th>
                   <th>Zone</th>
                   <th>TVA</th>
-                  <th>Total TTC</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -303,6 +306,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
                   total_ht: "",
                   tva: 20,
                   zone_stock_id: "",
+                  unite: "",
                 },
               ])
             }

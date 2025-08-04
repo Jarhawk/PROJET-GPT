@@ -11,6 +11,7 @@ import { toast } from "react-hot-toast";
 import GlassCard from "@/components/ui/GlassCard";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import AutoCompleteField from "@/components/ui/AutoCompleteField";
 
 export default function ProduitForm({
   produit,
@@ -40,7 +41,6 @@ export default function ProduitForm({
     produit?.sous_famille_id || "",
   );
   const [uniteId, setUniteId] = useState(produit?.unite_id || "");
-  const [uniteName, setUniteName] = useState(produit?.unite?.nom || "");
   const [fournisseurId, setFournisseurId] = useState(
     produit?.fournisseur_id || "",
   );
@@ -85,7 +85,6 @@ export default function ProduitForm({
       setFamilleId(produit.famille_id || "");
       setSousFamilleId(produit.sous_famille_id || "");
       setUniteId(produit.unite_id || "");
-      setUniteName(produit.unite?.nom || "");
       setFournisseurId(produit.fournisseur_id || "");
       setZoneStockId(produit.zone_stock_id || "");
       setStockMin(produit.stock_min || 0);
@@ -233,27 +232,13 @@ export default function ProduitForm({
         </div>
 
         <div className="flex flex-col gap-1 p-2 rounded-xl">
-          <label htmlFor="prod-unite" className="label text-white">
-            Unité *
-          </label>
-          <input
-            id="prod-unite"
-            list="unites-list"
-            className="input bg-white text-gray-900"
-            value={uniteName}
-            onChange={(e) => {
-              const val = e.target.value;
-              setUniteName(val);
-              const found = uniteOptions.find((u) => u.nom === val);
-              setUniteId(found ? found.id : "");
-            }}
+          <AutoCompleteField
+            label="Unité *"
+            value={uniteId}
+            onChange={(obj) => setUniteId(obj?.id || "")}
+            options={uniteOptions}
             required
           />
-          <datalist id="unites-list">
-            {uniteOptions.map((u) => (
-              <option key={u.id} value={u.nom} />
-            ))}
-          </datalist>
           {errors.unite && <p className="text-red-500 text-sm">{errors.unite}</p>}
         </div>
 

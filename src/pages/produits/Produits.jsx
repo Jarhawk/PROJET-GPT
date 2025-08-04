@@ -329,7 +329,7 @@ export default function Produits() {
                 <span>{produit.actif ? "✅" : "❌"}</span>
               </div>
               <div className="text-sm mt-1 flex flex-wrap gap-2">
-                <span>{produit.unite?.nom ?? produit.unite ?? ""}</span>
+                <span>{produit.unites?.nom ?? ""}</span>
                 <span>Stock: {produit.stock_theorique}</span>
                 <span>PMP: {produit.pmp != null ? Number(produit.pmp).toFixed(2) : "-"}</span>
               </div>

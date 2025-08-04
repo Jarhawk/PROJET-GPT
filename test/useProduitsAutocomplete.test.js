@@ -28,7 +28,7 @@ test('searchProduits filters by mama_id and query', async () => {
     await result.current.searchProduits('car');
   });
   expect(fromMock).toHaveBeenCalledWith('produits');
-  expect(selectMock).toHaveBeenCalledWith('id, nom, tva, dernier_prix, unite:unites(nom)');
+  expect(selectMock).toHaveBeenCalledWith('id, nom, tva, dernier_prix, unite_id, unites:unite_id (nom)');
   expect(eqMock).toHaveBeenCalledWith('mama_id', 'm1');
   expect(eqMock).toHaveBeenCalledWith('actif', true);
   expect(ilikeMock).toHaveBeenCalledWith('nom', '%car%');

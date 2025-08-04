@@ -210,7 +210,7 @@ export default function InventaireForm({ inventaire, onClose }) {
                       required
                     />
                   </td>
-                  <td>{prod?.unite || "-"}</td>
+                  <td>{prod?.unites?.nom || "-"}</td>
                   <td>{stock_debut}</td>
                   <td>{entrees}</td>
                   <td>{sorties}</td>

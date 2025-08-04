@@ -70,7 +70,7 @@ test('produits creation and disable refresh list', async () => {
   const { result } = renderHook(() => useProducts());
 
   await act(async () => {
-    await result.current.addProduct({ nom: 'P', famille: 'F', unite: 'kg' });
+    await result.current.addProduct({ nom: 'P', famille: 'F', unite_id: 'u1' });
   });
 
   const afterCreate = result.current.products.length === 1;

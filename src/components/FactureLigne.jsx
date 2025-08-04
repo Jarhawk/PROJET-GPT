@@ -38,7 +38,7 @@ export default function FactureLigne({
         onChange({
           ...newLigne,
           zone_stock_id: prod?.zone_stock_id || "",
-          unite: prod?.unite?.nom || newLigne.unite,
+          unite: prod?.unites?.nom || newLigne.unite,
         });
       } catch (error) {
         console.error(error);

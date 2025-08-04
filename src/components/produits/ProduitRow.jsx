@@ -20,7 +20,7 @@ export default function ProduitRow({
       >
         {produit.nom}
       </td>
-      <td className="px-2 text-center">{produit.unite?.nom ?? produit.unite ?? ""}</td>
+      <td className="px-2 text-center">{produit.unites?.nom ?? ""}</td>
       <td className="px-2 text-right">
         {produit.pmp != null ? Number(produit.pmp).toFixed(2) : "-"}
       </td>

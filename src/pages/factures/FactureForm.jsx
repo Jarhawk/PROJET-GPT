@@ -18,9 +18,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 function safeParse(val) {
   try {
-    return typeof val === "string" ? JSON.parse(val) : val || [];
-  } catch (e) {
-    console.warn("Erreur JSON.parse :", e, val);
+    return typeof val === "string" ? JSON.parse(val) : val ?? [];
+  } catch {
+    console.warn("Erreur JSON.parse:", val);
     return [];
   }
 }
@@ -69,10 +69,14 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
   const ecart = (parseFloat(String(totalHt).replace(',', '.')) || 0) - autoHt;
 
   useEffect(() => {
-    if (isBonLivraison && !numero.startsWith("BL")) {
-      setNumero(`BL${Date.now().toString().slice(-5)}`);
+    if (isBonLivraison) {
+      if (!numero.startsWith("BL")) {
+        setNumero(`BL${Date.now().toString().slice(-4)}`);
+      }
+    } else if (numero.startsWith("BL")) {
+      setNumero("");
     }
-  }, [isBonLivraison, numero]);
+  }, [isBonLivraison]);
 
   useEffect(() => {
     if (facture?.fournisseur_id && fournisseurs.length) {
@@ -106,6 +110,40 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
   }, [numero, mama_id, facture?.id]);
 
   useEffect(() => { searchProduits(""); }, [searchProduits]);
+
+  useEffect(() => {
+    if (facture) {
+      setDate(facture.date_facture || new Date().toISOString().slice(0, 10));
+      setFournisseurId(facture.fournisseur_id || "");
+      setNumero(facture.numero || "");
+      setStatut(facture.statut || "Brouillon");
+      setIsBonLivraison(Boolean(facture.bon_livraison));
+      setTotalHt(
+        facture?.total_ht !== undefined && facture?.total_ht !== null
+          ? String(facture.total_ht)
+          : "",
+      );
+      const lignesInit = safeParse(facture.lignes_produits);
+      setLignes(
+        lignesInit.length
+          ? lignesInit
+          : [
+              {
+                produit_id: "",
+                produit_nom: "",
+                quantite: 1,
+                total_ht: "",
+                pu: "",
+                tva: 20,
+                zone_stock_id: "",
+                unite_id: "",
+                unite: "",
+                pmp: null,
+              },
+            ],
+      );
+    }
+  }, [facture]);
 
   const ecartClass = Math.abs(ecart) > 0.01 ? "text-green-500" : "";
 
@@ -355,9 +393,9 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
 
         <section className="p-3 mt-4 bg-white/10 border border-white/20 rounded">
           <div className="flex flex-wrap gap-4">
-            <span className="font-bold">Total HT : {autoHt.toFixed(2)} €</span>
-            <span className="font-bold">- TVA : {autoTva.toFixed(2)} €</span>
-            <span className="font-bold">- TTC : {autoTotal.toFixed(2)} €</span>
+            <span>
+              Total HT : {autoHt.toFixed(2)} € – TVA : {autoTva.toFixed(2)} € – TTC : {autoTotal.toFixed(2)} €
+            </span>
             <span className={`font-bold ${ecartClass}`}>Écart HT : {ecart.toFixed(2)} €</span>
           </div>
         </section>

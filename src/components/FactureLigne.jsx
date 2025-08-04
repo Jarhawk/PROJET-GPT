@@ -70,27 +70,31 @@ export default function FactureLigne({
   function handleQuantite(val) {
     const replaced = String(val).replace(',', '.');
     const qNum = parseFloat(replaced);
+    const newLine = { ...ligne, quantite: val };
     if (!isNaN(qNum)) {
       const pu = parseNum(ligne.pu);
-      const newLine = { ...ligne, quantite: qNum };
       if (!ligne.manuallyEdited) {
-        newLine.total_ht = parseFloat((qNum * pu).toFixed(2));
+        newLine.total_ht = (qNum * pu).toFixed(2);
+      } else {
+        const total = parseNum(ligne.total_ht);
+        newLine.pu = qNum ? parseFloat((total / qNum).toFixed(2)) : 0;
       }
-      onChange(newLine);
     }
+    onChange(newLine);
   }
 
   function handleTotal(val) {
     const replaced = String(val).replace(',', '.');
     const tNum = parseFloat(replaced);
-    const isValid = !isNaN(tNum);
     const q = parseNum(ligne.quantite);
     const newLine = {
       ...ligne,
-      total_ht: isValid ? parseFloat(tNum.toFixed(2)) : 0,
-      pu: q ? (isValid ? parseFloat((tNum / q).toFixed(2)) : 0) : 0,
+      total_ht: val,
       manuallyEdited: true,
     };
+    if (!isNaN(tNum)) {
+      newLine.pu = q ? parseFloat((tNum / q).toFixed(2)) : 0;
+    }
     onChange(newLine);
   }
 
@@ -111,18 +115,23 @@ export default function FactureLigne({
       </td>
       <td className="p-1 align-middle">
         <Input
-          type="number"
-          step="any"
+          type="text"
+          inputMode="decimal"
           required
-          className="h-10 w-full"
+          className="h-10 w-full text-center"
           value={ligne.quantite}
-          onChange={e => handleQuantite(e.target.value.replace(',', '.'))}
-          onBlur={() => handleQuantite(ligne.quantite)}
+          onChange={e => handleQuantite(e.target.value)}
+          onBlur={() => handleQuantite(String(parseNum(ligne.quantite)))}
           onKeyDown={e => e.key === "Enter" && e.preventDefault()}
         />
       </td>
       <td className="p-1 align-middle">
-        <div className="h-10 flex items-center px-2">{ligne.unite || ""}</div>
+        <Input
+          type="text"
+          readOnly
+          value={ligne.unite || ""}
+          className="h-10 w-full"
+        />
       </td>
       <td className="p-1 align-middle">
         <div className="relative">
@@ -131,20 +140,27 @@ export default function FactureLigne({
             className="h-10 w-full pr-6"
             value={ligne.total_ht}
             onChange={e => handleTotal(e.target.value)}
-            onBlur={() => handleTotal(String(ligne.total_ht.toFixed(2)))}
+            onBlur={() => handleTotal(parseNum(ligne.total_ht).toFixed(2))}
             onKeyDown={e => e.key === 'Enter' && e.preventDefault()}
           />
           <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm">€</span>
         </div>
       </td>
       <td className="p-1 align-middle">
-        <div className="h-10 flex items-center px-2">
-          <span>PU: {puNum.toFixed(2)} €</span>
-          <span className="text-gray-500 ml-2">PMP: {pmp.toFixed(2)} €</span>
-        </div>
+        <Input
+          type="text"
+          readOnly
+          value={`PU : ${puNum.toFixed(2)} € / PMP : ${pmp.toFixed(2)} €`}
+          className="h-10 w-full"
+        />
       </td>
       <td className="p-1 align-middle">
-        <div className="h-10 flex items-center px-2">{ligne.tva || 0}%</div>
+        <Input
+          type="text"
+          readOnly
+          value={`${ligne.tva || 0}%`}
+          className="h-10 w-full"
+        />
       </td>
       <td className="p-1 align-middle">
         <Select

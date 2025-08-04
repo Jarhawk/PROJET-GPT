@@ -44,8 +44,8 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
   const [lignes, setLignes] = useState(() => {
     const lignesInit = safeParse(facture?.lignes_produits).map(l => ({
       ...l,
-      quantite: parseFloat(l.quantite) || 0,
-      total_ht: parseFloat(l.total_ht) || 0,
+      quantite: String(parseFloat(l.quantite) || 0),
+      total_ht: String(parseFloat(l.total_ht) || 0),
       pu: parseFloat(l.pu) || 0,
       pmp: l.pmp ?? 0,
       manuallyEdited: false,
@@ -56,8 +56,8 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
           {
             produit_id: "",
             produit_nom: "",
-            quantite: 1,
-            total_ht: 0,
+            quantite: "1",
+            total_ht: "0",
             pu: 0,
             tva: 20,
             zone_stock_id: "",
@@ -131,8 +131,8 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
       );
       const lignesInit = safeParse(facture.lignes_produits).map(l => ({
         ...l,
-        quantite: parseFloat(l.quantite) || 0,
-        total_ht: parseFloat(l.total_ht) || 0,
+        quantite: String(parseFloat(l.quantite) || 0),
+        total_ht: String(parseFloat(l.total_ht) || 0),
         pu: parseFloat(l.pu) || 0,
         pmp: l.pmp ?? 0,
         manuallyEdited: false,
@@ -144,8 +144,8 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
               {
                 produit_id: "",
                 produit_nom: "",
-                quantite: 1,
-                total_ht: 0,
+                quantite: "1",
+                total_ht: "0",
                 pu: 0,
                 tva: 20,
                 zone_stock_id: "",
@@ -232,8 +232,8 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
           {
             produit_id: "",
             produit_nom: "",
-            quantite: 1,
-            total_ht: 0,
+            quantite: "1",
+            total_ht: "0",
             pu: 0,
             tva: 20,
             zone_stock_id: "",
@@ -347,14 +347,14 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
           <div className="overflow-x-auto">
             <table className="w-full text-sm table-fixed">
               <colgroup>
-                <col style={{ width: "25%" }} />
-                <col style={{ width: "10%" }} />
-                <col style={{ width: "10%" }} />
-                <col style={{ width: "10%" }} />
-                <col style={{ width: "15%" }} />
+                <col style={{ width: "28%" }} />
+                <col style={{ width: "8%" }} />
                 <col style={{ width: "8%" }} />
                 <col style={{ width: "12%" }} />
-                <col style={{ width: "5%" }} />
+                <col style={{ width: "20%" }} />
+                <col style={{ width: "8%" }} />
+                <col style={{ width: "12%" }} />
+                <col style={{ width: "4%" }} />
               </colgroup>
               <thead>
                 <tr>
@@ -362,7 +362,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
                   <th className="text-left">Quantité</th>
                   <th className="text-left">Unité</th>
                   <th className="text-left">Total HT</th>
-                  <th className="text-left">PU / PMP</th>
+                  <th className="text-left">PU/PMP</th>
                   <th className="text-left">TVA</th>
                   <th className="text-left">Zone</th>
                   <th className="text-right">Actions</th>
@@ -400,8 +400,8 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
                 {
                   produit_id: "",
                   produit_nom: "",
-                  quantite: 1,
-                  total_ht: 0,
+                  quantite: "1",
+                  total_ht: "0",
                   pu: 0,
                   tva: 20,
                   zone_stock_id: "",

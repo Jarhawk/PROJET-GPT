@@ -59,6 +59,15 @@ VALUES
   ('audit', 'peut_voir')
 ON CONFLICT DO NOTHING;
 
+-- Correction de la colonne des lignes produits
+ALTER TABLE factures
+ADD COLUMN IF NOT EXISTS lignes_produits jsonb DEFAULT '[]';
+
+UPDATE factures
+SET lignes_produits = '[]'
+WHERE lignes_produits IS NULL
+   OR lignes_produits::text = '';
+
 -- Ajout/ajustement du module planning prévisionnel
 ALTER TABLE planning_previsionnel
   ADD COLUMN IF NOT EXISTS nom text,

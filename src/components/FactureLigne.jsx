@@ -19,13 +19,6 @@ export default function FactureLigne({
   const { zones, fetchZones } = useZones();
   const [loadingProd, setLoadingProd] = useState(false);
   const parseNum = v => parseFloat(String(v).replace(',', '.')) || 0;
-  const formatNum = v =>
-    isNaN(v)
-      ? ""
-      : Number(v).toLocaleString("fr-FR", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        });
   useEffect(() => {
     fetchZones();
   }, [fetchZones]);
@@ -68,7 +61,7 @@ export default function FactureLigne({
         zone_stock_id: "",
         unite_id: "",
         unite: "",
-        pmp: null,
+        pmp: 0,
       });
       if (obj?.nom?.length >= 2) searchProduits(obj.nom);
     }
@@ -76,45 +69,32 @@ export default function FactureLigne({
 
   function handleQuantite(val) {
     const replaced = String(val).replace(',', '.');
-    const qNum = parseFloat(replaced) || 0;
+    const qNum = parseFloat(replaced);
+    const isValid = !isNaN(qNum);
     const pu = parseNum(ligne.pu);
-    const t = parseNum(ligne.total_ht);
-    let newLine = { ...ligne, quantite: qNum };
-    if (ligne.pu) {
-      newLine.total_ht = formatNum(qNum * pu);
-    } else if (ligne.total_ht) {
-      newLine.pu = qNum ? formatNum(t / qNum) : ligne.pu;
+    let newLine = { ...ligne, quantite: isValid ? qNum : 0 };
+    if (!ligne.manuallyEdited) {
+      newLine.total_ht = isValid ? parseFloat((qNum * pu).toFixed(2)) : 0;
     }
     onChange(newLine);
   }
 
   function handleTotal(val) {
-    const t = val;
-    const tNum = parseNum(val);
+    const replaced = String(val).replace(',', '.');
+    const tNum = parseFloat(replaced);
+    const isValid = !isNaN(tNum);
     const q = parseNum(ligne.quantite);
     const newLine = {
       ...ligne,
-      total_ht: t,
-      pu: q ? formatNum(tNum / q) : ligne.pu,
+      total_ht: isValid ? parseFloat(tNum.toFixed(2)) : 0,
+      pu: q ? (isValid ? parseFloat((tNum / q).toFixed(2)) : 0) : 0,
+      manuallyEdited: true,
     };
     onChange(newLine);
   }
 
-  function handlePu(val) {
-    const p = val;
-    const pNum = parseNum(val);
-    const q = parseNum(ligne.quantite);
-    const newLine = {
-      ...ligne,
-      pu: p,
-      total_ht: formatNum(q * pNum),
-    };
-    onChange(newLine);
-  }
   const puNum = parseNum(ligne.pu);
   const pmp = parseNum(ligne.pmp);
-  const variation = puNum - pmp;
-  const icon = variation > 0 ? "⬆️" : variation < 0 ? "⬇️" : "⚖️";
 
   return (
     <tr className="h-10">
@@ -140,11 +120,10 @@ export default function FactureLigne({
         />
       </td>
       <td className="p-1 align-middle">
-        <Input
+        <input
           value={ligne.unite || ""}
           readOnly
-          style={{ width: 80, backgroundColor: "#f6f6f6" }}
-          className="h-10"
+          style={{ border: "none", background: "transparent", width: "100%", padding: "0.5rem", textAlign: "center" }}
         />
       </td>
       <td className="p-1 align-middle">
@@ -154,28 +133,16 @@ export default function FactureLigne({
             className="h-10 w-full pr-6"
             value={ligne.total_ht}
             onChange={e => handleTotal(e.target.value)}
-            onBlur={() => handleTotal(formatNum(parseNum(ligne.total_ht)))}
+            onBlur={() => handleTotal(String(ligne.total_ht.toFixed(2)))}
             onKeyDown={e => e.key === 'Enter' && e.preventDefault()}
           />
           <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm">€</span>
         </div>
       </td>
       <td className="p-1 align-middle">
-        <div className="flex items-center gap-1">
-          <div className="relative" style={{ width: 80 }}>
-            <Input
-              type="number"
-              step="0.01"
-              className="h-10 w-full pr-6"
-              value={ligne.pu}
-              onChange={e => handlePu(e.target.value)}
-              onBlur={() => handlePu(formatNum(parseNum(ligne.pu)))}
-              onKeyDown={e => e.key === 'Enter' && e.preventDefault()}
-            />
-            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm">€</span>
-          </div>
-          <span className="text-xs text-gray-500">PMP : {formatNum(pmp)} €</span>
-          <span>{icon}</span>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span>PU : {puNum.toFixed(2)} €</span>
+          <span style={{ color: "gray", fontSize: "0.85rem" }}>PMP : {pmp.toFixed(2)} €</span>
         </div>
       </td>
       <td className="min-w-[20ch] p-1 align-middle">
@@ -197,11 +164,10 @@ export default function FactureLigne({
         </Select>
       </td>
       <td className="p-1 align-middle">
-        <Input
+        <input
           value={ligne.tva ?? 0}
           readOnly
-          style={{ width: 60, backgroundColor: "#f6f6f6" }}
-          className="h-10"
+          style={{ border: "none", background: "transparent", width: "100%", padding: "0.5rem", textAlign: "center" }}
         />
       </td>
       <td className="p-1 align-middle">

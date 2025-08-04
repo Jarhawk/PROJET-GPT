@@ -6,7 +6,6 @@ import { useFactures } from "@/hooks/useFactures";
 import { useProduitsAutocomplete } from "@/hooks/useProduitsAutocomplete";
 import { useFournisseursAutocomplete } from "@/hooks/useFournisseursAutocomplete";
 import { useFactureForm } from "@/hooks/useFactureForm";
-import { useProducts } from "@/hooks/useProducts";
 import GlassCard from "@/components/ui/GlassCard";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -17,7 +16,6 @@ import toast from "react-hot-toast";
 
 export default function FactureForm({ facture = null, fournisseurs = [], onClose, onSaved }) {
   const { createFacture, updateFacture, addLigneFacture } = useFactures();
-  const { updateProduct } = useProducts();
   const { results: fournisseurOptions, searchFournisseurs } = useFournisseursAutocomplete();
   const { results: produitOptions, searchProduits } = useProduitsAutocomplete();
   const { mama_id } = useAuth();
@@ -36,21 +34,19 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
   const [statut, setStatut] = useState(facture?.statut || "brouillon");
   const [lignes, setLignes] = useState(() =>
     facture?.lignes?.map(l => ({
-      ...l,
+      produit_id: l.produit_id,
       produit_nom: l.produit?.nom || "",
-      unite: l.produit?.unite || "",
-      majProduit: false,
+      quantite: l.quantite,
+      total_ht: l.prix_unitaire != null ? String(l.prix_unitaire * l.quantite) : "",
+      tva: l.tva ?? 20,
       zone_stock_id: l.zone_stock_id || "",
-      prix_unitaire: l.prix_unitaire != null ? String(l.prix_unitaire) : "",
     })) || [
       {
         produit_id: "",
         produit_nom: "",
-        unite: "",
         quantite: 1,
-        prix_unitaire: "",
+        total_ht: "",
         tva: 20,
-        majProduit: false,
         zone_stock_id: "",
       },
     ],
@@ -78,14 +74,19 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
   useEffect(() => {
     const checkNumero = async () => {
       if (!numero) { setNumeroUsed(false); return; }
-      const { data } = await supabase
-        .from("factures")
-        .select("id")
-        .eq("mama_id", mama_id)
-        .eq("numero", numero)
-        .neq("id", facture?.id || 0)
-        .maybeSingle();
-      setNumeroUsed(!!data);
+      try {
+        const { data } = await supabase
+          .from("factures")
+          .select("id")
+          .eq("mama_id", mama_id)
+          .eq("numero", numero)
+          .neq("id", facture?.id || 0)
+          .limit(1)
+          .maybeSingle();
+        setNumeroUsed(!!data);
+      } catch (error) {
+        console.error(error);
+      }
     };
     checkNumero();
   }, [numero, mama_id, facture?.id]);
@@ -128,29 +129,14 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
           toast.error("Produit requis pour chaque ligne");
           return;
         }
-        const {
-          produit_nom: _n,
-          majProduit: _m,
-          unite: _u,
-          prix_unitaire,
-          ...rest
-        } = ligne;
+        const { produit_nom: _n, total_ht, ...rest } = ligne;
+        const prix_unitaire =
+          Number(total_ht) / (Number(ligne.quantite) || 1);
         await addLigneFacture(fid, {
           ...rest,
-          prix_unitaire: Number(prix_unitaire) || 0,
+          prix_unitaire: isFinite(prix_unitaire) ? prix_unitaire : 0,
           fournisseur_id,
         });
-        if (ligne.majProduit) {
-          await updateProduct(
-            ligne.produit_id,
-            {
-              dernier_prix: Number(prix_unitaire) || 0,
-              zone_stock_id: ligne.zone_stock_id,
-              tva: ligne.tva,
-            },
-            { refresh: false },
-          );
-        }
       }
       onSaved?.();
       toast.success(facture ? "Facture modifiée !" : "Facture ajoutée !");
@@ -169,11 +155,9 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
           {
             produit_id: "",
             produit_nom: "",
-            unite: "",
             quantite: 1,
-            prix_unitaire: "",
+            total_ht: "",
             tva: 20,
-            majProduit: false,
             zone_stock_id: "",
           },
         ]);
@@ -193,7 +177,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
           l.produit_id ||
           l.produit_nom ||
           l.quantite !== 1 ||
-          l.prix_unitaire !== "" ||
+          l.total_ht !== "" ||
           l.tva !== 20 ||
           l.zone_stock_id,
         ));
@@ -279,14 +263,12 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
               <thead>
                 <tr>
                   <th>Produit</th>
-                  <th>Qté</th>
-                  <th>Unité</th>
+                  <th>Quantité</th>
+                  <th>Total HT</th>
                   <th>PU</th>
-                  <th>TVA</th>
                   <th>Zone</th>
-                  <th>MAJ produit</th>
-                  <th>Total</th>
-                  <th></th>
+                  <th>TVA</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -321,11 +303,9 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
                 {
                   produit_id: "",
                   produit_nom: "",
-                  unite: "",
                   quantite: 1,
-                  prix_unitaire: "",
+                  total_ht: "",
                   tva: 20,
-                  majProduit: false,
                   zone_stock_id: "",
                 },
               ])
@@ -337,10 +317,10 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
 
         <section className="p-3 mt-4 bg-white/10 border border-white/20 rounded">
           <div className="flex flex-wrap gap-4">
-            <span className="font-bold">Total HT: {autoHt.toFixed(2)} €</span>
-            <span className="font-bold">TVA: {autoTva.toFixed(2)} €</span>
-            <span className="font-bold">TTC: {autoTotal.toFixed(2)} €</span>
-            <span className={`font-bold ${ecartClass}`}>Écart HT: {ecart.toFixed(2)} €</span>
+            <span className="font-bold">Total HT : {autoHt.toFixed(2)} €</span>
+            <span className="font-bold">- TVA : {autoTva.toFixed(2)} €</span>
+            <span className="font-bold">- TTC : {autoTotal.toFixed(2)} €</span>
+            <span className={`font-bold ${ecartClass}`}>Écart HT : {ecart.toFixed(2)} €</span>
           </div>
         </section>
 

@@ -1,7 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import AutoCompleteField from "@/components/ui/AutoCompleteField";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { useProducts } from "@/hooks/useProducts";
@@ -19,7 +18,9 @@ export default function FactureLigne({
   const { getProduct } = useProducts();
   const { zones, fetchZones } = useZones();
   const [loadingProd, setLoadingProd] = useState(false);
-  useEffect(() => { fetchZones(); }, [fetchZones]);
+  useEffect(() => {
+    fetchZones();
+  }, [fetchZones]);
 
   async function handleProduitSelection(obj) {
     if (obj?.id) {
@@ -27,23 +28,23 @@ export default function FactureLigne({
         ...ligne,
         produit_nom: obj.nom,
         produit_id: obj.id,
-        unite: obj.unite || "",
-        prix_unitaire:
-          obj.dernier_prix != null ? String(obj.dernier_prix) : ligne.prix_unitaire,
         tva: obj.tva ?? ligne.tva,
       };
       onChange(newLigne);
       setLoadingProd(true);
-      const prod = await getProduct(obj.id);
-      onChange({ ...newLigne, zone_stock_id: prod?.zone_stock_id || "" });
+      try {
+        const prod = await getProduct(obj.id);
+        onChange({ ...newLigne, zone_stock_id: prod?.zone_stock_id || "" });
+      } catch (error) {
+        console.error(error);
+        onChange({ ...newLigne, zone_stock_id: "" });
+      }
       setLoadingProd(false);
     } else {
       onChange({
         ...ligne,
         produit_nom: obj?.nom || "",
         produit_id: "",
-        unite: "",
-        prix_unitaire: "",
         zone_stock_id: "",
       });
       if (obj?.nom?.length >= 2) searchProduits(obj.nom);
@@ -53,6 +54,9 @@ export default function FactureLigne({
   function update(field, value) {
     onChange({ ...ligne, [field]: value });
   }
+
+  const prixUnitaire =
+    ligne.quantite ? (Number(ligne.total_ht) || 0) / Number(ligne.quantite) : 0;
 
   return (
     <tr className="h-10">
@@ -75,26 +79,22 @@ export default function FactureLigne({
           onKeyDown={e => e.key === "Enter" && e.preventDefault()}
         />
       </td>
-      <td className="text-center p-1 align-middle">{ligne.unite}</td>
       <td className="p-1 align-middle">
         <Input
           type="number"
+          required
           className="h-10 w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-          value={ligne.prix_unitaire}
-          onChange={e => update("prix_unitaire", e.target.value)}
+          value={ligne.total_ht}
+          onChange={e => update("total_ht", e.target.value)}
           onKeyDown={e => e.key === "Enter" && e.preventDefault()}
         />
       </td>
-      <td className="p-1 align-middle w-16">
+      <td className="p-1 align-middle">
         <Input
           type="number"
-          className="h-10 w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-          title="Taux de TVA appliqué"
-          required
-          max={9999}
-          value={ligne.tva}
-          onChange={e => update("tva", Number(e.target.value))}
-          onKeyDown={e => e.key === "Enter" && e.preventDefault()}
+          readOnly
+          className="h-10 w-full bg-gray-100 text-gray-700"
+          value={prixUnitaire.toFixed(2)}
         />
       </td>
       <td className="min-w-[120px] p-1 align-middle">
@@ -115,20 +115,17 @@ export default function FactureLigne({
             ))}
         </Select>
       </td>
-      <td className="p-1 align-middle text-center">
-        <Checkbox
-          checked={ligne.majProduit}
-          onChange={e => update("majProduit", e.target.checked)}
+      <td className="p-1 align-middle">
+        <Input
+          type="number"
+          className="h-10 w-[4ch] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          title="Taux de TVA appliqué"
+          required
+          max={9999}
+          value={ligne.tva}
+          onChange={e => update("tva", Number(e.target.value))}
+          onKeyDown={e => e.key === "Enter" && e.preventDefault()}
         />
-      </td>
-      <td className="text-right p-1 align-middle">
-        {
-          (
-            Number(ligne.quantite) *
-            (Number(ligne.prix_unitaire) || 0) *
-            (1 + (Number(ligne.tva) || 0) / 100)
-          ).toFixed(2)
-        }
       </td>
       <td className="p-1 align-middle">
         <Button
@@ -144,3 +141,4 @@ export default function FactureLigne({
     </tr>
   );
 }
+

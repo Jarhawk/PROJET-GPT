@@ -20,16 +20,7 @@ import { Toaster, toast } from "react-hot-toast";
 import PaginationFooter from "@/components/ui/PaginationFooter";
 import FactureTable from "@/components/FactureTable";
 import FactureImportModal from "@/components/FactureImportModal";
-
-const STATUTS = {
-  brouillon: "badge",
-  "en attente": "badge badge-user",
-  validée: "badge badge-admin",
-  payée: "badge badge-admin",
-  refusée: "badge badge-superadmin",
-  annulée: "badge badge-superadmin",
-  archivée: "badge",
-};
+import { FACTURE_STATUTS } from "@/constants/factures";
 
 export default function Factures() {
   const { factures, total, getFactures, deleteFacture, toggleFactureActive } = useFactures();
@@ -131,8 +122,10 @@ export default function Factures() {
               className="w-full sm:w-40"
             >
               <option value="">Tous statuts</option>
-              {Object.keys(STATUTS).map(s => (
-                <option key={s} value={s}>{s}</option>
+              {FACTURE_STATUTS.map(s => (
+                <option key={s} value={s}>
+                  {s.charAt(0).toUpperCase() + s.slice(1)}
+                </option>
               ))}
             </Select>
             <Select

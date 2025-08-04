@@ -42,7 +42,7 @@ export default function FactureLigne({
           zone_stock_id: prod?.zone_stock_id || "",
           unite_id: prod?.unite_id || "",
           unite: prod?.unite?.nom || "",
-          pmp: prod?.pmp ?? null,
+          pmp: prod?.pmp ?? 0,
         });
       } catch (error) {
         console.error(error);
@@ -51,7 +51,7 @@ export default function FactureLigne({
           zone_stock_id: "",
           unite_id: "",
           unite: "",
-          pmp: null,
+          pmp: 0,
         });
       }
       setLoadingProd(false);

@@ -16,7 +16,7 @@ export function useProduitsInventaire() {
       setError(null);
       let query = supabase
         .from('v_produits_dernier_prix')
-        .select('id, nom, unite_id, unites:unite_id (nom), famille')
+        .select('id, nom, unite_id, unite:unite_id (nom), famille')
         .eq('mama_id', mama_id)
         .eq('actif', true);
       if (famille) query = query.ilike('famille', `%${famille}%`);
@@ -39,7 +39,7 @@ export function useProduitsInventaire() {
       const stockMap = Object.fromEntries((stockData || []).map(s => [s.produit_id, s.stock]));
       const final = (Array.isArray(data) ? data : []).map(p => ({
         ...p,
-        unite: p.unites?.nom || '',
+        unite: p.unite?.nom || '',
         pmp: pmpMap[p.id] ?? 0,
         stock_theorique: stockMap[p.id] ?? 0,
       }));

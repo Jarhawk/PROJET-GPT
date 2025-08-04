@@ -233,7 +233,7 @@ export default function FicheForm({ fiche, onClose }) {
                         required
                       />
                     </td>
-                    <td>{l.type === 'produit' ? prod?.unites?.nom || '-' : 'portion'}</td>
+                    <td>{l.type === 'produit' ? prod?.unite?.nom || '-' : 'portion'}</td>
                     <td>{l.type === 'produit' ? (prod?.pmp ? prod.pmp.toFixed(2) : '-') : sf?.cout_par_portion?.toFixed(2) || '-'}</td>
                     <td>{l.type === 'produit' ? (prod?.pmp ? (prod.pmp * l.quantite).toFixed(2) : '-') : sf?.cout_par_portion ? (sf.cout_par_portion * l.quantite).toFixed(2) : '-'}</td>
                     <td><Button size="sm" variant="outline" onClick={() => removeLigne(i)}>Suppr.</Button></td>

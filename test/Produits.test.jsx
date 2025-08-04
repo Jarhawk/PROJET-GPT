@@ -47,7 +47,7 @@ test('toggle button calls hook', async () => {
       {
         id: '1',
         nom: 'Test',
-        unites: { nom: 'kg' },
+        unite: { nom: 'kg' },
         pmp: 1,
         stock_theorique: 10,
         actif: true,

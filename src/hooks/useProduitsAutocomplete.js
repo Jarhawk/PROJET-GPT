@@ -15,7 +15,7 @@ export function useProduitsAutocomplete() {
     setError(null);
     let q = supabase
       .from("produits")
-      .select("id, nom, tva, dernier_prix, unite_id, unites:unite_id (nom)")
+      .select("id, nom, tva, dernier_prix, unite_id, unite:unite_id (nom)")
       .eq("mama_id", mama_id)
       .eq("actif", true);
     if (query) q = q.ilike("nom", `%${query}%`);
@@ -31,7 +31,7 @@ export function useProduitsAutocomplete() {
       produit_id: p.id,
       nom: p.nom,
       unite_id: p.unite_id || "",
-      unite: p.unites?.nom || "",
+      unite: p.unite?.nom || "",
       tva: p.tva ?? 0,
       dernier_prix: p.dernier_prix ?? 0,
     }));

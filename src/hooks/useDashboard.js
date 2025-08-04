@@ -31,7 +31,7 @@ export function useDashboard() {
     try {
       const { data: produitsRaw, error: errorProd } = await supabase
         .from("v_produits_dernier_prix")
-        .select("id, nom, unite_id, unites:unite_id (nom), famille, stock_reel, stock_min")
+        .select("id, nom, unite_id, unite:unite_id (nom), famille, stock_reel, stock_min")
         .eq("mama_id", mama_id);
       if (errorProd) throw errorProd;
       const { data: pmpData } = await supabase

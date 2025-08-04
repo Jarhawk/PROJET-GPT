@@ -41,7 +41,7 @@ export default function FactureLigne({
           ...newLigne,
           zone_stock_id: prod?.zone_stock_id || "",
           unite_id: prod?.unite_id || "",
-          unite: prod?.unites?.nom || "",
+          unite: prod?.unite?.nom || "",
           pmp: prod?.pmp ?? null,
         });
       } catch (error) {
@@ -70,11 +70,11 @@ export default function FactureLigne({
   }
 
   function handleQuantite(val) {
-    const q = val;
-    const qNum = parseNum(val);
+    const replaced = String(val).replace(',', '.');
+    const qNum = parseFloat(replaced) || 0;
     const pu = parseNum(ligne.pu);
     const t = parseNum(ligne.total_ht);
-    let newLine = { ...ligne, quantite: q };
+    let newLine = { ...ligne, quantite: qNum };
     if (ligne.pu) {
       newLine.total_ht = formatNum(qNum * pu);
     } else if (ligne.total_ht) {
@@ -108,7 +108,8 @@ export default function FactureLigne({
   }
   const puNum = parseNum(ligne.pu);
   const pmp = parseNum(ligne.pmp);
-  const variation = puNum > pmp ? "🔺" : puNum < pmp ? "🔻" : "⚪";
+  const variation = puNum - pmp;
+  const icon = variation > 0 ? "⬆️" : variation < 0 ? "⬇️" : "⚖️";
 
   return (
     <tr className="h-10">
@@ -129,7 +130,7 @@ export default function FactureLigne({
           className="h-10 w-full"
           value={ligne.quantite}
           onChange={e => handleQuantite(e.target.value)}
-          onBlur={() => handleQuantite(formatNum(parseNum(ligne.quantite)))}
+          onBlur={() => handleQuantite(ligne.quantite)}
           onKeyDown={e => e.key === "Enter" && e.preventDefault()}
         />
       </td>
@@ -167,7 +168,7 @@ export default function FactureLigne({
             />
             <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm">€</span>
           </div>
-          <span>{variation}</span>
+          <span>{icon}</span>
         </div>
         {ligne.pmp != null && (
           <div className="text-xs text-gray-500">PMP: {formatNum(pmp)} €</div>

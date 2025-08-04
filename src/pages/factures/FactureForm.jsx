@@ -16,6 +16,15 @@ import toast from "react-hot-toast";
 import { FACTURE_STATUTS } from "@/constants/factures";
 import { Checkbox } from "@/components/ui/checkbox";
 
+function safeParseJSON(val) {
+  try {
+    return typeof val === "string" ? JSON.parse(val) : val || [];
+  } catch (e) {
+    console.warn("Erreur parse JSON", e);
+    return [];
+  }
+}
+
 export default function FactureForm({ facture = null, fournisseurs = [], onClose, onSaved }) {
   const { createFacture, updateFacture, addLigneFacture } = useFactures();
   const { results: fournisseurOptions, searchFournisseurs } = useFournisseursAutocomplete();
@@ -32,33 +41,25 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
   const [numero, setNumero] = useState(facture?.numero || "");
   const [numeroUsed, setNumeroUsed] = useState(false);
   const [statut, setStatut] = useState(facture?.statut || "Brouillon");
-  const [lignes, setLignes] = useState(() =>
-    facture?.lignes?.map(l => ({
-      produit_id: l.produit_id,
-      produit_nom: l.produit?.nom || "",
-      quantite: String(l.quantite),
-      total_ht: l.prix_unitaire != null ? String(l.prix_unitaire * l.quantite) : "",
-      pu: l.prix_unitaire != null ? String(l.prix_unitaire) : "",
-      tva: l.tva ?? 20,
-      zone_stock_id: l.zone_stock_id || "",
-      unite_id: l.produit?.unite_id || "",
-      unite: l.produit?.unites?.nom || "",
-      pmp: l.produit?.pmp ?? null,
-    })) || [
-      {
-        produit_id: "",
-        produit_nom: "",
-        quantite: "1",
-        total_ht: "",
-        pu: "",
-        tva: 20,
-        zone_stock_id: "",
-        unite_id: "",
-        unite: "",
-        pmp: null,
-      },
-    ],
-  );
+  const [lignes, setLignes] = useState(() => {
+    const initial = safeParseJSON(facture?.lignes_produits);
+    return initial.length
+      ? initial
+      : [
+          {
+            produit_id: "",
+            produit_nom: "",
+            quantite: 1,
+            total_ht: "",
+            pu: "",
+            tva: 20,
+            zone_stock_id: "",
+            unite_id: "",
+            unite: "",
+            pmp: null,
+          },
+        ];
+  });
   const [totalHt, setTotalHt] = useState(
     facture?.total_ht !== undefined && facture?.total_ht !== null
       ? String(facture.total_ht)
@@ -167,7 +168,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
           {
             produit_id: "",
             produit_nom: "",
-            quantite: "1",
+        quantite: 1,
             total_ht: "",
             pu: "",
             tva: 20,
@@ -321,7 +322,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
                 {
                   produit_id: "",
                   produit_nom: "",
-                  quantite: "1",
+            quantite: 1,
                   total_ht: "",
                   pu: "",
                   tva: 20,

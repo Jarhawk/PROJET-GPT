@@ -88,7 +88,7 @@ export default function Stock() {
                 </Button>
               </td>
               <td className="border px-4 py-2">{s.stock_reel}</td>
-              <td className="border px-4 py-2">{s.unites?.nom}</td>
+              <td className="border px-4 py-2">{s.unite?.nom}</td>
               <td className="border px-4 py-2">{s.pmp?.toFixed(2)}</td>
               <td className="border px-4 py-2">{(s.pmp * s.stock_reel).toFixed(2)} €</td>
               <td className="border px-4 py-2">

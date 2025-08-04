@@ -68,7 +68,7 @@ export default function InventaireDetail() {
       head: [["Produit", "Unité", "Physique", "Théorique", "Prix", "Valeur", "Écart", "Valeur écart"]],
       body: (inventaire.lignes || []).map(l => [
         l.product?.nom,
-        l.product?.unites?.nom,
+        l.product?.unite?.nom,
         l.quantite,
         l.product?.stock_theorique,
         l.product?.pmp,
@@ -118,7 +118,7 @@ export default function InventaireDetail() {
               return (
                 <tr key={idx} className="border-b last:border-none">
                   <td className="p-2">{l.product?.nom}</td>
-                  <td className="p-2">{l.product?.unites?.nom}</td>
+                  <td className="p-2">{l.product?.unite?.nom}</td>
                   <td className="p-2">{l.quantite}</td>
                   <td className="p-2">{l.product?.stock_theorique}</td>
                   <td className="p-2">{l.product?.pmp}</td>

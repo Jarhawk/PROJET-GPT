@@ -164,6 +164,7 @@ export function useFactures() {
       prix_unitaire,
       tva,
       zone_stock_id,
+      unite_id,
       date,
     } = ligne || {};
     const { data: inserted, error } = await supabase
@@ -175,6 +176,7 @@ export function useFactures() {
           prix_unitaire,
           tva,
           zone_stock_id,
+          unite_id,
           total: quantite * (prix_unitaire || 0),
           facture_id,
           mama_id,

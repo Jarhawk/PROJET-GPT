@@ -106,22 +106,23 @@ export default function FactureLigne({
           options={produitOptions}
           required
           placeholder="Nom du produit..."
-          className="h-10 min-w-[40ch]"
+          className="h-10 w-full"
         />
       </td>
       <td className="p-1 align-middle">
         <Input
-          type="text"
+          type="number"
+          step="any"
           required
           className="h-10 w-full"
           value={ligne.quantite}
-          onChange={e => handleQuantite(e.target.value)}
+          onChange={e => handleQuantite(e.target.value.replace(',', '.'))}
           onBlur={() => handleQuantite(ligne.quantite)}
           onKeyDown={e => e.key === "Enter" && e.preventDefault()}
         />
       </td>
-      <td className="p-1 align-middle h-10 text-center">
-        <span>{ligne.unite || ""} | TVA {ligne.tva || 0}</span>
+      <td className="p-1 align-middle">
+        <div className="h-10 flex items-center px-2">{ligne.unite || ""}</div>
       </td>
       <td className="p-1 align-middle">
         <div className="relative">
@@ -137,12 +138,15 @@ export default function FactureLigne({
         </div>
       </td>
       <td className="p-1 align-middle">
-        <div style={{ display: "flex", justifyContent: "space-between", padding: "0.25rem 0.5rem" }}>
-          <span><strong>PU:</strong> {puNum.toFixed(2)} €</span>
-          <span style={{ color: "gray" }}><strong>PMP:</strong> {pmp.toFixed(2)} €</span>
+        <div className="h-10 flex items-center px-2">
+          <span>PU: {puNum.toFixed(2)} €</span>
+          <span className="text-gray-500 ml-2">PMP: {pmp.toFixed(2)} €</span>
         </div>
       </td>
-      <td className="min-w-[20ch] p-1 align-middle">
+      <td className="p-1 align-middle">
+        <div className="h-10 flex items-center px-2">{ligne.tva || 0}%</div>
+      </td>
+      <td className="p-1 align-middle">
         <Select
           value={ligne.zone_stock_id}
           onChange={e => onChange({ ...ligne, zone_stock_id: e.target.value })}
@@ -160,7 +164,7 @@ export default function FactureLigne({
             ))}
         </Select>
       </td>
-      <td className="p-1 align-middle">
+      <td className="p-1 align-middle text-right">
         <Button
           type="button"
           size="sm"
@@ -168,7 +172,7 @@ export default function FactureLigne({
           onClick={() => onRemove?.(index)}
           className="h-10 px-2"
         >
-          X
+          ❌
         </Button>
       </td>
     </tr>

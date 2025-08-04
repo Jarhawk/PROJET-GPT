@@ -15,6 +15,7 @@ import FactureLigne from "@/components/FactureLigne";
 import toast from "react-hot-toast";
 import { FACTURE_STATUTS } from "@/constants/factures";
 import { Checkbox } from "@/components/ui/checkbox";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 function safeParse(val) {
   try {
@@ -41,6 +42,20 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
   const [numero, setNumero] = useState(facture?.numero || "");
   const [numeroUsed, setNumeroUsed] = useState(false);
   const [statut, setStatut] = useState(facture?.statut || "Brouillon");
+  const defaultLigne = {
+    produit_id: "",
+    produit_nom: "",
+    quantite: "1",
+    total_ht: "0",
+    pu: 0,
+    tva: 20,
+    zone_stock_id: "",
+    unite_id: "",
+    unite: "",
+    pmp: 0,
+    manuallyEdited: false,
+  };
+
   const [lignes, setLignes] = useState(() => {
     const lignesInit = safeParse(facture?.lignes_produits).map(l => ({
       ...l,
@@ -50,23 +65,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
       pmp: l.pmp ?? 0,
       manuallyEdited: false,
     }));
-    return lignesInit.length
-      ? lignesInit
-      : [
-          {
-            produit_id: "",
-            produit_nom: "",
-            quantite: "1",
-            total_ht: "0",
-            pu: 0,
-            tva: 20,
-            zone_stock_id: "",
-            unite_id: "",
-            unite: "",
-            pmp: 0,
-            manuallyEdited: false,
-          },
-        ];
+    return lignesInit.length ? lignesInit : [defaultLigne];
   });
   const [totalHt, setTotalHt] = useState(
     facture?.total_ht !== undefined && facture?.total_ht !== null
@@ -75,6 +74,8 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
   );
   const { autoHt, autoTva, autoTotal } = useFactureForm(lignes);
   const ecart = (parseFloat(String(totalHt).replace(',', '.')) || 0) - autoHt;
+  const factureId = facture?.id;
+  const [loadingData, setLoadingData] = useState(false);
 
   useEffect(() => {
     if (isBonLivraison && !numero.startsWith("BL")) {
@@ -85,15 +86,10 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
   }, [isBonLivraison]);
 
   useEffect(() => {
-    if (facture?.fournisseur_id && fournisseurs.length) {
-      const found = fournisseurs.find(f => f.id === facture.fournisseur_id);
-      setFournisseurNom(found?.nom || "");
-      searchFournisseurs(found?.nom || "");
-    } else {
-      setFournisseurNom("");
+    if (!factureId) {
       searchFournisseurs("");
     }
-  }, [facture?.fournisseur_id, fournisseurs, searchFournisseurs]);
+  }, [factureId, searchFournisseurs]);
 
   useEffect(() => {
     const checkNumero = async () => {
@@ -104,7 +100,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
           .select("id")
           .eq("mama_id", mama_id)
           .eq("numero", numero)
-          .neq("id", facture?.id || 0)
+          .neq("id", factureId || 0)
           .limit(1)
           .maybeSingle();
         setNumeroUsed(!!data);
@@ -113,51 +109,73 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
       }
     };
     checkNumero();
-  }, [numero, mama_id, facture?.id]);
+  }, [numero, mama_id, factureId]);
 
   useEffect(() => { searchProduits(""); }, [searchProduits]);
 
   useEffect(() => {
-    if (facture) {
-      setDate(facture.date_facture || new Date().toISOString().slice(0, 10));
-      setFournisseurId(facture.fournisseur_id || "");
-      setNumero(facture.numero || "");
-      setStatut(facture.statut || "Brouillon");
-      setIsBonLivraison(Boolean(facture.bon_livraison));
-      setTotalHt(
-        facture?.total_ht !== undefined && facture?.total_ht !== null
-          ? String(facture.total_ht)
-          : "",
-      );
-      const lignesInit = safeParse(facture.lignes_produits).map(l => ({
-        ...l,
-        quantite: String(parseFloat(l.quantite) || 0),
-        total_ht: String(parseFloat(l.total_ht) || 0),
-        pu: parseFloat(l.pu) || 0,
-        pmp: l.pmp ?? 0,
-        manuallyEdited: false,
-      }));
-      setLignes(
-        lignesInit.length
-          ? lignesInit
-          : [
-              {
-                produit_id: "",
-                produit_nom: "",
-                quantite: "1",
-                total_ht: "0",
-                pu: 0,
-                tva: 20,
-                zone_stock_id: "",
-                unite_id: "",
-                unite: "",
-                pmp: 0,
-                manuallyEdited: false,
-              },
-            ],
-      );
-    }
-  }, [facture]);
+    const loadFacture = async () => {
+      if (!factureId) return;
+      setLoadingData(true);
+      try {
+        const { data: f, error } = await supabase
+          .from("factures")
+          .select("*, fournisseur:fournisseur_id(id, nom)")
+          .eq("id", factureId)
+          .single();
+        if (error) throw error;
+
+        setDate(f.date_facture || new Date().toISOString().slice(0, 10));
+        setFournisseurId(f.fournisseur_id || "");
+        setNumero(f.numero || "");
+        setStatut(f.statut || "Brouillon");
+        setIsBonLivraison(Boolean(f.bon_livraison));
+        setTotalHt(
+          f?.total_ht !== undefined && f?.total_ht !== null
+            ? String(f.total_ht)
+            : "",
+        );
+        setFournisseurNom(f.fournisseur?.nom || "");
+        if (f.fournisseur?.nom) searchFournisseurs(f.fournisseur.nom);
+
+        const { data: lignesData, error: lignesError } = await supabase
+          .from("facture_lignes")
+          .select(
+            "id, produit_id, quantite, prix_unitaire, total, tva, zone_stock_id, unite_id, produit:produits!facture_lignes_produit_id_fkey(id, nom, unite_id, unite:unite_id (nom), tva, pmp), unite:unite_id(nom)"
+          )
+          .eq("facture_id", factureId)
+          .order("id");
+        if (lignesError) throw lignesError;
+
+        const mapped = (lignesData || []).map(l => {
+          const q = parseFloat(l.quantite) || 0;
+          const pu = parseFloat(l.prix_unitaire) || 0;
+          const total = parseFloat(l.total ?? q * pu) || 0;
+          return {
+            produit_id: l.produit_id || l.produit?.id || "",
+            produit_nom: l.produit?.nom || "",
+            quantite: String(q),
+            total_ht: String(total),
+            pu,
+            tva: l.tva ?? l.produit?.tva ?? 20,
+            zone_stock_id: l.zone_stock_id || "",
+            unite_id: l.unite_id || l.produit?.unite_id || "",
+            unite: l.unite?.nom || l.produit?.unite?.nom || "",
+            pmp: l.produit?.pmp ?? 0,
+            manuallyEdited: Math.abs(total - q * pu) > 0.01,
+          };
+        });
+
+        setLignes(mapped.length ? mapped : [defaultLigne]);
+      } catch (err) {
+        console.error(err);
+        toast.error("Erreur de chargement de la facture");
+      } finally {
+        setLoadingData(false);
+      }
+    };
+    loadFacture();
+  }, [factureId, searchFournisseurs]);
 
   const ecartClass = Math.abs(ecart) > 0.01 ? "text-green-500" : "";
 
@@ -172,7 +190,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
       return;
     }
     try {
-      let fid = facture?.id;
+      let fid = factureId;
       const invoice = {
         date_facture: date,
         fournisseur_id,
@@ -228,21 +246,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
         setStatut("Brouillon");
         setTotalHt("");
         setIsBonLivraison(false);
-        setLignes([
-          {
-            produit_id: "",
-            produit_nom: "",
-            quantite: "1",
-            total_ht: "0",
-            pu: 0,
-            tva: 20,
-            zone_stock_id: "",
-            unite_id: "",
-            unite: "",
-            pmp: 0,
-            manuallyEdited: false,
-          },
-        ]);
+        setLignes([{ ...defaultLigne }]);
         searchFournisseurs("");
         searchProduits("");
       }
@@ -266,6 +270,8 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
     if (hasContent && !window.confirm("Fermer sans enregistrer ?")) return;
     onClose?.();
   };
+
+  if (loadingData) return <LoadingSpinner message="Chargement..." />;
 
   return (
     <GlassCard width="w-full" title={facture ? "Modifier la facture" : "Ajouter une facture"}>
@@ -395,22 +401,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
             type="button"
             className="mt-4"
             onClick={() =>
-              setLignes(ls => [
-                ...ls,
-                {
-                  produit_id: "",
-                  produit_nom: "",
-                  quantite: "1",
-                  total_ht: "0",
-                  pu: 0,
-                  tva: 20,
-                  zone_stock_id: "",
-                  unite_id: "",
-                  unite: "",
-                  pmp: 0,
-                  manuallyEdited: false,
-                },
-              ])
+              setLignes(ls => [...ls, { ...defaultLigne }])
             }
           >
             Ajouter ligne

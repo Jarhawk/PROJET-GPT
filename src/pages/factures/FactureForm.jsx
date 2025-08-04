@@ -41,7 +41,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
       total_ht: l.prix_unitaire != null ? String(l.prix_unitaire * l.quantite) : "",
       tva: l.tva ?? 20,
       zone_stock_id: l.zone_stock_id || "",
-      unite: l.produit?.unite?.nom || l.produit?.unite || "",
+      unite: l.produit?.unites?.nom || "",
     })) || [
       {
         produit_id: "",

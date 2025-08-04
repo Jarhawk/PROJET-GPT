@@ -43,7 +43,7 @@ export default function FicheDetail({ fiche: ficheProp, onClose }) {
     const rows = fiche.lignes?.map(l => ({
       Produit: l.produit?.nom || l.sous_fiche?.nom,
       Quantite: l.quantite,
-      Unite: l.produit?.unite || (l.sous_fiche ? "portion" : ""),
+      Unite: l.produit?.unites?.nom || (l.sous_fiche ? "portion" : ""),
       Cout: l.produit?.pmp
         ? (l.produit.pmp * l.quantite).toFixed(2)
         : l.sous_fiche?.cout_par_portion
@@ -61,7 +61,7 @@ export default function FicheDetail({ fiche: ficheProp, onClose }) {
     const rows = fiche.lignes?.map(l => [
       l.produit?.nom || l.sous_fiche?.nom,
       l.quantite,
-      l.produit?.unite || (l.sous_fiche ? "portion" : ""),
+      l.produit?.unites?.nom || (l.sous_fiche ? "portion" : ""),
       l.produit?.pmp
         ? (l.produit.pmp * l.quantite).toFixed(2)
         : l.sous_fiche?.cout_par_portion
@@ -103,7 +103,7 @@ export default function FicheDetail({ fiche: ficheProp, onClose }) {
             {fiche.lignes?.map((l, i) => (
               <li key={i}>
                 {l.produit?.nom || l.sous_fiche?.nom} — {l.quantite}{" "}
-                {l.produit?.unite || (l.sous_fiche ? "portion" : "")} —{" "}
+                {l.produit?.unites?.nom || (l.sous_fiche ? "portion" : "")} —{" "}
                 {l.produit?.pmp
                   ? (l.produit.pmp * l.quantite).toFixed(2)
                   : l.sous_fiche?.cout_par_portion

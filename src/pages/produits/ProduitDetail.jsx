@@ -118,6 +118,7 @@ export default function ProduitDetailPage() {
             {product && (
               <div className="mb-4 text-sm">
                 <p>Fournisseur : {product.main_fournisseur?.nom || '-'}</p>
+                <p>Unité : {product.unites?.nom || '-'}</p>
                 <p>Stock minimum : {product.seuil_min ?? '-'}</p>
               </div>
             )}

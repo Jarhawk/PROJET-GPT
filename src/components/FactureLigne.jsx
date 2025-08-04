@@ -29,12 +29,17 @@ export default function FactureLigne({
         produit_nom: obj.nom,
         produit_id: obj.id,
         tva: obj.tva ?? ligne.tva,
+        unite: obj.unite || ligne.unite || "",
       };
       onChange(newLigne);
       setLoadingProd(true);
       try {
         const prod = await getProduct(obj.id);
-        onChange({ ...newLigne, zone_stock_id: prod?.zone_stock_id || "" });
+        onChange({
+          ...newLigne,
+          zone_stock_id: prod?.zone_stock_id || "",
+          unite: prod?.unite?.nom || newLigne.unite,
+        });
       } catch (error) {
         console.error(error);
         onChange({ ...newLigne, zone_stock_id: "" });
@@ -46,6 +51,7 @@ export default function FactureLigne({
         produit_nom: obj?.nom || "",
         produit_id: "",
         zone_stock_id: "",
+        unite: "",
       });
       if (obj?.nom?.length >= 2) searchProduits(obj.nom);
     }
@@ -57,9 +63,7 @@ export default function FactureLigne({
 
   const qte = Number(ligne.quantite) || 0;
   const ht = Number(ligne.total_ht) || 0;
-  const tvaRate = Number(ligne.tva) || 0;
   const prixUnitaire = qte ? ht / qte : 0;
-  const totalTtc = ht + (tvaRate * ht) / 100;
 
   return (
     <tr className="h-10">
@@ -85,6 +89,14 @@ export default function FactureLigne({
             update('quantite', Number(val));
           }}
           onKeyDown={e => e.key === "Enter" && e.preventDefault()}
+        />
+      </td>
+      <td className="p-1 align-middle">
+        <Input
+          type="text"
+          readOnly
+          className="h-10 w-full bg-gray-100 text-gray-500"
+          value={ligne.unite || ''}
         />
       </td>
       <td className="p-1 align-middle">
@@ -145,17 +157,6 @@ export default function FactureLigne({
           }}
           onKeyDown={e => e.key === "Enter" && e.preventDefault()}
         />
-      </td>
-      <td className="p-1 align-middle">
-        <div className="relative">
-          <Input
-            type="number"
-            readOnly
-            className="h-10 w-full pr-6 bg-gray-100 text-gray-500"
-            value={totalTtc.toFixed(2)}
-          />
-          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm">€</span>
-        </div>
       </td>
       <td className="p-1 align-middle">
         <Button

@@ -350,11 +350,10 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
                 <tr>
                   <th>Produit</th>
                   <th>Quantité</th>
-                  <th>Unité</th>
+                  <th>Unité | TVA</th>
                   <th>Total HT</th>
-                  <th>PU</th>
+                  <th>PU | PMP</th>
                   <th>Zone</th>
-                  <th>TVA</th>
                   <th>Actions</th>
                 </tr>
               </thead>

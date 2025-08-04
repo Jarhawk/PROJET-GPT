@@ -33,7 +33,7 @@ export default function Factures() {
   const [showImport, setShowImport] = useState(false);
   const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState("");
-  const [statutFilter, setStatutFilter] = useState("Brouillon");
+  const [statutFilter, setStatutFilter] = useState("");
   const [fournisseurFilter, setFournisseurFilter] = useState("");
   const [fournisseurInput, setFournisseurInput] = useState("");
   const [actifFilter, setActifFilter] = useState("true");

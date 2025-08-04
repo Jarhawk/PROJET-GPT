@@ -102,26 +102,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
 
   const ecartClass = Math.abs(ecart) > 0.01 ? "text-green-500" : "";
 
-  const year = new Date().getFullYear();
   const parseNum = v => parseFloat(String(v).replace(',', '.')) || 0;
-
-  const handleBonLivraisonToggle = e => {
-    const checked = e.target.checked;
-    setIsBonLivraison(checked);
-    const prefix = checked ? "BL-" : "FAC-";
-    setNumero(n => {
-      if (!n || n.startsWith("BL-") || n.startsWith("FAC-")) {
-        return `${prefix}${year}-`;
-      }
-      return n;
-    });
-  };
-
-  useEffect(() => {
-    if (!facture && !numero) {
-      setNumero(`FAC-${year}-`);
-    }
-  }, [facture, numero, year]);
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -177,7 +158,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
         setDate(today);
         setFournisseurId("");
         setFournisseurNom("");
-        setNumero(`FAC-${year}-`);
+        setNumero("");
         setNumeroUsed(false);
         setStatut("Brouillon");
         setTotalHt("");
@@ -230,15 +211,24 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
       >
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="flex flex-col lg:col-span-2">
-            <label className="flex items-center gap-2 text-sm mb-1">
-              <Checkbox checked={isBonLivraison} onChange={handleBonLivraisonToggle} />
-              Bon de livraison
-            </label>
+            <div className="flex items-center gap-2 text-sm mb-1">
+              <Checkbox
+                checked={isBonLivraison}
+                onChange={e => {
+                  const val = e.target.checked;
+                  setIsBonLivraison(val);
+                  if (val && !numero?.startsWith("BL")) setNumero("BL");
+                  if (!val && numero?.startsWith("BL")) setNumero("");
+                }}
+              />
+              <span>Bon de livraison</span>
+            </div>
+            <label className="text-sm mb-1">Numéro</label>
             <Input
               type="text"
               value={numero}
               onChange={e => setNumero(e.target.value)}
-              placeholder={isBonLivraison ? `BL-${year}-...` : `FAC-${year}-...`}
+              placeholder={isBonLivraison ? "BL..." : "Numéro de facture"}
               className={numeroUsed ? "border-red-500" : ""}
               required
             />

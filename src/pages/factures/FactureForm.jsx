@@ -16,11 +16,11 @@ import toast from "react-hot-toast";
 import { FACTURE_STATUTS } from "@/constants/factures";
 import { Checkbox } from "@/components/ui/checkbox";
 
-function safeParseJSON(val) {
+function safeParse(val) {
   try {
     return typeof val === "string" ? JSON.parse(val) : val || [];
   } catch (e) {
-    console.warn("Erreur parse JSON", e);
+    console.warn("Erreur JSON.parse :", e, val);
     return [];
   }
 }
@@ -42,9 +42,9 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
   const [numeroUsed, setNumeroUsed] = useState(false);
   const [statut, setStatut] = useState(facture?.statut || "Brouillon");
   const [lignes, setLignes] = useState(() => {
-    const initial = safeParseJSON(facture?.lignes_produits);
-    return initial.length
-      ? initial
+    const lignesInit = safeParse(facture?.lignes_produits);
+    return lignesInit.length
+      ? lignesInit
       : [
           {
             produit_id: "",
@@ -67,6 +67,12 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
   );
   const { autoHt, autoTva, autoTotal } = useFactureForm(lignes);
   const ecart = (parseFloat(String(totalHt).replace(',', '.')) || 0) - autoHt;
+
+  useEffect(() => {
+    if (isBonLivraison && !numero.startsWith("BL")) {
+      setNumero(`BL${Date.now().toString().slice(-5)}`);
+    }
+  }, [isBonLivraison, numero]);
 
   useEffect(() => {
     if (facture?.fournisseur_id && fournisseurs.length) {
@@ -134,16 +140,22 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
       }
       for (let i = 0; i < lignes.length; i++) {
         const ligne = lignes[i];
-        if (!ligne.produit_id) {
-          toast.error("Produit requis pour chaque ligne");
-          return;
-        }
         const { produit_nom: _n, total_ht, pu, unite: _u, pmp: _p, ...rest } = ligne;
         const quantite = parseNum(ligne.quantite);
-        let prix_unitaire = parseNum(pu);
+        const prixSaisi = parseNum(pu);
+        const totalSaisi = parseNum(total_ht);
+        if (
+          !ligne.produit_id ||
+          !ligne.zone_stock_id ||
+          quantite <= 0 ||
+          (!prixSaisi && !totalSaisi)
+        ) {
+          toast.error("Ligne de produit invalide");
+          return;
+        }
+        let prix_unitaire = prixSaisi;
         if (!prix_unitaire) {
-          const ht = parseNum(total_ht);
-          prix_unitaire = quantite ? ht / quantite : 0;
+          prix_unitaire = quantite ? totalSaisi / quantite : 0;
         }
         await addLigneFacture(fid, {
           ...rest,
@@ -215,12 +227,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
             <div className="flex items-center gap-2 text-sm mb-1">
               <Checkbox
                 checked={isBonLivraison}
-                onChange={e => {
-                  const val = e.target.checked;
-                  setIsBonLivraison(val);
-                  if (val && !numero?.startsWith("BL")) setNumero("BL");
-                  if (!val && numero?.startsWith("BL")) setNumero("");
-                }}
+                onChange={e => setIsBonLivraison(e.target.checked)}
               />
               <span>Bon de livraison</span>
             </div>
@@ -251,12 +258,20 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
           </div>
           <div className="flex flex-col">
             <label className="text-sm mb-1">Total HT</label>
-            <Input
-              type="number"
-              value={totalHt}
-              onChange={e => setTotalHt(e.target.value)}
-              className="font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-            />
+            <div className="relative">
+              <Input
+                type="text"
+                value={totalHt}
+                onChange={e => setTotalHt(e.target.value.replace(',', '.'))}
+                onBlur={() =>
+                  setTotalHt(
+                    (parseFloat(String(totalHt).replace(',', '.')) || 0).toFixed(2),
+                  )
+                }
+                className="font-bold pr-6 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm">€</span>
+            </div>
           </div>
           <div className="flex flex-col lg:col-span-2">
             <label className="text-sm mb-1">Fournisseur *</label>

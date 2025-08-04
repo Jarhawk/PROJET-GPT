@@ -17,16 +17,7 @@ import { FACTURE_STATUTS } from "@/constants/factures";
 import { Checkbox } from "@/components/ui/checkbox";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
-function safeParse(val) {
-  try {
-    return typeof val === "string" ? JSON.parse(val) : val ?? [];
-  } catch {
-    console.warn("Erreur JSON.parse:", val);
-    return [];
-  }
-}
-
-export default function FactureForm({ facture = null, fournisseurs = [], onClose, onSaved }) {
+export default function FactureForm({ facture = null, onClose, onSaved }) {
   const { createFacture, updateFacture, addLigneFacture } = useFactures();
   const { results: fournisseurOptions, searchFournisseurs } = useFournisseursAutocomplete();
   const { results: produitOptions, searchProduits } = useProduitsAutocomplete();
@@ -47,7 +38,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
     produit_nom: "",
     quantite: "1",
     total_ht: "0",
-    pu: 0,
+    pu: "0",
     tva: 20,
     zone_stock_id: "",
     unite_id: "",
@@ -55,18 +46,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
     pmp: 0,
     manuallyEdited: false,
   };
-
-  const [lignes, setLignes] = useState(() => {
-    const lignesInit = safeParse(facture?.lignes_produits).map(l => ({
-      ...l,
-      quantite: String(parseFloat(l.quantite) || 0),
-      total_ht: String(parseFloat(l.total_ht) || 0),
-      pu: parseFloat(l.pu) || 0,
-      pmp: l.pmp ?? 0,
-      manuallyEdited: false,
-    }));
-    return lignesInit.length ? lignesInit : [defaultLigne];
-  });
+  const [lignes, setLignes] = useState([defaultLigne]);
   const [totalHt, setTotalHt] = useState(
     facture?.total_ht !== undefined && facture?.total_ht !== null
       ? String(facture.total_ht)
@@ -84,6 +64,10 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
       setNumero("");
     }
   }, [isBonLivraison]);
+
+  useEffect(() => {
+    setIsBonLivraison(numero.startsWith("BL"));
+  }, [numero]);
 
   useEffect(() => {
     if (!factureId) {
@@ -120,7 +104,12 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
       try {
         const { data: f, error } = await supabase
           .from("factures")
-          .select("*, fournisseur:fournisseur_id(id, nom)")
+          .select(
+            `*, fournisseur:fournisseur_id(id, nom), facture_lignes (
+              id, produit_id, quantite, prix_unitaire, tva, zone_stock_id,
+              produit:produits(nom, unite_id, pmp, unite:unite_id(nom))
+            )`
+          )
           .eq("id", factureId)
           .single();
         if (error) throw error;
@@ -129,7 +118,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
         setFournisseurId(f.fournisseur_id || "");
         setNumero(f.numero || "");
         setStatut(f.statut || "Brouillon");
-        setIsBonLivraison(Boolean(f.bon_livraison));
+        setIsBonLivraison(Boolean(f.bon_livraison) || (f.numero || "").startsWith("BL"));
         setTotalHt(
           f?.total_ht !== undefined && f?.total_ht !== null
             ? String(f.total_ht)
@@ -138,31 +127,23 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
         setFournisseurNom(f.fournisseur?.nom || "");
         if (f.fournisseur?.nom) searchFournisseurs(f.fournisseur.nom);
 
-        const { data: lignesData, error: lignesError } = await supabase
-          .from("facture_lignes")
-          .select(
-            "id, produit_id, quantite, prix_unitaire, total, tva, zone_stock_id, unite_id, produit:produits!facture_lignes_produit_id_fkey(id, nom, unite_id, unite:unite_id (nom), tva, pmp), unite:unite_id(nom)"
-          )
-          .eq("facture_id", factureId)
-          .order("id");
-        if (lignesError) throw lignesError;
-
-        const mapped = (lignesData || []).map(l => {
+        const lignesData = f.facture_lignes || [];
+        const mapped = lignesData.map(l => {
           const q = parseFloat(l.quantite) || 0;
           const pu = parseFloat(l.prix_unitaire) || 0;
-          const total = parseFloat(l.total ?? q * pu) || 0;
+          const total = q * pu;
           return {
-            produit_id: l.produit_id || l.produit?.id || "",
+            produit_id: l.produit_id || "",
             produit_nom: l.produit?.nom || "",
             quantite: String(q),
-            total_ht: String(total),
-            pu,
-            tva: l.tva ?? l.produit?.tva ?? 20,
+            total_ht: total.toFixed(2),
+            pu: pu.toFixed(2),
+            tva: l.tva ?? 20,
             zone_stock_id: l.zone_stock_id || "",
-            unite_id: l.unite_id || l.produit?.unite_id || "",
-            unite: l.unite?.nom || l.produit?.unite?.nom || "",
+            unite_id: l.produit?.unite_id || "",
+            unite: l.produit?.unite?.nom || "",
             pmp: l.produit?.pmp ?? 0,
-            manuallyEdited: Math.abs(total - q * pu) > 0.01,
+            manuallyEdited: false,
           };
         });
 
@@ -353,14 +334,15 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
           <div className="overflow-x-auto">
             <table className="w-full text-sm table-fixed">
               <colgroup>
-                <col style={{ width: "28%" }} />
+                <col style={{ width: "24%" }} />
                 <col style={{ width: "8%" }} />
                 <col style={{ width: "8%" }} />
                 <col style={{ width: "12%" }} />
-                <col style={{ width: "20%" }} />
+                <col style={{ width: "10%" }} />
+                <col style={{ width: "10%" }} />
                 <col style={{ width: "8%" }} />
-                <col style={{ width: "12%" }} />
-                <col style={{ width: "4%" }} />
+                <col style={{ width: "14%" }} />
+                <col style={{ width: "6%" }} />
               </colgroup>
               <thead>
                 <tr>
@@ -368,7 +350,8 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
                   <th className="text-left">Quantité</th>
                   <th className="text-left">Unité</th>
                   <th className="text-left">Total HT</th>
-                  <th className="text-left">PU/PMP</th>
+                  <th className="text-left">PU</th>
+                  <th className="text-left">PMP</th>
                   <th className="text-left">TVA</th>
                   <th className="text-left">Zone</th>
                   <th className="text-right">Actions</th>

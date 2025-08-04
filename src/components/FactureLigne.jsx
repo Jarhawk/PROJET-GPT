@@ -77,7 +77,7 @@ export default function FactureLigne({
         newLine.total_ht = (qNum * pu).toFixed(2);
       } else {
         const total = parseNum(ligne.total_ht);
-        newLine.pu = qNum ? parseFloat((total / qNum).toFixed(2)) : 0;
+        newLine.pu = qNum ? (total / qNum).toFixed(2) : "0";
       }
     }
     onChange(newLine);
@@ -93,7 +93,18 @@ export default function FactureLigne({
       manuallyEdited: true,
     };
     if (!isNaN(tNum)) {
-      newLine.pu = q ? parseFloat((tNum / q).toFixed(2)) : 0;
+      newLine.pu = q ? (tNum / q).toFixed(2) : "0";
+    }
+    onChange(newLine);
+  }
+
+  function handlePu(val) {
+    const replaced = String(val).replace(',', '.');
+    const puNum = parseFloat(replaced);
+    const q = parseNum(ligne.quantite);
+    const newLine = { ...ligne, pu: val, manuallyEdited: false };
+    if (!isNaN(puNum)) {
+      newLine.total_ht = (q * puNum).toFixed(2);
     }
     onChange(newLine);
   }
@@ -149,17 +160,37 @@ export default function FactureLigne({
       <td className="p-1 align-middle">
         <Input
           type="text"
-          readOnly
-          value={`PU : ${puNum.toFixed(2)} € / PMP : ${pmp.toFixed(2)} €`}
-          className="h-10 w-full"
+          inputMode="decimal"
+          className={`h-10 w-full text-center ${puNum > pmp ? "text-red-500" : puNum < pmp ? "text-green-500" : ""}`}
+          value={ligne.pu}
+          onChange={e => handlePu(e.target.value)}
+          onBlur={() => handlePu(parseNum(ligne.pu).toFixed(2))}
+          onKeyDown={e => e.key === "Enter" && e.preventDefault()}
         />
+      </td>
+      <td className="p-1 align-middle">
+        <div className="relative">
+          <Input
+            type="text"
+            readOnly
+            value={pmp.toFixed(2)}
+            className="h-10 w-full text-center pr-4"
+          />
+          {puNum !== pmp && (
+            <span
+              className={`absolute right-1 top-1/2 -translate-y-1/2 ${puNum > pmp ? "text-red-500" : "text-green-500"}`}
+            >
+              {puNum > pmp ? "▲" : "▼"}
+            </span>
+          )}
+        </div>
       </td>
       <td className="p-1 align-middle">
         <Input
           type="text"
           readOnly
           value={`${ligne.tva || 0}%`}
-          className="h-10 w-full"
+          className="h-10 w-full text-center"
         />
       </td>
       <td className="p-1 align-middle">

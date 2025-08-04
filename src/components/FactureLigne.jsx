@@ -20,7 +20,12 @@ export default function FactureLigne({
   const [loadingProd, setLoadingProd] = useState(false);
   const parseNum = v => parseFloat(String(v).replace(',', '.')) || 0;
   const formatNum = v =>
-    isNaN(v) ? "" : Number(v).toLocaleString("fr-FR", { maximumFractionDigits: 2 });
+    isNaN(v)
+      ? ""
+      : Number(v).toLocaleString("fr-FR", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
   useEffect(() => {
     fetchZones();
   }, [fetchZones]);
@@ -136,10 +141,10 @@ export default function FactureLigne({
       </td>
       <td className="p-1 align-middle">
         <Input
-          type="text"
+          value={ligne.unite || ""}
           readOnly
-          className="h-10 w-full bg-gray-100 text-gray-500"
-          value={ligne.unite || ''}
+          style={{ width: 80, backgroundColor: "#f6f6f6" }}
+          className="h-10"
         />
       </td>
       <td className="p-1 align-middle">
@@ -157,9 +162,10 @@ export default function FactureLigne({
       </td>
       <td className="p-1 align-middle">
         <div className="flex items-center gap-1">
-          <div className="relative flex-1">
+          <div className="relative" style={{ width: 80 }}>
             <Input
-              type="text"
+              type="number"
+              step="0.01"
               className="h-10 w-full pr-6"
               value={ligne.pu}
               onChange={e => handlePu(e.target.value)}
@@ -168,11 +174,9 @@ export default function FactureLigne({
             />
             <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm">€</span>
           </div>
+          <span className="text-xs text-gray-500">PMP : {formatNum(pmp)} €</span>
           <span>{icon}</span>
         </div>
-        {ligne.pmp != null && (
-          <div className="text-xs text-gray-500">PMP: {formatNum(pmp)} €</div>
-        )}
       </td>
       <td className="min-w-[20ch] p-1 align-middle">
         <Select
@@ -194,18 +198,10 @@ export default function FactureLigne({
       </td>
       <td className="p-1 align-middle">
         <Input
-          type="number"
-          step="0.01"
-          className="h-10 w-[6ch] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-          title="Taux de TVA appliqué"
-          required
-          max={9999}
-          value={ligne.tva}
-          onChange={e => {
-            const val = parseNum(e.target.value);
-            onChange({ ...ligne, tva: Math.round(val * 100) / 100 });
-          }}
-          onKeyDown={e => e.key === "Enter" && e.preventDefault()}
+          value={ligne.tva ?? 0}
+          readOnly
+          style={{ width: 60, backgroundColor: "#f6f6f6" }}
+          className="h-10"
         />
       </td>
       <td className="p-1 align-middle">

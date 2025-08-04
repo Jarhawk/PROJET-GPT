@@ -55,8 +55,11 @@ export default function FactureLigne({
     onChange({ ...ligne, [field]: value });
   }
 
-  const prixUnitaire =
-    ligne.quantite ? (Number(ligne.total_ht) || 0) / Number(ligne.quantite) : 0;
+  const qte = Number(ligne.quantite) || 0;
+  const ht = Number(ligne.total_ht) || 0;
+  const tvaRate = Number(ligne.tva) || 0;
+  const prixUnitaire = qte ? ht / qte : 0;
+  const totalTtc = ht + (tvaRate * ht) / 100;
 
   return (
     <tr className="h-10">
@@ -66,38 +69,50 @@ export default function FactureLigne({
           onChange={handleProduitSelection}
           options={produitOptions}
           required
-          className="h-10 min-w-[30ch]"
+          placeholder="Nom du produit..."
+          className="h-10 min-w-[40ch]"
         />
       </td>
       <td className="p-1 align-middle">
         <Input
           type="number"
+          step="0.01"
           required
           className="h-10 w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           value={ligne.quantite}
-          onChange={e => update("quantite", Number(e.target.value))}
+          onChange={e => {
+            const val = e.target.value.replace(',', '.');
+            update('quantite', Number(val));
+          }}
           onKeyDown={e => e.key === "Enter" && e.preventDefault()}
         />
       </td>
       <td className="p-1 align-middle">
-        <Input
-          type="number"
-          required
-          className="h-10 w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-          value={ligne.total_ht}
-          onChange={e => update("total_ht", e.target.value)}
-          onKeyDown={e => e.key === "Enter" && e.preventDefault()}
-        />
+        <div className="relative">
+          <Input
+            type="number"
+            step="0.01"
+            required
+            className="h-10 w-full pr-6 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            value={ligne.total_ht}
+            onChange={e => update('total_ht', e.target.value.replace(',', '.'))}
+            onKeyDown={e => e.key === 'Enter' && e.preventDefault()}
+          />
+          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm">€</span>
+        </div>
       </td>
       <td className="p-1 align-middle">
-        <Input
-          type="number"
-          readOnly
-          className="h-10 w-full bg-gray-100 text-gray-700"
-          value={prixUnitaire.toFixed(2)}
-        />
+        <div className="relative">
+          <Input
+            type="number"
+            readOnly
+            className="h-10 w-full pr-6 bg-gray-100 text-gray-500"
+            value={prixUnitaire.toFixed(2)}
+          />
+          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm">€</span>
+        </div>
       </td>
-      <td className="min-w-[120px] p-1 align-middle">
+      <td className="min-w-[20ch] p-1 align-middle">
         <Select
           value={ligne.zone_stock_id}
           onChange={e => update("zone_stock_id", e.target.value)}
@@ -118,14 +133,29 @@ export default function FactureLigne({
       <td className="p-1 align-middle">
         <Input
           type="number"
-          className="h-10 w-[4ch] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          step="0.01"
+          className="h-10 w-[6ch] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           title="Taux de TVA appliqué"
           required
           max={9999}
           value={ligne.tva}
-          onChange={e => update("tva", Number(e.target.value))}
+          onChange={e => {
+            const val = e.target.value.replace(',', '.');
+            update('tva', Math.round(Number(val) * 100) / 100);
+          }}
           onKeyDown={e => e.key === "Enter" && e.preventDefault()}
         />
+      </td>
+      <td className="p-1 align-middle">
+        <div className="relative">
+          <Input
+            type="number"
+            readOnly
+            className="h-10 w-full pr-6 bg-gray-100 text-gray-500"
+            value={totalTtc.toFixed(2)}
+          />
+          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm">€</span>
+        </div>
       </td>
       <td className="p-1 align-middle">
         <Button

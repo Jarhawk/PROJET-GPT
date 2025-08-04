@@ -1,14 +1,5 @@
 import { Button } from "@/components/ui/button";
-
-const STATUTS = {
-  brouillon: "badge",
-  "en attente": "badge badge-user",
-  validée: "badge badge-admin",
-  payée: "badge badge-admin",
-  refusée: "badge badge-superadmin",
-  annulée: "badge badge-superadmin",
-  archivée: "badge",
-};
+import { FACTURE_STATUT_BADGES } from "@/constants/factures";
 
 export default function FactureRow({ facture, onEdit, onDetail, onToggleActive, onArchive, canEdit }) {
   return (
@@ -18,7 +9,7 @@ export default function FactureRow({ facture, onEdit, onDetail, onToggleActive, 
       <td className="border px-4 py-2">{facture.fournisseur?.nom}</td>
       <td className="border px-4 py-2 text-right">{facture.total_ttc?.toFixed(2)} €</td>
       <td className="border px-4 py-2">
-        <span className={STATUTS[facture.statut] || "badge"}>{facture.statut}</span>
+        <span className={FACTURE_STATUT_BADGES[facture.statut] || "badge"}>{facture.statut}</span>
       </td>
       <td className="border px-4 py-2">{facture.actif ? "✅" : "❌"}</td>
       <td className="border px-4 py-2 space-x-1">

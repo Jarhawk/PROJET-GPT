@@ -13,6 +13,7 @@ import AutoCompleteField from "@/components/ui/AutoCompleteField";
 import { Button } from "@/components/ui/button";
 import FactureLigne from "@/components/FactureLigne";
 import toast from "react-hot-toast";
+import { FACTURE_STATUTS } from "@/constants/factures";
 
 export default function FactureForm({ facture = null, fournisseurs = [], onClose, onSaved }) {
   const { createFacture, updateFacture, addLigneFacture } = useFactures();
@@ -51,7 +52,6 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
       },
     ],
   );
-  const [commentaire, setCommentaire] = useState(facture?.commentaire || "");
   const [totalHt, setTotalHt] = useState(
     facture?.total_ht !== undefined && facture?.total_ht !== null
       ? String(facture.total_ht)
@@ -113,7 +113,6 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
         total_ht: parseFloat(totalHt) || 0,
         total_tva: autoTva,
         total_ttc: autoTotal,
-        commentaire,
         bon_livraison: bonLivraison || null,
       };
       if (fid) {
@@ -148,7 +147,6 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
         setNumero("");
         setNumeroUsed(false);
         setStatut("brouillon");
-        setCommentaire("");
         setTotalHt("");
         setBonLivraison("");
         setLignes([
@@ -172,7 +170,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
   const handleClose = () => {
     const hasContent =
       statut === "brouillon" &&
-      (fournisseurNom || numero || commentaire || totalHt || bonLivraison ||
+      (fournisseurNom || numero || totalHt || bonLivraison ||
         lignes.some(l =>
           l.produit_id ||
           l.produit_nom ||
@@ -210,10 +208,11 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
           <div className="flex flex-col">
             <label className="text-sm mb-1">État</label>
             <Select value={statut} onChange={e => setStatut(e.target.value)}>
-              <option value="brouillon">Brouillon</option>
-              <option value="en attente">En attente</option>
-              <option value="validée">Validée</option>
-              <option value="archivée">Archivée</option>
+              {FACTURE_STATUTS.map(s => (
+                <option key={s} value={s}>
+                  {s.charAt(0).toUpperCase() + s.slice(1)}
+                </option>
+              ))}
             </Select>
           </div>
           <div className="flex flex-col">
@@ -250,10 +249,6 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
               required
             />
           </div>
-          <div className="flex flex-col lg:col-span-2">
-            <label className="text-sm mb-1">Commentaire</label>
-            <Input type="text" value={commentaire} onChange={e => setCommentaire(e.target.value)} />
-          </div>
         </section>
 
         <section>
@@ -268,6 +263,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
                   <th>PU</th>
                   <th>Zone</th>
                   <th>TVA</th>
+                  <th>Total TTC</th>
                   <th>Actions</th>
                 </tr>
               </thead>

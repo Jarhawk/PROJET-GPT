@@ -42,7 +42,14 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
   const [numeroUsed, setNumeroUsed] = useState(false);
   const [statut, setStatut] = useState(facture?.statut || "Brouillon");
   const [lignes, setLignes] = useState(() => {
-    const lignesInit = safeParse(facture?.lignes_produits);
+    const lignesInit = safeParse(facture?.lignes_produits).map(l => ({
+      ...l,
+      quantite: parseFloat(l.quantite) || 0,
+      total_ht: parseFloat(l.total_ht) || 0,
+      pu: parseFloat(l.pu) || 0,
+      pmp: l.pmp ?? 0,
+      manuallyEdited: false,
+    }));
     return lignesInit.length
       ? lignesInit
       : [
@@ -50,13 +57,14 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
             produit_id: "",
             produit_nom: "",
             quantite: 1,
-            total_ht: "",
-            pu: "",
+            total_ht: 0,
+            pu: 0,
             tva: 20,
             zone_stock_id: "",
             unite_id: "",
             unite: "",
-            pmp: null,
+            pmp: 0,
+            manuallyEdited: false,
           },
         ];
   });
@@ -69,11 +77,9 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
   const ecart = (parseFloat(String(totalHt).replace(',', '.')) || 0) - autoHt;
 
   useEffect(() => {
-    if (isBonLivraison) {
-      if (!numero.startsWith("BL")) {
-        setNumero(`BL${Date.now().toString().slice(-4)}`);
-      }
-    } else if (numero.startsWith("BL")) {
+    if (isBonLivraison && !numero.startsWith("BL")) {
+      setNumero("BL");
+    } else if (!isBonLivraison && numero.startsWith("BL")) {
       setNumero("");
     }
   }, [isBonLivraison]);
@@ -123,7 +129,14 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
           ? String(facture.total_ht)
           : "",
       );
-      const lignesInit = safeParse(facture.lignes_produits);
+      const lignesInit = safeParse(facture.lignes_produits).map(l => ({
+        ...l,
+        quantite: parseFloat(l.quantite) || 0,
+        total_ht: parseFloat(l.total_ht) || 0,
+        pu: parseFloat(l.pu) || 0,
+        pmp: l.pmp ?? 0,
+        manuallyEdited: false,
+      }));
       setLignes(
         lignesInit.length
           ? lignesInit
@@ -132,13 +145,14 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
                 produit_id: "",
                 produit_nom: "",
                 quantite: 1,
-                total_ht: "",
-                pu: "",
+                total_ht: 0,
+                pu: 0,
                 tva: 20,
                 zone_stock_id: "",
                 unite_id: "",
                 unite: "",
-                pmp: null,
+                pmp: 0,
+                manuallyEdited: false,
               },
             ],
       );
@@ -151,7 +165,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
 
   const handleSubmit = async e => {
     e.preventDefault();
-    if (numeroUsed) return toast.error("Numéro de facture déjà utilisé");
+    if (numeroUsed) return toast.error("Référence déjà utilisée");
     if (!date || !fournisseur_id) {
       toast.error("Champs requis manquants !");
       formRef.current?.querySelector(":invalid")?.focus();
@@ -178,7 +192,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
       }
       for (let i = 0; i < lignes.length; i++) {
         const ligne = lignes[i];
-        const { produit_nom: _n, total_ht, pu, unite: _u, pmp: _p, ...rest } = ligne;
+        const { produit_nom: _n, total_ht, pu, unite: _u, pmp: _p, manuallyEdited: _m, ...rest } = ligne;
         const quantite = parseNum(ligne.quantite);
         const prixSaisi = parseNum(pu);
         const totalSaisi = parseNum(total_ht);
@@ -218,14 +232,15 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
           {
             produit_id: "",
             produit_nom: "",
-        quantite: 1,
-            total_ht: "",
-            pu: "",
+            quantite: 1,
+            total_ht: 0,
+            pu: 0,
             tva: 20,
             zone_stock_id: "",
             unite_id: "",
             unite: "",
-            pmp: null,
+            pmp: 0,
+            manuallyEdited: false,
           },
         ]);
         searchFournisseurs("");
@@ -244,7 +259,7 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
           l.produit_id ||
           l.produit_nom ||
           parseNum(l.quantite) !== 1 ||
-          l.total_ht !== "" ||
+          parseNum(l.total_ht) !== 0 ||
           l.tva !== 20 ||
           l.zone_stock_id,
         ));
@@ -269,16 +284,16 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
               />
               <span>Bon de livraison</span>
             </div>
-            <label className="text-sm mb-1">Numéro</label>
+            <label className="text-sm mb-1">Référence</label>
             <Input
               type="text"
               value={numero}
               onChange={e => setNumero(e.target.value)}
-              placeholder={isBonLivraison ? "BL..." : "Numéro de facture"}
+              placeholder="Référence facture ou bon de livraison"
               className={numeroUsed ? "border-red-500" : ""}
               required
             />
-            {numeroUsed && <p className="text-xs text-red-500">Numéro déjà existant</p>}
+            {numeroUsed && <p className="text-xs text-red-500">Référence déjà existante</p>}
           </div>
           <div className="flex flex-col">
             <label className="text-sm mb-1">Date *</label>
@@ -375,14 +390,15 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
                 {
                   produit_id: "",
                   produit_nom: "",
-            quantite: 1,
-                  total_ht: "",
-                  pu: "",
+                  quantite: 1,
+                  total_ht: 0,
+                  pu: 0,
                   tva: 20,
                   zone_stock_id: "",
                   unite_id: "",
                   unite: "",
-                  pmp: null,
+                  pmp: 0,
+                  manuallyEdited: false,
                 },
               ])
             }

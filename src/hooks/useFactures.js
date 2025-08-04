@@ -45,10 +45,7 @@ export function useFactures() {
     setError(null);
     let query = supabase
       .from("factures")
-      .select(
-        "*, fournisseur:fournisseur_id(id, nom), lignes:facture_lignes!facture_id(id, produit_id, produit:produit_id(nom))",
-        { count: "exact" }
-      )
+      .select("*, fournisseur:fournisseur_id(id, nom)", { count: "exact" })
       .eq("mama_id", mama_id)
       .order("date_facture", { ascending: false })
       .range((page - 1) * pageSize, page * pageSize - 1);

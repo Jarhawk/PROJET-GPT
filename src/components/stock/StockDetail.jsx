@@ -30,7 +30,7 @@ export default function StockDetail({ produit, mouvements, onClose }) {
       <div className="bg-white/10 border border-white/20 backdrop-blur-xl rounded-2xl shadow-lg p-8 min-w-[400px] max-w-[95vw] flex flex-col gap-2 relative">
         <Button variant="outline" className="absolute top-2 right-2" onClick={onClose}>Fermer</Button>
         <h2 className="font-bold text-xl mb-4">{produit.nom} — Mouvements</h2>
-        <div className="mb-2">Stock réel : {produit.stock_reel} {produit.unites?.nom || ''}</div>
+        <div className="mb-2">Stock réel : {produit.stock_reel} {produit.unite?.nom || ''}</div>
         <div className="mb-2">Valorisation : {(produit.pmp * produit.stock_reel).toFixed(2)} €</div>
         <div>
           <table className="min-w-full bg-white/10 border border-white/20 rounded backdrop-blur-xl text-xs">

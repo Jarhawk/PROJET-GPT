@@ -32,7 +32,7 @@ export function useProducts() {
     let query = supabase
       .from("produits")
       .select(
-        `*, unites:unite_id (nom), zone_stock:zones_stock(nom), famille:familles(nom), sous_famille:sous_familles(nom)`,
+        `*, unite:unite_id (nom), zone_stock:zones_stock(nom), famille:familles(nom), sous_famille:sous_familles(nom)`,
         { count: "exact" }
       )
       .eq("mama_id", mama_id);
@@ -56,7 +56,7 @@ export function useProducts() {
         .order("nom", { ascending: order === "asc" });
     } else if (sortBy === "unite") {
       query = query
-        .order("nom", { foreignTable: "unites", ascending: order === "asc" })
+        .order("nom", { foreignTable: "unite", ascending: order === "asc" })
         .order("nom", { ascending: order === "asc" });
     } else {
       query = query.order(sortBy, { ascending: order === "asc" }).order("nom", { ascending: order === "asc" });
@@ -230,7 +230,7 @@ export function useProducts() {
       const { data, error } = await supabase
         .from("produits")
         .select(
-          "*, famille:familles!fk_produits_famille(nom), sous_famille:sous_familles!fk_produits_sous_famille(nom), main_fournisseur:fournisseur_id(id, nom), unites:unite_id (nom)"
+          "*, famille:familles!fk_produits_famille(nom), sous_famille:sous_familles!fk_produits_sous_famille(nom), main_fournisseur:fournisseur_id(id, nom), unite:unite_id (nom)"
         )
         .eq("id", id)
         .eq("mama_id", mama_id)
@@ -250,7 +250,7 @@ export function useProducts() {
       id: p.id,
       nom: p.nom,
       famille: p.famille?.nom || "",
-      unite: p.unites?.nom || "",
+      unite: p.unite?.nom || "",
       code: p.code,
       allergenes: p.allergenes,
       pmp: p.pmp,

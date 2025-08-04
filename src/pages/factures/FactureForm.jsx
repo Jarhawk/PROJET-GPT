@@ -345,16 +345,27 @@ export default function FactureForm({ facture = null, fournisseurs = [], onClose
         <section>
           <h3 className="font-semibold mb-2">Lignes produits</h3>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm table-fixed">
+              <colgroup>
+                <col style={{ width: "25%" }} />
+                <col style={{ width: "10%" }} />
+                <col style={{ width: "10%" }} />
+                <col style={{ width: "10%" }} />
+                <col style={{ width: "15%" }} />
+                <col style={{ width: "8%" }} />
+                <col style={{ width: "12%" }} />
+                <col style={{ width: "5%" }} />
+              </colgroup>
               <thead>
                 <tr>
-                  <th>Produit</th>
-                  <th>Quantité</th>
-                  <th>Unité | TVA</th>
-                  <th>Total HT</th>
-                  <th>PU | PMP</th>
-                  <th>Zone</th>
-                  <th>Actions</th>
+                  <th className="text-left">Produit</th>
+                  <th className="text-left">Quantité</th>
+                  <th className="text-left">Unité</th>
+                  <th className="text-left">Total HT</th>
+                  <th className="text-left">PU / PMP</th>
+                  <th className="text-left">TVA</th>
+                  <th className="text-left">Zone</th>
+                  <th className="text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>

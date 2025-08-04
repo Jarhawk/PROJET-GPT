@@ -60,7 +60,15 @@ export default function FactureDetail({ facture: factureProp, onClose }) {
     const { data } = await createFacture({ ...payload, numero: `${facture.numero || facture.id}-copie` });
     if (data) {
       for (const l of produitsFacture) {
-        await addLigneFacture(data.id, { produit_id: l.produit_id, quantite: l.quantite, prix: l.prix_unitaire, tva: l.tva, fournisseur_id: facture.fournisseur_id });
+        await addLigneFacture(data.id, {
+          produit_id: l.produit_id,
+          quantite: l.quantite,
+          prix_unitaire: l.prix_unitaire,
+          tva: l.tva,
+          zone_stock_id: l.zone_stock_id,
+          unite_id: l.unite_id || l.produit?.unite_id,
+          fournisseur_id: facture.fournisseur_id,
+        });
       }
       await calculateTotals(data.id);
       onClose?.();
@@ -74,9 +82,7 @@ export default function FactureDetail({ facture: factureProp, onClose }) {
         <h2 className="font-bold text-xl mb-4">Détail de la facture #{facture.id}</h2>
         <div><b>Date :</b> {facture.date_facture}</div>
         <div><b>Fournisseur :</b> {facture.fournisseur?.nom}</div>
-        {facture.bon_livraison && (
-          <div><b>Bon de livraison :</b> {facture.bon_livraison}</div>
-        )}
+        {facture.bon_livraison && <div><b>Bon de livraison</b></div>}
         <div><b>Montant :</b> {facture.total_ttc?.toFixed(2)} €</div>
         <div><b>Statut :</b> {facture.statut}</div>
         {facture.commentaire && (

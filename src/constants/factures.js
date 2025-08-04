@@ -1,15 +1,15 @@
 export const FACTURE_STATUTS = [
-  "brouillon",
-  "en attente",
-  "validée",
-  "annulée",
-  "archivée",
+  "Brouillon",
+  "En attente",
+  "Validée",
+  "Annulée",
+  "Archivée",
 ];
 
 export const FACTURE_STATUT_BADGES = {
-  brouillon: "badge",
-  "en attente": "badge badge-user",
-  validée: "badge badge-admin",
-  annulée: "badge badge-superadmin",
-  archivée: "badge",
+  Brouillon: "badge",
+  "En attente": "badge badge-user",
+  Validée: "badge badge-admin",
+  Annulée: "badge badge-superadmin",
+  Archivée: "badge",
 };

@@ -18,6 +18,9 @@ export default function FactureLigne({
   const { getProduct } = useProducts();
   const { zones, fetchZones } = useZones();
   const [loadingProd, setLoadingProd] = useState(false);
+  const parseNum = v => parseFloat(String(v).replace(',', '.')) || 0;
+  const formatNum = v =>
+    isNaN(v) ? "" : Number(v).toLocaleString("fr-FR", { maximumFractionDigits: 2 });
   useEffect(() => {
     fetchZones();
   }, [fetchZones]);
@@ -29,7 +32,6 @@ export default function FactureLigne({
         produit_nom: obj.nom,
         produit_id: obj.id,
         tva: obj.tva ?? ligne.tva,
-        unite: obj.unite || ligne.unite || "",
       };
       onChange(newLigne);
       setLoadingProd(true);
@@ -38,11 +40,19 @@ export default function FactureLigne({
         onChange({
           ...newLigne,
           zone_stock_id: prod?.zone_stock_id || "",
-          unite: prod?.unites?.nom || newLigne.unite,
+          unite_id: prod?.unite_id || "",
+          unite: prod?.unites?.nom || "",
+          pmp: prod?.pmp ?? null,
         });
       } catch (error) {
         console.error(error);
-        onChange({ ...newLigne, zone_stock_id: "" });
+        onChange({
+          ...newLigne,
+          zone_stock_id: "",
+          unite_id: "",
+          unite: "",
+          pmp: null,
+        });
       }
       setLoadingProd(false);
     } else {
@@ -51,19 +61,54 @@ export default function FactureLigne({
         produit_nom: obj?.nom || "",
         produit_id: "",
         zone_stock_id: "",
+        unite_id: "",
         unite: "",
+        pmp: null,
       });
       if (obj?.nom?.length >= 2) searchProduits(obj.nom);
     }
   }
 
-  function update(field, value) {
-    onChange({ ...ligne, [field]: value });
+  function handleQuantite(val) {
+    const q = val;
+    const qNum = parseNum(val);
+    const pu = parseNum(ligne.pu);
+    const t = parseNum(ligne.total_ht);
+    let newLine = { ...ligne, quantite: q };
+    if (ligne.pu) {
+      newLine.total_ht = formatNum(qNum * pu);
+    } else if (ligne.total_ht) {
+      newLine.pu = qNum ? formatNum(t / qNum) : ligne.pu;
+    }
+    onChange(newLine);
   }
 
-  const qte = Number(ligne.quantite) || 0;
-  const ht = Number(ligne.total_ht) || 0;
-  const prixUnitaire = qte ? ht / qte : 0;
+  function handleTotal(val) {
+    const t = val;
+    const tNum = parseNum(val);
+    const q = parseNum(ligne.quantite);
+    const newLine = {
+      ...ligne,
+      total_ht: t,
+      pu: q ? formatNum(tNum / q) : ligne.pu,
+    };
+    onChange(newLine);
+  }
+
+  function handlePu(val) {
+    const p = val;
+    const pNum = parseNum(val);
+    const q = parseNum(ligne.quantite);
+    const newLine = {
+      ...ligne,
+      pu: p,
+      total_ht: formatNum(q * pNum),
+    };
+    onChange(newLine);
+  }
+  const puNum = parseNum(ligne.pu);
+  const pmp = parseNum(ligne.pmp);
+  const variation = puNum > pmp ? "🔺" : puNum < pmp ? "🔻" : "⚪";
 
   return (
     <tr className="h-10">
@@ -79,15 +124,12 @@ export default function FactureLigne({
       </td>
       <td className="p-1 align-middle">
         <Input
-          type="number"
-          step="0.01"
+          type="text"
           required
-          className="h-10 w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className="h-10 w-full"
           value={ligne.quantite}
-          onChange={e => {
-            const val = e.target.value.replace(',', '.');
-            update('quantite', Number(val));
-          }}
+          onChange={e => handleQuantite(e.target.value)}
+          onBlur={() => handleQuantite(formatNum(parseNum(ligne.quantite)))}
           onKeyDown={e => e.key === "Enter" && e.preventDefault()}
         />
       </td>
@@ -102,32 +144,39 @@ export default function FactureLigne({
       <td className="p-1 align-middle">
         <div className="relative">
           <Input
-            type="number"
-            step="0.01"
-            required
-            className="h-10 w-full pr-6 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            type="text"
+            className="h-10 w-full pr-6"
             value={ligne.total_ht}
-            onChange={e => update('total_ht', e.target.value.replace(',', '.'))}
+            onChange={e => handleTotal(e.target.value)}
+            onBlur={() => handleTotal(formatNum(parseNum(ligne.total_ht)))}
             onKeyDown={e => e.key === 'Enter' && e.preventDefault()}
           />
           <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm">€</span>
         </div>
       </td>
       <td className="p-1 align-middle">
-        <div className="relative">
-          <Input
-            type="number"
-            readOnly
-            className="h-10 w-full pr-6 bg-gray-100 text-gray-500"
-            value={prixUnitaire.toFixed(2)}
-          />
-          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm">€</span>
+        <div className="flex items-center gap-1">
+          <div className="relative flex-1">
+            <Input
+              type="text"
+              className="h-10 w-full pr-6"
+              value={ligne.pu}
+              onChange={e => handlePu(e.target.value)}
+              onBlur={() => handlePu(formatNum(parseNum(ligne.pu)))}
+              onKeyDown={e => e.key === 'Enter' && e.preventDefault()}
+            />
+            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm">€</span>
+          </div>
+          <span>{variation}</span>
         </div>
+        {ligne.pmp != null && (
+          <div className="text-xs text-gray-500">PMP: {formatNum(pmp)} €</div>
+        )}
       </td>
       <td className="min-w-[20ch] p-1 align-middle">
         <Select
           value={ligne.zone_stock_id}
-          onChange={e => update("zone_stock_id", e.target.value)}
+          onChange={e => onChange({ ...ligne, zone_stock_id: e.target.value })}
           disabled={loadingProd}
           required
           className="h-10 w-full"
@@ -152,8 +201,8 @@ export default function FactureLigne({
           max={9999}
           value={ligne.tva}
           onChange={e => {
-            const val = e.target.value.replace(',', '.');
-            update('tva', Math.round(Number(val) * 100) / 100);
+            const val = parseNum(e.target.value);
+            onChange({ ...ligne, tva: Math.round(val * 100) / 100 });
           }}
           onKeyDown={e => e.key === "Enter" && e.preventDefault()}
         />

@@ -1,3 +1,90 @@
+CREATE OR REPLACE FUNCTION current_user_mama_id()
+RETURNS uuid AS $$
+  SELECT mama_id FROM utilisateurs WHERE auth_id = auth.uid() LIMIT 1;
+$$ LANGUAGE sql STABLE;
+
+CREATE OR REPLACE FUNCTION set_updated_at()
+RETURNS trigger AS $$
+BEGIN
+  NEW.updated_at := now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION prevent_unite_delete()
+RETURNS trigger AS $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM produits WHERE unite_id = OLD.id AND actif IS TRUE) THEN
+    RAISE EXCEPTION 'Unité utilisée par des produits';
+  END IF;
+  RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION set_requisition_stock_theorique()
+RETURNS trigger AS $$
+DECLARE
+  current_stock numeric;
+  zid uuid;
+BEGIN
+  SELECT zone_id INTO zid FROM requisitions WHERE id = NEW.requisition_id;
+  SELECT quantite INTO current_stock FROM stocks
+    WHERE mama_id = NEW.mama_id AND zone_id = zid AND produit_id = NEW.produit_id;
+  NEW.stock_theorique_avant := COALESCE(current_stock,0);
+  NEW.stock_theorique_apres := COALESCE(current_stock,0) - COALESCE(NEW.quantite_demandee,0);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION insert_stock_from_transfert_ligne()
+RETURNS trigger AS $$
+DECLARE
+  tr record;
+  com text;
+BEGIN
+  SELECT * INTO tr FROM transferts WHERE id = NEW.transfert_id;
+  com := COALESCE(NEW.commentaire, tr.commentaire);
+  INSERT INTO stock_mouvements(mama_id, produit_id, quantite, type, date, zone_id, auteur_id, commentaire)
+    VALUES(tr.mama_id, NEW.produit_id, -NEW.quantite, 'transfert', tr.date_transfert, tr.zone_source_id, tr.utilisateur_id, com);
+  INSERT INTO stock_mouvements(mama_id, produit_id, quantite, type, date, zone_id, auteur_id, commentaire)
+    VALUES(tr.mama_id, NEW.produit_id, NEW.quantite, 'transfert', tr.date_transfert, tr.zone_dest_id, tr.utilisateur_id, com);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION apply_stock_from_achat(
+  achat_id uuid,
+  achat_table text,
+  mama_id uuid
+)
+RETURNS void AS $$
+DECLARE
+  r record;
+BEGIN
+  IF achat_table = 'factures' THEN
+    FOR r IN
+      SELECT fl.produit_id, fl.quantite
+      FROM facture_lignes fl
+      JOIN factures f ON f.id = fl.facture_id
+      WHERE f.id = achat_id AND f.mama_id = mama_id AND fl.actif IS TRUE
+    LOOP
+      INSERT INTO stock_mouvements(mama_id, date, type, quantite, produit_id)
+      VALUES (mama_id, NOW(), 'entree_achat', r.quantite, r.produit_id);
+    END LOOP;
+  ELSIF achat_table = 'bons_livraison' THEN
+    FOR r IN
+      SELECT l.produit_id, l.quantite_recue AS quantite
+      FROM lignes_bl l
+      JOIN bons_livraison b ON b.id = l.bl_id
+      WHERE b.id = achat_id AND b.mama_id = mama_id
+    LOOP
+      INSERT INTO stock_mouvements(mama_id, date, type, quantite, produit_id)
+      VALUES (mama_id, NOW(), 'entree_achat', r.quantite, r.produit_id);
+    END LOOP;
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE TABLE IF NOT EXISTS zones_stock (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   mama_id uuid NOT NULL REFERENCES mamas(id) ON DELETE CASCADE,
@@ -192,3 +279,89 @@ ALTER TABLE IF EXISTS produits DROP CONSTRAINT IF EXISTS fk_produits_unite;
 ALTER TABLE IF EXISTS produits ADD CONSTRAINT fk_produits_unite
   FOREIGN KEY (unite_id) REFERENCES unites(id)
   ON DELETE SET NULL;
+
+CREATE TABLE IF NOT EXISTS documents (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  mama_id uuid REFERENCES mamas(id),
+  chemin text,
+  type text,
+  created_at timestamptz DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_documents_mama_id ON documents(mama_id);
+ALTER TABLE IF EXISTS documents ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS documents_all ON documents;
+CREATE POLICY documents_all ON documents
+  FOR ALL USING (mama_id = current_user_mama_id())
+  WITH CHECK (mama_id = current_user_mama_id());
+
+CREATE TABLE IF NOT EXISTS notifications (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  mama_id uuid REFERENCES mamas(id),
+  user_id uuid REFERENCES utilisateurs(id),
+  titre text,
+  texte text,
+  lien text,
+  type text,
+  lu boolean DEFAULT false,
+  created_at timestamptz DEFAULT now(),
+  actif boolean DEFAULT true,
+  utilisateur_id uuid REFERENCES utilisateurs(id)
+);
+CREATE INDEX IF NOT EXISTS idx_notifications_mama_id ON notifications(mama_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(utilisateur_id);
+ALTER TABLE IF EXISTS notifications ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS notifications_all ON notifications;
+CREATE POLICY notifications_all ON notifications
+  FOR ALL USING ((mama_id = current_user_mama_id()) AND ((user_id = auth.uid()) OR (utilisateur_id = (SELECT utilisateurs.id FROM utilisateurs WHERE utilisateurs.auth_id = auth.uid()))))
+  WITH CHECK ((mama_id = current_user_mama_id()) AND ((user_id = auth.uid()) OR (utilisateur_id = (SELECT utilisateurs.id FROM utilisateurs WHERE utilisateurs.auth_id = auth.uid()))));
+
+CREATE OR REPLACE VIEW v_notifications_non_lues AS
+SELECT utilisateur_id, mama_id, COUNT(*) AS total_non_lues
+FROM notifications
+WHERE lu IS FALSE AND actif IS TRUE
+GROUP BY utilisateur_id, mama_id;
+
+CREATE TABLE IF NOT EXISTS gadgets (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  tableau_id uuid REFERENCES tableaux_de_bord(id),
+  type text,
+  config jsonb,
+  created_at timestamptz DEFAULT now(),
+  mama_id uuid,
+  actif boolean DEFAULT true,
+  nom text,
+  ordre integer DEFAULT 0,
+  configuration_json jsonb
+);
+CREATE INDEX IF NOT EXISTS idx_gadgets_mama_id ON gadgets(mama_id);
+CREATE INDEX IF NOT EXISTS idx_gadgets_actif ON gadgets(actif);
+ALTER TABLE IF EXISTS gadgets ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS gadgets_all ON gadgets;
+CREATE POLICY gadgets_all ON gadgets
+  FOR ALL USING (mama_id = current_user_mama_id())
+  WITH CHECK (mama_id = current_user_mama_id());
+
+DROP TRIGGER IF EXISTS trg_unites_updated_at ON unites;
+CREATE TRIGGER trg_unites_updated_at
+  BEFORE UPDATE ON unites
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+DROP TRIGGER IF EXISTS trg_unite_delete ON unites;
+CREATE TRIGGER trg_unite_delete
+  BEFORE DELETE ON unites
+  FOR EACH ROW EXECUTE FUNCTION prevent_unite_delete();
+DROP TRIGGER IF EXISTS trg_set_updated_at_taches ON taches;
+CREATE TRIGGER trg_set_updated_at_taches
+  BEFORE UPDATE ON taches
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+DROP TRIGGER IF EXISTS trg_requisition_lignes_stock ON requisition_lignes;
+CREATE TRIGGER trg_requisition_lignes_stock
+  BEFORE INSERT ON requisition_lignes
+  FOR EACH ROW EXECUTE FUNCTION set_requisition_stock_theorique();
+DROP TRIGGER IF EXISTS trg_transfert_lignes_stock ON transfert_lignes;
+CREATE TRIGGER trg_transfert_lignes_stock
+  AFTER INSERT ON transfert_lignes
+  FOR EACH ROW EXECUTE FUNCTION insert_stock_from_transfert_ligne();
+DROP TRIGGER IF EXISTS trg_set_updated_at_ventes_fiches_carte ON ventes_fiches_carte;
+CREATE TRIGGER trg_set_updated_at_ventes_fiches_carte
+  BEFORE UPDATE ON ventes_fiches_carte
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();

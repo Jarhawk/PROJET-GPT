@@ -15,30 +15,33 @@ const sousFamillesData = [
 const unitesData = [{ id: 100, nom: 'Kg' }];
 const zonesData = [{ id: 200, nom: 'Reserve' }];
 
-vi.mock('@/lib/supabase', () => ({
-  supabase: {
-    from: (table) => ({
-      select: () => ({
-        eq: () => {
-          switch (table) {
-            case 'familles':
-              return Promise.resolve({ data: famillesData });
-            case 'sous_familles':
-              return Promise.resolve({ data: sousFamillesData });
-            case 'unites':
-              return Promise.resolve({ data: unitesData });
-            case 'zones_stock':
-              return Promise.resolve({ data: zonesData });
-            case 'fournisseurs':
-              return Promise.resolve({ data: [] });
-            default:
-              return Promise.resolve({ data: [] });
-          }
-        },
-      }),
+const supabaseMock = {
+  from: (table) => ({
+    select: () => ({
+      eq: () => {
+        switch (table) {
+          case 'familles':
+            return Promise.resolve({ data: famillesData });
+          case 'sous_familles':
+            return Promise.resolve({ data: sousFamillesData });
+          case 'unites':
+            return Promise.resolve({ data: unitesData });
+          case 'zones_stock':
+            return Promise.resolve({ data: zonesData });
+          case 'fournisseurs':
+            return Promise.resolve({ data: [] });
+          case 'produits':
+            return Promise.resolve({ data: [] });
+          default:
+            return Promise.resolve({ data: [] });
+        }
+      },
     }),
-  },
-}));
+  }),
+};
+
+vi.mock('@/lib/supabase', () => ({ supabase: supabaseMock }));
+vi.mock('@/lib/supabaseClient', () => ({ supabase: supabaseMock }));
 
 function buildFile(rows) {
   const wb = XLSX.utils.book_new();

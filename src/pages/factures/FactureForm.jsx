@@ -105,8 +105,7 @@ export default function FactureForm({ facture = null, onClose, onSaved }) {
         const { data: f, error } = await supabase
           .from("factures")
           .select(
-            `*, fournisseur:fournisseur_id(id, nom), facture_lignes (
-              id, produit_id, quantite, prix_unitaire, tva, zone_stock_id,
+            `*, fournisseur:fournisseur_id(id, nom), facture_lignes(*,
               produit:produits(nom, unite_id, pmp, unite:unite_id(nom))
             )`
           )
@@ -334,15 +333,15 @@ export default function FactureForm({ facture = null, onClose, onSaved }) {
           <div className="overflow-x-auto">
             <table className="w-full text-sm table-fixed">
               <colgroup>
-                <col style={{ width: "24%" }} />
+                <col style={{ width: "25%" }} />
                 <col style={{ width: "8%" }} />
-                <col style={{ width: "8%" }} />
+                <col style={{ width: "7%" }} />
                 <col style={{ width: "12%" }} />
-                <col style={{ width: "10%" }} />
-                <col style={{ width: "10%" }} />
-                <col style={{ width: "8%" }} />
-                <col style={{ width: "14%" }} />
-                <col style={{ width: "6%" }} />
+                <col style={{ width: "9%" }} />
+                <col style={{ width: "9%" }} />
+                <col style={{ width: "7%" }} />
+                <col style={{ width: "18%" }} />
+                <col style={{ width: "5%" }} />
               </colgroup>
               <thead>
                 <tr>

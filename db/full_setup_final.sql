@@ -288,6 +288,17 @@ WHERE a.actif IS TRUE
 GROUP BY a.mama_id, mois
 ORDER BY mois;
 
+-- Vue des ventes agrégées par famille
+CREATE OR REPLACE VIEW v_ventes_par_famille AS
+SELECT
+  ft.mama_id,
+  ft.famille,
+  SUM(v.ventes) AS total_ventes
+FROM ventes_fiches_carte v
+JOIN fiches_techniques ft ON ft.fiche_id = v.fiche_id AND ft.mama_id = v.mama_id
+WHERE v.actif IS TRUE AND ft.actif IS TRUE
+GROUP BY ft.mama_id, ft.famille;
+
 ALTER TABLE IF EXISTS familles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS sous_familles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS unites ENABLE ROW LEVEL SECURITY;
@@ -409,6 +420,12 @@ DROP TRIGGER IF EXISTS trg_transfert_lignes_stock ON transfert_lignes;
 CREATE TRIGGER trg_transfert_lignes_stock
   AFTER INSERT ON transfert_lignes
   FOR EACH ROW EXECUTE FUNCTION insert_stock_from_transfert_ligne();
+
+ALTER TABLE IF EXISTS ventes_fiches_carte ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS ventes_fiches_carte_all ON ventes_fiches_carte;
+CREATE POLICY ventes_fiches_carte_all ON ventes_fiches_carte
+  FOR ALL USING (mama_id = current_user_mama_id())
+  WITH CHECK (mama_id = current_user_mama_id());
 
 DROP TRIGGER IF EXISTS trg_set_updated_at_ventes_fiches_carte ON ventes_fiches_carte;
 CREATE TRIGGER trg_set_updated_at_ventes_fiches_carte

@@ -9,7 +9,7 @@ vi.mock('@/hooks/usePlanning', () => ({
   usePlanning: () => hook,
 }));
 vi.mock('@/hooks/useAuth', () => ({
-  default: () => ({ mama_id: '1' }),
+  default: () => ({ mama_id: '1', hasAccess: () => true }),
 }));
 vi.mock('@/hooks/useProducts', () => ({
   useProducts: () => ({ products: [{ id: 'p1', nom: 'Prod' }], fetchProducts: vi.fn() }),

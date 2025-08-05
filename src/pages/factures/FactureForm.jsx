@@ -56,8 +56,76 @@ export default function FactureForm({ facture = null, onClose, onSaved }) {
   const { autoHt, autoTva, autoTotal } = useFactureForm(lignes);
   const ecart = (parseFloat(String(totalHt).replace(',', '.')) || 0) - autoHt;
   const factureId = facture?.id;
-  const [loadingData, setLoadingData] = useState(false);
+  const [loadingFacture, setLoadingFacture] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const loadFacture = async () => {
+    if (!factureId) return;
+    setLoadingFacture(true);
+    try {
+      const { data: f, error } = await supabase
+        .from("factures")
+        .select(
+          `*,
+          fournisseur: fournisseurs(id, nom),
+          facture_lignes(
+            id,
+            quantite,
+            prix_unitaire,
+            tva,
+            zone_stock_id,
+            produit_id,
+            produit: produits(nom, unite_id, pmp, unite:unite_id(nom))
+          )`
+        )
+        .eq("id", factureId)
+        .eq("mama_id", mama_id)
+        .single();
+      if (error) throw error;
+
+      setDate(f.date_facture || new Date().toISOString().slice(0, 10));
+      setFournisseurId(f.fournisseur_id || "");
+      setNumero(f.numero || "");
+      setStatut(f.statut || "Brouillon");
+      setIsBonLivraison(
+        Boolean(f.bon_livraison) || (f.numero || "").startsWith("BL"),
+      );
+      setTotalHt(
+        f?.total_ht !== undefined && f?.total_ht !== null
+          ? String(f.total_ht)
+          : "",
+      );
+      setFournisseurNom(f.fournisseur?.nom || "");
+      if (f.fournisseur?.nom) searchFournisseurs(f.fournisseur.nom);
+
+      const lignesData = f.facture_lignes || [];
+      const mapped = lignesData.map(l => {
+        const q = parseFloat(l.quantite) || 0;
+        const pu = parseFloat(l.prix_unitaire) || 0;
+        const total = q * pu;
+        return {
+          produit_id: l.produit_id || "",
+          produit_nom: l.produit?.nom || "",
+          quantite: String(q),
+          total_ht: total.toFixed(2),
+          pu: pu.toFixed(2),
+          tva: l.tva ?? 20,
+          zone_stock_id: l.zone_stock_id || "",
+          unite_id: l.produit?.unite_id || "",
+          unite: l.produit?.unite?.nom || "",
+          pmp: l.produit?.pmp ?? 0,
+          manuallyEdited: false,
+        };
+      });
+
+      setLignes(mapped.length ? mapped : [defaultLigne]);
+    } catch (err) {
+      console.error(err);
+      toast.error("Erreur de chargement de la facture");
+    } finally {
+      setLoadingFacture(false);
+    }
+  };
 
   useEffect(() => {
     if (isBonLivraison && !numero.startsWith("BL")) {
@@ -99,73 +167,7 @@ export default function FactureForm({ facture = null, onClose, onSaved }) {
 
   useEffect(() => { searchProduits(""); }, [searchProduits]);
 
-  useEffect(() => {
-    const loadFacture = async () => {
-      if (!factureId) return;
-      setLoadingData(true);
-      try {
-        const { data: f, error } = await supabase
-          .from("factures")
-          .select(
-            `*,
-            fournisseur: fournisseurs(id, nom),
-            facture_lignes(
-              id,
-              produit_id,
-              quantite,
-              prix_unitaire,
-              tva,
-              zone_stock_id,
-              produit: produits(nom, unite_id, pmp, unite:unite_id(nom))
-            )`
-          )
-          .eq("id", factureId)
-          .single();
-        if (error) throw error;
-
-        setDate(f.date_facture || new Date().toISOString().slice(0, 10));
-        setFournisseurId(f.fournisseur_id || "");
-        setNumero(f.numero || "");
-        setStatut(f.statut || "Brouillon");
-        setIsBonLivraison(Boolean(f.bon_livraison) || (f.numero || "").startsWith("BL"));
-        setTotalHt(
-          f?.total_ht !== undefined && f?.total_ht !== null
-            ? String(f.total_ht)
-            : "",
-        );
-        setFournisseurNom(f.fournisseur?.nom || "");
-        if (f.fournisseur?.nom) searchFournisseurs(f.fournisseur.nom);
-
-        const lignesData = f.facture_lignes || [];
-        const mapped = lignesData.map(l => {
-          const q = parseFloat(l.quantite) || 0;
-          const pu = parseFloat(l.prix_unitaire) || 0;
-          const total = q * pu;
-          return {
-            produit_id: l.produit_id || "",
-            produit_nom: l.produit?.nom || "",
-            quantite: String(q),
-            total_ht: total.toFixed(2),
-            pu: pu.toFixed(2),
-            tva: l.tva ?? 20,
-            zone_stock_id: l.zone_stock_id || "",
-            unite_id: l.produit?.unite_id || "",
-            unite: l.produit?.unite?.nom || "",
-            pmp: l.produit?.pmp ?? 0,
-            manuallyEdited: false,
-          };
-        });
-
-        setLignes(mapped.length ? mapped : [defaultLigne]);
-      } catch (err) {
-        console.error(err);
-        toast.error("Erreur de chargement de la facture");
-      } finally {
-        setLoadingData(false);
-      }
-    };
-    loadFacture();
-  }, [factureId, searchFournisseurs]);
+  useEffect(() => { loadFacture(); }, [factureId]);
 
   const ecartClass = Math.abs(ecart) > 0.01 ? "text-green-500" : "";
 
@@ -303,7 +305,7 @@ export default function FactureForm({ facture = null, onClose, onSaved }) {
     onClose?.();
   };
 
-  if (loadingData) return <LoadingSpinner message="Chargement..." />;
+  if (loadingFacture) return <LoadingSpinner message="Chargement..." />;
 
   return (
     <GlassCard width="w-full" title={facture ? "Modifier la facture" : "Ajouter une facture"}>
@@ -383,29 +385,18 @@ export default function FactureForm({ facture = null, onClose, onSaved }) {
         <section>
           <h3 className="font-semibold mb-2">Lignes produits</h3>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm table-fixed">
-              <colgroup>
-                <col style={{ width: "25%" }} />
-                <col style={{ width: "8%" }} />
-                <col style={{ width: "7%" }} />
-                <col style={{ width: "12%" }} />
-                <col style={{ width: "9%" }} />
-                <col style={{ width: "9%" }} />
-                <col style={{ width: "7%" }} />
-                <col style={{ width: "18%" }} />
-                <col style={{ width: "5%" }} />
-              </colgroup>
+            <table className="w-full text-sm table-auto">
               <thead>
                 <tr>
-                  <th className="text-left">Produit</th>
-                  <th className="text-left">Quantité</th>
-                  <th className="text-left">Unité</th>
-                  <th className="text-left">Total HT</th>
-                  <th className="text-left">PU</th>
-                  <th className="text-left">PMP</th>
-                  <th className="text-left">TVA</th>
-                  <th className="text-left">Zone</th>
-                  <th className="text-right">Actions</th>
+                  <th className="text-left min-w-[100px]">Produit</th>
+                  <th className="text-left min-w-[100px]">Quantité</th>
+                  <th className="text-left min-w-[100px]">Unité</th>
+                  <th className="text-left min-w-[100px]">Total HT</th>
+                  <th className="text-left min-w-[100px]">PU</th>
+                  <th className="text-left min-w-[100px]">PMP</th>
+                  <th className="text-left min-w-[100px]">TVA</th>
+                  <th className="text-left min-w-[100px]">Zone</th>
+                  <th className="text-right min-w-[100px]">Actions</th>
                 </tr>
               </thead>
               <tbody>

@@ -114,7 +114,7 @@ export default function FactureLigne({
 
   return (
     <tr className="h-10">
-      <td className="p-1 align-middle">
+      <td className="p-1 align-middle min-w-[100px]">
         <AutoCompleteField
           value={ligne.produit_nom}
           onChange={handleProduitSelection}
@@ -124,7 +124,7 @@ export default function FactureLigne({
           className="h-10 w-full"
         />
       </td>
-      <td className="p-1 align-middle">
+      <td className="p-1 align-middle min-w-[100px]">
         <Input
           type="text"
           inputMode="decimal"
@@ -136,7 +136,7 @@ export default function FactureLigne({
           onKeyDown={e => e.key === "Enter" && e.preventDefault()}
         />
       </td>
-      <td className="p-1 align-middle">
+      <td className="p-1 align-middle min-w-[100px]">
         <Input
           type="text"
           readOnly
@@ -144,7 +144,7 @@ export default function FactureLigne({
           className="h-10 w-full"
         />
       </td>
-      <td className="p-1 align-middle">
+      <td className="p-1 align-middle min-w-[100px]">
         <div className="relative">
           <Input
             type="text"
@@ -157,7 +157,7 @@ export default function FactureLigne({
           <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm">€</span>
         </div>
       </td>
-      <td className="p-1 align-middle">
+      <td className="p-1 align-middle min-w-[100px]">
         <Input
           type="text"
           inputMode="decimal"
@@ -168,7 +168,7 @@ export default function FactureLigne({
           onKeyDown={e => e.key === "Enter" && e.preventDefault()}
         />
       </td>
-      <td className="p-1 align-middle">
+      <td className="p-1 align-middle min-w-[100px]">
         <div className="relative">
           <Input
             type="text"
@@ -185,7 +185,7 @@ export default function FactureLigne({
           )}
         </div>
       </td>
-      <td className="p-1 align-middle">
+      <td className="p-1 align-middle min-w-[100px]">
         <Input
           type="text"
           readOnly
@@ -193,7 +193,7 @@ export default function FactureLigne({
           className="h-10 w-full text-center"
         />
       </td>
-      <td className="p-1 align-middle">
+      <td className="p-1 align-middle min-w-[100px]">
         <Select
           value={ligne.zone_stock_id}
           onChange={e => onChange({ ...ligne, zone_stock_id: e.target.value })}
@@ -211,7 +211,7 @@ export default function FactureLigne({
             ))}
         </Select>
       </td>
-      <td className="p-1 align-middle text-right">
+      <td className="p-1 align-middle text-right min-w-[100px]">
         <Button
           type="button"
           size="sm"

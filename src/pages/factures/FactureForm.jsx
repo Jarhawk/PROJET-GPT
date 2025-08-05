@@ -16,9 +16,10 @@ import toast from "react-hot-toast";
 import { FACTURE_STATUTS } from "@/constants/factures";
 import { Checkbox } from "@/components/ui/checkbox";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { Loader2 } from "lucide-react";
 
 export default function FactureForm({ facture = null, onClose, onSaved }) {
-  const { createFacture, updateFacture, addLigneFacture } = useFactures();
+  const { createFacture, updateFacture } = useFactures();
   const { results: fournisseurOptions, searchFournisseurs } = useFournisseursAutocomplete();
   const { results: produitOptions, searchProduits } = useProduitsAutocomplete();
   const { mama_id } = useAuth();
@@ -56,6 +57,7 @@ export default function FactureForm({ facture = null, onClose, onSaved }) {
   const ecart = (parseFloat(String(totalHt).replace(',', '.')) || 0) - autoHt;
   const factureId = facture?.id;
   const [loadingData, setLoadingData] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (isBonLivraison && !numero.startsWith("BL")) {
@@ -105,8 +107,16 @@ export default function FactureForm({ facture = null, onClose, onSaved }) {
         const { data: f, error } = await supabase
           .from("factures")
           .select(
-            `*, fournisseur:fournisseur_id(id, nom), facture_lignes(*,
-              produit:produits(nom, unite_id, pmp, unite:unite_id(nom))
+            `*,
+            fournisseur: fournisseurs(id, nom),
+            facture_lignes(
+              id,
+              produit_id,
+              quantite,
+              prix_unitaire,
+              tva,
+              zone_stock_id,
+              produit: produits(nom, unite_id, pmp, unite:unite_id(nom))
             )`
           )
           .eq("id", factureId)
@@ -169,6 +179,7 @@ export default function FactureForm({ facture = null, onClose, onSaved }) {
       formRef.current?.querySelector(":invalid")?.focus();
       return;
     }
+    setSaving(true);
     try {
       let fid = factureId;
       const invoice = {
@@ -188,6 +199,10 @@ export default function FactureForm({ facture = null, onClose, onSaved }) {
         if (error) throw error;
         fid = data.id;
       }
+
+      const lignesRows = [];
+      const fournisseurRows = [];
+      const achatsRows = [];
       for (let i = 0; i < lignes.length; i++) {
         const ligne = lignes[i];
         const { produit_nom: _n, total_ht, pu, unite: _u, pmp: _p, manuallyEdited: _m, ...rest } = ligne;
@@ -201,19 +216,54 @@ export default function FactureForm({ facture = null, onClose, onSaved }) {
           (!prixSaisi && !totalSaisi)
         ) {
           toast.error("Ligne de produit invalide");
+          setSaving(false);
           return;
         }
         let prix_unitaire = prixSaisi;
         if (!prix_unitaire) {
           prix_unitaire = quantite ? totalSaisi / quantite : 0;
         }
-        await addLigneFacture(fid, {
+        const prixFinal = isFinite(prix_unitaire) ? prix_unitaire : 0;
+        lignesRows.push({
           ...rest,
           quantite,
-          prix_unitaire: isFinite(prix_unitaire) ? prix_unitaire : 0,
+          prix_unitaire: prixFinal,
+          tva: ligne.tva,
+          zone_stock_id: ligne.zone_stock_id,
+          total: quantite * prixFinal,
+          facture_id: fid,
+          mama_id,
+        });
+        fournisseurRows.push({
+          produit_id: ligne.produit_id,
           fournisseur_id,
+          prix_achat: prixFinal,
+          date_livraison: date,
+          mama_id,
+        });
+        achatsRows.push({
+          produit_id: ligne.produit_id,
+          fournisseur_id,
+          prix: prixFinal,
+          quantite,
+          date_achat: date,
+          mama_id,
         });
       }
+
+      await Promise.all([
+        supabase
+          .from("facture_lignes")
+          .upsert(lignesRows, { returning: "minimal" }),
+        supabase
+          .from("fournisseur_produits")
+          .upsert(fournisseurRows, {
+            onConflict: ["produit_id", "fournisseur_id", "date_livraison"],
+            returning: "minimal",
+          }),
+        supabase.from("achats").insert(achatsRows, { returning: "minimal" }),
+      ]);
+
       onSaved?.();
       toast.success(facture ? "Facture modifiée !" : "Facture ajoutée !");
       if (!facture) {
@@ -232,6 +282,8 @@ export default function FactureForm({ facture = null, onClose, onSaved }) {
       }
     } catch (err) {
       toast.error(err?.message || "Erreur lors de l'enregistrement");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -400,8 +452,22 @@ export default function FactureForm({ facture = null, onClose, onSaved }) {
         </section>
 
         <div className="flex gap-2 mt-4">
-          <Button type="submit" variant="primary" className="min-w-[120px]" disabled={numeroUsed}>
-            {facture ? "Modifier" : "Ajouter"}
+          <Button
+            type="submit"
+            variant="primary"
+            className="min-w-[120px]"
+            disabled={numeroUsed || saving}
+          >
+            {saving ? (
+              <span className="flex items-center justify-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Enregistrement...
+              </span>
+            ) : facture ? (
+              "Modifier"
+            ) : (
+              "Ajouter"
+            )}
           </Button>
           <Button type="button" variant="ghost" onClick={handleClose}>
             Fermer

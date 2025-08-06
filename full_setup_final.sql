@@ -57,6 +57,7 @@ create table if not exists public.utilisateurs (
     auth_id uuid unique,
     nom text,
     email text,
+    two_fa_enabled boolean not null default false,
     role_id uuid references public.roles(id) on delete set null,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
@@ -132,6 +133,8 @@ create table if not exists public.produits (
     unite_id uuid references public.unites(id),
     zone_stock_id uuid references public.zones_stock(id),
     fournisseur_id uuid references public.fournisseurs(id),
+    stock_reel numeric(12,2) default 0,
+    stock_min numeric(12,2) default 0,
     dernier_prix numeric(12,2),
     pmp numeric(12,2),
     tva numeric(12,2),
@@ -233,15 +236,38 @@ create table if not exists public.stock_mouvements (
     id uuid primary key default uuid_generate_v4(),
     mama_id uuid references public.mamas(id) on delete cascade,
     produit_id uuid references public.produits(id),
+    inventaire_id uuid,
+    zone_id uuid references public.zones_stock(id),
+    zone_source_id uuid references public.zones_stock(id),
+    zone_destination_id uuid references public.zones_stock(id),
+    auteur_id uuid references public.utilisateurs(id),
     type text not null,
     quantite numeric(12,2) not null,
     reference_id uuid,
+    date timestamptz,
+    commentaire text,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
     actif boolean not null default true
 );
 create index if not exists idx_stock_mouvements_mama_id on public.stock_mouvements(mama_id);
 create index if not exists idx_stock_mouvements_produit_id on public.stock_mouvements(produit_id);
+create index if not exists idx_stock_mouvements_date on public.stock_mouvements(date);
+
+-- Table stocks
+create table if not exists public.stocks (
+    id uuid primary key default uuid_generate_v4(),
+    mama_id uuid references public.mamas(id) on delete cascade,
+    produit_id uuid references public.produits(id),
+    zone_id uuid references public.zones_stock(id),
+    quantite numeric(12,2) not null default 0,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now(),
+    actif boolean not null default true
+);
+create index if not exists idx_stocks_mama_id on public.stocks(mama_id);
+create index if not exists idx_stocks_produit_id on public.stocks(produit_id);
+create index if not exists idx_stocks_zone_id on public.stocks(zone_id);
 
 -- Table inventaires
 create table if not exists public.inventaires (
@@ -269,6 +295,10 @@ create table if not exists public.inventaire_lignes (
 );
 create index if not exists idx_inventaire_lignes_mama_id on public.inventaire_lignes(mama_id);
 create index if not exists idx_inventaire_lignes_inventaire_id on public.inventaire_lignes(inventaire_id);
+
+alter table if exists public.stock_mouvements
+  add constraint fk_stock_mouvements_inventaire
+    foreign key (inventaire_id) references public.inventaires(id);
 
 -- Table documents
 create table if not exists public.documents (
@@ -628,6 +658,86 @@ language sql stable as $$
   where u.auth_id = auth.uid();
 $$;
 
+create or replace function public.enable_two_fa(code text)
+returns boolean
+language plpgsql security definer as $$
+begin
+  update public.utilisateurs
+     set two_fa_enabled = true,
+         updated_at = now()
+   where auth_id = auth.uid();
+  return true;
+end;
+$$;
+
+create or replace function public.disable_two_fa()
+returns boolean
+language plpgsql security definer as $$
+begin
+  update public.utilisateurs
+     set two_fa_enabled = false,
+         updated_at = now()
+   where auth_id = auth.uid();
+  return true;
+end;
+$$;
+
+create or replace function public.fn_calc_budgets(
+  mama_id_param uuid,
+  periode_param text
+)
+returns table(budget numeric, reel numeric)
+language sql stable as $$
+  select 0::numeric as budget, 0::numeric as reel;
+$$;
+
+create or replace function public.stats_rotation_produit(
+  mama_id_param uuid,
+  produit_id_param uuid
+)
+returns jsonb
+language sql stable as $$
+  select coalesce(
+    jsonb_agg(
+      jsonb_build_object(
+        'mois', to_char(date_trunc('month', sm.date), 'YYYY-MM'),
+        'quantite', sum(sm.quantite)
+      ) order by to_char(date_trunc('month', sm.date), 'YYYY-MM')
+    ),
+    '[]'::jsonb
+  )
+  from public.stock_mouvements sm
+  where sm.mama_id = mama_id_param
+    and sm.produit_id = produit_id_param
+    and sm.type in ('sortie','sortie_fiche','perte','don','sortie_transfert');
+$$;
+
+create or replace function public.top_produits(
+  mama_id_param uuid,
+  debut_param date default null,
+  fin_param date default null,
+  limit_param integer default 5
+)
+returns table(produit_id uuid, nom text, quantite numeric)
+language sql stable as $$
+  select p.id, p.nom,
+         coalesce(sum(
+           case
+             when sm.type in ('sortie','sortie_fiche','perte','don','sortie_transfert') then sm.quantite
+             else 0 end
+         ),0) as quantite
+    from public.produits p
+    left join public.stock_mouvements sm
+      on sm.produit_id = p.id
+     and sm.mama_id = p.mama_id
+     and (debut_param is null or sm.date >= debut_param)
+     and (fin_param is null or sm.date <= fin_param)
+   where p.mama_id = mama_id_param
+   group by p.id, p.nom
+   order by quantite desc
+   limit limit_param;
+$$;
+
 create or replace function public.consolidated_stats()
 returns table(total_produits bigint, total_fournisseurs bigint, total_alertes bigint)
 language sql stable as $$
@@ -890,7 +1000,7 @@ do $$
 declare t text;
 begin
     foreach t in array array[
-      'mamas','roles','permissions','role_permissions','utilisateurs','familles','sous_familles','unites','zones_stock','fournisseurs','produits','commandes','bons_livraison','lignes_bl','factures','facture_lignes','fiches_techniques','stock_mouvements','inventaires','inventaire_lignes','documents','notifications','gadgets','ventes_fiches_carte','ventes_familles','feedback','consentements_utilisateur','periodes_comptables','taches'
+      'mamas','roles','permissions','role_permissions','utilisateurs','familles','sous_familles','unites','zones_stock','fournisseurs','produits','commandes','bons_livraison','lignes_bl','factures','facture_lignes','fiches_techniques','stock_mouvements','stocks','inventaires','inventaire_lignes','documents','notifications','gadgets','ventes_fiches_carte','ventes_familles','feedback','consentements_utilisateur','periodes_comptables','taches'
     ]
   loop
     execute format('drop trigger if exists set_timestamp on public.%I;', t);
@@ -945,7 +1055,7 @@ do $$
 declare t text;
 begin
   foreach t in array array[
-    'mamas','roles','permissions','role_permissions','utilisateurs','familles','sous_familles','unites','zones_stock','fournisseurs','produits','commandes','bons_livraison','lignes_bl','factures','facture_lignes','fiches_techniques','stock_mouvements','inventaires','inventaire_lignes','documents','notifications','gadgets','ventes_fiches_carte','ventes_familles','feedback','consentements_utilisateur','periodes_comptables','taches'
+    'mamas','roles','permissions','role_permissions','utilisateurs','familles','sous_familles','unites','zones_stock','fournisseurs','produits','commandes','bons_livraison','lignes_bl','factures','facture_lignes','fiches_techniques','stock_mouvements','stocks','inventaires','inventaire_lignes','documents','notifications','gadgets','ventes_fiches_carte','ventes_familles','feedback','consentements_utilisateur','periodes_comptables','taches'
   ]
   loop
     execute format('alter table public.%I enable row level security;', t);
@@ -975,7 +1085,7 @@ do $$
 declare t text;
 begin
   foreach t in array array[
-    'mamas','roles','permissions','role_permissions','utilisateurs','familles','sous_familles','unites','zones_stock','fournisseurs','produits','commandes','bons_livraison','lignes_bl','factures','facture_lignes','fiches_techniques','stock_mouvements','inventaires','inventaire_lignes','documents','notifications','gadgets','ventes_fiches_carte','ventes_familles','feedback','consentements_utilisateur','periodes_comptables','taches'
+    'mamas','roles','permissions','role_permissions','utilisateurs','familles','sous_familles','unites','zones_stock','fournisseurs','produits','commandes','bons_livraison','lignes_bl','factures','facture_lignes','fiches_techniques','stock_mouvements','stocks','inventaires','inventaire_lignes','documents','notifications','gadgets','ventes_fiches_carte','ventes_familles','feedback','consentements_utilisateur','periodes_comptables','taches'
   ]
   loop
     execute format('grant select, insert, update, delete on public.%I to authenticated;', t);

@@ -14,14 +14,9 @@ export default function TacheForm({ task }) {
   const [form, setForm] = useState({
     titre: task?.titre || "",
     description: task?.description || "",
-    assignes: task?.assignes || [],
-    utilisateur_id: task?.utilisateur_id || "",
-    date_debut: task?.date_debut || "",
-    delai_jours: task?.delai_jours || "",
-    date_echeance: task?.date_echeance || "",
+    assignes: task?.utilisateurs_taches?.map(a => a.utilisateur_id) || [],
     priorite: task?.priorite || "moyenne",
-    recurrente: task?.recurrente || false,
-    frequence: task?.frequence || "hebdomadaire",
+    date_echeance: task?.date_echeance || "",
     statut: task?.statut || "a_faire",
   });
   const [loading, setLoading] = useState(false);
@@ -31,12 +26,10 @@ export default function TacheForm({ task }) {
   }, [fetchUsers]);
 
   const handleChange = e => {
-    const { name, value, type, checked, options } = e.target;
+    const { name, value, options } = e.target;
     if (name === "assignes") {
       const vals = Array.from(options).filter(o => o.selected).map(o => o.value);
       setForm(f => ({ ...f, assignes: vals }));
-    } else if (type === "checkbox") {
-      setForm(f => ({ ...f, [name]: checked }));
     } else {
       setForm(f => ({ ...f, [name]: value }));
     }
@@ -65,74 +58,80 @@ export default function TacheForm({ task }) {
   return (
     <GlassCard title={task ? "Modifier la tâche" : "Nouvelle tâche"} className="max-w-md">
       <form onSubmit={handleSubmit} className="space-y-2">
-      <label className="block">
-        <span>Titre</span>
-        <input className="input w-full" name="titre" value={form.titre} onChange={handleChange} required />
-      </label>
-      <label className="block">
-        <span>Description</span>
-        <textarea className="input w-full" name="description" value={form.description} onChange={handleChange} />
-      </label>
-      <label className="block">
-        <span>Date de début</span>
-        <input type="date" className="input w-full" name="date_debut" value={form.date_debut} onChange={handleChange} required />
-      </label>
-      <label className="block">
-        <span>Délai en jours</span>
-        <input type="number" className="input w-full" name="delai_jours" value={form.delai_jours} onChange={handleChange} />
-      </label>
-      <label className="block">
-        <span>Ou échéance précise</span>
-        <input type="date" className="input w-full" name="date_echeance" value={form.date_echeance} onChange={handleChange} />
-      </label>
-      <label className="block">
-        <span>Priorité</span>
-        <select className="input w-full" name="priorite" value={form.priorite} onChange={handleChange}>
-          <option value="basse">Basse</option>
-          <option value="moyenne">Moyenne</option>
-          <option value="haute">Haute</option>
-        </select>
-      </label>
-      <label className="block">
-        <span>Récurrente ?</span>
-        <input type="checkbox" name="recurrente" checked={form.recurrente} onChange={handleChange} />
-      </label>
-      {form.recurrente && (
         <label className="block">
-          <span>Fréquence</span>
-          <select className="input w-full" name="frequence" value={form.frequence} onChange={handleChange}>
-            <option value="quotidien">Quotidien</option>
-            <option value="hebdomadaire">Hebdomadaire</option>
-            <option value="mensuel">Mensuel</option>
+          <span>Titre</span>
+          <input
+            className="input w-full"
+            name="titre"
+            value={form.titre}
+            onChange={handleChange}
+            required
+          />
+        </label>
+        <label className="block">
+          <span>Description</span>
+          <textarea
+            className="input w-full"
+            name="description"
+            value={form.description}
+            onChange={handleChange}
+          />
+        </label>
+        <label className="block">
+          <span>Assignés</span>
+          <select
+            multiple
+            name="assignes"
+            value={form.assignes}
+            onChange={handleChange}
+            className="input w-full"
+          >
+            {users.map(u => (
+              <option key={u.id} value={u.id}>
+                {u.nom}
+              </option>
+            ))}
           </select>
         </label>
-      )}
-      <label className="block">
-        <span>Assignés</span>
-        <select multiple name="assignes" value={form.assignes} onChange={handleChange} className="input w-full">
-          {users.map(u => (
-            <option key={u.id} value={u.id}>{u.nom}</option>
-          ))}
-        </select>
-      </label>
-      <label className="block">
-        <span>Responsable</span>
-        <select name="utilisateur_id" value={form.utilisateur_id} onChange={handleChange} className="input w-full">
-          <option value="">--</option>
-          {users.map(u => (
-            <option key={u.id} value={u.id}>{u.nom}</option>
-          ))}
-        </select>
-      </label>
-      <label className="block">
-        <span>Statut</span>
-        <select className="input w-full" name="statut" value={form.statut} onChange={handleChange}>
-          <option value="a_faire">À faire</option>
-          <option value="en_cours">En cours</option>
-          <option value="terminee">Terminée</option>
-        </select>
-      </label>
-      <Button type="submit" disabled={loading}>{task ? "Mettre à jour" : "Créer"}</Button>
+        <label className="block">
+          <span>Priorité</span>
+          <select
+            className="input w-full"
+            name="priorite"
+            value={form.priorite}
+            onChange={handleChange}
+          >
+            <option value="basse">Basse</option>
+            <option value="moyenne">Moyenne</option>
+            <option value="haute">Haute</option>
+          </select>
+        </label>
+        <label className="block">
+          <span>Échéance</span>
+          <input
+            type="date"
+            className="input w-full"
+            name="date_echeance"
+            value={form.date_echeance}
+            onChange={handleChange}
+          />
+        </label>
+        <label className="block">
+          <span>Statut</span>
+          <select
+            className="input w-full"
+            name="statut"
+            value={form.statut}
+            onChange={handleChange}
+          >
+            <option value="a_faire">À faire</option>
+            <option value="en_cours">En cours</option>
+            <option value="terminee">Terminée</option>
+          </select>
+        </label>
+        <Button type="submit" disabled={loading}>
+          {task ? "Mettre à jour" : "Créer"}
+        </Button>
       </form>
     </GlassCard>
   );

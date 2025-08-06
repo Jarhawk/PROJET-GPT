@@ -60,6 +60,7 @@ const MamaSettingsForm = lazyWithPreload(() => import("@/pages/parametrage/MamaS
 const Zones = lazyWithPreload(() => import("@/pages/parametrage/Zones.jsx"));
 const Familles = lazyWithPreload(() => import("@/pages/parametrage/Familles.jsx"));
 const Unites = lazyWithPreload(() => import("@/pages/parametrage/Unites.jsx"));
+const Periodes = lazyWithPreload(() => import("@/pages/parametrage/Periodes.jsx"));
 const Onboarding = lazyWithPreload(() => import("@/pages/public/Onboarding.jsx"));
 const Accueil = lazyWithPreload(() => import("@/pages/Accueil.jsx"));
 const Signup = lazyWithPreload(() => import("@/pages/public/Signup.jsx"));
@@ -149,6 +150,7 @@ export const routePreloadMap = {
   '/parametrage/zones-stock': Zones.preload,
   '/parametrage/familles': Familles.preload,
   '/parametrage/unites': Unites.preload,
+  '/parametrage/periodes': Periodes.preload,
   '/consentements': Consentements.preload,
   '/logs': Logs.preload,
   '/aide': AideContextuelle.preload,
@@ -474,6 +476,10 @@ export default function Router() {
           <Route
             path="/parametrage/unites"
             element={<ProtectedRoute moduleKey="parametrage"><Unites /></ProtectedRoute>}
+          />
+          <Route
+            path="/parametrage/periodes"
+            element={<ProtectedRoute moduleKey="parametrage"><Periodes /></ProtectedRoute>}
           />
           <Route
             path="/parametrage/access"

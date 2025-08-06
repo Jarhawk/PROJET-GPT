@@ -2,9 +2,11 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import useAuth from "@/hooks/useAuth";
+import usePeriodes from "@/hooks/usePeriodes";
 
 export function useFactures() {
   const { mama_id } = useAuth();
+  const { checkCurrentPeriode } = usePeriodes();
   const [factures, setFactures] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -96,6 +98,8 @@ export function useFactures() {
 
   async function createFacture(data) {
     if (!mama_id) return { error: "no mama_id" };
+    const { error: pErr } = await checkCurrentPeriode(data.date_facture);
+    if (pErr) return { error: pErr };
     setLoading(true);
     setError(null);
     const { data: inserted, error } = await supabase
@@ -114,6 +118,10 @@ export function useFactures() {
 
   async function updateFacture(id, fields) {
     if (!mama_id) return { error: "no mama_id" };
+    if (fields.date_facture) {
+      const { error: pErr } = await checkCurrentPeriode(fields.date_facture);
+      if (pErr) return { error: pErr };
+    }
     setLoading(true);
     setError(null);
     const { data: updated, error } = await supabase

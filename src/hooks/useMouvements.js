@@ -2,9 +2,11 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import useAuth from "@/hooks/useAuth";
+import usePeriodes from "@/hooks/usePeriodes";
 
 export function useMouvements() {
   const { mama_id, user_id } = useAuth();
+  const { checkCurrentPeriode } = usePeriodes();
   const [mouvements, setMouvements] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -35,6 +37,8 @@ export function useMouvements() {
 
   async function createMouvement(payload) {
     if (!mama_id) return { error: "no mama_id" };
+    const { error: pErr } = await checkCurrentPeriode(payload.date);
+    if (pErr) return { error: pErr };
     setLoading(true);
     setError(null);
     const { data, error } = await supabase

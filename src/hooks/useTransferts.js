@@ -2,9 +2,11 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import useAuth from "@/hooks/useAuth";
+import usePeriodes from "@/hooks/usePeriodes";
 
 export function useTransferts() {
   const { mama_id, user_id } = useAuth();
+  const { checkCurrentPeriode } = usePeriodes();
   const [transferts, setTransferts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -32,6 +34,8 @@ export function useTransferts() {
 
   async function createTransfert(header, lignes = []) {
     if (!mama_id) return { error: "no mama_id" };
+    const { error: pErr } = await checkCurrentPeriode(header.date_transfert);
+    if (pErr) return { error: pErr };
     setLoading(true);
     setError(null);
     const { data: tr, error } = await supabase

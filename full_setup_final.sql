@@ -3,6 +3,7 @@
 
 -- Extensions
 create extension if not exists "uuid-ossp";
+create extension if not exists "pgcrypto";
 
 -- ========================
 -- 1. TABLES PRINCIPALES
@@ -139,6 +140,7 @@ create table if not exists public.produits (
     fournisseur_id uuid references public.fournisseurs(id),
     dernier_prix numeric(12,2),
     pmp numeric(12,2),
+    tva numeric(12,2),
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
     actif boolean not null default true
@@ -196,6 +198,9 @@ create table if not exists public.factures (
     total_ht numeric(12,2),
     tva numeric(12,2),
     zone_id uuid references public.zones_stock(id),
+    justificatif text,
+    commentaire text,
+    bon_livraison text,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
     actif boolean not null default true
@@ -361,6 +366,69 @@ create table if not exists public.consentements_utilisateur (
 );
 create index if not exists idx_consentements_utilisateur_mama_id on public.consentements_utilisateur(mama_id);
 
+-- Table periodes_comptables
+create table if not exists public.periodes_comptables (
+    id uuid primary key default gen_random_uuid(),
+    mama_id uuid references public.mamas(id) on delete cascade,
+    date_debut date not null,
+    date_fin date not null,
+    cloturee boolean default false,
+    actuelle boolean default false,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now()
+);
+create index if not exists idx_periodes_comptables_mama_id on public.periodes_comptables(mama_id);
+create unique index if not exists idx_periodes_comptables_actuelle on public.periodes_comptables(mama_id) where actuelle;
+
+-- Table taches
+create table if not exists public.taches (
+    id uuid primary key default gen_random_uuid(),
+    mama_id uuid references public.mamas(id) on delete cascade,
+    titre text not null,
+    description text,
+    priorite text check (priorite in ('basse','moyenne','haute')) default 'moyenne',
+    statut text check (statut in ('a_faire','en_cours','terminee')) default 'a_faire',
+    date_echeance date,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now()
+);
+create index if not exists idx_taches_mama_id on public.taches(mama_id);
+create index if not exists idx_taches_statut on public.taches(statut);
+create index if not exists idx_taches_priorite on public.taches(priorite);
+
+-- Table utilisateurs_taches
+create table if not exists public.utilisateurs_taches (
+    tache_id uuid references public.taches(id) on delete cascade,
+    utilisateur_id uuid references public.utilisateurs(id) on delete cascade,
+    primary key (tache_id, utilisateur_id)
+);
+create index if not exists idx_utilisateurs_taches_utilisateur on public.utilisateurs_taches(utilisateur_id);
+
+alter table if exists public.produits
+  add column if not exists zone_stock_id uuid references public.zones_stock(id) on delete set null,
+  add column if not exists tva numeric(12,2);
+
+alter table if exists public.factures
+  add column if not exists justificatif text,
+  add column if not exists commentaire text,
+  add column if not exists bon_livraison text;
+
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_name = 'familles' and column_name = 'parent_id'
+  ) then
+    alter table public.familles rename column parent_id to famille_parent_id;
+  end if;
+  if not exists (
+    select 1 from information_schema.columns
+    where table_name = 'familles' and column_name = 'famille_parent_id'
+  ) then
+    alter table public.familles add column famille_parent_id uuid references public.familles(id) on delete set null;
+  end if;
+end$$;
+
 -- ========================
 -- 2. VUES SQL
 -- ========================
@@ -425,6 +493,23 @@ group by p.mama_id, p.id;
 create or replace view public.v_requisitions as
 select * from public.v_stock_disponible;
 
+create or replace view public.v_taches_assignees as
+select
+  t.id,
+  t.mama_id,
+  t.titre,
+  t.description,
+  t.priorite,
+  t.statut,
+  t.date_echeance,
+  t.created_at,
+  t.updated_at,
+  ut.utilisateur_id,
+  u.nom as utilisateur_nom
+from public.taches t
+left join public.utilisateurs_taches ut on ut.tache_id = t.id
+left join public.utilisateurs u on u.id = ut.utilisateur_id;
+
 -- ========================
 -- 3. FONCTIONS PERSONNALISÉES
 -- ========================
@@ -443,6 +528,21 @@ language sql stable as $$
   where u.auth_id = auth.uid();
 $$;
 
+create or replace function public.periode_actuelle(mid uuid)
+returns table(
+  id uuid,
+  mama_id uuid,
+  date_debut date,
+  date_fin date,
+  cloturee boolean,
+  actuelle boolean
+)
+language sql stable as $$
+  select * from public.periodes_comptables
+  where mama_id = mid and actuelle = true
+  limit 1;
+$$;
+
 create or replace function public.fn_sync_auth_user()
 returns trigger
 language plpgsql security definer as $$
@@ -454,27 +554,55 @@ begin
 end;
 $$;
 
-create or replace function public.apply_stock_from_achat(p_facture_id uuid)
+create or replace function public.apply_stock_from_achat(
+  p_achat_id uuid,
+  p_table text,
+  p_mama_id uuid
+)
 returns void
 language plpgsql as $$
 declare
-  l record;
-  v_mama_id uuid;
+  r record;
   v_stock numeric;
   v_pmp numeric;
 begin
-  select mama_id into v_mama_id from public.factures where id = p_facture_id;
-  delete from public.stock_mouvements where type = 'entree_achat' and reference_id = p_facture_id;
-  for l in select produit_id, quantite, prix from public.facture_lignes where facture_id = p_facture_id loop
-    insert into public.stock_mouvements(mama_id, produit_id, type, quantite, reference_id)
-    values (v_mama_id, l.produit_id, 'entree_achat', l.quantite, p_facture_id);
-    select coalesce(stock_reel,0), coalesce(pmp,0) into v_stock, v_pmp from public.produits where id = l.produit_id and mama_id = v_mama_id;
-    update public.produits
-       set dernier_prix = l.prix,
-           pmp = case when v_stock + l.quantite = 0 then l.prix
-                      else ((v_stock * v_pmp) + (l.quantite * l.prix)) / (v_stock + l.quantite) end
-     where id = l.produit_id and mama_id = v_mama_id;
-  end loop;
+  delete from public.stock_mouvements
+    where type = 'entree_achat' and reference_id = p_achat_id;
+  if p_table = 'factures' then
+    for r in
+      select fl.produit_id, fl.quantite, fl.prix
+      from public.facture_lignes fl
+      join public.factures f on f.id = fl.facture_id
+      where f.id = p_achat_id and f.mama_id = p_mama_id and fl.actif is true
+    loop
+      insert into public.stock_mouvements(mama_id, date, type, quantite, produit_id, reference_id)
+        values (p_mama_id, now(), 'entree_achat', r.quantite, r.produit_id, p_achat_id);
+      select coalesce(stock_reel,0), coalesce(pmp,0) into v_stock, v_pmp
+        from public.produits where id = r.produit_id and mama_id = p_mama_id;
+      update public.produits
+         set dernier_prix = r.prix,
+             pmp = case when v_stock + r.quantite = 0 then r.prix
+                        else ((v_stock * v_pmp) + (r.quantite * r.prix)) / (v_stock + r.quantite) end
+       where id = r.produit_id and mama_id = p_mama_id;
+    end loop;
+  elsif p_table = 'bons_livraison' then
+    for r in
+      select l.produit_id, l.quantite_recue as quantite, l.prix_achat as prix
+      from public.lignes_bl l
+      join public.bons_livraison b on b.id = l.bl_id
+      where b.id = p_achat_id and b.mama_id = p_mama_id
+    loop
+      insert into public.stock_mouvements(mama_id, date, type, quantite, produit_id, reference_id)
+        values (p_mama_id, now(), 'entree_achat', r.quantite, r.produit_id, p_achat_id);
+      select coalesce(stock_reel,0), coalesce(pmp,0) into v_stock, v_pmp
+        from public.produits where id = r.produit_id and mama_id = p_mama_id;
+      update public.produits
+         set dernier_prix = r.prix,
+             pmp = case when v_stock + r.quantite = 0 then r.prix
+                        else ((v_stock * v_pmp) + (r.quantite * r.prix)) / (v_stock + r.quantite) end
+       where id = r.produit_id and mama_id = p_mama_id;
+    end loop;
+  end if;
 end;
 $$;
 
@@ -575,7 +703,11 @@ create or replace function public.trg_apply_stock_from_achat()
 returns trigger
 language plpgsql as $$
 begin
-  perform public.apply_stock_from_achat(coalesce(new.facture_id, old.facture_id));
+  perform public.apply_stock_from_achat(
+    coalesce(new.facture_id, old.facture_id),
+    'factures',
+    coalesce(new.mama_id, old.mama_id)
+  );
   return new;
 end;
 $$;
@@ -594,6 +726,24 @@ returns trigger
 language plpgsql as $$
 begin
   perform public.set_requisition_stock_theorique(new.inventaire_id);
+  return new;
+end;
+$$;
+
+create or replace function public.trg_apply_stock_facture()
+returns trigger
+language plpgsql as $$
+begin
+  perform public.apply_stock_from_achat(new.id, 'factures', new.mama_id);
+  return new;
+end;
+$$;
+
+create or replace function public.trg_apply_stock_bl()
+returns trigger
+language plpgsql as $$
+begin
+  perform public.apply_stock_from_achat(new.id, 'bons_livraison', new.mama_id);
   return new;
 end;
 $$;
@@ -630,9 +780,9 @@ create trigger trg_sync_auth_user
 do $$
 declare t text;
 begin
-  foreach t in array array[
-    'mamas','roles','permissions','role_permissions','utilisateurs','familles','sous_familles','unites','zones_stock','fournisseurs','produits','commandes','bons_livraison','lignes_bl','factures','facture_lignes','fiches_techniques','stock_mouvements','inventaires','inventaire_lignes','documents','notifications','gadgets','ventes_fiches_carte','ventes_familles','feedback','consentements_utilisateur'
-  ]
+    foreach t in array array[
+      'mamas','roles','permissions','role_permissions','utilisateurs','familles','sous_familles','unites','zones_stock','fournisseurs','produits','commandes','bons_livraison','lignes_bl','factures','facture_lignes','fiches_techniques','stock_mouvements','inventaires','inventaire_lignes','documents','notifications','gadgets','ventes_fiches_carte','ventes_familles','feedback','consentements_utilisateur','periodes_comptables','taches'
+    ]
   loop
     execute format('drop trigger if exists set_timestamp on public.%I;', t);
     execute format('create trigger set_timestamp before update on public.%I for each row execute function public.trigger_set_timestamp();', t);
@@ -644,6 +794,16 @@ drop trigger if exists trg_apply_stock_from_achat on public.facture_lignes;
 create trigger trg_apply_stock_from_achat
   after insert or update or delete on public.facture_lignes
   for each row execute function public.trg_apply_stock_from_achat();
+
+drop trigger if exists trg_apply_stock_facture on public.factures;
+create trigger trg_apply_stock_facture
+  after insert on public.factures
+  for each row execute function public.trg_apply_stock_facture();
+
+drop trigger if exists trg_apply_stock_bl on public.bons_livraison;
+create trigger trg_apply_stock_bl
+  after insert on public.bons_livraison
+  for each row execute function public.trg_apply_stock_bl();
 
 drop trigger if exists trg_insert_stock_from_transfert_ligne on public.lignes_bl;
 create trigger trg_insert_stock_from_transfert_ligne
@@ -679,7 +839,7 @@ do $$
 declare t text;
 begin
   foreach t in array array[
-    'mamas','roles','permissions','role_permissions','familles','sous_familles','unites','zones_stock','fournisseurs','produits','commandes','bons_livraison','lignes_bl','factures','facture_lignes','fiches_techniques','stock_mouvements','inventaires','inventaire_lignes','documents','notifications','gadgets','ventes_fiches_carte','ventes_familles','feedback','consentements_utilisateur'
+    'mamas','roles','permissions','role_permissions','utilisateurs','familles','sous_familles','unites','zones_stock','fournisseurs','produits','commandes','bons_livraison','lignes_bl','factures','facture_lignes','fiches_techniques','stock_mouvements','inventaires','inventaire_lignes','documents','notifications','gadgets','ventes_fiches_carte','ventes_familles','feedback','consentements_utilisateur','periodes_comptables','taches'
   ]
   loop
     execute format('alter table public.%I enable row level security;', t);
@@ -688,6 +848,23 @@ begin
     execute format('grant select, insert, update, delete on public.%I to authenticated;', t);
   end loop;
 end$$;
+
+alter table public.utilisateurs_taches enable row level security;
+drop policy if exists utilisateurs_taches_policy on public.utilisateurs_taches;
+create policy utilisateurs_taches_policy on public.utilisateurs_taches
+  using (
+    exists (
+      select 1 from public.taches t
+      where t.id = tache_id and t.mama_id = public.current_user_mama_id()
+    )
+  )
+  with check (
+    exists (
+      select 1 from public.taches t
+      where t.id = tache_id and t.mama_id = public.current_user_mama_id()
+    )
+  );
+grant select, insert, update, delete on public.utilisateurs_taches to authenticated;
 
 -- ========================
 -- FIN DU SCRIPT

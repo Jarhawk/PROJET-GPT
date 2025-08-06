@@ -1,8 +1,12 @@
+-- ========================
 -- EXTENSIONS
+-- ========================
 create extension if not exists "uuid-ossp";
 create extension if not exists "pgcrypto";
 
+-- ========================
 -- TABLES
+-- ========================
 
 -- Table mamas
 create table if not exists public.mamas (
@@ -490,10 +494,9 @@ create table if not exists public.planning_lignes (
 );
 create index if not exists idx_planning_lignes_mama_id on public.planning_lignes(mama_id);
 
-drop trigger if exists trg_set_updated_at_taches on public.taches;
-create trigger trg_set_updated_at_taches
-  before update on public.taches
-  for each row execute function public.set_updated_at();
+-- ========================
+-- COLONNES ADDITIONNELLES
+-- ========================
 
 alter table if exists public.produits
   add column if not exists zone_stock_id uuid references public.zones_stock(id) on delete set null,
@@ -526,186 +529,16 @@ begin
     alter table public.familles add column famille_parent_id uuid references public.familles(id) on delete set null;
   end if;
 end$$;
-
+-- ========================
 -- FOREIGN KEYS
 -- (définies lors de la création des tables)
 
+-- ========================
 -- INDEXES
 -- (créés lors de la création des tables)
 create index if not exists idx_factures_periode_id on public.factures(periode_id);
 create index if not exists idx_inventaires_periode_id on public.inventaires(periode_id);
 create index if not exists idx_stock_mouvements_periode_id on public.stock_mouvements(periode_id);
-
--- VIEWS
-
-create or replace view public.v_produits_dernier_prix as
-select p.id as produit_id, p.mama_id,
-       (select fl.prix from public.facture_lignes fl
-         join public.factures f on fl.facture_id = f.id
-         where fl.produit_id = p.id
-         order by f.created_at desc
-         limit 1) as dernier_prix
-from public.produits p;
-
-create or replace view public.v_evolution_achats as
-select mama_id,
-       date_trunc('month', created_at) as mois,
-       sum(quantite) as quantite
-from public.stock_mouvements
-where type = 'entree_achat'
-group by mama_id, date_trunc('month', created_at);
-
-create or replace view public.v_ventes_par_famille as
-select vf.mama_id, f.nom as famille,
-       sum(vf.quantite) as quantite,
-       sum(vf.montant) as montant
-from public.ventes_familles vf
-join public.familles f on vf.famille_id = f.id
-group by vf.mama_id, f.nom;
-
-create or replace view public.v_ecarts_inventaire as
-select il.mama_id, i.id as inventaire_id, p.nom as produit,
-       il.stock_theorique, il.stock_reel, il.ecart
-from public.inventaire_lignes il
-join public.inventaires i on il.inventaire_id = i.id
-join public.produits p on il.produit_id = p.id;
-
-create or replace view public.v_notifications_non_lues as
-select * from public.notifications where lu = false;
-
-create or replace view public.v_stock_disponible as
-select p.mama_id, p.id as produit_id,
-       coalesce(sum(case
-         when sm.type in ('entree_achat','entree_transfert','entree') then sm.quantite
-         when sm.type in ('ajustement_inventaire','ajustement') then sm.quantite
-         else -sm.quantite end),0) as stock
-from public.produits p
-left join public.stock_mouvements sm on sm.produit_id = p.id and sm.mama_id = p.mama_id
-group by p.mama_id, p.id;
-
-create or replace view public.v_stocks as
-select * from public.v_stock_disponible;
-
-create or replace view public.v_consommation_cumulee as
-select p.mama_id, p.id as produit_id,
-       coalesce(sum(case
-         when sm.type in ('sortie_fiche','ajustement_inventaire','perte','don','sortie_transfert') then sm.quantite
-         else 0 end),0) as consommation
-from public.produits p
-left join public.stock_mouvements sm on sm.produit_id = p.id and sm.mama_id = p.mama_id
-group by p.mama_id, p.id;
-
-create or replace view public.v_requisitions as
-select * from public.v_stock_disponible;
-
-create or replace view public.v_taches_assignees as
-select
-  t.id,
-  t.mama_id,
-  t.titre,
-  t.description,
-  t.priorite,
-  t.statut,
-  t.date_echeance,
-  t.created_at,
-  t.updated_at,
-  ut.utilisateur_id,
-  u.nom as utilisateur_nom,
-  r.nom as utilisateur_role
-from public.taches t
-left join public.utilisateurs_taches ut on ut.tache_id = t.id
-left join public.utilisateurs u on u.id = ut.utilisateur_id
-left join public.roles r on r.id = u.role_id;
-
-create or replace view public.v_achats_mensuels as
-select f.mama_id,
-       date_trunc('month', f.date_facture) as mois,
-       sum(fl.quantite * fl.prix) as montant
-from public.factures f
-join public.facture_lignes fl on fl.facture_id = f.id
-group by f.mama_id, date_trunc('month', f.date_facture);
-
-create or replace view public.v_pmp as
-select p.mama_id,
-       p.id as produit_id,
-       p.pmp
-from public.produits p;
-
-create or replace view public.v_cost_center_month as
-select mcc.mama_id,
-       mcc.centre_cout_id as cost_center_id,
-       date_trunc('month', m.date) as mois,
-       sum(mcc.valeur) as valeur
-from public.mouvements m
-join public.mouvements_centres_cout mcc on mcc.mouvement_id = m.id
-group by mcc.mama_id, mcc.centre_cout_id, date_trunc('month', m.date);
-
-create or replace view public.v_cost_center_monthly as
-select mama_id, mois, sum(valeur) as total
-from public.v_cost_center_month
-group by mama_id, mois;
-
-create or replace view public.v_analytique_stock as
-select m.mama_id,
-       m.date as date,
-       p.famille,
-       mcc.centre_cout_id as cost_center_id,
-       m.produit_id,
-       mcc.valeur
-from public.mouvements m
-left join public.mouvements_centres_cout mcc on mcc.mouvement_id = m.id
-left join public.produits p on p.id = m.produit_id;
-
-create or replace view public.v_fournisseurs_inactifs as
-select id, mama_id, nom, ville, actif, created_at
-from public.fournisseurs
-where actif is false;
-
-create or replace view public.v_tendance_prix_produit as
-select fl.produit_id,
-       date_trunc('month', f.date_facture) as mois,
-       avg(fl.prix) as prix_moyen
-from public.facture_lignes fl
-join public.factures f on f.id = fl.facture_id
-where fl.actif is true and f.actif is true
-group by fl.produit_id, date_trunc('month', f.date_facture);
-
-create or replace view public.v_products_last_price as
-select sp.produit_id,
-       p.nom as produit_nom,
-       p.famille,
-       p.unite_id as unite,
-       sp.fournisseur_id,
-       s.nom as fournisseur_nom,
-       sp.prix_achat as dernier_prix,
-       sp.created_at,
-       p.mama_id
-from public.fournisseur_produits sp
-join public.produits p on sp.produit_id = p.id
-join public.fournisseurs s on sp.fournisseur_id = s.id
-where sp.created_at = (
-  select max(sp2.created_at)
-  from public.fournisseur_produits sp2
-  where sp2.produit_id = sp.produit_id
-    and sp2.fournisseur_id = sp.fournisseur_id
-);
-
-create or replace view public.v_transferts_historique as
-select t.id,
-       t.mama_id,
-       t.produit_id,
-       p.nom as produit_nom,
-       t.quantite,
-       t.motif,
-       t.date_transfert,
-       zs.nom as zone_depart,
-       zd.nom as zone_arrivee,
-       t.commentaire
-from public.transferts t
-left join public.produits p on p.id = t.produit_id
-left join public.zones_stock zs on zs.id = t.zone_source_id
-left join public.zones_stock zd on zd.id = t.zone_dest_id;
-
 -- ========================
 -- FUNCTIONS
 -- ========================
@@ -975,18 +808,6 @@ begin
   return new;
 end;
 $$;
-
-create or replace function public.prevent_unite_delete()
-returns trigger
-language plpgsql as $$
-begin
-  if exists (select 1 from public.produits where unite_id = old.id and actif is true) then
-    raise exception 'Unité utilisée par des produits';
-  end if;
-  return old;
-end;
-$$;
-
 create or replace function public.trigger_set_timestamp()
 returns trigger
 language plpgsql as $$
@@ -1136,7 +957,181 @@ create trigger trg_prevent_delete_produits
   before delete on public.produits
   for each row execute function public.prevent_delete_if_linked();
 
+-- ========================
+-- VIEWS
+-- ========================
+
+create or replace view public.v_produits_dernier_prix as
+select p.id as produit_id, p.mama_id,
+       (select fl.prix from public.facture_lignes fl
+         join public.factures f on fl.facture_id = f.id
+         where fl.produit_id = p.id
+         order by f.created_at desc
+         limit 1) as dernier_prix
+from public.produits p;
+
+create or replace view public.v_evolution_achats as
+select mama_id,
+       date_trunc('month', created_at) as mois,
+       sum(quantite) as quantite
+from public.stock_mouvements
+where type = 'entree_achat'
+group by mama_id, date_trunc('month', created_at);
+
+create or replace view public.v_ventes_par_famille as
+select vf.mama_id, f.nom as famille,
+       sum(vf.quantite) as quantite,
+       sum(vf.montant) as montant
+from public.ventes_familles vf
+join public.familles f on vf.famille_id = f.id
+group by vf.mama_id, f.nom;
+
+create or replace view public.v_ecarts_inventaire as
+select il.mama_id, i.id as inventaire_id, p.nom as produit,
+       il.stock_theorique, il.stock_reel, il.ecart
+from public.inventaire_lignes il
+join public.inventaires i on il.inventaire_id = i.id
+join public.produits p on il.produit_id = p.id;
+
+create or replace view public.v_notifications_non_lues as
+select * from public.notifications where lu = false;
+
+create or replace view public.v_stock_disponible as
+select p.mama_id, p.id as produit_id,
+       coalesce(sum(case
+         when sm.type in ('entree_achat','entree_transfert','entree') then sm.quantite
+         when sm.type in ('ajustement_inventaire','ajustement') then sm.quantite
+         else -sm.quantite end),0) as stock
+from public.produits p
+left join public.stock_mouvements sm on sm.produit_id = p.id and sm.mama_id = p.mama_id
+group by p.mama_id, p.id;
+
+create or replace view public.v_stocks as
+select * from public.v_stock_disponible;
+
+create or replace view public.v_consommation_cumulee as
+select p.mama_id, p.id as produit_id,
+       coalesce(sum(case
+         when sm.type in ('sortie_fiche','ajustement_inventaire','perte','don','sortie_transfert') then sm.quantite
+         else 0 end),0) as consommation
+from public.produits p
+left join public.stock_mouvements sm on sm.produit_id = p.id and sm.mama_id = p.mama_id
+group by p.mama_id, p.id;
+
+create or replace view public.v_requisitions as
+select * from public.v_stock_disponible;
+
+create or replace view public.v_taches_assignees as
+select
+  t.id,
+  t.mama_id,
+  t.titre,
+  t.description,
+  t.priorite,
+  t.statut,
+  t.date_echeance,
+  t.created_at,
+  t.updated_at,
+  ut.utilisateur_id,
+  u.nom as utilisateur_nom,
+  r.nom as utilisateur_role
+from public.taches t
+left join public.utilisateurs_taches ut on ut.tache_id = t.id
+left join public.utilisateurs u on u.id = ut.utilisateur_id
+left join public.roles r on r.id = u.role_id;
+
+create or replace view public.v_achats_mensuels as
+select f.mama_id,
+       date_trunc('month', f.date_facture) as mois,
+       sum(fl.quantite * fl.prix) as montant
+from public.factures f
+join public.facture_lignes fl on fl.facture_id = f.id
+group by f.mama_id, date_trunc('month', f.date_facture);
+
+create or replace view public.v_pmp as
+select p.mama_id,
+       p.id as produit_id,
+       p.pmp
+from public.produits p;
+
+create or replace view public.v_cost_center_month as
+select mcc.mama_id,
+       mcc.centre_cout_id as cost_center_id,
+       date_trunc('month', m.date) as mois,
+       sum(mcc.valeur) as valeur
+from public.mouvements m
+join public.mouvements_centres_cout mcc on mcc.mouvement_id = m.id
+group by mcc.mama_id, mcc.centre_cout_id, date_trunc('month', m.date);
+
+create or replace view public.v_cost_center_monthly as
+select mama_id, mois, sum(valeur) as total
+from public.v_cost_center_month
+group by mama_id, mois;
+
+create or replace view public.v_analytique_stock as
+select m.mama_id,
+       m.date as date,
+       p.famille,
+       mcc.centre_cout_id as cost_center_id,
+       m.produit_id,
+       mcc.valeur
+from public.mouvements m
+left join public.mouvements_centres_cout mcc on mcc.mouvement_id = m.id
+left join public.produits p on p.id = m.produit_id;
+
+create or replace view public.v_fournisseurs_inactifs as
+select id, mama_id, nom, ville, actif, created_at
+from public.fournisseurs
+where actif is false;
+
+create or replace view public.v_tendance_prix_produit as
+select fl.produit_id,
+       date_trunc('month', f.date_facture) as mois,
+       avg(fl.prix) as prix_moyen
+from public.facture_lignes fl
+join public.factures f on f.id = fl.facture_id
+where fl.actif is true and f.actif is true
+group by fl.produit_id, date_trunc('month', f.date_facture);
+
+create or replace view public.v_products_last_price as
+select sp.produit_id,
+       p.nom as produit_nom,
+       p.famille,
+       p.unite_id as unite,
+       sp.fournisseur_id,
+       s.nom as fournisseur_nom,
+       sp.prix_achat as dernier_prix,
+       sp.created_at,
+       p.mama_id
+from public.fournisseur_produits sp
+join public.produits p on sp.produit_id = p.id
+join public.fournisseurs s on sp.fournisseur_id = s.id
+where sp.created_at = (
+  select max(sp2.created_at)
+  from public.fournisseur_produits sp2
+  where sp2.produit_id = sp.produit_id
+    and sp2.fournisseur_id = sp.fournisseur_id
+);
+
+create or replace view public.v_transferts_historique as
+select t.id,
+       t.mama_id,
+       t.produit_id,
+       p.nom as produit_nom,
+       t.quantite,
+       t.motif,
+       t.date_transfert,
+       zs.nom as zone_depart,
+       zd.nom as zone_arrivee,
+       t.commentaire
+from public.transferts t
+left join public.produits p on p.id = t.produit_id
+left join public.zones_stock zs on zs.id = t.zone_source_id
+left join public.zones_stock zd on zd.id = t.zone_dest_id;
+
+-- ========================
 -- RLS
+-- ========================
 do $$
 declare t text;
 begin
@@ -1166,7 +1161,9 @@ create policy utilisateurs_taches_policy on public.utilisateurs_taches
     )
   );
 
+-- ========================
 -- GRANTS
+-- ========================
 do $$
 declare t text;
 begin

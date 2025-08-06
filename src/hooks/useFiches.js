@@ -51,7 +51,7 @@ export function useFiches() {
     const { data, error } = await supabase
       .from("fiches_techniques")
       .select(
-        "*, famille:familles!fiches_techniques_famille_id_fkey(id, nom), lignes:fiche_lignes!fiche_id(*, produit:produits!fiche_lignes_produit_id_fkey(id, nom, unite_id, unite:unite_id (nom), pmp), sous_fiche:sous_fiche_id(id, nom, cout_par_portion))"
+        "*, famille:familles!fiches_techniques_famille_id_fkey(id, nom), lignes:v_fiche_lignes_complete!fiche_id(*, sous_fiche:sous_fiche_id(id, nom, cout_par_portion))"
       )
       .eq("id", id)
       .eq("mama_id", mama_id)

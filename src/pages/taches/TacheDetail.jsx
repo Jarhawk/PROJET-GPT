@@ -7,12 +7,12 @@ import { useTaches } from "@/hooks/useTaches";
 
 export default function TacheDetail() {
   const { id } = useParams();
-  const { getTache, updateTache } = useTaches();
+  const { fetchTache, updateTache } = useTaches();
   const [tache, setTache] = useState(null);
 
   useEffect(() => {
-    getTache(id).then(setTache);
-  }, [id, getTache]);
+    fetchTache(id).then(setTache);
+  }, [id, fetchTache]);
 
   if (!tache) return <LoadingSpinner message="Chargement..." />;
 

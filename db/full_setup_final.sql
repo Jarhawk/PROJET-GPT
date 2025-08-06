@@ -17,7 +17,6 @@ create table if not exists public.mamas (
     updated_at timestamptz not null default now(),
     actif boolean not null default true
 );
-create index if not exists idx_mamas_mama_id on public.mamas(mama_id);
 
 -- Table roles
 create table if not exists public.roles (
@@ -28,7 +27,6 @@ create table if not exists public.roles (
     updated_at timestamptz not null default now(),
     actif boolean not null default true
 );
-create index if not exists idx_roles_mama_id on public.roles(mama_id);
 
 -- Table permissions
 create table if not exists public.permissions (
@@ -40,7 +38,6 @@ create table if not exists public.permissions (
     updated_at timestamptz not null default now(),
     actif boolean not null default true
 );
-create index if not exists idx_permissions_mama_id on public.permissions(mama_id);
 
 -- Table role_permissions (liaison)
 create table if not exists public.role_permissions (
@@ -52,8 +49,6 @@ create table if not exists public.role_permissions (
     updated_at timestamptz not null default now(),
     actif boolean not null default true
 );
-create unique index if not exists ux_role_permissions on public.role_permissions(role_id, permission_id);
-create index if not exists idx_role_permissions_mama_id on public.role_permissions(mama_id);
 
 -- Table utilisateurs
 create table if not exists public.utilisateurs (
@@ -68,7 +63,6 @@ create table if not exists public.utilisateurs (
     updated_at timestamptz not null default now(),
     actif boolean not null default true
 );
-create index if not exists idx_utilisateurs_mama_id on public.utilisateurs(mama_id);
 
 -- Table familles
 create table if not exists public.familles (
@@ -79,7 +73,6 @@ create table if not exists public.familles (
     updated_at timestamptz not null default now(),
     actif boolean not null default true
 );
-create index if not exists idx_familles_mama_id on public.familles(mama_id);
 
 -- Table sous_familles
 create table if not exists public.sous_familles (
@@ -91,8 +84,6 @@ create table if not exists public.sous_familles (
     updated_at timestamptz not null default now(),
     actif boolean not null default true
 );
-create index if not exists idx_sous_familles_mama_id on public.sous_familles(mama_id);
-create index if not exists idx_sous_familles_famille_id on public.sous_familles(famille_id);
 
 -- Table unites
 create table if not exists public.unites (
@@ -103,7 +94,6 @@ create table if not exists public.unites (
     updated_at timestamptz not null default now(),
     actif boolean not null default true
 );
-create index if not exists idx_unites_mama_id on public.unites(mama_id);
 
 -- Table zones_stock
 create table if not exists public.zones_stock (
@@ -114,7 +104,6 @@ create table if not exists public.zones_stock (
     updated_at timestamptz not null default now(),
     actif boolean not null default true
 );
-create index if not exists idx_zones_stock_mama_id on public.zones_stock(mama_id);
 
 -- Table fournisseurs
 create table if not exists public.fournisseurs (
@@ -126,7 +115,6 @@ create table if not exists public.fournisseurs (
     updated_at timestamptz not null default now(),
     actif boolean not null default true
 );
-create index if not exists idx_fournisseurs_mama_id on public.fournisseurs(mama_id);
 
 -- Table produits
 create table if not exists public.produits (
@@ -147,9 +135,6 @@ create table if not exists public.produits (
     updated_at timestamptz not null default now(),
     actif boolean not null default true
 );
-create index if not exists idx_produits_mama_id on public.produits(mama_id);
-create index if not exists idx_produits_famille_id on public.produits(famille_id);
-create index if not exists idx_produits_zone_stock_id on public.produits(zone_stock_id);
 
 -- Table commandes
 create table if not exists public.commandes (
@@ -167,8 +152,6 @@ create table if not exists public.commandes (
     bl_id uuid references public.bons_livraison(id),
     facture_id uuid references public.factures(id)
 );
-create index if not exists idx_commandes_mama_id on public.commandes(mama_id);
-create index if not exists idx_commandes_statut on public.commandes(statut);
 
 -- Table bons_livraison
 create table if not exists public.bons_livraison (
@@ -186,8 +169,6 @@ create table if not exists public.bons_livraison (
     commande_id uuid references public.commandes(id) on delete cascade,
     facture_id uuid references public.factures(id)
 );
-create index if not exists idx_bons_livraison_mama_id on public.bons_livraison(mama_id);
-create index if not exists idx_bons_livraison_statut on public.bons_livraison(statut);
 
 -- Table lignes_bl
 create table if not exists public.lignes_bl (
@@ -200,8 +181,6 @@ create table if not exists public.lignes_bl (
     updated_at timestamptz not null default now(),
     actif boolean not null default true
 );
-create index if not exists idx_lignes_bl_mama_id on public.lignes_bl(mama_id);
-create index if not exists idx_lignes_bl_bl_id on public.lignes_bl(bl_id);
 
 -- Table factures
 create table if not exists public.factures (
@@ -225,7 +204,6 @@ create table if not exists public.factures (
     commentaire text,
     bon_livraison text
 );
-create index if not exists idx_factures_mama_id on public.factures(mama_id);
 
 -- Table facture_lignes
 create table if not exists public.facture_lignes (
@@ -239,8 +217,6 @@ create table if not exists public.facture_lignes (
     updated_at timestamptz not null default now(),
     actif boolean not null default true
 );
-create index if not exists idx_facture_lignes_mama_id on public.facture_lignes(mama_id);
-create index if not exists idx_facture_lignes_facture_id on public.facture_lignes(facture_id);
 
 -- Table fiches_techniques
 create table if not exists public.fiches_techniques (
@@ -252,7 +228,6 @@ create table if not exists public.fiches_techniques (
     updated_at timestamptz not null default now(),
     actif boolean not null default true
 );
-create index if not exists idx_fiches_techniques_mama_id on public.fiches_techniques(mama_id);
 
 -- Table stock_mouvements
 create table if not exists public.stock_mouvements (
@@ -273,9 +248,6 @@ create table if not exists public.stock_mouvements (
     updated_at timestamptz not null default now(),
     actif boolean not null default true
 );
-create index if not exists idx_stock_mouvements_mama_id on public.stock_mouvements(mama_id);
-create index if not exists idx_stock_mouvements_produit_id on public.stock_mouvements(produit_id);
-create index if not exists idx_stock_mouvements_date on public.stock_mouvements(date);
 
 -- Table stocks
 create table if not exists public.stocks (
@@ -288,9 +260,6 @@ create table if not exists public.stocks (
     updated_at timestamptz not null default now(),
     actif boolean not null default true
 );
-create index if not exists idx_stocks_mama_id on public.stocks(mama_id);
-create index if not exists idx_stocks_produit_id on public.stocks(produit_id);
-create index if not exists idx_stocks_zone_id on public.stocks(zone_id);
 
 -- Table inventaires
 create table if not exists public.inventaires (
@@ -301,7 +270,6 @@ create table if not exists public.inventaires (
     updated_at timestamptz not null default now(),
     actif boolean not null default true
 );
-create index if not exists idx_inventaires_mama_id on public.inventaires(mama_id);
 
 -- Table inventaire_lignes
 create table if not exists public.inventaire_lignes (
@@ -316,8 +284,6 @@ create table if not exists public.inventaire_lignes (
     updated_at timestamptz not null default now(),
     actif boolean not null default true
 );
-create index if not exists idx_inventaire_lignes_mama_id on public.inventaire_lignes(mama_id);
-create index if not exists idx_inventaire_lignes_inventaire_id on public.inventaire_lignes(inventaire_id);
 
 alter table if exists public.stock_mouvements
   add constraint fk_stock_mouvements_inventaire
@@ -333,7 +299,6 @@ create table if not exists public.documents (
     updated_at timestamptz not null default now(),
     actif boolean not null default true
 );
-create index if not exists idx_documents_mama_id on public.documents(mama_id);
 
 -- Table notifications
 create table if not exists public.notifications (
@@ -347,8 +312,6 @@ create table if not exists public.notifications (
     updated_at timestamptz not null default now(),
     actif boolean not null default true
 );
-create index if not exists idx_notifications_mama_id on public.notifications(mama_id);
-create index if not exists idx_notifications_utilisateur_id on public.notifications(utilisateur_id);
 
 -- Table gadgets
 create table if not exists public.gadgets (
@@ -360,7 +323,6 @@ create table if not exists public.gadgets (
     updated_at timestamptz not null default now(),
     actif boolean not null default true
 );
-create index if not exists idx_gadgets_mama_id on public.gadgets(mama_id);
 
 -- Table ventes_fiches_carte
 create table if not exists public.ventes_fiches_carte (
@@ -373,7 +335,6 @@ create table if not exists public.ventes_fiches_carte (
     updated_at timestamptz not null default now(),
     actif boolean not null default true
 );
-create index if not exists idx_ventes_fiches_carte_mama_id on public.ventes_fiches_carte(mama_id);
 
 -- Table ventes_familles
 create table if not exists public.ventes_familles (
@@ -386,7 +347,6 @@ create table if not exists public.ventes_familles (
     updated_at timestamptz not null default now(),
     actif boolean not null default true
 );
-create index if not exists idx_ventes_familles_mama_id on public.ventes_familles(mama_id);
 
 -- Table feedback
 create table if not exists public.feedback (
@@ -398,7 +358,6 @@ create table if not exists public.feedback (
     updated_at timestamptz not null default now(),
     actif boolean not null default true
 );
-create index if not exists idx_feedback_mama_id on public.feedback(mama_id);
 
 -- Table consentements_utilisateur
 create table if not exists public.consentements_utilisateur (
@@ -411,7 +370,6 @@ create table if not exists public.consentements_utilisateur (
     updated_at timestamptz not null default now(),
     actif boolean not null default true
 );
-create index if not exists idx_consentements_utilisateur_mama_id on public.consentements_utilisateur(mama_id);
 
 -- Table periodes_comptables
 create table if not exists public.periodes_comptables (
@@ -424,8 +382,6 @@ create table if not exists public.periodes_comptables (
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now()
 );
-create index if not exists idx_periodes_comptables_mama_id on public.periodes_comptables(mama_id);
-create unique index if not exists idx_periodes_comptables_actuelle on public.periodes_comptables(mama_id) where actuelle;
 
 -- Table taches
 create table if not exists public.taches (
@@ -439,9 +395,6 @@ create table if not exists public.taches (
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now()
 );
-create index if not exists idx_taches_mama_id on public.taches(mama_id);
-create index if not exists idx_taches_statut on public.taches(statut);
-create index if not exists idx_taches_priorite on public.taches(priorite);
 
 -- Table utilisateurs_taches
 create table if not exists public.utilisateurs_taches (
@@ -449,8 +402,6 @@ create table if not exists public.utilisateurs_taches (
     utilisateur_id uuid references public.utilisateurs(id) on delete cascade,
     primary key (tache_id, utilisateur_id)
 );
-create index if not exists idx_utilisateurs_taches_tache on public.utilisateurs_taches(tache_id);
-create index if not exists idx_utilisateurs_taches_utilisateur on public.utilisateurs_taches(utilisateur_id);
 
 -- Table tache_instances
 create table if not exists public.tache_instances (
@@ -464,7 +415,6 @@ create table if not exists public.tache_instances (
     updated_at timestamptz default now(),
     actif boolean default true
 );
-create index if not exists idx_tache_instances_mama_id on public.tache_instances(mama_id);
 
 -- Table planning_previsionnel
 create table if not exists public.planning_previsionnel (
@@ -479,7 +429,6 @@ create table if not exists public.planning_previsionnel (
     statut text default 'prévu',
     actif boolean default true
 );
-create index if not exists idx_planning_previsionnel_mama_id on public.planning_previsionnel(mama_id);
 
 -- Table planning_lignes
 create table if not exists public.planning_lignes (
@@ -492,7 +441,6 @@ create table if not exists public.planning_lignes (
     actif boolean default true,
     created_at timestamptz default now()
 );
-create index if not exists idx_planning_lignes_mama_id on public.planning_lignes(mama_id);
 
 -- ========================
 -- COLONNES ADDITIONNELLES
@@ -531,11 +479,61 @@ begin
 end$$;
 -- ========================
 -- FOREIGN KEYS
--- (définies lors de la création des tables)
-
+-- All foreign keys are defined in table creation statements.
 -- ========================
 -- INDEXES
--- (créés lors de la création des tables)
+create index if not exists idx_mamas_mama_id on public.mamas(mama_id);
+create index if not exists idx_roles_mama_id on public.roles(mama_id);
+create index if not exists idx_permissions_mama_id on public.permissions(mama_id);
+create unique index if not exists ux_role_permissions on public.role_permissions(role_id, permission_id);
+create index if not exists idx_role_permissions_mama_id on public.role_permissions(mama_id);
+create index if not exists idx_utilisateurs_mama_id on public.utilisateurs(mama_id);
+create index if not exists idx_familles_mama_id on public.familles(mama_id);
+create index if not exists idx_sous_familles_mama_id on public.sous_familles(mama_id);
+create index if not exists idx_sous_familles_famille_id on public.sous_familles(famille_id);
+create index if not exists idx_unites_mama_id on public.unites(mama_id);
+create index if not exists idx_zones_stock_mama_id on public.zones_stock(mama_id);
+create index if not exists idx_fournisseurs_mama_id on public.fournisseurs(mama_id);
+create index if not exists idx_produits_mama_id on public.produits(mama_id);
+create index if not exists idx_produits_famille_id on public.produits(famille_id);
+create index if not exists idx_produits_zone_stock_id on public.produits(zone_stock_id);
+create index if not exists idx_commandes_mama_id on public.commandes(mama_id);
+create index if not exists idx_commandes_statut on public.commandes(statut);
+create index if not exists idx_bons_livraison_mama_id on public.bons_livraison(mama_id);
+create index if not exists idx_bons_livraison_statut on public.bons_livraison(statut);
+create index if not exists idx_lignes_bl_mama_id on public.lignes_bl(mama_id);
+create index if not exists idx_lignes_bl_bl_id on public.lignes_bl(bl_id);
+create index if not exists idx_factures_mama_id on public.factures(mama_id);
+create index if not exists idx_facture_lignes_mama_id on public.facture_lignes(mama_id);
+create index if not exists idx_facture_lignes_facture_id on public.facture_lignes(facture_id);
+create index if not exists idx_fiches_techniques_mama_id on public.fiches_techniques(mama_id);
+create index if not exists idx_stock_mouvements_mama_id on public.stock_mouvements(mama_id);
+create index if not exists idx_stock_mouvements_produit_id on public.stock_mouvements(produit_id);
+create index if not exists idx_stock_mouvements_date on public.stock_mouvements(date);
+create index if not exists idx_stocks_mama_id on public.stocks(mama_id);
+create index if not exists idx_stocks_produit_id on public.stocks(produit_id);
+create index if not exists idx_stocks_zone_id on public.stocks(zone_id);
+create index if not exists idx_inventaires_mama_id on public.inventaires(mama_id);
+create index if not exists idx_inventaire_lignes_mama_id on public.inventaire_lignes(mama_id);
+create index if not exists idx_inventaire_lignes_inventaire_id on public.inventaire_lignes(inventaire_id);
+create index if not exists idx_documents_mama_id on public.documents(mama_id);
+create index if not exists idx_notifications_mama_id on public.notifications(mama_id);
+create index if not exists idx_notifications_utilisateur_id on public.notifications(utilisateur_id);
+create index if not exists idx_gadgets_mama_id on public.gadgets(mama_id);
+create index if not exists idx_ventes_fiches_carte_mama_id on public.ventes_fiches_carte(mama_id);
+create index if not exists idx_ventes_familles_mama_id on public.ventes_familles(mama_id);
+create index if not exists idx_feedback_mama_id on public.feedback(mama_id);
+create index if not exists idx_consentements_utilisateur_mama_id on public.consentements_utilisateur(mama_id);
+create index if not exists idx_periodes_comptables_mama_id on public.periodes_comptables(mama_id);
+create unique index if not exists idx_periodes_comptables_actuelle on public.periodes_comptables(mama_id) where actuelle;
+create index if not exists idx_taches_mama_id on public.taches(mama_id);
+create index if not exists idx_taches_statut on public.taches(statut);
+create index if not exists idx_taches_priorite on public.taches(priorite);
+create index if not exists idx_utilisateurs_taches_tache on public.utilisateurs_taches(tache_id);
+create index if not exists idx_utilisateurs_taches_utilisateur on public.utilisateurs_taches(utilisateur_id);
+create index if not exists idx_tache_instances_mama_id on public.tache_instances(mama_id);
+create index if not exists idx_planning_previsionnel_mama_id on public.planning_previsionnel(mama_id);
+create index if not exists idx_planning_lignes_mama_id on public.planning_lignes(mama_id);
 create index if not exists idx_factures_periode_id on public.factures(periode_id);
 create index if not exists idx_inventaires_periode_id on public.inventaires(periode_id);
 create index if not exists idx_stock_mouvements_periode_id on public.stock_mouvements(periode_id);
@@ -893,7 +891,7 @@ end;
 $$;
 
 -- ========================
--- 5. TRIGGERS
+-- TRIGGERS
 -- ========================
 
 -- Synchronisation avec auth.users
@@ -915,7 +913,6 @@ begin
   end loop;
 end$$;
 
--- TRIGGERS
 drop trigger if exists trg_apply_stock_from_achat on public.facture_lignes;
 create trigger trg_apply_stock_from_achat
   after insert or update or delete on public.facture_lignes

@@ -379,7 +379,7 @@ select mama_id,
        date_trunc('month', created_at) as mois,
        sum(quantite) as quantite
 from public.stock_mouvements
-where type = 'ACHAT'
+where type = 'entree_achat'
 group by mama_id, date_trunc('month', created_at);
 
 create or replace view public.v_ventes_par_famille as
@@ -400,10 +400,21 @@ join public.produits p on il.produit_id = p.id;
 create or replace view public.v_notifications_non_lues as
 select * from public.notifications where lu = false;
 
+create or replace view public.v_stock_disponible as
+select p.mama_id, p.id as produit_id,
+       coalesce(sum(case
+         when sm.type in ('entree_achat','ENTREE','TRANSFERT','TRANSFERT+') then sm.quantite
+         when sm.type = 'ajustement_inventaire' then sm.quantite
+         else -sm.quantite end),0) as stock
+from public.produits p
+left join public.stock_mouvements sm on sm.produit_id = p.id and sm.mama_id = p.mama_id
+group by p.mama_id, p.id;
+
+create or replace view public.v_stocks as
+select * from public.v_stock_disponible;
+
 create or replace view public.v_requisitions as
-select sm.mama_id, sm.produit_id,
-       sum(case when sm.type in ('ACHAT','ENTREE','TRANSFERT+') then sm.quantite else -sm.quantite end) as stock
-group by sm.mama_id, sm.produit_id;
+select * from public.v_stock_disponible;
 
 -- ========================
 -- 3. FONCTIONS PERSONNALISÉES
@@ -437,11 +448,23 @@ $$;
 create or replace function public.apply_stock_from_achat(p_facture_id uuid)
 returns void
 language plpgsql as $$
-declare l record;
+declare
+  l record;
+  v_mama_id uuid;
+  v_stock numeric;
+  v_pmp numeric;
 begin
-  for l in select produit_id, quantite from public.facture_lignes where facture_id = p_facture_id loop
+  select mama_id into v_mama_id from public.factures where id = p_facture_id;
+  delete from public.stock_mouvements where type = 'entree_achat' and reference_id = p_facture_id;
+  for l in select produit_id, quantite, prix from public.facture_lignes where facture_id = p_facture_id loop
     insert into public.stock_mouvements(mama_id, produit_id, type, quantite, reference_id)
-    values ((select mama_id from public.factures where id = p_facture_id), l.produit_id, 'ACHAT', l.quantite, p_facture_id);
+    values (v_mama_id, l.produit_id, 'entree_achat', l.quantite, p_facture_id);
+    select coalesce(stock_reel,0), coalesce(pmp,0) into v_stock, v_pmp from public.produits where id = l.produit_id and mama_id = v_mama_id;
+    update public.produits
+       set dernier_prix = l.prix,
+           pmp = case when v_stock + l.quantite = 0 then l.prix
+                      else ((v_stock * v_pmp) + (l.quantite * l.prix)) / (v_stock + l.quantite) end
+     where id = l.produit_id and mama_id = v_mama_id;
   end loop;
 end;
 $$;
@@ -464,11 +487,50 @@ language plpgsql as $$
 begin
   update public.inventaire_lignes il
      set stock_theorique = coalesce((
-       select sum(case when type in ('ACHAT','ENTREE','TRANSFERT+') then quantite else -quantite end)
+       select sum(case
+         when type in ('entree_achat','ENTREE','TRANSFERT','TRANSFERT+') then quantite
+         when type = 'ajustement_inventaire' then quantite
+         else -quantite end)
        from public.stock_mouvements sm
        where sm.produit_id = il.produit_id and sm.mama_id = il.mama_id
      ),0)
-   where il.inventaire_id = p_inventaire_id;
+  where il.inventaire_id = p_inventaire_id;
+end;
+$$;
+
+create or replace function public.apply_stock_from_fiche(p_vente_id uuid)
+returns void
+language plpgsql as $$
+declare
+  v record;
+  l record;
+begin
+  select * into v from public.ventes_fiches_carte where id = p_vente_id;
+  if v.id is null then return; end if;
+  delete from public.stock_mouvements where type = 'sortie_fiche' and reference_id = p_vente_id;
+  for l in select produit_id, quantite from public.fiche_lignes where fiche_id = v.fiche_id loop
+    insert into public.stock_mouvements(mama_id, produit_id, type, quantite, reference_id)
+    values (v.mama_id, l.produit_id, 'sortie_fiche', l.quantite * v.ventes, p_vente_id);
+  end loop;
+end;
+$$;
+
+create or replace function public.apply_inventaire_line(p_ligne_id uuid)
+returns void
+language plpgsql as $$
+declare
+  l record;
+  v_ecart numeric;
+begin
+  select * into l from public.inventaire_lignes where id = p_ligne_id;
+  if l.id is null then return; end if;
+  v_ecart := coalesce(l.stock_reel,0) - coalesce(l.stock_theorique,0);
+  update public.inventaire_lignes set ecart = v_ecart where id = p_ligne_id;
+  delete from public.stock_mouvements where type = 'ajustement_inventaire' and reference_id = p_ligne_id;
+  if v_ecart <> 0 then
+    insert into public.stock_mouvements(mama_id, produit_id, type, quantite, reference_id)
+    values (l.mama_id, l.produit_id, 'ajustement_inventaire', v_ecart, p_ligne_id);
+  end if;
 end;
 $$;
 
@@ -497,7 +559,7 @@ create or replace function public.trg_apply_stock_from_achat()
 returns trigger
 language plpgsql as $$
 begin
-  perform public.apply_stock_from_achat(new.facture_id);
+  perform public.apply_stock_from_achat(coalesce(new.facture_id, old.facture_id));
   return new;
 end;
 $$;
@@ -516,6 +578,24 @@ returns trigger
 language plpgsql as $$
 begin
   perform public.set_requisition_stock_theorique(new.inventaire_id);
+  return new;
+end;
+$$;
+
+create or replace function public.trg_apply_stock_from_fiche()
+returns trigger
+language plpgsql as $$
+begin
+  perform public.apply_stock_from_fiche(coalesce(new.id, old.id));
+  return new;
+end;
+$$;
+
+create or replace function public.trg_apply_inventaire_line()
+returns trigger
+language plpgsql as $$
+begin
+  perform public.apply_inventaire_line(coalesce(new.id, old.id));
   return new;
 end;
 $$;
@@ -546,7 +626,7 @@ end$$;
 -- Triggers métier
 drop trigger if exists trg_apply_stock_from_achat on public.facture_lignes;
 create trigger trg_apply_stock_from_achat
-  after insert on public.facture_lignes
+  after insert or update or delete on public.facture_lignes
   for each row execute function public.trg_apply_stock_from_achat();
 
 drop trigger if exists trg_insert_stock_from_transfert_ligne on public.lignes_bl;
@@ -554,9 +634,19 @@ create trigger trg_insert_stock_from_transfert_ligne
   after insert on public.lignes_bl
   for each row execute function public.trg_insert_stock_from_transfert_ligne();
 
+drop trigger if exists trg_apply_stock_from_fiche on public.ventes_fiches_carte;
+create trigger trg_apply_stock_from_fiche
+  after insert or update or delete on public.ventes_fiches_carte
+  for each row execute function public.trg_apply_stock_from_fiche();
+
+drop trigger if exists trg_apply_inventaire_line on public.inventaire_lignes;
+create trigger trg_apply_inventaire_line
+  after insert or update or delete on public.inventaire_lignes
+  for each row execute function public.trg_apply_inventaire_line();
+
 drop trigger if exists trg_set_requisition_stock_theorique on public.inventaire_lignes;
 create trigger trg_set_requisition_stock_theorique
-  after insert on public.inventaire_lignes
+  after insert or update on public.inventaire_lignes
   for each row execute function public.trg_set_requisition_stock_theorique();
 
 -- Exemple de protection sur produits

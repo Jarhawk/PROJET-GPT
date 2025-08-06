@@ -2,9 +2,11 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import useAuth from "@/hooks/useAuth";
+import usePeriodes from "@/hooks/usePeriodes";
 
 export function useInventaires() {
   const { mama_id } = useAuth();
+  const { checkCurrentPeriode } = usePeriodes();
   const [inventaires, setInventaires] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -68,6 +70,12 @@ export function useInventaires() {
 
   async function createInventaire(inv) {
     if (!mama_id) return null;
+    const { date } = inv;
+    const { error: pErr } = await checkCurrentPeriode(date);
+    if (pErr) {
+      setError(pErr);
+      return null;
+    }
     setLoading(true);
     setError(null);
     const { lignes = [], date, ...entete } = inv;

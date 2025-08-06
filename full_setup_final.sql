@@ -1,13 +1,7 @@
--- Reconstitution complète du backend MamaStock
--- Script idempotent pour Supabase
-
--- Extensions
+-- EXTENSIONS
 create extension if not exists "uuid-ossp";
 create extension if not exists "pgcrypto";
-
--- ========================
--- 1. TABLES PRINCIPALES
--- ========================
+-- TABLES
 
 -- Table mamas
 create table if not exists public.mamas (
@@ -402,6 +396,7 @@ create table if not exists public.utilisateurs_taches (
     utilisateur_id uuid references public.utilisateurs(id) on delete cascade,
     primary key (tache_id, utilisateur_id)
 );
+create index if not exists idx_utilisateurs_taches_tache on public.utilisateurs_taches(tache_id);
 create index if not exists idx_utilisateurs_taches_utilisateur on public.utilisateurs_taches(utilisateur_id);
 
 alter table if exists public.produits
@@ -411,7 +406,14 @@ alter table if exists public.produits
 alter table if exists public.factures
   add column if not exists justificatif text,
   add column if not exists commentaire text,
-  add column if not exists bon_livraison text;
+  add column if not exists bon_livraison text,
+  add column if not exists periode_id uuid references public.periodes_comptables(id);
+
+alter table if exists public.inventaires
+  add column if not exists periode_id uuid references public.periodes_comptables(id);
+
+alter table if exists public.stock_mouvements
+  add column if not exists periode_id uuid references public.periodes_comptables(id);
 
 do $$
 begin
@@ -429,9 +431,16 @@ begin
   end if;
 end$$;
 
--- ========================
--- 2. VUES SQL
--- ========================
+-- FOREIGN KEYS
+-- (définies lors de la création des tables)
+
+-- INDEXES
+-- (créés lors de la création des tables)
+create index if not exists idx_factures_periode_id on public.factures(periode_id);
+create index if not exists idx_inventaires_periode_id on public.inventaires(periode_id);
+create index if not exists idx_stock_mouvements_periode_id on public.stock_mouvements(periode_id);
+
+-- VIEWS
 
 create or replace view public.v_produits_dernier_prix as
 select p.id as produit_id, p.mama_id,
@@ -505,13 +514,15 @@ select
   t.created_at,
   t.updated_at,
   ut.utilisateur_id,
-  u.nom as utilisateur_nom
+  u.nom as utilisateur_nom,
+  r.nom as utilisateur_role
 from public.taches t
 left join public.utilisateurs_taches ut on ut.tache_id = t.id
-left join public.utilisateurs u on u.id = ut.utilisateur_id;
+left join public.utilisateurs u on u.id = ut.utilisateur_id
+left join public.roles r on r.id = u.role_id;
 
 -- ========================
--- 3. FONCTIONS PERSONNALISÉES
+-- FUNCTIONS
 -- ========================
 
 create or replace function public.current_user_mama_id()
@@ -679,7 +690,7 @@ end;
 $$;
 
 -- ========================
--- 4. TRIGGER FUNCTIONS
+-- Additional trigger functions
 -- ========================
 
 create or replace function public.trigger_set_timestamp()
@@ -789,7 +800,7 @@ begin
   end loop;
 end$$;
 
--- Triggers métier
+-- TRIGGERS
 drop trigger if exists trg_apply_stock_from_achat on public.facture_lignes;
 create trigger trg_apply_stock_from_achat
   after insert or update or delete on public.facture_lignes
@@ -831,10 +842,7 @@ create trigger trg_prevent_delete_produits
   before delete on public.produits
   for each row execute function public.prevent_delete_if_linked();
 
--- ========================
--- 6. RLS & GRANTS
--- ========================
-
+-- RLS
 do $$
 declare t text;
 begin
@@ -845,7 +853,6 @@ begin
     execute format('alter table public.%I enable row level security;', t);
     execute format('drop policy if exists mama_policy on public.%I;', t);
     execute format('create policy mama_policy on public.%I using (mama_id = public.current_user_mama_id()) with check (mama_id = public.current_user_mama_id());', t);
-    execute format('grant select, insert, update, delete on public.%I to authenticated;', t);
   end loop;
 end$$;
 
@@ -864,6 +871,19 @@ create policy utilisateurs_taches_policy on public.utilisateurs_taches
       where t.id = tache_id and t.mama_id = public.current_user_mama_id()
     )
   );
+
+-- GRANTS
+do $$
+declare t text;
+begin
+  foreach t in array array[
+    'mamas','roles','permissions','role_permissions','utilisateurs','familles','sous_familles','unites','zones_stock','fournisseurs','produits','commandes','bons_livraison','lignes_bl','factures','facture_lignes','fiches_techniques','stock_mouvements','inventaires','inventaire_lignes','documents','notifications','gadgets','ventes_fiches_carte','ventes_familles','feedback','consentements_utilisateur','periodes_comptables','taches'
+  ]
+  loop
+    execute format('grant select, insert, update, delete on public.%I to authenticated;', t);
+  end loop;
+end$$;
+
 grant select, insert, update, delete on public.utilisateurs_taches to authenticated;
 
 -- ========================

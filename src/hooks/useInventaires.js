@@ -18,7 +18,7 @@ export function useInventaires() {
     let query = supabase
       .from("inventaires")
       .select(
-        "*, lignes:inventaire_lignes!inventaire_id(*, produit:produits!inventaire_lignes_produit_id_fkey(id, nom, unite_id, unite:unite_id (nom), stock_theorique, pmp))"
+        "*, lignes:inventaire_lignes!inventaire_id(*, produit:produits!inventaire_lignes_produit_id_fkey(id, nom, unite_id, unite:unite_id (nom), pmp))"
       )
       .eq("mama_id", mama_id);
     if (!includeArchives) query = query.eq("actif", true);
@@ -70,7 +70,7 @@ export function useInventaires() {
 
   async function createInventaire(inv) {
     if (!mama_id) return null;
-    const { date } = inv;
+    const { lignes = [], date, ...entete } = inv;
     const { error: pErr } = await checkCurrentPeriode(date);
     if (pErr) {
       setError(pErr);
@@ -78,7 +78,6 @@ export function useInventaires() {
     }
     setLoading(true);
     setError(null);
-    const { lignes = [], date, ...entete } = inv;
     const { data, error } = await supabase
       .from("inventaires")
       .insert([{ ...entete, date_inventaire: date, mama_id }])
@@ -108,14 +107,14 @@ export function useInventaires() {
     if (!mama_id || !id) return null;
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase
-      .from("inventaires")
-      .select(
-        "*, lignes:inventaire_lignes!inventaire_id(*, produit:produits!inventaire_lignes_produit_id_fkey(id, nom, unite_id, unite:unite_id (nom), stock_theorique, pmp))"
-      )
-      .eq("id", id)
-      .eq("mama_id", mama_id)
-      .single();
+      const { data, error } = await supabase
+        .from("inventaires")
+        .select(
+          "*, lignes:inventaire_lignes!inventaire_id(*, produit:produits!inventaire_lignes_produit_id_fkey(id, nom, unite_id, unite:unite_id (nom), pmp))"
+        )
+        .eq("id", id)
+        .eq("mama_id", mama_id)
+        .single();
     setLoading(false);
     if (error) {
       setError(error);

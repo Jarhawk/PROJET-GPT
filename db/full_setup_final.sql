@@ -11,7 +11,7 @@ create extension if not exists "pgcrypto";
 -- Table mamas
 create table if not exists public.mamas (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete set null,
+    mama_id uuid constraint fk_mamas_mama_id references public.mamas(id) on delete set null,
     nom text not null,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
@@ -21,7 +21,7 @@ create table if not exists public.mamas (
 -- Table roles
 create table if not exists public.roles (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
+    mama_id uuid constraint fk_roles_mama_id references public.mamas(id) on delete cascade,
     nom text not null unique,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
@@ -31,7 +31,7 @@ create table if not exists public.roles (
 -- Table permissions
 create table if not exists public.permissions (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
+    mama_id uuid constraint fk_permissions_mama_id references public.mamas(id) on delete cascade,
     code text not null unique,
     description text,
     created_at timestamptz not null default now(),
@@ -42,9 +42,9 @@ create table if not exists public.permissions (
 -- Table role_permissions (liaison)
 create table if not exists public.role_permissions (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
-    role_id uuid references public.roles(id) on delete cascade,
-    permission_id uuid references public.permissions(id) on delete cascade,
+    mama_id uuid constraint fk_role_permissions_mama_id references public.mamas(id) on delete cascade,
+    role_id uuid constraint fk_role_permissions_role_id references public.roles(id) on delete cascade,
+    permission_id uuid constraint fk_role_permissions_permission_id references public.permissions(id) on delete cascade,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
     actif boolean not null default true
@@ -53,12 +53,12 @@ create table if not exists public.role_permissions (
 -- Table utilisateurs
 create table if not exists public.utilisateurs (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
+    mama_id uuid constraint fk_utilisateurs_mama_id references public.mamas(id) on delete cascade,
     auth_id uuid unique,
     nom text,
     email text,
     two_fa_enabled boolean not null default false,
-    role_id uuid references public.roles(id) on delete set null,
+    role_id uuid constraint fk_utilisateurs_role_id references public.roles(id) on delete set null,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
     actif boolean not null default true
@@ -67,7 +67,7 @@ create table if not exists public.utilisateurs (
 -- Table familles
 create table if not exists public.familles (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
+    mama_id uuid constraint fk_familles_mama_id references public.mamas(id) on delete cascade,
     nom text not null,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
@@ -77,8 +77,8 @@ create table if not exists public.familles (
 -- Table sous_familles
 create table if not exists public.sous_familles (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
-    famille_id uuid references public.familles(id) on delete cascade,
+    mama_id uuid constraint fk_sous_familles_mama_id references public.mamas(id) on delete cascade,
+    famille_id uuid constraint fk_sous_familles_famille_id references public.familles(id) on delete cascade,
     nom text not null,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
@@ -88,7 +88,7 @@ create table if not exists public.sous_familles (
 -- Table unites
 create table if not exists public.unites (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
+    mama_id uuid constraint fk_unites_mama_id references public.mamas(id) on delete cascade,
     nom text not null,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
@@ -98,7 +98,7 @@ create table if not exists public.unites (
 -- Table zones_stock
 create table if not exists public.zones_stock (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
+    mama_id uuid constraint fk_zones_stock_mama_id references public.mamas(id) on delete cascade,
     nom text not null,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
@@ -108,7 +108,7 @@ create table if not exists public.zones_stock (
 -- Table fournisseurs
 create table if not exists public.fournisseurs (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
+    mama_id uuid constraint fk_fournisseurs_mama_id references public.mamas(id) on delete cascade,
     nom text not null,
     contact text,
     created_at timestamptz not null default now(),
@@ -119,13 +119,13 @@ create table if not exists public.fournisseurs (
 -- Table produits
 create table if not exists public.produits (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
+    mama_id uuid constraint fk_produits_mama_id references public.mamas(id) on delete cascade,
     nom text not null,
     famille_id uuid constraint fk_produits_famille references public.familles(id),
     sous_famille_id uuid constraint fk_produits_sous_famille references public.sous_familles(id),
-    unite_id uuid references public.unites(id),
-    zone_stock_id uuid references public.zones_stock(id),
-    fournisseur_id uuid references public.fournisseurs(id),
+    unite_id uuid constraint fk_produits_unite_id references public.unites(id),
+    zone_stock_id uuid constraint fk_produits_zone_stock_id references public.zones_stock(id),
+    fournisseur_id uuid constraint fk_produits_fournisseur_id references public.fournisseurs(id),
     stock_reel numeric(12,2) default 0,
     stock_min numeric(12,2) default 0,
     dernier_prix numeric(12,2),
@@ -139,8 +139,8 @@ create table if not exists public.produits (
 -- Table commandes
 create table if not exists public.commandes (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
-    fournisseur_id uuid references public.fournisseurs(id),
+    mama_id uuid constraint fk_commandes_mama_id references public.mamas(id) on delete cascade,
+    fournisseur_id uuid constraint fk_commandes_fournisseur_id references public.fournisseurs(id),
     statut text,
     created_at timestamptz not null default now(),
     date_commande date,
@@ -149,15 +149,15 @@ create table if not exists public.commandes (
     commentaire text,
     updated_at timestamptz not null default now(),
     actif boolean not null default true,
-    bl_id uuid references public.bons_livraison(id),
-    facture_id uuid references public.factures(id)
+    bl_id uuid constraint fk_commandes_bl_id references public.bons_livraison(id),
+    facture_id uuid constraint fk_commandes_facture_id references public.factures(id)
 );
 
 -- Table bons_livraison
 create table if not exists public.bons_livraison (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
-    fournisseur_id uuid references public.fournisseurs(id),
+    mama_id uuid constraint fk_bons_livraison_mama_id references public.mamas(id) on delete cascade,
+    fournisseur_id uuid constraint fk_bons_livraison_fournisseur_id references public.fournisseurs(id),
     numero_bl text,
     date_livraison date,
     created_at timestamptz not null default now(),
@@ -166,16 +166,16 @@ create table if not exists public.bons_livraison (
     statut text default 'recu',
     actif boolean not null default true,
     updated_at timestamptz not null default now(),
-    commande_id uuid references public.commandes(id) on delete cascade,
-    facture_id uuid references public.factures(id)
+    commande_id uuid constraint fk_bons_livraison_commande_id references public.commandes(id) on delete cascade,
+    facture_id uuid constraint fk_bons_livraison_facture_id references public.factures(id)
 );
 
 -- Table lignes_bl
 create table if not exists public.lignes_bl (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
-    bl_id uuid references public.bons_livraison(id) on delete cascade,
-    produit_id uuid references public.produits(id),
+    mama_id uuid constraint fk_lignes_bl_mama_id references public.mamas(id) on delete cascade,
+    bl_id uuid constraint fk_lignes_bl_bl_id references public.bons_livraison(id) on delete cascade,
+    produit_id uuid constraint fk_lignes_bl_produit_id references public.produits(id),
     quantite numeric(12,2) not null,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
@@ -185,8 +185,8 @@ create table if not exists public.lignes_bl (
 -- Table factures
 create table if not exists public.factures (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
-    fournisseur_id uuid references public.fournisseurs(id),
+    mama_id uuid constraint fk_factures_mama_id references public.mamas(id) on delete cascade,
+    fournisseur_id uuid constraint fk_factures_fournisseur_id references public.fournisseurs(id),
     numero text,
     date_facture date,
     created_at timestamptz not null default now(),
@@ -197,9 +197,9 @@ create table if not exists public.factures (
     total_ttc numeric(12,2),
     statut text,
     montant_total numeric(12,2),
-    bl_id uuid references public.bons_livraison(id),
+    bl_id uuid constraint fk_factures_bl_id references public.bons_livraison(id),
     lignes_produits jsonb,
-    zone_id uuid references public.zones_stock(id),
+    zone_id uuid constraint fk_factures_zone_id references public.zones_stock(id),
     justificatif text,
     commentaire text,
     bon_livraison text
@@ -208,9 +208,9 @@ create table if not exists public.factures (
 -- Table facture_lignes
 create table if not exists public.facture_lignes (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
-    facture_id uuid references public.factures(id) on delete cascade,
-    produit_id uuid references public.produits(id),
+    mama_id uuid constraint fk_facture_lignes_mama_id references public.mamas(id) on delete cascade,
+    facture_id uuid constraint fk_facture_lignes_facture_id references public.factures(id) on delete cascade,
+    produit_id uuid constraint fk_facture_lignes_produit_id references public.produits(id),
     quantite numeric(12,2) not null,
     prix numeric(12,2),
     created_at timestamptz not null default now(),
@@ -221,8 +221,8 @@ create table if not exists public.facture_lignes (
 -- Table fournisseur_produits
 create table if not exists public.fournisseur_produits (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
-    produit_id uuid references public.produits(id),
+    mama_id uuid constraint fk_fournisseur_produits_mama_id references public.mamas(id) on delete cascade,
+    produit_id uuid constraint fk_fournisseur_produits_produit_id references public.produits(id),
     fournisseur_id uuid constraint fk_fournisseur_produits_fournisseur_id references public.fournisseurs(id),
     prix_achat numeric(12,2),
     created_at timestamptz not null default now(),
@@ -233,8 +233,8 @@ create table if not exists public.fournisseur_produits (
 -- Table fiches_techniques
 create table if not exists public.fiches_techniques (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
-    produit_id uuid references public.produits(id),
+    mama_id uuid constraint fk_fiches_techniques_mama_id references public.mamas(id) on delete cascade,
+    produit_id uuid constraint fk_fiches_techniques_produit_id references public.produits(id),
     contenu jsonb,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
@@ -244,10 +244,10 @@ create table if not exists public.fiches_techniques (
 -- Table fiche_lignes
 create table if not exists public.fiche_lignes (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
-    fiche_id uuid references public.fiches_techniques(id) on delete cascade,
-    produit_id uuid references public.produits(id),
-    sous_fiche_id uuid references public.fiches_techniques(id),
+    mama_id uuid constraint fk_fiche_lignes_mama_id references public.mamas(id) on delete cascade,
+    fiche_id uuid constraint fk_fiche_lignes_fiche_id references public.fiches_techniques(id) on delete cascade,
+    produit_id uuid constraint fk_fiche_lignes_produit_id references public.produits(id),
+    sous_fiche_id uuid constraint fk_fiche_lignes_sous_fiche_id references public.fiches_techniques(id),
     quantite numeric(12,2) not null,
     commentaire text,
     created_at timestamptz not null default now(),
@@ -258,13 +258,13 @@ create table if not exists public.fiche_lignes (
 -- Table stock_mouvements
 create table if not exists public.stock_mouvements (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
-    produit_id uuid references public.produits(id),
-    inventaire_id uuid references public.inventaires(id),
-    zone_id uuid references public.zones_stock(id),
-    zone_source_id uuid references public.zones_stock(id),
-    zone_destination_id uuid references public.zones_stock(id),
-    auteur_id uuid references public.utilisateurs(id),
+    mama_id uuid constraint fk_stock_mouvements_mama_id references public.mamas(id) on delete cascade,
+    produit_id uuid constraint fk_stock_mouvements_produit_id references public.produits(id),
+    inventaire_id uuid constraint fk_stock_mouvements_inventaire_id references public.inventaires(id),
+    zone_id uuid constraint fk_stock_mouvements_zone_id references public.zones_stock(id),
+    zone_source_id uuid constraint fk_stock_mouvements_zone_source_id references public.zones_stock(id),
+    zone_destination_id uuid constraint fk_stock_mouvements_zone_destination_id references public.zones_stock(id),
+    auteur_id uuid constraint fk_stock_mouvements_auteur_id references public.utilisateurs(id),
     type text not null,
     quantite numeric(12,2) not null,
     reference_id uuid,
@@ -278,9 +278,9 @@ create table if not exists public.stock_mouvements (
 -- Table stocks
 create table if not exists public.stocks (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
-    produit_id uuid references public.produits(id),
-    zone_id uuid references public.zones_stock(id),
+    mama_id uuid constraint fk_stocks_mama_id references public.mamas(id) on delete cascade,
+    produit_id uuid constraint fk_stocks_produit_id references public.produits(id),
+    zone_id uuid constraint fk_stocks_zone_id references public.zones_stock(id),
     quantite numeric(12,2) not null default 0,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
@@ -290,7 +290,7 @@ create table if not exists public.stocks (
 -- Table inventaires
 create table if not exists public.inventaires (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
+    mama_id uuid constraint fk_inventaires_mama_id references public.mamas(id) on delete cascade,
     date_inventaire date,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
@@ -300,9 +300,9 @@ create table if not exists public.inventaires (
 -- Table inventaire_lignes
 create table if not exists public.inventaire_lignes (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
-    inventaire_id uuid references public.inventaires(id) on delete cascade,
-    produit_id uuid references public.produits(id),
+    mama_id uuid constraint fk_inventaire_lignes_mama_id references public.mamas(id) on delete cascade,
+    inventaire_id uuid constraint fk_inventaire_lignes_inventaire_id references public.inventaires(id) on delete cascade,
+    produit_id uuid constraint fk_inventaire_lignes_produit_id references public.produits(id),
     stock_theorique numeric(12,2) default 0,
     stock_reel numeric(12,2) default 0,
     ecart numeric(12,2) default 0,
@@ -314,15 +314,15 @@ create table if not exists public.inventaire_lignes (
 -- Table transferts
 create table if not exists public.transferts (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
-    produit_id uuid references public.produits(id),
+    mama_id uuid constraint fk_transferts_mama_id references public.mamas(id) on delete cascade,
+    produit_id uuid constraint fk_transferts_produit_id references public.produits(id),
     quantite numeric(12,2),
     motif text,
     date_transfert date,
-    zone_source_id uuid references public.zones_stock(id),
-    zone_dest_id uuid references public.zones_stock(id),
+    zone_source_id uuid constraint fk_transferts_zone_source_id references public.zones_stock(id),
+    zone_dest_id uuid constraint fk_transferts_zone_dest_id references public.zones_stock(id),
     commentaire text,
-    utilisateur_id uuid references public.utilisateurs(id),
+    utilisateur_id uuid constraint fk_transferts_utilisateur_id references public.utilisateurs(id),
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
     actif boolean not null default true
@@ -331,9 +331,9 @@ create table if not exists public.transferts (
 -- Table transfert_lignes
 create table if not exists public.transfert_lignes (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
-    transfert_id uuid references public.transferts(id) on delete cascade,
-    produit_id uuid references public.produits(id),
+    mama_id uuid constraint fk_transfert_lignes_mama_id references public.mamas(id) on delete cascade,
+    transfert_id uuid constraint fk_transfert_lignes_transfert_id references public.transferts(id) on delete cascade,
+    produit_id uuid constraint fk_transfert_lignes_produit_id references public.produits(id),
     quantite numeric(12,2) not null,
     commentaire text,
     created_at timestamptz not null default now(),
@@ -344,10 +344,10 @@ create table if not exists public.transfert_lignes (
 -- Table mouvements
 create table if not exists public.mouvements (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
-    produit_id uuid references public.produits(id),
-    inventaire_id uuid references public.inventaires(id),
-    transfert_id uuid references public.transferts(id),
+    mama_id uuid constraint fk_mouvements_mama_id references public.mamas(id) on delete cascade,
+    produit_id uuid constraint fk_mouvements_produit_id references public.produits(id),
+    inventaire_id uuid constraint fk_mouvements_inventaire_id references public.inventaires(id),
+    transfert_id uuid constraint fk_mouvements_transfert_id references public.transferts(id),
     quantite numeric(12,2),
     type text,
     date timestamptz not null default now(),
@@ -359,8 +359,8 @@ create table if not exists public.mouvements (
 -- Table mouvements_centres_cout
 create table if not exists public.mouvements_centres_cout (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
-    mouvement_id uuid references public.mouvements(id) on delete cascade,
+    mama_id uuid constraint fk_mouvements_centres_cout_mama_id references public.mamas(id) on delete cascade,
+    mouvement_id uuid constraint fk_mouvements_centres_cout_mouvement_id references public.mouvements(id) on delete cascade,
     centre_cout_id uuid,
     valeur numeric(12,2),
     created_at timestamptz not null default now(),
@@ -371,7 +371,7 @@ create table if not exists public.mouvements_centres_cout (
 -- Table documents
 create table if not exists public.documents (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
+    mama_id uuid constraint fk_documents_mama_id references public.mamas(id) on delete cascade,
     titre text,
     url text,
     created_at timestamptz not null default now(),
@@ -382,8 +382,8 @@ create table if not exists public.documents (
 -- Table notifications
 create table if not exists public.notifications (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
-    utilisateur_id uuid references public.utilisateurs(id) on delete cascade,
+    mama_id uuid constraint fk_notifications_mama_id references public.mamas(id) on delete cascade,
+    utilisateur_id uuid constraint fk_notifications_utilisateur_id references public.utilisateurs(id) on delete cascade,
     titre text,
     message text,
     lu boolean not null default false,
@@ -395,7 +395,7 @@ create table if not exists public.notifications (
 -- Table gadgets
 create table if not exists public.gadgets (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
+    mama_id uuid constraint fk_gadgets_mama_id references public.mamas(id) on delete cascade,
     nom text,
     configuration jsonb,
     created_at timestamptz not null default now(),
@@ -406,8 +406,8 @@ create table if not exists public.gadgets (
 -- Table ventes_fiches_carte
 create table if not exists public.ventes_fiches_carte (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
-    produit_id uuid references public.produits(id),
+    mama_id uuid constraint fk_ventes_fiches_carte_mama_id references public.mamas(id) on delete cascade,
+    produit_id uuid constraint fk_ventes_fiches_carte_produit_id references public.produits(id),
     quantite numeric(12,2),
     montant numeric(12,2),
     created_at timestamptz not null default now(),
@@ -418,8 +418,8 @@ create table if not exists public.ventes_fiches_carte (
 -- Table ventes_familles
 create table if not exists public.ventes_familles (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
-    famille_id uuid references public.familles(id),
+    mama_id uuid constraint fk_ventes_familles_mama_id references public.mamas(id) on delete cascade,
+    famille_id uuid constraint fk_ventes_familles_famille_id references public.familles(id),
     quantite numeric(12,2),
     montant numeric(12,2),
     created_at timestamptz not null default now(),
@@ -430,8 +430,8 @@ create table if not exists public.ventes_familles (
 -- Table feedback
 create table if not exists public.feedback (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
-    utilisateur_id uuid references public.utilisateurs(id) on delete cascade,
+    mama_id uuid constraint fk_feedback_mama_id references public.mamas(id) on delete cascade,
+    utilisateur_id uuid constraint fk_feedback_utilisateur_id references public.utilisateurs(id) on delete cascade,
     message text,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
@@ -441,8 +441,8 @@ create table if not exists public.feedback (
 -- Table consentements_utilisateur
 create table if not exists public.consentements_utilisateur (
     id uuid primary key default uuid_generate_v4(),
-    mama_id uuid references public.mamas(id) on delete cascade,
-    utilisateur_id uuid references public.utilisateurs(id) on delete cascade,
+    mama_id uuid constraint fk_consentements_utilisateur_mama_id references public.mamas(id) on delete cascade,
+    utilisateur_id uuid constraint fk_consentements_utilisateur_utilisateur_id references public.utilisateurs(id) on delete cascade,
     type text,
     donne boolean not null default true,
     created_at timestamptz not null default now(),
@@ -453,7 +453,7 @@ create table if not exists public.consentements_utilisateur (
 -- Table periodes_comptables
 create table if not exists public.periodes_comptables (
     id uuid primary key default gen_random_uuid(),
-    mama_id uuid references public.mamas(id) on delete cascade,
+    mama_id uuid constraint fk_periodes_comptables_mama_id references public.mamas(id) on delete cascade,
     date_debut date not null,
     date_fin date not null,
     cloturee boolean default false,
@@ -465,7 +465,7 @@ create table if not exists public.periodes_comptables (
 -- Table taches
 create table if not exists public.taches (
     id uuid primary key default gen_random_uuid(),
-    mama_id uuid references public.mamas(id) on delete cascade,
+    mama_id uuid constraint fk_taches_mama_id references public.mamas(id) on delete cascade,
     titre text not null,
     description text,
     priorite text check (priorite in ('basse','moyenne','haute')) default 'moyenne',
@@ -477,19 +477,19 @@ create table if not exists public.taches (
 
 -- Table utilisateurs_taches
 create table if not exists public.utilisateurs_taches (
-    tache_id uuid references public.taches(id) on delete cascade,
-    utilisateur_id uuid references public.utilisateurs(id) on delete cascade,
+    tache_id uuid constraint fk_utilisateurs_taches_tache_id references public.taches(id) on delete cascade,
+    utilisateur_id uuid constraint fk_utilisateurs_taches_utilisateur_id references public.utilisateurs(id) on delete cascade,
     primary key (tache_id, utilisateur_id)
 );
 
 -- Table tache_instances
 create table if not exists public.tache_instances (
     id uuid primary key default gen_random_uuid(),
-    mama_id uuid references public.mamas(id) on delete cascade,
-    tache_id uuid references public.taches(id) on delete cascade,
+    mama_id uuid constraint fk_tache_instances_mama_id references public.mamas(id) on delete cascade,
+    tache_id uuid constraint fk_tache_instances_tache_id references public.taches(id) on delete cascade,
     date_echeance date,
     statut text,
-    done_by uuid references public.utilisateurs(id),
+    done_by uuid constraint fk_tache_instances_done_by references public.utilisateurs(id),
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
     actif boolean default true
@@ -498,10 +498,10 @@ create table if not exists public.tache_instances (
 -- Table planning_previsionnel
 create table if not exists public.planning_previsionnel (
     id uuid primary key default gen_random_uuid(),
-    mama_id uuid references public.mamas(id) on delete cascade,
+    mama_id uuid constraint fk_planning_previsionnel_mama_id references public.mamas(id) on delete cascade,
     date_prevue date,
     quantite numeric,
-    produit_id uuid references public.produits(id),
+    produit_id uuid constraint fk_planning_previsionnel_produit_id references public.produits(id),
     created_at timestamptz default now(),
     nom text,
     commentaire text,
@@ -512,11 +512,11 @@ create table if not exists public.planning_previsionnel (
 -- Table planning_lignes
 create table if not exists public.planning_lignes (
     id uuid primary key default gen_random_uuid(),
-    planning_id uuid references public.planning_previsionnel(id) on delete cascade,
-    produit_id uuid references public.produits(id),
+    planning_id uuid constraint fk_planning_lignes_planning_id references public.planning_previsionnel(id) on delete cascade,
+    produit_id uuid constraint fk_planning_lignes_produit_id references public.produits(id),
     quantite numeric,
     observation text,
-    mama_id uuid references public.mamas(id),
+    mama_id uuid constraint fk_planning_lignes_mama_id references public.mamas(id),
     actif boolean default true,
     created_at timestamptz default now()
 );
@@ -526,20 +526,20 @@ create table if not exists public.planning_lignes (
 -- ========================
 
 alter table if exists public.produits
-  add column if not exists zone_stock_id uuid references public.zones_stock(id) on delete set null,
+  add column if not exists zone_stock_id uuid constraint fk_produits_zone_stock_id references public.zones_stock(id) on delete set null,
   add column if not exists tva numeric(12,2);
 
 alter table if exists public.factures
   add column if not exists justificatif text,
   add column if not exists commentaire text,
   add column if not exists bon_livraison text,
-  add column if not exists periode_id uuid references public.periodes_comptables(id);
+  add column if not exists periode_id uuid constraint fk_factures_periode_id references public.periodes_comptables(id);
 
 alter table if exists public.inventaires
-  add column if not exists periode_id uuid references public.periodes_comptables(id);
+  add column if not exists periode_id uuid constraint fk_inventaires_periode_id references public.periodes_comptables(id);
 
 alter table if exists public.stock_mouvements
-  add column if not exists periode_id uuid references public.periodes_comptables(id);
+  add column if not exists periode_id uuid constraint fk_stock_mouvements_periode_id references public.periodes_comptables(id);
 
 do $$
 begin
@@ -553,7 +553,7 @@ begin
     select 1 from information_schema.columns
     where table_name = 'familles' and column_name = 'famille_parent_id'
   ) then
-    alter table public.familles add column famille_parent_id uuid references public.familles(id) on delete set null;
+    alter table public.familles add column famille_parent_id uuid constraint fk_familles_famille_parent_id references public.familles(id) on delete set null;
   end if;
 end$$;
 -- ========================
@@ -589,6 +589,7 @@ create index if not exists idx_fiches_techniques_mama_id on public.fiches_techni
 create index if not exists idx_stock_mouvements_mama_id on public.stock_mouvements(mama_id);
 create index if not exists idx_stock_mouvements_produit_id on public.stock_mouvements(produit_id);
 create index if not exists idx_stock_mouvements_date on public.stock_mouvements(date);
+create index if not exists idx_stock_inventaire_id on public.stock_mouvements(inventaire_id);
 create index if not exists idx_stocks_mama_id on public.stocks(mama_id);
 create index if not exists idx_stocks_produit_id on public.stocks(produit_id);
 create index if not exists idx_stocks_zone_id on public.stocks(zone_id);

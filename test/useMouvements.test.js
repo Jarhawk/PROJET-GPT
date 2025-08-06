@@ -49,8 +49,10 @@ test('getMouvements applies filters', async () => {
 test('createMouvement injects mama_id and auteur_id', async () => {
   const { result } = renderHook(() => useMouvements());
   await act(async () => {
-    await result.current.createMouvement({ produit_id: 'p1', quantite: 1 });
+    await result.current.createMouvement({ produit_id: 'p1', quantite: 1, motif: 'test' });
   });
   expect(fromMock).toHaveBeenCalledWith('stock_mouvements');
-  expect(query.insert).toHaveBeenCalledWith([{ produit_id: 'p1', quantite: 1, mama_id: 'm1', auteur_id: 'u1' }]);
+  expect(query.insert).toHaveBeenCalledWith([
+    { produit_id: 'p1', quantite: 1, commentaire: 'test', mama_id: 'm1', auteur_id: 'u1' },
+  ]);
 });

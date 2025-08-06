@@ -16,12 +16,12 @@ export default function MouvementForm({ onClose }) {
   const { fetchZones } = useZones();
   const [produitInput, setProduitInput] = useState("");
   const [form, setForm] = useState({
-    type: "entrée",
+    type: "ajustement",
     produit_id: "",
     quantite: 0,
     zone_source_id: "",
     zone_destination_id: "",
-    commentaire: "",
+    motif: "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -36,6 +36,10 @@ export default function MouvementForm({ onClose }) {
     if (loading) return;
     if (!form.produit_id || !form.quantite) {
       toast.error("Produit et quantité requis");
+      return;
+    }
+    if (!form.motif) {
+      toast.error("Motif requis");
       return;
     }
     try {
@@ -66,10 +70,11 @@ export default function MouvementForm({ onClose }) {
           value={form.type}
           onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
         >
-          <option value="entrée">Entrée</option>
+          <option value="ajustement">Ajustement</option>
+          <option value="perte">Perte</option>
+          <option value="don">Don</option>
+          <option value="entree">Entrée</option>
           <option value="sortie">Sortie</option>
-          <option value="transfert">Transfert</option>
-          <option value="inventaire">Ajustement</option>
         </select>
         <div className="mb-2">
           <Input
@@ -93,18 +98,18 @@ export default function MouvementForm({ onClose }) {
           value={form.quantite}
           onChange={e => setForm(f => ({ ...f, quantite: parseFloat(e.target.value) }))}
         />
-        {form.type !== "entrée" && (
+        {form.type !== "entree" && (
           <AutoCompleteZoneField
-            placeholder="Zone source"
+            placeholder="Zone"
             value={form.zone_source_id}
             onChange={obj => {
               setForm(f => ({ ...f, zone_source_id: obj?.id || "" }));
             }}
           />
         )}
-        {form.type !== "sortie" && form.type !== "correction" && (
+        {form.type === "entree" && (
           <AutoCompleteZoneField
-            placeholder="Zone destination"
+            placeholder="Zone"
             value={form.zone_destination_id}
             onChange={obj => {
               setForm(f => ({ ...f, zone_destination_id: obj?.id || "" }));
@@ -113,9 +118,9 @@ export default function MouvementForm({ onClose }) {
         )}
         <textarea
           className="textarea mb-2 w-full"
-          placeholder="Commentaire"
-          value={form.commentaire}
-          onChange={e => setForm(f => ({ ...f, commentaire: e.target.value }))}
+          placeholder="Motif"
+          value={form.motif}
+          onChange={e => setForm(f => ({ ...f, motif: e.target.value }))}
         />
         <div className="flex flex-wrap justify-center gap-4 mt-4">
           <PrimaryButton type="submit" disabled={loading}>

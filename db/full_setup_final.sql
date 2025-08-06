@@ -110,13 +110,16 @@ DECLARE
   com text;
 BEGIN
   SELECT * INTO tr FROM transferts WHERE id = NEW.transfert_id;
+  IF NOT EXISTS (SELECT 1 FROM produits p WHERE p.id = NEW.produit_id AND p.mama_id = tr.mama_id) THEN
+    RAISE EXCEPTION 'Produit inexistant';
+  END IF;
   com := COALESCE(NEW.commentaire, tr.commentaire);
 
-  INSERT INTO stock_mouvements(mama_id, produit_id, quantite, type, date, zone_id, auteur_id, commentaire)
-    VALUES(tr.mama_id, NEW.produit_id, -NEW.quantite, 'transfert', tr.date_transfert, tr.zone_source_id, tr.utilisateur_id, com);
+  INSERT INTO stock_mouvements(mama_id, produit_id, quantite, type, date, zone_id, zone_source_id, zone_destination_id, auteur_id, commentaire)
+    VALUES(tr.mama_id, NEW.produit_id, NEW.quantite, 'sortie_transfert', tr.date_transfert, tr.zone_source_id, tr.zone_source_id, tr.zone_dest_id, tr.utilisateur_id, com);
 
-  INSERT INTO stock_mouvements(mama_id, produit_id, quantite, type, date, zone_id, auteur_id, commentaire)
-    VALUES(tr.mama_id, NEW.produit_id, NEW.quantite, 'transfert', tr.date_transfert, tr.zone_dest_id, tr.utilisateur_id, com);
+  INSERT INTO stock_mouvements(mama_id, produit_id, quantite, type, date, zone_id, zone_source_id, zone_destination_id, auteur_id, commentaire)
+    VALUES(tr.mama_id, NEW.produit_id, NEW.quantite, 'entree_transfert', tr.date_transfert, tr.zone_dest_id, tr.zone_source_id, tr.zone_dest_id, tr.utilisateur_id, com);
 
   RETURN NEW;
 END;
@@ -379,8 +382,8 @@ GROUP BY ft.mama_id, ft.famille;
 CREATE OR REPLACE VIEW v_stock_disponible AS
 SELECT p.mama_id, p.id AS produit_id,
        COALESCE(SUM(CASE
-         WHEN sm.type IN ('entree_achat','ENTREE','TRANSFERT','TRANSFERT+') THEN sm.quantite
-         WHEN sm.type = 'ajustement_inventaire' THEN sm.quantite
+         WHEN sm.type IN ('entree_achat','entree_transfert','entree') THEN sm.quantite
+         WHEN sm.type IN ('ajustement_inventaire','ajustement') THEN sm.quantite
          ELSE -sm.quantite END),0) AS stock
 FROM produits p
 LEFT JOIN stock_mouvements sm ON sm.produit_id = p.id AND sm.mama_id = p.mama_id
@@ -388,6 +391,15 @@ GROUP BY p.mama_id, p.id;
 
 CREATE OR REPLACE VIEW v_stocks AS
 SELECT * FROM v_stock_disponible;
+
+CREATE OR REPLACE VIEW v_consommation_cumulee AS
+SELECT p.mama_id, p.id AS produit_id,
+       COALESCE(SUM(CASE
+         WHEN sm.type IN ('sortie_fiche','ajustement_inventaire','perte','don','sortie_transfert') THEN sm.quantite
+         ELSE 0 END),0) AS consommation
+FROM produits p
+LEFT JOIN stock_mouvements sm ON sm.produit_id = p.id AND sm.mama_id = p.mama_id
+GROUP BY p.mama_id, p.id;
 
 ALTER TABLE IF EXISTS familles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS sous_familles ENABLE ROW LEVEL SECURITY;

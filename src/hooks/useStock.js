@@ -131,9 +131,14 @@ export function useStock() {
   const createMouvement = useCallback(
     async (payload) => {
       if (!mama_id) return null;
+      const toInsert = { ...payload, mama_id, auteur_id: user_id };
+      if (payload.motif) {
+        toInsert.commentaire = payload.motif;
+        delete toInsert.motif;
+      }
       const { data, error } = await supabase
         .from("stock_mouvements")
-        .insert([{ ...payload, mama_id, auteur_id: user_id }])
+        .insert([toInsert])
         .select()
         .single();
       if (error) return null;

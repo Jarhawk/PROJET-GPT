@@ -121,8 +121,8 @@ create table if not exists public.produits (
     id uuid primary key default uuid_generate_v4(),
     mama_id uuid references public.mamas(id) on delete cascade,
     nom text not null,
-    famille_id uuid references public.familles(id),
-    sous_famille_id uuid references public.sous_familles(id),
+    famille_id uuid constraint fk_produits_famille references public.familles(id),
+    sous_famille_id uuid constraint fk_produits_sous_famille references public.sous_familles(id),
     unite_id uuid references public.unites(id),
     zone_stock_id uuid references public.zones_stock(id),
     fournisseur_id uuid references public.fournisseurs(id),
@@ -223,7 +223,7 @@ create table if not exists public.fournisseur_produits (
     id uuid primary key default uuid_generate_v4(),
     mama_id uuid references public.mamas(id) on delete cascade,
     produit_id uuid references public.produits(id),
-    fournisseur_id uuid references public.fournisseurs(id),
+    fournisseur_id uuid constraint fk_fournisseur_produits_fournisseur_id references public.fournisseurs(id),
     prix_achat numeric(12,2),
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
@@ -347,6 +347,7 @@ create table if not exists public.mouvements (
     mama_id uuid references public.mamas(id) on delete cascade,
     produit_id uuid references public.produits(id),
     inventaire_id uuid references public.inventaires(id),
+    transfert_id uuid references public.transferts(id),
     quantite numeric(12,2),
     type text,
     date timestamptz not null default now(),
@@ -632,6 +633,7 @@ create index if not exists idx_transfert_lignes_produit_id on public.transfert_l
 create index if not exists idx_mouvements_mama_id on public.mouvements(mama_id);
 create index if not exists idx_mouvements_produit_id on public.mouvements(produit_id);
 create index if not exists idx_mouvements_date on public.mouvements(date);
+create index if not exists idx_mouvements_transfert_id on public.mouvements(transfert_id);
 create index if not exists idx_mouvements_centres_cout_mama_id on public.mouvements_centres_cout(mama_id);
 create index if not exists idx_mouvements_centres_cout_mouvement_id on public.mouvements_centres_cout(mouvement_id);
 create index if not exists idx_mouvements_centres_cout_centre_cout_id on public.mouvements_centres_cout(centre_cout_id);
@@ -1056,6 +1058,16 @@ create trigger trg_prevent_delete_produits
 -- VIEWS
 -- ========================
 
+create or replace view public.v_fiche_lignes_complete as
+select fl.*, 
+       p.nom as produit_nom,
+       u.nom as unite_nom,
+       p.pmp,
+       p.dernier_prix
+from public.fiche_lignes fl
+left join public.produits p on p.id = fl.produit_id
+left join public.unites u on u.id = p.unite_id;
+
 create or replace view public.v_produits_dernier_prix as
 select p.id as produit_id, p.mama_id,
        (select fl.prix from public.facture_lignes fl
@@ -1191,8 +1203,8 @@ group by fl.produit_id, date_trunc('month', f.date_facture);
 create or replace view public.v_products_last_price as
 select sp.produit_id,
        p.nom as produit_nom,
-       p.famille_id as famille,
-       p.unite_id as unite,
+       p.famille_id,
+       p.unite_id,
        sp.fournisseur_id,
        s.nom as fournisseur_nom,
        sp.prix_achat as dernier_prix,

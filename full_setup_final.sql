@@ -521,6 +521,95 @@ left join public.utilisateurs_taches ut on ut.tache_id = t.id
 left join public.utilisateurs u on u.id = ut.utilisateur_id
 left join public.roles r on r.id = u.role_id;
 
+create or replace view public.v_achats_mensuels as
+select f.mama_id,
+       date_trunc('month', f.date_facture) as mois,
+       sum(fl.quantite * fl.prix) as montant
+from public.factures f
+join public.facture_lignes fl on fl.facture_id = f.id
+group by f.mama_id, date_trunc('month', f.date_facture);
+
+create or replace view public.v_pmp as
+select p.mama_id,
+       p.id as produit_id,
+       p.pmp
+from public.produits p;
+
+create or replace view public.v_cost_center_month as
+select mcc.mama_id,
+       mcc.centre_cout_id as cost_center_id,
+       date_trunc('month', m.date) as mois,
+       sum(mcc.valeur) as valeur
+from public.mouvements m
+join public.mouvements_centres_cout mcc on mcc.mouvement_id = m.id
+group by mcc.mama_id, mcc.centre_cout_id, date_trunc('month', m.date);
+
+create or replace view public.v_cost_center_monthly as
+select mama_id, mois, sum(valeur) as total
+from public.v_cost_center_month
+group by mama_id, mois;
+
+create or replace view public.v_analytique_stock as
+select m.mama_id,
+       m.date as date,
+       p.famille,
+       mcc.centre_cout_id as cost_center_id,
+       m.produit_id,
+       mcc.valeur
+from public.mouvements m
+left join public.mouvements_centres_cout mcc on mcc.mouvement_id = m.id
+left join public.produits p on p.id = m.produit_id;
+
+create or replace view public.v_fournisseurs_inactifs as
+select id, mama_id, nom, ville, actif, created_at
+from public.fournisseurs
+where actif is false;
+
+create or replace view public.v_tendance_prix_produit as
+select fl.produit_id,
+       date_trunc('month', f.date_facture) as mois,
+       avg(fl.prix) as prix_moyen
+from public.facture_lignes fl
+join public.factures f on f.id = fl.facture_id
+where fl.actif is true and f.actif is true
+group by fl.produit_id, date_trunc('month', f.date_facture);
+
+create or replace view public.v_products_last_price as
+select sp.produit_id,
+       p.nom as produit_nom,
+       p.famille,
+       p.unite_id as unite,
+       sp.fournisseur_id,
+       s.nom as fournisseur_nom,
+       sp.prix_achat as dernier_prix,
+       sp.created_at,
+       p.mama_id
+from public.fournisseur_produits sp
+join public.produits p on sp.produit_id = p.id
+join public.fournisseurs s on sp.fournisseur_id = s.id
+where sp.created_at = (
+  select max(sp2.created_at)
+  from public.fournisseur_produits sp2
+  where sp2.produit_id = sp.produit_id
+    and sp2.fournisseur_id = sp.fournisseur_id
+);
+
+create or replace view public.v_transferts_historique as
+select t.id,
+       t.mama_id,
+       t.produit_id,
+       p.nom as produit_nom,
+       t.quantite,
+       t.motif,
+       t.date_transfert,
+       zs.nom as zone_depart,
+       zd.nom as zone_arrivee,
+       t.commentaire
+from public.transferts t
+left join public.produits p on p.id = t.produit_id
+left join public.zones_stock zs on zs.id = t.zone_source_id
+left join public.zones_stock zd on zd.id = t.zone_dest_id;
+
 -- ========================
 -- FUNCTIONS
 -- ========================
@@ -537,6 +626,15 @@ language sql stable as $$
   select r.nom from public.roles r
   join public.utilisateurs u on u.role_id = r.id
   where u.auth_id = auth.uid();
+$$;
+
+create or replace function public.consolidated_stats()
+returns table(total_produits bigint, total_fournisseurs bigint, total_alertes bigint)
+language sql stable as $$
+  select
+    (select count(*) from public.produits where mama_id = public.current_user_mama_id()),
+    (select count(*) from public.fournisseurs where mama_id = public.current_user_mama_id()),
+    (select count(*) from public.notifications where mama_id = public.current_user_mama_id() and lu is false)
 $$;
 
 create or replace function public.periode_actuelle(mid uuid)

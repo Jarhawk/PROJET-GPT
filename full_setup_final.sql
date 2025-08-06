@@ -2,24 +2,6 @@
 create extension if not exists "uuid-ossp";
 create extension if not exists "pgcrypto";
 
--- FUNCTIONS
-create or replace function set_updated_at()
-returns trigger as $$
-begin
-  new.updated_at := now();
-  return new;
-end;
-$$ language plpgsql;
-
-create or replace function prevent_unite_delete()
-returns trigger as $$
-begin
-  if exists (select 1 from produits where unite_id = old.id and actif is true) then
-    raise exception 'Unité utilisée par des produits';
-  end if;
-  return old;
-end;
-$$ language plpgsql;
 -- TABLES
 
 -- Table mamas
@@ -984,6 +966,26 @@ $$;
 -- ========================
 -- Additional trigger functions
 -- ========================
+
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql as $$
+begin
+  new.updated_at := now();
+  return new;
+end;
+$$;
+
+create or replace function public.prevent_unite_delete()
+returns trigger
+language plpgsql as $$
+begin
+  if exists (select 1 from public.produits where unite_id = old.id and actif is true) then
+    raise exception 'Unité utilisée par des produits';
+  end if;
+  return old;
+end;
+$$;
 
 create or replace function public.trigger_set_timestamp()
 returns trigger

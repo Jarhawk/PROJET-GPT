@@ -704,6 +704,87 @@ FROM inventaires i
 JOIN inventaire_lignes l ON l.inventaire_id = i.id
 WHERE i.actif IS TRUE AND l.actif IS TRUE;
 
+-- Dernier prix connu par produit
+CREATE OR REPLACE VIEW v_products_last_price AS
+SELECT DISTINCT ON (fp.produit_id, fp.mama_id)
+  fp.produit_id,
+  fp.mama_id,
+  fp.prix AS dernier_prix,
+  fp.date_livraison
+FROM fournisseur_produits fp
+WHERE fp.actif IS TRUE
+ORDER BY fp.produit_id, fp.mama_id, fp.date_livraison DESC;
+
+-- Vue détaillée des lignes de fiche
+CREATE OR REPLACE VIEW v_fiche_lignes_complete AS
+SELECT fl.*, p.nom AS produit_nom, u.nom AS unite_nom,
+       f.nom AS famille_nom, sf.nom AS sous_famille_nom,
+       vp.pmp, vl.dernier_prix
+FROM fiche_lignes fl
+LEFT JOIN produits p ON p.id = fl.produit_id
+LEFT JOIN unites u ON u.id = p.unite_id
+LEFT JOIN familles f ON f.id = p.famille_id
+LEFT JOIN sous_familles sf ON sf.id = p.sous_famille_id
+LEFT JOIN v_pmp vp ON vp.produit_id = fl.produit_id AND vp.mama_id = fl.mama_id
+LEFT JOIN v_products_last_price vl ON vl.produit_id = fl.produit_id AND vl.mama_id = fl.mama_id;
+
+-- Fonction de recalcul des coûts de fiche
+CREATE OR REPLACE FUNCTION refresh_fiche_cost_by_id(fid uuid)
+RETURNS void AS $$
+DECLARE
+  v_cout numeric;
+  v_portions numeric;
+BEGIN
+  SELECT COALESCE(SUM(fl.quantite * COALESCE(vp.pmp, vl.dernier_prix, 0)),0), f.portions
+    INTO v_cout, v_portions
+  FROM fiches_techniques f
+  LEFT JOIN fiche_lignes fl ON fl.fiche_id = f.id
+  LEFT JOIN v_pmp vp ON vp.produit_id = fl.produit_id AND vp.mama_id = f.mama_id
+  LEFT JOIN v_products_last_price vl ON vl.produit_id = fl.produit_id AND vl.mama_id = f.mama_id
+  WHERE f.id = fid
+  GROUP BY f.portions;
+
+  UPDATE fiches_techniques
+  SET cout_total = v_cout,
+      cout_par_portion = CASE WHEN v_portions > 0 THEN v_cout / v_portions ELSE 0 END
+  WHERE id = fid;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION trg_refresh_fiche_cost()
+RETURNS trigger AS $$
+BEGIN
+  PERFORM refresh_fiche_cost_by_id(COALESCE(NEW.fiche_id, OLD.fiche_id, NEW.id));
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION trg_refresh_fiches_from_product()
+RETURNS trigger AS $$
+DECLARE fid uuid;
+BEGIN
+  FOR fid IN SELECT fiche_id FROM fiche_lignes WHERE produit_id = NEW.id LOOP
+    PERFORM refresh_fiche_cost_by_id(fid);
+  END LOOP;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_fiche_lignes_cost ON fiche_lignes;
+CREATE TRIGGER trg_fiche_lignes_cost
+AFTER INSERT OR UPDATE OR DELETE ON fiche_lignes
+FOR EACH ROW EXECUTE FUNCTION trg_refresh_fiche_cost();
+
+DROP TRIGGER IF EXISTS trg_fiche_update_cost ON fiches_techniques;
+CREATE TRIGGER trg_fiche_update_cost
+AFTER UPDATE ON fiches_techniques
+FOR EACH ROW EXECUTE FUNCTION trg_refresh_fiche_cost();
+
+DROP TRIGGER IF EXISTS trg_product_update_fiches ON produits;
+CREATE TRIGGER trg_product_update_fiches
+AFTER UPDATE ON produits
+FOR EACH ROW EXECUTE FUNCTION trg_refresh_fiches_from_product();
+
 -- Onboarding helper
 CREATE OR REPLACE FUNCTION fn_sync_auth_user()
 RETURNS void AS $$

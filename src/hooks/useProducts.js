@@ -67,15 +67,19 @@ export function useProducts() {
     const [
       { data: pmpData },
       { data: stockData },
+      { data: lastPriceData },
     ] = await Promise.all([
       supabase.from('v_pmp').select('produit_id, pmp').eq('mama_id', mama_id),
       supabase.from('v_stocks').select('produit_id, stock').eq('mama_id', mama_id),
+      supabase.from('v_products_last_price').select('produit_id, dernier_prix').eq('mama_id', mama_id),
     ]);
     const pmpMap = Object.fromEntries((pmpData || []).map(p => [p.produit_id, p.pmp]));
     const stockMap = Object.fromEntries((stockData || []).map(s => [s.produit_id, s.stock]));
+    const lastPriceMap = Object.fromEntries((lastPriceData || []).map(l => [l.produit_id, l.dernier_prix]));
     const final = (Array.isArray(data) ? data : []).map((p) => ({
       ...p,
       pmp: pmpMap[p.id] ?? p.pmp,
+      dernier_prix: lastPriceMap[p.id] ?? p.dernier_prix,
       stock_theorique: stockMap[p.id] ?? p.stock_theorique,
     }));
     setProducts(final);

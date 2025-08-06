@@ -6,8 +6,8 @@ import useAuth from "@/hooks/useAuth";
 import { useFiches } from "@/hooks/useFiches";
 import { useProducts } from "@/hooks/useProducts";
 import { useFamilles } from "@/hooks/useFamilles";
-import { useProduitsAutocomplete } from "@/hooks/useProduitsAutocomplete";
 import { useFichesAutocomplete } from "@/hooks/useFichesAutocomplete";
+import { Select } from "@/components/ui/select";
 import TableContainer from "@/components/ui/TableContainer";
 import { Button } from "@/components/ui/button";
 import PrimaryButton from "@/components/ui/PrimaryButton";
@@ -32,16 +32,14 @@ export default function FicheForm({ fiche, onClose }) {
   const [loading, setLoading] = useState(false);
 
   const allowed = access_rights?.fiches_techniques?.peut_voir;
-  const { results: prodOptions, searchProduits } = useProduitsAutocomplete();
   const { results: ficheOptions, searchFiches } = useFichesAutocomplete();
 
   useEffect(() => {
     if (!allowed) return;
-    fetchProducts();
+    fetchProducts({ sortBy: 'nom', limit: 1000 });
     fetchFamilles();
-    searchProduits();
     searchFiches({ excludeId: fiche?.id });
-  }, [allowed, fetchProducts, fetchFamilles, searchProduits, searchFiches, fiche?.id]);
+  }, [allowed, fetchProducts, fetchFamilles, searchFiches, fiche?.id]);
 
   if (authLoading) {
     return <LoadingSpinner message="Chargement..." />;
@@ -66,8 +64,9 @@ export default function FicheForm({ fiche, onClose }) {
 
   const cout_total = lignes.reduce((sum, l) => {
     if (l.type === 'produit') {
-      const prod = products.find(p => p.id === l.produit_id) || prodOptions.find(p => p.id === l.produit_id);
-      return sum + (prod?.pmp ? Number(l.quantite) * Number(prod.pmp) : 0);
+      const prod = products.find(p => p.id === l.produit_id);
+      const prix = prod?.pmp ?? prod?.dernier_prix ?? 0;
+      return sum + Number(l.quantite) * Number(prix);
     }
     const sf = ficheOptions.find(f => f.id === l.sous_fiche_id);
     return sum + (sf?.cout_par_portion ? Number(l.quantite) * Number(sf.cout_par_portion) : 0);
@@ -177,7 +176,7 @@ export default function FicheForm({ fiche, onClose }) {
             </thead>
             <tbody>
               {lignes.map((l, i) => {
-                const prod = products.find(p => p.id === l.produit_id) || prodOptions.find(p => p.id === l.produit_id);
+                const prod = products.find(p => p.id === l.produit_id);
                 const sf = ficheOptions.find(f => f.id === l.sous_fiche_id);
                 return (
                   <tr key={i}>
@@ -200,9 +199,9 @@ export default function FicheForm({ fiche, onClose }) {
                           required
                         >
                           <option value="">Sélectionner</option>
-                          {prodOptions.map(p => (
+                          {products.map(p => (
                             <option key={p.id} value={p.id}>
-                              {p.nom}
+                              {p.nom}{p.unite?.nom ? ` (${p.unite.nom})` : ''}
                             </option>
                           ))}
                         </Select>
@@ -234,8 +233,8 @@ export default function FicheForm({ fiche, onClose }) {
                       />
                     </td>
                     <td>{l.type === 'produit' ? prod?.unite?.nom || '-' : 'portion'}</td>
-                    <td>{l.type === 'produit' ? (prod?.pmp ? prod.pmp.toFixed(2) : '-') : sf?.cout_par_portion?.toFixed(2) || '-'}</td>
-                    <td>{l.type === 'produit' ? (prod?.pmp ? (prod.pmp * l.quantite).toFixed(2) : '-') : sf?.cout_par_portion ? (sf.cout_par_portion * l.quantite).toFixed(2) : '-'}</td>
+                    <td>{l.type === 'produit' ? (prod?.pmp ?? prod?.dernier_prix ?? null) ? Number(prod.pmp ?? prod.dernier_prix).toFixed(2) : '-' : sf?.cout_par_portion?.toFixed(2) || '-'}</td>
+                    <td>{l.type === 'produit' ? (prod?.pmp ?? prod?.dernier_prix ?? null) ? ((Number(prod.pmp ?? prod.dernier_prix) * l.quantite).toFixed(2)) : '-' : sf?.cout_par_portion ? (sf.cout_par_portion * l.quantite).toFixed(2) : '-'}</td>
                     <td><Button size="sm" variant="outline" onClick={() => removeLigne(i)}>Suppr.</Button></td>
                   </tr>
                 );

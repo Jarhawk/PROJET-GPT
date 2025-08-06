@@ -15,14 +15,16 @@ export function useTaches() {
     setError(null);
     let query = supabase
       .from("taches")
-      .select("*")
+      .select(
+        "*, utilisateurs_taches(utilisateur_id, utilisateur:utilisateurs(nom))"
+      )
       .eq("mama_id", mama_id)
       .order("date_echeance", { ascending: true });
     if (filters.statut) query = query.eq("statut", filters.statut);
     if (filters.priorite) query = query.eq("priorite", filters.priorite);
-    if (filters.assigne) query = query.contains("assignes", [filters.assigne]);
-    if (filters.utilisateur_id) query = query.eq("utilisateur_id", filters.utilisateur_id);
-    if (filters.start) query = query.gte("date_debut", filters.start);
+    if (filters.assigne)
+      query = query.eq("utilisateurs_taches.utilisateur_id", filters.assigne);
+    if (filters.start) query = query.gte("date_echeance", filters.start);
     if (filters.end) query = query.lte("date_echeance", filters.end);
     const { data, error } = await query;
     setLoading(false);
@@ -35,95 +37,114 @@ export function useTaches() {
     return data || [];
   }, [mama_id]);
 
-  const computeDue = values => {
-    if (values.delai_jours && !values.date_echeance) {
-      const start = new Date(values.date_debut);
-      if (!Number.isNaN(start)) {
-        start.setDate(start.getDate() + Number(values.delai_jours));
-        return start.toISOString().slice(0, 10);
-      }
+  const getTache = useCallback(async id => {
+    if (!mama_id || !id) return null;
+    const { data, error } = await supabase
+      .from("taches")
+      .select(
+        "*, utilisateurs_taches(utilisateur_id, utilisateur:utilisateurs(nom))"
+      )
+      .eq("id", id)
+      .eq("mama_id", mama_id)
+      .single();
+    if (error) {
+      setError(error.message || error);
+      return null;
     }
-    return values.date_echeance;
-  };
+    return data;
+  }, [mama_id]);
 
-  const createTache = useCallback(
-    async values => {
-      if (!mama_id || !user_id) return { error: "no_mama" };
-      setLoading(true);
-      setError(null);
-      const payload = {
-        ...values,
-        date_echeance: computeDue(values),
-        mama_id,
-        created_by: user_id,
-        utilisateur_id: values.utilisateur_id || user_id,
-      };
-      if (!payload.assignes || payload.assignes.length === 0) {
-        payload.assignes = [user_id];
-      }
-      const { error } = await supabase.from("taches").insert([payload]);
+  const createTache = useCallback(async values => {
+    if (!mama_id || !user_id) return { error: "no_mama" };
+    setLoading(true);
+    setError(null);
+    const payload = {
+      titre: values.titre,
+      description: values.description,
+      priorite: values.priorite,
+      statut: values.statut || "a_faire",
+      date_echeance: values.date_echeance,
+      mama_id,
+    };
+    const { data, error } = await supabase
+      .from("taches")
+      .insert([payload])
+      .select()
+      .single();
+    if (error) {
       setLoading(false);
-      if (error) {
-        setError(error.message || error);
-        return { error };
-      }
-      await getTaches();
-      return {};
-    },
-    [mama_id, user_id, getTaches]
-  );
+      setError(error.message || error);
+      return { error };
+    }
+    const assignes = values.assignes && values.assignes.length > 0 ? values.assignes : [user_id];
+    const rows = assignes.map(uid => ({ tache_id: data.id, utilisateur_id: uid }));
+    await supabase.from("utilisateurs_taches").insert(rows);
+    setLoading(false);
+    await getTaches();
+    return data;
+  }, [mama_id, user_id, getTaches]);
 
-  const updateTache = useCallback(
-    async (id, values) => {
-      setLoading(true);
-      setError(null);
-      const payload = { ...values, date_echeance: computeDue(values), updated_at: new Date().toISOString() };
-      if (!payload.assignes || payload.assignes.length === 0) {
-        payload.assignes = [user_id];
-      }
-      const { error } = await supabase
-        .from("taches")
-        .update(payload)
-        .eq("id", id)
-        .eq("mama_id", mama_id);
+  const updateTache = useCallback(async (id, values) => {
+    setLoading(true);
+    setError(null);
+    const payload = {
+      titre: values.titre,
+      description: values.description,
+      priorite: values.priorite,
+      statut: values.statut,
+      date_echeance: values.date_echeance,
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await supabase
+      .from("taches")
+      .update(payload)
+      .eq("id", id)
+      .eq("mama_id", mama_id);
+    if (error) {
       setLoading(false);
-      if (error) {
-        setError(error.message || error);
-        return { error };
-      }
-      await getTaches();
-      return {};
-    },
-    [mama_id, getTaches]
-  );
+      setError(error.message || error);
+      return { error };
+    }
+    await supabase
+      .from("utilisateurs_taches")
+      .delete()
+      .eq("tache_id", id);
+    const assignes = values.assignes && values.assignes.length > 0 ? values.assignes : [user_id];
+    const rows = assignes.map(uid => ({ tache_id: id, utilisateur_id: uid }));
+    await supabase.from("utilisateurs_taches").insert(rows);
+    setLoading(false);
+    await getTaches();
+    return {};
+  }, [mama_id, user_id, getTaches]);
 
-  const deleteTache = useCallback(
-    async id => {
-      setLoading(true);
-      setError(null);
-      const { error } = await supabase
-        .from("taches")
-        .delete()
-        .eq("id", id)
-        .eq("mama_id", mama_id);
-      setLoading(false);
-      if (error) {
-        setError(error.message || error);
-        return { error };
-      }
-      await getTaches();
-      return {};
-    },
-    [mama_id, getTaches]
-  );
+  const deleteTache = useCallback(async id => {
+    setLoading(true);
+    setError(null);
+    await supabase.from("utilisateurs_taches").delete().eq("tache_id", id);
+    const { error } = await supabase
+      .from("taches")
+      .delete()
+      .eq("id", id)
+      .eq("mama_id", mama_id);
+    setLoading(false);
+    if (error) {
+      setError(error.message || error);
+      return { error };
+    }
+    await getTaches();
+    return {};
+  }, [mama_id, getTaches]);
 
   return {
     taches,
     loading,
     error,
     getTaches,
+    getTache,
     createTache,
     updateTache,
     deleteTache,
   };
 }
+
+export default useTaches;

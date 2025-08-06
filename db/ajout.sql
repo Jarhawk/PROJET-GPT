@@ -65,3 +65,74 @@ RETURNS TABLE(
   WHERE mama_id = mid AND actuelle = true
   LIMIT 1;
 $$ LANGUAGE sql STABLE;
+
+-- Module Tâches
+
+-- Table des tâches
+CREATE TABLE IF NOT EXISTS taches (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  mama_id uuid NOT NULL REFERENCES mamas(id) ON DELETE CASCADE,
+  titre text NOT NULL,
+  description text,
+  priorite text CHECK (priorite IN ('basse','moyenne','haute')) DEFAULT 'moyenne',
+  statut text CHECK (statut IN ('a_faire','en_cours','terminee')) DEFAULT 'a_faire',
+  date_echeance date,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_taches_mama_id ON taches(mama_id);
+CREATE INDEX IF NOT EXISTS idx_taches_statut ON taches(statut);
+CREATE INDEX IF NOT EXISTS idx_taches_priorite ON taches(priorite);
+
+DROP TRIGGER IF EXISTS trg_set_updated_at_taches ON taches;
+CREATE TRIGGER trg_set_updated_at_taches
+  BEFORE UPDATE ON taches
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+ALTER TABLE taches ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS taches_all ON taches;
+CREATE POLICY taches_all ON taches
+  FOR ALL USING (mama_id = current_user_mama_id())
+  WITH CHECK (mama_id = current_user_mama_id());
+
+-- Table de liaison tâches/utilisateurs
+CREATE TABLE IF NOT EXISTS utilisateurs_taches (
+  tache_id uuid REFERENCES taches(id) ON DELETE CASCADE,
+  utilisateur_id uuid REFERENCES utilisateurs(id) ON DELETE CASCADE,
+  PRIMARY KEY (tache_id, utilisateur_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_utilisateurs_taches_utilisateur ON utilisateurs_taches(utilisateur_id);
+
+ALTER TABLE utilisateurs_taches ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS utilisateurs_taches_all ON utilisateurs_taches;
+CREATE POLICY utilisateurs_taches_all ON utilisateurs_taches
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM taches t WHERE t.id = tache_id AND t.mama_id = current_user_mama_id()
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM taches t WHERE t.id = tache_id AND t.mama_id = current_user_mama_id()
+    )
+  );
+
+-- Vue facilitant les jointures avec les utilisateurs
+CREATE OR REPLACE VIEW v_taches_assignees AS
+SELECT
+  t.id,
+  t.mama_id,
+  t.titre,
+  t.description,
+  t.priorite,
+  t.statut,
+  t.date_echeance,
+  t.created_at,
+  t.updated_at,
+  ut.utilisateur_id,
+  u.nom AS utilisateur_nom
+FROM taches t
+LEFT JOIN utilisateurs_taches ut ON ut.tache_id = t.id
+LEFT JOIN utilisateurs u ON u.id = ut.utilisateur_id;

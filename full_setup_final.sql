@@ -1,6 +1,25 @@
 -- EXTENSIONS
 create extension if not exists "uuid-ossp";
 create extension if not exists "pgcrypto";
+
+-- FUNCTIONS
+create or replace function set_updated_at()
+returns trigger as $$
+begin
+  new.updated_at := now();
+  return new;
+end;
+$$ language plpgsql;
+
+create or replace function prevent_unite_delete()
+returns trigger as $$
+begin
+  if exists (select 1 from produits where unite_id = old.id and actif is true) then
+    raise exception 'Unité utilisée par des produits';
+  end if;
+  return old;
+end;
+$$ language plpgsql;
 -- TABLES
 
 -- Table mamas
@@ -137,7 +156,7 @@ create table if not exists public.produits (
     stock_min numeric(12,2) default 0,
     dernier_prix numeric(12,2),
     pmp numeric(12,2),
-    tva numeric(12,2),
+    tva numeric(12,2) default 20,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
     actif boolean not null default true
@@ -151,24 +170,38 @@ create table if not exists public.commandes (
     id uuid primary key default uuid_generate_v4(),
     mama_id uuid references public.mamas(id) on delete cascade,
     fournisseur_id uuid references public.fournisseurs(id),
-    date_commande date,
+    statut text,
     created_at timestamptz not null default now(),
+    date_commande date,
+    date_livraison_prevue date,
+    montant_total numeric(12,2),
+    commentaire text,
     updated_at timestamptz not null default now(),
-    actif boolean not null default true
+    actif boolean not null default true,
+    bl_id uuid references public.bons_livraison(id),
+    facture_id uuid references public.factures(id)
 );
 create index if not exists idx_commandes_mama_id on public.commandes(mama_id);
+create index if not exists idx_commandes_statut on public.commandes(statut);
 
 -- Table bons_livraison
 create table if not exists public.bons_livraison (
     id uuid primary key default uuid_generate_v4(),
     mama_id uuid references public.mamas(id) on delete cascade,
-    commande_id uuid references public.commandes(id) on delete cascade,
-    numero text,
+    fournisseur_id uuid references public.fournisseurs(id),
+    numero_bl text,
+    date_livraison date,
     created_at timestamptz not null default now(),
+    date_reception date,
+    commentaire text,
+    statut text default 'recu',
+    actif boolean not null default true,
     updated_at timestamptz not null default now(),
-    actif boolean not null default true
+    commande_id uuid references public.commandes(id) on delete cascade,
+    facture_id uuid references public.factures(id)
 );
 create index if not exists idx_bons_livraison_mama_id on public.bons_livraison(mama_id);
+create index if not exists idx_bons_livraison_statut on public.bons_livraison(statut);
 
 -- Table lignes_bl
 create table if not exists public.lignes_bl (
@@ -189,18 +222,22 @@ create table if not exists public.factures (
     id uuid primary key default uuid_generate_v4(),
     mama_id uuid references public.mamas(id) on delete cascade,
     fournisseur_id uuid references public.fournisseurs(id),
+    numero text,
+    date_facture date,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now(),
+    actif boolean not null default true,
+    total_ht numeric(12,2),
+    total_tva numeric(12,2),
+    total_ttc numeric(12,2),
+    statut text,
+    montant_total numeric(12,2),
     bl_id uuid references public.bons_livraison(id),
     lignes_produits jsonb,
-    etat text,
-    total_ht numeric(12,2),
-    tva numeric(12,2),
     zone_id uuid references public.zones_stock(id),
     justificatif text,
     commentaire text,
-    bon_livraison text,
-    created_at timestamptz not null default now(),
-    updated_at timestamptz not null default now(),
-    actif boolean not null default true
+    bon_livraison text
 );
 create index if not exists idx_factures_mama_id on public.factures(mama_id);
 
@@ -428,6 +465,53 @@ create table if not exists public.utilisateurs_taches (
 );
 create index if not exists idx_utilisateurs_taches_tache on public.utilisateurs_taches(tache_id);
 create index if not exists idx_utilisateurs_taches_utilisateur on public.utilisateurs_taches(utilisateur_id);
+
+-- Table tache_instances
+create table if not exists public.tache_instances (
+    id uuid primary key default gen_random_uuid(),
+    mama_id uuid references public.mamas(id) on delete cascade,
+    tache_id uuid references public.taches(id) on delete cascade,
+    date_echeance date,
+    statut text,
+    done_by uuid references public.utilisateurs(id),
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    actif boolean default true
+);
+create index if not exists idx_tache_instances_mama_id on public.tache_instances(mama_id);
+
+-- Table planning_previsionnel
+create table if not exists public.planning_previsionnel (
+    id uuid primary key default gen_random_uuid(),
+    mama_id uuid references public.mamas(id) on delete cascade,
+    date_prevue date,
+    quantite numeric,
+    produit_id uuid references public.produits(id),
+    created_at timestamptz default now(),
+    nom text,
+    commentaire text,
+    statut text default 'prévu',
+    actif boolean default true
+);
+create index if not exists idx_planning_previsionnel_mama_id on public.planning_previsionnel(mama_id);
+
+-- Table planning_lignes
+create table if not exists public.planning_lignes (
+    id uuid primary key default gen_random_uuid(),
+    planning_id uuid references public.planning_previsionnel(id) on delete cascade,
+    produit_id uuid references public.produits(id),
+    quantite numeric,
+    observation text,
+    mama_id uuid references public.mamas(id),
+    actif boolean default true,
+    created_at timestamptz default now()
+);
+create index if not exists idx_planning_lignes_mama_id on public.planning_lignes(mama_id);
+
+drop trigger if exists trg_set_updated_at_taches on public.taches;
+create trigger trg_set_updated_at_taches
+  before update on public.taches
+  for each row execute function public.set_updated_at();
 
 alter table if exists public.produits
   add column if not exists zone_stock_id uuid references public.zones_stock(id) on delete set null,
@@ -1055,7 +1139,7 @@ do $$
 declare t text;
 begin
   foreach t in array array[
-    'mamas','roles','permissions','role_permissions','utilisateurs','familles','sous_familles','unites','zones_stock','fournisseurs','produits','commandes','bons_livraison','lignes_bl','factures','facture_lignes','fiches_techniques','stock_mouvements','stocks','inventaires','inventaire_lignes','documents','notifications','gadgets','ventes_fiches_carte','ventes_familles','feedback','consentements_utilisateur','periodes_comptables','taches'
+    'mamas','roles','permissions','role_permissions','utilisateurs','familles','sous_familles','unites','zones_stock','fournisseurs','produits','commandes','bons_livraison','lignes_bl','factures','facture_lignes','fiches_techniques','stock_mouvements','stocks','inventaires','inventaire_lignes','documents','notifications','gadgets','ventes_fiches_carte','ventes_familles','feedback','consentements_utilisateur','periodes_comptables','taches','tache_instances','planning_previsionnel','planning_lignes'
   ]
   loop
     execute format('alter table public.%I enable row level security;', t);

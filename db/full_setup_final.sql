@@ -18,6 +18,66 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION apply_stock_from_fiche(vente_id uuid)
+RETURNS void AS $$
+DECLARE
+  v record;
+  l record;
+BEGIN
+  SELECT * INTO v FROM ventes_fiches_carte WHERE id = vente_id;
+  IF v.id IS NULL THEN RETURN; END IF;
+  DELETE FROM stock_mouvements WHERE type = 'sortie_fiche' AND reference_id = vente_id;
+  FOR l IN SELECT produit_id, quantite FROM fiche_lignes WHERE fiche_id = v.fiche_id LOOP
+    INSERT INTO stock_mouvements(mama_id, date, type, quantite, produit_id, reference_id)
+    VALUES (v.mama_id, NOW(), 'sortie_fiche', l.quantite * v.ventes, l.produit_id, vente_id);
+  END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION apply_inventaire_line(ligne_id uuid)
+RETURNS void AS $$
+DECLARE
+  l record;
+  v_ecart numeric;
+BEGIN
+  SELECT * INTO l FROM inventaire_lignes WHERE id = ligne_id;
+  IF l.id IS NULL THEN RETURN; END IF;
+  v_ecart := COALESCE(l.quantite_reelle,0) - COALESCE(l.quantite_theorique,0);
+  UPDATE inventaire_lignes SET ecart = v_ecart WHERE id = ligne_id;
+  DELETE FROM stock_mouvements WHERE type = 'ajustement_inventaire' AND reference_id = ligne_id;
+  IF v_ecart <> 0 THEN
+    INSERT INTO stock_mouvements(mama_id, date, type, quantite, produit_id, reference_id)
+    VALUES (l.mama_id, NOW(), 'ajustement_inventaire', v_ecart, l.produit_id, ligne_id);
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION trg_apply_stock_from_fiche()
+RETURNS trigger AS $$
+BEGIN
+  PERFORM apply_stock_from_fiche(COALESCE(NEW.id, OLD.id));
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION trg_apply_inventaire_line()
+RETURNS trigger AS $$
+BEGIN
+  PERFORM apply_inventaire_line(COALESCE(NEW.id, OLD.id));
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_apply_stock_from_fiche ON ventes_fiches_carte;
+CREATE TRIGGER trg_apply_stock_from_fiche
+AFTER INSERT OR UPDATE OR DELETE ON ventes_fiches_carte
+FOR EACH ROW EXECUTE FUNCTION trg_apply_stock_from_fiche();
+
+DROP TRIGGER IF EXISTS trg_apply_inventaire_line ON inventaire_lignes;
+CREATE TRIGGER trg_apply_inventaire_line
+AFTER INSERT OR UPDATE OR DELETE ON inventaire_lignes
+FOR EACH ROW EXECUTE FUNCTION trg_apply_inventaire_line();
+
 CREATE OR REPLACE FUNCTION prevent_unite_delete()
 RETURNS trigger AS $$
 BEGIN
@@ -70,26 +130,43 @@ CREATE OR REPLACE FUNCTION apply_stock_from_achat(
 RETURNS void AS $$
 DECLARE
   r record;
+  v_stock numeric;
+  v_pmp numeric;
 BEGIN
+  DELETE FROM stock_mouvements WHERE type = 'entree_achat' AND reference_id = achat_id;
   IF achat_table = 'factures' THEN
     FOR r IN
-      SELECT fl.produit_id, fl.quantite
+      SELECT fl.produit_id, fl.quantite, fl.prix
       FROM facture_lignes fl
       JOIN factures f ON f.id = fl.facture_id
       WHERE f.id = achat_id AND f.mama_id = mama_id AND fl.actif IS TRUE
     LOOP
-      INSERT INTO stock_mouvements(mama_id, date, type, quantite, produit_id)
-      VALUES (mama_id, NOW(), 'entree_achat', r.quantite, r.produit_id);
+      INSERT INTO stock_mouvements(mama_id, date, type, quantite, produit_id, reference_id)
+      VALUES (mama_id, NOW(), 'entree_achat', r.quantite, r.produit_id, achat_id);
+      SELECT COALESCE(stock_reel,0), COALESCE(pmp,0) INTO v_stock, v_pmp
+        FROM produits WHERE id = r.produit_id AND mama_id = mama_id;
+      UPDATE produits
+        SET dernier_prix = r.prix,
+            pmp = CASE WHEN v_stock + r.quantite = 0 THEN r.prix
+                       ELSE ((v_stock * v_pmp) + (r.quantite * r.prix)) / (v_stock + r.quantite) END
+        WHERE id = r.produit_id AND mama_id = mama_id;
     END LOOP;
   ELSIF achat_table = 'bons_livraison' THEN
     FOR r IN
-      SELECT l.produit_id, l.quantite_recue AS quantite
+      SELECT l.produit_id, l.quantite_recue AS quantite, l.prix_achat AS prix
       FROM lignes_bl l
       JOIN bons_livraison b ON b.id = l.bl_id
       WHERE b.id = achat_id AND b.mama_id = mama_id
     LOOP
-      INSERT INTO stock_mouvements(mama_id, date, type, quantite, produit_id)
-      VALUES (mama_id, NOW(), 'entree_achat', r.quantite, r.produit_id);
+      INSERT INTO stock_mouvements(mama_id, date, type, quantite, produit_id, reference_id)
+      VALUES (mama_id, NOW(), 'entree_achat', r.quantite, r.produit_id, achat_id);
+      SELECT COALESCE(stock_reel,0), COALESCE(pmp,0) INTO v_stock, v_pmp
+        FROM produits WHERE id = r.produit_id AND mama_id = mama_id;
+      UPDATE produits
+        SET dernier_prix = r.prix,
+            pmp = CASE WHEN v_stock + r.quantite = 0 THEN r.prix
+                       ELSE ((v_stock * v_pmp) + (r.quantite * r.prix)) / (v_stock + r.quantite) END
+        WHERE id = r.produit_id AND mama_id = mama_id;
     END LOOP;
   END IF;
 END;
@@ -298,6 +375,19 @@ FROM ventes_fiches_carte v
 JOIN fiches_techniques ft ON ft.fiche_id = v.fiche_id AND ft.mama_id = v.mama_id
 WHERE v.actif IS TRUE AND ft.actif IS TRUE
 GROUP BY ft.mama_id, ft.famille;
+
+CREATE OR REPLACE VIEW v_stock_disponible AS
+SELECT p.mama_id, p.id AS produit_id,
+       COALESCE(SUM(CASE
+         WHEN sm.type IN ('entree_achat','ENTREE','TRANSFERT','TRANSFERT+') THEN sm.quantite
+         WHEN sm.type = 'ajustement_inventaire' THEN sm.quantite
+         ELSE -sm.quantite END),0) AS stock
+FROM produits p
+LEFT JOIN stock_mouvements sm ON sm.produit_id = p.id AND sm.mama_id = p.mama_id
+GROUP BY p.mama_id, p.id;
+
+CREATE OR REPLACE VIEW v_stocks AS
+SELECT * FROM v_stock_disponible;
 
 ALTER TABLE IF EXISTS familles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS sous_familles ENABLE ROW LEVEL SECURITY;

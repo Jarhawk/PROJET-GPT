@@ -218,6 +218,18 @@ create table if not exists public.facture_lignes (
     actif boolean not null default true
 );
 
+-- Table fournisseur_produits
+create table if not exists public.fournisseur_produits (
+    id uuid primary key default uuid_generate_v4(),
+    mama_id uuid references public.mamas(id) on delete cascade,
+    produit_id uuid references public.produits(id),
+    fournisseur_id uuid references public.fournisseurs(id),
+    prix_achat numeric(12,2),
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now(),
+    actif boolean not null default true
+);
+
 -- Table fiches_techniques
 create table if not exists public.fiches_techniques (
     id uuid primary key default uuid_generate_v4(),
@@ -229,12 +241,26 @@ create table if not exists public.fiches_techniques (
     actif boolean not null default true
 );
 
+-- Table fiche_lignes
+create table if not exists public.fiche_lignes (
+    id uuid primary key default uuid_generate_v4(),
+    mama_id uuid references public.mamas(id) on delete cascade,
+    fiche_id uuid references public.fiches_techniques(id) on delete cascade,
+    produit_id uuid references public.produits(id),
+    sous_fiche_id uuid references public.fiches_techniques(id),
+    quantite numeric(12,2) not null,
+    commentaire text,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now(),
+    actif boolean not null default true
+);
+
 -- Table stock_mouvements
 create table if not exists public.stock_mouvements (
     id uuid primary key default uuid_generate_v4(),
     mama_id uuid references public.mamas(id) on delete cascade,
     produit_id uuid references public.produits(id),
-    inventaire_id uuid,
+    inventaire_id uuid references public.inventaires(id),
     zone_id uuid references public.zones_stock(id),
     zone_source_id uuid references public.zones_stock(id),
     zone_destination_id uuid references public.zones_stock(id),
@@ -285,9 +311,61 @@ create table if not exists public.inventaire_lignes (
     actif boolean not null default true
 );
 
-alter table if exists public.stock_mouvements
-  add constraint fk_stock_mouvements_inventaire
-    foreign key (inventaire_id) references public.inventaires(id);
+-- Table transferts
+create table if not exists public.transferts (
+    id uuid primary key default uuid_generate_v4(),
+    mama_id uuid references public.mamas(id) on delete cascade,
+    produit_id uuid references public.produits(id),
+    quantite numeric(12,2),
+    motif text,
+    date_transfert date,
+    zone_source_id uuid references public.zones_stock(id),
+    zone_dest_id uuid references public.zones_stock(id),
+    commentaire text,
+    utilisateur_id uuid references public.utilisateurs(id),
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now(),
+    actif boolean not null default true
+);
+
+-- Table transfert_lignes
+create table if not exists public.transfert_lignes (
+    id uuid primary key default uuid_generate_v4(),
+    mama_id uuid references public.mamas(id) on delete cascade,
+    transfert_id uuid references public.transferts(id) on delete cascade,
+    produit_id uuid references public.produits(id),
+    quantite numeric(12,2) not null,
+    commentaire text,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now(),
+    actif boolean not null default true
+);
+
+-- Table mouvements
+create table if not exists public.mouvements (
+    id uuid primary key default uuid_generate_v4(),
+    mama_id uuid references public.mamas(id) on delete cascade,
+    produit_id uuid references public.produits(id),
+    inventaire_id uuid references public.inventaires(id),
+    quantite numeric(12,2),
+    type text,
+    date timestamptz not null default now(),
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now(),
+    actif boolean not null default true
+);
+
+-- Table mouvements_centres_cout
+create table if not exists public.mouvements_centres_cout (
+    id uuid primary key default uuid_generate_v4(),
+    mama_id uuid references public.mamas(id) on delete cascade,
+    mouvement_id uuid references public.mouvements(id) on delete cascade,
+    centre_cout_id uuid,
+    valeur numeric(12,2),
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now(),
+    actif boolean not null default true
+);
 
 -- Table documents
 create table if not exists public.documents (
@@ -537,6 +615,26 @@ create index if not exists idx_planning_lignes_mama_id on public.planning_lignes
 create index if not exists idx_factures_periode_id on public.factures(periode_id);
 create index if not exists idx_inventaires_periode_id on public.inventaires(periode_id);
 create index if not exists idx_stock_mouvements_periode_id on public.stock_mouvements(periode_id);
+create index if not exists idx_fournisseur_produits_mama_id on public.fournisseur_produits(mama_id);
+create index if not exists idx_fournisseur_produits_produit_id on public.fournisseur_produits(produit_id);
+create index if not exists idx_fournisseur_produits_fournisseur_id on public.fournisseur_produits(fournisseur_id);
+create index if not exists idx_fournisseur_produits_produit_date on public.fournisseur_produits(produit_id, created_at desc);
+create index if not exists idx_fiche_lignes_mama_id on public.fiche_lignes(mama_id);
+create index if not exists idx_fiche_lignes_fiche_id on public.fiche_lignes(fiche_id);
+create index if not exists idx_fiche_lignes_produit_id on public.fiche_lignes(produit_id);
+create index if not exists idx_fiche_lignes_sous_fiche_id on public.fiche_lignes(sous_fiche_id);
+create index if not exists idx_transferts_mama_id on public.transferts(mama_id);
+create index if not exists idx_transferts_produit_id on public.transferts(produit_id);
+create index if not exists idx_transferts_zone_source_id on public.transferts(zone_source_id);
+create index if not exists idx_transferts_zone_dest_id on public.transferts(zone_dest_id);
+create index if not exists idx_transfert_lignes_transfert_id on public.transfert_lignes(transfert_id);
+create index if not exists idx_transfert_lignes_produit_id on public.transfert_lignes(produit_id);
+create index if not exists idx_mouvements_mama_id on public.mouvements(mama_id);
+create index if not exists idx_mouvements_produit_id on public.mouvements(produit_id);
+create index if not exists idx_mouvements_date on public.mouvements(date);
+create index if not exists idx_mouvements_centres_cout_mama_id on public.mouvements_centres_cout(mama_id);
+create index if not exists idx_mouvements_centres_cout_mouvement_id on public.mouvements_centres_cout(mouvement_id);
+create index if not exists idx_mouvements_centres_cout_centre_cout_id on public.mouvements_centres_cout(centre_cout_id);
 -- ========================
 -- FUNCTIONS
 -- ========================
@@ -905,7 +1003,7 @@ do $$
 declare t text;
 begin
     foreach t in array array[
-      'mamas','roles','permissions','role_permissions','utilisateurs','familles','sous_familles','unites','zones_stock','fournisseurs','produits','commandes','bons_livraison','lignes_bl','factures','facture_lignes','fiches_techniques','stock_mouvements','stocks','inventaires','inventaire_lignes','documents','notifications','gadgets','ventes_fiches_carte','ventes_familles','feedback','consentements_utilisateur','periodes_comptables','taches'
+      'mamas','roles','permissions','role_permissions','utilisateurs','familles','sous_familles','unites','zones_stock','fournisseurs','produits','commandes','bons_livraison','lignes_bl','factures','facture_lignes','fiches_techniques','stock_mouvements','stocks','inventaires','inventaire_lignes','documents','notifications','gadgets','ventes_fiches_carte','ventes_familles','feedback','consentements_utilisateur','periodes_comptables','taches','fournisseur_produits','fiche_lignes','transferts','transfert_lignes','mouvements','mouvements_centres_cout','tache_instances'
     ]
   loop
     execute format('drop trigger if exists set_timestamp on public.%I;', t);
@@ -928,9 +1026,9 @@ create trigger trg_apply_stock_bl
   after insert on public.bons_livraison
   for each row execute function public.trg_apply_stock_bl();
 
-drop trigger if exists trg_insert_stock_from_transfert_ligne on public.lignes_bl;
+drop trigger if exists trg_insert_stock_from_transfert_ligne on public.transfert_lignes;
 create trigger trg_insert_stock_from_transfert_ligne
-  after insert on public.lignes_bl
+  after insert on public.transfert_lignes
   for each row execute function public.trg_insert_stock_from_transfert_ligne();
 
 drop trigger if exists trg_apply_stock_from_fiche on public.ventes_fiches_carte;
@@ -1077,7 +1175,7 @@ left join public.mouvements_centres_cout mcc on mcc.mouvement_id = m.id
 left join public.produits p on p.id = m.produit_id;
 
 create or replace view public.v_fournisseurs_inactifs as
-select id, mama_id, nom, ville, actif, created_at
+select id, mama_id, nom, contact, actif, created_at
 from public.fournisseurs
 where actif is false;
 
@@ -1093,7 +1191,7 @@ group by fl.produit_id, date_trunc('month', f.date_facture);
 create or replace view public.v_products_last_price as
 select sp.produit_id,
        p.nom as produit_nom,
-       p.famille,
+       p.famille_id as famille,
        p.unite_id as unite,
        sp.fournisseur_id,
        s.nom as fournisseur_nom,
@@ -1133,7 +1231,7 @@ do $$
 declare t text;
 begin
   foreach t in array array[
-    'mamas','roles','permissions','role_permissions','utilisateurs','familles','sous_familles','unites','zones_stock','fournisseurs','produits','commandes','bons_livraison','lignes_bl','factures','facture_lignes','fiches_techniques','stock_mouvements','stocks','inventaires','inventaire_lignes','documents','notifications','gadgets','ventes_fiches_carte','ventes_familles','feedback','consentements_utilisateur','periodes_comptables','taches','tache_instances','planning_previsionnel','planning_lignes'
+    'mamas','roles','permissions','role_permissions','utilisateurs','familles','sous_familles','unites','zones_stock','fournisseurs','produits','commandes','bons_livraison','lignes_bl','factures','facture_lignes','fiches_techniques','stock_mouvements','stocks','inventaires','inventaire_lignes','documents','notifications','gadgets','ventes_fiches_carte','ventes_familles','feedback','consentements_utilisateur','periodes_comptables','taches','tache_instances','planning_previsionnel','planning_lignes','fournisseur_produits','fiche_lignes','transferts','transfert_lignes','mouvements','mouvements_centres_cout'
   ]
   loop
     execute format('alter table public.%I enable row level security;', t);
@@ -1165,7 +1263,7 @@ do $$
 declare t text;
 begin
   foreach t in array array[
-    'mamas','roles','permissions','role_permissions','utilisateurs','familles','sous_familles','unites','zones_stock','fournisseurs','produits','commandes','bons_livraison','lignes_bl','factures','facture_lignes','fiches_techniques','stock_mouvements','stocks','inventaires','inventaire_lignes','documents','notifications','gadgets','ventes_fiches_carte','ventes_familles','feedback','consentements_utilisateur','periodes_comptables','taches'
+    'mamas','roles','permissions','role_permissions','utilisateurs','familles','sous_familles','unites','zones_stock','fournisseurs','produits','commandes','bons_livraison','lignes_bl','factures','facture_lignes','fiches_techniques','stock_mouvements','stocks','inventaires','inventaire_lignes','documents','notifications','gadgets','ventes_fiches_carte','ventes_familles','feedback','consentements_utilisateur','periodes_comptables','taches','tache_instances','planning_previsionnel','planning_lignes','fournisseur_produits','fiche_lignes','transferts','transfert_lignes','mouvements','mouvements_centres_cout'
   ]
   loop
     execute format('grant select, insert, update, delete on public.%I to authenticated;', t);

@@ -24,23 +24,21 @@ beforeEach(async () => {
   Object.values(query).forEach(fn => fn.mockClear && fn.mockClear());
 });
 
-test('getTaches applies filters', async () => {
+test('fetchTaches applies filters', async () => {
   const { result } = renderHook(() => useTaches());
   await act(async () => {
-    await result.current.getTaches({
+    await result.current.fetchTaches({
       statut: 'a_faire',
-      priorite: 'haute',
-      assigne: 'u2',
+      utilisateur: 'u2',
       start: '2025-01-01',
       end: '2025-01-31',
     });
   });
-  expect(fromMock).toHaveBeenCalledWith('taches');
-  expect(query.select).toHaveBeenCalledWith('*, utilisateurs_taches(utilisateur_id, utilisateur:utilisateurs(nom))');
+  expect(fromMock).toHaveBeenCalledWith('v_taches_assignees');
+  expect(query.select).toHaveBeenCalledWith('*');
   expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1');
   expect(query.eq).toHaveBeenCalledWith('statut', 'a_faire');
-  expect(query.eq).toHaveBeenCalledWith('priorite', 'haute');
-  expect(query.eq).toHaveBeenCalledWith('utilisateurs_taches.utilisateur_id', 'u2');
+  expect(query.eq).toHaveBeenCalledWith('utilisateur_id', 'u2');
   expect(query.gte).toHaveBeenCalledWith('date_echeance', '2025-01-01');
   expect(query.lte).toHaveBeenCalledWith('date_echeance', '2025-01-31');
 });
@@ -63,4 +61,15 @@ test('createTache inserts task and assignments', async () => {
   expect(firstInsert.mama_id).toBe('m1');
   const secondInsert = query.insert.mock.calls[1][0][0];
   expect(secondInsert).toEqual({ tache_id: 't1', utilisateur_id: 'u2' });
+});
+
+test('deleteTache performs soft delete', async () => {
+  const { result } = renderHook(() => useTaches());
+  await act(async () => {
+    await result.current.deleteTache('t1');
+  });
+  expect(fromMock).toHaveBeenNthCalledWith(1, 'utilisateurs_taches');
+  expect(query.delete).toHaveBeenCalled();
+  expect(fromMock).toHaveBeenNthCalledWith(2, 'taches');
+  expect(query.update).toHaveBeenCalledWith({ actif: false });
 });

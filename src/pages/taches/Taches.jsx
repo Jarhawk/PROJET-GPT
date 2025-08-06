@@ -11,9 +11,9 @@ import GlassCard from "@/components/ui/GlassCard";
 import toast from "react-hot-toast";
 
 export default function Taches() {
-  const { taches, loading, error, getTaches, createTache } = useTaches();
+  const { taches, loading, error, fetchTaches, createTache } = useTaches();
   const { users, fetchUsers } = useUtilisateurs();
-  const [filters, setFilters] = useState({ statut: "", priorite: "", assigne: "", start: "", end: "" });
+  const [filters, setFilters] = useState({ statut: "", priorite: "", utilisateur: "", start: "", end: "" });
   const [view, setView] = useState("table");
   const [quick, setQuick] = useState({ titre: "", date_echeance: "" });
 
@@ -22,8 +22,8 @@ export default function Taches() {
   }, [fetchUsers]);
 
   useEffect(() => {
-    getTaches(filters);
-  }, [getTaches, filters]);
+    fetchTaches(filters);
+  }, [fetchTaches, filters]);
 
   const handleChange = e => setFilters(f => ({ ...f, [e.target.name]: e.target.value }));
   const handleQuickChange = e => setQuick(q => ({ ...q, [e.target.name]: e.target.value }));
@@ -90,8 +90,8 @@ export default function Taches() {
           <option value="haute">Haute</option>
         </select>
         <select
-          name="assigne"
-          value={filters.assigne}
+          name="utilisateur"
+          value={filters.utilisateur}
           onChange={handleChange}
           className="form-input"
         >
@@ -116,7 +116,7 @@ export default function Taches() {
           onChange={handleChange}
           className="form-input"
         />
-        <Button onClick={() => getTaches(filters)}>Filtrer</Button>
+        <Button onClick={() => fetchTaches(filters)}>Filtrer</Button>
         </div>
       </GlassCard>
       {loading && <LoadingSpinner message="Chargement..." />}

@@ -403,8 +403,8 @@ select * from public.notifications where lu = false;
 create or replace view public.v_stock_disponible as
 select p.mama_id, p.id as produit_id,
        coalesce(sum(case
-         when sm.type in ('entree_achat','ENTREE','TRANSFERT','TRANSFERT+') then sm.quantite
-         when sm.type = 'ajustement_inventaire' then sm.quantite
+         when sm.type in ('entree_achat','entree_transfert','entree') then sm.quantite
+         when sm.type in ('ajustement_inventaire','ajustement') then sm.quantite
          else -sm.quantite end),0) as stock
 from public.produits p
 left join public.stock_mouvements sm on sm.produit_id = p.id and sm.mama_id = p.mama_id
@@ -412,6 +412,15 @@ group by p.mama_id, p.id;
 
 create or replace view public.v_stocks as
 select * from public.v_stock_disponible;
+
+create or replace view public.v_consommation_cumulee as
+select p.mama_id, p.id as produit_id,
+       coalesce(sum(case
+         when sm.type in ('sortie_fiche','ajustement_inventaire','perte','don','sortie_transfert') then sm.quantite
+         else 0 end),0) as consommation
+from public.produits p
+left join public.stock_mouvements sm on sm.produit_id = p.id and sm.mama_id = p.mama_id
+group by p.mama_id, p.id;
 
 create or replace view public.v_requisitions as
 select * from public.v_stock_disponible;
@@ -472,12 +481,19 @@ $$;
 create or replace function public.insert_stock_from_transfert_ligne(p_ligne_id uuid)
 returns void
 language plpgsql as $$
-declare l record;
+declare
+  l record;
 begin
-  select * into l from public.lignes_bl where id = p_ligne_id;
+  select tl.*, t.mama_id, t.zone_source_id, t.zone_dest_id, t.utilisateur_id, t.date_transfert, coalesce(t.commentaire, tl.commentaire) as commentaire
+    into l
+    from public.transfert_lignes tl
+    join public.transferts t on t.id = tl.transfert_id
+    where tl.id = p_ligne_id;
   if l.id is null then return; end if;
-  insert into public.stock_mouvements(mama_id, produit_id, type, quantite, reference_id)
-    values (l.mama_id, l.produit_id, 'TRANSFERT', l.quantite, p_ligne_id);
+  insert into public.stock_mouvements(mama_id, produit_id, type, quantite, date, zone_id, zone_source_id, zone_destination_id, auteur_id, commentaire)
+    values (l.mama_id, l.produit_id, 'sortie_transfert', l.quantite, l.date_transfert, l.zone_source_id, l.zone_source_id, l.zone_dest_id, l.utilisateur_id, l.commentaire);
+  insert into public.stock_mouvements(mama_id, produit_id, type, quantite, date, zone_id, zone_source_id, zone_destination_id, auteur_id, commentaire)
+    values (l.mama_id, l.produit_id, 'entree_transfert', l.quantite, l.date_transfert, l.zone_dest_id, l.zone_source_id, l.zone_dest_id, l.utilisateur_id, l.commentaire);
 end;
 $$;
 
@@ -488,8 +504,8 @@ begin
   update public.inventaire_lignes il
      set stock_theorique = coalesce((
        select sum(case
-         when type in ('entree_achat','ENTREE','TRANSFERT','TRANSFERT+') then quantite
-         when type = 'ajustement_inventaire' then quantite
+         when type in ('entree_achat','entree','entree_transfert') then quantite
+         when type in ('ajustement_inventaire','ajustement') then quantite
          else -quantite end)
        from public.stock_mouvements sm
        where sm.produit_id = il.produit_id and sm.mama_id = il.mama_id

@@ -41,9 +41,14 @@ export function useMouvements() {
     if (pErr) return { error: pErr };
     setLoading(true);
     setError(null);
+    const toInsert = { ...payload, mama_id, auteur_id: user_id };
+    if (payload.motif) {
+      toInsert.commentaire = payload.motif;
+      delete toInsert.motif;
+    }
     const { data, error } = await supabase
       .from("stock_mouvements")
-      .insert([{ ...payload, mama_id, auteur_id: user_id }])
+      .insert([toInsert])
       .select()
       .single();
     setLoading(false);

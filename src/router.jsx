@@ -45,6 +45,7 @@ const StockTransferts = lazyWithPreload(() => import("@/pages/stock/Transferts.j
 const Alertes = lazyWithPreload(() => import("@/pages/Alertes.jsx"));
 const Taches = lazyWithPreload(() => import("@/pages/taches/Taches.jsx"));
 const TacheForm = lazyWithPreload(() => import("@/pages/taches/TacheForm.jsx"));
+const TacheDetail = lazyWithPreload(() => import("@/pages/taches/TacheDetail.jsx"));
 const AlertesTaches = lazyWithPreload(() => import("@/pages/taches/Alertes.jsx"));
 const Promotions = lazyWithPreload(() => import("@/pages/promotions/Promotions.jsx"));
 const Documents = lazyWithPreload(() => import("@/pages/documents/Documents.jsx"));
@@ -127,6 +128,8 @@ export const routePreloadMap = {
   '/planning': Planning.preload,
   '/planning/simulation': SimulationPlanner.preload,
   '/taches': Taches.preload,
+  '/taches/new': TacheForm.preload,
+  '/taches/:id': TacheDetail.preload,
   '/taches/alertes': AlertesTaches.preload,
   '/promotions': Promotions.preload,
   '/fiches': Fiches.preload,
@@ -351,6 +354,10 @@ export default function Router() {
           <Route
             path="/taches/new"
             element={<ProtectedRoute moduleKey="taches"><TacheForm /></ProtectedRoute>}
+          />
+          <Route
+            path="/taches/:id"
+            element={<ProtectedRoute moduleKey="taches"><TacheDetail /></ProtectedRoute>}
           />
           <Route
             path="/taches/alertes"

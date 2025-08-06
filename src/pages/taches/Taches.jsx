@@ -14,8 +14,8 @@ export default function Taches() {
   const { taches, loading, error, getTaches, createTache } = useTaches();
   const { users, fetchUsers } = useUtilisateurs();
   const [filters, setFilters] = useState({ statut: "", priorite: "", assigne: "", start: "", end: "" });
-  const [view, setView] = useState('table');
-  const [quick, setQuick] = useState({ titre: '', date_echeance: '' });
+  const [view, setView] = useState("table");
+  const [quick, setQuick] = useState({ titre: "", date_echeance: "" });
 
   useEffect(() => {
     fetchUsers({ actif: true });
@@ -35,7 +35,7 @@ export default function Taches() {
       toast.success('Tâche ajoutée');
       setQuick({ titre: '', date_echeance: '' });
     } catch (err) {
-      toast.error(err?.message || 'Erreur ajout');
+      toast.error(err?.message || "Erreur ajout");
     }
   };
 
@@ -52,8 +52,21 @@ export default function Taches() {
       </div>
       <GlassCard title="Ajouter rapidement" className="mb-4">
         <form onSubmit={handleQuickSubmit} className="flex gap-2 flex-wrap items-end">
-          <input className="input flex-1" name="titre" value={quick.titre} onChange={handleQuickChange} placeholder="Nouvelle tâche" required />
-          <input type="date" className="form-input" name="date_echeance" value={quick.date_echeance} onChange={handleQuickChange} />
+          <input
+            className="input flex-1"
+            name="titre"
+            value={quick.titre}
+            onChange={handleQuickChange}
+            placeholder="Nouvelle tâche"
+            required
+          />
+          <input
+            type="date"
+            className="form-input"
+            name="date_echeance"
+            value={quick.date_echeance}
+            onChange={handleQuickChange}
+          />
           <Button type="submit">Ajouter</Button>
         </form>
       </GlassCard>
@@ -65,20 +78,44 @@ export default function Taches() {
             <option value="en_cours">En cours</option>
             <option value="terminee">Terminée</option>
           </select>
-        <select name="priorite" value={filters.priorite} onChange={handleChange} className="form-input">
+        <select
+          name="priorite"
+          value={filters.priorite}
+          onChange={handleChange}
+          className="form-input"
+        >
           <option value="">-- Priorité --</option>
           <option value="basse">Basse</option>
           <option value="moyenne">Moyenne</option>
           <option value="haute">Haute</option>
         </select>
-        <select name="assigne" value={filters.assigne} onChange={handleChange} className="form-input">
+        <select
+          name="assigne"
+          value={filters.assigne}
+          onChange={handleChange}
+          className="form-input"
+        >
           <option value="">-- Assigné --</option>
           {users.map(u => (
-            <option key={u.id} value={u.id}>{u.nom}</option>
+            <option key={u.id} value={u.id}>
+              {u.nom}
+            </option>
           ))}
         </select>
-        <input type="date" name="start" value={filters.start} onChange={handleChange} className="form-input" />
-        <input type="date" name="end" value={filters.end} onChange={handleChange} className="form-input" />
+        <input
+          type="date"
+          name="start"
+          value={filters.start}
+          onChange={handleChange}
+          className="form-input"
+        />
+        <input
+          type="date"
+          name="end"
+          value={filters.end}
+          onChange={handleChange}
+          className="form-input"
+        />
         <Button onClick={() => getTaches(filters)}>Filtrer</Button>
         </div>
       </GlassCard>
@@ -91,26 +128,35 @@ export default function Taches() {
               <tr>
                 <th className="px-2 py-1">Statut</th>
                 <th className="px-2 py-1">Titre</th>
-                <th className="px-2 py-1">Début</th>
+                <th className="px-2 py-1">Priorité</th>
                 <th className="px-2 py-1">Échéance</th>
                 <th className="px-2 py-1">Assignés</th>
-                <th className="px-2 py-1">Récurrence</th>
               </tr>
             </thead>
             <tbody>
               {taches.map(t => (
                 <tr key={t.id} className="border-t">
                   <td className="px-2 py-1">{t.statut}</td>
-                  <td className="px-2 py-1">{t.titre}</td>
-                  <td className="px-2 py-1">{t.date_debut}</td>
+                  <td className="px-2 py-1">
+                    <Link to={`/taches/${t.id}`} className="underline">
+                      {t.titre}
+                    </Link>
+                  </td>
+                  <td className="px-2 py-1">{t.priorite}</td>
                   <td className="px-2 py-1">{t.date_echeance}</td>
-                  <td className="px-2 py-1">{(t.assignes || []).length}</td>
-                  <td className="px-2 py-1">{t.recurrente ? t.frequence : ''}</td>
+                  <td className="px-2 py-1">
+                    {(t.utilisateurs_taches || [])
+                      .map(a => a.utilisateur?.nom)
+                      .filter(Boolean)
+                      .join(", ")}
+                  </td>
                 </tr>
               ))}
               {taches.length === 0 && !loading && (
                 <tr>
-                  <td colSpan="6" className="py-4 text-center text-gray-500">Aucune tâche</td>
+                  <td colSpan="5" className="py-4 text-center text-gray-500">
+                    Aucune tâche
+                  </td>
                 </tr>
               )}
             </tbody>

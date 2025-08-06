@@ -132,6 +132,10 @@
     "module": "taches"
   },
   {
+    "route": "/taches/:id",
+    "module": "taches"
+  },
+  {
     "route": "/taches/alertes",
     "module": "alertes"
   },

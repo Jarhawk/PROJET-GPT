@@ -4,13 +4,13 @@ import { vi, beforeEach, test, expect } from 'vitest';
 const query = {
   select: vi.fn(() => query),
   eq: vi.fn(() => query),
-  contains: vi.fn(() => query),
   gte: vi.fn(() => query),
   lte: vi.fn(() => query),
   order: vi.fn(() => query),
   insert: vi.fn(() => query),
   update: vi.fn(() => query),
   delete: vi.fn(() => query),
+  single: vi.fn(() => ({ data: { id: 't1' } })),
 };
 const fromMock = vi.fn(() => query);
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
@@ -27,28 +27,40 @@ beforeEach(async () => {
 test('getTaches applies filters', async () => {
   const { result } = renderHook(() => useTaches());
   await act(async () => {
-    await result.current.getTaches({ statut: 'a_faire', priorite: 'haute', assigne: 'u2', start: '2025-01-01', end: '2025-01-31' });
+    await result.current.getTaches({
+      statut: 'a_faire',
+      priorite: 'haute',
+      assigne: 'u2',
+      start: '2025-01-01',
+      end: '2025-01-31',
+    });
   });
   expect(fromMock).toHaveBeenCalledWith('taches');
-  expect(query.select).toHaveBeenCalledWith('*');
+  expect(query.select).toHaveBeenCalledWith('*, utilisateurs_taches(utilisateur_id, utilisateur:utilisateurs(nom))');
   expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1');
   expect(query.eq).toHaveBeenCalledWith('statut', 'a_faire');
   expect(query.eq).toHaveBeenCalledWith('priorite', 'haute');
-  expect(query.contains).toHaveBeenCalledWith('assignes', ['u2']);
-  expect(query.gte).toHaveBeenCalledWith('date_debut', '2025-01-01');
+  expect(query.eq).toHaveBeenCalledWith('utilisateurs_taches.utilisateur_id', 'u2');
+  expect(query.gte).toHaveBeenCalledWith('date_echeance', '2025-01-01');
   expect(query.lte).toHaveBeenCalledWith('date_echeance', '2025-01-31');
 });
 
-test('createTache injects ids and computes due date', async () => {
+test('createTache inserts task and assignments', async () => {
   const { result } = renderHook(() => useTaches());
   await act(async () => {
-    await result.current.createTache({ titre: 'A', date_debut: '2025-05-01', delai_jours: 3, assignes: [] });
+    await result.current.createTache({
+      titre: 'A',
+      description: '',
+      priorite: 'moyenne',
+      date_echeance: '2025-05-01',
+      assignes: ['u2'],
+      statut: 'a_faire',
+    });
   });
-  expect(fromMock).toHaveBeenCalledWith('taches');
-  const inserted = query.insert.mock.calls[0][0][0];
-  expect(inserted.mama_id).toBe('m1');
-  expect(inserted.created_by).toBe('u1');
-  expect(inserted.date_echeance).toBe('2025-05-04');
-  expect(inserted.utilisateur_id).toBe('u1');
-  expect(inserted.assignes).toEqual(['u1']);
+  expect(fromMock).toHaveBeenNthCalledWith(1, 'taches');
+  expect(fromMock).toHaveBeenNthCalledWith(2, 'utilisateurs_taches');
+  const firstInsert = query.insert.mock.calls[0][0][0];
+  expect(firstInsert.mama_id).toBe('m1');
+  const secondInsert = query.insert.mock.calls[1][0][0];
+  expect(secondInsert).toEqual({ tache_id: 't1', utilisateur_id: 'u2' });
 });

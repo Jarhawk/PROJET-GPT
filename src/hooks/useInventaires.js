@@ -39,11 +39,11 @@ export function useInventaires() {
   async function fetchMouvementsInventaire(inventaireId) {
     if (!mama_id || !inventaireId) return [];
     const { data, error } = await supabase
-      .from("stock_mouvements")
+      .from("mouvements")
       .select("*")
       .eq("inventaire_id", inventaireId)
       .eq("mama_id", mama_id)
-      .order("created_at", { ascending: true });
+      .order("date", { ascending: true });
     if (error) {
       setError(error);
       return [];

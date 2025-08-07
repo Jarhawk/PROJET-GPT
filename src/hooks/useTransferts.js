@@ -97,9 +97,6 @@ export function useTransferts() {
         quantite: Number(l.quantite),
         type: "sortie_transfert",
         date,
-        zone_id: header.zone_source_id,
-        zone_source_id: header.zone_source_id,
-        zone_destination_id: header.zone_destination_id,
         transfert_id: tr.id,
         auteur_id: user_id,
       });
@@ -109,15 +106,12 @@ export function useTransferts() {
         quantite: Number(l.quantite),
         type: "entree_transfert",
         date,
-        zone_id: header.zone_destination_id,
-        zone_source_id: header.zone_source_id,
-        zone_destination_id: header.zone_destination_id,
         transfert_id: tr.id,
         auteur_id: user_id,
       });
     });
     const { error: err3 } = await supabase
-      .from("stock_mouvements")
+      .from("mouvements")
       .insert(mouvements);
     setLoading(false);
     if (err3) {

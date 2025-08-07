@@ -82,7 +82,6 @@ export default function Sidebar() {
       items: [
         { module: "produits", to: "/produits", label: "Produits", icon: <Boxes size={16} /> },
         { module: "inventaires", to: "/inventaire", label: "Inventaire", icon: <ClipboardList size={16} /> },
-        { module: "mouvements", to: "/mouvements", label: "Mouvements", icon: <History size={16} /> },
       ],
     },
     {

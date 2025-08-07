@@ -44,7 +44,6 @@ test('backupDb fetches tables and writes file', async () => {
     'fournisseur_produits',
     'taches',
     'tache_instances',
-    'stock_mouvements',
   ];
   for (const table of tables) {
     expect(fromMock).toHaveBeenCalledWith(table);

@@ -116,10 +116,6 @@
     "module": "inventaires"
   },
   {
-    "route": "/mouvements",
-    "module": "mouvements"
-  },
-  {
     "route": "/transferts",
     "module": "mouvements"
   },

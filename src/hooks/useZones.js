@@ -93,12 +93,7 @@ export function useZones() {
       .select('id', { count: 'exact', head: true })
       .eq('zone_id', id)
       .eq('mama_id', mama_id);
-    const { count: mouvCount } = await supabase
-      .from('stock_mouvements')
-      .select('id', { count: 'exact', head: true })
-      .or(`zone_source_id.eq.${id},zone_destination_id.eq.${id}`)
-      .eq('mama_id', mama_id);
-    if ((reqCount || 0) > 0 || (mouvCount || 0) > 0) {
+    if ((reqCount || 0) > 0) {
       const err = 'Zone liée à des données, suppression impossible';
       setLoading(false);
       setError(err);

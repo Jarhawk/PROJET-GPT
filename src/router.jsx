@@ -40,7 +40,6 @@ const Inventaire = lazyWithPreload(() => import("@/pages/inventaire/Inventaire.j
 const InventaireForm = lazyWithPreload(() => import("@/pages/inventaire/InventaireForm.jsx"));
 const InventaireDetail = lazyWithPreload(() => import("@/pages/inventaire/InventaireDetail.jsx"));
 const InventaireZones = lazyWithPreload(() => import("@/pages/inventaire/InventaireZones.jsx"));
-const Mouvements = lazyWithPreload(() => import("@/pages/mouvements/Mouvements.jsx"));
 const StockTransferts = lazyWithPreload(() => import("@/pages/stock/Transferts.jsx"));
 const Alertes = lazyWithPreload(() => import("@/pages/Alertes.jsx"));
 const Taches = lazyWithPreload(() => import("@/pages/taches/Taches.jsx"));
@@ -116,7 +115,6 @@ export const routePreloadMap = {
   '/dashboard': Dashboard.preload,
   '/produits': Produits.preload,
   '/inventaire': Inventaire.preload,
-  '/mouvements': Mouvements.preload,
   '/fournisseurs': Fournisseurs.preload,
   '/factures': Factures.preload,
   '/factures/import': ImportFactures.preload,
@@ -338,10 +336,6 @@ export default function Router() {
           <Route
             path="/inventaire/:id"
             element={<ProtectedRoute moduleKey="inventaires"><InventaireDetail /></ProtectedRoute>}
-          />
-          <Route
-            path="/mouvements"
-            element={<ProtectedRoute moduleKey="mouvements"><Mouvements /></ProtectedRoute>}
           />
           <Route
             path="/transferts"

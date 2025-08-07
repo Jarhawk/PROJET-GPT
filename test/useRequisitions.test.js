@@ -30,28 +30,29 @@ test('getRequisitions applies filters', async () => {
   const { result } = renderHook(() => useRequisitions());
   await act(async () => {
     await result.current.getRequisitions({
-      zone: 'z1',
       statut: 'draft',
+      utilisateur: 'u2',
+      produit: 'p1',
       debut: '2025-01-01',
       fin: '2025-01-31',
       page: 2,
     });
   });
   expect(fromMock).toHaveBeenCalledWith('requisitions');
-  expect(query.select).toHaveBeenCalledWith('*', { count: 'exact' });
+  expect(query.select).toHaveBeenCalledWith('*, lignes:requisition_lignes(produit_id, unite_id)', { count: 'exact' });
   expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1');
   expect(query.eq).toHaveBeenCalledWith('actif', true);
-  expect(query.eq).toHaveBeenCalledWith('zone_destination_id', 'z1');
   expect(query.eq).toHaveBeenCalledWith('statut', 'draft');
-  expect(query.gte).toHaveBeenCalledWith('date', '2025-01-01');
-  expect(query.lte).toHaveBeenCalledWith('date', '2025-01-31');
+  expect(query.eq).toHaveBeenCalledWith('utilisateur_id', 'u2');
+  expect(query.gte).toHaveBeenCalledWith('date_demande', '2025-01-01');
+  expect(query.lte).toHaveBeenCalledWith('date_demande', '2025-01-31');
   expect(query.range).toHaveBeenCalledWith(10, 19);
 });
 
 test('createRequisition inserts header and lines', async () => {
   const { result } = renderHook(() => useRequisitions());
   await act(async () => {
-    await result.current.createRequisition({ lignes: [{ produit_id: 'p1', quantite: 2 }] });
+    await result.current.createRequisition({ zone_id: 'z1', lignes: [{ produit_id: 'p1', quantite_demandee: 2, unite_id: 'u9' }] });
   });
   expect(fromMock).toHaveBeenCalledWith('requisitions');
   expect(query.insert).toHaveBeenCalled();

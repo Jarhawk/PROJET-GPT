@@ -23,11 +23,20 @@ export function useRequisitions() {
     return { data: data || [], count: count || 0 };
   }
 
-  async function getRequisitions({ zone = "", statut = "", debut = "", fin = "", page = 1, limit = 10 } = {}) {
+  async function getRequisitions({
+    zone = "",
+    statut = "",
+    debut = "",
+    fin = "",
+    utilisateur = "",
+    produit = "",
+    page = 1,
+    limit = 10,
+  } = {}) {
     if (!mama_id) return { data: [], count: 0 };
     let query = supabase
       .from("requisitions")
-      .select("*", { count: "exact" })
+      .select("*, lignes:requisition_lignes(produit_id, unite_id)", { count: "exact" })
       .eq("mama_id", mama_id)
       .eq("actif", true)
       .order("date_demande", { ascending: false })
@@ -36,12 +45,17 @@ export function useRequisitions() {
     if (statut) query = query.eq("statut", statut);
     if (debut) query = query.gte("date_demande", debut);
     if (fin) query = query.lte("date_demande", fin);
+    if (utilisateur) query = query.eq("utilisateur_id", utilisateur);
     const { data, count, error } = await query;
     if (error) {
       console.error("❌ Erreur getRequisitions:", error.message);
       return { data: [], count: 0 };
     }
-    return { data: data || [], count: count || 0 };
+    let rows = data || [];
+    if (produit) {
+      rows = rows.filter(r => (r.lignes || []).some(l => l.produit_id === produit));
+    }
+    return { data: rows, count: count || 0 };
   }
 
   async function getRequisitionById(id) {
@@ -49,7 +63,7 @@ export function useRequisitions() {
     const { data, error } = await supabase
       .from("requisitions")
       .select(
-        "*, lignes:requisition_lignes!requisition_id(*, produit:produit_id(id, nom))"
+        "*, lignes:requisition_lignes!requisition_id(*, produit:produit_id(id, nom), unite:unite_id(nom))"
       )
       .eq("id", id)
       .eq("mama_id", mama_id)
@@ -61,11 +75,28 @@ export function useRequisitions() {
     return data || null;
   }
 
-  async function createRequisition({ date_demande = new Date().toISOString().slice(0,10), zone_id = null, commentaire = "", statut = "brouillon", lignes = [] }) {
+  async function createRequisition({
+    date_demande = new Date().toISOString().slice(0, 10),
+    zone_id = null,
+    commentaire = "",
+    statut = "brouillon",
+    lignes = [],
+  }) {
     if (!mama_id || !zone_id) return { error: "mama_id manquant" };
     const { data, error } = await supabase
       .from("requisitions")
-      .insert([{ date_demande, zone_id, commentaire, statut, mama_id, utilisateur_id: user_id }])
+      .insert([
+        {
+          date_demande,
+          zone_id,
+          commentaire,
+          statut,
+          actif: true,
+          mama_id,
+          utilisateur_id: user_id,
+          created_by: user_id,
+        },
+      ])
       .select()
       .single();
     if (error) {
@@ -80,6 +111,7 @@ export function useRequisitions() {
         quantite_demandee: Number(l.quantite_demandee),
         stock_theorique_avant: l.stock_theorique_avant,
         stock_theorique_apres: l.stock_theorique_apres,
+        unite_id: l.unite_id || null,
         commentaire: l.commentaire || "",
         mama_id,
       }));

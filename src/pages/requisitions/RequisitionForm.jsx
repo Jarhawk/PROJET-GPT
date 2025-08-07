@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useRequisitions } from "@/hooks/useRequisitions";
 import { useProducts } from "@/hooks/useProducts";
 import { useZones } from "@/hooks/useZones";
+import { useUnites } from "@/hooks/useUnites";
 import useAuth from "@/hooks/useAuth";
 import { supabase } from "@/lib/supabase";
 import { Toaster, toast } from "react-hot-toast";
@@ -20,14 +21,20 @@ function RequisitionFormPage() {
   const { createRequisition } = useRequisitions();
   const { products, loading: loadingProducts } = useProducts();
   const { zones, fetchZones } = useZones();
+  const { unites, fetchUnites } = useUnites();
 
   const [statut, setStatut] = useState("");
   const [commentaire, setCommentaire] = useState("");
   const [zone_id, setZone] = useState("");
-  const [articles, setArticles] = useState([{ produit_id: "", quantite: 1, stock_avant: 0, stock_apres: 0 }]);
+  const [articles, setArticles] = useState([{ produit_id: "", unite_id: "", quantite: 1, stock_avant: 0, stock_apres: 0 }]);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => { fetchZones(); }, [fetchZones]);
+  useEffect(() => { fetchZones(); fetchUnites(); }, [fetchZones, fetchUnites]);
+
+  useEffect(() => {
+    const cave = zones.find(z => z.nom?.toLowerCase() === "cave");
+    if (cave) setZone(cave.id);
+  }, [zones]);
 
   const fetchStock = async (produitId) => {
     if (!produitId || !zone_id || !mama_id) return 0;
@@ -56,12 +63,12 @@ function RequisitionFormPage() {
   };
 
   const handleAddArticle = () => {
-    setArticles([...articles, { produit_id: "", quantite: 1, stock_avant: 0, stock_apres: 0 }]);
+    setArticles([...articles, { produit_id: "", unite_id: "", quantite: 1, stock_avant: 0, stock_apres: 0 }]);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!statut || !zone_id || articles.some(a => !a.produit_id || !a.quantite)) {
+    if (!statut || !zone_id || articles.some(a => !a.produit_id || !a.quantite || !a.unite_id)) {
       toast.error("Tous les champs sont obligatoires");
       return;
     }
@@ -73,6 +80,7 @@ function RequisitionFormPage() {
       lignes: articles.map(a => ({
         produit_id: a.produit_id,
         quantite_demandee: a.quantite,
+        unite_id: a.unite_id,
         stock_theorique_avant: a.stock_avant,
         stock_theorique_apres: a.stock_apres,
       })),
@@ -103,14 +111,18 @@ function RequisitionFormPage() {
 
         <div>
           <Label htmlFor="statut">Statut</Label>
-          <Input
+          <Select
             id="statut"
-            type="text"
             value={statut}
             onChange={(e) => setStatut(e.target.value)}
             required
             className="w-full"
-          />
+          >
+            <option value="">Sélectionner…</option>
+            <option value="brouillon">Brouillon</option>
+            <option value="faite">Faite</option>
+            <option value="réalisée">Réalisée</option>
+          </Select>
         </div>
 
         <div>
@@ -124,21 +136,14 @@ function RequisitionFormPage() {
           />
         </div>
 
-        <div>
-          <Label htmlFor="zone">Zone de stock</Label>
-          <Select
-            id="zone"
-            value={zone_id}
-            onChange={(e) => setZone(e.target.value)}
-            required
-            className="w-full"
-          >
-            <option value="">Sélectionner…</option>
-            {zones.map((z) => (
-              <option key={z.id} value={z.id}>{z.nom}</option>
-            ))}
-          </Select>
-        </div>
+        {zone_id && (
+          <div>
+            <Label>Zone</Label>
+            <div className="p-2 border rounded bg-muted/20">
+              {zones.find(z => z.id === zone_id)?.nom || "cave"}
+            </div>
+          </div>
+        )}
 
         <div>
           <h2 className="text-lg font-semibold mb-2">Articles</h2>
@@ -165,6 +170,17 @@ function RequisitionFormPage() {
                   ))}
                 </Select>
               )}
+              <Select
+                value={article.unite_id}
+                onChange={(e) => handleChangeArticle(index, "unite_id", e.target.value)}
+                className="w-32"
+                required
+              >
+                <option value="">Unité</option>
+                {unites.map(u => (
+                  <option key={u.id} value={u.id}>{u.nom}</option>
+                ))}
+              </Select>
               <Input
                 type="number"
                 value={article.quantite}

@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import useAuth from "@/hooks/useAuth";
 import usePeriodes from "@/hooks/usePeriodes";
@@ -11,36 +11,62 @@ export function useTransferts() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  async function fetchTransferts({ debut = "", fin = "" } = {}) {
-    if (!mama_id) return [];
-    setLoading(true);
-    setError(null);
-    let q = supabase
-      .from("v_transferts_historique")
-      .select("*")
-      .eq("mama_id", mama_id)
-      .order("date_transfert", { ascending: false });
-    if (debut) q = q.gte("date_transfert", debut);
-    if (fin) q = q.lte("date_transfert", fin);
-    const { data, error } = await q;
-    setLoading(false);
-    if (error) {
-      setError(error);
-      return [];
-    }
-    setTransferts(Array.isArray(data) ? data : []);
-    return data || [];
-  }
+  const fetchTransferts = useCallback(
+    async (
+      {
+        debut = "",
+        fin = "",
+        zone_source_id = "",
+        zone_destination_id = "",
+        produit_id = "",
+      } = {}
+    ) => {
+      if (!mama_id) return [];
+      setLoading(true);
+      setError(null);
+      let q = supabase
+        .from("transferts")
+        .select(
+          "id, date_transfert, motif, zone_source:zones_stock!fk_transferts_zone_source_id(id, nom), zone_destination:zones_stock!fk_transferts_zone_dest_id(id, nom), lignes:transfert_lignes(id, produit_id, quantite, produit:produits(id, nom))"
+        )
+        .eq("mama_id", mama_id)
+        .order("date_transfert", { ascending: false });
+      if (debut) q = q.gte("date_transfert", debut);
+      if (fin) q = q.lte("date_transfert", fin);
+      if (zone_source_id) q = q.eq("zone_source_id", zone_source_id);
+      if (zone_destination_id) q = q.eq("zone_dest_id", zone_destination_id);
+      if (produit_id) q = q.eq("transfert_lignes.produit_id", produit_id);
+      const { data, error } = await q;
+      setLoading(false);
+      if (error) {
+        setError(error);
+        return [];
+      }
+      setTransferts(Array.isArray(data) ? data : []);
+      return data || [];
+    },
+    [mama_id]
+  );
 
   async function createTransfert(header, lignes = []) {
     if (!mama_id) return { error: "no mama_id" };
-    const { error: pErr } = await checkCurrentPeriode(header.date_transfert);
+    const date = header.date_transfert || new Date().toISOString();
+    const { error: pErr } = await checkCurrentPeriode(date);
     if (pErr) return { error: pErr };
     setLoading(true);
     setError(null);
     const { data: tr, error } = await supabase
       .from("transferts")
-      .insert([{ ...header, mama_id, utilisateur_id: user_id }])
+      .insert([
+        {
+          mama_id,
+          zone_source_id: header.zone_source_id,
+          zone_dest_id: header.zone_destination_id,
+          motif: header.motif || "",
+          date_transfert: date,
+          utilisateur_id: user_id,
+        },
+      ])
       .select()
       .single();
     if (error) {
@@ -48,18 +74,91 @@ export function useTransferts() {
       setLoading(false);
       return { error };
     }
-    const withId = lignes.map((l) => ({ ...l, transfert_id: tr.id }));
-    const { error: err2 } = await supabase.from("transfert_lignes").insert(withId);
-    setLoading(false);
+    const lignesInsert = lignes.map((l) => ({
+      mama_id,
+      transfert_id: tr.id,
+      produit_id: l.produit_id,
+      quantite: Number(l.quantite),
+      commentaire: l.commentaire || "",
+    }));
+    const { error: err2 } = await supabase
+      .from("transfert_lignes")
+      .insert(lignesInsert);
     if (err2) {
       setError(err2);
+      setLoading(false);
       return { error: err2 };
     }
-    setTransferts((t) => [tr, ...t]);
+    const mouvements = [];
+    lignesInsert.forEach((l) => {
+      mouvements.push({
+        mama_id,
+        produit_id: l.produit_id,
+        quantite: Number(l.quantite),
+        type: "sortie_transfert",
+        date,
+        zone_id: header.zone_source_id,
+        zone_source_id: header.zone_source_id,
+        zone_destination_id: header.zone_destination_id,
+        transfert_id: tr.id,
+        auteur_id: user_id,
+      });
+      mouvements.push({
+        mama_id,
+        produit_id: l.produit_id,
+        quantite: Number(l.quantite),
+        type: "entree_transfert",
+        date,
+        zone_id: header.zone_destination_id,
+        zone_source_id: header.zone_source_id,
+        zone_destination_id: header.zone_destination_id,
+        transfert_id: tr.id,
+        auteur_id: user_id,
+      });
+    });
+    const { error: err3 } = await supabase
+      .from("stock_mouvements")
+      .insert(mouvements);
+    setLoading(false);
+    if (err3) {
+      setError(err3);
+      return { error: err3 };
+    }
+    setTransferts((t) => [{ ...tr, lignes: lignesInsert }, ...t]);
     return { data: tr };
   }
 
-  return { transferts, loading, error, fetchTransferts, createTransfert };
+  const getTransfertById = useCallback(
+    async (id) => {
+      if (!mama_id || !id) return null;
+      setLoading(true);
+      setError(null);
+      const { data, error } = await supabase
+        .from("transferts")
+        .select(
+          "id, date_transfert, motif, zone_source:zones_stock!fk_transferts_zone_source_id(id, nom), zone_destination:zones_stock!fk_transferts_zone_dest_id(id, nom), lignes:transfert_lignes(id, quantite, produit:produits(id, nom))"
+        )
+        .eq("mama_id", mama_id)
+        .eq("id", id)
+        .single();
+      setLoading(false);
+      if (error) {
+        setError(error);
+        return null;
+      }
+      return data;
+    },
+    [mama_id]
+  );
+
+  return {
+    transferts,
+    loading,
+    error,
+    fetchTransferts,
+    createTransfert,
+    getTransfertById,
+  };
 }
 
 export default useTransferts;

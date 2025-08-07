@@ -996,7 +996,7 @@ do $$
 declare t text;
 begin
     foreach t in array array[
-      'mamas','roles','permissions','role_permissions','utilisateurs','familles','sous_familles','unites','zones_stock','fournisseurs','produits','commandes','bons_livraison','lignes_bl','factures','facture_lignes','fiches_techniques','stock_mouvements','stocks','inventaires','inventaire_lignes','documents','notifications','gadgets','ventes_fiches_carte','ventes_familles','feedback','consentements_utilisateur','periodes_comptables','taches','fournisseur_produits','fiche_lignes','transferts','transfert_lignes','mouvements','mouvements_centres_cout','tache_instances'
+      'mamas','roles','permissions','role_permissions','utilisateurs','familles','sous_familles','unites','zones_stock','fournisseurs','produits','commandes','bons_livraison','lignes_bl','factures','facture_lignes','fiches_techniques','stock_mouvements','stocks','inventaires','inventaire_lignes','documents','notifications','gadgets','ventes_fiches_carte','ventes_familles','feedback','consentements_utilisateur','periodes_comptables','taches','fournisseur_produits','fiche_lignes','transferts','transfert_lignes','mouvements','mouvements_centres_cout','menus_groupes','menus_groupes_fiches','tache_instances'
     ]
   loop
     execute format('drop trigger if exists set_timestamp on public.%I;', t);
@@ -1234,7 +1234,7 @@ do $$
 declare t text;
 begin
   foreach t in array array[
-    'mamas','roles','permissions','role_permissions','utilisateurs','familles','sous_familles','unites','zones_stock','fournisseurs','produits','commandes','bons_livraison','lignes_bl','factures','facture_lignes','fiches_techniques','stock_mouvements','stocks','inventaires','inventaire_lignes','documents','notifications','gadgets','ventes_fiches_carte','ventes_familles','feedback','consentements_utilisateur','periodes_comptables','taches','tache_instances','planning_previsionnel','planning_lignes','fournisseur_produits','fiche_lignes','transferts','transfert_lignes','mouvements','mouvements_centres_cout'
+    'mamas','roles','permissions','role_permissions','utilisateurs','familles','sous_familles','unites','zones_stock','fournisseurs','produits','commandes','bons_livraison','lignes_bl','factures','facture_lignes','fiches_techniques','stock_mouvements','stocks','inventaires','inventaire_lignes','documents','notifications','gadgets','ventes_fiches_carte','ventes_familles','feedback','consentements_utilisateur','periodes_comptables','taches','tache_instances','planning_previsionnel','planning_lignes','fournisseur_produits','fiche_lignes','transferts','transfert_lignes','mouvements','mouvements_centres_cout','menus_groupes','menus_groupes_fiches'
   ]
   loop
     execute format('alter table public.%I enable row level security;', t);
@@ -1259,6 +1259,34 @@ create policy utilisateurs_taches_policy on public.utilisateurs_taches
     )
   );
 
+-- Tables menus groupes
+create table if not exists menus_groupes (
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid references mamas(id) not null,
+  nom text not null,
+  prix_vente numeric not null,
+  cout_total numeric,
+  marge numeric,
+  taux_food_cost numeric,
+  statut text default 'brouillon',
+  actif boolean default true,
+  created_at timestamp default now()
+);
+
+create table if not exists menus_groupes_fiches (
+  id uuid primary key default gen_random_uuid(),
+  menu_id uuid references menus_groupes(id) on delete cascade,
+  fiche_id uuid references fiches_techniques(id),
+  categorie text,
+  ordre integer,
+  mama_id uuid references mamas(id)
+);
+
+alter table menus_groupes enable row level security;
+alter table menus_groupes_fiches enable row level security;
+create policy rls_menus_groupes on menus_groupes using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+create policy rls_menus_groupes_fiches on menus_groupes_fiches using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+
 -- ========================
 -- GRANTS
 -- ========================
@@ -1266,7 +1294,7 @@ do $$
 declare t text;
 begin
   foreach t in array array[
-    'mamas','roles','permissions','role_permissions','utilisateurs','familles','sous_familles','unites','zones_stock','fournisseurs','produits','commandes','bons_livraison','lignes_bl','factures','facture_lignes','fiches_techniques','stock_mouvements','stocks','inventaires','inventaire_lignes','documents','notifications','gadgets','ventes_fiches_carte','ventes_familles','feedback','consentements_utilisateur','periodes_comptables','taches','tache_instances','planning_previsionnel','planning_lignes','fournisseur_produits','fiche_lignes','transferts','transfert_lignes','mouvements','mouvements_centres_cout'
+    'mamas','roles','permissions','role_permissions','utilisateurs','familles','sous_familles','unites','zones_stock','fournisseurs','produits','commandes','bons_livraison','lignes_bl','factures','facture_lignes','fiches_techniques','stock_mouvements','stocks','inventaires','inventaire_lignes','documents','notifications','gadgets','ventes_fiches_carte','ventes_familles','feedback','consentements_utilisateur','periodes_comptables','taches','tache_instances','planning_previsionnel','planning_lignes','fournisseur_produits','fiche_lignes','transferts','transfert_lignes','mouvements','mouvements_centres_cout','menus_groupes','menus_groupes_fiches'
   ]
   loop
     execute format('grant select, insert, update, delete on public.%I to authenticated;', t);

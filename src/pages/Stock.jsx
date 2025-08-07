@@ -2,8 +2,6 @@
 import { useEffect, useState } from "react";
 import { useStock } from "@/hooks/useStock";
 import useAuth from "@/hooks/useAuth";
-import StockMouvementForm from "@/components/stock/StockMouvementForm";
-import StockDetail from "@/components/stock/StockDetail";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
 import { Toaster } from "react-hot-toast";
@@ -14,20 +12,16 @@ import { motion as Motion } from "framer-motion";
 const PAGE_SIZE = 20;
 
 export default function Stock() {
-  const { stocks, fetchStocks, fetchMouvements, mouvements } = useStock();
+  const { stocks, fetchStocks } = useStock();
   const { mama_id, loading: authLoading } = useAuth();
   const [search, setSearch] = useState("");
-  const [showForm, setShowForm] = useState(false);
-  const [selected, setSelected] = useState(null);
-  const [showDetail, setShowDetail] = useState(false);
   const [page, setPage] = useState(1);
 
   useEffect(() => {
     if (!authLoading && mama_id) {
       fetchStocks();
-      fetchMouvements();
     }
-  }, [authLoading, mama_id, fetchStocks, fetchMouvements]);
+  }, [authLoading, mama_id, fetchStocks]);
 
   const filtered = stocks.filter(s =>
     !search || s.nom.toLowerCase().includes(search.toLowerCase())
@@ -54,9 +48,6 @@ export default function Stock() {
           className="form-input"
           placeholder="Recherche produit"
         />
-        <Button onClick={() => { setSelected(null); setShowForm(true); }}>
-          Mouvement stock
-        </Button>
         <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
       </div>
       <TableContainer className="mt-4">
@@ -72,28 +63,16 @@ export default function Stock() {
             <th className="px-4 py-2">Unité</th>
             <th className="px-4 py-2">PMP</th>
             <th className="px-4 py-2">Valorisation</th>
-            <th className="px-4 py-2">Actions</th>
           </tr>
         </thead>
         <tbody>
           {paged.map(s => (
             <tr key={s.id}>
-              <td className="border px-4 py-2">
-                <Button
-                  variant="link"
-                  className="font-semibold text-mamastockGold"
-                  onClick={() => { setSelected(s); setShowDetail(true); }}
-                >
-                  {s.nom}
-                </Button>
-              </td>
+              <td className="border px-4 py-2">{s.nom}</td>
               <td className="border px-4 py-2">{s.stock_reel}</td>
               <td className="border px-4 py-2">{s.unite?.nom}</td>
               <td className="border px-4 py-2">{s.pmp?.toFixed(2)}</td>
               <td className="border px-4 py-2">{(s.pmp * s.stock_reel).toFixed(2)} €</td>
-              <td className="border px-4 py-2">
-                <Button size="sm" variant="outline" onClick={() => { setSelected(s); setShowForm(true); }}>Mouvement</Button>
-              </td>
             </tr>
           ))}
         </tbody>
@@ -109,19 +88,6 @@ export default function Stock() {
           >{i + 1}</Button>
         )}
       </div>
-      {showForm && (
-        <StockMouvementForm
-          produit={selected}
-          onClose={() => { setShowForm(false); setSelected(null); fetchStocks(); fetchMouvements(); }}
-        />
-      )}
-      {showDetail && selected && (
-        <StockDetail
-          produit={selected}
-          mouvements={mouvements.filter(m => m.produit_id === selected.id)}
-          onClose={() => { setShowDetail(false); setSelected(null); }}
-        />
-      )}
     </div>
   );
 }

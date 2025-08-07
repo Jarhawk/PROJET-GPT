@@ -15,7 +15,7 @@ export function useStats() {
     const queries = [
       supabase.from("produits").select("id").eq("mama_id", mama_id),
       supabase.from("fiches_techniques").select("cout_total").eq("mama_id", mama_id),
-      supabase.from("stock_mouvements").select("quantite").eq("mama_id", mama_id),
+      supabase.from("mouvements").select("quantite").eq("mama_id", mama_id),
     ];
 
     const [products, fiches, mouvements] = await Promise.all(queries.map((q) => q));

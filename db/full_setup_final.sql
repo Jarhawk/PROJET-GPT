@@ -8,6 +8,14 @@ create extension if not exists "pgcrypto";
 -- TABLES
 -- ========================
 
+-- Suppression de l'ancien module Mouvements
+drop table if exists public.stock_mouvements cascade;
+drop view if exists public.v_mouvements_complets;
+drop function if exists trigger_create_stock_mouvement cascade;
+drop trigger if exists trg_stock_mouvements_insert on public.stock_mouvements;
+drop policy if exists mouvement_access on public.stock_mouvements;
+revoke all on public.stock_mouvements from authenticated;
+
 -- Table mamas
 create table if not exists public.mamas (
     id uuid primary key default uuid_generate_v4(),
@@ -255,25 +263,7 @@ create table if not exists public.fiche_lignes (
     actif boolean not null default true
 );
 
--- Table stock_mouvements
-create table if not exists public.stock_mouvements (
-    id uuid primary key default uuid_generate_v4(),
-    mama_id uuid constraint fk_stock_mouvements_mama_id references public.mamas(id) on delete cascade,
-    produit_id uuid constraint fk_stock_mouvements_produit_id references public.produits(id),
-    inventaire_id uuid constraint fk_stock_mouvements_inventaire_id references public.inventaires(id),
-    zone_id uuid constraint fk_stock_mouvements_zone_id references public.zones_stock(id),
-    zone_source_id uuid constraint fk_stock_mouvements_zone_source_id references public.zones_stock(id),
-    zone_destination_id uuid constraint fk_stock_mouvements_zone_destination_id references public.zones_stock(id),
-    auteur_id uuid constraint fk_stock_mouvements_auteur_id references public.utilisateurs(id),
-    type text not null,
-    quantite numeric(12,2) not null,
-    reference_id uuid,
-    date timestamptz,
-    commentaire text,
-    created_at timestamptz not null default now(),
-    updated_at timestamptz not null default now(),
-    actif boolean not null default true
-);
+-- Ancienne table stock_mouvements supprimée
 
 -- Table stocks
 create table if not exists public.stocks (
@@ -538,8 +528,8 @@ alter table if exists public.factures
 alter table if exists public.inventaires
   add column if not exists periode_id uuid constraint fk_inventaires_periode_id references public.periodes_comptables(id);
 
-alter table if exists public.stock_mouvements
-  add column if not exists periode_id uuid constraint fk_stock_mouvements_periode_id references public.periodes_comptables(id);
+-- alter table if exists public.stock_mouvements
+--   add column if not exists periode_id uuid constraint fk_stock_mouvements_periode_id references public.periodes_comptables(id);
 
 do $$
 begin
@@ -586,10 +576,10 @@ create index if not exists idx_factures_mama_id on public.factures(mama_id);
 create index if not exists idx_facture_lignes_mama_id on public.facture_lignes(mama_id);
 create index if not exists idx_facture_lignes_facture_id on public.facture_lignes(facture_id);
 create index if not exists idx_fiches_techniques_mama_id on public.fiches_techniques(mama_id);
-create index if not exists idx_stock_mouvements_mama_id on public.stock_mouvements(mama_id);
-create index if not exists idx_stock_mouvements_produit_id on public.stock_mouvements(produit_id);
-create index if not exists idx_stock_mouvements_date on public.stock_mouvements(date);
-create index if not exists idx_stock_inventaire_id on public.stock_mouvements(inventaire_id);
+-- create index if not exists idx_stock_mouvements_mama_id on public.stock_mouvements(mama_id);
+-- create index if not exists idx_stock_mouvements_produit_id on public.stock_mouvements(produit_id);
+-- create index if not exists idx_stock_mouvements_date on public.stock_mouvements(date);
+-- create index if not exists idx_stock_inventaire_id on public.stock_mouvements(inventaire_id);
 create index if not exists idx_stocks_mama_id on public.stocks(mama_id);
 create index if not exists idx_stocks_produit_id on public.stocks(produit_id);
 create index if not exists idx_stocks_zone_id on public.stocks(zone_id);
@@ -616,7 +606,7 @@ create index if not exists idx_planning_previsionnel_mama_id on public.planning_
 create index if not exists idx_planning_lignes_mama_id on public.planning_lignes(mama_id);
 create index if not exists idx_factures_periode_id on public.factures(periode_id);
 create index if not exists idx_inventaires_periode_id on public.inventaires(periode_id);
-create index if not exists idx_stock_mouvements_periode_id on public.stock_mouvements(periode_id);
+-- create index if not exists idx_stock_mouvements_periode_id on public.stock_mouvements(periode_id);
 create index if not exists idx_fournisseur_produits_mama_id on public.fournisseur_produits(mama_id);
 create index if not exists idx_fournisseur_produits_produit_id on public.fournisseur_produits(produit_id);
 create index if not exists idx_fournisseur_produits_fournisseur_id on public.fournisseur_produits(fournisseur_id);

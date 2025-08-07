@@ -18,7 +18,6 @@ router.get('/', async (req, res) => {
   const {
     since,
     type,
-    zone,
     page = '1',
     limit = '100',
     sortBy = 'date',
@@ -28,16 +27,11 @@ router.get('/', async (req, res) => {
   try {
     if (!supabase) throw new Error('Missing Supabase credentials');
     let query = supabase
-      .from('stock_mouvements')
+      .from('mouvements')
       .select('*')
       .eq('mama_id', mama_id);
     if (since) query = query.gte('date', since);
     if (type) query = query.eq('type', type);
-    if (zone) {
-      query = query.or(
-        `zone_source_id.eq.${zone},zone_destination_id.eq.${zone}`,
-      );
-    }
     query = query.order(sortBy, { ascending: order !== 'desc' });
     const p = Math.max(parseInt(page, 10), 1);
     const l = Math.max(parseInt(limit, 10), 1);

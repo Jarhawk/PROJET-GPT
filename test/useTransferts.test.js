@@ -32,7 +32,7 @@ const queryMouvements = {
 const fromMock = vi.fn((table) => {
   if (table === 'transferts') return queryTransferts;
   if (table === 'transfert_lignes') return queryLignes;
-  if (table === 'stock_mouvements') return queryMouvements;
+  if (table === 'mouvements') return queryMouvements;
   return baseQuery;
 });
 
@@ -80,7 +80,7 @@ test('createTransfert inserts header, lines and mouvements', async () => {
   });
   expect(fromMock).toHaveBeenNthCalledWith(1, 'transferts');
   expect(fromMock).toHaveBeenNthCalledWith(2, 'transfert_lignes');
-  expect(fromMock).toHaveBeenNthCalledWith(3, 'stock_mouvements');
+  expect(fromMock).toHaveBeenNthCalledWith(3, 'mouvements');
   const insertedHeader = queryTransferts.insert.mock.calls[0][0][0];
   expect(insertedHeader).toMatchObject({
     mama_id: 'm1',
@@ -100,11 +100,11 @@ test('createTransfert inserts header, lines and mouvements', async () => {
   expect(mouvements).toHaveLength(2);
   expect(mouvements[0]).toMatchObject({
     type: 'sortie_transfert',
-    zone_id: 'zs',
+    transfert_id: 't1',
   });
   expect(mouvements[1]).toMatchObject({
     type: 'entree_transfert',
-    zone_id: 'zd',
+    transfert_id: 't1',
   });
 });
 

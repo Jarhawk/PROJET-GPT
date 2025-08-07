@@ -211,10 +211,8 @@ export function useProducts() {
     async (productId) => {
       if (!mama_id) return [];
       const { data, error } = await supabase
-        .from('stock_mouvements')
-        .select(
-          'id,date,type,quantite, zone_source:zones_stock!stock_mouvements_zone_source_id_fkey(nom), zone_destination:zones_stock!stock_mouvements_zone_destination_id_fkey(nom)'
-        )
+        .from('mouvements')
+        .select('id,date,type,quantite')
         .eq('produit_id', productId)
         .eq('mama_id', mama_id)
         .order('date', { ascending: false });

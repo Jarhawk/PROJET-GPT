@@ -162,7 +162,7 @@ describe('public API router', () => {
     const res = await request(app).get('/stock?mama_id=m1').set('x-api-key', 'dev_key');
     expect(res.status).toBe(200);
     expect(res.body).toEqual(data);
-    expect(fromMock).toHaveBeenCalledWith('stock_mouvements');
+    expect(fromMock).toHaveBeenCalledWith('mouvements');
   });
 
   it('applies since filter on stock', async () => {
@@ -172,14 +172,13 @@ describe('public API router', () => {
     expect(chain.gte).toHaveBeenCalledWith('date', '2024-01-01');
   });
 
-  it('supports type, zone and pagination filters', async () => {
+  it('supports type and pagination filters', async () => {
     const app = express();
     app.use(router);
     await request(app)
-      .get('/stock?mama_id=m1&type=entree&zone=frigo&page=2&limit=50&sortBy=type&order=asc')
+      .get('/stock?mama_id=m1&type=entree&page=2&limit=50&sortBy=type&order=asc')
       .set('x-api-key', 'dev_key');
     expect(chain.eq).toHaveBeenCalledWith('type', 'entree');
-    expect(chain.or).toHaveBeenCalledWith('zone_source_id.eq.frigo,zone_destination_id.eq.frigo');
     expect(chain.order).toHaveBeenCalledWith('type', { ascending: true });
     expect(chain.range).toHaveBeenCalledWith(50, 99);
   });
@@ -198,7 +197,7 @@ describe('public API router', () => {
     expect(res.status).toBe(200);
     expect(res.body).toEqual(data);
     expect(getUserMock).toHaveBeenCalledWith('tok');
-    expect(fromMock).toHaveBeenCalledWith('stock_mouvements');
+    expect(fromMock).toHaveBeenCalledWith('mouvements');
   });
 
   it('handles Supabase error for stock', async () => {

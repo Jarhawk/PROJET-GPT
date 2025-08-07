@@ -50,7 +50,6 @@ export default function Sidebar() {
             <div className="ml-4 flex flex-col gap-1 mt-1">
               {has("produits") && <Link to="/produits">Produits</Link>}
               {has("inventaires") && <Link to="/inventaire">Inventaire</Link>}
-              {has("mouvements") && <Link to="/mouvements">Mouvements</Link>}
             </div>
           </details>
         )}

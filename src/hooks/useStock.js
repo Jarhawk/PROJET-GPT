@@ -6,7 +6,6 @@ import useAuth from "@/hooks/useAuth";
 export function useStock() {
   const { mama_id, user_id } = useAuth();
   const [stocks, setStocks] = useState([]);
-  const [mouvements, setMouvements] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -26,57 +25,6 @@ export function useStock() {
     setStocks(data || []);
     return data;
   }, [mama_id]);
-
-  // 2. Charger mouvements stock
-  const fetchMouvements = useCallback(async () => {
-    if (!mama_id) return [];
-    setLoading(true);
-    setError(null);
-    const { data, error } = await supabase
-      .from("stock_mouvements")
-      .select(
-        "*, zone_source:zones_stock!stock_mouvements_zone_source_id_fkey(id, nom), zone_destination:zones_stock!stock_mouvements_zone_destination_id_fkey(id, nom)"
-      )
-      .eq("mama_id", mama_id)
-      .order("created_at", { ascending: false });
-    setLoading(false);
-    if (error) setError(error);
-    setMouvements(data || []);
-    return data;
-  }, [mama_id]);
-
-  // 3. Ajouter mouvement de stock
-  async function addMouvementStock({
-    produit_id,
-    type,
-    quantite,
-    zone_source_id = null,
-    zone_destination_id = null,
-    commentaire = "",
-  }) {
-    setLoading(true);
-    setError(null);
-    const payload = {
-      produit_id,
-      type,
-      quantite: Number(quantite),
-      mama_id,
-      date: new Date().toISOString(),
-      commentaire,
-    };
-    if (type === "entree") {
-      payload.zone_destination_id = zone_destination_id ?? zone_source_id;
-    } else if (type === "sortie") {
-      payload.zone_source_id = zone_source_id ?? zone_destination_id;
-    } else if (type === "transfert") {
-      payload.zone_source_id = zone_source_id;
-      payload.zone_destination_id = zone_destination_id;
-    }
-    const { error } = await supabase.from("stock_mouvements").insert([payload]);
-    setLoading(false);
-    if (error) setError(error);
-    // Les listes seront rafraîchies via fetchStocks/fetchMouvements
-  }
 
   async function fetchRotationStats(produit_id) {
     const { data, error } = await supabase.rpc('stats_rotation_produit', {
@@ -137,7 +85,7 @@ export function useStock() {
         delete toInsert.motif;
       }
       const { data, error } = await supabase
-        .from("stock_mouvements")
+        .from("mouvements")
         .insert([toInsert])
         .select()
         .single();
@@ -149,12 +97,9 @@ export function useStock() {
 
   return {
     stocks,
-    mouvements,
     loading,
     error,
     fetchStocks,
-    fetchMouvements,
-    addMouvementStock,
     fetchRotationStats,
     getStockTheorique,
     getInventaires,

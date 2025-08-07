@@ -5,7 +5,6 @@ export const MODULES = [
   { label: "Factures", key: "factures" },
   { label: "Réceptions", key: "receptions" },
   { label: "Inventaires", key: "inventaires" },
-  { label: "Mouvements", key: "mouvements" },
   { label: "Menus", key: "menus" },
   { label: "Carte", key: "carte" },
   { label: "Recettes", key: "recettes" },

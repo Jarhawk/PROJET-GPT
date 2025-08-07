@@ -17,7 +17,7 @@ export default function useConsoMoyenne() {
       const start = new Date();
       start.setDate(start.getDate() - 7);
       const { data, error } = await supabase
-        .from('stock_mouvements')
+        .from('mouvements')
         .select('date, quantite')
         .eq('mama_id', mama_id)
         .eq('type', 'sortie')

@@ -51,7 +51,7 @@ export function useInventaireLignes() {
     return { data: data || [], count: count || 0 };
   }
 
-  async function createLigne({ inventaire_id, produit_id, quantite }) {
+  async function createLigne({ inventaire_id, produit_id, quantite_reelle }) {
     if (!mama_id || !inventaire_id || !produit_id) {
       throw new Error("missing reference");
     }
@@ -63,7 +63,7 @@ export function useInventaireLignes() {
     setError(null);
     const { data, error } = await supabase
       .from("inventaire_lignes")
-      .insert([{ inventaire_id, produit_id, quantite, mama_id }])
+      .insert([{ inventaire_id, produit_id, quantite_reelle, mama_id }])
       .select()
       .single();
     setLoading(false);

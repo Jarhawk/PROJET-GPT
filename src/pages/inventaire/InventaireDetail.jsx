@@ -29,7 +29,7 @@ export default function InventaireDetail() {
 
   const exportExcel = () => {
     const rows = (inventaire.lignes || []).map(l => {
-      const ecart = l.quantite - (l.product?.stock_theorique || 0);
+      const ecart = l.quantite_reelle - (l.product?.stock_theorique || 0);
       const valeurEcart = ecart * (l.product?.pmp || 0);
       const conso = l.conso_calculee || 0;
       const requisition = l.requisition_mensuelle || 0;
@@ -39,7 +39,7 @@ export default function InventaireDetail() {
         Zone: inventaire.zone || "",
         Produit: l.product?.nom,
         Famille: l.product?.famille,
-        Quantite: l.quantite,
+        Quantite: l.quantite_reelle,
         StockTheorique: l.product?.stock_theorique,
         PMP: l.product?.pmp,
         Ecart: ecart,
@@ -69,12 +69,12 @@ export default function InventaireDetail() {
       body: (inventaire.lignes || []).map(l => [
         l.product?.nom,
         l.product?.unite?.nom,
-        l.quantite,
+        l.quantite_reelle,
         l.product?.stock_theorique,
         l.product?.pmp,
-        (l.quantite * (l.product?.pmp || 0)).toFixed(2),
-        (l.quantite - (l.product?.stock_theorique || 0)).toFixed(2),
-        ((l.quantite - (l.product?.stock_theorique || 0)) * (l.product?.pmp || 0)).toFixed(2),
+        (l.quantite_reelle * (l.product?.pmp || 0)).toFixed(2),
+        (l.quantite_reelle - (l.product?.stock_theorique || 0)).toFixed(2),
+        ((l.quantite_reelle - (l.product?.stock_theorique || 0)) * (l.product?.pmp || 0)).toFixed(2),
       ]),
       styles: { fontSize: 9 },
     });
@@ -82,12 +82,12 @@ export default function InventaireDetail() {
   };
 
   const totalValeur = (inventaire.lignes || []).reduce(
-    (s, l) => s + Number(l.quantite || 0) * Number(l.product?.pmp || 0),
+    (s, l) => s + Number(l.quantite_reelle || 0) * Number(l.product?.pmp || 0),
     0
   );
   const totalEcart = (inventaire.lignes || []).reduce(
     (s, l) =>
-      s + (Number(l.quantite || 0) - Number(l.product?.stock_theorique || 0)) * Number(l.product?.pmp || 0),
+      s + (Number(l.quantite_reelle || 0) - Number(l.product?.stock_theorique || 0)) * Number(l.product?.pmp || 0),
     0
   );
 
@@ -113,13 +113,13 @@ export default function InventaireDetail() {
           </thead>
           <tbody>
             {(inventaire.lignes || []).map((l, idx) => {
-              const valeur = Number(l.quantite || 0) * Number(l.product?.pmp || 0);
-              const ecart = Number(l.quantite || 0) - Number(l.product?.stock_theorique || 0);
+              const valeur = Number(l.quantite_reelle || 0) * Number(l.product?.pmp || 0);
+              const ecart = Number(l.quantite_reelle || 0) - Number(l.product?.stock_theorique || 0);
               return (
                 <tr key={idx} className="border-b last:border-none">
                   <td className="p-2">{l.product?.nom}</td>
                   <td className="p-2">{l.product?.unite?.nom}</td>
-                  <td className="p-2">{l.quantite}</td>
+                  <td className="p-2">{l.quantite_reelle}</td>
                   <td className="p-2">{l.product?.stock_theorique}</td>
                   <td className="p-2">{l.product?.pmp}</td>
                   <td className="p-2">{valeur.toFixed(2)}</td>

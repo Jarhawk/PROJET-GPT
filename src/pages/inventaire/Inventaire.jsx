@@ -13,6 +13,7 @@ export default function Inventaire() {
   const canEdit = hasAccess("inventaires", "peut_modifier");
   const [zoneFilter, setZoneFilter] = useState("");
   const [dateFilter, setDateFilter] = useState("");
+  const [statutFilter, setStatutFilter] = useState("");
   const [showArchives, setShowArchives] = useState(false);
 
   useEffect(() => {
@@ -28,6 +29,7 @@ export default function Inventaire() {
   const filtered = inventaires
     .filter(i => !zoneFilter || i.zone === zoneFilter)
     .filter(i => !dateFilter || i.date_inventaire === dateFilter)
+    .filter(i => !statutFilter || i.statut === statutFilter)
     .sort((a, b) => new Date(b.date_inventaire) - new Date(a.date_inventaire));
 
   const zones = Array.from(new Set(inventaires.map(i => i.zone).filter(Boolean)));
@@ -60,6 +62,15 @@ export default function Inventaire() {
             <option key={z} value={z}>{z}</option>
           ))}
         </select>
+        <select
+          className="form-input"
+          value={statutFilter}
+          onChange={e => setStatutFilter(e.target.value)}
+        >
+          <option value="">Tous statuts</option>
+          <option value="brouillon">Brouillon</option>
+          <option value="valide">Validé</option>
+        </select>
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -85,12 +96,12 @@ export default function Inventaire() {
           <tbody>
             {filtered.map(inv => {
               const total = (inv.lignes || []).reduce(
-                (sum, l) => sum + Number(l.quantite || 0) * Number(l.product?.pmp || 0),
+                (sum, l) => sum + Number(l.quantite_reelle || 0) * Number(l.product?.pmp || 0),
                 0
               );
               const ecart = (inv.lignes || []).reduce(
                 (sum, l) =>
-                  sum + (Number(l.quantite || 0) - Number(l.product?.stock_theorique || 0)) * Number(l.product?.pmp || 0),
+                  sum + (Number(l.quantite_reelle || 0) - Number(l.product?.stock_theorique || 0)) * Number(l.product?.pmp || 0),
                 0
               );
               return (

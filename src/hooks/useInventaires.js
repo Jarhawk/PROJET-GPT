@@ -11,7 +11,12 @@ export function useInventaires() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  async function getInventaires({ includeArchives = false } = {}) {
+  async function getInventaires({
+    zoneId,
+    periode,
+    statut,
+    includeArchives = false,
+  } = {}) {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
@@ -21,8 +26,11 @@ export function useInventaires() {
         "*, lignes:inventaire_lignes!inventaire_id(*, produit:produits!inventaire_lignes_produit_id_fkey(id, nom, unite_id, unite:unite_id (nom), pmp))"
       )
       .eq("mama_id", mama_id);
+    if (zoneId) query = query.eq("zone_id", zoneId);
+    if (periode) query = query.eq("periode", periode);
+    if (statut) query = query.eq("statut", statut);
     if (!includeArchives) query = query.eq("actif", true);
-    const { data, error } = await query.order("date_inventaire", { ascending: false });
+    const { data, error } = await query.order("periode", { ascending: false });
     setLoading(false);
     if (error) {
       setError(error);
@@ -63,7 +71,7 @@ export function useInventaires() {
         .eq("mama_id", mama_id)
         .single();
       if (error || !data) return false;
-      if (Number(data.stock_reel) !== Number(line.quantite)) return false;
+      if (Number(data.stock_reel) !== Number(line.quantite_reelle)) return false;
     }
     return true;
   }
@@ -92,6 +100,7 @@ export function useInventaires() {
       const toInsert = lignes.map(l => ({
         ...l,
         produit_id: l.produit_id,
+        quantite_reelle: l.quantite_reelle,
         inventaire_id: data.id,
         mama_id,
       }));

@@ -5,7 +5,7 @@ import { vi, beforeEach, test, expect } from 'vitest';
 const limitMock = vi.fn(() => Promise.resolve({ data: [], error: null }));
 const orderMock = vi.fn(() => ({ limit: limitMock }));
 const ilikeMock = vi.fn(() => ({ order: orderMock, limit: limitMock }));
-const eqMock = vi.fn(() => ({ ilike: ilikeMock, order: orderMock, limit: limitMock }));
+const eqMock = vi.fn(() => ({ eq: eqMock, ilike: ilikeMock, order: orderMock, limit: limitMock }));
 const selectMock = vi.fn(() => ({ eq: eqMock, ilike: ilikeMock, order: orderMock, limit: limitMock }));
 const fromMock = vi.fn(() => ({ select: selectMock }));
 

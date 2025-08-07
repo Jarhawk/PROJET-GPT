@@ -2,14 +2,28 @@
 import { render, screen } from '@testing-library/react';
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest';
+import { supabase } from '../__mocks__/supabase.js';
+
+vi.mock('@/lib/supabase', () => ({ supabase }));
+
+let authMock;
+vi.mock('@/context/AuthContext', async () => {
+  const React = await import('react');
+  const AuthContext = React.createContext(null);
+  return {
+    AuthContext,
+    AuthProvider: ({ children }) => (
+      <AuthContext.Provider value={authMock}>{children}</AuthContext.Provider>
+    ),
+    useAuth: () => authMock,
+  };
+});
 
 let mockHook;
 vi.mock('@/hooks/useProducts', () => ({
   useProducts: () => mockHook(),
-}));
-vi.mock('@/hooks/useAuth', () => ({
-  default: () => ({ hasAccess: () => true, mama_id: 'm1' })
 }));
 vi.mock('@/hooks/useStorage', () => ({
   uploadFile: vi.fn(),
@@ -39,6 +53,7 @@ vi.mock('@/hooks/useZonesStock', () => ({
 }));
 
 import Produits from '@/pages/produits/Produits.jsx';
+import { AuthProvider } from '@/context/AuthContext';
 
 test('toggle button calls hook', async () => {
   const toggle = vi.fn();
@@ -61,8 +76,18 @@ test('toggle button calls hook', async () => {
     addProduct: vi.fn(),
     toggleProductActive: toggle,
   });
-  render(<Produits />);
-  const button = await screen.findByText('Désactiver');
-  fireEvent.click(button);
+  authMock = {
+    hasAccess: () => true,
+    mama_id: 'm1',
+    loading: false,
+  };
+  const wrapper = ({ children }) => (
+    <MemoryRouter>
+      <AuthProvider>{children}</AuthProvider>
+    </MemoryRouter>
+  );
+  render(<Produits />, { wrapper });
+  const buttons = await screen.findAllByText('Désactiver');
+  fireEvent.click(buttons[0]);
   expect(toggle).toHaveBeenCalledWith('1', false);
 });

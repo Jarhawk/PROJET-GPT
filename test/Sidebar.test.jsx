@@ -6,7 +6,6 @@ import { vi } from 'vitest';
 import { supabase } from '../__mocks__/supabase.js';
 
 vi.mock('@/lib/supabase', () => ({ supabase }));
-vi.mock('@/components/ui/LoadingSpinner', () => ({ LoadingSpinner: () => <div>Loading...</div> }));
 
 let authMock;
 vi.mock('@/context/AuthContext', async () => {
@@ -21,34 +20,29 @@ vi.mock('@/context/AuthContext', async () => {
   };
 });
 
-vi.mock('@/hooks/usePlanning', () => ({
-  usePlanning: () => ({
-    getPlannings: vi.fn(() => Promise.resolve({ data: [{ id: '1', nom: 'Plan A', date_prevue: '2024-01-01', statut: 'prévu' }] })),
-  }),
-}));
-
-import Planning from '@/pages/Planning.jsx';
+import Sidebar from '@/layout/Sidebar.jsx';
 import { AuthProvider } from '@/context/AuthContext';
 
-describe('Planning page', () => {
+describe('Sidebar', () => {
   beforeEach(() => {
     authMock = {
-      mama_id: 'abc',
       user: {},
       userData: {},
+      mama_id: 'abc',
       loading: false,
-      access_rights: { planning_previsionnel: { peut_voir: true } },
+      access_rights: { produits: { peut_voir: true } },
       hasAccess: (m, d = 'peut_voir') => !!authMock.access_rights[m]?.[d],
     };
   });
 
-  test('renders planning item', async () => {
+  test('shows permitted links', () => {
     const wrapper = ({ children }) => (
       <MemoryRouter>
         <AuthProvider>{children}</AuthProvider>
       </MemoryRouter>
     );
-    render(<Planning />, { wrapper });
-    expect(await screen.findByText('Plan A')).toBeInTheDocument();
+    render(<Sidebar />, { wrapper });
+    expect(screen.getByText('Produits')).toBeInTheDocument();
+    expect(screen.queryByText('Factures')).not.toBeInTheDocument();
   });
 });

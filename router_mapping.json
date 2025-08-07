@@ -192,6 +192,10 @@
     "module": "analyse"
   },
   {
+    "route": "/analyse/costing-carte",
+    "module": "analyse"
+  },
+  {
     "route": "/analyse/analytique",
     "module": "analyse"
   },

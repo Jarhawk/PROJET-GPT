@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import useAuth from "@/hooks/useAuth";
 import { useZones } from "@/hooks/useZones";
 import { useRequisitions } from "@/hooks/useRequisitions";
+import { useProducts } from "@/hooks/useProducts";
+import { useUtilisateurs } from "@/hooks/useUtilisateurs";
 import toast, { Toaster } from "react-hot-toast";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
@@ -14,24 +16,35 @@ import { Link } from "react-router-dom";
 export default function Requisitions() {
   const { mama_id, loading: authLoading } = useAuth();
   const { zones, fetchZones } = useZones();
+  const { products, fetchProducts } = useProducts();
+  const { users, fetchUsers } = useUtilisateurs();
   const { getRequisitions } = useRequisitions();
   const [requisitions, setRequisitions] = useState([]);
   const [statut, setStatut] = useState("");
-  const [zone, setZone] = useState("");
+  const [produit, setProduit] = useState("");
+  const [utilisateur, setUtilisateur] = useState("");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [periode, setPeriode] = useState({ debut: "", fin: "" });
+  const [caveZone, setCaveZone] = useState("");
 
   useEffect(() => {
     if (!mama_id || authLoading) return;
     fetchZones();
-  }, [mama_id, authLoading]);
+    fetchProducts({ limit: 1000 });
+    fetchUsers();
+  }, [mama_id, authLoading, fetchZones, fetchProducts, fetchUsers]);
 
   useEffect(() => {
-    if (!mama_id || authLoading || !periode.debut || !periode.fin) return;
-    getRequisitions({ zone, statut, debut: periode.debut, fin: periode.fin, page })
+    const cave = zones.find(z => z.nom?.toLowerCase() === "cave");
+    if (cave) setCaveZone(cave.id);
+  }, [zones]);
+
+  useEffect(() => {
+    if (!mama_id || authLoading || !periode.debut || !periode.fin || !caveZone) return;
+    getRequisitions({ zone: caveZone, statut, debut: periode.debut, fin: periode.fin, utilisateur, produit, page })
       .then(({ data, count }) => { setRequisitions(data); setTotal(count); });
-  }, [mama_id, authLoading, periode, zone, statut, page]);
+  }, [mama_id, authLoading, periode, statut, utilisateur, produit, page, caveZone]);
 
   const filtered = requisitions;
 
@@ -101,25 +114,43 @@ export default function Requisitions() {
           />
         </div>
         <div>
-          <label className="block font-medium">Zone</label>
+          <label className="block font-medium">Statut</label>
           <select
             className="input input-bordered"
-            value={zone}
-            onChange={e => setZone(e.target.value)}
+            value={statut}
+            onChange={e => setStatut(e.target.value)}
           >
-            <option value="">Toutes</option>
-            {zones.map(z => (
-              <option key={z.id} value={z.id}>{z.nom}</option>
+            <option value="">Tous</option>
+            <option value="brouillon">Brouillon</option>
+            <option value="faite">Faite</option>
+            <option value="réalisée">Réalisée</option>
+          </select>
+        </div>
+        <div>
+          <label className="block font-medium">Produit</label>
+          <select
+            className="input input-bordered"
+            value={produit}
+            onChange={e => setProduit(e.target.value)}
+          >
+            <option value="">Tous</option>
+            {products.map(p => (
+              <option key={p.id} value={p.id}>{p.nom}</option>
             ))}
           </select>
         </div>
         <div>
-          <label className="block font-medium">Statut</label>
-          <input
+          <label className="block font-medium">Utilisateur</label>
+          <select
             className="input input-bordered"
-            value={statut}
-            onChange={e => setStatut(e.target.value)}
-          />
+            value={utilisateur}
+            onChange={e => setUtilisateur(e.target.value)}
+          >
+            <option value="">Tous</option>
+            {users.map(u => (
+              <option key={u.id} value={u.id}>{u.nom}</option>
+            ))}
+          </select>
         </div>
         <Button onClick={handleExportExcel}>Export Excel</Button>
         <Button onClick={handleExportPDF}>Export PDF</Button>

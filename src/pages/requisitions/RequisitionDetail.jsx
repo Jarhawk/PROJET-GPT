@@ -33,7 +33,7 @@ function RequisitionDetailPage() {
           <strong>Date :</strong> {requisition.date_demande}
         </div>
         <div>
-          <strong>Zone :</strong> {requisition.zone_id}
+          <strong>Zone :</strong> Cave
         </div>
         <div>
           <strong>Commentaire :</strong> {requisition.commentaire}
@@ -49,7 +49,7 @@ function RequisitionDetailPage() {
                   className="w-6 h-6 rounded object-cover"
                 />
                 <span>
-                  {l.produit?.nom || l.produit_id} - {l.quantite_demandee} (stock {l.stock_theorique_avant} → {l.stock_theorique_apres})
+                  {l.produit?.nom || l.produit_id} - {l.quantite_demandee} {l.unite?.nom || ""} (stock {l.stock_theorique_avant} → {l.stock_theorique_apres})
                 </span>
               </li>
             ))}

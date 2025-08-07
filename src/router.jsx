@@ -104,7 +104,7 @@ const Recettes = lazyWithPreload(() => import("@/pages/recettes/Recettes.jsx"));
 const Surcouts = lazyWithPreload(() => import("@/pages/surcouts/Surcouts.jsx"));
 const TableauxDeBord = lazyWithPreload(() => import("@/pages/analyse/TableauxDeBord.jsx"));
 const Comparatif = lazyWithPreload(() => import("@/pages/fournisseurs/comparatif/ComparatifPrix.jsx"));
-const MenuEngineering = lazyWithPreload(() => import("@/pages/MenuEngineering.jsx"));
+const MenuEngineering = lazyWithPreload(() => import("@/pages/engineering/MenuEngineering.jsx"));
 const EngineeringMenu = lazyWithPreload(() => import("@/pages/EngineeringMenu.jsx"));
 const Logout = lazyWithPreload(() => import("@/pages/auth/Logout.jsx"));
 const Stats = lazyWithPreload(() => import("@/pages/stats/Stats.jsx"));

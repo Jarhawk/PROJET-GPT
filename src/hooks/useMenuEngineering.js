@@ -10,17 +10,21 @@ export function useMenuEngineering() {
   const [error, setError] = useState(null)
 
   const fetchData = useCallback(
-    async (periode) => {
+    async (periode, { famille, actif } = {}) => {
       if (!mama_id) return []
       setLoading(true)
       setError(null)
       try {
-        const { data: fiches, error } = await supabase
+        let query = supabase
           .from('v_menu_engineering')
           .select('*')
           .eq('mama_id', mama_id)
           .eq('periode', periode)
           .order('nom')
+        if (famille) query = query.eq('famille', famille)
+        if (actif !== '' && actif !== undefined) query = query.eq('actif', actif === 'actif')
+
+        const { data: fiches, error } = await query
         if (error) throw error
 
         const rows = (fiches || []).map(f => {
@@ -30,6 +34,8 @@ export function useMenuEngineering() {
           const pop = f.popularite ?? 0
           const foodCost = p > 0 ? (cout / p) * 100 : null
           const marge = p > 0 ? ((p - cout) / p) * 100 : 0
+          const margeEuro = p - cout
+          const ca = p * qty
           return {
             ...f,
             prix_vente: p,
@@ -38,6 +44,8 @@ export function useMenuEngineering() {
             popularite: pop,
             foodCost,
             marge,
+            margeEuro,
+            ca,
             x: pop * 100,
             y: marge,
           }
@@ -47,7 +55,7 @@ export function useMenuEngineering() {
         const medMarge = median(rows.map(r => r.marge))
         rows.forEach(r => {
           if (r.ventes >= medPop && r.marge >= medMarge) r.classement = 'Star'
-          else if (r.ventes >= medPop && r.marge < medMarge) r.classement = 'Plowhorse'
+          else if (r.ventes >= medPop && r.marge < medMarge) r.classement = 'Horse'
           else if (r.ventes < medPop && r.marge >= medMarge) r.classement = 'Puzzle'
           else r.classement = 'Dog'
           r.score_calc = Math.round(r.marge + r.popularite * 100)

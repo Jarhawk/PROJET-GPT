@@ -15,6 +15,7 @@ import SecondaryButton from "@/components/ui/SecondaryButton";
 import { Input } from "@/components/ui/input";
 import GlassCard from "@/components/ui/GlassCard";
 import toast from "react-hot-toast";
+import FicheLigne from "@/components/fiches/FicheLigne.jsx";
 
 export default function FicheForm({ fiche, onClose }) {
   const { access_rights, loading: authLoading } = useAuth();
@@ -175,70 +176,16 @@ export default function FicheForm({ fiche, onClose }) {
               </tr>
             </thead>
             <tbody>
-              {lignes.map((l, i) => {
-                const prod = products.find(p => p.id === l.produit_id);
-                const sf = ficheOptions.find(f => f.id === l.sous_fiche_id);
-                return (
-                  <tr key={i}>
-                    <td>
-                      <Select
-                        className="w-full"
-                        value={l.type}
-                        onChange={e => updateLigne(i, 'type', e.target.value)}
-                      >
-                        <option value="produit">Produit</option>
-                        <option value="sous_fiche">Sous-fiche</option>
-                      </Select>
-                    </td>
-                    <td>
-                      {l.type === 'produit' ? (
-                        <Select
-                          className="w-full"
-                          value={l.produit_id}
-                          onChange={e => updateLigne(i, 'produit_id', e.target.value)}
-                          required
-                        >
-                          <option value="">Sélectionner</option>
-                          {products.map(p => (
-                            <option key={p.id} value={p.id}>
-                              {p.nom}{p.unite?.nom ? ` (${p.unite.nom})` : ''}
-                            </option>
-                          ))}
-                        </Select>
-                      ) : (
-                        <Select
-                          className="w-full"
-                          value={l.sous_fiche_id}
-                          onChange={e => updateLigne(i, 'sous_fiche_id', e.target.value)}
-                          required
-                        >
-                          <option value="">Sélectionner</option>
-                          {ficheOptions.map(f => (
-                            <option key={f.id} value={f.id}>
-                              {f.nom}
-                            </option>
-                          ))}
-                        </Select>
-                      )}
-                    </td>
-                    <td>
-                      <Input
-                        type="number"
-                        className="w-full"
-                        min={0}
-                        step="0.01"
-                        value={l.quantite}
-                        onChange={e => updateLigne(i, 'quantite', Number(e.target.value))}
-                        required
-                      />
-                    </td>
-                    <td>{l.type === 'produit' ? prod?.unite?.nom || '-' : 'portion'}</td>
-                    <td>{l.type === 'produit' ? (prod?.pmp ?? prod?.dernier_prix ?? null) ? Number(prod.pmp ?? prod.dernier_prix).toFixed(2) : '-' : sf?.cout_par_portion?.toFixed(2) || '-'}</td>
-                    <td>{l.type === 'produit' ? (prod?.pmp ?? prod?.dernier_prix ?? null) ? ((Number(prod.pmp ?? prod.dernier_prix) * l.quantite).toFixed(2)) : '-' : sf?.cout_par_portion ? (sf.cout_par_portion * l.quantite).toFixed(2) : '-'}</td>
-                    <td><Button size="sm" variant="outline" onClick={() => removeLigne(i)}>Suppr.</Button></td>
-                  </tr>
-                );
-              })}
+              {lignes.map((l, i) => (
+                <FicheLigne
+                  key={i}
+                  ligne={l}
+                  products={products}
+                  ficheOptions={ficheOptions}
+                  onChange={(field, val) => updateLigne(i, field, val)}
+                  onRemove={() => removeLigne(i)}
+                />
+              ))}
             </tbody>
           </table>
         </TableContainer>

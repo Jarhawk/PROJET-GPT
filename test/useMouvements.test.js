@@ -23,36 +23,50 @@ beforeEach(async () => {
   Object.values(query).forEach(fn => fn.mockClear && fn.mockClear());
 });
 
-test('getMouvements applies filters', async () => {
+test('fetchMouvements applies filters', async () => {
   const { result } = renderHook(() => useMouvements());
   await act(async () => {
-    await result.current.getMouvements({
-      type: 'entree',
+    await result.current.fetchMouvements({
+      type: 'entree_manuelle',
       produit: 'p1',
-      zone_source: 'z1',
-      zone_destination: 'z2',
+      zone: 'z1',
       debut: '2025-01-01',
       fin: '2025-01-31',
     });
   });
   expect(fromMock).toHaveBeenCalledWith('stock_mouvements');
-  expect(query.select).toHaveBeenCalledWith('*', { count: 'exact' });
+  expect(query.select).toHaveBeenCalledWith(
+    'id, date, type, quantite, zone_id, motif, produits:produit_id(nom, unite)'
+  );
   expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1');
-  expect(query.eq).toHaveBeenCalledWith('type', 'entree');
+  expect(query.eq).toHaveBeenCalledWith('type', 'entree_manuelle');
   expect(query.eq).toHaveBeenCalledWith('produit_id', 'p1');
-  expect(query.eq).toHaveBeenCalledWith('zone_source_id', 'z1');
-  expect(query.eq).toHaveBeenCalledWith('zone_destination_id', 'z2');
+  expect(query.eq).toHaveBeenCalledWith('zone_id', 'z1');
   expect(query.gte).toHaveBeenCalledWith('date', '2025-01-01');
   expect(query.lte).toHaveBeenCalledWith('date', '2025-01-31');
 });
 
-test('createMouvement injects mama_id and auteur_id', async () => {
+test('createMouvement injects mama_id, auteur_id and date', async () => {
   const { result } = renderHook(() => useMouvements());
   await act(async () => {
-    await result.current.createMouvement({ produit_id: 'p1', quantite: 1, motif: 'test' });
+    await result.current.createMouvement({
+      produit_id: 'p1',
+      quantite: 1,
+      type: 'entree_manuelle',
+      zone_id: 'z1',
+      motif: 'test',
+    });
   });
   expect(fromMock).toHaveBeenCalledWith('stock_mouvements');
-  expect(query.insert).toHaveBeenCalledWith([
-    { produit_id: 'p1', quantite: 1, commentaire: 'test', mama_id: 'm1', auteur_id: 'u1' },
-  ]);
+  const inserted = query.insert.mock.calls[0][0][0];
+  expect(inserted).toMatchObject({
+    produit_id: 'p1',
+    quantite: 1,
+    type: 'entree_manuelle',
+    zone_id: 'z1',
+    commentaire: 'test',
+    mama_id: 'm1',
+    auteur_id: 'u1',
+  });
+  expect(typeof inserted.date).toBe('string');
 });

@@ -1,16 +1,33 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState } from "react";
-import { useStock } from "@/hooks/useStock";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import toast from "react-hot-toast";
 import GlassCard from "@/components/ui/GlassCard";
+import { useMouvements } from "@/hooks/useMouvements";
+import { useProducts } from "@/hooks/useProducts";
+import { useZones } from "@/hooks/useZones";
+import toast from "react-hot-toast";
 
 export default function MouvementForm({ onClose }) {
-  const { createMouvement } = useStock();
-  const [form, setForm] = useState({ produit_id: "", quantite: 0, type: "entree", commentaire: "" });
+  const { createMouvement } = useMouvements();
+  const { products, fetchProducts } = useProducts();
+  const { zones, fetchZones } = useZones();
+  const [form, setForm] = useState({
+    produit_id: "",
+    type: "entree_manuelle",
+    quantite: 0,
+    zone_id: "",
+    motif: "",
+  });
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  useEffect(() => {
+    fetchProducts({ limit: 1000 });
+    fetchZones();
+  }, [fetchProducts, fetchZones]);
+
+  const handleChange = (field, value) => setForm(f => ({ ...f, [field]: value }));
+
+  const handleSubmit = async e => {
     e.preventDefault();
     if (loading) return;
     if (!form.produit_id || !form.quantite) {
@@ -32,42 +49,78 @@ export default function MouvementForm({ onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
-      <GlassCard title="Nouveau mouvement" className="w-80">
-        <form onSubmit={handleSubmit} className="space-y-2">
-        <input
-          className="input mb-2 w-full"
-          placeholder="Produit ID"
-          value={form.produit_id}
-          onChange={(e) => setForm({ ...form, produit_id: e.target.value })}
-        />
-        <input
-          className="input mb-2 w-full"
-          type="number"
-          step="0.01"
-          placeholder="Quantité"
-          value={form.quantite}
-          onChange={(e) => setForm({ ...form, quantite: parseFloat(e.target.value) })}
-        />
-        <select
-          className="input mb-2 w-full"
-          value={form.type}
-          onChange={(e) => setForm({ ...form, type: e.target.value })}
-        >
-          <option value="entree">Entrée</option>
-          <option value="sortie">Sortie</option>
-          <option value="transfert">Transfert</option>
-        </select>
-        <textarea
-          className="input mb-2 w-full"
-          rows={2}
-          placeholder="Commentaire"
-          value={form.commentaire}
-          onChange={(e) => setForm({ ...form, commentaire: e.target.value })}
-        />
-        <div className="flex gap-2 justify-end mt-4">
-          <Button type="submit" disabled={loading}>Valider</Button>
-          <Button type="button" variant="outline" onClick={onClose} disabled={loading}>Annuler</Button>
-        </div>
+      <GlassCard title="Nouveau mouvement" className="w-96">
+        <form onSubmit={handleSubmit} className="space-y-2" aria-label="mouvement-form">
+          <label className="block text-sm font-medium">
+            Produit
+            <select
+              aria-label="Produit"
+              className="input w-full"
+              value={form.produit_id}
+              onChange={e => handleChange("produit_id", e.target.value)}
+            >
+              <option value="">Sélectionner</option>
+              {products.map(p => (
+                <option key={p.id} value={p.id}>{p.nom}</option>
+              ))}
+            </select>
+          </label>
+          <label className="block text-sm font-medium">
+            Type
+            <select
+              aria-label="Type"
+              className="input w-full"
+              value={form.type}
+              onChange={e => handleChange("type", e.target.value)}
+            >
+              <option value="entree_manuelle">Entrée manuelle</option>
+              <option value="sortie_manuelle">Sortie manuelle</option>
+              <option value="ajustement">Ajustement</option>
+            </select>
+          </label>
+          <label className="block text-sm font-medium">
+            Quantité
+            <input
+              aria-label="Quantité"
+              type="number"
+              step="0.01"
+              className="input w-full"
+              value={form.quantite}
+              onChange={e => handleChange("quantite", parseFloat(e.target.value))}
+            />
+          </label>
+          {zones.length > 0 && (
+            <label className="block text-sm font-medium">
+              Zone
+              <select
+                aria-label="Zone"
+                className="input w-full"
+                value={form.zone_id}
+                onChange={e => handleChange("zone_id", e.target.value)}
+              >
+                <option value="">Aucune</option>
+                {zones.map(z => (
+                  <option key={z.id} value={z.id}>{z.nom}</option>
+                ))}
+              </select>
+            </label>
+          )}
+          <label className="block text-sm font-medium">
+            Motif
+            <textarea
+              aria-label="Motif"
+              className="input w-full"
+              rows={2}
+              value={form.motif}
+              onChange={e => handleChange("motif", e.target.value)}
+            />
+          </label>
+          <div className="flex gap-2 justify-end pt-2">
+            <Button type="submit" disabled={loading}>Valider</Button>
+            <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
+              Annuler
+            </Button>
+          </div>
         </form>
       </GlassCard>
     </div>

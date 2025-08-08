@@ -1,0 +1,6 @@
+Les appels Supabase du front-end utilisent actuellement des tables/fonctions qui ne sont pas définies dans `db/full_setup_final.sql`.
+Une fois ces tables et fonctions ajoutées côté SQL (voir `db/ajout_manquant.sql`), vérifier que chaque requête :
+- filtre correctement sur `mama_id` et respecte les politiques RLS
+- utilise les vues/fonctions appropriées lorsqu'elles seront disponibles
+
+Aucune correction de code front spécifique n'a été appliquée dans ce commit. Ce fichier sert de mémo pour les revues futures.

@@ -54,7 +54,7 @@ export default function Requisitions() {
     const ws = XLSX.utils.json_to_sheet(
       filtered.map(r => ({
         Numero: r.numero,
-        Date: r.date_demande,
+        Date: r.date_requisition,
         Statut: r.statut,
         Zone: zones.find(z => z.id === r.zone_id)?.nom || "-",
       }))
@@ -74,7 +74,7 @@ export default function Requisitions() {
       head: [["Numero", "Date", "Statut", "Zone"]],
       body: filtered.map(r => [
         r.numero,
-        r.date_demande,
+        r.date_requisition,
         r.statut,
         zones.find(z => z.id === r.zone_id)?.nom || "-",
       ]),
@@ -170,7 +170,7 @@ export default function Requisitions() {
             {filtered.map(r => (
               <tr key={r.id}>
                 <td className="px-2 py-1">{r.numero}</td>
-                <td className="px-2 py-1">{r.date_demande}</td>
+                <td className="px-2 py-1">{r.date_requisition}</td>
                 <td className="px-2 py-1">{r.statut}</td>
                 <td className="px-2 py-1">{zones.find(z => z.id === r.zone_id)?.nom || '-'}</td>
               </tr>

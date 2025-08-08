@@ -56,33 +56,14 @@ export function useUtilisateurs() {
   async function addUser(user) {
     const targetMama = isSuperadmin ? user.mama_id : mama_id;
     if (!targetMama) return { error: "Aucun mama_id" };
-    if (!user.email) return { error: "Email manquant" };
-    if (user.actif === undefined) user.actif = true;
-    if (user.auth_id === undefined) user.auth_id = null;
     setLoading(true);
     setError(null);
-    let rights = {};
-    if (user.role_id) {
-      const { data: roleData } = await supabase
-        .from("roles")
-        .select("nom, access_rights")
-        .eq("id", user.role_id)
-        .maybeSingle();
-      if (roleData?.nom === "superadmin" && !isSuperadmin) {
-        setLoading(false);
-        return { error: "Rôle interdit" };
-      }
-      rights = roleData?.access_rights || {};
-    }
-    const now = new Date().toISOString();
-    const { error } = await supabase
-      .from("utilisateurs")
-      .upsert({
-        ...user,
-        mama_id: targetMama,
-        ...(Object.keys(rights).length ? { access_rights: rights } : {}),
-        updated_at: now,
-      });
+    const { error } = await supabase.rpc("create_utilisateur", {
+      email: user.email,
+      nom: user.nom,
+      role_id: user.role_id,
+      mama_id: targetMama,
+    });
     if (error) setError(error);
     setLoading(false);
     await fetchUsers();
@@ -207,12 +188,19 @@ export function useUtilisateurs() {
     roles,
     loading,
     error,
+    // listing
     fetchUsers,
+    getUtilisateurs: fetchUsers,
     fetchRoles,
+    // mutations
     addUser,
+    createUtilisateur: addUser,
     updateUser,
+    updateUtilisateur: updateUser,
     toggleUserActive,
     deleteUser,
+    deleteUtilisateur: deleteUser,
+    // exports
     exportUsersToExcel,
     exportUsersToCSV,
     importUsersFromExcel,

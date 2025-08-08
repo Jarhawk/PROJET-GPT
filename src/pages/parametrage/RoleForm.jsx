@@ -1,149 +1,93 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState } from "react";
-import { supabase } from "@/lib/supabase";
-import useAuth from "@/hooks/useAuth";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import PrimaryButton from "@/components/ui/PrimaryButton";
-import SecondaryButton from "@/components/ui/SecondaryButton";
-import GlassCard from "@/components/ui/GlassCard";
-import toast, { Toaster } from "react-hot-toast";
-import { MODULES } from "@/config/modules";
+import React, { useState } from "react";
+import { useRoles } from "@/hooks/useRoles";
+import { Button } from "@/components/ui/button";
 
-export default function RoleForm({ role, onClose, onSaved }) {
-  const { mama_id, loading: authLoading } = useAuth();
-  const [values, setValues] = useState({
-    nom: role?.nom || "",
-    description: role?.description || "",
-    actif: role?.actif ?? true,
-  });
-  const [rights, setRights] = useState(() => (
-    Array.isArray(role?.access_rights) ? role.access_rights : []
-  ));
-  const [saving, setSaving] = useState(false);
+const MODULES = [
+  "produits",
+  "fiches",
+  "factures",
+  "utilisateurs",
+  "roles",
+  "commandes",
+  "inventaire",
+  "requisitions",
+  "menu_du_jour",
+  "menu_engineering",
+];
 
-  if (authLoading) return <LoadingSpinner message="Chargement..." />;
+export default function RoleForm({ role, onClose }) {
+  const { addOrUpdateRole } = useRoles();
+  const [nom, setNom] = useState(role.nom || "");
+  const [accessRights, setAccessRights] = useState(role.access_rights || {});
 
-  const handleChange = e =>
-    setValues(v => ({ ...v, [e.target.name]: e.target.value }));
+  const toggle = (module, action) => {
+    setAccessRights(prev => ({
+      ...prev,
+      [module]: {
+        ...(prev[module] || {}),
+        [action]: !prev?.[module]?.[action],
+      },
+    }));
+  };
 
-  const toggleRight = key =>
-    setRights(r =>
-      r.includes(key) ? r.filter(k => k !== key) : [...r, key]
-    );
-
-  const handleSubmit = async e => {
-    e.preventDefault();
-    if (saving) return;
-    setSaving(true);
-
-    // Anti-doublon création
-    if (!role?.id) {
-      const { data: exists } = await supabase
-        .from("roles")
-        .select("id")
-        .eq("nom", values.nom)
-        .eq("mama_id", mama_id)
-        .maybeSingle();
-      if (exists) {
-        toast.error("Un rôle avec ce nom existe déjà !");
-        setSaving(false);
-        return;
-      }
-    }
-
-    try {
-      let error = null;
-      let saved = null;
-      const payload = { ...values, access_rights: rights };
-      if (role?.id) {
-        const res = await supabase
-          .from("roles")
-          .update(payload)
-          .eq("id", role.id)
-          .select()
-          .single();
-        error = res.error;
-        saved = res.data;
-      } else {
-        const res = await supabase
-          .from("roles")
-          .insert([{ ...payload, mama_id }])
-          .select()
-          .single();
-        error = res.error;
-        saved = res.data;
-      }
-      if (!error && saved) {
-        toast.success("Rôle enregistré !");
-        onSaved?.(saved);
-        onClose?.();
-      } else {
-        throw error;
-      }
-    } catch (err) {
-      toast.error(err?.message || "Erreur à l'enregistrement !");
-    } finally {
-      setSaving(false);
-    }
+  const save = async () => {
+    const payload = {
+      ...role,
+      nom,
+      access_rights: accessRights,
+    };
+    await addOrUpdateRole(payload);
+    onClose();
   };
 
   return (
-    <GlassCard title={role ? "Modifier le rôle" : "Nouveau rôle"}>
-      <form className="space-y-3" onSubmit={handleSubmit}>
-        <Toaster />
-      <div>
-        <Label htmlFor="nom">Nom du rôle</Label>
-        <Input
-          id="nom"
-          name="nom"
-          value={values.nom}
-          onChange={handleChange}
-          required
-          autoFocus
-        />
-      </div>
-      <div>
-        <Label htmlFor="description">Description</Label>
-        <Input
-          id="description"
-          name="description"
-          value={values.description}
-          onChange={handleChange}
-        />
-      </div>
-      <div className="flex items-center gap-2">
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg w-full max-w-2xl overflow-auto max-h-[90vh]">
+        <h2 className="text-lg font-bold mb-4">{role.id ? "Modifier" : "Créer"} un rôle</h2>
+
+        <label className="block mb-2">Nom du rôle</label>
         <input
-          id="actif"
-          type="checkbox"
-          name="actif"
-          checked={!!values.actif}
-          onChange={e => setValues(v => ({ ...v, actif: e.target.checked }))}
+          value={nom}
+          onChange={e => setNom(e.target.value)}
+          className="w-full border px-2 py-1 mb-4"
         />
-        <Label htmlFor="actif" className="!mb-0">Actif</Label>
-      </div>
-      <fieldset className="grid grid-cols-2 gap-2">
-        {MODULES.map((m) => (
-          <label key={m.key} className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={rights.includes(m.key)}
-              onChange={() => toggleRight(m.key)}
-            />
-            <span className="text-sm">{m.label}</span>
-          </label>
-        ))}
-      </fieldset>
-        <div className="flex gap-4 mt-4">
-          <PrimaryButton type="submit" disabled={saving} className="flex items-center gap-2">
-            {saving && <span className="loader-glass" />}Enregistrer
-          </PrimaryButton>
-          <SecondaryButton type="button" onClick={onClose} disabled={saving}>
+
+        <table className="w-full text-sm border">
+          <thead>
+            <tr>
+              <th className="border p-1">Module</th>
+              <th className="border p-1">Lecture</th>
+              <th className="border p-1">Création</th>
+              <th className="border p-1">Édition</th>
+              <th className="border p-1">Suppression</th>
+            </tr>
+          </thead>
+          <tbody>
+            {MODULES.map(mod => (
+              <tr key={mod}>
+                <td className="border p-1">{mod}</td>
+                {["lecture", "creation", "edition", "suppression"].map(action => (
+                  <td key={action} className="border p-1 text-center">
+                    <input
+                      type="checkbox"
+                      checked={accessRights?.[mod]?.[action] || false}
+                      onChange={() => toggle(mod, action)}
+                    />
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        <div className="flex justify-end gap-2 mt-4">
+          <Button onClick={onClose} variant="ghost">
             Annuler
-          </SecondaryButton>
+          </Button>
+          <Button onClick={save}>Enregistrer</Button>
         </div>
-      </form>
-    </GlassCard>
+      </div>
+    </div>
   );
 }

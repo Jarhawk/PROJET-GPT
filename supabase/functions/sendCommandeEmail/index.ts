@@ -30,6 +30,13 @@ serve(async (req) => {
     }),
   });
 
+  await supabase.from("emails_envoyés").insert({
+    commande_id: commande.id,
+    email: fournisseur.email,
+    statut: res.ok ? "succès" : "erreur",
+    mama_id: commande.mama_id,
+  });
+
   if (res.ok) return new Response("Email sent", { status: 200 });
   return new Response("Email failed", { status: 500 });
 });

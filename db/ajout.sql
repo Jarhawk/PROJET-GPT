@@ -95,3 +95,19 @@ for update using (
 );
 
 grant select, insert, update, delete on public.templates_commandes to authenticated;
+
+-- Historique des emails envoyés pour les commandes fournisseur
+create table if not exists public."emails_envoyés" (
+  id uuid primary key default gen_random_uuid(),
+  commande_id uuid references public.commandes(id) on delete cascade,
+  email text not null,
+  statut text default 'en_attente',
+  "envoyé_le" timestamptz default now(),
+  mama_id uuid not null references public.mamas(id) on delete cascade
+);
+
+alter table public."emails_envoyés" enable row level security;
+create policy rls_emails_envoyes on public."emails_envoyés"
+  for all
+  using (mama_id = current_user_mama_id());
+grant all on public."emails_envoyés" to authenticated;

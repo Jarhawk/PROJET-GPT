@@ -5,7 +5,7 @@ import TemplateCommandeForm from "./TemplateCommandeForm";
 import { Button } from "@/components/ui/button";
 
 export default function TemplatesCommandes() {
-  const { templates, loading, toggleActif } = useTemplatesCommandes();
+  const { templates, loading, error, toggleActif } = useTemplatesCommandes();
   const [selected, setSelected] = useState(null);
 
   return (
@@ -15,6 +15,7 @@ export default function TemplatesCommandes() {
       <Button onClick={() => setSelected({})}>➕ Nouveau modèle</Button>
 
       {loading && <p>Chargement...</p>}
+      {error && <p className="text-red-500">{error.message || error}</p>}
 
       <div className="space-y-2 mt-4">
         {templates.map(tpl => (

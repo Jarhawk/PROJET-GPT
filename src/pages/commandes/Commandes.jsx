@@ -7,15 +7,14 @@ import { useFournisseurs } from "@/hooks/useFournisseurs";
 
 export default function Commandes() {
   const { mama_id, role } = useAuth();
-  const { fetchCommandes, validateCommande } = useCommandes();
+  const { commandes, fetchCommandes, validateCommande, loading } = useCommandes();
   const { fournisseurs, fetchFournisseurs } = useFournisseurs();
   const [filters, setFilters] = useState({ fournisseur: "", statut: "", debut: "", fin: "" });
-  const [rows, setRows] = useState([]);
 
   useEffect(() => { fetchFournisseurs({ limit: 1000 }); }, [fetchFournisseurs]);
   useEffect(() => {
     if (!mama_id) return;
-    fetchCommandes({ ...filters }).then(({ data }) => setRows(data));
+    fetchCommandes({ ...filters });
   }, [mama_id, filters, fetchCommandes]);
 
   return (
@@ -84,21 +83,27 @@ export default function Commandes() {
             </tr>
           </thead>
           <tbody>
-            {rows.map(c => (
-              <tr key={c.id} className="border-b border-white/10">
-                <td>{c.reference}</td>
-                <td>{c.fournisseur?.nom || '-'}</td>
-                <td>{c.date_commande}</td>
-                <td>{c.statut}</td>
-                <td>{c.total || 0}</td>
-                <td className="space-x-2">
-                  <Link to={`/commandes/${c.id}`}>Voir</Link>
-                  {role === 'admin' && c.statut === 'brouillon' && (
-                    <button onClick={() => validateCommande(c.id)}>Valider</button>
-                  )}
-                </td>
+            {loading ? (
+              <tr>
+                <td colSpan={6}>Chargement...</td>
               </tr>
-            ))}
+            ) : (
+              commandes.map((c) => (
+                <tr key={c.id} className="border-b border-white/10">
+                  <td>{c.reference}</td>
+                  <td>{c.fournisseur?.nom || '-'}</td>
+                  <td>{c.date_commande}</td>
+                  <td>{c.statut}</td>
+                  <td>{c.total || 0}</td>
+                  <td className="space-x-2">
+                    <Link to={`/commandes/${c.id}`}>Voir</Link>
+                    {role === 'admin' && c.statut === 'brouillon' && (
+                      <button onClick={() => validateCommande(c.id)}>Valider</button>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

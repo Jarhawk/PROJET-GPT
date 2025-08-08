@@ -3,7 +3,14 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 
-vi.mock('@/hooks/useCommandes', () => ({ useCommandes: () => ({ fetchCommandes: vi.fn().mockResolvedValue({ data: [], count: 0 }), validateCommande: vi.fn() }) }));
+vi.mock('@/hooks/useCommandes', () => ({
+  useCommandes: () => ({
+    commandes: [],
+    loading: false,
+    fetchCommandes: vi.fn().mockResolvedValue({ data: [], count: 0 }),
+    validateCommande: vi.fn(),
+  }),
+}));
 vi.mock('@/hooks/useFournisseurs', () => ({ useFournisseurs: () => ({ fournisseurs: [], fetchFournisseurs: vi.fn() }) }));
 vi.mock('@/hooks/useAuth', () => ({ default: () => ({ mama_id: 'm1', role: 'admin' }) }));
 

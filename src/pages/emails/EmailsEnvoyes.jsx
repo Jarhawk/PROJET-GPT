@@ -67,7 +67,7 @@ export default function EmailsEnvoyes() {
 
   const handleViewPDF = async (commandeId) => {
     try {
-      const commande = await fetchCommandeById(commandeId);
+      const { data: commande } = await fetchCommandeById(commandeId);
       if (!commande) throw new Error();
       let template = null;
       if (commande.template_id) {

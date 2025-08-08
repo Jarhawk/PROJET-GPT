@@ -51,7 +51,7 @@ export function useCommandes() {
 
   const fetchCommandeById = useCallback(
     async (id) => {
-      if (!id || !mama_id) return null;
+      if (!id || !mama_id) return { data: null, error: null };
       setLoading(true);
       setError(null);
       const { data, error } = await supabase
@@ -65,12 +65,12 @@ export function useCommandes() {
       setLoading(false);
       if (error) {
         console.error("❌ fetchCommandeById", error.message);
-      setError(error);
-      setCurrent(null);
-      return null;
-    }
-    setCurrent(data);
-    return data;
+        setError(error);
+        setCurrent(null);
+        return { data: null, error };
+      }
+      setCurrent(data);
+      return { data, error: null };
     },
     [mama_id]
   );

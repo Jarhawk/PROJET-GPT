@@ -1,145 +1,148 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useCommandes } from "@/hooks/useCommandes";
-import { useProduitsAutocomplete } from "@/hooks/useProduitsAutocomplete";
-import { useFournisseursAutocomplete } from "@/hooks/useFournisseursAutocomplete";
-import AutoCompleteField from "@/components/ui/AutoCompleteField";
-import { Button } from "@/components/ui/button";
-import PrimaryButton from "@/components/ui/PrimaryButton";
-import SecondaryButton from "@/components/ui/SecondaryButton";
-import { Input } from "@/components/ui/input";
-import GlassCard from "@/components/ui/GlassCard";
-import toast from "react-hot-toast";
+import { useFournisseurs } from "@/hooks/useFournisseurs";
+import { useProduitsFournisseur } from "@/hooks/useProduitsFournisseur";
+import useAuth from "@/hooks/useAuth";
+import { toast } from "react-hot-toast";
 
-export default function CommandeForm({ commande, fournisseurs = [], onClose }) {
-  const { insertCommande, updateCommande } = useCommandes();
-  const { results: produitOptions, searchProduits } = useProduitsAutocomplete();
-  const { results: fournisseurOptions, searchFournisseurs } = useFournisseursAutocomplete();
-  const [date_commande, setDateCommande] = useState(commande?.date_commande || "");
-  const [fournisseur_id, setFournisseurId] = useState(commande?.fournisseur_id || "");
-  const [fournisseurName, setFournisseurName] = useState("");
-  const [statut, setStatut] = useState(commande?.statut || "a_valider");
-  const [lignes, setLignes] = useState(
-    commande?.lignes?.map(l => ({ ...l, produit_nom: l.produit?.nom || "" })) || [
-      { produit_id: "", produit_nom: "", quantite: 1, prix_unitaire: 0, tva: 20 },
-    ]
-  );
-  const [loading, setLoading] = useState(false);
+export default function CommandeForm() {
+  const navigate = useNavigate();
+  const { role } = useAuth();
+  const { createCommande } = useCommandes();
+  const { fournisseurs, fetchFournisseurs } = useFournisseurs();
+  const { useProduitsDuFournisseur } = useProduitsFournisseur();
+  const [fournisseurId, setFournisseurId] = useState("");
+  const { products, fetch } = useProduitsDuFournisseur(fournisseurId);
+  const [lignes, setLignes] = useState([
+    { produit_id: "", quantite: 1, unite: "", prix_achat: 0, total: 0, suggestion: false, commentaire: "" },
+  ]);
 
-  useEffect(() => {
-    if (commande?.fournisseur_id && fournisseurs.length) {
-      const f = fournisseurs.find(s => s.id === commande.fournisseur_id);
-      setFournisseurName(f?.nom || "");
+  useEffect(() => { fetchFournisseurs({ limit: 1000 }); }, [fetchFournisseurs]);
+  useEffect(() => { if (fournisseurId) fetch(); }, [fournisseurId, fetch]);
+
+  const handleChangeLine = (idx, field, value) => {
+    const updated = [...lignes];
+    updated[idx][field] = value;
+    if (field === "quantite" || field === "prix_achat") {
+      updated[idx].total = Number(updated[idx].quantite || 0) * Number(updated[idx].prix_achat || 0);
     }
-  }, [commande?.fournisseur_id, fournisseurs]);
+    setLignes(updated);
+  };
 
-  useEffect(() => { searchFournisseurs(fournisseurName); }, [fournisseurName]);
+  const addLine = () => setLignes([...lignes, { produit_id: "", quantite: 1, unite: "", prix_achat: 0, total: 0, suggestion: false, commentaire: "" }]);
 
   const handleSubmit = async e => {
     e.preventDefault();
-    if (!date_commande || !fournisseur_id) return toast.error("Date et fournisseur requis");
-    setLoading(true);
-    const payload = { date_commande, fournisseur_id, statut, lignes };
-    try {
-      if (commande?.id) {
-        await updateCommande(commande.id, payload);
-        toast.success("Commande modifiée");
-      } else {
-        const { error } = await insertCommande(payload);
-        if (error) throw error;
-        toast.success("Commande ajoutée");
-      }
-      onClose?.();
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setLoading(false);
+    const payload = {
+      fournisseur_id: fournisseurId,
+      lignes: lignes.map(l => ({
+        produit_id: l.produit_id,
+        quantite: Number(l.quantite),
+        unite: l.unite,
+        prix_achat: Number(l.prix_achat),
+        total_ligne: l.total,
+        suggestion: l.suggestion,
+        commentaire: l.commentaire,
+      })),
+    };
+    const { error } = await createCommande(payload);
+    if (error) toast.error("Erreur création");
+    else {
+      toast.success("Commande créée");
+      navigate("/commandes");
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-      <GlassCard title={commande ? "Modifier commande" : "Nouvelle commande"} className="p-6 min-w-[400px] space-y-2">
-        <form onSubmit={handleSubmit} className="space-y-2">
-          <label className="block text-sm mb-1">Date de commande *</label>
-          <Input
-            type="date"
-            value={date_commande}
-            onChange={e => setDateCommande(e.target.value)}
-            required
-          />
-          <label className="block text-sm mb-1">Fournisseur *</label>
-          <Input
-            list="fournisseurs-list"
-            value={fournisseurName}
-            onChange={e => {
-              const val = e.target.value;
-              setFournisseurName(val);
-              const found = fournisseurOptions.find(f => f.nom === val);
-              setFournisseurId(found ? found.id : "");
-            }}
-            placeholder="Fournisseur"
-            required
-          />
-          <datalist id="fournisseurs-list">
-            {fournisseurOptions.map(f => (
-              <option key={f.id} value={f.nom}>{f.nom}</option>
-            ))}
-          </datalist>
-          <select
-            className="form-select mb-2"
-            value={statut}
-            onChange={e => setStatut(e.target.value)}
-          >
-            <option value="a_valider">À valider</option>
-            <option value="envoyee">Envoyée</option>
-            <option value="receptionnee">Réceptionnée</option>
-            <option value="cloturee">Clôturée</option>
-          </select>
-          <table className="w-full text-sm mb-2">
-            <thead><tr><th>Produit</th><th>Qté</th><th>PU</th><th>TVA</th><th></th></tr></thead>
-            <tbody>
-              {lignes.map((l, idx) => (
-                <tr key={idx}>
-                  <td className="min-w-[150px]">
-                    <AutoCompleteField
-                      label=""
-                      value={l.produit_id}
-                      onChange={obj => {
-                        setLignes(ls => ls.map((it,i)=> i===idx ? { ...it, produit_nom: obj?.nom || "", produit_id: obj?.id || "" } : it));
-                        if ((obj?.nom || "").length >= 2) searchProduits(obj.nom);
-                      }}
-                      options={produitOptions.map(p => ({ id: p.id, nom: p.nom }))}
-                    />
-                  </td>
-                  <td><input type="number" className="form-input" value={l.quantite} onChange={e => setLignes(ls => ls.map((it,i)=> i===idx ? { ...it, quantite: Number(e.target.value) } : it))} /></td>
-                  <td><input type="number" className="form-input" value={l.prix_unitaire} onChange={e => setLignes(ls => ls.map((it,i)=> i===idx ? { ...it, prix_unitaire: Number(e.target.value) } : it))} /></td>
-                  <td><input type="number" className="form-input" value={l.tva} onChange={e => setLignes(ls => ls.map((it,i)=> i===idx ? { ...it, tva: Number(e.target.value) } : it))} /></td>
-                  <td><Button type="button" size="sm" variant="outline" onClick={() => setLignes(ls => ls.filter((_,i)=>i!==idx))}>X</Button></td>
-                </tr>
+    <form onSubmit={handleSubmit} className="p-4 space-y-4">
+      <div>
+        <label className="block" htmlFor="fournisseur">Fournisseur</label>
+        <select
+          id="fournisseur"
+          aria-label="Fournisseur"
+          className="input"
+          value={fournisseurId}
+          onChange={e => setFournisseurId(e.target.value)}
+        >
+          <option value="">--</option>
+          {fournisseurs.map(f => (
+            <option key={f.id} value={f.id}>{f.nom}</option>
+          ))}
+        </select>
+      </div>
+      {lignes.map((l, idx) => (
+        <div key={idx} className="border border-white/10 rounded p-2 space-y-2">
+          <div>
+            <label>Produit</label>
+            <select
+              aria-label="Produit"
+              className="input"
+              value={l.produit_id}
+              onChange={e => handleChangeLine(idx, "produit_id", e.target.value)}
+            >
+              <option value="">--</option>
+              {products.map(p => (
+                <option key={p.produit.id} value={p.produit.id}>{p.produit.nom}</option>
               ))}
-            </tbody>
-          </table>
-          <Button
-            type="button"
-            onClick={() =>
-              setLignes(ls => [
-                ...ls,
-                { produit_id: "", produit_nom: "", quantite: 1, prix_unitaire: 0, tva: 20 },
-              ])
-            }
-            className="mt-2"
-          >
-            Ajouter ligne
-          </Button>
-          <div className="flex gap-2 justify-end mt-2">
-            <PrimaryButton type="submit" disabled={loading} className="min-w-[120px]">
-              {loading ? "Enregistrement..." : commande ? "Modifier" : "Ajouter"}
-            </PrimaryButton>
-            <SecondaryButton type="button" onClick={onClose}>Annuler</SecondaryButton>
+            </select>
           </div>
-        </form>
-      </GlassCard>
-    </div>
+          <div>
+            <label>Quantité</label>
+            <input
+              type="number"
+              aria-label="Quantité"
+              className="input"
+              value={l.quantite}
+              onChange={e => handleChangeLine(idx, "quantite", e.target.value)}
+            />
+          </div>
+          <div>
+            <label>Unité</label>
+            <input
+              aria-label="Unité"
+              className="input"
+              value={l.unite}
+              onChange={e => handleChangeLine(idx, "unite", e.target.value)}
+            />
+          </div>
+          <div>
+            <label>Prix d’achat</label>
+            <input
+              type="number"
+              aria-label="Prix d’achat"
+              className="input"
+              value={l.prix_achat}
+              onChange={e => handleChangeLine(idx, "prix_achat", e.target.value)}
+            />
+          </div>
+          <div>
+            <label>Total ligne</label>
+            <input type="number" aria-label="Total ligne" className="input" value={l.total} readOnly />
+          </div>
+          <div>
+            <label>
+              <input
+                type="checkbox"
+                checked={l.suggestion}
+                onChange={e => handleChangeLine(idx, "suggestion", e.target.checked)}
+              />{' '}Suggestion
+            </label>
+          </div>
+          <div>
+            <label>Commentaire</label>
+            <input
+              aria-label="Commentaire"
+              className="input"
+              value={l.commentaire}
+              onChange={e => handleChangeLine(idx, "commentaire", e.target.value)}
+            />
+          </div>
+        </div>
+      ))}
+      <button type="button" onClick={addLine}>Ajouter ligne</button>
+      {role === 'admin' && <button type="submit">Valider commande</button>}
+    </form>
   );
 }

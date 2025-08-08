@@ -1,60 +1,72 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import useAuth from "@/hooks/useAuth";
 
 export function useCommandes() {
-  const { mama_id } = useAuth();
-  const [commandes, setCommandes] = useState([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const { mama_id, user_id, role } = useAuth();
 
-  async function getCommandes({ fournisseur = "", statut = "", page = 1, pageSize = 50 } = {}) {
-    if (!mama_id) return [];
-    setLoading(true);
-    setError(null);
-    let q = supabase
+  async function fetchCommandes({ fournisseur = "", statut = "", debut = "", fin = "", page = 1, limit = 20 } = {}) {
+    if (!mama_id) return { data: [], count: 0 };
+    let query = supabase
       .from("commandes")
-      .select("id, date_commande, statut, actif, fournisseur_id, fournisseur:fournisseur_id(id, nom), lignes:commande_lignes!commande_id(id)", { count: "exact" })
+      .select("*, fournisseur:fournisseur_id(id, nom, email), lignes:commande_lignes(total_ligne)", { count: "exact" })
       .eq("mama_id", mama_id)
       .order("date_commande", { ascending: false })
-      .range((page - 1) * pageSize, page * pageSize - 1);
-    if (fournisseur) q = q.eq("fournisseur_id", fournisseur);
-    if (statut) q = q.eq("statut", statut);
-    const { data, error, count } = await q;
-    if (!error) {
-      setCommandes(Array.isArray(data) ? data : []);
-      setTotal(count || 0);
+      .range((page - 1) * limit, page * limit - 1);
+    if (fournisseur) query = query.eq("fournisseur_id", fournisseur);
+    if (statut) query = query.eq("statut", statut);
+    if (debut) query = query.gte("date_commande", debut);
+    if (fin) query = query.lte("date_commande", fin);
+    const { data, count, error } = await query;
+    if (error) {
+      console.error("❌ fetchCommandes", error.message);
+      return { data: [], count: 0 };
     }
-    setLoading(false);
-    if (error) setError(error);
-    return data || [];
+    const rows = (data || []).map(c => ({
+      ...c,
+      total: (c.lignes || []).reduce((s, l) => s + Number(l.total_ligne || 0), 0),
+    }));
+    return { data: rows, count: count || 0 };
   }
 
-  async function insertCommande(cmd) {
-    if (!mama_id) return { error: "no mama_id" };
-    const { lignes = [], ...header } = cmd || {};
-    setLoading(true);
+  async function fetchCommandeById(id) {
+    if (!id || !mama_id) return null;
     const { data, error } = await supabase
       .from("commandes")
-      .insert([{ ...header, mama_id }])
-      .select("id")
+      .select(
+        "*, fournisseur:fournisseur_id(id, nom, email), lignes:commande_lignes(*, produit:produit_id(id, nom))"
+      )
+      .eq("id", id)
+      .eq("mama_id", mama_id)
       .single();
-    if (!error && data?.id && lignes.length) {
-      const rows = lignes.map(l => ({ ...l, commande_id: data.id, mama_id }));
-      await supabase.from("commande_lignes").insert(rows);
-    }
-    setLoading(false);
     if (error) {
-      setError(error);
+      console.error("❌ fetchCommandeById", error.message);
+      return null;
+    }
+    return data;
+  }
+
+  async function createCommande({ lignes = [], ...rest }) {
+    if (!mama_id) return { error: "mama_id manquant" };
+    const { data, error } = await supabase
+      .from("commandes")
+      .insert([{ ...rest, mama_id, created_by: user_id }])
+      .select()
+      .single();
+    if (error) {
+      console.error("❌ createCommande", error.message);
       return { error };
+    }
+    if (lignes.length) {
+      const toInsert = lignes.map(l => ({ ...l, commande_id: data.id }));
+      const { error: lineErr } = await supabase.from("commande_lignes").insert(toInsert);
+      if (lineErr) console.error("❌ commande lignes", lineErr.message);
     }
     return { data };
   }
 
   async function updateCommande(id, fields) {
-    if (!mama_id) return { error: "no mama_id" };
+    if (!mama_id) return { error: "mama_id manquant" };
     const { data, error } = await supabase
       .from("commandes")
       .update(fields)
@@ -62,23 +74,42 @@ export function useCommandes() {
       .eq("mama_id", mama_id)
       .select()
       .single();
-    if (error) setError(error);
-    return { data, error };
+    if (error) {
+      console.error("❌ updateCommande", error.message);
+      return { error };
+    }
+    return { data };
   }
 
-  async function toggleCommandeActif(id, actif) {
-    return updateCommande(id, { actif });
+  async function validateCommande(id) {
+    return updateCommande(id, {
+      statut: "validée",
+      validated_by: user_id,
+      envoyee_at: new Date().toISOString(),
+    });
+  }
+
+  async function deleteCommande(id) {
+    if (!mama_id) return { error: "mama_id manquant" };
+    const { error } = await supabase
+      .from("commandes")
+      .delete()
+      .eq("id", id)
+      .eq("mama_id", mama_id);
+    if (error) {
+      console.error("❌ deleteCommande", error.message);
+      return { error };
+    }
+    return { data: true };
   }
 
   return {
-    commandes,
-    total,
-    loading,
-    error,
-    getCommandes,
-    insertCommande,
+    fetchCommandes,
+    fetchCommandeById,
+    createCommande,
     updateCommande,
-    toggleCommandeActif,
+    validateCommande,
+    deleteCommande,
   };
 }
 

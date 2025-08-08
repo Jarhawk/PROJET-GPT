@@ -1,0 +1,25 @@
+import { render, screen } from '@testing-library/react';
+import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
+import { vi } from 'vitest';
+
+vi.mock('@/hooks/useCommandes', () => ({ useCommandes: () => ({ createCommande: vi.fn() }) }));
+vi.mock('@/hooks/useFournisseurs', () => ({ useFournisseurs: () => ({ fournisseurs: [], fetchFournisseurs: vi.fn() }) }));
+vi.mock('@/hooks/useProduitsFournisseur', () => ({ useProduitsFournisseur: () => ({ useProduitsDuFournisseur: () => ({ products: [], fetch: vi.fn() }) }) }));
+vi.mock('@/hooks/useAuth', () => ({ default: () => ({ role: 'admin' }) }));
+
+import CommandeForm from '@/pages/commandes/CommandeForm.jsx';
+
+test('renders commande form fields', () => {
+  render(
+    <MemoryRouter>
+      <CommandeForm />
+    </MemoryRouter>
+  );
+  expect(screen.getByLabelText(/Fournisseur/)).toBeInTheDocument();
+  expect(screen.getByText(/Ajouter ligne/)).toBeInTheDocument();
+  expect(screen.getByLabelText(/Quantité/)).toBeInTheDocument();
+  expect(screen.getByLabelText(/Prix d’achat/)).toBeInTheDocument();
+  expect(screen.getByLabelText(/Total ligne/)).toBeInTheDocument();
+  expect(screen.getByText(/Valider commande/)).toBeInTheDocument();
+});

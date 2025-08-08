@@ -5,7 +5,7 @@ import useAuth from "@/hooks/useAuth";
 
 export function useCommandes() {
   const { mama_id, user_id } = useAuth();
-  const [commandes, setCommandes] = useState([]);
+  const [data, setData] = useState([]);
   const [current, setCurrent] = useState(null);
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -34,7 +34,7 @@ export function useCommandes() {
       if (error) {
         console.error("❌ fetchCommandes", error.message);
         setError(error);
-        setCommandes([]);
+        setData([]);
         setCount(0);
         return { data: [], count: 0 };
       }
@@ -42,7 +42,7 @@ export function useCommandes() {
         ...c,
         total: (c.lignes || []).reduce((s, l) => s + Number(l.total_ligne || 0), 0),
       }));
-      setCommandes(rows);
+      setData(rows);
       setCount(count || 0);
       return { data: rows, count: count || 0 };
     },
@@ -65,12 +65,12 @@ export function useCommandes() {
       setLoading(false);
       if (error) {
         console.error("❌ fetchCommandeById", error.message);
-        setError(error);
-        setCurrent(null);
-        return null;
-      }
-      setCurrent(data);
-      return data;
+      setError(error);
+      setCurrent(null);
+      return null;
+    }
+    setCurrent(data);
+    return data;
     },
     [mama_id]
   );
@@ -145,7 +145,8 @@ export function useCommandes() {
   }
 
   return {
-    commandes,
+    data,
+    commandes: data,
     currentCommande: current,
     count,
     loading,

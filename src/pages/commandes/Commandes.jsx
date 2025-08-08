@@ -7,7 +7,7 @@ import { useFournisseurs } from "@/hooks/useFournisseurs";
 
 export default function Commandes() {
   const { mama_id, role } = useAuth();
-  const { commandes, fetchCommandes, validateCommande, loading } = useCommandes();
+  const { data: commandes, fetchCommandes, validateCommande, loading } = useCommandes();
   const { fournisseurs, fetchFournisseurs } = useFournisseurs();
   const [filters, setFilters] = useState({ fournisseur: "", statut: "", debut: "", fin: "" });
 

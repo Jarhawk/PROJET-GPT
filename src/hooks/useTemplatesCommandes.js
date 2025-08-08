@@ -14,32 +14,50 @@ export async function getTemplatesCommandesActifs() {
 export default function useTemplatesCommandes() {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const fetchTemplates = async () => {
     setLoading(true);
-    const { data } = await supabase
+    setError(null);
+    const { data, error } = await supabase
       .from("templates_commandes")
       .select("*")
       .order("nom");
-    setTemplates(data || []);
+    if (error) {
+      setError(error);
+      setTemplates([]);
+    } else {
+      setTemplates(data || []);
+    }
     setLoading(false);
+    return { data, error };
   };
 
-  const saveTemplate = async template => {
+  const saveTemplate = async (template) => {
+    setError(null);
     const { error } = await supabase
       .from("templates_commandes")
       .upsert(template)
       .select();
-    if (!error) fetchTemplates();
+    if (error) {
+      setError(error);
+    } else {
+      fetchTemplates();
+    }
     return { error };
   };
 
   const toggleActif = async (id, actif) => {
+    setError(null);
     const { error } = await supabase
       .from("templates_commandes")
       .update({ actif })
       .eq("id", id);
-    if (!error) fetchTemplates();
+    if (error) {
+      setError(error);
+    } else {
+      fetchTemplates();
+    }
     return { error };
   };
 
@@ -47,5 +65,13 @@ export default function useTemplatesCommandes() {
     fetchTemplates();
   }, []);
 
-  return { templates, loading, fetchTemplates, saveTemplate, toggleActif };
+  return {
+    data: templates,
+    templates,
+    loading,
+    error,
+    fetchTemplates,
+    saveTemplate,
+    toggleActif,
+  };
 }

@@ -28,6 +28,13 @@ create table if not exists public.produits (
   mama_id uuid not null,
   nom text not null,
   fournisseur_id uuid,
+  unite_id uuid,
+  famille_id uuid,
+  sous_famille_id uuid,
+  stock_reel numeric default 0,
+  stock_min numeric default 0,
+  pmp numeric default 0,
+  actif boolean default true,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
@@ -102,8 +109,8 @@ create table if not exists public.emails_envoyes (
   id uuid primary key default gen_random_uuid(),
   commande_id uuid not null,
   email text not null,
-  statut text default 'en_attente',
-  envoye_le timestamptz default now(),
+  statut text not null default 'en_attente' check (statut in ('en_attente','succès','erreur')),
+  envoye_le timestamptz not null default now(),
   mama_id uuid not null
 );
 
@@ -129,6 +136,10 @@ create table if not exists public.consentements_utilisateur (
 -- 3. Indexes
 create index if not exists idx_fournisseurs_mama_id on public.fournisseurs(mama_id);
 create index if not exists idx_produits_mama_id on public.produits(mama_id);
+create index if not exists idx_produits_fournisseur_id on public.produits(fournisseur_id);
+create index if not exists idx_produits_unite_id on public.produits(unite_id);
+create index if not exists idx_produits_famille_id on public.produits(famille_id);
+create index if not exists idx_produits_sous_famille_id on public.produits(sous_famille_id);
 create index if not exists idx_roles_mama_id on public.roles(mama_id);
 create index if not exists idx_utilisateurs_mama_id on public.utilisateurs(mama_id);
 create index if not exists idx_commandes_mama_id on public.commandes(mama_id);
@@ -161,6 +172,24 @@ do $$ begin
   if not exists (select 1 from pg_constraint where conname = 'fk_produits_fournisseur_id') then
     alter table public.produits
       add constraint fk_produits_fournisseur_id foreign key (fournisseur_id) references public.fournisseurs(id) on delete set null;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'fk_produits_unite_id') then
+    alter table public.produits
+      add constraint fk_produits_unite_id foreign key (unite_id) references public.unites(id) on delete set null;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'fk_produits_famille_id') then
+    alter table public.produits
+      add constraint fk_produits_famille_id foreign key (famille_id) references public.familles(id) on delete set null;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'fk_produits_sous_famille_id') then
+    alter table public.produits
+      add constraint fk_produits_sous_famille_id foreign key (sous_famille_id) references public.sous_familles(id) on delete set null;
   end if;
 end $$;
 
@@ -497,14 +526,35 @@ grant execute on function public.fn_calc_budgets(uuid, text) to authenticated;
 -- 2.b Additional Tables
 create table if not exists public.achats (
   id uuid primary key default uuid_generate_v4(),
-  mama_id uuid,
+  mama_id uuid not null,
+  produit_id uuid not null,
+  fournisseur_id uuid not null,
+  quantite numeric not null,
+  prix numeric not null,
+  date_achat date not null,
+  actif boolean default true,
   created_at timestamptz default now()
 );
 create index if not exists idx_achats_mama_id on public.achats(mama_id);
+create index if not exists idx_achats_produit_id on public.achats(produit_id);
+create index if not exists idx_achats_fournisseur_id on public.achats(fournisseur_id);
+create index if not exists idx_achats_date on public.achats(date_achat);
 do $$ begin
   if not exists (select 1 from pg_constraint where conname = 'fk_achats_mama_id') then
     alter table public.achats
       add constraint fk_achats_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'fk_achats_produit_id') then
+    alter table public.achats
+      add constraint fk_achats_produit_id foreign key (produit_id) references public.produits(id) on delete restrict;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'fk_achats_fournisseur_id') then
+    alter table public.achats
+      add constraint fk_achats_fournisseur_id foreign key (fournisseur_id) references public.fournisseurs(id) on delete restrict;
   end if;
 end $$;
 alter table public.achats enable row level security;
@@ -770,7 +820,9 @@ end $$;
 grant select, insert, update, delete on public.factures to authenticated;
 create table if not exists public.familles (
   id uuid primary key default uuid_generate_v4(),
-  mama_id uuid,
+  mama_id uuid not null,
+  nom text not null,
+  actif boolean default true,
   created_at timestamptz default now()
 );
 create index if not exists idx_familles_mama_id on public.familles(mama_id);
@@ -938,14 +990,32 @@ end $$;
 grant select, insert, update, delete on public.fournisseur_notes to authenticated;
 create table if not exists public.fournisseur_produits (
   id uuid primary key default uuid_generate_v4(),
-  mama_id uuid,
+  mama_id uuid not null,
+  produit_id uuid not null,
+  fournisseur_id uuid not null,
+  prix_achat numeric,
+  date_livraison date,
   created_at timestamptz default now()
 );
 create index if not exists idx_fournisseur_produits_mama_id on public.fournisseur_produits(mama_id);
+create index if not exists idx_fournisseur_produits_produit_id on public.fournisseur_produits(produit_id);
+create index if not exists idx_fournisseur_produits_fournisseur_id on public.fournisseur_produits(fournisseur_id);
 do $$ begin
   if not exists (select 1 from pg_constraint where conname = 'fk_fournisseur_produits_mama_id') then
     alter table public.fournisseur_produits
       add constraint fk_fournisseur_produits_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'fk_fournisseur_produits_produit_id') then
+    alter table public.fournisseur_produits
+      add constraint fk_fournisseur_produits_produit_id foreign key (produit_id) references public.produits(id) on delete cascade;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'fk_fournisseur_produits_fournisseur_id') then
+    alter table public.fournisseur_produits
+      add constraint fk_fournisseur_produits_fournisseur_id foreign key (fournisseur_id) references public.fournisseurs(id) on delete cascade;
   end if;
 end $$;
 alter table public.fournisseur_produits enable row level security;
@@ -1316,14 +1386,29 @@ end $$;
 grant select, insert, update, delete on public.menus_jour_fiches to authenticated;
 create table if not exists public.mouvements (
   id uuid primary key default uuid_generate_v4(),
-  mama_id uuid,
+  mama_id uuid not null,
+  produit_id uuid not null,
+  type text not null,
+  quantite numeric not null,
+  date date not null,
+  commentaire text,
+  transfert_id uuid,
+  auteur_id uuid,
   created_at timestamptz default now()
 );
 create index if not exists idx_mouvements_mama_id on public.mouvements(mama_id);
+create index if not exists idx_mouvements_produit_id on public.mouvements(produit_id);
+create index if not exists idx_mouvements_date on public.mouvements(date);
 do $$ begin
   if not exists (select 1 from pg_constraint where conname = 'fk_mouvements_mama_id') then
     alter table public.mouvements
       add constraint fk_mouvements_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'fk_mouvements_produit_id') then
+    alter table public.mouvements
+      add constraint fk_mouvements_produit_id foreign key (produit_id) references public.produits(id) on delete restrict;
   end if;
 end $$;
 alter table public.mouvements enable row level security;
@@ -1610,7 +1695,10 @@ end $$;
 grant select, insert, update, delete on public.signalements to authenticated;
 create table if not exists public.sous_familles (
   id uuid primary key default uuid_generate_v4(),
-  mama_id uuid,
+  mama_id uuid not null,
+  famille_id uuid not null,
+  nom text not null,
+  actif boolean default true,
   created_at timestamptz default now()
 );
 create index if not exists idx_sous_familles_mama_id on public.sous_familles(mama_id);
@@ -1618,6 +1706,12 @@ do $$ begin
   if not exists (select 1 from pg_constraint where conname = 'fk_sous_familles_mama_id') then
     alter table public.sous_familles
       add constraint fk_sous_familles_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'fk_sous_familles_famille_id') then
+    alter table public.sous_familles
+      add constraint fk_sous_familles_famille_id foreign key (famille_id) references public.familles(id) on delete cascade;
   end if;
 end $$;
 alter table public.sous_familles enable row level security;
@@ -1757,7 +1851,9 @@ end $$;
 grant select, insert, update, delete on public.transferts to authenticated;
 create table if not exists public.unites (
   id uuid primary key default uuid_generate_v4(),
-  mama_id uuid,
+  mama_id uuid not null,
+  nom text not null,
+  actif boolean default true,
   created_at timestamptz default now()
 );
 create index if not exists idx_unites_mama_id on public.unites(mama_id);
@@ -1904,7 +2000,16 @@ end $$;
 grant select, insert, update, delete on public.zones_stock to authenticated;
 
 -- 5.b Additional Views
-create or replace view public.v_achats_mensuels as select 1 as placeholder;
+create or replace view public.v_achats_mensuels as
+select
+  mama_id,
+  date_trunc('month', date_achat)::date as mois,
+  sum(quantite * prix) as achats,
+  sum(quantite * prix) as montant,
+  sum(quantite * prix) as montant_total
+from public.achats
+where actif = true
+group by mama_id, date_trunc('month', date_achat)::date;
 create or replace view public.v_analytique_stock as select 1 as placeholder;
 create or replace view public.v_besoins_previsionnels as select 1 as placeholder;
 create or replace view public.v_boissons as select 1 as placeholder;
@@ -1912,22 +2017,69 @@ create or replace view public.v_consolidated_stats as select 1 as placeholder;
 create or replace view public.v_cost_center_month as select 1 as placeholder;
 create or replace view public.v_cost_center_monthly as select 1 as placeholder;
 create or replace view public.v_ecarts_inventaire as select 1 as placeholder;
-create or replace view public.v_evolution_achats as select 1 as placeholder;
+create or replace view public.v_evolution_achats as
+select
+  mama_id,
+  date_trunc('month', date_achat)::date as mois,
+  sum(quantite * prix) as montant
+from public.achats
+where actif = true
+group by mama_id, date_trunc('month', date_achat)::date
+order by mois;
 create or replace view public.v_fournisseurs_inactifs as select 1 as placeholder;
 create or replace view public.v_menu_engineering as select 1 as placeholder;
 create or replace view public.v_performance_fiches as select 1 as placeholder;
-create or replace view public.v_pmp as select 1 as placeholder;
+create or replace view public.v_pmp as
+select
+  mama_id,
+  produit_id,
+  sum(prix * quantite) / nullif(sum(quantite),0) as pmp
+from public.achats
+where actif = true
+group by mama_id, produit_id;
 create or replace view public.v_products_last_price as select 1 as placeholder;
-create or replace view public.v_produits_dernier_prix as select 1 as placeholder;
+create or replace view public.v_produits_dernier_prix as
+select
+  p.id,
+  p.id as produit_id,
+  p.mama_id,
+  p.nom,
+  p.unite_id,
+  p.famille_id,
+  p.sous_famille_id,
+  p.stock_reel,
+  p.stock_min,
+  p.actif,
+  (
+    select a.prix
+    from public.achats a
+    where a.produit_id = p.id
+      and a.mama_id = p.mama_id
+      and a.actif = true
+    order by a.date_achat desc
+    limit 1
+  ) as dernier_prix
+from public.produits p;
 create or replace view public.v_produits_utilises as select 1 as placeholder;
 create or replace view public.v_reco_stockmort as select 1 as placeholder;
 create or replace view public.v_reco_surcout as select 1 as placeholder;
 create or replace view public.v_requisitions as select 1 as placeholder;
 create or replace view public.v_stock_requisitionne as select 1 as placeholder;
-create or replace view public.v_stocks as select 1 as placeholder;
+create or replace view public.v_stocks as
+select
+  mama_id,
+  produit_id,
+  sum(case when type like 'entree%' then quantite else -quantite end) as stock
+from public.mouvements
+group by mama_id, produit_id;
 create or replace view public.v_taches_assignees as select 1 as placeholder;
 create or replace view public.v_tendance_prix_produit as select 1 as placeholder;
 create or replace view public.v_top_fournisseurs as select 1 as placeholder;
+grant select on public.v_achats_mensuels to authenticated;
+grant select on public.v_evolution_achats to authenticated;
+grant select on public.v_pmp to authenticated;
+grant select on public.v_produits_dernier_prix to authenticated;
+grant select on public.v_stocks to authenticated;
 
 -- 6.b Placeholder Functions
 create or replace function public.advanced_stats()
@@ -2034,22 +2186,33 @@ begin
 end;
 $$;
 grant execute on function public.send_notification_webhook() to authenticated;
-create or replace function public.stats_achats_fournisseur()
-returns void
-language plpgsql as $$
-begin
-  return;
-end;
+create or replace function public.stats_achats_fournisseur(mama_id_param uuid, fournisseur_id_param uuid)
+returns table(mois date, total_achats numeric)
+language sql as $$
+  select
+    date_trunc('month', date_achat)::date as mois,
+    sum(quantite * prix) as total_achats
+  from public.achats
+  where mama_id = mama_id_param
+    and fournisseur_id = fournisseur_id_param
+    and actif = true
+  group by date_trunc('month', date_achat)::date
+  order by mois;
 $$;
-grant execute on function public.stats_achats_fournisseur() to authenticated;
-create or replace function public.stats_achats_fournisseurs()
-returns void
-language plpgsql as $$
-begin
-  return;
-end;
+grant execute on function public.stats_achats_fournisseur(uuid, uuid) to authenticated;
+create or replace function public.stats_achats_fournisseurs(mama_id_param uuid)
+returns table(mois date, total_achats numeric)
+language sql as $$
+  select
+    date_trunc('month', date_achat)::date as mois,
+    sum(quantite * prix) as total_achats
+  from public.achats
+  where mama_id = mama_id_param
+    and actif = true
+  group by date_trunc('month', date_achat)::date
+  order by mois;
 $$;
-grant execute on function public.stats_achats_fournisseurs() to authenticated;
+grant execute on function public.stats_achats_fournisseurs(uuid) to authenticated;
 create or replace function public.stats_cost_centers()
 returns void
 language plpgsql as $$
@@ -2074,11 +2237,26 @@ begin
 end;
 $$;
 grant execute on function public.stats_rotation_produit() to authenticated;
-create or replace function public.top_produits()
-returns void
-language plpgsql as $$
-begin
-  return;
-end;
+create or replace function public.top_produits(
+  mama_id_param uuid,
+  debut_param date,
+  fin_param date,
+  limit_param integer
+)
+returns table(produit_id uuid, nom text, total numeric)
+language sql as $$
+  select
+    m.produit_id,
+    p.nom,
+    sum(m.quantite) as total
+  from public.mouvements m
+  join public.produits p on p.id = m.produit_id
+  where m.mama_id = mama_id_param
+    and m.type = 'sortie'
+    and (debut_param is null or m.date >= debut_param)
+    and (fin_param is null or m.date <= fin_param)
+  group by m.produit_id, p.nom
+  order by total desc
+  limit coalesce(limit_param, 10);
 $$;
-grant execute on function public.top_produits() to authenticated;
+grant execute on function public.top_produits(uuid, date, date, integer) to authenticated;

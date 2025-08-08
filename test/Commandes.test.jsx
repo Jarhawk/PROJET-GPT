@@ -5,6 +5,7 @@ import { vi } from 'vitest';
 
 vi.mock('@/hooks/useCommandes', () => ({
   useCommandes: () => ({
+    data: [],
     commandes: [],
     loading: false,
     fetchCommandes: vi.fn().mockResolvedValue({ data: [], count: 0 }),

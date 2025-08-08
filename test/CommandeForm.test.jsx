@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 
 vi.mock('@/hooks/useCommandes', () => ({
-  useCommandes: () => ({ commandes: [], loading: false, createCommande: vi.fn() }),
+  useCommandes: () => ({ data: [], commandes: [], loading: false, createCommande: vi.fn() }),
 }));
 vi.mock('@/hooks/useFournisseurs', () => ({ useFournisseurs: () => ({ fournisseurs: [], fetchFournisseurs: vi.fn() }) }));
 vi.mock('@/hooks/useProduitsFournisseur', () => ({ useProduitsFournisseur: () => ({ useProduitsDuFournisseur: () => ({ products: [], fetch: vi.fn() }) }) }));

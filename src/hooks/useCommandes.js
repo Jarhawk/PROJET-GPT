@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 import useAuth from "@/hooks/useAuth";
 
 export function useCommandes() {
-  const { mama_id, user_id, role } = useAuth();
+  const { mama_id, user_id } = useAuth();
 
   async function fetchCommandes({ fournisseur = "", statut = "", debut = "", fin = "", page = 1, limit = 20 } = {}) {
     if (!mama_id) return { data: [], count: 0 };

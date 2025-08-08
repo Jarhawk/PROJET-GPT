@@ -46,3 +46,52 @@ create policy commande_lignes_access on public.commande_lignes
   );
 
 grant select, insert, update, delete on public.commandes, public.commande_lignes to authenticated;
+
+-- Templates de commandes fournisseur
+create table if not exists public.templates_commandes (
+  id uuid primary key default uuid_generate_v4(),
+  nom text not null,
+  adresse_livraison text,
+  pied_de_page text,
+  champs_visibles jsonb default '{}'::jsonb,
+  actif boolean default true,
+  mama_id uuid references public.mamas(id) on delete cascade,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create index if not exists idx_templates_commandes_mama on public.templates_commandes(mama_id);
+
+create or replace function public.update_timestamp_templates()
+returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$ language plpgsql;
+
+create trigger trg_templates_commandes_updated_at
+before update on public.templates_commandes
+for each row execute procedure public.update_timestamp_templates();
+
+alter table public.templates_commandes enable row level security;
+alter table public.templates_commandes force row level security;
+
+create policy select_templates on public.templates_commandes
+for select using (
+  mama_id = current_user_mama_id()
+);
+
+create policy insert_templates on public.templates_commandes
+for insert with check (
+  mama_id = current_user_mama_id()
+  and current_user_is_admin_or_manager()
+);
+
+create policy update_templates on public.templates_commandes
+for update using (
+  mama_id = current_user_mama_id()
+  and current_user_is_admin_or_manager()
+);
+
+grant select, insert, update, delete on public.templates_commandes to authenticated;

@@ -2,6 +2,15 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
+export async function getTemplatesCommandesActifs() {
+  const { data, error } = await supabase
+    .from("templates_commandes")
+    .select("*")
+    .eq("actif", true)
+    .order("nom");
+  return { data, error };
+}
+
 export default function useTemplatesCommandes() {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(false);

@@ -25,12 +25,11 @@ async function generateCommandePDFBase64(commande, template, fournisseur) {
 
 export default function CommandeDetail() {
   const { id } = useParams();
-  const { fetchCommandeById } = useCommandes();
-  const [commande, setCommande] = useState(null);
+  const { currentCommande: commande, fetchCommandeById, loading } = useCommandes();
   const [template, setTemplate] = useState(null);
 
   useEffect(() => {
-    fetchCommandeById(id).then(data => setCommande(data));
+    fetchCommandeById(id);
   }, [id, fetchCommandeById]);
 
   useEffect(() => {
@@ -44,7 +43,7 @@ export default function CommandeDetail() {
     }
   }, [commande]);
 
-  if (!commande) return <div>Chargement...</div>;
+  if (loading || !commande) return <div>Chargement...</div>;
 
   const fournisseur = commande.fournisseur;
 

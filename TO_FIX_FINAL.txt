@@ -1,0 +1,8 @@
+- Créer des hooks useXXX pour toutes les tables de full_setup_final.sql non couvertes dans src/hooks.
+- Implémenter les composants formulaire XXXForm.jsx et liste XXX.jsx pour chaque table métier.
+- Ajouter les routes manquantes dans src/router.jsx et sécuriser le routage selon access_rights.
+- Mettre à jour la Sidebar pour refléter tous les modules et respecter les droits d'accès.
+- Vérifier tous les appels Supabase pour le filtrage par mama_id et les contrôles de rôles.
+- Ajouter les boutons d'export PDF/Excel et l'envoi par e-mail sur les modules concernés.
+- Finaliser la responsivité mobile et l'utilisation de LoadingSpinner, ErrorBoundary et Suspense.
+- Supprimer les composants et appels Supabase obsolètes.

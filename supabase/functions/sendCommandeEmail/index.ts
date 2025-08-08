@@ -30,7 +30,7 @@ serve(async (req) => {
     }),
   });
 
-  await supabase.from("emails_envoyés").insert({
+  await supabase.from("emails_envoyes").insert({
     commande_id: commande.id,
     email: fournisseur.email,
     statut: res.ok ? "succès" : "erreur",

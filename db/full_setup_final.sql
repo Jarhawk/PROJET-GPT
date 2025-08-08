@@ -229,17 +229,16 @@ do $$ begin
   end if;
 end $$;
 
--- 5. Triggers
+-- 5. Views
+-- (aucune vue)
+
+-- 6. Functions
 create or replace function public.update_timestamp_roles() returns trigger as $$
 begin
   new.updated_at = now();
   return new;
 end;
 $$ language plpgsql;
-
-create trigger trg_roles_updated_at
-before update on public.roles
-for each row execute procedure public.update_timestamp_roles();
 
 create or replace function public.update_timestamp_templates() returns trigger as $$
 begin
@@ -248,14 +247,6 @@ begin
 end;
 $$ language plpgsql;
 
-create trigger trg_templates_commandes_updated_at
-before update on public.templates_commandes
-for each row execute procedure public.update_timestamp_templates();
-
--- 6. Views
--- (aucune vue)
-
--- 7. Functions
 create or replace function public.current_user_mama_id()
 returns uuid
 language sql stable as $$
@@ -290,6 +281,23 @@ begin
 exception when others then
   return json_build_object('success', false, 'error', SQLERRM);
 end;$$;
+
+-- 7. Triggers
+do $$ begin
+  if not exists (select 1 from pg_trigger where tgname = 'trg_roles_updated_at') then
+    create trigger trg_roles_updated_at
+    before update on public.roles
+    for each row execute procedure public.update_timestamp_roles();
+  end if;
+end $$;
+
+do $$ begin
+  if not exists (select 1 from pg_trigger where tgname = 'trg_templates_commandes_updated_at') then
+    create trigger trg_templates_commandes_updated_at
+    before update on public.templates_commandes
+    for each row execute procedure public.update_timestamp_templates();
+  end if;
+end $$;
 
 -- 8. RLS & Policies
 alter table public.fournisseurs enable row level security;
@@ -364,10 +372,7 @@ do $$ begin
   end if;
 end $$;
 
--- 9. Données initiales (insert)
--- (aucune donnée initiale)
-
--- 10. Sécurité (GRANT)
+-- 9. Sécurité (GRANT)
 grant select, insert, update, delete on public.fournisseurs to authenticated;
 grant select, insert, update, delete on public.produits to authenticated;
 grant select, insert, update, delete on public.roles to authenticated;
@@ -377,3 +382,6 @@ grant select, insert, update, delete on public.commande_lignes to authenticated;
 grant select, insert, update, delete on public.templates_commandes to authenticated;
 grant select, insert, update, delete on public.emails_envoyes to authenticated;
 grant execute on function public.create_utilisateur(text, text, uuid, uuid) to authenticated;
+
+-- 10. Données initiales (insert)
+-- (aucune donnée initiale)

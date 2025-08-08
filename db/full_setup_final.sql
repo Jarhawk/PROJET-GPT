@@ -1,6 +1,7 @@
 -- 1. Extensions
 create extension if not exists "uuid-ossp";
 create extension if not exists "pgcrypto";
+create extension if not exists "pg_net";
 
 -- 2. Tables
 create table if not exists public.mamas (
@@ -300,6 +301,15 @@ do $$ begin
 end $$;
 
 -- 8. RLS & Policies
+alter table public.mamas enable row level security;
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='mamas' and policyname='mamas_all') then
+    create policy mamas_all on public.mamas
+      for all using (id = current_user_mama_id())
+      with check (id = current_user_mama_id());
+  end if;
+end $$;
+
 alter table public.fournisseurs enable row level security;
 do $$ begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='fournisseurs' and policyname='fournisseurs_all') then
@@ -373,6 +383,7 @@ do $$ begin
 end $$;
 
 -- 9. Sécurité (GRANT)
+grant select, insert, update, delete on public.mamas to authenticated;
 grant select, insert, update, delete on public.fournisseurs to authenticated;
 grant select, insert, update, delete on public.produits to authenticated;
 grant select, insert, update, delete on public.roles to authenticated;

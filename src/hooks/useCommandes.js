@@ -91,8 +91,14 @@ export function useCommandes() {
       return { error };
     }
     if (lignes.length) {
-      const toInsert = lignes.map((l) => ({ ...l, commande_id: data.id }));
-      const { error: lineErr } = await supabase.from("commande_lignes").insert(toInsert);
+      const toInsert = lignes.map((l) => ({
+        ...l,
+        commande_id: data.id,
+        mama_id,
+      }));
+      const { error: lineErr } = await supabase
+        .from("commande_lignes")
+        .insert(toInsert);
       if (lineErr) console.error("❌ commande lignes", lineErr.message);
     }
     return { data };

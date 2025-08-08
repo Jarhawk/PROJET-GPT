@@ -7,14 +7,11 @@ const query = {
   order: vi.fn(() => query),
   eq: vi.fn(() => query),
   ilike: vi.fn(() => query),
-  insert: vi.fn(() => query),
-  update: vi.fn(() => query),
-  upsert: vi.fn(() => query),
-  delete: vi.fn(() => query),
   then: (fn) => Promise.resolve(fn({ data: [], error: null })),
 };
 const fromMock = vi.fn(() => query);
-vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
+const rpcMock = vi.fn(() => Promise.resolve({ data: null, error: null }));
+vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock, rpc: rpcMock } }));
 const csvMock = vi.fn();
 vi.mock('@/lib/export/exportHelpers', () => ({ exportToCSV: csvMock }));
 
@@ -26,20 +23,18 @@ let useUtilisateurs;
 beforeEach(async () => {
   ({ useUtilisateurs } = await import('@/hooks/useUtilisateurs'));
   fromMock.mockClear();
+  rpcMock.mockClear();
   query.select.mockClear();
   query.order.mockClear();
   query.eq.mockClear();
   query.ilike.mockClear();
-  query.insert.mockClear();
-  query.update.mockClear();
-  query.upsert.mockClear();
-  query.delete.mockClear();
+  csvMock.mockClear();
 });
 
-test('fetchUsers applies filters', async () => {
+test('getUtilisateurs applies filters', async () => {
   const { result } = renderHook(() => useUtilisateurs());
   await act(async () => {
-    await result.current.fetchUsers({ search: 'foo', actif: true });
+    await result.current.getUtilisateurs({ search: 'foo', actif: true });
   });
   expect(fromMock).toHaveBeenCalledWith('utilisateurs_complets');
   expect(query.select).toHaveBeenCalledWith('*');
@@ -49,24 +44,22 @@ test('fetchUsers applies filters', async () => {
   expect(query.eq.mock.calls).toContainEqual(['actif', true]);
 });
 
-test('addUser inserts with current mama_id', async () => {
+test('createUtilisateur uses rpc', async () => {
   const { result } = renderHook(() => useUtilisateurs());
   await act(async () => {
-    await result.current.addUser({ email: 'a' });
+    await result.current.createUtilisateur({ email: 'a', nom: 'A', role_id: 'r1' });
   });
-  expect(query.upsert).toHaveBeenCalledWith(expect.objectContaining({ email: 'a', mama_id: 'm1' }));
+  expect(rpcMock).toHaveBeenCalledWith('create_utilisateur', expect.objectContaining({ email: 'a', nom: 'A', role_id: 'r1', mama_id: 'm1' }));
 });
 
-test('superadmin bypasses mama filter', async () => {
+test('superadmin can set mama_id', async () => {
   authMock.mockReturnValueOnce({ mama_id: null, isSuperadmin: true });
   ({ useUtilisateurs } = await import('@/hooks/useUtilisateurs'));
   const { result } = renderHook(() => useUtilisateurs());
   await act(async () => {
-    await result.current.addUser({ email: 'b', mama_id: 'm2' });
-    await result.current.updateUser('id1', { role: 'user' });
+    await result.current.createUtilisateur({ email: 'b', nom: 'B', role_id: 'r1', mama_id: 'm2' });
   });
-  expect(query.upsert).toHaveBeenCalledWith(expect.objectContaining({ email: 'b', mama_id: 'm2' }));
-  expect(query.upsert).toHaveBeenCalledTimes(2);
+  expect(rpcMock).toHaveBeenCalledWith('create_utilisateur', expect.objectContaining({ mama_id: 'm2' }));
 });
 
 test('exportUsersToCSV calls helper', () => {

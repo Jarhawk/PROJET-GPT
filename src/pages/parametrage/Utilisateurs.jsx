@@ -3,111 +3,66 @@ import { useEffect, useState, useCallback } from "react";
 import { useUtilisateurs } from "@/hooks/useUtilisateurs";
 import useAuth from "@/hooks/useAuth";
 import { useRoles } from "@/hooks/useRoles";
-import { useMamas } from "@/hooks/useMamas";
-import UtilisateurForm from "./UtilisateurForm";
-import UtilisateurDetail from "@/components/utilisateurs/UtilisateurDetail";
-import UtilisateurRow from "@/components/parametrage/UtilisateurRow";
+import UtilisateurForm from "@/components/Utilisateurs/UtilisateurForm";
+import UtilisateurRow from "@/components/Utilisateurs/UtilisateurRow";
 import { Button } from "@/components/ui/button";
 import ListingContainer from "@/components/ui/ListingContainer";
 import PaginationFooter from "@/components/ui/PaginationFooter";
 import TableHeader from "@/components/ui/TableHeader";
-import { Toaster, toast } from "react-hot-toast";
-import { motion as Motion } from "framer-motion";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 const PAGE_SIZE = 50;
 
 export default function Utilisateurs() {
-  const {
-    users,
-    loading,
-    error,
-    fetchUsers,
-    toggleUserActive,
-    exportUsersToExcel,
-    exportUsersToCSV,
-  } = useUtilisateurs();
-  const { mama_id, loading: authLoading, hasAccess } = useAuth();
+  const { users, loading, error, getUtilisateurs, toggleUserActive } = useUtilisateurs();
+  const { mama_id, role, loading: authLoading } = useAuth();
   const { roles, fetchRoles } = useRoles();
-  const { mamas, fetchMamas } = useMamas();
   const [search, setSearch] = useState("");
   const [actifFilter, setActifFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
-  const [sortBy, setSortBy] = useState("nom");
   const [page, setPage] = useState(1);
   const [showForm, setShowForm] = useState(false);
   const [selected, setSelected] = useState(null);
-  const [showDetail, setShowDetail] = useState(false);
-  const canEdit = hasAccess("utilisateurs", "peut_modifier");
 
   const refreshList = useCallback(() => {
-    fetchUsers({
+    getUtilisateurs({
       search,
       actif: actifFilter === "all" ? null : actifFilter === "true",
     });
-  }, [fetchUsers, search, actifFilter]);
+  }, [getUtilisateurs, search, actifFilter]);
 
   useEffect(() => {
     if (!authLoading && mama_id) {
       refreshList();
       fetchRoles();
-      fetchMamas();
     }
-  }, [authLoading, mama_id, refreshList, fetchRoles, fetchMamas]);
+  }, [authLoading, mama_id, refreshList, fetchRoles]);
 
   if (authLoading) return <LoadingSpinner message="Chargement..." />;
-  if (!mama_id) return null;
+  if (!mama_id || role !== "admin") return null;
 
-  const mapped = users.map(u => ({
-    ...u,
-    mamaNom: mamas.find(m => m.id === u.mama_id)?.nom || u.mama_id,
-    roleNom: roles.find(r => r.id === u.role_id)?.nom || u.role?.nom || "",
-    role: roles.find(r => r.id === u.role_id)?.nom || u.role?.nom || "",
-  }));
-  const filtres = mapped.filter(u =>
-    (!search ||
-      u.nom?.toLowerCase().includes(search.toLowerCase()) ||
-      u.email?.toLowerCase().includes(search.toLowerCase())) &&
+  const filtres = users.filter(u =>
+    (!search || u.email?.toLowerCase().includes(search.toLowerCase())) &&
     (actifFilter === "all" || (actifFilter === "true" ? u.actif : !u.actif)) &&
-    (roleFilter === "all" || u.roleNom === roleFilter)
-  ).sort((a, b) => {
-    if (sortBy === "mama") return a.mamaNom.localeCompare(b.mamaNom);
-    if (sortBy === "role") return a.roleNom.localeCompare(b.roleNom);
-    if (sortBy === "email") return (a.email || "").localeCompare(b.email || "");
-    return a.nom.localeCompare(b.nom);
-  });
+    (roleFilter === "all" || u.role === roleFilter)
+  );
   const nbPages = Math.ceil(filtres.length / PAGE_SIZE);
   const paged = filtres.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-
-  const handleToggleActive = async (u) => {
-    await toggleUserActive(u.id, !u.actif);
-    await refreshList();
-    toast.success(u.actif ? "Utilisateur désactivé" : "Utilisateur réactivé");
-  };
-
-
   return (
     <div className="p-6 container mx-auto text-shadow">
-      <Toaster position="top-right" />
       <TableHeader>
         <input
           type="search"
           value={search}
-          onChange={e => {
-            setPage(1);
-            setSearch(e.target.value);
-          }}
+          onChange={e => { setPage(1); setSearch(e.target.value); }}
           className="form-input"
-          placeholder="Recherche nom"
+          placeholder="Recherche email"
         />
         <select
           className="form-input"
           value={actifFilter}
-          onChange={e => {
-            setPage(1);
-            setActifFilter(e.target.value);
-          }}
+          onChange={e => { setPage(1); setActifFilter(e.target.value); }}
         >
           <option value="all">Tous</option>
           <option value="true">Actif</option>
@@ -116,104 +71,51 @@ export default function Utilisateurs() {
         <select
           className="form-input"
           value={roleFilter}
-          onChange={e => {
-            setPage(1);
-            setRoleFilter(e.target.value);
-          }}
+          onChange={e => { setPage(1); setRoleFilter(e.target.value); }}
         >
           <option value="all">Tous rôles</option>
           {roles.map(r => (
             <option key={r.nom} value={r.nom}>{r.nom}</option>
           ))}
         </select>
-        {canEdit && (
-          <Button
-            onClick={() => {
-              setSelected(null);
-              setShowForm(true);
-            }}
-          >
-            Ajouter un utilisateur
-          </Button>
-        )}
-        <select
-          className="form-input"
-          value={sortBy}
-          onChange={e => {
-            setPage(1);
-            setSortBy(e.target.value);
-          }}
-        >
-          <option value="nom">Tri nom</option>
-          <option value="mama">Tri Mama</option>
-          <option value="role">Tri rôle</option>
-          <option value="email">Tri email</option>
-        </select>
-        <Button variant="outline" onClick={() => exportUsersToExcel(filtres)}>Export Excel</Button>
-        <Button variant="outline" onClick={() => exportUsersToCSV(filtres)}>Export CSV</Button>
+        <Button onClick={() => { setSelected(null); setShowForm(true); }}>Ajouter un utilisateur</Button>
       </TableHeader>
-      {error && (
-        <div className="text-red-500 mb-2">{error.message}</div>
-      )}
+      {error && <div className="text-red-500 mb-2">{error.message}</div>}
       {loading && <LoadingSpinner message="Chargement..." />}
       <ListingContainer className="mb-4">
-        <Motion.table
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="min-w-full text-white"
-        >
-        <thead>
-          <tr>
-            <th className="px-4 py-2">Nom</th>
-            <th className="px-4 py-2">Email</th>
-            <th className="px-4 py-2">Rôle</th>
-            <th className="px-4 py-2">Mama</th>
-            <th className="px-4 py-2">Actif</th>
-            <th className="px-4 py-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {paged.map((u) => (
-            <UtilisateurRow
-              key={u.id}
-              utilisateur={u}
-              canEdit={canEdit}
-              onEdit={(user) => {
-                setSelected(user);
-                setShowForm(true);
-              }}
-              onToggleActive={() => handleToggleActive(u)}
-            />
-          ))}
-          {paged.length === 0 && (
+        <table className="min-w-full text-white">
+          <thead>
             <tr>
-              <td colSpan={6} className="py-4 text-center text-gray-400">
-                Aucun utilisateur.
-              </td>
+              <th className="px-4 py-2">Nom</th>
+              <th className="px-4 py-2">Email</th>
+              <th className="px-4 py-2">Rôle</th>
+              <th className="px-4 py-2">Actif</th>
+              <th className="px-4 py-2">Actions</th>
             </tr>
-          )}
-        </tbody>
-        </Motion.table>
+          </thead>
+          <tbody>
+            {paged.map(u => (
+              <UtilisateurRow
+                key={u.id}
+                utilisateur={u}
+                canEdit
+                onEdit={(user) => { setSelected(user); setShowForm(true); }}
+                onToggleActive={() => { toggleUserActive(u.id, !u.actif); refreshList(); }}
+              />
+            ))}
+            {paged.length === 0 && (
+              <tr>
+                <td colSpan={5} className="py-4 text-center text-gray-400">Aucun utilisateur.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </ListingContainer>
-      <PaginationFooter
-        page={page}
-        pages={nbPages}
-        onPageChange={setPage}
-      />
+      <PaginationFooter page={page} pages={nbPages} onPageChange={setPage} />
       {showForm && (
         <UtilisateurForm
           utilisateur={selected}
-          onClose={() => {
-            setShowForm(false);
-            setSelected(null);
-            refreshList();
-          }}
-        />
-      )}
-      {showDetail && selected && (
-        <UtilisateurDetail
-          utilisateur={selected}
-          onClose={() => { setShowDetail(false); setSelected(null); }}
+          onClose={() => { setShowForm(false); setSelected(null); refreshList(); }}
         />
       )}
     </div>

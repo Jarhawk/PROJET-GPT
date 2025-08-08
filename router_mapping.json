@@ -168,6 +168,10 @@
     "module": "fournisseurs"
   },
   {
+    "route": "/commandes/:id",
+    "module": "fournisseurs"
+  },
+  {
     "route": "/planning",
     "module": "planning_previsionnel"
   },

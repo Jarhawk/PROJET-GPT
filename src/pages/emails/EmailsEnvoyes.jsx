@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useEmailsEnvoyes } from "@/hooks/useEmailsEnvoyes";
 import useAuth from "@/hooks/useAuth";
+import { useCommandes } from "@/hooks/useCommandes";
 import TableContainer from "@/components/ui/TableContainer";
 import GlassCard from "@/components/ui/GlassCard";
 import { Input } from "@/components/ui/input";
@@ -12,10 +13,15 @@ import { Badge } from "@/components/ui/badge";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { pdf } from "@react-pdf/renderer";
+import CommandePDF from "@/components/pdf/CommandePDF";
+import { supabase } from "@/lib/supabase";
+import toast from "react-hot-toast";
 
 export default function EmailsEnvoyes() {
-  const { mama_id, loading: authLoading } = useAuth();
-  const { emails, fetchEmails, loading, error } = useEmailsEnvoyes();
+  const { mama_id, loading: authLoading, role } = useAuth();
+  const { emails, fetchEmails, loading, error, resendEmail } = useEmailsEnvoyes();
+  const { fetchCommandeById } = useCommandes();
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
   const [statut, setStatut] = useState("");
@@ -57,6 +63,39 @@ export default function EmailsEnvoyes() {
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "Emails");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     saveAs(new Blob([buf]), "emails-envoyes.xlsx");
+  };
+
+  const handleViewPDF = async (commandeId) => {
+    try {
+      const commande = await fetchCommandeById(commandeId);
+      if (!commande) throw new Error();
+      let template = null;
+      if (commande.template_id) {
+        const { data: tpl } = await supabase
+          .from("templates_commandes")
+          .select("*")
+          .eq("id", commande.template_id)
+          .single();
+        template = tpl || null;
+      }
+      const blob = await pdf(
+        <CommandePDF commande={commande} template={template} fournisseur={commande.fournisseur} />,
+      ).toBlob();
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    } catch {
+      toast.error("Erreur lors de la génération du PDF");
+    }
+  };
+
+  const handleResend = async (id) => {
+    const { error: err } = await resendEmail(id);
+    if (err) {
+      toast.error("Erreur lors de l'envoi");
+    } else {
+      toast.success("Email renvoyé avec succès");
+      await load();
+    }
   };
 
   if (authLoading) return <LoadingSpinner message="Chargement..." />;
@@ -121,6 +160,7 @@ export default function EmailsEnvoyes() {
                   <th className="px-2 py-1">Email</th>
                   <th className="px-2 py-1">Commande</th>
                   <th className="px-2 py-1">Statut</th>
+                  <th className="px-2 py-1">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -151,6 +191,25 @@ export default function EmailsEnvoyes() {
                       <Badge color={e.statut === "success" ? "green" : "red"}>
                         {e.statut === "success" ? "Succès" : "Erreur"}
                       </Badge>
+                    </td>
+                    <td className="px-2 py-1 md:border-none block md:table-cell space-x-1">
+                      <span className="md:hidden font-semibold">Actions: </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleViewPDF(e.commande_id)}
+                      >
+                        Voir PDF
+                      </Button>
+                      {role === "admin" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleResend(e.id)}
+                        >
+                          Renvoyer
+                        </Button>
+                      )}
                     </td>
                   </tr>
                 ))}

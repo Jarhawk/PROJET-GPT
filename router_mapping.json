@@ -292,6 +292,10 @@
     "module": "licences"
   },
   {
+    "route": "/emails/envoyes",
+    "module": "emails_envoyes"
+  },
+  {
     "route": "/logs",
     "module": "logs"
   },

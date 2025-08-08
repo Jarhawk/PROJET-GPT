@@ -25,6 +25,7 @@ import {
   HelpCircle,
   Gift,
   Bell,
+  Mail,
   MessageCircle,
   Plug,
 } from "lucide-react";
@@ -105,6 +106,7 @@ export default function Sidebar() {
       title: "Notifications",
       items: [
         { module: "notifications", to: "/notifications", label: "Notifications", icon: <Bell size={16} /> },
+        { module: "emails_envoyes", to: "/emails/envoyes", label: "Emails envoyés", icon: <Mail size={16} /> },
       ],
     },
     {

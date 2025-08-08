@@ -233,5 +233,11 @@
     "edit": false,
     "delete": false
   },
-    
+  "emails_envoyes": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  }
+
 }

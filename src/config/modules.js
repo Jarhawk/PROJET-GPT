@@ -37,4 +37,5 @@ export const MODULES = [
   { label: "Paramétrage", key: "parametrage" },
   { label: "Feedback", key: "feedback" },
   { label: "Logs", key: "logs" },
+  { label: "Emails envoyés", key: "emails_envoyes" },
 ];

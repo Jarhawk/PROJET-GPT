@@ -81,6 +81,7 @@ const FournisseurApiSettingsForm = lazyWithPreload(() => import("@/pages/fournis
 const ApiFournisseurs = lazyWithPreload(() => import("@/pages/fournisseurs/ApiFournisseurs.jsx"));
 const CatalogueSyncViewer = lazyWithPreload(() => import("@/pages/catalogue/CatalogueSyncViewer.jsx"));
 const CommandesEnvoyees = lazyWithPreload(() => import("@/pages/commandes/CommandesEnvoyees.jsx"));
+const EmailsEnvoyes = lazyWithPreload(() => import("@/pages/emails/EmailsEnvoyes.jsx"));
 const SimulationPlanner = lazyWithPreload(() => import("@/pages/planning/SimulationPlanner.jsx"));
 const Commandes = lazyWithPreload(() => import("@/pages/commandes/Commandes.jsx"));
 const Planning = lazyWithPreload(() => import("@/pages/Planning.jsx"));
@@ -124,6 +125,7 @@ export const routePreloadMap = {
   '/bons-livraison': BonsLivraison.preload,
   '/documents': Documents.preload,
   '/notifications': NotificationsInbox.preload,
+  '/emails/envoyes': EmailsEnvoyes.preload,
   '/planning': Planning.preload,
   '/planning/simulation': SimulationPlanner.preload,
   '/taches': Taches.preload,
@@ -390,6 +392,10 @@ export default function Router() {
           <Route
             path="/commandes/envoyees"
             element={<ProtectedRoute moduleKey="fournisseurs"><CommandesEnvoyees /></ProtectedRoute>}
+          />
+          <Route
+            path="/emails/envoyes"
+            element={<ProtectedRoute moduleKey="emails_envoyes"><EmailsEnvoyes /></ProtectedRoute>}
           />
           <Route
             path="/planning"

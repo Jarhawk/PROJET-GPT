@@ -1630,48 +1630,43 @@ do $$ begin
   end if;
 end $$;
 grant select, insert, update, delete on public.regles_alertes to authenticated;
-create table if not exists public.requisition_lignes (
-  id uuid primary key default uuid_generate_v4(),
-  mama_id uuid,
-  created_at timestamptz default now()
-);
-create index if not exists idx_requisition_lignes_mama_id on public.requisition_lignes(mama_id);
-do $$ begin
-  if not exists (select 1 from pg_constraint where conname = 'fk_requisition_lignes_mama_id') then
-    alter table public.requisition_lignes
-      add constraint fk_requisition_lignes_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
-  end if;
-end $$;
-alter table public.requisition_lignes enable row level security;
-do $$ begin
-  if not exists (select 1 from pg_policies where schemaname='public' and tablename='requisition_lignes' and policyname='requisition_lignes_all') then
-    create policy requisition_lignes_all on public.requisition_lignes
-      for all using (mama_id = current_user_mama_id())
-      with check (mama_id = current_user_mama_id());
-  end if;
-end $$;
-grant select, insert, update, delete on public.requisition_lignes to authenticated;
 create table if not exists public.requisitions (
-  id uuid primary key default uuid_generate_v4(),
-  mama_id uuid,
-  created_at timestamptz default now()
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid references public.mamas(id),
+  date_requisition date not null,
+  zone_id uuid references public.zones_stock(id),
+  statut text check (statut in ('brouillon','faite','réalisée')) default 'brouillon',
+  commentaire text,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  actif boolean default true
 );
 create index if not exists idx_requisitions_mama_id on public.requisitions(mama_id);
-do $$ begin
-  if not exists (select 1 from pg_constraint where conname = 'fk_requisitions_mama_id') then
-    alter table public.requisitions
-      add constraint fk_requisitions_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
-  end if;
-end $$;
+create index if not exists idx_requisitions_zone on public.requisitions(zone_id);
 alter table public.requisitions enable row level security;
-do $$ begin
-  if not exists (select 1 from pg_policies where schemaname='public' and tablename='requisitions' and policyname='requisitions_all') then
-    create policy requisitions_all on public.requisitions
-      for all using (mama_id = current_user_mama_id())
-      with check (mama_id = current_user_mama_id());
-  end if;
-end $$;
+create policy requisitions_select on public.requisitions for select using (mama_id = current_user_mama_id());
+create policy requisitions_insert on public.requisitions for insert with check (mama_id = current_user_mama_id());
+create policy requisitions_update on public.requisitions for update using (mama_id = current_user_mama_id());
+create policy requisitions_delete on public.requisitions for delete using (mama_id = current_user_mama_id());
 grant select, insert, update, delete on public.requisitions to authenticated;
+
+create table if not exists public.requisition_lignes (
+  id uuid primary key default gen_random_uuid(),
+  requisition_id uuid references public.requisitions(id) on delete cascade,
+  produit_id uuid references public.produits(id),
+  quantite numeric,
+  unite text,
+  mama_id uuid,
+  created_at timestamptz default now()
+);
+create index if not exists idx_requisition_lignes_requisition on public.requisition_lignes(requisition_id);
+create index if not exists idx_requisition_lignes_mama_id on public.requisition_lignes(mama_id);
+alter table public.requisition_lignes enable row level security;
+create policy requisition_lignes_select on public.requisition_lignes for select using (mama_id = current_user_mama_id());
+create policy requisition_lignes_insert on public.requisition_lignes for insert with check (mama_id = current_user_mama_id());
+create policy requisition_lignes_update on public.requisition_lignes for update using (mama_id = current_user_mama_id());
+create policy requisition_lignes_delete on public.requisition_lignes for delete using (mama_id = current_user_mama_id());
+grant select, insert, update, delete on public.requisition_lignes to authenticated;
 create table if not exists public.signalements (
   id uuid primary key default uuid_generate_v4(),
   mama_id uuid,
@@ -2063,8 +2058,32 @@ from public.produits p;
 create or replace view public.v_produits_utilises as select 1 as placeholder;
 create or replace view public.v_reco_stockmort as select 1 as placeholder;
 create or replace view public.v_reco_surcout as select 1 as placeholder;
-create or replace view public.v_requisitions as select 1 as placeholder;
+create or replace view public.v_requisitions as
+select r.id,
+       r.mama_id,
+       r.date_requisition,
+       r.zone_id,
+       r.statut,
+       r.commentaire,
+       r.created_at,
+       r.updated_at,
+       r.actif
+from public.requisitions r;
+
 create or replace view public.v_stock_requisitionne as select 1 as placeholder;
+
+create or replace view public.suggestions_commandes as
+select rl.produit_id,
+       sum(rl.quantite) as quantite_totale,
+       p.stock_reel,
+       p.stock_min,
+       (p.stock_reel - sum(rl.quantite)) as stock_projection
+from public.requisition_lignes rl
+join public.requisitions r on r.id = rl.requisition_id
+join public.produits p on p.id = rl.produit_id
+where r.statut = 'faite'
+group by rl.produit_id, p.stock_reel, p.stock_min
+having (p.stock_reel - sum(rl.quantite)) < p.stock_min;
 create or replace view public.v_stocks as
 select
   mama_id,

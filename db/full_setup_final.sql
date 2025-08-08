@@ -107,6 +107,25 @@ create table if not exists public.emails_envoyes (
   mama_id uuid not null
 );
 
+create table if not exists public.permissions (
+  id uuid primary key default gen_random_uuid(),
+  role_id uuid not null,
+  module text not null,
+  droit text not null,
+  mama_id uuid not null,
+  created_at timestamptz default now()
+);
+
+create table if not exists public.consentements_utilisateur (
+  id uuid primary key default gen_random_uuid(),
+  utilisateur_id uuid not null,
+  user_id uuid,
+  mama_id uuid not null,
+  type_consentement text not null,
+  consentement boolean not null,
+  date_consentement timestamptz default now()
+);
+
 -- 3. Indexes
 create index if not exists idx_fournisseurs_mama_id on public.fournisseurs(mama_id);
 create index if not exists idx_produits_mama_id on public.produits(mama_id);
@@ -119,6 +138,9 @@ create index if not exists idx_commande_lignes_mama_id on public.commande_lignes
 create index if not exists idx_templates_commandes_mama on public.templates_commandes(mama_id);
 create index if not exists idx_emails_envoyes_commande on public.emails_envoyes(commande_id);
 create index if not exists idx_emails_envoyes_mama_id on public.emails_envoyes(mama_id);
+create index if not exists idx_permissions_role_id on public.permissions(role_id);
+create index if not exists idx_permissions_mama_id on public.permissions(mama_id);
+create index if not exists idx_consentements_utilisateur_mama_id on public.consentements_utilisateur(mama_id);
 
 -- 4. Foreign keys
 do $$ begin
@@ -233,8 +255,39 @@ do $$ begin
   end if;
 end $$;
 
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'fk_permissions_role_id') then
+    alter table public.permissions
+      add constraint fk_permissions_role_id foreign key (role_id) references public.roles(id) on delete cascade;
+  end if;
+end $$;
+
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'fk_permissions_mama_id') then
+    alter table public.permissions
+      add constraint fk_permissions_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
+  end if;
+end $$;
+
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'fk_consentements_utilisateur_utilisateur_id') then
+    alter table public.consentements_utilisateur
+      add constraint fk_consentements_utilisateur_utilisateur_id foreign key (utilisateur_id) references public.utilisateurs(id) on delete cascade;
+  end if;
+end $$;
+
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'fk_consentements_utilisateur_mama_id') then
+    alter table public.consentements_utilisateur
+      add constraint fk_consentements_utilisateur_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
+  end if;
+end $$;
+
 -- 5. Views
--- (aucune vue)
+create or replace view public.utilisateurs_complets as
+select u.*, r.nom as role_nom, r.access_rights as role_access_rights
+from public.utilisateurs u
+left join public.roles r on r.id = u.role_id;
 
 -- 6. Functions
 create or replace function public.update_timestamp_roles() returns trigger as $$
@@ -285,6 +338,22 @@ begin
 exception when others then
   return json_build_object('success', false, 'error', SQLERRM);
 end;$$;
+
+create or replace function public.calcul_ecarts_inventaire(p_date date, p_zone text, mama_id_param uuid)
+returns table(produit text, stock_theorique numeric, stock_reel numeric, ecart numeric, motif text)
+language plpgsql as $$
+begin
+  return;
+end;
+$$;
+
+create or replace function public.fn_calc_budgets(mama_id_param uuid, periode_param text)
+returns table(famille text, ecart_pct numeric)
+language plpgsql as $$
+begin
+  return;
+end;
+$$;
 
 -- 7. Triggers
 do $$ begin
@@ -385,6 +454,24 @@ do $$ begin
   end if;
 end $$;
 
+alter table public.permissions enable row level security;
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='permissions' and policyname='permissions_all') then
+    create policy permissions_all on public.permissions
+      for all using (mama_id = current_user_mama_id())
+      with check (mama_id = current_user_mama_id());
+  end if;
+end $$;
+
+alter table public.consentements_utilisateur enable row level security;
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='consentements_utilisateur' and policyname='consentements_utilisateur_all') then
+    create policy consentements_utilisateur_all on public.consentements_utilisateur
+      for all using (mama_id = current_user_mama_id())
+      with check (mama_id = current_user_mama_id());
+  end if;
+end $$;
+
 -- 9. Sécurité (GRANT)
 grant select, insert, update, delete on public.mamas to authenticated;
 grant select, insert, update, delete on public.fournisseurs to authenticated;
@@ -395,7 +482,11 @@ grant select, insert, update, delete on public.commandes to authenticated;
 grant select, insert, update, delete on public.commande_lignes to authenticated;
 grant select, insert, update, delete on public.templates_commandes to authenticated;
 grant select, insert, update, delete on public.emails_envoyes to authenticated;
+grant select, insert, update, delete on public.permissions to authenticated;
+grant select, insert, update, delete on public.consentements_utilisateur to authenticated;
 grant execute on function public.create_utilisateur(text, text, uuid, uuid) to authenticated;
+grant execute on function public.calcul_ecarts_inventaire(date, text, uuid) to authenticated;
+grant execute on function public.fn_calc_budgets(uuid, text) to authenticated;
 
 -- 10. Données initiales (insert)
 -- (aucune donnée initiale)

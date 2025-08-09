@@ -40,6 +40,7 @@ export default function Sidebar() {
             <div className="ml-4 flex flex-col gap-1 mt-1">
               {has("fiches_techniques") && <Link to="/fiches">Fiches</Link>}
               {has("menus") && <Link to="/menus">Menus</Link>}
+              {has("menu_du_jour") && <Link to="/menu">Menu du jour</Link>}
             </div>
           </details>
         )}

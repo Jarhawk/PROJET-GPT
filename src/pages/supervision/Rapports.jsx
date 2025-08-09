@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import useAuth from "@/hooks/useAuth";
 import { useLogs } from "@/hooks/useLogs";
 import { supabase } from "@/lib/supabase";
@@ -22,18 +22,18 @@ export default function Rapports() {
   const [open, setOpen] = useState(false);
   const [gen, setGen] = useState({ module: "", type: "pdf", start: "", end: "" });
 
-  useEffect(() => {
-    if (!authLoading && mama_id) load();
-  }, [authLoading, mama_id]);
-
-  async function load() {
+  const load = useCallback(async () => {
     await fetchRapports({
       module: filters.module || undefined,
       type: filters.type || undefined,
       start: filters.start || undefined,
       end: filters.end || undefined,
     });
-  }
+  }, [fetchRapports, filters]);
+
+  useEffect(() => {
+    if (!authLoading && mama_id) load();
+  }, [authLoading, mama_id, load]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

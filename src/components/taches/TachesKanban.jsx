@@ -1,5 +1,3 @@
-import React from 'react';
-
 export default function TachesKanban({ taches = [] }) {
   const cols = ['a_faire', 'en_cours', 'terminee'];
   const labels = {

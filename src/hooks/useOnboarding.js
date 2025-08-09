@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import useAuth from "@/hooks/useAuth";
 
@@ -8,12 +8,7 @@ export function useOnboarding() {
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (!user || !mama_id) return;
-    fetchProgress();
-  }, [user?.id, mama_id]);
-
-  async function fetchProgress() {
+  const fetchProgress = useCallback(async () => {
     if (!user || !mama_id) return [];
     setLoading(true);
     const { data } = await supabase
@@ -28,7 +23,12 @@ export function useOnboarding() {
       setStep(parseInt(last.etape, 10));
     }
     return data || [];
-  }
+  }, [user, mama_id]);
+
+  useEffect(() => {
+    if (!user || !mama_id) return;
+    fetchProgress();
+  }, [user, mama_id, fetchProgress]);
 
   async function startOnboarding() {
     if (!user || !mama_id) return;

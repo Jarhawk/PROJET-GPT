@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import MamaLogo from "@/components/ui/MamaLogo";
 import ResetAuthButton from "@/components/ResetAuthButton";
@@ -54,7 +54,7 @@ export default function Login() {
     }
     toast.success(`Bienvenue ${session.user.email}`);
     if (pathname !== "/dashboard") navigate("/dashboard");
-  }, [session, userData, authLoading, navigate, pathname, getAuthorizedModules]);
+  }, [session, userData, authLoading, navigate, pathname, getAuthorizedModules, rightsLoaded]);
 
   if (authLoading || (session && !userData)) {
     return <LoadingSpinner message="Chargement..." />;

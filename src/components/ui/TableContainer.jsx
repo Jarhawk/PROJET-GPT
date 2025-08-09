@@ -1,11 +1,11 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import React from "react";
+import { Children, isValidElement, cloneElement } from "react";
 
 export default function TableContainer({ className = "", children, ...props }) {
-  const enhanced = React.Children.map(children, child => {
-    if (React.isValidElement(child) && child.type === "table") {
+  const enhanced = Children.map(children, child => {
+    if (isValidElement(child) && child.type === "table") {
       const childClass = child.props.className || "";
-      return React.cloneElement(child, {
+      return cloneElement(child, {
         className: `listing-table ${childClass}`.trim(),
       });
     }

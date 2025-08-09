@@ -5,7 +5,6 @@ import useAuth from "@/hooks/useAuth";
 import ListingContainer from "@/components/ui/ListingContainer";
 import TableHeader from "@/components/ui/TableHeader";
 import PaginationFooter from "@/components/ui/PaginationFooter";
-import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import RequisitionRow from "@/components/requisitions/RequisitionRow";
 

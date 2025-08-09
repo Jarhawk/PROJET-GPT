@@ -1,10 +1,10 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import React from "react";
+import { useId } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { AnimatePresence, motion as Motion } from "framer-motion";
 
 export default function SmartDialog({ open, onClose, title, description, children }) {
-  const descriptionId = React.useId();
+  const descriptionId = useId();
   return (
     <Dialog.Root open={open} onOpenChange={(v) => !v && onClose?.()}>
       <AnimatePresence>

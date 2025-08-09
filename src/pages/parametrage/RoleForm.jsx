@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import React, { useState } from "react";
+import { useState } from "react";
 import { useRoles } from "@/hooks/useRoles";
 import { Button } from "@/components/ui/button";
 

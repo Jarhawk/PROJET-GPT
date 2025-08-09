@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import useAuth from "@/hooks/useAuth";
 
@@ -9,7 +9,7 @@ export function useSignalements() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchSignalements = async () => {
+  const fetchSignalements = useCallback(async () => {
     if (!mama_id || authLoading) return;
 
     setLoading(true);
@@ -29,11 +29,11 @@ export function useSignalements() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [mama_id, authLoading]);
 
   useEffect(() => {
     if (!authLoading) fetchSignalements();
-  }, [mama_id, authLoading]);
+  }, [authLoading, fetchSignalements]);
 
   const addSignalement = async (newSignalement) => {
     if (!mama_id || authLoading) return;

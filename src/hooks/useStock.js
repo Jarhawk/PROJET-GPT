@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabase";
 import useAuth from "@/hooks/useAuth";
 
 export function useStock() {
-  const { mama_id, user_id } = useAuth();
+  const { mama_id } = useAuth();
   const [stocks, setStocks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -73,7 +73,7 @@ export function useStock() {
       if (error) return null;
       return data;
     },
-    [mama_id, user_id]
+    [mama_id]
   );
 
   return {

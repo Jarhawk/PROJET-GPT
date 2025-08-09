@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRuptureAlerts } from "@/hooks/useRuptureAlerts";
 import { Button } from "@/components/ui/button";
 
@@ -8,12 +8,12 @@ export default function AlertesRupture() {
   const [type, setType] = useState(null);
   const [traite, setTraite] = useState(null);
 
-  async function load() {
+  const load = useCallback(async () => {
     const data = await fetchAlerts(type, traite);
     setAlerts(data);
-  }
+  }, [fetchAlerts, type, traite]);
 
-  useEffect(() => { load(); }, [type, traite]);
+  useEffect(() => { load(); }, [load]);
 
   return (
     <div className="p-6">

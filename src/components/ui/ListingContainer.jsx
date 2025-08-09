@@ -1,5 +1,4 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import React from 'react';
 import GlassCard from './GlassCard';
 import TableContainer from './TableContainer';
 

@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import useAuth from "@/hooks/useAuth";
 import { useLogs } from "@/hooks/useLogs";
 import GlassCard from "@/components/ui/GlassCard";
@@ -22,11 +22,7 @@ export default function Logs() {
   const [filters, setFilters] = useState({ start: "", end: "", type: "", module: "", critique: false });
   const [detail, setDetail] = useState(null);
 
-  useEffect(() => {
-    if (!authLoading && mama_id) load();
-  }, [authLoading, mama_id]);
-
-  async function load() {
+  const load = useCallback(async () => {
     await fetchLogs({
       type: filters.type || undefined,
       module: filters.module || undefined,
@@ -34,7 +30,11 @@ export default function Logs() {
       end: filters.end || undefined,
       critique: filters.critique ? true : undefined,
     });
-  }
+  }, [fetchLogs, filters]);
+
+  useEffect(() => {
+    if (!authLoading && mama_id) load();
+  }, [authLoading, mama_id, load]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

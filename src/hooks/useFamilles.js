@@ -142,6 +142,30 @@ export function useFamilles() {
     await fetchFamilles();
   }
 
+  // Fusion de familles
+  async function mergeFamilles(srcId, dstId) {
+    if (!mama_id) return { error: "Aucun mama_id" };
+    setLoading(true);
+    setError(null);
+    const { error } = await supabase.rpc("merge_familles", { src: srcId, dst: dstId });
+    if (error) setError(error);
+    setLoading(false);
+    await fetchFamilles();
+    return { error };
+  }
+
+  // Réordonnancement des familles
+  async function reorderFamilles(rows = []) {
+    if (!mama_id) return { error: "Aucun mama_id" };
+    setLoading(true);
+    setError(null);
+    const { error } = await supabase.rpc("reorder_familles", { p_rows: rows });
+    if (error) setError(error);
+    setLoading(false);
+    await fetchFamilles();
+    return { error };
+  }
+
   // Export Excel
   function exportFamillesToExcel() {
     const datas = (familles || []).map((f) => ({
@@ -181,6 +205,8 @@ export function useFamilles() {
     updateFamille,
     deleteFamille,
     batchDeleteFamilles,
+    mergeFamilles,
+    reorderFamilles,
     exportFamillesToExcel,
     importFamillesFromExcel,
   };

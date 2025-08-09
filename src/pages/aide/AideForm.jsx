@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import GlassCard from '@/components/ui/GlassCard';
 import { useAide } from '@/hooks/useAide';
 import { Toaster, toast } from 'react-hot-toast';
+import { Input } from '@/components/ui/input';
 
 export default function AideForm({ article, onClose, onSaved }) {
   const isEdit = !!article?.id;

@@ -17,7 +17,6 @@ import Blocked from "@/pages/auth/Blocked";
 import OnboardingUtilisateur from "@/pages/onboarding/OnboardingUtilisateur";
 import AuthDebug from "@/pages/debug/AuthDebug";
 import AccessExample from "@/pages/debug/AccessExample";
-import NotFound from "@/pages/NotFound";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 const Dashboard = lazyWithPreload(() => import("@/pages/Dashboard.jsx"));

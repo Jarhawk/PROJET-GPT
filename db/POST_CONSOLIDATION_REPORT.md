@@ -40,3 +40,6 @@
 ## TODO
 - Enrichir la vue `v_me_classification` avec des métriques réelles.
 - Compléter la logique d'alertes de rupture si nécessaire.
+
+- Tooling stabilized: ESLint 8.57.0 + Vitest jsdom; polyfills added; alias @/* actifs.
+- Patched imports & tests; remaining TODOs listés.

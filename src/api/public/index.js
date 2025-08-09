@@ -5,7 +5,7 @@ import express from 'express';
 import produitsRouter from './produits.js';
 import stockRouter from './stock.js';
 import promotionsRouter from './promotions.js';
-import { getSupabaseClient } from '../shared/supabaseClient.js';
+import { getSupabaseClient } from '@/api/shared/supabaseClient.js';
 
 // Supabase client used to validate Bearer tokens when provided
 let supabase = null;

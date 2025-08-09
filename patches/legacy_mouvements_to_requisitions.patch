@@ -1,0 +1,44 @@
+diff --git a/scripts/reallocate_history.js b/scripts/reallocate_history.js
+index 9c7f7b8..a7250d8 100644
+--- a/scripts/reallocate_history.js
++++ b/scripts/reallocate_history.js
+@@ -51,7 +51,7 @@ export async function reallocateHistory(
+       if (dryRun) {
+         console.log('Would allocate', record);
+       } else {
+-        await supabase.from('mouvements_centres_cout').insert(record);
++        await supabase.from('requisition_lignes').insert(record);
+       }
+     }
+     if (!dryRun) {
+diff --git a/src/hooks/useMouvementCostCenters.js b/src/hooks/useMouvementCostCenters.js
+index 821404f..05780fb 100644
+--- a/src/hooks/useMouvementCostCenters.js
++++ b/src/hooks/useMouvementCostCenters.js
+@@ -16,7 +16,7 @@ export function useMouvementCostCenters() {
+     setLoading(true);
+     setError(null);
+     const { data, error } = await supabase
+-      .from("mouvements_centres_cout")
++      .from("requisition_lignes")
+       .select("id, mouvement_id, cost_center_id, quantite, valeur, centres_de_cout:cost_center_id(nom)")
+       .eq("mouvement_id", mouvement_id)
+       .eq("mama_id", mama_id)
+@@ -36,7 +36,7 @@ export function useMouvementCostCenters() {
+     setLoading(true);
+     setError(null);
+     await supabase
+-      .from("mouvements_centres_cout")
++      .from("requisition_lignes")
+       .delete()
+       .eq("mouvement_id", mouvement_id)
+       .eq("mama_id", mama_id);
+@@ -49,7 +49,7 @@ export function useMouvementCostCenters() {
+     }));
+     if (prepared.length > 0) {
+       const { error } = await supabase
+-        .from("mouvements_centres_cout")
++        .from("requisition_lignes")
+         .insert(prepared);
+       if (error) setError(error);
+     }

@@ -1132,27 +1132,6 @@ do $$ begin
   end if;
 end $$;
 grant select, insert, update, delete on public.help_articles to authenticated;
-create table if not exists public.inventaire_lignes (
-  id uuid primary key default uuid_generate_v4(),
-  mama_id uuid,
-  created_at timestamptz default now()
-);
-create index if not exists idx_inventaire_lignes_mama_id on public.inventaire_lignes(mama_id);
-do $$ begin
-  if not exists (select 1 from pg_constraint where conname = 'fk_inventaire_lignes_mama_id') then
-    alter table public.inventaire_lignes
-      add constraint fk_inventaire_lignes_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
-  end if;
-end $$;
-alter table public.inventaire_lignes enable row level security;
-do $$ begin
-  if not exists (select 1 from pg_policies where schemaname='public' and tablename='inventaire_lignes' and policyname='inventaire_lignes_all') then
-    create policy inventaire_lignes_all on public.inventaire_lignes
-      for all using (mama_id = current_user_mama_id())
-      with check (mama_id = current_user_mama_id());
-  end if;
-end $$;
-grant select, insert, update, delete on public.inventaire_lignes to authenticated;
 create table if not exists public.inventaire_zones (
   id uuid primary key default uuid_generate_v4(),
   mama_id uuid,
@@ -1175,26 +1154,63 @@ do $$ begin
 end $$;
 grant select, insert, update, delete on public.inventaire_zones to authenticated;
 create table if not exists public.inventaires (
-  id uuid primary key default uuid_generate_v4(),
-  mama_id uuid,
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid references public.mamas(id),
+  date_inventaire date not null,
+  zone_id uuid references public.inventaire_zones(id),
+  periode_id uuid references public.periodes_comptables(id),
+  commentaire text,
+  actif boolean default true,
   created_at timestamptz default now()
 );
 create index if not exists idx_inventaires_mama_id on public.inventaires(mama_id);
-do $$ begin
-  if not exists (select 1 from pg_constraint where conname = 'fk_inventaires_mama_id') then
-    alter table public.inventaires
-      add constraint fk_inventaires_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
-  end if;
-end $$;
+create index if not exists idx_inventaires_periode_id on public.inventaires(periode_id);
 alter table public.inventaires enable row level security;
 do $$ begin
-  if not exists (select 1 from pg_policies where schemaname='public' and tablename='inventaires' and policyname='inventaires_all') then
-    create policy inventaires_all on public.inventaires
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='inventaires' and policyname='inventaires_select') then
+    create policy inventaires_select on public.inventaires
+      for select using (mama_id = current_user_mama_id());
+  end if;
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='inventaires' and policyname='inventaires_update') then
+    create policy inventaires_update on public.inventaires
+      for update using (mama_id = current_user_mama_id())
+      with check (mama_id = current_user_mama_id());
+  end if;
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='inventaires' and policyname='inventaires_delete') then
+    create policy inventaires_delete on public.inventaires
+      for delete using (mama_id = current_user_mama_id());
+  end if;
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='inventaires' and policyname='inventaire_insert') then
+    create policy inventaire_insert on public.inventaires
+      for insert with check (
+        mama_id = current_user_mama_id()
+        and exists (select 1 from periodes_comptables p where p.id = periode_id and p.cloturee = false)
+      );
+  end if;
+end $$;
+grant select, insert, update, delete on public.inventaires to authenticated;
+create table if not exists public.produits_inventaire (
+  id uuid primary key default gen_random_uuid(),
+  inventaire_id uuid references public.inventaires(id) on delete cascade,
+  produit_id uuid references public.produits(id),
+  quantite_theorique numeric,
+  quantite_reelle numeric,
+  unite text,
+  ecart numeric generated always as (coalesce(quantite_reelle,0) - coalesce(quantite_theorique,0)) stored,
+  mama_id uuid references public.mamas(id),
+  created_at timestamptz default now()
+);
+create index if not exists idx_produits_inventaire_mama_id on public.produits_inventaire(mama_id);
+create index if not exists idx_produits_inventaire_inventaire_id on public.produits_inventaire(inventaire_id);
+alter table public.produits_inventaire enable row level security;
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='produits_inventaire' and policyname='produits_inventaire_rls') then
+    create policy produits_inventaire_rls on public.produits_inventaire
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
 end $$;
-grant select, insert, update, delete on public.inventaires to authenticated;
+grant select, insert, update, delete on public.produits_inventaire to authenticated;
 create table if not exists public.journaux_utilisateur (
   id uuid primary key default uuid_generate_v4(),
   mama_id uuid,
@@ -1505,21 +1521,19 @@ do $$ begin
 end $$;
 grant select, insert, update, delete on public.parametres_commandes to authenticated;
 create table if not exists public.periodes_comptables (
-  id uuid primary key default uuid_generate_v4(),
-  mama_id uuid,
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid references public.mamas(id),
+  debut date not null,
+  fin date not null,
+  actif boolean default true,
+  cloturee boolean default false,
   created_at timestamptz default now()
 );
 create index if not exists idx_periodes_comptables_mama_id on public.periodes_comptables(mama_id);
-do $$ begin
-  if not exists (select 1 from pg_constraint where conname = 'fk_periodes_comptables_mama_id') then
-    alter table public.periodes_comptables
-      add constraint fk_periodes_comptables_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
-  end if;
-end $$;
 alter table public.periodes_comptables enable row level security;
 do $$ begin
-  if not exists (select 1 from pg_policies where schemaname='public' and tablename='periodes_comptables' and policyname='periodes_comptables_all') then
-    create policy periodes_comptables_all on public.periodes_comptables
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='periodes_comptables' and policyname='periodes_comptables_rls') then
+    create policy periodes_comptables_rls on public.periodes_comptables
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
@@ -2011,7 +2025,14 @@ create or replace view public.v_boissons as select 1 as placeholder;
 create or replace view public.v_consolidated_stats as select 1 as placeholder;
 create or replace view public.v_cost_center_month as select 1 as placeholder;
 create or replace view public.v_cost_center_monthly as select 1 as placeholder;
-create or replace view public.v_ecarts_inventaire as select 1 as placeholder;
+create or replace view public.v_ecarts_inventaire as
+select i.periode_id,
+       i.zone_id,
+       sum(p.ecart) as ecart_total
+from public.inventaires i
+join public.produits_inventaire p on p.inventaire_id = i.id
+where i.actif is true
+group by i.periode_id, i.zone_id;
 create or replace view public.v_evolution_achats as
 select
   mama_id,

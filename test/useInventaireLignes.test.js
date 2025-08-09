@@ -37,7 +37,7 @@ test('fetchLignes applies filters and pagination', async () => {
   await act(async () => {
     await result.current.fetchLignes({ inventaireId: 'inv1', page: 2, limit: 10 });
   });
-  expect(fromMock).toHaveBeenCalledWith('inventaire_lignes');
+  expect(fromMock).toHaveBeenCalledWith('produits_inventaire');
   expect(query.select).toHaveBeenCalledWith('*', { count: 'exact' });
   expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1');
   expect(query.eq).toHaveBeenCalledWith('inventaire_id', 'inv1');
@@ -51,6 +51,7 @@ test('createLigne inserts with mama_id', async () => {
     await result.current.createLigne({ inventaire_id: 'inv1', produit_id: 'p1', quantite_reelle: 1 });
   });
   expect(fromMock).toHaveBeenCalledWith('inventaires');
+  expect(fromMock).toHaveBeenCalledWith('produits_inventaire');
   expect(query.insert).toHaveBeenCalledWith([{ inventaire_id: 'inv1', produit_id: 'p1', quantite_reelle: 1, mama_id: 'm1' }]);
 });
 
@@ -79,7 +80,7 @@ test('getLigne selects by id', async () => {
   await act(async () => {
     await result.current.getLigne('l2');
   });
-  expect(fromMock).toHaveBeenCalledWith('inventaire_lignes');
+  expect(fromMock).toHaveBeenCalledWith('produits_inventaire');
   expect(query.select).toHaveBeenCalledWith('*');
   expect(query.eq).toHaveBeenCalledWith('id', 'l2');
   expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1');

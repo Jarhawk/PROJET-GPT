@@ -72,13 +72,13 @@ export default function Periodes() {
             ) : (
               periodes.map(p => (
                 <tr key={p.id}>
-                  <td className="px-2 py-1">{p.date_debut}</td>
-                  <td className="px-2 py-1">{p.date_fin}</td>
+                  <td className="px-2 py-1">{p.debut}</td>
+                  <td className="px-2 py-1">{p.fin}</td>
                   <td className="px-2 py-1">
-                    {p.actuelle ? 'En cours' : p.cloturee ? 'Clôturée' : 'Future'}
+                    {p.actif ? 'En cours' : p.cloturee ? 'Clôturée' : 'Future'}
                   </td>
                   <td className="px-2 py-1">
-                    {p.actuelle && (
+                    {p.actif && (
                       <Button size="sm" onClick={() => handleClose(p.id)}>
                         Clôturer
                       </Button>

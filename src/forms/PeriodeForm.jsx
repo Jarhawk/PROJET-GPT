@@ -12,7 +12,7 @@ export default function PeriodeForm({ onSave, onCancel }) {
   const handleSubmit = e => {
     e.preventDefault();
     if (!debut || !fin) return;
-    onSave({ date_debut: debut, date_fin: fin });
+    onSave({ debut, fin });
   };
 
   return (

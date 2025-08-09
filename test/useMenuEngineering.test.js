@@ -1,70 +1,149 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { renderHook, act } from '@testing-library/react'
-import { vi, beforeEach, test, expect } from 'vitest'
+import { renderHook, act } from '@testing-library/react';
+import { vi, beforeEach, test, expect } from 'vitest';
 
-const sampleRows = [
-  { id: 'f1', prix_vente: 10, cout_portion: 4, ventes: 10, popularite: 0.5 },
-  { id: 'f2', prix_vente: 8, cout_portion: 5, ventes: 2, popularite: 0.1 },
-]
+const metricsRows = [{ fiche_id: 'f1', categorie_me: 'Star' }];
+const stagedRows = [
+  {
+    id: 's1',
+    fiche_id: 'f1',
+    date_vente: '2025-06-01',
+    quantite: 2,
+    prix_vente_unitaire: 10,
+  },
+];
 
-const query = {
-  select: vi.fn(() => query),
-  eq: vi.fn(() => query),
-  order: vi.fn(() => query),
-  maybeSingle: vi.fn(() => Promise.resolve({ data: { id: 'r1' }, error: null })),
-  insert: vi.fn(() => query),
-  update: vi.fn(() => query),
-  then: fn => Promise.resolve(fn({ data: sampleRows, error: null })),
-}
-const fromMock = vi.fn(() => query)
-vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }))
-const authMock = vi.fn(() => ({ mama_id: 'm1' }))
-vi.mock('@/hooks/useAuth', () => ({ default: authMock }))
+const metricsQuery = {
+  select: vi.fn(() => metricsQuery),
+  eq: vi.fn(() => metricsQuery),
+  gte: vi.fn(() => metricsQuery),
+  lte: vi.fn(() => metricsQuery),
+  then: (fn) => Promise.resolve(fn({ data: metricsRows, error: null })),
+};
 
-let useMenuEngineering
+const stagingQuery = {
+  select: vi.fn(() => stagingQuery),
+  eq: vi.fn(() => stagingQuery),
+  in: vi.fn(() => stagingQuery),
+  update: vi.fn(() => stagingQuery),
+  then: (fn) => Promise.resolve(fn({ data: stagedRows, error: null })),
+};
+
+const ventesQuery = {
+  insert: vi.fn(() => Promise.resolve({ error: null })),
+  upsert: vi.fn(() => Promise.resolve({ error: null })),
+};
+
+const menuQuery = {
+  select: vi.fn(() => menuQuery),
+  eq: vi.fn(() => menuQuery),
+  maybeSingle: vi.fn(() => Promise.resolve({ data: { food_cost_avg: 42 }, error: null })),
+};
+
+const fromMock = vi.fn((table) => {
+  if (table === 'v_me_classification') return metricsQuery;
+  if (table === 'ventes_import_staging') return stagingQuery;
+  if (table === 'ventes_fiches') return ventesQuery;
+  if (table === 'v_menu_du_jour_mensuel') return menuQuery;
+  return {};
+});
+
+vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
+const authMock = vi.fn(() => ({ mama_id: 'm1' }));
+vi.mock('@/hooks/useAuth', () => ({ default: authMock }));
+
+let useMenuEngineering;
 
 beforeEach(async () => {
-  ({ useMenuEngineering } = await import('@/hooks/useMenuEngineering'))
-  fromMock.mockClear()
-  query.select.mockClear()
-  query.eq.mockClear()
-  query.order.mockClear()
-  query.maybeSingle.mockClear()
-  query.insert.mockClear()
-  query.update.mockClear()
-})
+  ({ useMenuEngineering } = await import('@/hooks/useMenuEngineering'));
+  fromMock.mockClear();
+  metricsQuery.select.mockClear();
+  metricsQuery.eq.mockClear();
+  metricsQuery.gte.mockClear();
+  metricsQuery.lte.mockClear();
+  stagingQuery.select.mockClear();
+  stagingQuery.eq.mockClear();
+  stagingQuery.in.mockClear();
+  stagingQuery.update.mockClear();
+  ventesQuery.insert.mockClear();
+  ventesQuery.upsert.mockClear();
+  menuQuery.select.mockClear();
+  menuQuery.eq.mockClear();
+  menuQuery.maybeSingle.mockClear();
+});
 
-test('fetchData queries analytic view', async () => {
-  const { result } = renderHook(() => useMenuEngineering())
+test('fetchMetrics queries classification view and food cost', async () => {
+  const { result } = renderHook(() => useMenuEngineering());
+  let res;
   await act(async () => {
-    await result.current.fetchData('2025-06-01')
-  })
-  expect(fromMock).toHaveBeenCalledWith('v_menu_engineering')
-  expect(query.select).toHaveBeenCalledWith('*')
-  expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1')
-  expect(query.eq).toHaveBeenCalledWith('periode', '2025-06-01')
-  expect(query.order).toHaveBeenCalledWith('nom')
-})
+    res = await result.current.fetchMetrics({
+      dateStart: '2025-06-01',
+      dateEnd: '2025-06-30',
+      type: 'plat',
+      actif: true,
+    });
+  });
+  expect(fromMock).toHaveBeenCalledWith('v_me_classification');
+  expect(metricsQuery.select).toHaveBeenCalledWith('*');
+  expect(metricsQuery.eq).toHaveBeenCalledWith('mama_id', 'm1');
+  expect(menuQuery.select).toHaveBeenCalledWith('food_cost_avg');
+  expect(res.rows).toEqual(metricsRows);
+  expect(res.foodCost).toBe(42);
+});
 
-test('fetchData computes ca and classement', async () => {
-  const { result } = renderHook(() => useMenuEngineering())
-  let rows
+test('commitImport moves staged rows', async () => {
+  const { result } = renderHook(() => useMenuEngineering());
   await act(async () => {
-    rows = await result.current.fetchData('2025-06-01')
-  })
-  expect(rows[0].ca).toBe(100)
-  expect(rows[0].margeEuro).toBe(6)
-  expect(rows[0].classement).toBe('Star')
-  expect(rows[1].classement).toBe('Dog')
-})
+    await result.current.commitImport();
+  });
+  expect(fromMock).toHaveBeenCalledWith('ventes_import_staging');
+  expect(stagingQuery.select).toHaveBeenCalled();
+  expect(ventesQuery.insert).toHaveBeenCalledWith([
+    {
+      mama_id: 'm1',
+      fiche_id: 'f1',
+      date_vente: '2025-06-01',
+      quantite: 2,
+      prix_vente_unitaire: 10,
+    },
+  ]);
+  expect(stagingQuery.update).toHaveBeenCalled();
+});
 
-test('fetchData skips when no mama_id', async () => {
+test('upsertManual writes sale', async () => {
+  const { result } = renderHook(() => useMenuEngineering());
+  await act(async () => {
+    await result.current.upsertManual({
+      fiche_id: 'f1',
+      date_vente: '2025-06-01',
+      quantite: 3,
+      prix_vente_unitaire: 9,
+    });
+  });
+  expect(fromMock).toHaveBeenCalledWith('ventes_fiches');
+  expect(ventesQuery.upsert).toHaveBeenCalledWith(
+    [
+      {
+        mama_id: 'm1',
+        fiche_id: 'f1',
+        date_vente: '2025-06-01',
+        quantite: 3,
+        prix_vente_unitaire: 9,
+      },
+    ],
+    { onConflict: 'mama_id,fiche_id,date_vente' }
+  );
+});
+
+test('fetchMetrics skips when no mama_id', async () => {
   authMock.mockReturnValueOnce({ mama_id: null });
-  ({ useMenuEngineering } = await import('@/hooks/useMenuEngineering'))
-  const { result } = renderHook(() => useMenuEngineering())
+  ({ useMenuEngineering } = await import('@/hooks/useMenuEngineering'));
+  const { result } = renderHook(() => useMenuEngineering());
+  let res;
   await act(async () => {
-    const data = await result.current.fetchData('2025-06-01')
-    expect(data).toEqual([])
-  })
-  expect(fromMock).not.toHaveBeenCalled()
-})
+    res = await result.current.fetchMetrics({});
+  });
+  expect(res.rows).toEqual([]);
+  expect(fromMock).not.toHaveBeenCalled();
+});
+

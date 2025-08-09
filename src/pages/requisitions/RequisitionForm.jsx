@@ -16,7 +16,7 @@ import PrimaryButton from "@/components/ui/PrimaryButton";
 
 function RequisitionFormPage() {
   const navigate = useNavigate();
-  const { mama_id, loading: authLoading } = useAuth();
+  const { loading: authLoading } = useAuth();
   const { createRequisition } = useRequisitions();
   const { products, loading: loadingProducts } = useProducts();
   const { myAccessibleZones } = useZones();

@@ -34,7 +34,7 @@
     "stats/StatsStock.jsx"
   ],
   "consolidation": [
-    "Consolidation.jsx",
+    "consolidation/Consolidation.jsx",
     "stats/StatsConsolidation.jsx"
   ],
   "menu_engineering": [
@@ -231,7 +231,8 @@
   "permissions": [
     "parametrage/Permissions.jsx",
     "parametrage/PermissionsAdmin.jsx",
-    "parametrage/PermissionsForm.jsx"
+    "parametrage/PermissionsForm.jsx",
+    "consolidation/AccessMultiSites.jsx"
   ],
   "settings": [
     "fournisseurs/FournisseurApiSettingsForm.jsx",

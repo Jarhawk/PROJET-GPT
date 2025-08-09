@@ -149,6 +149,12 @@ export default function Sidebar() {
       ],
     },
     {
+      title: "Admin",
+      items: [
+        { module: "permissions", to: "/admin/access-multi-sites", label: "Accès multi-sites", icon: <UsersIcon size={16} /> },
+      ],
+    },
+    {
       title: "Paramètres",
       items: [
         { module: "utilisateurs", to: "/parametrage/utilisateurs", label: "Utilisateurs", icon: <UsersIcon size={16} /> },

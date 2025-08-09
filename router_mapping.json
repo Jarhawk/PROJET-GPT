@@ -196,8 +196,8 @@
     "module": "analyse"
   },
   {
-    "route": "/analyse/costing-carte",
-    "module": "analyse"
+    "route": "/costing/carte",
+    "module": "costing_carte"
   },
   {
     "route": "/analyse/analytique",

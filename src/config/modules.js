@@ -17,6 +17,7 @@ export const MODULES = [
   { label: "Alertes", key: "alertes" },
   { label: "Analyse", key: "analyse" },
   { label: "Reporting", key: "reporting" },
+  { label: "Costing Carte", key: "costing_carte" },
   { label: "Utilisateurs", key: "utilisateurs" },
   { label: "Rôles", key: "roles" },
   { label: "Mamas", key: "mamas" },

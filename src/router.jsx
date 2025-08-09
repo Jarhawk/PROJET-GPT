@@ -51,7 +51,7 @@ const Documents = lazyWithPreload(() => import("@/pages/documents/Documents.jsx"
 const Analyse = lazyWithPreload(() => import("@/pages/analyse/Analyse.jsx"));
 const AnalyseCostCenter = lazyWithPreload(() => import("@/pages/analyse/AnalyseCostCenter.jsx"));
 const AnalytiqueDashboard = lazyWithPreload(() => import("@/pages/analytique/AnalytiqueDashboard.jsx"));
-const CostingCarte = lazyWithPreload(() => import("@/pages/analyse/CostingCarte.jsx"));
+const CostingCarte = lazyWithPreload(() => import("@/pages/costing/CostingCarte.jsx"));
 const Utilisateurs = lazyWithPreload(() => import("@/pages/parametrage/Utilisateurs.jsx"));
 const Mamas = lazyWithPreload(() => import("@/pages/parametrage/Mamas.jsx"));
 const Permissions = lazyWithPreload(() => import("@/pages/parametrage/Permissions.jsx"));
@@ -149,7 +149,7 @@ export const routePreloadMap = {
   '/tableaux-de-bord': TableauxDeBord.preload,
   '/comparatif': Comparatif.preload,
   '/surcouts': Surcouts.preload,
-  '/analyse/costing-carte': CostingCarte.preload,
+  '/costing/carte': CostingCarte.preload,
   '/alertes': Alertes.preload,
   '/parametrage/utilisateurs': Utilisateurs.preload,
   '/parametrage/mamas': Mamas.preload,
@@ -436,8 +436,8 @@ export default function Router() {
             element={<ProtectedRoute moduleKey="analyse"><AnalyseCostCenter /></ProtectedRoute>}
           />
           <Route
-            path="/analyse/costing-carte"
-            element={<ProtectedRoute moduleKey="analyse"><CostingCarte /></ProtectedRoute>}
+              path="/costing/carte"
+              element={<ProtectedRoute moduleKey="costing_carte"><CostingCarte /></ProtectedRoute>}
           />
           <Route
             path="/analyse/analytique"

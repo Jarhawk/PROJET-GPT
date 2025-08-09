@@ -15,7 +15,11 @@ export function useStats() {
     const queries = [
       supabase.from("produits").select("id").eq("mama_id", mama_id),
       supabase.from("fiches_techniques").select("cout_total").eq("mama_id", mama_id),
-      supabase.from("mouvements").select("quantite").eq("mama_id", mama_id),
+      supabase
+        .from("requisition_lignes")
+        .select("quantite, requisitions!inner(mama_id, statut)")
+        .eq("requisitions.mama_id", mama_id)
+        .eq("requisitions.statut", "réalisée"),
     ];
 
     const [products, fiches, mouvements] = await Promise.all(queries.map((q) => q));
@@ -24,7 +28,8 @@ export function useStats() {
       totalProduits: products.data?.length || 0,
       totalFiches: fiches.data?.length || 0,
       coutTotalFiches: fiches.data?.reduce((a, f) => a + (f.cout_total || 0), 0) || 0,
-      mouvementsTotal: mouvements.data?.reduce((a, m) => a + (m.quantite || 0), 0) || 0,
+      mouvementsTotal:
+        mouvements.data?.reduce((a, m) => a + (m.quantite || 0), 0) || 0,
     });
 
     setLoading(false);

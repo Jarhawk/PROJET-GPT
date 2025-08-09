@@ -1,0 +1,2904 @@
+[
+  {
+    "type": "table",
+    "name": "achats",
+    "files": [
+      {
+        "file": "src/hooks/useAchats.js",
+        "line": 17
+      },
+      {
+        "file": "src/hooks/useAchats.js",
+        "line": 43
+      },
+      {
+        "file": "src/hooks/useAchats.js",
+        "line": 55
+      },
+      {
+        "file": "src/hooks/useAchats.js",
+        "line": 67
+      },
+      {
+        "file": "src/hooks/useAchats.js",
+        "line": 81
+      },
+      {
+        "file": "src/hooks/useFactures.js",
+        "line": 205
+      },
+      {
+        "file": "src/pages/factures/FactureForm.jsx",
+        "line": 266
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "alertes",
+    "files": [
+      {
+        "file": "src/pages/taches/Alertes.jsx",
+        "line": 17
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "alertes_rupture",
+    "files": [
+      {
+        "file": "src/hooks/useRuptureAlerts.js",
+        "line": 10
+      },
+      {
+        "file": "src/hooks/useRuptureAlerts.js",
+        "line": 26
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "api_keys",
+    "files": [
+      {
+        "file": "src/hooks/useApiKeys.js",
+        "line": 16
+      },
+      {
+        "file": "src/hooks/useApiKeys.js",
+        "line": 36
+      },
+      {
+        "file": "src/hooks/useApiKeys.js",
+        "line": 55
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "auth_double_facteur",
+    "files": [
+      {
+        "file": "src/hooks/useTwoFactorAuth.js",
+        "line": 16
+      },
+      {
+        "file": "src/hooks/useTwoFactorAuth.js",
+        "line": 41
+      },
+      {
+        "file": "src/hooks/useTwoFactorAuth.js",
+        "line": 52
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "bons_livraison",
+    "files": [
+      {
+        "file": "src/hooks/useBonsLivraison.js",
+        "line": 17
+      },
+      {
+        "file": "src/hooks/useBonsLivraison.js",
+        "line": 39
+      },
+      {
+        "file": "src/hooks/useBonsLivraison.js",
+        "line": 56
+      },
+      {
+        "file": "src/hooks/useBonsLivraison.js",
+        "line": 80
+      },
+      {
+        "file": "src/hooks/useFactures.js",
+        "line": 19
+      },
+      {
+        "file": "src/hooks/useFactures.js",
+        "line": 230
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "catalogue_updates",
+    "files": [
+      {
+        "file": "src/hooks/useFournisseurAPI.js",
+        "line": 112
+      },
+      {
+        "file": "src/pages/catalogue/CatalogueSyncViewer.jsx",
+        "line": 18
+      },
+      {
+        "file": "src/pages/catalogue/CatalogueSyncViewer.jsx",
+        "line": 43
+      },
+      {
+        "file": "src/pages/catalogue/CatalogueSyncViewer.jsx",
+        "line": 53
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "centres_de_cout",
+    "files": [
+      {
+        "file": "src/hooks/useCostCenters.js",
+        "line": 21
+      },
+      {
+        "file": "src/hooks/useCostCenters.js",
+        "line": 34
+      },
+      {
+        "file": "src/hooks/useCostCenters.js",
+        "line": 47
+      },
+      {
+        "file": "src/hooks/useCostCenters.js",
+        "line": 62
+      },
+      {
+        "file": "src/pages/parametrage/CentreCoutForm.jsx",
+        "line": 34
+      },
+      {
+        "file": "src/pages/parametrage/CentreCoutForm.jsx",
+        "line": 41
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "commande_lignes",
+    "files": [
+      {
+        "file": "src/hooks/useCommandes.js",
+        "line": 99
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "commandes",
+    "files": [
+      {
+        "file": "src/hooks/useCommandes.js",
+        "line": 19
+      },
+      {
+        "file": "src/hooks/useCommandes.js",
+        "line": 57
+      },
+      {
+        "file": "src/hooks/useCommandes.js",
+        "line": 82
+      },
+      {
+        "file": "src/hooks/useCommandes.js",
+        "line": 111
+      },
+      {
+        "file": "src/hooks/useCommandes.js",
+        "line": 139
+      },
+      {
+        "file": "src/hooks/useEmailsEnvoyes.js",
+        "line": 65
+      },
+      {
+        "file": "src/hooks/useFournisseurAPI.js",
+        "line": 138
+      },
+      {
+        "file": "src/hooks/useFournisseurAPI.js",
+        "line": 165
+      },
+      {
+        "file": "src/hooks/useFournisseurAPI.js",
+        "line": 185
+      },
+      {
+        "file": "src/hooks/useFournisseurAPI.js",
+        "line": 224
+      },
+      {
+        "file": "src/hooks/useFournisseurAPI.js",
+        "line": 253
+      },
+      {
+        "file": "src/pages/commandes/CommandesEnvoyees.jsx",
+        "line": 20
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "compta_mapping",
+    "files": [
+      {
+        "file": "src/hooks/useExportCompta.js",
+        "line": 57
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "consentements_utilisateur",
+    "files": [
+      {
+        "file": "src/hooks/useConsentements.js",
+        "line": 12
+      },
+      {
+        "file": "src/pages/parametrage/RGPDConsentForm.jsx",
+        "line": 30
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "consolidated_stats",
+    "files": [
+      {
+        "file": "src/hooks/useConsolidatedStats.js",
+        "line": 12
+      },
+      {
+        "file": "src/hooks/useReporting.js",
+        "line": 19
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "disable_two_fa",
+    "files": [
+      {
+        "file": "src/lib/loginUser.js",
+        "line": 106
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "documentation",
+    "files": [
+      {
+        "file": "src/context/HelpProvider.jsx",
+        "line": 40
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "documents",
+    "files": [
+      {
+        "file": "src/hooks/useDocuments.js",
+        "line": 17
+      },
+      {
+        "file": "src/hooks/useDocuments.js",
+        "line": 56
+      },
+      {
+        "file": "src/hooks/useDocuments.js",
+        "line": 94
+      },
+      {
+        "file": "src/hooks/useDocuments.js",
+        "line": 114
+      },
+      {
+        "file": "src/hooks/useDocuments.js",
+        "line": 131
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "emails_envoyes",
+    "files": [
+      {
+        "file": "src/hooks/useEmailsEnvoyes.js",
+        "line": 26
+      },
+      {
+        "file": "src/hooks/useEmailsEnvoyes.js",
+        "line": 57
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "etapes_onboarding",
+    "files": [
+      {
+        "file": "src/hooks/useOnboarding.js",
+        "line": 19
+      },
+      {
+        "file": "src/hooks/useOnboarding.js",
+        "line": 36
+      },
+      {
+        "file": "src/hooks/useOnboarding.js",
+        "line": 45
+      },
+      {
+        "file": "src/hooks/useOnboarding.js",
+        "line": 52
+      },
+      {
+        "file": "src/hooks/useOnboarding.js",
+        "line": 59
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "facture_lignes",
+    "files": [
+      {
+        "file": "src/hooks/useExportCompta.js",
+        "line": 18
+      },
+      {
+        "file": "src/hooks/useFactures.js",
+        "line": 175
+      },
+      {
+        "file": "src/hooks/useFactures.js",
+        "line": 276
+      },
+      {
+        "file": "src/hooks/useInvoiceItems.js",
+        "line": 18
+      },
+      {
+        "file": "src/hooks/useInvoiceItems.js",
+        "line": 35
+      },
+      {
+        "file": "src/hooks/useInvoiceItems.js",
+        "line": 60
+      },
+      {
+        "file": "src/hooks/useInvoiceItems.js",
+        "line": 75
+      },
+      {
+        "file": "src/hooks/useInvoiceItems.js",
+        "line": 87
+      },
+      {
+        "file": "src/pages/factures/FactureForm.jsx",
+        "line": 257
+      },
+      {
+        "file": "src/pages/fournisseurs/FournisseurDetail.jsx",
+        "line": 37
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "factures",
+    "files": [
+      {
+        "file": "src/hooks/useExport.js",
+        "line": 51
+      },
+      {
+        "file": "src/hooks/useFactures.js",
+        "line": 48
+      },
+      {
+        "file": "src/hooks/useFactures.js",
+        "line": 85
+      },
+      {
+        "file": "src/hooks/useFactures.js",
+        "line": 105
+      },
+      {
+        "file": "src/hooks/useFactures.js",
+        "line": 127
+      },
+      {
+        "file": "src/hooks/useFactures.js",
+        "line": 147
+      },
+      {
+        "file": "src/hooks/useFactures.js",
+        "line": 264
+      },
+      {
+        "file": "src/hooks/useFactures.js",
+        "line": 284
+      },
+      {
+        "file": "src/hooks/useFacturesAutocomplete.js",
+        "line": 15
+      },
+      {
+        "file": "src/hooks/useFournisseurAPI.js",
+        "line": 61
+      },
+      {
+        "file": "src/hooks/useInvoices.js",
+        "line": 20
+      },
+      {
+        "file": "src/hooks/useInvoices.js",
+        "line": 46
+      },
+      {
+        "file": "src/hooks/useInvoices.js",
+        "line": 65
+      },
+      {
+        "file": "src/hooks/useInvoices.js",
+        "line": 83
+      },
+      {
+        "file": "src/hooks/useInvoices.js",
+        "line": 96
+      },
+      {
+        "file": "src/hooks/useInvoices.js",
+        "line": 111
+      },
+      {
+        "file": "src/hooks/useInvoices.js",
+        "line": 126
+      },
+      {
+        "file": "src/pages/factures/FactureForm.jsx",
+        "line": 66
+      },
+      {
+        "file": "src/pages/factures/FactureForm.jsx",
+        "line": 152
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "familles",
+    "files": [
+      {
+        "file": "src/hooks/useFamilles.js",
+        "line": 10
+      },
+      {
+        "file": "src/hooks/useFamilles.js",
+        "line": 14
+      },
+      {
+        "file": "src/hooks/useFamilles.js",
+        "line": 35
+      },
+      {
+        "file": "src/hooks/useFamilles.js",
+        "line": 61
+      },
+      {
+        "file": "src/hooks/useFamilles.js",
+        "line": 84
+      },
+      {
+        "file": "src/hooks/useFamilles.js",
+        "line": 95
+      },
+      {
+        "file": "src/hooks/useFamilles.js",
+        "line": 120
+      },
+      {
+        "file": "src/hooks/useFamilles.js",
+        "line": 135
+      },
+      {
+        "file": "src/hooks/useFamillesWithSousFamilles.js",
+        "line": 17
+      },
+      {
+        "file": "src/hooks/useFamillesWithSousFamilles.js",
+        "line": 42
+      },
+      {
+        "file": "src/hooks/useFamillesWithSousFamilles.js",
+        "line": 51
+      },
+      {
+        "file": "src/hooks/useFamillesWithSousFamilles.js",
+        "line": 61
+      },
+      {
+        "file": "src/pages/CartePlats.jsx",
+        "line": 27
+      },
+      {
+        "file": "src/pages/parametrage/Familles.jsx",
+        "line": 54
+      },
+      {
+        "file": "src/pages/stats/StatsFiches.jsx",
+        "line": 30
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "feedback",
+    "files": [
+      {
+        "file": "src/hooks/useFeedback.js",
+        "line": 16
+      },
+      {
+        "file": "src/hooks/useFeedback.js",
+        "line": 37
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "fiche_cout_history",
+    "files": [
+      {
+        "file": "src/hooks/useFicheCoutHistory.js",
+        "line": 17
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "fiche_lignes",
+    "files": [
+      {
+        "file": "src/hooks/useFiches.js",
+        "line": 93
+      },
+      {
+        "file": "src/hooks/useFiches.js",
+        "line": 122
+      },
+      {
+        "file": "src/hooks/useFiches.js",
+        "line": 141
+      },
+      {
+        "file": "src/hooks/useFiches.js",
+        "line": 212
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "fiches",
+    "files": [
+      {
+        "file": "src/pages/simulation/SimulationForm.jsx",
+        "line": 19
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "fiches_techniques",
+    "files": [
+      {
+        "file": "src/hooks/useCarte.js",
+        "line": 16
+      },
+      {
+        "file": "src/hooks/useCarte.js",
+        "line": 37
+      },
+      {
+        "file": "src/hooks/useCarte.js",
+        "line": 50
+      },
+      {
+        "file": "src/hooks/useExport.js",
+        "line": 31
+      },
+      {
+        "file": "src/hooks/useFiches.js",
+        "line": 23
+      },
+      {
+        "file": "src/hooks/useFiches.js",
+        "line": 51
+      },
+      {
+        "file": "src/hooks/useFiches.js",
+        "line": 73
+      },
+      {
+        "file": "src/hooks/useFiches.js",
+        "line": 111
+      },
+      {
+        "file": "src/hooks/useFiches.js",
+        "line": 159
+      },
+      {
+        "file": "src/hooks/useFiches.js",
+        "line": 179
+      },
+      {
+        "file": "src/hooks/useFiches.js",
+        "line": 192
+      },
+      {
+        "file": "src/hooks/useFichesAutocomplete.js",
+        "line": 16
+      },
+      {
+        "file": "src/hooks/useFichesTechniques.js",
+        "line": 16
+      },
+      {
+        "file": "src/hooks/useFichesTechniques.js",
+        "line": 37
+      },
+      {
+        "file": "src/hooks/useFichesTechniques.js",
+        "line": 55
+      },
+      {
+        "file": "src/hooks/useFichesTechniques.js",
+        "line": 75
+      },
+      {
+        "file": "src/hooks/useStats.js",
+        "line": 17
+      },
+      {
+        "file": "src/pages/BarManager.jsx",
+        "line": 57
+      },
+      {
+        "file": "src/pages/CartePlats.jsx",
+        "line": 22
+      },
+      {
+        "file": "src/pages/costboisson/CostBoisson.jsx",
+        "line": 71
+      },
+      {
+        "file": "src/pages/stats/StatsFiches.jsx",
+        "line": 29
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "fournisseur_contacts",
+    "files": [
+      {
+        "file": "src/hooks/useFournisseurs.js",
+        "line": 66
+      },
+      {
+        "file": "src/hooks/useFournisseurs.js",
+        "line": 95
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "fournisseur_notes",
+    "files": [
+      {
+        "file": "src/hooks/useFournisseurNotes.js",
+        "line": 20
+      },
+      {
+        "file": "src/hooks/useFournisseurNotes.js",
+        "line": 39
+      },
+      {
+        "file": "src/hooks/useFournisseurNotes.js",
+        "line": 48
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "fournisseur_produits",
+    "files": [
+      {
+        "file": "src/hooks/useComparatif.js",
+        "line": 23
+      },
+      {
+        "file": "src/hooks/useFactures.js",
+        "line": 193
+      },
+      {
+        "file": "src/hooks/useFournisseurAPI.js",
+        "line": 90
+      },
+      {
+        "file": "src/hooks/useFournisseurAPI.js",
+        "line": 99
+      },
+      {
+        "file": "src/hooks/useProducts.js",
+        "line": 175
+      },
+      {
+        "file": "src/hooks/useProduitsFournisseur.js",
+        "line": 21
+      },
+      {
+        "file": "src/hooks/useProduitsFournisseur.js",
+        "line": 41
+      },
+      {
+        "file": "src/hooks/useProduitsFournisseur.js",
+        "line": 57
+      },
+      {
+        "file": "src/pages/catalogue/CatalogueSyncViewer.jsx",
+        "line": 31
+      },
+      {
+        "file": "src/pages/factures/FactureForm.jsx",
+        "line": 260
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "fournisseurs",
+    "files": [
+      {
+        "file": "src/hooks/useFournisseurs.js",
+        "line": 24
+      },
+      {
+        "file": "src/hooks/useFournisseurs.js",
+        "line": 60
+      },
+      {
+        "file": "src/hooks/useFournisseurs.js",
+        "line": 89
+      },
+      {
+        "file": "src/hooks/useFournisseurs.js",
+        "line": 116
+      },
+      {
+        "file": "src/hooks/useFournisseursAutocomplete.js",
+        "line": 15
+      },
+      {
+        "file": "src/hooks/useGlobalSearch.js",
+        "line": 19
+      },
+      {
+        "file": "src/pages/fournisseurs/FournisseurDetail.jsx",
+        "line": 47
+      },
+      {
+        "file": "src/utils/importExcelProduits.js",
+        "line": 67
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "fournisseurs_api_config",
+    "files": [
+      {
+        "file": "src/hooks/useFournisseurAPI.js",
+        "line": 14
+      },
+      {
+        "file": "src/hooks/useFournisseurApiConfig.js",
+        "line": 15
+      },
+      {
+        "file": "src/hooks/useFournisseurApiConfig.js",
+        "line": 33
+      },
+      {
+        "file": "src/hooks/useFournisseurApiConfig.js",
+        "line": 51
+      },
+      {
+        "file": "src/hooks/useFournisseurApiConfig.js",
+        "line": 67
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "gadgets",
+    "files": [
+      {
+        "file": "src/hooks/useDashboards.js",
+        "line": 54
+      },
+      {
+        "file": "src/hooks/useDashboards.js",
+        "line": 62
+      },
+      {
+        "file": "src/hooks/useDashboards.js",
+        "line": 86
+      },
+      {
+        "file": "src/hooks/useDashboards.js",
+        "line": 112
+      },
+      {
+        "file": "src/hooks/useGadgets.js",
+        "line": 59
+      },
+      {
+        "file": "src/hooks/useGadgets.js",
+        "line": 79
+      },
+      {
+        "file": "src/hooks/useGadgets.js",
+        "line": 101
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "groupes",
+    "files": [
+      {
+        "file": "src/pages/supervision/GroupeParamForm.jsx",
+        "line": 54
+      },
+      {
+        "file": "src/pages/supervision/GroupeParamForm.jsx",
+        "line": 67
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "guides_seen",
+    "files": [
+      {
+        "file": "src/context/HelpProvider.jsx",
+        "line": 53
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "help_articles",
+    "files": [
+      {
+        "file": "src/hooks/useAide.js",
+        "line": 17
+      },
+      {
+        "file": "src/hooks/useAide.js",
+        "line": 43
+      },
+      {
+        "file": "src/hooks/useAide.js",
+        "line": 64
+      },
+      {
+        "file": "src/hooks/useAide.js",
+        "line": 87
+      },
+      {
+        "file": "src/hooks/useHelpArticles.js",
+        "line": 13
+      },
+      {
+        "file": "src/hooks/useHelpArticles.js",
+        "line": 30
+      },
+      {
+        "file": "src/hooks/useHelpArticles.js",
+        "line": 44
+      },
+      {
+        "file": "src/hooks/useHelpArticles.js",
+        "line": 59
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "inventaire_zones",
+    "files": [
+      {
+        "file": "src/hooks/useInventaireZones.js",
+        "line": 17
+      },
+      {
+        "file": "src/hooks/useInventaireZones.js",
+        "line": 37
+      },
+      {
+        "file": "src/hooks/useInventaireZones.js",
+        "line": 53
+      },
+      {
+        "file": "src/hooks/useInventaireZones.js",
+        "line": 71
+      },
+      {
+        "file": "src/hooks/useInventaireZones.js",
+        "line": 87
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "inventaires",
+    "files": [
+      {
+        "file": "src/hooks/useExport.js",
+        "line": 37
+      },
+      {
+        "file": "src/hooks/useGraphiquesMultiZone.js",
+        "line": 25
+      },
+      {
+        "file": "src/hooks/useInventaireLignes.js",
+        "line": 12
+      },
+      {
+        "file": "src/hooks/useInventaires.js",
+        "line": 23
+      },
+      {
+        "file": "src/hooks/useInventaires.js",
+        "line": 76
+      },
+      {
+        "file": "src/hooks/useInventaires.js",
+        "line": 106
+      },
+      {
+        "file": "src/hooks/useInventaires.js",
+        "line": 133
+      },
+      {
+        "file": "src/hooks/useInventaires.js",
+        "line": 145
+      },
+      {
+        "file": "src/hooks/useStock.js",
+        "line": 56
+      },
+      {
+        "file": "src/hooks/useStock.js",
+        "line": 68
+      },
+      {
+        "file": "src/pages/Transferts.jsx",
+        "line": 52
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "journaux_utilisateur",
+    "files": [
+      {
+        "file": "src/hooks/useAuditLog.js",
+        "line": 10
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "lignes_bl",
+    "files": [
+      {
+        "file": "src/hooks/useBonsLivraison.js",
+        "line": 63
+      },
+      {
+        "file": "src/hooks/useFactures.js",
+        "line": 237
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "logs_activite",
+    "files": [
+      {
+        "file": "src/hooks/useLogs.js",
+        "line": 21
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "logs_securite",
+    "files": [
+      {
+        "file": "src/hooks/gadgets/useDerniersAcces.js",
+        "line": 17
+      },
+      {
+        "file": "src/hooks/useAuditLog.js",
+        "line": 26
+      },
+      {
+        "file": "src/hooks/useUsageStats.js",
+        "line": 34
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "mamas",
+    "files": [
+      {
+        "file": "src/context/AuthContext.jsx",
+        "line": 276
+      },
+      {
+        "file": "src/context/MultiMamaContext.jsx",
+        "line": 33
+      },
+      {
+        "file": "src/context/MultiMamaContext.jsx",
+        "line": 40
+      },
+      {
+        "file": "src/hooks/useMama.js",
+        "line": 16
+      },
+      {
+        "file": "src/hooks/useMama.js",
+        "line": 31
+      },
+      {
+        "file": "src/hooks/useMamaSettings.js",
+        "line": 28
+      },
+      {
+        "file": "src/hooks/useMamaSettings.js",
+        "line": 44
+      },
+      {
+        "file": "src/hooks/useMamas.js",
+        "line": 19
+      },
+      {
+        "file": "src/hooks/useMamas.js",
+        "line": 35
+      },
+      {
+        "file": "src/hooks/useMamas.js",
+        "line": 50
+      },
+      {
+        "file": "src/hooks/useMamas.js",
+        "line": 66
+      },
+      {
+        "file": "src/pages/auth/CreateMama.jsx",
+        "line": 27
+      },
+      {
+        "file": "src/pages/legal/Confidentialite.jsx",
+        "line": 15
+      },
+      {
+        "file": "src/pages/legal/MentionsLegales.jsx",
+        "line": 15
+      },
+      {
+        "file": "src/pages/parametrage/InvitationsEnAttente.jsx",
+        "line": 21
+      },
+      {
+        "file": "src/pages/parametrage/InviteUser.jsx",
+        "line": 27
+      },
+      {
+        "file": "src/pages/parametrage/InviteUser.jsx",
+        "line": 33
+      },
+      {
+        "file": "src/pages/parametrage/MamaForm.jsx",
+        "line": 39
+      },
+      {
+        "file": "src/pages/parametrage/MamaForm.jsx",
+        "line": 55
+      },
+      {
+        "file": "src/pages/parametrage/MamaForm.jsx",
+        "line": 64
+      },
+      {
+        "file": "src/pages/parametrage/Mamas.jsx",
+        "line": 32
+      },
+      {
+        "file": "src/pages/parametrage/Mamas.jsx",
+        "line": 44
+      },
+      {
+        "file": "src/pages/parametrage/PermissionsAdmin.jsx",
+        "line": 33
+      },
+      {
+        "file": "src/pages/supervision/GroupeParamForm.jsx",
+        "line": 25
+      },
+      {
+        "file": "src/pages/supervision/GroupeParamForm.jsx",
+        "line": 31
+      },
+      {
+        "file": "src/pages/supervision/GroupeParamForm.jsx",
+        "line": 62
+      },
+      {
+        "file": "src/pages/supervision/GroupeParamForm.jsx",
+        "line": 64
+      },
+      {
+        "file": "src/pages/supervision/GroupeParamForm.jsx",
+        "line": 75
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "menu_fiches",
+    "files": [
+      {
+        "file": "src/hooks/useMenus.js",
+        "line": 74
+      },
+      {
+        "file": "src/hooks/useMenus.js",
+        "line": 95
+      },
+      {
+        "file": "src/hooks/useMenus.js",
+        "line": 106
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "menu_groupe_lignes",
+    "files": [
+      {
+        "file": "src/hooks/useMenuGroupe.js",
+        "line": 32
+      },
+      {
+        "file": "src/hooks/useMenuGroupe.js",
+        "line": 70
+      },
+      {
+        "file": "src/hooks/useMenuGroupe.js",
+        "line": 79
+      },
+      {
+        "file": "src/hooks/useMenuGroupe.js",
+        "line": 84
+      },
+      {
+        "file": "src/hooks/useMenuGroupe.js",
+        "line": 119
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "menu_groupe_modele_lignes",
+    "files": [
+      {
+        "file": "src/hooks/useMenuGroupe.js",
+        "line": 105
+      },
+      {
+        "file": "src/hooks/useMenuGroupe.js",
+        "line": 132
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "menu_groupe_modeles",
+    "files": [
+      {
+        "file": "src/hooks/useMenuGroupe.js",
+        "line": 114
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "menu_groupes",
+    "files": [
+      {
+        "file": "src/hooks/useMenuGroupe.js",
+        "line": 12
+      },
+      {
+        "file": "src/hooks/useMenuGroupe.js",
+        "line": 26
+      },
+      {
+        "file": "src/hooks/useMenuGroupe.js",
+        "line": 51
+      },
+      {
+        "file": "src/hooks/useMenuGroupe.js",
+        "line": 60
+      },
+      {
+        "file": "src/hooks/useMenuGroupe.js",
+        "line": 94
+      },
+      {
+        "file": "src/hooks/useMenuGroupe.js",
+        "line": 98
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "menus",
+    "files": [
+      {
+        "file": "src/hooks/useMenus.js",
+        "line": 31
+      },
+      {
+        "file": "src/hooks/useMenus.js",
+        "line": 61
+      },
+      {
+        "file": "src/hooks/useMenus.js",
+        "line": 88
+      },
+      {
+        "file": "src/hooks/useMenus.js",
+        "line": 118
+      },
+      {
+        "file": "src/hooks/useMenus.js",
+        "line": 136
+      },
+      {
+        "file": "src/hooks/useMenus.js",
+        "line": 151
+      },
+      {
+        "file": "src/pages/menus/MenuPDF.jsx",
+        "line": 14
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "menus_jour",
+    "files": [
+      {
+        "file": "src/hooks/useMenuDuJour.js",
+        "line": 22
+      },
+      {
+        "file": "src/hooks/useMenuDuJour.js",
+        "line": 60
+      },
+      {
+        "file": "src/hooks/useMenuDuJour.js",
+        "line": 80
+      },
+      {
+        "file": "src/hooks/useMenuDuJour.js",
+        "line": 101
+      },
+      {
+        "file": "src/hooks/useMenuDuJour.js",
+        "line": 134
+      },
+      {
+        "file": "src/hooks/useMenuDuJour.js",
+        "line": 148
+      },
+      {
+        "file": "src/hooks/useMenuDuJour.js",
+        "line": 177
+      },
+      {
+        "file": "src/hooks/useMenuDuJour.js",
+        "line": 187
+      },
+      {
+        "file": "src/hooks/useMenuDuJour.js",
+        "line": 195
+      },
+      {
+        "file": "src/hooks/useMenuDuJour.js",
+        "line": 203
+      },
+      {
+        "file": "src/hooks/useMenuDuJour.js",
+        "line": 209
+      },
+      {
+        "file": "src/hooks/useMenuDuJour.js",
+        "line": 236
+      },
+      {
+        "file": "src/hooks/useMenuDuJour.js",
+        "line": 261
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "menus_jour_fiches",
+    "files": [
+      {
+        "file": "src/hooks/useMenuDuJour.js",
+        "line": 67
+      },
+      {
+        "file": "src/hooks/useMenuDuJour.js",
+        "line": 86
+      },
+      {
+        "file": "src/hooks/useMenuDuJour.js",
+        "line": 89
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "menus_jour_lignes",
+    "files": [
+      {
+        "file": "src/hooks/useMenuDuJour.js",
+        "line": 271
+      },
+      {
+        "file": "src/hooks/useMenuDuJour.js",
+        "line": 278
+      },
+      {
+        "file": "src/hooks/useMenuDuJour.js",
+        "line": 285
+      },
+      {
+        "file": "src/hooks/useMenuDuJour.js",
+        "line": 292
+      },
+      {
+        "file": "src/hooks/useMenuDuJour.js",
+        "line": 317
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "mouvements_centres_cout",
+    "files": [
+      {
+        "file": "src/hooks/useMouvementCostCenters.js",
+        "line": 18
+      },
+      {
+        "file": "src/hooks/useMouvementCostCenters.js",
+        "line": 38
+      },
+      {
+        "file": "src/hooks/useMouvementCostCenters.js",
+        "line": 51
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "notification_preferences",
+    "files": [
+      {
+        "file": "src/hooks/useNotifications.js",
+        "line": 116
+      },
+      {
+        "file": "src/hooks/useNotifications.js",
+        "line": 129
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "notifications",
+    "files": [
+      {
+        "file": "src/hooks/useNotifications.js",
+        "line": 22
+      },
+      {
+        "file": "src/hooks/useNotifications.js",
+        "line": 58
+      },
+      {
+        "file": "src/hooks/useNotifications.js",
+        "line": 81
+      },
+      {
+        "file": "src/hooks/useNotifications.js",
+        "line": 94
+      },
+      {
+        "file": "src/hooks/useNotifications.js",
+        "line": 105
+      },
+      {
+        "file": "src/hooks/useNotifications.js",
+        "line": 145
+      },
+      {
+        "file": "src/hooks/useNotifications.js",
+        "line": 159
+      },
+      {
+        "file": "src/hooks/useNotifications.js",
+        "line": 177
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "parametres_commandes",
+    "files": [
+      {
+        "file": "src/pages/parametrage/ParametresCommandes.jsx",
+        "line": 19
+      },
+      {
+        "file": "src/pages/parametrage/ParametresCommandes.jsx",
+        "line": 40
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "periodes_comptables",
+    "files": [
+      {
+        "file": "src/hooks/usePeriodes.js",
+        "line": 17
+      },
+      {
+        "file": "src/hooks/usePeriodes.js",
+        "line": 36
+      },
+      {
+        "file": "src/hooks/usePeriodes.js",
+        "line": 54
+      },
+      {
+        "file": "src/hooks/usePeriodes.js",
+        "line": 65
+      },
+      {
+        "file": "src/hooks/usePeriodes.js",
+        "line": 80
+      },
+      {
+        "file": "src/hooks/usePeriodes.js",
+        "line": 96
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "permissions",
+    "files": [
+      {
+        "file": "src/hooks/usePermissions.js",
+        "line": 20
+      },
+      {
+        "file": "src/hooks/usePermissions.js",
+        "line": 37
+      },
+      {
+        "file": "src/hooks/usePermissions.js",
+        "line": 50
+      },
+      {
+        "file": "src/hooks/usePermissions.js",
+        "line": 65
+      },
+      {
+        "file": "src/pages/parametrage/PermissionsForm.jsx",
+        "line": 33
+      },
+      {
+        "file": "src/pages/parametrage/PermissionsForm.jsx",
+        "line": 59
+      },
+      {
+        "file": "src/pages/parametrage/PermissionsForm.jsx",
+        "line": 69
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "pertes",
+    "files": [
+      {
+        "file": "src/hooks/usePertes.js",
+        "line": 18
+      },
+      {
+        "file": "src/hooks/usePertes.js",
+        "line": 39
+      },
+      {
+        "file": "src/hooks/usePertes.js",
+        "line": 55
+      },
+      {
+        "file": "src/hooks/usePertes.js",
+        "line": 73
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "planning_lignes",
+    "files": [
+      {
+        "file": "src/hooks/usePlanning.js",
+        "line": 58
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "planning_previsionnel",
+    "files": [
+      {
+        "file": "src/hooks/usePlanning.js",
+        "line": 10
+      },
+      {
+        "file": "src/hooks/usePlanning.js",
+        "line": 29
+      },
+      {
+        "file": "src/hooks/usePlanning.js",
+        "line": 44
+      },
+      {
+        "file": "src/hooks/usePlanning.js",
+        "line": 66
+      },
+      {
+        "file": "src/hooks/usePlanning.js",
+        "line": 79
+      },
+      {
+        "file": "src/hooks/usePlanning.js",
+        "line": 91
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "produits",
+    "files": [
+      {
+        "file": "src/components/produits/ModalImportProduits.jsx",
+        "line": 94
+      },
+      {
+        "file": "src/hooks/useEnrichedProducts.js",
+        "line": 16
+      },
+      {
+        "file": "src/hooks/useExport.js",
+        "line": 43
+      },
+      {
+        "file": "src/hooks/useGlobalSearch.js",
+        "line": 13
+      },
+      {
+        "file": "src/hooks/useInventaires.js",
+        "line": 54
+      },
+      {
+        "file": "src/hooks/useProducts.js",
+        "line": 32
+      },
+      {
+        "file": "src/hooks/useProducts.js",
+        "line": 106
+      },
+      {
+        "file": "src/hooks/useProducts.js",
+        "line": 124
+      },
+      {
+        "file": "src/hooks/useProducts.js",
+        "line": 141
+      },
+      {
+        "file": "src/hooks/useProducts.js",
+        "line": 158
+      },
+      {
+        "file": "src/hooks/useProducts.js",
+        "line": 237
+      },
+      {
+        "file": "src/hooks/useProduitsAutocomplete.js",
+        "line": 16
+      },
+      {
+        "file": "src/hooks/useRecommendations.js",
+        "line": 42
+      },
+      {
+        "file": "src/hooks/useStats.js",
+        "line": 16
+      },
+      {
+        "file": "src/hooks/useStock.js",
+        "line": 17
+      },
+      {
+        "file": "src/pages/Transferts.jsx",
+        "line": 45
+      },
+      {
+        "file": "src/pages/costboisson/CostBoisson.jsx",
+        "line": 63
+      },
+      {
+        "file": "src/pages/fournisseurs/comparatif/ComparatifPrix.jsx",
+        "line": 22
+      },
+      {
+        "file": "src/pages/mobile/MobileInventaire.jsx",
+        "line": 17
+      },
+      {
+        "file": "src/pages/mobile/MobileRequisition.jsx",
+        "line": 17
+      },
+      {
+        "file": "src/utils/exportExcelProduits.js",
+        "line": 30
+      },
+      {
+        "file": "src/utils/importExcelProduits.js",
+        "line": 68
+      },
+      {
+        "file": "src/utils/importExcelProduits.js",
+        "line": 159
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "produits_inventaire",
+    "files": [
+      {
+        "file": "src/hooks/useInventaireLignes.js",
+        "line": 33
+      },
+      {
+        "file": "src/hooks/useInventaireLignes.js",
+        "line": 64
+      },
+      {
+        "file": "src/hooks/useInventaireLignes.js",
+        "line": 85
+      },
+      {
+        "file": "src/hooks/useInventaireLignes.js",
+        "line": 104
+      },
+      {
+        "file": "src/hooks/useInventaireLignes.js",
+        "line": 115
+      },
+      {
+        "file": "src/hooks/useInventaires.js",
+        "line": 94
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "promotions",
+    "files": [
+      {
+        "file": "src/api/public/promotions.js",
+        "line": 29
+      },
+      {
+        "file": "src/hooks/usePromotions.js",
+        "line": 17
+      },
+      {
+        "file": "src/hooks/usePromotions.js",
+        "line": 39
+      },
+      {
+        "file": "src/hooks/usePromotions.js",
+        "line": 51
+      },
+      {
+        "file": "src/hooks/usePromotions.js",
+        "line": 65
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "rapports_generes",
+    "files": [
+      {
+        "file": "src/hooks/useLogs.js",
+        "line": 55
+      },
+      {
+        "file": "src/hooks/useLogs.js",
+        "line": 74
+      },
+      {
+        "file": "src/pages/supervision/Rapports.jsx",
+        "line": 45
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "regles_alertes",
+    "files": [
+      {
+        "file": "src/hooks/useAlerts.js",
+        "line": 16
+      },
+      {
+        "file": "src/hooks/useAlerts.js",
+        "line": 40
+      },
+      {
+        "file": "src/hooks/useAlerts.js",
+        "line": 54
+      },
+      {
+        "file": "src/hooks/useAlerts.js",
+        "line": 70
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "requisition_lignes",
+    "files": [
+      {
+        "file": "src/api/public/stock.js",
+        "line": 29
+      },
+      {
+        "file": "src/hooks/gadgets/useConsoMoyenne.js",
+        "line": 19
+      },
+      {
+        "file": "src/hooks/useDashboard.js",
+        "line": 60
+      },
+      {
+        "file": "src/hooks/useProducts.js",
+        "line": 213
+      },
+      {
+        "file": "src/hooks/useRequisitions.js",
+        "line": 111
+      },
+      {
+        "file": "src/hooks/useStats.js",
+        "line": 18
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "requisitions",
+    "files": [
+      {
+        "file": "src/hooks/useRequisitions.js",
+        "line": 36
+      },
+      {
+        "file": "src/hooks/useRequisitions.js",
+        "line": 61
+      },
+      {
+        "file": "src/hooks/useRequisitions.js",
+        "line": 84
+      },
+      {
+        "file": "src/hooks/useRequisitions.js",
+        "line": 119
+      },
+      {
+        "file": "src/hooks/useRequisitions.js",
+        "line": 135
+      },
+      {
+        "file": "src/pages/mobile/MobileRequisition.jsx",
+        "line": 31
+      },
+      {
+        "file": "src/pages/mobile/MobileRequisition.jsx",
+        "line": 42
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "roles",
+    "files": [
+      {
+        "file": "src/hooks/useRoles.js",
+        "line": 11
+      },
+      {
+        "file": "src/hooks/useRoles.js",
+        "line": 20
+      },
+      {
+        "file": "src/hooks/useRoles.js",
+        "line": 29
+      },
+      {
+        "file": "src/hooks/useUtilisateurs.js",
+        "line": 46
+      },
+      {
+        "file": "src/hooks/useUtilisateurs.js",
+        "line": 84
+      },
+      {
+        "file": "src/pages/parametrage/InvitationsEnAttente.jsx",
+        "line": 26
+      },
+      {
+        "file": "src/pages/parametrage/InviteUser.jsx",
+        "line": 41
+      },
+      {
+        "file": "src/pages/parametrage/Permissions.jsx",
+        "line": 29
+      },
+      {
+        "file": "src/pages/parametrage/PermissionsAdmin.jsx",
+        "line": 39
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "settings",
+    "files": [
+      {
+        "file": "src/hooks/useCostingCarte.js",
+        "line": 49
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "signalements",
+    "files": [
+      {
+        "file": "src/hooks/useSignalements.js",
+        "line": 17
+      },
+      {
+        "file": "src/hooks/useSignalements.js",
+        "line": 41
+      },
+      {
+        "file": "src/hooks/useSignalements.js",
+        "line": 74
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "sous_familles",
+    "files": [
+      {
+        "file": "src/components/parametrage/SousFamilleList.jsx",
+        "line": 25
+      },
+      {
+        "file": "src/components/parametrage/SousFamilleList.jsx",
+        "line": 42
+      },
+      {
+        "file": "src/components/parametrage/SousFamilleList.jsx",
+        "line": 56
+      },
+      {
+        "file": "src/components/parametrage/SousFamilleList.jsx",
+        "line": 71
+      },
+      {
+        "file": "src/components/parametrage/SousFamilleList.jsx",
+        "line": 86
+      },
+      {
+        "file": "src/hooks/useFamillesWithSousFamilles.js",
+        "line": 22
+      },
+      {
+        "file": "src/hooks/useFamillesWithSousFamilles.js",
+        "line": 72
+      },
+      {
+        "file": "src/hooks/useFamillesWithSousFamilles.js",
+        "line": 81
+      },
+      {
+        "file": "src/hooks/useFamillesWithSousFamilles.js",
+        "line": 91
+      },
+      {
+        "file": "src/hooks/useSousFamilles.js",
+        "line": 20
+      },
+      {
+        "file": "src/hooks/useSousFamilles.js",
+        "line": 42
+      },
+      {
+        "file": "src/hooks/useSousFamilles.js",
+        "line": 60
+      },
+      {
+        "file": "src/hooks/useSousFamilles.js",
+        "line": 76
+      },
+      {
+        "file": "src/pages/parametrage/Familles.jsx",
+        "line": 85
+      },
+      {
+        "file": "src/pages/parametrage/SousFamilles.jsx",
+        "line": 32
+      },
+      {
+        "file": "src/pages/parametrage/SousFamilles.jsx",
+        "line": 53
+      },
+      {
+        "file": "src/utils/importExcelProduits.js",
+        "line": 64
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "tableaux_de_bord",
+    "files": [
+      {
+        "file": "src/hooks/useDashboards.js",
+        "line": 16
+      },
+      {
+        "file": "src/hooks/useDashboards.js",
+        "line": 36
+      },
+      {
+        "file": "src/hooks/useGadgets.js",
+        "line": 15
+      },
+      {
+        "file": "src/hooks/useGadgets.js",
+        "line": 37
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "taches",
+    "files": [
+      {
+        "file": "src/hooks/gadgets/useTachesUrgentes.js",
+        "line": 20
+      },
+      {
+        "file": "src/hooks/useTaches.js",
+        "line": 81
+      },
+      {
+        "file": "src/hooks/useTaches.js",
+        "line": 113
+      },
+      {
+        "file": "src/hooks/useTaches.js",
+        "line": 139
+      },
+      {
+        "file": "src/hooks/useTaches.js",
+        "line": 145
+      },
+      {
+        "file": "src/hooks/useTasks.js",
+        "line": 16
+      },
+      {
+        "file": "src/hooks/useTasks.js",
+        "line": 34
+      },
+      {
+        "file": "src/hooks/useTasks.js",
+        "line": 53
+      },
+      {
+        "file": "src/hooks/useTasks.js",
+        "line": 73
+      },
+      {
+        "file": "src/hooks/useTasks.js",
+        "line": 90
+      },
+      {
+        "file": "src/hooks/useTasks.js",
+        "line": 109
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "templates_commandes",
+    "files": [
+      {
+        "file": "src/hooks/useTemplatesCommandes.js",
+        "line": 6
+      },
+      {
+        "file": "src/hooks/useTemplatesCommandes.js",
+        "line": 20
+      },
+      {
+        "file": "src/hooks/useTemplatesCommandes.js",
+        "line": 32
+      },
+      {
+        "file": "src/hooks/useTemplatesCommandes.js",
+        "line": 43
+      },
+      {
+        "file": "src/hooks/useTemplatesCommandes.js",
+        "line": 53
+      },
+      {
+        "file": "src/hooks/useTemplatesCommandes.js",
+        "line": 65
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "tooltips",
+    "files": [
+      {
+        "file": "src/context/HelpProvider.jsx",
+        "line": 24
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "transfert_lignes",
+    "files": [
+      {
+        "file": "src/hooks/useTransferts.js",
+        "line": 84
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "transferts",
+    "files": [
+      {
+        "file": "src/hooks/useTransferts.js",
+        "line": 27
+      },
+      {
+        "file": "src/hooks/useTransferts.js",
+        "line": 58
+      },
+      {
+        "file": "src/hooks/useTransferts.js",
+        "line": 102
+      },
+      {
+        "file": "src/pages/Transferts.jsx",
+        "line": 66
+      },
+      {
+        "file": "src/pages/Transferts.jsx",
+        "line": 195
+      },
+      {
+        "file": "src/pages/Transferts.jsx",
+        "line": 224
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "unites",
+    "files": [
+      {
+        "file": "src/hooks/useUnites.js",
+        "line": 10
+      },
+      {
+        "file": "src/hooks/useUnites.js",
+        "line": 26
+      },
+      {
+        "file": "src/hooks/useUnites.js",
+        "line": 47
+      },
+      {
+        "file": "src/hooks/useUnites.js",
+        "line": 70
+      },
+      {
+        "file": "src/hooks/useUnites.js",
+        "line": 81
+      },
+      {
+        "file": "src/hooks/useUnites.js",
+        "line": 106
+      },
+      {
+        "file": "src/hooks/useUnites.js",
+        "line": 121
+      },
+      {
+        "file": "src/pages/parametrage/Unites.jsx",
+        "line": 39
+      },
+      {
+        "file": "src/pages/parametrage/Unites.jsx",
+        "line": 50
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "usage_stats",
+    "files": [
+      {
+        "file": "src/hooks/useUsageStats.js",
+        "line": 10
+      },
+      {
+        "file": "src/hooks/useUsageStats.js",
+        "line": 21
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "user_mama_access",
+    "files": [
+      {
+        "file": "src/hooks/useConsolidation.js",
+        "line": 17
+      },
+      {
+        "file": "src/pages/consolidation/AccessMultiSites.jsx",
+        "line": 13
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "utilisateurs",
+    "files": [
+      {
+        "file": "src/context/AuthContext.jsx",
+        "line": 282
+      },
+      {
+        "file": "src/hooks/useRGPD.js",
+        "line": 10
+      },
+      {
+        "file": "src/hooks/useRGPD.js",
+        "line": 20
+      },
+      {
+        "file": "src/hooks/useUtilisateurs.js",
+        "line": 96
+      },
+      {
+        "file": "src/hooks/useUtilisateurs.js",
+        "line": 114
+      },
+      {
+        "file": "src/hooks/useUtilisateurs.js",
+        "line": 144
+      },
+      {
+        "file": "src/pages/auth/CreateMama.jsx",
+        "line": 33
+      },
+      {
+        "file": "src/pages/parametrage/InvitationsEnAttente.jsx",
+        "line": 32
+      },
+      {
+        "file": "src/pages/parametrage/InvitationsEnAttente.jsx",
+        "line": 52
+      },
+      {
+        "file": "src/pages/parametrage/InviteUser.jsx",
+        "line": 66
+      },
+      {
+        "file": "src/pages/parametrage/InviteUser.jsx",
+        "line": 78
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "utilisateurs_complets",
+    "files": [
+      {
+        "file": "src/context/AuthContext.jsx",
+        "line": 76
+      },
+      {
+        "file": "src/hooks/useUtilisateurs.js",
+        "line": 22
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "utilisateurs_taches",
+    "files": [
+      {
+        "file": "src/hooks/useTacheAssignation.js",
+        "line": 13
+      },
+      {
+        "file": "src/hooks/useTacheAssignation.js",
+        "line": 25
+      },
+      {
+        "file": "src/hooks/useTaches.js",
+        "line": 60
+      },
+      {
+        "file": "src/hooks/useTaches.js",
+        "line": 124
+      },
+      {
+        "file": "src/hooks/useTaches.js",
+        "line": 138
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_achats_mensuels",
+    "files": [
+      {
+        "file": "src/hooks/gadgets/useAchatsMensuels.js",
+        "line": 18
+      },
+      {
+        "file": "src/hooks/useAnalyse.js",
+        "line": 16
+      },
+      {
+        "file": "src/hooks/useReporting.js",
+        "line": 32
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_analytique_stock",
+    "files": [
+      {
+        "file": "src/hooks/useAnalytique.js",
+        "line": 16
+      },
+      {
+        "file": "src/hooks/useAnalytique.js",
+        "line": 35
+      },
+      {
+        "file": "src/hooks/useAnalytique.js",
+        "line": 51
+      },
+      {
+        "file": "src/hooks/useReporting.js",
+        "line": 39
+      },
+      {
+        "file": "src/hooks/useReporting.js",
+        "line": 64
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_besoins_previsionnels",
+    "files": [
+      {
+        "file": "src/hooks/useSimulation.js",
+        "line": 46
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_boissons",
+    "files": [
+      {
+        "file": "src/pages/costboisson/CostBoisson.jsx",
+        "line": 37
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_cons_achats_mensuels",
+    "files": [
+      {
+        "file": "src/hooks/useConsolidation.js",
+        "line": 54
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_cons_ecarts_inventaire",
+    "files": [
+      {
+        "file": "src/hooks/useConsolidation.js",
+        "line": 87
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_cons_foodcost_mensuel",
+    "files": [
+      {
+        "file": "src/hooks/useConsolidation.js",
+        "line": 76
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_cons_ventes_mensuelles",
+    "files": [
+      {
+        "file": "src/hooks/useConsolidation.js",
+        "line": 65
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_consolidation_mensuelle",
+    "files": [
+      {
+        "file": "src/hooks/useConsolidation.js",
+        "line": 34
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_cost_center_month",
+    "files": [
+      {
+        "file": "src/hooks/useReporting.js",
+        "line": 47
+      },
+      {
+        "file": "src/hooks/useReporting.js",
+        "line": 80
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_cost_center_monthly",
+    "files": [
+      {
+        "file": "src/hooks/useCostCenterMonthlyStats.js",
+        "line": 10
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_costing_carte",
+    "files": [
+      {
+        "file": "src/hooks/useCostingCarte.js",
+        "line": 22
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_ecarts_inventaire",
+    "files": [
+      {
+        "file": "src/hooks/useAnalyse.js",
+        "line": 61
+      },
+      {
+        "file": "src/hooks/useEcartsInventaire.js",
+        "line": 16
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_evolution_achats",
+    "files": [
+      {
+        "file": "src/hooks/gadgets/useEvolutionAchats.js",
+        "line": 21
+      },
+      {
+        "file": "src/hooks/useAnalyse.js",
+        "line": 32
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_fournisseurs_inactifs",
+    "files": [
+      {
+        "file": "src/hooks/useFournisseursInactifs.js",
+        "line": 12
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_me_classification",
+    "files": [
+      {
+        "file": "src/hooks/useMenuEngineering.js",
+        "line": 18
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_menu_du_jour_lignes_cout",
+    "files": [
+      {
+        "file": "src/hooks/useMenuDuJour.js",
+        "line": 249
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_menu_du_jour_mensuel",
+    "files": [
+      {
+        "file": "src/hooks/useMenuDuJour.js",
+        "line": 351
+      },
+      {
+        "file": "src/hooks/useMenuEngineering.js",
+        "line": 33
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_menu_du_jour_resume",
+    "files": [
+      {
+        "file": "src/hooks/useMenuDuJour.js",
+        "line": 224
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_menu_groupe_couts",
+    "files": [
+      {
+        "file": "src/hooks/useMenuGroupe.js",
+        "line": 42
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_menu_groupe_resume",
+    "files": [
+      {
+        "file": "src/hooks/useMenuGroupe.js",
+        "line": 37
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_performance_fiches",
+    "files": [
+      {
+        "file": "src/hooks/usePerformanceFiches.js",
+        "line": 15
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_pmp",
+    "files": [
+      {
+        "file": "src/hooks/useAnalyse.js",
+        "line": 48
+      },
+      {
+        "file": "src/hooks/useDashboard.js",
+        "line": 37
+      },
+      {
+        "file": "src/hooks/useProducts.js",
+        "line": 72
+      },
+      {
+        "file": "src/hooks/useProduitsInventaire.js",
+        "line": 30
+      },
+      {
+        "file": "src/hooks/useReporting.js",
+        "line": 36
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_products_last_price",
+    "files": [
+      {
+        "file": "src/hooks/useProducts.js",
+        "line": 74
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_produits_dernier_prix",
+    "files": [
+      {
+        "file": "src/api/public/produits.js",
+        "line": 30
+      },
+      {
+        "file": "src/hooks/gadgets/useAlerteStockFaible.js",
+        "line": 17
+      },
+      {
+        "file": "src/hooks/useDashboard.js",
+        "line": 32
+      },
+      {
+        "file": "src/hooks/useProduitsInventaire.js",
+        "line": 17
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_produits_utilises",
+    "files": [
+      {
+        "file": "src/hooks/gadgets/useProduitsUtilises.js",
+        "line": 19
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_reco_stockmort",
+    "files": [
+      {
+        "file": "src/hooks/useRecommendations.js",
+        "line": 11
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_reco_surcout",
+    "files": [
+      {
+        "file": "src/hooks/useRecommendations.js",
+        "line": 26
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_requisitions",
+    "files": [
+      {
+        "file": "src/hooks/useRequisitions.js",
+        "line": 11
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_stock_requisitionne",
+    "files": [
+      {
+        "file": "src/hooks/useStockRequisitionne.js",
+        "line": 14
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_stocks",
+    "files": [
+      {
+        "file": "src/hooks/useDashboard.js",
+        "line": 41
+      },
+      {
+        "file": "src/hooks/useProducts.js",
+        "line": 73
+      },
+      {
+        "file": "src/hooks/useProducts.js",
+        "line": 194
+      },
+      {
+        "file": "src/hooks/useProduitsInventaire.js",
+        "line": 34
+      },
+      {
+        "file": "src/hooks/useStock.js",
+        "line": 42
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_taches_assignees",
+    "files": [
+      {
+        "file": "src/hooks/useTaches.js",
+        "line": 16
+      },
+      {
+        "file": "src/hooks/useTaches.js",
+        "line": 41
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_tendance_prix_produit",
+    "files": [
+      {
+        "file": "src/hooks/usePriceTrends.js",
+        "line": 15
+      }
+    ]
+  },
+  {
+    "type": "view",
+    "name": "v_top_fournisseurs",
+    "files": [
+      {
+        "file": "src/hooks/gadgets/useTopFournisseurs.js",
+        "line": 18
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "validation_requests",
+    "files": [
+      {
+        "file": "src/hooks/useValidations.js",
+        "line": 16
+      },
+      {
+        "file": "src/hooks/useValidations.js",
+        "line": 36
+      },
+      {
+        "file": "src/hooks/useValidations.js",
+        "line": 51
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "ventes_boissons",
+    "files": [
+      {
+        "file": "src/pages/BarManager.jsx",
+        "line": 69
+      },
+      {
+        "file": "src/pages/costboisson/CostBoisson.jsx",
+        "line": 48
+      },
+      {
+        "file": "src/pages/costboisson/CostBoisson.jsx",
+        "line": 104
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "ventes_fiches",
+    "files": [
+      {
+        "file": "src/hooks/useMenuEngineering.js",
+        "line": 76
+      },
+      {
+        "file": "src/hooks/useMenuEngineering.js",
+        "line": 99
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "ventes_import_staging",
+    "files": [
+      {
+        "file": "src/hooks/useMenuEngineering.js",
+        "line": 61
+      },
+      {
+        "file": "src/hooks/useMenuEngineering.js",
+        "line": 82
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "zones_droits",
+    "files": [
+      {
+        "file": "src/hooks/useZoneRights.js",
+        "line": 10
+      },
+      {
+        "file": "src/hooks/useZoneRights.js",
+        "line": 23
+      },
+      {
+        "file": "src/hooks/useZoneRights.js",
+        "line": 31
+      }
+    ]
+  },
+  {
+    "type": "table",
+    "name": "zones_stock",
+    "files": [
+      {
+        "file": "src/hooks/useGraphiquesMultiZone.js",
+        "line": 17
+      },
+      {
+        "file": "src/hooks/useZones.js",
+        "line": 12
+      },
+      {
+        "file": "src/hooks/useZones.js",
+        "line": 30
+      },
+      {
+        "file": "src/hooks/useZones.js",
+        "line": 43
+      },
+      {
+        "file": "src/hooks/useZones.js",
+        "line": 51
+      },
+      {
+        "file": "src/hooks/useZones.js",
+        "line": 60
+      },
+      {
+        "file": "src/hooks/useZones.js",
+        "line": 76
+      },
+      {
+        "file": "src/hooks/useZonesStock.js",
+        "line": 6
+      },
+      {
+        "file": "src/hooks/useZonesStock.js",
+        "line": 17
+      },
+      {
+        "file": "src/hooks/useZonesStock.js",
+        "line": 32
+      }
+    ]
+  }
+]

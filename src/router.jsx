@@ -391,7 +391,7 @@ export default function Router() {
           />
           <Route
             path="/transferts"
-            element={<ProtectedRoute moduleKey="mouvements"><StockTransferts /></ProtectedRoute>}
+            element={<ProtectedRoute moduleKey="transferts"><StockTransferts /></ProtectedRoute>}
           />
           <Route
             path="/stock/alertes"

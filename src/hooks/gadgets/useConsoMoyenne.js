@@ -17,16 +17,16 @@ export default function useConsoMoyenne() {
       const start = new Date();
       start.setDate(start.getDate() - 7);
       const { data, error } = await supabase
-        .from('mouvements')
-        .select('date, quantite')
-        .eq('mama_id', mama_id)
-        .eq('type', 'sortie')
-        .gte('date', start.toISOString())
-        .order('date', { ascending: true });
+        .from('requisition_lignes')
+        .select('quantite, requisitions!inner(date_requisition,mama_id,statut)')
+        .eq('requisitions.mama_id', mama_id)
+        .eq('requisitions.statut', 'réalisée')
+        .gte('requisitions.date_requisition', start.toISOString())
+        .order('requisitions.date_requisition', { ascending: true });
       if (error) throw error;
       const daily = {};
       (data || []).forEach((m) => {
-        const d = m.date?.slice(0, 10);
+        const d = m.requisitions.date_requisition?.slice(0, 10);
         if (!daily[d]) daily[d] = 0;
         daily[d] += Number(m.quantite || 0);
       });

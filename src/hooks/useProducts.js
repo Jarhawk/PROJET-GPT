@@ -211,17 +211,22 @@ export function useProducts() {
     async (productId) => {
       if (!mama_id) return [];
       const { data, error } = await supabase
-        .from('mouvements')
-        .select('id,date,type,quantite')
+        .from('requisition_lignes')
+        .select('quantite, requisitions!inner(date_requisition, mama_id, statut)')
         .eq('produit_id', productId)
-        .eq('mama_id', mama_id)
-        .order('date', { ascending: false });
+        .eq('requisitions.mama_id', mama_id)
+        .eq('requisitions.statut', 'réalisée')
+        .order('requisitions.date_requisition', { ascending: false });
       if (error) {
         setError(error);
         toast.error(error.message);
         return [];
       }
-      return data || [];
+      return (data || []).map(m => ({
+        date: m.requisitions.date_requisition,
+        type: 'sortie',
+        quantite: m.quantite,
+      }));
     },
     [mama_id]
   );

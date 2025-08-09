@@ -76,25 +76,6 @@ export function useStock() {
     [mama_id, user_id]
   );
 
-  const createMouvement = useCallback(
-    async (payload) => {
-      if (!mama_id) return null;
-      const toInsert = { ...payload, mama_id, auteur_id: user_id };
-      if (payload.motif) {
-        toInsert.commentaire = payload.motif;
-        delete toInsert.motif;
-      }
-      const { data, error } = await supabase
-        .from("mouvements")
-        .insert([toInsert])
-        .select()
-        .single();
-      if (error) return null;
-      return data;
-    },
-    [mama_id, user_id]
-  );
-
   return {
     stocks,
     loading,
@@ -104,6 +85,5 @@ export function useStock() {
     getStockTheorique,
     getInventaires,
     createInventaire,
-    createMouvement,
   };
 }

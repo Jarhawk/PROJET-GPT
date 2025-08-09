@@ -89,35 +89,7 @@ export function useTransferts() {
       setLoading(false);
       return { error: err2 };
     }
-    const mouvements = [];
-    lignesInsert.forEach((l) => {
-      mouvements.push({
-        mama_id,
-        produit_id: l.produit_id,
-        quantite: Number(l.quantite),
-        type: "sortie_transfert",
-        date,
-        transfert_id: tr.id,
-        auteur_id: user_id,
-      });
-      mouvements.push({
-        mama_id,
-        produit_id: l.produit_id,
-        quantite: Number(l.quantite),
-        type: "entree_transfert",
-        date,
-        transfert_id: tr.id,
-        auteur_id: user_id,
-      });
-    });
-    const { error: err3 } = await supabase
-      .from("mouvements")
-      .insert(mouvements);
     setLoading(false);
-    if (err3) {
-      setError(err3);
-      return { error: err3 };
-    }
     setTransferts((t) => [{ ...tr, lignes: lignesInsert }, ...t]);
     return { data: tr };
   }

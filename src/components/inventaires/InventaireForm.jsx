@@ -15,7 +15,6 @@ export default function InventaireForm({ inventaire, onClose }) {
     addInventaire,
     editInventaire,
     clotureInventaire,
-    fetchMouvementsForPeriod,
     fetchLastClosedInventaire,
   } = useInventaires();
   const { products, fetchProducts } = useProducts();
@@ -44,8 +43,7 @@ export default function InventaireForm({ inventaire, onClose }) {
       }
         setDateDebut(date_debut);
         if (dateInventaire) {
-          const mouvements = await fetchMouvementsForPeriod(date_debut, dateInventaire);
-          setMouvementsProduits(mouvements);
+          // TODO: recompute mouvements via requisitions
         }
     }
     init();

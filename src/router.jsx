@@ -98,7 +98,8 @@ const PlanningForm = lazyWithPreload(() => import("@/pages/PlanningForm.jsx"));
 const PlanningDetail = lazyWithPreload(() => import("@/pages/PlanningDetail.jsx"));
 const DashboardBuilder = lazyWithPreload(() => import("@/pages/dashboard/DashboardBuilder.jsx"));
 const Reporting = lazyWithPreload(() => import("@/pages/reporting/Reporting.jsx"));
-const Consolidation = lazyWithPreload(() => import("@/pages/Consolidation.jsx"));
+const Consolidation = lazyWithPreload(() => import("@/pages/consolidation/Consolidation.jsx"));
+const AccessMultiSites = lazyWithPreload(() => import("@/pages/consolidation/AccessMultiSites.jsx"));
 const CreateMama = lazyWithPreload(() => import("@/pages/auth/CreateMama.jsx"));
 const Feedback = lazyWithPreload(() => import("@/pages/Feedback.jsx"));
 const Logs = lazyWithPreload(() => import("@/pages/Logs.jsx"));
@@ -157,6 +158,7 @@ export const routePreloadMap = {
   '/recettes': Recettes.preload,
   '/requisitions': Requisitions.preload,
   '/consolidation': Consolidation.preload,
+  '/admin/access-multi-sites': AccessMultiSites.preload,
   '/reporting': Reporting.preload,
   '/tableaux-de-bord': TableauxDeBord.preload,
   '/comparatif': Comparatif.preload,
@@ -501,6 +503,10 @@ export default function Router() {
           <Route
             path="/consolidation"
             element={<ProtectedRoute moduleKey="consolidation"><Consolidation /></ProtectedRoute>}
+          />
+          <Route
+            path="/admin/access-multi-sites"
+            element={<ProtectedRoute moduleKey="permissions"><AccessMultiSites /></ProtectedRoute>}
           />
           <Route
             path="/parametrage/utilisateurs"

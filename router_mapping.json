@@ -248,6 +248,10 @@
     "module": "consolidation"
   },
   {
+    "route": "/admin/access-multi-sites",
+    "module": "permissions"
+  },
+  {
     "route": "/parametrage/utilisateurs",
     "module": "utilisateurs"
   },

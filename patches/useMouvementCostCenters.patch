@@ -1,0 +1,17 @@
+diff --git a/src/hooks/useMouvementCostCenters.js b/src/hooks/useMouvementCostCenters.js
+index 0000000..1111111 100644
+--- a/src/hooks/useMouvementCostCenters.js
++++ b/src/hooks/useMouvementCostCenters.js
+@@
+-      .from("mouvements_centres_cout")
+-      .select("id, mouvement_id, cost_center_id, quantite, valeur, centres_de_cout:cost_center_id(nom)")
+-      .eq("mouvement_id", mouvement_id)
++      .from("requisition_lignes")
++      .select("id, requisition_id as mouvement_id, cost_center_id, quantite, valeur, centres_de_cout:cost_center_id(nom)")
++      .eq("requisition_id", mouvement_id)
+@@
+-      .from("mouvements_centres_cout")
++      .from("requisition_lignes")
+@@
+-        .from("mouvements_centres_cout")
++        .from("requisition_lignes")

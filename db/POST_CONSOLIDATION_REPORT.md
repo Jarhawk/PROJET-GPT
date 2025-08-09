@@ -26,3 +26,17 @@
 - Ajouter des paramètres de période aux vues pour affiner les analyses.
 - Compléter les vues de cost center dès que les tables associées seront disponibles.
 - Optimiser les vues avec des index sur `achats` et `requisitions` pour les champs de date et `produit_id`.
+
+## Ajouts récents
+- Création des tables utilitaires : `alertes_rupture`, `logs_activite`, `menus_jour_lignes`, `rapports_generes`, `settings`, `user_mama_access`, `ventes_fiches`, `ventes_import_staging`.
+- Ajout de la fonction RPC `log_action` pour tracer les actions utilisateur.
+- Ajout des vues de consolidation : `v_cons_achats_mensuels`, `v_cons_ventes_mensuelles`, `v_cons_foodcost_mensuel`, `v_cons_ecarts_inventaire`, `v_consolidation_mensuelle`.
+- Ajout des vues menu du jour : `v_menu_du_jour_lignes_cout`, `v_menu_du_jour_resume`, `v_menu_du_jour_mensuel`.
+- Vue de classification simplifiée `v_me_classification` pour le module Menu Engineering.
+
+## Patchs front générés
+- `patches/useMouvementCostCenters.patch` : remplace les accès `mouvements_centres_cout` par `requisition_lignes`.
+
+## TODO
+- Enrichir la vue `v_me_classification` avec des métriques réelles.
+- Compléter la logique d'alertes de rupture si nécessaire.

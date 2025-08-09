@@ -324,6 +324,38 @@
     "name": "menu_groupe_modele_lignes"
   },
   {
+    "type": "table",
+    "name": "alertes_rupture"
+  },
+  {
+    "type": "table",
+    "name": "logs_activite"
+  },
+  {
+    "type": "table",
+    "name": "menus_jour_lignes"
+  },
+  {
+    "type": "table",
+    "name": "rapports_generes"
+  },
+  {
+    "type": "table",
+    "name": "settings"
+  },
+  {
+    "type": "table",
+    "name": "user_mama_access"
+  },
+  {
+    "type": "table",
+    "name": "ventes_fiches"
+  },
+  {
+    "type": "table",
+    "name": "ventes_import_staging"
+  },
+  {
     "type": "view",
     "name": "utilisateurs_complets"
   },
@@ -436,6 +468,42 @@
     "name": "v_costing_carte"
   },
   {
+    "type": "view",
+    "name": "v_menu_du_jour_lignes_cout"
+  },
+  {
+    "type": "view",
+    "name": "v_menu_du_jour_resume"
+  },
+  {
+    "type": "view",
+    "name": "v_menu_du_jour_mensuel"
+  },
+  {
+    "type": "view",
+    "name": "v_cons_achats_mensuels"
+  },
+  {
+    "type": "view",
+    "name": "v_cons_ventes_mensuelles"
+  },
+  {
+    "type": "view",
+    "name": "v_cons_foodcost_mensuel"
+  },
+  {
+    "type": "view",
+    "name": "v_cons_ecarts_inventaire"
+  },
+  {
+    "type": "view",
+    "name": "v_consolidation_mensuelle"
+  },
+  {
+    "type": "view",
+    "name": "v_me_classification"
+  },
+  {
     "type": "function",
     "name": "trg_set_timestamp"
   },
@@ -542,5 +610,9 @@
   {
     "type": "function",
     "name": "top_produits"
+  },
+  {
+    "type": "function",
+    "name": "log_action"
   }
 ]

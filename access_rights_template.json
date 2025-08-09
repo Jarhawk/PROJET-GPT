@@ -113,6 +113,12 @@
     "edit": false,
     "delete": false
   },
+  "costing_carte": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
   "reporting": {
     "view": false,
     "create": false,

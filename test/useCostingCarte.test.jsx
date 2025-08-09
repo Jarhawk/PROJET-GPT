@@ -16,27 +16,36 @@ const wrapper = ({ children }) => (
 beforeEach(async () => {
   ;({ useCostingCarte } = await import('@/hooks/useCostingCarte'))
   const sample = [
-    { id: 1, nom: 'Test', famille: 'A', sous_famille: null, type: 'plat', portions: 2, cout_total: 10, prix_vente: 20 }
+    {
+      fiche_id: 1,
+      nom: 'Test',
+      type: 'plat',
+      cout_par_portion: 5,
+      prix_vente: 20,
+      marge_euro: 15,
+      marge_pct: 75,
+      food_cost_pct: 25,
+      actif: true,
+    },
   ]
   const orderMock = vi.fn(() => Promise.resolve({ data: sample, error: null }))
   const query = {
     select: vi.fn(() => query),
     eq: vi.fn(() => query),
-    not: vi.fn(() => query),
-    gt: vi.fn(() => query),
     order: orderMock,
   }
   fromSpy = vi.spyOn(supabase, 'from').mockReturnValue(query)
 })
 
-afterEach(() => { fromSpy.mockRestore() })
+afterEach(() => {
+  fromSpy.mockRestore()
+})
 
-test('calculates margins and ratios', async () => {
+test('fetchCosting returns rows from view', async () => {
   const { result } = renderHook(() => useCostingCarte(), { wrapper })
-  await act(async () => { await result.current.fetchFichesPourLaCarte() })
-  expect(result.current.fiches[0]).toMatchObject({
-    cout_unitaire: 5,
-    marge_brute: 15,
-    taux_food_cost: 25,
+  await act(async () => {
+    await result.current.fetchCosting()
   })
+  expect(fromSpy).toHaveBeenCalledWith('v_costing_carte')
+  expect(result.current.data[0]).toMatchObject({ marge_euro: 15, food_cost_pct: 25 })
 })

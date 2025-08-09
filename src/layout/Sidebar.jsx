@@ -143,6 +143,7 @@ export default function Sidebar() {
         { module: "analyse", to: "/tableaux-de-bord", label: "Tableaux de bord", icon: <BarChart2 size={16} /> },
         { module: "analyse", to: "/comparatif", label: "Comparatif", icon: <BarChart2 size={16} /> },
         { module: "analyse", to: "/surcouts", label: "Surcoûts", icon: <FileBarChart size={16} /> },
+        { module: "costing_carte", to: "/costing/carte", label: "Costing Carte", icon: <BarChart2 size={16} /> },
         { module: "alertes", to: "/alertes", label: "Alertes", icon: <FileText size={16} /> },
       ],
     },

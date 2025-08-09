@@ -4,30 +4,63 @@ import React from 'react'
 import { MemoryRouter } from 'react-router-dom'
 import { vi, test, expect } from 'vitest'
 
-vi.mock('@/hooks/useAuth', () => ({ default: () => ({ role: 'manager', loading: false }) }))
+vi.mock('@/hooks/useAuth', () => ({
+  default: () => ({
+    role: 'manager',
+    loading: false,
+    access_rights: { costing_carte: { export: true } },
+  }),
+}))
 vi.mock('@/hooks/useCostingCarte', () => ({
   useCostingCarte: () => ({
-    fiches: [
-      { id: 1, nom: 'Plat', type: 'plat', famille: 'A', prix_vente: 10, cout_unitaire: 3, marge_brute: 7, taux_food_cost: 30 },
-      { id: 2, nom: 'Vin', type: 'boisson', famille: 'B', prix_vente: 5, cout_unitaire: 3, marge_brute: 2, taux_food_cost: 60 }
+    data: [
+      {
+        fiche_id: 1,
+        nom: 'Plat',
+        type: 'plat',
+        famille: 'A',
+        actif: true,
+        cout_par_portion: 3,
+        prix_vente: 10,
+        marge_euro: 7,
+        marge_pct: 70,
+        food_cost_pct: 30,
+      },
+      {
+        fiche_id: 2,
+        nom: 'Vin',
+        type: 'boisson',
+        famille: 'B',
+        actif: true,
+        cout_par_portion: 3,
+        prix_vente: 5,
+        marge_euro: 2,
+        marge_pct: 40,
+        food_cost_pct: 60,
+      },
     ],
-    fetchFichesPourLaCarte: vi.fn(),
+    settings: { objectif_marge_pct: 50, objectif_food_cost_pct: 40 },
+    fetchCosting: vi.fn(),
+    fetchSettings: vi.fn(),
+    exportExcel: vi.fn(),
+    exportPdf: vi.fn(),
     loading: false,
-    error: null
-  })
+    error: null,
+  }),
 }))
 
-import CostingCarte from '@/pages/analyse/CostingCarte.jsx'
+import CostingCarte from '@/pages/costing/CostingCarte.jsx'
 
 test('filters by type', () => {
   render(<CostingCarte />, { wrapper: MemoryRouter })
-  fireEvent.change(screen.getByLabelText(/Type/i), { target: { value: 'plat' } })
+  fireEvent.change(screen.getByLabelText(/Type/i), {
+    target: { value: 'plat' },
+  })
   expect(screen.getByText('Plat', { selector: 'td' })).toBeInTheDocument()
   expect(screen.queryByText('Vin')).toBeNull()
 })
 
-test('high food cost highlighted', () => {
+test('high food cost shows badge', () => {
   render(<CostingCarte />, { wrapper: MemoryRouter })
-  const row = screen.getByText('Vin').closest('tr')
-  expect(row.className).toMatch(/text-red-600/)
+  expect(screen.getAllByText('FC').length).toBeGreaterThan(0)
 })

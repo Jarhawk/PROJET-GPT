@@ -74,6 +74,7 @@ export default function Sidebar() {
                 <Link to="/menu-engineering">Menu Engineering</Link>
               )}
               {canAnalyse && <Link to="/engineering">Engineering</Link>}
+              {has("costing_carte") && <Link to="/costing/carte">Costing Carte</Link>}
             </div>
           </details>
         )}

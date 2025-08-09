@@ -42,6 +42,7 @@ create table if not exists public.produits (
 create table if not exists public.roles (
   id uuid primary key default gen_random_uuid(),
   nom text not null,
+  description text,
   access_rights jsonb default '{}'::jsonb,
   actif boolean default true,
   mama_id uuid not null,
@@ -56,6 +57,7 @@ create table if not exists public.utilisateurs (
   auth_id uuid unique,
   role_id uuid,
   mama_id uuid not null,
+  access_rights jsonb default '{}'::jsonb,
   actif boolean default true,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
@@ -331,7 +333,7 @@ end $$;
 
 -- 5. Views
 create or replace view public.utilisateurs_complets as
-select u.*, r.nom as role_nom, r.access_rights as role_access_rights
+select u.*, r.nom as role_nom, r.description as role_description
 from public.utilisateurs u
 left join public.roles r on r.id = u.role_id;
 
@@ -469,18 +471,34 @@ end $$;
 
 alter table public.roles enable row level security;
 do $$ begin
-  if not exists (select 1 from pg_policies where schemaname='public' and tablename='roles' and policyname='roles_all') then
-    create policy roles_all on public.roles
-      for all using (mama_id = current_user_mama_id())
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='roles' and policyname='roles_self_mama') then
+    create policy roles_self_mama on public.roles
+      for select using (mama_id = current_user_mama_id());
+  end if;
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='roles' and policyname='roles_insert_mama') then
+    create policy roles_insert_mama on public.roles
+      for insert with check (mama_id = current_user_mama_id());
+  end if;
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='roles' and policyname='roles_update_mama') then
+    create policy roles_update_mama on public.roles
+      for update using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
 end $$;
 
 alter table public.utilisateurs enable row level security;
 do $$ begin
-  if not exists (select 1 from pg_policies where schemaname='public' and tablename='utilisateurs' and policyname='utilisateurs_all') then
-    create policy utilisateurs_all on public.utilisateurs
-      for all using (mama_id = current_user_mama_id())
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='utilisateurs' and policyname='utilisateurs_self_mama') then
+    create policy utilisateurs_self_mama on public.utilisateurs
+      for select using (mama_id = current_user_mama_id());
+  end if;
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='utilisateurs' and policyname='utilisateurs_insert_mama') then
+    create policy utilisateurs_insert_mama on public.utilisateurs
+      for insert with check (mama_id = current_user_mama_id());
+  end if;
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='utilisateurs' and policyname='utilisateurs_update_mama') then
+    create policy utilisateurs_update_mama on public.utilisateurs
+      for update using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
 end $$;
@@ -529,9 +547,17 @@ end $$;
 
 alter table public.permissions enable row level security;
 do $$ begin
-  if not exists (select 1 from pg_policies where schemaname='public' and tablename='permissions' and policyname='permissions_all') then
-    create policy permissions_all on public.permissions
-      for all using (mama_id = current_user_mama_id())
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='permissions' and policyname='permissions_self_mama') then
+    create policy permissions_self_mama on public.permissions
+      for select using (mama_id = current_user_mama_id());
+  end if;
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='permissions' and policyname='permissions_insert_mama') then
+    create policy permissions_insert_mama on public.permissions
+      for insert with check (mama_id = current_user_mama_id());
+  end if;
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='permissions' and policyname='permissions_update_mama') then
+    create policy permissions_update_mama on public.permissions
+      for update using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
 end $$;
@@ -549,13 +575,14 @@ end $$;
 grant select, insert, update, delete on public.mamas to authenticated;
 grant select, insert, update, delete on public.fournisseurs to authenticated;
 grant select, insert, update, delete on public.produits to authenticated;
-grant select, insert, update, delete on public.roles to authenticated;
-grant select, insert, update, delete on public.utilisateurs to authenticated;
+grant select, insert, update on public.roles to authenticated;
+grant select, insert, update on public.utilisateurs to authenticated;
 grant select, insert, update, delete on public.commandes to authenticated;
 grant select, insert, update, delete on public.commande_lignes to authenticated;
 grant select, insert, update, delete on public.templates_commandes to authenticated;
 grant select, insert, update, delete on public.emails_envoyes to authenticated;
-grant select, insert, update, delete on public.permissions to authenticated;
+grant select, insert, update on public.permissions to authenticated;
+grant select on public.utilisateurs_complets to authenticated;
 grant select, insert, update, delete on public.consentements_utilisateur to authenticated;
 grant execute on function public.create_utilisateur(text, text, uuid, uuid) to authenticated;
 grant execute on function public.calcul_ecarts_inventaire(date, text, uuid) to authenticated;

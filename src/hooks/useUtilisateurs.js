@@ -122,7 +122,21 @@ export function useUtilisateurs() {
     await fetchUsers();
   }
 
-  // 5. Supprimer un utilisateur (optionnel)
+  // 5. Réinitialiser le mot de passe via auth_id
+  async function resetPassword(authId) {
+    if (!authId) return { error: "auth_id manquant" };
+    setLoading(true);
+    setError(null);
+    const { data, error } = await supabase.auth.admin.generateLink({
+      type: "recovery",
+      user_id: authId,
+    });
+    if (error) setError(error);
+    setLoading(false);
+    return { data, error };
+  }
+
+  // 6. Supprimer un utilisateur (optionnel)
   async function deleteUser(id) {
     if (!mama_id && !isSuperadmin) return { error: "Aucun mama_id" };
     setLoading(true);
@@ -139,6 +153,7 @@ export function useUtilisateurs() {
   }
 
   // 6. Export Excel
+  // (numérotation ajustée après ajout resetPassword)
   function exportUsersToExcel(data = users) {
     const datas = (data || []).map(u => ({
       id: u.id,
@@ -200,6 +215,7 @@ export function useUtilisateurs() {
     toggleUserActive,
     deleteUser,
     deleteUtilisateur: deleteUser,
+    resetPassword,
     // exports
     exportUsersToExcel,
     exportUsersToCSV,

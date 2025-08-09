@@ -163,9 +163,10 @@ export default function Sidebar() {
       ],
     },
     {
-      title: "Logs",
+      title: "Supervision",
       items: [
-        { module: "logs", to: "/logs", label: "Logs", icon: <History size={16} /> },
+        { module: "logs_activite", to: "/supervision/logs", label: "Logs activité", icon: <History size={16} /> },
+        { module: "rapports_generes", to: "/supervision/rapports", label: "Rapports générés", icon: <FileText size={16} /> },
       ],
     },
     {

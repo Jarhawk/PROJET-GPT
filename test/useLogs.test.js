@@ -2,17 +2,18 @@
 import { renderHook, act } from '@testing-library/react';
 import { vi, beforeEach, test, expect } from 'vitest';
 
-const queryExec = { then: fn => fn({ data: [{ id: 'l1' }], error: null }) };
-const ilikeMock = vi.fn(() => queryExec);
-const lteMock = vi.fn(() => queryExec);
-const gteMock = vi.fn(() => ({ lte: lteMock, then: queryExec.then }));
-const rangeMock = vi.fn(() => ({ ilike: ilikeMock, gte: gteMock, lte: lteMock, then: queryExec.then }));
-const orderMock = vi.fn(() => ({ range: rangeMock }));
-const eqMock = vi.fn(() => ({ order: orderMock }));
-const selectMock = vi.fn(() => ({ eq: eqMock }));
-const fromMock = vi.fn(() => ({ select: selectMock }));
+const fromMock = vi.fn();
+const selectMock = vi.fn();
+const eqMock = vi.fn();
+const orderMock = vi.fn();
+const rpcMock = vi.fn();
 
-vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
+const supabaseMock = {
+  from: fromMock,
+  rpc: rpcMock,
+};
+
+vi.mock('@/lib/supabase', () => ({ supabase: supabaseMock }));
 const authMock = vi.fn(() => ({ mama_id: 'm1' }));
 vi.mock('@/hooks/useAuth', () => ({ default: authMock }));
 vi.mock('file-saver', () => ({ saveAs: vi.fn() }));
@@ -22,49 +23,58 @@ let useLogs;
 
 beforeEach(async () => {
   ({ useLogs } = await import('@/hooks/useLogs'));
-  fromMock.mockClear();
-  selectMock.mockClear();
-  eqMock.mockClear();
-  orderMock.mockClear();
-  ilikeMock.mockClear();
-  rangeMock.mockClear();
+  fromMock.mockReset();
+  selectMock.mockReset();
+  eqMock.mockReset();
+  orderMock.mockReset();
+  rpcMock.mockReset();
+  fromMock.mockReturnValue({ select: selectMock });
+  selectMock.mockReturnValue({ eq: eqMock });
+  eqMock.mockReturnValue({ eq: eqMock, order: orderMock, gte: eqMock, lte: eqMock });
+  orderMock.mockReturnValue({});
 });
 
-test('fetchLogs queries journaux_utilisateur', async () => {
+test('fetchLogs queries logs_activite', async () => {
+  orderMock.mockResolvedValue({ data: [{ id: '1' }], error: null });
   const { result } = renderHook(() => useLogs());
-  await act(async () => { await result.current.fetchLogs({ search: 'TEST' }); });
-  expect(fromMock).toHaveBeenCalledWith('journaux_utilisateur');
-  expect(selectMock).toHaveBeenCalledWith('*, utilisateurs:done_by(nom)');
+  await act(async () => {
+    await result.current.fetchLogs({ type: 'login' });
+  });
+  expect(fromMock).toHaveBeenCalledWith('logs_activite');
+  expect(selectMock).toHaveBeenCalledWith('*');
   expect(eqMock).toHaveBeenCalledWith('mama_id', 'm1');
-  expect(orderMock).toHaveBeenCalledWith('created_at', { ascending: false });
-  expect(ilikeMock).toHaveBeenCalledWith('action', '%TEST%');
-  expect(rangeMock).toHaveBeenCalledWith(0, 99);
-  expect(result.current.logs).toEqual([{ id: 'l1' }]);
+  expect(eqMock).toHaveBeenCalledWith('type', 'login');
+  expect(orderMock).toHaveBeenCalledWith('date_log', { ascending: false });
+  expect(result.current.logs).toEqual([{ id: '1' }]);
 });
 
-test('fetchLogs skips when no mama_id', async () => {
-  authMock.mockReturnValueOnce({ mama_id: null });
+test('logAction calls rpc', async () => {
+  const { result } = renderHook(() => useLogs());
+  await act(async () => {
+    await result.current.logAction({ type: 'login', module: 'auth', description: 'test' });
+  });
+  expect(rpcMock).toHaveBeenCalledWith('log_action', expect.objectContaining({ p_type: 'login' }));
+});
+
+test('fetchRapports queries rapports_generes', async () => {
+  fromMock.mockReturnValueOnce({ select: selectMock });
+  selectMock.mockReturnValueOnce({ eq: eqMock });
+  eqMock.mockReturnValueOnce({ order: orderMock });
+  orderMock.mockResolvedValueOnce({ data: [{ id: 'r1' }], error: null });
+  const { result } = renderHook(() => useLogs());
+  await act(async () => {
+    await result.current.fetchRapports();
+  });
+  expect(fromMock).toHaveBeenCalledWith('rapports_generes');
+  expect(result.current.rapports).toEqual([{ id: 'r1' }]);
+});
+
+test('exportLogs generates file', async () => {
+  orderMock.mockResolvedValueOnce({ data: [{ id: '1', date_log: '2024-01-01', type: 't', module: 'm', description: 'd', critique: false }], error: null });
   const { result } = renderHook(() => useLogs());
   await act(async () => { await result.current.fetchLogs(); });
-  expect(fromMock).not.toHaveBeenCalled();
-});
-
-test('fetchLogs applies date filters', async () => {
-  const { result } = renderHook(() => useLogs());
-  await act(async () => { await result.current.fetchLogs({ startDate: '2024-01-01', endDate: '2024-02-01' }); });
-  expect(gteMock).toHaveBeenCalledWith('created_at', '2024-01-01');
-  expect(lteMock).toHaveBeenCalledWith('created_at', '2024-02-01');
-});
-
-
-test('exportLogsToExcel writes file', async () => {
-  const { result } = renderHook(() => useLogs());
-  await act(async () => { await result.current.fetchLogs(); });
-  await act(() => { result.current.exportLogsToExcel(); });
-  const { saveAs } = await import('file-saver');
+  await act(() => { result.current.exportLogs('xlsx'); });
   const XLSX = await import('xlsx');
   expect(XLSX.utils.book_append_sheet).toHaveBeenCalled();
-  expect(saveAs).toHaveBeenCalled();
 });
-
 

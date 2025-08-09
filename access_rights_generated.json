@@ -238,5 +238,17 @@
     "create": false,
     "edit": false,
     "delete": false
+  },
+  "logs_activite": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
+  "rapports_generes": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
   }
 }

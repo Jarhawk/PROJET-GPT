@@ -296,16 +296,20 @@
     "module": "emails_envoyes"
   },
   {
-    "route": "/logs",
-    "module": "logs"
-  },
-  {
     "route": "/supervision",
     "module": "dashboard"
   },
   {
     "route": "/supervision/comparateur",
     "module": "fiches_techniques"
+  },
+  {
+    "route": "/supervision/logs",
+    "module": "logs_activite"
+  },
+  {
+    "route": "/supervision/rapports",
+    "module": "rapports_generes"
   },
   {
     "route": "/debug/auth",

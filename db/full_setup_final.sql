@@ -2279,3 +2279,80 @@ language sql as $$
   limit coalesce(limit_param, 10);
 $$;
 grant execute on function public.top_produits(uuid, date, date, integer) to authenticated;
+
+-- logs d'activité pour supervision
+create table if not exists public.logs_activite (
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid not null references public.mamas(id) on delete cascade,
+  user_id uuid references auth.users(id) on delete set null,
+  type text not null,
+  module text,
+  description text,
+  donnees jsonb,
+  ip_address inet,
+  user_agent text,
+  date_log timestamptz default now(),
+  critique boolean default false
+);
+
+create index if not exists idx_logs_mama_date on public.logs_activite(mama_id, date_log desc);
+create index if not exists idx_logs_type on public.logs_activite(type);
+create index if not exists idx_logs_module on public.logs_activite(module);
+
+alter table public.logs_activite enable row level security;
+create policy logs_select_self on public.logs_activite
+  for select using (mama_id = current_user_mama_id());
+create policy logs_insert_self on public.logs_activite
+  for insert with check (mama_id = current_user_mama_id());
+grant select, insert on public.logs_activite to authenticated;
+
+create or replace function public.log_action(
+  p_mama_id uuid,
+  p_type text,
+  p_module text,
+  p_description text,
+  p_donnees jsonb default '{}'::jsonb,
+  p_critique boolean default false
+)
+returns void
+language plpgsql
+security definer
+as $$
+begin
+  insert into public.logs_activite(
+    mama_id, user_id, type, module, description, donnees, ip_address, user_agent, critique
+  ) values (
+    p_mama_id,
+    auth.uid(),
+    p_type,
+    p_module,
+    p_description,
+    p_donnees,
+    null,
+    null,
+    p_critique
+  );
+end;
+$$;
+
+grant execute on function public.log_action(uuid, text, text, text, jsonb, boolean) to authenticated;
+
+-- rapports générés pour suivi reporting
+create table if not exists public.rapports_generes (
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid not null references public.mamas(id) on delete cascade,
+  user_id uuid references auth.users(id) on delete set null,
+  type text not null,
+  module text not null,
+  periode_debut date,
+  periode_fin date,
+  chemin_fichier text,
+  date_generation timestamptz default now()
+);
+
+alter table public.rapports_generes enable row level security;
+create policy rapports_select_self on public.rapports_generes
+  for select using (mama_id = current_user_mama_id());
+create policy rapports_insert_self on public.rapports_generes
+  for insert with check (mama_id = current_user_mama_id());
+grant select, insert on public.rapports_generes to authenticated;

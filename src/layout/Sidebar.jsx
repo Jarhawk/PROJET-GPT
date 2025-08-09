@@ -128,6 +128,7 @@ export default function Sidebar() {
       items: [
         { module: "fiches_techniques", to: "/fiches", label: "Fiches", icon: <ChefHat size={16} /> },
         { module: "menus", to: "/menus", label: "Menus", icon: <MenuIcon size={16} /> },
+        { module: "menu_du_jour", to: "/menu", label: "Menu du jour", icon: <MenuIcon size={16} /> },
         { module: "menu_groupe", to: "/menu-groupes", label: "Menu Groupe", icon: <MenuIcon size={16} /> },
         { module: "carte", to: "/carte", label: "Carte", icon: <BookOpen size={16} /> },
         { module: "recettes", to: "/recettes", label: "Recettes", icon: <BookOpen size={16} /> },

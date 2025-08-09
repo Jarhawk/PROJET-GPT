@@ -1,0 +1,54 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { useMenuDuJour } from "@/hooks/useMenuDuJour";
+
+function getMonday(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  d.setDate(diff);
+  return d.toISOString().slice(0, 10);
+}
+
+export default function MenuDuJour() {
+  const { fetchWeek } = useMenuDuJour();
+  const [startDate, setStartDate] = useState(getMonday(new Date()));
+  const [resume, setResume] = useState([]);
+
+  useEffect(() => {
+    fetchWeek({ startDate }).then(setResume);
+  }, [startDate, fetchWeek]);
+
+  const changeWeek = (delta) => {
+    const d = new Date(startDate);
+    d.setDate(d.getDate() + delta * 7);
+    setStartDate(getMonday(d));
+  };
+
+  const days = Array.from({ length: 7 }).map((_, i) => {
+    const d = new Date(startDate);
+    d.setDate(d.getDate() + i);
+    const iso = d.toISOString().slice(0, 10);
+    const info = resume.find((r) => r.date_menu === iso) || {};
+    return { date: iso, info };
+  });
+
+  return (
+    <div className="p-4">
+      <div className="flex justify-between items-center mb-4">
+        <button onClick={() => changeWeek(-1)}>&lt;</button>
+        <h1 className="text-xl font-bold">Menu du jour</h1>
+        <button onClick={() => changeWeek(1)}>&gt;</button>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+        {days.map(({ date, info }) => (
+          <Link key={date} to={`/menu/${date}`} className="border p-2 rounded hover:bg-gray-50">
+            <div className="font-semibold">{date}</div>
+            <div className="text-sm mt-1">Coût: {info.cout_total ? info.cout_total.toFixed(2) : "-"} €</div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}

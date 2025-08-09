@@ -5,6 +5,7 @@ import useAuth from "@/hooks/useAuth";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import jsPDF from "jspdf";
 
 export function useMenuDuJour() {
   const { mama_id } = useAuth();
@@ -213,6 +214,152 @@ export function useMenuDuJour() {
     return fetchMenuForDate(date);
   }
 
+  // --- Nouveau module Menu du Jour ---
+
+  async function fetchWeek({ startDate }) {
+    if (!mama_id) return [];
+    const start = new Date(startDate);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    const { data, error } = await supabase
+      .from("v_menu_du_jour_resume")
+      .select("*")
+      .eq("mama_id", mama_id)
+      .gte("date_menu", start.toISOString().slice(0, 10))
+      .lte("date_menu", end.toISOString().slice(0, 10));
+    if (error) setError(error);
+    return data || [];
+  }
+
+  async function fetchDay(date) {
+    if (!mama_id) return {};
+    const { data: menu, error: errMenu } = await supabase
+      .from("menus_jour")
+      .select("*")
+      .eq("mama_id", mama_id)
+      .eq("date_menu", date)
+      .single();
+    if (errMenu && errMenu.code !== "PGRST116") {
+      setError(errMenu);
+      return {};
+    }
+    const menuId = menu?.id;
+    let lignes = [];
+    if (menuId) {
+      const { data: lignesData, error: errLignes } = await supabase
+        .from("v_menu_du_jour_lignes_cout")
+        .select("*")
+        .eq("menu_id", menuId)
+        .eq("mama_id", mama_id);
+      if (errLignes) setError(errLignes); else lignes = lignesData;
+    }
+    return { menu, lignes };
+  }
+
+  async function createOrUpdateMenu(date, lignes = []) {
+    if (!mama_id) return { error: "Aucun mama_id" };
+    const { data, error: err } = await supabase
+      .from("menus_jour")
+      .upsert({ mama_id, date_menu: date }, { onConflict: "mama_id,date_menu" })
+      .select("id")
+      .single();
+    if (err) {
+      setError(err);
+      return { error: err };
+    }
+    const menuId = data.id;
+    await supabase
+      .from("menus_jour_lignes")
+      .delete()
+      .eq("menu_id", menuId)
+      .eq("mama_id", mama_id);
+    if (Array.isArray(lignes) && lignes.length) {
+      const rows = lignes.map((l) => ({ ...l, menu_id: menuId, mama_id }));
+      await supabase.from("menus_jour_lignes").insert(rows);
+    }
+    return { id: menuId };
+  }
+
+  async function addLigne(menu_id, { categorie, fiche_id, portions }) {
+    if (!mama_id) return;
+    return supabase
+      .from("menus_jour_lignes")
+      .insert({ menu_id, categorie, fiche_id, portions, mama_id });
+  }
+
+  async function removeLigne(ligne_id) {
+    if (!mama_id) return;
+    return supabase
+      .from("menus_jour_lignes")
+      .delete()
+      .eq("id", ligne_id)
+      .eq("mama_id", mama_id);
+  }
+
+  async function duplicateDay(fromDate, toDate) {
+    if (!mama_id) return;
+    const { lignes } = await fetchDay(fromDate);
+    await createOrUpdateMenu(
+      toDate,
+      (lignes || []).map((l) => ({ categorie: l.categorie, fiche_id: l.fiche_id, portions: 1 }))
+    );
+  }
+
+  async function loadFromFavoris(menu_id, favoris = []) {
+    if (!mama_id || !Array.isArray(favoris) || !favoris.length) return;
+    const rows = favoris.map((f) => ({
+      menu_id,
+      mama_id,
+      categorie: f.categorie,
+      fiche_id: f.fiche_id,
+      portions: f.portions_default || 1,
+    }));
+    return supabase.from("menus_jour_lignes").insert(rows);
+  }
+
+  async function exportExcel(date) {
+    const { lignes } = await fetchDay(date);
+    const data = (lignes || []).map((l) => ({
+      categorie: l.categorie,
+      fiche_id: l.fiche_id,
+      portions: l.portions,
+      cout_par_portion: l.cout_par_portion,
+      cout_ligne_total: l.cout_ligne_total,
+    }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), "Menu");
+    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    saveAs(new Blob([buf]), `menu_${date}.xlsx`);
+  }
+
+  async function exportPdf(date) {
+    const { lignes } = await fetchDay(date);
+    const doc = new jsPDF();
+    doc.text(`Menu du ${date}`, 10, 10);
+    let y = 20;
+    (lignes || []).forEach((l) => {
+      const line = `${l.categorie} - ${l.portions} x ${(l.cout_par_portion || 0).toFixed(2)}€`;
+      doc.text(line, 10, y);
+      y += 8;
+    });
+    const pdf = doc.output("arraybuffer");
+    saveAs(new Blob([pdf], { type: "application/pdf" }), `menu_${date}.pdf`);
+  }
+
+  async function getMonthlyAverageFoodCost(month) {
+    if (!mama_id) return null;
+    const { data, error } = await supabase
+      .from("v_menu_du_jour_mensuel")
+      .select("cout_total_mois")
+      .eq("mama_id", mama_id)
+      .eq("mois", month);
+    if (error) {
+      setError(error);
+      return null;
+    }
+    return data?.[0]?.cout_total_mois ?? null;
+  }
+
   return {
     menusDuJour,
     total,
@@ -230,5 +377,15 @@ export function useMenuDuJour() {
     removeFicheFromMenu,
     duplicateMenu,
     reloadSavedFiches,
+    fetchWeek,
+    fetchDay,
+    createOrUpdateMenu,
+    addLigne,
+    removeLigne,
+    duplicateDay,
+    loadFromFavoris,
+    exportExcel,
+    exportPdf,
+    getMonthlyAverageFoodCost,
   };
 }

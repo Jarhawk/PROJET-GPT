@@ -2731,3 +2731,273 @@ select
 from public.fiches_techniques f
 left join public.v_couts_fiches cf
   on cf.fiche_id = f.id and cf.mama_id = f.mama_id;
+
+-- Added missing tables
+create table if not exists public.alertes_rupture (
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid not null,
+  produit_id uuid,
+  type text,
+  stock_actuel numeric,
+  stock_min numeric,
+  stock_projete numeric,
+  cree_le timestamptz default now(),
+  traite boolean default false
+);
+create index if not exists idx_alertes_rupture_mama on public.alertes_rupture(mama_id);
+alter table public.alertes_rupture enable row level security;
+create policy alertes_rupture_all on public.alertes_rupture for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+grant select, insert, update, delete on public.alertes_rupture to authenticated;
+
+create table if not exists public.logs_activite (
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid not null,
+  user_id uuid,
+  type text,
+  module text,
+  description text,
+  donnees jsonb default '{}'::jsonb,
+  ip_address text,
+  user_agent text,
+  critique boolean default false,
+  date_log timestamptz default now()
+);
+create index if not exists idx_logs_activite_mama on public.logs_activite(mama_id, date_log desc);
+alter table public.logs_activite enable row level security;
+create policy logs_activite_all on public.logs_activite for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+grant select, insert on public.logs_activite to authenticated;
+
+create table if not exists public.menus_jour_lignes (
+  id uuid primary key default gen_random_uuid(),
+  menu_id uuid not null references public.menus_jour(id) on delete cascade,
+  mama_id uuid not null,
+  categorie text not null check (categorie in ('entree','plat','dessert','boisson')),
+  fiche_id uuid not null references public.fiches_techniques(id) on delete restrict,
+  portions numeric not null default 1,
+  prix_unitaire_snapshot numeric,
+  created_at timestamptz default now()
+);
+create index if not exists idx_menus_jour_lignes_menu on public.menus_jour_lignes(menu_id);
+create index if not exists idx_menus_jour_lignes_fiche on public.menus_jour_lignes(fiche_id);
+alter table public.menus_jour_lignes enable row level security;
+create policy menus_jour_lignes_all on public.menus_jour_lignes for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+grant select, insert, update, delete on public.menus_jour_lignes to authenticated;
+
+create table if not exists public.rapports_generes (
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid not null,
+  module text,
+  type text,
+  periode_debut date,
+  periode_fin date,
+  date_generation timestamptz default now(),
+  chemin_fichier text,
+  created_by uuid
+);
+create index if not exists idx_rapports_generes_mama on public.rapports_generes(mama_id);
+alter table public.rapports_generes enable row level security;
+create policy rapports_generes_all on public.rapports_generes for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+grant select, insert on public.rapports_generes to authenticated;
+
+create table if not exists public.settings (
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid not null references public.mamas(id) on delete cascade,
+  objectif_marge_pct numeric,
+  objectif_food_cost_pct numeric,
+  primary_color text,
+  secondary_color text,
+  dark_mode boolean,
+  logo_url text,
+  created_at timestamptz default now()
+);
+create index if not exists idx_settings_mama on public.settings(mama_id);
+alter table public.settings enable row level security;
+create policy settings_all on public.settings for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+grant select, insert, update on public.settings to authenticated;
+
+create table if not exists public.user_mama_access (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null,
+  mama_id uuid not null references public.mamas(id) on delete cascade,
+  role text default 'viewer' check (role in ('viewer','manager','admin')),
+  created_at timestamptz default now(),
+  unique (user_id, mama_id)
+);
+alter table public.user_mama_access enable row level security;
+create policy user_mama_access_select on public.user_mama_access for select using (user_id = auth.uid());
+create policy user_mama_access_modify on public.user_mama_access for all using (current_user_is_admin()) with check (current_user_is_admin());
+grant select, insert, update, delete on public.user_mama_access to authenticated;
+
+create table if not exists public.ventes_fiches (
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid not null,
+  fiche_id uuid not null references public.fiches_techniques(id) on delete cascade,
+  date_vente date not null,
+  quantite numeric not null default 0,
+  prix_vente_unitaire numeric,
+  created_at timestamptz default now(),
+  unique (mama_id, fiche_id, date_vente)
+);
+create index if not exists idx_ventes_fiches_mama on public.ventes_fiches(mama_id);
+alter table public.ventes_fiches enable row level security;
+create policy ventes_fiches_all on public.ventes_fiches for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+grant select, insert, update, delete on public.ventes_fiches to authenticated;
+
+create table if not exists public.ventes_import_staging (
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid not null,
+  fiche_id uuid,
+  date_vente date,
+  quantite numeric,
+  prix_vente_unitaire numeric,
+  statut text default 'pending',
+  created_at timestamptz default now()
+);
+create index if not exists idx_vis_mama on public.ventes_import_staging(mama_id);
+alter table public.ventes_import_staging enable row level security;
+create policy ventes_import_staging_all on public.ventes_import_staging for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+grant select, insert, update, delete on public.ventes_import_staging to authenticated;
+
+-- Functions
+create or replace function public.log_action(
+  p_mama_id uuid,
+  p_type text,
+  p_module text,
+  p_description text,
+  p_donnees jsonb default '{}'::jsonb,
+  p_critique boolean default false
+) returns void
+language plpgsql
+security definer
+as $$
+begin
+  insert into public.logs_activite(mama_id, user_id, type, module, description, donnees, critique)
+  values (p_mama_id, auth.uid(), p_type, p_module, p_description, p_donnees, p_critique);
+end;
+$$;
+grant execute on function public.log_action(uuid, text, text, text, jsonb, boolean) to authenticated;
+
+-- Views
+create or replace view public.v_menu_du_jour_lignes_cout as
+select
+  l.id,
+  l.menu_id,
+  l.mama_id,
+  l.categorie,
+  l.fiche_id,
+  l.portions,
+  cf.cout as cout_total_fiche,
+  cf.portions as portions_fiche,
+  (cf.cout / nullif(cf.portions,0)) as cout_par_portion,
+  ((cf.cout / nullif(cf.portions,0)) * l.portions) as cout_ligne_total
+from public.menus_jour_lignes l
+join public.v_couts_fiches cf on cf.fiche_id = l.fiche_id and cf.mama_id = l.mama_id;
+
+create or replace view public.v_menu_du_jour_resume as
+with lignes as (
+  select menu_id, categorie, sum(cout_ligne_total) as cout_categorie
+  from public.v_menu_du_jour_lignes_cout
+  group by menu_id, categorie
+)
+select
+  m.id as menu_id,
+  m.mama_id,
+  m.date_menu,
+  coalesce(sum(l.cout_categorie) filter (where l.categorie='entree'),0) as cout_entrees,
+  coalesce(sum(l.cout_categorie) filter (where l.categorie='plat'),0) as cout_plats,
+  coalesce(sum(l.cout_categorie) filter (where l.categorie='dessert'),0) as cout_desserts,
+  coalesce(sum(l.cout_categorie) filter (where l.categorie='boisson'),0) as cout_boissons,
+  coalesce(sum(l.cout_categorie),0) as cout_total
+from public.menus_jour m
+left join lignes l on l.menu_id = m.id
+group by m.id, m.mama_id, m.date_menu;
+
+create or replace view public.v_menu_du_jour_mensuel as
+select
+  mama_id,
+  date_trunc('month', date_menu)::date as mois,
+  avg(cout_total) as food_cost_avg,
+  sum(cout_total) as cout_total_mois
+from public.v_menu_du_jour_resume
+group by mama_id, date_trunc('month', date_menu);
+
+create or replace view public.v_cons_achats_mensuels as
+select
+  cl.mama_id,
+  date_trunc('month', c.date_commande)::date as mois,
+  sum(coalesce(cl.quantite,0) * coalesce(cl.prix_achat,0)) as achats_total
+from public.commande_lignes cl
+join public.commandes c on c.id = cl.commande_id and c.mama_id = cl.mama_id
+where cl.mama_id = current_user_mama_id()
+group by cl.mama_id, date_trunc('month', c.date_commande);
+
+create or replace view public.v_cons_ventes_mensuelles as
+select
+  mama_id,
+  date_trunc('month', date_vente)::date as mois,
+  sum(coalesce(quantite,0) * coalesce(prix_vente_unitaire,0)) as ca_total,
+  sum(coalesce(quantite,0)) as ventes_total
+from public.ventes_fiches
+where mama_id = current_user_mama_id()
+group by mama_id, date_trunc('month', date_vente);
+
+create or replace view public.v_cons_foodcost_mensuel as
+select
+  mama_id,
+  mois,
+  cout_total_mois as menu_foodcost_total
+from public.v_menu_du_jour_mensuel
+where mama_id = current_user_mama_id();
+
+create or replace view public.v_cons_ecarts_inventaire as
+select
+  mama_id,
+  date_trunc('month', date_inventaire)::date as mois,
+  sum(abs(coalesce(ecart_valorise,0))) as ecart_valorise_total
+from public.v_ecarts_inventaire
+where mama_id = current_user_mama_id()
+group by mama_id, date_trunc('month', date_inventaire);
+
+create or replace view public.v_consolidation_mensuelle as
+select
+  mid.mama_id,
+  mid.mois,
+  coalesce(a.achats_total,0) as achats_total,
+  coalesce(v.ca_total,0) as ca_total,
+  coalesce(v.ventes_total,0) as ventes_total,
+  coalesce(f.menu_foodcost_total,0) as menu_foodcost_total,
+  null::numeric as marge_pct_moy,
+  coalesce(i.ecart_valorise_total,0) as ecart_valorise_total
+from (
+  select mama_id, mois from public.v_cons_achats_mensuels
+  union
+  select mama_id, mois from public.v_cons_ventes_mensuelles
+  union
+  select mama_id, mois from public.v_cons_foodcost_mensuel
+  union
+  select mama_id, mois from public.v_cons_ecarts_inventaire
+) mid
+left join public.v_cons_achats_mensuels a on a.mama_id=mid.mama_id and a.mois=mid.mois
+left join public.v_cons_ventes_mensuelles v on v.mama_id=mid.mama_id and v.mois=mid.mois
+left join public.v_cons_foodcost_mensuel f on f.mama_id=mid.mama_id and f.mois=mid.mois
+left join public.v_cons_ecarts_inventaire i on i.mama_id=mid.mama_id and i.mois=mid.mois;
+
+create or replace view public.v_me_classification as
+select
+  ft.mama_id,
+  ft.id as fiche_id,
+  ft.nom,
+  ft.type as fiche_type,
+  ft.actif,
+  current_date as debut,
+  current_date as fin,
+  null::numeric as ventes,
+  null::numeric as cout_portion,
+  null::numeric as prix_vente,
+  null::numeric as marge,
+  null::numeric as score_calc,
+  null::text as classement,
+  null::numeric as x,
+  null::numeric as y
+from public.fiches_techniques ft
+where 1=0;

@@ -3,6 +3,7 @@
 ## ✅ OK (présents)
 - achats
 - alertes
+- alertes_rupture
 - api_keys
 - auth_double_facteur
 - bons_livraison
@@ -39,6 +40,7 @@
 - inventaires
 - journaux_utilisateur
 - lignes_bl
+- logs_activite
 - logs_securite
 - mamas
 - menu_fiches
@@ -49,6 +51,7 @@
 - menus
 - menus_jour
 - menus_jour_fiches
+- menus_jour_lignes
 - notification_preferences
 - notifications
 - parametres_commandes
@@ -60,10 +63,12 @@
 - produits
 - produits_inventaire
 - promotions
+- rapports_generes
 - regles_alertes
 - requisition_lignes
 - requisitions
 - roles
+- settings
 - signalements
 - sous_familles
 - tableaux_de_bord
@@ -74,6 +79,7 @@
 - transferts
 - unites
 - usage_stats
+- user_mama_access
 - utilisateurs
 - utilisateurs_complets
 - utilisateurs_taches
@@ -81,12 +87,21 @@
 - v_analytique_stock
 - v_besoins_previsionnels
 - v_boissons
+- v_cons_achats_mensuels
+- v_cons_ecarts_inventaire
+- v_cons_foodcost_mensuel
+- v_cons_ventes_mensuelles
+- v_consolidation_mensuelle
 - v_cost_center_month
 - v_cost_center_monthly
 - v_costing_carte
 - v_ecarts_inventaire
 - v_evolution_achats
 - v_fournisseurs_inactifs
+- v_me_classification
+- v_menu_du_jour_lignes_cout
+- v_menu_du_jour_mensuel
+- v_menu_du_jour_resume
 - v_menu_groupe_couts
 - v_menu_groupe_resume
 - v_performance_fiches
@@ -104,27 +119,12 @@
 - v_top_fournisseurs
 - validation_requests
 - ventes_boissons
+- ventes_fiches
+- ventes_import_staging
 - zones_droits
 - zones_stock
 
 ## ❌ Manquants (à créer côté SQL)
-- alertes_rupture (src/hooks/useRuptureAlerts.js:10, src/hooks/useRuptureAlerts.js:26)
-- logs_activite (src/hooks/useLogs.js:21)
-- menus_jour_lignes (src/hooks/useMenuDuJour.js:271, src/hooks/useMenuDuJour.js:278, src/hooks/useMenuDuJour.js:285, src/hooks/useMenuDuJour.js:292, src/hooks/useMenuDuJour.js:317)
-- rapports_generes (src/hooks/useLogs.js:55, src/hooks/useLogs.js:74, src/pages/supervision/Rapports.jsx:45)
-- settings (src/hooks/useCostingCarte.js:49)
-- user_mama_access (src/hooks/useConsolidation.js:17, src/pages/consolidation/AccessMultiSites.jsx:13)
-- v_cons_achats_mensuels (src/hooks/useConsolidation.js:54)
-- v_cons_ecarts_inventaire (src/hooks/useConsolidation.js:87)
-- v_cons_foodcost_mensuel (src/hooks/useConsolidation.js:76)
-- v_cons_ventes_mensuelles (src/hooks/useConsolidation.js:65)
-- v_consolidation_mensuelle (src/hooks/useConsolidation.js:34)
-- v_me_classification (src/hooks/useMenuEngineering.js:18)
-- v_menu_du_jour_lignes_cout (src/hooks/useMenuDuJour.js:249)
-- v_menu_du_jour_mensuel (src/hooks/useMenuDuJour.js:351, src/hooks/useMenuEngineering.js:33)
-- v_menu_du_jour_resume (src/hooks/useMenuDuJour.js:224)
-- ventes_fiches (src/hooks/useMenuEngineering.js:76, src/hooks/useMenuEngineering.js:99)
-- ventes_import_staging (src/hooks/useMenuEngineering.js:61, src/hooks/useMenuEngineering.js:82)
 
 ## ⚠️ Appels legacy
 - mouvements_centres_cout (src/hooks/useMouvementCostCenters.js:18, src/hooks/useMouvementCostCenters.js:38, src/hooks/useMouvementCostCenters.js:51)

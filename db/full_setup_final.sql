@@ -2557,6 +2557,7 @@ select
   f.id as fiche_id,
   f.nom,
   f.type,
+  f.famille,
   f.actif,
   cf.cout,
   cf.portions,

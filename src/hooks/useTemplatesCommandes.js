@@ -1,6 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import useAuth from "@/hooks/useAuth";
 
 export async function getTemplatesCommandesActifs() {
   const { data, error } = await supabase
@@ -11,67 +11,74 @@ export async function getTemplatesCommandesActifs() {
   return { data, error };
 }
 
-export default function useTemplatesCommandes() {
-  const [templates, setTemplates] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  const fetchTemplates = async () => {
-    setLoading(true);
-    setError(null);
-    const { data, error } = await supabase
-      .from("templates_commandes")
-      .select("*")
-      .order("nom");
-    if (error) {
-      setError(error);
-      setTemplates([]);
-    } else {
-      setTemplates(data || []);
-    }
-    setLoading(false);
-    return { data, error };
-  };
-
-  const saveTemplate = async (template) => {
-    setError(null);
-    const { error } = await supabase
-      .from("templates_commandes")
-      .upsert(template)
-      .select();
-    if (error) {
-      setError(error);
-    } else {
-      fetchTemplates();
-    }
-    return { error };
-  };
-
-  const toggleActif = async (id, actif) => {
-    setError(null);
-    const { error } = await supabase
-      .from("templates_commandes")
-      .update({ actif })
-      .eq("id", id);
-    if (error) {
-      setError(error);
-    } else {
-      fetchTemplates();
-    }
-    return { error };
-  };
-
-  useEffect(() => {
-    fetchTemplates();
-  }, []);
+export function useTemplatesCommandes() {
+  const { mama_id } = useAuth();
 
   return {
-    data: templates,
-    templates,
-    loading,
-    error,
-    fetchTemplates,
-    saveTemplate,
-    toggleActif,
+    fetchTemplates: async ({ fournisseur_id } = {}) => {
+      if (!mama_id) return { data: [], error: null };
+      let query = supabase
+        .from("templates_commandes")
+        .select("*, fournisseur:fournisseur_id(id, nom)")
+        .eq("mama_id", mama_id)
+        .order("nom");
+      if (fournisseur_id) query = query.eq("fournisseur_id", fournisseur_id);
+      const { data, error } = await query;
+      return { data, error };
+    },
+
+    fetchTemplateById: async (id) => {
+      if (!mama_id) return { data: null, error: null };
+      const { data, error } = await supabase
+        .from("templates_commandes")
+        .select("*, fournisseur:fournisseur_id(id, nom)")
+        .eq("id", id)
+        .eq("mama_id", mama_id)
+        .single();
+      return { data, error };
+    },
+
+    createTemplate: async (payload) => {
+      if (!mama_id) return { data: null, error: "mama_id manquant" };
+      const { data, error } = await supabase
+        .from("templates_commandes")
+        .insert({ ...payload, mama_id })
+        .select()
+        .single();
+      return { data, error };
+    },
+
+    updateTemplate: async (id, payload) => {
+      if (!mama_id) return { data: null, error: "mama_id manquant" };
+      const { data, error } = await supabase
+        .from("templates_commandes")
+        .update(payload)
+        .eq("id", id)
+        .eq("mama_id", mama_id)
+        .select()
+        .single();
+      return { data, error };
+    },
+
+    deleteTemplate: async (id) => {
+      if (!mama_id) return { error: "mama_id manquant" };
+      const { error } = await supabase
+        .from("templates_commandes")
+        .delete()
+        .eq("id", id)
+        .eq("mama_id", mama_id);
+      return { error };
+    },
+
+    getTemplateForFournisseur: async (fournisseur_id) => {
+      if (!mama_id) return { data: null, error: "mama_id manquant" };
+      const { data, error } = await supabase
+        .rpc("get_template_commande", { p_mama: mama_id, p_fournisseur: fournisseur_id })
+        .single();
+      return { data, error };
+    },
   };
 }
+
+export default useTemplatesCommandes;
+

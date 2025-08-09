@@ -23,7 +23,7 @@ export default function CommandeForm() {
   const [templateId, setTemplateId] = useState("");
   const [form, setForm] = useState({
     adresse_livraison: "",
-    pied_de_page: "",
+    pied_page: "",
     champs_visibles: {},
   });
 
@@ -57,7 +57,7 @@ export default function CommandeForm() {
       setForm(prev => ({
         ...prev,
         adresse_livraison: tpl.adresse_livraison || "",
-        pied_de_page: tpl.pied_de_page || "",
+        pied_page: tpl.pied_page || "",
         champs_visibles: tpl.champs_visibles || {},
       }));
     }
@@ -69,7 +69,7 @@ export default function CommandeForm() {
       fournisseur_id: fournisseurId,
       template_id: templateId || undefined,
       adresse_livraison: form.adresse_livraison,
-      pied_de_page: form.pied_de_page,
+      pied_page: form.pied_page,
       champs_visibles: form.champs_visibles,
       lignes: lignes.map(l => ({
         produit_id: l.produit_id,
@@ -129,13 +129,13 @@ export default function CommandeForm() {
           />
         </div>
       )}
-      {form.champs_visibles?.pied_de_page !== false && (
+      {form.champs_visibles?.pied_page !== false && (
         <div>
           <label className="block font-medium">Pied de page</label>
           <textarea
             className="input"
-            value={form.pied_de_page}
-            onChange={e => setForm(prev => ({ ...prev, pied_de_page: e.target.value }))}
+            value={form.pied_page}
+            onChange={e => setForm(prev => ({ ...prev, pied_page: e.target.value }))}
           />
         </div>
       )}

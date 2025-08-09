@@ -40,7 +40,7 @@ test('backupDb fetches tables and writes file', async () => {
     'factures',
     'facture_lignes',
     'inventaires',
-    'inventaire_lignes',
+    'produits_inventaire',
     'fournisseur_produits',
     'taches',
     'tache_instances',

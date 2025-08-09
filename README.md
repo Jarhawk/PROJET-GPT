@@ -84,7 +84,7 @@ MAMASTOCK_RETRY_ATTEMPTS=3
 MAMASTOCK_RETRY_DELAY_MS=1000
 MAMASTOCK_TIMEOUT_MS=10000
 BACKUP_TABLES=produits,fournisseurs,factures,facture_lignes,\
-inventaires,inventaire_lignes,fournisseur_produits,taches,\
+inventaires,produits_inventaire,fournisseur_produits,taches,\
 tache_instances,mouvements_stock
 BACKUP_DIR=backups
 BACKUP_GZIP=false

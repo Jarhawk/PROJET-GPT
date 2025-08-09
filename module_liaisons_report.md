@@ -18,7 +18,7 @@ Ce document récapitule l'état des références `produit_id` et des mises à jo
 - Vérifier que toutes les écritures passent par cette table.
 
 ## Inventaires / lignes_inventaire
-- `inventaire_lignes` contient `produit_id` ; la vue `v_ecarts_inventaire` expose les écarts.
+- `produits_inventaire` contient `produit_id` ; la vue `v_ecarts_inventaire` expose les écarts.
 - Manquent des triggers pour appliquer systématiquement les ajustements de stock.
 - **Back**: TODO dans `db/ajout.sql`.
 - **Front**: `useInventaires` doit invalider le cache stock après clôture.

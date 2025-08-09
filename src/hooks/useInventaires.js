@@ -13,7 +13,7 @@ export function useInventaires() {
 
   async function getInventaires({
     zoneId,
-    periode,
+    periodeId,
     statut,
     includeArchives = false,
   } = {}) {
@@ -23,14 +23,14 @@ export function useInventaires() {
     let query = supabase
       .from("inventaires")
       .select(
-        "*, lignes:inventaire_lignes!inventaire_id(*, produit:produits!inventaire_lignes_produit_id_fkey(id, nom, unite_id, unite:unite_id (nom), pmp))"
+        "*, zone:inventaire_zones!inventaires_zone_id_fkey(nom), lignes:produits_inventaire!inventaire_id(*, produit:produits!produits_inventaire_produit_id_fkey(id, nom, unite_id, unite:unite_id (nom), pmp))"
       )
       .eq("mama_id", mama_id);
     if (zoneId) query = query.eq("zone_id", zoneId);
-    if (periode) query = query.eq("periode", periode);
+    if (periodeId) query = query.eq("periode_id", periodeId);
     if (statut) query = query.eq("statut", statut);
     if (!includeArchives) query = query.eq("actif", true);
-    const { data, error } = await query.order("periode", { ascending: false });
+    const { data, error } = await query.order("date_inventaire", { ascending: false });
     setLoading(false);
     if (error) {
       setError(error);
@@ -38,6 +38,7 @@ export function useInventaires() {
     }
     const cleaned = (data || []).map(inv => ({
       ...inv,
+      zone: inv.zone?.nom || null,
       lignes: (inv.lignes || []).filter(l => l.actif !== false),
     }));
     setInventaires(cleaned);
@@ -79,7 +80,7 @@ export function useInventaires() {
   async function createInventaire(inv) {
     if (!mama_id) return null;
     const { lignes = [], date, ...entete } = inv;
-    const { error: pErr } = await checkCurrentPeriode(date);
+    const { data: periode, error: pErr } = await checkCurrentPeriode(date);
     if (pErr) {
       setError(pErr);
       return null;
@@ -88,7 +89,7 @@ export function useInventaires() {
     setError(null);
     const { data, error } = await supabase
       .from("inventaires")
-      .insert([{ ...entete, date_inventaire: date, mama_id }])
+      .insert([{ ...entete, date_inventaire: date, periode_id: periode.id, mama_id }])
       .select()
       .single();
     if (error) {
@@ -104,7 +105,7 @@ export function useInventaires() {
         inventaire_id: data.id,
         mama_id,
       }));
-      const { error: errLines } = await supabase.from("inventaire_lignes").insert(toInsert);
+      const { error: errLines } = await supabase.from("produits_inventaire").insert(toInsert);
       if (errLines) setError(errLines);
     }
     setLoading(false);
@@ -119,7 +120,7 @@ export function useInventaires() {
       const { data, error } = await supabase
         .from("inventaires")
         .select(
-          "*, lignes:inventaire_lignes!inventaire_id(*, produit:produits!inventaire_lignes_produit_id_fkey(id, nom, unite_id, unite:unite_id (nom), pmp))"
+          "*, zone:inventaire_zones!inventaires_zone_id_fkey(nom), lignes:produits_inventaire!inventaire_id(*, produit:produits!produits_inventaire_produit_id_fkey(id, nom, unite_id, unite:unite_id (nom), pmp))"
         )
         .eq("id", id)
         .eq("mama_id", mama_id)
@@ -130,7 +131,11 @@ export function useInventaires() {
       return null;
     }
     const inv = data
-      ? { ...data, lignes: (data.lignes || []).filter(l => l.actif !== false) }
+      ? {
+          ...data,
+          zone: data.zone?.nom || null,
+          lignes: (data.lignes || []).filter(l => l.actif !== false),
+        }
       : null;
     return inv;
   }

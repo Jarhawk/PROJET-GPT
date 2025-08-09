@@ -85,9 +85,10 @@ export default function InventaireForm() {
       return;
     }
     setLoading(true);
+    const zoneObj = zones.find(z => z.nom === zone);
     const payload = {
       date,
-      zone,
+      zone_id: zoneObj?.id,
       lignes: lignes.map(l => ({
         produit_id: l.produit_id,
         quantite_reelle: Number(l.quantite_reelle || 0),

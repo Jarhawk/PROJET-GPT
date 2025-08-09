@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useTemplatesCommandes } from "@/hooks/useTemplatesCommandes";
 import { useFournisseurs } from "@/hooks/useFournisseurs";
 import TemplateCommandeForm from "./TemplateCommandeForm";
@@ -18,17 +18,17 @@ export default function TemplatesCommandes() {
     fetchFournisseurs({ limit: 1000 });
   }, [fetchFournisseurs]);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     const { data, error } = await fetchTemplates({ fournisseur_id: fournisseurId || undefined });
     if (error) setError(error);
     setTemplates(data || []);
     setLoading(false);
-  };
+  }, [fetchTemplates, fournisseurId]);
 
   useEffect(() => {
     load();
-  }, [fournisseurId]);
+  }, [load]);
 
   const handleDelete = async (id) => {
     if (!window.confirm("Supprimer ce modèle ?")) return;

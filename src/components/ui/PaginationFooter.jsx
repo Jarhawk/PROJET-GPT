@@ -1,5 +1,4 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import React from 'react';
 import { Button } from './button';
 
 export default function PaginationFooter({ page, pages, onPageChange, className = '' }) {

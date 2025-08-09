@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import useAuth from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -16,11 +16,7 @@ export default function GroupeParamForm({ groupe, onClose, onSaved }) {
   const [selected, setSelected] = useState(groupe?.mamas_ids || []);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    fetchMamas();
-  }, []);
-
-  async function fetchMamas() {
+  const fetchMamas = useCallback(async () => {
     if (role === "superadmin") {
       const { data } = await supabase
         .from("mamas")
@@ -35,7 +31,11 @@ export default function GroupeParamForm({ groupe, onClose, onSaved }) {
         .maybeSingle();
       setMamas(data ? [data] : []);
     }
-  }
+  }, [role, myMama]);
+
+  useEffect(() => {
+    fetchMamas();
+  }, [fetchMamas]);
 
   const toggleMama = (id) => {
     setSelected((s) =>

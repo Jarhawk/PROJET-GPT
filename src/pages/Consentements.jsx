@@ -7,7 +7,7 @@ export default function Consentements() {
 
   useEffect(() => {
     fetchConsentements();
-  }, []);
+  }, [fetchConsentements]);
 
   return (
     <div className="p-6 max-w-2xl mx-auto space-y-6">

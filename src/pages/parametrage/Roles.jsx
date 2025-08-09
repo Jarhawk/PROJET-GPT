@@ -1,12 +1,12 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import React from "react";
+import { useState } from "react";
 import { useRoles } from "@/hooks/useRoles";
 import { Button } from "@/components/ui/button";
 import RoleForm from "./RoleForm";
 
 export default function Roles() {
   const { roles, loading, toggleActif } = useRoles();
-  const [selectedRole, setSelectedRole] = React.useState(null);
+  const [selectedRole, setSelectedRole] = useState(null);
 
   return (
     <div className="p-4">

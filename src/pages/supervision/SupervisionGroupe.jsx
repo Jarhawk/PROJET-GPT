@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useMultiMama } from "@/context/MultiMamaContext";
 import TableContainer from "@/components/ui/TableContainer";
@@ -11,17 +11,17 @@ export default function SupervisionGroupe() {
   const [stats, setStats] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (mamas.length > 0) fetchStats();
-  }, [mamas]);
-
-  async function fetchStats() {
+  const fetchStats = useCallback(async () => {
     setLoading(true);
     const ids = mamas.map((m) => m.id);
     const { data } = await supabase.rpc("stats_multi_mamas", { mama_ids: ids });
     setStats(Array.isArray(data) ? data : []);
     setLoading(false);
-  }
+  }, [mamas]);
+
+  useEffect(() => {
+    if (mamas.length > 0) fetchStats();
+  }, [mamas, fetchStats]);
 
   const display = stats.length ? stats : mamas.map((m) => ({ ...m, mama_id: m.id }));
 

@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import React from "react";
+import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./globals.css";
@@ -28,11 +28,11 @@ if (!import.meta.env.DEV) {
 
 const root = createRoot(document.getElementById("root"));
 root.render(
-  <React.StrictMode>
+  <StrictMode>
     <BrowserRouter>
       <AuthProvider>
         <App />
       </AuthProvider>
     </BrowserRouter>
-  </React.StrictMode>
+  </StrictMode>
 );

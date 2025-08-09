@@ -1,5 +1,4 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import React from "react";
 export default function Receptions() {
   return (
     <div className="p-4">

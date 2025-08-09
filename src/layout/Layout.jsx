@@ -6,6 +6,7 @@ import useAuth from "@/hooks/useAuth";
 import useNotifications from "@/hooks/useNotifications";
 import { Badge } from "@/components/ui/badge";
 import { Bell } from "lucide-react";
+import AlertBadge from "@/components/stock/AlertBadge";
 import toast from "react-hot-toast";
 import Footer from "@/components/Footer";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
@@ -66,17 +67,18 @@ export default function Layout() {
       <div className="flex flex-col flex-1 relative z-10">
         <main className="flex-1 p-4 overflow-auto">
           <div className="flex justify-end items-center gap-2 mb-4">
-          {user && (
-            <>
-              <Link to="/notifications" className="relative">
-                <Bell size={20} />
-                {unread > 0 && (
-                  <Badge color="red" className="absolute -top-1 -right-1">
-                    {unread}
-                  </Badge>
-                )}
-              </Link>
-              <span>{user.email}</span>
+            {user && (
+              <>
+                <Link to="/notifications" className="relative">
+                  <Bell size={20} />
+                  {unread > 0 && (
+                    <Badge color="red" className="absolute -top-1 -right-1">
+                      {unread}
+                    </Badge>
+                  )}
+                </Link>
+                <AlertBadge />
+                <span>{user.email}</span>
               {userData.nom && (
                 <span className="text-xs bg-white/10 px-2 py-1 rounded capitalize">
                   {userData.nom}

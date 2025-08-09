@@ -33,11 +33,16 @@ create table if not exists public.produits (
   sous_famille_id uuid,
   stock_reel numeric default 0,
   stock_min numeric default 0,
+  stock_theorique numeric default 0,
   pmp numeric default 0,
   actif boolean default true,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
+
+alter table if exists public.produits
+  add column if not exists stock_min numeric default 0,
+  add column if not exists stock_theorique numeric default 0;
 
 create table if not exists public.roles (
   id uuid primary key default gen_random_uuid(),
@@ -2279,3 +2284,125 @@ language sql as $$
   limit coalesce(limit_param, 10);
 $$;
 grant execute on function public.top_produits(uuid, date, date, integer) to authenticated;
+
+-- Stock alert system
+create or replace view public.v_stock_theorique as
+select
+  p.id as produit_id,
+  p.nom,
+  p.mama_id,
+  coalesce(sum(m.quantite),0) as stock_actuel,
+  p.stock_min,
+  (coalesce(sum(m.quantite),0)
+   - coalesce(sum(rq.quantite),0)
+   + coalesce(sum(cmd.quantite),0)
+  ) as stock_projete
+from public.produits p
+left join public.mouvements m
+  on m.produit_id = p.id and m.mama_id = p.mama_id
+left join (
+  select rl.produit_id, sum(rl.quantite) as quantite, r.mama_id
+  from public.requisitions r
+  join public.requisition_lignes rl on rl.requisition_id = r.id
+  where r.statut='faite'
+  group by rl.produit_id, r.mama_id
+) rq on rq.produit_id = p.id and rq.mama_id = p.mama_id
+left join (
+  select cl.produit_id, sum(cl.quantite) as quantite, c.mama_id
+  from public.commandes c
+  join public.commande_lignes cl on cl.commande_id = c.id
+  where c.statut in ('brouillon','envoyée')
+  group by cl.produit_id, c.mama_id
+) cmd on cmd.produit_id = p.id and cmd.mama_id = p.mama_id
+group by p.id, p.nom, p.mama_id, p.stock_min;
+
+create table if not exists public.alertes_rupture (
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid not null references public.mamas(id) on delete cascade,
+  produit_id uuid not null references public.produits(id) on delete cascade,
+  type text not null check (type in ('rupture','prevision')),
+  stock_actuel numeric not null,
+  stock_min numeric not null,
+  stock_projete numeric,
+  cree_le timestamptz default now(),
+  traite boolean default false
+);
+create index if not exists idx_alertes_mama_produit on public.alertes_rupture(mama_id, produit_id);
+alter table public.alertes_rupture enable row level security;
+create policy alertes_select on public.alertes_rupture
+  for select using (mama_id = current_user_mama_id());
+create policy alertes_all on public.alertes_rupture
+  for all using (mama_id = current_user_mama_id())
+  with check (mama_id = current_user_mama_id());
+grant select, insert, update, delete on public.alertes_rupture to authenticated;
+
+create or replace function public.notify_create(
+  p_mama uuid,
+  p_type text,
+  p_severity text,
+  p_title text,
+  p_message text,
+  p_link text,
+  p_meta jsonb
+) returns void
+language plpgsql
+as $$
+begin
+  return;
+end;
+$$;
+grant execute on function public.notify_create(uuid, text, text, text, text, text, jsonb) to authenticated;
+
+create or replace function public.check_alertes_rupture(p_mama uuid)
+returns void
+language plpgsql
+security definer
+as $$
+declare
+  r record;
+begin
+  for r in
+    select *
+    from public.v_stock_theorique
+    where mama_id = p_mama
+      and stock_actuel <= stock_min
+  loop
+    insert into public.alertes_rupture (mama_id, produit_id, type, stock_actuel, stock_min, stock_projete)
+    values (p_mama, r.produit_id, 'rupture', r.stock_actuel, r.stock_min, r.stock_projete)
+    on conflict do nothing;
+
+    perform public.notify_create(
+      p_mama,
+      'seuil',
+      'warning',
+      'Rupture imminente : ' || r.nom,
+      'Stock actuel ' || r.stock_actuel || ' ≤ min ' || r.stock_min,
+      '/produits/' || r.produit_id,
+      jsonb_build_object(''produit_id'', r.produit_id)
+    );
+  end loop;
+
+  for r in
+    select *
+    from public.v_stock_theorique
+    where mama_id = p_mama
+      and stock_projete <= stock_min
+      and stock_actuel > stock_min
+  loop
+    insert into public.alertes_rupture (mama_id, produit_id, type, stock_actuel, stock_min, stock_projete)
+    values (p_mama, r.produit_id, 'prevision', r.stock_actuel, r.stock_min, r.stock_projete)
+    on conflict do nothing;
+
+    perform public.notify_create(
+      p_mama,
+      'seuil',
+      'info',
+      'Prévision rupture : ' || r.nom,
+      'Stock projeté ' || r.stock_projete || ' ≤ min ' || r.stock_min,
+      '/produits/' || r.produit_id,
+      jsonb_build_object(''produit_id'', r.produit_id)
+    );
+  end loop;
+end;
+$$;
+grant execute on function public.check_alertes_rupture(uuid) to authenticated;

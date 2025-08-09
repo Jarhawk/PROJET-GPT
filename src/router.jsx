@@ -40,8 +40,9 @@ const Inventaire = lazyWithPreload(() => import("@/pages/inventaire/Inventaire.j
 const InventaireForm = lazyWithPreload(() => import("@/pages/inventaire/InventaireForm.jsx"));
 const InventaireDetail = lazyWithPreload(() => import("@/pages/inventaire/InventaireDetail.jsx"));
 const InventaireZones = lazyWithPreload(() => import("@/pages/inventaire/InventaireZones.jsx"));
-const StockTransferts = lazyWithPreload(() => import("@/pages/stock/Transferts.jsx"));
-const Alertes = lazyWithPreload(() => import("@/pages/Alertes.jsx"));
+  const StockTransferts = lazyWithPreload(() => import("@/pages/stock/Transferts.jsx"));
+  const Alertes = lazyWithPreload(() => import("@/pages/Alertes.jsx"));
+  const AlertesRupture = lazyWithPreload(() => import("@/pages/stock/AlertesRupture.jsx"));
 const Taches = lazyWithPreload(() => import("@/pages/taches/Taches.jsx"));
 const TacheForm = lazyWithPreload(() => import("@/pages/taches/TacheForm.jsx"));
 const TacheDetail = lazyWithPreload(() => import("@/pages/taches/TacheDetail.jsx"));
@@ -151,6 +152,7 @@ export const routePreloadMap = {
   '/surcouts': Surcouts.preload,
   '/analyse/costing-carte': CostingCarte.preload,
   '/alertes': Alertes.preload,
+  '/stock/alertes-rupture': AlertesRupture.preload,
   '/parametrage/utilisateurs': Utilisateurs.preload,
   '/parametrage/mamas': Mamas.preload,
   '/parametrage/permissions': Permissions.preload,
@@ -370,6 +372,10 @@ export default function Router() {
           <Route
             path="/alertes"
             element={<ProtectedRoute moduleKey="alertes"><Alertes /></ProtectedRoute>}
+          />
+          <Route
+            path="/stock/alertes-rupture"
+            element={<ProtectedRoute moduleKey="alertes"><AlertesRupture /></ProtectedRoute>}
           />
           <Route
             path="/promotions"

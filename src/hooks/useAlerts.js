@@ -79,5 +79,50 @@ export function useAlerts() {
     }
   }
 
-  return { rules, loading, error, fetchRules, addRule, updateRule, deleteRule };
+  const fetchAlerts = useCallback(async (type = null, traite = null) => {
+    if (!mama_id) return [];
+    let query = supabase
+      .from("alertes_rupture")
+      .select("*, produit:produit_id(id, nom)")
+      .eq("mama_id", mama_id)
+      .order("cree_le", { ascending: false });
+    if (type) query = query.eq("type", type);
+    if (typeof traite === "boolean") query = query.eq("traite", traite);
+    const { data } = await query;
+    return data || [];
+  }, [mama_id]);
+
+  const markAsHandled = useCallback(async (id) => {
+    if (!mama_id) return;
+    await supabase
+      .from("alertes_rupture")
+      .update({ traite: true })
+      .eq("id", id)
+      .eq("mama_id", mama_id);
+  }, [mama_id]);
+
+  const generateSuggestions = useCallback(async () => {
+    if (!mama_id) return [];
+    const res = await fetch("/functions/v1/generatePurchaseSuggestions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mama_id }),
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return json.suggestions || [];
+  }, [mama_id]);
+
+  return {
+    rules,
+    loading,
+    error,
+    fetchRules,
+    addRule,
+    updateRule,
+    deleteRule,
+    fetchAlerts,
+    markAsHandled,
+    generateSuggestions,
+  };
 }

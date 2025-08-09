@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { PDFDownloadLink, pdf } from "@react-pdf/renderer";
 import { supabase } from "@/lib/supabase";
 import { useCommandes } from "@/hooks/useCommandes";
+import { useTemplatesCommandes } from "@/hooks/useTemplatesCommandes";
 import CommandePDF from "@/components/pdf/CommandePDF";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
@@ -26,6 +27,7 @@ async function generateCommandePDFBase64(commande, template, fournisseur) {
 export default function CommandeDetail() {
   const { id } = useParams();
   const { currentCommande: commande, fetchCommandeById, loading } = useCommandes();
+  const { getTemplateForFournisseur } = useTemplatesCommandes();
   const [template, setTemplate] = useState(null);
 
   useEffect(() => {
@@ -33,15 +35,12 @@ export default function CommandeDetail() {
   }, [id, fetchCommandeById]);
 
   useEffect(() => {
-    if (commande?.template_id) {
-      supabase
-        .from("templates_commandes")
-        .select("*")
-        .eq("id", commande.template_id)
-        .single()
-        .then(({ data }) => setTemplate(data || null));
+    if (commande?.fournisseur_id) {
+      getTemplateForFournisseur(commande.fournisseur_id).then(({ data }) =>
+        setTemplate(data || null)
+      );
     }
-  }, [commande]);
+  }, [commande, getTemplateForFournisseur]);
 
   if (loading || !commande) return <div>Chargement...</div>;
 

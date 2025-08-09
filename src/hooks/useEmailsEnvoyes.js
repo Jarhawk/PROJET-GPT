@@ -72,15 +72,13 @@ export function useEmailsEnvoyes() {
       .single();
     if (cmdErr || !commande) return { error: cmdErr || "Commande introuvable" };
 
-    let template = null;
-    if (commande.template_id) {
-      const { data: tpl } = await supabase
-        .from("templates_commandes")
-        .select("*")
-        .eq("id", commande.template_id)
-        .single();
-      template = tpl || null;
-    }
+    const { data: tpl } = await supabase
+      .rpc("get_template_commande", {
+        p_mama: mama_id,
+        p_fournisseur: commande.fournisseur_id,
+      })
+      .single();
+    const template = tpl || null;
 
     const blob = await pdf(
       <CommandePDF commande={commande} template={template} fournisseur={commande.fournisseur} />,

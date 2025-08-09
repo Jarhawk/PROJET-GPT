@@ -94,15 +94,23 @@ create table if not exists public.commande_lignes (
 );
 
 create table if not exists public.templates_commandes (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid not null references public.mamas(id) on delete cascade,
   nom text not null,
+  fournisseur_id uuid references public.fournisseurs(id) on delete set null,
+  logo_url text,
+  entete text,
+  pied_page text,
   adresse_livraison text,
-  pied_de_page text,
+  contact_nom text,
+  contact_tel text,
+  contact_email text,
+  conditions_generales text,
   champs_visibles jsonb default '{}'::jsonb,
   actif boolean default true,
-  mama_id uuid not null,
   created_at timestamptz default now(),
-  updated_at timestamptz default now()
+  updated_at timestamptz default now(),
+  unique (mama_id, nom, fournisseur_id)
 );
 
 create table if not exists public.emails_envoyes (
@@ -146,7 +154,9 @@ create index if not exists idx_commandes_mama_id on public.commandes(mama_id);
 create index if not exists idx_commandes_fournisseur_id on public.commandes(fournisseur_id);
 create index if not exists idx_commande_lignes_commande_id on public.commande_lignes(commande_id);
 create index if not exists idx_commande_lignes_mama_id on public.commande_lignes(mama_id);
-create index if not exists idx_templates_commandes_mama on public.templates_commandes(mama_id);
+create index if not exists idx_templates_cmd_mama on public.templates_commandes(mama_id);
+create index if not exists idx_templates_cmd_fournisseur on public.templates_commandes(fournisseur_id);
+create unique index if not exists uq_templates_cmd_mama_nom_generic on public.templates_commandes(mama_id, nom) where fournisseur_id is null;
 create index if not exists idx_emails_envoyes_commande on public.emails_envoyes(commande_id);
 create index if not exists idx_emails_envoyes_mama_id on public.emails_envoyes(mama_id);
 create index if not exists idx_permissions_role_id on public.permissions(role_id);
@@ -271,6 +281,13 @@ do $$ begin
 end $$;
 
 do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'fk_templates_commandes_fournisseur_id') then
+    alter table public.templates_commandes
+      add constraint fk_templates_commandes_fournisseur_id foreign key (fournisseur_id) references public.fournisseurs(id) on delete set null;
+  end if;
+end $$;
+
+do $$ begin
   if not exists (select 1 from pg_constraint where conname = 'fk_emails_envoyes_commande_id') then
     alter table public.emails_envoyes
       add constraint fk_emails_envoyes_commande_id foreign key (commande_id) references public.commandes(id) on delete cascade;
@@ -326,7 +343,7 @@ begin
 end;
 $$ language plpgsql;
 
-create or replace function public.update_timestamp_templates() returns trigger as $$
+create or replace function public.trg_set_timestamp() returns trigger as $$
 begin
   new.updated_at = now();
   return new;
@@ -338,6 +355,30 @@ returns uuid
 language sql stable as $$
   select u.mama_id from public.utilisateurs u where u.auth_id = auth.uid();
 $$;
+
+create or replace function public.current_user_is_admin_or_manager()
+returns boolean
+language sql stable as $$
+  select exists (
+    select 1 from public.utilisateurs u
+    join public.roles r on r.id = u.role_id
+    where u.auth_id = auth.uid()
+      and r.nom in ('admin','manager')
+  );
+$$;
+
+create or replace function public.get_template_commande(p_mama uuid, p_fournisseur uuid)
+returns setof public.templates_commandes
+language sql security definer as $$
+  select *
+  from public.templates_commandes
+  where mama_id = p_mama
+    and actif = true
+    and (fournisseur_id = p_fournisseur or fournisseur_id is null)
+  order by fournisseur_id nulls last
+  limit 1;
+$$;
+grant execute on function public.get_template_commande(uuid, uuid) to authenticated;
 
 create or replace function public.create_utilisateur(
   p_email text,
@@ -393,13 +434,10 @@ do $$ begin
   end if;
 end $$;
 
-do $$ begin
-  if not exists (select 1 from pg_trigger where tgname = 'trg_templates_commandes_updated_at') then
-    create trigger trg_templates_commandes_updated_at
-    before update on public.templates_commandes
-    for each row execute procedure public.update_timestamp_templates();
-  end if;
-end $$;
+drop trigger if exists set_ts_templates_cmd on public.templates_commandes;
+create trigger set_ts_templates_cmd
+before update on public.templates_commandes
+for each row execute procedure public.trg_set_timestamp();
 
 -- 8. RLS & Policies
 alter table public.mamas enable row level security;
@@ -467,10 +505,16 @@ end $$;
 
 alter table public.templates_commandes enable row level security;
 do $$ begin
-  if not exists (select 1 from pg_policies where schemaname='public' and tablename='templates_commandes' and policyname='templates_commandes_all') then
-    create policy templates_commandes_all on public.templates_commandes
-      for all using (mama_id = current_user_mama_id())
-      with check (mama_id = current_user_mama_id());
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='templates_commandes' and policyname='templates_commandes_select') then
+    create policy templates_commandes_select on public.templates_commandes
+      for select using (mama_id = current_user_mama_id());
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='templates_commandes' and policyname='templates_commandes_crud_admin') then
+    create policy templates_commandes_crud_admin on public.templates_commandes
+      for all using (mama_id = current_user_mama_id() and current_user_is_admin_or_manager())
+      with check (mama_id = current_user_mama_id() and current_user_is_admin_or_manager());
   end if;
 end $$;
 

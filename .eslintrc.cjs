@@ -9,10 +9,18 @@ module.exports = {
     "plugin:react-hooks/recommended",
     "prettier"
   ],
-  plugins: ["react", "react-hooks"],
+  plugins: ["react", "react-hooks", "react-refresh"],
   settings: { react: { version: "detect" } },
   rules: {
-    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+    // React Fast Refresh
+    "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
+
+    // Échapper les apostrophes/quotes dans JSX
+    "react/no-unescaped-entities": "off",
+    "no-irregular-whitespace": "warn",
+
+    // Hygiène
+    "no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
     "react/prop-types": "off"
   }
 };

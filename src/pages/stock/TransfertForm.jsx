@@ -10,7 +10,8 @@ import toast from "react-hot-toast";
 export default function TransfertForm({ onClose, onSaved }) {
   const { createTransfert } = useTransferts();
   const { products, fetchProducts } = useProducts();
-  const { zones, fetchZones } = useZones();
+  const { myAccessibleZones } = useZones();
+  const [zones, setZones] = useState([]);
 
   const [header, setHeader] = useState({
     zone_source_id: "",
@@ -22,8 +23,8 @@ export default function TransfertForm({ onClose, onSaved }) {
 
   useEffect(() => {
     fetchProducts({});
-    fetchZones();
-  }, [fetchProducts, fetchZones]);
+    myAccessibleZones({ mode: 'transfert' }).then(setZones);
+  }, [fetchProducts, myAccessibleZones]);
 
   const handleAddLine = () => {
     setLignes((l) => [...l, { produit_id: "", quantite: "" }]);

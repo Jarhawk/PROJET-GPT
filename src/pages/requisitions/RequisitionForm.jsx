@@ -19,7 +19,8 @@ function RequisitionFormPage() {
   const { mama_id, loading: authLoading } = useAuth();
   const { createRequisition } = useRequisitions();
   const { products, loading: loadingProducts } = useProducts();
-  const { zones, fetchZones } = useZones();
+  const { myAccessibleZones } = useZones();
+  const [zones, setZones] = useState([]);
   const { unites, fetchUnites } = useUnites();
 
   const [statut, setStatut] = useState("");
@@ -28,11 +29,10 @@ function RequisitionFormPage() {
   const [articles, setArticles] = useState([{ produit_id: "", unite_id: "", quantite: 1 }]);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => { fetchZones(); fetchUnites(); }, [fetchZones, fetchUnites]);
+  useEffect(() => { myAccessibleZones({ mode: 'requisition' }).then(setZones); fetchUnites(); }, [myAccessibleZones, fetchUnites]);
 
   useEffect(() => {
-    const cave = zones.find(z => z.nom?.toLowerCase() === "cave");
-    if (cave) setZone(cave.id);
+    if (zones.length > 0) setZone(zones[0].id);
   }, [zones]);
 
   const handleChangeArticle = (index, field, value) => {

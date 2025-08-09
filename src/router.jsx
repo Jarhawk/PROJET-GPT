@@ -62,6 +62,8 @@ const AccessRights = lazyWithPreload(() => import("@/pages/parametrage/AccessRig
 const APIKeys = lazyWithPreload(() => import("@/pages/parametrage/APIKeys.jsx"));
 const MamaSettingsForm = lazyWithPreload(() => import("@/pages/parametrage/MamaSettingsForm.jsx"));
 const Zones = lazyWithPreload(() => import("@/pages/parametrage/Zones.jsx"));
+const ZoneForm = lazyWithPreload(() => import("@/pages/parametrage/ZoneForm.jsx"));
+const ZoneAccess = lazyWithPreload(() => import("@/pages/parametrage/ZoneAccess.jsx"));
 const Familles = lazyWithPreload(() => import("@/pages/parametrage/Familles.jsx"));
 const Unites = lazyWithPreload(() => import("@/pages/parametrage/Unites.jsx"));
 const Periodes = lazyWithPreload(() => import("@/pages/parametrage/Periodes.jsx"));
@@ -164,7 +166,9 @@ export const routePreloadMap = {
   '/parametrage/api-keys': APIKeys.preload,
   '/parametrage/api-fournisseurs': ApiFournisseurs.preload,
   '/parametrage/settings': MamaSettingsForm.preload,
-  '/parametrage/zones-stock': Zones.preload,
+  '/parametrage/zones': Zones.preload,
+  '/parametrage/zones/:id': ZoneForm.preload,
+  '/parametrage/zones/:id/droits': ZoneAccess.preload,
   '/parametrage/familles': Familles.preload,
   '/parametrage/unites': Unites.preload,
   '/parametrage/periodes': Periodes.preload,
@@ -511,8 +515,16 @@ export default function Router() {
             element={<ProtectedRoute moduleKey="settings"><MamaSettingsForm /></ProtectedRoute>}
           />
           <Route
-            path="/parametrage/zones-stock"
+            path="/parametrage/zones"
             element={<ProtectedRoute moduleKey="zones_stock"><Zones /></ProtectedRoute>}
+          />
+          <Route
+            path="/parametrage/zones/:id"
+            element={<ProtectedRoute moduleKey="zones_stock"><ZoneForm /></ProtectedRoute>}
+          />
+          <Route
+            path="/parametrage/zones/:id/droits"
+            element={<ProtectedRoute moduleKey="zones_stock"><ZoneAccess /></ProtectedRoute>}
           />
           <Route
             path="/parametrage/familles"

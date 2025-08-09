@@ -268,7 +268,7 @@
     "module": "settings"
   },
   {
-    "route": "/parametrage/zones-stock",
+    "route": "/parametrage/zones",
     "module": "zones_stock"
   },
   {

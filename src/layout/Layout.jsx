@@ -9,6 +9,7 @@ import { Bell } from "lucide-react";
 import toast from "react-hot-toast";
 import Footer from "@/components/Footer";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import AlertBadge from "@/components/stock/AlertBadge";
 import {
   LiquidBackground,
   WavesBackground,
@@ -76,6 +77,7 @@ export default function Layout() {
                   </Badge>
                 )}
               </Link>
+              <AlertBadge />
               <span>{user.email}</span>
               {userData.nom && (
                 <span className="text-xs bg-white/10 px-2 py-1 rounded capitalize">

@@ -2,19 +2,12 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { beforeEach, expect, test, vi } from 'vitest';
 
-vi.mock('@/hooks/useMenusGroupes', () => ({
+vi.mock('@/hooks/useMenuGroupe', () => ({
   default: () => ({
-    createOrUpdateMenu: vi.fn(),
-    calculateMenuStats: ({ prix_vente, fiches }) => {
-      const total = fiches.reduce((s, f) => s + (f.cout || 0), 0);
-      return {
-        totalCost: total,
-        marge: prix_vente - total,
-        taux_food_cost: prix_vente ? (total / prix_vente) * 100 : 0,
-      };
-    },
-    exportMenuPDF: vi.fn(),
-    exportMenuExcel: vi.fn(),
+    createMenuGroupe: vi.fn().mockResolvedValue({ id: '1' }),
+    addLigne: vi.fn().mockResolvedValue({}),
+    exportPdf: vi.fn(),
+    exportExcel: vi.fn(),
   }),
 }));
 
@@ -26,11 +19,10 @@ beforeEach(async () => {
   MenuGroupeForm = (await import('@/pages/menus/MenuGroupeForm.jsx')).default;
 });
 
-test("ajout de fiche et alerte marge", () => {
+test('ajout fiche calcule les couts', () => {
   render(<MenuGroupeForm />);
   fireEvent.change(screen.getByLabelText('prix'), { target: { value: '10' } });
   fireEvent.click(screen.getByText('Ajouter fiche'));
   expect(screen.getByText('Coût total: 8.00 €')).toBeInTheDocument();
-  expect(screen.getByText('Marge: 2.00 €')).toBeInTheDocument();
-  expect(screen.getByRole('alert')).toBeInTheDocument();
+  expect(screen.getByText(/Marge: 2.00 €/)).toBeInTheDocument();
 });

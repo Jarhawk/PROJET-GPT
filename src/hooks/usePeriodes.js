@@ -18,24 +18,24 @@ export default function usePeriodes() {
       .from('periodes_comptables')
       .select('*')
       .eq('mama_id', mama_id)
-      .order('date_debut', { ascending: false });
+      .order('debut', { ascending: false });
     setLoading(false);
     if (error) {
       setError(error);
       return [];
     }
     setPeriodes(Array.isArray(data) ? data : []);
-    setCurrent(data?.find(p => p.actuelle) || null);
+    setCurrent(data?.find(p => p.actif) || null);
     return data || [];
   }
 
-  async function createPeriode({ date_debut, date_fin }) {
+  async function createPeriode({ debut, fin }) {
     if (!mama_id) return { error: 'no mama_id' };
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
       .from('periodes_comptables')
-      .insert([{ mama_id, date_debut, date_fin, cloturee: false, actuelle: true }])
+      .insert([{ mama_id, debut, fin, cloturee: false, actif: true }])
       .select()
       .single();
     setLoading(false);
@@ -64,7 +64,7 @@ export default function usePeriodes() {
     }
     const { error: updErr } = await supabase
       .from('periodes_comptables')
-      .update({ cloturee: true, actuelle: false })
+      .update({ cloturee: true, actif: false })
       .eq('id', id)
       .eq('mama_id', mama_id);
     if (updErr) {
@@ -72,7 +72,7 @@ export default function usePeriodes() {
       setError(updErr);
       return { error: updErr };
     }
-    const debut = new Date(periode.date_fin);
+    const debut = new Date(periode.fin);
     debut.setDate(debut.getDate() + 1);
     const fin = new Date(debut);
     fin.setMonth(fin.getMonth() + 1);
@@ -80,10 +80,10 @@ export default function usePeriodes() {
     await supabase.from('periodes_comptables').insert([
       {
         mama_id,
-        date_debut: debut.toISOString().slice(0, 10),
-        date_fin: fin.toISOString().slice(0, 10),
+        debut: debut.toISOString().slice(0, 10),
+        fin: fin.toISOString().slice(0, 10),
         cloturee: false,
-        actuelle: true,
+        actif: true,
       },
     ]);
     setLoading(false);
@@ -97,11 +97,11 @@ export default function usePeriodes() {
       .from('periodes_comptables')
       .select('*')
       .eq('mama_id', mama_id)
-      .eq('actuelle', true)
+      .eq('actif', true)
       .single();
     if (error) return { error };
     if (!data) return { error: new Error('Aucune période active') };
-    if (data.cloturee || date < data.date_debut || date > data.date_fin)
+    if (data.cloturee || date < data.debut || date > data.fin)
       return { error: new Error('Période comptable clôturée') };
     return { data };
   }

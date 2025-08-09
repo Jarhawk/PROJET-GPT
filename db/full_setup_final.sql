@@ -1132,27 +1132,6 @@ do $$ begin
   end if;
 end $$;
 grant select, insert, update, delete on public.help_articles to authenticated;
-create table if not exists public.inventaire_lignes (
-  id uuid primary key default uuid_generate_v4(),
-  mama_id uuid,
-  created_at timestamptz default now()
-);
-create index if not exists idx_inventaire_lignes_mama_id on public.inventaire_lignes(mama_id);
-do $$ begin
-  if not exists (select 1 from pg_constraint where conname = 'fk_inventaire_lignes_mama_id') then
-    alter table public.inventaire_lignes
-      add constraint fk_inventaire_lignes_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
-  end if;
-end $$;
-alter table public.inventaire_lignes enable row level security;
-do $$ begin
-  if not exists (select 1 from pg_policies where schemaname='public' and tablename='inventaire_lignes' and policyname='inventaire_lignes_all') then
-    create policy inventaire_lignes_all on public.inventaire_lignes
-      for all using (mama_id = current_user_mama_id())
-      with check (mama_id = current_user_mama_id());
-  end if;
-end $$;
-grant select, insert, update, delete on public.inventaire_lignes to authenticated;
 create table if not exists public.inventaire_zones (
   id uuid primary key default uuid_generate_v4(),
   mama_id uuid,
@@ -1175,26 +1154,63 @@ do $$ begin
 end $$;
 grant select, insert, update, delete on public.inventaire_zones to authenticated;
 create table if not exists public.inventaires (
-  id uuid primary key default uuid_generate_v4(),
-  mama_id uuid,
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid references public.mamas(id),
+  date_inventaire date not null,
+  zone_id uuid references public.inventaire_zones(id),
+  periode_id uuid references public.periodes_comptables(id),
+  commentaire text,
+  actif boolean default true,
   created_at timestamptz default now()
 );
 create index if not exists idx_inventaires_mama_id on public.inventaires(mama_id);
-do $$ begin
-  if not exists (select 1 from pg_constraint where conname = 'fk_inventaires_mama_id') then
-    alter table public.inventaires
-      add constraint fk_inventaires_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
-  end if;
-end $$;
+create index if not exists idx_inventaires_periode_id on public.inventaires(periode_id);
 alter table public.inventaires enable row level security;
 do $$ begin
-  if not exists (select 1 from pg_policies where schemaname='public' and tablename='inventaires' and policyname='inventaires_all') then
-    create policy inventaires_all on public.inventaires
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='inventaires' and policyname='inventaires_select') then
+    create policy inventaires_select on public.inventaires
+      for select using (mama_id = current_user_mama_id());
+  end if;
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='inventaires' and policyname='inventaires_update') then
+    create policy inventaires_update on public.inventaires
+      for update using (mama_id = current_user_mama_id())
+      with check (mama_id = current_user_mama_id());
+  end if;
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='inventaires' and policyname='inventaires_delete') then
+    create policy inventaires_delete on public.inventaires
+      for delete using (mama_id = current_user_mama_id());
+  end if;
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='inventaires' and policyname='inventaire_insert') then
+    create policy inventaire_insert on public.inventaires
+      for insert with check (
+        mama_id = current_user_mama_id()
+        and exists (select 1 from periodes_comptables p where p.id = periode_id and p.cloturee = false)
+      );
+  end if;
+end $$;
+grant select, insert, update, delete on public.inventaires to authenticated;
+create table if not exists public.produits_inventaire (
+  id uuid primary key default gen_random_uuid(),
+  inventaire_id uuid references public.inventaires(id) on delete cascade,
+  produit_id uuid references public.produits(id),
+  quantite_theorique numeric,
+  quantite_reelle numeric,
+  unite text,
+  ecart numeric generated always as (coalesce(quantite_reelle,0) - coalesce(quantite_theorique,0)) stored,
+  mama_id uuid references public.mamas(id),
+  created_at timestamptz default now()
+);
+create index if not exists idx_produits_inventaire_mama_id on public.produits_inventaire(mama_id);
+create index if not exists idx_produits_inventaire_inventaire_id on public.produits_inventaire(inventaire_id);
+alter table public.produits_inventaire enable row level security;
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='produits_inventaire' and policyname='produits_inventaire_rls') then
+    create policy produits_inventaire_rls on public.produits_inventaire
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
 end $$;
-grant select, insert, update, delete on public.inventaires to authenticated;
+grant select, insert, update, delete on public.produits_inventaire to authenticated;
 create table if not exists public.journaux_utilisateur (
   id uuid primary key default uuid_generate_v4(),
   mama_id uuid,
@@ -1505,21 +1521,19 @@ do $$ begin
 end $$;
 grant select, insert, update, delete on public.parametres_commandes to authenticated;
 create table if not exists public.periodes_comptables (
-  id uuid primary key default uuid_generate_v4(),
-  mama_id uuid,
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid references public.mamas(id),
+  debut date not null,
+  fin date not null,
+  actif boolean default true,
+  cloturee boolean default false,
   created_at timestamptz default now()
 );
 create index if not exists idx_periodes_comptables_mama_id on public.periodes_comptables(mama_id);
-do $$ begin
-  if not exists (select 1 from pg_constraint where conname = 'fk_periodes_comptables_mama_id') then
-    alter table public.periodes_comptables
-      add constraint fk_periodes_comptables_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
-  end if;
-end $$;
 alter table public.periodes_comptables enable row level security;
 do $$ begin
-  if not exists (select 1 from pg_policies where schemaname='public' and tablename='periodes_comptables' and policyname='periodes_comptables_all') then
-    create policy periodes_comptables_all on public.periodes_comptables
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='periodes_comptables' and policyname='periodes_comptables_rls') then
+    create policy periodes_comptables_rls on public.periodes_comptables
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
@@ -2011,7 +2025,14 @@ create or replace view public.v_boissons as select 1 as placeholder;
 create or replace view public.v_consolidated_stats as select 1 as placeholder;
 create or replace view public.v_cost_center_month as select 1 as placeholder;
 create or replace view public.v_cost_center_monthly as select 1 as placeholder;
-create or replace view public.v_ecarts_inventaire as select 1 as placeholder;
+create or replace view public.v_ecarts_inventaire as
+select i.periode_id,
+       i.zone_id,
+       sum(p.ecart) as ecart_total
+from public.inventaires i
+join public.produits_inventaire p on p.inventaire_id = i.id
+where i.actif is true
+group by i.periode_id, i.zone_id;
 create or replace view public.v_evolution_achats as
 select
   mama_id,
@@ -2280,6 +2301,7 @@ language sql as $$
 $$;
 grant execute on function public.top_produits(uuid, date, date, integer) to authenticated;
 
+
 -- View: v_costing_carte
 create or replace view public.v_costing_carte as
 select
@@ -2307,3 +2329,125 @@ select
 from public.fiches_techniques f
 left join public.v_couts_fiches cf
   on cf.fiche_id = f.id and cf.mama_id = f.mama_id;
+-- Menu groupe tables and views
+create table if not exists public.menu_groupes (
+  id uuid primary key default uuid_generate_v4(),
+  mama_id uuid not null references public.mamas(id) on delete cascade,
+  nom text not null,
+  prix_vente_personne numeric,
+  statut text not null default 'brouillon' check (statut in ('brouillon','valide')),
+  actif boolean default true,
+  archive boolean default false,
+  archive_at timestamptz,
+  note text,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  unique (mama_id, nom)
+);
+create index if not exists idx_menu_groupes_mama on public.menu_groupes(mama_id);
+alter table public.menu_groupes enable row level security;
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='menu_groupes' and policyname='menu_groupes_all') then
+    create policy menu_groupes_all on public.menu_groupes
+      for all using (mama_id = current_user_mama_id())
+      with check (mama_id = current_user_mama_id());
+  end if;
+end $$;
+grant select, insert, update, delete on public.menu_groupes to authenticated;
+
+create table if not exists public.menu_groupe_lignes (
+  id uuid primary key default uuid_generate_v4(),
+  menu_groupe_id uuid not null references public.menu_groupes(id) on delete cascade,
+  mama_id uuid not null,
+  categorie text not null check (categorie in ('aperitif','entree','plat','dessert','boisson')),
+  fiche_id uuid not null references public.fiches_techniques(id) on delete restrict,
+  portions_par_personne numeric not null default 1,
+  position integer,
+  created_at timestamptz default now()
+);
+create index if not exists idx_menu_groupe_lignes_menu on public.menu_groupe_lignes(menu_groupe_id);
+create index if not exists idx_menu_groupe_lignes_fiche on public.menu_groupe_lignes(fiche_id);
+alter table public.menu_groupe_lignes enable row level security;
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='menu_groupe_lignes' and policyname='menu_groupe_lignes_all') then
+    create policy menu_groupe_lignes_all on public.menu_groupe_lignes
+      for all using (mama_id = current_user_mama_id())
+      with check (mama_id = current_user_mama_id());
+  end if;
+end $$;
+grant select, insert, update, delete on public.menu_groupe_lignes to authenticated;
+
+create table if not exists public.menu_groupe_modeles (
+  id uuid primary key default uuid_generate_v4(),
+  mama_id uuid not null references public.mamas(id) on delete cascade,
+  nom text not null,
+  actif boolean default true,
+  created_at timestamptz default now()
+);
+create index if not exists idx_menu_groupe_modeles_mama on public.menu_groupe_modeles(mama_id);
+alter table public.menu_groupe_modeles enable row level security;
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='menu_groupe_modeles' and policyname='menu_groupe_modeles_all') then
+    create policy menu_groupe_modeles_all on public.menu_groupe_modeles
+      for all using (mama_id = current_user_mama_id())
+      with check (mama_id = current_user_mama_id());
+  end if;
+end $$;
+grant select, insert, update, delete on public.menu_groupe_modeles to authenticated;
+
+create table if not exists public.menu_groupe_modele_lignes (
+  id uuid primary key default uuid_generate_v4(),
+  modele_id uuid not null references public.menu_groupe_modeles(id) on delete cascade,
+  mama_id uuid not null,
+  categorie text not null check (categorie in ('aperitif','entree','plat','dessert','boisson')),
+  fiche_id uuid not null references public.fiches_techniques(id) on delete restrict,
+  portions_par_personne numeric not null default 1,
+  position integer,
+  created_at timestamptz default now()
+);
+create index if not exists idx_menu_groupe_modele_lignes_modele on public.menu_groupe_modele_lignes(modele_id);
+alter table public.menu_groupe_modele_lignes enable row level security;
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='menu_groupe_modele_lignes' and policyname='menu_groupe_modele_lignes_all') then
+    create policy menu_groupe_modele_lignes_all on public.menu_groupe_modele_lignes
+      for all using (mama_id = current_user_mama_id())
+      with check (mama_id = current_user_mama_id());
+  end if;
+end $$;
+grant select, insert, update, delete on public.menu_groupe_modele_lignes to authenticated;
+
+create or replace view public.v_menu_groupe_couts as
+select
+  l.id as ligne_id,
+  l.menu_groupe_id,
+  l.mama_id,
+  l.categorie,
+  l.fiche_id,
+  l.portions_par_personne,
+  cf.cout as cout_total_fiche,
+  cf.portions as portions_fiche,
+  (cf.cout / nullif(cf.portions,0)) as cout_par_portion_fiche,
+  ((cf.cout / nullif(cf.portions,0)) * l.portions_par_personne) as cout_par_personne_ligne
+from public.menu_groupe_lignes l
+join public.v_couts_fiches cf on cf.fiche_id = l.fiche_id and cf.mama_id = l.mama_id;
+
+create or replace view public.v_menu_groupe_resume as
+with couts as (
+  select menu_groupe_id, sum(cout_par_personne_ligne) as cout_par_personne
+  from public.v_menu_groupe_couts
+  group by menu_groupe_id
+)
+select
+  mg.id as menu_groupe_id,
+  mg.mama_id,
+  mg.nom,
+  mg.prix_vente_personne,
+  coalesce(c.cout_par_personne,0) as cout_par_personne,
+  (mg.prix_vente_personne - coalesce(c.cout_par_personne,0)) as marge_par_personne,
+  case
+    when mg.prix_vente_personne is null or mg.prix_vente_personne = 0 then null
+    else round((mg.prix_vente_personne - coalesce(c.cout_par_personne,0)) / mg.prix_vente_personne * 100, 2)
+  end as marge_pct
+from public.menu_groupes mg
+left join couts c on c.menu_groupe_id = mg.id;
+

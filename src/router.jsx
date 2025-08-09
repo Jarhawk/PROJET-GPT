@@ -33,6 +33,9 @@ const Fiches = lazyWithPreload(() => import("@/pages/fiches/Fiches.jsx"));
 const FicheDetail = lazyWithPreload(() => import("@/pages/fiches/FicheDetail.jsx"));
 const Carte = lazyWithPreload(() => import("@/pages/carte/Carte.jsx"));
 const Menus = lazyWithPreload(() => import("@/pages/menus/Menus.jsx"));
+const MenuGroupes = lazyWithPreload(() => import("@/pages/menus/MenuGroupes.jsx"));
+const MenuGroupeForm = lazyWithPreload(() => import("@/pages/menus/MenuGroupeForm.jsx"));
+const MenuGroupeDetail = lazyWithPreload(() => import("@/pages/menus/MenuGroupeDetail.jsx"));
 const Produits = lazyWithPreload(() => import("@/pages/produits/Produits.jsx"));
 const ProduitDetail = lazyWithPreload(() => import("@/pages/produits/ProduitDetail.jsx"));
 const ProduitForm = lazyWithPreload(() => import("@/pages/produits/ProduitForm.jsx"));
@@ -141,6 +144,9 @@ export const routePreloadMap = {
   '/promotions': Promotions.preload,
   '/fiches': Fiches.preload,
   '/menus': Menus.preload,
+  '/menu-groupes': MenuGroupes.preload,
+  '/menu-groupes/nouveau': MenuGroupeForm.preload,
+  '/menu-groupes/:id': MenuGroupeDetail.preload,
   '/carte': Carte.preload,
   '/recettes': Recettes.preload,
   '/requisitions': Requisitions.preload,
@@ -298,6 +304,18 @@ export default function Router() {
           <Route
             path="/menus"
             element={<ProtectedRoute moduleKey="menus"><Menus /></ProtectedRoute>}
+          />
+          <Route
+            path="/menu-groupes"
+            element={<ProtectedRoute moduleKey="menu_groupe"><MenuGroupes /></ProtectedRoute>}
+          />
+          <Route
+            path="/menu-groupes/nouveau"
+            element={<ProtectedRoute moduleKey="menu_groupe"><MenuGroupeForm /></ProtectedRoute>}
+          />
+          <Route
+            path="/menu-groupes/:id"
+            element={<ProtectedRoute moduleKey="menu_groupe"><MenuGroupeDetail /></ProtectedRoute>}
           />
           <Route
             path="/carte"

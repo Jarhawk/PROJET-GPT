@@ -36,7 +36,7 @@ export default function useExport() {
       } else if (type === 'inventaire') {
         const res = await supabase
           .from('inventaires')
-          .select('*, lignes:inventaire_lignes!inventaire_id(*)')
+          .select('*, lignes:produits_inventaire!inventaire_id(*)')
           .eq('mama_id', mama_id);
         data = res.data || [];
       } else if (type === 'produits') {

@@ -31,7 +31,7 @@ export function useInventaireLignes() {
     setLoading(true);
     setError(null);
     let query = supabase
-      .from("inventaire_lignes")
+      .from("produits_inventaire")
       .select("*", { count: "exact" })
       .eq("mama_id", mama_id)
       .eq("inventaire_id", inventaireId)
@@ -62,7 +62,7 @@ export function useInventaireLignes() {
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
-      .from("inventaire_lignes")
+      .from("produits_inventaire")
       .insert([{ inventaire_id, produit_id, quantite_reelle, mama_id }])
       .select()
       .single();
@@ -83,7 +83,7 @@ export function useInventaireLignes() {
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
-      .from("inventaire_lignes")
+      .from("produits_inventaire")
       .update(values)
       .eq("id", id)
       .eq("mama_id", mama_id)
@@ -102,7 +102,7 @@ export function useInventaireLignes() {
     setLoading(true);
     setError(null);
     const { error } = await supabase
-      .from("inventaire_lignes")
+      .from("produits_inventaire")
       .update({ actif: false })
       .eq("id", id)
       .eq("mama_id", mama_id);
@@ -113,7 +113,7 @@ export function useInventaireLignes() {
   async function getLigne(id) {
     if (!mama_id || !id) return null;
     const { data, error } = await supabase
-      .from("inventaire_lignes")
+      .from("produits_inventaire")
       .select("*")
       .eq("id", id)
       .eq("mama_id", mama_id)

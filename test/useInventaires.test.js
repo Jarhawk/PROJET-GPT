@@ -16,7 +16,7 @@ const query = {
 const fromMock = vi.fn(() => query);
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
 vi.mock('@/hooks/useAuth', () => ({ default: () => ({ mama_id: 'm1' }) }));
-vi.mock('@/hooks/usePeriodes', () => ({ default: () => ({ checkCurrentPeriode: vi.fn(() => ({ error: null })) }) }));
+vi.mock('@/hooks/usePeriodes', () => ({ default: () => ({ checkCurrentPeriode: vi.fn(() => ({ error: null, data: { id: 'per1' } })) }) }));
 
 let useInventaires;
 let insertCount = 0;
@@ -44,12 +44,12 @@ beforeEach(async () => {
 test('getInventaires applies filters', async () => {
   const { result } = renderHook(() => useInventaires());
   await act(async () => {
-    await result.current.getInventaires({ zoneId: 'z1', periode: '2025-01', statut: 'brouillon' });
+    await result.current.getInventaires({ zoneId: 'z1', periodeId: '2025-01', statut: 'brouillon' });
   });
   expect(fromMock).toHaveBeenCalledWith('inventaires');
   expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1');
   expect(query.eq).toHaveBeenCalledWith('zone_id', 'z1');
-  expect(query.eq).toHaveBeenCalledWith('periode', '2025-01');
+  expect(query.eq).toHaveBeenCalledWith('periode_id', '2025-01');
   expect(query.eq).toHaveBeenCalledWith('statut', 'brouillon');
   expect(query.order).toHaveBeenCalled();
 });
@@ -59,12 +59,12 @@ test('createInventaire inserts lines with quantite_reelle', async () => {
   await act(async () => {
     await result.current.createInventaire({
       date: '2025-01-01',
-      zone: 'z1',
+      zone_id: 'z1',
       lignes: [{ produit_id: 'p1', quantite_reelle: 2 }],
     });
   });
   expect(fromMock).toHaveBeenCalledWith('inventaires');
-  expect(fromMock).toHaveBeenCalledWith('inventaire_lignes');
+  expect(fromMock).toHaveBeenCalledWith('produits_inventaire');
   // second insert call corresponds to lignes
   expect(query.insert.mock.calls[1][0]).toEqual([
     {
@@ -73,5 +73,8 @@ test('createInventaire inserts lines with quantite_reelle', async () => {
       inventaire_id: 'invNew',
       mama_id: 'm1',
     },
+  ]);
+  expect(query.insert.mock.calls[0][0]).toEqual([
+    { zone_id: 'z1', date_inventaire: '2025-01-01', periode_id: 'per1', mama_id: 'm1' }
   ]);
 });

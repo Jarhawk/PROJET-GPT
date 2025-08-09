@@ -61,7 +61,7 @@ test('listConfigs applies filters and pagination', async () => {
     await result.current.listConfigs({ actif: true, page: 2, limit: 10 });
   });
   expect(fromMock).toHaveBeenCalledWith('fournisseurs_api_config');
-  expect(queryObj.select).toHaveBeenCalledWith('*, fournisseur:fournisseurs(id, nom)', { count: 'exact' });
+  expect(queryObj.select).toHaveBeenCalledWith('*, fournisseur:fournisseur_id(id, nom)', { count: 'exact' });
   expect(queryObj.eq).toHaveBeenCalledWith('mama_id', 'm1');
   expect(queryObj.eq).toHaveBeenCalledWith('actif', true);
   expect(queryObj.range).toHaveBeenCalledWith(10, 19);

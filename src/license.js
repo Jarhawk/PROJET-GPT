@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import data from '../db/license-keys.json';
+import data from '@/db/license-keys.json';
 
 export function validateLicense(key) {
   const lic = data.licenses.find((l) => l.key === key && !l.revoked);

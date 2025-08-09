@@ -1,119 +1,102 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import useAuth from '@/hooks/useAuth';
 import { toast } from 'react-hot-toast';
+import { useState } from 'react';
 
 export function useZones() {
   const { mama_id } = useAuth();
   const [zones, setZones] = useState([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
-  async function fetchZones({ search = '', includeInactive = false, page = 1, limit = 50 } = {}) {
-    if (!mama_id) return [];
-    setLoading(true);
-    setError(null);
+  async function fetchZones({ q, type, actif } = {}) {
     let query = supabase
       .from('zones_stock')
-      .select('*', { count: 'exact' })
+      .select('*')
       .eq('mama_id', mama_id)
-      .order('nom', { ascending: true })
-      .range((page - 1) * limit, page * limit - 1);
-    if (!includeInactive) query = query.eq('actif', true);
-    if (search) query = query.ilike('nom', `%${search}%`);
-    const { data, error, count } = await query;
-    setLoading(false);
+      .order('position', { ascending: true });
+    if (q) query = query.ilike('nom', `%${q}%`);
+    if (type) query = query.eq('type', type);
+    if (actif !== undefined) query = query.eq('actif', actif);
+    const { data, error } = await query;
     if (error) {
-      setError(error);
       toast.error(error.message);
       return [];
     }
-    setZones(Array.isArray(data) ? data : []);
-    setTotal(count || 0);
+    setZones(data || []);
     return data || [];
   }
 
-  async function addZone(nom) {
-    if (!mama_id) return { error: 'Aucun mama_id' };
-    if (!nom) return { error: 'Nom requis' };
-    setLoading(true);
-    setError(null);
-    const { data: existing } = await supabase
+  async function fetchZoneById(id) {
+    const { data, error } = await supabase
       .from('zones_stock')
-      .select('id')
-      .eq('mama_id', mama_id)
-      .ilike('nom', nom);
-    if (existing && existing.length > 0) {
-      setLoading(false);
-      const err = 'Zone déjà existante.';
-      setError(err);
-      toast.error(err);
-      return { error: err };
-    }
-    const { error } = await supabase
-      .from('zones_stock')
-      .insert([{ nom, mama_id, actif: true }]);
-    setLoading(false);
+      .select('*')
+      .eq('id', id)
+      .single();
     if (error) {
-      setError(error);
       toast.error(error.message);
-      return { error };
+      return null;
     }
-    await fetchZones();
-    return {};
+    return data;
   }
 
-  async function updateZone(id, fields) {
-    if (!mama_id) return { error: 'Aucun mama_id' };
-    setLoading(true);
-    setError(null);
+  async function createZone(payload) {
     const { error } = await supabase
       .from('zones_stock')
-      .update(fields)
-      .eq('id', id)
-      .eq('mama_id', mama_id);
-    setLoading(false);
-    if (error) {
-      setError(error);
-      toast.error(error.message);
-      return { error };
-    }
-    await fetchZones();
-    return {};
+      .insert([{ ...payload, mama_id }]);
+    if (error) toast.error(error.message);
+    return { error };
+  }
+
+  async function updateZone(id, payload) {
+    const { error } = await supabase
+      .from('zones_stock')
+      .update(payload)
+      .eq('id', id);
+    if (error) toast.error(error.message);
+    return { error };
   }
 
   async function deleteZone(id) {
-    if (!mama_id) return { error: 'Aucun mama_id' };
-    setLoading(true);
-    setError(null);
-    const { count: reqCount } = await supabase
-      .from('requisitions')
-      .select('id', { count: 'exact', head: true })
-      .eq('zone_id', id)
-      .eq('mama_id', mama_id);
-    if ((reqCount || 0) > 0) {
-      const err = 'Zone liée à des données, suppression impossible';
-      setLoading(false);
-      setError(err);
-      toast.error(err);
-      return { error: err };
-    }
     const { error } = await supabase
       .from('zones_stock')
       .delete()
-      .eq('id', id)
-      .eq('mama_id', mama_id);
-    setLoading(false);
-    if (error) {
-      setError(error);
-      toast.error(error.message);
-      return { error };
-    }
-    await fetchZones();
-    return {};
+      .eq('id', id);
+    if (error) toast.error(error.message);
+    return { error };
   }
 
-  return { zones, total, loading, error, fetchZones, addZone, updateZone, deleteZone };
+  async function reorderZones(rows) {
+    const { error } = await supabase.rpc('reorder_zones', { rows });
+    if (error) toast.error(error.message);
+    return { error };
+  }
+
+  async function myAccessibleZones({ mode } = {}) {
+    const { data: { user } = {} } = await supabase.auth.getUser();
+    let query = supabase
+      .from('zones_stock')
+      .select('*, zones_droits!inner(*)')
+      .eq('zones_droits.user_id', user?.id || null)
+      .eq('actif', true);
+    if (mode) query = query.eq(`zones_droits.${mode}`, true);
+    if (mode === 'requisition') query = query.in('type', ['cave', 'shop']);
+    const { data, error } = await query;
+    if (error) {
+      toast.error(error.message);
+      return [];
+    }
+    return data?.map(z => ({ ...z, ...z.zones_droits })) || [];
+  }
+
+  return {
+    zones,
+    fetchZones,
+    fetchZoneById,
+    createZone,
+    updateZone,
+    deleteZone,
+    reorderZones,
+    myAccessibleZones,
+  };
 }
+

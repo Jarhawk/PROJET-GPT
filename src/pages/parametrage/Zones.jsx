@@ -1,111 +1,102 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from 'react';
-import { Toaster, toast } from 'react-hot-toast';
-import TableContainer from '@/components/ui/TableContainer';
-import { Button } from '@/components/ui/button';
 import { useZones } from '@/hooks/useZones';
-import ZoneRow from '@/components/parametrage/ZoneRow';
-import ZoneForm from '@/forms/ZoneForm';
-import useAuth from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
+import { Toaster } from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import useAuth from '@/hooks/useAuth';
 import Unauthorized from '@/pages/auth/Unauthorized';
 
 export default function Zones() {
-  const { zones, total, fetchZones, addZone, updateZone, deleteZone } = useZones();
-  const { mama_id, hasAccess, loading: authLoading } = useAuth();
+  const { fetchZones, updateZone } = useZones();
+  const { hasAccess, loading } = useAuth();
   const canEdit = hasAccess('zones_stock', 'peut_modifier');
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
-  const [edit, setEdit] = useState(null);
+  const [filters, setFilters] = useState({ q: '', type: '', actif: true });
+  const [rows, setRows] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (!authLoading && mama_id) {
-      fetchZones({ search, page });
-    }
-  }, [fetchZones, search, page, authLoading, mama_id]);
+    fetchZones(filters).then(setRows);
+  }, [filters]);
 
-  const handleSave = async values => {
-    if (edit?.id) await updateZone(edit.id, values);
-    else await addZone(values.nom);
-    setEdit(null);
-    toast.success('Zone enregistrée');
-  };
-
-  const handleDelete = async zone => {
-    if (window.confirm('Supprimer cette zone ?')) {
-      const res = await deleteZone(zone.id);
-      if (!res?.error) toast.success('Zone supprimée');
-    }
-  };
-
-  const handleToggle = async zone => {
-    await updateZone(zone.id, { actif: !zone.actif });
-  };
-
-  const pages = Math.ceil(total / 50) || 1;
-
-  if (authLoading) return <LoadingSpinner message="Chargement..." />;
+  if (loading) return <LoadingSpinner message="Chargement..." />;
   if (!canEdit) return <Unauthorized />;
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
+    <div className="p-6">
       <Toaster position="top-right" />
-      <h1 className="text-2xl font-bold mb-4">Zones de stockage</h1>
-      <div className="flex gap-2 mb-4 items-end">
+      <h1 className="text-2xl font-bold mb-4">Zones de stock</h1>
+      <div className="flex flex-wrap gap-2 mb-4 items-end">
         <input
-          className="input flex-1"
+          className="input"
           placeholder="Recherche"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
+          value={filters.q}
+          onChange={e => setFilters(f => ({ ...f, q: e.target.value }))}
         />
-        <Button onClick={() => setEdit({})}>+ Nouvelle zone</Button>
+        <select
+          className="input"
+          value={filters.type}
+          onChange={e => setFilters(f => ({ ...f, type: e.target.value }))}
+        >
+          <option value="">Tous types</option>
+          <option value="cave">Cave</option>
+          <option value="shop">Shop</option>
+          <option value="cuisine">Cuisine</option>
+          <option value="bar">Bar</option>
+          <option value="entrepot">Entrepôt</option>
+          <option value="autre">Autre</option>
+        </select>
+        <label className="flex items-center gap-1 text-sm">
+          <input
+            type="checkbox"
+            checked={filters.actif}
+            onChange={e => setFilters(f => ({ ...f, actif: e.target.checked }))}
+          />
+          Actifs uniquement
+        </label>
+        <Button onClick={() => navigate('/parametrage/zones/new')}>+ Nouvelle zone</Button>
       </div>
-      <TableContainer>
-        <table className="min-w-full text-sm text-center">
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-sm">
           <thead>
             <tr>
-              <th className="px-2 py-1">Nom</th>
-              <th className="px-2 py-1">Statut</th>
-              <th className="px-2 py-1">Créée le</th>
+              <th className="px-2 py-1 text-left">Nom</th>
+              <th className="px-2 py-1 text-left">Type</th>
+              <th className="px-2 py-1">Actif</th>
               <th className="px-2 py-1">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {zones.map(z => (
-              <ZoneRow key={z.id} zone={z} onEdit={setEdit} onDelete={handleDelete} onToggle={handleToggle} />
-            ))}
-            {zones.length === 0 && (
-              <tr>
-                <td colSpan="4" className="py-2">
-                  Aucune zone
+            {rows.map(z => (
+              <tr key={z.id} className="border-t border-white/10">
+                <td className="px-2 py-1">{z.nom}</td>
+                <td className="px-2 py-1">{z.type}</td>
+                <td className="px-2 py-1 text-center">
+                  <input
+                    type="checkbox"
+                    checked={z.actif}
+                    onChange={async () => {
+                      await updateZone(z.id, { actif: !z.actif });
+                      setRows(await fetchZones(filters));
+                    }}
+                  />
                 </td>
+                <td className="px-2 py-1 flex gap-2 justify-center">
+                  <Button size="sm" variant="outline" onClick={() => navigate(`/parametrage/zones/${z.id}`)}>Éditer</Button>
+                  <Button size="sm" variant="outline" onClick={() => navigate(`/parametrage/zones/${z.id}/droits`)}>Droits</Button>
+                </td>
+              </tr>
+            ))}
+            {rows.length === 0 && (
+              <tr>
+                <td colSpan="4" className="text-center py-2">Aucune zone</td>
               </tr>
             )}
           </tbody>
         </table>
-      </TableContainer>
-      <div className="flex justify-between mt-2">
-        <Button variant="outline" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>
-          Précédent
-        </Button>
-        <span>
-          Page {page}/{pages}
-        </span>
-        <Button variant="outline" onClick={() => setPage(p => Math.min(pages, p + 1))} disabled={page >= pages}>
-          Suivant
-        </Button>
       </div>
-        {edit && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-            <div className="bg-white/10 backdrop-blur-xl rounded-xl shadow-lg border border-white/20 p-6 animate-fade-in">
-              <ZoneForm
-                zone={edit}
-                onCancel={() => setEdit(null)}
-                onSave={handleSave}
-              />
-            </div>
-          </div>
-        )}
     </div>
   );
 }
+

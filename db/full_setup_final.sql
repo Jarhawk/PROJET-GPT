@@ -1972,27 +1972,110 @@ do $$ begin
   end if;
 end $$;
 grant select, insert, update, delete on public.ventes_fiches_carte to authenticated;
+
+-- Zones de stock
 create table if not exists public.zones_stock (
-  id uuid primary key default uuid_generate_v4(),
-  mama_id uuid,
-  created_at timestamptz default now()
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid not null references public.mamas(id) on delete cascade,
+  nom text not null,
+  code text,
+  type text not null check (type in ('cave','shop','cuisine','bar','entrepot','autre')),
+  parent_id uuid references public.zones_stock(id) on delete set null,
+  actif boolean default true,
+  position int default 0,
+  adresse text,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  unique (mama_id, nom)
 );
-create index if not exists idx_zones_stock_mama_id on public.zones_stock(mama_id);
-do $$ begin
-  if not exists (select 1 from pg_constraint where conname = 'fk_zones_stock_mama_id') then
-    alter table public.zones_stock
-      add constraint fk_zones_stock_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
-  end if;
-end $$;
+create index if not exists idx_zones_mama_pos on public.zones_stock(mama_id, position);
+create index if not exists idx_zones_parent on public.zones_stock(parent_id);
+
+-- Droits par utilisateur
+create table if not exists public.zones_droits (
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid not null references public.mamas(id) on delete cascade,
+  zone_id uuid not null references public.zones_stock(id) on delete cascade,
+  user_id uuid not null,
+  lecture boolean default true,
+  ecriture boolean default false,
+  transfert boolean default false,
+  requisition boolean default false,
+  created_at timestamptz default now(),
+  unique (mama_id, zone_id, user_id)
+);
+create index if not exists idx_zones_droits_zone on public.zones_droits(zone_id);
+create index if not exists idx_zones_droits_user on public.zones_droits(user_id);
+
+-- Row Level Security
 alter table public.zones_stock enable row level security;
-do $$ begin
-  if not exists (select 1 from pg_policies where schemaname='public' and tablename='zones_stock' and policyname='zones_stock_all') then
-    create policy zones_stock_all on public.zones_stock
-      for all using (mama_id = current_user_mama_id())
-      with check (mama_id = current_user_mama_id());
-  end if;
-end $$;
-grant select, insert, update, delete on public.zones_stock to authenticated;
+alter table public.zones_droits enable row level security;
+
+drop policy if exists zones_stock_all on public.zones_stock;
+create policy zones_stock_select on public.zones_stock
+  for select using (
+    mama_id = current_user_mama_id()
+    and exists (
+      select 1 from public.zones_droits zd
+      where zd.zone_id = zones_stock.id
+        and zd.user_id = auth.uid()
+        and zd.lecture = true
+        and zd.mama_id = zones_stock.mama_id
+    )
+  );
+create policy zones_stock_admin_iud on public.zones_stock
+  for all using (mama_id = current_user_mama_id() and current_user_is_admin_or_manager())
+  with check (mama_id = current_user_mama_id() and current_user_is_admin_or_manager());
+
+create policy zones_droits_admin_all on public.zones_droits
+  for all using (mama_id = current_user_mama_id() and current_user_is_admin())
+  with check (mama_id = current_user_mama_id() and current_user_is_admin());
+
+grant select, insert, update, delete on public.zones_stock, public.zones_droits to authenticated;
+
+-- Trigger for updated_at
+create or replace function public.trg_set_timestamp() returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end; $$ language plpgsql;
+
+drop trigger if exists set_ts_zones on public.zones_stock;
+create trigger set_ts_zones before update on public.zones_stock
+for each row execute procedure public.trg_set_timestamp();
+
+-- RPC Functions
+create or replace function public.can_access_zone(p_zone uuid, p_mode text default 'lecture')
+returns boolean
+language sql stable security definer
+as $$
+  select case
+    when p_mode = 'lecture' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and lecture=true)
+    when p_mode = 'ecriture' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and ecriture=true)
+    when p_mode = 'transfert' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and transfert=true)
+    when p_mode = 'requisition' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and requisition=true)
+    else false end;
+$$;
+
+create or replace function public.can_transfer(p_src uuid, p_dst uuid)
+returns boolean
+language sql stable security definer
+as $$
+  select
+    (select public.can_access_zone(p_src, 'transfert')) and
+    (select public.can_access_zone(p_dst, 'transfert'));
+$$;
+
+create or replace function public.zone_is_cave_or_shop(p_zone uuid)
+returns boolean
+language sql stable security definer
+as $$
+  select exists(
+    select 1 from public.zones_stock z
+    where z.id = p_zone
+      and z.type in ('cave','shop')
+  );
+$$;
 
 -- 5.b Additional Views
 create or replace view public.v_achats_mensuels as

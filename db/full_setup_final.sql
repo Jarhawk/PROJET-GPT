@@ -181,17 +181,17 @@ do $$ begin
   end if;
 end $$;
 do $$ begin
-  if not exists (select 1 from pg_constraint where conname = 'fk_produits_famille_id') then
-    alter table public.produits
-      add constraint fk_produits_famille_id foreign key (famille_id) references public.familles(id) on delete set null;
-  end if;
-end $$;
-do $$ begin
-  if not exists (select 1 from pg_constraint where conname = 'fk_produits_sous_famille_id') then
-    alter table public.produits
-      add constraint fk_produits_sous_famille_id foreign key (sous_famille_id) references public.sous_familles(id) on delete set null;
-  end if;
-end $$;
+    if not exists (select 1 from pg_constraint where conname = 'fk_produits_famille_id') then
+      alter table public.produits
+        add constraint fk_produits_famille_id foreign key (famille_id) references public.familles(id) on delete restrict;
+    end if;
+  end $$;
+  do $$ begin
+    if not exists (select 1 from pg_constraint where conname = 'fk_produits_sous_famille_id') then
+      alter table public.produits
+        add constraint fk_produits_sous_famille_id foreign key (sous_famille_id) references public.sous_familles(id) on delete restrict;
+    end if;
+  end $$;
 
 do $$ begin
   if not exists (select 1 from pg_constraint where conname = 'fk_roles_mama_id') then
@@ -822,14 +822,25 @@ create table if not exists public.familles (
   id uuid primary key default uuid_generate_v4(),
   mama_id uuid not null,
   nom text not null,
+  position int default 0,
   actif boolean default true,
-  created_at timestamptz default now()
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
 );
-create index if not exists idx_familles_mama_id on public.familles(mama_id);
+alter table if exists public.familles
+  add column if not exists position int default 0,
+  add column if not exists updated_at timestamptz default now();
+create index if not exists idx_familles_mama_pos on public.familles(mama_id, position);
 do $$ begin
   if not exists (select 1 from pg_constraint where conname = 'fk_familles_mama_id') then
     alter table public.familles
       add constraint fk_familles_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'uq_familles_nom_mama') then
+    alter table public.familles
+      add constraint uq_familles_nom_mama unique (mama_id, nom);
   end if;
 end $$;
 alter table public.familles enable row level security;
@@ -1693,10 +1704,16 @@ create table if not exists public.sous_familles (
   mama_id uuid not null,
   famille_id uuid not null,
   nom text not null,
+  position int default 0,
   actif boolean default true,
-  created_at timestamptz default now()
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
 );
+alter table if exists public.sous_familles
+  add column if not exists position int default 0,
+  add column if not exists updated_at timestamptz default now();
 create index if not exists idx_sous_familles_mama_id on public.sous_familles(mama_id);
+create index if not exists idx_sous_familles_famille_pos on public.sous_familles(famille_id, position);
 do $$ begin
   if not exists (select 1 from pg_constraint where conname = 'fk_sous_familles_mama_id') then
     alter table public.sous_familles
@@ -1707,6 +1724,12 @@ do $$ begin
   if not exists (select 1 from pg_constraint where conname = 'fk_sous_familles_famille_id') then
     alter table public.sous_familles
       add constraint fk_sous_familles_famille_id foreign key (famille_id) references public.familles(id) on delete cascade;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'uq_sousfamilles_nom_mama') then
+    alter table public.sous_familles
+      add constraint uq_sousfamilles_nom_mama unique (mama_id, nom);
   end if;
 end $$;
 alter table public.sous_familles enable row level security;
@@ -2279,3 +2302,130 @@ language sql as $$
   limit coalesce(limit_param, 10);
 $$;
 grant execute on function public.top_produits(uuid, date, date, integer) to authenticated;
+
+-- Utilities for familles & sous_familles
+create or replace function public.trg_set_timestamp() returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$ language plpgsql;
+
+do $$ begin
+  if not exists (select 1 from pg_trigger where tgname = 'set_ts_familles') then
+    create trigger set_ts_familles
+    before update on public.familles
+    for each row execute procedure public.trg_set_timestamp();
+  end if;
+end $$;
+
+do $$ begin
+  if not exists (select 1 from pg_trigger where tgname = 'set_ts_sous_familles') then
+    create trigger set_ts_sous_familles
+    before update on public.sous_familles
+    for each row execute procedure public.trg_set_timestamp();
+  end if;
+end $$;
+
+create or replace function public.prevent_delete_famille_if_linked() returns trigger as $$
+begin
+  if exists (select 1 from public.produits p where p.famille_id = old.id) then
+    raise exception 'Impossible de supprimer une famille rattachée à des produits';
+  end if;
+  return old;
+end;
+$$ language plpgsql;
+
+do $$ begin
+  if not exists (select 1 from pg_trigger where tgname = 'tg_prevent_delete_famille') then
+    create trigger tg_prevent_delete_famille
+    before delete on public.familles
+    for each row execute procedure public.prevent_delete_famille_if_linked();
+  end if;
+end $$;
+
+create or replace function public.prevent_delete_sousfamille_if_linked() returns trigger as $$
+begin
+  if exists (select 1 from public.produits p where p.sous_famille_id = old.id) then
+    raise exception 'Impossible de supprimer une sous-famille rattachée à des produits';
+  end if;
+  return old;
+end;
+$$ language plpgsql;
+
+do $$ begin
+  if not exists (select 1 from pg_trigger where tgname = 'tg_prevent_delete_sous_famille') then
+    create trigger tg_prevent_delete_sous_famille
+    before delete on public.sous_familles
+    for each row execute procedure public.prevent_delete_sousfamille_if_linked();
+  end if;
+end $$;
+
+create or replace function public.merge_familles(src uuid, dst uuid)
+returns void language plpgsql as $$
+begin
+  update public.produits set famille_id = dst where famille_id = src;
+  delete from public.familles where id = src;
+end;
+$$;
+grant execute on function public.merge_familles(uuid, uuid) to authenticated;
+
+create or replace function public.merge_sous_familles(src uuid, dst uuid)
+returns void language plpgsql as $$
+begin
+  update public.produits set sous_famille_id = dst where sous_famille_id = src;
+  delete from public.sous_familles where id = src;
+end;
+$$;
+grant execute on function public.merge_sous_familles(uuid, uuid) to authenticated;
+
+create or replace function public.reorder_familles(p_rows jsonb)
+returns void language plpgsql as $$
+declare r jsonb;
+begin
+  for r in select * from jsonb_array_elements(p_rows)
+  loop
+    update public.familles set position = (r->>'position')::int
+    where id = (r->>'id')::uuid and mama_id = current_user_mama_id();
+  end loop;
+end;
+$$;
+grant execute on function public.reorder_familles(jsonb) to authenticated;
+
+create or replace function public.reorder_sous_familles(p_famille uuid, p_rows jsonb)
+returns void language plpgsql as $$
+declare r jsonb;
+begin
+  for r in select * from jsonb_array_elements(p_rows)
+  loop
+    update public.sous_familles set position = (r->>'position')::int
+    where id = (r->>'id')::uuid and famille_id = p_famille and mama_id = current_user_mama_id();
+  end loop;
+end;
+$$;
+grant execute on function public.reorder_sous_familles(uuid, jsonb) to authenticated;
+
+create or replace view public.v_familles_stats as
+select
+  f.mama_id,
+  f.id as famille_id,
+  f.nom as famille_nom,
+  count(p.id) as nb_produits
+from public.familles f
+left join public.produits p on p.famille_id = f.id
+where f.mama_id = current_user_mama_id()
+group by f.mama_id, f.id, f.nom;
+
+create or replace view public.v_sous_familles_stats as
+select
+  sf.mama_id,
+  sf.id as sous_famille_id,
+  sf.nom as sous_famille_nom,
+  sf.famille_id,
+  count(p.id) as nb_produits
+from public.sous_familles sf
+left join public.produits p on p.sous_famille_id = sf.id
+where sf.mama_id = current_user_mama_id()
+group by sf.mama_id, sf.id, sf.nom, sf.famille_id;
+
+grant select on public.v_familles_stats, public.v_sous_familles_stats to authenticated;

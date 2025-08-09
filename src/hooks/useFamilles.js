@@ -6,12 +6,48 @@ import * as XLSX from "xlsx";
 import { safeImportXLSX } from "@/lib/xlsx/safeImportXLSX";
 import { saveAs } from "file-saver";
 
+export async function fetchFamilles(mama_id) {
+  const { data, error } = await supabase
+    .from("familles")
+    .select("id, nom, position, actif")
+    .eq("mama_id", mama_id)
+    .order("position", { ascending: true });
+  if (error) throw error;
+  const { data: stats } = await supabase
+    .from("v_familles_stats")
+    .select("famille_id, nb_produits")
+    .eq("mama_id", mama_id);
+  const map = new Map((stats || []).map((s) => [s.famille_id, s.nb_produits]));
+  return (data || []).map((f) => ({ ...f, nb_produits: map.get(f.id) || 0 }));
+}
+
+export async function createFamille({ nom, actif = true, position = 0 }, mama_id) {
+  return await supabase
+    .from("familles")
+    .insert([{ nom, actif, position, mama_id }]);
+}
+
+export async function updateFamille(id, payload, mama_id) {
+  return await supabase
+    .from("familles")
+    .update(payload)
+    .match({ id, mama_id });
+}
+
 export async function deleteFamille(id, mama_id) {
   return await supabase.from("familles").delete().match({ id, mama_id });
 }
 
 export async function fetchFamillesForValidation(mama_id) {
   return await supabase.from("familles").select("id, nom").eq("mama_id", mama_id);
+}
+
+export async function mergeFamilles(srcId, dstId) {
+  return await supabase.rpc("merge_familles", { src: srcId, dst: dstId });
+}
+
+export async function reorderFamilles(rows) {
+  return await supabase.rpc("reorder_familles", { p_rows: rows });
 }
 
 export function useFamilles() {

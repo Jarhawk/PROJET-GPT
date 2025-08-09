@@ -33,6 +33,8 @@ const Fiches = lazyWithPreload(() => import("@/pages/fiches/Fiches.jsx"));
 const FicheDetail = lazyWithPreload(() => import("@/pages/fiches/FicheDetail.jsx"));
 const Carte = lazyWithPreload(() => import("@/pages/carte/Carte.jsx"));
 const Menus = lazyWithPreload(() => import("@/pages/menus/Menus.jsx"));
+const MenuDuJourPlanning = lazyWithPreload(() => import("@/pages/menu/MenuDuJour.jsx"));
+const MenuDuJourJour = lazyWithPreload(() => import("@/pages/menu/MenuDuJourJour.jsx"));
 const Produits = lazyWithPreload(() => import("@/pages/produits/Produits.jsx"));
 const ProduitDetail = lazyWithPreload(() => import("@/pages/produits/ProduitDetail.jsx"));
 const ProduitForm = lazyWithPreload(() => import("@/pages/produits/ProduitForm.jsx"));
@@ -141,6 +143,8 @@ export const routePreloadMap = {
   '/promotions': Promotions.preload,
   '/fiches': Fiches.preload,
   '/menus': Menus.preload,
+  '/menu': MenuDuJourPlanning.preload,
+  '/menu/:date': MenuDuJourJour.preload,
   '/carte': Carte.preload,
   '/recettes': Recettes.preload,
   '/requisitions': Requisitions.preload,
@@ -298,6 +302,14 @@ export default function Router() {
           <Route
             path="/menus"
             element={<ProtectedRoute moduleKey="menus"><Menus /></ProtectedRoute>}
+          />
+          <Route
+            path="/menu"
+            element={<ProtectedRoute moduleKey="menu_du_jour"><MenuDuJourPlanning /></ProtectedRoute>}
+          />
+          <Route
+            path="/menu/:date"
+            element={<ProtectedRoute moduleKey="menu_du_jour"><MenuDuJourJour /></ProtectedRoute>}
           />
           <Route
             path="/carte"

@@ -68,6 +68,14 @@
     "module": "menus"
   },
   {
+    "route": "/menu",
+    "module": "menu_du_jour"
+  },
+  {
+    "route": "/menu/:date",
+    "module": "menu_du_jour"
+  },
+  {
     "route": "/carte",
     "module": "carte"
   },

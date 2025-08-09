@@ -1343,17 +1343,16 @@ do $$ begin
 end $$;
 grant select, insert, update, delete on public.menus_groupes_fiches to authenticated;
 create table if not exists public.menus_jour (
-  id uuid primary key default uuid_generate_v4(),
-  mama_id uuid,
-  created_at timestamptz default now()
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid not null references public.mamas(id) on delete cascade,
+  date_menu date not null,
+  titre text,
+  note text,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  constraint menus_jour_unique unique (mama_id, date_menu)
 );
-create index if not exists idx_menus_jour_mama_id on public.menus_jour(mama_id);
-do $$ begin
-  if not exists (select 1 from pg_constraint where conname = 'fk_menus_jour_mama_id') then
-    alter table public.menus_jour
-      add constraint fk_menus_jour_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
-  end if;
-end $$;
+create index if not exists idx_menus_jour_mama_date on public.menus_jour(mama_id, date_menu);
 alter table public.menus_jour enable row level security;
 do $$ begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='menus_jour' and policyname='menus_jour_all') then
@@ -1363,27 +1362,92 @@ do $$ begin
   end if;
 end $$;
 grant select, insert, update, delete on public.menus_jour to authenticated;
-create table if not exists public.menus_jour_fiches (
-  id uuid primary key default uuid_generate_v4(),
-  mama_id uuid,
+
+create table if not exists public.menus_jour_lignes (
+  id uuid primary key default gen_random_uuid(),
+  menu_id uuid not null references public.menus_jour(id) on delete cascade,
+  mama_id uuid not null,
+  categorie text not null check (categorie in ('entree','plat','dessert','boisson')),
+  fiche_id uuid not null references public.fiches_techniques(id) on delete restrict,
+  portions numeric not null default 1,
+  prix_unitaire_snapshot numeric,
   created_at timestamptz default now()
 );
-create index if not exists idx_menus_jour_fiches_mama_id on public.menus_jour_fiches(mama_id);
+create index if not exists idx_menus_jour_lignes_menu on public.menus_jour_lignes(menu_id);
+create index if not exists idx_menus_jour_lignes_fiche on public.menus_jour_lignes(fiche_id);
+alter table public.menus_jour_lignes enable row level security;
 do $$ begin
-  if not exists (select 1 from pg_constraint where conname = 'fk_menus_jour_fiches_mama_id') then
-    alter table public.menus_jour_fiches
-      add constraint fk_menus_jour_fiches_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
-  end if;
-end $$;
-alter table public.menus_jour_fiches enable row level security;
-do $$ begin
-  if not exists (select 1 from pg_policies where schemaname='public' and tablename='menus_jour_fiches' and policyname='menus_jour_fiches_all') then
-    create policy menus_jour_fiches_all on public.menus_jour_fiches
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='menus_jour_lignes' and policyname='menus_jour_lignes_all') then
+    create policy menus_jour_lignes_all on public.menus_jour_lignes
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
 end $$;
-grant select, insert, update, delete on public.menus_jour_fiches to authenticated;
+grant select, insert, update, delete on public.menus_jour_lignes to authenticated;
+
+create table if not exists public.menus_favoris (
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid not null references public.mamas(id) on delete cascade,
+  nom text not null,
+  categorie text check (categorie in ('entree','plat','dessert','boisson')),
+  fiche_id uuid not null references public.fiches_techniques(id) on delete restrict,
+  portions_default numeric default 1,
+  actif boolean default true,
+  created_at timestamptz default now()
+);
+create index if not exists idx_menus_favoris_mama on public.menus_favoris(mama_id);
+alter table public.menus_favoris enable row level security;
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='menus_favoris' and policyname='menus_favoris_all') then
+    create policy menus_favoris_all on public.menus_favoris
+      for all using (mama_id = current_user_mama_id())
+      with check (mama_id = current_user_mama_id());
+  end if;
+end $$;
+grant select, insert, update, delete on public.menus_favoris to authenticated;
+
+create or replace view public.v_menu_du_jour_lignes_cout as
+select
+  l.id,
+  l.menu_id,
+  l.mama_id,
+  l.categorie,
+  l.fiche_id,
+  l.portions,
+  cf.cout as cout_total_fiche,
+  cf.portions as portions_fiche,
+  (cf.cout / nullif(cf.portions,0)) as cout_par_portion,
+  ((cf.cout / nullif(cf.portions,0)) * l.portions) as cout_ligne_total
+from public.menus_jour_lignes l
+join public.v_couts_fiches cf on cf.fiche_id = l.fiche_id
+where l.mama_id = cf.mama_id;
+
+create or replace view public.v_menu_du_jour_resume as
+with lignes as (
+  select menu_id, categorie, sum(cout_ligne_total) as cout_categorie
+  from public.v_menu_du_jour_lignes_cout
+  group by menu_id, categorie
+)
+select
+  m.id as menu_id,
+  m.mama_id,
+  m.date_menu,
+  coalesce(sum(l.cout_categorie) filter (where l.categorie='entree'),0) as cout_entrees,
+  coalesce(sum(l.cout_categorie) filter (where l.categorie='plat'),0) as cout_plats,
+  coalesce(sum(l.cout_categorie) filter (where l.categorie='dessert'),0) as cout_desserts,
+  coalesce(sum(l.cout_categorie) filter (where l.categorie='boisson'),0) as cout_boissons,
+  coalesce(sum(l.cout_categorie),0) as cout_total
+from public.menus_jour m
+left join lignes l on l.menu_id = m.id
+group by m.id, m.mama_id, m.date_menu;
+
+create or replace view public.v_menu_du_jour_mensuel as
+select
+  mama_id,
+  date_trunc('month', date_menu)::date as mois,
+  sum(cout_total) as cout_total_mois
+from public.v_menu_du_jour_resume
+group by mama_id, date_trunc('month', date_menu);
 create table if not exists public.mouvements (
   id uuid primary key default uuid_generate_v4(),
   mama_id uuid not null,

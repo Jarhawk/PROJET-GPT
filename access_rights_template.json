@@ -47,6 +47,12 @@
     "edit": false,
     "delete": false
   },
+  "menu_du_jour": {
+    "view": false,
+    "create": false,
+    "edit": false,
+    "delete": false
+  },
   "carte": {
     "view": false,
     "create": false,

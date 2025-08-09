@@ -102,7 +102,8 @@ const Consolidation = lazyWithPreload(() => import("@/pages/consolidation/Consol
 const AccessMultiSites = lazyWithPreload(() => import("@/pages/consolidation/AccessMultiSites.jsx"));
 const CreateMama = lazyWithPreload(() => import("@/pages/auth/CreateMama.jsx"));
 const Feedback = lazyWithPreload(() => import("@/pages/Feedback.jsx"));
-const Logs = lazyWithPreload(() => import("@/pages/Logs.jsx"));
+const SupervisionLogs = lazyWithPreload(() => import("@/pages/supervision/Logs.jsx"));
+const SupervisionRapports = lazyWithPreload(() => import("@/pages/supervision/Rapports.jsx"));
 const Consentements = lazyWithPreload(() => import("@/pages/Consentements.jsx"));
 const Requisitions = lazyWithPreload(() => import("@/pages/requisitions/Requisitions.jsx"));
 const RequisitionForm = lazyWithPreload(() => import("@/pages/requisitions/RequisitionForm.jsx"));
@@ -179,7 +180,10 @@ export const routePreloadMap = {
   '/parametrage/unites': Unites.preload,
   '/parametrage/periodes': Periodes.preload,
   '/consentements': Consentements.preload,
-  '/logs': Logs.preload,
+  '/supervision': SupervisionGroupe.preload,
+  '/supervision/comparateur': ComparateurFiches.preload,
+  '/supervision/logs': SupervisionLogs.preload,
+  '/supervision/rapports': SupervisionRapports.preload,
   '/aide': AideContextuelle.preload,
   '/feedback': Feedback.preload,
   '/stats': Stats.preload,
@@ -589,16 +593,20 @@ export default function Router() {
             element={<ProtectedRoute moduleKey="licences"><Licences /></ProtectedRoute>}
           />
           <Route
-            path="/logs"
-            element={<ProtectedRoute moduleKey="logs"><Logs /></ProtectedRoute>}
-          />
-          <Route
             path="/supervision"
             element={<ProtectedRoute moduleKey="dashboard"><SupervisionGroupe /></ProtectedRoute>}
           />
           <Route
             path="/supervision/comparateur"
             element={<ProtectedRoute moduleKey="fiches_techniques"><ComparateurFiches /></ProtectedRoute>}
+          />
+          <Route
+            path="/supervision/logs"
+            element={<ProtectedRoute moduleKey="logs"><SupervisionLogs /></ProtectedRoute>}
+          />
+          <Route
+            path="/supervision/rapports"
+            element={<ProtectedRoute moduleKey="reporting"><SupervisionRapports /></ProtectedRoute>}
           />
           <Route
             path="/debug/auth"
@@ -608,7 +616,6 @@ export default function Router() {
             path="/debug/access"
             element={<ProtectedRoute moduleKey="dashboard"><AccessExample /></ProtectedRoute>}
           />
-          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
       </Suspense>

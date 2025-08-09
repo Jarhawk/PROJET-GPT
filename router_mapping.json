@@ -320,10 +320,6 @@
     "module": "emails_envoyes"
   },
   {
-    "route": "/logs",
-    "module": "logs"
-  },
-  {
     "route": "/supervision",
     "module": "dashboard"
   },
@@ -338,5 +334,13 @@
   {
     "route": "/debug/access",
     "module": "dashboard"
+  },
+  {
+    "route": "/supervision/logs",
+    "module": "logs"
+  },
+  {
+    "route": "/supervision/rapports",
+    "module": "reporting"
   }
 ]

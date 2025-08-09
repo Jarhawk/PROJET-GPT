@@ -1,0 +1,546 @@
+[
+  {
+    "type": "table",
+    "name": "mamas"
+  },
+  {
+    "type": "table",
+    "name": "fournisseurs"
+  },
+  {
+    "type": "table",
+    "name": "produits"
+  },
+  {
+    "type": "table",
+    "name": "roles"
+  },
+  {
+    "type": "table",
+    "name": "utilisateurs"
+  },
+  {
+    "type": "table",
+    "name": "commandes"
+  },
+  {
+    "type": "table",
+    "name": "commande_lignes"
+  },
+  {
+    "type": "table",
+    "name": "templates_commandes"
+  },
+  {
+    "type": "table",
+    "name": "emails_envoyes"
+  },
+  {
+    "type": "table",
+    "name": "permissions"
+  },
+  {
+    "type": "table",
+    "name": "consentements_utilisateur"
+  },
+  {
+    "type": "table",
+    "name": "achats"
+  },
+  {
+    "type": "table",
+    "name": "alertes"
+  },
+  {
+    "type": "table",
+    "name": "api_keys"
+  },
+  {
+    "type": "table",
+    "name": "auth_double_facteur"
+  },
+  {
+    "type": "table",
+    "name": "bons_livraison"
+  },
+  {
+    "type": "table",
+    "name": "catalogue_updates"
+  },
+  {
+    "type": "table",
+    "name": "centres_de_cout"
+  },
+  {
+    "type": "table",
+    "name": "compta_mapping"
+  },
+  {
+    "type": "table",
+    "name": "documentation"
+  },
+  {
+    "type": "table",
+    "name": "documents"
+  },
+  {
+    "type": "table",
+    "name": "etapes_onboarding"
+  },
+  {
+    "type": "table",
+    "name": "facture_lignes"
+  },
+  {
+    "type": "table",
+    "name": "factures"
+  },
+  {
+    "type": "table",
+    "name": "familles"
+  },
+  {
+    "type": "table",
+    "name": "feedback"
+  },
+  {
+    "type": "table",
+    "name": "fiche_cout_history"
+  },
+  {
+    "type": "table",
+    "name": "fiche_lignes"
+  },
+  {
+    "type": "table",
+    "name": "fiches"
+  },
+  {
+    "type": "table",
+    "name": "fiches_techniques"
+  },
+  {
+    "type": "table",
+    "name": "fournisseur_contacts"
+  },
+  {
+    "type": "table",
+    "name": "fournisseur_notes"
+  },
+  {
+    "type": "table",
+    "name": "fournisseur_produits"
+  },
+  {
+    "type": "table",
+    "name": "fournisseurs_api_config"
+  },
+  {
+    "type": "table",
+    "name": "gadgets"
+  },
+  {
+    "type": "table",
+    "name": "groupes"
+  },
+  {
+    "type": "table",
+    "name": "guides_seen"
+  },
+  {
+    "type": "table",
+    "name": "help_articles"
+  },
+  {
+    "type": "table",
+    "name": "inventaire_zones"
+  },
+  {
+    "type": "table",
+    "name": "inventaires"
+  },
+  {
+    "type": "table",
+    "name": "produits_inventaire"
+  },
+  {
+    "type": "table",
+    "name": "journaux_utilisateur"
+  },
+  {
+    "type": "table",
+    "name": "lignes_bl"
+  },
+  {
+    "type": "table",
+    "name": "logs_securite"
+  },
+  {
+    "type": "table",
+    "name": "menu_fiches"
+  },
+  {
+    "type": "table",
+    "name": "menus"
+  },
+  {
+    "type": "table",
+    "name": "menus_groupes"
+  },
+  {
+    "type": "table",
+    "name": "menus_groupes_fiches"
+  },
+  {
+    "type": "table",
+    "name": "menus_jour"
+  },
+  {
+    "type": "table",
+    "name": "menus_jour_fiches"
+  },
+  {
+    "type": "table",
+    "name": "notification_preferences"
+  },
+  {
+    "type": "table",
+    "name": "notifications"
+  },
+  {
+    "type": "table",
+    "name": "parametres_commandes"
+  },
+  {
+    "type": "table",
+    "name": "periodes_comptables"
+  },
+  {
+    "type": "table",
+    "name": "pertes"
+  },
+  {
+    "type": "table",
+    "name": "planning_lignes"
+  },
+  {
+    "type": "table",
+    "name": "planning_previsionnel"
+  },
+  {
+    "type": "table",
+    "name": "promotions"
+  },
+  {
+    "type": "table",
+    "name": "regles_alertes"
+  },
+  {
+    "type": "table",
+    "name": "requisitions"
+  },
+  {
+    "type": "table",
+    "name": "requisition_lignes"
+  },
+  {
+    "type": "table",
+    "name": "signalements"
+  },
+  {
+    "type": "table",
+    "name": "sous_familles"
+  },
+  {
+    "type": "table",
+    "name": "stocks"
+  },
+  {
+    "type": "table",
+    "name": "tableaux_de_bord"
+  },
+  {
+    "type": "table",
+    "name": "taches"
+  },
+  {
+    "type": "table",
+    "name": "tooltips"
+  },
+  {
+    "type": "table",
+    "name": "transfert_lignes"
+  },
+  {
+    "type": "table",
+    "name": "transferts"
+  },
+  {
+    "type": "table",
+    "name": "unites"
+  },
+  {
+    "type": "table",
+    "name": "usage_stats"
+  },
+  {
+    "type": "table",
+    "name": "utilisateurs_taches"
+  },
+  {
+    "type": "table",
+    "name": "validation_requests"
+  },
+  {
+    "type": "table",
+    "name": "ventes_boissons"
+  },
+  {
+    "type": "table",
+    "name": "ventes_fiches_carte"
+  },
+  {
+    "type": "table",
+    "name": "zones_stock"
+  },
+  {
+    "type": "table",
+    "name": "zones_droits"
+  },
+  {
+    "type": "table",
+    "name": "menu_groupes"
+  },
+  {
+    "type": "table",
+    "name": "menu_groupe_lignes"
+  },
+  {
+    "type": "table",
+    "name": "menu_groupe_modeles"
+  },
+  {
+    "type": "table",
+    "name": "menu_groupe_modele_lignes"
+  },
+  {
+    "type": "view",
+    "name": "utilisateurs_complets"
+  },
+  {
+    "type": "view",
+    "name": "v_achats_mensuels"
+  },
+  {
+    "type": "view",
+    "name": "v_analytique_stock"
+  },
+  {
+    "type": "view",
+    "name": "v_besoins_previsionnels"
+  },
+  {
+    "type": "view",
+    "name": "v_boissons"
+  },
+  {
+    "type": "view",
+    "name": "v_cost_center_month"
+  },
+  {
+    "type": "view",
+    "name": "v_cost_center_monthly"
+  },
+  {
+    "type": "view",
+    "name": "v_ecarts_inventaire"
+  },
+  {
+    "type": "view",
+    "name": "v_evolution_achats"
+  },
+  {
+    "type": "view",
+    "name": "v_fournisseurs_inactifs"
+  },
+  {
+    "type": "view",
+    "name": "v_performance_fiches"
+  },
+  {
+    "type": "view",
+    "name": "v_pmp"
+  },
+  {
+    "type": "view",
+    "name": "v_products_last_price"
+  },
+  {
+    "type": "view",
+    "name": "v_produits_dernier_prix"
+  },
+  {
+    "type": "view",
+    "name": "v_produits_utilises"
+  },
+  {
+    "type": "view",
+    "name": "v_reco_stockmort"
+  },
+  {
+    "type": "view",
+    "name": "v_reco_surcout"
+  },
+  {
+    "type": "view",
+    "name": "v_requisitions"
+  },
+  {
+    "type": "view",
+    "name": "v_stock_requisitionne"
+  },
+  {
+    "type": "view",
+    "name": "suggestions_commandes"
+  },
+  {
+    "type": "view",
+    "name": "v_stocks"
+  },
+  {
+    "type": "view",
+    "name": "v_taches_assignees"
+  },
+  {
+    "type": "view",
+    "name": "v_tendance_prix_produit"
+  },
+  {
+    "type": "view",
+    "name": "v_top_fournisseurs"
+  },
+  {
+    "type": "view",
+    "name": "v_couts_fiches"
+  },
+  {
+    "type": "view",
+    "name": "v_menu_groupe_couts"
+  },
+  {
+    "type": "view",
+    "name": "v_menu_groupe_resume"
+  },
+  {
+    "type": "view",
+    "name": "v_costing_carte"
+  },
+  {
+    "type": "function",
+    "name": "trg_set_timestamp"
+  },
+  {
+    "type": "function",
+    "name": "current_user_mama_id"
+  },
+  {
+    "type": "function",
+    "name": "current_user_is_admin_or_manager"
+  },
+  {
+    "type": "function",
+    "name": "get_template_commande"
+  },
+  {
+    "type": "function",
+    "name": "create_utilisateur"
+  },
+  {
+    "type": "function",
+    "name": "calcul_ecarts_inventaire"
+  },
+  {
+    "type": "function",
+    "name": "fn_calc_budgets"
+  },
+  {
+    "type": "function",
+    "name": "can_access_zone"
+  },
+  {
+    "type": "function",
+    "name": "can_transfer"
+  },
+  {
+    "type": "function",
+    "name": "zone_is_cave_or_shop"
+  },
+  {
+    "type": "function",
+    "name": "advanced_stats"
+  },
+  {
+    "type": "function",
+    "name": "apply_stock_from_achat"
+  },
+  {
+    "type": "function",
+    "name": "calcul_ecarts_inventaire"
+  },
+  {
+    "type": "function",
+    "name": "compare_fiche"
+  },
+  {
+    "type": "function",
+    "name": "consolidated_stats"
+  },
+  {
+    "type": "function",
+    "name": "dashboard_stats"
+  },
+  {
+    "type": "function",
+    "name": "disable_two_fa"
+  },
+  {
+    "type": "function",
+    "name": "enable_two_fa"
+  },
+  {
+    "type": "function",
+    "name": "import_invoice"
+  },
+  {
+    "type": "function",
+    "name": "send_email_notification"
+  },
+  {
+    "type": "function",
+    "name": "send_notification_webhook"
+  },
+  {
+    "type": "function",
+    "name": "stats_achats_fournisseur"
+  },
+  {
+    "type": "function",
+    "name": "stats_achats_fournisseurs"
+  },
+  {
+    "type": "function",
+    "name": "stats_cost_centers"
+  },
+  {
+    "type": "function",
+    "name": "stats_multi_mamas"
+  },
+  {
+    "type": "function",
+    "name": "stats_rotation_produit"
+  },
+  {
+    "type": "function",
+    "name": "top_produits"
+  }
+]

@@ -45,20 +45,6 @@ export function useInventaires() {
     return cleaned;
   }
 
-  async function fetchMouvementsInventaire(inventaireId) {
-    if (!mama_id || !inventaireId) return [];
-    const { data, error } = await supabase
-      .from("mouvements")
-      .select("*")
-      .eq("inventaire_id", inventaireId)
-      .eq("mama_id", mama_id)
-      .order("date", { ascending: true });
-    if (error) {
-      setError(error);
-      return [];
-    }
-    return data || [];
-  }
 
   async function validateInventaireStock(inventaireId) {
     if (!mama_id || !inventaireId) return false;
@@ -173,7 +159,6 @@ export function useInventaires() {
     getInventaireById,
     deleteInventaire,
     reactivateInventaire,
-    fetchMouvementsInventaire,
     validateInventaireStock,
   };
 }

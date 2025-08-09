@@ -1,0 +1,130 @@
+# Vérification schéma vs Front
+
+## ✅ OK (présents)
+- achats
+- alertes
+- api_keys
+- auth_double_facteur
+- bons_livraison
+- catalogue_updates
+- centres_de_cout
+- commande_lignes
+- commandes
+- compta_mapping
+- consentements_utilisateur
+- consolidated_stats
+- disable_two_fa
+- documentation
+- documents
+- emails_envoyes
+- etapes_onboarding
+- facture_lignes
+- factures
+- familles
+- feedback
+- fiche_cout_history
+- fiche_lignes
+- fiches
+- fiches_techniques
+- fournisseur_contacts
+- fournisseur_notes
+- fournisseur_produits
+- fournisseurs
+- fournisseurs_api_config
+- gadgets
+- groupes
+- guides_seen
+- help_articles
+- inventaire_zones
+- inventaires
+- journaux_utilisateur
+- lignes_bl
+- logs_securite
+- mamas
+- menu_fiches
+- menu_groupe_lignes
+- menu_groupe_modele_lignes
+- menu_groupe_modeles
+- menu_groupes
+- menus
+- menus_jour
+- menus_jour_fiches
+- notification_preferences
+- notifications
+- parametres_commandes
+- periodes_comptables
+- permissions
+- pertes
+- planning_lignes
+- planning_previsionnel
+- produits
+- produits_inventaire
+- promotions
+- regles_alertes
+- requisition_lignes
+- requisitions
+- roles
+- signalements
+- sous_familles
+- tableaux_de_bord
+- taches
+- templates_commandes
+- tooltips
+- transfert_lignes
+- transferts
+- unites
+- usage_stats
+- utilisateurs
+- utilisateurs_complets
+- utilisateurs_taches
+- v_achats_mensuels
+- v_analytique_stock
+- v_besoins_previsionnels
+- v_boissons
+- v_cost_center_month
+- v_cost_center_monthly
+- v_costing_carte
+- v_ecarts_inventaire
+- v_evolution_achats
+- v_fournisseurs_inactifs
+- v_menu_groupe_couts
+- v_menu_groupe_resume
+- v_performance_fiches
+- v_pmp
+- v_products_last_price
+- v_produits_dernier_prix
+- v_produits_utilises
+- v_reco_stockmort
+- v_reco_surcout
+- v_requisitions
+- v_stock_requisitionne
+- v_stocks
+- v_taches_assignees
+- v_tendance_prix_produit
+- v_top_fournisseurs
+- validation_requests
+- ventes_boissons
+- zones_droits
+- zones_stock
+
+## ❌ Manquants (à créer côté SQL)
+- alertes_rupture (src/hooks/useRuptureAlerts.js:10, src/hooks/useRuptureAlerts.js:26)
+- logs_activite (src/hooks/useLogs.js:21)
+- menus_jour_lignes (src/hooks/useMenuDuJour.js:271, src/hooks/useMenuDuJour.js:278, src/hooks/useMenuDuJour.js:285, src/hooks/useMenuDuJour.js:292, src/hooks/useMenuDuJour.js:317)
+- rapports_generes (src/hooks/useLogs.js:55, src/hooks/useLogs.js:74, src/pages/supervision/Rapports.jsx:45)
+- settings (src/hooks/useCostingCarte.js:49)
+- user_mama_access (src/hooks/useConsolidation.js:17, src/pages/consolidation/AccessMultiSites.jsx:13)
+- v_cons_achats_mensuels (src/hooks/useConsolidation.js:54)
+- v_cons_ecarts_inventaire (src/hooks/useConsolidation.js:87)
+- v_cons_foodcost_mensuel (src/hooks/useConsolidation.js:76)
+- v_cons_ventes_mensuelles (src/hooks/useConsolidation.js:65)
+- v_consolidation_mensuelle (src/hooks/useConsolidation.js:34)
+- v_me_classification (src/hooks/useMenuEngineering.js:18)
+- v_menu_du_jour_lignes_cout (src/hooks/useMenuDuJour.js:249)
+- v_menu_du_jour_mensuel (src/hooks/useMenuDuJour.js:351, src/hooks/useMenuEngineering.js:33)
+- v_menu_du_jour_resume (src/hooks/useMenuDuJour.js:224)
+- ventes_fiches (src/hooks/useMenuEngineering.js:76, src/hooks/useMenuEngineering.js:99)
+- ventes_import_staging (src/hooks/useMenuEngineering.js:61, src/hooks/useMenuEngineering.js:82)
+
+## ⚠️ Appels legacy
+- mouvements_centres_cout (src/hooks/useMouvementCostCenters.js:18, src/hooks/useMouvementCostCenters.js:38, src/hooks/useMouvementCostCenters.js:51)

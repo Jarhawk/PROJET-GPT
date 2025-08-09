@@ -27,12 +27,13 @@ router.get('/', async (req, res) => {
   try {
     if (!supabase) throw new Error('Missing Supabase credentials');
     let query = supabase
-      .from('mouvements')
-      .select('*')
-      .eq('mama_id', mama_id);
-    if (since) query = query.gte('date', since);
-    if (type) query = query.eq('type', type);
-    query = query.order(sortBy, { ascending: order !== 'desc' });
+      .from('requisition_lignes')
+      .select('quantite, produit_id, requisitions!inner(mama_id,date_requisition,statut)')
+      .eq('requisitions.mama_id', mama_id)
+      .eq('requisitions.statut', 'réalisée');
+    if (since) query = query.gte('requisitions.date_requisition', since);
+    if (type) void type; // les lignes de réquisition sont des sorties
+    query = query.order('requisitions.' + sortBy, { ascending: order !== 'desc' });
     const p = Math.max(parseInt(page, 10), 1);
     const l = Math.max(parseInt(limit, 10), 1);
     const start = (p - 1) * l;

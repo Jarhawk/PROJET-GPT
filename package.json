@@ -19,7 +19,9 @@
     "allocate:history": "node scripts/reallocate_history.js",
     "backup": "node scripts/backup_db.js",
     "test:manifest": "node scripts/validate_manifest_icons.cjs",
-    "deploy": "npm run build && npx netlify deploy --dir=dist --prod"
+    "deploy": "npm run build && npx netlify deploy --dir=dist --prod",
+    "check:schema": "node scripts/checkSchema.js",
+    "fix:imports": "node scripts/fixLegacyMouvements.js"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.14",

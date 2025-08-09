@@ -2114,43 +2114,50 @@ where actif = true
 group by mama_id, date_trunc('month', date_achat)::date;
 create or replace view public.v_analytique_stock as
 select
-  p.famille_id::text as famille,
-  null::text as activite,
-  null::uuid as cost_center_id,
-  null::text as cost_center_nom,
-  sum(rl.quantite) as quantite,
-  sum(rl.quantite * 0)::numeric as valeur,
-  r.mama_id,
-  r.date_requisition as date
-from public.requisition_lignes rl
-join public.requisitions r on r.id = rl.requisition_id
-join public.produits p on p.id = rl.produit_id
-where r.statut = 'réalisée'
-group by p.famille_id, r.mama_id, r.date_requisition;
+  p.famille_id,
+  p.sous_famille_id,
+  s.mama_id,
+  sum(s.stock) as quantite,
+  sum(s.stock * coalesce(vplp.dernier_prix,0)) as valeur
+from public.v_stocks s
+join public.produits p on p.id = s.produit_id and p.mama_id = s.mama_id
+left join public.v_products_last_price vplp on vplp.produit_id = s.produit_id and vplp.mama_id = s.mama_id
+group by p.famille_id, p.sous_famille_id, s.mama_id;
 create or replace view public.v_besoins_previsionnels as
-select m.id as menu_id, m.mama_id, null::uuid as produit_id, 0::numeric as quantite, 0::numeric as valeur
-from public.menu_groupes m
-where false;
-create or replace view public.v_boissons as
-select p.id, p.mama_id, p.nom, null::text as type, null::text as unite, null::numeric as cout_portion, p.prix_vente
+select
+  p.mama_id,
+  p.id as produit_id,
+  greatest(p.stock_min - coalesce(s.stock,0),0) as quantite
 from public.produits p
-where false;
+left join public.v_stocks s on s.produit_id = p.id and s.mama_id = p.mama_id;
+create or replace view public.v_boissons as
+select
+  f.id,
+  f.mama_id,
+  f.created_at,
+  cf.cout / nullif(cf.portions,0) as cout_portion
+from public.fiches_techniques f
+left join public.v_couts_fiches cf on cf.fiche_id = f.id and cf.mama_id = f.mama_id;
 create or replace view public.v_cost_center_month as
 select
   null::uuid as cost_center_id,
   null::text as nom,
-  date_trunc('month', now())::date as mois,
-  0::numeric as valeur,
-  current_user_mama_id() as mama_id
-where false;
+  date_trunc('month', a.date_achat)::date as mois,
+  sum(a.quantite * a.prix) as valeur,
+  a.mama_id
+from public.achats a
+where a.actif is true
+group by a.mama_id, date_trunc('month', a.date_achat)::date;
 create or replace view public.v_cost_center_monthly as
 select
-  date_trunc('month', now())::date as mois,
+  date_trunc('month', a.date_achat)::date as mois,
   null::text as nom,
   null::uuid as cost_center_id,
-  0::numeric as valeur,
-  current_user_mama_id() as mama_id
-where false;
+  sum(a.quantite * a.prix) as valeur,
+  a.mama_id
+from public.achats a
+where a.actif is true
+group by a.mama_id, date_trunc('month', a.date_achat)::date;
 create or replace view public.v_ecarts_inventaire as
 select i.periode_id,
        i.zone_id,
@@ -2173,9 +2180,14 @@ select f.id, f.mama_id, f.nom, f.contact, false::boolean as actif
 from public.fournisseurs f
 where false;
 create or replace view public.v_performance_fiches as
-select f.id as fiche_id, f.mama_id, 0::numeric as performance
+select
+  f.id as fiche_id,
+  f.mama_id,
+  cf.cout / nullif(cf.portions,0) as cout_par_portion,
+  f.prix_vente,
+  (f.prix_vente - cf.cout / nullif(cf.portions,0)) as marge
 from public.fiches_techniques f
-where false;
+left join public.v_couts_fiches cf on cf.fiche_id = f.id and cf.mama_id = f.mama_id;
 create or replace view public.v_pmp as
 select
   mama_id,
@@ -2221,24 +2233,55 @@ select
   ) as dernier_prix
 from public.produits p;
 create or replace view public.v_produits_utilises as
-select
-  rl.produit_id,
-  p.nom as produit_nom,
-  rl.quantite,
-  r.date_requisition as date_utilisation,
-  r.mama_id
-from public.requisition_lignes rl
-join public.requisitions r on r.id = rl.requisition_id
-join public.produits p on p.id = rl.produit_id
-where r.statut = 'réalisée';
+select x.mama_id,
+       x.produit_id,
+       count(*) as usage_count
+from (
+  select r.mama_id, rl.produit_id
+  from public.requisition_lignes rl
+  join public.requisitions r on r.id = rl.requisition_id
+  where r.statut = 'réalisée'
+  union all
+  select f.mama_id, fl.produit_id
+  from public.fiche_lignes fl
+  join public.fiches_techniques f on f.id = fl.fiche_id
+) x
+group by x.mama_id, x.produit_id;
 create or replace view public.v_reco_stockmort as
-select p.id as produit_id, p.mama_id, p.nom, 0::integer as jours_inactif
+with achats as (
+  select produit_id, mama_id
+  from public.achats
+  where actif is true
+    and date_achat >= now() - interval '90 days'
+  group by produit_id, mama_id
+),
+requis as (
+  select rl.produit_id, r.mama_id, sum(rl.quantite) as q
+  from public.requisition_lignes rl
+  join public.requisitions r on r.id = rl.requisition_id
+  where r.statut = 'réalisée'
+    and r.date_requisition >= now() - interval '90 days'
+  group by rl.produit_id, r.mama_id
+)
+select p.id as produit_id, p.mama_id, p.nom
 from public.produits p
-where false;
+join achats a on a.produit_id = p.id and a.mama_id = p.mama_id
+left join requis r on r.produit_id = p.id and r.mama_id = p.mama_id
+where coalesce(r.q,0) = 0;
 create or replace view public.v_reco_surcout as
-select p.id as produit_id, p.mama_id, p.nom, 0::numeric as variation_pct
+select p.id as produit_id,
+       p.mama_id,
+       p.nom,
+       vplp.dernier_prix,
+       p.pmp,
+       case
+         when p.pmp > 0 and vplp.dernier_prix > p.pmp
+           then (vplp.dernier_prix - p.pmp) / p.pmp * 100
+         else null
+       end as variation_pct
 from public.produits p
-where false;
+join public.v_products_last_price vplp on vplp.produit_id = p.id and vplp.mama_id = p.mama_id
+where p.pmp > 0 and vplp.dernier_prix > p.pmp;
 create or replace view public.v_requisitions as
 select r.id,
        r.mama_id,
@@ -2255,10 +2298,11 @@ create or replace view public.v_stock_requisitionne as
 select
   r.mama_id,
   rl.produit_id,
-  sum(rl.quantite) as quantite
+  sum(rl.quantite) as quantite_30j
 from public.requisition_lignes rl
 join public.requisitions r on r.id = rl.requisition_id
-where r.statut = 'en_cours'
+where r.statut in ('faite','réalisée')
+  and r.date_requisition >= now() - interval '30 days'
 group by r.mama_id, rl.produit_id;
 
 create or replace view public.suggestions_commandes as
@@ -2314,16 +2358,17 @@ select
   avg(a.prix) as prix_moyen
 from public.achats a
 where a.actif is true
+  and a.date_achat >= date_trunc('month', now()) - interval '11 months'
 group by a.mama_id, a.produit_id, to_char(a.date_achat, 'YYYY-MM');
 create or replace view public.v_top_fournisseurs as
 select
   a.mama_id,
   a.fournisseur_id,
-  date_trunc('month', a.date_achat) as mois,
   sum(a.prix * a.quantite) as montant
 from public.achats a
 where a.actif is true
-group by a.mama_id, a.fournisseur_id, date_trunc('month', a.date_achat);
+  and a.date_achat >= current_date - interval '12 months'
+group by a.mama_id, a.fournisseur_id;
 create or replace view public.v_couts_fiches as
 select
   f.id as fiche_id,

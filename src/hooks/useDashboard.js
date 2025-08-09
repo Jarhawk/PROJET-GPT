@@ -55,16 +55,22 @@ export function useDashboard() {
       return;
     }
 
-    // 2. Récupère mouvements
+    // 2. Récupère consommations via requisitions
     try {
       const { data: mouvementsRaw, error: errorMouv } = await supabase
-        .from("mouvements")
-        .select("type, quantite, produit_id, date")
-        .eq("mama_id", mama_id);
+        .from('requisition_lignes')
+        .select('quantite, produit_id, requisitions!inner(date_requisition,mama_id,statut)')
+        .eq('requisitions.mama_id', mama_id)
+        .eq('requisitions.statut', 'réalisée');
       if (errorMouv) throw errorMouv;
-      mouvements = Array.isArray(mouvementsRaw) ? mouvementsRaw : [];
+      mouvements = (mouvementsRaw || []).map(m => ({
+        quantite: m.quantite,
+        produit_id: m.produit_id,
+        type: 'sortie',
+        date: m.requisitions.date_requisition,
+      }));
     } catch (_err) {
-      setError("Erreur chargement mouvements");
+      setError('Erreur chargement mouvements');
       void _err;
       setLoading(false);
       return;

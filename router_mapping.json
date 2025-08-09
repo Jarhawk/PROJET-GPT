@@ -68,6 +68,18 @@
     "module": "menus"
   },
   {
+    "route": "/menu-groupes",
+    "module": "menu_groupe"
+  },
+  {
+    "route": "/menu-groupes/nouveau",
+    "module": "menu_groupe"
+  },
+  {
+    "route": "/menu-groupes/:id",
+    "module": "menu_groupe"
+  },
+  {
     "route": "/carte",
     "module": "carte"
   },

@@ -2300,3 +2300,125 @@ language sql as $$
   limit coalesce(limit_param, 10);
 $$;
 grant execute on function public.top_produits(uuid, date, date, integer) to authenticated;
+
+-- Menu groupe tables and views
+create table if not exists public.menu_groupes (
+  id uuid primary key default uuid_generate_v4(),
+  mama_id uuid not null references public.mamas(id) on delete cascade,
+  nom text not null,
+  prix_vente_personne numeric,
+  statut text not null default 'brouillon' check (statut in ('brouillon','valide')),
+  actif boolean default true,
+  archive boolean default false,
+  archive_at timestamptz,
+  note text,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  unique (mama_id, nom)
+);
+create index if not exists idx_menu_groupes_mama on public.menu_groupes(mama_id);
+alter table public.menu_groupes enable row level security;
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='menu_groupes' and policyname='menu_groupes_all') then
+    create policy menu_groupes_all on public.menu_groupes
+      for all using (mama_id = current_user_mama_id())
+      with check (mama_id = current_user_mama_id());
+  end if;
+end $$;
+grant select, insert, update, delete on public.menu_groupes to authenticated;
+
+create table if not exists public.menu_groupe_lignes (
+  id uuid primary key default uuid_generate_v4(),
+  menu_groupe_id uuid not null references public.menu_groupes(id) on delete cascade,
+  mama_id uuid not null,
+  categorie text not null check (categorie in ('aperitif','entree','plat','dessert','boisson')),
+  fiche_id uuid not null references public.fiches_techniques(id) on delete restrict,
+  portions_par_personne numeric not null default 1,
+  position integer,
+  created_at timestamptz default now()
+);
+create index if not exists idx_menu_groupe_lignes_menu on public.menu_groupe_lignes(menu_groupe_id);
+create index if not exists idx_menu_groupe_lignes_fiche on public.menu_groupe_lignes(fiche_id);
+alter table public.menu_groupe_lignes enable row level security;
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='menu_groupe_lignes' and policyname='menu_groupe_lignes_all') then
+    create policy menu_groupe_lignes_all on public.menu_groupe_lignes
+      for all using (mama_id = current_user_mama_id())
+      with check (mama_id = current_user_mama_id());
+  end if;
+end $$;
+grant select, insert, update, delete on public.menu_groupe_lignes to authenticated;
+
+create table if not exists public.menu_groupe_modeles (
+  id uuid primary key default uuid_generate_v4(),
+  mama_id uuid not null references public.mamas(id) on delete cascade,
+  nom text not null,
+  actif boolean default true,
+  created_at timestamptz default now()
+);
+create index if not exists idx_menu_groupe_modeles_mama on public.menu_groupe_modeles(mama_id);
+alter table public.menu_groupe_modeles enable row level security;
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='menu_groupe_modeles' and policyname='menu_groupe_modeles_all') then
+    create policy menu_groupe_modeles_all on public.menu_groupe_modeles
+      for all using (mama_id = current_user_mama_id())
+      with check (mama_id = current_user_mama_id());
+  end if;
+end $$;
+grant select, insert, update, delete on public.menu_groupe_modeles to authenticated;
+
+create table if not exists public.menu_groupe_modele_lignes (
+  id uuid primary key default uuid_generate_v4(),
+  modele_id uuid not null references public.menu_groupe_modeles(id) on delete cascade,
+  mama_id uuid not null,
+  categorie text not null check (categorie in ('aperitif','entree','plat','dessert','boisson')),
+  fiche_id uuid not null references public.fiches_techniques(id) on delete restrict,
+  portions_par_personne numeric not null default 1,
+  position integer,
+  created_at timestamptz default now()
+);
+create index if not exists idx_menu_groupe_modele_lignes_modele on public.menu_groupe_modele_lignes(modele_id);
+alter table public.menu_groupe_modele_lignes enable row level security;
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='menu_groupe_modele_lignes' and policyname='menu_groupe_modele_lignes_all') then
+    create policy menu_groupe_modele_lignes_all on public.menu_groupe_modele_lignes
+      for all using (mama_id = current_user_mama_id())
+      with check (mama_id = current_user_mama_id());
+  end if;
+end $$;
+grant select, insert, update, delete on public.menu_groupe_modele_lignes to authenticated;
+
+create or replace view public.v_menu_groupe_couts as
+select
+  l.id as ligne_id,
+  l.menu_groupe_id,
+  l.mama_id,
+  l.categorie,
+  l.fiche_id,
+  l.portions_par_personne,
+  cf.cout as cout_total_fiche,
+  cf.portions as portions_fiche,
+  (cf.cout / nullif(cf.portions,0)) as cout_par_portion_fiche,
+  ((cf.cout / nullif(cf.portions,0)) * l.portions_par_personne) as cout_par_personne_ligne
+from public.menu_groupe_lignes l
+join public.v_couts_fiches cf on cf.fiche_id = l.fiche_id and cf.mama_id = l.mama_id;
+
+create or replace view public.v_menu_groupe_resume as
+with couts as (
+  select menu_groupe_id, sum(cout_par_personne_ligne) as cout_par_personne
+  from public.v_menu_groupe_couts
+  group by menu_groupe_id
+)
+select
+  mg.id as menu_groupe_id,
+  mg.mama_id,
+  mg.nom,
+  mg.prix_vente_personne,
+  coalesce(c.cout_par_personne,0) as cout_par_personne,
+  (mg.prix_vente_personne - coalesce(c.cout_par_personne,0)) as marge_par_personne,
+  case
+    when mg.prix_vente_personne is null or mg.prix_vente_personne = 0 then null
+    else round((mg.prix_vente_personne - coalesce(c.cout_par_personne,0)) / mg.prix_vente_personne * 100, 2)
+  end as marge_pct
+from public.menu_groupes mg
+left join couts c on c.menu_groupe_id = mg.id;

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import SousFamilleRow from './SousFamilleRow';
-import SousFamilleForm from './SousFamilleForm';
+import SousFamilleForm from '@/forms/SousFamilleForm.jsx';
 
 export default function FamilleRow({
   famille,
@@ -69,7 +69,8 @@ export default function FamilleRow({
             <tr>
               <td colSpan={3} className="px-2 py-1">
                 <SousFamilleForm
-                  onSubmit={async (data) => {
+                  familleId={famille.id}
+                  onSave={async (data) => {
                     await onAddSousFamille(famille.id, data);
                     setAdding(false);
                   }}

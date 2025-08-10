@@ -33,8 +33,7 @@ export default function Produits() {
     toggleProductActive,
   } = useProducts();
   const { familles: famillesHook, fetchFamilles } = useFamilles();
-  const { sousFamilles, fetchSousFamilles, setSousFamilles } =
-    useSousFamilles();
+  const { sousFamilles, list: listSousFamilles } = useSousFamilles();
   const { zones } = useZonesStock();
   const familles = famillesHook;
 
@@ -96,11 +95,9 @@ export default function Produits() {
     if (!canView) return;
     setSousFamilleFilter("");
     if (familleFilter) {
-      fetchSousFamilles(familleFilter);
-    } else {
-      setSousFamilles([]);
+      listSousFamilles({ familleId: familleFilter, actif: true });
     }
-  }, [familleFilter, fetchSousFamilles, setSousFamilles, canView]);
+  }, [familleFilter, listSousFamilles, canView]);
 
   function resetFilters() {
     setSearch("");
@@ -109,7 +106,6 @@ export default function Produits() {
     setZoneFilter("");
     setActifFilter("all");
     setPage(1);
-    setSousFamilles([]);
   }
 
   function toggleSort(field) {

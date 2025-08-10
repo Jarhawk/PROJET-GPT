@@ -27,10 +27,9 @@ vi.mock('@/hooks/useFournisseurs', () => ({
 vi.mock('@/hooks/useSousFamilles', () => ({
   useSousFamilles: () => ({
     sousFamilles: [],
-    fetchSousFamilles: vi.fn(),
+    list: vi.fn(),
     loading: false,
     error: null,
-    setSousFamilles: vi.fn(),
   }),
 }));
 vi.mock('@/hooks/useZonesStock', () => ({

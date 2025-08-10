@@ -55,6 +55,19 @@ export function useFamilles() {
     [mama_id]
   );
 
+  const list = useCallback(
+    async ({ search = '', actif } = {}) => {
+      if (!mama_id) return [];
+      let query = supabase.from('familles').select('*').eq('mama_id', mama_id).order('nom', { ascending: true });
+      if (search) query = query.ilike('nom', `%${search}%`);
+      if (typeof actif === 'boolean') query = query.eq('actif', actif);
+      const { data, error } = await query;
+      if (error) setError(error);
+      return data || [];
+    },
+    [mama_id]
+  );
+
   const suggestFamilles = useCallback(
     async (search = "") => {
       if (!mama_id) return [];
@@ -200,6 +213,7 @@ export function useFamilles() {
     loading,
     error,
     fetchFamilles,
+    list,
     suggestFamilles,
     addFamille,
     updateFamille,

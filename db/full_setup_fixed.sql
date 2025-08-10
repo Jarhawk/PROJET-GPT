@@ -2559,6 +2559,7 @@ select
   p.id as produit_id,
   p.mama_id,
   p.famille_id,
+  p.sous_famille_id,
   p.unite_id,
   (
     select a.prix
@@ -4074,3 +4075,38 @@ where p.zone_id is not null
     select 1 from public.produits_zones px
     where px.mama_id = p.mama_id and px.produit_id = p.id and px.zone_id = p.zone_id
   );
+
+-- Trigger to ensure sous_famille coherence
+create or replace function public.trg_products_check_subfam() returns trigger as $$
+declare
+  sf record;
+begin
+  if new.sous_famille_id is not null then
+    select s.id, s.famille_id, s.mama_id into sf
+    from public.sous_familles s
+    where s.id = new.sous_famille_id;
+
+    if sf is null then
+      raise exception 'Sous-famille inexistante';
+    end if;
+
+    if new.famille_id is null or sf.famille_id is distinct from new.famille_id then
+      new.sous_famille_id := null;
+    end if;
+
+    if sf.mama_id is distinct from new.mama_id then
+      raise exception 'Incohérence mama_id entre produit et sous-famille';
+    end if;
+  end if;
+  return new;
+end;
+$$ language plpgsql;
+
+do $$
+begin
+  if not exists (select 1 from pg_trigger where tgname='trg_products_check_subfam_biu') then
+    create trigger trg_products_check_subfam_biu
+    before insert or update on public.produits
+    for each row execute function public.trg_products_check_subfam();
+  end if;
+end $$;

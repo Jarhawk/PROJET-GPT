@@ -1,7 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState, useCallback } from "react";
-import { supabase } from "@/lib/supabase";
-import useAuth from "@/hooks/useAuth";
+import { useCallback, useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { supabase } from '@/lib/supabase';
+import useAuth from '@/hooks/useAuth';
 
 export function useSousFamilles() {
   const { mama_id } = useAuth();
@@ -9,107 +10,82 @@ export function useSousFamilles() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const fetchSousFamilles = useCallback(
-    async (familleId) => {
-      if (!mama_id || !familleId) {
-        setSousFamilles([]);
-        return [];
-      }
+  const list = useCallback(
+    async ({ search = '', actif, familleId } = {}) => {
+      if (!mama_id) return { data: [], error: null };
       setLoading(true);
       setError(null);
-      const { data, error } = await supabase
-        .from("sous_familles")
-        .select("id, nom, famille_id, actif, position")
-        .eq("mama_id", mama_id)
-        .eq("famille_id", familleId)
-        .order("position", { ascending: true });
+      let query = supabase.from('sous_familles').select('*').eq('mama_id', mama_id);
+      if (search) query = query.ilike('nom', `%${search}%`);
+      if (typeof actif === 'boolean') query = query.eq('actif', actif);
+      if (familleId) query = query.eq('famille_id', familleId);
+      const { data, error } = await query;
       if (error) {
         setError(error);
+        toast.error('Erreur chargement sous-familles');
         setSousFamilles([]);
       } else {
         setSousFamilles(Array.isArray(data) ? data : []);
       }
       setLoading(false);
-      return data || [];
+      return { data: data || [], error };
     },
     [mama_id]
   );
 
-  async function createSousFamille({ famille_id, nom, actif = true, position = 0 }) {
-    if (!mama_id) return { error: "Aucun mama_id" };
-    setLoading(true);
-    setError(null);
-    const { data, error } = await supabase
-      .from("sous_familles")
-      .insert([{ famille_id, nom, actif, position, mama_id }])
-      .select("id, nom, famille_id, actif, position")
-      .single();
-    setLoading(false);
-    if (error) {
-      setError(error);
+  const create = useCallback(
+    async (payload) => {
+      if (!mama_id) return { error: 'Aucun mama_id' };
+      const { data, error } = await supabase
+        .from('sous_familles')
+        .insert([{ ...payload, mama_id }])
+        .select('*')
+        .single();
+      if (error) {
+        toast.error("Erreur lors de l'ajout");
+        return { error };
+      }
+      await list({ familleId: payload.famille_id });
+      return { data };
+    },
+    [mama_id, list]
+  );
+
+  const update = useCallback(
+    async (id, payload) => {
+      if (!mama_id) return { error: 'Aucun mama_id' };
+      const { error } = await supabase
+        .from('sous_familles')
+        .update(payload)
+        .eq('id', id)
+        .eq('mama_id', mama_id);
+      if (error) toast.error('Erreur lors de la mise à jour');
+      await list({ familleId: payload.famille_id });
       return { error };
-    }
-    await fetchSousFamilles(famille_id);
-    return { data };
-  }
+    },
+    [mama_id, list]
+  );
 
-  async function updateSousFamille(id, payload) {
-    if (!mama_id) return { error: "Aucun mama_id" };
-    setLoading(true);
-    setError(null);
-    const { error } = await supabase
-      .from("sous_familles")
-      .update(payload)
-      .eq("id", id)
-      .eq("mama_id", mama_id);
-    setLoading(false);
-    if (error) {
-      setError(error);
+  const toggleActif = useCallback(
+    async (id, actif) => {
+      return update(id, { actif });
+    },
+    [update]
+  );
+
+  const remove = useCallback(
+    async (id) => {
+      if (!mama_id) return { error: 'Aucun mama_id' };
+      const { error } = await supabase
+        .from('sous_familles')
+        .delete()
+        .eq('id', id)
+        .eq('mama_id', mama_id);
+      if (error) toast.error('Erreur lors de la suppression');
       return { error };
-    }
-    await fetchSousFamilles(payload.famille_id || sousFamilles.find(sf => sf.id === id)?.famille_id);
-    return { error: null };
-  }
+    },
+    [mama_id]
+  );
 
-  async function deleteSousFamille(id) {
-    if (!mama_id) return { error: "Aucun mama_id" };
-    const { error } = await supabase
-      .from("sous_familles")
-      .delete()
-      .eq("id", id)
-      .eq("mama_id", mama_id);
-    if (error) setError(error);
-    return { error };
-  }
-
-  async function mergeSousFamilles(srcId, dstId) {
-    setLoading(true);
-    setError(null);
-    const { error } = await supabase.rpc("merge_sous_familles", { src: srcId, dst: dstId });
-    if (error) setError(error);
-    setLoading(false);
-    return { error };
-  }
-
-  async function reorderSousFamilles(familleId, rows = []) {
-    setLoading(true);
-    setError(null);
-    const { error } = await supabase.rpc("reorder_sous_familles", { p_famille: familleId, p_rows: rows });
-    if (error) setError(error);
-    setLoading(false);
-    return { error };
-  }
-
-  return {
-    sousFamilles,
-    loading,
-    error,
-    fetchSousFamilles,
-    createSousFamille,
-    updateSousFamille,
-    deleteSousFamille,
-    mergeSousFamilles,
-    reorderSousFamilles,
-    setSousFamilles,
-  };
+  return { sousFamilles, list, create, update, toggleActif, remove, loading, error };
 }

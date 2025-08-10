@@ -29,7 +29,6 @@ create table if not exists public.produits (
   fournisseur_id uuid,
   unite_id uuid,
   famille_id uuid,
-  sous_famille_id uuid,
   stock_reel numeric default 0,
   stock_min numeric default 0,
   pmp numeric default 0,
@@ -38,8 +37,21 @@ create table if not exists public.produits (
   updated_at timestamptz default now()
 );
 
-alter table public.produits
-  add column if not exists zone_id uuid;
+-- FK safety for produits
+do $$ begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema='public' and table_name='produits' and column_name='sous_famille_id'
+  ) then
+    alter table public.produits add column sous_famille_id uuid;
+  end if;
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema='public' and table_name='produits' and column_name='zone_id'
+  ) then
+    alter table public.produits add column zone_id uuid;
+  end if;
+end $$;
 
 do $$ begin
   if not exists (
@@ -85,8 +97,6 @@ create table if not exists public.commandes (
   date_commande date default current_date,
   statut text default 'brouillon' check (statut in ('brouillon','validée','envoyée')),
   commentaire text,
-  created_by uuid,
-  validated_by uuid,
   envoyee_at timestamptz,
   created_at timestamptz default now(),
   updated_at timestamptz default now(),
@@ -95,6 +105,22 @@ create table if not exists public.commandes (
   bl_id uuid,
   facture_id uuid
 );
+
+-- FK safety for commandes
+do $$ begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema='public' and table_name='commandes' and column_name='created_by'
+  ) then
+    alter table public.commandes add column created_by uuid;
+  end if;
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema='public' and table_name='commandes' and column_name='validated_by'
+  ) then
+    alter table public.commandes add column validated_by uuid;
+  end if;
+end $$;
 
 create table if not exists public.commande_lignes (
   id uuid primary key default gen_random_uuid(),

@@ -1,12 +1,19 @@
-# Schema Single Report
+# Schema Consolidation Report
 
-Summary of adjustments in `db/full_setup_final.sql`:
+## Added Columns
+- `public.commandes.created_by uuid` (FK to `public.utilisateurs.id`)
+- `public.commandes.validated_by uuid` (FK to `public.utilisateurs.id`)
+- `public.produits.sous_famille_id uuid` (FK to `public.sous_familles.id`)
+- `public.produits.zone_id uuid` (FK to `public.zones_stock.id`)
 
-- Reordered schema setup so foreign keys precede indexes.
-- Added missing function `current_user_is_admin()` and granted execution rights for user context helper functions.
-- Ensured timestamp triggers are idempotent and created only if absent.
-- Replaced `utilisateurs_complets` and `v_produits_par_zone` views with explicit column lists for compatibility.
-- Recorded grants for the new and existing helper functions.
+## Foreign Keys
+- Regenerated foreign keys for the above columns when missing.
 
-No tables were dropped in this pass.
+## Views / Triggers / Policies
+- No changes beyond existing definitions; ensured idempotent creation.
 
+## Removed Tables
+- None.
+
+## Notes
+- All other SQL files in `db/` were removed to keep a single `full_setup_final.sql`.

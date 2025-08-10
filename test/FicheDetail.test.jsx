@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { vi, test } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 
-vi.mock('@/hooks/useAuth', () => ({ default: () => ({ access_rights: { fiches_techniques: { peut_voir: true } }, loading: false }) }));
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ access_rights: { fiches_techniques: { peut_voir: true } }, loading: false }) }));
 let getFicheByIdMock;
 vi.mock('@/hooks/useFiches', () => ({ useFiches: () => ({ getFicheById: getFicheByIdMock }) }));
 vi.mock('@/hooks/useFicheCoutHistory', () => ({ useFicheCoutHistory: () => ({ history: [], fetchFicheCoutHistory: vi.fn() }) }));
@@ -16,7 +16,7 @@ vi.mock('recharts', () => ({
   Tooltip: () => null,
 }));
 vi.mock('xlsx', () => ({ utils: { book_new: vi.fn(), book_append_sheet: vi.fn(), json_to_sheet: vi.fn() }, writeFile: vi.fn() }), { virtual: true });
-vi.mock('jspdf', () => ({ default: vi.fn(() => ({ text: vi.fn(), autoTable: vi.fn(), save: vi.fn(), lastAutoTable: { finalY: 0 } })) }));
+vi.mock('jspdf', () => ({ useAuth: vi.fn(() => ({ text: vi.fn(), autoTable: vi.fn(), save: vi.fn(), lastAutoTable: { finalY: 0 } })) }));
 vi.mock('jspdf-autotable', () => ({}), { virtual: true });
 
 import FicheDetail from '@/pages/fiches/FicheDetail.jsx';

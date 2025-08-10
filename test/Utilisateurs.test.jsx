@@ -11,10 +11,10 @@ vi.mock('@/hooks/useUtilisateurs', () => ({
     toggleUserActive: vi.fn(),
   }),
 }));
-vi.mock('@/hooks/useAuth', () => ({ default: () => ({ mama_id: 'm1', role: 'admin', loading: false }) }));
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1', role: 'admin', loading: false }) }));
 vi.mock('@/hooks/useRoles', () => ({ useRoles: () => ({ roles: [], fetchRoles: vi.fn() }) }));
-vi.mock('@/components/Utilisateurs/UtilisateurRow', () => ({ default: () => <tr data-testid="row" /> }));
-vi.mock('@/components/Utilisateurs/UtilisateurForm', () => ({ default: () => <div>form</div> }));
+vi.mock('@/components/Utilisateurs/UtilisateurRow', () => ({ useAuth: () => <tr data-testid="row" /> }));
+vi.mock('@/components/Utilisateurs/UtilisateurForm', () => ({ useAuth: () => <div>form</div> }));
 
 import Utilisateurs from '@/pages/parametrage/Utilisateurs.jsx';
 

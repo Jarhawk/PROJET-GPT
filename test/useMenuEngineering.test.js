@@ -50,7 +50,7 @@ const fromMock = vi.fn((table) => {
 
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
 const authMock = vi.fn(() => ({ mama_id: 'm1' }));
-vi.mock('@/hooks/useAuth', () => ({ default: authMock }));
+vi.mock('@/hooks/useAuth', () => ({ useAuth: authMock }));
 
 let useMenuEngineering;
 

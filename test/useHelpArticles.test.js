@@ -13,7 +13,7 @@ const query = {
 };
 const fromMock = vi.fn(() => query);
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
-vi.mock('@/hooks/useAuth', () => ({ default: () => ({}) }));
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({}) }));
 
 let useHelpArticles;
 

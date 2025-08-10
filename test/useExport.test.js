@@ -11,7 +11,7 @@ const queryObj = {
 };
 const fromMock = vi.fn(() => queryObj);
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
-vi.mock('@/hooks/useAuth', () => ({ default: () => ({ mama_id: 'm1' }) }));
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
 
 const pdfMock = vi.fn();
 const excelMock = vi.fn();
@@ -42,7 +42,7 @@ vi.mock('@/lib/export/exportHelpers', () => ({
 let useExport;
 
 beforeEach(async () => {
-  ({ default: useExport } = await import('@/hooks/useExport'));
+  ({ useAuth: useExport } = await import('@/hooks/useExport'));
   fromMock.mockClear();
   queryObj.select.mockClear();
   queryObj.eq.mockClear();

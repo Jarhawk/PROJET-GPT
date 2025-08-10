@@ -13,7 +13,7 @@ const queryObj = {
 queryObj.then = (fn) => Promise.resolve(fn({ data: [], error: null }));
 const fromMock = vi.fn(() => queryObj);
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
-vi.mock('@/hooks/useAuth', () => ({ default: () => ({ mama_id: 'm1' }) }));
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
 
 let usePlanning;
 

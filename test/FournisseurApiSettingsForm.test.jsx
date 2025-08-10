@@ -13,13 +13,13 @@ const upsertMock = vi.fn(() => ({ select: selectAfterUpsert }));
 const fromMock = vi.fn(() => ({ select: selectMock, upsert: upsertMock }));
 
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
-vi.mock('@/hooks/useAuth', () => ({ default: () => ({ mama_id: 'm1' }) }));
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
 
 let FournisseurApiSettingsForm;
 
 beforeEach(async () => {
   vi.clearAllMocks();
-  ({ default: FournisseurApiSettingsForm } = await import('@/pages/fournisseurs/FournisseurApiSettingsForm.jsx'));
+  ({ useAuth: FournisseurApiSettingsForm } = await import('@/pages/fournisseurs/FournisseurApiSettingsForm.jsx'));
 });
 
 test('submits config with composite conflict keys', async () => {

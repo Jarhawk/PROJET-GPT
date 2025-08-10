@@ -12,7 +12,7 @@ const queryObj = {
 };
 const fromMock = vi.fn(() => queryObj);
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
-vi.mock('@/hooks/useAuth', () => ({ default: () => ({ mama_id: 'm1', user: { id: 'u1' } }) }));
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1', user: { id: 'u1' } }) }));
 
 let useValidations;
 

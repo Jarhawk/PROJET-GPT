@@ -27,12 +27,12 @@ const fromMock = vi.fn((table) => {
 });
 
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock, functions: { invoke: vi.fn() } } }));
-vi.mock('@/hooks/useAuth', () => ({ default: () => ({ mama_id: 'm1' }) }));
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
 
 let useMenuGroupe;
 
 beforeEach(async () => {
-  ({ default: useMenuGroupe } = await import('@/hooks/useMenuGroupe'));
+  ({ useAuth: useMenuGroupe } = await import('@/hooks/useMenuGroupe'));
   fromMock.mockClear();
   selectMock.mockClear();
   eqMock.mockClear();

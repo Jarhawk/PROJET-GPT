@@ -24,12 +24,12 @@ vi.mock('@/hooks/useMenuEngineering', () => ({
     saveVente: vi.fn(),
   }),
 }))
-vi.mock('@/hooks/useAuth', () => ({ default: () => ({ mama_id: 'm1', roles: ['admin'], loading: false }) }))
-vi.mock('@/components/engineering/EngineeringFilters', () => ({ default: () => <div /> }))
-vi.mock('@/components/engineering/EngineeringChart', () => ({ default: () => <div /> }))
-vi.mock('@/components/engineering/ImportVentesExcel', () => ({ default: () => <div /> }))
-vi.mock('html2canvas', () => ({ default: vi.fn() }))
-vi.mock('jspdf', () => ({ default: vi.fn(() => ({ addImage: vi.fn(), save: vi.fn() })) }))
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1', roles: ['admin'], loading: false }) }))
+vi.mock('@/components/engineering/EngineeringFilters', () => ({ useAuth: () => <div /> }))
+vi.mock('@/components/engineering/EngineeringChart', () => ({ useAuth: () => <div /> }))
+vi.mock('@/components/engineering/ImportVentesExcel', () => ({ useAuth: () => <div /> }))
+vi.mock('html2canvas', () => ({ useAuth: vi.fn() }))
+vi.mock('jspdf', () => ({ useAuth: vi.fn(() => ({ addImage: vi.fn(), save: vi.fn() })) }))
 vi.mock('xlsx', () => ({ utils: { json_to_sheet: vi.fn(), book_new: vi.fn(() => ({})), book_append_sheet: vi.fn() }, writeFile: vi.fn() }))
 
 let MenuEngineering

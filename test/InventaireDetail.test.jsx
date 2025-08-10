@@ -4,7 +4,7 @@ import { vi } from 'vitest';
 
 let mockGet;
 vi.mock('@/hooks/useInventaires', () => ({ useInventaires: () => ({ getInventaireById: mockGet }) }));
-vi.mock('@/hooks/useAuth', () => ({ default: () => ({ mama_id: 'm1', loading: false }) }));
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1', loading: false }) }));
 vi.mock('react-router-dom', () => ({ useParams: () => ({ id: 'inv1' }), useNavigate: () => vi.fn() }));
 
 import InventaireDetail from '@/pages/inventaire/InventaireDetail.jsx';

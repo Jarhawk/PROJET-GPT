@@ -14,7 +14,7 @@ vi.mock('@/hooks/useProduitsInventaire', () => ({
   }),
 }));
 vi.mock('@/hooks/useInventaireZones', () => ({ useInventaireZones: () => ({ zones: [], getZones: vi.fn() }) }));
-vi.mock('@/hooks/useAuth', () => ({ default: () => ({ mama_id: 'm1', hasAccess: () => true, loading: false }) }));
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1', hasAccess: () => true, loading: false }) }));
 vi.mock('react-router-dom', () => ({ useNavigate: () => vi.fn() }));
 
 import InventaireForm from '@/pages/inventaire/InventaireForm.jsx';

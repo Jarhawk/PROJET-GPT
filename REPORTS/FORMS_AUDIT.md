@@ -201,24 +201,19 @@
 - /workspace/PROJET-GPT/src/pages/supervision/Logs.jsx
 - /workspace/PROJET-GPT/src/pages/taches/TacheForm.jsx
 
-## customGridCols
+## missingAriaInvalid
 
-- /workspace/PROJET-GPT/src/pages/Dashboard.jsx
-- /workspace/PROJET-GPT/src/pages/analyse/MenuEngineering.jsx
-- /workspace/PROJET-GPT/src/pages/costing/CostingCarte.jsx
-- /workspace/PROJET-GPT/src/pages/ecarts/Ecarts.jsx
-- /workspace/PROJET-GPT/src/pages/factures/FactureForm.jsx
-- /workspace/PROJET-GPT/src/pages/menu/MenuDuJour.jsx
-- /workspace/PROJET-GPT/src/pages/parametrage/TemplateCommandeForm.jsx
-- /workspace/PROJET-GPT/src/pages/reporting/Reporting.jsx
-- /workspace/PROJET-GPT/src/pages/signalements/Signalements.jsx
-- /workspace/PROJET-GPT/src/pages/simulation/Simulation.jsx
-- /workspace/PROJET-GPT/src/pages/stats/StatsFiches.jsx
+- /workspace/PROJET-GPT/src/components/produits/ModalImportProduits.jsx
+- /workspace/PROJET-GPT/src/pages/fournisseurs/FournisseurForm.jsx
+- /workspace/PROJET-GPT/src/pages/fournisseurs/comparatif/ComparatifPrix.jsx
+- /workspace/PROJET-GPT/src/pages/fournisseurs/comparatif/PrixFournisseurs.jsx
 
 ## numberNoStep
 
 - /workspace/PROJET-GPT/src/components/analytics/CostCenterAllocationModal.jsx
+- /workspace/PROJET-GPT/src/components/fiches/FicheLigne.jsx
 - /workspace/PROJET-GPT/src/components/inventaire/InventaireLigneRow.jsx
+- /workspace/PROJET-GPT/src/components/inventaires/InventaireForm.jsx
 - /workspace/PROJET-GPT/src/components/produits/ProduitForm.jsx
 - /workspace/PROJET-GPT/src/pages/Alertes.jsx
 - /workspace/PROJET-GPT/src/pages/Pertes.jsx
@@ -234,6 +229,7 @@
 - /workspace/PROJET-GPT/src/pages/fiches/FicheDetail.jsx
 - /workspace/PROJET-GPT/src/pages/fiches/FicheForm.jsx
 - /workspace/PROJET-GPT/src/pages/menu/MenuDuJourJour.jsx
+- /workspace/PROJET-GPT/src/pages/menus/MenuDuJourForm.jsx
 - /workspace/PROJET-GPT/src/pages/menus/MenuGroupeForm.jsx
 - /workspace/PROJET-GPT/src/pages/mobile/MobileInventaire.jsx
 - /workspace/PROJET-GPT/src/pages/mobile/MobileRequisition.jsx

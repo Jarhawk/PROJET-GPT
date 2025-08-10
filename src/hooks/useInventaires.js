@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import useAuth from "@/hooks/useAuth";
 import usePeriodes from "@/hooks/usePeriodes";
@@ -10,6 +10,12 @@ export function useInventaires() {
   const [inventaires, setInventaires] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!mama_id) return;
+    void getInventaires();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mama_id]);
 
   async function getInventaires({
     zoneId,

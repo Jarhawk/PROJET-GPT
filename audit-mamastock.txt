@@ -578,7 +578,7 @@ TwoFactorSetup.jsx : configuration de la double authentification
 - Dockerfile multi-stage avec Node 18 pour builder puis servir `dist`
 - `supabase/config.toml` expose l'API locale sur le port 54321
 - `.github/workflows/ci.yml` exécute lint, tests et e2e sur Node 18
-- `vite.config.js` active le plugin PWA pour générer le service worker
+- `vite.config.ts` active le plugin PWA pour générer le service worker
 - `src/lib/supabase.js` déclare les variables Node `process.env` pour ESLint
 
 

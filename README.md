@@ -1,6 +1,9 @@
 # MamaStock
 ⚠️ Ce logiciel est propriétaire. Toute utilisation, copie ou distribution sans licence commerciale valide est interdite.
 
+L’accès est contrôlé par Supabase Auth + RLS. Aucun mécanisme de licence front n’est nécessaire.
+Pour un contrôle commercial, utiliser les rôles/permissions ou un champ `licence_active` côté DB.
+
 
 React application using Supabase. The toolchain relies on modern ESM modules and
 requires **Node.js 18+** (see `package.json` engines field).
@@ -309,7 +312,6 @@ Task management is documented in [docs/taches.md](docs/taches.md).
   - TXT export via `exportToTXT`
   - Clipboard export via `exportToClipboard`
   - `useExport` hook handles TSV, JSON, XML, HTML, Markdown, YAML, TXT and clipboard formats
-  - All exports support `includeWatermark: false` to remove the footer
 - Forms display links to preview uploaded documents immediately
 - Product management supports codes, allergens and photo upload
 - Products track a minimum stock level for dashboard alerts

@@ -15,7 +15,6 @@ import { Blob as NodeBlob } from 'buffer';
 
 const saveAsMock = vi.fn();
 vi.mock('file-saver', () => ({ saveAs: (...args) => saveAsMock(...args) }));
-vi.mock('@/license', () => ({ watermark: () => 'wm' }));
 
 let constructorArgs;
 const autoTable = vi.fn();
@@ -61,10 +60,6 @@ describe('exportToPDF', () => {
     expect(constructorArgs).toEqual({ orientation: 'landscape' });
   });
 
-  it('omits watermark when disabled', () => {
-    exportToPDF([{ a: 1 }], { includeWatermark: false });
-    expect(text).not.toHaveBeenCalled();
-  });
 });
 
 describe('exportToCSV', () => {
@@ -92,15 +87,6 @@ describe('exportToCSV', () => {
     expect(text.startsWith('"a","b"')).toBe(true);
   });
 
-  it('skips watermark when disabled', async () => {
-    const originalBlob = global.Blob;
-    global.Blob = NodeBlob;
-    exportToCSV([{ a: 1 }], { includeWatermark: false });
-    const blob = saveAsMock.mock.calls[saveAsMock.mock.calls.length - 1][0];
-    const csv = await blob.text();
-    global.Blob = originalBlob;
-    expect(csv.endsWith('wm')).toBe(false);
-  });
 });
 
 describe('exportToTSV', () => {
@@ -138,15 +124,6 @@ describe('exportToJSON', () => {
     expect(text.includes('\n')).toBe(false);
   });
 
-  it('skips watermark when disabled', async () => {
-    const originalBlob = global.Blob;
-    global.Blob = NodeBlob;
-    exportToJSON([{ a: 1 }], { includeWatermark: false });
-    const blob = saveAsMock.mock.calls[saveAsMock.mock.calls.length - 1][0];
-    const text = await blob.text();
-    global.Blob = originalBlob;
-    expect(text.includes('wm')).toBe(false);
-  });
 });
 
 describe('exportToXML', () => {
@@ -224,7 +201,7 @@ describe('exportToClipboard', () => {
 
   it('returns text when clipboard missing', async () => {
     delete global.navigator;
-    const result = await exportToClipboard([{ a: 1 }], { includeWatermark: false });
+    const result = await exportToClipboard([{ a: 1 }]);
     expect(result).toBe('a: 1');
   });
 });

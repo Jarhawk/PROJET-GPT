@@ -8,14 +8,6 @@ import "@/i18n/i18n";
 import "./registerSW.js";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
-import { validateLicense } from "./license";
-
-const lic = import.meta.env.VITE_LICENSE_KEY;
-const { valid, message } = validateLicense(lic);
-if (!valid) {
-  alert(`${message}. Contact: contact@mamastock.com`);
-  throw new Error(message);
-}
 
 // Avoid noisy output in production by disabling debug logs
 if (!import.meta.env.DEV) {

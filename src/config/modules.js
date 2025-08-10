@@ -34,7 +34,6 @@ export const MODULES = [
   { label: "Consolidation", key: "consolidation" },
   { label: "Menu Engineering", key: "menu_engineering" },
   { label: "Zones de stock", key: "zones_stock" },
-  { label: "Licences", key: "licences" },
   { label: "Paramétrage", key: "parametrage" },
   { label: "Feedback", key: "feedback" },
   { label: "Logs", key: "logs" },

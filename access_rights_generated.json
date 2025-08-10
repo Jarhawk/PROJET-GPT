@@ -47,12 +47,6 @@
     "edit": false,
     "delete": false
   },
-  "licences": {
-    "view": false,
-    "create": false,
-    "edit": false,
-    "delete": false
-  },
   "parametrage": {
     "view": false,
     "create": false,

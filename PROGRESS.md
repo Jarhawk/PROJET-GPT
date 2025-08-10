@@ -1724,7 +1724,6 @@
 - lint passes, tests fail (missing Supabase creds)
 
 ## 2025-07-28 Step 330
-- verified licences and mama settings pages; no Supabase issues
 - lint ok after npm install; tests fail due to missing credentials
 ## 2025-07-28 Step 331
 - audited pages sous src/pages/produits et hooks associés; verifie les colonnes `fournisseur_principal_id`, `famille_id`, `unite_id` et filtres mama_id

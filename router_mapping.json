@@ -312,10 +312,6 @@
     "module": "roles"
   },
   {
-    "route": "/licences",
-    "module": "licences"
-  },
-  {
     "route": "/emails/envoyes",
     "module": "emails_envoyes"
   },

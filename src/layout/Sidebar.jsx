@@ -167,7 +167,6 @@ export default function Sidebar() {
         { module: "zones_stock", to: "/parametrage/zones", label: "Zones de stock", icon: <Boxes size={16} /> },
         { module: "parametrage", to: "/parametrage/familles", label: "Familles", icon: <Boxes size={16} /> },
         { module: "parametrage", to: "/parametrage/unites", label: "Unités", icon: <Boxes size={16} /> },
-        { module: "licences", to: "/parametrage/licences", label: "Licences", icon: <Key size={16} /> },
         { module: "parametrage", to: "/consentements", label: "Consentements", icon: <CheckSquare size={16} /> },
       ],
     },

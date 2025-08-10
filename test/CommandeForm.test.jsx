@@ -7,7 +7,7 @@ vi.mock('@/hooks/useCommandes', () => ({
 }));
 vi.mock('@/hooks/useFournisseurs', () => ({ useFournisseurs: () => ({ fournisseurs: [], fetchFournisseurs: vi.fn() }) }));
 vi.mock('@/hooks/useProduitsFournisseur', () => ({ useProduitsFournisseur: () => ({ useProduitsDuFournisseur: () => ({ products: [], fetch: vi.fn() }) }) }));
-vi.mock('@/hooks/useAuth', () => ({ default: () => ({ role: 'admin' }) }));
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ role: 'admin' }) }));
 
 import CommandeForm from '@/pages/commandes/CommandeForm.jsx';
 

@@ -16,7 +16,7 @@ const fromMock = vi.fn(() => successChain);
 const rpcMock = vi.fn(() => Promise.resolve({ data: {}, error: null }));
 
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock, rpc: rpcMock } }));
-vi.mock('@/hooks/useAuth', () => ({ default: () => ({ mama_id: 'm1' }) }));
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
 vi.mock('react-hot-toast', () => ({ toast: { error: vi.fn() } }));
 
 let useZoneProducts;

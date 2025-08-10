@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { vi, test, expect } from 'vitest'
 
 vi.mock('@/hooks/useAuth', () => ({
-  default: () => ({
+  useAuth: () => ({
     role: 'manager',
     loading: false,
     access_rights: { costing_carte: { export: true } },

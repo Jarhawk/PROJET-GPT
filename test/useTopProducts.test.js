@@ -4,7 +4,7 @@ import { vi, beforeEach, test, expect } from 'vitest';
 
 const rpcMock = vi.fn(() => Promise.resolve({ data: [{ id: 'p1' }], error: null }));
 vi.mock('@/lib/supabase', () => ({ supabase: { rpc: rpcMock } }));
-vi.mock('@/hooks/useAuth', () => ({ default: () => ({ mama_id: 'm1' }) }));
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
 
 let useTopProducts;
 

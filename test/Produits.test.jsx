@@ -8,7 +8,7 @@ vi.mock('@/hooks/useProducts', () => ({
   useProducts: () => mockHook(),
 }));
 vi.mock('@/hooks/useAuth', () => ({
-  default: () => ({ hasAccess: () => true, mama_id: 'm1' })
+  useAuth: () => ({ hasAccess: () => true, mama_id: 'm1' })
 }));
 vi.mock('@/hooks/useStorage', () => ({
   uploadFile: vi.fn(),
@@ -33,7 +33,7 @@ vi.mock('@/hooks/useSousFamilles', () => ({
   }),
 }));
 vi.mock('@/hooks/useZonesStock', () => ({
-  default: () => ({ zones: [], loading: false })
+  useAuth: () => ({ zones: [], loading: false })
 }));
 
 import Produits from '@/pages/produits/Produits.jsx';

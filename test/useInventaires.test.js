@@ -15,8 +15,8 @@ const query = {
 };
 const fromMock = vi.fn(() => query);
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
-vi.mock('@/hooks/useAuth', () => ({ default: () => ({ mama_id: 'm1' }) }));
-vi.mock('@/hooks/usePeriodes', () => ({ default: () => ({ checkCurrentPeriode: vi.fn(() => ({ error: null, data: { id: 'per1' } })) }) }));
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
+vi.mock('@/hooks/usePeriodes', () => ({ useAuth: () => ({ checkCurrentPeriode: vi.fn(() => ({ error: null, data: { id: 'per1' } })) }) }));
 
 let useInventaires;
 let insertCount = 0;

@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { vi } from 'vitest';
 
-vi.mock('@/hooks/useAuth', () => ({ default: () => ({ isAuthenticated: true, loading: false }) }));
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ isAuthenticated: true, loading: false }) }));
 
 let mockTransferts;
 let mockProducts;

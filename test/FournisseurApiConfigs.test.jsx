@@ -7,7 +7,7 @@ let hook;
 vi.mock('@/hooks/useFournisseurApiConfig', () => ({
   useFournisseurApiConfig: () => hook,
 }));
-vi.mock('@/hooks/useAuth', () => ({ default: () => ({ mama_id: 'm1' }) }));
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
 
 import ApiFournisseurs from '@/pages/fournisseurs/ApiFournisseurs.jsx';
 

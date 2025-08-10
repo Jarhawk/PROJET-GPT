@@ -7,7 +7,7 @@ vi.mock('@/hooks/useFeedback', () => ({
   useFeedback: () => hook,
 }));
 vi.mock('@/hooks/useAuth', () => ({
-  default: () => ({ mama_id: '1', loading: false }),
+  useAuth: () => ({ mama_id: '1', loading: false }),
 }));
 
 import Feedback from '@/pages/Feedback.jsx';

@@ -6,10 +6,10 @@ vi.mock("@/db/license-keys.json", () => ({ default: [] }));
 vi.mock("@/utils/watermark", () => ({ addWatermark: (pdf) => pdf, clearWatermark: (pdf) => pdf }));
 
 // Default auth hook mock
-vi.mock("@/hooks/useAuth", () => ({
-  __esModule: true,
-  default: () => ({ mama_id: "00000000-0000-0000-0000-000000000000", user_id: "u-test" }),
-}));
+vi.mock("@/hooks/useAuth", async () => {
+  const mod = await import("./__mocks__/hooks/useAuth.ts");
+  return { useAuth: mod.useAuth };
+});
 
 // Polyfills Node pour jsdom/tests
 // TextEncoder/TextDecoder (si nécessaire)

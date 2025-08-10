@@ -15,10 +15,10 @@ const authState = {
   userData: null,
 };
 vi.mock('@/hooks/useAuth', () => ({
-  default: () => authState
+  useAuth: () => authState
 }));
 vi.mock('@/hooks/useAuth', () => ({
-  default: () => authState
+  useAuth: () => authState
 }));
 
 vi.mock('@/hooks/useDashboard', () => ({
@@ -41,12 +41,12 @@ vi.mock('@/hooks/useDashboard', () => ({
 
 vi.mock('@/pages/Dashboard.jsx', () => ({
   __esModule: true,
-  default: () => <div>Dashboard Stock & Achats</div>,
+  useAuth: () => <div>Dashboard Stock & Achats</div>,
 }));
 
 vi.mock('@/pages/auth/Login.jsx', () => ({
   __esModule: true,
-  default: () => <div>Login</div>,
+  useAuth: () => <div>Login</div>,
 }));
 
 beforeEach(() => {

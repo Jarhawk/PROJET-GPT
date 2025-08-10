@@ -2,7 +2,7 @@
 import { render, screen } from '@testing-library/react';
 import { vi, test } from 'vitest';
 
-vi.mock('@/hooks/useAuth', () => ({ default: () => ({ access_rights: { fiches_techniques: { peut_voir: true } }, loading: false }) }));
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ access_rights: { fiches_techniques: { peut_voir: true } }, loading: false }) }));
 vi.mock('@/hooks/useFiches', () => ({ useFiches: () => ({ createFiche: vi.fn(), updateFiche: vi.fn() }) }));
 vi.mock('@/hooks/useProducts', () => ({ useProducts: () => ({ products: [{ id: 'p1', nom: 'Prod', pmp: 3, unite: { nom: 'kg' } }], fetchProducts: vi.fn() }) }));
 vi.mock('@/hooks/useFamilles', () => ({ useFamilles: () => ({ familles: [], fetchFamilles: vi.fn() }) }));

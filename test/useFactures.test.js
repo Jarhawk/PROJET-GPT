@@ -16,7 +16,7 @@ const query = {
 const fromMock = vi.fn(() => query);
 const rpcMock = vi.fn(() => ({ data: null, error: null }));
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock, rpc: rpcMock } }));
-vi.mock('@/hooks/useAuth', () => ({ default: () => ({ mama_id: 'm1' }) }));
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
 
 let useFactures;
 

@@ -7,7 +7,7 @@ vi.mock('@/hooks/useInvoiceImport', () => ({
   useInvoiceImport: () => hook,
 }));
 vi.mock('@/hooks/useAuth', () => ({
-  default: () => ({ mama_id: '1', loading: false }),
+  useAuth: () => ({ mama_id: '1', loading: false }),
 }));
 
 import ImportFactures from '@/pages/factures/ImportFactures.jsx';

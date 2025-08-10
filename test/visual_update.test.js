@@ -8,7 +8,7 @@ beforeAll(() => {
   fs.writeFileSync('test_visual_update.log', '');
 });
 
-vi.mock('@/hooks/useAuth', () => ({ default: () => ({ mama_id: 'm1' }) }));
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
 
 let fromMock;
 let data = {};

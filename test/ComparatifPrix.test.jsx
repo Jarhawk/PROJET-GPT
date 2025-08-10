@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { vi, beforeEach } from 'vitest';
 
 vi.mock('@/hooks/useAuth', () => ({
-  default: () => ({ mama_id: 1 }),
+  useAuth: () => ({ mama_id: 1 }),
 }));
 
 const orderMock = vi.fn();
@@ -15,7 +15,7 @@ vi.mock('@/lib/supabase', () => ({ supabase }));
 
 let ComparatifPrix;
 beforeEach(async () => {
-  ({ default: ComparatifPrix } = await import('@/pages/fournisseurs/comparatif/ComparatifPrix.jsx'));
+  ({ useAuth: ComparatifPrix } = await import('@/pages/fournisseurs/comparatif/ComparatifPrix.jsx'));
   orderMock.mockReset();
 });
 

@@ -2,7 +2,7 @@
 import { useMama } from "@/hooks/useMama";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { Toaster, toast } from "react-hot-toast";
 

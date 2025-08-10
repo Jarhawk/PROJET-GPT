@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Navigate } from "react-router-dom";
 import { useFiches } from "@/hooks/useFiches";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 import FicheForm from "./FicheForm.jsx";
 import FicheDetail from "./FicheDetail.jsx";
 import FicheRow from "@/components/fiches/FicheRow.jsx";

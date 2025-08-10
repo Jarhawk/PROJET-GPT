@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { Link, useLocation } from "react-router-dom";
 import { routePreloadMap } from "@/router";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 import logo from "@/assets/logo-mamastock.png";
 import {
   Boxes,

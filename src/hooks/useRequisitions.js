@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 // src/hooks/useRequisitions.js
 import { supabase } from "@/lib/supabase";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 
 export function useRequisitions() {
   const { mama_id } = useAuth();

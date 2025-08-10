@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { useUnites } from '@/hooks/useUnites';
 import UniteRow from '@/components/parametrage/UniteRow';
 import UniteForm from '@/forms/UniteForm';
-import useAuth from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import Unauthorized from '@/pages/auth/Unauthorized';
 import { supabase } from '@/lib/supabase';

@@ -6,7 +6,7 @@ import { useProduitsFournisseur } from "@/hooks/useProduitsFournisseur";
 import { useInvoices } from "@/hooks/useInvoices";
 import { useFournisseurs } from "@/hooks/useFournisseurs";
 import { supabase } from "@/lib/supabase";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { Button } from "@/components/ui/button";

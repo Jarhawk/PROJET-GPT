@@ -46,7 +46,6 @@ vi.mock('recharts', () => ({
 }));
 
 import Fournisseurs from '@/pages/fournisseurs/Fournisseurs.jsx';
-import { AuthProvider } from '@/context/AuthContext.jsx';
 import { MemoryRouter } from 'react-router-dom';
 
 test('export excel button triggers hook', async () => {
@@ -62,9 +61,7 @@ test('export excel button triggers hook', async () => {
   });
   render(
     <MemoryRouter>
-      <AuthProvider>
-        <Fournisseurs />
-      </AuthProvider>
+      <Fournisseurs />
     </MemoryRouter>
   );
   const button = await screen.findByText('Export Excel');

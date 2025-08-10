@@ -6,7 +6,7 @@ import {
   validateProduitRow,
   downloadProduitsTemplate,
 } from "@/utils/excelUtils";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from "@/components/ui/button";
 import { toast } from "react-hot-toast";
 import { supabase } from "@/lib/supabase";

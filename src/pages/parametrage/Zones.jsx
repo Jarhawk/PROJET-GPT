@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Toaster, toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import useAuth from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 import Unauthorized from '@/pages/auth/Unauthorized';
 import { supabase } from '@/lib/supabase';
 

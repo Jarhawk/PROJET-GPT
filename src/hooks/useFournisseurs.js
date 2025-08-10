@@ -2,7 +2,7 @@
 // src/hooks/useFournisseurs.js
 import { useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 import * as XLSX from "xlsx";
 import { safeImportXLSX } from "@/lib/xlsx/safeImportXLSX";
 import { saveAs } from "file-saver";

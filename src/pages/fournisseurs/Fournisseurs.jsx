@@ -20,7 +20,7 @@ import { ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, Tool
 import FournisseurDetail from "./FournisseurDetail";
 import FournisseurForm from "./FournisseurForm";
 import { PlusCircle, Search } from "lucide-react";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Fournisseurs() {
   const { fournisseurs, total, getFournisseurs, createFournisseur, updateFournisseur, disableFournisseur, exportFournisseursToExcel } = useFournisseurs();

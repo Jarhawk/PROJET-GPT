@@ -1,4 +1,4 @@
-import useAuth from './useAuth';
+import { useAuth } from './useAuth';
 
 export default function useAccess(module, right = 'peut_voir') {
   const { hasAccess, loading, pending, isSuperadmin } = useAuth();

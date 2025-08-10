@@ -4,7 +4,7 @@ import { useRoles } from "@/hooks/useRoles";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
 import { useEffect } from "react";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 import { MODULES as MODULE_LIST } from "@/config/modules";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { Toaster, toast } from "react-hot-toast";

@@ -5,7 +5,7 @@ import { Toaster } from "react-hot-toast";
 import * as XLSX from "xlsx";
 import { Button } from "@/components/ui/button";
 import GlassCard from "@/components/ui/GlassCard";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 import { useCostCenters } from "@/hooks/useCostCenters";
 import { useFamilles } from "@/hooks/useFamilles";
 import { useAnalytique } from "@/hooks/useAnalytique";

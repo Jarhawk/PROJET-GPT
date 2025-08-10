@@ -6,7 +6,7 @@ import TableHeader from '@/components/ui/TableHeader';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import Unauthorized from '@/pages/auth/Unauthorized';
-import useAuth from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 import usePeriodes from '@/hooks/usePeriodes';
 import PeriodeForm from '@/forms/PeriodeForm';
 

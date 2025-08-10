@@ -5,7 +5,7 @@ import { useRequisitions } from "@/hooks/useRequisitions";
 import { useZoneProducts } from "@/hooks/useZoneProducts";
 import { useZones } from "@/hooks/useZones";
 import { useUnites } from "@/hooks/useUnites";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 import { Toaster, toast } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import GlassCard from "@/components/ui/GlassCard";

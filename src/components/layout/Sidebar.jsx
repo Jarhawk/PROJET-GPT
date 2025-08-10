@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 // Le menu latéral n'affiche que les modules pour lesquels
 // l'utilisateur possède le droit "peut_voir". Les droits proviennent
 // du contexte d'authentification (merge utilisateur + rôle).
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 import logo from "@/assets/logo-mamastock.png";
 
 export default function Sidebar() {

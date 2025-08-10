@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import { useRequisitions } from "@/hooks/useRequisitions";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 import ListingContainer from "@/components/ui/ListingContainer";
 import TableHeader from "@/components/ui/TableHeader";
 import PaginationFooter from "@/components/ui/PaginationFooter";

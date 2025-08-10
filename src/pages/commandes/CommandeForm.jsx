@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useCommandes } from "@/hooks/useCommandes";
 import { useFournisseurs } from "@/hooks/useFournisseurs";
 import { useProduitsFournisseur } from "@/hooks/useProduitsFournisseur";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from "react-hot-toast";
 import { getTemplatesCommandesActifs } from "@/hooks/useTemplatesCommandes";
 

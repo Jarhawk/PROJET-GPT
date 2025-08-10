@@ -2,16 +2,10 @@
 import { renderHook, act } from '@testing-library/react'
 import { vi, beforeEach, afterEach, test, expect } from 'vitest'
 import { supabase } from '@/lib/supabase'
-import { AuthContext } from '@/context/AuthContext'
-
-vi.mock('@/hooks/useAuth', () => ({ default: () => ({ mama_id: 'm1' }) }))
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1', mamaId: 'm1' }) }))
 
 let useCostingCarte
 let fromSpy
-
-const wrapper = ({ children }) => (
-  <AuthContext.Provider value={{ mama_id: 'm1' }}>{children}</AuthContext.Provider>
-)
 
 beforeEach(async () => {
   ;({ useCostingCarte } = await import('@/hooks/useCostingCarte'))
@@ -42,7 +36,7 @@ afterEach(() => {
 })
 
 test('fetchCosting returns rows from view', async () => {
-  const { result } = renderHook(() => useCostingCarte(), { wrapper })
+  const { result } = renderHook(() => useCostingCarte())
   await act(async () => {
     await result.current.fetchCosting()
   })

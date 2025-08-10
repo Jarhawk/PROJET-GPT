@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
-import useAuth from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 import usePerformanceFiches from '@/hooks/usePerformanceFiches';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 

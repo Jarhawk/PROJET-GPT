@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function useAchatsMensuels() {
-  const { mama_id } = useAuth();
+  const { mama_id, loading: authLoading } = useAuth() || {};
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    if (authLoading) return;
     if (!mama_id) return;
 
     const fetchData = async () => {
@@ -33,7 +34,7 @@ export default function useAchatsMensuels() {
     };
 
     fetchData();
-  }, [mama_id]);
+  }, [authLoading, mama_id]);
 
   return { data, loading, error };
 }

@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from 'react-i18next';
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 import { useGlobalSearch } from "@/hooks/useGlobalSearch";
 import LanguageSelector from "@/components/ui/LanguageSelector";
 

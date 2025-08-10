@@ -1,18 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 
 export function useEmailsEnvoyes() {
-  const { mamaId } = useAuth();
+    const { mamaId, loading } = useAuth() || {};
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState(null);
 
-  const baseQuery = useMemo(() => {
-    return supabase.from("emails_envoyes").select("*")
-      .eq("mama_id", mamaId)
-      .order("envoye_le", { ascending: false });
-  }, [mamaId]);
+    const baseQuery = useMemo(() => {
+      return supabase.from("emails_envoyes").select("*")
+        .eq("mama_id", mamaId)
+        .order("envoye_le", { ascending: false });
+    }, [mamaId]);
 
   const fetchEmails = useCallback(async (filters = {}) => {
     setLoading(true);
@@ -37,7 +37,11 @@ export function useEmailsEnvoyes() {
     return { ok: true };
   }, [fetchEmails, mamaId]);
 
-  useEffect(() => { if (mamaId) { fetchEmails(); } }, [mamaId, fetchEmails]);
+    useEffect(() => {
+      if (loading) return;
+      if (!mamaId) return;
+      fetchEmails();
+    }, [loading, mamaId, fetchEmails]);
 
   return { list, loading, error: err, fetchEmails, logEmail };
 }

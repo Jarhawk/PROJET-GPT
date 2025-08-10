@@ -14,7 +14,7 @@ import {
 } from "@radix-ui/react-dialog";
 import { Toaster, toast } from "react-hot-toast";
 import { useInventaireZones } from "@/hooks/useInventaireZones";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import Unauthorized from "@/pages/auth/Unauthorized";
 

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import useSupabaseClient from '@/hooks/useSupabaseClient';
-import useAuth from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function useProduitsUtilises() {
   const supabase = useSupabaseClient();

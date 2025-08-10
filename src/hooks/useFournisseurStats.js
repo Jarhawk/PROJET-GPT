@@ -2,7 +2,7 @@
 // src/hooks/useFournisseurStats.js
 
 import { supabase } from "@/lib/supabase";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 
 // Stats d’évolution d’achats (tous fournisseurs ou par fournisseur)
 export function useFournisseurStats() {

@@ -1,6 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 import { useDocuments } from "@/hooks/useDocuments";
 import DocumentForm from "./DocumentForm.jsx";
 import DocumentPreview from "@/components/documents/DocumentPreview";

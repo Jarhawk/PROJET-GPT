@@ -2,7 +2,7 @@
 import { Outlet, useLocation, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Sidebar from "@/layout/Sidebar";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 import useNotifications from "@/hooks/useNotifications";
 import { Badge } from "@/components/ui/badge";
 import { Bell } from "lucide-react";

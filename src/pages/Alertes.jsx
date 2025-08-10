@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useAlerts } from "@/hooks/useAlerts";
 import { useProducts } from "@/hooks/useProducts";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from "@/components/ui/button";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";

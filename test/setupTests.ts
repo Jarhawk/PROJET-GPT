@@ -1,5 +1,10 @@
 import { expect, vi } from "vitest";
 
+// Stubs pour anciens modules supprimés
+vi.mock("@/license", () => ({ default: { validateLicense: () => true } }));
+vi.mock("@/db/license-keys.json", () => ({ default: [] }));
+vi.mock("@/utils/watermark", () => ({ addWatermark: (pdf) => pdf, clearWatermark: (pdf) => pdf }));
+
 // Polyfills Node pour jsdom/tests
 // TextEncoder/TextDecoder (si nécessaire)
 import { TextEncoder, TextDecoder } from "node:util";

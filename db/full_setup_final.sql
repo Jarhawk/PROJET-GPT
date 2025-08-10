@@ -156,30 +156,7 @@ create table if not exists public.consentements_utilisateur (
   consentement boolean not null,
   date_consentement timestamptz default now()
 );
-
--- 3. Indexes
-create index if not exists idx_fournisseurs_mama_id on public.fournisseurs(mama_id);
-create index if not exists idx_produits_mama_id on public.produits(mama_id);
-create index if not exists idx_produits_fournisseur_id on public.produits(fournisseur_id);
-create index if not exists idx_produits_unite_id on public.produits(unite_id);
-create index if not exists idx_produits_famille_id on public.produits(famille_id);
-create index if not exists idx_produits_sous_famille_id on public.produits(sous_famille_id);
-create index if not exists idx_roles_mama_id on public.roles(mama_id);
-create index if not exists idx_utilisateurs_mama_id on public.utilisateurs(mama_id);
-create index if not exists idx_commandes_mama_id on public.commandes(mama_id);
-create index if not exists idx_commandes_fournisseur_id on public.commandes(fournisseur_id);
-create index if not exists idx_commande_lignes_commande_id on public.commande_lignes(commande_id);
-create index if not exists idx_commande_lignes_mama_id on public.commande_lignes(mama_id);
-create index if not exists idx_templates_cmd_mama on public.templates_commandes(mama_id);
-create index if not exists idx_templates_cmd_fournisseur on public.templates_commandes(fournisseur_id);
-create unique index if not exists uq_templates_cmd_mama_nom_generic on public.templates_commandes(mama_id, nom) where fournisseur_id is null;
-create index if not exists idx_emails_envoyes_commande on public.emails_envoyes(commande_id);
-create index if not exists idx_emails_envoyes_mama_id on public.emails_envoyes(mama_id);
-create index if not exists idx_permissions_role_id on public.permissions(role_id);
-create index if not exists idx_permissions_mama_id on public.permissions(mama_id);
-create index if not exists idx_consentements_utilisateur_mama_id on public.consentements_utilisateur(mama_id);
-
--- 4. Foreign keys
+-- 3. Foreign keys
 do $$ begin
   if not exists (select 1 from pg_constraint where conname = 'fk_fournisseurs_mama_id') then
     alter table public.fournisseurs
@@ -345,13 +322,29 @@ do $$ begin
   end if;
 end $$;
 
--- 5. Views
-create or replace view public.utilisateurs_complets as
-select u.*, r.nom as role_nom, r.description as role_description
-from public.utilisateurs u
-left join public.roles r on r.id = u.role_id;
+-- 4. Indexes
+create index if not exists idx_fournisseurs_mama_id on public.fournisseurs(mama_id);
+create index if not exists idx_produits_mama_id on public.produits(mama_id);
+create index if not exists idx_produits_fournisseur_id on public.produits(fournisseur_id);
+create index if not exists idx_produits_unite_id on public.produits(unite_id);
+create index if not exists idx_produits_famille_id on public.produits(famille_id);
+create index if not exists idx_produits_sous_famille_id on public.produits(sous_famille_id);
+create index if not exists idx_roles_mama_id on public.roles(mama_id);
+create index if not exists idx_utilisateurs_mama_id on public.utilisateurs(mama_id);
+create index if not exists idx_commandes_mama_id on public.commandes(mama_id);
+create index if not exists idx_commandes_fournisseur_id on public.commandes(fournisseur_id);
+create index if not exists idx_commande_lignes_commande_id on public.commande_lignes(commande_id);
+create index if not exists idx_commande_lignes_mama_id on public.commande_lignes(mama_id);
+create index if not exists idx_templates_cmd_mama on public.templates_commandes(mama_id);
+create index if not exists idx_templates_cmd_fournisseur on public.templates_commandes(fournisseur_id);
+create unique index if not exists uq_templates_cmd_mama_nom_generic on public.templates_commandes(mama_id, nom) where fournisseur_id is null;
+create index if not exists idx_emails_envoyes_commande on public.emails_envoyes(commande_id);
+create index if not exists idx_emails_envoyes_mama_id on public.emails_envoyes(mama_id);
+create index if not exists idx_permissions_role_id on public.permissions(role_id);
+create index if not exists idx_permissions_mama_id on public.permissions(mama_id);
+create index if not exists idx_consentements_utilisateur_mama_id on public.consentements_utilisateur(mama_id);
 
--- 6. Functions
+-- 5. Functions
 create or replace function public.trg_set_timestamp() returns trigger as $$
 begin
   new.updated_at = now();
@@ -376,6 +369,16 @@ language sql stable as $$
   );
 $$;
 
+create or replace function public.current_user_is_admin()
+returns boolean
+language sql stable as $$
+  select public.current_user_is_admin_or_manager() and exists (
+    select 1 from public.utilisateurs u
+    join public.roles r on r.id = u.role_id
+    where u.auth_id = auth.uid() and r.nom = 'admin'
+  );
+$$;
+
 create or replace function public.get_template_commande(p_mama uuid, p_fournisseur uuid)
 returns setof public.templates_commandes
 language sql security definer as $$
@@ -388,6 +391,10 @@ language sql security definer as $$
   limit 1;
 $$;
 grant execute on function public.get_template_commande(uuid, uuid) to authenticated;
+
+grant execute on function public.current_user_mama_id() to authenticated;
+grant execute on function public.current_user_is_admin_or_manager() to authenticated;
+grant execute on function public.current_user_is_admin() to authenticated;
 
 create or replace function public.create_utilisateur(
   p_email text,
@@ -436,7 +443,7 @@ begin
 end;
 $$;
 
--- 7. Triggers
+-- 6. Triggers
 do $$ begin
   if not exists (select 1 from pg_trigger where tgname = 'trg_roles_updated_at') then
     create trigger trg_roles_updated_at
@@ -444,13 +451,15 @@ do $$ begin
     for each row execute procedure public.trg_set_timestamp();
   end if;
 end $$;
+do $$ begin
+  if not exists (select 1 from pg_trigger where tgname = 'set_ts_templates_cmd') then
+    create trigger set_ts_templates_cmd
+    before update on public.templates_commandes
+    for each row execute procedure public.trg_set_timestamp();
+  end if;
+end $$;
 
-drop trigger if exists set_ts_templates_cmd on public.templates_commandes;
-create trigger set_ts_templates_cmd
-before update on public.templates_commandes
-for each row execute procedure public.trg_set_timestamp();
-
--- 8. RLS & Policies
+-- 7. RLS & Policies
 alter table public.mamas enable row level security;
 do $$ begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='mamas' and policyname='mamas_all') then
@@ -2078,10 +2087,12 @@ create policy zones_droits_admin_all on public.zones_droits
 
 grant select, insert, update, delete on public.zones_stock, public.zones_droits to authenticated;
 
-
-drop trigger if exists set_ts_zones on public.zones_stock;
-create trigger set_ts_zones before update on public.zones_stock
-for each row execute procedure public.trg_set_timestamp();
+do $$ begin
+  if not exists (select 1 from pg_trigger where tgname = 'set_ts_zones') then
+    create trigger set_ts_zones before update on public.zones_stock
+    for each row execute procedure public.trg_set_timestamp();
+  end if;
+end $$;
 
 -- RPC Functions
 create or replace function public.can_access_zone(p_zone uuid, p_mode text default 'lecture')
@@ -2116,7 +2127,18 @@ as $$
   );
 $$;
 
--- 5.b Additional Views
+-- 8. Views
+create or replace view public.utilisateurs_complets (
+  id, nom, email, auth_id, role_id, mama_id, access_rights, actif, created_at, updated_at,
+  role_nom, role_description
+) as
+select
+  u.id, u.nom, u.email, u.auth_id, u.role_id, u.mama_id, u.access_rights, u.actif, u.created_at, u.updated_at,
+  r.nom as role_nom, r.description as role_description
+from public.utilisateurs u
+left join public.roles r on r.id = u.role_id;
+
+-- Additional Views
 create or replace view public.v_achats_mensuels as
 select
   mama_id,
@@ -3035,9 +3057,12 @@ create index if not exists idx_pz_mama on public.produits_zones(mama_id);
 create index if not exists idx_pz_zone on public.produits_zones(zone_id);
 create index if not exists idx_pz_prod on public.produits_zones(produit_id);
 
-drop trigger if exists trg_pz_ts on public.produits_zones;
-create trigger trg_pz_ts before update on public.produits_zones
-for each row execute procedure public.trg_set_timestamp();
+do $$ begin
+  if not exists (select 1 from pg_trigger where tgname = 'trg_pz_ts') then
+    create trigger trg_pz_ts before update on public.produits_zones
+    for each row execute procedure public.trg_set_timestamp();
+  end if;
+end $$;
 
 alter table public.produits_zones enable row level security;
 create policy if not exists pz_select on public.produits_zones
@@ -3078,10 +3103,13 @@ begin
   return new;
 end $$ language plpgsql;
 
-drop trigger if exists trg_prod_sync_zone on public.produits;
-create trigger trg_prod_sync_zone
-after insert or update of zone_id on public.produits
-for each row execute procedure public.sync_pivot_from_produits();
+do $$ begin
+  if not exists (select 1 from pg_trigger where tgname = 'trg_prod_sync_zone') then
+    create trigger trg_prod_sync_zone
+    after insert or update of zone_id on public.produits
+    for each row execute procedure public.sync_pivot_from_produits();
+  end if;
+end $$;
 
 create or replace function public.sync_produits_from_pivot() returns trigger as $$
 begin
@@ -3095,12 +3123,17 @@ begin
   return new;
 end $$ language plpgsql;
 
-drop trigger if exists trg_pz_sync_prod on public.produits_zones;
-create trigger trg_pz_sync_prod
-after insert or update of actif on public.produits_zones
-for each row execute procedure public.sync_produits_from_pivot();
+do $$ begin
+  if not exists (select 1 from pg_trigger where tgname = 'trg_pz_sync_prod') then
+    create trigger trg_pz_sync_prod
+    after insert or update of actif on public.produits_zones
+    for each row execute procedure public.sync_produits_from_pivot();
+  end if;
+end $$;
 
-create or replace view public.v_produits_par_zone as
+create or replace view public.v_produits_par_zone (
+  mama_id, produit_id, produit_nom, zone_id, zone_nom, zone_type, unite_id, stock_reel, stock_min
+) as
 with base as (
   select
     p.mama_id,

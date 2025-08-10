@@ -3,7 +3,7 @@ import { useFamilles } from "@/hooks/useFamilles";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
 import { useState, useEffect } from "react";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { Toaster, toast } from "react-hot-toast";
 import { saveAs } from "file-saver";

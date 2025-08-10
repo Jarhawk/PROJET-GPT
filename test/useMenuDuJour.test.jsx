@@ -2,16 +2,11 @@
 import { renderHook, act } from '@testing-library/react';
 import { vi, beforeEach, afterEach, test, expect } from 'vitest';
 import { supabase } from '@/lib/supabase';
-import { AuthContext } from '@/context/AuthContext';
-
-vi.mock('@/hooks/useAuth', () => ({ default: () => ({ mama_id: 'm1' }) }));
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1', mamaId: 'm1' }) }));
 
 let useMenuDuJour;
 let upsertMock, updateMock, updateMatchMock, deleteMock, deleteMatchMock, insertMock, selectMock, selectMatchMock;
 let fromSpy;
-const wrapper = ({ children }) => (
-  <AuthContext.Provider value={{ mama_id: 'm1' }}>{children}</AuthContext.Provider>
-);
 
 beforeEach(async () => {
   ({ useMenuDuJour } = await import('@/hooks/useMenuDuJour'));
@@ -37,7 +32,7 @@ afterEach(() => {
 });
 
 test('setFicheForCategorie upserts row', async () => {
-  const { result } = renderHook(() => useMenuDuJour(), { wrapper });
+  const { result } = renderHook(() => useMenuDuJour());
   await act(async () => {
     await result.current.setFicheForCategorie('2025-01-01', 'entrée', 'f1');
   });
@@ -49,7 +44,7 @@ test('setFicheForCategorie upserts row', async () => {
 });
 
 test('setPortions updates quantity', async () => {
-  const { result } = renderHook(() => useMenuDuJour(), { wrapper });
+  const { result } = renderHook(() => useMenuDuJour());
   await act(async () => {
     await result.current.setPortions('2025-01-01', 'plat', 5);
   });
@@ -58,7 +53,7 @@ test('setPortions updates quantity', async () => {
 });
 
 test('removeFicheFromMenu deletes row', async () => {
-  const { result } = renderHook(() => useMenuDuJour(), { wrapper });
+  const { result } = renderHook(() => useMenuDuJour());
   await act(async () => {
     await result.current.removeFicheFromMenu('2025-01-01', 'dessert');
   });
@@ -67,7 +62,7 @@ test('removeFicheFromMenu deletes row', async () => {
 });
 
 test('duplicateMenu copies records', async () => {
-  const { result } = renderHook(() => useMenuDuJour(), { wrapper });
+  const { result } = renderHook(() => useMenuDuJour());
   await act(async () => {
     await result.current.duplicateMenu('2025-01-01', '2025-01-02');
   });

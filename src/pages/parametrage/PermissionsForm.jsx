@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import GlassCard from "@/components/ui/GlassCard";
 import toast, { Toaster } from "react-hot-toast";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 import { MODULES as MODULE_LIST } from "@/config/modules";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 

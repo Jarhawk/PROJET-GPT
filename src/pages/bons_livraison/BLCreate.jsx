@@ -4,7 +4,7 @@ import { useFournisseurs } from "@/hooks/useFournisseurs";
 import BLForm from "./BLForm.jsx";
 import GlassCard from "@/components/ui/GlassCard";
 import { LiquidBackground } from "@/components/LiquidBackground";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import Unauthorized from "@/pages/auth/Unauthorized";
 

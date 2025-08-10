@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 import PageSkeleton from "@/components/ui/PageSkeleton";
 import { MODULE_KEYS, PUBLIC_MODULES } from "@/constants/accessKeys";
 

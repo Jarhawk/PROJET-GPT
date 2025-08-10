@@ -1,17 +1,18 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 
 export async function fetchZonesForValidation(mama_id) {
   return await supabase.from("zones_stock").select("id, nom").eq("mama_id", mama_id);
 }
 
 export default function useZonesStock() {
-  const { mama_id } = useAuth();
+  const { mama_id, loading } = useAuth() || {};
   const [zones, setZones] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (loading) return;
     if (!mama_id) return;
     const fetchZones = async () => {
       const { data, error } = await supabase
@@ -24,7 +25,7 @@ export default function useZonesStock() {
       setLoading(false);
     };
     fetchZones();
-  }, [mama_id]);
+  }, [loading, mama_id]);
 
   const suggestZones = useCallback(
     async (search = "") => {
@@ -38,8 +39,8 @@ export default function useZonesStock() {
         .limit(10);
       return data || [];
     },
-    [mama_id]
-  );
+      [mama_id]
+    );
 
   return { zones, loading, suggestZones };
 }

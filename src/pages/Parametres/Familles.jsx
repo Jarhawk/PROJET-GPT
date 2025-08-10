@@ -6,7 +6,7 @@ import TableHeader from '@/components/ui/TableHeader';
 import { Button } from '@/components/ui/button';
 import FamilleRow from '@/components/parametrage/FamilleRow';
 import FamilleForm from '@/forms/FamilleForm';
-import useAuth from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import Unauthorized from '@/pages/auth/Unauthorized';
 import { useFamillesWithSousFamilles } from '@/hooks/useFamillesWithSousFamilles';

@@ -9,7 +9,7 @@ import TableContainer from "@/components/ui/TableContainer";
 import GlassCard from "@/components/ui/GlassCard";
 import { Toaster } from "react-hot-toast";
 import BonLivraisonRow from "@/components/bons_livraison/BonLivraisonRow";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 
 export default function BonsLivraison() {
   const { bons, total, getBonsLivraison, toggleBonActif } = useBonsLivraison();

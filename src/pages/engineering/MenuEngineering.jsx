@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { Toaster, toast } from 'react-hot-toast'
 import { Button } from '@/components/ui/button'
-import useAuth from '@/hooks/useAuth'
+import { useAuth } from '@/hooks/useAuth'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { useMenuEngineering } from '@/hooks/useMenuEngineering'
 import EngineeringFilters from '@/components/engineering/EngineeringFilters'

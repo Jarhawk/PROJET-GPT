@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import GlassCard from "@/components/ui/GlassCard";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { useAchats } from "@/hooks/useAchats";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 import Unauthorized from "@/pages/auth/Unauthorized";
 
 export default function AchatDetail({ achat: achatProp, onClose }) {

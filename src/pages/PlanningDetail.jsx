@@ -5,7 +5,7 @@ import { usePlanning } from "@/hooks/usePlanning";
 import TableContainer from "@/components/ui/TableContainer";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { Button } from "@/components/ui/button";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 
 export default function PlanningDetail() {
   const { id } = useParams();

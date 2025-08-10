@@ -3,7 +3,7 @@ import { motion as Motion } from "framer-motion";
 import logoMamaStock from "@/assets/logo-mamastock.png";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 import Footer from "@/components/Footer";
 import PreviewBanner from "@/components/ui/PreviewBanner";
 import {

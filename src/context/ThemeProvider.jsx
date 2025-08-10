@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { createContext, useContext, useEffect } from "react";
 import useMamaSettings from "@/hooks/useMamaSettings";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 
 const ThemeContext = createContext({});
 

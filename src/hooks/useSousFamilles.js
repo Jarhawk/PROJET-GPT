@@ -2,7 +2,7 @@
 import { useCallback, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
-import useAuth from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 
 export function useSousFamilles() {
   const { mama_id } = useAuth();

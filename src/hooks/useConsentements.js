@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabaseClient";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 
 export default function useConsentements() {
   const { user_id, mama_id } = useAuth();

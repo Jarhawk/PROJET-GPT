@@ -15,7 +15,7 @@ import { Select } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { Plus as PlusIcon, FileDown as FileDownIcon } from "lucide-react";
 import { Toaster, toast } from "react-hot-toast";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 import ProduitRow from "@/components/produits/ProduitRow";
 import { exportExcelProduits } from "@/utils/excelUtils";
 import ModalImportProduits from "@/components/produits/ModalImportProduits";

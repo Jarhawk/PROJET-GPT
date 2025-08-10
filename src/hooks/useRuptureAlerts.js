@@ -1,6 +1,6 @@
 // Hook for stock rupture alerts
 import { supabase } from "@/lib/supabase";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 
 export function useRuptureAlerts() {
   const { mama_id } = useAuth();

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import GlassCard from "@/components/ui/GlassCard";
 import PageIntro from "@/components/ui/PageIntro";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 import {
   LiquidBackground,
   WavesBackground,

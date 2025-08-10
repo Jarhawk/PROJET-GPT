@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import PrixFournisseurs from "./PrixFournisseurs";
 import { supabase } from "@/lib/supabase";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { Select } from "@/components/ui/select";
 

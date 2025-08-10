@@ -3,7 +3,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useFactures } from "@/hooks/useFactures";
 import { useFournisseurs } from "@/hooks/useFournisseurs";
 import { useFournisseursAutocomplete } from "@/hooks/useFournisseursAutocomplete";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 import { useFacturesAutocomplete } from "@/hooks/useFacturesAutocomplete";
 import FactureForm from "./FactureForm.jsx";
 import FactureDetail from "./FactureDetail.jsx";

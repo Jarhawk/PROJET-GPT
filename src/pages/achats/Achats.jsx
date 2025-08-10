@@ -10,7 +10,7 @@ import TableContainer from "@/components/ui/TableContainer";
 import GlassCard from "@/components/ui/GlassCard";
 import { Toaster } from "react-hot-toast";
 import AchatRow from "@/components/achats/AchatRow.jsx";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Achats() {
   const { achats, total, getAchats, deleteAchat } = useAchats();

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import useSupabaseClient from '@/hooks/useSupabaseClient';
-import useAuth from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function useBudgetMensuel() {
   const supabase = useSupabaseClient();

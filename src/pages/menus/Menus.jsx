@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useMenus } from "@/hooks/useMenus";
 import { useFiches } from "@/hooks/useFiches";
-import useAuth from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 import MenuForm from "./MenuForm.jsx";
 import MenuDetail from "./MenuDetail.jsx";
 import { Button } from "@/components/ui/button";

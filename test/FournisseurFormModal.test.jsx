@@ -1,6 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { fireEvent } from '@testing-library/react';
-import React from 'react';
 import { vi } from 'vitest';
 
 const create = vi.fn();

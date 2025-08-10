@@ -38,6 +38,21 @@ create table if not exists public.produits (
   updated_at timestamptz default now()
 );
 
+alter table public.produits
+  add column if not exists zone_id uuid;
+
+do $$ begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'fk_produits_zone_id'
+  ) then
+    alter table public.produits
+      add constraint fk_produits_zone_id
+      foreign key (zone_id) references public.zones_stock(id) on delete set null;
+  end if;
+end $$;
+
+create index if not exists idx_produits_zone_id on public.produits(zone_id);
+
 create table if not exists public.roles (
   id uuid primary key default gen_random_uuid(),
   nom text not null,
@@ -3033,23 +3048,89 @@ create policy if not exists pz_iud on public.produits_zones
 
 grant select, insert, update, delete on public.produits_zones to authenticated;
 
+insert into public.produits_zones(mama_id, produit_id, zone_id, actif, stock_reel, stock_min)
+select distinct p.mama_id, p.id, p.zone_id, true, p.stock_reel, p.stock_min
+from public.produits p
+where p.zone_id is not null
+  and not exists (
+    select 1 from public.produits_zones px
+    where px.mama_id = p.mama_id and px.produit_id = p.id and px.zone_id = p.zone_id
+  );
+
+create or replace function public.sync_pivot_from_produits() returns trigger as $$
+begin
+  if new.zone_id is null then
+    return new;
+  end if;
+
+  insert into public.produits_zones(mama_id, produit_id, zone_id, actif)
+  values (new.mama_id, new.id, new.zone_id, true)
+  on conflict (mama_id, produit_id, zone_id)
+  do update set actif = true, updated_at = now();
+
+  update public.produits_zones
+    set actif = false, updated_at = now()
+  where mama_id = new.mama_id
+    and produit_id = new.id
+    and zone_id <> new.zone_id
+    and actif is true;
+
+  return new;
+end $$ language plpgsql;
+
+drop trigger if exists trg_prod_sync_zone on public.produits;
+create trigger trg_prod_sync_zone
+after insert or update of zone_id on public.produits
+for each row execute procedure public.sync_pivot_from_produits();
+
+create or replace function public.sync_produits_from_pivot() returns trigger as $$
+begin
+  if new.actif is true then
+    update public.produits p
+      set zone_id = new.zone_id, updated_at = now()
+    where p.id = new.produit_id
+      and p.mama_id = new.mama_id
+      and (p.zone_id is distinct from new.zone_id);
+  end if;
+  return new;
+end $$ language plpgsql;
+
+drop trigger if exists trg_pz_sync_prod on public.produits_zones;
+create trigger trg_pz_sync_prod
+after insert or update of actif on public.produits_zones
+for each row execute procedure public.sync_produits_from_pivot();
+
 create or replace view public.v_produits_par_zone as
+with base as (
+  select
+    p.mama_id,
+    p.id as produit_id,
+    p.nom as produit_nom,
+    coalesce(pz.zone_id, p.zone_id) as zone_id,
+    p.unite_id,
+    p.stock_reel,
+    p.stock_min
+  from public.produits p
+  left join lateral (
+    select zone_id
+    from public.produits_zones z
+    where z.produit_id = p.id and z.mama_id = p.mama_id and z.actif = true
+    limit 1
+  ) pz on true
+)
 select
-  pz.id,
-  pz.mama_id,
+  b.mama_id,
+  b.produit_id,
+  b.produit_nom,
   z.id as zone_id,
   z.nom as zone_nom,
   z.type as zone_type,
-  pr.id as produit_id,
-  pr.nom as produit_nom,
-  pr.unite_id,
-  pz.stock_reel,
-  pz.stock_min,
-  pz.actif
-from public.produits_zones pz
-join public.zones_stock z on z.id = pz.zone_id
-join public.produits pr on pr.id = pz.produit_id
-where pz.actif = true;
+  b.unite_id,
+  b.stock_reel,
+  b.stock_min
+from base b
+left join public.zones_stock z on z.id = b.zone_id
+where b.zone_id is not null;
 
 grant select on public.v_produits_par_zone to authenticated;
 

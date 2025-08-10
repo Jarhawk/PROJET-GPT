@@ -2,12 +2,17 @@
 import { renderHook, act } from '@testing-library/react';
 import { vi, beforeEach, test, expect } from 'vitest';
 
-const fromChain = {
-  select: vi.fn(() => fromChain),
-  eq: vi.fn(() => fromChain),
+const successChain = {
+  select: vi.fn(() => successChain),
+  eq: vi.fn(() => successChain),
   then: fn => Promise.resolve(fn({ data: [], error: null })),
 };
-const fromMock = vi.fn(() => fromChain);
+const errorChain = {
+  select: vi.fn(() => errorChain),
+  eq: vi.fn(() => errorChain),
+  then: fn => Promise.resolve(fn({ data: null, error: { code: '42P01', message: 'missing' } })),
+};
+const fromMock = vi.fn(() => successChain);
 const rpcMock = vi.fn(() => Promise.resolve({ data: {}, error: null }));
 
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock, rpc: rpcMock } }));
@@ -19,18 +24,32 @@ let useZoneProducts;
 beforeEach(async () => {
   ({ useZoneProducts } = await import('@/hooks/useZoneProducts'));
   fromMock.mockClear();
-  fromChain.select.mockClear();
-  fromChain.eq.mockClear();
+  successChain.select.mockClear();
+  successChain.eq.mockClear();
+  errorChain.select.mockClear();
+  errorChain.eq.mockClear();
   rpcMock.mockClear();
 });
 
 test('list queries view filtered by zone', async () => {
+  fromMock.mockImplementation(() => successChain);
   const { result } = renderHook(() => useZoneProducts());
   await act(async () => {
     await result.current.list('z1');
   });
   expect(fromMock).toHaveBeenCalledWith('v_produits_par_zone');
-  expect(fromChain.eq).toHaveBeenCalledWith('zone_id', 'z1');
+  expect(successChain.eq).toHaveBeenCalledWith('zone_id', 'z1');
+});
+
+test('list falls back to produits when view missing', async () => {
+  fromMock.mockImplementation((table) => table === 'v_produits_par_zone' ? errorChain : successChain);
+  const { result } = renderHook(() => useZoneProducts());
+  await act(async () => {
+    await result.current.list('z1');
+  });
+  expect(fromMock).toHaveBeenNthCalledWith(1, 'v_produits_par_zone');
+  expect(fromMock).toHaveBeenNthCalledWith(2, 'produits');
+  expect(successChain.eq).toHaveBeenCalledWith('zone_id', 'z1');
 });
 
 test('move calls rpc with mama id', async () => {

@@ -4,9 +4,10 @@ import { vi, beforeEach, test, expect } from 'vitest';
 
 const listMock = vi.fn();
 const moveMock = vi.fn(() => Promise.resolve({ error: null }));
+const setDefaultMock = vi.fn(() => Promise.resolve({ error: null }));
 
 vi.mock('@/hooks/useZoneProducts', () => ({
-  useZoneProducts: () => ({ list: listMock, move: moveMock }),
+  useZoneProducts: () => ({ list: listMock, move: moveMock, setDefault: setDefaultMock }),
 }));
 vi.mock('react-hot-toast', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 

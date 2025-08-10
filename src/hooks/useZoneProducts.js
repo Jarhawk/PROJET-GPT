@@ -12,6 +12,17 @@ export function useZoneProducts() {
       .select('*')
       .eq('zone_id', zoneId);
     if (error) {
+      if (error.code === '42P01') {
+        const { data: fallback, error: err2 } = await supabase
+          .from('produits')
+          .select('*')
+          .eq('zone_id', zoneId);
+        if (err2) {
+          toast.error(err2.message);
+          return [];
+        }
+        return fallback || [];
+      }
       toast.error(error.message);
       return [];
     }
@@ -83,5 +94,15 @@ export function useZoneProducts() {
     return { error };
   }
 
-  return { list, move, copy, merge, unlink, setMin, setStock };
+  async function setDefault(zoneId, produitId) {
+    const { error } = await supabase
+      .from('produits')
+      .update({ zone_id: zoneId })
+      .eq('id', produitId)
+      .eq('mama_id', mama_id);
+    if (error) toast.error(error.message);
+    return { error };
+  }
+
+  return { list, move, copy, merge, unlink, setMin, setStock, setDefault };
 }

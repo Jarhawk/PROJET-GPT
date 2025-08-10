@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from 'react-i18next';
 import useAuth from "@/hooks/useAuth";
 import { useGlobalSearch } from "@/hooks/useGlobalSearch";
@@ -11,9 +11,9 @@ export default function Navbar() {
   const [term, setTerm] = useState("");
   const { results, search } = useGlobalSearch();
   const [dark, setDark] = useState(false);
-  const toggleSidebar = () => {
+  const toggleSidebar = useCallback(() => {
     document.dispatchEvent(new CustomEvent('toggle-sidebar'));
-  };
+  }, []);
 
   useEffect(() => {
     if (localStorage.theme === 'dark') {
@@ -22,21 +22,21 @@ export default function Navbar() {
     }
   }, []);
 
-  const toggleDark = () => {
+  const toggleDark = useCallback(() => {
     const html = document.documentElement;
     const isDark = html.classList.toggle('dark');
     localStorage.theme = isDark ? 'dark' : 'light';
     setDark(isDark);
-  };
+  }, []);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     const confirmLogout = window.confirm(
       "Voulez-vous vraiment vous déconnecter ?"
     );
     if (!confirmLogout) return;
 
     window.location.href = "/logout";
-  };
+  }, []);
 
   return (
     <nav className="glass-panel border-b border-white/10 backdrop-blur-xl text-white px-6 py-4 flex items-center justify-between shadow-md text-shadow">

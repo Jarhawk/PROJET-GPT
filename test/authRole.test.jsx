@@ -1,5 +1,4 @@
 import { renderHook, waitFor } from '@testing-library/react';
-import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 import { AuthProvider } from '../src/context/AuthContext.jsx';

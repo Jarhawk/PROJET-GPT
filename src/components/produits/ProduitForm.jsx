@@ -12,6 +12,7 @@ import GlassCard from "@/components/ui/GlassCard";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import AutoCompleteField from "@/components/ui/AutoCompleteField";
+import { Badge } from "@/components/ui/badge";
 
 export default function ProduitForm({
   produit,
@@ -27,10 +28,9 @@ export default function ProduitForm({
   } = useFamilles();
   const {
     sousFamilles,
-    fetchSousFamilles,
+    list: listSousFamilles,
     loading: sousFamillesLoading,
     error: sousFamillesError,
-    setSousFamilles,
   } = useSousFamilles();
   const { unites, fetchUnites } = useUnites();
   const { zones } = useZonesStock();
@@ -64,20 +64,26 @@ export default function ProduitForm({
     fetchFournisseurs();
   }, [fetchFamilles, fetchUnites, fetchFournisseurs]);
 
+  const [familleHasSous, setFamilleHasSous] = useState(false);
+
   useEffect(() => {
     if (editing && produit?.famille_id) {
-      fetchSousFamilles(produit.famille_id);
+      listSousFamilles({ familleId: produit.famille_id, actif: true }).then(({ data }) => {
+        setFamilleHasSous((data || []).length > 0);
+      });
     }
-  }, [editing, produit, fetchSousFamilles]);
+  }, [editing, produit, listSousFamilles]);
 
   useEffect(() => {
     setSousFamilleId("");
     if (familleId) {
-      fetchSousFamilles(familleId);
+      listSousFamilles({ familleId, actif: true }).then(({ data }) => {
+        setFamilleHasSous((data || []).length > 0);
+      });
     } else {
-      setSousFamilles([]);
+      setFamilleHasSous(false);
     }
-  }, [familleId, fetchSousFamilles, setSousFamilles]);
+  }, [familleId, listSousFamilles]);
 
   useEffect(() => {
     if (editing && produit) {
@@ -100,7 +106,7 @@ export default function ProduitForm({
     const errs = {};
     if (!nom.trim()) errs.nom = "Nom requis";
     if (!familleId) errs.famille = "Famille requise";
-    if (!sousFamilleId) errs.sous_famille = "Sous-famille requise";
+    if (familleHasSous && !sousFamilleId) errs.sous_famille = "Sous-famille requise";
     if (!uniteId) errs.unite = "Unité requise";
     setErrors(errs);
     if (Object.keys(errs).length) {
@@ -198,15 +204,15 @@ export default function ProduitForm({
 
         <div className="flex flex-col gap-1 p-2 rounded-xl">
           <label htmlFor="prod-sous-famille" className="label text-white">
-            Sous-famille *
+            Sous-famille {familleHasSous ? '*' : ''}
           </label>
           <select
             id="prod-sous-famille"
             className="input bg-white text-gray-900"
             value={sousFamilleId}
             onChange={(e) => setSousFamilleId(e.target.value)}
-            disabled={!familleId || sousFamillesLoading}
-            required
+            disabled={!familleId || sousFamillesLoading || !familleHasSous}
+            required={familleHasSous}
           >
             <option value="">
               {sousFamillesLoading ? "Chargement..." : "-- Choisir --"}
@@ -230,6 +236,19 @@ export default function ProduitForm({
               <p className="text-red-500 text-sm">Aucune sous-famille</p>
             )}
         </div>
+
+        {familleId && (
+          <div className="flex gap-2 p-2 rounded-xl">
+            <Badge>
+              {familles.find((f) => f.id === familleId)?.nom || ''}
+            </Badge>
+            {sousFamilleId && (
+              <Badge>
+                {sousFamilles.find((sf) => sf.id === sousFamilleId)?.nom || ''}
+              </Badge>
+            )}
+          </div>
+        )}
 
         <div className="flex flex-col gap-1 p-2 rounded-xl">
           <AutoCompleteField

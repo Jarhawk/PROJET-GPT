@@ -6,7 +6,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { supabase } from '@/lib/supabaseClient';
 import useAuth from '@/hooks/useAuth';
 import { toast } from 'react-hot-toast';
-import SousFamilleForm from './SousFamilleForm';
+import SousFamilleForm from '@/forms/SousFamilleForm.jsx';
 import SousFamilleRow from './SousFamilleRow';
 
 export default function SousFamilleList({ famille }) {
@@ -41,7 +41,7 @@ export default function SousFamilleList({ famille }) {
     if (!mama_id) return toast.error('Action non autorisée');
     const { error } = await supabase
       .from('sous_familles')
-      .insert([{ ...values, famille_id: famille.id, mama_id }]);
+      .insert([{ ...values, mama_id }]);
     if (error) {
       toast.error(error.message);
     } else {
@@ -105,7 +105,8 @@ export default function SousFamilleList({ famille }) {
       <CardContent>
         {adding && (
           <SousFamilleForm
-            onSubmit={handleCreate}
+            familleId={famille?.id}
+            onSave={handleCreate}
             onCancel={() => setAdding(false)}
           />
         )}

@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import SousFamilleForm from './SousFamilleForm';
+import SousFamilleForm from '@/forms/SousFamilleForm.jsx';
 
 export default function SousFamilleRow({ sousFamille, onUpdate, onDelete, onToggle }) {
   const [editing, setEditing] = useState(false);
@@ -11,8 +11,8 @@ export default function SousFamilleRow({ sousFamille, onUpdate, onDelete, onTogg
       <tr>
         <td colSpan={3} className="px-2 py-1">
           <SousFamilleForm
-            initialData={sousFamille}
-            onSubmit={async data => {
+            sousFamille={sousFamille}
+            onSave={async (data) => {
               await onUpdate(sousFamille.id, data);
               setEditing(false);
             }}

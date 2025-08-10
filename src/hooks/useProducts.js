@@ -1,6 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 // src/hooks/useProducts.js
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import useAuth from "@/hooks/useAuth";
 import * as XLSX from "xlsx";
@@ -90,6 +90,12 @@ export function useProducts() {
       toast.error(error.message);
     }
     return data || [];
+  }, [mama_id]);
+
+  useEffect(() => {
+    if (!mama_id) return;
+    fetchProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mama_id]);
 
   async function addProduct(product, { refresh = true } = {}) {

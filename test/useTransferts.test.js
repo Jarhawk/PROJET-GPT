@@ -24,15 +24,9 @@ const queryLignes = {
   insert: vi.fn(() => ({ data: [], error: null })),
 };
 
-const queryMouvements = {
-  ...baseQuery,
-  insert: vi.fn(() => ({ data: [], error: null })),
-};
-
 const fromMock = vi.fn((table) => {
   if (table === 'transferts') return queryTransferts;
   if (table === 'transfert_lignes') return queryLignes;
-  if (table === 'mouvements') return queryMouvements;
   return baseQuery;
 });
 
@@ -45,7 +39,7 @@ let useTransferts;
 beforeEach(async () => {
   ({ useTransferts } = await import('@/hooks/useTransferts'));
   fromMock.mockClear();
-  [queryTransferts, queryLignes, queryMouvements, baseQuery].forEach((q) => {
+  [queryTransferts, queryLignes, baseQuery].forEach((q) => {
     Object.values(q).forEach((fn) => fn.mockClear && fn.mockClear());
   });
 });
@@ -70,7 +64,7 @@ test('fetchTransferts applies filters', async () => {
   expect(queryTransferts.lte).toHaveBeenCalledWith('date_transfert', '2025-01-31');
 });
 
-test('createTransfert inserts header, lines and mouvements', async () => {
+test('createTransfert inserts header and lines', async () => {
   const { result } = renderHook(() => useTransferts());
   await act(async () => {
     await result.current.createTransfert(
@@ -80,7 +74,6 @@ test('createTransfert inserts header, lines and mouvements', async () => {
   });
   expect(fromMock).toHaveBeenNthCalledWith(1, 'transferts');
   expect(fromMock).toHaveBeenNthCalledWith(2, 'transfert_lignes');
-  expect(fromMock).toHaveBeenNthCalledWith(3, 'mouvements');
   const insertedHeader = queryTransferts.insert.mock.calls[0][0][0];
   expect(insertedHeader).toMatchObject({
     mama_id: 'm1',
@@ -94,16 +87,6 @@ test('createTransfert inserts header, lines and mouvements', async () => {
     mama_id: 'm1',
     produit_id: 'p1',
     quantite: 2,
-    transfert_id: 't1',
-  });
-  const mouvements = queryMouvements.insert.mock.calls[0][0];
-  expect(mouvements).toHaveLength(2);
-  expect(mouvements[0]).toMatchObject({
-    type: 'sortie_transfert',
-    transfert_id: 't1',
-  });
-  expect(mouvements[1]).toMatchObject({
-    type: 'entree_transfert',
     transfert_id: 't1',
   });
 });

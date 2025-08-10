@@ -5,7 +5,7 @@ import path from "path";
 const reports = {
   missingId: [],
   missingHtmlFor: [],
-  customGridCols: [],
+  missingAriaInvalid: [],
   numberNoStep: [],
   submitNoType: [],
 };
@@ -20,8 +20,8 @@ function walk(dir) {
       const content = fs.readFileSync(full, "utf8");
       if (/(<input|<select|<textarea)(?![^>]*id=)/i.test(content)) reports.missingId.push(full);
       if (/<label(?![^>]*htmlFor=)/i.test(content)) reports.missingHtmlFor.push(full);
-      if (/grid-cols-[3-9]/.test(content)) reports.customGridCols.push(full);
-      if (/<input[^>]*type="number"(?![^>]*step)(?![^>]*inputMode)/i.test(content)) reports.numberNoStep.push(full);
+      if (/<p[^>]*text-red-600/i.test(content) && !/aria-invalid/i.test(content)) reports.missingAriaInvalid.push(full);
+      if (/<input[^>]*type="number"(?![^>]*step="any")(?![^>]*inputMode)/i.test(content)) reports.numberNoStep.push(full);
       if (/<button(?![^>]*type="submit")[^>]*submit/i.test(content)) reports.submitNoType.push(full);
     }
   }

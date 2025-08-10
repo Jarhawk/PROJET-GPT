@@ -2,6 +2,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import request from 'supertest';
 import express from 'express';
+import { TABLES } from '@/constants/tables';
 
 process.env.PUBLIC_API_KEY = 'dev_key';
 process.env.VITE_SUPABASE_URL = 'https://example.supabase.co';
@@ -162,7 +163,7 @@ describe('public API router', () => {
     const res = await request(app).get('/stock?mama_id=m1').set('x-api-key', 'dev_key');
     expect(res.status).toBe(200);
     expect(res.body).toEqual(data);
-    expect(fromMock).toHaveBeenCalledWith('mouvements');
+    expect(fromMock).toHaveBeenCalledWith(TABLES.MOUVEMENTS);
   });
 
   it('applies since filter on stock', async () => {
@@ -197,7 +198,7 @@ describe('public API router', () => {
     expect(res.status).toBe(200);
     expect(res.body).toEqual(data);
     expect(getUserMock).toHaveBeenCalledWith('tok');
-    expect(fromMock).toHaveBeenCalledWith('mouvements');
+    expect(fromMock).toHaveBeenCalledWith(TABLES.MOUVEMENTS);
   });
 
   it('handles Supabase error for stock', async () => {

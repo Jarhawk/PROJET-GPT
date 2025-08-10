@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'react-hot-toast';
 
 export default function ZoneFormProducts({ zoneId }) {
-  const { list, move } = useZoneProducts();
+  const { list, move, setDefault } = useZoneProducts();
   const [rows, setRows] = useState([]);
 
   async function refresh() {
@@ -32,6 +32,14 @@ export default function ZoneFormProducts({ zoneId }) {
     }
   }
 
+  async function handleDefault(prodId) {
+    const { error } = await setDefault(zoneId, prodId);
+    if (!error) {
+      toast.success('Zone par défaut mise à jour');
+      refresh();
+    }
+  }
+
   return (
     <div>
       <table className="min-w-full text-sm">
@@ -51,7 +59,10 @@ export default function ZoneFormProducts({ zoneId }) {
               <td className="px-2 py-1">{p.unite_id}</td>
               <td className="px-2 py-1 text-right">{p.stock_reel}</td>
               <td className="px-2 py-1 text-right">{p.stock_min}</td>
-              <td className="px-2 py-1">
+              <td className="px-2 py-1 space-x-2">
+                <Button size="sm" variant="outline" onClick={() => handleDefault(p.produit_id)} data-testid="default-btn">
+                  Défaut
+                </Button>
                 <Button size="sm" variant="outline" onClick={handleMove} data-testid="move-btn">
                   Déplacer
                 </Button>

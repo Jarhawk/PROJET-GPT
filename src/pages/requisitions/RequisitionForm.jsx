@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRequisitions } from "@/hooks/useRequisitions";
-import { useProducts } from "@/hooks/useProducts";
+import { useZoneProducts } from "@/hooks/useZoneProducts";
 import { useZones } from "@/hooks/useZones";
 import { useUnites } from "@/hooks/useUnites";
 import useAuth from "@/hooks/useAuth";
@@ -18,7 +18,7 @@ function RequisitionFormPage() {
   const navigate = useNavigate();
   const { loading: authLoading } = useAuth();
   const { createRequisition } = useRequisitions();
-  const { products, loading: loadingProducts } = useProducts();
+  const { list: listZoneProducts } = useZoneProducts();
   const { myAccessibleZones } = useZones();
   const [zones, setZones] = useState([]);
   const { unites, fetchUnites } = useUnites();
@@ -28,12 +28,20 @@ function RequisitionFormPage() {
   const [zone_id, setZone] = useState("");
   const [articles, setArticles] = useState([{ produit_id: "", unite_id: "", quantite: 1 }]);
   const [submitting, setSubmitting] = useState(false);
+  const [zoneProducts, setZoneProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
 
   useEffect(() => { myAccessibleZones({ mode: 'requisition' }).then(setZones); fetchUnites(); }, [myAccessibleZones, fetchUnites]);
 
   useEffect(() => {
     if (zones.length > 0) setZone(zones[0].id);
   }, [zones]);
+
+  useEffect(() => {
+    if (!zone_id) return;
+    setLoadingProducts(true);
+    listZoneProducts(zone_id).then(p => { setZoneProducts(p); setLoadingProducts(false); });
+  }, [zone_id, listZoneProducts]);
 
   const handleChangeArticle = (index, field, value) => {
     const updated = [...articles];
@@ -140,9 +148,9 @@ function RequisitionFormPage() {
                   required
                 >
                   <option value="">Sélectionner un produit</option>
-                  {products.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.nom}
+                  {zoneProducts.map((p) => (
+                    <option key={p.produit_id || p.id} value={p.produit_id || p.id}>
+                      {p.produit_nom || p.nom}
                     </option>
                   ))}
                 </Select>

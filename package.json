@@ -33,6 +33,7 @@
     "@tailwindcss/cli": "^4.1.7",
     "@tailwindcss/vite": "^4.1.7",
     "@tanstack/react-query": "^5.17.0",
+    "date-fns": "3.6.0",
     "express": "^5.1.0",
     "file-saver": "^2.0.5",
     "framer-motion": "^12.19.1",
@@ -55,8 +56,7 @@
     "tesseract.js": "^6.0.1",
     "uuid": "^11.1.0",
     "xlsx": "^0.18.5",
-    "zod": "3.23.8",
-    "date-fns": "3.6.0"
+    "zod": "3.23.8"
   },
   "devDependencies": {
     "@eslint/js": "8.57.0",
@@ -65,13 +65,16 @@
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
+    "@types/node": "20.12.7",
     "@types/react": "18.3.3",
     "@types/react-dom": "18.3.0",
     "@vitejs/plugin-react": "4.3.1",
+    "@vitest/ui": "1.6.0",
     "autoprefixer": "^10.4.21",
     "dotenv": "^17.2.1",
     "eslint": "8.57.0",
     "eslint-config-prettier": "9.1.0",
+    "eslint-plugin-jsx-a11y": "^6.8.0",
     "eslint-plugin-react": "7.34.1",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "0.4.6",
@@ -81,13 +84,11 @@
     "prettier": "^3.5.3",
     "supertest": "^7.1.1",
     "tailwindcss": "^3.4.17",
+    "ts-node": "10.9.2",
+    "typescript": "5.4.5",
     "vite": "5.4.2",
     "vite-plugin-pwa": "^1.0.0",
-    "vitest": "1.6.0",
-    "@vitest/ui": "1.6.0",
-    "@types/node": "20.12.7",
-    "typescript": "5.4.5",
-    "ts-node": "10.9.2"
+    "vitest": "1.6.0"
   },
   "overrides": {
     "react": "18.3.1",

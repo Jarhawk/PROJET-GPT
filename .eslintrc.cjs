@@ -7,9 +7,10 @@ module.exports = {
     "plugin:react/recommended",
     "plugin:react/jsx-runtime",
     "plugin:react-hooks/recommended",
+    "plugin:jsx-a11y/recommended",
     "prettier"
   ],
-  plugins: ["react", "react-hooks", "react-refresh"],
+  plugins: ["react", "react-hooks", "react-refresh", "jsx-a11y"],
   settings: { react: { version: "detect" } },
   rules: {
     // React Fast Refresh
@@ -21,6 +22,10 @@ module.exports = {
 
     // Hygiène
     "no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
-    "react/prop-types": "off"
+    "react/prop-types": "off",
+
+    // Accessibilité
+    "jsx-a11y/label-has-for": "off",
+    "jsx-a11y/label-has-associated-control": ["error", { assert: "either" }]
   }
 };

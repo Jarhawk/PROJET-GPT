@@ -1,10 +1,9 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import PrimaryButton from '@/components/ui/PrimaryButton';
-import SecondaryButton from '@/components/ui/SecondaryButton';
-import { Input } from '@/components/ui/input';
-import GlassCard from '@/components/ui/GlassCard';
+import { Form } from '@/components/ui/Form';
+import { FormField } from '@/components/ui/FormField';
+import { FormActions } from '@/components/ui/FormActions';
+import { Input, Checkbox } from '@/components/ui/controls';
 
 export default function ZoneForm({ zone, onSave, onCancel }) {
   const [nom, setNom] = useState(zone?.nom || '');
@@ -22,34 +21,25 @@ export default function ZoneForm({ zone, onSave, onCancel }) {
   };
 
   return (
-    <GlassCard title={zone ? "Modifier la zone" : "Nouvelle zone"}>
-      <form onSubmit={handleSubmit} className="space-y-3">
-      <div>
-        <label className="block text-sm mb-1 font-medium" htmlFor="zone-nom">Nom</label>
+    <Form onSubmit={handleSubmit} title={zone ? "Modifier la zone" : "Nouvelle zone"}>
+      <FormField label="Nom" htmlFor="zone-nom" required>
         <Input
           id="zone-nom"
-          className="w-full"
           placeholder="Nom de la zone"
           value={nom}
           onChange={e => setNom(e.target.value)}
           required
         />
-      </div>
-      <div className="flex items-center gap-2">
-        <input
-          id="actif-checkbox"
-          type="checkbox"
-          className="checkbox"
+      </FormField>
+      <FormField>
+        <Checkbox
+          id="zone-actif"
+          label="Zone active"
           checked={actif}
           onChange={e => setActif(e.target.checked)}
         />
-        <label htmlFor="actif-checkbox">Zone active</label>
-      </div>
-      <div className="flex gap-2">
-        <PrimaryButton type="submit" className="flex items-center gap-2">Enregistrer</PrimaryButton>
-        <SecondaryButton type="button" onClick={onCancel}>Annuler</SecondaryButton>
-      </div>
-      </form>
-    </GlassCard>
+      </FormField>
+      <FormActions onCancel={onCancel} />
+    </Form>
   );
 }

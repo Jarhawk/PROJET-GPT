@@ -2,15 +2,16 @@
 import { useEffect, useState } from 'react';
 import { useZones } from '@/hooks/useZones';
 import { Button } from '@/components/ui/button';
-import { Toaster } from 'react-hot-toast';
+import { Toaster, toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import useAuth from '@/hooks/useAuth';
 import Unauthorized from '@/pages/auth/Unauthorized';
+import { supabase } from '@/lib/supabase';
 
 export default function Zones() {
   const { fetchZones, updateZone } = useZones();
-  const { hasAccess, loading } = useAuth();
+  const { hasAccess, loading, mama_id } = useAuth();
   const canEdit = hasAccess('zones_stock', 'peut_modifier');
   const [filters, setFilters] = useState({ q: '', type: '', actif: true });
   const [rows, setRows] = useState([]);
@@ -19,6 +20,20 @@ export default function Zones() {
   useEffect(() => {
     fetchZones(filters).then(setRows);
   }, [filters]);
+
+  async function handleDelete(id) {
+    const reassign = window.prompt('Réassigner vers la zone (laisser vide pour aucune)');
+    const { error } = await supabase.rpc('safe_delete_zone', {
+      p_mama: mama_id,
+      p_zone: id,
+      p_reassign_to: reassign || null,
+    });
+    if (error) toast.error(error.message);
+    else {
+      toast.success('Zone supprimée');
+      setRows(await fetchZones(filters));
+    }
+  }
 
   if (loading) return <LoadingSpinner message="Chargement..." />;
   if (!canEdit) return <Unauthorized />;
@@ -85,6 +100,7 @@ export default function Zones() {
                 <td className="px-2 py-1 flex gap-2 justify-center">
                   <Button size="sm" variant="outline" onClick={() => navigate(`/parametrage/zones/${z.id}`)}>Éditer</Button>
                   <Button size="sm" variant="outline" onClick={() => navigate(`/parametrage/zones/${z.id}/droits`)}>Droits</Button>
+                  <Button size="sm" variant="outline" onClick={() => handleDelete(z.id)}>Supprimer</Button>
                 </td>
               </tr>
             ))}

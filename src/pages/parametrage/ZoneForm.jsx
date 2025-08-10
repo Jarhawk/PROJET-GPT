@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { Tabs } from '@/components/ui/tabs';
+import ZoneFormProducts from '@/components/parametrage/ZoneFormProducts.jsx';
 
 export default function ZoneForm() {
   const { id } = useParams();
@@ -51,57 +53,70 @@ export default function ZoneForm() {
 
   if (loading) return <LoadingSpinner message="Chargement..." />;
 
+  const infoForm = (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="block text-sm mb-1" htmlFor="nom">Nom</label>
+        <Input id="nom" name="nom" defaultValue={zone?.nom || ''} required />
+      </div>
+      <div>
+        <label className="block text-sm mb-1" htmlFor="type">Type</label>
+        <Select id="type" name="type" defaultValue={zone?.type || ''} required className="w-full">
+          <option value="">Choisir…</option>
+          <option value="cave">Cave</option>
+          <option value="shop">Shop</option>
+          <option value="cuisine">Cuisine</option>
+          <option value="bar">Bar</option>
+          <option value="entrepot">Entrepôt</option>
+          <option value="autre">Autre</option>
+        </Select>
+      </div>
+      <div>
+        <label className="block text-sm mb-1" htmlFor="code">Code</label>
+        <Input id="code" name="code" defaultValue={zone?.code || ''} />
+      </div>
+      <div>
+        <label className="block text-sm mb-1" htmlFor="parent_id">Parent</label>
+        <Select id="parent_id" name="parent_id" defaultValue={zone?.parent_id || ''} className="w-full">
+          <option value="">Aucun</option>
+          {zones.filter(z => z.id !== id).map(z => (
+            <option key={z.id} value={z.id}>{z.nom}</option>
+          ))}
+        </Select>
+      </div>
+      <div>
+        <label className="block text-sm mb-1" htmlFor="adresse">Adresse</label>
+        <Input id="adresse" name="adresse" defaultValue={zone?.adresse || ''} />
+      </div>
+      <div>
+        <label className="block text-sm mb-1" htmlFor="position">Position</label>
+        <Input id="position" name="position" type="number" min={0} step={1} defaultValue={zone?.position || 0} />
+      </div>
+      <div className="flex items-center gap-2">
+        <input id="actif" name="actif" type="checkbox" defaultChecked={zone?.actif ?? true} />
+        <label htmlFor="actif">Zone active</label>
+      </div>
+      <p className="text-xs text-muted-foreground">La réquisition est possible uniquement pour les zones de type cave ou shop.</p>
+      <div className="flex gap-2 justify-end">
+        <Button type="button" variant="outline" onClick={() => navigate('/parametrage/zones')}>Annuler</Button>
+        <Button type="submit">Enregistrer</Button>
+      </div>
+    </form>
+  );
+
   return (
     <div className="p-6 max-w-xl mx-auto">
       <GlassCard title={id === 'new' ? 'Nouvelle zone' : 'Modifier la zone'}>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm mb-1" htmlFor="nom">Nom</label>
-            <Input id="nom" name="nom" defaultValue={zone?.nom || ''} required />
-          </div>
-          <div>
-            <label className="block text-sm mb-1" htmlFor="type">Type</label>
-            <Select id="type" name="type" defaultValue={zone?.type || ''} required className="w-full">
-              <option value="">Choisir…</option>
-              <option value="cave">Cave</option>
-              <option value="shop">Shop</option>
-              <option value="cuisine">Cuisine</option>
-              <option value="bar">Bar</option>
-              <option value="entrepot">Entrepôt</option>
-              <option value="autre">Autre</option>
-            </Select>
-          </div>
-          <div>
-            <label className="block text-sm mb-1" htmlFor="code">Code</label>
-            <Input id="code" name="code" defaultValue={zone?.code || ''} />
-          </div>
-          <div>
-            <label className="block text-sm mb-1" htmlFor="parent_id">Parent</label>
-            <Select id="parent_id" name="parent_id" defaultValue={zone?.parent_id || ''} className="w-full">
-              <option value="">Aucun</option>
-              {zones.filter(z => z.id !== id).map(z => (
-                <option key={z.id} value={z.id}>{z.nom}</option>
-              ))}
-            </Select>
-          </div>
-          <div>
-            <label className="block text-sm mb-1" htmlFor="adresse">Adresse</label>
-            <Input id="adresse" name="adresse" defaultValue={zone?.adresse || ''} />
-          </div>
-          <div>
-            <label className="block text-sm mb-1" htmlFor="position">Position</label>
-            <Input id="position" name="position" type="number" min={0} step={1} defaultValue={zone?.position || 0} />
-          </div>
-          <div className="flex items-center gap-2">
-            <input id="actif" name="actif" type="checkbox" defaultChecked={zone?.actif ?? true} />
-            <label htmlFor="actif">Zone active</label>
-          </div>
-          <p className="text-xs text-muted-foreground">La réquisition est possible uniquement pour les zones de type cave ou shop.</p>
-          <div className="flex gap-2 justify-end">
-            <Button type="button" variant="outline" onClick={() => navigate('/parametrage/zones')}>Annuler</Button>
-            <Button type="submit">Enregistrer</Button>
-          </div>
-        </form>
+        {id === 'new' ? (
+          infoForm
+        ) : (
+          <Tabs
+            tabs={[
+              { name: 'Infos', content: infoForm },
+              { name: 'Produits', content: <ZoneFormProducts zoneId={id} /> },
+            ]}
+          />
+        )}
       </GlassCard>
     </div>
   );

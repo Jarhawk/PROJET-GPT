@@ -26,7 +26,8 @@
     "lint:fix": "eslint \"src/**/*.{js,jsx,ts,tsx}\" --fix",
     "schema:smoke": "node scripts/smokeSchema.mjs",
     "front:sql:gaps": "node scripts/checkFrontVsSQL.mjs",
-    "schema:normalize": "node scripts/normalizeSchema.js"
+    "schema:normalize": "node scripts/normalizeSchema.js",
+    "schema:fix-fk": "node scripts/fixForeignKeys.js"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.14",

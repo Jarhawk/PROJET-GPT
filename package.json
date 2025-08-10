@@ -23,7 +23,9 @@
     "check:schema": "node scripts/checkSchema.js",
     "fix:imports": "node scripts/fixLegacyMouvements.js",
     "test:ui": "vitest --ui",
-    "lint:fix": "eslint \"src/**/*.{js,jsx,ts,tsx}\" --fix"
+    "lint:fix": "eslint \"src/**/*.{js,jsx,ts,tsx}\" --fix",
+    "schema:smoke": "node scripts/smokeSchema.mjs",
+    "front:sql:gaps": "node scripts/checkFrontVsSQL.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.14",

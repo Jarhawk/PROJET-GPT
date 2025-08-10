@@ -68,6 +68,9 @@ supabase db reset --file db/Ajout.sql
 This script adds any missing columns, views and policies so the schema matches
 the application. Adjust configuration in `supabase/config.toml` as required.
 
+The `zones_stock` table uses a `position` column to preserve the display order
+of zones. Ensure this column exists and is populated before running the app.
+
 ### Environment variables
 
 Copy `.env.example` to `.env` at the project root and adjust the Supabase

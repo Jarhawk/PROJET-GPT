@@ -11,9 +11,10 @@ export function useZones() {
   async function fetchZones({ q, type, actif } = {}) {
     let query = supabase
       .from('zones_stock')
-      .select('*')
+      .select('id, nom, type, parent_id, position, actif, created_at')
       .eq('mama_id', mama_id)
-      .order('position', { ascending: true });
+      .order('position', { ascending: true })
+      .order('nom');
     if (q) query = query.ilike('nom', `%${q}%`);
     if (type) query = query.eq('type', type);
     if (actif !== undefined) query = query.eq('actif', actif);
@@ -22,21 +23,29 @@ export function useZones() {
       toast.error(error.message);
       return [];
     }
-    setZones(data || []);
-    return data || [];
+    const cleaned = (data || []).map(z => ({
+      ...z,
+      position: Number.isFinite(z.position) ? z.position : 0,
+    }));
+    cleaned.sort((a, b) => a.position - b.position || a.nom.localeCompare(b.nom));
+    setZones(cleaned);
+    return cleaned;
   }
 
   async function fetchZoneById(id) {
     const { data, error } = await supabase
       .from('zones_stock')
-      .select('*')
+      .select('id, nom, type, parent_id, position, actif, created_at')
       .eq('id', id)
       .single();
     if (error) {
       toast.error(error.message);
       return null;
     }
-    return data;
+    return {
+      ...data,
+      position: Number.isFinite(data.position) ? data.position : 0,
+    };
   }
 
   async function createZone(payload) {
@@ -65,8 +74,11 @@ export function useZones() {
     return { error };
   }
 
-  async function reorderZones(rows) {
-    const { error } = await supabase.rpc('reorder_zones', { rows });
+  async function reorderZones(list) {
+    const updates = list.map((z, idx) => ({ id: z.id, position: idx }));
+    const { error } = await supabase
+      .from('zones_stock')
+      .upsert(updates);
     if (error) toast.error(error.message);
     return { error };
   }

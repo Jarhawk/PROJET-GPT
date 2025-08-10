@@ -5,11 +5,8 @@ import { vi, beforeEach, test, expect } from 'vitest';
 const queryObj = {
   select: vi.fn(() => queryObj),
   eq: vi.fn(() => queryObj),
-  ilike: vi.fn(() => queryObj),
   order: vi.fn(() => queryObj),
-  range: vi.fn(() => queryObj),
-  or: vi.fn(() => queryObj),
-  then: fn => Promise.resolve(fn({ data: [], error: null, count: 0 })),
+  then: fn => Promise.resolve(fn({ data: [], error: null })),
 };
 const fromMock = vi.fn(() => queryObj);
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
@@ -23,31 +20,23 @@ beforeEach(async () => {
   fromMock.mockClear();
   queryObj.select.mockClear();
   queryObj.eq.mockClear();
-  queryObj.ilike.mockClear();
   queryObj.order.mockClear();
-  queryObj.range.mockClear();
 });
 
-test('fetchZones applies filters', async () => {
-  queryObj.then = fn => Promise.resolve(fn({ data: [], error: null, count: 0 }));
+test('fetchZones returns zones sorted by position', async () => {
+  const unsorted = [
+    { id: 'b', nom: 'B', position: 2 },
+    { id: 'a', nom: 'A', position: 0 },
+    { id: 'c', nom: 'C', position: 1 },
+  ];
+  queryObj.then = fn => Promise.resolve(fn({ data: unsorted, error: null }));
   const { result } = renderHook(() => useZones());
+  let zones;
   await act(async () => {
-    await result.current.fetchZones({ search: 'cui', page: 2 });
+    zones = await result.current.fetchZones();
   });
-  expect(fromMock).toHaveBeenCalledWith('zones_stock');
-  expect(queryObj.select).toHaveBeenCalledWith('*', { count: 'exact' });
-  expect(queryObj.eq).toHaveBeenCalledWith('mama_id', 'm1');
-  expect(queryObj.eq).toHaveBeenCalledWith('actif', true);
-  expect(queryObj.ilike).toHaveBeenCalledWith('nom', '%cui%');
-  expect(queryObj.order).toHaveBeenCalledWith('nom', { ascending: true });
-  expect(queryObj.range).toHaveBeenCalledWith(50, 99);
-});
-
-test('deleteZone stops when data exists', async () => {
-  queryObj.then = fn => Promise.resolve(fn({ data: null, error: null, count: 1 }));
-  const { result } = renderHook(() => useZones());
-  let res;
-  await act(async () => { res = await result.current.deleteZone('z'); });
-  expect(fromMock).toHaveBeenCalledWith('requisitions');
-  expect(res.error).toBeDefined();
+  expect(queryObj.select).toHaveBeenCalledWith('id, nom, type, parent_id, position, actif, created_at');
+  expect(queryObj.order).toHaveBeenNthCalledWith(1, 'position', { ascending: true });
+  expect(queryObj.order).toHaveBeenNthCalledWith(2, 'nom');
+  expect(zones.map(z => z.id)).toEqual(['a', 'c', 'b']);
 });

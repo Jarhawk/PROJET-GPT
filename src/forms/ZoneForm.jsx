@@ -7,17 +7,19 @@ import { Input, Checkbox } from '@/components/ui/controls';
 
 export default function ZoneForm({ zone, onSave, onCancel }) {
   const [nom, setNom] = useState(zone?.nom || '');
+  const [position, setPosition] = useState(zone?.position ?? 0);
   const [actif, setActif] = useState(zone?.actif ?? true);
 
   useEffect(() => {
     setNom(zone?.nom || '');
+    setPosition(zone?.position ?? 0);
     setActif(zone?.actif ?? true);
   }, [zone]);
 
   const handleSubmit = e => {
     e.preventDefault();
     if (!nom.trim()) return;
-    onSave({ nom: nom.trim(), actif });
+    onSave({ nom: nom.trim(), position, actif });
   };
 
   return (
@@ -29,6 +31,16 @@ export default function ZoneForm({ zone, onSave, onCancel }) {
           value={nom}
           onChange={e => setNom(e.target.value)}
           required
+        />
+      </FormField>
+      <FormField label="Position" htmlFor="zone-position">
+        <Input
+          id="zone-position"
+          type="number"
+          min={0}
+          step={1}
+          value={position}
+          onChange={e => setPosition(parseInt(e.target.value, 10) || 0)}
         />
       </FormField>
       <FormField>

@@ -90,7 +90,7 @@ export default function ZoneForm() {
           </div>
           <div>
             <label className="block text-sm mb-1" htmlFor="position">Position</label>
-            <Input id="position" name="position" type="number" defaultValue={zone?.position || 0} />
+            <Input id="position" name="position" type="number" min={0} step={1} defaultValue={zone?.position || 0} />
           </div>
           <div className="flex items-center gap-2">
             <input id="actif" name="actif" type="checkbox" defaultChecked={zone?.actif ?? true} />

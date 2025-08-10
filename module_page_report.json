@@ -61,10 +61,6 @@
     "stock/Mouvements.jsx",
     "stock/Transferts.jsx"
   ],
-  "licences": [
-    "Licences.jsx",
-    "legal/Licence.jsx"
-  ],
   "parametrage": [
     "parametrage/APIKeys.jsx",
     "parametrage/AccessRights.jsx",

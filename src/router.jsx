@@ -120,7 +120,6 @@ const MenuEngineering = lazyWithPreload(() => import("@/pages/engineering/MenuEn
 const EngineeringMenu = lazyWithPreload(() => import("@/pages/EngineeringMenu.jsx"));
 const Logout = lazyWithPreload(() => import("@/pages/auth/Logout.jsx"));
 const Stats = lazyWithPreload(() => import("@/pages/stats/Stats.jsx"));
-const Licences = lazyWithPreload(() => import("@/pages/Licences.jsx"));
 const Roles = lazyWithPreload(() => import("@/pages/parametrage/Roles.jsx"));
 const PlanningModule = lazyWithPreload(() => import("@/pages/PlanningModule.jsx"));
 
@@ -190,7 +189,6 @@ export const routePreloadMap = {
   '/stats': Stats.preload,
   '/planning-module': PlanningModule.preload,
   '/parametrage/roles': Roles.preload,
-  '/licences': Licences.preload,
 };
 
 
@@ -592,10 +590,6 @@ export default function Router() {
           <Route
             path="/parametrage/roles"
             element={<ProtectedRoute moduleKey="roles"><Roles /></ProtectedRoute>}
-          />
-          <Route
-            path="/licences"
-            element={<ProtectedRoute moduleKey="licences"><Licences /></ProtectedRoute>}
           />
           <Route
             path="/supervision"

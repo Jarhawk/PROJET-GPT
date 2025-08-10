@@ -20,7 +20,6 @@ feedback
 fiches_techniques
 fournisseurs
 inventaires
-licences
 logs
 mamas
 menu_engineering
@@ -62,7 +61,6 @@ feedback
 fiches_techniques
 fournisseurs
 inventaires
-licences
 logs
 mamas
 menu_engineering
@@ -104,7 +102,6 @@ feedback
 fiches_techniques
 fournisseurs
 inventaires
-licences
 logs
 mamas
 menu_engineering

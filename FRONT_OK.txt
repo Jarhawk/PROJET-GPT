@@ -27,7 +27,6 @@ feedback
 stats
 planning
 roles
-licences
 emails_envoyes
 logs
 supervision

@@ -27,7 +27,9 @@
     "schema:smoke": "node scripts/smokeSchema.mjs",
     "front:sql:gaps": "node scripts/checkFrontVsSQL.mjs",
     "schema:normalize": "node scripts/normalizeSchema.js",
-    "schema:fix-fk": "node scripts/fixForeignKeys.js"
+    "schema:fix-fk": "node scripts/fixForeignKeys.js",
+    "schema:repair": "node scripts/repairSchema.js",
+    "schema:repair:apply": "SCHEMA_APPLY=1 node scripts/repairSchema.js"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.14",
@@ -49,6 +51,7 @@
     "nprogress": "^0.2.0",
     "otplib": "^12.0.1",
     "qrcode.react": "^4.2.0",
+    "pg": "^8.11.3",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-hot-toast": "^2.5.2",

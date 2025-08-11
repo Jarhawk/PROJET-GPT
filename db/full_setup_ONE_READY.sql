@@ -3091,11 +3091,36 @@ do $$ begin
 end $$;
 
 alter table public.produits_zones enable row level security;
-create policy if not exists pz_select on public.produits_zones
-  for select using (mama_id = current_user_mama_id());
-create policy if not exists pz_iud on public.produits_zones
-  for all using (mama_id = current_user_mama_id())
-  with check (mama_id = current_user_mama_id());
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename  = 'produits_zones'
+      AND policyname = 'pz_select'
+  ) THEN
+    CREATE POLICY pz_select ON public.produits_zones
+      FOR SELECT
+      USING (mama_id = current_user_mama_id());
+  END IF;
+END$$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename  = 'produits_zones'
+      AND policyname = 'pz_iud'
+  ) THEN
+    CREATE POLICY pz_iud ON public.produits_zones
+      FOR ALL
+      USING (mama_id = current_user_mama_id())
+      WITH CHECK (mama_id = current_user_mama_id());
+  END IF;
+END$$;
 
 grant select, insert, update, delete on public.produits_zones to authenticated;
 

@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import MamaLogo from "@/components/ui/MamaLogo";
 import ResetAuthButton from "@/components/ResetAuthButton";
@@ -12,6 +12,7 @@ import PreviewBanner from "@/components/ui/PreviewBanner";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { Input } from "@/components/ui/input";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { makeId } from "@/utils/formIds";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -59,6 +60,9 @@ export default function Login() {
   if (authLoading || (session && !userData)) {
     return <LoadingSpinner message="Chargement..." />;
   }
+
+  const emailId = useMemo(() => makeId('fld'), []);
+  const passwordId = useMemo(() => makeId('fld'), []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -112,8 +116,9 @@ export default function Login() {
         <p className="text-xs text-white/70 text-center mb-6">Plateforme F&B<br />by MamaStock</p>
         <form onSubmit={handleLogin} className="w-full flex flex-col gap-4">
             <div>
-              <label className="block text-xs font-semibold text-white/90 mb-1">Email</label>
+              <label htmlFor={emailId} className="block text-xs font-semibold text-white/90 mb-1">Email</label>
               <Input
+                id={emailId}
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
@@ -127,8 +132,9 @@ export default function Login() {
               )}
             </div>
             <div>
-              <label className="block text-xs font-semibold text-white/90 mb-1">Mot de passe</label>
+              <label htmlFor={passwordId} className="block text-xs font-semibold text-white/90 mb-1">Mot de passe</label>
               <Input
+                id={passwordId}
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}

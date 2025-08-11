@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useUtilisateurs } from "@/hooks/useUtilisateurs";
 import { useRoles } from "@/hooks/useRoles";
 import { useAuth } from '@/hooks/useAuth';
@@ -9,6 +9,7 @@ import { Select } from "@/components/ui/select";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import toast from "react-hot-toast";
+import { makeId } from "@/utils/formIds";
 
 export default function UtilisateurForm({ utilisateur, onClose }) {
   const { createUtilisateur, updateUtilisateur } = useUtilisateurs();
@@ -19,6 +20,7 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
   const [roleId, setRoleId] = useState(utilisateur?.role_id || "");
   const [actif, setActif] = useState(utilisateur?.actif ?? true);
   const [loading, setLoading] = useState(false);
+  const actifId = useMemo(() => makeId('fld'), []);
 
   useEffect(() => {
     fetchRoles();
@@ -75,8 +77,13 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
             <option key={r.id} value={r.id}>{r.nom}</option>
           ))}
         </Select>
-        <label className="flex items-center gap-2 mb-2">
-          <input type="checkbox" checked={actif} onChange={e => setActif(e.target.checked)} />
+        <label htmlFor={actifId} className="flex items-center gap-2 mb-2">
+          <input
+            id={actifId}
+            type="checkbox"
+            checked={actif}
+            onChange={e => setActif(e.target.checked)}
+          />
           Actif
         </label>
         <div className="flex gap-2 mt-4">

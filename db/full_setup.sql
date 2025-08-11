@@ -37,34 +37,6 @@ create table if not exists public.produits (
   updated_at timestamptz default now()
 );
 
--- FK safety for produits
-do $$ begin
-  if not exists (
-    select 1 from information_schema.columns
-    where table_schema='public' and table_name='produits' and column_name='sous_famille_id'
-  ) then
-    alter table public.produits add column sous_famille_id uuid;
-  end if;
-  if not exists (
-    select 1 from information_schema.columns
-    where table_schema='public' and table_name='produits' and column_name='zone_id'
-  ) then
-    alter table public.produits add column zone_id uuid;
-  end if;
-end $$;
-
-do $$ begin
-  if not exists (
-    select 1 from pg_constraint where conname = 'fk_produits_zone_id'
-  ) then
-    alter table public.produits
-      add constraint fk_produits_zone_id
-      foreign key (zone_id) references public.zones_stock(id) on delete set null;
-  end if;
-end $$;
-
-create index if not exists idx_produits_zone_id on public.produits(zone_id);
-
 create table if not exists public.roles (
   id uuid primary key default gen_random_uuid(),
   nom text not null,
@@ -194,31 +166,6 @@ do $$ begin
   if not exists (select 1 from pg_constraint where conname = 'fk_produits_mama_id') then
     alter table public.produits
       add constraint fk_produits_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
-  end if;
-end $$;
-
-do $$ begin
-  if not exists (select 1 from pg_constraint where conname = 'fk_produits_fournisseur_id') then
-    alter table public.produits
-      add constraint fk_produits_fournisseur_id foreign key (fournisseur_id) references public.fournisseurs(id) on delete set null;
-  end if;
-end $$;
-do $$ begin
-  if not exists (select 1 from pg_constraint where conname = 'fk_produits_unite_id') then
-    alter table public.produits
-      add constraint fk_produits_unite_id foreign key (unite_id) references public.unites(id) on delete set null;
-  end if;
-end $$;
-do $$ begin
-  if not exists (select 1 from pg_constraint where conname = 'fk_produits_famille_id') then
-    alter table public.produits
-      add constraint fk_produits_famille_id foreign key (famille_id) references public.familles(id) on delete set null;
-  end if;
-end $$;
-do $$ begin
-  if not exists (select 1 from pg_constraint where conname = 'fk_produits_sous_famille_id') then
-    alter table public.produits
-      add constraint fk_produits_sous_famille_id foreign key (sous_famille_id) references public.sous_familles(id) on delete set null;
   end if;
 end $$;
 
@@ -354,7 +301,6 @@ create index if not exists idx_produits_mama_id on public.produits(mama_id);
 create index if not exists idx_produits_fournisseur_id on public.produits(fournisseur_id);
 create index if not exists idx_produits_unite_id on public.produits(unite_id);
 create index if not exists idx_produits_famille_id on public.produits(famille_id);
-create index if not exists idx_produits_sous_famille_id on public.produits(sous_famille_id);
 create index if not exists idx_roles_mama_id on public.roles(mama_id);
 create index if not exists idx_utilisateurs_mama_id on public.utilisateurs(mama_id);
 create index if not exists idx_commandes_mama_id on public.commandes(mama_id);
@@ -627,7 +573,6 @@ grant select, insert, update, delete on public.commande_lignes to authenticated;
 grant select, insert, update, delete on public.templates_commandes to authenticated;
 grant select, insert, update, delete on public.emails_envoyes to authenticated;
 grant select, insert, update on public.permissions to authenticated;
-grant select on public.utilisateurs_complets to authenticated;
 grant select, insert, update, delete on public.consentements_utilisateur to authenticated;
 grant execute on function public.create_utilisateur(text, text, uuid, uuid) to authenticated;
 grant execute on function public.calcul_ecarts_inventaire(date, text, uuid) to authenticated;
@@ -999,16 +944,59 @@ do $$ begin
   end if;
 end $$;
 grant select, insert, update, delete on public.fiche_cout_history to authenticated;
+create table if not exists public.fiches_techniques (
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid,
+  nom text,
+  type text,
+  famille text,
+  prix_vente numeric,
+  actif boolean default true,
+  created_at timestamptz default now()
+);
+create index if not exists idx_fiches_techniques_mama_id on public.fiches_techniques(mama_id);
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'fk_fiches_techniques_mama_id') then
+    alter table public.fiches_techniques
+      add constraint fk_fiches_techniques_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
+  end if;
+end $$;
+alter table public.fiches_techniques enable row level security;
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='fiches_techniques' and policyname='fiches_techniques_all') then
+    create policy fiches_techniques_all on public.fiches_techniques
+      for all using (mama_id = current_user_mama_id())
+      with check (mama_id = current_user_mama_id());
+  end if;
+end $$;
+grant select, insert, update, delete on public.fiches_techniques to authenticated;
 create table if not exists public.fiche_lignes (
   id uuid primary key default gen_random_uuid(),
+  fiche_id uuid,
+  produit_id uuid,
+  quantite numeric,
   mama_id uuid,
   created_at timestamptz default now()
 );
 create index if not exists idx_fiche_lignes_mama_id on public.fiche_lignes(mama_id);
+create index if not exists idx_fiche_lignes_fiche_id on public.fiche_lignes(fiche_id);
+create index if not exists idx_fiche_lignes_produit_id on public.fiche_lignes(produit_id);
 do $$ begin
   if not exists (select 1 from pg_constraint where conname = 'fk_fiche_lignes_mama_id') then
     alter table public.fiche_lignes
       add constraint fk_fiche_lignes_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'fk_fiche_lignes_fiche_id') then
+    alter table public.fiche_lignes
+      add constraint fk_fiche_lignes_fiche_id foreign key (fiche_id) references public.fiches_techniques(id) on delete cascade;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'fk_fiche_lignes_produit_id') then
+    alter table public.fiche_lignes
+      add constraint fk_fiche_lignes_produit_id foreign key (produit_id) references public.produits(id);
   end if;
 end $$;
 alter table public.fiche_lignes enable row level security;
@@ -1041,27 +1029,6 @@ do $$ begin
   end if;
 end $$;
 grant select, insert, update, delete on public.fiches to authenticated;
-create table if not exists public.fiches_techniques (
-  id uuid primary key default gen_random_uuid(),
-  mama_id uuid,
-  created_at timestamptz default now()
-);
-create index if not exists idx_fiches_techniques_mama_id on public.fiches_techniques(mama_id);
-do $$ begin
-  if not exists (select 1 from pg_constraint where conname = 'fk_fiches_techniques_mama_id') then
-    alter table public.fiches_techniques
-      add constraint fk_fiches_techniques_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
-  end if;
-end $$;
-alter table public.fiches_techniques enable row level security;
-do $$ begin
-  if not exists (select 1 from pg_policies where schemaname='public' and tablename='fiches_techniques' and policyname='fiches_techniques_all') then
-    create policy fiches_techniques_all on public.fiches_techniques
-      for all using (mama_id = current_user_mama_id())
-      with check (mama_id = current_user_mama_id());
-  end if;
-end $$;
-grant select, insert, update, delete on public.fiches_techniques to authenticated;
 create table if not exists public.fournisseur_contacts (
   id uuid primary key default gen_random_uuid(),
   mama_id uuid,
@@ -1269,6 +1236,27 @@ do $$ begin
   end if;
 end $$;
 grant select, insert, update, delete on public.inventaire_zones to authenticated;
+
+create table if not exists public.periodes_comptables (
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid references public.mamas(id),
+  debut date not null,
+  fin date not null,
+  actif boolean default true,
+  cloturee boolean default false,
+  created_at timestamptz default now()
+);
+create index if not exists idx_periodes_comptables_mama_id on public.periodes_comptables(mama_id);
+alter table public.periodes_comptables enable row level security;
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='periodes_comptables' and policyname='periodes_comptables_rls') then
+    create policy periodes_comptables_rls on public.periodes_comptables
+      for all using (mama_id = current_user_mama_id())
+      with check (mama_id = current_user_mama_id());
+  end if;
+end $$;
+grant select, insert, update, delete on public.periodes_comptables to authenticated;
+
 create table if not exists public.inventaires (
   id uuid primary key default gen_random_uuid(),
   mama_id uuid references public.mamas(id),
@@ -1579,25 +1567,6 @@ do $$ begin
   end if;
 end $$;
 grant select, insert, update, delete on public.parametres_commandes to authenticated;
-create table if not exists public.periodes_comptables (
-  id uuid primary key default gen_random_uuid(),
-  mama_id uuid references public.mamas(id),
-  debut date not null,
-  fin date not null,
-  actif boolean default true,
-  cloturee boolean default false,
-  created_at timestamptz default now()
-);
-create index if not exists idx_periodes_comptables_mama_id on public.periodes_comptables(mama_id);
-alter table public.periodes_comptables enable row level security;
-do $$ begin
-  if not exists (select 1 from pg_policies where schemaname='public' and tablename='periodes_comptables' and policyname='periodes_comptables_rls') then
-    create policy periodes_comptables_rls on public.periodes_comptables
-      for all using (mama_id = current_user_mama_id())
-      with check (mama_id = current_user_mama_id());
-  end if;
-end $$;
-grant select, insert, update, delete on public.periodes_comptables to authenticated;
 create table if not exists public.pertes (
   id uuid primary key default gen_random_uuid(),
   mama_id uuid,
@@ -1703,6 +1672,113 @@ do $$ begin
   end if;
 end $$;
 grant select, insert, update, delete on public.regles_alertes to authenticated;
+
+-- Zones de stock
+create table if not exists public.zones_stock (
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid not null references public.mamas(id) on delete cascade,
+  nom text not null,
+  code text,
+  type text not null check (type in ('cave','shop','cuisine','bar','entrepot','autre')),
+  parent_id uuid references public.zones_stock(id) on delete set null,
+  actif boolean default true,
+  position int default 0,
+  adresse text,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  unique (mama_id, nom)
+);
+create index if not exists idx_zones_mama_pos on public.zones_stock(mama_id, position);
+create index if not exists idx_zones_parent on public.zones_stock(parent_id);
+
+-- Droits par utilisateur
+create table if not exists public.zones_droits (
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid not null references public.mamas(id) on delete cascade,
+  zone_id uuid not null references public.zones_stock(id) on delete cascade,
+  user_id uuid not null,
+  lecture boolean default true,
+  ecriture boolean default false,
+  transfert boolean default false,
+  requisition boolean default false,
+  created_at timestamptz default now(),
+  unique (mama_id, zone_id, user_id)
+);
+create index if not exists idx_zones_droits_zone on public.zones_droits(zone_id);
+create index if not exists idx_zones_droits_user on public.zones_droits(user_id);
+
+-- Row Level Security
+alter table public.zones_stock enable row level security;
+alter table public.zones_droits enable row level security;
+
+drop policy if exists zones_stock_all on public.zones_stock;
+drop policy if exists zones_stock_select on public.zones_stock;
+create policy zones_stock_select on public.zones_stock
+  for select using (
+    mama_id = current_user_mama_id()
+    and exists (
+      select 1 from public.zones_droits zd
+      where zd.zone_id = zones_stock.id
+        and zd.user_id = auth.uid()
+        and zd.lecture = true
+        and zd.mama_id = zones_stock.mama_id
+    )
+  );
+drop policy if exists zones_stock_admin_iud on public.zones_stock;
+create policy zones_stock_admin_iud on public.zones_stock
+  for all using (mama_id = current_user_mama_id() and current_user_is_admin_or_manager())
+  with check (mama_id = current_user_mama_id() and current_user_is_admin_or_manager());
+
+drop policy if exists zones_droits_admin_all on public.zones_droits;
+create policy zones_droits_admin_all on public.zones_droits
+  for all using (mama_id = current_user_mama_id() and current_user_is_admin())
+  with check (mama_id = current_user_mama_id() and current_user_is_admin());
+
+grant select, insert, update, delete on public.zones_stock, public.zones_droits to authenticated;
+
+do $$ begin
+  if not exists (select 1 from pg_trigger where tgname = 'set_ts_zones') then
+    create trigger set_ts_zones before update on public.zones_stock
+    for each row execute procedure public.trg_set_timestamp();
+  end if;
+end $$;
+
+-- RPC Functions
+create or replace function public.can_access_zone(p_zone uuid, p_mode text default 'lecture')
+returns boolean
+language sql stable security definer
+as $$
+  select case
+    when p_mode = 'lecture' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and lecture=true)
+    when p_mode = 'ecriture' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and ecriture=true)
+    when p_mode = 'transfert' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and transfert=true)
+    when p_mode = 'requisition' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and requisition=true)
+      else false end;
+$$;
+grant execute on function public.can_access_zone(uuid, text) to authenticated;
+
+create or replace function public.can_transfer(p_src uuid, p_dst uuid)
+returns boolean
+language sql stable security definer
+as $$
+  select
+    (select public.can_access_zone(p_src, 'transfert')) and
+    (select public.can_access_zone(p_dst, 'transfert'));
+$$;
+grant execute on function public.can_transfer(uuid, uuid) to authenticated;
+
+create or replace function public.zone_is_cave_or_shop(p_zone uuid)
+returns boolean
+language sql stable security definer
+as $$
+  select exists(
+    select 1 from public.zones_stock z
+    where z.id = p_zone
+      and z.type in ('cave','shop')
+  );
+$$;
+grant execute on function public.zone_is_cave_or_shop(uuid) to authenticated;
+
 create table if not exists public.requisitions (
   id uuid primary key default gen_random_uuid(),
   mama_id uuid references public.mamas(id),
@@ -1717,6 +1793,7 @@ create table if not exists public.requisitions (
 create index if not exists idx_requisitions_mama_id on public.requisitions(mama_id);
 create index if not exists idx_requisitions_zone on public.requisitions(zone_id);
 alter table public.requisitions enable row level security;
+drop policy if exists requisitions_select on public.requisitions;
 create policy requisitions_select on public.requisitions for select using (mama_id = current_user_mama_id());
 drop policy if exists requisitions_insert on public.requisitions;
 create policy requisitions_insert on public.requisitions
@@ -1727,7 +1804,9 @@ for insert with check (
     where z.id = zone_id and z.mama_id = mama_id and z.type in ('cave','shop')
   )
 );
+drop policy if exists requisitions_update on public.requisitions;
 create policy requisitions_update on public.requisitions for update using (mama_id = current_user_mama_id());
+drop policy if exists requisitions_delete on public.requisitions;
 create policy requisitions_delete on public.requisitions for delete using (mama_id = current_user_mama_id());
 grant select, insert, update, delete on public.requisitions to authenticated;
 
@@ -1883,27 +1962,6 @@ do $$ begin
   end if;
 end $$;
 grant select, insert, update, delete on public.tooltips to authenticated;
-create table if not exists public.transfert_lignes (
-  id uuid primary key default gen_random_uuid(),
-  mama_id uuid,
-  created_at timestamptz default now()
-);
-create index if not exists idx_transfert_lignes_mama_id on public.transfert_lignes(mama_id);
-do $$ begin
-  if not exists (select 1 from pg_constraint where conname = 'fk_transfert_lignes_mama_id') then
-    alter table public.transfert_lignes
-      add constraint fk_transfert_lignes_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
-  end if;
-end $$;
-alter table public.transfert_lignes enable row level security;
-do $$ begin
-  if not exists (select 1 from pg_policies where schemaname='public' and tablename='transfert_lignes' and policyname='transfert_lignes_all') then
-    create policy transfert_lignes_all on public.transfert_lignes
-      for all using (mama_id = current_user_mama_id())
-      with check (mama_id = current_user_mama_id());
-  end if;
-end $$;
-grant select, insert, update, delete on public.transfert_lignes to authenticated;
 create table if not exists public.transferts (
   id uuid primary key default gen_random_uuid(),
   mama_id uuid,
@@ -1925,6 +1983,44 @@ do $$ begin
   end if;
 end $$;
 grant select, insert, update, delete on public.transferts to authenticated;
+create table if not exists public.transfert_lignes (
+  id uuid primary key default gen_random_uuid(),
+  transfert_id uuid,
+  produit_id uuid,
+  quantite numeric,
+  mama_id uuid,
+  created_at timestamptz default now()
+);
+create index if not exists idx_transfert_lignes_mama_id on public.transfert_lignes(mama_id);
+create index if not exists idx_transfert_lignes_transfert_id on public.transfert_lignes(transfert_id);
+create index if not exists idx_transfert_lignes_produit_id on public.transfert_lignes(produit_id);
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'fk_transfert_lignes_mama_id') then
+    alter table public.transfert_lignes
+      add constraint fk_transfert_lignes_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'fk_transfert_lignes_transfert_id') then
+    alter table public.transfert_lignes
+      add constraint fk_transfert_lignes_transfert_id foreign key (transfert_id) references public.transferts(id) on delete cascade;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'fk_transfert_lignes_produit_id') then
+    alter table public.transfert_lignes
+      add constraint fk_transfert_lignes_produit_id foreign key (produit_id) references public.produits(id);
+  end if;
+end $$;
+alter table public.transfert_lignes enable row level security;
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='transfert_lignes' and policyname='transfert_lignes_all') then
+    create policy transfert_lignes_all on public.transfert_lignes
+      for all using (mama_id = current_user_mama_id())
+      with check (mama_id = current_user_mama_id());
+  end if;
+end $$;
+grant select, insert, update, delete on public.transfert_lignes to authenticated;
 create table if not exists public.unites (
   id uuid primary key default gen_random_uuid(),
   mama_id uuid not null,
@@ -2054,108 +2150,63 @@ do $$ begin
 end $$;
 grant select, insert, update, delete on public.ventes_fiches_carte to authenticated;
 
--- Zones de stock
-create table if not exists public.zones_stock (
-  id uuid primary key default gen_random_uuid(),
-  mama_id uuid not null references public.mamas(id) on delete cascade,
-  nom text not null,
-  code text,
-  type text not null check (type in ('cave','shop','cuisine','bar','entrepot','autre')),
-  parent_id uuid references public.zones_stock(id) on delete set null,
-  actif boolean default true,
-  position int default 0,
-  adresse text,
-  created_at timestamptz default now(),
-  updated_at timestamptz default now(),
-  unique (mama_id, nom)
-);
-create index if not exists idx_zones_mama_pos on public.zones_stock(mama_id, position);
-create index if not exists idx_zones_parent on public.zones_stock(parent_id);
-
--- Droits par utilisateur
-create table if not exists public.zones_droits (
-  id uuid primary key default gen_random_uuid(),
-  mama_id uuid not null references public.mamas(id) on delete cascade,
-  zone_id uuid not null references public.zones_stock(id) on delete cascade,
-  user_id uuid not null,
-  lecture boolean default true,
-  ecriture boolean default false,
-  transfert boolean default false,
-  requisition boolean default false,
-  created_at timestamptz default now(),
-  unique (mama_id, zone_id, user_id)
-);
-create index if not exists idx_zones_droits_zone on public.zones_droits(zone_id);
-create index if not exists idx_zones_droits_user on public.zones_droits(user_id);
-
--- Row Level Security
-alter table public.zones_stock enable row level security;
-alter table public.zones_droits enable row level security;
-
-drop policy if exists zones_stock_all on public.zones_stock;
-create policy zones_stock_select on public.zones_stock
-  for select using (
-    mama_id = current_user_mama_id()
-    and exists (
-      select 1 from public.zones_droits zd
-      where zd.zone_id = zones_stock.id
-        and zd.user_id = auth.uid()
-        and zd.lecture = true
-        and zd.mama_id = zones_stock.mama_id
-    )
-  );
-create policy zones_stock_admin_iud on public.zones_stock
-  for all using (mama_id = current_user_mama_id() and current_user_is_admin_or_manager())
-  with check (mama_id = current_user_mama_id() and current_user_is_admin_or_manager());
-
-create policy zones_droits_admin_all on public.zones_droits
-  for all using (mama_id = current_user_mama_id() and current_user_is_admin())
-  with check (mama_id = current_user_mama_id() and current_user_is_admin());
-
-grant select, insert, update, delete on public.zones_stock, public.zones_droits to authenticated;
-
+-- FK safety for produits
 do $$ begin
-  if not exists (select 1 from pg_trigger where tgname = 'set_ts_zones') then
-    create trigger set_ts_zones before update on public.zones_stock
-    for each row execute procedure public.trg_set_timestamp();
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema='public' and table_name='produits' and column_name='sous_famille_id'
+  ) then
+    alter table public.produits add column sous_famille_id uuid;
+  end if;
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema='public' and table_name='produits' and column_name='zone_id'
+  ) then
+    alter table public.produits add column zone_id uuid;
   end if;
 end $$;
 
--- RPC Functions
-create or replace function public.can_access_zone(p_zone uuid, p_mode text default 'lecture')
-returns boolean
-language sql stable security definer
-as $$
-  select case
-    when p_mode = 'lecture' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and lecture=true)
-    when p_mode = 'ecriture' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and ecriture=true)
-    when p_mode = 'transfert' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and transfert=true)
-    when p_mode = 'requisition' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and requisition=true)
-      else false end;
-$$;
-grant execute on function public.can_access_zone(uuid, text) to authenticated;
+-- Foreign keys for produits
+do $$ begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'fk_produits_zone_id'
+  ) then
+    alter table public.produits
+      add constraint fk_produits_zone_id
+      foreign key (zone_id) references public.zones_stock(id) on delete set null;
+  end if;
+end $$;
 
-create or replace function public.can_transfer(p_src uuid, p_dst uuid)
-returns boolean
-language sql stable security definer
-as $$
-  select
-    (select public.can_access_zone(p_src, 'transfert')) and
-    (select public.can_access_zone(p_dst, 'transfert'));
-$$;
-grant execute on function public.can_transfer(uuid, uuid) to authenticated;
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'fk_produits_fournisseur_id') then
+    alter table public.produits
+      add constraint fk_produits_fournisseur_id foreign key (fournisseur_id) references public.fournisseurs(id) on delete set null;
+  end if;
+end $$;
 
-create or replace function public.zone_is_cave_or_shop(p_zone uuid)
-returns boolean
-language sql stable security definer
-as $$
-  select exists(
-    select 1 from public.zones_stock z
-    where z.id = p_zone
-      and z.type in ('cave','shop')
-  );
-$$;
-grant execute on function public.zone_is_cave_or_shop(uuid) to authenticated;
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'fk_produits_unite_id') then
+    alter table public.produits
+      add constraint fk_produits_unite_id foreign key (unite_id) references public.unites(id) on delete set null;
+  end if;
+end $$;
+
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'fk_produits_famille_id') then
+    alter table public.produits
+      add constraint fk_produits_famille_id foreign key (famille_id) references public.familles(id) on delete set null;
+  end if;
+end $$;
+
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'fk_produits_sous_famille_id') then
+    alter table public.produits
+      add constraint fk_produits_sous_famille_id foreign key (sous_famille_id) references public.sous_familles(id) on delete set null;
+  end if;
+end $$;
+
+create index if not exists idx_produits_zone_id on public.produits(zone_id);
+create index if not exists idx_produits_sous_famille_id on public.produits(sous_famille_id);
 
 -- 8. Views
 create or replace view public.utilisateurs_complets (
@@ -2169,6 +2220,8 @@ from public.utilisateurs u
 left join public.roles r on r.id = u.role_id;
 
 -- Additional Views
+grant select on public.utilisateurs_complets to authenticated;
+
 create or replace view public.v_achats_mensuels as
 select
   mama_id,
@@ -2179,6 +2232,50 @@ select
 from public.achats
 where actif = true
 group by mama_id, date_trunc('month', date_achat)::date;
+create or replace view public.v_products_last_price as
+select
+  p.id as produit_id,
+  p.mama_id,
+  p.famille_id,
+  p.unite_id,
+  (
+    select a.prix
+    from public.achats a
+    where a.produit_id=p.id and a.mama_id=p.mama_id and a.actif is true
+    order by a.date_achat desc
+    limit 1
+  ) as dernier_prix
+from public.produits p;
+create or replace view public.v_stocks as
+with base as (
+  select p.id produit_id, p.mama_id, 0::numeric as stock from public.produits p
+),
+achats as (
+  select a.produit_id, a.mama_id, sum(a.quantite) as q
+  from public.achats a
+  where a.actif is true
+  group by 1,2
+),
+transferts_plus as (
+  select tl.produit_id, t.mama_id, sum(tl.quantite) as q
+  from public.transferts t
+  join public.transfert_lignes tl on tl.transfert_id = t.id
+  group by 1,2
+),
+requis_moins as (
+  select rl.produit_id, r.mama_id, sum(rl.quantite) as q
+  from public.requisition_lignes rl
+  join public.requisitions r on r.id = rl.requisition_id
+  where r.statut = 'réalisée'
+  group by 1,2
+)
+select
+  b.mama_id, b.produit_id,
+  coalesce(a.q,0) + coalesce(tp.q,0) - coalesce(rm.q,0) as stock
+from base b
+left join achats a on a.produit_id=b.produit_id and a.mama_id=b.mama_id
+left join transferts_plus tp on tp.produit_id=b.produit_id and tp.mama_id=b.mama_id
+left join requis_moins rm on rm.produit_id=b.produit_id and rm.mama_id=b.mama_id;
 create or replace view public.v_analytique_stock as
 select
   p.famille_id,
@@ -2197,6 +2294,16 @@ select
   greatest(p.stock_min - coalesce(s.stock,0),0) as quantite
 from public.produits p
 left join public.v_stocks s on s.produit_id = p.id and s.mama_id = p.mama_id;
+create or replace view public.v_couts_fiches as
+select
+  f.id as fiche_id,
+  f.mama_id,
+  1::numeric as portions,
+  coalesce(sum(vplp.dernier_prix * coalesce(fl.quantite,0)),0) as cout
+from public.fiches_techniques f
+left join public.fiche_lignes fl on fl.mama_id=f.mama_id and fl.fiche_id=f.id
+left join public.v_products_last_price vplp on vplp.produit_id=fl.produit_id and vplp.mama_id=f.mama_id
+group by f.id, f.mama_id;
 create or replace view public.v_boissons as
 select
   f.id,
@@ -2263,20 +2370,6 @@ select
 from public.achats
 where actif = true
 group by mama_id, produit_id;
-create or replace view public.v_products_last_price as
-select
-  p.id as produit_id,
-  p.mama_id,
-  p.famille_id,
-  p.unite_id,
-  (
-    select a.prix
-    from public.achats a
-    where a.produit_id=p.id and a.mama_id=p.mama_id and a.actif is true
-    order by a.date_achat desc
-    limit 1
-  ) as dernier_prix
-from public.produits p;
 create or replace view public.v_produits_dernier_prix as
 select
   p.id,
@@ -2384,36 +2477,6 @@ join public.produits p on p.id = rl.produit_id
 where r.statut = 'faite'
 group by rl.produit_id, p.stock_reel, p.stock_min
 having (p.stock_reel - sum(rl.quantite)) < p.stock_min;
-create or replace view public.v_stocks as
-with base as (
-  select p.id produit_id, p.mama_id, 0::numeric as stock from public.produits p
-),
-achats as (
-  select a.produit_id, a.mama_id, sum(a.quantite) as q
-  from public.achats a
-  where a.actif is true
-  group by 1,2
-),
-transferts_plus as (
-  select tl.produit_id, t.mama_id, sum(tl.quantite) as q
-  from public.transferts t
-  join public.transfert_lignes tl on tl.transfert_id = t.id
-  group by 1,2
-),
-requis_moins as (
-  select rl.produit_id, r.mama_id, sum(rl.quantite) as q
-  from public.requisition_lignes rl
-  join public.requisitions r on r.id = rl.requisition_id
-  where r.statut = 'réalisée'
-  group by 1,2
-)
-select
-  b.mama_id, b.produit_id,
-  coalesce(a.q,0) + coalesce(tp.q,0) - coalesce(rm.q,0) as stock
-from base b
-left join achats a on a.produit_id=b.produit_id and a.mama_id=b.mama_id
-left join transferts_plus tp on tp.produit_id=b.produit_id and tp.mama_id=b.mama_id
-left join requis_moins rm on rm.produit_id=b.produit_id and rm.mama_id=b.mama_id;
 create or replace view public.v_taches_assignees as
 select t.id as tache_id, t.mama_id, null::uuid as utilisateur_id, null::text as utilisateur_nom
 from public.taches t;
@@ -2436,16 +2499,6 @@ from public.achats a
 where a.actif is true
   and a.date_achat >= current_date - interval '12 months'
 group by a.mama_id, a.fournisseur_id;
-create or replace view public.v_couts_fiches as
-select
-  f.id as fiche_id,
-  f.mama_id,
-  1::numeric as portions,
-  coalesce(sum(vplp.dernier_prix * coalesce(fl.quantite,0)),0) as cout
-from public.fiches_techniques f
-left join public.fiche_lignes fl on fl.mama_id=f.mama_id and fl.fiche_id=f.id
-left join public.v_products_last_price vplp on vplp.produit_id=fl.produit_id and vplp.mama_id=f.mama_id
-group by f.id, f.mama_id;
 grant select on public.v_achats_mensuels to authenticated;
 grant select on public.v_analytique_stock to authenticated;
 grant select on public.v_besoins_previsionnels to authenticated;

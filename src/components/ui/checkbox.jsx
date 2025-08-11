@@ -9,7 +9,7 @@ export function Checkbox({ checked, onChange, className = '', ...props }) {
       onChange={onChange}
       className={`h-4 w-4 rounded border-white/20 bg-white/10 text-mamastockGold focus:ring-mamastockGold ${className}`}
       {...props}
-    />
+      id="fld-field-gk8a" />
   );
 }
 

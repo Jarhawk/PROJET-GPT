@@ -1,31 +1,22 @@
 module.exports = {
   root: true,
-  env: { es2023: true, browser: true, node: true },
-  parserOptions: { ecmaVersion: 2023, sourceType: "module", ecmaFeatures: { jsx: true } },
+  parser: '@typescript-eslint/parser',
+  parserOptions: {
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+    ecmaFeatures: { jsx: true },
+    project: ['./tsconfig.json'],
+  },
+  settings: { react: { version: 'detect' } },
+  plugins: ['react', 'react-hooks', '@typescript-eslint'],
   extends: [
-    "eslint:recommended",
-    "plugin:react/recommended",
-    "plugin:react/jsx-runtime",
-    "plugin:react-hooks/recommended",
-    "plugin:jsx-a11y/recommended",
-    "prettier"
+    'eslint:recommended',
+    'plugin:react/recommended',
+    'plugin:react-hooks/recommended',
+    'plugin:@typescript-eslint/recommended',
   ],
-  plugins: ["react", "react-hooks", "react-refresh", "jsx-a11y"],
-  settings: { react: { version: "detect" } },
   rules: {
-    // React Fast Refresh
-    "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
-
-    // Échapper les apostrophes/quotes dans JSX
-    "react/no-unescaped-entities": "off",
-    "no-irregular-whitespace": "warn",
-
-    // Hygiène
-    "no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
-    "react/prop-types": "off",
-
-    // Accessibilité
-    "jsx-a11y/label-has-for": "off",
-    "jsx-a11y/label-has-associated-control": ["error", { assert: "either" }]
-  }
+    'no-control-regex': 'off', // (temporaire si besoin)
+  },
+  ignorePatterns: ['dist/', 'node_modules/', 'vite.config.*', 'scripts/'],
 };

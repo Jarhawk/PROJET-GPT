@@ -31,7 +31,8 @@
     "schema:repair": "node scripts/repairSchema.js",
     "schema:repair:apply": "SCHEMA_APPLY=1 node scripts/repairSchema.js",
     "fix:fe": "node scripts/fixFrontend.js",
-    "fix:fe:write": "node scripts/fixFrontend.js --write"
+    "fix:fe:write": "node scripts/fixFrontend.js --write",
+    "schema:analyze": "node scripts/analyzeFrontBackend.js"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.14",

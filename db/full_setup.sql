@@ -377,6 +377,7 @@ begin
   return new;
 end;
 $$ language plpgsql;
+grant execute on function public.trg_set_timestamp() to authenticated;
 
 create or replace function public.current_user_mama_id()
 returns uuid
@@ -2130,8 +2131,9 @@ as $$
     when p_mode = 'ecriture' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and ecriture=true)
     when p_mode = 'transfert' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and transfert=true)
     when p_mode = 'requisition' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and requisition=true)
-    else false end;
+      else false end;
 $$;
+grant execute on function public.can_access_zone(uuid, text) to authenticated;
 
 create or replace function public.can_transfer(p_src uuid, p_dst uuid)
 returns boolean
@@ -2141,6 +2143,7 @@ as $$
     (select public.can_access_zone(p_src, 'transfert')) and
     (select public.can_access_zone(p_dst, 'transfert'));
 $$;
+grant execute on function public.can_transfer(uuid, uuid) to authenticated;
 
 create or replace function public.zone_is_cave_or_shop(p_zone uuid)
 returns boolean
@@ -2152,6 +2155,7 @@ as $$
       and z.type in ('cave','shop')
   );
 $$;
+grant execute on function public.zone_is_cave_or_shop(uuid) to authenticated;
 
 -- 8. Views
 create or replace view public.utilisateurs_complets (
@@ -3128,6 +3132,7 @@ begin
 
   return new;
 end $$ language plpgsql;
+grant execute on function public.sync_pivot_from_produits() to authenticated;
 
 do $$ begin
   if not exists (select 1 from pg_trigger where tgname = 'trg_prod_sync_zone') then
@@ -3148,6 +3153,7 @@ begin
   end if;
   return new;
 end $$ language plpgsql;
+grant execute on function public.sync_produits_from_pivot() to authenticated;
 
 do $$ begin
   if not exists (select 1 from pg_trigger where tgname = 'trg_pz_sync_prod') then

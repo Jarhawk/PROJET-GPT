@@ -1,19 +1,13 @@
 import fs from 'fs/promises';
 import glob from 'glob';
 import { promisify } from 'util';
-import recast from 'recast';
-import * as babelParser from '@babel/parser';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+const parser = require('@babel/parser');
+const traverse = require('@babel/traverse').default;
 
 const globAsync = promisify(glob);
-
-const parser = {
-  parse(source) {
-    return babelParser.parse(source, {
-      sourceType: 'module',
-      plugins: ['jsx', 'typescript'],
-    });
-  },
-};
 
 function isMember(node, name) {
   return (
@@ -93,13 +87,16 @@ async function scanFront() {
     const code = await fs.readFile(file, 'utf8');
     let ast;
     try {
-      ast = recast.parse(code, { parser });
+      ast = parser.parse(code, {
+        sourceType: 'module',
+        plugins: ['jsx', 'typescript'],
+      });
     } catch (e) {
       console.warn('Parse error in', file, e.message);
       continue;
     }
-    recast.types.visit(ast, {
-      visitCallExpression(path) {
+    traverse(ast, {
+      CallExpression(path) {
         const node = path.node;
         if (isMember(node, 'rpc')) {
           const arg = node.arguments[0];
@@ -121,7 +118,6 @@ async function scanFront() {
             }
           }
         }
-        this.traverse(path);
       },
     });
   }

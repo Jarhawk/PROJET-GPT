@@ -371,22 +371,74 @@ create index if not exists idx_permissions_mama_id on public.permissions(mama_id
 create index if not exists idx_consentements_utilisateur_mama_id on public.consentements_utilisateur(mama_id);
 
 -- 5. Functions
-create or replace function public.trg_set_timestamp() returns trigger as $$
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'trg_set_timestamp'
+      AND pg_get_function_identity_arguments(p.oid) = ''
+  ) THEN
+    DROP FUNCTION public.trg_set_timestamp();
+  END IF;
+END$$;
+
+CREATE FUNCTION public.trg_set_timestamp()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
 begin
   new.updated_at = now();
   return new;
 end;
-$$ language plpgsql;
+$$;
 
-create or replace function public.current_user_mama_id()
-returns uuid
-language sql stable as $$
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'current_user_mama_id'
+      AND pg_get_function_identity_arguments(p.oid) = ''
+  ) THEN
+    DROP FUNCTION public.current_user_mama_id();
+  END IF;
+END$$;
+
+CREATE FUNCTION public.current_user_mama_id()
+RETURNS uuid
+LANGUAGE sql
+STABLE
+AS $$
   select u.mama_id from public.utilisateurs u where u.auth_id = auth.uid();
 $$;
 
-create or replace function public.current_user_is_admin_or_manager()
-returns boolean
-language sql stable as $$
+grant execute on function public.current_user_mama_id() to authenticated;
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'current_user_is_admin_or_manager'
+      AND pg_get_function_identity_arguments(p.oid) = ''
+  ) THEN
+    DROP FUNCTION public.current_user_is_admin_or_manager();
+  END IF;
+END$$;
+
+CREATE FUNCTION public.current_user_is_admin_or_manager()
+RETURNS boolean
+LANGUAGE sql
+STABLE
+AS $$
   select exists (
     select 1 from public.utilisateurs u
     join public.roles r on r.id = u.role_id
@@ -395,9 +447,27 @@ language sql stable as $$
   );
 $$;
 
-create or replace function public.current_user_is_admin()
-returns boolean
-language sql stable as $$
+grant execute on function public.current_user_is_admin_or_manager() to authenticated;
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'current_user_is_admin'
+      AND pg_get_function_identity_arguments(p.oid) = ''
+  ) THEN
+    DROP FUNCTION public.current_user_is_admin();
+  END IF;
+END$$;
+
+CREATE FUNCTION public.current_user_is_admin()
+RETURNS boolean
+LANGUAGE sql
+STABLE
+AS $$
   select public.current_user_is_admin_or_manager() and exists (
     select 1 from public.utilisateurs u
     join public.roles r on r.id = u.role_id
@@ -405,9 +475,27 @@ language sql stable as $$
   );
 $$;
 
-create or replace function public.get_template_commande(p_mama uuid, p_fournisseur uuid)
-returns setof public.templates_commandes
-language sql security definer as $$
+grant execute on function public.current_user_is_admin() to authenticated;
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'get_template_commande'
+      AND pg_get_function_identity_arguments(p.oid) = 'uuid, uuid'
+  ) THEN
+    DROP FUNCTION public.get_template_commande(uuid, uuid);
+  END IF;
+END$$;
+
+CREATE FUNCTION public.get_template_commande(p_mama uuid, p_fournisseur uuid)
+RETURNS SETOF public.templates_commandes
+LANGUAGE sql
+SECURITY DEFINER
+AS $$
   select *
   from public.templates_commandes
   where mama_id = p_mama
@@ -416,20 +504,32 @@ language sql security definer as $$
   order by fournisseur_id nulls last
   limit 1;
 $$;
+
 grant execute on function public.get_template_commande(uuid, uuid) to authenticated;
 
-grant execute on function public.current_user_mama_id() to authenticated;
-grant execute on function public.current_user_is_admin_or_manager() to authenticated;
-grant execute on function public.current_user_is_admin() to authenticated;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'create_utilisateur'
+      AND pg_get_function_identity_arguments(p.oid) = 'text, text, uuid, uuid'
+  ) THEN
+    DROP FUNCTION public.create_utilisateur(text, text, uuid, uuid);
+  END IF;
+END$$;
 
-create or replace function public.create_utilisateur(
+CREATE FUNCTION public.create_utilisateur(
   p_email text,
   p_nom text,
   p_role_id uuid,
   p_mama_id uuid
-) returns json
-language plpgsql
-security definer as $$
+) RETURNS json
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
 declare
   v_auth_id uuid;
   v_password text;
@@ -449,20 +549,51 @@ begin
   return json_build_object('success', true);
 exception when others then
   return json_build_object('success', false, 'error', SQLERRM);
-end;$$;
+end;
+$$;
 
-create or replace function public.calcul_ecarts_inventaire(p_date date, p_zone text, mama_id_param uuid)
-returns table(produit text, stock_theorique numeric, stock_reel numeric, ecart numeric, motif text)
-language plpgsql as $$
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'calcul_ecarts_inventaire'
+      AND pg_get_function_identity_arguments(p.oid) = 'date, text, uuid'
+  ) THEN
+    DROP FUNCTION public.calcul_ecarts_inventaire(date, text, uuid);
+  END IF;
+END$$;
+
+CREATE FUNCTION public.calcul_ecarts_inventaire(p_date date, p_zone text, mama_id_param uuid)
+RETURNS TABLE(produit text, stock_theorique numeric, stock_reel numeric, ecart numeric, motif text)
+LANGUAGE plpgsql
+AS $$
 begin
   raise notice 'TODO';
   return;
 end;
 $$;
 
-create or replace function public.fn_calc_budgets(mama_id_param uuid, periode_param text)
-returns table(famille text, ecart_pct numeric)
-language plpgsql as $$
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'fn_calc_budgets'
+      AND pg_get_function_identity_arguments(p.oid) = 'uuid, text'
+  ) THEN
+    DROP FUNCTION public.fn_calc_budgets(uuid, text);
+  END IF;
+END$$;
+
+CREATE FUNCTION public.fn_calc_budgets(mama_id_param uuid, periode_param text)
+RETURNS TABLE(famille text, ecart_pct numeric)
+LANGUAGE plpgsql
+AS $$
 begin
   raise notice 'TODO';
   return;
@@ -2121,10 +2252,26 @@ do $$ begin
 end $$;
 
 -- RPC Functions
-create or replace function public.can_access_zone(p_zone uuid, p_mode text default 'lecture')
-returns boolean
-language sql stable security definer
-as $$
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'can_access_zone'
+      AND pg_get_function_identity_arguments(p.oid) = 'uuid, text'
+  ) THEN
+    DROP FUNCTION public.can_access_zone(uuid, text);
+  END IF;
+END$$;
+
+CREATE FUNCTION public.can_access_zone(p_zone uuid, p_mode text default 'lecture')
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+AS $$
   select case
     when p_mode = 'lecture' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and lecture=true)
     when p_mode = 'ecriture' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and ecriture=true)
@@ -2133,19 +2280,51 @@ as $$
     else false end;
 $$;
 
-create or replace function public.can_transfer(p_src uuid, p_dst uuid)
-returns boolean
-language sql stable security definer
-as $$
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'can_transfer'
+      AND pg_get_function_identity_arguments(p.oid) = 'uuid, uuid'
+  ) THEN
+    DROP FUNCTION public.can_transfer(uuid, uuid);
+  END IF;
+END$$;
+
+CREATE FUNCTION public.can_transfer(p_src uuid, p_dst uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+AS $$
   select
     (select public.can_access_zone(p_src, 'transfert')) and
     (select public.can_access_zone(p_dst, 'transfert'));
 $$;
 
-create or replace function public.zone_is_cave_or_shop(p_zone uuid)
-returns boolean
-language sql stable security definer
-as $$
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'zone_is_cave_or_shop'
+      AND pg_get_function_identity_arguments(p.oid) = 'uuid'
+  ) THEN
+    DROP FUNCTION public.zone_is_cave_or_shop(uuid);
+  END IF;
+END$$;
+
+CREATE FUNCTION public.zone_is_cave_or_shop(p_zone uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+AS $$
   select exists(
     select 1 from public.zones_stock z
     where z.id = p_zone
@@ -2465,108 +2644,309 @@ grant select on public.v_couts_fiches to authenticated;
 grant select on public.v_performance_fiches to authenticated;
 
 -- 6.b Placeholder Functions
-create or replace function public.advanced_stats()
-returns void
-language plpgsql as $$
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'advanced_stats'
+      AND pg_get_function_identity_arguments(p.oid) = ''
+  ) THEN
+    DROP FUNCTION public.advanced_stats();
+  END IF;
+END$$;
+
+CREATE FUNCTION public.advanced_stats()
+RETURNS void
+LANGUAGE plpgsql
+AS $$
 begin
   raise notice 'TODO';
   return;
 end;
 $$;
+
 grant execute on function public.advanced_stats() to authenticated;
-create or replace function public.apply_stock_from_achat()
-returns void
-language plpgsql as $$
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'apply_stock_from_achat'
+      AND pg_get_function_identity_arguments(p.oid) = ''
+  ) THEN
+    DROP FUNCTION public.apply_stock_from_achat();
+  END IF;
+END$$;
+
+CREATE FUNCTION public.apply_stock_from_achat()
+RETURNS void
+LANGUAGE plpgsql
+AS $$
 begin
   raise notice 'TODO';
   return;
 end;
 $$;
+
 grant execute on function public.apply_stock_from_achat() to authenticated;
-create or replace function public.calcul_ecarts_inventaire()
-returns void
-language plpgsql as $$
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'calcul_ecarts_inventaire'
+      AND pg_get_function_identity_arguments(p.oid) = ''
+  ) THEN
+    DROP FUNCTION public.calcul_ecarts_inventaire();
+  END IF;
+END$$;
+
+CREATE FUNCTION public.calcul_ecarts_inventaire()
+RETURNS void
+LANGUAGE plpgsql
+AS $$
 begin
   raise notice 'TODO';
   return;
 end;
 $$;
+
 grant execute on function public.calcul_ecarts_inventaire() to authenticated;
-create or replace function public.compare_fiche()
-returns void
-language plpgsql as $$
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'compare_fiche'
+      AND pg_get_function_identity_arguments(p.oid) = ''
+  ) THEN
+    DROP FUNCTION public.compare_fiche();
+  END IF;
+END$$;
+
+CREATE FUNCTION public.compare_fiche()
+RETURNS void
+LANGUAGE plpgsql
+AS $$
 begin
   raise notice 'TODO';
   return;
 end;
 $$;
+
 grant execute on function public.compare_fiche() to authenticated;
-create or replace function public.consolidated_stats()
-returns void
-language plpgsql as $$
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'consolidated_stats'
+      AND pg_get_function_identity_arguments(p.oid) = ''
+  ) THEN
+    DROP FUNCTION public.consolidated_stats();
+  END IF;
+END$$;
+
+CREATE FUNCTION public.consolidated_stats()
+RETURNS void
+LANGUAGE plpgsql
+AS $$
 begin
   raise notice 'TODO';
   return;
 end;
 $$;
+
 grant execute on function public.consolidated_stats() to authenticated;
-create or replace function public.dashboard_stats()
-returns void
-language plpgsql as $$
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'dashboard_stats'
+      AND pg_get_function_identity_arguments(p.oid) = ''
+  ) THEN
+    DROP FUNCTION public.dashboard_stats();
+  END IF;
+END$$;
+
+CREATE FUNCTION public.dashboard_stats()
+RETURNS void
+LANGUAGE plpgsql
+AS $$
 begin
   raise notice 'TODO';
   return;
 end;
 $$;
+
 grant execute on function public.dashboard_stats() to authenticated;
-create or replace function public.disable_two_fa()
-returns void
-language plpgsql as $$
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'disable_two_fa'
+      AND pg_get_function_identity_arguments(p.oid) = ''
+  ) THEN
+    DROP FUNCTION public.disable_two_fa();
+  END IF;
+END$$;
+
+CREATE FUNCTION public.disable_two_fa()
+RETURNS void
+LANGUAGE plpgsql
+AS $$
 begin
   raise notice 'TODO';
   return;
 end;
 $$;
+
 grant execute on function public.disable_two_fa() to authenticated;
-create or replace function public.enable_two_fa()
-returns void
-language plpgsql as $$
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'enable_two_fa'
+      AND pg_get_function_identity_arguments(p.oid) = ''
+  ) THEN
+    DROP FUNCTION public.enable_two_fa();
+  END IF;
+END$$;
+
+CREATE FUNCTION public.enable_two_fa()
+RETURNS void
+LANGUAGE plpgsql
+AS $$
 begin
   raise notice 'TODO';
   return;
 end;
 $$;
+
 grant execute on function public.enable_two_fa() to authenticated;
-create or replace function public.import_invoice()
-returns void
-language plpgsql as $$
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'import_invoice'
+      AND pg_get_function_identity_arguments(p.oid) = ''
+  ) THEN
+    DROP FUNCTION public.import_invoice();
+  END IF;
+END$$;
+
+CREATE FUNCTION public.import_invoice()
+RETURNS void
+LANGUAGE plpgsql
+AS $$
 begin
   raise notice 'TODO';
   return;
 end;
 $$;
+
 grant execute on function public.import_invoice() to authenticated;
-create or replace function public.send_email_notification()
-returns void
-language plpgsql as $$
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'send_email_notification'
+      AND pg_get_function_identity_arguments(p.oid) = ''
+  ) THEN
+    DROP FUNCTION public.send_email_notification();
+  END IF;
+END$$;
+
+CREATE FUNCTION public.send_email_notification()
+RETURNS void
+LANGUAGE plpgsql
+AS $$
 begin
   raise notice 'TODO';
   return;
 end;
 $$;
+
 grant execute on function public.send_email_notification() to authenticated;
-create or replace function public.send_notification_webhook()
-returns void
-language plpgsql as $$
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'send_notification_webhook'
+      AND pg_get_function_identity_arguments(p.oid) = ''
+  ) THEN
+    DROP FUNCTION public.send_notification_webhook();
+  END IF;
+END$$;
+
+CREATE FUNCTION public.send_notification_webhook()
+RETURNS void
+LANGUAGE plpgsql
+AS $$
 begin
   raise notice 'TODO';
   return;
 end;
 $$;
+
 grant execute on function public.send_notification_webhook() to authenticated;
-create or replace function public.stats_achats_fournisseur(mama_id_param uuid, fournisseur_id_param uuid)
-returns table(mois date, total_achats numeric)
-language sql as $$
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'stats_achats_fournisseur'
+      AND pg_get_function_identity_arguments(p.oid) = 'uuid, uuid'
+  ) THEN
+    DROP FUNCTION public.stats_achats_fournisseur(uuid, uuid);
+  END IF;
+END$$;
+
+CREATE FUNCTION public.stats_achats_fournisseur(mama_id_param uuid, fournisseur_id_param uuid)
+RETURNS TABLE(mois date, total_achats numeric)
+LANGUAGE sql
+AS $$
   select
     date_trunc('month', date_achat)::date as mois,
     sum(quantite * prix) as total_achats
@@ -2577,10 +2957,27 @@ language sql as $$
   group by date_trunc('month', date_achat)::date
   order by mois;
 $$;
+
 grant execute on function public.stats_achats_fournisseur(uuid, uuid) to authenticated;
-create or replace function public.stats_achats_fournisseurs(mama_id_param uuid)
-returns table(mois date, total_achats numeric)
-language sql as $$
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'stats_achats_fournisseurs'
+      AND pg_get_function_identity_arguments(p.oid) = 'uuid'
+  ) THEN
+    DROP FUNCTION public.stats_achats_fournisseurs(uuid);
+  END IF;
+END$$;
+
+CREATE FUNCTION public.stats_achats_fournisseurs(mama_id_param uuid)
+RETURNS TABLE(mois date, total_achats numeric)
+LANGUAGE sql
+AS $$
   select
     date_trunc('month', date_achat)::date as mois,
     sum(quantite * prix) as total_achats
@@ -2590,42 +2987,110 @@ language sql as $$
   group by date_trunc('month', date_achat)::date
   order by mois;
 $$;
+
 grant execute on function public.stats_achats_fournisseurs(uuid) to authenticated;
-create or replace function public.stats_cost_centers()
-returns void
-language plpgsql as $$
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'stats_cost_centers'
+      AND pg_get_function_identity_arguments(p.oid) = ''
+  ) THEN
+    DROP FUNCTION public.stats_cost_centers();
+  END IF;
+END$$;
+
+CREATE FUNCTION public.stats_cost_centers()
+RETURNS void
+LANGUAGE plpgsql
+AS $$
 begin
   raise notice 'TODO';
   return;
 end;
 $$;
+
 grant execute on function public.stats_cost_centers() to authenticated;
-create or replace function public.stats_multi_mamas()
-returns void
-language plpgsql as $$
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'stats_multi_mamas'
+      AND pg_get_function_identity_arguments(p.oid) = ''
+  ) THEN
+    DROP FUNCTION public.stats_multi_mamas();
+  END IF;
+END$$;
+
+CREATE FUNCTION public.stats_multi_mamas()
+RETURNS void
+LANGUAGE plpgsql
+AS $$
 begin
   raise notice 'TODO';
   return;
 end;
 $$;
+
 grant execute on function public.stats_multi_mamas() to authenticated;
-create or replace function public.stats_rotation_produit()
-returns void
-language plpgsql as $$
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'stats_rotation_produit'
+      AND pg_get_function_identity_arguments(p.oid) = ''
+  ) THEN
+    DROP FUNCTION public.stats_rotation_produit();
+  END IF;
+END$$;
+
+CREATE FUNCTION public.stats_rotation_produit()
+RETURNS void
+LANGUAGE plpgsql
+AS $$
 begin
   raise notice 'TODO';
   return;
 end;
 $$;
+
 grant execute on function public.stats_rotation_produit() to authenticated;
-create or replace function public.top_produits(
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'top_produits'
+      AND pg_get_function_identity_arguments(p.oid) = 'uuid, date, date, integer'
+  ) THEN
+    DROP FUNCTION public.top_produits(uuid, date, date, integer);
+  END IF;
+END$$;
+
+CREATE FUNCTION public.top_produits(
   mama_id_param uuid,
   debut_param date,
   fin_param date,
   limit_param integer
 )
-returns table(produit_id uuid, nom text, total numeric)
-language sql as $$
+RETURNS TABLE(produit_id uuid, nom text, total numeric)
+LANGUAGE sql
+AS $$
   select
     rl.produit_id,
     p.nom,
@@ -2641,6 +3106,7 @@ language sql as $$
   order by total desc
   limit coalesce(limit_param, 10);
 $$;
+
 grant execute on function public.top_produits(uuid, date, date, integer) to authenticated;
 
 
@@ -2922,22 +3388,37 @@ create policy ventes_import_staging_all on public.ventes_import_staging for all 
 grant select, insert, update, delete on public.ventes_import_staging to authenticated;
 
 -- Functions
-create or replace function public.log_action(
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'log_action'
+      AND pg_get_function_identity_arguments(p.oid) = 'uuid, text, text, text, jsonb, boolean'
+  ) THEN
+    DROP FUNCTION public.log_action(uuid, text, text, text, jsonb, boolean);
+  END IF;
+END$$;
+
+CREATE FUNCTION public.log_action(
   p_mama_id uuid,
   p_type text,
   p_module text,
   p_description text,
   p_donnees jsonb default '{}'::jsonb,
   p_critique boolean default false
-) returns void
-language plpgsql
-security definer
-as $$
+) RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
 begin
   insert into public.logs_activite(mama_id, user_id, type, module, description, donnees, critique)
   values (p_mama_id, auth.uid(), p_type, p_module, p_description, p_donnees, p_critique);
 end;
 $$;
+
 grant execute on function public.log_action(uuid, text, text, text, jsonb, boolean) to authenticated;
 
 -- Views
@@ -3133,7 +3614,24 @@ where p.zone_id is not null
     where px.mama_id = p.mama_id and px.produit_id = p.id and px.zone_id = p.zone_id
   );
 
-create or replace function public.sync_pivot_from_produits() returns trigger as $$
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'sync_pivot_from_produits'
+      AND pg_get_function_identity_arguments(p.oid) = ''
+  ) THEN
+    DROP FUNCTION public.sync_pivot_from_produits();
+  END IF;
+END$$;
+
+CREATE FUNCTION public.sync_pivot_from_produits()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
 begin
   if new.zone_id is null then
     return new;
@@ -3152,7 +3650,8 @@ begin
     and actif is true;
 
   return new;
-end $$ language plpgsql;
+end;
+$$;
 
 do $$ begin
   if not exists (select 1 from pg_trigger where tgname = 'trg_prod_sync_zone') then
@@ -3162,7 +3661,24 @@ do $$ begin
   end if;
 end $$;
 
-create or replace function public.sync_produits_from_pivot() returns trigger as $$
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'sync_produits_from_pivot'
+      AND pg_get_function_identity_arguments(p.oid) = ''
+  ) THEN
+    DROP FUNCTION public.sync_produits_from_pivot();
+  END IF;
+END$$;
+
+CREATE FUNCTION public.sync_produits_from_pivot()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
 begin
   if new.actif is true then
     update public.produits p
@@ -3172,7 +3688,8 @@ begin
       and (p.zone_id is distinct from new.zone_id);
   end if;
   return new;
-end $$ language plpgsql;
+end;
+$$;
 
 do $$ begin
   if not exists (select 1 from pg_trigger where tgname = 'trg_pz_sync_prod') then
@@ -3218,12 +3735,29 @@ where b.zone_id is not null;
 
 grant select on public.v_produits_par_zone to authenticated;
 
-create or replace function public.move_zone_products(
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'move_zone_products'
+      AND pg_get_function_identity_arguments(p.oid) = 'uuid, uuid, uuid, boolean'
+  ) THEN
+    DROP FUNCTION public.move_zone_products(uuid, uuid, uuid, boolean);
+  END IF;
+END$$;
+
+CREATE FUNCTION public.move_zone_products(
   p_mama uuid,
   p_src_zone uuid,
   p_dst_zone uuid,
   p_keep_quantities boolean default true
-) returns json language plpgsql security definer as $$
+) RETURNS json
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
 declare v_cnt int := 0;
 begin
   perform 1 from public.zones_stock z where z.id in (p_src_zone, p_dst_zone) and z.mama_id = p_mama;
@@ -3249,16 +3783,34 @@ begin
   where mama_id = p_mama and zone_id = p_src_zone;
 
   return json_build_object('moved', v_cnt);
-end $$;
+end;
+$$;
 
 grant execute on function public.move_zone_products(uuid,uuid,uuid,boolean) to authenticated;
 
-create or replace function public.copy_zone_products(
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'copy_zone_products'
+      AND pg_get_function_identity_arguments(p.oid) = 'uuid, uuid, uuid, boolean'
+  ) THEN
+    DROP FUNCTION public.copy_zone_products(uuid, uuid, uuid, boolean);
+  END IF;
+END$$;
+
+CREATE FUNCTION public.copy_zone_products(
   p_mama uuid,
   p_src_zone uuid,
   p_dst_zone uuid,
   p_with_quantities boolean default false
-) returns json language plpgsql security definer as $$
+) RETURNS json
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
 declare v_cnt int := 0;
 begin
   insert into public.produits_zones(mama_id, produit_id, zone_id, stock_reel, stock_min, actif)
@@ -3275,15 +3827,33 @@ begin
     updated_at = now();
   get diagnostics v_cnt = row_count;
   return json_build_object('copied', v_cnt);
-end $$;
+end;
+$$;
 
 grant execute on function public.copy_zone_products(uuid,uuid,uuid,boolean) to authenticated;
 
-create or replace function public.merge_zone_products(
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'merge_zone_products'
+      AND pg_get_function_identity_arguments(p.oid) = 'uuid, uuid, uuid'
+  ) THEN
+    DROP FUNCTION public.merge_zone_products(uuid, uuid, uuid);
+  END IF;
+END$$;
+
+CREATE FUNCTION public.merge_zone_products(
   p_mama uuid,
   p_src_zone uuid,
   p_dst_zone uuid
-) returns json language plpgsql security definer as $$
+) RETURNS json
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
 declare v_cnt int := 0;
 begin
   insert into public.produits_zones(mama_id, produit_id, zone_id, stock_reel, stock_min, actif)
@@ -3300,15 +3870,33 @@ begin
   update public.produits_zones set actif=false, updated_at=now()
   where mama_id=p_mama and zone_id=p_src_zone;
   return json_build_object('merged', v_cnt);
-end $$;
+end;
+$$;
 
 grant execute on function public.merge_zone_products(uuid,uuid,uuid) to authenticated;
 
-create or replace function public.safe_delete_zone(
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'safe_delete_zone'
+      AND pg_get_function_identity_arguments(p.oid) = 'uuid, uuid, uuid'
+  ) THEN
+    DROP FUNCTION public.safe_delete_zone(uuid, uuid, uuid);
+  END IF;
+END$$;
+
+CREATE FUNCTION public.safe_delete_zone(
   p_mama uuid,
   p_zone uuid,
   p_reassign_to uuid default null
-) returns json language plpgsql security definer as $$
+) RETURNS json
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
 declare v_cnt int := 0;
 begin
   if p_reassign_to is not null then
@@ -3322,7 +3910,8 @@ begin
   delete from public.zones_stock where id = p_zone and mama_id = p_mama;
   get diagnostics v_cnt = row_count;
   return json_build_object('deleted', v_cnt);
-end $$;
+end;
+$$;
 
 grant execute on function public.safe_delete_zone(uuid,uuid,uuid) to authenticated;
 

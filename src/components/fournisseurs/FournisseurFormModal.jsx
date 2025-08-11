@@ -61,30 +61,29 @@ export default function FournisseurFormModal({ fournisseur, onClose }) {
    >
       <h3 className="text-xl font-bold mb-2">{fournisseur ? "Modifier" : "Ajouter"} un fournisseur</h3>
       <div>
-        <label>Nom</label>
-        <input className="form-input w-full" name="nom" value={form.nom} onChange={handleChange} required />
+        <label htmlFor="nom">Nom</label>
+        <input id="nom" className="form-input w-full" name="nom" value={form.nom} onChange={handleChange} required />
       </div>
       <div>
-        <label>Email</label>
-        <input className="form-input w-full" name="email" value={form.email} onChange={handleChange} type="email" />
+        <label htmlFor="email">Email</label>
+        <input id="email" className="form-input w-full" name="email" value={form.email} onChange={handleChange} type="email" />
       </div>
       <div>
-        <label>Téléphone</label>
-        <input className="form-input w-full" name="tel" type="tel" value={form.tel} onChange={handleChange} />
+        <label htmlFor="tel">Téléphone</label>
+        <input id="tel" className="form-input w-full" name="tel" type="tel" value={form.tel} onChange={handleChange} />
       </div>
       <div>
-        <label>Contact</label>
-        <input className="form-input w-full" name="contact" value={form.contact} onChange={handleChange} />
+        <label htmlFor="contact">Contact</label>
+        <input id="contact" className="form-input w-full" name="contact" value={form.contact} onChange={handleChange} />
       </div>
-      <div>
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={form.actif}
-            onChange={e => setForm(f => ({ ...f, actif: e.target.checked }))}
-          />
-          Actif
-        </label>
+      <div className="flex items-center gap-2">
+        <input
+          id="actif"
+          type="checkbox"
+          checked={form.actif}
+          onChange={e => setForm(f => ({ ...f, actif: e.target.checked }))}
+        />
+        <label htmlFor="actif">Actif</label>
       </div>
       <div className="flex gap-2 justify-end">
         <Button type="button" variant="outline" onClick={onClose} disabled={loading}>Annuler</Button>

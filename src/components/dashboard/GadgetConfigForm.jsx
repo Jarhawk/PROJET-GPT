@@ -47,8 +47,8 @@ export default function GadgetConfigForm({ gadget, onSave, onCancel }) {
       <form onSubmit={handleSubmit} className="space-y-4">
       <InputField label="Nom" value={nom} onChange={(e) => setNom(e.target.value)} required />
       <div>
-        <label className="block text-sm text-white mb-1">Type</label>
-        <select className="form-select w-full" value={type} onChange={(e) => setType(e.target.value)}>
+        <label htmlFor="type" className="block text-sm text-white mb-1">Type</label>
+        <select id="type" className="form-select w-full" value={type} onChange={(e) => setType(e.target.value)}>
           <option value="indicator">Indicateur</option>
           <option value="line">Line</option>
           <option value="bar">Bar</option>
@@ -57,8 +57,9 @@ export default function GadgetConfigForm({ gadget, onSave, onCancel }) {
         </select>
       </div>
       <div>
-        <label className="block text-sm text-white mb-1">Configuration (JSON)</label>
+        <label htmlFor="config" className="block text-sm text-white mb-1">Configuration (JSON)</label>
         <textarea
+          id="config"
           className="form-textarea w-full font-mono"
           rows="4"
           value={config}

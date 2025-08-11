@@ -7,7 +7,7 @@ import GlassCard from "@/components/ui/GlassCard";
 import toast from "react-hot-toast";
 import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
 
-// Ajuste le seuil d’alerte si besoin
+// Ajuste le seuil d'alerte si besoin
 const SEUIL_ECART = 0.5; // Unité
 
 export default function InventaireForm({ inventaire, onClose }) {
@@ -28,7 +28,7 @@ export default function InventaireForm({ inventaire, onClose }) {
   const [fileUrl, setFileUrl] = useState(inventaire?.document || "");
   const [loading, setLoading] = useState(false);
 
-  // Recherche la période d’inventaire automatiquement à partir de l’inventaire précédent
+  // Recherche la période d'inventaire automatiquement à partir de l'inventaire précédent
   useEffect(() => {
     async function init() {
       await fetchProducts();
@@ -133,13 +133,13 @@ export default function InventaireForm({ inventaire, onClose }) {
   };
 
   return (
-    <GlassCard title={inventaire ? "Modifier l’inventaire" : "Ajouter un inventaire"}>
+    <GlassCard title={inventaire ? "Modifier l'inventaire" : "Ajouter un inventaire"}>
       <form onSubmit={handleSubmit} className="space-y-2">
       <input
         className="form-input mb-2"
           value={reference}
           onChange={e => setReference(e.target.value)}
-        placeholder="Nom de l’inventaire"
+        placeholder="Nom de l'inventaire"
         required
       />
       <input
@@ -151,7 +151,7 @@ export default function InventaireForm({ inventaire, onClose }) {
       />
       {/* Optionnel : affichage période analysée */}
       <div className="mb-4 text-xs">
-        <b>Période d’analyse mouvements :</b> {dateDebut} → {dateInventaire || "?"}
+        <b>Période d'analyse mouvements :</b> {dateDebut} → {dateInventaire || "?"}
       </div>
       <div className="mb-4">
         <label className="block font-semibold mb-2">Produits inventoriés :</label>

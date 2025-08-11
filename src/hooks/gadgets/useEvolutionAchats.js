@@ -3,17 +3,17 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function useEvolutionAchats() {
-  const { mama_id, loading } = useAuth() || {};
+  const { mama_id, loading: authLoading } = useAuth() || {};
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (loading) return;
+    if (authLoading) return;
     if (!mama_id) return;
 
     const fetchData = async () => {
-      setLoading(true);
+      setIsLoading(true);
       setError(null);
       try {
         const start = new Date();
@@ -33,12 +33,14 @@ export default function useEvolutionAchats() {
         setError(e);
         setData([]);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
     fetchData();
-  }, [loading, mama_id]);
+  }, [authLoading, mama_id]);
+
+  const loading = [authLoading, isLoading].some(Boolean);
 
   return { data, loading, error };
 }

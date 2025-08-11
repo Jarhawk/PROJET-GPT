@@ -7,12 +7,12 @@ export async function fetchZonesForValidation(mama_id) {
 }
 
 export default function useZonesStock() {
-  const { mama_id, loading } = useAuth() || {};
+  const { mama_id, loading: authLoading } = useAuth() || {};
   const [zones, setZones] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (loading) return;
+    if (authLoading) return;
     if (!mama_id) return;
     const fetchZones = async () => {
       const { data, error } = await supabase
@@ -22,10 +22,10 @@ export default function useZonesStock() {
         .eq("actif", true)
         .order("nom", { ascending: true });
       if (!error) setZones(data);
-      setLoading(false);
+      setIsLoading(false);
     };
     fetchZones();
-  }, [loading, mama_id]);
+  }, [authLoading, mama_id]);
 
   const suggestZones = useCallback(
     async (search = "") => {
@@ -39,8 +39,10 @@ export default function useZonesStock() {
         .limit(10);
       return data || [];
     },
-      [mama_id]
-    );
+    [mama_id]
+  );
+
+  const loading = [authLoading, isLoading].some(Boolean);
 
   return { zones, loading, suggestZones };
 }

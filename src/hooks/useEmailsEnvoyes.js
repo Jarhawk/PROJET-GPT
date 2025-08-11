@@ -3,9 +3,9 @@ import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/useAuth";
 
 export function useEmailsEnvoyes() {
-    const { mamaId, loading } = useAuth() || {};
+  const { mamaId, loading: authLoading } = useAuth() || {};
   const [list, setList] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [err, setErr] = useState(null);
 
     const baseQuery = useMemo(() => {
@@ -15,15 +15,15 @@ export function useEmailsEnvoyes() {
     }, [mamaId]);
 
   const fetchEmails = useCallback(async (filters = {}) => {
-    setLoading(true);
+    setIsLoading(true);
     setErr(null);
     let q = baseQuery;
     if (filters.commande_id) q = q.eq("commande_id", filters.commande_id);
     if (filters.statut) q = q.eq("statut", filters.statut);
     const { data, error } = await q;
-    if (error) { setErr(error); setLoading(false); return []; }
+    if (error) { setErr(error); setIsLoading(false); return []; }
     setList(data || []);
-    setLoading(false);
+    setIsLoading(false);
     return data || [];
   }, [baseQuery]);
 
@@ -37,11 +37,13 @@ export function useEmailsEnvoyes() {
     return { ok: true };
   }, [fetchEmails, mamaId]);
 
-    useEffect(() => {
-      if (loading) return;
-      if (!mamaId) return;
-      fetchEmails();
-    }, [loading, mamaId, fetchEmails]);
+  useEffect(() => {
+    if (authLoading) return;
+    if (!mamaId) return;
+    fetchEmails();
+  }, [authLoading, mamaId, fetchEmails]);
+
+  const loading = [authLoading, isLoading].some(Boolean);
 
   return { list, loading, error: err, fetchEmails, logEmail };
 }

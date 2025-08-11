@@ -10,8 +10,9 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { useRef, useState } from "react";
+import { useRef, useState, useMemo } from "react";
 import html2canvas from "html2canvas";
+import { makeId } from "@/utils/formIds";
 
 const allZones = [
   { key: "cost_cuisine", label: "Cuisine", color: "#bfa14d" },
@@ -23,6 +24,7 @@ const allZones = [
 export default function GraphMultiZone({ data }) {
   const chartRef = useRef(null);
   const [selectedZones, setSelectedZones] = useState(allZones.map(z => z.key));
+  const checkboxIds = useMemo(() => Object.fromEntries(allZones.map(z => [z.key, makeId('fld')])), []);
 
   const toggleZone = (key) => {
     setSelectedZones((prev) =>
@@ -53,16 +55,20 @@ export default function GraphMultiZone({ data }) {
       </div>
 
       <div className="flex gap-4 mb-4 flex-wrap text-white">
-        {allZones.map((zone) => (
-          <label key={zone.key} className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={selectedZones.includes(zone.key)}
-              onChange={() => toggleZone(zone.key)}
-            />
-            {zone.label}
-          </label>
-        ))}
+        {allZones.map((zone) => {
+          const id = checkboxIds[zone.key];
+          return (
+            <label key={zone.key} htmlFor={id} className="flex items-center gap-2 text-sm">
+              <input
+                id={id}
+                type="checkbox"
+                checked={selectedZones.includes(zone.key)}
+                onChange={() => toggleZone(zone.key)}
+              />
+              {zone.label}
+            </label>
+          );
+        })}
       </div>
 
       <div ref={chartRef}>

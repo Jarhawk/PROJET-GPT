@@ -1,0 +1,252 @@
+# SQL Build Summary
+
+## Columns added for FKs
+- public.produits.zone_id -> public.zones_stock(id)
+- public.fournisseurs.mama_id -> public.mamas(id)
+- public.produits.mama_id -> public.mamas(id)
+- public.produits.fournisseur_id -> public.fournisseurs(id)
+- public.produits.unite_id -> public.unites(id)
+- public.produits.famille_id -> public.familles(id)
+- public.produits.sous_famille_id -> public.sous_familles(id)
+- public.roles.mama_id -> public.mamas(id)
+- public.utilisateurs.mama_id -> public.mamas(id)
+- public.utilisateurs.role_id -> public.roles(id)
+- public.commandes.mama_id -> public.mamas(id)
+- public.commandes.fournisseur_id -> public.fournisseurs(id)
+- public.commandes.created_by -> public.utilisateurs(id)
+- public.commandes.validated_by -> public.utilisateurs(id)
+- public.commande_lignes.commande_id -> public.commandes(id)
+- public.commande_lignes.produit_id -> public.produits(id)
+- public.commande_lignes.mama_id -> public.mamas(id)
+- public.templates_commandes.mama_id -> public.mamas(id)
+- public.templates_commandes.fournisseur_id -> public.fournisseurs(id)
+- public.emails_envoyes.commande_id -> public.commandes(id)
+- public.emails_envoyes.mama_id -> public.mamas(id)
+- public.permissions.role_id -> public.roles(id)
+- public.permissions.mama_id -> public.mamas(id)
+- public.consentements_utilisateur.utilisateur_id -> public.utilisateurs(id)
+- public.consentements_utilisateur.mama_id -> public.mamas(id)
+- public.achats.mama_id -> public.mamas(id)
+- public.achats.produit_id -> public.produits(id)
+- public.achats.fournisseur_id -> public.fournisseurs(id)
+- public.alertes.mama_id -> public.mamas(id)
+- public.api_keys.mama_id -> public.mamas(id)
+- public.auth_double_facteur.mama_id -> public.mamas(id)
+- public.bons_livraison.mama_id -> public.mamas(id)
+- public.catalogue_updates.mama_id -> public.mamas(id)
+- public.centres_de_cout.mama_id -> public.mamas(id)
+- public.compta_mapping.mama_id -> public.mamas(id)
+- public.documentation.mama_id -> public.mamas(id)
+- public.documents.mama_id -> public.mamas(id)
+- public.etapes_onboarding.mama_id -> public.mamas(id)
+- public.facture_lignes.mama_id -> public.mamas(id)
+- public.factures.mama_id -> public.mamas(id)
+- public.familles.mama_id -> public.mamas(id)
+- public.feedback.mama_id -> public.mamas(id)
+- public.fiche_cout_history.mama_id -> public.mamas(id)
+- public.fiche_lignes.mama_id -> public.mamas(id)
+- public.fiches.mama_id -> public.mamas(id)
+- public.fiches_techniques.mama_id -> public.mamas(id)
+- public.fournisseur_contacts.mama_id -> public.mamas(id)
+- public.fournisseur_notes.mama_id -> public.mamas(id)
+- public.fournisseur_produits.mama_id -> public.mamas(id)
+- public.fournisseur_produits.produit_id -> public.produits(id)
+- public.fournisseur_produits.fournisseur_id -> public.fournisseurs(id)
+- public.fournisseurs_api_config.mama_id -> public.mamas(id)
+- public.gadgets.mama_id -> public.mamas(id)
+- public.groupes.mama_id -> public.mamas(id)
+- public.guides_seen.mama_id -> public.mamas(id)
+- public.help_articles.mama_id -> public.mamas(id)
+- public.inventaire_zones.mama_id -> public.mamas(id)
+- public.journaux_utilisateur.mama_id -> public.mamas(id)
+- public.lignes_bl.mama_id -> public.mamas(id)
+- public.logs_securite.mama_id -> public.mamas(id)
+- public.menu_fiches.mama_id -> public.mamas(id)
+- public.menus.mama_id -> public.mamas(id)
+- public.menus_groupes.mama_id -> public.mamas(id)
+- public.menus_groupes_fiches.mama_id -> public.mamas(id)
+- public.menus_jour.mama_id -> public.mamas(id)
+- public.menus_jour_fiches.mama_id -> public.mamas(id)
+- public.notification_preferences.mama_id -> public.mamas(id)
+- public.notifications.mama_id -> public.mamas(id)
+- public.parametres_commandes.mama_id -> public.mamas(id)
+- public.pertes.mama_id -> public.mamas(id)
+- public.planning_lignes.mama_id -> public.mamas(id)
+- public.planning_previsionnel.mama_id -> public.mamas(id)
+- public.promotions.mama_id -> public.mamas(id)
+- public.regles_alertes.mama_id -> public.mamas(id)
+- public.signalements.mama_id -> public.mamas(id)
+- public.sous_familles.mama_id -> public.mamas(id)
+- public.sous_familles.famille_id -> public.familles(id)
+- public.stocks.mama_id -> public.mamas(id)
+- public.tableaux_de_bord.mama_id -> public.mamas(id)
+- public.taches.mama_id -> public.mamas(id)
+- public.tooltips.mama_id -> public.mamas(id)
+- public.transfert_lignes.mama_id -> public.mamas(id)
+- public.transferts.mama_id -> public.mamas(id)
+- public.unites.mama_id -> public.mamas(id)
+- public.usage_stats.mama_id -> public.mamas(id)
+- public.utilisateurs_taches.mama_id -> public.mamas(id)
+- public.validation_requests.mama_id -> public.mamas(id)
+- public.ventes_boissons.mama_id -> public.mamas(id)
+- public.ventes_fiches_carte.mama_id -> public.mamas(id)
+
+## Policies wrapped
+- requisitions_select on public.requisitions
+- requisitions_insert on public.requisitions
+- requisitions_update on public.requisitions
+- requisitions_delete on public.requisitions
+- requisition_lignes_select on public.requisition_lignes
+- requisition_lignes_insert on public.requisition_lignes
+- requisition_lignes_update on public.requisition_lignes
+- requisition_lignes_delete on public.requisition_lignes
+- zones_stock_select on public.zones_stock
+- zones_stock_admin_iud on public.zones_stock
+- zones_droits_admin_all on public.zones_droits
+- alertes_rupture_all on public.alertes_rupture
+- logs_activite_all on public.logs_activite
+- menus_jour_lignes_all on public.menus_jour_lignes
+- rapports_generes_all on public.rapports_generes
+- settings_all on public.settings
+- user_mama_access_select on public.user_mama_access
+- user_mama_access_modify on public.user_mama_access
+- ventes_fiches_all on public.ventes_fiches
+- ventes_import_staging_all on public.ventes_import_staging
+
+## Constraints wrapped
+- fk_produits_zone_id
+- fk_fournisseurs_mama_id
+- fk_produits_mama_id
+- fk_produits_fournisseur_id
+- fk_produits_unite_id
+- fk_produits_famille_id
+- fk_produits_sous_famille_id
+- fk_roles_mama_id
+- fk_utilisateurs_mama_id
+- fk_utilisateurs_role_id
+- fk_commandes_mama_id
+- fk_commandes_fournisseur_id
+- fk_commandes_created_by
+- fk_commandes_validated_by
+- fk_commande_lignes_commande_id
+- fk_commande_lignes_produit_id
+- fk_commande_lignes_mama_id
+- fk_templates_commandes_mama_id
+- fk_templates_commandes_fournisseur_id
+- fk_emails_envoyes_commande_id
+- fk_emails_envoyes_mama_id
+- fk_permissions_role_id
+- fk_permissions_mama_id
+- fk_consentements_utilisateur_utilisateur_id
+- fk_consentements_utilisateur_mama_id
+- fk_achats_mama_id
+- fk_achats_produit_id
+- fk_achats_fournisseur_id
+- fk_alertes_mama_id
+- fk_api_keys_mama_id
+- fk_auth_double_facteur_mama_id
+- fk_bons_livraison_mama_id
+- fk_catalogue_updates_mama_id
+- fk_centres_de_cout_mama_id
+- fk_compta_mapping_mama_id
+- fk_documentation_mama_id
+- fk_documents_mama_id
+- fk_etapes_onboarding_mama_id
+- fk_facture_lignes_mama_id
+- fk_factures_mama_id
+- fk_familles_mama_id
+- fk_feedback_mama_id
+- fk_fiche_cout_history_mama_id
+- fk_fiche_lignes_mama_id
+- fk_fiches_mama_id
+- fk_fiches_techniques_mama_id
+- fk_fournisseur_contacts_mama_id
+- fk_fournisseur_notes_mama_id
+- fk_fournisseur_produits_mama_id
+- fk_fournisseur_produits_produit_id
+- fk_fournisseur_produits_fournisseur_id
+- fk_fournisseurs_api_config_mama_id
+- fk_gadgets_mama_id
+- fk_groupes_mama_id
+- fk_guides_seen_mama_id
+- fk_help_articles_mama_id
+- fk_inventaire_zones_mama_id
+- fk_journaux_utilisateur_mama_id
+- fk_lignes_bl_mama_id
+- fk_logs_securite_mama_id
+- fk_menu_fiches_mama_id
+- fk_menus_mama_id
+- fk_menus_groupes_mama_id
+- fk_menus_groupes_fiches_mama_id
+- fk_menus_jour_mama_id
+- fk_menus_jour_fiches_mama_id
+- fk_notification_preferences_mama_id
+- fk_notifications_mama_id
+- fk_parametres_commandes_mama_id
+- fk_pertes_mama_id
+- fk_planning_lignes_mama_id
+- fk_planning_previsionnel_mama_id
+- fk_promotions_mama_id
+- fk_regles_alertes_mama_id
+- fk_signalements_mama_id
+- fk_sous_familles_mama_id
+- fk_sous_familles_famille_id
+- fk_stocks_mama_id
+- fk_tableaux_de_bord_mama_id
+- fk_taches_mama_id
+- fk_tooltips_mama_id
+- fk_transfert_lignes_mama_id
+- fk_transferts_mama_id
+- fk_unites_mama_id
+- fk_usage_stats_mama_id
+- fk_utilisateurs_taches_mama_id
+- fk_validation_requests_mama_id
+- fk_ventes_boissons_mama_id
+- fk_ventes_fiches_carte_mama_id
+
+## Views touched
+- public.v_analytique_stock
+- public.v_besoins_previsionnels
+- public.v_boissons
+- public.v_cost_center_month
+- public.v_cost_center_monthly
+- public.v_ecarts_inventaire
+- public.v_evolution_achats
+- public.v_fournisseurs_inactifs
+- public.v_performance_fiches
+- public.v_pmp
+- public.v_products_last_price
+- public.v_produits_dernier_prix
+- public.v_produits_utilises
+- public.v_reco_stockmort
+- public.v_reco_surcout
+- public.v_requisitions
+- public.v_stock_requisitionne
+- public.suggestions_commandes
+- public.v_stocks
+- public.v_taches_assignees
+- public.v_tendance_prix_produit
+- public.v_top_fournisseurs
+- public.v_couts_fiches
+- public.v_menu_groupe_couts
+- public.v_menu_groupe_resume
+- public.v_menu_du_jour_resume
+- public.v_menu_du_jour_mensuel
+- public.v_cons_achats_mensuels
+- public.v_cons_ventes_mensuelles
+- public.v_cons_foodcost_mensuel
+- public.v_cons_ecarts_inventaire
+- public.v_consolidation_mensuelle
+- public.v_me_classification
+- public.v_produits_par_zone
+
+## Functions aliased/stubbed
+None
+
+## Execution order
+EXTENSIONS -> FUNCTIONS -> TABLES -> ADDCOLUMNS -> INDEXES -> TRIGGERS -> RLS_ENABLE -> POLICIES -> GRANTS -> VIEWS -> OTHER
+
+## Cleanup suggestions
+- Views: v_boissons, suggestions_commandes, v_couts_fiches
+- Functions: current_user_mama_id, current_user_is_admin_or_manager, current_user_is_admin, calcul_ecarts_inventaire, can_transfer, zone_is_cave_or_shop, compare_fiche, stats_multi_mamas, sync_pivot_from_produits, sync_produits_from_pivot, safe_delete_zone
+- Tables: emails_envoyes, alertes, documentation, fiches, groupes, guides_seen, menus_groupes, menus_groupes_fiches, parametres_commandes, stocks, tooltips, ventes_boissons, ventes_fiches_carte

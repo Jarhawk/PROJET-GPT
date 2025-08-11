@@ -29,7 +29,9 @@
     "schema:normalize": "node scripts/normalizeSchema.js",
     "schema:fix-fk": "node scripts/fixForeignKeys.js",
     "schema:repair": "node scripts/repairSchema.js",
-    "schema:repair:apply": "SCHEMA_APPLY=1 node scripts/repairSchema.js"
+    "schema:repair:apply": "SCHEMA_APPLY=1 node scripts/repairSchema.js",
+    "fix:fe": "node scripts/fixFrontend.js",
+    "fix:fe:write": "node scripts/fixFrontend.js --write"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.14",
@@ -50,8 +52,8 @@
     "lucide-react": "^0.511.0",
     "nprogress": "^0.2.0",
     "otplib": "^12.0.1",
-    "qrcode.react": "^4.2.0",
     "pg": "^8.11.3",
+    "qrcode.react": "^4.2.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-hot-toast": "^2.5.2",
@@ -66,6 +68,8 @@
     "zod": "3.23.8"
   },
   "devDependencies": {
+    "@babel/parser": "^7.28.0",
+    "@babel/traverse": "^7.28.0",
     "@eslint/js": "8.57.0",
     "@playwright/test": "^1.54.1",
     "@tailwindcss/postcss": "^4.1.11",
@@ -85,10 +89,12 @@
     "eslint-plugin-react": "7.34.1",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "0.4.6",
+    "glob": "^7.2.3",
     "globals": "^16.0.0",
     "jsdom": "^26.1.0",
     "postcss": "^8.5.3",
     "prettier": "^3.5.3",
+    "recast": "^0.23.11",
     "supertest": "^7.1.1",
     "tailwindcss": "^3.4.17",
     "ts-node": "10.9.2",

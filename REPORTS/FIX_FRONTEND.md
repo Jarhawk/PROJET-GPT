@@ -1,0 +1,715 @@
+# FIX FRONTEND REPORT
+
+- date: 2025-08-11T09:46:32.978Z
+- dryRun: false
+
+## A11y (labels/ids)
+- fixed: 2
+  - /workspace/PROJET-GPT/src/components/ui/checkbox.jsx → control @id = fld-field-gk8a
+  - /workspace/PROJET-GPT/src/components/ui/input.jsx → control @id = fld-field-a16p
+
+## Hooks mocks
+- aligned: 124
+- created: 124
+- changed: 0
+- warnings: 3
+  - Parse failed (exports): /workspace/PROJET-GPT/src/hooks/gadgets/useEvolutionAchats.js → SyntaxError: Identifier 'loading' has already been declared. (8:9)
+  - Parse failed (exports): /workspace/PROJET-GPT/src/hooks/useEmailsEnvoyes.js → SyntaxError: Identifier 'loading' has already been declared. (8:9)
+  - Parse failed (exports): /workspace/PROJET-GPT/src/hooks/useZonesStock.js → SyntaxError: Identifier 'loading' has already been declared. (12:9)
+
+## Duplicate identifiers
+- fixed: 0
+- warnings: 326
+  - Parse failed: /workspace/PROJET-GPT/src/App.jsx → Error: Line 26: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/achats/AchatRow.jsx → Error: Line 6: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/analytics/CostCenterAllocationModal.jsx → Error: Line 80: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/bons_livraison/BonLivraisonRow.jsx → Error: Line 8: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/CookieConsent.jsx → Error: Line 29: Unexpected token ILLEGAL
+  - Parse failed: /workspace/PROJET-GPT/src/components/costing/CostingCartePDF.jsx → Error: Line 18: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/dashboard/DashboardCard.jsx → Error: Line 21: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/dashboard/GadgetConfigForm.jsx → Error: Line 50: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/dashboard/PeriodFilter.jsx → Error: Line 25: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/dashboard/WidgetRenderer.jsx → Error: Line 16: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/DeleteAccountButton.jsx → Error: Line 27: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/documents/DocumentPreview.jsx → Error: Line 18: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/documents/DocumentUpload.jsx → Error: Line 48: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/engineering/EngineeringChart.jsx → Error: Line 35: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/engineering/EngineeringFilters.jsx → Error: Line 23: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/engineering/ImportVentesExcel.jsx → Error: Line 25: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ErrorBoundary.jsx → Error: Line 22: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/export/ExportManager.jsx → Error: Line 19: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/export/FicheExportView.jsx → Error: Line 7: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/FactureImportModal.jsx → Error: Line 40: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/FactureLigne.jsx → Error: Line 126: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/factures/FactureRow.jsx → Error: Line 7: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/FactureTable.jsx → Error: Line 23: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/fiches/FicheLigne.jsx → Error: Line 25: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/fiches/FicheRentabiliteCard.jsx → Error: Line 16: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/fiches/FicheRow.jsx → Error: Line 13: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/Footer.jsx → Error: Line 7: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/fournisseurs/FournisseurFormModal.jsx → Error: Line 62: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/fournisseurs/FournisseurRow.jsx → Error: Line 7: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/gadgets/GadgetAlerteStockFaible.jsx → Error: Line 13: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/gadgets/GadgetBudgetMensuel.jsx → Error: Line 13: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/gadgets/GadgetConsoMoyenne.jsx → Error: Line 13: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/gadgets/GadgetDerniersAcces.jsx → Error: Line 13: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/gadgets/GadgetEvolutionAchats.jsx → Error: Line 13: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/gadgets/GadgetProduitsUtilises.jsx → Error: Line 13: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/gadgets/GadgetTachesUrgentes.jsx → Error: Line 13: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/gadgets/GadgetTopFournisseurs.jsx → Error: Line 15: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/help/DocumentationPanel.jsx → Error: Line 24: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/help/FeedbackForm.jsx → Error: Line 41: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/help/GuidedTour.jsx → Error: Line 42: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/help/TooltipHelper.jsx → Error: Line 22: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ia/RecommandationsBox.jsx → Error: Line 15: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/inventaire/InventaireLigneRow.jsx → Error: Line 12: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/inventaires/InventaireDetail.jsx → Error: Line 26: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/inventaires/InventaireForm.jsx → Error: Line 154: Unexpected token ILLEGAL
+  - Parse failed: /workspace/PROJET-GPT/src/components/layout/Sidebar.jsx → Error: Line 25: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/LiquidBackground/BubblesParticles.jsx → Error: Line 23: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/LiquidBackground/LiquidBackground.jsx → Error: Line 28: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/LiquidBackground/TouchLight.jsx → Error: Line 29: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/LiquidBackground/WavesBackground.jsx → Error: Line 8: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/mouvements/MouvementFormModal.jsx → Error: Line 101: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/parametrage/FamilleRow.jsx → Error: Line 31: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/parametrage/ParamAccess.jsx → Error: Line 41: Unexpected token ILLEGAL
+  - Parse failed: /workspace/PROJET-GPT/src/components/parametrage/ParamCostCenters.jsx → Error: Line 105: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/parametrage/ParamFamilles.jsx → Error: Line 85: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/parametrage/ParamMama.jsx → Error: Line 41: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/parametrage/ParamSecurity.jsx → Error: Line 7: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/parametrage/ParamUnites.jsx → Error: Line 74: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/parametrage/SousFamilleList.jsx → Error: Line 100: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/parametrage/SousFamilleModal.jsx → Error: Line 15: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/parametrage/SousFamilleRow.jsx → Error: Line 21: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/parametrage/UniteRow.jsx → Error: Line 7: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/parametrage/UtilisateurRow.jsx → Error: Line 41: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/parametrage/ZoneFormProducts.jsx → Error: Line 22: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/parametrage/ZoneRow.jsx → Error: Line 7: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/pdf/CommandePDF.jsx → Error: Line 19: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/produits/ModalImportProduits.jsx → Error: Line 119: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/produits/ProduitDetail.jsx → Error: Line 79: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/produits/ProduitForm.jsx → Error: Line 158: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/produits/ProduitFormModal.jsx → Error: Line 20: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/produits/ProduitRow.jsx → Error: Line 22: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/promotions/PromotionRow.jsx → Error: Line 6: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/Reporting/GraphMultiZone.jsx → Error: Line 46: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/requisitions/RequisitionRow.jsx → Error: Line 7: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ResetAuthButton.jsx → Error: Line 13: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/security/TwoFactorSetup.jsx → Error: Line 38: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/simulation/SimulationDetailsModal.jsx → Error: Line 23: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/stock/AlertBadge.jsx → Error: Line 20: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/taches/TacheForm.jsx → Error: Line 64: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/taches/TachesKanban.jsx → Error: Line 12: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/AutoCompleteField.jsx → Error: Line 79: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/badge.jsx → Error: Line 18: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/Breadcrumbs.jsx → Error: Line 16: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/button.jsx → Error: Line 13: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/Button.jsx → Error: Line 13: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/card.jsx → Error: Line 5: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/Card.jsx → Error: Line 5: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/controls/index.jsx → Error: Line 22: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/dialog.jsx → Error: Line 45: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/Form.jsx → Error: Line 5: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/FormActions.jsx → Error: Line 12: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/FormField.jsx → Error: Line 18: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/GlassCard.jsx → Error: Line 19: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/ImportPreviewTable.jsx → Error: Line 29: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/InputField.jsx → Error: Line 18: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/label.jsx → Error: Line 11: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/LanguageSelector.jsx → Error: Line 29: Unexpected token ILLEGAL
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/ListingContainer.jsx → Error: Line 8: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/LoadingScreen.jsx → Error: Line 7: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/LoadingSpinner.jsx → Error: Line 12: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/ModalGlass.jsx → Error: Line 40: Unexpected token ILLEGAL
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/PageIntro.jsx → Error: Line 8: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/PageSkeleton.jsx → Error: Line 7: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/PageWrapper.jsx → Error: Line 23: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/PaginationFooter.jsx → Error: Line 13: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/PreviewBanner.jsx → Error: Line 15: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/PrimaryButton.jsx → Error: Line 9: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/SecondaryButton.jsx → Error: Line 9: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/select.jsx → Error: Line 21: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/SmartDialog.jsx → Error: Line 21: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/StatCard.jsx → Error: Line 7: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/TableContainer.jsx → Error: Line 21: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/TableHeader.jsx → Error: Line 10: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/ui/tabs.jsx → Error: Line 5: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/utilisateurs/UtilisateurDetail.jsx → Error: Line 13: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/utilisateurs/UtilisateurForm.jsx → Error: Line 75: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/Utilisateurs/UtilisateurForm.jsx → Error: Line 75: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/components/Utilisateurs/UtilisateurRow.jsx → Error: Line 6: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/context/HelpProvider.jsx → Error: Line 70: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/context/MultiMamaContext.jsx → Error: Line 70: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/context/ThemeProvider.jsx → Error: Line 54: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/contexts/AuthContext.jsx → Error: Line 65: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/forms/FamilleForm.jsx → Error: Line 32: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/forms/PeriodeForm.jsx → Error: Line 28: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/forms/SousFamilleForm.jsx → Error: Line 36: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/forms/UniteForm.jsx → Error: Line 33: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/forms/ZoneForm.jsx → Error: Line 35: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/hooks/gadgets/useEvolutionAchats.js → SyntaxError: Identifier 'loading' has already been declared. (8:9)
+  - Parse failed: /workspace/PROJET-GPT/src/hooks/useEmailsEnvoyes.js → SyntaxError: Identifier 'loading' has already been declared. (8:9)
+  - Parse failed: /workspace/PROJET-GPT/src/hooks/useZonesStock.js → SyntaxError: Identifier 'loading' has already been declared. (12:9)
+  - Parse failed: /workspace/PROJET-GPT/src/layout/AdminLayout.jsx → Error: Line 25: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/layout/Layout.jsx → Error: Line 77: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/layout/LegalLayout.jsx → Error: Line 31: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/layout/Navbar.jsx → Error: Line 46: Unexpected token ILLEGAL
+  - Parse failed: /workspace/PROJET-GPT/src/layout/Sidebar.jsx → Error: Line 75: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/layout/ViewerLayout.jsx → Error: Line 25: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/main.jsx → Error: Line 27: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/Accueil.jsx → Error: Line 54: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/achats/AchatDetail.jsx → Error: Line 33: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/achats/AchatForm.jsx → Error: Line 64: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/achats/Achats.jsx → Error: Line 56: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/aide/Aide.jsx → Error: Line 36: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/aide/AideForm.jsx → Error: Line 52: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/Alertes.jsx → Error: Line 64: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/analyse/Analyse.jsx → Error: Line 36: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/analyse/AnalyseCostCenter.jsx → Error: Line 3: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/analyse/MenuEngineering.jsx → Error: Line 36: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/analytique/AnalytiqueDashboard.jsx → Error: Line 48: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/auth/Blocked.jsx → Error: Line 12: Unexpected token ILLEGAL
+  - Parse failed: /workspace/PROJET-GPT/src/pages/auth/CreateMama.jsx → Error: Line 53: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/auth/Login.jsx → Error: Line 101: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/auth/Logout.jsx → Error: Line 20: Unexpected token ILLEGAL
+  - Parse failed: /workspace/PROJET-GPT/src/pages/auth/Pending.jsx → Error: Line 9: Unexpected token ILLEGAL
+  - Parse failed: /workspace/PROJET-GPT/src/pages/auth/ResetPassword.jsx → Error: Line 36: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/auth/RoleError.jsx → Error: Line 11: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/auth/Unauthorized.jsx → Error: Line 13: Unexpected token ILLEGAL
+  - Parse failed: /workspace/PROJET-GPT/src/pages/auth/UpdatePassword.jsx → Error: Line 42: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/BarManager.jsx → Error: Line 159: Unexpected token ILLEGAL
+  - Parse failed: /workspace/PROJET-GPT/src/pages/bons_livraison/BLCreate.jsx → Error: Line 24: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/bons_livraison/BLDetail.jsx → Error: Line 28: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/bons_livraison/BLForm.jsx → Error: Line 73: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/bons_livraison/BonsLivraison.jsx → Error: Line 58: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/carte/Carte.jsx → Error: Line 73: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/CartePlats.jsx → Error: Line 56: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/catalogue/CatalogueSyncViewer.jsx → Error: Line 65: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/commandes/CommandeDetail.jsx → Error: Line 45: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/commandes/CommandeForm.jsx → Error: Line 95: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/commandes/Commandes.jsx → Error: Line 24: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/commandes/CommandesEnvoyees.jsx → Error: Line 40: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/Consentements.jsx → Error: Line 14: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/consolidation/AccessMultiSites.jsx → Error: Line 24: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/consolidation/Consolidation.jsx → Error: Line 39: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/costboisson/CostBoisson.jsx → Error: Line 208: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/costing/CostingCarte.jsx → Error: Line 66: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/cuisine/MenuDuJour.jsx → Error: Line 91: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/Dashboard.jsx → Error: Line 28: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/dashboard/DashboardBuilder.jsx → Error: Line 38: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/debug/AccessExample.jsx → Error: Line 12: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/debug/AuthDebug.jsx → Error: Line 23: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/debug/Debug.jsx → Error: Line 13: Unexpected token ILLEGAL
+  - Parse failed: /workspace/PROJET-GPT/src/pages/debug/DebugUser.jsx → Error: Line 15: Unexpected token ILLEGAL
+  - Parse failed: /workspace/PROJET-GPT/src/pages/documents/DocumentForm.jsx → Error: Line 34: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/documents/Documents.jsx → Error: Line 46: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/ecarts/Ecarts.jsx → Error: Line 27: Unexpected token ILLEGAL
+  - Parse failed: /workspace/PROJET-GPT/src/pages/emails/EmailsEnvoyes.jsx → Error: Line 104: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/engineering/MenuEngineering.jsx → Error: Line 69: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/EngineeringMenu.jsx → Error: Line 19: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/factures/FactureCreate.jsx → Error: Line 15: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/factures/FactureDetail.jsx → Error: Line 81: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/factures/FactureForm.jsx → Error: Line 325: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/factures/Factures.jsx → Error: Line 102: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/factures/ImportFactures.jsx → Error: Line 25: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/Feedback.jsx → Error: Line 36: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/fiches/FicheDetail.jsx → Error: Line 86: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/fiches/FicheForm.jsx → Error: Line 131: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/fiches/Fiches.jsx → Error: Line 96: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/fournisseurs/ApiFournisseurs.jsx → Error: Line 27: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/fournisseurs/comparatif/ComparatifPrix.jsx → Error: Line 48: Unexpected token ILLEGAL
+  - Parse failed: /workspace/PROJET-GPT/src/pages/fournisseurs/comparatif/PrixFournisseurs.jsx → Error: Line 21: Invalid regular expression: missing /
+  - Parse failed: /workspace/PROJET-GPT/src/pages/fournisseurs/FournisseurApiSettingsForm.jsx → Error: Line 60: Invalid regular expression: missing /
+
+## Errors
+- /workspace/PROJET-GPT/src/App.jsx → A11y error: Error: Line 26: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/achats/AchatRow.jsx → A11y error: Error: Line 6: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/analytics/CostCenterAllocationModal.jsx → A11y error: Error: Line 80: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/bons_livraison/BonLivraisonRow.jsx → A11y error: Error: Line 8: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/CookieConsent.jsx → A11y error: Error: Line 29: Unexpected token ILLEGAL
+- /workspace/PROJET-GPT/src/components/costing/CostingCartePDF.jsx → A11y error: Error: Line 18: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/dashboard/DashboardCard.jsx → A11y error: Error: Line 21: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/dashboard/GadgetConfigForm.jsx → A11y error: Error: Line 50: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/dashboard/PeriodFilter.jsx → A11y error: Error: Line 25: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/dashboard/WidgetRenderer.jsx → A11y error: Error: Line 16: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/DeleteAccountButton.jsx → A11y error: Error: Line 27: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/documents/DocumentPreview.jsx → A11y error: Error: Line 18: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/documents/DocumentUpload.jsx → A11y error: Error: Line 48: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/engineering/EngineeringChart.jsx → A11y error: Error: Line 35: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/engineering/EngineeringFilters.jsx → A11y error: Error: Line 23: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/engineering/ImportVentesExcel.jsx → A11y error: Error: Line 25: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ErrorBoundary.jsx → A11y error: Error: Line 22: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/export/ExportManager.jsx → A11y error: Error: Line 19: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/export/FicheExportView.jsx → A11y error: Error: Line 7: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/FactureImportModal.jsx → A11y error: Error: Line 40: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/FactureLigne.jsx → A11y error: Error: Line 126: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/factures/FactureRow.jsx → A11y error: Error: Line 7: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/FactureTable.jsx → A11y error: Error: Line 23: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/fiches/FicheLigne.jsx → A11y error: Error: Line 25: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/fiches/FicheRentabiliteCard.jsx → A11y error: Error: Line 16: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/fiches/FicheRow.jsx → A11y error: Error: Line 13: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/Footer.jsx → A11y error: Error: Line 7: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/fournisseurs/FournisseurFormModal.jsx → A11y error: Error: Line 62: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/fournisseurs/FournisseurRow.jsx → A11y error: Error: Line 7: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/gadgets/GadgetAlerteStockFaible.jsx → A11y error: Error: Line 13: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/gadgets/GadgetBudgetMensuel.jsx → A11y error: Error: Line 13: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/gadgets/GadgetConsoMoyenne.jsx → A11y error: Error: Line 13: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/gadgets/GadgetDerniersAcces.jsx → A11y error: Error: Line 13: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/gadgets/GadgetEvolutionAchats.jsx → A11y error: Error: Line 13: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/gadgets/GadgetProduitsUtilises.jsx → A11y error: Error: Line 13: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/gadgets/GadgetTachesUrgentes.jsx → A11y error: Error: Line 13: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/gadgets/GadgetTopFournisseurs.jsx → A11y error: Error: Line 15: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/help/DocumentationPanel.jsx → A11y error: Error: Line 24: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/help/FeedbackForm.jsx → A11y error: Error: Line 41: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/help/GuidedTour.jsx → A11y error: Error: Line 42: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/help/TooltipHelper.jsx → A11y error: Error: Line 22: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ia/RecommandationsBox.jsx → A11y error: Error: Line 15: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/inventaire/InventaireLigneRow.jsx → A11y error: Error: Line 12: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/inventaires/InventaireDetail.jsx → A11y error: Error: Line 26: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/inventaires/InventaireForm.jsx → A11y error: Error: Line 154: Unexpected token ILLEGAL
+- /workspace/PROJET-GPT/src/components/layout/Sidebar.jsx → A11y error: Error: Line 25: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/LiquidBackground/BubblesParticles.jsx → A11y error: Error: Line 23: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/LiquidBackground/LiquidBackground.jsx → A11y error: Error: Line 28: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/LiquidBackground/TouchLight.jsx → A11y error: Error: Line 29: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/LiquidBackground/WavesBackground.jsx → A11y error: Error: Line 8: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/mouvements/MouvementFormModal.jsx → A11y error: Error: Line 101: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/parametrage/FamilleRow.jsx → A11y error: Error: Line 31: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/parametrage/ParamAccess.jsx → A11y error: Error: Line 41: Unexpected token ILLEGAL
+- /workspace/PROJET-GPT/src/components/parametrage/ParamCostCenters.jsx → A11y error: Error: Line 105: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/parametrage/ParamFamilles.jsx → A11y error: Error: Line 85: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/parametrage/ParamMama.jsx → A11y error: Error: Line 41: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/parametrage/ParamSecurity.jsx → A11y error: Error: Line 7: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/parametrage/ParamUnites.jsx → A11y error: Error: Line 74: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/parametrage/SousFamilleList.jsx → A11y error: Error: Line 100: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/parametrage/SousFamilleModal.jsx → A11y error: Error: Line 15: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/parametrage/SousFamilleRow.jsx → A11y error: Error: Line 21: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/parametrage/UniteRow.jsx → A11y error: Error: Line 7: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/parametrage/UtilisateurRow.jsx → A11y error: Error: Line 41: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/parametrage/ZoneFormProducts.jsx → A11y error: Error: Line 22: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/parametrage/ZoneRow.jsx → A11y error: Error: Line 7: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/pdf/CommandePDF.jsx → A11y error: Error: Line 19: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/produits/ModalImportProduits.jsx → A11y error: Error: Line 119: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/produits/ProduitDetail.jsx → A11y error: Error: Line 79: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/produits/ProduitForm.jsx → A11y error: Error: Line 158: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/produits/ProduitFormModal.jsx → A11y error: Error: Line 20: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/produits/ProduitRow.jsx → A11y error: Error: Line 22: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/promotions/PromotionRow.jsx → A11y error: Error: Line 6: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/Reporting/GraphMultiZone.jsx → A11y error: Error: Line 46: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/requisitions/RequisitionRow.jsx → A11y error: Error: Line 7: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ResetAuthButton.jsx → A11y error: Error: Line 13: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/security/TwoFactorSetup.jsx → A11y error: Error: Line 38: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/simulation/SimulationDetailsModal.jsx → A11y error: Error: Line 23: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/stock/AlertBadge.jsx → A11y error: Error: Line 20: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/taches/TacheForm.jsx → A11y error: Error: Line 64: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/taches/TachesKanban.jsx → A11y error: Error: Line 12: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/AutoCompleteField.jsx → A11y error: Error: Line 79: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/badge.jsx → A11y error: Error: Line 18: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/Breadcrumbs.jsx → A11y error: Error: Line 16: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/button.jsx → A11y error: Error: Line 13: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/Button.jsx → A11y error: Error: Line 13: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/card.jsx → A11y error: Error: Line 5: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/Card.jsx → A11y error: Error: Line 5: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/controls/index.jsx → A11y error: Error: Line 22: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/dialog.jsx → A11y error: Error: Line 45: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/Form.jsx → A11y error: Error: Line 5: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/FormActions.jsx → A11y error: Error: Line 12: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/FormField.jsx → A11y error: Error: Line 18: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/GlassCard.jsx → A11y error: Error: Line 19: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/ImportPreviewTable.jsx → A11y error: Error: Line 29: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/InputField.jsx → A11y error: Error: Line 18: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/label.jsx → A11y error: Error: Line 11: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/LanguageSelector.jsx → A11y error: Error: Line 29: Unexpected token ILLEGAL
+- /workspace/PROJET-GPT/src/components/ui/ListingContainer.jsx → A11y error: Error: Line 8: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/LoadingScreen.jsx → A11y error: Error: Line 7: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/LoadingSpinner.jsx → A11y error: Error: Line 12: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/ModalGlass.jsx → A11y error: Error: Line 40: Unexpected token ILLEGAL
+- /workspace/PROJET-GPT/src/components/ui/PageIntro.jsx → A11y error: Error: Line 8: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/PageSkeleton.jsx → A11y error: Error: Line 7: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/PageWrapper.jsx → A11y error: Error: Line 23: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/PaginationFooter.jsx → A11y error: Error: Line 13: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/PreviewBanner.jsx → A11y error: Error: Line 15: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/PrimaryButton.jsx → A11y error: Error: Line 9: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/SecondaryButton.jsx → A11y error: Error: Line 9: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/select.jsx → A11y error: Error: Line 21: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/SmartDialog.jsx → A11y error: Error: Line 21: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/StatCard.jsx → A11y error: Error: Line 7: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/TableContainer.jsx → A11y error: Error: Line 21: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/TableHeader.jsx → A11y error: Error: Line 10: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/ui/tabs.jsx → A11y error: Error: Line 5: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/utilisateurs/UtilisateurDetail.jsx → A11y error: Error: Line 13: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/utilisateurs/UtilisateurForm.jsx → A11y error: Error: Line 75: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/Utilisateurs/UtilisateurForm.jsx → A11y error: Error: Line 75: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/components/Utilisateurs/UtilisateurRow.jsx → A11y error: Error: Line 6: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/context/HelpProvider.jsx → A11y error: Error: Line 70: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/context/MultiMamaContext.jsx → A11y error: Error: Line 70: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/context/ThemeProvider.jsx → A11y error: Error: Line 54: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/contexts/AuthContext.jsx → A11y error: Error: Line 65: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/forms/FamilleForm.jsx → A11y error: Error: Line 32: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/forms/PeriodeForm.jsx → A11y error: Error: Line 28: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/forms/SousFamilleForm.jsx → A11y error: Error: Line 36: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/forms/UniteForm.jsx → A11y error: Error: Line 33: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/forms/ZoneForm.jsx → A11y error: Error: Line 35: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/hooks/gadgets/useEvolutionAchats.js → A11y error: SyntaxError: Identifier 'loading' has already been declared. (8:9)
+- /workspace/PROJET-GPT/src/hooks/useEmailsEnvoyes.js → A11y error: SyntaxError: Identifier 'loading' has already been declared. (8:9)
+- /workspace/PROJET-GPT/src/hooks/useZonesStock.js → A11y error: SyntaxError: Identifier 'loading' has already been declared. (12:9)
+- /workspace/PROJET-GPT/src/layout/AdminLayout.jsx → A11y error: Error: Line 25: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/layout/Layout.jsx → A11y error: Error: Line 77: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/layout/LegalLayout.jsx → A11y error: Error: Line 31: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/layout/Navbar.jsx → A11y error: Error: Line 46: Unexpected token ILLEGAL
+- /workspace/PROJET-GPT/src/layout/Sidebar.jsx → A11y error: Error: Line 75: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/layout/ViewerLayout.jsx → A11y error: Error: Line 25: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/main.jsx → A11y error: Error: Line 27: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/Accueil.jsx → A11y error: Error: Line 54: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/achats/AchatDetail.jsx → A11y error: Error: Line 33: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/achats/AchatForm.jsx → A11y error: Error: Line 64: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/achats/Achats.jsx → A11y error: Error: Line 56: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/aide/Aide.jsx → A11y error: Error: Line 36: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/aide/AideForm.jsx → A11y error: Error: Line 52: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/Alertes.jsx → A11y error: Error: Line 64: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/analyse/Analyse.jsx → A11y error: Error: Line 36: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/analyse/AnalyseCostCenter.jsx → A11y error: Error: Line 3: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/analyse/MenuEngineering.jsx → A11y error: Error: Line 36: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/analytique/AnalytiqueDashboard.jsx → A11y error: Error: Line 48: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/auth/Blocked.jsx → A11y error: Error: Line 12: Unexpected token ILLEGAL
+- /workspace/PROJET-GPT/src/pages/auth/CreateMama.jsx → A11y error: Error: Line 53: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/auth/Login.jsx → A11y error: Error: Line 101: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/auth/Logout.jsx → A11y error: Error: Line 20: Unexpected token ILLEGAL
+- /workspace/PROJET-GPT/src/pages/auth/Pending.jsx → A11y error: Error: Line 9: Unexpected token ILLEGAL
+- /workspace/PROJET-GPT/src/pages/auth/ResetPassword.jsx → A11y error: Error: Line 36: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/auth/RoleError.jsx → A11y error: Error: Line 11: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/auth/Unauthorized.jsx → A11y error: Error: Line 13: Unexpected token ILLEGAL
+- /workspace/PROJET-GPT/src/pages/auth/UpdatePassword.jsx → A11y error: Error: Line 42: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/BarManager.jsx → A11y error: Error: Line 159: Unexpected token ILLEGAL
+- /workspace/PROJET-GPT/src/pages/bons_livraison/BLCreate.jsx → A11y error: Error: Line 24: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/bons_livraison/BLDetail.jsx → A11y error: Error: Line 28: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/bons_livraison/BLForm.jsx → A11y error: Error: Line 73: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/bons_livraison/BonsLivraison.jsx → A11y error: Error: Line 58: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/carte/Carte.jsx → A11y error: Error: Line 73: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/CartePlats.jsx → A11y error: Error: Line 56: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/catalogue/CatalogueSyncViewer.jsx → A11y error: Error: Line 65: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/commandes/CommandeDetail.jsx → A11y error: Error: Line 45: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/commandes/CommandeForm.jsx → A11y error: Error: Line 95: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/commandes/Commandes.jsx → A11y error: Error: Line 24: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/commandes/CommandesEnvoyees.jsx → A11y error: Error: Line 40: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/Consentements.jsx → A11y error: Error: Line 14: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/consolidation/AccessMultiSites.jsx → A11y error: Error: Line 24: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/consolidation/Consolidation.jsx → A11y error: Error: Line 39: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/costboisson/CostBoisson.jsx → A11y error: Error: Line 208: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/costing/CostingCarte.jsx → A11y error: Error: Line 66: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/cuisine/MenuDuJour.jsx → A11y error: Error: Line 91: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/Dashboard.jsx → A11y error: Error: Line 28: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/dashboard/DashboardBuilder.jsx → A11y error: Error: Line 38: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/debug/AccessExample.jsx → A11y error: Error: Line 12: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/debug/AuthDebug.jsx → A11y error: Error: Line 23: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/debug/Debug.jsx → A11y error: Error: Line 13: Unexpected token ILLEGAL
+- /workspace/PROJET-GPT/src/pages/debug/DebugUser.jsx → A11y error: Error: Line 15: Unexpected token ILLEGAL
+- /workspace/PROJET-GPT/src/pages/documents/DocumentForm.jsx → A11y error: Error: Line 34: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/documents/Documents.jsx → A11y error: Error: Line 46: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/ecarts/Ecarts.jsx → A11y error: Error: Line 27: Unexpected token ILLEGAL
+- /workspace/PROJET-GPT/src/pages/emails/EmailsEnvoyes.jsx → A11y error: Error: Line 104: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/engineering/MenuEngineering.jsx → A11y error: Error: Line 69: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/EngineeringMenu.jsx → A11y error: Error: Line 19: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/factures/FactureCreate.jsx → A11y error: Error: Line 15: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/factures/FactureDetail.jsx → A11y error: Error: Line 81: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/factures/FactureForm.jsx → A11y error: Error: Line 325: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/factures/Factures.jsx → A11y error: Error: Line 102: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/factures/ImportFactures.jsx → A11y error: Error: Line 25: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/Feedback.jsx → A11y error: Error: Line 36: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/fiches/FicheDetail.jsx → A11y error: Error: Line 86: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/fiches/FicheForm.jsx → A11y error: Error: Line 131: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/fiches/Fiches.jsx → A11y error: Error: Line 96: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/fournisseurs/ApiFournisseurs.jsx → A11y error: Error: Line 27: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/fournisseurs/comparatif/ComparatifPrix.jsx → A11y error: Error: Line 48: Unexpected token ILLEGAL
+- /workspace/PROJET-GPT/src/pages/fournisseurs/comparatif/PrixFournisseurs.jsx → A11y error: Error: Line 21: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/fournisseurs/FournisseurApiSettingsForm.jsx → A11y error: Error: Line 60: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/fournisseurs/FournisseurCreate.jsx → A11y error: Error: Line 13: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/fournisseurs/FournisseurDetail.jsx → A11y error: Error: Line 81: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/fournisseurs/FournisseurDetailPage.jsx → A11y error: Error: Line 14: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/fournisseurs/FournisseurForm.jsx → A11y error: Error: Line 59: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/fournisseurs/Fournisseurs.jsx → A11y error: Error: Line 127: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/HelpCenter.jsx → A11y error: Error: Line 16: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/inventaire/EcartInventaire.jsx → A11y error: Error: Line 130: Unexpected token ILLEGAL
+- /workspace/PROJET-GPT/src/pages/inventaire/Inventaire.jsx → A11y error: Error: Line 40: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/inventaire/InventaireDetail.jsx → A11y error: Error: Line 96: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/inventaire/InventaireForm.jsx → A11y error: Error: Line 127: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/inventaire/InventaireZones.jsx → A11y error: Error: Line 56: Unexpected token ILLEGAL
+- /workspace/PROJET-GPT/src/pages/Journal.jsx → A11y error: Error: Line 56: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/legal/Cgu.jsx → A11y error: Error: Line 12: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/legal/Cgv.jsx → A11y error: Error: Line 12: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/legal/Confidentialite.jsx → A11y error: Error: Line 34: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/legal/Contact.jsx → A11y error: Error: Line 8: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/legal/Licence.jsx → A11y error: Error: Line 8: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/legal/MentionsLegales.jsx → A11y error: Error: Line 34: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/menu/MenuDuJour.jsx → A11y error: Error: Line 40: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/menu/MenuDuJourJour.jsx → A11y error: Error: Line 37: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/menus/MenuDetail.jsx → A11y error: Error: Line 37: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/menus/MenuDuJour.jsx → A11y error: Error: Line 66: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/menus/MenuDuJourDetail.jsx → A11y error: Error: Line 31: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/menus/MenuDuJourForm.jsx → A11y error: Error: Line 86: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/menus/MenuForm.jsx → A11y error: Error: Line 106: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/menus/MenuGroupeDetail.jsx → A11y error: Error: Line 15: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/menus/MenuGroupeForm.jsx → A11y error: Error: Line 51: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/menus/MenuGroupes.jsx → A11y error: Error: Line 18: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/menus/MenuPDF.jsx → A11y error: Error: Line 76: Unexpected token ILLEGAL
+- /workspace/PROJET-GPT/src/pages/menus/Menus.jsx → A11y error: Error: Line 124: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/mobile/MobileAccueil.jsx → A11y error: Error: Line 11: Unexpected token ILLEGAL
+- /workspace/PROJET-GPT/src/pages/mobile/MobileInventaire.jsx → A11y error: Error: Line 50: Unexpected token ILLEGAL
+- /workspace/PROJET-GPT/src/pages/mobile/MobileRequisition.jsx → A11y error: Error: Line 60: Unexpected token ILLEGAL
+- /workspace/PROJET-GPT/src/pages/NotFound.jsx → A11y error: Error: Line 19: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/notifications/NotificationSettingsForm.jsx → A11y error: Error: Line 59: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/notifications/NotificationsInbox.jsx → A11y error: Error: Line 29: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/Onboarding.jsx → A11y error: Error: Line 29: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/onboarding/OnboardingUtilisateur.jsx → A11y error: Error: Line 12: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/parametrage/AccessRights.jsx → A11y error: Error: Line 36: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/parametrage/APIKeys.jsx → A11y error: Error: Line 33: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/parametrage/CentreCoutForm.jsx → A11y error: Error: Line 63: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/parametrage/ExportComptaPage.jsx → A11y error: Error: Line 29: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/parametrage/ExportUserData.jsx → A11y error: Error: Line 38: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/parametrage/InvitationsEnAttente.jsx → A11y error: Error: Line 69: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/parametrage/InviteUser.jsx → A11y error: Error: Line 115: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/parametrage/MamaForm.jsx → A11y error: Error: Line 91: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/parametrage/Mamas.jsx → A11y error: Error: Line 68: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/parametrage/MamaSettingsForm.jsx → A11y error: Error: Line 64: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/parametrage/Parametrage.jsx → A11y error: Error: Line 28: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/parametrage/ParametresCommandes.jsx → A11y error: Error: Line 50: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/parametrage/Periodes.jsx → A11y error: Error: Line 51: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/parametrage/Permissions.jsx → A11y error: Error: Line 47: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/parametrage/PermissionsAdmin.jsx → A11y error: Error: Line 61: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/parametrage/PermissionsForm.jsx → A11y error: Error: Line 97: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/parametrage/RGPDConsentForm.jsx → A11y error: Error: Line 49: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/parametrage/RoleForm.jsx → A11y error: Error: Line 47: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/parametrage/Roles.jsx → A11y error: Error: Line 13: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/parametrage/SousFamilles.jsx → A11y error: Error: Line 75: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/parametrage/TemplateCommandeForm.jsx → A11y error: Error: Line 64: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/parametrage/TemplatesCommandes.jsx → A11y error: Error: Line 41: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/parametrage/Unites.jsx → A11y error: Error: Line 69: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/parametrage/UtilisateurForm.jsx → A11y error: Error: Line 76: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/parametrage/Utilisateurs.jsx → A11y error: Error: Line 67: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/parametrage/ZoneAccess.jsx → A11y error: Error: Line 52: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/parametrage/ZoneForm.jsx → A11y error: Error: Line 59: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/parametrage/Zones.jsx → A11y error: Error: Line 44: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/Parametres/Familles.jsx → A11y error: Error: Line 111: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/Pertes.jsx → A11y error: Error: Line 68: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/Planning.jsx → A11y error: Error: Line 39: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/planning/SimulationPlanner.jsx → A11y error: Error: Line 44: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/PlanningDetail.jsx → A11y error: Error: Line 27: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/PlanningForm.jsx → A11y error: Error: Line 68: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/PlanningModule.jsx → A11y error: Error: Line 5: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/produits/ProduitDetail.jsx → A11y error: Error: Line 100: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/produits/ProduitForm.jsx → A11y error: Error: Line 14: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/produits/Produits.jsx → A11y error: Error: Line 141: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/promotions/PromotionForm.jsx → A11y error: Error: Line 22: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/promotions/Promotions.jsx → A11y error: Error: Line 92: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/public/LandingPage.jsx → A11y error: Error: Line 33: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/public/Onboarding.jsx → A11y error: Error: Line 57: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/public/Signup.jsx → A11y error: Error: Line 44: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/receptions/Receptions.jsx → A11y error: Error: Line 5: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/recettes/Recettes.jsx → A11y error: Error: Line 8: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/reporting/GraphCost.jsx → A11y error: Error: Line 24: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/reporting/Reporting.jsx → A11y error: Error: Line 58: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/reporting/ReportingPDF.jsx → A11y error: Error: Line 7: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/requisitions/RequisitionDetail.jsx → A11y error: Error: Line 27: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/requisitions/RequisitionForm.jsx → A11y error: Error: Line 93: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/requisitions/Requisitions.jsx → A11y error: Error: Line 95: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/Rgpd.jsx → A11y error: Error: Line 19: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/signalements/SignalementDetail.jsx → A11y error: Error: Line 7: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/signalements/SignalementForm.jsx → A11y error: Error: Line 62: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/signalements/Signalements.jsx → A11y error: Error: Line 15: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/simulation/Simulation.jsx → A11y error: Error: Line 18: Unexpected token ILLEGAL
+- /workspace/PROJET-GPT/src/pages/simulation/SimulationForm.jsx → A11y error: Error: Line 42: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/simulation/SimulationMenu.jsx → A11y error: Error: Line 11: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/simulation/SimulationResult.jsx → A11y error: Error: Line 5: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/stats/Stats.jsx → A11y error: Error: Line 5: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/stats/StatsAdvanced.jsx → A11y error: Error: Line 32: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/stats/StatsConsolidation.jsx → A11y error: Error: Line 27: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/stats/StatsCostCenters.jsx → A11y error: Error: Line 37: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/stats/StatsCostCentersPivot.jsx → A11y error: Error: Line 50: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/stats/StatsFiches.jsx → A11y error: Error: Line 108: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/stats/StatsStock.jsx → A11y error: Error: Line 34: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/Stock.jsx → A11y error: Error: Line 51: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/stock/AlertesRupture.jsx → A11y error: Error: Line 20: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/stock/Inventaire.jsx → A11y error: Error: Line 19: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/stock/InventaireForm.jsx → A11y error: Error: Line 15: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/stock/Requisitions.jsx → A11y error: Error: Line 45: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/stock/TransfertForm.jsx → A11y error: Error: Line 78: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/stock/Transferts.jsx → A11y error: Error: Line 40: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/supervision/ComparateurFiches.jsx → A11y error: Error: Line 30: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/supervision/GroupeParamForm.jsx → A11y error: Error: Line 92: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/supervision/Logs.jsx → A11y error: Error: Line 49: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/supervision/Rapports.jsx → A11y error: Error: Line 62: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/supervision/SupervisionGroupe.jsx → A11y error: Error: Line 31: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/surcouts/Surcouts.jsx → A11y error: Error: Line 8: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/taches/Alertes.jsx → A11y error: Error: Line 30: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/taches/TacheDetail.jsx → A11y error: Error: Line 30: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/taches/TacheForm.jsx → A11y error: Error: Line 62: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/taches/TacheNew.jsx → A11y error: Error: Line 7: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/taches/Taches.jsx → A11y error: Error: Line 45: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/Transferts.jsx → A11y error: Error: Line 248: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/Utilisateurs.jsx → A11y error: Error: Line 77: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/pages/Validations.jsx → A11y error: Error: Line 50: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/router.jsx → A11y error: Error: Line 250: Invalid regular expression: missing /
+- /workspace/PROJET-GPT/src/api/public/index.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/api/public/produits.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/api/public/promotions.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/api/public/stock.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/api/shared/supabaseClient.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/api/shared/supabaseEnv.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/components/LiquidBackground/index.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/components/LiquidBackground/MouseLight.jsx → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/components/parametrage/ParamRoles.jsx → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/components/produits/priceHelpers.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/components/ProtectedRoute.jsx → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/components/ui/AutoCompleteZoneField.jsx → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/components/ui/checkbox.jsx → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/components/ui/dropdown-menu.jsx → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/components/ui/input.jsx → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/components/ui/LoadingSkeleton.jsx → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/components/ui/MamaLogo.jsx → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/config/modules.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/constants/accessKeys.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/constants/factures.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/constants/tables.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/gadgets/useAchatsMensuels.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/gadgets/useAlerteStockFaible.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/gadgets/useBudgetMensuel.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/gadgets/useConsoMoyenne.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/gadgets/useDerniersAcces.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/gadgets/useProduitsUtilises.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/gadgets/useTachesUrgentes.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/gadgets/useTopFournisseurs.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useAccess.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useAchats.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useAdvancedStats.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useAide.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useAlerts.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useAnalyse.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useAnalytique.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useApiFournisseurs.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useApiKeys.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useAuditLog.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useAuth.ts → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useBonsLivraison.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useCarte.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useCommandes.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useComparatif.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useConsentements.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useConsolidatedStats.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useConsolidation.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useCostCenterMonthlyStats.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useCostCenters.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useCostCenterStats.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useCostCenterSuggestions.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useCostingCarte.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useDashboard.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useDashboards.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useDashboardStats.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useDocuments.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useEcartsInventaire.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useEnrichedProducts.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useExport.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useExportCompta.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useFactureForm.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useFactures.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useFacturesAutocomplete.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useFamilles.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useFamillesWithSousFamilles.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useFeedback.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useFicheCoutHistory.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useFiches.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useFichesAutocomplete.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useFichesTechniques.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useFormatters.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useFormErrors.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useFournisseurAPI.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useFournisseurApiConfig.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useFournisseurNotes.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useFournisseurs.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useFournisseursAutocomplete.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useFournisseursInactifs.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useFournisseurStats.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useGadgets.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useGlobalSearch.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useGraphiquesMultiZone.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useHelpArticles.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useInventaireLignes.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useInventaires.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useInventaireZones.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useInvoiceImport.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useInvoiceItems.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useInvoiceOcr.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useInvoices.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useLogs.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useMama.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useMamas.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useMamaSettings.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useMamaSwitcher.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useMenuDuJour.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useMenuEngineering.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useMenuGroupe.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useMenus.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useMouvementCostCenters.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useNotifications.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useOnboarding.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/usePerformanceFiches.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/usePeriodes.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/usePermissions.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/usePertes.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/usePlanning.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/usePriceTrends.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useProducts.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useProduitsAutocomplete.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useProduitsFournisseur.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useProduitsInventaire.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/usePromotions.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useRecommendations.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useReporting.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useRequisitions.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useRGPD.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useRoles.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useRuptureAlerts.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useSignalements.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useSimulation.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useSousFamilles.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useStats.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useStock.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useStockRequisitionne.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useStorage.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useSupabaseClient.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useSwipe.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useTacheAssignation.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useTaches.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useTasks.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useTemplatesCommandes.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useTopProducts.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useTransferts.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useTwoFactorAuth.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useUnites.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useUsageStats.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useUtilisateurs.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useValidations.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useZoneProducts.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useZoneRights.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/hooks/useZones.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/i18n/i18n.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/lib/access.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/lib/export/exportHelpers.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/lib/lazyWithPreload.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/lib/loginUser.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/lib/roleUtils.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/lib/supabase.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/lib/supabaseClient.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/lib/utils.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/lib/xlsx/safeImportXLSX.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/license.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/pages/AideContextuelle.jsx → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/pages/analyse/TableauxDeBord.jsx → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/pages/fournisseurs/ApiFournisseurForm.jsx → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/registerSW.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/supabaseClient.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/utils/excelUtils.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/utils/exportExcelProduits.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/utils/formIds.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/utils/importExcelProduits.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/utils/permissions.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/utils/watermark.js → Duplicate error: TypeError: traverse is not a function
+- /workspace/PROJET-GPT/src/workers/NotificationServiceWorker.js → Duplicate error: TypeError: traverse is not a function

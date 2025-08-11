@@ -1,0 +1,1766 @@
+{
+  "missing": {
+    "tables": [
+      "requisitions!inner",
+      "utilisateur:utilisateurs!logs_securite_utilisateur_id_fkey",
+      "fournisseur:fournisseur_id",
+      "produit:produit_id",
+      "lignes:lignes_bl!bl_id",
+      "lignes:commande_lignes",
+      "unite:unite_id",
+      "gadgets:gadgets!tableau_id",
+      "famille:familles!fk_produits_famille",
+      "sous_famille:sous_familles!fk_produits_sous_famille",
+      "liaisons:fournisseur_produits!fournisseur_produits_produit_id_fkey",
+      "fournisseur:fournisseurs!fk_fournisseur_produits_fournisseur_id",
+      "lignes:produits_inventaire!inventaire_id",
+      "fournisseur_produits:fournisseur_produits!fournisseur_produits_produit_id_fkey",
+      "lignes:facture_lignes!facture_id",
+      "factures:facture_id",
+      "famille:familles!fiches_techniques_famille_id_fkey",
+      "lignes:fiche_lignes!fiche_id",
+      "lignes:v_fiche_lignes_complete!fiche_id",
+      "sous_fiche:sous_fiche_id",
+      "contact:fournisseur_contacts",
+      "zones_stock",
+      "zone:inventaire_zones!inventaires_zone_id_fkey",
+      "produit:produits!produits_inventaire_produit_id_fkey",
+      "produit:produits!facture_lignes_produit_id_fkey",
+      "famille:familles",
+      "utilisateurs:user_id",
+      "mamas",
+      "fiches:menus_jour_fiches",
+      "fiche:fiches_techniques",
+      "resume:v_menu_groupe_resume",
+      "fiches:menu_fiches",
+      "fiche: fiches",
+      "mouvements_centres_cout",
+      "centres_de_cout:cost_center_id",
+      "lignes:planning_lignes!planning_id",
+      "main_fournisseur:fournisseur_id",
+      "produit:produits!fournisseur_produits_produit_id_fkey",
+      "lignes:requisition_lignes",
+      "lignes:requisition_lignes!requisition_id",
+      "assigned:utilisateurs!taches_assigned_to_fkey",
+      "zone_source:zones_stock!fk_transferts_zone_source_id",
+      "zone_destination:zones_stock!fk_transferts_zone_dest_id",
+      "lignes:transfert_lignes",
+      "produit:produits",
+      "utilisateurs_complets",
+      "zones_droits!inner"
+    ],
+    "columns": {
+      "promotions": [
+        "*"
+      ],
+      "logs_securite": [
+        "utilisateur_id",
+        "description",
+        "count:id"
+      ],
+      "taches": [
+        "titre",
+        "date_echeance",
+        "*"
+      ],
+      "achats": [
+        "*"
+      ],
+      "help_articles": [
+        "*"
+      ],
+      "regles_alertes": [
+        "*"
+      ],
+      "api_keys": [
+        "*"
+      ],
+      "bons_livraison": [
+        "numero_bl",
+        "date_reception",
+        "commentaire",
+        "actif",
+        "fournisseur_id",
+        "*"
+      ],
+      "fiches_techniques": [
+        "*",
+        "nom",
+        "cout_par_portion",
+        "actif",
+        "cout_total"
+      ],
+      "commandes": [
+        "*"
+      ],
+      "fournisseur_produits": [
+        "*",
+        "derniere_livraison:date_livraison"
+      ],
+      "consentements_utilisateur": [
+        "*"
+      ],
+      "centres_de_cout": [
+        "*"
+      ],
+      "tableaux_de_bord": [
+        "*",
+        "liste_gadgets_json"
+      ],
+      "gadgets": [
+        "ordre"
+      ],
+      "documents": [
+        "*",
+        "fichier_url",
+        "url"
+      ],
+      "produits": [
+        "sous_famille_id",
+        "*",
+        "tva",
+        "dernier_prix"
+      ],
+      "inventaires": [
+        "*",
+        "date"
+      ],
+      "factures": [
+        "*",
+        "numero",
+        "date_facture",
+        "fournisseur_id",
+        "total_ttc",
+        "statut"
+      ],
+      "facture_lignes": [
+        "quantite",
+        "prix",
+        "tva",
+        "facture_id",
+        "prix_unitaire",
+        "*"
+      ],
+      "compta_mapping": [
+        "cle",
+        "compte"
+      ],
+      "familles": [
+        "*"
+      ],
+      "sous_familles": [
+        "*"
+      ],
+      "feedback": [
+        "*"
+      ],
+      "fiche_cout_history": [
+        "*"
+      ],
+      "fournisseurs_api_config": [
+        "*"
+      ],
+      "fournisseur_notes": [
+        "*"
+      ],
+      "fournisseurs": [
+        "actif"
+      ],
+      "produits_inventaire": [
+        "*"
+      ],
+      "inventaire_zones": [
+        "*"
+      ],
+      "logs_activite": [
+        "*"
+      ],
+      "rapports_generes": [
+        "*"
+      ],
+      "menus_jour": [
+        "*",
+        "date",
+        "categorie",
+        "fiche_id",
+        "portions"
+      ],
+      "menu_groupes": [
+        "*"
+      ],
+      "menu_groupe_lignes": [
+        "*"
+      ],
+      "menu_groupe_modele_lignes": [
+        "*"
+      ],
+      "menus": [
+        "*"
+      ],
+      "notifications": [
+        "*"
+      ],
+      "notification_preferences": [
+        "*"
+      ],
+      "etapes_onboarding": [
+        "etape",
+        "statut"
+      ],
+      "periodes_comptables": [
+        "*"
+      ],
+      "permissions": [
+        "*"
+      ],
+      "pertes": [
+        "*"
+      ],
+      "planning_previsionnel": [
+        "*"
+      ],
+      "requisitions": [
+        "*"
+      ],
+      "roles": [
+        "*"
+      ],
+      "alertes_rupture": [
+        "*"
+      ],
+      "signalements": [
+        "*"
+      ],
+      "templates_commandes": [
+        "*"
+      ],
+      "transferts": [
+        "date_transfert",
+        "motif"
+      ],
+      "auth_double_facteur": [
+        "enabled",
+        "secret"
+      ],
+      "usage_stats": [
+        "module",
+        "count:id",
+        "timestamp"
+      ],
+      "validation_requests": [
+        "*"
+      ],
+      "v_produits_par_zone": [
+        "*"
+      ],
+      "zones_droits": [
+        "*"
+      ]
+    },
+    "views": [
+      "v_achats_mensuels",
+      "v_costing_carte",
+      "v_menu_du_jour_lignes_cout"
+    ],
+    "functions": [
+      "advanced_stats",
+      "suggest_cost_centers",
+      "merge_familles",
+      "reorder_familles",
+      "log_action"
+    ]
+  },
+  "mismatch": {
+    "fks": [
+      {
+        "from": {
+          "table": "templates_commandes",
+          "columns": [
+            "mama_id"
+          ]
+        },
+        "to": {
+          "table": "mamas",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "inventaires",
+          "columns": [
+            "mama_id"
+          ]
+        },
+        "to": {
+          "table": "mamas",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "produits_inventaire",
+          "columns": [
+            "mama_id"
+          ]
+        },
+        "to": {
+          "table": "mamas",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "periodes_comptables",
+          "columns": [
+            "mama_id"
+          ]
+        },
+        "to": {
+          "table": "mamas",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "requisitions",
+          "columns": [
+            "mama_id"
+          ]
+        },
+        "to": {
+          "table": "mamas",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "requisitions",
+          "columns": [
+            "zone_id"
+          ]
+        },
+        "to": {
+          "table": "zones_stock",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "menu_groupe_lignes",
+          "columns": [
+            "menu_groupe_id"
+          ]
+        },
+        "to": {
+          "table": "menu_groupes",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "menu_groupe_modeles",
+          "columns": [
+            "mama_id"
+          ]
+        },
+        "to": {
+          "table": "mamas",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "settings",
+          "columns": [
+            "mama_id"
+          ]
+        },
+        "to": {
+          "table": "mamas",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "user_mama_access",
+          "columns": [
+            "mama_id"
+          ]
+        },
+        "to": {
+          "table": "mamas",
+          "columns": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "policies": [],
+    "views": []
+  },
+  "unused": {
+    "tables": [
+      "emails_envoyes",
+      "alertes",
+      "documentation",
+      "fiches",
+      "groupes",
+      "guides_seen",
+      "menus_groupes",
+      "menus_groupes_fiches",
+      "parametres_commandes",
+      "stocks",
+      "tooltips",
+      "ventes_boissons",
+      "ventes_fiches_carte"
+    ],
+    "views": [
+      "v_boissons",
+      "suggestions_commandes",
+      "v_couts_fiches"
+    ],
+    "functions": [
+      "current_user_mama_id",
+      "current_user_is_admin_or_manager",
+      "current_user_is_admin",
+      "calcul_ecarts_inventaire",
+      "can_transfer",
+      "zone_is_cave_or_shop",
+      "compare_fiche",
+      "stats_multi_mamas",
+      "sync_pivot_from_produits",
+      "sync_produits_from_pivot",
+      "safe_delete_zone"
+    ]
+  },
+  "sqlIndex": {
+    "tables": {
+      "fournisseurs": {
+        "columns": [
+          "id",
+          "mama_id",
+          "nom",
+          "contact",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "produits": {
+        "columns": [
+          "id",
+          "mama_id",
+          "nom",
+          "fournisseur_id",
+          "unite_id",
+          "famille_id",
+          "stock_reel",
+          "stock_min",
+          "pmp",
+          "actif",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "roles": {
+        "columns": [
+          "id",
+          "nom",
+          "description",
+          "access_rights",
+          "actif",
+          "mama_id",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "utilisateurs": {
+        "columns": [
+          "id",
+          "nom",
+          "email",
+          "auth_id",
+          "role_id",
+          "mama_id",
+          "access_rights",
+          "actif",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "commandes": {
+        "columns": [
+          "id",
+          "mama_id",
+          "fournisseur_id",
+          "reference",
+          "date_commande",
+          "statut",
+          "commentaire",
+          "envoyee_at",
+          "created_at",
+          "updated_at",
+          "date_livraison_prevue",
+          "montant_total",
+          "bl_id",
+          "facture_id"
+        ]
+      },
+      "commande_lignes": {
+        "columns": [
+          "id",
+          "commande_id",
+          "produit_id",
+          "mama_id",
+          "quantite",
+          "unite",
+          "prix_achat",
+          "total_ligne",
+          "suggestion",
+          "commentaire"
+        ]
+      },
+      "templates_commandes": {
+        "columns": [
+          "id",
+          "mama_id",
+          "nom",
+          "fournisseur_id",
+          "logo_url",
+          "entete",
+          "pied_page",
+          "adresse_livraison",
+          "contact_nom",
+          "contact_tel",
+          "contact_email",
+          "conditions_generales",
+          "champs_visibles",
+          "actif",
+          "created_at",
+          "updated_at",
+          "unique"
+        ]
+      },
+      "emails_envoyes": {
+        "columns": [
+          "id",
+          "commande_id",
+          "email",
+          "statut",
+          "envoye_le",
+          "mama_id"
+        ]
+      },
+      "permissions": {
+        "columns": [
+          "id",
+          "role_id",
+          "module",
+          "droit",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "consentements_utilisateur": {
+        "columns": [
+          "id",
+          "utilisateur_id",
+          "user_id",
+          "mama_id",
+          "type_consentement",
+          "consentement",
+          "date_consentement"
+        ]
+      },
+      "achats": {
+        "columns": []
+      },
+      "alertes": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "api_keys": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "auth_double_facteur": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "bons_livraison": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "catalogue_updates": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "centres_de_cout": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "compta_mapping": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "documentation": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "documents": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "etapes_onboarding": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "facture_lignes": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "factures": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "familles": {
+        "columns": [
+          "id",
+          "mama_id",
+          "nom",
+          "actif",
+          "created_at"
+        ]
+      },
+      "feedback": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "fiche_cout_history": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "fiche_lignes": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "fiches": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "fiches_techniques": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "fournisseur_contacts": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "fournisseur_notes": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "fournisseur_produits": {
+        "columns": [
+          "id",
+          "mama_id",
+          "produit_id",
+          "fournisseur_id",
+          "prix_achat",
+          "date_livraison",
+          "created_at"
+        ]
+      },
+      "fournisseurs_api_config": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "gadgets": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "groupes": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "guides_seen": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "help_articles": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "inventaire_zones": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "inventaires": {
+        "columns": [
+          "id",
+          "mama_id",
+          "date_inventaire",
+          "zone_id",
+          "periode_id",
+          "commentaire",
+          "actif",
+          "created_at"
+        ]
+      },
+      "produits_inventaire": {
+        "columns": [
+          "id",
+          "inventaire_id",
+          "produit_id",
+          "quantite_theorique",
+          "quantite_reelle",
+          "unite",
+          "ecart",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "journaux_utilisateur": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "lignes_bl": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "logs_securite": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "menu_fiches": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "menus": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "menus_groupes": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "menus_groupes_fiches": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "menus_jour": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "menus_jour_fiches": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "notification_preferences": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "notifications": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "parametres_commandes": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "periodes_comptables": {
+        "columns": [
+          "id",
+          "mama_id",
+          "debut",
+          "fin",
+          "actif",
+          "cloturee",
+          "created_at"
+        ]
+      },
+      "pertes": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "planning_lignes": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "planning_previsionnel": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "promotions": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "regles_alertes": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "requisitions": {
+        "columns": [
+          "id",
+          "mama_id",
+          "date_requisition",
+          "zone_id",
+          "statut",
+          "commentaire",
+          "created_at",
+          "updated_at",
+          "actif"
+        ]
+      },
+      "requisition_lignes": {
+        "columns": [
+          "id",
+          "requisition_id",
+          "produit_id",
+          "quantite",
+          "unite",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "signalements": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "sous_familles": {
+        "columns": [
+          "id",
+          "mama_id",
+          "famille_id",
+          "nom",
+          "actif",
+          "created_at"
+        ]
+      },
+      "stocks": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "tableaux_de_bord": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "taches": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "tooltips": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "transfert_lignes": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "transferts": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "unites": {
+        "columns": [
+          "id",
+          "mama_id",
+          "nom",
+          "actif",
+          "created_at"
+        ]
+      },
+      "usage_stats": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "utilisateurs_taches": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "validation_requests": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "ventes_boissons": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "ventes_fiches_carte": {
+        "columns": [
+          "id",
+          "mama_id",
+          "created_at"
+        ]
+      },
+      "zones_droits": {
+        "columns": []
+      },
+      "menu_groupes": {
+        "columns": []
+      },
+      "menu_groupe_lignes": {
+        "columns": [
+          "id",
+          "menu_groupe_id",
+          "mama_id",
+          "categorie",
+          "fiche_id",
+          "portions_par_personne",
+          "position",
+          "created_at"
+        ]
+      },
+      "menu_groupe_modeles": {
+        "columns": [
+          "id",
+          "mama_id",
+          "nom",
+          "actif",
+          "created_at"
+        ]
+      },
+      "menu_groupe_modele_lignes": {
+        "columns": [
+          "id",
+          "modele_id",
+          "mama_id",
+          "categorie",
+          "fiche_id",
+          "portions_par_personne",
+          "position",
+          "created_at"
+        ]
+      },
+      "alertes_rupture": {
+        "columns": []
+      },
+      "logs_activite": {
+        "columns": [
+          "id",
+          "mama_id",
+          "user_id",
+          "type",
+          "module",
+          "description",
+          "donnees",
+          "ip_address",
+          "user_agent",
+          "critique",
+          "date_log"
+        ]
+      },
+      "menus_jour_lignes": {
+        "columns": [
+          "id",
+          "menu_id",
+          "mama_id",
+          "categorie",
+          "fiche_id",
+          "portions",
+          "prix_unitaire_snapshot",
+          "created_at"
+        ]
+      },
+      "rapports_generes": {
+        "columns": [
+          "id",
+          "mama_id",
+          "module",
+          "type",
+          "periode_debut",
+          "periode_fin",
+          "date_generation",
+          "chemin_fichier",
+          "created_by"
+        ]
+      },
+      "settings": {
+        "columns": [
+          "id",
+          "mama_id",
+          "objectif_marge_pct",
+          "objectif_food_cost_pct",
+          "primary_color",
+          "secondary_color",
+          "dark_mode",
+          "logo_url",
+          "created_at"
+        ]
+      },
+      "user_mama_access": {
+        "columns": [
+          "id",
+          "user_id",
+          "mama_id",
+          "role",
+          "created_at",
+          "unique"
+        ]
+      },
+      "ventes_fiches": {
+        "columns": [
+          "id",
+          "mama_id",
+          "fiche_id",
+          "date_vente",
+          "quantite",
+          "prix_vente_unitaire",
+          "created_at",
+          "unique"
+        ]
+      },
+      "ventes_import_staging": {
+        "columns": [
+          "id",
+          "mama_id",
+          "fiche_id",
+          "date_vente",
+          "quantite",
+          "prix_vente_unitaire",
+          "statut",
+          "created_at"
+        ]
+      },
+      "produits_zones": {
+        "columns": []
+      }
+    },
+    "views": {
+      "v_analytique_stock": {
+        "columns": []
+      },
+      "v_besoins_previsionnels": {
+        "columns": []
+      },
+      "v_boissons": {
+        "columns": []
+      },
+      "v_cost_center_month": {
+        "columns": []
+      },
+      "v_cost_center_monthly": {
+        "columns": []
+      },
+      "v_ecarts_inventaire": {
+        "columns": []
+      },
+      "v_evolution_achats": {
+        "columns": []
+      },
+      "v_fournisseurs_inactifs": {
+        "columns": []
+      },
+      "v_performance_fiches": {
+        "columns": []
+      },
+      "v_pmp": {
+        "columns": []
+      },
+      "v_products_last_price": {
+        "columns": []
+      },
+      "v_produits_dernier_prix": {
+        "columns": []
+      },
+      "v_produits_utilises": {
+        "columns": []
+      },
+      "v_reco_stockmort": {
+        "columns": []
+      },
+      "v_reco_surcout": {
+        "columns": []
+      },
+      "v_requisitions": {
+        "columns": []
+      },
+      "v_stock_requisitionne": {
+        "columns": []
+      },
+      "suggestions_commandes": {
+        "columns": []
+      },
+      "v_stocks": {
+        "columns": []
+      },
+      "v_taches_assignees": {
+        "columns": []
+      },
+      "v_tendance_prix_produit": {
+        "columns": []
+      },
+      "v_top_fournisseurs": {
+        "columns": []
+      },
+      "v_couts_fiches": {
+        "columns": []
+      },
+      "v_menu_groupe_couts": {
+        "columns": []
+      },
+      "v_menu_groupe_resume": {
+        "columns": []
+      },
+      "v_menu_du_jour_resume": {
+        "columns": []
+      },
+      "v_menu_du_jour_mensuel": {
+        "columns": []
+      },
+      "v_cons_achats_mensuels": {
+        "columns": []
+      },
+      "v_cons_ventes_mensuelles": {
+        "columns": []
+      },
+      "v_cons_foodcost_mensuel": {
+        "columns": []
+      },
+      "v_cons_ecarts_inventaire": {
+        "columns": []
+      },
+      "v_consolidation_mensuelle": {
+        "columns": []
+      },
+      "v_me_classification": {
+        "columns": []
+      },
+      "v_produits_par_zone": {
+        "columns": [
+          "mama_id",
+          "produit_id",
+          "produit_nom",
+          "zone_id",
+          "zone_nom",
+          "zone_type",
+          "unite_id",
+          "stock_reel",
+          "stock_min"
+        ]
+      }
+    },
+    "functions": [
+      {
+        "name": "current_user_mama_id",
+        "args": 0
+      },
+      {
+        "name": "current_user_is_admin_or_manager",
+        "args": 0
+      },
+      {
+        "name": "current_user_is_admin",
+        "args": 0
+      },
+      {
+        "name": "get_template_commande",
+        "args": 2
+      },
+      {
+        "name": "create_utilisateur",
+        "args": 4
+      },
+      {
+        "name": "calcul_ecarts_inventaire",
+        "args": 0
+      },
+      {
+        "name": "fn_calc_budgets",
+        "args": 2
+      },
+      {
+        "name": "can_transfer",
+        "args": 2
+      },
+      {
+        "name": "zone_is_cave_or_shop",
+        "args": 1
+      },
+      {
+        "name": "apply_stock_from_achat",
+        "args": 0
+      },
+      {
+        "name": "compare_fiche",
+        "args": 0
+      },
+      {
+        "name": "consolidated_stats",
+        "args": 0
+      },
+      {
+        "name": "dashboard_stats",
+        "args": 0
+      },
+      {
+        "name": "disable_two_fa",
+        "args": 0
+      },
+      {
+        "name": "enable_two_fa",
+        "args": 0
+      },
+      {
+        "name": "import_invoice",
+        "args": 0
+      },
+      {
+        "name": "send_email_notification",
+        "args": 0
+      },
+      {
+        "name": "send_notification_webhook",
+        "args": 0
+      },
+      {
+        "name": "stats_achats_fournisseur",
+        "args": 2
+      },
+      {
+        "name": "stats_achats_fournisseurs",
+        "args": 1
+      },
+      {
+        "name": "stats_cost_centers",
+        "args": 0
+      },
+      {
+        "name": "stats_multi_mamas",
+        "args": 0
+      },
+      {
+        "name": "stats_rotation_produit",
+        "args": 0
+      },
+      {
+        "name": "top_produits",
+        "args": 4
+      },
+      {
+        "name": "sync_pivot_from_produits",
+        "args": 0
+      },
+      {
+        "name": "sync_produits_from_pivot",
+        "args": 0
+      },
+      {
+        "name": "move_zone_products",
+        "args": 4
+      },
+      {
+        "name": "copy_zone_products",
+        "args": 4
+      },
+      {
+        "name": "merge_zone_products",
+        "args": 3
+      },
+      {
+        "name": "safe_delete_zone",
+        "args": 3
+      }
+    ],
+    "fks": [
+      {
+        "from": {
+          "table": "templates_commandes",
+          "columns": [
+            "mama_id"
+          ]
+        },
+        "to": {
+          "table": "mamas",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "templates_commandes",
+          "columns": [
+            "fournisseur_id"
+          ]
+        },
+        "to": {
+          "table": "fournisseurs",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "inventaires",
+          "columns": [
+            "mama_id"
+          ]
+        },
+        "to": {
+          "table": "mamas",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "inventaires",
+          "columns": [
+            "zone_id"
+          ]
+        },
+        "to": {
+          "table": "inventaire_zones",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "inventaires",
+          "columns": [
+            "periode_id"
+          ]
+        },
+        "to": {
+          "table": "periodes_comptables",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "produits_inventaire",
+          "columns": [
+            "inventaire_id"
+          ]
+        },
+        "to": {
+          "table": "inventaires",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "produits_inventaire",
+          "columns": [
+            "produit_id"
+          ]
+        },
+        "to": {
+          "table": "produits",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "produits_inventaire",
+          "columns": [
+            "mama_id"
+          ]
+        },
+        "to": {
+          "table": "mamas",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "periodes_comptables",
+          "columns": [
+            "mama_id"
+          ]
+        },
+        "to": {
+          "table": "mamas",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "requisitions",
+          "columns": [
+            "mama_id"
+          ]
+        },
+        "to": {
+          "table": "mamas",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "requisitions",
+          "columns": [
+            "zone_id"
+          ]
+        },
+        "to": {
+          "table": "zones_stock",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "requisition_lignes",
+          "columns": [
+            "requisition_id"
+          ]
+        },
+        "to": {
+          "table": "requisitions",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "requisition_lignes",
+          "columns": [
+            "produit_id"
+          ]
+        },
+        "to": {
+          "table": "produits",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "menu_groupe_lignes",
+          "columns": [
+            "menu_groupe_id"
+          ]
+        },
+        "to": {
+          "table": "menu_groupes",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "menu_groupe_lignes",
+          "columns": [
+            "fiche_id"
+          ]
+        },
+        "to": {
+          "table": "fiches_techniques",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "menu_groupe_modeles",
+          "columns": [
+            "mama_id"
+          ]
+        },
+        "to": {
+          "table": "mamas",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "menu_groupe_modele_lignes",
+          "columns": [
+            "modele_id"
+          ]
+        },
+        "to": {
+          "table": "menu_groupe_modeles",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "menu_groupe_modele_lignes",
+          "columns": [
+            "fiche_id"
+          ]
+        },
+        "to": {
+          "table": "fiches_techniques",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "menus_jour_lignes",
+          "columns": [
+            "menu_id"
+          ]
+        },
+        "to": {
+          "table": "menus_jour",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "menus_jour_lignes",
+          "columns": [
+            "fiche_id"
+          ]
+        },
+        "to": {
+          "table": "fiches_techniques",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "settings",
+          "columns": [
+            "mama_id"
+          ]
+        },
+        "to": {
+          "table": "mamas",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "user_mama_access",
+          "columns": [
+            "mama_id"
+          ]
+        },
+        "to": {
+          "table": "mamas",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      {
+        "from": {
+          "table": "ventes_fiches",
+          "columns": [
+            "fiche_id"
+          ]
+        },
+        "to": {
+          "table": "fiches_techniques",
+          "columns": [
+            "id"
+          ]
+        }
+      }
+    ]
+  }
+}

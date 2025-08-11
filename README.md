@@ -18,7 +18,10 @@ npm test
 npm run test:e2e
 npm run build
 npm run preview
+npm run sanitize:src
 ```
+
+Run `npm run sanitize:src` to strip BOM, NBSP, and Unicode line separators from source files.
 
 If linting or tests fail because required packages are missing, simply run
 `npm install` again. This ensures `tesseract.js`, `vitest`, `@eslint/js` and

@@ -22,24 +22,22 @@ export default function PeriodFilter({ onChange, initialStart, initialEnd }) {
 
   return (
     <div className="flex gap-2 items-center">
-      <label>
-        Du :
-        <input
-          type="date"
-          value={start}
-          onChange={e => update(e.target.value, end)}
-          className="form-input"
-        />
-      </label>
-      <label>
-        Au :
-        <input
-          type="date"
-          value={end}
-          onChange={e => update(start, e.target.value)}
-          className="form-input"
-        />
-      </label>
+      <label htmlFor="period-start">Du :</label>
+      <input
+        id="period-start"
+        type="date"
+        value={start}
+        onChange={e => update(e.target.value, end)}
+        className="form-input"
+      />
+      <label htmlFor="period-end">Au :</label>
+      <input
+        id="period-end"
+        type="date"
+        value={end}
+        onChange={e => update(start, e.target.value)}
+        className="form-input"
+      />
       <button
         className="btn btn-sm"
         onClick={() => update(getToday(), getToday())}

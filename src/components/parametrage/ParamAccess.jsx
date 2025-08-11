@@ -38,7 +38,7 @@ export default function ParamAccess() {
   return (
     <div>
       <Toaster position="top-right" />
-      <h2 className="font-bold text-xl mb-4">Grille d’accès par rôle</h2>
+      <h2 className="font-bold text-xl mb-4">Grille d'accès par rôle</h2>
       <TableContainer className="mt-2">
         <table className="min-w-full text-xs">
           <thead>

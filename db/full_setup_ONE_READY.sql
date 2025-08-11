@@ -484,6 +484,30 @@ $$;
 
 grant execute on function public.calcul_ecarts_inventaire(date, text, uuid) to authenticated;
 
+DO $pl$
+DECLARE
+  v_oid oid;
+  v_res text;
+BEGIN
+  SELECT p.oid, pg_catalog.pg_get_function_result(p.oid)
+  INTO v_oid, v_res
+  FROM pg_proc p
+  JOIN pg_namespace n ON n.oid = p.pronamespace
+  WHERE n.nspname = 'public'
+    AND p.proname = 'fn_calc_budgets'
+    AND pg_get_function_identity_arguments(p.oid) = 'uuid, text';
+
+  IF v_oid IS NOT NULL AND v_res IS DISTINCT FROM 'TABLE(famille text, ecart_pct numeric)' THEN
+    BEGIN
+      EXECUTE 'DROP FUNCTION public.fn_calc_budgets(uuid, text)';
+    EXCEPTION
+      WHEN dependent_objects_still_exist THEN
+        EXECUTE 'ALTER FUNCTION public.fn_calc_budgets(uuid, text) RENAME TO fn_calc_budgets_old_'||to_char(now(),'YYYYMMDDHH24MISS');
+    END;
+  END IF;
+END
+$pl$;
+
 CREATE OR REPLACE FUNCTION public.fn_calc_budgets(mama_id_param uuid, periode_param text)
 RETURNS TABLE(famille text, ecart_pct numeric)
 LANGUAGE plpgsql
@@ -501,14 +525,14 @@ do $$ begin
   if not exists (select 1 from pg_trigger where tgname = 'trg_roles_updated_at') then
     create trigger trg_roles_updated_at
     before update on public.roles
-    for each row execute procedure public.trg_set_timestamp();
+    for each row execute function public.trg_set_timestamp();
   end if;
 end $$;
 do $$ begin
   if not exists (select 1 from pg_trigger where tgname = 'set_ts_templates_cmd') then
     create trigger set_ts_templates_cmd
     before update on public.templates_commandes
-    for each row execute procedure public.trg_set_timestamp();
+    for each row execute function public.trg_set_timestamp();
   end if;
 end $$;
 
@@ -2241,7 +2265,7 @@ grant select, insert, update, delete on public.zones_droits to authenticated;
 do $$ begin
   if not exists (select 1 from pg_trigger where tgname = 'set_ts_zones') then
     create trigger set_ts_zones before update on public.zones_stock
-    for each row execute procedure public.trg_set_timestamp();
+    for each row execute function public.trg_set_timestamp();
   end if;
 end $$;
 
@@ -2301,7 +2325,14 @@ select
 from public.utilisateurs u
 left join public.roles r on r.id = u.role_id;
 
-grant select on public.utilisateurs_complets to authenticated;
+DO $$ BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname='public' AND c.relname='utilisateurs_complets'
+  ) THEN
+    EXECUTE 'GRANT SELECT ON public.utilisateurs_complets TO authenticated';
+  END IF;
+END $$;
 
 -- Additional Views
 create or replace view public.v_achats_mensuels as
@@ -2997,7 +3028,18 @@ create table if not exists public.alertes_rupture (
 );
 create index if not exists idx_alertes_rupture_mama on public.alertes_rupture(mama_id);
 alter table public.alertes_rupture enable row level security;
-create policy alertes_rupture_all on public.alertes_rupture for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname='public' AND tablename='alertes_rupture' AND policyname='alertes_rupture_all'
+  ) THEN
+    CREATE POLICY alertes_rupture_all ON public.alertes_rupture
+      FOR ALL
+      USING (mama_id = current_user_mama_id())
+      WITH CHECK (mama_id = current_user_mama_id());
+  END IF;
+END$$;
 grant select, insert, update, delete on public.alertes_rupture to authenticated;
 
 create table if not exists public.logs_activite (
@@ -3015,7 +3057,18 @@ create table if not exists public.logs_activite (
 );
 create index if not exists idx_logs_activite_mama on public.logs_activite(mama_id, date_log desc);
 alter table public.logs_activite enable row level security;
-create policy logs_activite_all on public.logs_activite for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname='public' AND tablename='logs_activite' AND policyname='logs_activite_all'
+  ) THEN
+    CREATE POLICY logs_activite_all ON public.logs_activite
+      FOR ALL
+      USING (mama_id = current_user_mama_id())
+      WITH CHECK (mama_id = current_user_mama_id());
+  END IF;
+END$$;
 grant select, insert on public.logs_activite to authenticated;
 
 create table if not exists public.menus_jour_lignes (
@@ -3031,7 +3084,18 @@ create table if not exists public.menus_jour_lignes (
 create index if not exists idx_menus_jour_lignes_menu on public.menus_jour_lignes(menu_id);
 create index if not exists idx_menus_jour_lignes_fiche on public.menus_jour_lignes(fiche_id);
 alter table public.menus_jour_lignes enable row level security;
-create policy menus_jour_lignes_all on public.menus_jour_lignes for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname='public' AND tablename='menus_jour_lignes' AND policyname='menus_jour_lignes_all'
+  ) THEN
+    CREATE POLICY menus_jour_lignes_all ON public.menus_jour_lignes
+      FOR ALL
+      USING (mama_id = current_user_mama_id())
+      WITH CHECK (mama_id = current_user_mama_id());
+  END IF;
+END$$;
 grant select, insert, update, delete on public.menus_jour_lignes to authenticated;
 
 create table if not exists public.rapports_generes (
@@ -3047,7 +3111,18 @@ create table if not exists public.rapports_generes (
 );
 create index if not exists idx_rapports_generes_mama on public.rapports_generes(mama_id);
 alter table public.rapports_generes enable row level security;
-create policy rapports_generes_all on public.rapports_generes for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname='public' AND tablename='rapports_generes' AND policyname='rapports_generes_all'
+  ) THEN
+    CREATE POLICY rapports_generes_all ON public.rapports_generes
+      FOR ALL
+      USING (mama_id = current_user_mama_id())
+      WITH CHECK (mama_id = current_user_mama_id());
+  END IF;
+END$$;
 grant select, insert on public.rapports_generes to authenticated;
 
 create table if not exists public.settings (
@@ -3063,7 +3138,18 @@ create table if not exists public.settings (
 );
 create index if not exists idx_settings_mama on public.settings(mama_id);
 alter table public.settings enable row level security;
-create policy settings_all on public.settings for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname='public' AND tablename='settings' AND policyname='settings_all'
+  ) THEN
+    CREATE POLICY settings_all ON public.settings
+      FOR ALL
+      USING (mama_id = current_user_mama_id())
+      WITH CHECK (mama_id = current_user_mama_id());
+  END IF;
+END$$;
 grant select, insert, update on public.settings to authenticated;
 
 create table if not exists public.user_mama_access (
@@ -3075,8 +3161,30 @@ create table if not exists public.user_mama_access (
   unique (user_id, mama_id)
 );
 alter table public.user_mama_access enable row level security;
-create policy user_mama_access_select on public.user_mama_access for select using (user_id = auth.uid());
-create policy user_mama_access_modify on public.user_mama_access for all using (current_user_is_admin()) with check (current_user_is_admin());
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname='public' AND tablename='user_mama_access' AND policyname='user_mama_access_select'
+  ) THEN
+    CREATE POLICY user_mama_access_select ON public.user_mama_access
+      FOR SELECT
+      USING (user_id = auth.uid());
+  END IF;
+END$$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname='public' AND tablename='user_mama_access' AND policyname='user_mama_access_modify'
+  ) THEN
+    CREATE POLICY user_mama_access_modify ON public.user_mama_access
+      FOR ALL
+      USING (current_user_is_admin())
+      WITH CHECK (current_user_is_admin());
+  END IF;
+END$$;
 grant select, insert, update, delete on public.user_mama_access to authenticated;
 
 create table if not exists public.ventes_fiches (
@@ -3091,7 +3199,18 @@ create table if not exists public.ventes_fiches (
 );
 create index if not exists idx_ventes_fiches_mama on public.ventes_fiches(mama_id);
 alter table public.ventes_fiches enable row level security;
-create policy ventes_fiches_all on public.ventes_fiches for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname='public' AND tablename='ventes_fiches' AND policyname='ventes_fiches_all'
+  ) THEN
+    CREATE POLICY ventes_fiches_all ON public.ventes_fiches
+      FOR ALL
+      USING (mama_id = current_user_mama_id())
+      WITH CHECK (mama_id = current_user_mama_id());
+  END IF;
+END$$;
 grant select, insert, update, delete on public.ventes_fiches to authenticated;
 
 create table if not exists public.ventes_import_staging (
@@ -3106,7 +3225,18 @@ create table if not exists public.ventes_import_staging (
 );
 create index if not exists idx_vis_mama on public.ventes_import_staging(mama_id);
 alter table public.ventes_import_staging enable row level security;
-create policy ventes_import_staging_all on public.ventes_import_staging for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname='public' AND tablename='ventes_import_staging' AND policyname='ventes_import_staging_all'
+  ) THEN
+    CREATE POLICY ventes_import_staging_all ON public.ventes_import_staging
+      FOR ALL
+      USING (mama_id = current_user_mama_id())
+      WITH CHECK (mama_id = current_user_mama_id());
+  END IF;
+END$$;
 grant select, insert, update, delete on public.ventes_import_staging to authenticated;
 
 -- Functions
@@ -3275,7 +3405,7 @@ create index if not exists idx_pz_prod on public.produits_zones(produit_id);
 do $$ begin
   if not exists (select 1 from pg_trigger where tgname = 'trg_pz_ts') then
     create trigger trg_pz_ts before update on public.produits_zones
-    for each row execute procedure public.trg_set_timestamp();
+    for each row execute function public.trg_set_timestamp();
   end if;
 end $$;
 
@@ -3351,7 +3481,7 @@ do $$ begin
   if not exists (select 1 from pg_trigger where tgname = 'trg_prod_sync_zone') then
     create trigger trg_prod_sync_zone
     after insert or update of zone_id on public.produits
-    for each row execute procedure public.sync_pivot_from_produits();
+    for each row execute function public.sync_pivot_from_produits();
   end if;
 end $$;
 
@@ -3375,7 +3505,7 @@ do $$ begin
   if not exists (select 1 from pg_trigger where tgname = 'trg_pz_sync_prod') then
     create trigger trg_pz_sync_prod
     after insert or update of actif on public.produits_zones
-    for each row execute procedure public.sync_produits_from_pivot();
+    for each row execute function public.sync_produits_from_pivot();
   end if;
 end $$;
 
@@ -3554,3 +3684,7 @@ grant execute on function public.safe_delete_zone(uuid,uuid,uuid) to authenticat
 --   -- end if;
 -- end
 -- $cleanup$;
+
+-- \echo OK: schema loaded
+-- SELECT 1 FROM public.current_user_mama_id() LIMIT 0;
+-- SELECT 'has_fn_calc_budgets' WHERE EXISTS (SELECT 1 FROM pg_proc WHERE proname='fn_calc_budgets');

@@ -431,10 +431,12 @@ do $$
 declare r record;
 begin
   for r in (
-    select table_schema, table_name
-    from information_schema.columns
-    where column_name = 'updated_at'
-      and table_schema = 'public'
+    select c.table_schema, c.table_name
+    from information_schema.columns c
+    join information_schema.tables t on t.table_schema = c.table_schema and t.table_name = c.table_name
+    where c.column_name = 'updated_at'
+      and c.table_schema = 'public'
+      and t.table_type = 'BASE TABLE'
   ) loop
     begin
       execute format('create trigger %I before update on %I.%I for each row execute function public.trg_set_timestamp();',
@@ -1823,10 +1825,26 @@ create table if not exists public.requisition_lignes (
 create index if not exists idx_requisition_lignes_requisition on public.requisition_lignes(requisition_id);
 create index if not exists idx_requisition_lignes_mama_id on public.requisition_lignes(mama_id);
 alter table public.requisition_lignes enable row level security;
-create policy requisition_lignes_select on public.requisition_lignes for select using (mama_id = current_user_mama_id());
-create policy requisition_lignes_insert on public.requisition_lignes for insert with check (mama_id = current_user_mama_id());
-create policy requisition_lignes_update on public.requisition_lignes for update using (mama_id = current_user_mama_id());
-create policy requisition_lignes_delete on public.requisition_lignes for delete using (mama_id = current_user_mama_id());
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='requisition_lignes' and policyname='requisition_lignes_select') then
+    create policy requisition_lignes_select on public.requisition_lignes for select using (mama_id = current_user_mama_id());
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='requisition_lignes' and policyname='requisition_lignes_insert') then
+    create policy requisition_lignes_insert on public.requisition_lignes for insert with check (mama_id = current_user_mama_id());
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='requisition_lignes' and policyname='requisition_lignes_update') then
+    create policy requisition_lignes_update on public.requisition_lignes for update using (mama_id = current_user_mama_id());
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='requisition_lignes' and policyname='requisition_lignes_delete') then
+    create policy requisition_lignes_delete on public.requisition_lignes for delete using (mama_id = current_user_mama_id());
+  end if;
+end $$;
 grant select, insert, update, delete on public.requisition_lignes to authenticated;
 create table if not exists public.signalements (
   id uuid primary key default gen_random_uuid(),
@@ -1964,6 +1982,30 @@ do $$ begin
 end $$;
 grant select, insert, update, delete on public.tooltips to authenticated;
 
+create table if not exists public.unites (
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid not null,
+  nom text not null,
+  actif boolean default true,
+  created_at timestamptz default now()
+);
+create index if not exists idx_unites_mama_id on public.unites(mama_id);
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'fk_unites_mama_id') then
+    alter table public.unites
+      add constraint fk_unites_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
+  end if;
+end $$;
+alter table public.unites enable row level security;
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='unites' and policyname='unites_all') then
+    create policy unites_all on public.unites
+      for all using (mama_id = current_user_mama_id())
+      with check (mama_id = current_user_mama_id());
+  end if;
+end $$;
+grant select, insert, update, delete on public.unites to authenticated;
+
 create table if not exists public.transferts (
   id uuid primary key default gen_random_uuid(),
   mama_id uuid not null references public.mamas(id) on delete cascade,
@@ -2009,29 +2051,6 @@ do $$ begin
   end if;
 end $$;
 grant select, insert, update, delete on public.lignes_transfert to authenticated;
-create table if not exists public.unites (
-  id uuid primary key default gen_random_uuid(),
-  mama_id uuid not null,
-  nom text not null,
-  actif boolean default true,
-  created_at timestamptz default now()
-);
-create index if not exists idx_unites_mama_id on public.unites(mama_id);
-do $$ begin
-  if not exists (select 1 from pg_constraint where conname = 'fk_unites_mama_id') then
-    alter table public.unites
-      add constraint fk_unites_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
-  end if;
-end $$;
-alter table public.unites enable row level security;
-do $$ begin
-  if not exists (select 1 from pg_policies where schemaname='public' and tablename='unites' and policyname='unites_all') then
-    create policy unites_all on public.unites
-      for all using (mama_id = current_user_mama_id())
-      with check (mama_id = current_user_mama_id());
-  end if;
-end $$;
-grant select, insert, update, delete on public.unites to authenticated;
 create table if not exists public.usage_stats (
   id uuid primary key default gen_random_uuid(),
   mama_id uuid,
@@ -2320,14 +2339,19 @@ select
 from public.achats a
 where a.actif is true
 group by a.mama_id, date_trunc('month', a.date_achat)::date;
+drop view if exists public.v_ecarts_inventaire cascade;
 create or replace view public.v_ecarts_inventaire as
-select i.periode_id,
-       i.zone_id,
-       sum(p.ecart) as ecart_total
+select
+  i.mama_id,
+  i.date_inventaire,
+  i.zone_id,
+  pi.produit_id,
+  pi.ecart,
+  pi.ecart * coalesce(pr.pmp,0) as ecart_valorise
 from public.inventaires i
-join public.produits_inventaire p on p.inventaire_id = i.id
-where i.actif is true
-group by i.periode_id, i.zone_id;
+join public.produits_inventaire pi on pi.inventaire_id = i.id
+join public.produits pr on pr.id = pi.produit_id
+where i.actif is true;
 create or replace view public.v_evolution_achats as
 select
   mama_id,
@@ -2854,7 +2878,11 @@ create table if not exists public.alertes_rupture (
 );
 create index if not exists idx_alertes_rupture_mama on public.alertes_rupture(mama_id);
 alter table public.alertes_rupture enable row level security;
-create policy alertes_rupture_all on public.alertes_rupture for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='alertes_rupture' and policyname='alertes_rupture_all') then
+    create policy alertes_rupture_all on public.alertes_rupture for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+  end if;
+end $$;
 grant select, insert, update, delete on public.alertes_rupture to authenticated;
 
 create table if not exists public.logs_activite (
@@ -2872,7 +2900,11 @@ create table if not exists public.logs_activite (
 );
 create index if not exists idx_logs_activite_mama on public.logs_activite(mama_id, date_log desc);
 alter table public.logs_activite enable row level security;
-create policy logs_activite_all on public.logs_activite for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='logs_activite' and policyname='logs_activite_all') then
+    create policy logs_activite_all on public.logs_activite for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+  end if;
+end $$;
 grant select, insert on public.logs_activite to authenticated;
 
 create table if not exists public.menus_jour_lignes (
@@ -2888,7 +2920,11 @@ create table if not exists public.menus_jour_lignes (
 create index if not exists idx_menus_jour_lignes_menu on public.menus_jour_lignes(menu_id);
 create index if not exists idx_menus_jour_lignes_fiche on public.menus_jour_lignes(fiche_id);
 alter table public.menus_jour_lignes enable row level security;
-create policy menus_jour_lignes_all on public.menus_jour_lignes for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='menus_jour_lignes' and policyname='menus_jour_lignes_all') then
+    create policy menus_jour_lignes_all on public.menus_jour_lignes for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+  end if;
+end $$;
 grant select, insert, update, delete on public.menus_jour_lignes to authenticated;
 
 create table if not exists public.rapports_generes (
@@ -2904,7 +2940,11 @@ create table if not exists public.rapports_generes (
 );
 create index if not exists idx_rapports_generes_mama on public.rapports_generes(mama_id);
 alter table public.rapports_generes enable row level security;
-create policy rapports_generes_all on public.rapports_generes for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='rapports_generes' and policyname='rapports_generes_all') then
+    create policy rapports_generes_all on public.rapports_generes for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+  end if;
+end $$;
 grant select, insert on public.rapports_generes to authenticated;
 
 create table if not exists public.settings (
@@ -2920,7 +2960,11 @@ create table if not exists public.settings (
 );
 create index if not exists idx_settings_mama on public.settings(mama_id);
 alter table public.settings enable row level security;
-create policy settings_all on public.settings for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='settings' and policyname='settings_all') then
+    create policy settings_all on public.settings for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+  end if;
+end $$;
 grant select, insert, update on public.settings to authenticated;
 
 create table if not exists public.user_mama_access (
@@ -2932,8 +2976,16 @@ create table if not exists public.user_mama_access (
   unique (user_id, mama_id)
 );
 alter table public.user_mama_access enable row level security;
-create policy user_mama_access_select on public.user_mama_access for select using (user_id = auth.uid());
-create policy user_mama_access_modify on public.user_mama_access for all using (current_user_is_admin()) with check (current_user_is_admin());
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='user_mama_access' and policyname='user_mama_access_select') then
+    create policy user_mama_access_select on public.user_mama_access for select using (user_id = auth.uid());
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='user_mama_access' and policyname='user_mama_access_modify') then
+    create policy user_mama_access_modify on public.user_mama_access for all using (current_user_is_admin()) with check (current_user_is_admin());
+  end if;
+end $$;
 grant select, insert, update, delete on public.user_mama_access to authenticated;
 
 create table if not exists public.ventes_fiches (
@@ -2948,7 +3000,11 @@ create table if not exists public.ventes_fiches (
 );
 create index if not exists idx_ventes_fiches_mama on public.ventes_fiches(mama_id);
 alter table public.ventes_fiches enable row level security;
-create policy ventes_fiches_all on public.ventes_fiches for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='ventes_fiches' and policyname='ventes_fiches_all') then
+    create policy ventes_fiches_all on public.ventes_fiches for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+  end if;
+end $$;
 grant select, insert, update, delete on public.ventes_fiches to authenticated;
 
 create table if not exists public.ventes_import_staging (
@@ -2963,7 +3019,11 @@ create table if not exists public.ventes_import_staging (
 );
 create index if not exists idx_vis_mama on public.ventes_import_staging(mama_id);
 alter table public.ventes_import_staging enable row level security;
-create policy ventes_import_staging_all on public.ventes_import_staging for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='ventes_import_staging' and policyname='ventes_import_staging_all') then
+    create policy ventes_import_staging_all on public.ventes_import_staging for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
+  end if;
+end $$;
 grant select, insert, update, delete on public.ventes_import_staging to authenticated;
 
 -- Functions
@@ -3127,9 +3187,6 @@ create table if not exists public.produits_zones (
 create index if not exists idx_pz_mama on public.produits_zones(mama_id);
 create index if not exists idx_pz_zone on public.produits_zones(zone_id);
 create index if not exists idx_pz_prod on public.produits_zones(produit_id);
-
-  with check (mama_id = current_user_mama_id());
-
 grant select, insert, update, delete on public.produits_zones to authenticated;
 
 insert into public.produits_zones(mama_id, produit_id, zone_id, actif, stock_reel, stock_min)

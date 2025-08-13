@@ -335,7 +335,7 @@ grant execute on function public.trg_set_timestamp() to authenticated;
 
 create or replace function public.get_template_commande(p_mama uuid, p_fournisseur uuid)
 returns setof public.templates_commandes
-language sql security definer as $$
+language sql as $$
   select *
   from public.templates_commandes
   where mama_id = p_mama

@@ -1,3 +1,22 @@
+-- SAFE
+set search_path = public, pg_catalog;
+set check_function_bodies = off;
+
+do $$
+begin
+  if exists (
+    select 1
+    from pg_proc p
+    join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'public'
+      and p.proname = 'fn_calc_budgets'
+      and pg_get_function_identity_arguments(p.oid) = 'uuid, text'
+      and pg_get_function_result(p.oid) <> 'TABLE (famille text, ecart_pct numeric)'
+  ) then
+    drop function public.fn_calc_budgets(uuid, text);
+  end if;
+end $$;
+
 -- 01_app_safe.sql
 -- À exécuter dans le SQL Editor (rôle standard/authenticated).
 -- Contient : DDL/DML schéma public, RLS, policies, grants sur public, fonctions sans accès auth/pg_net.

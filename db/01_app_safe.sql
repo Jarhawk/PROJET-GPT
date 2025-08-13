@@ -3,18 +3,17 @@ set search_path = public, pg_catalog;
 set check_function_bodies = off;
 
 do $$
+declare r record;
 begin
-  if exists (
-    select 1
+  for r in (
+    select p.oid::regprocedure as ident
     from pg_proc p
     join pg_namespace n on n.oid = p.pronamespace
     where n.nspname = 'public'
       and p.proname = 'fn_calc_budgets'
-      and pg_get_function_identity_arguments(p.oid) = 'uuid, text'
-      and pg_get_function_result(p.oid) <> 'TABLE (famille text, ecart_pct numeric)'
-  ) then
-    drop function public.fn_calc_budgets(uuid, text);
-  end if;
+  ) loop
+    execute format('drop function %s;', r.ident);
+  end loop;
 end $$;
 
 -- 01_app_safe.sql
@@ -1696,7 +1695,7 @@ grant select, insert, update, delete on public.zones_stock, public.zones_droits 
 
 create or replace function public.can_transfer(p_src uuid, p_dst uuid)
 returns boolean
-language sql stable security definer
+language sql stable
 as $$
   select
     (select public.can_access_zone(p_src, 'transfert')) and
@@ -1706,7 +1705,7 @@ grant execute on function public.can_transfer(uuid, uuid) to authenticated;
 
 create or replace function public.zone_is_cave_or_shop(p_zone uuid)
 returns boolean
-language sql stable security definer
+language sql stable
 as $$
   select exists(
     select 1 from public.zones_stock z
@@ -3202,7 +3201,7 @@ create or replace function public.move_zone_products(
   p_src_zone uuid,
   p_dst_zone uuid,
   p_keep_quantities boolean default true
-) returns json language plpgsql security definer as $$
+) returns json language plpgsql as $$
 declare v_cnt int := 0;
 begin
   perform 1 from public.zones_stock z where z.id in (p_src_zone, p_dst_zone) and z.mama_id = p_mama;
@@ -3237,7 +3236,7 @@ create or replace function public.copy_zone_products(
   p_src_zone uuid,
   p_dst_zone uuid,
   p_with_quantities boolean default false
-) returns json language plpgsql security definer as $$
+) returns json language plpgsql as $$
 declare v_cnt int := 0;
 begin
   insert into public.produits_zones(mama_id, produit_id, zone_id, stock_reel, stock_min, actif)
@@ -3262,7 +3261,7 @@ create or replace function public.merge_zone_products(
   p_mama uuid,
   p_src_zone uuid,
   p_dst_zone uuid
-) returns json language plpgsql security definer as $$
+) returns json language plpgsql as $$
 declare v_cnt int := 0;
 begin
   insert into public.produits_zones(mama_id, produit_id, zone_id, stock_reel, stock_min, actif)
@@ -3287,7 +3286,7 @@ create or replace function public.safe_delete_zone(
   p_mama uuid,
   p_zone uuid,
   p_reassign_to uuid default null
-) returns json language plpgsql security definer as $$
+) returns json language plpgsql as $$
 declare v_cnt int := 0;
 begin
   if p_reassign_to is not null then

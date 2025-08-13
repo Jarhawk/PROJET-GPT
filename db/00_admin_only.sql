@@ -5,33 +5,69 @@
 -- 1. Extensions
 create extension if not exists "pgcrypto";
 create extension if not exists "pg_net";
-do $$ begin
-  create role authenticated noinherit;
-exception when duplicate_object then null; end $$;
-create or replace function public.current_user_mama_id()
-returns uuid
-language sql stable as $$
-  select u.mama_id from public.utilisateurs u where u.auth_id = auth.uid();
-$$;
-create or replace function public.current_user_is_admin_or_manager()
-returns boolean
-language sql stable as $$
-  select exists (
-    select 1 from public.utilisateurs u
-    join public.roles r on r.id = u.role_id
-    where u.auth_id = auth.uid()
-      and r.nom in ('admin','manager')
-  );
-$$;
-create or replace function public.current_user_is_admin()
-returns boolean
-language sql stable as $$
-  select public.current_user_is_admin_or_manager() and exists (
-    select 1 from public.utilisateurs u
-    join public.roles r on r.id = u.role_id
-    where u.auth_id = auth.uid() and r.nom = 'admin'
-  );
-$$;
+
+-- === current_user_mama_id() ===
+do $$
+begin
+  if to_regclass('public.utilisateurs') is not null then
+    execute $fn$
+      create or replace function public.current_user_mama_id()
+      returns uuid
+      language sql stable as $$
+        select u.mama_id
+        from public.utilisateurs u
+        where u.auth_id = auth.uid()
+        limit 1
+      $$;
+    $fn$;
+  else
+    raise notice 'Skip current_user_mama_id(): table public.utilisateurs absente';
+  end if;
+end $$;
+
+-- === current_user_is_admin_or_manager() ===
+do $$
+begin
+  if to_regclass('public.utilisateurs') is not null and to_regclass('public.roles') is not null then
+    execute $fn$
+      create or replace function public.current_user_is_admin_or_manager()
+      returns boolean
+      language sql stable as $$
+        select exists (
+          select 1
+          from public.utilisateurs u
+          join public.roles r on r.id = u.role_id
+          where u.auth_id = auth.uid()
+            and r.nom in ('admin','manager')
+        )
+      $$;
+    $fn$;
+  else
+    raise notice 'Skip current_user_is_admin_or_manager(): tables utilisateurs/roles absentes';
+  end if;
+end $$;
+
+-- === current_user_is_admin() ===
+do $$
+begin
+  if to_regclass('public.utilisateurs') is not null and to_regclass('public.roles') is not null then
+    execute $fn$
+      create or replace function public.current_user_is_admin()
+      returns boolean
+      language sql stable as $$
+        select public.current_user_is_admin_or_manager() and exists (
+          select 1
+          from public.utilisateurs u
+          join public.roles r on r.id = u.role_id
+          where u.auth_id = auth.uid()
+            and r.nom = 'admin'
+        )
+      $$;
+    $fn$;
+  else
+    raise notice 'Skip current_user_is_admin(): tables utilisateurs/roles absentes';
+  end if;
+end $$;
 create or replace function public.create_utilisateur(
   p_email text,
   p_nom text,
@@ -60,19 +96,33 @@ begin
 exception when others then
   return json_build_object('success', false, 'error', SQLERRM);
 end;$$;
-drop policy if exists zones_stock_all on public.zones_stock;
-drop policy if exists zones_stock_select on public.zones_stock;
-create policy zones_stock_select on public.zones_stock
-  for select using (
-    mama_id = current_user_mama_id()
-    and exists (
-      select 1 from public.zones_droits zd
-      where zd.zone_id = zones_stock.id
-        and zd.user_id = auth.uid()
-        and zd.lecture = true
-        and zd.mama_id = zones_stock.mama_id
-    )
-  );
+
+-- === zones_stock_select policy ===
+do $$
+begin
+  if to_regclass('public.zones_stock') is not null then
+    execute 'drop policy if exists zones_stock_all on public.zones_stock';
+    execute 'drop policy if exists zones_stock_select on public.zones_stock';
+    execute $pol$
+      create policy zones_stock_select
+      on public.zones_stock
+      for select
+      using (
+        mama_id = current_user_mama_id()
+        and exists (
+          select 1
+          from public.zones_droits zd
+          where zd.zone_id = zones_stock.id
+            and zd.user_id = auth.uid()
+            and zd.lecture = true
+            and zd.mama_id = zones_stock.mama_id
+        )
+      );
+    $pol$;
+  else
+    raise notice 'Skip policy zones_stock_select: table public.zones_stock absente';
+  end if;
+end $$;
 create or replace function public.can_access_zone(p_zone uuid, p_mode text default 'lecture')
 returns boolean
 language sql stable security definer
@@ -84,9 +134,23 @@ as $$
     when p_mode = 'requisition' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and requisition=true)
       else false end;
 $$;
-do $$ begin
-  if not exists (select 1 from pg_policies where schemaname='public' and tablename='user_mama_access' and policyname='user_mama_access_select') then
-    create policy user_mama_access_select on public.user_mama_access for select using (user_id = auth.uid());
+do $$
+begin
+  if to_regclass('public.user_mama_access') is not null then
+    if not exists (
+      select 1
+      from pg_policies
+      where schemaname='public'
+        and tablename='user_mama_access'
+        and policyname='user_mama_access_select'
+    ) then
+      create policy user_mama_access_select
+      on public.user_mama_access
+      for select
+      using (user_id = auth.uid());
+    end if;
+  else
+    raise notice 'Skip policy user_mama_access_select: table public.user_mama_access absente';
   end if;
 end $$;
 create or replace function public.log_action(

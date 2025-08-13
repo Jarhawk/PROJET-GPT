@@ -1,7 +1,3 @@
--- SAFE
-set search_path = public, pg_catalog;
-set check_function_bodies = off;
-
 do $$
 declare r record;
 begin
@@ -15,6 +11,276 @@ begin
     execute format('drop function %s;', r.ident);
   end loop;
 end $$;
+
+do $$ begin
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='achats' and column_name='mama_id') then
+    alter table public.achats add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='alertes' and column_name='mama_id') then
+    alter table public.alertes add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='alertes_rupture' and column_name='mama_id') then
+    alter table public.alertes_rupture add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='api_keys' and column_name='mama_id') then
+    alter table public.api_keys add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='auth_double_facteur' and column_name='mama_id') then
+    alter table public.auth_double_facteur add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='bons_livraison' and column_name='mama_id') then
+    alter table public.bons_livraison add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='catalogue_updates' and column_name='mama_id') then
+    alter table public.catalogue_updates add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='centres_de_cout' and column_name='mama_id') then
+    alter table public.centres_de_cout add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='commande_lignes' and column_name='mama_id') then
+    alter table public.commande_lignes add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='commandes' and column_name='mama_id') then
+    alter table public.commandes add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='compta_mapping' and column_name='mama_id') then
+    alter table public.compta_mapping add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='consentements_utilisateur' and column_name='mama_id') then
+    alter table public.consentements_utilisateur add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='documentation' and column_name='mama_id') then
+    alter table public.documentation add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='documents' and column_name='mama_id') then
+    alter table public.documents add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='emails_envoyes' and column_name='mama_id') then
+    alter table public.emails_envoyes add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='etapes_onboarding' and column_name='mama_id') then
+    alter table public.etapes_onboarding add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='facture_lignes' and column_name='mama_id') then
+    alter table public.facture_lignes add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='factures' and column_name='mama_id') then
+    alter table public.factures add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='familles' and column_name='mama_id') then
+    alter table public.familles add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='feedback' and column_name='mama_id') then
+    alter table public.feedback add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='fiche_cout_history' and column_name='mama_id') then
+    alter table public.fiche_cout_history add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='fiche_lignes' and column_name='mama_id') then
+    alter table public.fiche_lignes add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='fiches' and column_name='mama_id') then
+    alter table public.fiches add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='fiches_techniques' and column_name='mama_id') then
+    alter table public.fiches_techniques add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='fournisseur_contacts' and column_name='mama_id') then
+    alter table public.fournisseur_contacts add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='fournisseur_notes' and column_name='mama_id') then
+    alter table public.fournisseur_notes add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='fournisseur_produits' and column_name='mama_id') then
+    alter table public.fournisseur_produits add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='fournisseurs' and column_name='mama_id') then
+    alter table public.fournisseurs add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='fournisseurs_api_config' and column_name='mama_id') then
+    alter table public.fournisseurs_api_config add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='gadgets' and column_name='mama_id') then
+    alter table public.gadgets add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='groupes' and column_name='mama_id') then
+    alter table public.groupes add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='guides_seen' and column_name='mama_id') then
+    alter table public.guides_seen add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='help_articles' and column_name='mama_id') then
+    alter table public.help_articles add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='inventaire_zones' and column_name='mama_id') then
+    alter table public.inventaire_zones add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='inventaires' and column_name='mama_id') then
+    alter table public.inventaires add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='journaux_utilisateur' and column_name='mama_id') then
+    alter table public.journaux_utilisateur add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='lignes_bl' and column_name='mama_id') then
+    alter table public.lignes_bl add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='lignes_transfert' and column_name='mama_id') then
+    alter table public.lignes_transfert add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='logs_activite' and column_name='mama_id') then
+    alter table public.logs_activite add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='logs_securite' and column_name='mama_id') then
+    alter table public.logs_securite add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='mamas' and column_name='mama_id') then
+    alter table public.mamas add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='menu_fiches' and column_name='mama_id') then
+    alter table public.menu_fiches add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='menu_groupe_lignes' and column_name='mama_id') then
+    alter table public.menu_groupe_lignes add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='menu_groupe_modele_lignes' and column_name='mama_id') then
+    alter table public.menu_groupe_modele_lignes add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='menu_groupe_modeles' and column_name='mama_id') then
+    alter table public.menu_groupe_modeles add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='menu_groupes' and column_name='mama_id') then
+    alter table public.menu_groupes add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='menus' and column_name='mama_id') then
+    alter table public.menus add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='menus_groupes' and column_name='mama_id') then
+    alter table public.menus_groupes add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='menus_groupes_fiches' and column_name='mama_id') then
+    alter table public.menus_groupes_fiches add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='menus_jour' and column_name='mama_id') then
+    alter table public.menus_jour add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='menus_jour_fiches' and column_name='mama_id') then
+    alter table public.menus_jour_fiches add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='menus_jour_lignes' and column_name='mama_id') then
+    alter table public.menus_jour_lignes add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='notification_preferences' and column_name='mama_id') then
+    alter table public.notification_preferences add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='notifications' and column_name='mama_id') then
+    alter table public.notifications add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='parametres_commandes' and column_name='mama_id') then
+    alter table public.parametres_commandes add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='periodes_comptables' and column_name='mama_id') then
+    alter table public.periodes_comptables add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='permissions' and column_name='mama_id') then
+    alter table public.permissions add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='pertes' and column_name='mama_id') then
+    alter table public.pertes add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='planning_lignes' and column_name='mama_id') then
+    alter table public.planning_lignes add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='planning_previsionnel' and column_name='mama_id') then
+    alter table public.planning_previsionnel add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='produits' and column_name='mama_id') then
+    alter table public.produits add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='produits_inventaire' and column_name='mama_id') then
+    alter table public.produits_inventaire add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='promotions' and column_name='mama_id') then
+    alter table public.promotions add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='rapports_generes' and column_name='mama_id') then
+    alter table public.rapports_generes add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='regles_alertes' and column_name='mama_id') then
+    alter table public.regles_alertes add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='requisition_lignes' and column_name='mama_id') then
+    alter table public.requisition_lignes add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='requisitions' and column_name='mama_id') then
+    alter table public.requisitions add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='roles' and column_name='mama_id') then
+    alter table public.roles add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='settings' and column_name='mama_id') then
+    alter table public.settings add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='signalements' and column_name='mama_id') then
+    alter table public.signalements add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='sous_familles' and column_name='mama_id') then
+    alter table public.sous_familles add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='stocks' and column_name='mama_id') then
+    alter table public.stocks add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='tableaux_de_bord' and column_name='mama_id') then
+    alter table public.tableaux_de_bord add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='taches' and column_name='mama_id') then
+    alter table public.taches add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='templates_commandes' and column_name='mama_id') then
+    alter table public.templates_commandes add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='tooltips' and column_name='mama_id') then
+    alter table public.tooltips add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='transferts' and column_name='mama_id') then
+    alter table public.transferts add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='unites' and column_name='mama_id') then
+    alter table public.unites add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='usage_stats' and column_name='mama_id') then
+    alter table public.usage_stats add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='utilisateurs' and column_name='mama_id') then
+    alter table public.utilisateurs add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='utilisateurs_taches' and column_name='mama_id') then
+    alter table public.utilisateurs_taches add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='validation_requests' and column_name='mama_id') then
+    alter table public.validation_requests add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='ventes_boissons' and column_name='mama_id') then
+    alter table public.ventes_boissons add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='ventes_fiches' and column_name='mama_id') then
+    alter table public.ventes_fiches add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='ventes_fiches_carte' and column_name='mama_id') then
+    alter table public.ventes_fiches_carte add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='ventes_import_staging' and column_name='mama_id') then
+    alter table public.ventes_import_staging add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='zones_droits' and column_name='mama_id') then
+    alter table public.zones_droits add column mama_id uuid;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='zones_stock' and column_name='mama_id') then
+    alter table public.zones_stock add column mama_id uuid;
+  end if;
+end $$;
+-- SAFE
+set search_path = public, pg_catalog;
+set check_function_bodies = off;
 
 -- 01_app_safe.sql
 -- À exécuter dans le SQL Editor (rôle standard/authenticated).

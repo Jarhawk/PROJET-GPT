@@ -1,4 +1,8 @@
-do $$
+-- SAFE
+set search_path = public, pg_catalog;
+set check_function_bodies = off;
+
+do $do$
 declare r record;
 begin
   for r in (
@@ -10,9 +14,10 @@ begin
   ) loop
     execute format('drop function %s;', r.ident);
   end loop;
-end $$;
+  end;
+$do$ language plpgsql;
 
-do $$
+do $do$
 declare tbl text;
 begin
   foreach tbl in array[
@@ -40,11 +45,8 @@ begin
   ] loop
     execute format('alter table if exists public.%I add column if not exists mama_id uuid;', tbl);
   end loop;
-end $$;
-
--- SAFE
-set search_path = public, pg_catalog;
-set check_function_bodies = off;
+end;
+$do$ language plpgsql;
 
 -- 01_app_safe.sql
 -- À exécuter dans le SQL Editor (rôle standard/authenticated).

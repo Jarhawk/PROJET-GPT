@@ -1,66 +1,91 @@
-import React, { createContext, useContext, useMemo, useState, useEffect, useCallback } from "react";
-import { supabase } from "@/supabaseClient";
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { supabase } from "@/lib/supabaseClient";
 
 export const AuthContext = createContext({
+  session: null,
   user: null,
-  mamaId: null,
-  mama_id: null,
-  role: null,
-  access_rights: {},
+  userData: null,
   loading: true,
-  hasAccess: () => false,
+  signInWithPassword: async () => {},
+  signOut: async () => {},
 });
 
 export function AuthProvider({ children }) {
-  const [state, setState] = useState({
-    user: null,
-    mamaId: null,
-    mama_id: null,
-    role: null,
-    access_rights: {},
-    loading: true,
-  });
+  const [session, setSession] = useState(null);
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const loadSession = useCallback(async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    const user = session?.user ?? null;
-
-    let mamaId = null, role = null, access_rights = {};
-    if (user) {
-      const { data: rows } = await supabase
-        .from("utilisateurs")
-        .select("mama_id, roles:role_id ( nom ), access_rights")
-        .eq("auth_id", user.id)
-        .limit(1);
-      if (rows?.[0]) {
-        mamaId = rows[0].mama_id ?? null;
-        role = rows[0].roles?.nom ?? null;
-        access_rights = rows[0].access_rights ?? {};
-      }
+  const loadUserData = useCallback(async (authId) => {
+    if (!authId) return null;
+    const { data, error } = await supabase
+      .from("utilisateurs")
+      .select("*")
+      .eq("auth_id", authId)
+      .single();
+    if (error) {
+      console.error(error);
+      return null;
     }
-
-    setState({ user, mamaId, mama_id: mamaId, role, access_rights, loading: false });
+    return data;
   }, []);
 
   useEffect(() => {
-    loadSession();
-    const { data: sub } = supabase.auth.onAuthStateChange(() => loadSession());
-    return () => sub?.subscription?.unsubscribe?.();
-  }, [loadSession]);
+    let active = true;
 
-  const hasAccess = useCallback((module, action = "read") => {
-    const rights = state.access_rights || {};
-    if (state.role === "admin") return true;
-    const mod = rights[module];
-    if (!mod) return false;
-    return !!mod[action];
-  }, [state.access_rights, state.role]);
+    const init = async () => {
+      setLoading(true);
+      const {
+        data: { session: currentSession },
+      } = await supabase.auth.getSession();
 
-  const value = useMemo(() => ({
-    ...state,
-    mama_id: state.mamaId,
-    hasAccess,
-  }), [state, hasAccess]);
+      if (!active) return;
+      setSession(currentSession);
+
+      if (currentSession?.user) {
+        const user = await loadUserData(currentSession.user.id);
+        if (!active) return;
+        setUserData(user);
+      } else {
+        setUserData(null);
+      }
+      setLoading(false);
+    };
+
+    init();
+
+    const { data: subscription } = supabase.auth.onAuthStateChange(
+      async (_event, newSession) => {
+        setSession(newSession);
+        if (newSession?.user) {
+          const user = await loadUserData(newSession.user.id);
+          setUserData(user);
+        } else {
+          setUserData(null);
+        }
+      }
+    );
+
+    return () => {
+      active = false;
+      subscription.subscription.unsubscribe();
+    };
+  }, [loadUserData]);
+
+  const signInWithPassword = useCallback(
+    (credentials) => supabase.auth.signInWithPassword(credentials),
+    []
+  );
+
+  const signOut = useCallback(() => supabase.auth.signOut(), []);
+
+  const value = {
+    session,
+    user: session?.user ?? null,
+    userData,
+    loading,
+    signInWithPassword,
+    signOut,
+  };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

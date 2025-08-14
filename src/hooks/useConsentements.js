@@ -1,11 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
-import { createClient } from "@/lib/supabaseClient";
+import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from '@/hooks/useAuth';
 
 export default function useConsentements() {
   const { user_id, mama_id } = useAuth();
   const [consentements, setConsentements] = useState([]);
-  const supabase = createClient();
 
   const fetchConsentements = useCallback(
     async (utilisateurId = user_id) => {
@@ -22,7 +21,7 @@ export default function useConsentements() {
       setConsentements(data || []);
       return data || [];
     },
-    [supabase, mama_id, user_id]
+    [mama_id, user_id]
   );
 
   useEffect(() => {

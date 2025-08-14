@@ -1,14 +1,14 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { Outlet, useLocation, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import Sidebar from "@/layout/Sidebar";
-import { useAuth } from '@/hooks/useAuth';
+import Sidebar from "@/components/Sidebar";
+import { useAuth } from "@/hooks/useAuth";
 import useNotifications from "@/hooks/useNotifications";
 import { Badge } from "@/components/ui/badge";
 import { Bell } from "lucide-react";
 import toast from "react-hot-toast";
 import Footer from "@/components/Footer";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import PageSkeleton from "@/components/ui/PageSkeleton";
 import AlertBadge from "@/components/stock/AlertBadge";
 import {
   LiquidBackground,
@@ -19,15 +19,7 @@ import {
 
 export default function Layout() {
   const { pathname } = useLocation();
-  const {
-    session,
-    userData,
-    mama_id,
-    access_rights,
-    loading,
-    pending,
-    logout,
-  } = useAuth();
+  const { session, userData, loading, logout } = useAuth();
   const { fetchUnreadCount, subscribeToNotifications } = useNotifications();
   const [unread, setUnread] = useState(0);
 
@@ -38,22 +30,22 @@ export default function Layout() {
     });
     return unsub;
   }, [fetchUnreadCount, subscribeToNotifications]);
-  if (import.meta.env.DEV) {
-    console.debug("Layout", {
-      session,
-      userData,
-      mama_id,
-      access_rights,
-    });
-    console.log("\uD83E\uDDE0 moduleKey access_rights", userData?.access_rights);
+  if (pathname === "/login" || pathname === "/unauthorized") return <Outlet />;
+  if (loading) {
+    return <PageSkeleton />;
   }
 
-  if (pathname === "/login" || pathname === "/unauthorized") return <Outlet />;
+  if (session && !userData) {
+    return (
+      <div className="flex items-center justify-center h-screen text-white">
+        Profil incomplet
+      </div>
+    );
+  }
 
-  if (loading || pending) return <LoadingSpinner message="Chargement..." />;
-  if (!session || !userData)
-    return <LoadingSpinner message="Chargement utilisateur..." />;
-
+  if (!session) {
+    return <Outlet />;
+  }
 
   const user = session.user;
 

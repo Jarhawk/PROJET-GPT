@@ -22,6 +22,7 @@ create table if not exists familles (
   id uuid primary key default gen_random_uuid(),
   mama_id uuid not null references mamas(id) on delete cascade,
   nom text not null,
+  parent_id uuid references familles(id) on delete set null,
   position int default 0,
   actif boolean default true,
   created_at timestamptz default now(),
@@ -44,7 +45,12 @@ create table if not exists sous_familles (
 -- Ensure new columns exist on pre-existing tables
 alter table if exists familles
   add column if not exists position int default 0,
-  add column if not exists updated_at timestamptz default now();
+  add column if not exists updated_at timestamptz default now(),
+  add column if not exists parent_id uuid;
+
+alter table if exists familles
+  add constraint if not exists fk_familles_parent_id
+    foreign key (parent_id) references familles(id) on delete set null;
 
 alter table if exists sous_familles
   add column if not exists position int default 0,
@@ -64,6 +70,7 @@ DO $$ BEGIN
 END $$;
 
 create index if not exists idx_familles_mama_pos on familles(mama_id, position);
+create index if not exists idx_familles_parent on familles(parent_id);
 create index if not exists idx_sous_familles_famille_pos on sous_familles(famille_id, position);
 
 -- 2) RLS policies

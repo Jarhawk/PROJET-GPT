@@ -897,22 +897,14 @@ create table if not exists public.familles (
   id uuid primary key default gen_random_uuid(),
   mama_id uuid not null,
   nom text not null,
-  parent_id uuid references public.familles(id) on delete set null,
   actif boolean default true,
   created_at timestamptz default now()
 );
 create index if not exists idx_familles_mama_id on public.familles(mama_id);
-create index if not exists idx_familles_parent_id on public.familles(parent_id);
 do $$ begin
   if not exists (select 1 from pg_constraint where conname = 'fk_familles_mama_id') then
     alter table public.familles
       add constraint fk_familles_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
-  end if;
-end $$;
-do $$ begin
-  if not exists (select 1 from pg_constraint where conname = 'fk_familles_parent_id') then
-    alter table public.familles
-      add constraint fk_familles_parent_id foreign key (parent_id) references public.familles(id) on delete set null;
   end if;
 end $$;
 alter table public.familles enable row level security;

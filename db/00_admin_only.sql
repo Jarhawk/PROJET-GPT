@@ -2,6 +2,8 @@
 -- À exécuter via service role (Admin) dans Supabase.
 -- Contient : extensions, rôles, fonctions/triggers touchant auth.*, pg_net, storage.*, grants admin-only.
 -- Idempotent. NE JAMAIS redéfinir auth.uid() ici.
+set search_path = public, pg_catalog;
+set check_function_bodies = off;
 -- 1. Extensions
 create extension if not exists "pgcrypto";
 create extension if not exists "pg_net";

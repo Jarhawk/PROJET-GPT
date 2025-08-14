@@ -1,11 +1,13 @@
 {
-  "lines": 3768,
+  "lines": 3767,
   "bytes": 159936,
   "sha256": "a276616bad303dfd7d8fd1307004931a5d3cf0767f7f861f78051edc8315569e",
-  "policiesDropped": 11,
-  "policiesCreated": 112,
-  "viewsRecreated": 1,
-  "functionsReplaced": 50,
-  "indexesCreated": 128,
-  "renamesApplied": 4
+  "addedTypes": 0,
+  "createdTables": 0,
+  "addedColumns": 0,
+  "policiesCreated": 0,
+  "viewsRecreated": 0,
+  "functionsReplaced": 0,
+  "indexesCreated": 0,
+  "renamesApplied": 0
 }

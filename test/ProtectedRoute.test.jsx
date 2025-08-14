@@ -49,10 +49,10 @@ describe('ProtectedRoute', () => {
     expect(screen.getByText('Secret')).toBeTruthy();
   });
 
-  it('403 si droit KO', async () => {
+  it('403 si accessKey manquant', async () => {
     authMock.mockReturnValue({
       session: { user: { id: '1' } },
-      userData: { access_rights: { dashboard: { peut_voir: false } } },
+      userData: { access_rights: {} },
       loading: false,
     });
     render(

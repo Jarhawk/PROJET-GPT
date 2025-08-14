@@ -3393,6 +3393,56 @@ end $$;
 
 grant execute on function public.safe_delete_zone(uuid,uuid,uuid) to authenticated;
 
+-- Added table transfert_lignes
+create table if not exists public.transfert_lignes (
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid,
+  transfert_id uuid,
+  produit_id uuid,
+  quantite numeric,
+  commentaire text,
+  actif boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists transfert_lignes_transfert_id_idx on public.transfert_lignes(transfert_id);
+create index if not exists transfert_lignes_produit_id_idx on public.transfert_lignes(produit_id);
+create index if not exists transfert_lignes_mama_id_idx on public.transfert_lignes(mama_id);
+alter table public.transfert_lignes enable row level security;
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='transfert_lignes' and policyname='transfert_lignes_all') then
+    create policy transfert_lignes_all on public.transfert_lignes
+      for all using (mama_id = current_user_mama_id())
+      with check (mama_id = current_user_mama_id());
+  end if;
+end $$;
+grant select, insert, update, delete on public.transfert_lignes to authenticated;
+
+-- Added table mouvements_centres_cout
+create table if not exists public.mouvements_centres_cout (
+  id uuid primary key default gen_random_uuid(),
+  mama_id uuid,
+  mouvement_id uuid,
+  cost_center_id uuid,
+  quantite numeric,
+  valeur numeric,
+  actif boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists mouvements_centres_cout_mouvement_id_idx on public.mouvements_centres_cout(mouvement_id);
+create index if not exists mouvements_centres_cout_cost_center_id_idx on public.mouvements_centres_cout(cost_center_id);
+create index if not exists mouvements_centres_cout_mama_id_idx on public.mouvements_centres_cout(mama_id);
+alter table public.mouvements_centres_cout enable row level security;
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='mouvements_centres_cout' and policyname='mouvements_centres_cout_all') then
+    create policy mouvements_centres_cout_all on public.mouvements_centres_cout
+      for all using (mama_id = current_user_mama_id())
+      with check (mama_id = current_user_mama_id());
+  end if;
+end $$;
+grant select, insert, update, delete on public.mouvements_centres_cout to authenticated;
+
 
 
 -- Helper functions
@@ -3764,4 +3814,4 @@ JOIN public.familles f ON f.id = sf.famille_id;
 --   end if;
 -- end;
 -- $do$ language plpgsql;
--- 
+--

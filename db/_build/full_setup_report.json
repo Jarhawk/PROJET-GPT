@@ -1,13 +1,19 @@
 {
-  "lines": 3767,
-  "bytes": 159936,
-  "sha256": "a276616bad303dfd7d8fd1307004931a5d3cf0767f7f861f78051edc8315569e",
+  "lines": 3817,
+  "bytes": 162363,
+  "sha256": "b1eedc6ca49e14a3d281f286134eb2a8e781e3087b61eb17516abbe2b6310407",
   "addedTypes": 0,
-  "createdTables": 0,
+  "createdTables": 2,
   "addedColumns": 0,
-  "policiesCreated": 0,
+  "policiesCreated": 2,
   "viewsRecreated": 0,
   "functionsReplaced": 0,
-  "indexesCreated": 0,
-  "renamesApplied": 0
+  "indexesCreated": 6,
+  "renamesApplied": 0,
+  "missingUnresolved": {
+    "tables": [],
+    "views": [],
+    "functions": [],
+    "columns": {}
+  }
 }

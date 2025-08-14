@@ -23,7 +23,7 @@ import { PlusCircle, Search } from "lucide-react";
 import { useAuth } from '@/hooks/useAuth';
 
 export default function Fournisseurs() {
-  const { fournisseurs, total, getFournisseurs, createFournisseur, updateFournisseur, disableFournisseur, exportFournisseursToExcel } = useFournisseurs();
+  const { fournisseurs, total, getFournisseurs, createFournisseur, updateFournisseur, toggleFournisseurActive, exportFournisseursToExcel } = useFournisseurs();
   const { fetchStatsAll } = useFournisseurStats();
   const { getProduitsDuFournisseur, countProduitsDuFournisseur } = useProduitsFournisseur();
   const { products } = useProducts();
@@ -40,7 +40,7 @@ export default function Fournisseurs() {
   const [productCounts, setProductCounts] = useState({});
   const [actifFilter, setActifFilter] = useState("all");
   const [page, setPage] = useState(1);
-  const PAGE_SIZE = 20;
+  const PAGE_SIZE = 50;
 
   function refreshList() {
     getFournisseurs({
@@ -253,10 +253,11 @@ export default function Fournisseurs() {
                     canEdit={canEdit}
                     onDetail={() => setSelected(f.id)}
                     onEdit={() => setEditRow(f)}
-                    onDelete={async (id) => {
-                      if (!window.confirm('Désactiver ce fournisseur ?')) return;
-                      await disableFournisseur(id);
-                      toast.success('Fournisseur désactivé');
+                    onToggleActive={async (id, actif) => {
+                      const msg = actif ? 'Activer ce fournisseur ?' : 'Désactiver ce fournisseur ?';
+                      if (!window.confirm(msg)) return;
+                      await toggleFournisseurActive(id, actif);
+                      toast.success(actif ? 'Fournisseur activé' : 'Fournisseur désactivé');
                       refreshList();
                     }}
                   />

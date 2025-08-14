@@ -1,7 +1,7 @@
-import { Eye, Edit, Trash2 } from "lucide-react";
+import { Eye, Edit, Trash2, Check } from "lucide-react";
 import Button from "@/components/ui/button";
 
-export default function FournisseurRow({ fournisseur, productCount, onDetail, onEdit, onDelete, canEdit }) {
+export default function FournisseurRow({ fournisseur, productCount, onDetail, onEdit, onToggleActive, canEdit }) {
   return (
     <tr className={fournisseur.actif ? "" : "opacity-50"}>
       <td className="py-1 px-3 font-semibold text-white">{fournisseur.nom}</td>
@@ -32,11 +32,11 @@ export default function FournisseurRow({ fournisseur, productCount, onDetail, on
             </Button>
             <Button
               className="w-auto flex items-center gap-1"
-              onClick={() => onDelete(fournisseur.id)}
-              aria-label="Désactiver"
+              onClick={() => onToggleActive(fournisseur.id, !fournisseur.actif)}
+              aria-label={fournisseur.actif ? "Désactiver" : "Activer"}
             >
-              <Trash2 size={16} />
-              <span className="hidden sm:inline">Désactiver</span>
+              {fournisseur.actif ? <Trash2 size={16} /> : <Check size={16} />}
+              <span className="hidden sm:inline">{fournisseur.actif ? "Désactiver" : "Activer"}</span>
             </Button>
           </div>
         )}

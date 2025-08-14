@@ -17,7 +17,7 @@ export function useFournisseurs() {
 
   // 1. Charger les fournisseurs (filtrage par mama_id automatiquement)
   const fetchFournisseurs = useCallback(
-    async ({ search = "", actif = null, page = 1, limit = 20 } = {}) => {
+    async ({ search = "", actif = null, page = 1, limit = 50 } = {}) => {
       if (loading || !mama_id) return [];
       setLoading(true);
       setError(null);
@@ -108,14 +108,14 @@ export function useFournisseurs() {
     }
   }
 
-  // 4. Désactiver un fournisseur (soft delete)
-  async function disableFournisseur(id) {
+  // 4. Activer/désactiver un fournisseur (soft toggle)
+  async function toggleFournisseurActive(id, actif) {
     if (loading || !mama_id) return;
     setLoading(true);
     setError(null);
     const { error } = await supabase
       .from("fournisseurs")
-      .update({ actif: false })
+      .update({ actif })
       .eq("id", id)
       .eq("mama_id", mama_id);
     setLoading(false);
@@ -170,7 +170,7 @@ export function useFournisseurs() {
     getFournisseurs,
     createFournisseur,
     updateFournisseur,
-    disableFournisseur,
+    toggleFournisseurActive,
     exportFournisseursToExcel,
     importFournisseursFromExcel,
   };

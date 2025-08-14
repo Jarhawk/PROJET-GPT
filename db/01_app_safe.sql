@@ -11,10 +11,11 @@ begin
     join pg_namespace n on n.oid = p.pronamespace
     where n.nspname = 'public'
       and p.proname = 'fn_calc_budgets'
+      and pg_get_userbyid(p.proowner) = current_user
   ) loop
     execute format('drop function %s;', r.ident);
   end loop;
-  end;
+end;
 $do$ language plpgsql;
 
 do $do$
@@ -523,14 +524,37 @@ begin
 end;
 $$;
 
-create or replace function public.fn_calc_budgets(mama_id_param uuid, periode_param text)
-returns table(famille text, ecart_pct numeric)
-language plpgsql as $$
+do $do$
 begin
-  raise notice 'TODO';
-  return;
+  if (
+    not exists (
+      select 1
+      from pg_proc p
+      join pg_namespace n on n.oid = p.pronamespace
+      where n.nspname = 'public'
+        and p.proname = 'fn_calc_budgets'
+    ) and has_schema_privilege('public', 'CREATE')
+  ) or exists (
+      select 1
+      from pg_proc p
+      join pg_namespace n on n.oid = p.pronamespace
+      where n.nspname = 'public'
+        and p.proname = 'fn_calc_budgets'
+        and pg_get_userbyid(p.proowner) = current_user
+  ) then
+    execute $fn$
+      create or replace function public.fn_calc_budgets(mama_id_param uuid, periode_param text)
+      returns table(famille text, ecart_pct numeric)
+      language plpgsql as $$
+      begin
+        raise notice 'TODO';
+        return;
+      end;
+      $$;
+    $fn$;
+  end if;
 end;
-$$;
+$do$ language plpgsql;
 
 
 -- 6. Triggers
@@ -721,7 +745,20 @@ grant select, insert, update, delete on public.emails_envoyes to authenticated;
 grant select, insert, update on public.permissions to authenticated;
 grant select, insert, update, delete on public.consentements_utilisateur to authenticated;
 grant execute on function public.calcul_ecarts_inventaire(date, text, uuid) to authenticated;
-grant execute on function public.fn_calc_budgets(uuid, text) to authenticated;
+do $do$
+begin
+  if exists (
+    select 1
+    from pg_proc p
+    join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'public'
+      and p.proname = 'fn_calc_budgets'
+      and pg_get_userbyid(p.proowner) = current_user
+  ) then
+    grant execute on function public.fn_calc_budgets(uuid, text) to authenticated;
+  end if;
+end;
+$do$ language plpgsql;
 
 -- 10. Données initiales (insert)
 -- (aucune donnée initiale)

@@ -6,6 +6,11 @@ set search_path = public, pg_catalog;
 -- Vérif de contexte
 select current_user as user, session_user, current_schema;
 
+-- Nettoyage des privilèges par défaut
+revoke all on schema public from public;
+revoke all on schema public from authenticated;
+revoke all on schema public from anon;
+
 -- Ownership + droits schéma 'public'
 alter schema public owner to postgres;
 grant usage, create on schema public to postgres;

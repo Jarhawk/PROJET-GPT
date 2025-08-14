@@ -5,8 +5,8 @@
 set search_path = public, pg_catalog;
 set check_function_bodies = off;
 -- 1. Extensions
-create extension if not exists "pgcrypto";
-create extension if not exists "pg_net";
+create extension if not exists "pgcrypto" with schema extensions;
+create extension if not exists "pg_net" with schema extensions;
 
 do $do$
 begin
@@ -85,9 +85,12 @@ begin
   if exists(select 1 from auth.users where lower(email) = lower(p_email)) then
     raise exception 'email exists';
   end if;
-  v_password := encode(gen_random_bytes(9), 'base64');
+  v_password := encode(extensions.gen_random_bytes(9), 'base64');
   insert into auth.users(email, encrypted_password)
-  values (p_email, crypt(v_password, gen_salt('bf'))) returning id into v_auth_id;
+  values (
+    p_email,
+    extensions.crypt(v_password, extensions.gen_salt('bf'))
+  ) returning id into v_auth_id;
   insert into public.utilisateurs(nom, email, auth_id, role_id, mama_id, actif)
   values(p_nom, p_email, v_auth_id, p_role_id, p_mama_id, true);
   perform net.http_post(

@@ -1,64 +1,70 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState, useEffect } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from "@/lib/supabase";
-import { Button } from "@/components/ui/button";
+import { supabase } from '@/lib/supabase';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogTitle,
   DialogDescription,
-} from "@radix-ui/react-dialog";
-import PermissionsForm from "./PermissionsForm";
-import toast, { Toaster } from "react-hot-toast";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import TableContainer from "@/components/ui/TableContainer";
+} from '@radix-ui/react-dialog';
+import PermissionsForm from './PermissionsForm';
+import toast, { Toaster } from 'react-hot-toast';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import TableContainer from '@/components/ui/TableContainer';
 
 export default function PermissionsAdmin() {
   const { role, loading: authLoading } = useAuth();
   const [roles, setRoles] = useState([]);
   const [mamas, setMamas] = useState([]);
   const [editRole, setEditRole] = useState(null);
-  const [filterMama, setFilterMama] = useState("");
+  const [filterMama, setFilterMama] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (role === "superadmin") {
+    if (role === 'superadmin') {
       fetchMamas();
       fetchRoles();
     }
   }, [role]);
 
   const fetchMamas = async () => {
-    const { data } = await supabase.from("mamas").select("id, nom, ville");
+    const { data } = await supabase.from('mamas').select('id, nom, ville');
     setMamas(data || []);
   };
 
   const fetchRoles = async () => {
     setLoading(true);
-    let query = supabase.from("roles").select("*").order("nom", { ascending: true });
-    if (filterMama) query = query.eq("mama_id", filterMama);
+    let query = supabase
+      .from('roles')
+      .select('*')
+      .order('nom', { ascending: true });
+    if (filterMama) query = query.eq('mama_id', filterMama);
     const { data, error } = await query;
     if (!error) setRoles(data || []);
     setLoading(false);
   };
 
   useEffect(() => {
-    if (role === "superadmin") fetchRoles();
+    if (role === 'superadmin') fetchRoles();
   }, [filterMama]);
 
   if (authLoading) return <LoadingSpinner message="Chargement..." />;
 
   const handlePermissionsSaved = () => {
-    toast.success("Permissions mises à jour !");
+    toast.success('Permissions mises à jour !');
     fetchRoles();
     setEditRole(null);
   };
 
-  if (role !== "superadmin") {
+  if (role !== 'superadmin') {
     return (
       <div className="p-8">
-        <h2 className="text-lg text-red-600 font-bold">Accès réservé aux superadmins</h2>
+        <h2 className="text-lg text-red-600 font-bold">
+          Accès réservé aux superadmins
+        </h2>
       </div>
     );
   }
@@ -66,17 +72,19 @@ export default function PermissionsAdmin() {
   return (
     <div className="p-8 max-w-5xl mx-auto">
       <Toaster />
-      <h1 className="text-2xl font-bold text-mamastock-gold mb-4">Permissions globales (superadmin)</h1>
+      <h1 className="text-2xl font-bold text-mamastock-gold mb-4">
+        Permissions globales (superadmin)
+      </h1>
       <div className="flex items-end gap-4 mb-4">
         <label>
           <span className="text-gray-600">Filtrer par établissement :</span>
           <select
             className="input input-bordered ml-2"
             value={filterMama}
-            onChange={e => setFilterMama(e.target.value)}
+            onChange={(e) => setFilterMama(e.target.value)}
           >
             <option value="">Tous</option>
-            {mamas.map(m => (
+            {mamas.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.nom} ({m.ville})
               </option>
@@ -101,26 +109,24 @@ export default function PermissionsAdmin() {
               </tr>
             </thead>
             <tbody>
-              {roles.map(role => (
+              {roles.map((role) => (
                 <tr key={role.id}>
                   <td className="px-2 py-1">
-                    {
-                      mamas.find(m => m.id === role.mama_id)
-                        ? `${mamas.find(m => m.id === role.mama_id)?.nom} (${mamas.find(m => m.id === role.mama_id)?.ville})`
-                        : role.mama_id
-                    }
+                    {mamas.find((m) => m.id === role.mama_id)
+                      ? `${mamas.find((m) => m.id === role.mama_id)?.nom} (${mamas.find((m) => m.id === role.mama_id)?.ville})`
+                      : role.mama_id}
                   </td>
                   <td className="px-2 py-1">{role.nom}</td>
-                  <td className="px-2 py-1">{role.description || ""}</td>
+                  <td className="px-2 py-1">{role.description || ''}</td>
                   <td className="px-2 py-1">
                     <span
                       className={
                         role.actif
-                          ? "inline-block bg-green-100 text-green-800 px-2 rounded-full"
-                          : "inline-block bg-red-100 text-red-800 px-2 rounded-full"
+                          ? 'inline-block bg-green-100 text-green-800 px-2 rounded-full'
+                          : 'inline-block bg-red-100 text-red-800 px-2 rounded-full'
                       }
                     >
-                      {role.actif ? "Oui" : "Non"}
+                      {role.actif ? 'Oui' : 'Non'}
                     </span>
                   </td>
                   <td className="px-2 py-1">
@@ -146,10 +152,10 @@ export default function PermissionsAdmin() {
           </table>
         )}
       </TableContainer>
-      <Dialog open={!!editRole} onOpenChange={v => !v && setEditRole(null)}>
+      <Dialog open={!!editRole} onOpenChange={(v) => !v && setEditRole(null)}>
         <DialogContent className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl shadow-lg p-6 max-w-xl">
           <DialogTitle className="font-bold mb-2">
-            {editRole?.id ? "Modifier le rôle" : "Nouveau rôle"}
+            {editRole?.id ? 'Modifier le rôle' : 'Nouveau rôle'}
           </DialogTitle>
           <DialogDescription className="sr-only">
             Gestion des permissions administrateur

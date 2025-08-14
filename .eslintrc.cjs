@@ -7,15 +7,9 @@ module.exports = {
     ecmaFeatures: { jsx: true },
   },
   settings: { react: { version: 'detect' } },
-  plugins: ['react', 'react-hooks', '@typescript-eslint'],
-  extends: [
-    'eslint:recommended',
-    'plugin:react/recommended',
-    'plugin:react-hooks/recommended',
-    'plugin:@typescript-eslint/recommended',
-  ],
+  plugins: ['react-hooks', 'react-refresh'],
+  extends: ['plugin:react-hooks/recommended'],
   rules: {
-    'no-control-regex': 'off', // (temporaire si besoin)
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',
   },

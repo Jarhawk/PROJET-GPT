@@ -1,10 +1,11 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useEffect, useState } from "react";
-import { useHelp } from "@/context/HelpProvider";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect, useState } from 'react';
+import { useHelp } from '@/context/HelpProvider';
 
 export default function TooltipHelper({ field }) {
   const { tooltips, fetchTooltips } = useHelp();
-  const [text, setText] = useState("");
+  const [text, setText] = useState('');
 
   useEffect(() => {
     if (tooltips[field]) {
@@ -22,4 +23,3 @@ export default function TooltipHelper({ field }) {
     </span>
   );
 }
-

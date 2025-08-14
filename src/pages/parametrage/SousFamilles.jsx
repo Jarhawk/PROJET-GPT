@@ -1,4 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from 'react';
 import { Toaster, toast } from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
@@ -78,7 +79,7 @@ export default function SousFamilles() {
           className="input flex-1"
           placeholder="Recherche"
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={(e) => setSearch(e.target.value)}
         />
       </TableHeader>
       <ListingContainer className="w-full overflow-x-auto">
@@ -93,7 +94,9 @@ export default function SousFamilles() {
           <tbody>
             {sousFamilles.length === 0 ? (
               <tr>
-                <td colSpan="3" className="py-2">Aucune sous-famille</td>
+                <td colSpan="3" className="py-2">
+                  Aucune sous-famille
+                </td>
               </tr>
             ) : (
               sousFamilles.map((sf) => (

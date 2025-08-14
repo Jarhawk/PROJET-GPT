@@ -1,34 +1,36 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { useEmailsEnvoyes } from "@/hooks/useEmailsEnvoyes";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useEmailsEnvoyes } from '@/hooks/useEmailsEnvoyes';
 import { useAuth } from '@/hooks/useAuth';
-import { useCommandes } from "@/hooks/useCommandes";
-import TableContainer from "@/components/ui/TableContainer";
-import GlassCard from "@/components/ui/GlassCard";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import PaginationFooter from "@/components/ui/PaginationFooter";
-import { Badge } from "@/components/ui/badge";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
-import { pdf } from "@react-pdf/renderer";
-import CommandePDF from "@/components/pdf/CommandePDF";
-import { supabase } from "@/lib/supabase";
-import toast from "react-hot-toast";
+import { useCommandes } from '@/hooks/useCommandes';
+import TableContainer from '@/components/ui/TableContainer';
+import GlassCard from '@/components/ui/GlassCard';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import PaginationFooter from '@/components/ui/PaginationFooter';
+import { Badge } from '@/components/ui/badge';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import { pdf } from '@react-pdf/renderer';
+import CommandePDF from '@/components/pdf/CommandePDF';
+import { supabase } from '@/lib/supabase';
+import toast from 'react-hot-toast';
 
 export default function EmailsEnvoyes() {
   const { mama_id, loading: authLoading, role } = useAuth();
-  const { emails, fetchEmails, loading, error, resendEmail } = useEmailsEnvoyes();
+  const { emails, fetchEmails, loading, error, resendEmail } =
+    useEmailsEnvoyes();
   const { fetchCommandeById } = useCommandes();
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
-  const [statut, setStatut] = useState("");
-  const [email, setEmail] = useState("");
-  const [commande, setCommande] = useState("");
-  const [start, setStart] = useState("");
-  const [end, setEnd] = useState("");
+  const [statut, setStatut] = useState('');
+  const [email, setEmail] = useState('');
+  const [commande, setCommande] = useState('');
+  const [start, setStart] = useState('');
+  const [end, setEnd] = useState('');
 
   useEffect(() => {
     if (!authLoading && mama_id) load();
@@ -60,9 +62,9 @@ export default function EmailsEnvoyes() {
       statut: e.statut,
     }));
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "Emails");
-    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([buf]), "emails-envoyes.xlsx");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Emails');
+    const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    saveAs(new Blob([buf]), 'emails-envoyes.xlsx');
   };
 
   const handleViewPDF = async (commandeId) => {
@@ -70,19 +72,23 @@ export default function EmailsEnvoyes() {
       const { data: commande } = await fetchCommandeById(commandeId);
       if (!commande) throw new Error();
       const { data: tpl } = await supabase
-        .rpc("get_template_commande", {
+        .rpc('get_template_commande', {
           p_mama: mama_id,
           p_fournisseur: commande.fournisseur_id,
         })
         .single();
       const template = tpl || null;
       const blob = await pdf(
-        <CommandePDF commande={commande} template={template} fournisseur={commande.fournisseur} />,
+        <CommandePDF
+          commande={commande}
+          template={template}
+          fournisseur={commande.fournisseur}
+        />
       ).toBlob();
       const url = URL.createObjectURL(blob);
-      window.open(url, "_blank");
+      window.open(url, '_blank');
     } catch {
-      toast.error("Erreur lors de la génération du PDF");
+      toast.error('Erreur lors de la génération du PDF');
     }
   };
 
@@ -91,7 +97,7 @@ export default function EmailsEnvoyes() {
     if (err) {
       toast.error("Erreur lors de l'envoi");
     } else {
-      toast.success("Email renvoyé avec succès");
+      toast.success('Email renvoyé avec succès');
       await load();
     }
   };
@@ -103,7 +109,10 @@ export default function EmailsEnvoyes() {
     <div className="p-6 space-y-4 container mx-auto text-sm">
       <h1 className="text-2xl font-bold">Emails envoyés</h1>
       <GlassCard title="Filtrer" className="mb-4">
-        <form onSubmit={handleSubmit} className="flex flex-wrap gap-2 items-end">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-wrap gap-2 items-end"
+        >
           <select
             value={statut}
             onChange={(e) => setStatut(e.target.value)}
@@ -176,7 +185,9 @@ export default function EmailsEnvoyes() {
                       {e.email}
                     </td>
                     <td className="px-2 py-1 md:border-none block md:table-cell">
-                      <span className="md:hidden font-semibold">Commande: </span>
+                      <span className="md:hidden font-semibold">
+                        Commande:{' '}
+                      </span>
                       <Link
                         to={`/commandes/${e.commande_id}`}
                         className="underline text-mamastockGold"
@@ -186,8 +197,8 @@ export default function EmailsEnvoyes() {
                     </td>
                     <td className="px-2 py-1 md:border-none block md:table-cell">
                       <span className="md:hidden font-semibold">Statut: </span>
-                      <Badge color={e.statut === "success" ? "green" : "red"}>
-                        {e.statut === "success" ? "Succès" : "Erreur"}
+                      <Badge color={e.statut === 'success' ? 'green' : 'red'}>
+                        {e.statut === 'success' ? 'Succès' : 'Erreur'}
                       </Badge>
                     </td>
                     <td className="px-2 py-1 md:border-none block md:table-cell space-x-1">
@@ -199,7 +210,7 @@ export default function EmailsEnvoyes() {
                       >
                         Voir PDF
                       </Button>
-                      {role === "admin" && (
+                      {role === 'admin' && (
                         <Button
                           variant="outline"
                           size="sm"

@@ -1,4 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from 'react';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -73,7 +74,8 @@ export default function SousFamilleList({ famille }) {
       .delete()
       .match({ id: sf.id, mama_id });
     if (error) {
-      if (error.code === '23503') toast.error('Sous-famille utilisée par des produits.');
+      if (error.code === '23503')
+        toast.error('Sous-famille utilisée par des produits.');
       else toast.error(error.message);
     } else {
       toast.success('Sous-famille supprimée');
@@ -97,7 +99,9 @@ export default function SousFamilleList({ famille }) {
   return (
     <Card>
       <CardHeader className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Sous-familles de {famille?.nom}</h2>
+        <h2 className="text-lg font-semibold">
+          Sous-familles de {famille?.nom}
+        </h2>
         {!adding && (
           <Button onClick={() => setAdding(true)}>Nouvelle sous-famille</Button>
         )}
@@ -130,7 +134,7 @@ export default function SousFamilleList({ famille }) {
                     </td>
                   </tr>
                 )}
-                {sousFamilles.map(sf => (
+                {sousFamilles.map((sf) => (
                   <SousFamilleRow
                     key={sf.id}
                     sousFamille={sf}

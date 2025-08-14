@@ -1,13 +1,14 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useFamilles } from "@/hooks/useFamilles";
-import { Button } from "@/components/ui/button";
-import TableContainer from "@/components/ui/TableContainer";
-import { useState, useEffect } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useFamilles } from '@/hooks/useFamilles';
+import { Button } from '@/components/ui/button';
+import TableContainer from '@/components/ui/TableContainer';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import { Toaster, toast } from "react-hot-toast";
-import { saveAs } from "file-saver";
-import * as XLSX from "xlsx";
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { Toaster, toast } from 'react-hot-toast';
+import { saveAs } from 'file-saver';
+import * as XLSX from 'xlsx';
 
 export default function ParamFamilles() {
   const {
@@ -18,8 +19,8 @@ export default function ParamFamilles() {
     batchDeleteFamilles,
   } = useFamilles();
   const { mama_id, loading: authLoading } = useAuth();
-  const [search, setSearch] = useState("");
-  const [form, setForm] = useState({ nom: "", id: null });
+  const [search, setSearch] = useState('');
+  const [form, setForm] = useState({ nom: '', id: null });
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -29,43 +30,46 @@ export default function ParamFamilles() {
 
   if (authLoading) return <LoadingSpinner message="Chargement..." />;
 
-  const filtered = familles.filter(f =>
-    !search || f.nom.toLowerCase().includes(search.toLowerCase())
+  const filtered = familles.filter(
+    (f) => !search || f.nom.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleEdit = f => { setForm(f); setEditMode(true); };
-  const handleDelete = async id => {
-    if (window.confirm("Désactiver la famille ?")) {
+  const handleEdit = (f) => {
+    setForm(f);
+    setEditMode(true);
+  };
+  const handleDelete = async (id) => {
+    if (window.confirm('Désactiver la famille ?')) {
       try {
         await batchDeleteFamilles([id]);
         await fetchFamilles();
-        toast.success("Famille désactivée.");
+        toast.success('Famille désactivée.');
       } catch (err) {
-        console.error("Erreur suppression famille:", err);
-        toast.error("Échec suppression");
+        console.error('Erreur suppression famille:', err);
+        toast.error('Échec suppression');
       }
     }
   };
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (loading) return;
     setLoading(true);
-    if (!form.nom.trim()) return toast.error("Nom requis");
+    if (!form.nom.trim()) return toast.error('Nom requis');
     try {
       if (editMode) {
         await updateFamille(form.id, { nom: form.nom });
-        toast.success("Famille modifiée !");
+        toast.success('Famille modifiée !');
       } else {
         await addFamille({ nom: form.nom });
-        toast.success("Famille ajoutée !");
+        toast.success('Famille ajoutée !');
       }
       setEditMode(false);
-      setForm({ nom: "", id: null });
+      setForm({ nom: '', id: null });
       await fetchFamilles();
     } catch (err) {
-      console.error("Erreur enregistrement famille:", err);
-      toast.error("Échec enregistrement");
+      console.error('Erreur enregistrement famille:', err);
+      toast.error('Échec enregistrement');
     } finally {
       setLoading(false);
     }
@@ -74,9 +78,9 @@ export default function ParamFamilles() {
   const exportExcel = () => {
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(filtered);
-    XLSX.utils.book_append_sheet(wb, ws, "Familles");
-    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([buf]), "familles.xlsx");
+    XLSX.utils.book_append_sheet(wb, ws, 'Familles');
+    const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    saveAs(new Blob([buf]), 'familles.xlsx');
   };
 
   return (
@@ -88,18 +92,25 @@ export default function ParamFamilles() {
           className="form-input"
           placeholder="Nom de la famille"
           value={form.nom}
-          onChange={e => setForm(f => ({ ...f, nom: e.target.value }))}
+          onChange={(e) => setForm((f) => ({ ...f, nom: e.target.value }))}
           required
         />
-        <Button type="submit" disabled={loading} className="flex items-center gap-2">
+        <Button
+          type="submit"
+          disabled={loading}
+          className="flex items-center gap-2"
+        >
           {loading && <span className="loader-glass" />}
-          {editMode ? "Modifier" : "Ajouter"}
+          {editMode ? 'Modifier' : 'Ajouter'}
         </Button>
         {editMode && (
           <Button
             variant="outline"
             type="button"
-            onClick={() => { setEditMode(false); setForm({ nom: "", id: null }); }}
+            onClick={() => {
+              setEditMode(false);
+              setForm({ nom: '', id: null });
+            }}
             disabled={loading}
           >
             Annuler
@@ -110,9 +121,11 @@ export default function ParamFamilles() {
         className="form-input mb-2"
         placeholder="Recherche"
         value={search}
-        onChange={e => setSearch(e.target.value)}
+        onChange={(e) => setSearch(e.target.value)}
       />
-      <Button variant="outline" className="mb-2" onClick={exportExcel}>Export Excel</Button>
+      <Button variant="outline" className="mb-2" onClick={exportExcel}>
+        Export Excel
+      </Button>
       <TableContainer className="mt-2">
         <table className="min-w-full text-xs">
           <thead>
@@ -122,12 +135,24 @@ export default function ParamFamilles() {
             </tr>
           </thead>
           <tbody>
-            {filtered.map(f => (
+            {filtered.map((f) => (
               <tr key={f.id}>
                 <td>{f.nom}</td>
                 <td>
-                  <Button size="sm" variant="outline" onClick={() => handleEdit(f)}>Modifier</Button>
-                  <Button size="sm" variant="outline" onClick={() => handleDelete(f.id)}>Archiver</Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleEdit(f)}
+                  >
+                    Modifier
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleDelete(f.id)}
+                  >
+                    Archiver
+                  </Button>
                 </td>
               </tr>
             ))}

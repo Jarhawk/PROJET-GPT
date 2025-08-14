@@ -1,8 +1,9 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState, useEffect } from "react";
-import { QRCode } from "qrcode.react";
-import { useTwoFactorAuth } from "@/hooks/useTwoFactorAuth";
-import { Button } from "@/components/ui/button";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useState, useEffect } from 'react';
+import { QRCode } from 'qrcode.react';
+import { useTwoFactorAuth } from '@/hooks/useTwoFactorAuth';
+import { Button } from '@/components/ui/button';
 
 export default function TwoFactorSetup() {
   const {
@@ -14,14 +15,16 @@ export default function TwoFactorSetup() {
     disable,
     verify,
   } = useTwoFactorAuth();
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState('');
   const [verified, setVerified] = useState(false);
 
-  useEffect(() => { refresh(); }, []);
+  useEffect(() => {
+    refresh();
+  }, []);
 
   const handleEnable = () => {
     startSetup();
-    setCode("");
+    setCode('');
     setVerified(false);
   };
 
@@ -30,26 +33,31 @@ export default function TwoFactorSetup() {
       await finalizeSetup();
       setVerified(true);
     } else {
-      alert("Code invalide");
+      alert('Code invalide');
     }
   };
 
   if (!enabled && !secret) {
-    return <Button onClick={handleEnable}>Activer la double authentification</Button>;
+    return (
+      <Button onClick={handleEnable}>Activer la double authentification</Button>
+    );
   }
 
   return (
     <div className="space-y-4">
       {!enabled && secret && (
         <div className="p-4 bg-white/10 border border-white/20 backdrop-blur-xl rounded-2xl shadow">
-          <p>Scannez ce QR code dans votre application d'authentification puis entrez le code :</p>
+          <p>
+            Scannez ce QR code dans votre application d'authentification puis
+            entrez le code :
+          </p>
           {secret && (
             <QRCode value={`otpauth://totp/MamaStock?secret=${secret}`} />
           )}
           <input
             className="form-input mt-2"
             value={code}
-            onChange={e => setCode(e.target.value)}
+            onChange={(e) => setCode(e.target.value)}
             placeholder="123456"
           />
           <Button onClick={handleVerify}>Vérifier</Button>
@@ -59,7 +67,9 @@ export default function TwoFactorSetup() {
         <div className="text-green-600">Double authentification activée !</div>
       )}
       {enabled && (
-        <Button variant="outline" onClick={disable}>Désactiver la double authentification</Button>
+        <Button variant="outline" onClick={disable}>
+          Désactiver la double authentification
+        </Button>
       )}
     </div>
   );

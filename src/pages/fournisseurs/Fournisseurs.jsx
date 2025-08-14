@@ -1,36 +1,57 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+/* eslint-disable react-hooks/exhaustive-deps */
 // src/pages/Fournisseurs.jsx
-import { useState, useEffect } from "react";
-import { useFournisseurs } from "@/hooks/useFournisseurs";
-import { useFournisseurStats } from "@/hooks/useFournisseurStats";
-import { useProduitsFournisseur } from "@/hooks/useProduitsFournisseur";
-import { useProducts } from "@/hooks/useProducts";
-import { useFournisseursInactifs } from "@/hooks/useFournisseursInactifs";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from 'react';
+import { useFournisseurs } from '@/hooks/useFournisseurs';
+import { useFournisseurStats } from '@/hooks/useFournisseurStats';
+import { useProduitsFournisseur } from '@/hooks/useProduitsFournisseur';
+import { useProducts } from '@/hooks/useProducts';
+import { useFournisseursInactifs } from '@/hooks/useFournisseursInactifs';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import ListingContainer from '@/components/ui/ListingContainer';
 import PaginationFooter from '@/components/ui/PaginationFooter';
 import TableHeader from '@/components/ui/TableHeader';
-import FournisseurRow from "@/components/fournisseurs/FournisseurRow";
-import { Dialog, DialogContent } from "@radix-ui/react-dialog";
-import jsPDF from "jspdf";
-import "jspdf-autotable";
-import { Toaster, toast } from "react-hot-toast";
-import { ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
-import FournisseurDetail from "./FournisseurDetail";
-import FournisseurForm from "./FournisseurForm";
-import { PlusCircle, Search } from "lucide-react";
+import FournisseurRow from '@/components/fournisseurs/FournisseurRow';
+import { Dialog, DialogContent } from '@radix-ui/react-dialog';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import { Toaster, toast } from 'react-hot-toast';
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+} from 'recharts';
+import FournisseurDetail from './FournisseurDetail';
+import FournisseurForm from './FournisseurForm';
+import { PlusCircle, Search } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function Fournisseurs() {
-  const { fournisseurs, total, getFournisseurs, createFournisseur, updateFournisseur, toggleFournisseurActive, exportFournisseursToExcel } = useFournisseurs();
+  const {
+    fournisseurs,
+    total,
+    getFournisseurs,
+    createFournisseur,
+    updateFournisseur,
+    toggleFournisseurActive,
+    exportFournisseursToExcel,
+  } = useFournisseurs();
   const { fetchStatsAll } = useFournisseurStats();
-  const { getProduitsDuFournisseur, countProduitsDuFournisseur } = useProduitsFournisseur();
+  const { getProduitsDuFournisseur, countProduitsDuFournisseur } =
+    useProduitsFournisseur();
   const { products } = useProducts();
-  const { fournisseurs: inactiveByInvoices, fetchInactifs } = useFournisseursInactifs();
+  const { fournisseurs: inactiveByInvoices, fetchInactifs } =
+    useFournisseursInactifs();
   const { hasAccess } = useAuth();
-  const canEdit = hasAccess("fournisseurs", "peut_modifier");
-  const [search, setSearch] = useState("");
+  const canEdit = hasAccess('fournisseurs', 'peut_modifier');
+  const [search, setSearch] = useState('');
   const [selected, setSelected] = useState(null);
   const [showCreate, setShowCreate] = useState(false);
   const [editRow, setEditRow] = useState(null);
@@ -38,23 +59,23 @@ export default function Fournisseurs() {
   const [stats, setStats] = useState([]);
   const [topProducts, setTopProducts] = useState([]);
   const [productCounts, setProductCounts] = useState({});
-  const [actifFilter, setActifFilter] = useState("all");
+  const [actifFilter, setActifFilter] = useState('all');
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 50;
 
   function refreshList() {
     getFournisseurs({
       search,
-      actif: actifFilter === "all" ? null : actifFilter === "true",
+      actif: actifFilter === 'all' ? null : actifFilter === 'true',
       page,
       limit: PAGE_SIZE,
     });
   }
-  const listWithContact = fournisseurs.map(f => ({
+  const listWithContact = fournisseurs.map((f) => ({
     ...f,
     contact: Array.isArray(f.contact) ? f.contact[0] : f.contact,
   }));
-  const inactifs = listWithContact.filter(f => !f.actif);
+  const inactifs = listWithContact.filter((f) => !f.actif);
 
   useEffect(() => {
     async function fetchCounts() {
@@ -69,19 +90,19 @@ export default function Fournisseurs() {
 
   const exportPDF = () => {
     const doc = new jsPDF();
-    doc.text("Liste Fournisseurs", 10, 12);
+    doc.text('Liste Fournisseurs', 10, 12);
     doc.autoTable({
       startY: 20,
-      head: [["Nom", "Téléphone", "Contact", "Email"]],
-      body: listWithContact.map(f => [
+      head: [['Nom', 'Téléphone', 'Contact', 'Email']],
+      body: listWithContact.map((f) => [
         f.nom,
-        f.contact?.tel || "",
-        f.contact?.nom || "",
-        f.contact?.email || "",
+        f.contact?.tel || '',
+        f.contact?.nom || '',
+        f.contact?.email || '',
       ]),
       styles: { fontSize: 9 },
     });
-    doc.save("fournisseurs.pdf");
+    doc.save('fournisseurs.pdf');
   };
 
   // Chargement initial
@@ -96,7 +117,7 @@ export default function Fournisseurs() {
   }, [search, actifFilter, page]);
 
   // Recherche live
-  const fournisseursFiltrés = listWithContact.filter(f =>
+  const fournisseursFiltrés = listWithContact.filter((f) =>
     f.nom?.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -107,13 +128,17 @@ export default function Fournisseurs() {
       const statsProduits = {};
       for (const f of fournisseurs) {
         const ps = await getProduitsDuFournisseur(f.id);
-        ps.forEach(p => {
-          statsProduits[p.produit_id] = (statsProduits[p.produit_id] || 0) + (p.total_achat || 0);
+        ps.forEach((p) => {
+          statsProduits[p.produit_id] =
+            (statsProduits[p.produit_id] || 0) + (p.total_achat || 0);
         });
       }
       setTopProducts(
         Object.entries(statsProduits)
-          .map(([id, total]) => ({ nom: products.find(p => p.id === id)?.nom || "-", total }))
+          .map(([id, total]) => ({
+            nom: products.find((p) => p.id === id)?.nom || '-',
+            total,
+          }))
           .sort((a, b) => b.total - a.total)
           .slice(0, 8)
       );
@@ -134,14 +159,23 @@ export default function Fournisseurs() {
                 className="input w-full pl-8"
                 placeholder="Recherche fournisseur"
                 value={search}
-                onChange={e => { setPage(1); setSearch(e.target.value); }}
+                onChange={(e) => {
+                  setPage(1);
+                  setSearch(e.target.value);
+                }}
               />
-              <Search className="absolute left-2 top-2.5 text-white" size={18} />
+              <Search
+                className="absolute left-2 top-2.5 text-white"
+                size={18}
+              />
             </div>
             <select
               className="input w-32"
               value={actifFilter}
-              onChange={e => { setPage(1); setActifFilter(e.target.value); }}
+              onChange={(e) => {
+                setPage(1);
+                setActifFilter(e.target.value);
+              }}
             >
               <option value="all">Tous</option>
               <option value="true">Actif</option>
@@ -152,7 +186,10 @@ export default function Fournisseurs() {
         <CardContent className="pt-4">
           <TableHeader>
             {canEdit && (
-              <Button className="w-auto flex items-center" onClick={() => setShowCreate(true)}>
+              <Button
+                className="w-auto flex items-center"
+                onClick={() => setShowCreate(true)}
+              >
                 <PlusCircle className="mr-2" size={18} /> Ajouter fournisseur
               </Button>
             )}
@@ -179,7 +216,9 @@ export default function Fournisseurs() {
       <div className="grid md:grid-cols-2 gap-6 mb-10">
         <Card>
           <CardHeader>
-            <h2 className="font-semibold">Évolution des achats (tous fournisseurs)</h2>
+            <h2 className="font-semibold">
+              Évolution des achats (tous fournisseurs)
+            </h2>
           </CardHeader>
           <CardContent>
             {stats.length === 0 ? (
@@ -193,7 +232,12 @@ export default function Fournisseurs() {
                   <YAxis fontSize={11} />
                   <Tooltip />
                   <Legend />
-                  <Line type="monotone" dataKey="total_achats" stroke="#bfa14d" name="Total Achats" />
+                  <Line
+                    type="monotone"
+                    dataKey="total_achats"
+                    stroke="#bfa14d"
+                    name="Total Achats"
+                  />
                 </LineChart>
               </ResponsiveContainer>
             )}
@@ -226,44 +270,48 @@ export default function Fournisseurs() {
       <h2 className="font-semibold mb-2">Liste des fournisseurs</h2>
       <ListingContainer className="mb-6">
         <table className="text-sm">
-            <thead>
+          <thead>
+            <tr>
+              <th className="py-2 px-3">Nom</th>
+              <th className="py-2 px-3">Téléphone</th>
+              <th className="py-2 px-3">Contact</th>
+              <th className="py-2 px-3">Email</th>
+              <th className="py-2 px-3 text-right">Nb Produits</th>
+              <th className="py-2 px-3"></th>
+              <th className="py-2 px-3"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {fournisseursFiltrés.length === 0 ? (
               <tr>
-                <th className="py-2 px-3">Nom</th>
-                <th className="py-2 px-3">Téléphone</th>
-                <th className="py-2 px-3">Contact</th>
-                <th className="py-2 px-3">Email</th>
-                <th className="py-2 px-3 text-right">Nb Produits</th>
-                <th className="py-2 px-3"></th>
-                <th className="py-2 px-3"></th>
+                <td colSpan={7} className="py-4 text-muted-foreground">
+                  Aucun fournisseur trouvé
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {fournisseursFiltrés.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="py-4 text-muted-foreground">
-                    Aucun fournisseur trouvé
-                  </td>
-                </tr>
-              ) : (
-                fournisseursFiltrés.map(f => (
-                  <FournisseurRow
-                    key={f.id}
-                    fournisseur={f}
-                    productCount={productCounts[f.id] ?? 0}
-                    canEdit={canEdit}
-                    onDetail={() => setSelected(f.id)}
-                    onEdit={() => setEditRow(f)}
-                    onToggleActive={async (id, actif) => {
-                      const msg = actif ? 'Activer ce fournisseur ?' : 'Désactiver ce fournisseur ?';
-                      if (!window.confirm(msg)) return;
-                      await toggleFournisseurActive(id, actif);
-                      toast.success(actif ? 'Fournisseur activé' : 'Fournisseur désactivé');
-                      refreshList();
-                    }}
-                  />
-                ))
-              )}
-            </tbody>
+            ) : (
+              fournisseursFiltrés.map((f) => (
+                <FournisseurRow
+                  key={f.id}
+                  fournisseur={f}
+                  productCount={productCounts[f.id] ?? 0}
+                  canEdit={canEdit}
+                  onDetail={() => setSelected(f.id)}
+                  onEdit={() => setEditRow(f)}
+                  onToggleActive={async (id, actif) => {
+                    const msg = actif
+                      ? 'Activer ce fournisseur ?'
+                      : 'Désactiver ce fournisseur ?';
+                    if (!window.confirm(msg)) return;
+                    await toggleFournisseurActive(id, actif);
+                    toast.success(
+                      actif ? 'Fournisseur activé' : 'Fournisseur désactivé'
+                    );
+                    refreshList();
+                  }}
+                />
+              ))
+            )}
+          </tbody>
         </table>
       </ListingContainer>
       <PaginationFooter
@@ -273,28 +321,39 @@ export default function Fournisseurs() {
       />
 
       {/* Modal création/édition */}
-      <Dialog open={showCreate || !!editRow} onOpenChange={v => { if (!v) { setShowCreate(false); setEditRow(null); } }}>
+      <Dialog
+        open={showCreate || !!editRow}
+        onOpenChange={(v) => {
+          if (!v) {
+            setShowCreate(false);
+            setEditRow(null);
+          }
+        }}
+      >
         <DialogContent className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl max-w-lg w-full p-8">
           <FournisseurForm
             fournisseur={editRow}
             saving={saving}
-            onCancel={() => { setShowCreate(false); setEditRow(null); }}
+            onCancel={() => {
+              setShowCreate(false);
+              setEditRow(null);
+            }}
             onSubmit={async (data) => {
               if (saving) return;
               setSaving(true);
               try {
                 if (editRow) {
                   await updateFournisseur(editRow.id, data);
-                  toast.success("Fournisseur modifié !");
+                  toast.success('Fournisseur modifié !');
                 } else {
                   await createFournisseur(data);
-                  toast.success("Fournisseur ajouté !");
+                  toast.success('Fournisseur ajouté !');
                 }
                 setShowCreate(false);
                 setEditRow(null);
                 refreshList();
               } catch (err) {
-                toast.error(err?.message || "Erreur enregistrement");
+                toast.error(err?.message || 'Erreur enregistrement');
               }
               setSaving(false);
             }}
@@ -303,12 +362,11 @@ export default function Fournisseurs() {
       </Dialog>
 
       {/* Modal détail */}
-      <Dialog open={!!selected} onOpenChange={v => !v && setSelected(null)}>
+      <Dialog open={!!selected} onOpenChange={(v) => !v && setSelected(null)}>
         <DialogContent className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl max-w-2xl w-full p-10">
           {selected && <FournisseurDetail id={selected} />}
         </DialogContent>
       </Dialog>
-
     </div>
   );
 }

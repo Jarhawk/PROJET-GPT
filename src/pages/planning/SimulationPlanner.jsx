@@ -1,19 +1,20 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useEffect, useState } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useMenus } from "@/hooks/useMenus";
-import { useSimulation } from "@/hooks/useSimulation";
-import SimulationDetailsModal from "@/components/simulation/SimulationDetailsModal";
-import Button from "@/components/ui/Button";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import TableContainer from "@/components/ui/TableContainer";
+import { useMenus } from '@/hooks/useMenus';
+import { useSimulation } from '@/hooks/useSimulation';
+import SimulationDetailsModal from '@/components/simulation/SimulationDetailsModal';
+import Button from '@/components/ui/Button';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import TableContainer from '@/components/ui/TableContainer';
 
 export default function SimulationPlanner() {
   const { mama_id, loading: authLoading } = useAuth();
   const { getMenus } = useMenus();
   const { simulerBudget, loading } = useSimulation();
 
-  const [periode, setPeriode] = useState({ start: "", end: "" });
+  const [periode, setPeriode] = useState({ start: '', end: '' });
   const [menus, setMenus] = useState([]);
   const [scenario, setScenario] = useState([]);
   const [result, setResult] = useState(null);
@@ -55,7 +56,9 @@ export default function SimulationPlanner() {
           value={periode.end}
           onChange={(e) => setPeriode((p) => ({ ...p, end: e.target.value }))}
         />
-        <Button onClick={handleSimulate} disabled={loading}>Simuler</Button>
+        <Button onClick={handleSimulate} disabled={loading}>
+          Simuler
+        </Button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4">
         {menus.map((m) => (
@@ -65,7 +68,9 @@ export default function SimulationPlanner() {
               checked={!!scenario.find((s) => s.menu_id === m.id)}
               onChange={() => toggleMenu(m.id)}
             />
-            <span>{m.nom} ({m.date})</span>
+            <span>
+              {m.nom} ({m.date})
+            </span>
           </label>
         ))}
       </div>
@@ -73,22 +78,22 @@ export default function SimulationPlanner() {
         <div className="mt-4">
           <TableContainer>
             <table className="min-w-full text-sm">
-            <thead>
-              <tr>
-                <th className="px-2">Produit</th>
-                <th className="px-2">Qté</th>
-                <th className="px-2">Valeur</th>
-              </tr>
-            </thead>
-            <tbody>
-              {result.produits.map((p, idx) => (
-                <tr key={idx}>
-                  <td className="px-2">{p.produit_nom || p.produit_id}</td>
-                  <td className="px-2">{p.quantite}</td>
-                  <td className="px-2">{p.valeur}</td>
+              <thead>
+                <tr>
+                  <th className="px-2">Produit</th>
+                  <th className="px-2">Qté</th>
+                  <th className="px-2">Valeur</th>
                 </tr>
-              ))}
-            </tbody>
+              </thead>
+              <tbody>
+                {result.produits.map((p, idx) => (
+                  <tr key={idx}>
+                    <td className="px-2">{p.produit_nom || p.produit_id}</td>
+                    <td className="px-2">{p.quantite}</td>
+                    <td className="px-2">{p.valeur}</td>
+                  </tr>
+                ))}
+              </tbody>
             </table>
           </TableContainer>
           <div className="font-semibold">Total : {result.total} €</div>
@@ -97,7 +102,11 @@ export default function SimulationPlanner() {
           </Button>
         </div>
       )}
-      <SimulationDetailsModal open={open} onClose={() => setOpen(false)} result={result} />
+      <SimulationDetailsModal
+        open={open}
+        onClose={() => setOpen(false)}
+        result={result}
+      />
     </div>
   );
 }

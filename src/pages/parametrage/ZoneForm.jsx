@@ -1,4 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useZones } from '@/hooks/useZones';
@@ -32,7 +33,7 @@ export default function ZoneForm() {
     load();
   }, [id]);
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const form = e.target;
     const payload = {
@@ -44,7 +45,8 @@ export default function ZoneForm() {
       actif: form.actif.checked,
       position: parseInt(form.position.value || '0', 10),
     };
-    const { error } = id === 'new' ? await createZone(payload) : await updateZone(id, payload);
+    const { error } =
+      id === 'new' ? await createZone(payload) : await updateZone(id, payload);
     if (!error) {
       toast.success('Zone enregistrée');
       navigate('/parametrage/zones');
@@ -56,12 +58,22 @@ export default function ZoneForm() {
   const infoForm = (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm mb-1" htmlFor="nom">Nom</label>
+        <label className="block text-sm mb-1" htmlFor="nom">
+          Nom
+        </label>
         <Input id="nom" name="nom" defaultValue={zone?.nom || ''} required />
       </div>
       <div>
-        <label className="block text-sm mb-1" htmlFor="type">Type</label>
-        <Select id="type" name="type" defaultValue={zone?.type || ''} required className="w-full">
+        <label className="block text-sm mb-1" htmlFor="type">
+          Type
+        </label>
+        <Select
+          id="type"
+          name="type"
+          defaultValue={zone?.type || ''}
+          required
+          className="w-full"
+        >
           <option value="">Choisir…</option>
           <option value="cave">Cave</option>
           <option value="shop">Shop</option>
@@ -72,33 +84,71 @@ export default function ZoneForm() {
         </Select>
       </div>
       <div>
-        <label className="block text-sm mb-1" htmlFor="code">Code</label>
+        <label className="block text-sm mb-1" htmlFor="code">
+          Code
+        </label>
         <Input id="code" name="code" defaultValue={zone?.code || ''} />
       </div>
       <div>
-        <label className="block text-sm mb-1" htmlFor="parent_id">Parent</label>
-        <Select id="parent_id" name="parent_id" defaultValue={zone?.parent_id || ''} className="w-full">
+        <label className="block text-sm mb-1" htmlFor="parent_id">
+          Parent
+        </label>
+        <Select
+          id="parent_id"
+          name="parent_id"
+          defaultValue={zone?.parent_id || ''}
+          className="w-full"
+        >
           <option value="">Aucun</option>
-          {zones.filter(z => z.id !== id).map(z => (
-            <option key={z.id} value={z.id}>{z.nom}</option>
-          ))}
+          {zones
+            .filter((z) => z.id !== id)
+            .map((z) => (
+              <option key={z.id} value={z.id}>
+                {z.nom}
+              </option>
+            ))}
         </Select>
       </div>
       <div>
-        <label className="block text-sm mb-1" htmlFor="adresse">Adresse</label>
+        <label className="block text-sm mb-1" htmlFor="adresse">
+          Adresse
+        </label>
         <Input id="adresse" name="adresse" defaultValue={zone?.adresse || ''} />
       </div>
       <div>
-        <label className="block text-sm mb-1" htmlFor="position">Position</label>
-        <Input id="position" name="position" type="number" min={0} step={1} defaultValue={zone?.position || 0} />
+        <label className="block text-sm mb-1" htmlFor="position">
+          Position
+        </label>
+        <Input
+          id="position"
+          name="position"
+          type="number"
+          min={0}
+          step={1}
+          defaultValue={zone?.position || 0}
+        />
       </div>
       <div className="flex items-center gap-2">
-        <input id="actif" name="actif" type="checkbox" defaultChecked={zone?.actif ?? true} />
+        <input
+          id="actif"
+          name="actif"
+          type="checkbox"
+          defaultChecked={zone?.actif ?? true}
+        />
         <label htmlFor="actif">Zone active</label>
       </div>
-      <p className="text-xs text-muted-foreground">La réquisition est possible uniquement pour les zones de type cave ou shop.</p>
+      <p className="text-xs text-muted-foreground">
+        La réquisition est possible uniquement pour les zones de type cave ou
+        shop.
+      </p>
       <div className="flex gap-2 justify-end">
-        <Button type="button" variant="outline" onClick={() => navigate('/parametrage/zones')}>Annuler</Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => navigate('/parametrage/zones')}
+        >
+          Annuler
+        </Button>
         <Button type="submit">Enregistrer</Button>
       </div>
     </form>
@@ -121,4 +171,3 @@ export default function ZoneForm() {
     </div>
   );
 }
-

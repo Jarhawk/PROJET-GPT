@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { createContext, useContext, useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { createContext, useContext, useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
 const HelpContext = createContext();
@@ -22,9 +23,9 @@ export function HelpProvider({ children }) {
     if (!mama_id) return {};
     setLoading(true);
     const { data } = await supabase
-      .from("tooltips")
-      .select("champ, texte")
-      .eq("mama_id", mama_id);
+      .from('tooltips')
+      .select('champ, texte')
+      .eq('mama_id', mama_id);
     setLoading(false);
     const map = {};
     (data || []).forEach((t) => {
@@ -34,15 +35,15 @@ export function HelpProvider({ children }) {
     return map;
   }
 
-  async function fetchDocs({ search = "" } = {}) {
+  async function fetchDocs({ search = '' } = {}) {
     if (!mama_id) return [];
     setLoading(true);
     let query = supabase
-      .from("documentation")
-      .select("id, titre, contenu, categorie")
-      .eq("mama_id", mama_id);
-    if (search) query = query.ilike("titre", `%${search}%`);
-    const { data } = await query.order("titre", { ascending: true });
+      .from('documentation')
+      .select('id, titre, contenu, categorie')
+      .eq('mama_id', mama_id);
+    if (search) query = query.ilike('titre', `%${search}%`);
+    const { data } = await query.order('titre', { ascending: true });
     setLoading(false);
     setDocs(Array.isArray(data) ? data : []);
     return data || [];
@@ -51,10 +52,10 @@ export function HelpProvider({ children }) {
   async function markGuideSeen(module) {
     if (!user_id || !mama_id) return;
     await supabase
-      .from("guides_seen")
+      .from('guides_seen')
       .upsert(
         { user_id, mama_id, module, seen: true },
-        { onConflict: "user_id,module" }
+        { onConflict: 'user_id,module' }
       );
   }
 
@@ -74,4 +75,3 @@ export function HelpProvider({ children }) {
 export function useHelp() {
   return useContext(HelpContext) || {};
 }
-

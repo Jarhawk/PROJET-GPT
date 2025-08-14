@@ -1800,6 +1800,8 @@ create table if not exists public.menus_jour (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+-- Column safety for menus_jour.date_menu
+alter table if exists public.menus_jour add column if not exists date_menu date;
 create table if not exists public.menus_jour_fiches (
   id uuid primary key default gen_random_uuid(),
   mama_id uuid not null references public.mamas(id) on delete cascade,

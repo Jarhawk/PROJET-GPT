@@ -6,8 +6,7 @@
 create extension if not exists "pgcrypto";
 create extension if not exists "pg_net";
 
--- === current_user_mama_id() ===
-do $$
+do $do$
 begin
   if to_regclass('public.utilisateurs') is not null then
     execute $fn$
@@ -23,10 +22,10 @@ begin
   else
     raise notice 'Skip current_user_mama_id(): table public.utilisateurs absente';
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 
--- === current_user_is_admin_or_manager() ===
-do $$
+do $do$
 begin
   if to_regclass('public.utilisateurs') is not null and to_regclass('public.roles') is not null then
     execute $fn$
@@ -45,10 +44,10 @@ begin
   else
     raise notice 'Skip current_user_is_admin_or_manager(): tables utilisateurs/roles absentes';
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 
--- === current_user_is_admin() ===
-do $$
+do $do$
 begin
   if to_regclass('public.utilisateurs') is not null and to_regclass('public.roles') is not null then
     execute $fn$
@@ -67,7 +66,8 @@ begin
   else
     raise notice 'Skip current_user_is_admin(): tables utilisateurs/roles absentes';
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 create or replace function public.create_utilisateur(
   p_email text,
   p_nom text,
@@ -97,8 +97,7 @@ exception when others then
   return json_build_object('success', false, 'error', SQLERRM);
 end;$$;
 
--- === zones_stock_select policy ===
-  do $$
+  do $do$
   begin
     if to_regclass('public.zones_stock') is not null then
       if not exists (
@@ -125,7 +124,8 @@ end;$$;
     else
       raise notice 'Skip policy zones_stock_select: table public.zones_stock absente -- TODO: dépendance manquante';
     end if;
-  end $$;
+  end;
+  $do$ language plpgsql;
 create or replace function public.can_access_zone(p_zone uuid, p_mode text default 'lecture')
 returns boolean
 language sql stable security definer
@@ -137,7 +137,7 @@ as $$
     when p_mode = 'requisition' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and requisition=true)
       else false end;
 $$;
-do $$
+do $do$
 begin
   if to_regclass('public.user_mama_access') is not null then
     if not exists (
@@ -147,15 +147,18 @@ begin
         and tablename='user_mama_access'
         and policyname='user_mama_access_select'
     ) then
-      create policy user_mama_access_select
-      on public.user_mama_access
-      for select
-      using (user_id = auth.uid());
+      execute $pol$
+        create policy user_mama_access_select
+        on public.user_mama_access
+        for select
+        using (user_id = auth.uid());
+      $pol$;
     end if;
   else
     raise notice 'Skip policy user_mama_access_select: table public.user_mama_access absente';
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 create or replace function public.log_action(
   p_mama_id uuid,
   p_type text,
@@ -172,7 +175,7 @@ begin
   values (p_mama_id, auth.uid(), p_type, p_module, p_description, p_donnees, p_critique);
 end;
 $$;
-do $$
+do $do$
 begin
   if to_regprocedure('public.current_user_mama_id()') is not null then
     execute 'grant execute on function public.current_user_mama_id() to authenticated';
@@ -192,4 +195,5 @@ begin
   if to_regprocedure('public.log_action(uuid, text, text, text, jsonb, boolean)') is not null then
     execute 'grant execute on function public.log_action(uuid, text, text, text, jsonb, boolean) to authenticated';
   end if;
-end $$;
+end;
+$do$ language plpgsql;

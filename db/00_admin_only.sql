@@ -99,7 +99,8 @@ end;$$;
 
   do $do$
   begin
-    if to_regclass('public.zones_stock') is not null then
+    if to_regclass('public.zones_stock') is not null
+       and to_regclass('public.zones_droits') is not null then
       if not exists (
         select 1 from pg_policies
         where schemaname='public' and tablename='zones_stock' and policyname='zones_stock_select'
@@ -122,21 +123,32 @@ end;$$;
         $pol$;
       end if;
     else
-      raise notice 'Skip policy zones_stock_select: table public.zones_stock absente -- TODO: dépendance manquante';
+      raise notice 'Skip policy zones_stock_select: table public.zones_stock ou zones_droits absente';
     end if;
   end;
   $do$ language plpgsql;
-create or replace function public.can_access_zone(p_zone uuid, p_mode text default 'lecture')
-returns boolean
-language sql stable security definer
-as $$
-  select case
-    when p_mode = 'lecture' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and lecture=true)
-    when p_mode = 'ecriture' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and ecriture=true)
-    when p_mode = 'transfert' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and transfert=true)
-    when p_mode = 'requisition' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and requisition=true)
-      else false end;
-$$;
+
+do $do$
+begin
+  if to_regclass('public.zones_droits') is not null then
+    execute $fn$
+      create or replace function public.can_access_zone(p_zone uuid, p_mode text default 'lecture')
+      returns boolean
+      language sql stable security definer
+      as $$
+        select case
+          when p_mode = 'lecture' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and lecture=true)
+          when p_mode = 'ecriture' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and ecriture=true)
+          when p_mode = 'transfert' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and transfert=true)
+          when p_mode = 'requisition' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and requisition=true)
+            else false end;
+      $$;
+    $fn$;
+  else
+    raise notice 'Skip can_access_zone(): table public.zones_droits absente';
+  end if;
+end;
+$do$ language plpgsql;
 do $do$
 begin
   if to_regclass('public.user_mama_access') is not null then

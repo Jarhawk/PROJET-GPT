@@ -20,29 +20,98 @@ $do$ language plpgsql;
 do $do$
 declare tbl text;
 begin
-  foreach tbl in array[
-    'achats','alertes','alertes_rupture','api_keys','auth_double_facteur',
-    'bons_livraison','catalogue_updates','centres_de_cout','commande_lignes',
-    'commandes','compta_mapping','consentements_utilisateur','documentation',
-    'documents','emails_envoyes','etapes_onboarding','facture_lignes',
-    'factures','familles','feedback','fiche_cout_history','fiche_lignes',
-    'fiches','fiches_techniques','fournisseur_contacts','fournisseur_notes',
-    'fournisseur_produits','fournisseurs','fournisseurs_api_config','gadgets',
-    'groupes','guides_seen','help_articles','inventaire_zones','inventaires',
-    'journaux_utilisateur','lignes_bl','lignes_transfert','logs_activite',
-    'logs_securite','mamas','menu_fiches','menu_groupe_lignes',
-    'menu_groupe_modele_lignes','menu_groupe_modeles','menu_groupes','menus',
-    'menus_groupes','menus_groupes_fiches','menus_jour','menus_jour_fiches',
-    'menus_jour_lignes','notification_preferences','notifications',
-    'parametres_commandes','periodes_comptables','permissions','pertes',
-    'planning_lignes','planning_previsionnel','produits','produits_inventaire',
-    'promotions','rapports_generes','regles_alertes','requisition_lignes',
-    'requisitions','roles','settings','signalements','sous_familles','stocks',
-    'tableaux_de_bord','taches','templates_commandes','tooltips','transferts',
-    'unites','usage_stats','utilisateurs','utilisateurs_taches',
-    'validation_requests','ventes_boissons','ventes_fiches',
-    'ventes_fiches_carte','ventes_import_staging','zones_droits','zones_stock'
-  ] loop
+  for tbl in
+    select v.tbl from (values
+      ('achats'),
+      ('alertes'),
+      ('alertes_rupture'),
+      ('api_keys'),
+      ('auth_double_facteur'),
+      ('bons_livraison'),
+      ('catalogue_updates'),
+      ('centres_de_cout'),
+      ('commande_lignes'),
+      ('commandes'),
+      ('compta_mapping'),
+      ('consentements_utilisateur'),
+      ('documentation'),
+      ('documents'),
+      ('emails_envoyes'),
+      ('etapes_onboarding'),
+      ('facture_lignes'),
+      ('factures'),
+      ('familles'),
+      ('feedback'),
+      ('fiche_cout_history'),
+      ('fiche_lignes'),
+      ('fiches'),
+      ('fiches_techniques'),
+      ('fournisseur_contacts'),
+      ('fournisseur_notes'),
+      ('fournisseur_produits'),
+      ('fournisseurs'),
+      ('fournisseurs_api_config'),
+      ('gadgets'),
+      ('groupes'),
+      ('guides_seen'),
+      ('help_articles'),
+      ('inventaire_zones'),
+      ('inventaires'),
+      ('journaux_utilisateur'),
+      ('lignes_bl'),
+      ('lignes_transfert'),
+      ('logs_activite'),
+      ('logs_securite'),
+      ('mamas'),
+      ('menu_fiches'),
+      ('menu_groupe_lignes'),
+      ('menu_groupe_modele_lignes'),
+      ('menu_groupe_modeles'),
+      ('menu_groupes'),
+      ('menus'),
+      ('menus_groupes'),
+      ('menus_groupes_fiches'),
+      ('menus_jour'),
+      ('menus_jour_fiches'),
+      ('menus_jour_lignes'),
+      ('notification_preferences'),
+      ('notifications'),
+      ('parametres_commandes'),
+      ('periodes_comptables'),
+      ('permissions'),
+      ('pertes'),
+      ('planning_lignes'),
+      ('planning_previsionnel'),
+      ('produits'),
+      ('produits_inventaire'),
+      ('promotions'),
+      ('rapports_generes'),
+      ('regles_alertes'),
+      ('requisition_lignes'),
+      ('requisitions'),
+      ('roles'),
+      ('settings'),
+      ('signalements'),
+      ('sous_familles'),
+      ('stocks'),
+      ('tableaux_de_bord'),
+      ('taches'),
+      ('templates_commandes'),
+      ('tooltips'),
+      ('transferts'),
+      ('unites'),
+      ('usage_stats'),
+      ('utilisateurs'),
+      ('utilisateurs_taches'),
+      ('validation_requests'),
+      ('ventes_boissons'),
+      ('ventes_fiches'),
+      ('ventes_fiches_carte'),
+      ('ventes_import_staging'),
+      ('zones_droits'),
+      ('zones_stock')
+    ) as v(tbl)
+  loop
     execute format('alter table if exists public.%I add column if not exists mama_id uuid;', tbl);
   end loop;
 end;
@@ -195,145 +264,204 @@ create table if not exists public.consentements_utilisateur (
   date_consentement timestamptz default now()
 );
 -- 3. Foreign keys
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_fournisseurs_mama_id') then
     alter table if exists public.fournisseurs
       add constraint fk_fournisseurs_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_produits_mama_id') then
     alter table if exists public.produits
       add constraint fk_produits_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
 
-do $$ begin
+$do$ language plpgsql;
+
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_roles_mama_id') then
     alter table if exists public.roles
       add constraint fk_roles_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
 
-do $$ begin
+$do$ language plpgsql;
+
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_utilisateurs_mama_id') then
     alter table if exists public.utilisateurs
       add constraint fk_utilisateurs_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
 
-do $$ begin
+$do$ language plpgsql;
+
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_utilisateurs_role_id') then
     alter table if exists public.utilisateurs
       add constraint fk_utilisateurs_role_id foreign key (role_id) references public.roles(id) on delete restrict;
   end if;
-end $$;
+end;
 
-do $$ begin
+$do$ language plpgsql;
+
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_commandes_mama_id') then
     alter table if exists public.commandes
       add constraint fk_commandes_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
 
-do $$ begin
+$do$ language plpgsql;
+
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_commandes_fournisseur_id') then
     alter table if exists public.commandes
       add constraint fk_commandes_fournisseur_id foreign key (fournisseur_id) references public.fournisseurs(id) on delete set null;
   end if;
-end $$;
+end;
 
-do $$ begin
+$do$ language plpgsql;
+
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_commandes_created_by') then
     alter table if exists public.commandes
       add constraint fk_commandes_created_by foreign key (created_by) references public.utilisateurs(id) on delete set null;
   end if;
-end $$;
+end;
 
-do $$ begin
+$do$ language plpgsql;
+
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_commandes_validated_by') then
     alter table if exists public.commandes
       add constraint fk_commandes_validated_by foreign key (validated_by) references public.utilisateurs(id) on delete set null;
   end if;
-end $$;
+end;
 
-do $$ begin
+$do$ language plpgsql;
+
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_commande_lignes_commande_id') then
     alter table if exists public.commande_lignes
       add constraint fk_commande_lignes_commande_id foreign key (commande_id) references public.commandes(id) on delete cascade;
   end if;
-end $$;
+end;
 
-do $$ begin
+$do$ language plpgsql;
+
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_commande_lignes_produit_id') then
     alter table if exists public.commande_lignes
       add constraint fk_commande_lignes_produit_id foreign key (produit_id) references public.produits(id) on delete cascade;
   end if;
-end $$;
+end;
 
-do $$ begin
+$do$ language plpgsql;
+
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_commande_lignes_mama_id') then
     alter table if exists public.commande_lignes
       add constraint fk_commande_lignes_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
 
-do $$ begin
+$do$ language plpgsql;
+
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_templates_commandes_mama_id') then
     alter table if exists public.templates_commandes
       add constraint fk_templates_commandes_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
 
-do $$ begin
+$do$ language plpgsql;
+
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_templates_commandes_fournisseur_id') then
     alter table if exists public.templates_commandes
       add constraint fk_templates_commandes_fournisseur_id foreign key (fournisseur_id) references public.fournisseurs(id) on delete set null;
   end if;
-end $$;
+end;
 
-do $$ begin
+$do$ language plpgsql;
+
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_emails_envoyes_commande_id') then
     alter table if exists public.emails_envoyes
       add constraint fk_emails_envoyes_commande_id foreign key (commande_id) references public.commandes(id) on delete cascade;
   end if;
-end $$;
+end;
 
-do $$ begin
+$do$ language plpgsql;
+
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_emails_envoyes_mama_id') then
     alter table if exists public.emails_envoyes
       add constraint fk_emails_envoyes_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
 
-do $$ begin
+$do$ language plpgsql;
+
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_permissions_role_id') then
     alter table if exists public.permissions
       add constraint fk_permissions_role_id foreign key (role_id) references public.roles(id) on delete cascade;
   end if;
-end $$;
+end;
 
-do $$ begin
+$do$ language plpgsql;
+
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_permissions_mama_id') then
     alter table if exists public.permissions
       add constraint fk_permissions_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
 
-do $$ begin
+$do$ language plpgsql;
+
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_consentements_utilisateur_utilisateur_id') then
     alter table if exists public.consentements_utilisateur
       add constraint fk_consentements_utilisateur_utilisateur_id foreign key (utilisateur_id) references public.utilisateurs(id) on delete cascade;
   end if;
-end $$;
+end;
 
-do $$ begin
+$do$ language plpgsql;
+
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_consentements_utilisateur_mama_id') then
     alter table if exists public.consentements_utilisateur
       add constraint fk_consentements_utilisateur_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+
+$do$ language plpgsql;
 
 -- 4. Indexes
 create index if not exists idx_fournisseurs_mama_id on public.fournisseurs(mama_id);
@@ -406,7 +534,7 @@ $$;
 
 
 -- 6. Triggers
-do $$
+do $do$
 declare r record;
 begin
   for r in (
@@ -424,37 +552,45 @@ begin
       null;
     end;
   end loop;
-end$$;
+end;
+$do$ language plpgsql;
 -- 7. RLS & Policies
 alter table if exists public.mamas enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='mamas' and policyname='mamas_all') then
     create policy mamas_all on public.mamas
       for all using (id = current_user_mama_id())
       with check (id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 
 alter table if exists public.fournisseurs enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='fournisseurs' and policyname='fournisseurs_all') then
     create policy fournisseurs_all on public.fournisseurs
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 
 alter table if exists public.produits enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='produits' and policyname='produits_all') then
     create policy produits_all on public.produits
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 
 alter table if exists public.roles enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='roles' and policyname='roles_self_mama') then
     create policy roles_self_mama on public.roles
       for select using (mama_id = current_user_mama_id());
@@ -468,10 +604,12 @@ do $$ begin
       for update using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 
 alter table if exists public.utilisateurs enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='utilisateurs' and policyname='utilisateurs_self_mama') then
     create policy utilisateurs_self_mama on public.utilisateurs
       for select using (mama_id = current_user_mama_id());
@@ -485,52 +623,64 @@ do $$ begin
       for update using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 
 alter table if exists public.commandes enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='commandes' and policyname='commandes_all') then
     create policy commandes_all on public.commandes
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 
 alter table if exists public.commande_lignes enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='commande_lignes' and policyname='commande_lignes_all') then
     create policy commande_lignes_all on public.commande_lignes
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 
 alter table if exists public.templates_commandes enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='templates_commandes' and policyname='templates_commandes_select') then
     create policy templates_commandes_select on public.templates_commandes
       for select using (mama_id = current_user_mama_id());
   end if;
-end $$;
-do $$ begin
+end;
+$do$ language plpgsql;
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='templates_commandes' and policyname='templates_commandes_crud_admin') then
     create policy templates_commandes_crud_admin on public.templates_commandes
       for all using (mama_id = current_user_mama_id() and current_user_is_admin_or_manager())
       with check (mama_id = current_user_mama_id() and current_user_is_admin_or_manager());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 
 alter table if exists public.emails_envoyes enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='emails_envoyes' and policyname='emails_envoyes_all') then
     create policy emails_envoyes_all on public.emails_envoyes
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 
 alter table if exists public.permissions enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='permissions' and policyname='permissions_self_mama') then
     create policy permissions_self_mama on public.permissions
       for select using (mama_id = current_user_mama_id());
@@ -544,16 +694,19 @@ do $$ begin
       for update using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 
 alter table if exists public.consentements_utilisateur enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='consentements_utilisateur' and policyname='consentements_utilisateur_all') then
     create policy consentements_utilisateur_all on public.consentements_utilisateur
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 
 -- 9. Sécurité (GRANT)
 grant select, insert, update, delete on public.mamas to authenticated;
@@ -592,32 +745,40 @@ create index if not exists idx_achats_mama_id on public.achats(mama_id);
 create index if not exists idx_achats_produit_id on public.achats(produit_id);
 create index if not exists idx_achats_fournisseur_id on public.achats(fournisseur_id);
 create index if not exists idx_achats_date on public.achats(date_achat);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_achats_mama_id') then
     alter table if exists public.achats
       add constraint fk_achats_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
-do $$ begin
+end;
+$do$ language plpgsql;
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_achats_produit_id') then
     alter table if exists public.achats
       add constraint fk_achats_produit_id foreign key (produit_id) references public.produits(id) on delete restrict;
   end if;
-end $$;
-do $$ begin
+end;
+$do$ language plpgsql;
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_achats_fournisseur_id') then
     alter table if exists public.achats
       add constraint fk_achats_fournisseur_id foreign key (fournisseur_id) references public.fournisseurs(id) on delete restrict;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.achats enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='achats' and policyname='achats_all') then
     create policy achats_all on public.achats
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.achats to authenticated;
 create table if not exists public.alertes (
   id uuid primary key default gen_random_uuid(),
@@ -625,20 +786,24 @@ create table if not exists public.alertes (
   created_at timestamptz default now()
 );
 create index if not exists idx_alertes_mama_id on public.alertes(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_alertes_mama_id') then
     alter table if exists public.alertes
       add constraint fk_alertes_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.alertes enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='alertes' and policyname='alertes_all') then
     create policy alertes_all on public.alertes
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.alertes to authenticated;
 create table if not exists public.api_keys (
   id uuid primary key default gen_random_uuid(),
@@ -646,20 +811,24 @@ create table if not exists public.api_keys (
   created_at timestamptz default now()
 );
 create index if not exists idx_api_keys_mama_id on public.api_keys(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_api_keys_mama_id') then
     alter table if exists public.api_keys
       add constraint fk_api_keys_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.api_keys enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='api_keys' and policyname='api_keys_all') then
     create policy api_keys_all on public.api_keys
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.api_keys to authenticated;
 create table if not exists public.auth_double_facteur (
   id uuid primary key default gen_random_uuid(),
@@ -667,20 +836,24 @@ create table if not exists public.auth_double_facteur (
   created_at timestamptz default now()
 );
 create index if not exists idx_auth_double_facteur_mama_id on public.auth_double_facteur(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_auth_double_facteur_mama_id') then
     alter table if exists public.auth_double_facteur
       add constraint fk_auth_double_facteur_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.auth_double_facteur enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='auth_double_facteur' and policyname='auth_double_facteur_all') then
     create policy auth_double_facteur_all on public.auth_double_facteur
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.auth_double_facteur to authenticated;
 create table if not exists public.bons_livraison (
   id uuid primary key default gen_random_uuid(),
@@ -688,20 +861,24 @@ create table if not exists public.bons_livraison (
   created_at timestamptz default now()
 );
 create index if not exists idx_bons_livraison_mama_id on public.bons_livraison(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_bons_livraison_mama_id') then
     alter table if exists public.bons_livraison
       add constraint fk_bons_livraison_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.bons_livraison enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='bons_livraison' and policyname='bons_livraison_all') then
     create policy bons_livraison_all on public.bons_livraison
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.bons_livraison to authenticated;
 create table if not exists public.catalogue_updates (
   id uuid primary key default gen_random_uuid(),
@@ -709,20 +886,24 @@ create table if not exists public.catalogue_updates (
   created_at timestamptz default now()
 );
 create index if not exists idx_catalogue_updates_mama_id on public.catalogue_updates(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_catalogue_updates_mama_id') then
     alter table if exists public.catalogue_updates
       add constraint fk_catalogue_updates_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.catalogue_updates enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='catalogue_updates' and policyname='catalogue_updates_all') then
     create policy catalogue_updates_all on public.catalogue_updates
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.catalogue_updates to authenticated;
 create table if not exists public.centres_de_cout (
   id uuid primary key default gen_random_uuid(),
@@ -730,20 +911,24 @@ create table if not exists public.centres_de_cout (
   created_at timestamptz default now()
 );
 create index if not exists idx_centres_de_cout_mama_id on public.centres_de_cout(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_centres_de_cout_mama_id') then
     alter table if exists public.centres_de_cout
       add constraint fk_centres_de_cout_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.centres_de_cout enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='centres_de_cout' and policyname='centres_de_cout_all') then
     create policy centres_de_cout_all on public.centres_de_cout
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.centres_de_cout to authenticated;
 create table if not exists public.compta_mapping (
   id uuid primary key default gen_random_uuid(),
@@ -751,20 +936,24 @@ create table if not exists public.compta_mapping (
   created_at timestamptz default now()
 );
 create index if not exists idx_compta_mapping_mama_id on public.compta_mapping(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_compta_mapping_mama_id') then
     alter table if exists public.compta_mapping
       add constraint fk_compta_mapping_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.compta_mapping enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='compta_mapping' and policyname='compta_mapping_all') then
     create policy compta_mapping_all on public.compta_mapping
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.compta_mapping to authenticated;
 create table if not exists public.documentation (
   id uuid primary key default gen_random_uuid(),
@@ -772,20 +961,24 @@ create table if not exists public.documentation (
   created_at timestamptz default now()
 );
 create index if not exists idx_documentation_mama_id on public.documentation(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_documentation_mama_id') then
     alter table if exists public.documentation
       add constraint fk_documentation_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.documentation enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='documentation' and policyname='documentation_all') then
     create policy documentation_all on public.documentation
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.documentation to authenticated;
 create table if not exists public.documents (
   id uuid primary key default gen_random_uuid(),
@@ -793,20 +986,24 @@ create table if not exists public.documents (
   created_at timestamptz default now()
 );
 create index if not exists idx_documents_mama_id on public.documents(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_documents_mama_id') then
     alter table if exists public.documents
       add constraint fk_documents_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.documents enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='documents' and policyname='documents_all') then
     create policy documents_all on public.documents
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.documents to authenticated;
 create table if not exists public.etapes_onboarding (
   id uuid primary key default gen_random_uuid(),
@@ -814,20 +1011,24 @@ create table if not exists public.etapes_onboarding (
   created_at timestamptz default now()
 );
 create index if not exists idx_etapes_onboarding_mama_id on public.etapes_onboarding(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_etapes_onboarding_mama_id') then
     alter table if exists public.etapes_onboarding
       add constraint fk_etapes_onboarding_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.etapes_onboarding enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='etapes_onboarding' and policyname='etapes_onboarding_all') then
     create policy etapes_onboarding_all on public.etapes_onboarding
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.etapes_onboarding to authenticated;
 create table if not exists public.facture_lignes (
   id uuid primary key default gen_random_uuid(),
@@ -835,20 +1036,24 @@ create table if not exists public.facture_lignes (
   created_at timestamptz default now()
 );
 create index if not exists idx_facture_lignes_mama_id on public.facture_lignes(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_facture_lignes_mama_id') then
     alter table if exists public.facture_lignes
       add constraint fk_facture_lignes_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.facture_lignes enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='facture_lignes' and policyname='facture_lignes_all') then
     create policy facture_lignes_all on public.facture_lignes
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.facture_lignes to authenticated;
 create table if not exists public.factures (
   id uuid primary key default gen_random_uuid(),
@@ -856,20 +1061,24 @@ create table if not exists public.factures (
   created_at timestamptz default now()
 );
 create index if not exists idx_factures_mama_id on public.factures(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_factures_mama_id') then
     alter table if exists public.factures
       add constraint fk_factures_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.factures enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='factures' and policyname='factures_all') then
     create policy factures_all on public.factures
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.factures to authenticated;
 create table if not exists public.familles (
   id uuid primary key default gen_random_uuid(),
@@ -879,20 +1088,24 @@ create table if not exists public.familles (
   created_at timestamptz default now()
 );
 create index if not exists idx_familles_mama_id on public.familles(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_familles_mama_id') then
     alter table if exists public.familles
       add constraint fk_familles_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.familles enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='familles' and policyname='familles_all') then
     create policy familles_all on public.familles
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.familles to authenticated;
 create table if not exists public.feedback (
   id uuid primary key default gen_random_uuid(),
@@ -900,20 +1113,24 @@ create table if not exists public.feedback (
   created_at timestamptz default now()
 );
 create index if not exists idx_feedback_mama_id on public.feedback(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_feedback_mama_id') then
     alter table if exists public.feedback
       add constraint fk_feedback_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.feedback enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='feedback' and policyname='feedback_all') then
     create policy feedback_all on public.feedback
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.feedback to authenticated;
 create table if not exists public.fiche_cout_history (
   id uuid primary key default gen_random_uuid(),
@@ -921,20 +1138,24 @@ create table if not exists public.fiche_cout_history (
   created_at timestamptz default now()
 );
 create index if not exists idx_fiche_cout_history_mama_id on public.fiche_cout_history(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_fiche_cout_history_mama_id') then
     alter table if exists public.fiche_cout_history
       add constraint fk_fiche_cout_history_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.fiche_cout_history enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='fiche_cout_history' and policyname='fiche_cout_history_all') then
     create policy fiche_cout_history_all on public.fiche_cout_history
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.fiche_cout_history to authenticated;
 create table if not exists public.fiches_techniques (
   id uuid primary key default gen_random_uuid(),
@@ -947,20 +1168,24 @@ create table if not exists public.fiches_techniques (
   created_at timestamptz default now()
 );
 create index if not exists idx_fiches_techniques_mama_id on public.fiches_techniques(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_fiches_techniques_mama_id') then
     alter table if exists public.fiches_techniques
       add constraint fk_fiches_techniques_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.fiches_techniques enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='fiches_techniques' and policyname='fiches_techniques_all') then
     create policy fiches_techniques_all on public.fiches_techniques
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.fiches_techniques to authenticated;
 create table if not exists public.fiche_lignes (
   id uuid primary key default gen_random_uuid(),
@@ -973,32 +1198,40 @@ create table if not exists public.fiche_lignes (
 create index if not exists idx_fiche_lignes_mama_id on public.fiche_lignes(mama_id);
 create index if not exists idx_fiche_lignes_fiche_id on public.fiche_lignes(fiche_id);
 create index if not exists idx_fiche_lignes_produit_id on public.fiche_lignes(produit_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_fiche_lignes_mama_id') then
     alter table if exists public.fiche_lignes
       add constraint fk_fiche_lignes_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
-do $$ begin
+end;
+$do$ language plpgsql;
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_fiche_lignes_fiche_id') then
     alter table if exists public.fiche_lignes
       add constraint fk_fiche_lignes_fiche_id foreign key (fiche_id) references public.fiches_techniques(id) on delete cascade;
   end if;
-end $$;
-do $$ begin
+end;
+$do$ language plpgsql;
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_fiche_lignes_produit_id') then
     alter table if exists public.fiche_lignes
       add constraint fk_fiche_lignes_produit_id foreign key (produit_id) references public.produits(id);
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.fiche_lignes enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='fiche_lignes' and policyname='fiche_lignes_all') then
     create policy fiche_lignes_all on public.fiche_lignes
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.fiche_lignes to authenticated;
 create table if not exists public.fiches (
   id uuid primary key default gen_random_uuid(),
@@ -1006,20 +1239,24 @@ create table if not exists public.fiches (
   created_at timestamptz default now()
 );
 create index if not exists idx_fiches_mama_id on public.fiches(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_fiches_mama_id') then
     alter table if exists public.fiches
       add constraint fk_fiches_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.fiches enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='fiches' and policyname='fiches_all') then
     create policy fiches_all on public.fiches
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.fiches to authenticated;
 create table if not exists public.fournisseur_contacts (
   id uuid primary key default gen_random_uuid(),
@@ -1027,20 +1264,24 @@ create table if not exists public.fournisseur_contacts (
   created_at timestamptz default now()
 );
 create index if not exists idx_fournisseur_contacts_mama_id on public.fournisseur_contacts(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_fournisseur_contacts_mama_id') then
     alter table if exists public.fournisseur_contacts
       add constraint fk_fournisseur_contacts_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.fournisseur_contacts enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='fournisseur_contacts' and policyname='fournisseur_contacts_all') then
     create policy fournisseur_contacts_all on public.fournisseur_contacts
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.fournisseur_contacts to authenticated;
 create table if not exists public.fournisseur_notes (
   id uuid primary key default gen_random_uuid(),
@@ -1048,20 +1289,24 @@ create table if not exists public.fournisseur_notes (
   created_at timestamptz default now()
 );
 create index if not exists idx_fournisseur_notes_mama_id on public.fournisseur_notes(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_fournisseur_notes_mama_id') then
     alter table if exists public.fournisseur_notes
       add constraint fk_fournisseur_notes_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.fournisseur_notes enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='fournisseur_notes' and policyname='fournisseur_notes_all') then
     create policy fournisseur_notes_all on public.fournisseur_notes
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.fournisseur_notes to authenticated;
 create table if not exists public.fournisseur_produits (
   id uuid primary key default gen_random_uuid(),
@@ -1075,32 +1320,40 @@ create table if not exists public.fournisseur_produits (
 create index if not exists idx_fournisseur_produits_mama_id on public.fournisseur_produits(mama_id);
 create index if not exists idx_fournisseur_produits_produit_id on public.fournisseur_produits(produit_id);
 create index if not exists idx_fournisseur_produits_fournisseur_id on public.fournisseur_produits(fournisseur_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_fournisseur_produits_mama_id') then
     alter table if exists public.fournisseur_produits
       add constraint fk_fournisseur_produits_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
-do $$ begin
+end;
+$do$ language plpgsql;
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_fournisseur_produits_produit_id') then
     alter table if exists public.fournisseur_produits
       add constraint fk_fournisseur_produits_produit_id foreign key (produit_id) references public.produits(id) on delete cascade;
   end if;
-end $$;
-do $$ begin
+end;
+$do$ language plpgsql;
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_fournisseur_produits_fournisseur_id') then
     alter table if exists public.fournisseur_produits
       add constraint fk_fournisseur_produits_fournisseur_id foreign key (fournisseur_id) references public.fournisseurs(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.fournisseur_produits enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='fournisseur_produits' and policyname='fournisseur_produits_all') then
     create policy fournisseur_produits_all on public.fournisseur_produits
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.fournisseur_produits to authenticated;
 create table if not exists public.fournisseurs_api_config (
   id uuid primary key default gen_random_uuid(),
@@ -1108,20 +1361,24 @@ create table if not exists public.fournisseurs_api_config (
   created_at timestamptz default now()
 );
 create index if not exists idx_fournisseurs_api_config_mama_id on public.fournisseurs_api_config(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_fournisseurs_api_config_mama_id') then
     alter table if exists public.fournisseurs_api_config
       add constraint fk_fournisseurs_api_config_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.fournisseurs_api_config enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='fournisseurs_api_config' and policyname='fournisseurs_api_config_all') then
     create policy fournisseurs_api_config_all on public.fournisseurs_api_config
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.fournisseurs_api_config to authenticated;
 create table if not exists public.gadgets (
   id uuid primary key default gen_random_uuid(),
@@ -1129,20 +1386,24 @@ create table if not exists public.gadgets (
   created_at timestamptz default now()
 );
 create index if not exists idx_gadgets_mama_id on public.gadgets(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_gadgets_mama_id') then
     alter table if exists public.gadgets
       add constraint fk_gadgets_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.gadgets enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='gadgets' and policyname='gadgets_all') then
     create policy gadgets_all on public.gadgets
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.gadgets to authenticated;
 create table if not exists public.groupes (
   id uuid primary key default gen_random_uuid(),
@@ -1150,20 +1411,24 @@ create table if not exists public.groupes (
   created_at timestamptz default now()
 );
 create index if not exists idx_groupes_mama_id on public.groupes(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_groupes_mama_id') then
     alter table if exists public.groupes
       add constraint fk_groupes_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.groupes enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='groupes' and policyname='groupes_all') then
     create policy groupes_all on public.groupes
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.groupes to authenticated;
 create table if not exists public.guides_seen (
   id uuid primary key default gen_random_uuid(),
@@ -1171,20 +1436,24 @@ create table if not exists public.guides_seen (
   created_at timestamptz default now()
 );
 create index if not exists idx_guides_seen_mama_id on public.guides_seen(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_guides_seen_mama_id') then
     alter table if exists public.guides_seen
       add constraint fk_guides_seen_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.guides_seen enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='guides_seen' and policyname='guides_seen_all') then
     create policy guides_seen_all on public.guides_seen
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.guides_seen to authenticated;
 create table if not exists public.help_articles (
   id uuid primary key default gen_random_uuid(),
@@ -1192,20 +1461,24 @@ create table if not exists public.help_articles (
   created_at timestamptz default now()
 );
 create index if not exists idx_help_articles_mama_id on public.help_articles(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_help_articles_mama_id') then
     alter table if exists public.help_articles
       add constraint fk_help_articles_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.help_articles enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='help_articles' and policyname='help_articles_all') then
     create policy help_articles_all on public.help_articles
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.help_articles to authenticated;
 create table if not exists public.inventaire_zones (
   id uuid primary key default gen_random_uuid(),
@@ -1213,20 +1486,24 @@ create table if not exists public.inventaire_zones (
   created_at timestamptz default now()
 );
 create index if not exists idx_inventaire_zones_mama_id on public.inventaire_zones(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_inventaire_zones_mama_id') then
     alter table if exists public.inventaire_zones
       add constraint fk_inventaire_zones_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.inventaire_zones enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='inventaire_zones' and policyname='inventaire_zones_all') then
     create policy inventaire_zones_all on public.inventaire_zones
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.inventaire_zones to authenticated;
 
 create table if not exists public.periodes_comptables (
@@ -1240,13 +1517,15 @@ create table if not exists public.periodes_comptables (
 );
 create index if not exists idx_periodes_comptables_mama_id on public.periodes_comptables(mama_id);
 alter table if exists public.periodes_comptables enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='periodes_comptables' and policyname='periodes_comptables_rls') then
     create policy periodes_comptables_rls on public.periodes_comptables
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.periodes_comptables to authenticated;
 
 create table if not exists public.inventaires (
@@ -1262,7 +1541,8 @@ create table if not exists public.inventaires (
 create index if not exists idx_inventaires_mama_id on public.inventaires(mama_id);
 create index if not exists idx_inventaires_periode_id on public.inventaires(periode_id);
 alter table if exists public.inventaires enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='inventaires' and policyname='inventaires_select') then
     create policy inventaires_select on public.inventaires
       for select using (mama_id = current_user_mama_id());
@@ -1283,7 +1563,8 @@ do $$ begin
         and exists (select 1 from periodes_comptables p where p.id = periode_id and p.cloturee = false)
       );
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.inventaires to authenticated;
 create table if not exists public.produits_inventaire (
   id uuid primary key default gen_random_uuid(),
@@ -1299,13 +1580,15 @@ create table if not exists public.produits_inventaire (
 create index if not exists idx_produits_inventaire_mama_id on public.produits_inventaire(mama_id);
 create index if not exists idx_produits_inventaire_inventaire_id on public.produits_inventaire(inventaire_id);
 alter table if exists public.produits_inventaire enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='produits_inventaire' and policyname='produits_inventaire_rls') then
     create policy produits_inventaire_rls on public.produits_inventaire
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.produits_inventaire to authenticated;
 create table if not exists public.journaux_utilisateur (
   id uuid primary key default gen_random_uuid(),
@@ -1313,20 +1596,24 @@ create table if not exists public.journaux_utilisateur (
   created_at timestamptz default now()
 );
 create index if not exists idx_journaux_utilisateur_mama_id on public.journaux_utilisateur(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_journaux_utilisateur_mama_id') then
     alter table if exists public.journaux_utilisateur
       add constraint fk_journaux_utilisateur_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.journaux_utilisateur enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='journaux_utilisateur' and policyname='journaux_utilisateur_all') then
     create policy journaux_utilisateur_all on public.journaux_utilisateur
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.journaux_utilisateur to authenticated;
 create table if not exists public.lignes_bl (
   id uuid primary key default gen_random_uuid(),
@@ -1334,20 +1621,24 @@ create table if not exists public.lignes_bl (
   created_at timestamptz default now()
 );
 create index if not exists idx_lignes_bl_mama_id on public.lignes_bl(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_lignes_bl_mama_id') then
     alter table if exists public.lignes_bl
       add constraint fk_lignes_bl_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.lignes_bl enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='lignes_bl' and policyname='lignes_bl_all') then
     create policy lignes_bl_all on public.lignes_bl
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.lignes_bl to authenticated;
 create table if not exists public.logs_securite (
   id uuid primary key default gen_random_uuid(),
@@ -1355,20 +1646,24 @@ create table if not exists public.logs_securite (
   created_at timestamptz default now()
 );
 create index if not exists idx_logs_securite_mama_id on public.logs_securite(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_logs_securite_mama_id') then
     alter table if exists public.logs_securite
       add constraint fk_logs_securite_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.logs_securite enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='logs_securite' and policyname='logs_securite_all') then
     create policy logs_securite_all on public.logs_securite
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.logs_securite to authenticated;
 create table if not exists public.menu_fiches (
   id uuid primary key default gen_random_uuid(),
@@ -1376,20 +1671,24 @@ create table if not exists public.menu_fiches (
   created_at timestamptz default now()
 );
 create index if not exists idx_menu_fiches_mama_id on public.menu_fiches(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_menu_fiches_mama_id') then
     alter table if exists public.menu_fiches
       add constraint fk_menu_fiches_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.menu_fiches enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='menu_fiches' and policyname='menu_fiches_all') then
     create policy menu_fiches_all on public.menu_fiches
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.menu_fiches to authenticated;
 create table if not exists public.menus (
   id uuid primary key default gen_random_uuid(),
@@ -1397,20 +1696,24 @@ create table if not exists public.menus (
   created_at timestamptz default now()
 );
 create index if not exists idx_menus_mama_id on public.menus(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_menus_mama_id') then
     alter table if exists public.menus
       add constraint fk_menus_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.menus enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='menus' and policyname='menus_all') then
     create policy menus_all on public.menus
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.menus to authenticated;
 create table if not exists public.menus_groupes (
   id uuid primary key default gen_random_uuid(),
@@ -1418,20 +1721,24 @@ create table if not exists public.menus_groupes (
   created_at timestamptz default now()
 );
 create index if not exists idx_menus_groupes_mama_id on public.menus_groupes(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_menus_groupes_mama_id') then
     alter table if exists public.menus_groupes
       add constraint fk_menus_groupes_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.menus_groupes enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='menus_groupes' and policyname='menus_groupes_all') then
     create policy menus_groupes_all on public.menus_groupes
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.menus_groupes to authenticated;
 create table if not exists public.menus_groupes_fiches (
   id uuid primary key default gen_random_uuid(),
@@ -1439,20 +1746,24 @@ create table if not exists public.menus_groupes_fiches (
   created_at timestamptz default now()
 );
 create index if not exists idx_menus_groupes_fiches_mama_id on public.menus_groupes_fiches(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_menus_groupes_fiches_mama_id') then
     alter table if exists public.menus_groupes_fiches
       add constraint fk_menus_groupes_fiches_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.menus_groupes_fiches enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='menus_groupes_fiches' and policyname='menus_groupes_fiches_all') then
     create policy menus_groupes_fiches_all on public.menus_groupes_fiches
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.menus_groupes_fiches to authenticated;
 
 create table if not exists public.menus_jour (
@@ -1474,22 +1785,26 @@ create table if not exists public.menus_jour_fiches (
 create index if not exists idx_menus_jour_mama on public.menus_jour(mama_id, date_menu);
 create index if not exists idx_menus_jour_fiches_menu on public.menus_jour_fiches(menu_jour_id);
 alter table if exists public.menus_jour enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='menus_jour' and policyname='menus_jour_all') then
     create policy menus_jour_all on public.menus_jour
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.menus_jour to authenticated;
 alter table if exists public.menus_jour_fiches enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='menus_jour_fiches' and policyname='menus_jour_fiches_all') then
     create policy menus_jour_fiches_all on public.menus_jour_fiches
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.menus_jour_fiches to authenticated;
 create table if not exists public.notification_preferences (
   id uuid primary key default gen_random_uuid(),
@@ -1497,20 +1812,24 @@ create table if not exists public.notification_preferences (
   created_at timestamptz default now()
 );
 create index if not exists idx_notification_preferences_mama_id on public.notification_preferences(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_notification_preferences_mama_id') then
     alter table if exists public.notification_preferences
       add constraint fk_notification_preferences_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.notification_preferences enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='notification_preferences' and policyname='notification_preferences_all') then
     create policy notification_preferences_all on public.notification_preferences
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.notification_preferences to authenticated;
 create table if not exists public.notifications (
   id uuid primary key default gen_random_uuid(),
@@ -1518,20 +1837,24 @@ create table if not exists public.notifications (
   created_at timestamptz default now()
 );
 create index if not exists idx_notifications_mama_id on public.notifications(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_notifications_mama_id') then
     alter table if exists public.notifications
       add constraint fk_notifications_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.notifications enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='notifications' and policyname='notifications_all') then
     create policy notifications_all on public.notifications
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.notifications to authenticated;
 create table if not exists public.parametres_commandes (
   id uuid primary key default gen_random_uuid(),
@@ -1539,20 +1862,24 @@ create table if not exists public.parametres_commandes (
   created_at timestamptz default now()
 );
 create index if not exists idx_parametres_commandes_mama_id on public.parametres_commandes(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_parametres_commandes_mama_id') then
     alter table if exists public.parametres_commandes
       add constraint fk_parametres_commandes_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.parametres_commandes enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='parametres_commandes' and policyname='parametres_commandes_all') then
     create policy parametres_commandes_all on public.parametres_commandes
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.parametres_commandes to authenticated;
 create table if not exists public.pertes (
   id uuid primary key default gen_random_uuid(),
@@ -1560,20 +1887,24 @@ create table if not exists public.pertes (
   created_at timestamptz default now()
 );
 create index if not exists idx_pertes_mama_id on public.pertes(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_pertes_mama_id') then
     alter table if exists public.pertes
       add constraint fk_pertes_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.pertes enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='pertes' and policyname='pertes_all') then
     create policy pertes_all on public.pertes
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.pertes to authenticated;
 create table if not exists public.planning_lignes (
   id uuid primary key default gen_random_uuid(),
@@ -1581,20 +1912,24 @@ create table if not exists public.planning_lignes (
   created_at timestamptz default now()
 );
 create index if not exists idx_planning_lignes_mama_id on public.planning_lignes(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_planning_lignes_mama_id') then
     alter table if exists public.planning_lignes
       add constraint fk_planning_lignes_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.planning_lignes enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='planning_lignes' and policyname='planning_lignes_all') then
     create policy planning_lignes_all on public.planning_lignes
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.planning_lignes to authenticated;
 create table if not exists public.planning_previsionnel (
   id uuid primary key default gen_random_uuid(),
@@ -1602,20 +1937,24 @@ create table if not exists public.planning_previsionnel (
   created_at timestamptz default now()
 );
 create index if not exists idx_planning_previsionnel_mama_id on public.planning_previsionnel(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_planning_previsionnel_mama_id') then
     alter table if exists public.planning_previsionnel
       add constraint fk_planning_previsionnel_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.planning_previsionnel enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='planning_previsionnel' and policyname='planning_previsionnel_all') then
     create policy planning_previsionnel_all on public.planning_previsionnel
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.planning_previsionnel to authenticated;
 create table if not exists public.promotions (
   id uuid primary key default gen_random_uuid(),
@@ -1623,20 +1962,24 @@ create table if not exists public.promotions (
   created_at timestamptz default now()
 );
 create index if not exists idx_promotions_mama_id on public.promotions(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_promotions_mama_id') then
     alter table if exists public.promotions
       add constraint fk_promotions_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.promotions enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='promotions' and policyname='promotions_all') then
     create policy promotions_all on public.promotions
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.promotions to authenticated;
 create table if not exists public.regles_alertes (
   id uuid primary key default gen_random_uuid(),
@@ -1644,20 +1987,24 @@ create table if not exists public.regles_alertes (
   created_at timestamptz default now()
 );
 create index if not exists idx_regles_alertes_mama_id on public.regles_alertes(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_regles_alertes_mama_id') then
     alter table if exists public.regles_alertes
       add constraint fk_regles_alertes_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.regles_alertes enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='regles_alertes' and policyname='regles_alertes_all') then
     create policy regles_alertes_all on public.regles_alertes
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.regles_alertes to authenticated;
 
 -- Zones de stock
@@ -1698,27 +2045,35 @@ create index if not exists idx_zones_droits_user on public.zones_droits(user_id)
   alter table if exists public.zones_stock enable row level security;
   alter table if exists public.zones_droits enable row level security;
 
-  do $$ begin
-    if not exists (
-      select 1 from pg_policies
-      where schemaname='public' and tablename='zones_stock' and policyname='zones_stock_admin_iud'
-    ) then
-      create policy zones_stock_admin_iud on public.zones_stock
-        for all using (mama_id = current_user_mama_id() and current_user_is_admin_or_manager())
-        with check (mama_id = current_user_mama_id() and current_user_is_admin_or_manager());
+  do $do$
+  begin
+    if to_regclass('public.zones_stock') is not null then
+      if not exists (
+        select 1 from pg_policies
+        where schemaname='public' and tablename='zones_stock' and policyname='zones_stock_admin_iud'
+      ) then
+        create policy zones_stock_admin_iud on public.zones_stock
+          for all using (mama_id = current_user_mama_id() and current_user_is_admin_or_manager())
+          with check (mama_id = current_user_mama_id() and current_user_is_admin_or_manager());
+      end if;
     end if;
-  end $$;
+  end;
+  $do$ language plpgsql;
 
-  do $$ begin
-    if not exists (
-      select 1 from pg_policies
-      where schemaname='public' and tablename='zones_droits' and policyname='zones_droits_admin_all'
-    ) then
-      create policy zones_droits_admin_all on public.zones_droits
-        for all using (mama_id = current_user_mama_id() and current_user_is_admin())
-        with check (mama_id = current_user_mama_id() and current_user_is_admin());
+  do $do$
+  begin
+    if to_regclass('public.zones_droits') is not null then
+      if not exists (
+        select 1 from pg_policies
+        where schemaname='public' and tablename='zones_droits' and policyname='zones_droits_admin_all'
+      ) then
+        create policy zones_droits_admin_all on public.zones_droits
+          for all using (mama_id = current_user_mama_id() and current_user_is_admin())
+          with check (mama_id = current_user_mama_id() and current_user_is_admin());
+      end if;
     end if;
-  end $$;
+  end;
+  $do$ language plpgsql;
 
   grant select, insert, update, delete on public.zones_stock, public.zones_droits to authenticated;
 
@@ -1761,7 +2116,8 @@ create table if not exists public.requisitions (
 create index if not exists idx_requisitions_mama_id on public.requisitions(mama_id);
 create index if not exists idx_requisitions_zone on public.requisitions(zone_id);
 alter table if exists public.requisitions enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (
     select 1 from pg_policies where schemaname='public' and tablename='requisitions' and policyname='requisitions_select'
   ) then
@@ -1789,7 +2145,8 @@ do $$ begin
   ) then
     create policy requisitions_delete on public.requisitions for delete using (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.requisitions to authenticated;
 
 create table if not exists public.requisition_lignes (
@@ -1804,26 +2161,34 @@ create table if not exists public.requisition_lignes (
 create index if not exists idx_requisition_lignes_requisition on public.requisition_lignes(requisition_id);
 create index if not exists idx_requisition_lignes_mama_id on public.requisition_lignes(mama_id);
 alter table if exists public.requisition_lignes enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='requisition_lignes' and policyname='requisition_lignes_select') then
     create policy requisition_lignes_select on public.requisition_lignes for select using (mama_id = current_user_mama_id());
   end if;
-end $$;
-do $$ begin
+end;
+$do$ language plpgsql;
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='requisition_lignes' and policyname='requisition_lignes_insert') then
     create policy requisition_lignes_insert on public.requisition_lignes for insert with check (mama_id = current_user_mama_id());
   end if;
-end $$;
-do $$ begin
+end;
+$do$ language plpgsql;
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='requisition_lignes' and policyname='requisition_lignes_update') then
     create policy requisition_lignes_update on public.requisition_lignes for update using (mama_id = current_user_mama_id());
   end if;
-end $$;
-do $$ begin
+end;
+$do$ language plpgsql;
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='requisition_lignes' and policyname='requisition_lignes_delete') then
     create policy requisition_lignes_delete on public.requisition_lignes for delete using (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.requisition_lignes to authenticated;
 create table if not exists public.signalements (
   id uuid primary key default gen_random_uuid(),
@@ -1831,20 +2196,24 @@ create table if not exists public.signalements (
   created_at timestamptz default now()
 );
 create index if not exists idx_signalements_mama_id on public.signalements(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_signalements_mama_id') then
     alter table if exists public.signalements
       add constraint fk_signalements_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.signalements enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='signalements' and policyname='signalements_all') then
     create policy signalements_all on public.signalements
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.signalements to authenticated;
 create table if not exists public.sous_familles (
   id uuid primary key default gen_random_uuid(),
@@ -1855,26 +2224,32 @@ create table if not exists public.sous_familles (
   created_at timestamptz default now()
 );
 create index if not exists idx_sous_familles_mama_id on public.sous_familles(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_sous_familles_mama_id') then
     alter table if exists public.sous_familles
       add constraint fk_sous_familles_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
-do $$ begin
+end;
+$do$ language plpgsql;
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_sous_familles_famille_id') then
     alter table if exists public.sous_familles
       add constraint fk_sous_familles_famille_id foreign key (famille_id) references public.familles(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.sous_familles enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='sous_familles' and policyname='sous_familles_all') then
     create policy sous_familles_all on public.sous_familles
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.sous_familles to authenticated;
 create table if not exists public.stocks (
   id uuid primary key default gen_random_uuid(),
@@ -1882,20 +2257,24 @@ create table if not exists public.stocks (
   created_at timestamptz default now()
 );
 create index if not exists idx_stocks_mama_id on public.stocks(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_stocks_mama_id') then
     alter table if exists public.stocks
       add constraint fk_stocks_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.stocks enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='stocks' and policyname='stocks_all') then
     create policy stocks_all on public.stocks
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.stocks to authenticated;
 create table if not exists public.tableaux_de_bord (
   id uuid primary key default gen_random_uuid(),
@@ -1903,20 +2282,24 @@ create table if not exists public.tableaux_de_bord (
   created_at timestamptz default now()
 );
 create index if not exists idx_tableaux_de_bord_mama_id on public.tableaux_de_bord(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_tableaux_de_bord_mama_id') then
     alter table if exists public.tableaux_de_bord
       add constraint fk_tableaux_de_bord_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.tableaux_de_bord enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='tableaux_de_bord' and policyname='tableaux_de_bord_all') then
     create policy tableaux_de_bord_all on public.tableaux_de_bord
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.tableaux_de_bord to authenticated;
 create table if not exists public.taches (
   id uuid primary key default gen_random_uuid(),
@@ -1924,20 +2307,24 @@ create table if not exists public.taches (
   created_at timestamptz default now()
 );
 create index if not exists idx_taches_mama_id on public.taches(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_taches_mama_id') then
     alter table if exists public.taches
       add constraint fk_taches_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.taches enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='taches' and policyname='taches_all') then
     create policy taches_all on public.taches
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.taches to authenticated;
 create table if not exists public.tooltips (
   id uuid primary key default gen_random_uuid(),
@@ -1945,20 +2332,24 @@ create table if not exists public.tooltips (
   created_at timestamptz default now()
 );
 create index if not exists idx_tooltips_mama_id on public.tooltips(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_tooltips_mama_id') then
     alter table if exists public.tooltips
       add constraint fk_tooltips_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.tooltips enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='tooltips' and policyname='tooltips_all') then
     create policy tooltips_all on public.tooltips
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.tooltips to authenticated;
 
 create table if not exists public.unites (
@@ -1969,20 +2360,24 @@ create table if not exists public.unites (
   created_at timestamptz default now()
 );
 create index if not exists idx_unites_mama_id on public.unites(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_unites_mama_id') then
     alter table if exists public.unites
       add constraint fk_unites_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.unites enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='unites' and policyname='unites_all') then
     create policy unites_all on public.unites
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.unites to authenticated;
 
 create table if not exists public.transferts (
@@ -2013,22 +2408,26 @@ create index if not exists idx_lignes_transfert_mama on public.lignes_transfert(
 create index if not exists idx_lignes_transfert_transfert on public.lignes_transfert(transfert_id);
 create index if not exists idx_lignes_transfert_produit on public.lignes_transfert(produit_id);
 alter table if exists public.transferts enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='transferts' and policyname='transferts_all') then
     create policy transferts_all on public.transferts
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.transferts to authenticated;
 alter table if exists public.lignes_transfert enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='lignes_transfert' and policyname='lignes_transfert_all') then
     create policy lignes_transfert_all on public.lignes_transfert
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.lignes_transfert to authenticated;
 create table if not exists public.usage_stats (
   id uuid primary key default gen_random_uuid(),
@@ -2036,20 +2435,24 @@ create table if not exists public.usage_stats (
   created_at timestamptz default now()
 );
 create index if not exists idx_usage_stats_mama_id on public.usage_stats(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_usage_stats_mama_id') then
     alter table if exists public.usage_stats
       add constraint fk_usage_stats_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.usage_stats enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='usage_stats' and policyname='usage_stats_all') then
     create policy usage_stats_all on public.usage_stats
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.usage_stats to authenticated;
 create table if not exists public.utilisateurs_taches (
   id uuid primary key default gen_random_uuid(),
@@ -2057,20 +2460,24 @@ create table if not exists public.utilisateurs_taches (
   created_at timestamptz default now()
 );
 create index if not exists idx_utilisateurs_taches_mama_id on public.utilisateurs_taches(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_utilisateurs_taches_mama_id') then
     alter table if exists public.utilisateurs_taches
       add constraint fk_utilisateurs_taches_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.utilisateurs_taches enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='utilisateurs_taches' and policyname='utilisateurs_taches_all') then
     create policy utilisateurs_taches_all on public.utilisateurs_taches
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.utilisateurs_taches to authenticated;
 create table if not exists public.validation_requests (
   id uuid primary key default gen_random_uuid(),
@@ -2078,20 +2485,24 @@ create table if not exists public.validation_requests (
   created_at timestamptz default now()
 );
 create index if not exists idx_validation_requests_mama_id on public.validation_requests(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_validation_requests_mama_id') then
     alter table if exists public.validation_requests
       add constraint fk_validation_requests_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.validation_requests enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='validation_requests' and policyname='validation_requests_all') then
     create policy validation_requests_all on public.validation_requests
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.validation_requests to authenticated;
 create table if not exists public.ventes_boissons (
   id uuid primary key default gen_random_uuid(),
@@ -2099,20 +2510,24 @@ create table if not exists public.ventes_boissons (
   created_at timestamptz default now()
 );
 create index if not exists idx_ventes_boissons_mama_id on public.ventes_boissons(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_ventes_boissons_mama_id') then
     alter table if exists public.ventes_boissons
       add constraint fk_ventes_boissons_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.ventes_boissons enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='ventes_boissons' and policyname='ventes_boissons_all') then
     create policy ventes_boissons_all on public.ventes_boissons
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.ventes_boissons to authenticated;
 create table if not exists public.ventes_fiches_carte (
   id uuid primary key default gen_random_uuid(),
@@ -2120,24 +2535,29 @@ create table if not exists public.ventes_fiches_carte (
   created_at timestamptz default now()
 );
 create index if not exists idx_ventes_fiches_carte_mama_id on public.ventes_fiches_carte(mama_id);
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_ventes_fiches_carte_mama_id') then
     alter table if exists public.ventes_fiches_carte
       add constraint fk_ventes_fiches_carte_mama_id foreign key (mama_id) references public.mamas(id) on delete cascade;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 alter table if exists public.ventes_fiches_carte enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='ventes_fiches_carte' and policyname='ventes_fiches_carte_all') then
     create policy ventes_fiches_carte_all on public.ventes_fiches_carte
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.ventes_fiches_carte to authenticated;
 
 -- FK safety for produits
-do $$ begin
+do $do$
+begin
   if not exists (
     select 1 from information_schema.columns
     where table_schema='public' and table_name='produits' and column_name='sous_famille_id'
@@ -2150,10 +2570,12 @@ do $$ begin
   ) then
     alter table if exists public.produits add column zone_id uuid;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 
 -- Foreign keys for produits
-do $$ begin
+do $do$
+begin
   if not exists (
     select 1 from pg_constraint where conname = 'fk_produits_zone_id'
   ) then
@@ -2161,35 +2583,48 @@ do $$ begin
       add constraint fk_produits_zone_id
       foreign key (zone_id) references public.zones_stock(id) on delete set null;
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_produits_fournisseur_id') then
     alter table if exists public.produits
       add constraint fk_produits_fournisseur_id foreign key (fournisseur_id) references public.fournisseurs(id) on delete set null;
   end if;
-end $$;
+end;
 
-do $$ begin
+$do$ language plpgsql;
+
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_produits_unite_id') then
     alter table if exists public.produits
       add constraint fk_produits_unite_id foreign key (unite_id) references public.unites(id) on delete set null;
   end if;
-end $$;
+end;
 
-do $$ begin
+$do$ language plpgsql;
+
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_produits_famille_id') then
     alter table if exists public.produits
       add constraint fk_produits_famille_id foreign key (famille_id) references public.familles(id) on delete set null;
   end if;
-end $$;
+end;
 
-do $$ begin
+$do$ language plpgsql;
+
+do $do$
+begin
   if not exists (select 1 from pg_constraint where conname = 'fk_produits_sous_famille_id') then
     alter table if exists public.produits
       add constraint fk_produits_sous_famille_id foreign key (sous_famille_id) references public.sous_familles(id) on delete set null;
   end if;
-end $$;
+end;
+
+$do$ language plpgsql;
 
 create index if not exists idx_produits_zone_id on public.produits(zone_id);
 create index if not exists idx_produits_sous_famille_id on public.produits(sous_famille_id);
@@ -2709,13 +3144,15 @@ create table if not exists public.menu_groupes (
 );
 create index if not exists idx_menu_groupes_mama on public.menu_groupes(mama_id);
 alter table if exists public.menu_groupes enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='menu_groupes' and policyname='menu_groupes_all') then
     create policy menu_groupes_all on public.menu_groupes
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.menu_groupes to authenticated;
 
 create table if not exists public.menu_groupe_lignes (
@@ -2731,13 +3168,15 @@ create table if not exists public.menu_groupe_lignes (
 create index if not exists idx_menu_groupe_lignes_menu on public.menu_groupe_lignes(menu_groupe_id);
 create index if not exists idx_menu_groupe_lignes_fiche on public.menu_groupe_lignes(fiche_id);
 alter table if exists public.menu_groupe_lignes enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='menu_groupe_lignes' and policyname='menu_groupe_lignes_all') then
     create policy menu_groupe_lignes_all on public.menu_groupe_lignes
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.menu_groupe_lignes to authenticated;
 
 create table if not exists public.menu_groupe_modeles (
@@ -2749,13 +3188,15 @@ create table if not exists public.menu_groupe_modeles (
 );
 create index if not exists idx_menu_groupe_modeles_mama on public.menu_groupe_modeles(mama_id);
 alter table if exists public.menu_groupe_modeles enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='menu_groupe_modeles' and policyname='menu_groupe_modeles_all') then
     create policy menu_groupe_modeles_all on public.menu_groupe_modeles
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.menu_groupe_modeles to authenticated;
 
 create table if not exists public.menu_groupe_modele_lignes (
@@ -2770,13 +3211,15 @@ create table if not exists public.menu_groupe_modele_lignes (
 );
 create index if not exists idx_menu_groupe_modele_lignes_modele on public.menu_groupe_modele_lignes(modele_id);
 alter table if exists public.menu_groupe_modele_lignes enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='menu_groupe_modele_lignes' and policyname='menu_groupe_modele_lignes_all') then
     create policy menu_groupe_modele_lignes_all on public.menu_groupe_modele_lignes
       for all using (mama_id = current_user_mama_id())
       with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.menu_groupe_modele_lignes to authenticated;
 
 create or replace view public.v_menu_groupe_couts as
@@ -2857,11 +3300,13 @@ create table if not exists public.alertes_rupture (
 );
 create index if not exists idx_alertes_rupture_mama on public.alertes_rupture(mama_id);
 alter table if exists public.alertes_rupture enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='alertes_rupture' and policyname='alertes_rupture_all') then
     create policy alertes_rupture_all on public.alertes_rupture for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.alertes_rupture to authenticated;
 
 create table if not exists public.logs_activite (
@@ -2879,11 +3324,13 @@ create table if not exists public.logs_activite (
 );
 create index if not exists idx_logs_activite_mama on public.logs_activite(mama_id, date_log desc);
 alter table if exists public.logs_activite enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='logs_activite' and policyname='logs_activite_all') then
     create policy logs_activite_all on public.logs_activite for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert on public.logs_activite to authenticated;
 
 create table if not exists public.menus_jour_lignes (
@@ -2899,11 +3346,13 @@ create table if not exists public.menus_jour_lignes (
 create index if not exists idx_menus_jour_lignes_menu on public.menus_jour_lignes(menu_id);
 create index if not exists idx_menus_jour_lignes_fiche on public.menus_jour_lignes(fiche_id);
 alter table if exists public.menus_jour_lignes enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='menus_jour_lignes' and policyname='menus_jour_lignes_all') then
     create policy menus_jour_lignes_all on public.menus_jour_lignes for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.menus_jour_lignes to authenticated;
 
 create table if not exists public.rapports_generes (
@@ -2919,11 +3368,13 @@ create table if not exists public.rapports_generes (
 );
 create index if not exists idx_rapports_generes_mama on public.rapports_generes(mama_id);
 alter table if exists public.rapports_generes enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='rapports_generes' and policyname='rapports_generes_all') then
     create policy rapports_generes_all on public.rapports_generes for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert on public.rapports_generes to authenticated;
 
 create table if not exists public.settings (
@@ -2939,11 +3390,13 @@ create table if not exists public.settings (
 );
 create index if not exists idx_settings_mama on public.settings(mama_id);
 alter table if exists public.settings enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='settings' and policyname='settings_all') then
     create policy settings_all on public.settings for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update on public.settings to authenticated;
 
 create table if not exists public.user_mama_access (
@@ -2955,11 +3408,13 @@ create table if not exists public.user_mama_access (
   unique (user_id, mama_id)
 );
 alter table if exists public.user_mama_access enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='user_mama_access' and policyname='user_mama_access_modify') then
     create policy user_mama_access_modify on public.user_mama_access for all using (current_user_is_admin()) with check (current_user_is_admin());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.user_mama_access to authenticated;
 
 create table if not exists public.ventes_fiches (
@@ -2974,11 +3429,13 @@ create table if not exists public.ventes_fiches (
 );
 create index if not exists idx_ventes_fiches_mama on public.ventes_fiches(mama_id);
 alter table if exists public.ventes_fiches enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='ventes_fiches' and policyname='ventes_fiches_all') then
     create policy ventes_fiches_all on public.ventes_fiches for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.ventes_fiches to authenticated;
 
 create table if not exists public.ventes_import_staging (
@@ -2993,11 +3450,13 @@ create table if not exists public.ventes_import_staging (
 );
 create index if not exists idx_vis_mama on public.ventes_import_staging(mama_id);
 alter table if exists public.ventes_import_staging enable row level security;
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='ventes_import_staging' and policyname='ventes_import_staging_all') then
     create policy ventes_import_staging_all on public.ventes_import_staging for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());
   end if;
-end $$;
+end;
+$do$ language plpgsql;
 grant select, insert, update, delete on public.ventes_import_staging to authenticated;
 
 -- Functions
@@ -3177,13 +3636,16 @@ begin
 end $$ language plpgsql;
 grant execute on function public.sync_pivot_from_produits() to authenticated;
 
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_trigger where tgname = 'trg_prod_sync_zone') then
     create trigger trg_prod_sync_zone
     after insert or update of zone_id on public.produits
     for each row execute procedure public.sync_pivot_from_produits();
   end if;
-end $$;
+end;
+
+$do$ language plpgsql;
 
 create or replace function public.sync_produits_from_pivot() returns trigger as $$
 begin
@@ -3198,13 +3660,16 @@ begin
 end $$ language plpgsql;
 grant execute on function public.sync_produits_from_pivot() to authenticated;
 
-do $$ begin
+do $do$
+begin
   if not exists (select 1 from pg_trigger where tgname = 'trg_pz_sync_prod') then
     create trigger trg_pz_sync_prod
     after insert or update of actif on public.produits_zones
     for each row execute procedure public.sync_produits_from_pivot();
   end if;
-end $$;
+end;
+
+$do$ language plpgsql;
 
 create or replace view public.v_produits_par_zone (
   mama_id, produit_id, produit_nom, zone_id, zone_nom, zone_type, unite_id, stock_reel, stock_min

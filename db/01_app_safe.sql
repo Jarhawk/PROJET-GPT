@@ -1589,22 +1589,33 @@ create table if not exists public.inventaires (
 create index if not exists idx_inventaires_mama_id on public.inventaires(mama_id);
 do $do$
 begin
-  if not exists (
-    select 1 from information_schema.columns
-    where table_schema='public' and table_name='inventaires' and column_name='periode_id'
-  ) then
-    alter table if exists public.inventaires add column periode_id uuid;
-  end if;
   if exists (
-    select 1 from information_schema.columns
-    where table_schema='public' and table_name='inventaires' and column_name='periode_id'
+    select 1
+    from pg_class c
+    join pg_namespace n on n.oid = c.relnamespace
+    where n.nspname = 'public'
+      and c.relname = 'inventaires'
+      and pg_get_userbyid(c.relowner) = current_user
   ) then
-    if to_regclass('public.periodes_comptables') is not null then
-      if not exists (select 1 from pg_constraint where conname = 'fk_inventaires_periode_id') then
-        alter table if exists public.inventaires add constraint fk_inventaires_periode_id foreign key (periode_id) references public.periodes_comptables(id);
-      end if;
+    if not exists (
+      select 1 from information_schema.columns
+      where table_schema='public' and table_name='inventaires' and column_name='periode_id'
+    ) then
+      alter table public.inventaires add column periode_id uuid;
     end if;
-    create index if not exists idx_inventaires_periode_id on public.inventaires(periode_id);
+    if exists (
+      select 1 from information_schema.columns
+      where table_schema='public' and table_name='inventaires' and column_name='periode_id'
+    ) then
+      if to_regclass('public.periodes_comptables') is not null then
+        if not exists (select 1 from pg_constraint where conname = 'fk_inventaires_periode_id') then
+          alter table public.inventaires add constraint fk_inventaires_periode_id foreign key (periode_id) references public.periodes_comptables(id);
+        end if;
+      end if;
+      create index if not exists idx_inventaires_periode_id on public.inventaires(periode_id);
+    end if;
+  else
+    raise notice 'Skip periode_id on inventaires: not owner';
   end if;
 end;
 $do$ language plpgsql;
@@ -1848,8 +1859,23 @@ create table if not exists public.menus_jour (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
--- Column safety for menus_jour.date_menu
-alter table if exists public.menus_jour add column if not exists date_menu date;
+do $do$
+begin
+  if exists (
+    select 1
+    from pg_class c
+    join pg_namespace n on n.oid = c.relnamespace
+    where n.nspname = 'public'
+      and c.relname = 'menus_jour'
+      and pg_get_userbyid(c.relowner) = current_user
+  ) then
+    alter table if exists public.menus_jour add column if not exists date_menu date;
+    create index if not exists idx_menus_jour_mama on public.menus_jour(mama_id, date_menu);
+  else
+    raise notice 'Skip date_menu on menus_jour: not owner';
+  end if;
+end;
+$do$ language plpgsql;
 create table if not exists public.menus_jour_fiches (
   id uuid primary key default gen_random_uuid(),
   mama_id uuid not null references public.mamas(id) on delete cascade,
@@ -1859,9 +1885,8 @@ create table if not exists public.menus_jour_fiches (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
-create index if not exists idx_menus_jour_mama on public.menus_jour(mama_id, date_menu);
-create index if not exists idx_menus_jour_fiches_menu on public.menus_jour_fiches(menu_jour_id);
-alter table if exists public.menus_jour enable row level security;
+  create index if not exists idx_menus_jour_fiches_menu on public.menus_jour_fiches(menu_jour_id);
+  alter table if exists public.menus_jour enable row level security;
 do $do$
 begin
   if not exists (select 1 from pg_policies where schemaname='public' and tablename='menus_jour' and policyname='menus_jour_all') then
@@ -2099,7 +2124,23 @@ create table if not exists public.zones_stock (
   updated_at timestamptz default now(),
   unique (mama_id, nom)
 );
-create index if not exists idx_zones_mama_pos on public.zones_stock(mama_id, position);
+do $do$
+begin
+  if exists (
+    select 1
+    from pg_class c
+    join pg_namespace n on n.oid = c.relnamespace
+    where n.nspname = 'public'
+      and c.relname = 'zones_stock'
+      and pg_get_userbyid(c.relowner) = current_user
+  ) then
+    alter table if exists public.zones_stock add column if not exists position int default 0;
+    create index if not exists idx_zones_mama_pos on public.zones_stock(mama_id, position);
+  else
+    raise notice 'Skip position on zones_stock: not owner';
+  end if;
+end;
+$do$ language plpgsql;
 create index if not exists idx_zones_parent on public.zones_stock(parent_id);
 
 -- Droits par utilisateur
@@ -3242,8 +3283,24 @@ create table if not exists public.menu_groupe_lignes (
   position integer,
   created_at timestamptz default now()
 );
-create index if not exists idx_menu_groupe_lignes_menu on public.menu_groupe_lignes(menu_groupe_id);
-create index if not exists idx_menu_groupe_lignes_fiche on public.menu_groupe_lignes(fiche_id);
+do $do$
+begin
+  if exists (
+    select 1
+    from pg_class c
+    join pg_namespace n on n.oid = c.relnamespace
+    where n.nspname = 'public'
+      and c.relname = 'menu_groupe_lignes'
+      and pg_get_userbyid(c.relowner) = current_user
+  ) then
+    alter table if exists public.menu_groupe_lignes add column if not exists position integer;
+    create index if not exists idx_menu_groupe_lignes_menu on public.menu_groupe_lignes(menu_groupe_id);
+    create index if not exists idx_menu_groupe_lignes_fiche on public.menu_groupe_lignes(fiche_id);
+  else
+    raise notice 'Skip position on menu_groupe_lignes: not owner';
+  end if;
+end;
+$do$ language plpgsql;
 alter table if exists public.menu_groupe_lignes enable row level security;
 do $do$
 begin
@@ -3286,7 +3343,23 @@ create table if not exists public.menu_groupe_modele_lignes (
   position integer,
   created_at timestamptz default now()
 );
-create index if not exists idx_menu_groupe_modele_lignes_modele on public.menu_groupe_modele_lignes(modele_id);
+do $do$
+begin
+  if exists (
+    select 1
+    from pg_class c
+    join pg_namespace n on n.oid = c.relnamespace
+    where n.nspname = 'public'
+      and c.relname = 'menu_groupe_modele_lignes'
+      and pg_get_userbyid(c.relowner) = current_user
+  ) then
+    alter table if exists public.menu_groupe_modele_lignes add column if not exists position integer;
+    create index if not exists idx_menu_groupe_modele_lignes_modele on public.menu_groupe_modele_lignes(modele_id);
+  else
+    raise notice 'Skip position on menu_groupe_modele_lignes: not owner';
+  end if;
+end;
+$do$ language plpgsql;
 alter table if exists public.menu_groupe_modele_lignes enable row level security;
 do $do$
 begin

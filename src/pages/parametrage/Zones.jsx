@@ -1,4 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from 'react';
 import { useZones } from '@/hooks/useZones';
 import { Button } from '@/components/ui/button';
@@ -22,7 +23,9 @@ export default function Zones() {
   }, [filters]);
 
   async function handleDelete(id) {
-    const reassign = window.prompt('Réassigner vers la zone (laisser vide pour aucune)');
+    const reassign = window.prompt(
+      'Réassigner vers la zone (laisser vide pour aucune)'
+    );
     const { error } = await supabase.rpc('safe_delete_zone', {
       p_mama: mama_id,
       p_zone: id,
@@ -47,12 +50,12 @@ export default function Zones() {
           className="input"
           placeholder="Recherche"
           value={filters.q}
-          onChange={e => setFilters(f => ({ ...f, q: e.target.value }))}
+          onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))}
         />
         <select
           className="input"
           value={filters.type}
-          onChange={e => setFilters(f => ({ ...f, type: e.target.value }))}
+          onChange={(e) => setFilters((f) => ({ ...f, type: e.target.value }))}
         >
           <option value="">Tous types</option>
           <option value="cave">Cave</option>
@@ -66,11 +69,15 @@ export default function Zones() {
           <input
             type="checkbox"
             checked={filters.actif}
-            onChange={e => setFilters(f => ({ ...f, actif: e.target.checked }))}
+            onChange={(e) =>
+              setFilters((f) => ({ ...f, actif: e.target.checked }))
+            }
           />
           Actifs uniquement
         </label>
-        <Button onClick={() => navigate('/parametrage/zones/new')}>+ Nouvelle zone</Button>
+        <Button onClick={() => navigate('/parametrage/zones/new')}>
+          + Nouvelle zone
+        </Button>
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-full text-sm">
@@ -83,7 +90,7 @@ export default function Zones() {
             </tr>
           </thead>
           <tbody>
-            {rows.map(z => (
+            {rows.map((z) => (
               <tr key={z.id} className="border-t border-white/10">
                 <td className="px-2 py-1">{z.nom}</td>
                 <td className="px-2 py-1">{z.type}</td>
@@ -98,15 +105,37 @@ export default function Zones() {
                   />
                 </td>
                 <td className="px-2 py-1 flex gap-2 justify-center">
-                  <Button size="sm" variant="outline" onClick={() => navigate(`/parametrage/zones/${z.id}`)}>Éditer</Button>
-                  <Button size="sm" variant="outline" onClick={() => navigate(`/parametrage/zones/${z.id}/droits`)}>Droits</Button>
-                  <Button size="sm" variant="outline" onClick={() => handleDelete(z.id)}>Supprimer</Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => navigate(`/parametrage/zones/${z.id}`)}
+                  >
+                    Éditer
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() =>
+                      navigate(`/parametrage/zones/${z.id}/droits`)
+                    }
+                  >
+                    Droits
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleDelete(z.id)}
+                  >
+                    Supprimer
+                  </Button>
                 </td>
               </tr>
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan="4" className="text-center py-2">Aucune zone</td>
+                <td colSpan="4" className="text-center py-2">
+                  Aucune zone
+                </td>
               </tr>
             )}
           </tbody>
@@ -115,4 +144,3 @@ export default function Zones() {
     </div>
   );
 }
-

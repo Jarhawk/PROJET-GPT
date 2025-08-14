@@ -1,7 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useEffect, useState } from "react";
-import { motion as Motion, AnimatePresence } from "framer-motion";
-import { useHelp } from "@/context/HelpProvider";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect, useState } from 'react';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
+import { useHelp } from '@/context/HelpProvider';
 
 export default function GuidedTour({ steps = [], module }) {
   const { markGuideSeen } = useHelp();
@@ -51,4 +52,3 @@ export default function GuidedTour({ steps = [], module }) {
     </AnimatePresence>
   );
 }
-

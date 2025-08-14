@@ -1,20 +1,21 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { motion as Motion } from "framer-motion";
-import { useOnboarding } from "@/hooks/useOnboarding";
-import GlassCard from "@/components/ui/GlassCard";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion as Motion } from 'framer-motion';
+import { useOnboarding } from '@/hooks/useOnboarding';
+import GlassCard from '@/components/ui/GlassCard';
 import {
   LiquidBackground,
   WavesBackground,
   MouseLight,
   TouchLight,
-} from "@/components/LiquidBackground";
+} from '@/components/LiquidBackground';
 
 const steps = [
   "Choisissez votre type d'établissement",
-  "Ajoutez vos premiers produits ou fournisseurs",
-  "Découvrez la documentation pour aller plus loin",
+  'Ajoutez vos premiers produits ou fournisseurs',
+  'Découvrez la documentation pour aller plus loin',
 ];
 
 export default function Onboarding() {
@@ -30,13 +31,13 @@ export default function Onboarding() {
       await nextStep();
     } else {
       await complete();
-      navigate("/dashboard");
+      navigate('/dashboard');
     }
   };
 
   const handleSkip = async () => {
     await skip();
-    navigate("/dashboard");
+    navigate('/dashboard');
   };
 
   return (

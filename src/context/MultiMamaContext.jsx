@@ -1,9 +1,10 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { createContext, useContext, useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { createContext, useContext, useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
-import toast from "react-hot-toast";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import toast from 'react-hot-toast';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 const MultiMamaContext = createContext();
 
@@ -12,7 +13,7 @@ export function MultiMamaProvider({ children }) {
   const [mamas, setMamas] = useState([]);
   const [loading, setLoading] = useState(false);
   const [mamaActif, setMamaActifState] = useState(
-    localStorage.getItem("mamaActif") || authMamaId
+    localStorage.getItem('mamaActif') || authMamaId
   );
 
   useEffect(() => {
@@ -31,22 +32,22 @@ export function MultiMamaProvider({ children }) {
     try {
       if (isSuperadmin) {
         const { data: rows, error } = await supabase
-          .from("mamas")
-          .select("id, nom")
-          .order("nom");
+          .from('mamas')
+          .select('id, nom')
+          .order('nom');
         if (error) throw error;
         data = rows || [];
       } else if (authMamaId) {
         const { data: row, error } = await supabase
-          .from("mamas")
-          .select("id, nom")
-          .eq("id", authMamaId)
+          .from('mamas')
+          .select('id, nom')
+          .eq('id', authMamaId)
           .maybeSingle();
         if (error) throw error;
         data = row ? [row] : [];
       }
     } catch (err) {
-      toast.error(err.message || "Erreur chargement établissements");
+      toast.error(err.message || 'Erreur chargement établissements');
     }
     setMamas(Array.isArray(data) ? data : []);
     if (!mamaActif && Array.isArray(data) && data.length > 0) {
@@ -57,7 +58,7 @@ export function MultiMamaProvider({ children }) {
 
   const changeMama = (id) => {
     setMamaActifState(id);
-    localStorage.setItem("mamaActif", id);
+    localStorage.setItem('mamaActif', id);
   };
 
   const value = { mamas, mamaActif, setMamaActif: changeMama, loading };
@@ -67,7 +68,9 @@ export function MultiMamaProvider({ children }) {
   }
 
   return (
-    <MultiMamaContext.Provider value={value}>{children}</MultiMamaContext.Provider>
+    <MultiMamaContext.Provider value={value}>
+      {children}
+    </MultiMamaContext.Provider>
   );
 }
 

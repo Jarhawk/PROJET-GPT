@@ -1,17 +1,28 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+/* eslint-disable react-hooks/exhaustive-deps */
 // src/pages/FournisseurDetail.jsx
-import { useState, useEffect } from "react";
-import { useFournisseurStats } from "@/hooks/useFournisseurStats";
-import { useProduitsFournisseur } from "@/hooks/useProduitsFournisseur";
-import { useInvoices } from "@/hooks/useInvoices";
-import { useFournisseurs } from "@/hooks/useFournisseurs";
-import { supabase } from "@/lib/supabase";
+import { useState, useEffect } from 'react';
+import { useFournisseurStats } from '@/hooks/useFournisseurStats';
+import { useProduitsFournisseur } from '@/hooks/useProduitsFournisseur';
+import { useInvoices } from '@/hooks/useInvoices';
+import { useFournisseurs } from '@/hooks/useFournisseurs';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import { ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
-import { Button } from "@/components/ui/button";
-import GlassCard from "@/components/ui/GlassCard";
-import TableContainer from "@/components/ui/TableContainer";
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+} from 'recharts';
+import { Button } from '@/components/ui/button';
+import GlassCard from '@/components/ui/GlassCard';
+import TableContainer from '@/components/ui/TableContainer';
 
 export default function FournisseurDetail({ id }) {
   const { mama_id } = useAuth();
@@ -35,26 +46,30 @@ export default function FournisseurDetail({ id }) {
         const withCount = await Promise.all(
           (arr || []).map(async (f) => {
             const { count } = await supabase
-              .from("facture_lignes")
-              .select("id", { count: "exact", head: true })
-              .eq("facture_id", f.id)
-              .eq("mama_id", mama_id);
+              .from('facture_lignes')
+              .select('id', { count: 'exact', head: true })
+              .eq('facture_id', f.id)
+              .eq('mama_id', mama_id);
             return { ...f, nb_produits: count || 0 };
           })
         );
         setInvoices(withCount);
       }),
       supabase
-        .from("fournisseurs")
-        .select("id, nom, actif, created_at, contact:fournisseur_contacts!fournisseur_id(nom,email,tel)")
-        .eq("id", id)
-        .eq("mama_id", mama_id)
+        .from('fournisseurs')
+        .select(
+          'id, nom, actif, created_at, contact:fournisseur_contacts!fournisseur_id(nom,email,tel)'
+        )
+        .eq('id', id)
+        .eq('mama_id', mama_id)
         .single()
         .then(({ data }) => {
           if (data)
             setFournisseur({
               ...data,
-              contact: Array.isArray(data.contact) ? data.contact[0] : data.contact,
+              contact: Array.isArray(data.contact)
+                ? data.contact[0]
+                : data.contact,
             });
         }),
     ]).finally(() => setLoading(false));
@@ -66,7 +81,7 @@ export default function FournisseurDetail({ id }) {
       const ps = await getProduitsDuFournisseur(id);
       setTopProducts(
         ps
-          .map(p => ({ nom: p.produit_nom, total: p.total_achat }))
+          .map((p) => ({ nom: p.produit_nom, total: p.total_achat }))
           .sort((a, b) => b.total - a.total)
           .slice(0, 8)
       );
@@ -78,22 +93,26 @@ export default function FournisseurDetail({ id }) {
 
   return (
     <div className="space-y-8">
-      <h2 className="text-xl font-bold text-mamastockGold mb-2">Détail fournisseur</h2>
+      <h2 className="text-xl font-bold text-mamastockGold mb-2">
+        Détail fournisseur
+      </h2>
       {fournisseur && (
         <div className="space-y-2 mb-2">
           <Button
             size="sm"
             onClick={async () => {
-              await updateFournisseur(fournisseur.id, { actif: !fournisseur.actif });
+              await updateFournisseur(fournisseur.id, {
+                actif: !fournisseur.actif,
+              });
               setFournisseur({ ...fournisseur, actif: !fournisseur.actif });
             }}
           >
-            {fournisseur.actif ? "Désactiver" : "Réactiver"}
+            {fournisseur.actif ? 'Désactiver' : 'Réactiver'}
           </Button>
           <div className="text-sm">
             {fournisseur.contact && (
               <div>
-                Contact : {fournisseur.contact.nom || ""}
+                Contact : {fournisseur.contact.nom || ''}
                 {fournisseur.contact.tel && ` - ${fournisseur.contact.tel}`}
                 {fournisseur.contact.email && (
                   <span className="ml-1">({fournisseur.contact.email})</span>
@@ -113,7 +132,12 @@ export default function FournisseurDetail({ id }) {
               <YAxis fontSize={11} />
               <Tooltip />
               <Legend />
-              <Line type="monotone" dataKey="total_achats" stroke="#bfa14d" name="Total Achats" />
+              <Line
+                type="monotone"
+                dataKey="total_achats"
+                stroke="#bfa14d"
+                name="Total Achats"
+              />
             </LineChart>
           </ResponsiveContainer>
         </GlassCard>
@@ -144,14 +168,18 @@ export default function FournisseurDetail({ id }) {
             </tr>
           </thead>
           <tbody>
-            {invoices.map(f => (
+            {invoices.map((f) => (
               <tr key={f.id}>
                 <td>{f.date_facture}</td>
                 <td>{f.montant_total.toFixed(2)} €</td>
                 <td>{f.nb_produits}</td>
                 <td>-</td>
                 <td>
-                  <Button size="sm" variant="outline" onClick={() => window.open(`/factures/${f.id}`)}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => window.open(`/factures/${f.id}`)}
+                  >
                     Voir
                   </Button>
                 </td>

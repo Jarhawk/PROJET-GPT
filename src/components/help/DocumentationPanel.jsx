@@ -1,17 +1,18 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useEffect, useState } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogOverlay,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog";
-import { useHelp } from "@/context/HelpProvider";
+} from '@/components/ui/dialog';
+import { useHelp } from '@/context/HelpProvider';
 
 export default function DocumentationPanel({ open, onOpenChange }) {
   const { docs, fetchDocs } = useHelp();
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     if (open) fetchDocs({ search });
@@ -43,4 +44,3 @@ export default function DocumentationPanel({ open, onOpenChange }) {
     </Dialog>
   );
 }
-

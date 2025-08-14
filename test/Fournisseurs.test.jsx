@@ -56,7 +56,7 @@ test('export excel button triggers hook', async () => {
     getFournisseurs: vi.fn(),
     createFournisseur: vi.fn(),
     updateFournisseur: vi.fn(),
-    disableFournisseur: vi.fn(),
+    toggleFournisseurActive: vi.fn(),
     exportFournisseursToExcel: excel,
   });
   render(

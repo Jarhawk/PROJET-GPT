@@ -1539,29 +1539,56 @@ create table if not exists public.inventaires (
   created_at timestamptz default now()
 );
 create index if not exists idx_inventaires_mama_id on public.inventaires(mama_id);
-create index if not exists idx_inventaires_periode_id on public.inventaires(periode_id);
+do $do$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema='public' and table_name='inventaires' and column_name='periode_id'
+  ) then
+    alter table if exists public.inventaires add column periode_id uuid;
+  end if;
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema='public' and table_name='inventaires' and column_name='periode_id'
+  ) then
+    if to_regclass('public.periodes_comptables') is not null then
+      if not exists (select 1 from pg_constraint where conname = 'fk_inventaires_periode_id') then
+        alter table if exists public.inventaires add constraint fk_inventaires_periode_id foreign key (periode_id) references public.periodes_comptables(id);
+      end if;
+    end if;
+    create index if not exists idx_inventaires_periode_id on public.inventaires(periode_id);
+  end if;
+end;
+$do$ language plpgsql;
 alter table if exists public.inventaires enable row level security;
 do $do$
 begin
-  if not exists (select 1 from pg_policies where schemaname='public' and tablename='inventaires' and policyname='inventaires_select') then
-    create policy inventaires_select on public.inventaires
-      for select using (mama_id = current_user_mama_id());
-  end if;
-  if not exists (select 1 from pg_policies where schemaname='public' and tablename='inventaires' and policyname='inventaires_update') then
-    create policy inventaires_update on public.inventaires
-      for update using (mama_id = current_user_mama_id())
-      with check (mama_id = current_user_mama_id());
-  end if;
-  if not exists (select 1 from pg_policies where schemaname='public' and tablename='inventaires' and policyname='inventaires_delete') then
-    create policy inventaires_delete on public.inventaires
-      for delete using (mama_id = current_user_mama_id());
-  end if;
-  if not exists (select 1 from pg_policies where schemaname='public' and tablename='inventaires' and policyname='inventaire_insert') then
-    create policy inventaire_insert on public.inventaires
-      for insert with check (
-        mama_id = current_user_mama_id()
-        and exists (select 1 from periodes_comptables p where p.id = periode_id and p.cloturee = false)
-      );
+  if to_regclass('public.inventaires') is not null then
+    if not exists (select 1 from pg_policies where schemaname='public' and tablename='inventaires' and policyname='inventaires_select') then
+      create policy inventaires_select on public.inventaires
+        for select using (mama_id = current_user_mama_id());
+    end if;
+    if not exists (select 1 from pg_policies where schemaname='public' and tablename='inventaires' and policyname='inventaires_update') then
+      create policy inventaires_update on public.inventaires
+        for update using (mama_id = current_user_mama_id())
+        with check (mama_id = current_user_mama_id());
+    end if;
+    if not exists (select 1 from pg_policies where schemaname='public' and tablename='inventaires' and policyname='inventaires_delete') then
+      create policy inventaires_delete on public.inventaires
+        for delete using (mama_id = current_user_mama_id());
+    end if;
+    if exists (
+      select 1 from information_schema.columns
+      where table_schema='public' and table_name='inventaires' and column_name='periode_id'
+    ) and to_regclass('public.periodes_comptables') is not null then
+      if not exists (select 1 from pg_policies where schemaname='public' and tablename='inventaires' and policyname='inventaire_insert') then
+        create policy inventaire_insert on public.inventaires
+          for insert with check (
+            mama_id = current_user_mama_id()
+            and exists (select 1 from periodes_comptables p where p.id = periode_id and p.cloturee = false)
+          );
+      end if;
+    end if;
   end if;
 end;
 $do$ language plpgsql;

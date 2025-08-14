@@ -3393,3 +3393,375 @@ end $$;
 
 grant execute on function public.safe_delete_zone(uuid,uuid,uuid) to authenticated;
 
+
+
+-- Helper functions
+create or replace function public.jwt_claim(claim text)
+returns text language plpgsql as $$
+  declare c jsonb;
+begin
+  c := coalesce(nullif(current_setting('request.jwt.claims', true),'')::jsonb, nullif(current_setting('jwt.claims', true),'')::jsonb);
+  return c->>claim;
+end;
+$$;
+
+create or replace function public.current_user_id()
+returns uuid language sql stable as $$ select jwt_claim('sub')::uuid $$;
+
+create or replace function public.current_user_mama_id()
+returns uuid language sql stable as $$ select jwt_claim('mama_id')::uuid $$;
+
+create or replace function public.current_user_role()
+returns text language sql stable as $$ select jwt_claim('role') $$;
+
+create or replace function public.current_user_is_admin()
+returns boolean language sql stable as $$ select jwt_claim('is_admin')::boolean $$;
+
+create or replace function public.current_user_is_admin_or_manager()
+returns boolean language sql stable as $$ select (jwt_claim('is_admin')::boolean) or (jwt_claim('role')='manager') $$;
+
+
+-- Conditional renames
+do $$
+declare r record;
+begin
+  for r in select table_schema, table_name from information_schema.columns where column_name='main_supplier_id' and table_schema='public' loop
+    if not exists (select 1 from information_schema.columns where table_schema=r.table_schema and table_name=r.table_name and column_name='fournisseur_principal_id') then
+      execute format('alter table %I.%I rename column main_supplier_id to fournisseur_principal_id;', r.table_schema, r.table_name);
+    end if;
+  end loop;
+  for r in select table_schema, table_name from information_schema.columns where column_name='supplier_id' and table_schema='public' loop
+    if not exists (select 1 from information_schema.columns where table_schema=r.table_schema and table_name=r.table_name and column_name='fournisseur_id') then
+      execute format('alter table %I.%I rename column supplier_id to fournisseur_id;', r.table_schema, r.table_name);
+    end if;
+  end loop;
+  if exists (select 1 from information_schema.tables where table_schema='public' and table_name='supplier_products') and not exists (select 1 from information_schema.tables where table_schema='public' and table_name='fournisseur_produits') then
+    execute 'alter table public.supplier_products rename to fournisseur_produits';
+  end if;
+end$$;
+
+
+-- RLS policies
+do $$
+declare r record; s record;
+begin
+  -- utilisateurs
+  if exists (select 1 from information_schema.tables where table_schema='public' and table_name='utilisateurs') then
+    execute 'alter table public.utilisateurs enable row level security';
+    for r in select policyname from pg_policies where schemaname='public' and tablename='utilisateurs' loop
+      execute format('drop policy %I on public.utilisateurs;', r.policyname);
+    end loop;
+    execute 'create policy utilisateurs_select on public.utilisateurs for select using (auth.uid() = auth_id)';
+  end if;
+  -- mamas
+  if exists (select 1 from information_schema.tables where table_schema='public' and table_name='mamas') then
+    execute 'alter table public.mamas enable row level security';
+    for r in select policyname from pg_policies where schemaname='public' and tablename='mamas' loop
+      execute format('drop policy %I on public.mamas;', r.policyname);
+    end loop;
+    execute 'create policy mamas_all on public.mamas for all using (id = current_user_mama_id()) with check (id = current_user_mama_id())';
+  end if;
+  -- other tables with mama_id
+  for r in select table_name from information_schema.tables t where t.table_schema='public' and t.table_type='BASE TABLE' and t.table_name not in ('utilisateurs','mamas') and exists (select 1 from information_schema.columns c where c.table_schema='public' and c.table_name=t.table_name and c.column_name='mama_id') loop
+    execute format('alter table public.%I enable row level security;', r.table_name);
+    for s in select policyname from pg_policies where schemaname='public' and tablename=r.table_name loop
+      execute format('drop policy %I on public.%I;', s.policyname, r.table_name);
+    end loop;
+    execute format('create policy %I_rls on public.%I for all using (mama_id = current_user_mama_id()) with check (mama_id = current_user_mama_id());', r.table_name, r.table_name);
+  end loop;
+end$$;
+
+
+-- Trigger updated_at
+create or replace function public.trg_set_timestamp() returns trigger language plpgsql as $$ begin new.updated_at = now(); return new; end; $$;
+do $$
+declare r record;
+begin
+  for r in select table_name from information_schema.columns where table_schema='public' and column_name='updated_at' and table_name in (select table_name from information_schema.tables where table_schema='public' and table_type='BASE TABLE') loop
+    if not exists (select 1 from pg_trigger t join pg_class c on c.oid=t.tgrelid join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relname=r.table_name and t.tgname=format('trg_%s_updated_at',r.table_name)) then
+      execute format('create trigger trg_%s_updated_at before update on public.%I for each row execute function public.trg_set_timestamp();', r.table_name, r.table_name);
+    end if;
+  end loop;
+end$$;
+
+
+-- RPC get_my_profile
+create or replace function public.get_my_profile()
+returns table (id uuid, nom text, access_rights jsonb, mama_id uuid, role_id uuid)
+language sql stable security definer set search_path=public as $$
+  select id, nom, access_rights, mama_id, role_id from public.utilisateurs where auth_id = auth.uid() limit 1;
+$$;
+grant execute on function public.get_my_profile() to authenticated;
+
+
+-- Indexes
+do $$
+begin
+  if exists (select 1 from information_schema.columns where table_schema='public' and table_name='produits' and column_name='famille_id') then
+    create index if not exists produits_famille_id_idx on public.produits(famille_id);
+  end if;
+  if exists (select 1 from information_schema.columns where table_schema='public' and table_name='produits' and column_name='sous_famille_id') then
+    create index if not exists produits_sous_famille_id_idx on public.produits(sous_famille_id);
+  end if;
+  if exists (select 1 from information_schema.columns where table_schema='public' and table_name='sous_familles' and column_name='famille_id') then
+    create index if not exists sous_familles_famille_id_idx on public.sous_familles(famille_id);
+  end if;
+  if exists (select 1 from information_schema.columns where table_schema='public' and table_name='fournisseur_produits' and column_name='produit_id') then
+    create index if not exists fournisseur_produits_produit_id_idx on public.fournisseur_produits(produit_id);
+  end if;
+  if exists (select 1 from information_schema.columns where table_schema='public' and table_name='fournisseur_produits' and column_name='fournisseur_id') then
+    create index if not exists fournisseur_produits_fournisseur_id_idx on public.fournisseur_produits(fournisseur_id);
+  end if;
+  if exists (select 1 from information_schema.columns where table_schema='public' and table_name='inventaire_lignes' and column_name='inventaire_id') then
+    create index if not exists inventaire_lignes_inventaire_id_idx on public.inventaire_lignes(inventaire_id);
+  end if;
+  if exists (select 1 from information_schema.columns where table_schema='public' and table_name='facture_lignes' and column_name='facture_id') then
+    create index if not exists facture_lignes_facture_id_idx on public.facture_lignes(facture_id);
+  end if;
+  if exists (select 1 from information_schema.columns where table_schema='public' and table_name='commande_lignes' and column_name='commande_id') then
+    create index if not exists commande_lignes_commande_id_idx on public.commande_lignes(commande_id);
+  end if;
+  if exists (select 1 from information_schema.columns where table_schema='public' and table_name='transfert_lignes' and column_name='transfert_id') then
+    create index if not exists transfert_lignes_transfert_id_idx on public.transfert_lignes(transfert_id);
+  end if;
+  if exists (select 1 from information_schema.columns where table_schema='public' and table_name='zones_stock' and column_name='parent_id') then
+    create index if not exists zones_stock_parent_id_idx on public.zones_stock(parent_id);
+  end if;
+end$$;
+
+
+-- Grants
+do $$
+declare r record;
+begin
+  for r in select table_name from information_schema.tables where table_schema='public' and table_type='BASE TABLE' loop
+    execute format('grant select, insert, update, delete on table public.%I to authenticated;', r.table_name);
+  end loop;
+end$$;
+
+
+-- Views
+DROP VIEW IF EXISTS public.v_familles_sous_familles;
+CREATE VIEW public.v_familles_sous_familles AS
+SELECT sf.*, f.nom AS famille_nom
+FROM public.sous_familles sf
+JOIN public.familles f ON f.id = sf.famille_id;
+
+-- ADMIN-ONLY (commented)
+-- -- 00_admin_only.sql
+-- -- À exécuter via service role (Admin) dans Supabase.
+-- -- Contient : extensions, rôles, fonctions/triggers touchant auth.*, pg_net, storage.*, grants admin-only.
+-- -- Idempotent. NE JAMAIS redéfinir auth.uid() ici.
+-- set search_path = public, pg_catalog;
+-- set check_function_bodies = off;
+-- -- 1. Extensions
+-- create extension if not exists "pgcrypto" with schema extensions;
+-- create extension if not exists "pg_net" with schema extensions;
+-- 
+-- do $do$
+-- begin
+--   if to_regclass('public.utilisateurs') is not null then
+--     execute $fn$
+--       create or replace function public.current_user_mama_id()
+--       returns uuid
+--       language sql stable as $$
+--         select u.mama_id
+--         from public.utilisateurs u
+--         where u.auth_id = auth.uid()
+--         limit 1
+--       $$;
+--     $fn$;
+--   else
+--     raise notice 'Skip current_user_mama_id(): table public.utilisateurs absente';
+--   end if;
+-- end;
+-- $do$ language plpgsql;
+-- 
+-- do $do$
+-- begin
+--   if to_regclass('public.utilisateurs') is not null and to_regclass('public.roles') is not null then
+--     execute $fn$
+--       create or replace function public.current_user_is_admin_or_manager()
+--       returns boolean
+--       language sql stable as $$
+--         select exists (
+--           select 1
+--           from public.utilisateurs u
+--           join public.roles r on r.id = u.role_id
+--           where u.auth_id = auth.uid()
+--             and r.nom in ('admin','manager')
+--         )
+--       $$;
+--     $fn$;
+--   else
+--     raise notice 'Skip current_user_is_admin_or_manager(): tables utilisateurs/roles absentes';
+--   end if;
+-- end;
+-- $do$ language plpgsql;
+-- 
+-- do $do$
+-- begin
+--   if to_regclass('public.utilisateurs') is not null and to_regclass('public.roles') is not null then
+--     execute $fn$
+--       create or replace function public.current_user_is_admin()
+--       returns boolean
+--       language sql stable as $$
+--         select public.current_user_is_admin_or_manager() and exists (
+--           select 1
+--           from public.utilisateurs u
+--           join public.roles r on r.id = u.role_id
+--           where u.auth_id = auth.uid()
+--             and r.nom = 'admin'
+--         )
+--       $$;
+--     $fn$;
+--   else
+--     raise notice 'Skip current_user_is_admin(): tables utilisateurs/roles absentes';
+--   end if;
+-- end;
+-- $do$ language plpgsql;
+-- create or replace function public.create_utilisateur(
+--   p_email text,
+--   p_nom text,
+--   p_role_id uuid,
+--   p_mama_id uuid
+-- ) returns json
+-- language plpgsql
+-- security definer as $$
+-- declare
+--   v_auth_id uuid;
+--   v_password text;
+-- begin
+--   if exists(select 1 from auth.users where lower(email) = lower(p_email)) then
+--     raise exception 'email exists';
+--   end if;
+--   v_password := encode(extensions.gen_random_bytes(9), 'base64');
+--   insert into auth.users(email, encrypted_password)
+--   values (
+--     p_email,
+--     extensions.crypt(v_password, extensions.gen_salt('bf'))
+--   ) returning id into v_auth_id;
+--   insert into public.utilisateurs(nom, email, auth_id, role_id, mama_id, actif)
+--   values(p_nom, p_email, v_auth_id, p_role_id, p_mama_id, true);
+--   perform net.http_post(
+--     url => 'https://example.com/send',
+--     body => jsonb_build_object('email', p_email, 'password', v_password)
+--   );
+--   return json_build_object('success', true);
+-- exception when others then
+--   return json_build_object('success', false, 'error', SQLERRM);
+-- end;$$;
+-- 
+--   do $do$
+--   begin
+--     if to_regclass('public.zones_stock') is not null
+--        and to_regclass('public.zones_droits') is not null then
+--       if not exists (
+--         select 1 from pg_policies
+--         where schemaname='public' and tablename='zones_stock' and policyname='zones_stock_select'
+--       ) then
+--         execute $pol$
+--           create policy zones_stock_select
+--           on public.zones_stock
+--           for select
+--           using (
+--             mama_id = current_user_mama_id()
+--             and exists (
+--               select 1
+--               from public.zones_droits zd
+--               where zd.zone_id = zones_stock.id
+--                 and zd.user_id = auth.uid()
+--                 and zd.lecture = true
+--                 and zd.mama_id = zones_stock.mama_id
+--             )
+--           );
+--         $pol$;
+--       end if;
+--     else
+--       raise notice 'Skip policy zones_stock_select: table public.zones_stock ou zones_droits absente';
+--     end if;
+--   end;
+--   $do$ language plpgsql;
+-- 
+-- do $do$
+-- begin
+--   if to_regclass('public.zones_droits') is not null then
+--     execute $fn$
+--       create or replace function public.can_access_zone(p_zone uuid, p_mode text default 'lecture')
+--       returns boolean
+--       language sql stable security definer
+--       as $$
+--         select case
+--           when p_mode = 'lecture' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and lecture=true)
+--           when p_mode = 'ecriture' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and ecriture=true)
+--           when p_mode = 'transfert' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and transfert=true)
+--           when p_mode = 'requisition' then exists(select 1 from public.zones_droits where zone_id=p_zone and user_id=auth.uid() and requisition=true)
+--             else false end;
+--       $$;
+--     $fn$;
+--   else
+--     raise notice 'Skip can_access_zone(): table public.zones_droits absente';
+--   end if;
+-- end;
+-- $do$ language plpgsql;
+-- do $do$
+-- begin
+--   if to_regclass('public.user_mama_access') is not null then
+--     if not exists (
+--       select 1
+--       from pg_policies
+--       where schemaname='public'
+--         and tablename='user_mama_access'
+--         and policyname='user_mama_access_select'
+--     ) then
+--       execute $pol$
+--         create policy user_mama_access_select
+--         on public.user_mama_access
+--         for select
+--         using (user_id = auth.uid());
+--       $pol$;
+--     end if;
+--   else
+--     raise notice 'Skip policy user_mama_access_select: table public.user_mama_access absente';
+--   end if;
+-- end;
+-- $do$ language plpgsql;
+-- create or replace function public.log_action(
+--   p_mama_id uuid,
+--   p_type text,
+--   p_module text,
+--   p_description text,
+--   p_donnees jsonb default '{}'::jsonb,
+--   p_critique boolean default false
+-- ) returns void
+-- language plpgsql
+-- security definer
+-- as $$
+-- begin
+--   insert into public.logs_activite(mama_id, user_id, type, module, description, donnees, critique)
+--   values (p_mama_id, auth.uid(), p_type, p_module, p_description, p_donnees, p_critique);
+-- end;
+-- $$;
+-- do $do$
+-- begin
+--   if to_regprocedure('public.current_user_mama_id()') is not null then
+--     execute 'grant execute on function public.current_user_mama_id() to authenticated';
+--   end if;
+--   if to_regprocedure('public.current_user_is_admin_or_manager()') is not null then
+--     execute 'grant execute on function public.current_user_is_admin_or_manager() to authenticated';
+--   end if;
+--   if to_regprocedure('public.current_user_is_admin()') is not null then
+--     execute 'grant execute on function public.current_user_is_admin() to authenticated';
+--   end if;
+--   if to_regprocedure('public.create_utilisateur(text, text, uuid, uuid)') is not null then
+--     execute 'grant execute on function public.create_utilisateur(text, text, uuid, uuid) to authenticated';
+--   end if;
+--   if to_regprocedure('public.can_access_zone(uuid, text)') is not null then
+--     execute 'grant execute on function public.can_access_zone(uuid, text) to authenticated';
+--   end if;
+--   if to_regprocedure('public.log_action(uuid, text, text, text, jsonb, boolean)') is not null then
+--     execute 'grant execute on function public.log_action(uuid, text, text, text, jsonb, boolean) to authenticated';
+--   end if;
+-- end;
+-- $do$ language plpgsql;
+-- 

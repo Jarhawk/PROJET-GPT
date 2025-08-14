@@ -1,12 +1,11 @@
 {
-  "lines": 3395,
-  "bytes": 143034,
-  "sha256": "9f6193c6edae8bbb822f5e5c1df8cf09650e4ee278b9804b5f3ed2c85744532d",
-  "tablesRlsNormalized": 89,
-  "policiesDropped": 8,
-  "policiesCreated": 107,
-  "viewsRecreated": 38,
-  "functionsReplaced": 36,
-  "indexesCreated": 118,
-  "renamesApplied": 0
+  "lines": 3768,
+  "bytes": 159936,
+  "sha256": "a276616bad303dfd7d8fd1307004931a5d3cf0767f7f861f78051edc8315569e",
+  "policiesDropped": 11,
+  "policiesCreated": 112,
+  "viewsRecreated": 1,
+  "functionsReplaced": 50,
+  "indexesCreated": 128,
+  "renamesApplied": 4
 }

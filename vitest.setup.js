@@ -6,6 +6,11 @@ import { vi } from 'vitest';
 // Ensure test environment uses the dedicated .env.test file
 dotenv.config({ path: '.env.test' });
 
+process.env.VITE_SUPABASE_URL =
+  process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+process.env.VITE_SUPABASE_ANON_KEY =
+  process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+
 vi.mock('@/contexts/AuthContext', () => {
   const fake = {
     user: { id: 'u-test', email: 'test@ex.com' },

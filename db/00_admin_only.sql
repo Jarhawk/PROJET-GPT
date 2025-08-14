@@ -98,31 +98,34 @@ exception when others then
 end;$$;
 
 -- === zones_stock_select policy ===
-do $$
-begin
-  if to_regclass('public.zones_stock') is not null then
-    execute 'drop policy if exists zones_stock_all on public.zones_stock';
-    execute 'drop policy if exists zones_stock_select on public.zones_stock';
-    execute $pol$
-      create policy zones_stock_select
-      on public.zones_stock
-      for select
-      using (
-        mama_id = current_user_mama_id()
-        and exists (
-          select 1
-          from public.zones_droits zd
-          where zd.zone_id = zones_stock.id
-            and zd.user_id = auth.uid()
-            and zd.lecture = true
-            and zd.mama_id = zones_stock.mama_id
-        )
-      );
-    $pol$;
-  else
-    raise notice 'Skip policy zones_stock_select: table public.zones_stock absente';
-  end if;
-end $$;
+  do $$
+  begin
+    if to_regclass('public.zones_stock') is not null then
+      if not exists (
+        select 1 from pg_policies
+        where schemaname='public' and tablename='zones_stock' and policyname='zones_stock_select'
+      ) then
+        execute $pol$
+          create policy zones_stock_select
+          on public.zones_stock
+          for select
+          using (
+            mama_id = current_user_mama_id()
+            and exists (
+              select 1
+              from public.zones_droits zd
+              where zd.zone_id = zones_stock.id
+                and zd.user_id = auth.uid()
+                and zd.lecture = true
+                and zd.mama_id = zones_stock.mama_id
+            )
+          );
+        $pol$;
+      end if;
+    else
+      raise notice 'Skip policy zones_stock_select: table public.zones_stock absente -- TODO: dépendance manquante';
+    end if;
+  end $$;
 create or replace function public.can_access_zone(p_zone uuid, p_mode text default 'lecture')
 returns boolean
 language sql stable security definer
@@ -169,9 +172,24 @@ begin
   values (p_mama_id, auth.uid(), p_type, p_module, p_description, p_donnees, p_critique);
 end;
 $$;
-grant execute on function public.current_user_mama_id() to authenticated;
-grant execute on function public.current_user_is_admin_or_manager() to authenticated;
-grant execute on function public.current_user_is_admin() to authenticated;
-grant execute on function public.create_utilisateur(text, text, uuid, uuid) to authenticated;
-grant execute on function public.can_access_zone(uuid, text) to authenticated;
-grant execute on function public.log_action(uuid, text, text, text, jsonb, boolean) to authenticated;
+do $$
+begin
+  if to_regprocedure('public.current_user_mama_id()') is not null then
+    execute 'grant execute on function public.current_user_mama_id() to authenticated';
+  end if;
+  if to_regprocedure('public.current_user_is_admin_or_manager()') is not null then
+    execute 'grant execute on function public.current_user_is_admin_or_manager() to authenticated';
+  end if;
+  if to_regprocedure('public.current_user_is_admin()') is not null then
+    execute 'grant execute on function public.current_user_is_admin() to authenticated';
+  end if;
+  if to_regprocedure('public.create_utilisateur(text, text, uuid, uuid)') is not null then
+    execute 'grant execute on function public.create_utilisateur(text, text, uuid, uuid) to authenticated';
+  end if;
+  if to_regprocedure('public.can_access_zone(uuid, text)') is not null then
+    execute 'grant execute on function public.can_access_zone(uuid, text) to authenticated';
+  end if;
+  if to_regprocedure('public.log_action(uuid, text, text, text, jsonb, boolean)') is not null then
+    execute 'grant execute on function public.log_action(uuid, text, text, text, jsonb, boolean) to authenticated';
+  end if;
+end $$;

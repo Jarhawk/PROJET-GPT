@@ -113,7 +113,18 @@ begin
       ('zones_stock')
     ) as v(tbl)
   loop
-    execute format('alter table if exists public.%I add column if not exists mama_id uuid;', tbl);
+    if exists (
+      select 1
+      from pg_class c
+      join pg_namespace n on n.oid = c.relnamespace
+      where n.nspname = 'public'
+        and c.relname = tbl
+        and pg_get_userbyid(c.relowner) = current_user
+    ) then
+      execute format('alter table if exists public.%I add column if not exists mama_id uuid;', tbl);
+    else
+      raise notice 'Skip mama_id on %: not owner', tbl;
+    end if;
   end loop;
 end;
 $do$ language plpgsql;

@@ -8,5 +8,3 @@ export default function PrivateOutlet() {
   if (!userData) return <Navigate to="/unauthorized" replace />
   return <Outlet />
 }
-
-export { PrivateOutlet }

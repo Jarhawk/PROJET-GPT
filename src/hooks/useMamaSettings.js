@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -21,19 +21,36 @@ export default function useMamaSettings() {
   const { mama_id } = useAuth();
   const [settings, setSettings] = useState(defaults);
   const [loading, setLoading] = useState(false);
+  const [enabledModules, setEnabledModules] = useState(null);
+  const [featureFlags, setFeatureFlags] = useState(null);
+  const [ok, setOk] = useState(true);
 
   const fetchMamaSettings = useCallback(async () => {
-    if (!mama_id) return null;
+    if (!mama_id) {
+      setLoading(false);
+      return null;
+    }
     setLoading(true);
     const { data, error } = await supabase
       .from("mamas")
       .select(
-        "logo_url, primary_color, secondary_color, email_envoi, email_alertes, dark_mode, langue, monnaie, timezone, rgpd_text, mentions_legales"
+        "logo_url, primary_color, secondary_color, email_envoi, email_alertes, dark_mode, langue, monnaie, timezone, rgpd_text, mentions_legales, enabled_modules, feature_flags"
       )
       .eq("id", mama_id)
       .single();
     setLoading(false);
-    if (!error && data) setSettings({ ...defaults, ...data });
+    if (error) {
+      console.warn("[useMamaSettings] fetch failed", error);
+      setSettings(defaults);
+      setEnabledModules(null);
+      setFeatureFlags(null);
+      setOk(true);
+      return null;
+    }
+    setSettings({ ...defaults, ...data });
+    setEnabledModules(data.enabled_modules || null);
+    setFeatureFlags(data.feature_flags || null);
+    setOk(true);
     return data;
   }, [mama_id]);
 
@@ -54,5 +71,17 @@ export default function useMamaSettings() {
     [mama_id]
   );
 
-  return { settings, loading, fetchMamaSettings, updateMamaSettings };
+  useEffect(() => {
+    fetchMamaSettings();
+  }, [fetchMamaSettings]);
+
+  return {
+    settings,
+    loading,
+    enabledModules,
+    featureFlags,
+    ok,
+    fetchMamaSettings,
+    updateMamaSettings,
+  };
 }

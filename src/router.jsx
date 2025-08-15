@@ -7,7 +7,7 @@ import { useLocation } from 'react-router-dom';
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import PageSkeleton from "@/components/ui/PageSkeleton";
-import { Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from '@/contexts/AuthContext';
 import Layout from "@/layout/Layout";
 import Login from "@/pages/auth/Login";
@@ -18,13 +18,7 @@ import OnboardingUtilisateur from "@/pages/onboarding/OnboardingUtilisateur";
 import AuthDebug from "@/pages/debug/AuthDebug";
 import AccessExample from "@/pages/debug/AccessExample";
 import ProtectedRoute from "@/components/ProtectedRoute";
-
-function PrivateOutlet() {
-  const { session, userData, loading } = useAuth()
-  if (loading) return <LoadingSpinner message="Chargement..." />
-  if (!session || !userData || !userData.id) return <Navigate to="/unauthorized" replace />
-  return <Outlet />
-}
+import PrivateOutlet from "@/router/PrivateOutlet";
 
 const Dashboard = lazyWithPreload(() => import("@/pages/Dashboard.jsx"));
 const Fournisseurs = lazyWithPreload(() => import("@/pages/fournisseurs/Fournisseurs.jsx"));

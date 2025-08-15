@@ -27,6 +27,7 @@ export default function Login() {
       return
     }
     const { error } = await supabase.auth.signInWithPassword({ email, password })
+    console.log('[login] submit', { emailPresent: !!email })
     if (error) {
       console.error('[signInWithPassword] error', error)
       setErrorMsg(error.message || 'Connexion impossible')

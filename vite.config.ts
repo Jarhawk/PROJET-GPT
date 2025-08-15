@@ -45,4 +45,9 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"), // 👈 définit @ comme racine de /src
     },
   },
+  optimizeDeps: {
+    esbuildOptions: {
+      sourcemap: false,
+    },
+  },
 });

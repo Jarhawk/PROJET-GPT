@@ -1,7 +1,6 @@
 set search_path = public;
 set check_function_bodies = off;
 
--- Helpers
 create or replace function public.jwt_claim(claim text)
 returns text language sql stable as $$
   select coalesce(
@@ -10,10 +9,8 @@ returns text language sql stable as $$
   );
 $$;
 
--- current_user_mama_id (fallback table, SECURITY DEFINER)
 create or replace function public.current_user_mama_id()
-returns uuid
-language plpgsql stable security definer
+returns uuid language plpgsql stable security definer
 set search_path = public
 as $$
 declare v uuid;
@@ -26,7 +23,6 @@ end;
 $$;
 grant execute on function public.current_user_mama_id() to authenticated;
 
--- get_my_profile => jsonb objet (drop conditionnel si autre signature)
 do $$
 declare rt text;
 begin
@@ -34,15 +30,14 @@ begin
   from pg_proc p join pg_namespace n on n.oid=p.pronamespace
   where n.nspname='public' and p.proname='get_my_profile' and p.pronargs=0
   limit 1;
-  if rt is not null and rt !~* '\bjsonb\b' then
+  if rt is not null and rt !~* '\\bjsonb\\b' then
     execute 'drop function public.get_my_profile()';
   end if;
 end
 $$ language plpgsql;
 
 create or replace function public.get_my_profile()
-returns jsonb
-language plpgsql stable security definer
+returns jsonb language plpgsql stable security definer
 set search_path = public
 as $$
 declare result jsonb;
@@ -51,10 +46,12 @@ begin
     'id', u.id, 'nom', u.nom,
     'access_rights', coalesce(u.access_rights,'{}'::jsonb),
     'mama_id', u.mama_id, 'role_id', u.role_id
-  ) into result
+  )
+  into result
   from public.utilisateurs u
   where u.auth_id = auth.uid()
   limit 1;
+
   if result is null then
     result := jsonb_build_object('id',null,'nom',null,'access_rights','{}'::jsonb,'mama_id',null,'role_id',null);
   end if;
@@ -63,21 +60,17 @@ end;
 $$;
 grant execute on function public.get_my_profile() to authenticated;
 
--- bootstrap_my_profile => jsonb (drop signature incompatible si présent)
 do $$
 begin
-  if to_regprocedure('public.bootstrap_my_profile(text)') is not null then
-    -- ok, on laissera le CREATE OR REPLACE ajuster le corps
-    null;
-  elsif to_regprocedure('public.bootstrap_my_profile()') is not null then
+  if to_regprocedure('public.bootstrap_my_profile(text)') is null
+     and to_regprocedure('public.bootstrap_my_profile()') is not null then
     execute 'drop function public.bootstrap_my_profile()';
   end if;
 end
 $$ language plpgsql;
 
 create or replace function public.bootstrap_my_profile(p_nom text default null)
-returns jsonb
-language plpgsql security definer
+returns jsonb language plpgsql security definer
 set search_path = public
 as $$
 declare v_auth uuid := auth.uid(); v_mama uuid; v_row public.utilisateurs%rowtype;
@@ -100,12 +93,11 @@ end;
 $$;
 grant execute on function public.bootstrap_my_profile(text) to authenticated;
 
--- RLS rappel minimal: SELECT self sur utilisateurs (ajout si manquant, non destructif)
 do $$
 begin
   if to_regclass('public.utilisateurs') is not null then
     execute 'alter table public.utilisateurs enable row level security';
-    if not exists (select 1 from pg_policies where schemaname='public' and tablename='utilisateurs' and policyname='utilisateurs_select') then
+    if not exists (select 1 from pg_policies where schemaname=''public'' and tablename=''utilisateurs'' and policyname=''utilisateurs_select'') then
       execute $q$create policy utilisateurs_select on public.utilisateurs for select using (auth.uid()=auth_id)$q$;
     end if;
   end if;

@@ -2,10 +2,10 @@
 import { useState, useCallback } from "react";
 import toast from "react-hot-toast";
 import { supabase } from "@/lib/supabase";
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth as useAuthContext } from '@/hooks/useAuth';
 
 export default function useNotifications() {
-  const { mama_id, user_id } = useAuth();
+  const { mama_id, user_id } = useAuthContext();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -244,3 +244,5 @@ export default function useNotifications() {
     sendWebhook,
   };
 }
+
+export { useNotifications as useAuth };

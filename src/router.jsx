@@ -194,10 +194,13 @@ export const routePreloadMap = {
 
 function RootRoute() {
   const location = useLocation();
-  const { session, loading, userData, error } = useAuth();
+  const { session, userData, loading } = useAuth();
 
-  if (loading) return <LoadingSpinner message="Chargement..." />;
-  if (!session?.user)
+  if (loading || (session && !userData)) {
+    return <LoadingSpinner message="Chargement..." />;
+  }
+
+  if (!session) {
     return (
       <Navigate
         to="/login"
@@ -205,14 +208,10 @@ function RootRoute() {
         state={{ from: location.pathname }}
       />
     );
-  if (error) {
-    if (error === 'Utilisateur introuvable') {
-      return <Navigate to="/onboarding-utilisateur" replace />;
-    }
-    return <Navigate to="/login" replace />;
   }
-  if (!userData) return <LoadingSpinner message="Chargement..." />;
-  if (userData.actif === false) return <Navigate to="/blocked" replace />;
+
+  if (userData?.actif === false) return <Navigate to="/blocked" replace />;
+
   return <Navigate to="/dashboard" replace />;
 }
 

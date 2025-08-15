@@ -10,7 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import Unauthorized from '@/pages/auth/Unauthorized';
 import { useFamillesWithSousFamilles } from '@/hooks/useFamillesWithSousFamilles';
-import { supabase } from '@/lib/supabaseClient';
+import supabase from '@/lib/supabaseClient';
 
 export default function Familles() {
   const {

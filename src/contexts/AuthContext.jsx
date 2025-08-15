@@ -1,96 +1,59 @@
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { createContext, useContext, useEffect, useState, useCallback } from "react"
+import supabase from "@/lib/supabaseClient"
 
 export const AuthContext = createContext({
   session: null,
-  user: null,
   userData: null,
   loading: true,
   signInWithPassword: async () => {},
-  signOut: async () => {},
-});
+  logout: async () => {}
+})
 
 export function AuthProvider({ children }) {
-  const [session, setSession] = useState(null);
-  const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  const loadUserData = useCallback(async (authId) => {
-    if (!authId) return null;
-    const { data, error } = await supabase
-      .from("utilisateurs")
-      .select("*")
-      .eq("auth_id", authId)
-      .single();
-    if (error) {
-      console.error(error);
-      return null;
-    }
-    return data;
-  }, []);
+  const [session, setSession] = useState(null)
+  const [userData, setUserData] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    let active = true;
+    let isMounted = true
+    const run = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!isMounted) return
+      setSession(session ?? null)
 
-    const init = async () => {
-      setLoading(true);
-      const {
-        data: { session: currentSession },
-      } = await supabase.auth.getSession();
+      if (!session) { setUserData(null); setLoading(false); return }
 
-      if (!active) return;
-      setSession(currentSession);
-
-      if (currentSession?.user) {
-        const user = await loadUserData(currentSession.user.id);
-        if (!active) return;
-        setUserData(user);
+      // RPC renvoie un objet JSON (pas de .single())
+      const { data, error } = await supabase.rpc('get_my_profile')
+      if (!isMounted) return
+      if (error) {
+        console.error('[get_my_profile] error', error)
+        setUserData(null)
       } else {
-        setUserData(null);
+        setUserData(data)
       }
-      setLoading(false);
-    };
+      setLoading(false)
+    }
+    run()
 
-    init();
-
-    const { data: subscription } = supabase.auth.onAuthStateChange(
-      async (_event, newSession) => {
-        setSession(newSession);
-        if (newSession?.user) {
-          const user = await loadUserData(newSession.user.id);
-          setUserData(user);
-        } else {
-          setUserData(null);
-        }
-      }
-    );
-
-    return () => {
-      active = false;
-      subscription.subscription.unsubscribe();
-    };
-  }, [loadUserData]);
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, sess) => {
+      setSession(sess ?? null)
+    })
+    return () => { isMounted = false; sub?.subscription?.unsubscribe?.() }
+  }, [])
 
   const signInWithPassword = useCallback(
     (credentials) => supabase.auth.signInWithPassword(credentials),
     []
-  );
+  )
 
-  const signOut = useCallback(() => supabase.auth.signOut(), []);
+  const logout = useCallback(() => supabase.auth.signOut(), [])
 
-  const value = {
-    session,
-    user: session?.user ?? null,
-    userData,
-    loading,
-    signInWithPassword,
-    signOut,
-  };
+  const value = { session, userData, loading, signInWithPassword, logout }
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
 export function useAuth() {
-  return useContext(AuthContext);
+  return useContext(AuthContext)
 }
-

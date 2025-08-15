@@ -11,7 +11,7 @@ import UniteForm from '@/forms/UniteForm';
 import { useAuth } from '@/hooks/useAuth';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import Unauthorized from '@/pages/auth/Unauthorized';
-import { supabase } from '@/lib/supabase';
+import supabase from '@/lib/supabaseClient';
 
 export default function Unites() {
   const { unites, total, fetchUnites, addUnite, updateUnite } = useUnites();

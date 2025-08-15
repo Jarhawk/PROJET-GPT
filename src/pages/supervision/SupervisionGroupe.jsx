@@ -1,6 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState, useCallback } from "react";
-import { supabase } from "@/lib/supabase";
+import supabase from '@/lib/supabaseClient';
 import { useMultiMama } from "@/context/MultiMamaContext";
 import TableContainer from "@/components/ui/TableContainer";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";

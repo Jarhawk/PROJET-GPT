@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { PDFDownloadLink, pdf } from "@react-pdf/renderer";
-import { supabase } from "@/lib/supabase";
+import supabase from '@/lib/supabaseClient';
 import { useCommandes } from "@/hooks/useCommandes";
 import { useTemplatesCommandes } from "@/hooks/useTemplatesCommandes";
 import CommandePDF from "@/components/pdf/CommandePDF";

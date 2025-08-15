@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import supabase from '@/lib/supabaseClient';
 import { Button } from '@/components/ui/button';
 import GlassCard from '@/components/ui/GlassCard';
 import toast, { Toaster } from 'react-hot-toast';

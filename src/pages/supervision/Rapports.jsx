@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from '@/hooks/useAuth';
 import { useLogs } from "@/hooks/useLogs";
-import { supabase } from "@/lib/supabase";
+import supabase from '@/lib/supabaseClient';
 import GlassCard from "@/components/ui/GlassCard";
 import TableContainer from "@/components/ui/TableContainer";
 import { Input } from "@/components/ui/input";

@@ -2,7 +2,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from 'react';
 import { Toaster, toast } from 'react-hot-toast';
-import { supabase } from '@/lib/supabase';
+import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
 import ListingContainer from '@/components/ui/ListingContainer';
 import PaginationFooter from '@/components/ui/PaginationFooter';

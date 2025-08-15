@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 // src/hooks/useProducts.js
 import { useState, useCallback, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
 import * as XLSX from "xlsx";
 import { safeImportXLSX } from "@/lib/xlsx/safeImportXLSX";

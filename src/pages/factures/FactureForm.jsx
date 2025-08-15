@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect, useRef } from 'react';
-import { supabase } from '@/lib/supabase';
+import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
 import { useFactures } from '@/hooks/useFactures';
 import { useProduitsAutocomplete } from '@/hooks/useProduitsAutocomplete';

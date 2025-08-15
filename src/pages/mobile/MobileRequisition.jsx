@@ -1,6 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import supabase from '@/lib/supabaseClient';
 import { toast } from "react-toastify";
 import { useAuth } from '@/hooks/useAuth';
 import { LiquidBackground, TouchLight } from "@/components/LiquidBackground";

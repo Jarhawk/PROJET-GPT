@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { supabase } from "@/lib/supabase";
+import supabase from '@/lib/supabaseClient';
 import LegalLayout from "@/layout/LegalLayout";
 
 export default function Confidentialite() {

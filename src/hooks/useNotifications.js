@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useCallback } from "react";
 import toast from "react-hot-toast";
-import { supabase } from "@/lib/supabase";
+import supabase from '@/lib/supabaseClient';
 import { useAuth as useAuthContext } from '@/hooks/useAuth';
 
 export default function useNotifications() {

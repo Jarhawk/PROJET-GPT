@@ -1,8 +1,9 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { Outlet, useLocation, Link } from "react-router-dom";
+import { Outlet, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
+import supabase from "@/lib/supabaseClient";
 import useNotifications from "@/hooks/useNotifications";
 import { Badge } from "@/components/ui/badge";
 import { Bell } from "lucide-react";
@@ -18,8 +19,7 @@ import {
 } from "@/components/LiquidBackground";
 
 export default function Layout() {
-  const { pathname } = useLocation();
-  const { session, userData, loading, logout } = useAuth();
+  const { session, userData, loading } = useAuth();
   const { fetchUnreadCount, subscribeToNotifications } = useNotifications();
   const [unread, setUnread] = useState(0);
 
@@ -30,24 +30,10 @@ export default function Layout() {
     });
     return unsub;
   }, [fetchUnreadCount, subscribeToNotifications]);
-  if (pathname === "/login" || pathname === "/unauthorized") return <Outlet />;
   if (loading) {
     return <PageSkeleton />;
   }
-
-  if (session && !userData) {
-    return (
-      <div className="flex items-center justify-center h-screen text-white">
-        Profil incomplet
-      </div>
-    );
-  }
-
-  if (!session) {
-    return <Outlet />;
-  }
-
-  const user = session.user;
+  const user = session?.user;
 
   return (
     <div className="relative flex h-screen overflow-auto text-shadow">
@@ -78,7 +64,7 @@ export default function Layout() {
               )}
               <button
                 onClick={() => {
-                  logout();
+                  supabase.auth.signOut();
                   toast.success("Déconnecté");
                 }}
                 className="text-red-400 hover:underline"

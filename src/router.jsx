@@ -7,8 +7,8 @@ import { useLocation } from 'react-router-dom';
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import PageSkeleton from "@/components/ui/PageSkeleton";
-import { Routes, Route, Navigate } from "react-router-dom";
-import { useAuth } from '@/hooks/useAuth';
+import { Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { useAuth } from '@/contexts/AuthContext';
 import Layout from "@/layout/Layout";
 import Login from "@/pages/auth/Login";
 import Unauthorized from "@/pages/auth/Unauthorized";
@@ -18,6 +18,13 @@ import OnboardingUtilisateur from "@/pages/onboarding/OnboardingUtilisateur";
 import AuthDebug from "@/pages/debug/AuthDebug";
 import AccessExample from "@/pages/debug/AccessExample";
 import ProtectedRoute from "@/components/ProtectedRoute";
+
+function PrivateOutlet() {
+  const { session, userData, loading } = useAuth()
+  if (loading) return <LoadingSpinner message="Chargement..." />
+  if (!session || !userData || !userData.id) return <Navigate to="/unauthorized" replace />
+  return <Outlet />
+}
 
 const Dashboard = lazyWithPreload(() => import("@/pages/Dashboard.jsx"));
 const Fournisseurs = lazyWithPreload(() => import("@/pages/fournisseurs/Fournisseurs.jsx"));
@@ -248,7 +255,8 @@ export default function Router() {
         {/* Routes internes protégées par les droits utilisateurs.
             Chaque sous-route est enveloppée dans <ProtectedRoute accessKey="...">.
             La clé correspond au module autorisé dans access_rights. */}
-        <Route path="/" element={<Layout />}>
+        <Route element={<PrivateOutlet />}>
+          <Route path="/" element={<Layout />}>
           <Route
             path="dashboard"
             element={
@@ -622,6 +630,7 @@ export default function Router() {
             path="/debug/access"
             element={<ProtectedRoute accessKey="dashboard"><AccessExample /></ProtectedRoute>}
           />
+        </Route>
         </Route>
       </Routes>
       </Suspense>

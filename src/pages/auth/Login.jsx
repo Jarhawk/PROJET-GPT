@@ -2,7 +2,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import toast from "react-hot-toast";
-import { useAuth } from "@/hooks/useAuth";
+import supabase from "@/lib/supabaseClient";
+import { useAuth } from "@/contexts/AuthContext";
 import useFormErrors from "@/hooks/useFormErrors";
 import MamaLogo from "@/components/ui/MamaLogo";
 import GlassCard from "@/components/ui/GlassCard";
@@ -20,16 +21,15 @@ export default function Login() {
   const { errors, setError, clearErrors } = useFormErrors();
   const navigate = useNavigate();
   const location = useLocation();
-  const { session, userData, loading, signInWithPassword } = useAuth();
+  const { session, userData, loading } = useAuth();
   const emailId = useMemo(() => makeId("fld"), []);
   const passwordId = useMemo(() => makeId("fld"), []);
 
   useEffect(() => {
-    if (!loading && session && userData) {
-      const redirectTo = location.state?.from || "/dashboard";
-      navigate(redirectTo, { replace: true });
+    if (!loading && session && userData && userData.id) {
+      navigate("/dashboard", { replace: true });
     }
-  }, [loading, session, userData, navigate, location]);
+  }, [loading, session, userData, navigate]);
 
   if (loading) {
     return <LoadingSpinner message="Chargement..." />;
@@ -44,7 +44,7 @@ export default function Login() {
     if (!email || !password) return;
 
     setFormLoading(true);
-    const { error } = await signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password,
     });
@@ -125,4 +125,3 @@ export default function Login() {
     </PageWrapper>
   );
 }
-

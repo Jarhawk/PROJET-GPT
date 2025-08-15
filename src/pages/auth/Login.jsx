@@ -1,59 +1,47 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState, useEffect, useMemo } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import toast from "react-hot-toast";
-import supabase from "@/lib/supabaseClient";
-import { useAuth } from "@/contexts/AuthContext";
-import useFormErrors from "@/hooks/useFormErrors";
-import MamaLogo from "@/components/ui/MamaLogo";
-import GlassCard from "@/components/ui/GlassCard";
-import PageWrapper from "@/components/ui/PageWrapper";
-import PreviewBanner from "@/components/ui/PreviewBanner";
-import PrimaryButton from "@/components/ui/PrimaryButton";
-import { Input } from "@/components/ui/input";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import { makeId } from "@/utils/formIds";
+import { useState, useEffect } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
+import { useAuth } from '@/contexts/AuthContext'
+import supabase from '@/lib/supabaseClient'
+import PageWrapper from '@/components/ui/PageWrapper'
+import GlassCard from '@/components/ui/GlassCard'
+import MamaLogo from '@/components/ui/MamaLogo'
+import PreviewBanner from '@/components/ui/PreviewBanner'
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [formLoading, setFormLoading] = useState(false);
-  const { errors, setError, clearErrors } = useFormErrors();
-  const navigate = useNavigate();
-  const { session, userData, loading } = useAuth();
-  const emailId = useMemo(() => makeId("fld"), []);
-  const passwordId = useMemo(() => makeId("fld"), []);
+  const navigate = useNavigate()
+  const { session, userData, loading } = useAuth()
+  const [pending, setPending] = useState(false)
+  const [errorMsg, setErrorMsg] = useState('')
+
+  async function handleLogin(e) {
+    e.preventDefault()
+    setErrorMsg('')
+    setPending(true)
+    const form = e.currentTarget
+    const email = form.email?.value?.trim()
+    const password = form.password?.value ?? ''
+    if (!email || !password) {
+      setErrorMsg('Veuillez saisir email et mot de passe.')
+      setPending(false)
+      return
+    }
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) {
+      console.error('[signInWithPassword] error', error)
+      setErrorMsg(error.message || 'Connexion impossible')
+      setPending(false)
+      return
+    }
+    // Ne pas navigate ici: on attend AuthContext (bootstrap + get_my_profile)
+    // L’AuthContext passera loading=false et remplira userData.
+  }
 
   useEffect(() => {
     if (!loading && session && userData) {
-      navigate("/dashboard", { replace: true });
+      navigate('/dashboard', { replace: true })
     }
-  }, [loading, session, userData, navigate]);
-
-  if (loading) {
-    return <LoadingSpinner message="Chargement..." />;
-  }
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    if (formLoading) return;
-    clearErrors();
-    if (!email) setError("email", "Email requis");
-    if (!password) setError("password", "Mot de passe requis");
-    if (!email || !password) return;
-
-    setFormLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    });
-    if (error) {
-      console.error(error);
-      setError("password", error.message || String(error));
-      toast.error(error.message || "Échec de la connexion");
-    }
-    setFormLoading(false);
-  };
+  }, [loading, session, userData])
 
   return (
     <PageWrapper>
@@ -67,52 +55,39 @@ export default function Login() {
         </p>
         <form onSubmit={handleLogin} className="w-full flex flex-col gap-4">
           <div>
-            <label htmlFor={emailId} className="block text-xs font-semibold text-white/90 mb-1">
+            <label htmlFor="email" className="block text-xs font-semibold text-white/90 mb-1">
               Email
             </label>
-            <Input
-              id={emailId}
+            <input
+              id="email"
+              name="email"
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoFocus
               autoComplete="email"
               required
-              placeholder="votre@email.com"
+              className="w-full px-4 py-2 font-semibold text-white placeholder-white/50 bg-white/10 backdrop-blur rounded-md shadow-lg border border-white/20 ring-1 ring-white/20 focus:outline-none hover:bg-white/10"
             />
-            {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
           </div>
           <div>
-            <label htmlFor={passwordId} className="block text-xs font-semibold text-white/90 mb-1">
+            <label htmlFor="password" className="block text-xs font-semibold text-white/90 mb-1">
               Mot de passe
             </label>
-            <Input
-              id={passwordId}
+            <input
+              id="password"
+              name="password"
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
               autoComplete="current-password"
               required
-              placeholder="••••••••"
+              className="w-full px-4 py-2 font-semibold text-white placeholder-white/50 bg-white/10 backdrop-blur rounded-md shadow-lg border border-white/20 ring-1 ring-white/20 focus:outline-none hover:bg-white/10"
             />
-            {errors.password && (
-              <p className="text-sm text-red-500 mt-1">{errors.password}</p>
-            )}
           </div>
-          <PrimaryButton
+          {errorMsg ? <div role="alert" className="text-sm text-red-500">{errorMsg}</div> : null}
+          <button
             type="submit"
-            className="mt-3 flex items-center justify-center gap-2 disabled:opacity-50"
-            disabled={!email || !password || formLoading}
+            disabled={pending}
+            className="mt-3 px-4 py-2 rounded-xl text-sm font-semibold bg-primary text-white hover:bg-primary-90 transition-colors disabled:opacity-50"
           >
-            {formLoading ? (
-              <>
-                <span className="loader-glass" />
-                Connexion…
-              </>
-            ) : (
-              "Se connecter"
-            )}
-          </PrimaryButton>
+            {pending ? 'Connexion…' : 'Login'}
+          </button>
           <div className="text-right mt-2">
             <Link to="/reset-password" className="text-xs text-gold hover:underline">
               Mot de passe oublié ?
@@ -122,5 +97,5 @@ export default function Login() {
       </GlassCard>
       <p className="text-xs text-center text-white/40 mt-4">© MamaStock 2025</p>
     </PageWrapper>
-  );
+  )
 }

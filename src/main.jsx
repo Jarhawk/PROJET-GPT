@@ -7,7 +7,7 @@ import 'nprogress/nprogress.css';
 import "@/i18n/i18n";
 import "./registerSW.js";
 import { BrowserRouter } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
+import AuthProvider from "@/contexts/AuthContext";
 
 // Avoid noisy output in production by disabling debug logs
 if (!import.meta.env.DEV) {

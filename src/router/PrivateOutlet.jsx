@@ -1,0 +1,12 @@
+import { Navigate, Outlet } from 'react-router-dom'
+import { useAuth } from '@/contexts/AuthContext'
+
+export default function PrivateOutlet() {
+  const { session, userData, loading } = useAuth()
+  if (loading) return null
+  if (!session) return <Navigate to="/login" replace />
+  if (!userData) return <Navigate to="/unauthorized" replace />
+  return <Outlet />
+}
+
+export { PrivateOutlet }

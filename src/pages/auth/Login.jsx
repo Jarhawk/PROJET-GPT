@@ -1,6 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect, useMemo } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import supabase from "@/lib/supabaseClient";
 import { useAuth } from "@/contexts/AuthContext";
@@ -20,13 +20,12 @@ export default function Login() {
   const [formLoading, setFormLoading] = useState(false);
   const { errors, setError, clearErrors } = useFormErrors();
   const navigate = useNavigate();
-  const location = useLocation();
   const { session, userData, loading } = useAuth();
   const emailId = useMemo(() => makeId("fld"), []);
   const passwordId = useMemo(() => makeId("fld"), []);
 
   useEffect(() => {
-    if (!loading && session && userData && userData.id) {
+    if (!loading && session && userData) {
       navigate("/dashboard", { replace: true });
     }
   }, [loading, session, userData, navigate]);

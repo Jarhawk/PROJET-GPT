@@ -18,7 +18,6 @@ import OnboardingUtilisateur from "@/pages/onboarding/OnboardingUtilisateur";
 import DebugAuth from "@/pages/debug/DebugAuth";
 import AccessExample from "@/pages/debug/AccessExample";
 import DebugRights from "@/pages/debug/DebugRights";
-import ProtectedRoute from "@/components/ProtectedRoute";
 import PrivateOutlet from "@/router/PrivateOutlet";
 
 const Dashboard = lazyWithPreload(() => import("@/pages/Dashboard.jsx"));
@@ -249,379 +248,373 @@ export default function Router() {
         <Route path="/licence" element={<Licence />} />
         <Route path="/debug/auth" element={<DebugAuth />} />
         <Route path="/debug/rights" element={<DebugRights />} />
-        {/* Routes internes protégées par les droits utilisateurs.
-            Chaque sous-route est enveloppée dans <ProtectedRoute accessKey="...">.
-            La clé correspond au module autorisé dans access_rights. */}
+        {/* Routes internes protégées par les droits utilisateurs */}
         <Route element={<PrivateOutlet />}>
           <Route path="/" element={<Layout />}>
           <Route
             path="dashboard"
-            element={
-              <ProtectedRoute accessKey="dashboard">
-                <Dashboard />
-              </ProtectedRoute>
-            }
+            element={<Dashboard />}
           />
           <Route
             path="/dashboard/builder"
-            element={<ProtectedRoute accessKey="dashboard"><DashboardBuilder /></ProtectedRoute>}
+            element={<DashboardBuilder />}
           />
           <Route
             path="/fournisseurs"
-            element={<ProtectedRoute accessKey="fournisseurs"><Fournisseurs /></ProtectedRoute>}
+            element={<Fournisseurs />}
           />
           <Route
             path="/fournisseurs/nouveau"
-            element={<ProtectedRoute accessKey="fournisseurs"><FournisseurCreate /></ProtectedRoute>}
+            element={<FournisseurCreate />}
           />
           <Route
             path="/fournisseurs/:id"
-            element={<ProtectedRoute accessKey="fournisseurs"><FournisseurDetailPage /></ProtectedRoute>}
+            element={<FournisseurDetailPage />}
           />
           <Route
             path="/fournisseurs/:id/api"
-            element={<ProtectedRoute accessKey="fournisseurs"><FournisseurApiSettingsForm /></ProtectedRoute>}
+            element={<FournisseurApiSettingsForm />}
           />
           <Route
             path="/factures"
-            element={<ProtectedRoute accessKey="factures"><Factures /></ProtectedRoute>}
+            element={<Factures />}
           />
           <Route
             path="/factures/nouveau"
-            element={<ProtectedRoute accessKey="factures"><FactureCreate /></ProtectedRoute>}
+            element={<FactureCreate />}
           />
           <Route
             path="/factures/:id"
-            element={<ProtectedRoute accessKey="factures"><FactureDetail /></ProtectedRoute>}
+            element={<FactureDetail />}
           />
           <Route
             path="/factures/import"
-            element={<ProtectedRoute accessKey="factures"><ImportFactures /></ProtectedRoute>}
+            element={<ImportFactures />}
           />
           <Route
           path="/receptions"
-          element={<ProtectedRoute accessKey="receptions"><Receptions /></ProtectedRoute>}
+          element={<Receptions />}
         />
         <Route
           path="/achats"
-          element={<ProtectedRoute accessKey="achats"><Achats /></ProtectedRoute>}
+          element={<Achats />}
         />
         <Route
           path="/bons-livraison"
-          element={<ProtectedRoute accessKey="bons_livraison"><BonsLivraison /></ProtectedRoute>}
+          element={<BonsLivraison />}
         />
           <Route
             path="/bons-livraison/nouveau"
-            element={<ProtectedRoute accessKey="bons_livraison"><BLCreate /></ProtectedRoute>}
+            element={<BLCreate />}
           />
           <Route
             path="/bons-livraison/:id"
-            element={<ProtectedRoute accessKey="bons_livraison"><BLDetail /></ProtectedRoute>}
+            element={<BLDetail />}
           />
           <Route
             path="/fiches"
-            element={<ProtectedRoute accessKey="fiches_techniques"><Fiches /></ProtectedRoute>}
+            element={<Fiches />}
           />
           <Route
             path="/fiches/:id"
-            element={<ProtectedRoute accessKey="fiches_techniques"><FicheDetail /></ProtectedRoute>}
+            element={<FicheDetail />}
           />
           <Route
             path="/menus"
-            element={<ProtectedRoute accessKey="menus"><Menus /></ProtectedRoute>}
+            element={<Menus />}
           />
           <Route
             path="/menu"
-            element={<ProtectedRoute accessKey="menu_du_jour"><MenuDuJourPlanning /></ProtectedRoute>}
+            element={<MenuDuJourPlanning />}
           />
           <Route
             path="/menu/:date"
-            element={<ProtectedRoute accessKey="menu_du_jour"><MenuDuJourJour /></ProtectedRoute>}
+            element={<MenuDuJourJour />}
           />
           <Route
             path="/menu-groupes"
-            element={<ProtectedRoute accessKey="menu_groupe"><MenuGroupes /></ProtectedRoute>}
+            element={<MenuGroupes />}
           />
           <Route
             path="/menu-groupes/nouveau"
-            element={<ProtectedRoute accessKey="menu_groupe"><MenuGroupeForm /></ProtectedRoute>}
+            element={<MenuGroupeForm />}
           />
           <Route
             path="/menu-groupes/:id"
-            element={<ProtectedRoute accessKey="menu_groupe"><MenuGroupeDetail /></ProtectedRoute>}
+            element={<MenuGroupeDetail />}
           />
           <Route
             path="/carte"
-            element={<ProtectedRoute accessKey="carte"><Carte /></ProtectedRoute>}
+            element={<Carte />}
           />
           <Route
             path="/recettes"
-            element={<ProtectedRoute accessKey="recettes"><Recettes /></ProtectedRoute>}
+            element={<Recettes />}
           />
           <Route
             path="/requisitions"
-            element={<ProtectedRoute accessKey="requisitions"><Requisitions /></ProtectedRoute>}
+            element={<Requisitions />}
           />
           <Route
             path="/requisitions/nouvelle"
-            element={<ProtectedRoute accessKey="requisitions"><RequisitionForm /></ProtectedRoute>}
+            element={<RequisitionForm />}
           />
           <Route
             path="/requisitions/:id"
-            element={<ProtectedRoute accessKey="requisitions"><RequisitionDetail /></ProtectedRoute>}
+            element={<RequisitionDetail />}
           />
           <Route
             path="/produits"
-            element={<ProtectedRoute accessKey="produits"><Produits /></ProtectedRoute>}
+            element={<Produits />}
           />
           <Route
             path="/produits/nouveau"
-            element={<ProtectedRoute accessKey="produits"><ProduitForm /></ProtectedRoute>}
+            element={<ProduitForm />}
           />
           <Route
             path="/produits/:id"
-            element={<ProtectedRoute accessKey="produits"><ProduitDetail /></ProtectedRoute>}
+            element={<ProduitDetail />}
           />
           <Route
             path="/inventaire"
-            element={<ProtectedRoute accessKey="inventaires"><Inventaire /></ProtectedRoute>}
+            element={<Inventaire />}
           />
           <Route
             path="/inventaire/zones"
-            element={<ProtectedRoute accessKey="inventaires"><InventaireZones /></ProtectedRoute>}
+            element={<InventaireZones />}
           />
           <Route
             path="/inventaire/new"
-            element={<ProtectedRoute accessKey="inventaires"><InventaireForm /></ProtectedRoute>}
+            element={<InventaireForm />}
           />
           <Route
             path="/inventaire/:id"
-            element={<ProtectedRoute accessKey="inventaires"><InventaireDetail /></ProtectedRoute>}
+            element={<InventaireDetail />}
           />
           <Route
             path="/transferts"
-            element={<ProtectedRoute accessKey="transferts"><StockTransferts /></ProtectedRoute>}
+            element={<StockTransferts />}
           />
           <Route
             path="/stock/alertes"
-            element={<ProtectedRoute accessKey="stock"><StockAlertesRupture /></ProtectedRoute>}
+            element={<StockAlertesRupture />}
           />
           <Route
             path="/taches"
-            element={<ProtectedRoute accessKey="taches"><Taches /></ProtectedRoute>}
+            element={<Taches />}
           />
           <Route
             path="/taches/new"
-            element={<ProtectedRoute accessKey="taches"><TacheForm /></ProtectedRoute>}
+            element={<TacheForm />}
           />
           <Route
             path="/taches/:id"
-            element={<ProtectedRoute accessKey="taches"><TacheDetail /></ProtectedRoute>}
+            element={<TacheDetail />}
           />
           <Route
             path="/taches/alertes"
-            element={<ProtectedRoute accessKey="alertes"><AlertesTaches /></ProtectedRoute>}
+            element={<AlertesTaches />}
           />
           <Route
             path="/alertes"
-            element={<ProtectedRoute accessKey="alertes"><Alertes /></ProtectedRoute>}
+            element={<Alertes />}
           />
           <Route
             path="/promotions"
-            element={<ProtectedRoute accessKey="promotions"><Promotions /></ProtectedRoute>}
+            element={<Promotions />}
           />
           <Route
             path="/notifications"
-            element={<ProtectedRoute accessKey="notifications"><NotificationsInbox /></ProtectedRoute>}
+            element={<NotificationsInbox />}
           />
           <Route
             path="/notifications/settings"
-            element={<ProtectedRoute accessKey="notifications"><NotificationSettingsForm /></ProtectedRoute>}
+            element={<NotificationSettingsForm />}
           />
           <Route
             path="/documents"
-            element={<ProtectedRoute accessKey="documents"><Documents /></ProtectedRoute>}
+            element={<Documents />}
           />
           <Route
             path="/catalogue/sync"
-            element={<ProtectedRoute accessKey="produits"><CatalogueSyncViewer /></ProtectedRoute>}
+            element={<CatalogueSyncViewer />}
           />
           <Route
             path="/commandes"
-            element={<ProtectedRoute accessKey="fournisseurs"><Commandes /></ProtectedRoute>}
+            element={<Commandes />}
           />
           <Route
             path="/commandes/envoyees"
-            element={<ProtectedRoute accessKey="fournisseurs"><CommandesEnvoyees /></ProtectedRoute>}
+            element={<CommandesEnvoyees />}
           />
           <Route
             path="/commandes/nouvelle"
-            element={<ProtectedRoute accessKey="fournisseurs"><CommandeForm /></ProtectedRoute>}
+            element={<CommandeForm />}
           />
           <Route
             path="/commandes/:id"
-            element={<ProtectedRoute accessKey="fournisseurs"><CommandeDetail /></ProtectedRoute>}
+            element={<CommandeDetail />}
           />
           <Route
             path="/emails/envoyes"
-            element={<ProtectedRoute accessKey="emails_envoyes"><EmailsEnvoyes /></ProtectedRoute>}
+            element={<EmailsEnvoyes />}
           />
           <Route
             path="/planning"
-            element={<ProtectedRoute accessKey="planning_previsionnel"><Planning /></ProtectedRoute>}
+            element={<Planning />}
           />
           <Route
             path="/planning/nouveau"
-            element={<ProtectedRoute accessKey="planning_previsionnel"><PlanningForm /></ProtectedRoute>}
+            element={<PlanningForm />}
           />
           <Route
             path="/planning/:id"
-            element={<ProtectedRoute accessKey="planning_previsionnel"><PlanningDetail /></ProtectedRoute>}
+            element={<PlanningDetail />}
           />
           <Route
             path="/planning/simulation"
-            element={<ProtectedRoute accessKey="planning_previsionnel"><SimulationPlanner /></ProtectedRoute>}
+            element={<SimulationPlanner />}
           />
           <Route
             path="/analyse"
-            element={<ProtectedRoute accessKey="analyse"><Analyse /></ProtectedRoute>}
+            element={<Analyse />}
           />
           <Route
             path="/analyse/cost-centers"
-            element={<ProtectedRoute accessKey="analyse"><AnalyseCostCenter /></ProtectedRoute>}
+            element={<AnalyseCostCenter />}
           />
           <Route
             path="/costing/carte"
-            element={<ProtectedRoute accessKey="costing_carte"><CostingCarte /></ProtectedRoute>}
+            element={<CostingCarte />}
           />
           <Route
             path="/analyse/analytique"
-            element={<ProtectedRoute accessKey="analyse"><AnalytiqueDashboard /></ProtectedRoute>}
+            element={<AnalytiqueDashboard />}
           />
           <Route
             path="/menu-engineering"
-            element={<ProtectedRoute accessKey="menu_engineering"><MenuEngineering /></ProtectedRoute>}
+            element={<MenuEngineering />}
           />
           <Route path="/engineering" element={<EngineeringMenu />} />
           <Route
             path="/tableaux-de-bord"
-            element={<ProtectedRoute accessKey="analyse"><TableauxDeBord /></ProtectedRoute>}
+            element={<TableauxDeBord />}
           />
           <Route
             path="/comparatif"
-            element={<ProtectedRoute accessKey="analyse"><Comparatif /></ProtectedRoute>}
+            element={<Comparatif />}
           />
           <Route
             path="/surcouts"
-            element={<ProtectedRoute accessKey="analyse"><Surcouts /></ProtectedRoute>}
+            element={<Surcouts />}
           />
           <Route
             path="/reporting"
-            element={<ProtectedRoute accessKey="reporting"><Reporting /></ProtectedRoute>}
+            element={<Reporting />}
           />
           <Route
             path="/consolidation"
-            element={<ProtectedRoute accessKey="consolidation"><Consolidation /></ProtectedRoute>}
+            element={<Consolidation />}
           />
           <Route
             path="/admin/access-multi-sites"
-            element={<ProtectedRoute accessKey="permissions"><AccessMultiSites /></ProtectedRoute>}
+            element={<AccessMultiSites />}
           />
           <Route
             path="/parametrage/utilisateurs"
-            element={<ProtectedRoute accessKey="utilisateurs"><Utilisateurs /></ProtectedRoute>}
+            element={<Utilisateurs />}
           />
           <Route
             path="/parametrage/mamas"
-            element={<ProtectedRoute accessKey="mamas"><Mamas /></ProtectedRoute>}
+            element={<Mamas />}
           />
           <Route
             path="/parametrage/permissions"
-            element={<ProtectedRoute accessKey="permissions"><Permissions /></ProtectedRoute>}
+            element={<Permissions />}
           />
           <Route
             path="/parametrage/api-keys"
-            element={<ProtectedRoute accessKey="apikeys"><APIKeys /></ProtectedRoute>}
+            element={<APIKeys />}
           />
           <Route
             path="/parametrage/api-fournisseurs"
-            element={<ProtectedRoute accessKey="fournisseurs"><ApiFournisseurs /></ProtectedRoute>}
+            element={<ApiFournisseurs />}
           />
           <Route
             path="/parametrage/settings"
-            element={<ProtectedRoute accessKey="settings"><MamaSettingsForm /></ProtectedRoute>}
+            element={<MamaSettingsForm />}
           />
           <Route
             path="/parametrage/zones"
-            element={<ProtectedRoute accessKey="zones_stock"><Zones /></ProtectedRoute>}
+            element={<Zones />}
           />
           <Route
             path="/parametrage/zones/:id"
-            element={<ProtectedRoute accessKey="zones_stock"><ZoneForm /></ProtectedRoute>}
+            element={<ZoneForm />}
           />
           <Route
             path="/parametrage/zones/:id/droits"
-            element={<ProtectedRoute accessKey="zones_stock"><ZoneAccess /></ProtectedRoute>}
+            element={<ZoneAccess />}
           />
           <Route
             path="/parametrage/familles"
-            element={<ProtectedRoute accessKey="parametrage"><Familles /></ProtectedRoute>}
+            element={<Familles />}
           />
           <Route
             path="/parametrage/unites"
-            element={<ProtectedRoute accessKey="parametrage"><Unites /></ProtectedRoute>}
+            element={<Unites />}
           />
           <Route
             path="/parametrage/periodes"
-            element={<ProtectedRoute accessKey="parametrage"><Periodes /></ProtectedRoute>}
+            element={<Periodes />}
           />
           <Route
             path="/parametrage/access"
-            element={<ProtectedRoute accessKey="access"><AccessRights /></ProtectedRoute>}
+            element={<AccessRights />}
           />
           <Route
             path="/consentements"
-            element={<ProtectedRoute accessKey="parametrage"><Consentements /></ProtectedRoute>}
+            element={<Consentements />}
           />
           <Route
             path="/aide"
-            element={<ProtectedRoute accessKey="aide"><AideContextuelle /></ProtectedRoute>}
+            element={<AideContextuelle />}
           />
           <Route
             path="/feedback"
-            element={<ProtectedRoute accessKey="feedback"><Feedback /></ProtectedRoute>}
+            element={<Feedback />}
           />
           <Route
             path="/stats"
-            element={<ProtectedRoute accessKey="stats"><Stats /></ProtectedRoute>}
+            element={<Stats />}
           />
           <Route
             path="/planning-module"
-            element={<ProtectedRoute accessKey="planning"><PlanningModule /></ProtectedRoute>}
+            element={<PlanningModule />}
           />
           <Route
             path="/parametrage/roles"
-            element={<ProtectedRoute accessKey="roles"><Roles /></ProtectedRoute>}
+            element={<Roles />}
           />
           <Route
             path="/supervision"
-            element={<ProtectedRoute accessKey="dashboard"><SupervisionGroupe /></ProtectedRoute>}
+            element={<SupervisionGroupe />}
           />
           <Route
             path="/supervision/comparateur"
-            element={<ProtectedRoute accessKey="fiches_techniques"><ComparateurFiches /></ProtectedRoute>}
+            element={<ComparateurFiches />}
           />
           <Route
             path="/supervision/logs"
-            element={<ProtectedRoute accessKey="logs"><SupervisionLogs /></ProtectedRoute>}
+            element={<SupervisionLogs />}
           />
           <Route
             path="/supervision/rapports"
-            element={<ProtectedRoute accessKey="reporting"><SupervisionRapports /></ProtectedRoute>}
+            element={<SupervisionRapports />}
           />
           <Route
             path="/debug/access"
-            element={<ProtectedRoute accessKey="dashboard"><AccessExample /></ProtectedRoute>}
+            element={<AccessExample />}
           />
         </Route>
         </Route>

@@ -34,6 +34,7 @@ export default function Login() {
       setPending(false)
       return
     }
+    setPending(false)
     // Ne pas navigate ici: on attend AuthContext (bootstrap + get_my_profile)
     // L’AuthContext passera loading=false et remplira userData.
   }

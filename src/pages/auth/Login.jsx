@@ -20,16 +20,16 @@ export default function Login() {
   const { errors, setError, clearErrors } = useFormErrors();
   const navigate = useNavigate();
   const location = useLocation();
-  const { session, loading, signInWithPassword } = useAuth();
+  const { session, userData, loading, signInWithPassword } = useAuth();
   const emailId = useMemo(() => makeId("fld"), []);
   const passwordId = useMemo(() => makeId("fld"), []);
 
   useEffect(() => {
-    if (session) {
+    if (!loading && session && userData) {
       const redirectTo = location.state?.from || "/dashboard";
       navigate(redirectTo, { replace: true });
     }
-  }, [session, navigate, location]);
+  }, [loading, session, userData, navigate, location]);
 
   if (loading) {
     return <LoadingSpinner message="Chargement..." />;

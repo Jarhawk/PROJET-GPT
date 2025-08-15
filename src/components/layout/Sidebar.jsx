@@ -7,11 +7,11 @@ import { useAuth } from '@/hooks/useAuth';
 import logo from "@/assets/logo-mamastock.png";
 
 export default function Sidebar() {
-  const { access_rights, isSuperadmin, loading, pending, hasAccess } = useAuth();
+  const { loading, hasAccess } = useAuth();
   const { pathname } = useLocation();
 
-  if (loading || pending || access_rights === null) return null;
-  const has = (key) => isSuperadmin || hasAccess(key, "peut_voir");
+  if (loading) return null;
+  const has = (key) => hasAccess(key);
   const canAnalyse = has("analyse");
 
   return (

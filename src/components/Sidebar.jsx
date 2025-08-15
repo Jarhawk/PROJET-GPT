@@ -3,48 +3,21 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import useMamaSettings from "@/hooks/useMamaSettings";
 import logo from "@/assets/logo-mamastock.png";
+import { normalizeAccessKey } from '@/lib/access'
 
 export default function Sidebar() {
-  const { loading: authLoading, userData } = useAuth();
+  const { loading: authLoading, hasAccess, userData } = useAuth();
   const { pathname } = useLocation();
   const { loading: settingsLoading, enabledModules } = useMamaSettings();
   const rights = userData?.access_rights ?? {};
   console.debug('[sidebar] rights keys', Object.keys(rights || {}));
   console.debug('[sidebar] enabledModules keys', enabledModules ? Object.keys(enabledModules) : null);
 
-  const KEY_MAP = {
-    dashboard: 'dashboard',
-    fournisseurs: 'fournisseurs',
-    factures: 'factures',
-    fiches: 'fiches_techniques',
-    fiches_techniques: 'fiches_techniques',
-    menus: 'menus',
-    menu_du_jour: 'menu_du_jour',
-    produits: 'produits',
-    inventaires: 'inventaires',
-    alertes: 'alertes',
-    promotions: 'promotions',
-    documents: 'documents',
-    analyse: 'analyse',
-    engineering: 'analyse',
-    menu_engineering: 'menu_engineering',
-    costing_carte: 'costing_carte',
-    notifications: 'notifications',
-    utilisateurs: 'utilisateurs',
-    roles: 'roles',
-    mamas: 'mamas',
-    permissions: 'permissions',
-    access: 'access',
-  };
-
-  const normalizeKey = (k) => KEY_MAP[k] || k;
-  function canShow(key) {
-    const nk = normalizeKey(key);
-    const hasRight = !nk || rights[nk] === true;
-    const passesSettings = enabledModules && nk ? enabledModules[nk] !== false : true;
-    return hasRight && passesSettings;
+  const has = (key) => {
+    const k = normalizeAccessKey(key)
+    const isEnabled = enabledModules ? enabledModules[k] !== false : true
+    return hasAccess(k) && isEnabled
   }
-  const has = canShow;
   const canAnalyse = has('analyse');
 
   return (

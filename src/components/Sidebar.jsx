@@ -1,17 +1,51 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import useMamaSettings from "@/hooks/useMamaSettings";
 import logo from "@/assets/logo-mamastock.png";
 
 export default function Sidebar() {
-  const { loading, userData } = useAuth();
+  const { loading: authLoading, userData } = useAuth();
   const { pathname } = useLocation();
+  const { loading: settingsLoading, enabledModules } = useMamaSettings();
+  const rights = userData?.access_rights ?? {};
+  console.debug('[sidebar] rights keys', Object.keys(rights || {}));
+  console.debug('[sidebar] enabledModules keys', enabledModules ? Object.keys(enabledModules) : null);
 
-  if (loading || !userData) return null;
+  const KEY_MAP = {
+    dashboard: 'dashboard',
+    fournisseurs: 'fournisseurs',
+    factures: 'factures',
+    fiches: 'fiches_techniques',
+    fiches_techniques: 'fiches_techniques',
+    menus: 'menus',
+    menu_du_jour: 'menu_du_jour',
+    produits: 'produits',
+    inventaires: 'inventaires',
+    alertes: 'alertes',
+    promotions: 'promotions',
+    documents: 'documents',
+    analyse: 'analyse',
+    engineering: 'analyse',
+    menu_engineering: 'menu_engineering',
+    costing_carte: 'costing_carte',
+    notifications: 'notifications',
+    utilisateurs: 'utilisateurs',
+    roles: 'roles',
+    mamas: 'mamas',
+    permissions: 'permissions',
+    access: 'access',
+  };
 
-  const access_rights = userData.access_rights || {};
-  const has = (key) => access_rights[key]?.peut_voir === true;
-  const canAnalyse = has("analyse");
+  const normalizeKey = (k) => KEY_MAP[k] || k;
+  function canShow(key) {
+    const nk = normalizeKey(key);
+    const hasRight = !nk || rights[nk] === true;
+    const passesSettings = enabledModules && nk ? enabledModules[nk] !== false : true;
+    return hasRight && passesSettings;
+  }
+  const has = canShow;
+  const canAnalyse = has('analyse');
 
   return (
     <aside className="w-64 bg-white/10 border border-white/10 backdrop-blur-xl text-white p-4 h-screen shadow-md text-shadow">

@@ -34,6 +34,9 @@ export default function Layout() {
     return <PageSkeleton />;
   }
   const user = session?.user;
+  if (!userData?.access_rights) {
+    console.info('[layout] no access_rights yet, rendering with defaults');
+  }
 
   return (
     <div className="relative flex h-screen overflow-auto text-shadow">

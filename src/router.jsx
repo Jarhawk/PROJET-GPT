@@ -17,6 +17,7 @@ import Blocked from "@/pages/auth/Blocked";
 import OnboardingUtilisateur from "@/pages/onboarding/OnboardingUtilisateur";
 import DebugAuth from "@/pages/debug/DebugAuth";
 import AccessExample from "@/pages/debug/AccessExample";
+import DebugRights from "@/pages/debug/DebugRights";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PrivateOutlet from "@/router/PrivateOutlet";
 
@@ -247,6 +248,7 @@ export default function Router() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/licence" element={<Licence />} />
         <Route path="/debug/auth" element={<DebugAuth />} />
+        <Route path="/debug/rights" element={<DebugRights />} />
         {/* Routes internes protégées par les droits utilisateurs.
             Chaque sous-route est enveloppée dans <ProtectedRoute accessKey="...">.
             La clé correspond au module autorisé dans access_rights. */}

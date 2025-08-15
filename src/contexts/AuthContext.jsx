@@ -43,9 +43,9 @@ function AuthProvider({ children }) {
     init()
     const { data: sub } = supabase.auth.onAuthStateChange(async (_evt, sess) => {
       setSession(sess ?? null)
-      if (sess?.user?.id === lastLoadedUserRef.current && userData) return
-      lastLoadedUserRef.current = sess?.user?.id || null
+      if (sess?.user?.id && lastLoadedUserRef.current === sess.user.id && userData) return
       console.info('[auth] onAuthStateChange -> loadProfile for', sess?.user?.id)
+      lastLoadedUserRef.current = sess?.user?.id || null
       setLoading(true)
       await loadProfile(sess)
       setLoading(false)

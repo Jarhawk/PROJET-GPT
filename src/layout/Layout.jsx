@@ -2,7 +2,7 @@
 import { Outlet, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import supabase from "@/lib/supabaseClient";
 import useNotifications from "@/hooks/useNotifications";
 import { Badge } from "@/components/ui/badge";

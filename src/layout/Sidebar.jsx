@@ -31,14 +31,10 @@ import {
 } from "lucide-react";
 
 export default function Sidebar() {
-  const {
-    access_rights,
-    loading,
-    user,
-    userData,
-    mama_id,
-    hasAccess,
-  } = useAuth();
+  const { session, userData, loading, hasAccess } = useAuth();
+  const access_rights = userData?.access_rights;
+  const user = session?.user;
+  const mama_id = userData?.mama_id;
   const { pathname } = useLocation();
   if (import.meta.env.DEV) {
     console.debug("Sidebar", { user, mama_id, access_rights });
@@ -49,7 +45,7 @@ export default function Sidebar() {
   }
 
   const peutVoir = (module) => {
-    const ok = hasAccess(module, "peut_voir");
+    const ok = hasAccess(module);
     if (!ok && access_rights && !access_rights[module]) {
       console.info(`info: module '${module}' absent des access_rights`);
     }

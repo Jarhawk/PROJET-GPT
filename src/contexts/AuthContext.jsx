@@ -1,5 +1,6 @@
-import { useEffect, useState, useRef, createContext, useContext } from 'react'
+import { useEffect, useState, useRef, createContext, useContext, useMemo } from 'react'
 import supabase from '@/lib/supabaseClient'
+import { normalizeAccessKey } from '@/lib/access'
 
 const AuthCtx = createContext(null)
 export const useAuth = () => useContext(AuthCtx)
@@ -8,6 +9,7 @@ function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
   const [userData, setUserData] = useState(null)
   const [loading, setLoading] = useState(false)
+  const rights = userData?.access_rights ?? {}
   const initRef = useRef(false)
   const lastLoadedUserRef = useRef(null)
   const pollTimerRef = useRef(null)
@@ -63,8 +65,15 @@ function AuthProvider({ children }) {
     pollTimerRef.current = window.setInterval(tick, 500)
     return () => { sub?.subscription?.unsubscribe?.(); if (pollTimerRef.current) window.clearInterval(pollTimerRef.current) }
   }, [])
+  const hasAccess = useMemo(() => {
+    return (key) => {
+      const k = normalizeAccessKey(key)
+      if (!k) return true
+      return !!rights[k]
+    }
+  }, [rights])
 
-  return <AuthCtx.Provider value={{ session, userData, loading }}>{children}</AuthCtx.Provider>
+  return <AuthCtx.Provider value={{ session, userData, loading, hasAccess, ...(userData || {}) }}>{children}</AuthCtx.Provider>
 }
 
 export default AuthProvider

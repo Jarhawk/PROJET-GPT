@@ -49,3 +49,5 @@ export default function AuthProvider({ children }) {
     </AuthCtx.Provider>
   )
 }
+
+export { AuthProvider }

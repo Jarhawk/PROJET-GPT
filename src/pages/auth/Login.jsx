@@ -14,38 +14,39 @@ export default function Login() {
   const [pending, setPending] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
 
-    async function handleLogin(e) {
-      e.preventDefault()
-      const form = e.currentTarget
-      const email = form.email?.value?.trim()
-      const password = form.password?.value ?? ''
-      console.log('[login] submit', { emailPresent: !!email, passwordPresent: !!password })
-      setErrorMsg('')
-      setPending(true)
-      if (!email || !password) {
-        setErrorMsg('Veuillez saisir email et mot de passe.')
-        setPending(false)
-        return
-      }
-      console.time('[login] signIn')
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-      console.timeEnd('[login] signIn')
-      if (error) {
-        console.error('[login] error', error)
-        setErrorMsg(error.message || 'Connexion impossible')
-        setPending(false)
-        return
-      }
+  async function handleLogin(e) {
+    e.preventDefault()
+    const form = e.currentTarget
+    const email = form.email?.value?.trim()
+    const password = form.password?.value ?? ''
+    console.log('[login] submit', { emailPresent: !!email, passwordPresent: !!password })
+    setErrorMsg('')
+    setPending(true)
+    if (!email || !password) {
+      setErrorMsg('Veuillez saisir email et mot de passe.')
       setPending(false)
-      // Ne pas navigate ici: on attend AuthContext (bootstrap + get_my_profile)
-      // L’AuthContext passera loading=false et remplira userData.
+      return
     }
+    console.time('[login] signIn')
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    console.timeEnd('[login] signIn')
+    if (error) {
+      console.error('[login] error', error)
+      setErrorMsg(error.message || 'Connexion impossible')
+      setPending(false)
+      return
+    }
+    setPending(false)
+    // Ne pas navigate ici: on attend AuthContext (bootstrap + get_my_profile)
+    // L’AuthContext passera loading=false et remplira userData.
+  }
 
   useEffect(() => {
     if (!loading && session && userData) {
+      console.info('[login] redirect to /dashboard')
       navigate('/dashboard', { replace: true })
     }
-  }, [loading, session, userData])
+  }, [loading, session, userData, navigate])
 
   return (
     <PageWrapper>

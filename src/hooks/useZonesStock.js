@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { supabase } from "@/lib/supabase";
+import supabase from '@/lib/supabaseClient';
 import { useAuth } from "@/hooks/useAuth";
 
 export async function fetchZonesForValidation(mama_id) {

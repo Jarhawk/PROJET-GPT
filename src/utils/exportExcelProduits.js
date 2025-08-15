@@ -1,6 +1,6 @@
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import { supabase } from "@/lib/supabase";
+import supabase from '@/lib/supabaseClient';
 
 // Colonnes exportées avec libellés lisibles
 const EXPORT_HEADERS = [

@@ -1,5 +1,5 @@
 // Hook for stock rupture alerts
-import { supabase } from "@/lib/supabase";
+import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
 
 export function useRuptureAlerts() {

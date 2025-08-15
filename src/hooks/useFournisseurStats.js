@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 // src/hooks/useFournisseurStats.js
 
-import { supabase } from "@/lib/supabase";
+import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
 
 // Stats d’évolution d’achats (tous fournisseurs ou par fournisseur)

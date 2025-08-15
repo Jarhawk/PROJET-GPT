@@ -14,7 +14,7 @@ function AuthProvider({ children }) {
       if (!sess) { setUserData(null); return }
       const displayName = sess.user?.user_metadata?.full_name || sess.user?.email || null
       await supabase.rpc('bootstrap_my_profile', { p_nom: displayName })
-      const { data, error } = await supabase.rpc('get_my_profile') // RPC renvoie un OBJET JSON
+      const { data, error } = await supabase.rpc('get_my_profile')
       if (error) {
         console.error('[get_my_profile] error', error)
         setUserData(null)

@@ -15,7 +15,7 @@ import Unauthorized from "@/pages/auth/Unauthorized";
 import Pending from "@/pages/auth/Pending";
 import Blocked from "@/pages/auth/Blocked";
 import OnboardingUtilisateur from "@/pages/onboarding/OnboardingUtilisateur";
-import AuthDebug from "@/pages/debug/AuthDebug";
+import DebugAuth from "@/pages/debug/DebugAuth";
 import AccessExample from "@/pages/debug/AccessExample";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PrivateOutlet from "@/router/PrivateOutlet";
@@ -246,6 +246,7 @@ export default function Router() {
         <Route path="/cgv" element={<Cgv />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/licence" element={<Licence />} />
+        <Route path="/debug/auth" element={<DebugAuth />} />
         {/* Routes internes protégées par les droits utilisateurs.
             Chaque sous-route est enveloppée dans <ProtectedRoute accessKey="...">.
             La clé correspond au module autorisé dans access_rights. */}
@@ -615,10 +616,6 @@ export default function Router() {
           <Route
             path="/supervision/rapports"
             element={<ProtectedRoute accessKey="reporting"><SupervisionRapports /></ProtectedRoute>}
-          />
-          <Route
-            path="/debug/auth"
-            element={<ProtectedRoute accessKey="dashboard"><AuthDebug /></ProtectedRoute>}
           />
           <Route
             path="/debug/access"

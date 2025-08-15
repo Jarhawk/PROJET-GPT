@@ -108,6 +108,11 @@ export default function Sidebar() {
         <Link to="/onboarding">Onboarding</Link>
         <Link to="/aide">Aide</Link>
         {has("feedback") && <Link to="/feedback">Feedback</Link>}
+        {import.meta.env.DEV && (
+          <Link to="/debug/auth" className="text-xs opacity-50 mt-4">
+            Debug Auth
+          </Link>
+        )}
       </nav>
     </aside>
   );

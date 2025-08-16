@@ -425,51 +425,41 @@ export default function FactureForm({ facture = null, onClose, onSaved }) {
 
         <section>
           <h3 className="font-semibold mb-2">Lignes produits</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm table-auto">
-              <thead>
-                <tr>
-                  <th className="text-left min-w-[100px]">Produit</th>
-                  <th className="text-left min-w-[100px]">Quantité</th>
-                  <th className="text-left min-w-[100px]">Unité</th>
-                  <th className="text-left min-w-[100px]">Total HT</th>
-                  <th className="text-left min-w-[100px]">PU</th>
-                  <th className="text-left min-w-[100px]">PMP</th>
-                  <th className="text-left min-w-[100px]">TVA</th>
-                  <th className="text-left min-w-[100px]">Zone</th>
-                  <th className="text-right min-w-[100px]">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {lignes.map((l, idx) => (
-                  <FactureLigne
-                    key={idx}
-                    index={idx}
-                    ligne={l}
-                    produitOptions={produitOptions}
-                    searchProduits={searchProduits}
-                    onChange={(ligne) => {
-                      setLignes((ls) => {
-                        const newLs = ls.map((it, i) =>
-                          i === idx ? ligne : it
-                        );
-                        const ids = newLs
-                          .map((li) => li.produit_id)
-                          .filter(Boolean);
-                        const hasDup = ids.some(
-                          (id, i) => ids.indexOf(id) !== i
-                        );
-                        if (hasDup) toast.error('Produit déjà ajouté');
-                        return newLs;
-                      });
-                    }}
-                    onRemove={(i) =>
-                      setLignes((ls) => ls.filter((_, j) => j !== i))
-                    }
-                  />
-                ))}
-              </tbody>
-            </table>
+          <div className="mt-4 overflow-x-auto">
+            <div className="min-w-[1100px] space-y-2">
+              <div className="flex text-xs font-semibold uppercase tracking-wider">
+                <div className="p-1 basis-[20%] shrink-0">Produit</div>
+                <div className="p-1 basis-[15%] shrink-0">Quantité</div>
+                <div className="p-1 basis-[5%] shrink-0">Unité</div>
+                <div className="p-1 basis-[15%] shrink-0">Total HT</div>
+                <div className="p-1 basis-[10%] shrink-0">PU</div>
+                <div className="p-1 basis-[10%] shrink-0">PMP</div>
+                <div className="p-1 basis-[5%] shrink-0">TVA</div>
+                <div className="p-1 basis-[15%] shrink-0">Zone</div>
+                <div className="p-1 basis-[5%] shrink-0 text-right">Actions</div>
+              </div>
+              {lignes.map((l, idx) => (
+                <FactureLigne
+                  key={idx}
+                  index={idx}
+                  ligne={l}
+                  produitOptions={produitOptions}
+                  searchProduits={searchProduits}
+                  onChange={(ligne) => {
+                    setLignes((ls) => {
+                      const newLs = ls.map((it, i) => (i === idx ? ligne : it));
+                      const ids = newLs.map((li) => li.produit_id).filter(Boolean);
+                      const hasDup = ids.some((id, i) => ids.indexOf(id) !== i);
+                      if (hasDup) toast.error('Produit déjà ajouté');
+                      return newLs;
+                    });
+                  }}
+                  onRemove={(i) =>
+                    setLignes((ls) => ls.filter((_, j) => j !== i))
+                  }
+                />
+              ))}
+            </div>
           </div>
           <Button
             type="button"

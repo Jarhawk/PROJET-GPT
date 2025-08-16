@@ -5,7 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { useProducts } from "@/hooks/useProducts";
 import { useZones } from "@/hooks/useZones";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import supabase from "@/lib/supabaseClient";
+
+const PRODUIT_COLUMNS = ["tva", "zone_stock_id"];
+const firstExisting = (keys) => keys.find((k) => PRODUIT_COLUMNS.includes(k));
 
 export default function FactureLigne({
   ligne,
@@ -19,38 +23,99 @@ export default function FactureLigne({
   const { zones, fetchZones } = useZones();
   const [loadingProd, setLoadingProd] = useState(false);
   const parseNum = v => parseFloat(String(v).replace(',', '.')) || 0;
+  const lastPushed = useRef({ tva: ligne.tva, zone_id: ligne.zone_stock_id });
+  const updateProduitMeta = useCallback(async (id, { tva, zone_id }) => {
+    const fields = {};
+    if (tva !== undefined) {
+      const tvaKey = firstExisting(["tva_rate", "tva", "taux_tva"]);
+      if (tvaKey) fields[tvaKey] = Number(tva);
+    }
+    if (zone_id !== undefined) {
+      const zoneKey = firstExisting(["default_zone_id", "zone_id", "zone_stock_id"]);
+      if (zoneKey) fields[zoneKey] = zone_id;
+    }
+    if (Object.keys(fields).length === 0) return;
+    const { error } = await supabase
+      .from("produits")
+      .update(fields)
+      .eq("id", id)
+      .limit(1);
+    if (error) {
+      console.info("[produits] write-through meta failed", {
+        id,
+        fields,
+        code: error.code,
+        message: error.message,
+      });
+    }
+  }, []);
+
   useEffect(() => {
     fetchZones();
   }, [fetchZones]);
 
+  useEffect(() => {
+    lastPushed.current = { tva: ligne.tva, zone_id: ligne.zone_stock_id };
+  }, [ligne.produit_id]);
+
   async function handleProduitSelection(obj) {
     if (obj?.id) {
-      const newLigne = {
+      const q = parseNum(ligne.quantite);
+      const puBase = obj.dernier_prix ?? 0;
+      const initial = {
         ...ligne,
         produit_nom: obj.nom,
         produit_id: obj.id,
-        tva: obj.tva ?? ligne.tva,
+        unite_id: obj.unite_id || "",
+        unite: obj.unite || "",
+        pu: (puBase || 0).toFixed(2),
+        pmp: ligne.pmp,
+        tva: obj.tva ?? ligne.tva ?? 20,
+        zone_stock_id: ligne.zone_stock_id || "",
+        total_ht: (q * (puBase || 0)).toFixed(2),
+        manuallyEdited: false,
       };
-      onChange(newLigne);
+      onChange(initial);
       setLoadingProd(true);
       try {
         const prod = await getProduct(obj.id);
-        onChange({
-          ...newLigne,
-          zone_stock_id: prod?.zone_stock_id || "",
-          unite_id: prod?.unite_id || "",
-          unite: prod?.unite?.nom || "",
-          pmp: prod?.pmp ?? 0,
-        });
+        const unite =
+          prod?.unite_achat ||
+          prod?.unite ||
+          prod?.unite_principale ||
+          obj.unite ||
+          "Unité";
+        const pu =
+          prod?.dernier_prix_ht ??
+          prod?.prix_unitaire ??
+          prod?.price_ht ??
+          puBase;
+        const pmp = prod?.pmp_ht ?? prod?.pmp ?? 0;
+        const tva =
+          prod?.tva_rate ??
+          prod?.tva ??
+          prod?.taux_tva ??
+          initial.tva;
+        const zone =
+          prod?.default_zone_id ??
+          prod?.zone_id ??
+          prod?.zone_stock_id ??
+          null;
+        const updated = {
+          ...initial,
+          unite_id: prod?.unite_id || obj.unite_id || "",
+          unite,
+          pu: (pu || 0).toFixed(2),
+          pmp,
+          tva,
+          zone_stock_id: zone || "",
+          total_ht: (q * (pu || 0)).toFixed(2),
+        };
+        onChange(updated);
+        lastPushed.current = { tva, zone_id: zone || "" };
       } catch (error) {
         console.error(error);
-        onChange({
-          ...newLigne,
-          zone_stock_id: "",
-          unite_id: "",
-          unite: "",
-          pmp: 0,
-        });
+        lastPushed.current = { tva: initial.tva, zone_id: initial.zone_stock_id };
       }
       setLoadingProd(false);
     } else {
@@ -61,7 +126,10 @@ export default function FactureLigne({
         zone_stock_id: "",
         unite_id: "",
         unite: "",
+        pu: "0",
         pmp: 0,
+        total_ht: "0",
+        manuallyEdited: false,
       });
       if (obj?.nom?.length >= 2) searchProduits(obj.nom);
     }
@@ -98,23 +166,26 @@ export default function FactureLigne({
     onChange(newLine);
   }
 
-  function handlePu(val) {
-    const replaced = String(val).replace(',', '.');
-    const puNum = parseFloat(replaced);
-    const q = parseNum(ligne.quantite);
-    const newLine = { ...ligne, pu: val, manuallyEdited: false };
-    if (!isNaN(puNum)) {
-      newLine.total_ht = (q * puNum).toFixed(2);
-    }
-    onChange(newLine);
-  }
-
   const puNum = parseNum(ligne.pu);
   const pmp = parseNum(ligne.pmp);
 
+  const handleTvaBlur = () => {
+    if (!ligne.produit_id) return;
+    if (lastPushed.current.tva === ligne.tva) return;
+    lastPushed.current.tva = ligne.tva;
+    updateProduitMeta(ligne.produit_id, { tva: ligne.tva });
+  };
+
+  const handleZoneBlur = () => {
+    if (!ligne.produit_id) return;
+    if (lastPushed.current.zone_id === ligne.zone_stock_id) return;
+    lastPushed.current.zone_id = ligne.zone_stock_id;
+    updateProduitMeta(ligne.produit_id, { zone_id: ligne.zone_stock_id });
+  };
+
   return (
-    <tr className="h-10">
-      <td className="p-1 align-middle min-w-[100px]">
+    <div className="flex h-10 items-center">
+      <div className="p-1 basis-[20%] shrink-0">
         <AutoCompleteField
           value={ligne.produit_nom}
           onChange={handleProduitSelection}
@@ -123,95 +194,99 @@ export default function FactureLigne({
           placeholder="Nom du produit..."
           className="h-10 w-full"
         />
-      </td>
-      <td className="p-1 align-middle min-w-[100px]">
+      </div>
+      <div className="p-1 basis-[15%] shrink-0">
         <Input
           type="text"
           inputMode="decimal"
           required
-          className="h-10 w-full text-center"
+          className="h-10 w-full text-center rounded-xl"
           value={ligne.quantite}
-          onChange={e => handleQuantite(e.target.value)}
+          onChange={(e) => handleQuantite(e.target.value)}
           onBlur={() => handleQuantite(String(parseNum(ligne.quantite)))}
-          onKeyDown={e => e.key === "Enter" && e.preventDefault()}
+          onKeyDown={(e) => e.key === "Enter" && e.preventDefault()}
         />
-      </td>
-      <td className="p-1 align-middle min-w-[100px]">
+      </div>
+      <div className="p-1 basis-[5%] shrink-0">
         <Input
           type="text"
           readOnly
+          tabIndex={-1}
           value={ligne.unite || ""}
-          className="h-10 w-full"
+          className="h-10 w-full pointer-events-none select-none rounded-xl text-center"
+          aria-readonly="true"
         />
-      </td>
-      <td className="p-1 align-middle min-w-[100px]">
+      </div>
+      <div className="p-1 basis-[15%] shrink-0">
         <div className="relative">
           <Input
             type="text"
-            className="h-10 w-full pr-6"
+            className="h-10 w-full pr-6 rounded-xl"
             value={ligne.total_ht}
-            onChange={e => handleTotal(e.target.value)}
+            onChange={(e) => handleTotal(e.target.value)}
             onBlur={() => handleTotal(parseNum(ligne.total_ht).toFixed(2))}
-            onKeyDown={e => e.key === 'Enter' && e.preventDefault()}
+            onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
           />
           <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm">€</span>
         </div>
-      </td>
-      <td className="p-1 align-middle min-w-[100px]">
+      </div>
+      <div className="p-1 basis-[10%] shrink-0">
         <Input
           type="text"
-          inputMode="decimal"
-          className={`h-10 w-full text-center ${puNum > pmp ? "text-red-500" : puNum < pmp ? "text-green-500" : ""}`}
+          readOnly
+          tabIndex={-1}
           value={ligne.pu}
-          onChange={e => handlePu(e.target.value)}
-          onBlur={() => handlePu(parseNum(ligne.pu).toFixed(2))}
-          onKeyDown={e => e.key === "Enter" && e.preventDefault()}
+          className={`h-10 w-full text-center rounded-xl pointer-events-none select-none ${puNum > pmp ? 'text-red-500' : puNum < pmp ? 'text-green-500' : ''}`}
+          aria-readonly="true"
         />
-      </td>
-      <td className="p-1 align-middle min-w-[100px]">
+      </div>
+      <div className="p-1 basis-[10%] shrink-0">
         <div className="relative">
           <Input
             type="text"
             readOnly
+            tabIndex={-1}
             value={pmp.toFixed(2)}
-            className="h-10 w-full text-center pr-4"
+            className="h-10 w-full text-center pr-4 rounded-xl pointer-events-none select-none"
+            aria-readonly="true"
           />
           {puNum !== pmp && (
-            <span
-              className={`absolute right-1 top-1/2 -translate-y-1/2 ${puNum > pmp ? "text-red-500" : "text-green-500"}`}
-            >
-              {puNum > pmp ? "▲" : "▼"}
-            </span>
+            <span className={`absolute right-1 top-1/2 -translate-y-1/2 ${puNum > pmp ? 'text-red-500' : 'text-green-500'}`}>{puNum > pmp ? '▲' : '▼'}</span>
           )}
         </div>
-      </td>
-      <td className="p-1 align-middle min-w-[100px]">
-        <Input
-          type="text"
-          readOnly
-          value={`${ligne.tva || 0}%`}
-          className="h-10 w-full text-center"
-        />
-      </td>
-      <td className="p-1 align-middle min-w-[100px]">
+      </div>
+      <div className="p-1 basis-[5%] shrink-0">
+        <div className="relative">
+          <Input
+            type="number"
+            className="h-10 w-full text-center rounded-xl pr-4"
+            value={ligne.tva}
+            onChange={(e) => onChange({ ...ligne, tva: e.target.value })}
+            onBlur={handleTvaBlur}
+          />
+          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm">%</span>
+        </div>
+      </div>
+      <div className="p-1 basis-[15%] shrink-0">
         <Select
           value={ligne.zone_stock_id}
-          onChange={e => onChange({ ...ligne, zone_stock_id: e.target.value })}
+          onChange={(e) => onChange({ ...ligne, zone_stock_id: e.target.value })}
+          onBlur={handleZoneBlur}
           disabled={loadingProd}
           required
-          className="h-10 w-full"
+          className="h-10 w-full rounded-xl"
         >
           <option value="">Choisir...</option>
           {zones
-            .filter(z => z.actif)
-            .map(z => (
+            .filter((z) => z.actif)
+            .map((z) => (
               <option key={z.id} value={z.id}>
                 {z.nom}
               </option>
             ))}
         </Select>
-      </td>
-      <td className="p-1 align-middle text-right min-w-[100px]">
+      </div>
+      <div className="p-1 basis-[5%] shrink-0 text-right">
         <Button
           type="button"
           size="sm"
@@ -221,8 +296,8 @@ export default function FactureLigne({
         >
           ❌
         </Button>
-      </td>
-    </tr>
+      </div>
+    </div>
   );
 }
 

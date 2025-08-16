@@ -29,7 +29,17 @@ router.get('/', async (req, res) => {
     let query = supabase.from('promotions').select('*').eq('mama_id', mama_id);
     if (search) query = query.ilike('nom', `%${search}%`);
     if (actif !== undefined) query = query.eq('actif', actif === 'true');
-    query = query.order(sortBy, { ascending: order !== 'desc' }).order('nom', { ascending: true });
+    let sortField = sortBy;
+    let ascending = order !== 'desc';
+    if (sortField.includes('.')) {
+      const parts = sortField.split('.');
+      const dir = parts.pop();
+      if (dir === 'asc' || dir === 'desc') {
+        ascending = dir === 'asc';
+        sortField = parts.join('.');
+      }
+    }
+    query = query.order(sortField, { ascending }).order('nom', { ascending: true });
     const p = Math.max(parseInt(page, 10), 1);
     const l = Math.max(parseInt(limit, 10), 1);
     const start = (p - 1) * l;

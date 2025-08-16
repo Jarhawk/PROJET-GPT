@@ -5,7 +5,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
-import { useProduitsAutocomplete } from '@/hooks/useProduitsAutocomplete';
 import { useFournisseursAutocomplete } from '@/hooks/useFournisseursAutocomplete';
 import { useFactureForm } from '@/hooks/useFactureForm';
 import GlassCard from '@/components/ui/GlassCard';
@@ -77,7 +76,6 @@ export default function FactureForm({
   const mamaId = userData?.mama_id;
   const { results: fournisseurOptions, searchFournisseurs } =
     useFournisseursAutocomplete();
-  const { results: produitOptions, searchProduits } = useProduitsAutocomplete();
   const formRef = useRef(null);
 
   const [date, setDate] = useState(
@@ -233,10 +231,6 @@ export default function FactureForm({
     };
     checkNumero();
   }, [numero, mamaId, factureId]);
-
-  useEffect(() => {
-    searchProduits('');
-  }, [searchProduits]);
 
   useEffect(() => {
     if (!lignesInit.length) loadFacture();
@@ -539,8 +533,6 @@ export default function FactureForm({
                   key={idx}
                   index={idx}
                   ligne={l}
-                  produitOptions={produitOptions}
-                  searchProduits={searchProduits}
                   onChange={(ligne) => {
                     setLignes((ls) => {
                       const newLs = ls.map((it, i) => (i === idx ? ligne : it));

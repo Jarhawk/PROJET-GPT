@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import AutoCompleteField from "@/components/ui/AutoCompleteField";
+import AutocompleteProduit from "@/components/forms/AutocompleteProduit";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
@@ -36,8 +36,6 @@ export default function FactureLigne({
   index,
   onChange,
   onRemove,
-  produitOptions = [],
-  searchProduits,
 }) {
   const { getProduct } = useProducts();
   const { zones, fetchZones } = useZones();
@@ -81,16 +79,17 @@ export default function FactureLigne({
   async function handleProduitSelection(obj) {
     if (obj?.id) {
       const q = parseNum(ligne.quantite);
-      const puBase = obj.dernier_prix ?? 0;
+      const puBase =
+        obj.prix_unitaire ?? obj.price_ht ?? obj.dernier_prix ?? 0;
       const initial = {
         ...ligne,
         produit: obj,
         produit_id: obj.id,
-        unite: obj.unite || "",
+        unite: obj.unite_achat || obj.unite || "",
         pu: (puBase || 0).toFixed(2),
-        pmp: ligne.pmp,
-        tva: obj.tva ?? ligne.tva ?? 20,
-        zone_id: ligne.zone_id || "",
+        pmp: obj.pmp ?? obj.pmp_ht ?? ligne.pmp,
+        tva: obj.tva ?? obj.tva_rate ?? ligne.tva ?? 20,
+        zone_id: obj.zone_id || obj.zone_stock_id || ligne.zone_id || "",
         total_ht: (q * (puBase || 0)).toFixed(2),
         manuallyEdited: false,
       };
@@ -102,14 +101,18 @@ export default function FactureLigne({
           prod?.unite_achat ||
           prod?.unite ||
           prod?.unite_principale ||
+          obj.unite_achat ||
           obj.unite ||
           "Unité";
         const pu =
           prod?.dernier_prix_ht ??
           prod?.prix_unitaire ??
           prod?.price_ht ??
+          obj.prix_unitaire ??
+          obj.price_ht ??
+          obj.dernier_prix ??
           puBase;
-        const pmp = prod?.pmp_ht ?? prod?.pmp ?? 0;
+        const pmp = prod?.pmp_ht ?? prod?.pmp ?? obj.pmp ?? obj.pmp_ht ?? 0;
         const tva =
           prod?.tva_rate ??
           prod?.tva ??
@@ -119,6 +122,8 @@ export default function FactureLigne({
           prod?.default_zone_id ??
           prod?.zone_id ??
           prod?.zone_stock_id ??
+          obj.zone_id ??
+          obj.zone_stock_id ??
           null;
         const updated = {
           ...initial,
@@ -139,7 +144,7 @@ export default function FactureLigne({
     } else {
       onChange({
         ...ligne,
-        produit: obj?.id ? obj : { id: "" },
+        produit: obj?.id ? obj : { id: '', nom: obj?.nom || '' },
         produit_id: "",
         zone_id: "",
         unite: "",
@@ -148,7 +153,6 @@ export default function FactureLigne({
         total_ht: "0",
         manuallyEdited: false,
       });
-      if (obj?.nom?.length >= 2) searchProduits(obj.nom);
     }
   }
 
@@ -203,10 +207,9 @@ export default function FactureLigne({
   return (
     <div className="flex items-center gap-2">
       <div className="basis-[20%] shrink-0">
-        <AutoCompleteField
-          value={ligne.produit?.nom || ''}
+        <AutocompleteProduit
+          value={ligne.produit}
           onChange={handleProduitSelection}
-          options={produitOptions}
           required
           placeholder="Nom du produit..."
           className="h-10 w-full"
@@ -243,6 +246,7 @@ export default function FactureLigne({
         <div className="relative">
           <Input
             type="text"
+            tabIndex={-1}
             className="h-10 w-full pr-6 text-right rounded-xl"
             value={ligne.total_ht}
             onChange={(e) => handleTotal(e.target.value)}

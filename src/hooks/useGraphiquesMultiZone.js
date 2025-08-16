@@ -14,11 +14,21 @@ export function useGraphiquesMultiZone() {
     setLoading(true);
     setError(null);
     try {
-      const { data: zones, error } = await supabase
+      let { data: zones, error } = await supabase
         .from("zones_stock")
-        .select("id, nom");
+        .select("id,nom,type,parent_id,position,actif,created_at")
+        .eq("mama_id", mama_id)
+        .order("position", { ascending: true })
+        .order("nom", { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.info('[zones_stock] fetch failed; fallback list (no order)', { code: error.code, message: error.message });
+        const alt = await supabase
+          .from('zones_stock')
+          .select('id,nom,type,parent_id,position,actif,created_at')
+          .eq('mama_id', mama_id);
+        zones = alt.data ?? [];
+      }
 
       let allData = [];
       for (const zone of zones || []) {

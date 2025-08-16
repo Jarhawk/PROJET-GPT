@@ -25,7 +25,7 @@ export function useProduitsSearch(term = '', { enabled = true } = {}) {
     staleTime: 0,
     gcTime: 0,
     keepPreviousData: false,
-    queryFn: async ({ signal }) => {
+    queryFn: async () => {
       if (!mama_id) return [];
       const q = (debounced || '').trim();
 
@@ -34,54 +34,60 @@ export function useProduitsSearch(term = '', { enabled = true } = {}) {
 
       console.info('[produits] search', { q, mama_id });
 
-      let rq = supabase
-        .from('produits')
-        .select(
-          'id, nom, code, barcode, synonyms, tva, tva_rate, dernier_prix, prix_unitaire, price_ht, pmp, pmp_ht, unite_id, unite:unite_id (nom), zone_id, zone_stock_id'
-        )
-        .eq('mama_id', mama_id)
-        .eq('actif', true);
+      const tables = ['v_produits_actifs', 'produits'];
 
-      try {
-        rq = rq.abortSignal(signal);
-      } catch {}
+      for (const table of tables) {
+        try {
+          let rq = supabase
+            .from(table)
+            .select(
+              'id, nom, code, barcode, tva, tva_rate, dernier_prix, prix_unitaire, price_ht, pmp, pmp_ht, unite_id, unite:unite_id (nom), zone_id, zone_stock_id'
+            )
+            .eq('mama_id', mama_id);
+          try {
+            rq = rq.eq('actif', true);
+          } catch {}
 
-      if (q.length >= 2) {
-        rq = rq
-          .or(
-            `nom.ilike.%${q}%,code.ilike.%${q}%,barcode.ilike.%${q}%,synonyms.ilike.%${q}%`
-          )
-          .order('nom', { ascending: true })
-          .limit(50);
-      } else {
-        // Default list when query is empty: show recent products
-        rq = rq.order('updated_at', { ascending: false }).limit(20);
+          if (q.length >= 2) {
+            rq = rq
+              .or(`nom.ilike.%${q}%,code.ilike.%${q}%,barcode.ilike.%${q}%`)
+              .order('nom', { ascending: true })
+              .limit(50);
+          } else {
+            try {
+              rq = rq.order('updated_at', { ascending: false });
+            } catch {}
+            rq = rq.limit(20);
+          }
+
+          const { data, error } = await rq;
+          if (error || !Array.isArray(data)) continue;
+
+          const results = data.map((p) => ({
+            id: p.id,
+            nom: p.nom,
+            code: p.code || '',
+            barcode: p.barcode || '',
+            tva: p.tva ?? p.tva_rate ?? 0,
+            prix_unitaire: p.prix_unitaire ?? p.price_ht ?? p.dernier_prix ?? 0,
+            pmp: p.pmp ?? p.pmp_ht ?? 0,
+            unite_id: p.unite_id || '',
+            unite: p.unite?.nom || '',
+            unite_achat: p.unite_achat || p.unite?.nom || '',
+            zone_id: p.zone_id || p.zone_stock_id || '',
+          }));
+
+          if (q.length >= 2) {
+            return results.length > 0
+              ? results
+              : [{ id: '', nom: 'Aucun résultat' }];
+          }
+
+          return results;
+        } catch {}
       }
 
-      const { data, error } = await rq;
-      if (error || !Array.isArray(data)) return [];
-
-      const results = data.map((p) => ({
-        id: p.id,
-        nom: p.nom,
-        code: p.code || '',
-        barcode: p.barcode || '',
-        tva: p.tva ?? p.tva_rate ?? 0,
-        prix_unitaire: p.prix_unitaire ?? p.price_ht ?? p.dernier_prix ?? 0,
-        pmp: p.pmp ?? p.pmp_ht ?? 0,
-        unite_id: p.unite_id || '',
-        unite: p.unite?.nom || '',
-        unite_achat: p.unite_achat || p.unite?.nom || '',
-        zone_id: p.zone_id || p.zone_stock_id || '',
-      }));
-
-      if (q.length >= 2) {
-        return results.length > 0
-          ? results
-          : [{ id: '', nom: 'Aucun résultat' }];
-      }
-
-      return results;
+      return [];
     },
   });
 }

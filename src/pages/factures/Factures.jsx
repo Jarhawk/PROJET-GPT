@@ -186,7 +186,7 @@ export default function Factures() {
       <FactureTable
         factures={factures}
         canEdit={canEdit}
-        onEdit={f => { setSelected(f); setShowForm(true); }}
+        onEdit={f => { setSelected({ id: f.id }); setShowForm(true); }}
         onDetail={f => { setSelected(f); setShowDetail(true); }}
         onToggleActive={async (id, actif) => { await toggleFactureActive(id, actif); refreshList(); }}
         onArchive={handleDelete}

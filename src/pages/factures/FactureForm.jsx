@@ -18,6 +18,7 @@ import { FACTURE_STATUTS } from '@/constants/factures';
 import { Checkbox } from '@/components/ui/checkbox';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Loader2 } from 'lucide-react';
+import { useInvoice } from '@/hooks/useInvoice';
 
 export function toLabel(v) {
   if (v == null) return '';
@@ -77,6 +78,11 @@ export default function FactureForm({
   const { results: fournisseurOptions, searchFournisseurs } =
     useFournisseursAutocomplete();
   const formRef = useRef(null);
+  const factureId = id || facture?.id;
+  const { data: invoiceData, isLoading: loadingFacture } = useInvoice(
+    factureId,
+    { enabled: Boolean(factureId) }
+  );
 
   const [date, setDate] = useState(
     facture?.date_facture || new Date().toISOString().slice(0, 10)
@@ -129,43 +135,11 @@ export default function FactureForm({
   );
   const { autoHt, autoTva, autoTotal } = useFactureForm(lignes);
   const ecart = (parseFloat(String(totalHt).replace(',', '.')) || 0) - autoHt;
-  const factureId = id || facture?.id;
-  const [loadingFacture, setLoadingFacture] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  async function detectExistingTable(candidates) {
-    for (const t of candidates) {
-      const { error } = await supabase.from(t).select('id').limit(1);
-      if (!error) return t;
-    }
-    return candidates[0];
-  }
-  const loadFacture = async () => {
-    if (!factureId) return;
-    setLoadingFacture(true);
-    try {
-      const tableLines = await detectExistingTable(['facture_lignes', 'lignes_facture']);
-      const [headerRes, linesRes] = await Promise.all([
-        supabase
-          .from('factures')
-          .select(
-            'id, numero, date_facture, fournisseur_id, zone_id, tva_mode, actif, created_at, updated_at, statut, bon_livraison, total_ht'
-          )
-          .eq('id', factureId)
-          .eq('mama_id', mamaId)
-          .single(),
-        supabase
-          .from(tableLines)
-          .select(
-            `id, facture_id, produit_id, quantite, unite, total_ht, pu, pmp, tva, zone_id, position, note, actif, produit:produits(id, nom, code, ref_fournisseur, unite_achat, unite, tva_id, zone_stock_id)`
-          )
-          .eq('facture_id', factureId)
-          .order('position', { ascending: true }),
-      ]);
-      const { data: f, error: e1 } = headerRes;
-      const { data: lignesData, error: e2 } = linesRes;
-      if (e1 || e2) throw e1 || e2;
-
+  useEffect(() => {
+    if (invoiceData?.facture) {
+      const f = invoiceData.facture;
       setDate(f.date_facture || new Date().toISOString().slice(0, 10));
       setFournisseurId(f.fournisseur_id || '');
       setNumero(f.numero || '');
@@ -178,25 +152,21 @@ export default function FactureForm({
           ? String(f.total_ht)
           : ''
       );
-      if (f.fournisseur_id) {
-        const { data: fournisseur } = await supabase
-          .from('fournisseurs')
-          .select('nom')
-          .eq('id', f.fournisseur_id)
-          .single();
-        setFournisseurNom(fournisseur?.nom || '');
-        if (fournisseur?.nom) searchFournisseurs(fournisseur.nom);
-      }
-
-      const mapped = (lignesData || []).map(mapDbLineToUI);
+      setFournisseurNom(f.fournisseur?.nom || '');
+      if (f.fournisseur?.nom) searchFournisseurs(f.fournisseur.nom);
+      const mapped = (invoiceData.lignes || []).map(mapDbLineToUI);
       setLignes(mapped.length ? mapped : [defaultLigne]);
-    } catch (err) {
-      console.error(err);
-      toast.error('Erreur de chargement de la facture');
-    } finally {
-      setLoadingFacture(false);
+      setLineKeys(mapped.length ? mapped.map(() => 0) : [0]);
     }
-  };
+  }, [invoiceData]);
+
+  async function detectExistingTable(candidates) {
+    for (const t of candidates) {
+      const { error } = await supabase.from(t).select('id').limit(1);
+      if (!error) return t;
+    }
+    return candidates[0];
+  }
 
   useEffect(() => {
     if (isBonLivraison && !numero.startsWith('BL')) {
@@ -238,10 +208,6 @@ export default function FactureForm({
     };
     checkNumero();
   }, [numero, mamaId, factureId]);
-
-  useEffect(() => {
-    if (!lignesInit.length) loadFacture();
-  }, [factureId, lignesInit.length]);
 
   const ecartClass = Math.abs(ecart) > 0.01 ? 'text-green-500' : '';
 

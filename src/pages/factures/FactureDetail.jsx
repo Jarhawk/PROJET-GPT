@@ -59,7 +59,7 @@ export default function FactureDetail() {
           supabase
             .from('factures')
             .select(
-              'id, numero, date_facture, fournisseur_id, zone_id, tva_mode, actif, created_at, updated_at'
+              'id, numero, date_facture, fournisseur_id, tva_mode, actif, created_at, updated_at'
             )
             .eq('id', id)
             .single(),

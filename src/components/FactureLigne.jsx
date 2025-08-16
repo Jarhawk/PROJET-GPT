@@ -36,6 +36,8 @@ export default function FactureLigne({
   index,
   onChange,
   onRemove,
+  lineKey,
+  onProduitFocus,
 }) {
   const { getProduct } = useProducts();
   const { zones, fetchZones } = useZones();
@@ -210,6 +212,8 @@ export default function FactureLigne({
         <AutocompleteProduit
           value={ligne.produit}
           onChange={handleProduitSelection}
+          lineKey={lineKey}
+          onFocus={() => onProduitFocus?.(index)}
           required
           placeholder="Nom du produit..."
           className="h-10 w-full"
@@ -227,7 +231,7 @@ export default function FactureLigne({
           onKeyDown={(e) => e.key === "Enter" && e.preventDefault()}
         />
       </div>
-      <div className="basis-[7%] shrink-0">
+      <div className="basis-[10%] shrink-0">
         <Input
           type="text"
           readOnly
@@ -281,7 +285,7 @@ export default function FactureLigne({
           )}
         </div>
       </div>
-      <div className="basis-[7%] shrink-0">
+      <div className="basis-[10%] shrink-0">
         <div className="relative">
           <Input
             type="number"

@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useFactures } from "@/hooks/useFactures";
+import { useFacturesList } from "@/hooks/useFacturesList";
 import { useFournisseurs } from "@/hooks/useFournisseurs";
 import { useFournisseursAutocomplete } from "@/hooks/useFournisseursAutocomplete";
 import { useAuth } from '@/hooks/useAuth';
@@ -23,10 +24,10 @@ import FactureImportModal from "@/components/FactureImportModal";
 import { FACTURE_STATUTS } from "@/constants/factures";
 
 export default function Factures() {
-  const { factures, total, getFactures, deleteFacture, toggleFactureActive } = useFactures();
+  const { deleteFacture, toggleFactureActive } = useFactures();
   const { fournisseurs, getFournisseurs } = useFournisseurs();
   const { results: fournisseurOptions, searchFournisseurs } = useFournisseursAutocomplete();
-  const { mama_id, loading: authLoading, hasAccess } = useAuth();
+  const { loading: authLoading, hasAccess } = useAuth();
   const { results: factureOptions, searchFactures } = useFacturesAutocomplete();
   const [showForm, setShowForm] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
@@ -42,24 +43,26 @@ export default function Factures() {
   const [loading, setLoading] = useState(false);
   const { exportData, loading: exporting } = useExport();
 
-  const refreshList = useCallback(() => {
-    if (!mama_id) return;
-    getFactures({
-      search,
-      fournisseur: fournisseurFilter,
-      statut: statutFilter,
-      actif: actifFilter === "all" ? null : actifFilter === "true",
-      page,
-      pageSize,
-    });
-  }, [mama_id, getFactures, search, fournisseurFilter, statutFilter, actifFilter, page]);
+  const {
+    data: listData,
+    isFetching: listLoading,
+    refetch,
+  } = useFacturesList({
+    search,
+    fournisseur: fournisseurFilter,
+    statut: statutFilter,
+    actif: actifFilter === "all" ? null : actifFilter === "true",
+    page,
+    pageSize,
+  });
+  const factures = listData?.factures || [];
+  const total = listData?.total || 0;
 
   const canEdit = hasAccess("factures", "peut_modifier");
 
   useEffect(() => { getFournisseurs(); }, [getFournisseurs]);
   useEffect(() => { searchFactures(search); }, [search, searchFactures]);
   useEffect(() => { searchFournisseurs(fournisseurInput); }, [fournisseurInput, searchFournisseurs]);
-  useEffect(() => { refreshList(); }, [refreshList]);
 
   const handleFournisseurInput = e => {
     const val = e.target.value;
@@ -73,13 +76,14 @@ export default function Factures() {
     if (window.confirm(`Archiver la facture n°${facture.id} ?`)) {
       setLoading(true);
       await deleteFacture(facture.id);
-      await refreshList();
+      await refetch();
       setLoading(false);
       toast.success("Facture archivée.");
     }
   };
 
-  if (authLoading || loading) return <LoadingSpinner message="Chargement..." />;
+  if (authLoading || loading || listLoading)
+    return <LoadingSpinner message="Chargement..." />;
 
   return (
     <div className="p-6 container mx-auto text-shadow space-y-6">
@@ -178,8 +182,8 @@ export default function Factures() {
         <FactureForm
           facture={selected}
           fournisseurs={fournisseurs}
-          onClose={() => { setShowForm(false); setSelected(null); refreshList(); }}
-          onSaved={refreshList}
+          onClose={() => { setShowForm(false); setSelected(null); refetch(); }}
+          onSaved={refetch}
         />
       )}
 
@@ -188,7 +192,7 @@ export default function Factures() {
         canEdit={canEdit}
         onEdit={f => { setSelected({ id: f.id }); setShowForm(true); }}
         onDetail={f => { setSelected(f); setShowDetail(true); }}
-        onToggleActive={async (id, actif) => { await toggleFactureActive(id, actif); refreshList(); }}
+        onToggleActive={async (id, actif) => { await toggleFactureActive(id, actif); refetch(); }}
         onArchive={handleDelete}
       />
 
@@ -207,7 +211,7 @@ export default function Factures() {
         <FactureImportModal
           open={showImport}
           onClose={() => setShowImport(false)}
-          onImport={() => { setShowImport(false); refreshList(); }}
+          onImport={() => { setShowImport(false); refetch(); }}
         />
       )}
     </div>

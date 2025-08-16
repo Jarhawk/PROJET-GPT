@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useId, forwardRef, useImperativeHandle } from 'react';
 import { Input } from '@/components/ui/input';
-import { useProductSearch } from '@/hooks/useProductSearch';
+import { useProduitsSearch } from '@/hooks/useProduitsSearch';
 import ProductPickerModal from './ProductPickerModal';
 
 function AutocompleteProduit(
@@ -19,7 +19,7 @@ function AutocompleteProduit(
   const listId = useId();
   const nameId = useId();
 
-  const { data: options = [] } = useProductSearch(search, { enabled: open || modalOpen });
+  const { data: options = [] } = useProduitsSearch(search, { enabled: open || modalOpen });
 
   useEffect(() => {
     const el = inputRef.current;

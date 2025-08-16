@@ -11,6 +11,31 @@ import supabase from "@/lib/supabaseClient";
 const PRODUIT_COLUMNS = ["tva", "zone_stock_id"];
 const firstExisting = (keys) => keys.find((k) => PRODUIT_COLUMNS.includes(k));
 
+function toLabel(v) {
+  if (v == null) return '';
+  if (typeof v === 'string' || typeof v === 'number') return String(v);
+  if (Array.isArray(v)) return toLabel(v[0]);
+  if (typeof v === 'object') {
+    return (
+      v.nom ??
+      v.name ??
+      v.label ??
+      v.code ??
+      v.abbr ??
+      v.abreviation ??
+      v.symbol ??
+      v.symbole ??
+      (v.unite?.code ?? v.unite?.nom ?? v.unite?.label) ??
+      String(v.id ?? '')
+    );
+  }
+  try {
+    return String(v);
+  } catch {
+    return '';
+  }
+}
+
 export default function FactureLigne({
   ligne,
   index,
@@ -207,13 +232,18 @@ export default function FactureLigne({
           onKeyDown={(e) => e.key === "Enter" && e.preventDefault()}
         />
       </div>
-      <div className="basis-[10%] shrink-0">
+      <div className="basis-[7%] shrink-0">
         <Input
           type="text"
           readOnly
           tabIndex={-1}
-          value={ligne.unite || ""}
-          className="h-10 w-full pointer-events-none select-none rounded-xl text-center"
+          value={toLabel(
+            ligne.unite ??
+            ligne?.produit?.unite_achat ??
+            ligne?.produit?.unite ??
+            ligne?.produit?.unite_principale
+          )}
+          className="h-10 w-full pointer-events-none select-none rounded-xl"
           aria-readonly="true"
         />
       </div>
@@ -235,7 +265,7 @@ export default function FactureLigne({
           type="text"
           readOnly
           tabIndex={-1}
-          value={ligne.pu}
+          value={toLabel(ligne.pu)}
           className={`h-10 w-full text-right rounded-xl pointer-events-none select-none ${puNum > pmp ? 'text-red-500' : puNum < pmp ? 'text-green-500' : ''}`}
           aria-readonly="true"
         />
@@ -246,7 +276,7 @@ export default function FactureLigne({
             type="text"
             readOnly
             tabIndex={-1}
-            value={pmp.toFixed(2)}
+            value={toLabel(ligne.pmp)}
             className="h-10 w-full text-right pr-4 rounded-xl pointer-events-none select-none"
             aria-readonly="true"
           />
@@ -255,7 +285,7 @@ export default function FactureLigne({
           )}
         </div>
       </div>
-      <div className="basis-[10%] shrink-0">
+      <div className="basis-[7%] shrink-0">
         <div className="relative">
           <Input
             type="number"

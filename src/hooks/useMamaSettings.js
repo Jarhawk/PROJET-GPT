@@ -1,5 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState, useCallback, useEffect } from "react";
+import { useCallback } from "react";
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -17,95 +18,64 @@ const defaults = {
   mentions_legales: "",
 };
 
+const localEnabledModules = {};
+const localFeatureFlags = {};
+
 export default function useMamaSettings() {
   const { userData } = useAuth();
   const mamaId = userData?.mama_id;
-  const [settings, setSettings] = useState(defaults);
-  const [loading, setLoading] = useState(false);
-  const [enabledModules, setEnabledModules] = useState(null);
-  const [featureFlags, setFeatureFlags] = useState(null);
-  const [ok, setOk] = useState(true);
+  const queryClient = useQueryClient();
 
-  const fetchMamaSettings = useCallback(async () => {
-    if (!mamaId) {
-      setLoading(false);
-      return null;
-    }
-    setLoading(true);
-    const { data, error } = await supabase
-      .from("mamas")
-      .select(
-        "logo_url, primary_color, secondary_color, email_envoi, email_alertes, dark_mode, langue, monnaie, timezone, rgpd_text, mentions_legales, enabled_modules, feature_flags"
-      )
-      .eq("id", mamaId)
-      .single();
-    if (error?.code === '42703') {
-      const { data: fallback, error: fbError } = await supabase
+  const query = useQuery({
+    queryKey: ['mama-settings', mamaId],
+    enabled: !!mamaId,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    queryFn: async ({ signal }) => {
+      const { data, error } = await supabase
         .from('mamas')
         .select(
-          "logo_url, primary_color, secondary_color, email_envoi, email_alertes, dark_mode, langue, monnaie, timezone, rgpd_text, mentions_legales"
+          'logo_url, primary_color, secondary_color, email_envoi, email_alertes, dark_mode, langue, monnaie, timezone, rgpd_text, mentions_legales'
         )
         .eq('id', mamaId)
-        .single();
-      setLoading(false);
-      if (fbError) {
-        console.warn('[useMamaSettings] fallback fetch failed', fbError);
-        setSettings(defaults);
-        setEnabledModules(null);
-        setFeatureFlags(null);
-        setOk(true);
-        return null;
-      }
-      setSettings({ ...defaults, ...fallback });
-      setEnabledModules(null);
-      setFeatureFlags(null);
-      setOk(true);
-      return fallback;
-    }
-    setLoading(false);
-    if (error) {
-      console.warn("[useMamaSettings] fetch failed", error);
-      setSettings(defaults);
-      setEnabledModules(null);
-      setFeatureFlags(null);
-      setOk(true);
-      return null;
-    }
-    setSettings({ ...defaults, ...data });
-    setEnabledModules(data.enabled_modules || null);
-    setFeatureFlags(data.feature_flags || null);
-    setOk(true);
-    return data;
-  }, [mamaId]);
+        .single()
+        .abortSignal(signal);
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const updateMamaSettings = useCallback(
     async (fields) => {
-      if (!mamaId) return { error: "missing mama_id" };
-      setLoading(true);
+      if (!mamaId) return { error: 'missing mama_id' };
       const { data, error } = await supabase
-        .from("mamas")
+        .from('mamas')
         .update(fields)
-        .eq("id", mamaId)
+        .eq('id', mamaId)
         .select()
         .single();
-      setLoading(false);
-      if (!error && data) setSettings((s) => ({ ...s, ...data }));
+      if (!error && data) {
+        queryClient.setQueryData(['mama-settings', mamaId], (old) => ({
+          ...(old || {}),
+          ...data,
+        }));
+      }
       return { data, error };
     },
-    [mamaId]
+    [mamaId, queryClient]
   );
 
-  useEffect(() => {
-    fetchMamaSettings();
-  }, [fetchMamaSettings]);
+  const settings = { ...defaults, ...(query.data || {}) };
+  const enabledModules = query.data?.enabled_modules ?? localEnabledModules;
+  const featureFlags = query.data?.feature_flags ?? localFeatureFlags;
 
   return {
     settings,
-    loading,
+    loading: query.isFetching,
     enabledModules,
     featureFlags,
-    ok,
-    fetchMamaSettings,
+    ok: !query.error,
+    fetchMamaSettings: query.refetch,
     updateMamaSettings,
   };
 }

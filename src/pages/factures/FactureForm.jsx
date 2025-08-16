@@ -1,9 +1,10 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
-import { useFactures } from '@/hooks/useFactures';
 import { useProduitsAutocomplete } from '@/hooks/useProduitsAutocomplete';
 import { useFournisseursAutocomplete } from '@/hooks/useFournisseursAutocomplete';
 import { useFactureForm } from '@/hooks/useFactureForm';
@@ -67,11 +68,16 @@ export default function FactureForm({
   onClose,
   onSaved,
 }) {
-  const { createFacture, updateFacture } = useFactures();
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const isEdit = Boolean(id);
+  const submitLabel = isEdit ? 'Modifier' : 'Enregistrer';
+  const queryClient = useQueryClient();
+  const { userData } = useAuth();
+  const mamaId = userData?.mama_id;
   const { results: fournisseurOptions, searchFournisseurs } =
     useFournisseursAutocomplete();
   const { results: produitOptions, searchProduits } = useProduitsAutocomplete();
-  const { mama_id } = useAuth();
   const formRef = useRef(null);
 
   const [date, setDate] = useState(
@@ -118,25 +124,22 @@ export default function FactureForm({
   );
   const { autoHt, autoTva, autoTotal } = useFactureForm(lignes);
   const ecart = (parseFloat(String(totalHt).replace(',', '.')) || 0) - autoHt;
-  const factureId = facture?.id;
+  const factureId = id || facture?.id;
   const [loadingFacture, setLoadingFacture] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  async function tableExists(name) {
-    try {
-      const { error } = await supabase.from(name).select('id').limit(1);
-      return !error;
-    } catch {
-      return false;
+  async function detectExistingTable(candidates) {
+    for (const t of candidates) {
+      const { error } = await supabase.from(t).select('id').limit(1);
+      if (!error) return t;
     }
+    return candidates[0];
   }
   const loadFacture = async () => {
     if (!factureId) return;
     setLoadingFacture(true);
     try {
-      const tableLines = (await tableExists('facture_lignes'))
-        ? 'facture_lignes'
-        : 'lignes_facture';
+      const tableLines = await detectExistingTable(['facture_lignes', 'lignes_facture']);
       const [headerRes, linesRes] = await Promise.all([
         supabase
           .from('factures')
@@ -144,7 +147,7 @@ export default function FactureForm({
             'id, numero, date_facture, fournisseur_id, zone_id, tva_mode, actif, created_at, updated_at, statut, bon_livraison, total_ht'
           )
           .eq('id', factureId)
-          .eq('mama_id', mama_id)
+          .eq('mama_id', mamaId)
           .single(),
         supabase
           .from(tableLines)
@@ -218,7 +221,7 @@ export default function FactureForm({
         const { data } = await supabase
           .from('factures')
           .select('id')
-          .eq('mama_id', mama_id)
+          .eq('mama_id', mamaId)
           .eq('numero', numero)
           .neq('id', factureId || 0)
           .limit(1)
@@ -229,7 +232,7 @@ export default function FactureForm({
       }
     };
     checkNumero();
-  }, [numero, mama_id, factureId]);
+  }, [numero, mamaId, factureId]);
 
   useEffect(() => {
     searchProduits('');
@@ -251,10 +254,14 @@ export default function FactureForm({
       formRef.current?.querySelector(':invalid')?.focus();
       return;
     }
+    if (!mamaId) {
+      toast.error('Session invalide (mama_id manquant).');
+      return;
+    }
     setSaving(true);
     try {
-      let fid = factureId;
-      const invoice = {
+      let newId = factureId;
+      const header = {
         date_facture: date,
         fournisseur_id,
         numero,
@@ -263,13 +270,31 @@ export default function FactureForm({
         total_tva: autoTva,
         total_ttc: autoTotal,
         bon_livraison: isBonLivraison,
+        mama_id: mamaId,
       };
-      if (fid) {
-        await updateFacture(fid, invoice);
+
+      if (isEdit) {
+        const { error: eHdr } = await supabase
+          .from('factures')
+          .update(header)
+          .eq('id', newId);
+        if (eHdr) {
+          console.error(eHdr);
+          toast.error('Échec enregistrement entête : ' + eHdr.message);
+          return;
+        }
       } else {
-        const { data, error } = await createFacture(invoice);
-        if (error) throw error;
-        fid = data.id;
+        const { data: hdr, error: eHdr } = await supabase
+          .from('factures')
+          .insert([header])
+          .select('id')
+          .single();
+        if (eHdr) {
+          console.error(eHdr);
+          toast.error('Échec enregistrement entête : ' + eHdr.message);
+          return;
+        }
+        newId = hdr.id;
       }
 
       const lignesRows = [];
@@ -277,21 +302,9 @@ export default function FactureForm({
       const achatsRows = [];
       for (let i = 0; i < lignes.length; i++) {
         const ligne = lignes[i];
-        const {
-          produit: _p,
-          total_ht,
-          pu,
-          unite: _u,
-          pmp: _pmp,
-          note: _n,
-          position: _pos,
-          actif: _a,
-          manuallyEdited: _m,
-          ...rest
-        } = ligne;
         const quantite = parseNum(ligne.quantite);
-        const prixSaisi = parseNum(pu);
-        const totalSaisi = parseNum(total_ht);
+        const prixSaisi = parseNum(ligne.pu);
+        const totalSaisi = parseNum(ligne.total_ht);
         if (
           !ligne.produit_id ||
           !ligne.zone_id ||
@@ -299,69 +312,94 @@ export default function FactureForm({
           (!prixSaisi && !totalSaisi)
         ) {
           toast.error('Ligne de produit invalide');
-          setSaving(false);
           return;
         }
-        let prix_unitaire = prixSaisi;
-        if (!prix_unitaire) {
-          prix_unitaire = quantite ? totalSaisi / quantite : 0;
+        let puFinal = prixSaisi;
+        if (!puFinal) {
+          puFinal = quantite ? totalSaisi / quantite : 0;
         }
-        const prixFinal = isFinite(prix_unitaire) ? prix_unitaire : 0;
+        puFinal = isFinite(puFinal) ? puFinal : 0;
         lignesRows.push({
-          ...rest,
+          id: isEdit ? ligne.id ?? undefined : undefined,
+          facture_id: newId,
+          produit_id: ligne.produit_id ?? ligne.produit?.id ?? null,
           quantite,
-          prix_unitaire: prixFinal,
-          tva: ligne.tva,
-          zone_stock_id: ligne.zone_id,
-          total: quantite * prixFinal,
-          facture_id: fid,
-          mama_id,
+          unite: ligne.unite ?? null,
+          total_ht: totalSaisi || quantite * puFinal,
+          pu: puFinal,
+          pmp: parseNum(ligne.pmp),
+          tva: ligne.tva ?? null,
+          zone_id: ligne.zone_id ?? null,
+          position: ligne.position ?? i,
+          note: ligne.note ?? null,
+          actif: ligne.actif ?? true,
+          mama_id: mamaId,
         });
         fournisseurRows.push({
-          produit_id: ligne.produit_id,
+          produit_id: ligne.produit_id ?? ligne.produit?.id ?? null,
           fournisseur_id,
-          prix_achat: prixFinal,
+          prix_achat: puFinal,
           date_livraison: date,
-          mama_id,
+          mama_id: mamaId,
         });
         achatsRows.push({
-          produit_id: ligne.produit_id,
+          produit_id: ligne.produit_id ?? ligne.produit?.id ?? null,
           fournisseur_id,
-          prix: prixFinal,
+          prix: puFinal,
           quantite,
           date_achat: date,
-          mama_id,
+          mama_id: mamaId,
         });
+      }
+
+      if (lignesRows.length) {
+        const tableLines = await detectExistingTable(['facture_lignes', 'lignes_facture']);
+        const { error: eLines } = isEdit
+          ? await supabase.from(tableLines).upsert(lignesRows, { onConflict: 'id' })
+          : await supabase.from(tableLines).insert(lignesRows);
+        if (eLines) {
+          console.error(eLines);
+          toast.error('Échec enregistrement lignes : ' + eLines.message);
+          return;
+        }
+      }
+
+      if (fournisseurRows.length) {
+        const { error: eF } = await supabase
+          .from('fournisseur_produits')
+          .upsert(fournisseurRows, {
+            onConflict: ['produit_id', 'fournisseur_id', 'date_livraison'],
+            returning: 'minimal',
+          });
+        if (eF) {
+          console.error(eF);
+          toast.error('Échec enregistrement lignes : ' + eF.message);
+          return;
+        }
+      }
+
+      if (achatsRows.length) {
+        const { error: eA } = await supabase
+          .from('achats')
+          .insert(achatsRows, { returning: 'minimal' });
+        if (eA) {
+          console.error(eA);
+          toast.error('Échec enregistrement lignes : ' + eA.message);
+          return;
+        }
       }
 
       await Promise.all([
-        supabase
-          .from('facture_lignes')
-          .upsert(lignesRows, { returning: 'minimal' }),
-        supabase.from('fournisseur_produits').upsert(fournisseurRows, {
-          onConflict: ['produit_id', 'fournisseur_id', 'date_livraison'],
-          returning: 'minimal',
-        }),
-        supabase.from('achats').insert(achatsRows, { returning: 'minimal' }),
+        queryClient.invalidateQueries({ queryKey: ['factures'] }),
+        queryClient.invalidateQueries({ queryKey: ['facture-list'] }),
+        queryClient.invalidateQueries({ queryKey: ['facture-detail'] }),
       ]);
 
-      onSaved?.();
-      toast.success(facture ? 'Facture modifiée !' : 'Facture ajoutée !');
-      if (!facture) {
-        const today = new Date().toISOString().slice(0, 10);
-        setDate(today);
-        setFournisseurId('');
-        setFournisseurNom('');
-        setNumero('');
-        setNumeroUsed(false);
-        setStatut('Brouillon');
-        setTotalHt('');
-        setIsBonLivraison(false);
-        setLignes([{ ...defaultLigne }]);
-        searchFournisseurs('');
-        searchProduits('');
-      }
+      toast.success(isEdit ? 'Facture modifiée' : 'Facture enregistrée');
+      onSaved?.(newId);
+      navigate(`/factures/${newId}`);
     } catch (err) {
+      console.error(err);
       toast.error(err?.message || "Erreur lors de l'enregistrement");
     } finally {
       setSaving(false);
@@ -546,16 +584,15 @@ export default function FactureForm({
             variant="primary"
             className="min-w-[120px]"
             disabled={numeroUsed || saving}
+            aria-busy={saving}
           >
             {saving ? (
               <span className="flex items-center justify-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Enregistrement...
+                Patientez…
               </span>
-            ) : facture ? (
-              'Modifier'
             ) : (
-              'Ajouter'
+              submitLabel
             )}
           </Button>
           <Button type="button" variant="ghost" onClick={handleClose}>

@@ -430,11 +430,11 @@ export default function FactureForm({ facture = null, onClose, onSaved }) {
               <div className="flex items-center gap-2 text-xs uppercase tracking-wide opacity-70">
                 <div className="basis-[20%] shrink-0">Produit</div>
                 <div className="basis-[10%] shrink-0 text-right">Quantité</div>
-                <div className="basis-[10%] shrink-0">Unité</div>
+                <div className="basis-[7%] shrink-0">Unité</div>
                 <div className="basis-[10%] shrink-0 text-right">Total HT</div>
                 <div className="basis-[10%] shrink-0 text-right">PU</div>
                 <div className="basis-[10%] shrink-0 text-right">PMP</div>
-                <div className="basis-[10%] shrink-0">TVA</div>
+                <div className="basis-[7%] shrink-0">TVA</div>
                 <div className="basis-[15%] shrink-0">Zone</div>
                 <div className="basis-[5%] shrink-0 text-center">Actions</div>
               </div>

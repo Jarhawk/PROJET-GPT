@@ -8,14 +8,14 @@ import { useZones } from "@/hooks/useZones";
 import { useState, useEffect, useRef, useCallback } from "react";
 import supabase from "@/lib/supabaseClient";
 
-const PRODUIT_COLUMNS = ["tva", "zone_stock_id"];
+const PRODUIT_COLUMNS = ["tva", "zone_id", "zone_stock_id"];
 const firstExisting = (keys) => keys.find((k) => PRODUIT_COLUMNS.includes(k));
 
 function toLabel(v) {
   if (v == null) return '';
   if (typeof v === 'string' || typeof v === 'number') return String(v);
   if (Array.isArray(v)) return toLabel(v[0]);
-  if (typeof v === 'object') {
+  if (typeof v === 'object')
     return (
       v.nom ??
       v.name ??
@@ -25,15 +25,10 @@ function toLabel(v) {
       v.abreviation ??
       v.symbol ??
       v.symbole ??
-      (v.unite?.code ?? v.unite?.nom ?? v.unite?.label) ??
-      String(v.id ?? '')
-    );
-  }
-  try {
-    return String(v);
-  } catch {
-    return '';
-  }
+      v.id ??
+      ''
+    ) + '';
+  return String(v);
 }
 
 export default function FactureLigne({
@@ -48,7 +43,7 @@ export default function FactureLigne({
   const { zones, fetchZones } = useZones();
   const [loadingProd, setLoadingProd] = useState(false);
   const parseNum = v => parseFloat(String(v).replace(',', '.')) || 0;
-  const lastPushed = useRef({ tva: ligne.tva, zone_id: ligne.zone_stock_id });
+  const lastPushed = useRef({ tva: ligne.tva, zone_id: ligne.zone_id });
   const updateProduitMeta = useCallback(async (id, { tva, zone_id }) => {
     const fields = {};
     if (tva !== undefined) {
@@ -80,7 +75,7 @@ export default function FactureLigne({
   }, [fetchZones]);
 
   useEffect(() => {
-    lastPushed.current = { tva: ligne.tva, zone_id: ligne.zone_stock_id };
+    lastPushed.current = { tva: ligne.tva, zone_id: ligne.zone_id };
   }, [ligne.produit_id]);
 
   async function handleProduitSelection(obj) {
@@ -89,14 +84,13 @@ export default function FactureLigne({
       const puBase = obj.dernier_prix ?? 0;
       const initial = {
         ...ligne,
-        produit_nom: obj.nom,
+        produit: obj,
         produit_id: obj.id,
-        unite_id: obj.unite_id || "",
         unite: obj.unite || "",
         pu: (puBase || 0).toFixed(2),
         pmp: ligne.pmp,
         tva: obj.tva ?? ligne.tva ?? 20,
-        zone_stock_id: ligne.zone_stock_id || "",
+        zone_id: ligne.zone_id || "",
         total_ht: (q * (puBase || 0)).toFixed(2),
         manuallyEdited: false,
       };
@@ -128,28 +122,26 @@ export default function FactureLigne({
           null;
         const updated = {
           ...initial,
-          unite_id: prod?.unite_id || obj.unite_id || "",
           unite,
           pu: (pu || 0).toFixed(2),
           pmp,
           tva,
-          zone_stock_id: zone || "",
+          zone_id: zone || "",
           total_ht: (q * (pu || 0)).toFixed(2),
         };
         onChange(updated);
         lastPushed.current = { tva, zone_id: zone || "" };
       } catch (error) {
         console.error(error);
-        lastPushed.current = { tva: initial.tva, zone_id: initial.zone_stock_id };
+        lastPushed.current = { tva: initial.tva, zone_id: initial.zone_id };
       }
       setLoadingProd(false);
     } else {
       onChange({
         ...ligne,
-        produit_nom: obj?.nom || "",
+        produit: obj?.id ? obj : { id: "" },
         produit_id: "",
-        zone_stock_id: "",
-        unite_id: "",
+        zone_id: "",
         unite: "",
         pu: "0",
         pmp: 0,
@@ -203,16 +195,16 @@ export default function FactureLigne({
 
   const handleZoneBlur = () => {
     if (!ligne.produit_id) return;
-    if (lastPushed.current.zone_id === ligne.zone_stock_id) return;
-    lastPushed.current.zone_id = ligne.zone_stock_id;
-    updateProduitMeta(ligne.produit_id, { zone_id: ligne.zone_stock_id });
+    if (lastPushed.current.zone_id === ligne.zone_id) return;
+    lastPushed.current.zone_id = ligne.zone_id;
+    updateProduitMeta(ligne.produit_id, { zone_id: ligne.zone_id });
   };
 
   return (
     <div className="flex items-center gap-2">
       <div className="basis-[20%] shrink-0">
         <AutoCompleteField
-          value={ligne.produit_nom}
+          value={ligne.produit?.nom || ''}
           onChange={handleProduitSelection}
           options={produitOptions}
           required
@@ -299,8 +291,8 @@ export default function FactureLigne({
       </div>
       <div className="basis-[15%] shrink-0">
         <Select
-          value={ligne.zone_stock_id}
-          onChange={(e) => onChange({ ...ligne, zone_stock_id: e.target.value })}
+          value={ligne.zone_id}
+          onChange={(e) => onChange({ ...ligne, zone_id: e.target.value })}
           onBlur={handleZoneBlur}
           disabled={loadingProd}
           required

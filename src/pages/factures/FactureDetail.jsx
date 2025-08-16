@@ -1,182 +1,117 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { saveAs } from 'file-saver';
-import * as XLSX from 'xlsx';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
-import { Button } from '@/components/ui/button';
+import { useNavigate, useParams } from 'react-router-dom';
+import supabase from '@/lib/supabaseClient';
+import FactureForm, { mapDbLineToUI } from './FactureForm.jsx';
+import { useFournisseurs } from '@/hooks/useFournisseurs';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import TableContainer from '@/components/ui/TableContainer';
-import { useInvoiceItems } from '@/hooks/useInvoiceItems';
-import { useFactures } from '@/hooks/useFactures';
+import toast from 'react-hot-toast';
 
-export default function FactureDetail({ facture: factureProp, onClose }) {
+function toLabel(v) {
+  if (v == null) return '';
+  if (typeof v === 'string' || typeof v === 'number') return String(v);
+  if (Array.isArray(v)) return toLabel(v[0]);
+  if (typeof v === 'object') return (
+    v.nom ??
+    v.name ??
+    v.label ??
+    v.code ??
+    v.abbr ??
+    v.abreviation ??
+    v.symbol ??
+    v.symbole ??
+    v.id ??
+    ''
+  ) + '';
+  return String(v);
+}
+
+async function tableExists(name) {
+  try {
+    const { error } = await supabase.from(name).select('id').limit(1);
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+export default function FactureDetail() {
   const { id } = useParams();
-  const {
-    fetchFactureById,
-    createFacture,
-    addLigneFacture,
-    calculateTotals,
-    toggleFactureActive,
-  } = useFactures();
-  const { items: produitsFacture, fetchItemsByInvoice } = useInvoiceItems();
-  const [facture, setFacture] = useState(factureProp);
+  const navigate = useNavigate();
+  const { fournisseurs, getFournisseurs } = useFournisseurs();
+  const [loading, setLoading] = useState(true);
+  const [formState, setFormState] = useState({ header: null, lignes: [] });
 
   useEffect(() => {
-    const fid = factureProp?.id || id;
-    if (fid) {
-      if (!factureProp) fetchFactureById(fid).then(setFacture);
-      fetchItemsByInvoice(fid);
-    }
-  }, [factureProp, id]);
+    getFournisseurs();
+  }, [getFournisseurs]);
 
-  if (!facture) return <LoadingSpinner message="Chargement..." />;
+  useEffect(() => {
+    let isMounted = true;
+    async function load() {
+      setLoading(true);
+      try {
+        const tableLines = (await tableExists('facture_lignes'))
+          ? 'facture_lignes'
+          : 'lignes_facture';
 
-  // Export Excel d'une seule facture
-  const exportExcel = () => {
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet([facture]);
-    XLSX.utils.book_append_sheet(wb, ws, 'Facture');
-    const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    saveAs(new Blob([buf]), `facture_${facture.id}.xlsx`);
-  };
+        const [headerRes, linesRes] = await Promise.all([
+          supabase
+            .from('factures')
+            .select(
+              'id, numero, date_facture, fournisseur_id, zone_id, tva_mode, actif, created_at, updated_at'
+            )
+            .eq('id', id)
+            .single(),
+          supabase
+            .from(tableLines)
+            .select(
+              `id, facture_id, produit_id, quantite, unite, total_ht, pu, pmp, tva, zone_id, position, note, actif,
+            produit:produits(id, nom, code, ref_fournisseur, unite_achat, unite, tva_id, zone_stock_id)`
+            )
+            .eq('facture_id', id)
+            .order('position', { ascending: true })
+        ]);
 
-  const exportPDF = () => {
-    const doc = new jsPDF();
-    doc.text(`Facture #${facture.id}`, 10, 12);
-    doc.text(`Fournisseur: ${facture.fournisseur?.nom}`, 10, 20);
-    doc.text(`Date: ${facture.date_facture}`, 10, 28);
-    doc.autoTable({
-      startY: 36,
-      head: [['Produit', 'Quantité', 'PU', 'Total']],
-      body: produitsFacture.map((l) => [
-        l.produit?.nom || '-',
-        l.quantite,
-        l.prix_unitaire,
-        l.total,
-      ]),
-      styles: { fontSize: 9 },
-    });
-    doc.save(`facture_${facture.id}.pdf`);
-  };
+        const { data: header, error: e1 } = headerRes;
+        const { data: lines, error: e2 } = linesRes;
 
-  const duplicate = async () => {
-    const { id: _id, ...payload } = facture;
-    const { data } = await createFacture({
-      ...payload,
-      numero: `${facture.numero || facture.id}-copie`,
-    });
-    if (data) {
-      for (const l of produitsFacture) {
-        await addLigneFacture(data.id, {
-          produit_id: l.produit_id,
-          quantite: l.quantite,
-          prix_unitaire: l.prix_unitaire,
-          tva: l.tva,
-          zone_stock_id: l.zone_stock_id,
-          unite_id: l.unite_id || l.produit?.unite_id,
-          fournisseur_id: facture.fournisseur_id,
-        });
+        if (e1 || e2) {
+          toast.error('Erreur de chargement de la facture');
+          return;
+        }
+
+        if (isMounted) {
+          setFormState({
+            header,
+            lignes: (lines ?? []).map(mapDbLineToUI),
+          });
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error('Erreur de chargement de la facture');
+      } finally {
+        if (isMounted) setLoading(false);
       }
-      await calculateTotals(data.id);
-      onClose?.();
     }
-  };
+    load();
+    return () => {
+      isMounted = false;
+    };
+  }, [id]);
+
+  if (loading) return <LoadingSpinner message="Chargement..." />;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl shadow-lg p-8 min-w-[400px] max-w-[95vw] flex flex-col gap-2 relative">
-        <Button
-          variant="outline"
-          className="absolute top-2 right-2"
-          onClick={onClose}
-        >
-          Fermer
-        </Button>
-        <h2 className="font-bold text-xl mb-4">
-          Détail de la facture #{facture.id}
-        </h2>
-        <div>
-          <b>Date :</b> {facture.date_facture}
-        </div>
-        <div>
-          <b>Fournisseur :</b> {facture.fournisseur?.nom}
-        </div>
-        {facture.bon_livraison && (
-          <div>
-            <b>Bon de livraison</b>
-          </div>
-        )}
-        <div>
-          <b>Montant :</b> {facture.total_ttc?.toFixed(2)} €
-        </div>
-        <div>
-          <b>Statut :</b> {facture.statut}
-        </div>
-        {facture.commentaire && (
-          <div>
-            <b>Commentaire :</b> {facture.commentaire}
-          </div>
-        )}
-        <div>
-          <b>Actif :</b> {facture.actif ? 'Oui' : 'Non'}
-          <Button
-            size="sm"
-            variant="outline"
-            className="ml-2"
-            onClick={async () => {
-              await toggleFactureActive(facture.id, !facture.actif);
-              const f = await fetchFactureById(facture.id);
-              setFacture(f);
-            }}
-          >
-            {facture.actif ? 'Désactiver' : 'Réactiver'}
-          </Button>
-        </div>
-        {produitsFacture.length > 0 && (
-          <TableContainer className="mt-4">
-            <table className="min-w-full text-sm">
-              <thead className="bg-white/10 border-b border-white/20">
-                <tr>
-                  <th className="px-2 py-1 border">Produit</th>
-                  <th className="px-2 py-1 border">Quantité</th>
-                  <th className="px-2 py-1 border">PU</th>
-                  <th className="px-2 py-1 border">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {produitsFacture.map((l) => (
-                  <tr key={l.id}>
-                    <td className="border px-2 py-1">
-                      {l.produit?.nom || '-'}
-                    </td>
-                    <td className="border px-2 py-1 text-right">
-                      {l.quantite}
-                    </td>
-                    <td className="border px-2 py-1 text-right">
-                      {l.prix_unitaire}
-                    </td>
-                    <td className="border px-2 py-1 text-right">{l.total}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </TableContainer>
-        )}
-        <div className="flex gap-2 mt-4">
-          <Button variant="outline" onClick={exportExcel}>
-            Export Excel
-          </Button>
-          <Button variant="outline" onClick={exportPDF}>
-            Export PDF
-          </Button>
-          <Button variant="outline" onClick={duplicate}>
-            Dupliquer
-          </Button>
-        </div>
-      </div>
-    </div>
+    <FactureForm
+      facture={formState.header}
+      lignes={formState.lignes}
+      fournisseurs={fournisseurs}
+      onClose={() => navigate(-1)}
+      onSaved={() => navigate(-1)}
+    />
   );
 }
+
+export { toLabel };
+

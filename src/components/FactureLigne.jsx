@@ -72,7 +72,8 @@ export default function FactureLigne({
 
   useEffect(() => {
     fetchZones();
-  }, [fetchZones]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     lastPushed.current = { tva: ligne.tva, zone_id: ligne.zone_id };

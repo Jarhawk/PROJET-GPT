@@ -1,17 +1,12 @@
-import { useState, useRef, useEffect, useId } from 'react';
+import { useState, useRef, useEffect, useId, forwardRef, useImperativeHandle } from 'react';
 import { Input } from '@/components/ui/input';
 import { useProductSearch } from '@/hooks/useProductSearch';
 import ProductPickerModal from './ProductPickerModal';
 
-export default function AutocompleteProduit({
-  value,
-  onChange,
-  required = false,
-  placeholder = '',
-  className = '',
-  lineKey = 0,
-  onFocus,
-}) {
+function AutocompleteProduit(
+  { value, onChange, required = false, placeholder = '', className = '', lineKey = 0, onFocus },
+  ref
+) {
   const [inputValue, setInputValue] = useState(value?.nom || '');
   const [selected, setSelected] = useState(value?.id ? value : null);
   const [search, setSearch] = useState('');
@@ -20,6 +15,7 @@ export default function AutocompleteProduit({
   const [modalOpen, setModalOpen] = useState(false);
   const composing = useRef(false);
   const inputRef = useRef(null);
+  useImperativeHandle(ref, () => inputRef.current);
   const listId = useId();
   const nameId = useId();
 
@@ -188,3 +184,5 @@ export default function AutocompleteProduit({
     </div>
   );
 }
+
+export default forwardRef(AutocompleteProduit);

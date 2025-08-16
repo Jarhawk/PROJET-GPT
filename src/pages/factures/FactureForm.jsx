@@ -19,7 +19,54 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Loader2 } from 'lucide-react';
 
-export default function FactureForm({ facture = null, onClose, onSaved }) {
+export function toLabel(v) {
+  if (v == null) return '';
+  if (typeof v === 'string' || typeof v === 'number') return String(v);
+  if (Array.isArray(v)) return toLabel(v[0]);
+  if (typeof v === 'object')
+    return (
+      v.nom ??
+      v.name ??
+      v.label ??
+      v.code ??
+      v.abbr ??
+      v.abreviation ??
+      v.symbol ??
+      v.symbole ??
+      v.id ??
+      ''
+    ) + '';
+  return String(v);
+}
+
+export function mapDbLineToUI(l) {
+  const q = parseFloat(l.quantite) || 0;
+  const pu = parseFloat(l.pu ?? l.prix_unitaire) || 0;
+  return {
+    id: l.id,
+    produit: l.produit ?? { id: l.produit_id },
+    produit_id: l.produit_id,
+    quantite: String(q),
+    unite: l.unite ?? l.produit?.unite_achat ?? l.produit?.unite ?? '',
+    total_ht:
+      l.total_ht != null ? String(l.total_ht) : (q * pu).toFixed(2),
+    pu: pu.toFixed(2),
+    pmp: l.pmp ?? l.produit?.pmp ?? 0,
+    tva: l.tva ?? l.produit?.tva_id ?? null,
+    zone_id: l.zone_id ?? l.produit?.zone_stock_id ?? '',
+    position: l.position ?? 0,
+    note: l.note ?? '',
+    actif: l.actif ?? true,
+    manuallyEdited: false,
+  };
+}
+
+export default function FactureForm({
+  facture = null,
+  lignes: lignesInit = [],
+  onClose,
+  onSaved,
+}) {
   const { createFacture, updateFacture } = useFactures();
   const { results: fournisseurOptions, searchFournisseurs } =
     useFournisseursAutocomplete();
@@ -43,19 +90,27 @@ export default function FactureForm({ facture = null, onClose, onSaved }) {
   const [numeroUsed, setNumeroUsed] = useState(false);
   const [statut, setStatut] = useState(facture?.statut || 'Brouillon');
   const defaultLigne = {
+    id: null,
+    produit: { id: '' },
     produit_id: '',
-    produit_nom: '',
     quantite: '1',
+    unite: '',
     total_ht: '0',
     pu: '0',
-    tva: 20,
-    zone_stock_id: '',
-    unite_id: '',
-    unite: '',
     pmp: 0,
+    tva: 20,
+    zone_id: '',
+    position: 0,
+    note: '',
+    actif: true,
     manuallyEdited: false,
   };
-  const [lignes, setLignes] = useState([defaultLigne]);
+  const [lignes, setLignes] = useState(
+    lignesInit.length ? lignesInit : [defaultLigne]
+  );
+  useEffect(() => {
+    if (lignesInit.length) setLignes(lignesInit);
+  }, [lignesInit]);
   const [totalHt, setTotalHt] = useState(
     facture?.total_ht !== undefined && facture?.total_ht !== null
       ? String(facture.total_ht)
@@ -67,29 +122,41 @@ export default function FactureForm({ facture = null, onClose, onSaved }) {
   const [loadingFacture, setLoadingFacture] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  async function tableExists(name) {
+    try {
+      const { error } = await supabase.from(name).select('id').limit(1);
+      return !error;
+    } catch {
+      return false;
+    }
+  }
   const loadFacture = async () => {
     if (!factureId) return;
     setLoadingFacture(true);
     try {
-      const { data: f, error } = await supabase
-        .from('factures')
-        .select(
-          `*,
-          fournisseur: fournisseurs(id, nom),
-          facture_lignes(
-            id,
-            quantite,
-            prix_unitaire,
-            tva,
-            zone_stock_id,
-            produit_id,
-            produit: produits(nom, unite_id, pmp, unite:unite_id(nom))
-          )`
-        )
-        .eq('id', factureId)
-        .eq('mama_id', mama_id)
-        .single();
-      if (error) throw error;
+      const tableLines = (await tableExists('facture_lignes'))
+        ? 'facture_lignes'
+        : 'lignes_facture';
+      const [headerRes, linesRes] = await Promise.all([
+        supabase
+          .from('factures')
+          .select(
+            'id, numero, date_facture, fournisseur_id, zone_id, tva_mode, actif, created_at, updated_at, statut, bon_livraison, total_ht'
+          )
+          .eq('id', factureId)
+          .eq('mama_id', mama_id)
+          .single(),
+        supabase
+          .from(tableLines)
+          .select(
+            `id, facture_id, produit_id, quantite, unite, total_ht, pu, pmp, tva, zone_id, position, note, actif, produit:produits(id, nom, code, ref_fournisseur, unite_achat, unite, tva_id, zone_stock_id)`
+          )
+          .eq('facture_id', factureId)
+          .order('position', { ascending: true }),
+      ]);
+      const { data: f, error: e1 } = headerRes;
+      const { data: lignesData, error: e2 } = linesRes;
+      if (e1 || e2) throw e1 || e2;
 
       setDate(f.date_facture || new Date().toISOString().slice(0, 10));
       setFournisseurId(f.fournisseur_id || '');
@@ -103,29 +170,17 @@ export default function FactureForm({ facture = null, onClose, onSaved }) {
           ? String(f.total_ht)
           : ''
       );
-      setFournisseurNom(f.fournisseur?.nom || '');
-      if (f.fournisseur?.nom) searchFournisseurs(f.fournisseur.nom);
+      if (f.fournisseur_id) {
+        const { data: fournisseur } = await supabase
+          .from('fournisseurs')
+          .select('nom')
+          .eq('id', f.fournisseur_id)
+          .single();
+        setFournisseurNom(fournisseur?.nom || '');
+        if (fournisseur?.nom) searchFournisseurs(fournisseur.nom);
+      }
 
-      const lignesData = f.facture_lignes || [];
-      const mapped = lignesData.map((l) => {
-        const q = parseFloat(l.quantite) || 0;
-        const pu = parseFloat(l.prix_unitaire) || 0;
-        const total = q * pu;
-        return {
-          produit_id: l.produit_id || '',
-          produit_nom: l.produit?.nom || '',
-          quantite: String(q),
-          total_ht: total.toFixed(2),
-          pu: pu.toFixed(2),
-          tva: l.tva ?? 20,
-          zone_stock_id: l.zone_stock_id || '',
-          unite_id: l.produit?.unite_id || '',
-          unite: l.produit?.unite?.nom || '',
-          pmp: l.produit?.pmp ?? 0,
-          manuallyEdited: false,
-        };
-      });
-
+      const mapped = (lignesData || []).map(mapDbLineToUI);
       setLignes(mapped.length ? mapped : [defaultLigne]);
     } catch (err) {
       console.error(err);
@@ -181,8 +236,8 @@ export default function FactureForm({ facture = null, onClose, onSaved }) {
   }, [searchProduits]);
 
   useEffect(() => {
-    loadFacture();
-  }, [factureId]);
+    if (!lignesInit.length) loadFacture();
+  }, [factureId, lignesInit.length]);
 
   const ecartClass = Math.abs(ecart) > 0.01 ? 'text-green-500' : '';
 
@@ -223,11 +278,14 @@ export default function FactureForm({ facture = null, onClose, onSaved }) {
       for (let i = 0; i < lignes.length; i++) {
         const ligne = lignes[i];
         const {
-          produit_nom: _n,
+          produit: _p,
           total_ht,
           pu,
           unite: _u,
-          pmp: _p,
+          pmp: _pmp,
+          note: _n,
+          position: _pos,
+          actif: _a,
           manuallyEdited: _m,
           ...rest
         } = ligne;
@@ -236,7 +294,7 @@ export default function FactureForm({ facture = null, onClose, onSaved }) {
         const totalSaisi = parseNum(total_ht);
         if (
           !ligne.produit_id ||
-          !ligne.zone_stock_id ||
+          !ligne.zone_id ||
           quantite <= 0 ||
           (!prixSaisi && !totalSaisi)
         ) {
@@ -254,7 +312,7 @@ export default function FactureForm({ facture = null, onClose, onSaved }) {
           quantite,
           prix_unitaire: prixFinal,
           tva: ligne.tva,
-          zone_stock_id: ligne.zone_stock_id,
+          zone_stock_id: ligne.zone_id,
           total: quantite * prixFinal,
           facture_id: fid,
           mama_id,
@@ -320,11 +378,11 @@ export default function FactureForm({ facture = null, onClose, onSaved }) {
         lignes.some(
           (l) =>
             l.produit_id ||
-            l.produit_nom ||
+            l.produit?.nom ||
             parseNum(l.quantite) !== 1 ||
             parseNum(l.total_ht) !== 0 ||
             l.tva !== 20 ||
-            l.zone_stock_id
+            l.zone_id
         ));
     if (hasContent && !window.confirm('Fermer sans enregistrer ?')) return;
     onClose?.();

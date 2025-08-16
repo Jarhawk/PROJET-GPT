@@ -184,8 +184,8 @@ export default function FactureLigne({
   };
 
   return (
-    <div className="flex h-10 items-center">
-      <div className="p-1 basis-[20%] shrink-0">
+    <div className="flex items-center gap-2">
+      <div className="basis-[20%] shrink-0">
         <AutoCompleteField
           value={ligne.produit_nom}
           onChange={handleProduitSelection}
@@ -195,19 +195,19 @@ export default function FactureLigne({
           className="h-10 w-full"
         />
       </div>
-      <div className="p-1 basis-[15%] shrink-0">
+      <div className="basis-[10%] shrink-0">
         <Input
           type="text"
           inputMode="decimal"
           required
-          className="h-10 w-full text-center rounded-xl"
+          className="h-10 w-full text-right rounded-xl"
           value={ligne.quantite}
           onChange={(e) => handleQuantite(e.target.value)}
           onBlur={() => handleQuantite(String(parseNum(ligne.quantite)))}
           onKeyDown={(e) => e.key === "Enter" && e.preventDefault()}
         />
       </div>
-      <div className="p-1 basis-[5%] shrink-0">
+      <div className="basis-[10%] shrink-0">
         <Input
           type="text"
           readOnly
@@ -217,11 +217,11 @@ export default function FactureLigne({
           aria-readonly="true"
         />
       </div>
-      <div className="p-1 basis-[15%] shrink-0">
+      <div className="basis-[10%] shrink-0">
         <div className="relative">
           <Input
             type="text"
-            className="h-10 w-full pr-6 rounded-xl"
+            className="h-10 w-full pr-6 text-right rounded-xl"
             value={ligne.total_ht}
             onChange={(e) => handleTotal(e.target.value)}
             onBlur={() => handleTotal(parseNum(ligne.total_ht).toFixed(2))}
@@ -230,24 +230,24 @@ export default function FactureLigne({
           <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm">€</span>
         </div>
       </div>
-      <div className="p-1 basis-[10%] shrink-0">
+      <div className="basis-[10%] shrink-0">
         <Input
           type="text"
           readOnly
           tabIndex={-1}
           value={ligne.pu}
-          className={`h-10 w-full text-center rounded-xl pointer-events-none select-none ${puNum > pmp ? 'text-red-500' : puNum < pmp ? 'text-green-500' : ''}`}
+          className={`h-10 w-full text-right rounded-xl pointer-events-none select-none ${puNum > pmp ? 'text-red-500' : puNum < pmp ? 'text-green-500' : ''}`}
           aria-readonly="true"
         />
       </div>
-      <div className="p-1 basis-[10%] shrink-0">
+      <div className="basis-[10%] shrink-0">
         <div className="relative">
           <Input
             type="text"
             readOnly
             tabIndex={-1}
             value={pmp.toFixed(2)}
-            className="h-10 w-full text-center pr-4 rounded-xl pointer-events-none select-none"
+            className="h-10 w-full text-right pr-4 rounded-xl pointer-events-none select-none"
             aria-readonly="true"
           />
           {puNum !== pmp && (
@@ -255,11 +255,11 @@ export default function FactureLigne({
           )}
         </div>
       </div>
-      <div className="p-1 basis-[5%] shrink-0">
+      <div className="basis-[10%] shrink-0">
         <div className="relative">
           <Input
             type="number"
-            className="h-10 w-full text-center rounded-xl pr-4"
+            className="h-10 w-full text-right rounded-xl pr-4"
             value={ligne.tva}
             onChange={(e) => onChange({ ...ligne, tva: e.target.value })}
             onBlur={handleTvaBlur}
@@ -267,7 +267,7 @@ export default function FactureLigne({
           <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm">%</span>
         </div>
       </div>
-      <div className="p-1 basis-[15%] shrink-0">
+      <div className="basis-[15%] shrink-0">
         <Select
           value={ligne.zone_stock_id}
           onChange={(e) => onChange({ ...ligne, zone_stock_id: e.target.value })}
@@ -286,7 +286,7 @@ export default function FactureLigne({
             ))}
         </Select>
       </div>
-      <div className="p-1 basis-[5%] shrink-0 text-right">
+      <div className="basis-[5%] shrink-0 flex justify-center">
         <Button
           type="button"
           size="sm"

@@ -427,16 +427,16 @@ export default function FactureForm({ facture = null, onClose, onSaved }) {
           <h3 className="font-semibold mb-2">Lignes produits</h3>
           <div className="mt-4 overflow-x-auto">
             <div className="min-w-[1100px] space-y-2">
-              <div className="flex text-xs font-semibold uppercase tracking-wider">
-                <div className="p-1 basis-[20%] shrink-0">Produit</div>
-                <div className="p-1 basis-[15%] shrink-0">Quantité</div>
-                <div className="p-1 basis-[5%] shrink-0">Unité</div>
-                <div className="p-1 basis-[15%] shrink-0">Total HT</div>
-                <div className="p-1 basis-[10%] shrink-0">PU</div>
-                <div className="p-1 basis-[10%] shrink-0">PMP</div>
-                <div className="p-1 basis-[5%] shrink-0">TVA</div>
-                <div className="p-1 basis-[15%] shrink-0">Zone</div>
-                <div className="p-1 basis-[5%] shrink-0 text-right">Actions</div>
+              <div className="flex items-center gap-2 text-xs uppercase tracking-wide opacity-70">
+                <div className="basis-[20%] shrink-0">Produit</div>
+                <div className="basis-[10%] shrink-0 text-right">Quantité</div>
+                <div className="basis-[10%] shrink-0">Unité</div>
+                <div className="basis-[10%] shrink-0 text-right">Total HT</div>
+                <div className="basis-[10%] shrink-0 text-right">PU</div>
+                <div className="basis-[10%] shrink-0 text-right">PMP</div>
+                <div className="basis-[10%] shrink-0">TVA</div>
+                <div className="basis-[15%] shrink-0">Zone</div>
+                <div className="basis-[5%] shrink-0 text-center">Actions</div>
               </div>
               {lignes.map((l, idx) => (
                 <FactureLigne

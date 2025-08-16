@@ -112,8 +112,15 @@ export default function FactureForm({
   const [lignes, setLignes] = useState(
     lignesInit.length ? lignesInit : [defaultLigne]
   );
+  const [lineKeys, setLineKeys] = useState(
+    (lignesInit.length ? lignesInit : [defaultLigne]).map(() => 0)
+  );
+  const [activeLine, setActiveLine] = useState(null);
   useEffect(() => {
-    if (lignesInit.length) setLignes(lignesInit);
+    if (lignesInit.length) {
+      setLignes(lignesInit);
+      setLineKeys(lignesInit.map(() => 0));
+    }
   }, [lignesInit]);
   const [totalHt, setTotalHt] = useState(
     facture?.total_ht !== undefined && facture?.total_ht !== null
@@ -433,6 +440,13 @@ export default function FactureForm({
         onKeyDown={(e) => {
           if (e.key === 'Enter') e.preventDefault();
         }}
+        autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize="none"
+        spellCheck={false}
+        data-lpignore="true"
+        data-form-type="other"
+        enterKeyHint="search"
         className="space-y-6"
       >
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -520,19 +534,29 @@ export default function FactureForm({
               <div className="flex items-center gap-2 text-xs uppercase tracking-wide opacity-70">
                 <div className="basis-[20%] shrink-0">Produit</div>
                 <div className="basis-[10%] shrink-0 text-right">Quantité</div>
-                <div className="basis-[7%] shrink-0">Unité</div>
+                <div className="basis-[10%] shrink-0">Unité</div>
                 <div className="basis-[10%] shrink-0 text-right">Total HT</div>
                 <div className="basis-[10%] shrink-0 text-right">PU</div>
                 <div className="basis-[10%] shrink-0 text-right">PMP</div>
-                <div className="basis-[7%] shrink-0">TVA</div>
+                <div className="basis-[10%] shrink-0">TVA</div>
                 <div className="basis-[15%] shrink-0">Zone</div>
                 <div className="basis-[5%] shrink-0 text-center">Actions</div>
               </div>
               {lignes.map((l, idx) => (
                 <FactureLigne
-                  key={idx}
+                  key={`${idx}-${lineKeys[idx]}`}
                   index={idx}
                   ligne={l}
+                  lineKey={lineKeys[idx]}
+                  onProduitFocus={(i) => {
+                    setLineKeys((ks) => {
+                      if (activeLine == null || activeLine === i) return ks;
+                      const arr = [...ks];
+                      arr[activeLine] = (arr[activeLine] || 0) + 1;
+                      return arr;
+                    });
+                    setActiveLine(i);
+                  }}
                   onChange={(ligne) => {
                     setLignes((ls) => {
                       const newLs = ls.map((it, i) => (i === idx ? ligne : it));
@@ -542,9 +566,10 @@ export default function FactureForm({
                       return newLs;
                     });
                   }}
-                  onRemove={(i) =>
-                    setLignes((ls) => ls.filter((_, j) => j !== i))
-                  }
+                  onRemove={(i) => {
+                    setLignes((ls) => ls.filter((_, j) => j !== i));
+                    setLineKeys((ks) => ks.filter((_, j) => j !== i));
+                  }}
                 />
               ))}
             </div>
@@ -552,7 +577,10 @@ export default function FactureForm({
           <Button
             type="button"
             className="mt-4"
-            onClick={() => setLignes((ls) => [...ls, { ...defaultLigne }])}
+            onClick={() => {
+              setLignes((ls) => [...ls, { ...defaultLigne }]);
+              setLineKeys((ks) => [...ks, 0]);
+            }}
           >
             Ajouter ligne
           </Button>

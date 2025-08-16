@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useId } from 'react';
 import { Input } from '@/components/ui/input';
-import supabase from '@/lib/supabaseClient';
-import { useAuth } from '@/hooks/useAuth';
+import { useProductSearch } from '@/hooks/useProductSearch';
+import ProductPickerModal from './ProductPickerModal';
 
 export default function AutocompleteProduit({
   value,
@@ -9,101 +9,78 @@ export default function AutocompleteProduit({
   required = false,
   placeholder = '',
   className = '',
+  lineKey = 0,
+  onFocus,
 }) {
-  const { userData } = useAuth();
-  const mamaId = userData?.mama_id;
   const [inputValue, setInputValue] = useState(value?.nom || '');
-  const [options, setOptions] = useState([]);
+  const [selected, setSelected] = useState(value?.id ? value : null);
+  const [search, setSearch] = useState('');
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
-  const abortRef = useRef();
-  const debounceRef = useRef();
+  const [modalOpen, setModalOpen] = useState(false);
   const composing = useRef(false);
   const inputRef = useRef(null);
   const listId = useId();
+  const nameId = useId();
+
+  const { data: options = [] } = useProductSearch(search, { enabled: open || modalOpen });
 
   useEffect(() => {
+    const el = inputRef.current;
+    if (el) {
+      el.setAttribute('autocomplete', 'off');
+      el.setAttribute('autocorrect', 'off');
+      el.setAttribute('autocapitalize', 'none');
+      el.setAttribute('spellcheck', 'false');
+      el.setAttribute('data-lpignore', 'true');
+      el.setAttribute('data-form-type', 'other');
+      el.setAttribute('enterkeyhint', 'search');
+      el.name = `prod-${nameId}`;
+    }
+  }, [nameId]);
+
+  // Reset when line changes
+  useEffect(() => {
     setInputValue(value?.nom || '');
-  }, [value?.id, value?.nom]);
+    setSelected(value?.id ? value : null);
+    setSearch('');
+    setOpen(false);
+    setActive(-1);
+  }, [lineKey, value?.id, value?.nom]);
 
-  const normalize = (list) =>
-    (list || []).map((p) => ({
-      id: p.id,
-      nom: p.nom,
-      code: p.code,
-      unite_achat: p.unite_achat || p.unite,
-      tva: p.tva ?? p.tva_rate,
-      zone_id: p.zone_id ?? p.zone_stock_id,
-      pmp: p.pmp ?? p.pmp_ht,
-      prix_unitaire:
-        p.prix_unitaire ?? p.price_ht ?? p.dernier_prix ?? 0,
-    }));
-
-  const fetchProduits = async (q, signal) => {
-    if (!mamaId) return [];
-    if (!q) return [];
-    q = q.trim();
-    try {
-      const { data, error } = await supabase.rpc('search_produits', { q }, { signal });
-      if (!error && !signal.aborted) return normalize(data).slice(0, 20);
-    } catch (e) {
-      if (e.name === 'AbortError') throw e;
+  // debounce search
+  useEffect(() => {
+    if (composing.current) return;
+    const val = inputValue.trim();
+    if (val.length < 2) {
+      const t = setTimeout(() => setSearch(''), 250);
+      return () => clearTimeout(t);
     }
-    const tables = ['v_produits_actifs', 'produits'];
-    for (const t of tables) {
-      try {
-        let rq = supabase
-          .from(t)
-          .select(
-            'id, nom, code, unite_achat, unite, tva, tva_rate, zone_id, zone_stock_id, pmp, pmp_ht, prix_unitaire, price_ht, dernier_prix'
-          )
-          .eq('mama_id', mamaId)
-          .limit(20);
-        try { rq = rq.eq('actif', true); } catch {}
-        rq = rq.or(`nom.ilike.%${q}%,code.ilike.%${q}%`);
-        rq = rq.order('nom', { ascending: true });
-        const { data, error } = await rq;
-        if (!error && !signal.aborted) return normalize(data);
-      } catch (e) {
-        if (e.name === 'AbortError') throw e;
-      }
-    }
-    return [];
-  };
-
-  const triggerSearch = (q) => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (abortRef.current) abortRef.current.abort();
-    if (!q) { setOptions([]); return; }
-    debounceRef.current = setTimeout(async () => {
-      const controller = new AbortController();
-      abortRef.current = controller;
-      try {
-        const res = await fetchProduits(q, controller.signal);
-        if (!controller.signal.aborted) {
-          setOptions(res);
-          setOpen(true);
-          setActive(-1);
-        }
-      } catch (e) {
-        if (e.name !== 'AbortError') console.error(e);
-      }
+    const t = setTimeout(() => {
+      setSearch(val);
+      setOpen(true);
     }, 250);
-  };
+    return () => clearTimeout(t);
+  }, [inputValue]);
+
+  useEffect(() => {
+    setActive(-1);
+  }, [options]);
 
   const handleInput = (e) => {
     const val = e.target.value;
     setInputValue(val);
     onChange?.({ id: '', nom: val });
-    if (!composing.current) triggerSearch(val);
   };
 
-  const select = (opt) => {
-    if (!opt) return;
-    setInputValue(opt.nom);
+  const select = (prod) => {
+    if (!prod) return;
+    setInputValue(prod.nom);
+    setSelected(prod);
     setOpen(false);
     setActive(-1);
-    onChange?.(opt);
+    setSearch('');
+    onChange?.(prod);
   };
 
   const handleKey = (e) => {
@@ -123,32 +100,60 @@ export default function AutocompleteProduit({
       setOpen(false);
     } else if (e.key === 'Tab') {
       if (open && active >= 0) select(options[active]);
+    } else if (e.key === 'F2') {
+      e.preventDefault();
+      setModalOpen(true);
     }
   };
 
   const handleBlur = () => {
-    setTimeout(() => setOpen(false), 100);
-    if (!inputValue) onChange?.({ id: '', nom: '' });
+    setTimeout(() => {
+      setOpen(false);
+      setActive(-1);
+    }, 100);
+    if (!selected || inputValue !== selected.nom) {
+      setInputValue('');
+      setSelected(null);
+      setSearch('');
+      onChange?.({ id: '', nom: '' });
+    }
   };
 
   return (
-    <div className="relative" ref={inputRef}>
+    <div className="relative">
       <Input
+        ref={inputRef}
         value={inputValue}
         onChange={handleInput}
-        onCompositionStart={() => { composing.current = true; }}
-        onCompositionEnd={(e) => { composing.current = false; triggerSearch(e.target.value); }}
+        onCompositionStart={() => {
+          composing.current = true;
+        }}
+        onCompositionEnd={(e) => {
+          composing.current = false;
+          setInputValue(e.target.value);
+        }}
         onKeyDown={handleKey}
         onBlur={handleBlur}
+        onFocus={onFocus}
         role="combobox"
         aria-autocomplete="list"
         aria-expanded={open}
         aria-controls={listId}
-        aria-activedescendant={active >= 0 ? `${listId}-opt-${active}` : undefined}
+        aria-activedescendant={
+          active >= 0 ? `${listId}-opt-${active}` : undefined
+        }
         placeholder={placeholder}
         required={required}
         className={className}
       />
+      <button
+        type="button"
+        aria-label="Sélecteur de produits"
+        className="absolute right-1 top-1/2 -translate-y-1/2 p-1"
+        onClick={() => setModalOpen(true)}
+      >
+        🔍
+      </button>
       {open && options.length > 0 && (
         <ul
           id={listId}
@@ -162,14 +167,24 @@ export default function AutocompleteProduit({
               role="option"
               aria-selected={idx === active}
               className={`px-2 py-1 cursor-pointer ${idx === active ? 'bg-white/20' : ''}`}
-              onMouseDown={(e) => { e.preventDefault(); select(opt); }}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                select(opt);
+              }}
             >
               {opt.nom}
             </li>
           ))}
         </ul>
       )}
+      <ProductPickerModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSelect={(p) => {
+          select(p);
+          setModalOpen(false);
+        }}
+      />
     </div>
   );
 }
-

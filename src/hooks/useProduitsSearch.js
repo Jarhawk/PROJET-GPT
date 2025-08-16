@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import supabase from '@/lib/supabaseClient';
 
-function useDebounced(value, delay = 250) {
+function useDebounced(value, delay = 300) {
   const [debounced, setDebounced] = useState(value);
 
   useEffect(() => {
@@ -15,48 +15,68 @@ function useDebounced(value, delay = 250) {
   return debounced;
 }
 
-export function useProduitsSearch(term, { enabled = true } = {}) {
+export function useProduitsSearch(term = '', { enabled = true } = {}) {
   const { mama_id } = useAuth();
-  const debounced = useDebounced(term, 250);
+  const debounced = useDebounced(term, 300);
 
   return useQuery({
     queryKey: ['produits-search', mama_id, debounced],
-    enabled:
-      enabled && Boolean(mama_id) && (debounced || '').trim().length >= 1,
+    enabled: enabled && Boolean(mama_id),
     staleTime: 0,
     gcTime: 0,
-    queryFn: async () => {
-      if (!mama_id || !(debounced || '').trim()) return [];
-      const q = debounced.trim();
-      const { data, error } = await supabase
+    keepPreviousData: false,
+    queryFn: async ({ signal }) => {
+      if (!mama_id) return [];
+      const q = (debounced || '').trim();
+
+      // If only one character is provided, skip the search
+      if (q.length === 1) return [];
+
+      let rq = supabase
         .from('produits')
         .select(
-          'id, nom, code, shortcode, tva, dernier_prix, unite_id, unite:unite_id (nom)'
+          'id, nom, code, barcode, synonyms, tva, dernier_prix, unite_id, unite:unite_id (nom)'
         )
         .eq('mama_id', mama_id)
-        .eq('actif', true)
-        .or(
-          `nom.ilike.%${q}%,code.ilike.%${q}%,shortcode.ilike.%${q}%`
-        )
-        .order('nom', { ascending: true })
-        .limit(50);
+        .eq('actif', true);
 
+      try {
+        rq = rq.abortSignal(signal);
+      } catch {}
+
+      if (q.length >= 2) {
+        rq = rq
+          .or(
+            `nom.ilike.%${q}%,code.ilike.%${q}%,barcode.ilike.%${q}%,synonyms.ilike.%${q}%`
+          )
+          .order('nom', { ascending: true })
+          .limit(50);
+      } else {
+        // Default list when query is empty: show recent products
+        rq = rq.order('updated_at', { ascending: false }).limit(20);
+      }
+
+      const { data, error } = await rq;
       if (error || !Array.isArray(data)) return [];
 
       const results = data.map((p) => ({
         id: p.id,
         nom: p.nom,
         code: p.code || '',
-        shortcode: p.shortcode || '',
+        barcode: p.barcode || '',
         tva: p.tva ?? 0,
         dernier_prix: p.dernier_prix ?? 0,
         unite_id: p.unite_id || '',
         unite: p.unite?.nom || '',
       }));
 
-      return results.length > 0
-        ? results
-        : [{ id: '', nom: 'Pas de résultat' }];
+      if (q.length >= 2) {
+        return results.length > 0
+          ? results
+          : [{ id: '', nom: 'Aucun résultat' }];
+      }
+
+      return results;
     },
   });
 }

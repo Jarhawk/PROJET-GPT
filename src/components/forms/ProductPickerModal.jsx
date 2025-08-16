@@ -4,7 +4,7 @@ import SmartDialog from '@/components/ui/SmartDialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
-import { useProductSearch } from '@/hooks/useProductSearch';
+import { useProduitsSearch } from '@/hooks/useProduitsSearch';
 
 function highlight(str, q) {
   if (!q) return str;
@@ -23,7 +23,7 @@ export default function ProductPickerModal({ open, onClose, onSelect }) {
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
-  const { data: results = [] } = useProductSearch(query, { enabled: open });
+  const { data: results = [] } = useProduitsSearch(query, { enabled: open });
   const pages = Math.max(1, Math.ceil(results.length / limit));
   const start = (page - 1) * limit;
   const visible = results.slice(start, start + limit);

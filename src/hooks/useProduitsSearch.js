@@ -32,10 +32,12 @@ export function useProduitsSearch(term = '', { enabled = true } = {}) {
       // If only one character is provided, skip the search
       if (q.length === 1) return [];
 
+      console.info('[produits] search', { q, mama_id });
+
       let rq = supabase
         .from('produits')
         .select(
-          'id, nom, code, barcode, synonyms, tva, dernier_prix, unite_id, unite:unite_id (nom)'
+          'id, nom, code, barcode, synonyms, tva, tva_rate, dernier_prix, prix_unitaire, price_ht, pmp, pmp_ht, unite_id, unite:unite_id (nom), zone_id, zone_stock_id'
         )
         .eq('mama_id', mama_id)
         .eq('actif', true);
@@ -64,10 +66,13 @@ export function useProduitsSearch(term = '', { enabled = true } = {}) {
         nom: p.nom,
         code: p.code || '',
         barcode: p.barcode || '',
-        tva: p.tva ?? 0,
-        dernier_prix: p.dernier_prix ?? 0,
+        tva: p.tva ?? p.tva_rate ?? 0,
+        prix_unitaire: p.prix_unitaire ?? p.price_ht ?? p.dernier_prix ?? 0,
+        pmp: p.pmp ?? p.pmp_ht ?? 0,
         unite_id: p.unite_id || '',
         unite: p.unite?.nom || '',
+        unite_achat: p.unite_achat || p.unite?.nom || '',
+        zone_id: p.zone_id || p.zone_stock_id || '',
       }));
 
       if (q.length >= 2) {

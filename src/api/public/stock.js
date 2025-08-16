@@ -33,7 +33,17 @@ router.get('/', async (req, res) => {
       .eq('requisitions.statut', 'réalisée');
     if (since) query = query.gte('requisitions.date_requisition', since);
     if (type) void type; // les lignes de réquisition sont des sorties
-    query = query.order('requisitions.' + sortBy, { ascending: order !== 'desc' });
+    let column = sortBy;
+    let ascending = order !== 'desc';
+    if (column.includes('.')) {
+      const parts = column.split('.');
+      const dir = parts.pop();
+      if (dir === 'asc' || dir === 'desc') {
+        ascending = dir === 'asc';
+        column = parts.join('.');
+      }
+    }
+    query = query.order('requisitions.' + column, { ascending });
     const p = Math.max(parseInt(page, 10), 1);
     const l = Math.max(parseInt(limit, 10), 1);
     const start = (p - 1) * l;

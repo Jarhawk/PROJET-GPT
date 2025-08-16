@@ -34,8 +34,18 @@ router.get('/', async (req, res) => {
     if (famille) query = query.ilike('famille', `%${famille}%`);
     if (search) query = query.ilike('nom', `%${search}%`);
     if (actif !== undefined) query = query.eq('actif', actif === 'true');
+    let sortField = sortBy;
+    let ascending = order !== 'desc';
+    if (sortField.includes('.')) {
+      const parts = sortField.split('.');
+      const dir = parts.pop();
+      if (dir === 'asc' || dir === 'desc') {
+        ascending = dir === 'asc';
+        sortField = parts.join('.');
+      }
+    }
     query = query
-      .order(sortBy, { ascending: order !== 'desc' })
+      .order(sortField, { ascending })
       .order('nom', { ascending: true });
     const p = Math.max(parseInt(page, 10), 1);
     const l = Math.max(parseInt(limit, 10), 1);

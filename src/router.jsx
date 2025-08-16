@@ -14,6 +14,8 @@ import Login from "@/pages/auth/Login";
 import Unauthorized from "@/pages/auth/Unauthorized";
 import Pending from "@/pages/auth/Pending";
 import Blocked from "@/pages/auth/Blocked";
+import ResetPassword from "@/pages/auth/ResetPassword";
+import UpdatePassword from "@/pages/auth/UpdatePassword";
 import OnboardingUtilisateur from "@/pages/onboarding/OnboardingUtilisateur";
 import DebugAuth from "@/pages/debug/DebugAuth";
 import AccessExample from "@/pages/debug/AccessExample";
@@ -232,6 +234,8 @@ export default function Router() {
         <Route path="/accueil" element={<Accueil />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/update-password" element={<UpdatePassword />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/create-mama" element={<CreateMama />} />

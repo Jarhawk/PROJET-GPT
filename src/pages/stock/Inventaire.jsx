@@ -19,7 +19,7 @@ export default function InventairePage() {
       <h1 className="text-xl font-bold mb-4">Inventaires</h1>
       <TableHeader className="justify-end mb-2">
         <Button asChild>
-          <Link to="/stock/inventaires/new">Créer un nouvel inventaire</Link>
+          <Link to="/inventaire/new">Créer un nouvel inventaire</Link>
         </Button>
       </TableHeader>
       <ListingContainer>

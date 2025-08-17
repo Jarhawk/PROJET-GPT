@@ -1,6 +1,12 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
-import SmartDialog from "@/components/ui/SmartDialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/SmartDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import * as XLSX from "xlsx";
@@ -27,8 +33,12 @@ export default function FactureImportModal({ open, onClose, onImport }) {
   const invalid = row => !row.produit || !row.quantite;
 
   return (
-    <SmartDialog open={open} onClose={onClose} title="Import Excel">
-      <div className="space-y-4">
+    <Dialog open={open} onOpenChange={isOpen => !isOpen && onClose?.()}>
+      <DialogContent className="space-y-4">
+        <DialogTitle>Import Excel</DialogTitle>
+        <DialogDescription className="sr-only">
+          Importer une facture depuis un fichier Excel
+        </DialogDescription>
         <div className="flex items-center gap-2">
           <Input type="file" accept=".xlsx,.xls" onChange={handleFile} />
           <a
@@ -76,11 +86,13 @@ export default function FactureImportModal({ open, onClose, onImport }) {
           >
             Importer
           </Button>
-          <Button type="button" variant="outline" onClick={onClose}>
-            Fermer
-          </Button>
+          <DialogClose asChild>
+            <Button type="button" variant="outline">
+              Fermer
+            </Button>
+          </DialogClose>
         </div>
-      </div>
-    </SmartDialog>
+      </DialogContent>
+    </Dialog>
   );
 }

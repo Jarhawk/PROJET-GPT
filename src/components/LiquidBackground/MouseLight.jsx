@@ -13,7 +13,7 @@ export default function MouseLight({ className = '' }) {
       className={`hidden md:block fixed inset-0 pointer-events-none mix-blend-overlay ${className}`}
       style={{
         background: `radial-gradient(circle at ${pos.x}px ${pos.y}px, rgba(255,255,255,0.25), transparent 80%)`,
-        transition: 'background 0.15s',
+        transition: 'background-color 0.15s ease',
       }}
     />
   );

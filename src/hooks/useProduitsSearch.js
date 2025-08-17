@@ -29,9 +29,9 @@ function normalize(list = []) {
   }));
 }
 
-export function useProduitsSearch(term = '', { enabled = true } = {}) {
+export function useProduitsSearch(term = '', { enabled = true, debounce = 300 } = {}) {
   const { mama_id } = useAuth();
-  const debounced = useDebounced(term, 300);
+  const debounced = useDebounced(term, debounce);
 
   return useQuery({
     queryKey: ['produits-search', mama_id, debounced],

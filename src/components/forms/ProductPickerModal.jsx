@@ -23,7 +23,13 @@ export default function ProductPickerModal({ open, onClose, onSelect }) {
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
-  const { data: results = [] } = useProduitsSearch(query, { enabled: open });
+  const [recents, setRecents] = useState([]);
+  const searchEnabled = open && query.trim().length >= 2;
+  const { data: searchResults = [] } = useProduitsSearch(query, {
+    enabled: searchEnabled,
+    debounce: 250,
+  });
+  const results = searchEnabled ? searchResults : recents;
   const pages = Math.max(1, Math.ceil(results.length / limit));
   const start = (page - 1) * limit;
   const visible = results.slice(start, start + limit);
@@ -34,8 +40,35 @@ export default function ProductPickerModal({ open, onClose, onSelect }) {
       setQuery('');
       setPage(1);
       setActive(-1);
+      try {
+        const stored = JSON.parse(localStorage.getItem('recent-products') || '[]');
+        setRecents(Array.isArray(stored) ? stored : []);
+      } catch {
+        setRecents([]);
+      }
     }
   }, [open]);
+
+  const addRecent = useCallback((p) => {
+    setRecents((prev) => {
+      const filtered = prev.filter((r) => r.id !== p.id);
+      const next = [p, ...filtered].slice(0, 10);
+      try {
+        localStorage.setItem('recent-products', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }, []);
+
+  const selectProduct = useCallback(
+    (p) => {
+      if (!p) return;
+      addRecent(p);
+      onSelect?.(p);
+      onClose?.();
+    },
+    [addRecent, onClose, onSelect]
+  );
 
   const handleKey = useCallback((e) => {
     if (e.key === 'ArrowDown') {
@@ -47,16 +80,20 @@ export default function ProductPickerModal({ open, onClose, onSelect }) {
     } else if (e.key === 'Enter') {
       if (active >= 0) {
         e.preventDefault();
-        onSelect?.(visible[active]);
-        onClose?.();
+        selectProduct(visible[active]);
       }
     } else if (e.key === 'Escape') {
       onClose?.();
     }
-  }, [active, visible, onSelect, onClose]);
+  }, [active, visible, selectProduct, onClose]);
 
   return (
-    <SmartDialog open={open} onClose={onClose} title="Sélecteur de produits">
+    <SmartDialog
+      open={open}
+      onClose={onClose}
+      title="Sélecteur de produits"
+      description="Recherche et sélection d'un produit"
+    >
       <div className="space-y-3" onKeyDown={handleKey}>
         <Input
           autoFocus
@@ -92,10 +129,7 @@ export default function ProductPickerModal({ open, onClose, onSelect }) {
                 key={p.id}
                 className={`cursor-pointer ${idx === active ? 'bg-white/20' : ''}`}
                 onMouseEnter={() => setActive(idx)}
-                onDoubleClick={() => {
-                  onSelect?.(p);
-                  onClose?.();
-                }}
+                onDoubleClick={() => selectProduct(p)}
                 onClick={() => {
                   setActive(idx);
                 }}
@@ -112,7 +146,7 @@ export default function ProductPickerModal({ open, onClose, onSelect }) {
             {!visible.length && (
               <tr>
                 <td className="p-2 text-center text-sm opacity-70" colSpan={7}>
-                  Aucun résultat
+                  {searchEnabled ? 'Aucun résultat' : 'Aucun récent'}
                 </td>
               </tr>
             )}

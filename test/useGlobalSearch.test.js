@@ -2,12 +2,17 @@
 import { renderHook, act } from '@testing-library/react';
 import { vi, beforeEach, test, expect } from 'vitest';
 
-const prodQuery = { ilike: vi.fn(() => prodQuery), eq: vi.fn(() => prodQuery), select: vi.fn(() => prodQuery), limit: vi.fn(() => Promise.resolve({ data: [{ id: 'p1', nom: 'Prod' }], error: null })) };
-const fourQuery = { ilike: vi.fn(() => fourQuery), eq: vi.fn(() => fourQuery), select: vi.fn(() => fourQuery), limit: vi.fn(() => Promise.resolve({ data: [{ id: 'f1', nom: 'Four' }], error: null })) };
-const fromMock = vi.fn(source => ({ select: source === 'produits' ? prodQuery.select : fourQuery.select }));
+const prodQuery = {
+  ilike: vi.fn(() => prodQuery),
+  eq: vi.fn(() => prodQuery),
+  select: vi.fn(() => prodQuery),
+  limit: vi.fn(() => Promise.resolve({ data: [{ id: 'p1', nom: 'Prod' }], error: null })),
+};
+const fromMock = vi.fn(() => ({ select: prodQuery.select }));
 
-vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
+vi.mock('@/lib/supabaseClient', () => ({ default: { from: fromMock } }));
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
+vi.mock('@/hooks/data/useFournisseurs', () => ({ default: () => ({ data: [{ id: 'f1', nom: 'Four' }] }) }));
 
 let useGlobalSearch;
 
@@ -18,16 +23,14 @@ beforeEach(async () => {
   prodQuery.ilike.mockClear();
   prodQuery.eq.mockClear();
   prodQuery.limit.mockClear();
-  fourQuery.select.mockClear();
-  fourQuery.ilike.mockClear();
-  fourQuery.eq.mockClear();
-  fourQuery.limit.mockClear();
 });
 
-test('search queries products and fournisseurs', async () => {
+test('search queries products and filters fournisseurs from hook', async () => {
   const { result } = renderHook(() => useGlobalSearch());
-  await act(async () => { await result.current.search('boeuf'); });
+  await act(async () => {
+    await result.current.search('boeuf');
+  });
   expect(fromMock).toHaveBeenCalledWith('produits');
-  expect(fromMock).toHaveBeenCalledWith('fournisseurs');
+  expect(fromMock).not.toHaveBeenCalledWith('fournisseurs');
   expect(result.current.results.length).toBe(2);
 });

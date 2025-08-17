@@ -1,9 +1,14 @@
 import { motion as Motion } from 'framer-motion';
 import useTopFournisseurs from '@/hooks/gadgets/useTopFournisseurs';
+import useFournisseurs from '@/hooks/data/useFournisseurs';
 import LoadingSkeleton from '@/components/ui/LoadingSkeleton';
 
 export default function GadgetTopFournisseurs() {
   const { data, loading } = useTopFournisseurs();
+  const { data: fournisseurs = [] } = useFournisseurs({ actif: true });
+
+  const nameFor = (id) =>
+    fournisseurs.find((f) => f.id === id)?.nom || `Fournisseur ${id}`;
 
   if (loading) {
     return <LoadingSkeleton className="h-32 w-full rounded-2xl" />;
@@ -23,7 +28,7 @@ export default function GadgetTopFournisseurs() {
         {data.map((f) => (
           <li key={f.id} className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span>Fournisseur {f.id}</span>
+              <span>{nameFor(f.id)}</span>
             </div>
             <span className="font-semibold">{f.montant.toFixed(2)} €</span>
           </li>

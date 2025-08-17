@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useId, forwardRef, useImperativeHandle } f
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
 import { useProduitsSearch } from '@/hooks/useProduitsSearch';
+import useDebounce from '@/hooks/useDebounce';
 import ProductPickerModal from './ProductPickerModal';
 
 function AutocompleteProduit(
@@ -48,20 +49,19 @@ function AutocompleteProduit(
     setActive(-1);
   }, [lineKey, value?.id, value?.nom]);
 
-  // debounce search
+  const debouncedInput = useDebounce(inputValue, 250);
+
   useEffect(() => {
     if (composing.current) return;
-    const val = inputValue.trim();
+    const val = debouncedInput.trim();
     if (val.length < 2) {
-      const t = setTimeout(() => setSearch(''), 250);
-      return () => clearTimeout(t);
+      setSearch('');
+      setOpen(false);
+      return;
     }
-    const t = setTimeout(() => {
-      setSearch(val);
-      setOpen(true);
-    }, 250);
-    return () => clearTimeout(t);
-  }, [inputValue]);
+    setSearch(val);
+    setOpen(true);
+  }, [debouncedInput]);
 
   useEffect(() => {
     setActive(-1);

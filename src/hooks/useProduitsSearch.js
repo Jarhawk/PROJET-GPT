@@ -1,18 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import useDebounce from '@/hooks/useDebounce';
 import supabase from '@/lib/supabaseClient';
-
-function useDebounced(value, delay = 300) {
-  const [debounced, setDebounced] = useState(value);
-
-  useEffect(() => {
-    const t = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(t);
-  }, [value, delay]);
-
-  return debounced;
-}
 
 function normalize(list = []) {
   return list.map((p) => ({
@@ -26,7 +15,7 @@ function normalize(list = []) {
 }
 
 export function useProduitsSearch(term = '', mamaId, { enabled = true, debounce = 300 } = {}) {
-  const debounced = useDebounced(term, debounce);
+  const debounced = useDebounce(term, debounce);
 
   return useQuery({
     queryKey: ['produits-search', mamaId, debounced],

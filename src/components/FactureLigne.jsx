@@ -227,7 +227,7 @@ export default function FactureLigne({
         <ProductPickerModal
           open={pickerOpen}
           onOpenChange={setPickerOpen}
-          onPick={(p) => {
+          onSelect={(p) => {
             handleProduitSelection(p);
           }}
         />

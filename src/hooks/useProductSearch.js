@@ -1,22 +1,20 @@
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import useSupabaseClient from '@/hooks/useSupabaseClient'
+import { useMultiMama } from '@/context/MultiMamaContext'
 
 const ESCAPE_RE = /[%_]/g
 const escapeLike = (s) => s.replace(ESCAPE_RE, '\\$&')
 
-/**
- * Recherche de produits PAR NOM UNIQUEMENT.
- * - Ne sélectionne QUE les colonnes sûres ("id","nom") pour éviter les 42703.
- * - Filtre par mama_id.
- * - Debounce géré par le composant (on lui passe term déjà debounced si besoin).
- */
-export default function useProductSearch({ mamaId, term = '', open = true, limit = 50 }) {
+export default function useProductSearch(initial = '') {
+  const { mamaActif: mamaId } = useMultiMama()
+  const [query, setQuery] = useState(initial)
+  const q = (query ?? '').trim()
   const supabase = useSupabaseClient()
-  const q = (term ?? '').trim()
 
-  return useQuery({
-    queryKey: ['produits:search:nom', mamaId, q, open, limit],
-    enabled: !!mamaId && !!open,
+  const { data = [], isFetching, error } = useQuery({
+    queryKey: ['produits:picker', mamaId, q],
+    enabled: !!mamaId,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
     keepPreviousData: true,
@@ -24,18 +22,18 @@ export default function useProductSearch({ mamaId, term = '', open = true, limit
     queryFn: async () => {
       let req = supabase
         .from('produits')
-        .select('id,nom')            // ⬅️ ne plus demander unite_achat / tva / barcode / etc.
+        .select('id, nom, code, unite')
         .eq('mama_id', mamaId)
         .order('nom', { ascending: true })
-        .limit(limit)
-
+        .limit(100)
       if (q) {
         req = req.ilike('nom', `%${escapeLike(q)}%`)
       }
-
       const { data, error } = await req
       if (error) throw error
       return data ?? []
     }
   })
+
+  return { query, setQuery, isLoading: isFetching, results: data, error }
 }

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/SmartDialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useProductSearch } from '@/hooks/useProductSearch';
+import useProductSearch from '@/hooks/useProductSearch';
 
 export default function ProductPickerModal({ open, onOpenChange, mamaId, onPick }) {
   const [term, setTerm] = useState('');

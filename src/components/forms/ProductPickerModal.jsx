@@ -1,74 +1,77 @@
-import { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/SmartDialog';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import useProductSearch from '@/hooks/useProductSearch';
+import useDebounce from '@/hooks/useDebounce';
+import { useMemo, useState, useEffect } from 'react';
+import { useMultiMama } from '@/context/MultiMamaContext';
 
-export default function ProductPickerModal({ open, onOpenChange, mamaId, onPick }) {
+export default function ProductPickerModal({ open, onOpenChange, onPick }) {
+  const { mamaActif: currentMamaId } = useMultiMama();
   const [term, setTerm] = useState('');
-  const inputRef = useRef(null);
+  const debounced = useDebounce(term, 200);
 
-  const { data: produits = [], isFetching, isError, error } =
-    useProductSearch({ mamaId, term, open, limit: 50 });
+  const { data: produits, isFetching, error } = useProductSearch({
+    mamaId: currentMamaId,
+    term: debounced,
+    open,
+    limit: 50,
+  });
 
   useEffect(() => {
-    if (open) setTimeout(() => inputRef.current?.focus(), 0);
-    else setTerm('');
+    if (!open) setTerm('');
   }, [open]);
-
-  const first = produits[0];
-  const onKeyDown = (e) => {
-    if (e.key === 'Enter' && first) {
-      e.preventDefault();
-      onPick?.(first);
-      onOpenChange?.(false);
-    }
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogTitle>Sélecteur de produits</DialogTitle>
-        <DialogDescription>
-          Recherchez un produit par son nom. Tapez et appuyez sur Entrée pour choisir le 1er résultat.
-        </DialogDescription>
+        <DialogDescription>Recherchez un produit par son nom.</DialogDescription>
 
-        <div className="space-y-3">
-          <Input
-            ref={inputRef}
-            value={term}
-            onChange={(e) => setTerm(e.target.value)}
-            onKeyDown={onKeyDown}
-            placeholder="Nom du produit…"
-          />
+        <input
+          autoFocus
+          type="text"
+          value={term}
+          onChange={(e) => setTerm(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && produits?.length) {
+              onPick?.(produits[0]);
+              onOpenChange?.(false);
+            }
+          }}
+          placeholder="Saisir le nom du produit…"
+          className="w-full rounded-md border px-3 py-2"
+        />
 
-          {isError && <div className="text-sm text-red-600">Erreur : {error?.message}</div>}
-          {isFetching && <div className="text-sm text-muted-foreground">Recherche…</div>}
-          {!isFetching && produits.length === 0 && (
-            <div className="text-sm text-muted-foreground">
-              {term ? <>Aucun résultat pour « {term} ».</> : <>Aucun produit.</>}
-            </div>
-          )}
+        {error && (
+          <div className="text-red-600 text-sm mt-2">
+            Erreur de recherche : {error.message}
+          </div>
+        )}
 
-          {produits.length > 0 && (
-            <ul className="max-h-80 overflow-auto divide-y rounded-md border">
+        <div className="mt-3 max-h-72 overflow-auto border rounded-md">
+          {isFetching && !produits?.length ? (
+            <div className="p-3 text-sm opacity-70">Chargement…</div>
+          ) : produits?.length ? (
+            <ul>
               {produits.map((p) => (
-                <li key={p.id} className="p-2 flex items-center justify-between">
-                  <div className="min-w-0">
-                    <div className="font-medium truncate">{p.nom}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {p.code ?? '—'} · {p.unite_achat ?? p.unite_vente ?? 'u.'}
-                    </div>
-                  </div>
-                  <Button size="sm" onClick={() => (onPick?.(p), onOpenChange?.(false))}>
-                    Sélectionner
-                  </Button>
+                <li
+                  key={p.id}
+                  className="px-3 py-2 hover:bg-muted cursor-pointer flex items-center justify-between"
+                  onClick={() => {
+                    onPick?.(p);
+                    onOpenChange?.(false);
+                  }}
+                >
+                  <span className="truncate">{p.nom}</span>
+                  {p.code ? <span className="opacity-60 text-xs ml-2">{p.code}</span> : null}
                 </li>
               ))}
             </ul>
+          ) : (
+            <div className="p-3 text-sm opacity-70">Aucun produit</div>
           )}
         </div>
       </DialogContent>
     </Dialog>
   );
 }
+

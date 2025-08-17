@@ -1,6 +1,5 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 
-// Petite utilitaire pour composer des classes
 const cn = (...xs) => xs.filter(Boolean).join(' ')
 
 export const Dialog = DialogPrimitive.Root
@@ -29,7 +28,6 @@ export function DialogContent({ className, children, ...props }) {
     <DialogPortal>
       <DialogOverlay />
       <DialogPrimitive.Content
-        // Centrée, max largeur, max hauteur, colonne, pas de scroll de fond
         className={cn(
           'fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2',
           'w-[92vw] sm:w-full sm:max-w-xl rounded-2xl bg-white shadow-xl outline-none',
@@ -45,3 +43,17 @@ export function DialogContent({ className, children, ...props }) {
     </DialogPortal>
   )
 }
+
+// ✅ Default export pour compatibilité avec les imports existants
+const SmartDialog = {
+  Dialog,
+  DialogTrigger,
+  DialogPortal,
+  DialogClose,
+  DialogTitle,
+  DialogDescription,
+  DialogOverlay,
+  DialogContent,
+}
+
+export default SmartDialog

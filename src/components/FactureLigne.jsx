@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import AutocompleteProduit from "@/components/forms/AutocompleteProduit";
+import ProductPickerModal from "@/components/forms/ProductPickerModal";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
@@ -36,12 +36,13 @@ export default function FactureLigne({
   index,
   onChange,
   onRemove,
-  lineKey,
   onProduitFocus,
 }) {
   const { getProduct } = useProducts();
   const { zones, fetchZones } = useZones();
   const [loadingProd, setLoadingProd] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const quantiteRef = useRef(null);
   const parseNum = v => parseFloat(String(v).replace(',', '.')) || 0;
   const lastPushed = useRef({ tva: ligne.tva, zone_id: ligne.zone_id });
   const updateProduitMeta = useCallback(async (id, { tva, zone_id }) => {
@@ -144,6 +145,7 @@ export default function FactureLigne({
         lastPushed.current = { tva: initial.tva, zone_id: initial.zone_id };
       }
       setLoadingProd(false);
+      quantiteRef.current?.focus();
     } else {
       onChange({
         ...ligne,
@@ -156,6 +158,7 @@ export default function FactureLigne({
         total_ht: "0",
         manuallyEdited: false,
       });
+      quantiteRef.current?.focus();
     }
   }
 
@@ -210,14 +213,24 @@ export default function FactureLigne({
   return (
     <div className="flex items-center gap-2">
       <div className="basis-[20%] shrink-0">
-        <AutocompleteProduit
-          value={ligne.produit}
-          onChange={handleProduitSelection}
-          lineKey={lineKey}
-          onFocus={() => onProduitFocus?.(index)}
-          required
-          placeholder="Nom du produit..."
-          className="h-10 w-full"
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => {
+            setModalOpen(true);
+            onProduitFocus?.(index);
+          }}
+          className="h-10 w-full justify-start"
+        >
+          {ligne.produit?.nom || "Choisir..."}
+        </Button>
+        <ProductPickerModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onSelect={(p) => {
+            handleProduitSelection(p);
+            setModalOpen(false);
+          }}
         />
       </div>
       <div className="basis-[10%] shrink-0">
@@ -226,6 +239,7 @@ export default function FactureLigne({
           inputMode="decimal"
           required
           className="h-10 w-full text-right rounded-xl"
+          ref={quantiteRef}
           value={ligne.quantite}
           onChange={(e) => handleQuantite(e.target.value)}
           onBlur={() => handleQuantite(String(parseNum(ligne.quantite)))}

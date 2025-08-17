@@ -1,6 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-/* eslint-disable react-hooks/exhaustive-deps */
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -12,14 +11,7 @@ export function HelpProvider({ children }) {
   const [docs, setDocs] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (mama_id) {
-      fetchTooltips();
-      fetchDocs();
-    }
-  }, [mama_id]);
-
-  async function fetchTooltips() {
+  const fetchTooltips = useCallback(async () => {
     if (!mama_id) return {};
     setLoading(true);
     const { data } = await supabase
@@ -33,9 +25,9 @@ export function HelpProvider({ children }) {
     });
     setTooltips(map);
     return map;
-  }
+  }, [mama_id]);
 
-  async function fetchDocs({ search = '' } = {}) {
+  const fetchDocs = useCallback(async ({ search = '' } = {}) => {
     if (!mama_id) return [];
     setLoading(true);
     let query = supabase
@@ -47,7 +39,14 @@ export function HelpProvider({ children }) {
     setLoading(false);
     setDocs(Array.isArray(data) ? data : []);
     return data || [];
-  }
+  }, [mama_id]);
+
+  useEffect(() => {
+    if (mama_id) {
+      fetchTooltips();
+      fetchDocs();
+    }
+  }, [mama_id, fetchTooltips, fetchDocs]);
 
   async function markGuideSeen(module) {
     if (!user_id || !mama_id) return;

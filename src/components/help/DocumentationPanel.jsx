@@ -1,5 +1,4 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from 'react';
 import {
   Dialog,
@@ -16,7 +15,7 @@ export default function DocumentationPanel({ open, onOpenChange }) {
 
   useEffect(() => {
     if (open) fetchDocs({ search });
-  }, [open, search]);
+  }, [open, search, fetchDocs]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

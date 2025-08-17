@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useFactures } from "@/hooks/useFactures";
 import { useFacturesList } from "@/hooks/useFacturesList";
-import { useFournisseurs } from "@/hooks/useFournisseurs";
+import useFournisseurs from "@/hooks/data/useFournisseurs";
 import { useFournisseursAutocomplete } from "@/hooks/useFournisseursAutocomplete";
 import { useAuth } from '@/hooks/useAuth';
 import { useFacturesAutocomplete } from "@/hooks/useFacturesAutocomplete";
@@ -25,7 +25,7 @@ import { FACTURE_STATUTS } from "@/constants/factures";
 
 export default function Factures() {
   const { deleteFacture, toggleFactureActive } = useFactures();
-  const { fournisseurs, getFournisseurs } = useFournisseurs();
+  const { data: fournisseurs = [] } = useFournisseurs({ actif: true });
   const { results: fournisseurOptions, searchFournisseurs } = useFournisseursAutocomplete();
   const { loading: authLoading, hasAccess } = useAuth();
   const { results: factureOptions, searchFactures } = useFacturesAutocomplete();
@@ -60,7 +60,6 @@ export default function Factures() {
 
   const canEdit = hasAccess("factures", "peut_modifier");
 
-  useEffect(() => { getFournisseurs(); }, [getFournisseurs]);
   useEffect(() => { searchFactures(search); }, [search, searchFactures]);
   useEffect(() => { searchFournisseurs(fournisseurInput); }, [fournisseurInput, searchFournisseurs]);
 

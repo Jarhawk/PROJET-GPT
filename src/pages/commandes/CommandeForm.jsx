@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCommandes } from "@/hooks/useCommandes";
-import { useFournisseurs } from "@/hooks/useFournisseurs";
+import useFournisseurs from "@/hooks/data/useFournisseurs";
 import { useProduitsFournisseur } from "@/hooks/useProduitsFournisseur";
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from "react-hot-toast";
@@ -12,7 +12,7 @@ export default function CommandeForm() {
   const navigate = useNavigate();
   const { role } = useAuth();
   const { createCommande } = useCommandes();
-  const { fournisseurs, fetchFournisseurs } = useFournisseurs();
+  const { data: fournisseurs = [] } = useFournisseurs({ actif: true });
   const { useProduitsDuFournisseur } = useProduitsFournisseur();
   const [fournisseurId, setFournisseurId] = useState("");
   const { products, fetch } = useProduitsDuFournisseur(fournisseurId);
@@ -27,7 +27,6 @@ export default function CommandeForm() {
     champs_visibles: {},
   });
 
-  useEffect(() => { fetchFournisseurs({ limit: 1000 }); }, [fetchFournisseurs]);
   useEffect(() => { if (fournisseurId) fetch(); }, [fournisseurId, fetch]);
   useEffect(() => {
     getTemplatesCommandesActifs().then(({ data }) => {

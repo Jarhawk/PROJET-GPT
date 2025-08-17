@@ -1,22 +1,19 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState, useCallback } from "react";
 import { useTemplatesCommandes } from "@/hooks/useTemplatesCommandes";
-import { useFournisseurs } from "@/hooks/useFournisseurs";
+import useFournisseurs from "@/hooks/data/useFournisseurs";
 import TemplateCommandeForm from "./TemplateCommandeForm";
 import { Button } from "@/components/ui/button";
 
 export default function TemplatesCommandes() {
   const { fetchTemplates, deleteTemplate } = useTemplatesCommandes();
-  const { fournisseurs, fetchFournisseurs } = useFournisseurs();
+  const { data: fournisseurs = [] } = useFournisseurs({ actif: true });
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selected, setSelected] = useState(null);
   const [fournisseurId, setFournisseurId] = useState("");
 
-  useEffect(() => {
-    fetchFournisseurs({ limit: 1000 });
-  }, [fetchFournisseurs]);
 
   const load = useCallback(async () => {
     setLoading(true);

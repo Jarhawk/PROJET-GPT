@@ -5,7 +5,7 @@ import { useProducts } from "@/hooks/useProducts";
 import { useFamilles } from "@/hooks/useFamilles";
 import { useSousFamilles } from "@/hooks/useSousFamilles";
 import { useUnites } from "@/hooks/useUnites";
-import { useFournisseurs } from "@/hooks/useFournisseurs";
+import useFournisseurs from "@/hooks/data/useFournisseurs";
 import useZonesStock from "@/hooks/useZonesStock";
 import { toast } from "react-hot-toast";
 import GlassCard from "@/components/ui/GlassCard";
@@ -20,7 +20,7 @@ export default function ProduitForm({
   onClose,
 }) {
   const editing = !!produit;
-  const { fournisseurs, fetchFournisseurs } = useFournisseurs();
+  const { data: fournisseurs = [] } = useFournisseurs({ actif: true });
   const {
     familles,
     fetchFamilles,
@@ -61,8 +61,7 @@ export default function ProduitForm({
   useEffect(() => {
     fetchFamilles();
     fetchUnites();
-    fetchFournisseurs();
-  }, [fetchFamilles, fetchUnites, fetchFournisseurs]);
+  }, [fetchFamilles, fetchUnites]);
 
   const [familleHasSous, setFamilleHasSous] = useState(false);
 

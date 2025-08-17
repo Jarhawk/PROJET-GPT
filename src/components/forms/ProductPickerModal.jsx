@@ -1,109 +1,108 @@
-import { useEffect, useRef } from 'react'
-import {
-  Dialog, DialogContent, DialogTitle, DialogDescription, DialogClose
-} from '@/components/ui/SmartDialog'
+import * as Dialog from '@radix-ui/react-dialog'
 import { X } from 'lucide-react'
-import useProductSearch from '@/hooks/useProductSearch' // ton hook qui interroge "produits" par nom
-import useDebounce from '@/hooks/useDebounce'
+import { useRef } from 'react'
+import useProductSearch from '@/hooks/useProductSearch'
 
-export default function ProductPickerModal({ open, onOpenChange, onSelect, initialQuery = '' }) {
+export default function ProductPickerModal({ open, onOpenChange, onSelect }) {
+  const { query, setQuery, results, isLoading, error } = useProductSearch('')
   const inputRef = useRef(null)
-  const { query, setQuery, isLoading, results, error } = useProductSearch(initialQuery)
-  const q = useDebounce(query, 150)
-
-  // focus auto au show
-  useEffect(() => { if (open) setTimeout(() => inputRef.current?.focus(), 25) }, [open])
-
-  // nb résultats
-  const count = results?.length ?? 0
-
-  // navigation clavier
-  const activeIndexRef = useRef(0)
-  useEffect(() => { activeIndexRef.current = 0 }, [q, open])
-
-  const handleKeyDown = (e) => {
-    if (!results?.length) return
-    if ([ 'ArrowDown', 'ArrowUp', 'Enter' ].includes(e.key)) e.preventDefault()
-    const max = results.length - 1
-    if (e.key === 'ArrowDown') activeIndexRef.current = Math.min(max, activeIndexRef.current + 1)
-    if (e.key === 'ArrowUp')   activeIndexRef.current = Math.max(0,   activeIndexRef.current - 1)
-    if (e.key === 'Enter') {
-      const item = results[activeIndexRef.current]
-      if (item) { onSelect?.(item); onOpenChange(false) }
-    }
-    // force repaint en modifiant une valeur dérivée
-    // (astuce simple : pas besoin de state supplémentaire)
-    e.currentTarget.dataset.idx = String(activeIndexRef.current)
-  }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="p-0">
-        {/* HEADER STICKY */}
-        <div className="sticky top-0 z-[1] border-b border-black/10 dark:border-white/10 bg-white/90 dark:bg-neutral-900/90 backdrop-blur px-4 py-3">
-          <div className="flex items-center gap-2">
-            <DialogTitle className="text-base font-semibold">Sélecteur de produits</DialogTitle>
-            <span className="ml-1 text-xs text-muted-foreground">({count} résultats)</span>
-            <div className="ml-auto" />
-            <DialogClose className="rounded-lg p-2 hover:bg-black/5 dark:hover:bg-white/10">
-              <X className="h-4 w-4" />
-            </DialogClose>
+    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+      <Dialog.Portal>
+        {/* Overlay sombre + blur pour éviter le "blanc sur blanc" */}
+        <Dialog.Overlay className="
+          fixed inset-0 z-[100]
+          bg-black/60 backdrop-blur-sm
+          data-[state=open]:animate-in data-[state=closed]:animate-out
+          data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0
+        " />
+
+        {/* Contenu centré, thème sombre, bords doux */}
+        <Dialog.Content className="
+          fixed left-1/2 top-[8vh] -translate-x-1/2 z-[101]
+          w-[min(880px,94vw)]
+          rounded-2xl border
+          border-white/10 dark:border-white/10
+          bg-white/90 text-slate-900 shadow-2xl
+          dark:bg-neutral-900/90 dark:text-neutral-50
+          outline-none
+        ">
+          {/* Header */}
+          <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-black/5 dark:border-white/10">
+            <Dialog.Title className="text-lg font-semibold">
+              Sélecteur de produits
+              <span className="ml-2 text-sm font-normal opacity-60">
+                {isLoading ? 'Chargement…' : `(${results?.length ?? 0} résultats)`}
+              </span>
+            </Dialog.Title>
+            <Dialog.Close className="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 focus:outline-none">
+              <X className="h-5 w-5" />
+            </Dialog.Close>
           </div>
-          <DialogDescription className="sr-only">Recherchez un produit par nom puis sélectionnez-le</DialogDescription>
 
-          <div className="mt-3">
-            <input
-              ref={inputRef}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Tapez un nom de produit…"
-              className="w-full rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-neutral-900 px-3 py-2 outline-none ring-0 focus:border-primary/40"
-            />
+          <Dialog.Description className="sr-only">
+            Recherchez un produit par son nom, puis validez avec Entrée ou cliquez pour sélectionner.
+          </Dialog.Description>
+
+          {/* Barre de recherche sticky */}
+          <div className="sticky top-0 px-5 py-4 bg-white/80 dark:bg-neutral-900/80 backdrop-blur supports-[backdrop-filter]:bg-transparent border-b border-black/5 dark:border-white/10">
+            <label className="block">
+              <span className="sr-only">Rechercher</span>
+              <input
+                ref={inputRef}
+                autoFocus
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Recherchez par nom…"
+                className="
+                  w-full rounded-xl px-4 py-2.5
+                  bg-white/70 text-slate-900 placeholder:text-slate-500
+                  dark:bg-neutral-800/80 dark:text-neutral-50 dark:placeholder:text-neutral-400
+                  border border-black/10 dark:border-white/10
+                  focus:border-primary focus:ring-2 focus:ring-primary/30 outline-none
+                "
+              />
+            </label>
+            <p className="mt-2 text-xs opacity-60">
+              Astuces : ↑/↓ pour naviguer • Entrée pour sélectionner • Échap pour fermer
+            </p>
           </div>
-        </div>
 
-        {/* LISTE SCROLLABLE */}
-        <div className="max-h-[70vh] overflow-auto px-2 py-2">
-          {error && (
-            <div className="m-2 rounded-lg border border-rose-300 bg-rose-50 p-3 text-rose-700 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-300">
-              Erreur de recherche&nbsp;: {error.message ?? String(error)}
-            </div>
-          )}
+          {/* Liste des résultats */}
+          <div className="max-h-[56vh] overflow-y-auto px-2 py-2">
+            {error && (
+              <div className="mx-3 my-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm">
+                Erreur de recherche : {error.message ?? 'inconnue'}
+              </div>
+            )}
 
-          {isLoading && <div className="px-3 py-2 text-sm text-muted-foreground">Recherche…</div>}
+            {!isLoading && (results?.length ?? 0) === 0 && !error && (
+              <div className="mx-3 my-4 text-sm opacity-60">Aucun produit trouvé.</div>
+            )}
 
-          {!isLoading && !count && (
-            <div className="px-3 py-6 text-sm text-muted-foreground">Aucun produit</div>
-          )}
-
-          <ul className="space-y-1">
-            {results?.map((p, i) => (
-              <li key={p.id}>
-                <button
-                  type="button"
-                  onClick={() => { onSelect?.(p); onOpenChange(false) }}
-                  className="w-full rounded-xl border border-transparent px-3 py-2 text-left hover:border-black/10 dark:hover:border-white/10 hover:bg-black/5 dark:hover:bg-white/10 focus-visible:outline-primary"
-                  data-active={i === Number(inputRef.current?.dataset.idx)}
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="truncate font-medium">{p.nom}</div>
-                      <div className="truncate text-xs text-muted-foreground">
-                        {p.code ?? '—'}
-                      </div>
-                    </div>
-                    <div className="shrink-0 text-xs text-muted-foreground">
-                      {p.unite ?? ''}
-                    </div>
-                  </div>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </DialogContent>
-    </Dialog>
+            <ul className="space-y-1">
+              {(results ?? []).map((p) => (
+                <li key={p.id}>
+                  <button
+                    type="button"
+                    onClick={() => { onSelect?.(p); onOpenChange?.(false) }}
+                    className="
+                      w-full text-left px-4 py-3 rounded-xl
+                      hover:bg-black/5 dark:hover:bg-white/10
+                      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40
+                      border border-transparent hover:border-black/10 dark:hover:border-white/10
+                    "
+                  >
+                    <div className="truncate font-medium">{p.nom}</div>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   )
 }
-

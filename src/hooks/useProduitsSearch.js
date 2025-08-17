@@ -17,12 +17,9 @@ function useDebounced(value, delay = 300) {
 
 function normalize(list = []) {
   return list.map((p) => ({
-    id: p.id ?? null,
+    id: p.id ?? p.produit_id ?? null,
     nom: p.nom ?? null,
-    code: p.code ?? null,
-    barcode: p.barcode ?? null,
     unite_id: p.unite_id ?? null,
-    tva: p.tva ?? null,
     zone_id: p.zone_id ?? null,
     pmp: p.pmp ?? null,
     dernier_prix: p.dernier_prix ?? null,
@@ -48,9 +45,9 @@ export function useProduitsSearch(term = '', { enabled = true, debounce = 300 } 
       try {
         let rq = supabase
           .from('produits')
-          .select('id, nom, code, barcode, unite_id, tva, zone_id, pmp, dernier_prix')
+          .select('id, nom, unite_id, zone_id, pmp, dernier_prix')
           .limit(50)
-          .or(`nom.ilike.%${q}%,code.ilike.%${q}%,barcode.ilike.%${q}%`)
+          .ilike('nom', `%${q}%`)
           .order('nom', { ascending: true });
         if (mama_id) rq = rq.eq('mama_id', mama_id);
 
@@ -72,9 +69,9 @@ export function useProduitsSearch(term = '', { enabled = true, debounce = 300 } 
       try {
         let rq2 = supabase
           .from('v_produits_actifs')
-          .select('id, nom, code, unite_id, tva, zone_id, pmp, dernier_prix')
+          .select('id, produit_id, nom, unite_id, zone_id, pmp, dernier_prix')
           .limit(50)
-          .or(`nom.ilike.%${q}%,code.ilike.%${q}%`)
+          .ilike('nom', `%${q}%`)
           .order('nom', { ascending: true });
         if (mama_id) rq2 = rq2.eq('mama_id', mama_id);
 

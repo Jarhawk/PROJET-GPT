@@ -9,7 +9,17 @@ import { ThemeProvider } from "@/context/ThemeProvider";
 import { Toaster } from "react-hot-toast";
 import CookieConsent from "@/components/CookieConsent";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      refetchOnMount: false,
+      staleTime: Infinity,
+      gcTime: Infinity,
+    },
+  },
+});
 
 export default function App() {
   useEffect(() => {

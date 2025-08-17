@@ -12,12 +12,13 @@ import CookieConsent from "@/components/CookieConsent";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      staleTime: 10 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
       refetchOnMount: false,
-      retry: false,
-      staleTime: Infinity,
-      gcTime: Infinity,
+      retry: 1,
+      keepPreviousData: true,
     },
   },
 });

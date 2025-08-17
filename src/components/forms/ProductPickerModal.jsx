@@ -1,46 +1,48 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/SmartDialog';
 import useDebounce from '@/hooks/useDebounce';
 import useProductSearch from '@/hooks/useProductSearch';
 import { useMultiMama } from '@/context/MultiMamaContext';
 
 export default function ProductPickerModal({ open, onOpenChange, onPick }) {
-  const { mamaActif: currentMamaId } = useMultiMama(); // adapte si nécessaire
+  const { mamaActif: currentMamaId } = useMultiMama(); // adapte si besoin
   const [term, setTerm] = useState('');
-  const debounced = useDebounce(term, 150);
+  const debounced = useDebounce(term, 120);
+  const inputRef = useRef(null);
 
-  const { data: produits, isFetching, error } = useProductSearch({
+  const { data: produits = [], isFetching, error } = useProductSearch({
     mamaId: currentMamaId,
     term: debounced,
     open,
-    limit: 50,
+    limit: 50, // suffisant et rapide; on peut monter à 100 si besoin
   });
 
-  // Navigation clavier (↑/↓/Enter)
-  const [activeIndex, setActiveIndex] = useState(0);
+  // focus auto à l'ouverture
   useEffect(() => {
-    setActiveIndex(0);
-  }, [debounced, open]);
+    if (open) setTimeout(() => inputRef.current?.focus(), 0);
+    else setTerm('');
+  }, [open]);
 
-  const hasResults = (produits?.length ?? 0) > 0;
+  // navigation clavier
+  const [active, setActive] = useState(0);
+  useEffect(() => setActive(0), [debounced, open]);
+
+  const hasResults = produits.length > 0;
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(v) => {
-        if (!v) setTerm('');
-        onOpenChange?.(v);
-      }}
-    >
-      <DialogContent className="max-w-xl p-0 overflow-hidden">
-        <header className="px-4 pt-4 pb-2 border-b bg-white/70 backdrop-blur">
-          <DialogTitle className="text-base font-semibold">Sélecteur de produits</DialogTitle>
-          <DialogDescription className="text-xs text-muted-foreground">
-            Tapez pour rechercher par <strong>nom</strong>. Utilisez ↑/↓ puis <kbd>Entrée</kbd> pour sélectionner.
-          </DialogDescription>
-          <div className="mt-3">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="p-0">
+        {/* Header collant */}
+        <header className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b">
+          <div className="px-4 pt-4">
+            <DialogTitle className="text-base font-semibold">Sélecteur de produits</DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Recherchez par <strong>nom</strong>. Utilisez ↑/↓ puis <kbd>Entrée</kbd>.
+            </DialogDescription>
+          </div>
+          <div className="p-4 pb-3">
             <input
-              autoFocus
+              ref={inputRef}
               type="text"
               value={term}
               onChange={(e) => setTerm(e.target.value)}
@@ -48,72 +50,69 @@ export default function ProductPickerModal({ open, onOpenChange, onPick }) {
                 if (!hasResults) return;
                 if (e.key === 'ArrowDown') {
                   e.preventDefault();
-                  setActiveIndex((i) => Math.min(i + 1, produits.length - 1));
+                  setActive((i) => Math.min(i + 1, produits.length - 1));
                 } else if (e.key === 'ArrowUp') {
                   e.preventDefault();
-                  setActiveIndex((i) => Math.max(i - 1, 0));
+                  setActive((i) => Math.max(i - 1, 0));
                 } else if (e.key === 'Enter') {
                   e.preventDefault();
-                  onPick?.(produits[activeIndex]);
+                  onPick?.(produits[active]);
                   onOpenChange?.(false);
                 }
               }}
               placeholder="Rechercher un produit par nom…"
-              className="w-full rounded-lg border bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/40"
+              className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/40"
             />
           </div>
         </header>
 
-        {/* Corps liste */}
-        <div className="max-h-80 overflow-auto">
+        {/* Corps : scrollable */}
+        <div className="flex-1 overflow-auto">
           {error && (
             <div className="px-4 py-3 text-sm text-red-600">
               Erreur de recherche : {error.message}
             </div>
           )}
-
-          {isFetching && !hasResults && !error && (
-            <div className="px-4 py-3 text-sm opacity-70">Chargement…</div>
-          )}
-
-          {!isFetching && !error && !hasResults && (
-            <div className="px-4 py-3 text-sm opacity-70">
+          {!error && !isFetching && !hasResults && (
+            <div className="px-4 py-6 text-sm opacity-70">
               {debounced ? 'Aucun produit ne correspond.' : 'Commencez à saisir un nom de produit.'}
             </div>
           )}
-
+          {/* Liste compacte */}
           {hasResults && (
             <ul className="divide-y">
               {produits.map((p, idx) => {
-                const active = idx === activeIndex;
+                const isActive = idx === active;
                 return (
                   <li
                     key={p.id}
-                    onMouseEnter={() => setActiveIndex(idx)}
+                    onMouseEnter={() => setActive(idx)}
                     onClick={() => {
                       onPick?.(p);
                       onOpenChange?.(false);
                     }}
                     className={[
                       'px-4 py-2 cursor-pointer select-none',
-                      active ? 'bg-primary/5' : 'hover:bg-muted',
+                      isActive ? 'bg-primary/5' : 'hover:bg-muted',
                     ].join(' ')}
                   >
                     <div className="flex items-center justify-between gap-3">
                       <span className="truncate font-medium">{p.nom}</span>
-                      {/* Astuce UI : badge “Entrée” */}
-                      {active && <span className="text-[10px] uppercase opacity-60">Entrée</span>}
+                      {isActive && <span className="text-[10px] uppercase opacity-60">Entrée</span>}
                     </div>
                   </li>
                 );
               })}
             </ul>
           )}
+          {isFetching && (
+            <div className="px-4 py-3 text-sm opacity-70">Recherche…</div>
+          )}
         </div>
 
-        {/* Pied allégé */}
-        <footer className="px-4 py-2 border-t text-[11px] text-muted-foreground bg-white/60">
-          {isFetching ? 'Recherche…' : `${produits?.length ?? 0} résultat(s)`}
+        {/* Footer collant */}
+        <footer className="sticky bottom-0 bg-white/90 backdrop-blur border-t px-4 py-2 text-[11px] text-muted-foreground">
+          {isFetching ? 'Chargement…' : `${produits.length} résultat(s)`}
         </footer>
       </DialogContent>
     </Dialog>

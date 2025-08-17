@@ -12,16 +12,26 @@ export default function AutoCompleteField({
   required = false,
   disabledOptions = [],
   className = "",
+  optionsHook,
+  enabled = true,
+  minChars = 2,
   ...props
 }) {
-  const resolved = useMemo(
-    () => (options || []).map((opt) => (typeof opt === "string" ? { id: opt, nom: opt } : opt)),
-    [options],
-  );
   const [inputValue, setInputValue] = useState(() => {
-    const match = resolved.find(o => o.id === value || o.nom === value);
+    const match = (options || []).find(o => o.id === value || o.nom === value);
     return match ? match.nom : value || "";
   });
+
+  const { data: hookOptions = [] } = optionsHook
+    ? optionsHook(inputValue, {
+        enabled: enabled && inputValue.trim().length >= minChars,
+      })
+    : { data: [] };
+  const allOptions = options ?? hookOptions;
+  const resolved = useMemo(
+    () => (allOptions || []).map((opt) => (typeof opt === "string" ? { id: opt, nom: opt } : opt)),
+    [allOptions],
+  );
   const [showAdd, setShowAdd] = useState(false);
   const listId = useId();
 

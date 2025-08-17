@@ -21,11 +21,17 @@ export default function useConsoMoyenne() {
         .select('quantite, requisitions!inner(date_requisition,mama_id,statut)')
         .eq('requisitions.mama_id', mama_id)
         .eq('requisitions.statut', 'réalisée')
-        .gte('requisitions.date_requisition', start.toISOString())
-        .order('requisitions.date_requisition', { ascending: true });
+        .gte('requisitions.date_requisition', start.toISOString());
       if (error) throw error;
+
+      const sorted = (data || []).sort((a, b) => {
+        const da = new Date(a.requisitions?.date_requisition ?? 0).getTime();
+        const db = new Date(b.requisitions?.date_requisition ?? 0).getTime();
+        return da - db;
+      });
+
       const daily = {};
-      (data || []).forEach((m) => {
+      sorted.forEach((m) => {
         const d = m.requisitions.date_requisition?.slice(0, 10);
         if (!daily[d]) daily[d] = 0;
         daily[d] += Number(m.quantite || 0);

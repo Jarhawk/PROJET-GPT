@@ -15,81 +15,85 @@ function useDebounced(value, delay = 300) {
   return debounced;
 }
 
+function normalize(list = []) {
+  return list.map((p) => ({
+    id: p.id,
+    nom: p.nom,
+    code: p.code || '',
+    barcode: p.barcode || '',
+    tva: p.tva ?? p.tva_rate ?? 0,
+    prix_unitaire: p.prix_unitaire ?? p.price_ht ?? p.dernier_prix ?? 0,
+    pmp: p.pmp ?? p.pmp_ht ?? 0,
+    unite_id: p.unite_id || '',
+    unite: p.unite?.nom || '',
+    unite_achat: p.unite_achat || p.unite?.nom || '',
+    zone_id: p.zone_id || p.zone_stock_id || '',
+  }));
+}
+
 export function useProduitsSearch(term = '', { enabled = true } = {}) {
   const { mama_id } = useAuth();
   const debounced = useDebounced(term, 300);
 
   return useQuery({
     queryKey: ['produits-search', mama_id, debounced],
-    enabled: enabled && Boolean(mama_id),
+    enabled: enabled && debounced.trim().length >= 2,
     staleTime: 0,
     gcTime: 0,
     keepPreviousData: false,
     queryFn: async () => {
-      if (!mama_id) return [];
       const q = (debounced || '').trim();
+      if (q.length < 2) return [];
 
-      // If only one character is provided, skip the search
-      if (q.length === 1) return [];
+      console.info('[useProduitsSearch] search', { q, mama_id });
 
-      console.info('[produits] search', { q, mama_id });
-
-      const tables = ['v_produits_actifs', 'produits'];
-
-      for (const table of tables) {
-        try {
-          let rq = supabase
-            .from(table)
-            .select(
-              'id, nom, code, barcode, tva, tva_rate, dernier_prix, prix_unitaire, price_ht, pmp, pmp_ht, unite_id, unite:unite_id (nom), zone_id, zone_stock_id'
-            )
-            .eq('mama_id', mama_id);
-          try {
-            rq = rq.eq('actif', true);
-          } catch {}
-
-          if (q.length >= 2) {
-            rq = rq
-              .or(`nom.ilike.%${q}%,code.ilike.%${q}%,barcode.ilike.%${q}%`)
-              .order('nom', { ascending: true })
-              .limit(50);
-          } else {
-            try {
-              rq = rq.order('updated_at', { ascending: false });
-            } catch {}
-            rq = rq.limit(20);
-          }
-
-          const { data, error } = await rq;
-          if (error || !Array.isArray(data)) continue;
-
-          const results = data.map((p) => ({
-            id: p.id,
-            nom: p.nom,
-            code: p.code || '',
-            barcode: p.barcode || '',
-            tva: p.tva ?? p.tva_rate ?? 0,
-            prix_unitaire: p.prix_unitaire ?? p.price_ht ?? p.dernier_prix ?? 0,
-            pmp: p.pmp ?? p.pmp_ht ?? 0,
-            unite_id: p.unite_id || '',
-            unite: p.unite?.nom || '',
-            unite_achat: p.unite_achat || p.unite?.nom || '',
-            zone_id: p.zone_id || p.zone_stock_id || '',
-          }));
-
-          if (q.length >= 2) {
-            return results.length > 0
-              ? results
-              : [{ id: '', nom: 'Aucun résultat' }];
-          }
-
-          return results;
-        } catch {}
+      try {
+        const { data, error } = await supabase.rpc('search_produits', { q });
+        if (!error && Array.isArray(data)) {
+          const results = normalize(data).slice(0, 50);
+          console.info('[useProduitsSearch] rpc search_produits', {
+            count: results.length,
+          });
+          if (results.length) return results;
+        } else if (error) {
+          console.error('[useProduitsSearch] rpc error', error);
+        }
+      } catch (e) {
+        console.error('[useProduitsSearch] rpc exception', e);
       }
 
+      console.info('[useProduitsSearch] fallback v_produits_actifs');
+      try {
+        let rq = supabase
+          .from('v_produits_actifs')
+          .select(
+            'id, nom, code, barcode, tva, tva_rate, dernier_prix, prix_unitaire, price_ht, pmp, pmp_ht, unite_id, unite:unite_id (nom), unite_achat, zone_id, zone_stock_id'
+          )
+          .limit(50);
+
+        if (mama_id) rq = rq.eq('mama_id', mama_id);
+        rq = rq
+          .or(`nom.ilike.%${q}%,code.ilike.%${q}%,barcode.ilike.%${q}%`)
+          .order('nom', { ascending: true });
+
+        const { data, error } = await rq;
+        if (error) {
+          console.error('[useProduitsSearch] fallback error', error);
+          return [];
+        }
+        if (Array.isArray(data)) {
+          const results = normalize(data);
+          return results.length
+            ? results
+            : [{ id: '', nom: 'Aucun résultat' }];
+        }
+      } catch (e) {
+        console.error('[useProduitsSearch] fallback exception', e);
+      }
       return [];
     },
   });
 }
 
 export default useProduitsSearch;
+

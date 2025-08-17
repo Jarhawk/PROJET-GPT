@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
 import { useProductSearch } from '@/hooks/useProductSearch';
+import useDebounce from '@/hooks/useDebounce';
 import * as Dialog from '@radix-ui/react-dialog';
 
 function highlight(str, q) {
@@ -25,8 +26,9 @@ export default function ProductPickerModal({ open, onClose, onSelect }) {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
   const [recents, setRecents] = useState([]);
-  const searchEnabled = open && query.trim().length >= 2;
-  const { data: searchResults = [] } = useProductSearch(query, {
+  const debouncedQuery = useDebounce(query, 300);
+  const searchEnabled = open && debouncedQuery.trim().length >= 2;
+  const { data: searchResults = [] } = useProductSearch(debouncedQuery, {
     enabled: searchEnabled,
   });
   const results = searchEnabled ? searchResults : recents;

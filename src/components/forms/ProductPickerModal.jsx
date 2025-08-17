@@ -5,8 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
 import { useProductSearch } from '@/hooks/useProductSearch';
-import useDebounce from '@/hooks/useDebounce';
-import * as Dialog from '@radix-ui/react-dialog';
 
 function highlight(str, q) {
   if (!q) return str;
@@ -26,16 +24,16 @@ export default function ProductPickerModal({ open, onClose, onSelect }) {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
   const [recents, setRecents] = useState([]);
-  const debouncedQuery = useDebounce(query, 300);
-  const searchEnabled = open && debouncedQuery.trim().length >= 2;
-  const { data: searchResults = [] } = useProductSearch(debouncedQuery, {
+  const [active, setActive] = useState(-1);
+
+  const searchEnabled = open && query.trim().length >= 2;
+  const { data: searchResults = [] } = useProductSearch(query, {
     enabled: searchEnabled,
   });
   const results = searchEnabled ? searchResults : recents;
   const pages = Math.max(1, Math.ceil(results.length / limit));
   const start = (page - 1) * limit;
   const visible = results.slice(start, start + limit);
-  const [active, setActive] = useState(-1);
 
   useEffect(() => {
     if (open) {
@@ -72,22 +70,25 @@ export default function ProductPickerModal({ open, onClose, onSelect }) {
     [addRecent, onClose, onSelect]
   );
 
-  const handleKey = useCallback((e) => {
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      setActive((i) => Math.min(i + 1, visible.length - 1));
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      setActive((i) => Math.max(i - 1, 0));
-    } else if (e.key === 'Enter') {
-      if (active >= 0) {
+  const handleKey = useCallback(
+    (e) => {
+      if (e.key === 'ArrowDown') {
         e.preventDefault();
-        selectProduct(visible[active]);
+        setActive((i) => Math.min(i + 1, visible.length - 1));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setActive((i) => Math.max(i - 1, 0));
+      } else if (e.key === 'Enter') {
+        if (active >= 0) {
+          e.preventDefault();
+          selectProduct(visible[active]);
+        }
+      } else if (e.key === 'Escape') {
+        onClose?.();
       }
-    } else if (e.key === 'Escape') {
-      onClose?.();
-    }
-  }, [active, visible, selectProduct, onClose]);
+    },
+    [active, visible, selectProduct, onClose]
+  );
 
   return (
     <SmartDialog
@@ -97,9 +98,9 @@ export default function ProductPickerModal({ open, onClose, onSelect }) {
       description="Recherche et sélection d'un produit"
     >
       <div className="space-y-3" onKeyDown={handleKey}>
-        <Dialog.Description id="product-picker-search" className="sr-only">
+        <p id="product-picker-search" className="sr-only">
           Recherche par nom uniquement
-        </Dialog.Description>
+        </p>
         <Input
           autoFocus
           aria-describedby="product-picker-search"

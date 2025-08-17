@@ -226,11 +226,8 @@ export default function FactureLigne({
         </Button>
         <ProductPickerModal
           open={modalOpen}
-          onClose={() => setModalOpen(false)}
-          onSelect={(p) => {
-            handleProduitSelection(p);
-            setModalOpen(false);
-          }}
+          onOpenChange={setModalOpen}
+          onPick={handleProduitSelection}
         />
       </div>
       <div className="basis-[10%] shrink-0">

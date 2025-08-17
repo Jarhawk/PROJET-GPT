@@ -179,11 +179,8 @@ function AutocompleteProduit(
       )}
       <ProductPickerModal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onSelect={(p) => {
-          select(p);
-          setModalOpen(false);
-        }}
+        onOpenChange={setModalOpen}
+        onPick={select}
       />
     </div>
   );

@@ -11,7 +11,7 @@ vi.mock('@/hooks/useCommandes', () => ({
     validateCommande: vi.fn(),
   }),
 }));
-vi.mock('@/hooks/useFournisseurs', () => ({ useFournisseurs: () => ({ fournisseurs: [], fetchFournisseurs: vi.fn() }) }));
+vi.mock('@/hooks/data/useFournisseurs', () => ({ default: () => ({ data: [], isLoading: false }) }));
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1', role: 'admin' }) }));
 
 import Commandes from '@/pages/commandes/Commandes.jsx';

@@ -5,7 +5,7 @@ import { vi } from 'vitest';
 vi.mock('@/hooks/useCommandes', () => ({
   useCommandes: () => ({ data: [], commandes: [], loading: false, createCommande: vi.fn() }),
 }));
-vi.mock('@/hooks/useFournisseurs', () => ({ useFournisseurs: () => ({ fournisseurs: [], fetchFournisseurs: vi.fn() }) }));
+vi.mock('@/hooks/data/useFournisseurs', () => ({ default: () => ({ data: [], isLoading: false }) }));
 vi.mock('@/hooks/useProduitsFournisseur', () => ({ useProduitsFournisseur: () => ({ useProduitsDuFournisseur: () => ({ products: [], fetch: vi.fn() }) }) }));
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ role: 'admin' }) }));
 

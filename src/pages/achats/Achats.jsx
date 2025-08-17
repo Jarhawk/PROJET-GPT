@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState, useCallback } from "react";
 import { useAchats } from "@/hooks/useAchats";
-import { useFournisseurs } from "@/hooks/useFournisseurs";
+import useFournisseurs from "@/hooks/data/useFournisseurs";
 import { useProduitsAutocomplete } from "@/hooks/useProduitsAutocomplete";
 import AchatForm from "./AchatForm.jsx";
 import AchatDetail from "./AchatDetail.jsx";
@@ -14,7 +14,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 export default function Achats() {
   const { achats, total, getAchats, deleteAchat } = useAchats();
-  const { fournisseurs } = useFournisseurs();
+  const { data: fournisseurs = [] } = useFournisseurs({ actif: true });
   const { results: produitOptions, searchProduits } = useProduitsAutocomplete();
   const [produit, setProduit] = useState("");
   const [fournisseur, setFournisseur] = useState("");

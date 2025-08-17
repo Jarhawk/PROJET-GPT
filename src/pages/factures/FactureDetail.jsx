@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import supabase from '@/lib/supabaseClient';
 import FactureForm, { mapDbLineToUI } from './FactureForm.jsx';
-import { useFournisseurs } from '@/hooks/useFournisseurs';
+import useFournisseurs from '@/hooks/data/useFournisseurs';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import toast from 'react-hot-toast';
 
@@ -38,13 +38,10 @@ async function tableExists(name) {
 export default function FactureDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { fournisseurs, getFournisseurs } = useFournisseurs();
+  const { data: fournisseurs = [] } = useFournisseurs({ actif: true });
   const [loading, setLoading] = useState(true);
   const [formState, setFormState] = useState({ header: null, lignes: [] });
 
-  useEffect(() => {
-    getFournisseurs();
-  }, [getFournisseurs]);
 
   useEffect(() => {
     let isMounted = true;

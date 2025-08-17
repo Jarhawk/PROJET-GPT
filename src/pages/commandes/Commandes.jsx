@@ -3,15 +3,14 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from '@/hooks/useAuth';
 import { useCommandes } from "@/hooks/useCommandes";
-import { useFournisseurs } from "@/hooks/useFournisseurs";
+import useFournisseurs from "@/hooks/data/useFournisseurs";
 
 export default function Commandes() {
   const { mama_id, role } = useAuth();
   const { data: commandes, fetchCommandes, validateCommande, loading } = useCommandes();
-  const { fournisseurs, fetchFournisseurs } = useFournisseurs();
+  const { data: fournisseurs = [] } = useFournisseurs({ actif: true });
   const [filters, setFilters] = useState({ fournisseur: "", statut: "", debut: "", fin: "" });
 
-  useEffect(() => { fetchFournisseurs({ limit: 1000 }); }, [fetchFournisseurs]);
   useEffect(() => {
     if (!mama_id) return;
     fetchCommandes({ ...filters });

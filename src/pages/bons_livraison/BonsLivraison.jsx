@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState, useCallback } from "react";
 import { useBonsLivraison } from "@/hooks/useBonsLivraison";
-import { useFournisseurs } from "@/hooks/useFournisseurs";
+import useFournisseurs from "@/hooks/data/useFournisseurs";
 import BLForm from "./BLForm.jsx";
 import BLDetail from "./BLDetail.jsx";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 export default function BonsLivraison() {
   const { bons, total, getBonsLivraison, toggleBonActif } = useBonsLivraison();
-  const { fournisseurs, getFournisseurs } = useFournisseurs();
+  const { data: fournisseurs = [] } = useFournisseurs({ actif: true });
   const { hasAccess } = useAuth();
   const canEdit = hasAccess("bons_livraison", "peut_modifier");
   const [showForm, setShowForm] = useState(false);
@@ -25,7 +25,6 @@ export default function BonsLivraison() {
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 50;
 
-  useEffect(() => { getFournisseurs(); }, [getFournisseurs]);
 
   const refreshList = useCallback(() => {
     const debut = monthFilter ? `${monthFilter}-01` : "";

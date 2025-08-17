@@ -20,8 +20,8 @@ vi.mock('@/hooks/useSousFamilles', () => ({
 vi.mock('@/hooks/useUnites', () => ({
   useUnites: () => ({ unites: [], fetchUnites: vi.fn(), addUnite: vi.fn() })
 }));
-vi.mock('@/hooks/useFournisseurs', () => ({
-  useFournisseurs: () => ({ fournisseurs: [], fetchFournisseurs: vi.fn() })
+vi.mock('@/hooks/data/useFournisseurs', () => ({
+  default: () => ({ data: [], isLoading: false })
 }));
 vi.mock('@/hooks/useZonesStock', () => ({
   default: () => ({ zones: [], loading: false })

@@ -37,8 +37,8 @@ vi.mock('@/hooks/useSousFamilles', () => {
 vi.mock('@/hooks/useUnites', () => ({
   useUnites: () => ({ unites: [{ id: 'u1', nom: 'kg' }], fetchUnites: vi.fn() }),
 }));
-vi.mock('@/hooks/useFournisseurs', () => ({
-  useFournisseurs: () => ({ fournisseurs: [], fetchFournisseurs: vi.fn() }),
+vi.mock('@/hooks/data/useFournisseurs', () => ({
+  default: () => ({ data: [], isLoading: false }),
 }));
 vi.mock('@/hooks/useZonesStock', () => ({ default: () => ({ zones: [] }) }));
 vi.mock('react-hot-toast', () => ({ toast: { error: vi.fn(), success: vi.fn(), loading: vi.fn() } }));

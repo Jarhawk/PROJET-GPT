@@ -4,7 +4,8 @@ import SmartDialog from '@/components/ui/SmartDialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
-import { useProduitsSearch } from '@/hooks/useProduitsSearch';
+import { useProductSearch } from '@/hooks/useProductSearch';
+import * as Dialog from '@radix-ui/react-dialog';
 
 function highlight(str, q) {
   if (!q) return str;
@@ -25,9 +26,8 @@ export default function ProductPickerModal({ open, onClose, onSelect }) {
   const [limit, setLimit] = useState(20);
   const [recents, setRecents] = useState([]);
   const searchEnabled = open && query.trim().length >= 2;
-  const { data: searchResults = [] } = useProduitsSearch(query, {
+  const { data: searchResults = [] } = useProductSearch(query, {
     enabled: searchEnabled,
-    debounce: 250,
   });
   const results = searchEnabled ? searchResults : recents;
   const pages = Math.max(1, Math.ceil(results.length / limit));
@@ -95,13 +95,13 @@ export default function ProductPickerModal({ open, onClose, onSelect }) {
       description="Recherche et sélection d'un produit"
     >
       <div className="space-y-3" onKeyDown={handleKey}>
-        <p id="product-picker-search" className="sr-only">
+        <Dialog.Description id="product-picker-search" className="sr-only">
           Recherche par nom uniquement
-        </p>
+        </Dialog.Description>
         <Input
           autoFocus
           aria-describedby="product-picker-search"
-          placeholder="Rechercher un produit par nom"
+          placeholder="Nom du produit"
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);

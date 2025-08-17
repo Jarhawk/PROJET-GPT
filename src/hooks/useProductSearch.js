@@ -1,14 +1,18 @@
-import { useQuery } from '@tanstack/react-query';
-import useSupabaseClient from '@/hooks/useSupabaseClient';
+import { useQuery } from '@tanstack/react-query'
+import useSupabaseClient from '@/hooks/useSupabaseClient'
 
-function escapeLike(value) {
-  // pour ilike : échapper % et _
-  return value.replace(/[%_]/g, '\\$&');
-}
+const ESCAPE_RE = /[%_]/g
+const escapeLike = (s) => s.replace(ESCAPE_RE, '\\$&')
 
+/**
+ * Recherche de produits PAR NOM UNIQUEMENT.
+ * - Ne sélectionne QUE les colonnes sûres ("id","nom") pour éviter les 42703.
+ * - Filtre par mama_id.
+ * - Debounce géré par le composant (on lui passe term déjà debounced si besoin).
+ */
 export default function useProductSearch({ mamaId, term = '', open = true, limit = 50 }) {
-  const supabase = useSupabaseClient();
-  const q = (term ?? '').trim();
+  const supabase = useSupabaseClient()
+  const q = (term ?? '').trim()
 
   return useQuery({
     queryKey: ['produits:search:nom', mamaId, q, open, limit],
@@ -20,21 +24,18 @@ export default function useProductSearch({ mamaId, term = '', open = true, limit
     queryFn: async () => {
       let req = supabase
         .from('produits')
-        // 🔥 NE PAS DEMANDER 'barcode' ou 'tva' si elles n’existent pas
-        .select('id, nom, code, unite_achat, unite_vente, actif')
+        .select('id,nom')            // ⬅️ ne plus demander unite_achat / tva / barcode / etc.
         .eq('mama_id', mamaId)
-        .eq('actif', true)
         .order('nom', { ascending: true })
-        .limit(limit);
+        .limit(limit)
 
       if (q) {
-        const pattern = `%${escapeLike(q)}%`;
-        req = req.ilike('nom', pattern);
+        req = req.ilike('nom', `%${escapeLike(q)}%`)
       }
 
-      const { data, error } = await req;
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
+      const { data, error } = await req
+      if (error) throw error
+      return data ?? []
+    }
+  })
 }

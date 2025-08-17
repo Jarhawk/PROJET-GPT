@@ -17,17 +17,15 @@ function useDebounced(value, delay = 300) {
 
 function normalize(list = []) {
   return list.map((p) => ({
-    id: p.id,
-    nom: p.nom,
-    code: p.code || '',
-    barcode: p.barcode || '',
-    tva: p.tva ?? p.tva_rate ?? 0,
-    prix_unitaire: p.prix_unitaire ?? p.price_ht ?? p.dernier_prix ?? 0,
-    pmp: p.pmp ?? p.pmp_ht ?? 0,
-    unite_id: p.unite_id || '',
-    unite: p.unite?.nom || '',
-    unite_achat: p.unite_achat || p.unite?.nom || '',
-    zone_id: p.zone_id || p.zone_stock_id || '',
+    id: p.id ?? null,
+    nom: p.nom ?? null,
+    code: p.code ?? null,
+    barcode: p.barcode ?? null,
+    unite_id: p.unite_id ?? null,
+    tva: p.tva ?? null,
+    zone_id: p.zone_id ?? null,
+    pmp: p.pmp ?? null,
+    dernier_prix: p.dernier_prix ?? null,
   }));
 }
 
@@ -42,58 +40,58 @@ export function useProduitsSearch(term = '', { enabled = true } = {}) {
     gcTime: 0,
     keepPreviousData: false,
     queryFn: async () => {
-      const q = (debounced || '').trim();
+      const q = debounced.trim();
       if (q.length < 2) return [];
 
-      console.info('[useProduitsSearch] search', { q, mama_id });
+      console.debug('[useProduitsSearch] search produits', { q, mama_id });
 
-      try {
-        const { data, error } = await supabase.rpc('search_produits', { q });
-        if (!error && Array.isArray(data)) {
-          const results = normalize(data).slice(0, 50);
-          console.info('[useProduitsSearch] rpc search_produits', {
-            count: results.length,
-          });
-          if (results.length) return results;
-        } else if (error) {
-          console.error('[useProduitsSearch] rpc error', error);
-        }
-      } catch (e) {
-        console.error('[useProduitsSearch] rpc exception', e);
-      }
-
-      console.info('[useProduitsSearch] fallback v_produits_actifs');
       try {
         let rq = supabase
-          .from('v_produits_actifs')
-          .select(
-            'id, nom, code, barcode, tva, tva_rate, dernier_prix, prix_unitaire, price_ht, pmp, pmp_ht, unite_id, unite:unite_id (nom), unite_achat, zone_id, zone_stock_id'
-          )
-          .limit(50);
-
-        if (mama_id) rq = rq.eq('mama_id', mama_id);
-        rq = rq
+          .from('produits')
+          .select('id, nom, code, barcode, unite_id, tva, zone_id, pmp, dernier_prix')
+          .limit(50)
           .or(`nom.ilike.%${q}%,code.ilike.%${q}%,barcode.ilike.%${q}%`)
           .order('nom', { ascending: true });
+        if (mama_id) rq = rq.eq('mama_id', mama_id);
 
         const { data, error } = await rq;
         if (error) {
-          console.error('[useProduitsSearch] fallback error', error);
+          console.error('[useProduitsSearch] produits error', error);
+          throw error;
+        }
+        const results = normalize(data);
+        console.debug('[useProduitsSearch] produits results', { count: results.length });
+        return results;
+      } catch (err) {
+        console.warn(
+          '[useProduitsSearch] produits query failed, fallback to v_produits_actifs',
+          err
+        );
+      }
+
+      try {
+        let rq2 = supabase
+          .from('v_produits_actifs')
+          .select('id, nom, code, unite_id, tva, zone_id, pmp, dernier_prix')
+          .limit(50)
+          .or(`nom.ilike.%${q}%,code.ilike.%${q}%`)
+          .order('nom', { ascending: true });
+        if (mama_id) rq2 = rq2.eq('mama_id', mama_id);
+
+        const { data: data2, error: error2 } = await rq2;
+        if (error2) {
+          console.error('[useProduitsSearch] v_produits_actifs error', error2);
           return [];
         }
-        if (Array.isArray(data)) {
-          const results = normalize(data);
-          return results.length
-            ? results
-            : [{ id: '', nom: 'Aucun résultat' }];
-        }
-      } catch (e) {
-        console.error('[useProduitsSearch] fallback exception', e);
+        const results2 = normalize(data2);
+        console.debug('[useProduitsSearch] v_produits_actifs results', { count: results2.length });
+        return results2;
+      } catch (err2) {
+        console.error('[useProduitsSearch] v_produits_actifs query failed', err2);
+        return [];
       }
-      return [];
     },
   });
 }
 
 export default useProduitsSearch;
-

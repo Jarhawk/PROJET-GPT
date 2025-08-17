@@ -243,3 +243,15 @@ html.dark body {
 }
 .animate-touch-fade { animation: touch-fade 0.6s ease-out forwards; }
 }
+
+/* Corrections transition (Firefox est strict) */
+[data-state="open"].animate-in { transition: opacity 150ms ease, transform 150ms ease; }
+[data-state="closed"].animate-out { transition: opacity 120ms ease, transform 120ms ease; }
+
+/* Couleurs utilitaires si manquantes (adaptation shadcn/tailwind) */
+.bg-muted { background-color: rgba(0,0,0,0.04); }
+.text-muted-foreground { color: rgba(0,0,0,0.55); }
+
+/* Tailwind-like (si vous n’avez pas Tailwind complet) */
+.rounded-2xl { border-radius: 1rem; }
+.backdrop-blur { backdrop-filter: blur(6px); }

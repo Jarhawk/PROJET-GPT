@@ -41,7 +41,7 @@ export default function FactureLigne({
   const { getProduct } = useProducts();
   const { zones, fetchZones } = useZones();
   const [loadingProd, setLoadingProd] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const quantiteRef = useRef(null);
   const parseNum = v => parseFloat(String(v).replace(',', '.')) || 0;
   const lastPushed = useRef({ tva: ligne.tva, zone_id: ligne.zone_id });
@@ -217,7 +217,7 @@ export default function FactureLigne({
           type="button"
           variant="outline"
           onClick={() => {
-            setModalOpen(true);
+            setPickerOpen(true);
             onProduitFocus?.(index);
           }}
           className="h-10 w-full justify-start"
@@ -225,11 +225,10 @@ export default function FactureLigne({
           {ligne.produit?.nom || "Choisir..."}
         </Button>
         <ProductPickerModal
-          open={modalOpen}
-          onClose={() => setModalOpen(false)}
-          onSelect={(p) => {
+          open={pickerOpen}
+          onOpenChange={setPickerOpen}
+          onPick={(p) => {
             handleProduitSelection(p);
-            setModalOpen(false);
           }}
         />
       </div>

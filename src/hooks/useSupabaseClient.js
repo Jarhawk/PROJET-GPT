@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
+// Retourne le client Supabase initialisé
 import supabase from '@/lib/supabaseClient';
 
 export default function useSupabaseClient() {
-  return useMemo(() => supabase, []);
+  return supabase;
 }

@@ -1,7 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useAuth } from '@/hooks/useAuth';
 import supabase from '@/lib/supabaseClient';
 
 function useDebounced(value, delay = 300) {
@@ -26,12 +25,11 @@ function normalize(list = []) {
   }));
 }
 
-export function useProduitsSearch(term = '', { enabled = true, debounce = 300 } = {}) {
-  const { mama_id } = useAuth();
+export function useProduitsSearch(term = '', mamaId, { enabled = true, debounce = 300 } = {}) {
   const debounced = useDebounced(term, debounce);
 
   return useQuery({
-    queryKey: ['produits-search', mama_id, debounced],
+    queryKey: ['produits-search', mamaId, debounced],
     enabled: enabled && debounced.trim().length >= 2,
     staleTime: 0,
     gcTime: 0,
@@ -40,7 +38,7 @@ export function useProduitsSearch(term = '', { enabled = true, debounce = 300 } 
       const q = debounced.trim();
       if (q.length < 2) return [];
 
-      console.debug('[useProduitsSearch] search produits', { q, mama_id });
+      console.debug('[useProduitsSearch] search produits', { q, mamaId });
 
       try {
         let rq = supabase
@@ -49,7 +47,7 @@ export function useProduitsSearch(term = '', { enabled = true, debounce = 300 } 
           .limit(50)
           .ilike('nom', `%${q}%`)
           .order('nom', { ascending: true });
-        if (mama_id) rq = rq.eq('mama_id', mama_id);
+        if (mamaId) rq = rq.eq('mama_id', mamaId);
 
         const { data, error } = await rq;
         if (error) {
@@ -73,7 +71,7 @@ export function useProduitsSearch(term = '', { enabled = true, debounce = 300 } 
           .limit(50)
           .ilike('nom', `%${q}%`)
           .order('nom', { ascending: true });
-        if (mama_id) rq2 = rq2.eq('mama_id', mama_id);
+        if (mamaId) rq2 = rq2.eq('mama_id', mamaId);
 
         const { data: data2, error: error2 } = await rq2;
         if (error2) {

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useId, forwardRef, useImperativeHandle } from 'react';
 import { Input } from '@/components/ui/input';
+import { useAuth } from '@/hooks/useAuth';
 import { useProduitsSearch } from '@/hooks/useProduitsSearch';
 import ProductPickerModal from './ProductPickerModal';
 
@@ -19,7 +20,10 @@ function AutocompleteProduit(
   const listId = useId();
   const nameId = useId();
 
-  const { data: options = [] } = useProduitsSearch(search, { enabled: open || modalOpen });
+  const { mama_id: mamaId } = useAuth();
+  const { data: options = [] } = useProduitsSearch(search, mamaId, {
+    enabled: open || modalOpen,
+  });
 
   useEffect(() => {
     const el = inputRef.current;

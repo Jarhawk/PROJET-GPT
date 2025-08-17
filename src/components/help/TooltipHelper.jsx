@@ -1,5 +1,4 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from 'react';
 import { useHelp } from '@/context/HelpProvider';
 
@@ -13,7 +12,7 @@ export default function TooltipHelper({ field }) {
     } else if (Object.keys(tooltips).length === 0) {
       fetchTooltips();
     }
-  }, [tooltips, field]);
+  }, [tooltips, field, fetchTooltips]);
 
   if (!text) return null;
 

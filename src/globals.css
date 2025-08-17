@@ -268,3 +268,22 @@ html.dark body {
 [data-state="closed"].animate-out {
   transition: opacity .15s ease, transform .15s ease;
 }
+
+:root {
+  --primary: 99 102 241; /* indigo-500 par défaut : rgb triplet pour tailwind ring */
+}
+.dark {
+  --primary: 99 102 241;
+}
+
+/* Utilitaires (si pas déjà dans Tailwind config) */
+.focus-visible\:outline-primary:focus-visible { outline: 2px solid rgb(var(--primary)); outline-offset: 2px; }
+.focus\:border-primary:focus { border-color: rgb(var(--primary)); }
+.focus\:ring-primary\/30:focus { box-shadow: 0 0 0 4px rgba(var(--primary) / .3); }
+
+/* Scrollbar discrète pour les listes */
+@media (hover:hover) {
+  .max-h-\[56vh\]::-webkit-scrollbar { width: 10px; }
+  .max-h-\[56vh\]::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 999px; }
+  .max-h-\[56vh\]::-webkit-scrollbar-track { background: transparent; }
+}

@@ -1,69 +1,47 @@
-// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useId } from "react";
-import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { AnimatePresence, motion as Motion } from "framer-motion";
+import * as DialogPrimitive from '@radix-ui/react-dialog'
 
-// Si tu exposes des wrappers, garde-les. Sinon, expose au minimum ceci :
-export const Dialog = DialogPrimitive.Root;
-export const DialogTrigger = DialogPrimitive.Trigger;
-export const DialogPortal = DialogPrimitive.Portal;
-export const DialogOverlay = DialogPrimitive.Overlay;
-export const DialogContent = DialogPrimitive.Content;
-export const DialogTitle = DialogPrimitive.Title;
-export const DialogClose = DialogPrimitive.Close;
-// 👇 AJOUT : règle le warning "Missing Description"
-export const DialogDescription = DialogPrimitive.Description;
+// Petite utilitaire pour composer des classes
+const cn = (...xs) => xs.filter(Boolean).join(' ')
 
-export default function SmartDialog({ open, onClose, title, description, children }) {
-  const descriptionId = useId();
+export const Dialog = DialogPrimitive.Root
+export const DialogTrigger = DialogPrimitive.Trigger
+export const DialogPortal = DialogPrimitive.Portal
+export const DialogClose = DialogPrimitive.Close
+export const DialogTitle = DialogPrimitive.Title
+export const DialogDescription = DialogPrimitive.Description
+
+export function DialogOverlay({ className, ...props }) {
   return (
-    <DialogPrimitive.Root open={open} onOpenChange={(v) => !v && onClose?.()}>
-      <AnimatePresence>
-        {open && (
-          <DialogPrimitive.Portal forceMount>
-            <DialogPrimitive.Overlay asChild>
-              <Motion.div
-                className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={onClose}
-              />
-            </DialogPrimitive.Overlay>
-            <Motion.div
-              className="fixed inset-0 z-50 flex items-center justify-center p-4"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 260, damping: 20 }}
-            >
-              <DialogPrimitive.Content
-                aria-describedby={descriptionId}
-                className="relative bg-white/10 border border-white/20 backdrop-blur-xl rounded-2xl shadow-xl p-6 w-full max-w-lg"
-              >
-                {title && (
-                  <DialogPrimitive.Title className="text-lg font-semibold mb-4">
-                    {title}
-                  </DialogPrimitive.Title>
-                )}
-                <DialogPrimitive.Description id={descriptionId} className="sr-only">
-                  {description || ""}
-                </DialogPrimitive.Description>
-                <DialogPrimitive.Close asChild onClick={onClose}>
-                  <button
-                    className="absolute top-3 right-3 text-mamastockGold hover:text-mamastockGold/80"
-                    aria-label="Fermer"
-                    type="button"
-                  >
-                    ×
-                  </button>
-                </DialogPrimitive.Close>
-                {children}
-              </DialogPrimitive.Content>
-            </Motion.div>
-          </DialogPrimitive.Portal>
+    <DialogPrimitive.Overlay
+      className={cn(
+        'fixed inset-0 bg-black/40 backdrop-blur-sm',
+        'data-[state=open]:animate-in data-[state=closed]:animate-out',
+        'data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0',
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+export function DialogContent({ className, children, ...props }) {
+  return (
+    <DialogPortal>
+      <DialogOverlay />
+      <DialogPrimitive.Content
+        // Centrée, max largeur, max hauteur, colonne, pas de scroll de fond
+        className={cn(
+          'fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2',
+          'w-[92vw] sm:w-full sm:max-w-xl rounded-2xl bg-white shadow-xl outline-none',
+          'max-h-[85vh] flex flex-col overflow-hidden',
+          'data-[state=open]:animate-in data-[state=closed]:animate-out',
+          'data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95',
+          className
         )}
-      </AnimatePresence>
-    </DialogPrimitive.Root>
-  );
+        {...props}
+      >
+        {children}
+      </DialogPrimitive.Content>
+    </DialogPortal>
+  )
 }

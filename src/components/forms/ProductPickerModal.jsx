@@ -95,9 +95,13 @@ export default function ProductPickerModal({ open, onClose, onSelect }) {
       description="Recherche et sélection d'un produit"
     >
       <div className="space-y-3" onKeyDown={handleKey}>
+        <p id="product-picker-search" className="sr-only">
+          Recherche par nom uniquement
+        </p>
         <Input
           autoFocus
-          placeholder="Recherche..."
+          aria-describedby="product-picker-search"
+          placeholder="Rechercher un produit par nom"
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);

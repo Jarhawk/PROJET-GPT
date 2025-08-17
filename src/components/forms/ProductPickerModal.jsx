@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/SmartDialog';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/SmartDialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useProductSearch } from '@/hooks/useProductSearch';
@@ -27,10 +27,10 @@ export default function ProductPickerModal({ open, onOpenChange, mamaId, onPick 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent aria-describedby="product-picker-desc">
+      <DialogContent>
         <DialogTitle>Sélecteur de produits</DialogTitle>
-        <DialogDescription id="product-picker-desc" className="sr-only">
-          Recherchez un produit par nom. Tapez et appuyez sur Entrée pour sélectionner le premier résultat.
+        <DialogDescription>
+          Recherchez un produit par son nom. Tapez et appuyez sur Entrée pour choisir le 1er résultat.
         </DialogDescription>
 
         <div className="space-y-3">

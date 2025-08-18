@@ -1,12 +1,11 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from 'react';
-import {
-  Dialog,
+import SmartDialog, {
+  DialogRoot,
   DialogContent,
-  DialogOverlay,
   DialogTitle,
   DialogDescription,
-} from '@/components/ui/dialog';
+} from '@/components/ui/SmartDialog';
 import { useHelp } from '@/context/HelpProvider';
 
 export default function DocumentationPanel({ open, onOpenChange }) {
@@ -18,8 +17,7 @@ export default function DocumentationPanel({ open, onOpenChange }) {
   }, [open, search, fetchDocs]);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogOverlay className="fixed inset-0 bg-black/40" />
+    <DialogRoot open={open} onOpenChange={onOpenChange}>
       <DialogContent className="fixed right-0 top-0 bottom-0 w-96 bg-white/10 border border-white/20 backdrop-blur-xl p-4 overflow-y-auto">
         <DialogTitle className="font-bold mb-2">Documentation</DialogTitle>
         <DialogDescription className="sr-only">
@@ -40,6 +38,6 @@ export default function DocumentationPanel({ open, onOpenChange }) {
           ))}
         </ul>
       </DialogContent>
-    </Dialog>
+    </DialogRoot>
   );
 }

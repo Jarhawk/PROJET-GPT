@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
-import {
-  Dialog,
+import SmartDialog, {
+  DialogRoot,
   DialogContent,
   DialogTitle,
   DialogDescription,
@@ -33,7 +33,7 @@ export default function FactureImportModal({ open, onClose, onImport }) {
   const invalid = row => !row.produit || !row.quantite;
 
   return (
-    <Dialog open={open} onOpenChange={isOpen => !isOpen && onClose?.()}>
+    <DialogRoot open={open} onOpenChange={isOpen => !isOpen && onClose?.()}>
       <DialogContent className="space-y-4">
         <DialogTitle>Import Excel</DialogTitle>
         <DialogDescription className="sr-only">
@@ -93,6 +93,6 @@ export default function FactureImportModal({ open, onClose, onImport }) {
           </DialogClose>
         </div>
       </DialogContent>
-    </Dialog>
+    </DialogRoot>
   );
 }

@@ -2,7 +2,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
 import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
 import { useFournisseursAutocomplete } from '@/hooks/useFournisseursAutocomplete';
@@ -13,12 +12,12 @@ import { Select } from '@/components/ui/select';
 import AutoCompleteField from '@/components/ui/AutoCompleteField';
 import { Button } from '@/components/ui/button';
 import FactureLigne from '@/components/FactureLigne';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { FACTURE_STATUTS } from '@/constants/factures';
 import { Checkbox } from '@/components/ui/checkbox';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Loader2 } from 'lucide-react';
-import { useInvoice } from '@/hooks/useInvoice';
+import { useInvoice, useSaveFacture } from '@/hooks/useInvoice';
 
 export function toLabel(v) {
   if (v == null) return '';
@@ -72,9 +71,9 @@ export default function FactureForm({
   const { id } = useParams();
   const isEdit = Boolean(id);
   const submitLabel = isEdit ? 'Modifier' : 'Enregistrer';
-  const queryClient = useQueryClient();
   const { userData } = useAuth();
   const mamaId = userData?.mama_id;
+  const saveFacture = useSaveFacture(mamaId);
   const { results: fournisseurOptions, searchFournisseurs } =
     useFournisseursAutocomplete();
   const formRef = useRef(null);
@@ -160,14 +159,6 @@ export default function FactureForm({
     }
   }, [invoiceData]);
 
-  async function detectExistingTable(candidates) {
-    for (const t of candidates) {
-      const { error } = await supabase.from(t).select('id').limit(1);
-      if (!error) return t;
-    }
-    return candidates[0];
-  }
-
   useEffect(() => {
     if (isBonLivraison && !numero.startsWith('BL')) {
       setNumero('BL');
@@ -225,149 +216,48 @@ export default function FactureForm({
       toast.error('Session invalide (mama_id manquant).');
       return;
     }
-    setSaving(true);
-    try {
-      let newId = factureId;
-      const header = {
+
+    const payload = {
+      facture: {
+        id: factureId,
+        numero,
         date_facture: date,
         fournisseur_id,
-        numero,
-        statut,
-        total_ht: parseFloat(String(totalHt).replace(',', '.')) || 0,
-        total_tva: autoTva,
-        total_ttc: autoTotal,
-        bon_livraison: isBonLivraison,
-        mama_id: mamaId,
-      };
+        etat: statut,
+      },
+      lignes: [],
+      apply_stock: statut !== 'Brouillon',
+    };
 
-      if (isEdit) {
-        const { error: eHdr } = await supabase
-          .from('factures')
-          .update(header)
-          .eq('id', newId);
-        if (eHdr) {
-          console.error(eHdr);
-          toast.error('Échec enregistrement entête : ' + eHdr.message);
-          return;
-        }
-      } else {
-        const { data: hdr, error: eHdr } = await supabase
-          .from('factures')
-          .insert([header])
-          .select('id')
-          .single();
-        if (eHdr) {
-          console.error(eHdr);
-          toast.error('Échec enregistrement entête : ' + eHdr.message);
-          return;
-        }
-        newId = hdr.id;
+    for (let i = 0; i < lignes.length; i++) {
+      const ligne = lignes[i];
+      const quantite = parseNum(ligne.quantite);
+      const prixSaisi = parseNum(ligne.pu);
+      const totalSaisi = parseNum(ligne.total_ht);
+      if (!ligne.produit_id || quantite <= 0 || (!prixSaisi && !totalSaisi)) {
+        toast.error('Ligne de produit invalide');
+        return;
       }
+      let puFinal = prixSaisi || (quantite ? totalSaisi / quantite : 0);
+      puFinal = isFinite(puFinal) ? puFinal : 0;
+      payload.lignes.push({
+        id: ligne.id,
+        produit_id: ligne.produit_id ?? ligne.produit?.id ?? '',
+        quantite,
+        pu_ht: puFinal,
+        tva: ligne.tva ?? null,
+      });
+    }
 
-      const lignesRows = [];
-      const fournisseurRows = [];
-      const achatsRows = [];
-      for (let i = 0; i < lignes.length; i++) {
-        const ligne = lignes[i];
-        const quantite = parseNum(ligne.quantite);
-        const prixSaisi = parseNum(ligne.pu);
-        const totalSaisi = parseNum(ligne.total_ht);
-        if (
-          !ligne.produit_id ||
-          !ligne.zone_id ||
-          quantite <= 0 ||
-          (!prixSaisi && !totalSaisi)
-        ) {
-          toast.error('Ligne de produit invalide');
-          return;
-        }
-        let puFinal = prixSaisi;
-        if (!puFinal) {
-          puFinal = quantite ? totalSaisi / quantite : 0;
-        }
-        puFinal = isFinite(puFinal) ? puFinal : 0;
-        lignesRows.push({
-          id: isEdit ? ligne.id ?? undefined : undefined,
-          facture_id: newId,
-          produit_id: ligne.produit_id ?? ligne.produit?.id ?? null,
-          quantite,
-          unite: ligne.unite ?? null,
-          total_ht: totalSaisi || quantite * puFinal,
-          pu: puFinal,
-          pmp: parseNum(ligne.pmp),
-          tva: ligne.tva ?? null,
-          zone_id: ligne.zone_id ?? null,
-          position: ligne.position ?? i,
-          note: ligne.note ?? null,
-          actif: ligne.actif ?? true,
-          mama_id: mamaId,
-        });
-        fournisseurRows.push({
-          produit_id: ligne.produit_id ?? ligne.produit?.id ?? null,
-          fournisseur_id,
-          prix_achat: puFinal,
-          date_livraison: date,
-          mama_id: mamaId,
-        });
-        achatsRows.push({
-          produit_id: ligne.produit_id ?? ligne.produit?.id ?? null,
-          fournisseur_id,
-          prix: puFinal,
-          quantite,
-          date_achat: date,
-          mama_id: mamaId,
-        });
+    try {
+      setSaving(true);
+      const data = await saveFacture.mutateAsync(payload);
+      onSaved?.(data?.facture?.id);
+      if (data?.facture?.id) {
+        navigate(`/factures/${data.facture.id}`);
       }
-
-      if (lignesRows.length) {
-        const tableLines = await detectExistingTable(['facture_lignes', 'lignes_facture']);
-        const { error: eLines } = isEdit
-          ? await supabase.from(tableLines).upsert(lignesRows, { onConflict: 'id' })
-          : await supabase.from(tableLines).insert(lignesRows);
-        if (eLines) {
-          console.error(eLines);
-          toast.error('Échec enregistrement lignes : ' + eLines.message);
-          return;
-        }
-      }
-
-      if (fournisseurRows.length) {
-        const { error: eF } = await supabase
-          .from('fournisseur_produits')
-          .upsert(fournisseurRows, {
-            onConflict: ['produit_id', 'fournisseur_id', 'date_livraison'],
-            returning: 'minimal',
-          });
-        if (eF) {
-          console.error(eF);
-          toast.error('Échec enregistrement lignes : ' + eF.message);
-          return;
-        }
-      }
-
-      if (achatsRows.length) {
-        const { error: eA } = await supabase
-          .from('achats')
-          .insert(achatsRows, { returning: 'minimal' });
-        if (eA) {
-          console.error(eA);
-          toast.error('Échec enregistrement lignes : ' + eA.message);
-          return;
-        }
-      }
-
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['factures'] }),
-        queryClient.invalidateQueries({ queryKey: ['facture-list'] }),
-        queryClient.invalidateQueries({ queryKey: ['facture-detail'] }),
-      ]);
-
-      toast.success(isEdit ? 'Facture modifiée' : 'Facture enregistrée');
-      onSaved?.(newId);
-      navigate(`/factures/${newId}`);
     } catch (err) {
       console.error(err);
-      toast.error(err?.message || "Erreur lors de l'enregistrement");
     } finally {
       setSaving(false);
     }

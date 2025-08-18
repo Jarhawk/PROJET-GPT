@@ -3,7 +3,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useUtilisateurs } from "@/hooks/useUtilisateurs";
 import { useAuth } from '@/hooks/useAuth';
 import { useRoles } from "@/hooks/useRoles";
-import UtilisateurForm from "@/components/Utilisateurs/UtilisateurForm";
+import UtilisateurForm from "@/components/utilisateurs/UtilisateurForm";
 import UtilisateurRow from "@/components/Utilisateurs/UtilisateurRow";
 import { Button } from "@/components/ui/button";
 import ListingContainer from "@/components/ui/ListingContainer";

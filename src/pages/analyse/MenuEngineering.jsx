@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { useMenuEngineering } from '@/hooks/useMenuEngineering'
 import FicheRentabiliteCard from '@/components/fiches/FicheRentabiliteCard'
 import html2canvas from 'html2canvas'
-import jsPDF from 'jspdf'
+import JSPDF from 'jspdf'
 
 export default function MenuEngineering() {
   const { data, fetchData } = useMenuEngineering()
@@ -25,7 +25,7 @@ export default function MenuEngineering() {
     const el = document.getElementById('matrix')
     if (!el) return
     const canvas = await html2canvas(el)
-    const pdf = new jsPDF()
+    const pdf = new JSPDF()
     const img = canvas.toDataURL('image/png')
     pdf.addImage(img, 'PNG', 10, 10, 190, 0)
     pdf.save('menu_engineering.pdf')

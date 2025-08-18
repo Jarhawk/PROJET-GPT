@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import * as XLSX from "xlsx";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import jsPDF from "jspdf";
+import JSPDF from "jspdf";
 import "jspdf-autotable";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { Button } from "@/components/ui/button";
@@ -129,7 +129,7 @@ export default function BarManager() {
   };
 
   const handleExportPDF = () => {
-    const doc = new jsPDF();
+    const doc = new JSPDF();
     doc.text("Statistiques Bar Manager", 10, 12);
     doc.autoTable({
       startY: 20,

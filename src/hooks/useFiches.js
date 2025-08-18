@@ -4,7 +4,7 @@ import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import jsPDF from "jspdf";
+import JSPDF from "jspdf";
 import "jspdf-autotable";
 
 export function useFiches() {
@@ -238,7 +238,7 @@ export function useFiches() {
   }
 
   function exportFichesToPDF() {
-    const doc = new jsPDF();
+    const doc = new JSPDF();
     const rows = (fiches || []).map(f => [
       f.nom,
       f.famille?.nom || "",

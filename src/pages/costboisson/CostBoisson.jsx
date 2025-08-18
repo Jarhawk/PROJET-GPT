@@ -8,7 +8,7 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import GlassCard from "@/components/ui/GlassCard";
 import TableContainer from "@/components/ui/TableContainer";
 import * as XLSX from "xlsx";
-import jsPDF from "jspdf";
+import JSPDF from "jspdf";
 import "jspdf-autotable";
 import {
   Dialog,
@@ -141,7 +141,7 @@ export default function CostBoissons() {
   // Export PDF
   const handleExportPDF = () => {
     const filtered = filterBoissons();
-    const doc = new jsPDF();
+    const doc = new JSPDF();
     doc.text("Cost Boissons", 10, 12);
     doc.autoTable({
       startY: 20,

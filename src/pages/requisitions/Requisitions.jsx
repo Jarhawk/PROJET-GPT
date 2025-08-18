@@ -8,7 +8,7 @@ import { useProducts } from '@/hooks/useProducts';
 import { useUtilisateurs } from '@/hooks/useUtilisateurs';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
-import jsPDF from 'jspdf';
+import JSPDF from 'jspdf';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import 'jspdf-autotable';
 import { Button } from '@/components/ui/button';
@@ -87,7 +87,7 @@ export default function Requisitions() {
 
   // Export PDF
   const handleExportPDF = () => {
-    const doc = new jsPDF();
+    const doc = new JSPDF();
     doc.text('Historique Réquisitions', 10, 12);
     doc.autoTable({
       startY: 20,

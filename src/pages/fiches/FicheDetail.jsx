@@ -4,7 +4,7 @@ import { useParams, Navigate } from "react-router-dom";
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from "@/components/ui/button";
 import * as XLSX from "xlsx";
-import jsPDF from "jspdf";
+import JSPDF from "jspdf";
 import "jspdf-autotable";
 import { useFiches } from "@/hooks/useFiches";
 import { useFicheCoutHistory } from "@/hooks/useFicheCoutHistory";
@@ -56,7 +56,7 @@ export default function FicheDetail({ fiche: ficheProp, onClose }) {
   }
 
   function exportPDF() {
-    const doc = new jsPDF();
+    const doc = new JSPDF();
     doc.text(fiche.nom, 10, 10);
     const rows = fiche.lignes?.map(l => [
       l.produit_nom || l.sous_fiche?.nom,

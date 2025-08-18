@@ -4,7 +4,7 @@ import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
-import jsPDF from "jspdf";
+import JSPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 export function useLogs() {
@@ -89,7 +89,7 @@ export function useLogs() {
       const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
       saveAs(new Blob([buf]), "logs.xlsx");
     } else if (format === "pdf") {
-      const doc = new jsPDF();
+      const doc = new JSPDF();
       const rows = logs.map((l) => [l.date_log, l.type, l.module, l.description, l.critique ? "oui" : "non"]);
       autoTable(doc, {
         head: [["Date", "Type", "Module", "Description", "Critique"]],

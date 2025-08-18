@@ -2,7 +2,7 @@
 import { useState, useCallback } from "react";
 import supabase from '@/lib/supabaseClient';
 import * as XLSX from "xlsx";
-import jsPDF from "jspdf";
+import JSPDF from "jspdf";
 import "jspdf-autotable";
 
 export function useConsolidation() {
@@ -100,7 +100,7 @@ export function useConsolidation() {
   }, []);
 
   const exportPdf = useCallback((data) => {
-    const doc = new jsPDF();
+    const doc = new JSPDF();
     if (data && data.length > 0) {
       const head = [Object.keys(data[0])];
       const body = data.map((r) => Object.values(r));

@@ -9,7 +9,7 @@ import EngineeringFilters from '@/components/engineering/EngineeringFilters'
 import EngineeringChart from '@/components/engineering/EngineeringChart'
 import ImportVentesExcel from '@/components/engineering/ImportVentesExcel'
 import html2canvas from 'html2canvas'
-import jsPDF from 'jspdf'
+import JSPDF from 'jspdf'
 import * as XLSX from 'xlsx'
 
 export default function MenuEngineering() {
@@ -54,7 +54,7 @@ export default function MenuEngineering() {
     const el = document.getElementById('chart-container')
     if (!el) return
     const canvas = await html2canvas(el)
-    const pdf = new jsPDF()
+    const pdf = new JSPDF()
     const img = canvas.toDataURL('image/png')
     pdf.addImage(img, 'PNG', 10, 10, 190, 0)
     pdf.save('menu_engineering.pdf')

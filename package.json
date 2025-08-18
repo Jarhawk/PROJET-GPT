@@ -10,6 +10,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\" --quiet",
+    "typecheck": "tsc --noEmit",
     "preview": "vite preview",
     "test": "vitest run",
     "test:e2e": "node scripts/check_browsers.cjs && playwright test || true",
@@ -66,6 +67,7 @@
     "recharts": "^2.15.4",
     "sonner": "^2.0.7",
     "tesseract.js": "^6.0.1",
+    "js-yaml": "^4.1.0",
     "uuid": "^11.1.0",
     "xlsx": "^0.18.5",
     "zod": "3.23.8"
@@ -91,6 +93,7 @@
     "eslint": "8.57.0",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-jsx-a11y": "^6.8.0",
+    "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-react": "7.34.1",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "0.4.6",

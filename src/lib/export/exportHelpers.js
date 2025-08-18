@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import jsPDF from 'jspdf';
+import JSPDF from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
@@ -14,7 +14,7 @@ export function exportToPDF(data = [], config = {}) {
   const orient = ['portrait', 'landscape'].includes(String(orientation).toLowerCase())
     ? String(orientation).toLowerCase()
     : 'portrait';
-  const doc = new jsPDF({ orientation: orient });
+  const doc = new JSPDF({ orientation: orient });
   if (!Array.isArray(data)) data = [data];
   const headers = columns.length
     ? [columns.map((c) => c.label)]

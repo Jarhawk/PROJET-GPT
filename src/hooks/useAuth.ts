@@ -7,8 +7,8 @@ export function useAuth() {
 
 /** Hook pratique: renvoie une fonction hasAccess(key) */
 export function useHasAccess() {
-  const { userData } = useAuthContext()
-  const rights = userData?.access_rights ?? {}
+  const auth = useAuthContext()
+  const rights = auth?.userData?.access_rights ?? {}
   return (key?: string | null) => {
     const k = normalizeAccessKey(key)
     if (!k) return true

@@ -6,7 +6,7 @@ import TableContainer from "@/components/ui/TableContainer";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import * as XLSX from "xlsx";
-import jsPDF from "jspdf";
+import JSPDF from "jspdf";
 import "jspdf-autotable";
 import { useAuth } from '@/hooks/useAuth';
 
@@ -57,7 +57,7 @@ export default function InventaireDetail() {
   };
 
   const exportPDF = () => {
-    const doc = new jsPDF();
+    const doc = new JSPDF();
     doc.text(
       `Inventaire ${inventaire.date_inventaire} – Zone ${inventaire.zone || ''}`,
       10,

@@ -3,7 +3,7 @@ import { useState, useCallback } from 'react'
 import supabase from '@/lib/supabaseClient'
 import { useAuth } from '@/hooks/useAuth'
 import * as XLSX from 'xlsx'
-import jsPDF from 'jspdf'
+import JSPDF from 'jspdf'
 import 'jspdf-autotable'
 
 export function useCostingCarte() {
@@ -65,7 +65,7 @@ export function useCostingCarte() {
   }, [])
 
   const exportPdf = useCallback((rows) => {
-    const doc = new jsPDF()
+    const doc = new JSPDF()
     const headers = [
       ['Nom fiche', 'Type', 'Coût/portion', 'Prix vente', 'Marge €', 'Marge %', 'Food cost %'],
     ]

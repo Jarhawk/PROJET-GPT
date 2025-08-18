@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useAuditLog } from "@/hooks/useAuditLog";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import jsPDF from "jspdf";
+import JSPDF from "jspdf";
 
 export function useMenuDuJour() {
   const { mama_id } = useAuth();
@@ -334,7 +334,7 @@ export function useMenuDuJour() {
 
   async function exportPdf(date) {
     const { lignes } = await fetchDay(date);
-    const doc = new jsPDF();
+    const doc = new JSPDF();
     doc.text(`Menu du ${date}`, 10, 10);
     let y = 20;
     (lignes || []).forEach((l) => {

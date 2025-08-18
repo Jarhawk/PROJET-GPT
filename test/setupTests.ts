@@ -3,11 +3,11 @@ import { expect, vi } from "vitest";
 // Stubs pour anciens modules supprimés
 vi.mock("@/license", () => ({ default: { validateLicense: () => true } }));
 vi.mock("@/db/license-keys.json", () => ({ default: [] }));
-vi.mock("@/utils/watermark", () => ({ addWatermark: (pdf) => pdf, clearWatermark: (pdf) => pdf }));
+vi.mock("@/utils/watermark", () => ({ addWatermark: (pdf: any) => pdf, clearWatermark: (pdf: any) => pdf }));
 
 // Default auth hook mock
 vi.mock("@/hooks/useAuth", async () => {
-  const mod = await import("./__mocks__/hooks/useAuth.ts");
+  const mod = await import("./__mocks__/hooks/useAuth");
   return { useAuth: mod.useAuth };
 });
 
@@ -24,6 +24,7 @@ if (!globalThis.crypto) (globalThis as any).crypto = crypto.webcrypto;
 // DOMRect (certains graphiques)
 if (!(globalThis as any).DOMRect) {
   (globalThis as any).DOMRect = class DOMRect {
+    x: number; y: number; width: number; height: number; top: number; left: number; bottom: number; right: number;
     constructor(x=0,y=0,w=0,h=0){ this.x=x; this.y=y; this.width=w; this.height=h; this.top=y; this.left=x; this.bottom=y+h; this.right=x+w; }
     static fromRect(other:any){ return new (this as any)(other?.x, other?.y, other?.width, other?.height); }
   } as any;

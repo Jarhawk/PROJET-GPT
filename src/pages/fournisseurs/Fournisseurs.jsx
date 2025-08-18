@@ -14,7 +14,7 @@ import PaginationFooter from '@/components/ui/PaginationFooter';
 import TableHeader from '@/components/ui/TableHeader';
 import FournisseurRow from '@/components/fournisseurs/FournisseurRow';
 import { Dialog, DialogContent } from '@radix-ui/react-dialog';
-import jsPDF from 'jspdf';
+import JSPDF from 'jspdf';
 import 'jspdf-autotable';
 import { toast } from 'sonner';
 import {
@@ -89,7 +89,7 @@ export default function Fournisseurs() {
   }, [fournisseurs]);
 
   const exportPDF = () => {
-    const doc = new jsPDF();
+    const doc = new JSPDF();
     doc.text('Liste Fournisseurs', 10, 12);
     doc.autoTable({
       startY: 20,

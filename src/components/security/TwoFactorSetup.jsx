@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from 'react';
-import { QRCode } from 'qrcode.react';
+import QRCode from 'qrcode.react';
 import { useTwoFactorAuth } from '@/hooks/useTwoFactorAuth';
 import { Button } from '@/components/ui/button';
 

@@ -4,7 +4,7 @@ import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import * as XLSX from "xlsx";
-import jsPDF from "jspdf";
+import JSPDF from "jspdf";
 import "jspdf-autotable";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger, DialogContent } from "@radix-ui/react-dialog";
@@ -138,7 +138,7 @@ export default function Transferts() {
   };
 
   const handleExportPDF = () => {
-    const doc = new jsPDF();
+    const doc = new JSPDF();
     doc.text("Historique Transferts de stock inter-zones", 10, 12);
     doc.autoTable({
       startY: 20,

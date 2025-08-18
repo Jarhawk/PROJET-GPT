@@ -211,8 +211,8 @@ export default function FactureLigne({
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <div className="basis-[20%] shrink-0">
+    <div className="flex items-center gap-2 min-w-0">
+      <div className="basis-[20%] shrink min-w-0">
         <Button
           type="button"
           variant="outline"
@@ -220,7 +220,7 @@ export default function FactureLigne({
             setPickerOpen(true);
             onProduitFocus?.(index);
           }}
-          className="h-10 w-full justify-start"
+          className="h-10 w-full min-w-0 justify-start"
         >
           {ligne.produit?.nom || "Choisir..."}
         </Button>

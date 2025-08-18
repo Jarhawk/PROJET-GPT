@@ -15,6 +15,17 @@ if (!import.meta.env.DEV) {
   console.debug = () => {};
 }
 
+if (import.meta?.env?.DEV && 'serviceWorker' in navigator) {
+  navigator.serviceWorker
+    .getRegistrations()
+    .then((regs) => regs.forEach((r) => r.unregister()));
+  if (window.caches?.keys) {
+    caches
+      .keys()
+      .then((keys) => keys.forEach((k) => caches.delete(k)));
+  }
+}
+
 if (import.meta?.env?.DEV || process.env.NODE_ENV === 'development') {
   // @ts-ignore
   window.toast = toast;

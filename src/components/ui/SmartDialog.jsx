@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 
 /** Expose Radix primitives sous des noms stables */
@@ -8,6 +8,17 @@ const DialogPortal = Dialog.Portal
 const DialogTitle = Dialog.Title
 const DialogDescription = Dialog.Description
 const DialogClose = Dialog.Close
+
+function useLockBodyScroll(locked) {
+  useEffect(() => {
+    if (!locked) return
+    const original = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = original
+    }
+  }, [locked])
+}
 
 /** Overlay stylé (déclaré une seule fois, exporté une seule fois) */
 const DialogOverlay = React.forwardRef(function DialogOverlay(props, ref) {
@@ -40,7 +51,17 @@ const DialogContent = React.forwardRef(function DialogContent({ className = '', 
 })
 
 /** Exports nommés (UNE seule fois chacun) */
-export { DialogRoot, DialogTrigger, DialogPortal, DialogOverlay, DialogContent, DialogTitle, DialogDescription, DialogClose }
+export {
+  DialogRoot,
+  DialogTrigger,
+  DialogPortal,
+  DialogOverlay,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+  useLockBodyScroll,
+}
 
 /** Export par défaut en “namespace” pour compat éventuelle */
 const SmartDialog = {
@@ -52,5 +73,6 @@ const SmartDialog = {
   Title: DialogTitle,
   Description: DialogDescription,
   Close: DialogClose,
+  useLockBodyScroll,
 }
 export default SmartDialog

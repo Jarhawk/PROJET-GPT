@@ -4,12 +4,14 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import supabase from '@/lib/supabaseClient';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
+import SmartDialog, {
+  DialogRoot,
+  DialogTrigger,
   DialogContent,
   DialogTitle,
   DialogDescription,
-} from '@radix-ui/react-dialog';
+  DialogClose,
+} from '@/components/ui/SmartDialog';
 import PermissionsForm from './PermissionsForm';
 import { toast } from 'sonner';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
@@ -151,7 +153,7 @@ export default function PermissionsAdmin() {
           </table>
         )}
       </TableContainer>
-      <Dialog open={!!editRole} onOpenChange={(v) => !v && setEditRole(null)}>
+      <DialogRoot open={!!editRole} onOpenChange={(v) => !v && setEditRole(null)}>
         <DialogContent className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl shadow-lg p-6 max-w-xl">
           <DialogTitle className="font-bold mb-2">
             {editRole?.id ? 'Modifier le rôle' : 'Nouveau rôle'}
@@ -167,7 +169,7 @@ export default function PermissionsAdmin() {
             />
           )}
         </DialogContent>
-      </Dialog>
+      </DialogRoot>
     </div>
   );
 }

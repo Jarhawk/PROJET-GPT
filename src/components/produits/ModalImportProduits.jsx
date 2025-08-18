@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import SmartDialog from "@/components/ui/SmartDialog";
+import SmartDialog, {
+  DialogRoot,
+  DialogTrigger,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/SmartDialog";
 import ImportPreviewTable from "@/components/ui/ImportPreviewTable";
 import {
   parseProduitsFile,
@@ -111,13 +118,18 @@ export default function ModalImportProduits({ open, onClose, onSuccess }) {
   }
 
   return (
-    <SmartDialog open={open} onClose={onClose} title="Importer Produits via Excel">
-      <div className="space-y-4">
-        <div className="flex gap-2">
-          <Button onClick={downloadProduitsTemplate} type="button">
-            Télécharger modèle Excel
-          </Button>
-        </div>
+    <DialogRoot open={open} onOpenChange={(v) => !v && onClose?.()}>
+      <DialogContent>
+        <DialogTitle>Importer Produits via Excel</DialogTitle>
+        <DialogDescription className="sr-only">
+          Importer des produits depuis un fichier Excel
+        </DialogDescription>
+        <div className="space-y-4">
+          <div className="flex gap-2">
+            <Button onClick={downloadProduitsTemplate} type="button">
+              Télécharger modèle Excel
+            </Button>
+          </div>
         <input
           type="file"
           accept=".xlsx,.csv"
@@ -162,7 +174,8 @@ export default function ModalImportProduits({ open, onClose, onSuccess }) {
             Aucune ligne importée
           </p>
         )}
-      </div>
-    </SmartDialog>
+        </div>
+      </DialogContent>
+    </DialogRoot>
   );
 }

@@ -6,12 +6,14 @@ import SecondaryButton from "@/components/ui/SecondaryButton";
 import { Input } from "@/components/ui/input";
 import TableContainer from "@/components/ui/TableContainer";
 import GlassCard from "@/components/ui/GlassCard";
-import {
-  Dialog,
+import SmartDialog, {
+  DialogRoot,
+  DialogTrigger,
   DialogContent,
   DialogTitle,
   DialogDescription,
-} from "@radix-ui/react-dialog";
+  DialogClose,
+} from "@/components/ui/SmartDialog";
 import { toast } from 'sonner';
 import { useInventaireZones } from "@/hooks/useInventaireZones";
 import { useAuth } from '@/hooks/useAuth';
@@ -102,7 +104,7 @@ export default function InventaireZones() {
           </tbody>
         </table>
       </TableContainer>
-      <Dialog open={!!editZone} onOpenChange={v => !v && setEditZone(null)}>
+      <DialogRoot open={!!editZone} onOpenChange={v => !v && setEditZone(null)}>
       <DialogContent className="bg-white/10 backdrop-blur-lg text-white rounded-xl shadow-lg p-6 max-w-sm">
         <DialogTitle className="font-bold mb-2">
           {editZone?.id ? "Modifier la zone" : "Nouvelle zone"}
@@ -129,7 +131,7 @@ export default function InventaireZones() {
             </PrimaryButton>
           </form>
         </DialogContent>
-      </Dialog>
+      </DialogRoot>
     </div>
   );
 }

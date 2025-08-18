@@ -7,7 +7,14 @@ import * as XLSX from "xlsx";
 import JSPDF from "jspdf";
 import "jspdf-autotable";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogTrigger, DialogContent } from "@radix-ui/react-dialog";
+import SmartDialog, {
+  DialogRoot,
+  DialogTrigger,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/SmartDialog";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import GlassCard from "@/components/ui/GlassCard";
 import TableContainer from "@/components/ui/TableContainer";
@@ -337,7 +344,7 @@ export default function Transferts() {
                 <td className="px-2 py-1">{t.prix}</td>
                 <td className="px-2 py-1 font-bold">{t.cout} €</td>
                 <td>
-                  <Dialog>
+                  <DialogRoot>
                     <DialogTrigger asChild>
                       <Button
                         size="sm"
@@ -348,9 +355,9 @@ export default function Transferts() {
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="bg-white/10 backdrop-blur-lg rounded-xl shadow-lg p-6 max-w-lg">
-                      <h3 className="font-bold mb-2">
+                      <DialogTitle className="font-bold mb-2">
                         Timeline transferts : {t.nom}
-                      </h3>
+                      </DialogTitle>
                       {loadingTimeline ? (
                         <LoadingSpinner message="Chargement..." />
                       ) : (
@@ -378,7 +385,7 @@ export default function Transferts() {
                         </table>
                       )}
                     </DialogContent>
-                  </Dialog>
+                  </DialogRoot>
                 </td>
               </tr>
             ))}
@@ -386,12 +393,12 @@ export default function Transferts() {
         </table>
       </TableContainer>
       {/* Modal création transfert */}
-      <Dialog
+      <DialogRoot
         open={showCreate}
         onOpenChange={(v) => !v && setShowCreate(false)}
       >
         <DialogContent className="bg-white/10 backdrop-blur-lg rounded-xl shadow-lg p-6 max-w-md">
-          <h2 className="font-bold mb-2">Nouveau transfert de stock</h2>
+          <DialogTitle className="font-bold mb-2">Nouveau transfert de stock</DialogTitle>
           <form onSubmit={handleCreateTf} className="space-y-3">
             <div>
               <label>Produit</label>
@@ -472,7 +479,7 @@ export default function Transferts() {
             </Button>
           </form>
         </DialogContent>
-      </Dialog>
+      </DialogRoot>
     </div>
   );
 }

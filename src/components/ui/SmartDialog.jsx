@@ -3,7 +3,7 @@ import * as DialogPrimitive from '@radix-ui/react-dialog'
 const cx = (...xs) => xs.filter(Boolean).join(' ')
 
 // Sous-composants Radix exposés
-const Dialog = DialogPrimitive.Root
+const DialogRoot = DialogPrimitive.Root
 const DialogTrigger = DialogPrimitive.Trigger
 const DialogPortal = DialogPrimitive.Portal
 const DialogClose = DialogPrimitive.Close
@@ -25,12 +25,19 @@ export function DialogOverlay({ className, ...props }) {
   )
 }
 
-export function DialogContent({ className, children, ...props }) {
+export function DialogContent({
+  className,
+  children,
+  overlayClassName,
+  asChild,
+  ...props
+}) {
   return (
     <DialogPortal>
-      <DialogOverlay />
+      <DialogOverlay className={overlayClassName} />
       <DialogPrimitive.Content
         // z-index > overlay, largeur limitée, fond adapté clair/sombre, bordure/ombre
+        asChild={asChild}
         className={cx(
           'fixed left-1/2 top-1/2 z-[1001] -translate-x-1/2 -translate-y-1/2',
           'w-[min(96vw,900px)] max-h-[82vh] overflow-hidden',
@@ -43,10 +50,12 @@ export function DialogContent({ className, children, ...props }) {
         )}
         {...props}
       >
-        {/* Contenu scrollable interne pour éviter les débordements */}
-        <div className="flex max-h-[82vh] flex-col">
-          {children}
-        </div>
+        {asChild ? (
+          children
+        ) : (
+          // Contenu scrollable interne pour éviter les débordements
+          <div className="flex max-h-[82vh] flex-col">{children}</div>
+        )}
       </DialogPrimitive.Content>
     </DialogPortal>
   )
@@ -55,18 +64,22 @@ export function DialogContent({ className, children, ...props }) {
 // Composant racine pratique
 function SmartDialog({ open, onClose, title, description, children, ...props }) {
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose?.()} {...props}>
+    <DialogRoot
+      open={open}
+      onOpenChange={(isOpen) => !isOpen && onClose?.()}
+      {...props}
+    >
       <DialogContent>
         {title && <DialogTitle>{title}</DialogTitle>}
         {description && <DialogDescription>{description}</DialogDescription>}
         {children}
       </DialogContent>
-    </Dialog>
+    </DialogRoot>
   )
 }
 
 export {
-  Dialog,
+  DialogRoot,
   DialogTrigger,
   DialogPortal,
   DialogClose,

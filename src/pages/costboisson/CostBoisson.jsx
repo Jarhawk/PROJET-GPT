@@ -10,13 +10,14 @@ import TableContainer from "@/components/ui/TableContainer";
 import * as XLSX from "xlsx";
 import JSPDF from "jspdf";
 import "jspdf-autotable";
-import {
-  Dialog,
-  DialogContent,
+import SmartDialog, {
+  DialogRoot,
   DialogTrigger,
+  DialogContent,
   DialogTitle,
   DialogDescription,
-} from "@radix-ui/react-dialog";
+  DialogClose,
+} from "@/components/ui/SmartDialog";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { motion as Motion, AnimatePresence } from "framer-motion";
 
@@ -303,7 +304,7 @@ export default function CostBoissons() {
                     transition={{ duration: 0.2 }}
                   >
                     <td className="px-2 py-1">
-                      <Dialog>
+                      <DialogRoot>
                         <DialogTrigger asChild>
                           <Button variant="link" className="text-blue-700 p-0 h-auto min-w-0 underline">
                             {b.nom}
@@ -342,7 +343,7 @@ export default function CostBoissons() {
                             {b.quantiteVendue}
                           </p>
                         </DialogContent>
-                      </Dialog>
+                      </DialogRoot>
                     </td>
                     <td className="px-2 py-1">{b.type || b.famille || "-"}</td>
                     <td className="px-2 py-1">{b.unite || "-"}</td>
@@ -384,7 +385,7 @@ export default function CostBoissons() {
                       </div>
                     </td>
                     <td className="px-2 py-1">
-                      <Dialog>
+                      <DialogRoot>
                         <DialogTrigger asChild>
                           <Button variant="ghost" className="text-sm">Voir fiche</Button>
                         </DialogTrigger>
@@ -405,7 +406,7 @@ export default function CostBoissons() {
                             Dernière mise à jour : {b.created_at?.slice(0, 10) || "-"}
                           </p>
                         </DialogContent>
-                      </Dialog>
+                      </DialogRoot>
                     </td>
                   </Motion.tr>
                 );

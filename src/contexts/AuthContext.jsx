@@ -9,7 +9,7 @@ function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
   const [userData, setUserData] = useState(null)
   const [loading, setLoading] = useState(false)
-  const rights = userData?.access_rights ?? {}
+  const rights = useMemo(() => userData?.access_rights ?? {}, [userData?.access_rights])
   const initRef = useRef(false)
   const lastLoadedUserRef = useRef(null)
   const pollTimerRef = useRef(null)
@@ -73,7 +73,11 @@ function AuthProvider({ children }) {
     }
   }, [rights])
 
-  return <AuthCtx.Provider value={{ session, userData, loading, hasAccess, ...(userData || {}) }}>{children}</AuthCtx.Provider>
+  const value = useMemo(
+    () => ({ session, userData, loading, hasAccess, ...(userData || {}) }),
+    [session, userData, loading, hasAccess]
+  )
+  return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>
 }
 
 export default AuthProvider

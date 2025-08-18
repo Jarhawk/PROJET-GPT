@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
@@ -65,9 +65,15 @@ export default function useMamaSettings() {
     [mamaId, queryClient]
   );
 
-  const settings = { ...defaults, ...(query.data || {}) };
-  const enabledModules = query.data?.enabled_modules ?? localEnabledModules;
-  const featureFlags = query.data?.feature_flags ?? localFeatureFlags;
+  const settings = useMemo(() => ({ ...defaults, ...(query.data || {}) }), [query.data]);
+  const enabledModules = useMemo(
+    () => query.data?.enabled_modules ?? localEnabledModules,
+    [query.data?.enabled_modules]
+  );
+  const featureFlags = useMemo(
+    () => query.data?.feature_flags ?? localFeatureFlags,
+    [query.data?.feature_flags]
+  );
 
   return {
     settings,

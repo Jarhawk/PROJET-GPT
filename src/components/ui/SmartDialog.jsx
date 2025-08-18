@@ -1,80 +1,56 @@
-import * as DialogPrimitive from '@radix-ui/react-dialog'
+import React from 'react'
+import * as Dialog from '@radix-ui/react-dialog'
 
-const cx = (...xs) => xs.filter(Boolean).join(' ')
+/** Expose Radix primitives sous des noms stables */
+const DialogRoot = Dialog.Root
+const DialogTrigger = Dialog.Trigger
+const DialogPortal = Dialog.Portal
+const DialogTitle = Dialog.Title
+const DialogDescription = Dialog.Description
+const DialogClose = Dialog.Close
 
-// Sous-composants Radix exposés
-const Dialog = DialogPrimitive.Root
-const DialogTrigger = DialogPrimitive.Trigger
-const DialogPortal = DialogPrimitive.Portal
-const DialogClose = DialogPrimitive.Close
-const DialogTitle = DialogPrimitive.Title
-const DialogDescription = DialogPrimitive.Description
-
-export function DialogOverlay({ className, ...props }) {
+/** Overlay stylé (déclaré une seule fois, exporté une seule fois) */
+const DialogOverlay = React.forwardRef(function DialogOverlay(props, ref) {
   return (
-    <DialogPrimitive.Overlay
-      // z-index élevé pour passer devant tout
-      className={cx(
-        'fixed inset-0 z-[1000] bg-black/60 backdrop-blur-sm',
-        'data-[state=open]:animate-in data-[state=closed]:animate-out',
-        'data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0',
-        className
-      )}
+    <Dialog.Overlay
+      ref={ref}
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
       {...props}
     />
   )
-}
+})
 
-export function DialogContent({ className, children, ...props }) {
+/** Content centré, thème neutre pour ne pas “tout blanc sur blanc” */
+const DialogContent = React.forwardRef(function DialogContent({ className = '', children, ...props }, ref) {
   return (
     <DialogPortal>
       <DialogOverlay />
-      <DialogPrimitive.Content
-        // z-index > overlay, largeur limitée, fond adapté clair/sombre, bordure/ombre
-        className={cx(
-          'fixed left-1/2 top-1/2 z-[1001] -translate-x-1/2 -translate-y-1/2',
-          'w-[min(96vw,900px)] max-h-[82vh] overflow-hidden',
-          'rounded-2xl border border-black/10 dark:border-white/10',
-          'bg-white text-slate-900 dark:bg-neutral-900 dark:text-slate-100',
-          'shadow-2xl outline-none',
-          'data-[state=open]:animate-in data-[state=closed]:animate-out',
-          'data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95',
-          className
-        )}
+      <Dialog.Content
+        ref={ref}
+        className={
+          "fixed left-1/2 top-1/2 w-[min(92vw,760px)] max-h-[85vh] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-border bg-card text-card-foreground shadow-xl outline-none " +
+          "p-4 sm:p-6 overflow-auto " + className
+        }
         {...props}
       >
-        {/* Contenu scrollable interne pour éviter les débordements */}
-        <div className="flex max-h-[82vh] flex-col">
-          {children}
-        </div>
-      </DialogPrimitive.Content>
+        {children}
+      </Dialog.Content>
     </DialogPortal>
   )
-}
+})
 
-// Composant racine pratique
-function SmartDialog({ open, onClose, title, description, children, ...props }) {
-  return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose?.()} {...props}>
-      <DialogContent>
-        {title && <DialogTitle>{title}</DialogTitle>}
-        {description && <DialogDescription>{description}</DialogDescription>}
-        {children}
-      </DialogContent>
-    </Dialog>
-  )
-}
+/** Exports nommés (UNE seule fois chacun) */
+export { DialogRoot, DialogTrigger, DialogPortal, DialogOverlay, DialogContent, DialogTitle, DialogDescription, DialogClose }
 
-export {
-  Dialog,
-  DialogTrigger,
-  DialogPortal,
-  DialogClose,
-  DialogTitle,
-  DialogDescription,
-  DialogOverlay,
-  DialogContent,
+/** Export par défaut en “namespace” pour compat éventuelle */
+const SmartDialog = {
+  Root: DialogRoot,
+  Trigger: DialogTrigger,
+  Portal: DialogPortal,
+  Overlay: DialogOverlay,
+  Content: DialogContent,
+  Title: DialogTitle,
+  Description: DialogDescription,
+  Close: DialogClose,
 }
-
 export default SmartDialog
-

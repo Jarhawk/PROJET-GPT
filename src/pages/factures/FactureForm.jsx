@@ -495,8 +495,8 @@ export default function FactureForm({
 
         <section>
           <h3 className="font-semibold mb-2">Lignes produits</h3>
-          <div className="mt-4 overflow-x-auto">
-            <div className="min-w-[1100px] space-y-2">
+          <div className="mt-4 overflow-x-hidden">
+            <div className="space-y-2">
               <div className="flex items-center gap-2 text-xs uppercase tracking-wide opacity-70">
                 <div className="basis-[20%] shrink-0">Produit</div>
                 <div className="basis-[10%] shrink-0 text-right">Quantité</div>

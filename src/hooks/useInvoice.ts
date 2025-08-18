@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import useSupabaseClient from '@/hooks/useSupabaseClient';
 
@@ -21,55 +21,52 @@ type FacturePayload = {
   };
   lignes: Ligne[];
   apply_stock?: boolean;
+  mama_id: string;
 };
 
-export function useSaveFacture(mama_id: string) {
+export function useInvoice(id?: string, options: any = {}) {
   const supabase = useSupabaseClient();
   const qc = useQueryClient();
 
-  return useMutation({
-    mutationFn: async (payload: FacturePayload) => {
-      const { data, error } = await supabase.rpc('fn_facture_save', {
-        p_mama_id: mama_id,
-        p_payload: payload,
-        p_apply_stock: payload.apply_stock ?? false,
-      });
-
-      if (error) throw error;
-      return data as any; // { facture: {...}, lignes: [...] }
-    },
-    onMutate: () => {
-      toast.loading('Enregistrement de la facture…', { id: 'facture-save' });
-    },
-    onSuccess: (data) => {
-      toast.success('Facture enregistrée', { id: 'facture-save' });
-      // invalider les listes liées
-      qc.invalidateQueries({ queryKey: ['factures', mama_id] });
-      if (data?.facture?.id) {
-        qc.setQueryData(['facture', data.facture.id], data);
-      }
-    },
-    onError: (err: any) => {
-      toast.error(`Erreur d'enregistrement : ${err.message ?? err}`, { id: 'facture-save' });
-      console.error('[facture-save] error', err);
-    },
-  });
-}
-
-export function useFacture() {
-  const supabase = useSupabaseClient();
-  return {
-    fetchOne: async (id: string) => {
+  const query = useQuery({
+    queryKey: ['facture', id],
+    enabled: Boolean(id) && (options.enabled ?? true),
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('factures')
         .select(
           '*, lignes:facture_lignes(*, produit:produit_id(id, nom)), fournisseur:fournisseur_id(id, nom)'
         )
-        .eq('id', id)
+        .eq('id', id as string)
         .single();
       if (error) throw error;
-      return data;
+      return { facture: data, lignes: data?.lignes ?? [] };
     },
-  };
+  });
+
+  const create = useMutation({
+    mutationFn: async (payload: FacturePayload) => {
+      const { mama_id, ...rest } = payload;
+      const { data, error } = await supabase.rpc('fn_facture_save', {
+        p_mama_id: mama_id,
+        p_payload: rest,
+        p_apply_stock: rest.apply_stock ?? false,
+      });
+      if (error) throw error;
+      return data as any; // { facture: {...}, lignes: [...] }
+    },
+    onSuccess: () => {
+      toast.success('Facture enregistrée');
+      qc.invalidateQueries({ queryKey: ['factures'] });
+    },
+    onError: (e: any) => {
+      console.error(e);
+      toast.error("Erreur lors de l'enregistrement de la facture");
+    },
+  });
+
+  return { ...query, create };
 }
+
+export default useInvoice;
 

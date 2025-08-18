@@ -17,7 +17,7 @@ import { FACTURE_STATUTS } from '@/constants/factures';
 import { Checkbox } from '@/components/ui/checkbox';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Loader2 } from 'lucide-react';
-import { useInvoice, useSaveFacture } from '@/hooks/useInvoice';
+import { useInvoice } from '@/hooks/useInvoice';
 
 export function toLabel(v) {
   if (v == null) return '';
@@ -73,15 +73,15 @@ export default function FactureForm({
   const submitLabel = isEdit ? 'Modifier' : 'Enregistrer';
   const { userData } = useAuth();
   const mamaId = userData?.mama_id;
-  const saveFacture = useSaveFacture(mamaId);
+  const factureId = id || facture?.id;
+  const {
+    data: invoiceData,
+    isLoading: loadingFacture,
+    create: saveFacture,
+  } = useInvoice(factureId, { enabled: Boolean(factureId) });
   const { results: fournisseurOptions, searchFournisseurs } =
     useFournisseursAutocomplete();
   const formRef = useRef(null);
-  const factureId = id || facture?.id;
-  const { data: invoiceData, isLoading: loadingFacture } = useInvoice(
-    factureId,
-    { enabled: Boolean(factureId) }
-  );
 
   const [date, setDate] = useState(
     facture?.date_facture || new Date().toISOString().slice(0, 10)
@@ -251,7 +251,7 @@ export default function FactureForm({
 
     try {
       setSaving(true);
-      const data = await saveFacture.mutateAsync(payload);
+      const data = await saveFacture.mutateAsync({ ...payload, mama_id: mamaId });
       onSaved?.(data?.facture?.id);
       if (data?.facture?.id) {
         navigate(`/factures/${data.facture.id}`);

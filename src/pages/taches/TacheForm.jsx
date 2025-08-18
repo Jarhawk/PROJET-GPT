@@ -5,7 +5,7 @@ import { useTaches } from "@/hooks/useTaches";
 import { useUtilisateurs } from "@/hooks/useUtilisateurs";
 import { Button } from "@/components/ui/button";
 import GlassCard from "@/components/ui/GlassCard";
-import toast from "react-hot-toast";
+import { toast } from 'sonner';
 
 export default function TacheForm({ task }) {
   const navigate = useNavigate();

@@ -6,7 +6,7 @@ import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import GlassCard from "@/components/ui/GlassCard";
 import { Input } from "@/components/ui/input";
-import toast, { Toaster } from "react-hot-toast";
+import { toast } from 'sonner';
 
 export default function InviteUser({ onClose, onInvited }) {
   const { role, mama_id: myMama, user_id } = useAuth();
@@ -110,8 +110,7 @@ export default function InviteUser({ onClose, onInvited }) {
   return (
     <GlassCard title="Inviter un utilisateur">
       <form className="space-y-3" onSubmit={handleInvite}>
-        <Toaster />
-      <div>
+              <div>
         <label>Email</label>
         <Input
           className="w-full"

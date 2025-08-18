@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from '@/hooks/useAuth';
 import supabase from '@/lib/supabaseClient';
-import { Toaster } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import TableContainer from "@/components/ui/TableContainer";
 
@@ -52,8 +51,7 @@ export default function CartePlats() {
 
   return (
     <div className="p-8 max-w-3xl mx-auto">
-      <Toaster />
-      <h1 className="text-2xl font-bold text-mamastock-gold mb-4">Carte des plats actifs</h1>
+            <h1 className="text-2xl font-bold text-mamastock-gold mb-4">Carte des plats actifs</h1>
       <div className="flex flex-wrap gap-2 mb-4 items-end">
         <input
           className="form-input"

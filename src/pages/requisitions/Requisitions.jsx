@@ -6,7 +6,7 @@ import { useZones } from '@/hooks/useZones';
 import { useRequisitions } from '@/hooks/useRequisitions';
 import { useProducts } from '@/hooks/useProducts';
 import { useUtilisateurs } from '@/hooks/useUtilisateurs';
-import toast, { Toaster } from 'react-hot-toast';
+import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
@@ -111,8 +111,7 @@ export default function Requisitions() {
 
   return (
     <div className="p-8 max-w-5xl mx-auto">
-      <Toaster />
-      <h1 className="text-2xl font-bold text-mamastock-gold mb-4">
+            <h1 className="text-2xl font-bold text-mamastock-gold mb-4">
         Réquisitions (sortie stock)
       </h1>
       <div className="flex gap-4 mb-4 items-end">

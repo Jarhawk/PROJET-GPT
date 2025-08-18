@@ -1,7 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, PieChart, Pie, Cell } from "recharts";
-import { Toaster } from "react-hot-toast";
 import * as XLSX from "xlsx";
 import { Button } from "@/components/ui/button";
 import GlassCard from "@/components/ui/GlassCard";
@@ -44,8 +43,7 @@ export default function AnalytiqueDashboard() {
 
   return (
     <div className="p-8 container mx-auto">
-      <Toaster position="top-right" />
-      <h1 className="text-2xl font-bold mb-4">Dashboard analytique</h1>
+            <h1 className="text-2xl font-bold mb-4">Dashboard analytique</h1>
       <div className="flex flex-wrap gap-2 mb-4">
         <select className="form-input" value={filters.centre} onChange={e => setFilters(f => ({ ...f, centre: e.target.value }))}>
           <option value="">Tous centres</option>

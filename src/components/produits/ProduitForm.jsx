@@ -7,7 +7,7 @@ import { useSousFamilles } from "@/hooks/useSousFamilles";
 import { useUnites } from "@/hooks/useUnites";
 import useFournisseurs from "@/hooks/data/useFournisseurs";
 import useZonesStock from "@/hooks/useZonesStock";
-import { toast } from "react-hot-toast";
+import { toast } from 'sonner';
 import GlassCard from "@/components/ui/GlassCard";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";

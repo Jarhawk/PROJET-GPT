@@ -5,7 +5,7 @@ import { useInventaires } from '@/hooks/useInventaires';
 import { useProducts } from '@/hooks/useProducts';
 import { Button } from '@/components/ui/button';
 import GlassCard from '@/components/ui/GlassCard';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { uploadFile, deleteFile, pathFromUrl } from '@/hooks/useStorage';
 
 // Ajuste le seuil d'alerte si besoin

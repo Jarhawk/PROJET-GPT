@@ -8,7 +8,6 @@ import AchatDetail from "./AchatDetail.jsx";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
 import GlassCard from "@/components/ui/GlassCard";
-import { Toaster } from "react-hot-toast";
 import AchatRow from "@/components/achats/AchatRow.jsx";
 import { useAuth } from '@/hooks/useAuth';
 
@@ -50,8 +49,7 @@ export default function Achats() {
 
   return (
     <div className="p-6 container mx-auto text-shadow space-y-4">
-      <Toaster />
-      <GlassCard className="flex flex-wrap gap-2 items-end">
+            <GlassCard className="flex flex-wrap gap-2 items-end">
         <select className="form-input" value={fournisseur} onChange={e => { setFournisseur(e.target.value); setPage(1); }}>
           <option value="">Tous fournisseurs</option>
           {fournisseurs.map(s => <option key={s.id} value={s.id}>{s.nom}</option>)}

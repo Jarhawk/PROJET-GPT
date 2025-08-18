@@ -41,7 +41,7 @@ vi.mock('@/hooks/data/useFournisseurs', () => ({
   default: () => ({ data: [], isLoading: false }),
 }));
 vi.mock('@/hooks/useZonesStock', () => ({ default: () => ({ zones: [] }) }));
-vi.mock('react-hot-toast', () => ({ toast: { error: vi.fn(), success: vi.fn(), loading: vi.fn() } }));
+vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn(), loading: vi.fn() } }));
 
 beforeEach(() => {
   addProductMock = vi.fn().mockResolvedValue({});

@@ -6,8 +6,8 @@ import { useEffect } from 'react';
 import { HelpProvider } from "@/context/HelpProvider";
 import { MultiMamaProvider } from "@/context/MultiMamaContext";
 import { ThemeProvider } from "@/context/ThemeProvider";
-import { Toaster } from "react-hot-toast";
 import CookieConsent from "@/components/CookieConsent";
+import ToastRoot from "@/components/ToastRoot";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,7 +32,7 @@ export default function App() {
       <HelpProvider>
         <MultiMamaProvider>
           <ThemeProvider>
-            <Toaster position="top-right" />
+            <ToastRoot />
             <Router />
             <CookieConsent />
           </ThemeProvider>

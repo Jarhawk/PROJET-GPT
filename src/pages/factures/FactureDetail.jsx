@@ -5,7 +5,7 @@ import supabase from '@/lib/supabaseClient';
 import FactureForm, { mapDbLineToUI } from './FactureForm.jsx';
 import useFournisseurs from '@/hooks/data/useFournisseurs';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 function toLabel(v) {
   if (v == null) return '';

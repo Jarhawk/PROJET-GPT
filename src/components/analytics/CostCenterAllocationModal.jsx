@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useCostCenters } from '@/hooks/useCostCenters';
 import { useMouvementCostCenters } from '@/hooks/useMouvementCostCenters';
 import { useCostCenterSuggestions } from '@/hooks/useCostCenterSuggestions';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export default function CostCenterAllocationModal({
   mouvementId,

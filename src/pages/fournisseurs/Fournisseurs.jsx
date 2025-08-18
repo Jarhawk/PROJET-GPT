@@ -16,7 +16,7 @@ import FournisseurRow from '@/components/fournisseurs/FournisseurRow';
 import { Dialog, DialogContent } from '@radix-ui/react-dialog';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { Toaster, toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import {
   ResponsiveContainer,
   LineChart,
@@ -148,8 +148,7 @@ export default function Fournisseurs() {
 
   return (
     <div className="max-w-7xl mx-auto p-8 text-shadow space-y-6">
-      <Toaster />
-      <h1 className="text-2xl font-bold">Gestion des fournisseurs</h1>
+            <h1 className="text-2xl font-bold">Gestion des fournisseurs</h1>
 
       <Card>
         <CardHeader className="pb-4">

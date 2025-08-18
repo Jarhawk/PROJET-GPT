@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import GlassCard from "@/components/ui/GlassCard";
-import toast from "react-hot-toast";
+import { toast } from 'sonner';
 import { MODULES } from "@/config/modules";
 
 export default function UtilisateurForm({ utilisateur, onClose }) {

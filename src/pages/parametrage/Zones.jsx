@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useZones } from '@/hooks/useZones';
 import { Button } from '@/components/ui/button';
-import { Toaster, toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useAuth } from '@/hooks/useAuth';
@@ -43,8 +43,7 @@ export default function Zones() {
 
   return (
     <div className="p-6">
-      <Toaster position="top-right" />
-      <h1 className="text-2xl font-bold mb-4">Zones de stock</h1>
+            <h1 className="text-2xl font-bold mb-4">Zones de stock</h1>
       <div className="flex flex-wrap gap-2 mb-4 items-end">
         <input
           className="input"

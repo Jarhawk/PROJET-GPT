@@ -4,7 +4,7 @@ import ModalGlass from '@/components/ui/ModalGlass';
 import { Button } from '@/components/ui/button';
 import GlassCard from '@/components/ui/GlassCard';
 import { useAide } from '@/hooks/useAide';
-import { Toaster, toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 
 export default function AideForm({ article, onClose, onSaved }) {
@@ -46,8 +46,7 @@ export default function AideForm({ article, onClose, onSaved }) {
     <ModalGlass open={true} onClose={onClose}>
       <GlassCard title={isEdit ? "Modifier l'article" : 'Nouvel article'}>
         <form onSubmit={handleSubmit} className="space-y-2">
-        <Toaster />
-        <h3 className="text-lg font-semibold mb-2">
+                <h3 className="text-lg font-semibold mb-2">
           {isEdit ? "Modifier l'article" : 'Nouvel article'}
         </h3>
         <Input

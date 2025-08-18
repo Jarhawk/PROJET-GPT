@@ -12,7 +12,7 @@ import {
   DialogDescription,
 } from '@radix-ui/react-dialog';
 import MamaForm from './MamaForm';
-import toast, { Toaster } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 export default function Mamas() {
@@ -64,8 +64,7 @@ export default function Mamas() {
 
   return (
     <div className="p-8 max-w-4xl mx-auto text-shadow">
-      <Toaster />
-      <h1 className="text-2xl font-bold mb-4">Établissements (MAMA)</h1>
+            <h1 className="text-2xl font-bold mb-4">Établissements (MAMA)</h1>
       <div className="flex gap-4 mb-4 items-end">
         <input
           className="input input-bordered w-64"

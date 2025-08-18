@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useAdvancedStats } from "@/hooks/useAdvancedStats";
 import { useAuth } from '@/hooks/useAuth';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, Legend } from "recharts";
-import { Toaster } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 import * as XLSX from "xlsx";
@@ -33,8 +32,7 @@ export default function StatsAdvanced() {
 
   return (
     <div className="p-8 container mx-auto">
-      <Toaster position="top-right" />
-      <h1 className="text-2xl font-bold mb-4">Analytique avancée</h1>
+            <h1 className="text-2xl font-bold mb-4">Analytique avancée</h1>
       <div className="flex items-end gap-2 mb-4">
         <div>
           <label className="block text-xs">Début</label>

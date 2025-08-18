@@ -5,7 +5,7 @@ import { useCommandes } from "@/hooks/useCommandes";
 import useFournisseurs from "@/hooks/data/useFournisseurs";
 import { useProduitsFournisseur } from "@/hooks/useProduitsFournisseur";
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from "react-hot-toast";
+import { toast } from 'sonner';
 import { getTemplatesCommandesActifs } from "@/hooks/useTemplatesCommandes";
 
 export default function CommandeForm() {

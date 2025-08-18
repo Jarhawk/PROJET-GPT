@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
-import toast, { Toaster } from "react-hot-toast";
+import { toast } from 'sonner';
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -242,8 +242,7 @@ export default function Transferts() {
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-6">
-      <Toaster />
-      <h1 className="text-2xl font-bold text-mamastock-gold mb-4">
+            <h1 className="text-2xl font-bold text-mamastock-gold mb-4">
         Transferts de stock inter-zones
       </h1>
       {/* Graphiques */}

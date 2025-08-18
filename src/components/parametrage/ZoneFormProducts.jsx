@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useZoneProducts } from '@/hooks/useZoneProducts';
 import { Button } from '@/components/ui/button';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export default function ZoneFormProducts({ zoneId }) {
   const { list, move, setDefault } = useZoneProducts();

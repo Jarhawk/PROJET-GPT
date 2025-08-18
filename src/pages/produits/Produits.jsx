@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { Plus as PlusIcon, FileDown as FileDownIcon } from "lucide-react";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import ProduitRow from "@/components/produits/ProduitRow";
 import { exportExcelProduits } from "@/utils/excelUtils";
@@ -143,8 +143,7 @@ export default function Produits() {
 
   return (
     <div className="p-8 max-w-7xl mx-auto text-shadow space-y-6">
-      <Toaster />
-      <h1 className="text-2xl font-bold mb-4">Produits stock</h1>
+            <h1 className="text-2xl font-bold mb-4">Produits stock</h1>
       <div className="w-full md:w-4/5 mx-auto space-y-4">
         <div className="flex flex-col md:flex-row flex-wrap items-center gap-2 p-4 rounded-xl bg-muted/30 backdrop-blur">
           <Input

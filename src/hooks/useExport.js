@@ -16,7 +16,7 @@ import {
   exportToClipboard,
   printView,
 } from '@/lib/export/exportHelpers';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export default function useExport() {
   const { mama_id } = useAuth();

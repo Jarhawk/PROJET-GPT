@@ -8,7 +8,7 @@ import { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { MODULES as MODULE_LIST } from '@/config/modules';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { Toaster, toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export default function ParamAccess() {
   const { permissions, fetchPermissions, updatePermission } = usePermissions();
@@ -40,8 +40,7 @@ export default function ParamAccess() {
 
   return (
     <div>
-      <Toaster position="top-right" />
-      <h2 className="font-bold text-xl mb-4">Grille d'accès par rôle</h2>
+            <h2 className="font-bold text-xl mb-4">Grille d'accès par rôle</h2>
       <TableContainer className="mt-2">
         <table className="min-w-full text-xs">
           <thead>

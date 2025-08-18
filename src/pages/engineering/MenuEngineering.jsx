@@ -1,6 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from 'react'
-import { Toaster, toast } from 'react-hot-toast'
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/useAuth'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
@@ -65,8 +65,7 @@ export default function MenuEngineering() {
 
   return (
     <div className="p-6 space-y-4">
-      <Toaster />
-      <h1 className="text-2xl font-bold">Menu Engineering</h1>
+            <h1 className="text-2xl font-bold">Menu Engineering</h1>
       <EngineeringFilters filters={filters} onChange={setFilters} />
       <div className="flex flex-wrap gap-2 items-center">
         <Button onClick={() => setChartType('matrix')}>Quadrillage</Button>

@@ -7,7 +7,7 @@ import supabase from "@/lib/supabaseClient";
 import useNotifications from "@/hooks/useNotifications";
 import { Badge } from "@/components/ui/badge";
 import { Bell } from "lucide-react";
-import toast from "react-hot-toast";
+import { toast } from 'sonner';
 import Footer from "@/components/Footer";
 import PageSkeleton from "@/components/ui/PageSkeleton";
 import AlertBadge from "@/components/stock/AlertBadge";

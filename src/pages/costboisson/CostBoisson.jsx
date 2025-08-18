@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from '@/hooks/useAuth';
 import supabase from '@/lib/supabaseClient';
 import { Button } from "@/components/ui/button";
-import toast, { Toaster } from "react-hot-toast";
+import { toast } from 'sonner';
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import GlassCard from "@/components/ui/GlassCard";
 import TableContainer from "@/components/ui/TableContainer";
@@ -204,8 +204,7 @@ export default function CostBoissons() {
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
-      <Toaster />
-      <h1 className="text-2xl font-bold text-blue-700 mb-4">Cost Boissons</h1>
+            <h1 className="text-2xl font-bold text-blue-700 mb-4">Cost Boissons</h1>
       {/* Recherche, période, export */}
       <div className="flex flex-wrap gap-2 mb-4 items-end">
         <input

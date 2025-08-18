@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
-import toast from "react-hot-toast";
+import { toast } from 'sonner';
 import GlassCard from "@/components/ui/GlassCard";
 import { Select } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";

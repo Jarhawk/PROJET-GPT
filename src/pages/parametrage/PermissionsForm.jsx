@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import supabase from '@/lib/supabaseClient';
 import { Button } from '@/components/ui/button';
 import GlassCard from '@/components/ui/GlassCard';
-import toast, { Toaster } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { MODULES as MODULE_LIST } from '@/config/modules';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
@@ -90,8 +90,7 @@ export default function PermissionsForm({ role, onClose, onSaved }) {
 
   return (
     <GlassCard title={`Permissions pour : ${role.nom}`}>
-      <Toaster />
-      <div className="overflow-x-auto mb-4">
+            <div className="overflow-x-auto mb-4">
         <table className="min-w-full table-auto text-center">
           <thead>
             <tr>

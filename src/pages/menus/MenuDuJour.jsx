@@ -7,7 +7,7 @@ import MenuDuJourForm from "./MenuDuJourForm.jsx";
 import MenuDuJourDetail from "./MenuDuJourDetail.jsx";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from 'sonner';
 import { motion as Motion } from "framer-motion";
 
 export default function MenuDuJour() {
@@ -46,8 +46,7 @@ export default function MenuDuJour() {
 
   return (
     <div className="p-6 container mx-auto">
-      <Toaster position="top-right" />
-      <div className="flex flex-wrap gap-4 items-center mb-4">
+            <div className="flex flex-wrap gap-4 items-center mb-4">
         <input
           type="search"
           value={search}

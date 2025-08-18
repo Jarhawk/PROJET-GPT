@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import supabase from '@/lib/supabaseClient';
 import { Button } from "@/components/ui/button";
 import { useAuth } from '@/hooks/useAuth';
-import toast, { Toaster } from "react-hot-toast";
+import { toast } from 'sonner';
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 // Suppose que tu as un hook ou un cache des MAMA/roles
@@ -63,8 +63,7 @@ export default function InvitationsEnAttente() {
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
-      <Toaster />
-      <h1 className="text-2xl font-bold text-mamastock-gold mb-4">
+            <h1 className="text-2xl font-bold text-mamastock-gold mb-4">
         Invitations en attente
       </h1>
       <div className="bg-white/10 border border-white/20 backdrop-blur-xl shadow rounded-xl overflow-x-auto">

@@ -3,7 +3,7 @@ import { useState } from "react";
 import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
 import PrimaryButton from "@/components/ui/PrimaryButton";
-import toast, { Toaster } from "react-hot-toast";
+import { toast } from 'sonner';
 import GlassCard from "@/components/ui/GlassCard";
 
 export default function RGPDConsentForm() {
@@ -42,8 +42,7 @@ export default function RGPDConsentForm() {
   return (
     <GlassCard title="Consentement RGPD">
       <form onSubmit={handleSubmit} className="space-y-4">
-      <Toaster />
-      <label className="flex items-center gap-2">
+            <label className="flex items-center gap-2">
         <input type="checkbox" name="cookies" checked={values.cookies} onChange={handleChange} />
         J'accepte l'utilisation des cookies
       </label>

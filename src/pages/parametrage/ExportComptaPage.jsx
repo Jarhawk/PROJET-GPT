@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
 import TableContainer from '@/components/ui/TableContainer';
-import { Toaster } from 'react-hot-toast';
 import useExportCompta from '@/hooks/useExportCompta';
 
 export default function ExportComptaPage() {
@@ -25,8 +24,7 @@ export default function ExportComptaPage() {
 
   return (
     <div className="p-6 space-y-4">
-      <Toaster position="top-right" />
-      <h1 className="text-xl font-bold mb-2">Export comptable</h1>
+            <h1 className="text-xl font-bold mb-2">Export comptable</h1>
       <div className="flex gap-4 items-end">
         <div>
           <label className="block text-sm">Mois</label>

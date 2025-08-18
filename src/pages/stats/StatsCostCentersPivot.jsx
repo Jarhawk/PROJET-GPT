@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { useCostCenterMonthlyStats } from "@/hooks/useCostCenterMonthlyStats";
 import { useAuth } from '@/hooks/useAuth';
-import { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
@@ -46,8 +45,7 @@ export default function StatsCostCentersPivot() {
 
   return (
     <div className="p-8 container mx-auto">
-      <Toaster position="top-right" />
-      <h1 className="text-2xl font-bold mb-4">Ventilation mensuelle par Cost Center</h1>
+            <h1 className="text-2xl font-bold mb-4">Ventilation mensuelle par Cost Center</h1>
       <Button variant="outline" className="mb-2" onClick={exportExcel}>Export Excel</Button>
       <TableContainer className="mt-2">
         <table className="min-w-full text-xs">

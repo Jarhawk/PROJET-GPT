@@ -7,7 +7,7 @@ import { Select } from "@/components/ui/select";
 import GlassCard from "@/components/ui/GlassCard";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
-import { toast } from "react-hot-toast";
+import { toast } from 'sonner';
 
 export default function FeedbackForm({ open, onOpenChange }) {
   const { addFeedback } = useFeedback();

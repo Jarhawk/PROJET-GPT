@@ -10,7 +10,7 @@ vi.mock('@/hooks/useFournisseurs', () => ({
   }),
 }));
 
-vi.mock('react-hot-toast', () => ({
+vi.mock('sonner', () => ({
   __esModule: true,
   default: { error: vi.fn(), success: vi.fn() },
 }));

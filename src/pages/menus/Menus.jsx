@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import MenuForm from './MenuForm.jsx';
 import MenuDetail from './MenuDetail.jsx';
 import { Button } from '@/components/ui/button';
-import { Toaster, toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { saveAs } from 'file-saver';
 import * as XLSX from 'xlsx';
 import { motion as Motion } from 'framer-motion';
@@ -107,8 +107,7 @@ export default function Menus() {
 
   return (
     <div className="p-6 container mx-auto">
-      <Toaster position="top-right" />
-      <TableHeader>
+            <TableHeader>
         <input
           type="search"
           value={search}

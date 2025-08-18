@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
 import PromotionRow from "@/components/promotions/PromotionRow";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from 'sonner';
 import PromotionForm from "./PromotionForm.jsx";
 
 export default function Promotions() {
@@ -69,8 +69,7 @@ export default function Promotions() {
 
   return (
     <div className="p-6 container mx-auto">
-      <Toaster position="top-right" />
-      <div className="flex gap-4 mb-4 items-center">
+            <div className="flex gap-4 mb-4 items-center">
         <input
           type="search"
           value={search}

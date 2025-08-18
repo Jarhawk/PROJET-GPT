@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import TableContainer from "@/components/ui/TableContainer";
 import GlassCard from "@/components/ui/GlassCard";
 import { Search } from "lucide-react";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from 'sonner';
 
 export default function Alertes() {
   const { rules, fetchRules, addRule, deleteRule } = useAlerts();
@@ -60,8 +60,7 @@ export default function Alertes() {
 
   return (
     <div className="p-6 container mx-auto text-sm">
-      <Toaster position="top-right" />
-      <h1 className="text-2xl font-bold mb-4">Alertes avancées</h1>
+            <h1 className="text-2xl font-bold mb-4">Alertes avancées</h1>
       <GlassCard title="Nouvelle alerte" className="mb-4">
         <form onSubmit={handleSubmit} className="flex flex-wrap gap-2 items-end">
           <Select

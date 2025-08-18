@@ -8,7 +8,7 @@ import PrimaryButton from "@/components/ui/PrimaryButton";
 import { Input } from "@/components/ui/input";
 import TableContainer from "@/components/ui/TableContainer";
 import GlassCard from "@/components/ui/GlassCard";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from 'sonner';
 
 export default function Pertes() {
   const { mama_id } = useAuth();
@@ -64,8 +64,7 @@ export default function Pertes() {
 
   return (
     <div className="p-6 container mx-auto">
-      <Toaster position="top-right" />
-      <h1 className="text-2xl font-bold mb-4">Pertes / Casses / Dons</h1>
+            <h1 className="text-2xl font-bold mb-4">Pertes / Casses / Dons</h1>
       <GlassCard title="Nouvelle perte" className="mb-4">
         <form onSubmit={handleSubmit} className="flex flex-wrap gap-2 items-end">
           <label className="sr-only" htmlFor="produit_id">Produit</label>

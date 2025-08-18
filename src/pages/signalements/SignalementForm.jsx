@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useSignalements } from "@/hooks/useSignalements";
 import { useAuth } from '@/hooks/useAuth';
-import toast from "react-hot-toast";
+import { toast } from 'sonner';
 import GlassCard from "@/components/ui/GlassCard";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 

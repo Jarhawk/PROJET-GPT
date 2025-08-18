@@ -1,6 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
-import toast, { Toaster } from "react-hot-toast";
+import { toast } from 'sonner';
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { Input } from "@/components/ui/input";
 import GlassCard from "@/components/ui/GlassCard";
@@ -59,8 +59,7 @@ export default function MamaSettingsForm() {
   return (
     <GlassCard title="Paramètres établissement">
       <form onSubmit={handleSubmit} className="space-y-4">
-      <Toaster position="top-right" />
-      <div>
+            <div>
         <label className="block text-sm mb-1">Logo</label>
         {form.logo_url && (
           <img src={form.logo_url} alt="logo" className="h-16 mb-2" />

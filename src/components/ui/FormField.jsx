@@ -1,13 +1,10 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { idFromLabel } from "@/utils/formIds";
-import React from "react";
+import React, { useId } from "react";
 
 export function FormField(props) {
   const { label, required, help, error, children, full = false } = props;
-  const reactId =
-    typeof React.useId === "function"
-      ? React.useId()
-      : `uid-${Math.random().toString(36).slice(2, 8)}`;
+  const reactId = useId();
   const fieldId = props.id || `${idFromLabel(label)}-${reactId.slice(-4)}`;
 
   const child = React.Children.only(children);

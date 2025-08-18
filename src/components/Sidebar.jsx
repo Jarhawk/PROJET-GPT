@@ -1,5 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { Link, useLocation } from "react-router-dom";
+import { useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import useMamaSettings from "@/hooks/useMamaSettings";
 import logo from "@/assets/logo-mamastock.png";
@@ -9,9 +10,17 @@ export default function Sidebar() {
   const { loading: authLoading, hasAccess, userData } = useAuth();
   const { pathname } = useLocation();
   const { loading: settingsLoading, enabledModules } = useMamaSettings();
-  const rights = userData?.access_rights ?? {};
-  console.debug('[sidebar] rights keys', Object.keys(rights || {}));
-  console.debug('[sidebar] enabledModules keys', enabledModules ? Object.keys(enabledModules) : null);
+  const rights = useMemo(() => userData?.access_rights ?? {}, [userData?.access_rights]);
+
+  const rightsKeys = useMemo(() => Object.keys(rights || {}), [rights]);
+  const enabledKeys = useMemo(
+    () => Object.keys(enabledModules || {}),
+    [enabledModules]
+  );
+
+  const __DEV__ = import.meta.env.DEV;
+  __DEV__ && console.log('[sidebar] rights keys', rightsKeys);
+  __DEV__ && console.log('[sidebar] enabledModules keys', enabledKeys);
 
   const has = (key) => {
     const k = normalizeAccessKey(key)

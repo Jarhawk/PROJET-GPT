@@ -1,7 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
+import toast from 'react-hot-toast';
 
 async function detectExistingTable(candidates) {
   for (const t of candidates) {
@@ -43,6 +44,31 @@ export function useInvoice(id, { enabled = true } = {}) {
       const { data: lignes, error: e2 } = linesRes;
       if (e1 || e2) throw e1 || e2;
       return { facture, lignes: lignes || [] };
+    },
+  });
+}
+
+export function useSaveFacture(mamaId) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload) => {
+      const { data, error } = await supabase.rpc('save_facture', {
+        mama_id: mamaId,
+        ...payload,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onMutate: () => ({ toastId: toast.loading('Enregistrement...') }),
+    onError: (err, _variables, context) => {
+      toast.error(err.message || 'Erreur lors de l\'enregistrement', {
+        id: context?.toastId,
+      });
+    },
+    onSuccess: (_data, _variables, context) => {
+      toast.success('Facture enregistrée', { id: context?.toastId });
+      queryClient.invalidateQueries({ queryKey: ['factures'] });
+      queryClient.invalidateQueries({ queryKey: ['invoice'] });
     },
   });
 }

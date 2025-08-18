@@ -12,6 +12,7 @@ module.exports = {
   rules: {
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',
+    'import/export': 'error',
     'import/named': 'error',
     'import/no-named-as-default': 'error',
     'import/no-extraneous-dependencies': 'error',

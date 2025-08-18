@@ -72,8 +72,6 @@ export {
   DialogClose,
   DialogTitle,
   DialogDescription,
-  DialogOverlay,
-  DialogContent,
 }
 
 export default SmartDialog

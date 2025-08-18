@@ -3,7 +3,7 @@ import { useState } from 'react';
 import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
 import { exportToCSV } from '@/lib/export/exportHelpers';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export default function useExportCompta() {
   const { mama_id } = useAuth();

@@ -1,6 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from 'react';
-import { Toaster, toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import ListingContainer from '@/components/ui/ListingContainer';
 import PaginationFooter from '@/components/ui/PaginationFooter';
 import TableHeader from '@/components/ui/TableHeader';
@@ -65,8 +65,7 @@ export default function Unites() {
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
-      <Toaster position="top-right" />
-      <h1 className="text-2xl font-bold mb-4">Unités de produits</h1>
+            <h1 className="text-2xl font-bold mb-4">Unités de produits</h1>
       <TableHeader className="gap-2">
         <input
           className="input flex-1"

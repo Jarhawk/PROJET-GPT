@@ -17,7 +17,7 @@ import { saveAs } from 'file-saver';
 import { pdf } from '@react-pdf/renderer';
 import CommandePDF from '@/components/pdf/CommandePDF';
 import supabase from '@/lib/supabaseClient';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export default function EmailsEnvoyes() {
   const { mama_id, loading: authLoading, role } = useAuth();

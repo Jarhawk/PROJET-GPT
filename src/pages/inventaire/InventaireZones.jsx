@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@radix-ui/react-dialog";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from 'sonner';
 import { useInventaireZones } from "@/hooks/useInventaireZones";
 import { useAuth } from '@/hooks/useAuth';
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
@@ -52,8 +52,7 @@ export default function InventaireZones() {
 
   return (
     <div className="p-6 max-w-lg mx-auto text-shadow">
-      <Toaster />
-      <h1 className="text-2xl font-bold mb-4">Zones d'inventaire</h1>
+            <h1 className="text-2xl font-bold mb-4">Zones d'inventaire</h1>
       <GlassCard title="Zones" className="mb-4">
         <form onSubmit={e => e.preventDefault()} className="flex gap-2 items-end">
           <Input

@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCarte } from "@/hooks/useCarte";
 import { useFamilles } from "@/hooks/useFamilles";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from 'sonner';
 import TableContainer from "@/components/ui/TableContainer";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import * as XLSX from "xlsx";
@@ -136,8 +136,7 @@ export default function Carte() {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <Toaster />
-      <Tabs>
+            <Tabs>
         <TabsList>
           <TabsTrigger onClick={() => setTab("nourriture")} isActive={tab === "nourriture"}>Carte Nourriture</TabsTrigger>
           <TabsTrigger onClick={() => setTab("boisson")} isActive={tab === "boisson"}>Carte Boisson</TabsTrigger>

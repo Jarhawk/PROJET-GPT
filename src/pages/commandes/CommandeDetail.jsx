@@ -7,7 +7,7 @@ import { useCommandes } from "@/hooks/useCommandes";
 import { useTemplatesCommandes } from "@/hooks/useTemplatesCommandes";
 import CommandePDF from "@/components/pdf/CommandePDF";
 import { Button } from "@/components/ui/button";
-import toast from "react-hot-toast";
+import { toast } from 'sonner';
 
 async function generateCommandePDFBase64(commande, template, fournisseur) {
   const blob = await pdf(

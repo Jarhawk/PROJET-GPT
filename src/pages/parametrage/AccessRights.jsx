@@ -4,7 +4,7 @@ import { useUtilisateurs } from "@/hooks/useUtilisateurs";
 import { useAuth } from '@/hooks/useAuth';
 import { MODULES } from "@/config/modules";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import { toast, Toaster } from "react-hot-toast";
+import { toast } from 'sonner';
 import TableContainer from "@/components/ui/TableContainer";
 
 export default function AccessRights() {
@@ -30,8 +30,7 @@ export default function AccessRights() {
 
   return (
     <div className="p-6">
-      <Toaster position="top-right" />
-      <h1 className="text-2xl font-bold text-mamastock-gold mb-4">
+            <h1 className="text-2xl font-bold text-mamastock-gold mb-4">
         Droits personnalisés par utilisateur
       </h1>
       <TableContainer>

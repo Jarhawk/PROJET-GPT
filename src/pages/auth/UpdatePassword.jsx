@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import supabase from '@/lib/supabaseClient';
 import logo from "@/assets/logo-mamastock.png";
-import toast, { Toaster } from "react-hot-toast";
+import { toast } from 'sonner';
 import GlassCard from "@/components/ui/GlassCard";
 import PageWrapper from "@/components/ui/PageWrapper";
 import { Input } from "@/components/ui/input";
@@ -36,8 +36,7 @@ export default function UpdatePassword() {
 
   return (
     <PageWrapper>
-      <Toaster position="top-right" />
-      <GlassCard className="flex flex-col items-center">
+            <GlassCard className="flex flex-col items-center">
         <img src={logo} alt="MamaStock" className="w-24 h-24 mb-6 rounded-full shadow-md bg-gold/10 object-contain border-4 border-gold/30" />
         <h2 className="text-3xl font-bold text-gold mb-4">Nouveau mot de passe</h2>
         {message ? (

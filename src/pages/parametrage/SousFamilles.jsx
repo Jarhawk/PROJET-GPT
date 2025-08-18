@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from 'react';
-import { Toaster, toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
 import ListingContainer from '@/components/ui/ListingContainer';
@@ -72,8 +72,7 @@ export default function SousFamilles() {
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
-      <Toaster position="top-right" />
-      <h1 className="text-2xl font-bold mb-4">Sous-familles</h1>
+            <h1 className="text-2xl font-bold mb-4">Sous-familles</h1>
       <TableHeader className="gap-2">
         <input
           className="input flex-1"

@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Button } from '@/components/ui/button';
 import TableContainer from '@/components/ui/TableContainer';
-import { Toaster, toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 
 export default function ParamCostCenters() {
@@ -105,8 +105,7 @@ export default function ParamCostCenters() {
 
   return (
     <div>
-      <Toaster position="top-right" />
-      <h2 className="font-bold text-xl mb-4">Centres de coûts</h2>
+            <h2 className="font-bold text-xl mb-4">Centres de coûts</h2>
       <form onSubmit={handleSubmit} className="flex gap-2 mb-4">
         <input
           className="form-input"

@@ -8,7 +8,7 @@ import {
   DialogDescription,
 } from "@radix-ui/react-dialog";
 import { AnimatePresence, motion as Motion } from "framer-motion";
-import toast from "react-hot-toast";
+import { toast } from 'sonner';
 
 export default function MouvementFormModal({
   open,

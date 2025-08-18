@@ -11,7 +11,7 @@ import {
   DialogDescription,
 } from '@radix-ui/react-dialog';
 import PermissionsForm from './PermissionsForm';
-import toast, { Toaster } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import TableContainer from '@/components/ui/TableContainer';
 
@@ -44,8 +44,7 @@ export default function Permissions() {
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
-      <Toaster />
-      <h1 className="text-2xl font-bold text-mamastock-gold mb-4">
+            <h1 className="text-2xl font-bold text-mamastock-gold mb-4">
         Permissions des rôles
       </h1>
       <TableContainer className="mb-6">

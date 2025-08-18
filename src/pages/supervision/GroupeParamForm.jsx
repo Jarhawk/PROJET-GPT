@@ -4,7 +4,7 @@ import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from "@/components/ui/button";
 import GlassCard from "@/components/ui/GlassCard";
-import toast from "react-hot-toast";
+import { toast } from 'sonner';
 
 export default function GroupeParamForm({ groupe, onClose, onSaved }) {
   const { role, mama_id: myMama } = useAuth();

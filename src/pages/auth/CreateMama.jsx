@@ -8,7 +8,7 @@ import GlassCard from "@/components/ui/GlassCard";
 import MamaLogo from "@/components/ui/MamaLogo";
 import { Input } from "@/components/ui/input";
 import PrimaryButton from "@/components/ui/PrimaryButton";
-import toast from "react-hot-toast";
+import { toast } from 'sonner';
 
 export default function CreateMama() {
   const [nom, setNom] = useState("");

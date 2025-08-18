@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useValidations } from '@/hooks/useValidations';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { Toaster, toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import GlassCard from '@/components/ui/GlassCard';
 import TableContainer from '@/components/ui/TableContainer';
@@ -52,8 +52,7 @@ export default function Validations() {
 
   return (
     <div className="p-8 container mx-auto text-sm">
-      <Toaster position="top-right" />
-      <h1 className="text-2xl font-bold mb-4">Validations</h1>
+            <h1 className="text-2xl font-bold mb-4">Validations</h1>
       <GlassCard title="Nouvelle demande" className="mb-4">
         <form
           onSubmit={handleSubmit}

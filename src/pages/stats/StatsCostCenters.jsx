@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { useCostCenterStats } from "@/hooks/useCostCenterStats";
 import { useAuth } from '@/hooks/useAuth';
-import { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
@@ -33,8 +32,7 @@ export default function StatsCostCenters() {
 
   return (
     <div className="p-8 container mx-auto">
-      <Toaster position="top-right" />
-      <h1 className="text-2xl font-bold mb-4">Ventilation par Cost Center</h1>
+            <h1 className="text-2xl font-bold mb-4">Ventilation par Cost Center</h1>
       <Button variant="outline" className="mb-2" onClick={exportExcel}>
         Export Excel
       </Button>

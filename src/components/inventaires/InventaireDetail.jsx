@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
-import toast from "react-hot-toast";
+import { toast } from 'sonner';
 
 export default function InventaireDetail({ inventaire, onClose }) {
 

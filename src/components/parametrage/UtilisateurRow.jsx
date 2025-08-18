@@ -1,6 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from 'sonner';
 import supabase from '@/lib/supabaseClient';
 
 export default function UtilisateurRow({

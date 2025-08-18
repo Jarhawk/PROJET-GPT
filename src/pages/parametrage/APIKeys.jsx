@@ -4,7 +4,7 @@ import PrimaryButton from '@/components/ui/PrimaryButton';
 import SecondaryButton from '@/components/ui/SecondaryButton';
 import { Input } from '@/components/ui/input';
 import { useApiKeys } from '@/hooks/useApiKeys';
-import { Toaster, toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import TableContainer from '@/components/ui/TableContainer';
 import GlassCard from '@/components/ui/GlassCard';
@@ -29,8 +29,7 @@ export default function APIKeys() {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <Toaster />
-      <h1 className="text-2xl font-bold mb-4">Clés API</h1>
+            <h1 className="text-2xl font-bold mb-4">Clés API</h1>
       <PrimaryButton onClick={() => setFormOpen(o => !o)}>Nouvelle clé</PrimaryButton>
       {formOpen && (
         <GlassCard title="Nouvelle clé" className="mt-4">

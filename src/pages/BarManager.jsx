@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
-import toast, { Toaster } from "react-hot-toast";
+import { toast } from 'sonner';
 import * as XLSX from "xlsx";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import jsPDF from "jspdf";
@@ -155,8 +155,7 @@ export default function BarManager() {
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
-      <Toaster />
-      <h1 className="text-2xl font-bold text-blue-700 mb-4">Bar Manager — Analyses avancées</h1>
+            <h1 className="text-2xl font-bold text-blue-700 mb-4">Bar Manager — Analyses avancées</h1>
       {/* Période, recherche, export */}
       <div className="flex flex-wrap gap-2 mb-4 items-end">
         <Select

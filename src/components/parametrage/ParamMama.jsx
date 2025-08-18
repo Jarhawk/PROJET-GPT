@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { Toaster, toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export default function ParamMama() {
   const { mama, fetchMama, updateMama } = useMama();
@@ -42,8 +42,7 @@ export default function ParamMama() {
 
   return (
     <div>
-      <Toaster position="top-right" />
-      <h2 className="font-bold text-xl mb-4">Établissement</h2>
+            <h2 className="font-bold text-xl mb-4">Établissement</h2>
       {!edit ? (
         <div>
           <div>

@@ -301,3 +301,8 @@ html.dark body {
   -ms-overflow-style: none; /* IE / Edge legacy */
   scrollbar-width: none;    /* Firefox */
 }
+
+/* Ensure toast notifications appear above other elements */
+.sonner-toaster {
+  z-index: 9999 !important;
+}

@@ -3,7 +3,7 @@ import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
-import toast from "react-hot-toast";
+import { toast } from 'sonner';
 
 export default function MenuDetail({ menu, onClose, onDuplicate }) {
   // Export Excel d'un menu

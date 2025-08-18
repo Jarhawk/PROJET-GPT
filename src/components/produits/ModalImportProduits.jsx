@@ -8,7 +8,7 @@ import {
 } from "@/utils/excelUtils";
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from "@/components/ui/button";
-import { toast } from "react-hot-toast";
+import { toast } from 'sonner';
 import supabase from '@/lib/supabaseClient';
 
 export default function ModalImportProduits({ open, onClose, onSuccess }) {

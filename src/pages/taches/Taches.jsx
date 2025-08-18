@@ -8,7 +8,7 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import TableContainer from "@/components/ui/TableContainer";
 import TachesKanban from "@/components/taches/TachesKanban";
 import GlassCard from "@/components/ui/GlassCard";
-import toast from "react-hot-toast";
+import { toast } from 'sonner';
 
 export default function Taches() {
   const { taches, loading, error, fetchTaches, createTache } = useTaches();

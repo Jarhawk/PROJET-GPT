@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import useNotifications from "@/hooks/useNotifications";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from 'sonner';
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { Input } from "@/components/ui/input";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
@@ -44,8 +44,7 @@ export default function NotificationSettingsForm() {
 
   return (
     <GlassCard title="Paramètres notifications" className="p-6 text-sm max-w-md">
-      <Toaster position="top-right" />
-      <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
         <label className="block">
           <input
             type="checkbox"

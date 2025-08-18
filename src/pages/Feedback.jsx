@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import TableContainer from "@/components/ui/TableContainer";
 import GlassCard from "@/components/ui/GlassCard";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from 'sonner';
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function Feedback() {
@@ -32,8 +32,7 @@ export default function Feedback() {
 
   return (
     <div className="p-6 container mx-auto text-sm space-y-6">
-      <Toaster position="top-right" />
-      <h1 className="text-2xl font-bold">Feedback utilisateur</h1>
+            <h1 className="text-2xl font-bold">Feedback utilisateur</h1>
       <GlassCard title="Envoyer un message" className="max-w-md">
         <form onSubmit={handleSubmit} className="space-y-2">
           <Input

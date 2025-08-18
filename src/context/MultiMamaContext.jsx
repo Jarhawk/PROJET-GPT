@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 const MultiMamaContext = createContext();

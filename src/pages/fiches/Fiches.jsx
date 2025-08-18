@@ -11,7 +11,7 @@ import ListingContainer from "@/components/ui/ListingContainer";
 import PaginationFooter from "@/components/ui/PaginationFooter";
 import TableHeader from "@/components/ui/TableHeader";
 import { useFamilles } from "@/hooks/useFamilles";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from 'sonner';
 import { motion as Motion } from "framer-motion";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
@@ -73,8 +73,7 @@ export default function Fiches() {
 
   return (
     <div className="p-6 container mx-auto text-shadow">
-      <Toaster position="top-right" />
-      <TableHeader>
+            <TableHeader>
         <input
           type="search"
           value={search}

@@ -6,7 +6,7 @@ import TableContainer from '@/components/ui/TableContainer';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { Toaster, toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { saveAs } from 'file-saver';
 import * as XLSX from 'xlsx';
 
@@ -75,8 +75,7 @@ export default function ParamUnites() {
 
   return (
     <div>
-      <Toaster position="top-right" />
-      <h2 className="font-bold text-xl mb-4">Unités</h2>
+            <h2 className="font-bold text-xl mb-4">Unités</h2>
       <form onSubmit={handleSubmit} className="flex gap-2 mb-4">
         <input
           className="form-input"

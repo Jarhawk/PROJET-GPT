@@ -9,7 +9,7 @@ const setDefaultMock = vi.fn(() => Promise.resolve({ error: null }));
 vi.mock('@/hooks/useZoneProducts', () => ({
   useZoneProducts: () => ({ list: listMock, move: moveMock, setDefault: setDefaultMock }),
 }));
-vi.mock('react-hot-toast', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
 let ZoneFormProducts;
 
@@ -27,7 +27,7 @@ test('move triggers toast and refresh', async () => {
   await waitFor(() => expect(listMock).toHaveBeenCalledWith('z1'));
   fireEvent.click(screen.getByTestId('move-btn'));
   await waitFor(() => expect(moveMock).toHaveBeenCalledWith('z1', 'z2', true));
-  const { toast } = await import('react-hot-toast');
+  const { toast } = await import('sonner');
   await waitFor(() => expect(toast.success).toHaveBeenCalled());
   await waitFor(() => expect(listMock).toHaveBeenCalledTimes(2));
 });

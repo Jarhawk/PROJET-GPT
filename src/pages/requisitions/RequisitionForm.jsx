@@ -6,7 +6,7 @@ import { useZoneProducts } from "@/hooks/useZoneProducts";
 import { useZones } from "@/hooks/useZones";
 import { useUnites } from "@/hooks/useUnites";
 import { useAuth } from '@/hooks/useAuth';
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from 'sonner';
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import GlassCard from "@/components/ui/GlassCard";
 import { Input } from "@/components/ui/input";
@@ -89,8 +89,7 @@ function RequisitionFormPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <Toaster position="top-right" />
-      <h1 className="text-3xl font-bold text-mamastock-gold mb-6">Nouvelle réquisition</h1>
+            <h1 className="text-3xl font-bold text-mamastock-gold mb-6">Nouvelle réquisition</h1>
       <GlassCard title="Nouvelle réquisition" className="p-6">
         <form onSubmit={handleSubmit} className="space-y-4">
 

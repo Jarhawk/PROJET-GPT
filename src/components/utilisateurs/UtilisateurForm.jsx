@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
-import toast from "react-hot-toast";
+import { toast } from 'sonner';
 import { makeId } from "@/utils/formIds";
 
 export default function UtilisateurForm({ utilisateur, onClose }) {

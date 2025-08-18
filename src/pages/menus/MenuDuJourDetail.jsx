@@ -2,7 +2,7 @@
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import { Button } from "@/components/ui/button";
-import toast from "react-hot-toast";
+import { toast } from 'sonner';
 
 export default function MenuDuJourDetail({ menu, onClose }) {
   // Export Excel du menu du jour

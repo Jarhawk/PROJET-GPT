@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useZoneRights } from '@/hooks/useZoneRights';
 import { useZones } from '@/hooks/useZones';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import GlassCard from '@/components/ui/GlassCard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';

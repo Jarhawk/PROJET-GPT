@@ -5,7 +5,7 @@ import { useProduitsAutocomplete } from "@/hooks/useProduitsAutocomplete";
 import AutoCompleteField from "@/components/ui/AutoCompleteField";
 import { Button } from "@/components/ui/button";
 import GlassCard from "@/components/ui/GlassCard";
-import toast from "react-hot-toast";
+import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import Unauthorized from "@/pages/auth/Unauthorized";

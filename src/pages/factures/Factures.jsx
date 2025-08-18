@@ -17,7 +17,7 @@ import useExport from "@/hooks/useExport";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import TableHeader from "@/components/ui/TableHeader";
 import GlassCard from "@/components/ui/GlassCard";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from 'sonner';
 import PaginationFooter from "@/components/ui/PaginationFooter";
 import FactureTable from "@/components/FactureTable";
 import FactureImportModal from "@/components/FactureImportModal";
@@ -86,8 +86,7 @@ export default function Factures() {
 
   return (
     <div className="p-6 container mx-auto text-shadow space-y-6">
-      <Toaster position="top-right" />
-      <GlassCard width="w-full">
+            <GlassCard width="w-full">
         <TableHeader className="items-center w-full flex-wrap gap-2">
           <div className="flex flex-wrap items-center gap-2 flex-1">
             <Input

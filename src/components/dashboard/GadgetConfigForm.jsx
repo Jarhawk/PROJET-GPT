@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useGadgets } from '@/hooks/useGadgets';
 import InputField from '@/components/ui/InputField';
 import { Button } from '@/components/ui/button';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import GlassCard from '@/components/ui/GlassCard';
 
 export default function GadgetConfigForm({ gadget, onSave, onCancel }) {

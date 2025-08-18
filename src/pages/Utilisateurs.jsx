@@ -9,7 +9,7 @@ import ListingContainer from "@/components/ui/ListingContainer";
 import PaginationFooter from "@/components/ui/PaginationFooter";
 import TableHeader from "@/components/ui/TableHeader";
 import GlassCard from "@/components/ui/GlassCard";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from 'sonner';
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import { motion as Motion } from "framer-motion";
@@ -63,8 +63,7 @@ export default function Utilisateurs() {
 
   return (
     <div className="p-6 container mx-auto text-shadow">
-      <Toaster position="top-right" />
-      <GlassCard className="p-4 mb-4">
+            <GlassCard className="p-4 mb-4">
         <TableHeader>
           <input
             type="search"

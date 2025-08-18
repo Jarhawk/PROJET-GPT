@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import toast, { Toaster } from "react-hot-toast";
+import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { useRGPD } from "@/hooks/useRGPD";
 
@@ -32,8 +32,7 @@ export default function ExportUserData({ userId = null }) {
 
   return (
     <div className="p-6">
-      <Toaster />
-      <Button onClick={handleExport} disabled={loading}>
+            <Button onClick={handleExport} disabled={loading}>
         {loading ? "Export..." : "Exporter mes données"}
       </Button>
     </div>

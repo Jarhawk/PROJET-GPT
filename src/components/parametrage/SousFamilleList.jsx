@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import SousFamilleForm from '@/forms/SousFamilleForm.jsx';
 import SousFamilleRow from './SousFamilleRow';
 

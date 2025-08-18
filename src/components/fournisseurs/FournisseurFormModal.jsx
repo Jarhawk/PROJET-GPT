@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useFournisseurs } from "@/hooks/useFournisseurs";
 import { Button } from "@/components/ui/button";
-import toast from "react-hot-toast";
+import { toast } from 'sonner';
 import { motion as Motion } from "framer-motion";
 
 export default function FournisseurFormModal({ fournisseur, onClose }) {

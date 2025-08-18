@@ -6,7 +6,7 @@ import { useProducts } from "@/hooks/useProducts";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
 import GlassCard from "@/components/ui/GlassCard";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from 'sonner';
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { useAuth } from '@/hooks/useAuth';
 import Unauthorized from "@/pages/auth/Unauthorized";
@@ -60,8 +60,7 @@ export default function PlanningForm() {
   return (
     <GlassCard title="Nouveau planning">
       <form onSubmit={handleSubmit} className="space-y-4">
-      <Toaster position="top-right" />
-      <div className="flex gap-4">
+            <div className="flex gap-4">
         <input className="input flex-1" placeholder="Nom" value={nom} onChange={e => setNom(e.target.value)} required />
         <input type="date" className="form-input" value={date_prevue} onChange={e => setDatePrevue(e.target.value)} required />
         <select className="form-input" value={statut} onChange={e => setStatut(e.target.value)}>

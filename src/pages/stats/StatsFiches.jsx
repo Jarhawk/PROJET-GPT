@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from '@/hooks/useAuth';
 import supabase from '@/lib/supabaseClient';
-import toast, { Toaster } from "react-hot-toast";
+import { toast } from 'sonner';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Legend, LineChart, Line } from "recharts";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
@@ -104,8 +104,7 @@ export default function StatsFiches() {
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
-      <Toaster />
-      <h1 className="text-2xl font-bold text-mamastock-gold mb-6">Statistiques fiches techniques</h1>
+            <h1 className="text-2xl font-bold text-mamastock-gold mb-6">Statistiques fiches techniques</h1>
 
       <Button variant="outline" onClick={handleExportAll} className="mb-4">
         Exporter toutes les fiches (Excel)

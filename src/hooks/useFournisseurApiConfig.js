@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export function useFournisseurApiConfig() {
   const { mama_id } = useAuth();

@@ -8,10 +8,16 @@ import "@/i18n/i18n";
 import "./registerSW.js";
 import { BrowserRouter } from "react-router-dom";
 import AuthProvider from "@/contexts/AuthContext";
+import { toast } from 'sonner';
 
 // Avoid noisy output in production by disabling debug logs
 if (!import.meta.env.DEV) {
   console.debug = () => {};
+}
+
+if (import.meta?.env?.DEV || process.env.NODE_ENV === 'development') {
+  // @ts-ignore
+  window.toast = toast;
 }
 
 // Option sentry/reporting

@@ -7,7 +7,7 @@ import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import { Input } from "@/components/ui/input";
 import GlassCard from "@/components/ui/GlassCard";
-import toast, { Toaster } from "react-hot-toast";
+import { toast } from 'sonner';
 
 export default function MamaForm({ mama, onClose, onSaved }) {
   const { mama_id: myMama, role, loading: authLoading } = useAuth();
@@ -86,8 +86,7 @@ export default function MamaForm({ mama, onClose, onSaved }) {
   return (
     <GlassCard title={mama ? "Modifier l'établissement" : "Nouvel établissement"}>
       <form className="space-y-3" onSubmit={handleSubmit}>
-        <Toaster />
-      <div>
+              <div>
         <label>Nom</label>
         <Input
           className="w-full"

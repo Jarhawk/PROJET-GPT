@@ -4,7 +4,6 @@ import { useStock } from "@/hooks/useStock";
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
-import { Toaster } from "react-hot-toast";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import { motion as Motion } from "framer-motion";
@@ -39,8 +38,7 @@ export default function Stock() {
 
   return (
     <div className="p-6 container mx-auto">
-      <Toaster position="top-right" />
-      <div className="flex flex-wrap gap-4 items-center mb-4">
+            <div className="flex flex-wrap gap-4 items-center mb-4">
         <input
           type="search"
           value={search}

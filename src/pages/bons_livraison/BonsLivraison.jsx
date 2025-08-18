@@ -7,7 +7,6 @@ import BLDetail from "./BLDetail.jsx";
 import { Button } from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
 import GlassCard from "@/components/ui/GlassCard";
-import { Toaster } from "react-hot-toast";
 import BonLivraisonRow from "@/components/bons_livraison/BonLivraisonRow";
 import { useAuth } from '@/hooks/useAuth';
 
@@ -51,8 +50,7 @@ export default function BonsLivraison() {
 
   return (
     <div className="p-6 container mx-auto text-shadow space-y-4">
-      <Toaster />
-      <GlassCard className="flex flex-wrap gap-2 items-end">
+            <GlassCard className="flex flex-wrap gap-2 items-end">
         <select className="form-input" value={fournisseurFilter} onChange={e => { setFournisseurFilter(e.target.value); setPage(1); }}>
           <option value="">Tous fournisseurs</option>
           {fournisseurs.map(f => <option key={f.id} value={f.id}>{f.nom}</option>)}

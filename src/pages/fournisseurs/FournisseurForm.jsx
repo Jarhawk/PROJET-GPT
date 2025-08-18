@@ -5,7 +5,7 @@ import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import { Input } from "@/components/ui/input";
 import GlassCard from "@/components/ui/GlassCard";
-import toast from "react-hot-toast";
+import { toast } from 'sonner';
 
 export default function FournisseurForm({ fournisseur: fournisseurProp, onSubmit, onCancel, saving }) {
   const fournisseur = fournisseurProp || null;

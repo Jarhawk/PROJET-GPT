@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from '@/hooks/useAuth';
 import supabase from '@/lib/supabaseClient';
-import { toast } from "react-hot-toast";
+import { toast } from 'sonner';
 
 export default function ParametresCommandes() {
   const { mama_id } = useAuth();

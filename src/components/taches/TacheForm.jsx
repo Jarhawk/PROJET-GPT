@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import toast from "react-hot-toast";
+import { toast } from 'sonner';
 import GlassCard from "@/components/ui/GlassCard";
 
 export default function TacheForm({ task }) {

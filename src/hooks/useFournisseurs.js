@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import * as XLSX from "xlsx";
 import { safeImportXLSX } from "@/lib/xlsx/safeImportXLSX";
 import { saveAs } from "file-saver";
-import { toast } from "react-hot-toast";
+import { toast } from 'sonner';
 
 export function useFournisseurs() {
   const { mama_id } = useAuth();

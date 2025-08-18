@@ -7,7 +7,11 @@ import * as XLSX from "xlsx";
 import JSPDF from "jspdf";
 import "jspdf-autotable";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogTrigger, DialogContent } from "@radix-ui/react-dialog";
+import SmartDialog, {
+  DialogRoot,
+  DialogTrigger,
+  DialogContent,
+} from "@/components/ui/SmartDialog";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import GlassCard from "@/components/ui/GlassCard";
 import TableContainer from "@/components/ui/TableContainer";
@@ -337,7 +341,7 @@ export default function Transferts() {
                 <td className="px-2 py-1">{t.prix}</td>
                 <td className="px-2 py-1 font-bold">{t.cout} €</td>
                 <td>
-                  <Dialog>
+                  <DialogRoot>
                     <DialogTrigger asChild>
                       <Button
                         size="sm"
@@ -378,7 +382,7 @@ export default function Transferts() {
                         </table>
                       )}
                     </DialogContent>
-                  </Dialog>
+                  </DialogRoot>
                 </td>
               </tr>
             ))}
@@ -386,7 +390,7 @@ export default function Transferts() {
         </table>
       </TableContainer>
       {/* Modal création transfert */}
-      <Dialog
+      <DialogRoot
         open={showCreate}
         onOpenChange={(v) => !v && setShowCreate(false)}
       >
@@ -472,7 +476,7 @@ export default function Transferts() {
             </Button>
           </form>
         </DialogContent>
-      </Dialog>
+      </DialogRoot>
     </div>
   );
 }

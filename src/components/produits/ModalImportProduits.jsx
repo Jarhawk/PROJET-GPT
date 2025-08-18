@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import SmartDialog from "@/components/ui/SmartDialog";
+import SmartDialog, {
+  DialogRoot,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/SmartDialog";
 import ImportPreviewTable from "@/components/ui/ImportPreviewTable";
 import {
   parseProduitsFile,
@@ -111,58 +116,64 @@ export default function ModalImportProduits({ open, onClose, onSuccess }) {
   }
 
   return (
-    <SmartDialog open={open} onClose={onClose} title="Importer Produits via Excel">
-      <div className="space-y-4">
-        <div className="flex gap-2">
-          <Button onClick={downloadProduitsTemplate} type="button">
-            Télécharger modèle Excel
-          </Button>
-        </div>
-        <input
-          type="file"
-          accept=".xlsx,.csv"
-          ref={fileRef}
-          onChange={handleFileChange}
-          className="block"
-        />
-        {rows.length > 0 ? (
-          <>
-            <div className="flex justify-between my-2 text-sm">
-              <span>{rows.length} lignes chargées</span>
-              <span>
-                {validCount} valides / {invalidCount} à corriger
-              </span>
-            </div>
-            <div
-              className={`${
-                rows.length > 20 ? "max-h-[500px] overflow-y-auto" : ""
-              } border rounded`}
-            >
-              <ImportPreviewTable
-                rows={rows}
-                onUpdate={handleUpdate}
-                maps={maps}
-                reference={reference}
-              />
-            </div>
-            {ignoredMessages.map((msg, i) => (
-              <p key={i} className="text-xs text-red-600">
-                {msg}
-              </p>
-            ))}
-            <Button
-              disabled={validCount === 0 || importing}
-              onClick={handleImport}
-            >
-              Valider l'import
+    <DialogRoot open={open} onOpenChange={(v) => !v && onClose?.()}>
+      <DialogContent>
+        <DialogTitle>Importer Produits via Excel</DialogTitle>
+        <DialogDescription className="sr-only">
+          Importer des produits via un fichier Excel
+        </DialogDescription>
+        <div className="space-y-4">
+          <div className="flex gap-2">
+            <Button onClick={downloadProduitsTemplate} type="button">
+              Télécharger modèle Excel
             </Button>
-          </>
-        ) : (
-          <p className="text-sm text-center text-muted-foreground">
-            Aucune ligne importée
-          </p>
-        )}
-      </div>
-    </SmartDialog>
+          </div>
+          <input
+            type="file"
+            accept=".xlsx,.csv"
+            ref={fileRef}
+            onChange={handleFileChange}
+            className="block"
+          />
+          {rows.length > 0 ? (
+            <>
+              <div className="flex justify-between my-2 text-sm">
+                <span>{rows.length} lignes chargées</span>
+                <span>
+                  {validCount} valides / {invalidCount} à corriger
+                </span>
+              </div>
+              <div
+                className={`${
+                  rows.length > 20 ? "max-h-[500px] overflow-y-auto" : ""
+                } border rounded`}
+              >
+                <ImportPreviewTable
+                  rows={rows}
+                  onUpdate={handleUpdate}
+                  maps={maps}
+                  reference={reference}
+                />
+              </div>
+              {ignoredMessages.map((msg, i) => (
+                <p key={i} className="text-xs text-red-600">
+                  {msg}
+                </p>
+              ))}
+              <Button
+                disabled={validCount === 0 || importing}
+                onClick={handleImport}
+              >
+                Valider l'import
+              </Button>
+            </>
+          ) : (
+            <p className="text-sm text-center text-muted-foreground">
+              Aucune ligne importée
+            </p>
+          )}
+        </div>
+      </DialogContent>
+    </DialogRoot>
   );
 }

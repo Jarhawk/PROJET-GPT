@@ -9,7 +9,11 @@ import { Button } from "@/components/ui/button";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { Select } from "@/components/ui/select";
 import Checkbox from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import SmartDialog, {
+  DialogRoot,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/SmartDialog";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { Badge } from "@/components/ui/badge";
 
@@ -120,16 +124,16 @@ export default function Logs() {
           </table>
         </TableContainer>
       )}
-      <Dialog open={!!detail} onOpenChange={() => setDetail(null)}>
+      <DialogRoot open={!!detail} onOpenChange={() => setDetail(null)}>
         <DialogContent>
-          <DialogHeader>
+          <div className="p-4 border-b">
             <DialogTitle>Détails</DialogTitle>
-          </DialogHeader>
+          </div>
           <pre className="text-xs max-h-96 overflow-auto">
             {detail ? JSON.stringify(detail.donnees, null, 2) : ""}
           </pre>
         </DialogContent>
-      </Dialog>
+      </DialogRoot>
     </div>
   );
 }

@@ -1,12 +1,12 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
+import SmartDialog, {
+  DialogRoot,
   DialogContent,
   DialogTitle,
   DialogDescription,
-} from "@radix-ui/react-dialog";
+} from "@/components/ui/SmartDialog";
 import { AnimatePresence, motion as Motion } from "framer-motion";
 import { toast } from 'sonner';
 
@@ -80,7 +80,7 @@ export default function MouvementFormModal({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <DialogRoot open={open} onOpenChange={onOpenChange}>
       <AnimatePresence>
         {open && (
           <DialogContent asChild>
@@ -201,6 +201,6 @@ export default function MouvementFormModal({
           </DialogContent>
         )}
       </AnimatePresence>
-    </Dialog>
+    </DialogRoot>
   );
 }

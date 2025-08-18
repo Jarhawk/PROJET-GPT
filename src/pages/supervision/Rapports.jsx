@@ -9,7 +9,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { Select } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import SmartDialog, {
+  DialogRoot,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/SmartDialog";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 const MODULES = ["produits", "factures", "inventaire"];
@@ -118,11 +122,11 @@ export default function Rapports() {
           </tbody>
         </table>
       </TableContainer>
-      <Dialog open={open} onOpenChange={setOpen}>
+      <DialogRoot open={open} onOpenChange={setOpen}>
         <DialogContent>
-          <DialogHeader>
+          <div className="p-4 border-b">
             <DialogTitle>Nouveau rapport</DialogTitle>
-          </DialogHeader>
+          </div>
           <form onSubmit={handleGenerate} className="flex flex-col gap-2">
             <Select value={gen.module} onChange={(e) => setGen({ ...gen, module: e.target.value })}>
               <option value="">Module</option>
@@ -144,7 +148,7 @@ export default function Rapports() {
             <PrimaryButton type="submit">Générer</PrimaryButton>
           </form>
         </DialogContent>
-      </Dialog>
+      </DialogRoot>
     </div>
   );
 }

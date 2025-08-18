@@ -5,12 +5,12 @@ import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import TableContainer from '@/components/ui/TableContainer';
-import {
-  Dialog,
+import SmartDialog, {
+  DialogRoot,
   DialogContent,
   DialogTitle,
   DialogDescription,
-} from '@radix-ui/react-dialog';
+} from '@/components/ui/SmartDialog';
 import MamaForm from './MamaForm';
 import { toast } from 'sonner';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
@@ -168,7 +168,7 @@ export default function Mamas() {
           </table>
         )}
       </TableContainer>
-      <Dialog open={!!editMama} onOpenChange={(v) => !v && setEditMama(null)}>
+      <DialogRoot open={!!editMama} onOpenChange={(v) => !v && setEditMama(null)}>
         <DialogContent className="bg-white/10 backdrop-blur-lg text-white rounded-xl shadow-lg p-6 max-w-md">
           <DialogTitle className="font-bold mb-2">
             {editMama?.id ? "Modifier l'établissement" : 'Nouvel établissement'}
@@ -185,7 +185,7 @@ export default function Mamas() {
             onClose={() => setEditMama(null)}
           />
         </DialogContent>
-      </Dialog>
+      </DialogRoot>
     </div>
   );
 }

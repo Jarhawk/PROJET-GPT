@@ -2,12 +2,13 @@ import * as DialogPrimitive from '@radix-ui/react-dialog'
 
 const cx = (...xs) => xs.filter(Boolean).join(' ')
 
-export const Dialog = DialogPrimitive.Root
-export const DialogTrigger = DialogPrimitive.Trigger
-export const DialogPortal = DialogPrimitive.Portal
-export const DialogClose = DialogPrimitive.Close
-export const DialogTitle = DialogPrimitive.Title
-export const DialogDescription = DialogPrimitive.Description
+// Sous-composants Radix exposés
+const Dialog = DialogPrimitive.Root
+const DialogTrigger = DialogPrimitive.Trigger
+const DialogPortal = DialogPrimitive.Portal
+const DialogClose = DialogPrimitive.Close
+const DialogTitle = DialogPrimitive.Title
+const DialogDescription = DialogPrimitive.Description
 
 export function DialogOverlay({ className, ...props }) {
   return (
@@ -51,9 +52,29 @@ export function DialogContent({ className, children, ...props }) {
   )
 }
 
-// Export par défaut + nommés (compat)
-const SmartDialog = {
-  Dialog, DialogTrigger, DialogPortal, DialogClose,
-  DialogTitle, DialogDescription, DialogOverlay, DialogContent,
+// Composant racine pratique
+function SmartDialog({ open, onClose, title, description, children, ...props }) {
+  return (
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose?.()} {...props}>
+      <DialogContent>
+        {title && <DialogTitle>{title}</DialogTitle>}
+        {description && <DialogDescription>{description}</DialogDescription>}
+        {children}
+      </DialogContent>
+    </Dialog>
+  )
 }
+
+export {
+  Dialog,
+  DialogTrigger,
+  DialogPortal,
+  DialogClose,
+  DialogTitle,
+  DialogDescription,
+  DialogOverlay,
+  DialogContent,
+}
+
 export default SmartDialog
+

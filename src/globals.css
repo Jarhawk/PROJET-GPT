@@ -287,3 +287,17 @@ html.dark body {
   .max-h-\[56vh\]::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 999px; }
   .max-h-\[56vh\]::-webkit-scrollbar-track { background: transparent; }
 }
+
+/* Zone Lignes produits — pas de scroll horizontal */
+.lignes-produits {
+  overflow-x: hidden;
+}
+
+/* Masquer la barre si jamais un enfant scrolle */
+.lignes-produits::-webkit-scrollbar {
+  display: none;           /* Chrome / Edge / Safari */
+}
+.lignes-produits {
+  -ms-overflow-style: none; /* IE / Edge legacy */
+  scrollbar-width: none;    /* Firefox */
+}

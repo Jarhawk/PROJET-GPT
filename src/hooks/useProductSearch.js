@@ -1,51 +1,34 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import useSupabaseClient from '@/hooks/useSupabaseClient'
 import useDebounce from './useDebounce'
 import { useMultiMama } from '@/context/MultiMamaContext'
-import { logSupaError } from '@/lib/supa/logError'
 
 export default function useProductSearch(initialQuery = '') {
+  const [query, setQuery] = useState(initialQuery)
   const supabase = useSupabaseClient()
   const { mamaActif: currentMamaId } = useMultiMama()
-  const [query, setQuery] = useState(initialQuery)
-  const [results, setResults] = useState([])
-  const [isLoading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
 
-  const q = useDebounce(query.trim(), 150)
+  const debounced = useDebounce(query.trim(), 300)
 
-  useEffect(() => {
-    let cancel = false
-    ;(async () => {
-      setLoading(true)
-      setError(null)
-      try {
-        let req = supabase
-          .from('produits')
-          .select('id, nom, pmp, stock_reel')
-          .eq('mama_id', currentMamaId)
-          .eq('actif', true)
-          .order('nom', { ascending: true })
-          .limit(50)
+  const fetchProducts = async () => {
+    const { data, error } = await supabase
+      .from('produits')
+      .select('id, nom, stock_reel, pmp, v_produits_dernier_prix (prix)')
+      .ilike('nom', `%${debounced}%`)
+      .eq('mama_id', currentMamaId)
+      .limit(20)
+      .order('nom', { ascending: true })
 
-        if (q) req = req.ilike('nom', `%${q}%`)
+    if (error) throw error
+    return data ?? []
+  }
 
-        const { data, error } = await req
-        if (error) {
-          logSupaError('produits', error)
-          throw error
-        }
-        if (!cancel) setResults(data ?? [])
-      } catch (e) {
-        if (!cancel) setError(e)
-      } finally {
-        if (!cancel) setLoading(false)
-      }
-    })()
-    return () => {
-      cancel = true
-    }
-  }, [supabase, currentMamaId, q])
+  const { data: results = [], isLoading, error } = useQuery({
+    queryKey: ['product-search', currentMamaId, debounced],
+    queryFn: fetchProducts,
+    enabled: !!currentMamaId && debounced.length > 0,
+  })
 
   return { query, setQuery, results, isLoading, error }
 }

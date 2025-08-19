@@ -1,18 +1,23 @@
 import {
   Dialog,
+  DialogOverlay,
   DialogContent,
   DialogTitle,
   DialogDescription,
   DialogClose,
   useLockBodyScroll,
 } from '@/components/ui/SmartDialog'
-import { useRef, useEffect, useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { useEffect, useRef, useState } from 'react'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import useProductSearch from '@/hooks/useProductSearch'
 
 export default function ProductPickerModal({ open, onOpenChange, onSelect }) {
   useLockBodyScroll(open)
   const { query, setQuery, results, isLoading, error } = useProductSearch('')
   const inputRef = useRef(null)
+  const listRef = useRef(null)
   const [activeIdx, setActiveIdx] = useState(0)
 
   useEffect(() => {
@@ -23,16 +28,22 @@ export default function ProductPickerModal({ open, onOpenChange, onSelect }) {
     setActiveIdx(0)
   }, [results])
 
+  const virtualizer = useVirtualizer({
+    count: results.length,
+    getScrollElement: () => listRef.current,
+    estimateSize: () => 56,
+  })
+
   const handleKeyDown = (e) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault()
-      setActiveIdx((i) => Math.min(i + 1, (results?.length || 1) - 1))
+      setActiveIdx((i) => Math.min(i + 1, results.length - 1))
     } else if (e.key === 'ArrowUp') {
       e.preventDefault()
       setActiveIdx((i) => Math.max(i - 1, 0))
     } else if (e.key === 'Enter') {
       e.preventDefault()
-      const p = results?.[activeIdx]
+      const p = results[activeIdx]
       if (p) {
         onSelect?.(p)
         onOpenChange?.(false)
@@ -42,74 +53,93 @@ export default function ProductPickerModal({ open, onOpenChange, onSelect }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card text-card-foreground max-w-lg">
-        {/* Header sticky avec recherche */}
-        <div className="sticky top-0 z-10 border-b border-border bg-card/95 backdrop-blur p-4">
+      <DialogOverlay className="fixed inset-0 bg-black/60" />
+      <DialogContent className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-card text-card-foreground shadow-lg focus:outline-none">
+        <div className="p-4 space-y-3">
           <DialogTitle className="text-lg font-semibold">
             Sélecteur de produits
             <span className="ml-2 text-sm font-normal opacity-60">
-              {isLoading ? 'Chargement…' : `(${results?.length ?? 0} résultats)`}
+              {isLoading ? 'Chargement…' : `(${results.length} résultats)`}
             </span>
           </DialogTitle>
-          <DialogDescription className="text-sm opacity-80">
+          <DialogDescription id="product-search-desc" className="text-sm text-muted-foreground">
             Recherchez un produit par son nom, puis validez avec Entrée ou cliquez pour sélectionner.
           </DialogDescription>
-
-          <div className="mt-3">
-            <input
-              ref={inputRef}
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Rechercher un produit par nom…"
-              className="w-full rounded-xl border border-border bg-background px-3 py-2 outline-none focus:ring-2 focus:ring-primary"
-            />
-            </div>
-          <p className="mt-2 text-xs opacity-60">
-            Astuces : ↑/↓ pour naviguer • Entrée pour sélectionner • Échap pour fermer
+          <Input
+            ref={inputRef}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Rechercher un produit par nom…"
+            aria-label="Recherche produit"
+            aria-describedby="product-search-desc"
+          />
+          <p className="text-xs text-muted-foreground">
+            Astuce : ↑/↓ pour naviguer · Entrée pour sélectionner · Échap pour fermer
           </p>
         </div>
 
-        {/* Corps scrollable */}
-        <div className="max-h-[65vh] overflow-y-auto p-4">
+        <div ref={listRef} className="max-h-[65vh] overflow-y-auto">
           {error && (
-            <div className="mx-3 my-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm">
-              Erreur de recherche : {error.message ?? 'inconnue'}
+            <div className="m-4 rounded border border-destructive/50 bg-destructive/10 p-2 text-sm">
+              Erreur : {error.message}
             </div>
           )}
-
-          {!isLoading && (results?.length ?? 0) === 0 && !error && (
-            <div className="mx-3 my-4 text-sm opacity-60">Aucun produit trouvé.</div>
+          {!isLoading && results.length === 0 && !error && (
+            <div className="m-4 text-sm text-muted-foreground">Aucun produit trouvé.</div>
           )}
 
-          <ul className="space-y-1">
-            {(results ?? []).map((p, idx) => (
-              <li key={p.id}>
+          <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
+            {virtualizer.getVirtualItems().map((virtualRow) => {
+              const p = results[virtualRow.index]
+              const active = virtualRow.index === activeIdx
+              const lastPrice =
+                p?.v_produits_dernier_prix?.[0]?.prix ?? p?.v_produits_dernier_prix?.prix
+              return (
                 <button
+                  key={p.id}
                   type="button"
-                  onClick={() => { onSelect?.(p); onOpenChange?.(false) }}
-                  className={`w-full text-left rounded-xl border px-4 py-3 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${idx === activeIdx ? 'border-primary/50 bg-primary/10' : 'border-transparent hover:border-primary/30 hover:bg-primary/5'}`}
+                  onClick={() => {
+                    onSelect?.(p)
+                    onOpenChange?.(false)
+                  }}
+                  className={`absolute left-0 w-full px-4 py-2 text-left ${
+                    active
+                      ? 'bg-primary/10 border border-primary/50'
+                      : 'border-b border-border hover:bg-primary/5'
+                  } focus:outline-none`}
+                  style={{
+                    top: 0,
+                    transform: `translateY(${virtualRow.start}px)`,
+                  }}
                 >
-                  <div className="truncate font-medium">{p.nom}</div>
-                  {p.pmp != null && (
-                    <div className="text-xs opacity-60">PMP: {Number(p.pmp).toFixed(2)}</div>
-                  )}
+                  <div className="flex justify-between gap-2">
+                    <span className="truncate font-medium">{p.nom}</span>
+                    {lastPrice != null && (
+                      <span className="text-xs text-muted-foreground">
+                        Dernier {Number(lastPrice).toFixed(2)}€
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex gap-2 text-xs text-muted-foreground">
+                    <span>Stock {Number(p.stock_reel ?? 0)}</span>
+                    <span>PMP {Number(p.pmp ?? 0).toFixed(2)}</span>
+                  </div>
                 </button>
-              </li>
-            ))}
-          </ul>
+              )
+            })}
+          </div>
         </div>
 
-        {/* Footer */}
-        <div className="sticky bottom-0 z-10 border-t border-border bg-card/95 backdrop-blur p-3 flex justify-end">
+        <div className="flex justify-end border-t p-3">
           <DialogClose asChild>
-            <button type="button" className="rounded-lg border px-3 py-2 hover:bg-accent">
+            <Button variant="outline" type="button">
               Fermer
-            </button>
+            </Button>
           </DialogClose>
         </div>
       </DialogContent>
     </Dialog>
   )
 }
+

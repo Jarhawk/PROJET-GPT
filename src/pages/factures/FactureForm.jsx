@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { v4 as uuidv4 } from 'uuid'
+import { useForm, useFieldArray } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 
@@ -14,6 +15,8 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { useInvoice } from '@/hooks/useInvoice'
 import useSupabaseClient from '@/hooks/useSupabaseClient'
 import { useAuth } from '@/hooks/useAuth'
+
+const parseNum = (v) => parseFloat(String(v).replace(',', '.')) || 0
 
 export function mapDbLineToUI(l) {
   const q = parseFloat(l.quantite) || 0
@@ -30,7 +33,7 @@ export function mapDbLineToUI(l) {
   }
 }
 
-function createEmptyLine(position) {
+function createEmptyLine() {
   return {
     id: uuidv4(),
     produit: { id: '', nom: '' },
@@ -40,83 +43,37 @@ function createEmptyLine(position) {
     tva: 0,
     total_ht: '0',
     pmp: 0,
-    position,
-    manuallyEdited: false,
   }
 }
 
-const parseNum = (v) => parseFloat(String(v).replace(',', '.')) || 0
+function FactureFormInner({ defaultValues, fournisseurs, onSaved, onClose }) {
+  const form = useForm({ defaultValues })
+  const {
+    control,
+    register,
+    handleSubmit,
+    watch,
+    formState: { isSubmitting },
+  } = form
+  const { fields, append, remove, update } = useFieldArray({ control, name: 'lignes' })
 
-function FactureFormInner({
-  facture = null,
-  lignes: initialLignes = [],
-  fournisseurs: fournisseursProp,
-  onSaved,
-  onClose,
-}) {
-  const { data: fournisseursData = [] } = useFournisseurs({ actif: true })
-  const fournisseurs = fournisseursProp || fournisseursData
-
-  const [header, setHeader] = useState({
-    id: undefined,
-    numero: '',
-    date_facture: new Date().toISOString().slice(0, 10),
-    fournisseur_id: '',
-  })
-
-  const [lignes, setLignes] = useState([])
-
-  useEffect(() => {
-    if (facture) {
-      setHeader({
-        id: facture.id,
-        numero: facture.numero ?? '',
-        date_facture: (facture.date_facture ?? '').slice(0, 10),
-        fournisseur_id: facture.fournisseur_id ?? '',
-      })
-    }
-  }, [facture])
-
-  useEffect(() => {
-    if (initialLignes && initialLignes.length) {
-      setLignes(initialLignes)
-    } else {
-      setLignes([createEmptyLine(0)])
-    }
-  }, [initialLignes])
+  const lignes = watch('lignes')
 
   const totals = useMemo(() => {
     let ht = 0
     let tva = 0
     lignes.forEach((l) => {
-      const lineTotal = parseNum(l.total_ht)
-      ht += lineTotal
-      tva += lineTotal * (parseNum(l.tva) / 100)
+      const lineHt = parseNum(l.quantite) * parseNum(l.pu)
+      ht += lineHt
+      tva += lineHt * (parseNum(l.tva) / 100)
     })
-    const ttc = ht + tva
-    return { ht, tva, ttc }
+    return { ht, tva, ttc: ht + tva }
   }, [lignes])
 
-  const handleLineChange = (idx, newLine) => {
-    setLignes((ls) => ls.map((l, i) => (i === idx ? newLine : l)))
-  }
-
-  const handleRemoveLine = (idx) => {
-    setLignes((ls) => ls.filter((_, i) => i !== idx))
-  }
-
-  const handleAddLine = () => {
-    setLignes((ls) => [...ls, createEmptyLine(ls.length)])
-  }
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    onSaved?.({ ...header, lignes })
-  }
+  const onSubmit = handleSubmit((data) => onSaved?.(data))
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* ENTÊTE */}
+    <form onSubmit={onSubmit} className="space-y-6">
       <Card>
         <CardHeader>
           <h2 className="text-lg font-semibold">Entête</h2>
@@ -125,13 +82,7 @@ function FactureFormInner({
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-1">
               <label className="text-sm">Fournisseur</label>
-              <Select
-                value={header.fournisseur_id}
-                onChange={(e) =>
-                  setHeader((h) => ({ ...h, fournisseur_id: e.target.value }))
-                }
-                className="w-full"
-              >
+              <Select {...register('fournisseur_id')} className="w-full">
                 <option value="">Choisir...</option>
                 {fournisseurs.map((f) => (
                   <option key={f.id} value={f.id}>
@@ -142,34 +93,21 @@ function FactureFormInner({
             </div>
             <div className="space-y-1">
               <label className="text-sm">Numéro</label>
-              <Input
-                value={header.numero}
-                onChange={(e) =>
-                  setHeader((h) => ({ ...h, numero: e.target.value }))
-                }
-              />
+              <Input {...register('numero')} />
             </div>
             <div className="space-y-1">
               <label className="text-sm">Date</label>
-              <Input
-                type="date"
-                value={header.date_facture}
-                onChange={(e) =>
-                  setHeader((h) => ({ ...h, date_facture: e.target.value }))
-                }
-              />
+              <Input type="date" {...register('date_facture')} />
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* LIGNES */}
       <Card className="overflow-hidden">
         <CardHeader>
           <h2 className="text-lg font-semibold">Lignes</h2>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Table header */}
           <div className="flex items-center gap-2 text-sm font-medium">
             <div className="basis-[30%] min-w-0">Produit</div>
             <div className="basis-[15%] text-right">Qté</div>
@@ -179,26 +117,24 @@ function FactureFormInner({
             <div className="basis-[5%]" />
           </div>
 
-          {/* Lines */}
           <div className="space-y-2">
-            {lignes.map((ligne, idx) => (
+            {fields.map((field, idx) => (
               <FactureLigne
-                key={ligne.id || idx}
-                ligne={ligne}
+                key={field.id}
+                ligne={field}
                 index={idx}
-                onChange={(l) => handleLineChange(idx, l)}
-                onRemove={handleRemoveLine}
+                onChange={(l) => update(idx, l)}
+                onRemove={() => remove(idx)}
               />
             ))}
           </div>
 
-          <Button type="button" onClick={handleAddLine} className="w-full">
+          <Button type="button" onClick={() => append(createEmptyLine())} className="w-full">
             Ajouter une ligne
           </Button>
         </CardContent>
       </Card>
 
-      {/* TOTAUX + ACTIONS */}
       <Card>
         <CardContent>
           <div className="flex justify-end gap-8 text-sm">
@@ -222,7 +158,9 @@ function FactureFormInner({
               Annuler
             </Button>
           )}
-          <Button type="submit">Enregistrer</Button>
+          <Button type="submit" disabled={isSubmitting}>
+            Enregistrer
+          </Button>
         </div>
       </Card>
     </form>
@@ -242,19 +180,21 @@ export default function FactureForm() {
   const { data: invoice, isLoading } = useInvoice(isNew ? undefined : id)
   const { data: fournisseurs = [] } = useFournisseurs({ actif: true })
 
-  const initialFacture = invoice
+  const defaultValues = invoice
     ? {
         id: invoice.id,
         numero: invoice.numero ?? '',
         date_facture: (invoice.date_facture ?? '').slice(0, 10),
         fournisseur_id: invoice.fournisseur_id ?? '',
+        lignes: (invoice.lignes ?? []).map(mapDbLineToUI),
       }
-    : null
-
-  const initialLignes = useMemo(
-    () => (invoice?.lignes ?? []).map(mapDbLineToUI),
-    [invoice]
-  )
+    : {
+        id: undefined,
+        numero: '',
+        date_facture: new Date().toISOString().slice(0, 10),
+        fournisseur_id: '',
+        lignes: [createEmptyLine()],
+      }
 
   const handleSave = async ({ id: fid, numero, date_facture, fournisseur_id, lignes }) => {
     try {
@@ -284,8 +224,7 @@ export default function FactureForm() {
 
   return (
     <FactureFormInner
-      facture={initialFacture}
-      lignes={initialLignes}
+      defaultValues={defaultValues}
       fournisseurs={fournisseurs}
       onSaved={handleSave}
       onClose={() => navigate(-1)}

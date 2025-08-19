@@ -38,8 +38,8 @@ export default function FactureLigne({ ligne, index, onChange, onRemove, onProdu
   }
 
   return (
-    <div className="grid min-w-0 grid-cols-1 items-center gap-2 overflow-x-hidden md:grid-cols-[2fr,1fr,1fr,1fr,auto]">
-      <div className="min-w-0">
+    <div className="flex min-w-0 items-center gap-2 overflow-x-hidden">
+      <div className="basis-[30%] min-w-0">
         <Button
           type="button"
           variant="outline"
@@ -57,7 +57,7 @@ export default function FactureLigne({ ligne, index, onChange, onRemove, onProdu
           onSelect={handleProduitSelection}
         />
       </div>
-      <div className="min-w-0">
+      <div className="basis-[15%] min-w-0">
         <Input
           type="number"
           step="any"
@@ -68,7 +68,7 @@ export default function FactureLigne({ ligne, index, onChange, onRemove, onProdu
           onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
         />
       </div>
-      <div className="min-w-0">
+      <div className="basis-[15%] min-w-0">
         <Input
           type="number"
           step="any"
@@ -79,7 +79,7 @@ export default function FactureLigne({ ligne, index, onChange, onRemove, onProdu
           onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
         />
       </div>
-      <div className="min-w-0">
+      <div className="basis-[15%] min-w-0">
         <Input
           type="number"
           step="any"
@@ -88,7 +88,7 @@ export default function FactureLigne({ ligne, index, onChange, onRemove, onProdu
           onChange={(e) => onChange({ ...ligne, tva: e.target.value })}
         />
       </div>
-      <div className="min-w-0">
+      <div className="basis-[20%] min-w-0">
         <Input
           type="text"
           readOnly
@@ -98,7 +98,7 @@ export default function FactureLigne({ ligne, index, onChange, onRemove, onProdu
           aria-readonly="true"
         />
       </div>
-      <div className="flex justify-center min-w-0">
+      <div className="basis-[5%] flex justify-center min-w-0">
         <Button
           type="button"
           size="sm"

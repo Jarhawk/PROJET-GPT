@@ -1,9 +1,8 @@
-import { useSupabase } from '@/hooks/useSupabaseClient';
+import supabase from '@/lib/supabaseClient';
 
 export async function fetchAlertesRupture(mamaId) {
-  const supabase = useSupabase();
 
-  const { data, error } = await supabase
+    const { data, error } = await supabase
     .from('alertes_rupture')
     // embed grâce à la FK alertes_rupture.produit_id -> produits.id
     .select('id, mama_id, produit_id, traite, cree_le, produit:produits(id,nom)')

@@ -35,23 +35,38 @@ export default function Sidebar() {
       <nav className="flex flex-col gap-2 text-sm">
         {has("dashboard") && <Link to="/dashboard">Dashboard</Link>}
 
-        {(has("fournisseurs") || has("factures")) && (
-          <details open={pathname.startsWith("/fournisseurs") || pathname.startsWith("/factures")}>
+        {(has("fournisseurs") || has("factures") || has("receptions")) && (
+          <details
+            open={
+              pathname.startsWith("/fournisseurs") ||
+              pathname.startsWith("/factures") ||
+              pathname.startsWith("/receptions")
+            }
+          >
             <summary className="cursor-pointer">Achats</summary>
             <div className="ml-4 flex flex-col gap-1 mt-1">
               {has("fournisseurs") && <Link to="/fournisseurs">Fournisseurs</Link>}
               {has("factures") && <Link to="/factures">Factures</Link>}
+              {has("receptions") && <Link to="/receptions">Réceptions</Link>}
             </div>
           </details>
         )}
 
-        {(has("fiches_techniques") || has("menus")) && (
-          <details open={pathname.startsWith("/fiches") || pathname.startsWith("/menus")}>
+        {(has("fiches_techniques") || has("menus") || has("recettes") || has("menu_du_jour")) && (
+          <details
+            open={
+              pathname.startsWith("/fiches") ||
+              pathname.startsWith("/menus") ||
+              pathname.startsWith("/recettes") ||
+              pathname.startsWith("/menu")
+            }
+          >
             <summary className="cursor-pointer">Cuisine</summary>
             <div className="ml-4 flex flex-col gap-1 mt-1">
               {has("fiches_techniques") && <Link to="/fiches">Fiches</Link>}
               {has("menus") && <Link to="/menus">Menus</Link>}
               {has("menu_du_jour") && <Link to="/menu">Menu du jour</Link>}
+              {has("recettes") && <Link to="/recettes">Recettes</Link>}
             </div>
           </details>
         )}
@@ -78,16 +93,23 @@ export default function Sidebar() {
 
         {(has("documents") || canAnalyse || has("menu_engineering")) && (
           <details
-            open=
-              {pathname.startsWith("/documents") ||
-                pathname.startsWith("/analyse") ||
-                pathname.startsWith("/engineering") ||
-                pathname.startsWith("/menu-engineering")}
+            open={
+              pathname.startsWith("/documents") ||
+              pathname.startsWith("/analyse") ||
+              pathname.startsWith("/tableaux-de-bord") ||
+              pathname.startsWith("/comparatif") ||
+              pathname.startsWith("/surcouts") ||
+              pathname.startsWith("/engineering") ||
+              pathname.startsWith("/menu-engineering")
+            }
           >
             <summary className="cursor-pointer">Documents / Analyse</summary>
             <div className="ml-4 flex flex-col gap-1 mt-1">
               {has("documents") && <Link to="/documents">Documents</Link>}
               {canAnalyse && <Link to="/analyse">Analyse</Link>}
+              {canAnalyse && <Link to="/tableaux-de-bord">Tableaux de bord</Link>}
+              {canAnalyse && <Link to="/comparatif">Comparatif</Link>}
+              {canAnalyse && <Link to="/surcouts">Surcoûts</Link>}
               {has("menu_engineering") && (
                 <Link to="/menu-engineering">Menu Engineering</Link>
               )}

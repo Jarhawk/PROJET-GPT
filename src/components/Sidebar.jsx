@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import useMamaSettings from "@/hooks/useMamaSettings";
 import logo from "@/assets/logo-mamastock.png";
-import { normalizeAccessKey } from '@/lib/access'
+import { normalizeAccessKey } from "@/lib/access";
 
 export default function Sidebar() {
   const { loading: authLoading, hasAccess, userData } = useAuth();
@@ -12,22 +12,21 @@ export default function Sidebar() {
   const { loading: settingsLoading, enabledModules } = useMamaSettings();
   const rights = useMemo(() => userData?.access_rights ?? {}, [userData?.access_rights]);
 
-  const rightsKeys = useMemo(() => Object.keys(rights || {}), [rights]);
-  const enabledKeys = useMemo(
-    () => Object.keys(enabledModules || {}),
-    [enabledModules]
-  );
-
-  const __DEV__ = import.meta.env.DEV;
-  __DEV__ && console.log('[sidebar] rights keys', rightsKeys);
-  __DEV__ && console.log('[sidebar] enabledModules keys', enabledKeys);
+  const modules = useMemo(() => {
+    const em = enabledModules || {};
+    if (Object.keys(em).length > 0) return em;
+    return rights;
+  }, [enabledModules, rights]);
 
   const has = (key) => {
-    const k = normalizeAccessKey(key)
-    const isEnabled = enabledModules ? enabledModules[k] !== false : true
-    return hasAccess(k) && isEnabled
-  }
-  const canAnalyse = has('analyse');
+    const k = normalizeAccessKey(key);
+    const isEnabled = modules ? modules[k] !== false : true;
+    return hasAccess(k) && isEnabled;
+  };
+  const canAnalyse = has("analyse");
+  const isAdmin = userData?.role === "admin";
+
+  if (authLoading || settingsLoading) return null;
 
   return (
     <aside className="w-64 bg-white/10 border border-white/10 backdrop-blur-xl text-white p-4 h-screen shadow-md text-shadow">
@@ -121,7 +120,11 @@ export default function Sidebar() {
 
         {has("notifications") && <Link to="/notifications">Notifications</Link>}
 
-        {(has("parametrage") ||
+        {(isAdmin ||
+          has("familles") ||
+          has("sous_familles") ||
+          has("unites") ||
+          has("parametrage") ||
           has("utilisateurs") ||
           has("roles") ||
           has("mamas") ||
@@ -130,6 +133,16 @@ export default function Sidebar() {
           <details open={pathname.startsWith("/parametrage")}>
             <summary className="cursor-pointer">Paramétrage</summary>
             <div className="ml-4 flex flex-col gap-1 mt-1">
+              {has("parametrage") && (
+                <Link to="/parametrage/settings">Paramètres</Link>
+              )}
+              {has("familles") && (
+                <Link to="/parametrage/familles">Familles</Link>
+              )}
+              {has("sous_familles") && (
+                <Link to="/parametrage/sous-familles">Sous-familles</Link>
+              )}
+              {has("unites") && <Link to="/parametrage/unites">Unités</Link>}
               {has("utilisateurs") && (
                 <Link to="/parametrage/utilisateurs">Utilisateurs</Link>
               )}

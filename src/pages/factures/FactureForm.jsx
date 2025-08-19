@@ -1,6 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useMemo, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
+import { useNavigate, useParams } from 'react-router-dom'
+import { toast } from 'sonner'
 
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -8,6 +10,10 @@ import { Select } from '@/components/ui/select'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import FactureLigne from '@/components/FactureLigne'
 import useFournisseurs from '@/hooks/data/useFournisseurs'
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+import { useInvoice } from '@/hooks/useInvoice'
+import useSupabaseClient from '@/hooks/useSupabaseClient'
+import { useAuth } from '@/hooks/useAuth'
 
 export function mapDbLineToUI(l) {
   const q = parseFloat(l.quantite) || 0
@@ -51,7 +57,7 @@ function createEmptyLine(position) {
 
 const parseNum = (v) => parseFloat(String(v).replace(',', '.')) || 0
 
-export default function FactureForm({
+function FactureFormInner({
   facture = null,
   lignes: initialLignes = [],
   fournisseurs: fournisseursProp,
@@ -62,6 +68,7 @@ export default function FactureForm({
   const fournisseurs = fournisseursProp || fournisseursData
 
   const [header, setHeader] = useState({
+    id: undefined,
     numero: '',
     date_facture: new Date().toISOString().slice(0, 10),
     fournisseur_id: '',
@@ -72,6 +79,7 @@ export default function FactureForm({
   useEffect(() => {
     if (facture) {
       setHeader({
+        id: facture.id,
         numero: facture.numero ?? '',
         date_facture: (facture.date_facture ?? '').slice(0, 10),
         fournisseur_id: facture.fournisseur_id ?? '',
@@ -231,6 +239,70 @@ export default function FactureForm({
         </div>
       </Card>
     </form>
+  )
+}
+
+export default function FactureForm() {
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const supabase = useSupabaseClient()
+  const { session } = useAuth()
+  const mamaId = (
+    session?.user?.user_metadata?.mama_id ?? session?.user?.mama_id ?? ''
+  ).toString()
+  const isNew = !id || id === 'new'
+
+  const { data: invoice, isLoading } = useInvoice(isNew ? undefined : id)
+  const { data: fournisseurs = [] } = useFournisseurs({ actif: true })
+
+  const initialFacture = invoice
+    ? {
+        id: invoice.id,
+        numero: invoice.numero ?? '',
+        date_facture: (invoice.date_facture ?? '').slice(0, 10),
+        fournisseur_id: invoice.fournisseur_id ?? '',
+      }
+    : null
+
+  const initialLignes = useMemo(
+    () => (invoice?.lignes ?? []).map(mapDbLineToUI),
+    [invoice]
+  )
+
+  const handleSave = async ({ id: fid, numero, date_facture, fournisseur_id, lignes }) => {
+    try {
+      const payload = {
+        facture: { id: fid, numero, date_facture, fournisseur_id },
+        lignes: (lignes || []).map((l) => ({
+          id: l.id,
+          produit_id: l.produit_id,
+          quantite: parseNum(l.quantite),
+          pu_ht: parseNum(l.pu),
+          tva: parseNum(l.tva),
+        })),
+      }
+      const { error } = await supabase.rpc('fn_facture_save', {
+        p_mama_id: mamaId,
+        p_payload: payload,
+      })
+      if (error) throw error
+      toast.success('Facture enregistrée')
+      navigate('/factures')
+    } catch (e) {
+      toast.error(e.message || "Erreur lors de l'enregistrement")
+    }
+  }
+
+  if (isLoading) return <LoadingSpinner message="Chargement..." />
+
+  return (
+    <FactureFormInner
+      facture={initialFacture}
+      lignes={initialLignes}
+      fournisseurs={fournisseurs}
+      onSaved={handleSave}
+      onClose={() => navigate(-1)}
+    />
   )
 }
 

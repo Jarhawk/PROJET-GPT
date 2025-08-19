@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { Link, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import useMamaSettings from "@/hooks/useMamaSettings";
@@ -24,11 +24,21 @@ export default function Sidebar() {
     return hasAccess(k) && isEnabled;
   };
   const canAnalyse = has("analyse");
-  const isAdmin = userData?.role === "admin";
-  const canConfigure =
-    rights?.enabledModules?.includes?.("parametrage") ||
-    userData?.can_configurer ||
-    has("parametrage");
+  const isAdmin = ["admin", "super-admin"].includes(userData?.role);
+
+  const hasParamRight = (key) => {
+    const r = rights?.[key];
+    if (r === true) return true;
+    if (typeof r === "object") return Object.values(r).some(Boolean);
+    return false;
+  };
+  const showParametrage =
+    rights?.menus?.parametrage === true ||
+    hasParamRight("familles") ||
+    hasParamRight("sous_familles") ||
+    hasParamRight("unites") ||
+    isAdmin ||
+    import.meta.env.DEV;
 
   if (authLoading || settingsLoading) return null;
 
@@ -124,36 +134,28 @@ export default function Sidebar() {
 
         {has("notifications") && <Link to="/notifications">Notifications</Link>}
 
-        {(isAdmin ||
-          canConfigure ||
-          has("parametrage") ||
-          has("utilisateurs") ||
-          has("roles") ||
-          has("mamas") ||
-          has("permissions") ||
-          has("access")) && (
-          <details open={pathname.startsWith("/parametrage")}>
+        {showParametrage && (
+          <details open={pathname.startsWith("/parametrage")}> 
             <summary className="cursor-pointer">Paramétrage</summary>
             <div className="ml-4 flex flex-col gap-1 mt-1">
-              {has("parametrage") && (
-                <Link to="/parametrage/settings">Paramètres</Link>
-              )}
-              {canConfigure && (
-                <Link to="/parametrage/familles">Familles</Link>
-              )}
-              {canConfigure && (
-                <Link to="/parametrage/sous-familles">Sous-familles</Link>
-              )}
-              {canConfigure && <Link to="/parametrage/unites">Unités</Link>}
-              {has("utilisateurs") && (
-                <Link to="/parametrage/utilisateurs">Utilisateurs</Link>
-              )}
-              {has("roles") && <Link to="/parametrage/roles">Rôles</Link>}
-              {has("mamas") && <Link to="/parametrage/mamas">Mamas</Link>}
-              {has("permissions") && (
-                <Link to="/parametrage/permissions">Permissions</Link>
-              )}
-              {has("access") && <Link to="/parametrage/access">Accès</Link>}
+              <NavLink
+                to="/parametrage/familles"
+                className={({ isActive }) => (isActive ? "text-mamastockGold" : "")}
+              >
+                Familles
+              </NavLink>
+              <NavLink
+                to="/parametrage/sous-familles"
+                className={({ isActive }) => (isActive ? "text-mamastockGold" : "")}
+              >
+                Sous-familles
+              </NavLink>
+              <NavLink
+                to="/parametrage/unites"
+                className={({ isActive }) => (isActive ? "text-mamastockGold" : "")}
+              >
+                Unités
+              </NavLink>
             </div>
           </details>
         )}

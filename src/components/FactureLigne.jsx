@@ -38,8 +38,8 @@ export default function FactureLigne({ ligne, index, onChange, onRemove, onProdu
   }
 
   return (
-    <div className="flex items-center gap-2 min-w-0">
-      <div className="basis-[30%] shrink min-w-0">
+    <div className="grid min-w-0 grid-cols-1 items-center gap-2 overflow-x-hidden md:grid-cols-[2fr,1fr,1fr,1fr,auto]">
+      <div className="min-w-0">
         <Button
           type="button"
           variant="outline"
@@ -47,7 +47,7 @@ export default function FactureLigne({ ligne, index, onChange, onRemove, onProdu
             setPickerOpen(true)
             onProduitFocus?.(index)
           }}
-          className="h-10 w-full min-w-0 justify-start"
+          className="h-10 w-full min-w-0 justify-start truncate"
         >
           {ligne.produit?.nom || 'Choisir...'}
         </Button>
@@ -57,48 +57,48 @@ export default function FactureLigne({ ligne, index, onChange, onRemove, onProdu
           onSelect={handleProduitSelection}
         />
       </div>
-      <div className="basis-[15%] shrink-0">
+      <div className="min-w-0">
         <Input
           type="number"
           step="any"
           ref={quantiteRef}
-          className="h-10 w-full text-right rounded-xl"
+          className="h-10 w-full rounded-xl text-right truncate"
           value={ligne.quantite}
           onChange={(e) => handleQuantite(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
         />
       </div>
-      <div className="basis-[15%] shrink-0">
+      <div className="min-w-0">
         <Input
           type="number"
           step="any"
-          className="h-10 w-full text-right rounded-xl"
+          className="h-10 w-full rounded-xl text-right truncate"
           value={ligne.pu}
           onChange={(e) => handlePu(e.target.value)}
           onBlur={() => handlePu(parseNum(ligne.pu).toFixed(2))}
           onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
         />
       </div>
-      <div className="basis-[15%] shrink-0">
+      <div className="min-w-0">
         <Input
           type="number"
           step="any"
-          className="h-10 w-full text-right rounded-xl"
+          className="h-10 w-full rounded-xl text-right truncate"
           value={ligne.tva}
           onChange={(e) => onChange({ ...ligne, tva: e.target.value })}
         />
       </div>
-      <div className="basis-[20%] shrink-0">
+      <div className="min-w-0">
         <Input
           type="text"
           readOnly
           tabIndex={-1}
           value={ligne.total_ht}
-          className="h-10 w-full text-right rounded-xl pointer-events-none select-none"
+          className="pointer-events-none h-10 w-full select-none rounded-xl text-right truncate"
           aria-readonly="true"
         />
       </div>
-      <div className="basis-[5%] shrink-0 flex justify-center">
+      <div className="flex justify-center min-w-0">
         <Button
           type="button"
           size="sm"

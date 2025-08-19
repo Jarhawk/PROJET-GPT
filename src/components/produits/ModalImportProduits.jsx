@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import SmartDialog, {
-  DialogRoot,
+import {
+  Dialog,
   DialogContent,
   DialogTitle,
   DialogDescription,
@@ -116,7 +116,7 @@ export default function ModalImportProduits({ open, onClose, onSuccess }) {
   }
 
   return (
-    <DialogRoot open={open} onOpenChange={(v) => !v && onClose?.()}>
+    <Dialog open={open} onOpenChange={(v) => !v && onClose?.()}>
       <DialogContent>
         <DialogTitle>Importer Produits via Excel</DialogTitle>
         <DialogDescription className="sr-only">
@@ -174,6 +174,6 @@ export default function ModalImportProduits({ open, onClose, onSuccess }) {
           )}
         </div>
       </DialogContent>
-    </DialogRoot>
+    </Dialog>
   );
 }

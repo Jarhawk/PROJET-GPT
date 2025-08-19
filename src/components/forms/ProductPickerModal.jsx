@@ -1,5 +1,5 @@
 import {
-  DialogRoot,
+  Dialog,
   DialogContent,
   DialogTitle,
   DialogDescription,
@@ -41,7 +41,7 @@ export default function ProductPickerModal({ open, onOpenChange, onSelect }) {
   }
 
   return (
-    <DialogRoot open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-card text-card-foreground max-w-lg">
         {/* Header sticky avec recherche */}
         <div className="sticky top-0 z-10 border-b border-border bg-card/95 backdrop-blur p-4">
@@ -110,6 +110,6 @@ export default function ProductPickerModal({ open, onOpenChange, onSelect }) {
           </DialogClose>
         </div>
       </DialogContent>
-    </DialogRoot>
+    </Dialog>
   )
 }

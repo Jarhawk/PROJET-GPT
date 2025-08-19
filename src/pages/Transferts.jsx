@@ -7,8 +7,8 @@ import * as XLSX from "xlsx";
 import JSPDF from "jspdf";
 import "jspdf-autotable";
 import { Button } from "@/components/ui/button";
-import SmartDialog, {
-  DialogRoot,
+import {
+  Dialog,
   DialogTrigger,
   DialogContent,
 } from "@/components/ui/SmartDialog";
@@ -341,7 +341,7 @@ export default function Transferts() {
                 <td className="px-2 py-1">{t.prix}</td>
                 <td className="px-2 py-1 font-bold">{t.cout} €</td>
                 <td>
-                  <DialogRoot>
+                  <Dialog>
                     <DialogTrigger asChild>
                       <Button
                         size="sm"
@@ -382,7 +382,7 @@ export default function Transferts() {
                         </table>
                       )}
                     </DialogContent>
-                  </DialogRoot>
+                  </Dialog>
                 </td>
               </tr>
             ))}
@@ -390,7 +390,7 @@ export default function Transferts() {
         </table>
       </TableContainer>
       {/* Modal création transfert */}
-      <DialogRoot
+      <Dialog
         open={showCreate}
         onOpenChange={(v) => !v && setShowCreate(false)}
       >
@@ -476,7 +476,7 @@ export default function Transferts() {
             </Button>
           </form>
         </DialogContent>
-      </DialogRoot>
+      </Dialog>
     </div>
   );
 }

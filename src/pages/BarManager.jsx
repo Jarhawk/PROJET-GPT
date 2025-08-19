@@ -10,8 +10,8 @@ import "jspdf-autotable";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
-import SmartDialog, {
-  DialogRoot,
+import {
+  Dialog,
   DialogContent,
   DialogTrigger,
 } from "@/components/ui/SmartDialog";
@@ -272,7 +272,7 @@ export default function BarManager() {
                   transition={{ duration: 0.2 }}
                 >
                   <td className="border px-2 py-1">
-                    <DialogRoot>
+                    <Dialog>
                       <DialogTrigger asChild>
                         <Button variant="link" className="text-blue-700 p-0 h-auto min-w-0 underline">
                           {b.nom}
@@ -310,7 +310,7 @@ export default function BarManager() {
                           {b.totalCA ? b.totalCA.toFixed(2) : "-"} €
                         </p>
                       </DialogContent>
-                    </DialogRoot>
+                    </Dialog>
                   </td>
                   <td className="px-2 py-1">{b.type || b.famille || "-"}</td>
                   <td className="px-2 py-1">{b.cout_portion ? Number(b.cout_portion).toFixed(2) : "-"}</td>

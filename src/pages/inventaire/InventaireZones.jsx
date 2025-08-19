@@ -6,8 +6,8 @@ import SecondaryButton from "@/components/ui/SecondaryButton";
 import { Input } from "@/components/ui/input";
 import TableContainer from "@/components/ui/TableContainer";
 import GlassCard from "@/components/ui/GlassCard";
-import SmartDialog, {
-  DialogRoot,
+import {
+  Dialog,
   DialogContent,
   DialogTitle,
   DialogDescription,
@@ -102,7 +102,7 @@ export default function InventaireZones() {
           </tbody>
         </table>
       </TableContainer>
-      <DialogRoot open={!!editZone} onOpenChange={v => !v && setEditZone(null)}>
+      <Dialog open={!!editZone} onOpenChange={v => !v && setEditZone(null)}>
       <DialogContent className="bg-white/10 backdrop-blur-lg text-white rounded-xl shadow-lg p-6 max-w-sm">
         <DialogTitle className="font-bold mb-2">
           {editZone?.id ? "Modifier la zone" : "Nouvelle zone"}
@@ -129,7 +129,7 @@ export default function InventaireZones() {
             </PrimaryButton>
           </form>
         </DialogContent>
-      </DialogRoot>
+      </Dialog>
     </div>
   );
 }

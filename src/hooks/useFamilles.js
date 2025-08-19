@@ -1,227 +1,92 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState, useCallback } from "react";
-import supabase from "@/lib/supabaseClient";
+import { useState, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import supabase from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
-import * as XLSX from "xlsx";
-import { safeImportXLSX } from "@/lib/xlsx/safeImportXLSX";
-import { saveAs } from "file-saver";
-
-export async function deleteFamille(id, mama_id) {
-  return await supabase.from("familles").delete().match({ id, mama_id });
-}
-
-export async function fetchFamillesForValidation(mama_id) {
-  return await supabase.from("familles").select("id, nom").eq("mama_id", mama_id);
-}
 
 export function useFamilles() {
   const { mama_id } = useAuth();
-  const [familles, setFamilles] = useState([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const queryClient = useQueryClient();
+  const [params, setParams] = useState({ search: '', page: 1, limit: 50 });
 
-  // Chargement des familles (avec pagination / recherche)
+  const query = useQuery({
+    queryKey: ['familles', mama_id, params],
+    enabled: !!mama_id,
+    queryFn: async () => {
+      let q = supabase
+        .from('familles')
+        .select('id, code, nom, actif', { count: 'exact' })
+        .eq('mama_id', mama_id)
+        .order('nom', { ascending: true })
+        .range((params.page - 1) * params.limit, params.page * params.limit - 1);
+      if (params.search) q = q.ilike('nom', `%${params.search}%`);
+      const { data, error, count } = await q;
+      if (error) throw error;
+      return { data: data || [], count: count || 0 };
+    },
+  });
+
   const fetchFamilles = useCallback(
-    async ({
-      includeInactive = false,
-      search = "",
-      page = 1,
-      limit = 50,
-    } = {}) => {
-      if (!mama_id) return [];
-      setLoading(true);
-      setError(null);
-      let query = supabase
-        .from("familles")
-        .select("id, nom, actif", { count: "exact" })
-        .eq("mama_id", mama_id)
-        .order("nom", { ascending: true })
-        .range((page - 1) * limit, page * limit - 1);
-      if (!includeInactive) query = query.eq("actif", true);
-      if (search) query = query.ilike("nom", `%${search}%`);
-      const { data, error, count } = await query;
-      if (error) {
-        setError(error);
-        setFamilles([]);
-        setTotal(0);
-      } else {
-        setFamilles(Array.isArray(data) ? data : []);
-        setTotal(count || 0);
-      }
-      setLoading(false);
-      return data || [];
-    },
-    [mama_id]
+    (p = {}) => setParams((prev) => ({ ...prev, ...p })),
+    []
   );
 
-  const list = useCallback(
-    async ({ search = '', actif } = {}) => {
-      if (!mama_id) return [];
-      let query = supabase.from('familles').select('*').eq('mama_id', mama_id).order('nom', { ascending: true });
-      if (search) query = query.ilike('nom', `%${search}%`);
-      if (typeof actif === 'boolean') query = query.eq('actif', actif);
-      const { data, error } = await query;
-      if (error) setError(error);
-      return data || [];
+  const addMutation = useMutation({
+    mutationFn: async (payload) => {
+      const body = { ...payload, mama_id };
+      const { data, error } = await supabase
+        .from('familles')
+        .insert([body])
+        .select('id, code, nom, actif')
+        .single();
+      if (error) throw error;
+      return data;
     },
-    [mama_id]
-  );
+    onSuccess: () => queryClient.invalidateQueries(['familles', mama_id]),
+  });
 
-  const suggestFamilles = useCallback(
-    async (search = "") => {
-      if (!mama_id) return [];
-      const { data } = await supabase
-        .from("familles")
-        .select("id, nom")
-        .eq("mama_id", mama_id)
-        .ilike("nom", `%${search}%`)
-        .order("nom", { ascending: true })
-        .limit(10);
-      return data || [];
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, ...values }) => {
+      const { data, error } = await supabase
+        .from('familles')
+        .update(values)
+        .eq('id', id)
+        .eq('mama_id', mama_id)
+        .select('id, code, nom, actif')
+        .single();
+      if (error) throw error;
+      return data;
     },
-    [mama_id]
-  );
+    onSuccess: () => queryClient.invalidateQueries(['familles', mama_id]),
+  });
 
-  // Ajout d'une famille
-  async function addFamille({ nom, actif = true }) {
-    if (!mama_id) return { error: "Aucun mama_id" };
-    setLoading(true);
-    setError(null);
-    if (!nom) {
-      const err = "Le nom est obligatoire.";
-      setError(err);
-      setLoading(false);
-      return { error: err };
-    }
-    const { data: existing } = await supabase
-      .from("familles")
-      .select("id")
-      .eq("mama_id", mama_id)
-      .ilike("nom", nom);
-    if (existing && existing.length > 0) {
-      const err = "Famille déjà existante.";
-      setLoading(false);
-      setError(err);
-      return { error: err };
-    }
-    const { data, error } = await supabase
-      .from("familles")
-      .insert([{ nom, actif, mama_id }])
-      .select("id, nom, actif")
-      .single();
-    setLoading(false);
-    if (error) {
-      setError(error);
-      return { error };
-    }
-    await fetchFamilles();
-    return { data };
-  }
+  const deleteMutation = useMutation({
+    mutationFn: async (id) => {
+      const { error } = await supabase
+        .from('familles')
+        .delete()
+        .eq('id', id)
+        .eq('mama_id', mama_id);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries(['familles', mama_id]),
+  });
 
-  // Mise à jour d'une famille
-  async function updateFamille(id, fields) {
-    if (!mama_id) return { error: "Aucun mama_id" };
-    setLoading(true);
-    setError(null);
-    const payload = typeof fields === "string" ? { nom: fields } : fields;
-    if (!payload.nom) {
-      setError("Le nom est obligatoire.");
-      setLoading(false);
-      return;
-    }
-    const { error } = await supabase
-      .from("familles")
-      .update(payload)
-      .eq("id", id)
-      .eq("mama_id", mama_id);
-    if (error) setError(error);
-    setLoading(false);
-    await fetchFamilles();
-  }
-
-  // Désactivation de familles (batch)
-  async function batchDeleteFamilles(ids = []) {
-    if (!mama_id) return { error: "Aucun mama_id" };
-    setLoading(true);
-    setError(null);
-    const { error } = await supabase
-      .from("familles")
-      .update({ actif: false })
-      .in("id", ids)
-      .eq("mama_id", mama_id);
-    if (error) setError(error);
-    setLoading(false);
-    await fetchFamilles();
-  }
-
-  // Fusion de familles
-  async function mergeFamilles(srcId, dstId) {
-    if (!mama_id) return { error: "Aucun mama_id" };
-    setLoading(true);
-    setError(null);
-    const { error } = await supabase.rpc("merge_familles", { src: srcId, dst: dstId });
-    if (error) setError(error);
-    setLoading(false);
-    await fetchFamilles();
-    return { error };
-  }
-
-  // Réordonnancement des familles
-  async function reorderFamilles(rows = []) {
-    if (!mama_id) return { error: "Aucun mama_id" };
-    setLoading(true);
-    setError(null);
-    const { error } = await supabase.rpc("reorder_familles", { p_rows: rows });
-    if (error) setError(error);
-    setLoading(false);
-    await fetchFamilles();
-    return { error };
-  }
-
-  // Export Excel
-  function exportFamillesToExcel() {
-    const datas = (familles || []).map((f) => ({
-      id: f.id,
-      nom: f.nom,
-      mama_id: mama_id,
-    }));
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Familles");
-    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([buf]), "familles_mamastock.xlsx");
-  }
-
-  // Import Excel
-  async function importFamillesFromExcel(file) {
-    setLoading(true);
-    setError(null);
-    try {
-      const arr = await safeImportXLSX(file, "Familles");
-      return arr;
-    } catch (error) {
-      setError(error);
-      return [];
-    } finally {
-      setLoading(false);
-    }
-  }
+  const batchDeleteFamilles = async (ids = []) => {
+    await Promise.all(ids.map((id) => deleteMutation.mutateAsync(id)));
+  };
 
   return {
-    familles,
-    total,
-    loading,
-    error,
+    familles: query.data?.data || [],
+    total: query.data?.count || 0,
+    loading: query.isLoading,
+    error: query.error,
     fetchFamilles,
-    list,
-    suggestFamilles,
-    addFamille,
-    updateFamille,
-    deleteFamille,
+    addFamille: (payload) => addMutation.mutateAsync(payload),
+    updateFamille: (id, payload) => updateMutation.mutateAsync({ id, ...payload }),
+    deleteFamille: (id) => deleteMutation.mutateAsync(id),
     batchDeleteFamilles,
-    mergeFamilles,
-    reorderFamilles,
-    exportFamillesToExcel,
-    importFamillesFromExcel,
   };
 }
+
+export default useFamilles;

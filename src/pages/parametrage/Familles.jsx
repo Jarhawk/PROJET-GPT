@@ -2,29 +2,29 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
-import { useUnites } from '@/hooks/useUnites';
+import { useFamilles } from '@/hooks/useFamilles';
 import ListingContainer from '@/components/ui/ListingContainer';
 import TableHeader from '@/components/ui/TableHeader';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import Unauthorized from '@/pages/auth/Unauthorized';
 
-export default function Unites() {
+export default function Familles() {
   const { hasAccess, loading: authLoading } = useAuth();
   const canEdit = hasAccess('parametrage', 'peut_modifier');
-  const { unites, fetchUnites, addUnite, updateUnite, deleteUnite, loading } = useUnites();
+  const { familles, fetchFamilles, addFamille, updateFamille, deleteFamille, loading } = useFamilles();
   const [edit, setEdit] = useState(null);
 
   useEffect(() => {
-    fetchUnites();
-  }, [fetchUnites]);
+    fetchFamilles();
+  }, [fetchFamilles]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (edit?.id) await updateUnite(edit.id, { code: edit.code, nom: edit.nom });
-      else await addUnite({ code: edit?.code || '', nom: edit?.nom || '' });
-      toast.success('Unité enregistrée');
+      if (edit?.id) await updateFamille(edit.id, { code: edit.code, nom: edit.nom });
+      else await addFamille({ code: edit?.code || '', nom: edit?.nom || '' });
+      toast.success('Famille enregistrée');
       setEdit(null);
     } catch (err) {
       console.error(err);
@@ -35,8 +35,8 @@ export default function Unites() {
   const handleDelete = async (id) => {
     if (confirm('Supprimer cet élément ?')) {
       try {
-        await deleteUnite(id);
-        toast.success('Unité supprimée');
+        await deleteFamille(id);
+        toast.success('Famille supprimée');
       } catch (err) {
         console.error(err);
         toast.error('Suppression échouée');
@@ -49,9 +49,9 @@ export default function Unites() {
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Unités</h1>
+      <h1 className="text-2xl font-bold mb-4">Familles</h1>
       <TableHeader className="gap-2">
-        <Button onClick={() => setEdit({ code: '', nom: '' })}>+ Nouvelle unité</Button>
+        <Button onClick={() => setEdit({ code: '', nom: '' })}>+ Nouvelle famille</Button>
       </TableHeader>
       <ListingContainer className="w-full overflow-x-auto">
         <table className="text-sm w-full">
@@ -63,24 +63,28 @@ export default function Unites() {
             </tr>
           </thead>
           <tbody>
-            {unites.map((u) => (
-              <tr key={u.id}>
-                <td className="px-2 py-1">{u.code}</td>
-                <td className="px-2 py-1">{u.nom}</td>
+            {familles.map((f) => (
+              <tr key={f.id}>
+                <td className="px-2 py-1">{f.code}</td>
+                <td className="px-2 py-1">{f.nom}</td>
                 <td className="px-2 py-1 flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => setEdit(u)}>
+                  <Button size="sm" variant="outline" onClick={() => setEdit(f)}>
                     Modifier
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => handleDelete(u.id)}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleDelete(f.id)}
+                  >
                     Supprimer
                   </Button>
                 </td>
               </tr>
             ))}
-            {unites.length === 0 && (
+            {familles.length === 0 && (
               <tr>
                 <td colSpan="3" className="py-2">
-                  Aucune unité
+                  Aucune famille
                 </td>
               </tr>
             )}

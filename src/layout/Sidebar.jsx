@@ -162,6 +162,7 @@ export default function Sidebar() {
         { module: "settings", to: "/parametrage/settings", label: "Autres", icon: <Settings size={16} /> },
         { module: "zones_stock", to: "/parametrage/zones", label: "Zones de stock", icon: <Boxes size={16} /> },
         { module: "parametrage", to: "/parametrage/familles", label: "Familles", icon: <Boxes size={16} /> },
+        { module: "parametrage", to: "/parametrage/sous-familles", label: "Sous-familles", icon: <Boxes size={16} /> },
         { module: "parametrage", to: "/parametrage/unites", label: "Unités", icon: <Boxes size={16} /> },
         { module: "parametrage", to: "/consentements", label: "Consentements", icon: <CheckSquare size={16} /> },
       ],

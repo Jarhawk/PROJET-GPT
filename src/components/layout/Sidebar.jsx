@@ -7,12 +7,17 @@ import { useAuth } from '@/hooks/useAuth';
 import logo from "@/assets/logo-mamastock.png";
 
 export default function Sidebar() {
-  const { loading, hasAccess } = useAuth();
+  const { loading, hasAccess, userData } = useAuth();
   const { pathname } = useLocation();
 
   if (loading) return null;
+  const rights = userData?.access_rights || {};
   const has = (key) => hasAccess(key);
   const canAnalyse = has("analyse");
+  const canConfigure =
+    rights?.enabledModules?.includes?.("parametrage") ||
+    userData?.can_configurer ||
+    has("parametrage");
 
   return (
     <aside className="w-64 bg-white/10 border border-white/10 backdrop-blur-xl text-white p-4 h-screen shadow-md text-shadow">
@@ -82,10 +87,13 @@ export default function Sidebar() {
 
         {has("notifications") && <Link to="/notifications">Notifications</Link>}
 
-        {(has("parametrage") || has("utilisateurs") || has("roles") || has("mamas") || has("permissions") || has("access")) && (
-          <details open={pathname.startsWith("/parametrage")}> 
+        {(canConfigure || has("utilisateurs") || has("roles") || has("mamas") || has("permissions") || has("access")) && (
+          <details open={pathname.startsWith("/parametrage")}>
             <summary className="cursor-pointer">Paramétrage</summary>
             <div className="ml-4 flex flex-col gap-1 mt-1">
+              {canConfigure && <Link to="/parametrage/familles">Familles</Link>}
+              {canConfigure && <Link to="/parametrage/sous-familles">Sous-familles</Link>}
+              {canConfigure && <Link to="/parametrage/unites">Unités</Link>}
               {has("utilisateurs") && <Link to="/parametrage/utilisateurs">Utilisateurs</Link>}
               {has("roles") && <Link to="/parametrage/roles">Rôles</Link>}
               {has("mamas") && <Link to="/parametrage/mamas">Mamas</Link>}

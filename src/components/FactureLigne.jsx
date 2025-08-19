@@ -47,17 +47,28 @@ export default function FactureLigne({
   return (
     <div className="flex min-w-0 items-center gap-2 overflow-x-hidden">
       <div className="basis-[30%] min-w-0">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => {
-            setPickerOpen(true)
-            onProduitFocus?.(index)
-          }}
-          className="h-10 w-full min-w-0 justify-start truncate"
-        >
-          {ligne.produit?.nom || 'Choisir...'}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Input
+            readOnly
+            value={ligne.produit?.nom || ''}
+            placeholder="Choisir un produit…"
+            onClick={() => {
+              setPickerOpen(true)
+              onProduitFocus?.(index)
+            }}
+            className="cursor-pointer"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setPickerOpen(true)
+              onProduitFocus?.(index)
+            }}
+          >
+            Rechercher
+          </Button>
+        </div>
         <ProductPickerModal
           open={pickerOpen}
           onOpenChange={setPickerOpen}

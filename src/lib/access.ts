@@ -11,3 +11,13 @@ export function normalizeAccessKey(k?: string | null) {
   const key = String(k).trim()
   return map[key] ?? key
 }
+
+export function deduceEnabledModulesFromRights(rights?: Record<string, any> | null) {
+  if (!rights || typeof rights !== 'object') return {}
+  const modules: Record<string, boolean> = {}
+  for (const k of Object.keys(rights)) {
+    if (k === 'enabledModules') continue
+    modules[k] = true
+  }
+  return modules
+}

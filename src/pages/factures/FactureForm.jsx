@@ -146,6 +146,9 @@ function FactureFormInner({ defaultValues, fournisseurs, onSaved, onClose }) {
                 index={idx}
                 onChange={(l) => update(idx, l)}
                 onRemove={() => remove(idx)}
+                existingProductIds={lignes
+                  .map((l, i) => (i !== idx ? l.produit_id : null))
+                  .filter(Boolean)}
               />
             ))}
           </div>

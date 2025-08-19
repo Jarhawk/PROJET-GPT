@@ -1,9 +1,33 @@
 import { useState, useEffect, useCallback } from 'react';
-import useSupabaseClient from '@/hooks/useSupabaseClient';
+import { useSupabase } from '@/hooks/useSupabaseClient';
 import { useAuth } from '@/hooks/useAuth';
 
+export async function fetchConsoMoyenne(mamaId, sinceISO) {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const supabase = useSupabase();
+
+  // NOTE: "quantite" DOIT correspondre au vrai nom (ou à l’alias de la vue v_requisition_lignes)
+  const { data, error } = await supabase
+    .from('requisition_lignes') // ou 'v_requisition_lignes' si tu as créé la vue alias
+    .select(`
+      quantite,
+      requisitions!inner (
+        date_requisition,
+        mama_id,
+        statut
+      )
+    `)
+    .eq('requisitions.mama_id', mamaId)
+    .eq('requisitions.statut', 'réalisée')
+    .gte('requisitions.date_requisition', sinceISO)
+    // Tri sur le champ de la table référencée
+    .order('date_requisition', { referencedTable: 'requisitions', ascending: true });
+
+  if (error) throw error;
+  return data;
+}
+
 export default function useConsoMoyenne() {
-  const supabase = useSupabaseClient();
   const { mama_id } = useAuth();
   const [avg, setAvg] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -16,22 +40,10 @@ export default function useConsoMoyenne() {
     try {
       const start = new Date();
       start.setDate(start.getDate() - 7);
-      const { data, error } = await supabase
-        .from('requisition_lignes')
-        .select('quantite, requisitions!inner(date_requisition,mama_id,statut)')
-        .eq('requisitions.mama_id', mama_id)
-        .eq('requisitions.statut', 'réalisée')
-        .gte('requisitions.date_requisition', start.toISOString());
-      if (error) throw error;
-
-      const sorted = (data || []).sort((a, b) => {
-        const da = new Date(a.requisitions?.date_requisition ?? 0).getTime();
-        const db = new Date(b.requisitions?.date_requisition ?? 0).getTime();
-        return da - db;
-      });
+      const data = await fetchConsoMoyenne(mama_id, start.toISOString());
 
       const daily = {};
-      sorted.forEach((m) => {
+      (data || []).forEach((m) => {
         const d = m.requisitions.date_requisition?.slice(0, 10);
         if (!daily[d]) daily[d] = 0;
         daily[d] += Number(m.quantite || 0);
@@ -51,7 +63,7 @@ export default function useConsoMoyenne() {
     } finally {
       setLoading(false);
     }
-  }, [mama_id, supabase]);
+  }, [mama_id]);
 
   useEffect(() => {
     fetchData();
@@ -59,3 +71,4 @@ export default function useConsoMoyenne() {
 
   return { avg, loading, error, refresh: fetchData };
 }
+

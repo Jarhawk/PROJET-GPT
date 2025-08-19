@@ -124,40 +124,36 @@ function FactureFormInner({ defaultValues, fournisseurs, onSaved, onClose }) {
         </CardContent>
       </Card>
 
-      <Card className="overflow-hidden">
-        <CardHeader>
-          <h2 className="text-lg font-semibold">Lignes</h2>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center gap-2 text-sm font-medium">
-            <div className="basis-[30%] min-w-0">Produit</div>
-            <div className="basis-[15%] text-right">Qté</div>
-            <div className="basis-[15%] text-right">Prix HT</div>
-            <div className="basis-[15%] text-right">TVA</div>
-            <div className="basis-[20%] text-right">Total HT</div>
-            <div className="basis-[5%]" />
-          </div>
+      <section className="mt-6">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold text-muted-foreground">Lignes produits</h3>
+        </div>
 
-          <div className="space-y-2">
-            {fields.map((field, idx) => (
-              <FactureLigne
-                key={field.id}
-                ligne={field}
-                index={idx}
-                onChange={(l) => update(idx, l)}
-                onRemove={() => remove(idx)}
-                existingProductIds={lignes
-                  .map((l, i) => (i !== idx ? l.produit_id : null))
-                  .filter(Boolean)}
-              />
-            ))}
-          </div>
+        <div className="rounded-xl border border-border bg-card p-3 space-y-3">
+          {fields.map((field, idx) => (
+            <FactureLigne
+              key={field.id}
+              ligne={field}
+              index={idx}
+              onChange={(l) => update(idx, l)}
+              onRemove={() => remove(idx)}
+              existingProductIds={lignes
+                .map((l, i) => (i !== idx ? l.produit_id : null))
+                .filter(Boolean)}
+            />
+          ))}
+        </div>
 
-          <Button type="button" onClick={() => append(createEmptyLine())} className="w-full">
-            Ajouter une ligne
+        <div className="mt-3 flex justify-end">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => append(createEmptyLine())}
+          >
+            + Ajouter une ligne
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       <Card>
         <CardContent>

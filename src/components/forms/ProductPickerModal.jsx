@@ -1,5 +1,4 @@
-import {
-  DialogRoot,
+import DialogRoot, {
   DialogContent,
   DialogTitle,
   DialogDescription,
@@ -51,7 +50,7 @@ export default function ProductPickerModal({ open, onOpenChange, onSelect }) {
               {isLoading ? 'Chargement…' : `(${results?.length ?? 0} résultats)`}
             </span>
           </DialogTitle>
-          <DialogDescription className="text-sm opacity-80">
+          <DialogDescription id="product-search-desc" className="text-sm opacity-80">
             Recherchez un produit par son nom, puis validez avec Entrée ou cliquez pour sélectionner.
           </DialogDescription>
 
@@ -63,6 +62,8 @@ export default function ProductPickerModal({ open, onOpenChange, onSelect }) {
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Rechercher un produit par nom…"
+              aria-label="Recherche produit"
+              aria-describedby="product-search-desc"
               className="w-full rounded-xl border border-border bg-background px-3 py-2 outline-none focus:ring-2 focus:ring-primary"
             />
             </div>
@@ -84,20 +85,29 @@ export default function ProductPickerModal({ open, onOpenChange, onSelect }) {
           )}
 
           <ul className="space-y-1">
-            {(results ?? []).map((p, idx) => (
-              <li key={p.id}>
-                <button
-                  type="button"
-                  onClick={() => { onSelect?.(p); onOpenChange?.(false) }}
-                  className={`w-full text-left rounded-xl border px-4 py-3 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${idx === activeIdx ? 'border-primary/50 bg-primary/10' : 'border-transparent hover:border-primary/30 hover:bg-primary/5'}`}
-                >
-                  <div className="truncate font-medium">{p.nom}</div>
-                  {p.pmp != null && (
-                    <div className="text-xs opacity-60">PMP: {Number(p.pmp).toFixed(2)}</div>
-                  )}
-                </button>
-              </li>
-            ))}
+            {(results ?? []).map((p, idx) => {
+              const lastPrix = p?.v_produits_dernier_prix?.[0]?.prix
+              return (
+                <li key={p.id}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onSelect?.(p)
+                      onOpenChange?.(false)
+                    }}
+                    className={`w-full text-left rounded-xl border px-4 py-3 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${idx === activeIdx ? 'border-primary/50 bg-primary/10' : 'border-transparent hover:border-primary/30 hover:bg-primary/5'}`}
+                  >
+                    <div className="truncate font-medium">{p.nom}</div>
+                    <div className="text-xs opacity-60">
+                      {lastPrix != null && (
+                        <span>Dernier prix : {Number(lastPrix).toFixed(2)} € • </span>
+                      )}
+                      Stock : {p.stock_reel ?? 0} • PMP : {p.pmp != null ? Number(p.pmp).toFixed(2) : '-'}
+                    </div>
+                  </button>
+                </li>
+              )
+            })}
           </ul>
         </div>
 

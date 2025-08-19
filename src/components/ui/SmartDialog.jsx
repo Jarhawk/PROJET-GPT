@@ -56,15 +56,5 @@ export function useLockBodyScroll(open) {
   }, [open])
 }
 
-const SmartDialog = {
-  Root: DialogRoot,
-  Trigger: DialogTrigger,
-  Portal: DialogPortal,
-  Overlay: DialogOverlay,
-  Content: DialogContent,
-  Title: DialogTitle,
-  Description: DialogDescription,
-  Close: DialogClose,
-}
-export default SmartDialog
+export default DialogRoot
 

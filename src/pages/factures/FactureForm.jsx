@@ -1,7 +1,7 @@
-// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useEffect, useMemo, useState } from 'react'
-import { v4 as uuidv4 } from 'uuid'
+import { useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { v4 as uuidv4 } from 'uuid'
+import { useForm, useFieldArray, FormProvider } from 'react-hook-form'
 import { toast } from 'sonner'
 
 import { Input } from '@/components/ui/input'
@@ -15,123 +15,79 @@ import { useInvoice } from '@/hooks/useInvoice'
 import useSupabaseClient from '@/hooks/useSupabaseClient'
 import { useAuth } from '@/hooks/useAuth'
 
-export function mapDbLineToUI(l) {
-  const q = parseFloat(l.quantite) || 0
-  const pu = parseFloat(l.pu ?? l.prix_unitaire) || 0
-  return {
-    id: l.id,
-    produit: l.produit ?? { id: l.produit_id },
-    produit_id: l.produit_id,
-    quantite: String(q),
-    pu: pu.toFixed(2),
-    tva: l.tva ?? 0,
-    total_ht: l.total_ht != null ? String(l.total_ht) : (q * pu).toFixed(2),
-    pmp: l.pmp ?? 0,
-  }
-}
-
-function createEmptyLine(position) {
-  return {
-    id: uuidv4(),
-    produit: { id: '', nom: '' },
-    produit_id: '',
-    quantite: '0',
-    pu: '0',
-    tva: 0,
-    total_ht: '0',
-    pmp: 0,
-    position,
-    manuallyEdited: false,
-  }
-}
-
 const parseNum = (v) => parseFloat(String(v).replace(',', '.')) || 0
 
-function FactureFormInner({
-  facture = null,
-  lignes: initialLignes = [],
-  fournisseurs: fournisseursProp,
-  onSaved,
-  onClose,
-}) {
-  const { data: fournisseursData = [] } = useFournisseurs({ actif: true })
-  const fournisseurs = fournisseursProp || fournisseursData
+function mapDbLineToForm(l) {
+  const q = parseNum(l.quantite)
+  const pu = parseNum(l.pu_ht ?? l.pu ?? l.prix_unitaire)
+  const ht = q * pu
+  return {
+    id: l.id,
+    produit_id: l.produit_id,
+    designation: l.produit?.nom || '',
+    quantite: q,
+    prix_unitaire_ht: pu,
+    tva: parseNum(l.tva),
+    montant_ht: ht,
+    montant_ttc: ht * (1 + parseNum(l.tva) / 100),
+  }
+}
 
-  const [header, setHeader] = useState({
-    id: undefined,
-    numero: '',
-    date_facture: new Date().toISOString().slice(0, 10),
-    fournisseur_id: '',
+function createEmptyLine() {
+  return {
+    id: uuidv4(),
+    produit_id: '',
+    designation: '',
+    quantite: 0,
+    prix_unitaire_ht: 0,
+    tva: 0,
+    montant_ht: 0,
+    montant_ttc: 0,
+  }
+}
+
+function FactureFormInner({ facture, lignes, fournisseurs, onSaved, onClose }) {
+  const methods = useForm({
+    defaultValues: {
+      fournisseur_id: facture?.fournisseur_id || '',
+      date_facture: facture?.date_facture || new Date().toISOString().slice(0, 10),
+      numero: facture?.numero || '',
+      lignes: lignes.length ? lignes : [createEmptyLine()],
+    },
   })
+  const { control, handleSubmit, watch, formState } = methods
+  const { fields, append, remove } = useFieldArray({ control, name: 'lignes' })
 
-  const [lignes, setLignes] = useState([])
-
-  useEffect(() => {
-    if (facture) {
-      setHeader({
-        id: facture.id,
-        numero: facture.numero ?? '',
-        date_facture: (facture.date_facture ?? '').slice(0, 10),
-        fournisseur_id: facture.fournisseur_id ?? '',
-      })
-    }
-  }, [facture])
-
-  useEffect(() => {
-    if (initialLignes && initialLignes.length) {
-      setLignes(initialLignes)
-    } else {
-      setLignes([createEmptyLine(0)])
-    }
-  }, [initialLignes])
-
+  const allLignes = watch('lignes')
   const totals = useMemo(() => {
-    let ht = 0
-    let tva = 0
-    lignes.forEach((l) => {
-      const lineTotal = parseNum(l.total_ht)
-      ht += lineTotal
-      tva += lineTotal * (parseNum(l.tva) / 100)
-    })
-    const ttc = ht + tva
-    return { ht, tva, ttc }
-  }, [lignes])
+    return allLignes.reduce(
+      (acc, l) => {
+        const ht = parseNum(l.montant_ht)
+        const tva = ht * (parseNum(l.tva) / 100)
+        acc.ht += ht
+        acc.tva += tva
+        acc.ttc = acc.ht + acc.tva
+        return acc
+      },
+      { ht: 0, tva: 0, ttc: 0 }
+    )
+  }, [allLignes])
 
-  const handleLineChange = (idx, newLine) => {
-    setLignes((ls) => ls.map((l, i) => (i === idx ? newLine : l)))
-  }
-
-  const handleRemoveLine = (idx) => {
-    setLignes((ls) => ls.filter((_, i) => i !== idx))
-  }
-
-  const handleAddLine = () => {
-    setLignes((ls) => [...ls, createEmptyLine(ls.length)])
-  }
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    onSaved?.({ ...header, lignes })
+  const onSubmit = (data) => {
+    onSaved?.(data)
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* ENTÊTE */}
-      <Card>
-        <CardHeader>
-          <h2 className="text-lg font-semibold">Entête</h2>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="space-y-1">
-              <label className="text-sm">Fournisseur</label>
-              <Select
-                value={header.fournisseur_id}
-                onChange={(e) =>
-                  setHeader((h) => ({ ...h, fournisseur_id: e.target.value }))
-                }
-                className="w-full"
-              >
+    <FormProvider {...methods}>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <Card>
+          <CardHeader>
+            <h2 className="text-lg font-semibold">Entête</h2>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div>
+              <label className="mb-1 block text-sm">Fournisseur</label>
+              <Select {...methods.register('fournisseur_id')} className="h-10 w-full rounded-xl border px-3">
                 <option value="">Choisir...</option>
                 {fournisseurs.map((f) => (
                   <option key={f.id} value={f.id}>
@@ -140,92 +96,69 @@ function FactureFormInner({
                 ))}
               </Select>
             </div>
-            <div className="space-y-1">
-              <label className="text-sm">Numéro</label>
-              <Input
-                value={header.numero}
-                onChange={(e) =>
-                  setHeader((h) => ({ ...h, numero: e.target.value }))
-                }
-              />
+            <div>
+              <label className="mb-1 block text-sm">Date</label>
+              <Input type="date" className="h-10 w-full" {...methods.register('date_facture')} />
             </div>
-            <div className="space-y-1">
-              <label className="text-sm">Date</label>
-              <Input
-                type="date"
-                value={header.date_facture}
-                onChange={(e) =>
-                  setHeader((h) => ({ ...h, date_facture: e.target.value }))
-                }
-              />
+            <div>
+              <label className="mb-1 block text-sm">Numéro</label>
+              <Input className="h-10 w-full" {...methods.register('numero')} />
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* LIGNES */}
-      <Card className="overflow-hidden">
-        <CardHeader>
-          <h2 className="text-lg font-semibold">Lignes</h2>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Table header */}
-          <div className="flex items-center gap-2 text-sm font-medium">
-            <div className="basis-[30%] min-w-0">Produit</div>
-            <div className="basis-[15%] text-right">Qté</div>
-            <div className="basis-[15%] text-right">Prix HT</div>
-            <div className="basis-[15%] text-right">TVA</div>
-            <div className="basis-[20%] text-right">Total HT</div>
-            <div className="basis-[5%]" />
-          </div>
-
-          {/* Lines */}
-          <div className="space-y-2">
-            {lignes.map((ligne, idx) => (
-              <FactureLigne
-                key={ligne.id || idx}
-                ligne={ligne}
-                index={idx}
-                onChange={(l) => handleLineChange(idx, l)}
-                onRemove={handleRemoveLine}
-              />
+        <Card>
+          <CardHeader>
+            <h2 className="text-lg font-semibold">Lignes</h2>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <div className="basis-[30%] min-w-0">Produit</div>
+              <div className="basis-[15%] text-right">Qté</div>
+              <div className="basis-[15%] text-right">Prix HT</div>
+              <div className="basis-[15%] text-right">TVA</div>
+              <div className="basis-[20%] text-right">Total HT</div>
+              <div className="basis-[5%]" />
+            </div>
+            {fields.map((field, idx) => (
+              <FactureLigne key={field.id} index={idx} remove={remove} />
             ))}
-          </div>
-
-          <Button type="button" onClick={handleAddLine} className="w-full">
-            Ajouter une ligne
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* TOTAUX + ACTIONS */}
-      <Card>
-        <CardContent>
-          <div className="flex justify-end gap-8 text-sm">
-            <div className="text-right">
-              <div className="opacity-70">Total HT</div>
-              <div className="font-semibold">{totals.ht.toFixed(2)} €</div>
-            </div>
-            <div className="text-right">
-              <div className="opacity-70">TVA</div>
-              <div className="font-semibold">{totals.tva.toFixed(2)} €</div>
-            </div>
-            <div className="text-right">
-              <div className="opacity-70">Total TTC</div>
-              <div className="font-semibold">{totals.ttc.toFixed(2)} €</div>
-            </div>
-          </div>
-        </CardContent>
-        <div className="sticky bottom-0 flex justify-end gap-2 border-t border-white/10 bg-black/40 p-4">
-          {onClose && (
-            <Button type="button" variant="outline" onClick={onClose}>
-              Annuler
+            <Button type="button" onClick={() => append(createEmptyLine())} className="w-full">
+              Ajouter une ligne
             </Button>
-          )}
-          <Button type="submit">Enregistrer</Button>
-        </div>
-      </Card>
-    </form>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent>
+            <div className="flex justify-end gap-8 text-sm">
+              <div className="text-right">
+                <div className="opacity-70">Total HT</div>
+                <div className="font-semibold">{totals.ht.toFixed(2)} €</div>
+              </div>
+              <div className="text-right">
+                <div className="opacity-70">TVA</div>
+                <div className="font-semibold">{totals.tva.toFixed(2)} €</div>
+              </div>
+              <div className="text-right">
+                <div className="opacity-70">Total TTC</div>
+                <div className="font-semibold">{totals.ttc.toFixed(2)} €</div>
+              </div>
+            </div>
+          </CardContent>
+          <div className="sticky bottom-0 flex justify-end gap-2 border-t border-white/10 bg-black/40 p-4">
+            {onClose && (
+              <Button type="button" variant="outline" onClick={onClose} disabled={formState.isSubmitting}>
+                Annuler
+              </Button>
+            )}
+            <Button type="submit" disabled={formState.isSubmitting}>
+              Enregistrer
+            </Button>
+          </div>
+        </Card>
+      </form>
+    </FormProvider>
   )
 }
 
@@ -242,7 +175,7 @@ export default function FactureForm() {
   const { data: invoice, isLoading } = useInvoice(isNew ? undefined : id)
   const { data: fournisseurs = [] } = useFournisseurs({ actif: true })
 
-  const initialFacture = invoice
+  const facture = invoice
     ? {
         id: invoice.id,
         numero: invoice.numero ?? '',
@@ -251,20 +184,17 @@ export default function FactureForm() {
       }
     : null
 
-  const initialLignes = useMemo(
-    () => (invoice?.lignes ?? []).map(mapDbLineToUI),
-    [invoice]
-  )
+  const lignes = useMemo(() => (invoice?.lignes ?? []).map(mapDbLineToForm), [invoice])
 
-  const handleSave = async ({ id: fid, numero, date_facture, fournisseur_id, lignes }) => {
+  const handleSave = async ({ fournisseur_id, date_facture, numero, lignes: ls }) => {
     try {
       const payload = {
-        facture: { id: fid, numero, date_facture, fournisseur_id },
-        lignes: (lignes || []).map((l) => ({
+        facture: { id: facture?.id, numero, date_facture, fournisseur_id },
+        lignes: (ls || []).map((l) => ({
           id: l.id,
           produit_id: l.produit_id,
           quantite: parseNum(l.quantite),
-          pu_ht: parseNum(l.pu),
+          pu_ht: parseNum(l.prix_unitaire_ht),
           tva: parseNum(l.tva),
         })),
       }
@@ -284,12 +214,11 @@ export default function FactureForm() {
 
   return (
     <FactureFormInner
-      facture={initialFacture}
-      lignes={initialLignes}
+      facture={facture}
+      lignes={lignes}
       fournisseurs={fournisseurs}
       onSaved={handleSave}
       onClose={() => navigate(-1)}
     />
   )
 }
-

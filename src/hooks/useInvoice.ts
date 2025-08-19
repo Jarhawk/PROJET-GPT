@@ -28,6 +28,26 @@ export type Facture = {
   lignes?: FactureLigne[]
 }
 
+async function fetchInvoiceAndLinesSeparately(supabase, id: string, mamaId: string) {
+  const { data: head, error: e1 } = await supabase
+    .from('factures')
+    .select('id, mama_id, numero, date_facture, fournisseur_id, total_ht, total_ttc')
+    .eq('id', id)
+    .eq('mama_id', mamaId)
+    .maybeSingle()
+  if (e1) throw e1
+  if (!head) throw new Error('Facture introuvable')
+
+  const { data: lignes, error: e2 } = await supabase
+    .from('facture_lignes')
+    .select('id, facture_id, produit_id, quantite, prix_unitaire, tva, remise, total_ht, total_ttc, produit:produit_id(id, nom)')
+    .eq('facture_id', id)
+    .eq('mama_id', mamaId)
+  if (e2) throw e2
+
+  return { ...head, lignes }
+}
+
 export function useInvoice(id: string | undefined) {
   const { supabase } = useSupabase()
   const { session } = useAuth()
@@ -39,27 +59,31 @@ export function useInvoice(id: string | undefined) {
     queryKey: ['invoice', id, mamaId],
     enabled,
     queryFn: async (): Promise<Facture> => {
-      const { data, error } = await supabase
-        .from('factures')
-        .select(`
-          id, mama_id, numero, date_facture, fournisseur_id, total_ht, total_ttc,
-          lignes:facture_lignes (
-            id, facture_id, produit_id, quantite, prix_unitaire, tva, remise, total_ht, total_ttc,
-            produit:produit_id ( id, nom )
-          )
-        `)
-        .eq('id', id!)
-        .eq('mama_id', mamaId)
-        .maybeSingle()
+      try {
+        const { data, error } = await supabase
+          .from('factures')
+          .select(`
+            id, mama_id, numero, date_facture, fournisseur_id, total_ht, total_ttc,
+            lignes:facture_lignes (
+              id, facture_id, produit_id, quantite, prix_unitaire, tva, remise, total_ht, total_ttc,
+              produit:produit_id ( id, nom )
+            )
+          `)
+          .eq('id', id!)
+          .eq('mama_id', mamaId)
+          .maybeSingle()
 
-      if (error) {
-        console.error('[useInvoice] error', error)
-        throw error
+        if (error) {
+          throw error
+        }
+        if (!data) {
+          throw new Error('Facture introuvable ou non autorisée (RLS).')
+        }
+        return data as unknown as Facture
+      } catch (e) {
+        console.warn('[useInvoice] embed failed, fetching separately', e)
+        return (await fetchInvoiceAndLinesSeparately(supabase, id!, mamaId)) as Facture
       }
-      if (!data) {
-        throw new Error('Facture introuvable ou non autorisée (RLS).')
-      }
-      return data as unknown as Facture
     },
     staleTime: 0,
     refetchOnWindowFocus: false,

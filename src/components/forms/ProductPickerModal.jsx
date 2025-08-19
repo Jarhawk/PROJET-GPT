@@ -1,25 +1,43 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
-import { createPortal } from 'react-dom'
+import { useEffect, useRef, useState, useCallback, useId } from 'react'
+import Dialog, {
+  DialogOverlay,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/SmartDialog'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import useProductSearch from '@/hooks/useProductSearch'
 import { useLockBodyScroll } from '@/components/ui/SmartDialog'
 
-export default function ProductPickerModal({ open, onOpenChange, onSelect, returnFocusRef }) {
+export default function ProductPickerModal({
+  open,
+  onOpenChange,
+  onSelect,
+  returnFocusRef,
+  excludeIds = [],
+}) {
   useLockBodyScroll(open)
-  const { query, setQuery, results, isLoading, error } = useProductSearch('')
+  const { query, setQuery, results: allResults, isLoading, error } =
+    useProductSearch('')
+  const results = (allResults || [])
+    .filter((p, idx, arr) => arr.findIndex((r) => r.id === p.id) === idx)
+    .filter((p) => !excludeIds.includes(p.id))
   const inputRef = useRef(null)
   const listRef = useRef(null)
   const [activeIdx, setActiveIdx] = useState(0)
+  const inputName = useId()
 
   useEffect(() => {
     if (open) {
+      setQuery('')
+      setActiveIdx(0)
       setTimeout(() => inputRef.current?.focus(), 0)
     } else if (returnFocusRef?.current) {
       setTimeout(() => returnFocusRef.current?.focus(), 0)
     }
-  }, [open, returnFocusRef])
+  }, [open, returnFocusRef, setQuery])
 
   useEffect(() => {
     setActiveIdx(0)
@@ -43,7 +61,7 @@ export default function ProductPickerModal({ open, onOpenChange, onSelect, retur
     } else if (e.key === 'ArrowUp') {
       e.preventDefault()
       setActiveIdx((i) => Math.max(i - 1, 0))
-    } else if (e.key === 'Enter') {
+    } else if (e.key === 'Enter' || e.key === 'Tab') {
       e.preventDefault()
       const p = results[activeIdx]
       if (p) {
@@ -52,48 +70,42 @@ export default function ProductPickerModal({ open, onOpenChange, onSelect, retur
       }
     }
   }
-
   const close = useCallback(() => onOpenChange?.(false), [onOpenChange])
 
-  useEffect(() => {
-    const onEsc = (e) => {
-      if (e.key === 'Escape') close()
-    }
-    if (open) window.addEventListener('keydown', onEsc)
-    return () => window.removeEventListener('keydown', onEsc)
-  }, [open, close])
-
-  if (!open) return null
-
-  return createPortal(
-    <>
-      <div className="fixed inset-0 z-[1000] bg-background/80" onClick={close} />
-      <div
-        role="dialog"
-        aria-modal="true"
-        className="fixed left-1/2 top-1/2 z-[1001] w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-card text-card-foreground shadow-lg"
-      >
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogOverlay className="fixed inset-0 z-[1000] bg-background/40 backdrop-blur-sm" />
+      <DialogContent className="fixed left-1/2 top-1/2 z-[1001] w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-border bg-card text-foreground shadow-2xl focus:outline-none">
         <div className="p-4 space-y-3">
-          <h2 className="text-lg font-semibold">
+          <DialogTitle className="text-lg font-semibold">
             Sélecteur de produits
             <span className="ml-2 text-sm font-normal opacity-60">
               {isLoading ? 'Chargement…' : `(${results.length} résultats)`}
             </span>
-          </h2>
-          <p id="product-search-desc" className="text-sm text-muted-foreground">
+          </DialogTitle>
+          <DialogDescription id="product-search-desc" className="text-sm text-muted-foreground">
             Recherchez un produit par son nom, puis validez avec Entrée ou cliquez pour sélectionner.
-          </p>
-          <Input
-            ref={inputRef}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Rechercher un produit par nom…"
-            aria-label="Recherche produit"
-            aria-describedby="product-search-desc"
-          />
+          </DialogDescription>
+          <form autoComplete="off" onSubmit={(e) => e.preventDefault()}>
+            <Input
+              ref={inputRef}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Rechercher un produit par nom…"
+              aria-label="Recherche produit"
+              aria-describedby="product-search-desc"
+              autoComplete="off"
+              name={`pp-${inputName}`}
+              autoCorrect="off"
+              autoCapitalize="none"
+              spellCheck={false}
+              inputMode="search"
+              enterKeyHint="search"
+            />
+          </form>
           <p className="text-xs text-muted-foreground">
-            Astuce : ↑/↓ pour naviguer · Entrée pour sélectionner · Échap pour fermer
+            Astuce : ↑/↓ pour naviguer · Entrée/Tab pour sélectionner · Échap pour fermer
           </p>
         </div>
 
@@ -151,8 +163,7 @@ export default function ProductPickerModal({ open, onOpenChange, onSelect, retur
             Fermer
           </Button>
         </div>
-      </div>
-    </>,
-    document.body
+      </DialogContent>
+    </Dialog>
   )
 }

@@ -6,7 +6,14 @@ import { Button } from '@/components/ui/button'
 
 const parseNum = (v) => parseFloat(String(v).replace(',', '.')) || 0
 
-export default function FactureLigne({ ligne, index, onChange, onRemove, onProduitFocus }) {
+export default function FactureLigne({
+  ligne,
+  index,
+  onChange,
+  onRemove,
+  onProduitFocus,
+  existingProductIds = [],
+}) {
   const [pickerOpen, setPickerOpen] = useState(false)
   const quantiteRef = useRef(null)
 
@@ -55,6 +62,7 @@ export default function FactureLigne({ ligne, index, onChange, onRemove, onProdu
           open={pickerOpen}
           onOpenChange={setPickerOpen}
           onSelect={handleProduitSelection}
+          excludeIds={existingProductIds}
         />
       </div>
       <div className="basis-[15%] min-w-0">

@@ -1,72 +1,67 @@
-// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
-import useSupabaseClient from '@/hooks/useSupabaseClient';
+import { useQuery } from '@tanstack/react-query'
+import { useSupabase } from '@/hooks/useSupabaseClient'
+import { useAuth } from '@/contexts/AuthContext'
 
-type Ligne = {
-  id?: string;
-  produit_id: string;
-  quantite: number;
-  pu_ht: number;
-  tva?: number; // %
-};
+type UUID = string
 
-type FacturePayload = {
-  facture: {
-    id?: string;
-    numero: string;
-    date_facture: string; // 'YYYY-MM-DD'
-    fournisseur_id: string;
-    etat?: string; // 'Brouillon' | 'Validée'...
-  };
-  lignes: Ligne[];
-  apply_stock?: boolean;
-  mama_id: string;
-};
-
-export function useInvoice(id?: string, options: any = {}) {
-  const supabase = useSupabaseClient();
-  const qc = useQueryClient();
-
-  const query = useQuery({
-    queryKey: ['facture', id],
-    enabled: Boolean(id) && (options.enabled ?? true),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('factures')
-        .select(
-          '*, lignes:facture_lignes(*, produit:produit_id(id, nom)), fournisseur:fournisseur_id(id, nom)'
-        )
-        .eq('id', id as string)
-        .single();
-      if (error) throw error;
-      return { facture: data, lignes: data?.lignes ?? [] };
-    },
-  });
-
-  const create = useMutation({
-    mutationFn: async (payload: FacturePayload) => {
-      const { mama_id, ...rest } = payload;
-      const { data, error } = await supabase.rpc('fn_facture_save', {
-        p_mama_id: mama_id,
-        p_payload: rest,
-        p_apply_stock: rest.apply_stock ?? false,
-      });
-      if (error) throw error;
-      return data as any; // { facture: {...}, lignes: [...] }
-    },
-    onSuccess: () => {
-      toast.success('Facture enregistrée');
-      qc.invalidateQueries({ queryKey: ['factures'] });
-    },
-    onError: (e: any) => {
-      console.error(e);
-      toast.error("Erreur lors de l'enregistrement de la facture");
-    },
-  });
-
-  return { ...query, create };
+export type FactureLigne = {
+  id: UUID
+  facture_id: UUID
+  produit_id: UUID
+  quantite: number
+  prix_unitaire: number | null
+  tva: number | null
+  remise: number | null
+  total_ht: number | null
+  total_ttc: number | null
+  produit?: { id: UUID; nom: string } | null
 }
 
-export default useInvoice;
+export type Facture = {
+  id: UUID
+  mama_id: UUID
+  numero: string
+  date_facture: string
+  fournisseur_id: UUID | null
+  total_ht: number | null
+  total_ttc: number | null
+  lignes?: FactureLigne[]
+}
 
+export function useInvoice(id: string | undefined) {
+  const { supabase } = useSupabase()
+  const { session } = useAuth()
+  const mamaId = (session?.user?.user_metadata?.mama_id ?? session?.user?.mama_id ?? '').toString()
+
+  const enabled = !!id && id !== 'new' && mamaId.length > 0
+
+  return useQuery({
+    queryKey: ['invoice', id, mamaId],
+    enabled,
+    queryFn: async (): Promise<Facture> => {
+      const { data, error } = await supabase
+        .from('factures')
+        .select(`
+          id, mama_id, numero, date_facture, fournisseur_id, total_ht, total_ttc,
+          lignes:facture_lignes (
+            id, facture_id, produit_id, quantite, prix_unitaire, tva, remise, total_ht, total_ttc,
+            produit:produit_id ( id, nom )
+          )
+        `)
+        .eq('id', id!)
+        .eq('mama_id', mamaId)
+        .maybeSingle()
+
+      if (error) {
+        console.error('[useInvoice] error', error)
+        throw error
+      }
+      if (!data) {
+        throw new Error('Facture introuvable ou non autorisée (RLS).')
+      }
+      return data as unknown as Facture
+    },
+    staleTime: 0,
+    refetchOnWindowFocus: false,
+  })
+}

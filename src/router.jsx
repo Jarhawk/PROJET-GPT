@@ -27,9 +27,8 @@ const Fournisseurs = lazyWithPreload(() => import("@/pages/fournisseurs/Fourniss
 const FournisseurCreate = lazyWithPreload(() => import("@/pages/fournisseurs/FournisseurCreate.jsx"));
 const FournisseurDetailPage = lazyWithPreload(() => import("@/pages/fournisseurs/FournisseurDetailPage.jsx"));
 const Factures = lazyWithPreload(() => import("@/pages/factures/Factures.jsx"));
-const FactureDetail = lazyWithPreload(() => import("@/pages/factures/FactureDetail.jsx"));
+const FactureForm = lazyWithPreload(() => import("@/pages/factures/FactureForm.jsx"));
 const ImportFactures = lazyWithPreload(() => import("@/pages/factures/ImportFactures.jsx"));
-const FactureCreate = lazyWithPreload(() => import("@/pages/factures/FactureCreate.jsx"));
 const Achats = lazyWithPreload(() => import("@/pages/achats/Achats.jsx"));
 const Fiches = lazyWithPreload(() => import("@/pages/fiches/Fiches.jsx"));
 const FicheDetail = lazyWithPreload(() => import("@/pages/fiches/FicheDetail.jsx"));
@@ -132,6 +131,8 @@ export const routePreloadMap = {
   '/inventaire': Inventaire.preload,
   '/fournisseurs': Fournisseurs.preload,
   '/factures': Factures.preload,
+  '/factures/new': FactureForm.preload,
+  '/factures/:id': FactureForm.preload,
   '/factures/import': ImportFactures.preload,
   '/achats': Achats.preload,
   '/receptions': Receptions.preload,
@@ -284,12 +285,12 @@ export default function Router() {
             element={<Factures />}
           />
           <Route
-            path="/factures/nouveau"
-            element={<FactureCreate />}
+            path="/factures/new"
+            element={<FactureForm />}
           />
           <Route
             path="/factures/:id"
-            element={<FactureDetail />}
+            element={<FactureForm />}
           />
           <Route
             path="/factures/import"

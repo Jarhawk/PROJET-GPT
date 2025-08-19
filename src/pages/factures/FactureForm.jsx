@@ -69,11 +69,11 @@ export default function FactureForm({
 }) {
   const navigate = useNavigate();
   const { id } = useParams();
-  const isEdit = Boolean(id);
+  const isEdit = Boolean(id && id !== 'new');
   const submitLabel = isEdit ? 'Modifier' : 'Enregistrer';
   const { userData } = useAuth();
   const mamaId = userData?.mama_id;
-  const factureId = id || facture?.id;
+  const factureId = id === 'new' ? undefined : id || facture?.id;
   const {
     data: invoiceData,
     isLoading: loadingFacture,

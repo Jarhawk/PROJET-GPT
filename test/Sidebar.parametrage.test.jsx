@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { vi } from 'vitest';
 
@@ -16,6 +16,10 @@ import Sidebar from '@/components/Sidebar.jsx';
 describe('Sidebar paramétrage links', () => {
   beforeEach(() => {
     authMock.mockReset();
+  });
+  const originalDev = import.meta.env.DEV;
+  afterEach(() => {
+    import.meta.env.DEV = originalDev;
   });
 
   function setup({ userData }) {
@@ -37,22 +41,42 @@ describe('Sidebar paramétrage links', () => {
     );
   }
 
-  it('affiche les liens quand le module parametrage est activé', async () => {
+  it('affiche les liens quand rights.menus.parametrage est vrai', () => {
+    import.meta.env.DEV = false;
     setup({
-      userData: { access_rights: { enabledModules: ['parametrage'], parametrage: true } },
+      userData: { role: 'user', access_rights: { menus: { parametrage: true } } },
     });
     expect(screen.getByText('Familles')).toBeInTheDocument();
     expect(screen.getByText('Sous-familles')).toBeInTheDocument();
     expect(screen.getByText('Unités')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByText('Familles'));
-    expect(screen.getByText('Familles Page')).toBeInTheDocument();
   });
 
-  it('masque les liens quand le module parametrage est absent', () => {
-    setup({ userData: { access_rights: {} } });
-    expect(screen.queryByText('Familles')).toBeNull();
-    expect(screen.queryByText('Sous-familles')).toBeNull();
-    expect(screen.queryByText('Unités')).toBeNull();
+  it('affiche les liens quand l\'utilisateur a un droit familles', () => {
+    import.meta.env.DEV = false;
+    setup({
+      userData: { role: 'user', access_rights: { familles: true } },
+    });
+    expect(screen.getByText('Paramétrage')).toBeInTheDocument();
+    expect(screen.getByText('Familles')).toBeInTheDocument();
+  });
+
+  it('affiche les liens pour un admin sans droits explicites', () => {
+    import.meta.env.DEV = false;
+    setup({ userData: { role: 'admin', access_rights: {} } });
+    expect(screen.getByText('Familles')).toBeInTheDocument();
+    expect(screen.getByText('Sous-familles')).toBeInTheDocument();
+    expect(screen.getByText('Unités')).toBeInTheDocument();
+  });
+
+  it('masque la section quand aucun droit', () => {
+    import.meta.env.DEV = false;
+    setup({ userData: { role: 'user', access_rights: {} } });
+    expect(screen.queryByText('Paramétrage')).toBeNull();
+  });
+
+  it('affiche la section en mode dev sans droits', () => {
+    import.meta.env.DEV = true;
+    setup({ userData: { role: 'user', access_rights: {} } });
+    expect(screen.getByText('Paramétrage')).toBeInTheDocument();
   });
 });

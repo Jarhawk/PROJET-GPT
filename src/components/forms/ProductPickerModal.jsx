@@ -1,19 +1,12 @@
-import {
-  Dialog,
-  DialogOverlay,
-  DialogContent,
-  DialogTitle,
-  DialogDescription,
-  DialogClose,
-  useLockBodyScroll,
-} from '@/components/ui/SmartDialog'
-import { Button } from '@/components/ui/button'
+import { useEffect, useRef, useState, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { Input } from '@/components/ui/input'
-import { useEffect, useRef, useState } from 'react'
+import { Button } from '@/components/ui/button'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import useProductSearch from '@/hooks/useProductSearch'
+import { useLockBodyScroll } from '@/components/ui/SmartDialog'
 
-export default function ProductPickerModal({ open, onOpenChange, onSelect }) {
+export default function ProductPickerModal({ open, onOpenChange, onSelect, returnFocusRef }) {
   useLockBodyScroll(open)
   const { query, setQuery, results, isLoading, error } = useProductSearch('')
   const inputRef = useRef(null)
@@ -21,8 +14,12 @@ export default function ProductPickerModal({ open, onOpenChange, onSelect }) {
   const [activeIdx, setActiveIdx] = useState(0)
 
   useEffect(() => {
-    if (open) setTimeout(() => inputRef.current?.focus(), 0)
-  }, [open])
+    if (open) {
+      setTimeout(() => inputRef.current?.focus(), 0)
+    } else if (returnFocusRef?.current) {
+      setTimeout(() => returnFocusRef.current?.focus(), 0)
+    }
+  }, [open, returnFocusRef])
 
   useEffect(() => {
     setActiveIdx(0)
@@ -56,20 +53,36 @@ export default function ProductPickerModal({ open, onOpenChange, onSelect }) {
     }
   }
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogOverlay className="fixed inset-0 bg-black/60" />
-      <DialogContent className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-card text-card-foreground shadow-lg focus:outline-none">
+  const close = useCallback(() => onOpenChange?.(false), [onOpenChange])
+
+  useEffect(() => {
+    const onEsc = (e) => {
+      if (e.key === 'Escape') close()
+    }
+    if (open) window.addEventListener('keydown', onEsc)
+    return () => window.removeEventListener('keydown', onEsc)
+  }, [open, close])
+
+  if (!open) return null
+
+  return createPortal(
+    <>
+      <div className="fixed inset-0 z-[1000] bg-background/80" onClick={close} />
+      <div
+        role="dialog"
+        aria-modal="true"
+        className="fixed left-1/2 top-1/2 z-[1001] w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-card text-card-foreground shadow-lg"
+      >
         <div className="p-4 space-y-3">
-          <DialogTitle className="text-lg font-semibold">
+          <h2 className="text-lg font-semibold">
             Sélecteur de produits
             <span className="ml-2 text-sm font-normal opacity-60">
               {isLoading ? 'Chargement…' : `(${results.length} résultats)`}
             </span>
-          </DialogTitle>
-          <DialogDescription id="product-search-desc" className="text-sm text-muted-foreground">
+          </h2>
+          <p id="product-search-desc" className="text-sm text-muted-foreground">
             Recherchez un produit par son nom, puis validez avec Entrée ou cliquez pour sélectionner.
-          </DialogDescription>
+          </p>
           <Input
             ref={inputRef}
             value={query}
@@ -84,11 +97,7 @@ export default function ProductPickerModal({ open, onOpenChange, onSelect }) {
           </p>
         </div>
 
-        <div
-          ref={listRef}
-          className="overflow-y-auto"
-          style={{ height: 400 }}
-        >
+        <div ref={listRef} className="overflow-y-auto" style={{ height: 400 }}>
           {error && (
             <div className="m-4 rounded border border-destructive/50 bg-destructive/10 p-2 text-sm">
               Erreur : {error.message}
@@ -103,20 +112,19 @@ export default function ProductPickerModal({ open, onOpenChange, onSelect }) {
               const p = results[virtualRow.index]
               const active = virtualRow.index === activeIdx
               const lastPrice =
-                p?.v_produits_dernier_prix?.[0]?.prix ??
-                p?.v_produits_dernier_prix?.prix
+                p?.v_produits_dernier_prix?.[0]?.prix ?? p?.v_produits_dernier_prix?.prix
               return (
                 <button
                   key={virtualRow.key}
                   type="button"
                   onClick={() => {
                     onSelect?.(p)
-                    onOpenChange?.(false)
+                    close()
                   }}
                   className={`absolute left-0 top-0 flex h-11 w-full flex-col justify-center px-4 text-left ${
                     active
-                      ? 'bg-primary/10 border border-primary/50'
-                      : 'border-b border-border hover:bg-primary/5'
+                      ? 'bg-accent text-accent-foreground'
+                      : 'border-b border-border hover:bg-accent/50'
                   } focus:outline-none`}
                   style={{ transform: `translateY(${virtualRow.start}px)` }}
                 >
@@ -139,14 +147,12 @@ export default function ProductPickerModal({ open, onOpenChange, onSelect }) {
         </div>
 
         <div className="flex justify-end border-t p-3">
-          <DialogClose asChild>
-            <Button variant="outline" type="button">
-              Fermer
-            </Button>
-          </DialogClose>
+          <Button variant="outline" type="button" onClick={close}>
+            Fermer
+          </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </>,
+    document.body
   )
 }
-

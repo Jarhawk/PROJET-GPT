@@ -2,10 +2,15 @@
 import { render, screen } from '@testing-library/react';
 import { fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
+import React from 'react';
 
-let mockHook;
+let mockActionsHook;
+let mockDataHook;
 vi.mock('@/hooks/useFournisseurs', () => ({
-  useFournisseurs: () => mockHook(),
+  useFournisseurs: () => mockActionsHook(),
+}));
+vi.mock('@/hooks/data/useFournisseurs', () => ({
+  useFournisseurs: () => mockDataHook(),
 }));
 vi.mock('@/hooks/useFournisseurStats', () => ({
   useFournisseurStats: () => ({ fetchStatsAll: vi.fn(() => Promise.resolve([])) }),
@@ -21,6 +26,9 @@ vi.mock('@/hooks/useInvoices', () => ({
 }));
 vi.mock('@/hooks/useFournisseursInactifs', () => ({
   useFournisseursInactifs: () => ({ fournisseurs: [], fetchInactifs: vi.fn() }),
+}));
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({ hasAccess: () => true }),
 }));
 // Minimal Supabase mock for AuthProvider
 vi.mock('@/lib/supabase', () => ({
@@ -50,15 +58,13 @@ import { MemoryRouter } from 'react-router-dom';
 
 test('export excel button triggers hook', async () => {
   const excel = vi.fn();
-  mockHook = () => ({
-    fournisseurs: [],
-    total: 0,
-    getFournisseurs: vi.fn(),
+  mockActionsHook = () => ({
     createFournisseur: vi.fn(),
     updateFournisseur: vi.fn(),
     toggleFournisseurActive: vi.fn(),
     exportFournisseursToExcel: excel,
   });
+  mockDataHook = () => ({ data: { data: [], count: 0 } });
   render(
     <MemoryRouter>
       <Fournisseurs />
@@ -66,5 +72,5 @@ test('export excel button triggers hook', async () => {
   );
   const button = await screen.findByText('Export Excel');
   fireEvent.click(button);
-  expect(excel).toHaveBeenCalled();
+  expect(excel).toHaveBeenCalledWith([]);
 });

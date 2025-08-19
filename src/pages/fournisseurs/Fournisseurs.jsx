@@ -1,8 +1,9 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 /* eslint-disable react-hooks/exhaustive-deps */
 // src/pages/Fournisseurs.jsx
-import { useState, useEffect } from 'react';
-import { useFournisseurs } from '@/hooks/useFournisseurs';
+import { useState, useEffect, useMemo } from 'react';
+import { useFournisseurs as useFournisseursData } from '@/hooks/data/useFournisseurs';
+import { useFournisseurs as useFournisseursActions } from '@/hooks/useFournisseurs';
 import { useFournisseurStats } from '@/hooks/useFournisseurStats';
 import { useProduitsFournisseur } from '@/hooks/useProduitsFournisseur';
 import { useProducts } from '@/hooks/useProducts';
@@ -35,14 +36,11 @@ import { useAuth } from '@/hooks/useAuth';
 
 export default function Fournisseurs() {
   const {
-    fournisseurs,
-    total,
-    getFournisseurs,
     createFournisseur,
     updateFournisseur,
     toggleFournisseurActive,
     exportFournisseursToExcel,
-  } = useFournisseurs();
+  } = useFournisseursActions();
   const { fetchStatsAll } = useFournisseurStats();
   const { getProduitsDuFournisseur, countProduitsDuFournisseur } =
     useProduitsFournisseur();
@@ -63,18 +61,21 @@ export default function Fournisseurs() {
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 50;
 
-  function refreshList() {
-    getFournisseurs({
+  const filters = useMemo(
+    () => ({
       search,
       actif: actifFilter === 'all' ? null : actifFilter === 'true',
       page,
       limit: PAGE_SIZE,
-    });
-  }
-  const listWithContact = fournisseurs.map((f) => ({
-    ...f,
-    contact: Array.isArray(f.contact) ? f.contact[0] : f.contact,
-  }));
+    }),
+    [search, actifFilter, page]
+  );
+
+  const { data: fournisseursData } = useFournisseursData(filters);
+  const fournisseurs = fournisseursData?.data || [];
+  const total = fournisseursData?.count || 0;
+
+  const listWithContact = fournisseurs;
   const inactifs = listWithContact.filter((f) => !f.actif);
 
   useEffect(() => {
@@ -110,11 +111,6 @@ export default function Fournisseurs() {
     fetchStatsAll().then(setStats);
     fetchInactifs();
   }, []);
-
-  // Rafraîchissement selon la recherche ou filtre
-  useEffect(() => {
-    refreshList();
-  }, [search, actifFilter, page]);
 
   // Recherche live
   const fournisseursFiltrés = listWithContact.filter((f) =>
@@ -192,7 +188,7 @@ export default function Fournisseurs() {
                 <PlusCircle className="mr-2" size={18} /> Ajouter fournisseur
               </Button>
             )}
-            <Button className="w-auto" onClick={exportFournisseursToExcel}>
+            <Button className="w-auto" onClick={() => exportFournisseursToExcel(fournisseurs)}>
               Export Excel
             </Button>
             <Button className="w-auto" onClick={exportPDF}>
@@ -305,7 +301,6 @@ export default function Fournisseurs() {
                     toast.success(
                       actif ? 'Fournisseur activé' : 'Fournisseur désactivé'
                     );
-                    refreshList();
                   }}
                 />
               ))
@@ -350,7 +345,6 @@ export default function Fournisseurs() {
                 }
                 setShowCreate(false);
                 setEditRow(null);
-                refreshList();
               } catch (err) {
                 toast.error(err?.message || 'Erreur enregistrement');
               }

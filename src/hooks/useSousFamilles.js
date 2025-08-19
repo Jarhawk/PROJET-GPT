@@ -1,91 +1,93 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useCallback, useState } from 'react';
-import { toast } from 'sonner';
-import supabase from '@/lib/supabaseClient';
+import { useState, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import supabase from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
 export function useSousFamilles() {
   const { mama_id } = useAuth();
-  const [sousFamilles, setSousFamilles] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const queryClient = useQueryClient();
+  const [params, setParams] = useState({ search: '', actif: undefined, familleId: undefined });
+
+  const query = useQuery({
+    queryKey: ['sous_familles', mama_id, params],
+    enabled: !!mama_id,
+    queryFn: async () => {
+      let q = supabase
+        .from('sous_familles')
+        .select('id, code, nom, actif, famille_id, familles(nom)')
+        .eq('mama_id', mama_id)
+        .order('nom', { ascending: true });
+      if (params.search) q = q.ilike('nom', `%${params.search}%`);
+      if (typeof params.actif === 'boolean') q = q.eq('actif', params.actif);
+      if (params.familleId) q = q.eq('famille_id', params.familleId);
+      const { data, error } = await q;
+      if (error) throw error;
+      return data || [];
+    },
+  });
 
   const list = useCallback(
-    async ({ search = '', actif, familleId } = {}) => {
-      if (!mama_id) return { data: [], error: null };
-      setLoading(true);
-      setError(null);
-      let query = supabase.from('sous_familles').select('*').eq('mama_id', mama_id);
-      if (search) query = query.ilike('nom', `%${search}%`);
-      if (typeof actif === 'boolean') query = query.eq('actif', actif);
-      if (familleId) query = query.eq('famille_id', familleId);
-      const { data, error } = await query;
-      if (error) {
-        setError(error);
-        toast.error('Erreur chargement sous-familles');
-        setSousFamilles([]);
-      } else {
-        setSousFamilles(Array.isArray(data) ? data : []);
-      }
-      setLoading(false);
-      return { data: data || [], error };
-    },
-    [mama_id]
+    (p = {}) => setParams((prev) => ({ ...prev, ...p })),
+    []
   );
 
-  const create = useCallback(
-    async (payload) => {
-      if (!mama_id) return { error: 'Aucun mama_id' };
+  const createMutation = useMutation({
+    mutationFn: async (payload) => {
+      const body = { ...payload, mama_id };
       const { data, error } = await supabase
         .from('sous_familles')
-        .insert([{ ...payload, mama_id }])
-        .select('*')
+        .insert([body])
+        .select('id, code, nom, actif, famille_id')
         .single();
-      if (error) {
-        toast.error("Erreur lors de l'ajout");
-        return { error };
-      }
-      await list({ familleId: payload.famille_id });
-      return { data };
+      if (error) throw error;
+      return data;
     },
-    [mama_id, list]
-  );
+    onSuccess: () => queryClient.invalidateQueries(['sous_familles', mama_id]),
+  });
 
-  const update = useCallback(
-    async (id, payload) => {
-      if (!mama_id) return { error: 'Aucun mama_id' };
-      const { error } = await supabase
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, ...values }) => {
+      const { data, error } = await supabase
         .from('sous_familles')
-        .update(payload)
+        .update(values)
         .eq('id', id)
-        .eq('mama_id', mama_id);
-      if (error) toast.error('Erreur lors de la mise à jour');
-      await list({ familleId: payload.famille_id });
-      return { error };
+        .eq('mama_id', mama_id)
+        .select('id, code, nom, actif, famille_id')
+        .single();
+      if (error) throw error;
+      return data;
     },
-    [mama_id, list]
-  );
+    onSuccess: () => queryClient.invalidateQueries(['sous_familles', mama_id]),
+  });
 
-  const toggleActif = useCallback(
-    async (id, actif) => {
-      return update(id, { actif });
-    },
-    [update]
-  );
-
-  const remove = useCallback(
-    async (id) => {
-      if (!mama_id) return { error: 'Aucun mama_id' };
+  const deleteMutation = useMutation({
+    mutationFn: async (id) => {
       const { error } = await supabase
         .from('sous_familles')
         .delete()
         .eq('id', id)
         .eq('mama_id', mama_id);
-      if (error) toast.error('Erreur lors de la suppression');
-      return { error };
+      if (error) throw error;
     },
-    [mama_id]
+    onSuccess: () => queryClient.invalidateQueries(['sous_familles', mama_id]),
+  });
+
+  const toggleActif = useCallback(
+    (id, actif) => updateMutation.mutateAsync({ id, actif }),
+    [updateMutation]
   );
 
-  return { sousFamilles, list, create, update, toggleActif, remove, loading, error };
+  return {
+    sousFamilles: query.data || [],
+    loading: query.isLoading,
+    error: query.error,
+    list,
+    create: (payload) => createMutation.mutateAsync(payload),
+    update: (id, payload) => updateMutation.mutateAsync({ id, ...payload }),
+    toggleActif,
+    remove: (id) => deleteMutation.mutateAsync(id),
+  };
 }
+
+export default useSousFamilles;

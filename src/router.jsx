@@ -68,7 +68,8 @@ const MamaSettingsForm = lazyWithPreload(() => import("@/pages/parametrage/MamaS
 const Zones = lazyWithPreload(() => import("@/pages/parametrage/Zones.jsx"));
 const ZoneForm = lazyWithPreload(() => import("@/pages/parametrage/ZoneForm.jsx"));
 const ZoneAccess = lazyWithPreload(() => import("@/pages/parametrage/ZoneAccess.jsx"));
-const Familles = lazyWithPreload(() => import("@/pages/Parametres/Familles.jsx"));
+const Familles = lazyWithPreload(() => import("@/pages/parametrage/Familles.jsx"));
+const SousFamilles = lazyWithPreload(() => import("@/pages/parametrage/SousFamilles.jsx"));
 const Unites = lazyWithPreload(() => import("@/pages/parametrage/Unites.jsx"));
 const Periodes = lazyWithPreload(() => import("@/pages/parametrage/Periodes.jsx"));
 const Onboarding = lazyWithPreload(() => import("@/pages/public/Onboarding.jsx"));
@@ -181,6 +182,7 @@ export const routePreloadMap = {
   '/parametrage/zones/:id': ZoneForm.preload,
   '/parametrage/zones/:id/droits': ZoneAccess.preload,
   '/parametrage/familles': Familles.preload,
+  '/parametrage/sous-familles': SousFamilles.preload,
   '/parametrage/unites': Unites.preload,
   '/parametrage/periodes': Periodes.preload,
   '/consentements': Consentements.preload,
@@ -564,6 +566,10 @@ export default function Router() {
           <Route
             path="/parametrage/familles"
             element={<Familles />}
+          />
+          <Route
+            path="/parametrage/sous-familles"
+            element={<SousFamilles />}
           />
           <Route
             path="/parametrage/unites"

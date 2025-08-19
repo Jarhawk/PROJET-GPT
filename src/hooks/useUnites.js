@@ -1,178 +1,87 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState, useCallback } from "react";
-import supabase from '@/lib/supabaseClient';
+import { useState, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import supabase from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
-import * as XLSX from "xlsx";
-import { safeImportXLSX } from "@/lib/xlsx/safeImportXLSX";
-import { saveAs } from "file-saver";
-
-export async function fetchUnitesForValidation(mama_id) {
-  return await supabase.from("unites").select("id, nom").eq("mama_id", mama_id);
-}
 
 export function useUnites() {
   const { mama_id } = useAuth();
-  const [unites, setUnites] = useState([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const queryClient = useQueryClient();
+  const [params, setParams] = useState({ search: '', page: 1, limit: 50 });
 
-  // 1. Charger toutes les unités (filtrage recherche, batch)
+  const query = useQuery({
+    queryKey: ['unites', mama_id, params],
+    enabled: !!mama_id,
+    queryFn: async () => {
+      let q = supabase
+        .from('unites')
+        .select('id, code, nom, actif', { count: 'exact' })
+        .eq('mama_id', mama_id)
+        .order('nom', { ascending: true })
+        .range((params.page - 1) * params.limit, params.page * params.limit - 1);
+      if (params.search) q = q.ilike('nom', `%${params.search}%`);
+      const { data, error, count } = await q;
+      if (error) throw error;
+      return { data: data || [], count: count || 0 };
+    },
+  });
+
   const fetchUnites = useCallback(
-    async ({ search = "", includeInactive = true, page, limit } = {}) => {
-      if (!mama_id) return [];
-      setLoading(true);
-      setError(null);
-      let query = supabase
-        .from("unites")
-        .select("id, nom, actif")
-        .eq("mama_id", mama_id)
-        .order("nom", { ascending: true });
-      if (!includeInactive) query = query.eq("actif", true);
-      if (search) query = query.ilike("nom", `%${search}%`);
-      if (limit) query = query.range((page - 1) * limit, page * limit - 1);
-      const { data, error } = await query;
-      setUnites(Array.isArray(data) ? data : []);
-      setTotal(data ? data.length : 0);
-      setLoading(false);
-      if (error) setError(error);
-      return data || [];
-    },
-    [mama_id]
+    (p = {}) => setParams((prev) => ({ ...prev, ...p })),
+    []
   );
 
-  const suggestUnites = useCallback(
-    async (search = "") => {
-      if (!mama_id) return [];
-      const { data } = await supabase
-        .from("unites")
-        .select("id, nom")
-        .eq("mama_id", mama_id)
-        .ilike("nom", `%${search}%`)
-        .order("nom", { ascending: true })
-        .limit(10);
-      return data || [];
+  const addMutation = useMutation({
+    mutationFn: async (payload) => {
+      const body = typeof payload === 'string' ? { nom: payload } : payload;
+      const { data, error } = await supabase
+        .from('unites')
+        .insert([{ ...body, mama_id }])
+        .select('id, code, nom, actif')
+        .single();
+      if (error) throw error;
+      return data;
     },
-    [mama_id]
-  );
+    onSuccess: () => queryClient.invalidateQueries(['unites', mama_id]),
+  });
 
-  // 2. Ajouter une unité (avec vérif unicité)
-  async function addUnite(nom) {
-    if (!mama_id) return { error: "Aucun mama_id" };
-    setLoading(true);
-    setError(null);
-    if (!nom) {
-      const err = "Le nom est obligatoire.";
-      setError(err);
-      setLoading(false);
-      return { error: err };
-    }
-    const { data: existing } = await supabase
-      .from("unites")
-      .select("id")
-      .eq("mama_id", mama_id)
-      .ilike("nom", nom);
-    if (existing && existing.length > 0) {
-      const err = "Unité déjà existante.";
-      setLoading(false);
-      setError(err);
-      return { error: err };
-    }
-    const { data, error } = await supabase
-      .from("unites")
-      .insert([{ nom, mama_id }])
-      .select("id, nom")
-      .single();
-    setLoading(false);
-    if (error) {
-      setError(error);
-      return { error };
-    }
-    await fetchUnites();
-    return { data };
-  }
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, ...values }) => {
+      const { data, error } = await supabase
+        .from('unites')
+        .update(values)
+        .eq('id', id)
+        .eq('mama_id', mama_id)
+        .select('id, code, nom, actif')
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => queryClient.invalidateQueries(['unites', mama_id]),
+  });
 
-  // 3. Modifier une unité
-  async function updateUnite(id, fields) {
-    if (!mama_id) return { error: "Aucun mama_id" };
-    setLoading(true);
-    setError(null);
-    const payload = typeof fields === "string" ? { nom: fields } : fields;
-    if (!payload.nom) {
-      setError("Le nom est obligatoire.");
-      setLoading(false);
-      return;
-    }
-    const { error } = await supabase
-      .from("unites")
-      .update(payload)
-      .eq("id", id)
-      .eq("mama_id", mama_id);
-    if (error) setError(error);
-    setLoading(false);
-    await fetchUnites();
-  }
-
-  // 4. Batch suppression (désactivation)
-  async function batchDeleteUnites(ids = []) {
-    if (!mama_id) return { error: "Aucun mama_id" };
-    setLoading(true);
-    setError(null);
-    const { error } = await supabase
-      .from("unites")
-      .delete()
-      .in("id", ids)
-      .eq("mama_id", mama_id);
-    if (error) setError(error);
-    setLoading(false);
-    await fetchUnites();
-  }
-
-  // Convenience wrapper for single deletion
-  async function deleteUnite(id) {
-    return batchDeleteUnites([id]);
-  }
-
-  // 5. Export Excel
-  function exportUnitesToExcel() {
-    const datas = (unites || []).map(u => ({
-      id: u.id,
-      nom: u.nom,
-      mama_id: u.mama_id,
-    }));
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Unites");
-    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([buf]), "unites_mamastock.xlsx");
-  }
-
-  // 6. Import Excel
-  async function importUnitesFromExcel(file) {
-    setLoading(true);
-    setError(null);
-    try {
-      const arr = await safeImportXLSX(file, "Unites");
-      return arr;
-    } catch (error) {
-      setError(error);
-      return [];
-    } finally {
-      setLoading(false);
-    }
-  }
+  const deleteMutation = useMutation({
+    mutationFn: async (id) => {
+      const { error } = await supabase
+        .from('unites')
+        .delete()
+        .eq('id', id)
+        .eq('mama_id', mama_id);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries(['unites', mama_id]),
+  });
 
   return {
-    unites,
-    total,
-    loading,
-    error,
+    unites: query.data?.data || [],
+    total: query.data?.count || 0,
+    loading: query.isLoading,
+    error: query.error,
     fetchUnites,
-    suggestUnites,
-    addUnite,
-    updateUnite,
-    deleteUnite,
-    batchDeleteUnites,
-    exportUnitesToExcel,
-    importUnitesFromExcel,
+    addUnite: (payload) => addMutation.mutateAsync(payload),
+    updateUnite: (id, payload) => updateMutation.mutateAsync({ id, ...payload }),
+    deleteUnite: (id) => deleteMutation.mutateAsync(id),
   };
 }
+
+export default useUnites;

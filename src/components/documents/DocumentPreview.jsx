@@ -1,6 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import SmartDialog, {
-  DialogRoot,
+import {
+  Dialog,
   DialogContent,
   DialogTitle,
   DialogDescription,
@@ -9,7 +9,7 @@ import SmartDialog, {
 export default function DocumentPreview({ url, type = "", open, onClose }) {
   const isPdf = type.includes("pdf") || url?.toLowerCase().endsWith(".pdf");
   return (
-    <DialogRoot open={open} onOpenChange={(v) => !v && onClose?.()}>
+    <Dialog open={open} onOpenChange={(v) => !v && onClose?.()}>
       <DialogContent>
         <DialogTitle>Aperçu document</DialogTitle>
         <DialogDescription className="sr-only">
@@ -21,6 +21,6 @@ export default function DocumentPreview({ url, type = "", open, onClose }) {
           <img src={url} alt="Aperçu" className="max-h-[80vh] mx-auto" />
         )}
       </DialogContent>
-    </DialogRoot>
+    </Dialog>
   );
 }

@@ -9,8 +9,8 @@ import { Button } from "@/components/ui/button";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { Select } from "@/components/ui/select";
 import Checkbox from "@/components/ui/checkbox";
-import SmartDialog, {
-  DialogRoot,
+import {
+  Dialog,
   DialogContent,
   DialogTitle,
 } from "@/components/ui/SmartDialog";
@@ -124,7 +124,7 @@ export default function Logs() {
           </table>
         </TableContainer>
       )}
-      <DialogRoot open={!!detail} onOpenChange={() => setDetail(null)}>
+      <Dialog open={!!detail} onOpenChange={() => setDetail(null)}>
         <DialogContent>
           <div className="p-4 border-b">
             <DialogTitle>Détails</DialogTitle>
@@ -133,7 +133,7 @@ export default function Logs() {
             {detail ? JSON.stringify(detail.donnees, null, 2) : ""}
           </pre>
         </DialogContent>
-      </DialogRoot>
+      </Dialog>
     </div>
   );
 }

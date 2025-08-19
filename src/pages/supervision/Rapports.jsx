@@ -9,8 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { Select } from "@/components/ui/select";
-import SmartDialog, {
-  DialogRoot,
+import {
+  Dialog,
   DialogContent,
   DialogTitle,
 } from "@/components/ui/SmartDialog";
@@ -122,7 +122,7 @@ export default function Rapports() {
           </tbody>
         </table>
       </TableContainer>
-      <DialogRoot open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <div className="p-4 border-b">
             <DialogTitle>Nouveau rapport</DialogTitle>
@@ -148,7 +148,7 @@ export default function Rapports() {
             <PrimaryButton type="submit">Générer</PrimaryButton>
           </form>
         </DialogContent>
-      </DialogRoot>
+      </Dialog>
     </div>
   );
 }

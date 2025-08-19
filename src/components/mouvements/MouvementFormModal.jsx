@@ -1,8 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import SmartDialog, {
-  DialogRoot,
+import {
+  Dialog,
   DialogContent,
   DialogTitle,
   DialogDescription,
@@ -80,7 +80,7 @@ export default function MouvementFormModal({
   }
 
   return (
-    <DialogRoot open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <AnimatePresence>
         {open && (
           <DialogContent asChild>
@@ -201,6 +201,6 @@ export default function MouvementFormModal({
           </DialogContent>
         )}
       </AnimatePresence>
-    </DialogRoot>
+    </Dialog>
   );
 }

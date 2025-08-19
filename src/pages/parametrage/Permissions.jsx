@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import supabase from '@/lib/supabaseClient';
 import { Button } from '@/components/ui/button';
-import SmartDialog, {
-  DialogRoot,
+import {
+  Dialog,
   DialogContent,
   DialogTitle,
   DialogDescription,
@@ -101,7 +101,7 @@ export default function Permissions() {
           </table>
         )}
       </TableContainer>
-      <DialogRoot open={!!editRole} onOpenChange={(v) => !v && setEditRole(null)}>
+      <Dialog open={!!editRole} onOpenChange={(v) => !v && setEditRole(null)}>
         <DialogContent className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl shadow-lg p-6 max-w-xl">
           <DialogTitle className="font-bold mb-2">
             {editRole?.id ? 'Modifier le rôle' : 'Nouveau rôle'}
@@ -117,7 +117,7 @@ export default function Permissions() {
             />
           )}
         </DialogContent>
-      </DialogRoot>
+      </Dialog>
     </div>
   );
 }

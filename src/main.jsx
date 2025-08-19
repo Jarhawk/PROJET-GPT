@@ -38,10 +38,10 @@ if (import.meta?.env?.DEV || process.env.NODE_ENV === 'development') {
 const root = createRoot(document.getElementById("root"));
 root.render(
   <StrictMode>
-    <AuthProvider>
-      <BrowserRouter>
+    <BrowserRouter>
+      <AuthProvider>
         <App />
-      </BrowserRouter>
-    </AuthProvider>
+      </AuthProvider>
+    </BrowserRouter>
   </StrictMode>
 );

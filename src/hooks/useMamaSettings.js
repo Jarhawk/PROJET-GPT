@@ -3,6 +3,7 @@ import { useCallback, useMemo } from "react";
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
+import { deduceEnabledModulesFromRights } from '@/lib/access';
 
 const defaults = {
   logo_url: "",
@@ -66,10 +67,18 @@ export default function useMamaSettings() {
   );
 
   const settings = useMemo(() => ({ ...defaults, ...(query.data || {}) }), [query.data]);
-  const enabledModules = useMemo(
-    () => query.data?.enabled_modules ?? localEnabledModules,
-    [query.data?.enabled_modules]
+
+  const fallbackModules = useMemo(
+    () => deduceEnabledModulesFromRights(userData?.access_rights),
+    [userData?.access_rights]
   );
+
+  const enabledModules = useMemo(() => {
+    const em = query.data?.enabled_modules;
+    if (em && Object.keys(em).length > 0) return em;
+    if (Object.keys(fallbackModules).length > 0) return fallbackModules;
+    return localEnabledModules;
+  }, [query.data?.enabled_modules, fallbackModules]);
   const featureFlags = useMemo(
     () => query.data?.feature_flags ?? localFeatureFlags,
     [query.data?.feature_flags]

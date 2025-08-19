@@ -8,7 +8,7 @@ vi.mock('@/hooks/useAuth', () => ({
 }));
 
 vi.mock('@/hooks/useMamaSettings', () => ({
-  default: () => ({ loading: false, enabledModules: {} }),
+  default: () => ({ loading: false, enabledModules: [] }),
 }));
 
 import Sidebar from '@/components/Sidebar.jsx';

@@ -1,27 +1,16 @@
 import { useEffect } from 'react';
 import {
   Root as Dialog,
-  Trigger as DialogTrigger,
-  Portal as DialogPortal,
   Overlay as DialogOverlay,
   Content as DialogContent,
   Title as DialogTitle,
   Description as DialogDescription,
   Close as DialogClose,
-} from '@radix-ui/react-dialog';
+} from '@radix-ui/react-dialog'
 
-export {
-  Dialog,
-  DialogTrigger,
-  DialogPortal,
-  DialogOverlay,
-  DialogContent,
-  DialogTitle,
-  DialogDescription,
-  DialogClose,
-};
+export { Dialog, DialogOverlay, DialogContent, DialogTitle, DialogDescription, DialogClose }
 
-export default Dialog;
+export default Dialog
 
 /** Bloque le scroll de fond quand le Dialog est ouvert */
 export function useLockBodyScroll(open) {

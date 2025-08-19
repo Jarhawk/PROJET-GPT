@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import useSupabaseClient from '@/hooks/useSupabaseClient';
 import { useAuth } from '@/hooks/useAuth';
+import { logSupaError } from '@/lib/supa/logError';
 
 export default function useAlerteStockFaible() {
   const supabase = useSupabaseClient();
@@ -30,7 +31,10 @@ export default function useAlerteStockFaible() {
         .is('traite', false)
         .order('cree_le', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        logSupaError('alertes_rupture', error);
+        throw error;
+      }
 
       const list = (data || [])
         .filter(

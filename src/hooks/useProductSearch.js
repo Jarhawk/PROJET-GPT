@@ -1,3 +1,5 @@
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+// src/hooks/useProductSearch.js
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import useSupabaseClient from '@/hooks/useSupabaseClient';
@@ -12,6 +14,7 @@ export default function useProductSearch(initialQuery = '') {
   const debounced = useDebounce(query.trim(), 250);
 
   const fetchProducts = async () => {
+    if (!debounced) return [];
     try {
       const { data, error } = await supabase
         .from('produits')

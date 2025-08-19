@@ -29,7 +29,9 @@ export function mapDbLineToUI(l) {
 }
 
 export default function FactureForm({ onSaved, onClose }) {
-  const { id } = useParams();
+  const { id: routeId } = useParams();
+  const id = routeId ?? 'new';
+  const isEdit = id !== 'new';
 
   const form = useForm({
     defaultValues: {
@@ -45,7 +47,7 @@ export default function FactureForm({ onSaved, onClose }) {
     isLoading,
     error,
     refetch,
-  } = useInvoice(id);
+  } = useInvoice(isEdit ? id : undefined);
 
   const mapped = useMemo(() => {
     if (!invoice) return null;
@@ -68,17 +70,17 @@ export default function FactureForm({ onSaved, onClose }) {
   }, [invoice]);
 
   useEffect(() => {
-    if (mapped && id !== 'new') {
+    if (mapped && isEdit) {
       form.reset(mapped);
     }
-  }, [mapped, id, form]);
+  }, [mapped, isEdit, form]);
 
   const handleSave = () => {
     const values = form.getValues();
     onSaved?.(values);
   };
 
-  if (id !== 'new' && isLoading) {
+  if (isEdit && isLoading) {
     return (
       <div className="p-4 flex justify-center">
         <LoadingSpinner />
@@ -86,7 +88,7 @@ export default function FactureForm({ onSaved, onClose }) {
     );
   }
 
-  if (error) {
+  if (isEdit && error) {
     return (
       <div className="p-4 text-red-500">
         <p>Erreur lors du chargement de la facture.</p>

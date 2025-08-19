@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useUtilisateurs } from "@/hooks/useUtilisateurs";
 import { useAuth } from '@/hooks/useAuth';
-import UtilisateurForm from "@/pages/parametrage/UtilisateurForm.jsx";
+import UtilisateurForm from "@/components/utilisateurs/UtilisateurForm";
 import UtilisateurDetail from "@/components/utilisateurs/UtilisateurDetail";
 import { Button } from "@/components/ui/button";
 import ListingContainer from "@/components/ui/ListingContainer";

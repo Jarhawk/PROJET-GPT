@@ -1,4 +1,4 @@
-import SmartDialog, {
+import {
   DialogRoot,
   DialogContent,
   DialogTitle,
@@ -6,21 +6,43 @@ import SmartDialog, {
   DialogClose,
   useLockBodyScroll,
 } from '@/components/ui/SmartDialog'
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import useProductSearch from '@/hooks/useProductSearch'
 
 export default function ProductPickerModal({ open, onOpenChange, onSelect }) {
   useLockBodyScroll(open)
   const { query, setQuery, results, isLoading, error } = useProductSearch('')
   const inputRef = useRef(null)
+  const [activeIdx, setActiveIdx] = useState(0)
 
   useEffect(() => {
     if (open) setTimeout(() => inputRef.current?.focus(), 0)
   }, [open])
 
+  useEffect(() => {
+    setActiveIdx(0)
+  }, [results])
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setActiveIdx((i) => Math.min(i + 1, (results?.length || 1) - 1))
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setActiveIdx((i) => Math.max(i - 1, 0))
+    } else if (e.key === 'Enter') {
+      e.preventDefault()
+      const p = results?.[activeIdx]
+      if (p) {
+        onSelect?.(p)
+        onOpenChange?.(false)
+      }
+    }
+  }
+
   return (
     <DialogRoot open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card text-card-foreground">
+      <DialogContent className="bg-card text-card-foreground max-w-lg">
         {/* Header sticky avec recherche */}
         <div className="sticky top-0 z-10 border-b border-border bg-card/95 backdrop-blur p-4">
           <DialogTitle className="text-lg font-semibold">
@@ -39,9 +61,10 @@ export default function ProductPickerModal({ open, onOpenChange, onSelect }) {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-                placeholder="Rechercher un produit par nom…"
-                className="w-full rounded-xl border border-border bg-background px-3 py-2 outline-none focus:ring-2 focus:ring-primary"
-              />
+              onKeyDown={handleKeyDown}
+              placeholder="Rechercher un produit par nom…"
+              className="w-full rounded-xl border border-border bg-background px-3 py-2 outline-none focus:ring-2 focus:ring-primary"
+            />
             </div>
           <p className="mt-2 text-xs opacity-60">
             Astuces : ↑/↓ pour naviguer • Entrée pour sélectionner • Échap pour fermer
@@ -61,14 +84,17 @@ export default function ProductPickerModal({ open, onOpenChange, onSelect }) {
           )}
 
           <ul className="space-y-1">
-            {(results ?? []).map((p) => (
+            {(results ?? []).map((p, idx) => (
               <li key={p.id}>
                 <button
                   type="button"
                   onClick={() => { onSelect?.(p); onOpenChange?.(false) }}
-                  className="w-full text-left rounded-xl border border-transparent px-4 py-3 hover:border-primary/30 hover:bg-primary/5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                  className={`w-full text-left rounded-xl border px-4 py-3 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${idx === activeIdx ? 'border-primary/50 bg-primary/10' : 'border-transparent hover:border-primary/30 hover:bg-primary/5'}`}
                 >
                   <div className="truncate font-medium">{p.nom}</div>
+                  {p.pmp != null && (
+                    <div className="text-xs opacity-60">PMP: {Number(p.pmp).toFixed(2)}</div>
+                  )}
                 </button>
               </li>
             ))}

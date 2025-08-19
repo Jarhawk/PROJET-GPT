@@ -22,7 +22,7 @@ export default function useProductSearch(initialQuery = '') {
       try {
         let req = supabase
           .from('produits')
-          .select('id, nom')
+          .select('id, nom, pmp, stock_reel')
           .eq('mama_id', currentMamaId)
           .eq('actif', true)
           .order('nom', { ascending: true })

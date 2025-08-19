@@ -23,16 +23,10 @@ export function mapDbLineToUI(l) {
     produit: l.produit ?? { id: l.produit_id },
     produit_id: l.produit_id,
     quantite: String(q),
-    unite: l.unite ?? l.produit?.unite_achat ?? l.produit?.unite ?? '',
-    total_ht: l.total_ht != null ? String(l.total_ht) : (q * pu).toFixed(2),
     pu: pu.toFixed(2),
-    pmp: l.pmp ?? l.produit?.pmp ?? 0,
-    tva: l.tva ?? l.produit?.tva_id ?? null,
-    zone_id: l.zone_id ?? l.produit?.zone_stock_id ?? '',
-    position: l.position ?? 0,
-    note: l.note ?? '',
-    actif: l.actif ?? true,
-    manuallyEdited: false,
+    tva: l.tva ?? 0,
+    total_ht: l.total_ht != null ? String(l.total_ht) : (q * pu).toFixed(2),
+    pmp: l.pmp ?? 0,
   }
 }
 
@@ -42,15 +36,11 @@ function createEmptyLine(position) {
     produit: { id: '', nom: '' },
     produit_id: '',
     quantite: '0',
-    unite: '',
-    total_ht: '0',
     pu: '0',
-    pmp: 0,
     tva: 0,
-    zone_id: '',
+    total_ht: '0',
+    pmp: 0,
     position,
-    note: '',
-    actif: true,
     manuallyEdited: false,
   }
 }
@@ -181,14 +171,11 @@ function FactureFormInner({
         <CardContent className="space-y-4">
           {/* Table header */}
           <div className="flex items-center gap-2 text-sm font-medium">
-            <div className="basis-[20%] min-w-0">Produit</div>
-            <div className="basis-[10%] text-right">Qté</div>
-            <div className="basis-[10%] text-right">Unité</div>
-            <div className="basis-[10%] text-right">Total HT</div>
-            <div className="basis-[10%] text-right">PU</div>
-            <div className="basis-[10%] text-right">PMP</div>
-            <div className="basis-[10%] text-right">TVA</div>
-            <div className="basis-[15%] text-left">Zone</div>
+            <div className="basis-[30%] min-w-0">Produit</div>
+            <div className="basis-[15%] text-right">Qté</div>
+            <div className="basis-[15%] text-right">Prix HT</div>
+            <div className="basis-[15%] text-right">TVA</div>
+            <div className="basis-[20%] text-right">Total HT</div>
             <div className="basis-[5%]" />
           </div>
 

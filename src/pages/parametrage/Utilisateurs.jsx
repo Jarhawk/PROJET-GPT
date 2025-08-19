@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import supabase from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
-import UtilisateurForm from "@/pages/parametrage/UtilisateurForm.jsx";
+import UtilisateurForm from "@/components/utilisateurs/UtilisateurForm";
 
 export default function Utilisateurs() {
   const [users, setUsers] = useState([]);

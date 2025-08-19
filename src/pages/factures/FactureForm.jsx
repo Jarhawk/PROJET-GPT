@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Select } from '@/components/ui/select'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import FactureLigne from '@/components/FactureLigne'
 import useFournisseursList from '@/hooks/useFournisseursList'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
@@ -58,6 +59,14 @@ function FactureFormInner({ defaultValues, fournisseurs, onSaved, onClose }) {
   const { fields, append, remove, update } = useFieldArray({ control, name: 'lignes' })
 
   const lignes = watch('lignes')
+  const statut = watch('statut') || 'BROUILLON'
+
+  const statutColors = {
+    BROUILLON: 'gray',
+    VALIDEE: 'green',
+    ANNULEE: 'red',
+    PAYEE: 'blue',
+  }
 
   const totals = useMemo(() => {
     let ht = 0
@@ -75,11 +84,14 @@ function FactureFormInner({ defaultValues, fournisseurs, onSaved, onClose }) {
   return (
     <form onSubmit={onSubmit} className="space-y-6">
       <Card>
-        <CardHeader>
+        <CardHeader className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Entête</h2>
+          <Badge color={statutColors[statut]} className="capitalize">
+            {statut.toLowerCase()}
+          </Badge>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-4">
             <div className="space-y-1">
               <label className="text-sm">Fournisseur</label>
               <Select {...register('fournisseur_id')} className="w-full">
@@ -98,6 +110,15 @@ function FactureFormInner({ defaultValues, fournisseurs, onSaved, onClose }) {
             <div className="space-y-1">
               <label className="text-sm">Date</label>
               <Input type="date" {...register('date_facture')} />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm">Statut</label>
+              <Select {...register('statut')} className="w-full">
+                <option value="BROUILLON">BROUILLON</option>
+                <option value="VALIDEE">VALIDEE</option>
+                <option value="ANNULEE">ANNULEE</option>
+                <option value="PAYEE">PAYEE</option>
+              </Select>
             </div>
           </div>
         </CardContent>
@@ -187,6 +208,7 @@ export default function FactureForm() {
         date_facture: (invoice.date_facture ?? '').slice(0, 10),
         fournisseur_id: invoice.fournisseur_id ?? '',
         lignes: (invoice.lignes ?? []).map(mapDbLineToUI),
+        statut: invoice.actif ? 'VALIDEE' : 'BROUILLON',
       }
     : {
         id: undefined,
@@ -194,12 +216,26 @@ export default function FactureForm() {
         date_facture: new Date().toISOString().slice(0, 10),
         fournisseur_id: '',
         lignes: [createEmptyLine()],
+        statut: 'BROUILLON',
       }
 
-  const handleSave = async ({ id: fid, numero, date_facture, fournisseur_id, lignes }) => {
+  const handleSave = async ({
+    id: fid,
+    numero,
+    date_facture,
+    fournisseur_id,
+    lignes,
+    statut,
+  }) => {
     try {
       const payload = {
-        facture: { id: fid, numero, date_facture, fournisseur_id },
+        facture: {
+          id: fid,
+          numero,
+          date_facture,
+          fournisseur_id,
+          actif: statut === 'VALIDEE' || statut === 'PAYEE',
+        },
         lignes: (lignes || []).map((l) => ({
           id: l.id,
           produit_id: l.produit_id,

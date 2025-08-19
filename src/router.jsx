@@ -125,6 +125,7 @@ const Logout = lazyWithPreload(() => import("@/pages/auth/Logout.jsx"));
 const Stats = lazyWithPreload(() => import("@/pages/stats/Stats.jsx"));
 const Roles = lazyWithPreload(() => import("@/pages/parametrage/Roles.jsx"));
 const PlanningModule = lazyWithPreload(() => import("@/pages/PlanningModule.jsx"));
+const NotFound = lazyWithPreload(() => import("@/pages/NotFound.jsx"));
 
 export const routePreloadMap = {
   '/dashboard': Dashboard.preload,
@@ -629,6 +630,7 @@ export default function Router() {
           />
         </Route>
         </Route>
+        <Route path="*" element={<NotFound />} />
       </Routes>
       </Suspense>
     </ErrorBoundary>

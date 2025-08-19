@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Select } from '@/components/ui/select'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import FactureLigne from '@/components/FactureLigne'
-import useFournisseurs from '@/hooks/data/useFournisseurs'
+import useFournisseursList from '@/hooks/useFournisseursList'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { useInvoice } from '@/hooks/useInvoice'
 import useSupabaseClient from '@/hooks/useSupabaseClient'
@@ -178,7 +178,7 @@ export default function FactureForm() {
   const isNew = !id || id === 'new'
 
   const { data: invoice, isLoading } = useInvoice(isNew ? undefined : id)
-  const { data: fournisseurs = [] } = useFournisseurs({ actif: true })
+  const { data: fournisseurs = [] } = useFournisseursList({ actif: true })
 
   const defaultValues = invoice
     ? {
@@ -208,15 +208,16 @@ export default function FactureForm() {
           tva: parseNum(l.tva),
         })),
       }
-      const { error } = await supabase.rpc('fn_facture_save', {
+      const cleanPayload = JSON.parse(JSON.stringify(payload))
+      const { error } = await supabase.rpc('fn_save_facture', {
         p_mama_id: mamaId,
-        p_payload: payload,
+        p_payload: cleanPayload,
       })
       if (error) throw error
       toast.success('Facture enregistrée')
       navigate('/factures')
     } catch (e) {
-      toast.error(e.message || "Erreur lors de l'enregistrement")
+      toast.error(e?.details || e?.message || "Erreur lors de l'enregistrement")
     }
   }
 

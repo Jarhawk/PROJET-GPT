@@ -1,6 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { renderHook, act } from '@testing-library/react';
 import { vi, beforeEach, test, expect } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
 
 const selectAfterInsert = vi.fn(() => ({ single: vi.fn(() => Promise.resolve({ data: { id: 'f1' }, error: null })) }));
 const insertFournisseur = vi.fn(() => ({ select: selectAfterInsert }));
@@ -27,18 +29,24 @@ const fromMock = vi.fn((table) => {
   return fetchQuery;
 });
 
-vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
+vi.mock('@/lib/supabaseClient', () => ({ default: { from: fromMock } }));
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
 
 let useFournisseurs;
+let queryClient;
+
+function wrapper({ children }) {
+  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+}
 
 beforeEach(async () => {
   vi.clearAllMocks();
+  queryClient = new QueryClient();
   ({ useFournisseurs } = await import('@/hooks/useFournisseurs'));
 });
 
 test('createFournisseur insère un contact lié', async () => {
-  const { result } = renderHook(() => useFournisseurs());
+  const { result } = renderHook(() => useFournisseurs(), { wrapper });
   await act(async () => {
     await result.current.createFournisseur({ nom: 'Test', tel: '1', email: 'a@b.com', contact: 'T' });
   });
@@ -49,7 +57,7 @@ test('createFournisseur insère un contact lié', async () => {
 });
 
 test('updateFournisseur met à jour le contact', async () => {
-  const { result } = renderHook(() => useFournisseurs());
+  const { result } = renderHook(() => useFournisseurs(), { wrapper });
   await act(async () => {
     await result.current.updateFournisseur('f1', { actif: false, tel: '2', email: 'b@b.com', contact: 'B' });
   });

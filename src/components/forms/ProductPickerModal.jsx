@@ -31,8 +31,13 @@ export default function ProductPickerModal({ open, onOpenChange, onSelect }) {
   const virtualizer = useVirtualizer({
     count: results.length,
     getScrollElement: () => listRef.current,
-    estimateSize: () => 56,
+    estimateSize: () => 44,
+    overscan: 8,
   })
+
+  useEffect(() => {
+    virtualizer.scrollToIndex(activeIdx)
+  }, [activeIdx, virtualizer])
 
   const handleKeyDown = (e) => {
     if (e.key === 'ArrowDown') {
@@ -79,7 +84,11 @@ export default function ProductPickerModal({ open, onOpenChange, onSelect }) {
           </p>
         </div>
 
-        <div ref={listRef} className="max-h-[65vh] overflow-y-auto">
+        <div
+          ref={listRef}
+          className="overflow-y-auto"
+          style={{ height: 400 }}
+        >
           {error && (
             <div className="m-4 rounded border border-destructive/50 bg-destructive/10 p-2 text-sm">
               Erreur : {error.message}
@@ -94,24 +103,22 @@ export default function ProductPickerModal({ open, onOpenChange, onSelect }) {
               const p = results[virtualRow.index]
               const active = virtualRow.index === activeIdx
               const lastPrice =
-                p?.v_produits_dernier_prix?.[0]?.prix ?? p?.v_produits_dernier_prix?.prix
+                p?.v_produits_dernier_prix?.[0]?.prix ??
+                p?.v_produits_dernier_prix?.prix
               return (
                 <button
-                  key={p.id}
+                  key={virtualRow.key}
                   type="button"
                   onClick={() => {
                     onSelect?.(p)
                     onOpenChange?.(false)
                   }}
-                  className={`absolute left-0 w-full px-4 py-2 text-left ${
+                  className={`absolute left-0 top-0 flex h-11 w-full flex-col justify-center px-4 text-left ${
                     active
                       ? 'bg-primary/10 border border-primary/50'
                       : 'border-b border-border hover:bg-primary/5'
                   } focus:outline-none`}
-                  style={{
-                    top: 0,
-                    transform: `translateY(${virtualRow.start}px)`,
-                  }}
+                  style={{ transform: `translateY(${virtualRow.start}px)` }}
                 >
                   <div className="flex justify-between gap-2">
                     <span className="truncate font-medium">{p.nom}</span>

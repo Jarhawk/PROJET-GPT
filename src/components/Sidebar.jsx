@@ -25,6 +25,10 @@ export default function Sidebar() {
   };
   const canAnalyse = has("analyse");
   const isAdmin = userData?.role === "admin";
+  const canConfigure =
+    rights?.enabledModules?.includes?.("parametrage") ||
+    userData?.can_configurer ||
+    has("parametrage");
 
   if (authLoading || settingsLoading) return null;
 
@@ -121,9 +125,7 @@ export default function Sidebar() {
         {has("notifications") && <Link to="/notifications">Notifications</Link>}
 
         {(isAdmin ||
-          has("familles") ||
-          has("sous_familles") ||
-          has("unites") ||
+          canConfigure ||
           has("parametrage") ||
           has("utilisateurs") ||
           has("roles") ||
@@ -136,13 +138,13 @@ export default function Sidebar() {
               {has("parametrage") && (
                 <Link to="/parametrage/settings">Paramètres</Link>
               )}
-              {has("familles") && (
+              {canConfigure && (
                 <Link to="/parametrage/familles">Familles</Link>
               )}
-              {has("sous_familles") && (
+              {canConfigure && (
                 <Link to="/parametrage/sous-familles">Sous-familles</Link>
               )}
-              {has("unites") && <Link to="/parametrage/unites">Unités</Link>}
+              {canConfigure && <Link to="/parametrage/unites">Unités</Link>}
               {has("utilisateurs") && (
                 <Link to="/parametrage/utilisateurs">Utilisateurs</Link>
               )}

@@ -1,169 +1,158 @@
-import { useEffect, useRef, useState, useCallback, useId } from 'react'
-import Dialog, {
-  DialogOverlay,
-  DialogContent,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/SmartDialog'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { useVirtualizer } from '@tanstack/react-virtual'
-import useProductSearch from '@/hooks/useProductSearch'
-import { useLockBodyScroll } from '@/components/ui/SmartDialog'
+import * as Dialog from "@radix-ui/react-dialog";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { X, Search } from "lucide-react";
+import useProductSearch from "@/hooks/useProductSearch"; // ← ton hook existant
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
+// Props attendues:
+// open: bool, onOpenChange: fn(bool), mamaId: uuid,
+// onPick: fn({ id, nom }), excludeIds?: string[]  (optionnel)
 export default function ProductPickerModal({
   open,
   onOpenChange,
-  onSelect,
-  returnFocusRef,
+  mamaId,
+  onPick,
   excludeIds = [],
 }) {
-  useLockBodyScroll(open)
-  const { query, setQuery, results: allResults, isLoading, error } =
-    useProductSearch('')
-  const results = (allResults || [])
-    .filter((p, idx, arr) => arr.findIndex((r) => r.id === p.id) === idx)
-    .filter((p) => !excludeIds.includes(p.id))
-  const inputRef = useRef(null)
-  const listRef = useRef(null)
-  const [activeIdx, setActiveIdx] = useState(0)
-  const inputName = useId()
+  const [q, setQ] = useState("");
+  const { results, isLoading, error } = useProductSearch(q, mamaId);
+  const [idx, setIdx] = useState(0);
+  const inputRef = useRef(null);
+
+  const filtered = useMemo(() => {
+    if (!Array.isArray(results)) return [];
+    if (!excludeIds?.length) return results;
+    const set = new Set(excludeIds);
+    return results.filter((r) => !set.has(r.id));
+  }, [results, excludeIds]);
 
   useEffect(() => {
     if (open) {
-      setQuery('')
-      setActiveIdx(0)
-      setTimeout(() => inputRef.current?.focus(), 0)
-    } else if (returnFocusRef?.current) {
-      setTimeout(() => returnFocusRef.current?.focus(), 0)
+      setTimeout(() => inputRef.current?.focus(), 10);
+      setIdx(0);
+      setQ("");
     }
-  }, [open, returnFocusRef, setQuery])
+  }, [open]);
 
-  useEffect(() => {
-    setActiveIdx(0)
-  }, [results])
+  const commitPick = (item) => {
+    if (!item) return;
+    onPick?.(item);
+    onOpenChange?.(false);
+  };
 
-  const virtualizer = useVirtualizer({
-    count: results.length,
-    getScrollElement: () => listRef.current,
-    estimateSize: () => 44,
-    overscan: 8,
-  })
-
-  useEffect(() => {
-    virtualizer.scrollToIndex(activeIdx)
-  }, [activeIdx, virtualizer])
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      setActiveIdx((i) => Math.min(i + 1, results.length - 1))
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      setActiveIdx((i) => Math.max(i - 1, 0))
-    } else if (e.key === 'Enter' || e.key === 'Tab') {
-      e.preventDefault()
-      const p = results[activeIdx]
-      if (p) {
-        onSelect?.(p)
-        onOpenChange?.(false)
-      }
+  const onKeyDown = (e) => {
+    if (!filtered.length) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setIdx((i) => Math.min(i + 1, filtered.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setIdx((i) => Math.max(i - 1, 0));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      commitPick(filtered[idx]);
+    } else if (e.key === "Escape") {
+      onOpenChange?.(false);
     }
-  }
-  const close = useCallback(() => onOpenChange?.(false), [onOpenChange])
+  };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogOverlay className="fixed inset-0 z-[1000] bg-background/40 backdrop-blur-sm" />
-      <DialogContent className="fixed left-1/2 top-1/2 z-[1001] w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-border bg-card text-foreground shadow-2xl focus:outline-none">
-        <div className="p-4 space-y-3">
-          <DialogTitle className="text-lg font-semibold">
-            Sélecteur de produits
-            <span className="ml-2 text-sm font-normal opacity-60">
-              {isLoading ? 'Chargement…' : `(${results.length} résultats)`}
-            </span>
-          </DialogTitle>
-          <DialogDescription id="product-search-desc" className="text-sm text-muted-foreground">
-            Recherchez un produit par son nom, puis validez avec Entrée ou cliquez pour sélectionner.
-          </DialogDescription>
-          <form autoComplete="off" onSubmit={(e) => e.preventDefault()}>
-            <Input
-              ref={inputRef}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Rechercher un produit par nom…"
-              aria-label="Recherche produit"
-              aria-describedby="product-search-desc"
-              autoComplete="off"
-              name={`pp-${inputName}`}
-              autoCorrect="off"
-              autoCapitalize="none"
-              spellCheck={false}
-              inputMode="search"
-              enterKeyHint="search"
-            />
-          </form>
-          <p className="text-xs text-muted-foreground">
-            Astuce : ↑/↓ pour naviguer · Entrée/Tab pour sélectionner · Échap pour fermer
-          </p>
-        </div>
-
-        <div ref={listRef} className="overflow-y-auto" style={{ height: 400 }}>
-          {error && (
-            <div className="m-4 rounded border border-destructive/50 bg-destructive/10 p-2 text-sm">
-              Erreur : {error.message}
-            </div>
-          )}
-          {!isLoading && results.length === 0 && !error && (
-            <div className="m-4 text-sm text-muted-foreground">Aucun produit trouvé.</div>
-          )}
-
-          <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
-            {virtualizer.getVirtualItems().map((virtualRow) => {
-              const p = results[virtualRow.index]
-              const active = virtualRow.index === activeIdx
-              const lastPrice =
-                p?.v_produits_dernier_prix?.[0]?.prix ?? p?.v_produits_dernier_prix?.prix
-              return (
-                <button
-                  key={virtualRow.key}
-                  type="button"
-                  onClick={() => {
-                    onSelect?.(p)
-                    close()
-                  }}
-                  className={`absolute left-0 top-0 flex h-11 w-full flex-col justify-center px-4 text-left ${
-                    active
-                      ? 'bg-accent text-accent-foreground'
-                      : 'border-b border-border hover:bg-accent/50'
-                  } focus:outline-none`}
-                  style={{ transform: `translateY(${virtualRow.start}px)` }}
-                >
-                  <div className="flex justify-between gap-2">
-                    <span className="truncate font-medium">{p.nom}</span>
-                    {lastPrice != null && (
-                      <span className="text-xs text-muted-foreground">
-                        Dernier {Number(lastPrice).toFixed(2)}€
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex gap-2 text-xs text-muted-foreground">
-                    <span>Stock {Number(p.stock_reel ?? 0)}</span>
-                    <span>PMP {Number(p.pmp ?? 0).toFixed(2)}</span>
-                  </div>
-                </button>
-              )
-            })}
+    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+      <Dialog.Portal>
+        {/* Overlay dans le BODY, jamais clipé par un parent */}
+        <Dialog.Overlay className="
+          fixed inset-0 z-[90]
+          bg-background/70 backdrop-blur-sm
+          data-[state=open]:animate-in data-[state=closed]:animate-out
+          data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0
+        " />
+        <Dialog.Content className="
+          fixed z-[91] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
+          w-[min(800px,95vw)]
+          rounded-2xl border border-border bg-card shadow-2xl
+          outline-none
+          data-[state=open]:animate-in data-[state=closed]:animate-out
+          data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95
+        ">
+          <div className="p-4 border-b border-border flex items-center gap-3">
+            <Search className="h-4 w-4 opacity-70" />
+            <Dialog.Title className="text-base font-semibold">Rechercher un produit</Dialog.Title>
+            <div className="ml-auto" />
+            <Dialog.Close asChild>
+              <Button size="icon" variant="ghost" className="rounded-full">
+                <X className="h-4 w-4" />
+              </Button>
+            </Dialog.Close>
           </div>
-        </div>
 
-        <div className="flex justify-end border-t p-3">
-          <Button variant="outline" type="button" onClick={close}>
-            Fermer
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  )
+          <div className="p-4">
+            <div className="relative">
+              <Input
+                ref={inputRef}
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                onKeyDown={onKeyDown}
+                placeholder="Tapez pour rechercher (↑/↓ pour naviguer, Entrée pour valider)"
+                autoComplete="off" // ← pas de suggestions mémorisées
+                className="pr-10"
+              />
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 opacity-60 pointer-events-none" />
+            </div>
+
+            <div className="mt-3 max-h-[50vh] overflow-y-auto rounded-lg border border-border">
+              {isLoading && (
+                <div className="p-4 text-sm text-muted-foreground">Recherche…</div>
+              )}
+              {error && (
+                <div className="p-4 text-sm text-destructive">
+                  Erreur : {error.message || "Recherche impossible"}
+                </div>
+              )}
+              {!isLoading && !error && filtered.length === 0 && (
+                <div className="p-4 text-sm text-muted-foreground">
+                  Aucun produit.
+                </div>
+              )}
+
+              <ul role="listbox" aria-label="Résultats" className="divide-y divide-border">
+                {filtered.map((p, i) => (
+                  <li
+                    key={p.id}
+                    role="option"
+                    aria-selected={i === idx}
+                    tabIndex={-1}
+                    onMouseEnter={() => setIdx(i)}
+                    onDoubleClick={() => commitPick(p)}
+                    onClick={() => setIdx(i)}
+                    className={`
+                      px-3 py-2 cursor-pointer
+                      ${i === idx ? "bg-accent text-accent-foreground" : "bg-card hover:bg-muted/60"}
+                    `}
+                  >
+                    <div className="text-sm font-medium line-clamp-1">{p.nom}</div>
+                    {p.code && (
+                      <div className="text-xs text-muted-foreground/80">{p.code}</div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="mt-4 flex justify-end gap-2">
+              <Dialog.Close asChild>
+                <Button variant="outline">Annuler</Button>
+              </Dialog.Close>
+              <Button
+                onClick={() => commitPick(filtered[idx])}
+                disabled={!filtered[idx]}
+              >
+                Sélectionner
+              </Button>
+            </div>
+          </div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
 }

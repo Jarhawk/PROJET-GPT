@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import useSupabaseClient from '@/hooks/useSupabaseClient'
 import useDebounce from './useDebounce'
 import { useMultiMama } from '@/context/MultiMamaContext'
+import { logSupaError } from '@/lib/supa/logError'
 
 export default function useProductSearch(initialQuery = '') {
   const supabase = useSupabaseClient()
@@ -30,7 +31,10 @@ export default function useProductSearch(initialQuery = '') {
         if (q) req = req.ilike('nom', `%${q}%`)
 
         const { data, error } = await req
-        if (error) throw error
+        if (error) {
+          logSupaError('produits', error)
+          throw error
+        }
         if (!cancel) setResults(data ?? [])
       } catch (e) {
         if (!cancel) setError(e)

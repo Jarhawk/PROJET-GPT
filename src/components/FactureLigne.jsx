@@ -1,55 +1,56 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState, useRef } from 'react'
-import ProductPickerModal from '@/components/forms/ProductPickerModal'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
+import { useState, useRef } from 'react';
+import { useFormContext } from 'react-hook-form';
+import ProductPickerModal from '@/components/forms/ProductPickerModal';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
-const parseNum = (v) => parseFloat(String(v).replace(',', '.')) || 0
+const parseNum = (v) => parseFloat(String(v).replace(',', '.')) || 0;
 
-export default function FactureLigne({ ligne, index, onChange, onRemove, onProduitFocus }) {
-  const [pickerOpen, setPickerOpen] = useState(false)
-  const quantiteRef = useRef(null)
+export default function FactureLigne({ index, onRemove, onProduitFocus }) {
+  const { watch, setValue } = useFormContext();
+  const ligne = watch(`lignes.${index}`) || {};
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const quantiteRef = useRef(null);
 
   const handleProduitSelection = (p) => {
-    if (p?.id) {
-      const q = parseNum(ligne.quantite)
-      const pu = parseNum(ligne.pu)
-      onChange({
-        ...ligne,
-        produit: p,
-        produit_id: p.id,
-        pmp: p.pmp ?? 0,
-        total_ht: (q * pu).toFixed(2),
-      })
-      setTimeout(() => quantiteRef.current?.focus(), 0)
-    }
-  }
+    if (!p?.id) return;
+    const q = parseNum(ligne.quantite);
+    const pu = parseNum(ligne.prix_unitaire_ht);
+    setValue(`lignes.${index}.produit_id`, p.id);
+    setValue(`lignes.${index}.designation`, p.nom);
+    setValue(`lignes.${index}.pmp`, p.pmp ?? 0);
+    setValue(`lignes.${index}.montant_ht`, (q * pu).toFixed(2));
+    setTimeout(() => quantiteRef.current?.focus(), 0);
+  };
 
   const handleQuantite = (val) => {
-    const q = parseNum(val)
-    const pu = parseNum(ligne.pu)
-    onChange({ ...ligne, quantite: val, total_ht: (q * pu).toFixed(2) })
-  }
+    const q = parseNum(val);
+    const pu = parseNum(ligne.prix_unitaire_ht);
+    setValue(`lignes.${index}.quantite`, val);
+    setValue(`lignes.${index}.montant_ht`, (q * pu).toFixed(2));
+  };
 
   const handlePu = (val) => {
-    const q = parseNum(ligne.quantite)
-    const pu = parseNum(val)
-    onChange({ ...ligne, pu: val, total_ht: (q * pu).toFixed(2) })
-  }
+    const q = parseNum(ligne.quantite);
+    const pu = parseNum(val);
+    setValue(`lignes.${index}.prix_unitaire_ht`, val);
+    setValue(`lignes.${index}.montant_ht`, (q * pu).toFixed(2));
+  };
 
   return (
-    <div className="flex items-center gap-2 min-w-0">
-      <div className="basis-[30%] shrink min-w-0">
+    <div className="flex w-full items-center gap-2">
+      <div className="flex-1 min-w-0">
         <Button
           type="button"
           variant="outline"
           onClick={() => {
-            setPickerOpen(true)
-            onProduitFocus?.(index)
+            setPickerOpen(true);
+            onProduitFocus?.(index);
           }}
-          className="h-10 w-full min-w-0 justify-start"
+          className="h-10 w-full justify-start truncate"
         >
-          {ligne.produit?.nom || 'Choisir...'}
+          {ligne.designation || 'Choisir...'}
         </Button>
         <ProductPickerModal
           open={pickerOpen}
@@ -57,7 +58,7 @@ export default function FactureLigne({ ligne, index, onChange, onRemove, onProdu
           onSelect={handleProduitSelection}
         />
       </div>
-      <div className="basis-[15%] shrink-0">
+      <div className="w-24 shrink-0">
         <Input
           type="number"
           step="any"
@@ -68,37 +69,37 @@ export default function FactureLigne({ ligne, index, onChange, onRemove, onProdu
           onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
         />
       </div>
-      <div className="basis-[15%] shrink-0">
+      <div className="w-24 shrink-0">
         <Input
           type="number"
           step="any"
           className="h-10 w-full text-right rounded-xl"
-          value={ligne.pu}
+          value={ligne.prix_unitaire_ht}
           onChange={(e) => handlePu(e.target.value)}
-          onBlur={() => handlePu(parseNum(ligne.pu).toFixed(2))}
+          onBlur={() => handlePu(parseNum(ligne.prix_unitaire_ht).toFixed(2))}
           onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
         />
       </div>
-      <div className="basis-[15%] shrink-0">
+      <div className="w-24 shrink-0">
         <Input
           type="number"
           step="any"
           className="h-10 w-full text-right rounded-xl"
           value={ligne.tva}
-          onChange={(e) => onChange({ ...ligne, tva: e.target.value })}
+          onChange={(e) => setValue(`lignes.${index}.tva`, e.target.value)}
         />
       </div>
-      <div className="basis-[20%] shrink-0">
+      <div className="w-32 shrink-0">
         <Input
           type="text"
           readOnly
           tabIndex={-1}
-          value={ligne.total_ht}
+          value={ligne.montant_ht}
           className="h-10 w-full text-right rounded-xl pointer-events-none select-none"
           aria-readonly="true"
         />
       </div>
-      <div className="basis-[5%] shrink-0 flex justify-center">
+      <div className="w-10 shrink-0 flex justify-center">
         <Button
           type="button"
           size="sm"
@@ -110,5 +111,5 @@ export default function FactureLigne({ ligne, index, onChange, onRemove, onProdu
         </Button>
       </div>
     </div>
-  )
+  );
 }

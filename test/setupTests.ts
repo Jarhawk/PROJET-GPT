@@ -1,4 +1,5 @@
 import { expect, vi } from "vitest";
+import '@testing-library/jest-dom';
 
 // Stubs pour anciens modules supprimés
 vi.mock("@/license", () => ({ default: { validateLicense: () => true } }));

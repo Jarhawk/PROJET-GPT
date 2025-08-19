@@ -24,7 +24,7 @@
     "module": "factures"
   },
   {
-    "route": "/factures/nouveau",
+    "route": "/factures/new",
     "module": "factures"
   },
   {

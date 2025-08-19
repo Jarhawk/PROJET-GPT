@@ -352,7 +352,7 @@ Task management is documented in [docs/taches.md](docs/taches.md).
 - Task management available at `/taches` with creation and list pages
 - Tasks support manual or delayed due dates, priorities and recurring schedules
 - Invoice form supports OCR scanning of uploaded documents
-- Manage invoices from `/factures` with pages `/factures/nouveau` and `/factures/:id`
+- Manage invoices from `/factures` with pages `/factures/new` and `/factures/:id`
 - Index on `factures.reference` speeds up invoice search queries
 - Columns `total_ht`, `total_tva` and `total_ttc` are computed automatically via triggers
 - Index on `products.code` speeds up lookups by internal product code

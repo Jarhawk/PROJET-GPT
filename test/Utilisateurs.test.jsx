@@ -14,7 +14,7 @@ vi.mock('@/hooks/useUtilisateurs', () => ({
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1', role: 'admin', loading: false }) }));
 vi.mock('@/hooks/useRoles', () => ({ useRoles: () => ({ roles: [], fetchRoles: vi.fn() }) }));
 vi.mock('@/components/Utilisateurs/UtilisateurRow', () => ({ useAuth: () => <tr data-testid="row" /> }));
-vi.mock('@/components/utilisateurs/UtilisateurForm', () => ({ useAuth: () => <div>form</div> }));
+vi.mock('@/pages/parametrage/UtilisateurForm.jsx', () => ({ useAuth: () => <div>form</div> }));
 
 import Utilisateurs from '@/pages/parametrage/Utilisateurs.jsx';
 

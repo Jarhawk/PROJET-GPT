@@ -14,7 +14,7 @@ export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes
   );
 
   const q   = Number(value?.quantite || 0);
-  const lht = Number(value?.prix_total_ht || 0);
+  const lht = Number(value?.total_ht || 0);
   const pu  = q > 0 ? lht / q : 0;
 
   const update = (patch) => onChange({ ...value, ...patch });
@@ -69,8 +69,8 @@ export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes
       <Input
         type="number"
         step="0.01"
-        value={value?.prix_total_ht ?? ""}
-        onChange={(e) => update({ prix_total_ht: e.target.value })}
+        value={value?.total_ht ?? ""}
+        onChange={(e) => update({ total_ht: e.target.value })}
         placeholder="Total HT (€)"
         autoComplete="off"
         name="no-autofill"

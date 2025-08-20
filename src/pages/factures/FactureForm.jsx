@@ -63,7 +63,7 @@ export default function FactureForm() {
           produit_nom: "",
           quantite: 1,
           unite: "",
-          prix_total_ht: 0,
+          total_ht: 0,
           pmp: 0,
           tva: 0,
           zone_id: "",
@@ -77,19 +77,24 @@ export default function FactureForm() {
   const { fields, append, remove, update } = useFieldArray({ control, name: "lignes" });
   const lignes = watch("lignes");
 
-  // Totaux facture (HT = somme des prix_total_ht ; TVA et TTC calculés par ligne)
-  const totals = useMemo(() => {
-    let ht = 0, tvaSum = 0;
-    for (const l of lignes || []) {
-      const lht = Number(l.prix_total_ht || 0);
-      const ltva = lht * (Number(l.tva || 0) / 100);
-      ht += lht; tvaSum += ltva;
-    }
-    const total_ht = +ht.toFixed(2);
-    const tva = +tvaSum.toFixed(2);
-    const total_ttc = +(total_ht + tva).toFixed(2);
-    return { total_ht, tva, total_ttc };
-  }, [lignes]);
+  const sum = (arr) => arr.reduce((a, b) => a + b, 0);
+
+  const totalHT = useMemo(
+    () => sum((lignes || []).map(l => Number(l.total_ht || 0))),
+    [lignes]
+  );
+
+  const totalTVA_EUR = useMemo(
+    () =>
+      sum(
+        (lignes || []).map(
+          l => Number(l.total_ht || 0) * Number(l.tva || 0) / 100
+        )
+      ),
+    [lignes]
+  );
+
+  const totalTTC = useMemo(() => totalHT + totalTVA_EUR, [totalHT, totalTVA_EUR]);
 
   const addLigne = () =>
     append({
@@ -98,7 +103,7 @@ export default function FactureForm() {
       produit_nom: "",
       quantite: 1,
       unite: "",
-      prix_total_ht: 0,
+      total_ht: 0,
       pmp: 0,
       tva: 0,
       zone_id: "",
@@ -116,7 +121,7 @@ export default function FactureForm() {
         .filter(l => l.produit_id && Number(l.quantite) > 0)
         .map(l => {
           const q = Number(l.quantite || 0);
-          const lht = Number(l.prix_total_ht || 0);
+          const lht = Number(l.total_ht || 0);
           const pu = q > 0 ? lht / q : 0;
           return {
             produit_id: l.produit_id,
@@ -155,7 +160,7 @@ export default function FactureForm() {
             produit_nom: "",
             quantite: 1,
             unite: "",
-            prix_total_ht: 0,
+            total_ht: 0,
             pmp: 0,
             tva: 0,
             zone_id: "",
@@ -258,15 +263,15 @@ export default function FactureForm() {
       <div className="rounded-xl border border-border bg-card p-4 grid md:grid-cols-3 gap-4">
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Total HT</span>
-          <span className="font-semibold">{totals.total_ht.toFixed(2)}</span>
+          <span className="font-semibold">{totalHT.toFixed(2)}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">TVA</span>
-          <span className="font-semibold">{totals.tva.toFixed(2)}</span>
+          <span className="text-sm text-muted-foreground">TVA €</span>
+          <span className="font-semibold">{totalTVA_EUR.toFixed(2)}</span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Total TTC</span>
-          <span className="font-semibold">{totals.total_ttc.toFixed(2)}</span>
+          <span className="font-semibold">{totalTTC.toFixed(2)}</span>
         </div>
       </div>
 

@@ -102,7 +102,7 @@ export default function FactureLigne({ value: line, onChange, onRemove, allLines
       </div>
       <ProductPickerModal
         open={modalOpen}
-        onOpenChange={setModalOpen}
+        onClose={() => setModalOpen(false)}
         onSelect={(p) => {
           recalc({
             produit_id: p.id,
@@ -111,7 +111,6 @@ export default function FactureLigne({ value: line, onChange, onRemove, allLines
             pmp: Number(p.pmp ?? 0),
             tva: Number(p.tva ?? 0),
           });
-          setModalOpen(false);
         }}
         excludeIdsSameZone={excludeIdsSameZone}
         currentLineProductId={line.produit_id}

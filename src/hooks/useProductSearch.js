@@ -11,16 +11,15 @@ export function useProductSearch(q) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("produits")
-        .select("id, nom, pmp")
+        .select("id, nom, pmp")              // ne pas ajouter de colonnes non existantes
         .eq("mama_id", currentMamaId)
         .eq("actif", true)
-        .ilike("nom", `%${q}%`)
+        .ilike("nom", `%${q}%`)              // ILIKE sur produits.nom UNIQUEMENT
         .order("nom", { ascending: true })
-        .limit(30);
+        .limit(50);
       if (error) throw error;
       return data ?? [];
     },
   });
 }
 
-export default useProductSearch;

@@ -55,7 +55,8 @@ export default function FactureForm() {
       fournisseur_id: "",
       date_facture: today(),
       numero: "",
-      statut: "valide", // mappe vers p_actif
+      statut: "brouillon", // mappe vers p_actif
+      ecart_ht: 0,
       lignes: [
         {
           id: crypto.randomUUID(),
@@ -76,6 +77,7 @@ export default function FactureForm() {
   const { isSubmitting } = formState;
   const { fields, append, remove, update } = useFieldArray({ control, name: "lignes" });
   const lignes = watch("lignes");
+  const ecartHT = watch("ecart_ht", 0);
 
   // Totaux facture (HT = somme des prix_total_ht ; TVA et TTC calculés par ligne)
   const totals = useMemo(() => {
@@ -147,7 +149,8 @@ export default function FactureForm() {
         fournisseur_id: "",
         date_facture: today(),
         numero: "",
-        statut: "valide",
+        statut: "brouillon",
+        ecart_ht: 0,
         lignes: [
           {
             id: crypto.randomUUID(),
@@ -212,7 +215,7 @@ export default function FactureForm() {
                 <SelectTrigger><SelectValue placeholder="Statut" /></SelectTrigger>
                 <SelectContent align="start">
                   <SelectItem value="brouillon">Brouillon</SelectItem>
-                  <SelectItem value="valide">Validée</SelectItem>
+                  {ecartHT === 0 && <SelectItem value="valide">Validée</SelectItem>}
                 </SelectContent>
               </Select>
             )}

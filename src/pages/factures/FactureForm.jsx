@@ -1,7 +1,7 @@
 // src/pages/factures/FactureForm.jsx
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import supabase from "@/lib/supabaseClient";
@@ -16,6 +16,8 @@ const today = () => format(new Date(), "yyyy-MM-dd");
 export default function FactureForm() {
   const { profile } = useAuth();
   const mamaId = profile?.mama_id || null;
+  const queryClient = useQueryClient();
+  const [saving, setSaving] = useState(false);
 
   // Fournisseurs
   const { data: fournisseursData, isLoading: loadingF } = useQuery({
@@ -55,7 +57,7 @@ export default function FactureForm() {
       fournisseur_id: "",
       date_facture: today(),
       numero: "",
-      statut: "valide", // mappe vers p_actif
+      statut: "Validée", // mappe vers p_actif
       lignes: [
         {
           id: crypto.randomUUID(),
@@ -72,8 +74,7 @@ export default function FactureForm() {
     },
   });
 
-  const { control, handleSubmit, watch, reset, formState } = form;
-  const { isSubmitting } = formState;
+  const { control, handleSubmit, watch, reset } = form;
   const { fields, append, remove, update } = useFieldArray({ control, name: "lignes" });
   const lignes = watch("lignes");
 
@@ -106,48 +107,60 @@ export default function FactureForm() {
 
   const updateLigne = (i, patch) => update(i, { ...lignes[i], ...patch });
 
+  const buildPayload = (list = []) =>
+    list
+      .filter((l) => l.produit_id && Number(l.quantite) > 0)
+      .map((l) => {
+        const qte = Number(l.quantite || 0);
+        const pu_ht = qte > 0 ? Number(l.prix_total_ht || 0) / qte : 0;
+        return {
+          produit_id: l.produit_id,
+          quantite: Number(qte || 0),
+          prix_unitaire_ht: Number(pu_ht || 0),
+          tva: Number(l.tva || 0),
+          zone_id: l.zone_id ?? null,
+        };
+      });
+
   const onSubmit = async (values) => {
+    if (saving) return;
+    setSaving(true);
     try {
       if (!mamaId) { toast.error("Organisation introuvable."); return; }
       if (!values.fournisseur_id) { toast.error("Sélectionnez un fournisseur."); return; }
 
-      // Construire les lignes pour la RPC : PU = total_ht / qte
-      const payloadLignes = (values.lignes || [])
-        .filter(l => l.produit_id && Number(l.quantite) > 0)
-        .map(l => {
-          const q = Number(l.quantite || 0);
-          const lht = Number(l.prix_total_ht || 0);
-          const pu = q > 0 ? lht / q : 0;
-          return {
-            produit_id: l.produit_id,
-            quantite: q,
-            prix_unitaire_ht: +pu.toFixed(6),
-            tva: Number(l.tva || 0),
-            zone_id: l.zone_id || null,
-          };
-        });
-
+      const payloadLignes = buildPayload(values.lignes);
       if (payloadLignes.length === 0) { toast.error("Ajoutez au moins une ligne produit."); return; }
 
-      const rpcPayload = {
+      const payloadHt = payloadLignes.reduce(
+        (sum, l) => sum + l.quantite * l.prix_unitaire_ht,
+        0
+      );
+      const ecart_ht = +(totals.total_ht - payloadHt).toFixed(2);
+      const p_actif = values.statut === "Validée" && ecart_ht === 0;
+
+      const { data, error } = await supabase.rpc("fn_save_facture", {
         p_mama_id: mamaId,
         p_fournisseur_id: values.fournisseur_id,
         p_numero: values.numero || null,
         p_date: values.date_facture,
-        p_actif: values.statut === "valide",
         p_lignes: payloadLignes,
-      };
+        p_actif,
+      });
 
-      const { error } = await supabase.rpc("fn_save_facture", rpcPayload);
-      if (error) throw error;
+      if (error) {
+        toast.error(error.message || "Erreur lors de l'enregistrement");
+        return;
+      }
 
       toast.success("Facture enregistrée.");
+      queryClient.invalidateQueries({ queryKey: ["factures"] });
 
       reset({
         fournisseur_id: "",
         date_facture: today(),
         numero: "",
-        statut: "valide",
+        statut: "Validée",
         lignes: [
           {
             id: crypto.randomUUID(),
@@ -164,7 +177,9 @@ export default function FactureForm() {
       });
     } catch (e) {
       console.error(e);
-      toast.error("Erreur lors de l'enregistrement de la facture");
+      toast.error(e.message || "Erreur lors de l'enregistrement de la facture");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -211,8 +226,8 @@ export default function FactureForm() {
               <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger><SelectValue placeholder="Statut" /></SelectTrigger>
                 <SelectContent align="start">
-                  <SelectItem value="brouillon">Brouillon</SelectItem>
-                  <SelectItem value="valide">Validée</SelectItem>
+                  <SelectItem value="Brouillon">Brouillon</SelectItem>
+                  <SelectItem value="Validée">Validée</SelectItem>
                 </SelectContent>
               </Select>
             )}
@@ -272,7 +287,7 @@ export default function FactureForm() {
 
       {/* ACTIONS */}
       <div className="flex justify-end">
-        <Button type="submit" disabled={isSubmitting}>Enregistrer</Button>
+        <Button type="submit" disabled={saving}>Enregistrer</Button>
       </div>
     </form>
   );

@@ -1,34 +1,36 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { renderHook, act } from '@testing-library/react';
 import { vi, beforeEach, test, expect } from 'vitest';
+import { searchFournisseurs } from '@/hooks/useFournisseursAutocomplete';
 
-const limitMock = vi.fn(() => Promise.resolve({ data: [], error: null }));
-const orderMock = vi.fn(() => ({ limit: limitMock }));
-const ilikeMock = vi.fn(() => ({ order: orderMock, limit: limitMock }));
-const eqMock = vi.fn(() => ({ ilike: ilikeMock, order: orderMock, limit: limitMock }));
-const selectMock = vi.fn(() => ({ eq: eqMock, ilike: ilikeMock, order: orderMock, limit: limitMock }));
+const queryBuilder = {
+  eq: vi.fn(() => queryBuilder),
+  ilike: vi.fn(() => queryBuilder),
+  order: vi.fn(() => queryBuilder),
+  limit: vi.fn(() => queryBuilder),
+  then: vi.fn((resolve) => resolve({ data: [], error: null })),
+};
+
+const selectMock = vi.fn(() => queryBuilder);
 const fromMock = vi.fn(() => ({ select: selectMock }));
 
-vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
-vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
+vi.mock('@/lib/supabaseClient', () => ({ supabase: { from: fromMock } }));
 
-let useFournisseursAutocomplete;
-
-beforeEach(async () => {
-  ({ useFournisseursAutocomplete } = await import('@/hooks/useFournisseursAutocomplete'));
+beforeEach(() => {
   fromMock.mockClear();
   selectMock.mockClear();
-  eqMock.mockClear();
-  ilikeMock.mockClear();
+  queryBuilder.eq.mockClear();
+  queryBuilder.ilike.mockClear();
+  queryBuilder.order.mockClear();
+  queryBuilder.limit.mockClear();
 });
 
 test('searchFournisseurs filters by mama_id and query', async () => {
-  const { result } = renderHook(() => useFournisseursAutocomplete());
-  await act(async () => {
-    await result.current.searchFournisseurs('paris');
-  });
+  await searchFournisseurs('m1', 'paris');
   expect(fromMock).toHaveBeenCalledWith('fournisseurs');
   expect(selectMock).toHaveBeenCalledWith('id, nom');
-  expect(eqMock).toHaveBeenCalledWith('mama_id', 'm1');
-  expect(ilikeMock).toHaveBeenCalledWith('nom', '%paris%');
+  expect(queryBuilder.eq).toHaveBeenNthCalledWith(1, 'mama_id', 'm1');
+  expect(queryBuilder.eq).toHaveBeenNthCalledWith(2, 'actif', true);
+  expect(queryBuilder.ilike).toHaveBeenCalledWith('nom', '%paris%');
+  expect(queryBuilder.order).toHaveBeenCalledWith('nom', { ascending: true });
+  expect(queryBuilder.limit).toHaveBeenCalledWith(50);
 });

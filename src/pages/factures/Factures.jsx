@@ -30,9 +30,10 @@ import { FACTURE_STATUTS } from '@/constants/factures';
 
 export default function Factures() {
   const { deleteFacture, toggleFactureActive } = useFactures();
-  const { data: fournisseurs = [] } = useFournisseurs({ actif: true });
-  const { results: fournisseurOptions, searchFournisseurs } =
-    useFournisseursAutocomplete();
+  const { data: fournisseursActifs = [] } = useFournisseurs({ actif: true });
+  const [qF, setQF] = useState('');
+  const { data: fournisseurs = [], isLoading: isLoadingF } =
+    useFournisseursAutocomplete(qF);
   const { loading: authLoading, hasAccess } = useAuth();
   const { results: factureOptions, searchFactures } = useFacturesAutocomplete();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -45,7 +46,6 @@ export default function Factures() {
     searchParams.get('statut') || ''
   );
   const [fournisseurFilter, setFournisseurFilter] = useState('');
-  const [fournisseurInput, setFournisseurInput] = useState('');
   const [actifFilter, setActifFilter] = useState(
     searchParams.get('actif') || 'true'
   );
@@ -84,9 +84,6 @@ export default function Factures() {
     searchFactures(search);
   }, [search, searchFactures]);
   useEffect(() => {
-    searchFournisseurs(fournisseurInput);
-  }, [fournisseurInput, searchFournisseurs]);
-  useEffect(() => {
     setSearchParams((prev) => {
       const params = new URLSearchParams(prev);
       if (statutFilter) params.set('statut', statutFilter);
@@ -98,8 +95,8 @@ export default function Factures() {
 
   const handleFournisseurInput = (e) => {
     const val = e.target.value;
-    setFournisseurInput(val);
-    const match = fournisseurOptions.find(
+    setQF(val);
+    const match = fournisseurs.find(
       (f) => f.nom.toLowerCase() === val.toLowerCase()
     );
     setFournisseurFilter(match ? match.id : '');
@@ -143,13 +140,13 @@ export default function Factures() {
               <div className="w-full sm:w-auto">
                 <Input
                   list="fournisseurs-list"
-                  value={fournisseurInput}
+                  value={qF}
                   onChange={handleFournisseurInput}
                   placeholder="Tous fournisseurs"
                   className="w-full sm:w-48"
                 />
                 <datalist id="fournisseurs-list">
-                  {fournisseurOptions.map((f) => (
+                  {fournisseurs.map((f) => (
                     <option key={f.id} value={f.nom} />
                   ))}
                 </datalist>
@@ -246,7 +243,7 @@ export default function Factures() {
       {showForm && (
         <FactureForm
           facture={selected}
-          fournisseurs={fournisseurs}
+          fournisseurs={fournisseursActifs}
           onClose={() => {
             setShowForm(false);
             setSelected(null);

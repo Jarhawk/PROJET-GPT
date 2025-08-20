@@ -156,7 +156,9 @@ export default function FactureForm() {
       const { error } = await supabase.rpc("fn_save_facture", rpcPayload);
       if (error) throw error;
 
-      toast.success("Facture enregistrée.");
+      toast.success(
+        `Facture enregistrée • N° ${values.numero || "—"} • ${values.statut}`
+      );
 
       reset({
         fournisseur_id: "",
@@ -179,8 +181,8 @@ export default function FactureForm() {
         ],
       });
     } catch (e) {
-      console.error(e);
-      toast.error("Erreur lors de l'enregistrement de la facture");
+      console.warn(e);
+      toast.error(e?.message || "Erreur lors de l'enregistrement de la facture");
     }
   };
 

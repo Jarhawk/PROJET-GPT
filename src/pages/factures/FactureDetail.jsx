@@ -75,7 +75,9 @@ export default function FactureDetail() {
         const { data: lines, error: e2 } = linesRes;
 
         if (e1 || e2) {
-          toast.error('Erreur de chargement de la facture');
+          const err = e1 || e2;
+          toast.error(err?.message || 'Erreur de chargement de la facture');
+          console.warn(err);
           return;
         }
 
@@ -86,8 +88,8 @@ export default function FactureDetail() {
           });
         }
       } catch (err) {
-        console.error(err);
-        toast.error('Erreur de chargement de la facture');
+        console.warn(err);
+        toast.error(err?.message || 'Erreur de chargement de la facture');
       } finally {
         if (isMounted) setLoading(false);
       }

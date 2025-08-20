@@ -26,26 +26,19 @@ export default function Sidebar() {
   const canAnalyse = has("analyse");
   const isAdmin = ["admin", "super-admin"].includes(userData?.role);
 
-  const hasParamRight = (key) => {
-    const r = rights?.[key];
-    if (r === true) return true;
-    if (typeof r === "object") return Object.values(r).some(Boolean);
-    return false;
-  };
-  const paramKeys = ["familles", "sous_familles", "unites"];
-  const modulesFiltered = paramKeys.some((k) =>
-    Object.prototype.hasOwnProperty.call(modules, normalizeAccessKey(k))
-  );
   const canParam = (key) =>
-    modulesFiltered ? has(key) && hasParamRight(key) : true;
+    Object.prototype.hasOwnProperty.call(rights, key) ? has(key) : true;
   const canFamilles = canParam("familles");
   const canSousFamilles = canParam("sous_familles");
   const canUnites = canParam("unites");
+  const hasParamModule =
+    enabledModules?.includes?.("parametrage") ||
+    rights?.enabledModules?.includes?.("parametrage");
   const showParametrage =
     isAdmin ||
     import.meta.env.DEV ||
     rights?.menus?.parametrage === true ||
-    !modulesFiltered ||
+    hasParamModule ||
     canFamilles ||
     canSousFamilles ||
     canUnites;

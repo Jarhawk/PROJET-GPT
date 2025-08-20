@@ -1,11 +1,12 @@
 // src/pages/factures/FactureForm.jsx
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import supabase from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/useAuth";
+import { useZones } from "@/hooks/useZones";
 import FactureLigne from "@/components/FactureLigne";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,20 +36,8 @@ export default function FactureForm() {
   const fournisseurs = Array.isArray(fournisseursData) ? fournisseursData : [];
 
   // Zones (liste globale, préremplie ligne par ligne si default_zone_id arrive du produit)
-  const { data: zonesData } = useQuery({
-    queryKey: ["zones_stock", mamaId],
-    enabled: !!mamaId,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("zones_stock")
-        .select("id, nom")
-        .eq("mama_id", mamaId)
-        .order("nom", { ascending: true });
-      if (error) return [];
-      return data || [];
-    },
-  });
-  const zones = Array.isArray(zonesData) ? zonesData : [];
+  const { zones, fetchZones } = useZones();
+  useEffect(() => { fetchZones(); }, [fetchZones]);
 
   const form = useForm({
     defaultValues: {
@@ -229,7 +218,7 @@ export default function FactureForm() {
 
         <div className="rounded-xl border border-border bg-card p-3 space-y-4 overflow-x-hidden">
           {/* En-têtes colonnes */}
-          <div className="grid grid-cols-[minmax(240px,1.4fr)_minmax(90px,0.6fr)_minmax(120px,0.8fr)_minmax(140px,0.9fr)_minmax(140px,0.9fr)_minmax(120px,0.8fr)_minmax(160px,1fr)_minmax(120px,0.9fr)] gap-3 text-xs text-muted-foreground px-1">
+          <div className="grid grid-cols-[minmax(260px,1fr)_90px_110px_140px_140px_110px_110px_180px_60px] gap-3 text-xs text-muted-foreground px-1">
             <div>Produit</div>
             <div>Qté</div>
             <div>Unité</div>
@@ -237,7 +226,8 @@ export default function FactureForm() {
             <div>PU HT (€)</div>
             <div>PMP</div>
             <div>TVA %</div>
-            <div>Zone & Suppr</div>
+            <div>Zone</div>
+            <div>Actions</div>
           </div>
 
           {fields.map((f, i) => (

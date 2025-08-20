@@ -1,270 +1,281 @@
-// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useMemo } from 'react'
-import { v4 as uuidv4 } from 'uuid'
-import { useForm, useFieldArray } from 'react-hook-form'
-import { useNavigate, useParams } from 'react-router-dom'
-import { toast } from 'sonner'
+// src/pages/factures/FactureForm.jsx
+import { useMemo } from "react";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { format } from "date-fns";
+import supabase from "@/lib/supabaseClient";
+import { useAuth } from "@/hooks/useAuth";
+import FactureLigne from "@/components/FactureLigne";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Select } from '@/components/ui/select'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import FactureLigne from '@/components/FactureLigne'
-import useFournisseursList from '@/hooks/useFournisseursList'
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
-import { useInvoice } from '@/hooks/useInvoice'
-import useSupabaseClient from '@/hooks/useSupabaseClient'
-import { useAuth } from '@/hooks/useAuth'
+const today = () => format(new Date(), "yyyy-MM-dd");
 
-const parseNum = (v) => parseFloat(String(v).replace(',', '.')) || 0
+export default function FactureForm() {
+  const { profile } = useAuth();
+  const mamaId = profile?.mama_id || null;
 
-export function mapDbLineToUI(l) {
-  const q = parseFloat(l.quantite) || 0
-  const pu = parseFloat(l.pu ?? l.prix_unitaire) || 0
-  return {
-    id: l.id,
-    produit: l.produit ?? { id: l.produit_id },
-    produit_id: l.produit_id,
-    quantite: String(q),
-    pu: pu.toFixed(2),
-    tva: l.tva ?? 0,
-    total_ht: l.total_ht != null ? String(l.total_ht) : (q * pu).toFixed(2),
-    pmp: l.pmp ?? 0,
-  }
-}
+  // Fournisseurs
+  const { data: fournisseursData, isLoading: loadingF } = useQuery({
+    queryKey: ["fournisseurs", mamaId],
+    enabled: !!mamaId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("fournisseurs")
+        .select("id, nom")
+        .eq("mama_id", mamaId)
+        .eq("actif", true)
+        .order("nom", { ascending: true });
+      if (error) throw error;
+      return Array.isArray(data) ? data : [];
+    },
+  });
+  const fournisseurs = Array.isArray(fournisseursData) ? fournisseursData : [];
 
-function createEmptyLine() {
-  return {
-    id: uuidv4(),
-    produit: { id: '', nom: '' },
-    produit_id: '',
-    quantite: '0',
-    pu: '0',
-    tva: 0,
-    total_ht: '0',
-    pmp: 0,
-  }
-}
+  // Zones (liste globale, préremplie ligne par ligne si default_zone_id arrive du produit)
+  const { data: zonesData } = useQuery({
+    queryKey: ["zones_stock", mamaId],
+    enabled: !!mamaId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("zones_stock")
+        .select("id, nom")
+        .eq("mama_id", mamaId)
+        .order("nom", { ascending: true });
+      if (error) return [];
+      return data || [];
+    },
+  });
+  const zones = Array.isArray(zonesData) ? zonesData : [];
 
-function FactureFormInner({ defaultValues, fournisseurs, onSaved, onClose }) {
-  const form = useForm({ defaultValues })
-  const {
-    control,
-    register,
-    handleSubmit,
-    watch,
-    formState: { isSubmitting },
-  } = form
-  const { fields, append, remove, update } = useFieldArray({ control, name: 'lignes' })
+  const form = useForm({
+    defaultValues: {
+      fournisseur_id: "",
+      date_facture: today(),
+      numero: "",
+      statut: "valide", // mappe vers p_actif
+      lignes: [
+        {
+          id: crypto.randomUUID(),
+          produit_id: null,
+          produit_nom: "",
+          quantite: 1,
+          unite: "",
+          prix_total_ht: 0,
+          pmp: 0,
+          tva: 0,
+          zone_id: "",
+        },
+      ],
+    },
+  });
 
-  const lignes = watch('lignes')
-  const statut = watch('statut') || 'BROUILLON'
+  const { control, handleSubmit, watch, reset } = form;
+  const { fields, append, remove, update } = useFieldArray({ control, name: "lignes" });
+  const lignes = watch("lignes");
 
-  const statutColors = {
-    BROUILLON: 'gray',
-    VALIDEE: 'green',
-    ANNULEE: 'red',
-    PAYEE: 'blue',
-  }
-
+  // Totaux facture (HT = somme des prix_total_ht ; TVA et TTC calculés par ligne)
   const totals = useMemo(() => {
-    let ht = 0
-    let tva = 0
-    lignes.forEach((l) => {
-      const lineHt = parseNum(l.quantite) * parseNum(l.pu)
-      ht += lineHt
-      tva += lineHt * (parseNum(l.tva) / 100)
-    })
-    return { ht, tva, ttc: ht + tva }
-  }, [lignes])
+    let ht = 0, tvaSum = 0;
+    for (const l of lignes || []) {
+      const lht = Number(l.prix_total_ht || 0);
+      const ltva = lht * (Number(l.tva || 0) / 100);
+      ht += lht; tvaSum += ltva;
+    }
+    const total_ht = +ht.toFixed(2);
+    const tva = +tvaSum.toFixed(2);
+    const total_ttc = +(total_ht + tva).toFixed(2);
+    return { total_ht, tva, total_ttc };
+  }, [lignes]);
 
-  const onSubmit = handleSubmit((data) => onSaved?.(data))
+  const addLigne = () =>
+    append({
+      id: crypto.randomUUID(),
+      produit_id: null,
+      produit_nom: "",
+      quantite: 1,
+      unite: "",
+      prix_total_ht: 0,
+      pmp: 0,
+      tva: 0,
+      zone_id: "",
+    });
+
+  const updateLigne = (i, patch) => update(i, { ...lignes[i], ...patch });
+
+  const onSubmit = async (values) => {
+    try {
+      if (!mamaId) { toast.error("Organisation introuvable."); return; }
+      if (!values.fournisseur_id) { toast.error("Sélectionnez un fournisseur."); return; }
+
+      // Construire les lignes pour la RPC : PU = total_ht / qte
+      const payloadLignes = (values.lignes || [])
+        .filter(l => l.produit_id && Number(l.quantite) > 0)
+        .map(l => {
+          const q = Number(l.quantite || 0);
+          const lht = Number(l.prix_total_ht || 0);
+          const pu = q > 0 ? lht / q : 0;
+          return {
+            produit_id: l.produit_id,
+            quantite: q,
+            prix_unitaire_ht: +pu.toFixed(6),
+            tva: Number(l.tva || 0),
+            // Optionnel si ta RPC accepte zone_id sur la ligne:
+            zone_id: l.zone_id || null,
+          };
+        });
+
+      if (payloadLignes.length === 0) { toast.error("Ajoutez au moins une ligne produit."); return; }
+
+      const rpcPayload = {
+        p_mama_id: mamaId,
+        p_fournisseur_id: values.fournisseur_id,
+        p_numero: values.numero || null,
+        p_date: values.date_facture,
+        p_lignes: payloadLignes,
+        p_actif: values.statut === "valide",
+        // Si, plus tard, tu ajoutes dans SQL la MAJ TVA produit: p_update_product_tva: true
+      };
+
+      const { error } = await supabase.rpc("fn_save_facture", rpcPayload);
+      if (error) throw error;
+
+      toast.success("Facture enregistrée.");
+
+      reset({
+        fournisseur_id: "",
+        date_facture: today(),
+        numero: "",
+        statut: "valide",
+        lignes: [
+          {
+            id: crypto.randomUUID(),
+            produit_id: null,
+            produit_nom: "",
+            quantite: 1,
+            unite: "",
+            prix_total_ht: 0,
+            pmp: 0,
+            tva: 0,
+            zone_id: "",
+          },
+        ],
+      });
+    } catch (e) {
+      console.error(e);
+      toast.error("Une erreur est survenue. Merci de réessayer.");
+    }
+  };
 
   return (
-    <form onSubmit={onSubmit} className="space-y-6">
-      <Card>
-        <CardHeader className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Entête</h2>
-          <Badge color={statutColors[statut]} className="capitalize">
-            {statut.toLowerCase()}
-          </Badge>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-4">
-            <div className="space-y-1">
-              <label className="text-sm">Fournisseur</label>
-              <Select {...register('fournisseur_id')} className="w-full">
-                <option value="">Choisir...</option>
-                {fournisseurs.map((f) => (
-                  <option key={f.id} value={f.id}>
-                    {f.nom}
-                  </option>
-                ))}
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {/* ENTÊTE */}
+      <div className="rounded-xl border border-border bg-card p-4 grid gap-4 md:grid-cols-4 grid-cols-1">
+        {/* Fournisseur */}
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium">Fournisseur</label>
+          <Controller
+            control={control}
+            name="fournisseur_id"
+            render={({ field }) => (
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger><SelectValue placeholder={loadingF ? "Chargement…" : "Sélectionner"} /></SelectTrigger>
+                <SelectContent align="start" className="max-h-64 overflow-auto">
+                  {fournisseurs.map((f) => <SelectItem key={f.id} value={f.id}>{f.nom}</SelectItem>)}
+                </SelectContent>
               </Select>
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm">Numéro</label>
-              <Input {...register('numero')} />
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm">Date</label>
-              <Input type="date" {...register('date_facture')} />
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm">Statut</label>
-              <Select {...register('statut')} className="w-full">
-                <option value="BROUILLON">BROUILLON</option>
-                <option value="VALIDEE">VALIDEE</option>
-                <option value="ANNULEE">ANNULEE</option>
-                <option value="PAYEE">PAYEE</option>
-              </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <section className="mt-6">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-muted-foreground">Lignes produits</h3>
+            )}
+          />
         </div>
 
-        <div className="rounded-xl border border-border bg-card p-3 space-y-3">
-          {fields.map((field, idx) => (
+        {/* Date */}
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium">Date</label>
+          <Controller control={control} name="date_facture" render={({ field }) => <Input type="date" {...field} />} />
+        </div>
+
+        {/* Numéro */}
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium">Numéro</label>
+          <Controller control={control} name="numero" render={({ field }) => <Input placeholder="N° facture" {...field} />} />
+        </div>
+
+        {/* Statut (mappe p_actif) */}
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium">Statut</label>
+          <Controller
+            control={control}
+            name="statut"
+            render={({ field }) => (
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger><SelectValue placeholder="Statut" /></SelectTrigger>
+                <SelectContent align="start">
+                  <SelectItem value="brouillon">Brouillon</SelectItem>
+                  <SelectItem value="valide">Validée</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
+        </div>
+      </div>
+
+      {/* LIGNES */}
+      <section>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold text-muted-foreground">Lignes produits</h3>
+          <Button type="button" variant="secondary" onClick={addLigne}>+ Ajouter une ligne</Button>
+        </div>
+
+        <div className="rounded-xl border border-border bg-card p-3 space-y-4 overflow-x-hidden">
+          {/* En-têtes colonnes */}
+          <div className="grid grid-cols-[minmax(240px,1.4fr)_minmax(90px,0.6fr)_minmax(120px,0.8fr)_minmax(140px,0.9fr)_minmax(140px,0.9fr)_minmax(120px,0.8fr)_minmax(160px,1fr)_minmax(120px,0.9fr)] gap-3 text-xs text-muted-foreground px-1">
+            <div>Produit</div>
+            <div>Qté</div>
+            <div>Unité</div>
+            <div>Total HT (€)</div>
+            <div>PU HT (€)</div>
+            <div>PMP</div>
+            <div>TVA %</div>
+            <div>Zone & Suppr</div>
+          </div>
+
+          {fields.map((f, i) => (
             <FactureLigne
-              key={field.id}
-              ligne={field}
-              index={idx}
-              onChange={(l) => update(idx, l)}
-              onRemove={() => remove(idx)}
-              existingProductIds={lignes
-                .map((l, i) => (i !== idx ? l.produit_id : null))
-                .filter(Boolean)}
+              key={f.id}
+              value={lignes[i]}
+              onChange={(patch) => updateLigne(i, patch)}
+              onRemove={() => remove(i)}
+              mamaId={mamaId}
+              lignes={lignes}
+              zones={zones}
             />
           ))}
         </div>
-
-        <div className="mt-3 flex justify-end">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => append(createEmptyLine())}
-          >
-            + Ajouter une ligne
-          </Button>
-        </div>
       </section>
 
-      <Card>
-        <CardContent>
-          <div className="flex justify-end gap-8 text-sm">
-            <div className="text-right">
-              <div className="opacity-70">Total HT</div>
-              <div className="font-semibold">{totals.ht.toFixed(2)} €</div>
-            </div>
-            <div className="text-right">
-              <div className="opacity-70">TVA</div>
-              <div className="font-semibold">{totals.tva.toFixed(2)} €</div>
-            </div>
-            <div className="text-right">
-              <div className="opacity-70">Total TTC</div>
-              <div className="font-semibold">{totals.ttc.toFixed(2)} €</div>
-            </div>
-          </div>
-        </CardContent>
-        <div className="sticky bottom-0 flex justify-end gap-2 border-t border-white/10 bg-black/40 p-4">
-          {onClose && (
-            <Button type="button" variant="outline" onClick={onClose}>
-              Annuler
-            </Button>
-          )}
-          <Button type="submit" disabled={isSubmitting}>
-            Enregistrer
-          </Button>
+      {/* TOTAUX */}
+      <div className="rounded-xl border border-border bg-card p-4 grid md:grid-cols-3 gap-4">
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">Total HT</span>
+          <span className="font-semibold">{totals.total_ht.toFixed(2)}</span>
         </div>
-      </Card>
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">TVA</span>
+          <span className="font-semibold">{totals.tva.toFixed(2)}</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">Total TTC</span>
+          <span className="font-semibold">{totals.total_ttc.toFixed(2)}</span>
+        </div>
+      </div>
+
+      {/* ACTIONS */}
+      <div className="flex justify-end">
+        <Button type="submit">Enregistrer</Button>
+      </div>
     </form>
-  )
-}
-
-export default function FactureForm() {
-  const { id } = useParams()
-  const navigate = useNavigate()
-  const supabase = useSupabaseClient()
-  const { session } = useAuth()
-  const mamaId = (
-    session?.user?.user_metadata?.mama_id ?? session?.user?.mama_id ?? ''
-  ).toString()
-  const isNew = !id || id === 'new'
-
-  const { data: invoice, isLoading } = useInvoice(isNew ? undefined : id)
-  const { data: fournisseurs = [] } = useFournisseursList({ actif: true })
-
-  const defaultValues = invoice
-    ? {
-        id: invoice.id,
-        numero: invoice.numero ?? '',
-        date_facture: (invoice.date_facture ?? '').slice(0, 10),
-        fournisseur_id: invoice.fournisseur_id ?? '',
-        lignes: (invoice.lignes ?? []).map(mapDbLineToUI),
-        statut: invoice.actif ? 'VALIDEE' : 'BROUILLON',
-      }
-    : {
-        id: undefined,
-        numero: '',
-        date_facture: new Date().toISOString().slice(0, 10),
-        fournisseur_id: '',
-        lignes: [createEmptyLine()],
-        statut: 'BROUILLON',
-      }
-
-  const handleSave = async ({
-    id: fid,
-    numero,
-    date_facture,
-    fournisseur_id,
-    lignes,
-    statut,
-  }) => {
-    try {
-      const payload = {
-        facture: {
-          id: fid,
-          numero,
-          date_facture,
-          fournisseur_id,
-          actif: statut === 'VALIDEE' || statut === 'PAYEE',
-        },
-        lignes: (lignes || []).map((l) => ({
-          id: l.id,
-          produit_id: l.produit_id,
-          quantite: parseNum(l.quantite),
-          pu_ht: parseNum(l.pu),
-          tva: parseNum(l.tva),
-        })),
-      }
-      const cleanPayload = JSON.parse(JSON.stringify(payload))
-      const { error } = await supabase.rpc('fn_save_facture', {
-        p_mama_id: mamaId,
-        p_payload: cleanPayload,
-      })
-      if (error) throw error
-      toast.success('Facture enregistrée')
-      navigate('/factures')
-    } catch (e) {
-      toast.error(e?.details || e?.message || "Erreur lors de l'enregistrement")
-    }
-  }
-
-  if (isLoading) return <LoadingSpinner message="Chargement..." />
-
-  return (
-    <FactureFormInner
-      defaultValues={defaultValues}
-      fournisseurs={fournisseurs}
-      onSaved={handleSave}
-      onClose={() => navigate(-1)}
-    />
-  )
+  );
 }
 

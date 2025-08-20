@@ -73,7 +73,12 @@ export default function FactureLigne({ value: line, onChange, onRemove, allLines
       ? n.toLocaleString("fr-FR", { minimumFractionDigits: 4, maximumFractionDigits: 4 })
       : "";
 
-  const excludeIds = allLines.filter((l) => l.produit_id).map((l) => `'${l.produit_id}'`);
+  const excludeIdsSameZone = allLines
+    .filter(
+      (l) =>
+        l.id !== line.id && (l.zone_id ?? null) === (line.zone_id ?? null) && !!l.produit_id
+    )
+    .map((l) => l.produit_id);
 
   const TVA_OPTIONS = [0, 5.5, 10, 20];
 
@@ -98,7 +103,6 @@ export default function FactureLigne({ value: line, onChange, onRemove, allLines
       <ProductPickerModal
         open={modalOpen}
         onOpenChange={setModalOpen}
-        excludeIds={excludeIds}
         onSelect={(p) => {
           recalc({
             produit_id: p.id,
@@ -109,6 +113,8 @@ export default function FactureLigne({ value: line, onChange, onRemove, allLines
           });
           setModalOpen(false);
         }}
+        excludeIdsSameZone={excludeIdsSameZone}
+        currentLineProductId={line.produit_id}
       />
       <Input
         type="number"

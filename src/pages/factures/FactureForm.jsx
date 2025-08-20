@@ -8,6 +8,7 @@ import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
 import { useZones } from '@/hooks/useZones';
 import FactureLigne from '@/components/FactureLigne';
+import ProductPickerModal from '@/components/forms/ProductPickerModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -86,6 +87,8 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
 
   const { control, handleSubmit, watch, reset, setValue } = form;
   const [saving, setSaving] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerIndex, setPickerIndex] = useState(null);
   const { fields, append, remove, update } = useFieldArray({
     control,
     name: 'lignes',
@@ -163,6 +166,25 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
     });
 
   const updateLigne = (i, patch) => update(i, { ...lignes[i], ...patch });
+
+  const openPicker = (i) => {
+    setPickerIndex(i);
+    setPickerOpen(true);
+  };
+
+  const onPickProduct = (p) => {
+    if (pickerIndex !== null) {
+      updateLigne(pickerIndex, {
+        produit_id: p.id,
+        produit_nom: p.nom,
+        unite: p.unite ?? '',
+        pmp: Number(p.pmp ?? 0),
+        tva: typeof p.tva === 'number' ? p.tva : 0,
+        zone_id: p.zone_id ?? null,
+      });
+    }
+    setPickerOpen(false);
+  };
 
   const buildPayload = (lgs = []) =>
     (lgs || [])
@@ -380,9 +402,9 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
               value={lignes[i]}
               onChange={(patch) => updateLigne(i, patch)}
               onRemove={() => remove(i)}
-              mamaId={mamaId}
-              excludeIds={excludeIds}
               zones={zones}
+              openPicker={openPicker}
+              index={i}
             />
           ))}
         </div>
@@ -420,6 +442,17 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
           Enregistrer
         </Button>
       </div>
+
+      <ProductPickerModal
+        open={pickerOpen}
+        onOpenChange={(v) => {
+          setPickerOpen(v);
+          if (!v) setPickerIndex(null);
+        }}
+        mamaId={mamaId}
+        onPick={onPickProduct}
+        excludeIds={excludeIds}
+      />
     </form>
   );
 }

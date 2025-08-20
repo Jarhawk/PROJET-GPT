@@ -13,6 +13,13 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@
 
 const today = () => format(new Date(), "yyyy-MM-dd");
 
+const STATUT_OPTIONS = [
+  { value: "brouillon", label: "Brouillon" },
+  { value: "en_attente", label: "En attente" },
+  { value: "valide", label: "Validée" },
+  { value: "annulee", label: "Annulée" },
+];
+
 export default function FactureForm() {
   const { profile } = useAuth();
   const mamaId = profile?.mama_id || null;
@@ -55,7 +62,7 @@ export default function FactureForm() {
       fournisseur_id: "",
       date_facture: today(),
       numero: "",
-      statut: "valide", // mappe vers p_actif
+      statut: "brouillon", // mappe vers p_actif
       lignes: [
         {
           id: crypto.randomUUID(),
@@ -110,6 +117,10 @@ export default function FactureForm() {
     try {
       if (!mamaId) { toast.error("Organisation introuvable."); return; }
       if (!values.fournisseur_id) { toast.error("Sélectionnez un fournisseur."); return; }
+      if (!STATUT_OPTIONS.some(s => s.value === values.statut)) {
+        toast.error("Statut invalide.");
+        return;
+      }
 
       // Construire les lignes pour la RPC : PU = total_ht / qte
       const payloadLignes = (values.lignes || [])
@@ -147,7 +158,7 @@ export default function FactureForm() {
         fournisseur_id: "",
         date_facture: today(),
         numero: "",
-        statut: "valide",
+        statut: "brouillon",
         lignes: [
           {
             id: crypto.randomUUID(),
@@ -211,8 +222,9 @@ export default function FactureForm() {
               <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger><SelectValue placeholder="Statut" /></SelectTrigger>
                 <SelectContent align="start">
-                  <SelectItem value="brouillon">Brouillon</SelectItem>
-                  <SelectItem value="valide">Validée</SelectItem>
+                  {STATUT_OPTIONS.map(opt => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             )}

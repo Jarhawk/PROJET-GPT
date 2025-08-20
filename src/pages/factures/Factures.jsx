@@ -86,7 +86,16 @@ export default function Factures() {
 
   return (
     <div className="p-6 container mx-auto text-shadow space-y-6">
-            <GlassCard width="w-full">
+      {showForm && (
+        <FactureForm
+          facture={selected}
+          fournisseurs={fournisseurs}
+          onClose={() => { setShowForm(false); setSelected(null); refetch(); }}
+          onSaved={refetch}
+        />
+      )}
+
+      <GlassCard width="w-full">
         <TableHeader className="items-center w-full flex-wrap gap-2">
           <div className="flex flex-wrap items-center gap-2 flex-1">
             <Input
@@ -175,15 +184,6 @@ export default function Factures() {
           )}
         </TableHeader>
       </GlassCard>
-
-      {showForm && (
-        <FactureForm
-          facture={selected}
-          fournisseurs={fournisseurs}
-          onClose={() => { setShowForm(false); setSelected(null); refetch(); }}
-          onSaved={refetch}
-        />
-      )}
 
       <FactureTable
         factures={factures}

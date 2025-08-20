@@ -44,7 +44,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
     ? fournisseursData
     : (fournisseursData?.data ?? []);
 
-  // Zones (liste globale, préremplie ligne par ligne si default_zone_id arrive du produit)
+// Zones (liste globale, préremplie ligne par ligne si zone_id arrive du produit)
   const { zones, fetchZones } = useZones();
   useEffect(() => {
     fetchZones();

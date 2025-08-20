@@ -34,7 +34,7 @@ export default function FactureForm() {
   });
   const fournisseurs = Array.isArray(fournisseursData) ? fournisseursData : [];
 
-  // Zones (liste globale, préremplie ligne par ligne si default_zone_id arrive du produit)
+  // Zones (liste globale, préremplie ligne par ligne si zone_id arrive du produit)
   const { data: zonesData } = useQuery({
     queryKey: ["zones_stock", mamaId],
     enabled: !!mamaId,

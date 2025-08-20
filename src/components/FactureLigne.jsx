@@ -19,14 +19,16 @@ export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes
 
   const update = (patch) => onChange({ ...value, ...patch });
   const onPick = (p) => {
-    update({
+    const ligne = {
+      ...value,
       produit_id: p.id,
       produit_nom: p.nom,
       unite: p.unite ?? "",
       pmp: Number(p.pmp ?? 0),
-      tva: typeof p.tva === "number" ? p.tva : (value?.tva ?? 0),
-      zone_id: p.default_zone_id ?? value?.zone_id ?? "",
-    });
+      tva: typeof p.tva === "number" ? p.tva : 0,
+      zone_id: p.zone_id ?? null,
+    };
+    onChange(ligne);
   };
 
   return (

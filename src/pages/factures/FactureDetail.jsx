@@ -3,8 +3,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import supabase from '@/lib/supabaseClient';
 import FactureForm from './FactureForm.jsx';
-import { mapDbLineToUI } from '@/utils/factures/mappers';
-import useFournisseurs from '@/hooks/data/useFournisseurs';
+import { mapDbLineToUI } from '@/features/factures/invoiceMappers';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { toast } from 'sonner';
 
@@ -27,72 +26,44 @@ function toLabel(v) {
   return String(v);
 }
 
-async function tableExists(name) {
-  try {
-    const { error } = await supabase.from(name).select('id').limit(1);
-    return !error;
-  } catch {
-    return false;
-  }
-}
-
 export default function FactureDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { data: fournisseurs = [] } = useFournisseurs({ actif: true });
   const [loading, setLoading] = useState(true);
-  const [formState, setFormState] = useState({ header: null, lignes: [] });
-
+  const [form, setForm] = useState(null);
+  const [lignes, setLignes] = useState([]);
 
   useEffect(() => {
     let isMounted = true;
     async function load() {
       setLoading(true);
-      try {
-        const tableLines = (await tableExists('facture_lignes'))
-          ? 'facture_lignes'
-          : 'lignes_facture';
+      const { data, error } = await supabase
+        .from('factures')
+        .select(
+          `id, mama_id, fournisseur_id, numero, date_facture, actif, total_ht, total_ttc, tva,
+          lignes:facture_lignes(
+            id, produit_id, quantite, prix_unitaire_ht, montant_ht, tva, zone_id,
+            produit:produits(id, nom, unite, pmp, tva)
+          )`
+        )
+        .eq('id', id)
+        .single();
 
-        const [headerRes, linesRes] = await Promise.all([
-          supabase
-            .from('factures')
-            .select(
-              'id, numero, date_facture, fournisseur_id, tva_mode, actif, created_at, updated_at'
-            )
-            .eq('id', id)
-            .single(),
-          supabase
-            .from(tableLines)
-            .select(
-              `id, facture_id, produit_id, quantite, unite, total_ht, pu, pmp, tva, zone_id, position, note, actif,
-            produit:produits(id, nom, code, ref_fournisseur, unite_achat, unite, tva_id, zone_stock_id)`
-            )
-            .eq('facture_id', id)
-            .order('position', { ascending: true })
-        ]);
-
-        const { data: header, error: e1 } = headerRes;
-        const { data: lines, error: e2 } = linesRes;
-
-        if (e1 || e2) {
-          const err = e1 || e2;
-          toast.error(err?.message || 'Erreur de chargement de la facture');
-          console.warn(err);
-          return;
-        }
-
-        if (isMounted) {
-          setFormState({
-            header,
-            lignes: (lines ?? []).map(mapDbLineToUI),
-          });
-        }
-      } catch (err) {
-        console.warn(err);
-        toast.error(err?.message || 'Erreur de chargement de la facture');
-      } finally {
-        if (isMounted) setLoading(false);
+      if (error) {
+        toast.error(error.message || 'Erreur de chargement de la facture');
+      } else if (data && isMounted) {
+        setForm({
+          id: data.id,
+          fournisseur_id: data.fournisseur_id ?? null,
+          date_facture: data.date_facture,
+          numero: data.numero ?? '',
+          statut: data.actif ? 'Validée' : 'Brouillon',
+          total_ht_attendu: Number(data.total_ht ?? 0) || null,
+        });
+        setLignes((data.lignes || []).map(mapDbLineToUI));
       }
+
+      if (isMounted) setLoading(false);
     }
     load();
     return () => {
@@ -104,9 +75,8 @@ export default function FactureDetail() {
 
   return (
     <FactureForm
-      facture={formState.header}
-      lignes={formState.lignes}
-      fournisseurs={fournisseurs}
+      initialForm={form}
+      initialLignes={lignes}
       onClose={() => navigate(-1)}
       onSaved={() => navigate(-1)}
     />

@@ -288,9 +288,9 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
           <Button type="button" variant="secondary" onClick={addLigne}>+ Ajouter une ligne</Button>
         </div>
 
-        <div className="rounded-xl border border-border bg-card p-3 space-y-4 overflow-x-hidden">
+        <div className="rounded-xl border border-border bg-card p-3 space-y-4 lignes-produits">
           {/* En-têtes colonnes */}
-          <div className="grid grid-cols-[minmax(260px,1fr)_90px_110px_140px_140px_110px_110px_180px_60px] gap-3 text-xs text-muted-foreground px-1">
+          <div className="grid gap-3 text-xs text-muted-foreground px-1 grid-cols-[repeat(auto-fit,minmax(140px,1fr))] xl:grid-cols-[minmax(260px,1fr)_90px_110px_140px_140px_110px_110px_180px_60px]">
             <div>Produit</div>
             <div>Qté</div>
             <div>Unité</div>

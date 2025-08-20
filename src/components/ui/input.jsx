@@ -17,18 +17,25 @@ const Input = React.forwardRef(
     },
     ref
   ) => {
+    const handleChange = (e) => {
+      if (type === 'number') {
+        e.target.value = e.target.value.replace(',', '.');
+      }
+      onChange?.(e);
+    };
     return (
       <input
         ref={ref}
         type={type}
         value={value}
-        onChange={onChange}
+        onChange={handleChange}
         placeholder={placeholder}
         disabled={disabled}
         aria-label={ariaLabel || placeholder || 'Champ de saisie'}
         className={`w-full px-4 py-2 font-semibold text-white placeholder-white/50 bg-white/10 backdrop-blur rounded-md shadow-lg
 border border-white/20 ring-1 ring-white/20 focus:outline-none hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed
  ${className}`}
+        {...(type === 'number' ? { inputMode: 'decimal', pattern: '[0-9]*[.,]?[0-9]*' } : {})}
         {...props}
         id="fld-field-a16p"
       />

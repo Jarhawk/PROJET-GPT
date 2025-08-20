@@ -13,6 +13,7 @@ import ProductPickerModal from "@/components/forms/ProductPickerModal";
 export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes, zones = [] }) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const produitRef = useRef(null);
+  const lineRef = useRef(null);
 
   const excludeIds = useMemo(
     () => (Array.isArray(lignes) ? lignes.map((l) => l.produit_id).filter(Boolean) : []),
@@ -56,7 +57,11 @@ export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes
       : "";
 
   return (
-    <div className="grid gap-3 items-center overflow-x-hidden grid-cols-[minmax(260px,1fr)_90px_110px_140px_140px_110px_110px_180px_60px]">
+    <div
+      ref={lineRef}
+      tabIndex={-1}
+      className="grid gap-3 items-center grid-cols-[repeat(auto-fit,minmax(140px,1fr))] xl:grid-cols-[minmax(260px,1fr)_90px_110px_140px_140px_110px_110px_180px_60px]"
+    >
       {/* Produit (picker) */}
       <div className="flex items-center gap-2">
         <Input
@@ -65,6 +70,10 @@ export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes
           value={value?.produit_nom || ""}
           placeholder="Choisir un produit…"
           onClick={() => setPickerOpen(true)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') { e.preventDefault(); setPickerOpen(true); }
+            else if (e.key === 'Escape') { e.preventDefault(); lineRef.current?.focus(); }
+          }}
           autoComplete="off"
           name="no-autofill"
           className="cursor-pointer"
@@ -79,7 +88,6 @@ export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes
         type="number"
         min="0"
         step="0.01"
-        className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
         value={qte}
         onChange={(e) => recalc({ quantite: e.target.value })}
         placeholder="Qté"
@@ -95,7 +103,6 @@ export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes
         type="number"
         min="0"
         step="0.01"
-        className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
         value={total.toFixed(2)}
         onChange={(e) => recalc({ prix_total_ht: e.target.value })}
         placeholder="Total HT (€)"
@@ -114,7 +121,6 @@ export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes
         type="number"
         min="0"
         step="0.01"
-        className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
         value={tva.toFixed(2)}
         onChange={(e) => recalc({ tva: e.target.value })}
         placeholder="TVA %"
@@ -155,7 +161,7 @@ export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes
         open={pickerOpen}
         onOpenChange={(v) => {
           setPickerOpen(v);
-          if (!v) produitRef.current?.focus();
+          if (!v) lineRef.current?.focus();
         }}
         mamaId={mamaId}
         onPick={onPick}

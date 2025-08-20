@@ -309,3 +309,13 @@ html.dark body {
 .sonner-toaster {
   z-index: 9999 !important;
 }
+
+/* Remove spinners from numeric inputs */
+input[type="number"] {
+  appearance: textfield;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

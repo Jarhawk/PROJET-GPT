@@ -9,7 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import FactureLigne from "@/components/FactureLigne";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { Select, SelectTrigger, SelectContent, SelectItem } from "@/components/ui/select";
 
 const today = () => format(new Date(), "yyyy-MM-dd");
 
@@ -180,9 +180,18 @@ export default function FactureForm() {
             name="fournisseur_id"
             render={({ field }) => (
               <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger><SelectValue placeholder={loadingF ? "Chargement…" : "Sélectionner"} /></SelectTrigger>
+                <SelectTrigger>
+                  <span className="truncate">
+                    {fournisseurs.find((f) => f.id === field.value)?.nom ||
+                      (loadingF ? "Chargement…" : "Sélectionner")}
+                  </span>
+                </SelectTrigger>
                 <SelectContent align="start" className="max-h-64 overflow-auto">
-                  {fournisseurs.map((f) => <SelectItem key={f.id} value={f.id}>{f.nom}</SelectItem>)}
+                  {fournisseurs.map((f) => (
+                    <SelectItem key={f.id} value={f.id}>
+                      {f.nom}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             )}
@@ -209,7 +218,12 @@ export default function FactureForm() {
             name="statut"
             render={({ field }) => (
               <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger><SelectValue placeholder="Statut" /></SelectTrigger>
+                <SelectTrigger>
+                  <span className="truncate">
+                    {{ brouillon: "Brouillon", valide: "Validée" }[field.value] ||
+                      "Statut"}
+                  </span>
+                </SelectTrigger>
                 <SelectContent align="start">
                   <SelectItem value="brouillon">Brouillon</SelectItem>
                   <SelectItem value="valide">Validée</SelectItem>

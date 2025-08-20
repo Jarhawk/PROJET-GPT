@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { Select, SelectTrigger, SelectContent, SelectItem } from "@/components/ui/select";
 import ProductPickerModal from "@/components/forms/ProductPickerModal";
 
 export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes, zones }) {
@@ -107,9 +107,17 @@ export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes
       <div className="flex items-center gap-2">
         <div className="min-w-0 flex-1">
           <Select value={value?.zone_id || ""} onValueChange={(v) => update({ zone_id: v })}>
-            <SelectTrigger><SelectValue placeholder="Zone" /></SelectTrigger>
+            <SelectTrigger>
+              <span className="truncate">
+                {zones.find((z) => z.id === value?.zone_id)?.nom || "Zone"}
+              </span>
+            </SelectTrigger>
             <SelectContent align="start" className="max-h-64 overflow-auto">
-              {zones.map((z) => <SelectItem key={z.id} value={z.id}>{z.nom}</SelectItem>)}
+              {zones.map((z) => (
+                <SelectItem key={z.id} value={z.id}>
+                  {z.nom}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

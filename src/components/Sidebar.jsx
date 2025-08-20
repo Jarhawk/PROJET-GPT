@@ -32,13 +32,23 @@ export default function Sidebar() {
     if (typeof r === "object") return Object.values(r).some(Boolean);
     return false;
   };
+  const paramKeys = ["familles", "sous_familles", "unites"];
+  const modulesFiltered = paramKeys.some((k) =>
+    Object.prototype.hasOwnProperty.call(modules, normalizeAccessKey(k))
+  );
+  const canParam = (key) =>
+    modulesFiltered ? has(key) && hasParamRight(key) : true;
+  const canFamilles = canParam("familles");
+  const canSousFamilles = canParam("sous_familles");
+  const canUnites = canParam("unites");
   const showParametrage =
-    rights?.menus?.parametrage === true ||
-    hasParamRight("familles") ||
-    hasParamRight("sous_familles") ||
-    hasParamRight("unites") ||
     isAdmin ||
-    import.meta.env.DEV;
+    import.meta.env.DEV ||
+    rights?.menus?.parametrage === true ||
+    !modulesFiltered ||
+    canFamilles ||
+    canSousFamilles ||
+    canUnites;
 
   if (authLoading || settingsLoading) return null;
 
@@ -135,27 +145,39 @@ export default function Sidebar() {
         {has("notifications") && <Link to="/notifications">Notifications</Link>}
 
         {showParametrage && (
-          <details open={pathname.startsWith("/parametrage")}> 
+          <details open={pathname.startsWith("/parametrage")}>
             <summary className="cursor-pointer">Paramétrage</summary>
             <div className="ml-4 flex flex-col gap-1 mt-1">
-              <NavLink
-                to="/parametrage/familles"
-                className={({ isActive }) => (isActive ? "text-mamastockGold" : "")}
-              >
-                Familles
-              </NavLink>
-              <NavLink
-                to="/parametrage/sous-familles"
-                className={({ isActive }) => (isActive ? "text-mamastockGold" : "")}
-              >
-                Sous-familles
-              </NavLink>
-              <NavLink
-                to="/parametrage/unites"
-                className={({ isActive }) => (isActive ? "text-mamastockGold" : "")}
-              >
-                Unités
-              </NavLink>
+              {canFamilles && (
+                <NavLink
+                  to="/parametrage/familles"
+                  className={({ isActive }) =>
+                    isActive ? "text-mamastockGold" : ""
+                  }
+                >
+                  Familles
+                </NavLink>
+              )}
+              {canSousFamilles && (
+                <NavLink
+                  to="/parametrage/sous-familles"
+                  className={({ isActive }) =>
+                    isActive ? "text-mamastockGold" : ""
+                  }
+                >
+                  Sous-familles
+                </NavLink>
+              )}
+              {canUnites && (
+                <NavLink
+                  to="/parametrage/unites"
+                  className={({ isActive }) =>
+                    isActive ? "text-mamastockGold" : ""
+                  }
+                >
+                  Unités
+                </NavLink>
+              )}
             </div>
           </details>
         )}

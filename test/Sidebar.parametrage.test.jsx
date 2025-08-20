@@ -68,15 +68,32 @@ describe('Sidebar paramétrage links', () => {
     expect(screen.getByText('Unités')).toBeInTheDocument();
   });
 
-  it('masque la section quand aucun droit', () => {
+  it("affiche la section quand aucun droit parametrage n'est défini", () => {
     import.meta.env.DEV = false;
     setup({ userData: { role: 'user', access_rights: {} } });
+    expect(screen.getByText('Paramétrage')).toBeInTheDocument();
+    expect(screen.getByText('Familles')).toBeInTheDocument();
+  });
+
+  it('masque la section quand tous les modules paramétrage sont refusés', () => {
+    import.meta.env.DEV = false;
+    setup({
+      userData: {
+        role: 'user',
+        access_rights: { familles: false, sous_familles: false, unites: false },
+      },
+    });
     expect(screen.queryByText('Paramétrage')).toBeNull();
   });
 
-  it('affiche la section en mode dev sans droits', () => {
+  it('affiche la section en mode dev même si modules refusés', () => {
     import.meta.env.DEV = true;
-    setup({ userData: { role: 'user', access_rights: {} } });
+    setup({
+      userData: {
+        role: 'user',
+        access_rights: { familles: false, sous_familles: false, unites: false },
+      },
+    });
     expect(screen.getByText('Paramétrage')).toBeInTheDocument();
   });
 });

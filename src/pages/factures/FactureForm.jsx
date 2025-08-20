@@ -1,5 +1,5 @@
 // src/pages/factures/FactureForm.jsx
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import supabase from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/useAuth";
 import FactureLigne from "@/components/FactureLigne";
+import ProductPickerModal from "@/components/forms/ProductPickerModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
@@ -77,6 +78,27 @@ export default function FactureForm() {
   const { fields, append, remove, update } = useFieldArray({ control, name: "lignes" });
   const lignes = watch("lignes");
 
+  const [picker, setPicker] = useState({ open: false, index: null });
+  const openPicker = (i) => setPicker({ open: true, index: i });
+  const closePicker = () => setPicker({ open: false, index: null });
+  const updateLigne = (i, patch) => update(i, { ...lignes[i], ...patch });
+  const handlePick = (p) => {
+    if (picker.index === null) return;
+    updateLigne(picker.index, {
+      produit_id: p.id,
+      produit_nom: p.nom,
+      unite: p.unite ?? "",
+      pmp: Number(p.pmp ?? 0),
+      tva: typeof p.tva === "number" ? p.tva : (lignes[picker.index]?.tva ?? 0),
+      zone_id: p.default_zone_id ?? lignes[picker.index]?.zone_id ?? "",
+    });
+    closePicker();
+  };
+  const excludeIds = useMemo(
+    () => lignes.map((l, idx) => (idx === picker.index ? null : l.produit_id)).filter(Boolean),
+    [lignes, picker.index]
+  );
+
   // Totaux facture (HT = somme des prix_total_ht ; TVA et TTC calculés par ligne)
   const totals = useMemo(() => {
     let ht = 0, tvaSum = 0;
@@ -103,8 +125,6 @@ export default function FactureForm() {
       tva: 0,
       zone_id: "",
     });
-
-  const updateLigne = (i, patch) => update(i, { ...lignes[i], ...patch });
 
   const onSubmit = async (values) => {
     try {
@@ -246,9 +266,8 @@ export default function FactureForm() {
               value={lignes[i]}
               onChange={(patch) => updateLigne(i, patch)}
               onRemove={() => remove(i)}
-              mamaId={mamaId}
-              lignes={lignes}
               zones={zones}
+              openPicker={() => openPicker(i)}
             />
           ))}
         </div>
@@ -274,6 +293,14 @@ export default function FactureForm() {
       <div className="flex justify-end">
         <Button type="submit" disabled={isSubmitting}>Enregistrer</Button>
       </div>
+
+      <ProductPickerModal
+        open={picker.open}
+        onOpenChange={(v) => (v ? setPicker((p) => ({ ...p, open: v })) : closePicker())}
+        mamaId={mamaId}
+        onPick={handlePick}
+        excludeIds={excludeIds}
+      />
     </form>
   );
 }

@@ -18,6 +18,9 @@ import {
   SelectItem,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { mapUILineToPayload } from '@/features/factures/invoiceMappers';
+
+const FN_UPDATE_FACTURE_EXISTS = false;
 
 const today = () => format(new Date(), 'yyyy-MM-dd');
 
@@ -64,6 +67,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
   });
 
   const emptyForm = () => ({
+    id: null,
     fournisseur_id: '',
     date_facture: today(),
     numero: '',
@@ -96,6 +100,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
   const lignes = watch('lignes');
   const totalHTAttendu = watch('total_ht_attendu');
   const statut = watch('statut');
+  const formId = watch('id');
   const excludeIds = useMemo(
     () => (lignes || []).map((l) => l.produit_id).filter(Boolean),
     [lignes]
@@ -186,17 +191,6 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
     setPickerOpen(false);
   };
 
-  const buildPayload = (lgs = []) =>
-    (lgs || [])
-      .filter((l) => l.produit_id && Number(l.quantite) > 0)
-      .map(({ produit_id, quantite, prix_unitaire_ht, tva, zone_id }) => ({
-        produit_id,
-        quantite: Number(quantite || 0),
-        prix_unitaire_ht: Number(prix_unitaire_ht || 0),
-        tva: Number(tva || 0),
-        zone_id: zone_id ?? null,
-      }));
-
   const onSubmit = async (values) => {
     if (saving) return;
     setSaving(true);
@@ -209,8 +203,9 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
         toast.error('Sélectionnez un fournisseur.');
         return;
       }
-
-      const payloadLignes = buildPayload(values.lignes);
+      const payloadLignes = (lignes || [])
+        .filter((l) => l.produit_id)
+        .map(mapUILineToPayload);
       if (payloadLignes.length === 0) {
         toast.error('Ajoutez au moins une ligne produit.');
         return;
@@ -218,14 +213,34 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
 
       const p_actif = values.statut === 'Validée' && ecart_ht === 0;
 
-      const { data, error } = await supabase.rpc('fn_save_facture', {
-        p_mama_id: mamaId,
-        p_fournisseur_id: values.fournisseur_id,
-        p_numero: values.numero || null,
-        p_date: values.date_facture,
-        p_lignes: payloadLignes,
-        p_actif,
-      });
+      if (formId && !FN_UPDATE_FACTURE_EXISTS) {
+        toast.error(
+          'La modification nécessite fn_update_facture côté serveur'
+        );
+        return;
+      }
+
+      const rpcName = formId ? 'fn_update_facture' : 'fn_save_facture';
+      const args = formId
+        ? {
+            p_facture_id: formId,
+            p_mama_id: mamaId,
+            p_fournisseur_id: values.fournisseur_id,
+            p_numero: values.numero || null,
+            p_date: values.date_facture,
+            p_lignes: payloadLignes,
+            p_actif,
+          }
+        : {
+            p_mama_id: mamaId,
+            p_fournisseur_id: values.fournisseur_id,
+            p_numero: values.numero || null,
+            p_date: values.date_facture,
+            p_lignes: payloadLignes,
+            p_actif,
+          };
+
+      const { data, error } = await supabase.rpc(rpcName, args);
 
       if (error) {
         toast.error(error.message);
@@ -237,7 +252,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
       );
 
       onSaved?.();
-      if (!facture) reset(emptyForm());
+      if (!formId) reset(emptyForm());
       return data;
     } catch (e) {
       console.warn(e);
@@ -430,17 +445,28 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
 
       {/* ACTIONS */}
       <div className="flex justify-end">
-        <Button
-          type="submit"
-          disabled={saving || (statut === 'Validée' && ecart_ht !== 0)}
-          title={
-            statut === 'Validée' && ecart_ht !== 0
-              ? 'Écart non nul : la facture ne peut être validée.'
-              : undefined
-          }
-        >
-          Enregistrer
-        </Button>
+        <div className="flex flex-col items-end">
+          <Button
+            type="submit"
+            disabled={
+              saving ||
+              (statut === 'Validée' && ecart_ht !== 0) ||
+              (formId && !FN_UPDATE_FACTURE_EXISTS)
+            }
+            title={
+              statut === 'Validée' && ecart_ht !== 0
+                ? 'Écart non nul : la facture ne peut être validée.'
+                : undefined
+            }
+          >
+            Enregistrer
+          </Button>
+          {formId && !FN_UPDATE_FACTURE_EXISTS && (
+            <p className="text-sm text-destructive mt-2">
+              La modification nécessite fn_update_facture côté serveur
+            </p>
+          )}
+        </div>
       </div>
 
       <ProductPickerModal

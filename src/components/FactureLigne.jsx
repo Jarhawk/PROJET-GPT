@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectTrigger,
-  SelectValue,
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
@@ -126,7 +125,9 @@ export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes
       {/* Zone */}
       <Select value={value?.zone_id || ""} onValueChange={(v) => recalc({ zone_id: v })}>
         <SelectTrigger>
-          <SelectValue placeholder="Zone" />
+          <span className="truncate">
+            {zones.find((z) => z.id === value?.zone_id)?.nom || "Zone"}
+          </span>
         </SelectTrigger>
         <SelectContent align="start" className="max-h-64 overflow-auto">
           <SelectItem value="">-</SelectItem>

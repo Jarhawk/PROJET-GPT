@@ -1,7 +1,14 @@
 import { useMemo, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import { Trash2 } from "lucide-react";
 import ProductPickerModal from "@/components/forms/ProductPickerModal";
 
 export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes, zones }) {
@@ -13,24 +20,44 @@ export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes
     [lignes]
   );
 
-  const q   = Number(value?.quantite || 0);
-  const lht = Number(value?.prix_total_ht || 0);
-  const pu  = q > 0 ? lht / q : 0;
+  const qte = Number(value?.quantite || 0);
+  const total = Number(value?.prix_total_ht || 0);
+  const tva = Number(value?.tva || 0);
+  const pu = qte > 0 ? total / qte : 0;
 
-  const update = (patch) => onChange({ ...value, ...patch });
+  const recalc = (patch = {}) => {
+    const q = patch.quantite !== undefined ? Number(patch.quantite) : qte;
+    const lht = patch.prix_total_ht !== undefined ? Number(patch.prix_total_ht) : total;
+    const tv = patch.tva !== undefined ? Number(patch.tva) : tva;
+    const pu_ht = q > 0 ? lht / q : 0;
+    onChange({
+      ...value,
+      ...patch,
+      quantite: +q.toFixed(2),
+      prix_total_ht: +lht.toFixed(2),
+      prix_unitaire_ht: +pu_ht.toFixed(6),
+      tva: +Math.max(tv, 0).toFixed(2),
+    });
+  };
+
   const onPick = (p) => {
-    update({
+    recalc({
       produit_id: p.id,
       produit_nom: p.nom,
       unite: p.unite ?? "",
       pmp: Number(p.pmp ?? 0),
-      tva: typeof p.tva === "number" ? p.tva : (value?.tva ?? 0),
+      tva: typeof p.tva === "number" ? p.tva : tva,
       zone_id: p.default_zone_id ?? value?.zone_id ?? "",
     });
   };
 
+  const fmt = (n) =>
+    Number.isFinite(n)
+      ? n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      : "";
+
   return (
-    <div className="grid grid-cols-[minmax(240px,1.4fr)_minmax(90px,0.6fr)_minmax(120px,0.8fr)_minmax(140px,0.9fr)_minmax(140px,0.9fr)_minmax(120px,0.8fr)_minmax(160px,1fr)_minmax(120px,0.9fr)] gap-3 items-center overflow-x-hidden">
+    <div className="grid gap-3 items-center overflow-x-hidden grid-cols-[minmax(260px,1fr)_90px_110px_140px_140px_110px_110px_180px_60px]">
       {/* Produit (picker) */}
       <div className="flex items-center gap-2">
         <Input
@@ -43,83 +70,92 @@ export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes
           name="no-autofill"
           className="cursor-pointer"
         />
-        <Button type="button" variant="outline" onClick={() => setPickerOpen(true)}>Rechercher</Button>
+        <Button type="button" variant="outline" onClick={() => setPickerOpen(true)}>
+          Rechercher
+        </Button>
       </div>
 
-      {/* Quantité (editable) */}
+      {/* Qté */}
       <Input
         type="number"
+        min="0"
         step="0.01"
-        value={value?.quantite ?? ""}
-        onChange={(e) => update({ quantite: e.target.value })}
+        className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+        value={qte}
+        onChange={(e) => recalc({ quantite: e.target.value })}
         placeholder="Qté"
         autoComplete="off"
         name="no-autofill"
       />
 
-      {/* Unité (readonly, disabled for visual distinction) */}
-      <Input
-        readOnly
-        disabled
-        value={value?.unite || ""}
-        placeholder="Unité"
-      />
+      {/* Unité (RO) */}
+      <Input readOnly tabIndex={-1} value={value?.unite || ""} placeholder="Unité" />
 
-      {/* Prix total HT (€) editable */}
+      {/* Total HT (€) */}
       <Input
         type="number"
+        min="0"
         step="0.01"
-        value={value?.prix_total_ht ?? ""}
-        onChange={(e) => update({ prix_total_ht: e.target.value })}
+        className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+        value={total.toFixed(2)}
+        onChange={(e) => recalc({ prix_total_ht: e.target.value })}
         placeholder="Total HT (€)"
         autoComplete="off"
         name="no-autofill"
       />
 
-      {/* Prix unitaire calculé (€) readonly */}
-      <Input
-        readOnly
-        disabled
-        value={Number.isFinite(pu) ? pu.toFixed(4) : ""}
-        placeholder="PU HT (€)"
-      />
+      {/* PU HT (€) */}
+      <Input readOnly tabIndex={-1} value={fmt(pu)} placeholder="PU HT (€)" />
 
-      {/* PMP (readonly) */}
-      <Input
-        readOnly
-        disabled
-        value={Number(value?.pmp ?? 0).toFixed(2)}
-        placeholder="PMP"
-      />
+      {/* PMP */}
+      <Input readOnly tabIndex={-1} value={fmt(Number(value?.pmp ?? 0))} placeholder="PMP" />
 
-      {/* TVA % (prefill; editable) */}
+      {/* TVA % */}
       <Input
         type="number"
+        min="0"
         step="0.01"
-        value={value?.tva ?? ""}
-        onChange={(e) => update({ tva: e.target.value })}
+        className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+        value={tva.toFixed(2)}
+        onChange={(e) => recalc({ tva: e.target.value })}
         placeholder="TVA %"
         autoComplete="off"
         name="no-autofill"
       />
 
-      {/* Zone (prefill if known; editable) + Supprimer */}
-      <div className="flex items-center gap-2">
-        <div className="min-w-0 flex-1">
-          <Select value={value?.zone_id || ""} onValueChange={(v) => update({ zone_id: v })}>
-            <SelectTrigger><SelectValue placeholder="Zone" /></SelectTrigger>
-            <SelectContent align="start" className="max-h-64 overflow-auto">
-              {zones.map((z) => <SelectItem key={z.id} value={z.id}>{z.nom}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
-        <Button type="button" variant="ghost" className="text-destructive" onClick={onRemove}>Supprimer</Button>
-      </div>
+      {/* Zone */}
+      <Select value={value?.zone_id || ""} onValueChange={(v) => recalc({ zone_id: v })}>
+        <SelectTrigger>
+          <SelectValue placeholder="Zone" />
+        </SelectTrigger>
+        <SelectContent align="start" className="max-h-64 overflow-auto">
+          <SelectItem value="">-</SelectItem>
+          {zones.map((z) => (
+            <SelectItem key={z.id} value={z.id}>
+              {z.nom}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      {/* Actions */}
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="text-destructive"
+        onClick={onRemove}
+      >
+        <Trash2 size={16} />
+      </Button>
 
       {/* Modal de sélection produit */}
       <ProductPickerModal
         open={pickerOpen}
-        onOpenChange={(v) => { setPickerOpen(v); if (!v) produitRef.current?.focus(); }}
+        onOpenChange={(v) => {
+          setPickerOpen(v);
+          if (!v) produitRef.current?.focus();
+        }}
         mamaId={mamaId}
         onPick={onPick}
         excludeIds={excludeIds}

@@ -19,8 +19,8 @@ export default function Zones() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchZones(filters).then(setRows);
-  }, [filters]);
+    fetchZones(filters).then(data => setRows(Array.isArray(data) ? data : []));
+  }, [filters, fetchZones]);
 
   async function handleDelete(id) {
     const reassign = window.prompt(
@@ -34,7 +34,8 @@ export default function Zones() {
     if (error) toast.error(error.message);
     else {
       toast.success('Zone supprimée');
-      setRows(await fetchZones(filters));
+      const refreshed = await fetchZones(filters);
+      setRows(Array.isArray(refreshed) ? refreshed : []);
     }
   }
 
@@ -48,12 +49,12 @@ export default function Zones() {
         <input
           className="input"
           placeholder="Recherche"
-          value={filters.q}
+          value={filters.q ?? ''}
           onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))}
         />
         <select
           className="input"
-          value={filters.type}
+          value={filters.type ?? ''}
           onChange={(e) => setFilters((f) => ({ ...f, type: e.target.value }))}
         >
           <option value="">Tous types</option>
@@ -67,7 +68,7 @@ export default function Zones() {
         <label className="flex items-center gap-1 text-sm">
           <input
             type="checkbox"
-            checked={filters.actif}
+            checked={filters.actif ?? false}
             onChange={(e) =>
               setFilters((f) => ({ ...f, actif: e.target.checked }))
             }
@@ -99,7 +100,8 @@ export default function Zones() {
                     checked={z.actif}
                     onChange={async () => {
                       await updateZone(z.id, { actif: !z.actif });
-                      setRows(await fetchZones(filters));
+                      const refreshed = await fetchZones(filters);
+                      setRows(Array.isArray(refreshed) ? refreshed : []);
                     }}
                   />
                 </td>

@@ -20,7 +20,8 @@ export default function ProduitForm({
   onClose,
 }) {
   const editing = !!produit;
-  const { data: fournisseurs = [] } = useFournisseurs({ actif: true });
+  const { data: fournisseursData } = useFournisseurs({ actif: true });
+  const fournisseurs = fournisseursData?.data || [];
   const {
     familles,
     fetchFamilles,
@@ -300,8 +301,8 @@ export default function ProduitForm({
           <Input
             id="prod-min"
             type="number"
-            value={stockMin}
-            onChange={(e) => setStockMin(e.target.value)}
+            value={stockMin ?? 0}
+            onChange={(e) => setStockMin(Number(e.target.value) || 0)}
             min={0}
           />
         </div>
@@ -312,8 +313,8 @@ export default function ProduitForm({
           <Input
             id="prod-tva"
             type="number"
-            value={tva}
-            onChange={(e) => setTva(e.target.value)}
+            value={tva ?? 0}
+            onChange={(e) => setTva(Number(e.target.value) || 0)}
             min={0}
             step="0.1"
           />

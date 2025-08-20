@@ -14,7 +14,7 @@ export default function MouvementFormModal({
   open,
   onOpenChange,
   onSubmit,
-  produits,
+  produits = [],
   initial = {},
   loading = false,
   editMode = false,

@@ -11,7 +11,7 @@ import {
 import { Trash2 } from "lucide-react";
 import ProductPickerModal from "@/components/forms/ProductPickerModal";
 
-export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes, zones }) {
+export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes, zones = [] }) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const produitRef = useRef(null);
 

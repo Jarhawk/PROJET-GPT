@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import ProductPickerModal from "@/components/forms/ProductPickerModal";
 
-export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes, zones }) {
+export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes, zones = [] }) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const produitRef = useRef(null);
 

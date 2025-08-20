@@ -2,7 +2,7 @@ import { Select } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-export default function FicheLigne({ ligne, products, ficheOptions, onChange, onRemove }) {
+export default function FicheLigne({ ligne, products = [], ficheOptions = [], onChange, onRemove }) {
   const prod = products.find((p) => p.id === ligne.produit_id);
   const sf = ficheOptions.find((f) => f.id === ligne.sous_fiche_id);
   const prixUnitaire =

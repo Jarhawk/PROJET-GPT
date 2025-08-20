@@ -11,13 +11,14 @@ export function Input(props) {
 }
 
 export function Select(props) {
-  const { id, className = "", children, ...rest } = props;
+  const { id, className = "", children, placeholder, ...rest } = props;
   return (
     <select
       id={id}
       className={`block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900 ${className}`}
       {...rest}
     >
+      {placeholder !== undefined && <option value="">{placeholder}</option>}
       {children}
     </select>
   );

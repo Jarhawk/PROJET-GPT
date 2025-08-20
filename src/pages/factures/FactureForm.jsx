@@ -93,6 +93,10 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
   const lignes = watch('lignes');
   const totalHTAttendu = watch('total_ht_attendu');
   const statut = watch('statut');
+  const excludeIds = useMemo(
+    () => (lignes || []).map((l) => l.produit_id).filter(Boolean),
+    [lignes]
+  );
 
   const sommeLignesHT = useMemo(() => {
     let sum = 0;
@@ -377,7 +381,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
               onChange={(patch) => updateLigne(i, patch)}
               onRemove={() => remove(i)}
               mamaId={mamaId}
-              lignes={lignes}
+              excludeIds={excludeIds}
               zones={zones}
             />
           ))}

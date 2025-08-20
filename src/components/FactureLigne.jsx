@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,15 +10,10 @@ import {
 import { Trash2 } from "lucide-react";
 import ProductPickerModal from "@/components/forms/ProductPickerModal";
 
-export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes, zones = [] }) {
+export default function FactureLigne({ value, onChange, onRemove, mamaId, excludeIds = [], zones = [] }) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const produitRef = useRef(null);
   const lineRef = useRef(null);
-
-  const excludeIds = useMemo(
-    () => (Array.isArray(lignes) ? lignes.map((l) => l.produit_id).filter(Boolean) : []),
-    [lignes]
-  );
 
   const qte = Number(value?.quantite || 0);
   const total = Number(value?.prix_total_ht || 0);

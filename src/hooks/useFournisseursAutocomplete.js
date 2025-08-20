@@ -20,15 +20,16 @@ export function useFournisseursAutocomplete() {
     if (query) {
       q = q.ilike("nom", `%${query}%`);
     }
-    q = q.order("nom", { ascending: true }).limit(10);
+    q = q.order("nom", { ascending: true }).limit(50);
     const { data, error } = await q;
     setLoading(false);
     if (error) {
       setError(error);
       return [];
     }
-    setResults(Array.isArray(data) ? data : []);
-    return data || [];
+    const arr = Array.isArray(data) ? data : data?.data ?? [];
+    setResults(arr);
+    return arr;
   }, [mama_id]);
 
   return { results, loading, error, searchFournisseurs };

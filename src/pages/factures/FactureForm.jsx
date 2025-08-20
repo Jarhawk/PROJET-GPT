@@ -18,7 +18,7 @@ export default function FactureForm() {
   const mamaId = profile?.mama_id || null;
 
   // Fournisseurs
-  const { data: fournisseursData, isLoading: loadingF } = useQuery({
+  const { data: fournisseursData } = useQuery({
     queryKey: ["fournisseurs", mamaId],
     enabled: !!mamaId,
     queryFn: async () => {
@@ -27,12 +27,13 @@ export default function FactureForm() {
         .select("id, nom")
         .eq("mama_id", mamaId)
         .eq("actif", true)
-        .order("nom", { ascending: true });
+        .order("nom", { ascending: true })
+        .limit(50);
       if (error) throw error;
-      return Array.isArray(data) ? data : [];
+      return Array.isArray(data) ? data : data?.data ?? [];
     },
   });
-  const fournisseurs = Array.isArray(fournisseursData) ? fournisseursData : [];
+  const fournisseurs = Array.isArray(fournisseursData) ? fournisseursData : fournisseursData?.data ?? [];
 
   // Zones (liste globale, préremplie ligne par ligne si default_zone_id arrive du produit)
   const { data: zonesData } = useQuery({
@@ -179,10 +180,10 @@ export default function FactureForm() {
             control={control}
             name="fournisseur_id"
             render={({ field }) => (
-              <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger><SelectValue placeholder={loadingF ? "Chargement…" : "Sélectionner"} /></SelectTrigger>
+              <Select value={field.value ?? ''} onValueChange={v => field.onChange(v)}>
+                <SelectTrigger><SelectValue placeholder="Sélectionner" /></SelectTrigger>
                 <SelectContent align="start" className="max-h-64 overflow-auto">
-                  {fournisseurs.map((f) => <SelectItem key={f.id} value={f.id}>{f.nom}</SelectItem>)}
+                  {fournisseurs.map(f => <SelectItem key={f.id} value={f.id}>{f.nom}</SelectItem>)}
                 </SelectContent>
               </Select>
             )}

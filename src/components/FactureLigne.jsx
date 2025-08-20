@@ -41,8 +41,8 @@ export default function FactureLigne({ value, onChange, onRemove, mamaId, exclud
       produit_nom: p.nom,
       unite: p.unite ?? "",
       pmp: Number(p.pmp ?? 0),
-      tva: typeof p.tva === "number" ? p.tva : tva,
-      zone_id: p.default_zone_id ?? value?.zone_id ?? "",
+      tva: typeof p.tva === "number" ? p.tva : 0,
+      zone_id: p.zone_id ?? null,
     });
   };
 

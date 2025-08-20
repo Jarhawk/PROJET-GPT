@@ -29,11 +29,11 @@ export default function ProductPickerModal({ open, onOpenChange, mamaId, onPick,
   async function search(term) {
     if (!mamaId || !term) { setRows([]); return; }
 
-    // 1/ Essaye la vue enrichie si disponible (unite, tva, default_zone_id)
+    // 1/ Essaye la vue enrichie si disponible (unite, tva, zone_id)
     let data = [];
     let { data: vData, error: vErr } = await supabase
       .from("v_produits_actifs")
-      .select("id, nom, unite, tva, default_zone_id, stock_reel, pmp")
+      .select("id, nom, unite, tva, zone_id, stock_reel, pmp")
       .eq("mama_id", mamaId)
       .ilike("nom", `%${term}%`)
       .order("nom", { ascending: true })
@@ -56,7 +56,7 @@ export default function ProductPickerModal({ open, onOpenChange, mamaId, onPick,
           ...p,
           unite: null,
           tva: null,
-          default_zone_id: null,
+          zone_id: null,
         }));
       }
     }
@@ -94,7 +94,7 @@ export default function ProductPickerModal({ open, onOpenChange, mamaId, onPick,
           unite: p.unite,
           pmp: p.pmp,
           tva: p.tva,
-          zone_id: p.default_zone_id,
+          zone_id: p.zone_id,
         });
         onOpenChange(false);
       }
@@ -149,7 +149,7 @@ export default function ProductPickerModal({ open, onOpenChange, mamaId, onPick,
                             unite: p.unite,
                             pmp: p.pmp,
                             tva: p.tva,
-                            zone_id: p.default_zone_id,
+                            zone_id: p.zone_id,
                           });
                           onOpenChange(false);
                         }}

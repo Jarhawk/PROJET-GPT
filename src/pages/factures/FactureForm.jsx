@@ -1,5 +1,5 @@
 // src/pages/factures/FactureForm.jsx
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -10,6 +10,7 @@ import FactureLigne from "@/components/FactureLigne";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 
 const today = () => format(new Date(), "yyyy-MM-dd");
 
@@ -56,6 +57,7 @@ export default function FactureForm() {
       date_facture: today(),
       numero: "",
       statut: "valide", // mappe vers p_actif
+      total_ht_attendu: null,
       lignes: [
         {
           id: crypto.randomUUID(),
@@ -76,20 +78,48 @@ export default function FactureForm() {
   const { isSubmitting } = formState;
   const { fields, append, remove, update } = useFieldArray({ control, name: "lignes" });
   const lignes = watch("lignes");
+  const total_ht_attendu = watch("total_ht_attendu");
+  const statut = watch("statut");
+
+  const formatter = useMemo(
+    () => new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+    []
+  );
+
+  const sommeLignesHT = useMemo(
+    () => (lignes || []).reduce((sum, l) => sum + Number(l.prix_total_ht || 0), 0),
+    [lignes]
+  );
 
   // Totaux facture (HT = somme des prix_total_ht ; TVA et TTC calculés par ligne)
   const totals = useMemo(() => {
-    let ht = 0, tvaSum = 0;
+    let tvaSum = 0;
     for (const l of lignes || []) {
       const lht = Number(l.prix_total_ht || 0);
       const ltva = lht * (Number(l.tva || 0) / 100);
-      ht += lht; tvaSum += ltva;
+      tvaSum += ltva;
     }
-    const total_ht = +ht.toFixed(2);
+    const total_ht = +sommeLignesHT.toFixed(2);
     const tva = +tvaSum.toFixed(2);
     const total_ttc = +(total_ht + tva).toFixed(2);
     return { total_ht, tva, total_ttc };
-  }, [lignes]);
+  }, [lignes, sommeLignesHT]);
+
+  const ecartRaw = useMemo(
+    () => (total_ht_attendu ?? 0) - sommeLignesHT,
+    [total_ht_attendu, sommeLignesHT]
+  );
+  const ecart_ht = useMemo(() => +ecartRaw.toFixed(2), [ecartRaw]);
+
+  const badgeColor = ecart_ht === 0 ? "green" : Math.abs(ecartRaw) < 0.01 ? "gold" : "red";
+
+  useEffect(() => {
+    if (ecart_ht !== 0 && statut !== "brouillon") {
+      form.setValue("statut", "brouillon");
+    }
+  }, [ecart_ht, statut, form]);
+
+  const disableSubmit = statut !== "brouillon" && ecart_ht !== 0;
 
   const addLigne = () =>
     append({
@@ -129,12 +159,19 @@ export default function FactureForm() {
 
       if (payloadLignes.length === 0) { toast.error("Ajoutez au moins une ligne produit."); return; }
 
+      const sommeLignesHTSubmit = (values.lignes || []).reduce(
+        (sum, l) => sum + Number(l.prix_total_ht || 0),
+        0
+      );
+      const ecart_ht_submit = (values.total_ht_attendu ?? 0) - sommeLignesHTSubmit;
+      const p_actif = values.statut === "valide" && ecart_ht_submit === 0;
+
       const rpcPayload = {
         p_mama_id: mamaId,
         p_fournisseur_id: values.fournisseur_id,
         p_numero: values.numero || null,
         p_date: values.date_facture,
-        p_actif: values.statut === "valide",
+        p_actif,
         p_lignes: payloadLignes,
       };
 
@@ -148,6 +185,7 @@ export default function FactureForm() {
         date_facture: today(),
         numero: "",
         statut: "valide",
+        total_ht_attendu: null,
         lignes: [
           {
             id: crypto.randomUUID(),
@@ -171,7 +209,7 @@ export default function FactureForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* ENTÊTE */}
-      <div className="rounded-xl border border-border bg-card p-4 grid gap-4 md:grid-cols-4 grid-cols-1">
+      <div className="rounded-xl border border-border bg-card p-4 grid gap-4 md:grid-cols-5 grid-cols-1">
         {/* Fournisseur */}
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium">Fournisseur</label>
@@ -212,9 +250,33 @@ export default function FactureForm() {
                 <SelectTrigger><SelectValue placeholder="Statut" /></SelectTrigger>
                 <SelectContent align="start">
                   <SelectItem value="brouillon">Brouillon</SelectItem>
-                  <SelectItem value="valide">Validée</SelectItem>
+                  {ecart_ht === 0 && <SelectItem value="valide">Validée</SelectItem>}
                 </SelectContent>
               </Select>
+            )}
+          />
+        </div>
+
+        {/* Total HT attendu */}
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium">Total HT attendu (€)</label>
+          <Controller
+            control={control}
+            name="total_ht_attendu"
+            render={({ field }) => (
+              <div className="flex items-center gap-2">
+                <Input
+                  type="text"
+                  value={field.value === null ? "" : formatter.format(field.value)}
+                  onChange={(e) => {
+                    const val = parseFloat(
+                      e.target.value.replace(/\s/g, "").replace(",", ".")
+                    );
+                    field.onChange(isNaN(val) ? null : val);
+                  }}
+                />
+                <Badge color={badgeColor}>{`Écart: ${formatter.format(ecart_ht)}`}</Badge>
+              </div>
             )}
           />
         </div>
@@ -272,7 +334,13 @@ export default function FactureForm() {
 
       {/* ACTIONS */}
       <div className="flex justify-end">
-        <Button type="submit" disabled={isSubmitting}>Enregistrer</Button>
+        <Button
+          type="submit"
+          disabled={isSubmitting || disableSubmit}
+          title={disableSubmit ? "Écart non nul : la facture ne peut être validée." : undefined}
+        >
+          Enregistrer
+        </Button>
       </div>
     </form>
   );

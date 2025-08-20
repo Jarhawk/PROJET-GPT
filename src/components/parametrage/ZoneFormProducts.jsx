@@ -12,7 +12,7 @@ export default function ZoneFormProducts({ zoneId }) {
   async function refresh() {
     if (!zoneId) return;
     const data = await list(zoneId);
-    setRows(data);
+    setRows(Array.isArray(data) ? data : []);
   }
 
   useEffect(() => {

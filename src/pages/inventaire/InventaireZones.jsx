@@ -32,7 +32,9 @@ export default function InventaireZones() {
     }
   }, [getZones, authLoading, mama_id]);
 
-  const filtered = zones.filter(z => z.nom?.toLowerCase().includes(search.toLowerCase()));
+  const filtered = (zones || []).filter(z =>
+    z.nom?.toLowerCase().includes(search.toLowerCase())
+  );
 
   if (authLoading) return <LoadingSpinner message="Chargement..." />;
   if (!canEdit) return <Unauthorized />;
@@ -58,7 +60,7 @@ export default function InventaireZones() {
           <Input
             className="form-input flex-1"
             placeholder="Recherche zone"
-            value={search}
+            value={search ?? ''}
             onChange={e => setSearch(e.target.value)}
           />
           <PrimaryButton type="button" onClick={() => setEditZone({ nom: "" })}>+ Nouvelle zone</PrimaryButton>

@@ -23,7 +23,7 @@ export default function ZoneForm() {
   useEffect(() => {
     async function load() {
       const all = await fetchZones();
-      setZones(all);
+      setZones(Array.isArray(all) ? all : []);
       if (id && id !== 'new') {
         const z = await fetchZoneById(id);
         setZone(z);

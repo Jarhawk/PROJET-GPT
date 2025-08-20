@@ -11,6 +11,7 @@ import FactureLigne from "@/components/FactureLigne";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 
 const today = () => format(new Date(), "yyyy-MM-dd");
 
@@ -46,7 +47,7 @@ export default function FactureForm() {
       date_facture: today(),
       numero: "",
       statut: "brouillon", // mappe vers p_actif
-      ecart_ht: 0,
+      total_ht_attendu: null,
       lignes: [
         {
           id: crypto.randomUUID(),
@@ -63,11 +64,33 @@ export default function FactureForm() {
     },
   });
 
-  const { control, handleSubmit, watch, reset, formState } = form;
+  const formatter = useMemo(() => new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }), []);
+
+  const { control, handleSubmit, watch, reset, formState, setValue } = form;
   const { isSubmitting } = formState;
   const { fields, append, remove, update } = useFieldArray({ control, name: "lignes" });
   const lignes = watch("lignes");
-  const ecartHT = watch("ecart_ht", 0);
+  const totalHTAttendu = watch("total_ht_attendu");
+  const statut = watch("statut");
+
+  const sommeLignesHT = useMemo(() => {
+    let sum = 0;
+    for (const l of lignes || []) {
+      sum += Number(l.prix_total_ht || 0);
+    }
+    return +sum.toFixed(2);
+  }, [lignes]);
+
+  const ecart_ht = useMemo(() => {
+    const expected = Number(totalHTAttendu ?? 0);
+    return +(expected - sommeLignesHT).toFixed(2);
+  }, [totalHTAttendu, sommeLignesHT]);
+
+  useEffect(() => {
+    if (ecart_ht !== 0 && statut !== "brouillon") {
+      setValue("statut", "brouillon");
+    }
+  }, [ecart_ht, statut, setValue]);
 
   // Totaux facture (HT = somme des prix_total_ht ; TVA et TTC calculés par ligne)
   const totals = useMemo(() => {
@@ -126,7 +149,7 @@ export default function FactureForm() {
         p_fournisseur_id: values.fournisseur_id,
         p_numero: values.numero || null,
         p_date: values.date_facture,
-        p_actif: values.statut === "valide",
+        p_actif: values.statut === "valide" && ecart_ht === 0,
         p_lignes: payloadLignes,
       };
 
@@ -140,7 +163,7 @@ export default function FactureForm() {
         date_facture: today(),
         numero: "",
         statut: "brouillon",
-        ecart_ht: 0,
+        total_ht_attendu: null,
         lignes: [
           {
             id: crypto.randomUUID(),
@@ -164,7 +187,7 @@ export default function FactureForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* ENTÊTE */}
-      <div className="rounded-xl border border-border bg-card p-4 grid gap-4 md:grid-cols-4 grid-cols-1">
+      <div className="rounded-xl border border-border bg-card p-4 grid gap-4 md:grid-cols-5 grid-cols-1">
         {/* Fournisseur */}
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium">Fournisseur</label>
@@ -205,9 +228,37 @@ export default function FactureForm() {
                 <SelectTrigger><SelectValue placeholder="Statut" /></SelectTrigger>
                 <SelectContent align="start">
                   <SelectItem value="brouillon">Brouillon</SelectItem>
-                  {ecartHT === 0 && <SelectItem value="valide">Validée</SelectItem>}
+                  {ecart_ht === 0 && <SelectItem value="valide">Validée</SelectItem>}
                 </SelectContent>
               </Select>
+            )}
+          />
+        </div>
+
+        {/* Total HT attendu */}
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium">Total HT attendu (€)</label>
+          <Controller
+            control={control}
+            name="total_ht_attendu"
+            render={({ field }) => (
+              <div className="flex items-center gap-2">
+                <Input
+                  type="text"
+                  value={field.value === null || field.value === undefined || Number.isNaN(field.value) ? "" : formatter.format(field.value)}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/\s/g, "").replace(",", ".");
+                    const num = parseFloat(raw);
+                    field.onChange(Number.isNaN(num) ? null : num);
+                  }}
+                />
+                <Badge
+                  color={ecart_ht === 0 ? "green" : Math.abs(ecart_ht) < 0.01 ? "gold" : "red"}
+                  ariaLabel="Écart HT"
+                >
+                  {`Écart ${formatter.format(ecart_ht)}`}
+                </Badge>
+              </div>
             )}
           />
         </div>
@@ -266,7 +317,13 @@ export default function FactureForm() {
 
       {/* ACTIONS */}
       <div className="flex justify-end">
-        <Button type="submit" disabled={isSubmitting}>Enregistrer</Button>
+        <Button
+          type="submit"
+          disabled={isSubmitting || (statut !== "brouillon" && ecart_ht !== 0)}
+          title={statut !== "brouillon" && ecart_ht !== 0 ? "Écart non nul : la facture ne peut être validée." : undefined}
+        >
+          Enregistrer
+        </Button>
       </div>
     </form>
   );

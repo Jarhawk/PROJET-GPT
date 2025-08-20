@@ -1,17 +1,12 @@
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import ProductPickerModal from "@/components/forms/ProductPickerModal";
 
-export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes, zones }) {
+export default function FactureLigne({ value, onChange, onRemove, mamaId, zones, excludeIds = [] }) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const produitRef = useRef(null);
-
-  const excludeIds = useMemo(
-    () => (Array.isArray(lignes) ? lignes.map((l) => l.produit_id).filter(Boolean) : []),
-    [lignes]
-  );
 
   const q   = Number(value?.quantite || 0);
   const lht = Number(value?.prix_total_ht || 0);

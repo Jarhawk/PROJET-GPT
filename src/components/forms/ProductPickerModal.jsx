@@ -62,8 +62,8 @@ export default function ProductPickerModal({ open, onOpenChange, mamaId, onPick,
 
     // Exclure les produits déjà présents
     if (excludeIds?.length) {
-      const set = new Set(excludeIds);
-      data = data.filter(r => !set.has(r.id));
+      const set = new Set(excludeIds.map(String));
+      data = data.filter((r) => !set.has(String(r.id)));
     }
     setRows(data);
     setActive(0);

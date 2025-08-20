@@ -77,6 +77,11 @@ export default function FactureForm() {
   const { fields, append, remove, update } = useFieldArray({ control, name: "lignes" });
   const lignes = watch("lignes");
 
+  const excludeIds = useMemo(
+    () => (Array.isArray(lignes) ? lignes.map((l) => l.produit_id).filter(Boolean) : []),
+    [lignes]
+  );
+
   // Totaux facture (HT = somme des prix_total_ht ; TVA et TTC calculés par ligne)
   const totals = useMemo(() => {
     let ht = 0, tvaSum = 0;
@@ -247,8 +252,8 @@ export default function FactureForm() {
               onChange={(patch) => updateLigne(i, patch)}
               onRemove={() => remove(i)}
               mamaId={mamaId}
-              lignes={lignes}
               zones={zones}
+              excludeIds={excludeIds}
             />
           ))}
         </div>

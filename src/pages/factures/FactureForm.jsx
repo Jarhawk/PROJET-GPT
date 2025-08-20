@@ -142,7 +142,8 @@ export default function FactureForm() {
     },
   });
 
-  const { control, handleSubmit, watch, reset } = form;
+  const { control, handleSubmit, watch, reset, formState } = form;
+  const { isSubmitting } = formState;
   const { fields, append, remove, update } = useFieldArray({ control, name: "lignes" });
   const lignes = watch("lignes");
 
@@ -192,7 +193,6 @@ export default function FactureForm() {
             quantite: q,
             prix_unitaire_ht: +pu.toFixed(6),
             tva: Number(l.tva || 0),
-            // Optionnel si ta RPC accepte zone_id sur la ligne:
             zone_id: l.zone_id || null,
           };
         });
@@ -204,9 +204,8 @@ export default function FactureForm() {
         p_fournisseur_id: values.fournisseur_id,
         p_numero: values.numero || null,
         p_date: values.date_facture,
-        p_lignes: payloadLignes,
         p_actif: values.statut === "valide",
-        // Si, plus tard, tu ajoutes dans SQL la MAJ TVA produit: p_update_product_tva: true
+        p_lignes: payloadLignes,
       };
 
       const { error } = await supabase.rpc("fn_save_facture", rpcPayload);
@@ -235,7 +234,7 @@ export default function FactureForm() {
       });
     } catch (e) {
       console.error(e);
-      toast.error("Une erreur est survenue. Merci de réessayer.");
+      toast.error("Erreur lors de l'enregistrement de la facture");
     }
   };
 
@@ -343,7 +342,7 @@ export default function FactureForm() {
 
       {/* ACTIONS */}
       <div className="flex justify-end">
-        <Button type="submit">Enregistrer</Button>
+        <Button type="submit" disabled={isSubmitting}>Enregistrer</Button>
       </div>
     </form>
   );

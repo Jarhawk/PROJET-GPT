@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import supabase from "@/lib/supabaseClient";
@@ -12,6 +12,7 @@ export default function ProductPickerModal({ open, onOpenChange, mamaId, onPick,
   const [rows, setRows] = useState([]);
   const [active, setActive] = useState(0);
   const inputRef = useRef(null);
+  const inputName = useMemo(() => Math.random().toString(36).slice(2), []);
   const listRef = useRef(null);
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
@@ -85,7 +86,18 @@ export default function ProductPickerModal({ open, onOpenChange, mamaId, onPick,
     else if (e.key === "ArrowUp") { e.preventDefault(); const i = Math.max(active - 1, 0); setActive(i); scrollTo(i); }
     else if (e.key === "Enter" || e.key === "Tab") {
       e.preventDefault();
-      if (rows[active]) { handlePick(rows[active]); onOpenChange(false); }
+      if (rows[active]) {
+        const p = rows[active];
+        handlePick({
+          id: p.id,
+          nom: p.nom,
+          unite: p.unite,
+          pmp: p.pmp,
+          tva: p.tva,
+          zone_id: p.default_zone_id,
+        });
+        onOpenChange(false);
+      }
     } else if (e.key === "Escape") onOpenChange(false);
   };
 
@@ -93,14 +105,14 @@ export default function ProductPickerModal({ open, onOpenChange, mamaId, onPick,
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         {/* Overlay clair, dans le thème */}
-        <Dialog.Overlay className="fixed inset-0 bg-background/40 backdrop-blur-sm" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 w-[min(760px,95vw)] max-h-[85vh] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-border bg-card shadow-2xl overflow-hidden">
+        <Dialog.Overlay className="fixed inset-0 z-50 bg-[#0B1220]/60 backdrop-blur-sm" />
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[min(900px,95vw)] max-h-[70vh] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-border bg-card shadow-2xl flex flex-col overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/40">
             <Dialog.Title className="text-sm font-semibold">Rechercher un produit</Dialog.Title>
             <Dialog.Close asChild><button className="p-2 rounded-md hover:bg-muted"><X size={18} /></button></Dialog.Close>
           </div>
 
-          <div className="p-4">
+          <div className="flex-1 overflow-y-auto p-4 flex flex-col">
             <Input
               ref={inputRef}
               value={q}
@@ -111,11 +123,12 @@ export default function ProductPickerModal({ open, onOpenChange, mamaId, onPick,
               autoCorrect="off"
               autoCapitalize="none"
               spellCheck={false}
-              name="no-autofill"
+              inputMode="search"
+              name={inputName}
               data-lpignore="true"
               data-form-type="other"
             />
-            <div ref={listRef} className="mt-3 max-h-[55vh] overflow-auto rounded-lg border border-border">
+            <div ref={listRef} className="mt-3 flex-1 overflow-auto rounded-lg border border-border">
               {rows.length === 0 ? (
                 <div className="p-6 text-sm text-muted-foreground">Aucun résultat</div>
               ) : (
@@ -129,7 +142,17 @@ export default function ProductPickerModal({ open, onOpenChange, mamaId, onPick,
                         key={p.id}
                         ref={vr.measureElement}
                         data-idx={vr.index}
-                        onClick={() => { handlePick(p); onOpenChange(false); }}
+                        onClick={() => {
+                          handlePick({
+                            id: p.id,
+                            nom: p.nom,
+                            unite: p.unite,
+                            pmp: p.pmp,
+                            tva: p.tva,
+                            zone_id: p.default_zone_id,
+                          });
+                          onOpenChange(false);
+                        }}
                         onMouseEnter={() => setActive(vr.index)}
                         className={`w-full flex items-center justify-between gap-3 px-4 py-2 text-left ${vr.index === active ? "bg-accent" : "bg-card"} hover:bg-accent transition`}
                         style={{

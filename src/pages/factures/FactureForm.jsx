@@ -229,7 +229,7 @@ export default function FactureForm() {
 
         <div className="rounded-xl border border-border bg-card p-3 space-y-4 overflow-x-hidden">
           {/* En-têtes colonnes */}
-          <div className="grid grid-cols-[minmax(240px,1.4fr)_minmax(90px,0.6fr)_minmax(120px,0.8fr)_minmax(140px,0.9fr)_minmax(140px,0.9fr)_minmax(120px,0.8fr)_minmax(160px,1fr)_minmax(120px,0.9fr)] gap-3 text-xs text-muted-foreground px-1">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] xl:grid-cols-[minmax(240px,1.4fr)_minmax(90px,0.6fr)_minmax(120px,0.8fr)_minmax(140px,0.9fr)_minmax(140px,0.9fr)_minmax(120px,0.8fr)_minmax(160px,1fr)_minmax(120px,0.9fr)] gap-3 text-xs text-muted-foreground px-1">
             <div>Produit</div>
             <div>Qté</div>
             <div>Unité</div>

@@ -31,6 +31,28 @@ if (import.meta?.env?.DEV || process.env.NODE_ENV === 'development') {
   window.toast = toast;
 }
 
+// Enhance number inputs globally: set inputmode, pattern and comma-to-dot conversion
+function enhanceNumberInputs(root = document) {
+  root.querySelectorAll('input[type="number"]').forEach((inp) => {
+    if (inp.dataset.numEnhanced) return;
+    inp.dataset.numEnhanced = '1';
+    inp.setAttribute('inputmode', 'decimal');
+    inp.setAttribute('pattern', '[0-9]*[.,]?[0-9]*');
+    inp.addEventListener('change', () => {
+      inp.value = inp.value.replace(',', '.');
+    });
+  });
+}
+
+enhanceNumberInputs();
+new MutationObserver((mutations) => {
+  for (const m of mutations) {
+    for (const n of m.addedNodes) {
+      if (n instanceof HTMLElement) enhanceNumberInputs(n);
+    }
+  }
+}).observe(document.documentElement, { childList: true, subtree: true });
+
 // Option sentry/reporting
 // import * as Sentry from "@sentry/react";
 // Sentry.init({ dsn: "https://xxx.ingest.sentry.io/xxx" });

@@ -7,6 +7,7 @@ import ProductPickerModal from "@/components/forms/ProductPickerModal";
 export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes, zones }) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const produitRef = useRef(null);
+  const rowRef = useRef(null);
 
   const excludeIds = useMemo(
     () => (Array.isArray(lignes) ? lignes.map((l) => l.produit_id).filter(Boolean) : []),
@@ -30,7 +31,11 @@ export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes
   };
 
   return (
-    <div className="grid grid-cols-[minmax(240px,1.4fr)_minmax(90px,0.6fr)_minmax(120px,0.8fr)_minmax(140px,0.9fr)_minmax(140px,0.9fr)_minmax(120px,0.8fr)_minmax(160px,1fr)_minmax(120px,0.9fr)] gap-3 items-center overflow-x-hidden">
+    <div
+      ref={rowRef}
+      tabIndex={-1}
+      className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] xl:grid-cols-[minmax(240px,1.4fr)_minmax(90px,0.6fr)_minmax(120px,0.8fr)_minmax(140px,0.9fr)_minmax(140px,0.9fr)_minmax(120px,0.8fr)_minmax(160px,1fr)_minmax(120px,0.9fr)] gap-3 items-center overflow-x-hidden"
+    >
       {/* Produit (picker) */}
       <div className="flex items-center gap-2">
         <Input
@@ -39,6 +44,10 @@ export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes
           value={value?.produit_nom || ""}
           placeholder="Choisir un produit…"
           onClick={() => setPickerOpen(true)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') { e.preventDefault(); setPickerOpen(true); }
+            if (e.key === 'Escape') { e.preventDefault(); rowRef.current?.focus(); }
+          }}
           autoComplete="off"
           name="no-autofill"
           className="cursor-pointer"

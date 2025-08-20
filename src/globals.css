@@ -22,6 +22,17 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+/* Hide number input spinners and enforce textfield appearance */
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 a {
   color: #bfa14d;
   text-decoration: none;

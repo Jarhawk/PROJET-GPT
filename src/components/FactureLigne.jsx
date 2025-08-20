@@ -57,8 +57,13 @@ export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes
         name="no-autofill"
       />
 
-      {/* Unité (readonly) */}
-      <Input readOnly value={value?.unite || ""} placeholder="Unité" />
+      {/* Unité (readonly, disabled for visual distinction) */}
+      <Input
+        readOnly
+        disabled
+        value={value?.unite || ""}
+        placeholder="Unité"
+      />
 
       {/* Prix total HT (€) editable */}
       <Input
@@ -72,10 +77,20 @@ export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes
       />
 
       {/* Prix unitaire calculé (€) readonly */}
-      <Input readOnly value={Number.isFinite(pu) ? pu.toFixed(4) : ""} placeholder="PU HT (€)" />
+      <Input
+        readOnly
+        disabled
+        value={Number.isFinite(pu) ? pu.toFixed(4) : ""}
+        placeholder="PU HT (€)"
+      />
 
       {/* PMP (readonly) */}
-      <Input readOnly value={Number(value?.pmp ?? 0).toFixed(2)} placeholder="PMP" />
+      <Input
+        readOnly
+        disabled
+        value={Number(value?.pmp ?? 0).toFixed(2)}
+        placeholder="PMP"
+      />
 
       {/* TVA % (prefill; editable) */}
       <Input

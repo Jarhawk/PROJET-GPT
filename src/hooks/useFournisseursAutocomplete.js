@@ -1,36 +1,28 @@
-import { useState, useCallback } from "react";
-import supabase from '@/lib/supabaseClient';
-import { useAuth } from '@/hooks/useAuth';
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabaseClient";
+import { useMultiMama } from "@/context/MultiMamaContext";
 
-export function useFournisseursAutocomplete() {
-  const { mama_id } = useAuth();
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+export function useFournisseursAutocomplete(q) {
+  const { currentMamaId } = useMultiMama();
 
-  const searchFournisseurs = useCallback(async (query = "") => {
-    if (!mama_id) return [];
-    setLoading(true);
-    setError(null);
-    let q = supabase
-      .from("fournisseurs")
-      .select("id, nom")
-      .eq("mama_id", mama_id)
-      .eq("actif", true);
-    if (query) {
-      q = q.ilike("nom", `%${query}%`);
-    }
-    q = q.order("nom", { ascending: true }).limit(50);
-    const { data, error } = await q;
-    setLoading(false);
-    if (error) {
-      setError(error);
-      return [];
-    }
-    const arr = Array.isArray(data) ? data : data?.data ?? [];
-    setResults(arr);
-    return arr;
-  }, [mama_id]);
-
-  return { results, loading, error, searchFournisseurs };
+  return useQuery({
+    queryKey: ["fournisseurs-autocomplete", currentMamaId, q],
+    enabled: !!currentMamaId,
+    queryFn: async () => {
+      let req = supabase
+        .from("fournisseurs")
+        .select("id, nom")
+        .eq("mama_id", currentMamaId)
+        .eq("actif", true)
+        .order("nom", { ascending: true })
+        .limit(50);
+      if (q && q.trim().length > 0) {
+        req = req.ilike("nom", `%${q}%`);
+      }
+      const { data, error } = await req;
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
 }
+

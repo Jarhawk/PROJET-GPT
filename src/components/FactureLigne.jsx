@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,11 +8,8 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Trash2 } from "lucide-react";
-import ProductPickerModal from "@/components/forms/ProductPickerModal";
 
-export default function FactureLigne({ value, onChange, onRemove, mamaId, excludeIds = [], zones = [] }) {
-  const [pickerOpen, setPickerOpen] = useState(false);
-  const produitRef = useRef(null);
+export default function FactureLigne({ value, onChange, onRemove, zones = [], openPicker, index }) {
   const lineRef = useRef(null);
 
   const qte = Number(value?.quantite || 0);
@@ -35,17 +32,6 @@ export default function FactureLigne({ value, onChange, onRemove, mamaId, exclud
     });
   };
 
-  const onPick = (p) => {
-    recalc({
-      produit_id: p.id,
-      produit_nom: p.nom,
-      unite: p.unite ?? "",
-      pmp: Number(p.pmp ?? 0),
-      tva: typeof p.tva === "number" ? p.tva : 0,
-      zone_id: p.zone_id ?? null,
-    });
-  };
-
   const fmt = (n) =>
     Number.isFinite(n)
       ? n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -60,21 +46,20 @@ export default function FactureLigne({ value, onChange, onRemove, mamaId, exclud
       {/* Produit (picker) */}
       <div className="flex items-center gap-2">
         <Input
-          ref={produitRef}
           readOnly
           value={value?.produit_nom || ""}
           placeholder="Choisir un produit…"
-          onClick={() => setPickerOpen(true)}
+          onClick={() => openPicker(index)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') { e.preventDefault(); setPickerOpen(true); }
+            if (e.key === 'Enter') { e.preventDefault(); openPicker(index); }
             else if (e.key === 'Escape') { e.preventDefault(); lineRef.current?.focus(); }
           }}
           autoComplete="off"
           name="no-autofill"
           className="cursor-pointer"
         />
-        <Button type="button" variant="outline" onClick={() => setPickerOpen(true)}>
-          Rechercher
+        <Button type="button" variant="outline" onClick={() => openPicker(index)}>
+          Choisir un produit
         </Button>
       </div>
 
@@ -151,17 +136,6 @@ export default function FactureLigne({ value, onChange, onRemove, mamaId, exclud
         <Trash2 size={16} />
       </Button>
 
-      {/* Modal de sélection produit */}
-      <ProductPickerModal
-        open={pickerOpen}
-        onOpenChange={(v) => {
-          setPickerOpen(v);
-          if (!v) lineRef.current?.focus();
-        }}
-        mamaId={mamaId}
-        onPick={onPick}
-        excludeIds={excludeIds}
-      />
     </div>
   );
 }

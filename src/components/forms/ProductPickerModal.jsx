@@ -3,37 +3,16 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabaseClient";
-import { useMultiMama } from "@/context/MultiMamaContext";
+import { useProductSearch } from "@/hooks/useProductSearch";
 
-function useProductSearch(term, excludeIds = []) {
-  const { currentMamaId } = useMultiMama();
-  return useQuery({
-    queryKey: ["product-search", currentMamaId, term, excludeIds],
-    enabled: !!currentMamaId && typeof term === "string",
-    queryFn: async () => {
-      let q = supabase
-        .from("produits")
-        .select("id, nom, pmp, unite, tva")
-        .eq("mama_id", currentMamaId)
-        .eq("actif", true);
-      if (term && term.trim()) {
-        q = q.ilike("nom", `%${term.trim()}%`);
-      }
-      if (excludeIds?.length) {
-        q = q.not("id", "in", `(${excludeIds.join(",")})`);
-      }
-      const { data, error } = await q.order("nom", { ascending: true });
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
-}
-
-export default function ProductPickerModal({ open, onOpenChange, onSelect, excludeIds = [] }) {
+export default function ProductPickerModal({ open, onOpenChange, onSelect, excludeIdsSameZone, currentLineProductId }) {
   const [term, setTerm] = useState("");
-  const { data: products = [] } = useProductSearch(term, excludeIds);
+  const { data } = useProductSearch(term);
+  const blacklist = new Set(excludeIdsSameZone ?? []);
+  const results = (data ?? []).filter((p) => {
+    if (currentLineProductId && p.id === currentLineProductId) return true;
+    return !blacklist.has(p.id);
+  });
 
   useEffect(() => {
     if (!open) setTerm("");
@@ -61,10 +40,10 @@ export default function ProductPickerModal({ open, onOpenChange, onSelect, exclu
               autoComplete="off"
             />
             <div className="border border-border rounded-lg max-h-60 overflow-y-auto">
-              {products.length === 0 ? (
+              {results.length === 0 ? (
                 <div className="p-4 text-sm text-muted-foreground">Aucun résultat</div>
               ) : (
-                products.map((p) => (
+                results.map((p) => (
                   <button
                     key={p.id}
                     onClick={() => {

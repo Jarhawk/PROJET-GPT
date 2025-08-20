@@ -109,7 +109,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
       : '0,00 €';
 
   const sumHT = useMemo(
-    () => sum(lignes.map((l) => Number(l.total_ht ?? l.prix_total_ht ?? 0))),
+    () => sum(lignes.map((l) => Number(l.total_ht || 0))),
     [lignes]
   );
   const sommeLignesHT = sumHT;

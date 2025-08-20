@@ -10,7 +10,7 @@ import { useZones } from "@/hooks/useZones";
 import FactureLigne from "@/components/FactureLigne";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { Select, SelectTrigger, SelectContent, SelectItem } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 
 const today = () => format(new Date(), "yyyy-MM-dd");
@@ -196,9 +196,17 @@ export default function FactureForm() {
             name="fournisseur_id"
             render={({ field }) => (
               <Select value={field.value ?? ''} onValueChange={v => field.onChange(v)}>
-                <SelectTrigger><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+                <SelectTrigger>
+                  <span className="truncate">
+                    {fournisseurs.find(f => f.id === field.value)?.nom || "Sélectionner"}
+                  </span>
+                </SelectTrigger>
                 <SelectContent align="start" className="max-h-64 overflow-auto">
-                  {fournisseurs.map(f => <SelectItem key={f.id} value={f.id}>{f.nom}</SelectItem>)}
+                  {fournisseurs.map(f => (
+                    <SelectItem key={f.id} value={f.id}>
+                      {f.nom}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             )}
@@ -225,7 +233,15 @@ export default function FactureForm() {
             name="statut"
             render={({ field }) => (
               <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger><SelectValue placeholder="Statut" /></SelectTrigger>
+                <SelectTrigger>
+                  <span className="truncate">
+                    {field.value === "brouillon"
+                      ? "Brouillon"
+                      : field.value === "valide"
+                        ? "Validée"
+                        : "Statut"}
+                  </span>
+                </SelectTrigger>
                 <SelectContent align="start">
                   <SelectItem value="brouillon">Brouillon</SelectItem>
                   {ecart_ht === 0 && <SelectItem value="valide">Validée</SelectItem>}

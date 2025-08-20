@@ -6,7 +6,6 @@ const cn = (...c) => c.filter(Boolean).join(" ");
 export const Select = SelectPrimitive.Root;
 
 export const SelectGroup = SelectPrimitive.Group;
-export const SelectValue = SelectPrimitive.Value; // <= manquait
 export const SelectLabel = SelectPrimitive.Label;
 export const SelectIcon = SelectPrimitive.Icon;
 export const SelectSeparator = SelectPrimitive.Separator;

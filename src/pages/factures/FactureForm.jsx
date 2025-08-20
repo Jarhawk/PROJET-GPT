@@ -1,14 +1,12 @@
 // src/pages/factures/FactureForm.jsx
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import supabase from '@/lib/supabaseClient';
-import { useAuth } from '@/hooks/useAuth';
-import { useZones } from '@/hooks/useZones';
+import { supabase } from '@/lib/supabaseClient';
+import { useMultiMama } from '@/context/MultiMamaContext';
 import FactureLigne from '@/components/FactureLigne';
-import ProductPickerModal from '@/components/forms/ProductPickerModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -20,52 +18,48 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { mapUILineToPayload } from '@/features/factures/invoiceMappers';
-import { toStr, validOptions } from '@/utils/selectSafe';
 
 const FN_UPDATE_FACTURE_EXISTS = false;
 
 const today = () => format(new Date(), 'yyyy-MM-dd');
 
-export default function FactureForm({ facture = null, onSaved } = {}) {
-  const { profile } = useAuth();
-  const mamaId = profile?.mama_id || null;
-
-  // Fournisseurs
-  const { data: fournisseursData } = useQuery({
-    queryKey: ['fournisseurs', mamaId],
-    enabled: !!mamaId,
+function useFournisseurs() {
+  const { currentMamaId } = useMultiMama();
+  return useQuery({
+    queryKey: ['fournisseurs', currentMamaId],
+    enabled: !!currentMamaId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('fournisseurs')
         .select('id, nom')
-        .eq('mama_id', mamaId)
+        .eq('mama_id', currentMamaId)
         .eq('actif', true)
-        .order('nom', { ascending: true })
-        .limit(50);
+        .order('nom', { ascending: true });
       if (error) throw error;
-      return Array.isArray(data) ? data : (data?.data ?? []);
+      return data ?? [];
     },
   });
-  const fournisseurs = Array.isArray(fournisseursData)
-    ? fournisseursData
-    : (fournisseursData?.data ?? []);
-  const fournisseursSafe = validOptions(fournisseurs || [], 'id');
+}
 
-// Zones (liste globale, préremplie ligne par ligne si zone_id arrive du produit)
-  const { zones, fetchZones } = useZones();
-  useEffect(() => {
-    fetchZones();
-  }, [fetchZones]);
+export default function FactureForm({ facture = null, onSaved } = {}) {
+  const { currentMamaId } = useMultiMama();
+  const mamaId = currentMamaId;
 
   const emptyLigne = () => ({
     id: crypto.randomUUID(),
     produit_id: null,
     produit_nom: '',
     quantite: 1,
+    qte: 1,
     unite: '',
+    total_ht: 0,
     prix_total_ht: 0,
+    pu_ht: 0,
+    prix_unitaire_ht: 0,
     pmp: 0,
     tva: 0,
+    tva_montant: 0,
+    total_ttc: 0,
     zone_id: null,
   });
 
@@ -92,11 +86,9 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
     []
   );
 
-  const { control, handleSubmit, watch, reset, setValue } = form;
-  const values = watch();
+  const { control, handleSubmit, watch, reset, setValue, setError, formState } = form;
+  const { errors, submitCount } = formState;
   const [saving, setSaving] = useState(false);
-  const [pickerOpen, setPickerOpen] = useState(false);
-  const [pickerIndex, setPickerIndex] = useState(null);
   const { fields, append, remove, update } = useFieldArray({
     control,
     name: 'lignes',
@@ -105,18 +97,30 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
   const totalHTAttendu = watch('total_ht_attendu');
   const statut = watch('statut');
   const formId = watch('id');
-  const excludeIds = useMemo(
-    () => (lignes || []).map((l) => l.produit_id).filter(Boolean),
+  const { data: fournisseurs = [], isLoading: loadingF } = useFournisseurs();
+
+  const sum = (arr) => arr.reduce((acc, n) => acc + n, 0);
+  const eur = (n) =>
+    Number.isFinite(+n)
+      ? (+n).toLocaleString('fr-FR', {
+          style: 'currency',
+          currency: 'EUR',
+        })
+      : '0,00 €';
+
+  const sumHT = useMemo(
+    () => sum(lignes.map((l) => Number(l.total_ht ?? l.prix_total_ht ?? 0))),
     [lignes]
   );
-
-  const sommeLignesHT = useMemo(() => {
-    let sum = 0;
-    for (const l of lignes || []) {
-      sum += Number(l.total_ht ?? l.prix_total_ht ?? 0);
-    }
-    return +sum.toFixed(2);
-  }, [lignes]);
+  const sommeLignesHT = sumHT;
+  const sumTVA = useMemo(
+    () => sum(lignes.map((l) => Number(l.tva_montant || 0))),
+    [lignes]
+  );
+  const sumTTC = useMemo(
+    () => sum(lignes.map((l) => Number(l.total_ttc || 0))),
+    [lignes]
+  );
 
   const ecart_ht = useMemo(() => {
     const expected = Number(totalHTAttendu ?? 0);
@@ -129,71 +133,9 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
     }
   }, [ecart_ht, statut, setValue]);
 
-  const sum = (arr) => arr.reduce((acc, n) => acc + n, 0);
-
-  const totalHT = useMemo(
-    () =>
-      Number(
-        sum(
-          lignes.map((l) => Number(l.total_ht ?? l.prix_total_ht ?? 0))
-        ).toFixed(2)
-      ),
-    [lignes]
-  );
-
-  const totalTVA_EUR = useMemo(
-    () =>
-      Number(
-        sum(
-          lignes.map(
-            (l) =>
-              (Number(l.total_ht ?? l.prix_total_ht ?? 0) *
-                Number(l.tva || 0)) /
-              100
-          )
-        ).toFixed(2)
-      ),
-    [lignes]
-  );
-
-  const totalTTC = useMemo(
-    () => Number((totalHT + totalTVA_EUR).toFixed(2)),
-    [totalHT, totalTVA_EUR]
-  );
-
-  const addLigne = () =>
-    append({
-      id: crypto.randomUUID(),
-      produit_id: null,
-      produit_nom: '',
-      quantite: 1,
-      unite: '',
-      prix_total_ht: 0,
-      pmp: 0,
-      tva: 0,
-      zone_id: null,
-    });
+  const addLigne = () => append(emptyLigne());
 
   const updateLigne = (i, patch) => update(i, { ...lignes[i], ...patch });
-
-  const openPicker = (i) => {
-    setPickerIndex(i);
-    setPickerOpen(true);
-  };
-
-  const onPickProduct = (p) => {
-    if (pickerIndex !== null) {
-      updateLigne(pickerIndex, {
-        produit_id: p.id,
-        produit_nom: p.nom,
-        unite: p.unite ?? '',
-        pmp: Number(p.pmp ?? 0),
-        tva: typeof p.tva === 'number' ? p.tva : 0,
-        zone_id: p.zone_id ?? null,
-      });
-    }
-    setPickerOpen(false);
-  };
 
   const onSubmit = async (values) => {
     if (saving) return;
@@ -205,6 +147,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
       }
       if (!values.fournisseur_id) {
         toast.error('Sélectionnez un fournisseur.');
+        setError('fournisseur_id', { type: 'required' });
         return;
       }
       const payloadLignes = (lignes || [])
@@ -212,6 +155,9 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
         .map(mapUILineToPayload);
       if (payloadLignes.length === 0) {
         toast.error('Ajoutez au moins une ligne produit.');
+        (lignes || []).forEach((l, i) => {
+          if (!l.produit_id) setError(`lignes.${i}.produit_id`, { type: 'required' });
+        });
         return;
       }
 
@@ -276,15 +222,16 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium">Fournisseur</label>
           <Select
-            value={toStr(values?.fournisseur_id)}
-            onValueChange={(v) => setValue('fournisseur_id', v)}
+            value={watch('fournisseur_id') || undefined}
+            onValueChange={(v) => setValue('fournisseur_id', v, { shouldDirty: true })}
+            disabled={loadingF}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className={`w-full ${errors.fournisseur_id ? 'border-destructive' : ''}`} aria-invalid={errors.fournisseur_id ? 'true' : 'false'}>
               <SelectValue placeholder="Sélectionner un fournisseur" />
             </SelectTrigger>
             <SelectContent>
-              {fournisseursSafe.map((f) => (
-                <SelectItem key={f.id} value={String(f.id)}>
+              {fournisseurs.map((f) => (
+                <SelectItem key={f.id} value={f.id}>
                   {f.nom}
                 </SelectItem>
               ))}
@@ -412,9 +359,8 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
               value={lignes[i]}
               onChange={(patch) => updateLigne(i, patch)}
               onRemove={() => remove(i)}
-              zones={zones}
-              openPicker={openPicker}
-              index={i}
+              allLines={lignes}
+              invalidProduit={submitCount > 0 && !lignes[i]?.produit_id}
             />
           ))}
         </div>
@@ -424,17 +370,15 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
       <div className="rounded-xl border border-border bg-card p-4 grid md:grid-cols-3 gap-4">
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Total HT</span>
-          <span className="font-semibold">{formatter.format(totalHT)}</span>
+          <span className="font-semibold">{eur(sumHT)}</span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">TVA €</span>
-          <span className="font-semibold">
-            {formatter.format(totalTVA_EUR)}
-          </span>
+          <span className="font-semibold">{eur(sumTVA)}</span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Total TTC</span>
-          <span className="font-semibold">{formatter.format(totalTTC)}</span>
+          <span className="font-semibold">{eur(sumTTC)}</span>
         </div>
       </div>
 
@@ -464,16 +408,6 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
         </div>
       </div>
 
-      <ProductPickerModal
-        open={pickerOpen}
-        onOpenChange={(v) => {
-          setPickerOpen(v);
-          if (!v) setPickerIndex(null);
-        }}
-        mamaId={mamaId}
-        onPick={onPickProduct}
-        excludeIds={excludeIds}
-      />
     </form>
   );
 }

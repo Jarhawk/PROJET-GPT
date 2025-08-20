@@ -78,7 +78,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
   const sommeLignesHT = useMemo(() => {
     let sum = 0;
     for (const l of lignes || []) {
-      sum += Number(l.prix_total_ht || 0);
+      sum += Number(l.total_ht ?? l.prix_total_ht ?? 0);
     }
     return +sum.toFixed(2);
   }, [lignes]);
@@ -94,19 +94,35 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
     }
   }, [ecart_ht, statut, setValue]);
 
-  // Totaux facture (HT = somme des prix_total_ht ; TVA et TTC calculés par ligne)
-  const totals = useMemo(() => {
-    let ht = 0, tvaSum = 0;
-    for (const l of lignes || []) {
-      const lht = Number(l.prix_total_ht || 0);
-      const ltva = lht * (Number(l.tva || 0) / 100);
-      ht += lht; tvaSum += ltva;
-    }
-    const total_ht = +ht.toFixed(2);
-    const tva = +tvaSum.toFixed(2);
-    const total_ttc = +(total_ht + tva).toFixed(2);
-    return { total_ht, tva, total_ttc };
-  }, [lignes]);
+  const sum = (arr) => arr.reduce((acc, n) => acc + n, 0);
+
+  const totalHT = useMemo(
+    () =>
+      Number(
+        sum(lignes.map((l) => Number(l.total_ht ?? l.prix_total_ht ?? 0))).toFixed(2),
+      ),
+    [lignes],
+  );
+
+  const totalTVA_EUR = useMemo(
+    () =>
+      Number(
+        sum(
+          lignes.map(
+            (l) =>
+              Number(l.total_ht ?? l.prix_total_ht ?? 0) *
+              Number(l.tva || 0) /
+              100,
+          ),
+        ).toFixed(2),
+      ),
+    [lignes],
+  );
+
+  const totalTTC = useMemo(
+    () => Number((totalHT + totalTVA_EUR).toFixed(2)),
+    [totalHT, totalTVA_EUR],
+  );
 
   const addLigne = () =>
     append({
@@ -304,15 +320,15 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
       <div className="rounded-xl border border-border bg-card p-4 grid md:grid-cols-3 gap-4">
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Total HT</span>
-          <span className="font-semibold">{totals.total_ht.toFixed(2)}</span>
+          <span className="font-semibold">{formatter.format(totalHT)}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">TVA</span>
-          <span className="font-semibold">{totals.tva.toFixed(2)}</span>
+          <span className="text-sm text-muted-foreground">TVA €</span>
+          <span className="font-semibold">{formatter.format(totalTVA_EUR)}</span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Total TTC</span>
-          <span className="font-semibold">{totals.total_ttc.toFixed(2)}</span>
+          <span className="font-semibold">{formatter.format(totalTTC)}</span>
         </div>
       </div>
 

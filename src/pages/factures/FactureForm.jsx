@@ -26,12 +26,12 @@ const today = () => format(new Date(), 'yyyy-MM-dd');
 function useFournisseurs() {
   const { currentMamaId } = useMultiMama();
   return useQuery({
-    queryKey: ['fournisseurs', currentMamaId],
+    queryKey: ['fournisseurs-list', currentMamaId],
     enabled: !!currentMamaId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('fournisseurs')
-        .select('id, nom')
+        .select('id, nom') // <-- IMPORTANT: fournisseurs.nom
         .eq('mama_id', currentMamaId)
         .eq('actif', true)
         .order('nom', { ascending: true });
@@ -74,7 +74,9 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
   });
 
   const form = useForm({
-    defaultValues: emptyForm(),
+    defaultValues: facture
+      ? { ...emptyForm(), ...facture, fournisseur_id: facture.fournisseur_id }
+      : emptyForm(),
   });
 
   const formatter = useMemo(
@@ -97,7 +99,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
   const totalHTAttendu = watch('total_ht_attendu');
   const statut = watch('statut');
   const formId = watch('id');
-  const { data: fournisseurs = [], isLoading: loadingF } = useFournisseurs();
+  const { data: fournisseurs = [], isLoading: fLoading } = useFournisseurs();
 
   const sum = (arr) => arr.reduce((acc, n) => acc + n, 0);
   const eur = (n) =>
@@ -223,17 +225,20 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
           <label className="text-sm font-medium">Fournisseur</label>
           <Select
             value={watch('fournisseur_id') || undefined}
-            onValueChange={(v) => setValue('fournisseur_id', v, { shouldDirty: true })}
-            disabled={loadingF}
+            onValueChange={(val) =>
+              setValue('fournisseur_id', val, { shouldDirty: true })
+            }
+            disabled={fLoading}
           >
-            <SelectTrigger className={`w-full ${errors.fournisseur_id ? 'border-destructive' : ''}`} aria-invalid={errors.fournisseur_id ? 'true' : 'false'}>
+            <SelectTrigger
+              className={`w-full ${errors.fournisseur_id ? 'border-destructive' : ''}`}
+              aria-invalid={errors.fournisseur_id ? 'true' : 'false'}
+            >
               <SelectValue placeholder="Sélectionner un fournisseur" />
             </SelectTrigger>
             <SelectContent>
               {fournisseurs.map((f) => (
-                <SelectItem key={f.id} value={f.id}>
-                  {f.nom}
-                </SelectItem>
+                <SelectItem key={f.id} value={f.id}>{f.nom}</SelectItem> // <-- affiche fournisseurs.nom
               ))}
             </SelectContent>
           </Select>

@@ -22,6 +22,10 @@ import { mapUILineToPayload } from '@/features/factures/invoiceMappers';
 const FN_UPDATE_FACTURE_EXISTS = false;
 
 const today = () => format(new Date(), 'yyyy-MM-dd');
+const fmt2 = new Intl.NumberFormat('fr-FR', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
 
 function useFournisseurs() {
   const { currentMamaId } = useMultiMama();
@@ -375,15 +379,15 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
       <div className="rounded-xl border border-border bg-card p-4 grid md:grid-cols-3 gap-4">
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Total HT</span>
-          <span className="font-semibold">{eur(sumHT)}</span>
+          <span className="font-semibold">{fmt2.format(sumHT)} €</span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">TVA €</span>
-          <span className="font-semibold">{eur(sumTVA)}</span>
+          <span className="font-semibold">{fmt2.format(sumTVA)} €</span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Total TTC</span>
-          <span className="font-semibold">{eur(sumTTC)}</span>
+          <span className="font-semibold">{fmt2.format(sumTTC)} €</span>
         </div>
       </div>
 

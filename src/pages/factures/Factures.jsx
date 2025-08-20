@@ -1,5 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useFactures } from "@/hooks/useFactures";
 import { useFacturesList } from "@/hooks/useFacturesList";
 import useFournisseurs from "@/hooks/data/useFournisseurs";
@@ -10,7 +11,6 @@ import FactureForm from "./FactureForm.jsx";
 import FactureDetail from "./FactureDetail.jsx";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Menu } from "lucide-react";
 import useExport from "@/hooks/useExport";
@@ -29,19 +29,26 @@ export default function Factures() {
   const { results: fournisseurOptions, searchFournisseurs } = useFournisseursAutocomplete();
   const { loading: authLoading, hasAccess } = useAuth();
   const { results: factureOptions, searchFactures } = useFacturesAutocomplete();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [showForm, setShowForm] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState("");
-  const [statutFilter, setStatutFilter] = useState("");
+  const [statutFilter, setStatutFilter] = useState(searchParams.get("statut") || "");
   const [fournisseurFilter, setFournisseurFilter] = useState("");
   const [fournisseurInput, setFournisseurInput] = useState("");
-  const [actifFilter, setActifFilter] = useState("true");
+  const [actifFilter, setActifFilter] = useState(searchParams.get("actif") || "true");
   const [page, setPage] = useState(1);
   const pageSize = 10;
   const [loading, setLoading] = useState(false);
   const { exportData, loading: exporting } = useExport();
+  const STATUT_OPTIONS = ["", ...FACTURE_STATUTS.filter(s => s !== "Archivée")];
+  const ACTIF_OPTIONS = [
+    { value: "true", label: "Actives" },
+    { value: "false", label: "Inactives" },
+    { value: "all", label: "Toutes" },
+  ];
 
   const {
     data: listData,
@@ -62,6 +69,14 @@ export default function Factures() {
 
   useEffect(() => { searchFactures(search); }, [search, searchFactures]);
   useEffect(() => { searchFournisseurs(fournisseurInput); }, [fournisseurInput, searchFournisseurs]);
+  useEffect(() => {
+    setSearchParams(prev => {
+      const params = new URLSearchParams(prev);
+      if (statutFilter) params.set('statut', statutFilter); else params.delete('statut');
+      params.set('actif', actifFilter);
+      return params;
+    });
+  }, [statutFilter, actifFilter, setSearchParams]);
 
   const handleFournisseurInput = e => {
     const val = e.target.value;
@@ -118,27 +133,30 @@ export default function Factures() {
                 ))}
               </datalist>
             </div>
-            <Select
-              value={statutFilter}
-              onChange={e => { setStatutFilter(e.target.value); setPage(1); }}
-              className="w-full sm:w-40"
-            >
-              <option value="">Tous statuts</option>
-              {FACTURE_STATUTS.map(s => (
-                <option key={s} value={s}>
-                  {s.charAt(0).toUpperCase() + s.slice(1)}
-                </option>
+            <div className="flex flex-wrap items-center gap-1">
+              {STATUT_OPTIONS.map(s => (
+                <Button
+                  key={s || 'Tous'}
+                  size="sm"
+                  variant={statutFilter === s ? 'default' : 'outline'}
+                  onClick={() => { setStatutFilter(s); setPage(1); }}
+                >
+                  {s || 'Tous'}
+                </Button>
               ))}
-            </Select>
-            <Select
-              value={actifFilter}
-              onChange={e => { setActifFilter(e.target.value); setPage(1); }}
-              className="w-full sm:w-40"
-            >
-              <option value="true">Actives</option>
-              <option value="false">Inactives</option>
-              <option value="all">Toutes</option>
-            </Select>
+            </div>
+            <div className="flex flex-wrap items-center gap-1">
+              {ACTIF_OPTIONS.map(o => (
+                <Button
+                  key={o.value}
+                  size="sm"
+                  variant={actifFilter === o.value ? 'default' : 'outline'}
+                  onClick={() => { setActifFilter(o.value); setPage(1); }}
+                >
+                  {o.label}
+                </Button>
+              ))}
+            </div>
           </div>
           {canEdit && (
             <div className="flex items-center gap-2 ml-auto">

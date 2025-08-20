@@ -1,5 +1,5 @@
 // src/pages/factures/FactureForm.jsx
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 
 const today = () => format(new Date(), "yyyy-MM-dd");
 
-export default function FactureForm() {
+export default function FactureForm({ facture = null, onSaved } = {}) {
   const { profile } = useAuth();
   const mamaId = profile?.mama_id || null;
 
@@ -41,33 +41,35 @@ export default function FactureForm() {
   const { zones, fetchZones } = useZones();
   useEffect(() => { fetchZones(); }, [fetchZones]);
 
+  const emptyLigne = () => ({
+    id: crypto.randomUUID(),
+    produit_id: null,
+    produit_nom: "",
+    quantite: 1,
+    unite: "",
+    prix_total_ht: 0,
+    pmp: 0,
+    tva: 0,
+    zone_id: "",
+  });
+
+  const emptyForm = () => ({
+    fournisseur_id: "",
+    date_facture: today(),
+    numero: "",
+    statut: "Brouillon", // mappe vers p_actif
+    total_ht_attendu: null,
+    lignes: [emptyLigne()],
+  });
+
   const form = useForm({
-    defaultValues: {
-      fournisseur_id: "",
-      date_facture: today(),
-      numero: "",
-      statut: "brouillon", // mappe vers p_actif
-      total_ht_attendu: null,
-      lignes: [
-        {
-          id: crypto.randomUUID(),
-          produit_id: null,
-          produit_nom: "",
-          quantite: 1,
-          unite: "",
-          prix_total_ht: 0,
-          pmp: 0,
-          tva: 0,
-          zone_id: "",
-        },
-      ],
-    },
+    defaultValues: emptyForm(),
   });
 
   const formatter = useMemo(() => new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }), []);
 
-  const { control, handleSubmit, watch, reset, formState, setValue } = form;
-  const { isSubmitting } = formState;
+  const { control, handleSubmit, watch, reset, setValue } = form;
+  const [saving, setSaving] = useState(false);
   const { fields, append, remove, update } = useFieldArray({ control, name: "lignes" });
   const lignes = watch("lignes");
   const totalHTAttendu = watch("total_ht_attendu");
@@ -87,8 +89,8 @@ export default function FactureForm() {
   }, [totalHTAttendu, sommeLignesHT]);
 
   useEffect(() => {
-    if (ecart_ht !== 0 && statut !== "brouillon") {
-      setValue("statut", "brouillon");
+    if (ecart_ht !== 0 && statut !== "Brouillon") {
+      setValue("statut", "Brouillon");
     }
   }, [ecart_ht, statut, setValue]);
 
@@ -121,68 +123,55 @@ export default function FactureForm() {
 
   const updateLigne = (i, patch) => update(i, { ...lignes[i], ...patch });
 
+  const buildPayload = (lgs = []) =>
+    (lgs || [])
+      .filter((l) => l.produit_id && Number(l.quantite) > 0)
+      .map(({ produit_id, quantite, prix_unitaire_ht, tva, zone_id }) => ({
+        produit_id,
+        quantite: Number(quantite || 0),
+        prix_unitaire_ht: Number(prix_unitaire_ht || 0),
+        tva: Number(tva || 0),
+        zone_id: zone_id ?? null,
+      }));
+
   const onSubmit = async (values) => {
+    if (saving) return;
+    setSaving(true);
     try {
       if (!mamaId) { toast.error("Organisation introuvable."); return; }
       if (!values.fournisseur_id) { toast.error("Sélectionnez un fournisseur."); return; }
 
-      // Construire les lignes pour la RPC : PU = total_ht / qte
-      const payloadLignes = (values.lignes || [])
-        .filter(l => l.produit_id && Number(l.quantite) > 0)
-        .map(l => {
-          const q = Number(l.quantite || 0);
-          const lht = Number(l.prix_total_ht || 0);
-          const pu = q > 0 ? lht / q : 0;
-          return {
-            produit_id: l.produit_id,
-            quantite: q,
-            prix_unitaire_ht: +pu.toFixed(6),
-            tva: Number(l.tva || 0),
-            zone_id: l.zone_id || null,
-          };
-        });
-
+      const payloadLignes = buildPayload(values.lignes);
       if (payloadLignes.length === 0) { toast.error("Ajoutez au moins une ligne produit."); return; }
 
-      const rpcPayload = {
+      const p_actif = values.statut === "Validée" && ecart_ht === 0;
+
+      const { data, error } = await supabase.rpc('fn_save_facture', {
         p_mama_id: mamaId,
         p_fournisseur_id: values.fournisseur_id,
         p_numero: values.numero || null,
         p_date: values.date_facture,
-        p_actif: values.statut === "valide" && ecart_ht === 0,
         p_lignes: payloadLignes,
-      };
+        p_actif,
+      });
 
-      const { error } = await supabase.rpc("fn_save_facture", rpcPayload);
-      if (error) throw error;
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
 
       toast.success(
         `Facture enregistrée • N° ${values.numero || "—"} • ${values.statut}`
       );
 
-      reset({
-        fournisseur_id: "",
-        date_facture: today(),
-        numero: "",
-        statut: "brouillon",
-        total_ht_attendu: null,
-        lignes: [
-          {
-            id: crypto.randomUUID(),
-            produit_id: null,
-            produit_nom: "",
-            quantite: 1,
-            unite: "",
-            prix_total_ht: 0,
-            pmp: 0,
-            tva: 0,
-            zone_id: "",
-          },
-        ],
-      });
+      onSaved?.();
+      if (!facture) reset(emptyForm());
+      return data;
     } catch (e) {
       console.warn(e);
       toast.error(e?.message || "Erreur lors de l'enregistrement de la facture");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -236,17 +225,11 @@ export default function FactureForm() {
             render={({ field }) => (
               <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger>
-                  <span className="truncate">
-                    {field.value === "brouillon"
-                      ? "Brouillon"
-                      : field.value === "valide"
-                        ? "Validée"
-                        : "Statut"}
-                  </span>
+                  <span className="truncate">{field.value || "Statut"}</span>
                 </SelectTrigger>
                 <SelectContent align="start">
-                  <SelectItem value="brouillon">Brouillon</SelectItem>
-                  {ecart_ht === 0 && <SelectItem value="valide">Validée</SelectItem>}
+                  <SelectItem value="Brouillon">Brouillon</SelectItem>
+                  {ecart_ht === 0 && <SelectItem value="Validée">Validée</SelectItem>}
                 </SelectContent>
               </Select>
             )}
@@ -337,8 +320,8 @@ export default function FactureForm() {
       <div className="flex justify-end">
         <Button
           type="submit"
-          disabled={isSubmitting || (statut !== "brouillon" && ecart_ht !== 0)}
-          title={statut !== "brouillon" && ecart_ht !== 0 ? "Écart non nul : la facture ne peut être validée." : undefined}
+          disabled={saving || (statut !== "Brouillon" && ecart_ht !== 0)}
+          title={statut !== "Brouillon" && ecart_ht !== 0 ? "Écart non nul : la facture ne peut être validée." : undefined}
         >
           Enregistrer
         </Button>

@@ -2,7 +2,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import supabase from '@/lib/supabaseClient';
-import FactureForm, { mapDbLineToUI } from './FactureForm.jsx';
+import FactureForm from './FactureForm.jsx';
+import { mapDbLineToUI } from '@/utils/factures/mappers';
 import useFournisseurs from '@/hooks/data/useFournisseurs';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { toast } from 'sonner';

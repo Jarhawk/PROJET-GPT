@@ -37,10 +37,10 @@ export default function FactureLigne({ value: line, onChange, onRemove, allLines
   const { data: zones = [] } = useZones();
   const [modalOpen, setModalOpen] = useState(false);
 
-  const qte = Number(line?.quantite ?? line?.qte ?? 0);
-  const totalHt = Number(line?.total_ht ?? line?.prix_total_ht ?? 0);
-  const tva = Number(line?.tva ?? 0);
-  const puHt = qte > 0 ? totalHt / qte : 0;
+  const qte = Number(line.quantite || 0);
+  const totalHt = Number(line.total_ht || 0);
+  const tva = Number(line.tva || 0);
+  const puHt = qte > 0 ? +(totalHt / qte).toFixed(4) : 0;
 
   const recalc = (patch = {}) => {
     const q = patch.quantite !== undefined ? Number(patch.quantite) : qte;
@@ -67,6 +67,10 @@ export default function FactureLigne({ value: line, onChange, onRemove, allLines
   const fmt = (n) =>
     Number.isFinite(n)
       ? n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      : "";
+  const fmt4 = (n) =>
+    Number.isFinite(n)
+      ? n.toLocaleString("fr-FR", { minimumFractionDigits: 4, maximumFractionDigits: 4 })
       : "";
 
   const excludeIds = allLines.filter((l) => l.produit_id).map((l) => `'${l.produit_id}'`);
@@ -96,8 +100,7 @@ export default function FactureLigne({ value: line, onChange, onRemove, allLines
         onOpenChange={setModalOpen}
         excludeIds={excludeIds}
         onSelect={(p) => {
-          onChange({
-            ...line,
+          recalc({
             produit_id: p.id,
             produit_nom: p.nom,
             unite: p.unite ?? "",
@@ -126,7 +129,7 @@ export default function FactureLigne({ value: line, onChange, onRemove, allLines
         placeholder="Total HT (€)"
         autoComplete="off"
       />
-      <Input readOnly value={fmt(puHt)} placeholder="PU HT (€)" />
+      <Input readOnly value={fmt4(puHt)} placeholder="PU HT (€)" />
       <Input readOnly value={fmt(Number(line.pmp ?? 0))} placeholder="PMP" />
       <Select value={String(tva)} onValueChange={(v) => recalc({ tva: v })}>
         <SelectTrigger className="w-28">

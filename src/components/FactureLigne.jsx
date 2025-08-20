@@ -6,15 +6,20 @@ import {
   SelectTrigger,
   SelectContent,
   SelectItem,
+  SelectValue,
 } from "@/components/ui/select";
 import { Trash2 } from "lucide-react";
+import { toStr, validOptions } from "@/utils/selectSafe";
 
-export default function FactureLigne({ value, onChange, onRemove, zones = [], openPicker, index }) {
+export default function FactureLigne({ value: ligne, onChange, onRemove, zones = [], openPicker, index }) {
   const lineRef = useRef(null);
 
-  const qte = Number(value?.quantite || 0);
-  const total = Number(value?.prix_total_ht || 0);
-  const tva = Number(value?.tva || 0);
+  const zoneOptions = validOptions(zones || [], 'id');
+  const TVA_OPTIONS = [0, 5.5, 10, 20]; // adapte si ta config TVA est dynamique
+
+  const qte = Number(ligne?.quantite || 0);
+  const total = Number(ligne?.prix_total_ht || 0);
+  const tva = Number(ligne?.tva || 0);
   const pu = qte > 0 ? total / qte : 0;
 
   const recalc = (patch = {}) => {
@@ -23,7 +28,7 @@ export default function FactureLigne({ value, onChange, onRemove, zones = [], op
     const tv = patch.tva !== undefined ? Number(patch.tva) : tva;
     const pu_ht = q > 0 ? lht / q : 0;
     onChange({
-      ...value,
+      ...ligne,
       ...patch,
       quantite: +q.toFixed(2),
       prix_total_ht: +lht.toFixed(2),
@@ -47,7 +52,7 @@ export default function FactureLigne({ value, onChange, onRemove, zones = [], op
       <div className="flex items-center gap-2">
         <Input
           readOnly
-          value={value?.produit_nom || ""}
+          value={ligne?.produit_nom || ""}
           placeholder="Choisir un produit…"
           onClick={() => openPicker(index)}
           onKeyDown={(e) => {
@@ -76,7 +81,7 @@ export default function FactureLigne({ value, onChange, onRemove, zones = [], op
       />
 
       {/* Unité (RO) */}
-      <Input readOnly tabIndex={-1} value={value?.unite || ""} placeholder="Unité" />
+      <Input readOnly tabIndex={-1} value={ligne?.unite || ""} placeholder="Unité" />
 
       {/* Total HT (€) */}
       <Input
@@ -94,31 +99,38 @@ export default function FactureLigne({ value, onChange, onRemove, zones = [], op
       <Input readOnly tabIndex={-1} value={fmt(pu)} placeholder="PU HT (€)" />
 
       {/* PMP */}
-      <Input readOnly tabIndex={-1} value={fmt(Number(value?.pmp ?? 0))} placeholder="PMP" />
+      <Input readOnly tabIndex={-1} value={fmt(Number(ligne?.pmp ?? 0))} placeholder="PMP" />
 
       {/* TVA % */}
-      <Input
-        type="number"
-        min="0"
-        step="0.01"
-        value={tva.toFixed(2)}
-        onChange={(e) => recalc({ tva: e.target.value })}
-        placeholder="TVA %"
-        autoComplete="off"
-        name="no-autofill"
-      />
+      <Select
+        value={toStr(ligne?.tva)}
+        onValueChange={(v) => onChange({ tva: Number(v) })}
+      >
+        <SelectTrigger className="w-28">
+          <SelectValue placeholder="TVA (%)" />
+        </SelectTrigger>
+        <SelectContent>
+          {TVA_OPTIONS.map((t) => (
+            <SelectItem key={t} value={String(t)}>
+              {t}%
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
       {/* Zone */}
-      <Select value={value?.zone_id || ""} onValueChange={(v) => recalc({ zone_id: v })}>
-        <SelectTrigger>
-          <span className="truncate">
-            {zones.find((z) => z.id === value?.zone_id)?.nom || "Zone"}
-          </span>
+      <Select
+        value={toStr(ligne?.zone_id)}
+        onValueChange={(v) => onChange({ zone_id: v === '__none__' ? null : v })}
+      >
+        <SelectTrigger className="w-44">
+          <SelectValue placeholder="Zone (optionnel)" />
         </SelectTrigger>
-        <SelectContent align="start" className="max-h-64 overflow-auto">
-          <SelectItem value="">-</SelectItem>
-          {zones.map((z) => (
-            <SelectItem key={z.id} value={z.id}>
+        <SelectContent>
+          {/* Si tu veux une option "Aucune", utiliser une vraie valeur sentinelle */}
+          <SelectItem value="__none__">Aucune</SelectItem>
+          {zoneOptions.map((z) => (
+            <SelectItem key={z.id} value={String(z.id)}>
               {z.nom}
             </SelectItem>
           ))}

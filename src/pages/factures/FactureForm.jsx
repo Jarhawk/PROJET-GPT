@@ -16,9 +16,11 @@ import {
   SelectTrigger,
   SelectContent,
   SelectItem,
+  SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { mapUILineToPayload } from '@/features/factures/invoiceMappers';
+import { toStr, validOptions } from '@/utils/selectSafe';
 
 const FN_UPDATE_FACTURE_EXISTS = false;
 
@@ -47,6 +49,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
   const fournisseurs = Array.isArray(fournisseursData)
     ? fournisseursData
     : (fournisseursData?.data ?? []);
+  const fournisseursSafe = validOptions(fournisseurs || [], 'id');
 
 // Zones (liste globale, préremplie ligne par ligne si zone_id arrive du produit)
   const { zones, fetchZones } = useZones();
@@ -63,12 +66,12 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
     prix_total_ht: 0,
     pmp: 0,
     tva: 0,
-    zone_id: '',
+    zone_id: null,
   });
 
   const emptyForm = () => ({
     id: null,
-    fournisseur_id: '',
+    fournisseur_id: null,
     date_facture: today(),
     numero: '',
     statut: 'Brouillon', // mappe vers p_actif
@@ -90,6 +93,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
   );
 
   const { control, handleSubmit, watch, reset, setValue } = form;
+  const values = watch();
   const [saving, setSaving] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerIndex, setPickerIndex] = useState(null);
@@ -167,7 +171,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
       prix_total_ht: 0,
       pmp: 0,
       tva: 0,
-      zone_id: '',
+      zone_id: null,
     });
 
   const updateLigne = (i, patch) => update(i, { ...lignes[i], ...patch });
@@ -271,30 +275,21 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
         {/* Fournisseur */}
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium">Fournisseur</label>
-          <Controller
-            control={control}
-            name="fournisseur_id"
-            render={({ field }) => (
-              <Select
-                value={field.value ?? ''}
-                onValueChange={(v) => field.onChange(v)}
-              >
-                <SelectTrigger>
-                  <span className="truncate">
-                    {fournisseurs.find((f) => f.id === field.value)?.nom ||
-                      'Sélectionner'}
-                  </span>
-                </SelectTrigger>
-                <SelectContent align="start" className="max-h-64 overflow-auto">
-                  {fournisseurs.map((f) => (
-                    <SelectItem key={f.id} value={f.id}>
-                      {f.nom}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          />
+          <Select
+            value={toStr(values?.fournisseur_id)}
+            onValueChange={(v) => setValue('fournisseur_id', v)}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Sélectionner un fournisseur" />
+            </SelectTrigger>
+            <SelectContent>
+              {fournisseursSafe.map((f) => (
+                <SelectItem key={f.id} value={String(f.id)}>
+                  {f.nom}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Date */}

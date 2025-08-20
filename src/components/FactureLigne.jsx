@@ -1,133 +1,113 @@
-// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState, useRef } from 'react'
-import ProductPickerModal from '@/components/forms/ProductPickerModal'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
+import { useMemo, useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import ProductPickerModal from "@/components/forms/ProductPickerModal";
 
-const parseNum = (v) => parseFloat(String(v).replace(',', '.')) || 0
+export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes, zones }) {
+  const [pickerOpen, setPickerOpen] = useState(false);
 
-export default function FactureLigne({
-  ligne,
-  index,
-  onChange,
-  onRemove,
-  onProduitFocus,
-  existingProductIds = [],
-}) {
-  const [pickerOpen, setPickerOpen] = useState(false)
-  const quantiteRef = useRef(null)
+  const excludeIds = useMemo(
+    () => (Array.isArray(lignes) ? lignes.map((l) => l.produit_id).filter(Boolean) : []),
+    [lignes]
+  );
 
-  const handleProduitSelection = (p) => {
-    if (p?.id) {
-      const q = parseNum(ligne.quantite)
-      const pu = parseNum(ligne.pu)
-      onChange({
-        ...ligne,
-        produit: p,
-        produit_id: p.id,
-        pmp: p.pmp ?? 0,
-        total_ht: (q * pu).toFixed(2),
-      })
-      setTimeout(() => quantiteRef.current?.focus(), 0)
-    }
-  }
+  const q   = Number(value?.quantite || 0);
+  const lht = Number(value?.prix_total_ht || 0);
+  const pu  = q > 0 ? lht / q : 0;
 
-  const handleQuantite = (val) => {
-    const q = parseNum(val)
-    const pu = parseNum(ligne.pu)
-    onChange({ ...ligne, quantite: val, total_ht: (q * pu).toFixed(2) })
-  }
-
-  const handlePu = (val) => {
-    const q = parseNum(ligne.quantite)
-    const pu = parseNum(val)
-    onChange({ ...ligne, pu: val, total_ht: (q * pu).toFixed(2) })
-  }
+  const update = (patch) => onChange({ ...value, ...patch });
+  const onPick = (p) => {
+    update({
+      produit_id: p.id,
+      produit_nom: p.nom,
+      unite: p.unite ?? "",
+      pmp: Number(p.pmp ?? 0),
+      tva: typeof p.tva === "number" ? p.tva : (value?.tva ?? 0),
+      zone_id: p.default_zone_id ?? value?.zone_id ?? "",
+    });
+  };
 
   return (
-    <div className="flex min-w-0 items-center gap-2 overflow-x-hidden">
-      <div className="basis-[30%] min-w-0">
-        <div className="flex items-center gap-2">
-          <Input
-            readOnly
-            value={ligne.produit?.nom || ''}
-            placeholder="Choisir un produit…"
-            onClick={() => {
-              setPickerOpen(true)
-              onProduitFocus?.(index)
-            }}
-            className="cursor-pointer"
-          />
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              setPickerOpen(true)
-              onProduitFocus?.(index)
-            }}
-          >
-            Rechercher
-          </Button>
-        </div>
-        <ProductPickerModal
-          open={pickerOpen}
-          onOpenChange={setPickerOpen}
-          onSelect={handleProduitSelection}
-          excludeIds={existingProductIds}
-        />
-      </div>
-      <div className="basis-[15%] min-w-0">
+    <div className="grid grid-cols-[minmax(240px,1.4fr)_minmax(90px,0.6fr)_minmax(120px,0.8fr)_minmax(140px,0.9fr)_minmax(140px,0.9fr)_minmax(120px,0.8fr)_minmax(160px,1fr)_minmax(120px,0.9fr)] gap-3 items-center overflow-x-hidden">
+      {/* Produit (picker) */}
+      <div className="flex items-center gap-2">
         <Input
-          type="number"
-          step="any"
-          ref={quantiteRef}
-          className="h-10 w-full rounded-xl text-right truncate"
-          value={ligne.quantite}
-          onChange={(e) => handleQuantite(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
-        />
-      </div>
-      <div className="basis-[15%] min-w-0">
-        <Input
-          type="number"
-          step="any"
-          className="h-10 w-full rounded-xl text-right truncate"
-          value={ligne.pu}
-          onChange={(e) => handlePu(e.target.value)}
-          onBlur={() => handlePu(parseNum(ligne.pu).toFixed(2))}
-          onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
-        />
-      </div>
-      <div className="basis-[15%] min-w-0">
-        <Input
-          type="number"
-          step="any"
-          className="h-10 w-full rounded-xl text-right truncate"
-          value={ligne.tva}
-          onChange={(e) => onChange({ ...ligne, tva: e.target.value })}
-        />
-      </div>
-      <div className="basis-[20%] min-w-0">
-        <Input
-          type="text"
           readOnly
-          tabIndex={-1}
-          value={ligne.total_ht}
-          className="pointer-events-none h-10 w-full select-none rounded-xl text-right truncate"
-          aria-readonly="true"
+          value={value?.produit_nom || ""}
+          placeholder="Choisir un produit…"
+          onClick={() => setPickerOpen(true)}
+          autoComplete="off"
+          name="no-autofill"
+          className="cursor-pointer"
         />
+        <Button type="button" variant="outline" onClick={() => setPickerOpen(true)}>Rechercher</Button>
       </div>
-      <div className="basis-[5%] flex justify-center min-w-0">
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={() => onRemove?.(index)}
-          className="h-10 px-2"
-        >
-          ❌
-        </Button>
+
+      {/* Quantité (editable) */}
+      <Input
+        type="number"
+        step="0.01"
+        value={value?.quantite ?? ""}
+        onChange={(e) => update({ quantite: e.target.value })}
+        placeholder="Qté"
+        autoComplete="off"
+        name="no-autofill"
+      />
+
+      {/* Unité (readonly) */}
+      <Input readOnly value={value?.unite || ""} placeholder="Unité" />
+
+      {/* Prix total HT (€) editable */}
+      <Input
+        type="number"
+        step="0.01"
+        value={value?.prix_total_ht ?? ""}
+        onChange={(e) => update({ prix_total_ht: e.target.value })}
+        placeholder="Total HT (€)"
+        autoComplete="off"
+        name="no-autofill"
+      />
+
+      {/* Prix unitaire calculé (€) readonly */}
+      <Input readOnly value={Number.isFinite(pu) ? pu.toFixed(4) : ""} placeholder="PU HT (€)" />
+
+      {/* PMP (readonly) */}
+      <Input readOnly value={Number(value?.pmp ?? 0).toFixed(2)} placeholder="PMP" />
+
+      {/* TVA % (prefill; editable) */}
+      <Input
+        type="number"
+        step="0.01"
+        value={value?.tva ?? ""}
+        onChange={(e) => update({ tva: e.target.value })}
+        placeholder="TVA %"
+        autoComplete="off"
+        name="no-autofill"
+      />
+
+      {/* Zone (prefill if known; editable) + Supprimer */}
+      <div className="flex items-center gap-2">
+        <div className="min-w-0 flex-1">
+          <Select value={value?.zone_id || ""} onValueChange={(v) => update({ zone_id: v })}>
+            <SelectTrigger><SelectValue placeholder="Zone" /></SelectTrigger>
+            <SelectContent align="start" className="max-h-64 overflow-auto">
+              {zones.map((z) => <SelectItem key={z.id} value={z.id}>{z.nom}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        <Button type="button" variant="ghost" className="text-destructive" onClick={onRemove}>Supprimer</Button>
       </div>
+
+      {/* Modal de sélection produit */}
+      <ProductPickerModal
+        open={pickerOpen}
+        onOpenChange={setPickerOpen}
+        mamaId={mamaId}
+        onPick={onPick}
+        excludeIds={excludeIds}
+      />
     </div>
-  )
+  );
 }
+

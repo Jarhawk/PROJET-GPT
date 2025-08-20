@@ -323,7 +323,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
             render={({ field }) => (
               <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger>
-                  <span className="truncate">{field.value || 'Statut'}</span>
+                  <SelectValue placeholder="Statut" />
                 </SelectTrigger>
                 <SelectContent align="start">
                   <SelectItem value="Brouillon">Brouillon</SelectItem>

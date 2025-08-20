@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
@@ -6,6 +6,7 @@ import ProductPickerModal from "@/components/forms/ProductPickerModal";
 
 export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes, zones }) {
   const [pickerOpen, setPickerOpen] = useState(false);
+  const produitRef = useRef(null);
 
   const excludeIds = useMemo(
     () => (Array.isArray(lignes) ? lignes.map((l) => l.produit_id).filter(Boolean) : []),
@@ -33,6 +34,7 @@ export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes
       {/* Produit (picker) */}
       <div className="flex items-center gap-2">
         <Input
+          ref={produitRef}
           readOnly
           value={value?.produit_nom || ""}
           placeholder="Choisir un produit…"
@@ -102,7 +104,7 @@ export default function FactureLigne({ value, onChange, onRemove, mamaId, lignes
       {/* Modal de sélection produit */}
       <ProductPickerModal
         open={pickerOpen}
-        onOpenChange={setPickerOpen}
+        onOpenChange={(v) => { setPickerOpen(v); if (!v) produitRef.current?.focus(); }}
         mamaId={mamaId}
         onPick={onPick}
         excludeIds={excludeIds}

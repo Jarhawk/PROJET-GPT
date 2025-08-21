@@ -33,7 +33,14 @@ function useZones() {
   });
 }
 
-export default function FactureLigne({ value: line, onChange, onRemove, allLines = [], invalidProduit = false }) {
+export default function FactureLigne({
+  value: line,
+  onChange,
+  onRemove,
+  allLines = [],
+  invalidProduit = false,
+  index,
+}) {
   const lineRef = useRef(null);
   const { data: zones = [] } = useZones();
   const [modalOpen, setModalOpen] = useState(false);
@@ -66,11 +73,10 @@ export default function FactureLigne({ value: line, onChange, onRemove, allLines
 
   const fmt = (n) =>
     Number.isFinite(n)
-      ? n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-      : "";
-  const fmt4 = (n) =>
-    Number.isFinite(n)
-      ? n.toLocaleString("fr-FR", { minimumFractionDigits: 4, maximumFractionDigits: 4 })
+      ? n.toLocaleString("fr-FR", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })
       : "";
 
   const excludeIdsSameZone = allLines
@@ -117,19 +123,21 @@ export default function FactureLigne({ value: line, onChange, onRemove, allLines
         currentLineProductId={line.produit_id}
       />
       <NumericInput
+        name={`lignes.${index}.quantite`}
         value={qte}
         onValueChange={(n) => recalc({ quantite: n })}
         placeholder="0"
       />
       <Input readOnly disabled value={line.unite || ""} placeholder="Unité" />
       <NumericInput
+        name={`lignes.${index}.total_ht`}
         value={totalHt}
         decimals={2}
         min={0}
         onValueChange={(n) => recalc({ total_ht: n })}
         placeholder="0,00"
       />
-      <Input readOnly disabled value={fmt4(puHt)} placeholder="PU HT (€)" />
+      <Input readOnly disabled value={fmt(puHt)} placeholder="PU HT (€)" />
       <Input readOnly disabled value={fmt(Number(line.pmp ?? 0))} placeholder="PMP" />
       <Select value={String(tva)} onValueChange={(v) => recalc({ tva: v })}>
         <SelectTrigger className="w-28">

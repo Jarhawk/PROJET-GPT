@@ -359,6 +359,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
               onRemove={() => remove(i)}
               allLines={lignes}
               invalidProduit={submitCount > 0 && !lignes[i]?.produit_id}
+              index={i}
             />
           ))}
         </div>

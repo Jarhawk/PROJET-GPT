@@ -1,25 +1,74 @@
-import supabase from '@/lib/supabaseClient';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { resolveAlertesRuptureSource } from '@/lib/resolveAlertesRuptureSource';
+import supabase from '@/lib/supabaseClient';
+import { useAuth } from '@/hooks/useAuth';
 
-export async function fetchAlertesRupture(mamaId) {
-  try {
-    const source = await resolveAlertesRuptureSource(supabase);
-    const { data, error } = await supabase
-      .from(source)
-      // embed grâce à la FK alertes_rupture.produit_id -> produits.id
-      .select(
-        'id, mama_id, produit_id, stock_actuel, traite, cree_le, produit:produits(id,nom)'
-      )
-      .eq('mama_id', mamaId)
-      .is('traite', false)
-      .order('cree_le', { ascending: false });
-    if (error) throw error;
-    return data;
-  } catch (error) {
-    console.error(error);
-    toast.error(error.message || 'Erreur récupération alertes rupture');
-    return [];
-  }
+/**
+ * Hook for low stock alerts based on v_alertes_rupture view.
+ * @param {Object} params
+ * @param {number} [params.page=1]
+ * @param {number} [params.pageSize=20]
+ * @param {'manque'|'stock_actuel'|'stock_min'} [params.orderBy='manque']
+ */
+export function useAlerteStockFaible({ page = 1, pageSize = 20, orderBy = 'manque' } = {}) {
+  const { mama_id } = useAuth();
+  const [data, setData] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!mama_id) return;
+    let aborted = false;
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+      try {
+        let query = supabase
+          .from('v_alertes_rupture')
+          .select('produit_id, nom, stock_min, stock_actuel, manque', { count: 'exact' })
+          .order(orderBy, { ascending: false })
+          .range(from, to);
+        try {
+          query = query.eq('mama_id', mama_id);
+          var { data: rows, count, error } = await query;
+          if (error) throw error;
+        } catch (e) {
+          if (e.code === '42501') {
+            const { data: rows2, count: count2, error: err2 } = await supabase
+              .from('v_alertes_rupture')
+              .select('produit_id, nom, stock_min, stock_actuel, manque', { count: 'exact' })
+              .order(orderBy, { ascending: false })
+              .range(from, to);
+            if (err2) throw err2;
+            rows = rows2; count = count2;
+          } else {
+            throw e;
+          }
+        }
+        if (!aborted) {
+          setData(rows || []);
+          setTotal(count || 0);
+        }
+      } catch (err) {
+        console.error(err);
+        if (!aborted) {
+          setError(err);
+          setData([]);
+          toast.error(err.message || "Erreur récupération alertes rupture");
+        }
+      } finally {
+        if (!aborted) setLoading(false);
+      }
+    };
+    fetchData();
+    return () => {
+      aborted = true;
+    };
+  }, [mama_id, page, pageSize, orderBy]);
+
+  return { data, total, page, pageSize, loading, error };
 }
-
+export default useAlerteStockFaible;

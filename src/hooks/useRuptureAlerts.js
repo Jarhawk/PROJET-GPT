@@ -2,7 +2,6 @@
 import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-import { resolveAlertesRuptureSource } from '@/lib/resolveAlertesRuptureSource';
 
 export function useRuptureAlerts() {
   const { mama_id } = useAuth();
@@ -10,12 +9,11 @@ export function useRuptureAlerts() {
   async function fetchAlerts(type = null, traite = null) {
     if (!mama_id) return [];
     try {
-      const source = await resolveAlertesRuptureSource(supabase);
       let query = supabase
-        .from(source)
+        .from('v_alertes_rupture')
         .select('*, produit:produit_id(nom)')
         .eq('mama_id', mama_id)
-        .order('cree_le', { ascending: false });
+        .order('manque', { ascending: false });
 
       if (type) query = query.eq('type', type);
       if (typeof traite === 'boolean') query = query.eq('traite', traite);

@@ -1,61 +1,67 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabaseClient";
-import { useMultiMama } from "@/context/MultiMamaContext";
+import { useEffect, useState } from 'react';
+import supabase from '@/lib/supabaseClient';
+import { useAuth } from '@/hooks/useAuth';
+import useDebounce from '@/hooks/useDebounce';
 
-// Hook principal (recommandé)
-export default function useFournisseursAutocomplete(q = "") {
-  const { currentMamaId } = useMultiMama();
+/**
+ * Autocomplete fournisseurs by nom
+ * @param {{ term?: string, limit?: number }} params
+ */
+export function useFournisseursAutocomplete({ term = '', limit = 20 } = {}) {
+  const { mama_id } = useAuth();
+  const [options, setOptions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const search = useDebounce(term, 250);
 
-  const {
-    data = [],
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["fournisseurs-autocomplete", currentMamaId, q],
-    enabled: !!currentMamaId,
-    queryFn: async () => {
-      let req = supabase
-        .from("fournisseurs")
-        .select("id, nom")
-        .eq("mama_id", currentMamaId)
-        .eq("actif", true)
-        .order("nom", { ascending: true })
-        .limit(50);
-
-      if (q && q.trim().length > 0) {
-        req = req.ilike("nom", `%${q}%`);
+  useEffect(() => {
+    if (!mama_id) return;
+    let aborted = false;
+    const run = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        let req = supabase
+          .from('fournisseurs')
+          .select('id, nom, ville')
+          .eq('mama_id', mama_id)
+          .eq('actif', true)
+          .order('nom', { ascending: true })
+          .limit(limit);
+        if (search.trim()) req = req.ilike('nom', `%${search.trim()}%`);
+        const { data, error } = await req;
+        if (error) throw error;
+        if (!aborted) setOptions(data || []);
+      } catch (err) {
+        console.error(err);
+        if (!aborted) {
+          setError(err);
+          setOptions([]);
+        }
+      } finally {
+        if (!aborted) setLoading(false);
       }
+    };
+    run();
+    return () => {
+      aborted = true;
+    };
+  }, [mama_id, search, limit]);
 
-      const { data, error } = await req;
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
-
-  console.debug("[fournisseurs]", { q, count: data?.length || 0 });
-
-  return { data: data ?? [], isLoading, error };
+  return { options, loading, error };
 }
 
-// Fonction de compatibilité (au cas où des écrans appellent encore une “fonction”)
-export async function searchFournisseurs(mamaId, q = "") {
+export async function searchFournisseurs(mamaId, term = '', limit = 20) {
   if (!mamaId) return [];
   let req = supabase
-    .from("fournisseurs")
-    .select("id, nom")
-    .eq("mama_id", mamaId)
-    .eq("actif", true)
-    .order("nom", { ascending: true })
-    .limit(50);
-
-  if (q && q.trim().length > 0) {
-    req = req.ilike("nom", `%${q}%`);
-  }
-
+    .from('fournisseurs')
+    .select('id, nom, ville')
+    .eq('mama_id', mamaId)
+    .eq('actif', true)
+    .order('nom', { ascending: true })
+    .limit(limit);
+  if (term && term.trim()) req = req.ilike('nom', `%${term.trim()}%`);
   const { data, error } = await req;
   if (error) throw error;
-  const rows = data ?? [];
-  console.debug("[fournisseurs]", { q, count: rows.length });
-  return rows;
+  return data || [];
 }
-

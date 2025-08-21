@@ -5,8 +5,8 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import supabase from '@/lib/supabaseClient';
 import { useAuth } from '@/hooks/useAuth';
-import { useFournisseursAutocomplete } from '@/hooks/useFournisseursAutocomplete';
 import FactureLigne from '@/components/FactureLigne';
+import SupplierPicker from '@/components/factures/SupplierPicker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -86,9 +86,6 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
   const fournisseur_id = watch('fournisseur_id');
   const setFournisseurId = (val) =>
     setValue('fournisseur_id', val, { shouldDirty: true });
-  const [fSearch, setFSearch] = useState('');
-  const { options: fournisseurs = [], loading: fLoading } =
-    useFournisseursAutocomplete({ term: fSearch });
 
   const sum = (arr) => arr.reduce((acc, n) => acc + n, 0);
   const eur = (n) =>
@@ -212,31 +209,11 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
         {/* Fournisseur */}
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium">Fournisseur</label>
-          <Input
-            value={fSearch}
-            onChange={(e) => setFSearch(e.target.value)}
-            placeholder="Rechercher un fournisseur"
+          <SupplierPicker
+            value={fournisseur_id}
+            onChange={setFournisseurId}
+            error={errors.fournisseur_id}
           />
-          <Select
-            value={fournisseur_id ? String(fournisseur_id) : ''}
-            onValueChange={setFournisseurId}
-            disabled={fLoading}
-          >
-            <SelectTrigger
-              aria-label="Fournisseur"
-              className={`w-full ${errors.fournisseur_id ? 'border-destructive' : ''}`}
-              aria-invalid={errors.fournisseur_id ? 'true' : 'false'}
-            >
-              <SelectValue placeholder="Sélectionner un fournisseur" />
-            </SelectTrigger>
-            <SelectContent>
-              {fournisseurs?.map((f) => (
-                <SelectItem key={f.id} value={String(f.id)}>
-                  {f.nom}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
 
         {/* Date */}

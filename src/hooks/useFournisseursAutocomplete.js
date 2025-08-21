@@ -17,6 +17,12 @@ export function useFournisseursAutocomplete({ term = '', limit = 20 } = {}) {
   useEffect(() => {
     if (!mama_id) return;
     let aborted = false;
+    const s = search.trim();
+    if (s === '') {
+      setOptions([]);
+      setLoading(false);
+      return;
+    }
     const run = async () => {
       setLoading(true);
       setError(null);
@@ -27,8 +33,8 @@ export function useFournisseursAutocomplete({ term = '', limit = 20 } = {}) {
           .eq('mama_id', mama_id)
           .eq('actif', true)
           .order('nom', { ascending: true })
-          .limit(limit);
-        if (search.trim()) req = req.ilike('nom', `%${search.trim()}%`);
+          .limit(limit)
+          .ilike('nom', `%${s}%`);
         const { data, error } = await req;
         if (error) throw error;
         if (!aborted) setOptions(data || []);

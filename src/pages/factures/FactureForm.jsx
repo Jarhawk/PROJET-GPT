@@ -36,7 +36,6 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
     produit_id: null,
     produit_nom: '',
     quantite: 1,
-    qte: 1,
     unite: '',
     total_ht: 0,
     prix_total_ht: 0,

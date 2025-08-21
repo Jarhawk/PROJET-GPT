@@ -6,7 +6,7 @@ export function mapDbLineToUI(row: any) {
     id: row.id,
     produit_id: row.produit_id,
     produit_nom: row.produit?.nom ?? row.produit_nom ?? '',
-    qte,
+    quantite: qte,
     unite: row.produit?.unite ?? row.unite ?? '',
     total_ht,
     pu_ht: qte > 0 ? total_ht / qte : 0,
@@ -19,7 +19,7 @@ export function mapDbLineToUI(row: any) {
 export function mapUILineToPayload(l: any) {
   return {
     produit_id: l.produit_id,
-    quantite: Number(l.qte || 0),
+    quantite: Number(l.quantite || 0),
     prix_unitaire_ht: Number(l.pu_ht || 0),
     tva: Number(l.tva || 0),
     zone_id: l.zone_id ?? null,

@@ -2,28 +2,23 @@ import { useState, useEffect } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useProductSearch } from "@/hooks/useProductSearch";
+import useProductSearch from "@/hooks/useProductSearch";
 
 export default function ProductPickerModal({
   open,
   onClose,
   onSelect,
-  excludeIdsSameZone,
-  currentLineProductId,
+  excludeIdsSameZone: _excludeIdsSameZone,
+  currentLineProductId: _currentLineProductId,
 }) {
-  const [q, setQ] = useState("");
-  const { data } = useProductSearch(q);
-  const blacklist = new Set(excludeIdsSameZone ?? []);
-  const list = (data ?? []).filter((p) => {
-    if (currentLineProductId && p.id === currentLineProductId) return true;
-    return !blacklist.has(p.id);
-  });
+  const [query, setQuery] = useState("");
+  const { data: results = [] } = useProductSearch(query);
 
   const [active, setActive] = useState(-1);
 
   useEffect(() => {
     if (!open) {
-      setQ("");
+      setQuery("");
       setActive(-1);
     }
   }, [open]);
@@ -31,13 +26,13 @@ export default function ProductPickerModal({
   const handleKeyDown = (e) => {
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setActive((a) => Math.min(a + 1, list.length - 1));
+      setActive((a) => Math.min(a + 1, results.length - 1));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setActive((a) => Math.max(a - 1, 0));
     } else if (e.key === "Enter") {
       e.preventDefault();
-      const target = active >= 0 ? list[active] : list[0];
+      const target = active >= 0 ? results[active] : results[0];
       if (target) {
         onSelect?.(target);
         onClose?.();
@@ -50,7 +45,7 @@ export default function ProductPickerModal({
 
   useEffect(() => {
     setActive(-1);
-  }, [q, data]);
+  }, [query, results]);
 
   return (
     <Dialog.Root open={open} onOpenChange={(v) => !v && onClose?.()}>
@@ -68,27 +63,28 @@ export default function ProductPickerModal({
               </button>
             </Dialog.Close>
           </div>
-          <Dialog.Description id="product-search-desc" className="sr-only">
-            Tapez pour rechercher un produit (filtre sur le nom).
-          </Dialog.Description>
-
           <div className="p-4 space-y-4 flex-1 overflow-y-auto">
             <input
               type="text"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Rechercher un produit…"
               autoComplete="off"
-              autoCorrect="off"
+              spellCheck={false}
               autoCapitalize="none"
+              autoCorrect="off"
+              aria-describedby="product-search-desc"
               className="w-full px-4 py-2 font-semibold text-white placeholder-white/50 bg-white/10 backdrop-blur rounded-md shadow-lg border border-white/20 ring-1 ring-white/20 focus:outline-none hover:bg-white/10"
             />
+            <p id="product-search-desc" className="sr-only">
+              Recherche par nom de produit (ILIKE sur produits.nom)
+            </p>
             <div className="border border-border rounded-lg max-h-60 overflow-y-auto">
-              {list.length === 0 ? (
+              {results.length === 0 ? (
                 <div className="p-4 text-sm text-muted-foreground">Aucun résultat</div>
               ) : (
-                list.map((p, idx) => (
+                results.map((p, idx) => (
                   <button
                     key={p.id}
                     onClick={() => {
@@ -97,11 +93,7 @@ export default function ProductPickerModal({
                     }}
                     className={`w-full px-4 py-2 text-left hover:bg-accent ${idx === active ? "bg-accent" : ""}`}
                   >
-                    <div className="font-medium">{p.nom}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {p.unite ? `Unité: ${p.unite} • ` : ""}PMP: {Number(p.pmp ?? 0).toFixed(2)}
-                      {typeof p.tva === "number" ? ` • TVA: ${p.tva}%` : ""}
-                    </div>
+                    {p.nom}
                   </button>
                 ))
               )}

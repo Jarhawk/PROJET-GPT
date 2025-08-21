@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { mapUILineToPayload } from '@/features/factures/invoiceMappers';
+import useProduitLineDefaults from '@/hooks/useProduitLineDefaults';
 
 const FN_UPDATE_FACTURE_EXISTS = false;
 
@@ -29,11 +30,13 @@ const fmt2 = new Intl.NumberFormat('fr-FR', {
 
 export default function FactureForm({ facture = null, onSaved } = {}) {
   const { mama_id: mamaId } = useAuth();
+  const { fetchDefaults } = useProduitLineDefaults();
 
   const emptyLigne = () => ({
     id: crypto.randomUUID(),
     produit_id: null,
     produit_nom: '',
+    unite_id: null,
     quantite: 1,
     unite: '',
     total_ht: 0,
@@ -123,7 +126,36 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
 
   const addLigne = () => append(emptyLigne());
 
-  const updateLigne = (i, patch) => update(i, { ...lignes[i], ...patch });
+  const updateLigne = async (i, patch) => {
+    let merged = { ...lignes[i], ...patch };
+    if (patch.produit_id) {
+      try {
+        const defaults = await fetchDefaults({ produit_id: patch.produit_id });
+        const q = Number(merged.quantite || 0);
+        const lht = Number(merged.total_ht || 0);
+        const tv = Number(defaults.tva || 0);
+        const pu = q > 0 ? +(lht / q).toFixed(4) : 0;
+        const tvaMontant = +(lht * (tv / 100)).toFixed(2);
+        const totalTtc = +(lht + tvaMontant).toFixed(2);
+        merged = {
+          ...merged,
+          unite_id: defaults.unite_id,
+          unite: defaults.unite,
+          pmp: defaults.pmp,
+          tva: tv,
+          zone_id: defaults.zone_id,
+          pu_ht: pu,
+          prix_unitaire_ht: pu,
+          tva_montant: tvaMontant,
+          total_ttc: totalTtc,
+          prix_total_ht: lht,
+        };
+      } catch (e) {
+        console.warn('[FactureForm] defaults fetch failed', e);
+      }
+    }
+    update(i, merged);
+  };
 
   const onSubmit = async (values) => {
     if (saving) return;

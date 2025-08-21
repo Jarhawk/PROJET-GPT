@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Trash2 } from "lucide-react";
-import ProductPickerModal from "@/components/forms/ProductPickerModal";
+import ProduitSearchModal from "@/components/factures/ProduitSearchModal";
 import { useQuery } from "@tanstack/react-query";
 import supabase from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/useAuth";
@@ -99,16 +99,14 @@ export default function FactureLigne({ value: line, onChange, onRemove, allLines
           Choisir un produit
         </Button>
       </div>
-      <ProductPickerModal
+      <ProduitSearchModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onSelect={(p) => {
           recalc({
             produit_id: p.id,
             produit_nom: p.nom,
-            unite: p.unite ?? "",
-            pmp: Number(p.pmp ?? 0),
-            tva: Number(p.tva ?? 0),
+            unite_id: p.unite_id ?? null,
           });
         }}
         excludeIdsSameZone={excludeIdsSameZone}

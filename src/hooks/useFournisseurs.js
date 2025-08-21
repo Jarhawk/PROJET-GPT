@@ -32,6 +32,7 @@ export function useFournisseurs() {
     }
     if (error) toast.error(error.message);
     queryClient.invalidateQueries({ queryKey: ['fournisseurs', mama_id] });
+    queryClient.invalidateQueries({ queryKey: ['fournisseurs-autocomplete', mama_id] });
     return { data, error };
   }
 
@@ -54,6 +55,7 @@ export function useFournisseurs() {
     }
     if (error) toast.error(error.message);
     queryClient.invalidateQueries({ queryKey: ['fournisseurs', mama_id] });
+    queryClient.invalidateQueries({ queryKey: ['fournisseurs-autocomplete', mama_id] });
     return { error };
   }
 
@@ -67,6 +69,7 @@ export function useFournisseurs() {
       .eq('mama_id', mama_id);
     if (error) toast.error(error.message);
     queryClient.invalidateQueries({ queryKey: ['fournisseurs', mama_id] });
+    queryClient.invalidateQueries({ queryKey: ['fournisseurs-autocomplete', mama_id] });
     return { error };
   }
 

@@ -7,9 +7,11 @@ import * as XLSX from "xlsx";
 import { safeImportXLSX } from "@/lib/xlsx/safeImportXLSX";
 import { saveAs } from "file-saver";
 import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 
 export function useProducts() {
   const { mama_id } = useAuth();
+  const queryClient = useQueryClient();
   const [products, setProducts] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -116,6 +118,7 @@ export function useProducts() {
       toast.error(error.message);
     }
     if (refresh) await fetchProducts();
+    queryClient.invalidateQueries({ queryKey: ['product-search', mama_id] });
   }
 
   async function updateProduct(id, updateFields, { refresh = true } = {}) {
@@ -138,6 +141,7 @@ export function useProducts() {
       toast.error(error.message);
     }
     if (refresh) await fetchProducts();
+    queryClient.invalidateQueries({ queryKey: ['product-search', mama_id] });
   }
 
   async function toggleProductActive(id, actif, { refresh = true } = {}) {
@@ -155,6 +159,7 @@ export function useProducts() {
       toast.error(error.message);
     }
     if (refresh) await fetchProducts();
+    queryClient.invalidateQueries({ queryKey: ['product-search', mama_id] });
   }
 
   async function deleteProduct(id, { refresh = true } = {}) {
@@ -172,6 +177,7 @@ export function useProducts() {
       toast.error(error.message);
     }
     if (refresh) await fetchProducts();
+    queryClient.invalidateQueries({ queryKey: ['product-search', mama_id] });
   }
 
   const fetchProductPrices = useCallback(async (productId) => {

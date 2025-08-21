@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import useSupabaseClient from '@/hooks/useSupabaseClient';
 import { useAuth } from '@/hooks/useAuth';
 import { logSupaError } from '@/lib/supa/logError';
+import { toast } from 'sonner';
+import { resolveAlertesRuptureSource } from '@/lib/resolveAlertesRuptureSource';
 
 export default function useAlerteStockFaible() {
   const supabase = useSupabaseClient();
@@ -15,8 +17,9 @@ export default function useAlerteStockFaible() {
     setLoading(true);
     setError(null);
     try {
+      const source = await resolveAlertesRuptureSource(supabase);
       const { data, error } = await supabase
-        .from('alertes_rupture')
+        .from(source)
         .select(
           `id,
           mama_id,
@@ -56,7 +59,8 @@ export default function useAlerteStockFaible() {
       }
       return list;
     } catch (e) {
-      console.warn('useAlerteStockFaible', e.message);
+      console.error('useAlerteStockFaible', e.message);
+      toast.error(e.message || 'Erreur chargement alertes rupture');
       setError(e);
       setData([]);
       return [];

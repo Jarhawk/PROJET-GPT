@@ -53,7 +53,6 @@ export default function FactureLigne({ value: line, onChange, onRemove, allLines
       ...line,
       ...patch,
       quantite: q,
-      qte: q,
       total_ht: lht,
       prix_total_ht: lht,
       pu_ht: pu,

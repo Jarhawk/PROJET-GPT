@@ -8,6 +8,7 @@ function normalize(list = []) {
   return list.map((p) => ({
     id: p.id ?? p.produit_id ?? null,
     nom: p.nom ?? null,
+    // unite_id est nécessaire pour hydrater l'unité dans les formulaires
     unite_id: p.unite_id ?? null,
     zone_id: p.zone_id ?? null,
     pmp: p.pmp ?? null,

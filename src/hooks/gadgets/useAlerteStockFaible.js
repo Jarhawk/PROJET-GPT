@@ -21,10 +21,12 @@ export default function useAlerteStockFaible() {
         .select(
           `produit_id,
           nom,
+          unite,
+          fournisseur_nom,
           stock_actuel,
-          stock_min`
+          stock_min,
+          manque`
         )
-        .eq('mama_id', mama_id)
         .order('manque', { ascending: false })
         .limit(50);
 
@@ -34,17 +36,13 @@ export default function useAlerteStockFaible() {
       }
 
       const list = (data || [])
-        .filter(
-          (p) =>
-            typeof p.stock_min === 'number' &&
-            typeof p.stock_actuel === 'number' &&
-            p.stock_actuel < p.stock_min
-        )
         .map((p) => ({
           produit_id: p.produit_id,
-          nom: p.produit?.nom,
-          stock_reel: p.stock_actuel,
+          nom: p.nom,
+          stock_actuel: p.stock_actuel,
           stock_min: p.stock_min,
+          unite: p.unite,
+          fournisseur_nom: p.fournisseur_nom,
         }))
         .slice(0, 5);
       setData(list);

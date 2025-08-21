@@ -8,7 +8,9 @@ export default function AlertBadge() {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    fetchAlerts(null, false).then(a => setCount(a.length)).catch(() => {});
+    fetchAlerts()
+      .then((a) => setCount(a.filter((x) => !x.traite).length))
+      .catch(() => {});
   }, [fetchAlerts]);
 
   return (

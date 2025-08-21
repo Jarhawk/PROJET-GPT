@@ -26,28 +26,12 @@ export function useAlerteStockFaible({ page = 1, pageSize = 20, orderBy = 'manqu
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
       try {
-        let query = supabase
+        const { data: rows, count, error } = await supabase
           .from('v_alertes_rupture')
           .select('produit_id, nom, stock_min, stock_actuel, manque', { count: 'exact' })
           .order(orderBy, { ascending: false })
           .range(from, to);
-        try {
-          query = query.eq('mama_id', mama_id);
-          var { data: rows, count, error } = await query;
-          if (error) throw error;
-        } catch (e) {
-          if (e.code === '42501') {
-            const { data: rows2, count: count2, error: err2 } = await supabase
-              .from('v_alertes_rupture')
-              .select('produit_id, nom, stock_min, stock_actuel, manque', { count: 'exact' })
-              .order(orderBy, { ascending: false })
-              .range(from, to);
-            if (err2) throw err2;
-            rows = rows2; count = count2;
-          } else {
-            throw e;
-          }
-        }
+        if (error) throw error;
         if (!aborted) {
           setData(rows || []);
           setTotal(count || 0);

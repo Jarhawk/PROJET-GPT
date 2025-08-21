@@ -7,7 +7,7 @@ import useProductSearch from "@/hooks/useProductSearch";
 export default function ProductPickerModal({
   open,
   onClose,
-  onSelect,
+  onSelect: onPick,
   excludeIdsSameZone: _excludeIdsSameZone,
   currentLineProductId: _currentLineProductId,
 }) {
@@ -34,7 +34,7 @@ export default function ProductPickerModal({
       e.preventDefault();
       const target = active >= 0 ? results[active] : results[0];
       if (target) {
-        onSelect?.(target);
+        onPick?.(target);
         onClose?.();
       }
     } else if (e.key === "Escape") {
@@ -71,9 +71,9 @@ export default function ProductPickerModal({
               onKeyDown={handleKeyDown}
               placeholder="Rechercher un produit…"
               autoComplete="off"
-              spellCheck={false}
-              autoCapitalize="none"
               autoCorrect="off"
+              autoCapitalize="none"
+              spellCheck={false}
               aria-describedby="product-search-desc"
               className="w-full px-4 py-2 font-semibold text-white placeholder-white/50 bg-white/10 backdrop-blur rounded-md shadow-lg border border-white/20 ring-1 ring-white/20 focus:outline-none hover:bg-white/10"
             />
@@ -87,11 +87,14 @@ export default function ProductPickerModal({
                 results.map((p, idx) => (
                   <button
                     key={p.id}
+                    type="button"
                     onClick={() => {
-                      onSelect?.(p);
+                      onPick?.(p);
                       onClose?.();
                     }}
-                    className={`w-full px-4 py-2 text-left hover:bg-accent ${idx === active ? "bg-accent" : ""}`}
+                    className={`w-full text-left px-3 py-2 hover:bg-white/5 rounded ${
+                      idx === active ? "bg-white/10" : ""
+                    }`}
                   >
                     {p.nom}
                   </button>

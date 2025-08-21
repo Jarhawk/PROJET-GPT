@@ -3,10 +3,14 @@ import { supabase } from "@/lib/supabaseClient";
 import { useMultiMama } from "@/context/MultiMamaContext";
 
 // Hook principal (recommandé)
-export function useFournisseursAutocomplete(q) {
+export default function useFournisseursAutocomplete(q = "") {
   const { currentMamaId } = useMultiMama();
 
-  return useQuery({
+  const {
+    data = [],
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["fournisseurs-autocomplete", currentMamaId, q],
     enabled: !!currentMamaId,
     queryFn: async () => {
@@ -19,7 +23,7 @@ export function useFournisseursAutocomplete(q) {
         .limit(50);
 
       if (q && q.trim().length > 0) {
-        req = req.ilike("nom", `%${q}%`); // ILIKE sur fournisseurs.nom
+        req = req.ilike("nom", `%${q}%`);
       }
 
       const { data, error } = await req;
@@ -27,6 +31,10 @@ export function useFournisseursAutocomplete(q) {
       return data ?? [];
     },
   });
+
+  console.debug("[fournisseurs]", { q, count: data?.length || 0 });
+
+  return { data: data ?? [], isLoading, error };
 }
 
 // Fonction de compatibilité (au cas où des écrans appellent encore une “fonction”)
@@ -41,13 +49,13 @@ export async function searchFournisseurs(mamaId, q = "") {
     .limit(50);
 
   if (q && q.trim().length > 0) {
-    req = req.ilike("nom", `%${q}%`); // ILIKE sur fournisseurs.nom uniquement
+    req = req.ilike("nom", `%${q}%`);
   }
 
   const { data, error } = await req;
   if (error) throw error;
-  return data ?? [];
+  const rows = data ?? [];
+  console.debug("[fournisseurs]", { q, count: rows.length });
+  return rows;
 }
 
-// default export pour couvrir les imports par défaut existants
-export default useFournisseursAutocomplete;

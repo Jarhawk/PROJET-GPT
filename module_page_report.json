@@ -242,6 +242,21 @@
     "debug/AccessExample.jsx",
     "parametrage/AccessRights.jsx"
   ],
+  "costing_carte": [
+    "costing/CostingCarte.jsx"
+  ],
+  "emails_envoyes": [
+    "emails/EmailsEnvoyes.jsx"
+  ],
+  "menu_du_jour": [
+    "menu/MenuDuJour.jsx",
+    "menu/MenuDuJourJour.jsx"
+  ],
+  "menu_groupe": [
+    "menus/MenuGroupes.jsx",
+    "menus/MenuGroupeForm.jsx",
+    "menus/MenuGroupeDetail.jsx"
+  ],
   "aide": [
     "AideContextuelle.jsx",
     "aide/Aide.jsx",

@@ -12,7 +12,7 @@ export function useRuptureAlerts() {
       let query = supabase
         .from('v_alertes_rupture')
         .select(
-          'id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, stock_projete, manque, type, traite'
+          'produit_id, nom, unite, fournisseur_id, fournisseur_nom, stock_actuel, stock_min, manque'
         )
         .order('manque', { ascending: false });
 
@@ -25,21 +25,6 @@ export function useRuptureAlerts() {
       console.error(error);
       toast.error(error.message || 'Erreur chargement alertes rupture');
       return [];
-    }
-  }
-
-  async function markAsHandled(id) {
-    if (!mama_id) return;
-    try {
-      const { error } = await supabase
-        .from('alertes_rupture')
-        .update({ traite: true })
-        .eq('id', id)
-        .eq('mama_id', mama_id);
-      if (error) throw error;
-    } catch (error) {
-      console.error(error);
-      toast.error(error.message || 'Erreur mise à jour alerte');
     }
   }
 
@@ -59,5 +44,5 @@ export function useRuptureAlerts() {
     }
   }
 
-  return { fetchAlerts, markAsHandled, generateSuggestions };
+  return { fetchAlerts, generateSuggestions };
 }

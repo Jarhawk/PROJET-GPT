@@ -106,7 +106,7 @@ export default function FactureLigne({ value: line, onChange, onRemove, allLines
         onSelect={(p) => {
           const z = p.zone_id ?? (zones.length === 1 ? zones[0].id : null);
           recalc({
-            produit_id: p.id,
+            produit_id: p.produit_id,
             produit_nom: p.nom,
             unite_id: p.unite_id ?? null,
             tva: p.tva ?? 0,
@@ -126,9 +126,10 @@ export default function FactureLigne({ value: line, onChange, onRemove, allLines
         value={totalHt}
         onChange={(val) => recalc({ total_ht: val })}
         placeholder="Total HT (€)"
+        decimals={2}
       />
-      <Input readOnly value={fmt4(puHt)} placeholder="PU HT (€)" />
-      <Input readOnly value={fmt(Number(line.pmp ?? 0))} placeholder="PMP" />
+      <Input readOnly disabled value={fmt4(puHt)} placeholder="PU HT (€)" />
+      <Input readOnly disabled value={fmt(Number(line.pmp ?? 0))} placeholder="PMP" />
       <Select value={String(tva)} onValueChange={(v) => recalc({ tva: v })}>
         <SelectTrigger className="w-28">
           <SelectValue placeholder="TVA (%)" />

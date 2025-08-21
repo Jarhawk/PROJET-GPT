@@ -15,7 +15,7 @@ export function useProduitLineDefaults() {
     return queryClient.fetchQuery({
       queryKey: ['produit-line-defaults', mama_id, produit_id],
       queryFn: async () => {
-        const [prodRes, pmpRes] = await Promise.all([
+        const [prodRes, lignesRes] = await Promise.all([
           supabase
             .from('produits')
             .select('unite_id')
@@ -23,11 +23,12 @@ export function useProduitLineDefaults() {
             .eq('mama_id', mama_id)
             .maybeSingle(),
           supabase
-            .from('v_pmp')
-            .select('pmp')
+            .from('facture_lignes')
+            .select('pmp, prix_unitaire_ht')
             .eq('mama_id', mama_id)
             .eq('produit_id', produit_id)
-            .maybeSingle(),
+            .order('created_at', { ascending: false })
+            .limit(3),
         ]);
 
         const unite_id = prodRes.data?.unite_id ?? null;
@@ -40,10 +41,23 @@ export function useProduitLineDefaults() {
               .maybeSingle()
           : { data: null };
 
+        let pmp = 0;
+        const lignes = lignesRes.data || [];
+        const withPmp = lignes.find((l) => l.pmp != null);
+        if (withPmp) {
+          pmp = Number(withPmp.pmp);
+        } else if (lignes.length > 0) {
+          const sum = lignes.reduce(
+            (acc, l) => acc + Number(l.prix_unitaire_ht || 0),
+            0
+          );
+          pmp = sum / lignes.length;
+        }
+
         return {
           unite_id,
           unite: uniteData?.nom ?? '',
-          pmp: Number(pmpRes.data?.pmp ?? 0),
+          pmp: Number(pmp || 0),
         };
       },
     });

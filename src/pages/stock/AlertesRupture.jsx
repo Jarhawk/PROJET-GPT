@@ -3,7 +3,7 @@ import { useRuptureAlerts } from "@/hooks/useRuptureAlerts";
 import { Button } from "@/components/ui/button";
 
 export default function AlertesRupture() {
-  const { fetchAlerts, markAsHandled, generateSuggestions } = useRuptureAlerts();
+  const { fetchAlerts, generateSuggestions } = useRuptureAlerts();
   const [alerts, setAlerts] = useState([]);
   const [type, setType] = useState(null);
 
@@ -25,25 +25,30 @@ export default function AlertesRupture() {
       </div>
       <table className="min-w-full text-sm">
         <thead>
-          <tr><th>Produit</th><th>Actuel</th><th>Proj.</th><th></th></tr>
+          <tr>
+            <th>Produit</th>
+            <th>Actuel</th>
+            <th>Min</th>
+            <th>Manque</th>
+            <th>Fournisseur</th>
+          </tr>
         </thead>
         <tbody>
-          {alerts.map(a => (
-            <tr key={a.id} className="border-t">
+          {alerts.map((a) => (
+            <tr key={a.produit_id} className="border-t">
               <td className="px-2 py-1">{a.nom}</td>
               <td className="px-2 py-1">{a.stock_actuel}</td>
-              <td className="px-2 py-1">{a.stock_projete}</td>
-              <td className="px-2 py-1 text-right">
-                {!a.traite && (
-                  <Button size="sm" onClick={() => markAsHandled(a.id).then(load)}>
-                    Traiter
-                  </Button>
-                )}
-              </td>
+              <td className="px-2 py-1">{a.stock_min}</td>
+              <td className="px-2 py-1">{a.manque}</td>
+              <td className="px-2 py-1">{a.fournisseur_nom}</td>
             </tr>
           ))}
           {alerts.length === 0 && (
-            <tr><td colSpan={4} className="text-center p-2">Aucune alerte</td></tr>
+            <tr>
+              <td colSpan={5} className="text-center p-2">
+                Aucune alerte
+              </td>
+            </tr>
           )}
         </tbody>
       </table>

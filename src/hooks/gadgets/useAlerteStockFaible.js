@@ -22,6 +22,7 @@ export default function useAlerteStockFaible() {
           `produit_id,
           nom,
           unite,
+          fournisseur_id,
           fournisseur_nom,
           stock_actuel,
           stock_min,
@@ -42,6 +43,7 @@ export default function useAlerteStockFaible() {
           stock_actuel: p.stock_actuel,
           stock_min: p.stock_min,
           unite: p.unite,
+          fournisseur_id: p.fournisseur_id,
           fournisseur_nom: p.fournisseur_nom,
         }))
         .slice(0, 5);

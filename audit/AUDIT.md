@@ -1,0 +1,203 @@
+# Audit ciblé
+
+## Routes déclarées
+- /
+- /*
+- /accueil
+- /achats
+- /admin/access-multi-sites
+- /aide
+- /alertes
+- /analyse
+- /analyse/analytique
+- /analyse/cost-centers
+- /blocked
+- /bons-livraison
+- /bons-livraison/:id
+- /bons-livraison/nouveau
+- /carte
+- /catalogue/sync
+- /cgu
+- /cgv
+- /commandes
+- /commandes/:id
+- /commandes/envoyees
+- /commandes/nouvelle
+- /comparatif
+- /confidentialite
+- /consentements
+- /consolidation
+- /contact
+- /costing/carte
+- /create-mama
+- /dashboard
+- /dashboard/builder
+- /debug/access
+- /debug/auth
+- /debug/rights
+- /documents
+- /emails/envoyes
+- /engineering
+- /factures
+- /factures/:id
+- /factures/import
+- /factures/new
+- /feedback
+- /fiches
+- /fiches/:id
+- /fournisseurs
+- /fournisseurs/:id
+- /fournisseurs/:id/api
+- /fournisseurs/nouveau
+- /inventaire
+- /inventaire/:id
+- /inventaire/new
+- /inventaire/zones
+- /licence
+- /login
+- /logout
+- /mentions-legales
+- /menu
+- /menu-engineering
+- /menu-groupes
+- /menu-groupes/:id
+- /menu-groupes/nouveau
+- /menu/:date
+- /menus
+- /notifications
+- /notifications/settings
+- /onboarding
+- /onboarding-utilisateur
+- /parametrage/access
+- /parametrage/api-fournisseurs
+- /parametrage/api-keys
+- /parametrage/familles
+- /parametrage/mamas
+- /parametrage/periodes
+- /parametrage/permissions
+- /parametrage/roles
+- /parametrage/settings
+- /parametrage/sous-familles
+- /parametrage/unites
+- /parametrage/utilisateurs
+- /parametrage/zones
+- /parametrage/zones/:id
+- /parametrage/zones/:id/droits
+- /pending
+- /planning
+- /planning-module
+- /planning/:id
+- /planning/nouveau
+- /planning/simulation
+- /produits
+- /produits/:id
+- /produits/nouveau
+- /promotions
+- /receptions
+- /recettes
+- /reporting
+- /requisitions
+- /requisitions/:id
+- /requisitions/nouvelle
+- /reset-password
+- /rgpd
+- /signup
+- /stats
+- /stock/alertes
+- /supervision
+- /supervision/comparateur
+- /supervision/logs
+- /supervision/rapports
+- /surcouts
+- /tableaux-de-bord
+- /taches
+- /taches/:id
+- /taches/alertes
+- /taches/new
+- /transferts
+- /unauthorized
+- /update-password
+
+## Liens de navigation
+- /achats
+- /admin/access-multi-sites
+- /aide
+- /alertes
+- /bons-livraison
+- /carte
+- /comparatif
+- /consentements
+- /consolidation
+- /costing/carte
+- /dashboard
+- /documents
+- /emails/envoyes
+- /factures
+- /factures/import
+- /feedback
+- /fiches
+- /fournisseurs
+- /inventaire
+- /menu
+- /menu-groupes
+- /menus
+- /notifications
+- /parametrage/access
+- /parametrage/api-fournisseurs
+- /parametrage/api-keys
+- /parametrage/familles
+- /parametrage/mamas
+- /parametrage/permissions
+- /parametrage/settings
+- /parametrage/sous-familles
+- /parametrage/unites
+- /parametrage/utilisateurs
+- /parametrage/zones
+- /planning
+- /planning/simulation
+- /produits
+- /receptions
+- /recettes
+- /reporting
+- /requisitions
+- /stats
+- /supervision/logs
+- /supervision/rapports
+- /surcouts
+- /tableaux-de-bord
+- /taches
+- /taches/alertes
+
+## Comparaison
+- Aucun lien de menu sans route correspondante.
+- Routes non liées dans les menus : voir les routes ci-dessus hors liste de navigation (ex : /commandes*, /bons-livraison/*, /factures/new, /stock/alertes, pages debug...).
+
+## Supabase
+- Requêtes `v_alertes_rupture` utilisent sélection large avec `traite`, et une mise à jour sur la table `alertes_rupture`.
+- Aucune référence à `v_stock_theorique` côté front.
+
+## FactureForm et lignes produit
+- Champs numériques via `NumericInput` (type text, virgule/point ok).
+- `PU HT` et `PMP` en lecture seule mais style différent de "Unité".
+- À la sélection d’un produit, TVA et zone sont appliquées mais l’unité et le PMP proviennent d’un hook séparé.
+
+## ProduitSearchModal & recherche produit
+- `useProduitsSearch` sélectionne `id, nom, unite_id, tva, zone_stock_id` et renvoie les valeurs normalisées.
+- `ProduitSearchModal` renvoie actuellement l’objet produit complet.
+
+## Autocomplete fournisseurs
+- `useFournisseursAutocomplete` : fichier présent avec export nommé.
+
+## Modules manquants dans module_page_report.json
+- costing_carte
+- emails_envoyes
+- menu_du_jour
+- menu_groupe
+
+### À corriger
+- Normaliser les requêtes `v_alertes_rupture` (select direct, pas de filtre `traite`, vue uniquement).
+- Retirer l’usage de `alertes_rupture`.
+- Harmoniser `PU HT`/`PMP` (readonly + style).
+- Corriger `ProduitSearchModal` et `useProduitsSearch` pour remonter `{ produit_id, nom, unite_id, tva, zone_id }`.
+- Ajouter les modules manquants dans `module_page_report.json`.
+- Remplacer les doublons de pages par des réexportations (ex : EngineeringMenu).

@@ -11,7 +11,7 @@ function normalize(list = []) {
     // unite_id est nécessaire pour hydrater l'unité dans les formulaires
     unite_id: p.unite_id ?? null,
     tva: p.tva ?? null,
-    zone_id: p.zone_stock_id ?? null,
+    zone_stock_id: p.zone_stock_id ?? null,
   }));
 }
 

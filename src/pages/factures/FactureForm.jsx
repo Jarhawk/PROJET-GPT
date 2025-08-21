@@ -302,9 +302,11 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
             name="total_ht_attendu"
             render={({ field }) => (
               <div className="flex items-center gap-2">
-                                <NumericInput
+                <NumericInput
                   value={field.value}
-                  onChange={(val) => field.onChange(val)}
+                  decimals={2}
+                  min={0}
+                  onValueChange={(val) => field.onChange(val)}
                 />
                 <Badge
                   color={

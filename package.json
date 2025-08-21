@@ -34,7 +34,9 @@
     "fix:fe": "node scripts/fixFrontend.js",
     "fix:fe:write": "node scripts/fixFrontend.js --write",
     "schema:analyze": "node scripts/analyzeFrontBackend.js",
-    "sanitize:src": "node scripts/sanitize-source.js"
+    "sanitize:src": "node scripts/sanitize-source.js",
+    "audit": "node scripts/audit-project.mjs",
+    "audit:fix": "node scripts/fix-project.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

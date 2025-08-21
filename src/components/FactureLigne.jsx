@@ -11,19 +11,19 @@ import {
 import { Trash2 } from "lucide-react";
 import ProductPickerModal from "@/components/forms/ProductPickerModal";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabaseClient";
-import { useMultiMama } from "@/context/MultiMamaContext";
+import supabase from "@/lib/supabaseClient";
+import { useAuth } from "@/hooks/useAuth";
 
 function useZones() {
-  const { currentMamaId } = useMultiMama();
+  const { mama_id } = useAuth();
   return useQuery({
-    queryKey: ["zones_stock", currentMamaId],
-    enabled: !!currentMamaId,
+    queryKey: ["zones_stock", mama_id],
+    enabled: !!mama_id,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("zones_stock")
         .select("id, nom")
-        .eq("mama_id", currentMamaId)
+        .eq("mama_id", mama_id)
         .eq("actif", true)
         .order("nom", { ascending: true });
       if (error) throw error;

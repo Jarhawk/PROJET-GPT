@@ -3,7 +3,6 @@ import useSupabaseClient from '@/hooks/useSupabaseClient';
 import { useAuth } from '@/hooks/useAuth';
 import { logSupaError } from '@/lib/supa/logError';
 import { toast } from 'sonner';
-import { resolveAlertesRuptureSource } from '@/lib/resolveAlertesRuptureSource';
 
 export default function useAlerteStockFaible() {
   const supabase = useSupabaseClient();
@@ -17,25 +16,20 @@ export default function useAlerteStockFaible() {
     setLoading(true);
     setError(null);
     try {
-      const source = await resolveAlertesRuptureSource(supabase);
       const { data, error } = await supabase
-        .from(source)
+        .from('v_alertes_rupture')
         .select(
-          `id,
-          mama_id,
-          produit_id,
-          traite,
-          cree_le,
+          `produit_id,
+          nom,
           stock_actuel,
-          stock_min,
-          produit:produits ( id, nom )`
+          stock_min`
         )
         .eq('mama_id', mama_id)
-        .is('traite', false)
-        .order('cree_le', { ascending: false });
+        .order('manque', { ascending: false })
+        .limit(50);
 
       if (error) {
-        logSupaError('alertes_rupture', error);
+        logSupaError('v_alertes_rupture', error);
         throw error;
       }
 

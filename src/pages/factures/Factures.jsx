@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useFactures } from '@/hooks/useFactures';
 import { useFacturesList } from '@/hooks/useFacturesList';
 import useFournisseurs from '@/hooks/data/useFournisseurs';
-import useFournisseursAutocomplete from '@/hooks/useFournisseursAutocomplete';
+import { useFournisseursAutocomplete } from '@/hooks/useFournisseursAutocomplete';
 import { useAuth } from '@/hooks/useAuth';
 import { useFacturesAutocomplete } from '@/hooks/useFacturesAutocomplete';
 import FactureForm from './FactureForm.jsx';
@@ -38,8 +38,8 @@ export default function Factures() {
   const { deleteFacture, toggleFactureActive } = useFactures();
   const { data: fournisseursActifs = [] } = useFournisseurs({ actif: true });
   const [qF, setQF] = useState('');
-  const { data: fournisseurs = [], isLoading: isLoadingF } =
-    useFournisseursAutocomplete(qF);
+  const { options: fournisseurs = [], loading: isLoadingF } =
+    useFournisseursAutocomplete({ term: qF });
   const { loading: authLoading, hasAccess } = useAuth();
   const { results: factureOptions, searchFactures } = useFacturesAutocomplete();
   const [searchParams, setSearchParams] = useSearchParams();

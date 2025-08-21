@@ -13,7 +13,7 @@ const queryBuilder = {
 const selectMock = vi.fn(() => queryBuilder);
 const fromMock = vi.fn(() => ({ select: selectMock }));
 
-vi.mock('@/lib/supabaseClient', () => ({ supabase: { from: fromMock } }));
+vi.mock('@/lib/supabaseClient', () => ({ default: { from: fromMock }, supabase: { from: fromMock } }));
 
 beforeEach(() => {
   fromMock.mockClear();
@@ -27,10 +27,10 @@ beforeEach(() => {
 test('searchFournisseurs filters by mama_id and query', async () => {
   await searchFournisseurs('m1', 'paris');
   expect(fromMock).toHaveBeenCalledWith('fournisseurs');
-  expect(selectMock).toHaveBeenCalledWith('id, nom');
+  expect(selectMock).toHaveBeenCalledWith('id, nom, ville');
   expect(queryBuilder.eq).toHaveBeenNthCalledWith(1, 'mama_id', 'm1');
   expect(queryBuilder.eq).toHaveBeenNthCalledWith(2, 'actif', true);
   expect(queryBuilder.ilike).toHaveBeenCalledWith('nom', '%paris%');
   expect(queryBuilder.order).toHaveBeenCalledWith('nom', { ascending: true });
-  expect(queryBuilder.limit).toHaveBeenCalledWith(50);
+  expect(queryBuilder.limit).toHaveBeenCalledWith(20);
 });

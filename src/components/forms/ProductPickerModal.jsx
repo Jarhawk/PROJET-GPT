@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import useProductSearch from "@/hooks/useProductSearch";
+import { useProduitsSearch } from "@/hooks/useProduitsSearch";
 
 export default function ProductPickerModal({
   open,
@@ -12,7 +12,12 @@ export default function ProductPickerModal({
   currentLineProductId: _currentLineProductId,
 }) {
   const [query, setQuery] = useState("");
-  const { data: results = [] } = useProductSearch(query);
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
+  const { data: results = [], total } = useProduitsSearch(query, null, {
+    page,
+    pageSize,
+  });
 
   const [active, setActive] = useState(-1);
 
@@ -20,6 +25,7 @@ export default function ProductPickerModal({
     if (!open) {
       setQuery("");
       setActive(-1);
+      setPage(1);
     }
   }, [open]);
 
@@ -45,7 +51,11 @@ export default function ProductPickerModal({
 
   useEffect(() => {
     setActive(-1);
-  }, [query, results]);
+    setPage(1);
+  }, [query]);
+  useEffect(() => {
+    setActive(-1);
+  }, [results]);
 
   return (
     <Dialog.Root open={open} onOpenChange={(v) => !v && onClose?.()}>
@@ -100,6 +110,28 @@ export default function ProductPickerModal({
                   </button>
                 ))
               )}
+            </div>
+            <div className="flex justify-between items-center pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page === 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+              >
+                Préc.
+              </Button>
+              <span className="text-xs text-muted-foreground">
+                {Math.min((page - 1) * pageSize + 1, total)}-
+                {Math.min(page * pageSize, total)} / {total}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page * pageSize >= total}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                Suiv.
+              </Button>
             </div>
           </div>
 

@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import useDebounce from '@/hooks/useDebounce';
 import supabase from '@/lib/supabaseClient';
+import { useAuth } from '@/hooks/useAuth';
 
 function normalize(list = []) {
   return list.map((p) => ({
@@ -14,68 +15,50 @@ function normalize(list = []) {
   }));
 }
 
-export function useProduitsSearch(term = '', mamaId, { enabled = true, debounce = 300 } = {}) {
+export function useProduitsSearch(
+  term = '',
+  mamaIdParam,
+  { enabled = true, debounce = 300, page = 1, pageSize = 20 } = {}
+) {
+  const { mama_id: authMamaId } = useAuth();
+  const mamaId = mamaIdParam || authMamaId;
   const debounced = useDebounce(term, debounce);
 
-  return useQuery({
-    queryKey: ['produits-search', mamaId, debounced],
-    enabled: enabled && debounced.trim().length >= 2,
-    staleTime: 0,
-    gcTime: 0,
-    keepPreviousData: false,
+  const query = useQuery({
+    queryKey: ['produits-search', mamaId, debounced, page, pageSize],
+    enabled: enabled && debounced.trim().length >= 2 && !!mamaId,
     queryFn: async () => {
       const q = debounced.trim();
-      if (q.length < 2) return [];
-
-      console.debug('[useProduitsSearch] search produits', { q, mamaId });
-
+      if (q.length < 2) return { rows: [], total: 0 };
+      console.debug('[useProduitsSearch] search produits', { q, mamaId, page });
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
       try {
-        let rq = supabase
+        const { data, count, error } = await supabase
           .from('produits')
-          .select('id, nom, unite_id, zone_id, pmp, dernier_prix')
-          .limit(50)
+          .select('id, nom, unite_id, zone_id, pmp, dernier_prix', { count: 'exact' })
+          .eq('mama_id', mamaId)
+          .eq('actif', true)
           .ilike('nom', `%${q}%`)
-          .order('nom', { ascending: true });
-        if (mamaId) rq = rq.eq('mama_id', mamaId);
-
-        const { data, error } = await rq;
-        if (error) {
-          console.error('[useProduitsSearch] produits error', error);
-          throw error;
-        }
-        const results = normalize(data);
-        console.debug('[useProduitsSearch] produits results', { count: results.length });
-        return results;
+          .order('nom', { ascending: true })
+          .range(from, to);
+        if (error) throw error;
+        return { rows: normalize(data), total: count || 0 };
       } catch (err) {
-        console.warn(
-          '[useProduitsSearch] produits query failed, fallback to v_produits_actifs',
-          err
-        );
-      }
-
-      try {
-        let rq2 = supabase
-          .from('v_produits_actifs')
-          .select('id, produit_id, nom, unite_id, zone_id, pmp, dernier_prix')
-          .limit(50)
-          .ilike('nom', `%${q}%`)
-          .order('nom', { ascending: true });
-        if (mamaId) rq2 = rq2.eq('mama_id', mamaId);
-
-        const { data: data2, error: error2 } = await rq2;
-        if (error2) {
-          console.error('[useProduitsSearch] v_produits_actifs error', error2);
-          return [];
-        }
-        const results2 = normalize(data2);
-        console.debug('[useProduitsSearch] v_produits_actifs results', { count: results2.length });
-        return results2;
-      } catch (err2) {
-        console.error('[useProduitsSearch] v_produits_actifs query failed', err2);
-        return [];
+        console.warn('[useProduitsSearch] produits query failed', err);
+        return { rows: [], total: 0 };
       }
     },
   });
+
+  return {
+    data: query.data?.rows || [],
+    total: query.data?.total || 0,
+    page,
+    pageSize,
+    isLoading: query.isLoading,
+    error: query.error,
+  };
 }
 
 export default useProduitsSearch;

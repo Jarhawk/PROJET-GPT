@@ -3,8 +3,8 @@ import { useMemo, useState, useEffect } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { supabase } from '@/lib/supabaseClient';
-import { useMultiMama } from '@/context/MultiMamaContext';
+import supabase from '@/lib/supabaseClient';
+import { useAuth } from '@/hooks/useAuth';
 import { useFournisseursAutocomplete } from '@/hooks/useFournisseursAutocomplete';
 import FactureLigne from '@/components/FactureLigne';
 import { Button } from '@/components/ui/button';
@@ -28,8 +28,7 @@ const fmt2 = new Intl.NumberFormat('fr-FR', {
 });
 
 export default function FactureForm({ facture = null, onSaved } = {}) {
-  const { currentMamaId } = useMultiMama();
-  const mamaId = currentMamaId;
+  const { mama_id: mamaId } = useAuth();
 
   const emptyLigne = () => ({
     id: crypto.randomUUID(),
@@ -87,8 +86,9 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
   const fournisseur_id = watch('fournisseur_id');
   const setFournisseurId = (val) =>
     setValue('fournisseur_id', val, { shouldDirty: true });
-  const { data: fournisseurs = [], isLoading: fLoading } =
-    useFournisseursAutocomplete();
+  const [fSearch, setFSearch] = useState('');
+  const { options: fournisseurs = [], loading: fLoading } =
+    useFournisseursAutocomplete({ term: fSearch });
 
   const sum = (arr) => arr.reduce((acc, n) => acc + n, 0);
   const eur = (n) =>
@@ -212,6 +212,11 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
         {/* Fournisseur */}
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium">Fournisseur</label>
+          <Input
+            value={fSearch}
+            onChange={(e) => setFSearch(e.target.value)}
+            placeholder="Rechercher un fournisseur"
+          />
           <Select
             value={fournisseur_id ? String(fournisseur_id) : ''}
             onValueChange={setFournisseurId}

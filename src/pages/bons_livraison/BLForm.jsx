@@ -18,8 +18,7 @@ import Unauthorized from '@/pages/auth/Unauthorized';
 export default function BLForm({ bon, fournisseurs = [], onClose }) {
   const { insertBonLivraison, updateBonLivraison } = useBonsLivraison();
   const { results: produitOptions, searchProduits } = useProduitsAutocomplete();
-  const { results: fournisseurOptions, searchFournisseurs } =
-    useFournisseursAutocomplete();
+  const { options: fournisseurOptions } = useFournisseursAutocomplete({ term: fournisseurName });
   const { hasAccess, loading: authLoading } = useAuth();
   const canEdit = hasAccess('bons_livraison', 'peut_modifier');
   const [date_reception, setDateReception] = useState(
@@ -52,7 +51,7 @@ export default function BLForm({ bon, fournisseurs = [], onClose }) {
   }, [bon?.fournisseur_id, fournisseurs]);
 
   useEffect(() => {
-    searchFournisseurs(fournisseurName);
+    // fetching handled by hook
   }, [fournisseurName]);
 
   if (authLoading) return <LoadingSpinner message="Chargement..." />;

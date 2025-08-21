@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { renderHook, act } from '@testing-library/react';
 import { vi, beforeEach, test, expect } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const queryBuilder = {
   eq: vi.fn(() => queryBuilder),
@@ -28,10 +29,16 @@ beforeEach(async () => {
 });
 
 test('useProduitsSearch queries produits with pagination', async () => {
-  const { result } = renderHook(() => useProduitsSearch('car', null, { page: 2, pageSize: 10 }));
+  const wrapper = ({ children }) => (
+    <QueryClientProvider client={new QueryClient()}>{children}</QueryClientProvider>
+  );
+  const { result } = renderHook(
+    () => useProduitsSearch('car', null, { page: 2, pageSize: 10 }),
+    { wrapper }
+  );
   await act(async () => {});
   expect(fromMock).toHaveBeenCalledWith('produits');
-  expect(queryBuilder.select).toHaveBeenCalledWith('id, nom, unite_id, zone_id, pmp, dernier_prix', { count: 'exact' });
+  expect(queryBuilder.select).toHaveBeenCalledWith('id, nom, unite_id, tva, zone_stock_id', { count: 'exact' });
   expect(queryBuilder.eq).toHaveBeenCalledWith('mama_id', 'm1');
   expect(queryBuilder.eq).toHaveBeenCalledWith('actif', true);
   expect(queryBuilder.ilike).toHaveBeenCalledWith('nom', '%car%');

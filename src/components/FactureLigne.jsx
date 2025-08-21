@@ -104,12 +104,13 @@ export default function FactureLigne({ value: line, onChange, onRemove, allLines
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onSelect={(p) => {
+          const z = p.zone_id ?? (zones.length === 1 ? zones[0].id : null);
           recalc({
             produit_id: p.id,
             produit_nom: p.nom,
             unite_id: p.unite_id ?? null,
             tva: p.tva ?? 0,
-            zone_id: p.zone_id ?? null,
+            zone_id: z,
           });
         }}
         excludeIdsSameZone={excludeIdsSameZone}

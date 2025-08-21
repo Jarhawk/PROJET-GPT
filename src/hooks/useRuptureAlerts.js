@@ -32,7 +32,7 @@ export function useRuptureAlerts() {
     if (!mama_id) return;
     try {
       const { error } = await supabase
-        .from('alertes_rupture')
+        .from('v_alertes_rupture')
         .update({ traite: true })
         .eq('id', id)
         .eq('mama_id', mama_id);

@@ -118,17 +118,19 @@ export default function FactureLigne({ value: line, onChange, onRemove, allLines
       />
       <NumericInput
         value={qte}
-        onChange={(val) => recalc({ quantite: val })}
-        placeholder="Qté"
+        onValueChange={(n) => recalc({ quantite: n })}
+        placeholder="0"
       />
       <Input readOnly disabled value={line.unite || ""} placeholder="Unité" />
       <NumericInput
         value={totalHt}
-        onChange={(val) => recalc({ total_ht: val })}
-        placeholder="Total HT (€)"
+        decimals={2}
+        min={0}
+        onValueChange={(n) => recalc({ total_ht: n })}
+        placeholder="0,00"
       />
-      <Input readOnly value={fmt4(puHt)} placeholder="PU HT (€)" />
-      <Input readOnly value={fmt(Number(line.pmp ?? 0))} placeholder="PMP" />
+      <Input readOnly disabled value={fmt4(puHt)} placeholder="PU HT (€)" />
+      <Input readOnly disabled value={fmt(Number(line.pmp ?? 0))} placeholder="PMP" />
       <Select value={String(tva)} onValueChange={(v) => recalc({ tva: v })}>
         <SelectTrigger className="w-28">
           <SelectValue placeholder="TVA (%)" />

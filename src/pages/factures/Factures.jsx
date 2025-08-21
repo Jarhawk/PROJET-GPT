@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useFactures } from '@/hooks/useFactures';
 import { useFacturesList } from '@/hooks/useFacturesList';
 import useFournisseurs from '@/hooks/data/useFournisseurs';
-import { useFournisseursAutocomplete } from '@/hooks/useFournisseursAutocomplete';
+import useFournisseursAutocomplete from '@/hooks/useFournisseursAutocomplete';
 import { useAuth } from '@/hooks/useAuth';
 import { useFacturesAutocomplete } from '@/hooks/useFacturesAutocomplete';
 import FactureForm from './FactureForm.jsx';
@@ -17,6 +17,12 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select';
 import { Menu } from 'lucide-react';
 import useExport from '@/hooks/useExport';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
@@ -93,13 +99,8 @@ export default function Factures() {
     });
   }, [statutFilter, actifFilter, setSearchParams]);
 
-  const handleFournisseurInput = (e) => {
-    const val = e.target.value;
-    setQF(val);
-    const match = fournisseurs.find(
-      (f) => f.nom.toLowerCase() === val.toLowerCase()
-    );
-    setFournisseurFilter(match ? match.id : '');
+  const handleFournisseurChange = (v) => {
+    setFournisseurFilter(v);
     setPage(1);
   };
 
@@ -137,19 +138,35 @@ export default function Factures() {
                   </option>
                 ))}
               </datalist>
-              <div className="w-full sm:w-auto">
-                <Input
-                  list="fournisseurs-list"
+              <div className="w-full sm:w-48 flex flex-col gap-1">
+                <input
+                  type="text"
                   value={qF}
-                  onChange={handleFournisseurInput}
-                  placeholder="Tous fournisseurs"
-                  className="w-full sm:w-48"
+                  onChange={(e) => setQF(e.target.value)}
+                  placeholder="Rechercher un fournisseur…"
+                  autoComplete="off"
+                  className="w-full px-3 py-2 rounded-md bg-background border border-input"
                 />
-                <datalist id="fournisseurs-list">
-                  {fournisseurs.map((f) => (
-                    <option key={f.id} value={f.nom} />
-                  ))}
-                </datalist>
+                <Select
+                  value={fournisseurFilter ?? ""}
+                  onValueChange={handleFournisseurChange}
+                  disabled={isLoadingF}
+                >
+                  <SelectTrigger aria-label="Fournisseur">
+                    {
+                      fournisseurs.find(
+                        (f) => String(f.id) === String(fournisseurFilter)
+                      )?.nom || "Sélectionner un fournisseur"
+                    }
+                  </SelectTrigger>
+                  <SelectContent>
+                    {fournisseurs.map((f) => (
+                      <SelectItem key={f.id} value={String(f.id)}>
+                        {f.nom}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="flex flex-wrap items-center gap-1">
                 {STATUT_OPTIONS.map((s) => (

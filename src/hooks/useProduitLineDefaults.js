@@ -9,13 +9,13 @@ export function useProduitLineDefaults() {
 
   const fetchDefaults = async ({ produit_id } = {}) => {
     if (!mama_id || !produit_id) {
-      return { unite_id: null, unite: '', pmp: 0, tva: 0, zone_id: null };
+      return { unite_id: null, unite: '', pmp: 0 };
     }
 
     return queryClient.fetchQuery({
       queryKey: ['produit-line-defaults', mama_id, produit_id],
       queryFn: async () => {
-        const [prodRes, pmpRes, tvaRes, zonesRes] = await Promise.all([
+        const [prodRes, pmpRes] = await Promise.all([
           supabase
             .from('produits')
             .select('unite_id')
@@ -28,20 +28,6 @@ export function useProduitLineDefaults() {
             .eq('mama_id', mama_id)
             .eq('produit_id', produit_id)
             .maybeSingle(),
-          supabase
-            .from('facture_lignes')
-            .select('tva')
-            .eq('mama_id', mama_id)
-            .eq('produit_id', produit_id)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle(),
-          supabase
-            .from('produits_zones')
-            .select('zone_id')
-            .eq('mama_id', mama_id)
-            .eq('produit_id', produit_id)
-            .eq('actif', true),
         ]);
 
         const unite_id = prodRes.data?.unite_id ?? null;
@@ -54,29 +40,10 @@ export function useProduitLineDefaults() {
               .maybeSingle()
           : { data: null };
 
-        let zone_id = null;
-        const zones = zonesRes.data || [];
-        if (zones.length === 1) {
-          zone_id = zones[0].zone_id;
-        } else {
-          const { data: lastZone } = await supabase
-            .from('facture_lignes')
-            .select('zone_id')
-            .eq('mama_id', mama_id)
-            .eq('produit_id', produit_id)
-            .not('zone_id', 'is', null)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle();
-          zone_id = lastZone?.zone_id ?? null;
-        }
-
         return {
           unite_id,
           unite: uniteData?.nom ?? '',
           pmp: Number(pmpRes.data?.pmp ?? 0),
-          tva: Number(tvaRes.data?.tva ?? 0),
-          zone_id,
         };
       },
     });

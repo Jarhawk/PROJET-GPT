@@ -29,6 +29,12 @@ export default function ProduitSearchModal({
     }
   }, [open]);
 
+  const handleSelect = (prod) => {
+    if (!prod) return;
+    onPick?.({ ...prod, zone_id: prod.zone_stock_id ?? null });
+    onClose?.();
+  };
+
   const handleKeyDown = (e) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
@@ -39,10 +45,7 @@ export default function ProduitSearchModal({
     } else if (e.key === 'Enter') {
       e.preventDefault();
       const target = active >= 0 ? results[active] : results[0];
-      if (target) {
-        onPick?.(target);
-        onClose?.();
-      }
+      handleSelect(target);
     } else if (e.key === 'Escape') {
       e.preventDefault();
       onClose?.();
@@ -98,10 +101,7 @@ export default function ProduitSearchModal({
                   <button
                     key={p.id}
                     type="button"
-                    onClick={() => {
-                      onPick?.(p);
-                      onClose?.();
-                    }}
+                    onClick={() => handleSelect(p)}
                     className={`w-full text-left px-3 py-2 hover:bg-white/5 rounded ${
                       idx === active ? 'bg-white/10' : ''
                     }`}

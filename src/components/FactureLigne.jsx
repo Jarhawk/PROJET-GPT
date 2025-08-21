@@ -107,6 +107,8 @@ export default function FactureLigne({ value: line, onChange, onRemove, allLines
             produit_id: p.id,
             produit_nom: p.nom,
             unite_id: p.unite_id ?? null,
+            tva: p.tva ?? 0,
+            zone_id: p.zone_id ?? null,
           });
         }}
         excludeIdsSameZone={excludeIdsSameZone}

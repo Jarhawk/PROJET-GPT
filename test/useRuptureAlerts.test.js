@@ -22,12 +22,12 @@ beforeEach(async () => {
   queryBuilder.eq.mockClear();
 });
 
-test('fetchAlerts selects view columns without traite filter', async () => {
+test('fetchAlerts selects expected view columns', async () => {
   const { fetchAlerts } = useRuptureAlerts();
   await fetchAlerts('rupture');
   expect(fromMock).toHaveBeenCalledWith('v_alertes_rupture');
   expect(queryBuilder.select).toHaveBeenCalledWith(
-    'id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, stock_projete, manque, type, traite'
+    'id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, stock_projete, manque, type'
   );
   expect(queryBuilder.eq).toHaveBeenCalledTimes(1);
   expect(queryBuilder.eq).toHaveBeenCalledWith('type', 'rupture');

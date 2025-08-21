@@ -133,7 +133,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
         const defaults = await fetchDefaults({ produit_id: patch.produit_id });
         const q = Number(merged.quantite || 0);
         const lht = Number(merged.total_ht || 0);
-        const tv = Number(defaults.tva || 0);
+        const tv = Number(merged.tva ?? 0);
         const pu = q > 0 ? +(lht / q).toFixed(4) : 0;
         const tvaMontant = +(lht * (tv / 100)).toFixed(2);
         const totalTtc = +(lht + tvaMontant).toFixed(2);
@@ -143,7 +143,6 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
           unite: defaults.unite,
           pmp: defaults.pmp,
           tva: tv,
-          zone_id: defaults.zone_id,
           pu_ht: pu,
           prix_unitaire_ht: pu,
           tva_montant: tvaMontant,

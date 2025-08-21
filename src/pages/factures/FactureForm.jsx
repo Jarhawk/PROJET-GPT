@@ -9,6 +9,7 @@ import FactureLigne from '@/components/FactureLigne';
 import SupplierPicker from '@/components/factures/SupplierPicker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import NumericInput from '@/components/forms/NumericInput';
 import {
   Select,
   SelectTrigger,
@@ -301,22 +302,9 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
             name="total_ht_attendu"
             render={({ field }) => (
               <div className="flex items-center gap-2">
-                <Input
-                  type="text"
-                  value={
-                    field.value === null ||
-                    field.value === undefined ||
-                    Number.isNaN(field.value)
-                      ? ''
-                      : formatter.format(field.value)
-                  }
-                  onChange={(e) => {
-                    const raw = e.target.value
-                      .replace(/\s/g, '')
-                      .replace(',', '.');
-                    const num = parseFloat(raw);
-                    field.onChange(Number.isNaN(num) ? null : num);
-                  }}
+                                <NumericInput
+                  value={field.value}
+                  onChange={(val) => field.onChange(val)}
                 />
                 <Badge
                   color={

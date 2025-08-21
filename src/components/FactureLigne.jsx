@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
+import NumericInput from "@/components/forms/NumericInput";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -114,24 +115,16 @@ export default function FactureLigne({ value: line, onChange, onRemove, allLines
         excludeIdsSameZone={excludeIdsSameZone}
         currentLineProductId={line.produit_id}
       />
-      <Input
-        type="number"
-        min="0"
-        step="0.01"
+      <NumericInput
         value={qte}
-        onChange={(e) => recalc({ quantite: e.target.value })}
+        onChange={(val) => recalc({ quantite: val })}
         placeholder="Qté"
-        autoComplete="off"
       />
       <Input readOnly disabled value={line.unite || ""} placeholder="Unité" />
-      <Input
-        type="number"
-        min="0"
-        step="0.01"
-        value={totalHt.toFixed(2)}
-        onChange={(e) => recalc({ total_ht: e.target.value })}
+      <NumericInput
+        value={totalHt}
+        onChange={(val) => recalc({ total_ht: val })}
         placeholder="Total HT (€)"
-        autoComplete="off"
       />
       <Input readOnly value={fmt4(puHt)} placeholder="PU HT (€)" />
       <Input readOnly value={fmt(Number(line.pmp ?? 0))} placeholder="PMP" />

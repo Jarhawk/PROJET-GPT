@@ -6,17 +6,17 @@ import { toast } from 'sonner';
 export function useRuptureAlerts() {
   const { mama_id } = useAuth();
 
-  async function fetchAlerts(type = null, traite = null) {
+  async function fetchAlerts(type = null) {
     if (!mama_id) return [];
     try {
       let query = supabase
         .from('v_alertes_rupture')
-        .select('*, produit:produit_id(nom)')
-        .eq('mama_id', mama_id)
+        .select(
+          'id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, stock_projete, manque, type, traite'
+        )
         .order('manque', { ascending: false });
 
       if (type) query = query.eq('type', type);
-      if (typeof traite === 'boolean') query = query.eq('traite', traite);
 
       const { data, error } = await query;
       if (error) throw error;

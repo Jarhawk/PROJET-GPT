@@ -25,12 +25,12 @@ beforeEach(async () => {
   queryBuilder.select.mockClear();
 });
 
-test('useAlerteStockFaible queries v_alertes_rupture with filters', async () => {
+test('useAlerteStockFaible queries v_alertes_rupture without mama filter', async () => {
   const { result } = renderHook(() => useAlerteStockFaible());
   await waitFor(() => !result.current.loading);
   expect(fromMock).toHaveBeenCalledWith('v_alertes_rupture');
   expect(queryBuilder.select).toHaveBeenCalledWith('produit_id, nom, stock_min, stock_actuel, manque', { count: 'exact' });
-  expect(queryBuilder.eq).toHaveBeenCalledWith('mama_id', 'm1');
+  expect(queryBuilder.eq).not.toHaveBeenCalled();
   expect(queryBuilder.order).toHaveBeenCalledWith('manque', { ascending: false });
   expect(queryBuilder.range).toHaveBeenCalledWith(0, 19);
 });

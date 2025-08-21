@@ -6,12 +6,11 @@ export default function AlertesRupture() {
   const { fetchAlerts, markAsHandled, generateSuggestions } = useRuptureAlerts();
   const [alerts, setAlerts] = useState([]);
   const [type, setType] = useState(null);
-  const [traite, setTraite] = useState(null);
 
   const load = useCallback(async () => {
-    const data = await fetchAlerts(type, traite);
+    const data = await fetchAlerts(type);
     setAlerts(data);
-  }, [fetchAlerts, type, traite]);
+  }, [fetchAlerts, type]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -19,11 +18,9 @@ export default function AlertesRupture() {
     <div className="p-6">
       <h1 className="text-2xl mb-4">Alertes rupture</h1>
       <div className="flex gap-2 mb-4">
-        <Button onClick={() => {setType(null); setTraite(null);}}>Tous</Button>
+        <Button onClick={() => setType(null)}>Tous</Button>
         <Button onClick={() => setType('rupture')}>Ruptures</Button>
         <Button onClick={() => setType('prevision')}>Prévisions</Button>
-        <Button onClick={() => setTraite(false)}>Non traitées</Button>
-        <Button onClick={() => setTraite(true)}>Traitées</Button>
         <Button onClick={() => generateSuggestions()}>Générer commande fournisseur</Button>
       </div>
       <table className="min-w-full text-sm">
@@ -33,7 +30,7 @@ export default function AlertesRupture() {
         <tbody>
           {alerts.map(a => (
             <tr key={a.id} className="border-t">
-              <td className="px-2 py-1">{a.produit?.nom}</td>
+              <td className="px-2 py-1">{a.nom}</td>
               <td className="px-2 py-1">{a.stock_actuel}</td>
               <td className="px-2 py-1">{a.stock_projete}</td>
               <td className="px-2 py-1 text-right">

@@ -1,28 +1,20 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useFactures } from '@/hooks/useFactures';
-import { useFacturesList } from '@/hooks/useFacturesList';
+import { useFactures as useFacturesActions } from '@/hooks/useFactures';
+import { useFactures as useFacturesData } from '@/hooks/data/useFactures';
 import useFournisseurs from '@/hooks/data/useFournisseurs';
-import { useFournisseursAutocomplete } from '@/hooks/useFournisseursAutocomplete';
 import { useAuth } from '@/hooks/useAuth';
 import { useFacturesAutocomplete } from '@/hooks/useFacturesAutocomplete';
 import FactureForm from './FactureForm.jsx';
 import FactureDetail from './FactureDetail.jsx';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
-import {
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-} from '@/components/ui/select';
 import { Menu } from 'lucide-react';
 import useExport from '@/hooks/useExport';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
@@ -33,13 +25,11 @@ import PaginationFooter from '@/components/ui/PaginationFooter';
 import FactureTable from '@/components/FactureTable';
 import FactureImportModal from '@/components/FactureImportModal';
 import { FACTURE_STATUTS } from '@/constants/factures';
+import SupplierFilter from '@/components/filters/SupplierFilter';
 
 export default function Factures() {
-  const { deleteFacture, toggleFactureActive } = useFactures();
+  const { deleteFacture, toggleFactureActive } = useFacturesActions();
   const { data: fournisseursActifs = [] } = useFournisseurs({ actif: true });
-  const [qF, setQF] = useState('');
-  const { options: fournisseurs = [], loading: isLoadingF } =
-    useFournisseursAutocomplete({ term: qF });
   const { loading: authLoading, hasAccess } = useAuth();
   const { results: factureOptions, searchFactures } = useFacturesAutocomplete();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -47,62 +37,53 @@ export default function Factures() {
   const [showDetail, setShowDetail] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [selected, setSelected] = useState(null);
-  const [search, setSearch] = useState('');
-  const [statutFilter, setStatutFilter] = useState(
-    searchParams.get('statut') || ''
-  );
-  const [fournisseurFilter, setFournisseurFilter] = useState('');
-  const [actifFilter, setActifFilter] = useState(
-    searchParams.get('actif') || 'true'
-  );
+  const [filters, setFilters] = useState({
+    search: '',
+    fournisseur: null,
+    statut: searchParams.get('statut') || '',
+    actif: searchParams.get('actif') || '',
+  });
   const [page, setPage] = useState(1);
   const pageSize = 10;
   const [loading, setLoading] = useState(false);
   const { exportData, loading: exporting } = useExport();
-  const STATUT_OPTIONS = [
-    '',
-    ...FACTURE_STATUTS.filter((s) => s !== 'Archivée'),
+
+  const STATUTS = [
+    { label: 'Tous', value: '' },
+    ...FACTURE_STATUTS.filter((s) => s !== 'Archivée').map((s) => ({
+      label: s.charAt(0).toUpperCase() + s.slice(1),
+      value: s,
+    })),
   ];
-  const ACTIF_OPTIONS = [
-    { value: 'true', label: 'Actives' },
-    { value: 'false', label: 'Inactives' },
-    { value: 'all', label: 'Toutes' },
+  const ACTIVITE = [
+    { label: 'Toutes', value: '' },
+    { label: 'Actives', value: 'true' },
+    { label: 'Inactives', value: 'false' },
   ];
 
   const {
     data: listData,
     isFetching: listLoading,
     refetch,
-  } = useFacturesList({
-    search,
-    fournisseur: fournisseurFilter,
-    statut: statutFilter,
-    actif: actifFilter === 'all' ? null : actifFilter === 'true',
-    page,
-    pageSize,
-  });
+  } = useFacturesData({ ...filters, page, pageSize });
   const factures = listData?.factures || [];
   const total = listData?.total || 0;
 
   const canEdit = hasAccess('factures', 'peut_modifier');
 
   useEffect(() => {
-    searchFactures(search);
-  }, [search, searchFactures]);
+    searchFactures(filters.search || '');
+  }, [filters.search, searchFactures]);
   useEffect(() => {
     setSearchParams((prev) => {
       const params = new URLSearchParams(prev);
-      if (statutFilter) params.set('statut', statutFilter);
+      if (filters.statut) params.set('statut', filters.statut);
       else params.delete('statut');
-      params.set('actif', actifFilter);
+      if (filters.actif) params.set('actif', filters.actif);
+      else params.delete('actif');
       return params;
     });
-  }, [statutFilter, actifFilter, setSearchParams]);
-
-  const handleFournisseurChange = (v) => {
-    setFournisseurFilter(v);
-    setPage(1);
-  };
+  }, [filters.statut, filters.actif, setSearchParams]);
 
   const handleDelete = async (facture) => {
     if (window.confirm(`Archiver la facture n°${facture.id} ?`)) {
@@ -123,13 +104,16 @@ export default function Factures() {
         <GlassCard width="w-full">
           <TableHeader className="items-center w-full flex-wrap gap-2">
             <div className="flex flex-wrap items-center gap-2 flex-1">
-              <Input
+              <input
                 list="factures-list"
                 type="search"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                value={filters.search || ''}
+                onChange={(e) => {
+                  setFilters((f) => ({ ...f, search: e.target.value }));
+                  setPage(1);
+                }}
                 placeholder="Recherche (numéro)"
-                className="flex-1 min-w-[12rem]"
+                className="input input-bordered w-64"
               />
               <datalist id="factures-list">
                 {factureOptions.map((f) => (
@@ -138,66 +122,44 @@ export default function Factures() {
                   </option>
                 ))}
               </datalist>
-              <div className="w-full sm:w-48 flex flex-col gap-1">
-                <input
-                  type="text"
-                  value={qF}
-                  onChange={(e) => setQF(e.target.value)}
-                  placeholder="Rechercher un fournisseur…"
-                  autoComplete="off"
-                  className="w-full px-3 py-2 rounded-md bg-background border border-input"
-                />
-                <Select
-                  value={fournisseurFilter ?? ""}
-                  onValueChange={handleFournisseurChange}
-                  disabled={isLoadingF}
-                >
-                  <SelectTrigger aria-label="Fournisseur">
-                    {
-                      fournisseurs.find(
-                        (f) => String(f.id) === String(fournisseurFilter)
-                      )?.nom || "Sélectionner un fournisseur"
-                    }
-                  </SelectTrigger>
-                  <SelectContent>
-                    {fournisseurs.map((f) => (
-                      <SelectItem key={f.id} value={String(f.id)}>
-                        {f.nom}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-wrap items-center gap-1">
-                {STATUT_OPTIONS.map((s) => (
-                  <Button
-                    key={s || 'Tous'}
-                    size="sm"
-                    variant={statutFilter === s ? 'default' : 'outline'}
-                    onClick={() => {
-                      setStatutFilter(s);
-                      setPage(1);
-                    }}
-                  >
-                    {s || 'Tous'}
-                  </Button>
-                ))}
-              </div>
-              <div className="flex flex-wrap items-center gap-1">
-                {ACTIF_OPTIONS.map((o) => (
-                  <Button
-                    key={o.value}
-                    size="sm"
-                    variant={actifFilter === o.value ? 'default' : 'outline'}
-                    onClick={() => {
-                      setActifFilter(o.value);
-                      setPage(1);
-                    }}
-                  >
+
+              <SupplierFilter
+                value={filters.fournisseur || null}
+                onChange={(val) => {
+                  setFilters((f) => ({ ...f, fournisseur: val }));
+                  setPage(1);
+                }}
+              />
+
+              <select
+                value={filters.statut ?? ''}
+                onChange={(e) => {
+                  setFilters((f) => ({ ...f, statut: e.target.value }));
+                  setPage(1);
+                }}
+                className="select select-bordered h-10"
+              >
+                {STATUTS.map((o) => (
+                  <option key={o.label} value={o.value}>
                     {o.label}
-                  </Button>
+                  </option>
                 ))}
-              </div>
+              </select>
+
+              <select
+                value={filters.actif ?? ''}
+                onChange={(e) => {
+                  setFilters((f) => ({ ...f, actif: e.target.value }));
+                  setPage(1);
+                }}
+                className="select select-bordered h-10"
+              >
+                {ACTIVITE.map((o) => (
+                  <option key={o.label} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
             </div>
             {canEdit && (
               <div className="flex items-center gap-2 ml-auto">

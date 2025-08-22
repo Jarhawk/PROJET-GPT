@@ -19,7 +19,8 @@ export default function useAlerteStockFaible() {
       const { data, error } = await supabase
         .from('v_alertes_rupture')
         .select(
-          `produit_id,
+          `id:produit_id,
+          produit_id,
           nom,
           unite,
           fournisseur_nom,

@@ -17,7 +17,6 @@ const rpcMock = vi.fn(() => Promise.resolve({ data: {}, error: null }));
 
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock, rpc: rpcMock } }));
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
-vi.mock('sonner', () => ({ toast: { error: vi.fn() } }));
 
 let useZoneProducts;
 
@@ -38,7 +37,8 @@ test('list queries view filtered by zone', async () => {
     await result.current.list('z1');
   });
   expect(fromMock).toHaveBeenCalledWith('v_produits_par_zone');
-  expect(successChain.eq).toHaveBeenCalledWith('zone_id', 'z1');
+  expect(successChain.eq).toHaveBeenNthCalledWith(1, 'zone_id', 'z1');
+  expect(successChain.eq).toHaveBeenNthCalledWith(2, 'mama_id', 'm1');
 });
 
 test('list falls back to produits when view missing', async () => {
@@ -49,7 +49,10 @@ test('list falls back to produits when view missing', async () => {
   });
   expect(fromMock).toHaveBeenNthCalledWith(1, 'v_produits_par_zone');
   expect(fromMock).toHaveBeenNthCalledWith(2, 'produits');
-  expect(successChain.eq).toHaveBeenCalledWith('zone_id', 'z1');
+  expect(errorChain.eq).toHaveBeenNthCalledWith(1, 'zone_id', 'z1');
+  expect(errorChain.eq).toHaveBeenNthCalledWith(2, 'mama_id', 'm1');
+  expect(successChain.eq).toHaveBeenNthCalledWith(1, 'zone_id', 'z1');
+  expect(successChain.eq).toHaveBeenNthCalledWith(2, 'mama_id', 'm1');
 });
 
 test('move calls rpc with mama id', async () => {
@@ -60,8 +63,8 @@ test('move calls rpc with mama id', async () => {
   expect(rpcMock).toHaveBeenCalledWith('move_zone_products', {
     p_mama: 'm1',
     p_src_zone: 'a',
-    p_dst_zone: 'b',
-    p_keep_quantities: false,
+    p_dest_zone: 'b',
+    p_remove_src: false,
   });
 });
 
@@ -73,8 +76,8 @@ test('copy calls rpc with mama id', async () => {
   expect(rpcMock).toHaveBeenCalledWith('copy_zone_products', {
     p_mama: 'm1',
     p_src_zone: 'a',
-    p_dst_zone: 'b',
-    p_with_quantities: true,
+    p_dest_zone: 'b',
+    p_overwrite: true,
   });
 });
 
@@ -86,6 +89,6 @@ test('merge calls rpc with mama id', async () => {
   expect(rpcMock).toHaveBeenCalledWith('merge_zone_products', {
     p_mama: 'm1',
     p_src_zone: 'a',
-    p_dst_zone: 'b',
+    p_dest_zone: 'b',
   });
 });

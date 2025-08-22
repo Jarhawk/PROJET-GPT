@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import supabase from '@/lib/supabaseClient';
+import supabase from '@/lib/supabase';
 
 // Simple wrapper used by the AuthContext and auth pages
 export async function login(email, password) {
@@ -86,6 +86,7 @@ export async function refreshSession(currentSession) {
 }
 
 export function onAuthStateChange(callback) {
+  supabase.auth.getSession().then(({ data }) => callback(data?.session ?? null));
   const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
     callback(session);
   });

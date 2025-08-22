@@ -1,6 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import supabase from '@/lib/supabaseClient';
-import { useAuth } from '@/hooks/useAuth';
+import supabase from '@/lib/supabase';
+import useAuth from '@/hooks/useAuth';
 
 export async function getTemplatesCommandesActifs() {
   const { data, error } = await supabase

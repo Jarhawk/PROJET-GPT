@@ -6,11 +6,11 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { toast } from 'sonner';
 import { safeImportXLSX } from '@/lib/xlsx/safeImportXLSX';
-import { useQueryClient } from '@tanstack/react-query';
+import { getQueryClient } from '@/lib/react-query';
 
 export function useFournisseurs() {
   const { mama_id } = useAuth();
-  const queryClient = useQueryClient();
+  const queryClient = getQueryClient();
 
   // Ajouter un fournisseur
   async function createFournisseur(fournisseur) {

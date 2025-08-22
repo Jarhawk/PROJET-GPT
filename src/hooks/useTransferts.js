@@ -1,12 +1,13 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useCallback } from "react";
-import supabase from '@/lib/supabaseClient';
+import supabase from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
-import usePeriodes from "@/hooks/usePeriodes";
+import * as PeriodesMod from '@/hooks/usePeriodes';
 
 export function useTransferts() {
   const { mama_id, user_id } = useAuth();
-  const { checkCurrentPeriode } = usePeriodes();
+  const periodesFn = PeriodesMod.default || PeriodesMod.usePeriodes || PeriodesMod.useAuth || (() => ({}));
+  const { checkCurrentPeriode } = periodesFn();
   const [transferts, setTransferts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

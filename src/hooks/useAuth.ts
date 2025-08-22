@@ -5,6 +5,8 @@ export function useAuth() {
   return useAuthContext()
 }
 
+export default useAuth
+
 /** Hook pratique: renvoie une fonction hasAccess(key) */
 export function useHasAccess() {
   const auth = useAuthContext()

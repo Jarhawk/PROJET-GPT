@@ -1,7 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useCallback, useMemo } from "react";
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import supabase from '@/lib/supabaseClient';
+import { getQueryClient } from '@/lib/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { deduceEnabledModulesFromRights } from '@/lib/access';
 
@@ -25,7 +26,7 @@ const localFeatureFlags = {};
 export default function useMamaSettings() {
   const { userData } = useAuth();
   const mamaId = userData?.mama_id;
-  const queryClient = useQueryClient();
+  const queryClient = getQueryClient();
 
   const query = useQuery({
     queryKey: ['mama-settings', mamaId],
@@ -44,7 +45,7 @@ export default function useMamaSettings() {
       if (error) throw error;
       return data;
     },
-  });
+  }, queryClient);
 
   const updateMamaSettings = useCallback(
     async (fields) => {

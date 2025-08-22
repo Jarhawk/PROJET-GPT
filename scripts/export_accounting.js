@@ -3,7 +3,7 @@
 import { writeFileSync } from 'fs';
 import { join } from 'path';
 import * as XLSX from 'xlsx';
-import { getSupabaseClient } from '../src/api/shared/supabaseClient.js';
+import { supabase } from '@/lib/supabase';
 import {
   runScript,
   isMainModule,
@@ -27,7 +27,6 @@ export async function exportAccounting(
   output = null,
   format = process.env.ACCOUNTING_FORMAT || 'csv'
 ) {
-  const supabase = getSupabaseClient(supabaseUrl, supabaseKey);
   const mama_id = mamaId;
   const m = month || new Date().toISOString().slice(0,7);
   const start = `${m}-01`;

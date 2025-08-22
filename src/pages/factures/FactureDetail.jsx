@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import supabase from '@/lib/supabaseClient';
+import { supabase } from '@/lib/supabase';
 import FactureForm from './FactureForm.jsx';
 import { mapDbLineToUI } from '@/features/factures/invoiceMappers';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';

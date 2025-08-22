@@ -1,11 +1,7 @@
 import { serve } from "https://deno.land/std/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { supabase } from "@/lib/supabase";
 
 serve(async () => {
-  const supabase = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-  );
 
   const { data: mamas } = await supabase.from("mamas").select("id");
 

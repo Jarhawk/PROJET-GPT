@@ -10,7 +10,7 @@ const prodQuery = {
 };
 const fromMock = vi.fn(() => ({ select: prodQuery.select }));
 
-vi.mock('@/lib/supabaseClient', () => ({ default: { from: fromMock } }));
+vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
 vi.mock('@/hooks/data/useFournisseurs', () => ({ default: () => ({ data: [{ id: 'f1', nom: 'Four' }] }) }));
 

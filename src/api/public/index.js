@@ -4,15 +4,7 @@ import express from 'express';
 import produitsRouter from './produits.js';
 import stockRouter from './stock.js';
 import promotionsRouter from './promotions.js';
-import { getSupabaseClient } from '@/api/shared/supabaseClient.js';
-
-// Supabase client used to validate Bearer tokens when provided
-let supabase = null;
-try {
-  supabase = getSupabaseClient();
-} catch {
-  // Supabase credentials missing; JWT auth disabled
-}
+import { supabase } from '@/lib/supabase';
 
 const router = express.Router();
 
@@ -28,7 +20,7 @@ router.use(async (req, res, next) => {
   }
 
   // Vérification d'un token Bearer via Supabase
-  if (authHeader && supabase) {
+  if (authHeader) {
     const token = authHeader.replace(/^Bearer\s+/i, '');
     const { data, error } = await supabase.auth.getUser(token);
     if (data?.user && !error) {

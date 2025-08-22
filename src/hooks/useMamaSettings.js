@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useCallback, useMemo } from "react";
 import { useQuery } from '@tanstack/react-query';
-import supabase from '@/lib/supabaseClient';
+import { supabase } from '@/lib/supabase';
 import { getQueryClient } from '@/lib/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { deduceEnabledModulesFromRights } from '@/lib/access';

@@ -41,7 +41,6 @@ const supabaseMock = {
 };
 
 vi.mock('@/lib/supabase', () => ({ supabase: supabaseMock }));
-vi.mock('@/lib/supabaseClient', () => ({ supabase: supabaseMock }));
 
 function buildFile(rows) {
   const wb = XLSX.utils.book_new();

@@ -1,10 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useSupabase } from '@/hooks/useSupabaseClient';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
 export async function fetchConsoMoyenne(mamaId, sinceISO) {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const supabase = useSupabase();
 
   // NOTE: "quantite" DOIT correspondre au vrai nom (ou à l’alias de la vue v_requisition_lignes)
   const { data, error } = await supabase

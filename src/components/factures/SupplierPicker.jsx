@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import useDebounce from '@/hooks/useDebounce';
-import supabase from '@/lib/supabaseClient';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { useFournisseursAutocomplete } from '@/hooks/useFournisseursAutocomplete';
 import useFournisseursRecents from '@/hooks/useFournisseursRecents';

@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useAuth } from '@/hooks/useAuth';
 import Unauthorized from '@/pages/auth/Unauthorized';
-import supabase from '@/lib/supabaseClient';
+import { supabase } from '@/lib/supabase';
 
 export default function Zones() {
   const { fetchZones, updateZone } = useZones();

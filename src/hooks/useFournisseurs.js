@@ -1,6 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 // src/hooks/useFournisseurs.js
-import supabase from '@/lib/supabaseClient';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';

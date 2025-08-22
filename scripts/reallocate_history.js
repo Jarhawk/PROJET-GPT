@@ -1,6 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 /* eslint-env node */
-import { getSupabaseClient } from '../src/api/shared/supabaseClient.js';
+import { supabase } from '@/lib/supabase';
 import {
   runScript,
   isMainModule,
@@ -23,7 +23,6 @@ export async function reallocateHistory(
   supabaseKey = null,
   dryRun = false
 ) {
-  const supabase = getSupabaseClient(supabaseUrl, supabaseKey);
 
   const { data: mouvements, error } = await supabase.rpc(
     'mouvements_without_alloc',

@@ -1,6 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
-import supabase from "@/lib/supabaseClient";
+import { supabase } from '@/lib/supabase';
 import { Button } from "@/components/ui/button";
 import UtilisateurForm from "@/components/utilisateurs/UtilisateurForm";
 

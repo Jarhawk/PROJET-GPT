@@ -3,7 +3,7 @@
 import * as XLSX from 'xlsx';
 import { writeFileSync } from 'fs';
 import { posix as path } from 'path';
-import { getSupabaseClient } from '../src/api/shared/supabaseClient.js';
+import { supabase } from '@/lib/supabase';
 import {
   runScript,
   isMainModule,
@@ -21,14 +21,11 @@ export const USAGE =
 
 export async function generateWeeklyCostCenterReport(
   mamaId = process.env.MAMA_ID || null,
-  supabaseUrl = null,
-  supabaseKey = null,
   start = null,
   end = null,
   output = 'weekly_cost_centers.xlsx',
   format = process.env.WEEKLY_REPORT_FORMAT || 'xlsx',
 ) {
-  const supabase = getSupabaseClient(supabaseUrl, supabaseKey);
   const { data, error } = await supabase.rpc('stats_cost_centers', {
     mama_id_param: mamaId,
     debut_param: start,
@@ -89,8 +86,6 @@ if (isMainModule(import.meta.url)) {
       args = creds.args;
       return [
         id.mamaId ?? args[0],
-        creds.url ?? args[1],
-        creds.key ?? args[2],
         range.start,
         range.end,
         result.output,

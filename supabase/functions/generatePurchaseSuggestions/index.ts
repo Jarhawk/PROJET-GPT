@@ -1,14 +1,10 @@
 import { serve } from "https://deno.land/std/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { supabase } from "@/lib/supabase";
 
 serve(async (req) => {
   const { mama_id } = await req.json();
   if (!mama_id) return new Response("mama_id requis", { status: 400 });
 
-  const supabase = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-  );
 
   const { data: produits } = await supabase
     .from("v_stock_theorique")

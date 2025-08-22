@@ -29,7 +29,7 @@ const fromMock = vi.fn((table) => {
   return fetchQuery;
 });
 
-vi.mock('@/lib/supabaseClient', () => ({ default: { from: fromMock } }));
+vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
 
 let useFournisseurs;

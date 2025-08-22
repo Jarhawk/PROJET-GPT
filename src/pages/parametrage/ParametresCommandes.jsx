@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useEffect } from "react";
 import { useAuth } from '@/hooks/useAuth';
-import supabase from '@/lib/supabaseClient';
+import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
 export default function ParametresCommandes() {

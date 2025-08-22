@@ -8,9 +8,8 @@ import { useAuth } from '@/hooks/useAuth';
  * @param {Object} params
  * @param {number} [params.page=1]
  * @param {number} [params.pageSize=20]
- * @param {'manque'|'stock_actuel'|'stock_min'} [params.orderBy='manque']
  */
-export function useAlerteStockFaible({ page = 1, pageSize = 20, orderBy = 'manque' } = {}) {
+export function useAlerteStockFaible({ page = 1, pageSize = 20 } = {}) {
   const { mama_id } = useAuth();
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
@@ -28,8 +27,11 @@ export function useAlerteStockFaible({ page = 1, pageSize = 20, orderBy = 'manqu
       try {
         const { data: rows, count, error } = await supabase
           .from('v_alertes_rupture')
-          .select('produit_id, nom, stock_min, stock_actuel, manque', { count: 'exact' })
-          .order(orderBy, { ascending: false })
+          .select(
+            'produit_id, nom, unite, fournisseur_id, fournisseur_nom, stock_actuel, stock_min, manque',
+            { count: 'exact' }
+          )
+          .order('manque', { ascending: false })
           .range(from, to);
         if (error) throw error;
         if (!aborted) {
@@ -51,7 +53,7 @@ export function useAlerteStockFaible({ page = 1, pageSize = 20, orderBy = 'manqu
     return () => {
       aborted = true;
     };
-  }, [mama_id, page, pageSize, orderBy]);
+  }, [mama_id, page, pageSize]);
 
   return { data, total, page, pageSize, loading, error };
 }

@@ -1,3 +1,8 @@
+/**
+ * CLEANUP:
+ * - src/hooks/useAlerteStockFaible.js
+ * - test/useAlerteStockFaible.test.js
+ */
 import { motion as Motion } from 'framer-motion';
 import useAlerteStockFaible from '@/hooks/gadgets/useAlerteStockFaible';
 import LoadingSkeleton from '@/components/ui/LoadingSkeleton';

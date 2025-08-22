@@ -30,9 +30,14 @@ const fromMock = vi.fn((table) => {
   return baseQuery;
 });
 
-vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
+vi.mock('@/lib/supabase', () => {
+  const supabase = { from: fromMock };
+  return { supabase, default: supabase };
+});
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1', user_id: 'u1' }) }));
-vi.mock('@/hooks/usePeriodes', () => ({ useAuth: () => ({ checkCurrentPeriode: vi.fn(() => ({})) }) }));
+vi.mock('@/hooks/usePeriodes', () => ({
+  default: () => ({ checkCurrentPeriode: vi.fn(() => ({})) }),
+}));
 
 let useTransferts;
 

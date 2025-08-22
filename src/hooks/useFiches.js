@@ -79,7 +79,7 @@ export function useFiches() {
       console.error('createFiche error:', insertError);
       setLoading(false);
       setError(insertError);
-      throw insertError;
+      return { error: insertError };
     }
     const ficheId = data.id;
     if (lignes.length > 0) {
@@ -95,11 +95,12 @@ export function useFiches() {
         console.error('createFiche lignes error:', lignesError);
         setLoading(false);
         setError(lignesError);
-        throw lignesError;
+        return { error: lignesError };
       }
     }
+    setFiches(prev => [...prev, { id: ficheId, ...fiche }]);
+    setTotal(prev => prev + 1);
     setLoading(false);
-    await getFiches();
     return { data: ficheId };
   }
 
@@ -117,7 +118,7 @@ export function useFiches() {
       console.error('updateFiche error:', updateError);
       setLoading(false);
       setError(updateError);
-      throw updateError;
+      return { error: updateError };
     }
     const { error: deleteError } = await supabase
       .from("fiche_lignes")
@@ -128,7 +129,7 @@ export function useFiches() {
       console.error('updateFiche delete lines error:', deleteError);
       setLoading(false);
       setError(deleteError);
-      throw deleteError;
+      return { error: deleteError };
     }
     if (lignes.length > 0) {
       const toInsert = lignes.map(l => ({
@@ -143,11 +144,11 @@ export function useFiches() {
         console.error('updateFiche lines insert error:', insertError);
         setLoading(false);
         setError(insertError);
-        throw insertError;
+        return { error: insertError };
       }
     }
+    setFiches(prev => prev.map(f => f.id === id ? { ...f, ...fiche } : f));
     setLoading(false);
-    await getFiches();
     return { data: id };
   }
 
@@ -165,10 +166,11 @@ export function useFiches() {
       console.error('deleteFiche error:', deleteError);
       setLoading(false);
       setError(deleteError);
-      throw deleteError;
+      return { error: deleteError };
     }
+    setFiches(prev => prev.filter(f => f.id !== id));
+    setTotal(prev => Math.max(prev - 1, 0));
     setLoading(false);
-    await getFiches();
     return { data: id };
   }
 
@@ -186,7 +188,7 @@ export function useFiches() {
       console.error('duplicateFiche fetch error:', fetchError);
       setLoading(false);
       setError(fetchError);
-      throw fetchError;
+      return { error: fetchError };
     }
     const { lignes = [], ...rest } = fiche || {};
     const { data: inserted, error: insertError } = await supabase
@@ -198,7 +200,7 @@ export function useFiches() {
       console.error('duplicateFiche insert error:', insertError);
       setLoading(false);
       setError(insertError);
-      throw insertError;
+      return { error: insertError };
     }
     const newId = inserted.id;
     if (lignes.length) {
@@ -214,11 +216,12 @@ export function useFiches() {
         console.error('duplicateFiche lines insert error:', lineErr);
         setLoading(false);
         setError(lineErr);
-        throw lineErr;
+        return { error: lineErr };
       }
     }
+    setFiches(prev => [...prev, { ...rest, id: newId, nom: `${rest.nom} (copie)` }]);
+    setTotal(prev => prev + 1);
     setLoading(false);
-    await getFiches();
     return { data: newId };
   }
 

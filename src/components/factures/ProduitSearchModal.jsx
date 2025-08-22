@@ -31,7 +31,13 @@ export default function ProduitSearchModal({
 
   const handleSelect = (prod) => {
     if (!prod) return;
-    onPick?.({ ...prod, zone_id: prod.zone_stock_id ?? null });
+    onPick?.({
+      produit_id: prod.id,
+      nom: prod.nom,
+      unite_id: prod.unite_id ?? null,
+      tva: prod.tva ?? 0,
+      zone_id: prod.zone_id ?? null,
+    });
     onClose?.();
   };
 

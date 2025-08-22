@@ -8,8 +8,11 @@ const query = {
 const fromMock = vi.fn(() => query);
 const rpcMock = vi.fn();
 
-vi.mock("@/lib/supabase", () => ({ supabase: { from: fromMock, rpc: rpcMock } }));
-vi.mock("@/hooks/useAuth", () => ({ default: () => ({ mama_id: "m1" }) }));
+vi.mock("@/lib/supabase", () => {
+  const supabase = { from: fromMock, rpc: rpcMock };
+  return { supabase, default: supabase };
+});
+vi.mock("@/hooks/useAuth", () => ({ useAuth: () => ({ mama_id: "m1" }) }));
 
 let useTemplatesCommandes;
 
@@ -18,7 +21,9 @@ beforeEach(async () => {
   fromMock.mockClear();
   rpcMock.mockClear();
   Object.values(query).forEach((fn) => fn.mockClear && fn.mockClear());
-  rpcMock.mockResolvedValue({ data: { id: "t1" }, error: null });
+  rpcMock.mockReturnValue({
+    single: vi.fn(() => Promise.resolve({ data: { id: "t1" }, error: null })),
+  });
 });
 
 test("fetchTemplates applies filter", async () => {

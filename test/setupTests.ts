@@ -6,11 +6,21 @@ vi.mock("@/license", () => ({ default: { validateLicense: () => true } }));
 vi.mock("@/db/license-keys.json", () => ({ default: [] }));
 vi.mock("@/utils/watermark", () => ({ addWatermark: (pdf: any) => pdf, clearWatermark: (pdf: any) => pdf }));
 
-// Default auth hook mock
-vi.mock("@/hooks/useAuth", async () => {
-  const mod = await import("./__mocks__/hooks/useAuth");
-  return { useAuth: mod.useAuth };
-});
+// Global mocks for auth and periodes hooks
+vi.mock("@/hooks/useAuth", () => ({
+  useAuth: () => ({
+    mama_id: "m1",
+    user_id: "u1",
+    role: "admin",
+    hasAccess: () => true,
+  }),
+}));
+
+vi.mock("@/hooks/usePeriodes", () => ({
+  default: () => ({
+    checkCurrentPeriode: vi.fn().mockResolvedValue({ id: "p1" }),
+  }),
+}));
 
 // Polyfills Node pour jsdom/tests
 // TextEncoder/TextDecoder (si nécessaire)

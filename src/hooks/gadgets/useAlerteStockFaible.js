@@ -1,11 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import useSupabaseClient from '@/hooks/useSupabaseClient';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { logSupaError } from '@/lib/supa/logError';
 import { toast } from 'sonner';
 
 export default function useAlerteStockFaible() {
-  const supabase = useSupabaseClient();
   const { mama_id } = useAuth();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -60,7 +59,7 @@ export default function useAlerteStockFaible() {
     } finally {
       setLoading(false);
     }
-  }, [mama_id, supabase]);
+  }, [mama_id]);
 
   useEffect(() => {
     fetchData();

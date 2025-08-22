@@ -1,6 +1,6 @@
 import * as XLSX from "xlsx";
 import { v4 as uuidv4 } from "uuid";
-import supabase from '@/lib/supabaseClient';
+import { supabase } from '@/lib/supabase';
 import { fetchFamillesForValidation } from "@/hooks/useFamilles";
 import { fetchUnitesForValidation } from "@/hooks/useUnites";
 import { fetchZonesForValidation } from "@/hooks/useZonesStock";

@@ -1,16 +1,12 @@
 import { writeFile } from 'fs/promises';
-import { createClient } from '@supabase/supabase-js';
 import 'dotenv/config';
+import { supabase } from '@/lib/supabase';
 
 const url = process.env.SUPABASE_URL;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-let supabase = null;
-if (url && key) {
-  supabase = createClient(url, key);
-}
 
 async function execSql(sql) {
-  if (!supabase) throw new Error('Missing Supabase credentials');
+  if (!url || !key) throw new Error('Missing Supabase credentials');
   const res = await fetch(`${url}/rest/v1/rpc/sql`, {
     method: 'POST',
     headers: {

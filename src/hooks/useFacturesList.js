@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
-import supabase from '@/lib/supabaseClient';
+import { supabase } from '@/lib/supabase';
 
 export function useFacturesList(params = {}) {
   const { userData } = useAuth();

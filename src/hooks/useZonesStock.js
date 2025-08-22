@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import useSupabaseClient from '@/hooks/useSupabaseClient';
 import { useAuth } from '@/hooks/useAuth';
-import supabase from '@/lib/supabaseClient';
+import { supabase } from '@/lib/supabase';
 import { getQueryClient } from '@/lib/react-query';
 
 export async function fetchZonesForValidation(mama_id) {
@@ -14,13 +13,12 @@ export async function fetchZonesForValidation(mama_id) {
 }
 
 export default function useZonesStock() {
-  const supabaseClient = useSupabaseClient();
   const { mama_id: mamaId } = useAuth();
   const query = useQuery({
     queryKey: ['zones_stock', mamaId],
     enabled: !!mamaId,
     queryFn: async () => {
-      const { data, error } = await supabaseClient
+      const { data, error } = await supabase
         .from('zones_stock')
         .select('id, nom')
         .eq('mama_id', mamaId)

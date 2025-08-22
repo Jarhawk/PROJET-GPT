@@ -10,7 +10,7 @@ const queryBuilder = {
 };
 const fromMock = vi.fn(() => queryBuilder);
 
-vi.mock('@/lib/supabaseClient', () => ({ default: { from: fromMock }, supabase: { from: fromMock } }));
+vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
 vi.mock('sonner', () => ({ toast: { error: vi.fn() } }));
 

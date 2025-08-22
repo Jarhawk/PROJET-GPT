@@ -16,7 +16,7 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { pdf } from '@react-pdf/renderer';
 import CommandePDF from '@/components/pdf/CommandePDF';
-import supabase from '@/lib/supabaseClient';
+import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
 export default function EmailsEnvoyes() {

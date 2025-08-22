@@ -139,14 +139,10 @@ définit le délai maximum avant qu'une requête soit abandonnée si vous n'util
 pas l'option `timeoutMs` du constructeur. Ces trois valeurs doivent être des
 entiers positifs, sinon les valeurs par défaut (3 essais, 1000 ms de délai et
 10000 ms de timeout) sont utilisées.
-Un utilitaire `getSupabaseClient` centralise la création du client Supabase
-et combine éventuellement un paramètre passé en ligne de commande avec les
-variables d'environnement lorsque l'une des deux valeurs manque.
-Le client est mis en cache et réutilisé pour ces identifiants afin d'éviter
-de nouvelles connexions inutiles.
-Le client Supabase utilisé dans l'application frontend déclenche
-désormais une erreur si ces variables sont absentes afin d'éviter des
-plantages silencieux.
+Le client Supabase est désormais instancié une seule fois dans
+`src/lib/supabase.js` et réutilisé partout via
+`import { supabase } from '@/lib/supabase'`. Ce client unique évite la
+création répétée de connexions.
 Pour faciliter le linting côté Node, `src/lib/supabase.js` déclare
 l'environnement Node via `/* eslint-env node */`, donnant accès à
 `process.env`.

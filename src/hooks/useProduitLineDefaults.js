@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import supabase from '@/lib/supabaseClient';
+import { supabase } from '@/lib/supabase';
 import { getQueryClient } from '@/lib/react-query';
 import { useAuth } from '@/hooks/useAuth';
 

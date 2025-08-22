@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import useSupabaseClient from '@/hooks/useSupabaseClient';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function useDerniersAcces() {
-  const supabase = useSupabaseClient();
   const { mama_id } = useAuth();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -48,7 +47,7 @@ export default function useDerniersAcces() {
     } finally {
       setLoading(false);
     }
-  }, [mama_id, supabase]);
+  }, [mama_id]);
 
   useEffect(() => {
     fetchData();

@@ -14,7 +14,7 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
-import supabase from '@/lib/supabaseClient';
+import { supabase } from '@/lib/supabase';
 
 export default function ModalImportProduits({ open, onClose, onSuccess }) {
   const { mama_id } = useAuth();

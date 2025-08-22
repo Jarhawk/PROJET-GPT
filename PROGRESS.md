@@ -1063,13 +1063,13 @@
 - `npm run lint` and `npm test` succeed after changes
 
 ## 2025-07-01 Step 200
-- Introduced `getSupabaseClient` helper to create a Supabase client from either explicit credentials or environment variables
+- Introduced helper to create a Supabase client from either explicit credentials or environment variables
 - Updated API routes and Node scripts to use this helper
 - Added unit tests for the new helper
 - `npm run lint` and `npm test` pass after refactoring
 
 ## 2025-07-01 Step 201
-- `getSupabaseClient` now merges CLI parameters with environment variables
+- The helper now merges CLI parameters with environment variables
   when only one of them is provided
 - README documents the new partial override behavior
 - Added test verifying this mixing of credentials
@@ -1272,7 +1272,7 @@
 - `npm run lint` and `npm test` pass
 
 ## 2025-07-02 Step 233
-- `getSupabaseClient` now caches clients per credential pair to avoid
+- The helper now caches clients per credential pair to avoid
   redundant connections
 - README mentions the caching behavior
 - Added tests verifying the cache and updated existing ones

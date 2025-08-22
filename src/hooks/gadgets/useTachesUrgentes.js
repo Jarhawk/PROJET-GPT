@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import useSupabaseClient from '@/hooks/useSupabaseClient';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function useTachesUrgentes() {
-  const supabase = useSupabaseClient();
   const { mama_id } = useAuth();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -41,7 +40,7 @@ export default function useTachesUrgentes() {
     } finally {
       setLoading(false);
     }
-  }, [mama_id, supabase]);
+  }, [mama_id]);
 
   useEffect(() => {
     fetchData();

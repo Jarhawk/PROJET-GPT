@@ -3,7 +3,7 @@ import { useMemo, useState, useEffect } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import supabase from '@/lib/supabaseClient';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import FactureLigne from '@/components/FactureLigne';
 import SupplierPicker from '@/components/factures/SupplierPicker';

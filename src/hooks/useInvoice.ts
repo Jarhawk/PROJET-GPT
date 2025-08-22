@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { useSupabase } from '@/hooks/useSupabaseClient'
+import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 
 type UUID = string
@@ -49,7 +49,6 @@ async function fetchInvoiceAndLinesSeparately(supabase, id: string, mamaId: stri
 }
 
 export function useInvoice(id: string | undefined) {
-  const { supabase } = useSupabase()
   const { session } = useAuth()
   const mamaId = (session?.user?.user_metadata?.mama_id ?? session?.user?.mama_id ?? '').toString()
 

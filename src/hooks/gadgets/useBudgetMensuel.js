@@ -1,9 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import useSupabaseClient from '@/hooks/useSupabaseClient';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function useBudgetMensuel() {
-  const supabase = useSupabaseClient();
   const { mama_id } = useAuth();
 
   const periode = new Date().toISOString().slice(0, 7);

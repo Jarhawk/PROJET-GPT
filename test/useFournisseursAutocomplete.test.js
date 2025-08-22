@@ -13,7 +13,7 @@ const queryBuilder = {
 const selectMock = vi.fn(() => queryBuilder);
 const fromMock = vi.fn(() => ({ select: selectMock }));
 
-vi.mock('@/lib/supabaseClient', () => ({ default: { from: fromMock }, supabase: { from: fromMock } }));
+vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
 
 beforeEach(() => {
   fromMock.mockClear();

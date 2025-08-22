@@ -1,6 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
-import supabase from '@/lib/supabaseClient';
+import { supabase } from '@/lib/supabase';
 import logo from "@/assets/logo-mamastock.png";
 import { toast } from 'sonner';
 import GlassCard from "@/components/ui/GlassCard";

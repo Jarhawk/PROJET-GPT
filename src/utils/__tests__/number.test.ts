@@ -14,7 +14,7 @@ describe('utils/number', () => {
   });
 
   test('formatNumberFR', () => {
-    expect(formatNumberFR(1234.5)).toBe('1 234,50');
+    expect(formatNumberFR(1234.5)).toBe('1 234,50');
     expect(formatNumberFR(null)).toBe('');
   });
 });

@@ -19,5 +19,5 @@ export function formatNumberFR(value: number | null | undefined, decimals = 2): 
     maximumFractionDigits: decimals,
   })
     .format(value)
-    .replace(/\u202F/g, ' ');
+    .replace(/\u202F|\u00A0/g, ' ');
 }

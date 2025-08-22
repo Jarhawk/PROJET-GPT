@@ -27,7 +27,7 @@ test('fetchAlerts selects expected view columns', async () => {
   await fetchAlerts('rupture');
   expect(fromMock).toHaveBeenCalledWith('v_alertes_rupture');
   expect(queryBuilder.select).toHaveBeenCalledWith(
-    'id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, stock_projete, manque, type'
+    'id:produit_id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, stock_projete, manque, type'
   );
   expect(queryBuilder.eq).toHaveBeenCalledTimes(1);
   expect(queryBuilder.eq).toHaveBeenCalledWith('type', 'rupture');

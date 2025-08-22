@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import supabase from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -100,8 +100,11 @@ export function useUnites() {
 
 export default useUnites;
 
-// export minimal for importExcelProduits
-export async function fetchUnitesForValidation() {
-  // Implémentation minimale (peut retourner [] si pas utilisé en profondeur par les tests)
-  return [];
+export async function fetchUnitesForValidation(mama_id) {
+  const { data, error } = await supabase
+    .from('unites')
+    .select('id, nom')
+    .eq('mama_id', mama_id)
+    .order('nom', { ascending: true });
+  return { data: data ?? [], error };
 }

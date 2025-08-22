@@ -29,7 +29,10 @@ test('useAlerteStockFaible queries v_alertes_rupture without mama filter', async
   const { result } = renderHook(() => useAlerteStockFaible());
   await waitFor(() => !result.current.loading);
   expect(fromMock).toHaveBeenCalledWith('v_alertes_rupture');
-  expect(queryBuilder.select).toHaveBeenCalledWith('produit_id, nom, stock_min, stock_actuel, manque', { count: 'exact' });
+  expect(queryBuilder.select).toHaveBeenCalledWith(
+    'produit_id, nom, unite, fournisseur_id, fournisseur_nom, stock_actuel, stock_min, manque',
+    { count: 'exact' }
+  );
   expect(queryBuilder.eq).not.toHaveBeenCalled();
   expect(queryBuilder.order).toHaveBeenCalledWith('manque', { ascending: false });
   expect(queryBuilder.range).toHaveBeenCalledWith(0, 19);

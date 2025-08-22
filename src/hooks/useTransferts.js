@@ -2,12 +2,11 @@
 import { useState, useCallback } from "react";
 import supabase from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
-import * as PeriodesMod from '@/hooks/usePeriodes';
+import usePeriodes from '@/hooks/usePeriodes';
 
 export function useTransferts() {
   const { mama_id, user_id } = useAuth();
-  const periodesFn = PeriodesMod.default || PeriodesMod.usePeriodes || PeriodesMod.useAuth || (() => ({}));
-  const { checkCurrentPeriode } = periodesFn();
+  const { checkCurrentPeriode } = usePeriodes();
   const [transferts, setTransferts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

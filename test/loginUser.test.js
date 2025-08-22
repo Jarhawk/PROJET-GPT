@@ -1,11 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
 
-vi.mock('../src/lib/supabase.js', () => ({
-  supabase: {
+vi.mock('../src/lib/supabase.js', () => {
+  const supabase = {
     auth: {
       signInWithPassword: vi.fn(() => ({ data: { user: 'u' }, error: null })),
       signUp: vi.fn(() => ({ data: { user: 'n' }, error: null })),
-  signInWithOtp: vi.fn(() => ({ data: { user: 'magic' }, error: null })),
+      signInWithOtp: vi.fn(() => ({ data: { user: 'magic' }, error: null })),
       signInWithOAuth: vi.fn(() => ({ data: { provider: 'p' }, error: null })),
       verifyOtp: vi.fn(() => ({ data: { user: 'verified' }, error: null })),
       resetPasswordForEmail: vi.fn(() => ({ data: {}, error: null })),
@@ -13,16 +13,17 @@ vi.mock('../src/lib/supabase.js', () => ({
       signOut: vi.fn(() => ({ error: null })),
       updateUser: vi.fn((d) => ({ data: d, error: null })),
       getUser: vi.fn(() => ({ data: { user: 'cur' }, error: null })),
-      getSession: vi.fn(() => ({ data: { session: { access_token: 's' } }, error: null })),
+      getSession: vi.fn(() => Promise.resolve({ data: { session: { access_token: 's' } }, error: null })),
       refreshSession: vi.fn(() => ({ data: { session: 'new' }, error: null })),
       onAuthStateChange: vi.fn((cb) => {
         cb('SIGNED_IN', { session: 's' });
         return { data: { subscription: { unsubscribe: vi.fn() } } };
-      })
+      }),
     },
-    rpc: vi.fn(() => ({ data: { ok: true }, error: null }))
-  }
-}));
+    rpc: vi.fn(() => ({ data: { ok: true }, error: null })),
+  };
+  return { __esModule: true, default: supabase, supabase };
+});
 
 import {
   login,
@@ -143,10 +144,17 @@ describe('loginUser helpers', () => {
     expect(res.data).toEqual({ session: 'new' });
   });
 
-  it('onAuthStateChange subscribes to changes', () => {
-    const unsub = onAuthStateChange((session) => {
-      expect(session).toEqual({ session: 's' });
+  it('onAuthStateChange passes session object', async () => {
+    mockedSupabase.auth.getSession.mockResolvedValueOnce({
+      data: { session: { session: 's' } },
+      error: null,
     });
+    const cb = vi.fn();
+    const unsub = onAuthStateChange(cb);
+    await new Promise((r) => setTimeout(r, 0));
+    expect(cb).toHaveBeenNthCalledWith(1, { session: 's' });
+    expect(cb).toHaveBeenNthCalledWith(2, { session: 's' });
+    expect(cb).toHaveBeenCalledTimes(2);
     expect(mockedSupabase.auth.onAuthStateChange).toHaveBeenCalled();
     unsub();
   });

@@ -85,13 +85,13 @@ export async function refreshSession(currentSession) {
   return { data, error };
 }
 
-export function onAuthStateChange(callback) {
-  supabase.auth.getSession().then(({ data }) => callback(data?.session ?? null));
-  const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-    callback(session);
-  });
-  return listener.subscription.unsubscribe;
-}
+export const onAuthStateChange = (cb) => {
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange((_event, session) => cb(session));
+  supabase.auth.getSession().then(({ data }) => cb(data?.session ?? null));
+  return () => subscription?.unsubscribe();
+};
 
 export async function getAccessToken() {
   const { data, error } = await supabase.auth.getSession();

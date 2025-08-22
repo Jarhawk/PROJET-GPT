@@ -1,6 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
-import supabase from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import * as XLSX from "xlsx";
 import { safeImportXLSX } from "@/lib/xlsx/safeImportXLSX";
@@ -15,7 +15,7 @@ export function useUtilisateurs() {
   const [error, setError] = useState(null);
 
   // 1. Charger les utilisateurs (superadmin : tous, sinon par mama_id)
-  async function fetchUsers({ search = "", actif = null } = {}) {
+  async function getUtilisateurs({ search = "", actif } = {}) {
     if (!isSuperadmin && !mama_id) return [];
     setLoading(true);
     setError(null);
@@ -25,15 +25,11 @@ export function useUtilisateurs() {
       .order("nom", { ascending: true });
 
     if (!isSuperadmin) query = query.eq("mama_id", mama_id);
-    if (search) {
-      query = query
-        .ilike("nom", `%${search}%`)
-        .ilike("email", `%${search}%`);
-    }
-    if (typeof actif === "boolean") query = query.eq("actif", actif);
+    if (search) query = query.ilike("nom", `%${search}%`);
+    if (typeof actif !== "undefined") query = query.eq("actif", actif);
 
     const { data, error } = await query;
-    const cleaned = (Array.isArray(data) ? data : []);
+    const cleaned = Array.isArray(data) ? data : [];
     setUsers(cleaned);
     setLoading(false);
     if (error) setError(error);
@@ -53,20 +49,9 @@ export function useUtilisateurs() {
   }
 
   // 2. Ajouter un utilisateur (invitation)
-  async function addUser(user) {
-    const targetMama = isSuperadmin ? user.mama_id : mama_id;
-    if (!targetMama) return { error: "Aucun mama_id" };
-    setLoading(true);
-    setError(null);
-    const { error } = await supabase.rpc("create_utilisateur", {
-      email: user.email,
-      nom: user.nom,
-      role_id: user.role_id,
-      mama_id: targetMama,
-    });
-    if (error) setError(error);
-    setLoading(false);
-    await fetchUsers();
+  async function createUtilisateur({ email, nom, role_id, mama_id: providedMamaId }) {
+    const payloadMama = isSuperadmin ? providedMamaId : mama_id;
+    return supabase.rpc("create_utilisateur", { email, nom, role_id, mama_id: payloadMama });
   }
 
   // 3. Modifier un utilisateur (rôle, droits, etc.)
@@ -103,7 +88,7 @@ export function useUtilisateurs() {
       });
     if (error) setError(error);
     setLoading(false);
-    await fetchUsers();
+    await getUtilisateurs();
   }
 
   // 4. Activer/désactiver un utilisateur
@@ -119,7 +104,7 @@ export function useUtilisateurs() {
     const { error } = await query;
     if (error) setError(error);
     setLoading(false);
-    await fetchUsers();
+    await getUtilisateurs();
   }
 
   // 5. Réinitialiser le mot de passe via auth_id
@@ -149,7 +134,7 @@ export function useUtilisateurs() {
     const { error } = await query;
     if (error) setError(error);
     setLoading(false);
-    await fetchUsers();
+    await getUtilisateurs();
   }
 
   // 6. Export Excel
@@ -204,12 +189,11 @@ export function useUtilisateurs() {
     loading,
     error,
     // listing
-    fetchUsers,
-    getUtilisateurs: fetchUsers,
+    getUtilisateurs,
     fetchRoles,
     // mutations
-    addUser,
-    createUtilisateur: addUser,
+    createUtilisateur,
+    addUser: createUtilisateur,
     updateUser,
     updateUtilisateur: updateUser,
     toggleUserActive,

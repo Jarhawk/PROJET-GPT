@@ -4,7 +4,7 @@ import supabase from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
 export function useValidations() {
-  const { mama_id, user } = useAuth();
+  const { mama_id, user_id } = useAuth();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -16,9 +16,7 @@ export function useValidations() {
     const { data, error } = await supabase
       .from("validation_requests")
       .select("*")
-      .eq("mama_id", mama_id)
-      .eq("actif", true)
-      .order("created_at", { ascending: false });
+      .eq("mama_id", mama_id);
     setLoading(false);
     if (error) {
       setError(error.message || error);
@@ -30,12 +28,12 @@ export function useValidations() {
   }
 
   async function addRequest(values) {
-    if (!mama_id || !user) return { error: "Aucun mama_id" };
+    if (!mama_id || !user_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
       .from("validation_requests")
-      .insert([{ ...values, mama_id, requested_by: user.id, actif: true }]);
+      .insert([{ ...values, mama_id, requested_by: user_id, actif: true }]);
     setLoading(false);
     if (error) {
       setError(error.message || error);
@@ -45,15 +43,14 @@ export function useValidations() {
   }
 
   async function updateStatus(id, status) {
-    if (!mama_id || !user) return { error: "Aucun mama_id" };
+    if (!mama_id || !user_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
     const { error } = await supabase
       .from("validation_requests")
-      .update({ status, reviewed_by: user.id, reviewed_at: new Date().toISOString() })
+      .update({ status, reviewed_by: user_id, reviewed_at: new Date().toISOString() })
       .eq("id", id)
-      .eq("mama_id", mama_id)
-      .eq("actif", true);
+      .eq("mama_id", mama_id);
     setLoading(false);
     if (error) {
       setError(error.message || error);

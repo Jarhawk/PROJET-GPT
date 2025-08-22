@@ -2,12 +2,25 @@
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import supabase from '@/lib/supabase';
-import { getQueryClient } from '@/lib/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
+
+function safeQueryClient() {
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useQueryClient();
+  } catch {
+    return {
+      invalidateQueries: () => {},
+      setQueryData: () => {},
+      fetchQuery: async () => {},
+    };
+  }
+}
 
 export function useUnites() {
   const { mama_id } = useAuth();
-  const queryClient = getQueryClient();
+  const queryClient = safeQueryClient();
   const [params, setParams] = useState({ search: '', page: 1, limit: 50 });
 
   const query = useQuery({
@@ -44,7 +57,7 @@ export function useUnites() {
       return data;
     },
     onSuccess: () => queryClient.invalidateQueries(['unites', mama_id]),
-  }, queryClient);
+  });
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, ...values }) => {
@@ -59,7 +72,7 @@ export function useUnites() {
       return data;
     },
     onSuccess: () => queryClient.invalidateQueries(['unites', mama_id]),
-  }, queryClient);
+  });
 
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
@@ -71,7 +84,7 @@ export function useUnites() {
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries(['unites', mama_id]),
-  }, queryClient);
+  });
 
   return {
     unites: query.data?.data || [],

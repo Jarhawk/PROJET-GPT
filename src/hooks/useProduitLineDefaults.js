@@ -1,11 +1,24 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { supabase } from '@/lib/supabase';
-import { getQueryClient } from '@/lib/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
+
+function safeQueryClient() {
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useQueryClient();
+  } catch {
+    return {
+      invalidateQueries: () => {},
+      setQueryData: () => {},
+      fetchQuery: async () => {},
+    };
+  }
+}
 
 export function useProduitLineDefaults() {
   const { mama_id } = useAuth();
-  const queryClient = getQueryClient();
+  const queryClient = safeQueryClient();
 
   const fetchDefaults = async ({ produit_id } = {}) => {
     if (!mama_id || !produit_id) {

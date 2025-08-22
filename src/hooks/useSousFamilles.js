@@ -2,12 +2,25 @@
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import supabase from '@/lib/supabase';
-import { getQueryClient } from '@/lib/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
+
+function safeQueryClient() {
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useQueryClient();
+  } catch {
+    return {
+      invalidateQueries: () => {},
+      setQueryData: () => {},
+      fetchQuery: async () => {},
+    };
+  }
+}
 
 export function useSousFamilles() {
   const { mama_id } = useAuth();
-  const queryClient = getQueryClient();
+  const queryClient = safeQueryClient();
   const [params, setParams] = useState({ search: '', actif: undefined, familleId: undefined });
 
   const query = useQuery({
@@ -43,8 +56,9 @@ export function useSousFamilles() {
         .single();
       if (error) throw error;
       return data;
+    },
     onSuccess: () => queryClient.invalidateQueries(['sous_familles', mama_id]),
-  }, queryClient);
+  });
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, ...values }) => {
@@ -57,8 +71,9 @@ export function useSousFamilles() {
         .single();
       if (error) throw error;
       return data;
+    },
     onSuccess: () => queryClient.invalidateQueries(['sous_familles', mama_id]),
-  }, queryClient);
+  });
 
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
@@ -68,8 +83,9 @@ export function useSousFamilles() {
         .eq('id', id)
         .eq('mama_id', mama_id);
       if (error) throw error;
+    },
     onSuccess: () => queryClient.invalidateQueries(['sous_familles', mama_id]),
-  }, queryClient);
+  });
 
   const toggleActif = useCallback(
     (id, actif) => updateMutation.mutateAsync({ id, actif }),

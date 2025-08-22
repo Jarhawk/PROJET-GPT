@@ -11,21 +11,33 @@ export async function getTemplatesCommandesActifs() {
   return { data, error };
 }
 
+export async function fetchTemplates({ fournisseur_id } = {}) {
+  const { mama_id } = useAuth();
+  if (!mama_id) return { data: [], error: null };
+  let query = supabase
+    .from("templates_commandes")
+    .select("*, fournisseur:fournisseur_id(id, nom)")
+    .eq("mama_id", mama_id)
+    .order("nom");
+  if (fournisseur_id) query = query.eq("fournisseur_id", fournisseur_id);
+  const { data, error } = await query;
+  return { data, error };
+}
+
+export async function getTemplateForFournisseur(fournisseur_id) {
+  const { mama_id } = useAuth();
+  if (!mama_id) return { data: null, error: "mama_id manquant" };
+  const { data, error } = await supabase
+    .rpc("get_template_commande", { p_mama: mama_id, p_fournisseur: fournisseur_id })
+    .single();
+  return { data, error };
+}
+
 export function useTemplatesCommandes() {
   const { mama_id } = useAuth();
 
   return {
-    fetchTemplates: async ({ fournisseur_id } = {}) => {
-      if (!mama_id) return { data: [], error: null };
-      let query = supabase
-        .from("templates_commandes")
-        .select("*, fournisseur:fournisseur_id(id, nom)")
-        .eq("mama_id", mama_id)
-        .order("nom");
-      if (fournisseur_id) query = query.eq("fournisseur_id", fournisseur_id);
-      const { data, error } = await query;
-      return { data, error };
-    },
+    fetchTemplates,
 
     fetchTemplateById: async (id) => {
       if (!mama_id) return { data: null, error: null };
@@ -70,13 +82,7 @@ export function useTemplatesCommandes() {
       return { error };
     },
 
-    getTemplateForFournisseur: async (fournisseur_id) => {
-      if (!mama_id) return { data: null, error: "mama_id manquant" };
-      const { data, error } = await supabase
-        .rpc("get_template_commande", { p_mama: mama_id, p_fournisseur: fournisseur_id })
-        .single();
-      return { data, error };
-    },
+    getTemplateForFournisseur,
   };
 }
 

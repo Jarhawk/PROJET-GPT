@@ -11,28 +11,6 @@ import {
 } from "@/components/ui/select";
 import { Trash2 } from "lucide-react";
 import ProduitSearchModal from "@/components/factures/ProduitSearchModal";
-import { useQuery } from "@tanstack/react-query";
-import supabase from "@/lib/supabaseClient";
-import { useAuth } from "@/hooks/useAuth";
-
-function useZones() {
-  const { mama_id } = useAuth();
-  return useQuery({
-    queryKey: ["zones_stock", mama_id],
-    enabled: !!mama_id,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("zones_stock")
-        .select("id, nom")
-        .eq("mama_id", mama_id)
-        .eq("actif", true)
-        .order("nom", { ascending: true });
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
-}
-
 export default function FactureLigne({
   value: line,
   onChange,
@@ -40,9 +18,9 @@ export default function FactureLigne({
   allLines = [],
   invalidProduit = false,
   index,
+  zones = [],
 }) {
   const lineRef = useRef(null);
-  const { data: zones = [] } = useZones();
   const [modalOpen, setModalOpen] = useState(false);
 
   const qte = Number(line.quantite || 0);
@@ -110,13 +88,12 @@ export default function FactureLigne({
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onSelect={(p) => {
-          const z = p.zone_id ?? (zones.length === 1 ? zones[0].id : null);
           recalc({
-            produit_id: p.id,
+            produit_id: p.produit_id,
             produit_nom: p.nom,
             unite_id: p.unite_id ?? null,
             tva: p.tva ?? 0,
-            zone_id: z,
+            zone_id: p.zone_id ?? line.zone_id ?? null,
           });
         }}
         excludeIdsSameZone={excludeIdsSameZone}

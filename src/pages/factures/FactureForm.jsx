@@ -20,6 +20,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { mapUILineToPayload } from '@/features/factures/invoiceMappers';
 import useProduitLineDefaults from '@/hooks/useProduitLineDefaults';
+import useZonesStock from '@/hooks/useZonesStock';
 
 const FN_UPDATE_FACTURE_EXISTS = false;
 
@@ -84,6 +85,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
     name: 'lignes',
   });
   const lignes = watch('lignes');
+  const { data: zones = [], isSuccess } = useZonesStock();
   const totalHTAttendu = watch('total_ht_attendu');
   const statut = watch('statut');
   const formId = watch('id');
@@ -156,6 +158,15 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
     }
     update(i, merged);
   };
+
+  useEffect(() => {
+    lignes.forEach((l, i) => {
+      if (!l.zone_id && isSuccess && zones.length === 1) {
+        updateLigne(i, { zone_id: zones[0].id });
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSuccess, zones, lignes]);
 
   const onSubmit = async (values) => {
     if (saving) return;
@@ -360,6 +371,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
               allLines={lignes}
               invalidProduit={submitCount > 0 && !lignes[i]?.produit_id}
               index={i}
+              zones={zones}
             />
           ))}
         </div>

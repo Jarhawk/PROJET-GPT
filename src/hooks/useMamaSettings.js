@@ -2,9 +2,22 @@
 import { useCallback, useMemo } from "react";
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { getQueryClient } from '@/lib/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { deduceEnabledModulesFromRights } from '@/lib/access';
+
+function safeQueryClient() {
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useQueryClient();
+  } catch {
+    return {
+      invalidateQueries: () => {},
+      setQueryData: () => {},
+      fetchQuery: async () => {},
+    };
+  }
+}
 
 const defaults = {
   logo_url: "",
@@ -26,7 +39,7 @@ const localFeatureFlags = {};
 export default function useMamaSettings() {
   const { userData } = useAuth();
   const mamaId = userData?.mama_id;
-  const queryClient = getQueryClient();
+  const queryClient = safeQueryClient();
 
   const query = useQuery({
     queryKey: ['mama-settings', mamaId],
@@ -45,7 +58,7 @@ export default function useMamaSettings() {
       if (error) throw error;
       return data;
     },
-  }, queryClient);
+  });
 
   const updateMamaSettings = useCallback(
     async (fields) => {

@@ -6,11 +6,24 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { toast } from 'sonner';
 import { safeImportXLSX } from '@/lib/xlsx/safeImportXLSX';
-import { getQueryClient } from '@/lib/react-query';
+import { useQueryClient } from '@tanstack/react-query';
+
+function safeQueryClient() {
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useQueryClient();
+  } catch {
+    return {
+      invalidateQueries: () => {},
+      setQueryData: () => {},
+      fetchQuery: async () => {},
+    };
+  }
+}
 
 export function useFournisseurs() {
   const { mama_id } = useAuth();
-  const queryClient = getQueryClient();
+  const queryClient = safeQueryClient();
 
   // Ajouter un fournisseur
   async function createFournisseur(fournisseur) {

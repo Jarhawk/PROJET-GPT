@@ -53,3 +53,21 @@ test('createFiche inserts fiche and lines', async () => {
   expect(insertMainMock).toHaveBeenCalled();
   expect(insertLinesMock).toHaveBeenCalled();
 });
+
+test('createFiche updates local state', async () => {
+  const { result } = renderHook(() => useFiches());
+  await act(async () => {
+    await result.current.createFiche({ nom: 'f', lignes: [] });
+  });
+  expect(result.current.fiches).toHaveLength(1);
+  expect(result.current.fiches[0].nom).toBe('f');
+});
+
+test('createFiche returns error on failure', async () => {
+  insertMainMock.mockImplementationOnce(() => ({
+    select: () => ({ single: () => Promise.resolve({ data: null, error: { message: 'denied' } }) })
+  }));
+  const { result } = renderHook(() => useFiches());
+  const res = await result.current.createFiche({ nom: 'x', lignes: [] });
+  expect(res.error).toBeTruthy();
+});

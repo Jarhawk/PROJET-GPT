@@ -34,18 +34,21 @@ export function useFichesTechniques() {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("fiches_techniques")
-      .insert([{ ...ft, mama_id }]);
+      .insert([{ ...ft, mama_id }])
+      .select("id")
+      .single();
     if (error) {
       console.error('addFicheTechnique error:', error);
       setLoading(false);
       setError(error);
-      throw error;
+      return { error };
     }
-    await fetchFichesTechniques();
+    const fiche = { ...ft, id: data?.id };
+    setFichesTechniques(prev => [...prev, fiche]);
     setLoading(false);
-    return { data: true };
+    return { data: fiche.id };
   }
 
   async function updateFicheTechnique(id, updateFields) {
@@ -61,9 +64,9 @@ export function useFichesTechniques() {
       console.error('updateFicheTechnique error:', error);
       setLoading(false);
       setError(error);
-      throw error;
+      return { error };
     }
-    await fetchFichesTechniques();
+    setFichesTechniques(prev => prev.map(f => f.id === id ? { ...f, ...updateFields } : f));
     setLoading(false);
     return { data: id };
   }
@@ -81,9 +84,9 @@ export function useFichesTechniques() {
       console.error('deleteFicheTechnique error:', error);
       setLoading(false);
       setError(error);
-      throw error;
+      return { error };
     }
-    await fetchFichesTechniques();
+    setFichesTechniques(prev => prev.filter(f => f.id !== id));
     setLoading(false);
     return { data: id };
   }

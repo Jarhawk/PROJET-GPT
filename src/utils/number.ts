@@ -17,5 +17,7 @@ export function formatNumberFR(value: number | null | undefined, decimals = 2): 
   return new Intl.NumberFormat('fr-FR', {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
-  }).format(value);
+  })
+    .format(value)
+    .replace(/\u202F/g, ' ');
 }

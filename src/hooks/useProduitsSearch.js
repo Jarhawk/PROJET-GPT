@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import useDebounce from '@/hooks/useDebounce';
 import supabase from '@/lib/supabaseClient';
+import { getQueryClient } from '@/lib/react-query';
 import { useAuth } from '@/hooks/useAuth';
 
 function normalize(list = []) {
@@ -49,7 +50,7 @@ export function useProduitsSearch(
         return { rows: [], total: 0 };
       }
     },
-  });
+  }, getQueryClient());
 
   return {
     data: query.data?.rows || [],

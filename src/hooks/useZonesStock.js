@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import useSupabaseClient from '@/hooks/useSupabaseClient';
 import { useAuth } from '@/hooks/useAuth';
 import supabase from '@/lib/supabaseClient';
+import { getQueryClient } from '@/lib/react-query';
 
 export async function fetchZonesForValidation(mama_id) {
   const { data, error } = await supabase
@@ -28,7 +29,7 @@ export default function useZonesStock() {
       if (error) throw error;
       return data ?? [];
     },
-  });
+  }, getQueryClient());
   return { ...query, zones: query.data ?? [] };
 }
 

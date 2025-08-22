@@ -7,11 +7,11 @@ import * as XLSX from "xlsx";
 import { safeImportXLSX } from "@/lib/xlsx/safeImportXLSX";
 import { saveAs } from "file-saver";
 import { toast } from 'sonner';
-import { useQueryClient } from '@tanstack/react-query';
+import { getQueryClient } from '@/lib/react-query';
 
 export function useProducts() {
   const { mama_id } = useAuth();
-  const queryClient = useQueryClient();
+  const queryClient = getQueryClient();
   const [products, setProducts] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);

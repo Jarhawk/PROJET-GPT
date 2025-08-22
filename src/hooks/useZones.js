@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import supabase from '@/lib/supabaseClient';
+import supabase from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { useState } from 'react';
@@ -11,10 +11,10 @@ export function useZones() {
   async function fetchZones({ q, type, actif } = {}) {
     let query = supabase
       .from('zones_stock')
-      .select('id,nom,type,parent_id,position,actif,created_at')
+      .select('id, nom, type, parent_id, position, actif, created_at')
       .eq('mama_id', mama_id)
       .order('position', { ascending: true })
-      .order('nom', { ascending: true });
+      .order('nom');
     if (q) query = query.ilike('nom', `%${q}%`);
     if (type) query = query.eq('type', type);
     if (actif !== undefined) query = query.eq('actif', actif);
@@ -39,7 +39,7 @@ export function useZones() {
   async function fetchZoneById(id) {
     let { data, error } = await supabase
       .from('zones_stock')
-      .select('id,nom,type,parent_id,position,actif,created_at')
+      .select('id, nom, type, parent_id, position, actif, created_at')
       .eq('mama_id', mama_id)
       .eq('id', id)
       .single();
@@ -47,7 +47,7 @@ export function useZones() {
       console.info('[zones_stock] fetch failed; fallback list (no order)', { code: error.code, message: error.message });
       const alt = await supabase
         .from('zones_stock')
-        .select('id,nom,type,parent_id,position,actif,created_at')
+        .select('id, nom, type, parent_id, position, actif, created_at')
         .eq('mama_id', mama_id)
         .eq('id', id)
         .single();
@@ -99,7 +99,7 @@ export function useZones() {
     const { data: { user } = {} } = await supabase.auth.getUser();
     let query = supabase
       .from('zones_stock')
-      .select('id,nom,type,parent_id,position,actif,created_at,zones_droits!inner(*)')
+      .select('id, nom, type, parent_id, position, actif, created_at, zones_droits!inner(*)')
       .eq('mama_id', mama_id)
       .eq('zones_droits.user_id', user?.id || null)
       .eq('actif', true)
@@ -112,7 +112,7 @@ export function useZones() {
       console.info('[zones_stock] fetch failed; fallback list (no order)', { code: error.code, message: error.message });
       const alt = await supabase
         .from('zones_stock')
-        .select('id,nom,type,parent_id,position,actif,created_at,zones_droits!inner(*)')
+        .select('id, nom, type, parent_id, position, actif, created_at, zones_droits!inner(*)')
         .eq('mama_id', mama_id)
         .eq('zones_droits.user_id', user?.id || null)
         .eq('actif', true);

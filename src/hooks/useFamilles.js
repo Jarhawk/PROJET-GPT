@@ -1,12 +1,13 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useCallback } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import supabase from '@/lib/supabase';
+import { getQueryClient } from '@/lib/react-query';
 import { useAuth } from '@/hooks/useAuth';
 
 export function useFamilles() {
   const { mama_id } = useAuth();
-  const queryClient = useQueryClient();
+  const queryClient = getQueryClient();
   const [params, setParams] = useState({ search: '', page: 1, limit: 50 });
 
   const query = useQuery({
@@ -41,9 +42,8 @@ export function useFamilles() {
         .single();
       if (error) throw error;
       return data;
-    },
     onSuccess: () => queryClient.invalidateQueries(['familles', mama_id]),
-  });
+  }, queryClient);
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, ...values }) => {
@@ -56,9 +56,8 @@ export function useFamilles() {
         .single();
       if (error) throw error;
       return data;
-    },
     onSuccess: () => queryClient.invalidateQueries(['familles', mama_id]),
-  });
+  }, queryClient);
 
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
@@ -68,9 +67,8 @@ export function useFamilles() {
         .eq('id', id)
         .eq('mama_id', mama_id);
       if (error) throw error;
-    },
     onSuccess: () => queryClient.invalidateQueries(['familles', mama_id]),
-  });
+  }, queryClient);
 
   const batchDeleteFamilles = async (ids = []) => {
     await Promise.all(ids.map((id) => deleteMutation.mutateAsync(id)));

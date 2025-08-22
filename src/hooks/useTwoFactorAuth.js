@@ -1,6 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
-import supabase from '@/lib/supabaseClient';
+import supabase from '@/lib/supabase';
 import { authenticator } from "otplib";
 
 export function useTwoFactorAuth() {
@@ -12,11 +12,11 @@ export function useTwoFactorAuth() {
   async function refresh() {
     setLoading(true);
     setError(null);
-    const { data: userData } = await supabase.auth.getUser();
+    const { data: { user } = {} } = await supabase.auth.getUser();
     const { data, error } = await supabase
       .from("auth_double_facteur")
       .select("enabled, secret")
-      .eq("id", userData.user.id)
+      .eq("id", user?.id)
       .single();
     if (error) setError(error);
     else {
@@ -37,10 +37,10 @@ export function useTwoFactorAuth() {
     if (!secret) return;
     setLoading(true);
     setError(null);
-    const { data: userData } = await supabase.auth.getUser();
+    const { data: { user } = {} } = await supabase.auth.getUser();
     const { error } = await supabase
       .from("auth_double_facteur")
-      .upsert({ id: userData.user.id, secret, enabled: true });
+      .upsert({ id: user?.id, secret, enabled: true });
     if (error) setError(error);
     else setEnabled(true);
     setLoading(false);
@@ -48,11 +48,11 @@ export function useTwoFactorAuth() {
 
   async function disable() {
     setLoading(true);
-    const { data: userData } = await supabase.auth.getUser();
+    const { data: { user } = {} } = await supabase.auth.getUser();
     const { error } = await supabase
       .from("auth_double_facteur")
       .update({ enabled: false, secret: null })
-      .eq("id", userData.user.id);
+      .eq("id", user?.id);
     if (error) setError(error);
     else {
       setSecret(null);

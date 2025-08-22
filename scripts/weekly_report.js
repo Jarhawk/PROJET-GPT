@@ -2,7 +2,7 @@
 /* eslint-env node */
 import * as XLSX from 'xlsx';
 import { writeFileSync } from 'fs';
-import { join } from 'path';
+import { posix as path } from 'path';
 import { getSupabaseClient } from '../src/api/shared/supabaseClient.js';
 import {
   runScript,
@@ -42,7 +42,7 @@ export async function generateWeeklyCostCenterReport(
   if (format === 'csv') {
     let file = output || 'weekly_cost_centers.csv';
     if (!output && process.env.REPORT_DIR) {
-      file = join(process.env.REPORT_DIR, file);
+      file = path.join(process.env.REPORT_DIR, file);
     }
     ensureDirForFile(file);
     writeFileSync(file, toCsv(rows));
@@ -51,7 +51,7 @@ export async function generateWeeklyCostCenterReport(
   } else if (format === 'json') {
     let file = output || 'weekly_cost_centers.json';
     if (!output && process.env.REPORT_DIR) {
-      file = join(process.env.REPORT_DIR, file);
+      file = path.join(process.env.REPORT_DIR, file);
     }
     ensureDirForFile(file);
     writeFileSync(file, JSON.stringify(rows, null, 2));
@@ -63,7 +63,7 @@ export async function generateWeeklyCostCenterReport(
     XLSX.utils.book_append_sheet(wb, ws, 'Stats');
     let file = output || 'weekly_cost_centers.xlsx';
     if (!output && process.env.REPORT_DIR) {
-      file = join(process.env.REPORT_DIR, file);
+      file = path.join(process.env.REPORT_DIR, file);
     }
     ensureDirForFile(file);
     XLSX.writeFile(wb, file);

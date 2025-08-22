@@ -10,9 +10,8 @@ export function useZones() {
 
   async function fetchZones({ q, type, actif } = {}) {
     let query = supabase
-      .from('zones_stock')
+      .from('zones')
       .select('id, nom, type, parent_id, position, actif, created_at')
-      .eq('mama_id', mama_id)
       .order('position', { ascending: true })
       .order('nom');
     if (q) query = query.ilike('nom', `%${q}%`);
@@ -20,11 +19,10 @@ export function useZones() {
     if (actif !== undefined) query = query.eq('actif', actif);
     let { data, error } = await query;
     if (error) {
-      console.info('[zones_stock] fetch failed; fallback list (no order)', { code: error.code, message: error.message });
+      console.info('[zones] fetch failed; fallback list (no order)', { code: error.code, message: error.message });
       const alt = await supabase
-        .from('zones_stock')
-        .select('id,nom,type,parent_id,position,actif,created_at')
-        .eq('mama_id', mama_id);
+        .from('zones')
+        .select('id, nom, type, parent_id, position, actif, created_at');
       data = alt.data ?? [];
     }
     const cleaned = (data || []).map(z => ({

@@ -89,4 +89,15 @@ export function useFamilles() {
   };
 }
 
+// export minimal attendu par importExcelProduits.js
+export async function fetchFamillesForValidation(supabase, mama_id) {
+  const { data, error } = await supabase
+    .from('familles')
+    .select('id, nom, actif')
+    .eq('mama_id', mama_id)
+    .order('nom', { ascending: true });
+  if (error) throw error;
+  return data ?? [];
+}
+
 export default useFamilles;

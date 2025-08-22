@@ -60,7 +60,7 @@ export async function parseProduitsFile(file, mama_id) {
     fournisseursRes,
     produitsRes,
   ] = await Promise.all([
-    fetchFamillesForValidation(mama_id),
+    fetchFamillesForValidation(supabase, mama_id),
     supabase.from("sous_familles").select("id, nom").eq("mama_id", mama_id),
     fetchUnitesForValidation(mama_id),
     fetchZonesForValidation(mama_id),

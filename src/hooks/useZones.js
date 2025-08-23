@@ -1,10 +1,10 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { supabase } from '@/lib/supabase';
+import supabase from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { useState } from 'react';
 
-export function useZones() {
+export default function useZones() {
   const { mama_id } = useAuth();
   const [zones, setZones] = useState([]);
 
@@ -130,4 +130,6 @@ export function useZones() {
     myAccessibleZones,
   };
 }
+
+export { useZones };
 

@@ -183,6 +183,36 @@ export function useProducts() {
     queryClient.invalidateQueries({ queryKey: ['product-search', mama_id] });
   }
 
+  async function duplicateProduct(id, { refresh = true } = {}) {
+    if (!mama_id) return { error: "Aucun mama_id" };
+    const original = products.find(p => p.id === id);
+    if (!original) return { error: "Produit introuvable" };
+    setLoading(true);
+    setError(null);
+    const {
+      id: _id,
+      pmp,
+      stock_theorique,
+      stock_reel,
+      dernier_prix,
+      unite,
+      zone_stock,
+      famille,
+      sous_famille,
+      main_fournisseur,
+      ...rest
+    } = original;
+    const payload = { ...rest, nom: `${original.nom} (copie)`, mama_id };
+    const { error } = await supabase.from('produits').insert([payload]);
+    setLoading(false);
+    if (error) {
+      setError(error);
+      toast.error(error.message);
+    }
+    if (refresh) await fetchProducts();
+    queryClient.invalidateQueries({ queryKey: ['product-search', mama_id] });
+  }
+
   const fetchProductPrices = useCallback(async (productId) => {
     if (!mama_id) return [];
     setLoading(true);
@@ -316,6 +346,7 @@ export function useProducts() {
     updateProduct,
     toggleProductActive,
     deleteProduct,
+    duplicateProduct,
     fetchProductPrices,
     getProduct,
     exportProductsToExcel,

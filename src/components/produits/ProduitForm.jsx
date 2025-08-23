@@ -106,7 +106,7 @@ export default function ProduitForm({
     const errs = {};
     if (!nom.trim()) errs.nom = "Nom requis";
     if (!familleId) errs.famille = "Famille requise";
-    if (familleHasSous && !sousFamilleId) errs.sous_famille = "Sous-famille requise";
+    if (familleHasSous && !sousFamilleId) errs.sousFamille = "Sous-famille requise";
     if (!uniteId) errs.unite = "Unité requise";
     setErrors(errs);
     if (Object.keys(errs).length) {
@@ -212,7 +212,6 @@ export default function ProduitForm({
             value={sousFamilleId}
             onChange={(e) => setSousFamilleId(e.target.value)}
             disabled={!familleId || sousFamillesLoading || !familleHasSous}
-            required={familleHasSous}
           >
             <option value="">
               {sousFamillesLoading ? "Chargement..." : "-- Choisir --"}
@@ -223,8 +222,10 @@ export default function ProduitForm({
               </option>
             ))}
           </select>
-          {errors.sous_famille && (
-            <p className="text-red-500 text-sm">{errors.sous_famille}</p>
+          {errors.sousFamille && (
+            <p role="alert" className="text-red-500 text-xs mt-1">
+              {errors.sousFamille}
+            </p>
           )}
           {sousFamillesError && (
             <p className="text-red-500 text-sm">Erreur chargement sous-familles</p>

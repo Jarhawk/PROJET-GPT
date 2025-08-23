@@ -2,11 +2,30 @@
 import { useState, useEffect } from "react";
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
-import usePeriodes from "@/hooks/usePeriodes";
+
+async function getOrCreatePeriode(date, mama_id) {
+  let { data: periode, error } = await supabase
+    .from('periodes')
+    .select('*')
+    .eq('mama_id', mama_id)
+    .lte('debut', date)
+    .gte('fin', date)
+    .maybeSingle();
+  if (error) throw error;
+  if (!periode) {
+    const res = await supabase
+      .from('periodes')
+      .insert({ mama_id, debut: date, fin: date })
+      .select()
+      .single();
+    if (res.error) throw res.error;
+    periode = res.data;
+  }
+  return periode;
+}
 
 export function useInventaires() {
   const { mama_id } = useAuth();
-  const { checkCurrentPeriode } = usePeriodes();
   const [inventaires, setInventaires] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -71,19 +90,23 @@ export function useInventaires() {
     return true;
   }
 
-  async function createInventaire(inv) {
+  async function createInventaire(inv = {}) {
     if (!mama_id) return null;
-    const { lignes = [], date, ...entete } = inv;
-    const { data: periode, error: pErr } = await checkCurrentPeriode(date);
-    if (pErr) {
-      setError(pErr);
+    const { lignes = [], date = new Date().toISOString().slice(0, 10), ...entete } = inv;
+    let periode;
+    try {
+      periode = entete.periode_id
+        ? { id: entete.periode_id }
+        : await getOrCreatePeriode(date, mama_id);
+    } catch (e) {
+      setError(e);
       return null;
     }
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
-      .from("inventaires")
-      .insert([{ ...entete, date_inventaire: date, periode_id: periode?.id, mama_id }])
+      .from('inventaires')
+      .insert([{ ...entete, date_inventaire: date, periode_id: periode.id, mama_id }])
       .select()
       .single();
     if (error) {
@@ -99,7 +122,7 @@ export function useInventaires() {
         inventaire_id: data.id,
         mama_id,
       }));
-      const { error: errLines } = await supabase.from("produits_inventaire").insert(toInsert);
+      const { error: errLines } = await supabase.from('produits_inventaire').insert(toInsert);
       if (errLines) setError(errLines);
     }
     setLoading(false);

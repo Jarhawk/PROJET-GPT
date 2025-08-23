@@ -6,7 +6,7 @@ const query = {
   select: vi.fn(() => query),
   eq: vi.fn(() => query),
   ilike: vi.fn(() => query),
-  then: (resolve) => resolve({ data: [], error: null }),
+  then: vi.fn((resolve) => resolve({ data: [], error: null })),
 };
 
 const singleMock = vi.fn(() => Promise.resolve({ data: { id: 'sf1' }, error: null }));
@@ -31,6 +31,7 @@ let useSousFamilles;
 
 beforeEach(async () => {
   vi.clearAllMocks();
+  query.then.mockImplementation((resolve) => resolve({ data: [], error: null }));
   ({ useSousFamilles } = await import('@/hooks/useSousFamilles.js'));
 });
 
@@ -62,4 +63,17 @@ test('toggleActif met à jour le champ actif', async () => {
   expect(updateMock).toHaveBeenCalledWith({ actif: false });
   expect(eqAfterUpdate1).toHaveBeenCalledWith('id', 'sf1');
   expect(eqAfterUpdate2).toHaveBeenCalledWith('mama_id', 'm1');
+});
+
+test('list renvoie une erreur quand la requête échoue', async () => {
+  query.then.mockImplementationOnce((resolve) =>
+    resolve({ data: null, error: { message: 'nope' } })
+  );
+  const { result } = renderHook(() => useSousFamilles());
+  await act(async () => {
+    const { data, error } = await result.current.list();
+    expect(data).toEqual([]);
+    expect(error).toEqual({ message: 'nope' });
+  });
+  expect(result.current.error).toEqual({ message: 'nope' });
 });

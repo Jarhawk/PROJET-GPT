@@ -15,24 +15,62 @@ export default function useAlerteStockFaible() {
     setLoading(true);
     setError(null);
     try {
-      const { data, error } = await supabase
-        .from('v_alertes_rupture')
-        .select(
-          `id:produit_id,
+      const base = supabase.from('v_alertes_rupture');
+      const selectWith = `id:produit_id,
           produit_id,
           nom,
           unite,
           fournisseur_nom,
           stock_actuel,
           stock_min,
-          manque`
-        )
+          manque,
+          consommation_prevue,
+          receptions,
+          stock_projete`;
+
+      let { data, error } = await base
+        .select(selectWith)
         .order('manque', { ascending: false })
         .limit(50);
 
-      if (error) {
-        logSupaError('v_alertes_rupture', error);
-        throw error;
+      if (error && error.code === '42703') {
+        if (import.meta.env.DEV)
+          console.debug('v_alertes_rupture sans stock_projete');
+        const { data: d2, error: e2 } = await base
+          .select(`id:produit_id,
+          produit_id,
+          nom,
+          unite,
+          fournisseur_nom,
+          stock_actuel,
+          stock_min,
+          manque,
+          consommation_prevue,
+          receptions`)
+          .order('manque', { ascending: false })
+          .limit(50);
+        if (e2) {
+          logSupaError('v_alertes_rupture', e2);
+          throw e2;
+        }
+        data = (d2 ?? []).map((r) => ({
+          ...r,
+          stock_projete:
+            r.stock_actuel != null ||
+            r.receptions != null ||
+            r.consommation_prevue != null
+              ? (r.stock_actuel ?? 0) +
+                (r.receptions ?? 0) -
+                (r.consommation_prevue ?? 0)
+              : null,
+        }));
+      } else {
+        if (error) {
+          logSupaError('v_alertes_rupture', error);
+          throw error;
+        }
+        if (import.meta.env.DEV)
+          console.debug('v_alertes_rupture avec stock_projete');
       }
 
       const list = (data || [])

@@ -1,49 +1,34 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import Input from '@/components/ui/input.jsx';
+import { formatMoneyFR, parseMoneyToNumberFR } from '@/utils/numberFormat.js';
 
-function normalize(raw) {
-  return raw
-    .replace(/\u00A0/g, ' ')
-    .replace(/\u202F/g, ' ')
-    .replace(/\s+/g, '')
-    .replace(/€/g, '')
-    .replace(/,/g, '.');
-}
-function isTrailingSep(raw) {
+function isTrailing(raw) {
   const t = (raw ?? '').trim();
-  return t.endsWith(',') || t.endsWith('.');
+  return t.endsWith(',');
 }
 
 export default function MoneyInputFR({
   value,
-  onValueChange,
-  allowNegative = false,
+  onChange,
+  onBlur,
+  className = '',
   placeholder,
-  disabled,
   name,
-  className = 'input input-bordered w-full',
+  autoFocus,
+  disabled,
+  ...props
 }) {
-  const formatter = useMemo(
-    () =>
-      new Intl.NumberFormat('fr-FR', {
-        style: 'currency',
-        currency: 'EUR',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }),
-    []
+  const [text, setText] = useState(
+    value == null ? '' : formatMoneyFR(value)
   );
-
-  const format = useCallback((n) => (Number.isFinite(n) ? formatter.format(n) : ''), [formatter]);
-
-  const [text, setText] = useState(value == null ? '' : format(value));
   const focused = useRef(false);
   const caretRef = useRef(null);
   const inputRef = useRef(null);
 
   useEffect(() => {
     if (focused.current) return;
-    setText(value == null ? '' : format(value));
-  }, [value, format]);
+    setText(value == null ? '' : formatMoneyFR(value));
+  }, [value]);
 
   useEffect(() => {
     if (caretRef.current != null && inputRef.current) {
@@ -52,37 +37,26 @@ export default function MoneyInputFR({
     }
   }, [text]);
 
-  const onFocus = (e) => {
+  const handleFocus = (e) => {
     focused.current = true;
     queueMicrotask(() => e.target.select());
   };
 
-  const onChange = (e) => {
-    const raw = e.target.value ?? '';
+  const handleChange = (e) => {
+    let raw = e.target.value ?? '';
     const selection = e.target.selectionStart ?? raw.length;
-    const allowed = allowNegative ? /[^0-9.,\s€-]/g : /[^0-9.,\s€]/g;
-    const cleanedRaw = raw.replace(allowed, '');
-    const trailing = isTrailingSep(cleanedRaw);
-    const normalized = normalize(cleanedRaw);
+    raw = raw.replace(/\./g, ',');
+    raw = raw.replace(/[^0-9,\s€]/g, '');
+    const trailing = isTrailing(raw);
 
-    if (normalized === '' || normalized === '-' || normalized === '.' || normalized === '-.') {
-      setText(cleanedRaw);
-      onValueChange?.(null);
+    if (raw === '') {
+      setText('');
       return;
     }
 
-    const num = Number(normalized);
-    if (!Number.isFinite(num)) {
-      setText(cleanedRaw);
-      onValueChange?.(null);
-      return;
-    }
-
-    let formatted = format(num);
-    if (trailing) {
-      formatted = formatted.replace(/\s?€$/, ',');
-    }
-
+    const num = parseMoneyToNumberFR(raw);
+    let formatted = formatMoneyFR(num);
+    if (trailing) formatted = formatted.replace(/\s?€$/, ',');
     setText(formatted);
 
     const digitsBefore = raw.slice(0, selection).replace(/\D/g, '').length;
@@ -95,39 +69,48 @@ export default function MoneyInputFR({
     if (trailing) caret = formatted.length;
     caretRef.current = caret;
 
-    if (!trailing) onValueChange?.(num);
+    if (!trailing) onChange?.(num);
   };
 
-  const onBlur = () => {
+  const handleBlur = (e) => {
     focused.current = false;
-    const parsed = Number(normalize(text));
-    if (!Number.isFinite(parsed)) {
-      setText('');
-      onValueChange?.(null);
+    if (text === '') {
+      onBlur?.(e);
       return;
     }
-    let n = parsed;
-    const formatted = format(n);
+    const num = parseMoneyToNumberFR(text);
+    const formatted = formatMoneyFR(num);
     setText(formatted);
-    onValueChange?.(n);
+    onChange?.(num);
+    onBlur?.(e);
+  };
+
+  const handleKeyDown = (e) => {
+    const allowed = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End'];
+    if (allowed.includes(e.key)) return;
+    if (e.key === ',' || e.key === '.' || /\d/.test(e.key)) return;
+    e.preventDefault();
   };
 
   return (
-    <input
+    <Input
       ref={inputRef}
       type="text"
       inputMode="decimal"
-      pattern={allowNegative ? '[0-9.,\\s€-]*' : '[0-9.,\\s€]*'}
+      pattern="[0-9,. ]*"
       name={name}
       value={text}
-      onChange={onChange}
-      onFocus={onFocus}
-      onBlur={onBlur}
+      onChange={handleChange}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      onKeyDown={handleKeyDown}
       placeholder={placeholder}
       disabled={disabled}
       className={className}
+      autoFocus={autoFocus}
       lang="fr"
       autoComplete="off"
+      {...props}
     />
   );
 }

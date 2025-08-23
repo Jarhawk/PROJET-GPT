@@ -114,7 +114,7 @@ export default function FactureLigne({
       <MoneyInputFR
         name={`lignes.${index}.total_ht`}
         value={totalHt}
-        onValueChange={(v) => recalc({ total_ht: v ?? 0 })}
+        onChange={(v) => recalc({ total_ht: v ?? 0 })}
         placeholder="0,00 €"
       />
       <div className="relative">

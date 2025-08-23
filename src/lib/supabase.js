@@ -55,7 +55,33 @@ function makeNoopClient() {
   }
 }
 
-export const supabase = (url && anonKey)
-  ? createClient(url, anonKey)
-  : makeNoopClient()
+let client
+
+function initClient() {
+  if (client) return client
+  if (!url || !anonKey) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('Missing Supabase credentials')
+    }
+    client = makeNoopClient()
+  } else {
+    client = createClient(url, anonKey)
+  }
+  return client
+}
+
+export function getSupabaseClient() {
+  return initClient()
+}
+
+// Proxy to lazily init client while preserving direct `supabase` import usage
+export const supabase = new Proxy(
+  {},
+  {
+    get(_target, prop) {
+      const c = initClient()
+      return c[prop]
+    },
+  }
+)
 

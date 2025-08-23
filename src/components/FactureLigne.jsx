@@ -141,6 +141,10 @@ export default function FactureLigne({
         }}
         placeholder="0"
         inputMode="decimal"
+        aria-label="Quantité"
+        step="0.01"
+        lang="fr-FR"
+        onWheel={(e) => e.currentTarget.blur()}
       />
       <Input readOnly disabled value={line.unite || ""} placeholder="Unité" />
       <Input
@@ -158,6 +162,10 @@ export default function FactureLigne({
         }}
         placeholder="0,00 €"
         inputMode="decimal"
+        aria-label="Total HT ligne"
+        step="0.01"
+        lang="fr-FR"
+        onWheel={(e) => e.currentTarget.blur()}
       />
       <div className="relative">
         <Input
@@ -166,6 +174,9 @@ export default function FactureLigne({
           value={fmt(puHt)}
           placeholder="PU HT (€)"
           className="pr-6"
+          aria-label="Prix unitaire HT"
+          step="0.01"
+          lang="fr-FR"
         />
         <PriceDelta puHT={puHt} pmp={pmp} />
       </div>

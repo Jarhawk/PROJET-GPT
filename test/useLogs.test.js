@@ -16,8 +16,8 @@ const authMock = vi.fn(() => ({ mama_id: 'm1' }));
 vi.mock('@/hooks/useAuth', () => ({ useAuth: authMock }));
 vi.mock('file-saver', () => ({ saveAs: vi.fn() }));
 vi.mock('xlsx', () => ({ utils: { book_new: vi.fn(() => ({})), book_append_sheet: vi.fn(), json_to_sheet: vi.fn(() => ({})) }, write: vi.fn(() => new ArrayBuffer(10)) }));
-vi.mock('jspdf', () => vi.fn(() => ({ save: vi.fn() })));
-vi.mock('jspdf-autotable', () => vi.fn());
+vi.mock('jspdf', () => ({ default: vi.fn(() => ({ save: vi.fn() })) }));
+vi.mock('jspdf-autotable', () => ({ default: vi.fn() }));
 
 let useLogs;
 
@@ -49,7 +49,7 @@ test('logAction calls rpc', async () => {
 test('exportLogs writes file', async () => {
   const { result } = renderHook(() => useLogs());
   await act(async () => { await result.current.fetchLogs(); });
-  await act(() => { result.current.exportLogs('xlsx'); });
+  await act(async () => { await result.current.exportLogs('xlsx'); });
   const { saveAs } = await import('file-saver');
   expect(saveAs).toHaveBeenCalled();
 });

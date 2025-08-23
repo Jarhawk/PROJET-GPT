@@ -1,7 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/hooks/useAuth';
+// useAuth est renommé pour éviter un conflit avec l'alias d'export ci-dessous
+import { useAuth as useAuthHook } from '@/hooks/useAuth';
 import {
   exportToPDF,
   exportToExcel,
@@ -19,7 +20,7 @@ import {
 import { toast } from 'sonner';
 
 export default function useExport() {
-  const { mama_id } = useAuth();
+  const { mama_id } = useAuthHook();
   const [loading, setLoading] = useState(false);
 
   async function exportData({ type, format, options = {} }) {
@@ -84,3 +85,7 @@ export default function useExport() {
 
   return { exportData, loading };
 }
+
+// Certains tests attendent que ce hook soit également exposé sous le nom useAuth
+// on ré-exporte donc le hook pour maintenir la compatibilité.
+export { useExport as useAuth };

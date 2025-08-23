@@ -7,15 +7,11 @@ function normalize(raw) {
     .replace(/\s+/g, '')
     .replace(/,/g, '.');
 }
-function isTrailingSep(raw) {
-  const t = (raw ?? '').trim();
-  return t.endsWith(',') || t.endsWith('.');
-}
 
-export default function NumericInputFR({
+export default function MoneyInputFR({
   value,
   onChange,
-  decimals = 3,
+  decimals = 2,
   min,
   max,
   allowNegative = false,
@@ -27,9 +23,10 @@ export default function NumericInputFR({
   const formatter = useMemo(
     () =>
       new Intl.NumberFormat('fr-FR', {
+        style: 'currency',
+        currency: 'EUR',
+        minimumFractionDigits: decimals,
         maximumFractionDigits: decimals,
-        minimumFractionDigits: 0,
-        useGrouping: true,
       }),
     [decimals]
   );
@@ -72,7 +69,6 @@ export default function NumericInputFR({
     const selection = e.target.selectionStart ?? raw.length;
     const allowed = allowNegative ? /[^0-9.,\s-]/g : /[^0-9.,\s]/g;
     const cleanedRaw = raw.replace(allowed, '');
-    const trailing = isTrailingSep(cleanedRaw);
     const normalized = normalize(cleanedRaw);
 
     if (normalized === '' || normalized === '-' || normalized === '.' || normalized === '-.') {
@@ -88,9 +84,7 @@ export default function NumericInputFR({
       return;
     }
 
-    let formatted = format(num);
-    if (trailing) formatted += ',';
-
+    const formatted = format(num);
     setText(formatted);
 
     const digitsBefore = raw.slice(0, selection).replace(/\D/g, '').length;
@@ -100,12 +94,11 @@ export default function NumericInputFR({
       if (/\d/.test(formatted[caret])) digits++;
       caret++;
     }
-    if (trailing) caret = formatted.length;
     caretRef.current = caret;
 
     if (min !== undefined && num < min) return;
     if (max !== undefined && num > max) return;
-    if (!trailing) onChange?.(num);
+    onChange?.(num);
   };
 
   const onBlur = () => {

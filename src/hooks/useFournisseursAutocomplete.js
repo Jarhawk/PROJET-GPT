@@ -12,13 +12,13 @@ export function useFournisseursAutocomplete({ term = '', limit = 20 } = {}) {
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const search = useDebounce(term, 250);
+  const search = useDebounce(term, 300);
 
   useEffect(() => {
     if (!mama_id) return;
     let aborted = false;
     const s = search.trim();
-    if (s === '') {
+    if (s.length < 2) {
       setOptions([]);
       setLoading(false);
       return;
@@ -30,7 +30,7 @@ export function useFournisseursAutocomplete({ term = '', limit = 20 } = {}) {
       try {
         let req = supabase
           .from('fournisseurs')
-          .select('id, nom, ville')
+          .select('id, nom')
           .eq('mama_id', mama_id)
           .eq('actif', true)
           .order('nom', { ascending: true })
@@ -63,7 +63,7 @@ export async function searchFournisseurs(mamaId, term = '', limit = 20) {
   const supabase = getSupabaseClient();
   let req = supabase
     .from('fournisseurs')
-    .select('id, nom, ville')
+    .select('id, nom')
     .eq('mama_id', mamaId)
     .eq('actif', true)
     .order('nom', { ascending: true })

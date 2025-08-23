@@ -10,9 +10,9 @@ import {
 } from "@/components/ui/select";
 import { Trash2 } from "lucide-react";
 import ProduitSearchModal from "@/components/factures/ProduitSearchModal";
-import NumericInputFR from "@/components/forms/NumericInputFR";
-import MoneyInputFR from "@/components/forms/MoneyInputFR";
-import { formatSignedPercent } from "@/utils/number";
+import NumberInput from "@/components/inputs/NumberInput";
+import { formatEUR, formatQty } from "@/utils/number";
+
 export default function FactureLigne({
   value: line,
   onChange,
@@ -28,18 +28,42 @@ export default function FactureLigne({
   const qte = Number(line.quantite || 0);
   const totalHt = Number(line.total_ht || 0);
   const tva = Number(line.tva || 0);
-  const puHt = qte > 0 ? +(totalHt / qte).toFixed(4) : 0;
-  const pmp = Number(line.pmp ?? 0);
+  const puHt = line.quantite && line.quantite > 0 ? (line.total_ht ?? 0) / line.quantite : line.pu_ht ?? null;
+  const pmp = line.pmp ?? null;
 
-  const deltaPct =
-    pmp > 0 && Number.isFinite(puHt) ? ((puHt - pmp) / pmp) * 100 : null;
-
+  let deltaPct = null;
+  if (pmp && pmp > 0 && puHt !== null && Number.isFinite(puHt)) {
+    deltaPct = ((puHt - pmp) / pmp) * 100;
+  }
+  const deltaText =
+    deltaPct === null
+      ? ""
+      : deltaPct >= 0
+      ? `+${deltaPct.toFixed(2).replace(".", ",")} %`
+      : `${deltaPct.toFixed(2).replace(".", ",")} %`;
+  const deltaClass =
+    deltaPct === null
+      ? "text-muted-foreground"
+      : deltaPct > 0
+      ? "text-red-600"
+      : deltaPct < 0
+      ? "text-green-600"
+      : "text-muted-foreground";
 
   const recalc = (patch = {}) => {
     const q = patch.quantite !== undefined ? Number(patch.quantite) : qte;
-    const lht = patch.total_ht !== undefined ? Number(patch.total_ht) : totalHt;
+    let lht = patch.total_ht !== undefined ? Number(patch.total_ht) : totalHt;
+    let pu = patch.pu_ht !== undefined ? Number(patch.pu_ht) : puHt ?? 0;
     const tv = patch.tva !== undefined ? Number(patch.tva) : tva;
-    const pu = q > 0 ? +(lht / q).toFixed(4) : 0;
+
+    if (patch.total_ht !== undefined && patch.pu_ht === undefined) {
+      pu = q > 0 ? +(lht / q).toFixed(4) : 0;
+    } else if (patch.pu_ht !== undefined && patch.total_ht === undefined) {
+      lht = +(pu * q).toFixed(2);
+    } else if (patch.quantite !== undefined && patch.total_ht === undefined && patch.pu_ht === undefined) {
+      lht = +(pu * q).toFixed(2);
+    }
+
     const tvaMontant = +(lht * (tv / 100)).toFixed(2);
     const totalTtc = +(lht + tvaMontant).toFixed(2);
     onChange({
@@ -55,14 +79,6 @@ export default function FactureLigne({
       total_ttc: totalTtc,
     });
   };
-
-  const fmt = (n) =>
-    Number.isFinite(n)
-      ? n.toLocaleString("fr-FR", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })
-      : "";
 
   const excludeIdsSameZone = allLines
     .filter(
@@ -106,44 +122,38 @@ export default function FactureLigne({
         excludeIdsSameZone={excludeIdsSameZone}
         currentLineProductId={line.produit_id}
       />
-      <NumericInputFR
-        name={`lignes.${index}.quantite`}
+      <NumberInput
         value={qte}
-        onChange={(v) => recalc({ quantite: v ?? 0 })}
-        decimals={6}
+        onChangeNumber={(n) => recalc({ quantite: n ?? 0 })}
+        format={(n) => formatQty(n, 3)}
         placeholder="0"
+        className="input"
+        maxFractionDigits={3}
       />
       <Input readOnly disabled value={line.unite || ""} placeholder="Unité" />
-      <MoneyInputFR
-        name={`lignes.${index}.total_ht`}
+      <NumberInput
         value={totalHt}
-        onChange={(v) => recalc({ total_ht: v ?? 0 })}
+        onChangeNumber={(n) => recalc({ total_ht: n ?? 0 })}
+        format={formatEUR}
         placeholder="0,00 €"
+        className="input"
+        currency
+        maxFractionDigits={2}
       />
-      <div className="puht-with-delta">
-        <Input
-          readOnly
-          disabled
-          value={fmt(puHt)}
-          placeholder="PU HT (€)"
-          aria-label="Prix unitaire HT"
-          step="0.01"
-          lang="fr-FR"
+      <div className="flex items-center gap-2">
+        <NumberInput
+          value={puHt}
+          onChangeNumber={(n) => recalc({ pu_ht: n ?? 0 })}
+          format={formatEUR}
+          placeholder="0,00 €"
+          className="input w-full"
+          currency
         />
-        <span
-          title={deltaPct === null ? 'PMP indisponible' : 'Écart vs PMP'}
-          className={
-            deltaPct === null || deltaPct === 0
-              ? 'delta-badge zero'
-              : deltaPct > 0
-              ? 'delta-badge up'
-              : 'delta-badge down'
-          }
-        >
-          {formatSignedPercent(deltaPct, 1)}
-        </span>
+        {deltaPct !== null && (
+          <span className={`text-xs font-medium ${deltaClass}`}>{deltaText}</span>
+        )}
       </div>
-      <Input readOnly disabled value={fmt(pmp)} placeholder="PMP" />
+      <Input readOnly disabled value={formatEUR(pmp)} placeholder="PMP" />
       <Select value={String(tva)} onValueChange={(v) => recalc({ tva: v })}>
         <SelectTrigger className="w-28">
           <SelectValue placeholder="TVA (%)" />
@@ -184,4 +194,3 @@ export default function FactureLigne({
     </div>
   );
 }
-

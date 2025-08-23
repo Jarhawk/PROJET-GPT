@@ -13,7 +13,7 @@ export function useRuptureAlerts() {
       const selectWith =
         'id:produit_id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, consommation_prevue, receptions, stock_projete, manque, type';
 
-      let query = base.select(selectWith).order('manque', { ascending: false });
+      let query = base.select(selectWith).eq('mama_id', mama_id).order('manque', { ascending: false });
       if (type) query = query.eq('type', type);
       let { data, error } = await query;
 
@@ -21,23 +21,14 @@ export function useRuptureAlerts() {
         if (import.meta.env.DEV)
           console.debug('v_alertes_rupture sans stock_projete');
         let q2 = base
-          .select(
-            'id:produit_id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, consommation_prevue, receptions, manque, type'
-          )
+          .select('id:produit_id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, consommation_prevue, receptions, stock_previsionnel, manque, type').eq('mama_id', mama_id)
           .order('manque', { ascending: false });
         if (type) q2 = q2.eq('type', type);
         const { data: d2, error: e2 } = await q2;
         if (e2) throw e2;
         data = (d2 ?? []).map((r) => ({
           ...r,
-          stock_projete:
-            r.stock_actuel != null ||
-            r.receptions != null ||
-            r.consommation_prevue != null
-              ? (r.stock_actuel ?? 0) +
-                (r.receptions ?? 0) -
-                (r.consommation_prevue ?? 0)
-              : null,
+          stock_projete: r.stock_previsionnel ?? ((r.stock_actuel ?? 0) + (r.receptions ?? 0) - (r.consommation_prevue ?? 0)),
         }));
       } else {
         if (error) throw error;

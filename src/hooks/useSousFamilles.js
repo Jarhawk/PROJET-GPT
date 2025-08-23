@@ -65,4 +65,20 @@ export function useSousFamilles() {
   };
 }
 
+export async function fetchSousFamilles({ mamaId }) {
+  try {
+    let q = supabase
+      .from('sous_familles')
+      .select('id, nom, famille_id, mama_id, deleted_at')
+      .eq('mama_id', mamaId)
+      .order('nom', { ascending: true });
+    const { data, error } = await q;
+    if (error) throw error;
+    return (data ?? []).filter((r) => !r.deleted_at);
+  } catch (e) {
+    console.warn('[sous_familles] fallback []', e);
+    return [];
+  }
+}
+
 export default useSousFamilles;

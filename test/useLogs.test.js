@@ -2,12 +2,14 @@
 import { renderHook, act } from '@testing-library/react';
 import { vi, beforeEach, test, expect } from 'vitest';
 
-const queryExec = { then: fn => fn({ data: [{ id: 'l1' }], error: null }) };
-const orderMock = vi.fn(() => queryExec);
-const eqMock = vi.fn(() => ({ order: orderMock, gte: gteMock, lte: lteMock, then: queryExec.then }));
-const gteMock = vi.fn(() => ({ order: orderMock, eq: eqMock, lte: lteMock, then: queryExec.then }));
-const lteMock = vi.fn(() => ({ order: orderMock, eq: eqMock, gte: gteMock, then: queryExec.then }));
-const selectMock = vi.fn(() => ({ eq: eqMock, gte: gteMock, lte: lteMock, order: orderMock }));
+const queryExec = { then: resolve => resolve({ data: [{ id: 'l1' }], error: null }) };
+let queryBuilder;
+const orderMock = vi.fn(() => queryBuilder);
+const eqMock = vi.fn(() => queryBuilder);
+const gteMock = vi.fn(() => queryBuilder);
+const lteMock = vi.fn(() => queryBuilder);
+queryBuilder = { order: orderMock, eq: eqMock, gte: gteMock, lte: lteMock, then: queryExec.then };
+const selectMock = vi.fn(() => queryBuilder);
 const fromMock = vi.fn(() => ({ select: selectMock }));
 const rpcMock = vi.fn(() => ({ then: fn => fn({ data: null, error: null }) }));
 

@@ -1,29 +1,83 @@
-import path from 'node:path';
+// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import { posix as path } from 'node:path';
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { createClient } from '@supabase/supabase-js';
+import * as XLSX from 'xlsx';
+import {
+  runScript,
+  isMainModule,
+  parseMamaIdFlag,
+  parseSupabaseFlags,
+  parseDateRangeFlags,
+  parseOutputFlag,
+} from './cli_utils.js';
 
-const [argUrl, argKey, argOutDir] = process.argv.slice(2);
-const url = argUrl || process.env.SUPABASE_URL || 'https://generic.supabase.co';
-const key = argKey || process.env.SUPABASE_ANON_KEY || 'gen';
-const outDir = argOutDir || process.env.REPORT_DIR || '/tmp';
+export async function generateWeeklyCostCenterReport(
+  mamaId = process.env.MAMA_ID ?? null,
+  url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || 'https://generic.supabase.co',
+  key = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || 'gen',
+  start = null,
+  end = null,
+  output,
+  format
+) {
+  const client = createClient(url, key);
+  const fmt = format || process.env.WEEKLY_REPORT_FORMAT || 'xlsx';
+  const { data } = await client.rpc('stats_cost_centers', {
+    mama_id_param: mamaId,
+    debut_param: start,
+    fin_param: end,
+  });
 
-export const supabase = createClient(url, key, {
-  auth: {
-    storageKey: 'mamastock-auth',
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
-  },
-});
+  let out = output;
+  if (!out) {
+    const base = `weekly_cost_centers.${fmt}`;
+    const dir = process.env.REPORT_DIR;
+    if (dir) {
+      mkdirSync(dir, { recursive: true });
+      out = path.join(dir, base);
+    } else {
+      out = base;
+    }
+  } else {
+    const dir = path.dirname(out);
+    if (dir && dir !== '.') mkdirSync(dir, { recursive: true });
+  }
 
-const base = 'weekly_cost_centers';
-const reportsDir = path.posix.join(outDir, 'reports');
-export const csvPath = path.posix.join(reportsDir, `${base}.csv`);
-export const jsonPath = path.posix.join(reportsDir, `${base}.json`);
-export const xlsxPath = path.posix.join(reportsDir, `${base}.xlsx`);
+  if (fmt === 'csv') {
+    writeFileSync(out, '');
+  } else if (fmt === 'json') {
+    writeFileSync(out, JSON.stringify(data ?? []));
+  } else {
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data ?? []), 'Report');
+    XLSX.writeFile(wb, out);
+  }
+  return out;
+}
 
-mkdirSync(reportsDir, { recursive: true });
+export function parseArgs(args) {
+  let { args: rest, mamaId } = parseMamaIdFlag(args);
+  let url, key, start, end, output;
+  ({ args: rest, url, key } = parseSupabaseFlags(rest));
+  ({ args: rest, start, end } = parseDateRangeFlags(rest));
+  ({ args: rest, output } = parseOutputFlag(rest));
+  let format;
+  const i = rest.findIndex((a) => a === '--format' || a.startsWith('--format='));
+  if (i !== -1) {
+    if (rest[i].includes('=')) {
+      format = rest[i].split('=')[1];
+      rest = rest.slice();
+      rest.splice(i, 1);
+    } else if (rest[i + 1]) {
+      format = rest[i + 1];
+      rest = rest.slice();
+      rest.splice(i, 2);
+    }
+  }
+  return [mamaId, url, key, start, end, output, format];
+}
 
-writeFileSync(csvPath, '');
-writeFileSync(jsonPath, '[]');
-writeFileSync(xlsxPath, '');
+if (isMainModule(import.meta.url)) {
+  runScript(generateWeeklyCostCenterReport, 'weekly_report [options]', parseArgs);
+}

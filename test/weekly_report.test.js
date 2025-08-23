@@ -39,8 +39,9 @@ describe('weekly report script', () => {
     vi.resetModules();
   });
 
-  it('passes MAMA_ID to RPC', async () => {
-    process.env.MAMA_ID = 'm1';
+  it('prioritizes MAMASTOCK_MAMA_ID for RPC', async () => {
+    process.env.MAMASTOCK_MAMA_ID = 'm1';
+    process.env.MAMA_ID = 'uuid';
     vi.resetModules();
     const { generateWeeklyCostCenterReport: fn } = await import('../scripts/weekly_report.js');
     await expect(fn()).resolves.not.toThrow();
@@ -49,21 +50,22 @@ describe('weekly report script', () => {
       debut_param: null,
       fin_param: null,
     });
+    delete process.env.MAMASTOCK_MAMA_ID;
     delete process.env.MAMA_ID;
     vi.resetModules();
   });
 
-  it('falls back to VITE_MAMA_ID for RPC', async () => {
-    process.env.VITE_MAMA_ID = 'vm1';
+  it('falls back to MAMA_ID for RPC', async () => {
+    process.env.MAMA_ID = 'm2';
     vi.resetModules();
     const { generateWeeklyCostCenterReport: fn } = await import('../scripts/weekly_report.js');
     await expect(fn()).resolves.not.toThrow();
     expect(rpc).toHaveBeenCalledWith('stats_cost_centers', {
-      mama_id_param: 'vm1',
+      mama_id_param: 'm2',
       debut_param: null,
       fin_param: null,
     });
-    delete process.env.VITE_MAMA_ID;
+    delete process.env.MAMA_ID;
     vi.resetModules();
   });
 

@@ -2,38 +2,14 @@
 import { render, screen } from '@testing-library/react';
 import { fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
+import { MemoryRouter } from 'react-router-dom';
 
 let mockHook;
-vi.mock('@/hooks/useProducts', () => ({
-  useProducts: () => mockHook(),
+vi.mock('@/hooks/useProductsView', () => ({
+  useProductsView: () => mockHook(),
 }));
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ hasAccess: () => true, mama_id: 'm1' })
-}));
-vi.mock('@/hooks/useStorage', () => ({
-  uploadFile: vi.fn(),
-  deleteFile: vi.fn(),
-  pathFromUrl: () => '',
-}));
-vi.mock('@/hooks/useFamilles', () => ({
-  useFamilles: () => ({ familles: [], fetchFamilles: vi.fn(), addFamille: vi.fn() })
-}));
-vi.mock('@/hooks/useUnites', () => ({
-  useUnites: () => ({ unites: [], fetchUnites: vi.fn(), addUnite: vi.fn() })
-}));
-vi.mock('@/hooks/data/useFournisseurs', () => ({
-  default: () => ({ data: [], isLoading: false })
-}));
-vi.mock('@/hooks/useSousFamilles', () => ({
-  useSousFamilles: () => ({
-    sousFamilles: [],
-    list: vi.fn(),
-    loading: false,
-    error: null,
-  }),
-}));
-vi.mock('@/hooks/useZonesStock', () => ({
-  useAuth: () => ({ zones: [], loading: false })
 }));
 
 import Produits from '@/pages/produits/Produits.jsx';
@@ -50,16 +26,17 @@ test('toggle button calls hook', async () => {
         stock_theorique: 10,
         actif: true,
         zone_stock: { nom: 'Z' },
-        zone_stock_id: 'z1',
       },
     ],
     total: 1,
     fetchProducts: vi.fn(),
-    exportProductsToExcel: vi.fn(),
-    addProduct: vi.fn(),
     toggleProductActive: toggle,
   });
-  render(<Produits />);
+  render(
+    <MemoryRouter>
+      <Produits />
+    </MemoryRouter>
+  );
   const button = await screen.findByText('Désactiver');
   fireEvent.click(button);
   expect(toggle).toHaveBeenCalledWith('1', false);

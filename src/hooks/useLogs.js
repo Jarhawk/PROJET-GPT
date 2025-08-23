@@ -4,8 +4,6 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
-import JSPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 
 export function useLogs() {
   const { mama_id } = useAuth();
@@ -81,7 +79,7 @@ export function useLogs() {
     }
   }
 
-  function exportLogs(format = "csv") {
+  async function exportLogs(format = "csv") {
     if (format === "xlsx") {
       const ws = XLSX.utils.json_to_sheet(logs);
       const wb = XLSX.utils.book_new();
@@ -89,7 +87,11 @@ export function useLogs() {
       const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
       saveAs(new Blob([buf]), "logs.xlsx");
     } else if (format === "pdf") {
-      const doc = new JSPDF();
+      const mod = await import("jspdf");
+      const jsPDF = mod.default || mod.jsPDF || mod;
+      const autoTableMod = await import("jspdf-autotable");
+      const autoTable = autoTableMod.default || autoTableMod;
+      const doc = new jsPDF();
       const rows = logs.map((l) => [l.date_log, l.type, l.module, l.description, l.critique ? "oui" : "non"]);
       autoTable(doc, {
         head: [["Date", "Type", "Module", "Description", "Critique"]],

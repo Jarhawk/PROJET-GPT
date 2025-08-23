@@ -60,21 +60,11 @@ export function useProducts() {
     if (zone) query = query.eq("zone_stock_id", zone);
     if (typeof actif === "boolean") query = query.eq("actif", actif);
 
-    if (sortBy === "zone_stock") {
-      query = query
-        .order("nom", { foreignTable: "zone_stock", ascending: order === "asc" })
-        .order("nom", { foreignTable: "famille", ascending: order === "asc" })
-        .order("nom", { ascending: order === "asc" });
-    } else if (sortBy === "famille") {
-      query = query
-        .order("nom", { foreignTable: "famille", ascending: order === "asc" })
-        .order("nom", { ascending: order === "asc" });
-    } else if (sortBy === "unite") {
-      query = query
-        .order("nom", { foreignTable: "unite", ascending: order === "asc" })
-        .order("nom", { ascending: order === "asc" });
+    if (sortBy === "nom") {
+      query = query.order("nom", { ascending: order === "asc" });
     } else {
-      query = query.order(sortBy, { ascending: order === "asc" }).order("nom", { ascending: order === "asc" });
+      query = query.order(sortBy, { ascending: order === "asc" })
+                   .order("nom", { ascending: order === "asc" });
     }
     query = query.range((page - 1) * limit, page * limit - 1);
 

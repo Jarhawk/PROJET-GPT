@@ -24,6 +24,7 @@ function createQuery(table) {
     order: vi.fn(() => query),
     range: vi.fn(() => query),
     single: vi.fn(() => query),
+    maybeSingle: vi.fn(() => Promise.resolve({ data: { id: 'per1' }, error: null })),
     in: vi.fn(() => query),
     gte: vi.fn(() => query),
     lte: vi.fn(() => query),

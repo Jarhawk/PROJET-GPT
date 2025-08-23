@@ -5,12 +5,14 @@ import { vi, beforeEach, test, expect } from 'vitest';
 const query = {
   select: vi.fn(() => query),
   eq: vi.fn(() => query),
+  lte: vi.fn(() => query),
+  gte: vi.fn(() => query),
   order: vi.fn(() => query),
   insert: vi.fn(() => query),
   update: vi.fn(() => query),
   delete: vi.fn(() => query),
   single: vi.fn(() => query),
-  maybeSingle: vi.fn(() => Promise.resolve({ data: { id: 'inv1' }, error: null })),
+  maybeSingle: vi.fn(() => Promise.resolve({ data: { id: 'per1' }, error: null })),
   then: vi.fn(),
 };
 const fromMock = vi.fn(() => query);
@@ -19,9 +21,6 @@ vi.mock('@/lib/supabase', () => {
   return { supabase, default: supabase };
 });
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
-vi.mock('@/hooks/usePeriodes', () => ({
-  default: () => ({ checkCurrentPeriode: vi.fn(() => ({ error: null, data: { id: 'per1' } })) }),
-}));
 
 let useInventaires;
 let insertCount = 0;

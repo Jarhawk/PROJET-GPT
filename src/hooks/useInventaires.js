@@ -2,11 +2,30 @@
 import { useState, useEffect } from "react";
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
-import usePeriodes from "@/hooks/usePeriodes";
+
+async function getOrCreatePeriode(date, mama_id) {
+  let { data: periode, error } = await supabase
+    .from('periodes')
+    .select('*')
+    .eq('mama_id', mama_id)
+    .lte('debut', date)
+    .gte('fin', date)
+    .maybeSingle();
+  if (error) throw error;
+  if (!periode) {
+    const res = await supabase
+      .from('periodes')
+      .insert({ mama_id, debut: date, fin: date })
+      .select()
+      .single();
+    if (res.error) throw res.error;
+    periode = res.data;
+  }
+  return periode;
+}
 
 export function useInventaires() {
   const { mama_id } = useAuth();
-  const { checkCurrentPeriode } = usePeriodes();
   const [inventaires, setInventaires] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -71,38 +90,38 @@ export function useInventaires() {
 
   async function createInventaire(inv) {
     if (!mama_id) return null;
-    const { lignes = [], date, ...entete } = inv;
-    const { data: periode, error: pErr } = await checkCurrentPeriode(date);
-    if (pErr) {
-      setError(pErr);
-      return null;
-    }
+    const { lignes = [], date = new Date().toISOString().slice(0, 10), ...entete } = inv;
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase
-      .from("inventaires")
-      .insert([{ ...entete, date_inventaire: date, periode_id: periode.id, mama_id }])
-      .select()
-      .single();
-    if (error) {
+    try {
+      const periode = entete.periode_id
+        ? { id: entete.periode_id }
+        : await getOrCreatePeriode(date, mama_id);
+      const { data, error } = await supabase
+        .from('inventaires')
+        .insert([{ ...entete, date_inventaire: date, periode_id: periode.id, mama_id }])
+        .select()
+        .single();
+      if (error) throw error;
+      if (lignes.length) {
+        const toInsert = lignes.map(l => ({
+          ...l,
+          produit_id: l.produit_id,
+          quantite_reelle: l.quantite_reelle,
+          inventaire_id: data.id,
+          mama_id,
+        }));
+        const { error: errLines } = await supabase.from('produits_inventaire').insert(toInsert);
+        if (errLines) setError(errLines);
+      }
       setLoading(false);
-      setError(error);
+      await getInventaires();
+      return data;
+    } catch (err) {
+      setLoading(false);
+      setError(err);
       return null;
     }
-    if (lignes.length) {
-      const toInsert = lignes.map(l => ({
-        ...l,
-        produit_id: l.produit_id,
-        quantite_reelle: l.quantite_reelle,
-        inventaire_id: data.id,
-        mama_id,
-      }));
-      const { error: errLines } = await supabase.from("produits_inventaire").insert(toInsert);
-      if (errLines) setError(errLines);
-    }
-    setLoading(false);
-    await getInventaires();
-    return data;
   }
 
   async function getInventaireById(id) {

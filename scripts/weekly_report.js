@@ -1,91 +1,128 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { posix as path } from 'node:path';
 import { writeFileSync, mkdirSync } from 'node:fs';
+import { strict as assert } from 'node:assert';
 import { createClient } from '@supabase/supabase-js';
 import * as XLSX from 'xlsx';
-import {
-  runScript,
-  isMainModule,
-  parseMamaIdFlag,
-  parseDateRangeFlags,
-  parseOutputFlag,
-} from './cli_utils.js';
-
-const SUPA_URL =
-  process.env.SUPA_URL ||
-  process.env.SUPABASE_URL ||
-  process.env.VITE_SUPABASE_URL ||
-  'https://generic.supabase.co';
-const SUPA_KEY =
-  process.env.SUPA_KEY ||
-  process.env.SUPABASE_ANON_KEY ||
-  process.env.VITE_SUPABASE_ANON_KEY ||
-  'gen';
-
-const supabase = createClient(SUPA_URL, SUPA_KEY);
+import { runScript, isMainModule } from './cli_utils.js';
 
 export async function generateWeeklyCostCenterReport(
-  mamaId = process.env.MAMA_ID ?? null,
+  mamaId = null,
+  url = null,
+  key = null,
   start = null,
   end = null,
-  output,
-  format
+  outPath = null,
+  format = 'xlsx'
 ) {
-  const fmt = format || process.env.WEEKLY_REPORT_FORMAT || 'xlsx';
-  const { data } = await supabase.rpc('stats_cost_centers', {
-    mama_id_param: mamaId,
-    debut_param: start,
-    fin_param: end,
+  const resolvedUrl =
+    url ??
+    process.env.SUPA_URL ??
+    process.env.SUPABASE_URL ??
+    process.env.VITE_SUPABASE_URL;
+  const resolvedKey =
+    key ??
+    process.env.SUPA_KEY ??
+    process.env.SUPABASE_KEY ??
+    process.env.SUPABASE_ANON_KEY ??
+    process.env.VITE_SUPABASE_ANON_KEY;
+
+  assert(resolvedUrl, 'Supabase URL is required');
+  assert(/^https?:\/\//.test(resolvedUrl), 'Supabase URL must start with http');
+  assert(resolvedKey, 'Supabase key is required');
+
+  if (start) assert(/^\d{4}-\d{2}-\d{2}$/.test(start), 'Invalid start date format');
+  if (end) assert(/^\d{4}-\d{2}-\d{2}$/.test(end), 'Invalid end date format');
+  if (start && end) {
+    assert(new Date(start) <= new Date(end), 'Start date must be before end date');
+  }
+
+  const fmt = (format ?? process.env.WEEKLY_REPORT_FORMAT ?? 'xlsx').toLowerCase();
+  assert(['xlsx', 'csv', 'json'].includes(fmt), `Unknown format: ${fmt}`);
+
+  let dir;
+  let filename;
+  if (outPath) {
+    dir = path.dirname(outPath);
+    filename = path.basename(outPath);
+  } else {
+    dir = process.env.REPORT_DIR ?? null;
+    filename = `weekly_cost_centers.${fmt}`;
+  }
+  if (dir && dir !== '.') mkdirSync(dir, { recursive: true });
+  const full = dir ? path.join(dir, filename) : filename;
+  const ext = path.extname(filename).toLowerCase();
+  if (ext && ext !== `.${fmt}`) {
+    throw new Error('Output file extension does not match format');
+  }
+
+  const supa = createClient(resolvedUrl, resolvedKey);
+  const { data, error } = await supa.rpc('stats_cost_centers', {
+    mama_id_param: mamaId ?? null,
+    debut_param: start ?? null,
+    fin_param: end ?? null,
   });
+  if (error) throw error;
+  const rows = data ?? [];
 
-  let out = output;
-  if (!out) {
-    const base = `weekly_cost_centers.${fmt}`;
-    const dir = process.env.REPORT_DIR;
-    if (dir) {
-      mkdirSync(dir, { recursive: true });
-      out = path.join(dir, base);
-    } else {
-      out = base;
-    }
-  } else {
-    const dir = path.dirname(out);
-    if (dir && dir !== '.') mkdirSync(dir, { recursive: true });
-  }
-
-  if (fmt === 'csv') {
-    writeFileSync(out, '');
-  } else if (fmt === 'json') {
-    writeFileSync(out, JSON.stringify(data ?? []));
-  } else {
+  if (fmt === 'xlsx') {
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data ?? []), 'Report');
-    XLSX.writeFile(wb, out);
+    const ws = XLSX.utils.json_to_sheet(rows);
+    XLSX.utils.book_append_sheet(wb, ws, 'cost_centers');
+    XLSX.writeFile(wb, full);
+  } else if (fmt === 'csv') {
+    const csv = rows.length
+      ? [
+          Object.keys(rows[0]).join(','),
+          ...rows.map((r) =>
+            Object.values(r)
+              .map((v) => JSON.stringify(v ?? ''))
+              .join(',')
+          ),
+        ].join('\n')
+      : '';
+    writeFileSync(full, csv);
+  } else {
+    writeFileSync(full, JSON.stringify(rows, null, 2));
   }
-  return out;
+
+  return full;
 }
 
-export function parseArgs(args) {
-  let { args: rest, mamaId } = parseMamaIdFlag(args);
-  let start, end, output;
-  ({ args: rest, start, end } = parseDateRangeFlags(rest));
-  ({ args: rest, output } = parseOutputFlag(rest));
+export function parseArgs(argv) {
+  let mamaId;
+  let url;
+  let key;
+  let out;
+  let start;
+  let end;
   let format;
-  const i = rest.findIndex((a) => a === '--format' || a.startsWith('--format='));
-  if (i !== -1) {
-    if (rest[i].includes('=')) {
-      format = rest[i].split('=')[1];
-      rest = rest.slice();
-      rest.splice(i, 1);
-    } else if (rest[i + 1]) {
-      format = rest[i + 1];
-      rest = rest.slice();
-      rest.splice(i, 2);
-    }
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === '--mama-id') mamaId = argv[++i];
+    else if (a.startsWith('--mama-id=')) mamaId = a.split('=')[1];
+    else if (a === '--url') url = argv[++i];
+    else if (a.startsWith('--url=')) url = a.split('=')[1];
+    else if (a === '--key') key = argv[++i];
+    else if (a.startsWith('--key=')) key = a.split('=')[1];
+    else if (a === '--out') out = argv[++i];
+    else if (a.startsWith('--out=')) out = a.split('=')[1];
+    else if (a === '--start') start = argv[++i];
+    else if (a.startsWith('--start=')) start = a.split('=')[1];
+    else if (a === '--end') end = argv[++i];
+    else if (a.startsWith('--end=')) end = a.split('=')[1];
+    else if (a === '--format') format = argv[++i];
+    else if (a.startsWith('--format=')) format = a.split('=')[1];
   }
-  return [mamaId, start, end, output, format];
+  return [mamaId, url, key, out, start, end, format];
 }
 
 if (isMainModule(import.meta.url)) {
-  runScript(generateWeeklyCostCenterReport, 'weekly_report [options]', parseArgs);
+  runScript(
+    (mamaId, url, key, out, start, end, format) =>
+      generateWeeklyCostCenterReport(mamaId, url, key, start, end, out, format),
+    'weekly_report [options]',
+    parseArgs
+  );
 }
+

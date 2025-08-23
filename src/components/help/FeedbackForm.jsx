@@ -3,7 +3,6 @@ import { useState } from "react";
 import ModalGlass from "@/components/ui/ModalGlass";
 import { useFeedback } from "@/hooks/useFeedback";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
 import GlassCard from "@/components/ui/GlassCard";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
@@ -55,16 +54,18 @@ export default function FeedbackForm({ open, onOpenChange }) {
             onChange={e => setMessage(e.target.value)}
             required
           />
-          <label className="sr-only" htmlFor="urgence">Urgence</label>
-          <Select
+          <label htmlFor="urgence" className="label">Urgence</label>
+          <select
             id="urgence"
+            aria-label="Urgence"
+            className="input bg-white text-gray-900"
             value={urgence}
             onChange={e => setUrgence(e.target.value)}
           >
             <option value="faible">Faible</option>
             <option value="normal">Normal</option>
             <option value="elevee">Élevée</option>
-          </Select>
+          </select>
           <div className="flex gap-2 pt-2">
             <PrimaryButton type="submit" disabled={sending} className="flex items-center gap-2">
               {sending && <span className="loader-glass" />}Envoyer

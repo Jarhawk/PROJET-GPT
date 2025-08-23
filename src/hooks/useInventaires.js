@@ -42,11 +42,13 @@ export function useInventaires() {
       setError(error);
       return [];
     }
-    const cleaned = (data || []).map(inv => ({
-      ...inv,
-      zone: inv.zone?.nom || null,
-      lignes: (inv.lignes || []).filter(l => l.actif !== false),
-    }));
+    const cleaned = (data || [])
+      .filter(inv => inv.actif !== false)
+      .map(inv => ({
+        ...inv,
+        zone: inv.zone?.nom || null,
+        lignes: (inv.lignes || []).filter(l => l.actif !== false),
+      }));
     setInventaires(cleaned);
     return cleaned;
   }
@@ -81,7 +83,7 @@ export function useInventaires() {
     setError(null);
     const { data, error } = await supabase
       .from("inventaires")
-      .insert([{ ...entete, date_inventaire: date, periode_id: periode.id, mama_id }])
+      .insert([{ ...entete, date_inventaire: date, periode_id: periode?.id, mama_id }])
       .select()
       .single();
     if (error) {

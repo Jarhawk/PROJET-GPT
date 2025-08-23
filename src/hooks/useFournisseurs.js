@@ -1,5 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 // src/hooks/useFournisseurs.js
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import * as XLSX from 'xlsx';
@@ -25,6 +26,33 @@ function safeQueryClient() {
 export function useFournisseurs() {
   const { mama_id } = useAuth();
   const queryClient = safeQueryClient();
+  const [fournisseurs, setFournisseurs] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const fetchFournisseurs = useCallback(async () => {
+    if (!mama_id) return [];
+    setLoading(true);
+    setError(null);
+    const { data, error } = await supabase
+      .from('fournisseurs')
+      .select('*')
+      .eq('mama_id', mama_id)
+      .order('nom');
+    setLoading(false);
+    if (error) {
+      setError(error);
+      toast.error(error.message);
+      return [];
+    }
+    setFournisseurs(Array.isArray(data) ? data : []);
+    return data || [];
+  }, [mama_id]);
+
+  useEffect(() => {
+    if (!mama_id) return;
+    void fetchFournisseurs();
+  }, [mama_id, fetchFournisseurs]);
 
   // Ajouter un fournisseur
   async function createFournisseur(fournisseur) {
@@ -44,7 +72,11 @@ export function useFournisseurs() {
         tel,
       });
     }
-    if (error) toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+    } else if (data) {
+      setFournisseurs(prev => [...prev, { ...data, contact: { nom: contact, email, tel } }].sort((a,b)=>a.nom.localeCompare(b.nom)));
+    }
     queryClient.invalidateQueries({ queryKey: ['fournisseurs', mama_id] });
     queryClient.invalidateQueries({ queryKey: ['fournisseurs-autocomplete', mama_id] });
     return { data, error };
@@ -68,19 +100,18 @@ export function useFournisseurs() {
         );
     }
     if (!error) {
-      queryClient.setQueriesData({ queryKey: ['fournisseurs', mama_id] }, (old) => {
-        if (!old) return old;
-        const list = Array.isArray(old.data) ? old.data : old;
-        const updated = (list || []).map((f) => {
-          if (f.id !== id) return f;
-          const contactObj = { ...f.contact };
-          if (contact !== undefined) contactObj.nom = contact;
-          if (email !== undefined) contactObj.email = email;
-          if (tel !== undefined) contactObj.tel = tel;
-          return { ...f, ...fields, contact: contactObj };
-        }).sort((a, b) => a.nom.localeCompare(b.nom));
-        return Array.isArray(old.data) ? { ...old, data: updated } : updated;
-      });
+      setFournisseurs(prev =>
+        prev
+          .map(f => {
+            if (f.id !== id) return f;
+            const contactObj = { ...f.contact };
+            if (contact !== undefined) contactObj.nom = contact;
+            if (email !== undefined) contactObj.email = email;
+            if (tel !== undefined) contactObj.tel = tel;
+            return { ...f, ...fields, contact: contactObj };
+          })
+          .sort((a, b) => a.nom.localeCompare(b.nom))
+      );
     } else {
       toast.error(error.message);
     }
@@ -97,7 +128,11 @@ export function useFournisseurs() {
       .update({ actif })
       .eq('id', id)
       .eq('mama_id', mama_id);
-    if (error) toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      setFournisseurs(prev => prev.map(f => (f.id === id ? { ...f, actif } : f)));
+    }
     queryClient.invalidateQueries({ queryKey: ['fournisseurs', mama_id] });
     queryClient.invalidateQueries({ queryKey: ['fournisseurs-autocomplete', mama_id] });
     return { error };
@@ -131,6 +166,10 @@ export function useFournisseurs() {
   }
 
   return {
+    fournisseurs,
+    loading,
+    error,
+    fetchFournisseurs,
     createFournisseur,
     updateFournisseur,
     toggleFournisseurActive,

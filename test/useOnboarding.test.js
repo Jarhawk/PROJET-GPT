@@ -10,13 +10,13 @@ const queryObj = {
   then: (fn) => Promise.resolve(fn({ data: [], error: null })),
 };
 const fromMock = vi.fn(() => queryObj);
-vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
+vi.mock('@/lib/supabase', () => ({ default: { from: fromMock } }));
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1', user: { id: 'u1' } }) }));
 
 let useOnboarding;
 
 beforeEach(async () => {
-  ({ useOnboarding } = await import('@/hooks/useOnboarding'));
+  ({ default: useOnboarding } = await import('@/hooks/useOnboarding'));
   fromMock.mockClear();
   queryObj.select.mockClear();
   queryObj.eq.mockClear();

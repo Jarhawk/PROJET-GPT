@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion as Motion } from 'framer-motion';
-import { useOnboarding } from '@/hooks/useOnboarding';
+import useOnboarding from '@/hooks/useOnboarding';
 import GlassCard from '@/components/ui/GlassCard';
 import {
   LiquidBackground,

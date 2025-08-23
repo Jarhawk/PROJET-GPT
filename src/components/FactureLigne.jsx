@@ -129,6 +129,10 @@ export default function FactureLigne({
       <Input
         name={`lignes.${index}.quantite`}
         value={qteStr}
+        aria-label="Quantité"
+        lang="fr-FR"
+        step="0.01"
+        onWheel={(e) => e.currentTarget.blur()}
         onInput={(e) => {
           const n = formatNumberLive(e.target, { type: 'qty', locale: 'fr-FR' });
           setQteStr(e.target.value);
@@ -146,6 +150,9 @@ export default function FactureLigne({
       <Input
         name={`lignes.${index}.total_ht`}
         value={totalStr}
+        aria-label="Total HT ligne"
+        lang="fr-FR"
+        onWheel={(e) => e.currentTarget.blur()}
         onInput={(e) => {
           const n = formatNumberLive(e.target, { type: 'money', locale: 'fr-FR' });
           setTotalStr(e.target.value);
@@ -160,7 +167,15 @@ export default function FactureLigne({
         inputMode="decimal"
       />
       <div className="flex items-center">
-        <Input readOnly disabled value={fmt(puHt)} placeholder="PU HT (€)" />
+        <Input
+          readOnly
+          disabled
+          value={fmt(puHt)}
+          placeholder="PU HT (€)"
+          aria-label="Prix unitaire HT"
+          lang="fr-FR"
+          step="0.01"
+        />
         <PriceDelta puHT={puHt} pmp={pmp} />
       </div>
       <Input readOnly disabled value={fmt(pmp)} placeholder="PMP" />

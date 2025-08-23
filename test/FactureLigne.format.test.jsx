@@ -7,8 +7,8 @@ const renderLine = (onChange = vi.fn()) =>
 
 test('typing 1,5 in qty keeps display and numeric value', () => {
   const onChange = vi.fn();
-  const { getByPlaceholderText } = renderLine(onChange);
-  const input = getByPlaceholderText('0');
+  const { getByLabelText } = renderLine(onChange);
+  const input = getByLabelText('Quantité');
   fireEvent.input(input, { target: { value: '1,5' } });
   expect(input.value).toBe('1,5');
   expect(onChange).toHaveBeenLastCalledWith(
@@ -18,8 +18,8 @@ test('typing 1,5 in qty keeps display and numeric value', () => {
 
 test('total HT 1234,5 formats to currency', () => {
   const onChange = vi.fn();
-  const { getByPlaceholderText } = renderLine(onChange);
-  const input = getByPlaceholderText('0,00 €');
+  const { getByLabelText } = renderLine(onChange);
+  const input = getByLabelText('Total HT ligne');
   fireEvent.input(input, { target: { value: '1234,5' } });
   fireEvent.blur(input);
   expect(input.value).toBe('1 234,50 €');

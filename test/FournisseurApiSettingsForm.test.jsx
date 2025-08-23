@@ -19,7 +19,7 @@ let FournisseurApiSettingsForm;
 
 beforeEach(async () => {
   vi.clearAllMocks();
-  ({ useAuth: FournisseurApiSettingsForm } = await import('@/pages/fournisseurs/FournisseurApiSettingsForm.jsx'));
+  ({ default: FournisseurApiSettingsForm } = await import('@/pages/fournisseurs/FournisseurApiSettingsForm.jsx'));
 });
 
 test('submits config with composite conflict keys', async () => {

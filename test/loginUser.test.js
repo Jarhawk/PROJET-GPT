@@ -22,7 +22,7 @@ vi.mock('../src/lib/supabase.js', () => {
     },
     rpc: vi.fn(() => ({ data: { ok: true }, error: null })),
   };
-  return { __esModule: true, default: supabase, supabase };
+  return { __esModule: true, getSupabaseClient: () => supabase, supabase };
 });
 
 import {

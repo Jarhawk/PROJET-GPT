@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 /* eslint-env node */
-import { writeFileSync } from 'fs';
-import { join } from 'path';
+import { mkdirSync, writeFileSync } from 'fs';
+import path from 'node:path';
 import * as XLSX from 'xlsx';
 import { supabase } from '@/lib/supabase';
 import {
@@ -48,34 +48,32 @@ export async function exportAccounting(
     prix_unitaire: r.prix_unitaire,
     total: r.total,
   }));
+  const p = path.posix;
+  const dir = p.join(process.env.ACCOUNTING_DIR ?? '/tmp', 'reports');
+  const makeFile = (name) => {
+    if (output) {
+      ensureDirForFile(output);
+      return output;
+    }
+    mkdirSync(dir, { recursive: true });
+    return p.join(dir, name);
+  };
   if (format === 'xlsx') {
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Invoices');
-    let file = output || `invoices_${m}.xlsx`;
-    if (!output && process.env.ACCOUNTING_DIR) {
-      file = join(process.env.ACCOUNTING_DIR, file);
-    }
-    ensureDirForFile(file);
+    const file = makeFile(`invoices_${m}.xlsx`);
     XLSX.writeFile(wb, file);
     console.log(`Exported ${rows.length} rows to ${file}`);
     return file;
   } else if (format === 'json') {
-    let file = output || `invoices_${m}.json`;
-    if (!output && process.env.ACCOUNTING_DIR) {
-      file = join(process.env.ACCOUNTING_DIR, file);
-    }
-    ensureDirForFile(file);
+    const file = makeFile(`invoices_${m}.json`);
     writeFileSync(file, JSON.stringify(rows, null, 2));
     console.log(`Exported ${rows.length} rows to ${file}`);
     return file;
   }
   const csv = toCsv(rows);
-  let file = output || `invoices_${m}.csv`;
-  if (!output && process.env.ACCOUNTING_DIR) {
-    file = join(process.env.ACCOUNTING_DIR, file);
-  }
-  ensureDirForFile(file);
+  const file = makeFile(`invoices_${m}.csv`);
   writeFileSync(file, csv);
   console.log(`Exported ${rows.length} rows to ${file}`);
   return file;

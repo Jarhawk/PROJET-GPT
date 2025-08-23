@@ -1,10 +1,10 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState, useEffect } from "react";
-import { useTransferts } from "@/hooks/useTransferts";
-import { useProducts } from "@/hooks/useProducts";
-import { useZones } from "@/hooks/useZones";
-import { Button } from "@/components/ui/button";
-import GlassCard from "@/components/ui/GlassCard";
+import { useState, useEffect } from 'react';
+import { useTransferts } from '@/hooks/useTransferts';
+import { useProducts } from '@/hooks/useProducts';
+import { useZones } from '@/hooks/useZones';
+import { Button } from '@/components/ui/button';
+import GlassCard from '@/components/ui/GlassCard';
 import { toast } from 'sonner';
 
 export default function TransfertForm({ onClose, onSaved }) {
@@ -12,13 +12,14 @@ export default function TransfertForm({ onClose, onSaved }) {
   const { products, fetchProducts } = useProducts();
   const { myAccessibleZones } = useZones();
   const [zones, setZones] = useState([]);
+  const zonesSafe = Array.isArray(zones) ? zones : [];
 
   const [header, setHeader] = useState({
-    zone_source_id: "",
-    zone_destination_id: "",
-    motif: "",
+    zone_source_id: '',
+    zone_destination_id: '',
+    motif: '',
   });
-  const [lignes, setLignes] = useState([{ produit_id: "", quantite: "" }]);
+  const [lignes, setLignes] = useState([{ produit_id: '', quantite: '' }]);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -27,7 +28,7 @@ export default function TransfertForm({ onClose, onSaved }) {
   }, [fetchProducts, myAccessibleZones]);
 
   const handleAddLine = () => {
-    setLignes((l) => [...l, { produit_id: "", quantite: "" }]);
+    setLignes((l) => [...l, { produit_id: '', quantite: '' }]);
   };
 
   const handleLineChange = (idx, field, value) => {
@@ -40,15 +41,15 @@ export default function TransfertForm({ onClose, onSaved }) {
     e.preventDefault();
     if (saving) return;
     if (!header.zone_source_id || !header.zone_destination_id) {
-      toast.error("Zones requises");
+      toast.error('Zones requises');
       return;
     }
     if (header.zone_source_id === header.zone_destination_id) {
-      toast.error("Zones différentes requises");
+      toast.error('Zones différentes requises');
       return;
     }
     if (lignes.some((l) => !l.produit_id || Number(l.quantite) <= 0)) {
-      toast.error("Produits et quantités obligatoires");
+      toast.error('Produits et quantités obligatoires');
       return;
     }
     setSaving(true);
@@ -58,7 +59,7 @@ export default function TransfertForm({ onClose, onSaved }) {
       toast.error(error.message);
       return;
     }
-    toast.success("Transfert enregistré");
+    toast.success('Transfert enregistré');
     onSaved?.();
     onClose?.();
   };
@@ -76,7 +77,7 @@ export default function TransfertForm({ onClose, onSaved }) {
               }
             >
               <option value="">Zone source</option>
-              {zones.map((z) => (
+              {zonesSafe.map((z) => (
                 <option key={z.id} value={z.id}>
                   {z.nom}
                 </option>
@@ -86,11 +87,14 @@ export default function TransfertForm({ onClose, onSaved }) {
               className="input flex-1"
               value={header.zone_destination_id}
               onChange={(e) =>
-                setHeader((h) => ({ ...h, zone_destination_id: e.target.value }))
+                setHeader((h) => ({
+                  ...h,
+                  zone_destination_id: e.target.value,
+                }))
               }
             >
               <option value="">Zone destination</option>
-              {zones.map((z) => (
+              {zonesSafe.map((z) => (
                 <option key={z.id} value={z.id}>
                   {z.nom}
                 </option>
@@ -101,7 +105,9 @@ export default function TransfertForm({ onClose, onSaved }) {
             className="textarea w-full"
             placeholder="Motif"
             value={header.motif}
-            onChange={(e) => setHeader((h) => ({ ...h, motif: e.target.value }))}
+            onChange={(e) =>
+              setHeader((h) => ({ ...h, motif: e.target.value }))
+            }
           />
           <table className="w-full text-sm">
             <thead>
@@ -118,7 +124,7 @@ export default function TransfertForm({ onClose, onSaved }) {
                       className="input"
                       value={l.produit_id}
                       onChange={(e) =>
-                        handleLineChange(idx, "produit_id", e.target.value)
+                        handleLineChange(idx, 'produit_id', e.target.value)
                       }
                     >
                       <option value="">Produit</option>
@@ -135,7 +141,7 @@ export default function TransfertForm({ onClose, onSaved }) {
                       className="input w-24"
                       value={l.quantite}
                       onChange={(e) =>
-                        handleLineChange(idx, "quantite", e.target.value)
+                        handleLineChange(idx, 'quantite', e.target.value)
                       }
                     />
                   </td>
@@ -164,4 +170,3 @@ export default function TransfertForm({ onClose, onSaved }) {
     </div>
   );
 }
-

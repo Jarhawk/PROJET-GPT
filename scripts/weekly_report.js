@@ -7,23 +7,32 @@ import {
   runScript,
   isMainModule,
   parseMamaIdFlag,
-  parseSupabaseFlags,
   parseDateRangeFlags,
   parseOutputFlag,
 } from './cli_utils.js';
 
+const SUPA_URL =
+  process.env.SUPA_URL ||
+  process.env.SUPABASE_URL ||
+  process.env.VITE_SUPABASE_URL ||
+  'https://generic.supabase.co';
+const SUPA_KEY =
+  process.env.SUPA_KEY ||
+  process.env.SUPABASE_ANON_KEY ||
+  process.env.VITE_SUPABASE_ANON_KEY ||
+  'gen';
+
+const supabase = createClient(SUPA_URL, SUPA_KEY);
+
 export async function generateWeeklyCostCenterReport(
   mamaId = process.env.MAMA_ID ?? null,
-  url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || 'https://generic.supabase.co',
-  key = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || 'gen',
   start = null,
   end = null,
   output,
   format
 ) {
-  const client = createClient(url, key);
   const fmt = format || process.env.WEEKLY_REPORT_FORMAT || 'xlsx';
-  const { data } = await client.rpc('stats_cost_centers', {
+  const { data } = await supabase.rpc('stats_cost_centers', {
     mama_id_param: mamaId,
     debut_param: start,
     fin_param: end,
@@ -58,8 +67,7 @@ export async function generateWeeklyCostCenterReport(
 
 export function parseArgs(args) {
   let { args: rest, mamaId } = parseMamaIdFlag(args);
-  let url, key, start, end, output;
-  ({ args: rest, url, key } = parseSupabaseFlags(rest));
+  let start, end, output;
   ({ args: rest, start, end } = parseDateRangeFlags(rest));
   ({ args: rest, output } = parseOutputFlag(rest));
   let format;
@@ -75,7 +83,7 @@ export function parseArgs(args) {
       rest.splice(i, 2);
     }
   }
-  return [mamaId, url, key, start, end, output, format];
+  return [mamaId, start, end, output, format];
 }
 
 if (isMainModule(import.meta.url)) {

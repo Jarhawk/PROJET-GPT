@@ -1,63 +1,37 @@
-// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState } from "react";
-import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
+import supabase from '@/lib/supabase';
 
-export function useValidations() {
+export default function useValidations() {
   const { mama_id, user_id } = useAuth();
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   async function fetchRequests() {
-    if (!mama_id) return [];
-    setLoading(true);
-    setError(null);
-    const { data, error } = await supabase
-      .from("validation_requests")
-      .select("*")
-      .eq("mama_id", mama_id);
-    setLoading(false);
-    if (error) {
-      setError(error.message || error);
-      setItems([]);
-      return [];
-    }
-    setItems(Array.isArray(data) ? data : []);
+    const { data } = await supabase
+      .from('validation_requests')
+      .select('*')
+      .eq('mama_id', mama_id)
+      .eq('actif', true)
+      .order('created_at', { ascending: false });
     return data || [];
   }
 
-  async function addRequest(values) {
-    if (!mama_id || !user_id) return { error: "Aucun mama_id" };
-    setLoading(true);
-    setError(null);
-    const { error } = await supabase
-      .from("validation_requests")
-      .insert([{ ...values, mama_id, requested_by: user_id, actif: true }]);
-    setLoading(false);
-    if (error) {
-      setError(error.message || error);
-      return;
-    }
-    await fetchRequests();
+  async function addRequest(payload) {
+    return supabase
+      .from('validation_requests')
+      .insert([{ ...payload, mama_id, requested_by: user_id, actif: true }]);
   }
 
   async function updateStatus(id, status) {
-    if (!mama_id || !user_id) return { error: "Aucun mama_id" };
-    setLoading(true);
-    setError(null);
-    const { error } = await supabase
-      .from("validation_requests")
-      .update({ status, reviewed_by: user_id, reviewed_at: new Date().toISOString() })
-      .eq("id", id)
-      .eq("mama_id", mama_id);
-    setLoading(false);
-    if (error) {
-      setError(error.message || error);
-      return;
-    }
-    await fetchRequests();
+    return supabase
+      .from('validation_requests')
+      .update({
+        status,
+        reviewed_by: user_id,
+        reviewed_at: new Date().toISOString(),
+      })
+      .eq('id', id)
+      .eq('mama_id', mama_id);
   }
 
-  return { items, loading, error, fetchRequests, addRequest, updateStatus };
+  return { fetchRequests, addRequest, updateStatus };
 }
+

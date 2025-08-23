@@ -21,14 +21,11 @@ import { Badge } from '@/components/ui/badge';
 import { mapUILineToPayload } from '@/features/factures/invoiceMappers';
 import useProduitLineDefaults from '@/hooks/useProduitLineDefaults';
 import useZonesStock from '@/hooks/useZonesStock';
+import { formatMoneyFR } from '@/utils/numberFormat';
 
 const FN_UPDATE_FACTURE_EXISTS = false;
 
 const today = () => format(new Date(), 'yyyy-MM-dd');
-const fmt2 = new Intl.NumberFormat('fr-FR', {
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
 
 export default function FactureForm({ facture = null, onSaved } = {}) {
   const { mama_id: mamaId } = useAuth();
@@ -68,15 +65,6 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
       : emptyForm(),
   });
 
-  const formatter = useMemo(
-    () =>
-      new Intl.NumberFormat('fr-FR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }),
-    []
-  );
-
   const { control, handleSubmit, watch, reset, setValue, setError, formState } = form;
   const { errors, submitCount } = formState;
   const [saving, setSaving] = useState(false);
@@ -94,13 +82,6 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
     setValue('fournisseur_id', val, { shouldDirty: true });
 
   const sum = (arr) => arr.reduce((acc, n) => acc + n, 0);
-  const eur = (n) =>
-    Number.isFinite(+n)
-      ? (+n).toLocaleString('fr-FR', {
-          style: 'currency',
-          currency: 'EUR',
-        })
-      : '0,00 €';
 
   const sumHT = useMemo(
     () => sum(lignes.map((l) => Number(l.total_ht || 0))),
@@ -329,7 +310,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
                   }
                   ariaLabel="Écart HT"
                 >
-                  {`Écart ${formatter.format(ecart_ht)}`}
+                  {`Écart ${formatMoneyFR(ecart_ht)}`}
                 </Badge>
               </div>
             )}
@@ -381,15 +362,15 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
       <div className="rounded-xl border border-border bg-card p-4 grid md:grid-cols-3 gap-4">
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Total HT</span>
-          <span className="font-semibold">{fmt2.format(sumHT)} €</span>
+          <span className="font-semibold">{formatMoneyFR(sumHT)}</span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">TVA €</span>
-          <span className="font-semibold">{fmt2.format(sumTVA)} €</span>
+          <span className="font-semibold">{formatMoneyFR(sumTVA)}</span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Total TTC</span>
-          <span className="font-semibold">{fmt2.format(sumTTC)} €</span>
+          <span className="font-semibold">{formatMoneyFR(sumTTC)}</span>
         </div>
       </div>
 

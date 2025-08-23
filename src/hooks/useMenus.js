@@ -4,8 +4,16 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuditLog } from "@/hooks/useAuditLog";
 import * as XLSX from "xlsx";
-import { safeImportXLSX } from "@/lib/xlsx/safeImportXLSX";
 import { saveAs } from "file-saver";
+
+export async function importMenusFromExcel(file, sheetName) {
+  const buf = await file.arrayBuffer();
+  const wb = XLSX.read(buf, { type: "array" });
+  const pick = sheetName && wb.Sheets[sheetName] ? sheetName : wb.SheetNames[0];
+  const ws = wb.Sheets[pick];
+  if (!ws) return [];
+  return XLSX.utils.sheet_to_json(ws);
+}
 
 export function useMenus() {
   const { mama_id } = useAuth();
@@ -175,12 +183,11 @@ export function useMenus() {
   }
 
   // 8. Import Excel (lecture, à compléter avec création des liaisons menu_fiches)
-  async function importMenusFromExcel(file) {
+  async function importMenusFromExcelWithState(file, sheetName = "Menus") {
     setLoading(true);
     setError(null);
     try {
-      const arr = await safeImportXLSX(file, "Menus");
-      return arr;
+      return await importMenusFromExcel(file, sheetName);
     } catch (error) {
       setError(error);
       return [];
@@ -229,7 +236,7 @@ export function useMenus() {
     editMenu: updateMenuData,
     toggleMenuActive,
     exportMenusToExcel,
-    importMenusFromExcel,
+    importMenusFromExcel: importMenusFromExcelWithState,
     subscribeToMenus,
   };
 }

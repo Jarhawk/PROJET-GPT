@@ -4,8 +4,16 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuditLog } from "@/hooks/useAuditLog";
 import * as XLSX from "xlsx";
-import { safeImportXLSX } from "@/lib/xlsx/safeImportXLSX";
 import { saveAs } from "file-saver";
+
+export async function importCostCentersFromExcel(file, sheetName) {
+  const buf = await file.arrayBuffer();
+  const wb = XLSX.read(buf, { type: "array" });
+  const pick = sheetName && wb.Sheets[sheetName] ? sheetName : wb.SheetNames[0];
+  const ws = wb.Sheets[pick];
+  if (!ws) return [];
+  return XLSX.utils.sheet_to_json(ws);
+}
 
 export function useCostCenters() {
   const { mama_id } = useAuth();
@@ -81,12 +89,11 @@ export function useCostCenters() {
     saveAs(new Blob([buf]), "centres_de_cout.xlsx");
   }
 
-  async function importCostCentersFromExcel(file) {
+  async function importCostCentersFromExcelWithState(file, sheetName = "CostCenters") {
     setLoading(true);
     setError(null);
     try {
-      const arr = await safeImportXLSX(file, "CostCenters");
-      return arr;
+      return await importCostCentersFromExcel(file, sheetName);
     } catch (err) {
       setError(err);
       return [];
@@ -104,6 +111,6 @@ export function useCostCenters() {
     updateCostCenter,
     deleteCostCenter,
     exportCostCentersToExcel,
-    importCostCentersFromExcel,
+    importCostCentersFromExcel: importCostCentersFromExcelWithState,
   };
 }

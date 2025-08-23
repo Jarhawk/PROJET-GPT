@@ -1,25 +1,37 @@
-import { ArrowUp, ArrowDown, Minus } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
-export default function PriceDelta({ puHT, pmp }) {
-  if (!pmp) return null;
-  const diff = puHT - pmp;
-  const pct = pmp ? Math.round((diff / pmp) * 100) : 0;
-  let Icon = Minus;
+const formatMoneyFR = (n) =>
+  new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(n);
+
+export default function PriceDelta({ puHT = 0, pmp = 0 }) {
+  const delta = puHT - pmp;
+
+  let content = '—';
+  let color = 'text-muted-foreground';
   let label = 'PU égal au PMP';
-  if (diff > 0.005) {
-    Icon = ArrowUp;
-    label = `PU supérieur au PMP de ${pct}%`;
-  } else if (diff < -0.005) {
-    Icon = ArrowDown;
-    label = `PU inférieur au PMP de ${Math.abs(pct)}%`;
+
+  if (delta > 0) {
+    content = <ArrowUpRight size={12} />;
+    color = 'text-red-500';
+    label = `PU supérieur au PMP de ${formatMoneyFR(delta)}`;
+  } else if (delta < 0) {
+    content = <ArrowDownRight size={12} />;
+    color = 'text-green-500';
+    label = `PU inférieur au PMP de ${formatMoneyFR(-delta)}`;
   }
+
   return (
     <span
-      className="inline-flex items-center ml-1 text-xs text-muted-foreground"
+      className={`absolute right-2 inset-y-0 flex items-center pointer-events-none ${color}`}
       title={label}
       aria-label={label}
     >
-      <Icon size={12} />
+      {content}
     </span>
   );
 }

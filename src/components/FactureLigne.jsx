@@ -159,8 +159,14 @@ export default function FactureLigne({
         placeholder="0,00 €"
         inputMode="decimal"
       />
-      <div className="flex items-center">
-        <Input readOnly disabled value={fmt(puHt)} placeholder="PU HT (€)" />
+      <div className="relative">
+        <Input
+          readOnly
+          disabled
+          value={fmt(puHt)}
+          placeholder="PU HT (€)"
+          className="pr-6"
+        />
         <PriceDelta puHT={puHt} pmp={pmp} />
       </div>
       <Input readOnly disabled value={fmt(pmp)} placeholder="PMP" />

@@ -4,6 +4,7 @@ import { useProducts } from "@/hooks/useProducts";
 import { useFamilles } from "@/hooks/useFamilles";
 import { useSousFamilles } from "@/hooks/useSousFamilles";
 import useZonesStock from "@/hooks/useZonesStock";
+import LoadingSkeleton from "@/components/ui/LoadingSkeleton";
 import ProduitFormModal from "@/components/produits/ProduitFormModal";
 import ProduitDetail from "@/components/produits/ProduitDetail";
 import { Button } from "@/components/ui/button";
@@ -33,7 +34,12 @@ export default function Produits() {
     toggleProductActive,
   } = useProducts();
   const { familles: famillesHook, fetchFamilles } = useFamilles();
-  const { sousFamilles, list: listSousFamilles } = useSousFamilles();
+  const {
+    sousFamilles: rawSousFamilles,
+    list: listSousFamilles,
+    isLoading,
+  } = useSousFamilles();
+  const sousFamilles = Array.isArray(rawSousFamilles) ? rawSousFamilles : [];
   const { zones } = useZonesStock();
   const familles = famillesHook;
 
@@ -173,23 +179,28 @@ export default function Produits() {
               </option>
             ))}
           </Select>
-          <Select
-            className="flex-1 min-w-[150px]"
-            value={sousFamilleFilter}
-            onChange={(e) => {
-              setPage(1);
-              setSousFamilleFilter(e.target.value);
-            }}
-            disabled={!familleFilter}
-            ariaLabel="Filtrer par sous-famille"
-          >
-            <option value="">Toutes les sous-familles</option>
-            {sousFamilles.map((sf) => (
-              <option key={sf.id} value={sf.id}>
-                {sf.nom}
-              </option>
-            ))}
-          </Select>
+          {isLoading ? (
+            <LoadingSkeleton className="flex-1 min-w-[150px] h-10" />
+          ) : (
+            <Select
+              className="flex-1 min-w-[150px]"
+              value={sousFamilleFilter}
+              onChange={(e) => {
+                setPage(1);
+                setSousFamilleFilter(e.target.value);
+              }}
+              disabled={!familleFilter}
+              ariaLabel="Filtrer par sous-famille"
+            >
+              <option value="">Toutes les sous-familles</option>
+              {Array.isArray(sousFamilles) &&
+                sousFamilles.map((sf) => (
+                  <option key={sf.id} value={sf.id}>
+                    {sf.nom}
+                  </option>
+                ))}
+            </Select>
+          )}
           <Select
             className="flex-1 min-w-[150px]"
             value={zoneFilter}

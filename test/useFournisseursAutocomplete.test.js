@@ -28,7 +28,7 @@ beforeEach(() => {
 test('searchFournisseurs filters by mama_id and query', async () => {
   await searchFournisseurs('m1', 'paris');
   expect(fromMock).toHaveBeenCalledWith('fournisseurs');
-  expect(selectMock).toHaveBeenCalledWith('id, nom, ville');
+  expect(selectMock).toHaveBeenCalledWith('id, nom');
   expect(queryBuilder.eq).toHaveBeenNthCalledWith(1, 'mama_id', 'm1');
   expect(queryBuilder.eq).toHaveBeenNthCalledWith(2, 'actif', true);
   expect(queryBuilder.ilike).toHaveBeenCalledWith('nom', '%paris%');

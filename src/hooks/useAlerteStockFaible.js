@@ -30,7 +30,7 @@ export function useAlerteStockFaible({ page = 1, pageSize = 20 } = {}) {
           'id:produit_id, produit_id, nom, unite, fournisseur_id, fournisseur_nom, stock_actuel, stock_min, manque, consommation_prevue, receptions, stock_projete';
 
         let { data: rows, count, error } = await base
-          .select(selectWith, { count: 'exact' })
+          .select(selectWith, { count: 'exact' }).eq('mama_id', mama_id)
           .order('manque', { ascending: false })
           .range(from, to);
 
@@ -38,23 +38,13 @@ export function useAlerteStockFaible({ page = 1, pageSize = 20 } = {}) {
           if (import.meta.env.DEV)
             console.debug('v_alertes_rupture sans stock_projete');
           const { data: d2, count: c2, error: e2 } = await base
-            .select(
-              'id:produit_id, produit_id, nom, unite, fournisseur_id, fournisseur_nom, stock_actuel, stock_min, manque, consommation_prevue, receptions',
-              { count: 'exact' }
-            )
+            .select('id:produit_id, produit_id, nom, unite, fournisseur_id, fournisseur_nom, stock_actuel, stock_min, manque, consommation_prevue, receptions, stock_previsionnel', { count: 'exact' }).eq('mama_id', mama_id)
             .order('manque', { ascending: false })
             .range(from, to);
           if (e2) throw e2;
           rows = (d2 ?? []).map((r) => ({
             ...r,
-            stock_projete:
-              r.stock_actuel != null ||
-              r.receptions != null ||
-              r.consommation_prevue != null
-                ? (r.stock_actuel ?? 0) +
-                  (r.receptions ?? 0) -
-                  (r.consommation_prevue ?? 0)
-                : null,
+            stock_projete: r.stock_previsionnel ?? ((r.stock_actuel ?? 0) + (r.receptions ?? 0) - (r.consommation_prevue ?? 0)),
           }));
           count = c2 || 0;
         } else {

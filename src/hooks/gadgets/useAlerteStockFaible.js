@@ -29,7 +29,7 @@ export default function useAlerteStockFaible() {
           stock_projete`;
 
       let { data, error } = await base
-        .select(selectWith)
+        .select(selectWith).eq('mama_id', mama_id)
         .order('manque', { ascending: false })
         .limit(50);
 
@@ -46,7 +46,8 @@ export default function useAlerteStockFaible() {
           stock_min,
           manque,
           consommation_prevue,
-          receptions`)
+          receptions,
+          stock_previsionnel`).eq('mama_id', mama_id)
           .order('manque', { ascending: false })
           .limit(50);
         if (e2) {
@@ -55,14 +56,7 @@ export default function useAlerteStockFaible() {
         }
         data = (d2 ?? []).map((r) => ({
           ...r,
-          stock_projete:
-            r.stock_actuel != null ||
-            r.receptions != null ||
-            r.consommation_prevue != null
-              ? (r.stock_actuel ?? 0) +
-                (r.receptions ?? 0) -
-                (r.consommation_prevue ?? 0)
-              : null,
+          stock_projete: r.stock_previsionnel ?? ((r.stock_actuel ?? 0) + (r.receptions ?? 0) - (r.consommation_prevue ?? 0)),
         }));
       } else {
         if (error) {

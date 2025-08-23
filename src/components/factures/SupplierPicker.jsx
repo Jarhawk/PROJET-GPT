@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
-import useDebounce from '@/hooks/useDebounce';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { useFournisseursAutocomplete } from '@/hooks/useFournisseursAutocomplete';
-import useFournisseursRecents from '@/hooks/useFournisseursRecents';
 import SupplierBrowserModal from './SupplierBrowserModal';
 
 export default function SupplierPicker({ value, onChange, error }) {
@@ -16,11 +14,9 @@ export default function SupplierPicker({ value, onChange, error }) {
   const [modalOpen, setModalOpen] = useState(false);
   const inputRef = useRef(null);
 
-  const debounced = useDebounce(search, 250);
-  const { options: autoOptions = [] } = useFournisseursAutocomplete({ term: debounced });
-  const { data: recents = [] } = useFournisseursRecents();
+  const { options: autoOptions = [], loading: isLoading } = useFournisseursAutocomplete({ term: search });
 
-  const options = search.trim() ? autoOptions : recents;
+  const options = search.trim().length >= 2 ? autoOptions : [];
 
   useEffect(() => {
     setActive(-1);
@@ -114,23 +110,29 @@ export default function SupplierPicker({ value, onChange, error }) {
       >
         🔍
       </button>
-      {open && options.length > 0 && (
-        <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border border-white/20 bg-neutral-800 text-white">
-          {options.map((opt, idx) => (
-            <li
-              key={opt.id}
-              role="option"
-              aria-selected={idx === active}
-              className={`px-2 py-1 cursor-pointer ${idx === active ? 'bg-white/20' : ''}`}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                select(opt);
-              }}
-            >
-              {opt.nom}
-            </li>
-          ))}
-        </ul>
+      {open && search.trim().length >= 2 && (
+        isLoading ? (
+          <div className="absolute z-10 mt-1 w-full bg-neutral-800 text-white p-2">Chargement...</div>
+        ) : (
+          options.length > 0 && (
+            <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border border-white/20 bg-neutral-800 text-white">
+              {options.map((opt, idx) => (
+                <li
+                  key={opt.id}
+                  role="option"
+                  aria-selected={idx === active}
+                  className={`px-2 py-1 cursor-pointer ${idx === active ? 'bg-white/20' : ''}`}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    select(opt);
+                  }}
+                >
+                  {opt.nom}
+                </li>
+              ))}
+            </ul>
+          )
+        )
       )}
       <SupplierBrowserModal
         open={modalOpen}
@@ -143,4 +145,3 @@ export default function SupplierPicker({ value, onChange, error }) {
     </div>
   );
 }
-

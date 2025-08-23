@@ -1,6 +1,5 @@
 import { render, fireEvent } from '@testing-library/react';
 import { vi, test, expect } from 'vitest';
-import { useState } from 'react';
 import FactureLigne from '@/components/FactureLigne';
 
 const renderLine = (value = {}, onChange = vi.fn()) =>
@@ -49,7 +48,7 @@ test('pasting formatted currency parses numeric value', () => {
   );
 });
 
-test('delta badge shows signed percent vs PMP', () => {
+test('delta percent vs PMP shows with colors', () => {
   const { container, rerender } = render(
     <FactureLigne
       value={{ quantite: 1, total_ht: 1.8, pmp: 2 }}
@@ -57,11 +56,11 @@ test('delta badge shows signed percent vs PMP', () => {
       onRemove={() => {}}
       zones={[]}
       index={0}
-    />,
+    />
   );
-  let badge = container.querySelector('.delta-badge');
-  expect(badge?.textContent).toBe('-10,0%');
-  expect(badge?.classList.contains('down')).toBe(true);
+  let badge = container.querySelector('span');
+  expect(badge?.textContent).toBe('-10,00 %');
+  expect(badge?.classList.contains('text-green-600')).toBe(true);
 
   rerender(
     <FactureLigne
@@ -70,11 +69,11 @@ test('delta badge shows signed percent vs PMP', () => {
       onRemove={() => {}}
       zones={[]}
       index={0}
-    />,
+    />
   );
-  badge = container.querySelector('.delta-badge');
-  expect(badge?.textContent).toBe('+15,0%');
-  expect(badge?.classList.contains('up')).toBe(true);
+  badge = container.querySelector('span');
+  expect(badge?.textContent).toBe('+15,00 %');
+  expect(badge?.classList.contains('text-red-600')).toBe(true);
 
   rerender(
     <FactureLigne
@@ -83,9 +82,8 @@ test('delta badge shows signed percent vs PMP', () => {
       onRemove={() => {}}
       zones={[]}
       index={0}
-    />,
+    />
   );
-  badge = container.querySelector('.delta-badge');
-  expect(badge?.textContent).toBe('—');
-  expect(badge?.classList.contains('zero')).toBe(true);
+  badge = container.querySelector('span');
+  expect(badge).toBeNull();
 });

@@ -16,6 +16,7 @@ function safeQueryClient() {
     return {
       invalidateQueries: () => {},
       setQueryData: () => {},
+      setQueriesData: () => {},
       fetchQuery: async () => {},
     };
   }
@@ -66,7 +67,23 @@ export function useFournisseurs() {
           { onConflict: ['fournisseur_id', 'mama_id'] }
         );
     }
-    if (error) toast.error(error.message);
+    if (!error) {
+      queryClient.setQueriesData({ queryKey: ['fournisseurs', mama_id] }, (old) => {
+        if (!old) return old;
+        const list = Array.isArray(old.data) ? old.data : old;
+        const updated = (list || []).map((f) => {
+          if (f.id !== id) return f;
+          const contactObj = { ...f.contact };
+          if (contact !== undefined) contactObj.nom = contact;
+          if (email !== undefined) contactObj.email = email;
+          if (tel !== undefined) contactObj.tel = tel;
+          return { ...f, ...fields, contact: contactObj };
+        }).sort((a, b) => a.nom.localeCompare(b.nom));
+        return Array.isArray(old.data) ? { ...old, data: updated } : updated;
+      });
+    } else {
+      toast.error(error.message);
+    }
     queryClient.invalidateQueries({ queryKey: ['fournisseurs', mama_id] });
     queryClient.invalidateQueries({ queryKey: ['fournisseurs-autocomplete', mama_id] });
     return { error };

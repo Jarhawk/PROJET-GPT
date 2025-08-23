@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 /* eslint-env node */
 import express from 'express';
-import { supabase } from '@/lib/supabase';
+import makeClient from './supabaseClient.js';
 
 const router = express.Router();
 
@@ -19,6 +19,7 @@ router.get('/', async (req, res) => {
   } = req.query;
   if (!mama_id) return res.status(400).json({ error: 'mama_id requis' });
   try {
+    const supabase = makeClient();
     let query = supabase
       .from('v_produits_dernier_prix')
       .select('*')
@@ -45,9 +46,13 @@ router.get('/', async (req, res) => {
     const end = start + l - 1;
     const { data, error } = await query.range(start, end);
     if (error) throw error;
-    res.json(data);
+    res.json(data || []);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    if (String(err?.message).includes('Missing Supabase credentials')) {
+      res.status(500).json({ error: 'Missing Supabase credentials' });
+    } else {
+      res.status(500).json({ error: err.message });
+    }
   }
 });
 

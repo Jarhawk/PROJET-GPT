@@ -1,7 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 /* eslint-env node */
 import express from 'express';
-import { supabase } from '@/lib/supabase';
+import { TABLES } from '@/constants/tables';
+import makeClient from './supabaseClient.js';
 
 const router = express.Router();
 
@@ -18,33 +19,24 @@ router.get('/', async (req, res) => {
   } = req.query;
   if (!mama_id) return res.status(400).json({ error: 'mama_id requis' });
   try {
-    let query = supabase
-      .from('requisition_lignes')
-      .select('quantite, produit_id, requisitions!inner(mama_id,date_requisition,statut)')
-      .eq('requisitions.mama_id', mama_id)
-      .eq('requisitions.statut', 'réalisée');
-    if (since) query = query.gte('requisitions.date_requisition', since);
-    if (type) void type; // les lignes de réquisition sont des sorties
-    let column = sortBy;
-    let ascending = order !== 'desc';
-    if (column.includes('.')) {
-      const parts = column.split('.');
-      const dir = parts.pop();
-      if (dir === 'asc' || dir === 'desc') {
-        ascending = dir === 'asc';
-        column = parts.join('.');
-      }
-    }
-    query = query.order('requisitions.' + column, { ascending });
+    const supabase = makeClient();
+    let query = supabase.from(TABLES.MOUVEMENTS).select('*').eq('mama_id', mama_id);
+    if (since) query = query.gte('date', since);
+    if (type) query = query.eq('type', type);
+    query = query.order(sortBy, { ascending: order === 'asc' });
     const p = Math.max(parseInt(page, 10), 1);
     const l = Math.max(parseInt(limit, 10), 1);
     const start = (p - 1) * l;
     const end = start + l - 1;
     const { data, error } = await query.range(start, end);
     if (error) throw error;
-    res.json(data);
+    res.json(data || []);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    if (String(err?.message).includes('Missing Supabase credentials')) {
+      res.status(500).json({ error: 'Missing Supabase credentials' });
+    } else {
+      res.status(500).json({ error: err.message });
+    }
   }
 });
 

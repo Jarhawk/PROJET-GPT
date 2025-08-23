@@ -4,7 +4,7 @@ import express from 'express';
 import produitsRouter from './produits.js';
 import stockRouter from './stock.js';
 import promotionsRouter from './promotions.js';
-import { supabase } from '@/lib/supabase';
+import makeClient from './supabaseClient.js';
 
 const router = express.Router();
 
@@ -21,13 +21,20 @@ router.use(async (req, res, next) => {
 
   // Vérification d'un token Bearer via Supabase
   if (authHeader) {
-    const token = authHeader.replace(/^Bearer\s+/i, '');
-    const { data, error } = await supabase.auth.getUser(token);
-    if (data?.user && !error) {
-      req.user = {
-        mama_id: req.query.mama_id || data.user.user_metadata?.mama_id,
-      };
-      return next();
+    try {
+      const token = authHeader.replace(/^Bearer\s+/i, '');
+      const supabase = makeClient();
+      const { data, error } = await supabase.auth.getUser(token);
+      if (data?.user && !error) {
+        req.user = {
+          mama_id: req.query.mama_id || data.user.user_metadata?.mama_id,
+        };
+        return next();
+      }
+    } catch (err) {
+      if (String(err?.message).includes('Missing Supabase credentials')) {
+        return res.status(500).json({ error: 'Missing Supabase credentials' });
+      }
     }
   }
 

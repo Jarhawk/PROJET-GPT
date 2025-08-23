@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +11,8 @@ import {
 import { Trash2 } from "lucide-react";
 import ProduitSearchModal from "@/components/factures/ProduitSearchModal";
 import PriceDelta from "@/components/factures/PriceDelta";
-import { formatNumberLive } from "@/utils/formatNumberLive";
+import NumericInputFR from "@/components/forms/NumericInputFR";
+import MoneyInputFR from "@/components/forms/MoneyInputFR";
 export default function FactureLigne({
   value: line,
   onChange,
@@ -30,30 +31,6 @@ export default function FactureLigne({
   const puHt = qte > 0 ? +(totalHt / qte).toFixed(4) : 0;
   const pmp = Number(line.pmp ?? 0);
 
-  const fmtQty = (n) =>
-    Number.isFinite(n)
-      ? new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 6 }).format(n)
-      : "";
-  const fmtMoney = (n) =>
-    Number.isFinite(n)
-      ? new Intl.NumberFormat("fr-FR", {
-          style: "currency",
-          currency: "EUR",
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        }).format(n)
-      : "";
-
-  const [qteStr, setQteStr] = useState(fmtQty(qte));
-  const [totalStr, setTotalStr] = useState(fmtMoney(totalHt));
-
-  useEffect(() => {
-    setQteStr(fmtQty(qte));
-  }, [qte]);
-
-  useEffect(() => {
-    setTotalStr(fmtMoney(totalHt));
-  }, [totalHt]);
 
   const recalc = (patch = {}) => {
     const q = patch.quantite !== undefined ? Number(patch.quantite) : qte;
@@ -126,38 +103,19 @@ export default function FactureLigne({
         excludeIdsSameZone={excludeIdsSameZone}
         currentLineProductId={line.produit_id}
       />
-      <Input
+      <NumericInputFR
         name={`lignes.${index}.quantite`}
-        value={qteStr}
-        onInput={(e) => {
-          const n = formatNumberLive(e.target, { type: 'qty', locale: 'fr-FR' });
-          setQteStr(e.target.value);
-          recalc({ quantite: n ?? 0 });
-        }}
-        onBlur={(e) => {
-          const n = formatNumberLive(e.target, { type: 'qty', locale: 'fr-FR' });
-          setQteStr(e.target.value);
-          recalc({ quantite: n ?? 0 });
-        }}
+        value={qte}
+        decimals={6}
+        onValueChange={(v) => recalc({ quantite: v ?? 0 })}
         placeholder="0"
-        inputMode="decimal"
       />
       <Input readOnly disabled value={line.unite || ""} placeholder="Unité" />
-      <Input
+      <MoneyInputFR
         name={`lignes.${index}.total_ht`}
-        value={totalStr}
-        onInput={(e) => {
-          const n = formatNumberLive(e.target, { type: 'money', locale: 'fr-FR' });
-          setTotalStr(e.target.value);
-          recalc({ total_ht: n ?? 0 });
-        }}
-        onBlur={(e) => {
-          const n = formatNumberLive(e.target, { type: 'money', locale: 'fr-FR' });
-          setTotalStr(e.target.value);
-          recalc({ total_ht: n ?? 0 });
-        }}
+        value={totalHt}
+        onValueChange={(v) => recalc({ total_ht: v ?? 0 })}
         placeholder="0,00 €"
-        inputMode="decimal"
       />
       <div className="relative">
         <Input

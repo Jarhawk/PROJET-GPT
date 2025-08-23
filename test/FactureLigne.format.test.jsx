@@ -18,7 +18,7 @@ test('typing 12,5 in qty keeps display and numeric value', () => {
   const onChange = vi.fn();
   const { getByPlaceholderText } = renderLine({}, onChange);
   const input = getByPlaceholderText('0');
-  fireEvent.input(input, { target: { value: '12,5' } });
+  fireEvent.change(input, { target: { value: '12,5' } });
   expect(input.value).toBe('12,5');
   expect(onChange).toHaveBeenLastCalledWith(
     expect.objectContaining({ quantite: 12.5 })
@@ -29,7 +29,7 @@ test('typing 1000 in total HT formats to currency', () => {
   const onChange = vi.fn();
   const { getByPlaceholderText } = renderLine({}, onChange);
   const input = getByPlaceholderText('0,00 €');
-  fireEvent.input(input, { target: { value: '1000' } });
+  fireEvent.change(input, { target: { value: '1000' } });
   fireEvent.blur(input);
   expect(input.value).toBe('1 000,00 €');
   expect(onChange).toHaveBeenLastCalledWith(
@@ -41,7 +41,7 @@ test('pasting formatted currency parses numeric value', () => {
   const onChange = vi.fn();
   const { getByPlaceholderText } = renderLine({}, onChange);
   const input = getByPlaceholderText('0,00 €');
-  fireEvent.input(input, { target: { value: '1 234,56 €' } });
+  fireEvent.change(input, { target: { value: '1 234,56 €' } });
   fireEvent.blur(input);
   expect(input.value).toBe('1 234,56 €');
   expect(onChange).toHaveBeenLastCalledWith(
@@ -69,13 +69,13 @@ test('PriceDelta reacts to PU HT vs PMP', () => {
   const { getByLabelText, getByPlaceholderText } = render(<Wrapper />);
   const input = getByPlaceholderText('0,00 €');
   expect(getByLabelText(/égal/)).toBeTruthy();
-  fireEvent.input(input, { target: { value: '1,90' } });
+  fireEvent.change(input, { target: { value: '1,90' } });
   fireEvent.blur(input);
   expect(getByLabelText(/supérieur/)).toBeTruthy();
-  fireEvent.input(input, { target: { value: '1,50' } });
+  fireEvent.change(input, { target: { value: '1,50' } });
   fireEvent.blur(input);
   expect(getByLabelText(/inférieur/)).toBeTruthy();
-  fireEvent.input(input, { target: { value: '1,73' } });
+  fireEvent.change(input, { target: { value: '1,73' } });
   fireEvent.blur(input);
   expect(getByLabelText(/égal/)).toBeTruthy();
 });

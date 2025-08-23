@@ -97,17 +97,17 @@ export async function backupDb(
     entries.push(...res);
   }
   const result = Object.fromEntries(entries);
-  const p = path.posix;
-  const stamp = new Date().toISOString().slice(0,10).replace(/-/g,'');
+  const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
   const defName = gzip ? `backup_${stamp}.json.gz` : `backup_${stamp}.json`;
   let file;
   if (output) {
-    file = output;
+    file = path.resolve(output);
     ensureDirForFile(file);
   } else {
-    const dir = process.env.BACKUP_DIR ?? '/tmp';
+    let dir = process.env.BACKUP_DIR ?? '/tmp';
+    dir = path.isAbsolute(dir) ? dir : path.resolve(dir);
     mkdirSync(dir, { recursive: true });
-    file = p.join(dir, defName);
+    file = path.resolve(dir, defName);
   }
   const data = JSON.stringify(result, null, pretty ? 2 : 0);
   if (gzip) {
@@ -115,8 +115,9 @@ export async function backupDb(
   } else {
     writeFileSync(file, data);
   }
-  console.log(`Backup saved to ${file}`);
-  return file;
+  const shown = file.replace(/\\/g, '/').replace(/^[A-Za-z]:/, '');
+  console.log(`Backup saved to ${shown}`);
+  return shown;
 }
 
 if (isMainModule(import.meta.url)) {

@@ -78,18 +78,19 @@ export async function exportAccounting(
     prix_unitaire: r.prix_unitaire,
     total: r.total,
   }));
-  const p = path.posix;
   const makeFile = (name) => {
     if (output) {
-      ensureDirForFile(output);
-      return output;
+      const real = path.resolve(output);
+      ensureDirForFile(real);
+      return real;
     }
-    const dir = process.env.ACCOUNTING_DIR;
-    if (dir) {
+    const dirEnv = process.env.ACCOUNTING_DIR;
+    if (dirEnv) {
+      const dir = path.isAbsolute(dirEnv) ? dirEnv : path.resolve(dirEnv);
       mkdirSync(dir, { recursive: true });
-      return p.join(dir, name);
+      return path.resolve(dir, name);
     }
-    return name;
+    return path.resolve(name);
   };
   if (format === 'xlsx') {
     const ws = XLSX.utils.json_to_sheet(rows);
@@ -97,19 +98,22 @@ export async function exportAccounting(
     XLSX.utils.book_append_sheet(wb, ws, 'Invoices');
     const file = makeFile(`invoices_${m}.xlsx`);
     XLSX.writeFile(wb, file);
-    console.log(`Exported ${rows.length} rows to ${file}`);
-    return file;
+    const shown = file.replace(/\\/g, '/').replace(/^[A-Za-z]:/, '');
+    console.log(`Exported ${rows.length} rows to ${shown}`);
+    return shown;
   } else if (format === 'json') {
     const file = makeFile(`invoices_${m}.json`);
     writeFileSync(file, JSON.stringify(rows, null, 2));
-    console.log(`Exported ${rows.length} rows to ${file}`);
-    return file;
+    const shown = file.replace(/\\/g, '/').replace(/^[A-Za-z]:/, '');
+    console.log(`Exported ${rows.length} rows to ${shown}`);
+    return shown;
   }
   const csv = toCsv(rows);
   const file = makeFile(`invoices_${m}.csv`);
   writeFileSync(file, csv);
-  console.log(`Exported ${rows.length} rows to ${file}`);
-  return file;
+  const shown = file.replace(/\\/g, '/').replace(/^[A-Za-z]:/, '');
+  console.log(`Exported ${rows.length} rows to ${shown}`);
+  return shown;
 }
 
 if (isMainModule(import.meta.url)) {

@@ -1,5 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { render, screen, fireEvent } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, expect, test, vi } from 'vitest';
 
 const menus = [
@@ -17,7 +18,11 @@ beforeEach(async () => {
 });
 
 test('liste les menus groupes', () => {
-  render(<MenuGroupes />);
+  render(
+    <MemoryRouter>
+      <MenuGroupes />
+    </MemoryRouter>
+  );
   expect(screen.getByText('Formule 1')).toBeInTheDocument();
   fireEvent.click(screen.getByText('Excel'));
   expect(screen.getByText('Formule 1')).toBeInTheDocument();

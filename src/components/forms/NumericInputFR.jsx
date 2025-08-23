@@ -14,6 +14,7 @@ function isTrailingSep(raw) {
 
 export default function NumericInputFR({
   value,
+  onChange,
   onValueChange,
   decimals = 3,
   min,
@@ -67,7 +68,12 @@ export default function NumericInputFR({
     queueMicrotask(() => e.target.select());
   };
 
-  const onChange = (e) => {
+  const emit = (val) => {
+    onChange?.(val);
+    onValueChange?.(val);
+  };
+
+  const handleChange = (e) => {
     const raw = e.target.value ?? '';
     const selection = e.target.selectionStart ?? raw.length;
     const allowed = allowNegative ? /[^0-9.,\s-]/g : /[^0-9.,\s]/g;
@@ -77,14 +83,14 @@ export default function NumericInputFR({
 
     if (normalized === '' || normalized === '-' || normalized === '.' || normalized === '-.') {
       setText(cleanedRaw);
-      onValueChange?.(null);
+      emit(null);
       return;
     }
 
     const num = Number(normalized);
     if (!Number.isFinite(num)) {
       setText(cleanedRaw);
-      onValueChange?.(null);
+      emit(null);
       return;
     }
 
@@ -105,15 +111,15 @@ export default function NumericInputFR({
 
     if (min !== undefined && num < min) return;
     if (max !== undefined && num > max) return;
-    if (!trailing) onValueChange?.(num);
+    if (!trailing) emit(num);
   };
 
-  const onBlur = () => {
+  const handleBlur = () => {
     focused.current = false;
     const parsed = Number(normalize(text));
     if (!Number.isFinite(parsed)) {
       setText('');
-      onValueChange?.(null);
+      emit(null);
       return;
     }
     let n = parsed;
@@ -121,7 +127,7 @@ export default function NumericInputFR({
     if (max !== undefined && n > max) n = max;
     const formatted = format(n);
     setText(formatted);
-    onValueChange?.(n);
+    emit(n);
   };
 
   return (
@@ -132,9 +138,9 @@ export default function NumericInputFR({
       pattern={allowNegative ? "[0-9.,\\s-]*" : "[0-9.,\\s]*"}
       name={name}
       value={text}
-      onChange={onChange}
+      onChange={handleChange}
       onFocus={onFocus}
-      onBlur={onBlur}
+      onBlur={handleBlur}
       placeholder={placeholder}
       disabled={disabled}
       className={className}

@@ -106,7 +106,7 @@ export default function FactureLigne({
       <NumericInputFR
         name={`lignes.${index}.quantite`}
         value={qte}
-        onValueChange={(v) => recalc({ quantite: v ?? 0 })}
+        onChange={(v) => recalc({ quantite: v ?? 0 })}
         decimals={6}
         placeholder="0"
       />

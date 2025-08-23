@@ -23,7 +23,7 @@ export default function TransfertForm({ onClose, onSaved }) {
 
   useEffect(() => {
     fetchProducts({});
-    myAccessibleZones({ mode: 'transfert' }).then(setZones);
+    Promise.resolve(myAccessibleZones?.({ mode: 'transfert' })).then(setZones);
   }, [fetchProducts, myAccessibleZones]);
 
   const handleAddLine = () => {

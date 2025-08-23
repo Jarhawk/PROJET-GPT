@@ -1,6 +1,11 @@
 import { expect, vi } from "vitest";
 import '@testing-library/jest-dom';
 
+process.env.VITE_SUPABASE_URL ??= 'https://example.supabase.co';
+process.env.VITE_SUPABASE_ANON_KEY ??= 'key';
+process.env.SUPABASE_URL ??= 'https://example.supabase.co';
+process.env.SUPABASE_ANON_KEY ??= 'key';
+
 // Stubs pour anciens modules supprimés
 vi.mock("@/license", () => ({ default: { validateLicense: () => true } }));
 vi.mock("@/db/license-keys.json", () => ({ default: [] }));

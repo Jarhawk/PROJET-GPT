@@ -5,6 +5,8 @@ import { vi, beforeEach, test, expect } from 'vitest';
 const query = {
   select: vi.fn(() => query),
   eq: vi.fn(() => query),
+  lte: vi.fn(() => query),
+  gte: vi.fn(() => query),
   order: vi.fn(() => query),
   insert: vi.fn(() => query),
   update: vi.fn(() => query),
@@ -13,15 +15,21 @@ const query = {
   maybeSingle: vi.fn(() => Promise.resolve({ data: { id: 'inv1' }, error: null })),
   then: vi.fn(),
 };
-const fromMock = vi.fn(() => query);
+const periodeQuery = {
+  select: vi.fn(() => periodeQuery),
+  eq: vi.fn(() => periodeQuery),
+  lte: vi.fn(() => periodeQuery),
+  gte: vi.fn(() => periodeQuery),
+  insert: vi.fn(() => periodeQuery),
+  maybeSingle: vi.fn(() => Promise.resolve({ data: { id: 'per1' }, error: null })),
+  single: vi.fn(() => periodeQuery),
+};
+const fromMock = vi.fn(table => (table === 'periodes' ? periodeQuery : query));
 vi.mock('@/lib/supabase', () => {
   const supabase = { from: fromMock };
   return { supabase, default: supabase };
 });
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
-vi.mock('@/hooks/usePeriodes', () => ({
-  default: () => ({ checkCurrentPeriode: vi.fn(() => ({ error: null, data: { id: 'per1' } })) }),
-}));
 
 let useInventaires;
 let insertCount = 0;
@@ -42,8 +50,17 @@ beforeEach(async () => {
   fromMock.mockClear();
   query.select.mockClear();
   query.eq.mockClear();
+  query.lte.mockClear();
+  query.gte.mockClear();
   query.order.mockClear();
   query.insert.mockClear();
+  query.maybeSingle.mockClear();
+  periodeQuery.select.mockClear();
+  periodeQuery.eq.mockClear();
+  periodeQuery.lte.mockClear();
+  periodeQuery.gte.mockClear();
+  periodeQuery.insert.mockClear();
+  periodeQuery.maybeSingle.mockClear();
 });
 
 test('getInventaires applies filters', async () => {

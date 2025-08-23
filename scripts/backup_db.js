@@ -1,9 +1,9 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 /* eslint-env node */
-import { mkdirSync, writeFileSync } from 'fs';
-import { gzipSync } from 'zlib';
+import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { supabase } from '@/lib/supabase';
+import { gzipSync } from 'zlib';
 import {
   runScript,
   isMainModule,
@@ -17,8 +17,29 @@ import {
   ensureDirForFile,
 } from './cli_utils.js';
 
-export const USAGE =
-  'Usage: node scripts/backup_db.js [FILE] [MAMA_ID] [SUPABASE_URL] [SUPABASE_KEY] [--tables list] [--output FILE] [--gzip] [--pretty] [--concurrency N] [--url URL] [--key KEY]';
+function showUsageAndExit0(usage) {
+  console.log(`Usage: ${usage}`);
+  process.exit(0);
+}
+
+function showVersionAndExit0() {
+  const pkg = JSON.parse(
+    readFileSync(
+      path.join(path.dirname(fileURLToPath(import.meta.url)), '../package.json'),
+      'utf8'
+    )
+  );
+  console.log(pkg.version);
+  process.exit(0);
+}
+
+const argv = process.argv.slice(2);
+const USAGE_TEXT =
+  'node scripts/backup_db.js [FILE] [MAMA_ID] [SUPABASE_URL] [SUPABASE_KEY] [--tables list] [--output FILE] [--gzip] [--pretty] [--concurrency N] [--url URL] [--key KEY]';
+if (argv.includes('--help') || argv.includes('-h')) showUsageAndExit0(USAGE_TEXT);
+if (argv.includes('--version') || argv.includes('-v')) showVersionAndExit0();
+
+export const USAGE = `Usage: ${USAGE_TEXT}`;
 
 export async function backupDb(
   output = null,
@@ -35,6 +56,15 @@ export async function backupDb(
     return Number.isFinite(val) && val > 0 ? val : Infinity;
   })()
 ) {
+  const { createClient } = await import('@supabase/supabase-js');
+  const supabase = createClient(
+    supabaseUrl ?? process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL ?? 'https://example.supabase.co',
+    supabaseKey ??
+      process.env.VITE_SUPABASE_ANON_KEY ??
+      process.env.SUPABASE_ANON_KEY ??
+      process.env.SUPABASE_KEY ??
+      'key'
+  );
   if (!Number.isFinite(concurrency) || concurrency <= 0) concurrency = Infinity;
   const mama_id = mamaId;
   const defaultTables = process.env.BACKUP_TABLES
@@ -49,6 +79,7 @@ export async function backupDb(
         'fournisseur_produits',
         'taches',
         'tache_instances',
+        'mouvements_centres_cout',
       ];
   const list = tables || defaultTables;
   const entries = [];

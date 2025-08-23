@@ -1,5 +1,6 @@
 import { expect, vi } from "vitest";
 import '@testing-library/jest-dom';
+import { makeSupabaseMock } from './mocks/supabaseClient';
 
 process.env.VITE_SUPABASE_URL ??= 'https://example.supabase.co';
 process.env.VITE_SUPABASE_ANON_KEY ??= 'key';
@@ -51,38 +52,12 @@ if (!globalThis.fetch) {
   globalThis.fetch = (...args:any) => import("node-fetch").then(({default: f}) => f(...args)) as any;
 }
 
-// Conseils pour tests async : expect(await fn()) et utiliser `await` sur hooks async.
-
-// A chainable query stub for Supabase queries
-function queryChain() {
-  const self: any = {};
-  const ret = () => self;
-
-  self.select = vi.fn(ret);
-  self.eq = vi.fn(ret);
-  self.in = vi.fn(ret);
-  self.ilike = vi.fn(ret);
-  self.order = vi.fn(ret);
-  self.range = vi.fn(ret);
-  self.insert = vi.fn(async () => ({ data: [], error: null }));
-  self.update = vi.fn(async () => ({ data: [], error: null }));
-  self.delete = vi.fn(async () => ({ data: [], error: null }));
-  self.single = vi.fn(async () => ({ data: null, error: null }));
-  return self;
-}
-
-vi.mock('@/lib/supabase', () => {
-  const fromMock = vi.fn(() => queryChain());
-  const rpcMock = vi.fn(async () => ({ data: [], error: null }));
-  const auth = {
-    onAuthStateChange: vi.fn(),
-    getSession: vi.fn(async () => ({ data: { session: null } }))
-  };
-  return { supabase: { from: fromMock, rpc: rpcMock, auth } };
-});
-
-// For tests with custom vi.mock factories, avoid referencing top-level
-// variables inside the factory. Define them within the factory or use
-// vi.hoisted(() => ({})) to prevent initialization errors.
+// Supabase mock centralisé
+// Défini avant vi.mock pour éviter les variables hoistées
+(globalThis as any).__SUPABASE_TEST_CLIENT__ = makeSupabaseMock();
+vi.mock('@/lib/supabase', () => ({
+  getSupabaseClient: () => (globalThis as any).__SUPABASE_TEST_CLIENT__,
+  supabase: (globalThis as any).__SUPABASE_TEST_CLIENT__,
+}));
 
 export { expect, vi };

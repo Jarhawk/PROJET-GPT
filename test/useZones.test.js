@@ -9,7 +9,8 @@ const queryObj = {
   then: fn => Promise.resolve(fn({ data: [], error: null })),
 };
 const fromMock = vi.fn(() => queryObj);
-vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
+const supabaseMock = { from: fromMock };
+vi.mock('@/lib/supabase', () => ({ __esModule: true, default: supabaseMock, supabase: supabaseMock }));
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
 vi.mock('sonner', () => ({ toast: { error: vi.fn() } }));
 

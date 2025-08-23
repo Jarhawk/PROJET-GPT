@@ -15,7 +15,7 @@ function isTrailingSep(raw) {
 
 export default function MoneyInputFR({
   value,
-  onValueChange,
+  onChange,
   allowNegative = false,
   placeholder,
   disabled,
@@ -57,7 +57,7 @@ export default function MoneyInputFR({
     queueMicrotask(() => e.target.select());
   };
 
-  const onChange = (e) => {
+  const handleChange = (e) => {
     const raw = e.target.value ?? '';
     const selection = e.target.selectionStart ?? raw.length;
     const allowed = allowNegative ? /[^0-9.,\s€-]/g : /[^0-9.,\s€]/g;
@@ -67,14 +67,14 @@ export default function MoneyInputFR({
 
     if (normalized === '' || normalized === '-' || normalized === '.' || normalized === '-.') {
       setText(cleanedRaw);
-      onValueChange?.(null);
+      onChange?.(null);
       return;
     }
 
     const num = Number(normalized);
     if (!Number.isFinite(num)) {
       setText(cleanedRaw);
-      onValueChange?.(null);
+      onChange?.(null);
       return;
     }
 
@@ -95,7 +95,7 @@ export default function MoneyInputFR({
     if (trailing) caret = formatted.length;
     caretRef.current = caret;
 
-    if (!trailing) onValueChange?.(num);
+    if (!trailing) onChange?.(num);
   };
 
   const onBlur = () => {
@@ -103,13 +103,13 @@ export default function MoneyInputFR({
     const parsed = Number(normalize(text));
     if (!Number.isFinite(parsed)) {
       setText('');
-      onValueChange?.(null);
+      onChange?.(null);
       return;
     }
     let n = parsed;
     const formatted = format(n);
     setText(formatted);
-    onValueChange?.(n);
+    onChange?.(n);
   };
 
   return (
@@ -120,7 +120,7 @@ export default function MoneyInputFR({
       pattern={allowNegative ? '[0-9.,\\s€-]*' : '[0-9.,\\s€]*'}
       name={name}
       value={text}
-      onChange={onChange}
+      onChange={handleChange}
       onFocus={onFocus}
       onBlur={onBlur}
       placeholder={placeholder}

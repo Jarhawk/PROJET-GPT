@@ -14,7 +14,7 @@ function isTrailingSep(raw) {
 
 export default function NumericInputFR({
   value,
-  onValueChange,
+  onChange,
   decimals = 3,
   min,
   max,
@@ -67,7 +67,7 @@ export default function NumericInputFR({
     queueMicrotask(() => e.target.select());
   };
 
-  const onChange = (e) => {
+  const handleChange = (e) => {
     const raw = e.target.value ?? '';
     const selection = e.target.selectionStart ?? raw.length;
     const allowed = allowNegative ? /[^0-9.,\s-]/g : /[^0-9.,\s]/g;
@@ -77,14 +77,14 @@ export default function NumericInputFR({
 
     if (normalized === '' || normalized === '-' || normalized === '.' || normalized === '-.') {
       setText(cleanedRaw);
-      onValueChange?.(null);
+      onChange?.(null);
       return;
     }
 
     const num = Number(normalized);
     if (!Number.isFinite(num)) {
       setText(cleanedRaw);
-      onValueChange?.(null);
+      onChange?.(null);
       return;
     }
 
@@ -105,7 +105,7 @@ export default function NumericInputFR({
 
     if (min !== undefined && num < min) return;
     if (max !== undefined && num > max) return;
-    if (!trailing) onValueChange?.(num);
+    if (!trailing) onChange?.(num);
   };
 
   const onBlur = () => {
@@ -113,7 +113,7 @@ export default function NumericInputFR({
     const parsed = Number(normalize(text));
     if (!Number.isFinite(parsed)) {
       setText('');
-      onValueChange?.(null);
+      onChange?.(null);
       return;
     }
     let n = parsed;
@@ -121,7 +121,7 @@ export default function NumericInputFR({
     if (max !== undefined && n > max) n = max;
     const formatted = format(n);
     setText(formatted);
-    onValueChange?.(n);
+    onChange?.(n);
   };
 
   return (
@@ -132,7 +132,7 @@ export default function NumericInputFR({
       pattern={allowNegative ? "[0-9.,\\s-]*" : "[0-9.,\\s]*"}
       name={name}
       value={text}
-      onChange={onChange}
+      onChange={handleChange}
       onFocus={onFocus}
       onBlur={onBlur}
       placeholder={placeholder}

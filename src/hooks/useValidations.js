@@ -2,7 +2,8 @@ import { useAuth } from '@/hooks/useAuth';
 import supabase from '@/lib/supabase';
 
 export default function useValidations() {
-  const { mama_id, user_id } = useAuth();
+  const { mama_id, user } = useAuth();
+  const user_id = user?.id;
 
   async function fetchRequests() {
     const { data } = await supabase
@@ -29,7 +30,8 @@ export default function useValidations() {
         reviewed_at: new Date().toISOString(),
       })
       .eq('id', id)
-      .eq('mama_id', mama_id);
+      .eq('mama_id', mama_id)
+      .eq('actif', true);
   }
 
   return { fetchRequests, addRequest, updateStatus };

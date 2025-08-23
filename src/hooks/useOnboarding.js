@@ -3,16 +3,24 @@ import supabase from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function useOnboarding() {
-  const { mama_id } = useAuth();
+  const { mama_id, user } = useAuth();
+  const user_id = user?.id;
 
   async function fetchProgress() {
     const { data } = await supabase
-      .from('onboarding_progress')
-      .select('*')
+      .from('etapes_onboarding')
+      .select('etape, statut')
+      .eq('user_id', user_id)
       .eq('mama_id', mama_id)
-      .range(0, 0);
+      .order('created_at', { ascending: true });
     return data?.[0] || null;
   }
 
-  return { fetchProgress };
+  async function startOnboarding() {
+    return supabase
+      .from('etapes_onboarding')
+      .insert([{ user_id, mama_id, etape: '0', statut: 'en cours' }]);
+  }
+
+  return { fetchProgress, startOnboarding };
 }

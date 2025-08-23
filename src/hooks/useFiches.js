@@ -81,7 +81,7 @@ export function useFiches() {
       setError(insertError);
       return { error: insertError };
     }
-    const ficheId = data.id;
+    const ficheId = data?.id ?? data?.[0]?.id;
     if (lignes.length > 0) {
       const toInsert = lignes.map(l => ({
         fiche_id: ficheId,
@@ -98,7 +98,7 @@ export function useFiches() {
         return { error: lignesError };
       }
     }
-    setFiches(prev => [...prev, { id: ficheId, ...fiche }]);
+    setFiches(prev => [{ id: ficheId, ...fiche }, ...prev]);
     setTotal(prev => prev + 1);
     setLoading(false);
     return { data: ficheId };

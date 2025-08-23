@@ -100,7 +100,7 @@ export function useUnites() {
 
 export default useUnites;
 
-export async function fetchUnitesForValidation(mama_id) {
+async function fetchUnitesForValidation(mama_id) {
   const { data, error } = await supabase
     .from('unites')
     .select('id, nom')
@@ -108,3 +108,5 @@ export async function fetchUnitesForValidation(mama_id) {
     .order('nom', { ascending: true });
   return { data: data ?? [], error };
 }
+
+export { fetchUnitesForValidation };

@@ -1,8 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 /* eslint-env node */
-import { writeFileSync } from 'fs';
+import { mkdirSync, writeFileSync } from 'fs';
 import { gzipSync } from 'zlib';
-import { join } from 'path';
+import path from 'node:path';
 import { supabase } from '@/lib/supabase';
 import {
   runScript,
@@ -66,13 +66,18 @@ export async function backupDb(
     entries.push(...res);
   }
   const result = Object.fromEntries(entries);
+  const p = path.posix;
   const stamp = new Date().toISOString().slice(0,10).replace(/-/g,'');
   const defName = gzip ? `backup_${stamp}.json.gz` : `backup_${stamp}.json`;
-  let file = output || defName;
-  if (!output && process.env.BACKUP_DIR) {
-    file = join(process.env.BACKUP_DIR, file);
+  let file;
+  if (output) {
+    file = output;
+    ensureDirForFile(file);
+  } else {
+    const dir = process.env.BACKUP_DIR ?? '/tmp';
+    mkdirSync(dir, { recursive: true });
+    file = p.join(dir, defName);
   }
-  ensureDirForFile(file);
   const data = JSON.stringify(result, null, pretty ? 2 : 0);
   if (gzip) {
     writeFileSync(file, gzipSync(data));

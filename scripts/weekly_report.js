@@ -1,10 +1,33 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { posix as path } from 'node:path';
-import { writeFileSync, mkdirSync } from 'node:fs';
 import { strict as assert } from 'node:assert';
 import { createClient } from '@supabase/supabase-js';
 import * as XLSX from 'xlsx';
 import { runScript, isMainModule } from './cli_utils.js';
+
+export const USAGE = 'weekly_report [options]';
+
+function showUsageAndExit0(usage) {
+  console.log(`Usage: ${usage}`);
+  process.exit(0);
+}
+
+function showVersionAndExit0() {
+  const pkg = JSON.parse(
+    readFileSync(
+      path.join(path.dirname(fileURLToPath(import.meta.url)), '../package.json'),
+      'utf8',
+    ),
+  );
+  console.log(pkg.version);
+  process.exit(0);
+}
+
+const argv = process.argv.slice(2);
+if (argv.includes('--help') || argv.includes('-h')) showUsageAndExit0(USAGE);
+if (argv.includes('--version') || argv.includes('-v')) showVersionAndExit0();
 
 export async function generateWeeklyCostCenterReport(
   mamaId = null,
@@ -121,7 +144,7 @@ if (isMainModule(import.meta.url)) {
   runScript(
     (mamaId, url, key, out, start, end, format) =>
       generateWeeklyCostCenterReport(mamaId, url, key, start, end, out, format),
-    'weekly_report [options]',
+    `Usage: ${USAGE}`,
     parseArgs
   );
 }

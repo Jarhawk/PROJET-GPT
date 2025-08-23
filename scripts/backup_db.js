@@ -1,9 +1,10 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 /* eslint-env node */
-import { writeFileSync } from 'fs';
-import { gzipSync } from 'zlib';
-import { join } from 'path';
-import { supabase } from '@/lib/supabase';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { gzipSync } from 'node:zlib';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 import {
   runScript,
   isMainModule,
@@ -18,7 +19,27 @@ import {
 } from './cli_utils.js';
 
 export const USAGE =
-  'Usage: node scripts/backup_db.js [FILE] [MAMA_ID] [SUPABASE_URL] [SUPABASE_KEY] [--tables list] [--output FILE] [--gzip] [--pretty] [--concurrency N] [--url URL] [--key KEY]';
+  'node scripts/backup_db.js [FILE] [MAMA_ID] [SUPABASE_URL] [SUPABASE_KEY] [--tables list] [--output FILE] [--gzip] [--pretty] [--concurrency N] [--url URL] [--key KEY]';
+
+function showUsageAndExit0(usage) {
+  console.log(`Usage: ${usage}`);
+  process.exit(0);
+}
+
+function showVersionAndExit0() {
+  const pkg = JSON.parse(
+    readFileSync(
+      path.join(path.dirname(fileURLToPath(import.meta.url)), '../package.json'),
+      'utf8',
+    ),
+  );
+  console.log(pkg.version);
+  process.exit(0);
+}
+
+const argv = process.argv.slice(2);
+if (argv.includes('--help') || argv.includes('-h')) showUsageAndExit0(USAGE);
+if (argv.includes('--version') || argv.includes('-v')) showVersionAndExit0();
 
 export async function backupDb(
   output = null,
@@ -35,6 +56,7 @@ export async function backupDb(
     return Number.isFinite(val) && val > 0 ? val : Infinity;
   })()
 ) {
+  const { supabase } = await import('@/lib/supabase');
   if (!Number.isFinite(concurrency) || concurrency <= 0) concurrency = Infinity;
   const mama_id = mamaId;
   const defaultTables = process.env.BACKUP_TABLES
@@ -86,7 +108,7 @@ export async function backupDb(
 if (isMainModule(import.meta.url)) {
   runScript(
     backupDb,
-    USAGE,
+    `Usage: ${USAGE}`,
     (args) => {
       const out = parseOutputFlag(args);
       args = out.args;

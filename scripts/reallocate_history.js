@@ -1,6 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 /* eslint-env node */
-import { supabase } from '@/lib/supabase';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 import {
   runScript,
   isMainModule,
@@ -11,7 +13,27 @@ import {
 } from './cli_utils.js';
 
 export const USAGE =
-  'Usage: node scripts/reallocate_history.js [LIMIT] [MAMA_ID] [SUPABASE_URL] [SUPABASE_KEY] [--limit N] [--dry-run] [--url URL] [--key KEY]';
+  'node scripts/reallocate_history.js [LIMIT] [MAMA_ID] [SUPABASE_URL] [SUPABASE_KEY] [--limit N] [--dry-run] [--url URL] [--key KEY]';
+
+function showUsageAndExit0(usage) {
+  console.log(`Usage: ${usage}`);
+  process.exit(0);
+}
+
+function showVersionAndExit0() {
+  const pkg = JSON.parse(
+    readFileSync(
+      path.join(path.dirname(fileURLToPath(import.meta.url)), '../package.json'),
+      'utf8',
+    ),
+  );
+  console.log(pkg.version);
+  process.exit(0);
+}
+
+const argv = process.argv.slice(2);
+if (argv.includes('--help') || argv.includes('-h')) showUsageAndExit0(USAGE);
+if (argv.includes('--version') || argv.includes('-v')) showVersionAndExit0();
 
 export async function reallocateHistory(
   limit = (() => {
@@ -23,7 +45,7 @@ export async function reallocateHistory(
   supabaseKey = null,
   dryRun = false
 ) {
-
+  const { supabase } = await import('@/lib/supabase');
   const { data: mouvements, error } = await supabase.rpc(
     'mouvements_without_alloc',
     { limit_param: limit }
@@ -62,7 +84,7 @@ export async function reallocateHistory(
 if (isMainModule(import.meta.url)) {
   runScript(
     reallocateHistory,
-    USAGE,
+    `Usage: ${USAGE}`,
     (args) => {
       const limitOpt = parseLimitFlag(args);
       args = limitOpt.args;

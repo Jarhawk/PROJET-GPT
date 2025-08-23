@@ -11,7 +11,7 @@ const fromMock = vi.fn((table) => {
   if (table === 'menu_groupes') {
     return { select: selectMock };
   }
-  if (table === 'menu_groupe_lignes') {
+  if (table === 'menu_groupes_lignes') {
     return { insert: insertMock, delete: vi.fn(), update: vi.fn() };
   }
   if (table === 'v_menu_groupe_resume' || table === 'v_menu_groupe_couts') {
@@ -26,7 +26,8 @@ const fromMock = vi.fn((table) => {
   return {};
 });
 
-vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock, functions: { invoke: vi.fn() } } }));
+const supabaseMock = { from: fromMock, functions: { invoke: vi.fn() } };
+vi.mock('@/lib/supabase', () => ({ __esModule: true, default: supabaseMock, supabase: supabaseMock }));
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
 
 let useMenuGroupe;
@@ -50,6 +51,6 @@ test('addLigne inserts row', async () => {
   await act(async () => {
     await result.current.addLigne('mg1', { categorie: 'plat', fiche_id: 'f1', portions_par_personne: 1 });
   });
-  expect(fromMock).toHaveBeenCalledWith('menu_groupe_lignes');
+  expect(fromMock).toHaveBeenCalledWith('menu_groupes_lignes');
   expect(insertMock).toHaveBeenCalled();
 });

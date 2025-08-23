@@ -1,25 +1,18 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { renderHook, act } from '@testing-library/react';
 import { vi, beforeEach, test, expect } from 'vitest';
+import { makeSupabaseMock } from './mocks/supabaseClient.js';
 
-const limitMock = vi.fn(() => Promise.resolve({ data: [], error: null }));
-const orderMock = vi.fn(() => ({ limit: limitMock }));
-const ilikeMock = vi.fn(() => ({ order: orderMock, limit: limitMock }));
-const eqMock = vi.fn(() => ({ eq: eqMock, ilike: ilikeMock, order: orderMock, limit: limitMock }));
-const selectMock = vi.fn(() => ({ eq: eqMock, ilike: ilikeMock, order: orderMock, limit: limitMock }));
-const fromMock = vi.fn(() => ({ select: selectMock }));
-
-vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
 
 let useProduitsAutocomplete;
+let client;
 
 beforeEach(async () => {
+  globalThis.__SUPABASE_TEST_CLIENT__ = makeSupabaseMock({ data: [], error: null });
+  client = globalThis.__SUPABASE_TEST_CLIENT__;
   ({ useProduitsAutocomplete } = await import('@/hooks/useProduitsAutocomplete'));
-  fromMock.mockClear();
-  selectMock.mockClear();
-  eqMock.mockClear();
-  ilikeMock.mockClear();
+  vi.clearAllMocks();
 });
 
 test('searchProduits filters by mama_id and query', async () => {
@@ -27,9 +20,10 @@ test('searchProduits filters by mama_id and query', async () => {
   await act(async () => {
     await result.current.searchProduits('car');
   });
-  expect(fromMock).toHaveBeenCalledWith('produits');
-  expect(selectMock).toHaveBeenCalledWith('id, nom, tva, dernier_prix, unite_id, unite:unite_id (nom)');
-  expect(eqMock).toHaveBeenCalledWith('mama_id', 'm1');
-  expect(eqMock).toHaveBeenCalledWith('actif', true);
-  expect(ilikeMock).toHaveBeenCalledWith('nom', '%car%');
+  expect(client.from).toHaveBeenCalledWith('produits');
+  const query = client.from.mock.results[0].value;
+  expect(query.select).toHaveBeenCalledWith('id, nom, tva, dernier_prix, unite_id, unite:unite_id (nom)');
+  expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1');
+  expect(query.eq).toHaveBeenCalledWith('actif', true);
+  expect(query.ilike).toHaveBeenCalledWith('nom', '%car%');
 });

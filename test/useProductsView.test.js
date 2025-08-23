@@ -1,22 +1,17 @@
 import { renderHook, act } from '@testing-library/react';
 import { vi, beforeEach, test, expect } from 'vitest';
+import { makeSupabaseMock } from './mocks/supabaseClient.js';
 
-const rangeMock = vi.fn(() => Promise.resolve({ data: [], count: 0, error: null }));
-const orderMock2 = vi.fn(() => ({ range: rangeMock }));
-const orderMock1 = vi.fn(() => ({ order: orderMock2 }));
-const eqMock = vi.fn(() => ({ order: orderMock1 }));
-const selectMock = vi.fn(() => ({ eq: eqMock, order: orderMock1, range: rangeMock }));
-const fromMock = vi.fn(() => ({ select: selectMock }));
-
-vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
 
 let useProducts;
+let client;
 
 beforeEach(async () => {
+  globalThis.__SUPABASE_TEST_CLIENT__ = makeSupabaseMock({ data: [], count: 0, error: null });
+  client = globalThis.__SUPABASE_TEST_CLIENT__;
   ({ useProducts } = await import('@/hooks/useProducts'));
-  fromMock.mockClear();
-  selectMock.mockClear();
+  vi.clearAllMocks();
 });
 
 test('fetchProducts queries table with mama_id filter', async () => {
@@ -24,6 +19,7 @@ test('fetchProducts queries table with mama_id filter', async () => {
   await act(async () => {
     await result.current.fetchProducts();
   });
-  expect(fromMock).toHaveBeenCalledWith('produits');
-  expect(selectMock).toHaveBeenCalled();
+  expect(client.from).toHaveBeenCalledWith('produits');
+  const query = client.from.mock.results[0].value;
+  expect(query.select).toHaveBeenCalled();
 });

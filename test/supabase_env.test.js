@@ -36,16 +36,19 @@ test('lib/supabase falls back to generic env', async () => {
   vi.resetModules();
 });
 
-test('lib/supabase uses placeholders when env missing in tests', async () => {
+test('lib/supabase returns test client when global set', async () => {
   delete process.env.VITE_SUPABASE_URL;
   delete process.env.VITE_SUPABASE_ANON_KEY;
   delete process.env.SUPABASE_URL;
   delete process.env.SUPABASE_ANON_KEY;
+  globalThis.__SUPABASE_TEST_CLIENT__ = { ok: true };
   vi.resetModules();
   vi.unmock('@/lib/supabase');
   const { getSupabaseClient } = await import('../src/lib/supabase.js');
-  getSupabaseClient();
+  const client = getSupabaseClient();
+  expect(client).toBe(globalThis.__SUPABASE_TEST_CLIENT__);
   expect(createClientMock).not.toHaveBeenCalled();
+  delete globalThis.__SUPABASE_TEST_CLIENT__;
   process.env.VITE_SUPABASE_URL = 'https://example.supabase.co';
   process.env.VITE_SUPABASE_ANON_KEY = 'key';
   createClientMock.mockClear();

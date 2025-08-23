@@ -1,36 +1,29 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import path from 'node:path';
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
+import { writeFileSync, mkdirSync } from 'node:fs';
 import { strict as assert } from 'node:assert';
 import { createClient } from '@supabase/supabase-js';
 import * as XLSX from 'xlsx';
-import { runScript, isMainModule } from './cli_utils.js';
+import {
+  runScript,
+  isMainModule,
+  shouldShowHelp,
+  shouldShowVersion,
+  getPackageVersion,
+} from './cli_utils.js';
 
-function showUsageAndExit0(usage) {
-  console.log(`Usage: ${usage}`);
-  process.exit(0);
-}
-
-function showVersionAndExit0() {
-  const pkg = JSON.parse(
-    readFileSync(
-      path.join(path.dirname(fileURLToPath(import.meta.url)), '../package.json'),
-      'utf8'
-    )
-  );
-  console.log(pkg.version);
-  process.exit(0);
-}
+export const USAGE =
+  'Usage: node scripts/weekly_report.js [--mama-id ID] [--url URL] [--key KEY] [--out FILE] [--start DATE] [--end DATE] [--format xlsx|csv|json]';
 
 const argv = process.argv.slice(2);
-const USAGE_TEXT =
-  'node scripts/weekly_report.js [--mama-id ID] [--url URL] [--key KEY] [--out FILE] [--start DATE] [--end DATE] [--format xlsx|csv|json]';
-if (argv.includes('--help') || argv.includes('-h')) showUsageAndExit0(USAGE_TEXT);
-if (argv.includes('--version') || argv.includes('-v')) showVersionAndExit0();
-
-export const USAGE = `Usage: ${USAGE_TEXT}`;
-
+if (shouldShowHelp(argv)) {
+  console.log(USAGE);
+  process.exit(0);
+}
+if (shouldShowVersion(argv)) {
+  console.log(getPackageVersion());
+  process.exit(0);
+}
 export async function generateWeeklyCostCenterReport(
   mamaIdArg = null,
   url = null,

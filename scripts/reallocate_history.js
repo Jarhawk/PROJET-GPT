@@ -1,8 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 /* eslint-env node */
-import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import path from 'node:path';
 import {
   runScript,
   isMainModule,
@@ -10,32 +7,23 @@ import {
   parseLimitFlag,
   parseMamaIdFlag,
   parseSupabaseFlags,
+  shouldShowHelp,
+  shouldShowVersion,
+  getPackageVersion,
 } from './cli_utils.js';
 
-function showUsageAndExit0(usage) {
-  console.log(`Usage: ${usage}`);
-  process.exit(0);
-}
-
-function showVersionAndExit0() {
-  const pkg = JSON.parse(
-    readFileSync(
-      path.join(path.dirname(fileURLToPath(import.meta.url)), '../package.json'),
-      'utf8'
-    )
-  );
-  console.log(pkg.version);
-  process.exit(0);
-}
+export const USAGE =
+  'Usage: node scripts/reallocate_history.js [LIMIT] [MAMA_ID] [SUPABASE_URL] [SUPABASE_KEY] [--limit N] [--dry-run] [--url URL] [--key KEY]';
 
 const argv = process.argv.slice(2);
-const USAGE_TEXT =
-  'node scripts/reallocate_history.js [LIMIT] [MAMA_ID] [SUPABASE_URL] [SUPABASE_KEY] [--limit N] [--dry-run] [--url URL] [--key KEY]';
-if (argv.includes('--help') || argv.includes('-h')) showUsageAndExit0(USAGE_TEXT);
-if (argv.includes('--version') || argv.includes('-v')) showVersionAndExit0();
-
-export const USAGE = `Usage: ${USAGE_TEXT}`;
-
+if (shouldShowHelp(argv)) {
+  console.log(USAGE);
+  process.exit(0);
+}
+if (shouldShowVersion(argv)) {
+  console.log(getPackageVersion());
+  process.exit(0);
+}
 export async function reallocateHistory(
   limit = (() => {
     const val = Number(process.env.REALLOCATE_LIMIT);

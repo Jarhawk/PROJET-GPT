@@ -37,3 +37,52 @@ vi.mock('@/hooks/useAuth', async (orig) => {
     }),
   };
 });
+
+// Supabase mock
+function makeNoopClient() {
+  const result = { data: [], error: null, count: 0 };
+  const thenable = {
+    then: (resolve) => resolve(result),
+    catch: () => thenable,
+    finally: () => thenable,
+  };
+  const chain = new Proxy(function () {}, {
+    get: (_, prop) =>
+      prop === 'then' || prop === 'catch' || prop === 'finally' ? thenable[prop] : chain,
+    apply: () => chain,
+  });
+  return {
+    from: () => chain,
+    rpc: () => chain,
+    storage: { from: () => chain },
+    auth: {
+      getUser: async () => ({ data: { user: null }, error: null }),
+      getSession: async () => ({ data: { session: null }, error: null }),
+    },
+  };
+}
+
+globalThis.__SUPABASE_TEST_CLIENT__ = makeNoopClient();
+
+const originalMock = vi.mock;
+vi.mock = (id, factory, options) => {
+  if (id === '@/lib/supabase' && typeof factory === 'function') {
+    return originalMock(
+      id,
+      () => {
+        const result = factory();
+        if (!result.getSupabaseClient) {
+          if (result.supabase) {
+            const value = result.supabase;
+            result.getSupabaseClient = typeof value === 'function' ? value : () => value;
+          } else {
+            result.getSupabaseClient = () => globalThis.__SUPABASE_TEST_CLIENT__;
+          }
+        }
+        return result;
+      },
+      options,
+    );
+  }
+  return originalMock(id, factory, options);
+};

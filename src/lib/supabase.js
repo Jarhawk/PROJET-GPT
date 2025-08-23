@@ -1,61 +1,54 @@
 // src/lib/supabase.js
 import { createClient } from '@supabase/supabase-js'
 
-// Helper: lit d'abord Vite (browser), puis Node (tests/scripts)
-function getEnv(key) {
+let singleton
+
+function getBrowserEnv(key) {
   try {
-    if (typeof import.meta !== 'undefined' && import.meta.env && key in import.meta.env) {
-      return import.meta.env[key]
-    }
-  } catch {}
-  try {
-    if (typeof process !== 'undefined' && process?.env && key in process.env) {
-      return process.env[key]
-    }
-  } catch {}
-  return undefined
-}
-
-// Vars possibles (préfixe Vite puis génériques Node)
-const url =
-  getEnv('VITE_SUPABASE_URL') ||
-  getEnv('SUPABASE_URL')
-
-const anonKey =
-  getEnv('VITE_SUPABASE_ANON_KEY') ||
-  getEnv('SUPABASE_ANON_KEY')
-
-// Client no-op pour éviter les erreurs en dev/test sans creds
-function makeNoopClient() {
-  const result = { data: [], error: null, count: 0 }
-
-  const thenable = {
-    then: (resolve) => resolve(result),
-    catch: () => thenable,
-    finally: () => thenable,
-  }
-
-  const chain = new Proxy(function () {}, {
-    get: (_, prop) => {
-      if (prop === 'then' || prop === 'catch' || prop === 'finally') return thenable[prop]
-      return chain
-    },
-    apply: () => chain,
-  })
-
-  console.warn('[supabase] Missing credentials — using noop client (dev/test). Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.')
-  return {
-    from: () => chain,
-    rpc: () => chain,
-    storage: { from: () => chain },
-    auth: {
-      getUser: async () => ({ data: { user: null }, error: null }),
-      getSession: async () => ({ data: { session: null }, error: null }),
-    },
+    return import.meta.env?.[key]
+  } catch {
+    return undefined
   }
 }
 
-export const supabase = (url && anonKey)
-  ? createClient(url, anonKey)
-  : makeNoopClient()
+function getNodeEnv(key) {
+  return typeof process !== 'undefined' && process?.env ? process.env[key] : undefined
+}
+
+function resolveCredentials() {
+  const isNode = typeof process !== 'undefined' && process?.versions?.node
+  const url = isNode
+    ? getNodeEnv('SUPABASE_URL') ||
+      getNodeEnv('VITE_SUPABASE_URL') ||
+      getBrowserEnv('VITE_SUPABASE_URL')
+    : getBrowserEnv('VITE_SUPABASE_URL')
+  const anonKey = isNode
+    ? getNodeEnv('SUPABASE_ANON_KEY') ||
+      getNodeEnv('VITE_SUPABASE_ANON_KEY') ||
+      getBrowserEnv('VITE_SUPABASE_ANON_KEY')
+    : getBrowserEnv('VITE_SUPABASE_ANON_KEY')
+  return { url, anonKey }
+}
+
+export function getSupabaseClient() {
+  if (globalThis.__SUPABASE_TEST_CLIENT__) return globalThis.__SUPABASE_TEST_CLIENT__
+  if (!singleton) {
+    const { url, anonKey } = resolveCredentials()
+    if (!url || !anonKey) {
+      throw new Error('Missing Supabase credentials. Define VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.')
+    }
+    singleton = createClient(url, anonKey)
+  }
+  return singleton
+}
+
+export const supabase = new Proxy(
+  {},
+  {
+    get(_target, prop) {
+      return getSupabaseClient()[prop]
+    },
+  },
+)
+
 

@@ -63,15 +63,16 @@ export function useDashboard() {
       const { data: mouvementsRaw, error: errorMouv } = await supabase
         .from('requisition_lignes')
         .select('quantite, produit_id, requisitions!inner(date_requisition,mama_id,statut)')
-        .eq('requisitions.mama_id', mama_id)
-        .eq('requisitions.statut', 'réalisée');
+        .eq('requisitions.mama_id', mama_id);
       if (errorMouv) throw errorMouv;
-      mouvements = (mouvementsRaw || []).map(m => ({
-        quantite: m.quantite,
-        produit_id: m.produit_id,
-        type: 'sortie',
-        date: m.requisitions.date_requisition,
-      }));
+      mouvements = (mouvementsRaw || [])
+        .filter(m => m.requisitions?.statut === 'réalisée')
+        .map(m => ({
+          quantite: m.quantite,
+          produit_id: m.produit_id,
+          type: 'sortie',
+          date: m.requisitions.date_requisition,
+        }));
     } catch (_err) {
       setError('Erreur chargement mouvements');
       void _err;
@@ -92,9 +93,6 @@ export function useDashboard() {
     // Fonction SQL renommée top_produits dans le schéma final
     const { data: topData, error: topErr } = await supabase.rpc('top_produits', {
       mama_id_param: mama_id,
-      debut_param: null,
-      fin_param: null,
-      limit_param: 8,
     });
     if (!topErr) setTopProducts(Array.isArray(topData) ? topData : []);
 

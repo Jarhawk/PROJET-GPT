@@ -53,6 +53,20 @@ describe('weekly report script', () => {
     vi.resetModules();
   });
 
+  it('falls back to VITE_MAMA_ID for RPC', async () => {
+    process.env.VITE_MAMA_ID = 'vm1';
+    vi.resetModules();
+    const { generateWeeklyCostCenterReport: fn } = await import('../scripts/weekly_report.js');
+    await expect(fn()).resolves.not.toThrow();
+    expect(rpc).toHaveBeenCalledWith('stats_cost_centers', {
+      mama_id_param: 'vm1',
+      debut_param: null,
+      fin_param: null,
+    });
+    delete process.env.VITE_MAMA_ID;
+    vi.resetModules();
+  });
+
   it('accepts a mamaId argument', async () => {
     await expect(generateWeeklyCostCenterReport('m2')).resolves.not.toThrow();
     expect(rpc).toHaveBeenCalledWith('stats_cost_centers', {

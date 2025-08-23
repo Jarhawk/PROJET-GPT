@@ -78,7 +78,8 @@ vi.mock('@/lib/supabase', () => {
     onAuthStateChange: vi.fn(),
     getSession: vi.fn(async () => ({ data: { session: null } }))
   };
-  return { supabase: { from: fromMock, rpc: rpcMock, auth } };
+  const client = { from: fromMock, rpc: rpcMock, auth };
+  return { supabase: client, getSupabaseClient: () => client };
 });
 
 // For tests with custom vi.mock factories, avoid referencing top-level

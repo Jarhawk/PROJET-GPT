@@ -1,6 +1,6 @@
 import * as XLSX from "xlsx";
 import { v4 as uuidv4 } from "uuid";
-import { supabase } from '@/lib/supabase';
+import { getSupabaseClient } from '@/lib/supabase';
 import { fetchFamillesForValidation } from "@/hooks/useFamilles";
 import { fetchUnitesForValidation } from "@/hooks/useUnites";
 import { fetchZonesForValidation } from "@/hooks/useZonesStock";
@@ -52,6 +52,7 @@ export async function parseProduitsFile(file, mama_id) {
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const raw = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
+  const supabase = getSupabaseClient();
   const [
     famillesRes,
     sousFamillesRes,
@@ -142,6 +143,7 @@ export async function parseProduitsFile(file, mama_id) {
 }
 
 export async function insertProduits(rows) {
+  const supabase = getSupabaseClient();
   const results = [];
   for (const r of rows) {
     const {

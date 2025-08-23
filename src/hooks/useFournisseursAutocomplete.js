@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { getSupabaseClient } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import useDebounce from '@/hooks/useDebounce';
 
@@ -26,6 +26,7 @@ export function useFournisseursAutocomplete({ term = '', limit = 20 } = {}) {
     const run = async () => {
       setLoading(true);
       setError(null);
+      const supabase = getSupabaseClient();
       try {
         let req = supabase
           .from('fournisseurs')
@@ -59,6 +60,7 @@ export function useFournisseursAutocomplete({ term = '', limit = 20 } = {}) {
 
 export async function searchFournisseurs(mamaId, term = '', limit = 20) {
   if (!mamaId) return [];
+  const supabase = getSupabaseClient();
   let req = supabase
     .from('fournisseurs')
     .select('id, nom, ville')

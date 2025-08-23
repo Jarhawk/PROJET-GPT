@@ -2,18 +2,19 @@
 import { vi, beforeEach, test, expect } from 'vitest';
 import { searchFournisseurs } from '@/hooks/useFournisseursAutocomplete';
 
-const queryBuilder = {
-  eq: vi.fn(() => queryBuilder),
-  ilike: vi.fn(() => queryBuilder),
-  order: vi.fn(() => queryBuilder),
-  limit: vi.fn(() => queryBuilder),
-  then: vi.fn((resolve) => resolve({ data: [], error: null })),
-};
-
-const selectMock = vi.fn(() => queryBuilder);
-const fromMock = vi.fn(() => ({ select: selectMock }));
-
-vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
+var queryBuilder, selectMock, fromMock;
+vi.mock('@/lib/supabase', () => {
+  queryBuilder = {
+    eq: vi.fn(() => queryBuilder),
+    ilike: vi.fn(() => queryBuilder),
+    order: vi.fn(() => queryBuilder),
+    limit: vi.fn(() => queryBuilder),
+    then: vi.fn((resolve) => resolve({ data: [], error: null })),
+  };
+  selectMock = vi.fn(() => queryBuilder);
+  fromMock = vi.fn(() => ({ select: selectMock }));
+  return { getSupabaseClient: () => ({ from: fromMock }) };
+});
 
 beforeEach(() => {
   fromMock.mockClear();

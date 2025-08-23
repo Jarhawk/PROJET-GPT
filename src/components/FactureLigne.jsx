@@ -10,9 +10,9 @@ import {
 } from "@/components/ui/select";
 import { Trash2 } from "lucide-react";
 import ProduitSearchModal from "@/components/factures/ProduitSearchModal";
-import PriceDelta from "@/components/factures/PriceDelta";
 import NumericInputFR from "@/components/forms/NumericInputFR";
 import MoneyInputFR from "@/components/forms/MoneyInputFR";
+import { formatSignedPercent } from "@/utils/number";
 export default function FactureLigne({
   value: line,
   onChange,
@@ -30,6 +30,9 @@ export default function FactureLigne({
   const tva = Number(line.tva || 0);
   const puHt = qte > 0 ? +(totalHt / qte).toFixed(4) : 0;
   const pmp = Number(line.pmp ?? 0);
+
+  const deltaPct =
+    pmp > 0 && Number.isFinite(puHt) ? ((puHt - pmp) / pmp) * 100 : null;
 
 
   const recalc = (patch = {}) => {
@@ -117,18 +120,28 @@ export default function FactureLigne({
         onChange={(v) => recalc({ total_ht: v ?? 0 })}
         placeholder="0,00 €"
       />
-      <div className="relative">
+      <div className="puht-with-delta">
         <Input
           readOnly
           disabled
           value={fmt(puHt)}
           placeholder="PU HT (€)"
-          className="pr-6"
           aria-label="Prix unitaire HT"
           step="0.01"
           lang="fr-FR"
         />
-        <PriceDelta puHT={puHt} pmp={pmp} />
+        <span
+          title={deltaPct === null ? 'PMP indisponible' : 'Écart vs PMP'}
+          className={
+            deltaPct === null || deltaPct === 0
+              ? 'delta-badge zero'
+              : deltaPct > 0
+              ? 'delta-badge up'
+              : 'delta-badge down'
+          }
+        >
+          {formatSignedPercent(deltaPct, 1)}
+        </span>
       </div>
       <Input readOnly disabled value={fmt(pmp)} placeholder="PMP" />
       <Select value={String(tva)} onValueChange={(v) => recalc({ tva: v })}>

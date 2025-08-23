@@ -49,33 +49,43 @@ test('pasting formatted currency parses numeric value', () => {
   );
 });
 
-test('PriceDelta reacts to PU HT vs PMP', () => {
-  const Wrapper = () => {
-    const [value, setValue] = useState({
-      quantite: 1,
-      total_ht: 1.73,
-      pmp: 1.73,
-    });
-    return (
-      <FactureLigne
-        value={value}
-        onChange={setValue}
-        onRemove={() => {}}
-        zones={[]}
-        index={0}
-      />
-    );
-  };
-  const { getByLabelText, getByPlaceholderText } = render(<Wrapper />);
-  const input = getByPlaceholderText('0,00 €');
-  expect(getByLabelText(/égal/)).toBeTruthy();
-  fireEvent.input(input, { target: { value: '1,90' } });
-  fireEvent.blur(input);
-  expect(getByLabelText(/supérieur/)).toBeTruthy();
-  fireEvent.input(input, { target: { value: '1,50' } });
-  fireEvent.blur(input);
-  expect(getByLabelText(/inférieur/)).toBeTruthy();
-  fireEvent.input(input, { target: { value: '1,73' } });
-  fireEvent.blur(input);
-  expect(getByLabelText(/égal/)).toBeTruthy();
+test('delta badge shows signed percent vs PMP', () => {
+  const { container, rerender } = render(
+    <FactureLigne
+      value={{ quantite: 1, total_ht: 1.8, pmp: 2 }}
+      onChange={() => {}}
+      onRemove={() => {}}
+      zones={[]}
+      index={0}
+    />,
+  );
+  let badge = container.querySelector('.delta-badge');
+  expect(badge?.textContent).toBe('-10,0%');
+  expect(badge?.classList.contains('down')).toBe(true);
+
+  rerender(
+    <FactureLigne
+      value={{ quantite: 1, total_ht: 2.3, pmp: 2 }}
+      onChange={() => {}}
+      onRemove={() => {}}
+      zones={[]}
+      index={0}
+    />,
+  );
+  badge = container.querySelector('.delta-badge');
+  expect(badge?.textContent).toBe('+15,0%');
+  expect(badge?.classList.contains('up')).toBe(true);
+
+  rerender(
+    <FactureLigne
+      value={{ quantite: 1, total_ht: 2.3, pmp: 0 }}
+      onChange={() => {}}
+      onRemove={() => {}}
+      zones={[]}
+      index={0}
+    />,
+  );
+  badge = container.querySelector('.delta-badge');
+  expect(badge?.textContent).toBe('—');
+  expect(badge?.classList.contains('zero')).toBe(true);
 });

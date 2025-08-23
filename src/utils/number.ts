@@ -21,3 +21,12 @@ export function formatNumberFR(value: number | null | undefined, decimals = 2): 
     .format(value)
     .replace(/[\u202F\u00A0]/g, ' ');
 }
+
+export function formatSignedPercent(
+  n: number | null | undefined,
+  digits = 1,
+): string {
+  if (n === null || n === undefined || !Number.isFinite(n)) return '—';
+  const sign = n > 0 ? '+' : '';
+  return `${sign}${n.toFixed(digits).replace('.', ',')}%`;
+}

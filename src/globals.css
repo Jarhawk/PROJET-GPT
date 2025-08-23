@@ -319,3 +319,35 @@ input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
+@layer components {
+  .puht-with-delta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .delta-badge {
+    font-size: 12px;
+    line-height: 1;
+    padding: 3px 6px;
+    border-radius: 6px;
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  .delta-badge.up {
+    color: #dc2626;
+    background: rgba(220, 38, 38, 0.12);
+  }
+
+  .delta-badge.down {
+    color: #059669;
+    background: rgba(5, 150, 105, 0.12);
+  }
+
+  .delta-badge.zero {
+    color: #6b7280;
+    background: rgba(107, 114, 128, 0.12);
+  }
+}

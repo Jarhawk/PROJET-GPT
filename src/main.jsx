@@ -26,7 +26,7 @@ if (import.meta?.env?.DEV && 'serviceWorker' in navigator) {
   }
 }
 
-if (import.meta?.env?.DEV || process.env.NODE_ENV === 'development') {
+if (import.meta?.env?.DEV) {
   // @ts-ignore
   window.toast = toast;
 }

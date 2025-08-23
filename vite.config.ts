@@ -50,4 +50,7 @@ export default defineConfig({
       sourcemap: false,
     },
   },
+  define: {
+    'process.env': {}, // évite "process is not defined" côté navigateur
+  },
 });

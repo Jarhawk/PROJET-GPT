@@ -5,17 +5,23 @@ import { useAuth } from '@/hooks/useAuth';
 
 export function useSousFamilles() {
   const { mama_id } = useAuth();
-  const [items, setItems] = useState([]);
+  const [sousFamilles, setSousFamilles] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const list = useCallback(
     async ({ search = '', actif, familleId } = {}) => {
+      setLoading(true);
+      setError(null);
       let q = supabase.from('sous_familles').select('*').eq('mama_id', mama_id);
       if (typeof actif === 'boolean') q = q.eq('actif', actif);
       if (familleId) q = q.eq('famille_id', familleId);
       if (search) q = q.ilike('nom', `%${search}%`);
-      const { data } = await q;
-      setItems(data || []);
-      return data || [];
+      const { data, error: queryError } = await q;
+      if (queryError) setError(queryError);
+      setSousFamilles(data || []);
+      setLoading(false);
+      return { data: data || [], error: queryError };
     },
     [mama_id]
   );
@@ -27,7 +33,7 @@ export function useSousFamilles() {
         .insert([{ nom, famille_id, mama_id, actif: true }])
         .select()
         .single();
-      setItems((prev) => [data, ...prev]);
+      setSousFamilles((prev) => [data, ...prev]);
       return data;
     },
     [mama_id]
@@ -40,14 +46,23 @@ export function useSousFamilles() {
         .update({ actif: value })
         .eq('id', id)
         .eq('mama_id', mama_id);
-      setItems((prev) =>
+      setSousFamilles((prev) =>
         prev.map((s) => (s.id === id ? { ...s, actif: value } : s))
       );
     },
     [mama_id]
   );
 
-  return { items, list, create, toggleActif };
+  return {
+    sousFamilles: sousFamilles ?? [],
+    items: sousFamilles ?? [],
+    list,
+    create,
+    toggleActif,
+    loading,
+    isLoading: loading,
+    error,
+  };
 }
 
 export default useSousFamilles;

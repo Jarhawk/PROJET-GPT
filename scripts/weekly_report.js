@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { posix as path } from 'node:path';
+import path from 'node:path';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { strict as assert } from 'node:assert';
@@ -65,18 +65,16 @@ export async function generateWeeklyCostCenterReport(
   const fmt = (format ?? process.env.WEEKLY_REPORT_FORMAT ?? 'xlsx').toLowerCase();
   assert(['xlsx', 'csv', 'json'].includes(fmt), `Unknown format: ${fmt}`);
 
-  let dir;
-  let filename;
+  let file;
   if (outPath) {
-    dir = path.dirname(outPath);
-    filename = path.basename(outPath);
+    file = path.resolve(outPath);
   } else {
-    dir = process.env.REPORT_DIR ?? null;
-    filename = `weekly_cost_centers.${fmt}`;
+    const dirEnv = process.env.REPORT_DIR ?? '.';
+    const dir = path.isAbsolute(dirEnv) ? dirEnv : path.resolve(dirEnv);
+    file = path.resolve(dir, `weekly_cost_centers.${fmt}`);
   }
-  if (dir && dir !== '.') mkdirSync(dir, { recursive: true });
-  const full = dir ? path.join(dir, filename) : filename;
-  const ext = path.extname(filename).toLowerCase();
+  mkdirSync(path.dirname(file), { recursive: true });
+  const ext = path.extname(file).toLowerCase();
   if (ext && ext !== `.${fmt}`) {
     throw new Error('Output file extension does not match format');
   }
@@ -96,7 +94,7 @@ export async function generateWeeklyCostCenterReport(
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(rows);
     XLSX.utils.book_append_sheet(wb, ws, 'cost_centers');
-    XLSX.writeFile(wb, full);
+    XLSX.writeFile(wb, file);
   } else if (fmt === 'csv') {
     const csv = rows.length
       ? [
@@ -108,12 +106,12 @@ export async function generateWeeklyCostCenterReport(
           ),
         ].join('\n')
       : '';
-    writeFileSync(full, csv);
+    writeFileSync(file, csv);
   } else {
-    writeFileSync(full, JSON.stringify(rows, null, 2));
+    writeFileSync(file, JSON.stringify(rows, null, 2));
   }
-
-  return full;
+  const shown = file.replace(/\\/g, '/').replace(/^[A-Za-z]:/, '');
+  return shown;
 }
 
 export function parseArgs(argv) {

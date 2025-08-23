@@ -1,9 +1,9 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 /* eslint-env node */
-import { mkdirSync, writeFileSync } from 'fs';
+import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import * as XLSX from 'xlsx';
-import { supabase } from '@/lib/supabase';
 import {
   runScript,
   isMainModule,
@@ -15,8 +15,29 @@ import {
   ensureDirForFile,
 } from './cli_utils.js';
 
-export const USAGE =
-  'Usage: node scripts/export_accounting.js YYYY-MM [MAMA_ID] [SUPABASE_URL] [SUPABASE_KEY] [--output FILE] [--format csv|xlsx|json] [--url URL] [--key KEY]';
+function showUsageAndExit0(usage) {
+  console.log(`Usage: ${usage}`);
+  process.exit(0);
+}
+
+function showVersionAndExit0() {
+  const pkg = JSON.parse(
+    readFileSync(
+      path.join(path.dirname(fileURLToPath(import.meta.url)), '../package.json'),
+      'utf8'
+    )
+  );
+  console.log(pkg.version);
+  process.exit(0);
+}
+
+const argv = process.argv.slice(2);
+const USAGE_TEXT =
+  'node scripts/export_accounting.js YYYY-MM [MAMA_ID] [SUPABASE_URL] [SUPABASE_KEY] [--output FILE] [--format csv|xlsx|json] [--url URL] [--key KEY]';
+if (argv.includes('--help') || argv.includes('-h')) showUsageAndExit0(USAGE_TEXT);
+if (argv.includes('--version') || argv.includes('-v')) showVersionAndExit0();
+
+export const USAGE = `Usage: ${USAGE_TEXT}`;
 
 
 export async function exportAccounting(
@@ -27,6 +48,15 @@ export async function exportAccounting(
   output = null,
   format = process.env.ACCOUNTING_FORMAT || 'csv'
 ) {
+  const { createClient } = await import('@supabase/supabase-js');
+  const supabase = createClient(
+    supabaseUrl ?? process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL ?? 'https://example.supabase.co',
+    supabaseKey ??
+      process.env.VITE_SUPABASE_ANON_KEY ??
+      process.env.SUPABASE_ANON_KEY ??
+      process.env.SUPABASE_KEY ??
+      'key'
+  );
   const mama_id = mamaId;
   const m = month || new Date().toISOString().slice(0,7);
   const start = `${m}-01`;
@@ -49,14 +79,17 @@ export async function exportAccounting(
     total: r.total,
   }));
   const p = path.posix;
-  const dir = p.join(process.env.ACCOUNTING_DIR ?? '/tmp', 'reports');
   const makeFile = (name) => {
     if (output) {
       ensureDirForFile(output);
       return output;
     }
-    mkdirSync(dir, { recursive: true });
-    return p.join(dir, name);
+    const dir = process.env.ACCOUNTING_DIR;
+    if (dir) {
+      mkdirSync(dir, { recursive: true });
+      return p.join(dir, name);
+    }
+    return name;
   };
   if (format === 'xlsx') {
     const ws = XLSX.utils.json_to_sheet(rows);

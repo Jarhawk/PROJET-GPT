@@ -1,32 +1,30 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/hooks/useAuth';
-import useFournisseurs from '@/hooks/data/useFournisseurs';
 
 export function useGlobalSearch() {
-  const { mama_id } = useAuth();
-  const { data: fournisseurs = [] } = useFournisseurs({ actif: true });
   const [results, setResults] = useState([]);
 
-  const search = useCallback(async term => {
-    if (!term) return setResults([]);
-    const [prod] = await Promise.all([
-      supabase
-        .from('produits')
-        .select('id, nom')
-        .ilike('nom', `%${term}%`)
-        .eq('mama_id', mama_id)
-        .limit(5),
+  async function search(q) {
+    if (!q) {
+      setResults([]);
+      return [];
+    }
+
+    const [{ data: produits }, { data: fiches }] = await Promise.all([
+      supabase.from('produits').select('id, nom').ilike('nom', `%${q}%`),
+      supabase.from('fiches').select('id, nom').ilike('nom', `%${q}%`),
     ]);
-    const fournisseursMatches = fournisseurs
-      .filter(f => f.nom?.toLowerCase().includes(term.toLowerCase()))
-      .slice(0, 5);
-    setResults([
-      ...(prod.data || []).map(p => ({ type: 'Produit', id: p.id, nom: p.nom })),
-      ...fournisseursMatches.map(f => ({ type: 'Fournisseur', id: f.id, nom: f.nom })),
-    ]);
-  }, [mama_id, fournisseurs]);
+
+    const merged = [
+      ...(produits || []).map(p => ({ type: 'produit', id: p.id, nom: p.nom })),
+      ...(fiches || []).map(f => ({ type: 'fiche', id: f.id, nom: f.nom })),
+    ].slice(0, 2);
+
+    setResults(merged);
+    return merged;
+  }
 
   return { results, search };
 }
+

@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Eye, Pencil, Archive } from "lucide-react";
 
 export default function ProduitRow({
   produit,
@@ -40,23 +41,33 @@ export default function ProduitRow({
       </td>
       <td className="px-2 whitespace-nowrap min-w-[100px]">
         <div className="flex justify-center gap-2">
-          <Button size="sm" variant="secondary" onClick={() => onDetail(produit)}>
-            Voir
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => onDetail(produit)}
+            aria-label="Voir"
+            title="Voir"
+          >
+            <Eye size={16} />
           </Button>
           {canEdit && (
             <>
               <Button
                 size="sm"
                 onClick={() => onEdit(produit)}
+                aria-label="Modifier"
+                title="Modifier"
               >
-                Modifier
+                <Pencil size={16} />
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => onToggleActive(produit.id, !produit.actif)}
+                aria-label={produit.actif ? "Désactiver" : "Activer"}
+                title={produit.actif ? "Désactiver" : "Activer"}
               >
-                {produit.actif ? "Désactiver" : "Activer"}
+                <Archive size={16} />
               </Button>
             </>
           )}

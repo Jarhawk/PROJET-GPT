@@ -58,9 +58,10 @@ test('toggle button calls hook', async () => {
     exportProductsToExcel: vi.fn(),
     addProduct: vi.fn(),
     toggleProductActive: toggle,
+    loading: false,
   });
   render(<Produits />);
-  const button = await screen.findByText('Désactiver');
+  const button = await screen.findByRole('button', { name: 'Désactiver' });
   fireEvent.click(button);
   expect(toggle).toHaveBeenCalledWith('1', false);
 });

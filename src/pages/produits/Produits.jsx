@@ -14,7 +14,7 @@ import TableHeader from "@/components/ui/TableHeader";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { Plus as PlusIcon, FileDown as FileDownIcon } from "lucide-react";
+import { Plus as PlusIcon, FileDown as FileDownIcon, Eye, Pencil, Archive } from "lucide-react";
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import ProduitRow from "@/components/produits/ProduitRow";
@@ -32,6 +32,7 @@ export default function Produits() {
     total,
     fetchProducts,
     toggleProductActive,
+    loading: isLoading,
   } = useProducts();
   const { familles: famillesHook, fetchFamilles } = useFamilles();
   const {
@@ -297,7 +298,17 @@ export default function Produits() {
             </tr>
           </thead>
           <tbody>
-            {products.length === 0 ? (
+            {isLoading ? (
+              Array.from({ length: 12 }).map((_, i) => (
+                <tr key={i}>
+                  {Array.from({ length: 6 }).map((__, j) => (
+                    <td key={j}>
+                      <LoadingSkeleton className="h-4 w-full" />
+                    </td>
+                  ))}
+                </tr>
+              ))
+            ) : products.length === 0 ? (
               <tr>
                 <td colSpan={6} className="py-4 text-center text-muted-foreground">
                   Aucun produit trouvé. Essayez d’ajouter un produit via le bouton ci-dessus.
@@ -323,7 +334,11 @@ export default function Produits() {
       </ListingContainer>
       {/* Mobile listing */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:hidden">
-        {products.length === 0 ? (
+        {isLoading ? (
+          Array.from({ length: 12 }).map((_, i) => (
+            <LoadingSkeleton key={i} className="h-24" />
+          ))
+        ) : products.length === 0 ? (
           <div className="py-4 text-center text-muted-foreground">
             Aucun produit trouvé. Essayez d’ajouter un produit via le bouton ci-dessus.
           </div>
@@ -345,19 +360,27 @@ export default function Produits() {
                     setSelectedProduct(produit);
                     setShowDetail(true);
                   }}
+                  aria-label="Voir"
+                  title="Voir"
                 >
-                  Voir
+                  <Eye size={16} />
                 </Button>
                 {canEdit && (
                   <>
-                    <Button onClick={() => handleEdit(produit)}>Modifier</Button>
+                    <Button
+                      onClick={() => handleEdit(produit)}
+                      aria-label="Modifier"
+                      title="Modifier"
+                    >
+                      <Pencil size={16} />
+                    </Button>
                     <Button
                       variant="outline"
-                      onClick={() =>
-                        handleToggleActive(produit.id, !produit.actif)
-                      }
+                      onClick={() => handleToggleActive(produit.id, !produit.actif)}
+                      aria-label={produit.actif ? "Désactiver" : "Activer"}
+                      title={produit.actif ? "Désactiver" : "Activer"}
                     >
-                      {produit.actif ? "Désactiver" : "Activer"}
+                      <Archive size={16} />
                     </Button>
                   </>
                 )}

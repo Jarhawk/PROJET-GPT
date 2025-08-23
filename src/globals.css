@@ -123,17 +123,24 @@ select option:checked {
 .listing-table {
   @apply w-full min-w-max table-auto text-left whitespace-nowrap;
 }
+.listing-table thead {
+  @apply sticky top-0 z-[1];
+}
 .listing-table thead th {
-  @apply bg-white/10 backdrop-blur sticky top-0 z-10 px-3 py-3 border-b border-white/10;
+  @apply bg-white/10 backdrop-blur px-3 py-3 border-b border-white/10;
 }
 .listing-table td,
 .listing-table th {
   @apply px-3 py-3 border-b border-white/10;
 }
+.listing-table tbody tr {
+  @apply focus-within:outline-none focus-within:ring-2 focus-within:ring-primary/50;
+}
 .listing-table tbody tr:nth-child(odd) {
   @apply bg-white/5;
 }
-.listing-table tbody tr:hover {
+.listing-table tbody tr:hover,
+.listing-table tbody tr:focus-within {
   @apply bg-white/10;
 }
 

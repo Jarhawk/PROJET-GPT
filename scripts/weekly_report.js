@@ -83,7 +83,7 @@ export async function generateWeeklyCostCenterReport(
 
   const supa = createClient(resolvedUrl, resolvedKey);
   const mamaId =
-    mamaIdArg ?? process.env.MAMA_ID ?? process.env.VITE_MAMA_ID ?? null;
+    mamaIdArg ?? process.env.MAMASTOCK_MAMA_ID ?? process.env.MAMA_ID ?? null;
   const { data, error } = await supa.rpc('stats_cost_centers', {
     mama_id_param: mamaId,
     debut_param: start ?? null,

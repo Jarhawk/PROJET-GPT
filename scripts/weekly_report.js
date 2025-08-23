@@ -7,7 +7,7 @@ import * as XLSX from 'xlsx';
 import { runScript, isMainModule } from './cli_utils.js';
 
 export async function generateWeeklyCostCenterReport(
-  mamaId = null,
+  mamaIdArg = null,
   url = null,
   key = null,
   start = null,
@@ -57,8 +57,10 @@ export async function generateWeeklyCostCenterReport(
   }
 
   const supa = createClient(resolvedUrl, resolvedKey);
+  const mamaId =
+    mamaIdArg ?? process.env.MAMA_ID ?? process.env.VITE_MAMA_ID ?? null;
   const { data, error } = await supa.rpc('stats_cost_centers', {
-    mama_id_param: mamaId ?? null,
+    mama_id_param: mamaId,
     debut_param: start ?? null,
     fin_param: end ?? null,
   });

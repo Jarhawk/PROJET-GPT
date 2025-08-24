@@ -54,7 +54,7 @@ export default function useConsoMoyenne() {
       }
       return avgValue;
     } catch (e) {
-      console.warn('useConsoMoyenne', e);
+      console.warn('[gadgets] vue manquante ou colonne absente:', e?.message || e);
       setError(e);
       setAvg(0);
       return 0;

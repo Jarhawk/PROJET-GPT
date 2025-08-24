@@ -21,6 +21,7 @@ export function useDashboards() {
       .order("created_at", { ascending: true });
     setLoading(false);
     if (error) {
+      console.warn('[gadgets] vue manquante ou colonne absente:', error?.message || error);
       setError(error.message || error);
       setDashboards([]);
       return [];
@@ -40,6 +41,7 @@ export function useDashboards() {
       .single();
     setLoading(false);
     if (error) {
+      console.warn('[gadgets] vue manquante ou colonne absente:', error?.message || error);
       setError(error.message || error);
       return null;
     }
@@ -66,6 +68,7 @@ export function useDashboards() {
       .single();
     setLoading(false);
     if (error) {
+      console.warn('[gadgets] vue manquante ou colonne absente:', error?.message || error);
       setError(error.message || error);
       return null;
     }
@@ -93,6 +96,7 @@ export function useDashboards() {
       .single();
     setLoading(false);
     if (error) {
+      console.warn('[gadgets] vue manquante ou colonne absente:', error?.message || error);
       setError(error.message || error);
       return null;
     }
@@ -117,6 +121,7 @@ export function useDashboards() {
       .eq("mama_id", mama_id);
     setLoading(false);
     if (error) {
+      console.warn('[gadgets] vue manquante ou colonne absente:', error?.message || error);
       setError(error.message || error);
       return;
     }

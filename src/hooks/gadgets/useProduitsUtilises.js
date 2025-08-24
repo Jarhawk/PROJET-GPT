@@ -36,7 +36,7 @@ export default function useProduitsUtilises() {
       }
       return list;
     } catch (e) {
-      console.warn('useProduitsUtilises', e);
+      console.warn('[gadgets] vue manquante ou colonne absente:', e?.message || e);
       setError(e);
       setData([]);
       return [];

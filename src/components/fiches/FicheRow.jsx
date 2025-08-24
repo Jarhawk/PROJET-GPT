@@ -12,7 +12,7 @@ export default function FicheRow({ fiche, onEdit, onDetail, onDuplicate, onDelet
           {fiche.nom}
         </Button>
       </td>
-      <td className="border px-4 py-2">{fiche.famille?.nom || "-"}</td>
+      <td className="border px-4 py-2">{fiche.famille_nom || "—"}</td>
       <td className="border px-4 py-2 text-right">
         {Number(fiche.cout_par_portion).toLocaleString("fr-FR", {
           style: "currency",

@@ -1,136 +1,199 @@
-// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
-import { useAuth } from '@/hooks/useAuth';
-import { useSousFamilles } from '@/hooks/useSousFamilles';
-import { useFamilles } from '@/hooks/useFamilles';
-import ListingContainer from '@/components/ui/ListingContainer';
-import TableHeader from '@/components/ui/TableHeader';
+import { useMemo, useState } from 'react';
+import { supabase } from '@/lib/supabase';
+import { useMamaSettings } from '@/hooks/useMamaSettings';
+import { useFamillesParametrage } from '@/hooks/data/useFamillesParametrage';
+import { useSousFamillesParametrage } from '@/hooks/data/useSousFamillesParametrage';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import Unauthorized from '@/pages/auth/Unauthorized';
 
 export default function SousFamilles() {
-  const { hasAccess, loading: authLoading } = useAuth();
-  const canEdit = hasAccess('parametrage', 'peut_modifier');
-  const { sousFamilles, list, create, update, remove, loading } = useSousFamilles();
-  const { familles } = useFamilles();
-  const [edit, setEdit] = useState(null);
+  const { mamaId } = useMamaSettings();
+  const [searchRaw, setSearchRaw] = useState('');
+  const [search, setSearch] = useState('');
+  const [familleId, setFamilleId] = useState('');
+  const [statut, setStatut] = useState('all'); // all | actifs | inactifs
 
-  useEffect(() => {
-    list();
-  }, [list]);
+  useMemo(() => {
+    const id = setTimeout(() => setSearch(searchRaw), 250);
+    return () => clearTimeout(id);
+  }, [searchRaw]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      if (edit?.id) await update(edit.id, { code: edit.code, nom: edit.nom, famille_id: edit.famille_id });
-      else await create({ code: edit?.code || '', nom: edit?.nom || '', famille_id: edit?.famille_id });
-      toast.success('Sous-famille enregistrée');
-      setEdit(null);
-    } catch (err) {
-      console.error(err);
-      toast.error("Erreur lors de l'enregistrement");
-    }
-  };
+  const { data: familles = [] } = useFamillesParametrage({ mamaId });
+  const { data: sousFamilles = [], refetch, isLoading } =
+    useSousFamillesParametrage({ mamaId, search, familleId: familleId || null, statut });
 
-  const handleDelete = async (id) => {
-    if (confirm('Supprimer cet élément ?')) {
-      try {
-        await remove(id);
-        toast.success('Sous-famille supprimée');
-      } catch (err) {
-        console.error(err);
-        toast.error('Suppression échouée');
-      }
-    }
-  };
+  // Helpers
+  const famillesById = useMemo(() => {
+    const map = new Map();
+    (familles || []).forEach(f => map.set(f.id, f));
+    return map;
+  }, [familles]);
 
-  if (authLoading || loading) return <LoadingSpinner message="Chargement..." />;
-  if (!canEdit) return <Unauthorized />;
+  async function createOrUpdate(sf) {
+    const payload = {
+      id: sf.id ?? undefined,
+      nom: sf.nom?.trim(),
+      famille_id: sf.famille_id || null,
+      actif: sf.actif ?? true,
+      mama_id: mamaId,
+    };
+    const q = sf.id
+      ? supabase.from('sous_familles').update(payload).eq('id', sf.id).eq('mama_id', mamaId).select().single()
+      : supabase.from('sous_familles').insert(payload).select().single();
+
+    const { error } = await q;
+    if (error) throw error;
+    await refetch();
+  }
+
+  async function toggleActif(row) {
+    const { error } = await supabase
+      .from('sous_familles')
+      .update({ actif: !row.actif })
+      .eq('id', row.id)
+      .eq('mama_id', mamaId);
+    if (!error) refetch();
+  }
+
+  // Soft delete -> on passe actif à false (évite FK)
+  async function archive(row) {
+    const { error } = await supabase
+      .from('sous_familles')
+      .update({ actif: false })
+      .eq('id', row.id)
+      .eq('mama_id', mamaId);
+    if (!error) refetch();
+  }
+
+  // UI minimal d'édition inline
+  const [editing, setEditing] = useState(null);
+  const [form, setForm] = useState({ nom: '', famille_id: '', actif: true });
+
+  function startNew() {
+    setEditing(null);
+    setForm({ nom: '', famille_id: familleId || '', actif: true });
+  }
+  function startEdit(row) {
+    setEditing(row.id);
+    setForm({ nom: row.nom, famille_id: row.famille_id || '', actif: !!row.actif });
+  }
+  async function save() {
+    await createOrUpdate({
+      id: editing ?? undefined,
+      nom: form.nom,
+      famille_id: form.famille_id || null,
+      actif: form.actif,
+    });
+    startNew(); // reset
+  }
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Sous-familles</h1>
-      <TableHeader className="gap-2">
-        <Button onClick={() => setEdit({ code: '', nom: '', famille_id: familles[0]?.id })}>+ Nouvelle sous-famille</Button>
-      </TableHeader>
-      <ListingContainer className="w-full overflow-x-auto">
-        <table className="text-sm w-full">
-          <thead>
+    <div className="space-y-4">
+      {/* Filtres en une ligne */}
+      <div className="flex flex-wrap items-center gap-2">
+        <Input
+          placeholder="Recherche nom"
+          value={searchRaw}
+          onChange={(e) => setSearchRaw(e.target.value)}
+          className="min-w-[220px]"
+        />
+
+        <select
+          value={familleId}
+          onChange={(e) => setFamilleId(e.target.value)}
+          className="h-9 rounded-xl px-3 bg-black/20 border border-white/10"
+        >
+          <option value="">Toutes les familles</option>
+          {(familles || []).map(f => (
+            <option key={f.id} value={f.id}>{f.nom}</option>
+          ))}
+        </select>
+
+        <select
+          value={statut}
+          onChange={(e) => setStatut(e.target.value)}
+          className="h-9 rounded-xl px-3 bg-black/20 border border-white/10"
+        >
+          <option value="all">Tous</option>
+          <option value="actifs">Actifs</option>
+          <option value="inactifs">Inactifs</option>
+        </select>
+
+        <div className="ml-auto flex gap-2">
+          <Button onClick={startNew}>Nouvelle sous-famille</Button>
+        </div>
+      </div>
+
+      {/* Formulaire inline */}
+      <div className="rounded-2xl border border-white/10 p-3 bg-white/5">
+        <div className="flex flex-wrap gap-2 items-center">
+          <Input
+            placeholder="Nom de la sous-famille"
+            value={form.nom}
+            onChange={(e) => setForm((f) => ({ ...f, nom: e.target.value }))}
+            className="min-w-[240px]"
+          />
+          <select
+            value={form.famille_id}
+            onChange={(e) => setForm((f) => ({ ...f, famille_id: e.target.value }))}
+            className="h-9 rounded-xl px-3 bg-black/20 border border-white/10"
+          >
+            <option value="">— Choisir une famille —</option>
+            {(familles || []).map(f => (
+              <option key={f.id} value={f.id}>{f.nom}</option>
+            ))}
+          </select>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={!!form.actif}
+              onChange={(e) => setForm((f) => ({ ...f, actif: e.target.checked }))}
+            />
+            Actif
+          </label>
+
+          <Button onClick={save}>{editing ? 'Enregistrer' : 'Ajouter'}</Button>
+          {editing && <Button variant="secondary" onClick={startNew}>Annuler</Button>}
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="rounded-2xl border border-white/10 bg-white/5 overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-white/5">
             <tr>
-              <th className="px-2 py-1">Code</th>
-              <th className="px-2 py-1">Nom</th>
-              <th className="px-2 py-1">Famille</th>
-              <th className="px-2 py-1">Actions</th>
+              <th className="text-left p-3">Nom</th>
+              <th className="text-left p-3">Famille</th>
+              <th className="text-left p-3">Statut</th>
+              <th className="text-left p-3">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {sousFamilles.map((sf) => (
-              <tr key={sf.id}>
-                <td className="px-2 py-1">{sf.code}</td>
-                <td className="px-2 py-1">{sf.nom}</td>
-                <td className="px-2 py-1">{sf.familles?.nom || ''}</td>
-                <td className="px-2 py-1 flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => setEdit(sf)}>
-                    Modifier
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={() => handleDelete(sf.id)}>
-                    Supprimer
-                  </Button>
+            {isLoading && (
+              <tr><td colSpan={4} className="p-4">Chargement…</td></tr>
+            )}
+            {!isLoading && (sousFamilles ?? []).length === 0 && (
+              <tr><td colSpan={4} className="p-4">Aucune sous-famille.</td></tr>
+            )}
+            {(sousFamilles ?? []).map((row) => (
+              <tr key={row.id} className="border-t border-white/10">
+                <td className="p-3">{row.nom}</td>
+                <td className="p-3">{famillesById.get(row.famille_id)?.nom ?? '—'}</td>
+                <td className="p-3">{row.actif ? 'Actif' : 'Inactif'}</td>
+                <td className="p-3">
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="secondary" onClick={() => startEdit(row)}>Modifier</Button>
+                    <Button size="sm" variant="secondary" onClick={() => toggleActif(row)}>
+                      {row.actif ? 'Désactiver' : 'Activer'}
+                    </Button>
+                    <Button size="sm" variant="secondary" onClick={() => archive(row)}>Archiver</Button>
+                  </div>
                 </td>
               </tr>
             ))}
-            {sousFamilles.length === 0 && (
-              <tr>
-                <td colSpan="4" className="py-2">
-                  Aucune sous-famille
-                </td>
-              </tr>
-            )}
           </tbody>
         </table>
-      </ListingContainer>
-      {edit && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setEdit(null)} />
-          <div className="relative bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow-lg p-6 w-full max-w-md">
-            <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-              <input
-                className="input"
-                placeholder="Code"
-                value={edit.code || ''}
-                onChange={(e) => setEdit({ ...edit, code: e.target.value })}
-              />
-              <input
-                className="input"
-                placeholder="Nom"
-                required
-                value={edit.nom || ''}
-                onChange={(e) => setEdit({ ...edit, nom: e.target.value })}
-              />
-              <select
-                className="input"
-                value={edit.famille_id || ''}
-                onChange={(e) => setEdit({ ...edit, famille_id: e.target.value })}
-              >
-                <option value="">Sélectionner une famille</option>
-                {familles.map((f) => (
-                  <option key={f.id} value={f.id}>
-                    {f.nom}
-                  </option>
-                ))}
-              </select>
-              <div className="flex justify-end gap-2 mt-2">
-                <Button type="button" variant="outline" onClick={() => setEdit(null)}>
-                  Annuler
-                </Button>
-                <Button type="submit">Enregistrer</Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 }

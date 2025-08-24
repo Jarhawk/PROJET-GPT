@@ -36,7 +36,7 @@ const defaults = {
 const localEnabledModules = {};
 const localFeatureFlags = {};
 
-export function useMamaSettings() {
+export const useMamaSettings = () => {
   const { userData } = useAuth();
   const mamaId = userData?.mama_id;
   const queryClient = safeQueryClient();
@@ -107,6 +107,6 @@ export function useMamaSettings() {
     fetchMamaSettings: query.refetch,
     updateMamaSettings,
   };
-}
+};
 
 export default useMamaSettings;

@@ -28,27 +28,28 @@ beforeEach(async () => {
 
 test('fetchAlerts selects expected view columns', async () => {
   const { fetchAlerts } = useRuptureAlerts();
-  await fetchAlerts('rupture');
+  await fetchAlerts();
   expect(fromMock).toHaveBeenCalledWith('v_alertes_rupture');
   expect(queryBuilder.select).toHaveBeenCalledWith(
-    'id:produit_id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, consommation_prevue, receptions, manque, type'
+    'mama_id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, manque'
   );
-  expect(queryBuilder.eq).toHaveBeenNthCalledWith(1, 'mama_id', 'm1');
-  expect(queryBuilder.eq).toHaveBeenNthCalledWith(2, 'type', 'rupture');
+  expect(queryBuilder.eq).toHaveBeenCalledWith('mama_id', 'm1');
+  expect(queryBuilder.order).toHaveBeenCalledWith('manque', { ascending: false });
 });
 
-test('fetchAlerts computes stock_projete', async () => {
+test('fetchAlerts returns data', async () => {
   queryBuilder.then.mockImplementation((resolve) =>
     resolve({
       data: [
         {
+          mama_id: 'm1',
           produit_id: 1,
           nom: 'p',
+          unite: 'u',
+          fournisseur_nom: 'f',
           stock_actuel: 5,
-          consommation_prevue: 3,
-          receptions: 2,
-          manque: 0,
-          type: 'rupture',
+          stock_min: 10,
+          manque: 5,
         },
       ],
       error: null,
@@ -56,5 +57,5 @@ test('fetchAlerts computes stock_projete', async () => {
   );
   const { fetchAlerts } = useRuptureAlerts();
   const data = await fetchAlerts();
-  expect(data[0].stock_projete).toBe(4);
+  expect(data[0].nom).toBe('p');
 });

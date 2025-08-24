@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
+import { safeSelectWithFallback } from '@/lib/supa/safeSelect';
 
 export default function useTopFournisseurs() {
   const { mama_id, loading: authLoading } = useAuth() || {};
@@ -16,18 +17,15 @@ export default function useTopFournisseurs() {
       setLoading(true);
       setError(null);
       try {
-        const { data, error } = await supabase
-          .from('v_top_fournisseurs')
-          .select('fournisseur_id, montant, mois')
-          .eq('mama_id', mama_id);
-
-        if (error) throw error;
-
-        const rows = (data || []).map((r) => ({
-          id: r.fournisseur_id,
-          montant: r.montant,
-          mois: r.mois,
-        }));
+        const rows = await safeSelectWithFallback({
+          client: supabase,
+          table: 'v_top_fournisseurs',
+          select: 'fournisseur_id, montant, mois, mama_id',
+          transform: (rows) =>
+            (rows || [])
+              .filter(r => r.mama_id === mama_id)
+              .map(r => ({ id: r.fournisseur_id, montant: r.montant, mois: r.mois })),
+        });
         setData(rows);
       } catch (e) {
         console.warn('[gadgets] vue manquante ou colonne absente:', e?.message || e);

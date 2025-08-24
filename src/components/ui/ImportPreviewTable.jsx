@@ -1,8 +1,7 @@
 import { validateProduitRow } from "@/utils/excelUtils";
 
-export default function ImportPreviewTable({ rows, onUpdate, maps, reference }) {
-  const { familles = [], sousFamilles = [], unites = [], zones = [] } =
-    reference || {};
+export default function ImportPreviewTable({ rows = [], onUpdate, maps, reference = {} }) {
+  const { familles = [], sousFamilles = [], unites = [], zones = [] } = reference;
 
   function handleChange(index, field, value) {
     const updated = [...rows];

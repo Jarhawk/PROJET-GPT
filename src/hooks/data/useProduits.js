@@ -7,6 +7,7 @@ import { useMamaSettings } from '@/hooks/useMamaSettings';
  * Liste paginée des produits avec filtres.
  * - statut: 'tous' | 'actif' | 'inactif'
  * - sousFamilleId: UUID ou null
+ * Note: on n'utilise PAS de join PostgREST pour la sous-famille.
  */
 export const useProduits = ({
   search = '',
@@ -22,13 +23,17 @@ export const useProduits = ({
       let q = supabase
         .from('produits')
         .select(
-          'id, nom, unite, pmp, zone_stockage, actif, sous_famille_id, sous_famille:sous_familles(id, nom)',
+          // on récupère les deux variantes pour la compat
+          'id, nom, unite, pmp, zone_stockage, actif, sous_famille_id, sous_famille',
           { count: 'exact' }
         )
         .eq('mama_id', mamaId);
 
       if (search) q = q.ilike('nom', `%${search}%`);
-      if (sousFamilleId) q = q.eq('sous_famille_id', sousFamilleId);
+      if (sousFamilleId) {
+        // couvre soit "sous_famille_id", soit "sous_famille"
+        q = q.or(`sous_famille_id.eq.${sousFamilleId},sous_famille.eq.${sousFamilleId}`);
+      }
       if (statut === 'actif') q = q.eq('actif', true);
       if (statut === 'inactif') q = q.eq('actif', false);
 

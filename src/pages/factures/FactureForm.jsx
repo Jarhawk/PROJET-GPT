@@ -21,7 +21,7 @@ import { Badge } from '@/components/ui/badge';
 import { mapUILineToPayload } from '@/features/factures/invoiceMappers';
 import useProduitLineDefaults from '@/hooks/useProduitLineDefaults';
 import useZonesStock from '@/hooks/useZonesStock';
-import { formatMoneyFR } from '@/utils/numberFormat';
+import { formatMoneyFR, formatMoneyFromCents } from '@/utils/numberFormat';
 
 const FN_UPDATE_FACTURE_EXISTS = false;
 
@@ -83,17 +83,17 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
 
   const sum = (arr) => arr.reduce((acc, n) => acc + n, 0);
 
-  const sumHT = useMemo(
-    () => sum(lignes.map((l) => Number(l.total_ht || 0))),
+  const sumHTCents = useMemo(
+    () => sum(lignes.map((l) => Math.round(Number(l.total_ht || 0) * 100))),
     [lignes]
   );
-  const sommeLignesHT = sumHT;
-  const sumTVA = useMemo(
-    () => sum(lignes.map((l) => Number(l.tva_montant || 0))),
+  const sommeLignesHT = sumHTCents / 100;
+  const sumTVACents = useMemo(
+    () => sum(lignes.map((l) => Math.round(Number(l.tva_montant || 0) * 100))),
     [lignes]
   );
-  const sumTTC = useMemo(
-    () => sum(lignes.map((l) => Number(l.total_ttc || 0))),
+  const sumTTCents = useMemo(
+    () => sum(lignes.map((l) => Math.round(Number(l.total_ttc || 0) * 100))),
     [lignes]
   );
 
@@ -362,15 +362,15 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
       <div className="rounded-xl border border-border bg-card p-4 grid md:grid-cols-3 gap-4">
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Total HT</span>
-          <span className="font-semibold">{formatMoneyFR(sumHT)}</span>
+          <span className="font-semibold">{formatMoneyFromCents(sumHTCents)}</span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">TVA €</span>
-          <span className="font-semibold">{formatMoneyFR(sumTVA)}</span>
+          <span className="font-semibold">{formatMoneyFromCents(sumTVACents)}</span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Total TTC</span>
-          <span className="font-semibold">{formatMoneyFR(sumTTC)}</span>
+          <span className="font-semibold">{formatMoneyFromCents(sumTTCents)}</span>
         </div>
       </div>
 

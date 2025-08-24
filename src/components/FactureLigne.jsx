@@ -1,17 +1,18 @@
-import { useRef, useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { useEffect, useRef, useState } from 'react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectTrigger,
   SelectContent,
   SelectItem,
   SelectValue,
-} from "@/components/ui/select";
-import { Trash2 } from "lucide-react";
-import ProduitSearchModal from "@/components/factures/ProduitSearchModal";
-import NumberInput from "@/components/inputs/NumberInput";
-import { formatEUR, formatQty } from "@/utils/number";
+} from '@/components/ui/select';
+import { Trash2 } from 'lucide-react';
+import ProduitSearchModal from '@/components/factures/ProduitSearchModal';
+import MoneyInput from '@/components/inputs/MoneyInput';
+import QtyInput from '@/components/inputs/QtyInput';
+import { formatMoneyFromCents } from '@/utils/numberFormat';
 
 export default function FactureLigne({
   value: line,
@@ -25,60 +26,47 @@ export default function FactureLigne({
   const lineRef = useRef(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  const qte = Number(line.quantite || 0);
-  const totalHt = Number(line.total_ht || 0);
+  const [qty, setQty] = useState(Number(line.quantite || 0));
+  const [totalCents, setTotalCents] = useState(
+    Math.round(Number(line.total_ht || 0) * 100)
+  );
+
+  useEffect(() => {
+    setQty(Number(line.quantite || 0));
+  }, [line.quantite]);
+  useEffect(() => {
+    setTotalCents(Math.round(Number(line.total_ht || 0) * 100));
+  }, [line.total_ht]);
+
   const tva = Number(line.tva || 0);
-  const puHt = line.quantite && line.quantite > 0 ? (line.total_ht ?? 0) / line.quantite : line.pu_ht ?? null;
-  const pmp = line.pmp ?? null;
+  const puCents = qty > 0 ? Math.round(totalCents / qty) : 0;
+  const pmpCents = Math.round(Number(line.pmp ?? 0) * 100);
+  const variationPct =
+    pmpCents > 0 ? ((puCents - pmpCents) / pmpCents) * 100 : 0;
+  const varColor =
+    variationPct < 0
+      ? 'text-emerald-400'
+      : variationPct > 0
+      ? 'text-red-400'
+      : 'text-neutral-400';
 
-  let deltaPct = null;
-  if (pmp && pmp > 0 && puHt !== null && Number.isFinite(puHt)) {
-    deltaPct = ((puHt - pmp) / pmp) * 100;
-  }
-  const deltaText =
-    deltaPct === null
-      ? ""
-      : deltaPct >= 0
-      ? `+${deltaPct.toFixed(2).replace(".", ",")} %`
-      : `${deltaPct.toFixed(2).replace(".", ",")} %`;
-  const deltaClass =
-    deltaPct === null
-      ? "text-muted-foreground"
-      : deltaPct > 0
-      ? "text-red-600"
-      : deltaPct < 0
-      ? "text-green-600"
-      : "text-muted-foreground";
-
-  const recalc = (patch = {}) => {
-    const q = patch.quantite !== undefined ? Number(patch.quantite) : qte;
-    let lht = patch.total_ht !== undefined ? Number(patch.total_ht) : totalHt;
-    let pu = patch.pu_ht !== undefined ? Number(patch.pu_ht) : puHt ?? 0;
-    const tv = patch.tva !== undefined ? Number(patch.tva) : tva;
-
-    if (patch.total_ht !== undefined && patch.pu_ht === undefined) {
-      pu = q > 0 ? +(lht / q).toFixed(4) : 0;
-    } else if (patch.pu_ht !== undefined && patch.total_ht === undefined) {
-      lht = +(pu * q).toFixed(2);
-    } else if (patch.quantite !== undefined && patch.total_ht === undefined && patch.pu_ht === undefined) {
-      lht = +(pu * q).toFixed(2);
-    }
-
-    const tvaMontant = +(lht * (tv / 100)).toFixed(2);
-    const totalTtc = +(lht + tvaMontant).toFixed(2);
+  function update(nQty = qty, nTotalCents = totalCents, tv = tva) {
+    const pu = nQty > 0 ? Math.round(nTotalCents / nQty) : 0;
+    const total_ht = nTotalCents / 100;
+    const pu_ht = pu / 100;
+    const tva_montant = +(total_ht * (Number(tv) / 100)).toFixed(2);
+    const total_ttc = +(total_ht + tva_montant).toFixed(2);
     onChange({
-      ...line,
-      ...patch,
-      quantite: q,
-      total_ht: lht,
-      prix_total_ht: lht,
-      pu_ht: pu,
-      prix_unitaire_ht: pu,
+      quantite: nQty,
+      total_ht,
+      prix_total_ht: total_ht,
+      pu_ht,
+      prix_unitaire_ht: pu_ht,
       tva: tv,
-      tva_montant: tvaMontant,
-      total_ttc: totalTtc,
+      tva_montant,
+      total_ttc,
     });
-  };
+  }
 
   const excludeIdsSameZone = allLines
     .filter(
@@ -89,72 +77,99 @@ export default function FactureLigne({
 
   const TVA_OPTIONS = [0, 5.5, 10, 20];
 
+  function openProductPicker() {
+    setModalOpen(true);
+  }
+
   return (
     <div
       ref={lineRef}
       tabIndex={-1}
       className="grid gap-3 items-center grid-cols-[repeat(auto-fit,minmax(140px,1fr))] xl:grid-cols-[minmax(260px,1fr)_90px_110px_140px_140px_110px_110px_180px_60px]"
     >
-      <div className="flex gap-2">
-        <Input
-          className={`input w-full ${invalidProduit ? 'border-destructive' : ''}`}
-          value={line.produit_nom || ""}
-          readOnly
-          placeholder="Choisir un produit"
-          aria-invalid={invalidProduit ? 'true' : 'false'}
+      <div>
+        <div
+          className={`input w-full cursor-pointer ${invalidProduit ? 'border-destructive' : ''}`}
+          role="button"
+          tabIndex={0}
+          onClick={openProductPicker}
+          onKeyDown={(e) =>
+            (e.key === 'Enter' || e.key === ' ') && openProductPicker()
+          }
+          aria-label="Choisir un produit"
+        >
+          {line.produit_nom || 'Choisir un produit'}
+        </div>
+        <ProduitSearchModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onSelect={(p) => {
+            const tv = p.tva ?? 0;
+            onChange({
+              produit_id: p.produit_id,
+              produit_nom: p.nom,
+              unite_id: p.unite_id ?? null,
+              tva: tv,
+              zone_id: p.zone_id ?? line.zone_id ?? null,
+              pmp: p.pmp ?? null,
+              unite: p.unite ?? line.unite ?? '',
+            });
+            update(qty, totalCents, tv);
+          }}
+          excludeIdsSameZone={excludeIdsSameZone}
+          currentLineProductId={line.produit_id}
         />
-        <Button type="button" onClick={() => setModalOpen(true)}>
-          Choisir un produit
-        </Button>
       </div>
-      <ProduitSearchModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onSelect={(p) => {
-          recalc({
-            produit_id: p.produit_id,
-            produit_nom: p.nom,
-            unite_id: p.unite_id ?? null,
-            tva: p.tva ?? 0,
-            zone_id: p.zone_id ?? line.zone_id ?? null,
-          });
+      <QtyInput
+        value={qty}
+        onChange={(n) => {
+          const v = n ?? 0;
+          setQty(v);
+          update(v, totalCents);
         }}
-        excludeIdsSameZone={excludeIdsSameZone}
-        currentLineProductId={line.produit_id}
+        aria-label="Qté"
+        className="w-20"
       />
-      <NumberInput
-        value={qte}
-        onChangeNumber={(n) => recalc({ quantite: n ?? 0 })}
-        format={(n) => formatQty(n, 3)}
-        placeholder="0"
-        className="input"
-        maxFractionDigits={3}
-      />
-      <Input readOnly disabled value={line.unite || ""} placeholder="Unité" />
-      <NumberInput
-        value={totalHt}
-        onChangeNumber={(n) => recalc({ total_ht: n ?? 0 })}
-        format={formatEUR}
+      <Input readOnly disabled value={line.unite || ''} placeholder="Unité" />
+      <MoneyInput
+        valueCents={totalCents}
+        onChangeCents={(c) => {
+          const v = c ?? 0;
+          setTotalCents(v);
+          update(qty, v);
+        }}
+        aria-label="Total HT (€)"
+        className="w-28"
         placeholder="0,00 €"
-        className="input"
-        currency
-        maxFractionDigits={2}
       />
-      <div className="flex items-center gap-2">
-        <NumberInput
-          value={puHt}
-          onChangeNumber={(n) => recalc({ pu_ht: n ?? 0 })}
-          format={formatEUR}
-          placeholder="0,00 €"
-          className="input w-full"
-          currency
-        />
-        {deltaPct !== null && (
-          <span className={`text-xs font-medium ${deltaClass}`}>{deltaText}</span>
-        )}
+      <div className="flex items-center">
+        <div
+          className="input w-28 pointer-events-none select-none opacity-50"
+          aria-readonly="true"
+          tabIndex={-1}
+          role="textbox"
+          aria-label="PU HT (€) calculé"
+          title="PU HT = Total HT / Qté"
+        >
+          {formatMoneyFromCents(puCents)}
+        </div>
+        <div className={`ml-2 text-xs ${varColor}`} title="Écart vs PMP">
+          {pmpCents > 0 ? `${variationPct.toFixed(2).replace('.', ',')}%` : '—'}
+        </div>
       </div>
-      <Input readOnly disabled value={formatEUR(pmp)} placeholder="PMP" />
-      <Select value={String(tva)} onValueChange={(v) => recalc({ tva: v })}>
+      <Input
+        readOnly
+        disabled
+        value={formatMoneyFromCents(pmpCents)}
+        placeholder="PMP"
+      />
+      <Select
+        value={String(tva)}
+        onValueChange={(v) => {
+          const tv = Number(v);
+          update(qty, totalCents, tv);
+        }}
+      >
         <SelectTrigger className="w-28">
           <SelectValue placeholder="TVA (%)" />
         </SelectTrigger>
@@ -167,8 +182,8 @@ export default function FactureLigne({
         </SelectContent>
       </Select>
       <Select
-        value={line.zone_id ?? "__none__"}
-        onValueChange={(v) => onChange({ zone_id: v === "__none__" ? null : v })}
+        value={line.zone_id ?? '__none__'}
+        onValueChange={(v) => onChange({ zone_id: v === '__none__' ? null : v })}
       >
         <SelectTrigger className="w-44">
           <SelectValue placeholder="Zone (optionnel)" />

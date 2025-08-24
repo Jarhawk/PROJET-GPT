@@ -43,3 +43,24 @@ export function normalizeDecimalFR(str) {
   }
   return result;
 }
+const fmtMoney = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 });
+const fmtQty = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 3 });
+
+export function formatMoneyFromCents(cents = 0) {
+  return fmtMoney.format((cents ?? 0) / 100);
+}
+
+export function parseMoneyToCents(input = '') {
+  const raw = String(input).replace(/\s/g, '').replace(/\u00A0/g, '').replace('€','').replace(',', '.');
+  const n = Number.parseFloat(raw);
+  if (Number.isNaN(n)) return 0;
+  return Math.round(n * 100);
+}
+
+export function formatQty(n = 0) { return fmtQty.format(n ?? 0); }
+
+export function parseQty(input = '') {
+  const raw = String(input).replace(/\s/g, '').replace(/\u00A0/g, '').replace(',', '.');
+  const n = Number.parseFloat(raw);
+  return Number.isNaN(n) ? 0 : n;
+}

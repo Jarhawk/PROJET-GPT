@@ -245,7 +245,6 @@ html.dark body {
   to { transform: scale(1.2); opacity: 0; }
 }
 .animate-touch-fade { animation: touch-fade 0.6s ease-out forwards; }
-}
 
 
 /* Couleurs utilitaires si manquantes */

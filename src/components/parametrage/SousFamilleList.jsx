@@ -134,7 +134,7 @@ export default function SousFamilleList({ famille }) {
                     </td>
                   </tr>
                 )}
-                {sousFamilles.map((sf) => (
+                {(sousFamilles ?? []).map((sf) => (
                   <SousFamilleRow
                     key={sf.id}
                     sousFamille={sf}

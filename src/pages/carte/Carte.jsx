@@ -71,7 +71,7 @@ function CarteTable({ type }) {
         <input className="form-input" placeholder="Recherche" value={search} onChange={e => setSearch(e.target.value)} />
         <select className="form-select" value={familleFilter} onChange={e => setFamilleFilter(e.target.value)}>
           <option value="">Toutes familles</option>
-          {familles.map(f => <option key={f.id} value={f.nom}>{f.nom}</option>)}
+          {(familles ?? []).map(f => <option key={f.id} value={f.nom}>{f.nom}</option>)}
         </select>
         <label className="flex items-center gap-1">
           <input type="checkbox" className="checkbox" checked={onlyAboveThreshold} onChange={e => setOnlyAboveThreshold(e.target.checked)} />

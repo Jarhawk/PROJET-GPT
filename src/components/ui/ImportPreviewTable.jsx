@@ -62,12 +62,12 @@ export default function ImportPreviewTable({ rows = [], onUpdate, maps, referenc
         </tbody>
       </table>
       <datalist id="familles-list">
-        {familles.map((f) => (
+        {(familles ?? []).map((f) => (
           <option key={f.id} value={f.nom} />
         ))}
       </datalist>
       <datalist id="sousfamilles-list">
-        {sousFamilles.map((sf) => (
+        {(sousFamilles ?? []).map((sf) => (
           <option key={sf.id} value={sf.nom} />
         ))}
       </datalist>

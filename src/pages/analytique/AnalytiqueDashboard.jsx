@@ -53,7 +53,7 @@ export default function AnalytiqueDashboard() {
         </select>
         <select className="form-input" value={filters.famille} onChange={e => setFilters(f => ({ ...f, famille: e.target.value }))}>
           <option value="">Toutes familles</option>
-          {familles.map(f => (
+          {(familles ?? []).map(f => (
             <option key={f.id} value={f.nom}>{f.nom}</option>
           ))}
         </select>

@@ -1,53 +1,46 @@
-import { logSupaError } from './logError';
+// src/lib/supa/safeSelect.js
+export async function safeSelectWithFallback({ client, table, select, order, limit, transform }) {
+  // 1er essai : select complet
+  let q = client.from(table).select(select);
+  if (order) q = q.order(order.column, { ascending: order.ascending === true });
+  if (typeof limit === 'number') q = q.limit(limit);
 
-/**
- * Execute a select query with optional fallback when `stock_projete` column is missing.
- * It recalculates `stock_projete` from other fields if needed.
- *
- * @param {Object} params
- * @param {import('@supabase/supabase-js').SupabaseClient} params.client
- * @param {string} params.table - table or view name
- * @param {string} params.select - select clause
- * @param {{column: string, ascending: boolean}} [params.order]
- * @param {number} [params.limit]
- * @param {(query: any) => any} [params.filters]
- * @returns {Promise<any[]>}
- */
-export async function safeSelectWithFallback({
-  client,
-  table,
-  select,
-  order,
-  limit,
-  filters,
-}) {
-  let base = client.from(table);
-  if (filters) base = filters(base);
-  let query = base.select(select);
-  if (order) query = query.order(order.column, { ascending: order.ascending });
-  if (typeof limit === 'number') query = query.limit(limit);
+  let { data, error } = await q;
+  if (!error) {
+    return Array.isArray(transform) || typeof transform === 'function'
+      ? (typeof transform === 'function' ? transform(data) : data)
+      : data;
+  }
 
-  let { data, error } = await query;
-  if (error && error.code === '42703' && select.includes('stock_projete')) {
-    const fallbackSelect = select.replace('stock_projete', 'stock_previsionnel');
-    let fallback = base.select(fallbackSelect);
-    if (order) fallback = fallback.order(order.column, { ascending: order.ascending });
-    if (typeof limit === 'number') fallback = fallback.limit(limit);
-    const { data: d2, error: e2 } = await fallback;
-    if (e2) {
-      logSupaError(table, e2);
-      throw e2;
-    }
-    return (d2 || []).map((r) => ({
+  // Si l'erreur vient d'une colonne inconnue (400 PostgREST) on tente sans colonnes "à risque"
+  const riskyCols = ['stock_projete']; // on pourra étendre si besoin
+  const cleanSelect = select
+    .split(',')
+    .map(s => s.trim())
+    .filter(s => !riskyCols.includes(s) && !riskyCols.some(rc => s.endsWith(`:${rc}`)))
+    .join(', ');
+
+  q = client.from(table).select(cleanSelect);
+  if (order) q = q.order(order.column, { ascending: order.ascending === true });
+  if (typeof limit === 'number') q = q.limit(limit);
+
+  const res2 = await q;
+  if (res2.error) {
+    // Vue absente / autre erreur -> fallback vide
+    return [];
+  }
+
+  let rows = res2.data || [];
+  // Recalcule stock_projete côté client si pertinent
+  if (select.includes('stock_projete')) {
+    rows = rows.map(r => ({
       ...r,
       stock_projete:
-        r.stock_previsionnel ??
+        r.stock_projete ??
         ((r.stock_actuel ?? 0) + (r.receptions ?? 0) - (r.consommation_prevue ?? 0)),
     }));
   }
-  if (error) {
-    logSupaError(table, error);
-    throw error;
-  }
-  return data || [];
+  return Array.isArray(transform) || typeof transform === 'function'
+    ? (typeof transform === 'function' ? transform(rows) : rows)
+    : rows;
 }

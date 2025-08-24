@@ -16,7 +16,7 @@ export default function useAlerteStockFaible() {
     setError(null);
     try {
       const select =
-        'id:produit_id,produit_id,nom,unite,fournisseur_nom,stock_actuel,stock_min,consommation_prevue,receptions,manque,type,stock_projete';
+        'mama_id,id:produit_id,produit_id,nom,unite,fournisseur_nom,stock_actuel,stock_min,consommation_prevue,receptions,manque,type,stock_projete';
 
       const rows = await safeSelectWithFallback({
         client: supabase,
@@ -24,6 +24,7 @@ export default function useAlerteStockFaible() {
         select,
         order: { column: 'manque', ascending: false },
         limit: 50,
+        transform: (rows) => (rows || []).filter(r => r.mama_id === mama_id),
       });
 
       const list = (rows || [])

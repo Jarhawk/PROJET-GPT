@@ -2,6 +2,7 @@
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { safeSelectWithFallback } from '@/lib/supa/safeSelect';
 
 export function useRuptureAlerts() {
   const { mama_id } = useAuth();
@@ -9,34 +10,19 @@ export function useRuptureAlerts() {
   async function fetchAlerts(type = null) {
     if (!mama_id) return [];
     try {
-      const base = supabase.from('v_alertes_rupture');
-      const selectWith =
-        'id:produit_id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, consommation_prevue, receptions, stock_projete, manque, type';
-
-      let query = base.select(selectWith).eq('mama_id', mama_id).order('manque', { ascending: false });
-      if (type) query = query.eq('type', type);
-      let { data, error } = await query;
-
-      if (error && error.code === '42703') {
-        if (import.meta.env.DEV)
-          console.debug('v_alertes_rupture sans stock_projete');
-        let q2 = base
-          .select('id:produit_id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, consommation_prevue, receptions, stock_previsionnel, manque, type').eq('mama_id', mama_id)
-          .order('manque', { ascending: false });
-        if (type) q2 = q2.eq('type', type);
-        const { data: d2, error: e2 } = await q2;
-        if (e2) throw e2;
-        data = (d2 ?? []).map((r) => ({
-          ...r,
-          stock_projete: r.stock_previsionnel ?? ((r.stock_actuel ?? 0) + (r.receptions ?? 0) - (r.consommation_prevue ?? 0)),
-        }));
-      } else {
-        if (error) throw error;
-        if (import.meta.env.DEV)
-          console.debug('v_alertes_rupture avec stock_projete');
-      }
-
-      return data || [];
+      const select =
+        'mama_id, id:produit_id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, consommation_prevue, receptions, stock_projete, manque, type';
+      const rows = await safeSelectWithFallback({
+        client: supabase,
+        table: 'v_alertes_rupture',
+        select,
+        order: { column: 'manque', ascending: false },
+        transform: (data) =>
+          (data || [])
+            .filter(r => r.mama_id === mama_id && (!type || r.type === type))
+            .map(({ mama_id: _mama, ...rest }) => rest),
+      });
+      return rows;
     } catch (error) {
       console.error(error);
       toast.error(error.message || 'Erreur chargement alertes rupture');

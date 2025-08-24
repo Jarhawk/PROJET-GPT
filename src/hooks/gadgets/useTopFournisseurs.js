@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
+import { safeSelectWithFallback } from '@/lib/supa/safeSelect';
 
 export default function useTopFournisseurs() {
   const { mama_id, loading: authLoading } = useAuth() || {};
-  const [data, setData] = useState([]);
+  const [topFournisseurs, setTopFournisseurs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -16,23 +17,18 @@ export default function useTopFournisseurs() {
       setLoading(true);
       setError(null);
       try {
-        const { data, error } = await supabase
-          .from('v_top_fournisseurs')
-          .select('fournisseur_id, montant, mois')
-          .eq('mama_id', mama_id);
+        const rows = await safeSelectWithFallback({
+          client: supabase,
+          table: 'v_top_fournisseurs',
+          select: 'id:fournisseur_id, montant, mois',
+          filters: (q) => q.eq('mama_id', mama_id),
+        });
 
-        if (error) throw error;
-
-        const rows = (data || []).map((r) => ({
-          id: r.fournisseur_id,
-          montant: r.montant,
-          mois: r.mois,
-        }));
-        setData(rows);
+        setTopFournisseurs(Array.isArray(rows) ? rows : []);
       } catch (e) {
         console.warn('[gadgets] vue manquante ou colonne absente:', e?.message || e);
         setError(e);
-        setData([]);
+        setTopFournisseurs([]);
       } finally {
         setLoading(false);
       }
@@ -41,5 +37,5 @@ export default function useTopFournisseurs() {
     fetchData();
   }, [authLoading, mama_id]);
 
-  return { data, loading, error };
+  return { data: topFournisseurs, loading, error };
 }

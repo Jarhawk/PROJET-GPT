@@ -25,34 +25,16 @@ export function useAlerteStockFaible({ page = 1, pageSize = 20 } = {}) {
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
       try {
-        const base = supabase.from('v_alertes_rupture');
-        const selectWith =
-          'id:produit_id, produit_id, nom, unite, fournisseur_id, fournisseur_nom, stock_actuel, stock_min, manque, consommation_prevue, receptions, stock_projete';
-
-        let { data: rows, count, error } = await base
-          .select(selectWith, { count: 'exact' }).eq('mama_id', mama_id)
+        const { data: rows, count, error } = await supabase
+          .from('v_alertes_rupture')
+          .select(
+            'produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, manque',
+            { count: 'exact' }
+          )
+          .eq('mama_id', mama_id)
           .order('manque', { ascending: false })
           .range(from, to);
-
-        if (error && error.code === '42703') {
-          if (import.meta.env.DEV)
-            console.debug('v_alertes_rupture sans stock_projete');
-          const { data: d2, count: c2, error: e2 } = await base
-            .select('id:produit_id, produit_id, nom, unite, fournisseur_id, fournisseur_nom, stock_actuel, stock_min, manque, consommation_prevue, receptions, stock_previsionnel', { count: 'exact' }).eq('mama_id', mama_id)
-            .order('manque', { ascending: false })
-            .range(from, to);
-          if (e2) throw e2;
-          rows = (d2 ?? []).map((r) => ({
-            ...r,
-            stock_projete: r.stock_previsionnel ?? ((r.stock_actuel ?? 0) + (r.receptions ?? 0) - (r.consommation_prevue ?? 0)),
-          }));
-          count = c2 || 0;
-        } else {
-          if (error) throw error;
-          if (import.meta.env.DEV)
-            console.debug('v_alertes_rupture avec stock_projete');
-        }
-
+        if (error) throw error;
         if (!aborted) {
           setData(rows || []);
           setTotal(count || 0);

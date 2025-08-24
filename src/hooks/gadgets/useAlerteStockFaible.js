@@ -16,7 +16,9 @@ export default function useAlerteStockFaible() {
     try {
       const { data: rows, error } = await supabase
         .from('v_alertes_rupture')
-        .select('produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, manque')
+        .select(
+          'mama_id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, manque'
+        )
         .eq('mama_id', mama_id)
         .order('manque', { ascending: false })
         .limit(50);

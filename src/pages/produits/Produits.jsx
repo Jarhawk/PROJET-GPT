@@ -16,6 +16,10 @@ export default function Produits() {
 
   const { data: familles = [] } = useFamilles();
   const { data: allSousFamilles = [] } = useSousFamilles();
+  const sousFamillesMap = useMemo(
+    () => Object.fromEntries((allSousFamilles ?? []).map(sf => [sf.id, sf.nom])),
+    [allSousFamilles]
+  );
   const sousFamilles = useMemo(
     () => (familleId ? allSousFamilles.filter(sf => sf.famille_id === familleId) : allSousFamilles),
     [familleId, allSousFamilles]
@@ -99,7 +103,9 @@ export default function Produits() {
               <div className="table-cell py-2">{p.nom}</div>
               <div className="table-cell py-2">{p.unite ?? '—'}</div>
               <div className="table-cell py-2">{(p.pmp ?? 0).toFixed(2)}</div>
-              <div className="table-cell py-2">{p.sous_famille?.nom ?? '—'}</div>
+              <div className="table-cell py-2">
+                {sousFamillesMap[p.sous_famille_id ?? p.sous_famille] ?? '—'}
+              </div>
               <div className="table-cell py-2">{p.zone_stockage ?? '—'}</div>
               <div className="table-cell py-2">{p.actif ? 'Actif' : 'Inactif'}</div>
               <div className="table-cell py-2"> {/* actions existantes */}</div>

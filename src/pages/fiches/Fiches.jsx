@@ -34,7 +34,7 @@ export default function Fiches() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState("nom");
-  const [actif, setActif] = useState("true");
+  const [statut, setStatut] = useState("actif");
   const [familleFilter, setFamilleFilter] = useState("");
   const { familles, fetchFamilles } = useFamilles();
   const canEdit = hasAccess("fiches_techniques", "peut_modifier");
@@ -44,13 +44,18 @@ export default function Fiches() {
   const { data, isLoading, isError } = useFichesTechniques({
     page,
     search: debouncedSearch,
-    actif,
-    famille: familleFilter || undefined,
+    statut,
+    familleId: familleFilter || null,
     sortBy,
-    mamaId: mama_id,
   });
   const rows = data?.rows || [];
   const total = data?.total || 0;
+
+  const familleMap = Object.fromEntries((familles || []).map((f) => [f.id, f.nom]));
+  const rowsWithFamille = rows.map((f) => ({
+    ...f,
+    famille_nom: familleMap[f.famille_id] || '—',
+  }));
 
   const [searchParams, setSearchParams] = useSearchParams();
   const firstSync = useRef(true);
@@ -80,7 +85,7 @@ export default function Fiches() {
   }, [search, page, setSearchParams]);
 
   const exportExcel = () => {
-    const datas = rows.map((f) => ({
+    const datas = rowsWithFamille.map((f) => ({
       id: f.id,
       nom: f.nom,
       cout_par_portion: f.cout_par_portion,
@@ -94,7 +99,7 @@ export default function Fiches() {
 
   const exportPdf = () => {
     const doc = new JSPDF();
-    const rowsPdf = rows.map((f) => [
+    const rowsPdf = rowsWithFamille.map((f) => [
       f.nom,
       f.famille_nom || '',
       f.cout_par_portion,
@@ -141,15 +146,15 @@ export default function Fiches() {
         </select>
         <select
           className="form-input"
-          value={actif}
+          value={statut}
           onChange={(e) => {
             setPage(1);
-            setActif(e.target.value);
+            setStatut(e.target.value);
           }}
         >
-          <option value="true">Actives</option>
-          <option value="false">Inactives</option>
-          <option value="all">Toutes</option>
+          <option value="actif">Actives</option>
+          <option value="inactif">Inactives</option>
+          <option value="tous">Toutes</option>
         </select>
         <select
           className="form-input"
@@ -200,7 +205,7 @@ export default function Fiches() {
             </tr>
           </thead>
           <tbody>
-            {rows.map((fiche) => (
+            {rowsWithFamille.map((fiche) => (
               <FicheRow
                 key={fiche.id}
                 fiche={fiche}
@@ -216,13 +221,13 @@ export default function Fiches() {
                 onDuplicate={async (id) => {
                   await duplicateFiche(id);
                   toast.success("Fiche dupliquée");
-                  queryClient.invalidateQueries({ queryKey: ['fiches-techniques'] });
+                  queryClient.invalidateQueries({ queryKey: ['fiches'] });
                 }}
                 onDelete={(id) => {
                   if (window.confirm("Désactiver cette fiche ?")) {
                     deleteFiche(id);
                     toast.success("Fiche désactivée");
-                    queryClient.invalidateQueries({ queryKey: ['fiches-techniques'] });
+                    queryClient.invalidateQueries({ queryKey: ['fiches'] });
                   }
                 }}
               />
@@ -241,7 +246,7 @@ export default function Fiches() {
           onClose={() => {
             setShowForm(false);
             setSelected(null);
-            queryClient.invalidateQueries({ queryKey: ['fiches-techniques'] });
+            queryClient.invalidateQueries({ queryKey: ['fiches'] });
           }}
         />
       )}

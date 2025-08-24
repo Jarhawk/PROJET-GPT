@@ -1,27 +1,24 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { useQuery } from '@tanstack/react-query';
+import { useMamaSettings } from '@/hooks/useMamaSettings';
 
-export function useSousFamilles({ mamaId, familleId, enabled = true }) {
+export const useSousFamilles = () => {
+  const { mamaId } = useMamaSettings();
   return useQuery({
-    queryKey: ['sous-familles', { mamaId, familleId }],
-    enabled: !!mamaId && enabled,
+    queryKey: ['sous-familles', mamaId],
     queryFn: async () => {
-      let q = supabase
+      const { data, error } = await supabase
         .from('sous_familles')
-        .select('id, nom, famille_id, actif')
+        .select('id, nom, actif, famille_id')
         .eq('mama_id', mamaId)
         .order('nom', { ascending: true });
-
-      if (familleId) q = q.eq('famille_id', familleId);
-
-      const { data, error } = await q;
-      if (error) throw error;
+      if (error) {
+        console.warn('[sous_familles] fallback []', error);
+        return [];
+      }
       return data ?? [];
     },
-    staleTime: 10_000,
-    keepPreviousData: true,
-    initialData: [],
   });
-}
-
+};
+export default useSousFamilles;

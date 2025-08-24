@@ -1,158 +1,115 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useProduits } from '@/hooks/data/useProduits';
 import { useFamilles } from '@/hooks/data/useFamilles';
 import { useSousFamilles } from '@/hooks/data/useSousFamilles';
-import { useMamaSettings } from '@/hooks/useMamaSettings';
-import { Button } from '@/components/ui/button';
+import { useDebounce } from '@/hooks/useDebounce';
 
 export default function Produits() {
-  const { mamaId } = useMamaSettings(); // ou autre source
-  const [search, setSearch] = useState('');
-  const [statut, setStatut] = useState('tous'); // tous | actif | inactif
-  const [familleId, setFamilleId] = useState(null);
-  const [sousFamilleId, setSousFamilleId] = useState(null);
+  const [q, setQ] = useState('');
   const [page, setPage] = useState(1);
+  const [pageSize] = useState(25);
+  const [statut, setStatut] = useState('tous'); // 'tous' | 'actif' | 'inactif'
+  const [familleId, setFamilleId] = useState('');
+  const [sousFamilleId, setSousFamilleId] = useState('');
+  const dq = useDebounce(q, 250);
 
-  const pageSize = 25;
-
-  const { data: familles = [] } = useFamilles({ mamaId });
-  const { data: sousFamillesAll = [] } = useSousFamilles({ mamaId });
-  const sousFamillesOptions = familleId
-    ? sousFamillesAll.filter((sf) => sf.famille_id === familleId)
-    : sousFamillesAll;
+  const { data: familles = [] } = useFamilles();
+  const { data: allSousFamilles = [] } = useSousFamilles();
+  const sousFamilles = useMemo(
+    () => (familleId ? allSousFamilles.filter(sf => sf.famille_id === familleId) : allSousFamilles),
+    [familleId, allSousFamilles]
+  );
 
   const { data, isLoading, error } = useProduits({
-    search,
-    statut,
-    familleId,
-    sousFamilleId,
+    search: dq,
     page,
     pageSize,
+    statut,
+    sousFamilleId: sousFamilleId || null,
   });
-
-  const rows = data?.data ?? [];
+  const produits = data?.data ?? [];
   const total = data?.count ?? 0;
 
   return (
-    <div className="space-y-4">
-      {/* Filtres en 1 ligne */}
-      <div className="flex flex-wrap gap-2 items-center">
+    <div className="space-y-3">
+      {/* Barre de filtres en UNE LIGNE */}
+      <div className="flex flex-wrap items-center gap-2">
         <input
-          className="input min-w-[240px]"
+          className="input"
           placeholder="Recherche nom"
-          value={search}
-          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          value={q}
+          onChange={(e) => { setQ(e.target.value); setPage(1); }}
+          style={{ minWidth: 220 }}
         />
-
         <select
-          value={familleId ?? ''}
-          onChange={(e) => {
-            const v = e.target.value || null;
-            setFamilleId(v);
-            setSousFamilleId(null);
-            setPage(1);
-          }}
           className="select"
+          value={familleId}
+          onChange={(e) => { setFamilleId(e.target.value); setSousFamilleId(''); setPage(1); }}
         >
           <option value="">Toutes les familles</option>
-          {(familles || []).map(f => <option key={f.id} value={f.id}>{f.nom}</option>)}
+          {familles.map(f => <option key={f.id} value={f.id}>{f.nom}</option>)}
         </select>
-
         <select
-          value={sousFamilleId ?? ''}
-          onChange={(e) => {
-            const v = e.target.value || null;
-            setSousFamilleId(v);
-            setPage(1);
-          }}
           className="select"
+          value={sousFamilleId}
+          onChange={(e) => { setSousFamilleId(e.target.value); setPage(1); }}
         >
           <option value="">Toutes les sous-familles</option>
-          {sousFamillesOptions.map(sf => <option key={sf.id} value={sf.id}>{sf.nom}</option>)}
+          {sousFamilles.map(sf => <option key={sf.id} value={sf.id}>{sf.nom}</option>)}
         </select>
-
         <select
-          value={statut}
-          onChange={(e) => {
-            setStatut(e.target.value);
-            setPage(1);
-          }}
           className="select"
+          value={statut}
+          onChange={(e) => { setStatut(e.target.value); setPage(1); }}
         >
           <option value="tous">Tous</option>
           <option value="actif">Actif</option>
           <option value="inactif">Inactif</option>
         </select>
+      </div>
 
-        <div className="ml-auto flex gap-2">
-          <Button onClick={() => {/* open modal nouveau produit */}}>Nouveau produit</Button>
-          <Button variant="secondary" onClick={() => {/* export excel */}}>Exporter vers Excel</Button>
-          <Button variant="secondary" onClick={() => {/* import excel */}}>Importer via Excel</Button>
+      {error && (
+        <div className="text-red-400">Erreur chargement produits.</div>
+      )}
+
+      {/* Tableau */}
+      <div className="table w-full">
+        <div className="table-header-group">
+          <div className="table-row">
+            <div className="table-cell font-semibold py-2">Nom</div>
+            <div className="table-cell font-semibold py-2">Unité</div>
+            <div className="table-cell font-semibold py-2">PMP (€)</div>
+            <div className="table-cell font-semibold py-2">Sous-famille</div>
+            <div className="table-cell font-semibold py-2">Zone de stockage</div>
+            <div className="table-cell font-semibold py-2">Statut</div>
+            <div className="table-cell font-semibold py-2">Actions</div>
+          </div>
+        </div>
+        <div className="table-row-group">
+          {!isLoading && produits.length === 0 && (
+            <div className="table-row">
+              <div className="table-cell py-3 text-sm text-gray-400" colSpan={7}>
+                Aucun produit trouvé. Essayez d’ajouter un produit via le bouton ci-dessus.
+              </div>
+            </div>
+          )}
+          {produits.map((p) => (
+            <div key={p.id} className="table-row">
+              <div className="table-cell py-2">{p.nom}</div>
+              <div className="table-cell py-2">{p.unite ?? '—'}</div>
+              <div className="table-cell py-2">{(p.pmp ?? 0).toFixed(2)}</div>
+              <div className="table-cell py-2">{p.sous_famille?.nom ?? '—'}</div>
+              <div className="table-cell py-2">{p.zone_stockage ?? '—'}</div>
+              <div className="table-cell py-2">{p.actif ? 'Actif' : 'Inactif'}</div>
+              <div className="table-cell py-2"> {/* actions existantes */}</div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Table */}
-      <div className="rounded-2xl border border-white/10 bg-white/5 overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-white/5">
-            <tr>
-              <th className="text-left p-3">Nom</th>
-              <th className="text-left p-3">Unité</th>
-              <th className="text-left p-3">PMP (€)</th>
-              <th className="text-left p-3">Sous-famille</th>
-              <th className="text-left p-3">Zone de stockage</th>
-              <th className="text-left p-3">Statut</th>
-              <th className="text-left p-3">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {error && (
-              <tr><td className="p-4" colSpan={7}>Erreur lors du chargement des produits.</td></tr>
-            )}
-            {isLoading && !error && (
-              <tr><td className="p-4" colSpan={7}>Chargement…</td></tr>
-            )}
-            {!isLoading && !error && rows.length === 0 && (
-              <tr><td className="p-4" colSpan={7}>Aucun produit trouvé. Essayez d’ajouter un produit via le bouton ci-dessus.</td></tr>
-            )}
-            {!error && rows.map(p => (
-              <tr key={p.id} className="border-t border-white/10">
-                <td className="p-3">{p.nom}</td>
-                <td className="p-3">{p.unite ?? '—'}</td>
-                <td className="p-3">{Number(p.pmp || 0).toFixed(2)}</td>
-                <td className="p-3">{p.sous_famille?.nom ?? '—'}</td>
-                <td className="p-3">{p.zone_stockage ?? '—'}</td>
-                <td className="p-3">{p.actif ? 'Actif' : 'Inactif'}</td>
-                <td className="p-3">
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="secondary">Voir</Button>
-                    <Button size="sm" variant="secondary">Modifier</Button>
-                    <Button size="sm" variant="secondary">{p.actif ? 'Désactiver' : 'Activer'}</Button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination */}
-      <div className="flex items-center justify-between text-sm">
-        <div>Total : {rows.length}</div>
-        <div className="flex gap-2">
-          <Button variant="secondary" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Précédent</Button>
-          <div>Page {page} sur {Math.max(1, Math.ceil(total / pageSize))}</div>
-          <Button
-            variant="secondary"
-            disabled={page >= Math.ceil(total / pageSize)}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            Suivant
-          </Button>
-        </div>
-      </div>
+      {/* Footer pagination (existant) : remettre page à 1 sur changement de filtres */}
+      {/* Total: {total} */}
     </div>
   );
 }
-

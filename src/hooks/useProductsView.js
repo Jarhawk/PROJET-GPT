@@ -9,40 +9,57 @@ export function useProductsView() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  const fetchProducts = useCallback(async ({
-    term = '',
-    page = 1,
-    limit = 25,
-    sortBy = 'nom',
-    ascending = true,
-    filtreActif = 'tous',
-  } = {}) => {
-    if (!currentMamaId) return;
-    setLoading(true);
-    let query = supabase
-      .from('produits_view')
-      .select('id, nom, unite, pmp, stock_theorique, zone, actif', { count: 'exact' })
-      .eq('mama_id', currentMamaId);
-    if (term) query = query.ilike('nom', `%${term}%`);
-    if (filtreActif !== 'tous') query = query.eq('actif', filtreActif);
-    query = query
-      .order(sortBy, { ascending })
-      .range((page - 1) * limit, page * limit - 1);
-    const { data, error, count } = await query;
-    if (error) {
-      toast.error(error.message);
-      setLoading(false);
-      return;
-    }
-    const mapped = (data || []).map((p) => ({
-      ...p,
-      unite: p.unite ? { nom: p.unite } : null,
-      zone_stock: p.zone ? { nom: p.zone } : null,
-    }));
-    setProducts(mapped);
-    setTotal(count || 0);
-    setLoading(false);
-  }, [currentMamaId]);
+  const fetchProducts = useCallback(
+    async ({
+      search = '',
+      page = 1,
+      limit = 25,
+      sortBy = 'nom',
+      ascending = true,
+      statut = 'all',
+      familleId = 'all',
+      sousFamilleId = 'all',
+    } = {}) => {
+      if (!currentMamaId) return;
+      setLoading(true);
+      try {
+        let query = supabase
+          .from('produits_view')
+          .select(
+            'id, nom, unite, pmp, stock_theorique, zone, actif, famille_id, sous_famille_id',
+            { count: 'exact' }
+          )
+          .eq('mama_id', currentMamaId)
+          .order(sortBy, { ascending });
+
+        if (search?.trim()) query = query.ilike('nom', `%${search.trim()}%`);
+        if (statut === 'active') query = query.eq('actif', true);
+        if (statut === 'inactive') query = query.eq('actif', false);
+        if (familleId !== 'all') query = query.eq('famille_id', Number(familleId));
+        if (sousFamilleId !== 'all')
+          query = query.eq('sous_famille_id', Number(sousFamilleId));
+
+        const from = (page - 1) * limit;
+        const to = from + limit - 1;
+        query = query.range(from, to);
+
+        const { data, error, count } = await query;
+        if (error) throw error;
+        const mapped = (data || []).map((p) => ({
+          ...p,
+          unite: p.unite ? { nom: p.unite } : null,
+          zone_stock: p.zone ? { nom: p.zone } : null,
+        }));
+        setProducts(mapped);
+        setTotal(count || 0);
+      } catch (e) {
+        toast.error(e.message);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [currentMamaId]
+  );
 
   const toggleProductActive = useCallback(async (id, actif) => {
     if (!currentMamaId) return;

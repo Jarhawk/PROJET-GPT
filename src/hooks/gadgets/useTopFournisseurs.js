@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
+import { safeSelectWithFallback } from '@/lib/supa/safeSelect';
 
 export default function useTopFournisseurs() {
   const { mama_id, loading: authLoading } = useAuth() || {};
@@ -16,19 +17,19 @@ export default function useTopFournisseurs() {
       setLoading(true);
       setError(null);
       try {
-        const { data, error } = await supabase
-          .from('v_top_fournisseurs')
-          .select('fournisseur_id, montant, mois')
-          .eq('mama_id', mama_id);
+        const rows = await safeSelectWithFallback({
+          client: supabase,
+          table: 'v_top_fournisseurs',
+          select: 'fournisseur_id, montant, mois',
+          query: (q) => q.eq('mama_id', mama_id),
+        });
 
-        if (error) throw error;
-
-        const rows = (data || []).map((r) => ({
+        const mapped = (Array.isArray(rows) ? rows : []).map((r) => ({
           id: r.fournisseur_id,
           montant: r.montant,
           mois: r.mois,
         }));
-        setData(rows);
+        setData(mapped);
       } catch (e) {
         setError(e);
         setData([]);

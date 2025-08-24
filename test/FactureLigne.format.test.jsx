@@ -58,9 +58,9 @@ test('delta percent vs PMP shows with colors', () => {
       index={0}
     />
   );
-  let badge = container.querySelector('span');
-  expect(badge?.textContent).toBe('-10,00 %');
-  expect(badge?.classList.contains('text-green-600')).toBe(true);
+  let badge = container.querySelector('[title="Écart vs PMP"]');
+  expect(badge?.textContent).toBe('-10,00%');
+  expect(badge?.classList.contains('text-emerald-400')).toBe(true);
 
   rerender(
     <FactureLigne
@@ -71,9 +71,9 @@ test('delta percent vs PMP shows with colors', () => {
       index={0}
     />
   );
-  badge = container.querySelector('span');
-  expect(badge?.textContent).toBe('+15,00 %');
-  expect(badge?.classList.contains('text-red-600')).toBe(true);
+  badge = container.querySelector('[title="Écart vs PMP"]');
+  expect(badge?.textContent).toBe('15,00%');
+  expect(badge?.classList.contains('text-red-400')).toBe(true);
 
   rerender(
     <FactureLigne
@@ -84,6 +84,7 @@ test('delta percent vs PMP shows with colors', () => {
       index={0}
     />
   );
-  badge = container.querySelector('span');
-  expect(badge).toBeNull();
+  badge = container.querySelector('[title="Écart vs PMP"]');
+  expect(badge?.textContent).toBe('—');
+  expect(badge?.classList.contains('text-neutral-400')).toBe(true);
 });

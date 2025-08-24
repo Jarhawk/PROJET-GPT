@@ -1,8 +1,11 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useEffect, useState, useCallback } from "react";
-import { Navigate } from "react-router-dom";
-import { useFiches } from "@/hooks/useFiches";
+import { useEffect, useState, useRef } from "react";
+import { Navigate, useSearchParams } from "react-router-dom";
 import { useAuth } from '@/hooks/useAuth';
+import { useQueryClient } from '@tanstack/react-query';
+import useDebounce from "@/hooks/useDebounce";
+import { useFichesTechniques } from "@/hooks/data/useFichesTechniques";
+import { useFiches } from "@/hooks/useFiches";
 import FicheForm from "./FicheForm.jsx";
 import FicheDetail from "./FicheDetail.jsx";
 import FicheRow from "@/components/fiches/FicheRow.jsx";
@@ -14,20 +17,16 @@ import { useFamilles } from "@/hooks/useFamilles";
 import { toast } from 'sonner';
 import { motion as Motion } from "framer-motion";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import JSPDF from "jspdf";
+import "jspdf-autotable";
 
 const PAGE_SIZE = 20;
 
 export default function Fiches() {
-  const {
-    fiches,
-    total,
-    loading,
-    getFiches,
-    deleteFiche,
-    duplicateFiche,
-    exportFichesToExcel,
-    exportFichesToPDF,
-  } = useFiches();
+  const queryClient = useQueryClient();
+  const { deleteFiche, duplicateFiche } = useFiches();
   const { mama_id, loading: authLoading, access_rights, hasAccess } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
@@ -40,31 +39,76 @@ export default function Fiches() {
   const { familles, fetchFamilles } = useFamilles();
   const canEdit = hasAccess("fiches_techniques", "peut_modifier");
 
-  const refreshList = useCallback(() => {
-    getFiches({
-      search,
-      actif: actif === "all" ? null : actif === "true",
-      famille: familleFilter || null,
-      page,
-      limit: PAGE_SIZE,
-      sortBy,
-    });
-  }, [getFiches, search, actif, familleFilter, page, sortBy]);
+  const debouncedSearch = useDebounce(search, 300);
 
-  // Chargement
+  const { data, isLoading, isError } = useFichesTechniques({
+    page,
+    search: debouncedSearch,
+    actif,
+    famille: familleFilter || undefined,
+    sortBy,
+    mamaId: mama_id,
+  });
+  const rows = data?.rows || [];
+  const total = data?.total || 0;
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const firstSync = useRef(true);
+
+  // Lecture initiale de l'URL et chargement des familles
   useEffect(() => {
-    if (!authLoading && mama_id) {
-      refreshList();
-      fetchFamilles();
+    if (firstSync.current) {
+      firstSync.current = false;
+      const q = searchParams.get('q') || '';
+      const p = parseInt(searchParams.get('page') || '1', 10);
+      setSearch(q);
+      setPage(Number.isNaN(p) ? 1 : p);
     }
-  }, [authLoading, mama_id, refreshList, fetchFamilles]);
+    fetchFamilles();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const exportExcel = () => exportFichesToExcel();
-  const exportPdf = () => exportFichesToPDF();
+  // Écriture contrôlée dans l'URL
+  useEffect(() => {
+    if (firstSync.current) return;
+    const next = new URLSearchParams(searchParams);
+    next.set('q', search || '');
+    next.set('page', String(page));
+    if (next.toString() !== searchParams.toString()) {
+      setSearchParams(next, { replace: true });
+    }
+  }, [search, page, setSearchParams]);
 
-  const fichesFiltres = fiches;
-  if (authLoading || loading) {
+  const exportExcel = () => {
+    const datas = rows.map((f) => ({
+      id: f.id,
+      nom: f.nom,
+      cout_par_portion: f.cout_par_portion,
+      actif: f.actif,
+    }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Fiches");
+    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    saveAs(new Blob([buf]), "fiches_mamastock.xlsx");
+  };
+
+  const exportPdf = () => {
+    const doc = new JSPDF();
+    const rowsPdf = rows.map((f) => [
+      f.nom,
+      f.famille_nom || '',
+      f.cout_par_portion,
+    ]);
+    doc.autoTable({ head: [["Nom", "Famille", "Coût/portion"]], body: rowsPdf });
+    doc.save("fiches_mamastock.pdf");
+  };
+
+  if (authLoading || isLoading) {
     return <LoadingSpinner message="Chargement..." />;
+  }
+
+  if (isError) {
+    return <div className="p-6">Erreur chargement fiches techniques.</div>;
   }
 
   if (!access_rights?.fiches_techniques?.peut_voir) {
@@ -156,7 +200,7 @@ export default function Fiches() {
             </tr>
           </thead>
           <tbody>
-            {fichesFiltres.map((fiche) => (
+            {rows.map((fiche) => (
               <FicheRow
                 key={fiche.id}
                 fiche={fiche}
@@ -172,13 +216,13 @@ export default function Fiches() {
                 onDuplicate={async (id) => {
                   await duplicateFiche(id);
                   toast.success("Fiche dupliquée");
-                  refreshList();
+                  queryClient.invalidateQueries({ queryKey: ['fiches-techniques'] });
                 }}
                 onDelete={(id) => {
                   if (window.confirm("Désactiver cette fiche ?")) {
                     deleteFiche(id);
                     toast.success("Fiche désactivée");
-                    refreshList();
+                    queryClient.invalidateQueries({ queryKey: ['fiches-techniques'] });
                   }
                 }}
               />
@@ -197,7 +241,7 @@ export default function Fiches() {
           onClose={() => {
             setShowForm(false);
             setSelected(null);
-            refreshList();
+            queryClient.invalidateQueries({ queryKey: ['fiches-techniques'] });
           }}
         />
       )}

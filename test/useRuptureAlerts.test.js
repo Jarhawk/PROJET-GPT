@@ -31,41 +31,30 @@ test('fetchAlerts selects expected view columns', async () => {
   await fetchAlerts('rupture');
   expect(fromMock).toHaveBeenCalledWith('v_alertes_rupture');
   expect(queryBuilder.select).toHaveBeenCalledWith(
-    'id:produit_id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, consommation_prevue, receptions, stock_projete, manque, type'
-  );
-  expect(queryBuilder.eq).toHaveBeenCalledTimes(1);
-  expect(queryBuilder.eq).toHaveBeenCalledWith('type', 'rupture');
-});
-
-test('fetchAlerts falls back when stock_projete missing', async () => {
-  queryBuilder.then
-    .mockImplementationOnce((resolve) =>
-      resolve({ data: null, error: { code: '42703' } })
-    )
-    .mockImplementationOnce((resolve) =>
-      resolve({
-        data: [
-          {
-            produit_id: 1,
-            nom: 'p',
-            stock_actuel: 5,
-            consommation_prevue: 3,
-            receptions: 2,
-          },
-        ],
-        error: null,
-      })
-    );
-
-  const { fetchAlerts } = useRuptureAlerts();
-  const data = await fetchAlerts();
-  expect(queryBuilder.select).toHaveBeenNthCalledWith(
-    1,
-    'id:produit_id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, consommation_prevue, receptions, stock_projete, manque, type'
-  );
-  expect(queryBuilder.select).toHaveBeenNthCalledWith(
-    2,
     'id:produit_id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, consommation_prevue, receptions, manque, type'
   );
+  expect(queryBuilder.eq).toHaveBeenNthCalledWith(1, 'mama_id', 'm1');
+  expect(queryBuilder.eq).toHaveBeenNthCalledWith(2, 'type', 'rupture');
+});
+
+test('fetchAlerts computes stock_projete', async () => {
+  queryBuilder.then.mockImplementation((resolve) =>
+    resolve({
+      data: [
+        {
+          produit_id: 1,
+          nom: 'p',
+          stock_actuel: 5,
+          consommation_prevue: 3,
+          receptions: 2,
+          manque: 0,
+          type: 'rupture',
+        },
+      ],
+      error: null,
+    })
+  );
+  const { fetchAlerts } = useRuptureAlerts();
+  const data = await fetchAlerts();
   expect(data[0].stock_projete).toBe(4);
 });

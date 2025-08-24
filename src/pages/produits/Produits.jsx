@@ -4,11 +4,12 @@ import { useSearchParams } from "react-router-dom";
 import { useProductsView } from "@/hooks/useProductsView";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import TableHeader from "@/components/ui/TableHeader";
 import ListingContainer from "@/components/ui/ListingContainer";
 import PaginationFooter from "@/components/ui/PaginationFooter";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import { supabase } from "@/lib/supabase";
+import { fetchFamillesForValidation } from "@/hooks/useFamilles";
+import { fetchSousFamilles } from "@/hooks/useSousFamilles";
 import ProduitFormModal from "@/components/produits/ProduitFormModal";
 import ProduitDetail from "@/components/produits/ProduitDetail";
 import ProduitRow from "@/components/produits/ProduitRow";
@@ -39,35 +40,80 @@ export default function Produits() {
 
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [term, setTerm] = useState(searchParams.get("term") || "");
+  const [search, setSearch] = useState(searchParams.get("search") || "");
+  const [statut, setStatut] = useState(searchParams.get("statut") || "all");
+  const [familleId, setFamilleId] = useState(searchParams.get("familleId") || "all");
+  const [sousFamilleId, setSousFamilleId] = useState(
+    searchParams.get("sousFamilleId") || "all"
+  );
   const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "nom");
-  const [ascending, setAscending] = useState((searchParams.get("order") || "asc") === "asc");
+  const [ascending, setAscending] = useState(
+    (searchParams.get("order") || "asc") === "asc"
+  );
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
   const [limit, setLimit] = useState(Number(searchParams.get("limit")) || 25);
-  const [filtreActif, setFiltreActif] = useState(searchParams.get("actif") || "tous");
 
   const [showForm, setShowForm] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showDetail, setShowDetail] = useState(false);
   const [showImport, setShowImport] = useState(false);
 
-  const debouncedTerm = useDebounce(term, 300);
+  const [dataFamilles, setDataFamilles] = useState([]);
+  const [dataSousFamilles, setDataSousFamilles] = useState([]);
+
+  const debouncedSearch = useDebounce(search, 300);
 
   useEffect(() => {
     if (!canView) return;
-    fetchProducts({ term: debouncedTerm, page, limit, sortBy, ascending, filtreActif });
-  }, [debouncedTerm, page, limit, sortBy, ascending, filtreActif, fetchProducts, canView]);
+    fetchProducts({
+      search: debouncedSearch,
+      page,
+      limit,
+      sortBy,
+      ascending,
+      statut,
+      familleId,
+      sousFamilleId,
+    });
+  }, [debouncedSearch, page, limit, sortBy, ascending, statut, familleId, sousFamilleId, fetchProducts, canView]);
 
   useEffect(() => {
     const params = new URLSearchParams();
-    if (term) params.set("term", term);
+    if (search) params.set("search", search);
     if (sortBy) params.set("sortBy", sortBy);
     params.set("order", ascending ? "asc" : "desc");
     params.set("page", page.toString());
     params.set("limit", limit.toString());
-    params.set("actif", filtreActif);
+    params.set("statut", statut);
+    if (familleId !== "all") params.set("familleId", familleId);
+    if (sousFamilleId !== "all") params.set("sousFamilleId", sousFamilleId);
     setSearchParams(params);
-  }, [term, sortBy, ascending, page, limit, filtreActif, setSearchParams]);
+  }, [search, sortBy, ascending, page, limit, statut, familleId, sousFamilleId, setSearchParams]);
+
+  useEffect(() => {
+    if (!mama_id) return;
+    async function loadRefs() {
+      try {
+        const [fams, sous] = await Promise.all([
+          fetchFamillesForValidation(supabase, mama_id),
+          fetchSousFamilles({ mamaId: mama_id }),
+        ]);
+        setDataFamilles(fams || []);
+        setDataSousFamilles(sous || []);
+      } catch {
+        setDataFamilles([]);
+        setDataSousFamilles([]);
+      }
+    }
+    loadRefs();
+  }, [mama_id]);
+
+  const familles = dataFamilles ?? [];
+  const sousFamilles = dataSousFamilles ?? [];
+  const sousFamillesFiltrees =
+    familleId === 'all'
+      ? sousFamilles
+      : sousFamilles.filter((sf) => sf.famille_id === Number(familleId));
 
   const pages = Math.max(1, Math.ceil(total / limit));
 
@@ -95,7 +141,16 @@ export default function Produits() {
 
   async function handleToggleActive(id, actif) {
     await toggleProductActive(id, actif);
-    fetchProducts({ term: debouncedTerm, page, limit, sortBy, ascending, filtreActif });
+    fetchProducts({
+      search: debouncedSearch,
+      page,
+      limit,
+      sortBy,
+      ascending,
+      statut,
+      familleId,
+      sousFamilleId,
+    });
   }
 
   if (!canView) {
@@ -105,48 +160,92 @@ export default function Produits() {
   return (
     <div className="p-8 max-w-7xl mx-auto text-shadow space-y-6">
       <h1 className="text-2xl font-bold mb-4">Produits stock</h1>
-      <TableHeader className="flex-wrap gap-2">
+      <div className="flex flex-wrap md:flex-nowrap items-center gap-2 mb-4">
         <Input
           type="search"
-          value={term}
+          value={search}
           onChange={(e) => {
             setPage(1);
-            setTerm(e.target.value);
+            setSearch(e.target.value);
           }}
           placeholder="Recherche nom"
-          className="flex-1 min-w-[150px]"
+          className="flex-1 min-w-[220px]"
         />
-        <Select
-          className="w-32"
-          value={filtreActif}
+        <select
+          className="w-[160px] px-4 py-2 rounded-md border border-white/20 bg-white/10 text-white"
+          value={statut}
           onChange={(e) => {
             setPage(1);
-            setFiltreActif(e.target.value);
+            setStatut(e.target.value);
           }}
+          aria-label="Statut"
+          title="Filtrer par statut"
         >
-          <option value="tous">Actif ou non</option>
-          <option value="true">Actif</option>
-          <option value="false">Inactif</option>
-        </Select>
-        <Button
-          variant="primary"
-          icon={PlusIcon}
-          onClick={() => {
-            setShowForm(true);
-            setSelectedProduct(null);
+          <option value="all">Tous</option>
+          <option value="active">Actifs</option>
+          <option value="inactive">Inactifs</option>
+        </select>
+        <select
+          className="w-[220px] px-4 py-2 rounded-md border border-white/20 bg-white/10 text-white"
+          value={familleId}
+          onChange={(e) => {
+            setPage(1);
+            setFamilleId(e.target.value);
+            setSousFamilleId('all');
           }}
+          aria-label="Famille"
+          title="Filtrer par famille"
         >
-          Nouveau produit
-        </Button>
-        <Button
-          icon={FileDownIcon}
-          onClick={handleExportExcel}
-          disabled={products.length === 0}
+          <option value="all">Toutes les familles</option>
+          {familles.map((f) => (
+            <option key={f.id} value={f.id}>
+              {f.nom}
+            </option>
+          ))}
+        </select>
+        <select
+          className="w-[240px] px-4 py-2 rounded-md border border-white/20 bg-white/10 text-white disabled:opacity-50"
+          value={sousFamilleId}
+          onChange={(e) => {
+            setPage(1);
+            setSousFamilleId(e.target.value);
+          }}
+          aria-label="Sous-famille"
+          title="Filtrer par sous-famille"
+          disabled={familleId === 'all' && sousFamillesFiltrees.length === 0}
         >
-          Exporter vers Excel
-        </Button>
-        <Button onClick={() => setShowImport(true)}>Importer via Excel</Button>
-      </TableHeader>
+          <option value="all">
+            {familleId === 'all'
+              ? 'Toutes les sous-familles'
+              : 'Toutes'}
+          </option>
+          {sousFamillesFiltrees.map((sf) => (
+            <option key={sf.id} value={sf.id}>
+              {sf.nom}
+            </option>
+          ))}
+        </select>
+        <div className="ml-auto flex items-center gap-2">
+          <Button
+            variant="primary"
+            icon={PlusIcon}
+            onClick={() => {
+              setShowForm(true);
+              setSelectedProduct(null);
+            }}
+          >
+            Nouveau produit
+          </Button>
+          <Button
+            icon={FileDownIcon}
+            onClick={handleExportExcel}
+            disabled={products.length === 0}
+          >
+            Exporter vers Excel
+          </Button>
+          <Button onClick={() => setShowImport(true)}>Importer via Excel</Button>
+        </div>
+      </div>
       <ListingContainer className="hidden md:block">
         <table className="w-full table-auto text-sm">
           <thead>
@@ -259,8 +358,8 @@ export default function Produits() {
       </div>
       <div className="flex items-center justify-between mt-4 flex-wrap gap-2">
         <span className="text-sm">Total : {total}</span>
-        <Select
-          className="w-24"
+        <select
+          className="w-24 px-2 py-2 rounded-md border border-white/20 bg-white/10 text-white"
           value={limit}
           onChange={(e) => {
             setPage(1);
@@ -272,7 +371,7 @@ export default function Produits() {
               {opt}/page
             </option>
           ))}
-        </Select>
+        </select>
       </div>
       <PaginationFooter page={page} pages={pages} onPageChange={setPage} />
       <ProduitFormModal
@@ -283,7 +382,16 @@ export default function Produits() {
           setSelectedProduct(null);
         }}
         onSuccess={() => {
-          fetchProducts({ term: debouncedTerm, page, limit, sortBy, ascending, filtreActif });
+          fetchProducts({
+            search: debouncedSearch,
+            page,
+            limit,
+            sortBy,
+            ascending,
+            statut,
+            familleId,
+            sousFamilleId,
+          });
         }}
       />
       <ProduitDetail
@@ -299,7 +407,16 @@ export default function Produits() {
         onClose={() => setShowImport(false)}
         onSuccess={() => {
           setShowImport(false);
-          fetchProducts({ term: debouncedTerm, page, limit, sortBy, ascending, filtreActif });
+          fetchProducts({
+            search: debouncedSearch,
+            page,
+            limit,
+            sortBy,
+            ascending,
+            statut,
+            familleId,
+            sousFamilleId,
+          });
         }}
       />
     </div>

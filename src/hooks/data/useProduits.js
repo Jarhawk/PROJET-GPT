@@ -7,7 +7,7 @@ import useMamaSettings from '@/hooks/useMamaSettings';
  * Liste paginée des produits avec filtres.
  * - statut: 'tous' | 'actif' | 'inactif'
  * - sousFamilleId: UUID ou null
- * Note: on n'utilise PAS de join PostgREST pour la sous-famille.
+ * Inclut familles et sous-familles via FKs nommées.
  */
 export const useProduits = ({
   search = '',
@@ -18,10 +18,11 @@ export const useProduits = ({
   sousFamilleId = null,
 }) => {
   const { mamaId } = useMamaSettings();
-  return useQuery({
-    queryKey: ['produits', mamaId, search, page, pageSize, statut, familleId, sousFamilleId],
-    queryFn: async () => {
-      let q = supabase
+    return useQuery({
+      queryKey: ['produits', mamaId, search, page, pageSize, statut, familleId, sousFamilleId],
+      enabled: !!mamaId,
+      queryFn: async () => {
+        let q = supabase
         .from('produits')
         .select(
           `

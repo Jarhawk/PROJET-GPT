@@ -23,18 +23,22 @@ export default function ProduitForm({
   const { data: fournisseursData } = useFournisseurs({ actif: true });
   const fournisseurs = fournisseursData?.data || [];
   const {
-    familles,
+    familles: famillesData = [],
     fetchFamilles,
     error: famillesError,
   } = useFamilles();
   const {
-    sousFamilles,
+    sousFamilles: sousFamillesData = [],
     list: listSousFamilles,
     loading: sousFamillesLoading,
     error: sousFamillesError,
   } = useSousFamilles();
-  const { unites, fetchUnites } = useUnites();
-  const { zones } = useZonesStock();
+  const { unites: unitesData = [], fetchUnites } = useUnites();
+  const { zones = [] } = useZonesStock();
+
+  const familles = Array.isArray(famillesData) ? famillesData : [];
+  const sousFamilles = Array.isArray(sousFamillesData) ? sousFamillesData : [];
+  const unites = Array.isArray(unitesData) ? unitesData : [];
 
   const [nom, setNom] = useState(produit?.nom || "");
   const [familleId, setFamilleId] = useState(produit?.famille_id || "");

@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
-import { logSupaError } from '@/lib/supa/logError';
 import { toast } from 'sonner';
+import { safeSelectWithFallback } from '@/lib/supa/safeSelect';
 
 export default function useAlerteStockFaible() {
   const { mama_id } = useAuth();
@@ -15,8 +15,10 @@ export default function useAlerteStockFaible() {
     setLoading(true);
     setError(null);
     try {
-      const base = supabase.from('v_alertes_rupture');
-      const selectWith = `id:produit_id,
+      const rows = await safeSelectWithFallback({
+        client: supabase,
+        table: 'v_alertes_rupture',
+        select: `id:produit_id,
           produit_id,
           nom,
           unite,
@@ -26,48 +28,14 @@ export default function useAlerteStockFaible() {
           manque,
           consommation_prevue,
           receptions,
-          stock_projete`;
+          stock_projete,
+          mama_id`,
+        order: { column: 'manque', ascending: false },
+        limit: 50,
+      });
 
-      let { data, error } = await base
-        .select(selectWith).eq('mama_id', mama_id)
-        .order('manque', { ascending: false })
-        .limit(50);
-
-      if (error && error.code === '42703') {
-        if (import.meta.env.DEV)
-          console.debug('v_alertes_rupture sans stock_projete');
-        const { data: d2, error: e2 } = await base
-          .select(`id:produit_id,
-          produit_id,
-          nom,
-          unite,
-          fournisseur_nom,
-          stock_actuel,
-          stock_min,
-          manque,
-          consommation_prevue,
-          receptions,
-          stock_previsionnel`).eq('mama_id', mama_id)
-          .order('manque', { ascending: false })
-          .limit(50);
-        if (e2) {
-          logSupaError('v_alertes_rupture', e2);
-          throw e2;
-        }
-        data = (d2 ?? []).map((r) => ({
-          ...r,
-          stock_projete: r.stock_previsionnel ?? ((r.stock_actuel ?? 0) + (r.receptions ?? 0) - (r.consommation_prevue ?? 0)),
-        }));
-      } else {
-        if (error) {
-          logSupaError('v_alertes_rupture', error);
-          throw error;
-        }
-        if (import.meta.env.DEV)
-          console.debug('v_alertes_rupture avec stock_projete');
-      }
-
-      const list = (data || [])
+      const list = rows
+        .filter((r) => r.mama_id === mama_id)
         .map((p) => ({
           produit_id: p.produit_id,
           nom: p.nom,

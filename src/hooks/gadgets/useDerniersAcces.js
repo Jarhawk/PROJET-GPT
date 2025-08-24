@@ -40,7 +40,7 @@ export default function useDerniersAcces() {
       }
       return list;
     } catch (e) {
-      console.warn('useDerniersAcces', e);
+      console.warn('[gadgets] vue manquante ou colonne absente:', e?.message || e);
       setError(e);
       setData([]);
       return [];

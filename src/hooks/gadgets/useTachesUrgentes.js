@@ -33,7 +33,7 @@ export default function useTachesUrgentes() {
       }
       return data || [];
     } catch (e) {
-      console.warn('useTachesUrgentes', e);
+      console.warn('[gadgets] vue manquante ou colonne absente:', e?.message || e);
       setError(e);
       setData([]);
       return [];

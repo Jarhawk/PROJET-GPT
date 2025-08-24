@@ -83,7 +83,7 @@ export default function useAlerteStockFaible() {
       }
       return list;
     } catch (e) {
-      console.error('useAlerteStockFaible', e.message);
+      console.warn('[gadgets] vue manquante ou colonne absente:', e?.message || e);
       toast.error(e.message || 'Erreur chargement alertes rupture');
       setError(e);
       setData([]);

@@ -26,6 +26,7 @@ export default function useAchatsMensuels() {
 
         setData(data || []);
       } catch (e) {
+        console.warn('[gadgets] vue manquante ou colonne absente:', e?.message || e);
         setError(e);
         setData([]);
       } finally {

@@ -5,10 +5,11 @@ import useMamaSettings from '@/hooks/useMamaSettings';
 
 export const useSousFamilles = () => {
   const { mamaId } = useMamaSettings();
-  return useQuery({
-    queryKey: ['sous-familles', mamaId],
-    queryFn: async () => {
-      const { data, error } = await supabase
+    return useQuery({
+      queryKey: ['sous-familles', mamaId],
+      enabled: !!mamaId,
+      queryFn: async () => {
+        const { data, error } = await supabase
         .from('sous_familles')
         .select('id, nom, actif, famille_id')
         .eq('mama_id', mamaId)

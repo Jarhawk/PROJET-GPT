@@ -23,7 +23,7 @@ export default function FicheForm({ fiche, onClose }) {
   const { products, fetchProducts } = useProducts();
   const { familles, fetchFamilles } = useFamilles();
   const [nom, setNom] = useState(fiche?.nom || "");
-  const [famille, setFamille] = useState(fiche?.famille_id || "");
+  const [famille, setFamille] = useState(fiche?.famille || "");
   const [portions, setPortions] = useState(fiche?.portions || 1);
   const [rendement, setRendement] = useState(fiche?.rendement || 1);
   const [lignes, setLignes] = useState(
@@ -86,7 +86,7 @@ export default function FicheForm({ fiche, onClose }) {
     setLoading(true);
     const payload = {
       nom,
-      famille_id: famille || null,
+      famille: famille || null,
       portions,
       rendement,
       prix_vente: prixVente || null,
@@ -129,7 +129,7 @@ export default function FicheForm({ fiche, onClose }) {
         onChange={e => setFamille(e.target.value)}
       >
         <option value="">-- Famille --</option>
-        {(familles ?? []).map(f => <option key={f.id} value={f.id}>{f.nom}</option>)}
+        {(familles ?? []).map(f => <option key={f.id} value={f.nom}>{f.nom}</option>)}
       </Select>
       <div className="flex gap-2 mb-2">
         <Input

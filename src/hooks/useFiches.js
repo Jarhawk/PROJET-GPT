@@ -22,16 +22,13 @@ export function useFiches() {
     const sortField = ["nom", "cout_par_portion"].includes(sortBy) ? sortBy : "nom";
     let query = supabase
       .from("fiches_techniques")
-      .select(
-        "*, famille:familles!fiches_techniques_famille_id_fkey(id, nom), lignes:fiche_lignes!fiche_id(id)",
-        { count: "exact" }
-      )
+      .select("*, lignes:fiche_lignes!fiche_id(id)", { count: "exact" })
       .eq("mama_id", mama_id)
       .order(sortField, { ascending: asc })
       .range((page - 1) * limit, page * limit - 1);
     if (search) query = query.ilike("nom", `%${search}%`);
     if (typeof actif === "boolean") query = query.eq("actif", actif);
-    if (famille) query = query.eq("famille_id", famille);
+    if (famille) query = query.eq("famille", famille);
     const { data, error, count } = await query;
     setLoading(false);
     if (error) {
@@ -51,7 +48,7 @@ export function useFiches() {
     const { data, error } = await supabase
       .from("fiches_techniques")
       .select(
-        "*, famille:familles!fiches_techniques_famille_id_fkey(id, nom), lignes:v_fiche_lignes_complete!fiche_id(*, sous_fiche:sous_fiche_id(id, nom, cout_par_portion))"
+        "*, lignes:v_fiche_lignes_complete!fiche_id(*, sous_fiche:sous_fiche_id(id, nom, cout_par_portion))"
       )
       .eq("id", id)
       .eq("mama_id", mama_id)

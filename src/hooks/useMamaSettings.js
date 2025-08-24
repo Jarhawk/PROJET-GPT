@@ -108,5 +108,3 @@ export function useMamaSettings() {
     updateMamaSettings,
   };
 }
-
-export default useMamaSettings;

@@ -27,6 +27,7 @@ export default function Produits() {
     pageSize,
     statut,
     sousFamilleId: sousFamilleId || null,
+    familleId: familleId || null,
   });
   const produits = data?.data ?? [];
   const total = data?.count ?? 0;
@@ -97,10 +98,10 @@ export default function Produits() {
           {produits.map((p) => (
             <div key={p.id} className="table-row">
               <div className="table-cell py-2">{p.nom}</div>
-              <div className="table-cell py-2">{p.unite ?? '—'}</div>
+              <div className="table-cell py-2">{p.unite?.nom ?? '—'}</div>
               <div className="table-cell py-2">{(p.pmp ?? 0).toFixed(2)}</div>
               <div className="table-cell py-2">{p.sous_famille?.nom ?? '—'}</div>
-              <div className="table-cell py-2">{p.zone_stockage ?? '—'}</div>
+              <div className="table-cell py-2">{p.zone_stock?.nom ?? '—'}</div>
               <div className="table-cell py-2">{p.actif ? 'Actif' : 'Inactif'}</div>
               <div className="table-cell py-2"> {/* actions existantes */}</div>
             </div>

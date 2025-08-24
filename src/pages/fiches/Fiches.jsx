@@ -41,21 +41,16 @@ export default function Fiches() {
 
   const debouncedSearch = useDebounce(search, 300);
 
+  const familleNom = familles.find(f => f.id === familleFilter)?.nom || null;
   const { data, isLoading, isError } = useFichesTechniques({
     page,
     search: debouncedSearch,
     statut,
-    familleId: familleFilter || null,
+    famille: familleNom,
     sortBy,
   });
   const rows = data?.rows || [];
   const total = data?.total || 0;
-
-  const familleMap = Object.fromEntries((familles || []).map((f) => [f.id, f.nom]));
-  const rowsWithFamille = rows.map((f) => ({
-    ...f,
-    famille_nom: familleMap[f.famille_id] || '—',
-  }));
 
   const [searchParams, setSearchParams] = useSearchParams();
   const firstSync = useRef(true);
@@ -85,7 +80,7 @@ export default function Fiches() {
   }, [search, page, setSearchParams]);
 
   const exportExcel = () => {
-    const datas = rowsWithFamille.map((f) => ({
+    const datas = rows.map((f) => ({
       id: f.id,
       nom: f.nom,
       cout_par_portion: f.cout_par_portion,
@@ -99,9 +94,9 @@ export default function Fiches() {
 
   const exportPdf = () => {
     const doc = new JSPDF();
-    const rowsPdf = rowsWithFamille.map((f) => [
+    const rowsPdf = rows.map((f) => [
       f.nom,
-      f.famille_nom || '',
+      f.famille || '',
       f.cout_par_portion,
     ]);
     doc.autoTable({ head: [["Nom", "Famille", "Coût/portion"]], body: rowsPdf });
@@ -165,7 +160,7 @@ export default function Fiches() {
           }}
         >
           <option value="">-- Famille --</option>
-          {(familles ?? []).map((f) => (
+            {(familles ?? []).map((f) => (
             <option key={f.id} value={f.id}>
               {f.nom}
             </option>
@@ -205,7 +200,7 @@ export default function Fiches() {
             </tr>
           </thead>
           <tbody>
-            {rowsWithFamille.map((fiche) => (
+            {rows.map((fiche) => (
               <FicheRow
                 key={fiche.id}
                 fiche={fiche}

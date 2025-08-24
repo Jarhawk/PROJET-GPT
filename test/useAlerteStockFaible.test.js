@@ -25,38 +25,15 @@ beforeEach(async () => {
   queryBuilder.select.mockClear();
 });
 
-test('useAlerteStockFaible queries v_alertes_rupture without mama filter', async () => {
+test('useAlerteStockFaible queries v_alertes_rupture with mama filter', async () => {
   const { result } = renderHook(() => useAlerteStockFaible());
   await waitFor(() => !result.current.loading);
   expect(fromMock).toHaveBeenCalledWith('v_alertes_rupture');
   expect(queryBuilder.select).toHaveBeenCalledWith(
-    'id:produit_id, produit_id, nom, unite, fournisseur_id, fournisseur_nom, stock_actuel, stock_min, manque, consommation_prevue, receptions, stock_projete',
+    'mama_id, id:produit_id, produit_id, nom, unite, fournisseur_id, fournisseur_nom, stock_actuel, stock_min, manque',
     { count: 'exact' }
   );
-  expect(queryBuilder.eq).not.toHaveBeenCalled();
+  expect(queryBuilder.eq).toHaveBeenCalledWith('mama_id', 'm1');
   expect(queryBuilder.order).toHaveBeenCalledWith('manque', { ascending: false });
   expect(queryBuilder.range).toHaveBeenCalledWith(0, 19);
-});
-
-test('useAlerteStockFaible falls back when stock_projete missing', async () => {
-  queryBuilder.range
-    .mockResolvedValueOnce({ data: null, count: 0, error: { code: '42703' } })
-    .mockResolvedValueOnce({
-      data: [
-        {
-          produit_id: 1,
-          nom: 'p',
-          stock_actuel: 5,
-          consommation_prevue: 3,
-          receptions: 2,
-        },
-      ],
-      count: 1,
-      error: null,
-    });
-
-  const { result } = renderHook(() => useAlerteStockFaible());
-  await waitFor(() => !result.current.loading);
-  expect(queryBuilder.range).toHaveBeenCalledTimes(2);
-  expect(result.current.data[0].stock_projete).toBe(4);
 });

@@ -10,7 +10,7 @@ export const useFamilles = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('familles')
-        .select('id, code, nom, actif')
+        .select('id, nom, actif')
         .eq('mama_id', mamaId)
         .order('nom', { ascending: true });
       if (error) throw error;

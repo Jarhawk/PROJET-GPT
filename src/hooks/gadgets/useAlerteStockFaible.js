@@ -16,7 +16,7 @@ export default function useAlerteStockFaible() {
     setError(null);
     try {
       const select =
-        'mama_id,id:produit_id,produit_id,nom,unite,fournisseur_nom,stock_actuel,stock_min,consommation_prevue,receptions,manque,type,stock_projete';
+        'mama_id, id:produit_id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, manque';
 
       const rows = await safeSelectWithFallback({
         client: supabase,

@@ -2,7 +2,7 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import useMamaSettings from "@/hooks/useMamaSettings";
+import { useMamaSettings } from "@/hooks/useMamaSettings";
 import logo from "@/assets/logo-mamastock.png";
 import { normalizeAccessKey } from "@/lib/access";
 

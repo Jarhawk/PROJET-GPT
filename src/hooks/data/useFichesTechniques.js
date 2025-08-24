@@ -6,29 +6,29 @@ import { useMamaSettings } from '@/hooks/useMamaSettings';
 const DEFAULT_PAGE_SIZE = 20;
 
 /**
- * Chargement paginé des fiches techniques depuis la table `fiches`.
- * Filtres possibles: recherche par nom, famille, statut (actif/inactif/tous).
+ * Chargement paginé des fiches techniques depuis la table `fiches_techniques`.
+ * Filtres possibles: recherche par nom, famille (texte), statut (actif/inactif/tous).
  */
 export function useFichesTechniques({
   search = '',
   page = 1,
   pageSize = DEFAULT_PAGE_SIZE,
-  familleId = null,
+  famille = null,
   statut = 'tous', // 'tous' | 'actif' | 'inactif'
   sortBy = 'nom',
 }) {
   const { mamaId } = useMamaSettings();
 
   return useQuery({
-    queryKey: ['fiches', { mamaId, search, page, pageSize, familleId, statut, sortBy }],
+    queryKey: ['fiches', { mamaId, search, page, pageSize, famille, statut, sortBy }],
     enabled: !!mamaId,
     keepPreviousData: true,
     staleTime: 10_000,
     queryFn: async () => {
       let q = supabase
-        .from('fiches')
+        .from('fiches_techniques')
         .select(
-          'id, nom, actif, cout_par_portion, famille_id, created_at, updated_at',
+          'id, nom, actif, cout_par_portion, portions, famille, prix_vente, type_carte, sous_type_carte, carte_actuelle, cout_total, rendement, created_at, updated_at',
           { count: 'exact' },
         )
         .eq('mama_id', mamaId)
@@ -36,7 +36,7 @@ export function useFichesTechniques({
         .range((page - 1) * pageSize, page * pageSize - 1);
 
       if (search) q = q.ilike('nom', `%${search}%`);
-      if (familleId) q = q.eq('famille_id', familleId);
+      if (famille) q = q.eq('famille', famille);
       if (statut === 'actif') q = q.eq('actif', true);
       if (statut === 'inactif') q = q.eq('actif', false);
 

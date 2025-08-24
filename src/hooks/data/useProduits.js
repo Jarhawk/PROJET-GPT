@@ -7,6 +7,7 @@ import { useMamaSettings } from '@/hooks/useMamaSettings';
  * Liste paginée des produits avec filtres.
  * - statut: 'tous' | 'actif' | 'inactif'
  * - sousFamilleId: UUID ou null
+ * - familleId: UUID ou null
  */
 export const useProduits = ({
   search = '',
@@ -14,26 +15,33 @@ export const useProduits = ({
   pageSize = 25,
   statut = 'tous',
   sousFamilleId = null,
+  familleId = null,
 }) => {
   const { mamaId } = useMamaSettings();
   return useQuery({
-    queryKey: ['produits', mamaId, search, page, pageSize, statut, sousFamilleId],
+    queryKey: ['produits', mamaId, search, page, pageSize, statut, sousFamilleId, familleId],
     queryFn: async () => {
       let q = supabase
         .from('produits')
         .select(
-          'id, nom, unite, pmp, zone_stockage, actif, sous_famille_id, sous_famille:sous_familles(id, nom)',
+          `id, nom, unite_id, prix_vente, pmp, actif, sous_famille_id,
+          famille:familles!fk_produits_famille(id, nom),
+          sous_famille:sous_familles!fk_produits_sous_famille(id, nom),
+          unite:unites!fk_produits_unite(id, nom),
+          zone_stock:zones_stock!produits_zone_stock_id_fkey(id, nom)`,
           { count: 'exact' }
         )
         .eq('mama_id', mamaId);
 
       if (search) q = q.ilike('nom', `%${search}%`);
+      if (familleId) q = q.eq('famille_id', familleId);
       if (sousFamilleId) q = q.eq('sous_famille_id', sousFamilleId);
       if (statut === 'actif') q = q.eq('actif', true);
       if (statut === 'inactif') q = q.eq('actif', false);
 
-      q = q.order('nom', { ascending: true })
-           .range((page - 1) * pageSize, page * pageSize - 1);
+      q = q
+        .order('nom', { ascending: true })
+        .range((page - 1) * pageSize, page * pageSize - 1);
 
       const { data, error, count } = await q;
       if (error) throw error;

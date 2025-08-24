@@ -29,7 +29,13 @@ export default function Produits() {
   const canEdit = hasAccess("produits", "peut_modifier");
   const canView = hasAccess("produits", "peut_voir");
 
-  const { products, total, fetchProducts, toggleProductActive } = useProductsView();
+  const {
+    products: dataProducts,
+    total,
+    fetchProducts,
+    toggleProductActive,
+  } = useProductsView();
+  const products = dataProducts ?? [];
 
   const [searchParams, setSearchParams] = useSearchParams();
 

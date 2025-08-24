@@ -91,7 +91,7 @@ export default function CostingCarte() {
             onChange={(e) => setFamilleFilter(e.target.value)}
           >
             <option value="">Toutes</option>
-            {familles.map((f) => (
+            {(familles ?? []).map((f) => (
               <option key={f} value={f}>
                 {f}
               </option>

@@ -189,7 +189,7 @@ export default function ProduitForm({
             required
           >
             <option value="">-- Choisir --</option>
-            {familles.map((f) => (
+            {(familles ?? []).map((f) => (
               <option key={f.id} value={f.id}>
                 {f.nom}
               </option>
@@ -220,7 +220,7 @@ export default function ProduitForm({
             <option value="">
               {sousFamillesLoading ? "Chargement..." : "-- Choisir --"}
             </option>
-            {sousFamilles.map((sf) => (
+            {(sousFamilles ?? []).map((sf) => (
               <option key={sf.id} value={sf.id}>
                 {sf.nom}
               </option>

@@ -44,7 +44,7 @@ export default function StatsFiches() {
   }, [selectedFiche?.id, mama_id, fetchFicheCoutHistory]);
 
   // Graphiques
-  const repartFamille = familles.map(f => ({
+  const repartFamille = (familles ?? []).map(f => ({
     name: f,
     value: fiches.filter(fi => fi.famille === f).length,
   })).filter(f => f.value > 0);

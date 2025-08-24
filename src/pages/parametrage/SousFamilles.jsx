@@ -66,7 +66,7 @@ export default function SousFamilles() {
             </tr>
           </thead>
           <tbody>
-            {sousFamilles.map((sf) => (
+            {(sousFamilles ?? []).map((sf) => (
               <tr key={sf.id}>
                 <td className="px-2 py-1">{sf.code}</td>
                 <td className="px-2 py-1">{sf.nom}</td>
@@ -115,7 +115,7 @@ export default function SousFamilles() {
                 onChange={(e) => setEdit({ ...edit, famille_id: e.target.value })}
               >
                 <option value="">Sélectionner une famille</option>
-                {familles.map((f) => (
+                {(familles ?? []).map((f) => (
                   <option key={f.id} value={f.id}>
                     {f.nom}
                   </option>

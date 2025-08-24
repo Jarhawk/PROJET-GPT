@@ -63,7 +63,7 @@ export default function Familles() {
             </tr>
           </thead>
           <tbody>
-            {familles.map((f) => (
+            {(familles ?? []).map((f) => (
               <tr key={f.id}>
                 <td className="px-2 py-1">{f.code}</td>
                 <td className="px-2 py-1">{f.nom}</td>

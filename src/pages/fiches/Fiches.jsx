@@ -116,7 +116,7 @@ export default function Fiches() {
           }}
         >
           <option value="">-- Famille --</option>
-          {familles.map((f) => (
+          {(familles ?? []).map((f) => (
             <option key={f.id} value={f.id}>
               {f.nom}
             </option>

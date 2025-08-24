@@ -129,7 +129,7 @@ export default function FicheForm({ fiche, onClose }) {
         onChange={e => setFamille(e.target.value)}
       >
         <option value="">-- Famille --</option>
-        {familles.map(f => <option key={f.id} value={f.id}>{f.nom}</option>)}
+        {(familles ?? []).map(f => <option key={f.id} value={f.id}>{f.nom}</option>)}
       </Select>
       <div className="flex gap-2 mb-2">
         <Input

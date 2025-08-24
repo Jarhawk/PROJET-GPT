@@ -114,7 +114,7 @@ export function useDashboard() {
     setFoodCostGlobal(ca_fnb ? consoAlim / ca_fnb : 0);
 
     setFoodCostParFamille(
-      familles.map(fam => ({
+      (familles ?? []).map(fam => ({
         famille: fam,
         food_cost: ca_fnb ? (consoByFamille[fam] || 0) / ca_fnb : 0,
       }))

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { useMamaSettings } from '@/hooks/useMamaSettings';
+import useMamaSettings from '@/hooks/useMamaSettings';
 import { useFamillesParametrage } from '@/hooks/data/useFamillesParametrage';
 import { useSousFamillesParametrage } from '@/hooks/data/useSousFamillesParametrage';
 import { Input } from '@/components/ui/input';

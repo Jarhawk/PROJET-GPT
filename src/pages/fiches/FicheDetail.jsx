@@ -85,8 +85,8 @@ export default function FicheDetail({ fiche: ficheProp, onClose }) {
       <div className="bg-white/10 backdrop-blur-lg text-white rounded-xl shadow-lg p-8 min-w-[400px] max-w-[95vw] flex flex-col gap-2 relative text-shadow">
         <Button variant="outline" className="absolute top-2 right-2" onClick={onClose}>Fermer</Button>
         <h2 className="font-bold text-xl mb-4">{fiche.nom}</h2>
-        {fiche.famille?.nom && (
-          <div><b>Famille :</b> {fiche.famille.nom}</div>
+        {fiche.famille && (
+          <div><b>Famille :</b> {fiche.famille}</div>
         )}
         {typeof fiche.rendement === 'number' && (
           <div><b>Rendement :</b> {fiche.rendement}</div>

@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
-import { safeSelectWithFallback } from '@/lib/supa/safeSelect';
 import { toast } from 'sonner';
 
 export default function useAlerteStockFaible() {
@@ -15,17 +14,13 @@ export default function useAlerteStockFaible() {
     setLoading(true);
     setError(null);
     try {
-      const select =
-        'mama_id,id:produit_id,produit_id,nom,unite,fournisseur_nom,stock_actuel,stock_min,consommation_prevue,receptions,manque,type,stock_projete';
-
-      const rows = await safeSelectWithFallback({
-        client: supabase,
-        table: 'v_alertes_rupture',
-        select,
-        order: { column: 'manque', ascending: false },
-        limit: 50,
-        transform: (rows) => (rows || []).filter(r => r.mama_id === mama_id),
-      });
+      const { data: rows, error } = await supabase
+        .from('v_alertes_rupture')
+        .select('produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, manque')
+        .eq('mama_id', mama_id)
+        .order('manque', { ascending: false })
+        .limit(50);
+      if (error) throw error;
 
       const list = (rows || [])
         .map((p) => ({

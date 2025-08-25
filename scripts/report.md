@@ -1,67 +1,105 @@
-- Missing mama_id filter for table journaux_utilisateur in src/hooks/useAuditLog.js
-- Missing mama_id filter for table logs_securite in src/hooks/useAuditLog.js
-- Missing mama_id filter for table lignes_bl in src/hooks/useBonsLivraison.js
-- Unknown table v_cons_achats_mensuels in src/hooks/useConsolidation.js
-- Unknown table v_cons_ventes_mensuelles in src/hooks/useConsolidation.js
-- Unknown table v_cons_foodcost_mensuel in src/hooks/useConsolidation.js
-- Unknown table v_cons_ecarts_inventaire in src/hooks/useConsolidation.js
-- Unknown columns * on centres_de_cout in src/hooks/useCostCenters.js
-- Missing mama_id filter for table centres_de_cout in src/hooks/useCostCenters.js
-- Unknown table mouvements in src/hooks/useDashboard.js
-- Unknown columns * on emails_envoyes in src/hooks/useEmailsEnvoyes.js
-- Missing mama_id filter for table emails_envoyes in src/hooks/useEmailsEnvoyes.js
-- Missing mama_id filter for table lignes_bl in src/hooks/useFactures.js
-- Missing mama_id filter for table fiche_lignes in src/hooks/useFiches.js
-- Missing mama_id filter for table fiche_lignes in src/hooks/useFiches.js
-- Missing mama_id filter for table fiche_lignes in src/hooks/useFiches.js
-- Missing mama_id filter for table catalogue_updates in src/hooks/useFournisseurAPI.js
-- Missing mama_id filter for table fournisseur_contacts in src/hooks/useFournisseurs.js
-- Missing mama_id filter for table produits in src/hooks/useGlobalSearch.js
-- Unknown columns nom on fiches in src/hooks/useGlobalSearch.js
-- Missing mama_id filter for table fiches in src/hooks/useGlobalSearch.js
-- Unknown columns * on mamas in src/hooks/useMamas.js
-- Missing mama_id filter for table menus_jour_fiches in src/hooks/useMenuDuJour.js
-- Missing mama_id filter for table menus_jour_fiches in src/hooks/useMenuDuJour.js
-- Missing mama_id filter for table menus_jour_fiches in src/hooks/useMenuDuJour.js
-- Missing mama_id filter for table menus_jour_fiches in src/hooks/useMenuDuJour.js
-- Unknown table menu_groupes in src/hooks/useMenuGroupe.js
-- Missing mama_id filter for table menu_fiches in src/hooks/useMenus.js
-- Missing mama_id filter for table menu_fiches in src/hooks/useMenus.js
-- Missing mama_id filter for table notifications in src/hooks/useNotifications.js
-- Unknown columns * on permissions in src/hooks/usePermissions.js
-- Missing mama_id filter for table permissions in src/hooks/usePermissions.js
-- Missing mama_id filter for table planning_lignes in src/hooks/usePlanning.js
-- Missing mama_id filter for table v_pmp in src/hooks/useProducts.js
-- Missing mama_id filter for table v_stocks in src/hooks/useProducts.js
-- Unknown table v_products_last_price in src/hooks/useProducts.js
-- Missing mama_id filter for table produits in src/hooks/useProducts.js
-- Missing mama_id filter for table produits in src/hooks/useProducts.js
-- Missing mama_id filter for table utilisateurs in src/hooks/useRGPD.js
-- Unknown columns * on v_achats_mensuels in src/hooks/useReporting.js
-- Missing mama_id filter for table v_achats_mensuels in src/hooks/useReporting.js
-- Unknown columns * on v_pmp in src/hooks/useReporting.js
-- Missing mama_id filter for table v_pmp in src/hooks/useReporting.js
-- Unknown columns * on v_cost_center_month in src/hooks/useReporting.js
-- Missing mama_id filter for table v_cost_center_month in src/hooks/useReporting.js
-- Unknown columns * on v_cost_center_month in src/hooks/useReporting.js
-- Missing mama_id filter for table v_cost_center_month in src/hooks/useReporting.js
-- Missing mama_id filter for table requisition_lignes in src/hooks/useRequisitions.js
-- Missing mama_id filter for table produits in src/hooks/useStats.js
-- Missing mama_id filter for table fiches_techniques in src/hooks/useStats.js
-- Missing mama_id filter for table roles in src/hooks/useUtilisateurs.js
-- Direct supabase-js import in src/lib/supabase.js
-- Missing mama_id filter for table transferts in src/pages/Transferts.jsx
-- Missing mama_id filter for table sous_familles in src/utils/importExcelProduits.js
-- Missing mama_id filter for table fournisseurs in src/utils/importExcelProduits.js
-- Missing mama_id filter for table produits in src/utils/importExcelProduits.js
-- Missing mama_id filter for table familles in src/pages/Parametres/Familles.jsx
-- Missing mama_id filter for table sous_familles in src/pages/Parametres/Familles.jsx
-- Missing mama_id filter for table ventes_boissons in src/pages/costboisson/CostBoisson.jsx
-- Unknown columns * on roles in src/pages/parametrage/InviteUser.jsx
-- Missing mama_id filter for table roles in src/pages/parametrage/InviteUser.jsx
-- Unknown columns * on mamas in src/pages/parametrage/Mamas.jsx
-- Missing mama_id filter for table permissions in src/pages/parametrage/PermissionsForm.jsx
-- Missing mama_id filter for table consentements_utilisateur in src/pages/parametrage/RGPDConsentForm.jsx
-- Missing mama_id filter for table sous_familles in src/pages/parametrage/SousFamilles.jsx
-- Unknown columns * on fiches_techniques in src/pages/stats/StatsFiches.jsx
-- Missing mama_id filter for table fiches_techniques in src/pages/stats/StatsFiches.jsx
+# Scan report
+
+- src/contexts/AuthContext.jsx:23 - Unknown RPC bootstrap_my_profile
+- src/contexts/AuthContext.jsx:24 - Unknown RPC get_my_profile
+- src/hooks/useAdvancedStats.js:12 - Unknown RPC advanced_stats
+- src/hooks/useAuditLog.js:10 - Missing mama_id filter for journaux_utilisateur
+- src/hooks/useAuditLog.js:26 - Missing mama_id filter for logs_securite
+- src/hooks/useBonsLivraison.js:63 - Missing mama_id filter for lignes_bl
+- src/hooks/useConsolidatedStats.js:12 - Unknown RPC consolidated_stats
+- src/hooks/useConsolidation.js:54 - Unknown table v_cons_achats_mensuels
+- src/hooks/useConsolidation.js:65 - Unknown table v_cons_ventes_mensuelles
+- src/hooks/useConsolidation.js:76 - Unknown table v_cons_foodcost_mensuel
+- src/hooks/useConsolidation.js:87 - Unknown table v_cons_ecarts_inventaire
+- src/hooks/useCostCenterStats.js:10 - Unknown RPC stats_cost_centers
+- src/hooks/useCostCenters.js:29 - Unknown columns on centres_de_cout: *
+- src/hooks/useCostCenters.js:29 - Missing mama_id filter for centres_de_cout
+- src/hooks/useDashboard.js:59 - Unknown table mouvements
+- src/hooks/useDashboard.js:94 - Unknown RPC top_produits
+- src/hooks/useDashboardStats.js:39 - Unknown RPC dashboard_stats
+- src/hooks/useEmailsEnvoyes.js:10 - Unknown columns on emails_envoyes: *
+- src/hooks/useEmailsEnvoyes.js:10 - Missing mama_id filter for emails_envoyes
+- src/hooks/useFactures.js:237 - Missing mama_id filter for lignes_bl
+- src/hooks/useFactures.js:251 - Unknown RPC apply_stock_from_achat
+- src/hooks/useFiches.js:137 - Missing mama_id filter for fiche_lignes
+- src/hooks/useFiches.js:186 - Missing mama_id filter for fiche_lignes
+- src/hooks/useFiches.js:258 - Missing mama_id filter for fiche_lignes
+- src/hooks/useFournisseurAPI.js:112 - Missing mama_id filter for catalogue_updates
+- src/hooks/useFournisseurStats.js:14 - Unknown RPC stats_achats_fournisseurs
+- src/hooks/useFournisseurStats.js:22 - Unknown RPC stats_achats_fournisseur
+- src/hooks/useFournisseurs.js:67 - Missing mama_id filter for fournisseur_contacts
+- src/hooks/useGlobalSearch.js:15 - Missing mama_id filter for produits
+- src/hooks/useGlobalSearch.js:16 - Unknown columns on fiches: nom
+- src/hooks/useGlobalSearch.js:16 - Missing mama_id filter for fiches
+- src/hooks/useInventaires.js:125 - Unknown table produits_inventaire
+- src/hooks/useInvoiceImport.js:15 - Unknown RPC import_invoice
+- src/hooks/useLogs.js:41 - Unknown RPC log_action
+- src/hooks/useMamas.js:19 - Unknown columns on mamas: *
+- src/hooks/useMenuDuJour.js:69 - Missing mama_id filter for menus_jour_fiches
+- src/hooks/useMenuDuJour.js:88 - Missing mama_id filter for menus_jour_fiches
+- src/hooks/useMenuDuJour.js:91 - Missing mama_id filter for menus_jour_fiches
+- src/hooks/useMenuDuJour.js:198 - Missing mama_id filter for menus_jour_fiches
+- src/hooks/useMenuGroupe.js:5 - Unknown table menu_groupes
+- src/hooks/useMenus.js:98 - Missing mama_id filter for menu_fiches
+- src/hooks/useMenus.js:130 - Missing mama_id filter for menu_fiches
+- src/hooks/useNotifications.js:22 - Missing mama_id filter for notifications
+- src/hooks/useNotifications.js:39 - Unknown RPC send_email_notification
+- src/hooks/useNotifications.js:47 - Unknown RPC send_notification_webhook
+- src/hooks/usePeriodes.js:80 - Unknown table periodes_comptables
+- src/hooks/usePermissions.js:20 - Unknown columns on permissions: *
+- src/hooks/usePermissions.js:20 - Missing mama_id filter for permissions
+- src/hooks/usePlanning.js:58 - Missing mama_id filter for planning_lignes
+- src/hooks/useProducts.js:77 - Missing mama_id filter for v_pmp
+- src/hooks/useProducts.js:78 - Missing mama_id filter for v_stocks
+- src/hooks/useProducts.js:79 - Unknown table v_products_last_price
+- src/hooks/useProducts.js:117 - Missing mama_id filter for produits
+- src/hooks/useProducts.js:206 - Missing mama_id filter for produits
+- src/hooks/useRGPD.js:20 - Missing mama_id filter for utilisateurs
+- src/hooks/useRecommendations.js:60 - Unknown RPC fn_calc_budgets
+- src/hooks/useReporting.js:19 - Unknown RPC consolidated_stats
+- src/hooks/useReporting.js:32 - Unknown columns on v_achats_mensuels: *
+- src/hooks/useReporting.js:32 - Missing mama_id filter for v_achats_mensuels
+- src/hooks/useReporting.js:36 - Unknown columns on v_pmp: *
+- src/hooks/useReporting.js:36 - Missing mama_id filter for v_pmp
+- src/hooks/useReporting.js:47 - Unknown columns on v_cost_center_month: *
+- src/hooks/useReporting.js:47 - Missing mama_id filter for v_cost_center_month
+- src/hooks/useReporting.js:80 - Unknown columns on v_cost_center_month: *
+- src/hooks/useReporting.js:80 - Missing mama_id filter for v_cost_center_month
+- src/hooks/useRequisitions.js:111 - Missing mama_id filter for requisition_lignes
+- src/hooks/useStats.js:16 - Missing mama_id filter for produits
+- src/hooks/useStats.js:17 - Missing mama_id filter for fiches_techniques
+- src/hooks/useStock.js:30 - Unknown RPC stats_rotation_produit
+- src/hooks/useTacheAssignation.js:13 - Unknown table utilisateurs_taches
+- src/hooks/useTaches.js:39 - Unknown table utilisateurs_taches
+- src/hooks/useTopProducts.js:9 - Unknown RPC top_produits
+- src/hooks/useUtilisateurs.js:42 - Missing mama_id filter for roles
+- src/hooks/useUtilisateurs.js:54 - Unknown RPC create_utilisateur
+- src/hooks/useZoneProducts.js:27 - Unknown RPC move_zone_products
+- src/hooks/useZoneProducts.js:36 - Unknown RPC copy_zone_products
+- src/hooks/useZoneProducts.js:45 - Unknown RPC merge_zone_products
+- src/lib/loginUser.js:120 - Unknown RPC enable_two_fa
+- src/lib/loginUser.js:126 - Unknown RPC disable_two_fa
+- src/lib/supabase.js:1 - Direct supabase-js import; use src/lib/supabase.js
+- src/pages/Transferts.jsx:199 - Missing mama_id filter for transferts
+- src/utils/importExcelProduits.js:65 - Missing mama_id filter for sous_familles
+- src/utils/importExcelProduits.js:68 - Missing mama_id filter for fournisseurs
+- src/utils/importExcelProduits.js:69 - Missing mama_id filter for produits
+- src/hooks/gadgets/useBudgetMensuel.js:15 - Unknown RPC fn_calc_budgets
+- src/pages/Parametres/Familles.jsx:54 - Missing mama_id filter for familles
+- src/pages/Parametres/Familles.jsx:85 - Missing mama_id filter for sous_familles
+- src/pages/costboisson/CostBoisson.jsx:104 - Missing mama_id filter for ventes_boissons
+- src/pages/factures/FactureForm.jsx:210 - Unknown RPC fn_facture_save
+- src/pages/inventaire/EcartInventaire.jsx:36 - Unknown RPC calcul_ecarts_inventaire
+- src/pages/inventaire/EcartInventaire.jsx:46 - Unknown RPC calcul_ecarts_inventaire
+- src/pages/parametrage/InviteUser.jsx:41 - Unknown columns on roles: *
+- src/pages/parametrage/InviteUser.jsx:41 - Missing mama_id filter for roles
+- src/pages/parametrage/Mamas.jsx:32 - Unknown columns on mamas: *
+- src/pages/parametrage/PermissionsForm.jsx:70 - Missing mama_id filter for permissions
+- src/pages/parametrage/RGPDConsentForm.jsx:30 - Missing mama_id filter for consentements_utilisateur
+- src/pages/parametrage/SousFamilles.jsx:58 - Missing mama_id filter for sous_familles
+- src/pages/parametrage/Zones.jsx:29 - Unknown RPC safe_delete_zone
+- src/pages/stats/StatsFiches.jsx:29 - Unknown columns on fiches_techniques: *
+- src/pages/stats/StatsFiches.jsx:29 - Missing mama_id filter for fiches_techniques
+- src/pages/supervision/ComparateurFiches.jsx:19 - Unknown RPC compare_fiche
+- src/pages/supervision/Rapports.jsx:49 - Unknown table rapports_generes
+- src/pages/supervision/SupervisionGroupe.jsx:17 - Unknown RPC stats_multi_mamas

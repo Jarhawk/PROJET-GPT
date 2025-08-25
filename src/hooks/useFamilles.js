@@ -29,7 +29,7 @@ export function useFamilles() {
     queryFn: async () => {
       let q = supabase
         .from('familles')
-        .select('id, nom, actif', { count: 'exact' })
+        .select('id, code, nom, actif', { count: 'exact' })
         .eq('mama_id', mama_id)
         .order('nom', { ascending: true })
         .range((params.page - 1) * params.limit, params.page * params.limit - 1);
@@ -51,7 +51,7 @@ export function useFamilles() {
       const { data, error } = await supabase
         .from('familles')
         .insert([body])
-        .select('id, nom, actif')
+        .select('id, code, nom, actif')
         .single();
       if (error) throw error;
       return data;
@@ -66,7 +66,7 @@ export function useFamilles() {
         .update(values)
         .eq('id', id)
         .eq('mama_id', mama_id)
-        .select('id, nom, actif')
+        .select('id, code, nom, actif')
         .single();
       if (error) throw error;
       return data;
@@ -107,7 +107,7 @@ export function useFamilles() {
 export async function fetchFamillesForValidation(supabase, mama_id) {
   const { data, error } = await supabase
     .from('familles')
-    .select('id, nom, actif')
+    .select('id, code, nom, actif')
     .eq('mama_id', mama_id)
     .order('nom', { ascending: true });
   if (error) throw error;

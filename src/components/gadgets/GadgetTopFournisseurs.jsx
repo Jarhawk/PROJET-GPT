@@ -12,18 +12,18 @@ export default function GadgetTopFournisseurs() {
     error: errFourn,
   } = useFournisseurs({ actif: true });
 
-  const nameFor = (id) => {
-    const list = Array.isArray(fournisseurs) ? fournisseurs : [];
-    const item = list.find((f) => f.id === id);
-    return item?.nom ?? '—';
-  };
+  const list = Array.isArray(data) ? data : [];
+  const fMap = new Map(
+    (Array.isArray(fournisseurs) ? fournisseurs : []).map((f) => [f.id, f])
+  );
+  const nameFor = (id) => fMap.get(id)?.nom || '—';
 
   if (loading || loadingFourn) {
     return <LoadingSkeleton className="h-32 w-full rounded-2xl" />;
   }
   if (errTop) return <Card>Erreur chargement top fournisseurs</Card>;
   if (errFourn) return <Card>Erreur chargement fournisseurs</Card>;
-  if (!data.length) {
+  if (!list.length) {
     return <Card className="p-4 text-center">Aucune donnée</Card>;
   }
 
@@ -35,7 +35,7 @@ export default function GadgetTopFournisseurs() {
         animate={{ opacity: 1 }}
         className="space-y-2 text-sm"
       >
-        {data.map((f) => (
+        {list.map((f) => (
           <li
             key={f.fournisseur_id}
             className="flex items-center justify-between"

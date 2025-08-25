@@ -24,7 +24,7 @@ export default function useFournisseursBrowse({
       try {
         let req = supabase
           .from('fournisseurs')
-          .select('id, nom, ville', { count: 'exact' })
+          .select('id, nom', { count: 'exact' })
           .eq('mama_id', mama_id)
           .eq('actif', true);
         const t = term.trim();

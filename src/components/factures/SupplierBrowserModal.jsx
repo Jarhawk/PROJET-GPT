@@ -56,6 +56,7 @@ export default function SupplierBrowserModal({ open, onClose, onSelect }) {
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-[#0B1220]/60 backdrop-blur-sm" />
         <Dialog.Content
+          aria-describedby="supplier-browser-desc"
           className="fixed left-1/2 top-1/2 z-50 w-[min(600px,95vw)] max-h-[70vh] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-border bg-card shadow-2xl flex flex-col overflow-hidden"
         >
           <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/40">
@@ -67,6 +68,9 @@ export default function SupplierBrowserModal({ open, onClose, onSelect }) {
             </Dialog.Close>
           </div>
           <div className="p-4 space-y-4 flex-1 overflow-y-auto">
+            <p id="supplier-browser-desc" className="sr-only">
+              Recherche par nom de fournisseur (ILIKE sur fournisseurs.nom)
+            </p>
             <input
               type="text"
               value={query}

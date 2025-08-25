@@ -15,7 +15,7 @@ export default function Produits() {
   const [sousFamilleId, setSousFamilleId] = useState('');
   const dq = useDebounce(q, 250);
 
-  const { data: familles = [] } = useFamilles();
+  const { familles = [] } = useFamilles();
   const { data: allSousFamilles = [] } = useSousFamilles();
   const sousFamilles = useMemo(
     () => (familleId ? allSousFamilles.filter(sf => sf.famille_id === familleId) : allSousFamilles),
@@ -88,7 +88,7 @@ export default function Produits() {
             <div className="table-cell font-semibold py-2">Nom</div>
             <div className="table-cell font-semibold py-2">Unité</div>
             <div className="table-cell font-semibold py-2">PMP (€)</div>
-            <div className="table-cell font-semibold py-2">Sous-famille</div>
+            <div className="table-cell font-semibold py-2">Famille &gt; Sous-famille</div>
             <div className="table-cell font-semibold py-2">Zone de stockage</div>
             <div className="table-cell font-semibold py-2">Statut</div>
             <div className="table-cell font-semibold py-2">Actions</div>
@@ -107,7 +107,11 @@ export default function Produits() {
               <div className="table-cell py-2">{p.nom}</div>
               <div className="table-cell py-2">{p.unite?.nom ?? '—'}</div>
               <div className="table-cell py-2">{((p.pmp ?? p.dernier_prix) ?? 0).toFixed(2)}</div>
-              <div className="table-cell py-2">{p.sous_famille?.nom ?? '—'}</div>
+              <div className="table-cell py-2">
+                {p.sous_famille?.famille?.nom
+                  ? `${p.sous_famille.famille.nom} > ${p.sous_famille.nom}`
+                  : p.sous_famille?.nom ?? '—'}
+              </div>
               <div className="table-cell py-2">{p.zone_id ?? '—'}</div>
               <div className="table-cell py-2">{p.actif ? 'Actif' : 'Inactif'}</div>
               <div className="table-cell py-2"> {/* actions existantes */}</div>

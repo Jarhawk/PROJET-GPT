@@ -16,9 +16,9 @@ export default function useTopFournisseurs() {
       try {
         const { data, error } = await supabase
           .from('v_top_fournisseurs')
-          .select('fournisseur_id, montant, mois')
+          .select('fournisseur_id,montant:montant_total,nombre_achats,mama_id')
           .eq('mama_id', mama_id)
-          .order('montant', { ascending: false })
+          .order('montant_total', { ascending: false })
           .limit(5);
         if (error) throw error;
         setTopFournisseurs(Array.isArray(data) ? data : []);

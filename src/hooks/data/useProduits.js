@@ -28,10 +28,11 @@ export const useProduits = ({
         .from('produits')
         .select(
           `
-          id, nom, actif, unite_id, famille_id, sous_famille_id, pmp, dernier_prix, zone_id:zone_stock_id,
+          id, nom, actif, unite_id, sous_famille_id, pmp, dernier_prix, zone_id:zone_stock_id, tva,
           unite:unites(id, nom),
-          famille:familles(id, nom),
-          sous_famille:sous_familles(id, nom)
+          sous_famille:sous_familles!fk_produits_sous_famille(
+            id, nom, famille:familles!sous_familles_famille_id_fkey(id, nom)
+          )
           `,
           { count: 'exact' }
         )

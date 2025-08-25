@@ -22,15 +22,16 @@ export const useProduits = ({
       queryKey: ['produits', mamaId, search, page, pageSize, statut, familleId, sousFamilleId],
       enabled: !!mamaId,
       queryFn: async () => {
+        // Columns: id, nom, actif, unite_id, famille_id, sous_famille_id, pmp, dernier_prix, zone_stock_id,
+        // unite:unites(id, nom), famille:familles(id, nom), sous_famille:sous_familles(id, nom)
         let q = supabase
         .from('produits')
         .select(
           `
-          id, nom, unite_id, prix_vente, pmp, actif,
-          sous_famille_id,
-          famille:familles!fk_produits_famille(id, nom),
-          sous_famille:sous_familles!fk_produits_sous_famille(id, nom),
-          zone_id:zone_stock_id
+          id, nom, actif, unite_id, famille_id, sous_famille_id, pmp, dernier_prix, zone_id:zone_stock_id,
+          unite:unites(id, nom),
+          famille:familles(id, nom),
+          sous_famille:sous_familles(id, nom)
           `,
           { count: 'exact' }
         )

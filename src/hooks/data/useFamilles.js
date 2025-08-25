@@ -9,6 +9,7 @@ export const useFamilles = () => {
       queryKey: ['familles', mamaId],
       enabled: !!mamaId,
       queryFn: async () => {
+        // Columns: id, nom, actif
         const { data, error } = await supabase
         .from('familles')
         .select('id, nom, actif')

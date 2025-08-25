@@ -1,9 +1,10 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useProduits } from '@/hooks/data/useProduits';
 import { useFamilles } from '@/hooks/data/useFamilles';
 import { useSousFamilles } from '@/hooks/data/useSousFamilles';
 import { useDebounce } from '@/hooks/useDebounce';
+import { logSupaError } from '@/lib/supa/logError';
 
 export default function Produits() {
   const [q, setQ] = useState('');
@@ -32,10 +33,14 @@ export default function Produits() {
   const produits = data?.data ?? [];
   const total = data?.count ?? 0;
 
+  useEffect(() => {
+    if (error) logSupaError('produits:list', error);
+  }, [error]);
+
   return (
     <div className="space-y-3">
       {/* Barre de filtres en UNE LIGNE */}
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex items-center gap-2">
         <input
           className="input"
           placeholder="Recherche nom"
@@ -71,7 +76,9 @@ export default function Produits() {
       </div>
 
       {error && (
-        <div className="text-red-400">Erreur chargement produits.</div>
+        <div className="p-2 bg-red-100 text-red-600 rounded">
+          Erreur chargement produits.
+        </div>
       )}
 
       {/* Tableau */}
@@ -98,8 +105,8 @@ export default function Produits() {
           {produits.map((p) => (
             <div key={p.id} className="table-row">
               <div className="table-cell py-2">{p.nom}</div>
-              <div className="table-cell py-2">{p.unite_id ?? '—'}</div>
-              <div className="table-cell py-2">{(p.pmp ?? 0).toFixed(2)}</div>
+              <div className="table-cell py-2">{p.unite?.nom ?? '—'}</div>
+              <div className="table-cell py-2">{((p.pmp ?? p.dernier_prix) ?? 0).toFixed(2)}</div>
               <div className="table-cell py-2">{p.sous_famille?.nom ?? '—'}</div>
               <div className="table-cell py-2">{p.zone_id ?? '—'}</div>
               <div className="table-cell py-2">{p.actif ? 'Actif' : 'Inactif'}</div>

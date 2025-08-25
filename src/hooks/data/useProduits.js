@@ -49,7 +49,7 @@ export const useProduits = ({
 
       const { data, error, count } = await q;
       if (error) throw error;
-      return { data: data ?? [], count: count ?? 0 };
+      return { data: Array.isArray(data) ? data : [], count: count ?? 0 };
     },
   });
 };

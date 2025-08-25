@@ -22,25 +22,22 @@ export function toNumberSafe(input: string | number, locale = 'fr-FR'): number {
   return Number.isFinite(n) ? n : NaN;
 }
 
-export function formatMoneyEUR(v: number): string {
-  if (!Number.isFinite(v)) return '';
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(v);
+export function formatCurrencyEUR(n: number): string {
+  if (!Number.isFinite(n)) return '';
+  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(n);
 }
-
-export const formatCurrencyEUR = (v: number) => formatMoneyEUR(v);
 
 export function formatQty(v: number): string {
   if (!Number.isFinite(v)) return '';
   return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 3 }).format(v);
 }
 
-export function formatPercent(v: number): string {
-  if (!Number.isFinite(v)) return '';
-  const sign = v > 0 ? '+' : '';
-  return `${sign}${v.toLocaleString('fr-FR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}%`;
+export function formatPercent(delta: number): string {
+  if (!Number.isFinite(delta)) return '';
+  const sign = delta > 0 ? '+' : delta < 0 ? '-' : '';
+  const abs = Math.abs(delta);
+  const val = abs.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return `${sign}${val} %`;
 }
 
 export function safeDiv(a: number, b: number): number {

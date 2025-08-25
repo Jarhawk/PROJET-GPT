@@ -1,188 +1,49 @@
-// MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { Link, NavLink, useLocation } from "react-router-dom";
-import { useMemo } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { useMamaSettings } from "@/hooks/useMamaSettings";
-import logo from "@/assets/logo-mamastock.png";
-import { normalizeAccessKey } from "@/lib/access";
+import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import logo from '@/assets/logo-mamastock.png';
+import { ROUTES } from '@/router/routes';
+import { routePreloadMap } from '@/router';
+import useAuth from '@/hooks/useAuth';
+import { useMamaSettings } from '@/hooks/useMamaSettings';
 
 export default function Sidebar() {
-  const { loading: authLoading, hasAccess, userData } = useAuth();
+  const { hasAccess, loading: authLoading } = useAuth();
+  const { featureFlags, loading: settingsLoading } = useMamaSettings();
+  const { t } = useTranslation();
   const { pathname } = useLocation();
-  const { loading: settingsLoading, enabledModules } = useMamaSettings();
-  const rights = useMemo(() => userData?.access_rights ?? {}, [userData?.access_rights]);
-
-  const modules = useMemo(() => {
-    const em = enabledModules || {};
-    if (Object.keys(em).length > 0) return em;
-    return rights;
-  }, [enabledModules, rights]);
-
-  const has = (key) => {
-    const k = normalizeAccessKey(key);
-    const isEnabled = modules ? modules[k] !== false : true;
-    return hasAccess(k) && isEnabled;
-  };
-  const canAnalyse = has("analyse");
-  const isAdmin = ["admin", "super-admin"].includes(userData?.role);
-
-  const canParam = (key) =>
-    Object.prototype.hasOwnProperty.call(rights, key) ? has(key) : true;
-  const canFamilles = canParam("familles");
-  const canSousFamilles = canParam("sous_familles");
-  const canUnites = canParam("unites");
-  const hasParamModule =
-    enabledModules?.includes?.("parametrage") ||
-    rights?.enabledModules?.includes?.("parametrage");
-  const showParametrage =
-    isAdmin ||
-    import.meta.env.DEV ||
-    rights?.menus?.parametrage === true ||
-    hasParamModule ||
-    canFamilles ||
-    canSousFamilles ||
-    canUnites;
 
   if (authLoading || settingsLoading) return null;
 
+  const flagOK = (flag) => (flag ? featureFlags?.[flag] !== false : true);
+  const items = ROUTES.filter(
+    (r) => r.showInSidebar && hasAccess(r.right) && flagOK(r.featureFlag)
+  );
+
   return (
-    <aside className="w-64 bg-white/10 border border-white/10 backdrop-blur-xl text-white p-4 h-screen shadow-md text-shadow">
+    <aside className="w-64 bg-white/10 border border-white/10 backdrop-blur-xl text-white p-4 h-screen shadow-md text-shadow hidden md:flex md:flex-col">
       <img src={logo} alt="MamaStock" className="h-20 mx-auto mt-4 mb-6" />
       <nav className="flex flex-col gap-2 text-sm">
-        {has("dashboard") && <Link to="/dashboard">Dashboard</Link>}
-
-        {(has("fournisseurs") || has("factures") || has("receptions")) && (
-          <details
-            open={
-              pathname.startsWith("/fournisseurs") ||
-              pathname.startsWith("/factures") ||
-              pathname.startsWith("/receptions")
-            }
-          >
-            <summary className="cursor-pointer">Achats</summary>
-            <div className="ml-4 flex flex-col gap-1 mt-1">
-              {has("fournisseurs") && <Link to="/fournisseurs">Fournisseurs</Link>}
-              {has("factures") && <Link to="/factures">Factures</Link>}
-              {has("receptions") && <Link to="/receptions">Réceptions</Link>}
-            </div>
-          </details>
-        )}
-
-        {(has("fiches_techniques") || has("menus") || has("recettes") || has("menu_du_jour")) && (
-          <details
-            open={
-              pathname.startsWith("/fiches") ||
-              pathname.startsWith("/menus") ||
-              pathname.startsWith("/recettes") ||
-              pathname.startsWith("/menu")
-            }
-          >
-            <summary className="cursor-pointer">Cuisine</summary>
-            <div className="ml-4 flex flex-col gap-1 mt-1">
-              {has("fiches_techniques") && <Link to="/fiches">Fiches</Link>}
-              {has("menus") && <Link to="/menus">Menus</Link>}
-              {has("menu_du_jour") && <Link to="/menu">Menu du jour</Link>}
-              {has("recettes") && <Link to="/recettes">Recettes</Link>}
-            </div>
-          </details>
-        )}
-
-        {(has("produits") || has("inventaires")) && (
-          <details open={pathname.startsWith("/produits") || pathname.startsWith("/inventaire")}>
-            <summary className="cursor-pointer">Stock</summary>
-            <div className="ml-4 flex flex-col gap-1 mt-1">
-              {has("produits") && <Link to="/produits">Produits</Link>}
-              {has("inventaires") && <Link to="/inventaire">Inventaire</Link>}
-            </div>
-          </details>
-        )}
-
-        {(has("alertes") || has("promotions")) && (
-          <details open={pathname.startsWith("/alertes") || pathname.startsWith("/promotions")}>
-            <summary className="cursor-pointer">Alertes / Promotions</summary>
-            <div className="ml-4 flex flex-col gap-1 mt-1">
-              {has("alertes") && <Link to="/alertes">Alertes</Link>}
-              {has("promotions") && <Link to="/promotions">Promotions</Link>}
-            </div>
-          </details>
-        )}
-
-        {(has("documents") || canAnalyse || has("menu_engineering")) && (
-          <details
-            open={
-              pathname.startsWith("/documents") ||
-              pathname.startsWith("/analyse") ||
-              pathname.startsWith("/tableaux-de-bord") ||
-              pathname.startsWith("/comparatif") ||
-              pathname.startsWith("/surcouts") ||
-              pathname.startsWith("/engineering") ||
-              pathname.startsWith("/menu-engineering")
-            }
-          >
-            <summary className="cursor-pointer">Documents / Analyse</summary>
-            <div className="ml-4 flex flex-col gap-1 mt-1">
-              {has("documents") && <Link to="/documents">Documents</Link>}
-              {canAnalyse && <Link to="/analyse">Analyse</Link>}
-              {canAnalyse && <Link to="/tableaux-de-bord">Tableaux de bord</Link>}
-              {canAnalyse && <Link to="/comparatif">Comparatif</Link>}
-              {canAnalyse && <Link to="/surcouts">Surcoûts</Link>}
-              {has("menu_engineering") && (
-                <Link to="/menu-engineering">Menu Engineering</Link>
-              )}
-              {canAnalyse && <Link to="/engineering">Engineering</Link>}
-              {has("costing_carte") && <Link to="/costing/carte">Costing Carte</Link>}
-            </div>
-          </details>
-        )}
-
-        {has("notifications") && <Link to="/notifications">Notifications</Link>}
-
-        {showParametrage && (
-          <details open={pathname.startsWith("/parametrage")}>
-            <summary className="cursor-pointer">Paramétrage</summary>
-            <div className="ml-4 flex flex-col gap-1 mt-1">
-              {canFamilles && (
-                <NavLink
-                  to="/parametrage/familles"
-                  className={({ isActive }) =>
-                    isActive ? "text-mamastockGold" : ""
-                  }
-                >
-                  Familles
-                </NavLink>
-              )}
-              {canSousFamilles && (
-                <NavLink
-                  to="/parametrage/sous-familles"
-                  className={({ isActive }) =>
-                    isActive ? "text-mamastockGold" : ""
-                  }
-                >
-                  Sous-familles
-                </NavLink>
-              )}
-              {canUnites && (
-                <NavLink
-                  to="/parametrage/unites"
-                  className={({ isActive }) =>
-                    isActive ? "text-mamastockGold" : ""
-                  }
-                >
-                  Unités
-                </NavLink>
-              )}
-            </div>
-          </details>
-        )}
-
-        <Link to="/onboarding">Onboarding</Link>
-        <Link to="/aide">Aide</Link>
-        {has("feedback") && <Link to="/feedback">Feedback</Link>}
-        {import.meta.env.DEV && (
-          <Link to="/debug/auth" className="text-xs opacity-50 mt-4">
-            Debug Auth
-          </Link>
-        )}
+        {items.map((r) => {
+          const Icon = r.icon;
+          const prefetch = () => {
+            const fn = routePreloadMap[r.path];
+            if (fn) fn();
+          };
+          return (
+            <Link
+              key={r.path}
+              to={r.path}
+              onMouseEnter={prefetch}
+              onFocus={prefetch}
+              className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-white/10 ${
+                pathname.startsWith(r.path) ? 'bg-white/10 text-mamastockGold' : ''
+              }`}
+            >
+              <Icon size={16} />
+              <span>{t(r.labelKey)}</span>
+            </Link>
+          );
+        })}
       </nav>
     </aside>
   );

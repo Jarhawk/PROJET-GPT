@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import useMamaSettings from '@/hooks/useMamaSettings';
+import { useMamaSettings } from '@/hooks/useMamaSettings';
 
 const DEFAULT_PAGE_SIZE = 20;
 

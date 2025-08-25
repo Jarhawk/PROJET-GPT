@@ -40,6 +40,8 @@ export function useMenuDuJour() {
           );
           return {
             ...m,
+            prix_vente_ttc: m.prix_vente_ttc ? Number(m.prix_vente_ttc) : null,
+            tva: m.tva ? Number(m.tva) : null,
             cout_total: cost,
             marge: m.prix_vente_ttc ? ((Number(m.prix_vente_ttc) - cost) / Number(m.prix_vente_ttc)) * 100 : null,
           };
@@ -124,97 +126,7 @@ export function useMenuDuJour() {
     saveAs(new Blob([buf]), "menus_jour.xlsx");
   }
 
-  // --- Nouveaux helpers planning Menu du Jour ---
-
-  async function fetchSemaineMenus(startDate) {
-    if (!mama_id) return [];
-    const start = new Date(startDate);
-    const end = new Date(startDate);
-    end.setDate(end.getDate() + 6);
-    const { data, error } = await supabase
-      .from("menus_jour")
-      .select(
-        "date, categorie, fiche_id, portions, fiche:fiches_techniques(id, nom, cout_total, portions)"
-      )
-      .eq("mama_id", mama_id)
-      .gte("date", start.toISOString().slice(0, 10))
-      .lte("date", end.toISOString().slice(0, 10));
-    if (error) setError(error);
-    return data || [];
-  }
-
-  async function fetchMenuForDate(date) {
-    if (!mama_id) return {};
-    const { data, error } = await supabase
-      .from("menus_jour")
-      .select(
-        "categorie, fiche_id, portions, fiche:fiches_techniques(id, nom, cout_total, portions)"
-      )
-      .eq("mama_id", mama_id)
-      .eq("date", date);
-    if (error) {
-      setError(error);
-      return {};
-    }
-    const mapped = {};
-    (data || []).forEach((row) => {
-      const fiche = row.fiche;
-      const cout_unitaire = fiche && fiche.cout_total && fiche.portions
-        ? Number(fiche.cout_total) / Number(fiche.portions)
-        : 0;
-      mapped[row.categorie] = {
-        fiche_id: row.fiche_id,
-        nom: fiche?.nom,
-        cout_unitaire,
-        portions: Number(row.portions) || 1,
-      };
-    });
-    return mapped;
-  }
-
-  async function setFicheForCategorie(date, categorie, fiche_id) {
-    if (!mama_id) return;
-    return supabase
-      .from("menus_jour")
-      .upsert(
-        { mama_id, date, categorie, fiche_id },
-        { onConflict: "date,categorie,mama_id" }
-      );
-  }
-
-  async function setPortions(date, categorie, portions) {
-    if (!mama_id) return;
-    return supabase
-      .from("menus_jour")
-      .update({ portions })
-      .match({ mama_id, date, categorie });
-  }
-
-  async function removeFicheFromMenu(date, categorie) {
-    if (!mama_id) return;
-    return supabase
-      .from("menus_jour")
-      .delete()
-      .match({ mama_id, date, categorie });
-  }
-
-  async function duplicateMenu(fromDate, toDate) {
-    if (!mama_id) return;
-    const { data, error } = await supabase
-      .from("menus_jour")
-      .select("categorie, fiche_id, portions")
-      .match({ mama_id, date: fromDate });
-    if (!error && Array.isArray(data) && data.length) {
-      const toInsert = data.map((d) => ({ ...d, date: toDate, mama_id }));
-      await supabase.from("menus_jour").insert(toInsert);
-    }
-  }
-
-  async function reloadSavedFiches(date) {
-    return fetchMenuForDate(date);
-  }
-
-  // --- Nouveau module Menu du Jour ---
+  // Helpers planning Menu du Jour
 
   async function fetchWeek({ startDate }) {
     if (!mama_id) return [];
@@ -222,37 +134,43 @@ export function useMenuDuJour() {
     const end = new Date(start);
     end.setDate(start.getDate() + 6);
     const { data, error } = await supabase
-      .from("v_menu_du_jour_resume")
-      .select("*")
+      .from("menus_jour")
+      .select(
+        "date, items:menus_jour_fiches(quantite, fiche:fiches_techniques(id, cout_par_portion))"
+      )
       .eq("mama_id", mama_id)
-      .gte("date_menu", start.toISOString().slice(0, 10))
-      .lte("date_menu", end.toISOString().slice(0, 10));
-    if (error) setError(error);
-    return data || [];
+      .gte("date", start.toISOString().slice(0, 10))
+      .lte("date", end.toISOString().slice(0, 10))
+      .order("date", { ascending: true });
+    if (error) { setError(error); return []; }
+    return (data || []).map((m) => ({
+      date_menu: m.date,
+      cout_total: (m.items || []).reduce(
+        (s, i) => s + Number(i.quantite || 1) * Number(i.fiche?.cout_par_portion || 0),
+        0,
+      ),
+    }));
   }
 
   async function fetchDay(date) {
     if (!mama_id) return {};
     const { data: menu, error: errMenu } = await supabase
       .from("menus_jour")
-      .select("*")
+      .select(
+        "id, nom, date, items:menus_jour_fiches(id, fiche_id, quantite, categorie, fiche:fiches_techniques(id, nom, cout_par_portion))"
+      )
       .eq("mama_id", mama_id)
-      .eq("date_menu", date)
+      .eq("date", date)
       .single();
-    if (errMenu && errMenu.code !== "PGRST116") {
-      setError(errMenu);
-      return {};
-    }
-    const menuId = menu?.id;
-    let lignes = [];
-    if (menuId) {
-      const { data: lignesData, error: errLignes } = await supabase
-        .from("v_menu_du_jour_lignes_cout")
-        .select("*")
-        .eq("menu_id", menuId)
-        .eq("mama_id", mama_id);
-      if (errLignes) setError(errLignes); else lignes = lignesData;
-    }
+    if (errMenu && errMenu.code !== "PGRST116") { setError(errMenu); return {}; }
+    const lignes = (menu?.items || []).map((l) => ({
+      id: l.id,
+      fiche_id: l.fiche_id,
+      categorie: l.categorie || null,
+      portions: Number(l.quantite) || 1,
+      cout_par_portion: l.fiche?.cout_par_portion ? Number(l.fiche.cout_par_portion) : null,
+      cout_ligne_total: Number(l.quantite || 1) * Number(l.fiche?.cout_par_portion || 0),
+    }));
     return { menu, lignes };
   }
 
@@ -260,104 +178,26 @@ export function useMenuDuJour() {
     if (!mama_id) return { error: "Aucun mama_id" };
     const { data, error: err } = await supabase
       .from("menus_jour")
-      .upsert({ mama_id, date_menu: date }, { onConflict: "mama_id,date_menu" })
+      .upsert({ mama_id, date }, { onConflict: "mama_id,date" })
       .select("id")
       .single();
-    if (err) {
-      setError(err);
-      return { error: err };
-    }
+    if (err) { setError(err); return { error: err }; }
     const menuId = data.id;
     await supabase
-      .from("menus_jour_lignes")
+      .from("menus_jour_fiches")
       .delete()
-      .eq("menu_id", menuId)
+      .eq("menu_jour_id", menuId)
       .eq("mama_id", mama_id);
     if (Array.isArray(lignes) && lignes.length) {
-      const rows = lignes.map((l) => ({ ...l, menu_id: menuId, mama_id }));
-      await supabase.from("menus_jour_lignes").insert(rows);
+      const rows = lignes.map((l) => ({
+        menu_jour_id: menuId,
+        fiche_id: l.fiche_id,
+        quantite: l.portions || l.quantite || 1,
+        mama_id,
+      }));
+      await supabase.from("menus_jour_fiches").insert(rows);
     }
     return { id: menuId };
-  }
-
-  async function addLigne(menu_id, { categorie, fiche_id, portions }) {
-    if (!mama_id) return;
-    return supabase
-      .from("menus_jour_lignes")
-      .insert({ menu_id, categorie, fiche_id, portions, mama_id });
-  }
-
-  async function removeLigne(ligne_id) {
-    if (!mama_id) return;
-    return supabase
-      .from("menus_jour_lignes")
-      .delete()
-      .eq("id", ligne_id)
-      .eq("mama_id", mama_id);
-  }
-
-  async function duplicateDay(fromDate, toDate) {
-    if (!mama_id) return;
-    const { lignes } = await fetchDay(fromDate);
-    await createOrUpdateMenu(
-      toDate,
-      (lignes || []).map((l) => ({ categorie: l.categorie, fiche_id: l.fiche_id, portions: 1 }))
-    );
-  }
-
-  async function loadFromFavoris(menu_id, favoris = []) {
-    if (!mama_id || !Array.isArray(favoris) || !favoris.length) return;
-    const rows = favoris.map((f) => ({
-      menu_id,
-      mama_id,
-      categorie: f.categorie,
-      fiche_id: f.fiche_id,
-      portions: f.portions_default || 1,
-    }));
-    return supabase.from("menus_jour_lignes").insert(rows);
-  }
-
-  async function exportExcel(date) {
-    const { lignes } = await fetchDay(date);
-    const data = (lignes || []).map((l) => ({
-      categorie: l.categorie,
-      fiche_id: l.fiche_id,
-      portions: l.portions,
-      cout_par_portion: l.cout_par_portion,
-      cout_ligne_total: l.cout_ligne_total,
-    }));
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), "Menu");
-    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([buf]), `menu_${date}.xlsx`);
-  }
-
-  async function exportPdf(date) {
-    const { lignes } = await fetchDay(date);
-    const doc = new JSPDF();
-    doc.text(`Menu du ${date}`, 10, 10);
-    let y = 20;
-    (lignes || []).forEach((l) => {
-      const line = `${l.categorie} - ${l.portions} x ${(l.cout_par_portion || 0).toFixed(2)}€`;
-      doc.text(line, 10, y);
-      y += 8;
-    });
-    const pdf = doc.output("arraybuffer");
-    saveAs(new Blob([pdf], { type: "application/pdf" }), `menu_${date}.pdf`);
-  }
-
-  async function getMonthlyAverageFoodCost(month) {
-    if (!mama_id) return null;
-    const { data, error } = await supabase
-      .from("v_menu_du_jour_mensuel")
-      .select("cout_total_mois")
-      .eq("mama_id", mama_id)
-      .eq("mois", month);
-    if (error) {
-      setError(error);
-      return null;
-    }
-    return data?.[0]?.cout_total_mois ?? null;
   }
 
   return {
@@ -370,22 +210,8 @@ export function useMenuDuJour() {
     editMenuDuJour,
     deleteMenuDuJour,
     exportMenusDuJourToExcel,
-    fetchSemaineMenus,
-    fetchMenuForDate,
-    setFicheForCategorie,
-    setPortions,
-    removeFicheFromMenu,
-    duplicateMenu,
-    reloadSavedFiches,
     fetchWeek,
     fetchDay,
     createOrUpdateMenu,
-    addLigne,
-    removeLigne,
-    duplicateDay,
-    loadFromFavoris,
-    exportExcel,
-    exportPdf,
-    getMonthlyAverageFoodCost,
   };
 }

@@ -15,7 +15,15 @@ export function useFiches() {
   const [error, setError] = useState(null);
 
   // Liste paginée des fiches techniques
-  async function getFiches({ search = "", actif = null, famille = null, page = 1, limit = 20, sortBy = "nom", asc = true } = {}) {
+  async function getFiches({
+    search = "",
+    actif = null,
+    famille = null,
+    page = 1,
+    limit = 20,
+    sortBy = "nom",
+    asc = true,
+  } = {}) {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
@@ -23,15 +31,17 @@ export function useFiches() {
     let query = supabase
       .from("fiches_techniques")
       .select(
-        "id, nom, portions, cout_total, cout_par_portion, actif, famille, lignes:fiche_lignes!fiche_id(id)",
+        "id, nom, actif, cout_par_portion, portions, famille, prix_vente, type_carte, sous_type_carte, carte_actuelle, cout_total, rendement, created_at, updated_at",
         { count: "exact" }
       )
       .eq("mama_id", mama_id)
       .order(sortField, { ascending: asc })
       .range((page - 1) * limit, page * limit - 1);
+
     if (search) query = query.ilike("nom", `%${search}%`);
     if (typeof actif === "boolean") query = query.eq("actif", actif);
     if (famille) query = query.eq("famille", famille);
+
     const { data, error, count } = await query;
     setLoading(false);
     if (error) {
@@ -39,9 +49,17 @@ export function useFiches() {
       setError(error);
       return [];
     }
-    setFiches(Array.isArray(data) ? data : []);
+    const rows = Array.isArray(data)
+      ? data.map((d) => ({
+          ...d,
+          cout_par_portion: d.cout_par_portion ? Number(d.cout_par_portion) : null,
+          cout_total: d.cout_total ? Number(d.cout_total) : null,
+          portions: d.portions ? Number(d.portions) : null,
+        }))
+      : [];
+    setFiches(rows);
     setTotal(count || 0);
-    return data || [];
+    return rows;
   }
 
   // Récupération d'une fiche avec ses lignes + produits
@@ -51,7 +69,7 @@ export function useFiches() {
     const { data, error } = await supabase
       .from("fiches_techniques")
       .select(
-        "id, nom, actif, cout_par_portion, portions, famille, prix_vente, type_carte, sous_type_carte, carte_actuelle, cout_total, rendement, lignes:v_fiche_lignes_complete!fiche_id(*, sous_fiche:sous_fiche_id(id, nom, cout_par_portion))"
+        "id, nom, actif, cout_par_portion, portions, famille, prix_vente, type_carte, sous_type_carte, carte_actuelle, cout_total, rendement, lignes:fiche_lignes(id, produit_id, sous_fiche_id, description, quantite, produit:produits(id, nom, pmp, dernier_prix, unite:unites(id, nom)), sous_fiche:fiches_techniques(id, nom, cout_par_portion))"
       )
       .eq("id", id)
       .eq("mama_id", mama_id)
@@ -62,7 +80,33 @@ export function useFiches() {
       setError(error);
       return null;
     }
-    return data;
+    const mapped = {
+      ...data,
+      cout_par_portion: data.cout_par_portion ? Number(data.cout_par_portion) : null,
+      cout_total: data.cout_total ? Number(data.cout_total) : null,
+      portions: data.portions ? Number(data.portions) : null,
+      lignes: (data.lignes || []).map((l) => ({
+        id: l.id,
+        produit_id: l.produit_id,
+        sous_fiche_id: l.sous_fiche_id,
+        description: l.description,
+        quantite: l.quantite ? Number(l.quantite) : null,
+        produit_nom: l.produit?.nom,
+        unite_nom: l.produit?.unite?.nom,
+        pmp: l.produit?.pmp ? Number(l.produit.pmp) : null,
+        dernier_prix: l.produit?.dernier_prix ? Number(l.produit.dernier_prix) : null,
+        sous_fiche: l.sous_fiche
+          ? {
+              id: l.sous_fiche.id,
+              nom: l.sous_fiche.nom,
+              cout_par_portion: l.sous_fiche.cout_par_portion
+                ? Number(l.sous_fiche.cout_par_portion)
+                : null,
+            }
+          : null,
+      })),
+    };
+    return mapped;
   }
 
   // Création fiche + lignes

@@ -27,8 +27,14 @@ export function useFichesAutocomplete() {
       setError(error);
       return [];
     }
-    setResults(Array.isArray(data) ? data : []);
-    return data || [];
+    const rows = Array.isArray(data)
+      ? data.map((d) => ({
+          ...d,
+          cout_par_portion: d.cout_par_portion ? Number(d.cout_par_portion) : null,
+        }))
+      : [];
+    setResults(rows);
+    return rows;
   }, [mama_id]);
 
   return { results, loading, error, searchFiches };

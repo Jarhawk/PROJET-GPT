@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useMenuDuJour } from "@/hooks/useMenuDuJour";
 import { useFiches } from "@/hooks/useFiches";
 import { useAuth } from '@/hooks/useAuth';
+import { Navigate } from 'react-router-dom';
 import MenuDuJourForm from "./MenuDuJourForm.jsx";
 import MenuDuJourDetail from "./MenuDuJourDetail.jsx";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,7 @@ import { motion as Motion } from "framer-motion";
 export default function MenuDuJour() {
   const { menusDuJour, fetchMenusDuJour, deleteMenuDuJour, exportMenusDuJourToExcel } = useMenuDuJour();
   const { fiches, fetchFiches } = useFiches();
-  const { mama_id, loading: authLoading } = useAuth();
+  const { mama_id, loading: authLoading, access_rights } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected] = useState(null);
@@ -44,6 +45,10 @@ export default function MenuDuJour() {
     }
   };
 
+  if (!access_rights?.menus_jour?.peut_voir) {
+    return <Navigate to="/unauthorized" replace />;
+  }
+
   return (
     <div className="p-6 container mx-auto">
             <div className="flex flex-wrap gap-4 items-center mb-4">
@@ -60,9 +65,11 @@ export default function MenuDuJour() {
           onChange={e => setDateFilter(e.target.value)}
           className="form-input"
         />
-        <Button onClick={() => { setSelected(null); setShowForm(true); }}>
-          Ajouter un menu du jour
-        </Button>
+        {access_rights?.menus_jour?.peut_modifier && (
+          <Button onClick={() => { setSelected(null); setShowForm(true); }}>
+            Ajouter un menu du jour
+          </Button>
+        )}
         <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
       </div>
       <TableContainer as={Motion.table} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-2">
@@ -96,22 +103,26 @@ export default function MenuDuJour() {
               <td className="border px-4 py-2">{menu.cout_total?.toFixed(2)} €</td>
               <td className="border px-4 py-2">{menu.marge != null ? `${menu.marge.toFixed(1)}%` : '-'}</td>
               <td className="border px-4 py-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="mr-2"
-                  onClick={() => { setSelected(menu); setShowForm(true); }}
-                >
-                  Modifier
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="mr-2"
-                  onClick={() => handleDelete(menu)}
-                >
-                  Supprimer
-                </Button>
+                {access_rights?.menus_jour?.peut_modifier && (
+                  <>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="mr-2"
+                      onClick={() => { setSelected(menu); setShowForm(true); }}
+                    >
+                      Modifier
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="mr-2"
+                      onClick={() => handleDelete(menu)}
+                    >
+                      Supprimer
+                    </Button>
+                  </>
+                )}
               </td>
             </tr>
           ))}

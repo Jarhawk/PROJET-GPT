@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useMenus } from '@/hooks/useMenus';
 import { useFiches } from '@/hooks/useFiches';
 import { useAuth } from '@/hooks/useAuth';
+import { Navigate } from 'react-router-dom';
 import MenuForm from './MenuForm.jsx';
 import MenuDetail from './MenuDetail.jsx';
 import { Button } from '@/components/ui/button';
@@ -19,7 +20,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 export default function Menus() {
   const { menus, total, getMenus, deleteMenu, loading } = useMenus();
   const { fiches, fetchFiches } = useFiches();
-  const { mama_id, loading: authLoading } = useAuth();
+  const { mama_id, loading: authLoading, access_rights } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected] = useState(null);
@@ -82,6 +83,10 @@ export default function Menus() {
 
   if (authLoading || loading) {
     return <LoadingSpinner message="Chargement..." />;
+  }
+
+  if (!access_rights?.menus?.peut_voir) {
+    return <Navigate to="/unauthorized" replace />;
   }
 
   const exportExcel = () => {
@@ -195,36 +200,40 @@ export default function Menus() {
                   {menu.actif ? '✔' : '✖'}
                 </td>
                 <td className="border px-4 py-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="mr-2"
-                    onClick={() => {
-                      setSelected(menu);
-                      setShowForm(true);
-                    }}
-                  >
-                    Modifier
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="mr-2"
-                    onClick={() => {
-                      setSelected({ ...menu, date: '' });
-                      setShowForm(true);
-                    }}
-                  >
-                    Dupliquer
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="mr-2"
-                    onClick={() => handleDelete(menu)}
-                  >
-                    Supprimer
-                  </Button>
+                  {access_rights?.menus?.peut_modifier && (
+                    <>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="mr-2"
+                        onClick={() => {
+                          setSelected(menu);
+                          setShowForm(true);
+                        }}
+                      >
+                        Modifier
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="mr-2"
+                        onClick={() => {
+                          setSelected({ ...menu, date: '' });
+                          setShowForm(true);
+                        }}
+                      >
+                        Dupliquer
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="mr-2"
+                        onClick={() => handleDelete(menu)}
+                      >
+                        Supprimer
+                      </Button>
+                    </>
+                  )}
                 </td>
               </tr>
             ))}

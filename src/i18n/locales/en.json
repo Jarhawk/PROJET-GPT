@@ -6,5 +6,15 @@
   "spanish": "Spanish",
   "logout": "Logout",
   "search": "Search...",
-  "toggleTheme": "Toggle theme"
+  "toggleTheme": "Toggle theme",
+  "nav.dashboard": "Dashboard",
+  "nav.produits": "Products",
+  "nav.factures": "Invoices",
+  "nav.fiches": "Sheets",
+  "nav.menus": "Menus",
+  "nav.menuDuJour": "Daily menu",
+  "nav.zones": "Zones",
+  "nav.familles": "Families",
+  "nav.sousFamilles": "Sub-families",
+  "nav.unites": "Units"
 }

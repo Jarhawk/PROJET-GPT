@@ -12,7 +12,11 @@ export default function GadgetTopFournisseurs() {
     error: errFourn,
   } = useFournisseurs({ actif: true });
 
-  const nameFor = (id) => (fournisseurs.find?.((f) => f.id === id) || {}).nom ?? '—';
+  const nameFor = (id) => {
+    const list = Array.isArray(fournisseurs) ? fournisseurs : [];
+    const item = list.find((f) => f.id === id);
+    return item?.nom ?? '—';
+  };
 
   if (loading || loadingFourn) {
     return <LoadingSkeleton className="h-32 w-full rounded-2xl" />;
@@ -26,13 +30,22 @@ export default function GadgetTopFournisseurs() {
   return (
     <div className="bg-white/10 border border-white/20 backdrop-blur-xl rounded-2xl shadow-md p-4 text-white">
       <h3 className="font-bold mb-2">Top fournisseurs du mois</h3>
-      <Motion.ul initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-2 text-sm">
+      <Motion.ul
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="space-y-2 text-sm"
+      >
         {data.map((f) => (
-          <li key={f.fournisseur_id} className="flex items-center justify-between">
+          <li
+            key={f.fournisseur_id}
+            className="flex items-center justify-between"
+          >
             <div className="flex items-center gap-2">
               <span>{nameFor(f.fournisseur_id)}</span>
             </div>
-            <span className="font-semibold">{Number(f.montant).toFixed(2)} €</span>
+            <span className="font-semibold">
+              {Number(f.montant).toFixed(2)} €
+            </span>
           </li>
         ))}
       </Motion.ul>

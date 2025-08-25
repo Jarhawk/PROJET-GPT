@@ -9,7 +9,6 @@ import FactureLigne from '@/components/FactureLigne';
 import SupplierPicker from '@/components/factures/SupplierPicker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import NumericInput from '@/components/forms/NumericInput';
 import {
   Select,
   SelectTrigger,
@@ -22,6 +21,7 @@ import { mapUILineToPayload } from '@/features/factures/invoiceMappers';
 import useProduitLineDefaults from '@/hooks/useProduitLineDefaults';
 import useZonesStock from '@/hooks/useZonesStock';
 import { formatMoneyFR, formatMoneyFromCents } from '@/utils/numberFormat';
+import { parseDecimal, formatMoneyEUR } from '@/lib/numberFormat';
 
 const FN_UPDATE_FACTURE_EXISTS = false;
 
@@ -65,7 +65,16 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
       : emptyForm(),
   });
 
-  const { control, handleSubmit, watch, reset, setValue, setError, formState } = form;
+  const {
+    control,
+    handleSubmit,
+    watch,
+    reset,
+    setValue,
+    setError,
+    formState,
+    register,
+  } = form;
   const { errors, submitCount } = formState;
   const [saving, setSaving] = useState(false);
   const { fields, append, remove, update } = useFieldArray({
@@ -97,10 +106,25 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
     [lignes]
   );
 
+  const round2 = (n) =>
+    Number.isFinite(n) ? Math.round(n * 100) / 100 : NaN;
+  const [totalAttenduInput, setTotalAttenduInput] = useState(
+    totalHTAttendu ? formatMoneyEUR(round2(totalHTAttendu)) : ''
+  );
+  useEffect(() => {
+    setTotalAttenduInput(
+      totalHTAttendu ? formatMoneyEUR(round2(totalHTAttendu)) : ''
+    );
+  }, [totalHTAttendu]);
+
   const ecart_ht = useMemo(() => {
     const expected = Number(totalHTAttendu ?? 0);
     return +(expected - sommeLignesHT).toFixed(2);
   }, [totalHTAttendu, sommeLignesHT]);
+
+  useEffect(() => {
+    register('total_ht_attendu');
+  }, [register]);
 
   useEffect(() => {
     if (ecart_ht !== 0 && statut === 'Validée') {
@@ -289,32 +313,38 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
         {/* Total HT attendu */}
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium">Total HT attendu (€)</label>
-          <Controller
-            control={control}
-            name="total_ht_attendu"
-            render={({ field }) => (
-              <div className="flex items-center gap-2">
-                <NumericInput
-                  value={field.value}
-                  decimals={2}
-                  min={0}
-                  onValueChange={(val) => field.onChange(val)}
-                />
-                <Badge
-                  color={
-                    ecart_ht === 0
-                      ? 'green'
-                      : Math.abs(ecart_ht) < 0.01
-                        ? 'gold'
-                        : 'red'
-                  }
-                  ariaLabel="Écart HT"
-                >
-                  {`Écart ${formatMoneyFR(ecart_ht)}`}
-                </Badge>
-              </div>
-            )}
-          />
+          <div className="flex items-center gap-2">
+            <input
+              inputMode="decimal"
+              step="0.01"
+              value={totalAttenduInput}
+              onChange={(e) => setTotalAttenduInput(e.target.value)}
+              onBlur={() => {
+                const n = parseDecimal(totalAttenduInput);
+                const t = Number.isFinite(n) ? round2(n) : NaN;
+                setTotalAttenduInput(
+                  Number.isFinite(n) ? formatMoneyEUR(t) : ''
+                );
+                setValue('total_ht_attendu', Number.isFinite(n) ? t : null, {
+                  shouldDirty: true,
+                });
+              }}
+              className="bg-white text-gray-900 placeholder-gray-500 rounded-md h-9 px-3 w-36 text-right border border-gray-300"
+              placeholder="0,00 €"
+            />
+            <Badge
+              color={
+                ecart_ht === 0
+                  ? 'green'
+                  : Math.abs(ecart_ht) < 0.01
+                    ? 'gold'
+                    : 'red'
+              }
+              ariaLabel="Écart HT"
+            >
+              {`Écart ${formatMoneyFR(ecart_ht)}`}
+            </Badge>
+          </div>
         </div>
       </div>
 

@@ -10,7 +10,13 @@ import {
 } from '@/components/ui/select';
 import { Trash2 } from 'lucide-react';
 import ProduitSearchModal from '@/components/factures/ProduitSearchModal';
-import { parseDecimal, formatMoneyEUR, formatQty, safeDiv } from '@/lib/numberFormat';
+import {
+  toNumberSafe,
+  formatCurrencyEUR,
+  formatQty,
+  safeDiv,
+  formatPercent,
+} from '@/lib/numberFormat';
 import { Badge } from '@/components/ui/badge';
 
 export default function FactureLigne({
@@ -34,7 +40,7 @@ export default function FactureLigne({
     line.quantite ? formatQty(round3(Number(line.quantite))) : ''
   );
   const [totalHtInput, setTotalHtInput] = useState(
-    line.total_ht ? formatMoneyEUR(round2(Number(line.total_ht))) : ''
+    line.total_ht ? formatCurrencyEUR(round2(Number(line.total_ht))) : ''
   );
 
   useEffect(() => {
@@ -44,12 +50,12 @@ export default function FactureLigne({
   }, [line.quantite]);
   useEffect(() => {
     setTotalHtInput(
-      line.total_ht ? formatMoneyEUR(round2(Number(line.total_ht))) : ''
+      line.total_ht ? formatCurrencyEUR(round2(Number(line.total_ht))) : ''
     );
   }, [line.total_ht]);
 
-  const qte = round3(parseDecimal(qteInput));
-  const totalHT = round2(parseDecimal(totalHtInput));
+  const qte = round3(toNumberSafe(qteInput));
+  const totalHT = round2(toNumberSafe(totalHtInput));
   const tva = Number(line.tva || 0);
   const puHT = safeDiv(totalHT, qte);
   const pmp = Number(line.pmp ?? 0);
@@ -134,7 +140,7 @@ export default function FactureLigne({
         value={qteInput}
         onChange={(e) => setQteInput(e.target.value)}
         onBlur={() => {
-          const n = parseDecimal(qteInput);
+          const n = toNumberSafe(qteInput);
           const q = Number.isFinite(n) ? round3(n) : NaN;
           setQteInput(Number.isFinite(n) ? formatQty(q) : '');
           update(q, totalHT);
@@ -150,9 +156,9 @@ export default function FactureLigne({
         value={totalHtInput}
         onChange={(e) => setTotalHtInput(e.target.value)}
         onBlur={() => {
-          const n = parseDecimal(totalHtInput);
+          const n = toNumberSafe(totalHtInput);
           const t = Number.isFinite(n) ? round2(n) : NaN;
-          setTotalHtInput(Number.isFinite(n) ? formatMoneyEUR(t) : '');
+          setTotalHtInput(Number.isFinite(n) ? formatCurrencyEUR(t) : '');
           update(qte, t);
         }}
         aria-label="Total HT (€)"
@@ -163,18 +169,18 @@ export default function FactureLigne({
         <Input
           readOnly
           disabled
-          value={Number.isFinite(puHT) ? formatMoneyEUR(round2(puHT)) : ''}
+          value={Number.isFinite(puHT) ? formatCurrencyEUR(round2(puHT)) : ''}
           className="w-28 text-right opacity-60"
           placeholder="PU HT"
         />
         <Badge className="ml-2" color={varBadgeColor} ariaLabel="Écart vs PMP">
-          {pmp > 0 ? `${variationPct.toFixed(2).replace('.', ',')}%` : '—'}
+          {pmp > 0 ? formatPercent(variationPct) : '—'}
         </Badge>
       </div>
       <Input
         readOnly
         disabled
-        value={formatMoneyEUR(pmp)}
+        value={formatCurrencyEUR(pmp)}
         placeholder="PMP"
       />
       <Select

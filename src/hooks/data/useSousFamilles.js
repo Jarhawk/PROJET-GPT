@@ -11,7 +11,7 @@ export const useSousFamilles = () => {
       queryFn: async () => {
         const { data, error } = await supabase
         .from('sous_familles')
-        .select('id, nom, actif, famille_id')
+        .select('id, nom, famille_id, actif')
         .eq('mama_id', mamaId)
         .order('nom', { ascending: true });
       if (error) {

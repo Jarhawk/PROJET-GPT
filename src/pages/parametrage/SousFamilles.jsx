@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import useMamaSettings from '@/hooks/useMamaSettings';
-import { useFamillesParametrage } from '@/hooks/data/useFamillesParametrage';
-import { useSousFamillesParametrage } from '@/hooks/data/useSousFamillesParametrage';
+import { useFamilles } from '@/hooks/data/useFamilles';
+import useSousFamilles from '@/hooks/data/useSousFamilles';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -18,9 +18,25 @@ export default function SousFamilles() {
     return () => clearTimeout(id);
   }, [searchRaw]);
 
-  const { data: familles = [] } = useFamillesParametrage({ mamaId });
-  const { data: sousFamilles = [], refetch, isLoading } =
-    useSousFamillesParametrage({ mamaId, search, familleId: familleId || null, statut });
+  const { data: familles = [] } = useFamilles();
+  const {
+    data: sousFamillesData = [],
+    refetch,
+    isLoading,
+  } = useSousFamilles();
+
+  const sousFamilles = useMemo(() => {
+    return (sousFamillesData || [])
+      .filter(sf =>
+        search ? sf.nom.toLowerCase().includes(search.toLowerCase()) : true,
+      )
+      .filter(sf => (familleId ? sf.famille_id === familleId : true))
+      .filter(sf => {
+        if (statut === 'actifs') return sf.actif === true;
+        if (statut === 'inactifs') return sf.actif === false;
+        return true;
+      });
+  }, [sousFamillesData, search, familleId, statut]);
 
   // Helpers
   const famillesById = useMemo(() => {

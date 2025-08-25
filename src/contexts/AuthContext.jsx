@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, createContext, useContext, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { supabase } from '@/lib/supabase'
+import { supabase, supabaseInitError } from '@/lib/supabase'
 import { normalizeAccessKey } from '@/lib/access'
 
 const AuthCtx = createContext(null)
@@ -27,7 +27,7 @@ function AuthProvider({ children }) {
   }
 
   useEffect(() => {
-    if (initRef.current) return
+    if (supabaseInitError || initRef.current) return
     initRef.current = true
     if (import.meta.env.DEV) console.debug('[auth] init')
     const init = async () => {
@@ -80,6 +80,7 @@ function AuthProvider({ children }) {
     pollTimerRef.current = window.setInterval(tick, 500)
     return () => { sub?.subscription?.unsubscribe?.(); if (pollTimerRef.current) window.clearInterval(pollTimerRef.current) }
   }, [navigate, userData])
+
   const hasAccess = useMemo(() => {
     return (key) => {
       const k = normalizeAccessKey(key)
@@ -92,6 +93,15 @@ function AuthProvider({ children }) {
     () => ({ session, user, userData, loading, hasAccess, ...(userData || {}) }),
     [session, user, userData, loading, hasAccess]
   )
+
+  if (supabaseInitError) {
+    return (
+      <div className="p-8 text-center text-red-600">
+        {supabaseInitError}
+      </div>
+    )
+  }
+
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>
 }
 

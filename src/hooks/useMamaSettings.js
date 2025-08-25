@@ -99,6 +99,7 @@ export const useMamaSettings = () => {
   );
 
   return {
+    mamaId,
     settings,
     loading: query.isFetching,
     enabledModules,

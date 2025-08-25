@@ -20,3 +20,5 @@ export const useFamilles = () => {
   });
 };
 
+export default useFamilles;
+

@@ -6,32 +6,84 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const schemaFile = path.resolve(__dirname, '../db/Etat back end.txt')
 
 const raw = fs.readFileSync(schemaFile, 'utf8')
-const rawLines = raw.split(/\r?\n/)
-const lines = []
-for (const line of rawLines) {
-  if (line.startsWith('|')) lines.push(line)
-  else if (lines.length) lines[lines.length - 1] += ' ' + line.trim()
-}
+const lines = raw.split(/\r?\n/)
 
 const tables = {}
+const rpcs = {}
+
+// ----------------------
+// Parse columns section
+// ----------------------
+let inColumns = false
 for (const line of lines) {
-  const cells = line
-    .split('|')
-    .map((c) => c.trim())
-    .filter(Boolean)
-  if (cells.length < 3) continue
-  const [table, position, column] = cells
+  if (line.startsWith('| table_name') && line.includes('column_name')) {
+    inColumns = true
+    continue
+  }
+  if (!inColumns) continue
+  if (!line.startsWith('|')) break
+  const cells = line.split('|').map((c) => c.trim())
+  if (cells.length < 5) continue
+  const table = cells[1]
+  const column = cells[3]
   if (
+    !table ||
+    !column ||
     table === 'table_name' ||
     column === 'column_name' ||
     table.startsWith('-') ||
-    table === ''
+    column.startsWith('-')
   )
     continue
-  if (!tables[table]) tables[table] = { columns: [] }
+  if (!tables[table]) tables[table] = { columns: [], foreignKeys: [] }
   if (!tables[table].columns.includes(column)) tables[table].columns.push(column)
 }
 
+// ----------------------
+// Parse foreign keys
+// ----------------------
+let inFk = false
+for (const line of lines) {
+  if (line.startsWith('| fk_name')) {
+    inFk = true
+    continue
+  }
+  if (!inFk) continue
+  if (!line.startsWith('|')) break
+  const cells = line.split('|').map((c) => c.trim())
+  if (cells.length < 8) continue
+  const srcTable = cells[3]
+  const srcColumn = cells[4]
+  const tgtTable = cells[6]
+  const tgtColumn = cells[7]
+  if (!tables[srcTable]) tables[srcTable] = { columns: [], foreignKeys: [] }
+  tables[srcTable].foreignKeys.push({
+    column: srcColumn,
+    references: { table: tgtTable, column: tgtColumn },
+  })
+}
+
+// ----------------------
+// Parse RPC section if present
+// ----------------------
+let inRpc = false
+for (const line of lines) {
+  if (line.startsWith('| routine_schema') && line.includes('routine_name')) {
+    inRpc = true
+    continue
+  }
+  if (!inRpc) continue
+  if (!line.startsWith('|')) break
+  const cells = line.split('|').map((c) => c.trim())
+  if (cells.length < 4) continue
+  const routine = cells[2]
+  const param = cells[3]
+  if (!routine || routine === 'routine_name') continue
+  if (!rpcs[routine]) rpcs[routine] = { params: [] }
+  if (param && param !== 'parameter_name') rpcs[routine].params.push(param)
+}
+
+const out = { tables, rpcs }
 const outPath = path.resolve(__dirname, 'schema.json')
-fs.writeFileSync(outPath, JSON.stringify(tables, null, 2))
+fs.writeFileSync(outPath, JSON.stringify(out, null, 2))
 console.log('schema written to', outPath)

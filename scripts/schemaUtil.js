@@ -6,5 +6,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const schema = JSON.parse(fs.readFileSync(path.join(__dirname, 'schema.json'), 'utf8'))
 
 export function getEntity(name) {
-  return schema[name] || null
+  return schema.tables[name] || null
+}
+
+export function getRpc(name) {
+  return schema.rpcs[name] || null
 }

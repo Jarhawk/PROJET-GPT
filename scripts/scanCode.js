@@ -1,43 +1,65 @@
 import fs from 'fs'
 import path from 'path'
 import fg from 'fast-glob'
-import { getEntity } from './schemaUtil.js'
+import { getEntity, getRpc } from './schemaUtil.js'
 
 const files = fg.sync('src/**/*.{js,jsx,ts,tsx}', { dot: true })
-const report = []
+const issues = []
+
+function record(file, line, message) {
+  issues.push(`- ${file}:${line} - ${message}`)
+}
+
 for (const file of files) {
   const content = fs.readFileSync(file, 'utf8')
-  if (content.includes("from '@supabase/supabase-js'")) {
-    report.push(`Direct supabase-js import in ${file}`)
-  }
-  const fromMatches = [...content.matchAll(/supabase\.from\(['\"]([^'\"]+)['\"]\)/g)]
-  for (const match of fromMatches) {
-    const table = match[1]
-    const entity = getEntity(table)
-    const slice = content.slice(match.index, match.index + 200)
-    const selectMatch = slice.match(/select\(['\"]([^'\"]*)['\"]\)/)
-    if (selectMatch) {
-      const cols = selectMatch[1]
-        .split(',')
-        .map((c) => c.trim().split(':').pop())
-        .filter(Boolean)
+  const lines = content.split(/\r?\n/)
+
+  lines.forEach((line, idx) => {
+    const lineNo = idx + 1
+
+    if (line.includes("from '@supabase/supabase-js'")) {
+      record(file, lineNo, 'Direct supabase-js import; use src/lib/supabase.js')
+    }
+
+    const fromMatch = line.match(/supabase\.from\(['"]([^'\"]+)['"]\)/)
+    if (fromMatch) {
+      const table = fromMatch[1]
+      const entity = getEntity(table)
       if (!entity) {
-        report.push(`Unknown table ${table} in ${file}`)
+        record(file, lineNo, `Unknown table ${table}`)
       } else {
-        const missing = cols.filter((c) => !entity.columns.includes(c))
-        if (missing.length) {
-          report.push(`Unknown columns ${missing.join(', ')} on ${table} in ${file}`)
+        // look ahead for select columns within next 3 lines
+        const lookahead = lines.slice(idx, idx + 3).join(' ')
+        const selectMatch = lookahead.match(/select\(['"]([^'\"]*)['"]\)/)
+        if (selectMatch) {
+          const cols = selectMatch[1]
+            .split(',')
+            .map((c) => c.trim().split(':').pop())
+            .filter(Boolean)
+          const missing = cols.filter((c) => !entity.columns.includes(c))
+          if (missing.length) {
+            record(file, lineNo, `Unknown columns on ${table}: ${missing.join(', ')}`)
+          }
+        }
+        if (entity.columns.includes('mama_id')) {
+          const eqMatch = lookahead.match(/\.eq\(['"]mama_id['"],\s*mamaId\)/)
+          if (!eqMatch) {
+            record(file, lineNo, `Missing mama_id filter for ${table}`)
+          }
         }
       }
     }
-    if (entity && entity.columns.includes('mama_id')) {
-      if (!/\.eq\(['\"]mama_id['\"],\s*mamaId\)/.test(slice)) {
-        report.push(`Missing mama_id filter for table ${table} in ${file}`)
-      }
+
+    const rpcMatch = line.match(/supabase\.rpc\(['"]([^'\"]+)['"]/)
+    if (rpcMatch) {
+      const fn = rpcMatch[1]
+      const rpc = getRpc(fn)
+      if (!rpc) record(file, lineNo, `Unknown RPC ${fn}`)
     }
-  }
+  })
 }
 
 const out = path.join('scripts', 'report.md')
-fs.writeFileSync(out, report.map((r) => `- ${r}`).join('\n'))
-console.log(`Report written to ${out} with ${report.length} entries`)
+fs.writeFileSync(out, ['# Scan report', '', ...issues].join('\n'))
+console.log(`Report written to ${out} with ${issues.length} entries`)
+

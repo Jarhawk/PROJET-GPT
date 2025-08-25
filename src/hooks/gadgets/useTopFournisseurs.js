@@ -16,19 +16,13 @@ export default function useTopFournisseurs() {
       try {
         const { data, error } = await supabase
           .from('v_top_fournisseurs')
-          .select('fournisseur_id, montant_total, nombre_achats')
+          .select('fournisseur_id, montant, mois')
           .eq('mama_id', mama_id)
-          .order('montant_total', { ascending: false })
+          .order('montant', { ascending: false })
           .limit(5);
         if (error) throw error;
-        const list = (data || []).map((r) => ({
-          id: r.fournisseur_id,
-          montant_total: Number(r.montant_total) || 0,
-          nombre_achats: Number(r.nombre_achats) || 0,
-        }));
-        setTopFournisseurs(list);
+        setTopFournisseurs(Array.isArray(data) ? data : []);
       } catch (e) {
-        console.warn('[gadgets] vue manquante ou colonne absente:', e?.message || e);
         setError(e);
         setTopFournisseurs([]);
       } finally {

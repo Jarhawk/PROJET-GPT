@@ -10,9 +10,7 @@ import {
 } from '@/components/ui/select';
 import { Trash2 } from 'lucide-react';
 import ProduitSearchModal from '@/components/factures/ProduitSearchModal';
-import MoneyInput from '@/components/inputs/MoneyInput';
-import QtyInput from '@/components/inputs/QtyInput';
-import { formatMoneyFromCents } from '@/utils/numberFormat';
+import { parseDecimal, formatMoneyEUR, formatQty, safeDiv } from '@/lib/numberFormat';
 
 export default function FactureLigne({
   value: line,
@@ -26,23 +24,35 @@ export default function FactureLigne({
   const lineRef = useRef(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  const [qty, setQty] = useState(Number(line.quantite || 0));
-  const [totalCents, setTotalCents] = useState(
-    Math.round(Number(line.total_ht || 0) * 100)
+  const round2 = (n) =>
+    Number.isFinite(n) ? Math.round(n * 100) / 100 : NaN;
+  const round3 = (n) =>
+    Number.isFinite(n) ? Math.round(n * 1000) / 1000 : NaN;
+
+  const [qteInput, setQteInput] = useState(
+    line.quantite ? formatQty(round3(Number(line.quantite))) : ''
+  );
+  const [totalHtInput, setTotalHtInput] = useState(
+    line.total_ht ? formatMoneyEUR(round2(Number(line.total_ht))) : ''
   );
 
   useEffect(() => {
-    setQty(Number(line.quantite || 0));
+    setQteInput(
+      line.quantite ? formatQty(round3(Number(line.quantite))) : ''
+    );
   }, [line.quantite]);
   useEffect(() => {
-    setTotalCents(Math.round(Number(line.total_ht || 0) * 100));
+    setTotalHtInput(
+      line.total_ht ? formatMoneyEUR(round2(Number(line.total_ht))) : ''
+    );
   }, [line.total_ht]);
 
+  const qte = round3(parseDecimal(qteInput));
+  const totalHT = round2(parseDecimal(totalHtInput));
   const tva = Number(line.tva || 0);
-  const puCents = qty > 0 ? Math.round(totalCents / qty) : 0;
-  const pmpCents = Math.round(Number(line.pmp ?? 0) * 100);
-  const variationPct =
-    pmpCents > 0 ? ((puCents - pmpCents) / pmpCents) * 100 : 0;
+  const puHT = safeDiv(totalHT, qte);
+  const pmp = Number(line.pmp ?? 0);
+  const variationPct = pmp > 0 ? ((puHT - pmp) / pmp) * 100 : 0;
   const varColor =
     variationPct < 0
       ? 'text-emerald-400'
@@ -50,18 +60,19 @@ export default function FactureLigne({
       ? 'text-red-400'
       : 'text-neutral-400';
 
-  function update(nQty = qty, nTotalCents = totalCents, tv = tva) {
-    const pu = nQty > 0 ? Math.round(nTotalCents / nQty) : 0;
-    const total_ht = nTotalCents / 100;
-    const pu_ht = pu / 100;
-    const tva_montant = +(total_ht * (Number(tv) / 100)).toFixed(2);
-    const total_ttc = +(total_ht + tva_montant).toFixed(2);
+  function update(nQte = qte, nTotalHT = totalHT, tv = tva) {
+    const q = Number.isFinite(nQte) ? nQte : 0;
+    const tht = Number.isFinite(nTotalHT) ? nTotalHT : 0;
+    const pu = safeDiv(tht, q);
+    const puRounded = round2(pu);
+    const tva_montant = round2(tht * (Number(tv) / 100));
+    const total_ttc = round2(tht + tva_montant);
     onChange({
-      quantite: nQty,
-      total_ht,
-      prix_total_ht: total_ht,
-      pu_ht,
-      prix_unitaire_ht: pu_ht,
+      quantite: q,
+      total_ht: tht,
+      prix_total_ht: tht,
+      pu_ht: puRounded,
+      prix_unitaire_ht: puRounded,
       tva: tv,
       tva_montant,
       total_ttc,
@@ -114,60 +125,67 @@ export default function FactureLigne({
               pmp: p.pmp ?? null,
               unite: p.unite ?? line.unite ?? '',
             });
-            update(qty, totalCents, tv);
+            update(qte, totalHT, tv);
           }}
           excludeIdsSameZone={excludeIdsSameZone}
           currentLineProductId={line.produit_id}
         />
       </div>
-      <QtyInput
-        value={qty}
-        onChange={(n) => {
-          const v = n ?? 0;
-          setQty(v);
-          update(v, totalCents);
+      <input
+        inputMode="decimal"
+        step="0.001"
+        value={qteInput}
+        onChange={(e) => setQteInput(e.target.value)}
+        onBlur={() => {
+          const n = parseDecimal(qteInput);
+          const q = Number.isFinite(n) ? round3(n) : NaN;
+          setQteInput(Number.isFinite(n) ? formatQty(q) : '');
+          update(q, totalHT);
         }}
         aria-label="Qté"
-        className="w-20"
+        className="input w-20 text-right"
+        placeholder="0"
       />
       <Input readOnly disabled value={line.unite || ''} placeholder="Unité" />
-      <MoneyInput
-        valueCents={totalCents}
-        onChangeCents={(c) => {
-          const v = c ?? 0;
-          setTotalCents(v);
-          update(qty, v);
+      <input
+        inputMode="decimal"
+        step="0.01"
+        value={totalHtInput}
+        onChange={(e) => setTotalHtInput(e.target.value)}
+        onBlur={() => {
+          const n = parseDecimal(totalHtInput);
+          const t = Number.isFinite(n) ? round2(n) : NaN;
+          setTotalHtInput(Number.isFinite(n) ? formatMoneyEUR(t) : '');
+          update(qte, t);
         }}
         aria-label="Total HT (€)"
-        className="w-28"
+        className="input w-28 text-right"
         placeholder="0,00 €"
       />
       <div className="flex items-center">
         <div
-          className="input w-28 pointer-events-none select-none opacity-50"
-          aria-readonly="true"
+          aria-label="PU HT (€)"
+          className="w-28 h-9 px-3 flex items-center justify-end rounded-md border border-gray-700 bg-gray-800 text-gray-300 select-none"
           tabIndex={-1}
-          role="textbox"
-          aria-label="PU HT (€) calculé"
           title="PU HT = Total HT / Qté"
         >
-          {formatMoneyFromCents(puCents)}
+          {Number.isFinite(puHT) ? formatMoneyEUR(round2(puHT)) : '—'}
         </div>
         <div className={`ml-2 text-xs ${varColor}`} title="Écart vs PMP">
-          {pmpCents > 0 ? `${variationPct.toFixed(2).replace('.', ',')}%` : '—'}
+          {pmp > 0 ? `${variationPct.toFixed(2).replace('.', ',')}%` : '—'}
         </div>
       </div>
       <Input
         readOnly
         disabled
-        value={formatMoneyFromCents(pmpCents)}
+        value={formatMoneyEUR(pmp)}
         placeholder="PMP"
       />
       <Select
         value={String(tva)}
         onValueChange={(v) => {
           const tv = Number(v);
-          update(qty, totalCents, tv);
+          update(qte, totalHT, tv);
         }}
       >
         <SelectTrigger className="w-28">

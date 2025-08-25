@@ -3,6 +3,7 @@ import useTopFournisseurs from '@/hooks/gadgets/useTopFournisseurs';
 import useFournisseurs from '@/hooks/data/useFournisseurs';
 import LoadingSkeleton from '@/components/ui/LoadingSkeleton';
 import Card from '@/components/ui/Card';
+import { formatCurrencyEUR } from '@/lib/numberFormat';
 
 export default function GadgetTopFournisseurs() {
   const { data, loading, error: errTop } = useTopFournisseurs();
@@ -44,7 +45,7 @@ export default function GadgetTopFournisseurs() {
               <span>{nameFor(f.fournisseur_id)}</span>
             </div>
             <span className="font-semibold">
-              {Number(f.montant).toFixed(2)} €
+              {formatCurrencyEUR(Number(f.montant))}
             </span>
           </li>
         ))}

@@ -7,8 +7,11 @@ export default function GadgetTopFournisseurs() {
   const { data, loading } = useTopFournisseurs();
   const { data: fournisseurs = [] } = useFournisseurs({ actif: true });
 
-  const nameFor = (id) =>
-    fournisseurs.find((f) => f.id === id)?.nom || `Fournisseur ${id}`;
+  const nameFor = (id) => {
+    const list = Array.isArray(fournisseurs) ? fournisseurs : [];
+    const item = list.find((f) => f.id === id);
+    return item?.nom ?? '—';
+  };
 
   if (loading) {
     return <LoadingSkeleton className="h-32 w-full rounded-2xl" />;

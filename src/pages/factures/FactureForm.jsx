@@ -23,7 +23,6 @@ import useZonesStock from '@/hooks/useZonesStock';
 import { formatMoneyFR, formatMoneyFromCents } from '@/utils/numberFormat';
 import { parseDecimal, formatMoneyEUR } from '@/lib/numberFormat';
 
-const FN_UPDATE_FACTURE_EXISTS = false;
 
 const today = () => format(new Date(), 'yyyy-MM-dd');
 
@@ -54,7 +53,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
     fournisseur_id: null,
     date_facture: today(),
     numero: '',
-    statut: 'Brouillon', // mappe vers p_actif
+    statut: 'Brouillon',
     total_ht_attendu: null,
     lignes: [emptyLigne()],
   });
@@ -197,36 +196,21 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
         return;
       }
 
-      const p_actif = values.statut === 'Validée' && ecart_ht === 0;
+      const payload = {
+        facture: {
+          id: formId || undefined,
+          fournisseur_id: values.fournisseur_id,
+          numero: values.numero || null,
+          date_facture: values.date_facture,
+          etat: values.statut,
+        },
+        lignes: payloadLignes,
+      };
 
-      if (formId && !FN_UPDATE_FACTURE_EXISTS) {
-        toast.error(
-          'La modification nécessite fn_update_facture côté serveur'
-        );
-        return;
-      }
-
-      const rpcName = formId ? 'fn_update_facture' : 'fn_save_facture';
-      const args = formId
-        ? {
-            p_facture_id: formId,
-            p_mama_id: mamaId,
-            p_fournisseur_id: values.fournisseur_id,
-            p_numero: values.numero || null,
-            p_date: values.date_facture,
-            p_lignes: payloadLignes,
-            p_actif,
-          }
-        : {
-            p_mama_id: mamaId,
-            p_fournisseur_id: values.fournisseur_id,
-            p_numero: values.numero || null,
-            p_date: values.date_facture,
-            p_lignes: payloadLignes,
-            p_actif,
-          };
-
-      const { data, error } = await supabase.rpc(rpcName, args);
+      const { data, error } = await supabase.rpc('fn_facture_save', {
+        p_mama_id: mamaId,
+        p_payload: payload,
+      });
 
       if (error) {
         toast.error(error.message);
@@ -286,7 +270,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
           />
         </div>
 
-        {/* Statut (mappe p_actif) */}
+        {/* Statut */}
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium">Statut</label>
           <Controller
@@ -409,11 +393,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
         <div className="flex flex-col items-end">
           <Button
             type="submit"
-            disabled={
-              saving ||
-              (statut === 'Validée' && ecart_ht !== 0) ||
-              (formId && !FN_UPDATE_FACTURE_EXISTS)
-            }
+            disabled={saving || (statut === 'Validée' && ecart_ht !== 0)}
             title={
               statut === 'Validée' && ecart_ht !== 0
                 ? 'Écart non nul : la facture ne peut être validée.'
@@ -422,11 +402,6 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
           >
             Enregistrer
           </Button>
-          {formId && !FN_UPDATE_FACTURE_EXISTS && (
-            <p className="text-sm text-destructive mt-2">
-              La modification nécessite fn_update_facture côté serveur
-            </p>
-          )}
         </div>
       </div>
 

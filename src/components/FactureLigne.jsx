@@ -11,6 +11,7 @@ import {
 import { Trash2 } from 'lucide-react';
 import ProduitSearchModal from '@/components/factures/ProduitSearchModal';
 import { parseDecimal, formatMoneyEUR, formatQty, safeDiv } from '@/lib/numberFormat';
+import { Badge } from '@/components/ui/badge';
 
 export default function FactureLigne({
   value: line,
@@ -53,12 +54,8 @@ export default function FactureLigne({
   const puHT = safeDiv(totalHT, qte);
   const pmp = Number(line.pmp ?? 0);
   const variationPct = pmp > 0 ? ((puHT - pmp) / pmp) * 100 : 0;
-  const varColor =
-    variationPct < 0
-      ? 'text-emerald-400'
-      : variationPct > 0
-      ? 'text-red-400'
-      : 'text-neutral-400';
+  const varBadgeColor =
+    variationPct < 0 ? 'green' : variationPct > 0 ? 'red' : 'gray';
 
   function update(nQte = qte, nTotalHT = totalHT, tv = tva) {
     const q = Number.isFinite(nQte) ? nQte : 0;
@@ -163,17 +160,16 @@ export default function FactureLigne({
         placeholder="0,00 €"
       />
       <div className="flex items-center">
-        <div
-          aria-label="PU HT (€)"
-          className="w-28 h-9 px-3 flex items-center justify-end rounded-md border border-gray-700 bg-gray-800 text-gray-300 select-none"
-          tabIndex={-1}
-          title="PU HT = Total HT / Qté"
-        >
-          {Number.isFinite(puHT) ? formatMoneyEUR(round2(puHT)) : '—'}
-        </div>
-        <div className={`ml-2 text-xs ${varColor}`} title="Écart vs PMP">
+        <Input
+          readOnly
+          disabled
+          value={Number.isFinite(puHT) ? formatMoneyEUR(round2(puHT)) : ''}
+          className="w-28 text-right opacity-60"
+          placeholder="PU HT"
+        />
+        <Badge className="ml-2" color={varBadgeColor} ariaLabel="Écart vs PMP">
           {pmp > 0 ? `${variationPct.toFixed(2).replace('.', ',')}%` : '—'}
-        </div>
+        </Badge>
       </div>
       <Input
         readOnly

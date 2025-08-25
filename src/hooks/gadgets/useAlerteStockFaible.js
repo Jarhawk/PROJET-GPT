@@ -14,10 +14,11 @@ export default function useAlerteStockFaible() {
     setLoading(true);
     setError(null);
     try {
+      // Columns: mama_id, produit_id, nom, unite, fournisseur_nom, stock_min, stock_actuel, manque
       const { data: rows, error } = await supabase
         .from('v_alertes_rupture')
         .select(
-          'mama_id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, manque'
+          'mama_id, produit_id, nom, unite, fournisseur_nom, stock_min, stock_actuel, manque'
         )
         .eq('mama_id', mama_id)
         .order('manque', { ascending: false })

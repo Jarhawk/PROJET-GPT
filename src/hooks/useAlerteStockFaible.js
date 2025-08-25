@@ -25,10 +25,11 @@ export function useAlerteStockFaible({ page = 1, pageSize = 20 } = {}) {
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
       try {
+        // Columns: mama_id, produit_id, nom, unite, fournisseur_nom, stock_min, stock_actuel, manque
         const { data: rows, count, error } = await supabase
           .from('v_alertes_rupture')
           .select(
-            'mama_id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, manque',
+            'mama_id, produit_id, nom, unite, fournisseur_nom, stock_min, stock_actuel, manque',
             { count: 'exact' }
           )
           .eq('mama_id', mama_id)

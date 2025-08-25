@@ -39,7 +39,7 @@ export function useMenus() {
     let query = supabase
       .from("menus")
       .select(
-        "*, fiches:menu_fiches(fiche_id, fiche: fiches(id, nom))",
+        "id, nom, date, actif, fiches:menu_fiches(fiche_id, fiche:fiches_techniques(id, nom, cout_par_portion))",
         { count: "exact" }
       )
       .eq("mama_id", mama_id);
@@ -53,11 +53,27 @@ export function useMenus() {
     const { data, count, error } = await query
       .order("date", { ascending: false })
       .range(offset, offset + limit - 1);
-    setMenus(Array.isArray(data) ? data : []);
-    setTotal(typeof count === "number" ? count : Array.isArray(data) ? data.length : 0);
+    const rows = Array.isArray(data)
+      ? data.map((m) => ({
+          ...m,
+          fiches: (m.fiches || []).map((f) => ({
+            fiche_id: f.fiche_id,
+            fiche: f.fiche
+              ? {
+                  ...f.fiche,
+                  cout_par_portion: f.fiche.cout_par_portion
+                    ? Number(f.fiche.cout_par_portion)
+                    : null,
+                }
+              : null,
+          })),
+        }))
+      : [];
+    setMenus(rows);
+    setTotal(typeof count === "number" ? count : rows.length);
     setLoading(false);
     if (error) setError(error);
-    return data || [];
+    return rows;
   }
 
   // 2. Ajouter un menu (avec ses fiches)
@@ -126,14 +142,30 @@ export function useMenus() {
     const { data, error } = await supabase
       .from("menus")
       .select(
-        "*, fiches:menu_fiches(fiche_id, fiche: fiches(id, nom, portions, cout_total))"
+        "id, nom, date, actif, fiches:menu_fiches(fiche_id, fiche:fiches_techniques(id, nom, portions, cout_total, cout_par_portion))"
       )
       .eq("id", id)
       .eq("mama_id", mama_id)
       .single();
     setLoading(false);
     if (error) { setError(error); return null; }
-    return data;
+    const mapped = {
+      ...data,
+      fiches: (data?.fiches || []).map((f) => ({
+        fiche_id: f.fiche_id,
+        fiche: f.fiche
+          ? {
+              ...f.fiche,
+              cout_total: f.fiche.cout_total ? Number(f.fiche.cout_total) : null,
+              cout_par_portion: f.fiche.cout_par_portion
+                ? Number(f.fiche.cout_par_portion)
+                : null,
+              portions: f.fiche.portions ? Number(f.fiche.portions) : null,
+            }
+          : null,
+      })),
+    };
+    return mapped;
   }
 
   // 5. Supprimer un menu (désactivation logique)

@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useMenuDuJour } from "@/hooks/useMenuDuJour";
+import { useAuth } from "@/hooks/useAuth";
+import { Navigate } from "react-router-dom";
 
 function getMonday(date) {
   const d = new Date(date);
@@ -13,6 +15,7 @@ function getMonday(date) {
 
 export default function MenuDuJour() {
   const { fetchWeek } = useMenuDuJour();
+  const { access_rights } = useAuth();
   const [startDate, setStartDate] = useState(getMonday(new Date()));
   const [resume, setResume] = useState([]);
 
@@ -33,6 +36,10 @@ export default function MenuDuJour() {
     const info = resume.find((r) => r.date_menu === iso) || {};
     return { date: iso, info };
   });
+
+  if (!access_rights?.menus_jour?.peut_voir) {
+    return <Navigate to="/unauthorized" replace />;
+  }
 
   return (
     <div className="p-4">

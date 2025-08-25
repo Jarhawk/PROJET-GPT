@@ -27,7 +27,7 @@ const PAGE_SIZE = 20;
 export default function Fiches() {
   const queryClient = useQueryClient();
   const { deleteFiche, duplicateFiche } = useFiches();
-  const { mama_id, loading: authLoading, access_rights, hasAccess } = useAuth();
+  const { mama_id, loading: authLoading, access_rights } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected] = useState(null);
@@ -37,7 +37,7 @@ export default function Fiches() {
   const [statut, setStatut] = useState("actif");
   const [familleFilter, setFamilleFilter] = useState("");
   const { familles, fetchFamilles } = useFamilles();
-  const canEdit = hasAccess("fiches_techniques", "peut_modifier");
+  const canEdit = access_rights?.fiches?.peut_modifier;
 
   const debouncedSearch = useDebounce(search, 300);
 
@@ -110,7 +110,7 @@ export default function Fiches() {
     return <div className="p-6">Erreur chargement fiches techniques.</div>;
   }
 
-  if (!access_rights?.fiches_techniques?.peut_voir) {
+  if (!access_rights?.fiches?.peut_voir) {
     return <Navigate to="/unauthorized" replace />;
   }
 

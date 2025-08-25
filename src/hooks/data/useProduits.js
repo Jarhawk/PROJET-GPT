@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
-import useMamaSettings from '@/hooks/useMamaSettings';
+import { useMamaSettings } from '@/hooks/useMamaSettings';
 
 /**
  * Liste paginée des produits avec filtres.

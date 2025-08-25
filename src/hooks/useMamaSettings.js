@@ -110,4 +110,3 @@ export const useMamaSettings = () => {
   };
 };
 
-export default useMamaSettings;

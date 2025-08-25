@@ -1,13 +1,12 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 /* eslint-env node */
 import express from 'express';
-import makeClient from './supabaseClient.js';
+import { getSupabaseClient } from './supabaseClient.js';
 
 const router = express.Router();
 
 // GET /api/public/v1/promotions
 router.get('/', async (req, res) => {
-  const { mama_id } = req.user || {};
   const {
     search = '',
     actif,
@@ -15,11 +14,18 @@ router.get('/', async (req, res) => {
     limit = '100',
     sortBy = 'date_debut',
     order = 'desc',
+    mama_id: queryMamaId,
   } = req.query;
+  const mama_id = req.user?.mama_id ?? queryMamaId;
   if (!mama_id) return res.status(400).json({ error: 'mama_id requis' });
   try {
-    const supabase = makeClient();
-    let query = supabase.from('promotions').select('*').eq('mama_id', mama_id);
+    const supabase = getSupabaseClient();
+    let query = supabase
+      .from('promotions')
+      .select(
+        'id, mama_id, nom, description, date_debut, date_fin, actif, created_at, updated_at'
+      )
+      .eq('mama_id', mama_id);
     if (search) query = query.ilike('nom', `%${search}%`);
     if (actif !== undefined) query = query.eq('actif', actif === 'true');
     let sortField = sortBy;

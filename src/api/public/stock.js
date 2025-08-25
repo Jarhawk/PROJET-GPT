@@ -2,13 +2,12 @@
 /* eslint-env node */
 import express from 'express';
 import { TABLES } from '@/constants/tables';
-import makeClient from './supabaseClient.js';
+import { getSupabaseClient } from './supabaseClient.js';
 
 const router = express.Router();
 
 // GET /api/public/v1/stock
 router.get('/', async (req, res) => {
-  const { mama_id } = req.user || {};
   const {
     since,
     type,
@@ -16,10 +15,12 @@ router.get('/', async (req, res) => {
     limit = '100',
     sortBy = 'date',
     order = 'desc',
+    mama_id: queryMamaId,
   } = req.query;
+  const mama_id = req.user?.mama_id ?? queryMamaId;
   if (!mama_id) return res.status(400).json({ error: 'mama_id requis' });
   try {
-    const supabase = makeClient();
+    const supabase = getSupabaseClient();
     let query = supabase.from(TABLES.MOUVEMENTS).select('*').eq('mama_id', mama_id);
     if (since) query = query.gte('date', since);
     if (type) query = query.eq('type', type);

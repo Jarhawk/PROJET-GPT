@@ -7,6 +7,7 @@ import * as XLSX from 'xlsx';
 import {
   runScript,
   isMainModule,
+  formatShownPath,
   shouldShowHelp,
   shouldShowVersion,
   getPackageVersion,
@@ -60,11 +61,11 @@ export async function generateWeeklyCostCenterReport(
 
   let file;
   if (outPath) {
-    file = path.resolve(outPath);
+    file = outPath;
   } else {
     const dirEnv = process.env.REPORT_DIR ?? '.';
-    const dir = path.isAbsolute(dirEnv) ? dirEnv : path.resolve(dirEnv);
-    file = path.resolve(dir, `weekly_cost_centers.${fmt}`);
+    const dir = path.isAbsolute(dirEnv) ? dirEnv : dirEnv;
+    file = path.join(dir, `weekly_cost_centers.${fmt}`);
   }
   mkdirSync(path.dirname(file), { recursive: true });
   const ext = path.extname(file).toLowerCase();
@@ -103,8 +104,7 @@ export async function generateWeeklyCostCenterReport(
   } else {
     writeFileSync(file, JSON.stringify(rows, null, 2));
   }
-  const shown = file.replace(/\\/g, '/').replace(/^[A-Za-z]:/, '');
-  return shown;
+  return formatShownPath(file);
 }
 
 export function parseArgs(argv) {

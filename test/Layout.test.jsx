@@ -18,7 +18,7 @@ vi.mock('@/hooks/useNotifications', () => ({
 }));
 
 vi.mock('@/lib/supabase', () => ({ supabase: {} }));
-vi.mock('@/components/Sidebar', () => ({ default: () => <div>Sidebar</div> }));
+vi.mock('@/layout/Sidebar', () => ({ default: () => <div>Sidebar</div> }));
 vi.mock('@/components/Footer', () => ({ default: () => <div>Footer</div> }));
 vi.mock('@/components/stock/AlertBadge', () => ({ default: () => <div /> }));
 vi.mock('@/components/ui/PageSkeleton', () => ({ default: () => <div data-testid="skeleton">Loading</div> }));

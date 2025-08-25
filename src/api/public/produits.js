@@ -1,13 +1,12 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 /* eslint-env node */
 import express from 'express';
-import makeClient from './supabaseClient.js';
+import { getSupabaseClient } from './supabaseClient.js';
 
 const router = express.Router();
 
 // GET /api/public/v1/produits
 router.get('/', async (req, res) => {
-  const { mama_id } = req.user || {};
   const {
     famille,
     search = '',
@@ -16,10 +15,12 @@ router.get('/', async (req, res) => {
     limit = '100',
     sortBy = 'famille',
     order = 'asc',
+    mama_id: queryMamaId,
   } = req.query;
+  const mama_id = req.user?.mama_id ?? queryMamaId;
   if (!mama_id) return res.status(400).json({ error: 'mama_id requis' });
   try {
-    const supabase = makeClient();
+    const supabase = getSupabaseClient();
     let query = supabase
       .from('v_produits_dernier_prix')
       .select('*')

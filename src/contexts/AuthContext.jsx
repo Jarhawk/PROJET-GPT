@@ -96,8 +96,16 @@ function AuthProvider({ children }) {
 
   if (supabaseInitError) {
     return (
-      <div className="p-8 text-center text-red-600">
-        {supabaseInitError}
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <div className="max-w-md text-center">
+          <h1 className="mb-2 text-xl font-semibold">Configuration error</h1>
+          <p className="mb-4 text-red-600">{supabaseInitError}</p>
+          <p>
+            Please set <code>VITE_SUPABASE_URL</code> and{' '}
+            <code>VITE_SUPABASE_ANON_KEY</code> in your environment before
+            starting the application.
+          </p>
+        </div>
       </div>
     )
   }

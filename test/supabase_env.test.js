@@ -4,6 +4,11 @@ import { spawnSync } from 'node:child_process';
 process.env.VITE_SUPABASE_URL = 'https://example.supabase.co';
 process.env.VITE_SUPABASE_ANON_KEY = 'key';
 
+// `test/setup.ts` installs a global test client and mocks the supabase helper.
+// These env tests exercise the real implementation, so remove the globals.
+delete globalThis.__SUPABASE_TEST_CLIENT__;
+vi.unmock('@/lib/supabase');
+
 let createClientMock;
 vi.mock('@supabase/supabase-js', () => {
   createClientMock = vi.fn(() => ({}));

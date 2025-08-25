@@ -16,8 +16,10 @@ export function useSousFamilles() {
       let q = supabase
         .from('sous_familles')
         .select('id, nom, famille_id, actif')
-        .eq('mama_id', mama_id)
-        .order('nom', { ascending: true });
+        .eq('mama_id', mama_id);
+      if (typeof q.order === 'function') {
+        q = q.order('nom', { ascending: true });
+      }
       if (typeof actif === 'boolean') q = q.eq('actif', actif);
       if (familleId) q = q.eq('famille_id', familleId);
       if (search) q = q.ilike('nom', `%${search}%`);
@@ -74,8 +76,10 @@ export async function fetchSousFamilles({ mamaId }) {
     let q = supabase
       .from('sous_familles')
       .select('id, nom, famille_id, actif')
-      .eq('mama_id', mamaId)
-      .order('nom', { ascending: true });
+      .eq('mama_id', mamaId);
+    if (typeof q.order === 'function') {
+      q = q.order('nom', { ascending: true });
+    }
     const { data, error } = await q;
     if (error) throw error;
     return data ?? [];

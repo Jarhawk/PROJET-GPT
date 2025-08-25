@@ -12,6 +12,7 @@ import {
   parseFormatFlag,
   toCsv,
   ensureDirForFile,
+  formatShownPath,
   shouldShowHelp,
   shouldShowVersion,
   getPackageVersion,
@@ -69,17 +70,16 @@ export async function exportAccounting(
   }));
   const makeFile = (name) => {
     if (output) {
-      const real = path.resolve(output);
-      ensureDirForFile(real);
-      return real;
+      ensureDirForFile(output);
+      return output;
     }
     const dirEnv = process.env.ACCOUNTING_DIR;
     if (dirEnv) {
-      const dir = path.isAbsolute(dirEnv) ? dirEnv : path.resolve(dirEnv);
+      const dir = path.isAbsolute(dirEnv) ? dirEnv : dirEnv;
       mkdirSync(dir, { recursive: true });
-      return path.resolve(dir, name);
+      return path.join(dir, name);
     }
-    return path.resolve(name);
+    return name;
   };
   if (format === 'xlsx') {
     const ws = XLSX.utils.json_to_sheet(rows);
@@ -87,20 +87,20 @@ export async function exportAccounting(
     XLSX.utils.book_append_sheet(wb, ws, 'Invoices');
     const file = makeFile(`invoices_${m}.xlsx`);
     XLSX.writeFile(wb, file);
-    const shown = file.replace(/\\/g, '/').replace(/^[A-Za-z]:/, '');
+    const shown = formatShownPath(file);
     console.log(`Exported ${rows.length} rows to ${shown}`);
     return shown;
   } else if (format === 'json') {
     const file = makeFile(`invoices_${m}.json`);
     writeFileSync(file, JSON.stringify(rows, null, 2));
-    const shown = file.replace(/\\/g, '/').replace(/^[A-Za-z]:/, '');
+    const shown = formatShownPath(file);
     console.log(`Exported ${rows.length} rows to ${shown}`);
     return shown;
   }
   const csv = toCsv(rows);
   const file = makeFile(`invoices_${m}.csv`);
   writeFileSync(file, csv);
-  const shown = file.replace(/\\/g, '/').replace(/^[A-Za-z]:/, '');
+  const shown = formatShownPath(file);
   console.log(`Exported ${rows.length} rows to ${shown}`);
   return shown;
 }

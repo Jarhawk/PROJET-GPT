@@ -14,6 +14,7 @@ import {
   parsePrettyFlag,
   parseConcurrencyFlag,
   ensureDirForFile,
+  formatShownPath,
   shouldShowHelp,
   shouldShowVersion,
   getPackageVersion,
@@ -47,6 +48,7 @@ export async function backupDb(
     return Number.isFinite(val) && val > 0 ? val : Infinity;
   })()
 ) {
+  const origOutput = output;
   const { createClient } = await import('@supabase/supabase-js');
   const supabase = createClient(
     supabaseUrl ?? process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL ?? 'https://example.supabase.co',
@@ -92,7 +94,7 @@ export async function backupDb(
   const defName = gzip ? `backup_${stamp}.json.gz` : `backup_${stamp}.json`;
   let file;
   if (output) {
-    file = path.resolve(output);
+    file = output;
     ensureDirForFile(file);
   } else {
     let dir = process.env.BACKUP_DIR ?? '/tmp';
@@ -106,7 +108,7 @@ export async function backupDb(
   } else {
     writeFileSync(file, data);
   }
-  const shown = file.replace(/\\/g, '/').replace(/^[A-Za-z]:/, '');
+  const shown = formatShownPath(origOutput ?? file);
   console.log(`Backup saved to ${shown}`);
   return shown;
 }

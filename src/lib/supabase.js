@@ -3,15 +3,34 @@ import { createClient } from '@supabase/supabase-js'
 let singleton
 let initError = null
 
+export function getSupabaseEnv() {
+  const url =
+    (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_URL) ||
+    process.env.VITE_SUPABASE_URL ||
+    process.env.SUPABASE_URL
+  const anonKey =
+    (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_ANON_KEY) ||
+    process.env.VITE_SUPABASE_ANON_KEY ||
+    process.env.SUPABASE_ANON_KEY ||
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  return { url, anonKey }
+}
+
 export function getSupabaseClient() {
   if (singleton) return singleton
-  const url = import.meta.env.VITE_SUPABASE_URL
-  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+  if (globalThis.__SUPABASE_TEST_CLIENT__) {
+    singleton = globalThis.__SUPABASE_TEST_CLIENT__
+    return singleton
+  }
+  const { url, anonKey } = getSupabaseEnv()
   if (!url || !anonKey) {
     initError = 'Missing Supabase credentials: set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY'
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error(initError)
+    }
     return null
   }
-  singleton = createClient(url, anonKey, { auth: { persistSession: true, autoRefreshToken: true } })
+  singleton = createClient(url, anonKey)
   return singleton
 }
 

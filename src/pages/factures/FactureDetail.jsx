@@ -42,7 +42,7 @@ export default function FactureDetail() {
         .select(
           `id, mama_id, fournisseur_id, numero, date_facture, actif, total_ht, total_ttc, tva,
           lignes:facture_lignes(
-            id, produit_id, quantite, prix_unitaire_ht, montant_ht, tva, zone_id,
+            id, produit_id, quantite, pu_ht, total_ht, tva, zone_id,
             produit:produits(id, nom, unite, pmp, tva)
           )`
         )

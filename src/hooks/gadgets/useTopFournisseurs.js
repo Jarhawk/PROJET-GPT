@@ -16,15 +16,15 @@ export default function useTopFournisseurs() {
       try {
         const { data, error } = await supabase
           .from('v_top_fournisseurs')
-          .select('fournisseur_id, montant, mois')
+          .select('fournisseur_id, montant_total, nombre_achats')
           .eq('mama_id', mama_id)
-          .order('montant', { ascending: false })
+          .order('montant_total', { ascending: false })
           .limit(5);
         if (error) throw error;
-        const list = (data || []).map(r => ({
+        const list = (data || []).map((r) => ({
           id: r.fournisseur_id,
-          montant: Number(r.montant) || 0,
-          mois: r.mois,
+          montant_total: Number(r.montant_total) || 0,
+          nombre_achats: Number(r.nombre_achats) || 0,
         }));
         setTopFournisseurs(list);
       } catch (e) {

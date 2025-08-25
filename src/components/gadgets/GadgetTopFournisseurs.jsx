@@ -30,7 +30,7 @@ export default function GadgetTopFournisseurs() {
             <div className="flex items-center gap-2">
               <span>{nameFor(f.id)}</span>
             </div>
-            <span className="font-semibold">{f.montant.toFixed(2)} €</span>
+            <span className="font-semibold">{f.montant_total.toFixed(2)} €</span>
           </li>
         ))}
       </Motion.ul>

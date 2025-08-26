@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useMamaSettings } from '@/hooks/useMamaSettings';
 
 export default function Sidebar() {
-  const { hasAccess, loading: authLoading } = useAuth();
+  const { hasAccess = () => false, loading: authLoading } = useAuth();
   const { featureFlags, loading: settingsLoading } = useMamaSettings();
   const { t } = useTranslation();
   const { pathname } = useLocation();

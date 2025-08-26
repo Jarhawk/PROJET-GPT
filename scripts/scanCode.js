@@ -28,7 +28,7 @@ for (const file of files) {
       if (!entity) {
         record(file, lineNo, `Unknown table ${table}`)
       } else {
-        // look ahead for select columns within next 3 lines
+        // look ahead for next lines (select/insert/update)
         const lookahead = lines.slice(idx, idx + 3).join(' ')
         const selectMatch = lookahead.match(/select\(['"]([^'\"]*)['"]\)/)
         if (selectMatch) {
@@ -41,11 +41,15 @@ for (const file of files) {
             record(file, lineNo, `Unknown columns on ${table}: ${missing.join(', ')}`)
           }
         }
+        const mutating = /\.insert\(/.test(lookahead) || /\.update\(/.test(lookahead) || /\.upsert\(/.test(lookahead)
         if (entity.columns.includes('mama_id')) {
           const eqMatch = lookahead.match(/\.eq\(['"]mama_id['"],\s*mamaId\)/)
           if (!eqMatch) {
             record(file, lineNo, `Missing mama_id filter for ${table}`)
           }
+        }
+        if (mutating) {
+          // no additional checks yet but leave placeholder
         }
       }
     }

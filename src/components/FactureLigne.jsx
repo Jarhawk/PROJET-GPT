@@ -138,12 +138,16 @@ export default function FactureLigne({
         inputMode="decimal"
         step="0.001"
         value={qteInput}
-        onChange={(e) => setQteInput(e.target.value)}
+        onChange={(e) => {
+          const v = e.target.value;
+          setQteInput(v);
+          const n = toNumberSafe(v);
+          update(Number.isFinite(n) ? round3(n) : NaN, totalHT);
+        }}
         onBlur={() => {
           const n = toNumberSafe(qteInput);
           const q = Number.isFinite(n) ? round3(n) : NaN;
           setQteInput(Number.isFinite(n) ? formatQty(q) : '');
-          update(q, totalHT);
         }}
         aria-label="Qté"
         className="input w-20 text-right"
@@ -154,12 +158,16 @@ export default function FactureLigne({
         inputMode="decimal"
         step="0.01"
         value={totalHtInput}
-        onChange={(e) => setTotalHtInput(e.target.value)}
+        onChange={(e) => {
+          const v = e.target.value;
+          setTotalHtInput(v);
+          const n = toNumberSafe(v);
+          update(qte, Number.isFinite(n) ? round2(n) : NaN);
+        }}
         onBlur={() => {
           const n = toNumberSafe(totalHtInput);
           const t = Number.isFinite(n) ? round2(n) : NaN;
           setTotalHtInput(Number.isFinite(n) ? formatCurrencyEUR(t) : '');
-          update(qte, t);
         }}
         aria-label="Total HT (€)"
         className="input w-28 text-right"

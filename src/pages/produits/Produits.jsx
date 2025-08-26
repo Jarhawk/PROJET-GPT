@@ -3,7 +3,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useProduits } from '@/hooks/data/useProduits';
 import { useFamilles } from '@/hooks/data/useFamilles';
 import { useSousFamilles } from '@/hooks/data/useSousFamilles';
-import { useDebounce } from '@/hooks/useDebounce';
+import useDebounce from '@/hooks/useDebounce';
 import { logSupaError } from '@/lib/supa/logError';
 
 export default function Produits() {

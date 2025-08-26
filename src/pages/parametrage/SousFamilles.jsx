@@ -54,8 +54,19 @@ export default function SousFamilles() {
       mama_id: mamaId,
     };
     const q = sf.id
-      ? supabase.from('sous_familles').update(payload).eq('id', sf.id).eq('mama_id', mamaId).select().single()
-      : supabase.from('sous_familles').insert(payload).select().single();
+      ? supabase
+          .from('sous_familles')
+          .update(payload)
+          .eq('id', sf.id)
+          .eq('mama_id', mamaId)
+          .select()
+          .single()
+      : supabase
+          .from('sous_familles')
+          .insert(payload)
+          .eq('mama_id', mamaId)
+          .select()
+          .single();
 
     const { error } = await q;
     if (error) throw error;

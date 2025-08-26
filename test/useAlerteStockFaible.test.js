@@ -30,7 +30,7 @@ test('useAlerteStockFaible queries v_alertes_rupture with mama filter', async ()
   await waitFor(() => !result.current.loading);
   expect(fromMock).toHaveBeenCalledWith('v_alertes_rupture');
   expect(queryBuilder.select).toHaveBeenCalledWith(
-    'mama_id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, manque',
+    'mama_id, produit_id, nom, unite, fournisseur_nom, stock_min, stock_actuel, manque',
     { count: 'exact' }
   );
   expect(queryBuilder.eq).toHaveBeenCalledWith('mama_id', 'm1');

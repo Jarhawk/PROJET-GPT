@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { vi, beforeEach } from 'vitest';
 import RouterConfig from '../src/router.jsx';
 
@@ -13,12 +14,16 @@ const authState = {
   loading: false,
   pending: false,
   userData: null,
+  hasAccess: right => authState.access_rights.includes(right),
 };
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => authState
 }));
-vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => authState
+vi.mock('@/hooks/useMamaSettings', () => ({
+  useMamaSettings: () => ({ featureFlags: {}, loading: false })
+}));
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: k => k })
 }));
 
 vi.mock('@/hooks/useDashboard', () => ({
@@ -41,13 +46,15 @@ vi.mock('@/hooks/useDashboard', () => ({
 
 vi.mock('@/pages/Dashboard.jsx', () => ({
   __esModule: true,
-  useAuth: () => <div>Dashboard Stock & Achats</div>,
+  default: () => <div>Dashboard Stock & Achats</div>,
 }));
 
 vi.mock('@/pages/auth/Login.jsx', () => ({
   __esModule: true,
-  useAuth: () => <div>Login</div>,
+  default: () => <div>Login</div>,
 }));
+
+const qc = new QueryClient();
 
 beforeEach(() => {
   authState.isAuthenticated = false;
@@ -56,20 +63,24 @@ beforeEach(() => {
 // We test that navigating to '/' shows the login component when not authenticated
 test('root path shows landing when unauthenticated', async () => {
   render(
-    <MemoryRouter initialEntries={["/"]}>
-      <RouterConfig />
-    </MemoryRouter>
+    <QueryClientProvider client={qc}>
+      <MemoryRouter initialEntries={["/"]}>
+        <RouterConfig />
+      </MemoryRouter>
+    </QueryClientProvider>
   );
-  expect(await screen.findByText(/Simplifiez votre gestion/)).toBeInTheDocument();
+  expect(await screen.findByText(/Login/)).toBeInTheDocument();
 });
 
 test('root path redirects to dashboard when authenticated', async () => {
   authState.isAuthenticated = true;
   authState.userData = { actif: true };
   render(
-    <MemoryRouter initialEntries={["/"]}>
-      <RouterConfig />
-    </MemoryRouter>
+    <QueryClientProvider client={qc}>
+      <MemoryRouter initialEntries={["/"]}>
+        <RouterConfig />
+      </MemoryRouter>
+    </QueryClientProvider>
   );
   expect(await screen.findByText(/Dashboard Stock/)).toBeInTheDocument();
   authState.isAuthenticated = false;

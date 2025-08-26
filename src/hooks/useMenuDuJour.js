@@ -157,16 +157,15 @@ export function useMenuDuJour() {
     const { data: menu, error: errMenu } = await supabase
       .from("menus_jour")
       .select(
-        "id, nom, date, items:menus_jour_fiches(id, fiche_id, quantite, categorie, fiche:fiches_techniques(id, nom, cout_par_portion))"
+        "id, nom, date, items:menus_jour_fiches(id, fiche_id, quantite, fiche:fiches_techniques(id, nom, cout_par_portion))"
       )
       .eq("mama_id", mama_id)
       .eq("date", date)
       .single();
     if (errMenu && errMenu.code !== "PGRST116") { setError(errMenu); return {}; }
-    const lignes = (menu?.items || []).map((l) => ({
+    const lignes = (Array.isArray(menu?.items) ? menu.items : []).map((l) => ({
       id: l.id,
       fiche_id: l.fiche_id,
-      categorie: l.categorie || null,
       portions: Number(l.quantite) || 1,
       cout_par_portion: l.fiche?.cout_par_portion ? Number(l.fiche.cout_par_portion) : null,
       cout_ligne_total: Number(l.quantite || 1) * Number(l.fiche?.cout_par_portion || 0),

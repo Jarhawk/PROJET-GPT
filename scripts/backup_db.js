@@ -68,7 +68,7 @@ export async function backupDb(
         'factures',
         'facture_lignes',
         'inventaires',
-        'produits_inventaire',
+        'inventaire_lignes',
         'fournisseur_produits',
         'taches',
         'tache_instances',

@@ -88,13 +88,13 @@ export default function Login() {
             />
           </div>
           {errorMsg ? <div role="alert" className="text-sm text-red-500">{errorMsg}</div> : null}
-          <button
-            type="submit"
-            disabled={pending}
-            className="mt-3 px-4 py-2 rounded-xl text-sm font-semibold bg-primary text-white hover:bg-primary-90 transition-colors disabled:opacity-50"
-          >
-            {pending ? 'Connexion…' : 'Login'}
-          </button>
+            <button
+              type="submit"
+              disabled={pending}
+              className="mt-3 px-4 py-2 rounded-xl text-sm font-semibold bg-primary text-white hover:bg-primary-90 transition-colors disabled:opacity-50"
+            >
+              {pending ? 'Connexion…' : 'Se connecter'}
+            </button>
           <div className="text-right mt-2">
             <Link to="/reset-password" className="text-xs text-gold hover:underline">
               Mot de passe oublié ?

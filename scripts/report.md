@@ -27,18 +27,15 @@
 - src/hooks/useFournisseurAPI.js:112 - Missing mama_id filter for catalogue_updates
 - src/hooks/useFournisseurStats.js:14 - Unknown RPC stats_achats_fournisseurs
 - src/hooks/useFournisseurStats.js:22 - Unknown RPC stats_achats_fournisseur
-- src/hooks/useFournisseurs.js:67 - Missing mama_id filter for fournisseur_contacts
-- src/hooks/useGlobalSearch.js:15 - Missing mama_id filter for produits
-- src/hooks/useGlobalSearch.js:16 - Unknown columns on fiches: nom
-- src/hooks/useGlobalSearch.js:16 - Missing mama_id filter for fiches
-- src/hooks/useInventaires.js:125 - Unknown table produits_inventaire
+- src/hooks/useFournisseurs.js:73 - Missing mama_id filter for fournisseur_contacts
+- src/hooks/useInventaires.js:87 - Missing mama_id filter for inventaire_lignes
 - src/hooks/useInvoiceImport.js:15 - Unknown RPC import_invoice
 - src/hooks/useLogs.js:41 - Unknown RPC log_action
 - src/hooks/useMamas.js:19 - Unknown columns on mamas: *
 - src/hooks/useMenuDuJour.js:69 - Missing mama_id filter for menus_jour_fiches
 - src/hooks/useMenuDuJour.js:88 - Missing mama_id filter for menus_jour_fiches
 - src/hooks/useMenuDuJour.js:91 - Missing mama_id filter for menus_jour_fiches
-- src/hooks/useMenuDuJour.js:198 - Missing mama_id filter for menus_jour_fiches
+- src/hooks/useMenuDuJour.js:197 - Missing mama_id filter for menus_jour_fiches
 - src/hooks/useMenuGroupe.js:5 - Unknown table menu_groupes
 - src/hooks/useMenus.js:98 - Missing mama_id filter for menu_fiches
 - src/hooks/useMenus.js:130 - Missing mama_id filter for menu_fiches
@@ -91,12 +88,9 @@
 - src/pages/factures/FactureForm.jsx:210 - Unknown RPC fn_facture_save
 - src/pages/inventaire/EcartInventaire.jsx:36 - Unknown RPC calcul_ecarts_inventaire
 - src/pages/inventaire/EcartInventaire.jsx:46 - Unknown RPC calcul_ecarts_inventaire
-- src/pages/parametrage/InviteUser.jsx:41 - Unknown columns on roles: *
-- src/pages/parametrage/InviteUser.jsx:41 - Missing mama_id filter for roles
 - src/pages/parametrage/Mamas.jsx:32 - Unknown columns on mamas: *
 - src/pages/parametrage/PermissionsForm.jsx:70 - Missing mama_id filter for permissions
 - src/pages/parametrage/RGPDConsentForm.jsx:30 - Missing mama_id filter for consentements_utilisateur
-- src/pages/parametrage/SousFamilles.jsx:58 - Missing mama_id filter for sous_familles
 - src/pages/parametrage/Zones.jsx:29 - Unknown RPC safe_delete_zone
 - src/pages/stats/StatsFiches.jsx:29 - Unknown columns on fiches_techniques: *
 - src/pages/stats/StatsFiches.jsx:29 - Missing mama_id filter for fiches_techniques

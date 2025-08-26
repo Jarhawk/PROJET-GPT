@@ -36,8 +36,9 @@ export function useAlerteStockFaible({ page = 1, pageSize = 20 } = {}) {
           .order('manque', { ascending: false })
           .range(from, to);
         if (error) throw error;
+        const safeRows = Array.isArray(rows) ? rows : [];
         if (!aborted) {
-          setData(rows || []);
+          setData(safeRows);
           setTotal(count || 0);
         }
       } catch (err) {

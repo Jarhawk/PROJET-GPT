@@ -3,7 +3,7 @@ import { useCallback, useMemo } from "react";
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { deduceEnabledModulesFromRights } from '@/lib/access';
 
 function safeQueryClient() {
@@ -37,7 +37,7 @@ const localEnabledModules = {};
 const localFeatureFlags = {};
 
 export const useMamaSettings = () => {
-  const { userData } = useAuth();
+  const { userData } = useAuth() || {};
   const mamaId = userData?.mama_id;
   const queryClient = safeQueryClient();
 

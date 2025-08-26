@@ -17,6 +17,8 @@ const query = {
 const fromMock = vi.fn(() => query);
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
+const COLS =
+  'id, inventaire_id, produit_id, quantite, quantite_reelle, quantite_theorique, zone_id, actif, created_at, updated_at, mama_id, motif, produit:produits(id, nom, unite_id, pmp)';
 
 let useInventaireLignes;
 
@@ -37,8 +39,8 @@ test('fetchLignes applies filters and pagination', async () => {
   await act(async () => {
     await result.current.fetchLignes({ inventaireId: 'inv1', page: 2, limit: 10 });
   });
-  expect(fromMock).toHaveBeenCalledWith('produits_inventaire');
-  expect(query.select).toHaveBeenCalledWith('*', { count: 'exact' });
+  expect(fromMock).toHaveBeenCalledWith('inventaire_lignes');
+  expect(query.select).toHaveBeenCalledWith(COLS, { count: 'exact' });
   expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1');
   expect(query.eq).toHaveBeenCalledWith('inventaire_id', 'inv1');
   expect(query.order).toHaveBeenCalled();
@@ -51,7 +53,7 @@ test('createLigne inserts with mama_id', async () => {
     await result.current.createLigne({ inventaire_id: 'inv1', produit_id: 'p1', quantite_reelle: 1 });
   });
   expect(fromMock).toHaveBeenCalledWith('inventaires');
-  expect(fromMock).toHaveBeenCalledWith('produits_inventaire');
+  expect(fromMock).toHaveBeenCalledWith('inventaire_lignes');
   expect(query.insert).toHaveBeenCalledWith([{ inventaire_id: 'inv1', produit_id: 'p1', quantite_reelle: 1, mama_id: 'm1' }]);
 });
 
@@ -80,8 +82,8 @@ test('getLigne selects by id', async () => {
   await act(async () => {
     await result.current.getLigne('l2');
   });
-  expect(fromMock).toHaveBeenCalledWith('produits_inventaire');
-  expect(query.select).toHaveBeenCalledWith('*');
+  expect(fromMock).toHaveBeenCalledWith('inventaire_lignes');
+  expect(query.select).toHaveBeenCalledWith(COLS);
   expect(query.eq).toHaveBeenCalledWith('id', 'l2');
   expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1');
 });

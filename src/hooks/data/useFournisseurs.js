@@ -23,7 +23,7 @@ export function useFournisseurs(params = {}) {
     queryFn: async () => {
       let query = supabase
         .from('fournisseurs')
-        .select('id, nom, actif, contact:fournisseur_contacts(nom,email,tel)')
+        .select('id, nom, actif, contact:fournisseur_contacts!fournisseur_id(nom,email,tel)')
         .eq('mama_id', mama_id)
         .order('nom', { ascending: true })
         .range((page - 1) * limit, page * limit - 1);

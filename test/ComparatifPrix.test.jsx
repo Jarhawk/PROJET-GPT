@@ -15,7 +15,7 @@ vi.mock('@/lib/supabase', () => ({ supabase }));
 
 let ComparatifPrix;
 beforeEach(async () => {
-  ({ useAuth: ComparatifPrix } = await import('@/pages/fournisseurs/comparatif/ComparatifPrix.jsx'));
+  ({ default: ComparatifPrix } = await import('@/pages/fournisseurs/comparatif/ComparatifPrix.jsx'));
   orderMock.mockReset();
 });
 

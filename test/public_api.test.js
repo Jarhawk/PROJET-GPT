@@ -8,6 +8,10 @@ process.env.PUBLIC_API_KEY = 'dev_key';
 process.env.VITE_SUPABASE_URL = 'https://example.supabase.co';
 process.env.VITE_SUPABASE_ANON_KEY = 'key';
 
+// Use the real Supabase client rather than the global test mock for these API tests
+delete globalThis.__SUPABASE_TEST_CLIENT__;
+vi.unmock('@/lib/supabase');
+
 const data = [{ id: 'p1' }];
 
 const chain = {

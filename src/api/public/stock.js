@@ -21,6 +21,7 @@ router.get('/', async (req, res) => {
   if (!mama_id) return res.status(400).json({ error: 'mama_id requis' });
   try {
     const supabase = getSupabaseClient();
+    if (!supabase) throw new Error('Missing Supabase credentials');
     let query = supabase.from(TABLES.MOUVEMENTS).select('*').eq('mama_id', mama_id);
     if (since) query = query.gte('date', since);
     if (type) query = query.eq('type', type);

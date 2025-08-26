@@ -63,16 +63,14 @@ beforeEach(async () => {
   periodeQuery.maybeSingle.mockClear();
 });
 
-test('getInventaires applies filters', async () => {
+test('getInventaires fetches active records', async () => {
   const { result } = renderHook(() => useInventaires());
   await act(async () => {
-    await result.current.getInventaires({ zoneId: 'z1', periodeId: '2025-01', statut: 'brouillon' });
+    await result.current.getInventaires();
   });
   expect(fromMock).toHaveBeenCalledWith('inventaires');
   expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1');
-  expect(query.eq).toHaveBeenCalledWith('zone_id', 'z1');
-  expect(query.eq).toHaveBeenCalledWith('periode_id', '2025-01');
-  expect(query.eq).toHaveBeenCalledWith('statut', 'brouillon');
+  expect(query.eq).toHaveBeenCalledWith('actif', true);
   expect(query.order).toHaveBeenCalled();
 });
 
@@ -86,7 +84,7 @@ test('createInventaire inserts lines with quantite_reelle', async () => {
     });
   });
   expect(fromMock).toHaveBeenCalledWith('inventaires');
-  expect(fromMock).toHaveBeenCalledWith('produits_inventaire');
+  expect(fromMock).toHaveBeenCalledWith('inventaire_lignes');
   // second insert call corresponds to lignes
   expect(query.insert.mock.calls[1][0]).toEqual([
     {
@@ -97,6 +95,6 @@ test('createInventaire inserts lines with quantite_reelle', async () => {
     },
   ]);
   expect(query.insert.mock.calls[0][0]).toEqual([
-    { zone_id: 'z1', date_inventaire: '2025-01-01', periode_id: 'per1', mama_id: 'm1' }
+    { zone_id: 'z1', date_inventaire: '2025-01-01', mama_id: 'm1' }
   ]);
 });

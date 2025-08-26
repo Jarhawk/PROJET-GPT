@@ -10,7 +10,7 @@ const queryObj = {
 };
 const fromMock = vi.fn(() => queryObj);
 const supabaseMock = { from: fromMock };
-vi.mock('@/lib/supabase', () => ({ __esModule: true, default: supabaseMock, supabase: supabaseMock }));
+vi.mock('@/lib/supabase', () => ({ supabase: supabaseMock }));
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
 vi.mock('sonner', () => ({ toast: { error: vi.fn() } }));
 
@@ -36,7 +36,9 @@ test('fetchZones returns zones sorted by position', async () => {
   await act(async () => {
     zones = await result.current.fetchZones();
   });
-  expect(queryObj.select).toHaveBeenCalledWith('id, nom, type, parent_id, position, actif, created_at');
+    expect(fromMock).toHaveBeenCalledWith('zones_stock');
+    expect(queryObj.select).toHaveBeenCalledWith('id, nom, type, parent_id, position, actif, created_at');
+    expect(queryObj.eq).toHaveBeenCalledWith('mama_id', 'm1');
   expect(queryObj.order).toHaveBeenNthCalledWith(1, 'position', { ascending: true });
   expect(queryObj.order).toHaveBeenNthCalledWith(2, 'nom');
   expect(zones.map(z => z.id)).toEqual(['a', 'c', 'b']);

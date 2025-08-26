@@ -38,15 +38,22 @@ export default function InviteUser({ onClose, onInvited }) {
         setMamas(mData ? [mData] : []);
       }
 
-      let query = supabase.from("roles").select("*");
-      if (role !== "superadmin") query = query.eq("mama_id", myMama);
-      query = query.eq("actif", true);
-      const { data: rData } = await query.order("nom", { ascending: true });
+      const targetMama = role === "superadmin" ? values.mama_id : myMama;
+      if (!targetMama) {
+        setRoles([]);
+        return;
+      }
+      const { data: rData } = await supabase
+        .from("roles")
+        .select("id, nom, mama_id")
+        .eq("mama_id", targetMama)
+        .eq("actif", true)
+        .order("nom", { ascending: true });
       setRoles(rData || []);
     }
 
     fetchData();
-  }, [role, user_id, myMama]);
+  }, [role, user_id, myMama, values.mama_id]);
 
   const handleChange = e =>
     setValues(v => ({ ...v, [e.target.name]: e.target.value }));

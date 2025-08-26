@@ -31,8 +31,11 @@ export function useInventaireLignes() {
     setLoading(true);
     setError(null);
     let query = supabase
-      .from("produits_inventaire")
-      .select("*", { count: "exact" })
+      .from("inventaire_lignes")
+      .select(
+        "id, inventaire_id, produit_id, quantite, quantite_reelle, quantite_theorique, zone_id, actif, created_at, updated_at, mama_id, motif, produit:produits(id, nom, unite_id, pmp)",
+        { count: "exact" }
+      )
       .eq("mama_id", mama_id)
       .eq("inventaire_id", inventaireId)
       .order(sort, { ascending });
@@ -62,9 +65,9 @@ export function useInventaireLignes() {
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
-      .from("produits_inventaire")
+      .from("inventaire_lignes")
       .insert([{ inventaire_id, produit_id, quantite_reelle, mama_id }])
-      .select()
+      .select("id, inventaire_id, produit_id, quantite_reelle, quantite, quantite_theorique, zone_id, actif, created_at, updated_at, mama_id, motif")
       .single();
     setLoading(false);
     if (error) {
@@ -83,11 +86,11 @@ export function useInventaireLignes() {
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
-      .from("produits_inventaire")
+      .from("inventaire_lignes")
       .update(values)
       .eq("id", id)
       .eq("mama_id", mama_id)
-      .select()
+      .select("id, inventaire_id, produit_id, quantite_reelle, quantite, quantite_theorique, zone_id, actif, created_at, updated_at, mama_id, motif")
       .single();
     setLoading(false);
     if (error) {
@@ -102,7 +105,7 @@ export function useInventaireLignes() {
     setLoading(true);
     setError(null);
     const { error } = await supabase
-      .from("produits_inventaire")
+      .from("inventaire_lignes")
       .update({ actif: false })
       .eq("id", id)
       .eq("mama_id", mama_id);
@@ -113,8 +116,8 @@ export function useInventaireLignes() {
   async function getLigne(id) {
     if (!mama_id || !id) return null;
     const { data, error } = await supabase
-      .from("produits_inventaire")
-      .select("*")
+      .from("inventaire_lignes")
+      .select("id, inventaire_id, produit_id, quantite, quantite_reelle, quantite_theorique, zone_id, actif, created_at, updated_at, mama_id, motif, produit:produits(id, nom, unite_id, pmp)")
       .eq("id", id)
       .eq("mama_id", mama_id)
       .single();

@@ -27,6 +27,8 @@ test('fetchInactifs queries view with mama_id', async () => {
     await result.current.fetchInactifs();
   });
   expect(fromMock).toHaveBeenCalledWith('v_fournisseurs_inactifs');
-  expect(queryObj.select).toHaveBeenCalledWith('*');
+  expect(queryObj.select).toHaveBeenCalledWith(
+    'id:fournisseur_id, nom, fournisseur_actif, facture_actif, dernier_achat, mama_id'
+  );
   expect(queryObj.eq).toHaveBeenCalledWith('mama_id', 'm1');
 });

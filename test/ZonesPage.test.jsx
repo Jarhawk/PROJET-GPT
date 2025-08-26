@@ -1,5 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { render, screen, fireEvent, act } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 
 let mockHook;
@@ -26,7 +27,11 @@ test('new zone button opens form and triggers add', async () => {
     deleteZone: vi.fn(),
   });
   await act(async () => {
-    render(<Zones />);
+    render(
+      <MemoryRouter>
+        <Zones />
+      </MemoryRouter>
+    );
   });
   await act(async () => {
     fireEvent.click(screen.getByText('+ Nouvelle zone'));

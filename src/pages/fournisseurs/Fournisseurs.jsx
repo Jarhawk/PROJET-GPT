@@ -14,7 +14,7 @@ import ListingContainer from '@/components/ui/ListingContainer';
 import PaginationFooter from '@/components/ui/PaginationFooter';
 import TableHeader from '@/components/ui/TableHeader';
 import FournisseurRow from '@/components/fournisseurs/FournisseurRow';
-import { Dialog, DialogContent } from '@/components/ui/SmartDialog';
+import { Dialog, DialogContent, DialogDescription } from '@/components/ui/SmartDialog';
 import JSPDF from 'jspdf';
 import 'jspdf-autotable';
 import { toast } from 'sonner';
@@ -325,6 +325,9 @@ export default function Fournisseurs() {
         }}
       >
         <DialogContent className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl max-w-lg w-full p-8">
+          <DialogDescription className="sr-only">
+            Formulaire fournisseur
+          </DialogDescription>
           <FournisseurForm
             fournisseur={editRow}
             saving={saving}
@@ -357,6 +360,9 @@ export default function Fournisseurs() {
       {/* Modal détail */}
       <Dialog open={!!selected} onOpenChange={(v) => !v && setSelected(null)}>
         <DialogContent className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl max-w-2xl w-full p-10">
+          <DialogDescription className="sr-only">
+            Détail du fournisseur sélectionné
+          </DialogDescription>
           {selected && <FournisseurDetail id={selected} />}
         </DialogContent>
       </Dialog>

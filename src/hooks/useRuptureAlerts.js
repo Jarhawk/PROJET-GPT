@@ -11,11 +11,13 @@ export function useRuptureAlerts() {
     try {
       const { data, error } = await supabase
         .from('v_alertes_rupture')
-        .select('mama_id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, manque')
+        .select(
+          'mama_id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, manque'
+        )
         .eq('mama_id', mama_id)
         .order('manque', { ascending: false });
       if (error) throw error;
-      return data || [];
+      return Array.isArray(data) ? data : [];
     } catch (error) {
       console.error(error);
       toast.error(error.message || 'Erreur chargement alertes rupture');

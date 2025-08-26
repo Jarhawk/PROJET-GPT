@@ -36,7 +36,9 @@ export function useFournisseurs() {
     setError(null);
     const { data, error } = await supabase
       .from('fournisseurs')
-      .select('*')
+      .select(
+        'id, nom, actif, created_at, updated_at, contact:fournisseur_contacts!fournisseur_id(nom,email,tel)'
+      )
       .eq('mama_id', mama_id)
       .order('nom');
     setLoading(false);
@@ -45,8 +47,12 @@ export function useFournisseurs() {
       toast.error(error.message);
       return [];
     }
-    setFournisseurs(Array.isArray(data) ? data : []);
-    return data || [];
+    const list = (data || []).map((f) => ({
+      ...f,
+      contact: Array.isArray(f.contact) ? f.contact[0] : f.contact,
+    }));
+    setFournisseurs(Array.isArray(list) ? list : []);
+    return list;
   }, [mama_id]);
 
   useEffect(() => {

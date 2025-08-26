@@ -34,10 +34,13 @@ export function formatQty(v: number): string {
 
 export function formatPercent(delta: number): string {
   if (!Number.isFinite(delta)) return '';
-  const sign = delta > 0 ? '+' : delta < 0 ? '-' : '';
+  const sign = delta < 0 ? '-' : '';
   const abs = Math.abs(delta);
-  const val = abs.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  return `${sign}${val} %`;
+  const val = abs.toLocaleString('fr-FR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  return `${sign}${val}%`;
 }
 
 export function safeDiv(a: number, b: number): number {

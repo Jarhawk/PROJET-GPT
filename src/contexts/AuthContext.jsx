@@ -82,10 +82,13 @@ function AuthProvider({ children }) {
   }, [navigate, userData])
 
   const hasAccess = useMemo(() => {
-    return (key) => {
+    return (key, action = 'view') => {
       const k = normalizeAccessKey(key)
       if (!k) return true
-      return !!rights[k]
+      const r = rights[k]
+      if (r === true) return true
+      if (typeof r === 'object') return !!r[action]
+      return !!r
     }
   }, [rights])
 

@@ -1,5 +1,4 @@
 import { useAuth as useAuthContext } from '@/contexts/AuthContext'
-import { normalizeAccessKey } from '@/lib/access'
 
 export function useAuth() {
   return useAuthContext()
@@ -7,13 +6,10 @@ export function useAuth() {
 
 export default useAuth
 
-/** Hook pratique: renvoie une fonction hasAccess(key) */
+/** Hook pratique: renvoie une fonction hasAccess(key, action) */
 export function useHasAccess() {
   const auth = useAuthContext()
-  const rights = auth?.userData?.access_rights ?? {}
-  return (key?: string | null) => {
-    const k = normalizeAccessKey(key)
-    if (!k) return true
-    return !!rights[k]
+  return (key?: string | null, action: string = 'view') => {
+    return auth?.hasAccess?.(key, action)
   }
 }

@@ -3,7 +3,7 @@ declare module '@/contexts/AuthContext' {
     session?: any
     userData?: { access_rights?: Record<string, unknown> } | null
     loading?: boolean
-    hasAccess?: (key?: string | null) => boolean
+    hasAccess?: (key?: string | null, action?: string) => boolean
     [key: string]: any
   }
   export function useAuth(): AuthContextValue | null

@@ -20,8 +20,8 @@ import { Badge } from '@/components/ui/badge';
 import { mapUILineToPayload } from '@/features/factures/invoiceMappers';
 import useProduitLineDefaults from '@/hooks/useProduitLineDefaults';
 import useZonesStock from '@/hooks/useZonesStock';
-import { formatMoneyFR, formatMoneyFromCents } from '@/utils/numberFormat';
-import { parseDecimal, formatMoneyEUR } from '@/lib/numberFormat';
+import { formatMoneyFromCents } from '@/utils/numberFormat';
+import { toNumberSafe, formatCurrencyEUR } from '@/lib/numberFormat';
 
 
 const today = () => format(new Date(), 'yyyy-MM-dd');
@@ -108,11 +108,11 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
   const round2 = (n) =>
     Number.isFinite(n) ? Math.round(n * 100) / 100 : NaN;
   const [totalAttenduInput, setTotalAttenduInput] = useState(
-    totalHTAttendu ? formatMoneyEUR(round2(totalHTAttendu)) : ''
+    totalHTAttendu ? formatCurrencyEUR(round2(totalHTAttendu)) : ''
   );
   useEffect(() => {
     setTotalAttenduInput(
-      totalHTAttendu ? formatMoneyEUR(round2(totalHTAttendu)) : ''
+      totalHTAttendu ? formatCurrencyEUR(round2(totalHTAttendu)) : ''
     );
   }, [totalHTAttendu]);
 
@@ -299,15 +299,16 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
           <label className="text-sm font-medium">Total HT attendu (€)</label>
           <div className="flex items-center gap-2">
             <input
+              type="text"
               inputMode="decimal"
               step="0.01"
               value={totalAttenduInput}
               onChange={(e) => setTotalAttenduInput(e.target.value)}
               onBlur={() => {
-                const n = parseDecimal(totalAttenduInput);
+                const n = toNumberSafe(totalAttenduInput);
                 const t = Number.isFinite(n) ? round2(n) : NaN;
                 setTotalAttenduInput(
-                  Number.isFinite(n) ? formatMoneyEUR(t) : ''
+                  Number.isFinite(n) ? formatCurrencyEUR(t) : ''
                 );
                 setValue('total_ht_attendu', Number.isFinite(n) ? t : null, {
                   shouldDirty: true,
@@ -326,7 +327,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
               }
               ariaLabel="Écart HT"
             >
-              {`Écart ${formatMoneyFR(ecart_ht)}`}
+              {`Écart ${formatCurrencyEUR(ecart_ht)}`}
             </Badge>
           </div>
         </div>

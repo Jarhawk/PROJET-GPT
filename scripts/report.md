@@ -3,6 +3,8 @@
 - src/contexts/AuthContext.jsx:23 - Unknown RPC bootstrap_my_profile
 - src/contexts/AuthContext.jsx:24 - Unknown RPC get_my_profile
 - src/hooks/useAdvancedStats.js:12 - Unknown RPC advanced_stats
+- src/hooks/useAuditLog.js:10 - Missing mama_id filter for journaux_utilisateur
+- src/hooks/useAuditLog.js:26 - Missing mama_id filter for logs_securite
 - src/hooks/useBonsLivraison.js:63 - Missing mama_id filter for lignes_bl
 - src/hooks/useConsolidatedStats.js:12 - Unknown RPC consolidated_stats
 - src/hooks/useConsolidation.js:54 - Unknown table v_cons_achats_mensuels
@@ -15,6 +17,8 @@
 - src/hooks/useDashboard.js:59 - Unknown table mouvements
 - src/hooks/useDashboard.js:94 - Unknown RPC top_produits
 - src/hooks/useDashboardStats.js:39 - Unknown RPC dashboard_stats
+- src/hooks/useEmailsEnvoyes.js:10 - Unknown columns on emails_envoyes: *
+- src/hooks/useEmailsEnvoyes.js:10 - Missing mama_id filter for emails_envoyes
 - src/hooks/useFactures.js:237 - Missing mama_id filter for lignes_bl
 - src/hooks/useFactures.js:251 - Unknown RPC apply_stock_from_achat
 - src/hooks/useFiches.js:137 - Missing mama_id filter for fiche_lignes
@@ -23,6 +27,13 @@
 - src/hooks/useFournisseurStats.js:14 - Unknown RPC stats_achats_fournisseurs
 - src/hooks/useFournisseurStats.js:22 - Unknown RPC stats_achats_fournisseur
 - src/hooks/useFournisseurs.js:67 - Missing mama_id filter for fournisseur_contacts
+- src/hooks/useFournisseurAPI.js:112 - Missing mama_id filter for catalogue_updates
+- src/hooks/useFournisseurStats.js:14 - Unknown RPC stats_achats_fournisseurs
+- src/hooks/useFournisseurStats.js:22 - Unknown RPC stats_achats_fournisseur
+- src/hooks/useFournisseurs.js:67 - Missing mama_id filter for fournisseur_contacts
+- src/hooks/useGlobalSearch.js:15 - Missing mama_id filter for produits
+- src/hooks/useGlobalSearch.js:16 - Unknown columns on fiches: nom
+- src/hooks/useGlobalSearch.js:16 - Missing mama_id filter for fiches
 - src/hooks/useInventaires.js:125 - Unknown table produits_inventaire
 - src/hooks/useInvoiceImport.js:15 - Unknown RPC import_invoice
 - src/hooks/useLogs.js:41 - Unknown RPC log_action
@@ -31,6 +42,10 @@
 - src/hooks/useMenuDuJour.js:89 - Missing mama_id filter for menus_jour_fiches
 - src/hooks/useMenuDuJour.js:92 - Missing mama_id filter for menus_jour_fiches
 - src/hooks/useMenuDuJour.js:201 - Missing mama_id filter for menus_jour_fiches
+- src/hooks/useMenuDuJour.js:69 - Missing mama_id filter for menus_jour_fiches
+- src/hooks/useMenuDuJour.js:88 - Missing mama_id filter for menus_jour_fiches
+- src/hooks/useMenuDuJour.js:91 - Missing mama_id filter for menus_jour_fiches
+- src/hooks/useMenuDuJour.js:198 - Missing mama_id filter for menus_jour_fiches
 - src/hooks/useMenuGroupe.js:5 - Unknown table menu_groupes
 - src/hooks/useMenus.js:98 - Missing mama_id filter for menu_fiches
 - src/hooks/useMenus.js:130 - Missing mama_id filter for menu_fiches

@@ -6,5 +6,16 @@
   "spanish": "Español",
   "logout": "Cerrar sesión",
   "search": "Buscar...",
-  "toggleTheme": "Cambiar tema"
+  "toggleTheme": "Cambiar tema",
+  "nav.dashboard": "Tablero",
+  "nav.produits": "Productos",
+  "nav.fournisseurs": "Proveedores",
+  "nav.factures": "Facturas",
+  "nav.fiches": "Fichas",
+  "nav.menus": "Menús",
+  "nav.menuDuJour": "Menú del día",
+  "nav.zones": "Zonas",
+  "nav.familles": "Familias",
+  "nav.sousFamilles": "Subfamilias",
+  "nav.unites": "Unidades"
 }

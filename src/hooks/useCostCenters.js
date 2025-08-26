@@ -26,7 +26,10 @@ export function useCostCenters() {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
-    let query = supabase.from("centres_de_cout").select("*").eq("mama_id", mama_id);
+    let query = supabase
+      .from("centres_de_cout")
+      .select("id, nom, actif, activite, mama_id")
+      .eq("mama_id", mama_id);
     if (search) query = query.ilike("nom", `%${search}%`);
     const { data, error } = await query.order("nom", { ascending: true });
     setCostCenters(Array.isArray(data) ? data : []);

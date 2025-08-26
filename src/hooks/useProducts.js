@@ -45,12 +45,16 @@ export function useProducts() {
     setLoading(true);
     setError(null);
     let query = supabase
-      .from("produits")
+      .from('produits')
       .select(
-        `*, unite:unite_id (nom), zone_stock:zones_stock(nom), famille:familles(nom), sous_famille:sous_familles(nom)`,
-        { count: "exact" }
+        `*,
+         unite:unites!unite_id(nom),
+         zone_stock:zones_stock!zone_stock_id(nom),
+         famille:familles!famille_id(nom),
+         sous_famille:sous_familles!sous_famille_id(nom)`,
+        { count: 'exact' }
       )
-      .eq("mama_id", mama_id);
+      .eq('mama_id', mama_id);
 
     if (search) {
       query = query.ilike("nom", `%${search}%`);

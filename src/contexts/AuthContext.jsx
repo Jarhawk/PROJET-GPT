@@ -19,9 +19,15 @@ function AuthProvider({ children }) {
 
   async function loadProfile(sess) {
     if (!sess) { setUserData(null); return }
-    const displayName = sess.user?.user_metadata?.full_name || sess.user?.email || null
-    await supabase.rpc('bootstrap_my_profile', { p_nom: displayName })
-    const { data, error } = await supabase.rpc('get_my_profile')
+    const mamaId = sess.user?.user_metadata?.mama_id
+    let query = supabase
+      .from('utilisateurs')
+      .select('id, mama_id, nom, email, role_id, access_rights, role, invite_pending')
+      .eq('auth_id', sess.user.id)
+
+    if (mamaId) query = query.eq('mama_id', mamaId)
+
+    const { data, error } = await query.maybeSingle()
     if (error) { console.error(error); setUserData(null) }
     else { setUserData(data) }
   }

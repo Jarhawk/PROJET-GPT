@@ -17,7 +17,8 @@ export function usePermissions() {
     if (!mama_id && role !== "superadmin") return [];
     setLoading(true);
     setError(null);
-    let query = supabase.from("permissions").select("*");
+    const cols = 'id, mama_id, role_id, user_id, module, droit, created_at, updated_at, actif';
+    let query = supabase.from('permissions').select(cols);
     if (role !== "superadmin") query = query.eq("mama_id", mama_id);
     if (roleId) query = query.eq("role_id", roleId);
     if (userId) query = query.eq("user_id", userId);

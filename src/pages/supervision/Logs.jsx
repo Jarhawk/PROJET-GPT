@@ -13,6 +13,7 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/SmartDialog";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { Badge } from "@/components/ui/badge";
@@ -126,6 +127,9 @@ export default function Logs() {
       )}
       <Dialog open={!!detail} onOpenChange={() => setDetail(null)}>
         <DialogContent>
+          <DialogDescription className="sr-only">
+            Détails du log sélectionné
+          </DialogDescription>
           <div className="p-4 border-b">
             <DialogTitle>Détails</DialogTitle>
           </div>

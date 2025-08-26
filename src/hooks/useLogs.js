@@ -36,47 +36,13 @@ export function useLogs() {
     return data || [];
   }
 
-  async function logAction({ type, module, description, donnees = {}, critique = false }) {
-    if (!mama_id) return { error: 'no mama' };
-    return supabase.rpc("log_action", {
-      p_mama_id: mama_id,
-      p_type: type,
-      p_module: module,
-      p_description: description,
-      p_donnees: donnees,
-      p_critique: critique,
-    });
+  async function fetchRapports() {
+    setRapports([]);
+    return [];
   }
 
-  async function fetchRapports(filters = {}) {
-    if (!mama_id) return [];
-    let query = supabase
-      .from("rapports_generes")
-      .select("*")
-      .eq("mama_id", mama_id)
-      .order("date_generation", { ascending: false });
-    if (filters.module) query = query.eq("module", filters.module);
-    if (filters.type) query = query.eq("type", filters.type);
-    if (filters.start) query = query.gte("periode_debut", filters.start);
-    if (filters.end) query = query.lte("periode_fin", filters.end);
-    const { data, error } = await query;
-    if (error) {
-      console.error(error);
-      return [];
-    }
-    setRapports(data || []);
-    return data || [];
-  }
-
-  async function downloadRapport(id) {
-    const { data } = await supabase
-      .from("rapports_generes")
-      .select("chemin_fichier")
-      .eq("id", id)
-      .single();
-    if (data?.chemin_fichier) {
-      window.open(data.chemin_fichier, "_blank");
-    }
+  async function downloadRapport() {
+    return null;
   }
 
   async function exportLogs(format = "csv") {
@@ -114,7 +80,6 @@ export function useLogs() {
     loading,
     error,
     fetchLogs,
-    logAction,
     fetchRapports,
     downloadRapport,
     exportLogs,

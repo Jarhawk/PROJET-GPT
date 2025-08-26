@@ -11,6 +11,7 @@ import {
   Dialog,
   DialogTrigger,
   DialogContent,
+  DialogDescription,
 } from "@/components/ui/SmartDialog";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import GlassCard from "@/components/ui/GlassCard";
@@ -352,6 +353,9 @@ export default function Transferts() {
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="bg-white/10 backdrop-blur-lg rounded-xl shadow-lg p-6 max-w-lg">
+                      <DialogDescription className="sr-only">
+                        Historique des transferts
+                      </DialogDescription>
                       <h3 className="font-bold mb-2">
                         Timeline transferts : {t.nom}
                       </h3>
@@ -395,6 +399,9 @@ export default function Transferts() {
         onOpenChange={(v) => !v && setShowCreate(false)}
       >
         <DialogContent className="bg-white/10 backdrop-blur-lg rounded-xl shadow-lg p-6 max-w-md">
+          <DialogDescription className="sr-only">
+            Formulaire de création d'un transfert de stock
+          </DialogDescription>
           <h2 className="font-bold mb-2">Nouveau transfert de stock</h2>
           <form onSubmit={handleCreateTf} className="space-y-3">
             <div>

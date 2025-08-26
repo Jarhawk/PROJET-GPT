@@ -29,7 +29,7 @@ export default function Mamas() {
 
   const fetchMamas = async () => {
     setLoading(true);
-    let query = supabase.from('mamas').select('*');
+    let query = supabase.from('mamas').select('id, nom, ville, actif');
     if (role !== 'superadmin') query = query.eq('id', myMama);
     const { data, error } = await query.order('nom', { ascending: true });
     if (!error) setMamas(data || []);

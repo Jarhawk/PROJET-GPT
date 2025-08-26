@@ -16,7 +16,9 @@ export function useMamas() {
   async function fetchMamas({ search = "" } = {}) {
     setLoading(true);
     setError(null);
-    let query = supabase.from("mamas").select("*");
+    let query = supabase
+      .from("mamas")
+      .select("id, nom, ville, email_envoi, actif");
     if (role !== "superadmin") query = query.eq("id", mama_id);
     if (search) query = query.ilike("nom", `%${search}%`);
 
@@ -80,7 +82,7 @@ export function useMamas() {
       id: m.id,
       nom: m.nom,
       ville: m.ville,
-      email: m.email,
+      email_envoi: m.email_envoi,
     }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Mamas");

@@ -207,9 +207,10 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
         lignes: payloadLignes,
       };
 
-      const { data, error } = await supabase.rpc('fn_facture_save', {
-        p_mama_id: mamaId,
-        p_payload: payload,
+      const { data, error } = await supabase.rpc('fn_save_facture', {
+        mama_id: mamaId,
+        facture: payload.facture,
+        lignes: payload.lignes,
       });
 
       if (error) {

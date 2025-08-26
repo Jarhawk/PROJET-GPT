@@ -8,10 +8,9 @@ import { useNavigate } from 'react-router-dom';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useAuth } from '@/hooks/useAuth';
 import Unauthorized from '@/pages/auth/Unauthorized';
-import { supabase } from '@/lib/supabase';
 
 export default function Zones() {
-  const { fetchZones, updateZone } = useZones();
+  const { fetchZones, updateZone, deleteZone } = useZones();
   const { hasAccess, loading, mama_id } = useAuth();
   const canEdit = hasAccess('zones_stock', 'peut_modifier');
   const [filters, setFilters] = useState({ q: '', type: '', actif: true });
@@ -23,14 +22,7 @@ export default function Zones() {
   }, [filters, fetchZones]);
 
   async function handleDelete(id) {
-    const reassign = window.prompt(
-      'Réassigner vers la zone (laisser vide pour aucune)'
-    );
-    const { error } = await supabase.rpc('safe_delete_zone', {
-      p_mama: mama_id,
-      p_zone: id,
-      p_reassign_to: reassign || null,
-    });
+    const { error } = await deleteZone(id);
     if (error) toast.error(error.message);
     else {
       toast.success('Zone supprimée');

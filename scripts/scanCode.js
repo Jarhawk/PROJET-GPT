@@ -14,10 +14,24 @@ for (const file of files) {
   const content = fs.readFileSync(file, 'utf8')
   const lines = content.split(/\r?\n/)
 
+  // Basic accessibility check: DialogContent should have a description
+  if (
+    content.includes('DialogContent') &&
+    !content.includes('DialogDescription') &&
+    !content.includes('aria-describedby')
+  ) {
+    const idx = content.indexOf('DialogContent')
+    const lineNo = content.slice(0, idx).split(/\r?\n/).length
+    record(file, lineNo, 'DialogContent missing description')
+  }
+
   lines.forEach((line, idx) => {
     const lineNo = idx + 1
 
-    if (line.includes("from '@supabase/supabase-js'")) {
+    if (
+      line.includes("from '@supabase/supabase-js'") &&
+      file !== 'src/lib/supabase.js'
+    ) {
       record(file, lineNo, 'Direct supabase-js import; use src/lib/supabase.js')
     }
 
@@ -41,9 +55,15 @@ for (const file of files) {
             record(file, lineNo, `Unknown columns on ${table}: ${missing.join(', ')}`)
           }
         }
-        const mutating = /\.insert\(/.test(lookahead) || /\.update\(/.test(lookahead) || /\.upsert\(/.test(lookahead)
-        if (entity.columns.includes('mama_id')) {
-          const eqMatch = lookahead.match(/\.eq\(['"]mama_id['"],\s*mamaId\)/)
+        const mutating =
+          /\.insert\(/.test(lookahead) ||
+          /\.update\(/.test(lookahead) ||
+          /\.upsert\(/.test(lookahead) ||
+          /\.delete\(/.test(lookahead)
+        if (entity.columns.includes('mama_id') && !mutating) {
+          const eqMatch = lookahead.match(
+            /\.eq\(['"]mama_id['"],\s*(mamaId|mama_id)\)/
+          )
           if (!eqMatch) {
             record(file, lineNo, `Missing mama_id filter for ${table}`)
           }

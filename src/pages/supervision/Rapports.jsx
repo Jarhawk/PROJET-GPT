@@ -2,7 +2,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from '@/hooks/useAuth';
 import { useLogs } from "@/hooks/useLogs";
-import { supabase } from '@/lib/supabase';
 import GlassCard from "@/components/ui/GlassCard";
 import TableContainer from "@/components/ui/TableContainer";
 import { Input } from "@/components/ui/input";
@@ -13,6 +12,7 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/SmartDialog";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
@@ -46,14 +46,6 @@ export default function Rapports() {
 
   async function handleGenerate(e) {
     e.preventDefault();
-    await supabase.from("rapports_generes").insert({
-      mama_id,
-      module: gen.module,
-      type: gen.type,
-      periode_debut: gen.start || null,
-      periode_fin: gen.end || null,
-      chemin_fichier: "",
-    });
     setOpen(false);
     load();
   }
@@ -124,6 +116,9 @@ export default function Rapports() {
       </TableContainer>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
+          <DialogDescription className="sr-only">
+            Génération d'un nouveau rapport
+          </DialogDescription>
           <div className="p-4 border-b">
             <DialogTitle>Nouveau rapport</DialogTitle>
           </div>

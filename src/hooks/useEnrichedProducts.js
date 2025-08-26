@@ -14,11 +14,13 @@ export function useEnrichedProducts() {
     setError(null);
     try {
       const { data, error } = await supabase
-        .from("produits")
+        .from('produits')
         .select(
-          "id, nom, famille_id, sous_famille_id, famille:familles!fk_produits_famille(nom), sous_famille:sous_familles!fk_produits_sous_famille(nom), liaisons:fournisseur_produits!fournisseur_produits_produit_id_fkey(*, fournisseur:fournisseurs!fk_fournisseur_produits_fournisseur_id(*))"
+          `id, nom, famille_id, sous_famille_id,
+           famille:familles!famille_id(nom),
+           sous_famille:sous_familles!sous_famille_id(nom)`
         )
-        .eq("mama_id", mama_id);
+        .eq('mama_id', mama_id);
 
       if (error) throw error;
       setProducts(Array.isArray(data) ? data : []);

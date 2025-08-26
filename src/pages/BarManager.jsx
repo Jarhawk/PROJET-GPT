@@ -14,6 +14,7 @@ import {
   Dialog,
   DialogContent,
   DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/SmartDialog";
 import TableContainer from "@/components/ui/TableContainer";
 import { motion as Motion, AnimatePresence } from "framer-motion";
@@ -281,6 +282,9 @@ export default function BarManager() {
                       <DialogContent
                         className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl shadow-lg p-6 max-w-md z-[1000]"
                       >
+                        <DialogDescription className="sr-only">
+                          Détails de la boisson
+                        </DialogDescription>
                         <h2 className="font-bold text-xl mb-2">{b.nom}</h2>
                         <p>
                           <b>Type :</b> {b.type || b.famille || "-"}

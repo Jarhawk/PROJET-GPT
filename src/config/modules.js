@@ -1,4 +1,4 @@
-import { Home, Boxes, FileText, ChefHat, Menu as MenuIcon, Calendar, Settings } from 'lucide-react';
+import { Home, Boxes, FileText, ChefHat, Menu as MenuIcon, Calendar, Settings, Truck } from 'lucide-react';
 import lazyWithPreload from '@/lib/lazyWithPreload';
 
 export const MODULES = [
@@ -16,6 +16,14 @@ export const MODULES = [
     labelKey: 'nav.produits',
     icon: Boxes,
     rightKey: 'produits',
+    showInSidebar: true,
+  },
+  {
+    path: '/fournisseurs',
+    element: lazyWithPreload(() => import('@/pages/fournisseurs/Fournisseurs.jsx')),
+    labelKey: 'nav.fournisseurs',
+    icon: Truck,
+    rightKey: 'fournisseurs',
     showInSidebar: true,
   },
   {

@@ -17,8 +17,19 @@ export default function Produits() {
 
   const { familles = [] } = useFamilles();
   const { data: allSousFamilles = [] } = useSousFamilles();
+  const famillesById = useMemo(
+    () => Object.fromEntries(familles.map((f) => [f.id, f])),
+    [familles]
+  );
+  const sousFamillesById = useMemo(
+    () => Object.fromEntries(allSousFamilles.map((sf) => [sf.id, sf])),
+    [allSousFamilles]
+  );
   const sousFamilles = useMemo(
-    () => (familleId ? allSousFamilles.filter(sf => sf.famille_id === familleId) : allSousFamilles),
+    () =>
+      familleId
+        ? allSousFamilles.filter((sf) => sf.famille_id === familleId)
+        : allSousFamilles,
     [familleId, allSousFamilles]
   );
 
@@ -86,11 +97,9 @@ export default function Produits() {
         <div className="table-header-group">
           <div className="table-row">
             <div className="table-cell font-semibold py-2">Nom</div>
-            <div className="table-cell font-semibold py-2">Unité</div>
-            <div className="table-cell font-semibold py-2">PMP (€)</div>
             <div className="table-cell font-semibold py-2">Famille &gt; Sous-famille</div>
-            <div className="table-cell font-semibold py-2">Zone de stockage</div>
-            <div className="table-cell font-semibold py-2">Statut</div>
+            <div className="table-cell font-semibold py-2">Unité</div>
+            <div className="table-cell font-semibold py-2">Actif</div>
             <div className="table-cell font-semibold py-2">Actions</div>
           </div>
         </div>
@@ -105,14 +114,17 @@ export default function Produits() {
           {produits.map((p) => (
             <div key={p.id} className="table-row">
               <div className="table-cell py-2">{p.nom}</div>
-              <div className="table-cell py-2">{p.unite?.nom ?? '—'}</div>
-              <div className="table-cell py-2">{((p.pmp ?? p.dernier_prix) ?? 0).toFixed(2)}</div>
               <div className="table-cell py-2">
-                {p.sous_famille?.famille?.nom
-                  ? `${p.sous_famille.famille.nom} > ${p.sous_famille.nom}`
-                  : p.sous_famille?.nom ?? '—'}
+                {(() => {
+                  const sf = sousFamillesById[p.sous_famille_id];
+                  const fam = sf ? famillesById[sf.famille_id] : null;
+                  if (fam || sf) {
+                    return `${fam?.nom ?? ''}${fam && sf ? ' > ' : ''}${sf?.nom ?? ''}`;
+                  }
+                  return '—';
+                })()}
               </div>
-              <div className="table-cell py-2">{p.zone_id ?? '—'}</div>
+              <div className="table-cell py-2">{p.unite?.nom ?? p.unite_nom ?? '—'}</div>
               <div className="table-cell py-2">{p.actif ? 'Actif' : 'Inactif'}</div>
               <div className="table-cell py-2"> {/* actions existantes */}</div>
             </div>

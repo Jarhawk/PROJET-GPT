@@ -24,6 +24,9 @@
 - src/hooks/useFiches.js:137 - Missing mama_id filter for fiche_lignes
 - src/hooks/useFiches.js:186 - Missing mama_id filter for fiche_lignes
 - src/hooks/useFiches.js:258 - Missing mama_id filter for fiche_lignes
+- src/hooks/useFournisseurStats.js:14 - Unknown RPC stats_achats_fournisseurs
+- src/hooks/useFournisseurStats.js:22 - Unknown RPC stats_achats_fournisseur
+- src/hooks/useFournisseurs.js:67 - Missing mama_id filter for fournisseur_contacts
 - src/hooks/useFournisseurAPI.js:112 - Missing mama_id filter for catalogue_updates
 - src/hooks/useFournisseurStats.js:14 - Unknown RPC stats_achats_fournisseurs
 - src/hooks/useFournisseurStats.js:22 - Unknown RPC stats_achats_fournisseur
@@ -35,6 +38,10 @@
 - src/hooks/useInvoiceImport.js:15 - Unknown RPC import_invoice
 - src/hooks/useLogs.js:41 - Unknown RPC log_action
 - src/hooks/useMamas.js:19 - Unknown columns on mamas: *
+- src/hooks/useMenuDuJour.js:70 - Missing mama_id filter for menus_jour_fiches
+- src/hooks/useMenuDuJour.js:89 - Missing mama_id filter for menus_jour_fiches
+- src/hooks/useMenuDuJour.js:92 - Missing mama_id filter for menus_jour_fiches
+- src/hooks/useMenuDuJour.js:201 - Missing mama_id filter for menus_jour_fiches
 - src/hooks/useMenuDuJour.js:69 - Missing mama_id filter for menus_jour_fiches
 - src/hooks/useMenuDuJour.js:88 - Missing mama_id filter for menus_jour_fiches
 - src/hooks/useMenuDuJour.js:91 - Missing mama_id filter for menus_jour_fiches

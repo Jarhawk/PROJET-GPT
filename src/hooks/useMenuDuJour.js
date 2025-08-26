@@ -25,7 +25,8 @@ export function useMenuDuJour() {
         "*, fiches:menus_jour_fiches(fiche_id, quantite, fiche:fiches_techniques(id, nom, cout_par_portion))",
         { count: "exact" }
       )
-      .eq("mama_id", mama_id);
+      .eq("mama_id", mama_id)
+      .eq("menus_jour_fiches.mama_id", mama_id);
     if (search) query = query.ilike("nom", `%${search}%`);
     if (date) query = query.eq("date", date);
     if (typeof actif === "boolean") query = query.eq("actif", actif);
@@ -66,7 +67,7 @@ export function useMenuDuJour() {
       .single();
     if (!error && data?.id && fiches.length) {
       const toInsert = fiches.map((fiche_id) => ({ menu_jour_id: data.id, fiche_id, mama_id }));
-      await supabase.from("menus_jour_fiches").insert(toInsert);
+      await supabase.from("menus_jour_fiches").insert(toInsert).eq('mama_id', mama_id);
     }
     setLoading(false);
     if (error) setError(error); else await log("Ajout menu du jour", { id: data?.id, ...entete });
@@ -88,7 +89,7 @@ export function useMenuDuJour() {
       await supabase.from("menus_jour_fiches").delete().eq("menu_jour_id", id).eq("mama_id", mama_id);
       if (fiches.length) {
         const toInsert = fiches.map((fiche_id) => ({ menu_jour_id: id, fiche_id, mama_id }));
-        await supabase.from("menus_jour_fiches").insert(toInsert);
+        await supabase.from("menus_jour_fiches").insert(toInsert).eq('mama_id', mama_id);
       }
     }
     setLoading(false);
@@ -139,6 +140,7 @@ export function useMenuDuJour() {
         "date, items:menus_jour_fiches(quantite, fiche:fiches_techniques(id, cout_par_portion))"
       )
       .eq("mama_id", mama_id)
+      .eq("menus_jour_fiches.mama_id", mama_id)
       .gte("date", start.toISOString().slice(0, 10))
       .lte("date", end.toISOString().slice(0, 10))
       .order("date", { ascending: true });
@@ -160,6 +162,7 @@ export function useMenuDuJour() {
         "id, nom, date, items:menus_jour_fiches(id, fiche_id, quantite, categorie, fiche:fiches_techniques(id, nom, cout_par_portion))"
       )
       .eq("mama_id", mama_id)
+      .eq("menus_jour_fiches.mama_id", mama_id)
       .eq("date", date)
       .single();
     if (errMenu && errMenu.code !== "PGRST116") { setError(errMenu); return {}; }
@@ -195,7 +198,7 @@ export function useMenuDuJour() {
         quantite: l.portions || l.quantite || 1,
         mama_id,
       }));
-      await supabase.from("menus_jour_fiches").insert(rows);
+      await supabase.from("menus_jour_fiches").insert(rows).eq('mama_id', mama_id);
     }
     return { id: menuId };
   }

@@ -135,6 +135,7 @@ export default function FactureLigne({
         />
       </div>
       <input
+        type="text"
         inputMode="decimal"
         step="0.001"
         value={qteInput}
@@ -151,6 +152,7 @@ export default function FactureLigne({
       />
       <Input readOnly disabled value={line.unite || ''} placeholder="Unité" />
       <input
+        type="text"
         inputMode="decimal"
         step="0.01"
         value={totalHtInput}

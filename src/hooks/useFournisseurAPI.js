@@ -109,14 +109,17 @@ export function useFournisseurAPI() {
             { onConflict: ["produit_id", "fournisseur_id", "date_livraison"] }
           );
         if (existing && existing.prix_achat !== p.price) {
-          await supabase.from("catalogue_updates").insert({
-            fournisseur_id,
-            produit_id: p.produit_id,
-            ancienne_valeur: existing.prix_achat,
-            nouvelle_valeur: p.price,
-            modification: p,
-            mama_id,
-          });
+          await supabase
+            .from("catalogue_updates")
+            .insert({
+              fournisseur_id,
+              produit_id: p.produit_id,
+              ancienne_valeur: existing.prix_achat,
+              nouvelle_valeur: p.price,
+              modification: p,
+              mama_id,
+            })
+            .eq('mama_id', mama_id);
           updates.push(p);
         }
       }

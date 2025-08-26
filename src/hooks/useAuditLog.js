@@ -7,15 +7,18 @@ export function useAuditLog() {
 
   async function log(action, details = null) {
     if (!mama_id) return;
-    await supabase.from("journaux_utilisateur").insert([
-      {
-        mama_id,
-        user_id: user?.id || null,
-        action,
-        details,
-        done_by: user?.id || null,
-      },
-    ]);
+    await supabase
+      .from("journaux_utilisateur")
+      .insert([
+        {
+          mama_id,
+          user_id: user?.id || null,
+          action,
+          details,
+          done_by: user?.id || null,
+        },
+      ])
+      .eq('mama_id', mama_id);
   }
 
 
@@ -23,16 +26,19 @@ export function useAuditLog() {
     if (!mama_id) return;
     const ip = window?.location?.hostname || null;
     const navigateur = navigator.userAgent;
-    await supabase.from("logs_securite").insert([
-      {
-        mama_id,
-        type,
-        user_id: user_id || user?.id || null,
-        ip,
-        navigateur,
-        description,
-      },
-    ]);
+    await supabase
+      .from("logs_securite")
+      .insert([
+        {
+          mama_id,
+          type,
+          user_id: user_id || user?.id || null,
+          ip,
+          navigateur,
+          description,
+        },
+      ])
+      .eq('mama_id', mama_id);
   }
 
   return { log, logSecurityEvent };

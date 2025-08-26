@@ -2,13 +2,32 @@ import { useEffect } from 'react';
 import {
   Root as Dialog,
   Overlay as DialogOverlay,
-  Content as DialogContent,
+  Content as RadixDialogContent,
   Title as DialogTitle,
-  Description as DialogDescription,
+  Description as RadixDialogDescription,
   Close as DialogClose,
 } from '@radix-ui/react-dialog'
 
-export { Dialog, DialogOverlay, DialogContent, DialogTitle, DialogDescription, DialogClose }
+export {
+  Dialog,
+  DialogOverlay,
+  DialogTitle,
+  RadixDialogDescription as DialogDescription,
+  DialogClose,
+  DialogContent,
+}
+
+export function DialogContent({ 'aria-describedby': ariaDescribedBy, children, ...props }) {
+  const id = ariaDescribedBy || 'dialog-desc'
+  return (
+    <RadixDialogContent aria-describedby={id} {...props}>
+      {children}
+      {!ariaDescribedBy && (
+        <RadixDialogDescription id={id} className="sr-only" />
+      )}
+    </RadixDialogContent>
+  )
+}
 
 export default Dialog
 

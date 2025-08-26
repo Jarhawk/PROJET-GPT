@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import Sidebar from "@/components/layout/Sidebar";
+import Sidebar from "@/layout/Sidebar";
 import Navbar from "@/layout/Navbar";
 import {
   LiquidBackground,

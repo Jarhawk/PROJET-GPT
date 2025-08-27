@@ -15,7 +15,7 @@ export function useApiKeys() {
     setError(null);
     const { data, error } = await supabase
       .from('api_keys')
-      .select('*')
+      .select('id, mama_id, user_id, name, scopes, role, expiration, revoked, created_at')
       .eq('mama_id', mama_id)
       .order('created_at', { ascending: false });
     if (error) {
@@ -24,9 +24,10 @@ export function useApiKeys() {
       setLoading(false);
       return [];
     }
-    setKeys(data || []);
+    const rows = Array.isArray(data) ? data : [];
+    setKeys(rows);
     setLoading(false);
-    return data || [];
+    return rows;
   }, [mama_id]);
 
   const createKey = useCallback(async ({ name, scopes, role, expiration }) => {
@@ -36,14 +37,20 @@ export function useApiKeys() {
     const { data, error } = await supabase
       .from('api_keys')
       .insert([{ name, scopes, role, expiration, mama_id, user_id }])
-      .select()
+      .select('id, mama_id, user_id, name, scopes, role, expiration, revoked, created_at')
       .single();
     if (error) {
       setError(error.message || error);
       setLoading(false);
       return { error };
     }
-    if (data) setKeys(k => [data, ...k]);
+    if (data)
+      setKeys((k) => {
+        if (Array.isArray(k)) {
+          return [data, ...k];
+        }
+        return [data];
+      });
     setLoading(false);
     return { data };
   }, [mama_id, user_id]);
@@ -62,7 +69,12 @@ export function useApiKeys() {
       setLoading(false);
       return { error };
     }
-    setKeys(k => k.map(key => key.id === id ? { ...key, revoked: true } : key));
+    setKeys((k) => {
+      if (Array.isArray(k)) {
+        return k.map((key) => (key.id === id ? { ...key, revoked: true } : key));
+      }
+      return [];
+    });
     setLoading(false);
     return { error: null };
   }, [mama_id]);

@@ -37,9 +37,10 @@ export function useFournisseurs() {
     const { data, error } = await supabase
       .from('fournisseurs')
       .select(
-        'id, nom, actif, created_at, updated_at, contact:fournisseur_contacts!fournisseur_id(nom,email,tel)'
+        'id, nom, actif, created_at, updated_at, contact:fournisseur_contacts!fournisseur_id(mama_id,nom,email,tel)'
       )
       .eq('mama_id', mama_id)
+      .eq('contact.mama_id', mama_id)
       .order('nom');
     setLoading(false);
     if (error) {
@@ -47,11 +48,13 @@ export function useFournisseurs() {
       toast.error(error.message);
       return [];
     }
-    const list = (data || []).map((f) => ({
-      ...f,
-      contact: Array.isArray(f.contact) ? f.contact[0] : f.contact,
-    }));
-    setFournisseurs(Array.isArray(list) ? list : []);
+    const list = Array.isArray(data)
+      ? data.map((f) => ({
+          ...f,
+          contact: Array.isArray(f.contact) ? f.contact[0] : f.contact,
+        }))
+      : [];
+    setFournisseurs(list);
     return list;
   }, [mama_id]);
 
@@ -81,7 +84,11 @@ export function useFournisseurs() {
     if (error) {
       toast.error(error.message);
     } else if (data) {
-      setFournisseurs(prev => [...prev, { ...data, contact: { nom: contact, email, tel } }].sort((a,b)=>a.nom.localeCompare(b.nom)));
+      setFournisseurs(prev =>
+        Array.isArray(prev)
+          ? prev.concat({ ...data, contact: { nom: contact, email, tel } }).sort((a, b) => a.nom.localeCompare(b.nom))
+          : [{ ...data, contact: { nom: contact, email, tel } }]
+      );
     }
     queryClient.invalidateQueries({ queryKey: ['fournisseurs', mama_id] });
     queryClient.invalidateQueries({ queryKey: ['fournisseurs-autocomplete', mama_id] });
@@ -107,16 +114,18 @@ export function useFournisseurs() {
     }
     if (!error) {
       setFournisseurs(prev =>
-        prev
-          .map(f => {
-            if (f.id !== id) return f;
-            const contactObj = { ...f.contact };
-            if (contact !== undefined) contactObj.nom = contact;
-            if (email !== undefined) contactObj.email = email;
-            if (tel !== undefined) contactObj.tel = tel;
-            return { ...f, ...fields, contact: contactObj };
-          })
-          .sort((a, b) => a.nom.localeCompare(b.nom))
+        Array.isArray(prev)
+          ? prev
+              .map(f => {
+                if (f.id !== id) return f;
+                const contactObj = { ...f.contact };
+                if (contact !== undefined) contactObj.nom = contact;
+                if (email !== undefined) contactObj.email = email;
+                if (tel !== undefined) contactObj.tel = tel;
+                return { ...f, ...fields, contact: contactObj };
+              })
+              .sort((a, b) => a.nom.localeCompare(b.nom))
+          : []
       );
     } else {
       toast.error(error.message);
@@ -137,7 +146,9 @@ export function useFournisseurs() {
     if (error) {
       toast.error(error.message);
     } else {
-      setFournisseurs(prev => prev.map(f => (f.id === id ? { ...f, actif } : f)));
+      setFournisseurs(prev =>
+        Array.isArray(prev) ? prev.map(f => (f.id === id ? { ...f, actif } : f)) : []
+      );
     }
     queryClient.invalidateQueries({ queryKey: ['fournisseurs', mama_id] });
     queryClient.invalidateQueries({ queryKey: ['fournisseurs-autocomplete', mama_id] });
@@ -146,14 +157,14 @@ export function useFournisseurs() {
 
   // Export Excel
   function exportFournisseursToExcel(fournisseurs = []) {
-    const datas = (fournisseurs || []).map(f => ({
+    const datas = Array.isArray(fournisseurs) ? fournisseurs.map(f => ({
       id: f.id,
       nom: f.nom,
       tel: f.contact?.tel || '',
       contact: f.contact?.nom || '',
       email: f.contact?.email || '',
       actif: f.actif,
-    }));
+    })) : [];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), 'Fournisseurs');
     const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });

@@ -17,10 +17,12 @@ export function useAchats() {
     let q = supabase
       .from("achats")
       .select(
-        "*, fournisseur:fournisseur_id(id, nom), produit:produit_id(id, nom)",
+        "id, mama_id, produit_id, prix, quantite, date_achat, created_at, updated_at, actif, fournisseur_id, fournisseur:fournisseur_id(id, nom, mama_id), produit:produit_id(id, nom, mama_id)",
         { count: "exact" },
       )
       .eq("mama_id", mama_id)
+      .eq("fournisseur.mama_id", mama_id)
+      .eq("produit.mama_id", mama_id)
       .order("date_achat", { ascending: false })
       .range((page - 1) * pageSize, page * pageSize - 1);
     if (fournisseur) q = q.eq("fournisseur_id", fournisseur);
@@ -35,16 +37,18 @@ export function useAchats() {
     }
     setLoading(false);
     if (error) setError(error);
-    return data || [];
+    return Array.isArray(data) ? data : [];
   }
 
   async function fetchAchatById(id) {
     if (!id || !mama_id) return null;
     const { data, error } = await supabase
       .from("achats")
-      .select("*, fournisseur:fournisseur_id(id, nom), produit:produit_id(id, nom)")
+      .select("id, mama_id, produit_id, prix, quantite, date_achat, created_at, updated_at, actif, fournisseur_id, fournisseur:fournisseur_id(id, nom, mama_id), produit:produit_id(id, nom, mama_id)")
       .eq("id", id)
       .eq("mama_id", mama_id)
+      .eq("fournisseur.mama_id", mama_id)
+      .eq("produit.mama_id", mama_id)
       .single();
     if (error) { setError(error); return null; }
     return data;
@@ -55,10 +59,18 @@ export function useAchats() {
     const { data, error } = await supabase
       .from("achats")
       .insert([{ ...achat, mama_id }])
-      .select()
+      .select("id, mama_id, produit_id, prix, quantite, date_achat, created_at, updated_at, actif, fournisseur_id")
       .single();
-    if (error) { setError(error); return { error }; }
-    setAchats(a => [data, ...a]);
+    if (error) {
+      setError(error);
+      return { error };
+    }
+    setAchats((a) => {
+      if (Array.isArray(a)) {
+        return [data, ...a];
+      }
+      return [data];
+    });
     return { data };
   }
 
@@ -69,10 +81,18 @@ export function useAchats() {
       .update(fields)
       .eq("id", id)
       .eq("mama_id", mama_id)
-      .select()
+      .select("id, mama_id, produit_id, prix, quantite, date_achat, created_at, updated_at, actif, fournisseur_id")
       .single();
-    if (error) { setError(error); return { error }; }
-    setAchats(a => a.map(ac => ac.id === id ? data : ac));
+    if (error) {
+      setError(error);
+      return { error };
+    }
+    setAchats((a) => {
+      if (Array.isArray(a)) {
+        return a.map((ac) => (ac.id === id ? data : ac));
+      }
+      return [];
+    });
     return { data };
   }
 
@@ -83,8 +103,16 @@ export function useAchats() {
       .update({ actif: false })
       .eq("id", id)
       .eq("mama_id", mama_id);
-    if (error) { setError(error); return { error }; }
-    setAchats(a => a.map(ac => ac.id === id ? { ...ac, actif: false } : ac));
+    if (error) {
+      setError(error);
+      return { error };
+    }
+    setAchats((a) => {
+      if (Array.isArray(a)) {
+        return a.map((ac) => (ac.id === id ? { ...ac, actif: false } : ac));
+      }
+      return [];
+    });
     return { success: true };
   }
 

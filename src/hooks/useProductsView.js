@@ -24,9 +24,11 @@ export function useProductsView() {
       setLoading(true);
       try {
         let query = supabase
-          .from('produits_view')
+          .from('produits')
           .select(
-            'id, nom, unite, pmp, stock_theorique, zone, actif, famille_id, sous_famille_id',
+            `id, nom, actif, pmp, stock_theorique, famille_id, sous_famille_id,
+             unite:unites!unite_id(nom),
+             zone_stock:zones_stock!zone_stock_id(nom)`,
             { count: 'exact' }
           )
           .eq('mama_id', currentMamaId)
@@ -45,10 +47,10 @@ export function useProductsView() {
 
         const { data, error, count } = await query;
         if (error) throw error;
-        const mapped = (data || []).map((p) => ({
+        const mapped = (Array.isArray(data) ? data : []).map((p) => ({
           ...p,
-          unite: p.unite ? { nom: p.unite } : null,
-          zone_stock: p.zone ? { nom: p.zone } : null,
+          unite: p.unite || null,
+          zone_stock: p.zone_stock || null,
         }));
         setProducts(mapped);
         setTotal(count || 0);

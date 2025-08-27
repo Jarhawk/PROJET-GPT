@@ -12,7 +12,6 @@ export default function Aide() {
   const { items, fetchArticles, loading, error } = useAide();
   const [search, setSearch] = useState('');
   const [categorieFilter, setCategorieFilter] = useState('');
-  const [pageFilter, setPageFilter] = useState('');
   const [editing, setEditing] = useState(null);
 
   useEffect(() => {
@@ -20,13 +19,11 @@ export default function Aide() {
       fetchArticles({
         search,
         categorie: categorieFilter || undefined,
-        lien_page: pageFilter || undefined,
       });
     }
-  }, [authLoading, mama_id, search, categorieFilter, pageFilter, fetchArticles]);
+  }, [authLoading, mama_id, search, categorieFilter, fetchArticles]);
 
   const categories = [...new Set(items.map((a) => a.categorie).filter(Boolean))];
-  const pages = [...new Set(items.map((a) => a.lien_page).filter(Boolean))];
   const canEdit = isSuperadmin || access_rights?.aide?.peut_modifier;
 
   if (authLoading) return <LoadingSpinner message="Chargement..." />;
@@ -50,18 +47,6 @@ export default function Aide() {
           {categories.map((c) => (
             <option key={c} value={c}>
               {c}
-            </option>
-          ))}
-        </select>
-        <select
-          className="form-input"
-          value={pageFilter}
-          onChange={(e) => setPageFilter(e.target.value)}
-        >
-          <option value="">Toutes pages</option>
-          {pages.map((p) => (
-            <option key={p} value={p}>
-              {p}
             </option>
           ))}
         </select>
@@ -95,7 +80,6 @@ export default function Aide() {
             fetchArticles({
               search,
               categorie: categorieFilter || undefined,
-              lien_page: pageFilter || undefined,
             });
           }}
         />

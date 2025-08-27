@@ -36,7 +36,10 @@ export const useProduits = ({
           `,
           { count: 'exact' }
         )
-        .eq('mama_id', mamaId);
+        .eq('mama_id', mamaId)
+        .eq('unites.mama_id', mamaId)
+        .eq('sous_familles.mama_id', mamaId)
+        .eq('sous_familles.familles.mama_id', mamaId);
 
       if (search) q = q.ilike('nom', `%${search}%`);
       if (familleId) q = q.eq('famille_id', familleId);

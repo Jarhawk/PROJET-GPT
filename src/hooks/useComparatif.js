@@ -21,11 +21,14 @@ export function useComparatif(productId) {
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
-      .from("fournisseur_produits")
-      .select("prix_achat, date_livraison, fournisseur_id, fournisseur:fournisseur_id(nom)")
-      .eq("produit_id", id)
-      .eq("mama_id", mama_id)
-      .order("date_livraison", { ascending: false });
+      .from('fournisseur_produits')
+      .select(
+        'prix_achat, date_livraison, fournisseur_id, fournisseur:fournisseur_id(nom)'
+      )
+      .eq('produit_id', id)
+      .eq('mama_id', mama_id)
+      .eq('fournisseur.mama_id', mama_id)
+      .order('date_livraison', { ascending: false });
 
     if (error) {
       setError(error);
@@ -35,7 +38,8 @@ export function useComparatif(productId) {
     }
 
     const grouped = {};
-    for (const row of data || []) {
+    const rows = Array.isArray(data) ? data : [];
+    for (const row of rows) {
       const fid = row.fournisseur_id;
       if (!grouped[fid]) {
         grouped[fid] = {
@@ -50,12 +54,15 @@ export function useComparatif(productId) {
       }
     }
 
-    const lignesRes = Object.values(grouped).map((l) => ({
-      fournisseur: l.fournisseur,
-      dernierPrix: l.dernierPrix,
-      nb: l.nb,
-      pmp: l.total / l.nb,
-    }));
+    const groupedValues = Object.values(grouped);
+    const lignesRes = Array.isArray(groupedValues)
+      ? groupedValues.map((l) => ({
+          fournisseur: l.fournisseur,
+          dernierPrix: l.dernierPrix,
+          nb: l.nb,
+          pmp: l.total / l.nb,
+        }))
+      : [];
 
     setLignes(lignesRes);
     setLoading(false);

@@ -4,10 +4,14 @@ if (import.meta.env.PROD && 'serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {
       const registrations = await navigator.serviceWorker.getRegistrations();
-      for (const reg of registrations) await reg.unregister();
+      if (Array.isArray(registrations)) {
+        for (const reg of registrations) await reg.unregister();
+      }
       if ('caches' in window) {
-        const keys = await caches.keys();
-        await Promise.all(keys.map((k) => caches.delete(k)));
+        const keyList = await caches.keys();
+        await Promise.all(
+          (Array.isArray(keyList) ? keyList : []).map(k => caches.delete(k))
+        );
       }
 
       const registration = await navigator.serviceWorker.register('/service-worker.js');

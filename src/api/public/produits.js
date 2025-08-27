@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 /* eslint-env node */
 import express from 'express';
-import { getSupabaseClient } from './supabaseClient.js';
+import { getSupabaseClient } from '@/lib/supabase';
 
 const router = express.Router();
 

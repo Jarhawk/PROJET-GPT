@@ -6,48 +6,37 @@ export function useZoneProducts() {
   const { mama_id } = useAuth();
 
   async function list(zoneId) {
-    let q = supabase
-      .from('v_produits_par_zone')
-      .select('*')
-      .eq('zone_id', zoneId)
-      .eq('mama_id', mama_id);
-    let { data, error } = await q;
-    if (error) {
-      ({ data, error } = await supabase
-        .from('produits')
-        .select('*')
-        .eq('zone_id', zoneId)
-        .eq('mama_id', mama_id));
-    }
+    if (!mama_id || !zoneId) return [];
+    const { data, error } = await supabase
+      .from('produits')
+      .select(
+        'id, produit_id:id, produit_nom:nom, unite_id, stock_reel, stock_min'
+      )
+      .eq('zone_stock_id', zoneId)
+      .eq('mama_id', mama_id)
+      .order('nom', { ascending: true });
     if (error) throw error;
-    return data;
+    return Array.isArray(data) ? data : [];
   }
 
   async function move(srcZoneId, dstZoneId, removeSrc) {
-    return await supabase.rpc('move_zone_products', {
-      p_mama: mama_id,
-      p_src_zone: srcZoneId,
-      p_dest_zone: dstZoneId,
-      p_remove_src: removeSrc,
-    });
+    if (!mama_id || !srcZoneId || !dstZoneId) return { error: null };
+    const { error } = await supabase
+      .from('produits')
+      .update({ zone_stock_id: dstZoneId })
+      .eq('zone_stock_id', srcZoneId)
+      .eq('mama_id', mama_id);
+    // removeSrc flag kept for API compatibility; no extra handling needed
+    return { error };
   }
 
-  async function copy(srcZoneId, dstZoneId, overwrite) {
-    return await supabase.rpc('copy_zone_products', {
-      p_mama: mama_id,
-      p_src_zone: srcZoneId,
-      p_dest_zone: dstZoneId,
-      p_overwrite: overwrite,
-    });
+  async function setDefault(zoneId, prodId) {
+    return await supabase
+      .from('produits')
+      .update({ zone_stock_id: zoneId })
+      .eq('id', prodId)
+      .eq('mama_id', mama_id);
   }
 
-  async function merge(srcZoneId, dstZoneId) {
-    return await supabase.rpc('merge_zone_products', {
-      p_mama: mama_id,
-      p_src_zone: srcZoneId,
-      p_dest_zone: dstZoneId,
-    });
-  }
-
-  return { list, move, copy, merge };
+  return { list, move, setDefault };
 }

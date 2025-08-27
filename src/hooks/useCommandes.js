@@ -19,7 +19,7 @@ export function useCommandes() {
       let query = supabase
         .from("commandes")
         .select(
-          "*, fournisseur:fournisseur_id(id, nom, email), lignes:commande_lignes(total_ligne)",
+          "id, mama_id, fournisseur_id, statut, created_at, date_commande, date_livraison_prevue, montant_total, commentaire, updated_at, actif, bl_id, facture_id, created_by, validated_by, fournisseur:fournisseur_id(id, nom, email), lignes:commande_lignes(total_ligne:total)",
           { count: "exact" }
         )
         .eq("mama_id", mama_id)
@@ -38,9 +38,10 @@ export function useCommandes() {
         setCount(0);
         return { data: [], count: 0 };
       }
-      const rows = (data || []).map((c) => ({
+      const rows = (Array.isArray(data) ? data : []).map((c) => ({
         ...c,
-        total: (c.lignes || []).reduce((s, l) => s + Number(l.total_ligne || 0), 0),
+        lignes: Array.isArray(c.lignes) ? c.lignes : [],
+        total: (Array.isArray(c.lignes) ? c.lignes : []).reduce((s, l) => s + Number(l.total_ligne || 0), 0),
       }));
       setData(rows);
       setCount(count || 0);
@@ -57,7 +58,7 @@ export function useCommandes() {
       const { data, error } = await supabase
         .from("commandes")
         .select(
-          "*, fournisseur:fournisseur_id(id, nom, email), lignes:commande_lignes(*, produit:produit_id(id, nom))"
+          "id, mama_id, fournisseur_id, statut, created_at, date_commande, date_livraison_prevue, montant_total, commentaire, updated_at, actif, bl_id, facture_id, created_by, validated_by, fournisseur:fournisseur_id(id, nom, email), lignes:commande_lignes(id, commande_id, produit_id, quantite, unite, prix_unitaire, tva, total_ligne:total, commentaire, part_livree, rupture, actif, produit:produit_id(id, nom))"
         )
         .eq("id", id)
         .eq("mama_id", mama_id)
@@ -69,8 +70,9 @@ export function useCommandes() {
         setCurrent(null);
         return { data: null, error };
       }
-      setCurrent(data);
-      return { data, error: null };
+      const normalized = data ? { ...data, lignes: Array.isArray(data.lignes) ? data.lignes : [] } : null;
+      setCurrent(normalized);
+      return { data: normalized, error: null };
     },
     [mama_id]
   );
@@ -82,7 +84,7 @@ export function useCommandes() {
     const { data, error } = await supabase
       .from("commandes")
       .insert([{ ...rest, mama_id, created_by: user_id }])
-      .select()
+      .select("id, mama_id, fournisseur_id, statut, created_at, date_commande, date_livraison_prevue, montant_total, commentaire, updated_at, actif, bl_id, facture_id, created_by, validated_by")
       .single();
     setLoading(false);
     if (error) {
@@ -113,7 +115,7 @@ export function useCommandes() {
       .update(fields)
       .eq("id", id)
       .eq("mama_id", mama_id)
-      .select()
+      .select("id, mama_id, fournisseur_id, statut, created_at, date_commande, date_livraison_prevue, montant_total, commentaire, updated_at, actif, bl_id, facture_id, created_by, validated_by")
       .single();
     setLoading(false);
     if (error) {

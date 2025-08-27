@@ -22,7 +22,7 @@ export function useMenuDuJour() {
     let query = supabase
       .from("menus_jour")
       .select(
-        "*, fiches:menus_jour_fiches(fiche_id, quantite, fiche:fiches_techniques(id, nom, cout_par_portion))",
+        "id, nom, date, prix_vente_ttc, tva, actif, fiches:menus_jour_fiches(fiche_id, quantite, fiche:fiches_techniques(id, nom, cout_par_portion))",
         { count: "exact" }
       )
       .eq("mama_id", mama_id);
@@ -32,8 +32,9 @@ export function useMenuDuJour() {
     const { data, count, error } = await query
       .order("date", { ascending: false })
       .range(offset, offset + limit - 1);
-    const withCost = Array.isArray(data)
-      ? data.map((m) => {
+    const rows = Array.isArray(data) ? data : [];
+    const withCost = rows
+      .map((m) => {
           const cost = (m.fiches || []).reduce(
             (s, f) => s + (Number(f.quantite || 1) * (Number(f.fiche?.cout_par_portion) || 0)),
             0
@@ -143,7 +144,8 @@ export function useMenuDuJour() {
       .lte("date", end.toISOString().slice(0, 10))
       .order("date", { ascending: true });
     if (error) { setError(error); return []; }
-    return (data || []).map((m) => ({
+    const rows = Array.isArray(data) ? data : [];
+    return rows.map((m) => ({
       date_menu: m.date,
       cout_total: (m.items || []).reduce(
         (s, i) => s + Number(i.quantite || 1) * Number(i.fiche?.cout_par_portion || 0),

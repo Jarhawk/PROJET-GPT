@@ -10,13 +10,13 @@ export const useFamilles = () => {
       enabled: !!mamaId,
       queryFn: async () => {
         // Columns: id, nom, actif
-        const { data, error } = await supabase
+      const { data, error } = await supabase
         .from('familles')
         .select('id, nom, actif')
         .eq('mama_id', mamaId)
         .order('nom', { ascending: true });
       if (error) throw error;
-      return data ?? [];
+      return Array.isArray(data) ? data : [];
     },
   });
 };

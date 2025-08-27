@@ -80,11 +80,20 @@ export function useProducts() {
     ] = await Promise.all([
       supabase.from('v_pmp').select('produit_id, pmp').eq('mama_id', mama_id),
       supabase.from('v_stocks').select('produit_id, stock').eq('mama_id', mama_id),
-      supabase.from('v_products_last_price').select('produit_id, dernier_prix').eq('mama_id', mama_id),
+      supabase
+        .from('v_produits_dernier_prix')
+        .select('produit_id, dernier_prix')
+        .eq('mama_id', mama_id),
     ]);
-    const pmpMap = Object.fromEntries((pmpData || []).map(p => [p.produit_id, p.pmp]));
-    const stockMap = Object.fromEntries((stockData || []).map(s => [s.produit_id, s.stock]));
-    const lastPriceMap = Object.fromEntries((lastPriceData || []).map(l => [l.produit_id, l.dernier_prix]));
+    const pmpMap = Object.fromEntries(
+      (Array.isArray(pmpData) ? pmpData : []).map((p) => [p.produit_id, p.pmp])
+    );
+    const stockMap = Object.fromEntries(
+      (Array.isArray(stockData) ? stockData : []).map((s) => [s.produit_id, s.stock])
+    );
+    const lastPriceMap = Object.fromEntries(
+      (Array.isArray(lastPriceData) ? lastPriceData : []).map((l) => [l.produit_id, l.dernier_prix])
+    );
     const final = (Array.isArray(data) ? data : []).map((p) => ({
       ...p,
       pmp: pmpMap[p.id] ?? p.pmp,
@@ -98,7 +107,7 @@ export function useProducts() {
       setError(error);
       toast.error(error.message);
     }
-    return data || [];
+    return Array.isArray(data) ? data : [];
   }, [mama_id]);
 
   useEffect(() => {

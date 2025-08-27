@@ -3,14 +3,15 @@ import path from 'path'
 import fg from 'fast-glob'
 import { getEntity, getRpc } from './schemaUtil.js'
 
-const files = fg.sync('src/**/*.{js,jsx,ts,tsx}', { dot: true })
+const jsFiles = fg.sync('src/**/*.{js,jsx,ts,tsx}', { dot: true })
+const cssFiles = fg.sync('src/**/*.{css}', { dot: true })
 const issues = []
 
 function record(file, line, message) {
   issues.push(`- ${file}:${line} - ${message}`)
 }
 
-for (const file of files) {
+for (const file of jsFiles) {
   const content = fs.readFileSync(file, 'utf8')
   const lines = content.split(/\r?\n/)
 
@@ -28,11 +29,15 @@ for (const file of files) {
   lines.forEach((line, idx) => {
     const lineNo = idx + 1
 
-    if (
-      line.includes("from '@supabase/supabase-js'") &&
-      file !== 'src/lib/supabase.js'
-    ) {
+    if (line.includes("from '@supabase/supabase-js'") && file !== 'src/lib/supabase.js') {
       record(file, lineNo, 'Direct supabase-js import; use src/lib/supabase.js')
+    }
+    const supabaseImport = line.match(/import\s+\{?[^}]*supabase[^}]*\}?\s+from\s+['"]([^'"\n]+)['"]/)
+    if (supabaseImport) {
+      const importPath = supabaseImport[1]
+      if (!importPath.includes('lib/supabase')) {
+        record(file, lineNo, `Supabase client imported from ${importPath} instead of src/lib/supabase.js`)
+      }
     }
 
     const fromMatch = line.match(/supabase\.from\(['"]([^'\"]+)['"]\)/)
@@ -46,13 +51,31 @@ for (const file of files) {
         const lookahead = lines.slice(idx, idx + 3).join(' ')
         const selectMatch = lookahead.match(/select\(['"]([^'\"]*)['"]\)/)
         if (selectMatch) {
-          const cols = selectMatch[1]
+          const selectStr = selectMatch[1]
+          const cols = selectStr
             .split(',')
             .map((c) => c.trim().split(':').pop())
             .filter(Boolean)
           const missing = cols.filter((c) => !entity.columns.includes(c))
           if (missing.length) {
             record(file, lineNo, `Unknown columns on ${table}: ${missing.join(', ')}`)
+          }
+          const joinMatches = selectStr.matchAll(/([a-zA-Z0-9_]+)!([a-zA-Z0-9_]+)/g)
+          for (const jm of joinMatches) {
+            const joinTable = jm[1]
+            const fkName = jm[2]
+            const joinEntity = getEntity(joinTable)
+            let fkValid = false
+            if (joinEntity) {
+              fkValid = joinEntity.foreignKeys.some(
+                (fk) =>
+                  fk.references.table === table &&
+                  (fk.name === fkName || fk.column === fkName || fkName.includes(fk.column))
+              )
+            }
+            if (!fkValid) {
+              record(file, lineNo, `Invalid join ${joinTable}!${fkName} for base ${table}`)
+            }
           }
         }
         const mutating =
@@ -80,7 +103,24 @@ for (const file of files) {
       const rpc = getRpc(fn)
       if (!rpc) record(file, lineNo, `Unknown RPC ${fn}`)
     }
+
+    if (/[^?.]\.(map|find)\(/.test(line)) {
+      record(file, lineNo, 'Possible array method without safety check')
+    }
   })
+}
+
+// Basic CSS validation for unmatched braces and invalid properties
+for (const file of cssFiles) {
+  const content = fs.readFileSync(file, 'utf8')
+  const open = (content.match(/\{/g) || []).length
+  const close = (content.match(/\}/g) || []).length
+  if (open !== close) {
+    record(file, 0, 'Unmatched CSS braces')
+  }
+  if (/\bnull\s*:/.test(content)) {
+    record(file, 0, 'CSS contains invalid property "null"')
+  }
 }
 
 const out = path.join('scripts', 'report.md')

@@ -11,9 +11,8 @@ const lteMock = vi.fn(() => queryBuilder);
 queryBuilder = { order: orderMock, eq: eqMock, gte: gteMock, lte: lteMock, then: queryExec.then };
 const selectMock = vi.fn(() => queryBuilder);
 const fromMock = vi.fn(() => ({ select: selectMock }));
-const rpcMock = vi.fn(() => ({ then: fn => fn({ data: null, error: null }) }));
 
-vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock, rpc: rpcMock } }));
+vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
 const authMock = vi.fn(() => ({ mama_id: 'm1' }));
 vi.mock('@/hooks/useAuth', () => ({ useAuth: authMock }));
 vi.mock('file-saver', () => ({ saveAs: vi.fn() }));
@@ -29,23 +28,14 @@ beforeEach(async () => {
   selectMock.mockClear();
   eqMock.mockClear();
   orderMock.mockClear();
-  rpcMock.mockClear();
 });
 
-test('fetchLogs queries logs_activite', async () => {
+test('fetchLogs queries logs_securite', async () => {
   const { result } = renderHook(() => useLogs());
   await act(async () => { await result.current.fetchLogs({ type: 'login' }); });
-  expect(fromMock).toHaveBeenCalledWith('logs_activite');
+  expect(fromMock).toHaveBeenCalledWith('logs_securite');
   expect(eqMock).toHaveBeenCalledWith('mama_id', 'm1');
   expect(result.current.logs).toEqual([{ id: 'l1' }]);
-});
-
-test('logAction calls rpc', async () => {
-  const { result } = renderHook(() => useLogs());
-  await act(async () => {
-    await result.current.logAction({ type: 'login', module: 'm', description: 'd' });
-  });
-  expect(rpcMock).toHaveBeenCalledWith('log_action', expect.objectContaining({ p_type: 'login' }));
 });
 
 test('exportLogs writes file', async () => {

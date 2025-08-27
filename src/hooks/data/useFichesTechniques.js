@@ -43,7 +43,7 @@ export function useFichesTechniques({
       const { data, error, count } = await q;
       if (error) throw error;
 
-      return { rows: data ?? [], total: count ?? 0 };
+      return { rows: Array.isArray(data) ? data : [], total: count ?? 0 };
     },
   });
 }

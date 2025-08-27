@@ -19,7 +19,7 @@ export const useSousFamilles = () => {
         console.warn('[sous_familles] fallback []', error);
         return [];
       }
-      return data ?? [];
+      return Array.isArray(data) ? data : [];
     },
   });
 };

@@ -14,7 +14,6 @@ export default function AideForm({ article, onClose, onSaved }) {
     titre: article?.titre || '',
     contenu: article?.contenu || '',
     categorie: article?.categorie || '',
-    lien_page: article?.lien_page || '',
   });
   const [saving, setSaving] = useState(false);
 
@@ -62,13 +61,6 @@ export default function AideForm({ article, onClose, onSaved }) {
           name="categorie"
           placeholder="Catégorie"
           value={values.categorie}
-          onChange={handleChange}
-        />
-        <Input
-          className="w-full"
-          name="lien_page"
-          placeholder="Page liée"
-          value={values.lien_page}
           onChange={handleChange}
         />
         <textarea

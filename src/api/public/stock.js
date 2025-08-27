@@ -2,7 +2,7 @@
 /* eslint-env node */
 import express from 'express';
 import { TABLES } from '@/constants/tables';
-import { getSupabaseClient } from './supabaseClient.js';
+import { getSupabaseClient } from '@/lib/supabase';
 
 const router = express.Router();
 

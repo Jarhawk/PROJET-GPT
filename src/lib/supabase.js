@@ -14,9 +14,6 @@ export function getSupabaseEnv() {
     process.env.VITE_SUPABASE_ANON_KEY ||
     process.env.SUPABASE_ANON_KEY ||
     process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!url || !anonKey) {
-    throw new Error('Missing Supabase credentials')
-  }
   return { url, anonKey }
 }
 
@@ -28,7 +25,8 @@ export function getSupabaseClient() {
   }
   const { url, anonKey } = getSupabaseEnv()
   if (!url || !anonKey) {
-    initError = 'Missing Supabase credentials: set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY'
+    initError =
+      'Missing Supabase credentials: set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY'
     singleton = null
     cachedEnv = null
     if (process.env.NODE_ENV === 'production') {

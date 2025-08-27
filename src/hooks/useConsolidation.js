@@ -25,7 +25,9 @@ export function useConsolidation() {
       setSites([]);
       return [];
     }
-    const list = (data || []).map((m) => ({ mama_id: m.id, role }));
+    const list = Array.isArray(data)
+      ? data.map((m) => ({ mama_id: m.id, role }))
+      : [];
     setError(null);
     setSites(list);
     return list;
@@ -49,13 +51,15 @@ export function useConsolidation() {
         setRows([]);
         return [];
       }
-      const list = (data || []).map((r) => ({
-        ...r,
-        ca_total: 0,
-        menu_foodcost_total: 0,
-        marge_pct_moy: 0,
-        ecart_valorise_total: 0,
-      }));
+      const list = Array.isArray(data)
+        ? data.map((r) => ({
+            ...r,
+            ca_total: 0,
+            menu_foodcost_total: 0,
+            marge_pct_moy: 0,
+            ecart_valorise_total: 0,
+          }))
+        : [];
       setError(null);
       setRows(list);
       return list;
@@ -71,7 +75,7 @@ export function useConsolidation() {
 
   const exportPdf = useCallback((data) => {
     const doc = new JSPDF();
-    if (data && data.length > 0) {
+    if (Array.isArray(data) && data.length > 0) {
       const head = [Object.keys(data[0])];
       const body = data.map((r) => Object.values(r));
       doc.autoTable({ head, body });

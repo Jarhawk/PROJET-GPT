@@ -17,5 +17,14 @@
   "nav.zones": "Zones",
   "nav.familles": "Families",
   "nav.sousFamilles": "Sub-families",
-  "nav.unites": "Units"
+  "nav.unites": "Units",
+  "nav.receptions": "Receptions",
+  "nav.recettes": "Recipes",
+  "nav.tableauxDeBord": "Dashboards",
+  "nav.comparatif": "Comparison",
+  "nav.surcouts": "Overcosts",
+  "nav.alertesRupture": "Stock alerts",
+  "nav.inventaire": "Inventory",
+  "nav.requisitions": "Requisitions",
+  "nav.transferts": "Transfers"
 }

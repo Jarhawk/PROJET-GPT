@@ -7,8 +7,10 @@ import NotFound from '@/pages/NotFound.jsx';
 import PrivateOutlet from '@/router/PrivateOutlet';
 import PageSkeleton from '@/components/ui/PageSkeleton';
 
+const modules = Array.isArray(MODULES) ? MODULES : [];
+
 export const routePreloadMap = Object.fromEntries(
-  MODULES.map(m => [m.path, m.element.preload])
+  modules.map(m => [m.path, m.element.preload])
 );
 
 export default function Router() {
@@ -17,16 +19,16 @@ export default function Router() {
       <Route path="/login" element={<Login />} />
       <Route element={<PrivateOutlet />}>
         <Route element={<Layout />}>
-            {MODULES.map(m => (
-              <Route
-                key={m.path}
-                path={m.path}
-                element={
-                  <Suspense fallback={<PageSkeleton />}>
-                    <m.element />
-                  </Suspense>
-                }
-              />
+            {modules.map(m => (
+                <Route
+                  key={m.path}
+                  path={m.path}
+                  element={
+                    <Suspense fallback={<PageSkeleton />}>
+                      <m.element />
+                    </Suspense>
+                  }
+                />
             ))}
           <Route index element={<Navigate to="/dashboard" replace />} />
         </Route>

@@ -82,7 +82,8 @@ export function useCostCenters() {
   }
 
   function exportCostCentersToExcel() {
-    const datas = (costCenters || []).map(c => ({
+    const list = Array.isArray(costCenters) ? costCenters : [];
+    const datas = list.map(c => ({
       nom: c.nom,
       actif: c.actif,
     }));

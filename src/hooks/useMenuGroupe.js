@@ -1,20 +1,27 @@
-import supabase from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function useMenuGroupe() {
+  const { mama_id } = useAuth();
+
   async function fetchMenusGroupes({ q } = {}) {
-    let qy = supabase.from('menu_groupes').select('*');
+    if (!mama_id) return [];
+    let qy = supabase.from('menus').select('id, nom, date, actif')
+      .eq('mama_id', mama_id);
     if (q) qy = qy.ilike('nom', `%${q}%`);
-    const { data } = await qy;
-    return data || [];
+    const { data, error } = await qy;
+    if (error) return [];
+    return Array.isArray(data) ? data : [];
   }
 
-  async function addLigne(menuGroupeId, ligne) {
-    return supabase
-      .from('menu_groupes_lignes')
-      .insert([{ ...ligne, menu_groupe_id: menuGroupeId }]);
+  async function addLigne(menuId, ligne) {
+    if (!mama_id) return { error: 'Aucun mama_id' };
+    const { error } = await supabase
+      .from('menu_fiches')
+      .insert([{ ...ligne, menu_id: menuId, mama_id }]);
+    return { error };
   }
 
   return { fetchMenusGroupes, addLigne };
 }
 
-export { useMenuGroupe as useAuth };

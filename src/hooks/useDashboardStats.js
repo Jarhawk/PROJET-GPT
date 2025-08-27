@@ -8,9 +8,6 @@ import { useAuth } from '@/hooks/useAuth';
  *   auto: boolean (par défaut false)
  *   interval: nombre de ms pour le refresh auto (ex: 30000)
  *   retry: nombre d’essais max (ex: 2)
- *   page: numéro de page (1 par défaut)
- *   pageSize: nombre de lignes par page (défaut 30)
- *   params: params SQL additionnels pour la fonction (objet)
  * }
  */
 export function useDashboardStats(options = {}) {
@@ -19,9 +16,6 @@ export function useDashboardStats(options = {}) {
     auto = false,
     interval = 30000,
     retry = 2,
-    page = 1,
-    pageSize = 30,
-    params = {},
   } = options;
 
   const [stats, setStats] = useState(null);
@@ -31,34 +25,53 @@ export function useDashboardStats(options = {}) {
   const intervalId = useRef(null);
 
   // Fonction unique pour fetch (callback pour dépendances stables)
-  const fetchStats = useCallback(async (opts = {}) => {
-    if (!mama_id || authLoading) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const { data, error } = await supabase.rpc("dashboard_stats", {
-        mama_id_param: mama_id,
-        page_param: opts.page || page,
-        page_size_param: opts.pageSize || pageSize,
-        ...params,
-        ...opts.params, // surcharge possible
-      });
-      if (error) throw error;
-      setStats(data);
-      retries.current = 0; // Reset retry si succès
-    } catch (err) {
-      console.error('Erreur dashboard_stats:', err);
-      setError(err.message || "Erreur récupération stats dashboard.");
-      setStats(null);
-      // Retry intelligent
-      if (retries.current < retry) {
-        retries.current += 1;
-        setTimeout(() => fetchStats(opts), 1200); // attente avant retry
+  const fetchStats = useCallback(
+    async (opts = {}) => {
+      if (!mama_id || authLoading) return;
+      setLoading(true);
+      setError(null);
+      try {
+        const { data: produitsData, error: produitsErr } = await supabase
+          .from('produits')
+          .select('id, nom, stock_reel, pmp, mama_id')
+          .eq('mama_id', mama_id);
+        if (produitsErr) throw produitsErr;
+
+        const { data: lastData, error: lastErr } = await supabase
+          .from('v_produits_dernier_prix')
+          .select('produit_id, date_livraison, mama_id')
+          .eq('mama_id', mama_id);
+        if (lastErr) throw lastErr;
+
+        const lastMap = new Map(
+          (Array.isArray(lastData) ? lastData : []).map((r) => [r.produit_id, r.date_livraison])
+        );
+
+        const rows = (Array.isArray(produitsData) ? produitsData : []).map((p) => ({
+          produit_id: p.id,
+          nom: p.nom,
+          stock_reel: p.stock_reel,
+          pmp: p.pmp,
+          last_purchase: lastMap.get(p.id) || null,
+        }));
+
+        setStats(rows);
+        retries.current = 0; // Reset retry si succès
+      } catch (err) {
+        console.error('Erreur récupération stats dashboard:', err);
+        setError(err.message || 'Erreur récupération stats dashboard.');
+        setStats(null);
+        // Retry intelligent
+        if (retries.current < retry) {
+          retries.current += 1;
+          setTimeout(() => fetchStats(opts), 1200); // attente avant retry
+        }
+      } finally {
+        setLoading(false);
       }
-    } finally {
-      setLoading(false);
-    }
-  }, [mama_id, authLoading, params, page, pageSize, retry]);
+    },
+    [mama_id, authLoading, retry]
+  );
 
   // Refresh auto si demandé
   useEffect(() => {
@@ -74,13 +87,6 @@ export function useDashboardStats(options = {}) {
     if (!mama_id && !authLoading) setStats(null);
   }, [mama_id, authLoading]);
 
-  // Pagination : fetch si page/pageSize changent (hors auto)
-  useEffect(() => {
-    if (auto) return;
-    if (!mama_id || authLoading) return;
-    fetchStats({ page, pageSize });
-  }, [page, pageSize, mama_id, authLoading, auto, fetchStats]);
-
   return {
     stats,
     loading,
@@ -88,7 +94,5 @@ export function useDashboardStats(options = {}) {
     fetchStats,
     // helpers
     refresh: fetchStats,
-    setPage: (p) => fetchStats({ page: p, pageSize }),
-    setPageSize: (sz) => fetchStats({ page, pageSize: sz }),
   };
 }

@@ -15,12 +15,11 @@ export function useAide() {
       setLoading(true);
       setError(null);
       let query = supabase
-        .from('help_articles')
-        .select('*')
+        .from('documentation')
+        .select('id, titre, contenu, categorie, created_at, mama_id')
         .eq('mama_id', mama_id)
         .order('created_at', { ascending: false });
       if (filters.categorie) query = query.eq('categorie', filters.categorie);
-      if (filters.lien_page) query = query.eq('lien_page', filters.lien_page);
       if (filters.search) query = query.ilike('titre', `%${filters.search}%`);
       const { data, error } = await query;
       setLoading(false);
@@ -40,17 +39,24 @@ export function useAide() {
       if (!mama_id) return { error: 'missing mama_id' };
       setLoading(true);
       setError(null);
+      const { titre, contenu, categorie } = values || {};
+      const payload = { titre, contenu, categorie, mama_id };
       const { data, error } = await supabase
-        .from('help_articles')
-        .insert([{ ...values, mama_id }])
-        .select()
+        .from('documentation')
+        .insert([payload])
+        .select('id, titre, contenu, categorie, created_at, mama_id')
         .single();
       setLoading(false);
       if (error) {
         setError(error.message || error);
         return { error };
       }
-      setItems((arr) => [data, ...arr]);
+      setItems((arr) => {
+        if (Array.isArray(arr)) {
+          return [data, ...arr];
+        }
+        return [data];
+      });
       return { data };
     },
     [mama_id]
@@ -61,19 +67,26 @@ export function useAide() {
       if (!mama_id || !id) return { error: 'missing id' };
       setLoading(true);
       setError(null);
+      const { titre, contenu, categorie } = values || {};
+      const update = { titre, contenu, categorie };
       const { data, error } = await supabase
-        .from('help_articles')
-        .update(values)
+        .from('documentation')
+        .update(update)
         .eq('id', id)
         .eq('mama_id', mama_id)
-        .select()
+        .select('id, titre, contenu, categorie, created_at, mama_id')
         .single();
       setLoading(false);
       if (error) {
         setError(error.message || error);
         return { error };
       }
-      setItems((arr) => arr.map((a) => (a.id === id ? data : a)));
+      setItems((arr) => {
+        if (Array.isArray(arr)) {
+          return arr.map((a) => (a.id === id ? data : a));
+        }
+        return [];
+      });
       return { data };
     },
     [mama_id]
@@ -85,7 +98,7 @@ export function useAide() {
       setLoading(true);
       setError(null);
       const { error } = await supabase
-        .from('help_articles')
+        .from('documentation')
         .delete()
         .eq('id', id)
         .eq('mama_id', mama_id);
@@ -94,7 +107,12 @@ export function useAide() {
         setError(error.message || error);
         return { error };
       }
-      setItems((arr) => arr.filter((a) => a.id !== id));
+      setItems((arr) => {
+        if (Array.isArray(arr)) {
+          return arr.filter((a) => a.id !== id);
+        }
+        return [];
+      });
       return { success: true };
     },
     [mama_id]

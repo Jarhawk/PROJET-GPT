@@ -8,6 +8,9 @@ const schemaFile = path.resolve(__dirname, '../db/Etat back end.txt')
 const raw = fs.readFileSync(schemaFile, 'utf8')
 const lines = raw.split(/\r?\n/)
 
+// The resulting structure maps each table/view name to an object
+// `{ columns: string[], foreignKeys: Array<{ name: string, column: string, references: { table: string, column: string } }> }`
+// RPCs are stored under `rpcs` with their parameter names.
 const tables = {}
 const rpcs = {}
 
@@ -52,12 +55,14 @@ for (const line of lines) {
   if (!line.startsWith('|')) break
   const cells = line.split('|').map((c) => c.trim())
   if (cells.length < 8) continue
+  const fkName = cells[1]
   const srcTable = cells[3]
   const srcColumn = cells[4]
   const tgtTable = cells[6]
   const tgtColumn = cells[7]
   if (!tables[srcTable]) tables[srcTable] = { columns: [], foreignKeys: [] }
   tables[srcTable].foreignKeys.push({
+    name: fkName,
     column: srcColumn,
     references: { table: tgtTable, column: tgtColumn },
   })
@@ -81,6 +86,21 @@ for (const line of lines) {
   if (!routine || routine === 'routine_name') continue
   if (!rpcs[routine]) rpcs[routine] = { params: [] }
   if (param && param !== 'parameter_name') rpcs[routine].params.push(param)
+}
+
+// If the txt file didn't expose RPC definitions, fallback to SCHEMA_OBJECTS.json
+if (Object.keys(rpcs).length === 0) {
+  try {
+    const objectsPath = path.resolve(__dirname, '../SCHEMA_OBJECTS.json')
+    const objs = JSON.parse(fs.readFileSync(objectsPath, 'utf8'))
+    for (const obj of objs) {
+      if (obj.type === 'function' && obj.name && !rpcs[obj.name]) {
+        rpcs[obj.name] = { params: [] }
+      }
+    }
+  } catch {
+    // ignore if file missing or invalid
+  }
 }
 
 const out = { tables, rpcs }

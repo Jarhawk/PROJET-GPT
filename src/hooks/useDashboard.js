@@ -30,9 +30,9 @@ export function useDashboard() {
     let mouvements = [];
     try {
       const { data: produitsRaw, error: errorProd } = await supabase
-        .from("v_produits_dernier_prix")
-        .select("id, nom, unite_id, unite:unite_id (nom), famille, stock_reel, stock_min")
-        .eq("mama_id", mama_id);
+        .from('v_produits_dernier_prix')
+        .select('produit_id:id, nom, famille, unite, stock_reel, stock_min, mama_id')
+        .eq('mama_id', mama_id);
       if (errorProd) throw errorProd;
       const { data: pmpData } = await supabase
         .from('v_pmp')
@@ -42,14 +42,14 @@ export function useDashboard() {
         .from('v_stocks')
         .select('produit_id, stock')
         .eq('mama_id', mama_id);
-      const pmpMap = Object.fromEntries((pmpData || []).map(p => [p.produit_id, p.pmp]));
-      const stockMap = Object.fromEntries((stockData || []).map(s => [s.produit_id, s.stock]));
+      const pmpMap = Object.fromEntries((Array.isArray(pmpData) ? pmpData : []).map(p => [p.produit_id, p.pmp]));
+      const stockMap = Object.fromEntries((Array.isArray(stockData) ? stockData : []).map(s => [s.produit_id, s.stock]));
       produits = (Array.isArray(produitsRaw) ? produitsRaw : []).map(p => ({
         ...p,
         pmp: pmpMap[p.id] ?? 0,
         stock_theorique: stockMap[p.id] ?? 0,
       }));
-    } catch (_err) { void _err; 
+    } catch (_err) { void _err;
       setError("Erreur chargement produits");
       setLoading(false);
       return;
@@ -62,7 +62,7 @@ export function useDashboard() {
         .select('quantite, produit_id, requisitions!inner(date_requisition,mama_id,statut)')
         .eq('requisitions.mama_id', mama_id);
       if (errorMouv) throw errorMouv;
-      mouvements = (mouvementsRaw || [])
+      mouvements = (Array.isArray(mouvementsRaw) ? mouvementsRaw : [])
         .filter(m => m.requisitions?.statut === 'réalisée')
         .map(m => ({
           quantite: m.quantite,

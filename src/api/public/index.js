@@ -4,7 +4,7 @@ import express from 'express';
 import produitsRouter from './produits.js';
 import stockRouter from './stock.js';
 import promotionsRouter from './promotions.js';
-import { getSupabaseClient } from './supabaseClient.js';
+import { getSupabaseClient } from '@/lib/supabase';
 
 const router = express.Router();
 

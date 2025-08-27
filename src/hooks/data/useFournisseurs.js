@@ -25,6 +25,7 @@ export function useFournisseurs(params = {}) {
         .from('fournisseurs')
         .select('id, nom, actif, contact:fournisseur_contacts!fournisseur_id(nom,email,tel)')
         .eq('mama_id', mama_id)
+        .eq('fournisseur_contacts.mama_id', mama_id)
         .order('nom', { ascending: true })
         .range((page - 1) * limit, page * limit - 1);
 
@@ -33,11 +34,11 @@ export function useFournisseurs(params = {}) {
 
       const { data, error } = await query;
       if (error) throw error;
-      const list = (data || []).map((f) => ({
+      const rows = Array.isArray(data) ? data : [];
+      return rows.map((f) => ({
         ...f,
         contact: Array.isArray(f.contact) ? f.contact[0] : f.contact,
       }));
-      return Array.isArray(list) ? list : [];
     },
   });
 }

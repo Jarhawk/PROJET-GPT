@@ -23,15 +23,21 @@ export default function FactureImportModal({ open, onClose, onImport }) {
     const wb = XLSX.read(data, { type: "array" });
     const ws = wb.Sheets[wb.SheetNames[0]];
     const json = XLSX.utils.sheet_to_json(ws, { defval: "" });
-    setRows(json.map(r => ({ ...r })));
+    const arr = Array.isArray(json) ? json.map(r => ({ ...r })) : [];
+    setRows(arr);
   };
 
   const handleChange = (idx, field, value) => {
-    setRows(rs => rs.map((r, i) => (i === idx ? { ...r, [field]: value } : r)));
+    setRows(rs =>
+      Array.isArray(rs)
+        ? rs.map((r, i) => (i === idx ? { ...r, [field]: value } : r))
+        : rs
+    );
   };
 
   const invalid = row => !row.produit || !row.quantite;
 
+  const list = Array.isArray(rows) ? rows : [];
   return (
     <Dialog open={open} onOpenChange={isOpen => !isOpen && onClose?.()}>
       <DialogContent className="space-y-4">
@@ -54,15 +60,20 @@ export default function FactureImportModal({ open, onClose, onImport }) {
           <table className="w-full text-xs">
             <thead>
               <tr>
-                {rows[0] && Object.keys(rows[0]).map(k => (
-                  <th key={k} className="px-2 py-1 text-left sticky top-0 bg-black/30">
-                    {k}
-                  </th>
-                ))}
+                {list[0]
+                  ? Object.keys(list[0]).map(k => (
+                      <th
+                        key={k}
+                        className="px-2 py-1 text-left sticky top-0 bg-black/30"
+                      >
+                        {k}
+                      </th>
+                    ))
+                  : null}
               </tr>
             </thead>
             <tbody>
-              {rows.map((r, idx) => (
+              {list.map((r, idx) => (
                 <tr key={idx} className={invalid(r) ? "bg-red-200/20" : ""}>
                   {Object.keys(r).map(k => (
                     <td key={k} className="p-1">
@@ -81,8 +92,8 @@ export default function FactureImportModal({ open, onClose, onImport }) {
         <div className="flex justify-end gap-2 pt-2">
           <Button
             type="button"
-            disabled={!rows.length || rows.some(invalid)}
-            onClick={() => onImport?.(rows)}
+            disabled={!list.length || list.some(invalid)}
+            onClick={() => onImport?.(list)}
           >
             Importer
           </Button>

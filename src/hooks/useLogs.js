@@ -17,23 +17,26 @@ export function useLogs() {
     setLoading(true);
     setError(null);
     let query = supabase
-      .from("logs_activite")
-      .select("*, utilisateurs:user_id(nom)")
-      .eq("mama_id", mama_id)
-      .order("date_log", { ascending: false });
-    if (type) query = query.eq("type", type);
-    if (module) query = query.eq("module", module);
-    if (start) query = query.gte("date_log", start);
-    if (end) query = query.lte("date_log", end);
-    if (critique !== undefined) query = query.eq("critique", critique);
+      .from('logs_securite')
+      .select(
+        'id, type, description, module:type_evenement, critique:niveau_criticite, date_log:date_evenement, utilisateur:utilisateur_id(nom)'
+      )
+      .eq('mama_id', mama_id)
+      .order('date_evenement', { ascending: false });
+    if (type) query = query.eq('type', type);
+    if (module) query = query.eq('type_evenement', module);
+    if (start) query = query.gte('date_evenement', start);
+    if (end) query = query.lte('date_evenement', end);
+    if (critique !== undefined) query = query.eq('niveau_criticite', critique);
     const { data, error } = await query;
     setLoading(false);
     if (error) {
       setError(error);
       return [];
     }
-    setLogs(data || []);
-    return data || [];
+    const rows = Array.isArray(data) ? data : [];
+    setLogs(rows);
+    return rows;
   }
 
   async function fetchRapports() {
@@ -46,8 +49,9 @@ export function useLogs() {
   }
 
   async function exportLogs(format = "csv") {
+    const list = Array.isArray(logs) ? logs : [];
     if (format === "xlsx") {
-      const ws = XLSX.utils.json_to_sheet(logs);
+      const ws = XLSX.utils.json_to_sheet(list);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Logs");
       const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
@@ -58,7 +62,7 @@ export function useLogs() {
       const autoTableMod = await import("jspdf-autotable");
       const autoTable = autoTableMod.default || autoTableMod;
       const doc = new jsPDF();
-      const rows = logs.map((l) => [l.date_log, l.type, l.module, l.description, l.critique ? "oui" : "non"]);
+      const rows = list.map((l) => [l.date_log, l.type, l.module, l.description, l.critique ? "oui" : "non"]);
       autoTable(doc, {
         head: [["Date", "Type", "Module", "Description", "Critique"]],
         body: rows,
@@ -66,7 +70,7 @@ export function useLogs() {
       doc.save("logs.pdf");
     } else {
       const header = "Date;Type;Module;Description;Critique\n";
-      const csv = logs
+      const csv = list
         .map((l) => `${l.date_log};${l.type};${l.module};${l.description};${l.critique}`)
         .join("\n");
       const blob = new Blob([header + csv], { type: "text/csv;charset=utf-8" });

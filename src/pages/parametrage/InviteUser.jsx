@@ -26,13 +26,13 @@ export default function InviteUser({ onClose, onInvited }) {
       if (role === "superadmin") {
         const { data: mData } = await supabase
           .from("mamas")
-          .select("id, nom, ville")
+          .select("id, nom")
           .order("nom");
         setMamas(mData || []);
       } else if (myMama) {
         const { data: mData } = await supabase
           .from("mamas")
-          .select("id, nom, ville")
+          .select("id, nom")
           .eq("id", myMama)
           .maybeSingle();
         setMamas(mData ? [mData] : []);
@@ -140,7 +140,7 @@ export default function InviteUser({ onClose, onInvited }) {
           <option value="">Sélectionner…</option>
           {mamas.map(m => (
             <option key={m.id} value={m.id}>
-              {m.nom} ({m.ville})
+              {m.nom}
             </option>
           ))}
         </select>

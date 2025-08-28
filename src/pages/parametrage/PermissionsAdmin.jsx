@@ -31,7 +31,7 @@ export default function PermissionsAdmin() {
   }, [role]);
 
   const fetchMamas = async () => {
-    const { data } = await supabase.from('mamas').select('id, nom, ville');
+    const { data } = await supabase.from('mamas').select('id, nom');
     setMamas(data || []);
   };
 
@@ -85,7 +85,7 @@ export default function PermissionsAdmin() {
             <option value="">Tous</option>
             {mamas.map((m) => (
               <option key={m.id} value={m.id}>
-                {m.nom} ({m.ville})
+                {m.nom}
               </option>
             ))}
           </select>
@@ -111,9 +111,7 @@ export default function PermissionsAdmin() {
               {roles.map((role) => (
                 <tr key={role.id}>
                   <td className="px-2 py-1">
-                    {mamas.find((m) => m.id === role.mama_id)
-                      ? `${mamas.find((m) => m.id === role.mama_id)?.nom} (${mamas.find((m) => m.id === role.mama_id)?.ville})`
-                      : role.mama_id}
+                    {mamas.find((m) => m.id === role.mama_id)?.nom || role.mama_id}
                   </td>
                   <td className="px-2 py-1">{role.nom}</td>
                   <td className="px-2 py-1">{role.description || ''}</td>

@@ -18,7 +18,7 @@ export function useMamas() {
     setError(null);
     let query = supabase
       .from("mamas")
-      .select("id, nom, ville, email_envoi, actif");
+      .select("id, nom, email_envoi, actif");
     if (role !== "superadmin") query = query.eq("id", mama_id);
     if (search) query = query.ilike("nom", `%${search}%`);
 
@@ -81,7 +81,6 @@ export function useMamas() {
     const datas = (mamas || []).map(m => ({
       id: m.id,
       nom: m.nom,
-      ville: m.ville,
       email_envoi: m.email_envoi,
     }));
     const wb = XLSX.utils.book_new();

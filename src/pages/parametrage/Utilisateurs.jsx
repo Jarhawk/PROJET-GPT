@@ -1,10 +1,12 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from "@/components/ui/button";
 import UtilisateurForm from "@/components/utilisateurs/UtilisateurForm";
 
 export default function Utilisateurs() {
+  const { mama_id } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -15,7 +17,8 @@ export default function Utilisateurs() {
     setLoading(true);
     const { data, error } = await supabase
       .from("utilisateurs")
-      .select("*")
+      .select("id, email")
+      .eq("mama_id", mama_id)
       .order("email", { ascending: true });
     if (error) setError(error);
     setUsers(data || []);
@@ -24,7 +27,7 @@ export default function Utilisateurs() {
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [mama_id]);
 
   return (
     <div className="p-4">

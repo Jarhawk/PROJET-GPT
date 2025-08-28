@@ -16,7 +16,7 @@ export function useDocuments() {
     setError(null);
     let query = supabase
       .from("documents")
-      .select("*")
+      .select("id, nom, type, taille, categorie, url, fichier_url, titre, commentaire, entite_liee_type, entite_liee_id, mama_id, created_at")
       .eq("mama_id", mama_id)
       .order("created_at", { ascending: false });
 
@@ -70,7 +70,7 @@ export function useDocuments() {
               mama_id,
             },
           ])
-          .select()
+          .select("id, nom, type, taille, categorie, url, fichier_url, titre, commentaire, entite_liee_type, entite_liee_id, mama_id, created_at")
           .single();
         setLoading(false);
         if (error) {

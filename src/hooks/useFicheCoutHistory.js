@@ -16,7 +16,7 @@ export function useFicheCoutHistory() {
     try {
       const { data, error } = await supabase
         .from("fiche_cout_history")
-        .select("*")
+        .select("id, mama_id, fiche_id, old_cout, new_cout, changed_by, changed_at, created_at, updated_at, actif")
         .eq("fiche_id", fiche_id)
         .eq("mama_id", mama_id)
         .order("changed_at", { ascending: false });
@@ -25,8 +25,8 @@ export function useFicheCoutHistory() {
       const rows = Array.isArray(data)
         ? data.map((d) => ({
             ...d,
-            cout_portion: d.cout_portion ? Number(d.cout_portion) : null,
-            prix_vente: d.prix_vente ? Number(d.prix_vente) : null,
+            old_cout: d.old_cout ? Number(d.old_cout) : null,
+            new_cout: d.new_cout ? Number(d.new_cout) : null,
           }))
         : [];
       setHistory(rows);

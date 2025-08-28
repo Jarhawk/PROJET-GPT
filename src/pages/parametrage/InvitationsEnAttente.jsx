@@ -25,7 +25,7 @@ export default function InvitationsEnAttente() {
       .then(({ data }) => setMamas(data || []));
     supabase
       .from("roles")
-      .select("*")
+      .select("nom")
       .eq("mama_id", mama_id)
       .then(({ data }) => setRoles(data || []));
     setLoading(true);

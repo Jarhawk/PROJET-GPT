@@ -13,7 +13,7 @@ export function useStockRequisitionne() {
     setLoading(true);
     const { data, error } = await supabase
       .from("v_stock_requisitionne")
-      .select("*")
+      .select("produit_id, quantite_30j")
       .eq("mama_id", mama_id);
     setLoading(false);
     if (error) {

@@ -55,7 +55,7 @@ export function useStock() {
     if (!mama_id) return [];
     const { data, error } = await supabase
       .from("inventaires")
-      .select("*")
+      .select("id, mama_id, date_inventaire, created_at, updated_at, actif, reference, zone, date_debut, cloture")
       .eq("mama_id", mama_id)
       .order("date_inventaire", { ascending: false });
     if (error) return [];
@@ -68,7 +68,7 @@ export function useStock() {
       const { data, error } = await supabase
         .from("inventaires")
         .insert([{ ...payload, mama_id }])
-        .select()
+        .select("id, mama_id, date_inventaire, created_at, updated_at, actif, reference, zone, date_debut, cloture")
         .single();
       if (error) return null;
       return data;

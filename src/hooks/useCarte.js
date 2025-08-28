@@ -15,7 +15,7 @@ export function useCarte() {
       setError(null);
       let query = supabase
         .from("fiches_techniques")
-        .select("*")
+        .select("id, nom, famille, prix_vente, cout_portion, type_carte, carte_actuelle")
         .eq("mama_id", mama_id)
         .eq("carte_actuelle", true)
         .order("nom", { ascending: true });

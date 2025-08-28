@@ -4,9 +4,10 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import TableContainer from "@/components/ui/TableContainer";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { toast } from "sonner";
 
 export default function AccessMultiSites() {
-  const { mama_id } = useAuth();
+  const { mama_id: mamaId } = useAuth();
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -15,12 +16,21 @@ export default function AccessMultiSites() {
     supabase
       .from("user_mama_access")
       .select("id, user_id, mama_id, role")
-      .eq("mama_id", mama_id)
-      .then(({ data }) => {
-        setRows(Array.isArray(data) ? data : []);
+      .eq("mama_id", mamaId)
+      .then(({ data, error }) => {
+        if (error) {
+          if (error.code === "42P01") {
+            toast.error("Table user_mama_access manquante");
+          } else {
+            toast.error(error.message);
+          }
+          setRows([]);
+        } else {
+          setRows(Array.isArray(data) ? data : []);
+        }
         setLoading(false);
       });
-  }, [mama_id]);
+  }, [mamaId]);
 
   return (
     <div className="p-4 space-y-4">

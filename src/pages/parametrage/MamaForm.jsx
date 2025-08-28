@@ -13,7 +13,6 @@ export default function MamaForm({ mama, onClose, onSaved }) {
   const { mama_id: myMama, role, loading: authLoading } = useAuth();
   const [values, setValues] = useState({
     nom: mama?.nom || "",
-    ville: mama?.ville || "",
     actif: mama?.actif ?? true,
   });
   const [saving, setSaving] = useState(false);
@@ -95,15 +94,6 @@ export default function MamaForm({ mama, onClose, onSaved }) {
           onChange={handleChange}
           required
           autoFocus
-        />
-      </div>
-      <div>
-        <label>Ville</label>
-        <Input
-          className="w-full"
-          name="ville"
-          value={values.ville}
-          onChange={handleChange}
         />
       </div>
       <div>

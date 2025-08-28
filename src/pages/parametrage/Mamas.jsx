@@ -29,7 +29,7 @@ export default function Mamas() {
 
   const fetchMamas = async () => {
     setLoading(true);
-    let query = supabase.from('mamas').select('id, nom, ville, actif');
+    let query = supabase.from('mamas').select('id, nom, actif');
     if (role !== 'superadmin') query = query.eq('id', myMama);
     const { data, error } = await query.order('nom', { ascending: true });
     if (!error) setMamas(data || []);
@@ -56,10 +56,8 @@ export default function Mamas() {
     setConfirmId(null);
   };
 
-  const filtered = mamas.filter(
-    (m) =>
-      m.nom?.toLowerCase().includes(search.toLowerCase()) ||
-      m.ville?.toLowerCase().includes(search.toLowerCase())
+  const filtered = mamas.filter((m) =>
+    m.nom?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -68,13 +66,13 @@ export default function Mamas() {
       <div className="flex gap-4 mb-4 items-end">
         <input
           className="input input-bordered w-64"
-          placeholder="Recherche nom, ville"
+          placeholder="Recherche nom"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
         {role === 'superadmin' && (
           <Button
-            onClick={() => setEditMama({ nom: '', ville: '', actif: true })}
+            onClick={() => setEditMama({ nom: '', actif: true })}
           >
             + Nouvel établissement
           </Button>
@@ -88,7 +86,6 @@ export default function Mamas() {
             <thead>
               <tr>
                 <th className="px-2 py-1">Nom</th>
-                <th className="px-2 py-1">Ville</th>
                 <th className="px-2 py-1">Actif</th>
                 <th className="px-2 py-1">Actions</th>
               </tr>
@@ -97,7 +94,6 @@ export default function Mamas() {
               {filtered.map((m) => (
                 <tr key={m.id}>
                   <td className="px-2 py-1">{m.nom}</td>
-                  <td className="px-2 py-1">{m.ville}</td>
                   <td className="px-2 py-1">
                     <span
                       className={
@@ -159,7 +155,7 @@ export default function Mamas() {
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="py-4 text-gray-400">
+                  <td colSpan={3} className="py-4 text-gray-400">
                     Aucun établissement trouvé.
                   </td>
                 </tr>

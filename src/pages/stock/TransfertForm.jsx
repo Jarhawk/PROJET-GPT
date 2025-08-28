@@ -13,6 +13,7 @@ export default function TransfertForm({ onClose, onSaved }) {
   const { myAccessibleZones } = useZones();
   const [zones, setZones] = useState([]);
   const zonesSafe = Array.isArray(zones) ? zones : [];
+  const productsSafe = Array.isArray(products) ? products : [];
 
   const [header, setHeader] = useState({
     zone_source_id: '',
@@ -128,7 +129,7 @@ export default function TransfertForm({ onClose, onSaved }) {
                       }
                     >
                       <option value="">Produit</option>
-                      {products.map((p) => (
+                      {productsSafe.map((p) => (
                         <option key={p.id} value={p.id}>
                           {p.nom}
                         </option>

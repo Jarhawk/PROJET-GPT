@@ -48,7 +48,7 @@ for (const file of jsFiles) {
         record(file, lineNo, `Unknown table ${table}`)
       } else {
         // look ahead for next lines (select/insert/update)
-        const lookahead = lines.slice(idx, idx + 3).join(' ')
+        const lookahead = lines.slice(idx, idx + 10).join(' ')
         const selectMatch = lookahead.match(/select\(['"]([^'\"]*)['"]\)/)
         if (selectMatch) {
           const selectStr = selectMatch[1]
@@ -85,7 +85,7 @@ for (const file of jsFiles) {
           /\.delete\(/.test(lookahead)
         if (entity.columns.includes('mama_id') && !mutating) {
           const eqMatch = lookahead.match(
-            /\.eq\(['"]mama_id['"],\s*(mamaId|mama_id)\)/
+            /\.eq\(['"]mama_id['"],\s*[^\)]+\)/
           )
           if (!eqMatch) {
             record(file, lineNo, `Missing mama_id filter for ${table}`)

@@ -4,6 +4,13 @@ import { vi, beforeEach, afterEach, test, expect } from 'vitest';
 import { supabase } from '@/lib/supabase';
 
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
+vi.mock('xlsx', () => ({
+  __esModule: true,
+  utils: { book_new: vi.fn(), book_append_sheet: vi.fn(), json_to_sheet: vi.fn() },
+  write: vi.fn(),
+}));
+vi.mock('file-saver', () => ({ saveAs: vi.fn() }));
+vi.mock('jspdf', () => ({ default: vi.fn() }));
 
 let useMenuDuJour;
 let upsertMock, insertMock, deleteMock, deleteQuery, fromSpy;
@@ -17,9 +24,7 @@ beforeEach(async () => {
 
   insertMock = vi.fn(() => Promise.resolve({ error: null }));
 
-  deleteQuery = {
-    eq: vi.fn()
-  };
+  deleteQuery = { eq: vi.fn() };
   deleteQuery.eq
     .mockReturnValueOnce(deleteQuery)
     .mockReturnValueOnce(Promise.resolve({ error: null }));
@@ -33,7 +38,7 @@ beforeEach(async () => {
 });
 
 afterEach(() => {
-  fromSpy.mockRestore();
+  fromSpy?.mockRestore();
 });
 
 test('createOrUpdateMenu upserts menu and inserts lines', async () => {
@@ -57,4 +62,3 @@ test('createOrUpdateMenu upserts menu and inserts lines', async () => {
     { menu_jour_id: 'menu1', fiche_id: 'f1', quantite: 2, mama_id: 'm1' },
   ]);
 });
-

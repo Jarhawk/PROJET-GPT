@@ -11,7 +11,11 @@ const queryObj = {
   then: (fn) => Promise.resolve(fn({ data: [], error: null })),
 };
 const fromMock = vi.fn(() => queryObj);
-vi.mock('@/lib/supabase', () => ({ default: { from: fromMock } }));
+vi.mock('@/lib/supabase', () => ({
+  __esModule: true,
+  supabase: { from: fromMock },
+  default: { from: fromMock },
+}));
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1', user: { id: 'u1' } }) }));
 
 let useValidations;

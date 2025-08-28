@@ -28,8 +28,9 @@ export function useAide() {
         setItems([]);
         return [];
       }
-      setItems(Array.isArray(data) ? data : []);
-      return data || [];
+      const rows = Array.isArray(data) ? data : [];
+      setItems(rows);
+      return rows;
     },
     [mama_id]
   );
@@ -52,10 +53,8 @@ export function useAide() {
         return { error };
       }
       setItems((arr) => {
-        if (Array.isArray(arr)) {
-          return [data, ...arr];
-        }
-        return [data];
+        const list = Array.isArray(arr) ? arr : [];
+        return [data, ...list];
       });
       return { data };
     },
@@ -82,10 +81,8 @@ export function useAide() {
         return { error };
       }
       setItems((arr) => {
-        if (Array.isArray(arr)) {
-          return arr.map((a) => (a.id === id ? data : a));
-        }
-        return [];
+        const list = Array.isArray(arr) ? arr : [];
+        return list.map((a) => (a.id === id ? data : a));
       });
       return { data };
     },
@@ -108,10 +105,8 @@ export function useAide() {
         return { error };
       }
       setItems((arr) => {
-        if (Array.isArray(arr)) {
-          return arr.filter((a) => a.id !== id);
-        }
-        return [];
+        const list = Array.isArray(arr) ? arr : [];
+        return list.filter((a) => a.id !== id);
       });
       return { success: true };
     },

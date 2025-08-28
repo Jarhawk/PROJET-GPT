@@ -25,7 +25,9 @@ export function useMenuDuJour() {
         "id, nom, date, prix_vente_ttc, tva, actif, fiches:menus_jour_fiches(fiche_id, quantite, fiche:fiches_techniques(id, nom, cout_par_portion))",
         { count: "exact" }
       )
-      .eq("mama_id", mama_id);
+      .eq("mama_id", mama_id)
+      .eq("fiches.mama_id", mama_id)
+      .eq("fiches.fiche.mama_id", mama_id);
     if (search) query = query.ilike("nom", `%${search}%`);
     if (date) query = query.eq("date", date);
     if (typeof actif === "boolean") query = query.eq("actif", actif);
@@ -33,21 +35,21 @@ export function useMenuDuJour() {
       .order("date", { ascending: false })
       .range(offset, offset + limit - 1);
     const rows = Array.isArray(data) ? data : [];
-    const withCost = rows
-      .map((m) => {
-          const cost = (m.fiches || []).reduce(
-            (s, f) => s + (Number(f.quantite || 1) * (Number(f.fiche?.cout_par_portion) || 0)),
-            0
-          );
-          return {
-            ...m,
-            prix_vente_ttc: m.prix_vente_ttc ? Number(m.prix_vente_ttc) : null,
-            tva: m.tva ? Number(m.tva) : null,
-            cout_total: cost,
-            marge: m.prix_vente_ttc ? ((Number(m.prix_vente_ttc) - cost) / Number(m.prix_vente_ttc)) * 100 : null,
-          };
-        })
-      : [];
+    const withCost = rows.map((m) => {
+      const cost = (m.fiches || []).reduce(
+        (s, f) => s + (Number(f.quantite || 1) * (Number(f.fiche?.cout_par_portion) || 0)),
+        0
+      );
+      return {
+        ...m,
+        prix_vente_ttc: m.prix_vente_ttc ? Number(m.prix_vente_ttc) : null,
+        tva: m.tva ? Number(m.tva) : null,
+        cout_total: cost,
+        marge: m.prix_vente_ttc
+          ? ((Number(m.prix_vente_ttc) - cost) / Number(m.prix_vente_ttc)) * 100
+          : null,
+      };
+    });
     setMenus(withCost);
     setTotal(typeof count === "number" ? count : withCost.length);
     setLoading(false);
@@ -140,6 +142,8 @@ export function useMenuDuJour() {
         "date, items:menus_jour_fiches(quantite, fiche:fiches_techniques(id, cout_par_portion))"
       )
       .eq("mama_id", mama_id)
+      .eq("items.mama_id", mama_id)
+      .eq("items.fiche.mama_id", mama_id)
       .gte("date", start.toISOString().slice(0, 10))
       .lte("date", end.toISOString().slice(0, 10))
       .order("date", { ascending: true });
@@ -162,6 +166,8 @@ export function useMenuDuJour() {
         "id, nom, date, items:menus_jour_fiches(id, fiche_id, quantite, fiche:fiches_techniques(id, nom, cout_par_portion))"
       )
       .eq("mama_id", mama_id)
+      .eq("items.mama_id", mama_id)
+      .eq("items.fiche.mama_id", mama_id)
       .eq("date", date)
       .single();
     if (errMenu && errMenu.code !== "PGRST116") { setError(errMenu); return {}; }

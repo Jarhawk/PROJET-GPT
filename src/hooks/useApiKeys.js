@@ -46,10 +46,8 @@ export function useApiKeys() {
     }
     if (data)
       setKeys((k) => {
-        if (Array.isArray(k)) {
-          return [data, ...k];
-        }
-        return [data];
+        const list = Array.isArray(k) ? k : [];
+        return [data, ...list];
       });
     setLoading(false);
     return { data };
@@ -70,10 +68,8 @@ export function useApiKeys() {
       return { error };
     }
     setKeys((k) => {
-      if (Array.isArray(k)) {
-        return k.map((key) => (key.id === id ? { ...key, revoked: true } : key));
-      }
-      return [];
+      const list = Array.isArray(k) ? k : [];
+      return list.map((key) => (key.id === id ? { ...key, revoked: true } : key));
     });
     setLoading(false);
     return { error: null };

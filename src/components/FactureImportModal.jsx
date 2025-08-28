@@ -38,6 +38,7 @@ export default function FactureImportModal({ open, onClose, onImport }) {
   const invalid = row => !row.produit || !row.quantite;
 
   const list = Array.isArray(rows) ? rows : [];
+  const headers = list[0] && typeof list[0] === 'object' ? Object.keys(list[0]) : [];
   return (
     <Dialog open={open} onOpenChange={isOpen => !isOpen && onClose?.()}>
       <DialogContent className="space-y-4">
@@ -60,32 +61,33 @@ export default function FactureImportModal({ open, onClose, onImport }) {
           <table className="w-full text-xs">
             <thead>
               <tr>
-                {list[0]
-                  ? Object.keys(list[0]).map(k => (
-                      <th
-                        key={k}
-                        className="px-2 py-1 text-left sticky top-0 bg-black/30"
-                      >
-                        {k}
-                      </th>
-                    ))
-                  : null}
+                {headers.map((k) => (
+                  <th
+                    key={k}
+                    className="px-2 py-1 text-left sticky top-0 bg-black/30"
+                  >
+                    {k}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {list.map((r, idx) => (
-                <tr key={idx} className={invalid(r) ? "bg-red-200/20" : ""}>
-                  {Object.keys(r).map(k => (
-                    <td key={k} className="p-1">
-                      <Input
-                        value={r[k]}
-                        onChange={e => handleChange(idx, k, e.target.value)}
-                        className="text-xs bg-transparent"
-                      />
-                    </td>
-                  ))}
-                </tr>
-              ))}
+              {list.map((r, idx) => {
+                const cols = r && typeof r === 'object' ? Object.keys(r) : [];
+                return (
+                  <tr key={idx} className={invalid(r) ? "bg-red-200/20" : ""}>
+                    {cols.map((k) => (
+                      <td key={k} className="p-1">
+                        <Input
+                          value={r[k]}
+                          onChange={(e) => handleChange(idx, k, e.target.value)}
+                          className="text-xs bg-transparent"
+                        />
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

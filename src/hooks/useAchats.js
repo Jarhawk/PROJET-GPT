@@ -66,10 +66,8 @@ export function useAchats() {
       return { error };
     }
     setAchats((a) => {
-      if (Array.isArray(a)) {
-        return [data, ...a];
-      }
-      return [data];
+      const list = Array.isArray(a) ? a : [];
+      return [data, ...list];
     });
     return { data };
   }
@@ -88,10 +86,8 @@ export function useAchats() {
       return { error };
     }
     setAchats((a) => {
-      if (Array.isArray(a)) {
-        return a.map((ac) => (ac.id === id ? data : ac));
-      }
-      return [];
+      const list = Array.isArray(a) ? a : [];
+      return list.map((ac) => (ac.id === id ? data : ac));
     });
     return { data };
   }
@@ -108,10 +104,8 @@ export function useAchats() {
       return { error };
     }
     setAchats((a) => {
-      if (Array.isArray(a)) {
-        return a.map((ac) => (ac.id === id ? { ...ac, actif: false } : ac));
-      }
-      return [];
+      const list = Array.isArray(a) ? a : [];
+      return list.map((ac) => (ac.id === id ? { ...ac, actif: false } : ac));
     });
     return { success: true };
   }

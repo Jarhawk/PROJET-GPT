@@ -14,6 +14,9 @@ export default function Transferts() {
   const { transferts, fetchTransferts } = useTransferts();
   const { zones, fetchZones } = useZones();
   const { products, fetchProducts } = useProducts();
+  const zonesSafe = Array.isArray(zones) ? zones : [];
+  const productsSafe = Array.isArray(products) ? products : [];
+  const transfertsSafe = Array.isArray(transferts) ? transferts : [];
   const [filters, setFilters] = useState({
     debut: "",
     fin: "",
@@ -62,7 +65,7 @@ export default function Transferts() {
           }
         >
           <option value="">Zone source</option>
-          {zones.map((z) => (
+          {zonesSafe.map((z) => (
             <option key={z.id} value={z.id}>
               {z.nom}
             </option>
@@ -77,7 +80,7 @@ export default function Transferts() {
           }
         >
           <option value="">Zone destination</option>
-          {zones.map((z) => (
+          {zonesSafe.map((z) => (
             <option key={z.id} value={z.id}>
               {z.nom}
             </option>
@@ -92,7 +95,7 @@ export default function Transferts() {
           }
         >
           <option value="">Produit</option>
-          {products.map((p) => (
+          {productsSafe.map((p) => (
             <option key={p.id} value={p.id}>
               {p.nom}
             </option>
@@ -112,7 +115,7 @@ export default function Transferts() {
             </tr>
           </thead>
           <tbody>
-            {transferts.map((t) => (
+            {transfertsSafe.map((t) => (
               <tr key={t.id}>
                 <td className="p-2">{t.date_transfert?.slice(0, 10)}</td>
                 <td className="p-2">{t.zone_source?.nom || ""}</td>

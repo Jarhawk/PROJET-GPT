@@ -32,10 +32,11 @@ export function useCostCenters() {
       .eq("mama_id", mama_id);
     if (search) query = query.ilike("nom", `%${search}%`);
     const { data, error } = await query.order("nom", { ascending: true });
-    setCostCenters(Array.isArray(data) ? data : []);
+    const rows = Array.isArray(data) ? data : [];
+    setCostCenters(rows);
     setLoading(false);
     if (error) setError(error);
-    return data || [];
+    return rows;
   }
 
   async function addCostCenter(values) {

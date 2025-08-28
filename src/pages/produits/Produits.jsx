@@ -17,9 +17,14 @@ export default function Produits() {
 
   const { familles = [] } = useFamilles();
   const { data: allSousFamilles = [] } = useSousFamilles();
+  const safeFamilles = Array.isArray(familles) ? familles : [];
+  const safeAllSousFamilles = Array.isArray(allSousFamilles) ? allSousFamilles : [];
   const sousFamilles = useMemo(
-    () => (familleId ? allSousFamilles.filter(sf => sf.famille_id === familleId) : allSousFamilles),
-    [familleId, allSousFamilles]
+    () =>
+      familleId
+        ? safeAllSousFamilles.filter(sf => sf.famille_id === familleId)
+        : safeAllSousFamilles,
+    [familleId, safeAllSousFamilles]
   );
 
   const { data, isLoading, error } = useProduits({
@@ -30,7 +35,7 @@ export default function Produits() {
     familleId: familleId || null,
     sousFamilleId: sousFamilleId || null,
   });
-  const produits = data?.data ?? [];
+  const produits = Array.isArray(data?.data) ? data.data : [];
   const total = data?.count ?? 0;
 
   useEffect(() => {
@@ -54,7 +59,9 @@ export default function Produits() {
           onChange={(e) => { setFamilleId(e.target.value); setSousFamilleId(''); setPage(1); }}
         >
           <option value="">Toutes les familles</option>
-          {familles.map(f => <option key={f.id} value={f.id}>{f.nom}</option>)}
+          {safeFamilles.map(f => (
+            <option key={f.id} value={f.id}>{f.nom}</option>
+          ))}
         </select>
         <select
           className="select"
@@ -62,7 +69,9 @@ export default function Produits() {
           onChange={(e) => { setSousFamilleId(e.target.value); setPage(1); }}
         >
           <option value="">Toutes les sous-familles</option>
-          {sousFamilles.map(sf => <option key={sf.id} value={sf.id}>{sf.nom}</option>)}
+          {sousFamilles.map(sf => (
+            <option key={sf.id} value={sf.id}>{sf.nom}</option>
+          ))}
         </select>
         <select
           className="select"

@@ -85,26 +85,28 @@ export function useFiches() {
       cout_par_portion: data.cout_par_portion ? Number(data.cout_par_portion) : null,
       cout_total: data.cout_total ? Number(data.cout_total) : null,
       portions: data.portions ? Number(data.portions) : null,
-      lignes: (data.lignes || []).map((l) => ({
-        id: l.id,
-        produit_id: l.produit_id,
-        sous_fiche_id: l.sous_fiche_id,
-        description: l.description,
-        quantite: l.quantite ? Number(l.quantite) : null,
-        produit_nom: l.produit?.nom,
-        unite_nom: l.produit?.unite?.nom,
-        pmp: l.produit?.pmp ? Number(l.produit.pmp) : null,
-        dernier_prix: l.produit?.dernier_prix ? Number(l.produit.dernier_prix) : null,
-        sous_fiche: l.sous_fiche
-          ? {
-              id: l.sous_fiche.id,
-              nom: l.sous_fiche.nom,
-              cout_par_portion: l.sous_fiche.cout_par_portion
-                ? Number(l.sous_fiche.cout_par_portion)
-                : null,
-            }
-          : null,
-      })),
+      lignes: Array.isArray(data?.lignes)
+        ? data.lignes.map((l) => ({
+            id: l.id,
+            produit_id: l.produit_id,
+            sous_fiche_id: l.sous_fiche_id,
+            description: l.description,
+            quantite: l.quantite ? Number(l.quantite) : null,
+            produit_nom: l.produit?.nom,
+            unite_nom: l.produit?.unite?.nom,
+            pmp: l.produit?.pmp ? Number(l.produit.pmp) : null,
+            dernier_prix: l.produit?.dernier_prix ? Number(l.produit.dernier_prix) : null,
+            sous_fiche: l.sous_fiche
+              ? {
+                  id: l.sous_fiche.id,
+                  nom: l.sous_fiche.nom,
+                  cout_par_portion: l.sous_fiche.cout_par_portion
+                    ? Number(l.sous_fiche.cout_par_portion)
+                    : null,
+                }
+              : null,
+          }))
+        : [],
     };
     return mapped;
   }
@@ -126,7 +128,7 @@ export function useFiches() {
       return { error: insertError };
     }
     const ficheId = data?.id ?? data?.[0]?.id;
-    if (lignes.length > 0) {
+    if (Array.isArray(lignes) && lignes.length > 0) {
       const toInsert = lignes.map(l => ({
         fiche_id: ficheId,
         produit_id: l.produit_id || null,
@@ -175,7 +177,7 @@ export function useFiches() {
       setError(deleteError);
       return { error: deleteError };
     }
-    if (lignes.length > 0) {
+    if (Array.isArray(lignes) && lignes.length > 0) {
       const toInsert = lignes.map(l => ({
         fiche_id: id,
         produit_id: l.produit_id || null,
@@ -247,8 +249,9 @@ export function useFiches() {
       return { error: insertError };
     }
     const newId = inserted.id;
-    if (lignes.length) {
-      const toInsert = lignes.map(l => ({
+    const lignesArr = Array.isArray(lignes) ? lignes : [];
+    if (lignesArr.length) {
+      const toInsert = lignesArr.map(l => ({
         fiche_id: newId,
         produit_id: l.produit_id || null,
         sous_fiche_id: l.sous_fiche_id || null,
@@ -270,14 +273,14 @@ export function useFiches() {
   }
 
   function exportFichesToExcel() {
-    const datas = (fiches || []).map(f => ({
+    const datas = Array.isArray(fiches) ? fiches.map(f => ({
       id: f.id,
       nom: f.nom,
       portions: f.portions,
       cout_total: f.cout_total,
       cout_par_portion: f.cout_par_portion,
       actif: f.actif,
-    }));
+    })) : [];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Fiches");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
@@ -286,12 +289,9 @@ export function useFiches() {
 
   function exportFichesToPDF() {
     const doc = new JSPDF();
-    const rows = (fiches || []).map(f => [
-      f.nom,
-      f.famille || "",
-      f.portions,
-      f.cout_par_portion,
-    ]);
+    const rows = Array.isArray(fiches)
+      ? fiches.map(f => [f.nom, f.famille || "", f.portions, f.cout_par_portion])
+      : [];
     doc.autoTable({ head: [["Nom", "Famille", "Portions", "Coût/portion"]], body: rows });
     doc.save("fiches_mamastock.pdf");
   }

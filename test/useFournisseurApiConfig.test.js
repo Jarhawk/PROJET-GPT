@@ -32,7 +32,9 @@ test('fetchConfig queries by composite key', async () => {
   const { result } = renderHook(() => useFournisseurApiConfig());
   await act(async () => { await result.current.fetchConfig('f1'); });
   expect(fromMock).toHaveBeenCalledWith('fournisseurs_api_config');
-  expect(queryObj.select).toHaveBeenCalledWith('*');
+  expect(queryObj.select).toHaveBeenCalledWith(
+    'fournisseur_id, mama_id, url, type_api, token, format_facture, actif, created_at'
+  );
   expect(queryObj.eq).toHaveBeenCalledWith('mama_id', 'm1');
   expect(queryObj.eq).toHaveBeenCalledWith('fournisseur_id', 'f1');
   expect(queryObj.maybeSingle).toHaveBeenCalled();
@@ -61,7 +63,10 @@ test('listConfigs applies filters and pagination', async () => {
     await result.current.listConfigs({ actif: true, page: 2, limit: 10 });
   });
   expect(fromMock).toHaveBeenCalledWith('fournisseurs_api_config');
-  expect(queryObj.select).toHaveBeenCalledWith('*, fournisseur:fournisseur_id(id, nom)', { count: 'exact' });
+  expect(queryObj.select).toHaveBeenCalledWith(
+    'fournisseur_id, mama_id, url, type_api, token, format_facture, actif, created_at, fournisseur:fournisseur_id(id, nom)',
+    { count: 'exact' }
+  );
   expect(queryObj.eq).toHaveBeenCalledWith('mama_id', 'm1');
   expect(queryObj.eq).toHaveBeenCalledWith('actif', true);
   expect(queryObj.range).toHaveBeenCalledWith(10, 19);

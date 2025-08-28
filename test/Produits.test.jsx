@@ -1,43 +1,36 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { render, screen } from '@testing-library/react';
-import { fireEvent } from '@testing-library/react';
-import { vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { vi } from 'vitest';
 
-let mockHook;
-vi.mock('@/hooks/useProductsView', () => ({
-  useProductsView: () => mockHook(),
-}));
+let mockProduits, mockFamilles, mockSousFamilles;
+vi.mock('@/hooks/data/useProduits', () => ({ useProduits: () => mockProduits() }));
+vi.mock('@/hooks/data/useFamilles', () => ({ useFamilles: () => mockFamilles() }));
+vi.mock('@/hooks/data/useSousFamilles', () => ({ useSousFamilles: () => mockSousFamilles() }));
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ hasAccess: () => true, mama_id: 'm1' })
+  useAuth: () => ({ hasAccess: () => true, mama_id: 'm1' }),
 }));
 
 import Produits from '@/pages/produits/Produits.jsx';
 
-test('toggle button calls hook', async () => {
-  const toggle = vi.fn();
-  mockHook = () => ({
-    products: [
-      {
-        id: '1',
-        nom: 'Test',
-        unite: { nom: 'kg' },
-        pmp: 1,
-        stock_theorique: 10,
-        actif: true,
-        zone_stock: { nom: 'Z' },
-      },
-    ],
-    total: 1,
-    fetchProducts: vi.fn(),
-    toggleProductActive: toggle,
+test('affiche la liste des produits', async () => {
+  mockProduits = () => ({
+    data: { data: [{ id: '1', nom: 'Test', unite: { nom: 'kg' }, pmp: 1 }], count: 1 },
+    isLoading: false,
+    error: null,
   });
+  mockFamilles = () => ({ familles: [], fetchFamilles: vi.fn() });
+  mockSousFamilles = () => ({ data: [] });
+
+  const qc = new QueryClient();
   render(
-    <MemoryRouter>
-      <Produits />
-    </MemoryRouter>
+    <QueryClientProvider client={qc}>
+      <MemoryRouter>
+        <Produits />
+      </MemoryRouter>
+    </QueryClientProvider>
   );
-  const button = await screen.findByText('Désactiver');
-  fireEvent.click(button);
-  expect(toggle).toHaveBeenCalledWith('1', false);
+
+  expect(await screen.findByText('Test')).toBeInTheDocument();
 });

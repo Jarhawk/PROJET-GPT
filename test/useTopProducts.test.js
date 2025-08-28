@@ -2,26 +2,39 @@
 import { renderHook, act } from '@testing-library/react';
 import { vi, beforeEach, test, expect } from 'vitest';
 
-const rpcMock = vi.fn(() => Promise.resolve({ data: [{ id: 'p1' }], error: null }));
-vi.mock('@/lib/supabase', () => ({ supabase: { rpc: rpcMock } }));
+const fromMock = vi.fn();
+
+vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
 
 let useTopProducts;
 
 beforeEach(async () => {
   ({ useTopProducts } = await import('@/hooks/useTopProducts'));
-  rpcMock.mockClear();
+  const rows = [
+    { produit_id: 'p1', quantite: 2, requisitions: { statut: 'réalisée' } },
+    { produit_id: 'p2', quantite: 1, requisitions: { statut: 'réalisée' } },
+    { produit_id: 'p1', quantite: 3, requisitions: { statut: 'réalisée' } },
+  ];
+  fromMock.mockReturnValue({
+    select: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    gte: vi.fn().mockReturnThis(),
+    lte: vi.fn().mockReturnThis(),
+    then: (resolve) => resolve({ data: rows, error: null }),
+  });
 });
 
-test('fetchTop calls RPC with params', async () => {
+test('fetchTop agrège les quantités par produit', async () => {
   const { result } = renderHook(() => useTopProducts());
+  let top;
   await act(async () => {
-    await result.current.fetchTop({ debut: '2024-01-01', fin: '2024-01-31', limit: 3 });
+    const res = await result.current.fetchTop({ limit: 2 });
+    top = res.data;
   });
-  expect(rpcMock).toHaveBeenCalledWith('top_produits', {
-    mama_id_param: 'm1',
-    debut_param: '2024-01-01',
-    fin_param: '2024-01-31',
-    limit_param: 3,
-  });
+  expect(fromMock).toHaveBeenCalledWith('requisition_lignes');
+  expect(top).toEqual([
+    { produit_id: 'p1', quantite: 5 },
+    { produit_id: 'p2', quantite: 1 },
+  ]);
 });

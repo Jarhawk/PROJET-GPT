@@ -27,9 +27,13 @@ export function useTransferts() {
       let q = supabase
         .from("transferts")
         .select(
-          "id, date_transfert, motif, zone_source:zones_stock!fk_transferts_zone_source_id(id, nom), zone_destination:zones_stock!fk_transferts_zone_dest_id(id, nom), lignes:transfert_lignes(id, produit_id, quantite, produit:produits(id, nom))"
+          "id, date_transfert, motif, zone_source:zones_stock!fk_transferts_zone_source_id(id, nom, mama_id), zone_destination:zones_stock!fk_transferts_zone_dest_id(id, nom, mama_id), lignes:transfert_lignes(id, produit_id, quantite, mama_id, produit:produits(id, nom, mama_id))"
         )
         .eq("mama_id", mama_id)
+        .eq("zone_source.mama_id", mama_id)
+        .eq("zone_destination.mama_id", mama_id)
+        .eq("lignes.mama_id", mama_id)
+        .eq("lignes.produit.mama_id", mama_id)
         .order("date_transfert", { ascending: false });
       if (debut) q = q.gte("date_transfert", debut);
       if (fin) q = q.lte("date_transfert", fin);
@@ -42,8 +46,9 @@ export function useTransferts() {
         setError(error);
         return [];
       }
-      setTransferts(Array.isArray(data) ? data : []);
-      return data || [];
+      const rows = Array.isArray(data) ? data : [];
+      setTransferts(rows);
+      return rows;
     },
     [mama_id]
   );
@@ -102,9 +107,13 @@ export function useTransferts() {
       const { data, error } = await supabase
         .from("transferts")
         .select(
-          "id, date_transfert, motif, zone_source:zones_stock!fk_transferts_zone_source_id(id, nom), zone_destination:zones_stock!fk_transferts_zone_dest_id(id, nom), lignes:transfert_lignes(id, quantite, produit:produits(id, nom))"
+          "id, date_transfert, motif, zone_source:zones_stock!fk_transferts_zone_source_id(id, nom, mama_id), zone_destination:zones_stock!fk_transferts_zone_dest_id(id, nom, mama_id), lignes:transfert_lignes(id, quantite, mama_id, produit:produits(id, nom, mama_id))"
         )
         .eq("mama_id", mama_id)
+        .eq("zone_source.mama_id", mama_id)
+        .eq("zone_destination.mama_id", mama_id)
+        .eq("lignes.mama_id", mama_id)
+        .eq("lignes.produit.mama_id", mama_id)
         .eq("id", id)
         .single();
       setLoading(false);

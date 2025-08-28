@@ -31,7 +31,7 @@ export function useDashboard() {
     try {
       const { data: produitsRaw, error: errorProd } = await supabase
         .from('v_produits_dernier_prix')
-        .select('produit_id:id, nom, famille, unite, stock_reel, stock_min, mama_id')
+        .select('id:produit_id, nom, famille, unite, stock_reel, stock_min, mama_id')
         .eq('mama_id', mama_id);
       if (errorProd) throw errorProd;
       const { data: pmpData } = await supabase
@@ -42,9 +42,12 @@ export function useDashboard() {
         .from('v_stocks')
         .select('produit_id, stock')
         .eq('mama_id', mama_id);
-      const pmpMap = Object.fromEntries((Array.isArray(pmpData) ? pmpData : []).map(p => [p.produit_id, p.pmp]));
-      const stockMap = Object.fromEntries((Array.isArray(stockData) ? stockData : []).map(s => [s.produit_id, s.stock]));
-      produits = (Array.isArray(produitsRaw) ? produitsRaw : []).map(p => ({
+      const pmpArr = Array.isArray(pmpData) ? pmpData : [];
+      const stockArr = Array.isArray(stockData) ? stockData : [];
+      const pmpMap = Object.fromEntries(pmpArr.map(p => [p.produit_id, p.pmp]));
+      const stockMap = Object.fromEntries(stockArr.map(s => [s.produit_id, s.stock]));
+      const produitsBruts = Array.isArray(produitsRaw) ? produitsRaw : [];
+      produits = produitsBruts.map(p => ({
         ...p,
         pmp: pmpMap[p.id] ?? 0,
         stock_theorique: stockMap[p.id] ?? 0,
@@ -59,7 +62,10 @@ export function useDashboard() {
     try {
       const { data: mouvementsRaw, error: errorMouv } = await supabase
         .from('requisition_lignes')
-        .select('quantite, produit_id, requisitions!inner(date_requisition,mama_id,statut)')
+        .select(
+          'quantite, produit_id, requisitions!inner(date_requisition,mama_id,statut)'
+        )
+        .eq('mama_id', mama_id)
         .eq('requisitions.mama_id', mama_id);
       if (errorMouv) throw errorMouv;
       mouvements = (Array.isArray(mouvementsRaw) ? mouvementsRaw : [])
@@ -78,16 +84,21 @@ export function useDashboard() {
     }
 
     // 3. Statistiques de base
-    const stock_valorise = produits.reduce((sum, p) => sum + (Number(p.pmp) || 0) * (Number(p.stock_reel) || 0), 0);
+    const produitsArr = Array.isArray(produits) ? produits : [];
+    const mouvementsArr = Array.isArray(mouvements) ? mouvements : [];
+    const stock_valorise = produitsArr.reduce(
+      (sum, p) => sum + (Number(p.pmp) || 0) * (Number(p.stock_reel) || 0),
+      0
+    );
     const moisCourant = new Date().toISOString().slice(0, 7);
-    const conso_mois = mouvements
-      .filter(m => m.date && m.date.startsWith(moisCourant) && m.type === "sortie")
+    const conso_mois = mouvementsArr
+      .filter((m) => m.date && m.date.startsWith(moisCourant) && m.type === 'sortie')
       .reduce((sum, m) => sum + (Number(m.quantite) || 0), 0);
-    const nb_mouvements = mouvements.length;
+    const nb_mouvements = mouvementsArr.length;
     setStats({ stock_valorise, conso_mois, nb_mouvements, ca_fnb: caFnbInput });
 
     // 4. Top produits consommés calculés côté client
-    const topCounts = mouvements
+    const topCounts = mouvementsArr
       .filter((m) => m.type === 'sortie')
       .reduce((acc, m) => {
         acc[m.produit_id] = (acc[m.produit_id] || 0) + (Number(m.quantite) || 0);
@@ -101,23 +112,26 @@ export function useDashboard() {
 
     // 5. Food cost global & par famille
     const ca_fnb = Number(caFnbInput) || 1;
-    const familles = [...new Set(produits.map(p => p.famille).filter(Boolean))];
+    const familles = Array.isArray(produitsArr)
+      ? [...new Set(produitsArr.map((p) => p.famille).filter(Boolean))]
+      : [];
+    const famillesArr = Array.isArray(familles) ? familles : [];
     let consoByFamille = {};
-    familles.forEach(fam => {
-      const ids = produits.filter(p => p.famille === fam).map(p => p.id);
-      const total = mouvements
-        .filter(m => ids.includes(m.produit_id) && m.date?.startsWith(moisCourant) && m.type === "sortie")
+    famillesArr.forEach((fam) => {
+      const ids = produitsArr.filter((p) => p.famille === fam).map((p) => p.id);
+      const total = mouvementsArr
+        .filter((m) => ids.includes(m.produit_id) && m.date?.startsWith(moisCourant) && m.type === 'sortie')
         .reduce((sum, m) => sum + (Number(m.quantite) || 0), 0);
       consoByFamille[fam] = total;
     });
-    const consoAlim = familles.includes("Alimentaire")
-      ? consoByFamille["Alimentaire"] || 0
+    const consoAlim = famillesArr.includes('Alimentaire')
+      ? consoByFamille['Alimentaire'] || 0
       : Object.values(consoByFamille).reduce((sum, v) => sum + v, 0);
 
     setFoodCostGlobal(ca_fnb ? consoAlim / ca_fnb : 0);
 
     setFoodCostParFamille(
-      (familles ?? []).map(fam => ({
+      famillesArr.map((fam) => ({
         famille: fam,
         food_cost: ca_fnb ? (consoByFamille[fam] || 0) / ca_fnb : 0,
       }))
@@ -130,8 +144,8 @@ export function useDashboard() {
     });
 
     // 7. Évolution valorisation stock (par mois, 12 mois)
-    let moisArray = [];
-    let evolutionStockData = [];
+    const moisArray = [];
+    const evolutionStockData = [];
     for (let i = 11; i >= 0; i--) {
       const d = new Date();
       d.setMonth(d.getMonth() - i);
@@ -144,20 +158,21 @@ export function useDashboard() {
     }
     setEvolutionStock(evolutionStockData);
 
+    const moisArr = Array.isArray(moisArray) ? moisArray : [];
     // 8. Évolution consommation (par mois, 12 mois)
-    let evolutionConsoData = moisArray.map(mois => ({
+    const evolutionConsoData = moisArr.map((mois) => ({
       mois,
-      conso: mouvements
-        .filter(m => m.date && m.date.startsWith(mois) && m.type === "sortie")
-        .reduce((sum, m) => sum + (Number(m.quantite) || 0), 0)
+      conso: mouvementsArr
+        .filter((m) => m.date && m.date.startsWith(mois) && m.type === 'sortie')
+        .reduce((sum, m) => sum + (Number(m.quantite) || 0), 0),
     }));
     setEvolutionConso(evolutionConsoData);
 
     // 9. Évolution food cost
-    let evolFoodCost = moisArray.map(mois => {
+    const evolFoodCost = moisArr.map((mois) => {
       const caDummy = ca_fnb;
-      const conso = mouvements
-        .filter(m => m.date?.startsWith(mois) && m.type === "sortie")
+      const conso = mouvementsArr
+        .filter((m) => m.date?.startsWith(mois) && m.type === 'sortie')
         .reduce((sum, m) => sum + (Number(m.quantite) || 0), 0);
       return { mois, food_cost: caDummy ? conso / caDummy : 0 };
     });
@@ -165,10 +180,11 @@ export function useDashboard() {
 
     // 10. Alertes stocks bas
     setAlertesStockBas(
-      produits.filter(p =>
-        (typeof p.stock_min === "number") &&
-        typeof p.stock_reel === "number" &&
-        p.stock_reel < p.stock_min
+      produitsArr.filter(
+        (p) =>
+          typeof p.stock_min === 'number' &&
+          typeof p.stock_reel === 'number' &&
+          p.stock_reel < p.stock_min
       )
     );
 

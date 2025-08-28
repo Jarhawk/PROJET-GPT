@@ -82,7 +82,8 @@ export default function FactureLigne({
     });
   }
 
-  const excludeIdsSameZone = allLines
+  const linesArr = Array.isArray(allLines) ? allLines : [];
+  const excludeIdsSameZone = linesArr
     .filter(
       (l) =>
         l.id !== line.id && (l.zone_id ?? null) === (line.zone_id ?? null) && !!l.produit_id
@@ -216,9 +217,9 @@ export default function FactureLigne({
         <SelectTrigger className="w-44">
           <SelectValue placeholder="Zone (optionnel)" />
         </SelectTrigger>
-        <SelectContent>
+          <SelectContent>
           <SelectItem value="__none__">Aucune</SelectItem>
-          {zones.map((z) => (
+          {(Array.isArray(zones) ? zones : []).map((z) => (
             <SelectItem key={z.id} value={z.id}>
               {z.nom}
             </SelectItem>

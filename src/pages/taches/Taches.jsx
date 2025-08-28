@@ -96,7 +96,7 @@ export default function Taches() {
           className="form-input"
         >
           <option value="">-- Assigné --</option>
-          {users.map(u => (
+          {(Array.isArray(users) ? users : []).map(u => (
             <option key={u.id} value={u.id}>
               {u.nom}
             </option>
@@ -134,7 +134,7 @@ export default function Taches() {
               </tr>
             </thead>
             <tbody>
-              {taches.map(t => (
+              {(Array.isArray(taches) ? taches : []).map(t => (
                 <tr key={t.id} className="border-t">
                   <td className="px-2 py-1">{t.statut}</td>
                   <td className="px-2 py-1">
@@ -145,14 +145,14 @@ export default function Taches() {
                   <td className="px-2 py-1">{t.priorite}</td>
                   <td className="px-2 py-1">{t.date_echeance}</td>
                   <td className="px-2 py-1">
-                    {(t.utilisateurs_taches || [])
-                      .map(a => a.utilisateur?.nom)
-                      .filter(Boolean)
+                    {(Array.isArray(t.utilisateurs_taches)
+                      ? t.utilisateurs_taches.map(a => a.utilisateur?.nom).filter(Boolean)
+                      : [])
                       .join(", ")}
                   </td>
                 </tr>
               ))}
-              {taches.length === 0 && !loading && (
+              {(!Array.isArray(taches) || taches.length === 0) && !loading && (
                 <tr>
                   <td colSpan="5" className="py-4 text-center text-gray-500">
                     Aucune tâche

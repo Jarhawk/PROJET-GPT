@@ -1,5 +1,5 @@
 import { useAuth } from '@/hooks/useAuth';
-import supabase from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 
 export default function useValidations() {
   const { mama_id, user } = useAuth();
@@ -12,7 +12,7 @@ export default function useValidations() {
       .eq('mama_id', mama_id)
       .eq('actif', true)
       .order('created_at', { ascending: false });
-    return data || [];
+    return Array.isArray(data) ? data : [];
   }
 
   async function addRequest(payload) {

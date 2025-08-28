@@ -30,8 +30,9 @@ export function useCostingCarte() {
 
         const { data: rows, error } = await query.order('nom')
         if (error) throw error
-        setData(rows || [])
-        return rows || []
+        const list = Array.isArray(rows) ? rows : []
+        setData(list)
+        return list
       } catch (e) {
         setError(e)
         setData([])
@@ -59,17 +60,19 @@ export function useCostingCarte() {
   )
 
   const exportExcel = useCallback((rows) => {
+    const list = Array.isArray(rows) ? rows : []
     const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Costing')
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(list), 'Costing')
     XLSX.writeFile(wb, 'costing_carte.xlsx')
   }, [])
 
   const exportPdf = useCallback((rows) => {
+    const list = Array.isArray(rows) ? rows : []
     const doc = new JSPDF()
     const headers = [
       ['Nom fiche', 'Type', 'Coût/portion', 'Prix vente', 'Marge €', 'Marge %', 'Food cost %'],
     ]
-    const body = rows.map((r) => [
+    const body = list.map((r) => [
       r.nom,
       r.type,
       r.cout_par_portion ?? '',

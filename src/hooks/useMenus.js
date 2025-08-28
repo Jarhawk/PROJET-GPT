@@ -42,7 +42,8 @@ export function useMenus() {
         "id, nom, date, actif, fiches:menu_fiches(fiche_id, fiche:fiches_techniques(id, nom, cout_par_portion))",
         { count: "exact" }
       )
-      .eq("mama_id", mama_id);
+      .eq("mama_id", mama_id)
+      .eq("fiches.mama_id", mama_id);
 
     if (search) query = query.ilike("nom", `%${search}%`);
     if (date) query = query.eq("date", date);
@@ -56,17 +57,19 @@ export function useMenus() {
     const rows = Array.isArray(data)
       ? data.map((m) => ({
           ...m,
-          fiches: (m.fiches || []).map((f) => ({
-            fiche_id: f.fiche_id,
-            fiche: f.fiche
-              ? {
-                  ...f.fiche,
-                  cout_par_portion: f.fiche.cout_par_portion
-                    ? Number(f.fiche.cout_par_portion)
-                    : null,
-                }
-              : null,
-          })),
+          fiches: Array.isArray(m.fiches)
+            ? m.fiches.map((f) => ({
+                fiche_id: f.fiche_id,
+                fiche: f.fiche
+                  ? {
+                      ...f.fiche,
+                      cout_par_portion: f.fiche.cout_par_portion
+                        ? Number(f.fiche.cout_par_portion)
+                        : null,
+                    }
+                  : null,
+              }))
+            : [],
         }))
       : [];
     setMenus(rows);
@@ -146,24 +149,27 @@ export function useMenus() {
       )
       .eq("id", id)
       .eq("mama_id", mama_id)
+      .eq("fiches.mama_id", mama_id)
       .single();
     setLoading(false);
     if (error) { setError(error); return null; }
     const mapped = {
       ...data,
-      fiches: (data?.fiches || []).map((f) => ({
-        fiche_id: f.fiche_id,
-        fiche: f.fiche
-          ? {
-              ...f.fiche,
-              cout_total: f.fiche.cout_total ? Number(f.fiche.cout_total) : null,
-              cout_par_portion: f.fiche.cout_par_portion
-                ? Number(f.fiche.cout_par_portion)
-                : null,
-              portions: f.fiche.portions ? Number(f.fiche.portions) : null,
-            }
-          : null,
-      })),
+      fiches: Array.isArray(data?.fiches)
+        ? data.fiches.map((f) => ({
+            fiche_id: f.fiche_id,
+            fiche: f.fiche
+              ? {
+                  ...f.fiche,
+                  cout_total: f.fiche.cout_total ? Number(f.fiche.cout_total) : null,
+                  cout_par_portion: f.fiche.cout_par_portion
+                    ? Number(f.fiche.cout_par_portion)
+                    : null,
+                  portions: f.fiche.portions ? Number(f.fiche.portions) : null,
+                }
+              : null,
+          }))
+        : [],
     };
     return mapped;
   }
@@ -200,14 +206,14 @@ export function useMenus() {
 
   // 7. Export Excel
   function exportMenusToExcel() {
-    const datas = (menus || []).map(m => ({
+    const datas = Array.isArray(menus) ? menus.map(m => ({
       id: m.id,
       nom: m.nom,
       date: m.date,
       actif: m.actif,
       fiches: Array.isArray(m.fiches) ? m.fiches.map(f => f.fiche?.nom).join(", ") : "",
       mama_id: m.mama_id,
-    }));
+    })) : [];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Menus");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });

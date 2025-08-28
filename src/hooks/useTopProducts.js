@@ -9,6 +9,7 @@ export function useTopProducts() {
     let query = supabase
       .from('requisition_lignes')
       .select('produit_id, quantite, requisitions!inner(date_requisition, mama_id, statut)')
+      .eq('mama_id', mama_id)
       .eq('requisitions.mama_id', mama_id);
 
     if (debut) query = query.gte('requisitions.date_requisition', debut);
@@ -17,8 +18,8 @@ export function useTopProducts() {
     const { data, error } = await query;
     if (error) return { data: null, error };
 
-    const mouvements = (Array.isArray(data) ? data : [])
-      .filter(m => m.requisitions?.statut === 'réalisée');
+    const rows = Array.isArray(data) ? data : [];
+    const mouvements = rows.filter(m => m.requisitions?.statut === 'réalisée');
 
     const counts = mouvements.reduce((acc, m) => {
       acc[m.produit_id] = (acc[m.produit_id] || 0) + (Number(m.quantite) || 0);

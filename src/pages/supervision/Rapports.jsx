@@ -60,7 +60,7 @@ export default function Rapports() {
         <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-2">
           <Select value={filters.module} onChange={(e) => setFilters({ ...filters, module: e.target.value })}>
             <option value="">Module</option>
-            {MODULES.map((m) => (
+            {(Array.isArray(MODULES) ? MODULES : []).map((m) => (
               <option key={m} value={m}>
                 {m}
               </option>
@@ -68,7 +68,7 @@ export default function Rapports() {
           </Select>
           <Select value={filters.type} onChange={(e) => setFilters({ ...filters, type: e.target.value })}>
             <option value="">Format</option>
-            {FORMATS.map((f) => (
+            {(Array.isArray(FORMATS) ? FORMATS : []).map((f) => (
               <option key={f} value={f}>
                 {f}
               </option>
@@ -94,7 +94,7 @@ export default function Rapports() {
             </tr>
           </thead>
           <tbody>
-            {rapports.map((r) => (
+            {(Array.isArray(rapports) ? rapports : []).map((r) => (
               <tr key={r.id}>
                 <td className="border px-2 py-1">{r.module}</td>
                 <td className="border px-2 py-1">{r.type}</td>
@@ -125,14 +125,14 @@ export default function Rapports() {
           <form onSubmit={handleGenerate} className="flex flex-col gap-2">
             <Select value={gen.module} onChange={(e) => setGen({ ...gen, module: e.target.value })}>
               <option value="">Module</option>
-              {MODULES.map((m) => (
+              {(Array.isArray(MODULES) ? MODULES : []).map((m) => (
                 <option key={m} value={m}>
                   {m}
                 </option>
               ))}
             </Select>
             <Select value={gen.type} onChange={(e) => setGen({ ...gen, type: e.target.value })}>
-              {FORMATS.map((f) => (
+              {(Array.isArray(FORMATS) ? FORMATS : []).map((f) => (
                 <option key={f} value={f}>
                   {f}
                 </option>

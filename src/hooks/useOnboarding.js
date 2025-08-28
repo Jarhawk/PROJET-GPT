@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import supabase from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function useOnboarding() {
@@ -13,7 +13,7 @@ export default function useOnboarding() {
       .eq('user_id', user_id)
       .eq('mama_id', mama_id)
       .order('created_at', { ascending: true });
-    return data?.[0] || null;
+    return Array.isArray(data) ? data[0] || null : null;
   }
 
   async function startOnboarding() {

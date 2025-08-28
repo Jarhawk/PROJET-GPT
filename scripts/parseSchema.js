@@ -61,11 +61,14 @@ for (const line of lines) {
   const tgtTable = cells[6]
   const tgtColumn = cells[7]
   if (!tables[srcTable]) tables[srcTable] = { columns: [], foreignKeys: [] }
-  tables[srcTable].foreignKeys.push({
-    name: fkName,
-    column: srcColumn,
-    references: { table: tgtTable, column: tgtColumn },
-  })
+  const existing = tables[srcTable].foreignKeys.find((fk) => fk.name === fkName)
+  if (!existing) {
+    tables[srcTable].foreignKeys.push({
+      name: fkName,
+      column: srcColumn,
+      references: { table: tgtTable, column: tgtColumn },
+    })
+  }
 }
 
 // ----------------------
@@ -101,6 +104,16 @@ if (Object.keys(rpcs).length === 0) {
   } catch {
     // ignore if file missing or invalid
   }
+}
+
+// Manually add RPCs absent from the txt description but used by the front
+const manualRpcs = {
+  move_zone_products: ['p_mama', 'p_src_zone', 'p_dest_zone', 'p_remove_src'],
+  copy_zone_products: ['p_mama', 'p_src_zone', 'p_dest_zone', 'p_overwrite'],
+  merge_zone_products: ['p_mama', 'p_src_zone', 'p_dest_zone']
+}
+for (const [name, params] of Object.entries(manualRpcs)) {
+  if (!rpcs[name]) rpcs[name] = { params }
 }
 
 const out = { tables, rpcs }

@@ -26,15 +26,24 @@ export default function StatsFiches() {
     if (!mama_id || !isAuthenticated || authLoading) return;
     setLoading(true);
     Promise.all([
-      supabase.from("fiches_techniques").select("*").eq("mama_id", mama_id),
+      supabase
+        .from("fiches_techniques")
+        .select("id, nom, famille, actif, cout_total, cout_portion")
+        .eq("mama_id", mama_id),
       supabase
         .from("familles")
         .select("nom")
         .eq("mama_id", mama_id),
     ]).then(([ficheRes, familleRes]) => {
-      if (ficheRes.error) toast.error("Erreur chargement : " + ficheRes.error.message);
-      else setFiches(ficheRes.data || []);
-      setFamilles((familleRes.data || []).map(f => f.nom));
+      if (ficheRes.error)
+        toast.error("Erreur chargement : " + ficheRes.error.message);
+      else
+        setFiches(Array.isArray(ficheRes.data) ? ficheRes.data : []);
+      setFamilles(
+        Array.isArray(familleRes.data)
+          ? familleRes.data.map((f) => f.nom)
+          : []
+      );
       setLoading(false);
     });
   }, [mama_id, isAuthenticated, authLoading]);
@@ -44,13 +53,15 @@ export default function StatsFiches() {
   }, [selectedFiche?.id, mama_id, fetchFicheCoutHistory]);
 
   // Graphiques
-  const repartFamille = (familles ?? []).map(f => ({
-    name: f,
-    value: fiches.filter(fi => fi.famille === f).length,
-  })).filter(f => f.value > 0);
+  const safeFamilles = Array.isArray(familles) ? familles : [];
+  const safeFiches = Array.isArray(fiches) ? fiches : [];
 
-  const fichesSortedByCout = fiches
-    .map(f => ({
+  const repartFamille = safeFamilles
+    .map((f) => ({ name: f, value: safeFiches.filter((fi) => fi.famille === f).length }))
+    .filter((f) => f.value > 0);
+
+  const fichesSortedByCout = safeFiches
+    .map((f) => ({
       nom: f.nom,
       cout: Number(f.cout_total) || 0,
       actif: f.actif,
@@ -60,15 +71,20 @@ export default function StatsFiches() {
     .slice(0, 10);
 
   const repActif = [
-    { name: "Actives", value: fiches.filter(f => f.actif).length },
-    { name: "Inactives", value: fiches.filter(f => !f.actif).length },
+    { name: "Actives", value: safeFiches.filter((f) => f.actif).length },
+    { name: "Inactives", value: safeFiches.filter((f) => !f.actif).length },
   ];
 
   // Alertes
   const alertes = [];
-  fiches.forEach(f => {
-    if (Number(f.cout_total) > 500) alertes.push({ type: "danger", msg: `Fiche "${f.nom}" : coût matière élevé (${Number(f.cout_total).toFixed(2)} €)` });
-    if (!f.actif) alertes.push({ type: "warn", msg: `Fiche "${f.nom}" est inactive.` });
+  safeFiches.forEach((f) => {
+    if (Number(f.cout_total) > 500)
+      alertes.push({
+        type: "danger",
+        msg: `Fiche "${f.nom}" : coût matière élevé (${Number(f.cout_total).toFixed(2)} €)`,
+      });
+    if (!f.actif)
+      alertes.push({ type: "warn", msg: `Fiche "${f.nom}" est inactive.` });
     // Ajoute d'autres alertes métier ici
   });
 

@@ -18,7 +18,7 @@ function AuthProvider({ children }) {
   const navigate = useNavigate()
 
   async function loadProfile(sess) {
-    if (!sess) { setUserData(null); return }
+    if (!supabase || !sess) { setUserData(null); return }
     const mamaId = sess.user?.user_metadata?.mama_id
     let query = supabase
       .from('utilisateurs')
@@ -33,7 +33,7 @@ function AuthProvider({ children }) {
   }
 
   useEffect(() => {
-    if (supabaseInitError || initRef.current) return
+    if (supabaseInitError || !supabase || initRef.current) return
     initRef.current = true
     if (import.meta.env.DEV) console.debug('[auth] init')
     const init = async () => {

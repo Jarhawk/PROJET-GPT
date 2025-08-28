@@ -14,7 +14,9 @@ export default function TacheForm({ task }) {
   const [form, setForm] = useState({
     titre: task?.titre || "",
     description: task?.description || "",
-    assignes: task?.utilisateurs_taches?.map(a => a.utilisateur_id) || [],
+    assignes: Array.isArray(task?.utilisateurs_taches)
+      ? task.utilisateurs_taches.map(a => a.utilisateur_id)
+      : [],
     priorite: task?.priorite || "moyenne",
     date_echeance: task?.date_echeance || "",
     statut: task?.statut || "a_faire",
@@ -86,7 +88,7 @@ export default function TacheForm({ task }) {
             onChange={handleChange}
             className="input w-full"
           >
-            {users.map(u => (
+            {(Array.isArray(users) ? users : []).map(u => (
               <option key={u.id} value={u.id}>
                 {u.nom}
               </option>

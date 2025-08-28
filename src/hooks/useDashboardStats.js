@@ -43,11 +43,11 @@ export function useDashboardStats(options = {}) {
           .eq('mama_id', mama_id);
         if (lastErr) throw lastErr;
 
-        const lastMap = new Map(
-          (Array.isArray(lastData) ? lastData : []).map((r) => [r.produit_id, r.date_livraison])
-        );
+        const lastRows = Array.isArray(lastData) ? lastData : [];
+        const lastMap = new Map(lastRows.map((r) => [r.produit_id, r.date_livraison]));
 
-        const rows = (Array.isArray(produitsData) ? produitsData : []).map((p) => ({
+        const produitsRows = Array.isArray(produitsData) ? produitsData : [];
+        const rows = produitsRows.map((p) => ({
           produit_id: p.id,
           nom: p.nom,
           stock_reel: p.stock_reel,

@@ -11,6 +11,7 @@ export default function FactureTable({
   onToggleActive,
   onArchive,
 }) {
+  const rows = Array.isArray(factures) ? factures : [];
   return (
     <ListingContainer className="mb-4">
       <Motion.table
@@ -30,7 +31,7 @@ export default function FactureTable({
           </tr>
         </thead>
         <tbody>
-          {factures.map(facture => (
+          {rows.map((facture) => (
             <FactureRow
               key={facture.id}
               facture={facture}

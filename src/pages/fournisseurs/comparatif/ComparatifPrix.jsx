@@ -26,7 +26,8 @@ export default function ComparatifPrix() {
           .order("nom", { ascending: true });
 
         if (error) throw error;
-        setProduits(data || []);
+        const rows = Array.isArray(data) ? data : [];
+        setProduits(rows);
       } catch (err) {
         console.error("Erreur chargement produits :", err.message);
         setError(err);
@@ -63,7 +64,7 @@ export default function ComparatifPrix() {
         ariaLabel="Sélection produit"
       >
         <option value="">-- Choisir un produit --</option>
-        {produits.map((p) => (
+        {(Array.isArray(produits) ? produits : []).map((p) => (
           <option key={p.id} value={p.id}>
             {p.nom}
           </option>

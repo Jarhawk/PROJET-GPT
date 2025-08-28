@@ -13,17 +13,19 @@ export default function SupervisionGroupe() {
 
   const fetchStats = useCallback(async () => {
     setLoading(true);
-    const ids = mamas.map((m) => m.id);
-    const { data } = await supabase.rpc("stats_multi_mamas", { mama_ids: ids });
-    setStats(Array.isArray(data) ? data : []);
+    const { data } = await supabase.rpc("stats_multi_mamas");
+    const rows = Array.isArray(data) ? data : [];
+    setStats(rows);
     setLoading(false);
-  }, [mamas]);
+  }, []);
 
   useEffect(() => {
-    if (mamas.length > 0) fetchStats();
+    const mamaList = Array.isArray(mamas) ? mamas : [];
+    if (mamaList.length > 0) fetchStats();
   }, [mamas, fetchStats]);
 
-  const display = stats.length ? stats : mamas.map((m) => ({ ...m, mama_id: m.id }));
+  const mamaList = Array.isArray(mamas) ? mamas : [];
+  const display = stats.length ? stats : mamaList.map((m) => ({ ...m, mama_id: m.id }));
 
   return (
     <div className="p-6 flex justify-center">

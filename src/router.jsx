@@ -9,26 +9,27 @@ import PageSkeleton from '@/components/ui/PageSkeleton';
 
 const modules = Array.isArray(MODULES) ? MODULES : [];
 
-export const routePreloadMap = Object.fromEntries(
-  modules.map(m => [m.path, m.element.preload])
-);
+export const routePreloadMap = Array.isArray(modules)
+  ? Object.fromEntries(modules.map((m) => [m.path, m.element.preload]))
+  : {};
 
 export default function Router() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      <Route element={<PrivateOutlet />}>
-        <Route element={<Layout />}>
-            {modules.map(m => (
-                <Route
-                  key={m.path}
-                  path={m.path}
-                  element={
-                    <Suspense fallback={<PageSkeleton />}>
-                      <m.element />
-                    </Suspense>
-                  }
-                />
+      <Route element={<PrivateOutlet />}> 
+        <Route element={<Layout />}> 
+          {Array.isArray(modules) &&
+            modules.map((m) => (
+              <Route
+                key={m.path}
+                path={m.path}
+                element={
+                  <Suspense fallback={<PageSkeleton />}>
+                    <m.element />
+                  </Suspense>
+                }
+              />
             ))}
           <Route index element={<Navigate to="/dashboard" replace />} />
         </Route>

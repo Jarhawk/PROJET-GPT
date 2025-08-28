@@ -17,10 +17,12 @@ export function useBonsLivraison() {
     let q = supabase
       .from("bons_livraison")
       .select(
-        "id, mama_id, fournisseur_id, numero_bl, date_reception, commentaire, statut, actif, commande_id, facture_id, date_livraison, fournisseur:fournisseur_id(id, nom), lignes:lignes_bl!bl_id(id)",
+        "id, mama_id, fournisseur_id, numero_bl, date_reception, commentaire, statut, actif, commande_id, facture_id, date_livraison, fournisseur:fournisseur_id(id, nom, mama_id), lignes:lignes_bl!bl_id(id, mama_id)",
         { count: "exact" },
       )
       .eq("mama_id", mama_id)
+      .eq("fournisseur.mama_id", mama_id)
+      .eq("lignes.mama_id", mama_id)
       .order("date_reception", { ascending: false })
       .range((page - 1) * pageSize, page * pageSize - 1);
     if (fournisseur) q = q.eq("fournisseur_id", fournisseur);
@@ -34,7 +36,7 @@ export function useBonsLivraison() {
     }
     setLoading(false);
     if (error) setError(error);
-    return data || [];
+    return Array.isArray(data) ? data : [];
   }
 
   async function fetchBonLivraisonById(id) {
@@ -42,10 +44,13 @@ export function useBonsLivraison() {
     const { data, error } = await supabase
       .from("bons_livraison")
       .select(
-        "id, mama_id, fournisseur_id, numero_bl, date_reception, commentaire, statut, actif, commande_id, facture_id, date_livraison, fournisseur:fournisseur_id(id, nom), lignes:lignes_bl!bl_id(id, bl_id, quantite_recue, prix_unitaire, tva, produit:produit_id(nom))"
+        "id, mama_id, fournisseur_id, numero_bl, date_reception, commentaire, statut, actif, commande_id, facture_id, date_livraison, fournisseur:fournisseur_id(id, nom, mama_id), lignes:lignes_bl!bl_id(id, bl_id, quantite_recue, prix_unitaire, tva, mama_id, produit:produit_id(nom, mama_id))"
       )
       .eq("id", id)
       .eq("mama_id", mama_id)
+      .eq("fournisseur.mama_id", mama_id)
+      .eq("lignes.mama_id", mama_id)
+      .eq("lignes.produit.mama_id", mama_id)
       .single();
     if (error) {
       setError(error);
@@ -63,8 +68,9 @@ export function useBonsLivraison() {
       .insert([{ ...header, mama_id }])
       .select("id")
       .single();
-    if (!error && data?.id && Array.isArray(lignes) && lignes.length) {
-      const rows = lignes.map(l => ({ ...l, bl_id: data.id, mama_id }));
+    const arr = Array.isArray(lignes) ? lignes : [];
+    if (!error && data?.id && arr.length) {
+      const rows = arr.map(l => ({ ...l, bl_id: data.id, mama_id }));
       const { error: err2 } = await supabase.from("lignes_bl").insert(rows);
       if (err2) {
         setLoading(false);

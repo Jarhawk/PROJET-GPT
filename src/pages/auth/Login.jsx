@@ -1,7 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/hooks/useAuth'
 import PageWrapper from '@/components/ui/PageWrapper'
 import GlassCard from '@/components/ui/GlassCard'
 import MamaLogo from '@/components/ui/MamaLogo'
@@ -9,8 +10,13 @@ import PreviewBanner from '@/components/ui/PreviewBanner'
 
 export default function Login() {
   const navigate = useNavigate()
+  const { session } = useAuth()
   const [pending, setPending] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
+
+  useEffect(() => {
+    if (session) navigate('/dashboard', { replace: true })
+  }, [session, navigate])
 
   async function handleLogin(e) {
     e.preventDefault()

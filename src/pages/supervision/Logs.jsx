@@ -58,7 +58,7 @@ export default function Logs() {
           <Input type="date" value={filters.end} onChange={(e) => setFilters({ ...filters, end: e.target.value })} />
           <Select value={filters.type} onChange={(e) => setFilters({ ...filters, type: e.target.value })}>
             <option value="">Type</option>
-            {TYPES.map((t) => (
+            {(Array.isArray(TYPES) ? TYPES : []).map((t) => (
               <option key={t} value={t}>
                 {t}
               </option>
@@ -66,7 +66,7 @@ export default function Logs() {
           </Select>
           <Select value={filters.module} onChange={(e) => setFilters({ ...filters, module: e.target.value })}>
             <option value="">Module</option>
-            {MODULES.map((m) => (
+            {(Array.isArray(MODULES) ? MODULES : []).map((m) => (
               <option key={m} value={m}>
                 {m}
               </option>
@@ -102,7 +102,7 @@ export default function Logs() {
               </tr>
             </thead>
             <tbody>
-              {logs.map((l) => (
+              {(Array.isArray(logs) ? logs : []).map((l) => (
                 <tr key={l.id} className="align-top">
                   <td className="border px-2 py-1 whitespace-nowrap">
                     {new Date(l.date_log).toLocaleString()}

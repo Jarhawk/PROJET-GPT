@@ -13,7 +13,7 @@ export function useFournisseurAPI() {
     if (!mama_id || !fournisseur_id) return null;
     const { data, error } = await supabase
       .from("fournisseurs_api_config")
-      .select("*")
+      .select('fournisseur_id,mama_id,url,type_api,token,format_facture,actif,created_at')
       .eq("mama_id", mama_id)
       .eq("fournisseur_id", fournisseur_id)
       .single();
@@ -57,7 +57,7 @@ export function useFournisseurAPI() {
         headers: { Authorization: `Bearer ${config.token}` },
       });
       const factures = await res.json();
-      for (const ft of factures) {
+      for (const ft of (Array.isArray(factures) ? factures : [])) {
         await supabase
           .from("factures")
           .upsert(
@@ -66,7 +66,7 @@ export function useFournisseurAPI() {
           );
       }
       toast.success("Factures importées");
-      return factures;
+      return Array.isArray(factures) ? factures : [];
     } catch (err) {
       setError(err);
       toast.error("Erreur import factures");
@@ -86,7 +86,7 @@ export function useFournisseurAPI() {
       });
       const produits = await res.json();
       const updates = [];
-      for (const p of produits) {
+      for (const p of (Array.isArray(produits) ? produits : [])) {
         const { data: existing } = await supabase
           .from("fournisseur_produits")
           .select("prix_achat")
@@ -137,7 +137,7 @@ export function useFournisseurAPI() {
     setError(null);
     const { data: commande, error } = await supabase
       .from("commandes")
-      .select("*")
+      .select('id,fournisseur_id,statut,date_commande,date_livraison_prevue,montant_total,commentaire,updated_at,actif,bl_id,facture_id,created_by,validated_by,mama_id')
       .eq("id", commande_id)
       .eq("mama_id", mama_id)
       .single();

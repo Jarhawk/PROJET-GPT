@@ -5,12 +5,9 @@ import { vi, beforeEach, test, expect } from 'vitest';
 const successChain = {
   select: vi.fn(() => successChain),
   eq: vi.fn(() => successChain),
-  then: fn => Promise.resolve(fn({ data: [], error: null })),
-};
-const errorChain = {
-  select: vi.fn(() => errorChain),
-  eq: vi.fn(() => errorChain),
-  then: fn => Promise.resolve(fn({ data: null, error: { code: '42P01', message: 'missing' } })),
+  order: vi.fn(() => successChain),
+  update: vi.fn(() => successChain),
+  then: (fn) => Promise.resolve(fn({ data: [], error: null })),
 };
 const fromMock = vi.fn(() => successChain);
 const rpcMock = vi.fn(() => Promise.resolve({ data: {}, error: null }));
@@ -25,34 +22,23 @@ beforeEach(async () => {
   fromMock.mockClear();
   successChain.select.mockClear();
   successChain.eq.mockClear();
-  errorChain.select.mockClear();
-  errorChain.eq.mockClear();
+  successChain.order.mockClear();
+  successChain.update.mockClear();
   rpcMock.mockClear();
 });
 
-test('list queries view filtered by zone', async () => {
-  fromMock.mockImplementation(() => successChain);
+test('list queries produits filtered by zone', async () => {
   const { result } = renderHook(() => useZoneProducts());
   await act(async () => {
     await result.current.list('z1');
   });
-  expect(fromMock).toHaveBeenCalledWith('v_produits_par_zone');
-  expect(successChain.eq).toHaveBeenNthCalledWith(1, 'zone_id', 'z1');
+  expect(fromMock).toHaveBeenCalledWith('produits');
+  expect(successChain.select).toHaveBeenCalledWith(
+    'id, nom, unite_id, stock_reel, stock_min'
+  );
+  expect(successChain.eq).toHaveBeenNthCalledWith(1, 'zone_stock_id', 'z1');
   expect(successChain.eq).toHaveBeenNthCalledWith(2, 'mama_id', 'm1');
-});
-
-test('list falls back to produits when view missing', async () => {
-  fromMock.mockImplementation((table) => table === 'v_produits_par_zone' ? errorChain : successChain);
-  const { result } = renderHook(() => useZoneProducts());
-  await act(async () => {
-    await result.current.list('z1');
-  });
-  expect(fromMock).toHaveBeenNthCalledWith(1, 'v_produits_par_zone');
-  expect(fromMock).toHaveBeenNthCalledWith(2, 'produits');
-  expect(errorChain.eq).toHaveBeenNthCalledWith(1, 'zone_id', 'z1');
-  expect(errorChain.eq).toHaveBeenNthCalledWith(2, 'mama_id', 'm1');
-  expect(successChain.eq).toHaveBeenNthCalledWith(1, 'zone_id', 'z1');
-  expect(successChain.eq).toHaveBeenNthCalledWith(2, 'mama_id', 'm1');
+  expect(successChain.order).toHaveBeenCalledWith('nom', { ascending: true });
 });
 
 test('move calls rpc with mama id', async () => {

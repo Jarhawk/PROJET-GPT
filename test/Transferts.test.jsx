@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, act, waitFor, within } from '@testing-library/react';
 import { vi } from 'vitest';
 
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ isAuthenticated: true, loading: false }) }));
@@ -32,7 +32,7 @@ beforeAll(() => {
 
 test('renders transferts and submits form', async () => {
   const createTransfert = vi.fn(() => Promise.resolve({}));
-  mockTransferts = () => ({
+  const transfertsValue = {
     transferts: [
       {
         id: 't1',
@@ -44,9 +44,19 @@ test('renders transferts and submits form', async () => {
     ],
     fetchTransferts: vi.fn(),
     createTransfert,
-  });
-  mockProducts = () => ({ products: [{ id: 'p1', nom: 'Prod1' }], fetchProducts: vi.fn() });
-  mockZones = () => ({ zones: [{ id: 'A', nom: 'A' }, { id: 'B', nom: 'B' }], fetchZones: vi.fn() });
+  };
+  mockTransferts = () => transfertsValue;
+  const productsValue = {
+    products: [{ id: 'p1', nom: 'Prod1' }],
+    fetchProducts: vi.fn(),
+  };
+  mockProducts = () => productsValue;
+  const zonesValue = {
+    zones: [{ id: 'A', nom: 'A' }, { id: 'B', nom: 'B' }],
+    fetchZones: vi.fn(),
+    myAccessibleZones: vi.fn(() => [{ id: 'A', nom: 'A' }, { id: 'B', nom: 'B' }]),
+  };
+  mockZones = () => zonesValue;
 
   await act(async () => {
     render(<Transferts />);
@@ -58,17 +68,17 @@ test('renders transferts and submits form', async () => {
     fireEvent.click(screen.getByText('Nouveau transfert'));
   });
 
-  const allSelects = screen.getAllByRole('combobox');
-  const selects = allSelects.slice(-3);
+  const modal = screen.getAllByText('Nouveau transfert')[1].closest('div');
+  const selects = within(modal).getAllByRole('combobox');
   await act(async () => {
     fireEvent.change(selects[0], { target: { value: 'A' } });
     fireEvent.change(selects[1], { target: { value: 'B' } });
     fireEvent.change(selects[2], { target: { value: 'p1' } });
   });
-  const qty = screen.getByRole('spinbutton');
+  const qty = within(modal).getByRole('spinbutton');
   await act(async () => {
     fireEvent.change(qty, { target: { value: '2' } });
-    fireEvent.click(screen.getByText('Valider'));
+    fireEvent.click(within(modal).getByText('Valider'));
   });
   expect(createTransfert).toHaveBeenCalled();
 });

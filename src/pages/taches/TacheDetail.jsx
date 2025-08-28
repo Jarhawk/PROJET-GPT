@@ -17,9 +17,12 @@ export default function TacheDetail() {
   if (!tache) return <LoadingSpinner message="Chargement..." />;
 
   const handleDone = async () => {
+    const assignes = Array.isArray(tache.utilisateurs_taches)
+      ? tache.utilisateurs_taches.map(a => a.utilisateur_id)
+      : [];
     await updateTache(id, {
       ...tache,
-      assignes: (tache.utilisateurs_taches || []).map(a => a.utilisateur_id),
+      assignes,
       statut: "terminee",
     });
     setTache(t => ({ ...t, statut: "terminee" }));
@@ -34,9 +37,9 @@ export default function TacheDetail() {
       <p>Statut : {tache.statut}</p>
       <p>
         Assignés :
-        {(tache.utilisateurs_taches || [])
-          .map(a => a.utilisateur?.nom)
-          .filter(Boolean)
+        {(Array.isArray(tache.utilisateurs_taches)
+          ? tache.utilisateurs_taches.map(a => a.utilisateur?.nom).filter(Boolean)
+          : [])
           .join(", ") || " - "}
       </p>
       <Button onClick={handleDone} disabled={tache.statut === "terminee"}>

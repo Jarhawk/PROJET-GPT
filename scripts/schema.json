@@ -3498,6 +3498,29 @@
     },
     "log_action": {
       "params": []
+    },
+    "move_zone_products": {
+      "params": [
+        "p_mama",
+        "p_src_zone",
+        "p_dest_zone",
+        "p_remove_src"
+      ]
+    },
+    "copy_zone_products": {
+      "params": [
+        "p_mama",
+        "p_src_zone",
+        "p_dest_zone",
+        "p_overwrite"
+      ]
+    },
+    "merge_zone_products": {
+      "params": [
+        "p_mama",
+        "p_src_zone",
+        "p_dest_zone"
+      ]
     }
   }
 }

@@ -18,7 +18,9 @@ export default function Zones() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchZones(filters).then(data => setRows(Array.isArray(data) ? data : []));
+    Promise.resolve(fetchZones(filters)).then((data) =>
+      setRows(Array.isArray(data) ? data : [])
+    );
   }, [filters, fetchZones]);
 
   async function handleDelete(id) {

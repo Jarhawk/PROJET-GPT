@@ -25,9 +25,10 @@ export function useSousFamilles() {
       if (search) q = q.ilike('nom', `%${search}%`);
       const { data, error: queryError } = await q;
       if (queryError) setError(queryError);
-      setSousFamilles(data || []);
+      const list = Array.isArray(data) ? data : [];
+      setSousFamilles(list);
       setLoading(false);
-      return { data: data || [], error: queryError };
+      return { data: list, error: queryError };
     },
     [mama_id]
   );
@@ -39,7 +40,9 @@ export function useSousFamilles() {
         .insert([{ nom, famille_id, mama_id, actif: true }])
         .select()
         .single();
-      setSousFamilles((prev) => [data, ...prev]);
+      setSousFamilles((prev) =>
+        Array.isArray(prev) ? [data, ...prev] : [data]
+      );
       return data;
     },
     [mama_id]
@@ -53,7 +56,9 @@ export function useSousFamilles() {
         .eq('id', id)
         .eq('mama_id', mama_id);
       setSousFamilles((prev) =>
-        prev.map((s) => (s.id === id ? { ...s, actif: value } : s))
+        Array.isArray(prev)
+          ? prev.map((s) => (s.id === id ? { ...s, actif: value } : s))
+          : []
       );
     },
     [mama_id]
@@ -80,12 +85,12 @@ export async function fetchSousFamilles({ mamaId }) {
     if (typeof q.order === 'function') {
       q = q.order('nom', { ascending: true });
     }
-    const { data, error } = await q;
-    if (error) throw error;
-    return data ?? [];
-  } catch (e) {
-    console.warn('[sous_familles] fallback []', e);
-    return [];
+      const { data, error } = await q;
+      if (error) throw error;
+      return Array.isArray(data) ? data : [];
+    } catch (e) {
+      console.warn('[sous_familles] fallback []', e);
+      return [];
   }
 }
 

@@ -198,7 +198,7 @@ export function useProducts() {
 
   async function duplicateProduct(id, { refresh = true } = {}) {
     if (!mama_id) return { error: "Aucun mama_id" };
-    const original = products.find(p => p.id === id);
+    const original = Array.isArray(products) ? products.find(p => p.id === id) : undefined;
     if (!original) return { error: "Produit introuvable" };
     setLoading(true);
     setError(null);
@@ -243,7 +243,7 @@ export function useProducts() {
       setError(error);
       toast.error(error.message);
     }
-    return data || [];
+    return Array.isArray(data) ? data : [];
   }, [mama_id]);
 
   const fetchProductStock = useCallback(
@@ -280,7 +280,7 @@ export function useProducts() {
         toast.error(error.message);
         return [];
       }
-      return (data || []).map(m => ({
+      return (Array.isArray(data) ? data : []).map(m => ({
         date: m.requisitions.date_requisition,
         type: 'sortie',
         quantite: m.quantite,
@@ -311,7 +311,7 @@ export function useProducts() {
   );
 
   function exportProductsToExcel() {
-    const datas = (products || []).map(p => ({
+    const datas = Array.isArray(products) ? products.map(p => ({
       id: p.id,
       nom: p.nom,
       famille: p.famille?.nom || "",
@@ -326,7 +326,7 @@ export function useProducts() {
       fournisseur: p.main_fournisseur?.nom || "",
       fournisseur_id: p.fournisseur_id || "",
       actif: p.actif,
-    }));
+    })) : [];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Produits");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });

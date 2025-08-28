@@ -25,7 +25,8 @@ export default function useAlerteStockFaible() {
         .limit(50);
       if (error) throw error;
 
-      const list = (Array.isArray(rows) ? rows : [])
+      const arr = Array.isArray(rows) ? rows : [];
+      const list = arr
         .map((p) => ({
           produit_id: p.produit_id,
           nom: p.nom,

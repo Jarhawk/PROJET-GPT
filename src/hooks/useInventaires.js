@@ -25,6 +25,7 @@ export function useInventaires() {
         'id, date_inventaire, reference, zone, cloture, actif, created_at, updated_at, mama_id, lignes:inventaire_lignes(id, produit_id, quantite, quantite_reelle, quantite_theorique, zone_id, actif, produit:produits(id, nom, unite_id, pmp))'
       )
       .eq('mama_id', mama_id)
+      .eq('inventaire_lignes.mama_id', mama_id)
       .order('date_inventaire', { ascending: false });
     if (!includeArchives) query = query.eq('actif', true);
     const { data, error } = await query;
@@ -103,6 +104,7 @@ export function useInventaires() {
       )
       .eq('id', id)
       .eq('mama_id', mama_id)
+      .eq('inventaire_lignes.mama_id', mama_id)
       .single();
     setLoading(false);
     if (error) {

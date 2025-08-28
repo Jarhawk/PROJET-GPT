@@ -11,35 +11,33 @@ export function useConsolidation() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { mama_id: currentMamaId, role } = useAuth();
+  const { mama_id: currentMamaId } = useAuth();
 
   // Liste des sites accessibles par l'utilisateur
   const fetchSites = useCallback(async () => {
     setLoading(true);
-    let query = supabase.from('mamas').select('id, nom');
-    if (role !== 'superadmin') query = query.eq('id', currentMamaId);
-    const { data, error } = await query.order('nom', { ascending: true });
+    const { data, error } = await supabase
+      .from('user_mama_access')
+      .select('mama_id, role');
     setLoading(false);
     if (error) {
       setError(error.message || error);
       setSites([]);
       return [];
     }
-    const list = Array.isArray(data)
-      ? data.map((m) => ({ mama_id: m.id, role }))
-      : [];
+    const rows = Array.isArray(data) ? data : [];
     setError(null);
-    setSites(list);
-    return list;
-  }, [currentMamaId, role]);
+    setSites(rows);
+    return rows;
+  }, []);
 
   // Vue consolidation mensuelle
   const fetchConsoMensuelle = useCallback(
     async ({ mamaIds = [], start, end } = {}) => {
       setLoading(true);
       let query = supabase
-        .from('v_achats_mensuels')
-        .select('mama_id, mois, achats_total:montant_total');
+        .from('v_consolidation_mensuelle')
+        .select('mama_id, mois, achats_total, ca_total, menu_foodcost_total, marge_pct_moy, ecart_valorise_total');
       if (mamaIds.length) query = query.in('mama_id', mamaIds);
       else if (currentMamaId) query = query.eq('mama_id', currentMamaId);
       if (start) query = query.gte('mois', start);
@@ -51,33 +49,27 @@ export function useConsolidation() {
         setRows([]);
         return [];
       }
-      const list = Array.isArray(data)
-        ? data.map((r) => ({
-            ...r,
-            ca_total: 0,
-            menu_foodcost_total: 0,
-            marge_pct_moy: 0,
-            ecart_valorise_total: 0,
-          }))
-        : [];
+      const rows = Array.isArray(data) ? data : [];
       setError(null);
-      setRows(list);
-      return list;
+      setRows(rows);
+      return rows;
     },
     [currentMamaId]
   );
 
   const exportExcel = useCallback((data) => {
+    const list = Array.isArray(data) ? data : [];
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), "Consolidation");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(list), "Consolidation");
     XLSX.writeFile(wb, "consolidation.xlsx");
   }, []);
 
   const exportPdf = useCallback((data) => {
+    const list = Array.isArray(data) ? data : [];
     const doc = new JSPDF();
-    if (Array.isArray(data) && data.length > 0) {
-      const head = [Object.keys(data[0])];
-      const body = data.map((r) => Object.values(r));
+    if (list.length > 0) {
+      const head = [Object.keys(list[0])];
+      const body = list.map((r) => Object.values(r));
       doc.autoTable({ head, body });
     }
     doc.save("consolidation.pdf");

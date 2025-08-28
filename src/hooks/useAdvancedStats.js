@@ -15,11 +15,10 @@ export function useAdvancedStats() {
     let query = supabase
       .from('v_achats_mensuels')
       .select('mois, montant_total, mama_id')
-      .eq('mama_id', mama_id)
-      .order('mois', { ascending: true });
+      .eq('mama_id', mama_id);
     if (start) query = query.gte('mois', start);
     if (end) query = query.lte('mois', end);
-    const { data, error } = await query;
+    const { data, error } = await query.order('mois', { ascending: true });
     setLoading(false);
     if (error) {
       setError(error.message || error);

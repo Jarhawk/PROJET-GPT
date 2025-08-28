@@ -14,16 +14,18 @@ export default function Sidebar() {
 
   if (authLoading || settingsLoading) return null;
 
+  const modules = Array.isArray(MODULES) ? MODULES : [];
   const flagOK = flag => (flag ? featureFlags?.[flag] !== false : true);
-  const items = MODULES.filter(
+  const items = modules.filter(
     m => m.showInSidebar && hasAccess(m.rightKey) && flagOK(m.featureFlag)
   );
+  const list = Array.isArray(items) ? items : [];
 
   return (
     <aside className="w-64 bg-white/10 border border-white/10 backdrop-blur-xl text-white p-4 h-screen shadow-md text-shadow hidden md:flex md:flex-col">
       <img src={logo} alt="MamaStock" className="h-20 mx-auto mt-4 mb-6" />
       <nav className="flex flex-col gap-2 text-sm">
-        {items.map(m => {
+        {list.map(m => {
           const Icon = m.icon;
           const prefetch = () => {
             const fn = routePreloadMap[m.path];

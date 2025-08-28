@@ -18,7 +18,7 @@ export default function SimulationForm({ addRecipe, setPrix }) {
     if (!mama_id || authLoading) return;
     supabase
       .from("fiches")
-      .select("*")
+      .select("id, nom")
       .eq("mama_id", mama_id)
       .then(({ data }) => setRecipes(data || []));
   }, [mama_id, authLoading]);

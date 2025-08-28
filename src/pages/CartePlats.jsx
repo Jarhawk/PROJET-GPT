@@ -20,7 +20,7 @@ export default function CartePlats() {
     Promise.all([
       supabase
         .from("fiches_techniques")
-        .select("*")
+        .select("id, nom, famille, prix_vente, cout_portion")
         .eq("mama_id", mama_id)
         .eq("actif", true),
       supabase

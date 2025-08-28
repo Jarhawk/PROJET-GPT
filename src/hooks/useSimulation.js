@@ -45,7 +45,7 @@ export const useSimulation = () => {
     setError(null);
     const { data, error } = await supabase
       .from("v_besoins_previsionnels")
-      .select("*")
+      .select("mama_id, menu_id, produit_id, quantite, valeur")
       .eq("mama_id", mama_id)
       .eq("menu_id", menuId);
     setLoading(false);

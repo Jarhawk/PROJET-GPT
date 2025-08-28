@@ -61,7 +61,7 @@ export default function BarManager() {
     if (!mama_id) return;
     supabase
       .from("fiches_techniques")
-      .select("*")
+      .select("id, nom, famille, prix_vente, cout_portion, type:type_carte")
       .eq("mama_id", mama_id)
       .eq("actif", true)
       .ilike("famille", "%boisson%")

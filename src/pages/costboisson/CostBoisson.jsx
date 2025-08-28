@@ -36,7 +36,7 @@ export default function CostBoissons() {
     if (!mama_id || authLoading) return;
     supabase
       .from("v_boissons")
-      .select("*")
+      .select("id, nom, prix_vente, famille, type:famille, unite, fiche_id, cout_portion")
       .eq("mama_id", mama_id)
       .then(({ data }) => setBoissons(data || []));
   }, [mama_id, authLoading]);

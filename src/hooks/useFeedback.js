@@ -15,7 +15,7 @@ export function useFeedback() {
     setError(null);
     const { data, error } = await supabase
       .from("feedback")
-      .select("*")
+      .select("id, mama_id, user_id, module, message, urgence, created_at, actif")
       .eq("mama_id", mama_id)
       .eq("actif", true)
       .order("created_at", { ascending: false });

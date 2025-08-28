@@ -1,10 +1,12 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
 import TableContainer from "@/components/ui/TableContainer";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function AccessMultiSites() {
+  const { mama_id } = useAuth();
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -12,12 +14,13 @@ export default function AccessMultiSites() {
     setLoading(true);
     supabase
       .from("user_mama_access")
-      .select("*")
+      .select("id, user_id, mama_id, role")
+      .eq("mama_id", mama_id)
       .then(({ data }) => {
         setRows(Array.isArray(data) ? data : []);
         setLoading(false);
       });
-  }, []);
+  }, [mama_id]);
 
   return (
     <div className="p-4 space-y-4">

@@ -2806,6 +2806,25 @@
         }
       ]
     },
+    "user_mama_access": {
+      "columns": [
+        "id",
+        "user_id",
+        "mama_id",
+        "role",
+        "created_at"
+      ],
+      "foreignKeys": [
+        {
+          "name": "user_mama_access_mama_id_fkey",
+          "column": "mama_id",
+          "references": {
+            "table": "mamas",
+            "column": "id"
+          }
+        }
+      ]
+    },
     "users": {
       "columns": [
         "id",

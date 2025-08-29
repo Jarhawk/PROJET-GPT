@@ -187,6 +187,78 @@ export default function BarManager() {
   if (authLoading) return <LoadingSpinner message="Chargement..." />;
   if (!mama_id) return null;
 
+  const periodesList = Array.isArray(PERIODES) ? PERIODES : [];
+  const periodeOptions = [];
+  for (const p of periodesList) {
+    periodeOptions.push(<option key={p.value} value={p.value}>{p.label}</option>);
+  }
+
+  const boissonsStatsList = Array.isArray(boissonsStats) ? boissonsStats : [];
+  const boissonsRows = [];
+  for (const b of boissonsStatsList) {
+    boissonsRows.push(
+      <Motion.tr
+        key={b.id}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.2 }}
+      >
+        <td className="border px-2 py-1">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="link" className="text-blue-700 p-0 h-auto min-w-0 underline">
+                {b.nom}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl shadow-lg p-6 max-w-md z-[1000]">
+              <DialogDescription className="sr-only">
+                Détails de la boisson
+              </DialogDescription>
+              <h2 className="font-bold text-xl mb-2">{b.nom}</h2>
+              <p>
+                <b>Type :</b> {b.type || b.famille || "-"}
+                <br />
+                <b>Coût/portion :</b>{" "}
+                {b.cout_portion ? Number(b.cout_portion).toFixed(2) : "-"} €
+                <br />
+                <b>Prix vente :</b>{" "}
+                {b.prix_vente ? Number(b.prix_vente).toFixed(2) : "-"} €
+                <br />
+                <b>Food cost :</b>{" "}
+                {b.foodCost ? (
+                  <span className={b.foodCost > FOOD_COST_SEUIL ? "text-red-600 font-semibold" : ""}>
+                    {b.foodCost.toFixed(1)} %
+                  </span>
+                ) : (
+                  "-"
+                )}
+                <br />
+                <b>Ventes sur période sélectionnée : </b>
+                {b.quantiteVendue}
+                <br />
+                <b>Marge totale : </b>
+                {b.totalMarge ? b.totalMarge.toFixed(2) : "-"} €
+                <br />
+                <b>Chiffre d'affaires : </b>
+                {b.totalCA ? b.totalCA.toFixed(2) : "-"} €
+              </p>
+            </DialogContent>
+          </Dialog>
+        </td>
+        <td className="px-2 py-1">{b.type || b.famille || "-"}</td>
+        <td className="px-2 py-1">{b.cout_portion ? Number(b.cout_portion).toFixed(2) : "-"}</td>
+        <td className="px-2 py-1">{b.prix_vente ? Number(b.prix_vente).toFixed(2) : "-"}</td>
+        <td className={"border px-2 py-1 font-semibold " + (b.foodCost > FOOD_COST_SEUIL ? "text-red-600" : "")}> 
+          {b.foodCost ? b.foodCost.toFixed(1) : "-"}
+        </td>
+        <td className="border px-2 py-1">{b.quantiteVendue}</td>
+        <td className="border px-2 py-1">{b.totalMarge ? b.totalMarge.toFixed(2) : "-"}</td>
+        <td className="border px-2 py-1">{b.totalCA ? b.totalCA.toFixed(2) : "-"}</td>
+      </Motion.tr>
+    );
+  }
+
   return (
     <div className="p-8 max-w-6xl mx-auto">
             <h1 className="text-2xl font-bold text-blue-700 mb-4">Bar Manager — Analyses avancées</h1>
@@ -197,9 +269,7 @@ export default function BarManager() {
           onChange={e => setPeriode(e.target.value)}
           className="w-32"
         >
-          {PERIODES.map(p => (
-            <option key={p.value} value={p.value}>{p.label}</option>
-          ))}
+          {periodeOptions}
         </Select>
         <input
           type="date"
@@ -291,73 +361,11 @@ export default function BarManager() {
               <th className="px-2 py-1">CA €</th>
             </tr>
           </thead>
-          <tbody>
-            <AnimatePresence>
-              {boissonsStats.map(b => (
-                <Motion.tr
-                  key={b.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <td className="border px-2 py-1">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="link" className="text-blue-700 p-0 h-auto min-w-0 underline">
-                          {b.nom}
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent
-                        className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl shadow-lg p-6 max-w-md z-[1000]"
-                      >
-                        <DialogDescription className="sr-only">
-                          Détails de la boisson
-                        </DialogDescription>
-                        <h2 className="font-bold text-xl mb-2">{b.nom}</h2>
-                        <p>
-                          <b>Type :</b> {b.type || b.famille || "-"}
-                          <br />
-                          <b>Coût/portion :</b>{" "}
-                          {b.cout_portion ? Number(b.cout_portion).toFixed(2) : "-"} €
-                          <br />
-                          <b>Prix vente :</b>{" "}
-                          {b.prix_vente ? Number(b.prix_vente).toFixed(2) : "-"} €
-                          <br />
-                          <b>Food cost :</b>{" "}
-                          {b.foodCost ? (
-                            <span className={b.foodCost > FOOD_COST_SEUIL ? "text-red-600 font-semibold" : ""}>
-                              {b.foodCost.toFixed(1)} %
-                            </span>
-                          ) : (
-                            "-"
-                          )}
-                          <br />
-                          <b>Ventes sur période sélectionnée : </b>
-                          {b.quantiteVendue}
-                          <br />
-                          <b>Marge totale : </b>
-                          {b.totalMarge ? b.totalMarge.toFixed(2) : "-"} €
-                          <br />
-                          <b>Chiffre d'affaires : </b>
-                          {b.totalCA ? b.totalCA.toFixed(2) : "-"} €
-                        </p>
-                      </DialogContent>
-                    </Dialog>
-                  </td>
-                  <td className="px-2 py-1">{b.type || b.famille || "-"}</td>
-                  <td className="px-2 py-1">{b.cout_portion ? Number(b.cout_portion).toFixed(2) : "-"}</td>
-                  <td className="px-2 py-1">{b.prix_vente ? Number(b.prix_vente).toFixed(2) : "-"}</td>
-                  <td className={"border px-2 py-1 font-semibold " + (b.foodCost > FOOD_COST_SEUIL ? "text-red-600" : "")}>
-                    {b.foodCost ? b.foodCost.toFixed(1) : "-"}
-                  </td>
-                  <td className="border px-2 py-1">{b.quantiteVendue}</td>
-                  <td className="border px-2 py-1">{b.totalMarge ? b.totalMarge.toFixed(2) : "-"}</td>
-                  <td className="border px-2 py-1">{b.totalCA ? b.totalCA.toFixed(2) : "-"}</td>
-                </Motion.tr>
-              ))}
-            </AnimatePresence>
-          </tbody>
+            <tbody>
+              <AnimatePresence>
+                {boissonsRows}
+              </AnimatePresence>
+            </tbody>
         </table>
       </TableContainer>
     </div>

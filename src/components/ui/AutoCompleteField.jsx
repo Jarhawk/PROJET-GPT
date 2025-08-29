@@ -18,7 +18,8 @@ export default function AutoCompleteField({
   ...props
 }) {
   const [inputValue, setInputValue] = useState(() => {
-    const match = (options || []).find(o => o.id === value || o.nom === value);
+    const arr = Array.isArray(options) ? options : [];
+    const match = arr.find(o => o.id === value || o.nom === value);
     return match ? match.nom : value || "";
   });
 
@@ -29,14 +30,22 @@ export default function AutoCompleteField({
     : { data: [] };
   const allOptions = options ?? hookOptions;
   const resolved = useMemo(
-    () => (allOptions || []).map((opt) => (typeof opt === "string" ? { id: opt, nom: opt } : opt)),
+    () => {
+      const arr = Array.isArray(allOptions) ? allOptions : [];
+      const result = [];
+      for (const opt of arr) {
+        result.push(typeof opt === "string" ? { id: opt, nom: opt } : opt);
+      }
+      return result;
+    },
     [allOptions],
   );
   const [showAdd, setShowAdd] = useState(false);
   const listId = useId();
 
   useEffect(() => {
-    const match = resolved.find(o => o.id === value || o.nom === value);
+    const arr = Array.isArray(resolved) ? resolved : [];
+    const match = arr.find(o => o.id === value || o.nom === value);
     if (match) {
       setInputValue(match.nom);
     } else if (typeof value === "string") {
@@ -44,9 +53,14 @@ export default function AutoCompleteField({
     }
   }, [value, resolved]);
 
-  const disabledIds = disabledOptions.map((d) =>
-    typeof d === "string" ? d : d.id,
-  );
+  const disabledIds = (() => {
+    const arr = Array.isArray(disabledOptions) ? disabledOptions : [];
+    const ids = [];
+    for (const d of arr) {
+      ids.push(typeof d === "string" ? d : d.id);
+    }
+    return ids;
+  })();
 
   const isValid =
     inputValue &&
@@ -59,7 +73,8 @@ export default function AutoCompleteField({
   const handleInputChange = (e) => {
     const val = e.target.value;
     setInputValue(val);
-    const match = resolved.find(
+    const arr = Array.isArray(resolved) ? resolved : [];
+    const match = arr.find(
       (o) => o.nom.toLowerCase() === val.toLowerCase(),
     );
     if (match) onChange(match);
@@ -79,6 +94,15 @@ export default function AutoCompleteField({
       setShowAdd(false);
     }
   };
+
+  const datalistOptions = (() => {
+    const arr = Array.isArray(resolved) ? resolved : [];
+    const elements = [];
+    for (const opt of arr) {
+      elements.push(<option key={opt.id} value={opt.nom} />);
+    }
+    return elements;
+  })();
 
 
   return (
@@ -102,11 +126,7 @@ export default function AutoCompleteField({
         }}
         {...props}
       />
-      <datalist id={listId}>
-        {resolved.map(opt => (
-          <option key={opt.id} value={opt.nom} />
-        ))}
-      </datalist>
+      <datalist id={listId}>{datalistOptions}</datalist>
       {showAdd && onAddNewValue && (
         <Button
           type="button"

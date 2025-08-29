@@ -84,10 +84,10 @@ export function useCostCenters() {
 
   function exportCostCentersToExcel() {
     const list = Array.isArray(costCenters) ? costCenters : [];
-    const datas = list.map(c => ({
-      nom: c.nom,
-      actif: c.actif,
-    }));
+    const datas = [];
+    for (const c of list) {
+      datas.push({ nom: c.nom, actif: c.actif });
+    }
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "CostCenters");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });

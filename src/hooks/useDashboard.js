@@ -42,16 +42,23 @@ export function useDashboard() {
         .from('v_stocks')
         .select('produit_id, stock')
         .eq('mama_id', mama_id);
-      const pmpArr = Array.isArray(pmpData) ? pmpData : [];
-      const stockArr = Array.isArray(stockData) ? stockData : [];
-      const pmpMap = Object.fromEntries(pmpArr.map(p => [p.produit_id, p.pmp]));
-      const stockMap = Object.fromEntries(stockArr.map(s => [s.produit_id, s.stock]));
+      const pmpMap = {};
+      for (const p of Array.isArray(pmpData) ? pmpData : []) {
+        pmpMap[p.produit_id] = p.pmp;
+      }
+      const stockMap = {};
+      for (const s of Array.isArray(stockData) ? stockData : []) {
+        stockMap[s.produit_id] = s.stock;
+      }
       const produitsBruts = Array.isArray(produitsRaw) ? produitsRaw : [];
-      produits = produitsBruts.map(p => ({
-        ...p,
-        pmp: pmpMap[p.id] ?? 0,
-        stock_theorique: stockMap[p.id] ?? 0,
-      }));
+      produits = [];
+      for (const p of produitsBruts) {
+        produits.push({
+          ...p,
+          pmp: pmpMap[p.id] ?? 0,
+          stock_theorique: stockMap[p.id] ?? 0,
+        });
+      }
     } catch (_err) { void _err;
       setError("Erreur chargement produits");
       setLoading(false);
@@ -68,14 +75,17 @@ export function useDashboard() {
         .eq('mama_id', mama_id)
         .eq('requisitions.mama_id', mama_id);
       if (errorMouv) throw errorMouv;
-      mouvements = (Array.isArray(mouvementsRaw) ? mouvementsRaw : [])
-        .filter(m => m.requisitions?.statut === 'réalisée')
-        .map(m => ({
-          quantite: m.quantite,
-          produit_id: m.produit_id,
-          type: 'sortie',
-          date: m.requisitions.date_requisition,
-        }));
+      mouvements = [];
+      for (const m of Array.isArray(mouvementsRaw) ? mouvementsRaw : []) {
+        if (m.requisitions?.statut === 'réalisée') {
+          mouvements.push({
+            quantite: m.quantite,
+            produit_id: m.produit_id,
+            type: 'sortie',
+            date: m.requisitions.date_requisition,
+          });
+        }
+      }
     } catch (_err) {
       setError('Erreur chargement mouvements');
       void _err;
@@ -98,44 +108,58 @@ export function useDashboard() {
     setStats({ stock_valorise, conso_mois, nb_mouvements, ca_fnb: caFnbInput });
 
     // 4. Top produits consommés calculés côté client
-    const topCounts = mouvementsArr
-      .filter((m) => m.type === 'sortie')
-      .reduce((acc, m) => {
-        acc[m.produit_id] = (acc[m.produit_id] || 0) + (Number(m.quantite) || 0);
-        return acc;
-      }, {});
-    const topData = Object.entries(topCounts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([produit_id, quantite]) => ({ produit_id, quantite }));
+    const topCounts = {};
+    for (const m of mouvementsArr) {
+      if (m.type === 'sortie') {
+        topCounts[m.produit_id] =
+          (topCounts[m.produit_id] || 0) + (Number(m.quantite) || 0);
+      }
+    }
+    const topData = [];
+    const sortedTop = Object.entries(topCounts).sort((a, b) => b[1] - a[1]);
+    for (let i = 0; i < Math.min(5, sortedTop.length); i++) {
+      const [produit_id, quantite] = sortedTop[i];
+      topData.push({ produit_id, quantite });
+    }
     setTopProducts(topData);
 
     // 5. Food cost global & par famille
     const ca_fnb = Number(caFnbInput) || 1;
-    const familles = Array.isArray(produitsArr)
-      ? [...new Set(produitsArr.map((p) => p.famille).filter(Boolean))]
-      : [];
-    const famillesArr = Array.isArray(familles) ? familles : [];
-    let consoByFamille = {};
-    famillesArr.forEach((fam) => {
-      const ids = produitsArr.filter((p) => p.famille === fam).map((p) => p.id);
-      const total = mouvementsArr
-        .filter((m) => ids.includes(m.produit_id) && m.date?.startsWith(moisCourant) && m.type === 'sortie')
-        .reduce((sum, m) => sum + (Number(m.quantite) || 0), 0);
+    const familleSet = new Set();
+    for (const p of produitsArr) {
+      if (p.famille) familleSet.add(p.famille);
+    }
+    const famillesArr = Array.from(familleSet);
+    const consoByFamille = {};
+    for (const fam of famillesArr) {
+      const ids = [];
+      for (const p of produitsArr) if (p.famille === fam) ids.push(p.id);
+      let total = 0;
+      for (const m of mouvementsArr) {
+        if (
+          ids.includes(m.produit_id) &&
+          m.date?.startsWith(moisCourant) &&
+          m.type === 'sortie'
+        ) {
+          total += Number(m.quantite) || 0;
+        }
+      }
       consoByFamille[fam] = total;
-    });
+    }
     const consoAlim = famillesArr.includes('Alimentaire')
       ? consoByFamille['Alimentaire'] || 0
       : Object.values(consoByFamille).reduce((sum, v) => sum + v, 0);
 
     setFoodCostGlobal(ca_fnb ? consoAlim / ca_fnb : 0);
 
-    setFoodCostParFamille(
-      famillesArr.map((fam) => ({
+    const fcList = [];
+    for (const fam of famillesArr) {
+      fcList.push({
         famille: fam,
         food_cost: ca_fnb ? (consoByFamille[fam] || 0) / ca_fnb : 0,
-      }))
-    );
+      });
+    }
+    setFoodCostParFamille(fcList);
 
     // 6. Marge brute
     setMargeBrute({
@@ -160,33 +184,43 @@ export function useDashboard() {
 
     const moisArr = Array.isArray(moisArray) ? moisArray : [];
     // 8. Évolution consommation (par mois, 12 mois)
-    const evolutionConsoData = moisArr.map((mois) => ({
-      mois,
-      conso: mouvementsArr
-        .filter((m) => m.date && m.date.startsWith(mois) && m.type === 'sortie')
-        .reduce((sum, m) => sum + (Number(m.quantite) || 0), 0),
-    }));
+    const evolutionConsoData = [];
+    for (const mois of moisArr) {
+      let conso = 0;
+      for (const m of mouvementsArr) {
+        if (m.date && m.date.startsWith(mois) && m.type === 'sortie') {
+          conso += Number(m.quantite) || 0;
+        }
+      }
+      evolutionConsoData.push({ mois, conso });
+    }
     setEvolutionConso(evolutionConsoData);
 
     // 9. Évolution food cost
-    const evolFoodCost = moisArr.map((mois) => {
-      const caDummy = ca_fnb;
-      const conso = mouvementsArr
-        .filter((m) => m.date?.startsWith(mois) && m.type === 'sortie')
-        .reduce((sum, m) => sum + (Number(m.quantite) || 0), 0);
-      return { mois, food_cost: caDummy ? conso / caDummy : 0 };
-    });
+    const evolFoodCost = [];
+    for (const mois of moisArr) {
+      let conso = 0;
+      for (const m of mouvementsArr) {
+        if (m.date?.startsWith(mois) && m.type === 'sortie') {
+          conso += Number(m.quantite) || 0;
+        }
+      }
+      evolFoodCost.push({ mois, food_cost: ca_fnb ? conso / ca_fnb : 0 });
+    }
     setEvolutionFoodCost(evolFoodCost);
 
     // 10. Alertes stocks bas
-    setAlertesStockBas(
-      produitsArr.filter(
-        (p) =>
-          typeof p.stock_min === 'number' &&
-          typeof p.stock_reel === 'number' &&
-          p.stock_reel < p.stock_min
-      )
-    );
+    const alerts = [];
+    for (const p of produitsArr) {
+      if (
+        typeof p.stock_min === 'number' &&
+        typeof p.stock_reel === 'number' &&
+        p.stock_reel < p.stock_min
+      ) {
+        alerts.push(p);
+      }
+    }
+    setAlertesStockBas(alerts);
 
     setLoading(false);
   }

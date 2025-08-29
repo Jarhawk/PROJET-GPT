@@ -29,7 +29,7 @@ export function useFamilles() {
     queryFn: async () => {
       let q = supabase
         .from('familles')
-        .select('id, code, nom, actif', { count: 'exact' })
+        .select('id, nom, actif', { count: 'exact' })
         .eq('mama_id', mama_id)
         .order('nom', { ascending: true })
         .range((params.page - 1) * params.limit, params.page * params.limit - 1);
@@ -47,11 +47,12 @@ export function useFamilles() {
 
   const addMutation = useMutation({
     mutationFn: async (payload) => {
-      const body = { ...payload, mama_id };
+      const { code, ...rest } = payload;
+      const body = { ...rest, mama_id };
       const { data, error } = await supabase
         .from('familles')
         .insert([body])
-        .select('id, code, nom, actif')
+        .select('id, nom, actif')
         .single();
       if (error) throw error;
       return data;
@@ -61,12 +62,13 @@ export function useFamilles() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, ...values }) => {
+      const { code, ...fields } = values;
       const { data, error } = await supabase
         .from('familles')
-        .update(values)
+        .update(fields)
         .eq('id', id)
         .eq('mama_id', mama_id)
-        .select('id, code, nom, actif')
+        .select('id, nom, actif')
         .single();
       if (error) throw error;
       return data;
@@ -87,7 +89,12 @@ export function useFamilles() {
   });
 
   const batchDeleteFamilles = async (ids = []) => {
-    await Promise.all(ids.map((id) => deleteMutation.mutateAsync(id)));
+    const list = Array.isArray(ids) ? ids : [];
+    const tasks = [];
+    for (const id of list) {
+      tasks.push(deleteMutation.mutateAsync(id));
+    }
+    await Promise.all(tasks);
   };
 
   return {
@@ -107,7 +114,7 @@ export function useFamilles() {
 export async function fetchFamillesForValidation(supabase, mama_id) {
   const { data, error } = await supabase
     .from('familles')
-    .select('id, code, nom, actif')
+    .select('id, nom, actif')
     .eq('mama_id', mama_id)
     .order('nom', { ascending: true });
   if (error) throw error;

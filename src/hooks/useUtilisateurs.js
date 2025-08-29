@@ -140,15 +140,19 @@ export function useUtilisateurs() {
   // 6. Export Excel
   // (numérotation ajustée après ajout resetPassword)
   function exportUsersToExcel(data = users) {
-    const datas = (data || []).map(u => ({
-      id: u.id,
-      nom: u.nom,
-      email: u.email,
-      role_id: u.role_id,
-      actif: u.actif,
-      mama_id: u.mama_id,
-      access_rights: JSON.stringify(u.access_rights),
-    }));
+    const arr = Array.isArray(data) ? data : [];
+    const datas = [];
+    for (const u of arr) {
+      datas.push({
+        id: u.id,
+        nom: u.nom,
+        email: u.email,
+        role_id: u.role_id,
+        actif: u.actif,
+        mama_id: u.mama_id,
+        access_rights: JSON.stringify(u.access_rights),
+      });
+    }
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Utilisateurs");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
@@ -156,15 +160,19 @@ export function useUtilisateurs() {
   }
 
   function exportUsersToCSV(data = users) {
-    const datas = (data || []).map(u => ({
-      id: u.id,
-      nom: u.nom,
-      email: u.email,
-      role_id: u.role_id,
-      actif: u.actif,
-      mama_id: u.mama_id,
-      access_rights: JSON.stringify(u.access_rights),
-    }));
+    const arr = Array.isArray(data) ? data : [];
+    const datas = [];
+    for (const u of arr) {
+      datas.push({
+        id: u.id,
+        nom: u.nom,
+        email: u.email,
+        role_id: u.role_id,
+        actif: u.actif,
+        mama_id: u.mama_id,
+        access_rights: JSON.stringify(u.access_rights),
+      });
+    }
     exportToCSV(datas, { filename: "utilisateurs_mamastock.csv" });
   }
 

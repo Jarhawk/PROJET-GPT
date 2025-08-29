@@ -7,11 +7,14 @@ import NotFound from '@/pages/NotFound.jsx';
 import PrivateOutlet from '@/router/PrivateOutlet';
 import PageSkeleton from '@/components/ui/PageSkeleton';
 
-const modules = Array.isArray(MODULES) ? MODULES : [];
+const MODULE_LIST = Array.isArray(MODULES) ? MODULES : [];
 
-export const routePreloadMap = Array.isArray(modules)
-  ? Object.fromEntries(modules.map((m) => [m.path, m.element.preload]))
-  : {};
+const preloadEntries = [];
+for (const m of MODULE_LIST) {
+  preloadEntries.push([m.path, m.element.preload]);
+}
+
+export const routePreloadMap = Object.fromEntries(preloadEntries);
 
 export default function Router() {
   return (
@@ -19,18 +22,23 @@ export default function Router() {
       <Route path="/login" element={<Login />} />
       <Route element={<PrivateOutlet />}> 
         <Route element={<Layout />}> 
-          {Array.isArray(modules) &&
-            modules.map((m) => (
-              <Route
-                key={m.path}
-                path={m.path}
-                element={
-                  <Suspense fallback={<PageSkeleton />}>
-                    <m.element />
-                  </Suspense>
-                }
-              />
-            ))}
+          {(() => {
+            const elements = [];
+            for (const m of MODULE_LIST) {
+              elements.push(
+                <Route
+                  key={m.path}
+                  path={m.path}
+                  element={
+                    <Suspense fallback={<PageSkeleton />}>
+                      <m.element />
+                    </Suspense>
+                  }
+                />
+              );
+            }
+            return elements;
+          })()}
           <Route index element={<Navigate to="/dashboard" replace />} />
         </Route>
       </Route>

@@ -9,7 +9,9 @@ if (import.meta.env.PROD && 'serviceWorker' in navigator) {
         if ('caches' in window) {
           const keyList = await caches.keys();
           const keys = Array.isArray(keyList) ? keyList : [];
-          await Promise.all(keys.map((k) => caches.delete(k)));
+          for (const k of keys) {
+            await caches.delete(k);
+          }
         }
 
       const registration = await navigator.serviceWorker.register('/service-worker.js');

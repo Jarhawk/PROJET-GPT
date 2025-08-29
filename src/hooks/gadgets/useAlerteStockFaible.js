@@ -26,16 +26,18 @@ export default function useAlerteStockFaible() {
       if (error) throw error;
 
       const arr = Array.isArray(rows) ? rows : [];
-      const list = arr
-        .map((p) => ({
+      const list = [];
+      for (const p of arr) {
+        list.push({
           produit_id: p.produit_id,
           nom: p.nom,
           stock_actuel: p.stock_actuel,
           stock_min: p.stock_min,
           unite: p.unite,
           fournisseur_nom: p.fournisseur_nom,
-        }))
-        .slice(0, 5);
+        });
+        if (list.length >= 5) break;
+      }
       setData(list);
       if (import.meta.env.DEV) {
         console.debug('Chargement dashboard terminé');

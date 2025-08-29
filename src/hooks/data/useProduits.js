@@ -37,9 +37,9 @@ export const useProduits = ({
           { count: 'exact' }
         )
         .eq('mama_id', mamaId)
-        .eq('unites.mama_id', mamaId)
-        .eq('sous_familles.mama_id', mamaId)
-        .eq('sous_familles.familles.mama_id', mamaId);
+        .eq('unite.mama_id', mamaId)
+        .eq('sous_famille.mama_id', mamaId)
+        .eq('sous_famille.famille.mama_id', mamaId);
 
       if (search) q = q.ilike('nom', `%${search}%`);
       if (familleId) q = q.eq('famille_id', familleId);

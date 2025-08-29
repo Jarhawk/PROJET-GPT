@@ -50,6 +50,7 @@ export function useProduitLineDefaults() {
               .from('unites')
               .select('nom')
               .eq('id', unite_id)
+              .eq('mama_id', mama_id)
               .maybeSingle()
           : { data: null };
 

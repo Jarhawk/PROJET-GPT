@@ -44,16 +44,22 @@ export function useDashboardStats(options = {}) {
         if (lastErr) throw lastErr;
 
         const lastRows = Array.isArray(lastData) ? lastData : [];
-        const lastMap = new Map(lastRows.map((r) => [r.produit_id, r.date_livraison]));
+        const lastMap = new Map();
+        for (const r of lastRows) {
+          lastMap.set(r.produit_id, r.date_livraison);
+        }
 
         const produitsRows = Array.isArray(produitsData) ? produitsData : [];
-        const rows = produitsRows.map((p) => ({
-          produit_id: p.id,
-          nom: p.nom,
-          stock_reel: p.stock_reel,
-          pmp: p.pmp,
-          last_purchase: lastMap.get(p.id) || null,
-        }));
+        const rows = [];
+        for (const p of produitsRows) {
+          rows.push({
+            produit_id: p.id,
+            nom: p.nom,
+            stock_reel: p.stock_reel,
+            pmp: p.pmp,
+            last_purchase: lastMap.get(p.id) || null,
+          });
+        }
 
         setStats(rows);
         retries.current = 0; // Reset retry si succès

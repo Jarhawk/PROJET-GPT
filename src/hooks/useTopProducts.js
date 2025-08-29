@@ -26,13 +26,16 @@ export function useTopProducts() {
       return acc;
     }, {});
 
-    const top = Object.entries(counts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, limit)
-      .map(([produit_id, quantite]) => ({ produit_id, quantite }));
+      const entries = Object.entries(counts);
+      if (!Array.isArray(entries)) return { data: [], error: null };
 
-    return { data: top, error: null };
+      const top = [];
+      for (const [produit_id, quantite] of entries.sort((a, b) => b[1] - a[1]).slice(0, limit)) {
+        top.push({ produit_id, quantite });
+      }
+
+      return { data: top, error: null };
+    }
+
+    return { fetchTop };
   }
-
-  return { fetchTop };
-}

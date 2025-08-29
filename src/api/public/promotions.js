@@ -46,7 +46,8 @@ router.get('/', async (req, res) => {
     const end = start + l - 1;
     const { data, error } = await query.range(start, end);
     if (error) throw error;
-    res.json(data || []);
+    const rows = Array.isArray(data) ? data : [];
+    res.json(rows);
   } catch (err) {
     if (String(err?.message).includes('Missing Supabase credentials')) {
       res.status(500).json({ error: 'Missing Supabase credentials' });

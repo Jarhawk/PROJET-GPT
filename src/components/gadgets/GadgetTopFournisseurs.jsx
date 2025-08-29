@@ -14,9 +14,11 @@ export default function GadgetTopFournisseurs() {
   } = useFournisseurs({ actif: true });
 
   const list = Array.isArray(data) ? data : [];
-  const fMap = new Map(
-    (Array.isArray(fournisseurs) ? fournisseurs : []).map((f) => [f.id, f])
-  );
+  const fArr = Array.isArray(fournisseurs) ? fournisseurs : [];
+  const fMap = new Map();
+  for (const f of fArr) {
+    fMap.set(f.id, f);
+  }
   const nameFor = (id) => fMap.get(id)?.nom || '—';
 
   if (loading || loadingFourn) {
@@ -36,19 +38,27 @@ export default function GadgetTopFournisseurs() {
         animate={{ opacity: 1 }}
         className="space-y-2 text-sm"
       >
-        {list.map((f) => (
-          <li
-            key={f.fournisseur_id}
-            className="flex items-center justify-between"
-          >
-            <div className="flex items-center gap-2">
-              <span>{nameFor(f.fournisseur_id)}</span>
-            </div>
-            <span className="font-semibold">
-              {formatCurrencyEUR(Number(f.montant))}
-            </span>
-          </li>
-        ))}
+        {
+          (() => {
+            const items = [];
+            for (const f of list) {
+              items.push(
+                <li
+                  key={f.fournisseur_id}
+                  className="flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-2">
+                    <span>{nameFor(f.fournisseur_id)}</span>
+                  </div>
+                  <span className="font-semibold">
+                    {formatCurrencyEUR(Number(f.montant))}
+                  </span>
+                </li>
+              );
+            }
+            return items;
+          })()
+        }
       </Motion.ul>
     </div>
   );

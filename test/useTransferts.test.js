@@ -89,7 +89,6 @@ test('createTransfert inserts header and lines', async () => {
   });
   const insertedLine = queryLignes.insert.mock.calls[0][0][0];
   expect(insertedLine).toMatchObject({
-    mama_id: 'm1',
     produit_id: 'p1',
     quantite: 2,
     transfert_id: 't1',

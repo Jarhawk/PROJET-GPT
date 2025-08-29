@@ -78,11 +78,11 @@ export function useMamas() {
 
   // 5. Export Excel
   function exportMamasToExcel() {
-    const datas = (mamas || []).map(m => ({
-      id: m.id,
-      nom: m.nom,
-      email_envoi: m.email_envoi,
-    }));
+    const list = Array.isArray(mamas) ? mamas : [];
+    const datas = [];
+    for (const m of list) {
+      datas.push({ id: m.id, nom: m.nom, email_envoi: m.email_envoi });
+    }
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Mamas");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });

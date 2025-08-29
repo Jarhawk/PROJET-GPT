@@ -26,6 +26,7 @@ export function useInventaires() {
       )
       .eq('mama_id', mama_id)
       .eq('inventaire_lignes.mama_id', mama_id)
+      .eq('inventaire_lignes.produit.mama_id', mama_id)
       .order('date_inventaire', { ascending: false });
     if (!includeArchives) query = query.eq('actif', true);
     const { data, error } = await query;
@@ -34,12 +35,18 @@ export function useInventaires() {
       setError(error);
       return [];
     }
-    const cleaned = (Array.isArray(data) ? data : [])
-      .filter(inv => inv.actif !== false)
-      .map(inv => ({
-        ...inv,
-        lignes: Array.isArray(inv.lignes) ? inv.lignes.filter(l => l.actif !== false) : [],
-      }));
+    const rows = Array.isArray(data) ? data : [];
+    const cleaned = [];
+    for (const inv of rows) {
+      if (inv.actif === false) continue;
+      const lignes = [];
+      if (Array.isArray(inv.lignes)) {
+        for (const l of inv.lignes) {
+          if (l.actif !== false) lignes.push(l);
+        }
+      }
+      cleaned.push({ ...inv, lignes });
+    }
     setInventaires(cleaned);
     return cleaned;
   }
@@ -77,15 +84,21 @@ export function useInventaires() {
       setError(error);
       return null;
     }
-    if (lignes.length) {
-      const toInsert = lignes.map(l => ({
-        ...l,
-        produit_id: l.produit_id,
-        quantite_reelle: l.quantite_reelle,
-        inventaire_id: data.id,
-        mama_id,
-      }));
-      const { error: errLines } = await supabase.from('inventaire_lignes').insert(toInsert);
+    const list = Array.isArray(lignes) ? lignes : [];
+    if (list.length) {
+      const toInsert = [];
+      for (const l of list) {
+        toInsert.push({
+          ...l,
+          produit_id: l.produit_id,
+          quantite_reelle: l.quantite_reelle,
+          inventaire_id: data.id,
+          mama_id,
+        });
+      }
+      const { error: errLines } = await supabase
+        .from('inventaire_lignes')
+        .insert(toInsert);
       if (errLines) setError(errLines);
     }
     setLoading(false);
@@ -105,6 +118,7 @@ export function useInventaires() {
       .eq('id', id)
       .eq('mama_id', mama_id)
       .eq('inventaire_lignes.mama_id', mama_id)
+      .eq('inventaire_lignes.produit.mama_id', mama_id)
       .single();
     setLoading(false);
     if (error) {
@@ -114,7 +128,15 @@ export function useInventaires() {
     const inv = data
       ? {
           ...data,
-          lignes: Array.isArray(data.lignes) ? data.lignes.filter(l => l.actif !== false) : [],
+          lignes: (() => {
+            const arr = [];
+            if (Array.isArray(data.lignes)) {
+              for (const l of data.lignes) {
+                if (l.actif !== false) arr.push(l);
+              }
+            }
+            return arr;
+          })(),
         }
       : null;
     return inv;

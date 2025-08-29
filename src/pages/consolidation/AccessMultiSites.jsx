@@ -14,16 +14,12 @@ export default function AccessMultiSites() {
   useEffect(() => {
     setLoading(true);
     supabase
-      .from("user_mama_access")
-      .select("id, user_id, mama_id, role")
-      .eq("mama_id", mamaId)
+      .from('mamas')
+      .select('id, nom')
+      .eq('id', mamaId)
       .then(({ data, error }) => {
         if (error) {
-          if (error.code === "42P01") {
-            toast.error("Table user_mama_access manquante");
-          } else {
-            toast.error(error.message);
-          }
+          toast.error(error.message);
           setRows([]);
         } else {
           setRows(Array.isArray(data) ? data : []);
@@ -34,7 +30,7 @@ export default function AccessMultiSites() {
 
   return (
     <div className="p-4 space-y-4">
-      <h1 className="text-2xl font-bold">Accès multi-sites</h1>
+      <h1 className="text-2xl font-bold">Sites accessibles</h1>
       {loading ? (
         <LoadingSpinner message="Chargement..." />
       ) : (
@@ -42,17 +38,15 @@ export default function AccessMultiSites() {
           <table className="min-w-full text-xs">
             <thead>
               <tr>
-                <th>Utilisateur</th>
-                <th>Site</th>
-                <th>Rôle</th>
+                <th>ID</th>
+                <th>Nom</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((r) => (
                 <tr key={r.id}>
-                  <td>{r.user_id}</td>
-                  <td>{r.mama_id}</td>
-                  <td>{r.role}</td>
+                  <td>{r.id}</td>
+                  <td>{r.nom}</td>
                 </tr>
               ))}
             </tbody>

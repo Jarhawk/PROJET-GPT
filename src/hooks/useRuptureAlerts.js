@@ -17,7 +17,8 @@ export function useRuptureAlerts() {
         .eq('mama_id', mama_id)
         .order('manque', { ascending: false });
       if (error) throw error;
-      return Array.isArray(data) ? data : [];
+      const rows = Array.isArray(data) ? data : [];
+      return rows;
     } catch (error) {
       console.error(error);
       toast.error(error.message || 'Erreur chargement alertes rupture');

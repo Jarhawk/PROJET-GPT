@@ -5,7 +5,9 @@ export default function BubblesParticles({
   className = '',
   color = 'rgba(255,255,255,0.15)',
 }) {
-  const bubbles = Array.from({ length: count }).map((_, i) => {
+  const bubbles = [];
+  const total = count || 0;
+  for (let i = 0; i < total; i++) {
     const delay = (Math.random() * 8).toFixed(2);
     const size = Math.floor(Math.random() * 24) + 12;
     const left = Math.random() * 100;
@@ -18,7 +20,7 @@ export default function BubblesParticles({
       animationDuration: `${duration}s`,
       background: color,
     };
-    return <span key={i} className="bubble" style={style} />;
-  });
+    bubbles.push(<span key={i} className="bubble" style={style} />);
+  }
   return <div className={`absolute inset-0 overflow-hidden pointer-events-none ${className}`}>{bubbles}</div>;
 }

@@ -15,9 +15,10 @@ export function useDashboards() {
     setError(null);
     const { data, error } = await supabase
       .from("tableaux_de_bord")
-      .select("*, gadgets:gadgets!tableau_id(*)")
+      .select("id, nom, created_at, utilisateur_id, mama_id, widgets:gadgets!tableau_id(id, tableau_id, type, config, created_at, mama_id, actif, nom, ordre, configuration_json)")
       .eq("utilisateur_id", user_id)
       .eq("mama_id", mama_id)
+      .eq("gadgets.mama_id", mama_id)
       .order("created_at", { ascending: true });
     setLoading(false);
     if (error) {
@@ -26,8 +27,15 @@ export function useDashboards() {
       setDashboards([]);
       return [];
     }
-    setDashboards(Array.isArray(data) ? data : []);
-    return data || [];
+    const rows = [];
+    if (Array.isArray(data)) {
+      for (const d of data) {
+        const widgets = Array.isArray(d.widgets) ? d.widgets : [];
+        rows.push({ ...d, widgets });
+      }
+    }
+    setDashboards(rows);
+    return rows;
   }, [user_id, mama_id]);
 
   async function createDashboard(nom) {
@@ -37,7 +45,7 @@ export function useDashboards() {
     const { data, error } = await supabase
       .from("tableaux_de_bord")
       .insert([{ nom, utilisateur_id: user_id, mama_id }])
-      .select()
+      .select("id, nom, created_at, utilisateur_id, mama_id")
       .single();
     setLoading(false);
     if (error) {
@@ -57,6 +65,7 @@ export function useDashboards() {
       .from("gadgets")
       .select("ordre")
       .eq("tableau_id", dashboardId)
+      .eq("mama_id", mama_id)
       .order("ordre", { ascending: false })
       .limit(1)
       .single();
@@ -64,7 +73,7 @@ export function useDashboards() {
     const { data, error } = await supabase
       .from("gadgets")
       .insert([{ tableau_id: dashboardId, config, ordre, mama_id }])
-      .select()
+      .select("id, tableau_id, type, config, created_at, mama_id, actif, nom, ordre, configuration_json")
       .single();
     setLoading(false);
     if (error) {
@@ -72,13 +81,19 @@ export function useDashboards() {
       setError(error.message || error);
       return null;
     }
-    setDashboards((ds) =>
-      ds.map((db) =>
-        db.id === dashboardId
-          ? { ...db, widgets: [...(db.widgets || []), data] }
-          : db
-      )
-    );
+    setDashboards((ds) => {
+      const list = Array.isArray(ds) ? ds : [];
+      const next = [];
+      for (const db of list) {
+        if (db.id === dashboardId) {
+          const widgets = Array.isArray(db.widgets) ? [...db.widgets, data] : [data];
+          next.push({ ...db, widgets });
+        } else {
+          next.push(db);
+        }
+      }
+      return next;
+    });
     return data;
   }
 
@@ -92,7 +107,7 @@ export function useDashboards() {
       .eq("id", id)
       .eq("tableau_id", dashboardId)
       .eq("mama_id", mama_id)
-      .select()
+      .select("id, tableau_id, type, config, created_at, mama_id, actif, nom, ordre, configuration_json")
       .single();
     setLoading(false);
     if (error) {
@@ -100,12 +115,23 @@ export function useDashboards() {
       setError(error.message || error);
       return null;
     }
-    setDashboards((ds) =>
-      ds.map((db) => ({
-        ...db,
-        widgets: db.widgets?.map((w) => (w.id === id ? data : w)) || [],
-      }))
-    );
+    setDashboards((ds) => {
+      const list = Array.isArray(ds) ? ds : [];
+      const next = [];
+      for (const db of list) {
+        if (db.id === dashboardId) {
+          const widgetsList = Array.isArray(db.widgets) ? db.widgets : [];
+          const updated = [];
+          for (const w of widgetsList) {
+            updated.push(w.id === id ? data : w);
+          }
+          next.push({ ...db, widgets: updated });
+        } else {
+          next.push(db);
+        }
+      }
+      return next;
+    });
     return data;
   }
 
@@ -125,12 +151,23 @@ export function useDashboards() {
       setError(error.message || error);
       return;
     }
-    setDashboards((ds) =>
-      ds.map((db) => ({
-        ...db,
-        widgets: db.widgets?.filter((w) => w.id !== id) || [],
-      }))
-    );
+    setDashboards((ds) => {
+      const list = Array.isArray(ds) ? ds : [];
+      const next = [];
+      for (const db of list) {
+        if (db.id === dashboardId) {
+          const widgetsList = Array.isArray(db.widgets) ? db.widgets : [];
+          const remaining = [];
+          for (const w of widgetsList) {
+            if (w.id !== id) remaining.push(w);
+          }
+          next.push({ ...db, widgets: remaining });
+        } else {
+          next.push(db);
+        }
+      }
+      return next;
+    });
   }
 
   return {

@@ -25,12 +25,16 @@ export function useZones() {
           .from('zones_stock')
           .select('id, nom, type, parent_id, position, actif, created_at')
           .eq('mama_id', mama_id);
-        data = alt.data ?? [];
+        data = Array.isArray(alt.data) ? alt.data : [];
       }
-      const cleaned = (data || []).map(z => ({
-        ...z,
-        position: Number.isFinite(z.position) ? z.position : 0,
-      }));
+      const arr = Array.isArray(data) ? data : [];
+      const cleaned = [];
+      for (const z of arr) {
+        cleaned.push({
+          ...z,
+          position: Number.isFinite(z.position) ? z.position : 0,
+        });
+      }
       cleaned.sort((a, b) => a.position - b.position || a.nom.localeCompare(b.nom));
       setZones(cleaned);
       return cleaned;
@@ -89,38 +93,91 @@ export function useZones() {
   }
 
     async function reorderZones(list) {
-      const updates = list.map((z, idx) => ({ id: z.id, position: idx, mama_id }));
-      const { error } = await supabase
-        .from('zones_stock')
-        .upsert(updates);
-    if (error) toast.error(error.message);
-    return { error };
-  }
+      const arr = Array.isArray(list) ? list : [];
+      const updates = [];
+      let idx = 0;
+      for (const z of arr) {
+        updates.push({ id: z.id, position: idx, mama_id });
+        idx += 1;
+      }
+      const { error } = await supabase.from('zones_stock').upsert(updates);
+      if (error) toast.error(error.message);
+      return { error };
+    }
 
   async function myAccessibleZones({ mode } = {}) {
-    const { data: { user } = {} } = await supabase.auth.getUser();
-    let query = supabase
-      .from('zones_stock')
-      .select('id, nom, type, parent_id, position, actif, created_at, zones_droits!inner(*)')
+    const {
+      data: { user } = {},
+    } = await supabase.auth.getUser();
+
+    const { data: rightsData, error: rightsError } = await supabase
+      .from('zones_droits')
+      .select('zone_id, lecture, ecriture, transfert, requisition')
       .eq('mama_id', mama_id)
-      .eq('zones_droits.user_id', user?.id || null)
+      .eq('user_id', user?.id || null);
+
+    if (rightsError) {
+      console.info('[zones_droits] fetch failed', {
+        code: rightsError.code,
+        message: rightsError.message,
+      });
+      return [];
+    }
+
+    const rightsArr = Array.isArray(rightsData) ? rightsData : [];
+    const filtered = [];
+    for (const r of rightsArr) {
+      if (!mode || r[mode]) filtered.push(r);
+    }
+
+    const zoneIds = [];
+    for (const r of filtered) zoneIds.push(r.zone_id);
+
+    let { data, error } = await supabase
+      .from('zones_stock')
+      .select('id, nom, type, parent_id, position, actif, created_at')
+      .eq('mama_id', mama_id)
       .eq('actif', true)
+      .in('id', zoneIds)
       .order('position', { ascending: true })
       .order('nom', { ascending: true });
-    if (mode) query = query.eq(`zones_droits.${mode}`, true);
-    if (mode === 'requisition') query = query.in('type', ['cave', 'shop']);
-    let { data, error } = await query;
+
     if (error) {
-      console.info('[zones_stock] fetch failed; fallback list (no order)', { code: error.code, message: error.message });
+      console.info('[zones_stock] fetch failed; fallback list (no order)', {
+        code: error.code,
+        message: error.message,
+      });
       const alt = await supabase
         .from('zones_stock')
-        .select('id, nom, type, parent_id, position, actif, created_at, zones_droits!inner(*)')
+        .select('id, nom, type, parent_id, position, actif, created_at')
         .eq('mama_id', mama_id)
-        .eq('zones_droits.user_id', user?.id || null)
-        .eq('actif', true);
-      data = alt.data ?? [];
+        .eq('actif', true)
+        .in('id', zoneIds);
+      data = Array.isArray(alt.data) ? alt.data : [];
     }
-    return data?.map(z => ({ ...z, ...z.zones_droits })) || [];
+
+    const zonesArr = Array.isArray(data) ? data : [];
+    const out = [];
+    for (const z of zonesArr) {
+      let r = {};
+      for (const rt of filtered) {
+        if (rt.zone_id === z.id) {
+          r = rt;
+          break;
+        }
+      }
+      out.push({ ...z, ...r });
+    }
+
+    if (mode === 'requisition') {
+      const res = [];
+      for (const z of out) {
+        if (['cave', 'shop'].includes(z.type)) res.push(z);
+      }
+      return res;
+    }
+
+    return out;
   }
 
   return {

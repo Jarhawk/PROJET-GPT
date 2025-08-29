@@ -31,13 +31,14 @@ export function useAchats() {
     if (debut) q = q.gte("date_achat", debut);
     if (fin) q = q.lte("date_achat", fin);
     const { data, error, count } = await q;
+    const rows = Array.isArray(data) ? data : [];
     if (!error) {
-      setAchats(Array.isArray(data) ? data : []);
+      setAchats(rows);
       setTotal(count || 0);
     }
     setLoading(false);
     if (error) setError(error);
-    return Array.isArray(data) ? data : [];
+    return rows;
   }
 
   async function fetchAchatById(id) {
@@ -66,8 +67,8 @@ export function useAchats() {
       return { error };
     }
     setAchats((a) => {
-      const list = Array.isArray(a) ? a : [];
-      return [data, ...list];
+      const arr = Array.isArray(a) ? a : [];
+      return [data, ...arr];
     });
     return { data };
   }
@@ -86,8 +87,12 @@ export function useAchats() {
       return { error };
     }
     setAchats((a) => {
-      const list = Array.isArray(a) ? a : [];
-      return list.map((ac) => (ac.id === id ? data : ac));
+      const arr = Array.isArray(a) ? a : [];
+      const updated = [];
+      for (const ac of arr) {
+        updated.push(ac.id === id ? data : ac);
+      }
+      return updated;
     });
     return { data };
   }
@@ -104,8 +109,12 @@ export function useAchats() {
       return { error };
     }
     setAchats((a) => {
-      const list = Array.isArray(a) ? a : [];
-      return list.map((ac) => (ac.id === id ? { ...ac, actif: false } : ac));
+      const arr = Array.isArray(a) ? a : [];
+      const updated = [];
+      for (const ac of arr) {
+        updated.push(ac.id === id ? { ...ac, actif: false } : ac);
+      }
+      return updated;
     });
     return { success: true };
   }

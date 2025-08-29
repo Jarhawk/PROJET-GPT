@@ -16,29 +16,36 @@ export function useInvoiceItems() {
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
-      .from("facture_lignes")
+      .from('facture_lignes')
       .select(
-        "*, produit:produits!facture_lignes_produit_id_fkey(id, nom, unite_id, unite:unite_id (nom), famille:familles(nom))"
+        'id, facture_id, produit_id, quantite, prix_unitaire, total, mama_id, produit:produits!facture_lignes_produit_id_fkey(id, nom, mama_id, unite_id, unite:unite_id(nom, mama_id), famille:familles(id, nom, mama_id))'
       )
-      .eq("facture_id", invoiceId)
-      .eq("mama_id", mama_id)
-      .order("id");
-    setItems(data || []);
+      .eq('facture_id', invoiceId)
+      .eq('mama_id', mama_id)
+      .eq('produit.mama_id', mama_id)
+      .eq('produit.unite.mama_id', mama_id)
+      .eq('produit.famille.mama_id', mama_id)
+      .order('id');
+    const rows = Array.isArray(data) ? data : [];
+    setItems(rows);
     setLoading(false);
     if (error) setError(error);
-    return data || [];
+    return rows;
   }
 
   // Retrieve a single item by primary key
   async function fetchItemById(id) {
     if (!id || !mama_id) return null;
     const { data, error } = await supabase
-      .from("facture_lignes")
+      .from('facture_lignes')
       .select(
-        "*, produit:produits!facture_lignes_produit_id_fkey(id, nom, unite_id, unite:unite_id (nom), famille:familles(nom))"
+        'id, facture_id, produit_id, quantite, prix_unitaire, total, mama_id, produit:produits!facture_lignes_produit_id_fkey(id, nom, mama_id, unite_id, unite:unite_id(nom, mama_id), famille:familles(id, nom, mama_id))'
       )
-      .eq("id", id)
-      .eq("mama_id", mama_id)
+      .eq('id', id)
+      .eq('mama_id', mama_id)
+      .eq('produit.mama_id', mama_id)
+      .eq('produit.unite.mama_id', mama_id)
+      .eq('produit.famille.mama_id', mama_id)
       .single();
     if (error) {
       setError(error);

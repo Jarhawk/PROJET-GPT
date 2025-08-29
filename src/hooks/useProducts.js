@@ -47,14 +47,18 @@ export function useProducts() {
     let query = supabase
       .from('produits')
       .select(
-        `*,
-         unite:unites!unite_id(nom),
-         zone_stock:zones_stock!zone_stock_id(nom),
-         famille:familles!famille_id(nom),
-         sous_famille:sous_familles!sous_famille_id(nom)`,
+        `id, mama_id, nom, actif, famille_id, sous_famille_id, unite_id, zone_stock_id, pmp, stock_theorique, dernier_prix,
+         unite:unites!unite_id(nom, mama_id),
+         zone_stock:zones_stock!zone_stock_id(nom, mama_id),
+         famille:familles!famille_id(id, nom, mama_id),
+         sous_famille:sous_familles!sous_famille_id(id, nom, mama_id)`,
         { count: 'exact' }
       )
-      .eq('mama_id', mama_id);
+      .eq('mama_id', mama_id)
+      .eq('unite.mama_id', mama_id)
+      .eq('zone_stock.mama_id', mama_id)
+      .eq('famille.mama_id', mama_id)
+      .eq('sous_famille.mama_id', mama_id);
 
     if (search) {
       query = query.ilike("nom", `%${search}%`);
@@ -85,21 +89,31 @@ export function useProducts() {
         .select('produit_id, dernier_prix')
         .eq('mama_id', mama_id),
     ]);
-    const pmpMap = Object.fromEntries(
-      (Array.isArray(pmpData) ? pmpData : []).map((p) => [p.produit_id, p.pmp])
-    );
-    const stockMap = Object.fromEntries(
-      (Array.isArray(stockData) ? stockData : []).map((s) => [s.produit_id, s.stock])
-    );
-    const lastPriceMap = Object.fromEntries(
-      (Array.isArray(lastPriceData) ? lastPriceData : []).map((l) => [l.produit_id, l.dernier_prix])
-    );
-    const final = (Array.isArray(data) ? data : []).map((p) => ({
-      ...p,
-      pmp: pmpMap[p.id] ?? p.pmp,
-      dernier_prix: lastPriceMap[p.id] ?? p.dernier_prix,
-      stock_theorique: stockMap[p.id] ?? p.stock_theorique,
-    }));
+    const pmpMap = {};
+    const pmpArray = Array.isArray(pmpData) ? pmpData : [];
+    for (const p of pmpArray) {
+      pmpMap[p.produit_id] = p.pmp;
+    }
+    const stockMap = {};
+    const stockArray = Array.isArray(stockData) ? stockData : [];
+    for (const s of stockArray) {
+      stockMap[s.produit_id] = s.stock;
+    }
+    const lastPriceMap = {};
+    const lastPriceArray = Array.isArray(lastPriceData) ? lastPriceData : [];
+    for (const l of lastPriceArray) {
+      lastPriceMap[l.produit_id] = l.dernier_prix;
+    }
+    const final = [];
+    const dataArray = Array.isArray(data) ? data : [];
+    for (const p of dataArray) {
+      final.push({
+        ...p,
+        pmp: pmpMap[p.id] ?? p.pmp,
+        dernier_prix: lastPriceMap[p.id] ?? p.dernier_prix,
+        stock_theorique: stockMap[p.id] ?? p.stock_theorique,
+      });
+    }
     setProducts(final);
     setTotal(count || 0);
     setLoading(false);
@@ -198,7 +212,15 @@ export function useProducts() {
 
   async function duplicateProduct(id, { refresh = true } = {}) {
     if (!mama_id) return { error: "Aucun mama_id" };
-    const original = Array.isArray(products) ? products.find(p => p.id === id) : undefined;
+    let original;
+    if (Array.isArray(products)) {
+      for (const p of products) {
+        if (p.id === id) {
+          original = p;
+          break;
+        }
+      }
+    }
     if (!original) return { error: "Produit introuvable" };
     setLoading(true);
     setError(null);
@@ -280,11 +302,16 @@ export function useProducts() {
         toast.error(error.message);
         return [];
       }
-      return (Array.isArray(data) ? data : []).map(m => ({
-        date: m.requisitions.date_requisition,
-        type: 'sortie',
-        quantite: m.quantite,
-      }));
+      const rows = Array.isArray(data) ? data : [];
+      const out = [];
+      for (const m of rows) {
+        out.push({
+          date: m.requisitions.date_requisition,
+          type: 'sortie',
+          quantite: m.quantite,
+        });
+      }
+      return out;
     },
     [mama_id]
   );
@@ -311,22 +338,26 @@ export function useProducts() {
   );
 
   function exportProductsToExcel() {
-    const datas = Array.isArray(products) ? products.map(p => ({
-      id: p.id,
-      nom: p.nom,
-      famille: p.famille?.nom || "",
-      unite: p.unite?.nom || "",
-      code: p.code,
-      allergenes: p.allergenes,
-      pmp: p.pmp,
-      stock_theorique: p.stock_theorique,
-      stock_reel: p.stock_reel,
-      seuil_min: p.seuil_min,
-      dernier_prix: p.dernier_prix,
-      fournisseur: p.main_fournisseur?.nom || "",
-      fournisseur_id: p.fournisseur_id || "",
-      actif: p.actif,
-    })) : [];
+    const datas = [];
+    const productArray = Array.isArray(products) ? products : [];
+    for (const p of productArray) {
+      datas.push({
+        id: p.id,
+        nom: p.nom,
+        famille: p.famille?.nom || "",
+        unite: p.unite?.nom || "",
+        code: p.code,
+        allergenes: p.allergenes,
+        pmp: p.pmp,
+        stock_theorique: p.stock_theorique,
+        stock_reel: p.stock_reel,
+        seuil_min: p.seuil_min,
+        dernier_prix: p.dernier_prix,
+        fournisseur: p.main_fournisseur?.nom || "",
+        fournisseur_id: p.fournisseur_id || "",
+        actif: p.actif,
+      });
+    }
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Produits");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });

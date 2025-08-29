@@ -25,7 +25,7 @@ export default function SousFamilleList({ famille }) {
     setLoading(true);
     const { data, error } = await supabase
       .from('sous_familles')
-      .select('*')
+      .select('id, nom, famille_id, mama_id, actif')
       .eq('mama_id', mama_id)
       .eq('famille_id', famille.id)
       .order('nom', { ascending: true });
@@ -33,7 +33,8 @@ export default function SousFamilleList({ famille }) {
       toast.error(error.message);
       setSousFamilles([]);
     } else {
-      setSousFamilles(data || []);
+      const rows = Array.isArray(data) ? data : [];
+      setSousFamilles(rows);
     }
     setLoading(false);
   }

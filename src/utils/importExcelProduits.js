@@ -51,6 +51,7 @@ export async function parseProduitsFile(file, mama_id) {
   const workbook = XLSX.read(data, { type: "array" });
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const raw = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+  const rawRows = Array.isArray(raw) ? raw : [];
 
   const supabase = getSupabaseClient();
   const [
@@ -69,19 +70,27 @@ export async function parseProduitsFile(file, mama_id) {
     supabase.from("produits").select("nom").eq("mama_id", mama_id),
   ]);
 
-  const mapByName = (res) =>
-    new Map((res.data || []).map((x) => [x.nom.toLowerCase(), x.id]));
+  const mapByName = (res) => {
+    const m = new Map();
+    const arr = Array.isArray(res?.data) ? res.data : [];
+    for (const x of arr) {
+      m.set(x.nom.toLowerCase(), x.id);
+    }
+    return m;
+  };
   const famillesMap = mapByName(famillesRes);
   const sousFamillesMap = mapByName(sousFamillesRes);
   const unitesMap = mapByName(unitesRes);
   const zonesMap = mapByName(zonesRes);
-  const fournisseurIds = new Set(
-    (fournisseursRes.data || []).map((f) => String(f.id))
-  );
+  const fournisseurIds = new Set();
+  for (const f of Array.isArray(fournisseursRes.data) ? fournisseursRes.data : []) {
+    fournisseurIds.add(String(f.id));
+  }
 
-  const existingNames = new Set(
-    (produitsRes.data || []).map((p) => p.nom.toLowerCase())
-  );
+  const existingNames = new Set();
+  for (const p of Array.isArray(produitsRes.data) ? produitsRes.data : []) {
+    existingNames.add(p.nom.toLowerCase());
+  }
 
   const maps = {
     familles: famillesMap,
@@ -93,13 +102,17 @@ export async function parseProduitsFile(file, mama_id) {
 
   const seenNames = new Set();
 
-  const rows = raw.map((r) => {
-    const n = Object.fromEntries(
-      Object.entries(r).map(([k, v]) => [
+  const rows = [];
+  for (const r of rawRows) {
+    const entries = Object.entries(r);
+    const normalized = [];
+    for (const [k, v] of Array.isArray(entries) ? entries : []) {
+      normalized.push([
         k.toLowerCase().trim(),
         typeof v === "string" ? v.trim() : v,
-      ])
-    );
+      ]);
+    }
+    const n = Object.fromEntries(normalized);
 
     const baseRow = {
       id: uuidv4(),
@@ -129,8 +142,8 @@ export async function parseProduitsFile(file, mama_id) {
       validated.status = "error";
     }
     seenNames.add(lowerName);
-    return validated;
-  });
+    rows.push(validated);
+  }
 
   return {
     rows,
@@ -145,7 +158,8 @@ export async function parseProduitsFile(file, mama_id) {
 export async function insertProduits(rows) {
   const supabase = getSupabaseClient();
   const results = [];
-  for (const r of rows) {
+  const list = Array.isArray(rows) ? rows : [];
+  for (const r of list) {
     const {
       errors: _e,
       status: _s,

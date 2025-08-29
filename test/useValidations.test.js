@@ -34,7 +34,7 @@ test('fetchRequests queries table', async () => {
   const { result } = renderHook(() => useValidations());
   await act(async () => { await result.current.fetchRequests(); });
   expect(fromMock).toHaveBeenCalledWith('validation_requests');
-  expect(queryObj.select).toHaveBeenCalledWith('*');
+  expect(queryObj.select).toHaveBeenCalledWith('id, mama_id, user_id, module, payload, statut:statut, created_at, actif, updated_at');
   expect(queryObj.eq).toHaveBeenCalledWith('mama_id', 'm1');
   expect(queryObj.eq).toHaveBeenCalledWith('actif', true);
   expect(queryObj.order).toHaveBeenCalledWith('created_at', { ascending: false });
@@ -49,7 +49,7 @@ test('addRequest inserts with user and mama_id', async () => {
 test('updateStatus updates reviewed fields', async () => {
   const { result } = renderHook(() => useValidations());
   await act(async () => { await result.current.updateStatus('id1', 'approved'); });
-  expect(queryObj.update).toHaveBeenCalledWith({ status: 'approved', reviewed_by: 'u1', reviewed_at: expect.any(String) });
+  expect(queryObj.update).toHaveBeenCalledWith({ statut: 'approved', reviewed_by: 'u1', reviewed_at: expect.any(String) });
   expect(queryObj.eq).toHaveBeenCalledWith('id', 'id1');
   expect(queryObj.eq).toHaveBeenCalledWith('mama_id', 'm1');
   expect(queryObj.eq).toHaveBeenCalledWith('actif', true);

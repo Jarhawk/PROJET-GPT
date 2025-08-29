@@ -54,7 +54,9 @@ export function useAide() {
       }
       setItems((arr) => {
         const list = Array.isArray(arr) ? arr : [];
-        return [data, ...list];
+        const next = [data];
+        for (const item of list) next.push(item);
+        return next;
       });
       return { data };
     },
@@ -82,7 +84,11 @@ export function useAide() {
       }
       setItems((arr) => {
         const list = Array.isArray(arr) ? arr : [];
-        return list.map((a) => (a.id === id ? data : a));
+        const next = [];
+        for (const a of list) {
+          next.push(a.id === id ? data : a);
+        }
+        return next;
       });
       return { data };
     },
@@ -106,7 +112,11 @@ export function useAide() {
       }
       setItems((arr) => {
         const list = Array.isArray(arr) ? arr : [];
-        return list.filter((a) => a.id !== id);
+        const next = [];
+        for (const a of list) {
+          if (a.id !== id) next.push(a);
+        }
+        return next;
       });
       return { success: true };
     },

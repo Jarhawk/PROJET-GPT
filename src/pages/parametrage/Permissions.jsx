@@ -29,10 +29,13 @@ export default function Permissions() {
     setLoading(true);
     const { data, error } = await supabase
       .from('roles')
-      .select('*')
+      .select('id, nom, description, actif, mama_id')
       .eq('mama_id', mama_id)
       .order('nom', { ascending: true });
-    if (!error) setRoles(data || []);
+    if (!error) {
+      const rows = Array.isArray(data) ? data : [];
+      setRoles(rows);
+    }
     setLoading(false);
   };
 

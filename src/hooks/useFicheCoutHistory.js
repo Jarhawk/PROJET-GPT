@@ -22,13 +22,16 @@ export function useFicheCoutHistory() {
         .order("changed_at", { ascending: false });
 
       if (error) throw error;
-      const rows = Array.isArray(data)
-        ? data.map((d) => ({
+      const rows = [];
+      if (Array.isArray(data)) {
+        for (const d of data) {
+          rows.push({
             ...d,
             old_cout: d.old_cout ? Number(d.old_cout) : null,
             new_cout: d.new_cout ? Number(d.new_cout) : null,
-          }))
-        : [];
+          });
+        }
+      }
       setHistory(rows);
     } catch (err) {
       setError(err.message || "Erreur chargement historique coût fiche.");

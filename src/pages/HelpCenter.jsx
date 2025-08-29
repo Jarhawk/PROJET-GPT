@@ -17,7 +17,7 @@ export default function HelpCenter() {
       {loading && <LoadingSpinner message="Chargement..." />}
       {error && <div className="text-red-500">{error}</div>}
       <ul className="space-y-4">
-        {items.map((a) => (
+        {Array.isArray(items) && items.map((a) => (
           <li key={a.id} className="list-none">
             <GlassCard>
               <h2 className="font-semibold text-lg mb-2">{a.titre}</h2>

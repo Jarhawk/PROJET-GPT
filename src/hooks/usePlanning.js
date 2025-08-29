@@ -21,7 +21,7 @@ export function usePlanning() {
       console.error("getPlannings", error.message);
       return { data: [] };
     }
-    return { data: data || [] };
+    return { data: Array.isArray(data) ? data : [] };
   }
 
   async function getPlanningById(id) {
@@ -47,14 +47,18 @@ export function usePlanning() {
       .select("id")
       .single();
     if (error) return { error };
-    if (lignes.length) {
-      const rows = lignes.map(l => ({
-        planning_id: data.id,
-        produit_id: l.produit_id,
-        quantite: l.quantite,
-        observation: l.observation || "",
-        mama_id,
-      }));
+    const arr = Array.isArray(lignes) ? lignes : [];
+    if (arr.length) {
+      const rows = [];
+      for (const l of arr) {
+        rows.push({
+          planning_id: data.id,
+          produit_id: l.produit_id,
+          quantite: l.quantite,
+          observation: l.observation || "",
+          mama_id,
+        });
+      }
       const { error: err2 } = await supabase.from("planning_lignes").insert(rows);
       if (err2) return { error: err2 };
     }
@@ -102,7 +106,7 @@ export function usePlanning() {
       console.error("fetchPlanning", error.message);
       return [];
     }
-    return data || [];
+    return Array.isArray(data) ? data : [];
   }
   const addPlanning = createPlanning;
 

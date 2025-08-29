@@ -55,11 +55,14 @@ export function useSousFamilles() {
         .update({ actif: value })
         .eq('id', id)
         .eq('mama_id', mama_id);
-      setSousFamilles((prev) =>
-        Array.isArray(prev)
-          ? prev.map((s) => (s.id === id ? { ...s, actif: value } : s))
-          : []
-      );
+      setSousFamilles((prev) => {
+        const arr = Array.isArray(prev) ? prev : [];
+        const out = [];
+        for (const s of arr) {
+          out.push(s.id === id ? { ...s, actif: value } : s);
+        }
+        return out;
+      });
     },
     [mama_id]
   );

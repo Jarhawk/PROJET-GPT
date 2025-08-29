@@ -82,40 +82,52 @@ export default function BarManager() {
 
   // Map boissons et ventes
   const ventesAgg = {};
-  ventes.forEach(v => {
+  const ventesList = Array.isArray(ventes) ? ventes : [];
+  for (const v of ventesList) {
     ventesAgg[v.boisson_id] = (ventesAgg[v.boisson_id] || 0) + v.quantite;
-  });
-  const boissonsStats = boissons
-    .map(b => ({
-      ...b,
-      quantiteVendue: ventesAgg[b.id] || 0,
-      margeUnitaire: b.prix_vente && b.cout_portion ? b.prix_vente - b.cout_portion : 0,
-      foodCost: b.prix_vente && b.cout_portion ? (b.cout_portion / b.prix_vente) * 100 : null,
-      totalMarge: (ventesAgg[b.id] || 0) * (b.prix_vente && b.cout_portion ? b.prix_vente - b.cout_portion : 0),
-      totalCA: (ventesAgg[b.id] || 0) * (b.prix_vente || 0),
-    }))
-    .filter(b =>
-      b.nom?.toLowerCase().includes(search.toLowerCase()) ||
-      b.famille?.toLowerCase().includes(search.toLowerCase()) ||
-      b.type?.toLowerCase().includes(search.toLowerCase())
-    );
+  }
+  const boissonsList = Array.isArray(boissons) ? boissons : [];
+  const mappedBoissons = boissonsList.map(b => ({
+    ...b,
+    quantiteVendue: ventesAgg[b.id] || 0,
+    margeUnitaire: b.prix_vente && b.cout_portion ? b.prix_vente - b.cout_portion : 0,
+    foodCost: b.prix_vente && b.cout_portion ? (b.cout_portion / b.prix_vente) * 100 : null,
+    totalMarge: (ventesAgg[b.id] || 0) * (b.prix_vente && b.cout_portion ? b.prix_vente - b.cout_portion : 0),
+    totalCA: (ventesAgg[b.id] || 0) * (b.prix_vente || 0),
+  }));
+  const boissonsStats = Array.isArray(mappedBoissons)
+    ? mappedBoissons.filter(
+        b =>
+          b.nom?.toLowerCase().includes(search.toLowerCase()) ||
+          b.famille?.toLowerCase().includes(search.toLowerCase()) ||
+          b.type?.toLowerCase().includes(search.toLowerCase())
+      )
+    : [];
+  const statsList = Array.isArray(boissonsStats) ? boissonsStats : [];
   // Classement top ventes
-  const topVentes = [...boissonsStats].sort((a, b) => b.quantiteVendue - a.quantiteVendue).slice(0, 10);
+  const topVentes = [...statsList].sort((a, b) => b.quantiteVendue - a.quantiteVendue).slice(0, 10);
   // Classement top marges
-  const topMarge = [...boissonsStats].sort((a, b) => b.totalMarge - a.totalMarge).slice(0, 10);
+  const topMarge = [...statsList].sort((a, b) => b.totalMarge - a.totalMarge).slice(0, 10);
 
   // Stat globales
-  const ventesTot = boissonsStats.reduce((a, b) => a + b.quantiteVendue, 0);
-  const caTot = boissonsStats.reduce((a, b) => a + b.totalCA, 0);
-  const margeTot = boissonsStats.reduce((a, b) => a + b.totalMarge, 0);
-  const avgFC =
-    boissonsStats.filter(b => b.foodCost !== null).reduce((a, b) => a + b.foodCost, 0) /
-    (boissonsStats.filter(b => b.foodCost !== null).length || 1);
+  const ventesTot = statsList.reduce((a, b) => a + b.quantiteVendue, 0);
+  const caTot = statsList.reduce((a, b) => a + b.totalCA, 0);
+  const margeTot = statsList.reduce((a, b) => a + b.totalMarge, 0);
+  let sumFC = 0;
+  let countFC = 0;
+  for (const b of statsList) {
+    if (b.foodCost !== null) {
+      sumFC += b.foodCost;
+      countFC++;
+    }
+  }
+  const avgFC = sumFC / (countFC || 1);
 
   // Export Excel/PDF
   const handleExportExcel = () => {
+    const list = Array.isArray(statsList) ? statsList : [];
     const ws = XLSX.utils.json_to_sheet(
-      boissonsStats.map(b => ({
+      list.map(b => ({
         Nom: b.nom,
         Type: b.type || b.famille || "",
         "Coût/portion (€)": b.cout_portion ? Number(b.cout_portion).toFixed(2) : "",
@@ -134,12 +146,13 @@ export default function BarManager() {
   };
 
   const handleExportPDF = () => {
+    const list = Array.isArray(statsList) ? statsList : [];
     const doc = new JSPDF();
     doc.text("Statistiques Bar Manager", 10, 12);
     doc.autoTable({
       startY: 20,
       head: [["Nom", "Type", "Coût/portion", "PV", "FC (%)", "Ventes", "Marge €", "CA €"]],
-      body: boissonsStats.map(b => [
+      body: list.map(b => [
         b.nom,
         b.type || b.famille || "",
         b.cout_portion ? Number(b.cout_portion).toFixed(2) : "-",
@@ -158,6 +171,8 @@ export default function BarManager() {
   if (authLoading) return <LoadingSpinner message="Chargement..." />;
   if (!mama_id) return null;
 
+  const periodesList = Array.isArray(PERIODES) ? PERIODES : [];
+
   return (
     <div className="p-8 max-w-6xl mx-auto">
             <h1 className="text-2xl font-bold text-blue-700 mb-4">Bar Manager — Analyses avancées</h1>
@@ -168,7 +183,7 @@ export default function BarManager() {
           onChange={e => setPeriode(e.target.value)}
           className="w-32"
         >
-          {PERIODES.map(p => (
+          {periodesList.map(p => (
             <option key={p.value} value={p.value}>{p.label}</option>
           ))}
         </Select>
@@ -216,7 +231,7 @@ export default function BarManager() {
           </span>
         </div>
         <div>
-          <span className="font-semibold">Boissons référencées :</span> {boissonsStats.length}
+          <span className="font-semibold">Boissons référencées :</span> {statsList.length}
         </div>
       </div>
       {/* Graphe top ventes */}
@@ -264,7 +279,7 @@ export default function BarManager() {
           </thead>
           <tbody>
             <AnimatePresence>
-              {boissonsStats.map(b => (
+              {statsList.map(b => (
                 <Motion.tr
                   key={b.id}
                   initial={{ opacity: 0, y: 10 }}

@@ -3,7 +3,7 @@ import { useState, useCallback } from "react";
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
-const SELECT = '*, assigned:utilisateurs!taches_assigned_to_fkey(nom)';
+const SELECT = 'id, mama_id, titre, description, statut, next_echeance, assigned:utilisateurs!taches_assigned_to_fkey(nom)';
 
 export function useTasks() {
   const { mama_id } = useAuth();

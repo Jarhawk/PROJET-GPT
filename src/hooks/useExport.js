@@ -41,7 +41,9 @@ export default function useExport() {
           .from('inventaires')
           .select('id, date_inventaire, reference, zone, date_debut, cloture')
           .eq('mama_id', mama_id);
-        const ids = (invs || []).map((i) => i.id);
+        const invsArr = Array.isArray(invs) ? invs : [];
+        const ids = [];
+        for (const i of invsArr) ids.push(i.id);
         let lignes = [];
         if (ids.length) {
           const { data: lData } = await supabase
@@ -51,29 +53,36 @@ export default function useExport() {
             )
             .eq('mama_id', mama_id)
             .in('inventaire_id', ids);
-          lignes = lData || [];
+          lignes = Array.isArray(lData) ? lData : [];
         }
-        data = (invs || []).map((inv) => ({
-          ...inv,
-          lignes: lignes.filter((l) => l.inventaire_id === inv.id),
-        }));
+        const lignesArr = Array.isArray(lignes) ? lignes : [];
+        const tmp = [];
+        for (const inv of invsArr) {
+          const lines = [];
+          for (const l of lignesArr) {
+            if (l.inventaire_id === inv.id) lines.push(l);
+          }
+          tmp.push({ ...inv, lignes: lines });
+        }
+        data = tmp;
       } else if (type === 'produits') {
         const { data: rows } = await supabase
           .from('produits')
           .select('id, nom, famille_id, sous_famille_id, unite_id, actif')
           .eq('mama_id', mama_id);
-        data = rows || [];
+        data = Array.isArray(rows) ? rows : [];
       } else if (type === 'factures') {
         let query = supabase
           .from('factures')
           .select(
             'id, numero, date_facture, fournisseur_id, total_ht, total_ttc, lignes:facture_lignes!facture_id(id, produit_id, quantite, prix, tva)'
           )
-          .eq('mama_id', mama_id);
+          .eq('mama_id', mama_id)
+          .eq('lignes.mama_id', mama_id);
         if (options.start) query = query.gte('date_facture', options.start);
         if (options.end) query = query.lte('date_facture', options.end);
         const { data: rows } = await query;
-        data = rows || [];
+        data = Array.isArray(rows) ? rows : [];
       }
 
       if (format === 'pdf') exportToPDF(data, options);

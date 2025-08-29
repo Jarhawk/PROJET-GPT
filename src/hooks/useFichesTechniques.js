@@ -15,7 +15,9 @@ export function useFichesTechniques() {
     try {
       const { data, error } = await supabase
         .from("fiches_techniques")
-        .select("*")
+        .select(
+          "id, mama_id, fiche_id, technique, created_at, updated_at, actif, nom, cout_par_portion, portions, famille, prix_vente, type_carte, sous_type_carte, carte_actuelle, cout_total, cout_portion, rendement"
+        )
         .eq("mama_id", mama_id)
         .order("nom", { ascending: true });
 
@@ -46,7 +48,9 @@ export function useFichesTechniques() {
       return { error };
     }
     const fiche = { ...ft, id: data?.id };
-    setFichesTechniques(prev => [...prev, fiche]);
+    setFichesTechniques(prev =>
+      Array.isArray(prev) ? prev.concat(fiche) : [fiche]
+    );
     setLoading(false);
     return { data: fiche.id };
   }
@@ -66,7 +70,14 @@ export function useFichesTechniques() {
       setError(error);
       return { error };
     }
-    setFichesTechniques(prev => prev.map(f => f.id === id ? { ...f, ...updateFields } : f));
+    setFichesTechniques(prev => {
+      if (!Array.isArray(prev)) return [];
+      const list = [];
+      for (const f of prev) {
+        list.push(f.id === id ? { ...f, ...updateFields } : f);
+      }
+      return list;
+    });
     setLoading(false);
     return { data: id };
   }
@@ -86,7 +97,14 @@ export function useFichesTechniques() {
       setError(error);
       return { error };
     }
-    setFichesTechniques(prev => prev.filter(f => f.id !== id));
+    setFichesTechniques(prev => {
+      if (!Array.isArray(prev)) return [];
+      const list = [];
+      for (const f of prev) {
+        if (f.id !== id) list.push(f);
+      }
+      return list;
+    });
     setLoading(false);
     return { data: id };
   }

@@ -18,13 +18,13 @@ export function useInvoices() {
     setLoading(true);
     setError(null);
     let query = supabase
-      .from("factures")
-      .select(`
-        *,
-        fournisseur:fournisseur_id(id, nom)
-      `)
-      .eq("mama_id", mama_id)
-      .order("date_facture", { ascending: false });
+      .from('factures')
+      .select(
+        'id, mama_id, fournisseur_id, numero, date_facture, total_ttc, statut, fournisseur:fournisseur_id(id, nom, mama_id)'
+      )
+      .eq('mama_id', mama_id)
+      .eq('fournisseur.mama_id', mama_id)
+      .order('date_facture', { ascending: false });
 
     if (search) query = query.ilike("numero", `%${search}%`);
     if (fournisseur) query = query.eq("fournisseur_id", fournisseur);
@@ -32,10 +32,11 @@ export function useInvoices() {
     if (date) query = query.eq("date_facture", date);
 
     const { data, error } = await query;
-    setInvoices(data || []);
+    const rows = Array.isArray(data) ? data : [];
+    setInvoices(rows);
     setLoading(false);
     if (error) setError(error);
-    return data;
+    return rows;
   }
 
   // 2. Factures par fournisseur
@@ -44,17 +45,17 @@ export function useInvoices() {
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
-      .from("factures")
-      .select("id, date_facture, numero, total_ttc, statut")
-      .eq("mama_id", mama_id)
-      .eq("fournisseur_id", fournisseur_id)
-      .order("date_facture", { ascending: false });
+      .from('factures')
+      .select('id, date_facture, numero, total_ttc, statut')
+      .eq('mama_id', mama_id)
+      .eq('fournisseur_id', fournisseur_id)
+      .order('date_facture', { ascending: false });
     setLoading(false);
     if (error) {
       setError(error);
       return [];
     }
-    return data || [];
+    return Array.isArray(data) ? data : [];
   }
 
   // 3. Charger une facture par id
@@ -63,10 +64,13 @@ export function useInvoices() {
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
-      .from("factures")
-      .select("*, fournisseur:fournisseur_id(id, nom)")
-      .eq("id", id)
-      .eq("mama_id", mama_id)
+      .from('factures')
+      .select(
+        'id, mama_id, fournisseur_id, numero, date_facture, total_ht, total_tva, total_ttc, statut, commentaire, bon_livraison, fournisseur:fournisseur_id(id, nom, mama_id)'
+      )
+      .eq('id', id)
+      .eq('mama_id', mama_id)
+      .eq('fournisseur.mama_id', mama_id)
       .single();
     setLoading(false);
     if (error) {
@@ -135,15 +139,19 @@ export function useInvoices() {
 
   // 8. Export Excel
   function exportInvoicesToExcel() {
-    const datas = (invoices || []).map(f => ({
-      id: f.id,
-      numero: f.numero,
-      date: f.date_facture,
-      fournisseur: f.fournisseur?.nom,
-      montant: f.total_ttc,
-      statut: f.statut,
-      mama_id: f.mama_id,
-    }));
+    const list = Array.isArray(invoices) ? invoices : [];
+    const datas = [];
+    for (const f of list) {
+      datas.push({
+        id: f.id,
+        numero: f.numero,
+        date: f.date_facture,
+        fournisseur: f.fournisseur?.nom,
+        montant: f.total_ttc,
+        statut: f.statut,
+        mama_id: f.mama_id,
+      });
+    }
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Factures");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });

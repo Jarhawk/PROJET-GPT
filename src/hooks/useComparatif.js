@@ -23,7 +23,7 @@ export function useComparatif(productId) {
     const { data, error } = await supabase
       .from('fournisseur_produits')
       .select(
-        'prix_achat, date_livraison, fournisseur_id, fournisseur:fournisseur_id(nom)'
+        'prix_achat, date_livraison, fournisseur_id, mama_id, fournisseur:fournisseur_id(id, nom, mama_id)'
       )
       .eq('produit_id', id)
       .eq('mama_id', mama_id)
@@ -55,14 +55,17 @@ export function useComparatif(productId) {
     }
 
     const groupedValues = Object.values(grouped);
-    const lignesRes = Array.isArray(groupedValues)
-      ? groupedValues.map((l) => ({
+    const lignesRes = [];
+    if (Array.isArray(groupedValues)) {
+      for (const l of groupedValues) {
+        lignesRes.push({
           fournisseur: l.fournisseur,
           dernierPrix: l.dernierPrix,
           nb: l.nb,
           pmp: l.total / l.nb,
-        }))
-      : [];
+        });
+      }
+    }
 
     setLignes(lignesRes);
     setLoading(false);

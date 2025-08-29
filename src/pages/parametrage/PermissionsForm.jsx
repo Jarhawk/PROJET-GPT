@@ -33,12 +33,13 @@ export default function PermissionsForm({ role, onClose, onSaved }) {
     try {
       let query = supabase
         .from('permissions')
-        .select('*')
+        .select('id, mama_id, role_id, module, droit, actif')
         .eq('role_id', role.id);
       if (myRole !== 'superadmin') query = query.eq('mama_id', mama_id);
       const { data, error } = await query;
       if (error) throw error;
-      setPermissions(data || []);
+      const rows = Array.isArray(data) ? data : [];
+      setPermissions(rows);
     } catch (err) {
       toast.error(err.message || 'Erreur chargement permissions');
     }

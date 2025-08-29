@@ -100,14 +100,17 @@ export function useRequisitions() {
       return { error };
     }
     const requisition = data;
-    if (lignes.length) {
-      const toInsert = lignes.map(l => ({
-        requisition_id: requisition.id,
-        produit_id: l.produit_id,
-        quantite: Number(l.quantite),
-        unite: l.unite,
-        mama_id,
-      }));
+    if (Array.isArray(lignes) && lignes.length) {
+      const toInsert = [];
+      for (const l of lignes) {
+        toInsert.push({
+          requisition_id: requisition.id,
+          produit_id: l.produit_id,
+          quantite: Number(l.quantite),
+          unite: l.unite,
+          mama_id,
+        });
+      }
       const { error: lineErr } = await supabase.from("requisition_lignes").insert(toInsert);
       if (lineErr) console.error("❌ Erreur lignes requisition:", lineErr.message);
     }

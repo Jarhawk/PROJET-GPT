@@ -32,6 +32,8 @@ export function useProductsView() {
             { count: 'exact' }
           )
           .eq('mama_id', currentMamaId)
+          .eq('unite.mama_id', currentMamaId)
+          .eq('zone_stock.mama_id', currentMamaId)
           .order(sortBy, { ascending });
 
         if (search?.trim()) query = query.ilike('nom', `%${search.trim()}%`);
@@ -47,11 +49,15 @@ export function useProductsView() {
 
         const { data, error, count } = await query;
         if (error) throw error;
-        const mapped = (Array.isArray(data) ? data : []).map((p) => ({
-          ...p,
-          unite: p.unite || null,
-          zone_stock: p.zone_stock || null,
-        }));
+        const rows = Array.isArray(data) ? data : [];
+        const mapped = [];
+        for (const p of rows) {
+          mapped.push({
+            ...p,
+            unite: p.unite || null,
+            zone_stock: p.zone_stock || null,
+          });
+        }
         setProducts(mapped);
         setTotal(count || 0);
       } catch (e) {

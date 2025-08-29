@@ -18,18 +18,22 @@ export function useStats() {
       supabase
         .from("requisition_lignes")
         .select("quantite, requisitions!inner(mama_id, statut)")
+        .eq("mama_id", mama_id)
         .eq("requisitions.mama_id", mama_id)
         .eq("requisitions.statut", "réalisée"),
     ];
 
-    const [products, fiches, mouvements] = await Promise.all(queries.map((q) => q));
+    const [products, fiches, mouvements] = await Promise.all(queries);
+
+    const prodRows = Array.isArray(products.data) ? products.data : [];
+    const ficheRows = Array.isArray(fiches.data) ? fiches.data : [];
+    const mouvRows = Array.isArray(mouvements.data) ? mouvements.data : [];
 
     setStats({
-      totalProduits: products.data?.length || 0,
-      totalFiches: fiches.data?.length || 0,
-      coutTotalFiches: fiches.data?.reduce((a, f) => a + (f.cout_total || 0), 0) || 0,
-      mouvementsTotal:
-        mouvements.data?.reduce((a, m) => a + (m.quantite || 0), 0) || 0,
+      totalProduits: prodRows.length,
+      totalFiches: ficheRows.length,
+      coutTotalFiches: ficheRows.reduce((a, f) => a + (f.cout_total || 0), 0),
+      mouvementsTotal: mouvRows.reduce((a, m) => a + (m.quantite || 0), 0),
     });
 
     setLoading(false);

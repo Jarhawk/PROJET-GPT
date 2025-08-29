@@ -23,7 +23,9 @@ export function useEnrichedProducts() {
         .eq('mama_id', mama_id);
 
       if (error) throw error;
-      setProducts(Array.isArray(data) ? data : []);
+      const rows = Array.isArray(data) ? data : [];
+      setProducts(rows);
+      return rows;
     } catch (err) {
       setError(err.message || "Erreur chargement produits enrichis.");
       setProducts([]);

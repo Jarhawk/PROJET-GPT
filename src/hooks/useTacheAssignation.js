@@ -13,7 +13,11 @@ export function useTacheAssignation() {
       if (!mama_id) return {};
       setLoading(true);
       setError(null);
-      const rows = userIds.map(uid => ({ tache_id: tacheId, utilisateur_id: uid, mama_id }));
+      const list = Array.isArray(userIds) ? userIds : [];
+      const rows = [];
+      for (const uid of list) {
+        rows.push({ tache_id: tacheId, utilisateur_id: uid, mama_id });
+      }
       const { error } = await supabase.from("tache_assignations").insert(rows);
       setLoading(false);
       if (error) {

@@ -77,7 +77,7 @@ export default function Feedback() {
             </tr>
           </thead>
           <tbody>
-            {items.map((fb) => (
+            {Array.isArray(items) && items.map((fb) => (
               <tr key={fb.id} className="border-t">
                 <td className="px-2 py-1 whitespace-nowrap">
                   {new Date(fb.created_at).toLocaleDateString()}
@@ -87,7 +87,7 @@ export default function Feedback() {
                 <td className="px-2 py-1">{fb.message}</td>
               </tr>
             ))}
-            {items.length === 0 && (
+            {(!Array.isArray(items) || items.length === 0) && (
               <tr>
                 <td colSpan="4" className="py-4 text-center text-gray-500">
                   Aucun feedback pour le moment

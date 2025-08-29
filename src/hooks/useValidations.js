@@ -8,7 +8,7 @@ export default function useValidations() {
   async function fetchRequests() {
     const { data } = await supabase
       .from('validation_requests')
-      .select('*')
+      .select('id, mama_id, user_id, module, payload, statut:statut, created_at, actif, updated_at')
       .eq('mama_id', mama_id)
       .eq('actif', true)
       .order('created_at', { ascending: false });
@@ -21,11 +21,11 @@ export default function useValidations() {
       .insert([{ ...payload, mama_id, requested_by: user_id, actif: true }]);
   }
 
-  async function updateStatus(id, status) {
+  async function updateStatus(id, statut) {
     return supabase
       .from('validation_requests')
       .update({
-        status,
+        statut,
         reviewed_by: user_id,
         reviewed_at: new Date().toISOString(),
       })

@@ -21,8 +21,9 @@ export function useEmailsEnvoyes() {
     q = q.order('envoye_le', { ascending: false }).range(start, end);
     const { data, error } = await q;
     if (error) throw error;
-    setEmails(data || []);
-    return data;
+    const rows = Array.isArray(data) ? data : [];
+    setEmails(rows);
+    return rows;
   }
 
   return { fetchEmails, emails };

@@ -10,19 +10,19 @@ export function useMenuEngineering() {
   const [error, setError] = useState(null);
 
   const fetchMetrics = useCallback(
-    async ({ dateStart, dateEnd, type, actif } = {}) => {
+    async ({ dateStart, dateEnd } = {}) => {
       if (!mama_id) return { rows: [], foodCost: null };
       setLoading(true);
       setError(null);
       try {
         let query = supabase
-          .from('v_me_classification')
-          .select('*')
+          .from('v_menu_engineering')
+          .select(
+            'mama_id, fiche_id, nom, famille, prix_vente, cout_portion, periode, ventes, popularite, marge'
+          )
           .eq('mama_id', mama_id);
-        if (dateStart) query = query.gte('debut', dateStart);
-        if (dateEnd) query = query.lte('fin', dateEnd);
-        if (type) query = query.eq('fiche_type', type);
-        if (actif !== undefined) query = query.eq('actif', actif);
+        if (dateStart) query = query.gte('periode', dateStart);
+        if (dateEnd) query = query.lte('periode', dateEnd);
 
         const { data: rows, error: qError } = await query;
         if (qError) throw qError;
@@ -64,21 +64,26 @@ export function useMenuEngineering() {
         .eq('mama_id', mama_id)
         .eq('statut', 'mapped');
       if (stError) throw stError;
-      if (!staged?.length) return;
+      const rows = Array.isArray(staged) ? staged : [];
+      if (rows.length === 0) return;
 
-      const toInsert = staged.map((r) => ({
-        mama_id,
-        fiche_id: r.fiche_id,
-        date_vente: r.date_vente,
-        quantite: r.quantite,
-        prix_vente_unitaire: r.prix_vente_unitaire,
-      }));
+      const toInsert = [];
+      const ids = [];
+      for (const r of rows) {
+        toInsert.push({
+          mama_id,
+          fiche_id: r.fiche_id,
+          date_vente: r.date_vente,
+          quantite: r.quantite,
+          prix_vente_unitaire: r.prix_vente_unitaire,
+        });
+        ids.push(r.id);
+      }
       const { error: insError } = await supabase
         .from('ventes_fiches')
         .insert(toInsert);
       if (insError) throw insError;
 
-      const ids = staged.map((r) => r.id);
       const { error: updError } = await supabase
         .from('ventes_import_staging')
         .update({ statut: 'imported' })

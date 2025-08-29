@@ -38,7 +38,7 @@ export function useFournisseursAutocomplete({ term = '', limit = 20 } = {}) {
           .ilike('nom', `%${s}%`);
         const { data, error } = await req;
         if (error) throw error;
-        if (!aborted) setOptions(data || []);
+        if (!aborted) setOptions(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error(err);
         if (!aborted) {
@@ -71,5 +71,5 @@ export async function searchFournisseurs(mamaId, term = '', limit = 20) {
   if (term && term.trim()) req = req.ilike('nom', `%${term.trim()}%`);
   const { data, error } = await req;
   if (error) throw error;
-  return data || [];
+  return Array.isArray(data) ? data : [];
 }

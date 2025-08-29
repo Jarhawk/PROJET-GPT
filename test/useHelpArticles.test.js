@@ -30,7 +30,7 @@ test('fetchArticles queries table', async () => {
   const { result } = renderHook(() => useHelpArticles());
   await act(async () => { await result.current.fetchArticles(); });
   expect(fromMock).toHaveBeenCalledWith('help_articles');
-  expect(query.select).toHaveBeenCalledWith('*');
+  expect(query.select).toHaveBeenCalledWith('id, titre, contenu, created_at');
   expect(query.order).toHaveBeenCalledWith('created_at', { ascending: false });
 });
 

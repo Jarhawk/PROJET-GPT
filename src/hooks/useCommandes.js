@@ -19,7 +19,7 @@ export function useCommandes() {
       let query = supabase
         .from("commandes")
         .select(
-          "id, mama_id, fournisseur_id, statut, created_at, date_commande, date_livraison_prevue, montant_total, commentaire, updated_at, actif, bl_id, facture_id, created_by, validated_by, fournisseur:fournisseur_id(id, nom, mama_id), lignes:commande_lignes(total_ligne:total)",
+          "id, mama_id, fournisseur_id, statut, created_at, date_commande, date_livraison_prevue, montant_total, commentaire, updated_at, actif, bl_id, facture_id, created_by, validated_by, fournisseur:fournisseur_id(id, nom, mama_id), lignes:commande_lignes(id, mama_id, total_ligne:total)",
           { count: "exact" }
         )
         .eq("mama_id", mama_id)
@@ -40,11 +40,14 @@ export function useCommandes() {
         setCount(0);
         return { data: [], count: 0 };
       }
-      const rows = (Array.isArray(data) ? data : []).map((c) => ({
-        ...c,
-        lignes: Array.isArray(c.lignes) ? c.lignes : [],
-        total: (Array.isArray(c.lignes) ? c.lignes : []).reduce((s, l) => s + Number(l.total_ligne || 0), 0),
-      }));
+      const source = Array.isArray(data) ? data : [];
+      const rows = [];
+      for (const c of source) {
+        const lignes = Array.isArray(c.lignes) ? c.lignes : [];
+        let total = 0;
+        for (const l of lignes) total += Number(l.total_ligne || 0);
+        rows.push({ ...c, lignes, total });
+      }
       setData(rows);
       setCount(count || 0);
       return { data: rows, count: count || 0 };
@@ -99,16 +102,15 @@ export function useCommandes() {
     }
     const arr = Array.isArray(lignes) ? lignes : [];
     if (arr.length) {
-        const toInsert = arr.map((l) => ({
-          ...l,
-          commande_id: data.id,
-          mama_id,
-        }));
-        const { error: lineErr } = await supabase
-          .from("commande_lignes")
-          .insert(toInsert);
-        if (lineErr) console.error("❌ commande lignes", lineErr.message);
+      const toInsert = [];
+      for (const l of arr) {
+        toInsert.push({ ...l, commande_id: data.id, mama_id });
       }
+      const { error: lineErr } = await supabase
+        .from("commande_lignes")
+        .insert(toInsert);
+      if (lineErr) console.error("❌ commande lignes", lineErr.message);
+    }
     return { data };
   }
 
@@ -136,7 +138,6 @@ export function useCommandes() {
     return updateCommande(id, {
       statut: "validée",
       validated_by: user_id,
-      envoyee_at: new Date().toISOString(),
     });
   }
 

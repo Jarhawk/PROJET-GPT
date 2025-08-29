@@ -49,14 +49,17 @@ export function useFiches() {
       setError(error);
       return [];
     }
-    const rows = Array.isArray(data)
-      ? data.map((d) => ({
+    const rows = [];
+    if (Array.isArray(data)) {
+      for (const d of data) {
+        rows.push({
           ...d,
           cout_par_portion: d.cout_par_portion ? Number(d.cout_par_portion) : null,
           cout_total: d.cout_total ? Number(d.cout_total) : null,
           portions: d.portions ? Number(d.portions) : null,
-        }))
-      : [];
+        });
+      }
+    }
     setFiches(rows);
     setTotal(count || 0);
     return rows;
@@ -73,6 +76,10 @@ export function useFiches() {
       )
       .eq("id", id)
       .eq("mama_id", mama_id)
+      .eq("lignes.mama_id", mama_id)
+      .eq("lignes.produit.mama_id", mama_id)
+      .eq("lignes.produit.unite.mama_id", mama_id)
+      .eq("lignes.sous_fiche.mama_id", mama_id)
       .single();
     setLoading(false);
     if (error) {
@@ -80,33 +87,37 @@ export function useFiches() {
       setError(error);
       return null;
     }
+    const lignesList = [];
+    if (Array.isArray(data?.lignes)) {
+      for (const l of data.lignes) {
+        lignesList.push({
+          id: l.id,
+          produit_id: l.produit_id,
+          sous_fiche_id: l.sous_fiche_id,
+          description: l.description,
+          quantite: l.quantite ? Number(l.quantite) : null,
+          produit_nom: l.produit?.nom,
+          unite_nom: l.produit?.unite?.nom,
+          pmp: l.produit?.pmp ? Number(l.produit.pmp) : null,
+          dernier_prix: l.produit?.dernier_prix ? Number(l.produit.dernier_prix) : null,
+          sous_fiche: l.sous_fiche
+            ? {
+                id: l.sous_fiche.id,
+                nom: l.sous_fiche.nom,
+                cout_par_portion: l.sous_fiche.cout_par_portion
+                  ? Number(l.sous_fiche.cout_par_portion)
+                  : null,
+              }
+            : null,
+        });
+      }
+    }
     const mapped = {
       ...data,
       cout_par_portion: data.cout_par_portion ? Number(data.cout_par_portion) : null,
       cout_total: data.cout_total ? Number(data.cout_total) : null,
       portions: data.portions ? Number(data.portions) : null,
-      lignes: Array.isArray(data?.lignes)
-        ? data.lignes.map((l) => ({
-            id: l.id,
-            produit_id: l.produit_id,
-            sous_fiche_id: l.sous_fiche_id,
-            description: l.description,
-            quantite: l.quantite ? Number(l.quantite) : null,
-            produit_nom: l.produit?.nom,
-            unite_nom: l.produit?.unite?.nom,
-            pmp: l.produit?.pmp ? Number(l.produit.pmp) : null,
-            dernier_prix: l.produit?.dernier_prix ? Number(l.produit.dernier_prix) : null,
-            sous_fiche: l.sous_fiche
-              ? {
-                  id: l.sous_fiche.id,
-                  nom: l.sous_fiche.nom,
-                  cout_par_portion: l.sous_fiche.cout_par_portion
-                    ? Number(l.sous_fiche.cout_par_portion)
-                    : null,
-                }
-              : null,
-          }))
-        : [],
+      lignes: lignesList,
     };
     return mapped;
   }
@@ -129,13 +140,16 @@ export function useFiches() {
     }
     const ficheId = data?.id ?? data?.[0]?.id;
     if (Array.isArray(lignes) && lignes.length > 0) {
-      const toInsert = lignes.map(l => ({
-        fiche_id: ficheId,
-        produit_id: l.produit_id || null,
-        sous_fiche_id: l.sous_fiche_id || null,
-        quantite: l.quantite,
-        mama_id,
-      }));
+      const toInsert = [];
+      for (const l of lignes) {
+        toInsert.push({
+          fiche_id: ficheId,
+          produit_id: l.produit_id || null,
+          sous_fiche_id: l.sous_fiche_id || null,
+          quantite: l.quantite,
+          mama_id,
+        });
+      }
       const { error: lignesError } = await supabase.from("fiche_lignes").insert(toInsert);
       if (lignesError) {
         console.error('createFiche lignes error:', lignesError);
@@ -178,13 +192,16 @@ export function useFiches() {
       return { error: deleteError };
     }
     if (Array.isArray(lignes) && lignes.length > 0) {
-      const toInsert = lignes.map(l => ({
-        fiche_id: id,
-        produit_id: l.produit_id || null,
-        sous_fiche_id: l.sous_fiche_id || null,
-        quantite: l.quantite,
-        mama_id,
-      }));
+      const toInsert = [];
+      for (const l of lignes) {
+        toInsert.push({
+          fiche_id: id,
+          produit_id: l.produit_id || null,
+          sous_fiche_id: l.sous_fiche_id || null,
+          quantite: l.quantite,
+          mama_id,
+        });
+      }
       const { error: insertError } = await supabase.from("fiche_lignes").insert(toInsert);
       if (insertError) {
         console.error('updateFiche lines insert error:', insertError);
@@ -193,7 +210,13 @@ export function useFiches() {
         return { error: insertError };
       }
     }
-    setFiches(prev => prev.map(f => f.id === id ? { ...f, ...fiche } : f));
+    setFiches(prev => {
+      const arr = [];
+      for (const f of prev) {
+        arr.push(f.id === id ? { ...f, ...fiche } : f);
+      }
+      return arr;
+    });
     setLoading(false);
     return { data: id };
   }
@@ -214,7 +237,13 @@ export function useFiches() {
       setError(deleteError);
       return { error: deleteError };
     }
-    setFiches(prev => prev.filter(f => f.id !== id));
+    setFiches(prev => {
+      const arr = [];
+      for (const f of prev) {
+        if (f.id !== id) arr.push(f);
+      }
+      return arr;
+    });
     setTotal(prev => Math.max(prev - 1, 0));
     setLoading(false);
     return { data: id };
@@ -251,13 +280,16 @@ export function useFiches() {
     const newId = inserted.id;
     const lignesArr = Array.isArray(lignes) ? lignes : [];
     if (lignesArr.length) {
-      const toInsert = lignesArr.map(l => ({
-        fiche_id: newId,
-        produit_id: l.produit_id || null,
-        sous_fiche_id: l.sous_fiche_id || null,
-        quantite: l.quantite,
-        mama_id,
-      }));
+      const toInsert = [];
+      for (const l of lignesArr) {
+        toInsert.push({
+          fiche_id: newId,
+          produit_id: l.produit_id || null,
+          sous_fiche_id: l.sous_fiche_id || null,
+          quantite: l.quantite,
+          mama_id,
+        });
+      }
       const { error: lineErr } = await supabase.from("fiche_lignes").insert(toInsert);
       if (lineErr) {
         console.error('duplicateFiche lines insert error:', lineErr);
@@ -273,14 +305,19 @@ export function useFiches() {
   }
 
   function exportFichesToExcel() {
-    const datas = Array.isArray(fiches) ? fiches.map(f => ({
-      id: f.id,
-      nom: f.nom,
-      portions: f.portions,
-      cout_total: f.cout_total,
-      cout_par_portion: f.cout_par_portion,
-      actif: f.actif,
-    })) : [];
+    const datas = [];
+    if (Array.isArray(fiches)) {
+      for (const f of fiches) {
+        datas.push({
+          id: f.id,
+          nom: f.nom,
+          portions: f.portions,
+          cout_total: f.cout_total,
+          cout_par_portion: f.cout_par_portion,
+          actif: f.actif,
+        });
+      }
+    }
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Fiches");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
@@ -289,9 +326,12 @@ export function useFiches() {
 
   function exportFichesToPDF() {
     const doc = new JSPDF();
-    const rows = Array.isArray(fiches)
-      ? fiches.map(f => [f.nom, f.famille || "", f.portions, f.cout_par_portion])
-      : [];
+    const rows = [];
+    if (Array.isArray(fiches)) {
+      for (const f of fiches) {
+        rows.push([f.nom, f.famille || "", f.portions, f.cout_par_portion]);
+      }
+    }
     doc.autoTable({ head: [["Nom", "Famille", "Portions", "Coût/portion"]], body: rows });
     doc.save("fiches_mamastock.pdf");
   }

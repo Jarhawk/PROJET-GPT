@@ -18,19 +18,23 @@ export function useFactures() {
     setError(null);
     let q = supabase
       .from("bons_livraison")
-      .select("*", { count: "exact" })
+      .select(
+        "id, numero_bl, date_livraison, fournisseur_id, statut, actif, mama_id",
+        { count: "exact" }
+      )
       .eq("mama_id", mama_id)
       .order("date_livraison", { ascending: false });
     if (search) q = q.ilike("numero_bl", `%${search}%`);
     q = q.range((page - 1) * limit, page * limit - 1);
     const { data, error, count } = await q;
+    const rows = Array.isArray(data) ? data : [];
     if (!error) {
-      setFactures(data || []);
-      setTotal(count || 0);
+      setFactures(rows);
+      setTotal(typeof count === "number" ? count : rows.length);
     }
     setLoading(false);
     if (error) setError(error);
-    return data || [];
+    return rows;
   }
 
   async function getFactures({
@@ -47,14 +51,18 @@ export function useFactures() {
     setError(null);
     let query = supabase
       .from("factures")
-      .select("*, fournisseur:fournisseur_id(id, nom)", { count: "exact" })
+      .select(
+        "id, numero, date_facture, fournisseur_id, total_ttc, statut, actif, mama_id, fournisseur:fournisseur_id(id, nom)",
+        { count: "exact" }
+      )
       .eq("mama_id", mama_id)
+      .eq("fournisseur.mama_id", mama_id)
       .order("date_facture", { ascending: false })
       .range((page - 1) * pageSize, page * pageSize - 1);
 
     if (search) {
       query = query.or(
-        `numero.ilike.%${search}%,fournisseurs.nom.ilike.%${search}%`
+        `numero.ilike.%${search}%,fournisseur.nom.ilike.%${search}%`
       );
     }
     if (fournisseur) query = query.eq("fournisseur_id", fournisseur);
@@ -69,13 +77,14 @@ export function useFactures() {
     }
 
     const { data, error, count } = await query;
+    const rows = Array.isArray(data) ? data : [];
     if (!error) {
-      setFactures(data || []);
-      setTotal(count || 0);
+      setFactures(rows);
+      setTotal(typeof count === "number" ? count : rows.length);
     }
     setLoading(false);
     if (error) setError(error);
-    return data || [];
+    return rows;
   }
 
   async function fetchFactureById(id) {
@@ -84,9 +93,12 @@ export function useFactures() {
     setError(null);
     const { data, error } = await supabase
       .from("factures")
-      .select("*, fournisseur:fournisseur_id(id, nom)")
+      .select(
+        "id, numero, date_facture, fournisseur_id, total_ttc, statut, actif, mama_id, fournisseur:fournisseur_id(id, nom)"
+      )
       .eq("id", id)
       .eq("mama_id", mama_id)
+      .eq("fournisseur.mama_id", mama_id)
       .single();
     setLoading(false);
     if (error) {
@@ -105,7 +117,7 @@ export function useFactures() {
     const { data: inserted, error } = await supabase
       .from("factures")
       .insert([{ ...data, mama_id }])
-      .select()
+      .select("id, numero, date_facture, fournisseur_id, total_ttc, statut, actif, mama_id")
       .single();
     setLoading(false);
     if (error) {
@@ -129,14 +141,20 @@ export function useFactures() {
       .update(fields)
       .eq("id", id)
       .eq("mama_id", mama_id)
-      .select()
+      .select("id, numero, date_facture, fournisseur_id, total_ttc, statut, actif, mama_id")
       .single();
     setLoading(false);
     if (error) {
       setError(error);
       return { error };
     }
-    setFactures(f => f.map(ft => (ft.id === id ? updated : ft)));
+      setFactures(prev => {
+        const arr = [];
+        for (const ft of Array.isArray(prev) ? prev : []) {
+          arr.push(ft.id === id ? updated : ft);
+        }
+        return arr;
+      });
     return { data: updated };
   }
 
@@ -154,7 +172,13 @@ export function useFactures() {
       setError(error);
       return { error };
     }
-    setFactures(f => f.map(ft => (ft.id === id ? { ...ft, actif: false } : ft)));
+      setFactures(prev => {
+        const arr = [];
+        for (const ft of Array.isArray(prev) ? prev : []) {
+          arr.push(ft.id === id ? { ...ft, actif: false } : ft);
+        }
+        return arr;
+      });
     return { success: true };
   }
 
@@ -187,7 +211,9 @@ export function useFactures() {
           mama_id,
         },
       ])
-      .select()
+      .select(
+        "id, produit_id, quantite, prix_unitaire, tva, zone_stock_id, unite_id, total, facture_id, mama_id"
+      )
       .single();
     if (!error && produit_id && fournisseur_id) {
       await supabase
@@ -233,7 +259,10 @@ export function useFactures() {
       .select("id")
       .single();
     if (!error && data?.id && Array.isArray(lignes) && lignes.length) {
-      const rows = lignes.map(l => ({ ...l, bl_id: data.id, mama_id }));
+      const rows = [];
+      for (const l of lignes) {
+        rows.push({ ...l, bl_id: data.id, mama_id });
+      }
       await supabase.from("lignes_bl").insert(rows);
     }
     setLoading(false);
@@ -278,8 +307,9 @@ export function useFactures() {
       .select("quantite, prix_unitaire, tva")
       .eq("facture_id", facture_id)
       .eq("mama_id", mama_id);
-    const ht = (lignes || []).reduce((s,l) => s + l.quantite * (l.prix_unitaire || 0), 0);
-    const tva = (lignes || []).reduce((s,l) => s + l.quantite * (l.prix_unitaire || 0) * (l.tva || 0) / 100, 0);
+    const lignesArr = Array.isArray(lignes) ? lignes : [];
+    const ht = lignesArr.reduce((s,l) => s + l.quantite * (l.prix_unitaire || 0), 0);
+    const tva = lignesArr.reduce((s,l) => s + l.quantite * (l.prix_unitaire || 0) * (l.tva || 0) / 100, 0);
     const ttc = ht + tva;
     await supabase
       .from("factures")

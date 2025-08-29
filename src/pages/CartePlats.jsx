@@ -30,28 +30,33 @@ export default function CartePlats() {
         .eq("actif", true),
     ]).then(([ficheRes, familleRes]) => {
       setFiches(ficheRes.data || []);
-      setFamilles((familleRes.data || []).map((f) => f.nom));
+      const fams = [];
+      for (const f of Array.isArray(familleRes.data) ? familleRes.data : []) {
+        fams.push(f.nom);
+      }
+      setFamilles(fams);
     });
   }, [mama_id, authLoading]);
 
-  const filteredFiches = fiches.filter((f) => {
+  const fichesList = Array.isArray(fiches) ? fiches : [];
+  const filteredFiches = [];
+  for (const f of fichesList) {
     const foodCost =
       f.prix_vente && f.cout_portion
         ? (f.cout_portion / f.prix_vente) * 100
         : null;
-    if (search && !f.nom.toLowerCase().includes(search.toLowerCase())) return false;
-    if (familleFilter && f.famille !== familleFilter) return false;
-    if (onlyAboveThreshold && (foodCost === null || foodCost <= FOOD_COST_SEUIL)) return false;
-    return true;
-  });
-
+    if (search && !f.nom.toLowerCase().includes(search.toLowerCase())) continue;
+    if (familleFilter && f.famille !== familleFilter) continue;
+    if (onlyAboveThreshold && (foodCost === null || foodCost <= FOOD_COST_SEUIL)) continue;
+    filteredFiches.push({ ...f, foodCost });
+  }
 
   if (authLoading) return <LoadingSpinner message="Chargement..." />;
   if (!mama_id) return null;
 
   return (
     <div className="p-8 max-w-3xl mx-auto">
-            <h1 className="text-2xl font-bold text-mamastock-gold mb-4">Carte des plats actifs</h1>
+      <h1 className="text-2xl font-bold text-mamastock-gold mb-4">Carte des plats actifs</h1>
       <div className="flex flex-wrap gap-2 mb-4 items-end">
         <input
           className="form-input"
@@ -65,9 +70,13 @@ export default function CartePlats() {
           onChange={(e) => setFamilleFilter(e.target.value)}
         >
           <option value="">Toutes familles</option>
-          {(familles ?? []).map((f) => (
-            <option key={f} value={f}>{f}</option>
-          ))}
+          {(() => {
+            const opts = [];
+            for (const f of Array.isArray(familles) ? familles : []) {
+              opts.push(<option key={f} value={f}>{f}</option>);
+            }
+            return opts;
+          })()}
         </select>
         <label className="flex items-center gap-1">
           <input
@@ -91,28 +100,30 @@ export default function CartePlats() {
             </tr>
           </thead>
           <tbody>
-            {filteredFiches.map(f => {
-              const foodCost =
-                f.prix_vente && f.cout_portion
-                  ? ((f.cout_portion / f.prix_vente) * 100).toFixed(1)
-                  : null;
-              return (
-                <tr key={f.id}>
-                  <td className="border px-2 py-1">{f.nom}</td>
-                  <td className="border px-2 py-1">{f.famille || "-"}</td>
-                  <td className="border px-2 py-1">{f.cout_portion ? Number(f.cout_portion).toFixed(2) : "-"}</td>
-                  <td className="border px-2 py-1">
-                    {f.prix_vente ? Number(f.prix_vente).toFixed(2) : "-"}
-                  </td>
-                  <td className={"border px-2 py-1 font-semibold " + (foodCost > FOOD_COST_SEUIL ? "text-red-600" : "")}>
-                    {foodCost ?? "-"}
-                  </td>
-                </tr>
-              );
-            })}
+            {(() => {
+              const rows = [];
+              for (const f of filteredFiches) {
+                const fc = f.foodCost !== null ? f.foodCost.toFixed(1) : null;
+                rows.push(
+                  <tr key={f.id}>
+                    <td className="border px-2 py-1">{f.nom}</td>
+                    <td className="border px-2 py-1">{f.famille || "-"}</td>
+                    <td className="border px-2 py-1">{f.cout_portion ? Number(f.cout_portion).toFixed(2) : "-"}</td>
+                    <td className="border px-2 py-1">
+                      {f.prix_vente ? Number(f.prix_vente).toFixed(2) : "-"}
+                    </td>
+                    <td className={"border px-2 py-1 font-semibold " + (fc > FOOD_COST_SEUIL ? "text-red-600" : "")}>
+                      {fc ?? "-"}
+                    </td>
+                  </tr>
+                );
+              }
+              return rows;
+            })()}
           </tbody>
         </table>
       </TableContainer>
     </div>
   );
 }
+

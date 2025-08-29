@@ -22,7 +22,12 @@ router.get('/', async (req, res) => {
   try {
     const supabase = getSupabaseClient();
     if (!supabase) throw new Error('Missing Supabase credentials');
-    let query = supabase.from(TABLES.MOUVEMENTS).select('*').eq('mama_id', mama_id);
+    let query = supabase
+      .from(TABLES.MOUVEMENTS)
+      .select(
+        'id, mama_id, inventaire_id, created_at, updated_at, actif, date, type, quantite, produit_id, zone_source_id, zone_destination_id, commentaire, auteur_id, zone_id'
+      )
+      .eq('mama_id', mama_id);
     if (since) query = query.gte('date', since);
     if (type) query = query.eq('type', type);
     query = query.order(sortBy, { ascending: order === 'asc' });
@@ -32,7 +37,8 @@ router.get('/', async (req, res) => {
     const end = start + l - 1;
     const { data, error } = await query.range(start, end);
     if (error) throw error;
-    res.json(data || []);
+    const rows = Array.isArray(data) ? data : [];
+    res.json(rows);
   } catch (err) {
     if (String(err?.message).includes('Missing Supabase credentials')) {
       res.status(500).json({ error: 'Missing Supabase credentials' });

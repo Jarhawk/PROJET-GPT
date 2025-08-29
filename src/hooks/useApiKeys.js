@@ -18,13 +18,13 @@ export function useApiKeys() {
       .select('id, mama_id, user_id, name, scopes, role, expiration, revoked, created_at')
       .eq('mama_id', mama_id)
       .order('created_at', { ascending: false });
+    const rows = Array.isArray(data) ? data : [];
     if (error) {
       setError(error.message || error);
       setKeys([]);
       setLoading(false);
-      return [];
+      return rows;
     }
-    const rows = Array.isArray(data) ? data : [];
     setKeys(rows);
     setLoading(false);
     return rows;
@@ -46,8 +46,10 @@ export function useApiKeys() {
     }
     if (data)
       setKeys((k) => {
-        const list = Array.isArray(k) ? k : [];
-        return [data, ...list];
+        const arr = Array.isArray(k) ? k : [];
+        const next = [data];
+        for (const key of arr) next.push(key);
+        return next;
       });
     setLoading(false);
     return { data };
@@ -68,8 +70,12 @@ export function useApiKeys() {
       return { error };
     }
     setKeys((k) => {
-      const list = Array.isArray(k) ? k : [];
-      return list.map((key) => (key.id === id ? { ...key, revoked: true } : key));
+      const arr = Array.isArray(k) ? k : [];
+      const next = [];
+      for (const key of arr) {
+        next.push(key.id === id ? { ...key, revoked: true } : key);
+      }
+      return next;
     });
     setLoading(false);
     return { error: null };

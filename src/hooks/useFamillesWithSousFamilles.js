@@ -28,10 +28,18 @@ export function useFamillesWithSousFamilles() {
       setError(famRes.error || sousRes.error);
       setFamilles([]);
     } else {
-      const grouped = (famRes.data || []).map((f) => ({
-        ...f,
-        sous_familles: (sousRes.data || []).filter((sf) => sf.famille_id === f.id),
-      }));
+      const famList = Array.isArray(famRes.data) ? famRes.data : [];
+      const sousList = Array.isArray(sousRes.data) ? sousRes.data : [];
+      const grouped = [];
+      for (const f of famList) {
+        const sfList = [];
+        for (const sf of sousList) {
+          if (sf.famille_id === f.id) {
+            sfList.push(sf);
+          }
+        }
+        grouped.push({ ...f, sous_familles: sfList });
+      }
       setFamilles(grouped);
     }
     setLoading(false);

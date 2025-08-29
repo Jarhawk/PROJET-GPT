@@ -15,14 +15,18 @@ export function useZoneProducts() {
       .order('nom', { ascending: true });
     if (error) throw error;
     const rows = Array.isArray(data) ? data : [];
-    return rows.map(p => ({
-      id: p.id,
-      produit_id: p.id,
-      produit_nom: p.nom,
-      unite_id: p.unite_id,
-      stock_reel: p.stock_reel,
-      stock_min: p.stock_min,
-    }));
+    const out = [];
+    for (const p of rows) {
+      out.push({
+        id: p.id,
+        produit_id: p.id,
+        produit_nom: p.nom,
+        unite_id: p.unite_id,
+        stock_reel: p.stock_reel,
+        stock_min: p.stock_min,
+      });
+    }
+    return out;
   }
 
   async function move(srcZoneId, dstZoneId, removeSrc) {

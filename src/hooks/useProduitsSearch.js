@@ -6,14 +6,19 @@ import { getQueryClient } from '@/lib/react-query';
 import { useAuth } from '@/hooks/useAuth';
 
 function normalize(list = []) {
-  return list.map((p) => ({
-    id: p.id ?? p.produit_id ?? null,
-    nom: p.nom ?? null,
-    // unite_id est nécessaire pour hydrater l'unité dans les formulaires
-    unite_id: p.unite_id ?? null,
-    tva: p.tva ?? null,
-    zone_id: p.zone_stock_id ?? null,
-  }));
+  const arr = Array.isArray(list) ? list : [];
+  const out = [];
+  for (const p of arr) {
+    out.push({
+      id: p.id ?? p.produit_id ?? null,
+      nom: p.nom ?? null,
+      // unite_id est nécessaire pour hydrater l'unité dans les formulaires
+      unite_id: p.unite_id ?? null,
+      tva: p.tva ?? null,
+      zone_id: p.zone_stock_id ?? null,
+    });
+  }
+  return out;
 }
 
 export function useProduitsSearch(

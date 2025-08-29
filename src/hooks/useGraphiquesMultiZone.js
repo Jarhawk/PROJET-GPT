@@ -15,11 +15,11 @@ export function useGraphiquesMultiZone() {
     setError(null);
     try {
       let { data: zones, error } = await supabase
-        .from("zones_stock")
-        .select("id,nom,type,parent_id,position,actif,created_at")
-        .eq("mama_id", mama_id)
-        .order("position", { ascending: true })
-        .order("nom", { ascending: true });
+        .from('zones_stock')
+        .select('id,nom,type,parent_id,position,actif,created_at')
+        .eq('mama_id', mama_id)
+        .order('position', { ascending: true })
+        .order('nom', { ascending: true });
 
       if (error) {
         console.info('[zones_stock] fetch failed; fallback list (no order)', { code: error.code, message: error.message });
@@ -30,23 +30,29 @@ export function useGraphiquesMultiZone() {
         zones = alt.data ?? [];
       }
 
-      let allData = [];
-      for (const zone of zones || []) {
+      const zoneList = Array.isArray(zones) ? zones : [];
+      const allData = [];
+
+      for (const zone of zoneList) {
         const { data: inventaires, error: errorInv } = await supabase
-          .from("inventaires")
-          .select("date")
-          .eq("mama_id", mama_id)
-          .eq("zone", zone.nom)
-          .order("date_inventaire", { ascending: true });
+          .from('inventaires')
+          .select('date:date_inventaire')
+          .eq('mama_id', mama_id)
+          .eq('zone', zone.nom)
+          .order('date_inventaire', { ascending: true });
 
         if (errorInv) throw errorInv;
 
-          allData.push({
-            zone: zone.nom,
-            points: (inventaires || []).map(inv => ({
-              date: inv.date_inventaire,
-            })),
-          });
+        const invRows = Array.isArray(inventaires) ? inventaires : [];
+        const points = [];
+        for (const inv of invRows) {
+          points.push({ date: inv.date });
+        }
+
+        allData.push({
+          zone: zone.nom,
+          points,
+        });
       }
       setData(allData);
     } catch (err) {

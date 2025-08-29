@@ -7,10 +7,9 @@ const queryObj = {
   order: vi.fn(() => queryObj),
   eq: vi.fn(() => queryObj),
   ilike: vi.fn(() => queryObj),
-  or: vi.fn(() => queryObj),
   insert: vi.fn(() => queryObj),
   delete: vi.fn(() => queryObj),
-  single: vi.fn(() => Promise.resolve({ data: { url: '/f' }, error: null })),
+  single: vi.fn(() => Promise.resolve({ data: { chemin: '/f' }, error: null })),
 };
 const fromMock = vi.fn(() => queryObj);
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
@@ -34,16 +33,16 @@ test('listDocuments queries documents with search', async () => {
   const { result } = renderHook(() => useDocuments());
   await act(async () => { await result.current.listDocuments({ search: 'foo' }); });
   expect(fromMock).toHaveBeenCalledWith('documents');
-  expect(queryObj.select).toHaveBeenCalledWith('*');
+  expect(queryObj.select).toHaveBeenCalledWith('id, chemin, type, mama_id, created_at');
   expect(queryObj.eq).toHaveBeenCalledWith('mama_id', 'm1');
-  expect(queryObj.or).toHaveBeenCalledWith('nom.ilike.%foo%,titre.ilike.%foo%');
+  expect(queryObj.ilike).toHaveBeenCalledWith('chemin', '%foo%');
 });
 
-test('uploadDocument inserts row with metadata', async () => {
+test('uploadDocument inserts row', async () => {
   queryObj.select.mockReturnValue(queryObj);
-  queryObj.single.mockReturnValue(Promise.resolve({ data: { id: '1' }, error: null }));
+  queryObj.single.mockReturnValue(Promise.resolve({ data: { id: '1', chemin: '/f', type: 'text/plain', mama_id: 'm1' }, error: null }));
   const { result } = renderHook(() => useDocuments());
   const file = new File(['a'], 'file.txt', { type: 'text/plain' });
-  await act(async () => { await result.current.uploadDocument(file, { categorie: 'c' }); });
+  await act(async () => { await result.current.uploadDocument(file); });
   expect(queryObj.insert).toHaveBeenCalled();
 });

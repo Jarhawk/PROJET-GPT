@@ -111,7 +111,7 @@ export default function ZoneAccess() {
             ou shop.
           </p>
           <ul className="space-y-2">
-            {rights.map((r) => (
+            {(Array.isArray(rights) ? rights : []).map((r) => (
               <li
                 key={r.id}
                 className="flex justify-between items-center text-sm"

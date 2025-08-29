@@ -16,7 +16,7 @@ export function useAnalytique() {
     let query = supabase
       .from("v_analytique_stock")
       .select(
-        "famille, activite, cost_center_id, cost_center_nom, sum:quantite, sumv:valeur"
+        "famille, activite, cost_center_id, cost_center_nom, sum:sum(quantite), sumv:sum(valeur)"
       )
       .eq("mama_id", mama_id)
       .group("famille, activite, cost_center_id, cost_center_nom");
@@ -27,14 +27,15 @@ export function useAnalytique() {
       console.error("getVentilationProduits", error);
       return [];
     }
-    return data || [];
+    const rows = Array.isArray(data) ? data : [];
+    return rows;
   }
 
   async function getEcartsParFamille(periode = {}) {
     if (!mama_id) return [];
     let query = supabase
       .from("v_analytique_stock")
-      .select("famille, sumv:valeur")
+      .select("famille, sumv:sum(valeur)")
       .eq("mama_id", mama_id)
       .group("famille");
     query = applyPeriode(query, periode);
@@ -43,14 +44,15 @@ export function useAnalytique() {
       console.error("getEcartsParFamille", error);
       return [];
     }
-    return data || [];
+    const rows = Array.isArray(data) ? data : [];
+    return rows;
   }
 
   async function getConsommationParActivite(periode = {}, centre_id = null) {
     if (!mama_id) return [];
     let query = supabase
       .from("v_analytique_stock")
-      .select("activite, sumv:valeur")
+      .select("activite, sumv:sum(valeur)")
       .eq("mama_id", mama_id)
       .group("activite");
     if (centre_id) query = query.eq("cost_center_id", centre_id);
@@ -60,7 +62,8 @@ export function useAnalytique() {
       console.error("getConsommationParActivite", error);
       return [];
     }
-    return data || [];
+    const rows = Array.isArray(data) ? data : [];
+    return rows;
   }
 
   return { getVentilationProduits, getEcartsParFamille, getConsommationParActivite };

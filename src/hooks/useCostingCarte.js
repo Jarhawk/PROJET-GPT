@@ -21,7 +21,7 @@ export function useCostingCarte() {
       try {
         let query = supabase
           .from('v_costing_carte')
-          .select('*')
+          .select('id, nom, type, cout_par_portion, prix_vente, marge_euro, marge_pct, food_cost_pct, famille, actif, mama_id')
           .eq('mama_id', mama_id)
 
         if (filters.type) query = query.eq('type', filters.type)
@@ -72,15 +72,18 @@ export function useCostingCarte() {
     const headers = [
       ['Nom fiche', 'Type', 'Coût/portion', 'Prix vente', 'Marge €', 'Marge %', 'Food cost %'],
     ]
-    const body = list.map((r) => [
-      r.nom,
-      r.type,
-      r.cout_par_portion ?? '',
-      r.prix_vente ?? '',
-      r.marge_euro ?? '',
-      r.marge_pct ?? '',
-      r.food_cost_pct ?? '',
-    ])
+    const body = []
+    for (const r of list) {
+      body.push([
+        r.nom,
+        r.type,
+        r.cout_par_portion ?? '',
+        r.prix_vente ?? '',
+        r.marge_euro ?? '',
+        r.marge_pct ?? '',
+        r.food_cost_pct ?? '',
+      ])
+    }
     doc.autoTable({ head: headers, body })
     doc.save('costing_carte.pdf')
   }, [])

@@ -15,21 +15,28 @@ export function useConsolidation() {
 
   // Liste des sites accessibles par l'utilisateur
   const fetchSites = useCallback(async () => {
+    if (!currentMamaId) return [];
     setLoading(true);
     const { data, error } = await supabase
-      .from('user_mama_access')
-      .select('mama_id, role');
+      .from('mamas')
+      .select('id, nom')
+      .eq('id', currentMamaId);
     setLoading(false);
     if (error) {
       setError(error.message || error);
       setSites([]);
       return [];
     }
-    const rows = Array.isArray(data) ? data : [];
+    const rows = [];
+    if (Array.isArray(data)) {
+      for (const m of data) {
+        rows.push({ mama_id: m.id, nom: m.nom });
+      }
+    }
     setError(null);
     setSites(rows);
     return rows;
-  }, []);
+  }, [currentMamaId]);
 
   // Vue consolidation mensuelle
   const fetchConsoMensuelle = useCallback(
@@ -69,7 +76,8 @@ export function useConsolidation() {
     const doc = new JSPDF();
     if (list.length > 0) {
       const head = [Object.keys(list[0])];
-      const body = list.map((r) => Object.values(r));
+      const body = [];
+      for (const r of list) body.push(Object.values(r));
       doc.autoTable({ head, body });
     }
     doc.save("consolidation.pdf");

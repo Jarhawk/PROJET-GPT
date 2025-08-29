@@ -17,12 +17,15 @@ export default function CatalogueSyncViewer({ fournisseur_id }) {
     setLoading(true);
     let query = supabase
       .from("catalogue_updates")
-      .select("*, produit:produit_id(nom)")
+      .select(
+        "id, mama_id, fournisseur_id, produit_id, ancienne_valeur, nouvelle_valeur, modification, created_at, produit:produit_id(nom)"
+      )
       .eq("mama_id", mama_id)
       .order("created_at", { ascending: false });
     if (fournisseur_id) query = query.eq("fournisseur_id", fournisseur_id);
     query.then(({ data }) => {
-      setItems(data || []);
+      const rows = Array.isArray(data) ? data : [];
+      setItems(rows);
       setLoading(false);
     });
   }, [mama_id, fournisseur_id]);
@@ -74,7 +77,7 @@ export default function CatalogueSyncViewer({ fournisseur_id }) {
             </tr>
           </thead>
           <tbody>
-            {items.map((u) => (
+            {(Array.isArray(items) ? items : []).map((u) => (
               <tr key={u.id}>
                 <td className="border px-2 py-1">{u.produit?.nom || u.produit_id}</td>
                 <td className="border px-2 py-1">{u.ancienne_valeur}</td>

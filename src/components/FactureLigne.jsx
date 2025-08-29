@@ -83,14 +83,35 @@ export default function FactureLigne({
   }
 
   const linesArr = Array.isArray(allLines) ? allLines : [];
-  const excludeIdsSameZone = linesArr
-    .filter(
-      (l) =>
-        l.id !== line.id && (l.zone_id ?? null) === (line.zone_id ?? null) && !!l.produit_id
-    )
-    .map((l) => l.produit_id);
+  const excludeIdsSameZone = [];
+  for (const l of linesArr) {
+    if (
+      l.id !== line.id &&
+      (l.zone_id ?? null) === (line.zone_id ?? null) &&
+      l.produit_id
+    ) {
+      excludeIdsSameZone.push(l.produit_id);
+    }
+  }
 
   const TVA_OPTIONS = [0, 5.5, 10, 20];
+  const tvaItems = [];
+  for (const t of TVA_OPTIONS) {
+    tvaItems.push(
+      <SelectItem key={t} value={String(t)}>
+        {t}%
+      </SelectItem>
+    );
+  }
+
+  const zoneItems = [];
+  for (const z of Array.isArray(zones) ? zones : []) {
+    zoneItems.push(
+      <SelectItem key={z.id} value={z.id}>
+        {z.nom}
+      </SelectItem>
+    );
+  }
 
   function openProductPicker() {
     setModalOpen(true);
@@ -202,31 +223,21 @@ export default function FactureLigne({
         <SelectTrigger className="w-28">
           <SelectValue placeholder="TVA (%)" />
         </SelectTrigger>
-        <SelectContent>
-          {TVA_OPTIONS.map((t) => (
-            <SelectItem key={t} value={String(t)}>
-              {t}%
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <Select
-        value={line.zone_id ?? '__none__'}
-        onValueChange={(v) => onChange({ zone_id: v === '__none__' ? null : v })}
-      >
-        <SelectTrigger className="w-44">
-          <SelectValue placeholder="Zone (optionnel)" />
-        </SelectTrigger>
+          <SelectContent>{tvaItems}</SelectContent>
+        </Select>
+        <Select
+          value={line.zone_id ?? '__none__'}
+          onValueChange={(v) => onChange({ zone_id: v === '__none__' ? null : v })}
+        >
+          <SelectTrigger className="w-44">
+            <SelectValue placeholder="Zone (optionnel)" />
+          </SelectTrigger>
           <SelectContent>
-          <SelectItem value="__none__">Aucune</SelectItem>
-          {(Array.isArray(zones) ? zones : []).map((z) => (
-            <SelectItem key={z.id} value={z.id}>
-              {z.nom}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <Button
+            <SelectItem value="__none__">Aucune</SelectItem>
+            {zoneItems}
+          </SelectContent>
+        </Select>
+        <Button
         type="button"
         variant="ghost"
         size="icon"

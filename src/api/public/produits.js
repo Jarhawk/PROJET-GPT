@@ -24,7 +24,9 @@ router.get('/', async (req, res) => {
     if (!supabase) throw new Error('Missing Supabase credentials');
     let query = supabase
       .from('v_produits_dernier_prix')
-      .select('*')
+      .select(
+        'produit_id, nom, famille_id, famille, unite_id, unite, stock_reel, stock_min, fournisseur_id, fournisseur, dernier_prix, date_livraison, mama_id'
+      )
       .eq('mama_id', mama_id);
     if (famille) query = query.ilike('famille', `%${famille}%`);
     if (search) query = query.ilike('nom', `%${search}%`);
@@ -48,7 +50,8 @@ router.get('/', async (req, res) => {
     const end = start + l - 1;
     const { data, error } = await query.range(start, end);
     if (error) throw error;
-    res.json(data || []);
+    const rows = Array.isArray(data) ? data : [];
+    res.json(rows);
   } catch (err) {
     if (String(err?.message).includes('Missing Supabase credentials')) {
       res.status(500).json({ error: 'Missing Supabase credentials' });

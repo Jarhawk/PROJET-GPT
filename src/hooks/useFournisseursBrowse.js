@@ -41,7 +41,8 @@ export default function useFournisseursBrowse({
           .range(start, end);
         if (error) throw error;
         if (!aborted) {
-          setData(data || []);
+          const rows = Array.isArray(data) ? data : [];
+          setData(rows);
           setTotal(count || 0);
         }
       } catch (err) {

@@ -20,20 +20,25 @@ export function useGlobalSearch() {
         .eq('mama_id', mama_id)
         .ilike('nom', `%${q}%`),
       supabase
-        .from('fiches')
-        .select('id, nom:titre')
+        .from('fiches_techniques')
+        .select('id, nom')
         .eq('mama_id', mama_id)
-        .ilike('titre', `%${q}%`),
+        .ilike('nom', `%${q}%`),
     ]);
 
-    const pRows = Array.isArray(produits) ? produits : [];
-    const fRows = Array.isArray(fiches) ? fiches : [];
-
-    const merged = [
-      ...pRows.map(p => ({ type: 'produit', id: p.id, nom: p.nom })),
-      ...fRows.map(f => ({ type: 'fiche', id: f.id, nom: f.nom })),
-    ].slice(0, 2);
-
+    const prodList = [];
+    if (Array.isArray(produits)) {
+      for (const p of produits) {
+        prodList.push({ type: 'produit', id: p.id, nom: p.nom });
+      }
+    }
+    const ficheList = [];
+    if (Array.isArray(fiches)) {
+      for (const f of fiches) {
+        ficheList.push({ type: 'fiche', id: f.id, nom: f.nom });
+      }
+    }
+    const merged = prodList.concat(ficheList).slice(0, 2);
     setResults(merged);
     return merged;
   }

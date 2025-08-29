@@ -14,6 +14,19 @@ export default function EngineeringMenu() {
   if (authLoading || loading) return <LoadingSpinner message="Chargement..." />;
   if (!access_rights?.analyse?.peut_voir) return <Navigate to="/unauthorized" replace />;
 
+  const rows = Array.isArray(data) ? data : [];
+  const bodyRows = [];
+  for (const row of rows) {
+    bodyRows.push(
+      <tr key={row.fiche_id || row.id}>
+        <td className="px-2 py-1">{row.nom}</td>
+        <td className="px-2 py-1">{row.cout ? Number(row.cout).toFixed(2) : '-'}</td>
+        <td className="px-2 py-1">{row.volume}</td>
+        <td className="px-2 py-1">{(Number(row.popularite) * 100).toFixed(1)}%</td>
+      </tr>
+    );
+  }
+
   return (
     <div className="p-6 space-y-4 text-shadow">
       <h1 className="text-2xl font-bold">Engineering Menu</h1>
@@ -26,16 +39,7 @@ export default function EngineeringMenu() {
             <th className="px-2 py-1">Popularité</th>
           </tr>
         </thead>
-        <tbody>
-          {data.map(row => (
-            <tr key={row.fiche_id || row.id}>
-              <td className="px-2 py-1">{row.nom}</td>
-              <td className="px-2 py-1">{row.cout ? Number(row.cout).toFixed(2) : '-'}</td>
-              <td className="px-2 py-1">{row.volume}</td>
-              <td className="px-2 py-1">{(Number(row.popularite) * 100).toFixed(1)}%</td>
-            </tr>
-          ))}
-        </tbody>
+        <tbody>{bodyRows}</tbody>
       </table>
     </div>
   );

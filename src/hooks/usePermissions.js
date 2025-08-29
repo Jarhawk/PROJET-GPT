@@ -75,14 +75,18 @@ export function usePermissions() {
 
   // 5. Export Excel
   function exportPermissionsToExcel() {
-    const datas = (permissions || []).map(p => ({
-      id: p.id,
-      role_id: p.role_id,
-      user_id: p.user_id,
-      droit: p.droit,
-      actif: p.actif,
-      mama_id: p.mama_id,
-    }));
+    const list = Array.isArray(permissions) ? permissions : [];
+    const datas = [];
+    for (const p of list) {
+      datas.push({
+        id: p.id,
+        role_id: p.role_id,
+        user_id: p.user_id,
+        droit: p.droit,
+        actif: p.actif,
+        mama_id: p.mama_id,
+      });
+    }
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Permissions");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });

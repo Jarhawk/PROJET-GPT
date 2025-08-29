@@ -43,7 +43,8 @@ export function useMenus() {
         { count: "exact" }
       )
       .eq("mama_id", mama_id)
-      .eq("fiches.mama_id", mama_id);
+      .eq("fiches.mama_id", mama_id)
+      .eq("fiches.fiche.mama_id", mama_id);
 
     if (search) query = query.ilike("nom", `%${search}%`);
     if (date) query = query.eq("date", date);
@@ -54,24 +55,28 @@ export function useMenus() {
     const { data, count, error } = await query
       .order("date", { ascending: false })
       .range(offset, offset + limit - 1);
-    const rows = Array.isArray(data)
-      ? data.map((m) => ({
-          ...m,
-          fiches: Array.isArray(m.fiches)
-            ? m.fiches.map((f) => ({
-                fiche_id: f.fiche_id,
-                fiche: f.fiche
-                  ? {
-                      ...f.fiche,
-                      cout_par_portion: f.fiche.cout_par_portion
-                        ? Number(f.fiche.cout_par_portion)
-                        : null,
-                    }
-                  : null,
-              }))
-            : [],
-        }))
-      : [];
+    const rows = [];
+    if (Array.isArray(data)) {
+      for (const m of data) {
+        const fiches = [];
+        if (Array.isArray(m.fiches)) {
+          for (const f of m.fiches) {
+            fiches.push({
+              fiche_id: f.fiche_id,
+              fiche: f.fiche
+                ? {
+                    ...f.fiche,
+                    cout_par_portion: f.fiche.cout_par_portion
+                      ? Number(f.fiche.cout_par_portion)
+                      : null,
+                  }
+                : null,
+            });
+          }
+        }
+        rows.push({ ...m, fiches });
+      }
+    }
     setMenus(rows);
     setTotal(typeof count === "number" ? count : rows.length);
     setLoading(false);
@@ -93,11 +98,10 @@ export function useMenus() {
     if (error) { setError(error); setLoading(false); return; }
     // Ajout des fiches liées
     if (data?.id && Array.isArray(fiches) && fiches.length > 0) {
-      const fichesWithFk = fiches.map(fiche_id => ({
-        menu_id: data.id,
-        fiche_id,
-        mama_id,
-      }));
+      const fichesWithFk = [];
+      for (const fiche_id of fiches) {
+        fichesWithFk.push({ menu_id: data.id, fiche_id, mama_id });
+      }
       await supabase.from("menu_fiches").insert(fichesWithFk);
     }
     setLoading(false);
@@ -124,11 +128,10 @@ export function useMenus() {
         .delete()
         .eq("menu_id", id)
         .eq("mama_id", mama_id);
-      const fichesWithFk = fiches.map(fiche_id => ({
-        menu_id: id,
-        fiche_id,
-        mama_id,
-      }));
+      const fichesWithFk = [];
+      for (const fiche_id of fiches) {
+        fichesWithFk.push({ menu_id: id, fiche_id, mama_id });
+      }
       if (fichesWithFk.length > 0) {
         await supabase.from("menu_fiches").insert(fichesWithFk);
       }
@@ -150,13 +153,14 @@ export function useMenus() {
       .eq("id", id)
       .eq("mama_id", mama_id)
       .eq("fiches.mama_id", mama_id)
+      .eq("fiches.fiche.mama_id", mama_id)
       .single();
     setLoading(false);
     if (error) { setError(error); return null; }
-    const mapped = {
-      ...data,
-      fiches: Array.isArray(data?.fiches)
-        ? data.fiches.map((f) => ({
+      const fiches = [];
+      if (Array.isArray(data?.fiches)) {
+        for (const f of data.fiches) {
+          fiches.push({
             fiche_id: f.fiche_id,
             fiche: f.fiche
               ? {
@@ -168,10 +172,10 @@ export function useMenus() {
                   portions: f.fiche.portions ? Number(f.fiche.portions) : null,
                 }
               : null,
-          }))
-        : [],
-    };
-    return mapped;
+          });
+        }
+      }
+      return { ...data, fiches };
   }
 
   // 5. Supprimer un menu (désactivation logique)
@@ -206,16 +210,29 @@ export function useMenus() {
 
   // 7. Export Excel
   function exportMenusToExcel() {
-    const datas = Array.isArray(menus) ? menus.map(m => ({
-      id: m.id,
-      nom: m.nom,
-      date: m.date,
-      actif: m.actif,
-      fiches: Array.isArray(m.fiches) ? m.fiches.map(f => f.fiche?.nom).join(", ") : "",
-      mama_id: m.mama_id,
-    })) : [];
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Menus");
+      const datas = [];
+      if (Array.isArray(menus)) {
+        for (const m of menus) {
+          let ficheNames = "";
+          if (Array.isArray(m.fiches)) {
+            const names = [];
+            for (const f of m.fiches) {
+              if (f.fiche?.nom) names.push(f.fiche.nom);
+            }
+            ficheNames = names.join(", ");
+          }
+          datas.push({
+            id: m.id,
+            nom: m.nom,
+            date: m.date,
+            actif: m.actif,
+            fiches: ficheNames,
+            mama_id: m.mama_id,
+          });
+        }
+      }
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Menus");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     saveAs(new Blob([buf]), "menus_mamastock.xlsx");
   }

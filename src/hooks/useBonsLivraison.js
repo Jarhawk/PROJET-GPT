@@ -30,13 +30,14 @@ export function useBonsLivraison() {
     if (debut) q = q.gte("date_reception", debut);
     if (fin) q = q.lte("date_reception", fin);
     const { data, error, count } = await q;
+    const rows = Array.isArray(data) ? data : [];
     if (!error) {
-      setBons(Array.isArray(data) ? data : []);
+      setBons(rows);
       setTotal(count || 0);
     }
     setLoading(false);
     if (error) setError(error);
-    return Array.isArray(data) ? data : [];
+    return rows;
   }
 
   async function fetchBonLivraisonById(id) {
@@ -56,7 +57,8 @@ export function useBonsLivraison() {
       setError(error);
       return null;
     }
-    return data ? { ...data, lignes: Array.isArray(data.lignes) ? data.lignes : [] } : null;
+    const lignes = Array.isArray(data?.lignes) ? data.lignes : [];
+    return data ? { ...data, lignes } : null;
   }
 
   async function insertBonLivraison(bl) {
@@ -68,10 +70,14 @@ export function useBonsLivraison() {
       .insert([{ ...header, mama_id }])
       .select("id")
       .single();
-    const arr = Array.isArray(lignes) ? lignes : [];
-    if (!error && data?.id && arr.length) {
-      const rows = arr.map(l => ({ ...l, bl_id: data.id, mama_id }));
-      const { error: err2 } = await supabase.from("lignes_bl").insert(rows);
+    let rowsToInsert = [];
+    if (Array.isArray(lignes)) {
+      for (const l of lignes) {
+        rowsToInsert.push({ ...l, bl_id: data.id, mama_id });
+      }
+    }
+    if (!error && data?.id && rowsToInsert.length) {
+      const { error: err2 } = await supabase.from("lignes_bl").insert(rowsToInsert);
       if (err2) {
         setLoading(false);
         setError(err2);

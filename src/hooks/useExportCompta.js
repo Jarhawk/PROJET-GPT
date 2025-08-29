@@ -21,29 +21,34 @@ export default function useExportCompta() {
         'quantite, prix, tva, facture_id, factures:facture_id(date_facture, fournisseur:fournisseur_id(nom))'
       )
       .eq('mama_id', mama_id)
+      .eq('factures.mama_id', mama_id)
+      .eq('factures.fournisseur.mama_id', mama_id)
       .gte('factures.date_facture', start)
       .lt('factures.date_facture', endStr);
     if (error) {
       console.error(error);
       return [];
     }
-    return data || [];
+    const rows = Array.isArray(data) ? data : [];
+    return rows;
   }
 
   async function generateJournalCsv(month, download = true) {
     setLoading(true);
     const lignes = await fetchJournalLines(month);
-    const rows = lignes.map((l) => {
+    const list = Array.isArray(lignes) ? lignes : [];
+    const rows = [];
+    for (const l of list) {
       const ht = l.quantite * l.prix;
       const tva = ht * ((l.tva || 0) / 100);
-      return {
+      rows.push({
         date: l.factures?.date_facture,
         fournisseur: l.factures?.fournisseur?.nom || '',
         ht,
         tva,
         ttc: ht + tva,
-      };
-    });
+      });
+    }
     if (download) {
       exportToCSV(rows, { filename: `journal-achat-${month}.csv` });
       toast.success('Export généré');
@@ -60,21 +65,23 @@ export default function useExportCompta() {
       .eq('mama_id', mama_id)
       .eq('type', 'fournisseur');
     if (error) return {};
+    const rows = Array.isArray(data) ? data : [];
     const map = {};
-    for (const row of data) map[row.cle] = row.compte;
+    for (const row of rows) map[row.cle] = row.compte;
     return map;
   }
 
   async function exportToERP(month, endpoint, token) {
     try {
       const rows = await generateJournalCsv(month, false);
+      const arr = Array.isArray(rows) ? rows : [];
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ journal: rows }),
+        body: JSON.stringify({ journal: arr }),
       });
       if (!res.ok) throw new Error('API error');
       toast.success('Export envoyé');

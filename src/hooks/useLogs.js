@@ -49,9 +49,9 @@ export function useLogs() {
   }
 
   async function exportLogs(format = "csv") {
-    const list = Array.isArray(logs) ? logs : [];
+    const safe = Array.isArray(logs) ? logs : [];
     if (format === "xlsx") {
-      const ws = XLSX.utils.json_to_sheet(list);
+      const ws = XLSX.utils.json_to_sheet(safe);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Logs");
       const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
@@ -62,7 +62,16 @@ export function useLogs() {
       const autoTableMod = await import("jspdf-autotable");
       const autoTable = autoTableMod.default || autoTableMod;
       const doc = new jsPDF();
-      const rows = list.map((l) => [l.date_log, l.type, l.module, l.description, l.critique ? "oui" : "non"]);
+      const rows = [];
+      for (const l of safe) {
+        rows.push([
+          l.date_log,
+          l.type,
+          l.module,
+          l.description,
+          l.critique ? "oui" : "non",
+        ]);
+      }
       autoTable(doc, {
         head: [["Date", "Type", "Module", "Description", "Critique"]],
         body: rows,
@@ -70,10 +79,11 @@ export function useLogs() {
       doc.save("logs.pdf");
     } else {
       const header = "Date;Type;Module;Description;Critique\n";
-      const csv = list
-        .map((l) => `${l.date_log};${l.type};${l.module};${l.description};${l.critique}`)
-        .join("\n");
-      const blob = new Blob([header + csv], { type: "text/csv;charset=utf-8" });
+      let csv = "";
+      for (const l of safe) {
+        csv += `${l.date_log};${l.type};${l.module};${l.description};${l.critique}\n`;
+      }
+      const blob = new Blob([header + csv.trimEnd()], { type: "text/csv;charset=utf-8" });
       saveAs(blob, "logs.csv");
     }
   }

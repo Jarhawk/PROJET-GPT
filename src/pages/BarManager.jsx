@@ -82,40 +82,64 @@ export default function BarManager() {
 
   // Map boissons et ventes
   const ventesAgg = {};
-  ventes.forEach(v => {
-    ventesAgg[v.boisson_id] = (ventesAgg[v.boisson_id] || 0) + v.quantite;
-  });
-  const boissonsStats = boissons
-    .map(b => ({
+  const ventesList = Array.isArray(ventes) ? ventes : [];
+  for (const v of ventesList) {
+    ventesAgg[v.boisson_id] = (ventesAgg[v.boisson_id] || 0) + (v.quantite || 0);
+  }
+  const boissonsList = Array.isArray(boissons) ? boissons : [];
+  const allStats = [];
+  for (const b of boissonsList) {
+    const quantiteVendue = ventesAgg[b.id] || 0;
+    const margeUnitaire =
+      b.prix_vente && b.cout_portion ? b.prix_vente - b.cout_portion : 0;
+    const foodCost =
+      b.prix_vente && b.cout_portion ? (b.cout_portion / b.prix_vente) * 100 : null;
+    const totalMarge = quantiteVendue * margeUnitaire;
+    const totalCA = quantiteVendue * (b.prix_vente || 0);
+    allStats.push({
       ...b,
-      quantiteVendue: ventesAgg[b.id] || 0,
-      margeUnitaire: b.prix_vente && b.cout_portion ? b.prix_vente - b.cout_portion : 0,
-      foodCost: b.prix_vente && b.cout_portion ? (b.cout_portion / b.prix_vente) * 100 : null,
-      totalMarge: (ventesAgg[b.id] || 0) * (b.prix_vente && b.cout_portion ? b.prix_vente - b.cout_portion : 0),
-      totalCA: (ventesAgg[b.id] || 0) * (b.prix_vente || 0),
-    }))
-    .filter(b =>
-      b.nom?.toLowerCase().includes(search.toLowerCase()) ||
-      b.famille?.toLowerCase().includes(search.toLowerCase()) ||
-      b.type?.toLowerCase().includes(search.toLowerCase())
-    );
+      quantiteVendue,
+      margeUnitaire,
+      foodCost,
+      totalMarge,
+      totalCA,
+    });
+  }
+  const boissonsStats = [];
+  const s = search.toLowerCase();
+  for (const b of allStats) {
+    const n = b.nom ? b.nom.toLowerCase() : "";
+    const fam = b.famille ? b.famille.toLowerCase() : "";
+    const t = b.type ? b.type.toLowerCase() : "";
+    if (n.includes(s) || fam.includes(s) || t.includes(s)) boissonsStats.push(b);
+  }
   // Classement top ventes
   const topVentes = [...boissonsStats].sort((a, b) => b.quantiteVendue - a.quantiteVendue).slice(0, 10);
   // Classement top marges
   const topMarge = [...boissonsStats].sort((a, b) => b.totalMarge - a.totalMarge).slice(0, 10);
 
   // Stat globales
-  const ventesTot = boissonsStats.reduce((a, b) => a + b.quantiteVendue, 0);
-  const caTot = boissonsStats.reduce((a, b) => a + b.totalCA, 0);
-  const margeTot = boissonsStats.reduce((a, b) => a + b.totalMarge, 0);
-  const avgFC =
-    boissonsStats.filter(b => b.foodCost !== null).reduce((a, b) => a + b.foodCost, 0) /
-    (boissonsStats.filter(b => b.foodCost !== null).length || 1);
+  let ventesTot = 0;
+  let caTot = 0;
+  let margeTot = 0;
+  let fcSum = 0;
+  let fcCount = 0;
+  for (const b of boissonsStats) {
+    ventesTot += b.quantiteVendue;
+    caTot += b.totalCA;
+    margeTot += b.totalMarge;
+    if (b.foodCost !== null) {
+      fcSum += b.foodCost;
+      fcCount++;
+    }
+  }
+  const avgFC = fcSum / (fcCount || 1);
 
   // Export Excel/PDF
   const handleExportExcel = () => {
-    const ws = XLSX.utils.json_to_sheet(
-      boissonsStats.map(b => ({
+    const rows = [];
+    for (const b of boissonsStats) {
+      rows.push({
         Nom: b.nom,
         Type: b.type || b.famille || "",
         "Coût/portion (€)": b.cout_portion ? Number(b.cout_portion).toFixed(2) : "",
@@ -125,8 +149,9 @@ export default function BarManager() {
         "Marge unitaire (€)": b.margeUnitaire ? b.margeUnitaire.toFixed(2) : "",
         "Marge totale (€)": b.totalMarge ? b.totalMarge.toFixed(2) : "",
         "Chiffre d'affaires (€)": b.totalCA ? b.totalCA.toFixed(2) : "",
-      }))
-    );
+      });
+    }
+    const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "BarManager");
     XLSX.writeFile(wb, "BarManager.xlsx");
@@ -136,10 +161,9 @@ export default function BarManager() {
   const handleExportPDF = () => {
     const doc = new JSPDF();
     doc.text("Statistiques Bar Manager", 10, 12);
-    doc.autoTable({
-      startY: 20,
-      head: [["Nom", "Type", "Coût/portion", "PV", "FC (%)", "Ventes", "Marge €", "CA €"]],
-      body: boissonsStats.map(b => [
+    const pdfRows = [];
+    for (const b of boissonsStats) {
+      pdfRows.push([
         b.nom,
         b.type || b.famille || "",
         b.cout_portion ? Number(b.cout_portion).toFixed(2) : "-",
@@ -148,7 +172,12 @@ export default function BarManager() {
         b.quantiteVendue,
         b.margeUnitaire ? b.margeUnitaire.toFixed(2) : "-",
         b.totalCA ? b.totalCA.toFixed(2) : "-",
-      ]),
+      ]);
+    }
+    doc.autoTable({
+      startY: 20,
+      head: [["Nom", "Type", "Coût/portion", "PV", "FC (%)", "Ventes", "Marge €", "CA €"]],
+      body: pdfRows,
       styles: { fontSize: 9 }
     });
     doc.save("BarManager.pdf");

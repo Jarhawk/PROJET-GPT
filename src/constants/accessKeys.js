@@ -1,9 +1,10 @@
 import { MODULES } from '@/config/modules';
 
-const modules = Array.isArray(MODULES) ? MODULES : [];
+const MODULE_LIST = Array.isArray(MODULES) ? MODULES : [];
 
-export const MODULE_KEYS = Array.isArray(modules)
-  ? modules.map((m) => m.key)
-  : [];
+const keys = [];
+for (const m of MODULE_LIST) keys.push(m.key);
+
+export const MODULE_KEYS = keys;
 
 export const PUBLIC_MODULES = ['dashboard', 'home', 'debug'];

@@ -16,20 +16,13 @@ export function useDocuments() {
     setError(null);
     let query = supabase
       .from("documents")
-      .select("id, nom, type, taille, categorie, url, fichier_url, titre, commentaire, entite_liee_type, entite_liee_id, mama_id, created_at")
+      .select("id, chemin, type, mama_id, created_at")
       .eq("mama_id", mama_id)
       .order("created_at", { ascending: false });
 
-    if (filters.entite_liee_type)
-      query = query.eq("entite_liee_type", filters.entite_liee_type);
-    if (filters.entite_liee_id)
-      query = query.eq("entite_liee_id", filters.entite_liee_id);
-    if (filters.categorie) query = query.eq("categorie", filters.categorie);
     if (filters.type) query = query.eq("type", filters.type);
     if (filters.search) {
-      query = query.or(
-        `nom.ilike.%${filters.search}%,titre.ilike.%${filters.search}%`
-      );
+      query = query.ilike("chemin", `%${filters.search}%`);
     }
 
     const { data, error } = await query;
@@ -39,46 +32,36 @@ export function useDocuments() {
       setDocuments([]);
       return [];
     }
-    setDocuments(Array.isArray(data) ? data : []);
-    return data || [];
+    const rows = [];
+    if (Array.isArray(data)) {
+      for (const d of data) {
+        rows.push({ ...d, url: d.chemin });
+      }
+    }
+    setDocuments(rows);
+    return rows;
   }, [mama_id]);
 
   const uploadDocument = useCallback(
-    async (file, metadata = {}) => {
+    async (file) => {
       if (!mama_id || !file) return { error: "Aucun fichier" };
       setLoading(true);
       setError(null);
       try {
-        const folder = metadata.entite_liee_type
-          ? `${metadata.entite_liee_type}s`
-          : "misc";
-        const url = await uploadFile("mamastock-documents", file, folder);
+        const url = await uploadFile("mamastock-documents", file, "misc");
         const { data, error } = await supabase
           .from("documents")
-          .insert([
-            {
-              nom: file.name,
-              type: file.type,
-              taille: file.size,
-              categorie: metadata.categorie || null,
-              url,
-              fichier_url: url,
-              titre: metadata.titre || file.name,
-              commentaire: metadata.commentaire || null,
-              entite_liee_type: metadata.entite_liee_type || null,
-              entite_liee_id: metadata.entite_liee_id || null,
-              mama_id,
-            },
-          ])
-          .select("id, nom, type, taille, categorie, url, fichier_url, titre, commentaire, entite_liee_type, entite_liee_id, mama_id, created_at")
+          .insert([{ chemin: url, type: file.type, mama_id }])
+          .select("id, chemin, type, mama_id, created_at")
           .single();
         setLoading(false);
         if (error) {
           setError(error.message || error);
           return { error };
         }
-        setDocuments((d) => [data, ...d]);
-        return { data };
+        const row = { ...data, url: data.chemin };
+        setDocuments((d) => (Array.isArray(d) ? [row, ...d] : [row]));
+        return { data: row };
       } catch (err) {
         setLoading(false);
         setError(err.message || err);
@@ -93,7 +76,7 @@ export function useDocuments() {
       if (!id || !mama_id) return null;
       const { data, error } = await supabase
         .from("documents")
-        .select("fichier_url, url")
+        .select("chemin")
         .eq("id", id)
         .eq("mama_id", mama_id)
         .single();
@@ -101,7 +84,7 @@ export function useDocuments() {
         setError(error.message || error);
         return null;
       }
-      return data?.fichier_url || data?.url || null;
+      return data?.chemin || null;
     },
     [mama_id]
   );
@@ -113,7 +96,7 @@ export function useDocuments() {
       setError(null);
       const { data: doc, error: fetchError } = await supabase
         .from("documents")
-        .select("fichier_url, url")
+        .select("chemin")
         .eq("id", id)
         .eq("mama_id", mama_id)
         .single();
@@ -122,7 +105,7 @@ export function useDocuments() {
         setError(fetchError.message || fetchError);
         return { error: fetchError };
       }
-      const path = pathFromUrl(doc.fichier_url || doc.url);
+      const path = pathFromUrl(doc.chemin);
       try {
         await deleteFile("mamastock-documents", path);
       } catch {
@@ -138,7 +121,14 @@ export function useDocuments() {
         setError(error.message || error);
         return { error };
       }
-      setDocuments((d) => d.filter((doc) => doc.id !== id));
+      setDocuments((d) => {
+        const list = Array.isArray(d) ? d : [];
+        const next = [];
+        for (const doc of list) {
+          if (doc.id !== id) next.push(doc);
+        }
+        return next;
+      });
       return { success: true };
     },
     [mama_id]

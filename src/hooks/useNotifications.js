@@ -57,7 +57,9 @@ export default function useNotifications() {
       setError(null);
       let query = supabase
         .from("notifications")
-        .select("*")
+        .select(
+          "id, mama_id, user_id, titre, texte, lien, type, lu, created_at, actif"
+        )
         .eq("mama_id", mama_id)
         .eq("user_id", user_id)
         .order("created_at", { ascending: false });
@@ -69,8 +71,9 @@ export default function useNotifications() {
         setItems([]);
         return [];
       }
-      setItems(Array.isArray(data) ? data : []);
-      return data || [];
+      const rows = Array.isArray(data) ? data : [];
+      setItems(rows);
+      return rows;
     },
     [mama_id, user_id]
   );
@@ -84,7 +87,14 @@ export default function useNotifications() {
         .eq("id", id)
         .eq("mama_id", mama_id)
         .eq("user_id", user_id);
-      setItems((ns) => ns.map((n) => (n.id === id ? { ...n, lu: true } : n)));
+      setItems((ns) => {
+        const arr = Array.isArray(ns) ? ns : [];
+        const updated = [];
+        for (const n of arr) {
+          updated.push(n.id === id ? { ...n, lu: true } : n);
+        }
+        return updated;
+      });
     },
     [mama_id, user_id]
   );
@@ -97,7 +107,14 @@ export default function useNotifications() {
       .eq('mama_id', mama_id)
       .eq('user_id', user_id)
       .eq('lu', false);
-    setItems((ns) => ns.map((n) => ({ ...n, lu: true })));
+    setItems((ns) => {
+      const arr = Array.isArray(ns) ? ns : [];
+      const updated = [];
+      for (const n of arr) {
+        updated.push({ ...n, lu: true });
+      }
+      return updated;
+    });
   }, [mama_id, user_id]);
 
   const fetchUnreadCount = useCallback(async () => {
@@ -115,7 +132,7 @@ export default function useNotifications() {
     if (!mama_id || !user_id) return null;
     const { data, error } = await supabase
       .from('notification_preferences')
-      .select('*')
+      .select('id, utilisateur_id, mama_id, email_enabled, webhook_enabled, webhook_url, webhook_token, updated_at')
       .eq('mama_id', mama_id)
       .eq('utilisateur_id', user_id)
       .single();
@@ -148,7 +165,14 @@ export default function useNotifications() {
         .eq('id', id)
         .eq('mama_id', mama_id)
         .eq('user_id', user_id);
-      setItems((ns) => ns.filter((n) => n.id !== id));
+      setItems((ns) => {
+        const arr = Array.isArray(ns) ? ns : [];
+        const kept = [];
+        for (const n of arr) {
+          if (n.id !== id) kept.push(n);
+        }
+        return kept;
+      });
     },
     [mama_id, user_id],
   );
@@ -162,10 +186,17 @@ export default function useNotifications() {
         .eq('id', id)
         .eq('mama_id', mama_id)
         .eq('user_id', user_id)
-        .select()
+        .select('id, mama_id, user_id, titre, texte, lien, type, lu, created_at, actif')
         .single();
       if (!error && data)
-        setItems((ns) => ns.map((n) => (n.id === id ? { ...n, ...data } : n)));
+        setItems((ns) => {
+          const arr = Array.isArray(ns) ? ns : [];
+          const updated = [];
+          for (const n of arr) {
+            updated.push(n.id === id ? { ...n, ...data } : n);
+          }
+          return updated;
+        });
       return { data, error };
     },
     [mama_id, user_id],
@@ -176,20 +207,20 @@ export default function useNotifications() {
       if (!mama_id || !user_id || !id) return { data: null, error: 'missing' };
       const { data, error } = await supabase
         .from('notifications')
-        .select('*')
+        .select('id, mama_id, user_id, titre, texte, lien, type, lu, created_at, actif')
         .eq('id', id)
         .eq('mama_id', mama_id)
         .eq('user_id', user_id)
         .single();
       if (!error && data) {
         setItems((ns) => {
-          const idx = ns.findIndex((n) => n.id === id);
+          const arr = Array.isArray(ns) ? ns.slice() : [];
+          const idx = arr.findIndex((n) => n.id === id);
           if (idx >= 0) {
-            const arr = ns.slice();
             arr[idx] = data;
             return arr;
           }
-          return [data, ...ns];
+          return [data, ...arr];
         });
       }
       return { data, error };
@@ -211,7 +242,7 @@ export default function useNotifications() {
             filter: `user_id=eq.${user_id}`,
           },
           (payload) => {
-            setItems((ns) => [payload.new, ...ns]);
+            setItems((ns) => [payload.new, ...(Array.isArray(ns) ? ns : [])]);
             if (handler) handler(payload.new);
           },
         )

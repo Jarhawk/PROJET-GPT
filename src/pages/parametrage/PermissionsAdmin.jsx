@@ -32,18 +32,22 @@ export default function PermissionsAdmin() {
 
   const fetchMamas = async () => {
     const { data } = await supabase.from('mamas').select('id, nom');
-    setMamas(data || []);
+    const rows = Array.isArray(data) ? data : [];
+    setMamas(rows);
   };
 
   const fetchRoles = async () => {
     setLoading(true);
     let query = supabase
       .from('roles')
-      .select('*')
+      .select('id, nom, description, actif, mama_id')
       .order('nom', { ascending: true });
     if (filterMama) query = query.eq('mama_id', filterMama);
     const { data, error } = await query;
-    if (!error) setRoles(data || []);
+    if (!error) {
+      const rows = Array.isArray(data) ? data : [];
+      setRoles(rows);
+    }
     setLoading(false);
   };
 

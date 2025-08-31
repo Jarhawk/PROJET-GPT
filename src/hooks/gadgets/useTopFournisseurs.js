@@ -17,7 +17,7 @@ export default function useTopFournisseurs() {
         const { data, error } = await supabase
           .from('v_top_fournisseurs')
           .select(
-            'fournisseur_id, montant:montant_total, nombre_achats, mama_id'
+            'fournisseur_id, nom:fournisseur, montant:montant_total, nombre_achats, mama_id'
           )
           .eq('mama_id', mama_id)
           .order('montant_total', { ascending: false })

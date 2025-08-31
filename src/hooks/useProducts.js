@@ -48,10 +48,10 @@ export function useProducts() {
       .from('produits')
       .select(
         `id, mama_id, nom, actif, famille_id, sous_famille_id, unite_id, zone_stock_id, pmp, stock_theorique, dernier_prix,
-         unite:unites!unite_id(nom, mama_id),
-         zone_stock:zones_stock!zone_stock_id(nom, mama_id),
-         famille:familles!famille_id(id, nom, mama_id),
-         sous_famille:sous_familles!sous_famille_id(id, nom, mama_id)`,
+         unite:unites!fk_produits_unite(nom, mama_id),
+         zone_stock:zones_stock!produits_zone_stock_id_fkey(nom, mama_id),
+         famille:familles!fk_produits_famille(id, nom, mama_id),
+         sous_famille:sous_familles!fk_produits_sous_famille(id, nom, mama_id)`,
         { count: 'exact' }
       )
       .eq('mama_id', mama_id)
@@ -253,13 +253,14 @@ export function useProducts() {
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
-      .from("fournisseur_produits")
+      .from('fournisseur_produits')
       .select(
-        "*, fournisseur:fournisseurs!fk_fournisseur_produits_fournisseur_id(id, nom), derniere_livraison:date_livraison"
+        'id, fournisseur_id, produit_id, prix_achat, mama_id, actif, derniere_livraison:date_livraison, fournisseur:fournisseurs!fk_fournisseur_produits_fournisseur_id(id, nom)'
       )
-      .eq("produit_id", productId)
-      .eq("mama_id", mama_id)
-      .order("date_livraison", { ascending: false });
+      .eq('produit_id', productId)
+      .eq('mama_id', mama_id)
+      .eq('fournisseur.mama_id', mama_id)
+      .order('date_livraison', { ascending: false });
     setLoading(false);
     if (error) {
       setError(error);
@@ -322,10 +323,18 @@ export function useProducts() {
       const { data, error } = await supabase
         .from("produits")
         .select(
-          "*, famille:familles!fk_produits_famille(nom), sous_famille:sous_familles!fk_produits_sous_famille(nom), main_fournisseur:fournisseur_id(id, nom), unite:unite_id (nom)"
+          `id, nom, actif, famille_id, sous_famille_id, unite_id, zone_stock_id, code, image, allergenes, pmp, stock_reel, stock_min, stock_theorique, fournisseur_id, dernier_prix, fiche_technique_id, prix_vente, photo_url, url_photo, seuil_min, tva,
+          famille:familles!fk_produits_famille(id, nom, mama_id),
+          sous_famille:sous_familles!fk_produits_sous_famille(id, nom, mama_id),
+          main_fournisseur:fournisseurs!fournisseur_id(id, nom, mama_id),
+          unite:unites!fk_produits_unite(nom, mama_id)`
         )
         .eq("id", id)
         .eq("mama_id", mama_id)
+        .eq("famille.mama_id", mama_id)
+        .eq("sous_famille.mama_id", mama_id)
+        .eq("unite.mama_id", mama_id)
+        .eq("main_fournisseur.mama_id", mama_id)
         .single();
       if (error) {
         setError(error);

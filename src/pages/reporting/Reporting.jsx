@@ -196,14 +196,22 @@ export default function Reporting() {
               </tr>
             </thead>
             <tbody>
-              {ecarts.map((e) => (
-                <tr key={e.produit_id} className="odd:bg-black/10">
-                  <td className="px-2 py-1">{e.produit}</td>
-                  <td className="px-2 py-1">
-                    {Number(e.ecart || 0).toLocaleString()}
-                  </td>
-                </tr>
-              ))}
+              {(() => {
+                const rows = [];
+                const list = Array.isArray(ecarts) ? ecarts : [];
+                for (let i = 0; i < list.length; i++) {
+                  const e = list[i];
+                  rows.push(
+                    <tr key={e.produit_id} className="odd:bg-black/10">
+                      <td className="px-2 py-1">{e.produit}</td>
+                      <td className="px-2 py-1">
+                        {Number(e.ecart || 0).toLocaleString()}
+                      </td>
+                    </tr>
+                  );
+                }
+                return rows;
+              })()}
             </tbody>
           </table>
         )}

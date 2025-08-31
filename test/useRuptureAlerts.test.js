@@ -31,7 +31,7 @@ test('fetchAlerts selects expected view columns', async () => {
   await fetchAlerts();
   expect(fromMock).toHaveBeenCalledWith('v_alertes_rupture');
   expect(queryBuilder.select).toHaveBeenCalledWith(
-    'mama_id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, manque'
+    'mama_id, produit_id, nom, unite, fournisseur:fournisseur_nom, stock_actuel, stock_min, manque'
   );
   expect(queryBuilder.eq).toHaveBeenCalledWith('mama_id', 'm1');
   expect(queryBuilder.order).toHaveBeenCalledWith('manque', { ascending: false });
@@ -46,7 +46,7 @@ test('fetchAlerts returns data', async () => {
           produit_id: 1,
           nom: 'p',
           unite: 'u',
-          fournisseur_nom: 'f',
+          fournisseur: 'f',
           stock_actuel: 5,
           stock_min: 10,
           manque: 5,

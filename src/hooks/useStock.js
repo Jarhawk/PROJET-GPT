@@ -17,13 +17,20 @@ export function useStock() {
     const { data, error } = await supabase
       .from("produits")
       .select(
-        "id, nom, unite_id, unite:unite_id (nom), stock_reel, stock_min, pmp, famille_id, sous_famille_id, famille:familles!fk_produits_famille(nom), sous_famille:sous_familles!fk_produits_sous_famille(nom)"
+        "id, nom, unite_id, unite:unites!fk_produits_unite(nom), stock_reel, stock_min, pmp, famille_id, sous_famille_id, famille:familles!fk_produits_famille(nom), sous_famille:sous_familles!fk_produits_sous_famille(nom)"
       )
-      .eq("mama_id", mama_id);
+      .eq("mama_id", mama_id)
+      .eq("famille.mama_id", mama_id)
+      .eq("sous_famille.mama_id", mama_id)
+      .eq("unite.mama_id", mama_id);
     setLoading(false);
-    if (error) setError(error);
-    setStocks(data || []);
-    return data;
+    if (error) {
+      setError(error);
+      return [];
+    }
+    const rows = Array.isArray(data) ? data : [];
+    setStocks(rows);
+    return rows;
   }, [mama_id]);
 
   async function fetchRotationStats(produit_id) {
@@ -32,7 +39,7 @@ export function useStock() {
       produit_id_param: produit_id,
     });
     if (error) return [];
-    return data || [];
+    return Array.isArray(data) ? data : [];
   }
 
   // ----- New helpers for stock module -----
@@ -59,7 +66,7 @@ export function useStock() {
       .eq("mama_id", mama_id)
       .order("date_inventaire", { ascending: false });
     if (error) return [];
-    return data || [];
+    return Array.isArray(data) ? data : [];
   }, [mama_id]);
 
   const createInventaire = useCallback(

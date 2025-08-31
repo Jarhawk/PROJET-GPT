@@ -105,9 +105,15 @@ export default function Familles() {
     if (error) toast.error(error.message || 'Erreur lors du changement de statut');
   };
 
-  const filtered = familles.filter((f) =>
-    f.nom.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = (() => {
+    const arr = Array.isArray(familles) ? familles : [];
+    const res = [];
+    const term = search.toLowerCase();
+    for (const f of arr) {
+      if (f.nom.toLowerCase().includes(term)) res.push(f);
+    }
+    return res;
+  })();
 
   if (authLoading || loading || actionLoading)
     return <LoadingSpinner message="Chargement..." />;
@@ -142,27 +148,33 @@ export default function Familles() {
                 </td>
               </tr>
             ) : (
-              filtered.map((f) => (
-                <FamilleRow
-                  key={f.id}
-                  famille={f}
-                  onEdit={setEdit}
-                  onDelete={(id) => {
-                    if (confirm('Supprimer cet élément ?')) {
-                      handleDelete(id);
-                    }
-                  }}
-                  onToggle={handleToggle}
-                  onAddSousFamille={handleAddSous}
-                  onUpdateSousFamille={handleUpdateSous}
-                  onDeleteSousFamille={(id) => {
-                    if (confirm('Supprimer cet élément ?')) {
-                      handleDeleteSous(id);
-                    }
-                  }}
-                  onToggleSousFamille={handleToggleSous}
-                />
-              ))
+              (() => {
+                const elements = [];
+                for (const f of filtered) {
+                  elements.push(
+                    <FamilleRow
+                      key={f.id}
+                      famille={f}
+                      onEdit={setEdit}
+                      onDelete={(id) => {
+                        if (confirm('Supprimer cet élément ?')) {
+                          handleDelete(id);
+                        }
+                      }}
+                      onToggle={handleToggle}
+                      onAddSousFamille={handleAddSous}
+                      onUpdateSousFamille={handleUpdateSous}
+                      onDeleteSousFamille={(id) => {
+                        if (confirm('Supprimer cet élément ?')) {
+                          handleDeleteSous(id);
+                        }
+                      }}
+                      onToggleSousFamille={handleToggleSous}
+                    />,
+                  );
+                }
+                return elements;
+              })()
             )}
           </tbody>
         </table>

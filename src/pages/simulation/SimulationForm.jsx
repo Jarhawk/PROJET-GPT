@@ -20,7 +20,7 @@ export default function SimulationForm({ addRecipe, setPrix }) {
       .from("fiches")
       .select("id, nom")
       .eq("mama_id", mama_id)
-      .then(({ data }) => setRecipes(data || []));
+      .then(({ data }) => setRecipes(Array.isArray(data) ? data : []));
   }, [mama_id, authLoading]);
 
   const handleAdd = () => {
@@ -28,7 +28,15 @@ export default function SimulationForm({ addRecipe, setPrix }) {
       toast.error("Sélectionnez une fiche");
       return;
     }
-    const recette = recipes.find(r => r.id === selectedId);
+    const list = Array.isArray(recipes) ? recipes : [];
+    let recette = null;
+    for (let i = 0; i < list.length; i++) {
+      const r = list[i];
+      if (r.id === selectedId) {
+        recette = r;
+        break;
+      }
+    }
     if (recette) {
       addRecipe(recette);
       setPrix("");
@@ -40,11 +48,19 @@ export default function SimulationForm({ addRecipe, setPrix }) {
     <GlassCard title="Ajouter une fiche" width="max-w-md">
       <Select value={selectedId} onChange={(e) => setSelectedId(e.target.value)}>
         <option value="">Sélectionner une fiche</option>
-        {recipes.map((r) => (
-          <option key={r.id} value={r.id}>
-            {r.nom}
-          </option>
-        ))}
+        {(() => {
+          const opts = [];
+          const list = Array.isArray(recipes) ? recipes : [];
+          for (let i = 0; i < list.length; i++) {
+            const r = list[i];
+            opts.push(
+              <option key={r.id} value={r.id}>
+                {r.nom}
+              </option>
+            );
+          }
+          return opts;
+        })()}
       </Select>
       <Input
         type="number"

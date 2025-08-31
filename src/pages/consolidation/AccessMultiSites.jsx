@@ -28,6 +28,8 @@ export default function AccessMultiSites() {
       });
   }, [mamaId]);
 
+  const safeRows = Array.isArray(rows) ? rows : [];
+
   return (
     <div className="p-4 space-y-4">
       <h1 className="text-2xl font-bold">Sites accessibles</h1>
@@ -43,12 +45,18 @@ export default function AccessMultiSites() {
               </tr>
             </thead>
             <tbody>
-              {rows.map((r) => (
-                <tr key={r.id}>
-                  <td>{r.id}</td>
-                  <td>{r.nom}</td>
-                </tr>
-              ))}
+              {(() => {
+                const items = [];
+                for (const r of safeRows) {
+                  items.push(
+                    <tr key={r.id}>
+                      <td>{r.id}</td>
+                      <td>{r.nom}</td>
+                    </tr>
+                  );
+                }
+                return items;
+              })()}
             </tbody>
           </table>
         </TableContainer>

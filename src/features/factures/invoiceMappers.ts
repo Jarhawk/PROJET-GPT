@@ -7,7 +7,7 @@ export function mapDbLineToUI(row: any) {
     produit_id: row.produit_id,
     produit_nom: row.produit?.nom ?? row.produit_nom ?? '',
     quantite: qte,
-    unite: row.produit?.unite ?? row.unite ?? '',
+    unite: row.produit?.unite?.nom ?? row.produit?.unite ?? row.unite ?? '',
     total_ht,
     pu_ht: qte > 0 ? total_ht / qte : 0,
     pmp: Number(row.produit?.pmp ?? row.pmp ?? 0),

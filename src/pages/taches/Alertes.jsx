@@ -41,19 +41,30 @@ export default function Alertes() {
             </tr>
           </thead>
           <tbody>
-            {(Array.isArray(alertes) ? alertes : []).map(a => (
-              <tr key={a.produit_id} className="">
-                <td className="border px-2 py-1">{a.nom}</td>
-                <td className="border px-2 py-1 text-right">{a.stock_min}</td>
-                <td className="border px-2 py-1 text-right">{a.stock_actuel}</td>
-                <td className="border px-2 py-1 text-right">{a.manque}</td>
-              </tr>
-            ))}
-            {(!Array.isArray(alertes) || alertes.length === 0) && !loading && (
-              <tr>
-                <td colSpan="4" className="py-4 text-center text-gray-500">Aucune alerte</td>
-              </tr>
-            )}
+            {(() => {
+              const rows = [];
+              const list = Array.isArray(alertes) ? alertes : [];
+              for (const a of list) {
+                rows.push(
+                  <tr key={a.produit_id} className="">
+                    <td className="border px-2 py-1">{a.nom}</td>
+                    <td className="border px-2 py-1 text-right">{a.stock_min}</td>
+                    <td className="border px-2 py-1 text-right">{a.stock_actuel}</td>
+                    <td className="border px-2 py-1 text-right">{a.manque}</td>
+                  </tr>
+                );
+              }
+              if (rows.length === 0 && !loading) {
+                rows.push(
+                  <tr key="empty">
+                    <td colSpan="4" className="py-4 text-center text-gray-500">
+                      Aucune alerte
+                    </td>
+                  </tr>
+                );
+              }
+              return rows;
+            })()}
           </tbody>
         </table>
       </TableContainer>

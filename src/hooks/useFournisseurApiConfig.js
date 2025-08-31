@@ -37,7 +37,9 @@ export function useFournisseurApiConfig() {
       .upsert([{ ...config, fournisseur_id, mama_id }], {
         onConflict: ['fournisseur_id', 'mama_id'],
       })
-      .select()
+      .select(
+        'fournisseur_id, mama_id, url, type_api, token, format_facture, actif, created_at'
+      )
       .single();
     setLoading(false);
     if (error) {

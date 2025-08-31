@@ -15,7 +15,7 @@ function normalize(list = []) {
       // unite_id est nécessaire pour hydrater l'unité dans les formulaires
       unite_id: p.unite_id ?? null,
       tva: p.tva ?? null,
-      zone_id: p.zone_stock_id ?? null,
+      zone_id: p.zone_id ?? null,
     });
   }
   return out;
@@ -42,7 +42,7 @@ export function useProduitsSearch(
       try {
         const { data, count, error } = await supabase
           .from('produits')
-          .select('id, nom, unite_id, tva, zone_stock_id', { count: 'exact' })
+          .select('id, nom, unite_id, tva, zone_id:zone_stock_id', { count: 'exact' })
           .eq('mama_id', mamaId)
           .eq('actif', true)
           .ilike('nom', `%${q}%`)

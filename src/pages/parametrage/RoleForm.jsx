@@ -64,20 +64,31 @@ export default function RoleForm({ role, onClose }) {
             </tr>
           </thead>
           <tbody>
-            {MODULES.map(mod => (
-              <tr key={mod}>
-                <td className="border p-1">{mod}</td>
-                {["lecture", "creation", "edition", "suppression"].map(action => (
-                  <td key={action} className="border p-1 text-center">
-                    <input
-                      type="checkbox"
-                      checked={accessRights?.[mod]?.[action] || false}
-                      onChange={() => toggle(mod, action)}
-                    />
-                  </td>
-                ))}
-              </tr>
-            ))}
+            {(() => {
+              const rows = [];
+              for (const mod of MODULES) {
+                const cells = [];
+                const actions = ["lecture", "creation", "edition", "suppression"];
+                for (const action of actions) {
+                  cells.push(
+                    <td key={action} className="border p-1 text-center">
+                      <input
+                        type="checkbox"
+                        checked={accessRights?.[mod]?.[action] || false}
+                        onChange={() => toggle(mod, action)}
+                      />
+                    </td>
+                  );
+                }
+                rows.push(
+                  <tr key={mod}>
+                    <td className="border p-1">{mod}</td>
+                    {cells}
+                  </tr>
+                );
+              }
+              return rows;
+            })()}
           </tbody>
         </table>
 

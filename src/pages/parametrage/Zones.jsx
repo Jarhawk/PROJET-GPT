@@ -83,57 +83,65 @@ export default function Zones() {
               <th className="px-2 py-1">Actions</th>
             </tr>
           </thead>
-          <tbody>
-            {rows.map((z) => (
-              <tr key={z.id} className="border-t border-white/10">
-                <td className="px-2 py-1">{z.nom}</td>
-                <td className="px-2 py-1">{z.type}</td>
-                <td className="px-2 py-1 text-center">
-                  <input
-                    type="checkbox"
-                    checked={z.actif}
-                    onChange={async () => {
-                      await updateZone(z.id, { actif: !z.actif });
-                      const refreshed = await fetchZones(filters);
-                      setRows(Array.isArray(refreshed) ? refreshed : []);
-                    }}
-                  />
-                </td>
-                <td className="px-2 py-1 flex gap-2 justify-center">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => navigate(`/parametrage/zones/${z.id}`)}
-                  >
-                    Éditer
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() =>
-                      navigate(`/parametrage/zones/${z.id}/droits`)
-                    }
-                  >
-                    Droits
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleDelete(z.id)}
-                  >
-                    Supprimer
-                  </Button>
-                </td>
-              </tr>
-            ))}
-            {rows.length === 0 && (
-              <tr>
-                <td colSpan="4" className="text-center py-2">
-                  Aucune zone
-                </td>
-              </tr>
-            )}
-          </tbody>
+            <tbody>
+              {(() => {
+                const items = [];
+                const list = Array.isArray(rows) ? rows : [];
+                for (let i = 0; i < list.length; i++) {
+                  const z = list[i];
+                  items.push(
+                    <tr key={z.id} className="border-t border-white/10">
+                      <td className="px-2 py-1">{z.nom}</td>
+                      <td className="px-2 py-1">{z.type}</td>
+                      <td className="px-2 py-1 text-center">
+                        <input
+                          type="checkbox"
+                          checked={z.actif}
+                          onChange={async () => {
+                            await updateZone(z.id, { actif: !z.actif });
+                            const refreshed = await fetchZones(filters);
+                            setRows(Array.isArray(refreshed) ? refreshed : []);
+                          }}
+                        />
+                      </td>
+                      <td className="px-2 py-1 flex gap-2 justify-center">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => navigate(`/parametrage/zones/${z.id}`)}
+                        >
+                          Éditer
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => navigate(`/parametrage/zones/${z.id}/droits`)}
+                        >
+                          Droits
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDelete(z.id)}
+                        >
+                          Supprimer
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                }
+                if (list.length === 0) {
+                  items.push(
+                    <tr key="empty">
+                      <td colSpan="4" className="text-center py-2">
+                        Aucune zone
+                      </td>
+                    </tr>
+                  );
+                }
+                return items;
+              })()}
+            </tbody>
         </table>
       </div>
     </div>

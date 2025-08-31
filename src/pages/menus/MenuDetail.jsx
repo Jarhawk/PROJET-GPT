@@ -6,13 +6,16 @@ import TableContainer from "@/components/ui/TableContainer";
 import { toast } from 'sonner';
 
 export default function MenuDetail({ menu, onClose, onDuplicate }) {
+  const fiches = Array.isArray(menu?.fiches) ? menu.fiches : [];
+
   // Export Excel d'un menu
   const exportExcel = () => {
     const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet([{
-      ...menu,
-      fiches: fiches.map(f => f.fiche?.nom).join(", ")
-    }]);
+    const names = [];
+    for (const f of fiches) {
+      names.push(f.fiche?.nom);
+    }
+    const ws = XLSX.utils.json_to_sheet([{ ...menu, fiches: names.join(", ") }]);
     XLSX.utils.book_append_sheet(wb, ws, "Menu");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     saveAs(new Blob([buf]), `menu_${menu.id}.xlsx`);
@@ -22,14 +25,11 @@ export default function MenuDetail({ menu, onClose, onDuplicate }) {
     toast.success("Export PDF non implémenté (plug jsPDF)");
   };
 
-  const fiches = menu.fiches || [];
   const totalCout = fiches.reduce((sum, f) => sum + (Number(f.fiche?.cout_total) || 0), 0);
   const totalPortions = fiches.reduce((sum, f) => sum + (Number(f.fiche?.portions) || 0), 0);
   const coutPortion = totalPortions > 0 ? totalCout / totalPortions : 0;
 
-  const historique = menu.historique || [
-    { date: "2024-06-10", user: "admin", action: "Création" }
-  ];
+  const historique = Array.isArray(menu?.historique) ? menu.historique : [];
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
@@ -49,13 +49,20 @@ export default function MenuDetail({ menu, onClose, onDuplicate }) {
                 </tr>
               </thead>
               <tbody>
-                {fiches.map((f, i) => (
-                  <tr key={i}>
-                    <td className="border px-2">{f.fiche?.nom}</td>
-                    <td className="border px-2 text-center">{f.fiche?.portions}</td>
-                    <td className="border px-2">{Number(f.fiche?.cout_total || 0).toFixed(2)} €</td>
-                  </tr>
-                ))}
+                {(() => {
+                  const rows = [];
+                  for (let i = 0; i < fiches.length; i++) {
+                    const f = fiches[i];
+                    rows.push(
+                      <tr key={i}>
+                        <td className="border px-2">{f.fiche?.nom}</td>
+                        <td className="border px-2 text-center">{f.fiche?.portions}</td>
+                        <td className="border px-2">{Number(f.fiche?.cout_total || 0).toFixed(2)} €</td>
+                      </tr>
+                    );
+                  }
+                  return rows;
+                })()}
               </tbody>
             </table>
           </TableContainer>
@@ -80,9 +87,14 @@ export default function MenuDetail({ menu, onClose, onDuplicate }) {
         <div className="mt-4">
           <b>Historique :</b>
           <ul className="list-disc pl-6">
-            {historique.map((h, i) =>
-              <li key={i}>{h.date} — {h.user} — {h.action}</li>
-            )}
+            {(() => {
+              const items = [];
+              for (let i = 0; i < historique.length; i++) {
+                const h = historique[i];
+                items.push(<li key={i}>{h.date} — {h.user} — {h.action}</li>);
+              }
+              return items;
+            })()}
           </ul>
         </div>
       </div>

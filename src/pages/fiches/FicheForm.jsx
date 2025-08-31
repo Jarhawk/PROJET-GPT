@@ -26,9 +26,12 @@ export default function FicheForm({ fiche, onClose }) {
   const [famille, setFamille] = useState(fiche?.famille || "");
   const [portions, setPortions] = useState(fiche?.portions || 1);
   const [rendement, setRendement] = useState(fiche?.rendement || 1);
-  const [lignes, setLignes] = useState(
-    (fiche?.lignes || []).map(l => ({ type: "produit", ...l }))
-  );
+    const initLinesSrc = Array.isArray(fiche?.lignes) ? fiche.lignes : [];
+    const initLines = [];
+    for (const l of initLinesSrc) {
+      initLines.push({ type: 'produit', ...l });
+    }
+    const [lignes, setLignes] = useState(initLines);
   const [prixVente, setPrixVente] = useState(fiche?.prix_vente || 0);
   const [loading, setLoading] = useState(false);
 
@@ -50,38 +53,87 @@ export default function FicheForm({ fiche, onClose }) {
     return <Navigate to="/unauthorized" replace />;
   }
 
-  const addLigne = (type = "produit") =>
-    setLignes([...lignes, { type, produit_id: "", sous_fiche_id: "", quantite: 1 }]);
-  const updateLigne = (i, field, val) => {
-    setLignes(lignes.map((l, idx) => {
-      if (idx !== i) return l;
-      if (field === 'type') {
-        return { type: val, produit_id: '', sous_fiche_id: '', quantite: l.quantite };
-      }
-      return { ...l, [field]: val };
-    }));
-  };
-  const removeLigne = (i) => setLignes(lignes.filter((_, idx) => idx !== i));
+    const addLigne = (type = 'produit') =>
+      setLignes((prev) => {
+        const arr = Array.isArray(prev) ? [...prev] : [];
+        arr.push({ type, produit_id: '', sous_fiche_id: '', quantite: 1 });
+        return arr;
+      });
+    const updateLigne = (i, field, val) => {
+      setLignes((prev) => {
+        const arr = Array.isArray(prev) ? prev : [];
+        const next = [];
+        for (let idx = 0; idx < arr.length; idx++) {
+          const l = arr[idx];
+          if (idx !== i) {
+            next.push(l);
+            continue;
+          }
+          if (field === 'type') {
+            next.push({ type: val, produit_id: '', sous_fiche_id: '', quantite: l.quantite });
+          } else {
+            next.push({ ...l, [field]: val });
+          }
+        }
+        return next;
+      });
+    };
+    const removeLigne = (i) =>
+      setLignes((prev) => {
+        const arr = Array.isArray(prev) ? prev : [];
+        const next = [];
+        for (let idx = 0; idx < arr.length; idx++) {
+          if (idx !== i) next.push(arr[idx]);
+        }
+        return next;
+      });
 
-  const cout_total = lignes.reduce((sum, l) => {
-    if (l.type === 'produit') {
-      const prod = products.find(p => p.id === l.produit_id);
-      const prix = prod?.pmp ?? prod?.dernier_prix ?? 0;
-      return sum + Number(l.quantite) * Number(prix);
+    const productList = Array.isArray(products) ? products : [];
+    const ficheList = Array.isArray(ficheOptions) ? ficheOptions : [];
+    const lineList = Array.isArray(lignes) ? lignes : [];
+    let cout_total = 0;
+    for (const l of lineList) {
+      if (l.type === 'produit') {
+        let prod;
+        for (const p of productList) {
+          if (p.id === l.produit_id) {
+            prod = p;
+            break;
+          }
+        }
+        const prix = prod?.pmp ?? prod?.dernier_prix ?? 0;
+        cout_total += Number(l.quantite) * Number(prix);
+      } else {
+        let sf;
+        for (const f of ficheList) {
+          if (f.id === l.sous_fiche_id) {
+            sf = f;
+            break;
+          }
+        }
+        if (sf?.cout_par_portion) {
+          cout_total += Number(l.quantite) * Number(sf.cout_par_portion);
+        }
+      }
     }
-    const sf = ficheOptions.find(f => f.id === l.sous_fiche_id);
-    return sum + (sf?.cout_par_portion ? Number(l.quantite) * Number(sf.cout_par_portion) : 0);
-  }, 0);
-  const cout_par_portion = portions > 0 ? cout_total / portions : 0;
-  const ratio = prixVente > 0 ? cout_par_portion / prixVente : 0;
+    const cout_par_portion = portions > 0 ? cout_total / portions : 0;
+    const ratio = prixVente > 0 ? cout_par_portion / prixVente : 0;
 
   async function handleSubmit(e) {
     e.preventDefault();
     if (!nom.trim()) return toast.error("Nom obligatoire");
     if (!portions || portions <= 0) return toast.error("Portions > 0");
-    if (lignes.some(l => !l.quantite || (l.type === 'produit' ? !l.produit_id : !l.sous_fiche_id))) {
-      return toast.error("Ligne incomplète");
-    }
+      let incomplet = false;
+      for (const l of lineList) {
+        if (
+          !l.quantite ||
+          (l.type === 'produit' ? !l.produit_id : !l.sous_fiche_id)
+        ) {
+          incomplet = true;
+          break;
+        }
+      }
+      if (incomplet) return toast.error('Ligne incomplète');
     if (loading) return;
     setLoading(true);
     const payload = {
@@ -90,13 +142,19 @@ export default function FicheForm({ fiche, onClose }) {
       portions,
       rendement,
       prix_vente: prixVente || null,
-      lignes: lignes.map(l => ({
-        type: l.type,
-        produit_id: l.type === 'produit' ? l.produit_id : null,
-        sous_fiche_id: l.type === 'sous_fiche' ? l.sous_fiche_id : null,
-        quantite: l.quantite,
-      })),
-    };
+        lignes: (() => {
+          const arr = [];
+          for (const l of lineList) {
+            arr.push({
+              type: l.type,
+              produit_id: l.type === 'produit' ? l.produit_id : null,
+              sous_fiche_id: l.type === 'sous_fiche' ? l.sous_fiche_id : null,
+              quantite: l.quantite,
+            });
+          }
+          return arr;
+        })(),
+      };
     try {
       if (fiche?.id) {
         await updateFiche(fiche.id, payload);
@@ -129,7 +187,18 @@ export default function FicheForm({ fiche, onClose }) {
         onChange={e => setFamille(e.target.value)}
       >
         <option value="">-- Famille --</option>
-        {(familles ?? []).map(f => <option key={f.id} value={f.nom}>{f.nom}</option>)}
+          {(() => {
+            const options = [];
+            const fams = Array.isArray(familles) ? familles : [];
+            for (const f of fams) {
+              options.push(
+                <option key={f.id} value={f.nom}>
+                  {f.nom}
+                </option>
+              );
+            }
+            return options;
+          })()}
       </Select>
       <div className="flex gap-2 mb-2">
         <Input
@@ -176,16 +245,23 @@ export default function FicheForm({ fiche, onClose }) {
               </tr>
             </thead>
             <tbody>
-              {lignes.map((l, i) => (
-                <FicheLigne
-                  key={i}
-                  ligne={l}
-                  products={products}
-                  ficheOptions={ficheOptions}
-                  onChange={(field, val) => updateLigne(i, field, val)}
-                  onRemove={() => removeLigne(i)}
-                />
-              ))}
+                {(() => {
+                  const rows = [];
+                  for (let i = 0; i < lineList.length; i++) {
+                    const l = lineList[i];
+                    rows.push(
+                      <FicheLigne
+                        key={i}
+                        ligne={l}
+                        products={productList}
+                        ficheOptions={ficheList}
+                        onChange={(field, val) => updateLigne(i, field, val)}
+                        onRemove={() => removeLigne(i)}
+                      />
+                    );
+                  }
+                  return rows;
+                })()}
             </tbody>
           </table>
         </TableContainer>

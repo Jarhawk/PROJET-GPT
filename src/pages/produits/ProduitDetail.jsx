@@ -43,7 +43,7 @@ export default function ProduitDetailPage() {
       setLoading(true);
       fetchProductPrices(id).then((h) => {
         if (!active) return;
-        setHistory(h || []);
+        setHistory(Array.isArray(h) ? h : []);
         setLoading(false);
       });
     }
@@ -52,7 +52,8 @@ export default function ProduitDetailPage() {
     };
   }, [id, fetchProductPrices]);
 
-  const chartData = buildPriceData(history);
+  const list = Array.isArray(history) ? history : [];
+  const chartData = buildPriceData(list);
 
   const handleToggle = async () => {
     if (product) {
@@ -62,33 +63,36 @@ export default function ProduitDetailPage() {
     }
   };
 
-  const summary = Object.values(
-    history.reduce((acc, h) => {
-      const idF = h.fournisseur?.id || "";
-      if (!acc[idF]) {
-        acc[idF] = {
-          nom: h.fournisseur?.nom || "Inconnu",
-          count: 0,
-          total: 0,
-          lastPrice: null,
-          lastDate: null,
-        };
-      }
-      const cur = acc[idF];
-      cur.count += 1;
-      if (typeof h.prix_achat === "number") {
-        cur.total += Number(h.prix_achat);
-      }
-      if (!cur.lastDate || new Date(h.created_at) > new Date(cur.lastDate)) {
-        cur.lastDate = h.created_at;
-        cur.lastPrice = h.prix_achat;
-      }
-      return acc;
-    }, {})
-  ).map((s) => ({
-    ...s,
-    prix_moyen: s.count ? s.total / s.count : null,
-  }));
+  const tmp = list.reduce((acc, h) => {
+    const idF = h.fournisseur?.id || "";
+    if (!acc[idF]) {
+      acc[idF] = {
+        nom: h.fournisseur?.nom || "Inconnu",
+        count: 0,
+        total: 0,
+        lastPrice: null,
+        lastDate: null,
+      };
+    }
+    const cur = acc[idF];
+    cur.count += 1;
+    if (typeof h.prix_achat === "number") {
+      cur.total += Number(h.prix_achat);
+    }
+    if (!cur.lastDate || new Date(h.created_at) > new Date(cur.lastDate)) {
+      cur.lastDate = h.created_at;
+      cur.lastPrice = h.prix_achat;
+    }
+    return acc;
+  }, {});
+  const summary = [];
+  for (const key in tmp) {
+    const s = tmp[key];
+    summary.push({
+      ...s,
+      prix_moyen: s.count ? s.total / s.count : null,
+    });
+  }
 
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden p-6 text-white">
@@ -132,20 +136,29 @@ export default function ProduitDetailPage() {
                 </tr>
               </thead>
               <tbody>
-                {summary.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="py-4 text-center">Aucune donnée</td>
-                  </tr>
-                ) : (
-                  summary.map((s, i) => (
-                    <tr key={i}>
-                      <td>{s.nom}</td>
-                      <td>{s.count}</td>
-                      <td>{s.prix_moyen ? s.prix_moyen.toFixed(2) : '-'}</td>
-                      <td>{s.lastPrice != null ? s.lastPrice.toFixed(2) : '-'}</td>
-                    </tr>
-                  ))
-                )}
+                {(() => {
+                  const rows = [];
+                  if (summary.length === 0) {
+                    rows.push(
+                      <tr key="empty">
+                        <td colSpan={4} className="py-4 text-center">Aucune donnée</td>
+                      </tr>
+                    );
+                  } else {
+                    for (let i = 0; i < summary.length; i++) {
+                      const s = summary[i];
+                      rows.push(
+                        <tr key={i}>
+                          <td>{s.nom}</td>
+                          <td>{s.count}</td>
+                          <td>{s.prix_moyen ? s.prix_moyen.toFixed(2) : '-'}</td>
+                          <td>{s.lastPrice != null ? s.lastPrice.toFixed(2) : '-'}</td>
+                        </tr>
+                      );
+                    }
+                  }
+                  return rows;
+                })()}
               </tbody>
             </table>
             <table className="min-w-full text-sm">
@@ -158,20 +171,29 @@ export default function ProduitDetailPage() {
                 </tr>
               </thead>
               <tbody>
-                {history.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="py-4 text-center">Aucune donnée</td>
-                  </tr>
-                ) : (
-                  history.map((h, i) => (
-                    <tr key={i}>
-                      <td>{h.created_at?.slice(0, 10) || '-'}</td>
-                      <td>{h.fournisseur?.nom || '-'}</td>
-                      <td>{h.prix_achat ?? '-'}</td>
-                      <td>{h.derniere_livraison?.slice(0, 10) || '-'}</td>
-                    </tr>
-                  ))
-                )}
+                {(() => {
+                  const rows = [];
+                  if (list.length === 0) {
+                    rows.push(
+                      <tr key="empty">
+                        <td colSpan={4} className="py-4 text-center">Aucune donnée</td>
+                      </tr>
+                    );
+                  } else {
+                    for (let i = 0; i < list.length; i++) {
+                      const h = list[i];
+                      rows.push(
+                        <tr key={i}>
+                          <td>{h.created_at?.slice(0, 10) || '-'}</td>
+                          <td>{h.fournisseur?.nom || '-'}</td>
+                          <td>{h.prix_achat ?? '-'}</td>
+                          <td>{h.derniere_livraison?.slice(0, 10) || '-'}</td>
+                        </tr>
+                      );
+                    }
+                  }
+                  return rows;
+                })()}
               </tbody>
             </table>
           </>
@@ -184,9 +206,21 @@ export default function ProduitDetailPage() {
                 <YAxis fontSize={11} />
                 <Tooltip />
                 <Legend />
-                {Object.keys(chartData[0]).filter((k) => k !== 'date').map((key) => (
-                  <Line key={key} type="monotone" dataKey={key} stroke="#bfa14d" />
-                ))}
+                {(() => {
+                  const lines = [];
+                  if (chartData.length > 0) {
+                    const keys = Object.keys(chartData[0]);
+                    for (let i = 0; i < keys.length; i++) {
+                      const key = keys[i];
+                      if (key !== 'date') {
+                        lines.push(
+                          <Line key={key} type="monotone" dataKey={key} stroke="#bfa14d" />
+                        );
+                      }
+                    }
+                  }
+                  return lines;
+                })()}
               </LineChart>
             </ResponsiveContainer>
           </div>

@@ -9,7 +9,7 @@ export function usePlanning() {
     if (!mama_id) return { data: [] };
     let q = supabase
       .from("planning_previsionnel")
-      .select("*", { count: "exact" })
+      .select("id, nom, date_prevue, statut, mama_id", { count: "exact" })
       .eq("mama_id", mama_id)
       .eq("actif", true)
       .order("date_prevue", { ascending: true });
@@ -28,9 +28,12 @@ export function usePlanning() {
     if (!id || !mama_id) return null;
     const { data, error } = await supabase
       .from("planning_previsionnel")
-      .select("*, lignes:planning_lignes!planning_id(id, planning_id, produit_id, quantite, observation, produit:produit_id(nom))")
+      .select(
+        "id, nom, date_prevue, commentaire, statut, mama_id, lignes:planning_lignes(id, planning_id, produit_id, quantite, observation, produit:produit_id(nom))"
+      )
       .eq("id", id)
       .eq("mama_id", mama_id)
+      .eq("planning_lignes.mama_id", mama_id)
       .single();
     if (error) {
       console.error("getPlanningById", error.message);
@@ -72,7 +75,9 @@ export function usePlanning() {
       .update(fields)
       .eq("id", id)
       .eq("mama_id", mama_id)
-      .select()
+      .select(
+        'id, mama_id, date_prevue, quantite, produit_id, created_at, nom, commentaire, statut, actif'
+      )
       .single();
     if (error) return { error };
     return { data };
@@ -94,7 +99,7 @@ export function usePlanning() {
     if (!mama_id) return [];
     let q = supabase
       .from("planning_previsionnel")
-      .select("*")
+      .select("id, nom, date_prevue, statut, mama_id")
       .eq("mama_id", mama_id)
       .eq("actif", true)
       .order("date_prevue", { ascending: true });

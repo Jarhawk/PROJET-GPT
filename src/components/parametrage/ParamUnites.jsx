@@ -118,27 +118,34 @@ export default function ParamUnites() {
             </tr>
           </thead>
           <tbody>
-            {unites.map((u) => (
-              <tr key={u.id}>
-                <td>{u.nom}</td>
-                <td>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleEdit(u)}
-                  >
-                    Modifier
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleDelete(u.id)}
-                  >
-                    Archiver
-                  </Button>
-                </td>
-              </tr>
-            ))}
+            {(() => {
+              const rows = [];
+              const list = Array.isArray(unites) ? unites : [];
+              for (const u of list) {
+                rows.push(
+                  <tr key={u.id}>
+                    <td>{u.nom}</td>
+                    <td>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleEdit(u)}
+                      >
+                        Modifier
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleDelete(u.id)}
+                      >
+                        Archiver
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              }
+              return rows;
+            })()}
           </tbody>
         </table>
       </TableContainer>

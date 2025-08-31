@@ -16,6 +16,7 @@ export default function DashboardBuilder() {
     deleteWidget,
     loading,
   } = useDashboards();
+  const listDashboards = Array.isArray(dashboards) ? dashboards : [];
   const [current, setCurrent] = useState(null);
   const [newName, setNewName] = useState("");
   const [ordered, setOrdered] = useState([]);
@@ -25,10 +26,12 @@ export default function DashboardBuilder() {
   }, [getDashboards]);
 
   useEffect(() => {
-    if (current) setOrdered(current.widgets || []);
+    if (current) {
+      setOrdered(Array.isArray(current.widgets) ? current.widgets : []);
+    }
   }, [current]);
 
-  if (loading && dashboards.length === 0) {
+  if (loading && listDashboards.length === 0) {
     return <LoadingSpinner message="Chargement..." />;
   }
 
@@ -37,11 +40,17 @@ export default function DashboardBuilder() {
       <div className="p-6 max-w-3xl mx-auto">
         <h1 className="text-2xl font-bold mb-4">Mes tableaux de bord</h1>
         <ul className="mb-6 list-disc pl-6">
-          {dashboards.map((d) => (
-            <li key={d.id}>
-              <button className="underline" onClick={() => setCurrent(d)}>{d.nom}</button>
-            </li>
-          ))}
+          {(() => {
+            const items = [];
+            for (const d of listDashboards) {
+              items.push(
+                <li key={d.id}>
+                  <button className="underline" onClick={() => setCurrent(d)}>{d.nom}</button>
+                </li>
+              );
+            }
+            return items;
+          })()}
         </ul>
         <div className="flex gap-2">
           <input
@@ -67,13 +76,21 @@ export default function DashboardBuilder() {
   }
 
   const saveOrder = async () => {
-    for (let i = 0; i < ordered.length; i++) {
-      if (ordered[i].ordre !== i) {
-        await updateWidget(current.id, ordered[i].id, { ordre: i });
+    const ord = Array.isArray(ordered) ? ordered : [];
+    for (let i = 0; i < ord.length; i++) {
+      if (ord[i].ordre !== i) {
+        await updateWidget(current.id, ord[i].id, { ordre: i });
       }
     }
     const list = await getDashboards();
-    const match = list.find((d) => d.id === current.id);
+    const safeList = Array.isArray(list) ? list : [];
+    let match = null;
+    for (const d of safeList) {
+      if (d.id === current.id) {
+        match = d;
+        break;
+      }
+    }
     setCurrent(match || null);
   };
 
@@ -89,17 +106,28 @@ export default function DashboardBuilder() {
         onReorder={setOrdered}
         className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6"
       >
-        {ordered.map((w) => (
-          <Reorder.Item key={w.id} value={w} className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-4 relative">
-            <button
-              className="absolute top-2 right-2 text-red-600"
-              onClick={() => deleteWidget(current.id, w.id)}
-            >
-              ✕
-            </button>
-            <WidgetRenderer config={w.config} />
-          </Reorder.Item>
-        ))}
+        {(() => {
+          const widgets = Array.isArray(ordered) ? ordered : [];
+          const rows = [];
+          for (const w of widgets) {
+            rows.push(
+              <Reorder.Item
+                key={w.id}
+                value={w}
+                className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-4 relative"
+              >
+                <button
+                  className="absolute top-2 right-2 text-red-600"
+                  onClick={() => deleteWidget(current.id, w.id)}
+                >
+                  ✕
+                </button>
+                <WidgetRenderer config={w.config} />
+              </Reorder.Item>
+            );
+          }
+          return rows;
+        })()}
       </Reorder.Group>
       <div className="flex gap-2">
         <Button

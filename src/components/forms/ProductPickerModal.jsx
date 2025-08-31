@@ -14,12 +14,13 @@ export default function ProductPickerModal({
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 20;
-  const { data: results = [], total } = useProduitsSearch(query, null, {
-    page,
-    pageSize,
-  });
+    const { data: results = [], total } = useProduitsSearch(query, null, {
+      page,
+      pageSize,
+    });
+    const list = Array.isArray(results) ? results : [];
 
-  const [active, setActive] = useState(-1);
+    const [active, setActive] = useState(-1);
 
   useEffect(() => {
     if (!open) {
@@ -32,13 +33,13 @@ export default function ProductPickerModal({
   const handleKeyDown = (e) => {
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setActive((a) => Math.min(a + 1, results.length - 1));
+        setActive((a) => Math.min(a + 1, list.length - 1));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setActive((a) => Math.max(a - 1, 0));
     } else if (e.key === "Enter") {
       e.preventDefault();
-      const target = active >= 0 ? results[active] : results[0];
+        const target = active >= 0 ? list[active] : list[0];
       if (target) {
         onPick?.(target);
         onClose?.();
@@ -90,27 +91,33 @@ export default function ProductPickerModal({
             <p id="product-search-desc" className="sr-only">
               Recherche par nom de produit (ILIKE sur produits.nom)
             </p>
-            <div className="border border-border rounded-lg max-h-60 overflow-y-auto">
-              {results.length === 0 ? (
-                <div className="p-4 text-sm text-muted-foreground">Aucun résultat</div>
-              ) : (
-                results.map((p, idx) => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => {
-                      onPick?.(p);
-                      onClose?.();
-                    }}
-                    className={`w-full text-left px-3 py-2 hover:bg-white/5 rounded ${
-                      idx === active ? "bg-white/10" : ""
-                    }`}
-                  >
-                    {p.nom}
-                  </button>
-                ))
-              )}
-            </div>
+              <div className="border border-border rounded-lg max-h-60 overflow-y-auto">
+                {list.length === 0 ? (
+                  <div className="p-4 text-sm text-muted-foreground">Aucun résultat</div>
+                ) : (
+                  (() => {
+                    const rows = [];
+                    list.forEach((p, idx) => {
+                      rows.push(
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => {
+                            onPick?.(p);
+                            onClose?.();
+                          }}
+                          className={`w-full text-left px-3 py-2 hover:bg-white/5 rounded ${
+                            idx === active ? "bg-white/10" : ""
+                          }`}
+                        >
+                          {p.nom}
+                        </button>
+                      );
+                    });
+                    return rows;
+                  })()
+                )}
+              </div>
             <div className="flex justify-between items-center pt-2">
               <Button
                 variant="outline"

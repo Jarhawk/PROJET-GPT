@@ -4,28 +4,32 @@ import { useHelpArticles } from "@/hooks/useHelpArticles";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import GlassCard from "@/components/ui/GlassCard";
 
-export default function HelpCenter() {
-  const { fetchArticles, items, loading, error } = useHelpArticles();
+  export default function HelpCenter() {
+    const { fetchArticles, items, loading, error } = useHelpArticles();
 
-  useEffect(() => {
-    fetchArticles();
-  }, [fetchArticles]);
+    useEffect(() => {
+      fetchArticles();
+    }, [fetchArticles]);
 
-  return (
+    const list = Array.isArray(items) ? items : [];
+    const rows = [];
+    for (const a of list) {
+      rows.push(
+        <li key={a.id} className="list-none">
+          <GlassCard>
+            <h2 className="font-semibold text-lg mb-2">{a.titre}</h2>
+            <p className="whitespace-pre-line text-sm">{a.contenu}</p>
+          </GlassCard>
+        </li>
+      );
+    }
+
+    return (
     <div className="p-8 space-y-6">
       <h1 className="text-2xl font-bold">Aide & FAQ</h1>
       {loading && <LoadingSpinner message="Chargement..." />}
       {error && <div className="text-red-500">{error}</div>}
-      <ul className="space-y-4">
-        {Array.isArray(items) && items.map((a) => (
-          <li key={a.id} className="list-none">
-            <GlassCard>
-              <h2 className="font-semibold text-lg mb-2">{a.titre}</h2>
-              <p className="whitespace-pre-line text-sm">{a.contenu}</p>
-            </GlassCard>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
+        <ul className="space-y-4">{rows}</ul>
+      </div>
+    );
+  }

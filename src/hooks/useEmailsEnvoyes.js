@@ -9,7 +9,9 @@ export function useEmailsEnvoyes() {
   async function fetchEmails({ statut, email, commande_id, date_start, date_end, page = 1, limit = 50 } = {}) {
     let q = supabase
       .from('emails_envoyes')
-      .select('id, commande_id, email, statut, envoye_le, mama_id')
+      .select('id, commande_id, email, statut, envoye_le, mama_id', {
+        count: 'exact',
+      })
       .eq('mama_id', mama_id);
     if (statut) q = q.eq('statut', statut);
     if (email) q = q.ilike('email', `%${email}%`);
@@ -19,11 +21,11 @@ export function useEmailsEnvoyes() {
     const start = (page - 1) * limit;
     const end = start + limit - 1;
     q = q.order('envoye_le', { ascending: false }).range(start, end);
-    const { data, error } = await q;
+    const { data, error, count } = await q;
     if (error) throw error;
     const rows = Array.isArray(data) ? data : [];
     setEmails(rows);
-    return rows;
+    return { rows, count };
   }
 
   return { fetchEmails, emails };

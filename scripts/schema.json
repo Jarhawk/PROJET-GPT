@@ -3496,6 +3496,9 @@
     "top_produits": {
       "params": []
     },
+    "fn_save_facture": {
+      "params": ["mama_id", "facture", "lignes"]
+    },
     "log_action": {
       "params": []
     },

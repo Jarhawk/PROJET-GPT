@@ -62,7 +62,7 @@ export async function getRecommendations(user_id, mama_id) {
     periode_param: periode,
   });
 
-  (budgets || [])
+  (Array.isArray(budgets) ? budgets : [])
     .filter(b => b.ecart_pct !== null && Math.abs(Number(b.ecart_pct)) > 15)
     .forEach(b => {
       recos.push({

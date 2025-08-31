@@ -2,10 +2,12 @@
 import { Button } from "@/components/ui/button";
 
 export default function UtilisateurDetail({ utilisateur, onClose }) {
-  const historique = utilisateur.historique || [
-    { date: "2024-06-10", action: "Création", by: "superadmin" },
-    // Ajoute plus d’actions selon ta base
-  ];
+  const historique = Array.isArray(utilisateur?.historique)
+    ? utilisateur.historique
+    : [
+        { date: "2024-06-10", action: "Création", by: "superadmin" },
+        // Ajoute plus d’actions selon ta base
+      ];
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
@@ -25,9 +27,19 @@ export default function UtilisateurDetail({ utilisateur, onClose }) {
         <div>
           <b>Historique :</b>
           <ul className="list-disc pl-6">
-            {historique.map((h, i) =>
-              <li key={i}>{h.date} — {h.action} {h.by ? `par ${h.by}` : ""}</li>
-            )}
+            {(() => {
+              const rows = [];
+              const arr = Array.isArray(historique) ? historique : [];
+              for (let i = 0; i < arr.length; i++) {
+                const h = arr[i];
+                rows.push(
+                  <li key={i}>
+                    {h.date} — {h.action} {h.by ? `par ${h.by}` : ""}
+                  </li>,
+                );
+              }
+              return rows;
+            })()}
           </ul>
         </div>
       </div>

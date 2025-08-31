@@ -56,9 +56,11 @@ export default function Mamas() {
     setConfirmId(null);
   };
 
-  const filtered = mamas.filter((m) =>
-    m.nom?.toLowerCase().includes(search.toLowerCase())
-  );
+  const baseList = Array.isArray(mamas) ? mamas : [];
+  const filtered = [];
+  for (const m of baseList) {
+    if (m.nom?.toLowerCase().includes(search.toLowerCase())) filtered.push(m);
+  }
 
   return (
     <div className="p-8 max-w-4xl mx-auto text-shadow">
@@ -91,75 +93,83 @@ export default function Mamas() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((m) => (
-                <tr key={m.id}>
-                  <td className="px-2 py-1">{m.nom}</td>
-                  <td className="px-2 py-1">
-                    <span
-                      className={
-                        m.actif
-                          ? 'inline-block bg-green-100 text-green-800 px-2 rounded-full'
-                          : 'inline-block bg-red-100 text-red-800 px-2 rounded-full'
-                      }
-                    >
-                      {m.actif ? 'Oui' : 'Non'}
-                    </span>
-                  </td>
-                  <td className="px-2 py-1 flex items-center justify-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => setEditMama(m)}
-                      disabled={
-                        loading || (role !== 'superadmin' && m.id !== myMama)
-                      }
-                    >
-                      Éditer
-                    </Button>
-                    {confirmId === m.id ? (
-                      <>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleToggleActive(m.id, !m.actif)}
-                          disabled={
-                            loading ||
-                            (role !== 'superadmin' && m.id !== myMama)
+              {(() => {
+                const rows = [];
+                for (const m of filtered) {
+                  rows.push(
+                    <tr key={m.id}>
+                      <td className="px-2 py-1">{m.nom}</td>
+                      <td className="px-2 py-1">
+                        <span
+                          className={
+                            m.actif
+                              ? 'inline-block bg-green-100 text-green-800 px-2 rounded-full'
+                              : 'inline-block bg-red-100 text-red-800 px-2 rounded-full'
                           }
                         >
-                          Confirmer
-                        </Button>
+                          {m.actif ? 'Oui' : 'Non'}
+                        </span>
+                      </td>
+                      <td className="px-2 py-1 flex items-center justify-center gap-2">
                         <Button
                           size="sm"
                           variant="secondary"
-                          onClick={() => setConfirmId(null)}
-                          disabled={loading}
+                          onClick={() => setEditMama(m)}
+                          disabled={
+                            loading || (role !== 'superadmin' && m.id !== myMama)
+                          }
                         >
-                          Annuler
+                          Éditer
                         </Button>
-                      </>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => setConfirmId(m.id)}
-                        disabled={
-                          loading || (role !== 'superadmin' && m.id !== myMama)
-                        }
-                      >
-                        {m.actif ? 'Désactiver' : 'Activer'}
-                      </Button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-              {filtered.length === 0 && (
-                <tr>
-                  <td colSpan={3} className="py-4 text-gray-400">
-                    Aucun établissement trouvé.
-                  </td>
-                </tr>
-              )}
+                        {confirmId === m.id ? (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleToggleActive(m.id, !m.actif)}
+                              disabled={
+                                loading ||
+                                (role !== 'superadmin' && m.id !== myMama)
+                              }
+                            >
+                              Confirmer
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => setConfirmId(null)}
+                              disabled={loading}
+                            >
+                              Annuler
+                            </Button>
+                          </>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => setConfirmId(m.id)}
+                            disabled={
+                              loading || (role !== 'superadmin' && m.id !== myMama)
+                            }
+                          >
+                            {m.actif ? 'Désactiver' : 'Activer'}
+                          </Button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                }
+                if (rows.length === 0) {
+                  rows.push(
+                    <tr key="empty">
+                      <td colSpan={3} className="py-4 text-gray-400">
+                        Aucun établissement trouvé.
+                      </td>
+                    </tr>
+                  );
+                }
+                return rows;
+              })()}
             </tbody>
           </table>
         )}

@@ -13,7 +13,7 @@ vi.mock('@/lib/supabase', () => {
   };
   selectMock = vi.fn(() => queryBuilder);
   fromMock = vi.fn(() => ({ select: selectMock }));
-  return { getSupabaseClient: () => ({ from: fromMock }) };
+  return { supabase: { from: fromMock } };
 });
 
 beforeEach(() => {

@@ -28,7 +28,7 @@ export default function InviteUser({ onClose, onInvited }) {
           .from("mamas")
           .select("id, nom")
           .order("nom");
-        setMamas(mData || []);
+        setMamas(Array.isArray(mData) ? mData : []);
       } else if (myMama) {
         const { data: mData } = await supabase
           .from("mamas")
@@ -49,7 +49,7 @@ export default function InviteUser({ onClose, onInvited }) {
         .eq("mama_id", targetMama)
         .eq("actif", true)
         .order("nom", { ascending: true });
-      setRoles(rData || []);
+      setRoles(Array.isArray(rData) ? rData : []);
     }
 
     fetchData();
@@ -96,11 +96,20 @@ export default function InviteUser({ onClose, onInvited }) {
 
     if (!error) {
       // Appel Edge Function cloud Supabase
+      const mamaList = Array.isArray(mamas) ? mamas : [];
+      let mamaNom = "";
+      for (let i = 0; i < mamaList.length; i++) {
+        const m = mamaList[i];
+        if (m.id === values.mama_id) {
+          mamaNom = m.nom || "";
+          break;
+        }
+      }
       await fetch("https://jhpfdeolleprmvtchoxt.supabase.co/functions/v1/send-invite", {
         method: "POST",
         body: JSON.stringify({
           email: values.email,
-          mama_nom: mamas.find(m => m.id === values.mama_id)?.nom || "",
+          mama_nom: mamaNom,
         }),
         headers: { "Content-Type": "application/json" },
       });
@@ -138,11 +147,19 @@ export default function InviteUser({ onClose, onInvited }) {
           onChange={handleChange}
         >
           <option value="">Sélectionner…</option>
-          {mamas.map(m => (
-            <option key={m.id} value={m.id}>
-              {m.nom}
-            </option>
-          ))}
+          {(() => {
+            const list = Array.isArray(mamas) ? mamas : [];
+            const options = [];
+            for (let i = 0; i < list.length; i++) {
+              const m = list[i];
+              options.push(
+                <option key={m.id} value={m.id}>
+                  {m.nom}
+                </option>
+              );
+            }
+            return options;
+          })()}
         </select>
       </div>
       <div>
@@ -155,11 +172,19 @@ export default function InviteUser({ onClose, onInvited }) {
           onChange={handleChange}
         >
           <option value="">Sélectionner…</option>
-          {roles.map(r => (
-            <option key={r.nom} value={r.nom}>
-              {r.nom}
-            </option>
-          ))}
+          {(() => {
+            const list = Array.isArray(roles) ? roles : [];
+            const options = [];
+            for (let i = 0; i < list.length; i++) {
+              const r = list[i];
+              options.push(
+                <option key={r.nom} value={r.nom}>
+                  {r.nom}
+                </option>
+              );
+            }
+            return options;
+          })()}
         </select>
       </div>
         <div className="flex gap-4 mt-4">

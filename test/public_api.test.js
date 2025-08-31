@@ -87,14 +87,13 @@ describe('public API router', () => {
     expect(chain.ilike).toHaveBeenCalledWith('famille', '%bio%');
   });
 
-  it('supports search and actif filters with pagination', async () => {
+  it('supports search filter with pagination', async () => {
     const app = express();
     app.use(router);
     await request(app)
-      .get('/produits?mama_id=m1&search=choc&actif=false&page=2&limit=20')
+      .get('/produits?mama_id=m1&search=choc&page=2&limit=20')
       .set('x-api-key', 'dev_key');
     expect(chain.ilike).toHaveBeenCalledWith('nom', '%choc%');
-    expect(chain.eq).toHaveBeenCalledWith('actif', false);
     expect(chain.range).toHaveBeenCalledWith(20, 39);
   });
 

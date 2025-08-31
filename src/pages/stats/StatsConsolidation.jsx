@@ -42,23 +42,32 @@ export default function StatsConsolidation() {
           </tr>
         </thead>
         <tbody>
-          {stats.length === 0 ? (
-            <tr>
-              <td colSpan="4" className="p-2 text-center text-gray-500">
-                Aucune donnée
-              </td>
-            </tr>
-          ) : (
-            stats.map((s) => (
-              <tr key={s.mama_id}>
-                <td className="px-2 py-1 font-semibold">{s.nom}</td>
-                <td className="px-2 py-1 text-right">{Number(s.stock_valorise).toLocaleString()}</td>
-                <td className="px-2 py-1 text-right">{Number(s.conso_mois || 0).toLocaleString()}</td>
-                <td className="px-2 py-1 text-right">{s.nb_mouvements}</td>
-              </tr>
-            ))
-          )}
-          </tbody>
+          {(() => {
+            const list = Array.isArray(stats) ? stats : [];
+            if (list.length === 0) {
+              return (
+                <tr>
+                  <td colSpan="4" className="p-2 text-center text-gray-500">
+                    Aucune donnée
+                  </td>
+                </tr>
+              );
+            }
+            const rows = [];
+            for (let i = 0; i < list.length; i++) {
+              const s = list[i];
+              rows.push(
+                <tr key={s.mama_id}>
+                  <td className="px-2 py-1 font-semibold">{s.nom}</td>
+                  <td className="px-2 py-1 text-right">{Number(s.stock_valorise).toLocaleString()}</td>
+                  <td className="px-2 py-1 text-right">{Number(s.conso_mois || 0).toLocaleString()}</td>
+                  <td className="px-2 py-1 text-right">{s.nb_mouvements}</td>
+                </tr>
+              );
+            }
+            return rows;
+          })()}
+        </tbody>
         </table>
       </TableContainer>
     </div>

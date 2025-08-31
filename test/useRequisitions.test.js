@@ -38,7 +38,10 @@ test('getRequisitions applies filters', async () => {
     });
   });
   expect(fromMock).toHaveBeenCalledWith('requisitions');
-  expect(query.select).toHaveBeenCalledWith('*, lignes:requisition_lignes(produit_id, unite, quantite)', { count: 'exact' });
+  expect(query.select).toHaveBeenCalledWith(
+    'id, mama_id, zone_id, date_requisition, quantite, type, commentaire, auteur_id, statut, created_at, lignes:requisition_lignes(produit_id, unite, quantite)',
+    { count: 'exact' }
+  );
   expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1');
   expect(query.eq).toHaveBeenCalledWith('actif', true);
   expect(query.eq).toHaveBeenCalledWith('statut', 'draft');

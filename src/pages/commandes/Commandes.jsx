@@ -28,9 +28,14 @@ export default function Commandes() {
             onChange={e => setFilters(f => ({ ...f, fournisseur: e.target.value }))}
           >
             <option value="">Tous</option>
-            {fournisseurs.map(f => (
-              <option key={f.id} value={f.id}>{f.nom}</option>
-            ))}
+            {(() => {
+              const opts = [];
+              const list = Array.isArray(fournisseurs) ? fournisseurs : [];
+              for (const f of list) {
+                opts.push(<option key={f.id} value={f.id}>{f.nom}</option>);
+              }
+              return opts;
+            })()}
           </select>
         </div>
         <div>
@@ -87,21 +92,28 @@ export default function Commandes() {
                 <td colSpan={6}>Chargement...</td>
               </tr>
             ) : (
-              commandes.map((c) => (
-                <tr key={c.id} className="border-b border-white/10">
-                  <td>{c.reference}</td>
-                  <td>{c.fournisseur?.nom || '-'}</td>
-                  <td>{c.date_commande}</td>
-                  <td>{c.statut}</td>
-                  <td>{c.total || 0}</td>
-                  <td className="space-x-2">
-                    <Link to={`/commandes/${c.id}`}>Voir</Link>
-                    {role === 'admin' && c.statut === 'brouillon' && (
-                      <button onClick={() => validateCommande(c.id)}>Valider</button>
-                    )}
-                  </td>
-                </tr>
-              ))
+              (() => {
+                const rows = [];
+                const list = Array.isArray(commandes) ? commandes : [];
+                for (const c of list) {
+                  rows.push(
+                    <tr key={c.id} className="border-b border-white/10">
+                      <td>{c.reference}</td>
+                      <td>{c.fournisseur?.nom || '-'}</td>
+                      <td>{c.date_commande}</td>
+                      <td>{c.statut}</td>
+                      <td>{c.total || 0}</td>
+                      <td className="space-x-2">
+                        <Link to={`/commandes/${c.id}`}>Voir</Link>
+                        {role === 'admin' && c.statut === 'brouillon' && (
+                          <button onClick={() => validateCommande(c.id)}>Valider</button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                }
+                return rows;
+              })()
             )}
           </tbody>
         </table>

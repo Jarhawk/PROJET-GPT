@@ -28,10 +28,17 @@ export default function MenuDuJour() {
     }
   }, [authLoading, mama_id, search, dateFilter, fetchMenusDuJour, fetchFiches]);
 
-  const menusFiltres = menusDuJour.filter(m =>
-    (!search || m.nom?.toLowerCase().includes(search.toLowerCase())) &&
-    (!dateFilter || m.date === dateFilter)
-  );
+  const list = Array.isArray(menusDuJour) ? menusDuJour : [];
+  const menusFiltres = [];
+  for (let i = 0; i < list.length; i++) {
+    const m = list[i];
+    if (
+      (!search || m.nom?.toLowerCase().includes(search.toLowerCase())) &&
+      (!dateFilter || m.date === dateFilter)
+    ) {
+      menusFiltres.push(m);
+    }
+  }
 
   const exportExcel = () => {
     exportMenusDuJourToExcel();
@@ -85,47 +92,58 @@ export default function MenuDuJour() {
           </tr>
         </thead>
         <tbody>
-          {menusFiltres.map(menu => (
-            <tr key={menu.id}>
-              <td className="border px-4 py-2">{menu.date}</td>
-              <td className="border px-4 py-2">
-                <Button
-                  variant="link"
-                  className="font-semibold text-mamastockGold"
-                  onClick={() => { setSelected(menu); setShowDetail(true); }}
-                >
-                  {menu.nom}
-                </Button>
-              </td>
-              <td className="border px-4 py-2">
-                {menu.fiches?.map(f => f.nom).join(", ")}
-              </td>
-              <td className="border px-4 py-2">{menu.cout_total?.toFixed(2)} €</td>
-              <td className="border px-4 py-2">{menu.marge != null ? `${menu.marge.toFixed(1)}%` : '-'}</td>
-              <td className="border px-4 py-2">
-                {access_rights?.menus_jour?.peut_modifier && (
-                  <>
+          {(() => {
+            const rows = [];
+            for (let i = 0; i < menusFiltres.length; i++) {
+              const menu = menusFiltres[i];
+              const fichesList = Array.isArray(menu.fiches) ? menu.fiches : [];
+              const noms = [];
+              for (let j = 0; j < fichesList.length; j++) {
+                const f = fichesList[j];
+                noms.push(f.nom);
+              }
+              rows.push(
+                <tr key={menu.id}>
+                  <td className="border px-4 py-2">{menu.date}</td>
+                  <td className="border px-4 py-2">
                     <Button
-                      size="sm"
-                      variant="outline"
-                      className="mr-2"
-                      onClick={() => { setSelected(menu); setShowForm(true); }}
+                      variant="link"
+                      className="font-semibold text-mamastockGold"
+                      onClick={() => { setSelected(menu); setShowDetail(true); }}
                     >
-                      Modifier
+                      {menu.nom}
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="mr-2"
-                      onClick={() => handleDelete(menu)}
-                    >
-                      Supprimer
-                    </Button>
-                  </>
-                )}
-              </td>
-            </tr>
-          ))}
+                  </td>
+                  <td className="border px-4 py-2">{noms.join(", ")}</td>
+                  <td className="border px-4 py-2">{menu.cout_total?.toFixed(2)} €</td>
+                  <td className="border px-4 py-2">{menu.marge != null ? `${menu.marge.toFixed(1)}%` : '-'}</td>
+                  <td className="border px-4 py-2">
+                    {access_rights?.menus_jour?.peut_modifier && (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="mr-2"
+                          onClick={() => { setSelected(menu); setShowForm(true); }}
+                        >
+                          Modifier
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="mr-2"
+                          onClick={() => handleDelete(menu)}
+                        >
+                          Supprimer
+                        </Button>
+                      </>
+                    )}
+                  </td>
+                </tr>
+              );
+            }
+            return rows;
+          })()}
         </tbody>
         </table>
       </TableContainer>

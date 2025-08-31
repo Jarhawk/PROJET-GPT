@@ -17,12 +17,13 @@ export default function useBudgetMensuel() {
           periode_param: periode,
         });
         if (error) throw error;
+        const rows = Array.isArray(data) ? data : [];
         let cible = 0;
         let reel = 0;
-        (data || []).forEach((b) => {
+        for (const b of rows) {
           cible += Number(b.budget || b.cible || 0);
           reel += Number(b.reel || b.depense || b.total || 0);
-        });
+        }
         if (import.meta.env.DEV) {
           console.debug('Chargement dashboard terminé');
         }

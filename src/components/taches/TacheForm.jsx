@@ -17,11 +17,9 @@ export default function TacheForm({ task }) {
   const [form, setForm] = useState({
     titre: task?.titre || "",
     description: task?.description || "",
-    type: task?.type || "unique",
     date_debut: task?.date_debut || "",
-    date_fin: task?.date_fin || "",
-    next_echeance: task?.next_echeance || "",
-    assigned_to: task?.assigned_to || "",
+    date_echeance: task?.date_echeance || "",
+    assignes: Array.isArray(task?.assignes) ? task.assignes[0] : "",
     statut: task?.statut || "a_faire",
   });
   const [loading, setLoading] = useState(false);
@@ -41,11 +39,19 @@ export default function TacheForm({ task }) {
     }
     setLoading(true);
     try {
+      const payload = {
+        titre: form.titre,
+        description: form.description,
+        date_debut: form.date_debut,
+        date_echeance: form.date_echeance,
+        statut: form.statut,
+        assignes: form.assignes ? [form.assignes] : [],
+      };
       if (task) {
-        await updateTask(task.id, form);
+        await updateTask(task.id, payload);
         toast.success("Tâche mise à jour !");
       } else {
-        await addTask(form);
+        await addTask(payload);
         toast.success("Tâche ajoutée !");
       }
       navigate("/taches");
@@ -80,20 +86,6 @@ export default function TacheForm({ task }) {
         />
       </label>
       <label className="block">
-        <span>Type</span>
-        <Select
-          className="w-full"
-          name="type"
-          value={form.type}
-          onChange={handleChange}
-        >
-          <option value="unique">Unique</option>
-          <option value="quotidienne">Quotidienne</option>
-          <option value="hebdomadaire">Hebdomadaire</option>
-          <option value="mensuelle">Mensuelle</option>
-        </Select>
-      </label>
-      <label className="block">
         <span>Date début</span>
         <Input
           className="w-full"
@@ -105,22 +97,12 @@ export default function TacheForm({ task }) {
         />
       </label>
       <label className="block">
-        <span>Date fin</span>
+        <span>Date d'échéance</span>
         <Input
           className="w-full"
           type="date"
-          name="date_fin"
-          value={form.date_fin}
-          onChange={handleChange}
-        />
-      </label>
-      <label className="block">
-        <span>Prochaine échéance</span>
-        <Input
-          className="w-full"
-          type="date"
-          name="next_echeance"
-          value={form.next_echeance}
+          name="date_echeance"
+          value={form.date_echeance}
           onChange={handleChange}
         />
       </label>
@@ -128,14 +110,19 @@ export default function TacheForm({ task }) {
         <span>Assignée à</span>
         <Select
           className="w-full"
-          name="assigned_to"
-          value={form.assigned_to}
+          name="assignes"
+          value={form.assignes}
           onChange={handleChange}
         >
           <option value="">--</option>
-          {users.map(u => (
-            <option key={u.id} value={u.id}>{u.nom}</option>
-          ))}
+          {(() => {
+            const opts = [];
+            const arr = Array.isArray(users) ? users : [];
+            for (const u of arr) {
+              opts.push(<option key={u.id} value={u.id}>{u.nom}</option>);
+            }
+            return opts;
+          })()}
         </Select>
       </label>
       <label className="block">

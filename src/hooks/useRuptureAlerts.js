@@ -12,7 +12,7 @@ export function useRuptureAlerts() {
       const { data, error } = await supabase
         .from('v_alertes_rupture')
         .select(
-          'mama_id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, manque'
+          'mama_id, produit_id, nom, unite, fournisseur:fournisseur_nom, stock_actuel, stock_min, manque'
         )
         .eq('mama_id', mama_id)
         .order('manque', { ascending: false });
@@ -34,7 +34,10 @@ export function useRuptureAlerts() {
         { body: { mama_id } }
       );
       if (error) throw error;
-      return data;
+      const suggestions = Array.isArray(data?.suggestions)
+        ? data.suggestions
+        : [];
+      return { suggestions };
     } catch (error) {
       console.error(error);
       toast.error(error.message || 'Erreur génération suggestions');

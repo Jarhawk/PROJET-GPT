@@ -52,32 +52,40 @@ export default function NotificationsInbox() {
           </tr>
         </thead>
         <tbody>
-          {items.map((n) => (
-            <tr key={n.id} className={n.lu ? "" : "font-bold"}>
-              <td className="px-2 py-1">{n.titre}</td>
-              <td className="px-2 py-1">{n.texte}</td>
-              <td className="px-2 py-1">
-                {new Date(n.created_at).toLocaleString()}
-              </td>
-              <td className="px-2 py-1 text-right">
-                {!n.lu && (
-                  <Button size="sm" onClick={() => markAsRead(n.id)}>
-                    Marquer comme lu
-                  </Button>
-                )}
-              </td>
-            </tr>
-          ))}
-          {items.length === 0 && !loading && (
-            <tr>
-              <td colSpan="4" className="py-4 text-center text-gray-500">
-                Aucune notification
-              </td>
-            </tr>
-          )}
+          {(() => {
+            const rows = [];
+            const list = Array.isArray(items) ? items : [];
+            for (let i = 0; i < list.length; i++) {
+              const n = list[i];
+              rows.push(
+                <tr key={n.id} className={n.lu ? "" : "font-bold"}>
+                  <td className="px-2 py-1">{n.titre}</td>
+                  <td className="px-2 py-1">{n.texte}</td>
+                  <td className="px-2 py-1">{new Date(n.created_at).toLocaleString()}</td>
+                  <td className="px-2 py-1 text-right">
+                    {!n.lu && (
+                      <Button size="sm" onClick={() => markAsRead(n.id)}>
+                        Marquer comme lu
+                      </Button>
+                    )}
+                  </td>
+                </tr>
+              );
+            }
+            if (rows.length === 0 && !loading) {
+              rows.push(
+                <tr key="empty">
+                  <td colSpan="4" className="py-4 text-center text-gray-500">
+                    Aucune notification
+                  </td>
+                </tr>
+              );
+            }
+            return rows;
+          })()}
         </tbody>
         </table>
       </TableContainer>
-    </div>
-  );
-}
+      </div>
+    );
+  }

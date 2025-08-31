@@ -21,8 +21,22 @@ export default function Journal() {
     if (!authLoading && mama_id) fetchLogs();
   }, [authLoading, mama_id, fetchLogs]);
 
-  if (authLoading) return <LoadingSpinner message="Chargement..." />;
-  if (!mama_id) return null;
+    if (authLoading) return <LoadingSpinner message="Chargement..." />;
+    if (!mama_id) return null;
+
+    const list = Array.isArray(logs) ? logs : [];
+    const rows = [];
+    for (const l of list) {
+      rows.push(
+        <tr key={l.id}>
+          <td className="border px-2 py-1">
+            {new Date(l.created_at).toLocaleString()}
+          </td>
+          <td className="border px-2 py-1">{l.action}</td>
+          <td className="border px-2 py-1">{l.utilisateurs?.nom || l.done_by}</td>
+        </tr>
+      );
+    }
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -66,19 +80,18 @@ export default function Journal() {
               <th className="px-2 py-1">Utilisateur</th>
             </tr>
           </thead>
-          <tbody>
-            {logs.map(l => (
-              <tr key={l.id}>
-                <td className="border px-2 py-1">
-                  {new Date(l.created_at).toLocaleString()}
-                </td>
-                <td className="border px-2 py-1">{l.action}</td>
-                <td className="border px-2 py-1">{l.utilisateurs?.nom || l.done_by}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </TableContainer>
-    </div>
-  );
-}
+            <tbody>
+              {rows}
+              {list.length === 0 && (
+                <tr>
+                  <td colSpan="3" className="text-center py-4 text-gray-500">
+                    Aucun log
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </TableContainer>
+      </div>
+    );
+  }

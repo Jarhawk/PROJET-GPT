@@ -37,9 +37,17 @@ export default function PlanningForm() {
   }
 
   const updateLine = (idx, field, val) => {
-    setLignes(l => l.map((li, i) => (i === idx ? { ...li, [field]: val } : li)));
+    setLignes((l) => {
+      const arr = Array.isArray(l) ? l : [];
+      const next = [];
+      for (let i = 0; i < arr.length; i++) {
+        const li = arr[i];
+        next.push(i === idx ? { ...li, [field]: val } : li);
+      }
+      return next;
+    });
   };
-  const addLine = () => setLignes(l => [...l, { produit_id: "", quantite: 1, observation: "" }]);
+  const addLine = () => setLignes(l => [...(Array.isArray(l) ? l : []), { produit_id: "", quantite: 1, observation: "" }]);
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -57,55 +65,115 @@ export default function PlanningForm() {
     }
   };
 
+  const productOptions = (() => {
+    const list = Array.isArray(products) ? products : [];
+    const opts = [];
+    for (const p of list) {
+      opts.push(
+        <option key={p.id} value={p.id}>
+          {p.nom}
+        </option>
+      );
+    }
+    return opts;
+  })();
+
+  const lineRows = (() => {
+    const list = Array.isArray(lignes) ? lignes : [];
+    const rows = [];
+    for (let idx = 0; idx < list.length; idx++) {
+      const l = list[idx];
+      rows.push(
+        <tr key={idx}>
+          <td className="px-2 py-1">
+            <select
+              className="form-input"
+              value={l.produit_id}
+              onChange={(e) => updateLine(idx, "produit_id", e.target.value)}
+              required
+            >
+              <option value="">-- produit --</option>
+              {productOptions}
+            </select>
+          </td>
+          <td className="px-2 py-1">
+            <input
+              type="number"
+              min="0"
+              className="input w-24"
+              value={l.quantite}
+              onChange={(e) => updateLine(idx, "quantite", e.target.value)}
+              required
+            />
+          </td>
+          <td className="px-2 py-1">
+            <input
+              className="form-input"
+              value={l.observation}
+              onChange={(e) => updateLine(idx, "observation", e.target.value)}
+            />
+          </td>
+        </tr>
+      );
+    }
+    return rows;
+  })();
+
   return (
     <GlassCard title="Nouveau planning">
       <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="flex gap-4">
-        <input className="input flex-1" placeholder="Nom" value={nom} onChange={e => setNom(e.target.value)} required />
-        <input type="date" className="form-input" value={date_prevue} onChange={e => setDatePrevue(e.target.value)} required />
-        <select className="form-input" value={statut} onChange={e => setStatut(e.target.value)}>
-          <option value="prévu">Prévu</option>
-          <option value="confirmé">Confirmé</option>
-        </select>
-      </div>
-      <input className="input w-full" placeholder="Commentaire" value={commentaire} onChange={e => setCommentaire(e.target.value)} />
-      <h2 className="font-semibold">Produits</h2>
-      <TableContainer>
-        <table className="min-w-full text-sm">
-          <thead>
-            <tr>
-              <th className="px-2 py-1 text-left">Produit</th>
-              <th className="px-2 py-1 text-left">Quantité</th>
-              <th className="px-2 py-1 text-left">Observation</th>
-            </tr>
-          </thead>
-          <tbody>
-            {lignes.map((l, idx) => (
-              <tr key={idx}>
-                <td className="px-2 py-1">
-                  <select className="form-input" value={l.produit_id} onChange={e => updateLine(idx, "produit_id", e.target.value)} required>
-                    <option value="">-- produit --</option>
-                    {products.map(p => (
-                      <option key={p.id} value={p.id}>{p.nom}</option>
-                    ))}
-                  </select>
-                </td>
-                <td className="px-2 py-1">
-                  <input type="number" min="0" className="input w-24" value={l.quantite} onChange={e => updateLine(idx, "quantite", e.target.value)} required />
-                </td>
-                <td className="px-2 py-1">
-                  <input className="form-input" value={l.observation} onChange={e => updateLine(idx, "observation", e.target.value)} />
-                </td>
+        <div className="flex gap-4">
+          <input
+            className="input flex-1"
+            placeholder="Nom"
+            value={nom}
+            onChange={(e) => setNom(e.target.value)}
+            required
+          />
+          <input
+            type="date"
+            className="form-input"
+            value={date_prevue}
+            onChange={(e) => setDatePrevue(e.target.value)}
+            required
+          />
+          <select
+            className="form-input"
+            value={statut}
+            onChange={(e) => setStatut(e.target.value)}
+          >
+            <option value="prévu">Prévu</option>
+            <option value="confirmé">Confirmé</option>
+          </select>
+        </div>
+        <input
+          className="input w-full"
+          placeholder="Commentaire"
+          value={commentaire}
+          onChange={(e) => setCommentaire(e.target.value)}
+        />
+        <h2 className="font-semibold">Produits</h2>
+        <TableContainer>
+          <table className="min-w-full text-sm">
+            <thead>
+              <tr>
+                <th className="px-2 py-1 text-left">Produit</th>
+                <th className="px-2 py-1 text-left">Quantité</th>
+                <th className="px-2 py-1 text-left">Observation</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </TableContainer>
-      <Button type="button" variant="outline" onClick={addLine}>+ Ajouter une ligne</Button>
-      <div className="text-right">
-        <Button type="submit" disabled={loading}>Enregistrer</Button>
-      </div>
-      {loading && <LoadingSpinner message="Enregistrement..." />}
+            </thead>
+            <tbody>{lineRows}</tbody>
+          </table>
+        </TableContainer>
+        <Button type="button" variant="outline" onClick={addLine}>
+          + Ajouter une ligne
+        </Button>
+        <div className="text-right">
+          <Button type="submit" disabled={loading}>
+            Enregistrer
+          </Button>
+        </div>
+        {loading && <LoadingSpinner message="Enregistrement..." />}
       </form>
     </GlassCard>
   );

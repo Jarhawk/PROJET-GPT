@@ -16,7 +16,8 @@ export default function SupplierPicker({ value, onChange, error }) {
 
   const { options: autoOptions = [], loading: isLoading } = useFournisseursAutocomplete({ term: search });
 
-  const options = search.trim().length >= 2 ? autoOptions : [];
+  const options =
+    search.trim().length >= 2 && Array.isArray(autoOptions) ? autoOptions : [];
 
   useEffect(() => {
     setActive(-1);
@@ -114,24 +115,30 @@ export default function SupplierPicker({ value, onChange, error }) {
         isLoading ? (
           <div className="absolute z-10 mt-1 w-full bg-neutral-800 text-white p-2">Chargement...</div>
         ) : (
-          options.length > 0 && (
-            <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border border-white/20 bg-neutral-800 text-white">
-              {options.map((opt, idx) => (
-                <li
-                  key={opt.id}
-                  role="option"
-                  aria-selected={idx === active}
-                  className={`px-2 py-1 cursor-pointer ${idx === active ? 'bg-white/20' : ''}`}
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    select(opt);
-                  }}
-                >
-                  {opt.nom}
-                </li>
-              ))}
-            </ul>
-          )
+            options.length > 0 && (
+              <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border border-white/20 bg-neutral-800 text-white">
+                {(() => {
+                  const rows = [];
+                  options.forEach((opt, idx) => {
+                    rows.push(
+                      <li
+                        key={opt.id}
+                        role="option"
+                        aria-selected={idx === active}
+                        className={`px-2 py-1 cursor-pointer ${idx === active ? 'bg-white/20' : ''}`}
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          select(opt);
+                        }}
+                      >
+                        {opt.nom}
+                      </li>
+                    );
+                  });
+                  return rows;
+                })()}
+              </ul>
+            )
         )
       )}
       <SupplierBrowserModal

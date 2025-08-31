@@ -71,7 +71,7 @@ export function useFournisseurs() {
     const { data, error } = await supabase
       .from('fournisseurs')
       .insert([{ nom, actif, mama_id }])
-      .select()
+      .select('id, nom, actif, mama_id, created_at, updated_at')
       .single();
     if (!error && data && (tel || email || contact)) {
       await supabase.from('fournisseur_contacts').insert({

@@ -20,9 +20,9 @@ export function useUtilisateurs() {
     setLoading(true);
     setError(null);
     let query = supabase
-      .from("utilisateurs_complets")
-      .select("*")
-      .order("nom", { ascending: true });
+      .from('utilisateurs_complets')
+      .select('id, nom, mama_id, actif, access_rights, role_id, role_nom, role_access_rights, auth_id, email')
+      .order('nom', { ascending: true });
 
     if (!isSuperadmin) query = query.eq("mama_id", mama_id);
     if (search) query = query.ilike("nom", `%${search}%`);
@@ -33,19 +33,23 @@ export function useUtilisateurs() {
     setUsers(cleaned);
     setLoading(false);
     if (error) setError(error);
-    return data || [];
+    return cleaned;
   }
 
   async function fetchRoles() {
     setLoading(true);
     setError(null);
-    let query = supabase.from("roles").select("id, nom").order("nom", { ascending: true });
+    let query = supabase
+      .from('roles')
+      .select('id, nom')
+      .order('nom', { ascending: true });
     if (!isSuperadmin) query = query.eq("mama_id", mama_id);
     const { data, error } = await query;
-    setRoles(Array.isArray(data) ? data : []);
+    const rows = Array.isArray(data) ? data : [];
+    setRoles(rows);
     setLoading(false);
     if (error) setError(error);
-    return data || [];
+    return rows;
   }
 
   // 2. Ajouter un utilisateur (invitation)

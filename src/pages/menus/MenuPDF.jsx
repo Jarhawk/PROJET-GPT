@@ -25,7 +25,11 @@ export default function MenuPDF({ id }) {
         .select('fiche_id')
         .eq('menu_id', id)
         .eq('mama_id', mama_id);
-      const ficheIds = Array.isArray(mf) ? mf.map((r) => r.fiche_id) : [];
+      const ficheIds = [];
+      const mfList = Array.isArray(mf) ? mf : [];
+      for (const r of mfList) {
+        ficheIds.push(r.fiche_id);
+      }
       if (ficheIds.length === 0) {
         setFiches([]);
         return;
@@ -42,6 +46,15 @@ export default function MenuPDF({ id }) {
   }, [id, mama_id]);
 
   const exportPDF = () => {
+    const fichesList = Array.isArray(fiches) ? fiches : [];
+    let fichesHtml = '';
+    for (const f of fichesList) {
+      fichesHtml += `
+            <div class="fiche">
+              <div><strong>${f.nom}</strong></div>
+              <div class="type">Type : ${f.type} | Catégorie : ${f.categorie}</div>
+            </div>`;
+    }
     const content = `
       <html>
         <head>
@@ -58,16 +71,7 @@ export default function MenuPDF({ id }) {
           <img src="/logo-mamastock.png" class="logo" />
           <h1>Menu du jour : ${menu.nom}</h1>
           <p><strong>Date :</strong> ${menu.date}</p>
-          ${(Array.isArray(fiches) ? fiches : [])
-            .map(
-              (f) => `
-            <div class="fiche">
-              <div><strong>${f.nom}</strong></div>
-              <div class="type">Type : ${f.type} | Catégorie : ${f.categorie}</div>
-            </div>
-          `
-            )
-            .join("")}
+          ${fichesHtml}
         </body>
       </html>
     `;

@@ -4,9 +4,19 @@ export default function SimulationResult({ selection, results }) {
     <div className="text-sm text-gray-700">
       <h3 className="font-semibold mb-2">Menu simulé :</h3>
       <ul>
-        {selection.map((item, idx) => (
-          <li key={idx}>{item.nom} : coût {item.cout} € / prix {item.prix} €</li>
-        ))}
+        {(() => {
+          const items = [];
+          const list = Array.isArray(selection) ? selection : [];
+          for (let i = 0; i < list.length; i++) {
+            const item = list[i];
+            items.push(
+              <li key={i}>
+                {item.nom} : coût {item.cout} € / prix {item.prix} €
+              </li>
+            );
+          }
+          return items;
+        })()}
       </ul>
       <div className="mt-4 font-semibold">
         Coût total : {results.totalCout} €<br />

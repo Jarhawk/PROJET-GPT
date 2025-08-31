@@ -33,7 +33,7 @@ test('fetchPlanning queries with filters', async () => {
     await result.current.fetchPlanning({ start: '2024-01-01', end: '2024-01-31' });
   });
   expect(fromMock).toHaveBeenCalledWith('planning_previsionnel');
-  expect(queryObj.select).toHaveBeenCalledWith('*');
+  expect(queryObj.select).toHaveBeenCalledWith('id, nom, date_prevue, statut, mama_id');
   expect(queryObj.eq).toHaveBeenCalledWith('mama_id', 'm1');
   expect(queryObj.order).toHaveBeenCalledWith('date_prevue', { ascending: true });
   expect(queryObj.gte).toHaveBeenCalledWith('date_prevue', '2024-01-01');

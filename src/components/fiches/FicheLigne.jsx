@@ -3,8 +3,16 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 export default function FicheLigne({ ligne, products = [], ficheOptions = [], onChange, onRemove }) {
-  const prod = products.find((p) => p.id === ligne.produit_id);
-  const sf = ficheOptions.find((f) => f.id === ligne.sous_fiche_id);
+  const productList = Array.isArray(products) ? products : [];
+  const ficheList = Array.isArray(ficheOptions) ? ficheOptions : [];
+    let prod = null;
+    for (const p of productList) {
+      if (p.id === ligne.produit_id) { prod = p; break; }
+    }
+    let sf = null;
+    for (const f of ficheList) {
+      if (f.id === ligne.sous_fiche_id) { sf = f; break; }
+    }
   const prixUnitaire =
     ligne.type === "produit"
       ? prod?.pmp ?? prod?.dernier_prix ?? null
@@ -34,13 +42,19 @@ export default function FicheLigne({ ligne, products = [], ficheOptions = [], on
             onChange={(e) => onChange("produit_id", e.target.value)}
             required
           >
-            <option value="">Sélectionner</option>
-            {products.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.nom}
-                {p.unite?.nom ? ` (${p.unite.nom})` : ""}
-              </option>
-            ))}
+              <option value="">Sélectionner</option>
+              {(() => {
+                const opts = [];
+                for (const p of productList) {
+                  opts.push(
+                    <option key={p.id} value={p.id}>
+                      {p.nom}
+                      {p.unite?.nom ? ` (${p.unite.nom})` : ""}
+                    </option>
+                  );
+                }
+                return opts;
+              })()}
           </Select>
         ) : (
           <Select
@@ -49,12 +63,18 @@ export default function FicheLigne({ ligne, products = [], ficheOptions = [], on
             onChange={(e) => onChange("sous_fiche_id", e.target.value)}
             required
           >
-            <option value="">Sélectionner</option>
-            {ficheOptions.map((f) => (
-              <option key={f.id} value={f.id}>
-                {f.nom}
-              </option>
-            ))}
+              <option value="">Sélectionner</option>
+              {(() => {
+                const opts = [];
+                for (const f of ficheList) {
+                  opts.push(
+                    <option key={f.id} value={f.id}>
+                      {f.nom}
+                    </option>
+                  );
+                }
+                return opts;
+              })()}
           </Select>
         )}
       </td>

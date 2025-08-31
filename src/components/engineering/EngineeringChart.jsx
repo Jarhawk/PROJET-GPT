@@ -24,10 +24,11 @@ const median = arr => {
 }
 
 export default function EngineeringChart({ data, type }) {
+  const rows = Array.isArray(data) ? data : []
   if (type === 'radar') {
     return (
       <ResponsiveContainer width="100%" height="100%">
-        <RadarChart data={data}>
+        <RadarChart data={rows}>
           <PolarGrid />
           <PolarAngleAxis dataKey="nom" />
           <PolarRadiusAxis />
@@ -39,7 +40,7 @@ export default function EngineeringChart({ data, type }) {
   if (type === 'histogram') {
     return (
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data}>
+        <BarChart data={rows}>
           <CartesianGrid />
           <XAxis dataKey="nom" />
           <YAxis />
@@ -58,14 +59,20 @@ export default function EngineeringChart({ data, type }) {
           <YAxis type="number" dataKey="y" name="Marge" unit="%" />
           <ZAxis type="number" dataKey="ventes" range={[0, 400]} />
           <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-          <Scatter data={data} fill="#8884d8" />
+          <Scatter data={rows} fill="#8884d8" />
         </ScatterChart>
       </ResponsiveContainer>
     )
   }
   // default matrix chart
-  const medianPop = median(data.map(d => d.x))
-  const medianMarge = median(data.map(d => d.y))
+  const xs = []
+  const ys = []
+  for (const d of rows) {
+    xs.push(d.x)
+    ys.push(d.y)
+  }
+  const medianPop = median(xs)
+  const medianMarge = median(ys)
   return (
     <ResponsiveContainer width="100%" height="100%">
       <ScatterChart>
@@ -75,7 +82,7 @@ export default function EngineeringChart({ data, type }) {
         <Tooltip cursor={{ strokeDasharray: '3 3' }} />
         <ReferenceLine x={medianPop} stroke="grey" />
         <ReferenceLine y={medianMarge} stroke="grey" />
-        <Scatter data={data} fill="#8884d8" />
+        <Scatter data={rows} fill="#8884d8" />
       </ScatterChart>
     </ResponsiveContainer>
   )

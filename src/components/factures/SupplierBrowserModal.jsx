@@ -8,11 +8,12 @@ export default function SupplierBrowserModal({ open, onClose, onSelect }) {
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
   const pageSize = 20;
-  const { data: results = [], total } = useFournisseursBrowse({
-    page,
-    limit: pageSize,
-    term: query,
-  });
+    const { data: results = [], total } = useFournisseursBrowse({
+      page,
+      limit: pageSize,
+      term: query,
+    });
+    const list = Array.isArray(results) ? results : [];
   const [active, setActive] = useState(-1);
 
   useEffect(() => {
@@ -29,18 +30,18 @@ export default function SupplierBrowserModal({ open, onClose, onSelect }) {
   }, [query]);
   useEffect(() => {
     setActive(-1);
-  }, [results]);
+  }, [list]);
 
   const handleKeyDown = (e) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setActive((a) => Math.min(a + 1, results.length - 1));
+      setActive((a) => Math.min(a + 1, list.length - 1));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       setActive((a) => Math.max(a - 1, 0));
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      const target = active >= 0 ? results[active] : results[0];
+      const target = active >= 0 ? list[active] : list[0];
       if (target) {
         onSelect?.(target);
         onClose?.();
@@ -61,6 +62,9 @@ export default function SupplierBrowserModal({ open, onClose, onSelect }) {
         >
           <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/40">
             <Dialog.Title className="text-sm font-semibold">Rechercher un fournisseur</Dialog.Title>
+            <DialogDescription className="sr-only">
+              Modale de recherche fournisseur
+            </DialogDescription>
             <Dialog.Close asChild>
               <button className="p-2 rounded-md hover:bg-muted">
                 <X size={18} />
@@ -83,25 +87,31 @@ export default function SupplierBrowserModal({ open, onClose, onSelect }) {
               spellCheck={false}
               className="w-full px-4 py-2 font-semibold text-white placeholder-white/50 bg-white/10 backdrop-blur rounded-md shadow-lg border border-white/20 ring-1 ring-white/20 focus:outline-none hover:bg-white/10"
             />
-            <div className="border border-border rounded-lg max-h-60 overflow-y-auto">
-              {results.length === 0 ? (
-                <div className="p-4 text-sm text-muted-foreground">Aucun résultat</div>
-              ) : (
-                results.map((f, idx) => (
-                  <button
-                    key={f.id}
-                    type="button"
-                    onClick={() => {
-                      onSelect?.(f);
-                      onClose?.();
-                    }}
-                    className={`w-full text-left px-3 py-2 hover:bg-white/5 rounded ${idx === active ? 'bg-white/10' : ''}`}
-                  >
-                    {f.nom}
-                  </button>
-                ))
-              )}
-            </div>
+                <div className="border border-border rounded-lg max-h-60 overflow-y-auto">
+                  {list.length === 0 ? (
+                    <div className="p-4 text-sm text-muted-foreground">Aucun résultat</div>
+                  ) : (
+                    (() => {
+                      const rows = [];
+                      list.forEach((f, idx) => {
+                        rows.push(
+                          <button
+                            key={f.id}
+                            type="button"
+                            onClick={() => {
+                              onSelect?.(f);
+                              onClose?.();
+                            }}
+                            className={`w-full text-left px-3 py-2 hover:bg-white/5 rounded ${idx === active ? 'bg-white/10' : ''}`}
+                          >
+                            {f.nom}
+                          </button>
+                        );
+                      });
+                      return rows;
+                    })()
+                  )}
+                </div>
             <div className="flex justify-between items-center pt-2">
               <Button
                 variant="outline"

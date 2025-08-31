@@ -60,19 +60,31 @@ export default function Rapports() {
         <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-2">
           <Select value={filters.module} onChange={(e) => setFilters({ ...filters, module: e.target.value })}>
             <option value="">Module</option>
-            {(Array.isArray(MODULES) ? MODULES : []).map((m) => (
-              <option key={m} value={m}>
-                {m}
-              </option>
-            ))}
+            {(() => {
+              const opts = [];
+              for (const m of MODULES) {
+                opts.push(
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
+                );
+              }
+              return opts;
+            })()}
           </Select>
           <Select value={filters.type} onChange={(e) => setFilters({ ...filters, type: e.target.value })}>
             <option value="">Format</option>
-            {(Array.isArray(FORMATS) ? FORMATS : []).map((f) => (
-              <option key={f} value={f}>
-                {f}
-              </option>
-            ))}
+            {(() => {
+              const opts = [];
+              for (const f of FORMATS) {
+                opts.push(
+                  <option key={f} value={f}>
+                    {f}
+                  </option>
+                );
+              }
+              return opts;
+            })()}
           </Select>
           <Input type="date" value={filters.start} onChange={(e) => setFilters({ ...filters, start: e.target.value })} />
           <Input type="date" value={filters.end} onChange={(e) => setFilters({ ...filters, end: e.target.value })} />
@@ -94,23 +106,30 @@ export default function Rapports() {
             </tr>
           </thead>
           <tbody>
-            {(Array.isArray(rapports) ? rapports : []).map((r) => (
-              <tr key={r.id}>
-                <td className="border px-2 py-1">{r.module}</td>
-                <td className="border px-2 py-1">{r.type}</td>
-                <td className="border px-2 py-1">
-                  {r.periode_debut || ""} - {r.periode_fin || ""}
-                </td>
-                <td className="border px-2 py-1">
-                  {new Date(r.date_generation).toLocaleString()}
-                </td>
-                <td className="border px-2 py-1">
-                  <Button size="sm" onClick={() => downloadRapport(r.id)}>
-                    Télécharger
-                  </Button>
-                </td>
-              </tr>
-            ))}
+            {(() => {
+              const rows = [];
+              const list = Array.isArray(rapports) ? rapports : [];
+              for (const r of list) {
+                rows.push(
+                  <tr key={r.id}>
+                    <td className="border px-2 py-1">{r.module}</td>
+                    <td className="border px-2 py-1">{r.type}</td>
+                    <td className="border px-2 py-1">
+                      {r.periode_debut || ""} - {r.periode_fin || ""}
+                    </td>
+                    <td className="border px-2 py-1">
+                      {new Date(r.date_generation).toLocaleString()}
+                    </td>
+                    <td className="border px-2 py-1">
+                      <Button size="sm" onClick={() => downloadRapport(r.id)}>
+                        Télécharger
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              }
+              return rows;
+            })()}
           </tbody>
         </table>
       </TableContainer>
@@ -125,18 +144,30 @@ export default function Rapports() {
           <form onSubmit={handleGenerate} className="flex flex-col gap-2">
             <Select value={gen.module} onChange={(e) => setGen({ ...gen, module: e.target.value })}>
               <option value="">Module</option>
-              {(Array.isArray(MODULES) ? MODULES : []).map((m) => (
-                <option key={m} value={m}>
-                  {m}
-                </option>
-              ))}
+              {(() => {
+                const opts = [];
+                for (const m of MODULES) {
+                  opts.push(
+                    <option key={m} value={m}>
+                      {m}
+                    </option>
+                  );
+                }
+                return opts;
+              })()}
             </Select>
             <Select value={gen.type} onChange={(e) => setGen({ ...gen, type: e.target.value })}>
-              {(Array.isArray(FORMATS) ? FORMATS : []).map((f) => (
-                <option key={f} value={f}>
-                  {f}
-                </option>
-              ))}
+              {(() => {
+                const opts = [];
+                for (const f of FORMATS) {
+                  opts.push(
+                    <option key={f} value={f}>
+                      {f}
+                    </option>
+                  );
+                }
+                return opts;
+              })()}
             </Select>
             <Input type="date" value={gen.start} onChange={(e) => setGen({ ...gen, start: e.target.value })} />
             <Input type="date" value={gen.end} onChange={(e) => setGen({ ...gen, end: e.target.value })} />

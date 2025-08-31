@@ -59,9 +59,16 @@ export default function Produits() {
           onChange={(e) => { setFamilleId(e.target.value); setSousFamilleId(''); setPage(1); }}
         >
           <option value="">Toutes les familles</option>
-          {safeFamilles.map(f => (
-            <option key={f.id} value={f.id}>{f.nom}</option>
-          ))}
+          {(() => {
+            const opts = [];
+            for (let i = 0; i < safeFamilles.length; i++) {
+              const f = safeFamilles[i];
+              opts.push(
+                <option key={f.id} value={f.id}>{f.nom}</option>
+              );
+            }
+            return opts;
+          })()}
         </select>
         <select
           className="select"
@@ -69,9 +76,17 @@ export default function Produits() {
           onChange={(e) => { setSousFamilleId(e.target.value); setPage(1); }}
         >
           <option value="">Toutes les sous-familles</option>
-          {sousFamilles.map(sf => (
-            <option key={sf.id} value={sf.id}>{sf.nom}</option>
-          ))}
+          {(() => {
+            const opts = [];
+            const list = Array.isArray(sousFamilles) ? sousFamilles : [];
+            for (let i = 0; i < list.length; i++) {
+              const sf = list[i];
+              opts.push(
+                <option key={sf.id} value={sf.id}>{sf.nom}</option>
+              );
+            }
+            return opts;
+          })()}
         </select>
         <select
           className="select"
@@ -111,21 +126,29 @@ export default function Produits() {
               </div>
             </div>
           )}
-          {produits.map((p) => (
-            <div key={p.id} className="table-row">
-              <div className="table-cell py-2">{p.nom}</div>
-              <div className="table-cell py-2">{p.unite?.nom ?? '—'}</div>
-              <div className="table-cell py-2">{((p.pmp ?? p.dernier_prix) ?? 0).toFixed(2)}</div>
-              <div className="table-cell py-2">
-                {p.sous_famille?.famille?.nom
-                  ? `${p.sous_famille.famille.nom} > ${p.sous_famille.nom}`
-                  : p.sous_famille?.nom ?? '—'}
-              </div>
-              <div className="table-cell py-2">{p.zone_id ?? '—'}</div>
-              <div className="table-cell py-2">{p.actif ? 'Actif' : 'Inactif'}</div>
-              <div className="table-cell py-2"> {/* actions existantes */}</div>
-            </div>
-          ))}
+          {(() => {
+            const rowsElems = [];
+            const list = Array.isArray(produits) ? produits : [];
+            for (let i = 0; i < list.length; i++) {
+              const p = list[i];
+              rowsElems.push(
+                <div key={p.id} className="table-row">
+                  <div className="table-cell py-2">{p.nom}</div>
+                  <div className="table-cell py-2">{p.unite?.nom ?? '—'}</div>
+                  <div className="table-cell py-2">{((p.pmp ?? p.dernier_prix) ?? 0).toFixed(2)}</div>
+                  <div className="table-cell py-2">
+                    {p.sous_famille?.famille?.nom
+                      ? `${p.sous_famille.famille.nom} > ${p.sous_famille.nom}`
+                      : p.sous_famille?.nom ?? '—'}
+                  </div>
+                  <div className="table-cell py-2">{p.zone_id ?? '—'}</div>
+                  <div className="table-cell py-2">{p.actif ? 'Actif' : 'Inactif'}</div>
+                  <div className="table-cell py-2"> {/* actions existantes */}</div>
+                </div>
+              );
+            }
+            return rowsElems;
+          })()}
         </div>
       </div>
 

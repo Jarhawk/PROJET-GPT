@@ -135,15 +135,22 @@ export default function SousFamilleList({ famille }) {
                     </td>
                   </tr>
                 )}
-                {(sousFamilles ?? []).map((sf) => (
-                  <SousFamilleRow
-                    key={sf.id}
-                    sousFamille={sf}
-                    onUpdate={handleUpdate}
-                    onDelete={handleDelete}
-                    onToggle={handleToggle}
-                  />
-                ))}
+                {(() => {
+                  const rows = [];
+                  const list = Array.isArray(sousFamilles) ? sousFamilles : [];
+                  for (const sf of list) {
+                    rows.push(
+                      <SousFamilleRow
+                        key={sf.id}
+                        sousFamille={sf}
+                        onUpdate={handleUpdate}
+                        onDelete={handleDelete}
+                        onToggle={handleToggle}
+                      />
+                    );
+                  }
+                  return rows;
+                })()}
               </tbody>
             </table>
           </div>

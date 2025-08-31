@@ -22,12 +22,12 @@ export default function InvitationsEnAttente() {
       .from("mamas")
       .select("id, nom")
       .eq("id", mama_id)
-      .then(({ data }) => setMamas(data || []));
+      .then(({ data }) => setMamas(Array.isArray(data) ? data : []));
     supabase
       .from("roles")
       .select("nom")
       .eq("mama_id", mama_id)
-      .then(({ data }) => setRoles(data || []));
+      .then(({ data }) => setRoles(Array.isArray(data) ? data : []));
     setLoading(true);
     supabase
       .from("utilisateurs")
@@ -36,13 +36,27 @@ export default function InvitationsEnAttente() {
       .eq("mama_id", mama_id)
       .order("created_at", { ascending: false })
       .then(({ data }) => {
-        setInvites(data || []);
+        setInvites(Array.isArray(data) ? data : []);
         setLoading(false);
       });
   }, [mama_id]);
 
-  const mamaNom = id => mamas.find(m => m.id === id)?.nom || id;
-  const roleNom = nom => roles.find(r => r.nom === nom)?.nom || nom;
+  const mamaNom = (id) => {
+    const list = Array.isArray(mamas) ? mamas : [];
+    for (let i = 0; i < list.length; i++) {
+      const m = list[i];
+      if (m.id === id) return m.nom || id;
+    }
+    return id;
+  };
+  const roleNom = (nom) => {
+    const list = Array.isArray(roles) ? roles : [];
+    for (let i = 0; i < list.length; i++) {
+      const r = list[i];
+      if (r.nom === nom) return r.nom;
+    }
+    return nom;
+  };
 
   const handleResend = async () => {
     toast.error("Impossible de renvoyer l'invitation sans email");
@@ -54,7 +68,15 @@ export default function InvitationsEnAttente() {
       .delete()
       .eq("id", userId)
       .eq("mama_id", mama_id);
-    setInvites(invites => invites.filter(u => u.id !== userId));
+    setInvites((invites) => {
+      const rows = Array.isArray(invites) ? invites : [];
+      const next = [];
+      for (let i = 0; i < rows.length; i++) {
+        const u = rows[i];
+        if (u.id !== userId) next.push(u);
+      }
+      return next;
+    });
     setConfirmDeleteId(null);
     toast.success("Invitation annulée !");
   };
@@ -79,60 +101,70 @@ export default function InvitationsEnAttente() {
             </tr>
           </thead>
           <tbody>
-            {invites.map(u => (
-              <tr key={u.id}>
-                <td>{u.nom}</td>
-                <td>{mamaNom(u.mama_id)}</td>
-                <td>{roleNom(u.role)}</td>
-                <td>{u.created_at?.slice(0, 16).replace("T", " ")}</td>
-                <td>En attente</td>
-                <td>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleResend(u)}
-                  >
-                    Relancer
-                  </Button>
-                  {confirmDeleteId === u.id ? (
-                    <>
+            {(() => {
+              const rows = Array.isArray(invites) ? invites : [];
+              const items = [];
+              for (let i = 0; i < rows.length; i++) {
+                const u = rows[i];
+                items.push(
+                  <tr key={u.id}>
+                    <td>{u.nom}</td>
+                    <td>{mamaNom(u.mama_id)}</td>
+                    <td>{roleNom(u.role)}</td>
+                    <td>{u.created_at?.slice(0, 16).replace("T", " ")}</td>
+                    <td>En attente</td>
+                    <td>
                       <Button
                         size="sm"
-                        variant="destructive"
-                        className="ml-2"
-                        onClick={() => handleCancel(u.id)}
+                        variant="outline"
+                        onClick={() => handleResend(u)}
                       >
-                        Confirmer
+                        Relancer
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className="ml-2"
-                        onClick={() => setConfirmDeleteId(null)}
-                      >
-                        Annuler
-                      </Button>
-                    </>
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      className="ml-2"
-                      onClick={() => setConfirmDeleteId(u.id)}
-                    >
-                      Annuler
-                    </Button>
-                  )}
-                </td>
-              </tr>
-            ))}
-            {invites.length === 0 && (
-              <tr>
-                <td colSpan={6} className="py-4 text-gray-500">
-                  Aucune invitation en attente
-                </td>
-              </tr>
-            )}
+                      {confirmDeleteId === u.id ? (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            className="ml-2"
+                            onClick={() => handleCancel(u.id)}
+                          >
+                            Confirmer
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            className="ml-2"
+                            onClick={() => setConfirmDeleteId(null)}
+                          >
+                            Annuler
+                          </Button>
+                        </>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="ml-2"
+                          onClick={() => setConfirmDeleteId(u.id)}
+                        >
+                          Annuler
+                        </Button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              }
+              if (rows.length === 0) {
+                items.push(
+                  <tr key="empty">
+                    <td colSpan={6} className="py-4 text-gray-500">
+                      Aucune invitation en attente
+                    </td>
+                  </tr>
+                );
+              }
+              return items;
+            })()}
           </tbody>
         </table>
       </div>

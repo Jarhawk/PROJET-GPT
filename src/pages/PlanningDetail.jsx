@@ -21,6 +21,8 @@ export default function PlanningDetail() {
 
   if (authLoading || !planning) return <LoadingSpinner message="Chargement..." />;
 
+  const lignes = Array.isArray(planning.lignes) ? planning.lignes : [];
+
   return (
     <div className="p-6 space-y-4">
       <Link to="/planning"><Button variant="outline">Retour</Button></Link>
@@ -28,28 +30,34 @@ export default function PlanningDetail() {
       <div>Date : {planning.date_prevue}</div>
       <div>Statut : {planning.statut}</div>
       <div>Commentaire : {planning.commentaire || "-"}</div>
-      {planning.lignes?.length > 0 && (
-        <TableContainer>
-          <table className="min-w-full text-sm">
-            <thead>
-              <tr>
-                <th className="px-2 py-1 text-left">Produit</th>
-                <th className="px-2 py-1 text-left">Quantité</th>
-                <th className="px-2 py-1 text-left">Observation</th>
-              </tr>
-            </thead>
-            <tbody>
-              {planning.lignes.map(l => (
-                <tr key={l.id}>
-                  <td className="px-2 py-1">{l.produit?.nom}</td>
-                  <td className="px-2 py-1">{l.quantite}</td>
-                  <td className="px-2 py-1">{l.observation}</td>
+        {lignes.length > 0 && (
+          <TableContainer>
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr>
+                  <th className="px-2 py-1 text-left">Produit</th>
+                  <th className="px-2 py-1 text-left">Quantité</th>
+                  <th className="px-2 py-1 text-left">Observation</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </TableContainer>
-      )}
-    </div>
-  );
-}
+              </thead>
+              <tbody>
+                {(() => {
+                  const rows = [];
+                  for (const l of lignes) {
+                    rows.push(
+                      <tr key={l.id}>
+                        <td className="px-2 py-1">{l.produit?.nom}</td>
+                        <td className="px-2 py-1">{l.quantite}</td>
+                        <td className="px-2 py-1">{l.observation}</td>
+                      </tr>
+                    );
+                  }
+                  return rows;
+                })()}
+              </tbody>
+            </table>
+          </TableContainer>
+        )}
+      </div>
+    );
+  }

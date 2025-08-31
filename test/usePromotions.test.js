@@ -36,7 +36,10 @@ test('fetchPromotions filters by search and actif', async () => {
     await result.current.fetchPromotions({ search: 'promo', actif: true });
   });
   expect(fromMock).toHaveBeenCalledWith('promotions');
-  expect(query.select).toHaveBeenCalledWith('*', { count: 'exact' });
+  expect(query.select).toHaveBeenCalledWith(
+    'id, mama_id, nom, description, date_debut, date_fin, created_at, updated_at, actif',
+    { count: 'exact' }
+  );
   expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1');
   expect(query.order).toHaveBeenCalledWith('date_debut', { ascending: false });
   expect(query.ilike).toHaveBeenCalledWith('nom', '%promo%');

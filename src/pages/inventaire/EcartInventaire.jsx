@@ -19,7 +19,7 @@ function EcartInventairePage() {
   const fetchEcarts = useCallback(async () => {
     if ((!date && !mois) || !zone || !mama_id) return;
 
-    let all = [];
+    const all = [];
 
     if (mois) {
       const start = mois;
@@ -38,8 +38,10 @@ function EcartInventairePage() {
           p_zone: zone,
           mama_id_param: mama_id,
         });
-        if (!error && data.length > 0) {
-          all.push(...data.map((e) => ({ ...e, date: d })));
+        if (!error && Array.isArray(data) && data.length > 0) {
+          for (const e of data) {
+            all.push({ ...e, date: d });
+          }
         }
       }
     } else {
@@ -48,8 +50,10 @@ function EcartInventairePage() {
         p_zone: zone,
         mama_id_param: mama_id,
       });
-      if (!error) {
-        all = data.map((e) => ({ ...e, date }));
+      if (!error && Array.isArray(data)) {
+        for (const e of data) {
+          all.push({ ...e, date });
+        }
       }
     }
 
@@ -57,9 +61,10 @@ function EcartInventairePage() {
   }, [date, mois, zone, mama_id]);
 
   const renderPDF = useCallback(() => {
-    const rows = ecarts
-      .map(
-        (e) => `
+    const list = Array.isArray(ecarts) ? ecarts : [];
+    let rows = "";
+    for (const e of list) {
+      rows += `
       <tr>
         <td>${e.date || ""}</td>
         <td>${e.produit}</td>
@@ -67,9 +72,8 @@ function EcartInventairePage() {
         <td>${e.stock_reel}</td>
         <td>${e.ecart}</td>
         <td>${e.motif || ""}</td>
-      </tr>`
-      )
-      .join("");
+      </tr>`;
+    }
 
     const content = `
       <html>
@@ -151,9 +155,13 @@ function EcartInventairePage() {
             className="w-full"
           />
           <datalist id="zones">
-            {zones.map(z => (
-              <option key={z.id} value={z.nom} />
-            ))}
+            {(() => {
+              const opts = [];
+              for (const z of Array.isArray(zones) ? zones : []) {
+                opts.push(<option key={z.id} value={z.nom} />);
+              }
+              return opts;
+            })()}
           </datalist>
         </div>
         <button
@@ -177,18 +185,25 @@ function EcartInventairePage() {
             </tr>
           </thead>
           <tbody>
-            {ecarts.map((e, idx) => (
-              <tr key={idx} className="border-b hover:bg-white/5">
-                <td className="p-3">{e.date}</td>
-                <td className="p-3">{e.produit}</td>
-                <td className="p-3">{e.stock_theorique}</td>
-                <td className="p-3">{e.stock_reel}</td>
-                <td className={`p-3 font-bold ${e.ecart < 0 ? "text-red-600" : e.ecart > 0 ? "text-green-600" : "text-gray-600"}`}>
-                  {e.ecart}
-                </td>
-                <td className="p-3 italic text-gray-500">{e.motif}</td>
-              </tr>
-            ))}
+            {(() => {
+              const rows = [];
+              const list = Array.isArray(ecarts) ? ecarts : [];
+              let idx = 0;
+              for (const e of list) {
+                rows.push(
+                  <tr key={idx} className="border-b hover:bg-white/5">
+                    <td className="p-3">{e.date}</td>
+                    <td className="p-3">{e.produit}</td>
+                    <td className="p-3">{e.stock_theorique}</td>
+                    <td className="p-3">{e.stock_reel}</td>
+                    <td className={`p-3 font-bold ${e.ecart < 0 ? "text-red-600" : e.ecart > 0 ? "text-green-600" : "text-gray-600"}`}>{e.ecart}</td>
+                    <td className="p-3 italic text-gray-500">{e.motif}</td>
+                  </tr>
+                );
+                idx += 1;
+              }
+              return rows;
+            })()}
           </tbody>
         </table>
       </TableContainer>

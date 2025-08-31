@@ -62,30 +62,40 @@ export default function Familles() {
             </tr>
           </thead>
           <tbody>
-            {(familles ?? []).map((f) => (
-              <tr key={f.id}>
-                <td className="px-2 py-1">{f.nom}</td>
-                <td className="px-2 py-1 flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => setEdit(f)}>
-                    Modifier
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleDelete(f.id)}
-                  >
-                    Supprimer
-                  </Button>
-                </td>
-              </tr>
-            ))}
-            {familles.length === 0 && (
-              <tr>
-                <td colSpan="2" className="py-2">
-                  Aucune famille
-                </td>
-              </tr>
-            )}
+            {(() => {
+              const rows = Array.isArray(familles) ? familles : [];
+              const items = [];
+              for (let i = 0; i < rows.length; i++) {
+                const f = rows[i];
+                items.push(
+                  <tr key={f.id}>
+                    <td className="px-2 py-1">{f.nom}</td>
+                    <td className="px-2 py-1 flex gap-2">
+                      <Button size="sm" variant="outline" onClick={() => setEdit(f)}>
+                        Modifier
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleDelete(f.id)}
+                      >
+                        Supprimer
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              }
+              if (rows.length === 0) {
+                items.push(
+                  <tr key="empty">
+                    <td colSpan="2" className="py-2">
+                      Aucune famille
+                    </td>
+                  </tr>
+                );
+              }
+              return items;
+            })()}
           </tbody>
         </table>
       </ListingContainer>

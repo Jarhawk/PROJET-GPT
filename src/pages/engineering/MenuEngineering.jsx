@@ -63,6 +63,33 @@ export default function MenuEngineering() {
   if (authLoading) return <LoadingSpinner message="Chargement..." />
   if (!mama_id || !roles.some(r => ['admin', 'manager'].includes(r))) return null
 
+  const safeRows = Array.isArray(rows) ? rows : [];
+  const body = [];
+  for (let i = 0; i < safeRows.length; i += 1) {
+    const r = safeRows[i];
+    body.push(
+      <tr key={r.id}>
+        <td className="px-2 py-1">{r.nom}</td>
+        <td className="px-2 py-1">{r.famille || '-'}</td>
+        <td className="px-2 py-1">{r.prix_vente?.toFixed(2)}</td>
+        <td className="px-2 py-1">{r.cout_portion?.toFixed(2)}</td>
+        <td className="px-2 py-1">{r.margeEuro?.toFixed(2)}</td>
+        <td className="px-2 py-1">{r.marge?.toFixed(1)}</td>
+        <td className="px-2 py-1">
+          <input
+            type="number"
+            className="input w-20"
+            value={r.ventes}
+            onChange={e => handleVentesChange(r, e.target.value)}
+          />
+        </td>
+        <td className="px-2 py-1">{(r.ca).toFixed(2)}</td>
+        <td className="px-2 py-1">{(r.popularite * 100).toFixed(1)}%</td>
+        <td className="px-2 py-1">{r.classement}</td>
+      </tr>
+    );
+  }
+
   return (
     <div className="p-6 space-y-4">
             <h1 className="text-2xl font-bold">Menu Engineering</h1>
@@ -94,29 +121,7 @@ export default function MenuEngineering() {
             <th className="px-2 py-1">Catégorie</th>
           </tr>
         </thead>
-        <tbody>
-          {rows.map(r => (
-            <tr key={r.id}>
-              <td className="px-2 py-1">{r.nom}</td>
-              <td className="px-2 py-1">{r.famille || '-'}</td>
-              <td className="px-2 py-1">{r.prix_vente?.toFixed(2)}</td>
-              <td className="px-2 py-1">{r.cout_portion?.toFixed(2)}</td>
-              <td className="px-2 py-1">{r.margeEuro?.toFixed(2)}</td>
-              <td className="px-2 py-1">{r.marge?.toFixed(1)}</td>
-              <td className="px-2 py-1">
-                <input
-                  type="number"
-                  className="input w-20"
-                  value={r.ventes}
-                  onChange={e => handleVentesChange(r, e.target.value)}
-                />
-              </td>
-              <td className="px-2 py-1">{(r.ca).toFixed(2)}</td>
-              <td className="px-2 py-1">{(r.popularite * 100).toFixed(1)}%</td>
-              <td className="px-2 py-1">{r.classement}</td>
-            </tr>
-          ))}
-        </tbody>
+        <tbody>{body}</tbody>
       </table>
     </div>
   )

@@ -15,7 +15,7 @@ export default function ExportComptaPage() {
 
   const handlePreview = async () => {
     const rows = await generateJournalCsv(mois, false);
-    setPreview(rows);
+    setPreview(Array.isArray(rows) ? rows : []);
   };
 
   const handleDownload = () => generateJournalCsv(mois, true);
@@ -72,7 +72,7 @@ export default function ExportComptaPage() {
           🧮 Envoyer à ERP
         </Button>
       </div>
-      {preview.length > 0 && (
+      {Array.isArray(preview) && preview.length > 0 && (
         <TableContainer>
           <table className="min-w-full table-auto text-sm">
             <thead className="bg-white/10 border-b border-white/20">
@@ -85,15 +85,23 @@ export default function ExportComptaPage() {
               </tr>
             </thead>
             <tbody>
-              {preview.map((row, i) => (
-                <tr key={i} className="odd:bg-white/5">
-                  <td className="px-2 py-1">{row.date}</td>
-                  <td className="px-2 py-1">{row.fournisseur}</td>
-                  <td className="px-2 py-1 text-right">{row.ht.toFixed(2)}</td>
-                  <td className="px-2 py-1 text-right">{row.tva.toFixed(2)}</td>
-                  <td className="px-2 py-1 text-right">{row.ttc.toFixed(2)}</td>
-                </tr>
-              ))}
+              {(() => {
+                const rows = Array.isArray(preview) ? preview : [];
+                const items = [];
+                for (let i = 0; i < rows.length; i++) {
+                  const row = rows[i];
+                  items.push(
+                    <tr key={i} className="odd:bg-white/5">
+                      <td className="px-2 py-1">{row.date}</td>
+                      <td className="px-2 py-1">{row.fournisseur}</td>
+                      <td className="px-2 py-1 text-right">{row.ht.toFixed(2)}</td>
+                      <td className="px-2 py-1 text-right">{row.tva.toFixed(2)}</td>
+                      <td className="px-2 py-1 text-right">{row.ttc.toFixed(2)}</td>
+                    </tr>
+                  );
+                }
+                return items;
+              })()}
             </tbody>
           </table>
         </TableContainer>

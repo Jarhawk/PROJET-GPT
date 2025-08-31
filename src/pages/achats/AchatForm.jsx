@@ -58,11 +58,25 @@ export default function AchatForm({ achat, fournisseurs = [], onClose }) {
               setProduitId(obj?.id || "");
               if ((obj?.nom || "").length >= 2) searchProduits(obj.nom);
             }}
-            options={produitOptions.map(p => ({ id: p.id, nom: p.nom }))}
+            options={(() => {
+              const arr = Array.isArray(produitOptions) ? produitOptions : [];
+              const opts = [];
+              for (const p of arr) {
+                opts.push({ id: p.id, nom: p.nom });
+              }
+              return opts;
+            })()}
           />
           <select className="form-input" value={fournisseur_id} onChange={e => setFournisseurId(e.target.value)} required>
             <option value="">Fournisseur</option>
-            {fournisseurs.map(s => <option key={s.id} value={s.id}>{s.nom}</option>)}
+            {(() => {
+              const arr = Array.isArray(fournisseurs) ? fournisseurs : [];
+              const elems = [];
+              for (const s of arr) {
+                elems.push(<option key={s.id} value={s.id}>{s.nom}</option>);
+              }
+              return elems;
+            })()}
           </select>
           <input type="number" className="form-input" value={quantite} onChange={e => setQuantite(Number(e.target.value))} />
           <input type="number" className="form-input" value={prix} onChange={e => setPrix(Number(e.target.value))} />

@@ -5,20 +5,28 @@ export async function safeSelectWithFallback({ client, table, select, order, lim
   if (order) q = q.order(order.column, { ascending: order.ascending === true });
   if (typeof limit === 'number') q = q.limit(limit);
 
-  let { data, error } = await q;
+  const { data, error } = await q;
   if (!error) {
-    return Array.isArray(transform) || typeof transform === 'function'
-      ? (typeof transform === 'function' ? transform(data) : data)
-      : data;
+    const rows = Array.isArray(data) ? data : [];
+    return typeof transform === 'function' ? transform(rows) : rows;
   }
 
   // Si l'erreur vient d'une colonne inconnue (400 PostgREST) on tente sans colonnes "à risque"
   const riskyCols = ['stock_projete']; // on pourra étendre si besoin
-  const cleanSelect = select
-    .split(',')
-    .map(s => s.trim())
-    .filter(s => !riskyCols.includes(s) && !riskyCols.some(rc => s.endsWith(`:${rc}`)))
-    .join(', ');
+  const parts = select.split(',');
+  const keep = [];
+  for (const raw of parts) {
+    const s = raw.trim();
+    let isRisky = false;
+    for (const rc of riskyCols) {
+      if (s === rc || s.endsWith(`:${rc}`)) {
+        isRisky = true;
+        break;
+      }
+    }
+    if (!isRisky) keep.push(s);
+  }
+  const cleanSelect = keep.join(', ');
 
   q = client.from(table).select(cleanSelect);
   if (order) q = q.order(order.column, { ascending: order.ascending === true });
@@ -29,18 +37,19 @@ export async function safeSelectWithFallback({ client, table, select, order, lim
     // Vue absente / autre erreur -> fallback vide
     return [];
   }
-
-  let rows = res2.data || [];
+  let rows = Array.isArray(res2.data) ? res2.data : [];
   // Recalcule stock_projete côté client si pertinent
   if (select.includes('stock_projete')) {
-    rows = rows.map(r => ({
-      ...r,
-      stock_projete:
-        r.stock_projete ??
-        ((r.stock_actuel ?? 0) + (r.receptions ?? 0) - (r.consommation_prevue ?? 0)),
-    }));
+    const recalculated = [];
+    for (const r of rows) {
+      recalculated.push({
+        ...r,
+        stock_projete:
+          r.stock_projete ??
+          ((r.stock_actuel ?? 0) + (r.receptions ?? 0) - (r.consommation_prevue ?? 0)),
+      });
+    }
+    rows = recalculated;
   }
-  return Array.isArray(transform) || typeof transform === 'function'
-    ? (typeof transform === 'function' ? transform(rows) : rows)
-    : rows;
+  return typeof transform === 'function' ? transform(rows) : rows;
 }

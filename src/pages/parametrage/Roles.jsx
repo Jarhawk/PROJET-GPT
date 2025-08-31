@@ -17,28 +17,34 @@ export default function Roles() {
       {loading && <p>Chargement...</p>}
 
       <div className="mt-4 space-y-2">
-        {roles.map((role) => (
-          <div
-            key={role.id}
-            className="border p-2 rounded-md flex flex-col sm:flex-row justify-between items-center"
-          >
-            <div>
-              <strong>{role.nom}</strong>
-              {!role.actif && (
-                <span className="ml-2 text-red-500">[Inactif]</span>
-              )}
-            </div>
-            <div className="space-x-2 mt-2 sm:mt-0">
-              <Button onClick={() => setSelectedRole(role)}>✏️ Modifier</Button>
-              <Button
-                variant="destructive"
-                onClick={() => toggleActif(role.id, !role.actif)}
+        {(() => {
+          const items = [];
+          for (const r of roles) {
+            items.push(
+              <div
+                key={r.id}
+                className="border p-2 rounded-md flex flex-col sm:flex-row justify-between items-center"
               >
-                {role.actif ? "Désactiver" : "Réactiver"}
-              </Button>
-            </div>
-          </div>
-        ))}
+                <div>
+                  <strong>{r.nom}</strong>
+                  {!r.actif && (
+                    <span className="ml-2 text-red-500">[Inactif]</span>
+                  )}
+                </div>
+                <div className="space-x-2 mt-2 sm:mt-0">
+                  <Button onClick={() => setSelectedRole(r)}>✏️ Modifier</Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => toggleActif(r.id, !r.actif)}
+                  >
+                    {r.actif ? "Désactiver" : "Réactiver"}
+                  </Button>
+                </div>
+              </div>
+            );
+          }
+          return items;
+        })()}
       </div>
 
       {selectedRole && (

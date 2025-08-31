@@ -27,8 +27,8 @@ export function useProductsView() {
           .from('produits')
           .select(
             `id, nom, actif, pmp, stock_theorique, famille_id, sous_famille_id,
-             unite:unites!unite_id(nom),
-             zone_stock:zones_stock!zone_stock_id(nom)`,
+             unite:unites!fk_produits_unite(nom),
+             zone_stock:zones_stock!produits_zone_stock_id_fkey(nom)`,
             { count: 'exact' }
           )
           .eq('mama_id', currentMamaId)

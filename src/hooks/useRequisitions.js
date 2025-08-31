@@ -10,7 +10,10 @@ export function useRequisitions() {
     if (!mama_id) return { data: [], count: 0 };
     let query = supabase
       .from("v_requisitions")
-      .select("*", { count: "exact" })
+      .select(
+        "id, date_requisition, quantite, mama_id, produit_id, produit_nom, photo_url",
+        { count: "exact" }
+      )
       .eq("mama_id", mama_id)
       .order("date_requisition", { ascending: false })
       .range((page - 1) * limit, page * limit - 1);
@@ -35,7 +38,10 @@ export function useRequisitions() {
     if (!mama_id) return { data: [], count: 0 };
     let query = supabase
       .from("requisitions")
-      .select("*, lignes:requisition_lignes(produit_id, unite, quantite)", { count: "exact" })
+      .select(
+        "id, mama_id, zone_id, date_requisition, quantite, type, commentaire, auteur_id, statut, created_at, lignes:requisition_lignes(produit_id, unite, quantite)",
+        { count: "exact" }
+      )
       .eq("mama_id", mama_id)
       .eq("actif", true)
       .order("date_requisition", { ascending: false })
@@ -61,10 +67,11 @@ export function useRequisitions() {
     const { data, error } = await supabase
       .from("requisitions")
       .select(
-        "*, lignes:requisition_lignes!requisition_id(*, produit:produit_id(id, nom))"
+        "id, mama_id, zone_id, date_requisition, quantite, type, commentaire, auteur_id, statut, created_at, lignes:requisition_lignes!requisition_id(id, produit_id, unite, quantite, mama_id, produit:produit_id(id, nom))"
       )
       .eq("id", id)
       .eq("mama_id", mama_id)
+      .eq("lignes.mama_id", mama_id)
       .single();
     if (error) {
       console.error("❌ Erreur getRequisitionById:", error.message);
@@ -93,7 +100,7 @@ export function useRequisitions() {
           mama_id,
         },
       ])
-      .select()
+      .select("id")
       .single();
     if (error) {
       console.error("❌ Erreur creation requisition:", error.message);
@@ -124,7 +131,9 @@ export function useRequisitions() {
       .update(fields)
       .eq("id", id)
       .eq("mama_id", mama_id)
-      .select()
+      .select(
+        'id, mama_id, zone_id, date_requisition, quantite, type, commentaire, auteur_id, statut, created_at, updated_at, actif, utilisateur_id, date_demande'
+      )
       .single();
     if (error) {
       console.error("❌ Erreur update requisition:", error.message);

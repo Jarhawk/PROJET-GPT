@@ -48,7 +48,14 @@ export default function CatalogueSyncViewer({ fournisseur_id }) {
       .delete()
       .eq("id", row.id)
       .eq("mama_id", mama_id);
-    setItems((it) => it.filter((i) => i.id !== row.id));
+    setItems((it) => {
+      const arr = Array.isArray(it) ? it : [];
+      const out = [];
+      for (const i of arr) {
+        if (i.id !== row.id) out.push(i);
+      }
+      return out;
+    });
     toast.success("Modification appliquée");
   };
 
@@ -58,7 +65,14 @@ export default function CatalogueSyncViewer({ fournisseur_id }) {
       .delete()
       .eq("id", id)
       .eq("mama_id", mama_id);
-    setItems((it) => it.filter((i) => i.id !== id));
+    setItems((it) => {
+      const arr = Array.isArray(it) ? it : [];
+      const out = [];
+      for (const i of arr) {
+        if (i.id !== id) out.push(i);
+      }
+      return out;
+    });
   };
 
   if (loading) return <LoadingSpinner message="Chargement..." />;
@@ -77,25 +91,32 @@ export default function CatalogueSyncViewer({ fournisseur_id }) {
             </tr>
           </thead>
           <tbody>
-            {(Array.isArray(items) ? items : []).map((u) => (
-              <tr key={u.id}>
-                <td className="border px-2 py-1">{u.produit?.nom || u.produit_id}</td>
-                <td className="border px-2 py-1">{u.ancienne_valeur}</td>
-                <td className="border px-2 py-1">{u.nouvelle_valeur}</td>
-                <td className="border px-2 py-1 space-x-1">
-                  <Button size="sm" onClick={() => acceptUpdate(u)}>
-                    Accepter
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => rejectUpdate(u.id)}
-                  >
-                    Rejeter
-                  </Button>
-                </td>
-              </tr>
-            ))}
+            {(() => {
+              const rows = [];
+              const list = Array.isArray(items) ? items : [];
+              for (const u of list) {
+                rows.push(
+                  <tr key={u.id}>
+                    <td className="border px-2 py-1">{u.produit?.nom || u.produit_id}</td>
+                    <td className="border px-2 py-1">{u.ancienne_valeur}</td>
+                    <td className="border px-2 py-1">{u.nouvelle_valeur}</td>
+                    <td className="border px-2 py-1 space-x-1">
+                      <Button size="sm" onClick={() => acceptUpdate(u)}>
+                        Accepter
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => rejectUpdate(u.id)}
+                      >
+                        Rejeter
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              }
+              return rows;
+            })()}
           </tbody>
         </table>
       </TableContainer>

@@ -71,7 +71,9 @@ export function useTransferts() {
           utilisateur_id: user_id,
         },
       ])
-      .select()
+      .select(
+        'id, mama_id, zone_source_id, zone_dest_id, motif, date_transfert, utilisateur_id, created_at'
+      )
       .single();
     if (error) {
       setError(error);

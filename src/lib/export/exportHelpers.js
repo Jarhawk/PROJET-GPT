@@ -16,14 +16,30 @@ export function exportToPDF(data = [], config = {}) {
     : 'portrait';
   const doc = new JSPDF({ orientation: orient });
   if (!Array.isArray(data)) data = [data];
-  const headers = columns.length
-    ? [columns.map((c) => c.label)]
-    : [Object.keys(data[0] || {})];
-  const rows = data.map((item) =>
-    columns.length
-      ? columns.map((c) => item[c.key])
-      : Object.values(item)
-  );
+  const cols = Array.isArray(columns) ? columns : [];
+  const headers = [];
+  if (cols.length) {
+    const h = [];
+    for (const c of cols) h.push(c.label);
+    headers.push(h);
+  } else {
+    const first = data[0] || {};
+    const h = [];
+    for (const k in first) h.push(k);
+    headers.push(h);
+  }
+  const rows = [];
+  for (const item of data) {
+    if (cols.length) {
+      const r = [];
+      for (const c of cols) r.push(item[c.key]);
+      rows.push(r);
+    } else {
+      const r = [];
+      for (const k in item) r.push(item[k]);
+      rows.push(r);
+    }
+  }
   doc.autoTable({ head: headers, body: rows, styles: { fontSize: 9 } });
   doc.save(filename);
 }
@@ -35,16 +51,19 @@ export function exportToExcel(data = [], config = {}) {
     columns = [],
   } = config;
   if (!Array.isArray(data)) data = [data];
-  const arr = data.map((item) => {
-    if (columns.length) {
+  const cols = Array.isArray(columns) ? columns : [];
+  const arr = [];
+  for (const item of data) {
+    if (cols.length) {
       const obj = {};
-      columns.forEach((c) => {
+      for (const c of cols) {
         obj[c.label] = item[c.key];
-      });
-      return obj;
+      }
+      arr.push(obj);
+    } else {
+      arr.push(item);
     }
-    return item;
-  });
+  }
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.json_to_sheet(arr);
   XLSX.utils.book_append_sheet(wb, ws, sheet);
@@ -61,24 +80,36 @@ export function exportToCSV(data = [], config = {}) {
   } = config;
   const delim = typeof delimiter === 'string' && delimiter.length ? delimiter : ',';
   if (!Array.isArray(data)) data = [data];
+  const cols = Array.isArray(columns) ? columns : [];
   const quote = (v) => (quoteValues ? `"${v}"` : v);
-  const header = columns.length
-    ? columns.map((c) => quote(c.label)).join(delim)
-    : Object.keys(data[0] || {}).map(quote).join(delim);
-  const rows = data.map((item) =>
-    columns.length
-      ? columns.map((c) => quote(item[c.key])).join(delim)
-      : Object.values(item).map(quote).join(delim)
-  );
+  const headerParts = [];
+  if (cols.length) {
+    for (const c of cols) headerParts.push(quote(c.label));
+  } else {
+    const first = data[0] || {};
+    for (const k in first) headerParts.push(quote(k));
+  }
+  const header = headerParts.join(delim);
+  const rows = [];
+  for (const item of data) {
+    const rowParts = [];
+    if (cols.length) {
+      for (const c of cols) rowParts.push(quote(item[c.key]));
+    } else {
+      for (const k in item) rowParts.push(quote(item[k]));
+    }
+    rows.push(rowParts.join(delim));
+  }
   const csv = [header, ...rows].join('\n');
   saveAs(new Blob([csv], { type: 'text/csv;charset=utf-8;' }), filename);
 }
 
 export function exportToTSV(data = [], config = {}) {
   const { filename = 'export.tsv', columns = [] } = config;
+  const cols = Array.isArray(columns) ? columns : [];
   return exportToCSV(data, {
     filename,
-    columns,
+    columns: cols,
     delimiter: '\t',
     quoteValues: false,
   });
@@ -98,12 +129,14 @@ export function exportToXML(data = [], config = {}) {
     row = 'item',
   } = config;
   if (!Array.isArray(data)) data = [data];
-  const rows = data.map((item) => {
-    const cells = Object.entries(item)
-      .map(([k, v]) => `<${k}>${v}</${k}>`)
-      .join('');
-    return `<${row}>${cells}</${row}>`;
-  });
+  const rows = [];
+  for (const item of data) {
+    const cells = [];
+    for (const [k, v] of Object.entries(item)) {
+      cells.push(`<${k}>${v}</${k}>`);
+    }
+    rows.push(`<${row}>${cells.join('')}</${row}>`);
+  }
   const xml = `<${root}>${rows.join('')}</${root}>`;
   saveAs(new Blob([xml], { type: 'application/xml;charset=utf-8;' }), filename);
 }
@@ -111,14 +144,27 @@ export function exportToXML(data = [], config = {}) {
 export function exportToHTML(data = [], config = {}) {
   const { filename = 'export.html', columns = [] } = config;
   if (!Array.isArray(data)) data = [data];
-  const labels = columns.length ? columns.map((c) => c.label) : Object.keys(data[0] || {});
-  const header = labels.map((l) => `<th>${l}</th>`).join('');
-  const rows = data.map((item) => {
-    const cells = columns.length
-      ? columns.map((c) => `<td>${item[c.key]}</td>`)
-      : Object.values(item).map((v) => `<td>${v}</td>`);
-    return `<tr>${cells.join('')}</tr>`;
-  });
+  const cols = Array.isArray(columns) ? columns : [];
+  const labels = [];
+  if (cols.length) {
+    for (const c of cols) labels.push(c.label);
+  } else {
+    const first = data[0] || {};
+    for (const k in first) labels.push(k);
+  }
+  const headerCells = [];
+  for (const l of labels) headerCells.push(`<th>${l}</th>`);
+  const header = headerCells.join('');
+  const rows = [];
+  for (const item of data) {
+    const cells = [];
+    if (cols.length) {
+      for (const c of cols) cells.push(`<td>${item[c.key]}</td>`);
+    } else {
+      for (const k in item) cells.push(`<td>${item[k]}</td>`);
+    }
+    rows.push(`<tr>${cells.join('')}</tr>`);
+  }
   const html = `<table><thead><tr>${header}</tr></thead><tbody>${rows.join('')}</tbody></table>`;
   saveAs(new Blob([html], { type: 'text/html;charset=utf-8;' }), filename);
 }
@@ -126,13 +172,28 @@ export function exportToHTML(data = [], config = {}) {
 export function exportToMarkdown(data = [], config = {}) {
   const { filename = 'export.md', columns = [] } = config;
   if (!Array.isArray(data)) data = [data];
-  const labels = columns.length ? columns.map((c) => c.label) : Object.keys(data[0] || {});
+  const cols = Array.isArray(columns) ? columns : [];
+  const labels = [];
+  if (cols.length) {
+    for (const c of cols) labels.push(c.label);
+  } else {
+    const first = data[0] || {};
+    for (const k in first) labels.push(k);
+  }
   const header = `|${labels.join('|')}|`;
-  const divider = `|${labels.map(() => '---').join('|')}|`;
-  const rows = data.map((item) => {
-    const cells = columns.length ? columns.map((c) => item[c.key]) : labels.map((k) => item[k]);
-    return `|${cells.join('|')}|`;
-  });
+  const dividerArr = [];
+  for (let i = 0; i < labels.length; i++) dividerArr.push('---');
+  const divider = `|${dividerArr.join('|')}|`;
+  const rows = [];
+  for (const item of data) {
+    const cells = [];
+    if (cols.length) {
+      for (const c of cols) cells.push(item[c.key]);
+    } else {
+      for (const label of labels) cells.push(item[label]);
+    }
+    rows.push(`|${cells.join('|')}|`);
+  }
   const md = [header, divider, ...rows].join('\n');
   saveAs(new Blob([md], { type: 'text/markdown;charset=utf-8;' }), filename);
 }
@@ -147,14 +208,20 @@ export function exportToYAML(data = [], config = {}) {
 export function exportToTXT(data = [], config = {}) {
   const { filename = 'export.txt', columns = [] } = config;
   if (!Array.isArray(data)) data = [data];
-  const lines = data.map((item) => {
-    const obj = columns.length
-      ? columns.reduce((acc, c) => ({ ...acc, [c.label]: item[c.key] }), {})
-      : item;
-    return Object.entries(obj)
-      .map(([k, v]) => `${k}: ${v}`)
-      .join('\n');
-  });
+  const cols = Array.isArray(columns) ? columns : [];
+  const lines = [];
+  for (const item of data) {
+    let obj;
+    if (cols.length) {
+      obj = {};
+      for (const c of cols) obj[c.label] = item[c.key];
+    } else {
+      obj = item;
+    }
+    const parts = [];
+    for (const [k, v] of Object.entries(obj)) parts.push(`${k}: ${v}`);
+    lines.push(parts.join('\n'));
+  }
   const txt = lines.join('\n\n');
   saveAs(new Blob([txt], { type: 'text/plain;charset=utf-8;' }), filename);
 }
@@ -162,14 +229,20 @@ export function exportToTXT(data = [], config = {}) {
 export function exportToClipboard(data = [], config = {}) {
   const { columns = [] } = config;
   if (!Array.isArray(data)) data = [data];
-  const lines = data.map((item) => {
-    const obj = columns.length
-      ? columns.reduce((acc, c) => ({ ...acc, [c.label]: item[c.key] }), {})
-      : item;
-    return Object.entries(obj)
-      .map(([k, v]) => `${k}: ${v}`)
-      .join('\n');
-  });
+  const cols = Array.isArray(columns) ? columns : [];
+  const lines = [];
+  for (const item of data) {
+    let obj;
+    if (cols.length) {
+      obj = {};
+      for (const c of cols) obj[c.label] = item[c.key];
+    } else {
+      obj = item;
+    }
+    const parts = [];
+    for (const [k, v] of Object.entries(obj)) parts.push(`${k}: ${v}`);
+    lines.push(parts.join('\n'));
+  }
   const txt = lines.join('\n\n');
   if (typeof navigator !== 'undefined' && navigator.clipboard) {
     return navigator.clipboard.writeText(txt);

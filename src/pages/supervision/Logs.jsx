@@ -58,19 +58,31 @@ export default function Logs() {
           <Input type="date" value={filters.end} onChange={(e) => setFilters({ ...filters, end: e.target.value })} />
           <Select value={filters.type} onChange={(e) => setFilters({ ...filters, type: e.target.value })}>
             <option value="">Type</option>
-            {(Array.isArray(TYPES) ? TYPES : []).map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
+            {(() => {
+              const opts = [];
+              for (const t of TYPES) {
+                opts.push(
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                );
+              }
+              return opts;
+            })()}
           </Select>
           <Select value={filters.module} onChange={(e) => setFilters({ ...filters, module: e.target.value })}>
             <option value="">Module</option>
-            {(Array.isArray(MODULES) ? MODULES : []).map((m) => (
-              <option key={m} value={m}>
-                {m}
-              </option>
-            ))}
+            {(() => {
+              const opts = [];
+              for (const m of MODULES) {
+                opts.push(
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
+                );
+              }
+              return opts;
+            })()}
           </Select>
           <label className="flex items-center gap-1">
             <Checkbox
@@ -102,25 +114,32 @@ export default function Logs() {
               </tr>
             </thead>
             <tbody>
-              {(Array.isArray(logs) ? logs : []).map((l) => (
-                <tr key={l.id} className="align-top">
-                  <td className="border px-2 py-1 whitespace-nowrap">
-                    {new Date(l.date_log).toLocaleString()}
-                  </td>
-                  <td className="border px-2 py-1">{l.utilisateurs?.nom || l.user_id || ""}</td>
-                  <td className="border px-2 py-1">{l.type}</td>
-                  <td className="border px-2 py-1">{l.module}</td>
-                  <td className="border px-2 py-1">{l.description}</td>
-                  <td className="border px-2 py-1">
-                    {l.critique ? <Badge color="red">Critique</Badge> : ""}
-                  </td>
-                  <td className="border px-2 py-1">
-                    <Button size="sm" onClick={() => setDetail(l)}>
-                      Voir détails
-                    </Button>
-                  </td>
-                </tr>
-              ))}
+              {(() => {
+                const rows = [];
+                const list = Array.isArray(logs) ? logs : [];
+                for (const l of list) {
+                  rows.push(
+                    <tr key={l.id} className="align-top">
+                      <td className="border px-2 py-1 whitespace-nowrap">
+                        {new Date(l.date_log).toLocaleString()}
+                      </td>
+                      <td className="border px-2 py-1">{l.utilisateurs?.nom || l.user_id || ""}</td>
+                      <td className="border px-2 py-1">{l.type}</td>
+                      <td className="border px-2 py-1">{l.module}</td>
+                      <td className="border px-2 py-1">{l.description}</td>
+                      <td className="border px-2 py-1">
+                        {l.critique ? <Badge color="red">Critique</Badge> : ""}
+                      </td>
+                      <td className="border px-2 py-1">
+                        <Button size="sm" onClick={() => setDetail(l)}>
+                          Voir détails
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                }
+                return rows;
+              })()}
             </tbody>
           </table>
         </TableContainer>

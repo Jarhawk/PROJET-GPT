@@ -12,9 +12,16 @@ export default function MenuDuJour() {
   const today = new Date().toISOString().slice(0, 10);
   const [date, setDate] = useState(today);
   const [menu, setMenu] = useState({});
-  const { fetchMenuForDate, setFicheForCategorie, setPortions, removeFicheFromMenu, reloadSavedFiches } =
-    useMenuDuJour();
-  const { fiches = [], fetchFiches } = useFiches();
+  const {
+    fetchMenuForDate,
+    setFicheForCategorie,
+    setPortions,
+    removeFicheFromMenu,
+    reloadSavedFiches,
+  } = useMenuDuJour();
+  const { fiches: rawFiches = [], fetchFiches } = useFiches();
+  const fiches = Array.isArray(rawFiches) ? rawFiches : [];
+  const cats = Array.isArray(CATEGORIES) ? CATEGORIES : [];
 
   useEffect(() => {
     fetchFiches();
@@ -25,7 +32,13 @@ export default function MenuDuJour() {
   }, [date, fetchMenuForDate]);
 
   const handleFicheChange = (cat, ficheId) => {
-    const fiche = fiches.find((f) => f.id === ficheId);
+    let fiche = null;
+    for (const f of fiches) {
+      if (f.id === ficheId) {
+        fiche = f;
+        break;
+      }
+    }
     const cout_unitaire = fiche ? Number(fiche.cout_total || 0) / Number(fiche.portions || 1) : 0;
     setMenu((m) => ({
       ...m,
@@ -64,27 +77,28 @@ export default function MenuDuJour() {
   };
 
   const exportExcel = () => {
-    const rows = CATEGORIES.map((cat) => {
+    const rows = [];
+    for (const cat of cats) {
       const item = menu[cat] || {};
       const total = (item.portions || 0) * (item.cout_unitaire || 0);
-      return {
+      rows.push({
         categorie: cat,
         fiche: item.nom || "",
         portions: item.portions || 0,
         cout_par_portion: item.cout_unitaire || 0,
         total,
-      };
-    });
+      });
+    }
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(rows);
     XLSX.utils.book_append_sheet(wb, ws, "Menu");
     XLSX.writeFile(wb, `menu_${date}.xlsx`);
   };
 
-  const globalCostPerPortion = CATEGORIES.reduce(
-    (sum, cat) => sum + (menu[cat]?.cout_unitaire || 0),
-    0
-  );
+  let globalCostPerPortion = 0;
+  for (const cat of cats) {
+    globalCostPerPortion += menu[cat]?.cout_unitaire || 0;
+  }
 
   return (
     <div className="p-4">
@@ -107,46 +121,54 @@ export default function MenuDuJour() {
           </tr>
         </thead>
         <tbody>
-          {CATEGORIES.map((cat) => {
-            const item = menu[cat] || {};
-            const total = (item.portions || 0) * (item.cout_unitaire || 0);
-            return (
-              <tr key={cat} className="text-center">
-                <td>{cat}</td>
-                <td>
-                  <select
-                    value={item.fiche_id || ""}
-                    onChange={(e) => handleFicheChange(cat, e.target.value)}
-                  >
-                    <option value="">Choisir</option>
-                    {fiches.map((f) => (
-                      <option key={f.id} value={f.id}>
-                        {f.nom}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    value={item.portions || 0}
-                    onChange={(e) => handlePortionsChange(cat, e.target.value)}
-                    className="w-16 border"
-                  />
-                </td>
-                <td>{item.cout_unitaire != null ? item.cout_unitaire.toFixed(2) : "-"}</td>
-                <td>{total.toFixed(2)}</td>
-                <td className="space-x-2">
-                  <Button size="sm" onClick={() => saveCategorie(cat)}>
-                    Modifier
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={() => removeCategorie(cat)}>
-                    X
-                  </Button>
-                </td>
-              </tr>
-            );
-          })}
+          {(() => {
+            const rows = [];
+            for (const cat of cats) {
+              const item = menu[cat] || {};
+              const total = (item.portions || 0) * (item.cout_unitaire || 0);
+              const options = [];
+              for (const f of fiches) {
+                options.push(
+                  <option key={f.id} value={f.id}>
+                    {f.nom}
+                  </option>
+                );
+              }
+              rows.push(
+                <tr key={cat} className="text-center">
+                  <td>{cat}</td>
+                  <td>
+                    <select
+                      value={item.fiche_id || ""}
+                      onChange={(e) => handleFicheChange(cat, e.target.value)}
+                    >
+                      <option value="">Choisir</option>
+                      {options}
+                    </select>
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      value={item.portions || 0}
+                      onChange={(e) => handlePortionsChange(cat, e.target.value)}
+                      className="w-16 border"
+                    />
+                  </td>
+                  <td>{item.cout_unitaire != null ? item.cout_unitaire.toFixed(2) : "-"}</td>
+                  <td>{total.toFixed(2)}</td>
+                  <td className="space-x-2">
+                    <Button size="sm" onClick={() => saveCategorie(cat)}>
+                      Modifier
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => removeCategorie(cat)}>
+                      X
+                    </Button>
+                  </td>
+                </tr>
+              );
+            }
+            return rows;
+          })()}
         </tbody>
       </table>
       <div className="mt-2 font-semibold">Total global: {globalCostPerPortion.toFixed(2)} €</div>

@@ -25,8 +25,11 @@ export default function SousFamilles() {
     isLoading,
   } = useSousFamilles();
 
+  const famillesList = Array.isArray(familles) ? familles : [];
+
   const sousFamilles = useMemo(() => {
-    return (sousFamillesData || [])
+    const list = Array.isArray(sousFamillesData) ? sousFamillesData : [];
+    return list
       .filter(sf =>
         search ? sf.nom.toLowerCase().includes(search.toLowerCase()) : true,
       )
@@ -38,12 +41,16 @@ export default function SousFamilles() {
       });
   }, [sousFamillesData, search, familleId, statut]);
 
+  const sousFamillesList = Array.isArray(sousFamilles) ? sousFamilles : [];
+
   // Helpers
   const famillesById = useMemo(() => {
     const map = new Map();
-    (familles || []).forEach(f => map.set(f.id, f));
+    for (const f of famillesList) {
+      map.set(f.id, f);
+    }
     return map;
-  }, [familles]);
+  }, [famillesList]);
 
   async function createOrUpdate(sf) {
     const payload = {
@@ -59,13 +66,13 @@ export default function SousFamilles() {
           .update(payload)
           .eq('id', sf.id)
           .eq('mama_id', mamaId)
-          .select()
+          .select('id, nom, famille_id, mama_id, actif')
           .single()
       : supabase
           .from('sous_familles')
           .insert(payload)
           .eq('mama_id', mamaId)
-          .select()
+          .select('id, nom, famille_id, mama_id, actif')
           .single();
 
     const { error } = await q;
@@ -114,6 +121,35 @@ export default function SousFamilles() {
     startNew(); // reset
   }
 
+  const familleOptions = [];
+  for (const f of famillesList) {
+    familleOptions.push(
+      <option key={f.id} value={f.id}>
+        {f.nom}
+      </option>,
+    );
+  }
+
+  const sousFamilleRows = [];
+  for (const row of sousFamillesList) {
+    sousFamilleRows.push(
+      <tr key={row.id} className="border-t border-white/10">
+        <td className="p-3">{row.nom}</td>
+        <td className="p-3">{famillesById.get(row.famille_id)?.nom ?? '—'}</td>
+        <td className="p-3">{row.actif ? 'Actif' : 'Inactif'}</td>
+        <td className="p-3">
+          <div className="flex gap-2">
+            <Button size="sm" variant="secondary" onClick={() => startEdit(row)}>Modifier</Button>
+            <Button size="sm" variant="secondary" onClick={() => toggleActif(row)}>
+              {row.actif ? 'Désactiver' : 'Activer'}
+            </Button>
+            <Button size="sm" variant="secondary" onClick={() => archive(row)}>Archiver</Button>
+          </div>
+        </td>
+      </tr>,
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* Filtres en une ligne */}
@@ -131,9 +167,7 @@ export default function SousFamilles() {
           className="h-9 rounded-xl px-3 bg-black/20 border border-white/10"
         >
           <option value="">Toutes les familles</option>
-          {(familles || []).map(f => (
-            <option key={f.id} value={f.id}>{f.nom}</option>
-          ))}
+          {familleOptions}
         </select>
 
         <select
@@ -166,9 +200,7 @@ export default function SousFamilles() {
             className="h-9 rounded-xl px-3 bg-black/20 border border-white/10"
           >
             <option value="">— Choisir une famille —</option>
-            {(familles || []).map(f => (
-              <option key={f.id} value={f.id}>{f.nom}</option>
-            ))}
+            {familleOptions}
           </select>
           <label className="flex items-center gap-2 text-sm">
             <input
@@ -199,25 +231,10 @@ export default function SousFamilles() {
             {isLoading && (
               <tr><td colSpan={4} className="p-4">Chargement…</td></tr>
             )}
-            {!isLoading && (sousFamilles ?? []).length === 0 && (
+            {!isLoading && sousFamillesList.length === 0 && (
               <tr><td colSpan={4} className="p-4">Aucune sous-famille.</td></tr>
             )}
-            {(sousFamilles ?? []).map((row) => (
-              <tr key={row.id} className="border-t border-white/10">
-                <td className="p-3">{row.nom}</td>
-                <td className="p-3">{famillesById.get(row.famille_id)?.nom ?? '—'}</td>
-                <td className="p-3">{row.actif ? 'Actif' : 'Inactif'}</td>
-                <td className="p-3">
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="secondary" onClick={() => startEdit(row)}>Modifier</Button>
-                    <Button size="sm" variant="secondary" onClick={() => toggleActif(row)}>
-                      {row.actif ? 'Désactiver' : 'Activer'}
-                    </Button>
-                    <Button size="sm" variant="secondary" onClick={() => archive(row)}>Archiver</Button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {sousFamilleRows}
           </tbody>
         </table>
       </div>

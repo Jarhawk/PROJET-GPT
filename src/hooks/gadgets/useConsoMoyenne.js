@@ -15,6 +15,7 @@ export async function fetchConsoMoyenne(mamaId, sinceISO) {
         statut
       )
     `)
+    .eq('mama_id', mamaId)
     .eq('requisitions.mama_id', mamaId)
     .eq('requisitions.statut', 'réalisée')
     .gte('requisitions.date_requisition', sinceISO)
@@ -22,7 +23,7 @@ export async function fetchConsoMoyenne(mamaId, sinceISO) {
     .order('date_requisition', { referencedTable: 'requisitions', ascending: true });
 
   if (error) throw error;
-  return data;
+  return Array.isArray(data) ? data : [];
 }
 
 export default function useConsoMoyenne() {
@@ -38,16 +39,18 @@ export default function useConsoMoyenne() {
     try {
       const start = new Date();
       start.setDate(start.getDate() - 7);
-      const data = await fetchConsoMoyenne(mama_id, start.toISOString());
+      const arr = await fetchConsoMoyenne(mama_id, start.toISOString());
 
       const daily = {};
-      (data || []).forEach((m) => {
+      for (const m of arr) {
         const d = m.requisitions.date_requisition?.slice(0, 10);
         if (!daily[d]) daily[d] = 0;
         daily[d] += Number(m.quantite || 0);
-      });
+      }
       const values = Object.values(daily);
-      const avgValue = values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0;
+      let sum = 0;
+      for (const v of values) sum += v;
+      const avgValue = values.length ? sum / values.length : 0;
       setAvg(avgValue);
       if (import.meta.env.DEV) {
         console.debug('Chargement dashboard terminé');

@@ -45,6 +45,8 @@ export default function Permissions() {
     setEditRole(null);
   };
 
+  const list = Array.isArray(roles) ? roles : [];
+
   return (
     <div className="p-8 max-w-4xl mx-auto">
             <h1 className="text-2xl font-bold text-mamastock-gold mb-4">
@@ -66,40 +68,48 @@ export default function Permissions() {
               </tr>
             </thead>
             <tbody>
-              {roles.map((role) => (
-                <tr key={role.id}>
-                  <td className="px-2 py-1">{role.nom}</td>
-                  <td className="px-2 py-1">{role.description || ''}</td>
-                  <td className="px-2 py-1">
-                    <span
-                      className={
-                        role.actif
-                          ? 'inline-block bg-green-100 text-green-800 px-2 rounded-full'
-                          : 'inline-block bg-red-100 text-red-800 px-2 rounded-full'
-                      }
-                    >
-                      {role.actif ? 'Oui' : 'Non'}
-                    </span>
-                  </td>
-                  <td className="px-2 py-1">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => setEditRole(role)}
-                      disabled={loading}
-                    >
-                      Modifier permissions
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-              {roles.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="py-4 text-gray-400">
-                    Aucun rôle trouvé.
-                  </td>
-                </tr>
-              )}
+              {(() => {
+                const rows = [];
+                for (const role of list) {
+                  rows.push(
+                    <tr key={role.id}>
+                      <td className="px-2 py-1">{role.nom}</td>
+                      <td className="px-2 py-1">{role.description || ''}</td>
+                      <td className="px-2 py-1">
+                        <span
+                          className={
+                            role.actif
+                              ? 'inline-block bg-green-100 text-green-800 px-2 rounded-full'
+                              : 'inline-block bg-red-100 text-red-800 px-2 rounded-full'
+                          }
+                        >
+                          {role.actif ? 'Oui' : 'Non'}
+                        </span>
+                      </td>
+                      <td className="px-2 py-1">
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => setEditRole(role)}
+                          disabled={loading}
+                        >
+                          Modifier permissions
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                }
+                if (rows.length === 0) {
+                  rows.push(
+                    <tr key="empty">
+                      <td colSpan={4} className="py-4 text-gray-400">
+                        Aucun rôle trouvé.
+                      </td>
+                    </tr>
+                  );
+                }
+                return rows;
+              })()}
             </tbody>
           </table>
         )}

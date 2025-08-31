@@ -30,9 +30,13 @@ export default function ParamFamilles() {
 
   if (authLoading) return <LoadingSpinner message="Chargement..." />;
 
-  const filtered = familles.filter(
-    (f) => !search || f.nom.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = [];
+  if (Array.isArray(familles)) {
+    const s = search.toLowerCase();
+    for (const f of familles) {
+      if (!s || f.nom.toLowerCase().includes(s)) filtered.push(f);
+    }
+  }
 
   const handleEdit = (f) => {
     setForm(f);
@@ -134,27 +138,33 @@ export default function ParamFamilles() {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((f) => (
-              <tr key={f.id}>
-                <td>{f.nom}</td>
-                <td>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleEdit(f)}
-                  >
-                    Modifier
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleDelete(f.id)}
-                  >
-                    Archiver
-                  </Button>
-                </td>
-              </tr>
-            ))}
+            {(() => {
+              const rows = [];
+              for (const f of filtered) {
+                rows.push(
+                  <tr key={f.id}>
+                    <td>{f.nom}</td>
+                    <td>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleEdit(f)}
+                      >
+                        Modifier
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleDelete(f.id)}
+                      >
+                        Archiver
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              }
+              return rows;
+            })()}
           </tbody>
         </table>
       </TableContainer>

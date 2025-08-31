@@ -13,6 +13,11 @@ export default function Aide() {
   const [search, setSearch] = useState('');
   const [categorieFilter, setCategorieFilter] = useState('');
   const [editing, setEditing] = useState(null);
+  const list = Array.isArray(items) ? items : [];
+  const categories = [];
+  for (const a of list) {
+    if (a.categorie && !categories.includes(a.categorie)) categories.push(a.categorie);
+  }
 
   useEffect(() => {
     if (!authLoading && mama_id) {
@@ -23,7 +28,6 @@ export default function Aide() {
     }
   }, [authLoading, mama_id, search, categorieFilter, fetchArticles]);
 
-  const categories = [...new Set(items.map((a) => a.categorie).filter(Boolean))];
   const canEdit = isSuperadmin || access_rights?.aide?.peut_modifier;
 
   if (authLoading) return <LoadingSpinner message="Chargement..." />;
@@ -44,11 +48,17 @@ export default function Aide() {
           onChange={(e) => setCategorieFilter(e.target.value)}
         >
           <option value="">Toutes catégories</option>
-          {categories.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
+          {(() => {
+            const opts = [];
+            for (const c of categories) {
+              opts.push(
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              );
+            }
+            return opts;
+          })()}
         </select>
         {canEdit && (
           <Button onClick={() => setEditing({})}>Nouvel article</Button>
@@ -57,19 +67,25 @@ export default function Aide() {
       {loading && <LoadingSpinner message="Chargement..." />}
       {error && <div className="text-red-600">{error}</div>}
       <ul className="space-y-4">
-        {items.map((a) => (
-          <li key={a.id} className="list-none">
-            <GlassCard>
-              <h2 className="font-semibold text-lg mb-2">{a.titre}</h2>
-              <p className="whitespace-pre-line text-sm mb-2">{a.contenu}</p>
-              {canEdit && (
-                <Button size="sm" variant="outline" onClick={() => setEditing(a)}>
-                  Éditer
-                </Button>
-              )}
-            </GlassCard>
-          </li>
-        ))}
+        {(() => {
+          const rows = [];
+          for (const a of list) {
+            rows.push(
+              <li key={a.id} className="list-none">
+                <GlassCard>
+                  <h2 className="font-semibold text-lg mb-2">{a.titre}</h2>
+                  <p className="whitespace-pre-line text-sm mb-2">{a.contenu}</p>
+                  {canEdit && (
+                    <Button size="sm" variant="outline" onClick={() => setEditing(a)}>
+                      Éditer
+                    </Button>
+                  )}
+                </GlassCard>
+              </li>
+            );
+          }
+          return rows;
+        })()}
       </ul>
       {editing && (
         <AideForm

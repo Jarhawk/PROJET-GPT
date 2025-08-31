@@ -15,7 +15,7 @@ export function useProduitsAutocomplete() {
     setError(null);
     let q = supabase
       .from("produits")
-      .select("id, nom, tva, dernier_prix, unite_id, unite:unite_id (nom)")
+      .select("id, nom, tva, dernier_prix, unite_id, unite:unites!fk_produits_unite(nom)")
       .eq("mama_id", mama_id)
       .eq("actif", true)
       .eq("unite.mama_id", mama_id);

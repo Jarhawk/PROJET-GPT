@@ -61,7 +61,9 @@ export function useGadgets() {
       const { data, error } = await supabase
         .from('gadgets')
         .insert([{ ...gadget, mama_id }])
-        .select()
+        .select(
+          'id, tableau_id, type, config, created_at, mama_id, actif, nom, ordre, configuration_json'
+        )
         .single();
       setLoading(false);
       if (error) {
@@ -84,7 +86,9 @@ export function useGadgets() {
         .update(values)
         .eq('id', id)
         .eq('mama_id', mama_id)
-        .select()
+        .select(
+          'id, tableau_id, type, config, created_at, mama_id, actif, nom, ordre, configuration_json'
+        )
         .single();
       setLoading(false);
       if (error) {

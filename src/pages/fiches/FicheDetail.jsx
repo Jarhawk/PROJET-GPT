@@ -40,16 +40,20 @@ export default function FicheDetail({ fiche: ficheProp, onClose }) {
   }
 
   function exportExcel() {
-    const rows = fiche.lignes?.map(l => ({
-      Produit: l.produit_nom || l.sous_fiche?.nom,
-      Quantite: l.quantite,
-      Unite: l.unite_nom || (l.sous_fiche ? "portion" : ""),
-      Cout: l.produit_id
-        ? ((Number(l.pmp ?? l.dernier_prix ?? 0) * l.quantite).toFixed(2))
-        : l.sous_fiche?.cout_par_portion
-          ? (l.sous_fiche.cout_par_portion * l.quantite).toFixed(2)
-          : "",
-    })) || [];
+    const lignes = Array.isArray(fiche?.lignes) ? fiche.lignes : [];
+    const rows = [];
+    for (const l of lignes) {
+      rows.push({
+        Produit: l.produit_nom || l.sous_fiche?.nom,
+        Quantite: l.quantite,
+        Unite: l.unite_nom || (l.sous_fiche ? "portion" : ""),
+        Cout: l.produit_id
+          ? ((Number(l.pmp ?? l.dernier_prix ?? 0) * l.quantite).toFixed(2))
+          : l.sous_fiche?.cout_par_portion
+            ? (l.sous_fiche.cout_par_portion * l.quantite).toFixed(2)
+            : "",
+      });
+    }
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "Fiche");
     XLSX.writeFile(wb, `fiche_${fiche.id}.xlsx`);
@@ -58,16 +62,20 @@ export default function FicheDetail({ fiche: ficheProp, onClose }) {
   function exportPDF() {
     const doc = new JSPDF();
     doc.text(fiche.nom, 10, 10);
-    const rows = fiche.lignes?.map(l => [
-      l.produit_nom || l.sous_fiche?.nom,
-      l.quantite,
-      l.unite_nom || (l.sous_fiche ? "portion" : ""),
-      l.produit_id
-        ? ((Number(l.pmp ?? l.dernier_prix ?? 0) * l.quantite).toFixed(2))
-        : l.sous_fiche?.cout_par_portion
-          ? (l.sous_fiche.cout_par_portion * l.quantite).toFixed(2)
-          : "",
-    ]) || [];
+    const lignes = Array.isArray(fiche?.lignes) ? fiche.lignes : [];
+    const rows = [];
+    for (const l of lignes) {
+      rows.push([
+        l.produit_nom || l.sous_fiche?.nom,
+        l.quantite,
+        l.unite_nom || (l.sous_fiche ? "portion" : ""),
+        l.produit_id
+          ? ((Number(l.pmp ?? l.dernier_prix ?? 0) * l.quantite).toFixed(2))
+          : l.sous_fiche?.cout_par_portion
+            ? (l.sous_fiche.cout_par_portion * l.quantite).toFixed(2)
+            : "",
+      ]);
+    }
     doc.autoTable({
       head: [["Produit", "Quantité", "Unité", "Coût"]],
       body: rows,
@@ -78,6 +86,18 @@ export default function FicheDetail({ fiche: ficheProp, onClose }) {
     doc.text(`Coût total : ${Number(fiche.cout_total).toFixed(2)} €`, 10, y + 20);
     doc.text(`Coût/portion : ${Number(fiche.cout_par_portion).toFixed(2)} €`, 10, y + 30);
     doc.save(`fiche_${fiche.id}.pdf`);
+  }
+
+  const chartData = [];
+  const histArr = Array.isArray(history) ? history : [];
+  for (const h of histArr) {
+    chartData.push({
+      date: new Date(h.date).toLocaleDateString('fr-FR'),
+      marge:
+        h.prix_vente && h.cout_portion
+          ? ((h.prix_vente - h.cout_portion) / h.prix_vente) * 100
+          : null,
+    });
   }
 
   return (
@@ -99,20 +119,28 @@ export default function FicheDetail({ fiche: ficheProp, onClose }) {
         )}
         <div className="my-2">
           <b>Ingrédients :</b>
-          <ul className="list-disc pl-6">
-            {fiche.lignes?.map((l, i) => (
-              <li key={i}>
-                {l.produit_nom || l.sous_fiche?.nom} — {l.quantite}{" "}
-                {l.unite_nom || (l.sous_fiche ? "portion" : "")} —{" "}
-                {l.produit_id
-                  ? (Number(l.pmp ?? l.dernier_prix ?? 0) * l.quantite).toFixed(2)
-                  : l.sous_fiche?.cout_par_portion
-                    ? (l.sous_fiche.cout_par_portion * l.quantite).toFixed(2)
-                    : "-"}
-                {" €"}
-              </li>
-            ))}
-          </ul>
+            <ul className="list-disc pl-6">
+              {(() => {
+                const items = [];
+                const arr = Array.isArray(fiche?.lignes) ? fiche.lignes : [];
+                for (let i = 0; i < arr.length; i++) {
+                  const l = arr[i];
+                  items.push(
+                    <li key={i}>
+                      {l.produit_nom || l.sous_fiche?.nom} — {l.quantite}{" "}
+                      {l.unite_nom || (l.sous_fiche ? "portion" : "")} —{" "}
+                      {l.produit_id
+                        ? (Number(l.pmp ?? l.dernier_prix ?? 0) * l.quantite).toFixed(2)
+                        : l.sous_fiche?.cout_par_portion
+                          ? (l.sous_fiche.cout_par_portion * l.quantite).toFixed(2)
+                          : "-"}
+                      {" €"}
+                    </li>
+                  );
+                }
+                return items;
+              })()}
+            </ul>
         </div>
         <div className="flex gap-2 mt-4">
           <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
@@ -120,16 +148,16 @@ export default function FicheDetail({ fiche: ficheProp, onClose }) {
         </div>
         <div className="mt-6">
           <h3 className="font-semibold mb-2">Analyse rentabilité</h3>
-          <div className="h-32 bg-white/10 border border-white/20 backdrop-blur-xl rounded mb-2">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={(history || []).map(h => ({ date: new Date(h.date).toLocaleDateString('fr-FR'), marge: h.prix_vente && h.cout_portion ? ((h.prix_vente - h.cout_portion) / h.prix_vente) * 100 : null }))}>
-                <XAxis dataKey="date" hide />
-                <YAxis domain={[0, 'dataMax']} />
-                <Tooltip />
-                <Line type="monotone" dataKey="marge" stroke="#8884d8" dot={false} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+            <div className="h-32 bg-white/10 border border-white/20 backdrop-blur-xl rounded mb-2">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData}>
+                  <XAxis dataKey="date" hide />
+                  <YAxis domain={[0, 'dataMax']} />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="marge" stroke="#8884d8" dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           <div className="flex items-center gap-2">
             <input type="number" className="input w-24" value={simPrix ?? ''} onChange={e => setSimPrix(Number(e.target.value))} />
             {simPrix !== null && (

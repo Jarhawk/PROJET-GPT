@@ -29,6 +29,27 @@ export default function Utilisateurs() {
     fetchUsers();
   }, [mama_id]);
 
+  const rows = Array.isArray(users) ? users : [];
+  const items = [];
+  for (let i = 0; i < rows.length; i++) {
+    const u = rows[i];
+    items.push(
+      <li key={u.id} className="flex justify-between items-center">
+        <span>{u.email}</span>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => {
+            setSelected(u);
+            setShowForm(true);
+          }}
+        >
+          Modifier
+        </Button>
+      </li>
+    );
+  }
+
   return (
     <div className="p-4">
       <h1 className="text-xl font-bold mb-4">Utilisateurs</h1>
@@ -39,20 +60,7 @@ export default function Utilisateurs() {
       {loading && <p>Chargement...</p>}
       {error && <p className="text-red-500">{error.message}</p>}
 
-      <ul className="mt-4 space-y-2">
-        {users.map((u) => (
-          <li key={u.id} className="flex justify-between items-center">
-            <span>{u.email}</span>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => { setSelected(u); setShowForm(true); }}
-            >
-              Modifier
-            </Button>
-          </li>
-        ))}
-      </ul>
+      <ul className="mt-4 space-y-2">{items}</ul>
 
       {showForm && (
         <UtilisateurForm

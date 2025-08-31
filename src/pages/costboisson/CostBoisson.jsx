@@ -38,7 +38,7 @@ export default function CostBoissons() {
       .from("v_boissons")
       .select("id, nom, prix_vente, famille, type:famille, unite, fiche_id, cout_portion")
       .eq("mama_id", mama_id)
-      .then(({ data }) => setBoissons(data || []));
+      .then(({ data }) => setBoissons(Array.isArray(data) ? data : []));
   }, [mama_id, authLoading]);
 
   // Charger stats ventes sur la période (top ventes, volumes)
@@ -51,7 +51,7 @@ export default function CostBoissons() {
       .eq("mama_id", mama_id)
       .gte("date_vente", periode.debut)
       .lte("date_vente", periode.fin)
-      .then(({ data }) => setVentes(data || []));
+      .then(({ data }) => setVentes(Array.isArray(data) ? data : []));
   }, [mama_id, authLoading, periode]);
 
   // Saisie rapide PV
@@ -76,16 +76,26 @@ export default function CostBoissons() {
       );
     }
     const results = await Promise.all(updates);
-    const error = results.find(r => r.error)?.error;
-    if (!error) {
-      setBoissons(prev =>
-        prev.map(b =>
-          b.id === boisson.id ? { ...b, prix_vente: newPV } : b
-        )
-      );
+    const resultArr = Array.isArray(results) ? results : [];
+    let err = null;
+    for (const r of resultArr) {
+      if (r.error) {
+        err = r.error;
+        break;
+      }
+    }
+    if (!err) {
+      setBoissons(prev => {
+        const arr = Array.isArray(prev) ? prev : [];
+        const next = [];
+        for (const b of arr) {
+          next.push(b.id === boisson.id ? { ...b, prix_vente: newPV } : b);
+        }
+        return next;
+      });
       toast.success("Prix de vente enregistré !");
     } else {
-      toast.error(error.message);
+      toast.error(err.message);
     }
     setSavingId(null);
   };
@@ -119,8 +129,10 @@ export default function CostBoissons() {
   // Export Excel
   const handleExportExcel = () => {
     const filtered = filterBoissons();
-    const ws = XLSX.utils.json_to_sheet(
-      filtered.map(b => ({
+    const list = Array.isArray(filtered) ? filtered : [];
+    const rows = [];
+    for (const b of list) {
+      rows.push({
         Nom: b.nom,
         Type: b.type || b.famille || "",
         Contenance: b.unite || "",
@@ -130,8 +142,9 @@ export default function CostBoissons() {
           b.prix_vente && b.cout_portion
             ? ((b.cout_portion / b.prix_vente) * 100).toFixed(1)
             : "",
-      }))
-    );
+      });
+    }
+    const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Boissons");
     XLSX.writeFile(wb, "Boissons.xlsx");
@@ -141,12 +154,12 @@ export default function CostBoissons() {
   // Export PDF
   const handleExportPDF = () => {
     const filtered = filterBoissons();
+    const list = Array.isArray(filtered) ? filtered : [];
     const doc = new JSPDF();
     doc.text("Cost Boissons", 10, 12);
-    doc.autoTable({
-      startY: 20,
-      head: [["Nom", "Type", "Contenance", "Coût/portion", "Prix vente", "Food cost (%)"]],
-      body: filtered.map(b => [
+    const body = [];
+    for (const b of list) {
+      body.push([
         b.nom,
         b.type || b.famille || "",
         b.unite || "",
@@ -154,50 +167,93 @@ export default function CostBoissons() {
         b.prix_vente ? Number(b.prix_vente).toFixed(2) : "-",
         b.prix_vente && b.cout_portion
           ? ((b.cout_portion / b.prix_vente) * 100).toFixed(1)
-          : "-"
-      ]),
-      styles: { fontSize: 9 }
+          : "-",
+      ]);
+    }
+    doc.autoTable({
+      startY: 20,
+      head: [["Nom", "Type", "Contenance", "Coût/portion", "Prix vente", "Food cost (%)"]],
+      body,
+      styles: { fontSize: 9 },
     });
     doc.save("Boissons.pdf");
     toast.success("Export PDF généré !");
   };
 
   // Stats, filtrage & top ventes
-  const filterBoissons = () =>
-    boissons.filter(
-      b =>
-        b.nom?.toLowerCase().includes(search.toLowerCase()) ||
-        b.famille?.toLowerCase().includes(search.toLowerCase()) ||
-        b.type?.toLowerCase().includes(search.toLowerCase())
-    );
+  const boissonsList = Array.isArray(boissons) ? boissons : [];
+  const ventesList = Array.isArray(ventes) ? ventes : [];
+
+  const filterBoissons = () => {
+    const res = [];
+    const term = search.toLowerCase();
+    for (const b of boissonsList) {
+      const nom = b.nom ? b.nom.toLowerCase() : "";
+      const fam = b.famille ? b.famille.toLowerCase() : "";
+      const type = b.type ? b.type.toLowerCase() : "";
+      if (nom.includes(term) || fam.includes(term) || type.includes(term)) {
+        res.push(b);
+      }
+    }
+    return res;
+  };
   const filtered = filterBoissons();
 
   const ventesParBoisson = {};
-  ventes.forEach(v => {
-    ventesParBoisson[v.boisson_id] = (ventesParBoisson[v.boisson_id] || 0) + v.quantite;
-  });
-  const filteredWithVentes = filtered.map(b => ({
-    ...b,
-    quantiteVendue: ventesParBoisson[b.id] || 0
-  }));
-  const sortedByVentes = [...filteredWithVentes].sort((a, b) => b.quantiteVendue - a.quantiteVendue);
+  for (const v of ventesList) {
+    const key = v.boisson_id;
+    ventesParBoisson[key] = (ventesParBoisson[key] || 0) + v.quantite;
+  }
+  const filteredWithVentes = [];
+  if (Array.isArray(filtered)) {
+    for (const b of filtered) {
+      filteredWithVentes.push({
+        ...b,
+        quantiteVendue: ventesParBoisson[b.id] || 0,
+      });
+    }
+  }
+  const sortedByVentes = [];
+  for (const item of filteredWithVentes) {
+    let inserted = false;
+    for (let i = 0; i < sortedByVentes.length; i++) {
+      if (item.quantiteVendue > sortedByVentes[i].quantiteVendue) {
+        sortedByVentes.splice(i, 0, item);
+        inserted = true;
+        break;
+      }
+    }
+    if (!inserted) sortedByVentes.push(item);
+  }
+  const tableList = Array.isArray(filteredWithVentes) ? filteredWithVentes : [];
 
   // Stats globales
-  const foodCosts = filteredWithVentes
-    .filter(b => b.prix_vente && b.cout_portion)
-    .map(b => (b.cout_portion / b.prix_vente) * 100);
-  const avgFC = foodCosts.length
-    ? foodCosts.reduce((a, b) => a + b, 0) / foodCosts.length
-    : 0;
+  const fcSource = Array.isArray(filteredWithVentes) ? filteredWithVentes : [];
+  const foodCosts = [];
+  for (const b of fcSource) {
+    if (b.prix_vente && b.cout_portion) {
+      foodCosts.push((b.cout_portion / b.prix_vente) * 100);
+    }
+  }
+  let avgFC = 0;
+  if (foodCosts.length) {
+    let sum = 0;
+    for (const n of foodCosts) sum += n;
+    avgFC = sum / foodCosts.length;
+  }
 
   // Données pour graphique (top ventes)
-  const chartData = sortedByVentes
-    .slice(0, 10)
-    .map(b => ({
+  const chartSource = Array.isArray(sortedByVentes) ? sortedByVentes : [];
+  const chartData = [];
+  const limit = chartSource.length < 10 ? chartSource.length : 10;
+  for (let i = 0; i < limit; i++) {
+    const b = chartSource[i];
+    chartData.push({
       nom: b.nom,
       Ventes: b.quantiteVendue,
-      "Marge (€)": b.prix_vente && b.cout_portion ? (b.prix_vente - b.cout_portion).toFixed(2) : 0
-    }));
+      "Marge (€)": b.prix_vente && b.cout_portion ? (b.prix_vente - b.cout_portion).toFixed(2) : 0,
+    });
+  }
 
   if (authLoading) return <LoadingSpinner message="Chargement..." />;
   if (!mama_id) return null;
@@ -289,127 +345,127 @@ export default function CostBoissons() {
           </thead>
           <tbody>
             <AnimatePresence>
-              {filteredWithVentes.map(b => {
-                const foodCost =
-                  b.prix_vente && b.cout_portion
-                    ? ((b.cout_portion / b.prix_vente) * 100).toFixed(1)
-                    : null;
-                return (
-                  <Motion.tr
-                    key={b.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <td className="px-2 py-1">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button variant="link" className="text-blue-700 p-0 h-auto min-w-0 underline">
-                            {b.nom}
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent
-                          className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl shadow-lg p-6 max-w-md z-[1000]"
-                        >
-                          <DialogTitle className="font-bold text-xl mb-2">
-                            {b.nom}
-                          </DialogTitle>
-                          <DialogDescription className="sr-only">
-                            Détails du produit
-                          </DialogDescription>
-                          <p>
-                            <b>Type&nbsp;:</b> {b.type || b.famille || "-"}
-                            <br />
-                            <b>Contenance&nbsp;:</b> {b.unite || "-"}
-                            <br />
-                            <b>Coût/portion&nbsp;:</b>{" "}
-                            {b.cout_portion ? Number(b.cout_portion).toFixed(2) : "-"} €
-                            <br />
-                            <b>Prix vente&nbsp;:</b>{" "}
-                            {b.prix_vente ? Number(b.prix_vente).toFixed(2) : "-"} €
-                            <br />
-                            <b>Food cost&nbsp;:</b>{" "}
-                            {foodCost ? (
-                              <span className={foodCost > FOOD_COST_SEUIL ? "text-red-600 font-semibold" : ""}>
-                                {foodCost} %
-                              </span>
-                            ) : (
-                              "-"
-                            )}
-                            <br />
-                            <b>Ventes sur période sélectionnée&nbsp;: </b>
-                            {b.quantiteVendue}
-                          </p>
-                        </DialogContent>
-                      </Dialog>
-                    </td>
-                    <td className="px-2 py-1">{b.type || b.famille || "-"}</td>
-                    <td className="px-2 py-1">{b.unite || "-"}</td>
-                    <td className="px-2 py-1">{b.cout_portion ? Number(b.cout_portion).toFixed(2) : "-"}</td>
-                    <td className="px-2 py-1">
-                      <input
-                        type="number"
-                        min={0}
-                        step="0.01"
-                        className="input input-bordered w-20"
-                        value={b.prix_vente ?? ""}
-                        disabled={savingId === b.id}
-                        onChange={e =>
-                          handleChangePV(b, e.target.value ? Number(e.target.value) : null)
-                        }
-                      />
-                    </td>
-                    <td className={"px-2 py-1 font-semibold " + (foodCost > FOOD_COST_SEUIL ? "text-red-600" : "")}>
-                      {foodCost ?? "-"}
-                    </td>
-                    <td className="px-2 py-1">
-                      <div className="flex items-center gap-2">
+              {(() => {
+                const rows = [];
+                for (const b of tableList) {
+                  const foodCost =
+                    b.prix_vente && b.cout_portion
+                      ? ((b.cout_portion / b.prix_vente) * 100).toFixed(1)
+                      : null;
+                  rows.push(
+                    <Motion.tr
+                      key={b.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <td className="px-2 py-1">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="link" className="text-blue-700 p-0 h-auto min-w-0 underline">
+                              {b.nom}
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl shadow-lg p-6 max-w-md z-[1000]">
+                            <DialogTitle className="font-bold text-xl mb-2">
+                              {b.nom}
+                            </DialogTitle>
+                            <DialogDescription className="sr-only">
+                              Détails du produit
+                            </DialogDescription>
+                            <p>
+                              <b>Type&nbsp;:</b> {b.type || b.famille || "-"}
+                              <br />
+                              <b>Contenance&nbsp;:</b> {b.unite || "-"}
+                              <br />
+                              <b>Coût/portion&nbsp;:</b>{" "}
+                              {b.cout_portion ? Number(b.cout_portion).toFixed(2) : "-"} €
+                              <br />
+                              <b>Prix vente&nbsp;:</b>{" "}
+                              {b.prix_vente ? Number(b.prix_vente).toFixed(2) : "-"} €
+                              <br />
+                              <b>Food cost&nbsp;:</b>{" "}
+                              {foodCost ? (
+                                <span className={foodCost > FOOD_COST_SEUIL ? "text-red-600 font-semibold" : ""}>
+                                  {foodCost} %
+                                </span>
+                              ) : (
+                                "-"
+                              )}
+                              <br />
+                              <b>Ventes sur période sélectionnée&nbsp;: </b>
+                              {b.quantiteVendue}
+                            </p>
+                          </DialogContent>
+                        </Dialog>
+                      </td>
+                      <td className="px-2 py-1">{b.type || b.famille || "-"}</td>
+                      <td className="px-2 py-1">{b.unite || "-"}</td>
+                      <td className="px-2 py-1">{b.cout_portion ? Number(b.cout_portion).toFixed(2) : "-"}</td>
+                      <td className="px-2 py-1">
                         <input
                           type="number"
                           min={0}
-                          className="input input-bordered w-16"
-                          placeholder="Ventes"
-                          value={ventesInput[b.id] ?? ""}
-                          onChange={e => handleVentesInput(b.id, e.target.value)}
+                          step="0.01"
+                          className="input input-bordered w-20"
+                          value={b.prix_vente ?? ""}
+                          disabled={savingId === b.id}
+                          onChange={e =>
+                            handleChangePV(b, e.target.value ? Number(e.target.value) : null)
+                          }
                         />
-                        <Button
-                          size="sm"
-                          onClick={() => handleSaveVente(b.id)}
-                          variant="secondary"
-                        >
-                          +
-                        </Button>
-                        <span className="ml-2 text-blue-600">{b.quantiteVendue}</span>
-                      </div>
-                    </td>
-                    <td className="px-2 py-1">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button variant="ghost" className="text-sm">Voir fiche</Button>
-                        </DialogTrigger>
-                        <DialogContent
-                          className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl shadow-lg p-6 max-w-md z-[1000]"
-                        >
-                          <DialogTitle className="font-bold text-xl mb-2">
-                            {b.nom}
-                          </DialogTitle>
-                          <DialogDescription className="sr-only">
-                            Fiche technique
-                          </DialogDescription>
-                          <p>
-                            <b>Détails techniques :</b>
-                            <br />
-                            ID : {b.fiche_id || b.id}
-                            <br />
-                            Dernière mise à jour : {b.created_at?.slice(0, 10) || "-"}
-                          </p>
-                        </DialogContent>
-                      </Dialog>
-                    </td>
-                  </Motion.tr>
-                );
-              })}
+                      </td>
+                      <td className={"px-2 py-1 font-semibold " + (foodCost > FOOD_COST_SEUIL ? "text-red-600" : "")}> 
+                        {foodCost ?? "-"}
+                      </td>
+                      <td className="px-2 py-1">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            min={0}
+                            className="input input-bordered w-16"
+                            placeholder="Ventes"
+                            value={ventesInput[b.id] ?? ""}
+                            onChange={e => handleVentesInput(b.id, e.target.value)}
+                          />
+                          <Button
+                            size="sm"
+                            onClick={() => handleSaveVente(b.id)}
+                            variant="secondary"
+                          >
+                            +
+                          </Button>
+                          <span className="ml-2 text-blue-600">{b.quantiteVendue}</span>
+                        </div>
+                      </td>
+                      <td className="px-2 py-1">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="ghost" className="text-sm">Voir fiche</Button>
+                          </DialogTrigger>
+                          <DialogContent className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl shadow-lg p-6 max-w-md z-[1000]">
+                            <DialogTitle className="font-bold text-xl mb-2">
+                              {b.nom}
+                            </DialogTitle>
+                            <DialogDescription className="sr-only">
+                              Fiche technique
+                            </DialogDescription>
+                            <p>
+                              <b>Détails techniques :</b>
+                              <br />
+                              ID : {b.fiche_id || b.id}
+                              <br />
+                              Dernière mise à jour : {b.created_at?.slice(0, 10) || "-"}
+                            </p>
+                          </DialogContent>
+                        </Dialog>
+                      </td>
+                    </Motion.tr>
+                  );
+                }
+                return rows;
+              })()}
             </AnimatePresence>
           </tbody>
         </table>

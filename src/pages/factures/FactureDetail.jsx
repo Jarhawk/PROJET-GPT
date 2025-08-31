@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
 import FactureForm from './FactureForm.jsx';
 import { mapDbLineToUI } from '@/features/factures/invoiceMappers';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
@@ -29,6 +30,7 @@ function toLabel(v) {
 export default function FactureDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { mama_id } = useAuth();
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState(null);
   const [lignes, setLignes] = useState([]);
@@ -36,17 +38,22 @@ export default function FactureDetail() {
   useEffect(() => {
     let isMounted = true;
     async function load() {
+      if (!mama_id) return;
       setLoading(true);
       const { data, error } = await supabase
         .from('factures')
         .select(
           `id, mama_id, fournisseur_id, numero, date_facture, actif, total_ht, total_ttc, tva,
           lignes:facture_lignes(
-            id, produit_id, quantite, pu_ht, total_ht, tva, zone_id,
-            produit:produits(id, nom, unite, pmp, tva)
+            id, produit_id, quantite, pu_ht:prix_unitaire_ht, total_ht, tva, zone_id,
+            produit:produits(id, nom, pmp, tva, unite:unites!produits_unite_id_fkey(nom, mama_id))
           )`
         )
         .eq('id', id)
+        .eq('mama_id', mama_id)
+        .eq('lignes.mama_id', mama_id)
+        .eq('lignes.produit.mama_id', mama_id)
+        .eq('lignes.produit.unite.mama_id', mama_id)
         .single();
 
       if (error) {
@@ -60,7 +67,12 @@ export default function FactureDetail() {
           statut: data.actif ? 'Validée' : 'Brouillon',
           total_ht_attendu: Number(data.total_ht ?? 0) || null,
         });
-        setLignes((data.lignes || []).map(mapDbLineToUI));
+        const lignesBrutes = Array.isArray(data.lignes) ? data.lignes : [];
+        const lignesMappees = [];
+        for (let i = 0; i < lignesBrutes.length; i += 1) {
+          lignesMappees.push(mapDbLineToUI(lignesBrutes[i]));
+        }
+        setLignes(lignesMappees);
       }
 
       if (isMounted) setLoading(false);
@@ -69,7 +81,7 @@ export default function FactureDetail() {
     return () => {
       isMounted = false;
     };
-  }, [id]);
+  }, [id, mama_id]);
 
   if (loading) return <LoadingSpinner message="Chargement..." />;
 

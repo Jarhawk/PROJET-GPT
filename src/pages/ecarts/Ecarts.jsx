@@ -29,20 +29,37 @@ export default function Ecarts() {
     );
   }
 
-  const ecarts = (ecartsRaw || [])
-    .filter((e) =>
-      e.produit.toLowerCase().includes(search.toLowerCase())
-    )
-    .sort((a, b) => Math.abs(b.ecart) - Math.abs(a.ecart));
+  const baseList = Array.isArray(ecartsRaw) ? ecartsRaw : [];
+  const ecarts = [];
+  for (let i = 0; i < baseList.length; i += 1) {
+    const e = baseList[i];
+    if (e.produit.toLowerCase().includes(search.toLowerCase())) {
+      ecarts.push(e);
+    }
+  }
+  for (let i = 0; i < ecarts.length - 1; i += 1) {
+    for (let j = i + 1; j < ecarts.length; j += 1) {
+      if (Math.abs(ecarts[j].ecart) > Math.abs(ecarts[i].ecart)) {
+        const tmp = ecarts[i];
+        ecarts[i] = ecarts[j];
+        ecarts[j] = tmp;
+      }
+    }
+  }
+  const safeEcarts = Array.isArray(ecarts) ? ecarts : [];
 
   const handleExportCSV = () => {
     const headers = ["Produit", "Écart", "Motif"];
-    const rows = ecarts.map(e => [
-      e.produit,
-      e.ecart,
-      e.motif || "Non renseigné",
-    ]);
-    const csvContent = [headers, ...rows].map(r => r.join(";")).join("\n");
+    const rows = [];
+    for (let i = 0; i < safeEcarts.length; i += 1) {
+      const e = safeEcarts[i];
+      rows.push([e.produit, e.ecart, e.motif || "Non renseigné"]);
+    }
+    const csvLines = [];
+    for (let i = 0; i < rows.length; i += 1) {
+      csvLines.push(rows[i].join(";"));
+    }
+    const csvContent = [headers.join(";"), ...csvLines].join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     saveAs(blob, "ecarts_inventaire.csv");
   };
@@ -61,28 +78,35 @@ export default function Ecarts() {
         <Button onClick={handleExportCSV}>📁 Exporter CSV</Button>
       </div>
 
-      {ecarts.length === 0 ? (
+      {safeEcarts.length === 0 ? (
         <div className="text-gray-400 text-center mt-10">
           📭 Aucun écart détecté pour le moment.
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {ecarts.map((ecart) => (
-            <GlassCard key={ecart.id} className="p-4">
-              <h2 className="text-lg font-semibold">{ecart.produit}</h2>
-              <p className="text-sm text-gray-300">
-                Écart : <span className="font-bold">{ecart.ecart}</span>
-              </p>
-              <p className="text-sm text-gray-300">
-                Motif : {ecart.motif || "Non renseigné"}
-              </p>
-              {ecart.date && (
-                <p className="text-sm text-gray-400">
-                  📅 {new Date(ecart.date).toLocaleDateString()}
-                </p>
-              )}
-            </GlassCard>
-          ))}
+          {(() => {
+            const cards = [];
+            for (let i = 0; i < safeEcarts.length; i += 1) {
+              const ecart = safeEcarts[i];
+              cards.push(
+                <GlassCard key={ecart.id} className="p-4">
+                  <h2 className="text-lg font-semibold">{ecart.produit}</h2>
+                  <p className="text-sm text-gray-300">
+                    Écart : <span className="font-bold">{ecart.ecart}</span>
+                  </p>
+                  <p className="text-sm text-gray-300">
+                    Motif : {ecart.motif || "Non renseigné"}
+                  </p>
+                  {ecart.date && (
+                    <p className="text-sm text-gray-400">
+                      📅 {new Date(ecart.date).toLocaleDateString()}
+                    </p>
+                  )}
+                </GlassCard>
+              );
+            }
+            return cards;
+          })()}
         </div>
       )}
     </div>

@@ -255,7 +255,9 @@ export function useFiches() {
     setError(null);
     const { data: fiche, error: fetchError } = await supabase
       .from("fiches_techniques")
-      .select("*, lignes:fiche_lignes!fiche_id(*)")
+      .select(
+        "id, mama_id, fiche_id, technique, nom, cout_par_portion, portions, famille, prix_vente, type_carte, sous_type_carte, carte_actuelle, cout_total, cout_portion, rendement, lignes:fiche_lignes!fiche_id(id, produit_id, sous_fiche_id, quantite, description)"
+      )
       .eq("id", id)
       .eq("mama_id", mama_id)
       .single();
@@ -265,7 +267,13 @@ export function useFiches() {
       setError(fetchError);
       return { error: fetchError };
     }
-    const { lignes = [], ...rest } = fiche || {};
+    const {
+      lignes = [],
+      id: _oldId,
+      created_at: _c,
+      updated_at: _u,
+      ...rest
+    } = fiche || {};
     const { data: inserted, error: insertError } = await supabase
       .from("fiches_techniques")
       .insert([{ ...rest, nom: `${rest.nom} (copie)`, mama_id }])

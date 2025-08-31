@@ -10,7 +10,7 @@ import { getTemplatesCommandesActifs } from "@/hooks/useTemplatesCommandes";
 
 export default function CommandeForm() {
   const navigate = useNavigate();
-  const { role } = useAuth();
+  const { role, mama_id } = useAuth();
   const { createCommande } = useCommandes();
   const { data: fournisseurs = [] } = useFournisseurs({ actif: true });
   const { useProduitsDuFournisseur } = useProduitsFournisseur();
@@ -29,13 +29,14 @@ export default function CommandeForm() {
 
   useEffect(() => { if (fournisseurId) fetch(); }, [fournisseurId, fetch]);
   useEffect(() => {
-    getTemplatesCommandesActifs().then(({ data }) => {
-      if (data) setTemplates(data);
+    getTemplatesCommandesActifs(mama_id).then(({ data }) => {
+      setTemplates(Array.isArray(data) ? data : []);
     });
-  }, []);
+  }, [mama_id]);
 
   const handleChangeLine = (idx, field, value) => {
-    const updated = [...lignes];
+    const current = Array.isArray(lignes) ? lignes : [];
+    const updated = [...current];
     updated[idx][field] = value;
     if (field === "quantite" || field === "prix_achat") {
       updated[idx].total = Number(updated[idx].quantite || 0) * Number(updated[idx].prix_achat || 0);
@@ -44,14 +45,21 @@ export default function CommandeForm() {
   };
 
   const addLine = () =>
-    setLignes([
-      ...lignes,
+    setLignes(l => [
+      ...(Array.isArray(l) ? l : []),
       { produit_id: "", quantite: 1, unite: "", prix_achat: 0, total: 0, suggestion: false, commentaire: "" },
     ]);
 
   const handleTemplateChange = id => {
     setTemplateId(id);
-    const tpl = templates.find(t => t.id === id);
+    const list = Array.isArray(templates) ? templates : [];
+    let tpl = null;
+    for (const t of list) {
+      if (t.id === id) {
+        tpl = t;
+        break;
+      }
+    }
     if (tpl) {
       setForm(prev => ({
         ...prev,
@@ -64,13 +72,10 @@ export default function CommandeForm() {
 
   const handleSubmit = async e => {
     e.preventDefault();
-    const payload = {
-      fournisseur_id: fournisseurId,
-      template_id: templateId || undefined,
-      adresse_livraison: form.adresse_livraison,
-      pied_page: form.pied_page,
-      champs_visibles: form.champs_visibles,
-      lignes: lignes.map(l => ({
+    const lignesPayload = [];
+    const src = Array.isArray(lignes) ? lignes : [];
+    for (const l of src) {
+      lignesPayload.push({
         produit_id: l.produit_id,
         quantite: Number(l.quantite),
         unite: l.unite,
@@ -78,7 +83,15 @@ export default function CommandeForm() {
         total_ligne: l.total,
         suggestion: l.suggestion,
         commentaire: l.commentaire,
-      })),
+      });
+    }
+    const payload = {
+      fournisseur_id: fournisseurId,
+      template_id: templateId || undefined,
+      adresse_livraison: form.adresse_livraison,
+      pied_page: form.pied_page,
+      champs_visibles: form.champs_visibles,
+      lignes: lignesPayload,
     };
     const { error } = await createCommande(payload);
     if (error) toast.error("Erreur création");
@@ -98,9 +111,14 @@ export default function CommandeForm() {
           onChange={e => handleTemplateChange(e.target.value)}
         >
           <option value="">-- Aucun template --</option>
-          {templates.map(t => (
-            <option key={t.id} value={t.id}>{t.nom}</option>
-          ))}
+          {(() => {
+            const opts = [];
+            const list = Array.isArray(templates) ? templates : [];
+            for (const t of list) {
+              opts.push(<option key={t.id} value={t.id}>{t.nom}</option>);
+            }
+            return opts;
+          })()}
         </select>
       </div>
       <div>
@@ -113,9 +131,14 @@ export default function CommandeForm() {
           onChange={e => setFournisseurId(e.target.value)}
         >
           <option value="">--</option>
-          {fournisseurs.map(f => (
-            <option key={f.id} value={f.id}>{f.nom}</option>
-          ))}
+          {(() => {
+            const opts = [];
+            const list = Array.isArray(fournisseurs) ? fournisseurs : [];
+            for (const f of list) {
+              opts.push(<option key={f.id} value={f.id}>{f.nom}</option>);
+            }
+            return opts;
+          })()}
         </select>
       </div>
       {form.champs_visibles?.adresse !== false && (
@@ -138,7 +161,17 @@ export default function CommandeForm() {
           />
         </div>
       )}
-      {lignes.map((l, idx) => (
+      {(() => {
+        const blocks = [];
+        const list = Array.isArray(lignes) ? lignes : [];
+        for (let idx = 0; idx < list.length; idx++) {
+          const l = list[idx];
+          const prodOpts = [];
+          const prodList = Array.isArray(products) ? products : [];
+          for (const p of prodList) {
+            prodOpts.push(<option key={p.produit.id} value={p.produit.id}>{p.produit.nom}</option>);
+          }
+          blocks.push(
         <div key={idx} className="border border-white/10 rounded p-2 space-y-2">
           <div>
             <label>Produit</label>
@@ -149,9 +182,7 @@ export default function CommandeForm() {
               onChange={e => handleChangeLine(idx, "produit_id", e.target.value)}
             >
               <option value="">--</option>
-              {products.map(p => (
-                <option key={p.produit.id} value={p.produit.id}>{p.produit.nom}</option>
-              ))}
+              {prodOpts}
             </select>
           </div>
           <div>
@@ -210,7 +241,10 @@ export default function CommandeForm() {
             </div>
           )}
         </div>
-      ))}
+          );
+        }
+        return blocks;
+      })()}
       <button type="button" onClick={addLine}>Ajouter ligne</button>
       {role === 'admin' && <button type="submit">Valider commande</button>}
     </form>

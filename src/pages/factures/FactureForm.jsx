@@ -81,6 +81,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
     name: 'lignes',
   });
   const lignes = watch('lignes');
+  const lignesArr = Array.isArray(lignes) ? lignes : [];
   const { data: zones = [], isSuccess } = useZonesStock();
   const totalHTAttendu = watch('total_ht_attendu');
   const statut = watch('statut');
@@ -91,19 +92,28 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
 
   const sum = (arr) => arr.reduce((acc, n) => acc + n, 0);
 
-  const sumHTCents = useMemo(
-    () => sum(lignes.map((l) => Math.round(Number(l.total_ht || 0) * 100))),
-    [lignes]
-  );
+  const sumHTCents = useMemo(() => {
+    const values = [];
+    for (const l of lignesArr) {
+      values.push(Math.round(Number(l.total_ht || 0) * 100));
+    }
+    return sum(values);
+  }, [lignesArr]);
   const sommeLignesHT = sumHTCents / 100;
-  const sumTVACents = useMemo(
-    () => sum(lignes.map((l) => Math.round(Number(l.tva_montant || 0) * 100))),
-    [lignes]
-  );
-  const sumTTCents = useMemo(
-    () => sum(lignes.map((l) => Math.round(Number(l.total_ttc || 0) * 100))),
-    [lignes]
-  );
+  const sumTVACents = useMemo(() => {
+    const values = [];
+    for (const l of lignesArr) {
+      values.push(Math.round(Number(l.tva_montant || 0) * 100));
+    }
+    return sum(values);
+  }, [lignesArr]);
+  const sumTTCents = useMemo(() => {
+    const values = [];
+    for (const l of lignesArr) {
+      values.push(Math.round(Number(l.total_ttc || 0) * 100));
+    }
+    return sum(values);
+  }, [lignesArr]);
 
   const round2 = (n) =>
     Number.isFinite(n) ? Math.round(n * 100) / 100 : NaN;
@@ -134,7 +144,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
   const addLigne = () => append(emptyLigne());
 
   const updateLigne = async (i, patch) => {
-    let merged = { ...lignes[i], ...patch };
+    let merged = { ...lignesArr[i], ...patch };
     if (patch.produit_id) {
       try {
         const defaults = await fetchDefaults({ produit_id: patch.produit_id });
@@ -164,11 +174,13 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
   };
 
   useEffect(() => {
-    lignes.forEach((l, i) => {
+    const arr = Array.isArray(lignes) ? lignes : [];
+    for (let i = 0; i < arr.length; i++) {
+      const l = arr[i];
       if (!l.zone_id && isSuccess && zones.length === 1) {
         updateLigne(i, { zone_id: zones[0].id });
       }
-    });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSuccess, zones, lignes]);
 
@@ -185,14 +197,16 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
         setError('fournisseur_id', { type: 'required' });
         return;
       }
-      const payloadLignes = (lignes || [])
-        .filter((l) => l.produit_id)
-        .map(mapUILineToPayload);
+      const payloadLignes = [];
+      for (const l of lignesArr) {
+        if (l.produit_id) payloadLignes.push(mapUILineToPayload(l));
+      }
       if (payloadLignes.length === 0) {
         toast.error('Ajoutez au moins une ligne produit.');
-        (lignes || []).forEach((l, i) => {
-          if (!l.produit_id) setError(`lignes.${i}.produit_id`, { type: 'required' });
-        });
+        for (let i = 0; i < lignesArr.length; i++) {
+          if (!lignesArr[i]?.produit_id)
+            setError(`lignes.${i}.produit_id`, { type: 'required' });
+        }
         return;
       }
 
@@ -358,18 +372,27 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
             <div>Actions</div>
           </div>
 
-          {fields.map((f, i) => (
-            <FactureLigne
-              key={f.id}
-              value={lignes[i]}
-              onChange={(patch) => updateLigne(i, patch)}
-              onRemove={() => remove(i)}
-              allLines={lignes}
-              invalidProduit={submitCount > 0 && !lignes[i]?.produit_id}
-              index={i}
-              zones={zones}
-            />
-          ))}
+          {(() => {
+            const items = [];
+            if (Array.isArray(fields)) {
+              for (let i = 0; i < fields.length; i++) {
+                const f = fields[i];
+                items.push(
+                  <FactureLigne
+                    key={f.id}
+                    value={lignesArr[i]}
+                    onChange={(patch) => updateLigne(i, patch)}
+                    onRemove={() => remove(i)}
+                    allLines={lignesArr}
+                    invalidProduit={submitCount > 0 && !lignesArr[i]?.produit_id}
+                    index={i}
+                    zones={zones}
+                  />
+                );
+              }
+            }
+            return items;
+          })()}
         </div>
       </section>
 

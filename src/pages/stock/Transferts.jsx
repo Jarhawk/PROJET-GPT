@@ -65,11 +65,17 @@ export default function Transferts() {
           }
         >
           <option value="">Zone source</option>
-          {zonesSafe.map((z) => (
-            <option key={z.id} value={z.id}>
-              {z.nom}
-            </option>
-          ))}
+          {(() => {
+            const opts = [];
+            for (const z of zonesSafe) {
+              opts.push(
+                <option key={z.id} value={z.id}>
+                  {z.nom}
+                </option>
+              );
+            }
+            return opts;
+          })()}
         </select>
         <select
           aria-label="Zone destination"
@@ -80,11 +86,17 @@ export default function Transferts() {
           }
         >
           <option value="">Zone destination</option>
-          {zonesSafe.map((z) => (
-            <option key={z.id} value={z.id}>
-              {z.nom}
-            </option>
-          ))}
+          {(() => {
+            const opts = [];
+            for (const z of zonesSafe) {
+              opts.push(
+                <option key={z.id} value={z.id}>
+                  {z.nom}
+                </option>
+              );
+            }
+            return opts;
+          })()}
         </select>
         <select
           aria-label="Produit"
@@ -95,11 +107,17 @@ export default function Transferts() {
           }
         >
           <option value="">Produit</option>
-          {productsSafe.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.nom}
-            </option>
-          ))}
+          {(() => {
+            const opts = [];
+            for (const p of productsSafe) {
+              opts.push(
+                <option key={p.id} value={p.id}>
+                  {p.nom}
+                </option>
+              );
+            }
+            return opts;
+          })()}
         </select>
         <Button onClick={() => setShowForm(true)}>Nouveau transfert</Button>
       </div>
@@ -115,15 +133,21 @@ export default function Transferts() {
             </tr>
           </thead>
           <tbody>
-            {transfertsSafe.map((t) => (
-              <tr key={t.id}>
-                <td className="p-2">{t.date_transfert?.slice(0, 10)}</td>
-                <td className="p-2">{t.zone_source?.nom || ""}</td>
-                <td className="p-2">{t.zone_destination?.nom || ""}</td>
-                <td className="p-2">{t.lignes?.length || 0}</td>
-                <td className="p-2">{t.statut || "enregistré"}</td>
-              </tr>
-            ))}
+            {(() => {
+              const rows = [];
+              for (const t of transfertsSafe) {
+                rows.push(
+                  <tr key={t.id}>
+                    <td className="p-2">{t.date_transfert?.slice(0, 10)}</td>
+                    <td className="p-2">{t.zone_source?.nom || ""}</td>
+                    <td className="p-2">{t.zone_destination?.nom || ""}</td>
+                    <td className="p-2">{Array.isArray(t.lignes) ? t.lignes.length : 0}</td>
+                    <td className="p-2">{t.statut || "enregistré"}</td>
+                  </tr>
+                );
+              }
+              return rows;
+            })()}
           </tbody>
         </table>
       </TableContainer>

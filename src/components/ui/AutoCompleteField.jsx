@@ -19,7 +19,13 @@ export default function AutoCompleteField({
 }) {
   const [inputValue, setInputValue] = useState(() => {
     const arr = Array.isArray(options) ? options : [];
-    const match = arr.find(o => o.id === value || o.nom === value);
+    let match = null;
+    for (const o of arr) {
+      if (o.id === value || o.nom === value) {
+        match = o;
+        break;
+      }
+    }
     return match ? match.nom : value || "";
   });
 
@@ -45,7 +51,13 @@ export default function AutoCompleteField({
 
   useEffect(() => {
     const arr = Array.isArray(resolved) ? resolved : [];
-    const match = arr.find(o => o.id === value || o.nom === value);
+    let match = null;
+    for (const o of arr) {
+      if (o.id === value || o.nom === value) {
+        match = o;
+        break;
+      }
+    }
     if (match) {
       setInputValue(match.nom);
     } else if (typeof value === "string") {
@@ -62,21 +74,31 @@ export default function AutoCompleteField({
     return ids;
   })();
 
-  const isValid =
-    inputValue &&
-    resolved.some(
-      (o) =>
+  const isValid = (() => {
+    if (!inputValue) return false;
+    const arr = Array.isArray(resolved) ? resolved : [];
+    for (const o of arr) {
+      if (
         o.nom.toLowerCase() === inputValue.toLowerCase() &&
-        !disabledIds.includes(o.id),
-    );
+        !disabledIds.includes(o.id)
+      ) {
+        return true;
+      }
+    }
+    return false;
+  })();
 
   const handleInputChange = (e) => {
     const val = e.target.value;
     setInputValue(val);
     const arr = Array.isArray(resolved) ? resolved : [];
-    const match = arr.find(
-      (o) => o.nom.toLowerCase() === val.toLowerCase(),
-    );
+    let match = null;
+    for (const o of arr) {
+      if (o.nom.toLowerCase() === val.toLowerCase()) {
+        match = o;
+        break;
+      }
+    }
     if (match) onChange(match);
     else onChange(val ? { id: null, nom: val } : { id: "", nom: "" });
     setShowAdd(val && !match && !!onAddNewValue);

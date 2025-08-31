@@ -45,7 +45,37 @@ export default function Validations() {
     setSaving(false);
   };
 
-  const { items, loading, error } = validations;
+    const { items, loading, error } = validations;
+    const list = Array.isArray(items) ? items : [];
+    const rows = [];
+    for (const v of list) {
+      rows.push(
+        <tr key={v.id} className="border-t">
+          <td className="px-2 py-1">{v.module}</td>
+          <td className="px-2 py-1">{v.action}</td>
+          <td className="px-2 py-1">{v.status}</td>
+          {isAdmin && (
+            <td className="px-2 py-1 space-x-1 text-right">
+              <Button
+                size="sm"
+                disabled={saving}
+                onClick={() => handleUpdate(v.id, 'approved')}
+              >
+                OK
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                disabled={saving}
+                onClick={() => handleUpdate(v.id, 'rejected')}
+              >
+                Refus
+              </Button>
+            </td>
+          )}
+        </tr>
+      );
+    }
 
   if (loading) return <LoadingSpinner message="Chargement..." />;
   if (error) return <div className="p-8 text-red-600">{error}</div>;
@@ -95,36 +125,9 @@ export default function Validations() {
               {isAdmin && <th className="px-2 py-1"></th>}
             </tr>
           </thead>
-          <tbody>
-            {items.map((v) => (
-              <tr key={v.id} className="border-t">
-                <td className="px-2 py-1">{v.module}</td>
-                <td className="px-2 py-1">{v.action}</td>
-                <td className="px-2 py-1">{v.status}</td>
-                {isAdmin && (
-                  <td className="px-2 py-1 space-x-1 text-right">
-                    <Button
-                      size="sm"
-                      disabled={saving}
-                      onClick={() => handleUpdate(v.id, 'approved')}
-                    >
-                      OK
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      disabled={saving}
-                      onClick={() => handleUpdate(v.id, 'rejected')}
-                    >
-                      Refus
-                    </Button>
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </TableContainer>
-    </div>
-  );
-}
+            <tbody>{rows}</tbody>
+          </table>
+        </TableContainer>
+      </div>
+    );
+  }

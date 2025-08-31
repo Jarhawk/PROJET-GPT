@@ -8,7 +8,7 @@ export default function AlertesRupture() {
 
   const load = useCallback(async () => {
     const data = await fetchAlerts();
-    setAlerts(data);
+    setAlerts(Array.isArray(data) ? data : []);
   }, [fetchAlerts]);
 
   useEffect(() => { load(); }, [load]);
@@ -24,17 +24,29 @@ export default function AlertesRupture() {
           <tr><th>Produit</th><th>Stock actuel</th><th>Stock min</th><th>Manque</th></tr>
         </thead>
         <tbody>
-          {alerts.map(a => (
-            <tr key={a.produit_id} className="border-t">
-              <td className="px-2 py-1">{a.nom}</td>
-              <td className="px-2 py-1">{a.stock_actuel}</td>
-              <td className="px-2 py-1">{a.stock_min}</td>
-              <td className="px-2 py-1">{a.manque}</td>
-            </tr>
-          ))}
-          {alerts.length === 0 && (
-            <tr><td colSpan={4} className="text-center p-2">Aucune alerte</td></tr>
-          )}
+          {(() => {
+            const list = Array.isArray(alerts) ? alerts : [];
+            const rows = [];
+            for (let i = 0; i < list.length; i++) {
+              const a = list[i];
+              rows.push(
+                <tr key={a.produit_id} className="border-t">
+                  <td className="px-2 py-1">{a.nom}</td>
+                  <td className="px-2 py-1">{a.stock_actuel}</td>
+                  <td className="px-2 py-1">{a.stock_min}</td>
+                  <td className="px-2 py-1">{a.manque}</td>
+                </tr>
+              );
+            }
+            if (rows.length === 0) {
+              rows.push(
+                <tr key="empty">
+                  <td colSpan={4} className="text-center p-2">Aucune alerte</td>
+                </tr>
+              );
+            }
+            return rows;
+          })()}
         </tbody>
       </table>
     </div>

@@ -25,7 +25,12 @@ export default function SupervisionGroupe() {
   }, [mamas, fetchStats]);
 
   const mamaList = Array.isArray(mamas) ? mamas : [];
-  const display = stats.length ? stats : mamaList.map((m) => ({ ...m, mama_id: m.id }));
+  let display = [];
+  if (stats.length) {
+    display = stats;
+  } else {
+    for (const m of mamaList) display.push({ ...m, mama_id: m.id });
+  }
 
   return (
     <div className="p-6 flex justify-center">
@@ -44,15 +49,21 @@ export default function SupervisionGroupe() {
               </tr>
             </thead>
             <tbody>
-              {display.map((d) => (
-                <tr key={d.mama_id}>
-                  <td className="px-2 py-1">{d.nom}</td>
-                  <td className="px-2 py-1">{d.cout_matiere || '-'}</td>
-                  <td className="px-2 py-1">{d.nb_factures || '-'}</td>
-                  <td className="px-2 py-1">{d.taux_validation || '-'}</td>
-                  <td className="px-2 py-1">{d.ecart_inventaire || '-'}</td>
-                </tr>
-              ))}
+              {(() => {
+                const rows = [];
+                for (const d of display) {
+                  rows.push(
+                    <tr key={d.mama_id}>
+                      <td className="px-2 py-1">{d.nom}</td>
+                      <td className="px-2 py-1">{d.cout_matiere || '-'}</td>
+                      <td className="px-2 py-1">{d.nb_factures || '-'}</td>
+                      <td className="px-2 py-1">{d.taux_validation || '-'}</td>
+                      <td className="px-2 py-1">{d.ecart_inventaire || '-'}</td>
+                    </tr>
+                  );
+                }
+                return rows;
+              })()}
             </tbody>
           </table>
         </TableContainer>

@@ -24,7 +24,11 @@ export default function Consolidation() {
   }, [fetchSites]);
 
   const handleSelect = (e) => {
-    const opts = Array.from(e.target.selectedOptions).map((o) => o.value);
+    const opts = [];
+    const options = e.target.selectedOptions;
+    for (let i = 0; i < options.length; i++) {
+      opts.push(options[i].value);
+    }
     setSelected(opts);
   };
 
@@ -32,7 +36,9 @@ export default function Consolidation() {
     fetchConsoMensuelle({ mamaIds: selected, start: period.start, end: period.end });
   };
 
-  const kpis = getKpis(rows);
+  const safeSites = Array.isArray(sites) ? sites : [];
+  const safeRows = Array.isArray(rows) ? rows : [];
+  const kpis = getKpis(safeRows);
 
   return (
     <div className="p-4 space-y-4">
@@ -44,11 +50,17 @@ export default function Consolidation() {
           onChange={handleSelect}
           className="border p-1 flex-1 min-h-[5rem]"
         >
-          {sites.map((s) => (
-            <option key={s.mama_id} value={s.mama_id}>
-              {s.mama_id}
-            </option>
-          ))}
+          {(() => {
+            const items = [];
+            for (const s of safeSites) {
+              items.push(
+                <option key={s.mama_id} value={s.mama_id}>
+                  {s.mama_id}
+                </option>
+              );
+            }
+            return items;
+          })()}
         </select>
         <input
           type="month"
@@ -63,10 +75,10 @@ export default function Consolidation() {
           className="border p-1"
         />
         <Button onClick={load}>Charger</Button>
-        <Button variant="outline" onClick={() => exportExcel(rows)}>
+        <Button variant="outline" onClick={() => exportExcel(safeRows)}>
           Excel
         </Button>
-        <Button variant="outline" onClick={() => exportPdf(rows)}>
+        <Button variant="outline" onClick={() => exportPdf(safeRows)}>
           PDF
         </Button>
       </div>
@@ -94,17 +106,23 @@ export default function Consolidation() {
               </tr>
             </thead>
             <tbody>
-              {rows.map((r) => (
-                <tr key={`${r.mama_id}-${r.mois}`}>
-                  <td>{r.mama_id}</td>
-                  <td>{r.mois}</td>
-                  <td>{r.ca_total}</td>
-                  <td>{r.achats_total}</td>
-                  <td>{r.menu_foodcost_total}</td>
-                  <td>{r.marge_pct_moy}</td>
-                  <td>{r.ecart_valorise_total}</td>
-                </tr>
-              ))}
+              {(() => {
+                const rowsEls = [];
+                for (const r of safeRows) {
+                  rowsEls.push(
+                    <tr key={`${r.mama_id}-${r.mois}`}>
+                      <td>{r.mama_id}</td>
+                      <td>{r.mois}</td>
+                      <td>{r.ca_total}</td>
+                      <td>{r.achats_total}</td>
+                      <td>{r.menu_foodcost_total}</td>
+                      <td>{r.marge_pct_moy}</td>
+                      <td>{r.ecart_valorise_total}</td>
+                    </tr>
+                  );
+                }
+                return rowsEls;
+              })()}
             </tbody>
           </table>
         </TableContainer>

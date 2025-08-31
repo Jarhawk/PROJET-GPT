@@ -77,11 +77,18 @@ export default function Pertes() {
           required
         >
           <option value="">Produit…</option>
-          {products.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.nom}
-            </option>
-          ))}
+          {(() => {
+            const list = Array.isArray(products) ? products : [];
+            const opts = [];
+            for (const p of list) {
+              opts.push(
+                <option key={p.id} value={p.id}>
+                  {p.nom}
+                </option>
+              );
+            }
+            return opts;
+          })()}
         </select>
         <Input
           type="number"
@@ -123,18 +130,40 @@ export default function Pertes() {
           </tr>
         </thead>
         <tbody>
-          {pertes.map(p => (
-            <tr key={p.id}>
-              <td className="px-2 py-1">{p.date_perte}</td>
-              <td className="px-2 py-1">{p.produit?.nom || p.produit_id}</td>
-              <td className="px-2 py-1 text-right">{Number(p.quantite).toLocaleString()}</td>
-              <td className="px-2 py-1">{p.motif}</td>
-              <td className="px-2 py-1">
-                <Button variant="ghost" size="sm" onClick={() => handleDelete(p.id)}>Supprimer</Button>
-              </td>
-            </tr>
-          ))}
-          </tbody>
+          {(() => {
+            const list = Array.isArray(pertes) ? pertes : [];
+            const rows = [];
+            for (const p of list) {
+              rows.push(
+                <tr key={p.id}>
+                  <td className="px-2 py-1">{p.date_perte}</td>
+                  <td className="px-2 py-1">{p.produit?.nom || p.produit_id}</td>
+                  <td className="px-2 py-1 text-right">{Number(p.quantite).toLocaleString()}</td>
+                  <td className="px-2 py-1">{p.motif}</td>
+                  <td className="px-2 py-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDelete(p.id)}
+                    >
+                      Supprimer
+                    </Button>
+                  </td>
+                </tr>
+              );
+            }
+            if (rows.length === 0) {
+              rows.push(
+                <tr key="empty">
+                  <td colSpan="5" className="text-center py-4 text-gray-500">
+                    Aucune perte enregistrée
+                  </td>
+                </tr>
+              );
+            }
+            return rows;
+          })()}
+        </tbody>
         </table>
       </TableContainer>
     </div>

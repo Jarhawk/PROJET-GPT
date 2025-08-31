@@ -19,7 +19,7 @@ export function useFactures(filters = {}) {
           { count: 'exact' }
         )
         .eq('mama_id', mamaId)
-        .eq('fournisseurs.mama_id', mamaId)
+        .eq('fournisseur.mama_id', mamaId)
         .order('date_facture', { ascending: false })
         .range((page - 1) * pageSize, page * pageSize - 1);
 
@@ -37,15 +37,17 @@ export function useFactures(filters = {}) {
 
       const { data, error, count } = await q;
       if (error) throw error;
-      const rows = Array.isArray(data)
-        ? data.map((f) => ({
-            ...f,
-            fournisseur: Array.isArray(f.fournisseur)
-              ? f.fournisseur[0]
-              : f.fournisseur,
-          }))
-        : [];
-      return { factures: rows, total: count || 0 };
+      const rows = Array.isArray(data) ? data : [];
+      const mapped = [];
+      for (const f of rows) {
+        mapped.push({
+          ...f,
+          fournisseur: Array.isArray(f.fournisseur)
+            ? f.fournisseur[0]
+            : f.fournisseur,
+        });
+      }
+      return { factures: mapped, total: count || 0 };
     },
   });
 }

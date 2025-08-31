@@ -22,5 +22,7 @@ test('fetchProductPrices selects fields with last delivery alias', async () => {
   });
   expect(client.from).toHaveBeenCalledWith('fournisseur_produits');
   const query = client.from.mock.results[0].value;
-  expect(query.select).toHaveBeenCalledWith('*, fournisseur:fournisseurs!fk_fournisseur_produits_fournisseur_id(id, nom), derniere_livraison:date_livraison');
+  expect(query.select).toHaveBeenCalledWith(
+    'id, fournisseur_id, produit_id, prix_achat, mama_id, actif, derniere_livraison:date_livraison, fournisseur:fournisseurs!fk_fournisseur_produits_fournisseur_id(id, nom)'
+  );
 });

@@ -37,6 +37,7 @@ export default function Fiches() {
   const [statut, setStatut] = useState("actif");
   const [familleFilter, setFamilleFilter] = useState("");
   const { familles, fetchFamilles } = useFamilles();
+  const familleList = Array.isArray(familles) ? familles : [];
   const canEdit = access_rights?.fiches?.peut_modifier;
 
   const debouncedSearch = useDebounce(search, 300);
@@ -48,8 +49,8 @@ export default function Fiches() {
     famille: familleFilter || null,
     sortBy,
   });
-  const rows = data?.rows || [];
-  const total = data?.total || 0;
+  const rows = Array.isArray(data?.rows) ? data.rows : [];
+  const total = typeof data?.total === 'number' ? data.total : 0;
 
   const [searchParams, setSearchParams] = useSearchParams();
   const firstSync = useRef(true);
@@ -79,12 +80,15 @@ export default function Fiches() {
   }, [search, page, setSearchParams]);
 
   const exportExcel = () => {
-    const datas = rows.map((f) => ({
-      id: f.id,
-      nom: f.nom,
-      cout_par_portion: f.cout_par_portion,
-      actif: f.actif,
-    }));
+    const datas = [];
+    for (const f of rows) {
+      datas.push({
+        id: f.id,
+        nom: f.nom,
+        cout_par_portion: f.cout_par_portion,
+        actif: f.actif,
+      });
+    }
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Fiches");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
@@ -93,11 +97,10 @@ export default function Fiches() {
 
   const exportPdf = () => {
     const doc = new JSPDF();
-    const rowsPdf = rows.map((f) => [
-      f.nom,
-      f.famille || '',
-      f.cout_par_portion,
-    ]);
+    const rowsPdf = [];
+    for (const f of rows) {
+      rowsPdf.push([f.nom, f.famille || '', f.cout_par_portion]);
+    }
     doc.autoTable({ head: [["Nom", "Famille", "Coût/portion"]], body: rowsPdf });
     doc.save("fiches_mamastock.pdf");
   };
@@ -159,11 +162,17 @@ export default function Fiches() {
           }}
         >
           <option value="">-- Famille --</option>
-          {(familles ?? []).map((f) => (
-            <option key={f.id} value={f.nom}>
-              {f.nom}
-            </option>
-          ))}
+          {(() => {
+            const opts = [];
+            for (const f of familleList) {
+              opts.push(
+                <option key={f.id} value={f.nom}>
+                  {f.nom}
+                </option>
+              );
+            }
+            return opts;
+          })()}
         </select>
         {canEdit && (
           <Button
@@ -199,33 +208,39 @@ export default function Fiches() {
             </tr>
           </thead>
           <tbody>
-            {rows.map((fiche) => (
-              <FicheRow
-                key={fiche.id}
-                fiche={fiche}
-                canEdit={canEdit}
-                onEdit={(f) => {
-                  setSelected(f);
-                  setShowForm(true);
-                }}
-                onDetail={(f) => {
-                  setSelected(f);
-                  setShowDetail(true);
-                }}
-                onDuplicate={async (id) => {
-                  await duplicateFiche(id);
-                  toast.success("Fiche dupliquée");
-                  queryClient.invalidateQueries({ queryKey: ['fiches'] });
-                }}
-                onDelete={(id) => {
-                  if (window.confirm("Désactiver cette fiche ?")) {
-                    deleteFiche(id);
-                    toast.success("Fiche désactivée");
-                    queryClient.invalidateQueries({ queryKey: ['fiches'] });
-                  }
-                }}
-              />
-            ))}
+            {(() => {
+              const items = [];
+              for (const fiche of rows) {
+                items.push(
+                  <FicheRow
+                    key={fiche.id}
+                    fiche={fiche}
+                    canEdit={canEdit}
+                    onEdit={(f) => {
+                      setSelected(f);
+                      setShowForm(true);
+                    }}
+                    onDetail={(f) => {
+                      setSelected(f);
+                      setShowDetail(true);
+                    }}
+                    onDuplicate={async (id) => {
+                      await duplicateFiche(id);
+                      toast.success("Fiche dupliquée");
+                      queryClient.invalidateQueries({ queryKey: ['fiches'] });
+                    }}
+                    onDelete={(id) => {
+                      if (window.confirm("Désactiver cette fiche ?")) {
+                        deleteFiche(id);
+                        toast.success("Fiche désactivée");
+                        queryClient.invalidateQueries({ queryKey: ['fiches'] });
+                      }
+                    }}
+                  />
+                );
+              }
+              return items;
+            })()}
           </tbody>
         </Motion.table>
       </ListingContainer>

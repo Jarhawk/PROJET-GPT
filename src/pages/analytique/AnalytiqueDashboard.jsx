@@ -30,7 +30,16 @@ export default function AnalytiqueDashboard() {
     const periode = filters.debut ? { debut: filters.debut + "-01", fin: filters.debut + "-31" } : {};
     getConsommationParActivite(periode, filters.centre || null).then(setDataActivite);
     getVentilationProduits(periode, filters.centre || null).then(data => {
-      const filtered = filters.famille ? data.filter(d => d.famille === filters.famille) : data;
+      const list = Array.isArray(data) ? data : [];
+      const filtered = [];
+      if (filters.famille) {
+        for (let i = 0; i < list.length; i++) {
+          const d = list[i];
+          if (d.famille === filters.famille) filtered.push(d);
+        }
+      } else {
+        for (let i = 0; i < list.length; i++) filtered.push(list[i]);
+      }
       setDataProduits(filtered);
     });
   }, [isAuthenticated, authLoading, filters, getConsommationParActivite, getVentilationProduits]);
@@ -47,15 +56,27 @@ export default function AnalytiqueDashboard() {
       <div className="flex flex-wrap gap-2 mb-4">
         <select className="form-input" value={filters.centre} onChange={e => setFilters(f => ({ ...f, centre: e.target.value }))}>
           <option value="">Tous centres</option>
-          {costCenters.map(c => (
-            <option key={c.id} value={c.id}>{c.nom}</option>
-          ))}
+          {(() => {
+            const opts = [];
+            const list = Array.isArray(costCenters) ? costCenters : [];
+            for (let i = 0; i < list.length; i++) {
+              const c = list[i];
+              opts.push(<option key={c.id} value={c.id}>{c.nom}</option>);
+            }
+            return opts;
+          })()}
         </select>
         <select className="form-input" value={filters.famille} onChange={e => setFilters(f => ({ ...f, famille: e.target.value }))}>
           <option value="">Toutes familles</option>
-          {(familles ?? []).map(f => (
-            <option key={f.id} value={f.nom}>{f.nom}</option>
-          ))}
+          {(() => {
+            const opts = [];
+            const list = Array.isArray(familles) ? familles : [];
+            for (let i = 0; i < list.length; i++) {
+              const f = list[i];
+              opts.push(<option key={f.id} value={f.nom}>{f.nom}</option>);
+            }
+            return opts;
+          })()}
         </select>
         <input type="month" className="form-input" value={filters.debut} onChange={e => setFilters(f => ({ ...f, debut: e.target.value }))} />
       </div>
@@ -64,7 +85,7 @@ export default function AnalytiqueDashboard() {
         <GlassCard className="p-4">
           <h3 className="font-semibold mb-2">Consommation par activité</h3>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={dataActivite}>
+            <BarChart data={Array.isArray(dataActivite) ? dataActivite : []}>
               <XAxis dataKey="activite" />
               <YAxis />
               <Tooltip />
@@ -76,10 +97,16 @@ export default function AnalytiqueDashboard() {
           <h3 className="font-semibold mb-2">Ventilation produits</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
-              <Pie data={dataProduits} dataKey="sumv" nameKey="famille" label>
-                {dataProduits.map((_, i) => (
-                  <Cell key={i} fill={["#0088FE", "#00C49F", "#FFBB28", "#FF8042"][i % 4]} />
-                ))}
+              <Pie data={Array.isArray(dataProduits) ? dataProduits : []} dataKey="sumv" nameKey="famille" label>
+                {(() => {
+                  const cells = [];
+                  const list = Array.isArray(dataProduits) ? dataProduits : [];
+                  const colors = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
+                  for (let i = 0; i < list.length; i++) {
+                    cells.push(<Cell key={i} fill={colors[i % 4]} />);
+                  }
+                  return cells;
+                })()}
               </Pie>
               <Tooltip />
             </PieChart>

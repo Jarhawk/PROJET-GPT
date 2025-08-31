@@ -27,7 +27,7 @@ export default function CreateMama() {
       const { data: mama, error } = await supabase
         .from("mamas")
         .insert({ nom })
-        .select()
+        .select('id')
         .single();
       if (error) throw error;
       await supabase

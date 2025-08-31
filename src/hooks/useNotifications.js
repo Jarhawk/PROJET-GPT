@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { useAuth as useAuthContext } from '@/hooks/useAuth';
 
-export default function useNotifications() {
+function useNotifications() {
   const { mama_id, user_id } = useAuthContext();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -149,7 +149,9 @@ export default function useNotifications() {
           { mama_id, utilisateur_id: user_id, ...values },
           { onConflict: ['utilisateur_id', 'mama_id'] }
         )
-        .select()
+        .select(
+          'id, utilisateur_id, mama_id, email_enabled, webhook_enabled, webhook_url, webhook_token, updated_at'
+        )
         .single();
       return { data, error };
     },
@@ -239,7 +241,8 @@ export default function useNotifications() {
             event: 'INSERT',
             schema: 'public',
             table: 'notifications',
-            filter: `user_id=eq.${user_id}`,
+            // RLS: restreint aux notifications de l'utilisateur courant et de sa MAMA
+            filter: `mama_id=eq.${mama_id} and user_id=eq.${user_id}`,
           },
           (payload) => {
             setItems((ns) => [payload.new, ...(Array.isArray(ns) ? ns : [])]);
@@ -275,5 +278,5 @@ export default function useNotifications() {
     sendWebhook,
   };
 }
-
-export { useNotifications as useAuth };
+export default useNotifications;
+export { useNotifications };

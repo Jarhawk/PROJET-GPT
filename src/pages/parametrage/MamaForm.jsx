@@ -56,14 +56,16 @@ export default function MamaForm({ mama, onClose, onSaved }) {
           .update(values)
           .eq("id", mama.id);
         if (role !== "superadmin") query = query.eq("id", myMama);
-        const res = await query.select().single();
+        const res = await query
+          .select('id, nom, actif')
+          .single();
         error = res.error;
         saved = res.data;
       } else {
         const res = await supabase
           .from("mamas")
           .insert([{ ...values }])
-          .select()
+          .select('id, nom, actif')
           .single();
         error = res.error;
         saved = res.data;

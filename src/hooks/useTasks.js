@@ -3,7 +3,7 @@ import { useState, useCallback } from "react";
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
-const SELECT = 'id, mama_id, titre, description, statut, next_echeance, assigned:utilisateurs!taches_assigned_to_fkey(nom)';
+const SELECT = 'id, mama_id, titre, description, statut, date_echeance, assignes';
 
 export function useTasks() {
   const { mama_id } = useAuth();
@@ -19,7 +19,7 @@ export function useTasks() {
       .from('taches')
       .select(SELECT)
       .eq('mama_id', mama_id)
-      .order('next_echeance', { ascending: true });
+      .order('date_echeance', { ascending: true });
     setLoading(false);
     if (error) {
       setError(error.message);
@@ -53,7 +53,7 @@ export function useTasks() {
       .select(SELECT)
       .eq('mama_id', mama_id)
       .eq('statut', statut)
-      .order('next_echeance', { ascending: true });
+      .order('date_echeance', { ascending: true });
     setLoading(false);
     if (error) {
       setError(error.message);
@@ -66,10 +66,11 @@ export function useTasks() {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
+    const { titre, description, date_debut, date_echeance, statut, assignes = [] } = values;
     const { data, error } = await supabase
-      .from("taches")
-      .insert([{ ...values, mama_id }])
-      .select()
+      .from('taches')
+      .insert([{ titre, description, date_debut, date_echeance, statut, assignes, mama_id }])
+      .select(SELECT)
       .single();
     setLoading(false);
     if (error) {
@@ -83,12 +84,13 @@ export function useTasks() {
   const updateTask = useCallback(async (id, values) => {
     setLoading(true);
     setError(null);
+    const { titre, description, date_debut, date_echeance, statut, assignes = [] } = values;
     const { data, error } = await supabase
-      .from("taches")
-      .update(values)
-      .eq("id", id)
-      .eq("mama_id", mama_id)
-      .select()
+      .from('taches')
+      .update({ titre, description, date_debut, date_echeance, statut, assignes })
+      .eq('id', id)
+      .eq('mama_id', mama_id)
+      .select(SELECT)
       .single();
     setLoading(false);
     if (error) {

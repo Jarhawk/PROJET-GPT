@@ -78,11 +78,17 @@ export default function TransfertForm({ onClose, onSaved }) {
               }
             >
               <option value="">Zone source</option>
-              {zonesSafe.map((z) => (
-                <option key={z.id} value={z.id}>
-                  {z.nom}
-                </option>
-              ))}
+              {(() => {
+                const opts = [];
+                for (const z of zonesSafe) {
+                  opts.push(
+                    <option key={z.id} value={z.id}>
+                      {z.nom}
+                    </option>
+                  );
+                }
+                return opts;
+              })()}
             </select>
             <select
               className="input flex-1"
@@ -95,11 +101,17 @@ export default function TransfertForm({ onClose, onSaved }) {
               }
             >
               <option value="">Zone destination</option>
-              {zonesSafe.map((z) => (
-                <option key={z.id} value={z.id}>
-                  {z.nom}
-                </option>
-              ))}
+              {(() => {
+                const opts = [];
+                for (const z of zonesSafe) {
+                  opts.push(
+                    <option key={z.id} value={z.id}>
+                      {z.nom}
+                    </option>
+                  );
+                }
+                return opts;
+              })()}
             </select>
           </div>
           <textarea
@@ -118,36 +130,45 @@ export default function TransfertForm({ onClose, onSaved }) {
               </tr>
             </thead>
             <tbody>
-              {lignes.map((l, idx) => (
-                <tr key={idx}>
-                  <td>
-                    <select
-                      className="input"
-                      value={l.produit_id}
-                      onChange={(e) =>
-                        handleLineChange(idx, 'produit_id', e.target.value)
-                      }
-                    >
-                      <option value="">Produit</option>
-                      {productsSafe.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.nom}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td>
-                    <input
-                      type="number"
-                      className="input w-24"
-                      value={l.quantite}
-                      onChange={(e) =>
-                        handleLineChange(idx, 'quantite', e.target.value)
-                      }
-                    />
-                  </td>
-                </tr>
-              ))}
+              {(() => {
+                const rows = [];
+                for (let idx = 0; idx < lignes.length; idx++) {
+                  const l = lignes[idx];
+                  rows.push(
+                    <tr key={idx}>
+                      <td>
+                        <select
+                          className="input"
+                          value={l.produit_id}
+                          onChange={(e) => handleLineChange(idx, 'produit_id', e.target.value)}
+                        >
+                          <option value="">Produit</option>
+                          {(() => {
+                            const opts = [];
+                            for (const p of productsSafe) {
+                              opts.push(
+                                <option key={p.id} value={p.id}>
+                                  {p.nom}
+                                </option>
+                              );
+                            }
+                            return opts;
+                          })()}
+                        </select>
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          className="input w-24"
+                          value={l.quantite}
+                          onChange={(e) => handleLineChange(idx, 'quantite', e.target.value)}
+                        />
+                      </td>
+                    </tr>
+                  );
+                }
+                return rows;
+              })()}
             </tbody>
           </table>
           <Button type="button" onClick={handleAddLine} className="mt-2">

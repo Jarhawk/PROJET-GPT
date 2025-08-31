@@ -45,8 +45,12 @@ export default function Fournisseurs() {
   const { getProduitsDuFournisseur, countProduitsDuFournisseur } =
     useProduitsFournisseur();
   const { products } = useProducts();
+  const productsList = Array.isArray(products) ? products : [];
   const { fournisseurs: inactiveByInvoices, fetchInactifs } =
     useFournisseursInactifs();
+  const inactiveByInvoicesList = Array.isArray(inactiveByInvoices)
+    ? inactiveByInvoices
+    : [];
   const { hasAccess } = useAuth();
   const canEdit = hasAccess('fournisseurs', 'peut_modifier');
   const [search, setSearch] = useState('');
@@ -56,6 +60,8 @@ export default function Fournisseurs() {
   const [saving, setSaving] = useState(false);
   const [stats, setStats] = useState([]);
   const [topProducts, setTopProducts] = useState([]);
+  const statsList = Array.isArray(stats) ? stats : [];
+  const topProductsList = Array.isArray(topProducts) ? topProducts : [];
   const [productCounts, setProductCounts] = useState({});
   const [actifFilter, setActifFilter] = useState('all');
   const [page, setPage] = useState(1);
@@ -72,35 +78,43 @@ export default function Fournisseurs() {
   );
 
   const { data: fournisseursData } = useFournisseursData(filters);
-  const fournisseurs = fournisseursData?.data || [];
-  const total = fournisseursData?.count || 0;
+  const fournisseursList = Array.isArray(fournisseursData?.data)
+    ? fournisseursData.data
+    : [];
+  const total = typeof fournisseursData?.count === 'number'
+    ? fournisseursData.count
+    : 0;
 
-  const listWithContact = fournisseurs;
+  const listWithContact = fournisseursList;
   const inactifs = listWithContact.filter((f) => !f.actif);
 
   useEffect(() => {
     async function fetchCounts() {
       const counts = {};
-      for (const f of fournisseurs) {
+      for (const f of fournisseursList) {
         counts[f.id] = await countProduitsDuFournisseur(f.id);
       }
       setProductCounts(counts);
     }
-    if (fournisseurs.length) fetchCounts();
-  }, [fournisseurs]);
+    if (fournisseursList.length) fetchCounts();
+  }, [fournisseursList]);
 
   const exportPDF = () => {
     const doc = new JSPDF();
     doc.text('Liste Fournisseurs', 10, 12);
-    doc.autoTable({
-      startY: 20,
-      head: [['Nom', 'Téléphone', 'Contact', 'Email']],
-      body: listWithContact.map((f) => [
+    const body = [];
+    for (const f of listWithContact) {
+      body.push([
         f.nom,
         f.contact?.tel || '',
         f.contact?.nom || '',
         f.contact?.email || '',
-      ]),
+      ]);
+    }
+    doc.autoTable({
+      startY: 20,
+      head: [['Nom', 'Téléphone', 'Contact', 'Email']],
+      body,
       styles: { fontSize: 9 },
     });
     doc.save('fournisseurs.pdf');
@@ -108,39 +122,51 @@ export default function Fournisseurs() {
 
   // Chargement initial
   useEffect(() => {
-    fetchStatsAll().then(setStats);
+    fetchStatsAll().then((s) => setStats(Array.isArray(s) ? s : []));
     fetchInactifs();
   }, []);
 
   // Recherche live
-  const fournisseursFiltrés = listWithContact.filter((f) =>
-    f.nom?.toLowerCase().includes(search.toLowerCase())
-  );
+  const fournisseursFiltrés = [];
+  for (const f of listWithContact) {
+    if (f.nom?.toLowerCase().includes(search.toLowerCase())) {
+      fournisseursFiltrés.push(f);
+    }
+  }
 
   // Top produits global recalculé lorsqu'on reçoit les données
   useEffect(() => {
     async function computeTop() {
-      if (!fournisseurs.length || !products.length) return;
+      if (!fournisseursList.length || !productsList.length) return;
       const statsProduits = {};
-      for (const f of fournisseurs) {
+      for (const f of fournisseursList) {
         const ps = await getProduitsDuFournisseur(f.id);
-        ps.forEach((p) => {
+        const psList = Array.isArray(ps) ? ps : [];
+        for (const p of psList) {
           statsProduits[p.produit_id] =
             (statsProduits[p.produit_id] || 0) + (p.total_achat || 0);
-        });
+        }
       }
-      setTopProducts(
-        Object.entries(statsProduits)
-          .map(([id, total]) => ({
-            nom: products.find((p) => p.id === id)?.nom || '-',
-            total,
-          }))
-          .sort((a, b) => b.total - a.total)
-          .slice(0, 8)
-      );
+      const entries = [];
+      for (const id in statsProduits) {
+        entries.push([id, statsProduits[id]]);
+      }
+      const topArr = [];
+      for (const [id, total] of entries) {
+        let nom = '-';
+        for (const prod of productsList) {
+          if (prod.id === id) {
+            nom = prod.nom;
+            break;
+          }
+        }
+        topArr.push({ nom, total });
+      }
+      topArr.sort((a, b) => b.total - a.total);
+      setTopProducts(topArr.slice(0, 8));
     }
     computeTop();
-  }, [fournisseurs, products]);
+  }, [fournisseursList, productsList]);
 
   return (
     <div className="max-w-7xl mx-auto p-8 text-shadow space-y-6">
@@ -188,7 +214,7 @@ export default function Fournisseurs() {
                 <PlusCircle className="mr-2" size={18} /> Ajouter fournisseur
               </Button>
             )}
-            <Button className="w-auto" onClick={() => exportFournisseursToExcel(fournisseurs)}>
+            <Button className="w-auto" onClick={() => exportFournisseursToExcel(fournisseursList)}>
               Export Excel
             </Button>
             <Button className="w-auto" onClick={exportPDF}>
@@ -202,9 +228,9 @@ export default function Fournisseurs() {
           {inactifs.length} fournisseur(s) inactif(s)
         </div>
       )}
-      {inactiveByInvoices.length > 0 && (
+      {inactiveByInvoicesList.length > 0 && (
         <div className="mb-4 text-sm text-orange-700 bg-orange-50 border border-orange-200 rounded px-2 py-1">
-          {inactiveByInvoices.length} fournisseur(s) sans facture depuis 6 mois
+          {inactiveByInvoicesList.length} fournisseur(s) sans facture depuis 6 mois
         </div>
       )}
       {/* Statistiques générales */}
@@ -216,13 +242,13 @@ export default function Fournisseurs() {
             </h2>
           </CardHeader>
           <CardContent>
-            {stats.length === 0 ? (
+            {statsList.length === 0 ? (
               <div className="min-h-[180px] bg-white/5 rounded-xl flex items-center justify-center text-white/50">
                 Aucune donnée disponible pour le moment
               </div>
             ) : (
               <ResponsiveContainer width="100%" height={180}>
-                <LineChart data={stats}>
+                <LineChart data={statsList}>
                   <XAxis dataKey="mois" fontSize={11} />
                   <YAxis fontSize={11} />
                   <Tooltip />
@@ -243,13 +269,13 @@ export default function Fournisseurs() {
             <h2 className="font-semibold">Top produits achetés</h2>
           </CardHeader>
           <CardContent>
-            {topProducts.length === 0 ? (
+            {topProductsList.length === 0 ? (
               <div className="min-h-[180px] bg-white/5 rounded-xl flex items-center justify-center text-white/50">
                 Aucune donnée disponible pour le moment
               </div>
             ) : (
               <ResponsiveContainer width="100%" height={180}>
-                <BarChart data={topProducts}>
+                <BarChart data={topProductsList}>
                   <XAxis dataKey="nom" fontSize={11} />
                   <YAxis fontSize={11} />
                   <Tooltip />
@@ -283,31 +309,39 @@ export default function Fournisseurs() {
                   Aucun fournisseur trouvé
                 </td>
               </tr>
-            ) : (
-              fournisseursFiltrés.map((f) => (
-                <FournisseurRow
-                  key={f.id}
-                  fournisseur={f}
-                  productCount={productCounts[f.id] ?? 0}
-                  canEdit={canEdit}
-                  onDetail={() => setSelected(f.id)}
-                  onEdit={() => setEditRow(f)}
-                  onToggleActive={async (id, actif) => {
-                    const msg = actif
-                      ? 'Activer ce fournisseur ?'
-                      : 'Désactiver ce fournisseur ?';
-                    if (!window.confirm(msg)) return;
-                    await toggleFournisseurActive(id, actif);
-                    toast.success(
-                      actif ? 'Fournisseur activé' : 'Fournisseur désactivé'
+              ) : (
+                (() => {
+                  const rows = [];
+                  for (const f of fournisseursFiltrés) {
+                    rows.push(
+                      <FournisseurRow
+                        key={f.id}
+                        fournisseur={f}
+                        productCount={productCounts[f.id] ?? 0}
+                        canEdit={canEdit}
+                        onDetail={() => setSelected(f.id)}
+                        onEdit={() => setEditRow(f)}
+                        onToggleActive={async (id, actif) => {
+                          const msg = actif
+                            ? 'Activer ce fournisseur ?'
+                            : 'Désactiver ce fournisseur ?';
+                          if (!window.confirm(msg)) return;
+                          await toggleFournisseurActive(id, actif);
+                          toast.success(
+                            actif
+                              ? 'Fournisseur activé'
+                              : 'Fournisseur désactivé'
+                          );
+                        }}
+                      />
                     );
-                  }}
-                />
-              ))
-            )}
-          </tbody>
-        </table>
-      </ListingContainer>
+                  }
+                  return rows;
+                })()
+              )}
+            </tbody>
+          </table>
+        </ListingContainer>
       <PaginationFooter
         page={page}
         pages={Math.max(1, Math.ceil(total / PAGE_SIZE))}

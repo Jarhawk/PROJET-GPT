@@ -31,9 +31,12 @@ export default function ParamCostCenters() {
 
   if (authLoading) return <LoadingSpinner message="Chargement..." />;
 
-  const filtered = costCenters.filter(
-    (c) => !search || c.nom.toLowerCase().includes(search.toLowerCase())
-  );
+  const centers = Array.isArray(costCenters) ? costCenters : [];
+  const filtered = [];
+  const s = search.toLowerCase();
+  for (const c of centers) {
+    if (!s || c.nom.toLowerCase().includes(s)) filtered.push(c);
+  }
 
   const handleEdit = (c) => {
     setForm(c);
@@ -182,28 +185,34 @@ export default function ParamCostCenters() {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((c) => (
-              <tr key={c.id}>
-                <td>{c.nom}</td>
-                <td>{c.actif ? '✅' : '❌'}</td>
-                <td>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleEdit(c)}
-                  >
-                    Éditer
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => handleDelete(c.id)}
-                  >
-                    Supprimer
-                  </Button>
-                </td>
-              </tr>
-            ))}
+            {(() => {
+              const rows = [];
+              for (const c of filtered) {
+                rows.push(
+                  <tr key={c.id}>
+                    <td>{c.nom}</td>
+                    <td>{c.actif ? '✅' : '❌'}</td>
+                    <td>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleEdit(c)}
+                      >
+                        Éditer
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDelete(c.id)}
+                      >
+                        Supprimer
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              }
+              return rows;
+            })()}
           </tbody>
         </table>
       </TableContainer>

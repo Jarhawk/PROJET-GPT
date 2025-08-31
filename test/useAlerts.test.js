@@ -32,8 +32,11 @@ test('fetchRules queries regles_alertes with filters', async () => {
   const { result } = renderHook(() => useAlerts());
   await act(async () => { await result.current.fetchRules({ search: 'foo', actif: true }); });
   expect(fromMock).toHaveBeenCalledWith('regles_alertes');
-  expect(queryObj.select).toHaveBeenCalledWith('*, produit:produit_id(id, nom)');
+  expect(queryObj.select).toHaveBeenCalledWith(
+    'id, mama_id, produit_id, type, seuil, actif, created_at, produit:produits(id, nom, mama_id)'
+  );
   expect(queryObj.eq).toHaveBeenCalledWith('mama_id', 'm1');
+  expect(queryObj.eq).toHaveBeenCalledWith('produit.mama_id', 'm1');
   expect(queryObj.eq).toHaveBeenCalledWith('actif', true);
   expect(queryObj.ilike).toHaveBeenCalledWith('produit.nom', '%foo%');
   expect(queryObj.order).toHaveBeenCalledWith('created_at', { ascending: false });

@@ -14,9 +14,15 @@ export default function TacheForm({ task }) {
   const [form, setForm] = useState({
     titre: task?.titre || "",
     description: task?.description || "",
-    assignes: Array.isArray(task?.utilisateurs_taches)
-      ? task.utilisateurs_taches.map(a => a.utilisateur_id)
-      : [],
+    assignes: (() => {
+      const vals = [];
+      if (Array.isArray(task?.utilisateurs_taches)) {
+        for (const a of task.utilisateurs_taches) {
+          vals.push(a.utilisateur_id);
+        }
+      }
+      return vals;
+    })(),
     priorite: task?.priorite || "moyenne",
     date_echeance: task?.date_echeance || "",
     statut: task?.statut || "a_faire",
@@ -30,7 +36,10 @@ export default function TacheForm({ task }) {
   const handleChange = e => {
     const { name, value, options } = e.target;
     if (name === "assignes") {
-      const vals = Array.from(options).filter(o => o.selected).map(o => o.value);
+      const vals = [];
+      for (const o of Array.from(options)) {
+        if (o.selected) vals.push(o.value);
+      }
       setForm(f => ({ ...f, assignes: vals }));
     } else {
       setForm(f => ({ ...f, [name]: value }));
@@ -88,11 +97,18 @@ export default function TacheForm({ task }) {
             onChange={handleChange}
             className="input w-full"
           >
-            {(Array.isArray(users) ? users : []).map(u => (
-              <option key={u.id} value={u.id}>
-                {u.nom}
-              </option>
-            ))}
+            {(() => {
+              const opts = [];
+              const list = Array.isArray(users) ? users : [];
+              for (const u of list) {
+                opts.push(
+                  <option key={u.id} value={u.id}>
+                    {u.nom}
+                  </option>
+                );
+              }
+              return opts;
+            })()}
           </select>
         </label>
         <label className="block">

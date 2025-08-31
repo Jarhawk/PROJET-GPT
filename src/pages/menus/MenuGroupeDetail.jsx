@@ -16,17 +16,20 @@ export default function MenuGroupeDetail() {
   if (!data) return <div>Chargement...</div>;
 
   const { menu, lignes, resume } = data;
+  const lignesList = Array.isArray(lignes) ? lignes : [];
+  const rows = [];
+  for (const l of lignesList) {
+    rows.push(
+      <li key={l.id}>
+        {l.categorie} - {l.fiche?.nom} ({l.portions_par_personne})
+      </li>
+    );
+  }
 
   return (
     <div>
       <h1>{menu.nom}</h1>
-      <ul>
-        {lignes.map((l) => (
-          <li key={l.id}>
-            {l.categorie} - {l.fiche?.nom} ({l.portions_par_personne})
-          </li>
-        ))}
-      </ul>
+      <ul>{rows}</ul>
       <div>
         Coût/personne: {Number(resume?.cout_par_personne || 0).toFixed(2)}€
       </div>

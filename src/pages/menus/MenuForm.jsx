@@ -12,23 +12,41 @@ export default function MenuForm({ menu, fiches = [], onClose }) {
   const { createMenu, updateMenu } = useMenus();
   const [nom, setNom] = useState(menu?.nom || "");
   const [date, setDate] = useState(menu?.date || "");
-  const [selectedFiches, setSelectedFiches] = useState(
-    menu?.fiches?.map(f => f.fiche_id) || []
-  );
+
+  const menuFiches = Array.isArray(menu?.fiches) ? menu.fiches : [];
+  const initialSelected = [];
+  for (const f of menuFiches) {
+    initialSelected.push(f.fiche_id);
+  }
+  const [selectedFiches, setSelectedFiches] = useState(initialSelected);
+
+  const fichesList = Array.isArray(fiches) ? fiches : [];
   const [ficheInput, setFicheInput] = useState("");
   const [file, setFile] = useState(null);
   const [fileUrl, setFileUrl] = useState(menu?.document || "");
   const [loading, setLoading] = useState(false);
 
   const handleSelectFiche = id => {
-    setSelectedFiches(selectedFiches.includes(id)
-      ? selectedFiches.filter(f => f !== id)
-      : [...selectedFiches, id]
-    );
+    const exists = selectedFiches.includes(id);
+    if (exists) {
+      const next = [];
+      for (const fid of selectedFiches) {
+        if (fid !== id) next.push(fid);
+      }
+      setSelectedFiches(next);
+    } else {
+      setSelectedFiches([...selectedFiches, id]);
+    }
   };
 
   const handleAddFiche = () => {
-    const fiche = fiches.find(f => f.nom === ficheInput);
+    let fiche = null;
+    for (const f of fichesList) {
+      if (f.nom === ficheInput) {
+        fiche = f;
+        break;
+      }
+    }
     if (fiche && !selectedFiches.includes(fiche.id)) {
       setSelectedFiches([...selectedFiches, fiche.id]);
     }
@@ -51,15 +69,16 @@ export default function MenuForm({ menu, fiches = [], onClose }) {
     }
   };
 
-  const selectedObjects = fiches.filter(f => selectedFiches.includes(f.id));
-  const coutTotal = selectedObjects.reduce(
-    (sum, f) => sum + (Number(f.cout_total) || 0),
-    0
-  );
-  const totalPortions = selectedObjects.reduce(
-    (sum, f) => sum + (Number(f.portions) || 0),
-    0
-  );
+  const selectedObjects = [];
+  let coutTotal = 0;
+  let totalPortions = 0;
+  for (const f of fichesList) {
+    if (selectedFiches.includes(f.id)) {
+      selectedObjects.push(f);
+      coutTotal += Number(f.cout_total) || 0;
+      totalPortions += Number(f.portions) || 0;
+    }
+  }
   const coutPortion = totalPortions > 0 ? coutTotal / totalPortions : 0;
 
   const handleSubmit = async (e) => {
@@ -129,25 +148,32 @@ export default function MenuForm({ menu, fiches = [], onClose }) {
             placeholder="Rechercher une fiche"
           />
           <datalist id="fiches-list">
-            {fiches.map(f => (
-              <option key={f.id} value={f.nom} />
-            ))}
+            {(() => {
+              const opts = [];
+              for (const f of fichesList) {
+                opts.push(<option key={f.id} value={f.nom} />);
+              }
+              return opts;
+            })()}
           </datalist>
           <SecondaryButton type="button" onClick={handleAddFiche}>
             Ajouter
           </SecondaryButton>
         </div>
-        {selectedObjects.map(f => (
-          <div key={f.id} className="flex items-center gap-2 mb-1">
-            <span className="flex-1">{f.nom}</span>
-            <SecondaryButton
-              size="sm"
-              onClick={() => handleSelectFiche(f.id)}
-            >
-              Retirer
-            </SecondaryButton>
-          </div>
-        ))}
+        {(() => {
+          const rows = [];
+          for (const f of selectedObjects) {
+            rows.push(
+              <div key={f.id} className="flex items-center gap-2 mb-1">
+                <span className="flex-1">{f.nom}</span>
+                <SecondaryButton size="sm" onClick={() => handleSelectFiche(f.id)}>
+                  Retirer
+                </SecondaryButton>
+              </div>
+            );
+          }
+          return rows;
+        })()}
       </div>
       <div className="mb-4 flex gap-4">
         <div><b>Coût total :</b> {coutTotal.toFixed(2)} €</div>

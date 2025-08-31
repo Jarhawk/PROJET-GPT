@@ -15,8 +15,11 @@ export function useAlerts() {
     setError(null);
     let query = supabase
       .from("regles_alertes")
-      .select("*, produit:produit_id(id, nom)")
+      .select(
+        "id, mama_id, produit_id, type, seuil, actif, created_at, produit:produits(id, nom, mama_id)"
+      )
       .eq("mama_id", mama_id)
+      .eq("produit.mama_id", mama_id)
       .order("created_at", { ascending: false });
 
     if (typeof actif === "boolean") query = query.eq("actif", actif);

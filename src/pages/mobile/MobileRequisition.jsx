@@ -18,7 +18,7 @@ export default function MobileRequisition() {
       .from("produits")
       .select("id, nom")
       .eq("mama_id", mama_id)
-      .then(({ data }) => setProduits(data || []));
+      .then(({ data }) => setProduits(Array.isArray(data) ? data : []));
   }, [mama_id, authLoading]);
 
   const handleSubmit = async () => {
@@ -31,7 +31,7 @@ export default function MobileRequisition() {
     const { data, error } = await supabase
       .from("requisitions")
       .insert([{ zone: "Bar", mama_id }])
-      .select()
+      .select('id')
       .single();
 
     if (error || !data?.id) {
@@ -65,7 +65,17 @@ export default function MobileRequisition() {
           className="w-full border border-gray-300 rounded p-2 mb-3 bg-transparent"
         >
           <option value="">Sélectionner un produit</option>
-          {produits.map(p => <option key={p.id} value={p.id}>{p.nom}</option>)}
+          {(() => {
+            const opts = [];
+            for (const p of produits) {
+              opts.push(
+                <option key={p.id} value={p.id}>
+                  {p.nom}
+                </option>
+              );
+            }
+            return opts;
+          })()}
         </select>
 
         <input

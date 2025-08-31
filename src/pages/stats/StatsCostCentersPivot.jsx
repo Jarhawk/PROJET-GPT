@@ -14,11 +14,18 @@ export default function StatsCostCentersPivot() {
   const [months, setMonths] = useState([]);
 
   const exportExcel = () => {
-    const data = rows.map(r => {
+    const data = [];
+    const list = Array.isArray(rows) ? rows : [];
+    const mths = Array.isArray(months) ? months : [];
+    for (let i = 0; i < list.length; i++) {
+      const r = list[i];
       const obj = { nom: r.nom };
-      months.forEach(m => { obj[m] = r[m] || 0; });
-      return obj;
-    });
+      for (let j = 0; j < mths.length; j++) {
+        const m = mths[j];
+        obj[m] = r[m] || 0;
+      }
+      data.push(obj);
+    }
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), 'Stats');
     XLSX.writeFile(wb, 'cost_center_monthly.xlsx');
@@ -52,28 +59,51 @@ export default function StatsCostCentersPivot() {
           <thead>
             <tr>
               <th className="px-2 py-1">Cost Center</th>
-              {months.map((m) => (
-                <th key={m} className="px-2 py-1">{m}</th>
-              ))}
+              {(() => {
+                const headers = [];
+                const mths = Array.isArray(months) ? months : [];
+                for (let i = 0; i < mths.length; i++) {
+                  const m = mths[i];
+                  headers.push(
+                    <th key={m} className="px-2 py-1">{m}</th>
+                  );
+                }
+                return headers;
+              })()}
             </tr>
           </thead>
           <tbody>
-            {rows.length === 0 ? (
-              <tr>
-                <td colSpan={months.length + 1} className="p-2 text-center text-gray-500">
-                  Aucune donnée
-                </td>
-              </tr>
-            ) : (
-              rows.map((row, i) => (
-                <tr key={i}>
-                  <td className="px-2 py-1 font-semibold">{row.nom}</td>
-                  {months.map((m) => (
+            {(() => {
+              const mths = Array.isArray(months) ? months : [];
+              const list = Array.isArray(rows) ? rows : [];
+              if (list.length === 0) {
+                return (
+                  <tr>
+                    <td colSpan={mths.length + 1} className="p-2 text-center text-gray-500">
+                      Aucune donnée
+                    </td>
+                  </tr>
+                );
+              }
+              const body = [];
+              for (let i = 0; i < list.length; i++) {
+                const row = list[i];
+                const cells = [];
+                for (let j = 0; j < mths.length; j++) {
+                  const m = mths[j];
+                  cells.push(
                     <td key={m} className="px-2 py-1 text-right">{row[m]?.toLocaleString() || '-'}</td>
-                  ))}
-                </tr>
-              ))
-            )}
+                  );
+                }
+                body.push(
+                  <tr key={i}>
+                    <td className="px-2 py-1 font-semibold">{row.nom}</td>
+                    {cells}
+                  </tr>
+                );
+              }
+              return body;
+            })()}
           </tbody>
         </table>
       </TableContainer>

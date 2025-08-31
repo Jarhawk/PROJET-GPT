@@ -10,7 +10,6 @@ router.get('/', async (req, res) => {
   const {
     famille,
     search = '',
-    actif,
     page = '1',
     limit = '100',
     sortBy = 'famille',
@@ -25,12 +24,11 @@ router.get('/', async (req, res) => {
     let query = supabase
       .from('v_produits_dernier_prix')
       .select(
-        'produit_id, nom, famille_id, famille, unite_id, unite, stock_reel, stock_min, fournisseur_id, fournisseur, dernier_prix, date_livraison, mama_id'
+        'produit_id, nom, famille_id, famille, unite_id, unite, stock_reel, stock_min, fournisseur_id, fournisseur, dernier_prix, derniere_livraison:date_livraison, mama_id'
       )
       .eq('mama_id', mama_id);
     if (famille) query = query.ilike('famille', `%${famille}%`);
     if (search) query = query.ilike('nom', `%${search}%`);
-    if (actif !== undefined) query = query.eq('actif', actif === 'true');
     let sortField = sortBy;
     let ascending = order !== 'desc';
     if (sortField.includes('.')) {

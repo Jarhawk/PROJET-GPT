@@ -29,11 +29,12 @@ export default function useFournisseursBrowse({
           .eq('actif', true);
         const t = term.trim();
         if (t) req = req.ilike('nom', `%${t}%`);
-        Object.entries(filters || {}).forEach(([k, v]) => {
+        const entries = Object.entries(filters || {});
+        for (const [k, v] of entries) {
           if (v !== undefined && v !== null && v !== '') {
             req = req.eq(k, v);
           }
-        });
+        }
         const start = (page - 1) * limit;
         const end = start + limit - 1;
         const { data, error, count } = await req

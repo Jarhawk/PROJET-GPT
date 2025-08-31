@@ -37,7 +37,8 @@ test('fetchItemsByInvoice queries with invoice id and mama_id', async () => {
   });
   expect(fromMock).toHaveBeenCalledWith('facture_lignes');
   expect(query.select).toHaveBeenCalledWith(
-    'id, facture_id, produit_id, quantite, prix_unitaire, total, mama_id, produit:produits!facture_lignes_produit_id_fkey(id, nom, mama_id, unite_id, unite:unite_id(nom, mama_id), famille:familles(id, nom, mama_id))'
+    `id, facture_id, produit_id, quantite, pu_ht:prix_unitaire_ht, montant_ht, tva, zone_id, mama_id,
+        produit:produits(id, nom, mama_id, unite:unites!produits_unite_id_fkey(nom, mama_id), famille:familles!produits_famille_id_fkey(id, nom, mama_id))`
   );
   expect(query.eq).toHaveBeenNthCalledWith(1, 'facture_id', 'f1');
   expect(query.eq).toHaveBeenNthCalledWith(2, 'mama_id', 'm1');

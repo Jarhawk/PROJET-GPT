@@ -38,7 +38,7 @@ export default function BLDetail({ bon: bonProp, onClose }) {
             setBon(b);
           }}>{bon.actif ? "Désactiver" : "Réactiver"}</Button>
         </div>
-        {bon.lignes?.length > 0 && (
+        {Array.isArray(bon.lignes) && bon.lignes.length > 0 && (
           <TableContainer className="mt-4">
             <table className="min-w-full text-sm">
               <thead>
@@ -50,14 +50,22 @@ export default function BLDetail({ bon: bonProp, onClose }) {
                 </tr>
               </thead>
               <tbody>
-                {bon.lignes.map(l => (
-                  <tr key={l.id}>
-                    <td className="border px-2 py-1">{l.produit?.nom}</td>
-                    <td className="border px-2 py-1 text-right">{l.quantite_recue}</td>
-                    <td className="border px-2 py-1 text-right">{l.prix_unitaire}</td>
-                    <td className="border px-2 py-1 text-right">{l.tva}</td>
-                  </tr>
-                ))}
+                {(() => {
+                  const rows = [];
+                  const list = Array.isArray(bon.lignes) ? bon.lignes : [];
+                  for (let i = 0; i < list.length; i++) {
+                    const l = list[i];
+                    rows.push(
+                      <tr key={l.id}>
+                        <td className="border px-2 py-1">{l.produit?.nom}</td>
+                        <td className="border px-2 py-1 text-right">{l.quantite_recue}</td>
+                        <td className="border px-2 py-1 text-right">{l.prix_unitaire}</td>
+                        <td className="border px-2 py-1 text-right">{l.tva}</td>
+                      </tr>
+                    );
+                  }
+                  return rows;
+                })()}
               </tbody>
             </table>
           </TableContainer>

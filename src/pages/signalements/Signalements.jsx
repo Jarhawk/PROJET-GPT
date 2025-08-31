@@ -24,7 +24,9 @@ export default function Signalements() {
     );
   }
 
-  if (!signalements || signalements.length === 0) {
+  const list = Array.isArray(signalements) ? signalements : [];
+
+  if (list.length === 0) {
     return (
       <div className="p-6 text-gray-300 text-center">
         📭 Aucun signalement disponible.
@@ -37,14 +39,21 @@ export default function Signalements() {
       <h1 className="text-3xl font-bold mb-4 text-mamastock-gold">Signalements</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {signalements.map((sig) => (
-          <GlassCard key={sig.id} className="p-4">
-            <h2 className="text-lg font-semibold">{sig.titre}</h2>
-            <p className="text-sm text-gray-300">
-              {sig.commentaire || "Sans commentaire"}
-            </p>
-          </GlassCard>
-        ))}
+        {(() => {
+          const cards = [];
+          for (let i = 0; i < list.length; i++) {
+            const sig = list[i];
+            cards.push(
+              <GlassCard key={sig.id} className="p-4">
+                <h2 className="text-lg font-semibold">{sig.titre}</h2>
+                <p className="text-sm text-gray-300">
+                  {sig.commentaire || "Sans commentaire"}
+                </p>
+              </GlassCard>
+            );
+          }
+          return cards;
+        })()}
       </div>
     </div>
   );

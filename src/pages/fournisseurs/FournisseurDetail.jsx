@@ -33,6 +33,9 @@ export default function FournisseurDetail({ id }) {
   const [stats, setStats] = useState([]);
   const [invoices, setInvoices] = useState([]);
   const [topProducts, setTopProducts] = useState([]);
+  const statsList = Array.isArray(stats) ? stats : [];
+  const invoicesList = Array.isArray(invoices) ? invoices : [];
+  const topProductsList = Array.isArray(topProducts) ? topProducts : [];
   const [fournisseur, setFournisseur] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -41,36 +44,43 @@ export default function FournisseurDetail({ id }) {
     if (!id || !mama_id) return;
     setLoading(true);
     Promise.all([
-      fetchStatsForFournisseur(id).then(setStats),
+      fetchStatsForFournisseur(id).then((s) => setStats(Array.isArray(s) ? s : [])),
       fetchFacturesByFournisseur(id).then(async (arr) => {
-        const withCount = await Promise.all(
-          (arr || []).map(async (f) => {
-            const { count } = await supabase
+        const arrList = Array.isArray(arr) ? arr : [];
+        const promises = [];
+        for (const f of arrList) {
+          promises.push(
+            supabase
               .from('facture_lignes')
               .select('id', { count: 'exact', head: true })
               .eq('facture_id', f.id)
-              .eq('mama_id', mama_id);
-            return { ...f, nb_produits: count || 0 };
-          })
-        );
-        setInvoices(withCount);
+              .eq('mama_id', mama_id)
+              .then(({ count }) => ({ ...f, nb_produits: count || 0 }))
+          );
+        }
+        const withCount = await Promise.all(promises);
+        setInvoices(Array.isArray(withCount) ? withCount : []);
       }),
       supabase
         .from('fournisseurs')
         .select(
-          'id, nom, actif, created_at, contact:fournisseur_contacts!fournisseur_id(nom,email,tel)'
+          'id, nom, actif, created_at, contact:fournisseur_contacts!fournisseur_id(mama_id,nom,email,tel)'
         )
         .eq('id', id)
         .eq('mama_id', mama_id)
+        .eq('contact.mama_id', mama_id)
         .single()
         .then(({ data }) => {
-          if (data)
-            setFournisseur({
-              ...data,
-              contact: Array.isArray(data.contact)
-                ? data.contact[0]
-                : data.contact,
-            });
+          if (data) {
+            let contact = Array.isArray(data.contact)
+              ? data.contact[0]
+              : data.contact;
+            if (contact) {
+              const { nom, email, tel } = contact;
+              contact = { nom, email, tel };
+            }
+            setFournisseur({ ...data, contact });
+          }
         }),
     ]).finally(() => setLoading(false));
   }, [id, mama_id]);
@@ -79,12 +89,13 @@ export default function FournisseurDetail({ id }) {
   useEffect(() => {
     async function loadTop() {
       const ps = await getProduitsDuFournisseur(id);
-      setTopProducts(
-        ps
-          .map((p) => ({ nom: p.produit_nom, total: p.total_achat }))
-          .sort((a, b) => b.total - a.total)
-          .slice(0, 8)
-      );
+      const psList = Array.isArray(ps) ? ps : [];
+      const top = [];
+      for (const p of psList) {
+        top.push({ nom: p.produit_nom, total: p.total_achat });
+      }
+      top.sort((a, b) => b.total - a.total);
+      setTopProducts(top.slice(0, 8));
     }
     if (id) loadTop();
   }, [id]);
@@ -127,7 +138,7 @@ export default function FournisseurDetail({ id }) {
         <GlassCard className="p-4">
           <h3 className="font-semibold mb-2">Évolution achats mensuels</h3>
           <ResponsiveContainer width="100%" height={150}>
-            <LineChart data={stats}>
+            <LineChart data={statsList}>
               <XAxis dataKey="mois" fontSize={11} />
               <YAxis fontSize={11} />
               <Tooltip />
@@ -144,7 +155,7 @@ export default function FournisseurDetail({ id }) {
         <GlassCard className="p-4">
           <h3 className="font-semibold mb-2">Top produits achetés</h3>
           <ResponsiveContainer width="100%" height={150}>
-            <BarChart data={topProducts}>
+            <BarChart data={topProductsList}>
               <XAxis dataKey="nom" fontSize={11} />
               <YAxis fontSize={11} />
               <Tooltip />
@@ -168,23 +179,29 @@ export default function FournisseurDetail({ id }) {
             </tr>
           </thead>
           <tbody>
-            {invoices.map((f) => (
-              <tr key={f.id}>
-                <td>{f.date_facture}</td>
-                <td>{f.montant_total.toFixed(2)} €</td>
-                <td>{f.nb_produits}</td>
-                <td>-</td>
-                <td>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => window.open(`/factures/${f.id}`)}
-                  >
-                    Voir
-                  </Button>
-                </td>
-              </tr>
-            ))}
+            {(() => {
+              const rows = [];
+              for (const f of invoicesList) {
+                rows.push(
+                  <tr key={f.id}>
+                    <td>{f.date_facture}</td>
+                    <td>{f.montant_total.toFixed(2)} €</td>
+                    <td>{f.nb_produits}</td>
+                    <td>-</td>
+                    <td>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => window.open(`/factures/${f.id}`)}
+                      >
+                        Voir
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              }
+              return rows;
+            })()}
           </tbody>
         </table>
       </TableContainer>

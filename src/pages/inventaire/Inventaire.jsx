@@ -26,13 +26,20 @@ export default function Inventaire() {
     return <LoadingSpinner message="Chargement..." />;
   }
 
-  const filtered = inventaires
+  const list = Array.isArray(inventaires) ? inventaires : [];
+  const filtered = list
     .filter(i => !zoneFilter || i.zone === zoneFilter)
     .filter(i => !dateFilter || i.date_inventaire === dateFilter)
     .filter(i => !statutFilter || i.statut === statutFilter)
     .sort((a, b) => new Date(b.date_inventaire) - new Date(a.date_inventaire));
 
-  const zones = Array.from(new Set(inventaires.map(i => i.zone).filter(Boolean)));
+  const zonesSet = new Set();
+  for (const i of list) {
+    if (i.zone) zonesSet.add(i.zone);
+  }
+  const zones = Array.from(zonesSet);
+  const zoneOptions = [];
+  for (const z of zones) zoneOptions.push(z);
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -58,9 +65,13 @@ export default function Inventaire() {
           onChange={e => setZoneFilter(e.target.value)}
         >
           <option value="">Toutes zones</option>
-          {zones.map(z => (
-            <option key={z} value={z}>{z}</option>
-          ))}
+          {(() => {
+            const opts = [];
+            for (const z of zoneOptions) {
+              opts.push(<option key={z} value={z}>{z}</option>);
+            }
+            return opts;
+          })()}
         </select>
         <select
           className="form-input"
@@ -94,29 +105,34 @@ export default function Inventaire() {
             </tr>
           </thead>
           <tbody>
-            {filtered.map(inv => {
-              const total = (inv.lignes || []).reduce(
-                (sum, l) => sum + Number(l.quantite_reelle || 0) * Number(l.product?.pmp || 0),
-                0
-              );
-              const ecart = (inv.lignes || []).reduce(
-                (sum, l) =>
-                  sum + (Number(l.quantite_reelle || 0) - Number(l.product?.stock_theorique || 0)) * Number(l.product?.pmp || 0),
-                0
-              );
-              return (
+            {(() => {
+              const rows = [];
+              const listFiltered = Array.isArray(filtered) ? filtered : [];
+              for (const inv of listFiltered) {
+                const total = (inv.lignes || []).reduce(
+                  (sum, l) => sum + Number(l.quantite_reelle || 0) * Number(l.product?.pmp || 0),
+                  0
+                );
+                const ecart = (inv.lignes || []).reduce(
+                  (sum, l) =>
+                    sum + (Number(l.quantite_reelle || 0) - Number(l.product?.stock_theorique || 0)) * Number(l.product?.pmp || 0),
+                  0
+                );
+                rows.push(
                   <tr key={inv.id} className="border-b last:border-none">
                     <td className="p-2">{inv.date_inventaire}</td>
-                  <td className="p-2">{inv.zone || '-'}</td>
-                  <td className="p-2">{inv.lignes?.length || 0}</td>
-                  <td className="p-2">{total.toFixed(2)} €</td>
-                  <td className={`p-2 font-semibold ${ecart < 0 ? 'text-red-600' : ecart > 0 ? 'text-green-600' : ''}`}>{ecart.toFixed(2)} €</td>
-                  <td className="p-2">
-                    <Link to={`/inventaire/${inv.id}`} className="text-blue-600 underline">Voir</Link>
-                  </td>
-                </tr>
-              );
-            })}
+                    <td className="p-2">{inv.zone || '-'}</td>
+                    <td className="p-2">{inv.lignes?.length || 0}</td>
+                    <td className="p-2">{total.toFixed(2)} €</td>
+                    <td className={`p-2 font-semibold ${ecart < 0 ? 'text-red-600' : ecart > 0 ? 'text-green-600' : ''}`}>{ecart.toFixed(2)} €</td>
+                    <td className="p-2">
+                      <Link to={`/inventaire/${inv.id}`} className="text-blue-600 underline">Voir</Link>
+                    </td>
+                  </tr>
+                );
+              }
+              return rows;
+            })()}
             {filtered.length === 0 && (
               <tr>
                 <td colSpan="6" className="p-4">

@@ -22,6 +22,7 @@ export function useLogs() {
         'id, type, description, module:type_evenement, critique:niveau_criticite, date_log:date_evenement, utilisateur:utilisateur_id(nom)'
       )
       .eq('mama_id', mama_id)
+      .eq('utilisateur.mama_id', mama_id)
       .order('date_evenement', { ascending: false });
     if (type) query = query.eq('type', type);
     if (module) query = query.eq('type_evenement', module);

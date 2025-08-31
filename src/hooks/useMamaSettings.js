@@ -50,7 +50,7 @@ export const useMamaSettings = () => {
       const { data, error } = await supabase
         .from('mamas')
         .select(
-          'logo_url, primary_color, secondary_color, email_envoi, email_alertes, dark_mode, langue, monnaie, timezone, rgpd_text, mentions_legales'
+          'logo_url, primary_color, secondary_color, email_envoi, email_alertes, dark_mode, langue, monnaie, timezone, rgpd_text, mentions_legales, enabled_modules'
         )
         .eq('id', mamaId)
         .single()
@@ -67,7 +67,9 @@ export const useMamaSettings = () => {
         .from('mamas')
         .update(fields)
         .eq('id', mamaId)
-        .select()
+        .select(
+          'logo_url, primary_color, secondary_color, email_envoi, email_alertes, dark_mode, langue, monnaie, timezone, rgpd_text, mentions_legales, enabled_modules'
+        )
         .single();
       if (!error && data) {
         queryClient.setQueryData(['mama-settings', mamaId], (old) => ({

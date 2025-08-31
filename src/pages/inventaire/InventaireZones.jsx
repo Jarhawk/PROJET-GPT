@@ -32,9 +32,9 @@ export default function InventaireZones() {
     }
   }, [getZones, authLoading, mama_id]);
 
-  const filtered = (zones || []).filter(z =>
-    z.nom?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = Array.isArray(zones)
+    ? zones.filter(z => z.nom?.toLowerCase().includes(search.toLowerCase()))
+    : [];
 
   if (authLoading) return <LoadingSpinner message="Chargement..." />;
   if (!canEdit) return <Unauthorized />;
@@ -52,9 +52,32 @@ export default function InventaireZones() {
     setEditZone(null);
   };
 
+  const rows = [];
+  for (const z of filtered) {
+    rows.push(
+      <tr key={z.id} className="border-b last:border-none">
+        <td className="px-2 py-1">{z.nom}</td>
+        <td className="px-2 py-1">
+          <SecondaryButton size="sm" onClick={() => setEditZone(z)}>
+            Éditer
+          </SecondaryButton>
+          <Button
+            size="sm"
+            className="ml-2 bg-red-600 hover:bg-red-700 text-white"
+            onClick={async () => {
+              await deleteZone(z.id);
+            }}
+          >
+            Supprimer
+          </Button>
+        </td>
+      </tr>
+    );
+  }
+
   return (
     <div className="p-6 max-w-lg mx-auto text-shadow">
-            <h1 className="text-2xl font-bold mb-4">Zones d'inventaire</h1>
+      <h1 className="text-2xl font-bold mb-4">Zones d'inventaire</h1>
       <GlassCard title="Zones" className="mb-4">
         <form onSubmit={e => e.preventDefault()} className="flex gap-2 items-end">
           <Input
@@ -63,7 +86,9 @@ export default function InventaireZones() {
             value={search ?? ''}
             onChange={e => setSearch(e.target.value)}
           />
-          <PrimaryButton type="button" onClick={() => setEditZone({ nom: "" })}>+ Nouvelle zone</PrimaryButton>
+          <PrimaryButton type="button" onClick={() => setEditZone({ nom: "" })}>
+            + Nouvelle zone
+          </PrimaryButton>
         </form>
       </GlassCard>
       <TableContainer>
@@ -75,26 +100,8 @@ export default function InventaireZones() {
             </tr>
           </thead>
           <tbody>
-            {filtered.map(z => (
-              <tr key={z.id} className="border-b last:border-none">
-                <td className="px-2 py-1">{z.nom}</td>
-                <td className="px-2 py-1">
-                  <SecondaryButton size="sm" onClick={() => setEditZone(z)}>
-                    Éditer
-                  </SecondaryButton>
-                  <Button
-                    size="sm"
-                    className="ml-2 bg-red-600 hover:bg-red-700 text-white"
-                    onClick={async () => {
-                      await deleteZone(z.id);
-                    }}
-                  >
-                    Supprimer
-                  </Button>
-                </td>
-              </tr>
-            ))}
-            {filtered.length === 0 && !loading && (
+            {rows}
+            {rows.length === 0 && !loading && (
               <tr>
                 <td colSpan="2" className="py-2">
                   Aucune zone
@@ -105,18 +112,18 @@ export default function InventaireZones() {
         </table>
       </TableContainer>
       <Dialog open={!!editZone} onOpenChange={v => !v && setEditZone(null)}>
-      <DialogContent className="bg-white/10 backdrop-blur-lg text-white rounded-xl shadow-lg p-6 max-w-sm">
-        <DialogTitle className="font-bold mb-2">
-          {editZone?.id ? "Modifier la zone" : "Nouvelle zone"}
-        </DialogTitle>
-        <DialogDescription className="sr-only">
-          Formulaire de zone d'inventaire
-        </DialogDescription>
-        <form
-          onSubmit={e => {
-            e.preventDefault();
-            handleSave();
-          }}
+        <DialogContent className="bg-white/10 backdrop-blur-lg text-white rounded-xl shadow-lg p-6 max-w-sm">
+          <DialogTitle className="font-bold mb-2">
+            {editZone?.id ? "Modifier la zone" : "Nouvelle zone"}
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            Formulaire de zone d'inventaire
+          </DialogDescription>
+          <form
+            onSubmit={e => {
+              e.preventDefault();
+              handleSave();
+            }}
             className="space-y-3"
           >
             <Input
@@ -126,7 +133,11 @@ export default function InventaireZones() {
               onChange={e => setEditZone(z => ({ ...z, nom: e.target.value }))}
               required
             />
-            <PrimaryButton type="submit" disabled={loading} className="min-w-[120px]">
+            <PrimaryButton
+              type="submit"
+              disabled={loading}
+              className="min-w-[120px]"
+            >
               {loading ? "Enregistrement..." : "Enregistrer"}
             </PrimaryButton>
           </form>

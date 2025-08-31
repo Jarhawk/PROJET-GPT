@@ -39,14 +39,14 @@ export function useDashboardStats(options = {}) {
 
         const { data: lastData, error: lastErr } = await supabase
           .from('v_produits_dernier_prix')
-          .select('produit_id, date_livraison, mama_id')
+          .select('produit_id, last_purchase:date_livraison, mama_id')
           .eq('mama_id', mama_id);
         if (lastErr) throw lastErr;
 
         const lastRows = Array.isArray(lastData) ? lastData : [];
         const lastMap = new Map();
         for (const r of lastRows) {
-          lastMap.set(r.produit_id, r.date_livraison);
+          lastMap.set(r.produit_id, r.last_purchase);
         }
 
         const produitsRows = Array.isArray(produitsData) ? produitsData : [];

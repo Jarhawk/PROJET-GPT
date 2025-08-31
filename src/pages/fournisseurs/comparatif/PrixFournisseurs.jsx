@@ -27,6 +27,19 @@ export default function PrixFournisseurs({ produitId }) {
     return <p className="text-gray-500 text-sm mt-2">Aucune donnée fournisseur pour ce produit.</p>;
   }
 
+  const bodyRows = [];
+  let idx = 0;
+  for (const l of rows) {
+    bodyRows.push(
+      <tr key={idx++} className="border-t">
+        <td className="px-2 py-1">{l.fournisseur}</td>
+        <td className="px-2 py-1 text-right">{parseFloat(l.dernierPrix).toFixed(2)} €</td>
+        <td className="px-2 py-1 text-right">{parseFloat(l.pmp).toFixed(2)} €</td>
+        <td className="px-2 py-1 text-center">{l.nb}</td>
+      </tr>
+    );
+  }
+
   return (
     <div className="text-sm">
       <GlassCard className="p-4">
@@ -40,16 +53,7 @@ export default function PrixFournisseurs({ produitId }) {
                 <th className="px-2 py-1 text-center">Nb achats</th>
               </tr>
             </thead>
-            <tbody>
-              {rows.map((l, idx) => (
-                <tr key={idx} className="border-t">
-                  <td className="px-2 py-1">{l.fournisseur}</td>
-                  <td className="px-2 py-1 text-right">{parseFloat(l.dernierPrix).toFixed(2)} €</td>
-                  <td className="px-2 py-1 text-right">{parseFloat(l.pmp).toFixed(2)} €</td>
-                  <td className="px-2 py-1 text-center">{l.nb}</td>
-                </tr>
-              ))}
-            </tbody>
+            <tbody>{bodyRows}</tbody>
           </table>
         </TableContainer>
       </GlassCard>

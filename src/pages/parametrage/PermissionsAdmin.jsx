@@ -87,11 +87,17 @@ export default function PermissionsAdmin() {
             onChange={(e) => setFilterMama(e.target.value)}
           >
             <option value="">Tous</option>
-            {mamas.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.nom}
-              </option>
-            ))}
+            {(() => {
+              const options = [];
+              for (const m of mamas) {
+                options.push(
+                  <option key={m.id} value={m.id}>
+                    {m.nom}
+                  </option>
+                );
+              }
+              return options;
+            })()}
           </select>
         </label>
       </div>
@@ -112,36 +118,47 @@ export default function PermissionsAdmin() {
               </tr>
             </thead>
             <tbody>
-              {roles.map((role) => (
-                <tr key={role.id}>
-                  <td className="px-2 py-1">
-                    {mamas.find((m) => m.id === role.mama_id)?.nom || role.mama_id}
-                  </td>
-                  <td className="px-2 py-1">{role.nom}</td>
-                  <td className="px-2 py-1">{role.description || ''}</td>
-                  <td className="px-2 py-1">
-                    <span
-                      className={
-                        role.actif
-                          ? 'inline-block bg-green-100 text-green-800 px-2 rounded-full'
-                          : 'inline-block bg-red-100 text-red-800 px-2 rounded-full'
-                      }
-                    >
-                      {role.actif ? 'Oui' : 'Non'}
-                    </span>
-                  </td>
-                  <td className="px-2 py-1">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => setEditRole(role)}
-                      disabled={loading}
-                    >
-                      Modifier permissions
-                    </Button>
-                  </td>
-                </tr>
-              ))}
+              {(() => {
+                const rowsEl = [];
+                for (const r of roles) {
+                  let mamaNom = r.mama_id;
+                  for (const m of mamas) {
+                    if (m.id === r.mama_id) {
+                      mamaNom = m.nom;
+                      break;
+                    }
+                  }
+                  rowsEl.push(
+                    <tr key={r.id}>
+                      <td className="px-2 py-1">{mamaNom}</td>
+                      <td className="px-2 py-1">{r.nom}</td>
+                      <td className="px-2 py-1">{r.description || ''}</td>
+                      <td className="px-2 py-1">
+                        <span
+                          className={
+                            r.actif
+                              ? 'inline-block bg-green-100 text-green-800 px-2 rounded-full'
+                              : 'inline-block bg-red-100 text-red-800 px-2 rounded-full'
+                          }
+                        >
+                          {r.actif ? 'Oui' : 'Non'}
+                        </span>
+                      </td>
+                      <td className="px-2 py-1">
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => setEditRole(r)}
+                          disabled={loading}
+                        >
+                          Modifier permissions
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                }
+                return rowsEl;
+              })()}
               {roles.length === 0 && (
                 <tr>
                   <td colSpan={5} className="py-4 text-gray-400">

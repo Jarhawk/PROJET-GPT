@@ -38,7 +38,7 @@ export function useSousFamilles() {
       const { data } = await supabase
         .from('sous_familles')
         .insert([{ nom, famille_id, mama_id, actif: true }])
-        .select()
+        .select('id, nom, famille_id, actif, mama_id')
         .single();
       setSousFamilles((prev) =>
         Array.isArray(prev) ? [data, ...prev] : [data]

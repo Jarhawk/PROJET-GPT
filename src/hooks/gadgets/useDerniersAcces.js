@@ -22,9 +22,10 @@ export default function useDerniersAcces() {
         .order('created_at', { ascending: false })
         .limit(50);
       if (error) throw error;
+      const rows = Array.isArray(data) ? data : [];
       const seen = {};
       const list = [];
-      for (const row of data || []) {
+      for (const row of rows) {
         if (!row.utilisateur_id || seen[row.utilisateur_id]) continue;
         seen[row.utilisateur_id] = true;
         list.push({

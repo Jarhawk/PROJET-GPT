@@ -39,11 +39,13 @@ export default function StatsFiches() {
         toast.error("Erreur chargement : " + ficheRes.error.message);
       else
         setFiches(Array.isArray(ficheRes.data) ? ficheRes.data : []);
-      setFamilles(
-        Array.isArray(familleRes.data)
-          ? familleRes.data.map((f) => f.nom)
-          : []
-      );
+      if (Array.isArray(familleRes.data)) {
+        const fams = [];
+        for (const f of familleRes.data) fams.push(f.nom);
+        setFamilles(fams);
+      } else {
+        setFamilles([]);
+      }
       setLoading(false);
     });
   }, [mama_id, isAuthenticated, authLoading]);
@@ -56,23 +58,36 @@ export default function StatsFiches() {
   const safeFamilles = Array.isArray(familles) ? familles : [];
   const safeFiches = Array.isArray(fiches) ? fiches : [];
 
-  const repartFamille = safeFamilles
-    .map((f) => ({ name: f, value: safeFiches.filter((fi) => fi.famille === f).length }))
-    .filter((f) => f.value > 0);
+  const repartFamille = [];
+  for (const f of safeFamilles) {
+    let count = 0;
+    for (const fi of safeFiches) {
+      if (fi.famille === f) count++;
+    }
+    if (count > 0) repartFamille.push({ name: f, value: count });
+  }
 
-  const fichesSortedByCout = safeFiches
-    .map((f) => ({
+  const fichesSortedByCout = [];
+  for (const f of safeFiches) {
+    fichesSortedByCout.push({
       nom: f.nom,
       cout: Number(f.cout_total) || 0,
       actif: f.actif,
       id: f.id,
-    }))
-    .sort((a, b) => b.cout - a.cout)
-    .slice(0, 10);
+    });
+  }
+  fichesSortedByCout.sort((a, b) => b.cout - a.cout);
+  const topFiches = fichesSortedByCout.slice(0, 10);
 
+  let actives = 0;
+  let inactives = 0;
+  for (const f of safeFiches) {
+    if (f.actif) actives++;
+    else inactives++;
+  }
   const repActif = [
-    { name: "Actives", value: safeFiches.filter((f) => f.actif).length },
-    { name: "Inactives", value: safeFiches.filter((f) => !f.actif).length },
+    { name: "Actives", value: actives },
+    { name: "Inactives", value: inactives },
   ];
 
   // Alertes
@@ -89,23 +104,30 @@ export default function StatsFiches() {
   });
 
   // Historique coût réel
-  const historyChartData = (history || []).map(h => ({
-    date: new Date(h.date_cout).toLocaleDateString("fr-FR"),
-    cout: Number(h.cout_total),
-    cout_portion: Number(h.cout_portion),
-  }));
+  const historyChartData = [];
+  const historySafe = Array.isArray(history) ? history : [];
+  for (const h of historySafe) {
+    historyChartData.push({
+      date: new Date(h.date_cout).toLocaleDateString("fr-FR"),
+      cout: Number(h.cout_total),
+      cout_portion: Number(h.cout_portion),
+    });
+  }
 
   // Export global
   const handleExportAll = () => {
-    const ws = XLSX.utils.json_to_sheet(
-      fiches.map(f => ({
+    const rows = [];
+    const ficheList = Array.isArray(fiches) ? fiches : [];
+    for (const f of ficheList) {
+      rows.push({
         Nom: f.nom,
         Famille: f.famille,
         Actif: f.actif ? "Oui" : "Non",
         "Coût total (€)": Number(f.cout_total).toFixed(2),
         "Coût/portion (€)": Number(f.cout_portion).toFixed(2),
-      }))
-    );
+      });
+    }
+    const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Fiches");
     XLSX.writeFile(wb, "Toutes_les_fiches.xlsx");
@@ -133,9 +155,19 @@ export default function StatsFiches() {
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
               <Pie data={repartFamille} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70}>
-                {repartFamille.map((entry, idx) => (
-                  <Cell key={entry.name} fill={["#bfa14d", "#e2ba63", "#d8d1bc", "#f3e6c1", "#f9f6f0", "#eee6d6", "#e1c699", "#8e7649"][idx % 8]} />
-                ))}
+                {(() => {
+                  const cells = [];
+                  for (let idx = 0; idx < repartFamille.length; idx++) {
+                    const entry = repartFamille[idx];
+                    cells.push(
+                      <Cell
+                        key={entry.name}
+                        fill={["#bfa14d", "#e2ba63", "#d8d1bc", "#f3e6c1", "#f9f6f0", "#eee6d6", "#e1c699", "#8e7649"][idx % 8]}
+                      />
+                    );
+                  }
+                  return cells;
+                })()}
               </Pie>
               <Tooltip />
               <Legend />
@@ -146,7 +178,7 @@ export default function StatsFiches() {
         <GlassCard className="p-4">
           <h2 className="text-lg font-bold mb-2">Top 10 fiches par coût matière</h2>
           <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={fichesSortedByCout}>
+            <BarChart data={topFiches}>
               <XAxis dataKey="nom" tickFormatter={n => n.slice(0, 8) + (n.length > 8 ? "…" : "")} />
               <YAxis />
               <Tooltip />
@@ -160,9 +192,16 @@ export default function StatsFiches() {
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
               <Pie data={repActif} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70}>
-                {repActif.map((entry, idx) => (
-                  <Cell key={entry.name} fill={["#14b85a", "#eb6e34"][idx]} />
-                ))}
+                {(() => {
+                  const cells = [];
+                  for (let idx = 0; idx < repActif.length; idx++) {
+                    const entry = repActif[idx];
+                    cells.push(
+                      <Cell key={entry.name} fill={["#14b85a", "#eb6e34"][idx]} />
+                    );
+                  }
+                  return cells;
+                })()}
               </Pie>
               <Tooltip />
               <Legend />
@@ -193,29 +232,34 @@ export default function StatsFiches() {
             </tr>
           </thead>
           <tbody>
-            {fiches
-              .filter(f => f.nom.toLowerCase().includes(search.toLowerCase()))
-              .map((f) => (
-                <tr key={f.id}>
-                  <td className="px-3 py-2">{f.nom}</td>
-                  <td className="px-3 py-2">{f.famille || "-"}</td>
-                  <td className="px-3 py-2">
-                    {f.actif
-                      ? <span className="text-green-600 font-semibold">Oui</span>
-                      : <span className="text-red-600 font-semibold">Non</span>
-                    }
-                  </td>
-                  <td className="px-3 py-2">{f.cout_total ? Number(f.cout_total).toFixed(2) : "-"}</td>
-                  <td className="px-3 py-2">{f.cout_portion ? Number(f.cout_portion).toFixed(2) : "-"}</td>
-                  <td className="px-3 py-2">
-                    <Button size="sm" variant="outline"
-                      onClick={() => setSelectedFiche(f)}
-                    >
-                      Historique coût
-                    </Button>
-                  </td>
-                </tr>
-              ))}
+            {(() => {
+              const rows = [];
+              const searchLower = search.toLowerCase();
+              for (const f of safeFiches) {
+                if (!f.nom.toLowerCase().includes(searchLower)) continue;
+                rows.push(
+                  <tr key={f.id}>
+                    <td className="px-3 py-2">{f.nom}</td>
+                    <td className="px-3 py-2">{f.famille || "-"}</td>
+                    <td className="px-3 py-2">
+                      {f.actif ? (
+                        <span className="text-green-600 font-semibold">Oui</span>
+                      ) : (
+                        <span className="text-red-600 font-semibold">Non</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2">{f.cout_total ? Number(f.cout_total).toFixed(2) : "-"}</td>
+                    <td className="px-3 py-2">{f.cout_portion ? Number(f.cout_portion).toFixed(2) : "-"}</td>
+                    <td className="px-3 py-2">
+                      <Button size="sm" variant="outline" onClick={() => setSelectedFiche(f)}>
+                        Historique coût
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              }
+              return rows;
+            })()}
           </tbody>
         </table>
       </TableContainer>
@@ -254,11 +298,21 @@ export default function StatsFiches() {
         <div className="bg-yellow-50 border-l-4 border-yellow-400 text-yellow-900 p-4 rounded-xl mb-8">
           <h3 className="font-semibold mb-2">Alertes :</h3>
           <ul>
-            {alertes.map((a, idx) => (
-              <li key={idx} className={a.type === "danger" ? "text-red-700 font-bold" : "text-yellow-700"}>
-                {a.msg}
-              </li>
-            ))}
+            {(() => {
+              const items = [];
+              for (let idx = 0; idx < alertes.length; idx++) {
+                const a = alertes[idx];
+                items.push(
+                  <li
+                    key={idx}
+                    className={a.type === "danger" ? "text-red-700 font-bold" : "text-yellow-700"}
+                  >
+                    {a.msg}
+                  </li>
+                );
+              }
+              return items;
+            })()}
           </ul>
         </div>
       )}

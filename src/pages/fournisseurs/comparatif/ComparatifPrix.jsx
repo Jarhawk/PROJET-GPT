@@ -44,6 +44,16 @@ export default function ComparatifPrix() {
     return <LoadingSpinner message="Chargement..." />;
   }
 
+  const liste = Array.isArray(produits) ? produits : [];
+  const options = [];
+  for (const p of liste) {
+    options.push(
+      <option key={p.id} value={p.id}>
+        {p.nom}
+      </option>
+    );
+  }
+
   return (
     <div className="p-4">
       <h2 className="text-xl font-bold mb-4">📊 Comparatif fournisseurs par produit</h2>
@@ -64,11 +74,7 @@ export default function ComparatifPrix() {
         ariaLabel="Sélection produit"
       >
         <option value="">-- Choisir un produit --</option>
-        {(Array.isArray(produits) ? produits : []).map((p) => (
-          <option key={p.id} value={p.id}>
-            {p.nom}
-          </option>
-        ))}
+        {options}
       </Select>
 
       {produitId && <PrixFournisseurs produitId={produitId} />}

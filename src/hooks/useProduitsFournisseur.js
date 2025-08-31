@@ -21,7 +21,7 @@ export function useProduitsFournisseur() {
       const { data, error } = await supabase
         .from("fournisseur_produits")
         .select(
-          "*, produit:produits!fournisseur_produits_produit_id_fkey(id, nom, unite_id, unite:unite_id (nom), famille:familles!fk_produits_famille(id, nom))"
+          "*, produit:produits!fournisseur_produits_produit_id_fkey(id, nom, unite_id, unite:unites!fk_produits_unite(nom), famille:familles!fk_produits_famille(id, nom))"
         )
         .eq("fournisseur_id", fournisseur_id)
         .eq("mama_id", mama_id);
@@ -41,7 +41,7 @@ export function useProduitsFournisseur() {
       const { data } = await supabase
         .from("fournisseur_produits")
         .select(
-          "*, produit:produits!fournisseur_produits_produit_id_fkey(id, nom, unite_id, unite:unite_id (nom), famille:familles!fk_produits_famille(id, nom))"
+          "*, produit:produits!fournisseur_produits_produit_id_fkey(id, nom, unite_id, unite:unites!fk_produits_unite(nom), famille:familles!fk_produits_famille(id, nom))"
         )
         .eq("fournisseur_id", fournisseur_id)
         .eq("mama_id", mama_id);

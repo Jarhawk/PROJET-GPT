@@ -74,10 +74,13 @@ export default function Documents() {
             </tr>
           </thead>
           <tbody>
-            {Array.isArray(documents) &&
-              documents.map((doc) => {
+            {(() => {
+              const rows = [];
+              const safeDocs = Array.isArray(documents) ? documents : [];
+              for (let i = 0; i < safeDocs.length; i += 1) {
+                const doc = safeDocs[i];
                 const nom = doc.url?.split("/").pop() || "";
-                return (
+                rows.push(
                   <tr key={doc.id}>
                     <td className="p-2">{nom}</td>
                     <td className="p-2">{doc.type}</td>
@@ -92,7 +95,9 @@ export default function Documents() {
                     </td>
                   </tr>
                 );
-              })}
+              }
+              return rows;
+            })()}
           </tbody>
         </table>
       </TableContainer>

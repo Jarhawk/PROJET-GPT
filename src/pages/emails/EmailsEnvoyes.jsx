@@ -55,12 +55,16 @@ export default function EmailsEnvoyes() {
   };
 
   const exportExcel = () => {
-    const rows = emails.map((e) => ({
-      envoye_le: e.envoye_le,
-      email: e.email,
-      commande: e.commandes?.reference || e.commande_id,
-      statut: e.statut,
-    }));
+    const rows = [];
+    const list = Array.isArray(emails) ? emails : [];
+    for (const e of list) {
+      rows.push({
+        envoye_le: e.envoye_le,
+        email: e.email,
+        commande: e.commandes?.reference || e.commande_id,
+        statut: e.statut,
+      });
+    }
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Emails');
     const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
@@ -170,59 +174,64 @@ export default function EmailsEnvoyes() {
                   <th className="px-2 py-1">Actions</th>
                 </tr>
               </thead>
-              <tbody>
-                {emails.map((e) => (
-                  <tr
-                    key={e.id}
-                    className="border-b border-white/10 md:table-row block md:border-0 mb-2 md:mb-0"
-                  >
-                    <td className="px-2 py-1 md:border-none block md:table-cell">
-                      <span className="md:hidden font-semibold">Date: </span>
-                      {new Date(e.envoye_le).toLocaleString()}
-                    </td>
-                    <td className="px-2 py-1 md:border-none block md:table-cell break-all">
-                      <span className="md:hidden font-semibold">Email: </span>
-                      {e.email}
-                    </td>
-                    <td className="px-2 py-1 md:border-none block md:table-cell">
-                      <span className="md:hidden font-semibold">
-                        Commande:{' '}
-                      </span>
-                      <Link
-                        to={`/commandes/${e.commande_id}`}
-                        className="underline text-mamastockGold"
-                      >
-                        {e.commandes?.reference || e.commande_id}
-                      </Link>
-                    </td>
-                    <td className="px-2 py-1 md:border-none block md:table-cell">
-                      <span className="md:hidden font-semibold">Statut: </span>
-                      <Badge color={e.statut === 'success' ? 'green' : 'red'}>
-                        {e.statut === 'success' ? 'Succès' : 'Erreur'}
-                      </Badge>
-                    </td>
-                    <td className="px-2 py-1 md:border-none block md:table-cell space-x-1">
-                      <span className="md:hidden font-semibold">Actions: </span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleViewPDF(e.commande_id)}
-                      >
-                        Voir PDF
-                      </Button>
-                      {role === 'admin' && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleResend(e.id)}
+                <tbody>
+                  {(() => {
+                    const rows = [];
+                    const list = Array.isArray(emails) ? emails : [];
+                    for (const e of list) {
+                      rows.push(
+                        <tr
+                          key={e.id}
+                          className="border-b border-white/10 md:table-row block md:border-0 mb-2 md:mb-0"
                         >
-                          Renvoyer
-                        </Button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
+                          <td className="px-2 py-1 md:border-none block md:table-cell">
+                            <span className="md:hidden font-semibold">Date: </span>
+                            {new Date(e.envoye_le).toLocaleString()}
+                          </td>
+                          <td className="px-2 py-1 md:border-none block md:table-cell break-all">
+                            <span className="md:hidden font-semibold">Email: </span>
+                            {e.email}
+                          </td>
+                          <td className="px-2 py-1 md:border-none block md:table-cell">
+                            <span className="md:hidden font-semibold">Commande: </span>
+                            <Link
+                              to={`/commandes/${e.commande_id}`}
+                              className="underline text-mamastockGold"
+                            >
+                              {e.commandes?.reference || e.commande_id}
+                            </Link>
+                          </td>
+                          <td className="px-2 py-1 md:border-none block md:table-cell">
+                            <span className="md:hidden font-semibold">Statut: </span>
+                            <Badge color={e.statut === 'success' ? 'green' : 'red'}>
+                              {e.statut === 'success' ? 'Succès' : 'Erreur'}
+                            </Badge>
+                          </td>
+                          <td className="px-2 py-1 md:border-none block md:table-cell space-x-1">
+                            <span className="md:hidden font-semibold">Actions: </span>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewPDF(e.commande_id)}
+                            >
+                              Voir PDF
+                            </Button>
+                            {role === 'admin' && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleResend(e.id)}
+                              >
+                                Renvoyer
+                              </Button>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    }
+                    return rows;
+                  })()}
+                </tbody>
             </table>
           </TableContainer>
           <PaginationFooter

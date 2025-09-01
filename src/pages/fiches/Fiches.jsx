@@ -77,7 +77,7 @@ export default function Fiches() {
     if (next.toString() !== searchParams.toString()) {
       setSearchParams(next, { replace: true });
     }
-  }, [search, page, setSearchParams]);
+  }, [search, page, setSearchParams, searchParams]);
 
   const exportExcel = () => {
     const datas = [];

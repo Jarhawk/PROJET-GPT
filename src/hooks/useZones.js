@@ -8,7 +8,7 @@ export function useZones() {
   const { mama_id } = useAuth();
   const [zones, setZones] = useState([]);
 
-    async function fetchZones({ q, type, actif } = {}) {
+  async function fetchZones({ q, type, actif } = {}) {
       let query = supabase
         .from('zones_stock')
         .select('id, nom, type, parent_id, position, actif, created_at')
@@ -92,18 +92,18 @@ export function useZones() {
     return { error };
   }
 
-    async function reorderZones(list) {
-      const arr = Array.isArray(list) ? list : [];
-      const updates = [];
-      let idx = 0;
-      for (const z of arr) {
-        updates.push({ id: z.id, position: idx, mama_id });
-        idx += 1;
-      }
-      const { error } = await supabase.from('zones_stock').upsert(updates);
-      if (error) toast.error(error.message);
-      return { error };
+  async function reorderZones(list) {
+    const arr = Array.isArray(list) ? list : [];
+    const updates = [];
+    let idx = 0;
+    for (const z of arr) {
+      updates.push({ id: z.id, position: idx, mama_id });
+      idx += 1;
     }
+    const { error } = await supabase.from('zones_stock').upsert(updates);
+    if (error) toast.error(error.message);
+    return { error };
+  }
 
   async function myAccessibleZones({ mode } = {}) {
     const {
@@ -193,5 +193,4 @@ export function useZones() {
 }
 
 export default useZones;
-export { useZones };
 

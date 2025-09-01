@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
@@ -14,10 +14,16 @@ export default function SupplierPicker({ value, onChange, error }) {
   const [modalOpen, setModalOpen] = useState(false);
   const inputRef = useRef(null);
 
-  const { options: autoOptions = [], loading: isLoading } = useFournisseursAutocomplete({ term: search });
+  const { options: autoOptions = [], loading: isLoading } =
+    useFournisseursAutocomplete({ term: search });
 
-  const options =
-    search.trim().length >= 2 && Array.isArray(autoOptions) ? autoOptions : [];
+  const options = useMemo(
+    () =>
+      search.trim().length >= 2 && Array.isArray(autoOptions)
+        ? autoOptions
+        : [],
+    [search, autoOptions]
+  );
 
   useEffect(() => {
     setActive(-1);

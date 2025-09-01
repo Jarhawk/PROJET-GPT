@@ -16,6 +16,10 @@ import {
   ClipboardList,
   FilePlus,
   ArrowLeftRight,
+  Bug,
+  Users,
+  Shield,
+  PieChart,
 } from 'lucide-react';
 import lazyWithPreload from '@/lib/lazyWithPreload';
 
@@ -117,6 +121,14 @@ export const MODULES = [
     showInSidebar: true,
   },
   {
+    path: '/reporting',
+    element: lazyWithPreload(() => import('@/pages/reporting/Reporting.jsx')),
+    labelKey: 'nav.reporting',
+    icon: PieChart,
+    rightKey: 'reporting',
+    showInSidebar: true,
+  },
+  {
     path: '/stock/alertes',
     element: lazyWithPreload(() => import('@/pages/stock/AlertesRupture.jsx')),
     labelKey: 'nav.alertesRupture',
@@ -178,6 +190,30 @@ export const MODULES = [
     labelKey: 'nav.unites',
     icon: Boxes,
     rightKey: 'parametrage',
+    showInSidebar: true,
+  },
+  {
+    path: '/parametrage/utilisateurs',
+    element: lazyWithPreload(() => import('@/pages/parametrage/Utilisateurs.jsx')),
+    labelKey: 'nav.utilisateurs',
+    icon: Users,
+    rightKey: 'parametrage',
+    showInSidebar: true,
+  },
+  {
+    path: '/parametrage/roles',
+    element: lazyWithPreload(() => import('@/pages/parametrage/Roles.jsx')),
+    labelKey: 'nav.roles',
+    icon: Shield,
+    rightKey: 'parametrage',
+    showInSidebar: true,
+  },
+  {
+    path: '/debug',
+    element: lazyWithPreload(() => import('@/pages/debug/Debug.jsx')),
+    labelKey: 'nav.debug',
+    icon: Bug,
+    rightKey: 'debug',
     showInSidebar: true,
   },
 ];

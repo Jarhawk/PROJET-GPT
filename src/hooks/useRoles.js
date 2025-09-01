@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -8,7 +8,7 @@ export function useRoles() {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchRoles = async () => {
+  const fetchRoles = useCallback(async () => {
     if (!mama_id) return [];
     setLoading(true);
     const { data, error } = await supabase
@@ -20,7 +20,7 @@ export function useRoles() {
     if (!error) setRoles(rows);
     setLoading(false);
     return rows;
-  };
+  }, [mama_id]);
 
   const addOrUpdateRole = async (role) => {
     if (!mama_id) return { data: null, error: 'mama_id manquant' };
@@ -46,7 +46,7 @@ export function useRoles() {
 
   useEffect(() => {
     fetchRoles();
-  }, [mama_id]);
+  }, [fetchRoles]);
 
   return { roles, loading, fetchRoles, addOrUpdateRole, toggleActif };
 }

@@ -25,7 +25,10 @@ export default function SousFamilles() {
     isLoading,
   } = useSousFamilles();
 
-  const famillesList = Array.isArray(familles) ? familles : [];
+  const famillesList = useMemo(
+    () => (Array.isArray(familles) ? familles : []),
+    [familles]
+  );
 
   const sousFamilles = useMemo(() => {
     const list = Array.isArray(sousFamillesData) ? sousFamillesData : [];

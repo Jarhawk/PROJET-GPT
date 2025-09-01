@@ -81,7 +81,10 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
     name: 'lignes',
   });
   const lignes = watch('lignes');
-  const lignesArr = Array.isArray(lignes) ? lignes : [];
+  const lignesArr = useMemo(
+    () => (Array.isArray(lignes) ? lignes : []),
+    [lignes]
+  );
   const { data: zones = [], isSuccess } = useZonesStock();
   const totalHTAttendu = watch('total_ht_attendu');
   const statut = watch('statut');

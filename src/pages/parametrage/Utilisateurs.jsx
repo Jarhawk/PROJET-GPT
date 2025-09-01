@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ export default function Utilisateurs() {
   const [showForm, setShowForm] = useState(false);
   const [selected, setSelected] = useState(null);
 
-  async function fetchUsers() {
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("utilisateurs")
@@ -23,11 +23,11 @@ export default function Utilisateurs() {
     if (error) setError(error);
     setUsers(data || []);
     setLoading(false);
-  }
+  }, [mama_id]);
 
   useEffect(() => {
     fetchUsers();
-  }, [mama_id]);
+  }, [fetchUsers]);
 
   const rows = Array.isArray(users) ? users : [];
   const items = [];

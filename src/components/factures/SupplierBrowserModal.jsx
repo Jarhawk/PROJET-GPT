@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import useFournisseursBrowse from '@/hooks/useFournisseursBrowse';
 
@@ -8,12 +9,16 @@ export default function SupplierBrowserModal({ open, onClose, onSelect }) {
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
   const pageSize = 20;
+  const { t } = useTranslation();
     const { data: results = [], total } = useFournisseursBrowse({
       page,
       limit: pageSize,
       term: query,
     });
-    const list = Array.isArray(results) ? results : [];
+    const list = useMemo(
+      () => (Array.isArray(results) ? results : []),
+      [results]
+    );
   const [active, setActive] = useState(-1);
 
   useEffect(() => {
@@ -61,26 +66,31 @@ export default function SupplierBrowserModal({ open, onClose, onSelect }) {
           className="fixed left-1/2 top-1/2 z-50 w-[min(600px,95vw)] max-h-[70vh] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-border bg-card shadow-2xl flex flex-col overflow-hidden"
         >
           <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/40">
-            <Dialog.Title className="text-sm font-semibold">Rechercher un fournisseur</Dialog.Title>
-            <DialogDescription className="sr-only">
-              Modale de recherche fournisseur
-            </DialogDescription>
+            <Dialog.Title className="text-sm font-semibold">
+              {t('supplierSearch.title')}
+            </Dialog.Title>
+            <Dialog.Description className="sr-only">
+              {t('supplierSearch.description')}
+            </Dialog.Description>
             <Dialog.Close asChild>
-              <button className="p-2 rounded-md hover:bg-muted">
-                <X size={18} />
+              <button
+                className="p-2 rounded-md hover:bg-muted"
+                aria-label={t('common.close')}
+              >
+                <X size={18} aria-hidden="true" />
               </button>
             </Dialog.Close>
           </div>
           <div className="p-4 space-y-4 flex-1 overflow-y-auto">
             <p id="supplier-browser-desc" className="sr-only">
-              Recherche par nom de fournisseur (ILIKE sur fournisseurs.nom)
+              {t('supplierSearch.help')}
             </p>
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Rechercher un fournisseur…"
+              placeholder={t('supplierSearch.placeholder')}
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="none"
@@ -89,7 +99,9 @@ export default function SupplierBrowserModal({ open, onClose, onSelect }) {
             />
                 <div className="border border-border rounded-lg max-h-60 overflow-y-auto">
                   {list.length === 0 ? (
-                    <div className="p-4 text-sm text-muted-foreground">Aucun résultat</div>
+                    <div className="p-4 text-sm text-muted-foreground">
+                      {t('supplierSearch.noResult')}
+                    </div>
                   ) : (
                     (() => {
                       const rows = [];
@@ -119,7 +131,7 @@ export default function SupplierBrowserModal({ open, onClose, onSelect }) {
                 disabled={page === 1}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
               >
-                Préc.
+                {t('pagination.prev')}
               </Button>
               <span className="text-xs text-muted-foreground">
                 {Math.min((page - 1) * pageSize + 1, total)}-
@@ -131,13 +143,13 @@ export default function SupplierBrowserModal({ open, onClose, onSelect }) {
                 disabled={page * pageSize >= total}
                 onClick={() => setPage((p) => p + 1)}
               >
-                Suiv.
+                {t('pagination.next')}
               </Button>
             </div>
           </div>
           <div className="px-4 py-3 border-t border-border bg-muted/40 flex justify-end">
             <Button variant="secondary" onClick={() => onClose?.()}>
-              Fermer
+              {t('common.close')}
             </Button>
           </div>
         </Dialog.Content>

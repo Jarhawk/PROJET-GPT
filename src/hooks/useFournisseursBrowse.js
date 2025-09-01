@@ -61,7 +61,7 @@ export default function useFournisseursBrowse({
     return () => {
       aborted = true;
     };
-  }, [mama_id, page, limit, term, JSON.stringify(filters)]);
+  }, [mama_id, page, limit, term, filters]);
 
   return { data, total, loading, error };
 }

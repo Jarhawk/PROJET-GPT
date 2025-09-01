@@ -19,7 +19,10 @@ export default function CostingCarte() {
     exportExcel,
     exportPdf,
   } = useCostingCarte()
-  const data = Array.isArray(rawData) ? rawData : []
+  const data = useMemo(
+    () => (Array.isArray(rawData) ? rawData : []),
+    [rawData]
+  )
 
   const [typeFilter, setTypeFilter] = useState('')
   const [familleFilter, setFamilleFilter] = useState('')
@@ -42,13 +45,16 @@ export default function CostingCarte() {
     return arr
   }, [data])
 
-  const filtered = []
-  for (const f of data) {
-    if (typeFilter && f.type !== typeFilter) continue
-    if (familleFilter && f.famille !== familleFilter) continue
-    if (actifFilter !== '' && f.actif !== (actifFilter === 'true')) continue
-    filtered.push(f)
-  }
+  const filtered = useMemo(() => {
+    const arr = []
+    for (const f of data) {
+      if (typeFilter && f.type !== typeFilter) continue
+      if (familleFilter && f.famille !== familleFilter) continue
+      if (actifFilter !== '' && f.actif !== (actifFilter === 'true')) continue
+      arr.push(f)
+    }
+    return arr
+  }, [data, typeFilter, familleFilter, actifFilter])
 
   const kpis = useMemo(() => {
     if (filtered.length === 0) return { marge: 0, food: 0, under: 0 }

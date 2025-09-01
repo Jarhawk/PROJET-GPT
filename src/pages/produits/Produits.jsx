@@ -18,7 +18,10 @@ export default function Produits() {
   const { familles = [] } = useFamilles();
   const { data: allSousFamilles = [] } = useSousFamilles();
   const safeFamilles = Array.isArray(familles) ? familles : [];
-  const safeAllSousFamilles = Array.isArray(allSousFamilles) ? allSousFamilles : [];
+  const safeAllSousFamilles = useMemo(
+    () => (Array.isArray(allSousFamilles) ? allSousFamilles : []),
+    [allSousFamilles]
+  );
   const sousFamilles = useMemo(
     () =>
       familleId

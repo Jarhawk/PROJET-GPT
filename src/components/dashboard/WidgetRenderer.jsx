@@ -5,9 +5,9 @@ import DashboardCard from "./DashboardCard";
 export default function WidgetRenderer({ config }) {
   if (!config) return null;
   const type = config.type || "indicator";
-    const data = Array.isArray(config.data) ? config.data : [];
-    const items = Array.isArray(config.items) ? config.items : [];
-    const colors = Array.isArray(config.colors) ? config.colors : [];
+  const data = Array.isArray(config.data) ? config.data : [];
+  const items = Array.isArray(config.items) ? config.items : [];
+  const colors = Array.isArray(config.colors) ? config.colors : [];
 
   switch (type) {
     case "line":
@@ -39,33 +39,25 @@ export default function WidgetRenderer({ config }) {
               outerRadius={80}
               fill={config.color || "#bfa14d"}
             >
-              {(() => {
-                const cells = []
-                for (let idx = 0; idx < data.length; idx++) {
-                  cells.push(
-                    <Cell
-                      key={idx}
-                      fill={colors[idx % colors.length] || "#bfa14d"}
-                    />
-                  )
-                }
-                return cells
-              })()}
+              {data.map((_, idx) => (
+                <Cell
+                  key={idx}
+                  fill={colors[idx % colors.length] || "#bfa14d"}
+                />
+              ))}
             </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-        );
-      case "list":
-        return (
-          {(() => {
-            const listItems = []
-            for (let idx = 0; idx < items.length; idx++) {
-              listItems.push(<li key={idx}>{items[idx]}</li>)
-            }
-            return <ul className="list-disc pl-4 text-sm">{listItems}</ul>
-          })()}
-        );
+            <Tooltip />
+          </PieChart>
+        </ResponsiveContainer>
+      );
+    case "list":
+      return (
+        <ul className="list-disc pl-4 text-sm">
+          {items.map((item, idx) => (
+            <li key={idx}>{item}</li>
+          ))}
+        </ul>
+      );
     case "indicator":
     default:
       return (

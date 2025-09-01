@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { useProduitsSearch } from '@/hooks/useProduitsSearch';
 
@@ -11,6 +12,7 @@ export default function ProduitSearchModal({
   excludeIdsSameZone: _excludeIdsSameZone,
   currentLineProductId: _currentLineProductId,
 }) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
   const pageSize = 20;
@@ -18,7 +20,10 @@ export default function ProduitSearchModal({
       page,
       pageSize,
     });
-    const list = Array.isArray(results) ? results : [];
+    const list = useMemo(
+      () => (Array.isArray(results) ? results : []),
+      [results]
+    );
 
   const [active, setActive] = useState(-1);
 
@@ -72,14 +77,18 @@ export default function ProduitSearchModal({
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-[#0B1220]/60 backdrop-blur-sm" />
         <Dialog.Content
-          aria-describedby="product-search-desc"
           className="fixed left-1/2 top-1/2 z-50 w-[min(900px,95vw)] max-h-[70vh] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-border bg-card shadow-2xl flex flex-col overflow-hidden"
         >
           <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/40">
-            <Dialog.Title className="text-sm font-semibold">Rechercher un produit</Dialog.Title>
+            <Dialog.Title className="text-sm font-semibold">
+              {t('productSearch.title')}
+            </Dialog.Title>
+            <Dialog.Description className="sr-only">
+              {t('productSearch.description')}
+            </Dialog.Description>
             <Dialog.Close asChild>
-              <button className="p-2 rounded-md hover:bg-muted">
-                <X size={18} />
+              <button className="p-2 rounded-md hover:bg-muted" aria-label={t('common.close')}>
+                <X size={18} aria-hidden="true" />
               </button>
             </Dialog.Close>
           </div>
@@ -89,7 +98,7 @@ export default function ProduitSearchModal({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Rechercher un produit…"
+              placeholder={t('productSearch.placeholder')}
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="none"
@@ -98,11 +107,13 @@ export default function ProduitSearchModal({
               className="w-full px-4 py-2 font-semibold text-white placeholder-white/50 bg-white/10 backdrop-blur rounded-md shadow-lg border border-white/20 ring-1 ring-white/20 focus:outline-none hover:bg-white/10"
             />
             <p id="product-search-desc" className="sr-only">
-              Recherche par nom de produit (ILIKE sur produits.nom)
+              {t('productSearch.help')}
             </p>
                 <div className="border border-border rounded-lg max-h-60 overflow-y-auto">
                   {list.length === 0 ? (
-                    <div className="p-4 text-sm text-muted-foreground">Aucun résultat</div>
+                    <div className="p-4 text-sm text-muted-foreground">
+                      {t('productSearch.noResult')}
+                    </div>
                   ) : (
                     (() => {
                       const rows = [];
@@ -131,7 +142,7 @@ export default function ProduitSearchModal({
                 disabled={page === 1}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
               >
-                Préc.
+                {t('pagination.prev')}
               </Button>
               <span className="text-xs text-muted-foreground">
                 {Math.min((page - 1) * pageSize + 1, total)}-
@@ -143,14 +154,14 @@ export default function ProduitSearchModal({
                 disabled={page * pageSize >= total}
                 onClick={() => setPage((p) => p + 1)}
               >
-                Suiv.
+                {t('pagination.next')}
               </Button>
             </div>
           </div>
 
           <div className="px-4 py-3 border-t border-border bg-muted/40 flex justify-end">
             <Button variant="secondary" onClick={() => onClose?.()}>
-              Fermer
+              {t('common.close')}
             </Button>
           </div>
         </Dialog.Content>

@@ -101,7 +101,36 @@ for (const file of jsFiles) {
     if (rpcMatch) {
       const fn = rpcMatch[1]
       const rpc = getRpc(fn)
-      if (!rpc) record(file, lineNo, `Unknown RPC ${fn}`)
+      if (!rpc) {
+        record(file, lineNo, `Unknown RPC ${fn}`)
+      } else if (rpc.params && rpc.params.length) {
+        const lookahead = lines.slice(idx, idx + 10).join(' ')
+        const callMatch = lookahead.match(
+          /supabase\.rpc\(['"][^'"]+['"](,\s*([^\)]*))?\)/
+        )
+        const paramsSource = callMatch && callMatch[2] ? callMatch[2].trim() : null
+        if (!paramsSource) {
+          record(file, lineNo, `RPC ${fn} missing payload`)
+        } else if (paramsSource.startsWith('{')) {
+          const provided = Array.from(
+            paramsSource.matchAll(/([a-zA-Z0-9_]+)\s*:/g)
+          ).map((m) => m[1])
+          const missing = rpc.params.filter((p) => !provided.includes(p))
+          const extra = provided.filter((p) => !rpc.params.includes(p))
+          if (missing.length) {
+            record(file, lineNo, `RPC ${fn} missing params: ${missing.join(', ')}`)
+          }
+          if (extra.length) {
+            record(file, lineNo, `RPC ${fn} unexpected params: ${extra.join(', ')}`)
+          }
+        } else {
+          record(
+            file,
+            lineNo,
+            `RPC ${fn} payload not object literal; validation skipped`
+          )
+        }
+      }
     }
 
     if (/[^?.]\.(map|find)\(/.test(line)) {
@@ -124,6 +153,12 @@ for (const file of cssFiles) {
 }
 
 const out = path.join('scripts', 'report.md')
-fs.writeFileSync(out, ['# Scan report', '', ...issues].join('\n'))
+const lines = ['# Scan report', '']
+if (issues.length) {
+  lines.push(...issues)
+} else {
+  lines.push('Aucune anomalie détectée.')
+}
+fs.writeFileSync(out, lines.join('\n') + '\n')
 console.log(`Report written to ${out} with ${issues.length} entries`)
 

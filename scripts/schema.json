@@ -2,13 +2,13 @@
   "tables": {
     "access_rights": {
       "columns": [
+        "created_at",
         "id",
         "mama_id",
-        "role_id",
         "module",
-        "peut_voir",
         "peut_modifier",
-        "created_at"
+        "peut_voir",
+        "role_id"
       ],
       "foreignKeys": [
         {
@@ -31,19 +31,35 @@
     },
     "achats": {
       "columns": [
+        "actif",
+        "created_at",
+        "date_achat",
+        "fournisseur_id",
         "id",
         "mama_id",
-        "produit_id",
         "prix",
+        "produit_id",
         "quantite",
-        "date_achat",
-        "created_at",
-        "updated_at",
-        "actif",
-        "fournisseur_id",
-        "supplier_id"
+        "supplier_id",
+        "updated_at"
       ],
       "foreignKeys": [
+        {
+          "name": "fk_achats_fournisseur",
+          "column": "fournisseur_id",
+          "references": {
+            "table": "fournisseurs",
+            "column": "id"
+          }
+        },
+        {
+          "name": "fk_fournisseur",
+          "column": "fournisseur_id",
+          "references": {
+            "table": "fournisseurs",
+            "column": "id"
+          }
+        },
         {
           "name": "achats_mama_id_fkey",
           "column": "mama_id",
@@ -61,24 +77,8 @@
           }
         },
         {
-          "name": "fk_achats_fournisseur",
-          "column": "fournisseur_id",
-          "references": {
-            "table": "fournisseurs",
-            "column": "id"
-          }
-        },
-        {
           "name": "fk_achats_supplier",
           "column": "supplier_id",
-          "references": {
-            "table": "fournisseurs",
-            "column": "id"
-          }
-        },
-        {
-          "name": "fk_fournisseur",
-          "column": "fournisseur_id",
           "references": {
             "table": "fournisseurs",
             "column": "id"
@@ -88,12 +88,12 @@
     },
     "alertes_rupture": {
       "columns": [
+        "cree_le",
         "id",
         "mama_id",
         "produit_id",
-        "traite",
-        "cree_le",
-        "stock_actuel"
+        "stock_actuel",
+        "traite"
       ],
       "foreignKeys": [
         {
@@ -108,15 +108,15 @@
     },
     "api_keys": {
       "columns": [
+        "created_at",
+        "expiration",
         "id",
         "mama_id",
-        "user_id",
         "name",
-        "scopes",
-        "role",
-        "expiration",
         "revoked",
-        "created_at"
+        "role",
+        "scopes",
+        "user_id"
       ],
       "foreignKeys": [
         {
@@ -139,28 +139,28 @@
     },
     "auth_double_facteur": {
       "columns": [
-        "id",
-        "secret",
+        "created_at",
         "enabled",
-        "created_at"
+        "id",
+        "secret"
       ],
       "foreignKeys": []
     },
     "bons_livraison": {
       "columns": [
+        "actif",
+        "commande_id",
+        "commentaire",
+        "created_at",
+        "date_livraison",
+        "date_reception",
+        "facture_id",
+        "fournisseur_id",
         "id",
         "mama_id",
-        "fournisseur_id",
         "numero_bl",
-        "date_livraison",
-        "created_at",
-        "date_reception",
-        "commentaire",
         "statut",
-        "actif",
-        "updated_at",
-        "commande_id",
-        "facture_id"
+        "updated_at"
       ],
       "foreignKeys": [
         {
@@ -199,14 +199,14 @@
     },
     "catalogue_updates": {
       "columns": [
+        "ancienne_valeur",
+        "created_at",
+        "fournisseur_id",
         "id",
         "mama_id",
-        "fournisseur_id",
-        "produit_id",
-        "ancienne_valeur",
-        "nouvelle_valeur",
         "modification",
-        "created_at"
+        "nouvelle_valeur",
+        "produit_id"
       ],
       "foreignKeys": [
         {
@@ -237,13 +237,13 @@
     },
     "centres_de_cout": {
       "columns": [
+        "actif",
+        "activite",
+        "created_at",
         "id",
         "mama_id",
         "nom",
-        "created_at",
-        "updated_at",
-        "actif",
-        "activite"
+        "updated_at"
       ],
       "foreignKeys": [
         {
@@ -258,25 +258,33 @@
     },
     "commande_lignes": {
       "columns": [
+        "actif",
+        "commande_id",
+        "commentaire",
+        "created_at",
         "id",
         "mama_id",
-        "commande_id",
+        "part_livree",
+        "prix_unitaire",
         "produit_id",
         "quantite",
-        "unite",
-        "prix_unitaire",
-        "tva",
-        "total",
-        "commentaire",
-        "part_livree",
         "rupture",
-        "actif",
-        "created_at",
+        "total",
+        "tva",
+        "unite",
         "updated_at"
       ],
       "foreignKeys": [
         {
           "name": "commande_lignes_commande_id_fkey",
+          "column": "commande_id",
+          "references": {
+            "table": "commandes",
+            "column": "id"
+          }
+        },
+        {
+          "name": "fk_commande_lignes_commande_id",
           "column": "commande_id",
           "references": {
             "table": "commandes",
@@ -292,26 +300,18 @@
           }
         },
         {
-          "name": "commande_lignes_produit_id_fkey",
-          "column": "produit_id",
-          "references": {
-            "table": "produits",
-            "column": "id"
-          }
-        },
-        {
-          "name": "fk_commande_lignes_commande_id",
-          "column": "commande_id",
-          "references": {
-            "table": "commandes",
-            "column": "id"
-          }
-        },
-        {
           "name": "fk_commande_lignes_mama_id",
           "column": "mama_id",
           "references": {
             "table": "mamas",
+            "column": "id"
+          }
+        },
+        {
+          "name": "commande_lignes_produit_id_fkey",
+          "column": "produit_id",
+          "references": {
+            "table": "produits",
             "column": "id"
           }
         },
@@ -327,20 +327,20 @@
     },
     "commandes": {
       "columns": [
-        "id",
-        "mama_id",
-        "fournisseur_id",
-        "statut",
-        "created_at",
-        "date_commande",
-        "date_livraison_prevue",
-        "montant_total",
-        "commentaire",
-        "updated_at",
         "actif",
         "bl_id",
-        "facture_id",
+        "commentaire",
+        "created_at",
         "created_by",
+        "date_commande",
+        "date_livraison_prevue",
+        "facture_id",
+        "fournisseur_id",
+        "id",
+        "mama_id",
+        "montant_total",
+        "statut",
+        "updated_at",
         "validated_by"
       ],
       "foreignKeys": [
@@ -349,6 +349,14 @@
           "column": "bl_id",
           "references": {
             "table": "bons_livraison",
+            "column": "id"
+          }
+        },
+        {
+          "name": "fk_commandes_created_by",
+          "column": "created_by",
+          "references": {
+            "table": "utilisateurs",
             "column": "id"
           }
         },
@@ -369,26 +377,18 @@
           }
         },
         {
-          "name": "commandes_mama_id_fkey",
-          "column": "mama_id",
-          "references": {
-            "table": "mamas",
-            "column": "id"
-          }
-        },
-        {
-          "name": "fk_commandes_created_by",
-          "column": "created_by",
-          "references": {
-            "table": "utilisateurs",
-            "column": "id"
-          }
-        },
-        {
           "name": "fk_commandes_fournisseur_id",
           "column": "fournisseur_id",
           "references": {
             "table": "fournisseurs",
+            "column": "id"
+          }
+        },
+        {
+          "name": "commandes_mama_id_fkey",
+          "column": "mama_id",
+          "references": {
+            "table": "mamas",
             "column": "id"
           }
         },
@@ -412,12 +412,12 @@
     },
     "compta_mapping": {
       "columns": [
-        "id",
-        "mama_id",
         "cle",
         "compte",
-        "type",
-        "created_at"
+        "created_at",
+        "id",
+        "mama_id",
+        "type"
       ],
       "foreignKeys": [
         {
@@ -432,19 +432,27 @@
     },
     "consentements_utilisateur": {
       "columns": [
-        "id",
-        "user_id",
-        "mama_id",
-        "consentement",
-        "date_consentement",
         "actif",
+        "consentement",
         "created_at",
-        "utilisateur_id",
-        "type_consentement"
+        "date_consentement",
+        "id",
+        "mama_id",
+        "type_consentement",
+        "user_id",
+        "utilisateur_id"
       ],
       "foreignKeys": [
         {
           "name": "consentements_utilisateur_mama_id_fkey",
+          "column": "mama_id",
+          "references": {
+            "table": "mamas",
+            "column": "id"
+          }
+        },
+        {
+          "name": "fk_consentements_utilisateur_mama_id",
           "column": "mama_id",
           "references": {
             "table": "mamas",
@@ -468,14 +476,6 @@
           }
         },
         {
-          "name": "fk_consentements_utilisateur_mama_id",
-          "column": "mama_id",
-          "references": {
-            "table": "mamas",
-            "column": "id"
-          }
-        },
-        {
           "name": "fk_consentements_utilisateur_utilisateur_id",
           "column": "utilisateur_id",
           "references": {
@@ -487,12 +487,12 @@
     },
     "documentation": {
       "columns": [
+        "categorie",
+        "contenu",
+        "created_at",
         "id",
         "mama_id",
-        "titre",
-        "contenu",
-        "categorie",
-        "created_at"
+        "titre"
       ],
       "foreignKeys": [
         {
@@ -507,11 +507,11 @@
     },
     "documents": {
       "columns": [
+        "chemin",
+        "created_at",
         "id",
         "mama_id",
-        "chemin",
-        "type",
-        "created_at"
+        "type"
       ],
       "foreignKeys": [
         {
@@ -526,12 +526,12 @@
     },
     "emails_envoyes": {
       "columns": [
-        "id",
         "commande_id",
         "email",
-        "statut",
         "envoye_le",
-        "mama_id"
+        "id",
+        "mama_id",
+        "statut"
       ],
       "foreignKeys": [
         {
@@ -554,11 +554,11 @@
     },
     "etapes_onboarding": {
       "columns": [
+        "created_at",
+        "etape",
         "id",
         "mama_id",
-        "etape",
-        "terminee",
-        "created_at"
+        "terminee"
       ],
       "foreignKeys": [
         {
@@ -573,32 +573,40 @@
     },
     "facture_lignes": {
       "columns": [
+        "actif",
+        "created_at",
+        "facture_id",
         "id",
         "mama_id",
-        "facture_id",
-        "produit_id",
-        "quantite",
-        "prix",
-        "created_at",
-        "updated_at",
-        "actif",
-        "prix_unitaire",
-        "tva",
-        "total",
-        "note",
-        "zone_id",
-        "position",
-        "unite",
-        "total_ht",
-        "pu",
-        "pmp",
-        "prix_unitaire_ht",
         "montant_ht",
-        "montant_ttc"
+        "montant_ttc",
+        "note",
+        "pmp",
+        "position",
+        "prix",
+        "prix_unitaire",
+        "prix_unitaire_ht",
+        "produit_id",
+        "pu",
+        "quantite",
+        "total",
+        "total_ht",
+        "tva",
+        "unite",
+        "updated_at",
+        "zone_id"
       ],
       "foreignKeys": [
         {
           "name": "facture_lignes_facture_id_fkey",
+          "column": "facture_id",
+          "references": {
+            "table": "factures",
+            "column": "id"
+          }
+        },
+        {
+          "name": "fk_facture_lignes_facture",
           "column": "facture_id",
           "references": {
             "table": "factures",
@@ -622,26 +630,18 @@
           }
         },
         {
-          "name": "fk__zone",
-          "column": "zone_id",
-          "references": {
-            "table": "zones_stock",
-            "column": "id"
-          }
-        },
-        {
-          "name": "fk_facture_lignes_facture",
-          "column": "facture_id",
-          "references": {
-            "table": "factures",
-            "column": "id"
-          }
-        },
-        {
           "name": "fk_facture_lignes_produit",
           "column": "produit_id",
           "references": {
             "table": "produits",
+            "column": "id"
+          }
+        },
+        {
+          "name": "fk__zone",
+          "column": "zone_id",
+          "references": {
+            "table": "zones_stock",
             "column": "id"
           }
         },
@@ -657,24 +657,24 @@
     },
     "factures": {
       "columns": [
-        "id",
-        "mama_id",
-        "fournisseur_id",
-        "numero",
-        "date_facture",
-        "created_at",
-        "updated_at",
         "actif",
-        "total_ht",
-        "total_tva",
-        "total_ttc",
-        "statut",
-        "montant_total",
-        "justificatif",
-        "commentaire",
         "bon_livraison",
+        "commentaire",
+        "created_at",
+        "date_facture",
+        "fournisseur_id",
+        "id",
+        "justificatif",
         "lignes_produits",
-        "tva"
+        "mama_id",
+        "montant_total",
+        "numero",
+        "statut",
+        "total_ht",
+        "total_ttc",
+        "total_tva",
+        "tva",
+        "updated_at"
       ],
       "foreignKeys": [
         {
@@ -697,24 +697,16 @@
     },
     "familles": {
       "columns": [
-        "id",
-        "nom",
-        "mama_id",
         "actif",
         "created_at",
         "famille_parent_id",
+        "id",
+        "mama_id",
+        "nom",
         "populaire",
         "updated_at"
       ],
       "foreignKeys": [
-        {
-          "name": "familles_mama_id_fkey",
-          "column": "mama_id",
-          "references": {
-            "table": "mamas",
-            "column": "id"
-          }
-        },
         {
           "name": "familles_parent_id_fkey",
           "column": "famille_parent_id",
@@ -722,18 +714,26 @@
             "table": "familles",
             "column": "id"
           }
+        },
+        {
+          "name": "familles_mama_id_fkey",
+          "column": "mama_id",
+          "references": {
+            "table": "mamas",
+            "column": "id"
+          }
         }
       ]
     },
     "feedback": {
       "columns": [
+        "created_at",
         "id",
         "mama_id",
-        "user_id",
-        "module",
         "message",
+        "module",
         "urgence",
-        "created_at"
+        "user_id"
       ],
       "foreignKeys": [
         {
@@ -756,18 +756,26 @@
     },
     "fiche_cout_history": {
       "columns": [
+        "actif",
+        "changed_at",
+        "changed_by",
+        "created_at",
+        "fiche_id",
         "id",
         "mama_id",
-        "fiche_id",
-        "old_cout",
         "new_cout",
-        "changed_by",
-        "changed_at",
-        "created_at",
-        "updated_at",
-        "actif"
+        "old_cout",
+        "updated_at"
       ],
       "foreignKeys": [
+        {
+          "name": "fk_fiche_cout_history_changed_by",
+          "column": "changed_by",
+          "references": {
+            "table": "users",
+            "column": "id"
+          }
+        },
         {
           "name": "fiche_cout_history_fiche_id_fkey",
           "column": "fiche_id",
@@ -783,29 +791,21 @@
             "table": "mamas",
             "column": "id"
           }
-        },
-        {
-          "name": "fk_fiche_cout_history_changed_by",
-          "column": "changed_by",
-          "references": {
-            "table": "users",
-            "column": "id"
-          }
         }
       ]
     },
     "fiche_lignes": {
       "columns": [
+        "actif",
+        "created_at",
+        "description",
+        "fiche_id",
         "id",
         "mama_id",
-        "fiche_id",
-        "description",
-        "quantite",
-        "created_at",
-        "updated_at",
-        "actif",
         "produit_id",
-        "sous_fiche_id"
+        "quantite",
+        "sous_fiche_id",
+        "updated_at"
       ],
       "foreignKeys": [
         {
@@ -844,18 +844,26 @@
     },
     "fiche_prix_history": {
       "columns": [
+        "actif",
+        "changed_at",
+        "changed_by",
+        "created_at",
+        "fiche_id",
         "id",
         "mama_id",
-        "fiche_id",
-        "old_prix",
         "new_prix",
-        "changed_by",
-        "changed_at",
-        "created_at",
-        "updated_at",
-        "actif"
+        "old_prix",
+        "updated_at"
       ],
       "foreignKeys": [
+        {
+          "name": "fk_fiche_prix_history_changed_by",
+          "column": "changed_by",
+          "references": {
+            "table": "users",
+            "column": "id"
+          }
+        },
         {
           "name": "fiche_prix_history_fiche_id_fkey",
           "column": "fiche_id",
@@ -871,26 +879,18 @@
             "table": "mamas",
             "column": "id"
           }
-        },
-        {
-          "name": "fk_fiche_prix_history_changed_by",
-          "column": "changed_by",
-          "references": {
-            "table": "users",
-            "column": "id"
-          }
         }
       ]
     },
     "fiches": {
       "columns": [
+        "actif",
+        "created_at",
         "id",
         "mama_id",
+        "portions",
         "titre",
-        "created_at",
-        "updated_at",
-        "actif",
-        "portions"
+        "updated_at"
       ],
       "foreignKeys": [
         {
@@ -905,24 +905,24 @@
     },
     "fiches_techniques": {
       "columns": [
+        "actif",
+        "carte_actuelle",
+        "cout_par_portion",
+        "cout_portion",
+        "cout_total",
+        "created_at",
+        "famille",
+        "fiche_id",
         "id",
         "mama_id",
-        "fiche_id",
-        "technique",
-        "created_at",
-        "updated_at",
-        "actif",
         "nom",
-        "cout_par_portion",
         "portions",
-        "famille",
         "prix_vente",
-        "type_carte",
+        "rendement",
         "sous_type_carte",
-        "carte_actuelle",
-        "cout_total",
-        "cout_portion",
-        "rendement"
+        "technique",
+        "type_carte",
+        "updated_at"
       ],
       "foreignKeys": [
         {
@@ -945,25 +945,25 @@
     },
     "fournisseur_achats_mois": {
       "columns": [
-        "mama_id",
         "fournisseur_id",
+        "mama_id",
         "mois",
-        "montant_ht",
-        "montant"
+        "montant",
+        "montant_ht"
       ],
       "foreignKeys": []
     },
     "fournisseur_contacts": {
       "columns": [
+        "actif",
+        "created_at",
+        "email",
+        "fournisseur_id",
         "id",
         "mama_id",
-        "fournisseur_id",
         "nom",
-        "email",
         "tel",
-        "created_at",
-        "updated_at",
-        "actif"
+        "updated_at"
       ],
       "foreignKeys": [
         {
@@ -986,14 +986,14 @@
     },
     "fournisseur_notes": {
       "columns": [
+        "actif",
+        "created_at",
+        "date",
+        "fournisseur_id",
         "id",
         "mama_id",
-        "fournisseur_id",
         "note",
-        "date",
-        "created_at",
-        "updated_at",
-        "actif"
+        "updated_at"
       ],
       "foreignKeys": [
         {
@@ -1016,15 +1016,15 @@
     },
     "fournisseur_produits": {
       "columns": [
+        "actif",
+        "created_at",
+        "date_livraison",
+        "fournisseur_id",
         "id",
         "mama_id",
-        "fournisseur_id",
-        "produit_id",
-        "created_at",
-        "updated_at",
-        "actif",
         "prix_achat",
-        "date_livraison"
+        "produit_id",
+        "updated_at"
       ],
       "foreignKeys": [
         {
@@ -1032,14 +1032,6 @@
           "column": "fournisseur_id",
           "references": {
             "table": "fournisseurs",
-            "column": "id"
-          }
-        },
-        {
-          "name": "fk_fournisseur_produits_produit_id",
-          "column": "produit_id",
-          "references": {
-            "table": "produits",
             "column": "id"
           }
         },
@@ -1060,6 +1052,14 @@
           }
         },
         {
+          "name": "fk_fournisseur_produits_produit_id",
+          "column": "produit_id",
+          "references": {
+            "table": "produits",
+            "column": "id"
+          }
+        },
+        {
           "name": "fournisseur_produits_produit_id_fkey",
           "column": "produit_id",
           "references": {
@@ -1071,12 +1071,12 @@
     },
     "fournisseurs": {
       "columns": [
+        "actif",
+        "created_at",
         "id",
         "mama_id",
         "nom",
-        "created_at",
-        "updated_at",
-        "actif"
+        "updated_at"
       ],
       "foreignKeys": [
         {
@@ -1099,14 +1099,14 @@
     },
     "fournisseurs_api_config": {
       "columns": [
+        "actif",
+        "created_at",
+        "format_facture",
         "fournisseur_id",
         "mama_id",
-        "url",
-        "type_api",
         "token",
-        "format_facture",
-        "actif",
-        "created_at"
+        "type_api",
+        "url"
       ],
       "foreignKeys": [
         {
@@ -1129,16 +1129,16 @@
     },
     "gadgets": {
       "columns": [
-        "id",
-        "tableau_id",
-        "type",
-        "config",
-        "created_at",
-        "mama_id",
         "actif",
+        "config",
+        "configuration_json",
+        "created_at",
+        "id",
+        "mama_id",
         "nom",
         "ordre",
-        "configuration_json"
+        "tableau_id",
+        "type"
       ],
       "foreignKeys": [
         {
@@ -1153,10 +1153,10 @@
     },
     "guides_seen": {
       "columns": [
-        "user_id",
         "mama_id",
         "module",
-        "seen"
+        "seen",
+        "user_id"
       ],
       "foreignKeys": [
         {
@@ -1179,27 +1179,27 @@
     },
     "help_articles": {
       "columns": [
-        "id",
-        "titre",
         "contenu",
-        "created_at"
+        "created_at",
+        "id",
+        "titre"
       ],
       "foreignKeys": []
     },
     "inventaire_lignes": {
       "columns": [
+        "actif",
+        "created_at",
         "id",
-        "mama_id",
         "inventaire_id",
+        "mama_id",
+        "motif",
         "produit_id",
         "quantite",
-        "created_at",
-        "updated_at",
-        "actif",
-        "zone_id",
-        "quantite_theorique",
         "quantite_reelle",
-        "motif"
+        "quantite_theorique",
+        "updated_at",
+        "zone_id"
       ],
       "foreignKeys": [
         {
@@ -1238,11 +1238,11 @@
     },
     "inventaire_zones": {
       "columns": [
+        "actif",
+        "created_at",
         "id",
         "mama_id",
-        "nom",
-        "created_at",
-        "actif"
+        "nom"
       ],
       "foreignKeys": [
         {
@@ -1257,16 +1257,16 @@
     },
     "inventaires": {
       "columns": [
+        "actif",
+        "cloture",
+        "created_at",
+        "date_debut",
+        "date_inventaire",
         "id",
         "mama_id",
-        "date_inventaire",
-        "created_at",
-        "updated_at",
-        "actif",
         "reference",
-        "zone",
-        "date_debut",
-        "cloture"
+        "updated_at",
+        "zone"
       ],
       "foreignKeys": [
         {
@@ -1281,19 +1281,19 @@
     },
     "journaux_utilisateur": {
       "columns": [
-        "id",
-        "mama_id",
-        "user_id",
+        "actif",
         "action",
+        "created_at",
+        "date_action",
         "details",
         "done_by",
-        "created_at",
-        "updated_at",
-        "actif",
-        "utilisateur_id",
-        "page",
+        "id",
         "ip",
-        "date_action"
+        "mama_id",
+        "page",
+        "updated_at",
+        "user_id",
+        "utilisateur_id"
       ],
       "foreignKeys": [
         {
@@ -1332,18 +1332,18 @@
     },
     "lignes_bl": {
       "columns": [
-        "id",
+        "actif",
         "bl_id",
+        "commentaire",
+        "created_at",
+        "id",
+        "mama_id",
+        "prix",
+        "prix_unitaire",
         "produit_id",
         "quantite",
-        "prix",
-        "tva",
-        "created_at",
-        "mama_id",
         "quantite_recue",
-        "prix_unitaire",
-        "commentaire",
-        "actif",
+        "tva",
         "updated_at"
       ],
       "foreignKeys": [
@@ -1375,19 +1375,19 @@
     },
     "logs_securite": {
       "columns": [
-        "id",
-        "mama_id",
-        "user_id",
-        "type",
-        "ip",
-        "navigateur",
-        "description",
         "created_at",
-        "utilisateur_id",
-        "type_evenement",
-        "details",
         "date_evenement",
-        "niveau_criticite"
+        "description",
+        "details",
+        "id",
+        "ip",
+        "mama_id",
+        "navigateur",
+        "niveau_criticite",
+        "type",
+        "type_evenement",
+        "user_id",
+        "utilisateur_id"
       ],
       "foreignKeys": [
         {
@@ -1418,36 +1418,36 @@
     },
     "mamas": {
       "columns": [
-        "id",
-        "created_at",
-        "updated_at",
         "actif",
-        "nom",
-        "logo_url",
-        "primary_color",
-        "secondary_color",
-        "email_envoi",
-        "email_alertes",
+        "created_at",
         "dark_mode",
+        "email_alertes",
+        "email_envoi",
+        "enabled_modules",
+        "id",
         "langue",
-        "monnaie",
-        "timezone",
-        "rgpd_text",
+        "logo_url",
         "mentions_legales",
-        "ville",
-        "enabled_modules"
+        "monnaie",
+        "nom",
+        "primary_color",
+        "rgpd_text",
+        "secondary_color",
+        "timezone",
+        "updated_at",
+        "ville"
       ],
       "foreignKeys": []
     },
     "menu_fiches": {
       "columns": [
+        "actif",
+        "created_at",
+        "fiche_id",
         "id",
         "mama_id",
         "menu_id",
-        "fiche_id",
-        "created_at",
-        "updated_at",
-        "actif"
+        "updated_at"
       ],
       "foreignKeys": [
         {
@@ -1478,13 +1478,13 @@
     },
     "menus": {
       "columns": [
+        "actif",
+        "created_at",
+        "date",
         "id",
         "mama_id",
         "nom",
-        "date",
-        "created_at",
-        "updated_at",
-        "actif"
+        "updated_at"
       ],
       "foreignKeys": [
         {
@@ -1499,15 +1499,15 @@
     },
     "menus_jour": {
       "columns": [
+        "actif",
+        "created_at",
+        "date",
         "id",
         "mama_id",
         "nom",
-        "date",
         "prix_vente_ttc",
         "tva",
-        "created_at",
-        "updated_at",
-        "actif"
+        "updated_at"
       ],
       "foreignKeys": [
         {
@@ -1522,14 +1522,14 @@
     },
     "menus_jour_fiches": {
       "columns": [
-        "id",
-        "menu_jour_id",
-        "fiche_id",
-        "mama_id",
-        "quantite",
+        "actif",
         "created_at",
-        "updated_at",
-        "actif"
+        "fiche_id",
+        "id",
+        "mama_id",
+        "menu_jour_id",
+        "quantite",
+        "updated_at"
       ],
       "foreignKeys": [
         {
@@ -1560,15 +1560,15 @@
     },
     "mouvements_centres_cout": {
       "columns": [
+        "actif",
+        "centre_cout_id",
+        "created_at",
         "id",
         "mama_id",
         "mouvement_id",
-        "centre_cout_id",
         "quantite",
-        "valeur",
-        "created_at",
         "updated_at",
-        "actif"
+        "valeur"
       ],
       "foreignKeys": [
         {
@@ -1591,35 +1591,35 @@
     },
     "mouvements_stock": {
       "columns": [
-        "id",
-        "mama_id",
-        "produit_id",
-        "facture_id",
-        "facture_ligne_id",
-        "sens",
-        "quantite",
-        "pu_ht",
-        "total_ht",
-        "fait_le",
         "created_at",
         "date_mouvement",
-        "source",
+        "facture_id",
+        "facture_ligne_id",
+        "fait_le",
+        "id",
+        "mama_id",
+        "pmp",
+        "produit_id",
+        "pu_ht",
+        "quantite",
         "ref_id",
-        "type",
-        "pmp"
+        "sens",
+        "source",
+        "total_ht",
+        "type"
       ],
       "foreignKeys": []
     },
     "notification_preferences": {
       "columns": [
-        "id",
-        "utilisateur_id",
-        "mama_id",
         "email_enabled",
+        "id",
+        "mama_id",
+        "updated_at",
+        "utilisateur_id",
         "webhook_enabled",
-        "webhook_url",
         "webhook_token",
-        "updated_at"
+        "webhook_url"
       ],
       "foreignKeys": [
         {
@@ -1642,16 +1642,16 @@
     },
     "notifications": {
       "columns": [
-        "id",
-        "mama_id",
-        "user_id",
-        "titre",
-        "texte",
-        "lien",
-        "type",
-        "lu",
-        "created_at",
         "actif",
+        "created_at",
+        "id",
+        "lien",
+        "lu",
+        "mama_id",
+        "texte",
+        "titre",
+        "type",
+        "user_id",
         "utilisateur_id"
       ],
       "foreignKeys": [
@@ -1683,14 +1683,14 @@
     },
     "parametres": {
       "columns": [
-        "id",
-        "mama_id",
-        "nom",
-        "logo",
+        "actif",
         "contacts",
         "created_at",
-        "updated_at",
-        "actif"
+        "id",
+        "logo",
+        "mama_id",
+        "nom",
+        "updated_at"
       ],
       "foreignKeys": [
         {
@@ -1705,19 +1705,27 @@
     },
     "permissions": {
       "columns": [
+        "actif",
+        "created_at",
+        "droit",
         "id",
         "mama_id",
-        "role_id",
-        "user_id",
         "module",
-        "droit",
-        "created_at",
+        "role_id",
         "updated_at",
-        "actif"
+        "user_id"
       ],
       "foreignKeys": [
         {
           "name": "fk_permissions_mama_id",
+          "column": "mama_id",
+          "references": {
+            "table": "mamas",
+            "column": "id"
+          }
+        },
+        {
+          "name": "permissions_mama_id_fkey",
           "column": "mama_id",
           "references": {
             "table": "mamas",
@@ -1747,30 +1755,22 @@
             "table": "users",
             "column": "id"
           }
-        },
-        {
-          "name": "permissions_mama_id_fkey",
-          "column": "mama_id",
-          "references": {
-            "table": "mamas",
-            "column": "id"
-          }
         }
       ]
     },
     "pertes": {
       "columns": [
+        "actif",
+        "centre_cout_id",
+        "created_at",
+        "created_by",
+        "date_perte",
         "id",
         "mama_id",
-        "produit_id",
-        "centre_cout_id",
-        "date_perte",
-        "quantite",
         "motif",
-        "created_by",
-        "created_at",
-        "updated_at",
-        "actif"
+        "produit_id",
+        "quantite",
+        "updated_at"
       ],
       "foreignKeys": [
         {
@@ -1809,13 +1809,13 @@
     },
     "planning_lignes": {
       "columns": [
+        "created_at",
         "id",
+        "mama_id",
+        "observation",
         "planning_id",
         "produit_id",
-        "quantite",
-        "observation",
-        "mama_id",
-        "created_at"
+        "quantite"
       ],
       "foreignKeys": [
         {
@@ -1846,16 +1846,16 @@
     },
     "planning_previsionnel": {
       "columns": [
+        "actif",
+        "commentaire",
+        "created_at",
+        "date_prevue",
         "id",
         "mama_id",
-        "date_prevue",
-        "quantite",
-        "produit_id",
-        "created_at",
         "nom",
-        "commentaire",
-        "statut",
-        "actif"
+        "produit_id",
+        "quantite",
+        "statut"
       ],
       "foreignKeys": [
         {
@@ -1878,33 +1878,33 @@
     },
     "produits": {
       "columns": [
+        "actif",
+        "allergenes",
+        "code",
+        "created_at",
+        "dernier_prix",
+        "famille_id",
+        "fiche_technique_id",
+        "fournisseur_id",
         "id",
+        "image",
         "mama_id",
         "nom",
-        "created_at",
-        "updated_at",
-        "actif",
-        "famille_id",
-        "unite_id",
-        "code",
-        "image",
-        "allergenes",
-        "pmp",
-        "stock_reel",
-        "stock_min",
-        "stock_theorique",
-        "fournisseur_id",
-        "dernier_prix",
-        "fiche_technique_id",
-        "prix_vente",
         "photo_url",
-        "url_photo",
-        "sous_famille_id",
-        "zone_stock_id",
-        "zone_id",
+        "pmp",
+        "prix_vente",
         "seuil_min",
+        "sous_famille_id",
+        "stock_min",
+        "stock_reel",
+        "stock_theorique",
+        "supplier_id",
         "tva",
-        "supplier_id"
+        "unite_id",
+        "updated_at",
+        "url_photo",
+        "zone_id",
+        "zone_stock_id"
       ],
       "foreignKeys": [
         {
@@ -1916,7 +1916,31 @@
           }
         },
         {
+          "name": "produits_fiche_technique_id_fkey",
+          "column": "fiche_technique_id",
+          "references": {
+            "table": "fiches_techniques",
+            "column": "id"
+          }
+        },
+        {
+          "name": "produits_fournisseur_id_fkey",
+          "column": "fournisseur_id",
+          "references": {
+            "table": "fournisseurs",
+            "column": "id"
+          }
+        },
+        {
           "name": "fk_produits_mama_id",
+          "column": "mama_id",
+          "references": {
+            "table": "mamas",
+            "column": "id"
+          }
+        },
+        {
+          "name": "produits_mama_id_fkey",
           "column": "mama_id",
           "references": {
             "table": "mamas",
@@ -1948,30 +1972,6 @@
           }
         },
         {
-          "name": "produits_fiche_technique_id_fkey",
-          "column": "fiche_technique_id",
-          "references": {
-            "table": "fiches_techniques",
-            "column": "id"
-          }
-        },
-        {
-          "name": "produits_fournisseur_id_fkey",
-          "column": "fournisseur_id",
-          "references": {
-            "table": "fournisseurs",
-            "column": "id"
-          }
-        },
-        {
-          "name": "produits_mama_id_fkey",
-          "column": "mama_id",
-          "references": {
-            "table": "mamas",
-            "column": "id"
-          }
-        },
-        {
           "name": "produits_zone_stock_id_fkey",
           "column": "zone_stock_id",
           "references": {
@@ -1983,13 +1983,13 @@
     },
     "produits_utilises": {
       "columns": [
+        "date_utilisation",
         "id",
+        "mama_id",
         "produit_id",
         "quantite",
-        "unite",
         "source",
-        "date_utilisation",
-        "mama_id"
+        "unite"
       ],
       "foreignKeys": [
         {
@@ -2012,15 +2012,15 @@
     },
     "promotion_produits": {
       "columns": [
+        "actif",
+        "created_at",
+        "discount",
         "id",
         "mama_id",
-        "promotion_id",
-        "produit_id",
-        "discount",
         "prix_promo",
-        "created_at",
-        "updated_at",
-        "actif"
+        "produit_id",
+        "promotion_id",
+        "updated_at"
       ],
       "foreignKeys": [
         {
@@ -2051,15 +2051,15 @@
     },
     "promotions": {
       "columns": [
+        "actif",
+        "created_at",
+        "date_debut",
+        "date_fin",
+        "description",
         "id",
         "mama_id",
         "nom",
-        "description",
-        "date_debut",
-        "date_fin",
-        "created_at",
-        "updated_at",
-        "actif"
+        "updated_at"
       ],
       "foreignKeys": [
         {
@@ -2074,13 +2074,13 @@
     },
     "regles_alertes": {
       "columns": [
+        "actif",
+        "created_at",
         "id",
         "mama_id",
         "produit_id",
-        "type",
         "seuil",
-        "actif",
-        "created_at"
+        "type"
       ],
       "foreignKeys": [
         {
@@ -2103,18 +2103,18 @@
     },
     "requisition_lignes": {
       "columns": [
+        "actif",
+        "commentaire",
+        "created_at",
         "id",
         "mama_id",
-        "requisition_id",
         "produit_id",
+        "quantite",
         "quantite_demandee",
-        "stock_theorique_avant",
+        "requisition_id",
         "stock_theorique_apres",
-        "commentaire",
-        "actif",
-        "created_at",
-        "updated_at",
-        "quantite"
+        "stock_theorique_avant",
+        "updated_at"
       ],
       "foreignKeys": [
         {
@@ -2145,21 +2145,21 @@
     },
     "requisitions": {
       "columns": [
+        "actif",
+        "auteur_id",
+        "commentaire",
+        "created_at",
+        "date_demande",
+        "date_requisition",
         "id",
         "mama_id",
         "produit_id",
-        "zone_id",
-        "date_requisition",
         "quantite",
+        "statut",
         "type",
-        "commentaire",
-        "auteur_id",
-        "created_at",
         "updated_at",
-        "actif",
         "utilisateur_id",
-        "date_demande",
-        "statut"
+        "zone_id"
       ],
       "foreignKeys": [
         {
@@ -2206,14 +2206,14 @@
     },
     "roles": {
       "columns": [
-        "id",
-        "nom",
-        "created_at",
-        "updated_at",
+        "access_rights",
         "actif",
-        "mama_id",
+        "created_at",
         "description",
-        "access_rights"
+        "id",
+        "mama_id",
+        "nom",
+        "updated_at"
       ],
       "foreignKeys": [
         {
@@ -2236,13 +2236,13 @@
     },
     "signalements": {
       "columns": [
+        "created_at",
+        "created_by",
+        "date",
+        "description",
         "id",
         "mama_id",
-        "created_by",
-        "type",
-        "description",
-        "date",
-        "created_at"
+        "type"
       ],
       "foreignKeys": [
         {
@@ -2265,11 +2265,11 @@
     },
     "sous_familles": {
       "columns": [
-        "id",
-        "nom",
+        "actif",
         "famille_id",
+        "id",
         "mama_id",
-        "actif"
+        "nom"
       ],
       "foreignKeys": [
         {
@@ -2284,21 +2284,21 @@
     },
     "stock_mouvements": {
       "columns": [
-        "id",
-        "mama_id",
-        "inventaire_id",
-        "created_at",
-        "updated_at",
         "actif",
-        "date",
-        "type",
-        "quantite",
-        "produit_id",
-        "zone_source_id",
-        "zone_destination_id",
-        "commentaire",
         "auteur_id",
-        "zone_id"
+        "commentaire",
+        "created_at",
+        "date",
+        "id",
+        "inventaire_id",
+        "mama_id",
+        "produit_id",
+        "quantite",
+        "type",
+        "updated_at",
+        "zone_destination_id",
+        "zone_id",
+        "zone_source_id"
       ],
       "foreignKeys": [
         {
@@ -2361,14 +2361,14 @@
     },
     "stocks": {
       "columns": [
+        "actif",
+        "created_at",
         "id",
         "mama_id",
-        "zone_id",
         "produit_id",
         "quantite",
-        "created_at",
         "updated_at",
-        "actif"
+        "zone_id"
       ],
       "foreignKeys": [
         {
@@ -2399,12 +2399,12 @@
     },
     "tableaux_de_bord": {
       "columns": [
+        "created_at",
         "id",
+        "liste_gadgets_json",
         "mama_id",
         "nom",
-        "created_at",
-        "utilisateur_id",
-        "liste_gadgets_json"
+        "utilisateur_id"
       ],
       "foreignKeys": [
         {
@@ -2427,16 +2427,16 @@
     },
     "tache_assignations": {
       "columns": [
+        "actif",
+        "commentaire",
+        "created_at",
+        "date_realisation",
         "id",
         "mama_id",
-        "tache_id",
-        "utilisateur_id",
         "statut",
-        "commentaire",
-        "date_realisation",
-        "created_at",
+        "tache_id",
         "updated_at",
-        "actif"
+        "utilisateur_id"
       ],
       "foreignKeys": [
         {
@@ -2467,15 +2467,15 @@
     },
     "tache_instances": {
       "columns": [
+        "actif",
+        "created_at",
+        "date_echeance",
+        "done_by",
         "id",
         "mama_id",
-        "tache_id",
-        "date_echeance",
         "statut",
-        "done_by",
-        "created_at",
-        "updated_at",
-        "actif"
+        "tache_id",
+        "updated_at"
       ],
       "foreignKeys": [
         {
@@ -2506,22 +2506,22 @@
     },
     "taches": {
       "columns": [
+        "actif",
+        "assignes",
+        "created_at",
+        "created_by",
+        "date_debut",
+        "date_echeance",
+        "delai_jours",
+        "description",
+        "frequence",
         "id",
         "mama_id",
-        "titre",
-        "description",
-        "assignes",
-        "date_debut",
-        "delai_jours",
-        "date_echeance",
-        "recurrente",
-        "frequence",
         "priorite",
+        "recurrente",
         "statut",
-        "created_by",
-        "created_at",
+        "titre",
         "updated_at",
-        "actif",
         "utilisateur_id"
       ],
       "foreignKeys": [
@@ -2553,26 +2553,34 @@
     },
     "templates_commandes": {
       "columns": [
-        "id",
-        "mama_id",
-        "nom",
-        "fournisseur_id",
-        "logo_url",
-        "entete",
-        "pied_page",
+        "actif",
         "adresse_livraison",
+        "champs_visibles",
+        "conditions_generales",
+        "contact_email",
         "contact_nom",
         "contact_tel",
-        "contact_email",
-        "conditions_generales",
-        "champs_visibles",
-        "actif",
         "created_at",
+        "entete",
+        "fournisseur_id",
+        "id",
+        "logo_url",
+        "mama_id",
+        "nom",
+        "pied_page",
         "updated_at"
       ],
       "foreignKeys": [
         {
           "name": "fk_templates_commandes_fournisseur_id",
+          "column": "fournisseur_id",
+          "references": {
+            "table": "fournisseurs",
+            "column": "id"
+          }
+        },
+        {
+          "name": "templates_commandes_fournisseur_id_fkey",
           "column": "fournisseur_id",
           "references": {
             "table": "fournisseurs",
@@ -2588,14 +2596,6 @@
           }
         },
         {
-          "name": "templates_commandes_fournisseur_id_fkey",
-          "column": "fournisseur_id",
-          "references": {
-            "table": "fournisseurs",
-            "column": "id"
-          }
-        },
-        {
           "name": "templates_commandes_mama_id_fkey",
           "column": "mama_id",
           "references": {
@@ -2607,11 +2607,11 @@
     },
     "tooltips": {
       "columns": [
+        "champ",
+        "created_at",
         "id",
         "mama_id",
-        "champ",
-        "texte",
-        "created_at"
+        "texte"
       ],
       "foreignKeys": [
         {
@@ -2626,12 +2626,12 @@
     },
     "transfert_lignes": {
       "columns": [
+        "actif",
+        "commentaire",
         "id",
-        "transfert_id",
         "produit_id",
         "quantite",
-        "commentaire",
-        "actif"
+        "transfert_id"
       ],
       "foreignKeys": [
         {
@@ -2654,20 +2654,20 @@
     },
     "transferts": {
       "columns": [
+        "actif",
+        "commentaire",
+        "created_at",
+        "created_by",
+        "date_transfert",
         "id",
         "mama_id",
+        "motif",
         "produit_id",
         "quantite",
-        "motif",
-        "date_transfert",
-        "created_by",
-        "created_at",
         "updated_at",
-        "actif",
-        "zone_source_id",
+        "utilisateur_id",
         "zone_dest_id",
-        "commentaire",
-        "utilisateur_id"
+        "zone_source_id"
       ],
       "foreignKeys": [
         {
@@ -2722,11 +2722,11 @@
     },
     "unites": {
       "columns": [
-        "id",
-        "nom",
-        "mama_id",
         "actif",
         "created_at",
+        "id",
+        "mama_id",
+        "nom",
         "populaire",
         "updated_at"
       ],
@@ -2743,13 +2743,13 @@
     },
     "unites_equivalentes": {
       "columns": [
+        "actif",
+        "coefficient",
+        "created_at",
         "id",
         "mama_id",
-        "unite_src",
         "unite_dst",
-        "coefficient",
-        "actif",
-        "created_at",
+        "unite_src",
         "updated_at"
       ],
       "foreignKeys": [
@@ -2783,9 +2783,9 @@
       "columns": [
         "id",
         "mama_id",
-        "user_id",
         "module",
-        "timestamp"
+        "timestamp",
+        "user_id"
       ],
       "foreignKeys": [
         {
@@ -2808,32 +2808,48 @@
     },
     "users": {
       "columns": [
-        "id",
-        "username",
+        "actif",
         "created_at",
+        "id",
         "updated_at",
-        "actif"
+        "username"
       ],
       "foreignKeys": []
     },
     "utilisateurs": {
       "columns": [
+        "access_rights",
+        "actif",
+        "auth_id",
+        "created_at",
+        "email",
         "id",
+        "invite_pending",
         "mama_id",
         "nom",
-        "created_at",
-        "updated_at",
-        "actif",
-        "role_id",
-        "access_rights",
-        "auth_id",
-        "email",
         "role",
-        "invite_pending"
+        "role_id",
+        "updated_at"
       ],
       "foreignKeys": [
         {
+          "name": "utilisateurs_auth_id_fkey",
+          "column": "auth_id",
+          "references": {
+            "table": "users",
+            "column": "id"
+          }
+        },
+        {
           "name": "fk_utilisateurs_mama_id",
+          "column": "mama_id",
+          "references": {
+            "table": "mamas",
+            "column": "id"
+          }
+        },
+        {
+          "name": "utilisateurs_mama_id_fkey",
           "column": "mama_id",
           "references": {
             "table": "mamas",
@@ -2847,178 +2863,50 @@
             "table": "roles",
             "column": "id"
           }
-        },
-        {
-          "name": "utilisateurs_auth_id_fkey",
-          "column": "auth_id",
-          "references": {
-            "table": "users",
-            "column": "id"
-          }
-        },
-        {
-          "name": "utilisateurs_mama_id_fkey",
-          "column": "mama_id",
-          "references": {
-            "table": "mamas",
-            "column": "id"
-          }
         }
       ]
     },
-    "utilisateurs_complets": {
-      "columns": [
-        "id",
-        "nom",
-        "mama_id",
-        "actif",
-        "access_rights",
-        "role_id",
-        "role_nom",
-        "role_access_rights",
-        "auth_id",
-        "email"
-      ],
-      "foreignKeys": []
-    },
-    "v_achats_mensuels": {
-      "columns": [
-        "mama_id",
-        "mois",
-        "montant_total"
-      ],
-      "foreignKeys": []
-    },
     "v_alertes_rupture": {
       "columns": [
-        "mama_id",
-        "produit_id",
-        "nom",
         "famille_id",
-        "unite_id",
         "fournisseur_id",
         "fournisseur_nom",
-        "unite",
-        "stock_min",
+        "mama_id",
+        "manque",
+        "nom",
+        "produit_id",
         "stock_actuel",
-        "manque"
-      ],
-      "foreignKeys": []
-    },
-    "v_analytique_stock": {
-      "columns": [
-        "date",
-        "produit_id",
-        "famille",
-        "activite",
-        "cost_center_id",
-        "cost_center_nom",
-        "quantite",
-        "valeur",
-        "mama_id"
-      ],
-      "foreignKeys": []
-    },
-    "v_besoins_previsionnels": {
-      "columns": [
-        "mama_id",
-        "menu_id",
-        "produit_id",
-        "quantite",
-        "valeur"
-      ],
-      "foreignKeys": []
-    },
-    "v_boissons": {
-      "columns": [
-        "id",
-        "nom",
-        "prix_vente",
-        "created_at",
-        "mama_id",
-        "famille",
+        "stock_min",
         "unite",
-        "fiche_id",
-        "cout_portion"
-      ],
-      "foreignKeys": []
-    },
-    "v_cost_center_month": {
-      "columns": [
-        "mama_id",
-        "cost_center_id",
-        "nom",
-        "mois",
-        "total"
-      ],
-      "foreignKeys": []
-    },
-    "v_cost_center_monthly": {
-      "columns": [
-        "mama_id",
-        "nom",
-        "mois",
-        "montant"
-      ],
-      "foreignKeys": []
-    },
-    "v_ecarts_inventaire": {
-      "columns": [
-        "mama_id",
-        "produit_id",
-        "date",
-        "zone",
-        "stock_theorique",
-        "stock_reel",
-        "ecart",
-        "motif"
-      ],
-      "foreignKeys": []
-    },
-    "v_evolution_achats": {
-      "columns": [
-        "mama_id",
-        "mois",
-        "montant"
+        "unite_id"
       ],
       "foreignKeys": []
     },
     "v_familles_orphelines": {
       "columns": [
-        "id",
-        "nom",
-        "mama_id",
         "actif",
         "created_at",
+        "id",
+        "mama_id",
+        "nom",
         "parent_id",
         "populaire",
         "updated_at"
       ],
       "foreignKeys": []
     },
-    "v_fournisseurs_inactifs": {
-      "columns": [
-        "mama_id",
-        "fournisseur_id",
-        "nom",
-        "fournisseur_actif",
-        "facture_actif",
-        "dernier_achat"
-      ],
-      "foreignKeys": []
-    },
     "v_menu_engineering": {
       "columns": [
-        "fiche_id",
-        "nom",
-        "famille",
-        "prix_vente",
         "cout_portion",
-        "periode",
-        "ventes",
-        "popularite",
+        "famille",
+        "fiche_id",
+        "mama_id",
         "marge",
-        "mama_id"
+        "nom",
+        "periode",
+        "popularite",
+        "prix_vente",
+        "ventes"
       ],
       "foreignKeys": []
     },
@@ -3032,8 +2920,8 @@
     },
     "v_mouvements_centres_cout_stats": {
       "columns": [
-        "centre_cout_id",
         "centre_cout",
+        "centre_cout_id",
         "total_quantite",
         "total_valeur"
       ],
@@ -3041,148 +2929,66 @@
     },
     "v_notifications_non_lues": {
       "columns": [
-        "utilisateur_id",
         "mama_id",
-        "total_non_lues"
-      ],
-      "foreignKeys": []
-    },
-    "v_performance_fiches": {
-      "columns": [
-        "mama_id",
-        "fiche_id",
-        "nom",
-        "cout",
-        "volume",
-        "popularite"
-      ],
-      "foreignKeys": []
-    },
-    "v_pmp": {
-      "columns": [
-        "mama_id",
-        "produit_id",
-        "produit_actif",
-        "fournisseur_produit_actif",
-        "pmp"
+        "total_non_lues",
+        "utilisateur_id"
       ],
       "foreignKeys": []
     },
     "v_produits_actifs": {
       "columns": [
+        "actif",
+        "allergenes",
+        "code",
+        "created_at",
+        "dernier_prix",
+        "famille_id",
         "id",
+        "image",
+        "main_supplier_id",
         "mama_id",
         "nom",
-        "created_at",
-        "updated_at",
-        "actif",
-        "famille_id",
-        "unite_id",
-        "code",
-        "image",
-        "allergenes",
         "pmp",
-        "stock_reel",
         "stock_min",
+        "stock_reel",
         "stock_theorique",
-        "main_supplier_id",
-        "dernier_prix"
-      ],
-      "foreignKeys": []
-    },
-    "v_produits_dernier_prix": {
-      "columns": [
-        "produit_id",
-        "nom",
-        "famille_id",
-        "famille",
         "unite_id",
-        "unite",
-        "stock_reel",
-        "stock_min",
-        "fournisseur_id",
-        "fournisseur",
-        "dernier_prix",
-        "date_livraison",
-        "mama_id"
+        "updated_at"
       ],
       "foreignKeys": []
     },
     "v_produits_inactifs": {
       "columns": [
-        "id",
-        "mama_id",
-        "nom",
-        "created_at",
-        "updated_at",
         "actif",
-        "famille_id",
-        "unite_id",
-        "code",
-        "image",
         "allergenes",
-        "pmp",
-        "stock_reel",
-        "stock_min",
-        "stock_theorique",
-        "main_supplier_id",
-        "dernier_prix"
-      ],
-      "foreignKeys": []
-    },
-    "v_produits_utilises": {
-      "columns": [
+        "code",
+        "created_at",
+        "dernier_prix",
+        "famille_id",
         "id",
-        "produit_id",
-        "produit_nom",
-        "quantite",
-        "unite",
-        "source",
-        "date_utilisation",
-        "mama_id"
-      ],
-      "foreignKeys": []
-    },
-    "v_reco_stockmort": {
-      "columns": [
+        "image",
+        "main_supplier_id",
         "mama_id",
-        "produit_id",
         "nom",
-        "jours_inactif"
-      ],
-      "foreignKeys": []
-    },
-    "v_reco_surcout": {
-      "columns": [
-        "mama_id",
-        "produit_id",
-        "nom",
-        "variation_pct"
+        "pmp",
+        "stock_min",
+        "stock_reel",
+        "stock_theorique",
+        "unite_id",
+        "updated_at"
       ],
       "foreignKeys": []
     },
     "v_requisition_stock": {
       "columns": [
         "ligne_id",
-        "requisition_id",
-        "zone_id",
-        "produit_id",
-        "stock_reel",
-        "quantite_demandee",
-        "stock_apres",
-        "mama_id"
-      ],
-      "foreignKeys": []
-    },
-    "v_requisitions": {
-      "columns": [
-        "id",
-        "date_requisition",
-        "quantite",
         "mama_id",
         "produit_id",
-        "produit_nom",
-        "photo_url"
+        "quantite_demandee",
+        "requisition_id",
+        "stock_apres",
+        "stock_reel",
+        "zone_id"
       ],
       "foreignKeys": []
     },
@@ -3194,57 +3000,30 @@
       ],
       "foreignKeys": []
     },
-    "v_stocks": {
-      "columns": [
-        "mama_id",
-        "produit_id",
-        "stock"
-      ],
-      "foreignKeys": []
-    },
-    "v_tendance_prix_produit": {
-      "columns": [
-        "mama_id",
-        "produit_id",
-        "mois",
-        "prix_moyen"
-      ],
-      "foreignKeys": []
-    },
-    "v_top_fournisseurs": {
-      "columns": [
-        "fournisseur_id",
-        "fournisseur",
-        "montant_total",
-        "nombre_achats",
-        "mama_id"
-      ],
-      "foreignKeys": []
-    },
     "v_transferts_historique": {
       "columns": [
-        "transfert_id",
-        "date_transfert",
-        "zone_source_id",
-        "zone_source",
-        "zone_dest_id",
-        "zone_dest",
-        "produit_id",
-        "produit",
-        "quantite",
         "commentaire",
+        "created_at",
+        "date_transfert",
+        "produit",
+        "produit_id",
+        "quantite",
+        "transfert_id",
         "utilisateur_id",
-        "created_at"
+        "zone_dest",
+        "zone_dest_id",
+        "zone_source",
+        "zone_source_id"
       ],
       "foreignKeys": []
     },
     "v_unites_orphelines": {
       "columns": [
-        "id",
-        "nom",
-        "mama_id",
         "actif",
         "created_at",
+        "id",
+        "mama_id",
+        "nom",
         "populaire",
         "updated_at"
       ],
@@ -3252,15 +3031,15 @@
     },
     "validation_requests": {
       "columns": [
+        "actif",
+        "created_at",
         "id",
         "mama_id",
-        "user_id",
         "module",
         "payload",
         "statut",
-        "created_at",
-        "actif",
-        "updated_at"
+        "updated_at",
+        "user_id"
       ],
       "foreignKeys": [
         {
@@ -3283,15 +3062,15 @@
     },
     "ventes_boissons": {
       "columns": [
+        "actif",
+        "boisson_id",
+        "created_at",
+        "created_by",
+        "date_vente",
         "id",
         "mama_id",
-        "boisson_id",
         "quantite",
-        "date_vente",
-        "created_by",
-        "created_at",
-        "updated_at",
-        "actif"
+        "updated_at"
       ],
       "foreignKeys": [
         {
@@ -3322,14 +3101,14 @@
     },
     "ventes_fiches_carte": {
       "columns": [
+        "actif",
+        "created_at",
+        "fiche_id",
         "id",
         "mama_id",
-        "fiche_id",
         "periode",
-        "ventes",
-        "created_at",
         "updated_at",
-        "actif"
+        "ventes"
       ],
       "foreignKeys": [
         {
@@ -3352,44 +3131,44 @@
     },
     "vue_stock_disponible_par_produit_et_zone": {
       "columns": [
-        "produit",
-        "unite",
         "famille",
-        "zone_stock",
+        "mama_id",
+        "produit",
         "quantite",
+        "unite",
         "updated_at",
-        "mama_id"
+        "zone_stock"
       ],
       "foreignKeys": []
     },
     "zones_stock": {
       "columns": [
+        "actif",
+        "created_at",
+        "description",
         "id",
         "mama_id",
         "nom",
-        "created_at",
-        "updated_at",
-        "actif",
-        "description",
-        "type_zone",
         "parent_id",
         "position",
-        "type"
+        "type",
+        "type_zone",
+        "updated_at"
       ],
       "foreignKeys": [
-        {
-          "name": "fk_zones_stock_parent",
-          "column": "parent_id",
-          "references": {
-            "table": "zones_stock",
-            "column": "id"
-          }
-        },
         {
           "name": "zones_stock_mama_id_fkey",
           "column": "mama_id",
           "references": {
             "table": "mamas",
+            "column": "id"
+          }
+        },
+        {
+          "name": "fk_zones_stock_parent",
+          "column": "parent_id",
+          "references": {
+            "table": "zones_stock",
             "column": "id"
           }
         },
@@ -3402,41 +3181,239 @@
           }
         }
       ]
+    }
+  },
+  "views": {
+    "utilisateurs_complets": {
+      "columns": [
+        "access_rights",
+        "actif",
+        "auth_id",
+        "email",
+        "id",
+        "mama_id",
+        "nom",
+        "role_access_rights",
+        "role_id",
+        "role_nom"
+      ],
+      "foreignKeys": []
     },
-    "-------------------------": {
-      "columns": [],
-      "foreignKeys": [
-        {
-          "name": "---------------------------------------------",
-          "column": "-------------------",
-          "references": {
-            "table": "---------------------",
-            "column": "----------"
-          }
-        }
-      ]
+    "v_achats_mensuels": {
+      "columns": [
+        "mama_id",
+        "mois",
+        "montant_total"
+      ],
+      "foreignKeys": []
+    },
+    "v_analytique_stock": {
+      "columns": [
+        "activite",
+        "cost_center_id",
+        "cost_center_nom",
+        "date",
+        "famille",
+        "mama_id",
+        "produit_id",
+        "quantite",
+        "valeur"
+      ],
+      "foreignKeys": []
+    },
+    "v_besoins_previsionnels": {
+      "columns": [
+        "mama_id",
+        "menu_id",
+        "produit_id",
+        "quantite",
+        "valeur"
+      ],
+      "foreignKeys": []
+    },
+    "v_boissons": {
+      "columns": [
+        "cout_portion",
+        "created_at",
+        "famille",
+        "fiche_id",
+        "id",
+        "mama_id",
+        "nom",
+        "prix_vente",
+        "unite"
+      ],
+      "foreignKeys": []
+    },
+    "v_cost_center_month": {
+      "columns": [
+        "cost_center_id",
+        "mama_id",
+        "mois",
+        "nom",
+        "total"
+      ],
+      "foreignKeys": []
+    },
+    "v_cost_center_monthly": {
+      "columns": [
+        "mama_id",
+        "mois",
+        "montant",
+        "nom"
+      ],
+      "foreignKeys": []
+    },
+    "v_ecarts_inventaire": {
+      "columns": [
+        "date",
+        "ecart",
+        "mama_id",
+        "motif",
+        "produit_id",
+        "stock_reel",
+        "stock_theorique",
+        "zone"
+      ],
+      "foreignKeys": []
+    },
+    "v_evolution_achats": {
+      "columns": [
+        "mama_id",
+        "mois",
+        "montant"
+      ],
+      "foreignKeys": []
+    },
+    "v_fournisseurs_inactifs": {
+      "columns": [
+        "dernier_achat",
+        "facture_actif",
+        "fournisseur_actif",
+        "fournisseur_id",
+        "mama_id",
+        "nom"
+      ],
+      "foreignKeys": []
+    },
+    "v_performance_fiches": {
+      "columns": [
+        "cout",
+        "fiche_id",
+        "mama_id",
+        "nom",
+        "popularite",
+        "volume"
+      ],
+      "foreignKeys": []
+    },
+    "v_pmp": {
+      "columns": [
+        "fournisseur_produit_actif",
+        "mama_id",
+        "pmp",
+        "produit_actif",
+        "produit_id"
+      ],
+      "foreignKeys": []
+    },
+    "v_produits_dernier_prix": {
+      "columns": [
+        "date_livraison",
+        "dernier_prix",
+        "famille",
+        "famille_id",
+        "fournisseur",
+        "fournisseur_id",
+        "mama_id",
+        "nom",
+        "produit_id",
+        "stock_min",
+        "stock_reel",
+        "unite",
+        "unite_id"
+      ],
+      "foreignKeys": []
+    },
+    "v_produits_utilises": {
+      "columns": [
+        "date_utilisation",
+        "id",
+        "mama_id",
+        "produit_id",
+        "produit_nom",
+        "quantite",
+        "source",
+        "unite"
+      ],
+      "foreignKeys": []
+    },
+    "v_reco_stockmort": {
+      "columns": [
+        "jours_inactif",
+        "mama_id",
+        "nom",
+        "produit_id"
+      ],
+      "foreignKeys": []
+    },
+    "v_reco_surcout": {
+      "columns": [
+        "mama_id",
+        "nom",
+        "produit_id",
+        "variation_pct"
+      ],
+      "foreignKeys": []
+    },
+    "v_requisitions": {
+      "columns": [
+        "date_requisition",
+        "id",
+        "mama_id",
+        "photo_url",
+        "produit_id",
+        "produit_nom",
+        "quantite"
+      ],
+      "foreignKeys": []
+    },
+    "v_stocks": {
+      "columns": [
+        "mama_id",
+        "produit_id",
+        "stock"
+      ],
+      "foreignKeys": []
+    },
+    "v_tendance_prix_produit": {
+      "columns": [
+        "mama_id",
+        "mois",
+        "prix_moyen",
+        "produit_id"
+      ],
+      "foreignKeys": []
+    },
+    "v_top_fournisseurs": {
+      "columns": [
+        "fournisseur",
+        "fournisseur_id",
+        "mama_id",
+        "montant_total",
+        "nombre_achats"
+      ],
+      "foreignKeys": []
     }
   },
   "rpcs": {
-    "trg_set_timestamp": {
+    "advanced_stats": {
       "params": []
     },
-    "current_user_mama_id": {
-      "params": []
-    },
-    "current_user_is_admin_or_manager": {
-      "params": []
-    },
-    "get_template_commande": {
-      "params": []
-    },
-    "create_utilisateur": {
+    "apply_stock_from_achat": {
       "params": []
     },
     "calcul_ecarts_inventaire": {
-      "params": []
-    },
-    "fn_calc_budgets": {
       "params": []
     },
     "can_access_zone": {
@@ -3445,19 +3422,27 @@
     "can_transfer": {
       "params": []
     },
-    "zone_is_cave_or_shop": {
-      "params": []
-    },
-    "advanced_stats": {
-      "params": []
-    },
-    "apply_stock_from_achat": {
-      "params": []
-    },
     "compare_fiche": {
       "params": []
     },
     "consolidated_stats": {
+      "params": []
+    },
+    "copy_zone_products": {
+      "params": [
+        "p_dest_zone",
+        "p_mama",
+        "p_overwrite",
+        "p_src_zone"
+      ]
+    },
+    "create_utilisateur": {
+      "params": []
+    },
+    "current_user_is_admin_or_manager": {
+      "params": []
+    },
+    "current_user_mama_id": {
       "params": []
     },
     "dashboard_stats": {
@@ -3469,8 +3454,39 @@
     "enable_two_fa": {
       "params": []
     },
+    "fn_calc_budgets": {
+      "params": []
+    },
+    "fn_save_facture": {
+      "params": [
+        "facture",
+        "lignes",
+        "mama_id"
+      ]
+    },
+    "get_template_commande": {
+      "params": []
+    },
     "import_invoice": {
       "params": []
+    },
+    "log_action": {
+      "params": []
+    },
+    "merge_zone_products": {
+      "params": [
+        "p_dest_zone",
+        "p_mama",
+        "p_src_zone"
+      ]
+    },
+    "move_zone_products": {
+      "params": [
+        "p_dest_zone",
+        "p_mama",
+        "p_remove_src",
+        "p_src_zone"
+      ]
     },
     "send_email_notification": {
       "params": []
@@ -3496,34 +3512,11 @@
     "top_produits": {
       "params": []
     },
-    "fn_save_facture": {
-      "params": ["mama_id", "facture", "lignes"]
-    },
-    "log_action": {
+    "trg_set_timestamp": {
       "params": []
     },
-    "move_zone_products": {
-      "params": [
-        "p_mama",
-        "p_src_zone",
-        "p_dest_zone",
-        "p_remove_src"
-      ]
-    },
-    "copy_zone_products": {
-      "params": [
-        "p_mama",
-        "p_src_zone",
-        "p_dest_zone",
-        "p_overwrite"
-      ]
-    },
-    "merge_zone_products": {
-      "params": [
-        "p_mama",
-        "p_src_zone",
-        "p_dest_zone"
-      ]
+    "zone_is_cave_or_shop": {
+      "params": []
     }
   }
 }

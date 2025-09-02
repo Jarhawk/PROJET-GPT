@@ -218,4 +218,4 @@ export const MODULES = [
   },
 ];
 
-export default MODULES;
+export default {};

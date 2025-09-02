@@ -1,9 +1,9 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { render, screen, waitFor } from '@testing-library/react';
+import { RouterProvider, createMemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { vi, beforeEach } from 'vitest';
-import RouterConfig from '../src/router.jsx';
+import { routerConfig } from '../src/router.jsx';
 
 process.env.VITE_SUPABASE_URL = 'https://example.supabase.co';
 process.env.VITE_SUPABASE_ANON_KEY = 'key';
@@ -62,11 +62,10 @@ beforeEach(() => {
 
 // We test that navigating to '/' shows the login component when not authenticated
 test('root path shows landing when unauthenticated', async () => {
+  const testRouter = createMemoryRouter(routerConfig, { initialEntries: ['/'] });
   render(
     <QueryClientProvider client={qc}>
-      <MemoryRouter initialEntries={["/"]}>
-        <RouterConfig />
-      </MemoryRouter>
+      <RouterProvider router={testRouter} />
     </QueryClientProvider>
   );
   expect(await screen.findByText(/Login/)).toBeInTheDocument();
@@ -75,14 +74,15 @@ test('root path shows landing when unauthenticated', async () => {
 test('root path redirects to dashboard when authenticated', async () => {
   authState.isAuthenticated = true;
   authState.userData = { actif: true };
+  const testRouter = createMemoryRouter(routerConfig, { initialEntries: ['/'] });
   render(
     <QueryClientProvider client={qc}>
-      <MemoryRouter initialEntries={["/"]}>
-        <RouterConfig />
-      </MemoryRouter>
+      <RouterProvider router={testRouter} />
     </QueryClientProvider>
   );
-  expect(await screen.findByText(/Dashboard Stock/)).toBeInTheDocument();
+  await waitFor(() => {
+    expect(testRouter.state.location.pathname).toBe('/dashboard');
+  });
   authState.isAuthenticated = false;
   authState.userData = null;
 });

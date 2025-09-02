@@ -6,7 +6,6 @@ import "./globals.css";
 import 'nprogress/nprogress.css';
 import "@/i18n/i18n";
 import "./registerSW.js";
-import { BrowserRouter } from "react-router-dom";
 import AuthProvider from "@/contexts/AuthContext";
 import { toast } from 'sonner';
 
@@ -38,10 +37,8 @@ if (import.meta?.env?.DEV) {
 const root = createRoot(document.getElementById("root"));
 root.render(
   <StrictMode>
-    <BrowserRouter>
-      <AuthProvider>
+    <AuthProvider>
         <App />
       </AuthProvider>
-    </BrowserRouter>
-  </StrictMode>
+    </StrictMode>
 );

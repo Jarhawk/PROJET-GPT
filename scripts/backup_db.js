@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 /* eslint-env node */
 import { mkdirSync, writeFileSync } from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { gzipSync } from 'zlib';
 import {
@@ -97,10 +98,9 @@ export async function backupDb(
     file = output;
     ensureDirForFile(file);
   } else {
-    let dir = process.env.BACKUP_DIR ?? '/tmp';
-    dir = path.isAbsolute(dir) ? dir : path.resolve(dir);
+    const dir = path.resolve(process.env.BACKUP_DIR || os.tmpdir());
     mkdirSync(dir, { recursive: true });
-    file = path.resolve(dir, defName);
+    file = path.join(dir, defName);
   }
   const data = JSON.stringify(result, null, pretty ? 2 : 0);
   if (gzip) {

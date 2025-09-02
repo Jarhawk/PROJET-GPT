@@ -2,7 +2,7 @@ import { motion as Motion } from 'framer-motion';
 import useTopFournisseurs from '@/hooks/gadgets/useTopFournisseurs';
 import LoadingSkeleton from '@/components/ui/LoadingSkeleton';
 import Card from '@/components/ui/Card';
-import { formatCurrencyEUR } from '@/lib/numberFormat';
+import { formatCurrencyEUR } from '@/utils/numberFR.js';
 
 export default function GadgetTopFournisseurs() {
   const { data, loading, error: errTop } = useTopFournisseurs();

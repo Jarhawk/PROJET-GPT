@@ -7,7 +7,7 @@ import { useMamaSettings } from '@/hooks/useMamaSettings';
  * Liste paginée des produits avec filtres.
  * - statut: 'tous' | 'actif' | 'inactif'
  * - sousFamilleId: UUID ou null
- * Inclut familles et sous-familles via FKs nommées.
+ * Requêtes séparées pour familles/sous-familles côté UI.
  */
 export const useProduits = ({
   search = '',
@@ -22,24 +22,14 @@ export const useProduits = ({
       queryKey: ['produits', mamaId, search, page, pageSize, statut, familleId, sousFamilleId],
       enabled: !!mamaId,
       queryFn: async () => {
-        // Colonnes autorisées : id, nom, unite_id, tva, zone_stock_id, famille_id, sous_famille_id, actif, mama_id
-        // Join nom de l'unité et des (sous-)familles via leurs FKs
+        // Colonnes autorisées : id, nom, unite_id, tva, zone_stock_id, sous_famille_id, actif, mama_id
         let q = supabase
           .from('produits')
           .select(
-            `
-            id, nom, unite_id, tva, zone_id:zone_stock_id, famille_id, sous_famille_id, actif, mama_id,
-            unite:unites(id, nom),
-            sous_famille:sous_familles!fk_produits_sous_famille(
-              id, nom, famille:familles(id, nom)
-            )
-            `,
+            'id, nom, unite_id, tva, zone_stock_id, sous_famille_id, actif, mama_id',
             { count: 'exact' }
           )
-          .eq('mama_id', mamaId)
-          .eq('unite.mama_id', mamaId)
-          .eq('sous_famille.mama_id', mamaId)
-          .eq('sous_famille.famille.mama_id', mamaId);
+          .eq('mama_id', mamaId);
 
       if (search) q = q.ilike('nom', `%${search}%`);
       if (familleId) q = q.eq('famille_id', familleId);

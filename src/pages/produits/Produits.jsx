@@ -3,6 +3,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useProduits } from '@/hooks/data/useProduits';
 import { useFamilles } from '@/hooks/data/useFamilles';
 import { useSousFamilles } from '@/hooks/data/useSousFamilles';
+import { useUnites } from '@/hooks/useUnites';
 import useDebounce from '@/hooks/useDebounce';
 import { logSupaError } from '@/lib/supa/logError';
 
@@ -17,7 +18,11 @@ export default function Produits() {
 
   const { familles = [] } = useFamilles();
   const { data: allSousFamilles = [] } = useSousFamilles();
-  const safeFamilles = Array.isArray(familles) ? familles : [];
+  const { unites = [] } = useUnites();
+  const safeFamilles = useMemo(
+    () => (Array.isArray(familles) ? familles : []),
+    [familles]
+  );
   const safeAllSousFamilles = useMemo(
     () => (Array.isArray(allSousFamilles) ? allSousFamilles : []),
     [allSousFamilles]
@@ -40,6 +45,16 @@ export default function Produits() {
   });
   const produits = Array.isArray(data?.data) ? data.data : [];
   const total = data?.count ?? 0;
+
+  const unitesById = useMemo(() => {
+    return new Map((Array.isArray(unites) ? unites : []).map(u => [u.id, u]));
+  }, [unites]);
+  const famillesById = useMemo(() => {
+    return new Map(safeFamilles.map(f => [f.id, f]));
+  }, [safeFamilles]);
+  const sousFamillesById = useMemo(() => {
+    return new Map(safeAllSousFamilles.map(sf => [sf.id, sf]));
+  }, [safeAllSousFamilles]);
 
   useEffect(() => {
     if (error) logSupaError('produits:list', error);
@@ -136,13 +151,18 @@ export default function Produits() {
               rowsElems.push(
                 <div key={p.id} className="table-row">
                   <div className="table-cell py-2">{p.nom}</div>
-                  <div className="table-cell py-2">{p.unite?.nom ?? '—'}</div>
+                  <div className="table-cell py-2">{unitesById.get(p.unite_id)?.nom ?? '—'}</div>
                   <div className="table-cell py-2">
-                    {p.sous_famille?.famille?.nom
-                      ? `${p.sous_famille.famille.nom} > ${p.sous_famille.nom}`
-                      : p.sous_famille?.nom ?? '—'}
+                    {(() => {
+                      const sf = sousFamillesById.get(p.sous_famille_id);
+                      if (sf) {
+                        const famNom = famillesById.get(sf.famille_id)?.nom;
+                        return famNom ? `${famNom} › ${sf.nom}` : sf.nom;
+                      }
+                      return '—';
+                    })()}
                   </div>
-                  <div className="table-cell py-2">{p.zone_id ?? '—'}</div>
+                  <div className="table-cell py-2">{p.zone_stock_id ?? '—'}</div>
                   <div className="table-cell py-2">{p.actif ? 'Actif' : 'Inactif'}</div>
                   <div className="table-cell py-2"> {/* actions existantes */}</div>
                 </div>

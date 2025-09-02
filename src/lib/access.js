@@ -27,3 +27,8 @@ export function hasAccess(user, accessKey) {
   const key = normalizeAccessKey(accessKey)
   return !!rights[key]
 }
+
+// Alias used by the new routing config
+export function hasRight(user, access) {
+  return hasAccess(user, access)
+}

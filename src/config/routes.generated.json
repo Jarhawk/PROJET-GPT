@@ -7,139 +7,6 @@
     "showInSidebar": true
   },
   {
-    "path": "/aidecontextuelle",
-    "file": "AideContextuelle.jsx",
-    "labelKey": "nav.aidecontextuelle",
-    "group": "Général",
-    "showInSidebar": true
-  },
-  {
-    "path": "/barmanager",
-    "file": "BarManager.jsx",
-    "labelKey": "nav.barmanager",
-    "group": "Général",
-    "showInSidebar": true
-  },
-  {
-    "path": "/carteplats",
-    "file": "CartePlats.jsx",
-    "labelKey": "nav.carteplats",
-    "group": "Général",
-    "showInSidebar": true
-  },
-  {
-    "path": "/consentements",
-    "file": "Consentements.jsx",
-    "labelKey": "nav.consentements",
-    "group": "Général",
-    "showInSidebar": true
-  },
-  {
-    "path": "/dashboard",
-    "file": "Dashboard.jsx",
-    "labelKey": "nav.dashboard",
-    "group": "Général",
-    "showInSidebar": true
-  },
-  {
-    "path": "/engineeringmenu",
-    "file": "EngineeringMenu.jsx",
-    "labelKey": "nav.engineeringmenu",
-    "group": "Général",
-    "showInSidebar": true
-  },
-  {
-    "path": "/feedback",
-    "file": "Feedback.jsx",
-    "labelKey": "nav.feedback",
-    "group": "Général",
-    "showInSidebar": true
-  },
-  {
-    "path": "/helpcenter",
-    "file": "HelpCenter.jsx",
-    "labelKey": "nav.helpcenter",
-    "group": "Général",
-    "showInSidebar": true
-  },
-  {
-    "path": "/journal",
-    "file": "Journal.jsx",
-    "labelKey": "nav.journal",
-    "group": "Général",
-    "showInSidebar": true
-  },
-  {
-    "path": "/notfound",
-    "file": "NotFound.jsx",
-    "labelKey": "nav.notfound",
-    "group": "Général",
-    "showInSidebar": true
-  },
-  {
-    "path": "/onboarding",
-    "file": "Onboarding.jsx",
-    "labelKey": "nav.onboarding",
-    "group": "Général",
-    "showInSidebar": true
-  },
-  {
-    "path": "/parametres/familles",
-    "file": "Parametres/Familles.jsx",
-    "labelKey": "nav.parametres",
-    "group": "Parametres",
-    "showInSidebar": true
-  },
-  {
-    "path": "/pertes",
-    "file": "Pertes.jsx",
-    "labelKey": "nav.pertes",
-    "group": "Général",
-    "showInSidebar": true
-  },
-  {
-    "path": "/planning",
-    "file": "Planning.jsx",
-    "labelKey": "nav.planning",
-    "group": "Général",
-    "showInSidebar": true
-  },
-  {
-    "path": "/planningdetail",
-    "file": "PlanningDetail.jsx",
-    "labelKey": "nav.planningdetail",
-    "group": "Général",
-    "showInSidebar": true
-  },
-  {
-    "path": "/planningform",
-    "file": "PlanningForm.jsx",
-    "labelKey": "nav.planningform",
-    "group": "Général",
-    "showInSidebar": true
-  },
-  {
-    "path": "/planningmodule",
-    "file": "PlanningModule.jsx",
-    "labelKey": "nav.planningmodule",
-    "group": "Général",
-    "showInSidebar": true
-  },
-  {
-    "path": "/rgpd",
-    "file": "Rgpd.jsx",
-    "labelKey": "nav.rgpd",
-    "group": "Général",
-    "showInSidebar": true
-  },
-  {
-    "path": "/validations",
-    "file": "Validations.jsx",
-    "labelKey": "nav.validations",
-    "group": "Général",
-    "showInSidebar": true
-  },
-  {
     "path": "/achats/achatdetail",
     "file": "achats/AchatDetail.jsx",
     "labelKey": "nav.achats",
@@ -172,6 +39,13 @@
     "file": "aide/AideForm.jsx",
     "labelKey": "nav.aide",
     "group": "Aide",
+    "showInSidebar": true
+  },
+  {
+    "path": "/aidecontextuelle",
+    "file": "AideContextuelle.jsx",
+    "labelKey": "nav.aidecontextuelle",
+    "group": "Général",
     "showInSidebar": true
   },
   {
@@ -273,6 +147,13 @@
     "showInSidebar": true
   },
   {
+    "path": "/barmanager",
+    "file": "BarManager.jsx",
+    "labelKey": "nav.barmanager",
+    "group": "Général",
+    "showInSidebar": true
+  },
+  {
     "path": "/bons_livraison/blcreate",
     "file": "bons_livraison/BLCreate.jsx",
     "labelKey": "nav.bons_livraison",
@@ -308,6 +189,13 @@
     "showInSidebar": true
   },
   {
+    "path": "/carteplats",
+    "file": "CartePlats.jsx",
+    "labelKey": "nav.carteplats",
+    "group": "Général",
+    "showInSidebar": true
+  },
+  {
     "path": "/catalogue/cataloguesyncviewer",
     "file": "catalogue/CatalogueSyncViewer.jsx",
     "labelKey": "nav.catalogue",
@@ -340,6 +228,13 @@
     "file": "commandes/CommandesEnvoyees.jsx",
     "labelKey": "nav.commandes",
     "group": "Commandes",
+    "showInSidebar": true
+  },
+  {
+    "path": "/consentements",
+    "file": "Consentements.jsx",
+    "labelKey": "nav.consentements",
+    "group": "Général",
     "showInSidebar": true
   },
   {
@@ -382,6 +277,13 @@
     "file": "dashboard/DashboardBuilder.jsx",
     "labelKey": "nav.dashboard",
     "group": "Dashboard",
+    "showInSidebar": true
+  },
+  {
+    "path": "/dashboard",
+    "file": "Dashboard.jsx",
+    "labelKey": "nav.dashboard",
+    "group": "Général",
     "showInSidebar": true
   },
   {
@@ -462,6 +364,13 @@
     "showInSidebar": true
   },
   {
+    "path": "/engineeringmenu",
+    "file": "EngineeringMenu.jsx",
+    "labelKey": "nav.engineeringmenu",
+    "group": "Général",
+    "showInSidebar": true
+  },
+  {
     "path": "/factures/facturecreate",
     "file": "factures/FactureCreate.jsx",
     "labelKey": "nav.factures",
@@ -497,6 +406,13 @@
     "showInSidebar": true
   },
   {
+    "path": "/feedback",
+    "file": "Feedback.jsx",
+    "labelKey": "nav.feedback",
+    "group": "Général",
+    "showInSidebar": true
+  },
+  {
     "path": "/fiches/fichedetail",
     "file": "fiches/FicheDetail.jsx",
     "labelKey": "nav.fiches",
@@ -527,6 +443,20 @@
   {
     "path": "/fournisseurs/apifournisseurs",
     "file": "fournisseurs/ApiFournisseurs.jsx",
+    "labelKey": "nav.fournisseurs",
+    "group": "Fournisseurs",
+    "showInSidebar": true
+  },
+  {
+    "path": "/fournisseurs/comparatif/comparatifprix",
+    "file": "fournisseurs/comparatif/ComparatifPrix.jsx",
+    "labelKey": "nav.fournisseurs",
+    "group": "Fournisseurs",
+    "showInSidebar": true
+  },
+  {
+    "path": "/fournisseurs/comparatif/prixfournisseurs",
+    "file": "fournisseurs/comparatif/PrixFournisseurs.jsx",
     "labelKey": "nav.fournisseurs",
     "group": "Fournisseurs",
     "showInSidebar": true
@@ -574,17 +504,10 @@
     "showInSidebar": true
   },
   {
-    "path": "/fournisseurs/comparatif/comparatifprix",
-    "file": "fournisseurs/comparatif/ComparatifPrix.jsx",
-    "labelKey": "nav.fournisseurs",
-    "group": "Fournisseurs",
-    "showInSidebar": true
-  },
-  {
-    "path": "/fournisseurs/comparatif/prixfournisseurs",
-    "file": "fournisseurs/comparatif/PrixFournisseurs.jsx",
-    "labelKey": "nav.fournisseurs",
-    "group": "Fournisseurs",
+    "path": "/helpcenter",
+    "file": "HelpCenter.jsx",
+    "labelKey": "nav.helpcenter",
+    "group": "Général",
     "showInSidebar": true
   },
   {
@@ -620,6 +543,13 @@
     "file": "inventaire/InventaireZones.jsx",
     "labelKey": "nav.inventaire",
     "group": "Inventaire",
+    "showInSidebar": true
+  },
+  {
+    "path": "/journal",
+    "file": "Journal.jsx",
+    "labelKey": "nav.journal",
+    "group": "Général",
     "showInSidebar": true
   },
   {
@@ -770,6 +700,13 @@
     "showInSidebar": true
   },
   {
+    "path": "/notfound",
+    "file": "NotFound.jsx",
+    "labelKey": "nav.notfound",
+    "group": "Général",
+    "showInSidebar": true
+  },
+  {
     "path": "/notifications/notificationsettingsform",
     "file": "notifications/NotificationSettingsForm.jsx",
     "labelKey": "nav.notifications",
@@ -791,15 +728,22 @@
     "showInSidebar": true
   },
   {
-    "path": "/parametrage/apikeys",
-    "file": "parametrage/APIKeys.jsx",
-    "labelKey": "nav.parametrage",
-    "group": "Parametrage",
+    "path": "/onboarding",
+    "file": "Onboarding.jsx",
+    "labelKey": "nav.onboarding",
+    "group": "Général",
     "showInSidebar": true
   },
   {
     "path": "/parametrage/accessrights",
     "file": "parametrage/AccessRights.jsx",
+    "labelKey": "nav.parametrage",
+    "group": "Parametrage",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametrage/apikeys",
+    "file": "parametrage/APIKeys.jsx",
     "labelKey": "nav.parametrage",
     "group": "Parametrage",
     "showInSidebar": true
@@ -854,15 +798,15 @@
     "showInSidebar": true
   },
   {
-    "path": "/parametrage/mamasettingsform",
-    "file": "parametrage/MamaSettingsForm.jsx",
+    "path": "/parametrage/mamas",
+    "file": "parametrage/Mamas.jsx",
     "labelKey": "nav.parametrage",
     "group": "Parametrage",
     "showInSidebar": true
   },
   {
-    "path": "/parametrage/mamas",
-    "file": "parametrage/Mamas.jsx",
+    "path": "/parametrage/mamasettingsform",
+    "file": "parametrage/MamaSettingsForm.jsx",
     "labelKey": "nav.parametrage",
     "group": "Parametrage",
     "showInSidebar": true
@@ -987,10 +931,52 @@
     "showInSidebar": true
   },
   {
+    "path": "/parametres/familles",
+    "file": "Parametres/Familles.jsx",
+    "labelKey": "nav.parametres",
+    "group": "Parametres",
+    "showInSidebar": true
+  },
+  {
+    "path": "/pertes",
+    "file": "Pertes.jsx",
+    "labelKey": "nav.pertes",
+    "group": "Général",
+    "showInSidebar": true
+  },
+  {
     "path": "/planning/simulationplanner",
     "file": "planning/SimulationPlanner.jsx",
     "labelKey": "nav.planning",
     "group": "Planning",
+    "showInSidebar": true
+  },
+  {
+    "path": "/planning",
+    "file": "Planning.jsx",
+    "labelKey": "nav.planning",
+    "group": "Général",
+    "showInSidebar": true
+  },
+  {
+    "path": "/planningdetail",
+    "file": "PlanningDetail.jsx",
+    "labelKey": "nav.planningdetail",
+    "group": "Général",
+    "showInSidebar": true
+  },
+  {
+    "path": "/planningform",
+    "file": "PlanningForm.jsx",
+    "labelKey": "nav.planningform",
+    "group": "Général",
+    "showInSidebar": true
+  },
+  {
+    "path": "/planningmodule",
+    "file": "PlanningModule.jsx",
+    "labelKey": "nav.planningmodule",
+    "group": "Général",
     "showInSidebar": true
   },
   {
@@ -1103,6 +1089,13 @@
     "file": "requisitions/Requisitions.jsx",
     "labelKey": "nav.requisitions",
     "group": "Requisitions",
+    "showInSidebar": true
+  },
+  {
+    "path": "/rgpd",
+    "file": "Rgpd.jsx",
+    "labelKey": "nav.rgpd",
+    "group": "Général",
     "showInSidebar": true
   },
   {
@@ -1313,6 +1306,13 @@
     "file": "taches/Taches.jsx",
     "labelKey": "nav.taches",
     "group": "Taches",
+    "showInSidebar": true
+  },
+  {
+    "path": "/validations",
+    "file": "Validations.jsx",
+    "labelKey": "nav.validations",
+    "group": "Général",
     "showInSidebar": true
   }
 ]

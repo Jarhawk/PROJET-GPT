@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -14,6 +14,7 @@ export default function useFournisseursBrowse({
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const filtersKey = useMemo(() => JSON.stringify(filters || {}), [filters]);
 
   useEffect(() => {
     if (!mama_id) return;
@@ -61,7 +62,7 @@ export default function useFournisseursBrowse({
     return () => {
       aborted = true;
     };
-  }, [mama_id, page, limit, term, JSON.stringify(filters)]);
+  }, [mama_id, page, limit, term, filters, filtersKey]);
 
   return { data, total, loading, error };
 }

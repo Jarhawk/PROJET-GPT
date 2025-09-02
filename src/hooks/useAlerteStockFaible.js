@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/hooks/useAuth';
+import { useMamaSettings } from '@/hooks/useMamaSettings';
 
 /**
  * Hook for low stock alerts based on v_alertes_rupture view.
@@ -10,14 +10,14 @@ import { useAuth } from '@/hooks/useAuth';
  * @param {number} [params.pageSize=20]
  */
 export function useAlerteStockFaible({ page = 1, pageSize = 20 } = {}) {
-  const { mama_id } = useAuth();
+  const { mamaId } = useMamaSettings();
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!mama_id) return;
+    if (!mamaId) return;
     let aborted = false;
     const fetchData = async () => {
       setLoading(true);
@@ -32,7 +32,7 @@ export function useAlerteStockFaible({ page = 1, pageSize = 20 } = {}) {
             'mama_id, produit_id, nom, unite, fournisseur_nom, stock_min, stock_actuel, manque',
             { count: 'exact' }
           )
-          .eq('mama_id', mama_id)
+          .eq('mama_id', mamaId)
           .order('manque', { ascending: false })
           .range(from, to);
         if (error) throw error;
@@ -56,7 +56,7 @@ export function useAlerteStockFaible({ page = 1, pageSize = 20 } = {}) {
     return () => {
       aborted = true;
     };
-  }, [mama_id, page, pageSize]);
+  }, [mamaId, page, pageSize]);
 
   return { data, total, page, pageSize, loading, error };
 }

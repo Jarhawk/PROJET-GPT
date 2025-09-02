@@ -26,5 +26,6 @@
   "nav.alertesRupture": "Alertas de ruptura",
   "nav.inventaire": "Inventario",
   "nav.requisitions": "Requisiciones",
-  "nav.transferts": "Transferencias"
+  "nav.transferts": "Transferencias",
+  "nav.utilisateurs": "Usuarios"
 }

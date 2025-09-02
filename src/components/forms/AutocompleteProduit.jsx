@@ -48,7 +48,7 @@ function AutocompleteProduit(
     setSearch('');
     setOpen(false);
     setActive(-1);
-  }, [lineKey, value?.id, value?.nom]);
+  }, [lineKey, value]);
 
   const debouncedInput = useDebounce(inputValue, 250);
 

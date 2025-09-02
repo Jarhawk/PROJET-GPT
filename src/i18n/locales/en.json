@@ -26,5 +26,6 @@
   "nav.alertesRupture": "Stock alerts",
   "nav.inventaire": "Inventory",
   "nav.requisitions": "Requisitions",
-  "nav.transferts": "Transfers"
+  "nav.transferts": "Transfers",
+  "nav.utilisateurs": "Users"
 }

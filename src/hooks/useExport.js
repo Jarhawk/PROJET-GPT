@@ -75,7 +75,7 @@ export default function useExport() {
         let query = supabase
           .from('factures')
           .select(
-            'id, numero, date_facture, fournisseur_id, total_ht, total_ttc, lignes:facture_lignes!facture_id(id, produit_id, quantite, prix, tva)'
+            'id, numero, date_facture, fournisseur_id, total_ht, total_ttc, lignes:facture_lignes!facture_id(id, produit_id, quantite, pu_ht:pu, pmp, total_ht, total_ttc:montant_ttc, tva)'
           )
           .eq('mama_id', mama_id)
           .eq('lignes.mama_id', mama_id);

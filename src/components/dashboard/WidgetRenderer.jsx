@@ -28,43 +28,41 @@ export default function WidgetRenderer({ config }) {
           </BarChart>
         </ResponsiveContainer>
       );
-    case "pie":
-      return (
-        <ResponsiveContainer width="100%" height={220}>
-          <PieChart>
-            <Pie
-              data={data}
-              dataKey={config.dataKey}
-              nameKey={config.nameKey}
-              outerRadius={80}
-              fill={config.color || "#bfa14d"}
-            >
-              {(() => {
-                const cells = []
-                for (let idx = 0; idx < data.length; idx++) {
-                  cells.push(
-                    <Cell
-                      key={idx}
-                      fill={colors[idx % colors.length] || "#bfa14d"}
-                    />
-                  )
-                }
-                return cells
-              })()}
-            </Pie>
+      case "pie":
+        return (
+          <ResponsiveContainer width="100%" height={220}>
+            <PieChart>
+              <Pie
+                data={data}
+                dataKey={config.dataKey}
+                nameKey={config.nameKey}
+                outerRadius={80}
+                fill={config.color || "#bfa14d"}
+              >
+                {(() => {
+                  const cells = [];
+                  for (let idx = 0; idx < data.length; idx++) {
+                    cells.push(
+                      <Cell
+                        key={idx}
+                        fill={colors[idx % colors.length] || "#bfa14d"}
+                      />
+                    );
+                  }
+                  return cells;
+                })()}
+              </Pie>
               <Tooltip />
             </PieChart>
           </ResponsiveContainer>
         );
       case "list":
         return (
-          {(() => {
-            const listItems = []
-            for (let idx = 0; idx < items.length; idx++) {
-              listItems.push(<li key={idx}>{items[idx]}</li>)
-            }
-            return <ul className="list-disc pl-4 text-sm">{listItems}</ul>
-          })()}
+          <ul className="list-disc pl-4 text-sm">
+            {items.map((it, idx) => (
+              <li key={idx}>{it}</li>
+            ))}
+          </ul>
         );
     case "indicator":
     default:

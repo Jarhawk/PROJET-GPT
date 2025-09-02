@@ -18,17 +18,41 @@ export function useProduitsFournisseur() {
       }
       setLoading(true);
       setError(null);
-      const { data, error } = await supabase
-        .from("fournisseur_produits")
-        .select(
-          "*, produit:produits!fournisseur_produits_produit_id_fkey(id, nom, unite_id, unite:unites!fk_produits_unite(nom), famille:familles!fk_produits_famille(id, nom))"
-        )
-        .eq("fournisseur_id", fournisseur_id)
-        .eq("mama_id", mama_id);
-      setProducts(data || []);
+      const { data, error: fpErr } = await supabase
+        .from('fournisseur_produits')
+        .select('id, produit_id, fournisseur_id, prix_achat, actif, date_livraison, mama_id')
+        .eq('fournisseur_id', fournisseur_id)
+        .eq('mama_id', mama_id);
+
+      if (fpErr) {
+        setError(fpErr);
+        setProducts([]);
+        setLoading(false);
+        return [];
+      }
+
+      const rows = Array.isArray(data) ? data : [];
+      const ids = Array.from(new Set(rows.map(r => r.produit_id).filter(Boolean)));
+      let produitsMap = {};
+      if (ids.length) {
+        const { data: produits, error: pErr } = await supabase
+          .from('produits')
+          .select('id, nom, unite_id, famille_id, sous_famille_id, mama_id')
+          .eq('mama_id', mama_id)
+          .in('id', ids);
+        if (pErr) {
+          setError(pErr);
+        } else {
+          for (const p of Array.isArray(produits) ? produits : []) {
+            produitsMap[p.id] = p;
+          }
+        }
+      }
+
+      const enriched = rows.map(r => ({ ...r, produit: produitsMap[r.produit_id] || null }));
+      setProducts(enriched);
       setLoading(false);
-      if (error) setError(error);
-      return data || [];
+      return enriched;
     }
 
     return { products, loading, error, fetch };
@@ -38,15 +62,34 @@ export function useProduitsFournisseur() {
     async (fournisseur_id) => {
       if (!mama_id || !fournisseur_id) return [];
       if (cache[fournisseur_id]) return cache[fournisseur_id];
-      const { data } = await supabase
-        .from("fournisseur_produits")
-        .select(
-          "*, produit:produits!fournisseur_produits_produit_id_fkey(id, nom, unite_id, unite:unites!fk_produits_unite(nom), famille:familles!fk_produits_famille(id, nom))"
-        )
-        .eq("fournisseur_id", fournisseur_id)
-        .eq("mama_id", mama_id);
-      setCache((c) => ({ ...c, [fournisseur_id]: data || [] }));
-      return data || [];
+
+      const { data, error } = await supabase
+        .from('fournisseur_produits')
+        .select('id, produit_id, fournisseur_id, prix_achat, actif, date_livraison, mama_id')
+        .eq('fournisseur_id', fournisseur_id)
+        .eq('mama_id', mama_id);
+
+      if (error) return [];
+
+      const rows = Array.isArray(data) ? data : [];
+      const ids = Array.from(new Set(rows.map(r => r.produit_id).filter(Boolean)));
+      let produitsMap = {};
+      if (ids.length) {
+        const { data: produits, error: pErr } = await supabase
+          .from('produits')
+          .select('id, nom, unite_id, famille_id, sous_famille_id, mama_id')
+          .eq('mama_id', mama_id)
+          .in('id', ids);
+        if (!pErr) {
+          for (const p of Array.isArray(produits) ? produits : []) {
+            produitsMap[p.id] = p;
+          }
+        }
+      }
+
+      const enriched = rows.map(r => ({ ...r, produit: produitsMap[r.produit_id] || null }));
+      setCache(c => ({ ...c, [fournisseur_id]: enriched }));
+      return enriched;
     },
     [mama_id, cache]
   );

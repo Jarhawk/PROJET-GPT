@@ -12,7 +12,7 @@ export const useFamilles = () => {
         // Columns: id, nom, actif
       const { data, error } = await supabase
         .from('familles')
-        .select('id, nom, actif')
+        .select('id, nom, actif, mama_id')
         .eq('mama_id', mamaId)
         .order('nom', { ascending: true });
       if (error) throw error;

@@ -19,7 +19,7 @@ export default function CostingCarte() {
     exportExcel,
     exportPdf,
   } = useCostingCarte()
-  const data = Array.isArray(rawData) ? rawData : []
+  const data = useMemo(() => (Array.isArray(rawData) ? rawData : []), [rawData])
 
   const [typeFilter, setTypeFilter] = useState('')
   const [familleFilter, setFamilleFilter] = useState('')
@@ -31,9 +31,8 @@ export default function CostingCarte() {
   }, [fetchCosting, fetchSettings])
 
   const familles = useMemo(() => {
-    const source = Array.isArray(data) ? data : []
     const set = new Set()
-    for (const f of source) {
+    for (const f of data) {
       if (f && f.famille) set.add(f.famille)
     }
     const arr = []
@@ -42,13 +41,16 @@ export default function CostingCarte() {
     return arr
   }, [data])
 
-  const filtered = []
-  for (const f of data) {
-    if (typeFilter && f.type !== typeFilter) continue
-    if (familleFilter && f.famille !== familleFilter) continue
-    if (actifFilter !== '' && f.actif !== (actifFilter === 'true')) continue
-    filtered.push(f)
-  }
+  const filtered = useMemo(() => {
+    const out = []
+    for (const f of data) {
+      if (typeFilter && f.type !== typeFilter) continue
+      if (familleFilter && f.famille !== familleFilter) continue
+      if (actifFilter !== '' && f.actif !== (actifFilter === 'true')) continue
+      out.push(f)
+    }
+    return out
+  }, [data, typeFilter, familleFilter, actifFilter])
 
   const kpis = useMemo(() => {
     if (filtered.length === 0) return { marge: 0, food: 0, under: 0 }

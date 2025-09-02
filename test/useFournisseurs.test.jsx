@@ -13,6 +13,7 @@ const updateFournisseur = vi.fn(() => ({ eq: vi.fn(() => ({ eq: vi.fn(() => Prom
 const fetchQuery = {
   select: vi.fn(() => fetchQuery),
   eq: vi.fn(() => fetchQuery),
+  in: vi.fn(() => fetchQuery),
   order: vi.fn(() => fetchQuery),
   range: vi.fn(() => fetchQuery),
   ilike: vi.fn(() => fetchQuery),
@@ -24,7 +25,7 @@ const fromMock = vi.fn((table) => {
     return { insert: insertFournisseur, update: updateFournisseur, select: fetchQuery.select, eq: fetchQuery.eq, order: fetchQuery.order, range: fetchQuery.range, ilike: fetchQuery.ilike };
   }
   if (table === 'fournisseur_contacts') {
-    return { insert: insertContact, upsert: upsertContact };
+    return { insert: insertContact, upsert: upsertContact, select: fetchQuery.select, eq: fetchQuery.eq, in: fetchQuery.in };
   }
   return fetchQuery;
 });

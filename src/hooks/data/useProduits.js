@@ -18,28 +18,18 @@ export const useProduits = ({
   sousFamilleId = null,
 }) => {
   const { mamaId } = useMamaSettings();
-    return useQuery({
-      queryKey: ['produits', mamaId, search, page, pageSize, statut, familleId, sousFamilleId],
-      enabled: !!mamaId,
-      queryFn: async () => {
-        // Columns: id, nom, actif, unite_id, famille_id, sous_famille_id, pmp, dernier_prix, zone_stock_id,
-        // unite:unites(id, nom), famille:familles(id, nom), sous_famille:sous_familles(id, nom)
+  return useQuery({
+    queryKey: ['produits', mamaId, search, page, pageSize, statut, familleId, sousFamilleId],
+    enabled: !!mamaId,
+    queryFn: async () => {
+        // Colonnes conformes à db/Etat back end.txt (lignes 601 à 626)
         let q = supabase
-        .from('produits')
-        .select(
-          `
-          id, nom, actif, unite_id, sous_famille_id, pmp, dernier_prix, zone_id:zone_stock_id, tva,
-          unite:unites(id, nom),
-          sous_famille:sous_familles!fk_produits_sous_famille(
-            id, nom, famille:familles!sous_familles_famille_id_fkey(id, nom)
+          .from('produits')
+          .select(
+            'id, nom, unite_id, tva, zone_stock_id, famille_id, sous_famille_id, actif, mama_id',
+            { count: 'exact' }
           )
-          `,
-          { count: 'exact' }
-        )
-        .eq('mama_id', mamaId)
-        .eq('unite.mama_id', mamaId)
-        .eq('sous_famille.mama_id', mamaId)
-        .eq('sous_famille.famille.mama_id', mamaId);
+          .eq('mama_id', mamaId);
 
       if (search) q = q.ilike('nom', `%${search}%`);
       if (familleId) q = q.eq('famille_id', familleId);
@@ -47,12 +37,72 @@ export const useProduits = ({
       if (statut === 'actif') q = q.eq('actif', true);
       if (statut === 'inactif') q = q.eq('actif', false);
 
-      q = q.order('nom', { ascending: true })
+      q = q
+        .order('nom', { ascending: true })
         .range((page - 1) * pageSize, page * pageSize - 1);
 
       const { data, error, count } = await q;
       if (error) throw error;
-      return { data: Array.isArray(data) ? data : [], count: count ?? 0 };
+
+      const rows = Array.isArray(data) ? data : [];
+
+      const [
+        { data: sous, error: errSous },
+        { data: fams, error: errFams },
+        { data: unites, error: errUnites },
+      ] = await Promise.all([
+        supabase
+          .from('sous_familles')
+          .select('id, nom, famille_id, mama_id')
+          .eq('mama_id', mamaId),
+        supabase
+          .from('familles')
+          .select('id, nom, mama_id')
+          .eq('mama_id', mamaId),
+        supabase
+          .from('unites')
+          .select('id, nom, mama_id')
+          .eq('mama_id', mamaId),
+      ]);
+
+      const sousById = {};
+      if (!errSous) {
+        for (const sf of Array.isArray(sous) ? sous : []) {
+          sousById[sf.id] = sf;
+        }
+      }
+
+      const famillesById = {};
+      if (!errFams) {
+        for (const f of Array.isArray(fams) ? fams : []) {
+          famillesById[f.id] = f;
+        }
+      }
+
+      const unitesById = {};
+      if (!errUnites) {
+        for (const u of Array.isArray(unites) ? unites : []) {
+          unitesById[u.id] = u;
+        }
+      }
+
+      const enriched = rows.map((p) => {
+        const sf = p.sous_famille_id ? sousById[p.sous_famille_id] : null;
+        const famille =
+          p.famille_id
+            ? famillesById[p.famille_id]
+            : sf?.famille_id
+              ? famillesById[sf.famille_id]
+              : null;
+        return {
+          ...p,
+          sous_famille: sf || null,
+          famille: famille || null,
+          unite: p.unite_id ? unitesById[p.unite_id] || null : null,
+        };
+      });
+
+      return { data: enriched, count: count ?? 0 };
     },
   });
 };

@@ -1,30 +1,30 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useEffect, useState } from "react";
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/hooks/useAuth';
+import { useMamaSettings } from '@/hooks/useMamaSettings';
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import TableContainer from "@/components/ui/TableContainer";
 
 export default function Alertes() {
-  const { mama_id, loading: authLoading } = useAuth();
+  const { mamaId, loading: settingsLoading } = useMamaSettings();
   const [alertes, setAlertes] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function fetchAlertes() {
-      if (!mama_id || authLoading) return;
+      if (!mamaId || settingsLoading) return;
       setLoading(true);
       const { data } = await supabase
         .from("v_alertes_rupture")
         .select("produit_id, nom, stock_min, stock_actuel, manque")
-        .eq("mama_id", mama_id)
+        .eq("mama_id", mamaId)
         .order("nom", { ascending: true });
       const rows = Array.isArray(data) ? data : [];
       setAlertes(rows);
       setLoading(false);
     }
     fetchAlertes();
-  }, [mama_id, authLoading]);
+  }, [mamaId, settingsLoading]);
 
   return (
     <div className="p-6 text-sm">

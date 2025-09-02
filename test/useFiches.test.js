@@ -68,6 +68,9 @@ test('createFiche returns error on failure', async () => {
     select: () => ({ single: () => Promise.resolve({ data: null, error: { message: 'denied' } }) })
   }));
   const { result } = renderHook(() => useFiches());
-  const res = await result.current.createFiche({ nom: 'x', lignes: [] });
+  let res;
+  await act(async () => {
+    res = await result.current.createFiche({ nom: 'x', lignes: [] });
+  });
   expect(res.error).toBeTruthy();
 });

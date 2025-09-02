@@ -1,20 +1,20 @@
 // Hook for stock rupture alerts
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/hooks/useAuth';
+import { useMamaSettings } from '@/hooks/useMamaSettings';
 import { toast } from 'sonner';
 
 export function useRuptureAlerts() {
-  const { mama_id } = useAuth();
+  const { mamaId } = useMamaSettings();
 
   async function fetchAlerts() {
-    if (!mama_id) return [];
+    if (!mamaId) return [];
     try {
       const { data, error } = await supabase
         .from('v_alertes_rupture')
         .select(
           'mama_id, produit_id, nom, unite, fournisseur:fournisseur_nom, stock_actuel, stock_min, manque'
         )
-        .eq('mama_id', mama_id)
+        .eq('mama_id', mamaId)
         .order('manque', { ascending: false });
       if (error) throw error;
       const rows = Array.isArray(data) ? data : [];
@@ -27,11 +27,11 @@ export function useRuptureAlerts() {
   }
 
   async function generateSuggestions() {
-    if (!mama_id) return { suggestions: [] };
+    if (!mamaId) return { suggestions: [] };
     try {
       const { data, error } = await supabase.functions.invoke(
         'generatePurchaseSuggestions',
-        { body: { mama_id } }
+        { body: { mama_id: mamaId } }
       );
       if (error) throw error;
       const suggestions = Array.isArray(data?.suggestions)

@@ -18,11 +18,14 @@ export default function Produits() {
   const { familles = [] } = useFamilles();
   const { data: allSousFamilles = [] } = useSousFamilles();
   const safeFamilles = Array.isArray(familles) ? familles : [];
-  const safeAllSousFamilles = Array.isArray(allSousFamilles) ? allSousFamilles : [];
+  const safeAllSousFamilles = useMemo(
+    () => (Array.isArray(allSousFamilles) ? allSousFamilles : []),
+    [allSousFamilles]
+  );
   const sousFamilles = useMemo(
     () =>
       familleId
-        ? safeAllSousFamilles.filter(sf => sf.famille_id === familleId)
+        ? safeAllSousFamilles.filter((sf) => sf.famille_id === familleId)
         : safeAllSousFamilles,
     [familleId, safeAllSousFamilles]
   );
@@ -111,7 +114,6 @@ export default function Produits() {
           <div className="table-row">
             <div className="table-cell font-semibold py-2">Nom</div>
             <div className="table-cell font-semibold py-2">Unité</div>
-            <div className="table-cell font-semibold py-2">PMP (€)</div>
             <div className="table-cell font-semibold py-2">Famille &gt; Sous-famille</div>
             <div className="table-cell font-semibold py-2">Zone de stockage</div>
             <div className="table-cell font-semibold py-2">Statut</div>
@@ -135,13 +137,12 @@ export default function Produits() {
                 <div key={p.id} className="table-row">
                   <div className="table-cell py-2">{p.nom}</div>
                   <div className="table-cell py-2">{p.unite?.nom ?? '—'}</div>
-                  <div className="table-cell py-2">{((p.pmp ?? p.dernier_prix) ?? 0).toFixed(2)}</div>
                   <div className="table-cell py-2">
-                    {p.sous_famille?.famille?.nom
-                      ? `${p.sous_famille.famille.nom} > ${p.sous_famille.nom}`
-                      : p.sous_famille?.nom ?? '—'}
+                    {p.famille?.nom && p.sous_famille?.nom
+                      ? `${p.famille.nom} > ${p.sous_famille.nom}`
+                      : p.sous_famille?.nom || p.famille?.nom || '—'}
                   </div>
-                  <div className="table-cell py-2">{p.zone_id ?? '—'}</div>
+                  <div className="table-cell py-2">{p.zone_stock_id ?? '—'}</div>
                   <div className="table-cell py-2">{p.actif ? 'Actif' : 'Inactif'}</div>
                   <div className="table-cell py-2"> {/* actions existantes */}</div>
                 </div>

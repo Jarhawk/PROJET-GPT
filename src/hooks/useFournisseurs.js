@@ -36,11 +36,8 @@ export function useFournisseurs() {
     setError(null);
     const { data, error } = await supabase
       .from('fournisseurs')
-      .select(
-        'id, nom, actif, created_at, updated_at, contact:fournisseur_contacts!fournisseur_id(mama_id,nom,email,tel)'
-      )
+      .select('id, nom, actif, created_at, updated_at, mama_id')
       .eq('mama_id', mama_id)
-      .eq('contact.mama_id', mama_id)
       .order('nom');
     setLoading(false);
     if (error) {
@@ -48,13 +45,23 @@ export function useFournisseurs() {
       toast.error(error.message);
       return [];
     }
-    const list = [];
-    if (Array.isArray(data)) {
-      for (const f of data) {
-        const contact = Array.isArray(f.contact) ? f.contact[0] : f.contact;
-        list.push({ ...f, contact });
+    const rows = Array.isArray(data) ? data : [];
+    let contacts = [];
+    if (rows.length) {
+      const { data: cData, error: cErr } = await supabase
+        .from('fournisseur_contacts')
+        .select('fournisseur_id, nom, email, tel')
+        .eq('mama_id', mama_id)
+        .in('fournisseur_id', rows.map(r => r.id));
+      if (cErr) {
+        setError(cErr);
+        toast.error(cErr.message);
+      } else {
+        contacts = Array.isArray(cData) ? cData : [];
       }
     }
+    const contactsBySupplier = new Map(contacts.map(c => [c.fournisseur_id, c]));
+    const list = rows.map(f => ({ ...f, contact: contactsBySupplier.get(f.id) || null }));
     setFournisseurs(list);
     return list;
   }, [mama_id]);

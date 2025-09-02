@@ -81,7 +81,10 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
     name: 'lignes',
   });
   const lignes = watch('lignes');
-  const lignesArr = Array.isArray(lignes) ? lignes : [];
+  const lignesArr = useMemo(
+    () => (Array.isArray(lignes) ? lignes : []),
+    [lignes]
+  );
   const { data: zones = [], isSuccess } = useZonesStock();
   const totalHTAttendu = watch('total_ht_attendu');
   const statut = watch('statut');
@@ -216,7 +219,10 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
           fournisseur_id: values.fournisseur_id,
           numero: values.numero || null,
           date_facture: values.date_facture,
-          etat: values.statut,
+          statut: values.statut,
+          total_ht: sommeLignesHT,
+          total_tva: sumTVACents / 100,
+          total_ttc: sumTTCents / 100,
         },
         lignes: payloadLignes,
       };
@@ -314,6 +320,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
           <label className="text-sm font-medium">Total HT attendu (€)</label>
           <div className="flex items-center gap-2">
             <input
+              type="text"
               inputMode="decimal"
               step="0.01"
               value={totalAttenduInput}

@@ -1,16 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/hooks/useAuth';
+import { useMamaSettings } from '@/hooks/useMamaSettings';
 import { toast } from 'sonner';
 
 export default function useAlerteStockFaible() {
-  const { mama_id } = useAuth();
+  const { mamaId } = useMamaSettings();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const fetchData = useCallback(async () => {
-    if (!mama_id) return [];
+    if (!mamaId) return [];
     setLoading(true);
     setError(null);
     try {
@@ -20,7 +20,7 @@ export default function useAlerteStockFaible() {
         .select(
           'mama_id, produit_id, nom, unite, fournisseur_nom, stock_min, stock_actuel, manque'
         )
-        .eq('mama_id', mama_id)
+        .eq('mama_id', mamaId)
         .order('manque', { ascending: false })
         .limit(50);
       if (error) throw error;
@@ -52,7 +52,7 @@ export default function useAlerteStockFaible() {
     } finally {
       setLoading(false);
     }
-  }, [mama_id]);
+  }, [mamaId]);
 
   useEffect(() => {
     fetchData();

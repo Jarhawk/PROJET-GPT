@@ -16,6 +16,7 @@ import {
   ClipboardList,
   FilePlus,
   ArrowLeftRight,
+  Users,
 } from 'lucide-react';
 import lazyWithPreload from '@/lib/lazyWithPreload';
 
@@ -178,6 +179,14 @@ export const MODULES = [
     labelKey: 'nav.unites',
     icon: Boxes,
     rightKey: 'parametrage',
+    showInSidebar: true,
+  },
+  {
+    path: '/parametrage/utilisateurs',
+    element: lazyWithPreload(() => import('@/pages/parametrage/Utilisateurs.jsx')),
+    labelKey: 'nav.utilisateurs',
+    icon: Users,
+    rightKey: 'utilisateurs',
     showInSidebar: true,
   },
 ];

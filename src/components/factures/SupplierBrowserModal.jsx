@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,7 @@ export default function SupplierBrowserModal({ open, onClose, onSelect }) {
       limit: pageSize,
       term: query,
     });
-    const list = Array.isArray(results) ? results : [];
+    const list = useMemo(() => (Array.isArray(results) ? results : []), [results]);
   const [active, setActive] = useState(-1);
 
   useEffect(() => {
@@ -62,9 +62,9 @@ export default function SupplierBrowserModal({ open, onClose, onSelect }) {
         >
           <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/40">
             <Dialog.Title className="text-sm font-semibold">Rechercher un fournisseur</Dialog.Title>
-            <DialogDescription className="sr-only">
+            <Dialog.Description className="sr-only">
               Modale de recherche fournisseur
-            </DialogDescription>
+            </Dialog.Description>
             <Dialog.Close asChild>
               <button className="p-2 rounded-md hover:bg-muted">
                 <X size={18} />

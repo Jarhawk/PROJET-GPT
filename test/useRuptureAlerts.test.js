@@ -11,7 +11,7 @@ const queryBuilder = {
 const fromMock = vi.fn(() => queryBuilder);
 
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
-vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
+vi.mock('@/hooks/useMamaSettings', () => ({ useMamaSettings: () => ({ mamaId: 'm1' }) }));
 vi.mock('sonner', () => ({ toast: { error: vi.fn() } }));
 
 beforeEach(async () => {

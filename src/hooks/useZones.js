@@ -193,5 +193,4 @@ export function useZones() {
 }
 
 export default useZones;
-export { useZones };
 

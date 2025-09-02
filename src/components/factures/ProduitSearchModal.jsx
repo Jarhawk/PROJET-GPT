@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -18,7 +18,7 @@ export default function ProduitSearchModal({
       page,
       pageSize,
     });
-    const list = Array.isArray(results) ? results : [];
+    const list = useMemo(() => (Array.isArray(results) ? results : []), [results]);
 
   const [active, setActive] = useState(-1);
 

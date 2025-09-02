@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import os from 'node:os';
 import path from 'node:path';
-import { writeFileSync, mkdirSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { strict as assert } from 'node:assert';
 import { createClient } from '@supabase/supabase-js';
 import * as XLSX from 'xlsx';
@@ -59,14 +60,10 @@ export async function generateWeeklyCostCenterReport(
   const fmt = (format ?? process.env.WEEKLY_REPORT_FORMAT ?? 'xlsx').toLowerCase();
   assert(['xlsx', 'csv', 'json'].includes(fmt), `Unknown format: ${fmt}`);
 
-  let file;
-  if (outPath) {
-    file = outPath;
-  } else {
-    const dirEnv = process.env.REPORT_DIR ?? '.';
-    const dir = path.isAbsolute(dirEnv) ? dirEnv : dirEnv;
-    file = path.join(dir, `weekly_cost_centers.${fmt}`);
-  }
+  const reportDir = path.resolve(process.env.REPORT_DIR || os.tmpdir());
+  const file = outPath
+    ? path.resolve(outPath)
+    : path.join(reportDir, `weekly_cost_centers.${fmt}`);
   mkdirSync(path.dirname(file), { recursive: true });
   const ext = path.extname(file).toLowerCase();
   if (ext && ext !== `.${fmt}`) {

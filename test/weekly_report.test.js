@@ -1,5 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { vi, describe, it, expect } from 'vitest';
+import path from 'node:path';
+import os from 'node:os';
 process.env.VITE_SUPABASE_URL = 'https://example.supabase.co';
 process.env.VITE_SUPABASE_ANON_KEY = 'key';
 var rpc;
@@ -108,7 +110,7 @@ describe('weekly report script', () => {
       'out.xlsx'
     );
     expect(result).toBe('out.xlsx');
-    expect(writeSpy).toHaveBeenCalledWith(expect.any(Object), 'out.xlsx');
+    expect(writeSpy).toHaveBeenCalledWith(expect.any(Object), path.resolve('out.xlsx'));
     writeSpy.mockRestore();
   });
 
@@ -117,10 +119,8 @@ describe('weekly report script', () => {
     await expect(
       generateWeeklyCostCenterReport(null, null, null, null, null, null, 'csv')
     ).resolves.not.toThrow();
-    expect(writeFileSync).toHaveBeenCalledWith(
-      'weekly_cost_centers.csv',
-      expect.any(String)
-    );
+    const expectedFile = path.join(os.tmpdir(), 'weekly_cost_centers.csv');
+    expect(writeFileSync).toHaveBeenCalledWith(expectedFile, expect.any(String));
   });
 
   it('writes json when format is json', async () => {
@@ -128,15 +128,14 @@ describe('weekly report script', () => {
     await expect(
       generateWeeklyCostCenterReport(null, null, null, null, null, null, 'json')
     ).resolves.not.toThrow();
-    expect(writeFileSync).toHaveBeenCalledWith(
-      'weekly_cost_centers.json',
-      expect.any(String)
-    );
+    const expectedFile = path.join(os.tmpdir(), 'weekly_cost_centers.json');
+    expect(writeFileSync).toHaveBeenCalledWith(expectedFile, expect.any(String));
   });
 
   it('returns the default file name', async () => {
     const result = await generateWeeklyCostCenterReport();
-    expect(result).toBe('weekly_cost_centers.xlsx');
+    const expectedFile = path.join(os.tmpdir(), 'weekly_cost_centers.xlsx');
+    expect(result).toBe(expectedFile);
   });
 
   it('honours WEEKLY_REPORT_FORMAT env variable', async () => {
@@ -145,10 +144,8 @@ describe('weekly report script', () => {
     const { writeFileSync } = await import('fs');
     const { generateWeeklyCostCenterReport: fn } = await import('../scripts/weekly_report.js');
     await expect(fn()).resolves.not.toThrow();
-    expect(writeFileSync).toHaveBeenCalledWith(
-      'weekly_cost_centers.csv',
-      expect.any(String)
-    );
+    const expectedFile = path.join(os.tmpdir(), 'weekly_cost_centers.csv');
+    expect(writeFileSync).toHaveBeenCalledWith(expectedFile, expect.any(String));
     delete process.env.WEEKLY_REPORT_FORMAT;
     vi.resetModules();
   });
@@ -159,10 +156,8 @@ describe('weekly report script', () => {
     const { writeFileSync } = await import('fs');
     const { generateWeeklyCostCenterReport: fn } = await import('../scripts/weekly_report.js');
     await expect(fn()).resolves.not.toThrow();
-    expect(writeFileSync).toHaveBeenCalledWith(
-      'weekly_cost_centers.json',
-      expect.any(String)
-    );
+    const expectedFile = path.join(os.tmpdir(), 'weekly_cost_centers.json');
+    expect(writeFileSync).toHaveBeenCalledWith(expectedFile, expect.any(String));
     delete process.env.WEEKLY_REPORT_FORMAT;
     vi.resetModules();
   });
@@ -173,7 +168,8 @@ describe('weekly report script', () => {
     const { writeFileSync } = await import('fs');
     const { generateWeeklyCostCenterReport: fn } = await import('../scripts/weekly_report.js');
     await expect(fn(null, null, null, null, null, null, 'csv')).resolves.not.toThrow();
-    expect(writeFileSync).toHaveBeenCalledWith('/tmp/weekly_cost_centers.csv', expect.any(String));
+    const expectedFile = path.join(process.env.REPORT_DIR || os.tmpdir(), 'weekly_cost_centers.csv');
+    expect(writeFileSync).toHaveBeenCalledWith(expectedFile, expect.any(String));
     delete process.env.REPORT_DIR;
     vi.resetModules();
   });
@@ -184,7 +180,11 @@ describe('weekly report script', () => {
     const { mkdirSync } = await import('fs');
     const { generateWeeklyCostCenterReport: fn } = await import('../scripts/weekly_report.js');
     await expect(fn(null, null, null, null, null, null, 'csv')).resolves.not.toThrow();
-    expect(mkdirSync).toHaveBeenCalledWith('/tmp/reports', { recursive: true });
+    const expectedDir = process.env.REPORT_DIR || path.join(os.tmpdir(), 'reports');
+    const calls = mkdirSync.mock.calls.map(c => path.resolve(c[0]));
+    expect(calls).toContain(path.resolve(expectedDir));
+    const idx = calls.indexOf(path.resolve(expectedDir));
+    expect(mkdirSync.mock.calls[idx][1]).toEqual({ recursive: true });
     delete process.env.REPORT_DIR;
     vi.resetModules();
   });

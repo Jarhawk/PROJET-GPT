@@ -15,7 +15,7 @@ export function useSousFamilles() {
       setError(null);
       let q = supabase
         .from('sous_familles')
-        .select('id, nom, famille_id, actif')
+        .select('id, nom, famille_id, mama_id, actif')
         .eq('mama_id', mama_id);
       if (typeof q.order === 'function') {
         q = q.order('nom', { ascending: true });
@@ -38,6 +38,7 @@ export function useSousFamilles() {
       const { data } = await supabase
         .from('sous_familles')
         .insert([{ nom, famille_id, mama_id, actif: true }])
+        .eq('mama_id', mama_id)
         .select('id, nom, famille_id, actif, mama_id')
         .single();
       setSousFamilles((prev) =>
@@ -83,7 +84,7 @@ export async function fetchSousFamilles({ mamaId }) {
   try {
     let q = supabase
       .from('sous_familles')
-      .select('id, nom, famille_id, actif')
+      .select('id, nom, famille_id, mama_id, actif')
       .eq('mama_id', mamaId);
     if (typeof q.order === 'function') {
       q = q.order('nom', { ascending: true });

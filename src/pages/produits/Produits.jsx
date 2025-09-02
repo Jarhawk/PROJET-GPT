@@ -114,7 +114,6 @@ export default function Produits() {
           <div className="table-row">
             <div className="table-cell font-semibold py-2">Nom</div>
             <div className="table-cell font-semibold py-2">Unité</div>
-            <div className="table-cell font-semibold py-2">PMP (€)</div>
             <div className="table-cell font-semibold py-2">Famille &gt; Sous-famille</div>
             <div className="table-cell font-semibold py-2">Zone de stockage</div>
             <div className="table-cell font-semibold py-2">Statut</div>
@@ -124,7 +123,7 @@ export default function Produits() {
         <div className="table-row-group">
           {!isLoading && produits.length === 0 && (
             <div className="table-row">
-              <div className="table-cell py-3 text-sm text-gray-400" colSpan={7}>
+              <div className="table-cell py-3 text-sm text-gray-400" colSpan={6}>
                 Aucun produit trouvé. Essayez d’ajouter un produit via le bouton ci-dessus.
               </div>
             </div>
@@ -138,7 +137,6 @@ export default function Produits() {
                 <div key={p.id} className="table-row">
                   <div className="table-cell py-2">{p.nom}</div>
                   <div className="table-cell py-2">{p.unite?.nom ?? '—'}</div>
-                  <div className="table-cell py-2">{((p.pmp ?? p.dernier_prix) ?? 0).toFixed(2)}</div>
                   <div className="table-cell py-2">
                     {p.sous_famille?.famille?.nom
                       ? `${p.sous_famille.famille.nom} > ${p.sous_famille.nom}`

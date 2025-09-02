@@ -12,7 +12,7 @@ export function useRuptureAlerts() {
       const { data, error } = await supabase
         .from('v_alertes_rupture')
         .select(
-          'mama_id, produit_id, nom, unite, fournisseur:fournisseur_nom, stock_actuel, stock_min, manque'
+          'produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, manque'
         )
         .eq('mama_id', mama_id)
         .order('manque', { ascending: false });

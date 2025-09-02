@@ -10,13 +10,8 @@ import {
 } from '@/components/ui/select';
 import { Trash2 } from 'lucide-react';
 import ProduitSearchModal from '@/components/factures/ProduitSearchModal';
-import {
-  toNumberSafe,
-  formatCurrencyEUR,
-  formatQty,
-  safeDiv,
-  formatPercent,
-} from '@/lib/numberFormat';
+import { formatQty, safeDiv } from '@/lib/numberFormat';
+import { toNumberSafeFR, formatCurrencyEUR, formatPercent } from '@/utils/numberFR.js';
 import { Badge } from '@/components/ui/badge';
 
 export default function FactureLigne({
@@ -54,14 +49,14 @@ export default function FactureLigne({
     );
   }, [line.total_ht]);
 
-  const qte = round3(toNumberSafe(qteInput));
-  const totalHT = round2(toNumberSafe(totalHtInput));
+  const qte = round3(toNumberSafeFR(qteInput));
+  const totalHT = round2(toNumberSafeFR(totalHtInput));
   const tva = Number(line.tva || 0);
   const puHT = safeDiv(totalHT, qte);
   const pmp = Number(line.pmp ?? 0);
-  const variationPct = pmp > 0 ? ((puHT - pmp) / pmp) * 100 : 0;
+  const variation = pmp > 0 ? (puHT - pmp) / pmp : 0;
   const varBadgeColor =
-    variationPct < 0 ? 'green' : variationPct > 0 ? 'red' : 'gray';
+    variation < 0 ? 'green' : variation > 0 ? 'red' : 'gray';
 
   function update(nQte = qte, nTotalHT = totalHT, tv = tva) {
     const q = Number.isFinite(nQte) ? nQte : 0;
@@ -157,17 +152,18 @@ export default function FactureLigne({
         />
       </div>
       <input
+        type="text"
         inputMode="decimal"
         step="0.001"
         value={qteInput}
         onChange={(e) => {
           const v = e.target.value;
           setQteInput(v);
-          const n = toNumberSafe(v);
+          const n = toNumberSafeFR(v);
           update(Number.isFinite(n) ? round3(n) : NaN, totalHT);
         }}
         onBlur={() => {
-          const n = toNumberSafe(qteInput);
+          const n = toNumberSafeFR(qteInput);
           const q = Number.isFinite(n) ? round3(n) : NaN;
           setQteInput(Number.isFinite(n) ? formatQty(q) : '');
         }}
@@ -177,17 +173,18 @@ export default function FactureLigne({
       />
       <Input readOnly disabled value={line.unite || ''} placeholder="Unité" />
       <input
+        type="text"
         inputMode="decimal"
         step="0.01"
         value={totalHtInput}
         onChange={(e) => {
           const v = e.target.value;
           setTotalHtInput(v);
-          const n = toNumberSafe(v);
+          const n = toNumberSafeFR(v);
           update(qte, Number.isFinite(n) ? round2(n) : NaN);
         }}
         onBlur={() => {
-          const n = toNumberSafe(totalHtInput);
+          const n = toNumberSafeFR(totalHtInput);
           const t = Number.isFinite(n) ? round2(n) : NaN;
           setTotalHtInput(Number.isFinite(n) ? formatCurrencyEUR(t) : '');
         }}
@@ -204,13 +201,14 @@ export default function FactureLigne({
           placeholder="PU HT"
         />
         <Badge className="ml-2" color={varBadgeColor} ariaLabel="Écart vs PMP">
-          {pmp > 0 ? formatPercent(variationPct) : '—'}
+          {pmp > 0 ? formatPercent(variation) : '—'}
         </Badge>
       </div>
       <Input
         readOnly
         disabled
         value={formatCurrencyEUR(pmp)}
+        className="w-28 text-right opacity-60"
         placeholder="PMP"
       />
       <Select

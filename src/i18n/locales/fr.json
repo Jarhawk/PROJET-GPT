@@ -44,5 +44,16 @@
   "supplierSearch.noResult": "Aucun résultat",
   "pagination.prev": "Préc.",
   "pagination.next": "Suiv.",
-  "common.close": "Fermer"
+  "common.close": "Fermer",
+  "menu.dashboard": "Tableau de bord",
+  "menu.produits": "Produits",
+  "menu.factures": "Factures",
+  "menu.fiches": "Fiches",
+  "menu.menus": "Menus",
+  "menu.menuDuJour": "Menu du jour",
+  "menu.stock": "Stock",
+  "menu.familles": "Familles",
+  "menu.sousFamilles": "Sous-familles",
+  "menu.unites": "Unités",
+  "menu.zones": "Zones"
 }

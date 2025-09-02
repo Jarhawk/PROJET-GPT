@@ -6,7 +6,7 @@ import { useReporting } from '@/hooks/useReporting';
 import StatCard from '@/components/ui/StatCard';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import GlassCard from '@/components/ui/GlassCard';
-import { formatCurrencyEUR, formatPercent } from '@/lib/numberFormat';
+import { formatCurrencyEUR, formatPercent } from '@/utils/numberFR.js';
 import {
   ResponsiveContainer,
   LineChart,

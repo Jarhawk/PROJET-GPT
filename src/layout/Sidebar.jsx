@@ -1,55 +1,58 @@
-import { Link, useLocation } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import defaultLogo from '@/assets/logo-mamastock.png';
-import { MODULES } from '@/config/modules';
-import { routePreloadMap } from '@/router';
-import { useAuth } from '@/hooks/useAuth';
-import { useMamaSettings } from '@/hooks/useMamaSettings';
-import { useTheme } from '@/context/ThemeProvider';
+import { NavLink, useLocation } from 'react-router-dom';
+import routes from '../config/routes.merged.js';
+import { hasAccess } from '../lib/access.js';
+import { useAuth } from '../contexts/AuthContext.jsx';
+import * as Icons from 'lucide-react';
+
+function Icon({ name }) {
+  const Cmp = Icons[name] || Icons.Square;
+  return <Cmp className="h-4 w-4" aria-hidden="true" />;
+}
 
 export default function Sidebar() {
-  const { hasAccess = () => false, loading: authLoading } = useAuth();
-  const { featureFlags, loading: settingsLoading } = useMamaSettings();
-  const { t } = useTranslation();
-  const { pathname } = useLocation();
-  const { logo } = useTheme();
+  const { user } = useAuth?.() || { user: null };
+  const location = useLocation();
 
-  if (authLoading || settingsLoading) return null;
-
-  const modules = Array.isArray(MODULES) ? MODULES : [];
-  const flagOK = flag => (flag ? featureFlags?.[flag] !== false : true);
-  const navItems = modules
-    .filter(m => m.showInSidebar && hasAccess(m.rightKey) && flagOK(m.featureFlag))
-    .map(m => {
-      const Icon = m.icon;
-      const prefetch = () => {
-        const fn = routePreloadMap[m.path];
-        if (fn) fn();
-      };
-      return (
-        <Link
-          key={m.path}
-          to={m.path}
-          onMouseEnter={prefetch}
-          onFocus={prefetch}
-          className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-white/10 ${
-            pathname.startsWith(m.path) ? 'bg-white/10 text-mamastockGold' : ''
-          }`}
-          aria-current={pathname.startsWith(m.path) ? 'page' : undefined}
-        >
-          <Icon size={16} aria-hidden="true" />
-          <span>{t(m.labelKey)}</span>
-        </Link>
-      );
-    });
-
-  const logoSrc = logo || defaultLogo;
+  // Grouper par r.group
+  const groups = routes
+    .filter(r => r.showInSidebar !== false)
+    .filter(r => hasAccess ? hasAccess(user, r.accessKey) : true)
+    .reduce((acc, r) => {
+      const g = r.group || 'Général';
+      acc[g] = acc[g] || [];
+      acc[g].push(r);
+      return acc;
+    }, {});
 
   return (
-    <aside className="w-64 bg-white/10 border border-white/10 backdrop-blur-xl text-white p-4 h-screen shadow-md text-shadow hidden md:flex md:flex-col">
-      <img src={logoSrc} alt="MamaStock" className="h-20 mx-auto mt-4 mb-6" />
-      <nav aria-label={t('nav.main')} className="flex flex-col gap-2 text-sm">
-        {navItems}
+    <aside className="w-64 flex-shrink-0 border-r bg-background text-foreground">
+      <nav className="p-2 space-y-4">
+        {Object.entries(groups).map(([group, items]) => (
+          <div key={group}>
+            <div className="px-3 py-2 text-xs uppercase tracking-wider text-muted-foreground">{group}</div>
+            <ul className="space-y-1">
+              {items.map((r) => (
+                <li key={r.path}>
+                  <NavLink
+                    to={r.path}
+                    end={r.exact}
+                    className={({ isActive }) =>
+                      [
+                        'flex items-center gap-2 rounded-md px-3 py-2 text-sm transition',
+                        'hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring',
+                        isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'
+                      ].join(' ')
+                    }
+                    aria-current={location.pathname === r.path ? 'page' : undefined}
+                  >
+                    <Icon name={r.icon || 'Square'} />
+                    <span data-i18n-key={r.labelKey || ''}>{r.labelKey || r.path.replace('/','')}</span>
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </nav>
     </aside>
   );

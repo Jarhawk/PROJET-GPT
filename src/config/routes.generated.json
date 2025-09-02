@@ -1,0 +1,1318 @@
+[
+  {
+    "path": "/accueil",
+    "file": "Accueil.jsx",
+    "labelKey": "nav.accueil",
+    "group": "Général",
+    "showInSidebar": true
+  },
+  {
+    "path": "/aidecontextuelle",
+    "file": "AideContextuelle.jsx",
+    "labelKey": "nav.aidecontextuelle",
+    "group": "Général",
+    "showInSidebar": true
+  },
+  {
+    "path": "/barmanager",
+    "file": "BarManager.jsx",
+    "labelKey": "nav.barmanager",
+    "group": "Général",
+    "showInSidebar": true
+  },
+  {
+    "path": "/carteplats",
+    "file": "CartePlats.jsx",
+    "labelKey": "nav.carteplats",
+    "group": "Général",
+    "showInSidebar": true
+  },
+  {
+    "path": "/consentements",
+    "file": "Consentements.jsx",
+    "labelKey": "nav.consentements",
+    "group": "Général",
+    "showInSidebar": true
+  },
+  {
+    "path": "/dashboard",
+    "file": "Dashboard.jsx",
+    "labelKey": "nav.dashboard",
+    "group": "Général",
+    "showInSidebar": true
+  },
+  {
+    "path": "/engineeringmenu",
+    "file": "EngineeringMenu.jsx",
+    "labelKey": "nav.engineeringmenu",
+    "group": "Général",
+    "showInSidebar": true
+  },
+  {
+    "path": "/feedback",
+    "file": "Feedback.jsx",
+    "labelKey": "nav.feedback",
+    "group": "Général",
+    "showInSidebar": true
+  },
+  {
+    "path": "/helpcenter",
+    "file": "HelpCenter.jsx",
+    "labelKey": "nav.helpcenter",
+    "group": "Général",
+    "showInSidebar": true
+  },
+  {
+    "path": "/journal",
+    "file": "Journal.jsx",
+    "labelKey": "nav.journal",
+    "group": "Général",
+    "showInSidebar": true
+  },
+  {
+    "path": "/notfound",
+    "file": "NotFound.jsx",
+    "labelKey": "nav.notfound",
+    "group": "Général",
+    "showInSidebar": true
+  },
+  {
+    "path": "/onboarding",
+    "file": "Onboarding.jsx",
+    "labelKey": "nav.onboarding",
+    "group": "Général",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametres/familles",
+    "file": "Parametres/Familles.jsx",
+    "labelKey": "nav.parametres",
+    "group": "Parametres",
+    "showInSidebar": true
+  },
+  {
+    "path": "/pertes",
+    "file": "Pertes.jsx",
+    "labelKey": "nav.pertes",
+    "group": "Général",
+    "showInSidebar": true
+  },
+  {
+    "path": "/planning",
+    "file": "Planning.jsx",
+    "labelKey": "nav.planning",
+    "group": "Général",
+    "showInSidebar": true
+  },
+  {
+    "path": "/planningdetail",
+    "file": "PlanningDetail.jsx",
+    "labelKey": "nav.planningdetail",
+    "group": "Général",
+    "showInSidebar": true
+  },
+  {
+    "path": "/planningform",
+    "file": "PlanningForm.jsx",
+    "labelKey": "nav.planningform",
+    "group": "Général",
+    "showInSidebar": true
+  },
+  {
+    "path": "/planningmodule",
+    "file": "PlanningModule.jsx",
+    "labelKey": "nav.planningmodule",
+    "group": "Général",
+    "showInSidebar": true
+  },
+  {
+    "path": "/rgpd",
+    "file": "Rgpd.jsx",
+    "labelKey": "nav.rgpd",
+    "group": "Général",
+    "showInSidebar": true
+  },
+  {
+    "path": "/validations",
+    "file": "Validations.jsx",
+    "labelKey": "nav.validations",
+    "group": "Général",
+    "showInSidebar": true
+  },
+  {
+    "path": "/achats/achatdetail",
+    "file": "achats/AchatDetail.jsx",
+    "labelKey": "nav.achats",
+    "group": "Achats",
+    "showInSidebar": true
+  },
+  {
+    "path": "/achats/achatform",
+    "file": "achats/AchatForm.jsx",
+    "labelKey": "nav.achats",
+    "group": "Achats",
+    "showInSidebar": true
+  },
+  {
+    "path": "/achats/achats",
+    "file": "achats/Achats.jsx",
+    "labelKey": "nav.achats",
+    "group": "Achats",
+    "showInSidebar": true
+  },
+  {
+    "path": "/aide/aide",
+    "file": "aide/Aide.jsx",
+    "labelKey": "nav.aide",
+    "group": "Aide",
+    "showInSidebar": true
+  },
+  {
+    "path": "/aide/aideform",
+    "file": "aide/AideForm.jsx",
+    "labelKey": "nav.aide",
+    "group": "Aide",
+    "showInSidebar": true
+  },
+  {
+    "path": "/analyse/analyse",
+    "file": "analyse/Analyse.jsx",
+    "labelKey": "nav.analyse",
+    "group": "Analyse",
+    "showInSidebar": true
+  },
+  {
+    "path": "/analyse/analysecostcenter",
+    "file": "analyse/AnalyseCostCenter.jsx",
+    "labelKey": "nav.analyse",
+    "group": "Analyse",
+    "showInSidebar": true
+  },
+  {
+    "path": "/analyse/menuengineering",
+    "file": "analyse/MenuEngineering.jsx",
+    "labelKey": "nav.analyse",
+    "group": "Analyse",
+    "showInSidebar": true
+  },
+  {
+    "path": "/analyse/tableauxdebord",
+    "file": "analyse/TableauxDeBord.jsx",
+    "labelKey": "nav.analyse",
+    "group": "Analyse",
+    "showInSidebar": true
+  },
+  {
+    "path": "/analytique/analytiquedashboard",
+    "file": "analytique/AnalytiqueDashboard.jsx",
+    "labelKey": "nav.analytique",
+    "group": "Analytique",
+    "showInSidebar": true
+  },
+  {
+    "path": "/auth/blocked",
+    "file": "auth/Blocked.jsx",
+    "labelKey": "nav.auth",
+    "group": "Auth",
+    "showInSidebar": true
+  },
+  {
+    "path": "/auth/createmama",
+    "file": "auth/CreateMama.jsx",
+    "labelKey": "nav.auth",
+    "group": "Auth",
+    "showInSidebar": true
+  },
+  {
+    "path": "/auth/login",
+    "file": "auth/Login.jsx",
+    "labelKey": "nav.auth",
+    "group": "Auth",
+    "showInSidebar": true
+  },
+  {
+    "path": "/auth/logout",
+    "file": "auth/Logout.jsx",
+    "labelKey": "nav.auth",
+    "group": "Auth",
+    "showInSidebar": true
+  },
+  {
+    "path": "/auth/pending",
+    "file": "auth/Pending.jsx",
+    "labelKey": "nav.auth",
+    "group": "Auth",
+    "showInSidebar": true
+  },
+  {
+    "path": "/auth/resetpassword",
+    "file": "auth/ResetPassword.jsx",
+    "labelKey": "nav.auth",
+    "group": "Auth",
+    "showInSidebar": true
+  },
+  {
+    "path": "/auth/roleerror",
+    "file": "auth/RoleError.jsx",
+    "labelKey": "nav.auth",
+    "group": "Auth",
+    "showInSidebar": true
+  },
+  {
+    "path": "/auth/unauthorized",
+    "file": "auth/Unauthorized.jsx",
+    "labelKey": "nav.auth",
+    "group": "Auth",
+    "showInSidebar": true
+  },
+  {
+    "path": "/auth/updatepassword",
+    "file": "auth/UpdatePassword.jsx",
+    "labelKey": "nav.auth",
+    "group": "Auth",
+    "showInSidebar": true
+  },
+  {
+    "path": "/bons_livraison/blcreate",
+    "file": "bons_livraison/BLCreate.jsx",
+    "labelKey": "nav.bons_livraison",
+    "group": "Bons Livraison",
+    "showInSidebar": true
+  },
+  {
+    "path": "/bons_livraison/bldetail",
+    "file": "bons_livraison/BLDetail.jsx",
+    "labelKey": "nav.bons_livraison",
+    "group": "Bons Livraison",
+    "showInSidebar": true
+  },
+  {
+    "path": "/bons_livraison/blform",
+    "file": "bons_livraison/BLForm.jsx",
+    "labelKey": "nav.bons_livraison",
+    "group": "Bons Livraison",
+    "showInSidebar": true
+  },
+  {
+    "path": "/bons_livraison/bonslivraison",
+    "file": "bons_livraison/BonsLivraison.jsx",
+    "labelKey": "nav.bons_livraison",
+    "group": "Bons Livraison",
+    "showInSidebar": true
+  },
+  {
+    "path": "/carte/carte",
+    "file": "carte/Carte.jsx",
+    "labelKey": "nav.carte",
+    "group": "Carte",
+    "showInSidebar": true
+  },
+  {
+    "path": "/catalogue/cataloguesyncviewer",
+    "file": "catalogue/CatalogueSyncViewer.jsx",
+    "labelKey": "nav.catalogue",
+    "group": "Catalogue",
+    "showInSidebar": true
+  },
+  {
+    "path": "/commandes/commandedetail",
+    "file": "commandes/CommandeDetail.jsx",
+    "labelKey": "nav.commandes",
+    "group": "Commandes",
+    "showInSidebar": true
+  },
+  {
+    "path": "/commandes/commandeform",
+    "file": "commandes/CommandeForm.jsx",
+    "labelKey": "nav.commandes",
+    "group": "Commandes",
+    "showInSidebar": true
+  },
+  {
+    "path": "/commandes/commandes",
+    "file": "commandes/Commandes.jsx",
+    "labelKey": "nav.commandes",
+    "group": "Commandes",
+    "showInSidebar": true
+  },
+  {
+    "path": "/commandes/commandesenvoyees",
+    "file": "commandes/CommandesEnvoyees.jsx",
+    "labelKey": "nav.commandes",
+    "group": "Commandes",
+    "showInSidebar": true
+  },
+  {
+    "path": "/consolidation/accessmultisites",
+    "file": "consolidation/AccessMultiSites.jsx",
+    "labelKey": "nav.consolidation",
+    "group": "Consolidation",
+    "showInSidebar": true
+  },
+  {
+    "path": "/consolidation/consolidation",
+    "file": "consolidation/Consolidation.jsx",
+    "labelKey": "nav.consolidation",
+    "group": "Consolidation",
+    "showInSidebar": true
+  },
+  {
+    "path": "/costboisson/costboisson",
+    "file": "costboisson/CostBoisson.jsx",
+    "labelKey": "nav.costboisson",
+    "group": "Costboisson",
+    "showInSidebar": true
+  },
+  {
+    "path": "/costing/costingcarte",
+    "file": "costing/CostingCarte.jsx",
+    "labelKey": "nav.costing",
+    "group": "Costing",
+    "showInSidebar": true
+  },
+  {
+    "path": "/cuisine/menudujour",
+    "file": "cuisine/MenuDuJour.jsx",
+    "labelKey": "nav.cuisine",
+    "group": "Cuisine",
+    "showInSidebar": true
+  },
+  {
+    "path": "/dashboard/dashboardbuilder",
+    "file": "dashboard/DashboardBuilder.jsx",
+    "labelKey": "nav.dashboard",
+    "group": "Dashboard",
+    "showInSidebar": true
+  },
+  {
+    "path": "/debug/accessexample",
+    "file": "debug/AccessExample.jsx",
+    "labelKey": "nav.debug",
+    "group": "Debug",
+    "showInSidebar": true
+  },
+  {
+    "path": "/debug/authdebug",
+    "file": "debug/AuthDebug.jsx",
+    "labelKey": "nav.debug",
+    "group": "Debug",
+    "showInSidebar": true
+  },
+  {
+    "path": "/debug/debug",
+    "file": "debug/Debug.jsx",
+    "labelKey": "nav.debug",
+    "group": "Debug",
+    "showInSidebar": true
+  },
+  {
+    "path": "/debug/debugauth",
+    "file": "debug/DebugAuth.jsx",
+    "labelKey": "nav.debug",
+    "group": "Debug",
+    "showInSidebar": true
+  },
+  {
+    "path": "/debug/debugrights",
+    "file": "debug/DebugRights.jsx",
+    "labelKey": "nav.debug",
+    "group": "Debug",
+    "showInSidebar": true
+  },
+  {
+    "path": "/debug/debuguser",
+    "file": "debug/DebugUser.jsx",
+    "labelKey": "nav.debug",
+    "group": "Debug",
+    "showInSidebar": true
+  },
+  {
+    "path": "/documents/documentform",
+    "file": "documents/DocumentForm.jsx",
+    "labelKey": "nav.documents",
+    "group": "Documents",
+    "showInSidebar": true
+  },
+  {
+    "path": "/documents/documents",
+    "file": "documents/Documents.jsx",
+    "labelKey": "nav.documents",
+    "group": "Documents",
+    "showInSidebar": true
+  },
+  {
+    "path": "/ecarts/ecarts",
+    "file": "ecarts/Ecarts.jsx",
+    "labelKey": "nav.ecarts",
+    "group": "Ecarts",
+    "showInSidebar": true
+  },
+  {
+    "path": "/emails/emailsenvoyes",
+    "file": "emails/EmailsEnvoyes.jsx",
+    "labelKey": "nav.emails",
+    "group": "Emails",
+    "showInSidebar": true
+  },
+  {
+    "path": "/engineering/menuengineering",
+    "file": "engineering/MenuEngineering.jsx",
+    "labelKey": "nav.engineering",
+    "group": "Engineering",
+    "showInSidebar": true
+  },
+  {
+    "path": "/factures/facturecreate",
+    "file": "factures/FactureCreate.jsx",
+    "labelKey": "nav.factures",
+    "group": "Factures",
+    "showInSidebar": true
+  },
+  {
+    "path": "/factures/facturedetail",
+    "file": "factures/FactureDetail.jsx",
+    "labelKey": "nav.factures",
+    "group": "Factures",
+    "showInSidebar": true
+  },
+  {
+    "path": "/factures/factureform",
+    "file": "factures/FactureForm.jsx",
+    "labelKey": "nav.factures",
+    "group": "Factures",
+    "showInSidebar": true
+  },
+  {
+    "path": "/factures/factures",
+    "file": "factures/Factures.jsx",
+    "labelKey": "nav.factures",
+    "group": "Factures",
+    "showInSidebar": true
+  },
+  {
+    "path": "/factures/importfactures",
+    "file": "factures/ImportFactures.jsx",
+    "labelKey": "nav.factures",
+    "group": "Factures",
+    "showInSidebar": true
+  },
+  {
+    "path": "/fiches/fichedetail",
+    "file": "fiches/FicheDetail.jsx",
+    "labelKey": "nav.fiches",
+    "group": "Fiches",
+    "showInSidebar": true
+  },
+  {
+    "path": "/fiches/ficheform",
+    "file": "fiches/FicheForm.jsx",
+    "labelKey": "nav.fiches",
+    "group": "Fiches",
+    "showInSidebar": true
+  },
+  {
+    "path": "/fiches/fiches",
+    "file": "fiches/Fiches.jsx",
+    "labelKey": "nav.fiches",
+    "group": "Fiches",
+    "showInSidebar": true
+  },
+  {
+    "path": "/fournisseurs/apifournisseurform",
+    "file": "fournisseurs/ApiFournisseurForm.jsx",
+    "labelKey": "nav.fournisseurs",
+    "group": "Fournisseurs",
+    "showInSidebar": true
+  },
+  {
+    "path": "/fournisseurs/apifournisseurs",
+    "file": "fournisseurs/ApiFournisseurs.jsx",
+    "labelKey": "nav.fournisseurs",
+    "group": "Fournisseurs",
+    "showInSidebar": true
+  },
+  {
+    "path": "/fournisseurs/fournisseurapisettingsform",
+    "file": "fournisseurs/FournisseurApiSettingsForm.jsx",
+    "labelKey": "nav.fournisseurs",
+    "group": "Fournisseurs",
+    "showInSidebar": true
+  },
+  {
+    "path": "/fournisseurs/fournisseurcreate",
+    "file": "fournisseurs/FournisseurCreate.jsx",
+    "labelKey": "nav.fournisseurs",
+    "group": "Fournisseurs",
+    "showInSidebar": true
+  },
+  {
+    "path": "/fournisseurs/fournisseurdetail",
+    "file": "fournisseurs/FournisseurDetail.jsx",
+    "labelKey": "nav.fournisseurs",
+    "group": "Fournisseurs",
+    "showInSidebar": true
+  },
+  {
+    "path": "/fournisseurs/fournisseurdetailpage",
+    "file": "fournisseurs/FournisseurDetailPage.jsx",
+    "labelKey": "nav.fournisseurs",
+    "group": "Fournisseurs",
+    "showInSidebar": true
+  },
+  {
+    "path": "/fournisseurs/fournisseurform",
+    "file": "fournisseurs/FournisseurForm.jsx",
+    "labelKey": "nav.fournisseurs",
+    "group": "Fournisseurs",
+    "showInSidebar": true
+  },
+  {
+    "path": "/fournisseurs/fournisseurs",
+    "file": "fournisseurs/Fournisseurs.jsx",
+    "labelKey": "nav.fournisseurs",
+    "group": "Fournisseurs",
+    "showInSidebar": true
+  },
+  {
+    "path": "/fournisseurs/comparatif/comparatifprix",
+    "file": "fournisseurs/comparatif/ComparatifPrix.jsx",
+    "labelKey": "nav.fournisseurs",
+    "group": "Fournisseurs",
+    "showInSidebar": true
+  },
+  {
+    "path": "/fournisseurs/comparatif/prixfournisseurs",
+    "file": "fournisseurs/comparatif/PrixFournisseurs.jsx",
+    "labelKey": "nav.fournisseurs",
+    "group": "Fournisseurs",
+    "showInSidebar": true
+  },
+  {
+    "path": "/inventaire/ecartinventaire",
+    "file": "inventaire/EcartInventaire.jsx",
+    "labelKey": "nav.inventaire",
+    "group": "Inventaire",
+    "showInSidebar": true
+  },
+  {
+    "path": "/inventaire/inventaire",
+    "file": "inventaire/Inventaire.jsx",
+    "labelKey": "nav.inventaire",
+    "group": "Inventaire",
+    "showInSidebar": true
+  },
+  {
+    "path": "/inventaire/inventairedetail",
+    "file": "inventaire/InventaireDetail.jsx",
+    "labelKey": "nav.inventaire",
+    "group": "Inventaire",
+    "showInSidebar": true
+  },
+  {
+    "path": "/inventaire/inventaireform",
+    "file": "inventaire/InventaireForm.jsx",
+    "labelKey": "nav.inventaire",
+    "group": "Inventaire",
+    "showInSidebar": true
+  },
+  {
+    "path": "/inventaire/inventairezones",
+    "file": "inventaire/InventaireZones.jsx",
+    "labelKey": "nav.inventaire",
+    "group": "Inventaire",
+    "showInSidebar": true
+  },
+  {
+    "path": "/legal/cgu",
+    "file": "legal/Cgu.jsx",
+    "labelKey": "nav.legal",
+    "group": "Legal",
+    "showInSidebar": true
+  },
+  {
+    "path": "/legal/cgv",
+    "file": "legal/Cgv.jsx",
+    "labelKey": "nav.legal",
+    "group": "Legal",
+    "showInSidebar": true
+  },
+  {
+    "path": "/legal/confidentialite",
+    "file": "legal/Confidentialite.jsx",
+    "labelKey": "nav.legal",
+    "group": "Legal",
+    "showInSidebar": true
+  },
+  {
+    "path": "/legal/contact",
+    "file": "legal/Contact.jsx",
+    "labelKey": "nav.legal",
+    "group": "Legal",
+    "showInSidebar": true
+  },
+  {
+    "path": "/legal/licence",
+    "file": "legal/Licence.jsx",
+    "labelKey": "nav.legal",
+    "group": "Legal",
+    "showInSidebar": true
+  },
+  {
+    "path": "/legal/mentionslegales",
+    "file": "legal/MentionsLegales.jsx",
+    "labelKey": "nav.legal",
+    "group": "Legal",
+    "showInSidebar": true
+  },
+  {
+    "path": "/menu/menudujour",
+    "file": "menu/MenuDuJour.jsx",
+    "labelKey": "nav.menu",
+    "group": "Menu",
+    "showInSidebar": true
+  },
+  {
+    "path": "/menu/menudujourjour",
+    "file": "menu/MenuDuJourJour.jsx",
+    "labelKey": "nav.menu",
+    "group": "Menu",
+    "showInSidebar": true
+  },
+  {
+    "path": "/menus/menudetail",
+    "file": "menus/MenuDetail.jsx",
+    "labelKey": "nav.menus",
+    "group": "Menus",
+    "showInSidebar": true
+  },
+  {
+    "path": "/menus/menudujour",
+    "file": "menus/MenuDuJour.jsx",
+    "labelKey": "nav.menus",
+    "group": "Menus",
+    "showInSidebar": true
+  },
+  {
+    "path": "/menus/menudujourdetail",
+    "file": "menus/MenuDuJourDetail.jsx",
+    "labelKey": "nav.menus",
+    "group": "Menus",
+    "showInSidebar": true
+  },
+  {
+    "path": "/menus/menudujourform",
+    "file": "menus/MenuDuJourForm.jsx",
+    "labelKey": "nav.menus",
+    "group": "Menus",
+    "showInSidebar": true
+  },
+  {
+    "path": "/menus/menuform",
+    "file": "menus/MenuForm.jsx",
+    "labelKey": "nav.menus",
+    "group": "Menus",
+    "showInSidebar": true
+  },
+  {
+    "path": "/menus/menugroupedetail",
+    "file": "menus/MenuGroupeDetail.jsx",
+    "labelKey": "nav.menus",
+    "group": "Menus",
+    "showInSidebar": true
+  },
+  {
+    "path": "/menus/menugroupeform",
+    "file": "menus/MenuGroupeForm.jsx",
+    "labelKey": "nav.menus",
+    "group": "Menus",
+    "showInSidebar": true
+  },
+  {
+    "path": "/menus/menugroupes",
+    "file": "menus/MenuGroupes.jsx",
+    "labelKey": "nav.menus",
+    "group": "Menus",
+    "showInSidebar": true
+  },
+  {
+    "path": "/menus/menupdf",
+    "file": "menus/MenuPDF.jsx",
+    "labelKey": "nav.menus",
+    "group": "Menus",
+    "showInSidebar": true
+  },
+  {
+    "path": "/menus/menus",
+    "file": "menus/Menus.jsx",
+    "labelKey": "nav.menus",
+    "group": "Menus",
+    "showInSidebar": true
+  },
+  {
+    "path": "/mobile/mobileaccueil",
+    "file": "mobile/MobileAccueil.jsx",
+    "labelKey": "nav.mobile",
+    "group": "Mobile",
+    "showInSidebar": true
+  },
+  {
+    "path": "/mobile/mobileinventaire",
+    "file": "mobile/MobileInventaire.jsx",
+    "labelKey": "nav.mobile",
+    "group": "Mobile",
+    "showInSidebar": true
+  },
+  {
+    "path": "/mobile/mobilerequisition",
+    "file": "mobile/MobileRequisition.jsx",
+    "labelKey": "nav.mobile",
+    "group": "Mobile",
+    "showInSidebar": true
+  },
+  {
+    "path": "/notifications/notificationsettingsform",
+    "file": "notifications/NotificationSettingsForm.jsx",
+    "labelKey": "nav.notifications",
+    "group": "Notifications",
+    "showInSidebar": true
+  },
+  {
+    "path": "/notifications/notificationsinbox",
+    "file": "notifications/NotificationsInbox.jsx",
+    "labelKey": "nav.notifications",
+    "group": "Notifications",
+    "showInSidebar": true
+  },
+  {
+    "path": "/onboarding/onboardingutilisateur",
+    "file": "onboarding/OnboardingUtilisateur.jsx",
+    "labelKey": "nav.onboarding",
+    "group": "Onboarding",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametrage/apikeys",
+    "file": "parametrage/APIKeys.jsx",
+    "labelKey": "nav.parametrage",
+    "group": "Parametrage",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametrage/accessrights",
+    "file": "parametrage/AccessRights.jsx",
+    "labelKey": "nav.parametrage",
+    "group": "Parametrage",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametrage/centrecoutform",
+    "file": "parametrage/CentreCoutForm.jsx",
+    "labelKey": "nav.parametrage",
+    "group": "Parametrage",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametrage/exportcomptapage",
+    "file": "parametrage/ExportComptaPage.jsx",
+    "labelKey": "nav.parametrage",
+    "group": "Parametrage",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametrage/exportuserdata",
+    "file": "parametrage/ExportUserData.jsx",
+    "labelKey": "nav.parametrage",
+    "group": "Parametrage",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametrage/familles",
+    "file": "parametrage/Familles.jsx",
+    "labelKey": "nav.parametrage",
+    "group": "Parametrage",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametrage/invitationsenattente",
+    "file": "parametrage/InvitationsEnAttente.jsx",
+    "labelKey": "nav.parametrage",
+    "group": "Parametrage",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametrage/inviteuser",
+    "file": "parametrage/InviteUser.jsx",
+    "labelKey": "nav.parametrage",
+    "group": "Parametrage",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametrage/mamaform",
+    "file": "parametrage/MamaForm.jsx",
+    "labelKey": "nav.parametrage",
+    "group": "Parametrage",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametrage/mamasettingsform",
+    "file": "parametrage/MamaSettingsForm.jsx",
+    "labelKey": "nav.parametrage",
+    "group": "Parametrage",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametrage/mamas",
+    "file": "parametrage/Mamas.jsx",
+    "labelKey": "nav.parametrage",
+    "group": "Parametrage",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametrage/parametrage",
+    "file": "parametrage/Parametrage.jsx",
+    "labelKey": "nav.parametrage",
+    "group": "Parametrage",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametrage/parametrescommandes",
+    "file": "parametrage/ParametresCommandes.jsx",
+    "labelKey": "nav.parametrage",
+    "group": "Parametrage",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametrage/periodes",
+    "file": "parametrage/Periodes.jsx",
+    "labelKey": "nav.parametrage",
+    "group": "Parametrage",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametrage/permissions",
+    "file": "parametrage/Permissions.jsx",
+    "labelKey": "nav.parametrage",
+    "group": "Parametrage",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametrage/permissionsadmin",
+    "file": "parametrage/PermissionsAdmin.jsx",
+    "labelKey": "nav.parametrage",
+    "group": "Parametrage",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametrage/permissionsform",
+    "file": "parametrage/PermissionsForm.jsx",
+    "labelKey": "nav.parametrage",
+    "group": "Parametrage",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametrage/rgpdconsentform",
+    "file": "parametrage/RGPDConsentForm.jsx",
+    "labelKey": "nav.parametrage",
+    "group": "Parametrage",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametrage/roleform",
+    "file": "parametrage/RoleForm.jsx",
+    "labelKey": "nav.parametrage",
+    "group": "Parametrage",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametrage/roles",
+    "file": "parametrage/Roles.jsx",
+    "labelKey": "nav.parametrage",
+    "group": "Parametrage",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametrage/sousfamilles",
+    "file": "parametrage/SousFamilles.jsx",
+    "labelKey": "nav.parametrage",
+    "group": "Parametrage",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametrage/templatecommandeform",
+    "file": "parametrage/TemplateCommandeForm.jsx",
+    "labelKey": "nav.parametrage",
+    "group": "Parametrage",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametrage/templatescommandes",
+    "file": "parametrage/TemplatesCommandes.jsx",
+    "labelKey": "nav.parametrage",
+    "group": "Parametrage",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametrage/unites",
+    "file": "parametrage/Unites.jsx",
+    "labelKey": "nav.parametrage",
+    "group": "Parametrage",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametrage/utilisateurs",
+    "file": "parametrage/Utilisateurs.jsx",
+    "labelKey": "nav.parametrage",
+    "group": "Parametrage",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametrage/zoneaccess",
+    "file": "parametrage/ZoneAccess.jsx",
+    "labelKey": "nav.parametrage",
+    "group": "Parametrage",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametrage/zoneform",
+    "file": "parametrage/ZoneForm.jsx",
+    "labelKey": "nav.parametrage",
+    "group": "Parametrage",
+    "showInSidebar": true
+  },
+  {
+    "path": "/parametrage/zones",
+    "file": "parametrage/Zones.jsx",
+    "labelKey": "nav.parametrage",
+    "group": "Parametrage",
+    "showInSidebar": true
+  },
+  {
+    "path": "/planning/simulationplanner",
+    "file": "planning/SimulationPlanner.jsx",
+    "labelKey": "nav.planning",
+    "group": "Planning",
+    "showInSidebar": true
+  },
+  {
+    "path": "/produits/produitdetail",
+    "file": "produits/ProduitDetail.jsx",
+    "labelKey": "nav.produits",
+    "group": "Produits",
+    "showInSidebar": true
+  },
+  {
+    "path": "/produits/produitform",
+    "file": "produits/ProduitForm.jsx",
+    "labelKey": "nav.produits",
+    "group": "Produits",
+    "showInSidebar": true
+  },
+  {
+    "path": "/produits/produits",
+    "file": "produits/Produits.jsx",
+    "labelKey": "nav.produits",
+    "group": "Produits",
+    "showInSidebar": true
+  },
+  {
+    "path": "/promotions/promotionform",
+    "file": "promotions/PromotionForm.jsx",
+    "labelKey": "nav.promotions",
+    "group": "Promotions",
+    "showInSidebar": true
+  },
+  {
+    "path": "/promotions/promotions",
+    "file": "promotions/Promotions.jsx",
+    "labelKey": "nav.promotions",
+    "group": "Promotions",
+    "showInSidebar": true
+  },
+  {
+    "path": "/public/landingpage",
+    "file": "public/LandingPage.jsx",
+    "labelKey": "nav.public",
+    "group": "Public",
+    "showInSidebar": true
+  },
+  {
+    "path": "/public/onboarding",
+    "file": "public/Onboarding.jsx",
+    "labelKey": "nav.public",
+    "group": "Public",
+    "showInSidebar": true
+  },
+  {
+    "path": "/public/signup",
+    "file": "public/Signup.jsx",
+    "labelKey": "nav.public",
+    "group": "Public",
+    "showInSidebar": true
+  },
+  {
+    "path": "/receptions/receptions",
+    "file": "receptions/Receptions.jsx",
+    "labelKey": "nav.receptions",
+    "group": "Receptions",
+    "showInSidebar": true
+  },
+  {
+    "path": "/recettes/recettes",
+    "file": "recettes/Recettes.jsx",
+    "labelKey": "nav.recettes",
+    "group": "Recettes",
+    "showInSidebar": true
+  },
+  {
+    "path": "/reporting/graphcost",
+    "file": "reporting/GraphCost.jsx",
+    "labelKey": "nav.reporting",
+    "group": "Reporting",
+    "showInSidebar": true
+  },
+  {
+    "path": "/reporting/reporting",
+    "file": "reporting/Reporting.jsx",
+    "labelKey": "nav.reporting",
+    "group": "Reporting",
+    "showInSidebar": true
+  },
+  {
+    "path": "/reporting/reportingpdf",
+    "file": "reporting/ReportingPDF.jsx",
+    "labelKey": "nav.reporting",
+    "group": "Reporting",
+    "showInSidebar": true
+  },
+  {
+    "path": "/requisitions/requisitiondetail",
+    "file": "requisitions/RequisitionDetail.jsx",
+    "labelKey": "nav.requisitions",
+    "group": "Requisitions",
+    "showInSidebar": true
+  },
+  {
+    "path": "/requisitions/requisitionform",
+    "file": "requisitions/RequisitionForm.jsx",
+    "labelKey": "nav.requisitions",
+    "group": "Requisitions",
+    "showInSidebar": true
+  },
+  {
+    "path": "/requisitions/requisitions",
+    "file": "requisitions/Requisitions.jsx",
+    "labelKey": "nav.requisitions",
+    "group": "Requisitions",
+    "showInSidebar": true
+  },
+  {
+    "path": "/signalements/signalementdetail",
+    "file": "signalements/SignalementDetail.jsx",
+    "labelKey": "nav.signalements",
+    "group": "Signalements",
+    "showInSidebar": true
+  },
+  {
+    "path": "/signalements/signalementform",
+    "file": "signalements/SignalementForm.jsx",
+    "labelKey": "nav.signalements",
+    "group": "Signalements",
+    "showInSidebar": true
+  },
+  {
+    "path": "/signalements/signalements",
+    "file": "signalements/Signalements.jsx",
+    "labelKey": "nav.signalements",
+    "group": "Signalements",
+    "showInSidebar": true
+  },
+  {
+    "path": "/simulation/simulation",
+    "file": "simulation/Simulation.jsx",
+    "labelKey": "nav.simulation",
+    "group": "Simulation",
+    "showInSidebar": true
+  },
+  {
+    "path": "/simulation/simulationform",
+    "file": "simulation/SimulationForm.jsx",
+    "labelKey": "nav.simulation",
+    "group": "Simulation",
+    "showInSidebar": true
+  },
+  {
+    "path": "/simulation/simulationmenu",
+    "file": "simulation/SimulationMenu.jsx",
+    "labelKey": "nav.simulation",
+    "group": "Simulation",
+    "showInSidebar": true
+  },
+  {
+    "path": "/simulation/simulationresult",
+    "file": "simulation/SimulationResult.jsx",
+    "labelKey": "nav.simulation",
+    "group": "Simulation",
+    "showInSidebar": true
+  },
+  {
+    "path": "/stats/stats",
+    "file": "stats/Stats.jsx",
+    "labelKey": "nav.stats",
+    "group": "Stats",
+    "showInSidebar": true
+  },
+  {
+    "path": "/stats/statsadvanced",
+    "file": "stats/StatsAdvanced.jsx",
+    "labelKey": "nav.stats",
+    "group": "Stats",
+    "showInSidebar": true
+  },
+  {
+    "path": "/stats/statsconsolidation",
+    "file": "stats/StatsConsolidation.jsx",
+    "labelKey": "nav.stats",
+    "group": "Stats",
+    "showInSidebar": true
+  },
+  {
+    "path": "/stats/statscostcenters",
+    "file": "stats/StatsCostCenters.jsx",
+    "labelKey": "nav.stats",
+    "group": "Stats",
+    "showInSidebar": true
+  },
+  {
+    "path": "/stats/statscostcenterspivot",
+    "file": "stats/StatsCostCentersPivot.jsx",
+    "labelKey": "nav.stats",
+    "group": "Stats",
+    "showInSidebar": true
+  },
+  {
+    "path": "/stats/statsfiches",
+    "file": "stats/StatsFiches.jsx",
+    "labelKey": "nav.stats",
+    "group": "Stats",
+    "showInSidebar": true
+  },
+  {
+    "path": "/stats/statsstock",
+    "file": "stats/StatsStock.jsx",
+    "labelKey": "nav.stats",
+    "group": "Stats",
+    "showInSidebar": true
+  },
+  {
+    "path": "/stock/alertesrupture",
+    "file": "stock/AlertesRupture.jsx",
+    "labelKey": "nav.stock",
+    "group": "Stock",
+    "showInSidebar": true
+  },
+  {
+    "path": "/stock/inventaire",
+    "file": "stock/Inventaire.jsx",
+    "labelKey": "nav.stock",
+    "group": "Stock",
+    "showInSidebar": true
+  },
+  {
+    "path": "/stock/inventaireform",
+    "file": "stock/InventaireForm.jsx",
+    "labelKey": "nav.stock",
+    "group": "Stock",
+    "showInSidebar": true
+  },
+  {
+    "path": "/stock/transfertform",
+    "file": "stock/TransfertForm.jsx",
+    "labelKey": "nav.stock",
+    "group": "Stock",
+    "showInSidebar": true
+  },
+  {
+    "path": "/stock/transferts",
+    "file": "stock/Transferts.jsx",
+    "labelKey": "nav.stock",
+    "group": "Stock",
+    "showInSidebar": true
+  },
+  {
+    "path": "/supervision/comparateurfiches",
+    "file": "supervision/ComparateurFiches.jsx",
+    "labelKey": "nav.supervision",
+    "group": "Supervision",
+    "showInSidebar": true
+  },
+  {
+    "path": "/supervision/groupeparamform",
+    "file": "supervision/GroupeParamForm.jsx",
+    "labelKey": "nav.supervision",
+    "group": "Supervision",
+    "showInSidebar": true
+  },
+  {
+    "path": "/supervision/logs",
+    "file": "supervision/Logs.jsx",
+    "labelKey": "nav.supervision",
+    "group": "Supervision",
+    "showInSidebar": true
+  },
+  {
+    "path": "/supervision/rapports",
+    "file": "supervision/Rapports.jsx",
+    "labelKey": "nav.supervision",
+    "group": "Supervision",
+    "showInSidebar": true
+  },
+  {
+    "path": "/supervision/supervisiongroupe",
+    "file": "supervision/SupervisionGroupe.jsx",
+    "labelKey": "nav.supervision",
+    "group": "Supervision",
+    "showInSidebar": true
+  },
+  {
+    "path": "/surcouts/surcouts",
+    "file": "surcouts/Surcouts.jsx",
+    "labelKey": "nav.surcouts",
+    "group": "Surcouts",
+    "showInSidebar": true
+  },
+  {
+    "path": "/taches/alertes",
+    "file": "taches/Alertes.jsx",
+    "labelKey": "nav.taches",
+    "group": "Taches",
+    "showInSidebar": true
+  },
+  {
+    "path": "/taches/tachedetail",
+    "file": "taches/TacheDetail.jsx",
+    "labelKey": "nav.taches",
+    "group": "Taches",
+    "showInSidebar": true
+  },
+  {
+    "path": "/taches/tacheform",
+    "file": "taches/TacheForm.jsx",
+    "labelKey": "nav.taches",
+    "group": "Taches",
+    "showInSidebar": true
+  },
+  {
+    "path": "/taches/tachenew",
+    "file": "taches/TacheNew.jsx",
+    "labelKey": "nav.taches",
+    "group": "Taches",
+    "showInSidebar": true
+  },
+  {
+    "path": "/taches/taches",
+    "file": "taches/Taches.jsx",
+    "labelKey": "nav.taches",
+    "group": "Taches",
+    "showInSidebar": true
+  }
+]

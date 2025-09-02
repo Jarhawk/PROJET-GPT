@@ -21,3 +21,9 @@ export function deduceEnabledModulesFromRights(rights) {
   return modules
 }
 
+export function hasAccess(user, accessKey) {
+  if (!accessKey) return true
+  const rights = user?.access_rights || {}
+  const key = normalizeAccessKey(accessKey)
+  return !!rights[key]
+}

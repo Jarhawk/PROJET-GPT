@@ -43,7 +43,10 @@ export default function SousFamilleList({ famille }) {
     if (!mama_id) return toast.error('Action non autorisée');
     const { error } = await supabase
       .from('sous_familles')
-      .insert([{ ...values, mama_id }]);
+      .insert([{ ...values, mama_id }])
+      .eq('mama_id', mama_id)
+      .select('id, nom, famille_id, mama_id, actif')
+      .single();
     if (error) {
       toast.error(error.message);
     } else {

@@ -81,3 +81,64 @@ test('subscribeToMenus listens for inserts', async () => {
   unsub();
   expect(removeChannelMock).toHaveBeenCalledWith(channel);
 });
+
+test('getMenus merges fiche details', async () => {
+  const menusRange = vi.fn(() =>
+    Promise.resolve({
+      data: [
+        {
+          id: 'm1',
+          nom: 'MenuX',
+          date: '2025-01-01',
+          actif: true,
+          fiches: [{ fiche_id: 'f1' }, { fiche_id: 'f2' }],
+        },
+      ],
+      count: 1,
+      error: null,
+    })
+  );
+  const menusOrder = vi.fn(() => ({ range: menusRange }));
+  const menusEq = vi.fn(() => ({ eq: menusEq, order: menusOrder }));
+  const menusSelect = vi.fn(() => ({ eq: menusEq }));
+
+  const ftIn = vi.fn(() =>
+    Promise.resolve({
+      data: [
+        { fiche_id: 'f1', nom: 'F1', cout_par_portion: 10 },
+        { fiche_id: 'f2', nom: 'F2', cout_par_portion: 20 },
+      ],
+      error: null,
+    })
+  );
+  const ftEq = vi.fn(() => ({ in: ftIn }));
+  const ftSelect = vi.fn(() => ({ eq: ftEq }));
+
+  fromMock.mockImplementation((table) => {
+    if (table === 'menus') return { select: menusSelect };
+    if (table === 'fiches_techniques') return { select: ftSelect };
+    return { select: selectMock };
+  });
+
+  const { result } = renderHook(() => useMenus());
+  await act(async () => {
+    await result.current.getMenus();
+  });
+  expect(menusSelect).toHaveBeenCalledWith(
+    'id, nom, date, actif, fiches:menu_fiches(fiche_id, mama_id)',
+    { count: 'exact' }
+  );
+  expect(ftSelect).toHaveBeenCalledWith('fiche_id, nom, cout_par_portion');
+  expect(result.current.menus).toEqual([
+    {
+      id: 'm1',
+      nom: 'MenuX',
+      date: '2025-01-01',
+      actif: true,
+      fiches: [
+        { fiche_id: 'f1', fiche: { nom: 'F1', cout_par_portion: 10 } },
+        { fiche_id: 'f2', fiche: { nom: 'F2', cout_par_portion: 20 } },
+      ],
+    },
+  ]);
+});

@@ -16,7 +16,7 @@ import Produits from '@/pages/produits/Produits.jsx';
 
 test('affiche la liste des produits', async () => {
   mockProduits = () => ({
-    data: { data: [{ id: '1', nom: 'Test', unite: { nom: 'kg' }, pmp: 1 }], count: 1 },
+    data: { data: [{ id: '1', nom: 'Test', unite: { nom: 'kg' } }], count: 1 },
     isLoading: false,
     error: null,
   });

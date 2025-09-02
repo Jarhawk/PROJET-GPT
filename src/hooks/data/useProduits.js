@@ -22,24 +22,24 @@ export const useProduits = ({
       queryKey: ['produits', mamaId, search, page, pageSize, statut, familleId, sousFamilleId],
       enabled: !!mamaId,
       queryFn: async () => {
-        // Columns: id, nom, actif, unite_id, famille_id, sous_famille_id, pmp, dernier_prix, zone_stock_id,
-        // unite:unites(id, nom), famille:familles(id, nom), sous_famille:sous_familles(id, nom)
+        // Colonnes autorisées : id, nom, unite_id, tva, zone_stock_id, famille_id, sous_famille_id, actif, mama_id
+        // Join nom de l'unité et des (sous-)familles via leurs FKs
         let q = supabase
-        .from('produits')
-        .select(
-          `
-          id, nom, actif, unite_id, sous_famille_id, pmp, dernier_prix, zone_id:zone_stock_id, tva,
-          unite:unites(id, nom),
-          sous_famille:sous_familles!fk_produits_sous_famille(
-            id, nom, famille:familles!sous_familles_famille_id_fkey(id, nom)
+          .from('produits')
+          .select(
+            `
+            id, nom, unite_id, tva, zone_id:zone_stock_id, famille_id, sous_famille_id, actif, mama_id,
+            unite:unites(id, nom),
+            sous_famille:sous_familles!fk_produits_sous_famille(
+              id, nom, famille:familles(id, nom)
+            )
+            `,
+            { count: 'exact' }
           )
-          `,
-          { count: 'exact' }
-        )
-        .eq('mama_id', mamaId)
-        .eq('unite.mama_id', mamaId)
-        .eq('sous_famille.mama_id', mamaId)
-        .eq('sous_famille.famille.mama_id', mamaId);
+          .eq('mama_id', mamaId)
+          .eq('unite.mama_id', mamaId)
+          .eq('sous_famille.mama_id', mamaId)
+          .eq('sous_famille.famille.mama_id', mamaId);
 
       if (search) q = q.ilike('nom', `%${search}%`);
       if (familleId) q = q.eq('famille_id', familleId);

@@ -49,7 +49,8 @@ export function useFamillesWithSousFamilles() {
     if (!mama_id) return { error: 'Aucun mama_id' };
     const { error } = await supabase
       .from('familles')
-      .insert([{ ...values, mama_id }]);
+      .insert([{ ...values, mama_id }])
+      .eq('mama_id', mama_id);
     if (!error) await fetchAll();
     return { error };
   }
@@ -79,7 +80,8 @@ export function useFamillesWithSousFamilles() {
     if (!mama_id) return { error: 'Aucun mama_id' };
     const { error } = await supabase
       .from('sous_familles')
-      .insert([{ ...values, famille_id, mama_id }]);
+      .insert([{ ...values, famille_id, mama_id }])
+      .eq('mama_id', mama_id);
     if (!error) await fetchAll();
     return { error };
   }

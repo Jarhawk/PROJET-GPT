@@ -29,7 +29,7 @@ export function useUnites() {
     queryFn: async () => {
       let q = supabase
         .from('unites')
-        .select('id, code, nom, actif', { count: 'exact' })
+        .select('id, nom, actif', { count: 'exact' })
         .eq('mama_id', mama_id)
         .order('nom', { ascending: true })
         .range((params.page - 1) * params.limit, params.page * params.limit - 1);
@@ -51,7 +51,7 @@ export function useUnites() {
       const { data, error } = await supabase
         .from('unites')
         .insert([{ ...body, mama_id }])
-        .select('id, code, nom, actif')
+        .select('id, nom, actif')
         .single();
       if (error) throw error;
       return data;
@@ -66,7 +66,7 @@ export function useUnites() {
         .update(values)
         .eq('id', id)
         .eq('mama_id', mama_id)
-        .select('id, code, nom, actif')
+        .select('id, nom, actif')
         .single();
       if (error) throw error;
       return data;

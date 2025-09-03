@@ -1,34 +1,36 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import * as Icons from 'lucide-react';
-
-const items = [
-  { to: '/dashboard', label: 'Dashboard', icon: 'LayoutDashboard' },
-  // { to: '/produits', label: 'Produits', icon: 'Boxes' },
-  // { to: '/factures', label: 'Factures', icon: 'Receipt' },
-];
-
-function Icon({ name }) {
-  const Ico = Icons[name] ?? Icons.Circle;
-  return <Ico size={16} className="mr-2 opacity-90" />;
-}
+import { sidebarRoutes } from '@/config/routes.js';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Sidebar() {
+  const { access_rights, rightsLoading } = useAuth();
+  if (rightsLoading) return null;
+
+  const visible = sidebarRoutes.filter((r) => {
+    const moduleKey = r.path.slice(1).split('/')[0] || 'dashboard';
+    const mod = access_rights?.[moduleKey];
+    return mod?.peut_voir !== false;
+  });
+
   return (
     <nav className="py-4">
       <div className="px-4 mb-4 font-black tracking-wide text-yellow-300">MAMASTOCK</div>
       <ul className="space-y-1">
-        {items.map((it) => (
-          <li key={it.to}>
+        {visible.map((r) => (
+          <li key={r.path}>
             <NavLink
-              to={it.to}
+              to={r.path}
               className={({ isActive }) =>
-                `flex items-center px-4 py-2 rounded-lg transition
-                 ${isActive ? 'bg-white/15 text-white' : 'text-slate-300 hover:text-white hover:bg-white/5'}`
+                `flex items-center px-4 py-2 rounded-lg transition ${
+                  isActive
+                    ? 'bg-white/15 text-white'
+                    : 'text-slate-300 hover:text-white hover:bg-white/5'
+                }`
               }
             >
-              <Icon name={it.icon} />
-              <span className="text-sm">{it.label}</span>
+              <r.icon size={16} className="mr-2 opacity-90" />
+              <span className="text-sm">{r.label}</span>
             </NavLink>
           </li>
         ))}

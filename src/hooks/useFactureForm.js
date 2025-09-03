@@ -1,7 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useMemo } from "react";
+import { toNumberSafeFR } from '@/utils/numberFR.js';
 
-const parseNum = v => parseFloat(String(v).replace(',', '.')) || 0;
+const parseNum = (v) => toNumberSafeFR(v);
 
 export function useFactureForm(lignes = []) {
   const autoHt = useMemo(

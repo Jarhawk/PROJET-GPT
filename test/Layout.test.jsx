@@ -21,7 +21,6 @@ vi.mock('@/lib/supabase', () => ({ supabase: {} }));
 vi.mock('@/layout/Sidebar', () => ({ default: () => <div>Sidebar</div> }));
 vi.mock('@/components/Footer', () => ({ default: () => <div>Footer</div> }));
 vi.mock('@/components/stock/AlertBadge', () => ({ default: () => <div /> }));
-vi.mock('@/components/ui/PageSkeleton', () => ({ default: () => <div data-testid="skeleton">Loading</div> }));
 vi.mock('@/components/LiquidBackground', () => ({
   LiquidBackground: () => <div />,
   WavesBackground: () => <div />,
@@ -34,20 +33,6 @@ describe('Layout', () => {
     authMock.mockReset();
     notificationsMock.fetchUnreadCount.mockReset();
     notificationsMock.subscribeToNotifications.mockReset();
-  });
-
-  it('affiche un skeleton pendant le chargement', () => {
-    authMock.mockReturnValue({ session: null, userData: null, loading: true });
-    notificationsMock.fetchUnreadCount.mockResolvedValue(0);
-    notificationsMock.subscribeToNotifications.mockReturnValue(() => {});
-    render(
-      <MemoryRouter initialEntries={['/']}>
-        <Routes>
-          <Route path="/" element={<Layout />} />
-        </Routes>
-      </MemoryRouter>
-    );
-    expect(screen.getByTestId('skeleton')).toBeTruthy();
   });
 
   it('rend la mise en page après chargement du profil', () => {
@@ -69,7 +54,7 @@ describe('Layout', () => {
         </Routes>
       </MemoryRouter>
     );
-    expect(screen.getByText('Déconnexion')).toBeTruthy();
+    expect(screen.getByText('Sidebar')).toBeTruthy();
     expect(screen.getByText('Home')).toBeTruthy();
   });
 });

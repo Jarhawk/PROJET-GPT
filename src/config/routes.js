@@ -1,21 +1,81 @@
-import generated from './routes.generated.json' assert { type: 'json' };
+import { lazy } from 'react';
 
-export const ROUTES = [
-  { path:'/dashboard', element: () => import('../pages/Dashboard.jsx'), labelKey:'menu.dashboard', icon:'LayoutDashboard', access:'view_dashboard', showInSidebar:true },
-  { path:'/produits', element:() => import('../pages/produits/Produits.jsx'), labelKey:'menu.produits', icon:'Package', access:'view_produits', showInSidebar:true },
-  { path:'/factures', element:() => import('../pages/factures/Factures.jsx'), labelKey:'menu.factures', icon:'Receipt', access:'view_factures', showInSidebar:true },
-  { path:'/fiches', element:() => import('../pages/fiches/Fiches.jsx'), labelKey:'menu.fiches', icon:'BookOpen', access:'view_fiches', showInSidebar:true },
-  { path:'/menus', element:() => import('../pages/menus/Menus.jsx'), labelKey:'menu.menus', icon:'Utensils', access:'view_menus', showInSidebar:true },
-  { path:'/menu-jour', element:() => import('../pages/menus/MenuDuJour.jsx'), labelKey:'menu.menuDuJour', icon:'CalendarClock', access:'view_menu_jour', showInSidebar:true },
-  { path:'/stock', element:() => import('../pages/inventaire/Inventaire.jsx'), labelKey:'menu.stock', icon:'Boxes', access:'view_stock', showInSidebar:true },
-  { path:'/parametrage/familles', element:() => import('../pages/parametrage/Familles.jsx'), labelKey:'menu.familles', icon:'TreeDeciduous', access:'view_parametrage', showInSidebar:true },
-  { path:'/parametrage/sous-familles', element:() => import('../pages/parametrage/SousFamilles.jsx'), labelKey:'menu.sousFamilles', icon:'GitBranch', access:'view_parametrage', showInSidebar:true },
-  { path:'/parametrage/unites', element:() => import('../pages/parametrage/Unites.jsx'), labelKey:'menu.unites', icon:'Ruler', access:'view_parametrage', showInSidebar:true },
-  { path:'/parametrage/zones', element:() => import('../pages/parametrage/Zones.jsx'), labelKey:'menu.zones', icon:'Warehouse', access:'view_parametrage', showInSidebar:true },
+// Source unique de vérité pour les routes visibles dans la sidebar
+export const APP_ROUTES = [
+  {
+    path: '/dashboard',
+    element: lazy(() => import('../pages/Dashboard.jsx')),
+    labelKey: 'nav.accueil',
+    icon: 'Home',
+    showInSidebar: true,
+    access: 'view_dashboard',
+  },
+  {
+    path: '/produits',
+    element: lazy(() => import('../pages/produits/Produits.jsx')),
+    labelKey: 'nav.produits',
+    icon: 'Package',
+    showInSidebar: true,
+    access: 'view_produits',
+  },
+  {
+    path: '/factures',
+    element: lazy(() => import('../pages/factures/Factures.jsx')),
+    labelKey: 'nav.factures',
+    icon: 'FileText',
+    showInSidebar: true,
+    access: 'view_factures',
+  },
+  {
+    path: '/fiches',
+    element: lazy(() => import('../pages/fiches/Fiches.jsx')),
+    labelKey: 'nav.fiches',
+    icon: 'BookOpen',
+    showInSidebar: true,
+    access: 'view_fiches',
+  },
+  {
+    // IMPORTANT: la page "stock" est en réalité Inventaire.jsx
+    path: '/stock',
+    element: lazy(() => import('../pages/inventaire/Inventaire.jsx')),
+    labelKey: 'nav.stock',
+    icon: 'Boxes',
+    showInSidebar: true,
+    access: 'view_stock',
+  },
+  // Paramétrage
+  {
+    path: '/parametrage/familles',
+    element: lazy(() => import('../pages/parametrage/Familles.jsx')),
+    labelKey: 'nav.familles',
+    icon: 'Layers',
+    showInSidebar: true,
+    access: 'manage_parametrage',
+  },
+  {
+    path: '/parametrage/sous-familles',
+    element: lazy(() => import('../pages/parametrage/SousFamilles.jsx')),
+    labelKey: 'nav.sousFamilles',
+    icon: 'GitBranch',
+    showInSidebar: true,
+    access: 'manage_parametrage',
+  },
+  {
+    path: '/parametrage/zones',
+    element: lazy(() => import('../pages/parametrage/Zones.jsx')),
+    labelKey: 'nav.zones',
+    icon: 'Map',
+    showInSidebar: true,
+    access: 'manage_parametrage',
+  },
 ];
 
-for (const r of generated) {
-  if (!ROUTES.some(x => x.path === r.path)) ROUTES.push(r);
-}
+// Routes techniques (détail, formulaires, etc.) non visibles dans la sidebar
+export const HIDDEN_ROUTES = [
+  {
+    path: '/produits/:id',
+    element: lazy(() => import('../pages/produits/ProduitDetail.jsx')),
+    showInSidebar: false,
+  },
+];
 
-export default ROUTES;

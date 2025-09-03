@@ -1,44 +1,40 @@
-import { NavLink, useLocation } from 'react-router-dom';
-import routes from '../config/routes.js';
-import { hasRight } from '../lib/access.js';
-import { useAuth } from '../contexts/AuthContext.jsx';
-import * as Icons from 'lucide-react';
+import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-
-function Icon({ name }) {
-  const Cmp = Icons[name] || Icons.Square;
-  return <Cmp className="h-4 w-4" aria-hidden="true" />;
-}
+import { APP_ROUTES } from '../config/routes';
+import { hasAccess } from '../lib/access'; // doit retourner true/false pour une clé; sinon renvoie toujours true.
 
 export default function Sidebar() {
-  const { user } = useAuth?.() || { user: null };
-  const location = useLocation();
   const { t } = useTranslation();
 
-  const items = routes.filter(r => r.showInSidebar && hasRight(user, r.access));
+  const items = APP_ROUTES
+    .filter(r => r.showInSidebar)
+    .filter(r => !r.access || hasAccess(r.access))
+    .filter((r, i, arr) => arr.findIndex(x => x.path === r.path) === i);
 
   return (
-    <aside className="w-64 flex-shrink-0 border-r bg-background text-foreground">
-      <nav className="p-2 space-y-1">
-        {items.map(r => (
-          <NavLink
-            key={r.path}
-            to={r.path}
-            end={r.exact}
-            className={({ isActive }) =>
-              [
-                'flex items-center gap-2 rounded-md px-3 py-2 text-sm transition',
-                'hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring',
-                isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'
-              ].join(' ')
-            }
-            aria-current={location.pathname === r.path ? 'page' : undefined}
-          >
-            <Icon name={r.icon || 'Square'} />
-            <span>{t(r.labelKey)}</span>
-          </NavLink>
-        ))}
+    <aside className="w-64 shrink-0 border-r border-white/10 bg-slate-900/40 backdrop-blur">
+      <nav className="p-2">
+        <ul className="space-y-1">
+          {items.map(route => (
+            <li key={route.path}>
+              <NavLink
+                to={route.path}
+                className={({ isActive }) =>
+                  [
+                    'block rounded-md px-3 py-2 text-sm',
+                    isActive
+                      ? 'bg-white/10 text-white'
+                      : 'text-slate-300 hover:bg-white/5 hover:text-white',
+                  ].join(' ')
+                }
+              >
+                <span>{t(route.labelKey, route.labelKey)}</span>
+              </NavLink>
+            </li>
+          ))}
+        </ul>
       </nav>
     </aside>
   );
 }
+

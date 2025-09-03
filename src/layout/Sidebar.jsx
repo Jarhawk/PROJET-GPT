@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { APP_ROUTES } from '../config/routes';
 import { hasAccess } from '../lib/access'; // doit retourner true/false pour une clé; sinon renvoie toujours true.
+import Icon from '../components/ui/Icon';
 
 export default function Sidebar() {
   const { t } = useTranslation();
@@ -21,13 +22,14 @@ export default function Sidebar() {
                 to={route.path}
                 className={({ isActive }) =>
                   [
-                    'block rounded-md px-3 py-2 text-sm',
+                    'flex items-center gap-2 rounded-md px-3 py-2 text-sm',
                     isActive
                       ? 'bg-white/10 text-white'
                       : 'text-slate-300 hover:bg-white/5 hover:text-white',
                   ].join(' ')
                 }
               >
+                <Icon name={route.icon} className="h-4 w-4 opacity-90" />
                 <span>{t(route.labelKey, route.labelKey)}</span>
               </NavLink>
             </li>

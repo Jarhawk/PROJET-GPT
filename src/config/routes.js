@@ -97,11 +97,15 @@ export const routes = pagesReport.pages
     const isPublic = /pages\/auth\/|pages\/public\/|pages\/NotFound\.jsx$/.test(
       p.pageFile,
     );
+    const labelKey = `nav.${path.slice(1).replace(/\//g, '_')}`;
+    const accessKey = path.split('/')[1] || 'dashboard';
     return {
       path,
       importPath,
       element: lazy(() => import(/* @vite-ignore */ importPath)),
       label,
+      labelKey,
+      accessKey,
       icon: Icon,
       private: !isPublic,
       showInSidebar: !isPublic && !/notfound|auth|public/i.test(p.pageFile),

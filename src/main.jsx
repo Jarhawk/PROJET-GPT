@@ -6,6 +6,7 @@ import "./globals.css";
 import 'nprogress/nprogress.css';
 import "./registerSW.js";
 import { toast } from 'sonner';
+import './i18n.js';
 
 // Avoid noisy output in production by disabling debug logs
 if (!import.meta.env.DEV) {

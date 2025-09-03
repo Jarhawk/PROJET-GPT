@@ -1,17 +1,22 @@
 import { render, fireEvent } from '@testing-library/react';
 import { vi, test, expect } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import FactureLigne from '@/components/FactureLigne';
 
-const renderLine = (value = {}, onChange = vi.fn()) =>
-  render(
-    <FactureLigne
-      value={value}
-      onChange={onChange}
-      onRemove={() => {}}
-      zones={[]}
-      index={0}
-    />
+const renderLine = (value = {}, onChange = vi.fn()) => {
+  const qc = new QueryClient();
+  return render(
+    <QueryClientProvider client={qc}>
+      <FactureLigne
+        value={value}
+        onChange={onChange}
+        onRemove={() => {}}
+        zones={[]}
+        index={0}
+      />
+    </QueryClientProvider>
   );
+};
 
 test('typing 12,5 in qty keeps display and numeric value', () => {
   const onChange = vi.fn();
@@ -49,40 +54,47 @@ test('pasting formatted currency parses numeric value', () => {
 });
 
 test('delta percent vs PMP shows with colors', () => {
+  const qc = new QueryClient();
   const { container, rerender } = render(
-    <FactureLigne
-      value={{ quantite: 1, total_ht: 1.8, pmp: 2 }}
-      onChange={() => {}}
-      onRemove={() => {}}
-      zones={[]}
-      index={0}
-    />
+    <QueryClientProvider client={qc}>
+      <FactureLigne
+        value={{ quantite: 1, total_ht: 1.8, pmp: 2 }}
+        onChange={() => {}}
+        onRemove={() => {}}
+        zones={[]}
+        index={0}
+      />
+    </QueryClientProvider>
   );
   let badge = container.querySelector('[aria-label="Écart vs PMP"]');
   expect(badge?.textContent).toBe('-10,00%');
   expect(badge?.classList.contains('bg-green-500')).toBe(true);
 
   rerender(
-    <FactureLigne
-      value={{ quantite: 1, total_ht: 2.3, pmp: 2 }}
-      onChange={() => {}}
-      onRemove={() => {}}
-      zones={[]}
-      index={0}
-    />
+    <QueryClientProvider client={qc}>
+      <FactureLigne
+        value={{ quantite: 1, total_ht: 2.3, pmp: 2 }}
+        onChange={() => {}}
+        onRemove={() => {}}
+        zones={[]}
+        index={0}
+      />
+    </QueryClientProvider>
   );
   badge = container.querySelector('[aria-label="Écart vs PMP"]');
   expect(badge?.textContent).toBe('15,00%');
   expect(badge?.classList.contains('bg-red-500')).toBe(true);
 
   rerender(
-    <FactureLigne
-      value={{ quantite: 1, total_ht: 2.3, pmp: 0 }}
-      onChange={() => {}}
-      onRemove={() => {}}
-      zones={[]}
-      index={0}
-    />
+    <QueryClientProvider client={qc}>
+      <FactureLigne
+        value={{ quantite: 1, total_ht: 2.3, pmp: 0 }}
+        onChange={() => {}}
+        onRemove={() => {}}
+        zones={[]}
+        index={0}
+      />
+    </QueryClientProvider>
   );
   badge = container.querySelector('[aria-label="Écart vs PMP"]');
   expect(badge?.textContent).toBe('—');

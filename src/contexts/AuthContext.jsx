@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { supabase } from '../lib/supabase.js';
+import hasAccess from '../lib/access.js';
 
 const AuthCtx = createContext(null);
 
@@ -34,8 +35,12 @@ export default function AuthProvider({ children }) {
 
   const value = useMemo(() => ({
     session,
+    mama_id: session?.user?.user_metadata?.mama_id ?? null,
     access_rights,
-    rightsLoading,
+    loading: rightsLoading,
+    pending: false,
+    isSuperadmin: false,
+    hasAccess,
   }), [session, access_rights, rightsLoading]);
 
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;

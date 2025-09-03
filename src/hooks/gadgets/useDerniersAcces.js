@@ -19,6 +19,7 @@ export default function useDerniersAcces() {
           'utilisateur_id, created_at, utilisateur:utilisateurs!logs_securite_utilisateur_id_fkey(email, auth_id)'
         )
         .eq('mama_id', mama_id)
+        .eq('utilisateur.mama_id', mama_id)
         .order('created_at', { ascending: false })
         .limit(50);
       if (error) throw error;

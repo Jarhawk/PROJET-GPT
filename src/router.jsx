@@ -14,17 +14,23 @@ export default function AppRouter() {
   return (
     <BrowserRouter>
       <ErrorBoundary>
-        <Suspense fallback={<Spinner />}>
-          <Routes>
-            <Route element={<Layout />}>
-              <Route index element={<Navigate to="/dashboard" replace />} />
-              {routes.map((r) => (
-                <Route key={r.path} path={r.path} element={<r.Component />} />
-              ))}
-              <Route path="*" element={<div style={{ padding: 24 }}>Page introuvable</div>} />
-            </Route>
-          </Routes>
-        </Suspense>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route index element={<Navigate to="/dashboard" replace />} />
+            {routes.map((r) => (
+              <Route
+                key={r.path}
+                path={r.path}
+                element={
+                  <Suspense fallback={<Spinner />}>
+                    <r.Component />
+                  </Suspense>
+                }
+              />
+            ))}
+            <Route path="*" element={<div style={{ padding: 24 }}>Page introuvable</div>} />
+          </Route>
+        </Routes>
       </ErrorBoundary>
     </BrowserRouter>
   );

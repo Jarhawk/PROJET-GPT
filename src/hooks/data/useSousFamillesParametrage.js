@@ -19,7 +19,7 @@ export function useSousFamillesParametrage({ mamaId, search = '', familleId, sta
 
       const { data, error } = await q;
       if (error) throw error;
-      return data ?? [];
+      return Array.isArray(data) ? data : [];
     },
     initialData: [],
     staleTime: 5_000,

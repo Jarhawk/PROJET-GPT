@@ -1,12 +1,14 @@
 declare module '@/contexts/AuthContext' {
   interface AuthContextValue {
     session?: any
-    userData?: { access_rights?: Record<string, unknown> } | null
+    mama_id?: string | null
+    access_rights?: Record<string, unknown> | null
     loading?: boolean
-    hasAccess?: (key?: string | null) => boolean
+    pending?: boolean
+    isSuperadmin?: boolean
+    hasAccess?: (module?: string | null, right?: string | null) => boolean
     [key: string]: any
   }
-  export function useAuth(): AuthContextValue | null
-  export const AuthProvider: React.ComponentType<React.PropsWithChildren<unknown>>
-  export default AuthProvider
+  export default function AuthProvider(props: React.PropsWithChildren<unknown>): JSX.Element
+  export function useAuth(): AuthContextValue
 }

@@ -1,0 +1,4651 @@
+[
+  {
+    "file": "context/HelpProvider.jsx",
+    "resource": "tooltips",
+    "method": "from",
+    "columns": [
+      "champ",
+      "texte"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "context/HelpProvider.jsx",
+    "resource": "documentation",
+    "method": "from",
+    "columns": [
+      "id",
+      "titre",
+      "contenu",
+      "categorie"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "context/MultiMamaContext.jsx",
+    "resource": "mamas",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "context/MultiMamaContext.jsx",
+    "resource": "mamas",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useAchats.js",
+    "resource": "achats",
+    "method": "from",
+    "columns": [
+      "id",
+      "mama_id",
+      "produit_id",
+      "prix",
+      "quantite",
+      "date_achat",
+      "created_at",
+      "updated_at",
+      "actif",
+      "fournisseur_id",
+      "nom",
+      "mama_id)",
+      "nom",
+      "mama_id)"
+    ],
+    "missingColumns": [
+      "nom",
+      "mama_id)",
+      "nom",
+      "mama_id)"
+    ],
+    "joins": [
+      "fournisseur_id",
+      "produit_id"
+    ],
+    "joinIssues": [
+      "fournisseur_id",
+      "produit_id"
+    ]
+  },
+  {
+    "file": "hooks/useAchats.js",
+    "resource": "achats",
+    "method": "from",
+    "columns": [
+      "id",
+      "mama_id",
+      "produit_id",
+      "prix",
+      "quantite",
+      "date_achat",
+      "created_at",
+      "updated_at",
+      "actif",
+      "fournisseur_id",
+      "nom",
+      "mama_id)",
+      "nom",
+      "mama_id)"
+    ],
+    "missingColumns": [
+      "nom",
+      "mama_id)",
+      "nom",
+      "mama_id)"
+    ],
+    "joins": [
+      "fournisseur_id",
+      "produit_id"
+    ],
+    "joinIssues": [
+      "fournisseur_id",
+      "produit_id"
+    ]
+  },
+  {
+    "file": "hooks/useAdvancedStats.js",
+    "resource": "v_achats_mensuels",
+    "method": "from",
+    "columns": [
+      "mois",
+      "montant_total",
+      "mama_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useAide.js",
+    "resource": "documentation",
+    "method": "from",
+    "columns": [
+      "id",
+      "titre",
+      "contenu",
+      "categorie",
+      "created_at",
+      "mama_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useAlerteStockFaible.js",
+    "resource": "v_alertes_rupture",
+    "method": "from",
+    "columns": [
+      "mama_id",
+      "produit_id",
+      "nom",
+      "unite",
+      "fournisseur_nom",
+      "stock_min",
+      "stock_actuel",
+      "manque"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useAlerts.js",
+    "resource": "regles_alertes",
+    "method": "from",
+    "columns": [
+      "id",
+      "mama_id",
+      "produit_id",
+      "type",
+      "seuil",
+      "actif",
+      "created_at",
+      "nom",
+      "mama_id)"
+    ],
+    "missingColumns": [
+      "nom",
+      "mama_id)"
+    ],
+    "joins": [
+      "produits"
+    ],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useAnalyse.js",
+    "resource": "v_achats_mensuels",
+    "method": "from",
+    "columns": [
+      "mois",
+      "montant_total"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useAnalyse.js",
+    "resource": "v_evolution_achats",
+    "method": "from",
+    "columns": [
+      "mois",
+      "montant"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useAnalyse.js",
+    "resource": "v_pmp",
+    "method": "from",
+    "columns": [
+      "mama_id",
+      "produit_id",
+      "produit_actif",
+      "fournisseur_produit_actif",
+      "pmp"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useAnalyse.js",
+    "resource": "v_ecarts_inventaire",
+    "method": "from",
+    "columns": [
+      "date",
+      "ecart"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useAnalytique.js",
+    "resource": "v_analytique_stock",
+    "method": "from",
+    "columns": [
+      "famille",
+      "activite",
+      "cost_center_id",
+      "cost_center_nom"
+    ],
+    "missingColumns": [],
+    "joins": [
+      "sum",
+      "sum"
+    ],
+    "joinIssues": [
+      "sum",
+      "sum"
+    ]
+  },
+  {
+    "file": "hooks/useAnalytique.js",
+    "resource": "v_analytique_stock",
+    "method": "from",
+    "columns": [
+      "famille"
+    ],
+    "missingColumns": [],
+    "joins": [
+      "sum"
+    ],
+    "joinIssues": [
+      "sum"
+    ]
+  },
+  {
+    "file": "hooks/useAnalytique.js",
+    "resource": "v_analytique_stock",
+    "method": "from",
+    "columns": [
+      "activite"
+    ],
+    "missingColumns": [],
+    "joins": [
+      "sum"
+    ],
+    "joinIssues": [
+      "sum"
+    ]
+  },
+  {
+    "file": "hooks/useApiKeys.js",
+    "resource": "api_keys",
+    "method": "from",
+    "columns": [
+      "id",
+      "mama_id",
+      "user_id",
+      "name",
+      "scopes",
+      "role",
+      "expiration",
+      "revoked",
+      "created_at"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useBonsLivraison.js",
+    "resource": "bons_livraison",
+    "method": "from",
+    "columns": [
+      "id",
+      "mama_id",
+      "fournisseur_id",
+      "numero_bl",
+      "date_reception",
+      "commentaire",
+      "statut",
+      "actif",
+      "commande_id",
+      "facture_id",
+      "date_livraison",
+      "nom",
+      "mama_id)",
+      "mama_id)"
+    ],
+    "missingColumns": [
+      "nom",
+      "mama_id)",
+      "mama_id)"
+    ],
+    "joins": [
+      "fournisseur_id",
+      "lignes_bl"
+    ],
+    "joinIssues": [
+      "fournisseur_id"
+    ]
+  },
+  {
+    "file": "hooks/useBonsLivraison.js",
+    "resource": "bons_livraison",
+    "method": "from",
+    "columns": [
+      "id",
+      "mama_id",
+      "fournisseur_id",
+      "numero_bl",
+      "date_reception",
+      "commentaire",
+      "statut",
+      "actif",
+      "commande_id",
+      "facture_id",
+      "date_livraison",
+      "nom",
+      "mama_id)",
+      "bl_id",
+      "quantite_recue",
+      "prix_unitaire",
+      "tva",
+      "mama_id",
+      "mama_id))"
+    ],
+    "missingColumns": [
+      "nom",
+      "mama_id)",
+      "bl_id",
+      "quantite_recue",
+      "prix_unitaire",
+      "tva",
+      "mama_id))"
+    ],
+    "joins": [
+      "fournisseur_id",
+      "lignes_bl",
+      "produit_id"
+    ],
+    "joinIssues": [
+      "fournisseur_id",
+      "produit_id"
+    ]
+  },
+  {
+    "file": "hooks/useCarte.js",
+    "resource": "fiches_techniques",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "famille",
+      "prix_vente",
+      "cout_portion",
+      "type_carte",
+      "carte_actuelle"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useCommandes.js",
+    "resource": "commandes",
+    "method": "from",
+    "columns": [
+      "id",
+      "mama_id",
+      "fournisseur_id",
+      "statut",
+      "created_at",
+      "date_commande",
+      "date_livraison_prevue",
+      "montant_total",
+      "commentaire",
+      "updated_at",
+      "actif",
+      "bl_id",
+      "facture_id",
+      "created_by",
+      "validated_by",
+      "nom",
+      "mama_id)",
+      "mama_id",
+      "total)"
+    ],
+    "missingColumns": [
+      "nom",
+      "mama_id)",
+      "total)"
+    ],
+    "joins": [
+      "fournisseur_id",
+      "commande_lignes"
+    ],
+    "joinIssues": [
+      "fournisseur_id"
+    ]
+  },
+  {
+    "file": "hooks/useCommandes.js",
+    "resource": "commandes",
+    "method": "from",
+    "columns": [
+      "id",
+      "mama_id",
+      "fournisseur_id",
+      "statut",
+      "created_at",
+      "date_commande",
+      "date_livraison_prevue",
+      "montant_total",
+      "commentaire",
+      "updated_at",
+      "actif",
+      "bl_id",
+      "facture_id",
+      "created_by",
+      "validated_by",
+      "nom",
+      "mama_id)",
+      "commande_id",
+      "produit_id",
+      "quantite",
+      "unite",
+      "prix_unitaire",
+      "tva",
+      "total",
+      "commentaire",
+      "part_livree",
+      "rupture",
+      "actif",
+      "mama_id",
+      "nom",
+      "mama_id))"
+    ],
+    "missingColumns": [
+      "nom",
+      "mama_id)",
+      "commande_id",
+      "produit_id",
+      "quantite",
+      "unite",
+      "prix_unitaire",
+      "tva",
+      "total",
+      "part_livree",
+      "rupture",
+      "nom",
+      "mama_id))"
+    ],
+    "joins": [
+      "fournisseur_id",
+      "commande_lignes",
+      "produit_id"
+    ],
+    "joinIssues": [
+      "fournisseur_id",
+      "produit_id"
+    ]
+  },
+  {
+    "file": "hooks/useComparatif.js",
+    "resource": "fournisseur_produits",
+    "method": "from",
+    "columns": [
+      "prix_achat",
+      "date_livraison",
+      "fournisseur_id",
+      "mama_id",
+      "nom",
+      "mama_id)"
+    ],
+    "missingColumns": [
+      "nom",
+      "mama_id)"
+    ],
+    "joins": [
+      "fournisseur_id"
+    ],
+    "joinIssues": [
+      "fournisseur_id"
+    ]
+  },
+  {
+    "file": "hooks/useConsentements.js",
+    "resource": "consentements_utilisateur",
+    "method": "from",
+    "columns": [
+      "id",
+      "user_id",
+      "mama_id",
+      "consentement",
+      "date_consentement",
+      "actif",
+      "created_at",
+      "utilisateur_id",
+      "type_consentement"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useConsolidatedStats.js",
+    "resource": "v_mouvements_centres_cout_stats",
+    "method": "from",
+    "columns": [
+      "centre_cout_id",
+      "centre_cout",
+      "total_quantite",
+      "total_valeur"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useConsolidation.js",
+    "resource": "mamas",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useConsolidation.js",
+    "resource": "v_consolidation_mensuelle",
+    "method": "from",
+    "columns": [
+      "mama_id",
+      "mois",
+      "achats_total",
+      "ca_total",
+      "menu_foodcost_total",
+      "marge_pct_moy",
+      "ecart_valorise_total"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useCostCenterMonthlyStats.js",
+    "resource": "v_cost_center_monthly",
+    "method": "from",
+    "columns": [
+      "mama_id",
+      "nom",
+      "mois",
+      "montant"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useCostCenters.js",
+    "resource": "centres_de_cout",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "actif",
+      "activite",
+      "mama_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useCostingCarte.js",
+    "resource": "v_costing_carte",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "type",
+      "cout_par_portion",
+      "prix_vente",
+      "marge_euro",
+      "marge_pct",
+      "food_cost_pct",
+      "famille",
+      "actif",
+      "mama_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useCostingCarte.js",
+    "resource": "settings",
+    "method": "from",
+    "columns": [
+      "objectif_marge_pct",
+      "objectif_food_cost_pct"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useDashboard.js",
+    "resource": "v_produits_dernier_prix",
+    "method": "from",
+    "columns": [
+      "produit_id",
+      "nom",
+      "famille",
+      "unite",
+      "stock_reel",
+      "stock_min",
+      "mama_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useDashboard.js",
+    "resource": "v_pmp",
+    "method": "from",
+    "columns": [
+      "produit_id",
+      "pmp"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useDashboard.js",
+    "resource": "v_stocks",
+    "method": "from",
+    "columns": [
+      "produit_id",
+      "stock"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useDashboard.js",
+    "resource": "requisition_lignes",
+    "method": "from",
+    "columns": [
+      "quantite",
+      "produit_id",
+      "mama_id",
+      "statut)"
+    ],
+    "missingColumns": [
+      "statut)"
+    ],
+    "joins": [
+      "requisitions"
+    ],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useDashboardStats.js",
+    "resource": "produits",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "stock_reel",
+      "pmp",
+      "mama_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useDashboardStats.js",
+    "resource": "v_produits_dernier_prix",
+    "method": "from",
+    "columns": [
+      "produit_id",
+      "date_livraison",
+      "mama_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useDashboards.js",
+    "resource": "tableaux_de_bord",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "created_at",
+      "utilisateur_id",
+      "mama_id",
+      "tableau_id",
+      "type",
+      "config",
+      "created_at",
+      "mama_id",
+      "actif",
+      "nom",
+      "ordre",
+      "configuration_json)"
+    ],
+    "missingColumns": [
+      "tableau_id",
+      "type",
+      "config",
+      "actif",
+      "ordre",
+      "configuration_json)"
+    ],
+    "joins": [
+      "gadgets"
+    ],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useDashboards.js",
+    "resource": "gadgets",
+    "method": "from",
+    "columns": [
+      "ordre"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useDocuments.js",
+    "resource": "documents",
+    "method": "from",
+    "columns": [
+      "id",
+      "chemin",
+      "type",
+      "mama_id",
+      "created_at"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useDocuments.js",
+    "resource": "documents",
+    "method": "from",
+    "columns": [
+      "chemin"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useDocuments.js",
+    "resource": "documents",
+    "method": "from",
+    "columns": [
+      "chemin"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useEcartsInventaire.js",
+    "resource": "v_ecarts_inventaire",
+    "method": "from",
+    "columns": [
+      "mama_id",
+      "produit_id",
+      "date",
+      "zone",
+      "stock_theorique",
+      "stock_reel",
+      "ecart",
+      "motif"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useEmailsEnvoyes.js",
+    "resource": "emails_envoyes",
+    "method": "from",
+    "columns": [
+      "id",
+      "commande_id",
+      "email",
+      "statut",
+      "envoye_le",
+      "mama_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useEnrichedProducts.js",
+    "resource": "produits",
+    "method": "from",
+    "columns": [],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useExport.js",
+    "resource": "fiches_techniques",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "actif",
+      "cout_par_portion",
+      "portions",
+      "famille",
+      "prix_vente",
+      "type_carte",
+      "sous_type_carte",
+      "carte_actuelle",
+      "cout_total",
+      "cout_portion",
+      "rendement"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useExport.js",
+    "resource": "inventaires",
+    "method": "from",
+    "columns": [
+      "id",
+      "date_inventaire",
+      "reference",
+      "zone",
+      "date_debut",
+      "cloture"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useExport.js",
+    "resource": "inventaire_lignes",
+    "method": "from",
+    "columns": [
+      "inventaire_id",
+      "produit_id",
+      "quantite",
+      "quantite_theorique",
+      "quantite_reelle",
+      "zone_id",
+      "motif"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useExport.js",
+    "resource": "produits",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "famille_id",
+      "sous_famille_id",
+      "unite_id",
+      "actif"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useExport.js",
+    "resource": "factures",
+    "method": "from",
+    "columns": [
+      "id",
+      "numero",
+      "date_facture",
+      "fournisseur_id",
+      "total_ht",
+      "total_ttc",
+      "produit_id",
+      "quantite",
+      "prix",
+      "tva)"
+    ],
+    "missingColumns": [
+      "produit_id",
+      "quantite",
+      "prix",
+      "tva)"
+    ],
+    "joins": [
+      "facture_lignes"
+    ],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useExportCompta.js",
+    "resource": "facture_lignes",
+    "method": "from",
+    "columns": [
+      "quantite",
+      "prix",
+      "tva",
+      "facture_id"
+    ],
+    "missingColumns": [],
+    "joins": [
+      "facture_id",
+      "fournisseur_id"
+    ],
+    "joinIssues": [
+      "facture_id",
+      "fournisseur_id"
+    ]
+  },
+  {
+    "file": "hooks/useExportCompta.js",
+    "resource": "compta_mapping",
+    "method": "from",
+    "columns": [
+      "cle",
+      "compte"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useFactures.js",
+    "resource": "bons_livraison",
+    "method": "from",
+    "columns": [
+      "id",
+      "numero_bl",
+      "date_livraison",
+      "fournisseur_id",
+      "statut",
+      "actif",
+      "mama_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useFactures.js",
+    "resource": "factures",
+    "method": "from",
+    "columns": [
+      "id",
+      "numero",
+      "date_facture",
+      "fournisseur_id",
+      "total_ttc",
+      "statut",
+      "actif",
+      "mama_id",
+      "nom)"
+    ],
+    "missingColumns": [
+      "nom)"
+    ],
+    "joins": [
+      "fournisseur_id"
+    ],
+    "joinIssues": [
+      "fournisseur_id"
+    ]
+  },
+  {
+    "file": "hooks/useFactures.js",
+    "resource": "factures",
+    "method": "from",
+    "columns": [
+      "id",
+      "numero",
+      "date_facture",
+      "fournisseur_id",
+      "total_ttc",
+      "statut",
+      "actif",
+      "mama_id",
+      "nom)"
+    ],
+    "missingColumns": [
+      "nom)"
+    ],
+    "joins": [
+      "fournisseur_id"
+    ],
+    "joinIssues": [
+      "fournisseur_id"
+    ]
+  },
+  {
+    "file": "hooks/useFactures.js",
+    "resource": "facture_lignes",
+    "method": "from",
+    "columns": [
+      "quantite",
+      "prix_unitaire",
+      "tva"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useFacturesAutocomplete.js",
+    "resource": "factures",
+    "method": "from",
+    "columns": [
+      "id",
+      "numero",
+      "date_facture",
+      "fournisseur_id"
+    ],
+    "missingColumns": [],
+    "joins": [
+      "fournisseur_id"
+    ],
+    "joinIssues": [
+      "fournisseur_id"
+    ]
+  },
+  {
+    "file": "hooks/useFacturesList.js",
+    "resource": "factures",
+    "method": "from",
+    "columns": [
+      "id",
+      "numero",
+      "date_facture",
+      "fournisseur_id",
+      "total_ttc",
+      "statut",
+      "actif",
+      "nom",
+      "mama_id)"
+    ],
+    "missingColumns": [
+      "nom",
+      "mama_id)"
+    ],
+    "joins": [
+      "fournisseur_id"
+    ],
+    "joinIssues": [
+      "fournisseur_id"
+    ]
+  },
+  {
+    "file": "hooks/useFamilles.js",
+    "resource": "familles",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "actif"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useFamilles.js",
+    "resource": "familles",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "actif"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useFamillesWithSousFamilles.js",
+    "resource": "familles",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "actif"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useFamillesWithSousFamilles.js",
+    "resource": "sous_familles",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "actif",
+      "famille_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useFeedback.js",
+    "resource": "feedback",
+    "method": "from",
+    "columns": [
+      "id",
+      "mama_id",
+      "user_id",
+      "module",
+      "message",
+      "urgence",
+      "created_at"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useFicheCoutHistory.js",
+    "resource": "fiche_cout_history",
+    "method": "from",
+    "columns": [
+      "id",
+      "mama_id",
+      "fiche_id",
+      "old_cout",
+      "new_cout",
+      "changed_by",
+      "changed_at",
+      "created_at",
+      "updated_at",
+      "actif"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useFiches.js",
+    "resource": "fiches_techniques",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "actif",
+      "cout_par_portion",
+      "portions",
+      "famille",
+      "prix_vente",
+      "type_carte",
+      "sous_type_carte",
+      "carte_actuelle",
+      "cout_total",
+      "rendement",
+      "created_at",
+      "updated_at"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useFiches.js",
+    "resource": "fiches_techniques",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "actif",
+      "cout_par_portion",
+      "portions",
+      "famille",
+      "prix_vente",
+      "type_carte",
+      "sous_type_carte",
+      "carte_actuelle",
+      "cout_total",
+      "rendement",
+      "produit_id",
+      "sous_fiche_id",
+      "description",
+      "quantite",
+      "nom",
+      "pmp",
+      "dernier_prix",
+      "nom))",
+      "nom",
+      "cout_par_portion))"
+    ],
+    "missingColumns": [
+      "produit_id",
+      "sous_fiche_id",
+      "description",
+      "quantite",
+      "pmp",
+      "dernier_prix",
+      "nom))",
+      "cout_par_portion))"
+    ],
+    "joins": [
+      "fiche_lignes",
+      "produits",
+      "unites",
+      "fiches_techniques"
+    ],
+    "joinIssues": [
+      "unites",
+      "fiches_techniques"
+    ]
+  },
+  {
+    "file": "hooks/useFiches.js",
+    "resource": "fiches_techniques",
+    "method": "from",
+    "columns": [
+      "id",
+      "mama_id",
+      "fiche_id",
+      "technique",
+      "nom",
+      "cout_par_portion",
+      "portions",
+      "famille",
+      "prix_vente",
+      "type_carte",
+      "sous_type_carte",
+      "carte_actuelle",
+      "cout_total",
+      "cout_portion",
+      "rendement",
+      "produit_id",
+      "sous_fiche_id",
+      "quantite",
+      "description)"
+    ],
+    "missingColumns": [
+      "produit_id",
+      "sous_fiche_id",
+      "quantite",
+      "description)"
+    ],
+    "joins": [
+      "fiche_lignes"
+    ],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useFichesAutocomplete.js",
+    "resource": "fiches_techniques",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "cout_par_portion",
+      "actif"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useFichesTechniques.js",
+    "resource": "fiches_techniques",
+    "method": "from",
+    "columns": [
+      "id",
+      "mama_id",
+      "fiche_id",
+      "technique",
+      "created_at",
+      "updated_at",
+      "actif",
+      "nom",
+      "cout_par_portion",
+      "portions",
+      "famille",
+      "prix_vente",
+      "type_carte",
+      "sous_type_carte",
+      "carte_actuelle",
+      "cout_total",
+      "cout_portion",
+      "rendement"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useFournisseurAPI.js",
+    "resource": "fournisseurs_api_config",
+    "method": "from",
+    "columns": [
+      "fournisseur_id",
+      "mama_id",
+      "url",
+      "type_api",
+      "token",
+      "format_facture",
+      "actif",
+      "created_at"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useFournisseurAPI.js",
+    "resource": "fournisseur_produits",
+    "method": "from",
+    "columns": [
+      "prix_achat"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useFournisseurAPI.js",
+    "resource": "commandes",
+    "method": "from",
+    "columns": [
+      "id",
+      "fournisseur_id",
+      "statut",
+      "date_commande",
+      "date_livraison_prevue",
+      "montant_total",
+      "commentaire",
+      "updated_at",
+      "actif",
+      "bl_id",
+      "facture_id",
+      "created_by",
+      "validated_by",
+      "mama_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useFournisseurAPI.js",
+    "resource": "commandes",
+    "method": "from",
+    "columns": [
+      "fournisseur_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useFournisseurAPI.js",
+    "resource": "commandes",
+    "method": "from",
+    "columns": [
+      "fournisseur_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useFournisseurApiConfig.js",
+    "resource": "fournisseurs_api_config",
+    "method": "from",
+    "columns": [
+      "fournisseur_id",
+      "mama_id",
+      "url",
+      "type_api",
+      "token",
+      "format_facture",
+      "actif",
+      "created_at"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useFournisseurApiConfig.js",
+    "resource": "fournisseurs_api_config",
+    "method": "from",
+    "columns": [
+      "fournisseur_id",
+      "mama_id",
+      "url",
+      "type_api",
+      "token",
+      "format_facture",
+      "actif",
+      "created_at",
+      "nom)"
+    ],
+    "missingColumns": [
+      "nom)"
+    ],
+    "joins": [
+      "fournisseur_id"
+    ],
+    "joinIssues": [
+      "fournisseur_id"
+    ]
+  },
+  {
+    "file": "hooks/useFournisseurNotes.js",
+    "resource": "fournisseur_notes",
+    "method": "from",
+    "columns": [
+      "id",
+      "note",
+      "date",
+      "created_at",
+      "updated_at",
+      "actif",
+      "fournisseur_id",
+      "mama_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useFournisseurStats.js",
+    "resource": "fournisseur_achats_mois",
+    "method": "from",
+    "columns": [
+      "fournisseur_id",
+      "mois",
+      "montant_ht",
+      "montant",
+      "mama_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useFournisseurStats.js",
+    "resource": "fournisseur_achats_mois",
+    "method": "from",
+    "columns": [
+      "fournisseur_id",
+      "mois",
+      "montant_ht",
+      "montant",
+      "mama_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useFournisseurs.js",
+    "resource": "fournisseurs",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "actif",
+      "created_at",
+      "updated_at",
+      "nom",
+      "email",
+      "tel)"
+    ],
+    "missingColumns": [
+      "email",
+      "tel)"
+    ],
+    "joins": [
+      "fournisseur_contacts"
+    ],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useFournisseursAutocomplete.js",
+    "resource": "fournisseurs",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useFournisseursAutocomplete.js",
+    "resource": "fournisseurs",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useFournisseursBrowse.js",
+    "resource": "fournisseurs",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useFournisseursInactifs.js",
+    "resource": "v_fournisseurs_inactifs",
+    "method": "from",
+    "columns": [
+      "fournisseur_id",
+      "nom",
+      "fournisseur_actif",
+      "facture_actif",
+      "dernier_achat",
+      "mama_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useFournisseursRecents.js",
+    "resource": "fournisseurs_recents",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useGadgets.js",
+    "resource": "tableaux_de_bord",
+    "method": "from",
+    "columns": [
+      "liste_gadgets_json"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useGlobalSearch.js",
+    "resource": "produits",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useGlobalSearch.js",
+    "resource": "fiches_techniques",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useGraphiquesMultiZone.js",
+    "resource": "zones_stock",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "type",
+      "parent_id",
+      "position",
+      "actif",
+      "created_at"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useGraphiquesMultiZone.js",
+    "resource": "zones_stock",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "type",
+      "parent_id",
+      "position",
+      "actif",
+      "created_at"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useGraphiquesMultiZone.js",
+    "resource": "inventaires",
+    "method": "from",
+    "columns": [
+      "date_inventaire"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useHelpArticles.js",
+    "resource": "help_articles",
+    "method": "from",
+    "columns": [
+      "id",
+      "titre",
+      "contenu",
+      "created_at"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useInventaireLignes.js",
+    "resource": "inventaires",
+    "method": "from",
+    "columns": [
+      "id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useInventaireLignes.js",
+    "resource": "inventaire_lignes",
+    "method": "from",
+    "columns": [
+      "id",
+      "inventaire_id",
+      "produit_id",
+      "quantite",
+      "quantite_reelle",
+      "quantite_theorique",
+      "zone_id",
+      "actif",
+      "created_at",
+      "updated_at",
+      "mama_id",
+      "motif",
+      "nom",
+      "unite_id",
+      "pmp)"
+    ],
+    "missingColumns": [
+      "nom",
+      "unite_id",
+      "pmp)"
+    ],
+    "joins": [
+      "produits"
+    ],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useInventaireLignes.js",
+    "resource": "inventaire_lignes",
+    "method": "from",
+    "columns": [
+      "id",
+      "inventaire_id",
+      "produit_id",
+      "quantite",
+      "quantite_reelle",
+      "quantite_theorique",
+      "zone_id",
+      "actif",
+      "created_at",
+      "updated_at",
+      "mama_id",
+      "motif",
+      "nom",
+      "unite_id",
+      "pmp)"
+    ],
+    "missingColumns": [
+      "nom",
+      "unite_id",
+      "pmp)"
+    ],
+    "joins": [
+      "produits"
+    ],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useInventaireZones.js",
+    "resource": "inventaire_zones",
+    "method": "from",
+    "columns": [
+      "id",
+      "mama_id",
+      "nom",
+      "created_at",
+      "actif"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useInventaires.js",
+    "resource": "inventaires",
+    "method": "from",
+    "columns": [
+      "id",
+      "date_inventaire",
+      "reference",
+      "zone",
+      "cloture",
+      "actif",
+      "created_at",
+      "updated_at",
+      "mama_id",
+      "produit_id",
+      "quantite",
+      "quantite_reelle",
+      "quantite_theorique",
+      "zone_id",
+      "actif",
+      "nom",
+      "unite_id",
+      "pmp))"
+    ],
+    "missingColumns": [
+      "produit_id",
+      "quantite",
+      "quantite_reelle",
+      "quantite_theorique",
+      "zone_id",
+      "nom",
+      "unite_id",
+      "pmp))"
+    ],
+    "joins": [
+      "inventaire_lignes",
+      "produits"
+    ],
+    "joinIssues": [
+      "produits"
+    ]
+  },
+  {
+    "file": "hooks/useInventaires.js",
+    "resource": "produits",
+    "method": "from",
+    "columns": [
+      "stock_reel"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useInventaires.js",
+    "resource": "inventaires",
+    "method": "from",
+    "columns": [
+      "id",
+      "date_inventaire",
+      "reference",
+      "zone",
+      "cloture",
+      "actif",
+      "created_at",
+      "updated_at",
+      "mama_id",
+      "produit_id",
+      "quantite",
+      "quantite_reelle",
+      "quantite_theorique",
+      "zone_id",
+      "actif",
+      "nom",
+      "unite_id",
+      "pmp))"
+    ],
+    "missingColumns": [
+      "produit_id",
+      "quantite",
+      "quantite_reelle",
+      "quantite_theorique",
+      "zone_id",
+      "nom",
+      "unite_id",
+      "pmp))"
+    ],
+    "joins": [
+      "inventaire_lignes",
+      "produits"
+    ],
+    "joinIssues": [
+      "produits"
+    ]
+  },
+  {
+    "file": "hooks/useInvoice.ts",
+    "resource": "factures",
+    "method": "from",
+    "columns": [
+      "id",
+      "mama_id",
+      "numero",
+      "date_facture",
+      "fournisseur_id",
+      "total_ht",
+      "total_ttc"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useInvoice.ts",
+    "resource": "facture_lignes",
+    "method": "from",
+    "columns": [
+      "id",
+      "facture_id",
+      "produit_id",
+      "quantite",
+      "prix_unitaire",
+      "tva",
+      "remise",
+      "total_ht",
+      "total_ttc",
+      "nom)"
+    ],
+    "missingColumns": [
+      "remise",
+      "total_ttc",
+      "nom)"
+    ],
+    "joins": [
+      "produit_id"
+    ],
+    "joinIssues": [
+      "produit_id"
+    ]
+  },
+  {
+    "file": "hooks/useInvoice.ts",
+    "resource": "factures",
+    "method": "from",
+    "columns": [],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useInvoiceItems.js",
+    "resource": "facture_lignes",
+    "method": "from",
+    "columns": [],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useInvoiceItems.js",
+    "resource": "facture_lignes",
+    "method": "from",
+    "columns": [],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useInvoices.js",
+    "resource": "factures",
+    "method": "from",
+    "columns": [
+      "id",
+      "mama_id",
+      "fournisseur_id",
+      "numero",
+      "date_facture",
+      "total_ttc",
+      "statut",
+      "nom",
+      "mama_id)"
+    ],
+    "missingColumns": [
+      "nom",
+      "mama_id)"
+    ],
+    "joins": [
+      "fournisseur_id"
+    ],
+    "joinIssues": [
+      "fournisseur_id"
+    ]
+  },
+  {
+    "file": "hooks/useInvoices.js",
+    "resource": "factures",
+    "method": "from",
+    "columns": [
+      "id",
+      "date_facture",
+      "numero",
+      "total_ttc",
+      "statut"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useInvoices.js",
+    "resource": "factures",
+    "method": "from",
+    "columns": [
+      "id",
+      "mama_id",
+      "fournisseur_id",
+      "numero",
+      "date_facture",
+      "total_ht",
+      "total_tva",
+      "total_ttc",
+      "statut",
+      "commentaire",
+      "bon_livraison",
+      "nom",
+      "mama_id)"
+    ],
+    "missingColumns": [
+      "nom",
+      "mama_id)"
+    ],
+    "joins": [
+      "fournisseur_id"
+    ],
+    "joinIssues": [
+      "fournisseur_id"
+    ]
+  },
+  {
+    "file": "hooks/useLogs.js",
+    "resource": "logs_securite",
+    "method": "from",
+    "columns": [
+      "id",
+      "type",
+      "description",
+      "type_evenement",
+      "niveau_criticite",
+      "date_evenement"
+    ],
+    "missingColumns": [],
+    "joins": [
+      "utilisateur_id"
+    ],
+    "joinIssues": [
+      "utilisateur_id"
+    ]
+  },
+  {
+    "file": "hooks/useMama.js",
+    "resource": "mamas",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "logo_url",
+      "primary_color",
+      "secondary_color",
+      "email_envoi",
+      "email_alertes",
+      "dark_mode",
+      "langue",
+      "monnaie",
+      "timezone",
+      "rgpd_text",
+      "mentions_legales",
+      "enabled_modules"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useMamaSettings.js",
+    "resource": "mamas",
+    "method": "from",
+    "columns": [
+      "logo_url",
+      "primary_color",
+      "secondary_color",
+      "email_envoi",
+      "email_alertes",
+      "dark_mode",
+      "langue",
+      "monnaie",
+      "timezone",
+      "rgpd_text",
+      "mentions_legales",
+      "enabled_modules"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useMamas.js",
+    "resource": "mamas",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "email_envoi",
+      "actif"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useMenuDuJour.js",
+    "resource": "menus_jour",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "date",
+      "prix_vente_ttc",
+      "tva",
+      "actif",
+      "quantite",
+      "nom",
+      "cout_par_portion))"
+    ],
+    "missingColumns": [
+      "quantite",
+      "cout_par_portion))"
+    ],
+    "joins": [
+      "menus_jour_fiches",
+      "fiches_techniques"
+    ],
+    "joinIssues": [
+      "fiches_techniques"
+    ]
+  },
+  {
+    "file": "hooks/useMenuDuJour.js",
+    "resource": "menus_jour",
+    "method": "from",
+    "columns": [
+      "date",
+      "cout_par_portion))"
+    ],
+    "missingColumns": [
+      "cout_par_portion))"
+    ],
+    "joins": [
+      "menus_jour_fiches",
+      "fiches_techniques"
+    ],
+    "joinIssues": [
+      "fiches_techniques"
+    ]
+  },
+  {
+    "file": "hooks/useMenuDuJour.js",
+    "resource": "menus_jour",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "date",
+      "fiche_id",
+      "quantite",
+      "nom",
+      "cout_par_portion))"
+    ],
+    "missingColumns": [
+      "fiche_id",
+      "quantite",
+      "cout_par_portion))"
+    ],
+    "joins": [
+      "menus_jour_fiches",
+      "fiches_techniques"
+    ],
+    "joinIssues": [
+      "fiches_techniques"
+    ]
+  },
+  {
+    "file": "hooks/useMenuEngineering.js",
+    "resource": "v_menu_engineering",
+    "method": "from",
+    "columns": [
+      "mama_id",
+      "fiche_id",
+      "nom",
+      "famille",
+      "prix_vente",
+      "cout_portion",
+      "periode",
+      "ventes",
+      "popularite",
+      "marge"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useMenuEngineering.js",
+    "resource": "v_menu_du_jour_mensuel",
+    "method": "from",
+    "columns": [
+      "food_cost_avg"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useMenuEngineering.js",
+    "resource": "ventes_import_staging",
+    "method": "from",
+    "columns": [
+      "id",
+      "fiche_id",
+      "date_vente",
+      "quantite",
+      "prix_vente_unitaire"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useMenuGroupe.js",
+    "resource": "menus",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "date",
+      "actif"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useMenus.js",
+    "resource": "menus",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "date",
+      "actif",
+      "mama_id)"
+    ],
+    "missingColumns": [
+      "mama_id)"
+    ],
+    "joins": [
+      "menu_fiches"
+    ],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useMenus.js",
+    "resource": "fiches_techniques",
+    "method": "from",
+    "columns": [
+      "fiche_id",
+      "nom",
+      "cout_par_portion"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useMenus.js",
+    "resource": "menus",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "date",
+      "actif",
+      "mama_id)"
+    ],
+    "missingColumns": [
+      "mama_id)"
+    ],
+    "joins": [
+      "menu_fiches"
+    ],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useMenus.js",
+    "resource": "fiches_techniques",
+    "method": "from",
+    "columns": [
+      "fiche_id",
+      "nom",
+      "portions",
+      "cout_total",
+      "cout_par_portion"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useMouvementCostCenters.js",
+    "resource": "mouvements_centres_cout",
+    "method": "from",
+    "columns": [
+      "id",
+      "mouvement_id",
+      "centre_cout_id",
+      "quantite",
+      "valeur"
+    ],
+    "missingColumns": [],
+    "joins": [
+      "centre_cout_id"
+    ],
+    "joinIssues": [
+      "centre_cout_id"
+    ]
+  },
+  {
+    "file": "hooks/useNotifications.js",
+    "resource": "notifications",
+    "method": "from",
+    "columns": [
+      "id",
+      "mama_id",
+      "user_id",
+      "titre",
+      "texte",
+      "lien",
+      "type",
+      "lu",
+      "created_at",
+      "actif"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useNotifications.js",
+    "resource": "notifications",
+    "method": "from",
+    "columns": [
+      "id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useNotifications.js",
+    "resource": "notification_preferences",
+    "method": "from",
+    "columns": [
+      "id",
+      "utilisateur_id",
+      "mama_id",
+      "email_enabled",
+      "webhook_enabled",
+      "webhook_url",
+      "webhook_token",
+      "updated_at"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useNotifications.js",
+    "resource": "notifications",
+    "method": "from",
+    "columns": [
+      "id",
+      "mama_id",
+      "user_id",
+      "titre",
+      "texte",
+      "lien",
+      "type",
+      "lu",
+      "created_at",
+      "actif"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useOnboarding.js",
+    "resource": "etapes_onboarding",
+    "method": "from",
+    "columns": [
+      "etape",
+      "statut"
+    ],
+    "missingColumns": [
+      "statut"
+    ],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/usePerformanceFiches.js",
+    "resource": "v_performance_fiches",
+    "method": "from",
+    "columns": [
+      "mama_id",
+      "fiche_id",
+      "nom",
+      "cout",
+      "volume",
+      "popularite"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/usePermissions.js",
+    "resource": "permissions",
+    "method": "from",
+    "columns": [],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/usePertes.js",
+    "resource": "pertes",
+    "method": "from",
+    "columns": [
+      "id",
+      "produit_id",
+      "date_perte",
+      "quantite",
+      "motif"
+    ],
+    "missingColumns": [],
+    "joins": [
+      "produit_id"
+    ],
+    "joinIssues": [
+      "produit_id"
+    ]
+  },
+  {
+    "file": "hooks/usePlanning.js",
+    "resource": "planning_previsionnel",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "date_prevue",
+      "statut",
+      "mama_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/usePlanning.js",
+    "resource": "planning_previsionnel",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "date_prevue",
+      "commentaire",
+      "statut",
+      "mama_id",
+      "planning_id",
+      "produit_id",
+      "quantite",
+      "observation"
+    ],
+    "missingColumns": [
+      "planning_id",
+      "observation"
+    ],
+    "joins": [
+      "planning_lignes",
+      "produit_id"
+    ],
+    "joinIssues": [
+      "produit_id"
+    ]
+  },
+  {
+    "file": "hooks/usePlanning.js",
+    "resource": "planning_previsionnel",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "date_prevue",
+      "statut",
+      "mama_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/usePriceTrends.js",
+    "resource": "v_tendance_prix_produit",
+    "method": "from",
+    "columns": [
+      "mois",
+      "prix_moyen"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useProducts.js",
+    "resource": "produits",
+    "method": "from",
+    "columns": [],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useProducts.js",
+    "resource": "v_pmp",
+    "method": "from",
+    "columns": [
+      "produit_id",
+      "pmp"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useProducts.js",
+    "resource": "v_stocks",
+    "method": "from",
+    "columns": [
+      "produit_id",
+      "stock"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useProducts.js",
+    "resource": "v_produits_dernier_prix",
+    "method": "from",
+    "columns": [
+      "produit_id",
+      "dernier_prix"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useProducts.js",
+    "resource": "fournisseur_produits",
+    "method": "from",
+    "columns": [
+      "id",
+      "fournisseur_id",
+      "produit_id",
+      "prix_achat",
+      "mama_id",
+      "actif",
+      "date_livraison",
+      "nom)"
+    ],
+    "missingColumns": [
+      "nom)"
+    ],
+    "joins": [
+      "fournisseurs"
+    ],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useProducts.js",
+    "resource": "v_stocks",
+    "method": "from",
+    "columns": [
+      "stock"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useProducts.js",
+    "resource": "requisition_lignes",
+    "method": "from",
+    "columns": [
+      "quantite",
+      "mama_id",
+      "statut)"
+    ],
+    "missingColumns": [
+      "statut)"
+    ],
+    "joins": [
+      "requisitions"
+    ],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useProducts.js",
+    "resource": "produits",
+    "method": "from",
+    "columns": [],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useProductsView.js",
+    "resource": "produits",
+    "method": "from",
+    "columns": [],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useProduitLineDefaults.js",
+    "resource": "produits",
+    "method": "from",
+    "columns": [
+      "unite_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useProduitLineDefaults.js",
+    "resource": "v_pmp",
+    "method": "from",
+    "columns": [
+      "pmp"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useProduitLineDefaults.js",
+    "resource": "unites",
+    "method": "from",
+    "columns": [
+      "nom"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useProduitsAutocomplete.js",
+    "resource": "produits",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "tva",
+      "dernier_prix",
+      "unite_id"
+    ],
+    "missingColumns": [],
+    "joins": [
+      "unites"
+    ],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useProduitsFournisseur.js",
+    "resource": "fournisseur_produits",
+    "method": "from",
+    "columns": [
+      "*",
+      "nom",
+      "unite_id",
+      "nom))"
+    ],
+    "missingColumns": [
+      "*",
+      "nom",
+      "unite_id",
+      "nom))"
+    ],
+    "joins": [
+      "produits",
+      "unites",
+      "familles"
+    ],
+    "joinIssues": [
+      "unites",
+      "familles"
+    ]
+  },
+  {
+    "file": "hooks/useProduitsFournisseur.js",
+    "resource": "fournisseur_produits",
+    "method": "from",
+    "columns": [
+      "*",
+      "nom",
+      "unite_id",
+      "nom))"
+    ],
+    "missingColumns": [
+      "*",
+      "nom",
+      "unite_id",
+      "nom))"
+    ],
+    "joins": [
+      "produits",
+      "unites",
+      "familles"
+    ],
+    "joinIssues": [
+      "unites",
+      "familles"
+    ]
+  },
+  {
+    "file": "hooks/useProduitsFournisseur.js",
+    "resource": "fournisseur_produits",
+    "method": "from",
+    "columns": [
+      "id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useProduitsInventaire.js",
+    "resource": "v_produits_dernier_prix",
+    "method": "from",
+    "columns": [
+      "produit_id",
+      "nom",
+      "unite",
+      "famille"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useProduitsInventaire.js",
+    "resource": "v_pmp",
+    "method": "from",
+    "columns": [
+      "produit_id",
+      "pmp"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useProduitsInventaire.js",
+    "resource": "v_stocks",
+    "method": "from",
+    "columns": [
+      "produit_id",
+      "stock"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useProduitsSearch.js",
+    "resource": "produits",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "unite_id",
+      "tva",
+      "zone_stock_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/usePromotions.js",
+    "resource": "promotions",
+    "method": "from",
+    "columns": [
+      "id",
+      "mama_id",
+      "nom",
+      "description",
+      "date_debut",
+      "date_fin",
+      "created_at",
+      "updated_at",
+      "actif"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useRGPD.js",
+    "resource": "utilisateurs",
+    "method": "from",
+    "columns": [
+      "id",
+      "created_at"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useRecommendations.js",
+    "resource": "v_reco_stockmort",
+    "method": "from",
+    "columns": [
+      "mama_id",
+      "produit_id",
+      "nom",
+      "jours_inactif"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useRecommendations.js",
+    "resource": "v_reco_surcout",
+    "method": "from",
+    "columns": [
+      "mama_id",
+      "produit_id",
+      "nom",
+      "variation_pct"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useRecommendations.js",
+    "resource": "produits",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "stock_reel",
+      "stock_min",
+      "actif"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useReporting.js",
+    "resource": "v_mouvements_centres_cout_stats",
+    "method": "from",
+    "columns": [
+      "centre_cout_id",
+      "centre_cout",
+      "total_quantite",
+      "total_valeur"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useReporting.js",
+    "resource": "v_achats_mensuels",
+    "method": "from",
+    "columns": [
+      "mois",
+      "montant_total",
+      "mama_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useReporting.js",
+    "resource": "v_pmp",
+    "method": "from",
+    "columns": [
+      "produit_id",
+      "pmp",
+      "mama_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useReporting.js",
+    "resource": "v_analytique_stock",
+    "method": "from",
+    "columns": [
+      "famille",
+      "valeur"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useReporting.js",
+    "resource": "v_cost_center_month",
+    "method": "from",
+    "columns": [
+      "cost_center_id",
+      "nom",
+      "mois",
+      "total",
+      "mama_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useReporting.js",
+    "resource": "v_analytique_stock",
+    "method": "from",
+    "columns": [
+      "produit_id",
+      "valeur"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useReporting.js",
+    "resource": "v_cost_center_month",
+    "method": "from",
+    "columns": [
+      "cost_center_id",
+      "nom",
+      "mois",
+      "total",
+      "mama_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useRequisitions.js",
+    "resource": "v_requisitions",
+    "method": "from",
+    "columns": [
+      "id",
+      "date_requisition",
+      "quantite",
+      "mama_id",
+      "produit_id",
+      "produit_nom",
+      "photo_url"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useRequisitions.js",
+    "resource": "requisitions",
+    "method": "from",
+    "columns": [
+      "id",
+      "mama_id",
+      "zone_id",
+      "date_requisition",
+      "quantite",
+      "type",
+      "commentaire",
+      "auteur_id",
+      "statut",
+      "created_at",
+      "unite",
+      "quantite)"
+    ],
+    "missingColumns": [
+      "unite",
+      "quantite)"
+    ],
+    "joins": [
+      "requisition_lignes"
+    ],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useRequisitions.js",
+    "resource": "requisitions",
+    "method": "from",
+    "columns": [
+      "id",
+      "mama_id",
+      "zone_id",
+      "date_requisition",
+      "quantite",
+      "type",
+      "commentaire",
+      "auteur_id",
+      "statut",
+      "created_at",
+      "produit_id",
+      "unite",
+      "quantite",
+      "mama_id",
+      "nom))"
+    ],
+    "missingColumns": [
+      "unite",
+      "nom))"
+    ],
+    "joins": [
+      "requisition_lignes",
+      "produit_id"
+    ],
+    "joinIssues": [
+      "produit_id"
+    ]
+  },
+  {
+    "file": "hooks/useRoles.js",
+    "resource": "roles",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "description",
+      "access_rights",
+      "actif",
+      "mama_id",
+      "created_at",
+      "updated_at"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useRuptureAlerts.js",
+    "resource": "v_alertes_rupture",
+    "method": "from",
+    "columns": [
+      "produit_id",
+      "nom",
+      "unite",
+      "fournisseur_nom",
+      "stock_actuel",
+      "stock_min",
+      "manque"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useSignalements.js",
+    "resource": "signalements",
+    "method": "from",
+    "columns": [
+      "id",
+      "mama_id",
+      "created_by",
+      "type",
+      "description",
+      "date",
+      "created_at"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useSignalements.js",
+    "resource": "signalements",
+    "method": "from",
+    "columns": [
+      "id",
+      "mama_id",
+      "created_by",
+      "type",
+      "description",
+      "date",
+      "created_at"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useSimulation.js",
+    "resource": "v_besoins_previsionnels",
+    "method": "from",
+    "columns": [
+      "mama_id",
+      "menu_id",
+      "produit_id",
+      "quantite",
+      "valeur"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useSousFamilles.js",
+    "resource": "sous_familles",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "famille_id",
+      "mama_id",
+      "actif"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useSousFamilles.js",
+    "resource": "sous_familles",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "famille_id",
+      "mama_id",
+      "actif"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useStats.js",
+    "resource": "produits",
+    "method": "from",
+    "columns": [
+      "id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useStats.js",
+    "resource": "fiches_techniques",
+    "method": "from",
+    "columns": [
+      "cout_total"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useStats.js",
+    "resource": "requisition_lignes",
+    "method": "from",
+    "columns": [
+      "quantite",
+      "statut)"
+    ],
+    "missingColumns": [
+      "statut)"
+    ],
+    "joins": [
+      "requisitions"
+    ],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useStock.js",
+    "resource": "produits",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "unite_id",
+      "stock_reel",
+      "stock_min",
+      "pmp",
+      "famille_id",
+      "sous_famille_id"
+    ],
+    "missingColumns": [],
+    "joins": [
+      "unites",
+      "familles",
+      "sous_familles"
+    ],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useStock.js",
+    "resource": "v_stocks",
+    "method": "from",
+    "columns": [
+      "stock"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useStock.js",
+    "resource": "inventaires",
+    "method": "from",
+    "columns": [
+      "id",
+      "mama_id",
+      "date_inventaire",
+      "created_at",
+      "updated_at",
+      "actif",
+      "reference",
+      "zone",
+      "date_debut",
+      "cloture"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useStockRequisitionne.js",
+    "resource": "v_stock_requisitionne",
+    "method": "from",
+    "columns": [
+      "produit_id",
+      "quantite_30j"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useTaches.js",
+    "resource": "taches",
+    "method": "from",
+    "columns": [
+      "id",
+      "titre",
+      "description",
+      "assignes",
+      "date_echeance",
+      "statut",
+      "utilisateur_id",
+      "mama_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useTasks.js",
+    "resource": "taches",
+    "method": "from",
+    "columns": [],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useTasks.js",
+    "resource": "taches",
+    "method": "from",
+    "columns": [],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useTasks.js",
+    "resource": "taches",
+    "method": "from",
+    "columns": [],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useTemplatesCommandes.js",
+    "resource": "templates_commandes",
+    "method": "from",
+    "columns": [],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useTemplatesCommandes.js",
+    "resource": "templates_commandes",
+    "method": "from",
+    "columns": [],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useTemplatesCommandes.js",
+    "resource": "templates_commandes",
+    "method": "from",
+    "columns": [],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useTopProducts.js",
+    "resource": "requisition_lignes",
+    "method": "from",
+    "columns": [
+      "produit_id",
+      "quantite",
+      "mama_id",
+      "statut)"
+    ],
+    "missingColumns": [
+      "statut)"
+    ],
+    "joins": [
+      "requisitions"
+    ],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useTransferts.js",
+    "resource": "transferts",
+    "method": "from",
+    "columns": [
+      "id",
+      "date_transfert",
+      "motif",
+      "nom",
+      "mama_id)",
+      "nom",
+      "mama_id)",
+      "produit_id",
+      "quantite",
+      "nom",
+      "mama_id))"
+    ],
+    "missingColumns": [
+      "nom",
+      "mama_id)",
+      "nom",
+      "mama_id)",
+      "nom",
+      "mama_id))"
+    ],
+    "joins": [
+      "zones_stock",
+      "zones_stock",
+      "transfert_lignes",
+      "produits"
+    ],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useTransferts.js",
+    "resource": "transferts",
+    "method": "from",
+    "columns": [
+      "id",
+      "date_transfert",
+      "motif",
+      "nom",
+      "mama_id)",
+      "nom",
+      "mama_id)",
+      "quantite",
+      "nom",
+      "mama_id))"
+    ],
+    "missingColumns": [
+      "nom",
+      "mama_id)",
+      "nom",
+      "mama_id)",
+      "nom",
+      "mama_id))"
+    ],
+    "joins": [
+      "zones_stock",
+      "zones_stock",
+      "transfert_lignes",
+      "produits"
+    ],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useTwoFactorAuth.js",
+    "resource": "auth_double_facteur",
+    "method": "from",
+    "columns": [
+      "enabled",
+      "secret"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useUnites.js",
+    "resource": "unites",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "actif"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useUnites.js",
+    "resource": "unites",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useUsageStats.js",
+    "resource": "usage_stats",
+    "method": "from",
+    "columns": [
+      "module",
+      "id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useUsageStats.js",
+    "resource": "usage_stats",
+    "method": "from",
+    "columns": [
+      "timestamp"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useUsageStats.js",
+    "resource": "logs_securite",
+    "method": "from",
+    "columns": [
+      "description",
+      "id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useUtilisateurs.js",
+    "resource": "utilisateurs_complets",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "mama_id",
+      "actif",
+      "access_rights",
+      "role_id",
+      "role_nom",
+      "role_access_rights",
+      "auth_id",
+      "email"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useUtilisateurs.js",
+    "resource": "roles",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useUtilisateurs.js",
+    "resource": "roles",
+    "method": "from",
+    "columns": [
+      "nom",
+      "access_rights"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useValidations.js",
+    "resource": "validation_requests",
+    "method": "from",
+    "columns": [
+      "id",
+      "module",
+      "payload",
+      "statut",
+      "created_at"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useZoneProducts.js",
+    "resource": "produits",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "unite_id",
+      "stock_reel",
+      "stock_min"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useZoneRights.js",
+    "resource": "zones_droits",
+    "method": "from",
+    "columns": [
+      "id",
+      "mama_id",
+      "zone_id",
+      "user_id",
+      "lecture",
+      "ecriture",
+      "transfert",
+      "requisition"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useZones.js",
+    "resource": "zones_stock",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "type",
+      "parent_id",
+      "position",
+      "actif",
+      "created_at"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useZones.js",
+    "resource": "zones_stock",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "type",
+      "parent_id",
+      "position",
+      "actif",
+      "created_at"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useZones.js",
+    "resource": "zones_stock",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "type",
+      "parent_id",
+      "position",
+      "actif",
+      "created_at"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useZones.js",
+    "resource": "zones_stock",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "type",
+      "parent_id",
+      "position",
+      "actif",
+      "created_at"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useZones.js",
+    "resource": "zones_droits",
+    "method": "from",
+    "columns": [
+      "zone_id",
+      "lecture",
+      "ecriture",
+      "transfert",
+      "requisition"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useZones.js",
+    "resource": "zones_stock",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "type",
+      "parent_id",
+      "position",
+      "actif",
+      "created_at"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useZones.js",
+    "resource": "zones_stock",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "type",
+      "parent_id",
+      "position",
+      "actif",
+      "created_at"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useZonesStock.js",
+    "resource": "zones_stock",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/useZonesStock.js",
+    "resource": "zones_stock",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/BarManager.jsx",
+    "resource": "fiches_techniques",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "famille",
+      "prix_vente",
+      "cout_portion",
+      "type_carte"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/BarManager.jsx",
+    "resource": "ventes_boissons",
+    "method": "from",
+    "columns": [
+      "boisson_id",
+      "quantite",
+      "date_vente"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/CartePlats.jsx",
+    "resource": "fiches_techniques",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "famille",
+      "prix_vente",
+      "cout_portion"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/CartePlats.jsx",
+    "resource": "familles",
+    "method": "from",
+    "columns": [
+      "nom"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "utils/exportExcelProduits.js",
+    "resource": "produits",
+    "method": "from",
+    "columns": [],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "utils/importExcelProduits.js",
+    "resource": "sous_familles",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "utils/importExcelProduits.js",
+    "resource": "fournisseurs",
+    "method": "from",
+    "columns": [
+      "id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "utils/importExcelProduits.js",
+    "resource": "produits",
+    "method": "from",
+    "columns": [
+      "nom"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "api/public/produits.js",
+    "resource": "v_produits_dernier_prix",
+    "method": "from",
+    "columns": [
+      "produit_id",
+      "nom",
+      "famille_id",
+      "famille",
+      "unite_id",
+      "unite",
+      "stock_reel",
+      "stock_min",
+      "fournisseur_id",
+      "fournisseur",
+      "dernier_prix",
+      "date_livraison",
+      "mama_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "api/public/promotions.js",
+    "resource": "promotions",
+    "method": "from",
+    "columns": [
+      "id",
+      "mama_id",
+      "nom",
+      "description",
+      "date_debut",
+      "date_fin",
+      "actif",
+      "created_at",
+      "updated_at"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "components/factures/SupplierPicker.jsx",
+    "resource": "fournisseurs",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "components/gadgets/GadgetBudgetMensuel.jsx",
+    "resource": "v_budget_mensuel",
+    "method": "from",
+    "columns": [
+      "mois",
+      "total_ht"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "components/parametrage/SousFamilleList.jsx",
+    "resource": "sous_familles",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "famille_id",
+      "mama_id",
+      "actif"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/data/useFactures.js",
+    "resource": "factures",
+    "method": "from",
+    "columns": [
+      "id",
+      "numero",
+      "date_facture",
+      "fournisseur_id",
+      "total_ttc",
+      "statut",
+      "actif",
+      "nom",
+      "mama_id)"
+    ],
+    "missingColumns": [
+      "nom",
+      "mama_id)"
+    ],
+    "joins": [
+      "fournisseurs"
+    ],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/data/useFamilles.js",
+    "resource": "familles",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "actif"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/data/useFamillesParametrage.js",
+    "resource": "familles",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "actif"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/data/useFichesTechniques.js",
+    "resource": "fiches_techniques",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "actif",
+      "cout_par_portion",
+      "portions",
+      "famille",
+      "prix_vente",
+      "type_carte",
+      "sous_type_carte",
+      "carte_actuelle",
+      "cout_total",
+      "rendement",
+      "created_at",
+      "updated_at"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/data/useFournisseurs.js",
+    "resource": "fournisseurs",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "actif",
+      "nom",
+      "email",
+      "tel)"
+    ],
+    "missingColumns": [
+      "email",
+      "tel)"
+    ],
+    "joins": [
+      "fournisseur_contacts"
+    ],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/data/useProduits.js",
+    "resource": "produits",
+    "method": "from",
+    "columns": [],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/data/useSousFamilles.js",
+    "resource": "sous_familles",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "famille_id",
+      "mama_id",
+      "actif"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/data/useSousFamillesParametrage.js",
+    "resource": "sous_familles",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "actif",
+      "famille_id",
+      "mama_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/gadgets/useAchatsMensuels.js",
+    "resource": "v_achats_mensuels",
+    "method": "from",
+    "columns": [
+      "mois",
+      "montant_total"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/gadgets/useAlerteStockFaible.js",
+    "resource": "v_alertes_rupture",
+    "method": "from",
+    "columns": [
+      "mama_id",
+      "produit_id",
+      "nom",
+      "unite",
+      "fournisseur_nom",
+      "stock_min",
+      "stock_actuel",
+      "manque"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/gadgets/useConsoMoyenne.js",
+    "resource": "requisition_lignes",
+    "method": "from",
+    "columns": [],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/gadgets/useDerniersAcces.js",
+    "resource": "logs_securite",
+    "method": "from",
+    "columns": [
+      "utilisateur_id",
+      "created_at",
+      "auth_id)"
+    ],
+    "missingColumns": [
+      "auth_id)"
+    ],
+    "joins": [
+      "utilisateurs"
+    ],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/gadgets/useEvolutionAchats.js",
+    "resource": "v_evolution_achats",
+    "method": "from",
+    "columns": [
+      "mois",
+      "montant"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/gadgets/useProduitsUtilises.js",
+    "resource": "v_produits_utilises",
+    "method": "from",
+    "columns": [
+      "produit_id",
+      "produit_nom",
+      "quantite",
+      "date_utilisation"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/gadgets/useTachesUrgentes.js",
+    "resource": "taches",
+    "method": "from",
+    "columns": [
+      "id",
+      "titre",
+      "date_echeance"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "hooks/gadgets/useTopFournisseurs.js",
+    "resource": "v_top_fournisseurs",
+    "method": "from",
+    "columns": [
+      "fournisseur_id",
+      "fournisseur",
+      "montant_total",
+      "nombre_achats",
+      "mama_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/catalogue/CatalogueSyncViewer.jsx",
+    "resource": "catalogue_updates",
+    "method": "from",
+    "columns": [
+      "id",
+      "mama_id",
+      "fournisseur_id",
+      "produit_id",
+      "ancienne_valeur",
+      "nouvelle_valeur",
+      "modification",
+      "created_at"
+    ],
+    "missingColumns": [],
+    "joins": [
+      "produit_id"
+    ],
+    "joinIssues": [
+      "produit_id"
+    ]
+  },
+  {
+    "file": "pages/commandes/CommandesEnvoyees.jsx",
+    "resource": "commandes",
+    "method": "from",
+    "columns": [
+      "id",
+      "created_at",
+      "statut"
+    ],
+    "missingColumns": [],
+    "joins": [
+      "fournisseurs"
+    ],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/consolidation/AccessMultiSites.jsx",
+    "resource": "mamas",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/costboisson/CostBoisson.jsx",
+    "resource": "v_boissons",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "prix_vente",
+      "famille",
+      "famille",
+      "unite",
+      "fiche_id",
+      "cout_portion"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/costboisson/CostBoisson.jsx",
+    "resource": "ventes_boissons",
+    "method": "from",
+    "columns": [
+      "boisson_id",
+      "quantite"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/factures/FactureDetail.jsx",
+    "resource": "factures",
+    "method": "from",
+    "columns": [],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/fournisseurs/FournisseurDetail.jsx",
+    "resource": "facture_lignes",
+    "method": "from",
+    "columns": [
+      "id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/fournisseurs/FournisseurDetail.jsx",
+    "resource": "fournisseurs",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "actif",
+      "created_at",
+      "nom",
+      "email",
+      "tel)"
+    ],
+    "missingColumns": [
+      "email",
+      "tel)"
+    ],
+    "joins": [
+      "fournisseur_contacts"
+    ],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/legal/Confidentialite.jsx",
+    "resource": "mamas",
+    "method": "from",
+    "columns": [
+      "rgpd_text"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/legal/MentionsLegales.jsx",
+    "resource": "mamas",
+    "method": "from",
+    "columns": [
+      "mentions_legales"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/menus/MenuPDF.jsx",
+    "resource": "menus",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "date"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/menus/MenuPDF.jsx",
+    "resource": "menu_fiches",
+    "method": "from",
+    "columns": [
+      "fiche_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/menus/MenuPDF.jsx",
+    "resource": "fiches_techniques",
+    "method": "from",
+    "columns": [
+      "fiche_id",
+      "nom",
+      "type_carte",
+      "sous_type_carte"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/mobile/MobileInventaire.jsx",
+    "resource": "produits",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "famille_id",
+      "sous_famille_id"
+    ],
+    "missingColumns": [],
+    "joins": [
+      "familles",
+      "sous_familles"
+    ],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/mobile/MobileRequisition.jsx",
+    "resource": "produits",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/parametrage/InvitationsEnAttente.jsx",
+    "resource": "mamas",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/parametrage/InvitationsEnAttente.jsx",
+    "resource": "roles",
+    "method": "from",
+    "columns": [
+      "nom"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/parametrage/InvitationsEnAttente.jsx",
+    "resource": "utilisateurs",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "mama_id",
+      "role",
+      "invite_pending",
+      "actif",
+      "created_at"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/parametrage/InviteUser.jsx",
+    "resource": "mamas",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/parametrage/InviteUser.jsx",
+    "resource": "mamas",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/parametrage/InviteUser.jsx",
+    "resource": "roles",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "mama_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/parametrage/InviteUser.jsx",
+    "resource": "utilisateurs",
+    "method": "from",
+    "columns": [
+      "id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/parametrage/MamaForm.jsx",
+    "resource": "mamas",
+    "method": "from",
+    "columns": [
+      "id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/parametrage/Mamas.jsx",
+    "resource": "mamas",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "actif"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/parametrage/ParametresCommandes.jsx",
+    "resource": "parametres_commandes",
+    "method": "from",
+    "columns": [
+      "adresse_livraison",
+      "mentions_haut",
+      "mentions_bas",
+      "logo",
+      "footer_pdf"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/parametrage/Permissions.jsx",
+    "resource": "roles",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "description",
+      "actif",
+      "mama_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/parametrage/PermissionsAdmin.jsx",
+    "resource": "mamas",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/parametrage/PermissionsAdmin.jsx",
+    "resource": "roles",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "description",
+      "actif",
+      "mama_id"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/parametrage/PermissionsForm.jsx",
+    "resource": "permissions",
+    "method": "from",
+    "columns": [
+      "id",
+      "mama_id",
+      "role_id",
+      "module",
+      "droit",
+      "actif"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/parametrage/Utilisateurs.jsx",
+    "resource": "utilisateurs",
+    "method": "from",
+    "columns": [
+      "id",
+      "email"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/simulation/SimulationForm.jsx",
+    "resource": "fiches",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom"
+    ],
+    "missingColumns": [
+      "nom"
+    ],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/stats/StatsFiches.jsx",
+    "resource": "fiches_techniques",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom",
+      "famille",
+      "actif",
+      "cout_total",
+      "cout_portion"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/stats/StatsFiches.jsx",
+    "resource": "familles",
+    "method": "from",
+    "columns": [
+      "nom"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/supervision/GroupeParamForm.jsx",
+    "resource": "mamas",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/supervision/GroupeParamForm.jsx",
+    "resource": "mamas",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/taches/Alertes.jsx",
+    "resource": "v_alertes_rupture",
+    "method": "from",
+    "columns": [
+      "produit_id",
+      "nom",
+      "stock_min",
+      "stock_actuel",
+      "manque"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  },
+  {
+    "file": "pages/fournisseurs/comparatif/ComparatifPrix.jsx",
+    "resource": "produits",
+    "method": "from",
+    "columns": [
+      "id",
+      "nom"
+    ],
+    "missingColumns": [],
+    "joins": [],
+    "joinIssues": []
+  }
+]

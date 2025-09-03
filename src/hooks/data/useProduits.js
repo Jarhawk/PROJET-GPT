@@ -46,7 +46,9 @@ export const useProduits = ({
       let q = supabase
         .from('produits')
         .select(cols, { count: 'exact' })
-        .eq('mama_id', mamaId);
+        .eq('mama_id', mamaId)
+        .eq('sous_famille.mama_id', mamaId)
+        .eq('sous_famille.famille.mama_id', mamaId);
 
       if (search) q = q.ilike('nom', `%${search}%`);
       if (familleId) q = q.eq('sous_famille.famille_id', familleId);

@@ -2,6 +2,7 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import * as Lucide from "lucide-react";
 import { ROUTES } from "../config/routes";
+import { pageExists } from "../lib/lazyPage";
 import { useTranslation } from "react-i18next";
 
 function IconByName({ name, className }) {
@@ -12,7 +13,9 @@ function IconByName({ name, className }) {
 export default function Sidebar() {
   const { t } = useTranslation();
 
-  const items = ROUTES.filter(r => r.showInSidebar !== false);
+  const items = ROUTES.filter(
+    (r) => r.showInSidebar !== false && pageExists(r.file)
+  );
 
   return (
     <aside className="sidebar">

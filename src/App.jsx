@@ -1,6 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import router from "@/router";
-import { RouterProvider } from 'react-router-dom';
+import AppRouter from "@/router";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import nprogress from 'nprogress';
 import { useEffect } from 'react';
@@ -66,7 +65,7 @@ export default function App() {
         <MultiMamaProvider>
           <ThemeProvider>
             <ToastRoot />
-            <RouterProvider router={router} />
+            <AppRouter />
             <CookieConsent />
           </ThemeProvider>
         </MultiMamaProvider>

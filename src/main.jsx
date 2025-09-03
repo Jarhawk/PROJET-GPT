@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import "./globals.css";
 import 'nprogress/nprogress.css';
@@ -37,8 +38,10 @@ if (import.meta?.env?.DEV) {
 const root = createRoot(document.getElementById("root"));
 root.render(
   <StrictMode>
-    <AuthProvider>
+    <BrowserRouter>
+      <AuthProvider>
         <App />
       </AuthProvider>
-    </StrictMode>
+    </BrowserRouter>
+  </StrictMode>
 );

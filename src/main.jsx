@@ -1,13 +1,10 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import "./globals.css";
 import 'nprogress/nprogress.css';
-import "@/i18n/i18n";
 import "./registerSW.js";
-import AuthProvider from "@/contexts/AuthContext";
 import { toast } from 'sonner';
 
 // Avoid noisy output in production by disabling debug logs
@@ -36,12 +33,8 @@ if (import.meta?.env?.DEV) {
 // Sentry.init({ dsn: "https://xxx.ingest.sentry.io/xxx" });
 
 const root = createRoot(document.getElementById("root"));
-root.render(
-  <StrictMode>
-    <BrowserRouter>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </BrowserRouter>
-  </StrictMode>
-);
+  root.render(
+    <StrictMode>
+      <App />
+    </StrictMode>
+  );

@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase.js';
 
 const AuthCtx = createContext(null);
@@ -8,15 +7,14 @@ export default function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
   const [access_rights, setAccessRights] = useState(null);
   const [rightsLoading, setRightsLoading] = useState(true);
-  const navigate = useNavigate(); // OK car AuthProvider est SOUS BrowserRouter (cf App.jsx)
 
   useEffect(() => {
     const sub = supabase.auth.onAuthStateChange((_event, sess) => {
       setSession(sess);
-      if (!sess) navigate('/login');
+      // Redirection éventuelle à gérer ailleurs (hors AuthProvider)
     });
-    return () => sub.data.subscription.unsubscribe();
-  }, [navigate]);
+    return () => sub?.data?.subscription?.unsubscribe?.();
+  }, []);
 
   useEffect(() => {
     let on = true;

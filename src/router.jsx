@@ -1,26 +1,31 @@
-import React, { lazy } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import Layout from './layout/Layout.jsx';
+import React, { Suspense } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { buildRouteElements } from "./config/routes";
+import Layout from "./layout/Layout"; // doit rendre <Outlet />
+import ErrorBoundary from "./components/ErrorBoundary";
 
-const Dashboard = lazy(() => import('./pages/Dashboard.jsx'));
+const routes = buildRouteElements(React);
 
-// Ajoute ici d’autres pages si besoin (Produits, Factures, etc.) via lazy imports
-// const Produits = lazy(() => import('./pages/produits/Produits.jsx'));
+function Spinner() {
+  return <div style={{ padding: 24 }}>Chargement…</div>;
+}
 
 export default function AppRouter() {
   return (
-    <Routes>
-      <Route element={<Layout />}>
-        <Route index element={<Navigate to="/dashboard" replace />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-
-        {/* Exemple d’autres routes :
-        <Route path="/produits" element={<Produits />} />
-        */}
-      </Route>
-
-      {/* Catch-all */}
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
-    </Routes>
+    <BrowserRouter>
+      <ErrorBoundary>
+        <Suspense fallback={<Spinner />}>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route index element={<Navigate to="/dashboard" replace />} />
+              {routes.map((r) => (
+                <Route key={r.path} path={r.path} element={<r.Component />} />
+              ))}
+              <Route path="*" element={<div style={{ padding: 24 }}>Page introuvable</div>} />
+            </Route>
+          </Routes>
+        </Suspense>
+      </ErrorBoundary>
+    </BrowserRouter>
   );
 }

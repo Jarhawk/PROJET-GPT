@@ -1,19 +1,18 @@
 import { describe, it, expect } from 'vitest';
-import { routes, sidebarRoutes } from '../src/config/routes.js';
+import { ROUTES } from '../src/config/routes.js';
 
 describe('Navigation coverage', () => {
   it('paths are unique', () => {
-    const paths = routes.map((r) => r.path);
+    const paths = ROUTES.map((r) => r.path);
     const dup = paths.filter((p, i) => paths.indexOf(p) !== i);
     expect(dup, `Duplicate paths: ${dup.join(', ')}`).toEqual([]);
   });
 
-  it('sidebar routes have labels', () => {
-    const missingLabel = sidebarRoutes.filter((r) => !r.label);
+  it('sidebar routes have labelKey', () => {
+    const missing = ROUTES.filter((r) => r.showInSidebar !== false && !r.labelKey);
     expect(
-      missingLabel,
-      `Routes missing labels: ${missingLabel.map((r) => r.path).join(', ')}`,
+      missing,
+      `Routes missing labelKey: ${missing.map((r) => r.path).join(', ')}`,
     ).toEqual([]);
   });
 });
-

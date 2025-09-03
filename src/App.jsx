@@ -1,22 +1,26 @@
+import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import Layout from './layout/Layout';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ThemeProvider } from './context/ThemeProvider.jsx';
+import { HelpProvider } from './context/HelpProvider.jsx';
+import AuthProvider from './contexts/AuthContext.jsx';
 import AppRoutes from './router.jsx';
-import ErrorBoundary from './components/ErrorBoundary';
-import { AuthProvider } from './contexts/AuthContext';
-import './i18n'; // s'assurer que i18n est initialisé tôt
+
+const queryClient = new QueryClient();
 
 export default function App() {
   return (
     <BrowserRouter>
-      {/* BrowserRouter DOIT entourer les providers qui utilisent useNavigate */}
-      <AuthProvider>
-        <ErrorBoundary>
-          <Layout>
-            <AppRoutes />
-          </Layout>
-        </ErrorBoundary>
-      </AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <HelpProvider>
+            {/* AuthProvider DOIT être sous BrowserRouter sinon useNavigate casse */}
+            <AuthProvider>
+              <AppRoutes />
+            </AuthProvider>
+          </HelpProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
     </BrowserRouter>
   );
 }
-

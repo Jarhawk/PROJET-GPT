@@ -1,52 +1,56 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { supabase } from '../lib/supabase';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabase.js';
 
-const AuthCtx = createContext({ user: null, rights: null, loading: true });
+const AuthCtx = createContext(null);
 
-export function AuthProvider({ children }) {
-  const [state, setState] = useState({ user: null, rights: null, loading: true });
+export default function AuthProvider({ children }) {
+  const [session, setSession] = useState(null);
+  const [access_rights, setAccessRights] = useState(null);
+  const [rightsLoading, setRightsLoading] = useState(true);
+  const navigate = useNavigate(); // OK car AuthProvider est SOUS BrowserRouter (cf App.jsx)
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (cancelled) return;
-
-        if (!user) {
-          setState({ user: null, rights: [], loading: false });
-          return;
-        }
-
-        // charger le profil/rights
-        const { data: profile } = await supabase
-          .from('utilisateurs')
-          .select('access_rights,mama_id')
-          .eq('auth_id', user.id)
-          .single();
-
-        const rights = profile?.access_rights ?? [];
-        setState({ user, rights, loading: false });
-      } catch (_e) {
-        setState({ user: null, rights: [], loading: false });
-      }
-    }
-
-    load();
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      setState(s => ({ ...s, user: session?.user ?? null }));
+    const sub = supabase.auth.onAuthStateChange((_event, sess) => {
+      setSession(sess);
+      if (!sess) navigate('/login');
     });
-    return () => {
-      cancelled = true;
-      sub?.subscription?.unsubscribe?.();
-    };
-  }, []);
+    return () => sub.data.subscription.unsubscribe();
+  }, [navigate]);
 
-  const value = useMemo(() => state, [state]);
+  useEffect(() => {
+    let on = true;
+    (async () => {
+      setRightsLoading(true);
+      try {
+        if (!session) { setAccessRights(null); return; }
+        // TODO: charge tes droits depuis ta table/vue dédiée
+        const rights = await fetchRightsForUser(session.user.id);
+        if (on) setAccessRights(rights);
+      } finally {
+        if (on) setRightsLoading(false);
+      }
+    })();
+    return () => { on = false; };
+  }, [session]);
+
+  const value = useMemo(() => ({
+    session,
+    access_rights,
+    rightsLoading,
+  }), [session, access_rights, rightsLoading]);
+
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;
 }
 
 export function useAuth() {
-  return useContext(AuthCtx);
+  const ctx = useContext(AuthCtx);
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  return ctx;
+}
+
+async function fetchRightsForUser(/* userId */) {
+  // Implémente selon ton schéma; retourne un objet { rightKey: true/false }
+  // Par défaut, tout autorisé pour éviter les flashs pendant l’intégration
+  return {};
 }

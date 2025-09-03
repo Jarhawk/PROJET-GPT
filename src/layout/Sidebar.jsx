@@ -1,17 +1,20 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { sidebarRoutes } from '@/config/routes.js';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function Sidebar() {
   const { access_rights, rightsLoading } = useAuth();
+  const { t } = useTranslation();
   if (rightsLoading) return null;
 
-  const visible = sidebarRoutes.filter((r) => {
-    const moduleKey = r.path.slice(1).split('/')[0] || 'dashboard';
-    const mod = access_rights?.[moduleKey];
+  const hasRight = (key) => {
+    const mod = access_rights?.[key];
     return mod?.peut_voir !== false;
-  });
+  };
+
+  const visible = sidebarRoutes.filter((r) => hasRight(r.accessKey));
 
   return (
     <nav className="py-4">
@@ -30,7 +33,7 @@ export default function Sidebar() {
               }
             >
               <r.icon size={16} className="mr-2 opacity-90" />
-              <span className="text-sm">{r.label}</span>
+              <span className="text-sm">{t(r.labelKey, { defaultValue: r.label })}</span>
             </NavLink>
           </li>
         ))}

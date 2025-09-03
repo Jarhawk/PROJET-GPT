@@ -1,22 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useCallback, useMemo } from "react";
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
-
-function safeQueryClient() {
-  try {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useQueryClient();
-  } catch {
-    return {
-      invalidateQueries: () => {},
-      setQueryData: () => {},
-      fetchQuery: async () => {},
-    };
-  }
-}
 
 const defaults = {
   logo_url: "",
@@ -38,7 +24,7 @@ const localFeatureFlags = {};
 export const useMamaSettings = () => {
   const { userData } = useAuth() || {};
   const mamaId = userData?.mama_id;
-  const queryClient = safeQueryClient();
+  const queryClient = useQueryClient();
 
   const query = useQuery({
     queryKey: ['mama-settings', mamaId],

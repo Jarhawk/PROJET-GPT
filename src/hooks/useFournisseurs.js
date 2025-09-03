@@ -9,23 +9,9 @@ import { toast } from 'sonner';
 import { safeImportXLSX } from '@/lib/xlsx/safeImportXLSX';
 import { useQueryClient } from '@tanstack/react-query';
 
-function safeQueryClient() {
-  try {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useQueryClient();
-  } catch {
-    return {
-      invalidateQueries: () => {},
-      setQueryData: () => {},
-      setQueriesData: () => {},
-      fetchQuery: async () => {},
-    };
-  }
-}
-
 export function useFournisseurs() {
   const { mama_id } = useAuth();
-  const queryClient = safeQueryClient();
+  const queryClient = useQueryClient();
   const [fournisseurs, setFournisseurs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

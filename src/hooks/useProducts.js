@@ -9,22 +9,9 @@ import { saveAs } from "file-saver";
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 
-function safeQueryClient() {
-  try {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useQueryClient();
-  } catch {
-    return {
-      invalidateQueries: () => {},
-      setQueryData: () => {},
-      fetchQuery: async () => {},
-    };
-  }
-}
-
 export function useProducts() {
   const { mama_id } = useAuth();
-  const queryClient = safeQueryClient();
+  const queryClient = useQueryClient();
   const [products, setProducts] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);

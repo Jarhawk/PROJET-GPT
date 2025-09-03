@@ -1,26 +1,12 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useCallback } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
-
-function safeQueryClient() {
-  try {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useQueryClient();
-  } catch {
-    return {
-      invalidateQueries: () => {},
-      setQueryData: () => {},
-      fetchQuery: async () => {},
-    };
-  }
-}
 
 export function useFamilles() {
   const { mama_id } = useAuth();
-  const queryClient = safeQueryClient();
+  const queryClient = useQueryClient();
   const [params, setParams] = useState({ search: '', page: 1, limit: 50 });
 
   const query = useQuery({

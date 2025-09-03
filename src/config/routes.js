@@ -25,7 +25,7 @@ export const ROUTES = [
   { path: "/fiches",     file: "fiches/Fiches.jsx",             labelKey: "nav.fiches",            icon: "ChefHat",         showInSidebar: true },
   { path: "/menus",      file: "menus/Menus.jsx",               labelKey: "nav.menus",             icon: "Utensils",        showInSidebar: true },
   { path: "/menu-jour",  file: "menus/MenuDuJour.jsx",          labelKey: "nav.menuDuJour",        icon: "CalendarDays",    showInSidebar: true },
-  { path: "/stock",      file: "stock/Stock.jsx",               labelKey: "nav.stock",             icon: "Boxes",           showInSidebar: true },
+  { path: "/stock",      file: "stock/Inventaire.jsx",         labelKey: "nav.stock",             icon: "Boxes",           showInSidebar: true },
   { path: "/inventaire", file: "inventaire/Inventaire.jsx",     labelKey: "nav.inventaire",        icon: "ClipboardList",   showInSidebar: true },
   // Paramétrage
   { path: "/parametrage/familles",      file: "parametrage/Familles.jsx",      labelKey: "nav.familles",      icon: "Shapes",      showInSidebar: true },

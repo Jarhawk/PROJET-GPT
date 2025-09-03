@@ -30,7 +30,7 @@ export default function useBudgetMensuel() {
         return { cible, reel };
       } catch (e) {
         console.warn('[gadgets] vue manquante ou colonne absente:', e?.message || e);
-        throw e;
+        return { cible: 0, reel: 0 };
       }
     },
     staleTime: 1000 * 60 * 5,

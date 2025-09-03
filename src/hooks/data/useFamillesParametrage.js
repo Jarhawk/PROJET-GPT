@@ -14,7 +14,7 @@ export function useFamillesParametrage({ mamaId, enabled = true }) {
         .order('nom', { ascending: true });
 
       if (error) throw error;
-      return data ?? [];
+      return Array.isArray(data) ? data : [];
     },
     initialData: [],
     staleTime: 10_000,

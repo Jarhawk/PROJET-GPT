@@ -1,51 +1,27 @@
-import { motion as Motion } from 'framer-motion';
-import useTopFournisseurs from '@/hooks/gadgets/useTopFournisseurs';
-import LoadingSkeleton from '@/components/ui/LoadingSkeleton';
-import Card from '@/components/ui/Card';
-import { formatCurrencyEUR } from '@/utils/numberFR.js';
+import React from 'react';
+import { useAuth } from '../../hooks/useAuth.ts';
+import useTopFournisseurs from '../../hooks/gadgets/useTopFournisseurs.js';
 
 export default function GadgetTopFournisseurs() {
-  const { data, loading, error: errTop } = useTopFournisseurs();
-  const list = Array.isArray(data) ? data : [];
-
-  if (loading) {
-    return <LoadingSkeleton className="h-32 w-full rounded-2xl" />;
-  }
-  if (errTop) return <Card>Erreur chargement top fournisseurs</Card>;
-  if (!list.length) {
-    return <Card className="p-4 text-center">Aucune donnée</Card>;
-  }
+  const { mamaId } = useAuth();
+  const { data, isLoading, error } = useTopFournisseurs(mamaId, { limit: 5 });
 
   return (
-    <div className="bg-white/10 border border-white/20 backdrop-blur-xl rounded-2xl shadow-md p-4 text-white">
-      <h3 className="font-bold mb-2">Top fournisseurs du mois</h3>
-      <Motion.ul
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="space-y-2 text-sm"
-      >
-        {
-          (() => {
-            const items = [];
-            for (const f of list) {
-              items.push(
-                <li
-                  key={f.fournisseur_id}
-                  className="flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-2">
-                    <span>{f.nom}</span>
-                  </div>
-                  <span className="font-semibold">
-                    {formatCurrencyEUR(Number(f.montant))}
-                  </span>
-                </li>
-              );
-            }
-            return items;
-          })()
-        }
-      </Motion.ul>
+    <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
+      <h3 className="font-medium mb-3">Top fournisseurs</h3>
+      {isLoading && <div className="animate-pulse h-10 bg-white/10 rounded" />}
+      {error && <div className="text-red-300 text-sm">Erreur: {error.message}</div>}
+      {!isLoading && !error && (
+        <ul className="space-y-2">
+          {data.map((row) => (
+            <li key={row.fournisseur_id} className="flex justify-between text-sm">
+              <span className="truncate mr-3">{row.fournisseur}</span>
+              <span className="font-medium">{Number(row.montant ?? 0).toFixed(2)} €</span>
+            </li>
+          ))}
+          {data.length === 0 && <li className="text-slate-400 text-sm">Aucune donnée</li>}
+        </ul>
+      )}
     </div>
   );
 }

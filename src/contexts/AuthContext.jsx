@@ -87,6 +87,12 @@ function AuthProvider({ children }) {
     return () => { sub?.subscription?.unsubscribe?.(); if (pollTimerRef.current) window.clearInterval(pollTimerRef.current) }
   }, [navigate, userData])
 
+  useEffect(() => {
+    if (session === null) {
+      navigate('/login', { replace: true })
+    }
+  }, [session, navigate])
+
   const hasAccess = useMemo(() => {
     return (key) => {
       const k = normalizeAccessKey(key)

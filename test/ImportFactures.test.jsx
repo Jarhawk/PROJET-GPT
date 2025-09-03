@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { screen, fireEvent, act } from '@testing-library/react';
 import { vi } from 'vitest';
+import { renderWithRouter } from './utils/renderWithRouter.jsx';
 
 let hook;
 vi.mock('@/hooks/useInvoiceImport', () => ({
@@ -22,7 +23,7 @@ test('uploads file and calls hook', async () => {
   const importFromFile = vi.fn(() => Promise.resolve('id'));
   hook = { importFromFile, loading: false, error: null };
   await act(async () => {
-    render(<ImportFactures />);
+    renderWithRouter(<ImportFactures />);
   });
   const fileInput = document.querySelector('input[type="file"]');
   const file = new File(['{}'], 'facture.json', { type: 'application/json' });

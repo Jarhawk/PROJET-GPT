@@ -1,56 +1,56 @@
-import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import React, { Suspense, lazy } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './layout/Layout.jsx';
-import { APP_ROUTES, HIDDEN_ROUTES } from './config/routes';
-import { useAuth } from './contexts/AuthContext.jsx';
-import { hasAccess } from './lib/access.js';
+import PrivateOutlet from './router/PrivateOutlet.jsx';
+import { APP_ROUTES, HIDDEN_ROUTES } from './config/routes.js';
+
+function PageSkeleton() {
+  return <div style={{ padding: 16 }}>Chargement…</div>;
+}
 
 const Login = lazy(() => import('./pages/auth/Login.jsx'));
-const NotFound = lazy(() => import('./pages/NotFound.jsx'));
 
-function Spinner() {
-  return <div className="p-6 text-slate-300">Chargement…</div>;
-}
+export default function AppRoutes() {
+  const routesConfig = [...APP_ROUTES, ...HIDDEN_ROUTES];
+  const appRoutes = routesConfig.filter(r => r.path && r.element);
 
-function RouteGuard({ requiredRight }) {
-  const { user, rights, loading } = useAuth();
-
-  if (loading) return <Spinner />;
-  if (!user) return <Navigate to="/login" replace />;
-  if (!hasAccess(requiredRight, rights)) return <Navigate to="/403" replace />;
-
-  return <Outlet />;
-}
-
-export default function AppRouter() {
-  const ALL_ROUTES = [...APP_ROUTES, ...HIDDEN_ROUTES];
   return (
-    <BrowserRouter>
-      <Suspense fallback={<Spinner />}>
-        <Routes>
-          <Route element={<Layout />}>
-            {/* zone publique */}
-            <Route path="/login" element={<Login />} />
+    <Suspense fallback={<PageSkeleton />}>
+      <Routes>
+        {/* Route publique: login */}
+        <Route path="/login" element={<Login />} />
 
-            {/* zone privée */}
-            {ALL_ROUTES.map(r => {
-              const Page = r.element;
+        {/* Espace protégé */}
+        <Route element={<PrivateOutlet />}>
+          <Route element={<Layout />}>
+            {appRoutes.map((r) => {
+              const Component = r.element;
               return (
                 <Route
                   key={r.path}
-                  element={<RouteGuard requiredRight={r.access} />}
-                >
-                  <Route path={r.path} element={<Page />} />
-                </Route>
+                  path={r.path}
+                  element={
+                    <Suspense fallback={<PageSkeleton />}>
+                      <Component />
+                    </Suspense>
+                  }
+                />
               );
             })}
-
-            {/* 403/404 */}
-            <Route path="/403" element={<div className="p-6">Accès refusé</div>} />
-            <Route path="*" element={<NotFound />} />
+            {/* Accueil → dashboard si présent, sinon première route */}
+            <Route index element={<Navigate to={getDefaultHome(appRoutes)} replace />} />
           </Route>
-        </Routes>
-      </Suspense>
-    </BrowserRouter>
+        </Route>
+
+        {/* 404 */}
+        <Route path="*" element={<Navigate to={getDefaultHome(appRoutes)} replace />} />
+      </Routes>
+    </Suspense>
   );
+}
+
+// Choisit la page d’accueil par défaut
+function getDefaultHome(routes) {
+  const dashboard = routes.find(r => r.path === '/dashboard');
+  return dashboard ? '/dashboard' : (routes[0]?.path || '/login');
 }

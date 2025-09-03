@@ -35,7 +35,7 @@ export const APP_ROUTES = [
     access: 'view_fiches',
   },
   {
-    // IMPORTANT: la page "stock" est en réalité Inventaire.jsx
+    // alias /stock -> Inventaire.jsx
     path: '/stock',
     element: lazy(() => import('../pages/inventaire/Inventaire.jsx')),
     labelKey: 'nav.stock',

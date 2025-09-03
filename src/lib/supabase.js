@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 let singleton
 let initError = null
 let cachedEnv
+let overlayShown = false
 
 export function getSupabaseEnv() {
   const url =
@@ -29,6 +30,23 @@ export function getSupabaseClient() {
       'Missing Supabase credentials: set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY'
     singleton = null
     cachedEnv = null
+    if (typeof document !== 'undefined' && !overlayShown) {
+      const el = document.createElement('div')
+      el.style.position = 'fixed'
+      el.style.top = '0'
+      el.style.left = '0'
+      el.style.right = '0'
+      el.style.bottom = '0'
+      el.style.display = 'flex'
+      el.style.alignItems = 'center'
+      el.style.justifyContent = 'center'
+      el.style.background = 'rgba(0,0,0,0.7)'
+      el.style.color = 'white'
+      el.style.zIndex = '1000'
+      el.textContent = 'Missing Supabase credentials'
+      document.body.appendChild(el)
+      overlayShown = true
+    }
     if (process.env.NODE_ENV === 'production') {
       throw new Error(initError)
     }

@@ -4,7 +4,6 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
-import { deduceEnabledModulesFromRights } from '@/lib/access';
 
 function safeQueryClient() {
   try {
@@ -84,17 +83,11 @@ export const useMamaSettings = () => {
 
   const settings = useMemo(() => ({ ...defaults, ...(query.data || {}) }), [query.data]);
 
-  const fallbackModules = useMemo(
-    () => deduceEnabledModulesFromRights(userData?.access_rights),
-    [userData?.access_rights]
-  );
-
   const enabledModules = useMemo(() => {
     const em = query.data?.enabled_modules;
     if (em && Object.keys(em).length > 0) return em;
-    if (Object.keys(fallbackModules).length > 0) return fallbackModules;
     return localEnabledModules;
-  }, [query.data?.enabled_modules, fallbackModules]);
+  }, [query.data?.enabled_modules]);
   const featureFlags = useMemo(
     () => query.data?.feature_flags ?? localFeatureFlags,
     [query.data?.feature_flags]
@@ -111,5 +104,4 @@ export const useMamaSettings = () => {
     updateMamaSettings,
   };
 };
-
 

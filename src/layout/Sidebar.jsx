@@ -1,36 +1,38 @@
-import { NavLink, useLocation } from 'react-router-dom';
-import { sidebarRoutes } from '../config/routes.js';
+import React from 'react';
+import { NavLink } from 'react-router-dom';
+import * as Icons from 'lucide-react';
 
-export default function Sidebar() {
-  const { pathname } = useLocation();
-  return (
-    <aside className="w-64 border-r bg-neutral-50 sticky top-0 h-screen overflow-y-auto">
-      <div className="p-4 font-semibold">MamaStock</div>
-      <nav className="px-2 py-1 space-y-1">
-        <ul>
-          {sidebarRoutes.map((r) => {
-            const Icon = r.icon;
-            const active = pathname === r.path || pathname.startsWith(r.path + '/');
-            return (
-              <li key={r.path} className={active ? 'font-medium' : ''}>
-                <NavLink
-                  to={r.path}
-                  className={({ isActive }) =>
-                    `flex items-center gap-2 px-3 py-2 rounded-md text-sm transition ${
-                      isActive ? 'bg-neutral-200' : 'hover:bg-neutral-100'
-                    }`
-                  }
-                  end
-                >
-                  {Icon ? <Icon className="icon" aria-hidden /> : null}
-                  <span>{r.label}</span>
-                </NavLink>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
-    </aside>
-  );
+const items = [
+  { to: '/dashboard', label: 'Dashboard', icon: 'LayoutDashboard' },
+  // { to: '/produits', label: 'Produits', icon: 'Boxes' },
+  // { to: '/factures', label: 'Factures', icon: 'Receipt' },
+];
+
+function Icon({ name }) {
+  const Ico = Icons[name] ?? Icons.Circle;
+  return <Ico size={16} className="mr-2 opacity-90" />;
 }
 
+export default function Sidebar() {
+  return (
+    <nav className="py-4">
+      <div className="px-4 mb-4 font-black tracking-wide text-yellow-300">MAMASTOCK</div>
+      <ul className="space-y-1">
+        {items.map((it) => (
+          <li key={it.to}>
+            <NavLink
+              to={it.to}
+              className={({ isActive }) =>
+                `flex items-center px-4 py-2 rounded-lg transition
+                 ${isActive ? 'bg-white/15 text-white' : 'text-slate-300 hover:text-white hover:bg-white/5'}`
+              }
+            >
+              <Icon name={it.icon} />
+              <span className="text-sm">{it.label}</span>
+            </NavLink>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}

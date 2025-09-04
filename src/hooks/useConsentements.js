@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
-import { supabase } from '@/lib/supabase';
+import supabase from '@/lib/supabase';import { useEffect, useState, useCallback } from "react";
+
 import { useAuth } from '@/hooks/useAuth';
 
 export default function useConsentements() {
@@ -9,12 +9,12 @@ export default function useConsentements() {
   const fetchConsentements = useCallback(
     async (utilisateurId = user_id) => {
       if (!supabase || !mama_id || !utilisateurId) return [];
-      const { data, error } = await supabase
-        .from("consentements_utilisateur")
-        .select("*")
-        .eq("mama_id", mama_id)
-        .eq("utilisateur_id", utilisateurId)
-        .order("date_consentement", { ascending: false });
+      const { data, error } = await supabase.
+      from("consentements_utilisateur").
+      select("*").
+      eq("mama_id", mama_id).
+      eq("utilisateur_id", utilisateurId).
+      order("date_consentement", { ascending: false });
       if (error) {
         console.error("Erreur chargement consentements:", error);
       }

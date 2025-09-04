@@ -1,7 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 // src/hooks/useProducts.js
 import { useState, useCallback, useEffect } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 import * as XLSX from "xlsx";
 import { safeImportXLSX } from "@/lib/xlsx/safeImportXLSX";
@@ -17,7 +18,7 @@ function safeQueryClient() {
     return {
       invalidateQueries: () => {},
       setQueryData: () => {},
-      fetchQuery: async () => {},
+      fetchQuery: async () => {}
     };
   }
 }
@@ -39,18 +40,18 @@ export function useProducts() {
     page = 1,
     limit = 100,
     sortBy = "nom",
-    order = "asc",
+    order = "asc"
   } = {}) => {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
-    let query = supabase
-      .from("produits")
-      .select(
-        `*, unite:unite_id (nom), zone_stock:zones_stock(nom), famille:familles(nom), sous_famille:sous_familles(nom)`,
-        { count: "exact" }
-      )
-      .eq("mama_id", mama_id);
+    let query = supabase.
+    from("produits").
+    select(
+      `*, unite:unite_id (nom), zone_stock:zones_stock(nom), famille:familles(nom), sous_famille:sous_familles(nom)`,
+      { count: "exact" }
+    ).
+    eq("mama_id", mama_id);
 
     if (search) {
       query = query.ilike("nom", `%${search}%`);
@@ -63,29 +64,29 @@ export function useProducts() {
     if (sortBy === "nom") {
       query = query.order("nom", { ascending: order === "asc" });
     } else {
-      query = query.order(sortBy, { ascending: order === "asc" })
-                   .order("nom", { ascending: order === "asc" });
+      query = query.order(sortBy, { ascending: order === "asc" }).
+      order("nom", { ascending: order === "asc" });
     }
     query = query.range((page - 1) * limit, page * limit - 1);
 
     const { data, error, count } = await query;
     const [
-      { data: pmpData },
-      { data: stockData },
-      { data: lastPriceData },
-    ] = await Promise.all([
-      supabase.from('v_pmp').select('produit_id, pmp').eq('mama_id', mama_id),
-      supabase.from('v_stocks').select('produit_id, stock').eq('mama_id', mama_id),
-      supabase.from('v_products_last_price').select('produit_id, dernier_prix').eq('mama_id', mama_id),
-    ]);
-    const pmpMap = Object.fromEntries((pmpData || []).map(p => [p.produit_id, p.pmp]));
-    const stockMap = Object.fromEntries((stockData || []).map(s => [s.produit_id, s.stock]));
-    const lastPriceMap = Object.fromEntries((lastPriceData || []).map(l => [l.produit_id, l.dernier_prix]));
+    { data: pmpData },
+    { data: stockData },
+    { data: lastPriceData }] =
+    await Promise.all([
+    supabase.from('v_pmp').select('produit_id, pmp').eq('mama_id', mama_id),
+    supabase.from('v_stocks').select('produit_id, stock').eq('mama_id', mama_id),
+    supabase.from('v_products_last_price').select('produit_id, dernier_prix').eq('mama_id', mama_id)]
+    );
+    const pmpMap = Object.fromEntries((pmpData || []).map((p) => [p.produit_id, p.pmp]));
+    const stockMap = Object.fromEntries((stockData || []).map((s) => [s.produit_id, s.stock]));
+    const lastPriceMap = Object.fromEntries((lastPriceData || []).map((l) => [l.produit_id, l.dernier_prix]));
     const final = (Array.isArray(data) ? data : []).map((p) => ({
       ...p,
       pmp: pmpMap[p.id] ?? p.pmp,
       dernier_prix: lastPriceMap[p.id] ?? p.dernier_prix,
-      stock_theorique: stockMap[p.id] ?? p.stock_theorique,
+      stock_theorique: stockMap[p.id] ?? p.stock_theorique
     }));
     setProducts(final);
     setTotal(count || 0);
@@ -112,7 +113,7 @@ export function useProducts() {
       ...rest,
       tva: tva ?? 0,
       fournisseur_id: fournisseur_id ?? null,
-      mama_id,
+      mama_id
     };
     const { error } = await supabase.from("produits").insert([payload]);
     setLoading(false);
@@ -133,11 +134,11 @@ export function useProducts() {
     if (fournisseur_id !== undefined) {
       payload.fournisseur_id = fournisseur_id;
     }
-    const { error } = await supabase
-      .from("produits")
-      .update(payload)
-      .eq("id", id)
-      .eq("mama_id", mama_id);
+    const { error } = await supabase.
+    from("produits").
+    update(payload).
+    eq("id", id).
+    eq("mama_id", mama_id);
     setLoading(false);
     if (error) {
       setError(error);
@@ -151,11 +152,11 @@ export function useProducts() {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { error } = await supabase
-      .from("produits")
-      .update({ actif })
-      .eq("id", id)
-      .eq("mama_id", mama_id);
+    const { error } = await supabase.
+    from("produits").
+    update({ actif }).
+    eq("id", id).
+    eq("mama_id", mama_id);
     setLoading(false);
     if (error) {
       setError(error);
@@ -169,11 +170,11 @@ export function useProducts() {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { error } = await supabase
-      .from("produits")
-      .update({ actif: false })
-      .eq("id", id)
-      .eq("mama_id", mama_id);
+    const { error } = await supabase.
+    from("produits").
+    update({ actif: false }).
+    eq("id", id).
+    eq("mama_id", mama_id);
     setLoading(false);
     if (error) {
       setError(error);
@@ -185,7 +186,7 @@ export function useProducts() {
 
   async function duplicateProduct(id, { refresh = true } = {}) {
     if (!mama_id) return { error: "Aucun mama_id" };
-    const original = products.find(p => p.id === id);
+    const original = products.find((p) => p.id === id);
     if (!original) return { error: "Produit introuvable" };
     setLoading(true);
     setError(null);
@@ -217,14 +218,14 @@ export function useProducts() {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase
-      .from("fournisseur_produits")
-      .select(
-        "*, fournisseur:fournisseurs!fk_fournisseur_produits_fournisseur_id(id, nom), derniere_livraison:date_livraison"
-      )
-      .eq("produit_id", productId)
-      .eq("mama_id", mama_id)
-      .order("date_livraison", { ascending: false });
+    const { data, error } = await supabase.
+    from("fournisseur_produits").
+    select(
+      "*, fournisseur:fournisseurs!fk_fournisseur_produits_fournisseur_id(id, nom), derniere_livraison:date_livraison"
+    ).
+    eq("produit_id", productId).
+    eq("mama_id", mama_id).
+    order("date_livraison", { ascending: false });
     setLoading(false);
     if (error) {
       setError(error);
@@ -236,12 +237,12 @@ export function useProducts() {
   const fetchProductStock = useCallback(
     async (productId) => {
       if (!mama_id) return null;
-      const { data, error } = await supabase
-        .from('v_stocks')
-        .select('stock')
-        .eq('produit_id', productId)
-        .eq('mama_id', mama_id)
-        .single();
+      const { data, error } = await supabase.
+      from('v_stocks').
+      select('stock').
+      eq('produit_id', productId).
+      eq('mama_id', mama_id).
+      single();
       if (error) {
         setError(error);
         toast.error(error.message);
@@ -255,22 +256,22 @@ export function useProducts() {
   const fetchProductMouvements = useCallback(
     async (productId) => {
       if (!mama_id) return [];
-      const { data, error } = await supabase
-        .from('requisition_lignes')
-        .select('quantite, requisitions!inner(date_requisition, mama_id, statut)')
-        .eq('produit_id', productId)
-        .eq('requisitions.mama_id', mama_id)
-        .eq('requisitions.statut', 'réalisée')
-        .order('requisitions.date_requisition', { ascending: false });
+      const { data, error } = await supabase.
+      from('requisition_lignes').
+      select('quantite, requisitions!inner(date_requisition, mama_id, statut)').
+      eq('produit_id', productId).
+      eq('requisitions.mama_id', mama_id).
+      eq('requisitions.statut', 'réalisée').
+      order('requisitions.date_requisition', { ascending: false });
       if (error) {
         setError(error);
         toast.error(error.message);
         return [];
       }
-      return (data || []).map(m => ({
+      return (data || []).map((m) => ({
         date: m.requisitions.date_requisition,
         type: 'sortie',
-        quantite: m.quantite,
+        quantite: m.quantite
       }));
     },
     [mama_id]
@@ -279,14 +280,14 @@ export function useProducts() {
   const getProduct = useCallback(
     async (id) => {
       if (!mama_id) return null;
-      const { data, error } = await supabase
-        .from("produits")
-        .select(
-          "*, famille:familles!fk_produits_famille(nom), sous_famille:sous_familles!fk_produits_sous_famille(nom), main_fournisseur:fournisseur_id(id, nom), unite:unite_id (nom)"
-        )
-        .eq("id", id)
-        .eq("mama_id", mama_id)
-        .single();
+      const { data, error } = await supabase.
+      from("produits").
+      select(
+        "*, famille:familles!fk_produits_famille(nom), sous_famille:sous_familles!fk_produits_sous_famille(nom), main_fournisseur:fournisseur_id(id, nom), unite:unite_id (nom)"
+      ).
+      eq("id", id).
+      eq("mama_id", mama_id).
+      single();
       if (error) {
         setError(error);
         toast.error(error.message);
@@ -298,7 +299,7 @@ export function useProducts() {
   );
 
   function exportProductsToExcel() {
-    const datas = (products || []).map(p => ({
+    const datas = (products || []).map((p) => ({
       id: p.id,
       nom: p.nom,
       famille: p.famille?.nom || "",
@@ -312,7 +313,7 @@ export function useProducts() {
       dernier_prix: p.dernier_prix,
       fournisseur: p.main_fournisseur?.nom || "",
       fournisseur_id: p.fournisseur_id || "",
-      actif: p.actif,
+      actif: p.actif
     }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Produits");
@@ -352,7 +353,6 @@ export function useProducts() {
     exportProductsToExcel,
     importProductsFromExcel,
     fetchProductStock,
-    fetchProductMouvements,
+    fetchProductMouvements
   };
 }
-

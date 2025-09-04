@@ -1,5 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { supabase } from '@/lib/supabase';
+import supabase from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 
 export function usePlanning() {
@@ -7,12 +8,12 @@ export function usePlanning() {
 
   async function getPlannings({ statut = "", debut = "", fin = "" } = {}) {
     if (!mama_id) return { data: [] };
-    let q = supabase
-      .from("planning_previsionnel")
-      .select("*", { count: "exact" })
-      .eq("mama_id", mama_id)
-      .eq("actif", true)
-      .order("date_prevue", { ascending: true });
+    let q = supabase.
+    from("planning_previsionnel").
+    select("*", { count: "exact" }).
+    eq("mama_id", mama_id).
+    eq("actif", true).
+    order("date_prevue", { ascending: true });
     if (statut) q = q.eq("statut", statut);
     if (debut) q = q.gte("date_prevue", debut);
     if (fin) q = q.lte("date_prevue", fin);
@@ -26,12 +27,12 @@ export function usePlanning() {
 
   async function getPlanningById(id) {
     if (!id || !mama_id) return null;
-    const { data, error } = await supabase
-      .from("planning_previsionnel")
-      .select("*, lignes:planning_lignes!planning_id(id, planning_id, produit_id, quantite, observation, produit:produit_id(nom))")
-      .eq("id", id)
-      .eq("mama_id", mama_id)
-      .single();
+    const { data, error } = await supabase.
+    from("planning_previsionnel").
+    select("*, lignes:planning_lignes!planning_id(id, planning_id, produit_id, quantite, observation, produit:produit_id(nom))").
+    eq("id", id).
+    eq("mama_id", mama_id).
+    single();
     if (error) {
       console.error("getPlanningById", error.message);
       return null;
@@ -41,19 +42,19 @@ export function usePlanning() {
 
   async function createPlanning({ nom, date_prevue, commentaire = "", statut = "prévu", lignes = [] }) {
     if (!mama_id) return { error: new Error("mama_id manquant") };
-    const { data, error } = await supabase
-      .from("planning_previsionnel")
-      .insert([{ nom, date_prevue, commentaire, statut, mama_id }])
-      .select("id")
-      .single();
+    const { data, error } = await supabase.
+    from("planning_previsionnel").
+    insert([{ nom, date_prevue, commentaire, statut, mama_id }]).
+    select("id").
+    single();
     if (error) return { error };
     if (lignes.length) {
-      const rows = lignes.map(l => ({
+      const rows = lignes.map((l) => ({
         planning_id: data.id,
         produit_id: l.produit_id,
         quantite: l.quantite,
         observation: l.observation || "",
-        mama_id,
+        mama_id
       }));
       const { error: err2 } = await supabase.from("planning_lignes").insert(rows);
       if (err2) return { error: err2 };
@@ -63,24 +64,24 @@ export function usePlanning() {
 
   async function updatePlanning(id, fields) {
     if (!mama_id) return { error: new Error("mama_id manquant") };
-    const { data, error } = await supabase
-      .from("planning_previsionnel")
-      .update(fields)
-      .eq("id", id)
-      .eq("mama_id", mama_id)
-      .select()
-      .single();
+    const { data, error } = await supabase.
+    from("planning_previsionnel").
+    update(fields).
+    eq("id", id).
+    eq("mama_id", mama_id).
+    select().
+    single();
     if (error) return { error };
     return { data };
   }
 
   async function deletePlanning(id) {
     if (!mama_id) return { error: new Error("mama_id manquant") };
-    const { error } = await supabase
-      .from("planning_previsionnel")
-      .delete()
-      .eq("id", id)
-      .eq("mama_id", mama_id);
+    const { error } = await supabase.
+    from("planning_previsionnel").
+    delete().
+    eq("id", id).
+    eq("mama_id", mama_id);
     if (error) return { error };
     return { data: true };
   }
@@ -88,12 +89,12 @@ export function usePlanning() {
   // aliases for backward compatibility
   async function fetchPlanning({ start, end, statut } = {}) {
     if (!mama_id) return [];
-    let q = supabase
-      .from("planning_previsionnel")
-      .select("*")
-      .eq("mama_id", mama_id)
-      .eq("actif", true)
-      .order("date_prevue", { ascending: true });
+    let q = supabase.
+    from("planning_previsionnel").
+    select("*").
+    eq("mama_id", mama_id).
+    eq("actif", true).
+    order("date_prevue", { ascending: true });
     if (statut) q = q.eq("statut", statut);
     if (start) q = q.gte("date_prevue", start);
     if (end) q = q.lte("date_prevue", end);
@@ -113,7 +114,7 @@ export function usePlanning() {
     updatePlanning,
     deletePlanning,
     fetchPlanning,
-    addPlanning,
+    addPlanning
   };
 }
 

@@ -1,7 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { supabase } from '@/lib/supabase';
+
 import FactureForm from './FactureForm.jsx';
 import { mapDbLineToUI } from '@/features/factures/invoiceMappers';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
@@ -12,17 +13,17 @@ function toLabel(v) {
   if (typeof v === 'string' || typeof v === 'number') return String(v);
   if (Array.isArray(v)) return toLabel(v[0]);
   if (typeof v === 'object') return (
-    v.nom ??
-    v.name ??
-    v.label ??
-    v.code ??
-    v.abbr ??
-    v.abreviation ??
-    v.symbol ??
-    v.symbole ??
-    v.id ??
-    ''
-  ) + '';
+  v.nom ??
+  v.name ??
+  v.label ??
+  v.code ??
+  v.abbr ??
+  v.abreviation ??
+  v.symbol ??
+  v.symbole ??
+  v.id ??
+  '') +
+  '';
   return String(v);
 }
 
@@ -37,17 +38,17 @@ export default function FactureDetail() {
     let isMounted = true;
     async function load() {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('factures')
-        .select(
-          `id, mama_id, fournisseur_id, numero, date_facture, actif, total_ht, total_ttc, tva,
+      const { data, error } = await supabase.
+      from('factures').
+      select(
+        `id, mama_id, fournisseur_id, numero, date_facture, actif, total_ht, total_ttc, tva,
           lignes:facture_lignes(
             id, produit_id, quantite, prix_unitaire_ht, montant_ht, tva, zone_id,
             produit:produits(id, nom, unite, pmp, tva)
           )`
-        )
-        .eq('id', id)
-        .single();
+      ).
+      eq('id', id).
+      single();
 
       if (error) {
         toast.error(error.message || 'Erreur de chargement de la facture');
@@ -58,7 +59,7 @@ export default function FactureDetail() {
           date_facture: data.date_facture,
           numero: data.numero ?? '',
           statut: data.actif ? 'Validée' : 'Brouillon',
-          total_ht_attendu: Number(data.total_ht ?? 0) || null,
+          total_ht_attendu: Number(data.total_ht ?? 0) || null
         });
         setLignes((data.lignes || []).map(mapDbLineToUI));
       }
@@ -78,10 +79,9 @@ export default function FactureDetail() {
       initialForm={form}
       initialLignes={lignes}
       onClose={() => navigate(-1)}
-      onSaved={() => navigate(-1)}
-    />
-  );
+      onSaved={() => navigate(-1)} />);
+
+
 }
 
 export { toLabel };
-

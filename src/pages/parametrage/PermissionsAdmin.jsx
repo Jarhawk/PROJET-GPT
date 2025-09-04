@@ -1,15 +1,16 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/lib/supabase';
+
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogTitle,
-  DialogDescription,
-} from '@/components/ui/SmartDialog';
+  DialogDescription } from
+'@/components/ui/SmartDialog';
 import PermissionsForm from './PermissionsForm';
 import { toast } from 'sonner';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
@@ -37,10 +38,10 @@ export default function PermissionsAdmin() {
 
   const fetchRoles = async () => {
     setLoading(true);
-    let query = supabase
-      .from('roles')
-      .select('*')
-      .order('nom', { ascending: true });
+    let query = supabase.
+    from('roles').
+    select('*').
+    order('nom', { ascending: true });
     if (filterMama) query = query.eq('mama_id', filterMama);
     const { data, error } = await query;
     if (!error) setRoles(data || []);
@@ -65,8 +66,8 @@ export default function PermissionsAdmin() {
         <h2 className="text-lg text-red-600 font-bold">
           Accès réservé aux superadmins
         </h2>
-      </div>
-    );
+      </div>);
+
   }
 
   return (
@@ -80,24 +81,24 @@ export default function PermissionsAdmin() {
           <select
             className="input input-bordered ml-2"
             value={filterMama}
-            onChange={(e) => setFilterMama(e.target.value)}
-          >
+            onChange={(e) => setFilterMama(e.target.value)}>
+
             <option value="">Tous</option>
-            {mamas.map((m) => (
-              <option key={m.id} value={m.id}>
+            {mamas.map((m) =>
+            <option key={m.id} value={m.id}>
                 {m.nom} ({m.ville})
               </option>
-            ))}
+            )}
           </select>
         </label>
       </div>
       <TableContainer className="mb-6">
-        {loading ? (
-          <div className="text-center py-8 text-gray-500">
+        {loading ?
+        <div className="text-center py-8 text-gray-500">
             <LoadingSpinner message="Chargement…" />
-          </div>
-        ) : (
-          <table className="min-w-full table-auto text-center text-sm">
+          </div> :
+
+        <table className="min-w-full table-auto text-center text-sm">
             <thead>
               <tr>
                 <th className="px-2 py-1">Établissement</th>
@@ -108,48 +109,48 @@ export default function PermissionsAdmin() {
               </tr>
             </thead>
             <tbody>
-              {roles.map((role) => (
-                <tr key={role.id}>
+              {roles.map((role) =>
+            <tr key={role.id}>
                   <td className="px-2 py-1">
-                    {mamas.find((m) => m.id === role.mama_id)
-                      ? `${mamas.find((m) => m.id === role.mama_id)?.nom} (${mamas.find((m) => m.id === role.mama_id)?.ville})`
-                      : role.mama_id}
+                    {mamas.find((m) => m.id === role.mama_id) ?
+                `${mamas.find((m) => m.id === role.mama_id)?.nom} (${mamas.find((m) => m.id === role.mama_id)?.ville})` :
+                role.mama_id}
                   </td>
                   <td className="px-2 py-1">{role.nom}</td>
                   <td className="px-2 py-1">{role.description || ''}</td>
                   <td className="px-2 py-1">
                     <span
-                      className={
-                        role.actif
-                          ? 'inline-block bg-green-100 text-green-800 px-2 rounded-full'
-                          : 'inline-block bg-red-100 text-red-800 px-2 rounded-full'
-                      }
-                    >
+                  className={
+                  role.actif ?
+                  'inline-block bg-green-100 text-green-800 px-2 rounded-full' :
+                  'inline-block bg-red-100 text-red-800 px-2 rounded-full'
+                  }>
+
                       {role.actif ? 'Oui' : 'Non'}
                     </span>
                   </td>
                   <td className="px-2 py-1">
                     <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => setEditRole(role)}
-                      disabled={loading}
-                    >
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => setEditRole(role)}
+                  disabled={loading}>
+
                       Modifier permissions
                     </Button>
                   </td>
                 </tr>
-              ))}
-              {roles.length === 0 && (
-                <tr>
+            )}
+              {roles.length === 0 &&
+            <tr>
                   <td colSpan={5} className="py-4 text-gray-400">
                     Aucun rôle trouvé.
                   </td>
                 </tr>
-              )}
+            }
             </tbody>
           </table>
-        )}
+        }
       </TableContainer>
       <Dialog open={!!editRole} onOpenChange={(v) => !v && setEditRole(null)}>
         <DialogContent className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl shadow-lg p-6 max-w-xl">
@@ -159,15 +160,15 @@ export default function PermissionsAdmin() {
           <DialogDescription className="sr-only">
             Gestion des permissions administrateur
           </DialogDescription>
-          {editRole && (
-            <PermissionsForm
-              role={editRole}
-              onClose={() => setEditRole(null)}
-              onSaved={handlePermissionsSaved}
-            />
-          )}
+          {editRole &&
+          <PermissionsForm
+            role={editRole}
+            onClose={() => setEditRole(null)}
+            onSaved={handlePermissionsSaved} />
+
+          }
         </DialogContent>
       </Dialog>
-    </div>
-  );
+    </div>);
+
 }

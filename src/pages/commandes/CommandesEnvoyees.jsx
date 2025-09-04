@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useEffect, useState } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from "@/components/ui/button";
 import { useFournisseurAPI } from "@/hooks/useFournisseurAPI";
@@ -17,15 +18,15 @@ export default function CommandesEnvoyees() {
   useEffect(() => {
     if (!mama_id) return;
     setPageLoading(true);
-    supabase
-      .from("commandes")
-      .select("*, fournisseur:fournisseur_id(nom)")
-      .eq("mama_id", mama_id)
-      .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        setItems(data || []);
-        setPageLoading(false);
-      });
+    supabase.
+    from("commandes").
+    select("*, fournisseur:fournisseur_id(nom)").
+    eq("mama_id", mama_id).
+    order("created_at", { ascending: false }).
+    then(({ data }) => {
+      setItems(data || []);
+      setPageLoading(false);
+    });
   }, [mama_id]);
 
   const relancer = async (id) => {
@@ -49,8 +50,8 @@ export default function CommandesEnvoyees() {
           </tr>
         </thead>
         <tbody>
-          {items.map((c) => (
-            <tr key={c.id}>
+          {items.map((c) =>
+              <tr key={c.id}>
               <td className="px-2 py-1">{c.created_at?.slice(0, 10)}</td>
               <td className="px-2 py-1">{c.fournisseur?.nom || "-"}</td>
               <td className="px-2 py-1">{c.statut}</td>
@@ -60,11 +61,11 @@ export default function CommandesEnvoyees() {
                 </Button>
               </td>
             </tr>
-          ))}
+              )}
         </tbody>
         </table>
         </TableContainer>
       </GlassCard>
-    </div>
-  );
+    </div>);
+
 }

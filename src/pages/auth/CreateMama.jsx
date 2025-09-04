@@ -1,7 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 import PageWrapper from "@/components/ui/PageWrapper";
 import GlassCard from "@/components/ui/GlassCard";
@@ -20,20 +21,20 @@ export default function CreateMama() {
     if (mama_id) navigate("/dashboard");
   }, [mama_id, navigate]);
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const { data: mama, error } = await supabase
-        .from("mamas")
-        .insert({ nom })
-        .select()
-        .single();
+      const { data: mama, error } = await supabase.
+      from("mamas").
+      insert({ nom }).
+      select().
+      single();
       if (error) throw error;
-      await supabase
-        .from("utilisateurs")
-        .update({ mama_id: mama.id })
-        .eq("auth_id", auth_id);
+      await supabase.
+      from("utilisateurs").
+      update({ mama_id: mama.id }).
+      eq("auth_id", auth_id);
       await refreshUser();
       toast.success("Établissement créé");
       navigate("/onboarding");
@@ -57,16 +58,16 @@ export default function CreateMama() {
             <Input
               className="w-full"
               value={nom}
-              onChange={e => setNom(e.target.value)}
+              onChange={(e) => setNom(e.target.value)}
               required
-              placeholder="Nom du restaurant"
-            />
+              placeholder="Nom du restaurant" />
+
           </div>
           <PrimaryButton type="submit" className="w-full" disabled={loading}>
             {loading ? "Enregistrement..." : "Valider"}
           </PrimaryButton>
         </form>
       </GlassCard>
-    </PageWrapper>
-  );
+    </PageWrapper>);
+
 }

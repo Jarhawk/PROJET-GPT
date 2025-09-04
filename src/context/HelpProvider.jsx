@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 
 const HelpContext = createContext();
@@ -14,10 +15,10 @@ export function HelpProvider({ children }) {
   const fetchTooltips = useCallback(async () => {
     if (!mama_id) return {};
     setLoading(true);
-    const { data } = await supabase
-      .from('tooltips')
-      .select('champ, texte')
-      .eq('mama_id', mama_id);
+    const { data } = await supabase.
+    from('tooltips').
+    select('champ, texte').
+    eq('mama_id', mama_id);
     setLoading(false);
     const map = {};
     (data || []).forEach((t) => {
@@ -30,10 +31,10 @@ export function HelpProvider({ children }) {
   const fetchDocs = useCallback(async ({ search = '' } = {}) => {
     if (!mama_id) return [];
     setLoading(true);
-    let query = supabase
-      .from('documentation')
-      .select('id, titre, contenu, categorie')
-      .eq('mama_id', mama_id);
+    let query = supabase.
+    from('documentation').
+    select('id, titre, contenu, categorie').
+    eq('mama_id', mama_id);
     if (search) query = query.ilike('titre', `%${search}%`);
     const { data } = await query.order('titre', { ascending: true });
     setLoading(false);
@@ -50,12 +51,12 @@ export function HelpProvider({ children }) {
 
   async function markGuideSeen(module) {
     if (!user_id || !mama_id) return;
-    await supabase
-      .from('guides_seen')
-      .upsert(
-        { user_id, mama_id, module, seen: true },
-        { onConflict: 'user_id,module' }
-      );
+    await supabase.
+    from('guides_seen').
+    upsert(
+      { user_id, mama_id, module, seen: true },
+      { onConflict: 'user_id,module' }
+    );
   }
 
   const value = {
@@ -64,7 +65,7 @@ export function HelpProvider({ children }) {
     loading,
     fetchTooltips,
     fetchDocs,
-    markGuideSeen,
+    markGuideSeen
   };
 
   return <HelpContext.Provider value={value}>{children}</HelpContext.Provider>;

@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState } from "react";
-import { supabase } from '@/lib/supabase';
+
 
 export function useAdvancedStats() {
   const [data, setData] = useState([]);
@@ -11,7 +12,7 @@ export function useAdvancedStats() {
     setLoading(true);
     const { data, error } = await supabase.rpc("advanced_stats", {
       start_date: start || null,
-      end_date: end || null,
+      end_date: end || null
     });
     setLoading(false);
     if (error) {

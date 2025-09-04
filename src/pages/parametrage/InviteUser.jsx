@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState, useEffect } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
@@ -15,7 +16,7 @@ export default function InviteUser({ onClose, onInvited }) {
   const [values, setValues] = useState({
     email: "",
     mama_id: "",
-    role: "",
+    role: ""
   });
   const [sending, setSending] = useState(false);
 
@@ -24,17 +25,17 @@ export default function InviteUser({ onClose, onInvited }) {
       if (!user_id) return;
 
       if (role === "superadmin") {
-        const { data: mData } = await supabase
-          .from("mamas")
-          .select("id, nom, ville")
-          .order("nom");
+        const { data: mData } = await supabase.
+        from("mamas").
+        select("id, nom, ville").
+        order("nom");
         setMamas(mData || []);
       } else if (myMama) {
-        const { data: mData } = await supabase
-          .from("mamas")
-          .select("id, nom, ville")
-          .eq("id", myMama)
-          .maybeSingle();
+        const { data: mData } = await supabase.
+        from("mamas").
+        select("id, nom, ville").
+        eq("id", myMama).
+        maybeSingle();
         setMamas(mData ? [mData] : []);
       }
 
@@ -48,10 +49,10 @@ export default function InviteUser({ onClose, onInvited }) {
     fetchData();
   }, [role, user_id, myMama]);
 
-  const handleChange = e =>
-    setValues(v => ({ ...v, [e.target.name]: e.target.value }));
+  const handleChange = (e) =>
+  setValues((v) => ({ ...v, [e.target.name]: e.target.value }));
 
-  const handleInvite = async e => {
+  const handleInvite = async (e) => {
     e.preventDefault();
     setSending(true);
 
@@ -63,11 +64,11 @@ export default function InviteUser({ onClose, onInvited }) {
     }
 
     // Empêche doublon email
-    const { data: existingUser } = await supabase
-      .from("utilisateurs")
-      .select("id")
-      .eq("email", values.email)
-      .maybeSingle();
+    const { data: existingUser } = await supabase.
+    from("utilisateurs").
+    select("id").
+    eq("email", values.email).
+    maybeSingle();
 
     if (existingUser) {
       toast.error("Cet email existe déjà.");
@@ -75,17 +76,17 @@ export default function InviteUser({ onClose, onInvited }) {
       return;
     }
 
-    const { error } = await supabase
-      .from("utilisateurs")
-      .insert([
-        {
-          email: values.email,
-          mama_id: values.mama_id,
-          role: values.role,
-          actif: true,
-          invite_pending: true,
-        },
-      ]);
+    const { error } = await supabase.
+    from("utilisateurs").
+    insert([
+    {
+      email: values.email,
+      mama_id: values.mama_id,
+      role: values.role,
+      actif: true,
+      invite_pending: true
+    }]
+    );
 
     if (!error) {
       // Appel Edge Function cloud Supabase
@@ -93,9 +94,9 @@ export default function InviteUser({ onClose, onInvited }) {
         method: "POST",
         body: JSON.stringify({
           email: values.email,
-          mama_nom: mamas.find(m => m.id === values.mama_id)?.nom || "",
+          mama_nom: mamas.find((m) => m.id === values.mama_id)?.nom || ""
         }),
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" }
       });
       toast.success("Invitation envoyée !");
       if (onInvited) onInvited();
@@ -113,46 +114,46 @@ export default function InviteUser({ onClose, onInvited }) {
               <div>
         <label>Email</label>
         <Input
-          className="w-full"
-          name="email"
-          type="email"
-          required
-          value={values.email}
-          onChange={handleChange}
-        />
+            className="w-full"
+            name="email"
+            type="email"
+            required
+            value={values.email}
+            onChange={handleChange} />
+
       </div>
       <div>
         <label>Établissement (MAMA)</label>
         <select
-          className="input w-full"
-          name="mama_id"
-          required
-          value={values.mama_id}
-          onChange={handleChange}
-        >
+            className="input w-full"
+            name="mama_id"
+            required
+            value={values.mama_id}
+            onChange={handleChange}>
+
           <option value="">Sélectionner…</option>
-          {mamas.map(m => (
+          {mamas.map((m) =>
             <option key={m.id} value={m.id}>
               {m.nom} ({m.ville})
             </option>
-          ))}
+            )}
         </select>
       </div>
       <div>
         <label>Rôle</label>
         <select
-          className="input w-full"
-          name="role"
-          required
-          value={values.role}
-          onChange={handleChange}
-        >
+            className="input w-full"
+            name="role"
+            required
+            value={values.role}
+            onChange={handleChange}>
+
           <option value="">Sélectionner…</option>
-          {roles.map(r => (
+          {roles.map((r) =>
             <option key={r.nom} value={r.nom}>
               {r.nom}
             </option>
-          ))}
+            )}
         </select>
       </div>
         <div className="flex gap-4 mt-4">
@@ -164,6 +165,6 @@ export default function InviteUser({ onClose, onInvited }) {
           </SecondaryButton>
         </div>
       </form>
-    </GlassCard>
-  );
+    </GlassCard>);
+
 }

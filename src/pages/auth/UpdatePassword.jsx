@@ -1,7 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from '@/lib/supabase';
+
 import logo from "@/assets/logo-mamastock.png";
 import { toast } from 'sonner';
 import GlassCard from "@/components/ui/GlassCard";
@@ -39,33 +40,33 @@ export default function UpdatePassword() {
             <GlassCard className="flex flex-col items-center">
         <img src={logo} alt="MamaStock" className="w-24 h-24 mb-6 rounded-full shadow-md bg-gold/10 object-contain border-4 border-gold/30" />
         <h2 className="text-3xl font-bold text-gold mb-4">Nouveau mot de passe</h2>
-        {message ? (
-          <p className="text-center">{message}</p>
-        ) : (
-          <form onSubmit={handleUpdate} className="w-full flex flex-col gap-4">
+        {message ?
+        <p className="text-center">{message}</p> :
+
+        <form onSubmit={handleUpdate} className="w-full flex flex-col gap-4">
             <Input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder="Nouveau mot de passe"
-              required
-            />
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Nouveau mot de passe"
+            required />
+
             <Input
-              type="password"
-              value={confirm}
-              onChange={e => setConfirm(e.target.value)}
-              placeholder="Confirmez le mot de passe"
-              required
-            />
-            {error && (
-              <div className="text-red-700 bg-red-50 border border-red-100 rounded px-2 py-1 text-xs shadow">{error}</div>
-            )}
+            type="password"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            placeholder="Confirmez le mot de passe"
+            required />
+
+            {error &&
+          <div className="text-red-700 bg-red-50 border border-red-100 rounded px-2 py-1 text-xs shadow">{error}</div>
+          }
             <PrimaryButton type="submit" className="w-full mt-3">
               Mettre à jour
             </PrimaryButton>
           </form>
-        )}
+        }
       </GlassCard>
-    </PageWrapper>
-  );
+    </PageWrapper>);
+
 }

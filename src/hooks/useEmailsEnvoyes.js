@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import supabase from '@/lib/supabase';import { useState } from 'react';
+
 import { useAuth } from '@/hooks/useAuth';
 
 export function useEmailsEnvoyes() {
@@ -27,4 +27,3 @@ export function useEmailsEnvoyes() {
 }
 
 export default useEmailsEnvoyes;
-

@@ -1,4 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -16,13 +17,13 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { pdf } from '@react-pdf/renderer';
 import CommandePDF from '@/components/pdf/CommandePDF';
-import { supabase } from '@/lib/supabase';
+
 import { toast } from 'sonner';
 
 export default function EmailsEnvoyes() {
   const { mama_id, loading: authLoading, role } = useAuth();
   const { emails, fetchEmails, loading, error, resendEmail } =
-    useEmailsEnvoyes();
+  useEmailsEnvoyes();
   const { fetchCommandeById } = useCommandes();
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
@@ -43,7 +44,7 @@ export default function EmailsEnvoyes() {
       commande_id: commande || undefined,
       date_start: start || undefined,
       date_end: end || undefined,
-      page,
+      page
     });
     setPages(Math.max(1, Math.ceil((count || 0) / 50)));
   }
@@ -59,7 +60,7 @@ export default function EmailsEnvoyes() {
       envoye_le: e.envoye_le,
       email: e.email,
       commande: e.commandes?.reference || e.commande_id,
-      statut: e.statut,
+      statut: e.statut
     }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Emails');
@@ -71,19 +72,19 @@ export default function EmailsEnvoyes() {
     try {
       const { data: commande } = await fetchCommandeById(commandeId);
       if (!commande) throw new Error();
-      const { data: tpl } = await supabase
-        .rpc('get_template_commande', {
-          p_mama: mama_id,
-          p_fournisseur: commande.fournisseur_id,
-        })
-        .single();
+      const { data: tpl } = await supabase.
+      rpc('get_template_commande', {
+        p_mama: mama_id,
+        p_fournisseur: commande.fournisseur_id
+      }).
+      single();
       const template = tpl || null;
       const blob = await pdf(
         <CommandePDF
           commande={commande}
           template={template}
-          fournisseur={commande.fournisseur}
-        />
+          fournisseur={commande.fournisseur} />
+
       ).toBlob();
       const url = URL.createObjectURL(blob);
       window.open(url, '_blank');
@@ -111,13 +112,13 @@ export default function EmailsEnvoyes() {
       <GlassCard title="Filtrer" className="mb-4">
         <form
           onSubmit={handleSubmit}
-          className="flex flex-wrap gap-2 items-end"
-        >
+          className="flex flex-wrap gap-2 items-end">
+
           <select
             value={statut}
             onChange={(e) => setStatut(e.target.value)}
-            className="border rounded px-2 py-1 text-black"
-          >
+            className="border rounded px-2 py-1 text-black">
+
             <option value="">Tous</option>
             <option value="success">Succès</option>
             <option value="error">Erreur</option>
@@ -126,24 +127,24 @@ export default function EmailsEnvoyes() {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-40"
-          />
+            className="w-40" />
+
           <Input
             placeholder="Commande"
             value={commande}
             onChange={(e) => setCommande(e.target.value)}
-            className="w-32"
-          />
+            className="w-32" />
+
           <Input
             type="date"
             value={start}
-            onChange={(e) => setStart(e.target.value)}
-          />
+            onChange={(e) => setStart(e.target.value)} />
+
           <Input
             type="date"
             value={end}
-            onChange={(e) => setEnd(e.target.value)}
-          />
+            onChange={(e) => setEnd(e.target.value)} />
+
           <Button type="submit" className="text-sm">
             Filtrer
           </Button>
@@ -153,12 +154,12 @@ export default function EmailsEnvoyes() {
         </form>
       </GlassCard>
 
-      {loading ? (
-        <LoadingSpinner message="Chargement..." />
-      ) : error ? (
-        <div className="text-red-600">{error.message || error}</div>
-      ) : (
-        <>
+      {loading ?
+      <LoadingSpinner message="Chargement..." /> :
+      error ?
+      <div className="text-red-600">{error.message || error}</div> :
+
+      <>
           <TableContainer>
             <table className="min-w-full text-xs md:table">
               <thead className="hidden md:table-header-group">
@@ -171,11 +172,11 @@ export default function EmailsEnvoyes() {
                 </tr>
               </thead>
               <tbody>
-                {emails.map((e) => (
-                  <tr
-                    key={e.id}
-                    className="border-b border-white/10 md:table-row block md:border-0 mb-2 md:mb-0"
-                  >
+                {emails.map((e) =>
+              <tr
+                key={e.id}
+                className="border-b border-white/10 md:table-row block md:border-0 mb-2 md:mb-0">
+
                     <td className="px-2 py-1 md:border-none block md:table-cell">
                       <span className="md:hidden font-semibold">Date: </span>
                       {new Date(e.envoye_le).toLocaleString()}
@@ -189,9 +190,9 @@ export default function EmailsEnvoyes() {
                         Commande:{' '}
                       </span>
                       <Link
-                        to={`/commandes/${e.commande_id}`}
-                        className="underline text-mamastockGold"
-                      >
+                    to={`/commandes/${e.commande_id}`}
+                    className="underline text-mamastockGold">
+
                         {e.commandes?.reference || e.commande_id}
                       </Link>
                     </td>
@@ -204,34 +205,34 @@ export default function EmailsEnvoyes() {
                     <td className="px-2 py-1 md:border-none block md:table-cell space-x-1">
                       <span className="md:hidden font-semibold">Actions: </span>
                       <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleViewPDF(e.commande_id)}
-                      >
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleViewPDF(e.commande_id)}>
+
                         Voir PDF
                       </Button>
-                      {role === 'admin' && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleResend(e.id)}
-                        >
+                      {role === 'admin' &&
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleResend(e.id)}>
+
                           Renvoyer
                         </Button>
-                      )}
+                  }
                     </td>
                   </tr>
-                ))}
+              )}
               </tbody>
             </table>
           </TableContainer>
           <PaginationFooter
-            page={page}
-            pages={pages}
-            onPageChange={(p) => setPage(p)}
-          />
+          page={page}
+          pages={pages}
+          onPageChange={(p) => setPage(p)} />
+
         </>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 }

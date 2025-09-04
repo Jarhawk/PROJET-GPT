@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useCallback, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 
 export function useSousFamilles() {
@@ -28,11 +29,11 @@ export function useSousFamilles() {
 
   const create = useCallback(
     async ({ nom, famille_id }) => {
-      const { data } = await supabase
-        .from('sous_familles')
-        .insert([{ nom, famille_id, mama_id, actif: true }])
-        .select()
-        .single();
+      const { data } = await supabase.
+      from('sous_familles').
+      insert([{ nom, famille_id, mama_id, actif: true }]).
+      select().
+      single();
       setSousFamilles((prev) => [data, ...prev]);
       return data;
     },
@@ -41,13 +42,13 @@ export function useSousFamilles() {
 
   const toggleActif = useCallback(
     async (id, value) => {
-      await supabase
-        .from('sous_familles')
-        .update({ actif: value })
-        .eq('id', id)
-        .eq('mama_id', mama_id);
+      await supabase.
+      from('sous_familles').
+      update({ actif: value }).
+      eq('id', id).
+      eq('mama_id', mama_id);
       setSousFamilles((prev) =>
-        prev.map((s) => (s.id === id ? { ...s, actif: value } : s))
+      prev.map((s) => s.id === id ? { ...s, actif: value } : s)
       );
     },
     [mama_id]
@@ -61,17 +62,17 @@ export function useSousFamilles() {
     toggleActif,
     loading,
     isLoading: loading,
-    error,
+    error
   };
 }
 
 export async function fetchSousFamilles({ mamaId }) {
   try {
-    let q = supabase
-      .from('sous_familles')
-      .select('id, nom, famille_id, mama_id, deleted_at')
-      .eq('mama_id', mamaId)
-      .order('nom', { ascending: true });
+    let q = supabase.
+    from('sous_familles').
+    select('id, nom, famille_id, mama_id, deleted_at').
+    eq('mama_id', mamaId).
+    order('nom', { ascending: true });
     const { data, error } = await q;
     if (error) throw error;
     return (data ?? []).filter((r) => !r.deleted_at);

@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
+import supabase from '@/lib/supabase';import { useState, useEffect, useCallback } from 'react';
+
 import { useAuth } from '@/hooks/useAuth';
 
 export default function useTachesUrgentes() {
@@ -16,16 +16,16 @@ export default function useTachesUrgentes() {
       const today = new Date();
       const limitDate = new Date();
       limitDate.setDate(today.getDate() + 7);
-      const { data, error } = await supabase
-        .from('taches')
-        .select('id, titre, date_echeance')
-        .eq('mama_id', mama_id)
-        .is('actif', true)
-        .not('statut', 'eq', 'terminee')
-        .gte('date_echeance', today.toISOString().slice(0, 10))
-        .lte('date_echeance', limitDate.toISOString().slice(0, 10))
-        .order('date_echeance', { ascending: true })
-        .limit(5);
+      const { data, error } = await supabase.
+      from('taches').
+      select('id, titre, date_echeance').
+      eq('mama_id', mama_id).
+      is('actif', true).
+      not('statut', 'eq', 'terminee').
+      gte('date_echeance', today.toISOString().slice(0, 10)).
+      lte('date_echeance', limitDate.toISOString().slice(0, 10)).
+      order('date_echeance', { ascending: true }).
+      limit(5);
       if (error) throw error;
       setData(data || []);
       if (import.meta.env.DEV) {

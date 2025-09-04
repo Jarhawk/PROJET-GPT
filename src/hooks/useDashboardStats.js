@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState, useRef, useEffect, useCallback } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 
 /**
@@ -21,7 +22,7 @@ export function useDashboardStats(options = {}) {
     retry = 2,
     page = 1,
     pageSize = 30,
-    params = {},
+    params = {}
   } = options;
 
   const [stats, setStats] = useState(null);
@@ -41,7 +42,7 @@ export function useDashboardStats(options = {}) {
         page_param: opts.page || page,
         page_size_param: opts.pageSize || pageSize,
         ...params,
-        ...opts.params, // surcharge possible
+        ...opts.params // surcharge possible
       });
       if (error) throw error;
       setStats(data);
@@ -89,6 +90,6 @@ export function useDashboardStats(options = {}) {
     // helpers
     refresh: fetchStats,
     setPage: (p) => fetchStats({ page: p, pageSize }),
-    setPageSize: (sz) => fetchStats({ page, pageSize: sz }),
+    setPageSize: (sz) => fetchStats({ page, pageSize: sz })
   };
 }

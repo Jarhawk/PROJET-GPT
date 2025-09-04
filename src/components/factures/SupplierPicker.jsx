@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import supabase from '@/lib/supabase';import { useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import useDebounce from '@/hooks/useDebounce';
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 import { useFournisseursAutocomplete } from '@/hooks/useFournisseursAutocomplete';
 import useFournisseursRecents from '@/hooks/useFournisseursRecents';
@@ -33,12 +33,12 @@ export default function SupplierPicker({ value, onChange, error }) {
     }
     let cancelled = false;
     const fetch = async () => {
-      const { data } = await supabase
-        .from('fournisseurs')
-        .select('id, nom')
-        .eq('mama_id', mama_id)
-        .eq('id', value)
-        .single();
+      const { data } = await supabase.
+      from('fournisseurs').
+      select('id, nom').
+      eq('mama_id', mama_id).
+      eq('id', value).
+      single();
       if (!cancelled) setInputValue(data?.nom || '');
     };
     fetch();
@@ -104,43 +104,42 @@ export default function SupplierPicker({ value, onChange, error }) {
         onBlur={handleBlur}
         placeholder="Rechercher un fournisseur"
         className={`${error ? 'border-destructive' : ''}`}
-        aria-invalid={error ? 'true' : 'false'}
-      />
+        aria-invalid={error ? 'true' : 'false'} />
+
       <button
         type="button"
         aria-label="Sélecteur de fournisseurs"
         className="absolute right-1 top-1/2 -translate-y-1/2 p-1"
-        onClick={() => setModalOpen(true)}
-      >
+        onClick={() => setModalOpen(true)}>
+
         🔍
       </button>
-      {open && options.length > 0 && (
-        <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border border-white/20 bg-neutral-800 text-white">
-          {options.map((opt, idx) => (
-            <li
-              key={opt.id}
-              role="option"
-              aria-selected={idx === active}
-              className={`px-2 py-1 cursor-pointer ${idx === active ? 'bg-white/20' : ''}`}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                select(opt);
-              }}
-            >
+      {open && options.length > 0 &&
+      <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border border-white/20 bg-neutral-800 text-white">
+          {options.map((opt, idx) =>
+        <li
+          key={opt.id}
+          role="option"
+          aria-selected={idx === active}
+          className={`px-2 py-1 cursor-pointer ${idx === active ? 'bg-white/20' : ''}`}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            select(opt);
+          }}>
+
               {opt.nom}
             </li>
-          ))}
+        )}
         </ul>
-      )}
+      }
       <SupplierBrowserModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onSelect={(f) => {
           select(f);
           setModalOpen(false);
-        }}
-      />
-    </div>
-  );
-}
+        }} />
 
+    </div>);
+
+}

@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState, useCallback } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 
 export function useFeedback() {
@@ -13,12 +14,12 @@ export function useFeedback() {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase
-      .from("feedback")
-      .select("*")
-      .eq("mama_id", mama_id)
-      .eq("actif", true)
-      .order("created_at", { ascending: false });
+    const { data, error } = await supabase.
+    from("feedback").
+    select("*").
+    eq("mama_id", mama_id).
+    eq("actif", true).
+    order("created_at", { ascending: false });
     setLoading(false);
     if (error) {
       setError(error.message || error);
@@ -34,9 +35,9 @@ export function useFeedback() {
       if (!mama_id || !user_id) return { error: "Aucun utilisateur" };
       setLoading(true);
       setError(null);
-      const { error } = await supabase
-        .from("feedback")
-        .insert([{ ...values, mama_id, user_id, actif: true }]);
+      const { error } = await supabase.
+      from("feedback").
+      insert([{ ...values, mama_id, user_id, actif: true }]);
       setLoading(false);
       if (error) {
         setError(error.message || error);
@@ -50,4 +51,3 @@ export function useFeedback() {
 
   return { items, loading, error, fetchFeedback, addFeedback };
 }
-

@@ -1,4 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import ListingContainer from '@/components/ui/ListingContainer';
@@ -10,7 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import Unauthorized from '@/pages/auth/Unauthorized';
 import { useFamillesWithSousFamilles } from '@/hooks/useFamillesWithSousFamilles';
-import { supabase } from '@/lib/supabase';
+
 
 export default function Familles() {
   const {
@@ -22,7 +23,7 @@ export default function Familles() {
     addSousFamille,
     updateSousFamille,
     toggleFamille,
-    toggleSousFamille,
+    toggleSousFamille
   } = useFamillesWithSousFamilles();
   const { mama_id, hasAccess, loading: authLoading } = useAuth();
   const canEdit = hasAccess('parametrage', 'peut_modifier');
@@ -38,11 +39,11 @@ export default function Familles() {
 
   const handleSave = async (values) => {
     setActionLoading(true);
-    const { error } = edit?.id
-      ? await updateFamille(edit.id, values)
-      : await addFamille(values);
-    if (error) toast.error(error.message || 'Erreur lors de la sauvegarde.');
-    else {
+    const { error } = edit?.id ?
+    await updateFamille(edit.id, values) :
+    await addFamille(values);
+    if (error) toast.error(error.message || 'Erreur lors de la sauvegarde.');else
+    {
       toast.success('Famille enregistrée');
       setEdit(null);
     }
@@ -71,14 +72,14 @@ export default function Familles() {
 
   const handleAddSous = async (familleId, data) => {
     const { error } = await addSousFamille(familleId, data);
-    if (error) toast.error(error.message || "Erreur lors de l'ajout");
-    else toast.success('Sous-famille ajoutée');
+    if (error) toast.error(error.message || "Erreur lors de l'ajout");else
+    toast.success('Sous-famille ajoutée');
   };
 
   const handleUpdateSous = async (id, data) => {
     const { error } = await updateSousFamille(id, data);
-    if (error) toast.error(error.message || 'Erreur lors de la mise à jour');
-    else toast.success('Sous-famille mise à jour');
+    if (error) toast.error(error.message || 'Erreur lors de la mise à jour');else
+    toast.success('Sous-famille mise à jour');
   };
 
   const handleDeleteSous = async (id) => {
@@ -98,11 +99,11 @@ export default function Familles() {
   };
 
   const filtered = familles.filter((f) =>
-    f.nom.toLowerCase().includes(search.toLowerCase())
+  f.nom.toLowerCase().includes(search.toLowerCase())
   );
 
   if (authLoading || loading || actionLoading)
-    return <LoadingSpinner message="Chargement..." />;
+  return <LoadingSpinner message="Chargement..." />;
   if (!canEdit) return <Unauthorized />;
 
   return (
@@ -113,8 +114,8 @@ export default function Familles() {
           className="input flex-1"
           placeholder="Recherche"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+          onChange={(e) => setSearch(e.target.value)} />
+
         <Button onClick={() => setEdit({})}>+ Nouvelle famille</Button>
       </TableHeader>
       <ListingContainer className="w-full overflow-x-auto">
@@ -127,53 +128,53 @@ export default function Familles() {
             </tr>
           </thead>
           <tbody>
-            {filtered.length === 0 ? (
-              <tr>
+            {filtered.length === 0 ?
+            <tr>
                 <td colSpan="3" className="py-2">
                   Aucune famille
                 </td>
-              </tr>
-            ) : (
-              filtered.map((f) => (
-                <FamilleRow
-                  key={f.id}
-                  famille={f}
-                  onEdit={setEdit}
-                  onDelete={(id) => {
-                    if (confirm('Supprimer cet élément ?')) {
-                      handleDelete(id);
-                    }
-                  }}
-                  onToggle={handleToggle}
-                  onAddSousFamille={handleAddSous}
-                  onUpdateSousFamille={handleUpdateSous}
-                  onDeleteSousFamille={(id) => {
-                    if (confirm('Supprimer cet élément ?')) {
-                      handleDeleteSous(id);
-                    }
-                  }}
-                  onToggleSousFamille={handleToggleSous}
-                />
-              ))
-            )}
+              </tr> :
+
+            filtered.map((f) =>
+            <FamilleRow
+              key={f.id}
+              famille={f}
+              onEdit={setEdit}
+              onDelete={(id) => {
+                if (confirm('Supprimer cet élément ?')) {
+                  handleDelete(id);
+                }
+              }}
+              onToggle={handleToggle}
+              onAddSousFamille={handleAddSous}
+              onUpdateSousFamille={handleUpdateSous}
+              onDeleteSousFamille={(id) => {
+                if (confirm('Supprimer cet élément ?')) {
+                  handleDeleteSous(id);
+                }
+              }}
+              onToggleSousFamille={handleToggleSous} />
+
+            )
+            }
           </tbody>
         </table>
       </ListingContainer>
-      {edit && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
+      {edit &&
+      <div className="fixed inset-0 flex items-center justify-center z-50">
           <div
-            className="absolute inset-0 bg-black/50"
-            onClick={() => setEdit(null)}
-          />
+          className="absolute inset-0 bg-black/50"
+          onClick={() => setEdit(null)} />
+
           <div className="relative bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow-lg p-6 w-full max-w-md">
             <FamilleForm
-              famille={edit}
-              onCancel={() => setEdit(null)}
-              onSave={handleSave}
-            />
+            famille={edit}
+            onCancel={() => setEdit(null)}
+            onSave={handleSave} />
+
           </div>
         </div>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 }

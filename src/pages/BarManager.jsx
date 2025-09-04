@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState, useEffect } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import * as XLSX from "xlsx";
@@ -13,18 +14,18 @@ import { Select } from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
-  DialogTrigger,
-} from "@/components/ui/SmartDialog";
+  DialogTrigger } from
+"@/components/ui/SmartDialog";
 import TableContainer from "@/components/ui/TableContainer";
 import { motion as Motion, AnimatePresence } from "framer-motion";
 
 const FOOD_COST_SEUIL = 28;
 const PERIODES = [
-  { label: "Semaine", value: "week" },
-  { label: "Mois", value: "month" },
-  { label: "Année", value: "year" },
-  { label: "Personnalisée", value: "custom" },
-];
+{ label: "Semaine", value: "week" },
+{ label: "Mois", value: "month" },
+{ label: "Année", value: "year" },
+{ label: "Personnalisée", value: "custom" }];
+
 
 export default function BarManager() {
   const { mama_id, loading: authLoading } = useAuth();
@@ -58,46 +59,46 @@ export default function BarManager() {
   // Charger boissons actives
   useEffect(() => {
     if (!mama_id) return;
-    supabase
-      .from("fiches_techniques")
-      .select("*")
-      .eq("mama_id", mama_id)
-      .eq("actif", true)
-      .ilike("famille", "%boisson%")
-      .then(({ data }) => setBoissons(data || []));
+    supabase.
+    from("fiches_techniques").
+    select("*").
+    eq("mama_id", mama_id).
+    eq("actif", true).
+    ilike("famille", "%boisson%").
+    then(({ data }) => setBoissons(data || []));
   }, [mama_id]);
 
   // Charger stats ventes boissons sur période
   useEffect(() => {
     if (!mama_id || !dates.debut || !dates.fin) return;
-    supabase
-      .from("ventes_boissons")
-      .select("boisson_id, quantite, date_vente")
-      .eq("mama_id", mama_id)
-      .gte("date_vente", dates.debut)
-      .lte("date_vente", dates.fin)
-      .then(({ data }) => setVentes(data || []));
+    supabase.
+    from("ventes_boissons").
+    select("boisson_id, quantite, date_vente").
+    eq("mama_id", mama_id).
+    gte("date_vente", dates.debut).
+    lte("date_vente", dates.fin).
+    then(({ data }) => setVentes(data || []));
   }, [mama_id, dates]);
 
   // Map boissons et ventes
   const ventesAgg = {};
-  ventes.forEach(v => {
+  ventes.forEach((v) => {
     ventesAgg[v.boisson_id] = (ventesAgg[v.boisson_id] || 0) + v.quantite;
   });
-  const boissonsStats = boissons
-    .map(b => ({
-      ...b,
-      quantiteVendue: ventesAgg[b.id] || 0,
-      margeUnitaire: b.prix_vente && b.cout_portion ? b.prix_vente - b.cout_portion : 0,
-      foodCost: b.prix_vente && b.cout_portion ? (b.cout_portion / b.prix_vente) * 100 : null,
-      totalMarge: (ventesAgg[b.id] || 0) * (b.prix_vente && b.cout_portion ? b.prix_vente - b.cout_portion : 0),
-      totalCA: (ventesAgg[b.id] || 0) * (b.prix_vente || 0),
-    }))
-    .filter(b =>
-      b.nom?.toLowerCase().includes(search.toLowerCase()) ||
-      b.famille?.toLowerCase().includes(search.toLowerCase()) ||
-      b.type?.toLowerCase().includes(search.toLowerCase())
-    );
+  const boissonsStats = boissons.
+  map((b) => ({
+    ...b,
+    quantiteVendue: ventesAgg[b.id] || 0,
+    margeUnitaire: b.prix_vente && b.cout_portion ? b.prix_vente - b.cout_portion : 0,
+    foodCost: b.prix_vente && b.cout_portion ? b.cout_portion / b.prix_vente * 100 : null,
+    totalMarge: (ventesAgg[b.id] || 0) * (b.prix_vente && b.cout_portion ? b.prix_vente - b.cout_portion : 0),
+    totalCA: (ventesAgg[b.id] || 0) * (b.prix_vente || 0)
+  })).
+  filter((b) =>
+  b.nom?.toLowerCase().includes(search.toLowerCase()) ||
+  b.famille?.toLowerCase().includes(search.toLowerCase()) ||
+  b.type?.toLowerCase().includes(search.toLowerCase())
+  );
   // Classement top ventes
   const topVentes = [...boissonsStats].sort((a, b) => b.quantiteVendue - a.quantiteVendue).slice(0, 10);
   // Classement top marges
@@ -108,13 +109,13 @@ export default function BarManager() {
   const caTot = boissonsStats.reduce((a, b) => a + b.totalCA, 0);
   const margeTot = boissonsStats.reduce((a, b) => a + b.totalMarge, 0);
   const avgFC =
-    boissonsStats.filter(b => b.foodCost !== null).reduce((a, b) => a + b.foodCost, 0) /
-    (boissonsStats.filter(b => b.foodCost !== null).length || 1);
+  boissonsStats.filter((b) => b.foodCost !== null).reduce((a, b) => a + b.foodCost, 0) / (
+  boissonsStats.filter((b) => b.foodCost !== null).length || 1);
 
   // Export Excel/PDF
   const handleExportExcel = () => {
     const ws = XLSX.utils.json_to_sheet(
-      boissonsStats.map(b => ({
+      boissonsStats.map((b) => ({
         Nom: b.nom,
         Type: b.type || b.famille || "",
         "Coût/portion (€)": b.cout_portion ? Number(b.cout_portion).toFixed(2) : "",
@@ -123,7 +124,7 @@ export default function BarManager() {
         "Ventes": b.quantiteVendue,
         "Marge unitaire (€)": b.margeUnitaire ? b.margeUnitaire.toFixed(2) : "",
         "Marge totale (€)": b.totalMarge ? b.totalMarge.toFixed(2) : "",
-        "Chiffre d'affaires (€)": b.totalCA ? b.totalCA.toFixed(2) : "",
+        "Chiffre d'affaires (€)": b.totalCA ? b.totalCA.toFixed(2) : ""
       }))
     );
     const wb = XLSX.utils.book_new();
@@ -138,16 +139,16 @@ export default function BarManager() {
     doc.autoTable({
       startY: 20,
       head: [["Nom", "Type", "Coût/portion", "PV", "FC (%)", "Ventes", "Marge €", "CA €"]],
-      body: boissonsStats.map(b => [
-        b.nom,
-        b.type || b.famille || "",
-        b.cout_portion ? Number(b.cout_portion).toFixed(2) : "-",
-        b.prix_vente ? Number(b.prix_vente).toFixed(2) : "-",
-        b.foodCost ? b.foodCost.toFixed(1) : "-",
-        b.quantiteVendue,
-        b.margeUnitaire ? b.margeUnitaire.toFixed(2) : "-",
-        b.totalCA ? b.totalCA.toFixed(2) : "-",
-      ]),
+      body: boissonsStats.map((b) => [
+      b.nom,
+      b.type || b.famille || "",
+      b.cout_portion ? Number(b.cout_portion).toFixed(2) : "-",
+      b.prix_vente ? Number(b.prix_vente).toFixed(2) : "-",
+      b.foodCost ? b.foodCost.toFixed(1) : "-",
+      b.quantiteVendue,
+      b.margeUnitaire ? b.margeUnitaire.toFixed(2) : "-",
+      b.totalCA ? b.totalCA.toFixed(2) : "-"]
+      ),
       styles: { fontSize: 9 }
     });
     doc.save("BarManager.pdf");
@@ -164,33 +165,33 @@ export default function BarManager() {
       <div className="flex flex-wrap gap-2 mb-4 items-end">
         <Select
           value={periode}
-          onChange={e => setPeriode(e.target.value)}
-          className="w-32"
-        >
-          {PERIODES.map(p => (
-            <option key={p.value} value={p.value}>{p.label}</option>
-          ))}
+          onChange={(e) => setPeriode(e.target.value)}
+          className="w-32">
+
+          {PERIODES.map((p) =>
+          <option key={p.value} value={p.value}>{p.label}</option>
+          )}
         </Select>
         <input
           type="date"
           className="form-input"
           value={dates.debut}
-          onChange={e => setDates(d => ({ ...d, debut: e.target.value }))}
-          disabled={periode !== "custom"}
-        />
+          onChange={(e) => setDates((d) => ({ ...d, debut: e.target.value }))}
+          disabled={periode !== "custom"} />
+
         <input
           type="date"
           className="form-input"
           value={dates.fin}
-          onChange={e => setDates(d => ({ ...d, fin: e.target.value }))}
-          disabled={periode !== "custom"}
-        />
+          onChange={(e) => setDates((d) => ({ ...d, fin: e.target.value }))}
+          disabled={periode !== "custom"} />
+
         <input
           className="input w-64"
           placeholder="Recherche (nom/type/contenance)"
           value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
+          onChange={(e) => setSearch(e.target.value)} />
+
         <Button onClick={handleExportExcel}>Export Excel</Button>
         <Button onClick={handleExportPDF}>Export PDF</Button>
       </div>
@@ -263,14 +264,14 @@ export default function BarManager() {
           </thead>
           <tbody>
             <AnimatePresence>
-              {boissonsStats.map(b => (
-                <Motion.tr
-                  key={b.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
-                >
+              {boissonsStats.map((b) =>
+              <Motion.tr
+                key={b.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}>
+
                   <td className="border px-2 py-1">
                     <Dialog>
                       <DialogTrigger asChild>
@@ -279,8 +280,8 @@ export default function BarManager() {
                         </Button>
                       </DialogTrigger>
                       <DialogContent
-                        className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl shadow-lg p-6 max-w-md z-[1000]"
-                      >
+                      className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl shadow-lg p-6 max-w-md z-[1000]">
+
                         <h2 className="font-bold text-xl mb-2">{b.nom}</h2>
                         <p>
                           <b>Type :</b> {b.type || b.famille || "-"}
@@ -292,13 +293,13 @@ export default function BarManager() {
                           {b.prix_vente ? Number(b.prix_vente).toFixed(2) : "-"} €
                           <br />
                           <b>Food cost :</b>{" "}
-                          {b.foodCost ? (
-                            <span className={b.foodCost > FOOD_COST_SEUIL ? "text-red-600 font-semibold" : ""}>
+                          {b.foodCost ?
+                        <span className={b.foodCost > FOOD_COST_SEUIL ? "text-red-600 font-semibold" : ""}>
                               {b.foodCost.toFixed(1)} %
-                            </span>
-                          ) : (
-                            "-"
-                          )}
+                            </span> :
+
+                        "-"
+                        }
                           <br />
                           <b>Ventes sur période sélectionnée : </b>
                           {b.quantiteVendue}
@@ -322,11 +323,11 @@ export default function BarManager() {
                   <td className="border px-2 py-1">{b.totalMarge ? b.totalMarge.toFixed(2) : "-"}</td>
                   <td className="border px-2 py-1">{b.totalCA ? b.totalCA.toFixed(2) : "-"}</td>
                 </Motion.tr>
-              ))}
+              )}
             </AnimatePresence>
           </tbody>
         </table>
       </TableContainer>
-    </div>
-  );
+    </div>);
+
 }

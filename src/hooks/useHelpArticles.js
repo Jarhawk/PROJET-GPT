@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState } from "react";
-import { supabase } from '@/lib/supabase';
+
 
 export function useHelpArticles() {
   const [items, setItems] = useState([]);
@@ -10,10 +11,10 @@ export function useHelpArticles() {
   async function fetchArticles() {
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase
-      .from("help_articles")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const { data, error } = await supabase.
+    from("help_articles").
+    select("*").
+    order("created_at", { ascending: false });
     setLoading(false);
     if (error) {
       setError(error.message || error);
@@ -27,9 +28,9 @@ export function useHelpArticles() {
   async function addArticle(values) {
     setLoading(true);
     setError(null);
-    const { error } = await supabase
-      .from("help_articles")
-      .insert([values]);
+    const { error } = await supabase.
+    from("help_articles").
+    insert([values]);
     setLoading(false);
     if (error) {
       setError(error.message || error);
@@ -41,10 +42,10 @@ export function useHelpArticles() {
   async function updateArticle(id, values) {
     setLoading(true);
     setError(null);
-    const { error } = await supabase
-      .from("help_articles")
-      .update(values)
-      .eq("id", id);
+    const { error } = await supabase.
+    from("help_articles").
+    update(values).
+    eq("id", id);
     setLoading(false);
     if (error) {
       setError(error.message || error);
@@ -56,10 +57,10 @@ export function useHelpArticles() {
   async function deleteArticle(id) {
     setLoading(true);
     setError(null);
-    const { error } = await supabase
-      .from("help_articles")
-      .delete()
-      .eq("id", id);
+    const { error } = await supabase.
+    from("help_articles").
+    delete().
+    eq("id", id);
     setLoading(false);
     if (error) {
       setError(error.message || error);
@@ -75,6 +76,6 @@ export function useHelpArticles() {
     fetchArticles,
     addArticle,
     updateArticle,
-    deleteArticle,
+    deleteArticle
   };
 }

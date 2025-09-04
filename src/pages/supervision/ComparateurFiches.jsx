@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useMultiMama } from "@/context/MultiMamaContext";
 import TableContainer from "@/components/ui/TableContainer";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ export default function ComparateurFiches() {
     setLoading(true);
     const { data } = await supabase.rpc("compare_fiche", {
       fiche_id: ficheId,
-      mama_ids: mamas.map((m) => m.id),
+      mama_ids: mamas.map((m) => m.id)
     });
     setResults(Array.isArray(data) ? data : []);
     setLoading(false);
@@ -33,15 +34,15 @@ export default function ComparateurFiches() {
             className="form-input"
             placeholder="ID fiche"
             value={ficheId}
-            onChange={(e) => setFicheId(e.target.value)}
-          />
+            onChange={(e) => setFicheId(e.target.value)} />
+
           <Button onClick={handleCompare} disabled={loading || !ficheId}>
             Comparer
           </Button>
         </div>
         {loading && <LoadingSpinner message="Chargement..." />}
-        {results.length > 0 && (
-          <TableContainer>
+        {results.length > 0 &&
+        <TableContainer>
             <table className="min-w-full text-center">
               <thead>
                 <tr>
@@ -51,18 +52,18 @@ export default function ComparateurFiches() {
                 </tr>
               </thead>
               <tbody>
-                {results.map((r) => (
-                  <tr key={r.mama_id}>
+                {results.map((r) =>
+              <tr key={r.mama_id}>
                     <td className="px-2 py-1">{r.nom}</td>
                     <td className="px-2 py-1">{r.cout || '-'}</td>
                     <td className="px-2 py-1">{r.rendement || '-'}</td>
                   </tr>
-                ))}
+              )}
               </tbody>
             </table>
           </TableContainer>
-        )}
+        }
       </GlassCard>
-    </div>
-  );
+    </div>);
+
 }

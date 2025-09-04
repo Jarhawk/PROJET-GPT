@@ -1,7 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 /* eslint-disable react-hooks/exhaustive-deps */
 import { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
@@ -31,18 +32,18 @@ export function MultiMamaProvider({ children }) {
     let data = [];
     try {
       if (isSuperadmin) {
-        const { data: rows, error } = await supabase
-          .from('mamas')
-          .select('id, nom')
-          .order('nom');
+        const { data: rows, error } = await supabase.
+        from('mamas').
+        select('id, nom').
+        order('nom');
         if (error) throw error;
         data = rows || [];
       } else if (authMamaId) {
-        const { data: row, error } = await supabase
-          .from('mamas')
-          .select('id, nom')
-          .eq('id', authMamaId)
-          .maybeSingle();
+        const { data: row, error } = await supabase.
+        from('mamas').
+        select('id, nom').
+        eq('id', authMamaId).
+        maybeSingle();
         if (error) throw error;
         data = row ? [row] : [];
       }
@@ -70,8 +71,8 @@ export function MultiMamaProvider({ children }) {
   return (
     <MultiMamaContext.Provider value={value}>
       {children}
-    </MultiMamaContext.Provider>
-  );
+    </MultiMamaContext.Provider>);
+
 }
 
 // eslint-disable-next-line react-refresh/only-export-components

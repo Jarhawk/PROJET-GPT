@@ -1,7 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState, useEffect } from "react";
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/lib/supabase';
+
 import { toast } from 'sonner';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Legend, LineChart, Line } from "recharts";
 import { Button } from "@/components/ui/button";
@@ -26,15 +27,15 @@ export default function StatsFiches() {
     if (!mama_id || !isAuthenticated || authLoading) return;
     setLoading(true);
     Promise.all([
-      supabase.from("fiches_techniques").select("*").eq("mama_id", mama_id),
-      supabase
-        .from("familles")
-        .select("nom")
-        .eq("mama_id", mama_id),
-    ]).then(([ficheRes, familleRes]) => {
-      if (ficheRes.error) toast.error("Erreur chargement : " + ficheRes.error.message);
-      else setFiches(ficheRes.data || []);
-      setFamilles((familleRes.data || []).map(f => f.nom));
+    supabase.from("fiches_techniques").select("*").eq("mama_id", mama_id),
+    supabase.
+    from("familles").
+    select("nom").
+    eq("mama_id", mama_id)]
+    ).then(([ficheRes, familleRes]) => {
+      if (ficheRes.error) toast.error("Erreur chargement : " + ficheRes.error.message);else
+      setFiches(ficheRes.data || []);
+      setFamilles((familleRes.data || []).map((f) => f.nom));
       setLoading(false);
     });
   }, [mama_id, isAuthenticated, authLoading]);
@@ -44,50 +45,50 @@ export default function StatsFiches() {
   }, [selectedFiche?.id, mama_id, fetchFicheCoutHistory]);
 
   // Graphiques
-  const repartFamille = familles.map(f => ({
+  const repartFamille = familles.map((f) => ({
     name: f,
-    value: fiches.filter(fi => fi.famille === f).length,
-  })).filter(f => f.value > 0);
+    value: fiches.filter((fi) => fi.famille === f).length
+  })).filter((f) => f.value > 0);
 
-  const fichesSortedByCout = fiches
-    .map(f => ({
-      nom: f.nom,
-      cout: Number(f.cout_total) || 0,
-      actif: f.actif,
-      id: f.id,
-    }))
-    .sort((a, b) => b.cout - a.cout)
-    .slice(0, 10);
+  const fichesSortedByCout = fiches.
+  map((f) => ({
+    nom: f.nom,
+    cout: Number(f.cout_total) || 0,
+    actif: f.actif,
+    id: f.id
+  })).
+  sort((a, b) => b.cout - a.cout).
+  slice(0, 10);
 
   const repActif = [
-    { name: "Actives", value: fiches.filter(f => f.actif).length },
-    { name: "Inactives", value: fiches.filter(f => !f.actif).length },
-  ];
+  { name: "Actives", value: fiches.filter((f) => f.actif).length },
+  { name: "Inactives", value: fiches.filter((f) => !f.actif).length }];
+
 
   // Alertes
   const alertes = [];
-  fiches.forEach(f => {
+  fiches.forEach((f) => {
     if (Number(f.cout_total) > 500) alertes.push({ type: "danger", msg: `Fiche "${f.nom}" : coût matière élevé (${Number(f.cout_total).toFixed(2)} €)` });
     if (!f.actif) alertes.push({ type: "warn", msg: `Fiche "${f.nom}" est inactive.` });
     // Ajoute d'autres alertes métier ici
   });
 
   // Historique coût réel
-  const historyChartData = (history || []).map(h => ({
+  const historyChartData = (history || []).map((h) => ({
     date: new Date(h.date_cout).toLocaleDateString("fr-FR"),
     cout: Number(h.cout_total),
-    cout_portion: Number(h.cout_portion),
+    cout_portion: Number(h.cout_portion)
   }));
 
   // Export global
   const handleExportAll = () => {
     const ws = XLSX.utils.json_to_sheet(
-      fiches.map(f => ({
+      fiches.map((f) => ({
         Nom: f.nom,
         Famille: f.famille,
         Actif: f.actif ? "Oui" : "Non",
         "Coût total (€)": Number(f.cout_total).toFixed(2),
-        "Coût/portion (€)": Number(f.cout_portion).toFixed(2),
+        "Coût/portion (€)": Number(f.cout_portion).toFixed(2)
       }))
     );
     const wb = XLSX.utils.book_new();
@@ -117,9 +118,9 @@ export default function StatsFiches() {
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
               <Pie data={repartFamille} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70}>
-                {repartFamille.map((entry, idx) => (
-                  <Cell key={entry.name} fill={["#bfa14d", "#e2ba63", "#d8d1bc", "#f3e6c1", "#f9f6f0", "#eee6d6", "#e1c699", "#8e7649"][idx % 8]} />
-                ))}
+                {repartFamille.map((entry, idx) =>
+                <Cell key={entry.name} fill={["#bfa14d", "#e2ba63", "#d8d1bc", "#f3e6c1", "#f9f6f0", "#eee6d6", "#e1c699", "#8e7649"][idx % 8]} />
+                )}
               </Pie>
               <Tooltip />
               <Legend />
@@ -131,7 +132,7 @@ export default function StatsFiches() {
           <h2 className="text-lg font-bold mb-2">Top 10 fiches par coût matière</h2>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={fichesSortedByCout}>
-              <XAxis dataKey="nom" tickFormatter={n => n.slice(0, 8) + (n.length > 8 ? "…" : "")} />
+              <XAxis dataKey="nom" tickFormatter={(n) => n.slice(0, 8) + (n.length > 8 ? "…" : "")} />
               <YAxis />
               <Tooltip />
               <Bar dataKey="cout" fill="#bfa14d" />
@@ -144,9 +145,9 @@ export default function StatsFiches() {
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
               <Pie data={repActif} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70}>
-                {repActif.map((entry, idx) => (
-                  <Cell key={entry.name} fill={["#14b85a", "#eb6e34"][idx]} />
-                ))}
+                {repActif.map((entry, idx) =>
+                <Cell key={entry.name} fill={["#14b85a", "#eb6e34"][idx]} />
+                )}
               </Pie>
               <Tooltip />
               <Legend />
@@ -161,8 +162,8 @@ export default function StatsFiches() {
           className="input input-bordered w-72"
           placeholder="Recherche fiche par nom..."
           value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
+          onChange={(e) => setSearch(e.target.value)} />
+
       </div>
       <TableContainer className="mb-8">
         <table className="min-w-full table-auto">
@@ -177,36 +178,36 @@ export default function StatsFiches() {
             </tr>
           </thead>
           <tbody>
-            {fiches
-              .filter(f => f.nom.toLowerCase().includes(search.toLowerCase()))
-              .map((f) => (
-                <tr key={f.id}>
+            {fiches.
+            filter((f) => f.nom.toLowerCase().includes(search.toLowerCase())).
+            map((f) =>
+            <tr key={f.id}>
                   <td className="px-3 py-2">{f.nom}</td>
                   <td className="px-3 py-2">{f.famille || "-"}</td>
                   <td className="px-3 py-2">
-                    {f.actif
-                      ? <span className="text-green-600 font-semibold">Oui</span>
-                      : <span className="text-red-600 font-semibold">Non</span>
-                    }
+                    {f.actif ?
+                <span className="text-green-600 font-semibold">Oui</span> :
+                <span className="text-red-600 font-semibold">Non</span>
+                }
                   </td>
                   <td className="px-3 py-2">{f.cout_total ? Number(f.cout_total).toFixed(2) : "-"}</td>
                   <td className="px-3 py-2">{f.cout_portion ? Number(f.cout_portion).toFixed(2) : "-"}</td>
                   <td className="px-3 py-2">
                     <Button size="sm" variant="outline"
-                      onClick={() => setSelectedFiche(f)}
-                    >
+                onClick={() => setSelectedFiche(f)}>
+
                       Historique coût
                     </Button>
                   </td>
                 </tr>
-              ))}
+            )}
           </tbody>
         </table>
       </TableContainer>
 
       {/* Historique coût réel */}
-      {selectedFiche && (
-        <GlassCard className="p-4 mb-8">
+      {selectedFiche &&
+      <GlassCard className="p-4 mb-8">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-mamastock-gold mb-2">
               Historique coût matière : {selectedFiche.nom}
@@ -225,27 +226,27 @@ export default function StatsFiches() {
           </ResponsiveContainer>
           {/* Alerte : hausse brutale */}
           {historyChartData.length > 1 &&
-            historyChartData[historyChartData.length - 1].cout > 1.15 * historyChartData[0].cout && (
-            <div className="text-red-700 font-semibold mt-2">
+        historyChartData[historyChartData.length - 1].cout > 1.15 * historyChartData[0].cout &&
+        <div className="text-red-700 font-semibold mt-2">
               ⚠️ Hausse du coût matière supérieure à 15% sur la période !
             </div>
-          )}
+        }
         </GlassCard>
-      )}
+      }
 
       {/* Alertes générales */}
-      {alertes.length > 0 && (
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 text-yellow-900 p-4 rounded-xl mb-8">
+      {alertes.length > 0 &&
+      <div className="bg-yellow-50 border-l-4 border-yellow-400 text-yellow-900 p-4 rounded-xl mb-8">
           <h3 className="font-semibold mb-2">Alertes :</h3>
           <ul>
-            {alertes.map((a, idx) => (
-              <li key={idx} className={a.type === "danger" ? "text-red-700 font-bold" : "text-yellow-700"}>
+            {alertes.map((a, idx) =>
+          <li key={idx} className={a.type === "danger" ? "text-red-700 font-bold" : "text-yellow-700"}>
                 {a.msg}
               </li>
-            ))}
+          )}
           </ul>
         </div>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 }

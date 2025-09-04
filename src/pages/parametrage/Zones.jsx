@@ -1,4 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from 'react';
 import { useZones } from '@/hooks/useZones';
@@ -8,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useAuth } from '@/hooks/useAuth';
 import Unauthorized from '@/pages/auth/Unauthorized';
-import { supabase } from '@/lib/supabase';
+
 
 export default function Zones() {
   const { fetchZones, updateZone } = useZones();
@@ -19,7 +20,7 @@ export default function Zones() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchZones(filters).then(data => setRows(Array.isArray(data) ? data : []));
+    fetchZones(filters).then((data) => setRows(Array.isArray(data) ? data : []));
   }, [filters, fetchZones]);
 
   async function handleDelete(id) {
@@ -29,10 +30,10 @@ export default function Zones() {
     const { error } = await supabase.rpc('safe_delete_zone', {
       p_mama: mama_id,
       p_zone: id,
-      p_reassign_to: reassign || null,
+      p_reassign_to: reassign || null
     });
-    if (error) toast.error(error.message);
-    else {
+    if (error) toast.error(error.message);else
+    {
       toast.success('Zone supprimée');
       const refreshed = await fetchZones(filters);
       setRows(Array.isArray(refreshed) ? refreshed : []);
@@ -50,13 +51,13 @@ export default function Zones() {
           className="input"
           placeholder="Recherche"
           value={filters.q ?? ''}
-          onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))}
-        />
+          onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))} />
+
         <select
           className="input"
           value={filters.type ?? ''}
-          onChange={(e) => setFilters((f) => ({ ...f, type: e.target.value }))}
-        >
+          onChange={(e) => setFilters((f) => ({ ...f, type: e.target.value }))}>
+
           <option value="">Tous types</option>
           <option value="cave">Cave</option>
           <option value="shop">Shop</option>
@@ -70,9 +71,9 @@ export default function Zones() {
             type="checkbox"
             checked={filters.actif ?? false}
             onChange={(e) =>
-              setFilters((f) => ({ ...f, actif: e.target.checked }))
-            }
-          />
+            setFilters((f) => ({ ...f, actif: e.target.checked }))
+            } />
+
           Actifs uniquement
         </label>
         <Button onClick={() => navigate('/parametrage/zones/new')}>
@@ -90,58 +91,58 @@ export default function Zones() {
             </tr>
           </thead>
           <tbody>
-            {rows.map((z) => (
-              <tr key={z.id} className="border-t border-white/10">
+            {rows.map((z) =>
+            <tr key={z.id} className="border-t border-white/10">
                 <td className="px-2 py-1">{z.nom}</td>
                 <td className="px-2 py-1">{z.type}</td>
                 <td className="px-2 py-1 text-center">
                   <input
-                    type="checkbox"
-                    checked={z.actif}
-                    onChange={async () => {
-                      await updateZone(z.id, { actif: !z.actif });
-                      const refreshed = await fetchZones(filters);
-                      setRows(Array.isArray(refreshed) ? refreshed : []);
-                    }}
-                  />
+                  type="checkbox"
+                  checked={z.actif}
+                  onChange={async () => {
+                    await updateZone(z.id, { actif: !z.actif });
+                    const refreshed = await fetchZones(filters);
+                    setRows(Array.isArray(refreshed) ? refreshed : []);
+                  }} />
+
                 </td>
                 <td className="px-2 py-1 flex gap-2 justify-center">
                   <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => navigate(`/parametrage/zones/${z.id}`)}
-                  >
+                  size="sm"
+                  variant="outline"
+                  onClick={() => navigate(`/parametrage/zones/${z.id}`)}>
+
                     Éditer
                   </Button>
                   <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() =>
-                      navigate(`/parametrage/zones/${z.id}/droits`)
-                    }
-                  >
+                  size="sm"
+                  variant="outline"
+                  onClick={() =>
+                  navigate(`/parametrage/zones/${z.id}/droits`)
+                  }>
+
                     Droits
                   </Button>
                   <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleDelete(z.id)}
-                  >
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleDelete(z.id)}>
+
                     Supprimer
                   </Button>
                 </td>
               </tr>
-            ))}
-            {rows.length === 0 && (
-              <tr>
+            )}
+            {rows.length === 0 &&
+            <tr>
                 <td colSpan="4" className="text-center py-2">
                   Aucune zone
                 </td>
               </tr>
-            )}
+            }
           </tbody>
         </table>
       </div>
-    </div>
-  );
+    </div>);
+
 }

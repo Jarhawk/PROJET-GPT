@@ -1,8 +1,9 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 // src/pages/fournisseurs/comparatif/ComparatifPrix.jsx
 import { useEffect, useState } from "react";
 import PrixFournisseurs from "./PrixFournisseurs";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { Select } from "@/components/ui/select";
@@ -19,11 +20,11 @@ export default function ComparatifPrix() {
       setLoading(true);
       setError(null);
       try {
-        const { data, error } = await supabase
-          .from("produits")
-          .select("id, nom")
-          .eq("mama_id", mama_id)
-          .order("nom", { ascending: true });
+        const { data, error } = await supabase.
+        from("produits").
+        select("id, nom").
+        eq("mama_id", mama_id).
+        order("nom", { ascending: true });
 
         if (error) throw error;
         setProduits(data || []);
@@ -50,27 +51,27 @@ export default function ComparatifPrix() {
       <label htmlFor="produit-select" className="block font-semibold mb-1">
         Sélectionner un produit
       </label>
-      {error && (
-        <p className="text-red-600 bg-red-50 border border-red-200 rounded px-2 py-1 text-sm mb-2">
+      {error &&
+      <p className="text-red-600 bg-red-50 border border-red-200 rounded px-2 py-1 text-sm mb-2">
           {error.message || "Erreur de chargement"}
         </p>
-      )}
+      }
       <Select
         id="produit-select"
         value={produitId}
         onChange={(e) => setProduitId(e.target.value)}
         className="mb-4"
-        ariaLabel="Sélection produit"
-      >
+        ariaLabel="Sélection produit">
+
         <option value="">-- Choisir un produit --</option>
-        {produits.map((p) => (
-          <option key={p.id} value={p.id}>
+        {produits.map((p) =>
+        <option key={p.id} value={p.id}>
             {p.nom}
           </option>
-        ))}
+        )}
       </Select>
 
       {produitId && <PrixFournisseurs produitId={produitId} />}
-    </div>
-  );
+    </div>);
+
 }

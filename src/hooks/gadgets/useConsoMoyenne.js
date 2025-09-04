@@ -1,25 +1,25 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
+import supabase from '@/lib/supabase';import { useState, useEffect, useCallback } from 'react';
+
 import { useAuth } from '@/hooks/useAuth';
 
 export async function fetchConsoMoyenne(mamaId, sinceISO) {
 
   // NOTE: "quantite" DOIT correspondre au vrai nom (ou à l’alias de la vue v_requisition_lignes)
-  const { data, error } = await supabase
-    .from('requisition_lignes') // ou 'v_requisition_lignes' si tu as créé la vue alias
-    .select(`
+  const { data, error } = await supabase.
+  from('requisition_lignes') // ou 'v_requisition_lignes' si tu as créé la vue alias
+  .select(`
       quantite,
       requisitions!inner (
         date_requisition,
         mama_id,
         statut
       )
-    `)
-    .eq('requisitions.mama_id', mamaId)
-    .eq('requisitions.statut', 'réalisée')
-    .gte('requisitions.date_requisition', sinceISO)
-    // Tri sur le champ de la table référencée
-    .order('date_requisition', { referencedTable: 'requisitions', ascending: true });
+    `).
+  eq('requisitions.mama_id', mamaId).
+  eq('requisitions.statut', 'réalisée').
+  gte('requisitions.date_requisition', sinceISO)
+  // Tri sur le champ de la table référencée
+  .order('date_requisition', { referencedTable: 'requisitions', ascending: true });
 
   if (error) throw error;
   return data;
@@ -69,4 +69,3 @@ export default function useConsoMoyenne() {
 
   return { avg, loading, error, refresh: fetchData };
 }
-

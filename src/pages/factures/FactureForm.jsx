@@ -1,9 +1,9 @@
-// src/pages/factures/FactureForm.jsx
+import supabase from '@/lib/supabase'; // src/pages/factures/FactureForm.jsx
 import { useMemo, useState, useEffect } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 import FactureLigne from '@/components/FactureLigne';
 import SupplierPicker from '@/components/factures/SupplierPicker';
@@ -15,8 +15,8 @@ import {
   SelectTrigger,
   SelectContent,
   SelectItem,
-  SelectValue,
-} from '@/components/ui/select';
+  SelectValue } from
+'@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { mapUILineToPayload } from '@/features/factures/invoiceMappers';
 import useProduitLineDefaults from '@/hooks/useProduitLineDefaults';
@@ -46,7 +46,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
     tva: 0,
     tva_montant: 0,
     total_ttc: 0,
-    zone_id: null,
+    zone_id: null
   });
 
   const emptyForm = () => ({
@@ -56,13 +56,13 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
     numero: '',
     statut: 'Brouillon', // mappe vers p_actif
     total_ht_attendu: null,
-    lignes: [emptyLigne()],
+    lignes: [emptyLigne()]
   });
 
   const form = useForm({
-    defaultValues: facture
-      ? { ...emptyForm(), ...facture, fournisseur_id: facture.fournisseur_id }
-      : emptyForm(),
+    defaultValues: facture ?
+    { ...emptyForm(), ...facture, fournisseur_id: facture.fournisseur_id } :
+    emptyForm()
   });
 
   const { control, handleSubmit, watch, reset, setValue, setError, formState } = form;
@@ -70,7 +70,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
   const [saving, setSaving] = useState(false);
   const { fields, append, remove, update } = useFieldArray({
     control,
-    name: 'lignes',
+    name: 'lignes'
   });
   const lignes = watch('lignes');
   const { data: zones = [], isSuccess } = useZonesStock();
@@ -79,7 +79,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
   const formId = watch('id');
   const fournisseur_id = watch('fournisseur_id');
   const setFournisseurId = (val) =>
-    setValue('fournisseur_id', val, { shouldDirty: true });
+  setValue('fournisseur_id', val, { shouldDirty: true });
 
   const sum = (arr) => arr.reduce((acc, n) => acc + n, 0);
 
@@ -131,7 +131,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
           prix_unitaire_ht: pu,
           tva_montant: tvaMontant,
           total_ttc: totalTtc,
-          prix_total_ht: lht,
+          prix_total_ht: lht
         };
       } catch (e) {
         console.warn('[FactureForm] defaults fetch failed', e);
@@ -162,9 +162,9 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
         setError('fournisseur_id', { type: 'required' });
         return;
       }
-      const payloadLignes = (lignes || [])
-        .filter((l) => l.produit_id)
-        .map(mapUILineToPayload);
+      const payloadLignes = (lignes || []).
+      filter((l) => l.produit_id).
+      map(mapUILineToPayload);
       if (payloadLignes.length === 0) {
         toast.error('Ajoutez au moins une ligne produit.');
         (lignes || []).forEach((l, i) => {
@@ -183,24 +183,24 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
       }
 
       const rpcName = formId ? 'fn_update_facture' : 'fn_save_facture';
-      const args = formId
-        ? {
-            p_facture_id: formId,
-            p_mama_id: mamaId,
-            p_fournisseur_id: values.fournisseur_id,
-            p_numero: values.numero || null,
-            p_date: values.date_facture,
-            p_lignes: payloadLignes,
-            p_actif,
-          }
-        : {
-            p_mama_id: mamaId,
-            p_fournisseur_id: values.fournisseur_id,
-            p_numero: values.numero || null,
-            p_date: values.date_facture,
-            p_lignes: payloadLignes,
-            p_actif,
-          };
+      const args = formId ?
+      {
+        p_facture_id: formId,
+        p_mama_id: mamaId,
+        p_fournisseur_id: values.fournisseur_id,
+        p_numero: values.numero || null,
+        p_date: values.date_facture,
+        p_lignes: payloadLignes,
+        p_actif
+      } :
+      {
+        p_mama_id: mamaId,
+        p_fournisseur_id: values.fournisseur_id,
+        p_numero: values.numero || null,
+        p_date: values.date_facture,
+        p_lignes: payloadLignes,
+        p_actif
+      };
 
       const { data, error } = await supabase.rpc(rpcName, args);
 
@@ -236,8 +236,8 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
           <SupplierPicker
             value={fournisseur_id}
             onChange={setFournisseurId}
-            error={errors.fournisseur_id}
-          />
+            error={errors.fournisseur_id} />
+
         </div>
 
         {/* Date */}
@@ -246,8 +246,8 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
           <Controller
             control={control}
             name="date_facture"
-            render={({ field }) => <Input type="date" {...field} />}
-          />
+            render={({ field }) => <Input type="date" {...field} />} />
+
         </div>
 
         {/* Numéro */}
@@ -256,10 +256,10 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
           <Controller
             control={control}
             name="numero"
-            render={({ field }) => (
-              <Input placeholder="N° facture" {...field} />
-            )}
-          />
+            render={({ field }) =>
+            <Input placeholder="N° facture" {...field} />
+            } />
+
         </div>
 
         {/* Statut (mappe p_actif) */}
@@ -268,22 +268,22 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
           <Controller
             control={control}
             name="statut"
-            render={({ field }) => (
-              <Select value={field.value} onValueChange={field.onChange}>
+            render={({ field }) =>
+            <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="Statut" />
                 </SelectTrigger>
                 <SelectContent align="start">
                   <SelectItem value="Brouillon">Brouillon</SelectItem>
                   <SelectItem value="En attente">En attente</SelectItem>
-                  {ecart_ht === 0 && (
-                    <SelectItem value="Validée">Validée</SelectItem>
-                  )}
+                  {ecart_ht === 0 &&
+                <SelectItem value="Validée">Validée</SelectItem>
+                }
                   <SelectItem value="Annulée">Annulée</SelectItem>
                 </SelectContent>
               </Select>
-            )}
-          />
+            } />
+
         </div>
 
         {/* Total HT attendu */}
@@ -292,29 +292,29 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
           <Controller
             control={control}
             name="total_ht_attendu"
-            render={({ field }) => (
-              <div className="flex items-center gap-2">
+            render={({ field }) =>
+            <div className="flex items-center gap-2">
                 <NumericInput
-                  value={field.value}
-                  decimals={2}
-                  min={0}
-                  onValueChange={(val) => field.onChange(val)}
-                />
+                value={field.value}
+                decimals={2}
+                min={0}
+                onValueChange={(val) => field.onChange(val)} />
+
                 <Badge
-                  color={
-                    ecart_ht === 0
-                      ? 'green'
-                      : Math.abs(ecart_ht) < 0.01
-                        ? 'gold'
-                        : 'red'
-                  }
-                  ariaLabel="Écart HT"
-                >
+                color={
+                ecart_ht === 0 ?
+                'green' :
+                Math.abs(ecart_ht) < 0.01 ?
+                'gold' :
+                'red'
+                }
+                ariaLabel="Écart HT">
+
                   {`Écart ${formatMoneyFR(ecart_ht)}`}
                 </Badge>
               </div>
-            )}
-          />
+            } />
+
         </div>
       </div>
 
@@ -343,18 +343,18 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
             <div>Actions</div>
           </div>
 
-          {fields.map((f, i) => (
-            <FactureLigne
-              key={f.id}
-              value={lignes[i]}
-              onChange={(patch) => updateLigne(i, patch)}
-              onRemove={() => remove(i)}
-              allLines={lignes}
-              invalidProduit={submitCount > 0 && !lignes[i]?.produit_id}
-              index={i}
-              zones={zones}
-            />
-          ))}
+          {fields.map((f, i) =>
+          <FactureLigne
+            key={f.id}
+            value={lignes[i]}
+            onChange={(patch) => updateLigne(i, patch)}
+            onRemove={() => remove(i)}
+            allLines={lignes}
+            invalidProduit={submitCount > 0 && !lignes[i]?.produit_id}
+            index={i}
+            zones={zones} />
+
+          )}
         </div>
       </section>
 
@@ -380,26 +380,26 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
           <Button
             type="submit"
             disabled={
-              saving ||
-              (statut === 'Validée' && ecart_ht !== 0) ||
-              (formId && !FN_UPDATE_FACTURE_EXISTS)
+            saving ||
+            statut === 'Validée' && ecart_ht !== 0 ||
+            formId && !FN_UPDATE_FACTURE_EXISTS
             }
             title={
-              statut === 'Validée' && ecart_ht !== 0
-                ? 'Écart non nul : la facture ne peut être validée.'
-                : undefined
-            }
-          >
+            statut === 'Validée' && ecart_ht !== 0 ?
+            'Écart non nul : la facture ne peut être validée.' :
+            undefined
+            }>
+
             Enregistrer
           </Button>
-          {formId && !FN_UPDATE_FACTURE_EXISTS && (
-            <p className="text-sm text-destructive mt-2">
+          {formId && !FN_UPDATE_FACTURE_EXISTS &&
+          <p className="text-sm text-destructive mt-2">
               La modification nécessite fn_update_facture côté serveur
             </p>
-          )}
+          }
         </div>
       </div>
 
-    </form>
-  );
+    </form>);
+
 }

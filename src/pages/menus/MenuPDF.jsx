@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useEffect, useState } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 
 export default function MenuPDF({ id }) {
@@ -11,18 +12,18 @@ export default function MenuPDF({ id }) {
   useEffect(() => {
     const fetchMenu = async () => {
       if (!mama_id) return;
-      const { data: menuData } = await supabase
-        .from("menus")
-        .select(
-          "*, fiches:menu_fiches(fiche_id, fiche:fiches(id, nom, type, categorie))"
-        )
-        .eq("id", id)
-        .eq("mama_id", mama_id)
-        .single();
+      const { data: menuData } = await supabase.
+      from("menus").
+      select(
+        "*, fiches:menu_fiches(fiche_id, fiche:fiches(id, nom, type, categorie))"
+      ).
+      eq("id", id).
+      eq("mama_id", mama_id).
+      single();
 
       if (menuData) {
         setMenu(menuData);
-        setFiches(menuData.fiches?.map(f => f.fiche) || []);
+        setFiches(menuData.fiches?.map((f) => f.fiche) || []);
       }
     };
 
@@ -46,16 +47,16 @@ export default function MenuPDF({ id }) {
           <img src="/logo-mamastock.png" class="logo" />
           <h1>Menu du jour : ${menu.nom}</h1>
           <p><strong>Date :</strong> ${menu.date}</p>
-          ${fiches
-            .map(
-              (f) => `
+          ${fiches.
+    map(
+      (f) => `
             <div class="fiche">
               <div><strong>${f.nom}</strong></div>
               <div class="type">Type : ${f.type} | Catégorie : ${f.categorie}</div>
             </div>
           `
-            )
-            .join("")}
+    ).
+    join("")}
         </body>
       </html>
     `;
@@ -71,9 +72,9 @@ export default function MenuPDF({ id }) {
   return (
     <button
       onClick={exportPDF}
-      className="bg-mamastock-gold hover:bg-mamastock-gold-hover text-white px-3 py-1 rounded text-sm"
-    >
+      className="bg-mamastock-gold hover:bg-mamastock-gold-hover text-white px-3 py-1 rounded text-sm">
+
       📄 Exporter ce menu
-    </button>
-  );
+    </button>);
+
 }

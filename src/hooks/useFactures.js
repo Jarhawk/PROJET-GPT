@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 import usePeriodes from "@/hooks/usePeriodes";
 
@@ -16,11 +17,11 @@ export function useFactures() {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
-    let q = supabase
-      .from("bons_livraison")
-      .select("*", { count: "exact" })
-      .eq("mama_id", mama_id)
-      .order("date_livraison", { ascending: false });
+    let q = supabase.
+    from("bons_livraison").
+    select("*", { count: "exact" }).
+    eq("mama_id", mama_id).
+    order("date_livraison", { ascending: false });
     if (search) q = q.ilike("numero_bl", `%${search}%`);
     q = q.range((page - 1) * limit, page * limit - 1);
     const { data, error, count } = await q;
@@ -40,17 +41,17 @@ export function useFactures() {
     mois = "",
     actif = true,
     page = 1,
-    pageSize = 20,
+    pageSize = 20
   } = {}) {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
-    let query = supabase
-      .from("factures")
-      .select("*, fournisseur:fournisseur_id(id, nom)", { count: "exact" })
-      .eq("mama_id", mama_id)
-      .order("date_facture", { ascending: false })
-      .range((page - 1) * pageSize, page * pageSize - 1);
+    let query = supabase.
+    from("factures").
+    select("*, fournisseur:fournisseur_id(id, nom)", { count: "exact" }).
+    eq("mama_id", mama_id).
+    order("date_facture", { ascending: false }).
+    range((page - 1) * pageSize, page * pageSize - 1);
 
     if (search) {
       query = query.or(
@@ -82,12 +83,12 @@ export function useFactures() {
     if (!id || !mama_id) return null;
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase
-      .from("factures")
-      .select("*, fournisseur:fournisseur_id(id, nom)")
-      .eq("id", id)
-      .eq("mama_id", mama_id)
-      .single();
+    const { data, error } = await supabase.
+    from("factures").
+    select("*, fournisseur:fournisseur_id(id, nom)").
+    eq("id", id).
+    eq("mama_id", mama_id).
+    single();
     setLoading(false);
     if (error) {
       setError(error);
@@ -102,17 +103,17 @@ export function useFactures() {
     if (pErr) return { error: pErr };
     setLoading(true);
     setError(null);
-    const { data: inserted, error } = await supabase
-      .from("factures")
-      .insert([{ ...data, mama_id }])
-      .select()
-      .single();
+    const { data: inserted, error } = await supabase.
+    from("factures").
+    insert([{ ...data, mama_id }]).
+    select().
+    single();
     setLoading(false);
     if (error) {
       setError(error);
       return { error };
     }
-    setFactures(f => [inserted, ...f]);
+    setFactures((f) => [inserted, ...f]);
     return { data: inserted };
   }
 
@@ -124,19 +125,19 @@ export function useFactures() {
     }
     setLoading(true);
     setError(null);
-    const { data: updated, error } = await supabase
-      .from("factures")
-      .update(fields)
-      .eq("id", id)
-      .eq("mama_id", mama_id)
-      .select()
-      .single();
+    const { data: updated, error } = await supabase.
+    from("factures").
+    update(fields).
+    eq("id", id).
+    eq("mama_id", mama_id).
+    select().
+    single();
     setLoading(false);
     if (error) {
       setError(error);
       return { error };
     }
-    setFactures(f => f.map(ft => (ft.id === id ? updated : ft)));
+    setFactures((f) => f.map((ft) => ft.id === id ? updated : ft));
     return { data: updated };
   }
 
@@ -144,17 +145,17 @@ export function useFactures() {
     if (!mama_id) return { error: "no mama_id" };
     setLoading(true);
     setError(null);
-    const { error } = await supabase
-      .from("factures")
-      .update({ actif: false })
-      .eq("id", id)
-      .eq("mama_id", mama_id);
+    const { error } = await supabase.
+    from("factures").
+    update({ actif: false }).
+    eq("id", id).
+    eq("mama_id", mama_id);
     setLoading(false);
     if (error) {
       setError(error);
       return { error };
     }
-    setFactures(f => f.map(ft => (ft.id === id ? { ...ft, actif: false } : ft)));
+    setFactures((f) => f.map((ft) => ft.id === id ? { ...ft, actif: false } : ft));
     return { success: true };
   }
 
@@ -170,50 +171,50 @@ export function useFactures() {
       tva,
       zone_stock_id,
       unite_id,
-      date,
+      date
     } = ligne || {};
-    const { data: inserted, error } = await supabase
-      .from("facture_lignes")
-      .insert([
+    const { data: inserted, error } = await supabase.
+    from("facture_lignes").
+    insert([
+    {
+      produit_id,
+      quantite,
+      prix_unitaire,
+      tva,
+      zone_stock_id,
+      unite_id,
+      total: quantite * (prix_unitaire || 0),
+      facture_id,
+      mama_id
+    }]
+    ).
+    select().
+    single();
+    if (!error && produit_id && fournisseur_id) {
+      await supabase.
+      from("fournisseur_produits").
+      upsert(
         {
           produit_id,
-          quantite,
-          prix_unitaire,
-          tva,
-          zone_stock_id,
-          unite_id,
-          total: quantite * (prix_unitaire || 0),
-          facture_id,
-          mama_id,
+          fournisseur_id,
+          prix_achat: prix_unitaire,
+          date_livraison: date || new Date().toISOString().slice(0, 10),
+          mama_id
         },
-      ])
-      .select()
-      .single();
-    if (!error && produit_id && fournisseur_id) {
-      await supabase
-        .from("fournisseur_produits")
-        .upsert(
-          {
-            produit_id,
-            fournisseur_id,
-            prix_achat: prix_unitaire,
-            date_livraison: date || new Date().toISOString().slice(0, 10),
-            mama_id,
-          },
-          { onConflict: ["produit_id", "fournisseur_id", "date_livraison"] }
-        );
-      await supabase
-        .from("achats")
-        .insert([
-          {
-            produit_id,
-            fournisseur_id,
-            mama_id,
-            prix: prix_unitaire,
-            quantite,
-            date_achat: date || new Date().toISOString().slice(0, 10),
-          },
-        ]);
+        { onConflict: ["produit_id", "fournisseur_id", "date_livraison"] }
+      );
+      await supabase.
+      from("achats").
+      insert([
+      {
+        produit_id,
+        fournisseur_id,
+        mama_id,
+        prix: prix_unitaire,
+        quantite,
+        date_achat: date || new Date().toISOString().slice(0, 10)
+      }]
+      );
     }
     setLoading(false);
     if (error) {
@@ -227,13 +228,13 @@ export function useFactures() {
     if (!mama_id) return { error: "no mama_id" };
     const { lignes, ...entete } = bl || {};
     setLoading(true);
-    const { data, error } = await supabase
-      .from("bons_livraison")
-      .insert([{ ...entete, mama_id }])
-      .select("id")
-      .single();
+    const { data, error } = await supabase.
+    from("bons_livraison").
+    insert([{ ...entete, mama_id }]).
+    select("id").
+    single();
     if (!error && data?.id && Array.isArray(lignes) && lignes.length) {
-      const rows = lignes.map(l => ({ ...l, bl_id: data.id, mama_id }));
+      const rows = lignes.map((l) => ({ ...l, bl_id: data.id, mama_id }));
       await supabase.from("lignes_bl").insert(rows);
     }
     setLoading(false);
@@ -251,7 +252,7 @@ export function useFactures() {
     const { error } = await supabase.rpc("apply_stock_from_achat", {
       achat_id: id,
       achat_table: table,
-      mama_id,
+      mama_id
     });
     setLoading(false);
     if (error) setError(error);
@@ -261,11 +262,11 @@ export function useFactures() {
   async function toggleFactureActive(id, actif) {
     if (!mama_id) return { error: "no mama_id" };
     setLoading(true);
-    const { error } = await supabase
-      .from("factures")
-      .update({ actif })
-      .eq("id", id)
-      .eq("mama_id", mama_id);
+    const { error } = await supabase.
+    from("factures").
+    update({ actif }).
+    eq("id", id).
+    eq("mama_id", mama_id);
     setLoading(false);
     if (error) setError(error);
     return { error };
@@ -273,19 +274,19 @@ export function useFactures() {
 
   async function calculateTotals(facture_id) {
     if (!mama_id) return { ht: 0, tva: 0, ttc: 0 };
-    const { data: lignes } = await supabase
-      .from("facture_lignes")
-      .select("quantite, prix_unitaire, tva")
-      .eq("facture_id", facture_id)
-      .eq("mama_id", mama_id);
-    const ht = (lignes || []).reduce((s,l) => s + l.quantite * (l.prix_unitaire || 0), 0);
-    const tva = (lignes || []).reduce((s,l) => s + l.quantite * (l.prix_unitaire || 0) * (l.tva || 0) / 100, 0);
+    const { data: lignes } = await supabase.
+    from("facture_lignes").
+    select("quantite, prix_unitaire, tva").
+    eq("facture_id", facture_id).
+    eq("mama_id", mama_id);
+    const ht = (lignes || []).reduce((s, l) => s + l.quantite * (l.prix_unitaire || 0), 0);
+    const tva = (lignes || []).reduce((s, l) => s + l.quantite * (l.prix_unitaire || 0) * (l.tva || 0) / 100, 0);
     const ttc = ht + tva;
-    await supabase
-      .from("factures")
-      .update({ total_ht: ht, total_tva: tva, total_ttc: ttc, montant_total: ttc })
-      .eq("id", facture_id)
-      .eq("mama_id", mama_id);
+    await supabase.
+    from("factures").
+    update({ total_ht: ht, total_tva: tva, total_ttc: ttc, montant_total: ttc }).
+    eq("id", facture_id).
+    eq("mama_id", mama_id);
     return { ht, tva, ttc };
   }
 
@@ -304,6 +305,6 @@ export function useFactures() {
     addLigneFacture,
     updateStock,
     toggleFactureActive,
-    calculateTotals,
+    calculateTotals
   };
 }

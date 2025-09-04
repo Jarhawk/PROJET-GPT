@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState, useCallback } from "react";
-import { supabase } from '@/lib/supabase';
+
 import * as XLSX from "xlsx";
 import JSPDF from "jspdf";
 import "jspdf-autotable";
@@ -14,9 +15,9 @@ export function useConsolidation() {
   // Liste des sites accessibles par l'utilisateur
   const fetchSites = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("user_mama_access")
-      .select("mama_id, role");
+    const { data, error } = await supabase.
+    from("user_mama_access").
+    select("mama_id, role");
     setLoading(false);
     if (error) {
       setError(error.message || error);
@@ -31,9 +32,9 @@ export function useConsolidation() {
   // Vue consolidation mensuelle
   const fetchConsoMensuelle = useCallback(async ({ mamaIds = [], start, end } = {}) => {
     setLoading(true);
-    let query = supabase
-      .from("v_consolidation_mensuelle")
-      .select("*");
+    let query = supabase.
+    from("v_consolidation_mensuelle").
+    select("*");
     if (mamaIds.length) query = query.in("mama_id", mamaIds);
     if (start) query = query.gte("mois", start);
     if (end) query = query.lte("mois", end);
@@ -134,7 +135,7 @@ export function useConsolidation() {
     fetchEcarts,
     exportExcel,
     exportPdf,
-    getKpis,
+    getKpis
   };
 }
 

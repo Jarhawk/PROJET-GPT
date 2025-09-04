@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 
 export function useFamillesWithSousFamilles() {
@@ -14,23 +15,23 @@ export function useFamillesWithSousFamilles() {
     setLoading(true);
     setError(null);
     const [famRes, sousRes] = await Promise.all([
-      supabase
-        .from('familles')
-        .select('id, nom, actif')
-        .eq('mama_id', mama_id)
-        .order('nom', { ascending: true }),
-      supabase
-        .from('sous_familles')
-        .select('id, nom, actif, famille_id')
-        .eq('mama_id', mama_id),
-    ]);
+    supabase.
+    from('familles').
+    select('id, nom, actif').
+    eq('mama_id', mama_id).
+    order('nom', { ascending: true }),
+    supabase.
+    from('sous_familles').
+    select('id, nom, actif, famille_id').
+    eq('mama_id', mama_id)]
+    );
     if (famRes.error || sousRes.error) {
       setError(famRes.error || sousRes.error);
       setFamilles([]);
     } else {
       const grouped = (famRes.data || []).map((f) => ({
         ...f,
-        sous_familles: (sousRes.data || []).filter((sf) => sf.famille_id === f.id),
+        sous_familles: (sousRes.data || []).filter((sf) => sf.famille_id === f.id)
       }));
       setFamilles(grouped);
     }
@@ -39,60 +40,60 @@ export function useFamillesWithSousFamilles() {
 
   async function addFamille(values) {
     if (!mama_id) return { error: 'Aucun mama_id' };
-    const { error } = await supabase
-      .from('familles')
-      .insert([{ ...values, mama_id }]);
+    const { error } = await supabase.
+    from('familles').
+    insert([{ ...values, mama_id }]);
     if (!error) await fetchAll();
     return { error };
   }
 
   async function updateFamille(id, values) {
     if (!mama_id) return { error: 'Aucun mama_id' };
-    const { error } = await supabase
-      .from('familles')
-      .update(values)
-      .match({ id, mama_id });
+    const { error } = await supabase.
+    from('familles').
+    update(values).
+    match({ id, mama_id });
     if (!error) await fetchAll();
     return { error };
   }
 
   async function deleteFamille(id) {
     if (!mama_id) return { error: 'Aucun mama_id' };
-    const { error } = await supabase
-      .from('familles')
-      .delete()
-      .eq('id', id)
-      .eq('mama_id', mama_id);
+    const { error } = await supabase.
+    from('familles').
+    delete().
+    eq('id', id).
+    eq('mama_id', mama_id);
     if (!error) await fetchAll();
     return { error };
   }
 
   async function addSousFamille(famille_id, values) {
     if (!mama_id) return { error: 'Aucun mama_id' };
-    const { error } = await supabase
-      .from('sous_familles')
-      .insert([{ ...values, famille_id, mama_id }]);
+    const { error } = await supabase.
+    from('sous_familles').
+    insert([{ ...values, famille_id, mama_id }]);
     if (!error) await fetchAll();
     return { error };
   }
 
   async function updateSousFamille(id, values) {
     if (!mama_id) return { error: 'Aucun mama_id' };
-    const { error } = await supabase
-      .from('sous_familles')
-      .update(values)
-      .match({ id, mama_id });
+    const { error } = await supabase.
+    from('sous_familles').
+    update(values).
+    match({ id, mama_id });
     if (!error) await fetchAll();
     return { error };
   }
 
   async function deleteSousFamille(id) {
     if (!mama_id) return { error: 'Aucun mama_id' };
-    const { error } = await supabase
-      .from('sous_familles')
-      .delete()
-      .eq('id', id)
-      .eq('mama_id', mama_id);
+    const { error } = await supabase.
+    from('sous_familles').
+    delete().
+    eq('id', id).
+    eq('mama_id', mama_id);
     if (!error) await fetchAll();
     return { error };
   }
@@ -117,7 +118,7 @@ export function useFamillesWithSousFamilles() {
     updateSousFamille,
     deleteSousFamille,
     toggleFamille,
-    toggleSousFamille,
+    toggleSousFamille
   };
 }
 

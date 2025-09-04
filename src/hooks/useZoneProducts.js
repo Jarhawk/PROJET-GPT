@@ -1,23 +1,24 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { supabase } from '@/lib/supabase';
+import supabase from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 
 export function useZoneProducts() {
   const { mama_id } = useAuth();
 
   async function list(zoneId) {
-    let q = supabase
-      .from('v_produits_par_zone')
-      .select('*')
-      .eq('zone_id', zoneId)
-      .eq('mama_id', mama_id);
+    let q = supabase.
+    from('v_produits_par_zone').
+    select('*').
+    eq('zone_id', zoneId).
+    eq('mama_id', mama_id);
     let { data, error } = await q;
     if (error) {
-      ({ data, error } = await supabase
-        .from('produits')
-        .select('*')
-        .eq('zone_id', zoneId)
-        .eq('mama_id', mama_id));
+      ({ data, error } = await supabase.
+      from('produits').
+      select('*').
+      eq('zone_id', zoneId).
+      eq('mama_id', mama_id));
     }
     if (error) throw error;
     return data;
@@ -28,7 +29,7 @@ export function useZoneProducts() {
       p_mama: mama_id,
       p_src_zone: srcZoneId,
       p_dest_zone: dstZoneId,
-      p_remove_src: removeSrc,
+      p_remove_src: removeSrc
     });
   }
 
@@ -37,7 +38,7 @@ export function useZoneProducts() {
       p_mama: mama_id,
       p_src_zone: srcZoneId,
       p_dest_zone: dstZoneId,
-      p_overwrite: overwrite,
+      p_overwrite: overwrite
     });
   }
 
@@ -45,7 +46,7 @@ export function useZoneProducts() {
     return await supabase.rpc('merge_zone_products', {
       p_mama: mama_id,
       p_src_zone: srcZoneId,
-      p_dest_zone: dstZoneId,
+      p_dest_zone: dstZoneId
     });
   }
 

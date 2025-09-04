@@ -3,3 +3,9 @@ node_modules
 db
 scripts/**/generated/**
 **/*.patch
+src/hooks/useInvoiceOcr.js
+src/components/parametrage/SousFamilleList.jsx
+src/pages/signalements/Signalements.jsx
+src/pages/simulation/SimulationForm.jsx
+src/hooks/useTemplatesCommandes.js
+src/api/**

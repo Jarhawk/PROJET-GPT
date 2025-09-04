@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 
 export function usePromotions() {
@@ -14,11 +15,11 @@ export function usePromotions() {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
-    let query = supabase
-      .from("promotions")
-      .select("*", { count: "exact" })
-      .eq("mama_id", mama_id)
-      .order("date_debut", { ascending: false });
+    let query = supabase.
+    from("promotions").
+    select("*", { count: "exact" }).
+    eq("mama_id", mama_id).
+    order("date_debut", { ascending: false });
     if (typeof query.range === "function") {
       query = query.range((page - 1) * limit, page * limit - 1);
     }
@@ -36,9 +37,9 @@ export function usePromotions() {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { error } = await supabase
-      .from("promotions")
-      .insert([{ ...values, mama_id }]);
+    const { error } = await supabase.
+    from("promotions").
+    insert([{ ...values, mama_id }]);
     setLoading(false);
     if (error) setError(error.message || error);
     await fetchPromotions();
@@ -48,11 +49,11 @@ export function usePromotions() {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { error } = await supabase
-      .from("promotions")
-      .update(values)
-      .eq("id", id)
-      .eq("mama_id", mama_id);
+    const { error } = await supabase.
+    from("promotions").
+    update(values).
+    eq("id", id).
+    eq("mama_id", mama_id);
     setLoading(false);
     if (error) setError(error.message || error);
     await fetchPromotions();
@@ -62,11 +63,11 @@ export function usePromotions() {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { error } = await supabase
-      .from("promotions")
-      .update({ actif: false })
-      .eq("id", id)
-      .eq("mama_id", mama_id);
+    const { error } = await supabase.
+    from("promotions").
+    update({ actif: false }).
+    eq("id", id).
+    eq("mama_id", mama_id);
     setLoading(false);
     if (error) setError(error.message || error);
     await fetchPromotions();
@@ -80,6 +81,6 @@ export function usePromotions() {
     fetchPromotions,
     addPromotion,
     updatePromotion,
-    deletePromotion,
+    deletePromotion
   };
 }

@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import supabase from '@/lib/supabase';import { useEffect, useState } from 'react';
+
 import { useAuth } from '@/hooks/useAuth';
 
 export default function useTopFournisseurs() {
@@ -16,17 +16,17 @@ export default function useTopFournisseurs() {
       setLoading(true);
       setError(null);
       try {
-        const { data, error } = await supabase
-          .from('v_top_fournisseurs')
-          .select('fournisseur_id, montant, mois')
-          .eq('mama_id', mama_id);
+        const { data, error } = await supabase.
+        from('v_top_fournisseurs').
+        select('fournisseur_id, montant, mois').
+        eq('mama_id', mama_id);
 
         if (error) throw error;
 
         const rows = (data || []).map((r) => ({
           id: r.fournisseur_id,
           montant: r.montant,
-          mois: r.mois,
+          mois: r.mois
         }));
         setData(rows);
       } catch (e) {

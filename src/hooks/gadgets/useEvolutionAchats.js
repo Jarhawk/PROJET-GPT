@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import supabase from '@/lib/supabase';import { useEffect, useState } from 'react';
+
 import { useAuth } from '@/hooks/useAuth';
 
 export default function useEvolutionAchats() {
@@ -19,12 +19,12 @@ export default function useEvolutionAchats() {
         const start = new Date();
         start.setMonth(start.getMonth() - 12);
         const filterDate = new Date(start.getFullYear(), start.getMonth(), 1).toISOString();
-        const { data, error } = await supabase
-          .from('v_evolution_achats')
-          .select('mois, montant')
-          .eq('mama_id', mama_id)
-          .gte('mois', filterDate)
-          .order('mois', { ascending: true });
+        const { data, error } = await supabase.
+        from('v_evolution_achats').
+        select('mois, montant').
+        eq('mama_id', mama_id).
+        gte('mois', filterDate).
+        order('mois', { ascending: true });
 
         if (error) throw error;
 

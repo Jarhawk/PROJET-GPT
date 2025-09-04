@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { toast } from 'sonner';
@@ -11,10 +12,10 @@ export default function RGPDConsentForm() {
   const [values, setValues] = useState({ cookies: false, interne: false, tiers: false });
   const [loading, setLoading] = useState(false);
 
-  const handleChange = e =>
-    setValues(v => ({ ...v, [e.target.name]: e.target.checked }));
+  const handleChange = (e) =>
+  setValues((v) => ({ ...v, [e.target.name]: e.target.checked }));
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (loading) return;
     const payload = {
@@ -23,13 +24,13 @@ export default function RGPDConsentForm() {
       mama_id,
       type_consentement: "global",
       consentement: values.cookies && values.interne && values.tiers,
-      date_consentement: new Date().toISOString(),
+      date_consentement: new Date().toISOString()
     };
     try {
       setLoading(true);
       const { error } = await supabase.from("consentements_utilisateur").insert([
-        payload,
-      ]);
+      payload]
+      );
       if (error) throw error;
       toast.success("Consentement enregistré");
     } catch (err) {
@@ -58,6 +59,6 @@ export default function RGPDConsentForm() {
         {loading ? "Enregistrement..." : "Valider"}
       </PrimaryButton>
       </form>
-    </GlassCard>
-  );
+    </GlassCard>);
+
 }

@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
@@ -16,11 +17,11 @@ export function useLogs() {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
-    let query = supabase
-      .from("logs_activite")
-      .select("*, utilisateurs:user_id(nom)")
-      .eq("mama_id", mama_id)
-      .order("date_log", { ascending: false });
+    let query = supabase.
+    from("logs_activite").
+    select("*, utilisateurs:user_id(nom)").
+    eq("mama_id", mama_id).
+    order("date_log", { ascending: false });
     if (type) query = query.eq("type", type);
     if (module) query = query.eq("module", module);
     if (start) query = query.gte("date_log", start);
@@ -44,17 +45,17 @@ export function useLogs() {
       p_module: module,
       p_description: description,
       p_donnees: donnees,
-      p_critique: critique,
+      p_critique: critique
     });
   }
 
   async function fetchRapports(filters = {}) {
     if (!mama_id) return [];
-    let query = supabase
-      .from("rapports_generes")
-      .select("*")
-      .eq("mama_id", mama_id)
-      .order("date_generation", { ascending: false });
+    let query = supabase.
+    from("rapports_generes").
+    select("*").
+    eq("mama_id", mama_id).
+    order("date_generation", { ascending: false });
     if (filters.module) query = query.eq("module", filters.module);
     if (filters.type) query = query.eq("type", filters.type);
     if (filters.start) query = query.gte("periode_debut", filters.start);
@@ -69,11 +70,11 @@ export function useLogs() {
   }
 
   async function downloadRapport(id) {
-    const { data } = await supabase
-      .from("rapports_generes")
-      .select("chemin_fichier")
-      .eq("id", id)
-      .single();
+    const { data } = await supabase.
+    from("rapports_generes").
+    select("chemin_fichier").
+    eq("id", id).
+    single();
     if (data?.chemin_fichier) {
       window.open(data.chemin_fichier, "_blank");
     }
@@ -95,14 +96,14 @@ export function useLogs() {
       const rows = logs.map((l) => [l.date_log, l.type, l.module, l.description, l.critique ? "oui" : "non"]);
       autoTable(doc, {
         head: [["Date", "Type", "Module", "Description", "Critique"]],
-        body: rows,
+        body: rows
       });
       doc.save("logs.pdf");
     } else {
       const header = "Date;Type;Module;Description;Critique\n";
-      const csv = logs
-        .map((l) => `${l.date_log};${l.type};${l.module};${l.description};${l.critique}`)
-        .join("\n");
+      const csv = logs.
+      map((l) => `${l.date_log};${l.type};${l.module};${l.description};${l.critique}`).
+      join("\n");
       const blob = new Blob([header + csv], { type: "text/csv;charset=utf-8" });
       saveAs(blob, "logs.csv");
     }
@@ -117,7 +118,7 @@ export function useLogs() {
     logAction,
     fetchRapports,
     downloadRapport,
-    exportLogs,
+    exportLogs
   };
 }
 

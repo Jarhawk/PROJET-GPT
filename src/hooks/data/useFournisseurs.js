@@ -1,7 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/lib/supabase';
+
 
 export function useFournisseurs(params = {}) {
   const { mama_id } = useAuth();
@@ -9,7 +10,7 @@ export function useFournisseurs(params = {}) {
     search = '',
     actif = true,
     page = 1,
-    limit = 50,
+    limit = 50
   } = params;
 
   const filtre = { search, actif, page, limit };
@@ -21,12 +22,12 @@ export function useFournisseurs(params = {}) {
     gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
     queryFn: async () => {
-      let query = supabase
-        .from('fournisseurs')
-        .select('id, nom, actif, contact:fournisseur_contacts(nom,email,tel)', { count: 'exact' })
-        .eq('mama_id', mama_id)
-        .order('nom', { ascending: true })
-        .range((page - 1) * limit, page * limit - 1);
+      let query = supabase.
+      from('fournisseurs').
+      select('id, nom, actif, contact:fournisseur_contacts(nom,email,tel)', { count: 'exact' }).
+      eq('mama_id', mama_id).
+      order('nom', { ascending: true }).
+      range((page - 1) * limit, page * limit - 1);
 
       if (search) query = query.ilike('nom', `%${search}%`);
       if (actif !== null && actif !== undefined) query = query.eq('actif', actif);
@@ -35,10 +36,10 @@ export function useFournisseurs(params = {}) {
       if (error) throw error;
       const list = (data || []).map((f) => ({
         ...f,
-        contact: Array.isArray(f.contact) ? f.contact[0] : f.contact,
+        contact: Array.isArray(f.contact) ? f.contact[0] : f.contact
       }));
       return { data: list, count: count || 0 };
-    },
+    }
   });
 }
 

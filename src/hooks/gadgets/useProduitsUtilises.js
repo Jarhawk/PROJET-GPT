@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
+import supabase from '@/lib/supabase';import { useState, useEffect, useCallback } from 'react';
+
 import { useAuth } from '@/hooks/useAuth';
 
 export default function useProduitsUtilises() {
@@ -15,11 +15,11 @@ export default function useProduitsUtilises() {
     try {
       const start = new Date();
       start.setDate(start.getDate() - 30);
-      const { data, error } = await supabase
-        .from('v_produits_utilises')
-        .select('produit_id, produit_nom, quantite, date_utilisation')
-        .eq('mama_id', mama_id)
-        .gte('date_utilisation', start.toISOString().slice(0, 10));
+      const { data, error } = await supabase.
+      from('v_produits_utilises').
+      select('produit_id, produit_nom, quantite, date_utilisation').
+      eq('mama_id', mama_id).
+      gte('date_utilisation', start.toISOString().slice(0, 10));
       if (error) throw error;
       const totals = {};
       (data || []).forEach((r) => {

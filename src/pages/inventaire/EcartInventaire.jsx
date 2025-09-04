@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 import { useInventaireZones } from "@/hooks/useInventaireZones";
 import TableContainer from "@/components/ui/TableContainer";
@@ -17,15 +18,15 @@ function EcartInventairePage() {
   const [ecarts, setEcarts] = useState([]);
 
   const fetchEcarts = useCallback(async () => {
-    if ((!date && !mois) || !zone || !mama_id) return;
+    if (!date && !mois || !zone || !mama_id) return;
 
     let all = [];
 
     if (mois) {
       const start = mois;
-      const end = new Date(new Date(mois).getFullYear(), new Date(mois).getMonth() + 1, 0)
-        .toISOString()
-        .slice(0, 10);
+      const end = new Date(new Date(mois).getFullYear(), new Date(mois).getMonth() + 1, 0).
+      toISOString().
+      slice(0, 10);
 
       const rangeDates = [];
       for (let d = new Date(start); d <= new Date(end); d.setDate(d.getDate() + 1)) {
@@ -36,7 +37,7 @@ function EcartInventairePage() {
         const { data, error } = await supabase.rpc("calcul_ecarts_inventaire", {
           p_date: d,
           p_zone: zone,
-          mama_id_param: mama_id,
+          mama_id_param: mama_id
         });
         if (!error && data.length > 0) {
           all.push(...data.map((e) => ({ ...e, date: d })));
@@ -46,7 +47,7 @@ function EcartInventairePage() {
       const { data, error } = await supabase.rpc("calcul_ecarts_inventaire", {
         p_date: date,
         p_zone: zone,
-        mama_id_param: mama_id,
+        mama_id_param: mama_id
       });
       if (!error) {
         all = data.map((e) => ({ ...e, date }));
@@ -57,9 +58,9 @@ function EcartInventairePage() {
   }, [date, mois, zone, mama_id]);
 
   const renderPDF = useCallback(() => {
-    const rows = ecarts
-      .map(
-        (e) => `
+    const rows = ecarts.
+    map(
+      (e) => `
       <tr>
         <td>${e.date || ""}</td>
         <td>${e.produit}</td>
@@ -68,8 +69,8 @@ function EcartInventairePage() {
         <td>${e.ecart}</td>
         <td>${e.motif || ""}</td>
       </tr>`
-      )
-      .join("");
+    ).
+    join("");
 
     const content = `
       <html>
@@ -138,8 +139,8 @@ function EcartInventairePage() {
             setDate(e.target.value);
             setMois("");
           }}
-          className="flex-1"
-        />
+          className="flex-1" />
+
         <div className="flex-1">
           <InputField
             label="Zone"
@@ -148,18 +149,18 @@ function EcartInventairePage() {
             placeholder="Zone (ex: bar, cuisine...)"
             value={zone}
             onChange={(e) => setZone(e.target.value)}
-            className="w-full"
-          />
+            className="w-full" />
+
           <datalist id="zones">
-            {zones.map(z => (
-              <option key={z.id} value={z.nom} />
-            ))}
+            {zones.map((z) =>
+            <option key={z.id} value={z.nom} />
+            )}
           </datalist>
         </div>
         <button
           onClick={renderPDF}
-          className="bg-mamastock-gold text-white font-bold px-4 py-2 rounded self-end h-10"
-        >
+          className="bg-mamastock-gold text-white font-bold px-4 py-2 rounded self-end h-10">
+
           📄 Export PDF
         </button>
       </div>
@@ -177,8 +178,8 @@ function EcartInventairePage() {
             </tr>
           </thead>
           <tbody>
-            {ecarts.map((e, idx) => (
-              <tr key={idx} className="border-b hover:bg-white/5">
+            {ecarts.map((e, idx) =>
+            <tr key={idx} className="border-b hover:bg-white/5">
                 <td className="p-3">{e.date}</td>
                 <td className="p-3">{e.produit}</td>
                 <td className="p-3">{e.stock_theorique}</td>
@@ -188,16 +189,16 @@ function EcartInventairePage() {
                 </td>
                 <td className="p-3 italic text-gray-500">{e.motif}</td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </TableContainer>
-    </div>
-  );
+    </div>);
+
 }
 
 export default function EcartInventaire() {
   return (
-    <EcartInventairePage />
-  );
+    <EcartInventairePage />);
+
 }

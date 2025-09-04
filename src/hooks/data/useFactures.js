@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
+import supabase from '@/lib/supabase';import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/lib/supabase';
+
 
 export function useFactures(filters = {}) {
   const { userData } = useAuth();
@@ -12,15 +12,15 @@ export function useFactures(filters = {}) {
     enabled: !!mamaId,
     keepPreviousData: true,
     queryFn: async () => {
-      let q = supabase
-        .from('factures')
-        .select(
-          'id, numero, date_facture, fournisseur_id, montant_ttc:total_ttc, statut, actif, fournisseur:fournisseurs(nom)',
-          { count: 'exact' }
-        )
-        .eq('mama_id', mamaId)
-        .order('date_facture', { ascending: false })
-        .range((page - 1) * pageSize, page * pageSize - 1);
+      let q = supabase.
+      from('factures').
+      select(
+        'id, numero, date_facture, fournisseur_id, montant_ttc:total_ttc, statut, actif, fournisseur:fournisseurs(nom)',
+        { count: 'exact' }
+      ).
+      eq('mama_id', mamaId).
+      order('date_facture', { ascending: false }).
+      range((page - 1) * pageSize, page * pageSize - 1);
 
       if (filters?.search) {
         q = q.ilike('numero', `%${filters.search}%`);
@@ -37,7 +37,7 @@ export function useFactures(filters = {}) {
       const { data, error, count } = await q;
       if (error) throw error;
       return { factures: data ?? [], total: count || 0 };
-    },
+    }
   });
 }
 

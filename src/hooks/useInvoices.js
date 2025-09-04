@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 import * as XLSX from "xlsx";
 import { safeImportXLSX } from "@/lib/xlsx/safeImportXLSX";
@@ -17,14 +18,14 @@ export function useInvoices() {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
-    let query = supabase
-      .from("factures")
-      .select(`
+    let query = supabase.
+    from("factures").
+    select(`
         *,
         fournisseur:fournisseur_id(id, nom)
-      `)
-      .eq("mama_id", mama_id)
-      .order("date_facture", { ascending: false });
+      `).
+    eq("mama_id", mama_id).
+    order("date_facture", { ascending: false });
 
     if (search) query = query.ilike("numero", `%${search}%`);
     if (fournisseur) query = query.eq("fournisseur_id", fournisseur);
@@ -43,12 +44,12 @@ export function useInvoices() {
     if (!fournisseur_id || !mama_id) return [];
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase
-      .from("factures")
-      .select("id, date_facture, numero, total_ttc, statut")
-      .eq("mama_id", mama_id)
-      .eq("fournisseur_id", fournisseur_id)
-      .order("date_facture", { ascending: false });
+    const { data, error } = await supabase.
+    from("factures").
+    select("id, date_facture, numero, total_ttc, statut").
+    eq("mama_id", mama_id).
+    eq("fournisseur_id", fournisseur_id).
+    order("date_facture", { ascending: false });
     setLoading(false);
     if (error) {
       setError(error);
@@ -62,12 +63,12 @@ export function useInvoices() {
     if (!id || !mama_id) return null;
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase
-      .from("factures")
-      .select("*, fournisseur:fournisseur_id(id, nom)")
-      .eq("id", id)
-      .eq("mama_id", mama_id)
-      .single();
+    const { data, error } = await supabase.
+    from("factures").
+    select("*, fournisseur:fournisseur_id(id, nom)").
+    eq("id", id).
+    eq("mama_id", mama_id).
+    single();
     setLoading(false);
     if (error) {
       setError(error);
@@ -80,9 +81,9 @@ export function useInvoices() {
     if (!mama_id) return;
     setLoading(true);
     setError(null);
-    const { error } = await supabase
-      .from("factures")
-      .insert([{ ...invoice, mama_id }]);
+    const { error } = await supabase.
+    from("factures").
+    insert([{ ...invoice, mama_id }]);
     if (error) setError(error);
     setLoading(false);
     await fetchInvoices();
@@ -93,11 +94,11 @@ export function useInvoices() {
     if (!mama_id) return;
     setLoading(true);
     setError(null);
-    const { error } = await supabase
-      .from("factures")
-      .update(updateFields)
-      .eq("id", id)
-      .eq("mama_id", mama_id);
+    const { error } = await supabase.
+    from("factures").
+    update(updateFields).
+    eq("id", id).
+    eq("mama_id", mama_id);
     if (error) setError(error);
     setLoading(false);
     await fetchInvoices();
@@ -108,11 +109,11 @@ export function useInvoices() {
     if (!mama_id) return;
     setLoading(true);
     setError(null);
-    const { error } = await supabase
-      .from("factures")
-      .delete()
-      .eq("id", id)
-      .eq("mama_id", mama_id);
+    const { error } = await supabase.
+    from("factures").
+    delete().
+    eq("id", id).
+    eq("mama_id", mama_id);
     if (error) setError(error);
     setLoading(false);
     await fetchInvoices();
@@ -123,11 +124,11 @@ export function useInvoices() {
     if (!mama_id) return;
     setLoading(true);
     setError(null);
-    const { error } = await supabase
-      .from("factures")
-      .update({ statut })
-      .in("id", ids)
-      .eq("mama_id", mama_id);
+    const { error } = await supabase.
+    from("factures").
+    update({ statut }).
+    in("id", ids).
+    eq("mama_id", mama_id);
     if (error) setError(error);
     setLoading(false);
     await fetchInvoices();
@@ -135,14 +136,14 @@ export function useInvoices() {
 
   // 8. Export Excel
   function exportInvoicesToExcel() {
-    const datas = (invoices || []).map(f => ({
+    const datas = (invoices || []).map((f) => ({
       id: f.id,
       numero: f.numero,
       date: f.date_facture,
       fournisseur: f.fournisseur?.nom,
       montant: f.total_ttc,
       statut: f.statut,
-      mama_id: f.mama_id,
+      mama_id: f.mama_id
     }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Factures");
@@ -177,6 +178,6 @@ export function useInvoices() {
     deleteInvoice,
     batchUpdateStatus,
     exportInvoicesToExcel,
-    importInvoicesFromExcel,
+    importInvoicesFromExcel
   };
 }

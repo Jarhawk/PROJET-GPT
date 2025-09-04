@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState, useCallback } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 
 const SELECT = '*, assigned:utilisateurs!taches_assigned_to_fkey(nom)';
@@ -15,11 +16,11 @@ export function useTasks() {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase
-      .from('taches')
-      .select(SELECT)
-      .eq('mama_id', mama_id)
-      .order('next_echeance', { ascending: true });
+    const { data, error } = await supabase.
+    from('taches').
+    select(SELECT).
+    eq('mama_id', mama_id).
+    order('next_echeance', { ascending: true });
     setLoading(false);
     if (error) {
       setError(error.message);
@@ -31,12 +32,12 @@ export function useTasks() {
 
   const fetchTaskById = useCallback(async (id) => {
     if (!mama_id || !id) return null;
-    const { data, error } = await supabase
-      .from('taches')
-      .select(SELECT)
-      .eq('id', id)
-      .eq('mama_id', mama_id)
-      .single();
+    const { data, error } = await supabase.
+    from('taches').
+    select(SELECT).
+    eq('id', id).
+    eq('mama_id', mama_id).
+    single();
     if (error) {
       setError(error.message);
       return null;
@@ -48,12 +49,12 @@ export function useTasks() {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase
-      .from('taches')
-      .select(SELECT)
-      .eq('mama_id', mama_id)
-      .eq('statut', statut)
-      .order('next_echeance', { ascending: true });
+    const { data, error } = await supabase.
+    from('taches').
+    select(SELECT).
+    eq('mama_id', mama_id).
+    eq('statut', statut).
+    order('next_echeance', { ascending: true });
     setLoading(false);
     if (error) {
       setError(error.message);
@@ -66,11 +67,11 @@ export function useTasks() {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase
-      .from("taches")
-      .insert([{ ...values, mama_id }])
-      .select()
-      .single();
+    const { data, error } = await supabase.
+    from("taches").
+    insert([{ ...values, mama_id }]).
+    select().
+    single();
     setLoading(false);
     if (error) {
       setError(error.message);
@@ -83,13 +84,13 @@ export function useTasks() {
   const updateTask = useCallback(async (id, values) => {
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase
-      .from("taches")
-      .update(values)
-      .eq("id", id)
-      .eq("mama_id", mama_id)
-      .select()
-      .single();
+    const { data, error } = await supabase.
+    from("taches").
+    update(values).
+    eq("id", id).
+    eq("mama_id", mama_id).
+    select().
+    single();
     setLoading(false);
     if (error) {
       setError(error.message);
@@ -102,11 +103,11 @@ export function useTasks() {
   const deleteTask = useCallback(async (id) => {
     setLoading(true);
     setError(null);
-    const { error } = await supabase
-      .from("taches")
-      .delete()
-      .eq("id", id)
-      .eq("mama_id", mama_id);
+    const { error } = await supabase.
+    from("taches").
+    delete().
+    eq("id", id).
+    eq("mama_id", mama_id);
     setLoading(false);
     if (error) {
       setError(error.message);
@@ -125,6 +126,6 @@ export function useTasks() {
     fetchTasksByStatus,
     addTask,
     updateTask,
-    deleteTask,
+    deleteTask
   };
 }

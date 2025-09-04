@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
+import supabase from '@/lib/supabase';import { useState, useEffect, useCallback } from 'react';
+
 import { useAuth } from '@/hooks/useAuth';
 
 export default function useDerniersAcces() {
@@ -13,14 +13,14 @@ export default function useDerniersAcces() {
     setLoading(true);
     setError(null);
     try {
-      const { data, error } = await supabase
-        .from('logs_securite')
-        .select(
-          'utilisateur_id, created_at, utilisateur:utilisateurs!logs_securite_utilisateur_id_fkey(email, auth_id)'
-        )
-        .eq('mama_id', mama_id)
-        .order('created_at', { ascending: false })
-        .limit(50);
+      const { data, error } = await supabase.
+      from('logs_securite').
+      select(
+        'utilisateur_id, created_at, utilisateur:utilisateurs!logs_securite_utilisateur_id_fkey(email, auth_id)'
+      ).
+      eq('mama_id', mama_id).
+      order('created_at', { ascending: false }).
+      limit(50);
       if (error) throw error;
       const seen = {};
       const list = [];
@@ -30,7 +30,7 @@ export default function useDerniersAcces() {
         list.push({
           id: row.utilisateur_id,
           email: row.utilisateur?.email,
-          date: row.created_at,
+          date: row.created_at
         });
         if (list.length >= 5) break;
       }

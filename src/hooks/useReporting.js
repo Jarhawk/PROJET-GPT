@@ -1,5 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { supabase } from '@/lib/supabase';
+import supabase from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 
 export function useReporting() {
@@ -36,11 +37,11 @@ export function useReporting() {
         query = supabase.from('v_pmp').select('*').eq('mama_id', mama_id);
         break;
       case 'familles':
-        query = supabase
-          .from('v_analytique_stock')
-          .select('famille, sumv:valeur')
-          .eq('mama_id', mama_id)
-          .group('famille');
+        query = supabase.
+        from('v_analytique_stock').
+        select('famille, sumv:valeur').
+        eq('mama_id', mama_id).
+        group('famille');
         query = applyFilters(query, filters);
         break;
       case 'cost_center':
@@ -61,11 +62,11 @@ export function useReporting() {
 
   async function getEcartInventaire(filters = {}) {
     if (!mama_id) return [];
-    let query = supabase
-      .from('v_analytique_stock')
-      .select('produit_id, sumv:valeur')
-      .eq('mama_id', mama_id)
-      .group('produit_id');
+    let query = supabase.
+    from('v_analytique_stock').
+    select('produit_id, sumv:valeur').
+    eq('mama_id', mama_id).
+    group('produit_id');
     query = applyFilters(query, filters);
     const { data, error } = await query;
     if (error) {

@@ -1,9 +1,10 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { Outlet, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from '@/lib/supabase';
+
 import useNotifications from "@/hooks/useNotifications";
 import { Badge } from "@/components/ui/badge";
 import { Bell } from "lucide-react";
@@ -15,8 +16,8 @@ import {
   LiquidBackground,
   WavesBackground,
   MouseLight,
-  TouchLight,
-} from "@/components/LiquidBackground";
+  TouchLight } from
+"@/components/LiquidBackground";
 
 export default function Layout() {
   const { session, userData, loading } = useAuth();
@@ -48,39 +49,39 @@ export default function Layout() {
       <div className="flex flex-col flex-1 relative z-10">
         <main className="flex-1 p-4 overflow-auto">
           <div className="flex justify-end items-center gap-2 mb-4">
-          {user && (
+          {user &&
             <>
               <Link to="/notifications" className="relative">
                 <Bell size={20} />
-                {unread > 0 && (
-                  <Badge color="red" className="absolute -top-1 -right-1">
+                {unread > 0 &&
+                <Badge color="red" className="absolute -top-1 -right-1">
                     {unread}
                   </Badge>
-                )}
+                }
               </Link>
               <AlertBadge />
               <span>{user.email}</span>
-              {userData.nom && (
-                <span className="text-xs bg-white/10 px-2 py-1 rounded capitalize">
+              {userData.nom &&
+              <span className="text-xs bg-white/10 px-2 py-1 rounded capitalize">
                   {userData.nom}
                 </span>
-              )}
+              }
               <button
                 onClick={() => {
                   supabase.auth.signOut();
                   toast.success("Déconnecté");
                 }}
-                className="text-red-400 hover:underline"
-              >
+                className="text-red-400 hover:underline">
+
                 Déconnexion
               </button>
             </>
-          )}
+            }
           </div>
           <Outlet />
         </main>
         <Footer />
       </div>
-    </div>
-  );
+    </div>);
+
 }

@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { authenticator } from "otplib";
 
 export function useTwoFactorAuth() {
@@ -13,13 +14,13 @@ export function useTwoFactorAuth() {
     setLoading(true);
     setError(null);
     const { data: { user } } = await supabase.auth.getUser();
-    const { data, error } = await supabase
-      .from("auth_double_facteur")
-      .select("enabled, secret")
-      .eq("id", user.id)
-      .single();
-    if (error) setError(error);
-    else {
+    const { data, error } = await supabase.
+    from("auth_double_facteur").
+    select("enabled, secret").
+    eq("id", user.id).
+    single();
+    if (error) setError(error);else
+    {
       setEnabled(data.enabled);
       setSecret(data.secret);
     }
@@ -39,20 +40,20 @@ export function useTwoFactorAuth() {
     setError(null);
     const { data: { user } } = await supabase.auth.getUser();
     const { error } = await supabase.from('auth_double_facteur').upsert({ id: user.id, secret, enabled: true });
-    if (error) setError(error);
-    else setEnabled(true);
+    if (error) setError(error);else
+    setEnabled(true);
     setLoading(false);
   }
 
   async function disable() {
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
-    const { error } = await supabase
-      .from("auth_double_facteur")
-      .update({ enabled: false, secret: null })
-      .eq("id", user.id);
-    if (error) setError(error);
-    else {
+    const { error } = await supabase.
+    from("auth_double_facteur").
+    update({ enabled: false, secret: null }).
+    eq("id", user.id);
+    if (error) setError(error);else
+    {
       setSecret(null);
       setEnabled(false);
     }
@@ -77,6 +78,6 @@ export function useTwoFactorAuth() {
     startSetup,
     finalizeSetup,
     disable,
-    verify,
+    verify
   };
 }

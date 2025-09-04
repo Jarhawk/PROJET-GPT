@@ -1,8 +1,9 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { PDFDownloadLink, pdf } from "@react-pdf/renderer";
-import { supabase } from '@/lib/supabase';
+
 import { useCommandes } from "@/hooks/useCommandes";
 import { useTemplatesCommandes } from "@/hooks/useTemplatesCommandes";
 import CommandePDF from "@/components/pdf/CommandePDF";
@@ -11,7 +12,7 @@ import { toast } from 'sonner';
 
 async function generateCommandePDFBase64(commande, template, fournisseur) {
   const blob = await pdf(
-    <CommandePDF commande={commande} template={template} fournisseur={fournisseur} />,
+    <CommandePDF commande={commande} template={template} fournisseur={fournisseur} />
   ).toBlob();
 
   return new Promise((resolve) => {
@@ -37,7 +38,7 @@ export default function CommandeDetail() {
   useEffect(() => {
     if (commande?.fournisseur_id) {
       getTemplateForFournisseur(commande.fournisseur_id).then(({ data }) =>
-        setTemplate(data || null)
+      setTemplate(data || null)
       );
     }
   }, [commande, getTemplateForFournisseur]);
@@ -53,8 +54,8 @@ export default function CommandeDetail() {
         body: {
           commande,
           fournisseur,
-          pdfBase64: base64,
-        },
+          pdfBase64: base64
+        }
       });
 
       if (error) throw error;
@@ -70,14 +71,13 @@ export default function CommandeDetail() {
       <PDFDownloadLink
         document={<CommandePDF commande={commande} template={template} fournisseur={fournisseur} />}
         fileName={`commande-${commande.id}.pdf`}
-        className="btn btn-sm bg-blue-600 text-white mt-3"
-      >
-        {({ loading }) => (loading ? "Préparation..." : "Télécharger PDF")}
+        className="btn btn-sm bg-blue-600 text-white mt-3">
+
+        {({ loading }) => loading ? "Préparation..." : "Télécharger PDF"}
       </PDFDownloadLink>
       <Button onClick={handleSendEmail} className="mt-2 bg-green-600 text-white">
         📩 Envoyer par email
       </Button>
-    </div>
-  );
-}
+    </div>);
 
+}

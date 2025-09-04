@@ -717,8 +717,8 @@ Table présente Supabase
 | public       | transferts                  | mama_id                 | uuid                        | YES         | null                                            |
 | public       | transferts                  | produit_id              | uuid                        | YES         | null                                            |
 | public       | transferts                  | date_transfert          | date                        | NO          | null                                            |
-| public       | transferts                  | zone_depart             | character varying           | NO          | null                                            |
-| public       | transferts                  | zone_arrivee            | character varying           | NO          | null                                            |
+| public       | transferts                  | zone_source_id          | uuid                        | YES          | null                                            |
+| public       | transferts                  | zone_dest_id            | uuid                        | YES          | null                                            |
 | public       | transferts                  | quantite                | numeric                     | NO          | null                                            |
 | public       | transferts                  | motif                   | text                        | YES         | null                                            |
 | public       | transferts                  | created_by              | uuid                        | YES         | null                                            |

@@ -54,14 +54,14 @@ export default function Transferts() {
           onChange={(e) => setFilters((f) => ({ ...f, fin: e.target.value }))}
         />
         <select
-          aria-label="Zone source"
+          aria-label="Zone départ"
           className="form-input"
           value={filters.zone_source_id}
           onChange={(e) =>
             setFilters((f) => ({ ...f, zone_source_id: e.target.value }))
           }
         >
-          <option value="">Zone source</option>
+          <option value="">Zone départ</option>
           {zones.map((z) => (
             <option key={z.id} value={z.id}>
               {z.nom}
@@ -69,14 +69,14 @@ export default function Transferts() {
           ))}
         </select>
         <select
-          aria-label="Zone destination"
+          aria-label="Zone arrivée"
           className="form-input"
           value={filters.zone_dest_id}
           onChange={(e) =>
             setFilters((f) => ({ ...f, zone_dest_id: e.target.value }))
           }
         >
-          <option value="">Zone destination</option>
+          <option value="">Zone arrivée</option>
           {zones.map((z) => (
             <option key={z.id} value={z.id}>
               {z.nom}
@@ -105,8 +105,8 @@ export default function Transferts() {
           <thead>
             <tr>
               <th className="p-2">Date</th>
-              <th className="p-2">Zone source</th>
-              <th className="p-2">Zone destination</th>
+              <th className="p-2">Zone départ</th>
+              <th className="p-2">Zone arrivée</th>
               <th className="p-2">Nb produits</th>
               <th className="p-2">Statut</th>
             </tr>

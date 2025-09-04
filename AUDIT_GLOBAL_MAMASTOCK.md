@@ -28,7 +28,7 @@
 | Factures/BL | `/factures`, `/bons-livraison` → `src/pages/factures/Factures.jsx`, `src/pages/bons_livraison/BonsLivraison.jsx` | `useFactures.js`, `useBonsLivraison.js` | Tables: `factures`, `bons_livraison`, `lignes_bl` | ❌ | Schéma SQL incomplet |
 | Inventaires | `/inventaire` → `src/pages/inventaire/Inventaire.jsx` | `useInventaires.js` | Tables: `inventaires`, `inventaire_zones`, `produits_inventaire` | ⚠️ | RLS non vérifiée |
 | Commandes | `/commandes` → `src/pages/commandes/Commandes.jsx` | `useCommandes.js` | Tables: `commandes`, `commande_lignes` | ❌ | Colonnes manquantes |
-| Transferts | `/transferts` → `src/pages/stock/Transferts.jsx` | `useTransferts.js` | Tables: `transferts`, `transfert_lignes` | ⚠️ | Noms `zone_depart`/`zone_arrivee` absents |
+| Transferts | `/transferts` → `src/pages/stock/Transferts.jsx` | `useTransferts.js` | Tables: `transferts`, `transfert_lignes` | ⚠️ | Noms `zone_source_id`/`zone_dest_id` absents |
 | Réquisitions | `/requisitions` → `src/pages/requisitions/Requisitions.jsx` | `useRequisitions.js` | Tables: `requisitions`, `requisition_lignes`; vue: `v_requisitions` | ⚠️ | Vue sans filtre `mama_id` |
 | Tâches | `/taches` → `src/pages/taches/Taches.jsx` | `useTaches.js` | Table: `taches` | ⚠️ | Doublons `loading` |
 | Fiches techniques | `/fiches` → `src/pages/fiches/Fiches.jsx` | `useFiches.js` | Tables: `fiches_techniques`, `fiche_lignes`; vue: `v_fiche_lignes_complete` | ⚠️ | Vue à valider |
@@ -118,7 +118,7 @@ Présence de toasts d'erreur et de gestion de chargement, mais doublons `loading
 | `src/hooks/usePromotions.js:17-26` | `from('promotions').select('*', { count:'exact' }).eq('mama_id', mama_id).order('date_debut', { ascending:false })` | table:`promotions` | `nom`, `description`, `date_debut`, `date_fin`, `actif` | oui | Policy `promotions_all` |
 | `src/hooks/useReporting.js:31-33` | `from('v_achats_mensuels').select('*').eq('mama_id', mama_id)` | vue:`v_achats_mensuels` | `mama_id`, `mois`, `montant_total` | oui | - |
 | `src/hooks/useTransferts.js:27-38` | `from('transferts').select("id, date_transfert, motif, zone_source:zones_stock!fk_transferts_zone_source_id(id, nom), zone_destination:zones_stock!fk_transferts_zone_dest_id(id, nom), lignes:transfert_lignes(id, produit_id, quantite, produit:produits(id, nom))").eq('mama_id', mama_id)` | table:`transferts`; join:`transfert_lignes` | `date_transfert`, `motif`, `zone_source_id`, `zone_dest_id` | oui | Filtres `mama_id` OK |
-| `src/pages/Transferts.jsx:229-233` | `from('transferts').select("date_transfert, zone_depart, zone_arrivee, quantite, motif").eq('mama_id', mama_id).eq('produit_id', produit_id)` | table:`transferts` | `date_transfert`, `zone_depart`, `zone_arrivee`, `quantite`, `motif` | non | `zone_depart`/`zone_arrivee` inexistantes |
+| `src/pages/Transferts.jsx:229-233` | `from('transferts').select("date_transfert, zone_source_id, zone_dest_id, quantite, motif").eq('mama_id', mama_id).eq('produit_id', produit_id)` | table:`transferts` | `date_transfert`, `zone_source_id`, `zone_dest_id`, `quantite`, `motif` | non | `zone_source_id`/`zone_dest_id` inexistantes |
 | `src/hooks/useEmailsEnvoyes.js:10-19` | `from('emails_envoyes').select('*').eq('mama_id', mama_id)...order('envoye_le')` | table:`emails_envoyes` | `email`, `statut`, `commande_id`, `envoye_le` | oui | - |
 | `src/hooks/useNotifications.js:58-65` | `from('notifications').select('*').eq('mama_id', mama_id).eq('user_id', user_id).order('created_at', { ascending:false })` | table:`notifications` | `titre`, `texte`, `type`, `lu`, `created_at` | oui | - |
 | `src/hooks/useUtilisateurs.js:19-30` | `from('utilisateurs_complets').select('*').eq('mama_id', mama_id).order('nom')` | view:`utilisateurs_complets` | `nom`, `email`, `role_id`, `actif` | oui | - |
@@ -132,12 +132,12 @@ Présence de toasts d'erreur et de gestion de chargement, mais doublons `loading
 ## 6) Erreurs connues
 - `Identifier 'loading' has already been declared` dans plusieurs hooks (`useEvolutionAchats`, `useEmailsEnvoyes`, `useZonesStock`).
 - Colonnes manquantes provoquant des erreurs 42703 potentielles dans `factures`, `bons_livraison`, `commandes`, `menus_jour`.
-- Sélection `zone_depart`/`zone_arrivee` inexistante dans `transferts`.
+- Sélection `zone_source_id`/`zone_dest_id` inexistante dans `transferts`.
 - Tests unitaires échoués (`backup_db.test.js`, `export_accounting.test.js`, `weekly_report.test.js`).
 
 ## 7) Manquants
 - Colonnes confirmées manquantes : `fournisseurs.contact`, `produits.pmp`, `produits.stock_theorique`, `factures.numero`, `factures.date_facture`, `factures.montant`, `bons_livraison.numero_bl`, `commandes.date_commande`, `requisitions.zone_id`, `menus_jour.prix_vente_ttc`.
-- Colonnes front non trouvées : `transferts.zone_depart`, `transferts.zone_arrivee`.
+- Colonnes front non trouvées : `transferts.zone_source_id`, `transferts.zone_dest_id`.
 - Vues à compléter : `v_pmp`, `v_stocks`, `v_products_last_price`, `v_requisitions`, `v_fiche_lignes_complete`, `v_me_classification`, `v_menu_du_jour_mensuel` avec filtre `mama_id` et colonnes attendues.
 - Vues à compléter : `v_pmp`, `v_stocks`, `v_products_last_price`, `v_requisitions`, `v_fiche_lignes_complete`, `v_me_classification`, `v_menu_du_jour_mensuel`, `v_achats_mensuels`, `v_analytique_stock`, `v_cost_center_month` avec filtre `mama_id` et colonnes attendues.
 - Fonctions/Triggers à créer : `trg_set_timestamp`, `current_user_is_admin_or_manager`.

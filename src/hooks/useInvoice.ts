@@ -38,7 +38,7 @@ async function fetchInvoiceAndLinesSeparately(id: UUID, mamaId: UUID): Promise<F
     .returns<FactureHead>()
     .eq('mama_id', mamaId)
     .eq('id', id)
-    .maybeSingle();
+    .single();
   if (e1) throw e1;
   if (!head) throw new Error('Facture introuvable');
 
@@ -80,7 +80,7 @@ export function useInvoice(id: UUID | undefined): UseQueryResult<Facture> {
           .eq('mama_id', mamaId)
           .eq('id', id!)
           .returns<Facture>()
-          .maybeSingle();
+          .single();
 
         if (error) {
           throw error;

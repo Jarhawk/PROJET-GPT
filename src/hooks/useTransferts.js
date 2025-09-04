@@ -18,7 +18,7 @@ export function useTransferts() {
       debut = "",
       fin = "",
       zone_source_id = "",
-      zone_destination_id = "",
+      zone_dest_id = "",
       produit_id = ""
     } = {}) =>
     {
@@ -28,14 +28,14 @@ export function useTransferts() {
       let q = supabase.
       from("transferts").
       select(
-        "id, date_transfert, motif, zone_source:zones_stock!fk_transferts_zone_source_id(id, nom), zone_destination:zones_stock!fk_transferts_zone_dest_id(id, nom), lignes:transfert_lignes(id, produit_id, quantite, produit:produits(id, nom))"
+        "id, date_transfert, motif, zone_source_id, zone_dest_id, zone_source:zones_stock!transferts_zone_source_id_fkey(id, nom), zone_dest:zones_stock!transferts_zone_dest_id_fkey(id, nom), lignes:transfert_lignes(id, produit_id, quantite, produit:produits(id, nom))"
       ).
       eq("mama_id", mama_id).
       order("date_transfert", { ascending: false });
       if (debut) q = q.gte("date_transfert", debut);
       if (fin) q = q.lte("date_transfert", fin);
       if (zone_source_id) q = q.eq("zone_source_id", zone_source_id);
-      if (zone_destination_id) q = q.eq("zone_dest_id", zone_destination_id);
+      if (zone_dest_id) q = q.eq("zone_dest_id", zone_dest_id);
       if (produit_id) q = q.eq("transfert_lignes.produit_id", produit_id);
       const { data, error } = await q;
       setLoading(false);
@@ -62,7 +62,7 @@ export function useTransferts() {
     {
       mama_id,
       zone_source_id: header.zone_source_id,
-      zone_dest_id: header.zone_destination_id,
+      zone_dest_id: header.zone_dest_id,
       motif: header.motif || "",
       date_transfert: date,
       utilisateur_id: user_id
@@ -103,7 +103,7 @@ export function useTransferts() {
       const { data, error } = await supabase.
       from("transferts").
       select(
-        "id, date_transfert, motif, zone_source:zones_stock!fk_transferts_zone_source_id(id, nom), zone_destination:zones_stock!fk_transferts_zone_dest_id(id, nom), lignes:transfert_lignes(id, quantite, produit:produits(id, nom))"
+        "id, date_transfert, motif, zone_source_id, zone_dest_id, zone_source:zones_stock!transferts_zone_source_id_fkey(id, nom), zone_dest:zones_stock!transferts_zone_dest_id_fkey(id, nom), lignes:transfert_lignes(id, quantite, produit:produits(id, nom))"
       ).
       eq("mama_id", mama_id).
       eq("id", id).

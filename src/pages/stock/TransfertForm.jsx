@@ -16,7 +16,7 @@ export default function TransfertForm({ onClose, onSaved }) {
 
   const [header, setHeader] = useState({
     zone_source_id: '',
-    zone_destination_id: '',
+    zone_dest_id: '',
     motif: '',
   });
   const [lignes, setLignes] = useState([{ produit_id: '', quantite: '' }]);
@@ -40,11 +40,11 @@ export default function TransfertForm({ onClose, onSaved }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (saving) return;
-    if (!header.zone_source_id || !header.zone_destination_id) {
+    if (!header.zone_source_id || !header.zone_dest_id) {
       toast.error('Zones requises');
       return;
     }
-    if (header.zone_source_id === header.zone_destination_id) {
+    if (header.zone_source_id === header.zone_dest_id) {
       toast.error('Zones différentes requises');
       return;
     }
@@ -85,11 +85,11 @@ export default function TransfertForm({ onClose, onSaved }) {
             </select>
             <select
               className="input flex-1"
-              value={header.zone_destination_id}
+              value={header.zone_dest_id}
               onChange={(e) =>
                 setHeader((h) => ({
                   ...h,
-                  zone_destination_id: e.target.value,
+                  zone_dest_id: e.target.value,
                 }))
               }
             >

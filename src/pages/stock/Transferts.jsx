@@ -18,7 +18,7 @@ export default function Transferts() {
     debut: "",
     fin: "",
     zone_source_id: "",
-    zone_destination_id: "",
+    zone_dest_id: "",
     produit_id: "",
   });
   const [showForm, setShowForm] = useState(false);
@@ -71,9 +71,9 @@ export default function Transferts() {
         <select
           aria-label="Zone destination"
           className="form-input"
-          value={filters.zone_destination_id}
+          value={filters.zone_dest_id}
           onChange={(e) =>
-            setFilters((f) => ({ ...f, zone_destination_id: e.target.value }))
+            setFilters((f) => ({ ...f, zone_dest_id: e.target.value }))
           }
         >
           <option value="">Zone destination</option>
@@ -115,8 +115,8 @@ export default function Transferts() {
             {transferts.map((t) => (
               <tr key={t.id}>
                 <td className="p-2">{t.date_transfert?.slice(0, 10)}</td>
-                <td className="p-2">{t.zone_source?.nom || ""}</td>
-                <td className="p-2">{t.zone_destination?.nom || ""}</td>
+                <td className="p-2">{t.zone_source?.nom || "(inconnue)"}</td>
+                <td className="p-2">{t.zone_dest?.nom || "(inconnue)"}</td>
                 <td className="p-2">{t.lignes?.length || 0}</td>
                 <td className="p-2">{t.statut || "enregistré"}</td>
               </tr>

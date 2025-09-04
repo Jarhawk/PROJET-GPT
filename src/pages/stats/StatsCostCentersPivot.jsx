@@ -30,12 +30,12 @@ export default function StatsCostCentersPivot() {
       const moisSet = new Set();
       data.forEach(d => moisSet.add(d.mois.slice(0,7)));
       const sortedMonths = Array.from(moisSet).sort();
-      const grouped = {};
-      data.forEach(d => {
-        const key = d.cost_center_id;
-        if (!grouped[key]) grouped[key] = { nom: d.nom };
-        grouped[key][d.mois.slice(0,7)] = Number(d.valeur);
-      });
+        const grouped = {};
+        data.forEach(d => {
+          const key = d.nom;
+          if (!grouped[key]) grouped[key] = { nom: d.nom };
+          grouped[key][d.mois.slice(0,7)] = Number(d.montant);
+        });
       setMonths(sortedMonths);
       setRows(Object.values(grouped));
     });

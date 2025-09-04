@@ -6,4 +6,5 @@ globalThis.__SUPABASE_TEST_CLIENT__ = makeSupabaseMock({ data: [], error: null, 
 vi.mock('@/lib/supabase', () => ({
   getSupabaseClient: () => globalThis.__SUPABASE_TEST_CLIENT__,
   supabase: globalThis.__SUPABASE_TEST_CLIENT__,
+  default: globalThis.__SUPABASE_TEST_CLIENT__,
 }));

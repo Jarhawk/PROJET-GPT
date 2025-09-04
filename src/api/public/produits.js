@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 /* eslint-env node */
 import express from 'express';
-import makeClient from './supabaseClient.js';
+import supabase from '@/lib/supabase';
 
 const router = express.Router();
 
@@ -19,7 +19,6 @@ router.get('/', async (req, res) => {
   } = req.query;
   if (!mama_id) return res.status(400).json({ error: 'mama_id requis' });
   try {
-    const supabase = makeClient();
     let query = supabase
       .from('v_produits_dernier_prix')
       .select('*')

@@ -2,7 +2,7 @@
 /* eslint-env node */
 import express from 'express';
 import { TABLES } from '@/constants/tables';
-import makeClient from './supabaseClient.js';
+import supabase from '@/lib/supabase';
 
 const router = express.Router();
 
@@ -19,7 +19,6 @@ router.get('/', async (req, res) => {
   } = req.query;
   if (!mama_id) return res.status(400).json({ error: 'mama_id requis' });
   try {
-    const supabase = makeClient();
     let query = supabase.from(TABLES.MOUVEMENTS).select('*').eq('mama_id', mama_id);
     if (since) query = query.gte('date', since);
     if (type) query = query.eq('type', type);

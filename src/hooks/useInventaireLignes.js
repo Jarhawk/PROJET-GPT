@@ -29,14 +29,16 @@ export function useInventaireLignes() {
     includeArchives = false
   } = {}) {
     if (!mama_id || !inventaireId) return [];
+    page = Number(page);
+    limit = Number(limit);
     setLoading(true);
     setError(null);
-    let query = supabase.
-    from("produits_inventaire").
-    select("*", { count: "exact" }).
-    eq("mama_id", mama_id).
-    eq("inventaire_id", inventaireId).
-    order(sort, { ascending });
+    let query = supabase
+      .from("produits_inventaire")
+      .select("*", { count: "exact" })
+      .eq("mama_id", mama_id)
+      .eq("inventaire_id", inventaireId)
+      .order(sort, { ascending });
     if (!includeArchives) query = query.eq("actif", true);
     if (search) {
       query = query.eq("produit_id", search);

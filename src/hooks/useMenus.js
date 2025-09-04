@@ -35,15 +35,17 @@ export function useMenus() {
     limit = 50
   } = {}) {
     if (!mama_id) return [];
+    offset = Number(offset);
+    limit = Number(limit);
     setLoading(true);
     setError(null);
-    let query = supabase.
-    from("menus").
-    select(
-      "*, fiches:menu_fiches(fiche_id, fiche: fiches(id, nom))",
-      { count: "exact" }
-    ).
-    eq("mama_id", mama_id);
+    let query = supabase
+      .from("menus")
+      .select(
+        "*, fiches:menu_fiches(fiche_id, fiche: fiches(id, nom))",
+        { count: "exact" }
+      )
+      .eq("mama_id", mama_id);
 
     if (search) query = query.ilike("nom", `%${search}%`);
     if (date) query = query.eq("date", date);
@@ -51,9 +53,9 @@ export function useMenus() {
     if (end) query = query.lte("date", end);
     if (typeof actif === "boolean") query = query.eq("actif", actif);
 
-    const { data, count, error } = await query.
-    order("date", { ascending: false }).
-    range(offset, offset + limit - 1);
+    const { data, count, error } = await query
+      .order("date", { ascending: false })
+      .range(offset, offset + limit - 1);
     setMenus(Array.isArray(data) ? data : []);
     setTotal(typeof count === "number" ? count : Array.isArray(data) ? data.length : 0);
     setLoading(false);

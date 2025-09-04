@@ -43,6 +43,8 @@ export function useProducts() {
     order = "asc"
   } = {}) => {
     if (!mama_id) return [];
+    page = Number(page);
+    limit = Number(limit);
     setLoading(true);
     setError(null);
     let query = supabase.

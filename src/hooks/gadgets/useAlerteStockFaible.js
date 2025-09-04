@@ -15,7 +15,7 @@ export default function useAlerteStockFaible() {
     setLoading(true);
     setError(null);
     try {
-      const base = supabase.from('v_alertes_rupture');
+      const base = supabase.from('v_alertes_rupture').eq('mama_id', mama_id);
       const selectWith = `id:produit_id,
           produit_id,
           nom,

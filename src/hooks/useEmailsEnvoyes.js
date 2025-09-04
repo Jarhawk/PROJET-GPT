@@ -7,6 +7,8 @@ export function useEmailsEnvoyes() {
   const [emails, setEmails] = useState([]);
 
   async function fetchEmails({ statut, email, commande_id, date_start, date_end, page = 1, limit = 50 } = {}) {
+    page = Number(page);
+    limit = Number(limit);
     let q = supabase.from('emails_envoyes').select('*');
     q = q.eq('mama_id', mama_id);
     if (statut) q = q.eq('statut', statut);

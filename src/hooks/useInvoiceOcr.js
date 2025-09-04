@@ -1,3 +1,17 @@
-ÓááóûóÑ××w|
-KoçÇŸü~}ş–Jª)lnnfÂËßß·¶ğicÇUİm/??›{û»ŸÎN.''æş·ƒ‚b #'½IÏ*:üu7ß__övşş]]ŞäåïÿûÁÁëÎÚsX^Z[ı}}=»ù8ë«¯­.nüüìàúû~~ßwVƒâöõı¾¬ìmO[{kKÛîêúú«îşÿ¿¿•—Òòó_]Õ¥&%½ÿ¯ííKKo1±×]ÉÊßİßÒ‚.î˜îóÒmïÿÓÓóûµ±èÉÉSbÚÓ÷+*Ÿ__ó½éíÓÑT>w×××çæşßÇÇÏ]YËÎúú¦'6V^~zzæ&3û;<˜XW75uwv>¶æj{ÿ²²›m­Ë‘1iÑÁIuş¶¥L\*y==ïttüññåçÿç§‹Ëó÷æ†:ûÿÿßÛùızZŠ®¯ÿÙÙÖÜÔ÷·¯îŞ^Nîé©«û¿9yqw?'g7¶wÖ[?¿ÿëêØÀÄw¿÷DeDkZÚRSZÒöõ¤¦ù™Şú{/¦F~ş|}ÚÙ¹;5#	È|o**_ß_jÀÈŞîî–rC„,x8·&dlß^NÎ“³¿oKKLJÖÆ‡›;}=<ü´¼~fÇÎ®»±•Çîÿÿwr¶{{_·um›_ocóÓ±‘êè»»½µõúZ[ßİµ'/¯·EôÔ×ß§%5ıM-_İQ›ŸÛs3µ¼ù{ihè+#Ââú~Ÿ77ÿöòû÷ıõóÀŒMë»ÿïéˆOM}|ŒÇó­+{oÍ9;kgg{ûİÙ«XPqêêÿÌÌüòà¹Z[ŞÚşÀƒ=821yúº¼´öttÿùÉMO¿½x:;>ŞŸ{ÓÀÌÎ›²²ûû=5wÿıü¾BAEóõ•—÷·7..jëéQEd&½äbìğ±½ÿ¿Ío¿3sùù¹¿ş*	fF­µ÷ZZÿ×Gg»;K‰¹ÿììøúû{nêc7sûv²¿—ÕÔŞü|>¾³óª3;»>,ìŞÓs»¾şÏßÿóñ¹İ×ÔüİTÊÃŞÖ×ÕÕûëêv’
-+óÔR­oNÖ×÷w%¶~--oÿë‰ÁâáıéëÜ\41øêë­ü¬¯½}?‘ÑŸW’’[§ããGÑÑŸºêàĞVöçıÑÑÁÉÓÅááõÓÓëo']ïOOÜÔutîîõ÷··ûûÿÿÿ“³;
+ï»¿/* @ts-nocheck */
+// Stub OCR facture â€” dÃ©sactivÃ© par dÃ©faut
+import { useMemo } from 'react';
+
+/**
+ * Hook OCR factures (stub).
+ * @returns {{ enabled: boolean, parse: (file: File|Blob) => Promise<{lines:any[], meta:any}> }}
+ */
+export default function useInvoiceOcr() {
+  return useMemo(() => ({
+    enabled: false,
+    async parse() {
+      // TODO: brancher un vrai moteur OCR plus tard
+      return { lines: [], meta: {} };
+    }
+  }), []);
+}

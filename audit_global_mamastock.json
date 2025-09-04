@@ -1,0 +1,2470 @@
+{
+  "summary": {
+    "coherence_score": 40,
+    "top_blockers": [
+      "schema:analyze fails to run",
+      "unit tests failing",
+      "duplicate 'loading' identifiers",
+      "missing columns for factures/bons_livraison/commandes/menus_jour",
+      "transferts column mismatch zone_depart/zone_arrivee"
+    ],
+    "priorities": [
+      "fix analysis scripts and tests",
+      "reconcile front/back columns for fournisseurs, produits, factures, bons_livraison, commandes, fiches, menus",
+      "create missing SQL functions and policies"
+    ]
+  },
+  "modules": [
+    {
+      "name": "Fournisseurs",
+      "routes": [
+        {
+          "path": "/fournisseurs",
+          "file": "src/pages/fournisseurs/Fournisseurs.jsx",
+          "guard": null
+        }
+      ],
+      "hooks": [
+        {
+          "file": "src/hooks/useFournisseurs.js",
+          "queries": [
+            {
+              "from": "fournisseurs",
+              "select": "*",
+              "filters": [
+                "eq('mama_id', mama_id)"
+              ],
+              "order": [
+                "nom"
+              ]
+            }
+          ]
+        }
+      ],
+      "backend": {
+        "tables": [
+          "fournisseurs",
+          "fournisseur_contacts"
+        ],
+        "views": [],
+        "functions": []
+      },
+      "status": "⚠️",
+      "notes": "verify columns and RLS"
+    },
+    {
+      "name": "Produits",
+      "routes": [
+        {
+          "path": "/produits",
+          "file": "src/pages/produits/Produits.jsx",
+          "guard": null
+        }
+      ],
+      "hooks": [
+        {
+          "file": "src/hooks/useProducts.js",
+          "queries": [
+            {
+              "from": "produits",
+              "select": "*, unite:unite_id(nom), zone_stock:zones_stock(nom), famille:familles(nom), sous_famille:sous_familles(nom)",
+              "filters": [
+                "eq('mama_id', mama_id)"
+              ],
+              "order": [
+                "nom"
+              ],
+              "range": [
+                "(page-1)*limit",
+                "page*limit-1"
+              ]
+            }
+          ]
+        }
+      ],
+      "backend": {
+        "tables": [
+          "produits"
+        ],
+        "views": [
+          "v_pmp",
+          "v_stocks",
+          "v_products_last_price"
+        ],
+        "functions": []
+      },
+      "status": "⚠️",
+      "notes": "views missing explicit mama_id filter"
+    },
+    {
+      "name": "Achats",
+      "routes": [
+        {
+          "path": "/achats",
+          "file": "src/pages/achats/Achats.jsx",
+          "guard": null
+        }
+      ],
+      "hooks": [
+        {
+          "file": "src/hooks/useAchats.js",
+          "queries": [
+            {
+              "from": "achats",
+              "select": "*, fournisseur:fournisseur_id(id, nom), produit:produit_id(id, nom)",
+              "filters": [
+                "eq('mama_id', mama_id)",
+                "eq('fournisseur_id', fournisseur)",
+                "eq('produit_id', produit)",
+                "eq('actif', actif)",
+                "gte('date_achat', debut)",
+                "lte('date_achat', fin)"
+              ],
+              "order": [
+                "date_achat desc"
+              ],
+              "range": [
+                "(page-1)*pageSize",
+                "page*pageSize-1"
+              ]
+            }
+          ]
+        }
+      ],
+      "backend": {
+        "tables": [
+          "achats"
+        ],
+        "views": [],
+        "functions": []
+      },
+      "status": "⚠️",
+      "notes": "Policy achats_all"
+    },
+    {
+      "name": "Factures/BL",
+      "routes": [
+        {
+          "path": "/factures",
+          "file": "src/pages/factures/Factures.jsx",
+          "guard": null
+        },
+        {
+          "path": "/bons-livraison",
+          "file": "src/pages/bons_livraison/BonsLivraison.jsx",
+          "guard": null
+        }
+      ],
+      "hooks": [
+        {
+          "file": "src/hooks/useFactures.js"
+        },
+        {
+          "file": "src/hooks/useBonsLivraison.js"
+        }
+      ],
+      "backend": {
+        "tables": [
+          "factures",
+          "bons_livraison",
+          "lignes_bl"
+        ],
+        "views": [],
+        "functions": []
+      },
+      "status": "❌",
+      "notes": "schema lacks business columns"
+    },
+    {
+      "name": "Inventaires",
+      "routes": [
+        {
+          "path": "/inventaire",
+          "file": "src/pages/inventaire/Inventaire.jsx",
+          "guard": null
+        }
+      ],
+      "hooks": [
+        {
+          "file": "src/hooks/useInventaires.js"
+        }
+      ],
+      "backend": {
+        "tables": [
+          "inventaires",
+          "inventaire_zones",
+          "produits_inventaire"
+        ],
+        "views": [],
+        "functions": []
+      },
+      "status": "⚠️",
+      "notes": "RLS not verified"
+    },
+    {
+      "name": "Transferts",
+      "routes": [
+        {
+          "path": "/transferts",
+          "file": "src/pages/stock/Transferts.jsx",
+          "guard": null
+        }
+      ],
+      "hooks": [
+        {
+          "file": "src/hooks/useTransferts.js",
+          "queries": [
+            {
+              "from": "transferts",
+              "select": "id, date_transfert, motif, zone_source:zones_stock!fk_transferts_zone_source_id(id, nom), zone_destination:zones_stock!fk_transferts_zone_dest_id(id, nom), lignes:transfert_lignes(id, produit_id, quantite, produit:produits(id, nom))",
+              "filters": [
+                "eq('mama_id', mama_id)",
+                "gte('date_transfert', debut)",
+                "lte('date_transfert', fin)",
+                "eq('zone_source_id', zone_source_id)",
+                "eq('zone_dest_id', zone_destination_id)",
+                "eq('transfert_lignes.produit_id', produit_id)"
+              ],
+              "order": [
+                "date_transfert desc"
+              ]
+            }
+          ]
+        }
+      ],
+      "backend": {
+        "tables": [
+          "transferts",
+          "transfert_lignes"
+        ],
+        "views": [
+          "v_transferts_historique"
+        ],
+        "functions": []
+      },
+      "status": "⚠️",
+      "notes": "front expects zone_depart/zone_arrivee"
+    },
+    {
+      "name": "Commandes",
+      "routes": [
+        {
+          "path": "/commandes",
+          "file": "src/pages/commandes/Commandes.jsx",
+          "guard": null
+        }
+      ],
+      "hooks": [
+        {
+          "file": "src/hooks/useCommandes.js"
+        }
+      ],
+      "backend": {
+        "tables": [
+          "commandes",
+          "commande_lignes"
+        ],
+        "views": [],
+        "functions": []
+      },
+      "status": "❌",
+      "notes": "columns missing"
+    },
+    {
+      "name": "Réquisitions",
+      "routes": [
+        {
+          "path": "/requisitions",
+          "file": "src/pages/requisitions/Requisitions.jsx",
+          "guard": null
+        }
+      ],
+      "hooks": [
+        {
+          "file": "src/hooks/useRequisitions.js"
+        }
+      ],
+      "backend": {
+        "tables": [
+          "requisitions",
+          "requisition_lignes"
+        ],
+        "views": [
+          "v_requisitions"
+        ],
+        "functions": []
+      },
+      "status": "⚠️",
+      "notes": "view missing mama_id filter"
+    },
+    {
+      "name": "Tâches",
+      "routes": [
+        {
+          "path": "/taches",
+          "file": "src/pages/taches/Taches.jsx",
+          "guard": null
+        }
+      ],
+      "hooks": [
+        {
+          "file": "src/hooks/useTaches.js"
+        }
+      ],
+      "backend": {
+        "tables": [
+          "taches"
+        ],
+        "views": [],
+        "functions": []
+      },
+      "status": "⚠️",
+      "notes": "duplicate loading identifiers"
+    },
+    {
+      "name": "Fiches techniques",
+      "routes": [
+        {
+          "path": "/fiches",
+          "file": "src/pages/fiches/Fiches.jsx",
+          "guard": null
+        }
+      ],
+      "hooks": [
+        {
+          "file": "src/hooks/useFiches.js",
+          "queries": [
+            {
+              "from": "fiches_techniques",
+              "select": "*, famille:familles(id, nom), lignes:fiche_lignes!fiche_id(id)",
+              "filters": [
+                "eq('mama_id', mama_id)"
+              ],
+              "order": [
+                "sortField"
+              ],
+              "range": [
+                "(page-1)*limit",
+                "page*limit-1"
+              ]
+            }
+          ]
+        }
+      ],
+      "backend": {
+        "tables": [
+          "fiches_techniques",
+          "fiche_lignes"
+        ],
+        "views": [
+          "v_fiche_lignes_complete"
+        ],
+        "functions": []
+      },
+      "status": "⚠️",
+      "notes": "view requires mama_id filter"
+    },
+    {
+      "name": "Menu du jour",
+      "routes": [
+        {
+          "path": "/menu",
+          "file": "src/pages/menu/MenuDuJour.jsx",
+          "guard": null
+        },
+        {
+          "path": "/menu/:date",
+          "file": "src/pages/menu/MenuDuJourJour.jsx",
+          "guard": null
+        }
+      ],
+      "hooks": [
+        {
+          "file": "src/hooks/useMenuDuJour.js",
+          "queries": [
+            {
+              "from": "menus_jour",
+              "select": "*, fiches:menus_jour_fiches(fiche_id, quantite, fiche:fiches_techniques(id, nom, cout_par_portion))",
+              "filters": [
+                "eq('mama_id', mama_id)"
+              ],
+              "order": [
+                "date desc"
+              ],
+              "range": [
+                "offset",
+                "offset+limit-1"
+              ]
+            }
+          ]
+        }
+      ],
+      "backend": {
+        "tables": [
+          "menus_jour",
+          "menus_jour_fiches"
+        ],
+        "views": [],
+        "functions": []
+      },
+      "status": "⚠️",
+      "notes": "cost computed client-side"
+    },
+    {
+      "name": "Menu engineering",
+      "routes": [
+        {
+          "path": "/menu-engineering",
+          "file": "src/pages/engineering/MenuEngineering.jsx",
+          "guard": null
+        }
+      ],
+      "hooks": [
+        {
+          "file": "src/hooks/useMenuEngineering.js",
+          "queries": [
+            {
+              "from": "v_me_classification",
+              "select": "*",
+              "filters": [
+                "eq('mama_id', mama_id)"
+              ]
+            },
+            {
+              "from": "v_menu_du_jour_mensuel",
+              "select": "food_cost_avg",
+              "filters": [
+                "eq('mama_id', mama_id)",
+                "eq('mois', month)"
+              ]
+            }
+          ]
+        }
+      ],
+      "backend": {
+        "tables": [
+          "ventes_import_staging",
+          "ventes_fiches"
+        ],
+        "views": [
+          "v_me_classification",
+          "v_menu_du_jour_mensuel"
+        ],
+        "functions": []
+      },
+      "status": "⚠️",
+      "notes": "depends on staging tables"
+    },
+    {
+      "name": "Dashboard",
+      "routes": [
+        {
+          "path": "/dashboard",
+          "file": "src/pages/Dashboard.jsx",
+          "guard": null
+        }
+      ],
+      "hooks": [
+        {
+          "file": "src/hooks/useStats.js"
+        },
+        {
+          "file": "src/hooks/useAlerteStockFaible.js"
+        }
+      ],
+      "backend": {
+        "tables": [],
+        "views": [
+          "v_alertes_rupture",
+          "v_stats_globales"
+        ],
+        "functions": []
+      },
+      "status": "⚠️",
+      "notes": "multiple gadget data sources"
+    },
+    {
+      "name": "Paramétrage",
+      "routes": [
+        {
+          "path": "/parametrage/utilisateurs",
+          "file": "src/pages/parametrage/Utilisateurs.jsx",
+          "guard": null
+        },
+        {
+          "path": "/parametrage/roles",
+          "file": "src/pages/parametrage/Roles.jsx",
+          "guard": null
+        },
+        {
+          "path": "/parametrage/permissions",
+          "file": "src/pages/parametrage/Permissions.jsx",
+          "guard": null
+        },
+        {
+          "path": "/parametrage/mamas",
+          "file": "src/pages/parametrage/Mamas.jsx",
+          "guard": null
+        },
+        {
+          "path": "/parametrage/familles",
+          "file": "src/pages/parametrage/Familles.jsx",
+          "guard": null
+        },
+        {
+          "path": "/parametrage/sous-familles",
+          "file": "src/pages/parametrage/SousFamilles.jsx",
+          "guard": null
+        }
+      ],
+      "hooks": [
+        {
+          "file": "src/hooks/useUtilisateurs.js"
+        },
+        {
+          "file": "src/hooks/useRoles.js"
+        },
+        {
+          "file": "src/hooks/usePermissions.js"
+        },
+        {
+          "file": "src/hooks/useMamas.js"
+        },
+        {
+          "file": "src/hooks/useFamilles.js"
+        },
+        {
+          "file": "src/hooks/useSousFamilles.js"
+        }
+      ],
+      "backend": {
+        "tables": [
+          "utilisateurs",
+          "roles",
+          "permissions",
+          "mamas",
+          "familles",
+          "sous_familles"
+        ],
+        "views": [
+          "utilisateurs_complets"
+        ],
+        "functions": []
+      },
+      "status": "⚠️",
+      "notes": "verify rights"
+    },
+    {
+      "name": "Emails envoyés",
+      "routes": [
+        {
+          "path": "/emails/envoyes",
+          "file": "src/pages/emails/EmailsEnvoyes.jsx",
+          "guard": null
+        }
+      ],
+      "hooks": [
+        {
+          "file": "src/hooks/useEmailsEnvoyes.js",
+          "queries": [
+            {
+              "from": "emails_envoyes",
+              "select": "*",
+              "filters": [
+                "eq('mama_id', mama_id)",
+                "eq('statut', statut)",
+                "ilike('email', `%${email}%`)",
+                "eq('commande_id', commande_id)",
+                "gte('envoye_le', date_start)",
+                "lte('envoye_le', date_end)"
+              ],
+              "order": [
+                "envoye_le"
+              ],
+              "range": [
+                "start",
+                "end"
+              ]
+            }
+          ]
+        }
+      ],
+      "backend": {
+        "tables": [
+          "emails_envoyes"
+        ],
+        "views": [],
+        "functions": []
+      },
+      "status": "⚠️",
+      "notes": "RLS emails_envoyes_all"
+    },
+    {
+      "name": "Notifications",
+      "routes": [
+        {
+          "path": "/notifications",
+          "file": "src/pages/notifications/NotificationsInbox.jsx",
+          "guard": null
+        },
+        {
+          "path": "/notifications/settings",
+          "file": "src/pages/notifications/NotificationSettingsForm.jsx",
+          "guard": null
+        }
+      ],
+      "hooks": [
+        {
+          "file": "src/hooks/useNotifications.js",
+          "queries": [
+            {
+              "from": "notifications",
+              "select": "*",
+              "filters": [
+                "eq('mama_id', mama_id)",
+                "eq('user_id', user_id)",
+                "eq('type', type)"
+              ],
+              "order": [
+                "created_at"
+              ]
+            },
+            {
+              "from": "notification_preferences",
+              "select": "*",
+              "filters": [
+                "eq('mama_id', mama_id)",
+                "eq('utilisateur_id', user_id)"
+              ],
+              "single": true
+            }
+          ],
+          "rpc": [
+            "send_email_notification",
+            "send_notification_webhook"
+          ]
+        }
+      ],
+      "backend": {
+        "tables": [
+          "notifications",
+          "notification_preferences"
+        ],
+        "views": [
+          "v_notifications_non_lues"
+        ],
+        "functions": [
+          "send_email_notification",
+          "send_notification_webhook"
+        ]
+      },
+      "status": "⚠️",
+      "notes": "Préférences utilisateurs à valider"
+    },
+    {
+      "name": "Pages légales",
+      "routes": [
+        {
+          "path": "/confidentialite",
+          "file": "src/pages/legal/Confidentialite.jsx",
+          "guard": null
+        },
+        {
+          "path": "/mentions-legales",
+          "file": "src/pages/legal/MentionsLegales.jsx",
+          "guard": null
+        },
+        {
+          "path": "/cgu",
+          "file": "src/pages/legal/Cgu.jsx",
+          "guard": null
+        },
+        {
+          "path": "/cgv",
+          "file": "src/pages/legal/Cgv.jsx",
+          "guard": null
+        },
+        {
+          "path": "/contact",
+          "file": "src/pages/legal/Contact.jsx",
+          "guard": null
+        },
+        {
+          "path": "/licence",
+          "file": "src/pages/legal/Licence.jsx",
+          "guard": null
+        }
+      ],
+      "hooks": [
+        {
+          "file": "src/pages/legal/MentionsLegales.jsx",
+          "queries": [
+            {
+              "from": "mamas",
+              "select": "mentions_legales",
+              "filters": [
+                "eq('id', mamaId)"
+              ],
+              "single": true
+            }
+          ]
+        }
+      ],
+      "backend": {
+        "tables": [
+          "mamas"
+        ],
+        "views": [],
+        "functions": []
+      },
+      "status": "⚠️",
+      "notes": "Texte chargé dynamiquement"
+    },
+    {
+      "name": "Promotions",
+      "routes": [
+        {
+          "path": "/promotions",
+          "file": "src/pages/promotions/Promotions.jsx",
+          "guard": null
+        }
+      ],
+      "hooks": [
+        {
+          "file": "src/hooks/usePromotions.js",
+          "queries": [
+            {
+              "from": "promotions",
+              "select": "*",
+              "filters": [
+                "eq('mama_id', mama_id)",
+                "ilike('nom', '%search%')",
+                "eq('actif', actif)"
+              ],
+              "order": [
+                "date_debut desc"
+              ],
+              "range": [
+                "(page-1)*limit",
+                "page*limit-1"
+              ]
+            }
+          ]
+        }
+      ],
+      "backend": {
+        "tables": [
+          "promotions"
+        ],
+        "views": [],
+        "functions": []
+      },
+      "status": "⚠️",
+      "notes": "policy promotions_all à vérifier"
+    },
+    {
+      "name": "Reporting",
+      "routes": [
+        {
+          "path": "/reporting",
+          "file": "src/pages/reporting/Reporting.jsx",
+          "guard": null
+        }
+      ],
+      "hooks": [
+        {
+          "file": "src/hooks/useReporting.js",
+          "queries": [
+            {
+              "from": "v_achats_mensuels",
+              "select": "*",
+              "filters": [
+                "eq('mama_id', mama_id)"
+              ]
+            },
+            {
+              "from": "v_pmp",
+              "select": "*",
+              "filters": [
+                "eq('mama_id', mama_id)"
+              ]
+            },
+            {
+              "from": "v_analytique_stock",
+              "select": "famille, sumv:valeur",
+              "filters": [
+                "eq('mama_id', mama_id)"
+              ],
+              "group": [
+                "famille"
+              ]
+            },
+            {
+              "from": "v_cost_center_month",
+              "select": "*",
+              "filters": [
+                "eq('mama_id', mama_id)"
+              ]
+            }
+          ],
+          "rpc": [
+            "consolidated_stats"
+          ]
+        }
+      ],
+      "backend": {
+        "tables": [],
+        "views": [
+          "v_achats_mensuels",
+          "v_pmp",
+          "v_analytique_stock",
+          "v_cost_center_month"
+        ],
+        "functions": [
+          "consolidated_stats"
+        ]
+      },
+      "status": "⚠️",
+      "notes": "vues à harmoniser"
+    }
+  ],
+  "frontend": {
+    "routes": [
+      {
+        "path": "/fournisseurs",
+        "module": "Fournisseurs"
+      },
+      {
+        "path": "/produits",
+        "module": "Produits"
+      },
+      {
+        "path": "/factures",
+        "module": "Factures/BL"
+      },
+      {
+        "path": "/bons-livraison",
+        "module": "Factures/BL"
+      },
+      {
+        "path": "/inventaire",
+        "module": "Inventaires"
+      },
+      {
+        "path": "/transferts",
+        "module": "Transferts"
+      },
+      {
+        "path": "/commandes",
+        "module": "Commandes"
+      },
+      {
+        "path": "/requisitions",
+        "module": "Réquisitions"
+      },
+      {
+        "path": "/taches",
+        "module": "Tâches"
+      },
+      {
+        "path": "/fiches",
+        "module": "Fiches techniques"
+      },
+      {
+        "path": "/menu",
+        "module": "Menu du jour"
+      },
+      {
+        "path": "/menu/:date",
+        "module": "Menu du jour"
+      },
+      {
+        "path": "/menu-engineering",
+        "module": "Menu engineering"
+      },
+      {
+        "path": "/dashboard",
+        "module": "Dashboard"
+      },
+      {
+        "path": "/parametrage/utilisateurs",
+        "module": "Paramétrage"
+      },
+      {
+        "path": "/emails/envoyes",
+        "module": "Emails envoyés"
+      },
+      {
+        "path": "/notifications",
+        "module": "Notifications"
+      },
+      {
+        "path": "/notifications/settings",
+        "module": "Notifications"
+      },
+      {
+        "path": "/confidentialite",
+        "module": "Pages légales"
+      },
+      {
+        "path": "/mentions-legales",
+        "module": "Pages légales"
+      },
+      {
+        "path": "/cgu",
+        "module": "Pages légales"
+      },
+      {
+        "path": "/cgv",
+        "module": "Pages légales"
+      },
+      {
+        "path": "/contact",
+        "module": "Pages légales"
+      },
+      {
+        "path": "/licence",
+        "module": "Pages légales"
+      },
+      {
+        "path": "/achats",
+        "module": "Achats"
+      },
+      {
+        "path": "/promotions",
+        "module": "Promotions"
+      },
+      {
+        "path": "/reporting",
+        "module": "Reporting"
+      }
+    ],
+    "hooks": [
+      {
+        "file": "src/hooks/useFournisseurs.js"
+      },
+      {
+        "file": "src/hooks/useProducts.js"
+      },
+      {
+        "file": "src/hooks/useFactures.js"
+      },
+      {
+        "file": "src/hooks/useBonsLivraison.js"
+      },
+      {
+        "file": "src/hooks/useInventaires.js"
+      },
+      {
+        "file": "src/hooks/useTransferts.js"
+      },
+      {
+        "file": "src/hooks/useCommandes.js"
+      },
+      {
+        "file": "src/hooks/useRequisitions.js"
+      },
+      {
+        "file": "src/hooks/useTaches.js"
+      },
+      {
+        "file": "src/hooks/useFiches.js"
+      },
+      {
+        "file": "src/hooks/useMenuDuJour.js"
+      },
+      {
+        "file": "src/hooks/useMenuEngineering.js"
+      },
+      {
+        "file": "src/hooks/useStats.js"
+      },
+      {
+        "file": "src/hooks/useAlerteStockFaible.js"
+      },
+      {
+        "file": "src/hooks/useEmailsEnvoyes.js"
+      },
+      {
+        "file": "src/hooks/useNotifications.js"
+      },
+      {
+        "file": "src/hooks/useAchats.js"
+      },
+      {
+        "file": "src/hooks/usePromotions.js"
+      },
+      {
+        "file": "src/hooks/useReporting.js"
+      }
+    ],
+    "auth": {
+      "context_file": "src/context/AuthContext.jsx",
+      "exposes": [
+        "session",
+        "userData",
+        "mama_id",
+        "role",
+        "access_rights",
+        "loading",
+        "error"
+      ]
+    }
+  },
+  "backend": {
+    "tables": [
+      {
+        "name": "fournisseurs",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "mama_id",
+            "type": "uuid"
+          },
+          {
+            "name": "nom",
+            "type": "text"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz"
+          },
+          {
+            "name": "actif",
+            "type": "boolean"
+          }
+        ],
+        "rls": {
+          "enabled": false,
+          "forced": false
+        }
+      },
+      {
+        "name": "produits",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "mama_id",
+            "type": "uuid"
+          },
+          {
+            "name": "nom",
+            "type": "text"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz"
+          },
+          {
+            "name": "actif",
+            "type": "boolean"
+          },
+          {
+            "name": "famille_id",
+            "type": "uuid"
+          },
+          {
+            "name": "unite_id",
+            "type": "uuid"
+          },
+          {
+            "name": "code",
+            "type": "text"
+          },
+          {
+            "name": "image",
+            "type": "text"
+          }
+        ],
+        "rls": {
+          "enabled": false,
+          "forced": false
+        }
+      },
+      {
+        "name": "factures",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "mama_id",
+            "type": "uuid"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz"
+          }
+        ],
+        "rls": {
+          "enabled": false,
+          "forced": false
+        }
+      },
+      {
+        "name": "bons_livraison",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "mama_id",
+            "type": "uuid"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz"
+          }
+        ],
+        "rls": {
+          "enabled": false,
+          "forced": false
+        }
+      },
+      {
+        "name": "commandes",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "mama_id",
+            "type": "uuid"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz"
+          }
+        ],
+        "rls": {
+          "enabled": false,
+          "forced": false
+        }
+      },
+      {
+        "name": "inventaires",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "mama_id",
+            "type": "uuid"
+          },
+          {
+            "name": "date_inventaire",
+            "type": "date"
+          },
+          {
+            "name": "zone_id",
+            "type": "uuid"
+          },
+          {
+            "name": "periode_id",
+            "type": "uuid"
+          },
+          {
+            "name": "statut",
+            "type": "text"
+          }
+        ],
+        "rls": {
+          "enabled": false,
+          "forced": false
+        }
+      },
+      {
+        "name": "requisitions",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "mama_id",
+            "type": "uuid"
+          },
+          {
+            "name": "zone_id",
+            "type": "uuid"
+          },
+          {
+            "name": "date_requisition",
+            "type": "date"
+          },
+          {
+            "name": "statut",
+            "type": "text"
+          }
+        ],
+        "rls": {
+          "enabled": false,
+          "forced": false
+        }
+      },
+      {
+        "name": "taches",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "mama_id",
+            "type": "uuid"
+          },
+          {
+            "name": "statut",
+            "type": "text"
+          }
+        ],
+        "rls": {
+          "enabled": false,
+          "forced": false
+        }
+      },
+      {
+        "name": "fiches_techniques",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "mama_id",
+            "type": "uuid"
+          },
+          {
+            "name": "nom",
+            "type": "text"
+          },
+          {
+            "name": "cout_par_portion",
+            "type": "numeric"
+          }
+        ],
+        "rls": {
+          "enabled": false,
+          "forced": false
+        }
+      },
+      {
+        "name": "fiche_lignes",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "fiche_id",
+            "type": "uuid"
+          }
+        ],
+        "rls": {
+          "enabled": false,
+          "forced": false
+        }
+      },
+      {
+        "name": "menus_jour",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "mama_id",
+            "type": "uuid"
+          },
+          {
+            "name": "nom",
+            "type": "text"
+          },
+          {
+            "name": "date",
+            "type": "date"
+          },
+          {
+            "name": "prix_vente_ttc",
+            "type": "numeric"
+          }
+        ],
+        "rls": {
+          "enabled": false,
+          "forced": false
+        }
+      },
+      {
+        "name": "menus_jour_fiches",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "menu_jour_id",
+            "type": "uuid"
+          },
+          {
+            "name": "fiche_id",
+            "type": "uuid"
+          }
+        ],
+        "rls": {
+          "enabled": false,
+          "forced": false
+        }
+      },
+      {
+        "name": "transferts",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "mama_id",
+            "type": "uuid"
+          },
+          {
+            "name": "date_transfert",
+            "type": "date"
+          },
+          {
+            "name": "zone_source_id",
+            "type": "uuid"
+          },
+          {
+            "name": "zone_dest_id",
+            "type": "uuid"
+          },
+          {
+            "name": "motif",
+            "type": "text"
+          },
+          {
+            "name": "utilisateur_id",
+            "type": "uuid"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz"
+          },
+          {
+            "name": "actif",
+            "type": "boolean"
+          }
+        ],
+        "rls": {
+          "enabled": true,
+          "forced": true
+        }
+      },
+      {
+        "name": "transfert_lignes",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "transfert_id",
+            "type": "uuid"
+          },
+          {
+            "name": "produit_id",
+            "type": "uuid"
+          },
+          {
+            "name": "quantite",
+            "type": "numeric"
+          },
+          {
+            "name": "commentaire",
+            "type": "text"
+          },
+          {
+            "name": "actif",
+            "type": "boolean"
+          }
+        ],
+        "rls": {
+          "enabled": true,
+          "forced": true
+        }
+      },
+      {
+        "name": "ventes_import_staging",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "fiche_id",
+            "type": "uuid"
+          },
+          {
+            "name": "date_vente",
+            "type": "date"
+          },
+          {
+            "name": "quantite",
+            "type": "numeric"
+          }
+        ],
+        "rls": {
+          "enabled": false,
+          "forced": false
+        }
+      },
+      {
+        "name": "ventes_fiches",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "fiche_id",
+            "type": "uuid"
+          },
+          {
+            "name": "date_vente",
+            "type": "date"
+          },
+          {
+            "name": "quantite",
+            "type": "numeric"
+          }
+        ],
+        "rls": {
+          "enabled": false,
+          "forced": false
+        }
+      },
+      {
+        "name": "emails_envoyes",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "commande_id",
+            "type": "uuid"
+          },
+          {
+            "name": "email",
+            "type": "text"
+          },
+          {
+            "name": "statut",
+            "type": "text"
+          },
+          {
+            "name": "envoye_le",
+            "type": "timestamptz"
+          },
+          {
+            "name": "mama_id",
+            "type": "uuid"
+          }
+        ],
+        "rls": {
+          "enabled": true,
+          "forced": true
+        }
+      },
+      {
+        "name": "notifications",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "mama_id",
+            "type": "uuid"
+          },
+          {
+            "name": "user_id",
+            "type": "uuid"
+          },
+          {
+            "name": "titre",
+            "type": "text"
+          },
+          {
+            "name": "texte",
+            "type": "text"
+          },
+          {
+            "name": "lien",
+            "type": "text"
+          },
+          {
+            "name": "type",
+            "type": "text"
+          },
+          {
+            "name": "lu",
+            "type": "boolean"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz"
+          },
+          {
+            "name": "actif",
+            "type": "boolean"
+          }
+        ],
+        "rls": {
+          "enabled": true,
+          "forced": true
+        }
+      },
+      {
+        "name": "notification_preferences",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "utilisateur_id",
+            "type": "uuid"
+          },
+          {
+            "name": "mama_id",
+            "type": "uuid"
+          },
+          {
+            "name": "email_enabled",
+            "type": "boolean"
+          },
+          {
+            "name": "webhook_enabled",
+            "type": "boolean"
+          },
+          {
+            "name": "webhook_url",
+            "type": "text"
+          },
+          {
+            "name": "webhook_token",
+            "type": "text"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz"
+          }
+        ],
+        "rls": {
+          "enabled": true,
+          "forced": true
+        }
+      },
+      {
+        "name": "achats",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "mama_id",
+            "type": "uuid"
+          },
+          {
+            "name": "produit_id",
+            "type": "uuid"
+          },
+          {
+            "name": "fournisseur_id",
+            "type": "uuid"
+          },
+          {
+            "name": "quantite",
+            "type": "numeric"
+          },
+          {
+            "name": "prix",
+            "type": "numeric"
+          },
+          {
+            "name": "date_achat",
+            "type": "date"
+          },
+          {
+            "name": "actif",
+            "type": "boolean"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz"
+          }
+        ],
+        "rls": {
+          "enabled": true,
+          "forced": true
+        }
+      },
+      {
+        "name": "promotions",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "mama_id",
+            "type": "uuid"
+          },
+          {
+            "name": "nom",
+            "type": "text"
+          },
+          {
+            "name": "description",
+            "type": "text"
+          },
+          {
+            "name": "date_debut",
+            "type": "date"
+          },
+          {
+            "name": "date_fin",
+            "type": "date"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz"
+          },
+          {
+            "name": "actif",
+            "type": "boolean"
+          }
+        ],
+        "rls": {
+          "enabled": true,
+          "forced": false
+        }
+      },
+      {
+        "name": "mamas",
+        "columns": [
+          { "name": "id", "type": "uuid" },
+          { "name": "nom", "type": "text" },
+          { "name": "created_at", "type": "timestamptz" },
+          { "name": "updated_at", "type": "timestamptz" }
+        ],
+        "rls": { "enabled": true, "forced": false }
+      },
+      {
+        "name": "utilisateurs",
+        "columns": [
+          { "name": "id", "type": "uuid" },
+          { "name": "nom", "type": "text" },
+          { "name": "email", "type": "text" },
+          { "name": "auth_id", "type": "uuid" },
+          { "name": "role_id", "type": "uuid" },
+          { "name": "mama_id", "type": "uuid" },
+          { "name": "access_rights", "type": "jsonb" },
+          { "name": "actif", "type": "boolean" },
+          { "name": "created_at", "type": "timestamptz" },
+          { "name": "updated_at", "type": "timestamptz" }
+        ],
+        "rls": { "enabled": true, "forced": false }
+      },
+      {
+        "name": "roles",
+        "columns": [
+          { "name": "id", "type": "uuid" },
+          { "name": "nom", "type": "text" },
+          { "name": "description", "type": "text" },
+          { "name": "access_rights", "type": "jsonb" },
+          { "name": "actif", "type": "boolean" },
+          { "name": "mama_id", "type": "uuid" },
+          { "name": "created_at", "type": "timestamptz" },
+          { "name": "updated_at", "type": "timestamptz" }
+        ],
+        "rls": { "enabled": true, "forced": false }
+      },
+      {
+        "name": "permissions",
+        "columns": [
+          { "name": "id", "type": "uuid" },
+          { "name": "role_id", "type": "uuid" },
+          { "name": "module", "type": "text" },
+          { "name": "droit", "type": "text" },
+          { "name": "mama_id", "type": "uuid" },
+          { "name": "created_at", "type": "timestamptz" }
+        ],
+        "rls": { "enabled": true, "forced": false }
+      },
+      {
+        "name": "familles",
+        "columns": [
+          { "name": "id", "type": "uuid" },
+          { "name": "mama_id", "type": "uuid" },
+          { "name": "nom", "type": "text" },
+          { "name": "actif", "type": "boolean" },
+          { "name": "created_at", "type": "timestamptz" }
+        ],
+        "rls": { "enabled": true, "forced": false }
+      },
+      {
+        "name": "sous_familles",
+        "columns": [
+          { "name": "id", "type": "uuid" },
+          { "name": "mama_id", "type": "uuid" },
+          { "name": "famille_id", "type": "uuid" },
+          { "name": "nom", "type": "text" },
+          { "name": "actif", "type": "boolean" },
+          { "name": "created_at", "type": "timestamptz" }
+        ],
+        "rls": { "enabled": true, "forced": false }
+      }
+    ],
+    "views": [
+      {
+        "name": "utilisateurs_complets",
+        "columns": []
+      },
+      {
+        "name": "v_pmp",
+        "columns": []
+      },
+      {
+        "name": "v_stocks",
+        "columns": []
+      },
+      {
+        "name": "v_products_last_price",
+        "columns": []
+      },
+      {
+        "name": "v_requisitions",
+        "columns": []
+      },
+      {
+        "name": "v_fiche_lignes_complete",
+        "columns": []
+      },
+      {
+        "name": "v_me_classification",
+        "columns": []
+      },
+      {
+        "name": "v_transferts_historique",
+        "columns": []
+      },
+      {
+        "name": "v_menu_du_jour_mensuel",
+        "columns": []
+      },
+      {
+        "name": "v_notifications_non_lues",
+        "columns": []
+      },
+      {
+        "name": "v_achats_mensuels",
+        "columns": [
+          "mama_id",
+          "mois",
+          "montant_total"
+        ]
+      },
+      {
+        "name": "v_analytique_stock",
+        "columns": [
+          "date",
+          "produit_id",
+          "famille",
+          "activite",
+          "cost_center_id",
+          "cost_center_nom",
+          "quantite",
+          "valeur",
+          "mama_id"
+        ]
+      },
+      {
+        "name": "v_cost_center_month",
+        "columns": [
+          "mama_id",
+          "cost_center_id",
+          "nom",
+          "mois",
+          "total"
+        ]
+      },
+      {
+        "name": "v_cost_center_monthly",
+        "columns": [
+          "mama_id",
+          "nom",
+          "mois",
+          "montant"
+        ]
+      }
+    ],
+    "functions": [
+      {
+        "name": "trg_set_timestamp",
+        "exists": false
+      },
+      {
+        "name": "current_user_is_admin_or_manager",
+        "exists": false
+      },
+      {
+        "name": "consolidated_stats",
+        "exists": true
+      }
+    ],
+    "policies": []
+  },
+  "front_back_mapping": [
+    {
+      "file": "src/hooks/useFournisseurs.js",
+      "line": 37,
+      "query": "from('fournisseurs').select('*').eq('mama_id', mama_id).order('nom')",
+      "target": "table:fournisseurs",
+      "columns_expected": [
+        "id",
+        "nom",
+        "actif",
+        "created_at",
+        "updated_at"
+      ],
+      "sql_presence": {
+        "table": true,
+        "columns": {
+          "id": true,
+          "nom": true,
+          "actif": true,
+          "created_at": true,
+          "updated_at": true
+        }
+      },
+      "anomalies": []
+    },
+    {
+      "file": "src/hooks/useProducts.js",
+      "line": 47,
+      "query": "from('produits').select('*).eq('mama_id', mama_id)",
+      "target": "table:produits",
+      "columns_expected": [
+        "*"
+      ],
+      "sql_presence": {
+        "table": true,
+        "columns": {}
+      },
+      "anomalies": [
+        "views lack explicit mama_id filter"
+      ]
+    },
+    {
+      "file": "src/hooks/useFactures.js",
+      "line": 31,
+      "query": "from('factures').select(\"*, fournisseur:fournisseur_id(id, nom)\").eq('mama_id', mama_id)",
+      "target": "table:factures",
+      "columns_expected": [
+        "numero",
+        "date_facture",
+        "montant",
+        "statut",
+        "fournisseur_id"
+      ],
+      "sql_presence": {
+        "table": true,
+        "columns": {}
+      },
+      "anomalies": [
+        "missing business columns"
+      ]
+    },
+    {
+      "file": "src/hooks/useBonsLivraison.js",
+      "line": 17,
+      "query": "from('bons_livraison').select(\"id, numero_bl, date_reception, actif, fournisseur_id, lignes:lignes_bl!bl_id(id)\").eq('mama_id', mama_id)",
+      "target": "table:bons_livraison",
+      "columns_expected": [
+        "numero_bl",
+        "date_reception",
+        "fournisseur_id"
+      ],
+      "sql_presence": {
+        "table": true,
+        "columns": {}
+      },
+      "anomalies": [
+        "missing business columns"
+      ]
+    },
+    {
+      "file": "src/hooks/useInventaires.js",
+      "line": 42,
+      "query": "from('inventaires').select(\"*, zone:inventaire_zones(nom), lignes:produits_inventaire(*, produit:produits(nom, unite_id, pmp))\").eq('mama_id', mama_id)",
+      "target": "table:inventaires",
+      "columns_expected": [
+        "date_inventaire",
+        "zone_id",
+        "periode_id",
+        "statut"
+      ],
+      "sql_presence": {
+        "table": true,
+        "columns": {}
+      },
+      "anomalies": [
+        "RLS not verified"
+      ]
+    },
+    {
+      "file": "src/hooks/useCommandes.js",
+      "line": 18,
+      "query": "from('commandes').select(\"*, fournisseur:fournisseur_id(id, nom, email), lignes:commande_lignes(total_ligne)\").eq('mama_id', mama_id)",
+      "target": "table:commandes",
+      "columns_expected": [
+        "date_commande",
+        "statut",
+        "fournisseur_id"
+      ],
+      "sql_presence": {
+        "table": true,
+        "columns": {}
+      },
+      "anomalies": [
+        "missing business columns"
+      ]
+    },
+    {
+      "file": "src/hooks/useRequisitions.js",
+      "line": 31,
+      "query": "from('requisitions').select(\"*, lignes:requisition_lignes(produit_id, unite, quantite)\").eq('mama_id', mama_id)",
+      "target": "table:requisitions",
+      "columns_expected": [
+        "zone_id",
+        "statut",
+        "commentaire"
+      ],
+      "sql_presence": {
+        "table": true,
+        "columns": {}
+      },
+      "anomalies": [
+        "RLS not verified"
+      ]
+    },
+    {
+      "file": "src/hooks/useFiches.js",
+      "line": 18,
+      "query": "from('fiches_techniques').select(\"*, famille:familles(id, nom), lignes:fiche_lignes!fiche_id(id)\").eq('mama_id', mama_id)",
+      "target": "table:fiches_techniques",
+      "columns_expected": [
+        "nom",
+        "famille_id",
+        "actif",
+        "cout_par_portion"
+      ],
+      "sql_presence": {
+        "table": true,
+        "columns": {}
+      },
+      "anomalies": [
+        "view v_fiche_lignes_complete without mama_id"
+      ]
+    },
+    {
+      "file": "src/hooks/useMenuDuJour.js",
+      "line": 18,
+      "query": "from('menus_jour').select(\"*, fiches:menus_jour_fiches(fiche_id, quantite, fiche:fiches_techniques(id, nom, cout_par_portion))\").eq('mama_id', mama_id)",
+      "target": "table:menus_jour",
+      "columns_expected": [
+        "nom",
+        "date",
+        "prix_vente_ttc"
+      ],
+      "sql_presence": {
+        "table": true,
+        "columns": {}
+      },
+      "anomalies": [
+        "cost computed client-side"
+      ]
+    },
+    {
+      "file": "src/hooks/useMenuEngineering.js",
+      "line": 13,
+      "query": "from('v_me_classification').select('*').eq('mama_id', mama_id)",
+      "target": "view:v_me_classification",
+      "columns_expected": [
+        "*"
+      ],
+      "sql_presence": {
+        "table": false,
+        "columns": {}
+      },
+      "anomalies": [
+        "depends on staging data"
+      ]
+    },
+    {
+      "file": "src/hooks/useTransferts.js",
+      "line": 27,
+      "query": "from('transferts').select(\"id, date_transfert, motif, zone_source:zones_stock!fk_transferts_zone_source_id(id, nom), zone_destination:zones_stock!fk_transferts_zone_dest_id(id, nom), lignes:transfert_lignes(id, produit_id, quantite, produit:produits(id, nom))\").eq('mama_id', mama_id)",
+      "target": "table:transferts",
+      "columns_expected": [
+        "date_transfert",
+        "motif",
+        "zone_source_id",
+        "zone_dest_id"
+      ],
+      "sql_presence": {
+        "table": true,
+        "columns": {}
+      },
+      "anomalies": []
+    },
+    {
+      "file": "src/pages/Transferts.jsx",
+      "line": 229,
+      "query": "from('transferts').select(\"date_transfert, zone_depart, zone_arrivee, quantite, motif\").eq('mama_id', mama_id).eq('produit_id', produit_id)",
+      "target": "table:transferts",
+      "columns_expected": [
+        "date_transfert",
+        "zone_depart",
+        "zone_arrivee",
+        "quantite",
+        "motif"
+      ],
+      "sql_presence": {
+        "table": true,
+        "columns": {
+          "zone_depart": false,
+          "zone_arrivee": false
+        }
+      },
+      "anomalies": [
+        "zone_depart/zone_arrivee missing"
+      ]
+    },
+    {
+      "file": "src/hooks/useEmailsEnvoyes.js",
+      "line": 10,
+      "query": "from('emails_envoyes').select('*').eq('mama_id', mama_id)...order('envoye_le')",
+      "target": "table:emails_envoyes",
+      "columns_expected": [
+        "email",
+        "statut",
+        "commande_id",
+        "envoye_le"
+      ],
+      "sql_presence": {
+        "table": true,
+        "columns": {}
+      },
+      "anomalies": []
+    },
+    {
+      "file": "src/hooks/useNotifications.js",
+      "line": 58,
+      "query": "from('notifications').select('*').eq('mama_id', mama_id).eq('user_id', user_id).order('created_at', { ascending:false })",
+      "target": "table:notifications",
+      "columns_expected": [
+        "titre",
+        "texte",
+        "type",
+        "lu",
+        "created_at"
+      ],
+      "sql_presence": {
+        "table": true,
+        "columns": {}
+      },
+      "anomalies": []
+    },
+    {
+      "file": "src/pages/legal/MentionsLegales.jsx",
+      "line": 15,
+      "query": "from('mamas').select('mentions_legales').eq('id', mamaId)",
+      "target": "table:mamas",
+      "columns_expected": [
+        "mentions_legales"
+      ],
+      "sql_presence": {
+        "table": true,
+        "columns": {
+          "mentions_legales": true
+        }
+      },
+      "anomalies": []
+    },
+    {
+      "file": "src/hooks/useAchats.js",
+      "line": 18,
+      "query": "from('achats').select(\"*, fournisseur:fournisseur_id(id, nom), produit:produit_id(id, nom)\").eq('mama_id', mama_id)",
+      "target": "table:achats",
+      "columns_expected": [
+        "fournisseur_id",
+        "produit_id",
+        "quantite",
+        "prix",
+        "date_achat",
+        "actif"
+      ],
+      "sql_presence": {
+        "table": true,
+        "columns": {
+          "fournisseur_id": true,
+          "produit_id": true,
+          "quantite": true,
+          "prix": true,
+          "date_achat": true,
+          "actif": true
+        }
+      },
+      "anomalies": []
+    },
+    {
+      "file": "src/hooks/usePromotions.js",
+      "line": 17,
+      "query": "from('promotions').select('*', { count:'exact' }).eq('mama_id', mama_id).order('date_debut',{ ascending:false })",
+      "target": "table:promotions",
+      "columns_expected": [
+        "id",
+        "nom",
+        "description",
+        "date_debut",
+        "date_fin",
+        "actif"
+      ],
+      "sql_presence": {
+        "table": true,
+        "columns": {
+          "id": true,
+          "nom": true,
+          "description": true,
+          "date_debut": true,
+          "date_fin": true,
+          "actif": true
+        }
+      },
+      "anomalies": []
+    },
+    {
+      "file": "src/hooks/useReporting.js",
+      "line": 31,
+      "query": "from('v_achats_mensuels').select('*').eq('mama_id', mama_id)",
+      "target": "view:v_achats_mensuels",
+      "columns_expected": [
+        "mama_id",
+        "mois",
+        "montant_total"
+      ],
+      "sql_presence": {
+        "table": true,
+        "columns": {
+          "mama_id": true,
+          "mois": true,
+          "montant_total": true
+        }
+      },
+      "anomalies": []
+    },
+    {
+      "file": "src/hooks/useUtilisateurs.js",
+      "line": 19,
+      "query": "from('utilisateurs_complets').select('*').eq('mama_id', mama_id).order('nom')",
+      "target": "view:utilisateurs_complets",
+      "columns_expected": [
+        "nom",
+        "email",
+        "role_id",
+        "actif"
+      ],
+      "sql_presence": { "table": true, "columns": {} },
+      "anomalies": []
+    },
+    {
+      "file": "src/hooks/useRoles.js",
+      "line": 10,
+      "query": "from('roles').select('*').order('nom')",
+      "target": "table:roles",
+      "columns_expected": [
+        "nom",
+        "description",
+        "access_rights"
+      ],
+      "sql_presence": { "table": true, "columns": {} },
+      "anomalies": []
+    },
+    {
+      "file": "src/hooks/usePermissions.js",
+      "line": 20,
+      "query": "from('permissions').select('*').eq('mama_id', mama_id).order('role_id')",
+      "target": "table:permissions",
+      "columns_expected": [
+        "role_id",
+        "module",
+        "droit"
+      ],
+      "sql_presence": { "table": true, "columns": {} },
+      "anomalies": []
+    },
+    {
+      "file": "src/hooks/useMamas.js",
+      "line": 15,
+      "query": "from('mamas').select('*').order('nom').ilike('nom', `%${search}%`).eq('id', mama_id)",
+      "target": "table:mamas",
+      "columns_expected": [
+        "nom",
+        "created_at"
+      ],
+      "sql_presence": { "table": true, "columns": {} },
+      "anomalies": []
+    },
+    {
+      "file": "src/hooks/useFamilles.js",
+      "line": 26,
+      "query": "from('familles').select('id, code, nom, actif', { count:'exact' }).eq('mama_id', mama_id).order('nom').range((params.page-1)*params.limit, params.page*params.limit-1)",
+      "target": "table:familles",
+      "columns_expected": [
+        "id",
+        "code",
+        "nom",
+        "actif"
+      ],
+      "sql_presence": { "table": true, "columns": {} },
+      "anomalies": []
+    },
+    {
+      "file": "src/hooks/useSousFamilles.js",
+      "line": 14,
+      "query": "from('sous_familles').select('*').eq('mama_id', mama_id).eq('famille_id', familleId).ilike('nom', `%${search}%`)",
+      "target": "table:sous_familles",
+      "columns_expected": [
+        "nom",
+        "famille_id",
+        "actif"
+      ],
+      "sql_presence": { "table": true, "columns": {} },
+      "anomalies": []
+    }
+  ],
+  "issues": {
+    "errors": [
+      {
+        "code": "TEST_FAIL",
+        "context": "Vitest assertions",
+        "files": [
+          "test/backup_db.test.js",
+          "test/export_accounting.test.js"
+        ]
+      },
+      {
+        "code": "MISSING_COLUMNS",
+        "context": "factures/bons_livraison/commandes/menus_jour",
+        "files": [
+          "src/hooks/useFactures.js",
+          "src/hooks/useBonsLivraison.js",
+          "src/hooks/useCommandes.js",
+          "src/hooks/useMenuDuJour.js"
+        ]
+      }
+    ],
+    "duplicates": [
+      {
+        "file": "src/hooks/useZonesStock.js",
+        "identifier": "loading"
+      },
+      {
+        "file": "src/hooks/useEmailsEnvoyes.js",
+        "identifier": "loading"
+      }
+    ],
+    "naming_mismatch": [
+      {
+        "front": "zone_depart/zone_arrivee",
+        "back": "zone_source_id/zone_dest_id",
+        "files": [
+          "src/pages/Transferts.jsx"
+        ]
+      }
+    ]
+  },
+  "gaps": {
+    "columns_to_add": [
+      {
+        "table": "fournisseurs",
+        "column": "contact",
+        "type": "text"
+      },
+      {
+        "table": "produits",
+        "column": "pmp",
+        "type": "numeric"
+      },
+      {
+        "table": "produits",
+        "column": "stock_theorique",
+        "type": "numeric"
+      },
+      {
+        "table": "factures",
+        "column": "numero",
+        "type": "text"
+      },
+      {
+        "table": "factures",
+        "column": "date_facture",
+        "type": "date"
+      },
+      {
+        "table": "factures",
+        "column": "montant",
+        "type": "numeric"
+      },
+      {
+        "table": "bons_livraison",
+        "column": "numero_bl",
+        "type": "text"
+      },
+      {
+        "table": "commandes",
+        "column": "date_commande",
+        "type": "date"
+      },
+      {
+        "table": "requisitions",
+        "column": "zone_id",
+        "type": "uuid"
+      },
+      {
+        "table": "menus_jour",
+        "column": "prix_vente_ttc",
+        "type": "numeric"
+      },
+      {
+        "table": "transferts",
+        "column": "zone_depart",
+        "type": "uuid"
+      },
+      {
+        "table": "transferts",
+        "column": "zone_arrivee",
+        "type": "uuid"
+      }
+    ],
+    "views_to_fix": [
+      {
+        "name": "v_pmp",
+        "must_expose": [
+          "mama_id filter"
+        ]
+      },
+      {
+        "name": "v_stocks",
+        "must_expose": [
+          "mama_id filter"
+        ]
+      },
+      {
+        "name": "v_products_last_price",
+        "must_expose": [
+          "mama_id filter"
+        ]
+      },
+      {
+        "name": "v_requisitions",
+        "must_expose": [
+          "mama_id filter"
+        ]
+      },
+      {
+        "name": "v_fiche_lignes_complete",
+        "must_expose": [
+          "mama_id filter"
+        ]
+      },
+      {
+        "name": "v_me_classification",
+        "must_expose": [
+          "mama_id filter"
+        ]
+      },
+      {
+        "name": "v_menu_du_jour_mensuel",
+        "must_expose": [
+          "mama_id filter"
+        ]
+      }
+    ],
+    "functions_to_create": [
+      "trg_set_timestamp",
+      "current_user_is_admin_or_manager"
+    ]
+  },
+  "next_steps": {
+    "front_fix_list": [
+      "resolve duplicate loading identifiers",
+      "align factures/bons_livraison/commandes/fiches/menus hooks with SQL"
+    ],
+    "sql_preflight_queries": [
+      "SELECT column_name FROM information_schema.columns WHERE table_name='fournisseurs';",
+      "SELECT column_name FROM information_schema.columns WHERE table_name='produits';",
+      "SELECT column_name FROM information_schema.columns WHERE table_name='factures';",
+      "SELECT column_name FROM information_schema.columns WHERE table_name='bons_livraison';",
+      "SELECT column_name FROM information_schema.columns WHERE table_name='commandes';",
+      "SELECT column_name FROM information_schema.columns WHERE table_name='transferts';",
+      "SELECT column_name FROM information_schema.columns WHERE table_name='menus_jour';",
+      "SELECT column_name FROM information_schema.columns WHERE table_name='emails_envoyes';",
+      "SELECT column_name FROM information_schema.columns WHERE table_name='notifications';",
+      "SELECT column_name FROM information_schema.columns WHERE table_name='notification_preferences';",
+      "SELECT column_name FROM information_schema.columns WHERE table_name='mamas';",
+      "SELECT column_name FROM information_schema.columns WHERE table_name='utilisateurs';",
+      "SELECT column_name FROM information_schema.columns WHERE table_name='roles';",
+      "SELECT column_name FROM information_schema.columns WHERE table_name='permissions';",
+      "SELECT column_name FROM information_schema.columns WHERE table_name='familles';",
+      "SELECT column_name FROM information_schema.columns WHERE table_name='sous_familles';",
+      "SELECT column_name FROM information_schema.columns WHERE table_name='achats';",
+      "SELECT column_name FROM information_schema.columns WHERE table_name='promotions';"
+    ],
+    "sql_patch_outline": [
+      "-- add missing business columns",
+      "-- create trg_set_timestamp if not exists",
+      "-- add current_user_is_admin_or_manager if not exists"
+    ]
+  }
+}

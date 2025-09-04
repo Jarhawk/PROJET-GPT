@@ -52,7 +52,11 @@ export default function Familles() {
 
   const handleDelete = async (id) => {
     setActionLoading(true);
-    const { error } = await supabase.from('familles').delete().eq('id', id);
+    const { error } = await supabase
+      .from('familles')
+      .delete()
+      .eq('id', id)
+      .eq('mama_id', mama_id);
     if (error) {
       console.error('Erreur suppression :', error);
       toast.error('Suppression échouée.');
@@ -83,7 +87,11 @@ export default function Familles() {
   };
 
   const handleDeleteSous = async (id) => {
-    const { error } = await supabase.from('sous_familles').delete().eq('id', id);
+    const { error } = await supabase
+      .from('sous_familles')
+      .delete()
+      .eq('id', id)
+      .eq('mama_id', mama_id);
     if (error) {
       console.error('Erreur suppression :', error);
       toast.error('Suppression échouée.');

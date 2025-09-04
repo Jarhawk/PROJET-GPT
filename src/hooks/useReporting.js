@@ -47,7 +47,7 @@ export function useReporting() {
       case 'cost_center':
         query = supabase
           .from('v_cost_center_monthly')
-          .select('mama_id, nom, mois, montant')
+          .select('nom, mois, montant')
           .eq('mama_id', mama_id)
           .order('mois', { ascending: true });
         if (filters.date_start) query = query.gte('mois', filters.date_start);
@@ -84,7 +84,7 @@ export function useReporting() {
     if (!mama_id) return [];
     let query = supabase
       .from('v_cost_center_monthly')
-      .select('mama_id, nom, mois, montant')
+      .select('nom, mois, montant')
       .eq('mama_id', mama_id)
       .order('mois', { ascending: true });
     if (filters.date_start) query = query.gte('mois', filters.date_start);

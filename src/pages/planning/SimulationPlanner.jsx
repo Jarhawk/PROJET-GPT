@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useMenus } from '@/hooks/useMenus';
 import { useSimulation } from '@/hooks/useSimulation';
 import SimulationDetailsModal from '@/components/simulation/SimulationDetailsModal';
-import Button from '@/components/ui/Button';
+import Button from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import TableContainer from '@/components/ui/TableContainer';
 

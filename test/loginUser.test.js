@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 
-vi.mock('../src/lib/supabase.js', () => {
+vi.mock('@/lib/supabase', () => {
   const supabase = {
     auth: {
       signInWithPassword: vi.fn(() => ({ data: { user: 'u' }, error: null })),
@@ -45,7 +45,7 @@ import {
   enableTwoFa,
   disableTwoFa,
 } from '../src/lib/loginUser.js';
-import { supabase as mockedSupabase } from '../src/lib/supabase.js';
+import { supabase as mockedSupabase } from '@/lib/supabase';
 
 describe('loginUser helpers', () => {
   it('login calls signInWithPassword', async () => {

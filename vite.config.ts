@@ -2,7 +2,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
-import { fileURLToPath, URL } from "node:url";
+import path from "node:path";
 
 export default defineConfig({
   plugins: [
@@ -42,7 +42,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@": fileURLToPath(new URL("./src", import.meta.url)), // 👈 définit @ comme racine de /src
+      "@": path.resolve(__dirname, "./src"), // 👈 définit @ comme racine de /src
     },
   },
   optimizeDeps: {

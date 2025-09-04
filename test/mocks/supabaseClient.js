@@ -1,5 +1,10 @@
 export function makeSupabaseMock(init = { data: [], error: null, count: 0 }) {
-  const result = Promise.resolve({ data: init.data, error: init.error, count: init.count });
+  const result = Promise.resolve({
+    data: init.data,
+    error: init.error,
+    count: init.count
+  });
+
   const chain = {
     from() { return chain; },
     select() { return chain; },
@@ -8,6 +13,7 @@ export function makeSupabaseMock(init = { data: [], error: null, count: 0 }) {
     delete() { return chain; },
     order() { return chain; },
     eq() { return chain; },
+    in() { return chain; },
     range() { return chain; },
     single() { return result; },
     maybeSingle() { return result; },

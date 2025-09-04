@@ -73,7 +73,7 @@ export default function Requisitions() {
   const handleExportExcel = () => {
     const ws = XLSX.utils.json_to_sheet(
       filtered.map((r) => ({
-        Numero: r.numero,
+        Numero: r.id,
         Date: r.date_requisition,
         Statut: r.statut,
         Zone: zones.find((z) => z.id === r.zone_id)?.nom || '-',
@@ -91,9 +91,9 @@ export default function Requisitions() {
     doc.text('Historique Réquisitions', 10, 12);
     doc.autoTable({
       startY: 20,
-      head: [['Numero', 'Date', 'Statut', 'Zone']],
+      head: [['ID', 'Date', 'Statut', 'Zone']],
       body: filtered.map((r) => [
-        r.numero,
+        r.id,
         r.date_requisition,
         r.statut,
         zones.find((z) => z.id === r.zone_id)?.nom || '-',
@@ -189,7 +189,7 @@ export default function Requisitions() {
         <table className="min-w-full table-auto text-center">
           <thead>
             <tr>
-              <th className="px-2 py-1">Numéro</th>
+              <th className="px-2 py-1">ID</th>
               <th className="px-2 py-1">Date</th>
               <th className="px-2 py-1">Statut</th>
               <th className="px-2 py-1">Zone</th>
@@ -198,7 +198,7 @@ export default function Requisitions() {
           <tbody>
             {filtered.map((r) => (
               <tr key={r.id}>
-                <td className="px-2 py-1">{r.numero}</td>
+                <td className="px-2 py-1">{r.id}</td>
                 <td className="px-2 py-1">{r.date_requisition}</td>
                 <td className="px-2 py-1">{r.statut}</td>
                 <td className="px-2 py-1">

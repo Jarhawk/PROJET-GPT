@@ -32,7 +32,8 @@ export default function MobileRequisition() {
     const { data, error } = await supabase.
     from("requisitions").
     insert([{ zone: "Bar", mama_id }]).
-    select().
+    select("id").
+    eq("mama_id", mama_id).
     single();
 
     if (error || !data?.id) {
@@ -41,8 +42,9 @@ export default function MobileRequisition() {
     }
 
     const { error: lineError } = await supabase.
-    from("requisitions").
-    insert([{ requisition_id: data.id, produit_id: selectedId, quantite, mama_id }]);
+    from("requisition_lignes").
+    insert([{ requisition_id: data.id, produit_id: selectedId, quantite, mama_id }]).
+    eq("mama_id", mama_id);
 
     if (lineError) {
       toast.error("Erreur lors de l'ajout du produit");

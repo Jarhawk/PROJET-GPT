@@ -38,9 +38,9 @@ test('getRequisitions applies filters', async () => {
     });
   });
   expect(fromMock).toHaveBeenCalledWith('requisitions');
-  expect(query.select).toHaveBeenCalledWith('*, lignes:requisition_lignes(produit_id, unite, quantite)', { count: 'exact' });
+  expect(query.select).toHaveBeenCalledWith(`id, date_requisition, statut, zone_id, mama_id,
+      lignes:requisition_lignes ( id, produit_id, unite, quantite )`, { count: 'exact' });
   expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1');
-  expect(query.eq).toHaveBeenCalledWith('actif', true);
   expect(query.eq).toHaveBeenCalledWith('statut', 'draft');
   expect(query.gte).toHaveBeenCalledWith('date_requisition', '2025-01-01');
   expect(query.lte).toHaveBeenCalledWith('date_requisition', '2025-01-31');

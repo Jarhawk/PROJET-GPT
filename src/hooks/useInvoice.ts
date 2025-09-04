@@ -1,5 +1,5 @@
 import supabase from '@/lib/supabase';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -29,10 +29,13 @@ export type Facture = {
   lignes?: FactureLigne[];
 };
 
-async function fetchInvoiceAndLinesSeparately(id: string, mamaId: string): Promise<Facture> {
+type FactureHead = Omit<Facture, 'lignes'>;
+
+async function fetchInvoiceAndLinesSeparately(id: UUID, mamaId: UUID): Promise<Facture> {
   const { data: head, error: e1 } = await supabase
     .from('factures')
     .select('id, mama_id, numero, date_facture, fournisseur_id, montant, statut')
+    .returns<FactureHead>()
     .eq('id', id)
     .eq('mama_id', mamaId)
     .maybeSingle();
@@ -44,14 +47,15 @@ async function fetchInvoiceAndLinesSeparately(id: string, mamaId: string): Promi
     .select(
       'id, facture_id, produit_id, quantite, prix_unitaire, tva, remise, total_ht, total_ttc, produit:produit_id(id, nom)'
     )
+    .returns<FactureLigne[]>()
     .eq('facture_id', id)
     .eq('mama_id', mamaId);
   if (e2) throw e2;
 
-  return { ...head, lignes } as Facture;
+  return { ...head, lignes: lignes ?? undefined };
 }
 
-export function useInvoice(id: string | undefined) {
+export function useInvoice(id: UUID | undefined): UseQueryResult<Facture> {
   const auth = useAuth();
   if (!auth) throw new Error('Auth indisponible');
   const { session } = auth;
@@ -75,6 +79,7 @@ export function useInvoice(id: string | undefined) {
           `)
           .eq('id', id!)
           .eq('mama_id', mamaId)
+          .returns<Facture>()
           .maybeSingle();
 
         if (error) {
@@ -83,7 +88,7 @@ export function useInvoice(id: string | undefined) {
         if (!data) {
           throw new Error('Facture introuvable ou non autorisée (RLS).');
         }
-        return data as unknown as Facture;
+        return data;
       } catch (e) {
         console.warn('[useInvoice] embed failed, fetching separately', e);
         return await fetchInvoiceAndLinesSeparately(id!, mamaId);

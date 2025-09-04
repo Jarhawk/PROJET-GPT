@@ -22,28 +22,30 @@ export function useAlerteStockFaible({ page = 1, pageSize = 20 } = {}) {
     const fetchData = async () => {
       setLoading(true);
       setError(null);
-      const from = (page - 1) * pageSize;
-      const to = from + pageSize - 1;
+      const p = Number(page);
+      const l = Number(pageSize);
+      const from = (p - 1) * l;
+      const to = from + l - 1;
       try {
-        const base = supabase.from('v_alertes_rupture');
+        const base = supabase.from('v_alertes_rupture').eq('mama_id', mama_id);
         const selectWith =
         'id:produit_id, produit_id, nom, unite, fournisseur_id, fournisseur_nom, stock_actuel, stock_min, manque, consommation_prevue, receptions, stock_projete';
 
-        let { data: rows, count, error } = await base.
-        select(selectWith, { count: 'exact' }).
-        order('manque', { ascending: false }).
-        range(from, to);
+        let { data: rows, count, error } = await base
+          .select(selectWith, { count: 'exact' })
+          .order('manque', { ascending: false })
+          .range(from, to);
 
         if (error && error.code === '42703') {
           if (import.meta.env.DEV)
           console.debug('v_alertes_rupture sans stock_projete');
-          const { data: d2, count: c2, error: e2 } = await base.
-          select(
-            'id:produit_id, produit_id, nom, unite, fournisseur_id, fournisseur_nom, stock_actuel, stock_min, manque, consommation_prevue, receptions',
-            { count: 'exact' }
-          ).
-          order('manque', { ascending: false }).
-          range(from, to);
+          const { data: d2, count: c2, error: e2 } = await base
+            .select(
+              'id:produit_id, produit_id, nom, unite, fournisseur_id, fournisseur_nom, stock_actuel, stock_min, manque, consommation_prevue, receptions',
+              { count: 'exact' }
+            )
+            .order('manque', { ascending: false })
+            .range(from, to);
           if (e2) throw e2;
           rows = (d2 ?? []).map((r) => ({
             ...r,

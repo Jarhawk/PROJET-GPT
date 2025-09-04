@@ -15,13 +15,15 @@ export function useFactures() {
 
   async function getBonsLivraison({ search = "", page = 1, limit = 50 } = {}) {
     if (!mama_id) return [];
+    page = Number(page);
+    limit = Number(limit);
     setLoading(true);
     setError(null);
-    let q = supabase.
-    from("bons_livraison").
-    select("*", { count: "exact" }).
-    eq("mama_id", mama_id).
-    order("date_livraison", { ascending: false });
+    let q = supabase
+      .from("bons_livraison")
+      .select("*", { count: "exact" })
+      .eq("mama_id", mama_id)
+      .order("date_livraison", { ascending: false });
     if (search) q = q.ilike("numero_bl", `%${search}%`);
     q = q.range((page - 1) * limit, page * limit - 1);
     const { data, error, count } = await q;
@@ -44,14 +46,16 @@ export function useFactures() {
     pageSize = 20
   } = {}) {
     if (!mama_id) return [];
+    page = Number(page);
+    pageSize = Number(pageSize);
     setLoading(true);
     setError(null);
-    let query = supabase.
-    from("factures").
-    select("*, fournisseur:fournisseur_id(id, nom)", { count: "exact" }).
-    eq("mama_id", mama_id).
-    order("date_facture", { ascending: false }).
-    range((page - 1) * pageSize, page * pageSize - 1);
+    let query = supabase
+      .from("factures")
+      .select("*, fournisseur:fournisseur_id(id, nom)", { count: "exact" })
+      .eq("mama_id", mama_id)
+      .order("date_facture", { ascending: false })
+      .range((page - 1) * pageSize, page * pageSize - 1);
 
     if (search) {
       query = query.or(

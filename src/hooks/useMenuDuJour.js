@@ -18,21 +18,23 @@ export function useMenuDuJour() {
 
   async function fetchMenusDuJour({ search = "", date = "", actif = null, offset = 0, limit = 50 } = {}) {
     if (!mama_id) return [];
+    offset = Number(offset);
+    limit = Number(limit);
     setLoading(true);
     setError(null);
-    let query = supabase.
-    from("menus_jour").
-    select(
-      "*, fiches:menus_jour_fiches(fiche_id, quantite, fiche:fiches_techniques(id, nom, cout_par_portion))",
-      { count: "exact" }
-    ).
-    eq("mama_id", mama_id);
+    let query = supabase
+      .from("menus_jour")
+      .select(
+        "*, fiches:menus_jour_fiches(fiche_id, quantite, fiche:fiches_techniques(id, nom, cout_par_portion))",
+        { count: "exact" }
+      )
+      .eq("mama_id", mama_id);
     if (search) query = query.ilike("nom", `%${search}%`);
     if (date) query = query.eq("date", date);
     if (typeof actif === "boolean") query = query.eq("actif", actif);
-    const { data, count, error } = await query.
-    order("date", { ascending: false }).
-    range(offset, offset + limit - 1);
+    const { data, count, error } = await query
+      .order("date", { ascending: false })
+      .range(offset, offset + limit - 1);
     const withCost = Array.isArray(data) ?
     data.map((m) => {
       const cost = (m.fiches || []).reduce(

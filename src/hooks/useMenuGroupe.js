@@ -1,8 +1,12 @@
 import supabase from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function useMenuGroupe() {
+  const { mama_id } = useAuth();
+
   async function fetchMenusGroupes({ q } = {}) {
-    let qy = supabase.from('menu_groupes').select('*');
+    if (!mama_id) return [];
+    let qy = supabase.from('menu_groupes').select('*').eq('mama_id', mama_id);
     if (q) qy = qy.ilike('nom', `%${q}%`);
     const { data } = await qy;
     return data || [];

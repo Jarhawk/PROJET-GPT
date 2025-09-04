@@ -13,14 +13,16 @@ export function useBonsLivraison() {
 
   async function getBonsLivraison({ fournisseur = "", debut = "", fin = "", actif = true, page = 1, pageSize = 50 } = {}) {
     if (!mama_id) return [];
+    page = Number(page);
+    pageSize = Number(pageSize);
     setLoading(true);
     setError(null);
-    let q = supabase.
-    from("bons_livraison").
-    select("id, numero_bl, date_reception, commentaire, actif, fournisseur_id, fournisseur:fournisseur_id(id, nom), lignes:lignes_bl!bl_id(id)", { count: "exact" }).
-    eq("mama_id", mama_id).
-    order("date_reception", { ascending: false }).
-    range((page - 1) * pageSize, page * pageSize - 1);
+    let q = supabase
+      .from("bons_livraison")
+      .select("id, numero_bl, date_reception, commentaire, actif, fournisseur_id, fournisseur:fournisseur_id(id, nom), lignes:lignes_bl!bl_id(id)", { count: "exact" })
+      .eq("mama_id", mama_id)
+      .order("date_reception", { ascending: false })
+      .range((page - 1) * pageSize, page * pageSize - 1);
     if (fournisseur) q = q.eq("fournisseur_id", fournisseur);
     if (actif !== null) q = q.eq("actif", actif);
     if (debut) q = q.gte("date_reception", debut);

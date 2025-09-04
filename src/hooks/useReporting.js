@@ -45,7 +45,7 @@ export function useReporting() {
         query = applyFilters(query, filters);
         break;
       case 'cost_center':
-        query = supabase.from('v_cost_center_month').select('*').eq('mama_id', mama_id);
+        query = supabase.from('v_cost_center_monthly').select('*').eq('mama_id', mama_id);
         if (filters.date_start) query = query.gte('mois', filters.date_start);
         if (filters.date_end) query = query.lte('mois', filters.date_end);
         break;
@@ -78,7 +78,7 @@ export function useReporting() {
 
   async function getCostCenterBreakdown(filters = {}) {
     if (!mama_id) return [];
-    let query = supabase.from("v_cost_center_month").select("*").eq("mama_id", mama_id);
+    let query = supabase.from("v_cost_center_monthly").select("*").eq("mama_id", mama_id);
     if (filters.date_start) query = query.gte("mois", filters.date_start);
     if (filters.date_end) query = query.lte("mois", filters.date_end);
     const { data, error } = await query;

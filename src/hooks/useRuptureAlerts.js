@@ -9,7 +9,7 @@ export function useRuptureAlerts() {
   async function fetchAlerts(type = null) {
     if (!mama_id) return [];
     try {
-      const base = supabase.from('v_alertes_rupture');
+      const base = supabase.from('v_alertes_rupture').eq('mama_id', mama_id);
       const selectWith =
       'id:produit_id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, consommation_prevue, receptions, stock_projete, manque, type';
 

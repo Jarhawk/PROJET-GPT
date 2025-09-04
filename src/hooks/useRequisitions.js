@@ -9,12 +9,14 @@ export function useRequisitions() {
 
   async function fetchRequisitions({ search = "", page = 1, limit = 20 } = {}) {
     if (!mama_id) return { data: [], count: 0 };
-    let query = supabase.
-    from("v_requisitions").
-    select("*", { count: "exact" }).
-    eq("mama_id", mama_id).
-    order("date_requisition", { ascending: false }).
-    range((page - 1) * limit, page * limit - 1);
+    page = Number(page);
+    limit = Number(limit);
+    let query = supabase
+      .from("v_requisitions")
+      .select("*", { count: "exact" })
+      .eq("mama_id", mama_id)
+      .order("date_requisition", { ascending: false })
+      .range((page - 1) * limit, page * limit - 1);
     if (search) query = query.ilike("produit_nom", `%${search}%`);
     const { data, count, error } = await query;
     if (error) {
@@ -34,13 +36,15 @@ export function useRequisitions() {
     limit = 10
   } = {}) {
     if (!mama_id) return { data: [], count: 0 };
-    let query = supabase.
-    from("requisitions").
-    select("*, lignes:requisition_lignes(produit_id, unite, quantite)", { count: "exact" }).
-    eq("mama_id", mama_id).
-    eq("actif", true).
-    order("date_requisition", { ascending: false }).
-    range((page - 1) * limit, page * limit - 1);
+    page = Number(page);
+    limit = Number(limit);
+    let query = supabase
+      .from("requisitions")
+      .select("*, lignes:requisition_lignes(produit_id, unite, quantite)", { count: "exact" })
+      .eq("mama_id", mama_id)
+      .eq("actif", true)
+      .order("date_requisition", { ascending: false })
+      .range((page - 1) * limit, page * limit - 1);
     if (zone) query = query.eq("zone_id", zone);
     if (statut) query = query.eq("statut", statut);
     if (debut) query = query.gte("date_requisition", debut);

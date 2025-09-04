@@ -13,16 +13,16 @@ export function usePromotions() {
 
   async function fetchPromotions({ search = "", actif = null, page = 1, limit = 20 } = {}) {
     if (!mama_id) return [];
+    page = Number(page);
+    limit = Number(limit);
     setLoading(true);
     setError(null);
-    let query = supabase.
-    from("promotions").
-    select("*", { count: "exact" }).
-    eq("mama_id", mama_id).
-    order("date_debut", { ascending: false });
-    if (typeof query.range === "function") {
-      query = query.range((page - 1) * limit, page * limit - 1);
-    }
+    let query = supabase
+      .from("promotions")
+      .select("*", { count: "exact" })
+      .eq("mama_id", mama_id)
+      .order("date_debut", { ascending: false })
+      .range((page - 1) * limit, page * limit - 1);
     if (search) query = query.ilike("nom", `%${search}%`);
     if (typeof actif === "boolean") query = query.eq("actif", actif);
     const { data, error, count } = await query;

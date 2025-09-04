@@ -218,7 +218,7 @@ export default function Reporting() {
               <XAxis dataKey="mois" />
               <YAxis />
               <Tooltip />
-              <Line type="monotone" dataKey="valeur" stroke="#0f1c2e" />
+                <Line type="monotone" dataKey="montant" stroke="#0f1c2e" />
             </LineChart>
           </ResponsiveContainer>
         </GlassCard>

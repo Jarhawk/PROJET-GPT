@@ -29,7 +29,6 @@ export default function BLForm({ bon, fournisseurs = [], onClose }) {
   );
   const [fournisseurName, setFournisseurName] = useState('');
   const [numero_bl, setNumero] = useState(bon?.numero_bl || '');
-  const [commentaire, setCommentaire] = useState(bon?.commentaire || '');
   const [lignes, setLignes] = useState(
     bon?.lignes?.map((l) => ({ ...l, produit_nom: l.produit?.nom || '' })) || [
       {
@@ -66,7 +65,6 @@ export default function BLForm({ bon, fournisseurs = [], onClose }) {
       numero_bl,
       date_reception,
       fournisseur_id,
-      commentaire,
       lignes,
     };
     try {
@@ -126,13 +124,6 @@ export default function BLForm({ bon, fournisseurs = [], onClose }) {
               </option>
             ))}
           </datalist>
-          <label className="block text-sm mb-1">Commentaire</label>
-          <textarea
-            className="form-textarea w-full"
-            placeholder="Commentaire"
-            value={commentaire}
-            onChange={(e) => setCommentaire(e.target.value)}
-          />
           <table className="w-full text-sm mb-2">
             <thead>
               <tr>

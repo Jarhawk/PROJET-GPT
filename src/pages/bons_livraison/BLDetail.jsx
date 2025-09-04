@@ -29,7 +29,6 @@ export default function BLDetail({ bon: bonProp, onClose }) {
         <h2 className="font-bold text-xl mb-4">Bon de livraison #{bon.numero_bl}</h2>
         <div><b>Date :</b> {bon.date_reception}</div>
         <div><b>Fournisseur :</b> {bon.fournisseur?.nom}</div>
-        <div><b>Commentaire :</b> {bon.commentaire || "-"}</div>
         <div>
           <b>Actif :</b> {bon.actif ? "Oui" : "Non"}
           <Button size="sm" variant="outline" className="ml-2" onClick={async () => {

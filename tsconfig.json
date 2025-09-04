@@ -8,6 +8,7 @@
     "noEmit": true,
     "isolatedModules": true,
     "skipLibCheck": true,
+    "allowJs": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
@@ -15,7 +16,7 @@
       "@components/*": ["src/components/*"],
       "@pages/*": ["src/pages/*"]
     },
-    "types": ["vitest/globals", "node", "vite/client"]
+    "types": ["vitest/globals"]
   },
   "include": ["src", "test", "vitest.config.ts", "vite.config.ts"]
 }

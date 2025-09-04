@@ -1,4 +1,5 @@
-import supabase from '@/lib/supabase';import { useQuery } from '@tanstack/react-query';
+import supabase from '@/lib/supabase';
+import { useQuery } from '@tanstack/react-query';
 
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -14,7 +15,7 @@ export type FactureLigne = {
   remise: number | null;
   total_ht: number | null;
   total_ttc: number | null;
-  produit?: {id: UUID;nom: string;} | null;
+  produit?: { id: UUID; nom: string } | null;
 };
 
 export type Facture = {
@@ -28,49 +29,53 @@ export type Facture = {
   lignes?: FactureLigne[];
 };
 
-async function fetchInvoiceAndLinesSeparately(supabase, id: string, mamaId: string) {
-  const { data: head, error: e1 } = await supabase.
-  from('factures').
-  select('id, mama_id, numero, date_facture, fournisseur_id, total_ht, total_ttc').
-  eq('id', id).
-  eq('mama_id', mamaId).
-  maybeSingle();
+async function fetchInvoiceAndLinesSeparately(id: string, mamaId: string): Promise<Facture> {
+  const { data: head, error: e1 } = await supabase
+    .from('factures')
+    .select('id, mama_id, numero, date_facture, fournisseur_id, total_ht, total_ttc')
+    .eq('id', id)
+    .eq('mama_id', mamaId)
+    .maybeSingle();
   if (e1) throw e1;
   if (!head) throw new Error('Facture introuvable');
 
-  const { data: lignes, error: e2 } = await supabase.
-  from('facture_lignes').
-  select('id, facture_id, produit_id, quantite, prix_unitaire, tva, remise, total_ht, total_ttc, produit:produit_id(id, nom)').
-  eq('facture_id', id).
-  eq('mama_id', mamaId);
+  const { data: lignes, error: e2 } = await supabase
+    .from('facture_lignes')
+    .select(
+      'id, facture_id, produit_id, quantite, prix_unitaire, tva, remise, total_ht, total_ttc, produit:produit_id(id, nom)'
+    )
+    .eq('facture_id', id)
+    .eq('mama_id', mamaId);
   if (e2) throw e2;
 
-  return { ...head, lignes };
+  return { ...head, lignes } as Facture;
 }
 
 export function useInvoice(id: string | undefined) {
-  const { session } = useAuth();
+  const auth = useAuth();
+  if (!auth) throw new Error('Auth indisponible');
+  const { session } = auth;
   const mamaId = (session?.user?.user_metadata?.mama_id ?? session?.user?.mama_id ?? '').toString();
 
   const enabled = !!id && id !== 'new' && mamaId.length > 0;
 
-  return useQuery({
+  return useQuery<Facture>({
     queryKey: ['invoice', id, mamaId],
     enabled,
     queryFn: async (): Promise<Facture> => {
       try {
-        const { data, error } = await supabase.
-        from('factures').
-        select(`
+        const { data, error } = await supabase
+          .from('factures')
+          .select(`
             id, mama_id, numero, date_facture, fournisseur_id, total_ht, total_ttc,
             lignes:facture_lignes (
               id, facture_id, produit_id, quantite, prix_unitaire, tva, remise, total_ht, total_ttc,
               produit:produit_id ( id, nom )
             )
-          `).
-        eq('id', id!).
-        eq('mama_id', mamaId).
-        maybeSingle();
+          `)
+          .eq('id', id!)
+          .eq('mama_id', mamaId)
+          .maybeSingle();
 
         if (error) {
           throw error;
@@ -81,10 +86,10 @@ export function useInvoice(id: string | undefined) {
         return data as unknown as Facture;
       } catch (e) {
         console.warn('[useInvoice] embed failed, fetching separately', e);
-        return (await fetchInvoiceAndLinesSeparately(supabase, id!, mamaId)) as Facture;
+        return await fetchInvoiceAndLinesSeparately(id!, mamaId);
       }
     },
     staleTime: 0,
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
   });
 }

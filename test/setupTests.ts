@@ -48,7 +48,8 @@ if (!(globalThis as any).DOMRect) {
 
 // fetch si besoin
 if (!globalThis.fetch) {
-  globalThis.fetch = (...args:any) => import("node-fetch").then(({default: f}) => f(...args)) as any;
+  // eslint-disable-next-line import/no-extraneous-dependencies
+  globalThis.fetch = (...args: any) => import('node-fetch').then(({ default: f }) => f(...args)) as any;
 }
 
 // Conseils pour tests async : expect(await fn()) et utiliser `await` sur hooks async.

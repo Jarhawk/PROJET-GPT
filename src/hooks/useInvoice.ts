@@ -36,8 +36,8 @@ async function fetchInvoiceAndLinesSeparately(id: UUID, mamaId: UUID): Promise<F
     .from('factures')
     .select('id, mama_id, numero, date_facture, fournisseur_id, montant, statut')
     .returns<FactureHead>()
-    .eq('id', id)
     .eq('mama_id', mamaId)
+    .eq('id', id)
     .maybeSingle();
   if (e1) throw e1;
   if (!head) throw new Error('Facture introuvable');
@@ -48,8 +48,8 @@ async function fetchInvoiceAndLinesSeparately(id: UUID, mamaId: UUID): Promise<F
       'id, facture_id, produit_id, quantite, prix_unitaire, tva, remise, total_ht, total_ttc, produit:produit_id(id, nom)'
     )
     .returns<FactureLigne[]>()
-    .eq('facture_id', id)
-    .eq('mama_id', mamaId);
+    .eq('mama_id', mamaId)
+    .eq('facture_id', id);
   if (e2) throw e2;
 
   return { ...head, lignes: lignes ?? undefined };
@@ -77,8 +77,8 @@ export function useInvoice(id: UUID | undefined): UseQueryResult<Facture> {
               produit:produit_id ( id, nom )
             )
           `)
-          .eq('id', id!)
           .eq('mama_id', mamaId)
+          .eq('id', id!)
           .returns<Facture>()
           .maybeSingle();
 

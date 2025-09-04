@@ -1,6 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import ModalGlass from "@/components/ui/ModalGlass";
-import Button from "@/components/ui/Button";
+import Button from "@/components/ui/button";
 import TableContainer from "@/components/ui/TableContainer";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";

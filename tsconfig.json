@@ -16,7 +16,8 @@
       "@components/*": ["src/components/*"],
       "@pages/*": ["src/pages/*"]
     },
-    "types": ["vitest/globals"]
+    "types": ["vitest/globals"],
+    "lib": ["ES2022", "DOM"]
   },
   "include": ["src", "test", "vitest.config.ts", "vite.config.ts"]
 }

@@ -2,6 +2,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from '@/hooks/useAuth';
 import { useLogs } from "@/hooks/useLogs";
+import { supabase } from '@/lib/supabase';
 import GlassCard from "@/components/ui/GlassCard";
 import TableContainer from "@/components/ui/TableContainer";
 import { Input } from "@/components/ui/input";
@@ -12,7 +13,6 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/SmartDialog";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
@@ -46,6 +46,14 @@ export default function Rapports() {
 
   async function handleGenerate(e) {
     e.preventDefault();
+    await supabase.from("rapports_generes").insert({
+      mama_id,
+      module: gen.module,
+      type: gen.type,
+      periode_debut: gen.start || null,
+      periode_fin: gen.end || null,
+      chemin_fichier: "",
+    });
     setOpen(false);
     load();
   }
@@ -60,31 +68,19 @@ export default function Rapports() {
         <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-2">
           <Select value={filters.module} onChange={(e) => setFilters({ ...filters, module: e.target.value })}>
             <option value="">Module</option>
-            {(() => {
-              const opts = [];
-              for (const m of MODULES) {
-                opts.push(
-                  <option key={m} value={m}>
-                    {m}
-                  </option>
-                );
-              }
-              return opts;
-            })()}
+            {MODULES.map((m) => (
+              <option key={m} value={m}>
+                {m}
+              </option>
+            ))}
           </Select>
           <Select value={filters.type} onChange={(e) => setFilters({ ...filters, type: e.target.value })}>
             <option value="">Format</option>
-            {(() => {
-              const opts = [];
-              for (const f of FORMATS) {
-                opts.push(
-                  <option key={f} value={f}>
-                    {f}
-                  </option>
-                );
-              }
-              return opts;
-            })()}
+            {FORMATS.map((f) => (
+              <option key={f} value={f}>
+                {f}
+              </option>
+            ))}
           </Select>
           <Input type="date" value={filters.start} onChange={(e) => setFilters({ ...filters, start: e.target.value })} />
           <Input type="date" value={filters.end} onChange={(e) => setFilters({ ...filters, end: e.target.value })} />
@@ -106,68 +102,46 @@ export default function Rapports() {
             </tr>
           </thead>
           <tbody>
-            {(() => {
-              const rows = [];
-              const list = Array.isArray(rapports) ? rapports : [];
-              for (const r of list) {
-                rows.push(
-                  <tr key={r.id}>
-                    <td className="border px-2 py-1">{r.module}</td>
-                    <td className="border px-2 py-1">{r.type}</td>
-                    <td className="border px-2 py-1">
-                      {r.periode_debut || ""} - {r.periode_fin || ""}
-                    </td>
-                    <td className="border px-2 py-1">
-                      {new Date(r.date_generation).toLocaleString()}
-                    </td>
-                    <td className="border px-2 py-1">
-                      <Button size="sm" onClick={() => downloadRapport(r.id)}>
-                        Télécharger
-                      </Button>
-                    </td>
-                  </tr>
-                );
-              }
-              return rows;
-            })()}
+            {rapports.map((r) => (
+              <tr key={r.id}>
+                <td className="border px-2 py-1">{r.module}</td>
+                <td className="border px-2 py-1">{r.type}</td>
+                <td className="border px-2 py-1">
+                  {r.periode_debut || ""} - {r.periode_fin || ""}
+                </td>
+                <td className="border px-2 py-1">
+                  {new Date(r.date_generation).toLocaleString()}
+                </td>
+                <td className="border px-2 py-1">
+                  <Button size="sm" onClick={() => downloadRapport(r.id)}>
+                    Télécharger
+                  </Button>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </TableContainer>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
-          <DialogDescription className="sr-only">
-            Génération d'un nouveau rapport
-          </DialogDescription>
           <div className="p-4 border-b">
             <DialogTitle>Nouveau rapport</DialogTitle>
           </div>
           <form onSubmit={handleGenerate} className="flex flex-col gap-2">
             <Select value={gen.module} onChange={(e) => setGen({ ...gen, module: e.target.value })}>
               <option value="">Module</option>
-              {(() => {
-                const opts = [];
-                for (const m of MODULES) {
-                  opts.push(
-                    <option key={m} value={m}>
-                      {m}
-                    </option>
-                  );
-                }
-                return opts;
-              })()}
+              {MODULES.map((m) => (
+                <option key={m} value={m}>
+                  {m}
+                </option>
+              ))}
             </Select>
             <Select value={gen.type} onChange={(e) => setGen({ ...gen, type: e.target.value })}>
-              {(() => {
-                const opts = [];
-                for (const f of FORMATS) {
-                  opts.push(
-                    <option key={f} value={f}>
-                      {f}
-                    </option>
-                  );
-                }
-                return opts;
-              })()}
+              {FORMATS.map((f) => (
+                <option key={f} value={f}>
+                  {f}
+                </option>
+              ))}
             </Select>
             <Input type="date" value={gen.start} onChange={(e) => setGen({ ...gen, start: e.target.value })} />
             <Input type="date" value={gen.end} onChange={(e) => setGen({ ...gen, end: e.target.value })} />

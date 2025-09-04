@@ -8,14 +8,9 @@ export default function MenuDuJourDetail({ menu, onClose }) {
   // Export Excel du menu du jour
   const exportExcel = () => {
     const wb = XLSX.utils.book_new();
-    const list = Array.isArray(menu.fiches) ? menu.fiches : [];
-    const noms = [];
-    for (let i = 0; i < list.length; i++) {
-      noms.push(list[i].nom);
-    }
-    const ws = XLSX.utils.json_to_sheet([{ 
+    const ws = XLSX.utils.json_to_sheet([{
       ...menu,
-      fiches: noms.join(", ")
+      fiches: menu.fiches?.map(f => f.nom).join(", ")
     }]);
     XLSX.utils.book_append_sheet(wb, ws, "MenuDuJour");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
@@ -26,9 +21,9 @@ export default function MenuDuJourDetail({ menu, onClose }) {
     toast.success("Export PDF non implémenté (plug jsPDF)");
   };
 
-  const historique = Array.isArray(menu.historique)
-    ? menu.historique
-    : [{ date: "2024-06-10", user: "admin", action: "Création" }];
+  const historique = menu.historique || [
+    { date: "2024-06-10", user: "admin", action: "Création" }
+  ];
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
@@ -39,14 +34,7 @@ export default function MenuDuJourDetail({ menu, onClose }) {
         <div>
           <b>Fiches :</b>
           <ul className="list-disc pl-6">
-            {(() => {
-              const list = Array.isArray(menu.fiches) ? menu.fiches : [];
-              const items = [];
-              for (let i = 0; i < list.length; i++) {
-                items.push(<li key={i}>{list[i].nom}</li>);
-              }
-              return items;
-            })()}
+            {menu.fiches?.map((f, i) => <li key={i}>{f.nom}</li>)}
           </ul>
         </div>
         <div><b>Coût total :</b> {menu.cout_total?.toFixed(2)} €</div>
@@ -66,14 +54,9 @@ export default function MenuDuJourDetail({ menu, onClose }) {
         <div className="mt-4">
           <b>Historique :</b>
           <ul className="list-disc pl-6">
-            {(() => {
-              const items = [];
-              for (let i = 0; i < historique.length; i++) {
-                const h = historique[i];
-                items.push(<li key={i}>{h.date} — {h.user} — {h.action}</li>);
-              }
-              return items;
-            })()}
+            {historique.map((h, i) =>
+              <li key={i}>{h.date} — {h.user} — {h.action}</li>
+            )}
           </ul>
         </div>
       </div>

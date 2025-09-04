@@ -31,24 +31,16 @@ function RequisitionFormPage() {
   const [zoneProducts, setZoneProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
 
-  useEffect(() => {
-    myAccessibleZones({ mode: 'requisition' }).then((z) =>
-      setZones(Array.isArray(z) ? z : [])
-    );
-    fetchUnites();
-  }, [myAccessibleZones, fetchUnites]);
+  useEffect(() => { myAccessibleZones({ mode: 'requisition' }).then(setZones); fetchUnites(); }, [myAccessibleZones, fetchUnites]);
 
   useEffect(() => {
-    if (Array.isArray(zones) && zones.length > 0) setZone(zones[0].id);
+    if (zones.length > 0) setZone(zones[0].id);
   }, [zones]);
 
   useEffect(() => {
     if (!zone_id) return;
     setLoadingProducts(true);
-    listZoneProducts(zone_id).then((p) => {
-      setZoneProducts(Array.isArray(p) ? p : []);
-      setLoadingProducts(false);
-    });
+    listZoneProducts(zone_id).then(p => { setZoneProducts(p); setLoadingProducts(false); });
   }, [zone_id, listZoneProducts]);
 
   const handleChangeArticle = (index, field, value) => {
@@ -63,38 +55,21 @@ function RequisitionFormPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    let invalid = false;
-    for (let i = 0; i < articles.length; i++) {
-      const a = articles[i];
-      if (!a.produit_id || !a.quantite || !a.unite_id) {
-        invalid = true;
-        break;
-      }
-    }
-    if (!statut || !zone_id || invalid) {
+    if (!statut || !zone_id || articles.some(a => !a.produit_id || !a.quantite || !a.unite_id)) {
       toast.error("Tous les champs sont obligatoires");
       return;
     }
     if (submitting) return;
-    const safeUnites = Array.isArray(unites) ? unites : [];
-    const lignes = [];
-    for (let i = 0; i < articles.length; i++) {
-      const a = articles[i];
-      let uniteNom = "";
-      for (let j = 0; j < safeUnites.length; j++) {
-        const u = safeUnites[j];
-        if (u.id === a.unite_id) {
-          uniteNom = u.nom;
-          break;
-        }
-      }
-      lignes.push({
+    const payload = {
+      statut,
+      commentaire,
+      zone_id,
+      lignes: articles.map(a => ({
         produit_id: a.produit_id,
         quantite: a.quantite,
-        unite: uniteNom,
-      });
-    }
-    const payload = { statut, commentaire, zone_id, lignes };
+        unite: unites.find(u => u.id === a.unite_id)?.nom || "",
+      })),
+    };
     try {
       setSubmitting(true);
       const { error } = await createRequisition(payload);
@@ -149,93 +124,57 @@ function RequisitionFormPage() {
           <div>
             <Label>Zone</Label>
             <div className="p-2 border rounded bg-muted/20">
-              {(() => {
-                let nom = "cave";
-                const arr = Array.isArray(zones) ? zones : [];
-                for (let i = 0; i < arr.length; i++) {
-                  const z = arr[i];
-                  if (z.id === zone_id) {
-                    nom = z.nom;
-                    break;
-                  }
-                }
-                return nom;
-              })()}
+              {zones.find(z => z.id === zone_id)?.nom || "cave"}
             </div>
           </div>
         )}
 
         <div>
           <h2 className="text-lg font-semibold mb-2">Articles</h2>
-          {(() => {
-            const rows = [];
-            for (let index = 0; index < articles.length; index++) {
-              const article = articles[index];
-              const productOptions = [];
-              const zp = Array.isArray(zoneProducts) ? zoneProducts : [];
-              for (let i = 0; i < zp.length; i++) {
-                const p = zp[i];
-                productOptions.push(
-                  <option key={p.produit_id || p.id} value={p.produit_id || p.id}>
-                    {p.produit_nom || p.nom}
-                  </option>
-                );
-              }
-              const uniteOptions = [];
-              const uni = Array.isArray(unites) ? unites : [];
-              for (let i = 0; i < uni.length; i++) {
-                const u = uni[i];
-                uniteOptions.push(
-                  <option key={u.id} value={u.id}>
-                    {u.nom}
-                  </option>
-                );
-              }
-              rows.push(
-                <div key={index} className="flex gap-4 mb-2 items-end">
-                  {loadingProducts ? (
-                    <div className="flex-1 flex items-center justify-center py-2">
-                      <LoadingSpinner message="Chargement produits..." />
-                    </div>
-                  ) : (
-                    <Select
-                      value={article.produit_id}
-                      onChange={(e) =>
-                        handleChangeArticle(index, "produit_id", e.target.value)
-                      }
-                      className="flex-1"
-                      required
-                    >
-                      <option value="">Sélectionner un produit</option>
-                      {productOptions}
-                    </Select>
-                  )}
-                  <Select
-                    value={article.unite_id}
-                    onChange={(e) =>
-                      handleChangeArticle(index, "unite_id", e.target.value)
-                    }
-                    className="w-32"
-                    required
-                  >
-                    <option value="">Unité</option>
-                    {uniteOptions}
-                  </Select>
-                  <Input
-                    type="number"
-                    value={article.quantite}
-                    onChange={(e) =>
-                      handleChangeArticle(index, "quantite", e.target.value)
-                    }
-                    className="w-24"
-                    min="1"
-                    required
-                  />
+          {articles.map((article, index) => (
+            <div key={index} className="flex gap-4 mb-2 items-end">
+              {loadingProducts ? (
+                <div className="flex-1 flex items-center justify-center py-2">
+                  <LoadingSpinner message="Chargement produits..." />
                 </div>
-              );
-            }
-            return rows;
-          })()}
+              ) : (
+                <Select
+                  value={article.produit_id}
+                  onChange={(e) =>
+                    handleChangeArticle(index, "produit_id", e.target.value)
+                  }
+                  className="flex-1"
+                  required
+                >
+                  <option value="">Sélectionner un produit</option>
+                  {zoneProducts.map((p) => (
+                    <option key={p.produit_id || p.id} value={p.produit_id || p.id}>
+                      {p.produit_nom || p.nom}
+                    </option>
+                  ))}
+                </Select>
+              )}
+              <Select
+                value={article.unite_id}
+                onChange={(e) => handleChangeArticle(index, "unite_id", e.target.value)}
+                className="w-32"
+                required
+              >
+                <option value="">Unité</option>
+                {unites.map(u => (
+                  <option key={u.id} value={u.id}>{u.nom}</option>
+                ))}
+              </Select>
+              <Input
+                type="number"
+                value={article.quantite}
+                onChange={(e) => handleChangeArticle(index, "quantite", e.target.value)}
+                className="w-24"
+                min="1"
+                required
+              />
+            </div>
+          ))}
           <button
             type="button"
             onClick={handleAddArticle}

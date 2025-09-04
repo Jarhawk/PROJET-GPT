@@ -2,63 +2,73 @@
 import { renderHook, act } from '@testing-library/react';
 import { vi, beforeEach, afterEach, test, expect } from 'vitest';
 import { supabase } from '@/lib/supabase';
-
-vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
-vi.mock('xlsx', () => ({
-  __esModule: true,
-  utils: { book_new: vi.fn(), book_append_sheet: vi.fn(), json_to_sheet: vi.fn() },
-  write: vi.fn(),
-}));
-vi.mock('file-saver', () => ({ saveAs: vi.fn() }));
-vi.mock('jspdf', () => ({ default: vi.fn() }));
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1', mamaId: 'm1' }) }));
 
 let useMenuDuJour;
-let upsertMock, insertMock, deleteMock, deleteQuery, fromSpy;
+let upsertMock, updateMock, updateMatchMock, deleteMock, deleteMatchMock, insertMock, selectMock, selectMatchMock;
+let fromSpy;
 
 beforeEach(async () => {
   ({ useMenuDuJour } = await import('@/hooks/useMenuDuJour'));
-
-  const selectSingle = vi.fn(() => Promise.resolve({ data: { id: 'menu1' }, error: null }));
-  const select = vi.fn(() => ({ single: selectSingle }));
-  upsertMock = vi.fn(() => ({ select }));
-
-  insertMock = vi.fn(() => Promise.resolve({ error: null }));
-
-  deleteQuery = { eq: vi.fn() };
-  deleteQuery.eq
-    .mockReturnValueOnce(deleteQuery)
-    .mockReturnValueOnce(Promise.resolve({ error: null }));
-  deleteMock = vi.fn(() => deleteQuery);
-
-  fromSpy = vi.spyOn(supabase, 'from').mockImplementation((table) => {
-    if (table === 'menus_jour') return { upsert: upsertMock };
-    if (table === 'menus_jour_fiches') return { delete: deleteMock, insert: insertMock };
-    return {};
-  });
+  upsertMock = vi.fn(() => Promise.resolve({ data: null, error: null }));
+  updateMatchMock = vi.fn(() => Promise.resolve({ data: null, error: null }));
+  updateMock = vi.fn(() => ({ match: updateMatchMock }));
+  deleteMatchMock = vi.fn(() => Promise.resolve({ data: null, error: null }));
+  deleteMock = vi.fn(() => ({ match: deleteMatchMock }));
+  insertMock = vi.fn(() => Promise.resolve({ data: null, error: null }));
+  selectMatchMock = vi.fn(() => Promise.resolve({ data: [{ categorie: 'entrée', fiche_id: 'f1', portions: 2 }] }));
+  selectMock = vi.fn(() => ({ match: selectMatchMock }));
+  fromSpy = vi.spyOn(supabase, 'from').mockImplementation(() => ({
+    upsert: upsertMock,
+    update: updateMock,
+    delete: deleteMock,
+    insert: insertMock,
+    select: selectMock,
+  }));
 });
 
 afterEach(() => {
-  fromSpy?.mockRestore();
+  fromSpy.mockRestore();
 });
 
-test('createOrUpdateMenu upserts menu and inserts lines', async () => {
+test('setFicheForCategorie upserts row', async () => {
   const { result } = renderHook(() => useMenuDuJour());
   await act(async () => {
-    await result.current.createOrUpdateMenu('2025-01-01', [
-      { fiche_id: 'f1', portions: 2 },
-    ]);
+    await result.current.setFicheForCategorie('2025-01-01', 'entrée', 'f1');
   });
-
-  expect(fromSpy).toHaveBeenCalledWith('menus_jour');
+  expect(supabase.from).toHaveBeenCalledWith('menus_jour');
   expect(upsertMock).toHaveBeenCalledWith(
-    { mama_id: 'm1', date: '2025-01-01' },
-    { onConflict: 'mama_id,date' }
+    { mama_id: 'm1', date: '2025-01-01', categorie: 'entrée', fiche_id: 'f1' },
+    { onConflict: 'date,categorie,mama_id' }
   );
-  expect(fromSpy).toHaveBeenCalledWith('menus_jour_fiches');
+});
+
+test('setPortions updates quantity', async () => {
+  const { result } = renderHook(() => useMenuDuJour());
+  await act(async () => {
+    await result.current.setPortions('2025-01-01', 'plat', 5);
+  });
+  expect(updateMock).toHaveBeenCalledWith({ portions: 5 });
+  expect(updateMatchMock).toHaveBeenCalledWith({ mama_id: 'm1', date: '2025-01-01', categorie: 'plat' });
+});
+
+test('removeFicheFromMenu deletes row', async () => {
+  const { result } = renderHook(() => useMenuDuJour());
+  await act(async () => {
+    await result.current.removeFicheFromMenu('2025-01-01', 'dessert');
+  });
   expect(deleteMock).toHaveBeenCalled();
-  expect(deleteQuery.eq).toHaveBeenNthCalledWith(1, 'menu_jour_id', 'menu1');
-  expect(deleteQuery.eq).toHaveBeenNthCalledWith(2, 'mama_id', 'm1');
+  expect(deleteMatchMock).toHaveBeenCalledWith({ mama_id: 'm1', date: '2025-01-01', categorie: 'dessert' });
+});
+
+test('duplicateMenu copies records', async () => {
+  const { result } = renderHook(() => useMenuDuJour());
+  await act(async () => {
+    await result.current.duplicateMenu('2025-01-01', '2025-01-02');
+  });
+  expect(selectMock).toHaveBeenCalled();
+  expect(selectMatchMock).toHaveBeenCalledWith({ mama_id: 'm1', date: '2025-01-01' });
   expect(insertMock).toHaveBeenCalledWith([
-    { menu_jour_id: 'menu1', fiche_id: 'f1', quantite: 2, mama_id: 'm1' },
+    { categorie: 'entrée', fiche_id: 'f1', portions: 2, date: '2025-01-02', mama_id: 'm1' },
   ]);
 });

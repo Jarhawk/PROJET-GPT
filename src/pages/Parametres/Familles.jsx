@@ -51,11 +51,7 @@ export default function Familles() {
 
   const handleDelete = async (id) => {
     setActionLoading(true);
-    const { error } = await supabase
-      .from('familles')
-      .delete()
-      .eq('id', id)
-      .eq('mama_id', mama_id);
+    const { error } = await supabase.from('familles').delete().eq('id', id);
     if (error) {
       console.error('Erreur suppression :', error);
       toast.error('Suppression échouée.');
@@ -86,11 +82,7 @@ export default function Familles() {
   };
 
   const handleDeleteSous = async (id) => {
-    const { error } = await supabase
-      .from('sous_familles')
-      .delete()
-      .eq('id', id)
-      .eq('mama_id', mama_id);
+    const { error } = await supabase.from('sous_familles').delete().eq('id', id);
     if (error) {
       console.error('Erreur suppression :', error);
       toast.error('Suppression échouée.');
@@ -105,15 +97,9 @@ export default function Familles() {
     if (error) toast.error(error.message || 'Erreur lors du changement de statut');
   };
 
-  const filtered = (() => {
-    const arr = Array.isArray(familles) ? familles : [];
-    const res = [];
-    const term = search.toLowerCase();
-    for (const f of arr) {
-      if (f.nom.toLowerCase().includes(term)) res.push(f);
-    }
-    return res;
-  })();
+  const filtered = familles.filter((f) =>
+    f.nom.toLowerCase().includes(search.toLowerCase())
+  );
 
   if (authLoading || loading || actionLoading)
     return <LoadingSpinner message="Chargement..." />;
@@ -148,33 +134,27 @@ export default function Familles() {
                 </td>
               </tr>
             ) : (
-              (() => {
-                const elements = [];
-                for (const f of filtered) {
-                  elements.push(
-                    <FamilleRow
-                      key={f.id}
-                      famille={f}
-                      onEdit={setEdit}
-                      onDelete={(id) => {
-                        if (confirm('Supprimer cet élément ?')) {
-                          handleDelete(id);
-                        }
-                      }}
-                      onToggle={handleToggle}
-                      onAddSousFamille={handleAddSous}
-                      onUpdateSousFamille={handleUpdateSous}
-                      onDeleteSousFamille={(id) => {
-                        if (confirm('Supprimer cet élément ?')) {
-                          handleDeleteSous(id);
-                        }
-                      }}
-                      onToggleSousFamille={handleToggleSous}
-                    />,
-                  );
-                }
-                return elements;
-              })()
+              filtered.map((f) => (
+                <FamilleRow
+                  key={f.id}
+                  famille={f}
+                  onEdit={setEdit}
+                  onDelete={(id) => {
+                    if (confirm('Supprimer cet élément ?')) {
+                      handleDelete(id);
+                    }
+                  }}
+                  onToggle={handleToggle}
+                  onAddSousFamille={handleAddSous}
+                  onUpdateSousFamille={handleUpdateSous}
+                  onDeleteSousFamille={(id) => {
+                    if (confirm('Supprimer cet élément ?')) {
+                      handleDeleteSous(id);
+                    }
+                  }}
+                  onToggleSousFamille={handleToggleSous}
+                />
+              ))
             )}
           </tbody>
         </table>

@@ -20,9 +20,7 @@ export default function MobileInventaire() {
         "id, nom, famille_id, sous_famille_id, famille:familles!fk_produits_famille(nom), sous_famille:sous_familles!fk_produits_sous_famille(nom)"
       )
       .eq("mama_id", mama_id)
-      .eq("famille.mama_id", mama_id)
-      .eq("sous_famille.mama_id", mama_id)
-      .then(({ data }) => setProduits(Array.isArray(data) ? data : []));
+      .then(({ data }) => setProduits(data || []));
   }, [mama_id, authLoading]);
 
   const handleChange = (id, value) => {
@@ -31,10 +29,10 @@ export default function MobileInventaire() {
 
   const handleSave = async () => {
     if (authLoading || !mama_id) return;
-    const lignes = [];
-    for (const [produit_id, q] of Object.entries(stockFinal)) {
-      lignes.push({ produit_id, quantite: parseFloat(q) });
-    }
+    const lignes = Object.entries(stockFinal).map(([produit_id, q]) => ({
+      produit_id,
+      quantite: parseFloat(q),
+    }));
     if (!lignes.length) return;
     await createInventaire({
       date: new Date().toISOString().slice(0, 10),
@@ -51,23 +49,17 @@ export default function MobileInventaire() {
       <GlassCard className="w-full max-w-sm space-y-4 relative z-10">
         <h2 className="text-lg font-bold">📦 Inventaire - Stock Final uniquement</h2>
         <ul className="space-y-2">
-          {(() => {
-            const items = [];
-            for (const p of produits) {
-              items.push(
-                <li key={p.id} className="flex justify-between items-center border p-2 rounded">
-                  <span>{p.nom}</span>
-                  <input
-                    type="number"
-                    className="w-20 border px-1 bg-transparent"
-                    value={stockFinal[p.id] || ""}
-                    onChange={(e) => handleChange(p.id, e.target.value)}
-                  />
-                </li>
-              );
-            }
-            return items;
-          })()}
+          {produits.map(p => (
+            <li key={p.id} className="flex justify-between items-center border p-2 rounded">
+              <span>{p.nom}</span>
+              <input
+                type="number"
+              className="w-20 border px-1 bg-transparent"
+                value={stockFinal[p.id] || ""}
+                onChange={(e) => handleChange(p.id, e.target.value)}
+              />
+            </li>
+          ))}
         </ul>
         <button
           onClick={handleSave}

@@ -13,7 +13,7 @@ vi.mock('@/lib/supabase', () => {
   };
   selectMock = vi.fn(() => queryBuilder);
   fromMock = vi.fn(() => ({ select: selectMock }));
-  return { supabase: { from: fromMock } };
+  return { getSupabaseClient: () => ({ from: fromMock }) };
 });
 
 beforeEach(() => {
@@ -28,7 +28,7 @@ beforeEach(() => {
 test('searchFournisseurs filters by mama_id and query', async () => {
   await searchFournisseurs('m1', 'paris');
   expect(fromMock).toHaveBeenCalledWith('fournisseurs');
-  expect(selectMock).toHaveBeenCalledWith('id, nom');
+  expect(selectMock).toHaveBeenCalledWith('id, nom, ville');
   expect(queryBuilder.eq).toHaveBeenNthCalledWith(1, 'mama_id', 'm1');
   expect(queryBuilder.eq).toHaveBeenNthCalledWith(2, 'actif', true);
   expect(queryBuilder.ilike).toHaveBeenCalledWith('nom', '%paris%');

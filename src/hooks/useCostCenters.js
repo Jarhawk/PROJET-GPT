@@ -26,17 +26,13 @@ export function useCostCenters() {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
-    let query = supabase
-      .from("centres_de_cout")
-      .select("id, nom, actif, activite, mama_id")
-      .eq("mama_id", mama_id);
+    let query = supabase.from("centres_de_cout").select("*").eq("mama_id", mama_id);
     if (search) query = query.ilike("nom", `%${search}%`);
     const { data, error } = await query.order("nom", { ascending: true });
-    const rows = Array.isArray(data) ? data : [];
-    setCostCenters(rows);
+    setCostCenters(Array.isArray(data) ? data : []);
     setLoading(false);
     if (error) setError(error);
-    return rows;
+    return data || [];
   }
 
   async function addCostCenter(values) {
@@ -83,11 +79,10 @@ export function useCostCenters() {
   }
 
   function exportCostCentersToExcel() {
-    const list = Array.isArray(costCenters) ? costCenters : [];
-    const datas = [];
-    for (const c of list) {
-      datas.push({ nom: c.nom, actif: c.actif });
-    }
+    const datas = (costCenters || []).map(c => ({
+      nom: c.nom,
+      actif: c.actif,
+    }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "CostCenters");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });

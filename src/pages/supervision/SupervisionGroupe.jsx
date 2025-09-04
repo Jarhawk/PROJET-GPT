@@ -13,24 +13,17 @@ export default function SupervisionGroupe() {
 
   const fetchStats = useCallback(async () => {
     setLoading(true);
-    const { data } = await supabase.rpc("stats_multi_mamas");
-    const rows = Array.isArray(data) ? data : [];
-    setStats(rows);
+    const ids = mamas.map((m) => m.id);
+    const { data } = await supabase.rpc("stats_multi_mamas", { mama_ids: ids });
+    setStats(Array.isArray(data) ? data : []);
     setLoading(false);
-  }, []);
+  }, [mamas]);
 
   useEffect(() => {
-    const mamaList = Array.isArray(mamas) ? mamas : [];
-    if (mamaList.length > 0) fetchStats();
+    if (mamas.length > 0) fetchStats();
   }, [mamas, fetchStats]);
 
-  const mamaList = Array.isArray(mamas) ? mamas : [];
-  let display = [];
-  if (stats.length) {
-    display = stats;
-  } else {
-    for (const m of mamaList) display.push({ ...m, mama_id: m.id });
-  }
+  const display = stats.length ? stats : mamas.map((m) => ({ ...m, mama_id: m.id }));
 
   return (
     <div className="p-6 flex justify-center">
@@ -49,21 +42,15 @@ export default function SupervisionGroupe() {
               </tr>
             </thead>
             <tbody>
-              {(() => {
-                const rows = [];
-                for (const d of display) {
-                  rows.push(
-                    <tr key={d.mama_id}>
-                      <td className="px-2 py-1">{d.nom}</td>
-                      <td className="px-2 py-1">{d.cout_matiere || '-'}</td>
-                      <td className="px-2 py-1">{d.nb_factures || '-'}</td>
-                      <td className="px-2 py-1">{d.taux_validation || '-'}</td>
-                      <td className="px-2 py-1">{d.ecart_inventaire || '-'}</td>
-                    </tr>
-                  );
-                }
-                return rows;
-              })()}
+              {display.map((d) => (
+                <tr key={d.mama_id}>
+                  <td className="px-2 py-1">{d.nom}</td>
+                  <td className="px-2 py-1">{d.cout_matiere || '-'}</td>
+                  <td className="px-2 py-1">{d.nb_factures || '-'}</td>
+                  <td className="px-2 py-1">{d.taux_validation || '-'}</td>
+                  <td className="px-2 py-1">{d.ecart_inventaire || '-'}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </TableContainer>

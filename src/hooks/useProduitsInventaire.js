@@ -16,8 +16,9 @@ export function useProduitsInventaire() {
       setError(null);
       let query = supabase
         .from('v_produits_dernier_prix')
-        .select('id:produit_id, nom, unite, famille')
-        .eq('mama_id', mama_id);
+        .select('id, nom, unite_id, unite:unite_id (nom), famille')
+        .eq('mama_id', mama_id)
+        .eq('actif', true);
       if (famille) query = query.ilike('famille', `%${famille}%`);
       if (search) query = query.ilike('nom', `%${search}%`);
       const { data, error } = await query.order('nom', { ascending: true });
@@ -34,26 +35,14 @@ export function useProduitsInventaire() {
         .from('v_stocks')
         .select('produit_id, stock')
         .eq('mama_id', mama_id);
-      const pmpMap = {};
-      const pmpArray = Array.isArray(pmpData) ? pmpData : [];
-      for (const p of pmpArray) {
-        pmpMap[p.produit_id] = p.pmp;
-      }
-      const stockMap = {};
-      const stockArray = Array.isArray(stockData) ? stockData : [];
-      for (const s of stockArray) {
-        stockMap[s.produit_id] = s.stock;
-      }
-      const final = [];
-      const dataArray = Array.isArray(data) ? data : [];
-      for (const p of dataArray) {
-        final.push({
-          ...p,
-          unite: p.unite || '',
-          pmp: pmpMap[p.id] ?? 0,
-          stock_theorique: stockMap[p.id] ?? 0,
-        });
-      }
+      const pmpMap = Object.fromEntries((pmpData || []).map(p => [p.produit_id, p.pmp]));
+      const stockMap = Object.fromEntries((stockData || []).map(s => [s.produit_id, s.stock]));
+      const final = (Array.isArray(data) ? data : []).map(p => ({
+        ...p,
+        unite: p.unite?.nom || '',
+        pmp: pmpMap[p.id] ?? 0,
+        stock_theorique: stockMap[p.id] ?? 0,
+      }));
       setProduits(final);
       return final;
     },

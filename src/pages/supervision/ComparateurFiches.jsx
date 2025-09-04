@@ -16,12 +16,9 @@ export default function ComparateurFiches() {
   const handleCompare = async () => {
     if (!ficheId || mamas.length === 0) return;
     setLoading(true);
-    const ids = [];
-    const safeMamas = Array.isArray(mamas) ? mamas : [];
-    for (const m of safeMamas) ids.push(m.id);
     const { data } = await supabase.rpc("compare_fiche", {
       fiche_id: ficheId,
-      mama_ids: ids,
+      mama_ids: mamas.map((m) => m.id),
     });
     setResults(Array.isArray(data) ? data : []);
     setLoading(false);
@@ -54,19 +51,13 @@ export default function ComparateurFiches() {
                 </tr>
               </thead>
               <tbody>
-                {(() => {
-                  const rows = [];
-                  for (const r of results) {
-                    rows.push(
-                      <tr key={r.mama_id}>
-                        <td className="px-2 py-1">{r.nom}</td>
-                        <td className="px-2 py-1">{r.cout || '-'}</td>
-                        <td className="px-2 py-1">{r.rendement || '-'}</td>
-                      </tr>
-                    );
-                  }
-                  return rows;
-                })()}
+                {results.map((r) => (
+                  <tr key={r.mama_id}>
+                    <td className="px-2 py-1">{r.nom}</td>
+                    <td className="px-2 py-1">{r.cout || '-'}</td>
+                    <td className="px-2 py-1">{r.rendement || '-'}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </TableContainer>

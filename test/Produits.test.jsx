@@ -1,36 +1,66 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
 
-let mockProduits, mockFamilles, mockSousFamilles;
-vi.mock('@/hooks/data/useProduits', () => ({ useProduits: () => mockProduits() }));
-vi.mock('@/hooks/data/useFamilles', () => ({ useFamilles: () => mockFamilles() }));
-vi.mock('@/hooks/data/useSousFamilles', () => ({ useSousFamilles: () => mockSousFamilles() }));
+let mockHook;
+vi.mock('@/hooks/useProducts', () => ({
+  useProducts: () => mockHook(),
+}));
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ hasAccess: () => true, mama_id: 'm1' }),
+  useAuth: () => ({ hasAccess: () => true, mama_id: 'm1' })
+}));
+vi.mock('@/hooks/useStorage', () => ({
+  uploadFile: vi.fn(),
+  deleteFile: vi.fn(),
+  pathFromUrl: () => '',
+}));
+vi.mock('@/hooks/useFamilles', () => ({
+  useFamilles: () => ({ familles: [], fetchFamilles: vi.fn(), addFamille: vi.fn() })
+}));
+vi.mock('@/hooks/useUnites', () => ({
+  useUnites: () => ({ unites: [], fetchUnites: vi.fn(), addUnite: vi.fn() })
+}));
+vi.mock('@/hooks/data/useFournisseurs', () => ({
+  default: () => ({ data: [], isLoading: false })
+}));
+vi.mock('@/hooks/useSousFamilles', () => ({
+  useSousFamilles: () => ({
+    sousFamilles: [],
+    list: vi.fn(),
+    loading: false,
+    error: null,
+  }),
+}));
+vi.mock('@/hooks/useZonesStock', () => ({
+  useAuth: () => ({ zones: [], loading: false })
 }));
 
 import Produits from '@/pages/produits/Produits.jsx';
 
-test('affiche la liste des produits', async () => {
-  mockProduits = () => ({
-    data: { data: [{ id: '1', nom: 'Test', unite: { nom: 'kg' } }], count: 1 },
-    isLoading: false,
-    error: null,
+test('toggle button calls hook', async () => {
+  const toggle = vi.fn();
+  mockHook = () => ({
+    products: [
+      {
+        id: '1',
+        nom: 'Test',
+        unite: { nom: 'kg' },
+        pmp: 1,
+        stock_theorique: 10,
+        actif: true,
+        zone_stock: { nom: 'Z' },
+        zone_stock_id: 'z1',
+      },
+    ],
+    total: 1,
+    fetchProducts: vi.fn(),
+    exportProductsToExcel: vi.fn(),
+    addProduct: vi.fn(),
+    toggleProductActive: toggle,
   });
-  mockFamilles = () => ({ familles: [], fetchFamilles: vi.fn() });
-  mockSousFamilles = () => ({ data: [] });
-
-  const qc = new QueryClient();
-  render(
-    <QueryClientProvider client={qc}>
-      <MemoryRouter>
-        <Produits />
-      </MemoryRouter>
-    </QueryClientProvider>
-  );
-
-  expect(await screen.findByText('Test')).toBeInTheDocument();
+  render(<Produits />);
+  const button = await screen.findByText('Désactiver');
+  fireEvent.click(button);
+  expect(toggle).toHaveBeenCalledWith('1', false);
 });

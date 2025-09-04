@@ -29,60 +29,34 @@ export default function useExport() {
     try {
       let data = [];
       if (type === 'fiches') {
-        const { data: rows } = await supabase
+        const res = await supabase
           .from('fiches_techniques')
+          .select('*')
+          .eq('mama_id', mama_id);
+        data = res.data || [];
+      } else if (type === 'inventaire') {
+        const res = await supabase
+          .from('inventaires')
+          .select('*, lignes:produits_inventaire!inventaire_id(*)')
+          .eq('mama_id', mama_id);
+        data = res.data || [];
+      } else if (type === 'produits') {
+        const res = await supabase
+          .from('produits')
           .select(
-            'id, nom, actif, cout_par_portion, portions, famille, prix_vente, type_carte, sous_type_carte, carte_actuelle, cout_total, cout_portion, rendement'
+            'id, nom, famille_id, sous_famille_id, famille:familles!fk_produits_famille(nom), sous_famille:sous_familles!fk_produits_sous_famille(nom), fournisseur_produits:fournisseur_produits!fournisseur_produits_produit_id_fkey(*, fournisseur:fournisseurs!fk_fournisseur_produits_fournisseur_id(nom))'
           )
           .eq('mama_id', mama_id);
-        data = rows || [];
-      } else if (type === 'inventaire') {
-        const { data: invs } = await supabase
-          .from('inventaires')
-          .select('id, date_inventaire, reference, zone, date_debut, cloture')
-          .eq('mama_id', mama_id);
-        const invsArr = Array.isArray(invs) ? invs : [];
-        const ids = [];
-        for (const i of invsArr) ids.push(i.id);
-        let lignes = [];
-        if (ids.length) {
-          const { data: lData } = await supabase
-            .from('inventaire_lignes')
-            .select(
-              'inventaire_id, produit_id, quantite, quantite_theorique, quantite_reelle, zone_id, motif'
-            )
-            .eq('mama_id', mama_id)
-            .in('inventaire_id', ids);
-          lignes = Array.isArray(lData) ? lData : [];
-        }
-        const lignesArr = Array.isArray(lignes) ? lignes : [];
-        const tmp = [];
-        for (const inv of invsArr) {
-          const lines = [];
-          for (const l of lignesArr) {
-            if (l.inventaire_id === inv.id) lines.push(l);
-          }
-          tmp.push({ ...inv, lignes: lines });
-        }
-        data = tmp;
-      } else if (type === 'produits') {
-        const { data: rows } = await supabase
-          .from('produits')
-          .select('id, nom, famille_id, sous_famille_id, unite_id, actif')
-          .eq('mama_id', mama_id);
-        data = Array.isArray(rows) ? rows : [];
+        data = res.data || [];
       } else if (type === 'factures') {
         let query = supabase
           .from('factures')
-          .select(
-            'id, numero, date_facture, fournisseur_id, total_ht, total_ttc, lignes:facture_lignes!facture_id(id, produit_id, quantite, prix, tva)'
-          )
-          .eq('mama_id', mama_id)
-          .eq('lignes.mama_id', mama_id);
+          .select('*, lignes:facture_lignes!facture_id(*)')
+          .eq('mama_id', mama_id);
         if (options.start) query = query.gte('date_facture', options.start);
         if (options.end) query = query.lte('date_facture', options.end);
-        const { data: rows } = await query;
-        data = Array.isArray(rows) ? rows : [];
+        const res = await query;
+        data = res.data || [];
       }
 
       if (format === 'pdf') exportToPDF(data, options);

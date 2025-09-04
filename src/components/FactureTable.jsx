@@ -11,21 +11,6 @@ export default function FactureTable({
   onToggleActive,
   onArchive,
 }) {
-  const rows = Array.isArray(factures) ? factures : [];
-  const factureRows = [];
-  for (const facture of rows) {
-    factureRows.push(
-      <FactureRow
-        key={facture.id}
-        facture={facture}
-        canEdit={canEdit}
-        onEdit={onEdit}
-        onDetail={onDetail}
-        onToggleActive={onToggleActive}
-        onArchive={onArchive}
-      />
-    );
-  }
   return (
     <ListingContainer className="mb-4">
       <Motion.table
@@ -44,7 +29,19 @@ export default function FactureTable({
             <th className="px-4 py-2">Actions</th>
           </tr>
         </thead>
-        <tbody>{factureRows}</tbody>
+        <tbody>
+          {factures.map(facture => (
+            <FactureRow
+              key={facture.id}
+              facture={facture}
+              canEdit={canEdit}
+              onEdit={onEdit}
+              onDetail={onDetail}
+              onToggleActive={onToggleActive}
+              onArchive={onArchive}
+            />
+          ))}
+        </tbody>
       </Motion.table>
     </ListingContainer>
   );

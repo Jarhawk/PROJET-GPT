@@ -16,10 +16,7 @@ export function usePromotions() {
     setError(null);
     let query = supabase
       .from("promotions")
-      .select(
-        "id, mama_id, nom, description, date_debut, date_fin, created_at, updated_at, actif",
-        { count: "exact" }
-      )
+      .select("*", { count: "exact" })
       .eq("mama_id", mama_id)
       .order("date_debut", { ascending: false });
     if (typeof query.range === "function") {

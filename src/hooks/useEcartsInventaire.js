@@ -15,7 +15,7 @@ export function useEcartsInventaire() {
     setError(null);
     let query = supabase
       .from("v_ecarts_inventaire")
-      .select("mama_id, produit_id, date, zone, stock_theorique, stock_reel, ecart, motif")
+      .select("*")
       .eq("mama_id", mama_id);
     if (filters.date_start) query = query.gte("date", filters.date_start);
     if (filters.date_end) query = query.lte("date", filters.date_end);

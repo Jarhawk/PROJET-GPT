@@ -10,17 +10,16 @@ export default function useConsentements() {
     async (utilisateurId = user_id) => {
       if (!supabase || !mama_id || !utilisateurId) return [];
       const { data, error } = await supabase
-        .from('consentements_utilisateur')
-        .select('id, user_id, mama_id, consentement, date_consentement, actif, created_at, utilisateur_id, type_consentement')
-        .eq('mama_id', mama_id)
-        .eq('utilisateur_id', utilisateurId)
-        .order('date_consentement', { ascending: false });
+        .from("consentements_utilisateur")
+        .select("*")
+        .eq("mama_id", mama_id)
+        .eq("utilisateur_id", utilisateurId)
+        .order("date_consentement", { ascending: false });
       if (error) {
-        console.error('Erreur chargement consentements:', error);
+        console.error("Erreur chargement consentements:", error);
       }
-      const rows = Array.isArray(data) ? data : [];
-      setConsentements(rows);
-      return rows;
+      setConsentements(data || []);
+      return data || [];
     },
     [mama_id, user_id]
   );

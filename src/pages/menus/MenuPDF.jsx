@@ -12,49 +12,24 @@ export default function MenuPDF({ id }) {
     const fetchMenu = async () => {
       if (!mama_id) return;
       const { data: menuData } = await supabase
-        .from('menus')
-        .select('id, nom, date')
-        .eq('id', id)
-        .eq('mama_id', mama_id)
+        .from("menus")
+        .select(
+          "*, fiches:menu_fiches(fiche_id, fiche:fiches(id, nom, type, categorie))"
+        )
+        .eq("id", id)
+        .eq("mama_id", mama_id)
         .single();
-      if (!menuData) return;
-      setMenu(menuData);
 
-      const { data: mf } = await supabase
-        .from('menu_fiches')
-        .select('fiche_id')
-        .eq('menu_id', id)
-        .eq('mama_id', mama_id);
-      const ficheIds = [];
-      const mfList = Array.isArray(mf) ? mf : [];
-      for (const r of mfList) {
-        ficheIds.push(r.fiche_id);
+      if (menuData) {
+        setMenu(menuData);
+        setFiches(menuData.fiches?.map(f => f.fiche) || []);
       }
-      if (ficheIds.length === 0) {
-        setFiches([]);
-        return;
-      }
-      const { data: ft } = await supabase
-        .from('fiches_techniques')
-        .select('id:fiche_id, nom, type:type_carte, categorie:sous_type_carte')
-        .in('fiche_id', ficheIds)
-        .eq('mama_id', mama_id);
-      setFiches(Array.isArray(ft) ? ft : []);
     };
 
     fetchMenu();
   }, [id, mama_id]);
 
   const exportPDF = () => {
-    const fichesList = Array.isArray(fiches) ? fiches : [];
-    let fichesHtml = '';
-    for (const f of fichesList) {
-      fichesHtml += `
-            <div class="fiche">
-              <div><strong>${f.nom}</strong></div>
-              <div class="type">Type : ${f.type} | Catégorie : ${f.categorie}</div>
-            </div>`;
-    }
     const content = `
       <html>
         <head>
@@ -71,7 +46,16 @@ export default function MenuPDF({ id }) {
           <img src="/logo-mamastock.png" class="logo" />
           <h1>Menu du jour : ${menu.nom}</h1>
           <p><strong>Date :</strong> ${menu.date}</p>
-          ${fichesHtml}
+          ${fiches
+            .map(
+              (f) => `
+            <div class="fiche">
+              <div><strong>${f.nom}</strong></div>
+              <div class="type">Type : ${f.type} | Catégorie : ${f.categorie}</div>
+            </div>
+          `
+            )
+            .join("")}
         </body>
       </html>
     `;

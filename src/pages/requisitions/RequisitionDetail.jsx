@@ -41,28 +41,18 @@ function RequisitionDetailPage() {
         <div>
           <strong>Lignes :</strong>
           <ul className="list-disc ml-5 space-y-1">
-            {(() => {
-              const items = [];
-              const list = Array.isArray(requisition.lignes)
-                ? requisition.lignes
-                : [];
-              for (let i = 0; i < list.length; i++) {
-                const l = list[i];
-                items.push(
-                  <li key={l.id} className="flex items-center gap-2">
-                    <img
-                      src="/icons/icon-128x128.png"
-                      alt=""
-                      className="w-6 h-6 rounded object-cover"
-                    />
-                    <span>
-                      {l.produit?.nom || l.produit_id} - {l.quantite} {l.unite || ""}
-                    </span>
-                  </li>
-                );
-              }
-              return items;
-            })()}
+            {(requisition.lignes || []).map((l) => (
+              <li key={l.id} className="flex items-center gap-2">
+                <img
+                  src="/icons/icon-128x128.png"
+                  alt=""
+                  className="w-6 h-6 rounded object-cover"
+                />
+              <span>
+                  {l.produit?.nom || l.produit_id} - {l.quantite} {l.unite || ""}
+                </span>
+              </li>
+            ))}
           </ul>
         </div>
       </GlassCard>

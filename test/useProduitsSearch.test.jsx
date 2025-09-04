@@ -38,7 +38,7 @@ test('useProduitsSearch queries produits with pagination', async () => {
   );
   await act(async () => {});
   expect(fromMock).toHaveBeenCalledWith('produits');
-  expect(queryBuilder.select).toHaveBeenCalledWith('id, nom, unite_id, tva, zone_id:zone_stock_id', { count: 'exact' });
+  expect(queryBuilder.select).toHaveBeenCalledWith('id, nom, unite_id, tva, zone_stock_id', { count: 'exact' });
   expect(queryBuilder.eq).toHaveBeenCalledWith('mama_id', 'm1');
   expect(queryBuilder.eq).toHaveBeenCalledWith('actif', true);
   expect(queryBuilder.ilike).toHaveBeenCalledWith('nom', '%car%');

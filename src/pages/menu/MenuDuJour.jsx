@@ -2,8 +2,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useMenuDuJour } from "@/hooks/useMenuDuJour";
-import { useAuth } from "@/hooks/useAuth";
-import { Navigate } from "react-router-dom";
 
 function getMonday(date) {
   const d = new Date(date);
@@ -15,7 +13,6 @@ function getMonday(date) {
 
 export default function MenuDuJour() {
   const { fetchWeek } = useMenuDuJour();
-  const { access_rights } = useAuth();
   const [startDate, setStartDate] = useState(getMonday(new Date()));
   const [resume, setResume] = useState([]);
 
@@ -29,35 +26,13 @@ export default function MenuDuJour() {
     setStartDate(getMonday(d));
   };
 
-  const list = Array.isArray(resume) ? resume : [];
-  const days = [];
-  for (let i = 0; i < 7; i++) {
+  const days = Array.from({ length: 7 }).map((_, i) => {
     const d = new Date(startDate);
     d.setDate(d.getDate() + i);
     const iso = d.toISOString().slice(0, 10);
-    let info = {};
-    for (const r of list) {
-      if (r.date_menu === iso) {
-        info = r;
-        break;
-      }
-    }
-    days.push({ date: iso, info });
-  }
-  const daysList = Array.isArray(days) ? days : [];
-  const dayLinks = [];
-  for (const { date, info } of daysList) {
-    dayLinks.push(
-      <Link key={date} to={`/menu/${date}`} className="border p-2 rounded hover:bg-gray-50">
-        <div className="font-semibold">{date}</div>
-        <div className="text-sm mt-1">Coût: {info.cout_total ? info.cout_total.toFixed(2) : "-"} €</div>
-      </Link>
-    );
-  }
-
-  if (!access_rights?.menus_jour?.peut_voir) {
-    return <Navigate to="/unauthorized" replace />;
-  }
+    const info = resume.find((r) => r.date_menu === iso) || {};
+    return { date: iso, info };
+  });
 
   return (
     <div className="p-4">
@@ -66,9 +41,14 @@ export default function MenuDuJour() {
         <h1 className="text-xl font-bold">Menu du jour</h1>
         <button onClick={() => changeWeek(1)}>&gt;</button>
       </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-          {dayLinks}
-        </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+        {days.map(({ date, info }) => (
+          <Link key={date} to={`/menu/${date}`} className="border p-2 rounded hover:bg-gray-50">
+            <div className="font-semibold">{date}</div>
+            <div className="text-sm mt-1">Coût: {info.cout_total ? info.cout_total.toFixed(2) : "-"} €</div>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }

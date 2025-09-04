@@ -3,7 +3,6 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useProduitsSearch } from "@/hooks/useProduitsSearch";
-import { useTranslation } from "react-i18next";
 
 export default function ProductPickerModal({
   open,
@@ -15,12 +14,10 @@ export default function ProductPickerModal({
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 20;
-  const { t } = useTranslation();
   const { data: results = [], total } = useProduitsSearch(query, null, {
     page,
     pageSize,
   });
-  const list = Array.isArray(results) ? results : [];
 
   const [active, setActive] = useState(-1);
 
@@ -35,13 +32,13 @@ export default function ProductPickerModal({
   const handleKeyDown = (e) => {
     if (e.key === "ArrowDown") {
       e.preventDefault();
-        setActive((a) => Math.min(a + 1, list.length - 1));
+      setActive((a) => Math.min(a + 1, results.length - 1));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setActive((a) => Math.max(a - 1, 0));
     } else if (e.key === "Enter") {
       e.preventDefault();
-        const target = active >= 0 ? list[active] : list[0];
+      const target = active >= 0 ? results[active] : results[0];
       if (target) {
         onPick?.(target);
         onClose?.();
@@ -69,15 +66,10 @@ export default function ProductPickerModal({
           className="fixed left-1/2 top-1/2 z-50 w-[min(900px,95vw)] max-h-[70vh] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-border bg-card shadow-2xl flex flex-col overflow-hidden"
         >
           <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/40">
-            <Dialog.Title className="text-sm font-semibold">
-              {t("productSearch.title")}
-            </Dialog.Title>
+            <Dialog.Title className="text-sm font-semibold">Rechercher un produit</Dialog.Title>
             <Dialog.Close asChild>
-              <button
-                className="p-2 rounded-md hover:bg-muted"
-                aria-label={t("common.close")}
-              >
-                <X size={18} aria-hidden="true" />
+              <button className="p-2 rounded-md hover:bg-muted">
+                <X size={18} />
               </button>
             </Dialog.Close>
           </div>
@@ -87,7 +79,7 @@ export default function ProductPickerModal({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={t("productSearch.placeholder")}
+              placeholder="Rechercher un produit…"
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="none"
@@ -96,35 +88,27 @@ export default function ProductPickerModal({
               className="w-full px-4 py-2 font-semibold text-white placeholder-white/50 bg-white/10 backdrop-blur rounded-md shadow-lg border border-white/20 ring-1 ring-white/20 focus:outline-none hover:bg-white/10"
             />
             <p id="product-search-desc" className="sr-only">
-              {t("productSearch.help")}
+              Recherche par nom de produit (ILIKE sur produits.nom)
             </p>
             <div className="border border-border rounded-lg max-h-60 overflow-y-auto">
-              {list.length === 0 ? (
-                <div className="p-4 text-sm text-muted-foreground">
-                  {t("productSearch.noResult")}
-                </div>
+              {results.length === 0 ? (
+                <div className="p-4 text-sm text-muted-foreground">Aucun résultat</div>
               ) : (
-                (() => {
-                  const rows = [];
-                  list.forEach((p, idx) => {
-                    rows.push(
-                      <button
-                        key={p.id}
-                        type="button"
-                        onClick={() => {
-                          onPick?.(p);
-                          onClose?.();
-                        }}
-                        className={`w-full text-left px-3 py-2 hover:bg-white/5 rounded ${
-                          idx === active ? "bg-white/10" : ""
-                        }`}
-                      >
-                        {p.nom}
-                      </button>
-                    );
-                  });
-                  return rows;
-                })()
+                results.map((p, idx) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => {
+                      onPick?.(p);
+                      onClose?.();
+                    }}
+                    className={`w-full text-left px-3 py-2 hover:bg-white/5 rounded ${
+                      idx === active ? "bg-white/10" : ""
+                    }`}
+                  >
+                    {p.nom}
+                  </button>
+                ))
               )}
             </div>
             <div className="flex justify-between items-center pt-2">
@@ -134,7 +118,7 @@ export default function ProductPickerModal({
                 disabled={page === 1}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
               >
-                {t("pagination.prev")}
+                Préc.
               </Button>
               <span className="text-xs text-muted-foreground">
                 {Math.min((page - 1) * pageSize + 1, total)}-
@@ -146,14 +130,14 @@ export default function ProductPickerModal({
                 disabled={page * pageSize >= total}
                 onClick={() => setPage((p) => p + 1)}
               >
-                {t("pagination.next")}
+                Suiv.
               </Button>
             </div>
           </div>
 
           <div className="px-4 py-3 border-t border-border bg-muted/40 flex justify-end">
             <Button variant="secondary" onClick={() => onClose?.()}>
-              {t("common.close")}
+              Fermer
             </Button>
           </div>
         </Dialog.Content>

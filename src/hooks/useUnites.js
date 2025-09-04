@@ -1,12 +1,26 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useCallback } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
+
+function safeQueryClient() {
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useQueryClient();
+  } catch {
+    return {
+      invalidateQueries: () => {},
+      setQueryData: () => {},
+      fetchQuery: async () => {},
+    };
+  }
+}
 
 export function useUnites() {
   const { mama_id } = useAuth();
-  const queryClient = useQueryClient();
+  const queryClient = safeQueryClient();
   const [params, setParams] = useState({ search: '', page: 1, limit: 50 });
 
   const query = useQuery({
@@ -15,7 +29,7 @@ export function useUnites() {
     queryFn: async () => {
       let q = supabase
         .from('unites')
-        .select('id, nom, actif', { count: 'exact' })
+        .select('id, code, nom, actif', { count: 'exact' })
         .eq('mama_id', mama_id)
         .order('nom', { ascending: true })
         .range((params.page - 1) * params.limit, params.page * params.limit - 1);
@@ -37,7 +51,7 @@ export function useUnites() {
       const { data, error } = await supabase
         .from('unites')
         .insert([{ ...body, mama_id }])
-        .select('id, nom, actif')
+        .select('id, code, nom, actif')
         .single();
       if (error) throw error;
       return data;
@@ -52,7 +66,7 @@ export function useUnites() {
         .update(values)
         .eq('id', id)
         .eq('mama_id', mama_id)
-        .select('id, nom, actif')
+        .select('id, code, nom, actif')
         .single();
       if (error) throw error;
       return data;

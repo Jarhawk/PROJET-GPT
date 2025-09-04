@@ -4,9 +4,11 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./globals.css";
 import 'nprogress/nprogress.css';
+import "@/i18n/i18n";
 import "./registerSW.js";
+import { BrowserRouter } from "react-router-dom";
+import AuthProvider from "@/contexts/AuthContext";
 import { toast } from 'sonner';
-import './i18n.js';
 
 // Avoid noisy output in production by disabling debug logs
 if (!import.meta.env.DEV) {
@@ -34,8 +36,12 @@ if (import.meta?.env?.DEV) {
 // Sentry.init({ dsn: "https://xxx.ingest.sentry.io/xxx" });
 
 const root = createRoot(document.getElementById("root"));
-  root.render(
-    <StrictMode>
-      <App />
-    </StrictMode>
-  );
+root.render(
+  <StrictMode>
+    <BrowserRouter>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </BrowserRouter>
+  </StrictMode>
+);

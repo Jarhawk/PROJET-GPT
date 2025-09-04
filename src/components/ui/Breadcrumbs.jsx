@@ -6,7 +6,6 @@ export default function Breadcrumbs() {
 
   // Découpe le pathname (ex: /stock/mouvement/123)
   const pathnames = location.pathname.split("/").filter(x => x);
-  const segments = Array.isArray(pathnames) ? pathnames : [];
 
   return (
     <nav className="text-xs text-mamastockGold bg-mamastockBg/80 py-2 px-4 rounded-md mb-6 shadow-sm" aria-label="Breadcrumb">
@@ -15,34 +14,30 @@ export default function Breadcrumbs() {
           <Link to="/" className="hover:underline font-semibold">
             Accueil
           </Link>
-          {segments.length > 0 && <span className="mx-2">/</span>}
+          {pathnames.length > 0 && <span className="mx-2">/</span>}
         </li>
-        {(() => {
-          const items = [];
-          for (let i = 0; i < segments.length; i++) {
-            const name = segments[i];
-            const routeTo = "/" + segments.slice(0, i + 1).join("/");
-            const isLast = i === segments.length - 1;
-            const label = isNaN(name) ? decodeURIComponent(name) : "#";
-            items.push(
-              <li key={routeTo} className="flex items-center">
-                {!isLast ? (
-                  <>
-                    <Link to={routeTo} className="hover:underline">
-                      {label.charAt(0).toUpperCase() + label.slice(1)}
-                    </Link>
-                    <span className="mx-2">/</span>
-                  </>
-                ) : (
-                  <span className="font-bold text-mamastockGold">
+        {pathnames.map((name, i) => {
+          const routeTo = "/" + pathnames.slice(0, i + 1).join("/");
+          const isLast = i === pathnames.length - 1;
+          // On remplace les IDs par # (pour éviter des bread “1234567” peu lisibles)
+          const label = isNaN(name) ? decodeURIComponent(name) : "#";
+          return (
+            <li key={routeTo} className="flex items-center">
+              {!isLast ? (
+                <>
+                  <Link to={routeTo} className="hover:underline">
                     {label.charAt(0).toUpperCase() + label.slice(1)}
-                  </span>
-                )}
-              </li>
-            );
-          }
-          return items;
-        })()}
+                  </Link>
+                  <span className="mx-2">/</span>
+                </>
+              ) : (
+                <span className="font-bold text-mamastockGold">
+                  {label.charAt(0).toUpperCase() + label.slice(1)}
+                </span>
+              )}
+            </li>
+          );
+        })}
       </ol>
     </nav>
   );

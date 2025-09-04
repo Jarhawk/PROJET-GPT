@@ -37,9 +37,7 @@ test('getUtilisateurs applies filters', async () => {
     await result.current.getUtilisateurs({ search: 'foo', actif: true });
   });
   expect(fromMock).toHaveBeenCalledWith('utilisateurs_complets');
-  expect(query.select).toHaveBeenCalledWith(
-    'id, nom, mama_id, actif, access_rights, role_id, role_nom, role_access_rights, auth_id, email'
-  );
+  expect(query.select).toHaveBeenCalledWith('*');
   expect(query.order).toHaveBeenCalledWith('nom', { ascending: true });
   expect(query.eq.mock.calls).toContainEqual(['mama_id', 'm1']);
   expect(query.ilike).toHaveBeenCalledWith('nom', '%foo%');

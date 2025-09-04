@@ -17,12 +17,10 @@ export function useAchats() {
     let q = supabase
       .from("achats")
       .select(
-        "id, mama_id, produit_id, prix, quantite, date_achat, created_at, updated_at, actif, fournisseur_id, fournisseur:fournisseur_id(id, nom, mama_id), produit:produit_id(id, nom, mama_id)",
+        "*, fournisseur:fournisseur_id(id, nom), produit:produit_id(id, nom)",
         { count: "exact" },
       )
       .eq("mama_id", mama_id)
-      .eq("fournisseur.mama_id", mama_id)
-      .eq("produit.mama_id", mama_id)
       .order("date_achat", { ascending: false })
       .range((page - 1) * pageSize, page * pageSize - 1);
     if (fournisseur) q = q.eq("fournisseur_id", fournisseur);
@@ -31,25 +29,22 @@ export function useAchats() {
     if (debut) q = q.gte("date_achat", debut);
     if (fin) q = q.lte("date_achat", fin);
     const { data, error, count } = await q;
-    const rows = Array.isArray(data) ? data : [];
     if (!error) {
-      setAchats(rows);
+      setAchats(Array.isArray(data) ? data : []);
       setTotal(count || 0);
     }
     setLoading(false);
     if (error) setError(error);
-    return rows;
+    return data || [];
   }
 
   async function fetchAchatById(id) {
     if (!id || !mama_id) return null;
     const { data, error } = await supabase
       .from("achats")
-      .select("id, mama_id, produit_id, prix, quantite, date_achat, created_at, updated_at, actif, fournisseur_id, fournisseur:fournisseur_id(id, nom, mama_id), produit:produit_id(id, nom, mama_id)")
+      .select("*, fournisseur:fournisseur_id(id, nom), produit:produit_id(id, nom)")
       .eq("id", id)
       .eq("mama_id", mama_id)
-      .eq("fournisseur.mama_id", mama_id)
-      .eq("produit.mama_id", mama_id)
       .single();
     if (error) { setError(error); return null; }
     return data;
@@ -60,16 +55,10 @@ export function useAchats() {
     const { data, error } = await supabase
       .from("achats")
       .insert([{ ...achat, mama_id }])
-      .select("id, mama_id, produit_id, prix, quantite, date_achat, created_at, updated_at, actif, fournisseur_id")
+      .select()
       .single();
-    if (error) {
-      setError(error);
-      return { error };
-    }
-    setAchats((a) => {
-      const arr = Array.isArray(a) ? a : [];
-      return [data, ...arr];
-    });
+    if (error) { setError(error); return { error }; }
+    setAchats(a => [data, ...a]);
     return { data };
   }
 
@@ -80,20 +69,10 @@ export function useAchats() {
       .update(fields)
       .eq("id", id)
       .eq("mama_id", mama_id)
-      .select("id, mama_id, produit_id, prix, quantite, date_achat, created_at, updated_at, actif, fournisseur_id")
+      .select()
       .single();
-    if (error) {
-      setError(error);
-      return { error };
-    }
-    setAchats((a) => {
-      const arr = Array.isArray(a) ? a : [];
-      const updated = [];
-      for (const ac of arr) {
-        updated.push(ac.id === id ? data : ac);
-      }
-      return updated;
-    });
+    if (error) { setError(error); return { error }; }
+    setAchats(a => a.map(ac => ac.id === id ? data : ac));
     return { data };
   }
 
@@ -104,18 +83,8 @@ export function useAchats() {
       .update({ actif: false })
       .eq("id", id)
       .eq("mama_id", mama_id);
-    if (error) {
-      setError(error);
-      return { error };
-    }
-    setAchats((a) => {
-      const arr = Array.isArray(a) ? a : [];
-      const updated = [];
-      for (const ac of arr) {
-        updated.push(ac.id === id ? { ...ac, actif: false } : ac);
-      }
-      return updated;
-    });
+    if (error) { setError(error); return { error }; }
+    setAchats(a => a.map(ac => ac.id === id ? { ...ac, actif: false } : ac));
     return { success: true };
   }
 

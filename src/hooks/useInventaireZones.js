@@ -15,11 +15,11 @@ export function useInventaireZones() {
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
-      .from('inventaire_zones')
-      .select('id, mama_id, nom, created_at, actif')
-      .eq('mama_id', mama_id)
-      .eq('actif', true)
-      .order('nom', { ascending: true });
+      .from("inventaire_zones")
+      .select("*")
+      .eq("mama_id", mama_id)
+      .eq("actif", true)
+      .order("nom", { ascending: true });
     setLoading(false);
     if (error) {
       setError(error);
@@ -35,8 +35,8 @@ export function useInventaireZones() {
     setLoading(true);
     setError(null);
     const { error } = await supabase
-      .from('inventaire_zones')
-      .insert([{ nom: zone.nom, mama_id, actif: true }]);
+      .from("inventaire_zones")
+      .insert([{ ...zone, mama_id, actif: true }]);
     setLoading(false);
     if (error) {
       setError(error);
@@ -51,10 +51,10 @@ export function useInventaireZones() {
     setLoading(true);
     setError(null);
     const { error } = await supabase
-      .from('inventaire_zones')
+      .from("inventaire_zones")
       .update(fields)
-      .eq('id', id)
-      .eq('mama_id', mama_id);
+      .eq("id", id)
+      .eq("mama_id", mama_id);
     setLoading(false);
     if (error) {
       setError(error);
@@ -69,10 +69,10 @@ export function useInventaireZones() {
     setLoading(true);
     setError(null);
     const { error } = await supabase
-      .from('inventaire_zones')
+      .from("inventaire_zones")
       .update({ actif: false })
-      .eq('id', id)
-      .eq('mama_id', mama_id);
+      .eq("id", id)
+      .eq("mama_id", mama_id);
     setLoading(false);
     if (error) {
       setError(error);
@@ -85,10 +85,10 @@ export function useInventaireZones() {
   async function reactivateZone(id) {
     if (!mama_id || !id) return;
     const { error } = await supabase
-      .from('inventaire_zones')
+      .from("inventaire_zones")
       .update({ actif: true })
-      .eq('id', id)
-      .eq('mama_id', mama_id);
+      .eq("id", id)
+      .eq("mama_id", mama_id);
     if (!error) await getZones();
   }
 

@@ -100,16 +100,11 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
         onChange={e => setRoleId(e.target.value)}
         required
       >
-        {(() => {
-          const opts = [];
-          const arr = Array.isArray(roles) ? roles : [];
-          for (const r of arr) {
-            if (myRole === "superadmin" || r.nom !== "superadmin") {
-              opts.push(<option key={r.id} value={r.id}>{r.nom}</option>);
-            }
-          }
-          return opts;
-        })()}
+        {roles
+          .filter(r => myRole === "superadmin" || r.nom !== "superadmin")
+          .map(r => (
+            <option key={r.id} value={r.id}>{r.nom}</option>
+          ))}
       </Select>
       {myRole === "superadmin" && (
         <>
@@ -121,14 +116,9 @@ export default function UtilisateurForm({ utilisateur, onClose }) {
             onChange={e => setMama(e.target.value)}
             required
           >
-            {(() => {
-              const opts = [];
-              const arr = Array.isArray(mamas) ? mamas : [];
-              for (const m of arr) {
-                opts.push(<option key={m.id} value={m.id}>{m.nom}</option>);
-              }
-              return opts;
-            })()}
+            {mamas.map(m => (
+              <option key={m.id} value={m.id}>{m.nom}</option>
+            ))}
           </Select>
         </>
       )}

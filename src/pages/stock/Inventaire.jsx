@@ -34,22 +34,15 @@ export default function InventairePage() {
             </tr>
           </thead>
           <tbody>
-            {(() => {
-              const rows = [];
-              const list = Array.isArray(inventaires) ? inventaires : [];
-              for (const inv of list) {
-                rows.push(
-                  <tr key={inv.id}>
-                    <td className="p-2">{inv.reference}</td>
-                    <td className="p-2">{inv.date_inventaire}</td>
-                    <td className="p-2">{inv.utilisateurs?.username || "-"}</td>
-                    <td className="p-2">{inv.cloture ? "validé" : "en cours"}</td>
-                    <td className="p-2 text-right">{inv.ecart_total ?? "-"}</td>
-                  </tr>
-                );
-              }
-              return rows;
-            })()}
+            {inventaires.map((inv) => (
+              <tr key={inv.id}>
+                <td className="p-2">{inv.reference}</td>
+                <td className="p-2">{inv.date_inventaire}</td>
+                <td className="p-2">{inv.utilisateurs?.username || "-"}</td>
+                <td className="p-2">{inv.cloture ? "validé" : "en cours"}</td>
+                <td className="p-2 text-right">{inv.ecart_total ?? "-"}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </ListingContainer>

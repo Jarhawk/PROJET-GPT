@@ -19,15 +19,11 @@ export default function CommandesEnvoyees() {
     setPageLoading(true);
     supabase
       .from("commandes")
-      .select(
-        "id, created_at, statut, fournisseur:fournisseurs!commandes_fournisseur_id_fkey(nom)"
-      )
+      .select("*, fournisseur:fournisseur_id(nom)")
       .eq("mama_id", mama_id)
-      .eq("fournisseur.mama_id", mama_id)
       .order("created_at", { ascending: false })
       .then(({ data }) => {
-        const rows = Array.isArray(data) ? data : [];
-        setItems(rows);
+        setItems(data || []);
         setPageLoading(false);
       });
   }, [mama_id]);
@@ -53,25 +49,18 @@ export default function CommandesEnvoyees() {
           </tr>
         </thead>
         <tbody>
-          {(() => {
-            const rows = [];
-            const list = Array.isArray(items) ? items : [];
-            for (const c of list) {
-              rows.push(
-                <tr key={c.id}>
-                  <td className="px-2 py-1">{c.created_at?.slice(0, 10)}</td>
-                  <td className="px-2 py-1">{c.fournisseur?.nom || "-"}</td>
-                  <td className="px-2 py-1">{c.statut}</td>
-                  <td className="px-2 py-1">
-                    <Button size="sm" onClick={() => relancer(c.id)}>
-                      Relancer
-                    </Button>
-                  </td>
-                </tr>
-              );
-            }
-            return rows;
-          })()}
+          {items.map((c) => (
+            <tr key={c.id}>
+              <td className="px-2 py-1">{c.created_at?.slice(0, 10)}</td>
+              <td className="px-2 py-1">{c.fournisseur?.nom || "-"}</td>
+              <td className="px-2 py-1">{c.statut}</td>
+              <td className="px-2 py-1">
+                <Button size="sm" onClick={() => relancer(c.id)}>
+                  Relancer
+                </Button>
+              </td>
+            </tr>
+          ))}
         </tbody>
         </table>
         </TableContainer>

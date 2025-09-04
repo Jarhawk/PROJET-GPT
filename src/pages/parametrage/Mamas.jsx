@@ -29,7 +29,7 @@ export default function Mamas() {
 
   const fetchMamas = async () => {
     setLoading(true);
-    let query = supabase.from('mamas').select('id, nom, actif');
+    let query = supabase.from('mamas').select('*');
     if (role !== 'superadmin') query = query.eq('id', myMama);
     const { data, error } = await query.order('nom', { ascending: true });
     if (!error) setMamas(data || []);
@@ -56,11 +56,11 @@ export default function Mamas() {
     setConfirmId(null);
   };
 
-  const baseList = Array.isArray(mamas) ? mamas : [];
-  const filtered = [];
-  for (const m of baseList) {
-    if (m.nom?.toLowerCase().includes(search.toLowerCase())) filtered.push(m);
-  }
+  const filtered = mamas.filter(
+    (m) =>
+      m.nom?.toLowerCase().includes(search.toLowerCase()) ||
+      m.ville?.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="p-8 max-w-4xl mx-auto text-shadow">
@@ -68,13 +68,13 @@ export default function Mamas() {
       <div className="flex gap-4 mb-4 items-end">
         <input
           className="input input-bordered w-64"
-          placeholder="Recherche nom"
+          placeholder="Recherche nom, ville"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
         {role === 'superadmin' && (
           <Button
-            onClick={() => setEditMama({ nom: '', actif: true })}
+            onClick={() => setEditMama({ nom: '', ville: '', actif: true })}
           >
             + Nouvel établissement
           </Button>
@@ -88,88 +88,82 @@ export default function Mamas() {
             <thead>
               <tr>
                 <th className="px-2 py-1">Nom</th>
+                <th className="px-2 py-1">Ville</th>
                 <th className="px-2 py-1">Actif</th>
                 <th className="px-2 py-1">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {(() => {
-                const rows = [];
-                for (const m of filtered) {
-                  rows.push(
-                    <tr key={m.id}>
-                      <td className="px-2 py-1">{m.nom}</td>
-                      <td className="px-2 py-1">
-                        <span
-                          className={
-                            m.actif
-                              ? 'inline-block bg-green-100 text-green-800 px-2 rounded-full'
-                              : 'inline-block bg-red-100 text-red-800 px-2 rounded-full'
+              {filtered.map((m) => (
+                <tr key={m.id}>
+                  <td className="px-2 py-1">{m.nom}</td>
+                  <td className="px-2 py-1">{m.ville}</td>
+                  <td className="px-2 py-1">
+                    <span
+                      className={
+                        m.actif
+                          ? 'inline-block bg-green-100 text-green-800 px-2 rounded-full'
+                          : 'inline-block bg-red-100 text-red-800 px-2 rounded-full'
+                      }
+                    >
+                      {m.actif ? 'Oui' : 'Non'}
+                    </span>
+                  </td>
+                  <td className="px-2 py-1 flex items-center justify-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => setEditMama(m)}
+                      disabled={
+                        loading || (role !== 'superadmin' && m.id !== myMama)
+                      }
+                    >
+                      Éditer
+                    </Button>
+                    {confirmId === m.id ? (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleToggleActive(m.id, !m.actif)}
+                          disabled={
+                            loading ||
+                            (role !== 'superadmin' && m.id !== myMama)
                           }
                         >
-                          {m.actif ? 'Oui' : 'Non'}
-                        </span>
-                      </td>
-                      <td className="px-2 py-1 flex items-center justify-center gap-2">
+                          Confirmer
+                        </Button>
                         <Button
                           size="sm"
                           variant="secondary"
-                          onClick={() => setEditMama(m)}
-                          disabled={
-                            loading || (role !== 'superadmin' && m.id !== myMama)
-                          }
+                          onClick={() => setConfirmId(null)}
+                          disabled={loading}
                         >
-                          Éditer
+                          Annuler
                         </Button>
-                        {confirmId === m.id ? (
-                          <>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => handleToggleActive(m.id, !m.actif)}
-                              disabled={
-                                loading ||
-                                (role !== 'superadmin' && m.id !== myMama)
-                              }
-                            >
-                              Confirmer
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="secondary"
-                              onClick={() => setConfirmId(null)}
-                              disabled={loading}
-                            >
-                              Annuler
-                            </Button>
-                          </>
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => setConfirmId(m.id)}
-                            disabled={
-                              loading || (role !== 'superadmin' && m.id !== myMama)
-                            }
-                          >
-                            {m.actif ? 'Désactiver' : 'Activer'}
-                          </Button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                }
-                if (rows.length === 0) {
-                  rows.push(
-                    <tr key="empty">
-                      <td colSpan={3} className="py-4 text-gray-400">
-                        Aucun établissement trouvé.
-                      </td>
-                    </tr>
-                  );
-                }
-                return rows;
-              })()}
+                      </>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => setConfirmId(m.id)}
+                        disabled={
+                          loading || (role !== 'superadmin' && m.id !== myMama)
+                        }
+                      >
+                        {m.actif ? 'Désactiver' : 'Activer'}
+                      </Button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="py-4 text-gray-400">
+                    Aucun établissement trouvé.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         )}

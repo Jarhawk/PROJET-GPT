@@ -9,15 +9,6 @@ export default function SousFamilleForm({ sousFamille, familles = [], familleId,
   const [nom, setNom] = useState(sousFamille?.nom || '');
   const [famille, setFamille] = useState(familleId || sousFamille?.famille_id || '');
   const [actif, setActif] = useState(sousFamille?.actif ?? true);
-  const familleOptions = Array.isArray(familles) ? familles : [];
-  const optionEls = [];
-  for (const f of familleOptions) {
-    optionEls.push(
-      <option key={f.id} value={f.id}>
-        {f.nom}
-      </option>
-    );
-  }
 
   useEffect(() => {
     setNom(sousFamille?.nom || '');
@@ -43,7 +34,7 @@ export default function SousFamilleForm({ sousFamille, familles = [], familleId,
           required
         />
       </FormField>
-      {familleOptions.length > 0 && (
+      {familles.length > 0 && (
         <FormField label="Famille" htmlFor="sf-famille" required>
           <Select
             id="sf-famille"
@@ -52,7 +43,11 @@ export default function SousFamilleForm({ sousFamille, familles = [], familleId,
             required
           >
             <option value="">Choisir</option>
-            {optionEls}
+            {familles.map((f) => (
+              <option key={f.id} value={f.id}>
+                {f.nom}
+              </option>
+            ))}
           </Select>
         </FormField>
       )}

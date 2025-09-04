@@ -10,9 +10,7 @@ const query = {
 };
 
 const singleMock = vi.fn(() => Promise.resolve({ data: { id: 'sf1' }, error: null }));
-const insertSelectMock = vi.fn(() => ({ single: singleMock }));
-const insertEqMock = vi.fn(() => ({ select: insertSelectMock }));
-const insertMock = vi.fn(() => ({ eq: insertEqMock }));
+const insertMock = vi.fn(() => ({ select: vi.fn(() => ({ single: singleMock })) }));
 const eqAfterUpdate2 = vi.fn(() => Promise.resolve({ error: null }));
 const eqAfterUpdate1 = vi.fn(() => ({ eq: eqAfterUpdate2 }));
 const updateMock = vi.fn(() => ({ eq: eqAfterUpdate1 }));

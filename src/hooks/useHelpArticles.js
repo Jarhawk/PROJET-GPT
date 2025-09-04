@@ -12,7 +12,7 @@ export function useHelpArticles() {
     setError(null);
     const { data, error } = await supabase
       .from("help_articles")
-      .select("id, titre, contenu, created_at")
+      .select("*")
       .order("created_at", { ascending: false });
     setLoading(false);
     if (error) {
@@ -20,9 +20,8 @@ export function useHelpArticles() {
       setItems([]);
       return [];
     }
-    const rows = Array.isArray(data) ? data : [];
-    setItems(rows);
-    return rows;
+    setItems(Array.isArray(data) ? data : []);
+    return data || [];
   }
 
   async function addArticle(values) {

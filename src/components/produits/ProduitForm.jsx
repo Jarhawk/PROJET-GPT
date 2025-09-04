@@ -21,31 +21,20 @@ export default function ProduitForm({
 }) {
   const editing = !!produit;
   const { data: fournisseursData } = useFournisseurs({ actif: true });
-  const fournisseurs = Array.isArray(fournisseursData?.data)
-    ? fournisseursData.data
-    : [];
+  const fournisseurs = fournisseursData?.data || [];
   const {
-    familles: dataFamilles,
+    familles,
     fetchFamilles,
     error: famillesError,
   } = useFamilles();
-  const familles = Array.isArray(dataFamilles) ? dataFamilles : [];
   const {
-    sousFamilles: dataSousFamilles,
+    sousFamilles,
     list: listSousFamilles,
     loading: sousFamillesLoading,
     error: sousFamillesError,
   } = useSousFamilles();
-  const sousFamilles = Array.isArray(dataSousFamilles) ? dataSousFamilles : [];
-  const { unites: dataUnites, fetchUnites } = useUnites();
-  const unites = Array.isArray(dataUnites) ? dataUnites : [];
-  const { zones: dataZones } = useZonesStock();
-  const zones = Array.isArray(dataZones) ? dataZones : [];
-
-  const famillesList = Array.isArray(familles) ? familles : [];
-  const sousFamillesList = Array.isArray(sousFamilles) ? sousFamilles : [];
-  const zonesList = Array.isArray(zones) ? zones : [];
-  const fournisseursList = Array.isArray(fournisseurs) ? fournisseurs : [];
+  const { unites, fetchUnites } = useUnites();
+  const { zones } = useZonesStock();
 
   const [nom, setNom] = useState(produit?.nom || "");
   const [familleId, setFamilleId] = useState(produit?.famille_id || "");
@@ -66,63 +55,9 @@ export default function ProduitForm({
   const { addProduct, updateProduct, loading } = useProducts();
   const [saving, setSaving] = useState(false);
 
-  const familleOptions = [];
-  for (const f of famillesList) {
-    familleOptions.push(
-      <option key={f.id} value={f.id}>
-        {f.nom}
-      </option>
-    );
-  }
-
-  const sousFamilleOptions = [];
-  for (const sf of sousFamillesList) {
-    sousFamilleOptions.push(
-      <option key={sf.id} value={sf.id}>
-        {sf.nom}
-      </option>
-    );
-  }
-
-  const zoneOptions = [];
-  for (const z of zonesList) {
-    zoneOptions.push(
-      <option key={z.id} value={z.id}>
-        {z.nom}
-      </option>
-    );
-  }
-
-  const fournisseurOptions = [];
-  for (const f of fournisseursList) {
-    fournisseurOptions.push(
-      <option key={f.id} value={f.id}>
-        {f.nom}
-      </option>
-    );
-  }
-
-  let familleNom = "";
-  for (const f of famillesList) {
-    if (f.id === familleId) {
-      familleNom = f.nom;
-      break;
-    }
-  }
-
-  let sousFamilleNom = "";
-  for (const sf of sousFamillesList) {
-    if (sf.id === sousFamilleId) {
-      sousFamilleNom = sf.nom;
-      break;
-    }
-  }
-
-  const uniteOptions = Array.isArray(unites)
-    ? [...unites]
-        .filter((u, idx, arr) => arr.findIndex((uu) => uu.id === u.id) === idx)
-        .sort((a, b) => (a.nom || "").localeCompare(b.nom || ""))
-    : [];
+  const uniteOptions = [...unites]
+    .filter((u, idx, arr) => arr.findIndex((uu) => uu.id === u.id) === idx)
+    .sort((a, b) => (a.nom || "").localeCompare(b.nom || ""));
 
   useEffect(() => {
     fetchFamilles();
@@ -250,7 +185,11 @@ export default function ProduitForm({
             required
           >
             <option value="">-- Choisir --</option>
-            {familleOptions}
+            {familles.map((f) => (
+              <option key={f.id} value={f.id}>
+                {f.nom}
+              </option>
+            ))}
           </select>
           {errors.famille && (
             <p className="text-red-500 text-sm">{errors.famille}</p>
@@ -258,7 +197,7 @@ export default function ProduitForm({
           {famillesError && (
             <p className="text-red-500 text-sm">Erreur chargement familles</p>
           )}
-          {!famillesError && famillesList.length === 0 && (
+          {!famillesError && familles.length === 0 && (
             <p className="text-red-500 text-sm">Aucune famille disponible</p>
           )}
         </div>
@@ -277,7 +216,11 @@ export default function ProduitForm({
             <option value="">
               {sousFamillesLoading ? "Chargement..." : "-- Choisir --"}
             </option>
-            {sousFamilleOptions}
+            {sousFamilles.map((sf) => (
+              <option key={sf.id} value={sf.id}>
+                {sf.nom}
+              </option>
+            ))}
           </select>
           {errors.sousFamille && (
             <p role="alert" className="text-red-500 text-xs mt-1">
@@ -290,7 +233,7 @@ export default function ProduitForm({
           {!sousFamillesError &&
             familleId &&
             !sousFamillesLoading &&
-            sousFamillesList.length === 0 && (
+            sousFamilles.length === 0 && (
               <p className="text-red-500 text-sm">Aucune sous-famille</p>
             )}
         </div>
@@ -298,11 +241,11 @@ export default function ProduitForm({
         {familleId && (
           <div className="flex gap-2 p-2 rounded-xl">
             <Badge>
-              {familleNom}
+              {familles.find((f) => f.id === familleId)?.nom || ''}
             </Badge>
             {sousFamilleId && (
               <Badge>
-                {sousFamilleNom}
+                {sousFamilles.find((sf) => sf.id === sousFamilleId)?.nom || ''}
               </Badge>
             )}
           </div>
@@ -330,7 +273,11 @@ export default function ProduitForm({
             onChange={(e) => setZoneStockId(e.target.value)}
           >
             <option value="">Aucune</option>
-            {zoneOptions}
+            {zones.map((z) => (
+              <option key={z.id} value={z.id}>
+                {z.nom}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -396,7 +343,11 @@ export default function ProduitForm({
             onChange={(e) => setFournisseurId(e.target.value)}
           >
             <option value="">Aucun</option>
-            {fournisseurOptions}
+            {fournisseurs.map((f) => (
+              <option key={f.id} value={f.id}>
+                {f.nom}
+              </option>
+            ))}
           </select>
         </div>
 

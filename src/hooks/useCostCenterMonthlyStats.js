@@ -9,7 +9,7 @@ export function useCostCenterMonthlyStats() {
     if (!mama_id) return [];
     let query = supabase
       .from('v_cost_center_monthly')
-      .select('mama_id, nom, mois, montant')
+      .select('*')
       .eq('mama_id', mama_id)
       .order('mois', { ascending: true })
       .order('nom', { ascending: true });
@@ -20,8 +20,7 @@ export function useCostCenterMonthlyStats() {
       console.error('Erreur fetchMonthly:', error);
       return [];
     }
-    const rows = Array.isArray(data) ? data : [];
-    return rows;
+    return data || [];
   }
 
   return { fetchMonthly };

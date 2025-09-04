@@ -19,14 +19,12 @@ export default function useDerniersAcces() {
           'utilisateur_id, created_at, utilisateur:utilisateurs!logs_securite_utilisateur_id_fkey(email, auth_id)'
         )
         .eq('mama_id', mama_id)
-        .eq('utilisateur.mama_id', mama_id)
         .order('created_at', { ascending: false })
         .limit(50);
       if (error) throw error;
-      const rows = Array.isArray(data) ? data : [];
       const seen = {};
       const list = [];
-      for (const row of rows) {
+      for (const row of data || []) {
         if (!row.utilisateur_id || seen[row.utilisateur_id]) continue;
         seen[row.utilisateur_id] = true;
         list.push({
@@ -42,7 +40,7 @@ export default function useDerniersAcces() {
       }
       return list;
     } catch (e) {
-      console.warn('[gadgets] vue manquante ou colonne absente:', e?.message || e);
+      console.warn('useDerniersAcces', e);
       setError(e);
       setData([]);
       return [];

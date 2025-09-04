@@ -22,22 +22,8 @@ export default function PrixFournisseurs({ produitId }) {
     );
   }
 
-  const rows = Array.isArray(lignes) ? lignes : [];
-  if (rows.length === 0) {
+  if (!lignes || lignes.length === 0) {
     return <p className="text-gray-500 text-sm mt-2">Aucune donnée fournisseur pour ce produit.</p>;
-  }
-
-  const bodyRows = [];
-  let idx = 0;
-  for (const l of rows) {
-    bodyRows.push(
-      <tr key={idx++} className="border-t">
-        <td className="px-2 py-1">{l.fournisseur}</td>
-        <td className="px-2 py-1 text-right">{parseFloat(l.dernierPrix).toFixed(2)} €</td>
-        <td className="px-2 py-1 text-right">{parseFloat(l.pmp).toFixed(2)} €</td>
-        <td className="px-2 py-1 text-center">{l.nb}</td>
-      </tr>
-    );
   }
 
   return (
@@ -45,15 +31,24 @@ export default function PrixFournisseurs({ produitId }) {
       <GlassCard className="p-4">
         <TableContainer>
           <table className="w-full text-left border-collapse">
-            <thead className="bg-white/10 border-b border-white/20">
-              <tr>
-                <th className="px-2 py-1">Fournisseur</th>
-                <th className="px-2 py-1 text-right">Dernier prix</th>
-                <th className="px-2 py-1 text-right">PMP</th>
-                <th className="px-2 py-1 text-center">Nb achats</th>
-              </tr>
-            </thead>
-            <tbody>{bodyRows}</tbody>
+        <thead className="bg-white/10 border-b border-white/20">
+          <tr>
+            <th className="px-2 py-1">Fournisseur</th>
+            <th className="px-2 py-1 text-right">Dernier prix</th>
+            <th className="px-2 py-1 text-right">PMP</th>
+            <th className="px-2 py-1 text-center">Nb achats</th>
+          </tr>
+        </thead>
+        <tbody>
+          {lignes.map((l, idx) => (
+            <tr key={idx} className="border-t">
+              <td className="px-2 py-1">{l.fournisseur}</td>
+              <td className="px-2 py-1 text-right">{parseFloat(l.dernierPrix).toFixed(2)} €</td>
+              <td className="px-2 py-1 text-right">{parseFloat(l.pmp).toFixed(2)} €</td>
+              <td className="px-2 py-1 text-center">{l.nb}</td>
+            </tr>
+          ))}
+        </tbody>
           </table>
         </TableContainer>
       </GlassCard>

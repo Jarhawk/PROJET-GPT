@@ -9,7 +9,7 @@ export function usePlanning() {
     if (!mama_id) return { data: [] };
     let q = supabase
       .from("planning_previsionnel")
-      .select("id, nom, date_prevue, statut, mama_id", { count: "exact" })
+      .select("*", { count: "exact" })
       .eq("mama_id", mama_id)
       .eq("actif", true)
       .order("date_prevue", { ascending: true });
@@ -21,19 +21,16 @@ export function usePlanning() {
       console.error("getPlannings", error.message);
       return { data: [] };
     }
-    return { data: Array.isArray(data) ? data : [] };
+    return { data: data || [] };
   }
 
   async function getPlanningById(id) {
     if (!id || !mama_id) return null;
     const { data, error } = await supabase
       .from("planning_previsionnel")
-      .select(
-        "id, nom, date_prevue, commentaire, statut, mama_id, lignes:planning_lignes(id, planning_id, produit_id, quantite, observation, produit:produit_id(nom))"
-      )
+      .select("*, lignes:planning_lignes!planning_id(id, planning_id, produit_id, quantite, observation, produit:produit_id(nom))")
       .eq("id", id)
       .eq("mama_id", mama_id)
-      .eq("planning_lignes.mama_id", mama_id)
       .single();
     if (error) {
       console.error("getPlanningById", error.message);
@@ -50,18 +47,14 @@ export function usePlanning() {
       .select("id")
       .single();
     if (error) return { error };
-    const arr = Array.isArray(lignes) ? lignes : [];
-    if (arr.length) {
-      const rows = [];
-      for (const l of arr) {
-        rows.push({
-          planning_id: data.id,
-          produit_id: l.produit_id,
-          quantite: l.quantite,
-          observation: l.observation || "",
-          mama_id,
-        });
-      }
+    if (lignes.length) {
+      const rows = lignes.map(l => ({
+        planning_id: data.id,
+        produit_id: l.produit_id,
+        quantite: l.quantite,
+        observation: l.observation || "",
+        mama_id,
+      }));
       const { error: err2 } = await supabase.from("planning_lignes").insert(rows);
       if (err2) return { error: err2 };
     }
@@ -75,9 +68,7 @@ export function usePlanning() {
       .update(fields)
       .eq("id", id)
       .eq("mama_id", mama_id)
-      .select(
-        'id, mama_id, date_prevue, quantite, produit_id, created_at, nom, commentaire, statut, actif'
-      )
+      .select()
       .single();
     if (error) return { error };
     return { data };
@@ -99,7 +90,7 @@ export function usePlanning() {
     if (!mama_id) return [];
     let q = supabase
       .from("planning_previsionnel")
-      .select("id, nom, date_prevue, statut, mama_id")
+      .select("*")
       .eq("mama_id", mama_id)
       .eq("actif", true)
       .order("date_prevue", { ascending: true });
@@ -111,7 +102,7 @@ export function usePlanning() {
       console.error("fetchPlanning", error.message);
       return [];
     }
-    return Array.isArray(data) ? data : [];
+    return data || [];
   }
   const addPlanning = createPlanning;
 

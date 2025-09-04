@@ -14,29 +14,15 @@ export default function MenuDuJourForm({ menu, fiches = [], onClose }) {
   const [date, setDate] = useState(menu?.date || "");
   const [prixVente, setPrixVente] = useState(menu?.prix_vente_ttc || 0);
   const [tva, setTva] = useState(menu?.tva || 5.5);
-  const initialSelected = [];
-  if (Array.isArray(menu?.fiches)) {
-    for (const f of menu.fiches) {
-      initialSelected.push(f.fiche_id);
-    }
-  }
-  const [selectedFiches, setSelectedFiches] = useState(initialSelected);
+  const [selectedFiches, setSelectedFiches] = useState(
+    menu?.fiches?.map(f => f.fiche_id) || []
+  );
   const [file, setFile] = useState(null);
   const [fileUrl, setFileUrl] = useState(menu?.document || "");
   const [loading, setLoading] = useState(false);
 
-  const fichesList = Array.isArray(fiches) ? fiches : [];
-  const selectedObjects = [];
-  for (const f of fichesList) {
-    if (selectedFiches.includes(f.id)) {
-      selectedObjects.push(f);
-    }
-  }
-  let coutTotal = 0;
-  for (let i = 0; i < selectedObjects.length; i++) {
-    const f = selectedObjects[i];
-    coutTotal += Number(f.cout_total) || 0;
-  }
+  const selectedObjects = fiches.filter(f => selectedFiches.includes(f.id));
+  const coutTotal = selectedObjects.reduce((sum, f) => sum + (Number(f.cout_total) || 0), 0);
   const marge = prixVente > 0 ? ((prixVente - coutTotal) / prixVente) * 100 : 0;
 
   const handleSelectFiche = id => {
@@ -135,24 +121,17 @@ export default function MenuDuJourForm({ menu, fiches = [], onClose }) {
       <div className="mb-4">
         <label className="block font-semibold mb-2">Fiches du menu :</label>
         <div className="max-h-48 overflow-auto border border-white/20 rounded p-2 bg-white/10 backdrop-blur-xl text-white">
-          {(() => {
-            const items = [];
-            for (let i = 0; i < fichesList.length; i++) {
-              const f = fichesList[i];
-              items.push(
-                <label key={f.id} className="block">
-                  <input
-                    type="checkbox"
-                    checked={selectedFiches.includes(f.id)}
-                    onChange={() => handleSelectFiche(f.id)}
-                    className="mr-2"
-                  />
-                  {f.nom}
-                </label>
-              );
-            }
-            return items;
-          })()}
+          {fiches.map(f => (
+            <label key={f.id} className="block">
+              <input
+                type="checkbox"
+                checked={selectedFiches.includes(f.id)}
+                onChange={() => handleSelectFiche(f.id)}
+                className="mr-2"
+              />
+              {f.nom}
+            </label>
+          ))}
         </div>
       </div>
       <label>

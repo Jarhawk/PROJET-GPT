@@ -1,13 +1,12 @@
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient, useQueryClient } from '@tanstack/react-query'
 
-export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: true,
-      retry: 1,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-    },
-    mutations: { retry: 0 },
-  },
-});
+let client
+export function getQueryClient() {
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useQueryClient()
+  } catch {
+    if (!client) client = new QueryClient()
+    return client
+  }
+}

@@ -30,7 +30,7 @@ vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1', user_id: 'u
 let useNotifications;
 
 beforeEach(async () => {
-  ({ default: useNotifications } = await import('@/hooks/useNotifications'));
+  ({ useAuth: useNotifications } = await import('@/hooks/useNotifications'));
   fromMock.mockClear();
   queryObj.select.mockClear();
   queryObj.eq.mockClear();

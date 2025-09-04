@@ -17,20 +17,13 @@ export function useStock() {
     const { data, error } = await supabase
       .from("produits")
       .select(
-        "id, nom, unite_id, unite:unites!fk_produits_unite(nom), stock_reel, stock_min, pmp, famille_id, sous_famille_id, famille:familles!fk_produits_famille(nom), sous_famille:sous_familles!fk_produits_sous_famille(nom)"
+        "id, nom, unite_id, unite:unite_id (nom), stock_reel, stock_min, pmp, famille_id, sous_famille_id, famille:familles!fk_produits_famille(nom), sous_famille:sous_familles!fk_produits_sous_famille(nom)"
       )
-      .eq("mama_id", mama_id)
-      .eq("famille.mama_id", mama_id)
-      .eq("sous_famille.mama_id", mama_id)
-      .eq("unite.mama_id", mama_id);
+      .eq("mama_id", mama_id);
     setLoading(false);
-    if (error) {
-      setError(error);
-      return [];
-    }
-    const rows = Array.isArray(data) ? data : [];
-    setStocks(rows);
-    return rows;
+    if (error) setError(error);
+    setStocks(data || []);
+    return data;
   }, [mama_id]);
 
   async function fetchRotationStats(produit_id) {
@@ -39,7 +32,7 @@ export function useStock() {
       produit_id_param: produit_id,
     });
     if (error) return [];
-    return Array.isArray(data) ? data : [];
+    return data || [];
   }
 
   // ----- New helpers for stock module -----
@@ -62,11 +55,11 @@ export function useStock() {
     if (!mama_id) return [];
     const { data, error } = await supabase
       .from("inventaires")
-      .select("id, mama_id, date_inventaire, created_at, updated_at, actif, reference, zone, date_debut, cloture")
+      .select("*")
       .eq("mama_id", mama_id)
       .order("date_inventaire", { ascending: false });
     if (error) return [];
-    return Array.isArray(data) ? data : [];
+    return data || [];
   }, [mama_id]);
 
   const createInventaire = useCallback(
@@ -75,7 +68,7 @@ export function useStock() {
       const { data, error } = await supabase
         .from("inventaires")
         .insert([{ ...payload, mama_id }])
-        .select("id, mama_id, date_inventaire, created_at, updated_at, actif, reference, zone, date_debut, cloture")
+        .select()
         .single();
       if (error) return null;
       return data;

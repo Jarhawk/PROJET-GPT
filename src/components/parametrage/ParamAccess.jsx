@@ -25,21 +25,13 @@ export default function ParamAccess() {
   if (authLoading) return <LoadingSpinner message="Chargement..." />;
 
   // Liste des modules disponibles
-  const modules = [];
-  if (Array.isArray(MODULE_LIST)) {
-    for (const m of MODULE_LIST) modules.push(m.key);
-  }
+  const modules = MODULE_LIST.map((m) => m.key);
 
   // Modification rapide
   const handleChange = async (role_id, module) => {
-    const perms = Array.isArray(permissions) ? permissions : [];
-    let current = null;
-    for (const p of perms) {
-      if (p.role_id === role_id && p.module === module) {
-        current = p;
-        break;
-      }
-    }
+    const current = permissions.find(
+      (p) => p.role_id === role_id && p.module === module
+    );
     if (!current) return;
     await updatePermission(current.id, { actif: !current.actif });
     await fetchPermissions();
@@ -54,29 +46,20 @@ export default function ParamAccess() {
           <thead>
             <tr>
               <th>Rôle</th>
-              {(() => {
-                const heads = [];
-                for (const m of modules) heads.push(<th key={m}>{m}</th>);
-                return heads;
-              })()}
+              {modules.map((m) => (
+                <th key={m}>{m}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {(() => {
-              const rows = [];
-              const list = Array.isArray(roles) ? roles : [];
-              for (const r of list) {
-                const cells = [];
-                for (const m of modules) {
-                  const perms = Array.isArray(permissions) ? permissions : [];
-                  let current = null;
-                  for (const p of perms) {
-                    if (p.role_id === r.id && p.module === m) {
-                      current = p;
-                      break;
-                    }
-                  }
-                  cells.push(
+            {roles.map((r) => (
+              <tr key={r.id}>
+                <td>{r.nom}</td>
+                {modules.map((m) => {
+                  const current = permissions.find(
+                    (p) => p.role_id === r.id && p.module === m
+                  );
+                  return (
                     <td key={m}>
                       <input
                         type="checkbox"
@@ -85,16 +68,9 @@ export default function ParamAccess() {
                       />
                     </td>
                   );
-                }
-                rows.push(
-                  <tr key={r.id}>
-                    <td>{r.nom}</td>
-                    {cells}
-                  </tr>
-                );
-              }
-              return rows;
-            })()}
+                })}
+              </tr>
+            ))}
           </tbody>
         </table>
       </TableContainer>

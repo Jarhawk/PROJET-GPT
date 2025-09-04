@@ -6,15 +6,13 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
 export default function SimulationDetailsModal({ open, onClose, result }) {
-  const produits = Array.isArray(result?.produits) ? result.produits : [];
-
   const exportExcel = () => {
-    if (produits.length === 0) return;
+    if (!result) return;
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(
       wb,
-      XLSX.utils.json_to_sheet(produits),
-      "Besoins",
+      XLSX.utils.json_to_sheet(result.produits || []),
+      "Besoins"
     );
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     saveAs(new Blob([buf]), "besoins_previsionnels.xlsx");
@@ -33,20 +31,13 @@ export default function SimulationDetailsModal({ open, onClose, result }) {
             </tr>
           </thead>
           <tbody>
-            {(() => {
-              const rows = [];
-              for (let i = 0; i < produits.length; i++) {
-                const p = produits[i];
-                rows.push(
-                  <tr key={i}>
-                    <td className="px-2">{p.produit_nom || p.produit_id}</td>
-                    <td className="px-2">{p.quantite}</td>
-                    <td className="px-2">{p.valeur}</td>
-                  </tr>,
-                );
-              }
-              return rows;
-            })()}
+            {(result?.produits || []).map((p, idx) => (
+              <tr key={idx}>
+                <td className="px-2">{p.produit_nom || p.produit_id}</td>
+                <td className="px-2">{p.quantite}</td>
+                <td className="px-2">{p.valeur}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </TableContainer>

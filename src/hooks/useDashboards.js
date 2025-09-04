@@ -15,27 +15,18 @@ export function useDashboards() {
     setError(null);
     const { data, error } = await supabase
       .from("tableaux_de_bord")
-      .select("id, nom, created_at, utilisateur_id, mama_id, widgets:gadgets!tableau_id(id, tableau_id, type, config, created_at, mama_id, actif, nom, ordre, configuration_json)")
+      .select("*, gadgets:gadgets!tableau_id(*)")
       .eq("utilisateur_id", user_id)
       .eq("mama_id", mama_id)
-      .eq("gadgets.mama_id", mama_id)
       .order("created_at", { ascending: true });
     setLoading(false);
     if (error) {
-      console.warn('[gadgets] vue manquante ou colonne absente:', error?.message || error);
       setError(error.message || error);
       setDashboards([]);
       return [];
     }
-    const rows = [];
-    if (Array.isArray(data)) {
-      for (const d of data) {
-        const widgets = Array.isArray(d.widgets) ? d.widgets : [];
-        rows.push({ ...d, widgets });
-      }
-    }
-    setDashboards(rows);
-    return rows;
+    setDashboards(Array.isArray(data) ? data : []);
+    return data || [];
   }, [user_id, mama_id]);
 
   async function createDashboard(nom) {
@@ -45,11 +36,10 @@ export function useDashboards() {
     const { data, error } = await supabase
       .from("tableaux_de_bord")
       .insert([{ nom, utilisateur_id: user_id, mama_id }])
-      .select("id, nom, created_at, utilisateur_id, mama_id")
+      .select()
       .single();
     setLoading(false);
     if (error) {
-      console.warn('[gadgets] vue manquante ou colonne absente:', error?.message || error);
       setError(error.message || error);
       return null;
     }
@@ -65,7 +55,6 @@ export function useDashboards() {
       .from("gadgets")
       .select("ordre")
       .eq("tableau_id", dashboardId)
-      .eq("mama_id", mama_id)
       .order("ordre", { ascending: false })
       .limit(1)
       .single();
@@ -73,27 +62,20 @@ export function useDashboards() {
     const { data, error } = await supabase
       .from("gadgets")
       .insert([{ tableau_id: dashboardId, config, ordre, mama_id }])
-      .select("id, tableau_id, type, config, created_at, mama_id, actif, nom, ordre, configuration_json")
+      .select()
       .single();
     setLoading(false);
     if (error) {
-      console.warn('[gadgets] vue manquante ou colonne absente:', error?.message || error);
       setError(error.message || error);
       return null;
     }
-    setDashboards((ds) => {
-      const list = Array.isArray(ds) ? ds : [];
-      const next = [];
-      for (const db of list) {
-        if (db.id === dashboardId) {
-          const widgets = Array.isArray(db.widgets) ? [...db.widgets, data] : [data];
-          next.push({ ...db, widgets });
-        } else {
-          next.push(db);
-        }
-      }
-      return next;
-    });
+    setDashboards((ds) =>
+      ds.map((db) =>
+        db.id === dashboardId
+          ? { ...db, widgets: [...(db.widgets || []), data] }
+          : db
+      )
+    );
     return data;
   }
 
@@ -107,31 +89,19 @@ export function useDashboards() {
       .eq("id", id)
       .eq("tableau_id", dashboardId)
       .eq("mama_id", mama_id)
-      .select("id, tableau_id, type, config, created_at, mama_id, actif, nom, ordre, configuration_json")
+      .select()
       .single();
     setLoading(false);
     if (error) {
-      console.warn('[gadgets] vue manquante ou colonne absente:', error?.message || error);
       setError(error.message || error);
       return null;
     }
-    setDashboards((ds) => {
-      const list = Array.isArray(ds) ? ds : [];
-      const next = [];
-      for (const db of list) {
-        if (db.id === dashboardId) {
-          const widgetsList = Array.isArray(db.widgets) ? db.widgets : [];
-          const updated = [];
-          for (const w of widgetsList) {
-            updated.push(w.id === id ? data : w);
-          }
-          next.push({ ...db, widgets: updated });
-        } else {
-          next.push(db);
-        }
-      }
-      return next;
-    });
+    setDashboards((ds) =>
+      ds.map((db) => ({
+        ...db,
+        widgets: db.widgets?.map((w) => (w.id === id ? data : w)) || [],
+      }))
+    );
     return data;
   }
 
@@ -147,27 +117,15 @@ export function useDashboards() {
       .eq("mama_id", mama_id);
     setLoading(false);
     if (error) {
-      console.warn('[gadgets] vue manquante ou colonne absente:', error?.message || error);
       setError(error.message || error);
       return;
     }
-    setDashboards((ds) => {
-      const list = Array.isArray(ds) ? ds : [];
-      const next = [];
-      for (const db of list) {
-        if (db.id === dashboardId) {
-          const widgetsList = Array.isArray(db.widgets) ? db.widgets : [];
-          const remaining = [];
-          for (const w of widgetsList) {
-            if (w.id !== id) remaining.push(w);
-          }
-          next.push({ ...db, widgets: remaining });
-        } else {
-          next.push(db);
-        }
-      }
-      return next;
-    });
+    setDashboards((ds) =>
+      ds.map((db) => ({
+        ...db,
+        widgets: db.widgets?.filter((w) => w.id !== id) || [],
+      }))
+    );
   }
 
   return {

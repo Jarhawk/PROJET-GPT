@@ -45,10 +45,7 @@ export default function ModalImportProduits({ open, onClose, onSuccess }) {
     if (fileRef.current) fileRef.current.value = "";
   }
 
-  let validCount = 0;
-  for (const r of rows) {
-    if (r.status === "ok") validCount++;
-  }
+  const validCount = rows.filter((r) => r.status === "ok").length;
   const invalidCount = rows.length - validCount;
 
   function formatRowErrors(row) {
@@ -68,20 +65,17 @@ export default function ModalImportProduits({ open, onClose, onSuccess }) {
   }
 
   useEffect(() => {
-    const msgs = [];
-    for (let idx = 0; idx < rows.length; idx++) {
-      const r = rows[idx];
-      if (r.status === "error") {
-        msgs.push(`Ligne ${idx + 1} : ${formatRowErrors(r)}`);
-      }
-    }
+    const msgs = rows
+      .map((r, idx) =>
+        r.status === "error" ? `Ligne ${idx + 1} : ${formatRowErrors(r)}` : null
+      )
+      .filter(Boolean);
     setIgnoredMessages(msgs);
   }, [rows]);
 
   async function handleImport() {
     const produits_valides = [];
-    for (let idx = 0; idx < rows.length; idx++) {
-      const row = rows[idx];
+    rows.forEach((row, idx) => {
       if (row.status === "ok") {
         produits_valides.push({
           nom: row.nom,
@@ -99,7 +93,7 @@ export default function ModalImportProduits({ open, onClose, onSuccess }) {
         const reason = formatRowErrors(row) || "données invalides";
         console.warn("Produit ignoré", idx + 1, reason);
       }
-    }
+    });
     if (!produits_valides.length) return;
     setImporting(true);
     const { error } = await supabase
@@ -118,12 +112,7 @@ export default function ModalImportProduits({ open, onClose, onSuccess }) {
   }
 
   function handleUpdate(newRows) {
-    const arr = Array.isArray(newRows) ? newRows : [];
-    const updated = [];
-    for (const r of arr) {
-      updated.push(maps ? validateProduitRow(r, maps) : r);
-    }
-    setRows(updated);
+    setRows(newRows.map((r) => (maps ? validateProduitRow(r, maps) : r)));
   }
 
   return (
@@ -166,18 +155,11 @@ export default function ModalImportProduits({ open, onClose, onSuccess }) {
                   reference={reference}
                 />
               </div>
-              {(() => {
-                const elems = [];
-                for (let i = 0; i < ignoredMessages.length; i++) {
-                  const msg = ignoredMessages[i];
-                  elems.push(
-                    <p key={i} className="text-xs text-red-600">
-                      {msg}
-                    </p>,
-                  );
-                }
-                return elems;
-              })()}
+              {ignoredMessages.map((msg, i) => (
+                <p key={i} className="text-xs text-red-600">
+                  {msg}
+                </p>
+              ))}
               <Button
                 disabled={validCount === 0 || importing}
                 onClick={handleImport}

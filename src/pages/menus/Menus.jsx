@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useMenus } from '@/hooks/useMenus';
 import { useFiches } from '@/hooks/useFiches';
 import { useAuth } from '@/hooks/useAuth';
-import { Navigate } from 'react-router-dom';
 import MenuForm from './MenuForm.jsx';
 import MenuDetail from './MenuDetail.jsx';
 import { Button } from '@/components/ui/button';
@@ -20,7 +19,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 export default function Menus() {
   const { menus, total, getMenus, deleteMenu, loading } = useMenus();
   const { fiches, fetchFiches } = useFiches();
-  const { mama_id, loading: authLoading, access_rights } = useAuth();
+  const { mama_id, loading: authLoading } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected] = useState(null);
@@ -79,33 +78,20 @@ export default function Menus() {
   ]);
 
   const pageCount = Math.ceil(total / perPage);
-  const paginatedMenus = Array.isArray(menus) ? menus : [];
-  const ficheList = Array.isArray(fiches) ? fiches : [];
+  const paginatedMenus = menus;
 
   if (authLoading || loading) {
     return <LoadingSpinner message="Chargement..." />;
   }
 
-  if (!access_rights?.menus?.peut_voir) {
-    return <Navigate to="/unauthorized" replace />;
-  }
-
   const exportExcel = () => {
     const wb = XLSX.utils.book_new();
-    const list = Array.isArray(menus) ? menus : [];
-    const rows = [];
-    for (let i = 0; i < list.length; i += 1) {
-      const m = list[i];
-      const names = [];
-      if (Array.isArray(m.fiches)) {
-        for (let j = 0; j < m.fiches.length; j += 1) {
-          const f = m.fiches[j];
-          if (f?.fiche?.nom) names.push(f.fiche.nom);
-        }
-      }
-      rows.push({ ...m, fiches: names.join(', ') });
-    }
-    const ws = XLSX.utils.json_to_sheet(rows);
+    const ws = XLSX.utils.json_to_sheet(
+      menus.map((m) => ({
+        ...m,
+        fiches: m.fiches?.map((f) => f.fiche?.nom).join(', '),
+      }))
+    );
     XLSX.utils.book_append_sheet(wb, ws, 'Menus');
     const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
     saveAs(new Blob([buf]), 'menus.xlsx');
@@ -176,87 +162,72 @@ export default function Menus() {
             </tr>
           </thead>
           <tbody>
-            {(() => {
-              const rows = [];
-              for (let i = 0; i < paginatedMenus.length; i += 1) {
-                const menu = paginatedMenus[i];
-                const ficheArray = Array.isArray(menu.fiches) ? menu.fiches : [];
-                let totalFiche = 0;
-                for (let j = 0; j < ficheArray.length; j += 1) {
-                  const f = ficheArray[j];
-                  let fiche = null;
-                  for (let k = 0; k < ficheList.length; k += 1) {
-                    const fi = ficheList[k];
-                    if (fi.id === f.fiche_id || fi.id === f.fiche?.id) {
-                      fiche = fi;
-                      break;
-                    }
-                  }
-                  totalFiche += Number(fiche?.cout_total) || 0;
-                }
-                rows.push(
-                  <tr key={menu.id}>
-                    <td className="border px-4 py-2">{menu.date}</td>
-                    <td className="border px-4 py-2">
-                      <Button
-                        variant="link"
-                        className="font-semibold text-mamastockGold"
-                        onClick={() => {
-                          setSelected(menu);
-                          setShowDetail(true);
-                        }}
-                      >
-                        {menu.nom}
-                      </Button>
-                    </td>
-                    <td className="border px-4 py-2 text-right">{ficheArray.length}</td>
-                    <td className="border px-4 py-2 text-right">
-                      {totalFiche.toFixed(2)} €
-                    </td>
-                    <td className="border px-4 py-2 text-center">
-                      {menu.actif ? '✔' : '✖'}
-                    </td>
-                    <td className="border px-4 py-2">
-                      {access_rights?.menus?.peut_modifier && (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="mr-2"
-                            onClick={() => {
-                              setSelected(menu);
-                              setShowForm(true);
-                            }}
-                          >
-                            Modifier
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="mr-2"
-                            onClick={() => {
-                              setSelected({ ...menu, date: '' });
-                              setShowForm(true);
-                            }}
-                          >
-                            Dupliquer
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="mr-2"
-                            onClick={() => handleDelete(menu)}
-                          >
-                            Supprimer
-                          </Button>
-                        </>
-                      )}
-                    </td>
-                  </tr>
-                );
-              }
-              return rows;
-            })()}
+            {paginatedMenus.map((menu) => (
+              <tr key={menu.id}>
+                <td className="border px-4 py-2">{menu.date}</td>
+                <td className="border px-4 py-2">
+                  <Button
+                    variant="link"
+                    className="font-semibold text-mamastockGold"
+                    onClick={() => {
+                      setSelected(menu);
+                      setShowDetail(true);
+                    }}
+                  >
+                    {menu.nom}
+                  </Button>
+                </td>
+                <td className="border px-4 py-2 text-right">
+                  {menu.fiches?.length || 0}
+                </td>
+                <td className="border px-4 py-2 text-right">
+                  {(menu.fiches || [])
+                    .reduce((sum, f) => {
+                      const fiche = fiches.find(
+                        (fi) => fi.id === f.fiche_id || fi.id === f.fiche?.id
+                      );
+                      return sum + (Number(fiche?.cout_total) || 0);
+                    }, 0)
+                    .toFixed(2)}{' '}
+                  €
+                </td>
+                <td className="border px-4 py-2 text-center">
+                  {menu.actif ? '✔' : '✖'}
+                </td>
+                <td className="border px-4 py-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="mr-2"
+                    onClick={() => {
+                      setSelected(menu);
+                      setShowForm(true);
+                    }}
+                  >
+                    Modifier
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="mr-2"
+                    onClick={() => {
+                      setSelected({ ...menu, date: '' });
+                      setShowForm(true);
+                    }}
+                  >
+                    Dupliquer
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="mr-2"
+                    onClick={() => handleDelete(menu)}
+                  >
+                    Supprimer
+                  </Button>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </Motion.table>
       </ListingContainer>

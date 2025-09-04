@@ -28,10 +28,8 @@ export default function useEvolutionAchats() {
 
         if (error) throw error;
 
-        const rows = Array.isArray(data) ? data : [];
-        setData(rows);
+        setData(data || []);
       } catch (e) {
-        console.warn('[gadgets] vue manquante ou colonne absente:', e?.message || e);
         setError(e);
         setData([]);
       } finally {

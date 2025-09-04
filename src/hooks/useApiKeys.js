@@ -15,19 +15,18 @@ export function useApiKeys() {
     setError(null);
     const { data, error } = await supabase
       .from('api_keys')
-      .select('id, mama_id, user_id, name, scopes, role, expiration, revoked, created_at')
+      .select('*')
       .eq('mama_id', mama_id)
       .order('created_at', { ascending: false });
-    const rows = Array.isArray(data) ? data : [];
     if (error) {
       setError(error.message || error);
       setKeys([]);
       setLoading(false);
-      return rows;
+      return [];
     }
-    setKeys(rows);
+    setKeys(data || []);
     setLoading(false);
-    return rows;
+    return data || [];
   }, [mama_id]);
 
   const createKey = useCallback(async ({ name, scopes, role, expiration }) => {
@@ -37,20 +36,14 @@ export function useApiKeys() {
     const { data, error } = await supabase
       .from('api_keys')
       .insert([{ name, scopes, role, expiration, mama_id, user_id }])
-      .select('id, mama_id, user_id, name, scopes, role, expiration, revoked, created_at')
+      .select()
       .single();
     if (error) {
       setError(error.message || error);
       setLoading(false);
       return { error };
     }
-    if (data)
-      setKeys((k) => {
-        const arr = Array.isArray(k) ? k : [];
-        const next = [data];
-        for (const key of arr) next.push(key);
-        return next;
-      });
+    if (data) setKeys(k => [data, ...k]);
     setLoading(false);
     return { data };
   }, [mama_id, user_id]);
@@ -69,14 +62,7 @@ export function useApiKeys() {
       setLoading(false);
       return { error };
     }
-    setKeys((k) => {
-      const arr = Array.isArray(k) ? k : [];
-      const next = [];
-      for (const key of arr) {
-        next.push(key.id === id ? { ...key, revoked: true } : key);
-      }
-      return next;
-    });
+    setKeys(k => k.map(key => key.id === id ? { ...key, revoked: true } : key));
     setLoading(false);
     return { error: null };
   }, [mama_id]);

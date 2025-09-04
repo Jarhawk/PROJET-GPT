@@ -13,6 +13,7 @@ export default function CentreCoutForm({ centre, onClose, onSaved }) {
   const [values, setValues] = useState({
     nom: centre?.nom || "",
     activite: centre?.activite || "",
+    type: centre?.type || "",
     actif: centre?.actif ?? true,
   });
   const [saving, setSaving] = useState(false);
@@ -29,19 +30,18 @@ export default function CentreCoutForm({ centre, onClose, onSaved }) {
     try {
       setSaving(true);
       let res;
-      const payload = { nom: values.nom, activite: values.activite, actif: values.actif };
       if (centre?.id) {
         res = await supabase
           .from("centres_de_cout")
-          .update(payload)
+          .update(values)
           .eq("id", centre.id)
-          .select('id, nom, activite, actif, mama_id, created_at, updated_at')
+          .select()
           .single();
       } else {
         res = await supabase
           .from("centres_de_cout")
-          .insert([{ ...payload, mama_id }])
-          .select('id, nom, activite, actif, mama_id, created_at, updated_at')
+          .insert([{ ...values, mama_id }])
+          .select()
           .single();
       }
       if (res.error) throw res.error;
@@ -75,6 +75,15 @@ export default function CentreCoutForm({ centre, onClose, onSaved }) {
           className="w-full"
           name="activite"
           value={values.activite}
+          onChange={handleChange}
+        />
+      </div>
+      <div>
+        <label>Type</label>
+        <Input
+          className="w-full"
+          name="type"
+          value={values.type}
           onChange={handleChange}
         />
       </div>

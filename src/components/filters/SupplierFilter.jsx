@@ -7,7 +7,6 @@ export default function SupplierFilter({ value, onChange, placeholder = 'Recherc
   const inputRef = useRef(null);
 
   const { options: results = [], loading } = useFournisseursAutocomplete({ term: query });
-  const list = Array.isArray(results) ? results : [];
 
   useEffect(() => {
     if (!value) setQuery('');
@@ -46,27 +45,17 @@ export default function SupplierFilter({ value, onChange, placeholder = 'Recherc
       {open && !value && (query.trim().length > 0 || loading) && (
         <div className="absolute z-20 mt-1 w-full rounded-md border border-slate-600 bg-slate-800 shadow-lg max-h-56 overflow-auto">
           {loading && <div className="px-3 py-2 text-sm opacity-70">Recherche…</div>}
-          {!loading && (Array.isArray(list) && list.length ? (
-            (() => {
-              const rows = [];
-              for (const r of list) {
-                rows.push(
-                  <button
-                    key={r.id}
-                    type="button"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => handleSelect({ id: r.id, nom: r.nom })}
-                    className="w-full text-left px-3 py-2 hover:bg-slate-700"
-                  >
-                    {r.nom}
-                  </button>
-                );
-              }
-              return rows;
-            })()
-          ) : (
-            <div className="px-3 py-2 text-sm opacity-70">Aucun résultat</div>
-          ))}
+          {!loading && (results?.length ? results.map(r => (
+            <button
+              key={r.id}
+              type="button"
+              onMouseDown={(e)=>e.preventDefault()}
+              onClick={() => handleSelect({ id: r.id, nom: r.nom })}
+              className="w-full text-left px-3 py-2 hover:bg-slate-700"
+            >
+              {r.nom}
+            </button>
+          )) : <div className="px-3 py-2 text-sm opacity-70">Aucun résultat</div>)}
         </div>
       )}
     </div>

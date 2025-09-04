@@ -28,18 +28,10 @@ export function useFamillesWithSousFamilles() {
       setError(famRes.error || sousRes.error);
       setFamilles([]);
     } else {
-      const famList = Array.isArray(famRes.data) ? famRes.data : [];
-      const sousList = Array.isArray(sousRes.data) ? sousRes.data : [];
-      const grouped = [];
-      for (const f of famList) {
-        const sfList = [];
-        for (const sf of sousList) {
-          if (sf.famille_id === f.id) {
-            sfList.push(sf);
-          }
-        }
-        grouped.push({ ...f, sous_familles: sfList });
-      }
+      const grouped = (famRes.data || []).map((f) => ({
+        ...f,
+        sous_familles: (sousRes.data || []).filter((sf) => sf.famille_id === f.id),
+      }));
       setFamilles(grouped);
     }
     setLoading(false);
@@ -49,8 +41,7 @@ export function useFamillesWithSousFamilles() {
     if (!mama_id) return { error: 'Aucun mama_id' };
     const { error } = await supabase
       .from('familles')
-      .insert([{ ...values, mama_id }])
-      .eq('mama_id', mama_id);
+      .insert([{ ...values, mama_id }]);
     if (!error) await fetchAll();
     return { error };
   }
@@ -80,8 +71,7 @@ export function useFamillesWithSousFamilles() {
     if (!mama_id) return { error: 'Aucun mama_id' };
     const { error } = await supabase
       .from('sous_familles')
-      .insert([{ ...values, famille_id, mama_id }])
-      .eq('mama_id', mama_id);
+      .insert([{ ...values, famille_id, mama_id }]);
     if (!error) await fetchAll();
     return { error };
   }

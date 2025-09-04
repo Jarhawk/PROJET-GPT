@@ -1,7 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 /* eslint-env node */
 import { mkdirSync, writeFileSync } from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import { gzipSync } from 'zlib';
 import {
@@ -15,7 +14,6 @@ import {
   parsePrettyFlag,
   parseConcurrencyFlag,
   ensureDirForFile,
-  formatShownPath,
   shouldShowHelp,
   shouldShowVersion,
   getPackageVersion,
@@ -49,7 +47,6 @@ export async function backupDb(
     return Number.isFinite(val) && val > 0 ? val : Infinity;
   })()
 ) {
-  const origOutput = output;
   const { createClient } = await import('@supabase/supabase-js');
   const supabase = createClient(
     supabaseUrl ?? process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL ?? 'https://example.supabase.co',
@@ -69,7 +66,7 @@ export async function backupDb(
         'factures',
         'facture_lignes',
         'inventaires',
-        'inventaire_lignes',
+        'produits_inventaire',
         'fournisseur_produits',
         'taches',
         'tache_instances',
@@ -95,12 +92,13 @@ export async function backupDb(
   const defName = gzip ? `backup_${stamp}.json.gz` : `backup_${stamp}.json`;
   let file;
   if (output) {
-    file = output;
+    file = path.resolve(output);
     ensureDirForFile(file);
   } else {
-    const dir = path.resolve(process.env.BACKUP_DIR || os.tmpdir());
+    let dir = process.env.BACKUP_DIR ?? '/tmp';
+    dir = path.isAbsolute(dir) ? dir : path.resolve(dir);
     mkdirSync(dir, { recursive: true });
-    file = path.join(dir, defName);
+    file = path.resolve(dir, defName);
   }
   const data = JSON.stringify(result, null, pretty ? 2 : 0);
   if (gzip) {
@@ -108,7 +106,7 @@ export async function backupDb(
   } else {
     writeFileSync(file, data);
   }
-  const shown = formatShownPath(origOutput ?? file);
+  const shown = file.replace(/\\/g, '/').replace(/^[A-Za-z]:/, '');
   console.log(`Backup saved to ${shown}`);
   return shown;
 }

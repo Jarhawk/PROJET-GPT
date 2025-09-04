@@ -13,6 +13,7 @@ export default function MamaForm({ mama, onClose, onSaved }) {
   const { mama_id: myMama, role, loading: authLoading } = useAuth();
   const [values, setValues] = useState({
     nom: mama?.nom || "",
+    ville: mama?.ville || "",
     actif: mama?.actif ?? true,
   });
   const [saving, setSaving] = useState(false);
@@ -56,16 +57,14 @@ export default function MamaForm({ mama, onClose, onSaved }) {
           .update(values)
           .eq("id", mama.id);
         if (role !== "superadmin") query = query.eq("id", myMama);
-        const res = await query
-          .select('id, nom, actif')
-          .single();
+        const res = await query.select().single();
         error = res.error;
         saved = res.data;
       } else {
         const res = await supabase
           .from("mamas")
           .insert([{ ...values }])
-          .select('id, nom, actif')
+          .select()
           .single();
         error = res.error;
         saved = res.data;
@@ -96,6 +95,15 @@ export default function MamaForm({ mama, onClose, onSaved }) {
           onChange={handleChange}
           required
           autoFocus
+        />
+      </div>
+      <div>
+        <label>Ville</label>
+        <Input
+          className="w-full"
+          name="ville"
+          value={values.ville}
+          onChange={handleChange}
         />
       </div>
       <div>

@@ -10,7 +10,6 @@ import { useHelp } from '@/context/HelpProvider';
 
 export default function DocumentationPanel({ open, onOpenChange }) {
   const { docs, fetchDocs } = useHelp();
-  const safeDocs = Array.isArray(docs) ? docs : [];
   const [search, setSearch] = useState('');
 
   useEffect(() => {
@@ -31,18 +30,12 @@ export default function DocumentationPanel({ open, onOpenChange }) {
           onChange={(e) => setSearch(e.target.value)}
         />
         <ul className="space-y-4">
-          {(function () {
-            const items = [];
-            for (const d of safeDocs) {
-              items.push(
-                <li key={d.id} className="text-sm">
-                  <h4 className="font-semibold mb-1">{d.titre}</h4>
-                  <div dangerouslySetInnerHTML={{ __html: d.contenu }} />
-                </li>
-              );
-            }
-            return items;
-          })()}
+          {docs.map((d) => (
+            <li key={d.id} className="text-sm">
+              <h4 className="font-semibold mb-1">{d.titre}</h4>
+              <div dangerouslySetInnerHTML={{ __html: d.contenu }} />
+            </li>
+          ))}
         </ul>
       </DialogContent>
     </Dialog>

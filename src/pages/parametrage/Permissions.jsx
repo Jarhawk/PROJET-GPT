@@ -29,13 +29,10 @@ export default function Permissions() {
     setLoading(true);
     const { data, error } = await supabase
       .from('roles')
-      .select('id, nom, description, actif, mama_id')
+      .select('*')
       .eq('mama_id', mama_id)
       .order('nom', { ascending: true });
-    if (!error) {
-      const rows = Array.isArray(data) ? data : [];
-      setRoles(rows);
-    }
+    if (!error) setRoles(data || []);
     setLoading(false);
   };
 
@@ -44,8 +41,6 @@ export default function Permissions() {
     fetchRoles();
     setEditRole(null);
   };
-
-  const list = Array.isArray(roles) ? roles : [];
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
@@ -68,48 +63,40 @@ export default function Permissions() {
               </tr>
             </thead>
             <tbody>
-              {(() => {
-                const rows = [];
-                for (const role of list) {
-                  rows.push(
-                    <tr key={role.id}>
-                      <td className="px-2 py-1">{role.nom}</td>
-                      <td className="px-2 py-1">{role.description || ''}</td>
-                      <td className="px-2 py-1">
-                        <span
-                          className={
-                            role.actif
-                              ? 'inline-block bg-green-100 text-green-800 px-2 rounded-full'
-                              : 'inline-block bg-red-100 text-red-800 px-2 rounded-full'
-                          }
-                        >
-                          {role.actif ? 'Oui' : 'Non'}
-                        </span>
-                      </td>
-                      <td className="px-2 py-1">
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => setEditRole(role)}
-                          disabled={loading}
-                        >
-                          Modifier permissions
-                        </Button>
-                      </td>
-                    </tr>
-                  );
-                }
-                if (rows.length === 0) {
-                  rows.push(
-                    <tr key="empty">
-                      <td colSpan={4} className="py-4 text-gray-400">
-                        Aucun rôle trouvé.
-                      </td>
-                    </tr>
-                  );
-                }
-                return rows;
-              })()}
+              {roles.map((role) => (
+                <tr key={role.id}>
+                  <td className="px-2 py-1">{role.nom}</td>
+                  <td className="px-2 py-1">{role.description || ''}</td>
+                  <td className="px-2 py-1">
+                    <span
+                      className={
+                        role.actif
+                          ? 'inline-block bg-green-100 text-green-800 px-2 rounded-full'
+                          : 'inline-block bg-red-100 text-red-800 px-2 rounded-full'
+                      }
+                    >
+                      {role.actif ? 'Oui' : 'Non'}
+                    </span>
+                  </td>
+                  <td className="px-2 py-1">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => setEditRole(role)}
+                      disabled={loading}
+                    >
+                      Modifier permissions
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+              {roles.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="py-4 text-gray-400">
+                    Aucun rôle trouvé.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         )}

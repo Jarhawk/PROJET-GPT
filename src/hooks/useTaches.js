@@ -11,17 +11,16 @@ export function useTaches() {
     async (filtres = {}) => {
       if (!mama_id) return [];
       let q = supabase
-        .from('taches')
-        .select('id, titre, description, assignes, date_echeance, statut, utilisateur_id, mama_id')
+        .from('v_taches_assignees')
+        .select('*')
         .eq('mama_id', mama_id);
       if (filtres.statut) q = q.eq('statut', filtres.statut);
-      if (filtres.utilisateur) q = q.contains('assignes', [filtres.utilisateur]);
+      if (filtres.utilisateur) q = q.eq('utilisateur_id', filtres.utilisateur);
       if (filtres.start) q = q.gte('date_echeance', filtres.start);
       if (filtres.end) q = q.lte('date_echeance', filtres.end);
       const { data } = await q;
-      const rows = Array.isArray(data) ? data : [];
-      setTaches(rows);
-      return rows;
+      setTaches(data || []);
+      return data || [];
     },
     [mama_id]
   );
@@ -32,9 +31,13 @@ export function useTaches() {
       const { assignes = [], ...tache } = values;
       const { data } = await supabase
         .from('taches')
-        .insert([{ ...tache, assignes, mama_id }])
-        .select('id, titre, description, assignes, date_echeance, statut, utilisateur_id, mama_id')
+        .insert([{ ...tache, mama_id }])
+        .select()
         .single();
+      if (assignes.length) {
+        const rows = assignes.map(uid => ({ tache_id: data.id, utilisateur_id: uid }));
+        await supabase.from('utilisateurs_taches').insert(rows);
+      }
       return data;
     },
     [mama_id]
@@ -42,6 +45,11 @@ export function useTaches() {
 
   const deleteTache = useCallback(
     async id => {
+      await supabase
+        .from('utilisateurs_taches')
+        .delete()
+        .eq('tache_id', id)
+        .eq('mama_id', mama_id);
       await supabase
         .from('taches')
         .update({ actif: false })

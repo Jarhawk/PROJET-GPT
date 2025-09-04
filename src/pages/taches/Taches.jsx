@@ -96,18 +96,11 @@ export default function Taches() {
           className="form-input"
         >
           <option value="">-- Assigné --</option>
-          {(() => {
-            const opts = [];
-            const list = Array.isArray(users) ? users : [];
-            for (const u of list) {
-              opts.push(
-                <option key={u.id} value={u.id}>
-                  {u.nom}
-                </option>
-              );
-            }
-            return opts;
-          })()}
+          {users.map(u => (
+            <option key={u.id} value={u.id}>
+              {u.nom}
+            </option>
+          ))}
         </select>
         <input
           type="date"
@@ -141,33 +134,25 @@ export default function Taches() {
               </tr>
             </thead>
             <tbody>
-              {(() => {
-                const rows = [];
-                const list = Array.isArray(taches) ? taches : [];
-                for (const t of list) {
-                  const noms = [];
-                  if (Array.isArray(t.utilisateurs_taches)) {
-                    for (const a of t.utilisateurs_taches) {
-                      if (a.utilisateur?.nom) noms.push(a.utilisateur.nom);
-                    }
-                  }
-                  rows.push(
-                    <tr key={t.id} className="border-t">
-                      <td className="px-2 py-1">{t.statut}</td>
-                      <td className="px-2 py-1">
-                        <Link to={`/taches/${t.id}`} className="underline">
-                          {t.titre}
-                        </Link>
-                      </td>
-                      <td className="px-2 py-1">{t.priorite}</td>
-                      <td className="px-2 py-1">{t.date_echeance}</td>
-                      <td className="px-2 py-1">{noms.join(", ")}</td>
-                    </tr>
-                  );
-                }
-                return rows;
-              })()}
-              {(!Array.isArray(taches) || taches.length === 0) && !loading && (
+              {taches.map(t => (
+                <tr key={t.id} className="border-t">
+                  <td className="px-2 py-1">{t.statut}</td>
+                  <td className="px-2 py-1">
+                    <Link to={`/taches/${t.id}`} className="underline">
+                      {t.titre}
+                    </Link>
+                  </td>
+                  <td className="px-2 py-1">{t.priorite}</td>
+                  <td className="px-2 py-1">{t.date_echeance}</td>
+                  <td className="px-2 py-1">
+                    {(t.utilisateurs_taches || [])
+                      .map(a => a.utilisateur?.nom)
+                      .filter(Boolean)
+                      .join(", ")}
+                  </td>
+                </tr>
+              ))}
+              {taches.length === 0 && !loading && (
                 <tr>
                   <td colSpan="5" className="py-4 text-center text-gray-500">
                     Aucune tâche

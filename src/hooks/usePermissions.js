@@ -17,8 +17,7 @@ export function usePermissions() {
     if (!mama_id && role !== "superadmin") return [];
     setLoading(true);
     setError(null);
-    const cols = 'id, mama_id, role_id, user_id, module, droit, created_at, updated_at, actif';
-    let query = supabase.from('permissions').select(cols);
+    let query = supabase.from("permissions").select("*");
     if (role !== "superadmin") query = query.eq("mama_id", mama_id);
     if (roleId) query = query.eq("role_id", roleId);
     if (userId) query = query.eq("user_id", userId);
@@ -75,18 +74,14 @@ export function usePermissions() {
 
   // 5. Export Excel
   function exportPermissionsToExcel() {
-    const list = Array.isArray(permissions) ? permissions : [];
-    const datas = [];
-    for (const p of list) {
-      datas.push({
-        id: p.id,
-        role_id: p.role_id,
-        user_id: p.user_id,
-        droit: p.droit,
-        actif: p.actif,
-        mama_id: p.mama_id,
-      });
-    }
+    const datas = (permissions || []).map(p => ({
+      id: p.id,
+      role_id: p.role_id,
+      user_id: p.user_id,
+      droit: p.droit,
+      actif: p.actif,
+      mama_id: p.mama_id,
+    }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Permissions");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });

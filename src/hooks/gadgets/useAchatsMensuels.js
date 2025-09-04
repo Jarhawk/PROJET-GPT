@@ -18,16 +18,14 @@ export default function useAchatsMensuels() {
       try {
         const { data, error } = await supabase
           .from('v_achats_mensuels')
-          .select('month:mois, purchases:montant_total')
+          .select('mois, montant')
           .eq('mama_id', mama_id)
           .order('mois', { ascending: true });
 
         if (error) throw error;
 
-        const rows = Array.isArray(data) ? data : [];
-        setData(rows);
+        setData(data || []);
       } catch (e) {
-        console.warn('[gadgets] vue manquante ou colonne absente:', e?.message || e);
         setError(e);
         setData([]);
       } finally {

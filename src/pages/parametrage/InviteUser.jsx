@@ -26,34 +26,27 @@ export default function InviteUser({ onClose, onInvited }) {
       if (role === "superadmin") {
         const { data: mData } = await supabase
           .from("mamas")
-          .select("id, nom")
+          .select("id, nom, ville")
           .order("nom");
-        setMamas(Array.isArray(mData) ? mData : []);
+        setMamas(mData || []);
       } else if (myMama) {
         const { data: mData } = await supabase
           .from("mamas")
-          .select("id, nom")
+          .select("id, nom, ville")
           .eq("id", myMama)
           .maybeSingle();
         setMamas(mData ? [mData] : []);
       }
 
-      const targetMama = role === "superadmin" ? values.mama_id : myMama;
-      if (!targetMama) {
-        setRoles([]);
-        return;
-      }
-      const { data: rData } = await supabase
-        .from("roles")
-        .select("id, nom, mama_id")
-        .eq("mama_id", targetMama)
-        .eq("actif", true)
-        .order("nom", { ascending: true });
-      setRoles(Array.isArray(rData) ? rData : []);
+      let query = supabase.from("roles").select("*");
+      if (role !== "superadmin") query = query.eq("mama_id", myMama);
+      query = query.eq("actif", true);
+      const { data: rData } = await query.order("nom", { ascending: true });
+      setRoles(rData || []);
     }
 
     fetchData();
-  }, [role, user_id, myMama, values.mama_id]);
+  }, [role, user_id, myMama]);
 
   const handleChange = e =>
     setValues(v => ({ ...v, [e.target.name]: e.target.value }));
@@ -96,20 +89,11 @@ export default function InviteUser({ onClose, onInvited }) {
 
     if (!error) {
       // Appel Edge Function cloud Supabase
-      const mamaList = Array.isArray(mamas) ? mamas : [];
-      let mamaNom = "";
-      for (let i = 0; i < mamaList.length; i++) {
-        const m = mamaList[i];
-        if (m.id === values.mama_id) {
-          mamaNom = m.nom || "";
-          break;
-        }
-      }
       await fetch("https://jhpfdeolleprmvtchoxt.supabase.co/functions/v1/send-invite", {
         method: "POST",
         body: JSON.stringify({
           email: values.email,
-          mama_nom: mamaNom,
+          mama_nom: mamas.find(m => m.id === values.mama_id)?.nom || "",
         }),
         headers: { "Content-Type": "application/json" },
       });
@@ -147,19 +131,11 @@ export default function InviteUser({ onClose, onInvited }) {
           onChange={handleChange}
         >
           <option value="">Sélectionner…</option>
-          {(() => {
-            const list = Array.isArray(mamas) ? mamas : [];
-            const options = [];
-            for (let i = 0; i < list.length; i++) {
-              const m = list[i];
-              options.push(
-                <option key={m.id} value={m.id}>
-                  {m.nom}
-                </option>
-              );
-            }
-            return options;
-          })()}
+          {mamas.map(m => (
+            <option key={m.id} value={m.id}>
+              {m.nom} ({m.ville})
+            </option>
+          ))}
         </select>
       </div>
       <div>
@@ -172,19 +148,11 @@ export default function InviteUser({ onClose, onInvited }) {
           onChange={handleChange}
         >
           <option value="">Sélectionner…</option>
-          {(() => {
-            const list = Array.isArray(roles) ? roles : [];
-            const options = [];
-            for (let i = 0; i < list.length; i++) {
-              const r = list[i];
-              options.push(
-                <option key={r.nom} value={r.nom}>
-                  {r.nom}
-                </option>
-              );
-            }
-            return options;
-          })()}
+          {roles.map(r => (
+            <option key={r.nom} value={r.nom}>
+              {r.nom}
+            </option>
+          ))}
         </select>
       </div>
         <div className="flex gap-4 mt-4">

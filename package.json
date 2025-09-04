@@ -36,10 +36,7 @@
     "schema:analyze": "node scripts/analyzeFrontBackend.js",
     "sanitize:src": "node scripts/sanitize-source.js",
     "audit": "node scripts/audit-project.mjs",
-    "audit:fix": "node scripts/fix-project.mjs",
-    "sync:routes": "node scripts/generate_routes.mjs",
-    "test:nav": "vitest run test/sidebar.routes.test.jsx",
-    "qa": "node qa/runner.js"
+    "audit:fix": "node scripts/fix-project.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

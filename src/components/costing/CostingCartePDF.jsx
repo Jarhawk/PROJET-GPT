@@ -11,7 +11,6 @@ const styles = StyleSheet.create({
 })
 
 export default function CostingCartePDF({ data = [], kpis = {}, mamaName = '' }) {
-  const rows = Array.isArray(data) ? data : []
   const date = new Date().toLocaleDateString()
   return (
     <Document>
@@ -23,24 +22,17 @@ export default function CostingCartePDF({ data = [], kpis = {}, mamaName = '' })
           <Text>Fiches sous objectif: {kpis.under ?? 0}</Text>
         </View>
         <View>
-          {(() => {
-            const lignes = []
-            for (let idx = 0; idx < rows.length; idx++) {
-              const f = rows[idx]
-              lignes.push(
-                <View key={idx} style={styles.row}>
-                  <Text style={styles.cell}>{f.nom}</Text>
-                  <Text style={styles.cell}>{f.type}</Text>
-                  <Text style={styles.cell}>{f.cout_par_portion}</Text>
-                  <Text style={styles.cell}>{f.prix_vente}</Text>
-                  <Text style={styles.cell}>{f.marge_euro}</Text>
-                  <Text style={styles.cell}>{f.marge_pct}</Text>
-                  <Text style={styles.cell}>{f.food_cost_pct}</Text>
-                </View>
-              )
-            }
-            return lignes
-          })()}
+          {data.map((f, idx) => (
+            <View key={idx} style={styles.row}>
+              <Text style={styles.cell}>{f.nom}</Text>
+              <Text style={styles.cell}>{f.type}</Text>
+              <Text style={styles.cell}>{f.cout_par_portion}</Text>
+              <Text style={styles.cell}>{f.prix_vente}</Text>
+              <Text style={styles.cell}>{f.marge_euro}</Text>
+              <Text style={styles.cell}>{f.marge_pct}</Text>
+              <Text style={styles.cell}>{f.food_cost_pct}</Text>
+            </View>
+          ))}
         </View>
         <Text style={styles.footer}>
           {mamaName} - {date}

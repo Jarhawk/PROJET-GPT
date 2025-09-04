@@ -1,60 +1,5 @@
-// MamaStock Â© 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useSignalements } from "@/hooks/useSignalements";
-import { useAuth } from '@/hooks/useAuth';
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import GlassCard from "@/components/ui/GlassCard";
+@sWwİİ;…sa9±÷¿Ö×øúïM(8¶¤§×Ó¡áóûûÓ××w~OoçÇŸş~ş†Jª)lnnfÂËßß5¶ğicÇW_İm/??“{û»ŸÊN.''æş·ƒ‚b"'½MÏ*:üuwß__öòŞş]ŞäåïÿûÁÁëÎÚsZ^Z[ı=}=»ù8(Ë+¯¯.nüüìèúû>VßwVƒböõı¾¬ìmO[{kK›îêÚúëîŞÿ¿¿—Òòó[]Õ¥'%½ÿïííKKo1±WÉËßßÏÒ.îîóÒmïÿÓÓóûµ±›éÉÉSrÚÓ÷+*
+Ÿ__ûıííÓÑT~w×××çæşßÇÇË]YËÎòúæ'6V^~zzæ&3ú;<˜XW65uwv>¶äj{ÿ²²›m­Ë‘1iÑÁI}ş¶¡L\*y==ëttüññåæÿç§‹Ë³÷æ†;ÛÿÿßÛùızZˆ®­ÿÙÙŞÜÔ÷³¯îŞ^îé©«û¿9yqw?'g7·wWÖ[?¿ßëêØÀÄwÿ·EeekZÚRSZÒæõ¤¦ùÉ^ú{/¦f~ş|}ÛÙ¹;5!	È|o**_ß_jˆÈŞîî’rC„,x8·&dl?Ï^NÎ“³¿oKKNNÖÆ‡›;m=<ü¼¼~fÇÎ®»±•Çï÷ÿwvö{{_·um›_ocóó±±êê»»¼µõúZ[ßİµ'/¯·EôÔ×ß§%5ım-_İQ›ŸÛs3µ¼ù{ihè+#â¢ú~œŸ77ÿöòûÿıõóÀŒMë»ÿïéˆOM}|ŒÇ÷­+{oí9;kgg{ûİÙ»XPqêêÿÌÌüòğ¹Z[ŞŞşÂƒ=821yúº¼´ötpÿùÉMO¿½x;>ŞßûÓÀÌÎ›²²ûû=5wwÿıü¾BAE÷õ•—··7..jëéQEd&½äbìp±½÷¿Ío¿3Sùù¹¿ş*f@½•÷ZZÿ×Gg»:K‰¹ÿììøúû{nêcwsëö¶¿—UÔŞü|>¾³óª&3;»>ìŞÓó»¾şß×ÿóñ¹İ×ÔüİÔÊÃŞÖ×ÅÕûëêö’
++óÖV­oLÖ×÷W7²~--oÿëÉÁãáİéëÜ\41øêëmü¬¯½}?‘ÑŸW’’[¦ã£ÇÑÑŸºêàĞÖæçıÑÑÁÉÁÓÅááõÓÓ«o']ïOOÜÄ5tîî÷÷··ûûÿ÷³³»³âîëû~nnNŞ^Úzûûúúé­+##0øİÊJZ;¿µumû~~n¯?wûêàåës÷ñ¸8ñU¼ŒËÙ9®ªšÉÍ•ŸÓò.-M^‹«ûıßß…±·ÿîæd0’×õ•×öşÿÿ‹‹ë––Ïîşÿß¿+«íÍ‰³·ó¸œŞÖÔÜ<>®®ŒÜÛËÿÿûûûßË!!}?­8Úññµ¿ÿÿ|l/#3?ßßƒ#çemíşæ©)o6¶û‰‰ÿ«³¡¥ñùcc~|MÏÏÿ?=¼
 
-export default function Signalements() {
-  const { loading: authLoading } = useAuth();
-  const { data: signalements, loading, error } = useSignalements();
-
-  if (loading || authLoading) {
-    return (
-      <div className="p-6 text-center">
-        <LoadingSpinner message="Chargement des signalements..." />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-6 text-red-500 text-center">
-        âŒ Erreur lors du chargement : {error.message}
-      </div>
-    );
-  }
-
-  const list = Array.isArray(signalements) ? signalements : [];
-
-  if (list.length === 0) {
-    return (
-      <div className="p-6 text-gray-300 text-center">
-        ğŸ“­ Aucun signalement disponible.
-      </div>
-    );
-  }
-
-  return (
-    <div className="p-6 text-white">
-      <h1 className="text-3xl font-bold mb-4 text-mamastock-gold">Signalements</h1>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {(() => {
-          const cards = [];
-          for (let i = 0; i < list.length; i++) {
-            const sig = list[i];
-            cards.push(
-              <GlassCard key={sig.id} className="p-4">
-                <h2 className="text-lg font-semibold">{sig.titre}</h2>
-                <p className="text-sm text-gray-300">
-                  {sig.commentaire || "Sans commentaire"}
-                </p>
-              </GlassCard>
-            );
-          }
-          return cards;
-        })()}
-      </div>
-    </div>
-  );
-}
+?ÛÕÕÛ‘—)%"ŠŸ›Ë¯½¼|^[c£§©¨ú¯¯¿,,ıÿ[C§¼°õ}|]İ//_ïãÒÒ?ÿtt£¯Í…„Äk{ùóÃïâ‚ÿ|</êúsvuY–¬¥çãâºº¿÷óÖÎÿ¿.b"®ŞŞ^kcbx¤^^ÇçÿïÃGÓÓçÃCÒnfã£·÷ıĞÓßÇ$4°øşME¾AY=XÄéñw×··—UsâÂ×òÒÜÔ6_ŸŸÚûïãëëù™mi¸63ºö³¬HK1)¡ÑÈ&4<-+kc÷ÇÎÊ³±Loß˜9¹{qƒjüÙËãCWGï¾ººîîŞŠÊëû»OÏ—åí­)z¨¨»ÂÂW,Õğ°9o£±«ooæoo½=ëàğyŸ-m½»u=¿_{[Mì¿ÿñğŸV~û:S‡‹»“SYù‘±¿»ùíŒ¸³´äæöşõÑÑÒ²7gãùáó315Õ//ş¾¿¿~şÎÏß_;Zúòg+ª¾\TrÓRVåŒ†tQYÛñà NÇñÙßûëÏÕÕ×}ınŒ>WÕııï—×•ÖşÒÛ›¯§÷ÃX|y#¡ééd&‘pYA@ZëæÖÖXUÔğúò

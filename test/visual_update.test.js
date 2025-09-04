@@ -2,8 +2,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { beforeAll, afterEach, test, expect, vi } from 'vitest';
 import fs from 'fs';
-import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // reset log file before tests
 beforeAll(() => {
@@ -69,10 +67,7 @@ let useProducts;
 test('produits creation and disable refresh list', async () => {
   setup({ produits: [], v_produits_dernier_prix: [] });
   ({ useProducts } = await import('@/hooks/useProducts'));
-  const qc = new QueryClient();
-  const wrapper = ({ children }) =>
-    React.createElement(QueryClientProvider, { client: qc, children });
-  const { result } = renderHook(() => useProducts(), { wrapper });
+  const { result } = renderHook(() => useProducts());
 
   await act(async () => {
     await result.current.addProduct({ nom: 'P', famille: 'F', unite_id: 'u1' });
@@ -97,10 +92,7 @@ let useFournisseurs;
 test('fournisseurs update name refresh list', async () => {
   setup({ fournisseurs: [{ id: '1', nom: 'Old', actif: true }] });
   ({ useFournisseurs } = await import('@/hooks/useFournisseurs'));
-  const qc = new QueryClient();
-  const wrapper = ({ children }) =>
-    React.createElement(QueryClientProvider, { client: qc, children });
-  const { result } = renderHook(() => useFournisseurs(), { wrapper });
+  const { result } = renderHook(() => useFournisseurs());
 
   await act(async () => {
     await result.current.updateFournisseur('1', { nom: 'New' });

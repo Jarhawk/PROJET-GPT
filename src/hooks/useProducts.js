@@ -9,9 +9,22 @@ import { saveAs } from "file-saver";
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 
+function safeQueryClient() {
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useQueryClient();
+  } catch {
+    return {
+      invalidateQueries: () => {},
+      setQueryData: () => {},
+      fetchQuery: async () => {},
+    };
+  }
+}
+
 export function useProducts() {
   const { mama_id } = useAuth();
-  const queryClient = useQueryClient();
+  const queryClient = safeQueryClient();
   const [products, setProducts] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -32,20 +45,12 @@ export function useProducts() {
     setLoading(true);
     setError(null);
     let query = supabase
-      .from('produits')
+      .from("produits")
       .select(
-        `id, mama_id, nom, actif, famille_id, sous_famille_id, unite_id, zone_stock_id, pmp, stock_theorique, dernier_prix,
-         unite:unites!fk_produits_unite(nom, mama_id),
-         zone_stock:zones_stock!produits_zone_stock_id_fkey(nom, mama_id),
-         famille:familles!fk_produits_famille(id, nom, mama_id),
-         sous_famille:sous_familles!fk_produits_sous_famille(id, nom, mama_id)`,
-        { count: 'exact' }
+        `*, unite:unite_id (nom), zone_stock:zones_stock(nom), famille:familles(nom), sous_famille:sous_familles(nom)`,
+        { count: "exact" }
       )
-      .eq('mama_id', mama_id)
-      .eq('unite.mama_id', mama_id)
-      .eq('zone_stock.mama_id', mama_id)
-      .eq('famille.mama_id', mama_id)
-      .eq('sous_famille.mama_id', mama_id);
+      .eq("mama_id", mama_id);
 
     if (search) {
       query = query.ilike("nom", `%${search}%`);
@@ -71,36 +76,17 @@ export function useProducts() {
     ] = await Promise.all([
       supabase.from('v_pmp').select('produit_id, pmp').eq('mama_id', mama_id),
       supabase.from('v_stocks').select('produit_id, stock').eq('mama_id', mama_id),
-      supabase
-        .from('v_produits_dernier_prix')
-        .select('produit_id, dernier_prix')
-        .eq('mama_id', mama_id),
+      supabase.from('v_products_last_price').select('produit_id, dernier_prix').eq('mama_id', mama_id),
     ]);
-    const pmpMap = {};
-    const pmpArray = Array.isArray(pmpData) ? pmpData : [];
-    for (const p of pmpArray) {
-      pmpMap[p.produit_id] = p.pmp;
-    }
-    const stockMap = {};
-    const stockArray = Array.isArray(stockData) ? stockData : [];
-    for (const s of stockArray) {
-      stockMap[s.produit_id] = s.stock;
-    }
-    const lastPriceMap = {};
-    const lastPriceArray = Array.isArray(lastPriceData) ? lastPriceData : [];
-    for (const l of lastPriceArray) {
-      lastPriceMap[l.produit_id] = l.dernier_prix;
-    }
-    const final = [];
-    const dataArray = Array.isArray(data) ? data : [];
-    for (const p of dataArray) {
-      final.push({
-        ...p,
-        pmp: pmpMap[p.id] ?? p.pmp,
-        dernier_prix: lastPriceMap[p.id] ?? p.dernier_prix,
-        stock_theorique: stockMap[p.id] ?? p.stock_theorique,
-      });
-    }
+    const pmpMap = Object.fromEntries((pmpData || []).map(p => [p.produit_id, p.pmp]));
+    const stockMap = Object.fromEntries((stockData || []).map(s => [s.produit_id, s.stock]));
+    const lastPriceMap = Object.fromEntries((lastPriceData || []).map(l => [l.produit_id, l.dernier_prix]));
+    const final = (Array.isArray(data) ? data : []).map((p) => ({
+      ...p,
+      pmp: pmpMap[p.id] ?? p.pmp,
+      dernier_prix: lastPriceMap[p.id] ?? p.dernier_prix,
+      stock_theorique: stockMap[p.id] ?? p.stock_theorique,
+    }));
     setProducts(final);
     setTotal(count || 0);
     setLoading(false);
@@ -108,7 +94,7 @@ export function useProducts() {
       setError(error);
       toast.error(error.message);
     }
-    return Array.isArray(data) ? data : [];
+    return data || [];
   }, [mama_id]);
 
   useEffect(() => {
@@ -199,15 +185,7 @@ export function useProducts() {
 
   async function duplicateProduct(id, { refresh = true } = {}) {
     if (!mama_id) return { error: "Aucun mama_id" };
-    let original;
-    if (Array.isArray(products)) {
-      for (const p of products) {
-        if (p.id === id) {
-          original = p;
-          break;
-        }
-      }
-    }
+    const original = products.find(p => p.id === id);
     if (!original) return { error: "Produit introuvable" };
     setLoading(true);
     setError(null);
@@ -240,20 +218,19 @@ export function useProducts() {
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
-      .from('fournisseur_produits')
+      .from("fournisseur_produits")
       .select(
-        'id, fournisseur_id, produit_id, prix_achat, mama_id, actif, derniere_livraison:date_livraison, fournisseur:fournisseurs!fk_fournisseur_produits_fournisseur_id(id, nom)'
+        "*, fournisseur:fournisseurs!fk_fournisseur_produits_fournisseur_id(id, nom), derniere_livraison:date_livraison"
       )
-      .eq('produit_id', productId)
-      .eq('mama_id', mama_id)
-      .eq('fournisseur.mama_id', mama_id)
-      .order('date_livraison', { ascending: false });
+      .eq("produit_id", productId)
+      .eq("mama_id", mama_id)
+      .order("date_livraison", { ascending: false });
     setLoading(false);
     if (error) {
       setError(error);
       toast.error(error.message);
     }
-    return Array.isArray(data) ? data : [];
+    return data || [];
   }, [mama_id]);
 
   const fetchProductStock = useCallback(
@@ -290,16 +267,11 @@ export function useProducts() {
         toast.error(error.message);
         return [];
       }
-      const rows = Array.isArray(data) ? data : [];
-      const out = [];
-      for (const m of rows) {
-        out.push({
-          date: m.requisitions.date_requisition,
-          type: 'sortie',
-          quantite: m.quantite,
-        });
-      }
-      return out;
+      return (data || []).map(m => ({
+        date: m.requisitions.date_requisition,
+        type: 'sortie',
+        quantite: m.quantite,
+      }));
     },
     [mama_id]
   );
@@ -310,18 +282,10 @@ export function useProducts() {
       const { data, error } = await supabase
         .from("produits")
         .select(
-          `id, nom, actif, famille_id, sous_famille_id, unite_id, zone_stock_id, code, image, allergenes, pmp, stock_reel, stock_min, stock_theorique, fournisseur_id, dernier_prix, fiche_technique_id, prix_vente, photo_url, url_photo, seuil_min, tva,
-          famille:familles!fk_produits_famille(id, nom, mama_id),
-          sous_famille:sous_familles!fk_produits_sous_famille(id, nom, mama_id),
-          main_fournisseur:fournisseurs!fournisseur_id(id, nom, mama_id),
-          unite:unites!fk_produits_unite(nom, mama_id)`
+          "*, famille:familles!fk_produits_famille(nom), sous_famille:sous_familles!fk_produits_sous_famille(nom), main_fournisseur:fournisseur_id(id, nom), unite:unite_id (nom)"
         )
         .eq("id", id)
         .eq("mama_id", mama_id)
-        .eq("famille.mama_id", mama_id)
-        .eq("sous_famille.mama_id", mama_id)
-        .eq("unite.mama_id", mama_id)
-        .eq("main_fournisseur.mama_id", mama_id)
         .single();
       if (error) {
         setError(error);
@@ -334,26 +298,22 @@ export function useProducts() {
   );
 
   function exportProductsToExcel() {
-    const datas = [];
-    const productArray = Array.isArray(products) ? products : [];
-    for (const p of productArray) {
-      datas.push({
-        id: p.id,
-        nom: p.nom,
-        famille: p.famille?.nom || "",
-        unite: p.unite?.nom || "",
-        code: p.code,
-        allergenes: p.allergenes,
-        pmp: p.pmp,
-        stock_theorique: p.stock_theorique,
-        stock_reel: p.stock_reel,
-        seuil_min: p.seuil_min,
-        dernier_prix: p.dernier_prix,
-        fournisseur: p.main_fournisseur?.nom || "",
-        fournisseur_id: p.fournisseur_id || "",
-        actif: p.actif,
-      });
-    }
+    const datas = (products || []).map(p => ({
+      id: p.id,
+      nom: p.nom,
+      famille: p.famille?.nom || "",
+      unite: p.unite?.nom || "",
+      code: p.code,
+      allergenes: p.allergenes,
+      pmp: p.pmp,
+      stock_theorique: p.stock_theorique,
+      stock_reel: p.stock_reel,
+      seuil_min: p.seuil_min,
+      dernier_prix: p.dernier_prix,
+      fournisseur: p.main_fournisseur?.nom || "",
+      fournisseur_id: p.fournisseur_id || "",
+      actif: p.actif,
+    }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Produits");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });

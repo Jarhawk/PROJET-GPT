@@ -8,9 +8,7 @@ import { Button } from "@/components/ui/button";
 export default function TemplatesCommandes() {
   const { fetchTemplates, deleteTemplate } = useTemplatesCommandes();
   const { data: fournisseurs = [] } = useFournisseurs({ actif: true });
-  const fournisseursList = Array.isArray(fournisseurs) ? fournisseurs : [];
   const [templates, setTemplates] = useState([]);
-  const templatesList = Array.isArray(templates) ? templates : [];
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selected, setSelected] = useState(null);
@@ -21,7 +19,7 @@ export default function TemplatesCommandes() {
     setLoading(true);
     const { data, error } = await fetchTemplates({ fournisseur_id: fournisseurId || undefined });
     if (error) setError(error);
-    setTemplates(Array.isArray(data) ? data : []);
+    setTemplates(data || []);
     setLoading(false);
   }, [fetchTemplates, fournisseurId]);
 
@@ -35,35 +33,6 @@ export default function TemplatesCommandes() {
     load();
   };
 
-  const templateRows = [];
-  for (const tpl of templatesList) {
-    templateRows.push(
-      <tr key={tpl.id} className="border-b">
-        <td className="p-2">{tpl.nom}</td>
-        <td className="p-2">{tpl.fournisseur ? tpl.fournisseur.nom : "Générique"}</td>
-        <td className="p-2">{tpl.actif ? "Oui" : "Non"}</td>
-        <td className="p-2">{tpl.updated_at ? new Date(tpl.updated_at).toLocaleDateString() : ""}</td>
-        <td className="p-2 flex gap-2">
-          <Button size="sm" onClick={() => setSelected(tpl)}>
-            Modifier
-          </Button>
-          <Button size="sm" variant="destructive" onClick={() => handleDelete(tpl.id)}>
-            Supprimer
-          </Button>
-        </td>
-      </tr>,
-    );
-  }
-
-  const fournisseurOptions = [];
-  for (const f of fournisseursList) {
-    fournisseurOptions.push(
-      <option key={f.id} value={f.id}>
-        {f.nom}
-      </option>,
-    );
-  }
-
   return (
     <div className="p-4">
       <h1 className="text-xl font-bold mb-4">Templates de commandes</h1>
@@ -76,7 +45,11 @@ export default function TemplatesCommandes() {
           onChange={(e) => setFournisseurId(e.target.value)}
         >
           <option value="">Tous les fournisseurs</option>
-          {fournisseurOptions}
+          {fournisseurs.map((f) => (
+            <option key={f.id} value={f.id}>
+              {f.nom}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -94,14 +67,35 @@ export default function TemplatesCommandes() {
           </tr>
         </thead>
         <tbody>
-          {templateRows}
+          {templates.map((tpl) => (
+            <tr key={tpl.id} className="border-b">
+              <td className="p-2">{tpl.nom}</td>
+              <td className="p-2">{tpl.fournisseur ? tpl.fournisseur.nom : "Générique"}</td>
+              <td className="p-2">{tpl.actif ? "Oui" : "Non"}</td>
+              <td className="p-2">
+                {tpl.updated_at ? new Date(tpl.updated_at).toLocaleDateString() : ""}
+              </td>
+              <td className="p-2 flex gap-2">
+                <Button size="sm" onClick={() => setSelected(tpl)}>
+                  Modifier
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => handleDelete(tpl.id)}
+                >
+                  Supprimer
+                </Button>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
 
       {selected && (
         <TemplateCommandeForm
           template={selected}
-          fournisseurs={fournisseursList}
+          fournisseurs={fournisseurs}
           onClose={() => {
             setSelected(null);
             load();

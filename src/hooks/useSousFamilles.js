@@ -13,22 +13,15 @@ export function useSousFamilles() {
     async ({ search = '', actif, familleId } = {}) => {
       setLoading(true);
       setError(null);
-      let q = supabase
-        .from('sous_familles')
-        .select('id, nom, famille_id, mama_id, actif')
-        .eq('mama_id', mama_id);
-      if (typeof q.order === 'function') {
-        q = q.order('nom', { ascending: true });
-      }
+      let q = supabase.from('sous_familles').select('*').eq('mama_id', mama_id);
       if (typeof actif === 'boolean') q = q.eq('actif', actif);
       if (familleId) q = q.eq('famille_id', familleId);
       if (search) q = q.ilike('nom', `%${search}%`);
       const { data, error: queryError } = await q;
       if (queryError) setError(queryError);
-      const list = Array.isArray(data) ? data : [];
-      setSousFamilles(list);
+      setSousFamilles(data || []);
       setLoading(false);
-      return { data: list, error: queryError };
+      return { data: data || [], error: queryError };
     },
     [mama_id]
   );
@@ -38,12 +31,9 @@ export function useSousFamilles() {
       const { data } = await supabase
         .from('sous_familles')
         .insert([{ nom, famille_id, mama_id, actif: true }])
-        .eq('mama_id', mama_id)
-        .select('id, nom, famille_id, actif, mama_id')
+        .select()
         .single();
-      setSousFamilles((prev) =>
-        Array.isArray(prev) ? [data, ...prev] : [data]
-      );
+      setSousFamilles((prev) => [data, ...prev]);
       return data;
     },
     [mama_id]
@@ -56,14 +46,9 @@ export function useSousFamilles() {
         .update({ actif: value })
         .eq('id', id)
         .eq('mama_id', mama_id);
-      setSousFamilles((prev) => {
-        const arr = Array.isArray(prev) ? prev : [];
-        const out = [];
-        for (const s of arr) {
-          out.push(s.id === id ? { ...s, actif: value } : s);
-        }
-        return out;
-      });
+      setSousFamilles((prev) =>
+        prev.map((s) => (s.id === id ? { ...s, actif: value } : s))
+      );
     },
     [mama_id]
   );
@@ -84,17 +69,15 @@ export async function fetchSousFamilles({ mamaId }) {
   try {
     let q = supabase
       .from('sous_familles')
-      .select('id, nom, famille_id, mama_id, actif')
-      .eq('mama_id', mamaId);
-    if (typeof q.order === 'function') {
-      q = q.order('nom', { ascending: true });
-    }
-      const { data, error } = await q;
-      if (error) throw error;
-      return Array.isArray(data) ? data : [];
-    } catch (e) {
-      console.warn('[sous_familles] fallback []', e);
-      return [];
+      .select('id, nom, famille_id, mama_id, deleted_at')
+      .eq('mama_id', mamaId)
+      .order('nom', { ascending: true });
+    const { data, error } = await q;
+    if (error) throw error;
+    return (data ?? []).filter((r) => !r.deleted_at);
+  } catch (e) {
+    console.warn('[sous_familles] fallback []', e);
+    return [];
   }
 }
 

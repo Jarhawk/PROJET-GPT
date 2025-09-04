@@ -47,7 +47,7 @@ export function useAnalyse() {
     if (!mama_id) return [];
     const { data, error } = await supabase
       .from("v_pmp")
-      .select("mama_id, produit_id, produit_actif, fournisseur_produit_actif, pmp")
+      .select("*")
       .eq("mama_id", mama_id);
     if (error) {
       console.error("getPmp", error);

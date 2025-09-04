@@ -27,12 +27,9 @@ export function useTransferts() {
       let q = supabase
         .from("transferts")
         .select(
-          "id, date_transfert, motif, zone_source:zones_stock!fk_transferts_zone_source_id(id, nom, mama_id), zone_destination:zones_stock!fk_transferts_zone_dest_id(id, nom, mama_id), lignes:transfert_lignes(id, produit_id, quantite, produit:produits(id, nom, mama_id))"
+          "id, date_transfert, motif, zone_source:zones_stock!fk_transferts_zone_source_id(id, nom), zone_destination:zones_stock!fk_transferts_zone_dest_id(id, nom), lignes:transfert_lignes(id, produit_id, quantite, produit:produits(id, nom))"
         )
         .eq("mama_id", mama_id)
-        .eq("zone_source.mama_id", mama_id)
-        .eq("zone_destination.mama_id", mama_id)
-        .eq("lignes.produit.mama_id", mama_id)
         .order("date_transfert", { ascending: false });
       if (debut) q = q.gte("date_transfert", debut);
       if (fin) q = q.lte("date_transfert", fin);
@@ -45,9 +42,8 @@ export function useTransferts() {
         setError(error);
         return [];
       }
-      const rows = Array.isArray(data) ? data : [];
-      setTransferts(rows);
-      return rows;
+      setTransferts(Array.isArray(data) ? data : []);
+      return data || [];
     },
     [mama_id]
   );
@@ -71,25 +67,20 @@ export function useTransferts() {
           utilisateur_id: user_id,
         },
       ])
-      .select(
-        'id, mama_id, zone_source_id, zone_dest_id, motif, date_transfert, utilisateur_id, created_at'
-      )
+      .select()
       .single();
     if (error) {
       setError(error);
       setLoading(false);
       return { error };
     }
-    const lignesArr = Array.isArray(lignes) ? lignes : [];
-    const lignesInsert = [];
-    for (const l of lignesArr) {
-      lignesInsert.push({
-        transfert_id: tr.id,
-        produit_id: l.produit_id,
-        quantite: Number(l.quantite),
-        commentaire: l.commentaire || "",
-      });
-    }
+    const lignesInsert = lignes.map((l) => ({
+      mama_id,
+      transfert_id: tr.id,
+      produit_id: l.produit_id,
+      quantite: Number(l.quantite),
+      commentaire: l.commentaire || "",
+    }));
     const { error: err2 } = await supabase
       .from("transfert_lignes")
       .insert(lignesInsert);
@@ -111,12 +102,9 @@ export function useTransferts() {
       const { data, error } = await supabase
         .from("transferts")
         .select(
-          "id, date_transfert, motif, zone_source:zones_stock!fk_transferts_zone_source_id(id, nom, mama_id), zone_destination:zones_stock!fk_transferts_zone_dest_id(id, nom, mama_id), lignes:transfert_lignes(id, quantite, produit:produits(id, nom, mama_id))"
+          "id, date_transfert, motif, zone_source:zones_stock!fk_transferts_zone_source_id(id, nom), zone_destination:zones_stock!fk_transferts_zone_dest_id(id, nom), lignes:transfert_lignes(id, quantite, produit:produits(id, nom))"
         )
         .eq("mama_id", mama_id)
-        .eq("zone_source.mama_id", mama_id)
-        .eq("zone_destination.mama_id", mama_id)
-        .eq("lignes.produit.mama_id", mama_id)
         .eq("id", id)
         .single();
       setLoading(false);

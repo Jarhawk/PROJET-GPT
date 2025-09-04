@@ -7,18 +7,16 @@ export function useReporting() {
 
   // Applique uniquement les filtres existant dans les vues utilisées
   const applyFilters = (query, filters = {}) => {
-    if (filters.date_start) query = query.gte('date', filters.date_start);
-    if (filters.date_end) query = query.lte('date', filters.date_end);
-    if (filters.famille) query = query.eq('famille', filters.famille);
-    if (filters.cost_center) query = query.eq('cost_center_id', filters.cost_center);
+    if (filters.date_start) query = query.gte("date", filters.date_start);
+    if (filters.date_end) query = query.lte("date", filters.date_end);
+    if (filters.famille) query = query.eq("famille", filters.famille);
+    if (filters.cost_center) query = query.eq("cost_center_id", filters.cost_center);
     return query;
   };
 
   async function getIndicators() {
     if (!mama_id) return {};
-    const { data, error } = await supabase
-      .from('v_mouvements_centres_cout_stats')
-      .select('centre_cout_id, centre_cout, total_quantite, total_valeur');
+    const { data, error } = await supabase.rpc('consolidated_stats');
     if (error) {
       console.error('getIndicators', error);
       return {};
@@ -31,18 +29,11 @@ export function useReporting() {
     let query;
     switch (type) {
       case 'achats':
-        query = supabase
-          .from('v_achats_mensuels')
-          .select('mois, montant:montant_total, mama_id')
-          .eq('mama_id', mama_id);
-        if (filters.date_start) query = query.gte('mois', filters.date_start);
-        if (filters.date_end) query = query.lte('mois', filters.date_end);
+        query = supabase.from('v_achats_mensuels').select('*').eq('mama_id', mama_id);
+        query = applyFilters(query, filters);
         break;
       case 'pmp':
-        query = supabase
-          .from('v_pmp')
-          .select('produit_id, pmp, mama_id')
-          .eq('mama_id', mama_id);
+        query = supabase.from('v_pmp').select('*').eq('mama_id', mama_id);
         break;
       case 'familles':
         query = supabase
@@ -53,10 +44,7 @@ export function useReporting() {
         query = applyFilters(query, filters);
         break;
       case 'cost_center':
-        query = supabase
-          .from('v_cost_center_month')
-          .select('cost_center_id, nom, mois, total, mama_id')
-          .eq('mama_id', mama_id);
+        query = supabase.from('v_cost_center_month').select('*').eq('mama_id', mama_id);
         if (filters.date_start) query = query.gte('mois', filters.date_start);
         if (filters.date_end) query = query.lte('mois', filters.date_end);
         break;
@@ -65,10 +53,10 @@ export function useReporting() {
     }
     const { data, error } = await query;
     if (error) {
-      console.error('getGraphData', error);
+      console.error("getGraphData", error);
       return [];
     }
-    return Array.isArray(data) ? data : [];
+    return data || [];
   }
 
   async function getEcartInventaire(filters = {}) {
@@ -84,23 +72,20 @@ export function useReporting() {
       console.error('getEcartInventaire', error);
       return [];
     }
-    return Array.isArray(data) ? data : [];
+    return data || [];
   }
 
   async function getCostCenterBreakdown(filters = {}) {
     if (!mama_id) return [];
-    let query = supabase
-      .from('v_cost_center_month')
-      .select('cost_center_id, nom, mois, total, mama_id')
-      .eq('mama_id', mama_id);
-    if (filters.date_start) query = query.gte('mois', filters.date_start);
-    if (filters.date_end) query = query.lte('mois', filters.date_end);
+    let query = supabase.from("v_cost_center_month").select("*").eq("mama_id", mama_id);
+    if (filters.date_start) query = query.gte("mois", filters.date_start);
+    if (filters.date_end) query = query.lte("mois", filters.date_end);
     const { data, error } = await query;
     if (error) {
-      console.error('getCostCenterBreakdown', error);
+      console.error("getCostCenterBreakdown", error);
       return [];
     }
-    return Array.isArray(data) ? data : [];
+    return data || [];
   }
 
   return { getIndicators, getGraphData, getEcartInventaire, getCostCenterBreakdown };

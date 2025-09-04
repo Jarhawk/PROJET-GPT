@@ -4,7 +4,7 @@ import express from 'express';
 import produitsRouter from './produits.js';
 import stockRouter from './stock.js';
 import promotionsRouter from './promotions.js';
-import { getSupabaseClient } from '@/lib/supabase';
+import makeClient from './supabaseClient.js';
 
 const router = express.Router();
 
@@ -23,7 +23,7 @@ router.use(async (req, res, next) => {
   if (authHeader) {
     try {
       const token = authHeader.replace(/^Bearer\s+/i, '');
-      const supabase = getSupabaseClient();
+      const supabase = makeClient();
       const { data, error } = await supabase.auth.getUser(token);
       if (data?.user && !error) {
         req.user = {

@@ -23,26 +23,21 @@ export function useFournisseurs(params = {}) {
     queryFn: async () => {
       let query = supabase
         .from('fournisseurs')
-        .select('id, nom, actif, contact:fournisseur_contacts!fournisseur_id(mama_id,nom,email,tel)')
+        .select('id, nom, actif, contact:fournisseur_contacts(nom,email,tel)', { count: 'exact' })
         .eq('mama_id', mama_id)
-        .eq('contact.mama_id', mama_id)
         .order('nom', { ascending: true })
         .range((page - 1) * limit, page * limit - 1);
 
       if (search) query = query.ilike('nom', `%${search}%`);
       if (actif !== null && actif !== undefined) query = query.eq('actif', actif);
 
-      const { data, error } = await query;
+      const { data, error, count } = await query;
       if (error) throw error;
-      const rows = Array.isArray(data) ? data : [];
-      const mapped = [];
-      for (const f of rows) {
-        mapped.push({
-          ...f,
-          contact: Array.isArray(f.contact) ? f.contact[0] : f.contact,
-        });
-      }
-      return mapped;
+      const list = (data || []).map((f) => ({
+        ...f,
+        contact: Array.isArray(f.contact) ? f.contact[0] : f.contact,
+      }));
+      return { data: list, count: count || 0 };
     },
   });
 }

@@ -14,9 +14,7 @@ export function useFournisseurApiConfig() {
     setLoading(true);
     const { data, error } = await supabase
       .from('fournisseurs_api_config')
-      .select(
-        'fournisseur_id, mama_id, url, type_api, token, format_facture, actif, created_at'
-      )
+      .select('*')
       .eq('mama_id', mama_id)
       .eq('fournisseur_id', fournisseur_id)
       .maybeSingle();
@@ -37,9 +35,7 @@ export function useFournisseurApiConfig() {
       .upsert([{ ...config, fournisseur_id, mama_id }], {
         onConflict: ['fournisseur_id', 'mama_id'],
       })
-      .select(
-        'fournisseur_id, mama_id, url, type_api, token, format_facture, actif, created_at'
-      )
+      .select()
       .single();
     setLoading(false);
     if (error) {
@@ -65,20 +61,12 @@ export function useFournisseurApiConfig() {
     return { error };
   }
 
-  async function listConfigs({
-    fournisseur_id,
-    actif,
-    page = 1,
-    limit = 20,
-  } = {}) {
+  async function listConfigs({ fournisseur_id, actif, page = 1, limit = 20 } = {}) {
     if (!mama_id) return { data: [], count: 0, error: null };
     setLoading(true);
     let query = supabase
       .from('fournisseurs_api_config')
-      .select(
-        'fournisseur_id, mama_id, url, type_api, token, format_facture, actif, created_at, fournisseur:fournisseur_id(id, nom)',
-        { count: 'exact' }
-      )
+      .select('*, fournisseur:fournisseur_id(id, nom)', { count: 'exact' })
       .eq('mama_id', mama_id)
       .order('fournisseur_id');
     if (fournisseur_id) query = query.eq('fournisseur_id', fournisseur_id);
@@ -91,11 +79,7 @@ export function useFournisseurApiConfig() {
       toast.error(error.message || 'Erreur chargement configurations');
       return { data: [], count: 0, error };
     }
-    return {
-      data: Array.isArray(data) ? data : [],
-      count: count || 0,
-      error: null,
-    };
+    return { data, count, error: null };
   }
 
   return { loading, error, fetchConfig, saveConfig, deleteConfig, listConfigs };

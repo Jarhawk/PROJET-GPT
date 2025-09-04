@@ -3,9 +3,22 @@ import { supabase } from '@/lib/supabase';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 
+function safeQueryClient() {
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useQueryClient();
+  } catch {
+    return {
+      invalidateQueries: () => {},
+      setQueryData: () => {},
+      fetchQuery: async () => {},
+    };
+  }
+}
+
 export function useProduitLineDefaults() {
   const { mama_id } = useAuth();
-  const queryClient = useQueryClient();
+  const queryClient = safeQueryClient();
 
   const fetchDefaults = async ({ produit_id } = {}) => {
     if (!mama_id || !produit_id) {
@@ -37,7 +50,6 @@ export function useProduitLineDefaults() {
               .from('unites')
               .select('nom')
               .eq('id', unite_id)
-              .eq('mama_id', mama_id)
               .maybeSingle()
           : { data: null };
 

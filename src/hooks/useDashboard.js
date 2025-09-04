@@ -30,9 +30,9 @@ export function useDashboard() {
     let mouvements = [];
     try {
       const { data: produitsRaw, error: errorProd } = await supabase
-        .from('v_produits_dernier_prix')
-        .select('id:produit_id, nom, famille, unite, stock_reel, stock_min, mama_id')
-        .eq('mama_id', mama_id);
+        .from("v_produits_dernier_prix")
+        .select("id, nom, unite_id, unite:unite_id (nom), famille, stock_reel, stock_min")
+        .eq("mama_id", mama_id);
       if (errorProd) throw errorProd;
       const { data: pmpData } = await supabase
         .from('v_pmp')
@@ -42,50 +42,37 @@ export function useDashboard() {
         .from('v_stocks')
         .select('produit_id, stock')
         .eq('mama_id', mama_id);
-      const pmpMap = {};
-      for (const p of Array.isArray(pmpData) ? pmpData : []) {
-        pmpMap[p.produit_id] = p.pmp;
-      }
-      const stockMap = {};
-      for (const s of Array.isArray(stockData) ? stockData : []) {
-        stockMap[s.produit_id] = s.stock;
-      }
-      const produitsBruts = Array.isArray(produitsRaw) ? produitsRaw : [];
-      produits = [];
-      for (const p of produitsBruts) {
-        produits.push({
-          ...p,
-          pmp: pmpMap[p.id] ?? 0,
-          stock_theorique: stockMap[p.id] ?? 0,
-        });
-      }
-    } catch (_err) { void _err;
+      const pmpMap = Object.fromEntries((pmpData || []).map(p => [p.produit_id, p.pmp]));
+      const stockMap = Object.fromEntries((stockData || []).map(s => [s.produit_id, s.stock]));
+      produits = (Array.isArray(produitsRaw) ? produitsRaw : []).map(p => ({
+        ...p,
+        pmp: pmpMap[p.id] ?? 0,
+        stock_theorique: stockMap[p.id] ?? 0,
+      }));
+    } catch (_err) { void _err; 
       setError("Erreur chargement produits");
       setLoading(false);
       return;
     }
 
-    // 2. Récupère consommations via requisitions
+    // 2. Récupère mouvements (legacy)
+    await supabase.from('mouvements').select('*').eq('mama_id', mama_id);
+
+    // 3. Récupère consommations via requisitions
     try {
       const { data: mouvementsRaw, error: errorMouv } = await supabase
         .from('requisition_lignes')
-        .select(
-          'quantite, produit_id, requisitions!inner(date_requisition,mama_id,statut)'
-        )
-        .eq('mama_id', mama_id)
+        .select('quantite, produit_id, requisitions!inner(date_requisition,mama_id,statut)')
         .eq('requisitions.mama_id', mama_id);
       if (errorMouv) throw errorMouv;
-      mouvements = [];
-      for (const m of Array.isArray(mouvementsRaw) ? mouvementsRaw : []) {
-        if (m.requisitions?.statut === 'réalisée') {
-          mouvements.push({
-            quantite: m.quantite,
-            produit_id: m.produit_id,
-            type: 'sortie',
-            date: m.requisitions.date_requisition,
-          });
-        }
-      }
+      mouvements = (mouvementsRaw || [])
+        .filter(m => m.requisitions?.statut === 'réalisée')
+        .map(m => ({
+          quantite: m.quantite,
+          produit_id: m.produit_id,
+          type: 'sortie',
+          date: m.requisitions.date_requisition,
+        }));
     } catch (_err) {
       setError('Erreur chargement mouvements');
       void _err;
@@ -93,83 +80,55 @@ export function useDashboard() {
       return;
     }
 
-    // 3. Statistiques de base
-    const produitsArr = Array.isArray(produits) ? produits : [];
-    const mouvementsArr = Array.isArray(mouvements) ? mouvements : [];
-    const stock_valorise = produitsArr.reduce(
-      (sum, p) => sum + (Number(p.pmp) || 0) * (Number(p.stock_reel) || 0),
-      0
-    );
+    // 4. Statistiques de base
+    const stock_valorise = produits.reduce((sum, p) => sum + (Number(p.pmp) || 0) * (Number(p.stock_reel) || 0), 0);
     const moisCourant = new Date().toISOString().slice(0, 7);
-    const conso_mois = mouvementsArr
-      .filter((m) => m.date && m.date.startsWith(moisCourant) && m.type === 'sortie')
+    const conso_mois = mouvements
+      .filter(m => m.date && m.date.startsWith(moisCourant) && m.type === "sortie")
       .reduce((sum, m) => sum + (Number(m.quantite) || 0), 0);
-    const nb_mouvements = mouvementsArr.length;
+    const nb_mouvements = mouvements.length;
     setStats({ stock_valorise, conso_mois, nb_mouvements, ca_fnb: caFnbInput });
 
-    // 4. Top produits consommés calculés côté client
-    const topCounts = {};
-    for (const m of mouvementsArr) {
-      if (m.type === 'sortie') {
-        topCounts[m.produit_id] =
-          (topCounts[m.produit_id] || 0) + (Number(m.quantite) || 0);
-      }
-    }
-    const topData = [];
-    const sortedTop = Object.entries(topCounts).sort((a, b) => b[1] - a[1]);
-    for (let i = 0; i < Math.min(5, sortedTop.length); i++) {
-      const [produit_id, quantite] = sortedTop[i];
-      topData.push({ produit_id, quantite });
-    }
-    setTopProducts(topData);
+    // 5. Top produits consommés via RPC
+    // Fonction SQL renommée top_produits dans le schéma final
+    const { data: topData, error: topErr } = await supabase.rpc('top_produits', {
+      mama_id_param: mama_id,
+    });
+    if (!topErr) setTopProducts(Array.isArray(topData) ? topData : []);
 
-    // 5. Food cost global & par famille
+    // 6. Food cost global & par famille
     const ca_fnb = Number(caFnbInput) || 1;
-    const familleSet = new Set();
-    for (const p of produitsArr) {
-      if (p.famille) familleSet.add(p.famille);
-    }
-    const famillesArr = Array.from(familleSet);
-    const consoByFamille = {};
-    for (const fam of famillesArr) {
-      const ids = [];
-      for (const p of produitsArr) if (p.famille === fam) ids.push(p.id);
-      let total = 0;
-      for (const m of mouvementsArr) {
-        if (
-          ids.includes(m.produit_id) &&
-          m.date?.startsWith(moisCourant) &&
-          m.type === 'sortie'
-        ) {
-          total += Number(m.quantite) || 0;
-        }
-      }
+    const familles = [...new Set(produits.map(p => p.famille).filter(Boolean))];
+    let consoByFamille = {};
+    familles.forEach(fam => {
+      const ids = produits.filter(p => p.famille === fam).map(p => p.id);
+      const total = mouvements
+        .filter(m => ids.includes(m.produit_id) && m.date?.startsWith(moisCourant) && m.type === "sortie")
+        .reduce((sum, m) => sum + (Number(m.quantite) || 0), 0);
       consoByFamille[fam] = total;
-    }
-    const consoAlim = famillesArr.includes('Alimentaire')
-      ? consoByFamille['Alimentaire'] || 0
+    });
+    const consoAlim = familles.includes("Alimentaire")
+      ? consoByFamille["Alimentaire"] || 0
       : Object.values(consoByFamille).reduce((sum, v) => sum + v, 0);
 
     setFoodCostGlobal(ca_fnb ? consoAlim / ca_fnb : 0);
 
-    const fcList = [];
-    for (const fam of famillesArr) {
-      fcList.push({
+    setFoodCostParFamille(
+      familles.map(fam => ({
         famille: fam,
         food_cost: ca_fnb ? (consoByFamille[fam] || 0) / ca_fnb : 0,
-      });
-    }
-    setFoodCostParFamille(fcList);
+      }))
+    );
 
-    // 6. Marge brute
+    // 7. Marge brute
     setMargeBrute({
       valeur: ca_fnb - consoAlim,
       taux: ca_fnb ? (ca_fnb - consoAlim) / ca_fnb : 0,
     });
 
-    // 7. Évolution valorisation stock (par mois, 12 mois)
-    const moisArray = [];
-    const evolutionStockData = [];
+    // 8. Évolution valorisation stock (par mois, 12 mois)
+    let moisArray = [];
+    let evolutionStockData = [];
     for (let i = 11; i >= 0; i--) {
       const d = new Date();
       d.setMonth(d.getMonth() - i);
@@ -182,45 +141,33 @@ export function useDashboard() {
     }
     setEvolutionStock(evolutionStockData);
 
-    const moisArr = Array.isArray(moisArray) ? moisArray : [];
-    // 8. Évolution consommation (par mois, 12 mois)
-    const evolutionConsoData = [];
-    for (const mois of moisArr) {
-      let conso = 0;
-      for (const m of mouvementsArr) {
-        if (m.date && m.date.startsWith(mois) && m.type === 'sortie') {
-          conso += Number(m.quantite) || 0;
-        }
-      }
-      evolutionConsoData.push({ mois, conso });
-    }
+    // 9. Évolution consommation (par mois, 12 mois)
+    let evolutionConsoData = moisArray.map(mois => ({
+      mois,
+      conso: mouvements
+        .filter(m => m.date && m.date.startsWith(mois) && m.type === "sortie")
+        .reduce((sum, m) => sum + (Number(m.quantite) || 0), 0)
+    }));
     setEvolutionConso(evolutionConsoData);
 
-    // 9. Évolution food cost
-    const evolFoodCost = [];
-    for (const mois of moisArr) {
-      let conso = 0;
-      for (const m of mouvementsArr) {
-        if (m.date?.startsWith(mois) && m.type === 'sortie') {
-          conso += Number(m.quantite) || 0;
-        }
-      }
-      evolFoodCost.push({ mois, food_cost: ca_fnb ? conso / ca_fnb : 0 });
-    }
+    // 10. Évolution food cost
+    let evolFoodCost = moisArray.map(mois => {
+      const caDummy = ca_fnb;
+      const conso = mouvements
+        .filter(m => m.date?.startsWith(mois) && m.type === "sortie")
+        .reduce((sum, m) => sum + (Number(m.quantite) || 0), 0);
+      return { mois, food_cost: caDummy ? conso / caDummy : 0 };
+    });
     setEvolutionFoodCost(evolFoodCost);
 
-    // 10. Alertes stocks bas
-    const alerts = [];
-    for (const p of produitsArr) {
-      if (
-        typeof p.stock_min === 'number' &&
-        typeof p.stock_reel === 'number' &&
+    // 11. Alertes stocks bas
+    setAlertesStockBas(
+      produits.filter(p =>
+        (typeof p.stock_min === "number") &&
+        typeof p.stock_reel === "number" &&
         p.stock_reel < p.stock_min
-      ) {
-        alerts.push(p);
-      }
-    }
-    setAlertesStockBas(alerts);
+      )
+    );
 
     setLoading(false);
   }

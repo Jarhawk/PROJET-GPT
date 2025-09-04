@@ -111,35 +111,28 @@ export default function ZoneAccess() {
             ou shop.
           </p>
           <ul className="space-y-2">
-            {(() => {
-              const items = [];
-              const list = Array.isArray(rights) ? rights : [];
-              for (let i = 0; i < list.length; i++) {
-                const r = list[i];
-                items.push(
-                  <li
-                    key={r.id}
-                    className="flex justify-between items-center text-sm"
-                  >
-                    <span>{r.user_id}</span>
-                    <span className="text-xs">
-                      L:{r.lecture ? '✔' : '✖'} E:{r.ecriture ? '✔' : '✖'} T:{r.transfert ? '✔' : '✖'} R:{r.requisition ? '✔' : '✖'}
-                    </span>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={async () => {
-                        await removeUserRights(r.id);
-                        setRights(await fetchZoneRights(id));
-                      }}
-                    >
-                      Supprimer
-                    </Button>
-                  </li>
-                );
-              }
-              return items;
-            })()}
+            {rights.map((r) => (
+              <li
+                key={r.id}
+                className="flex justify-between items-center text-sm"
+              >
+                <span>{r.user_id}</span>
+                <span className="text-xs">
+                  L:{r.lecture ? '✔' : '✖'} E:{r.ecriture ? '✔' : '✖'} T:
+                  {r.transfert ? '✔' : '✖'} R:{r.requisition ? '✔' : '✖'}
+                </span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={async () => {
+                    await removeUserRights(r.id);
+                    setRights(await fetchZoneRights(id));
+                  }}
+                >
+                  Supprimer
+                </Button>
+              </li>
+            ))}
           </ul>
           <div className="flex justify-end">
             <Button

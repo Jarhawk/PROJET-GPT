@@ -1,7 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useCallback } from "react";
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/hooks/useAuth';
 import * as XLSX from "xlsx";
 import JSPDF from "jspdf";
 import "jspdf-autotable";
@@ -11,73 +10,100 @@ export function useConsolidation() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { mama_id: currentMamaId } = useAuth();
 
   // Liste des sites accessibles par l'utilisateur
   const fetchSites = useCallback(async () => {
-    if (!currentMamaId) return [];
     setLoading(true);
     const { data, error } = await supabase
-      .from('mamas')
-      .select('id, nom')
-      .eq('id', currentMamaId);
+      .from("user_mama_access")
+      .select("mama_id, role");
     setLoading(false);
     if (error) {
       setError(error.message || error);
       setSites([]);
       return [];
     }
-    const rows = [];
-    if (Array.isArray(data)) {
-      for (const m of data) {
-        rows.push({ mama_id: m.id, nom: m.nom });
-      }
-    }
     setError(null);
-    setSites(rows);
-    return rows;
-  }, [currentMamaId]);
+    setSites(Array.isArray(data) ? data : []);
+    return data || [];
+  }, []);
 
   // Vue consolidation mensuelle
-  const fetchConsoMensuelle = useCallback(
-    async ({ mamaIds = [], start, end } = {}) => {
-      setLoading(true);
-      let query = supabase
-        .from('v_consolidation_mensuelle')
-        .select('mama_id, mois, achats_total, ca_total, menu_foodcost_total, marge_pct_moy, ecart_valorise_total');
-      if (mamaIds.length) query = query.in('mama_id', mamaIds);
-      else if (currentMamaId) query = query.eq('mama_id', currentMamaId);
-      if (start) query = query.gte('mois', start);
-      if (end) query = query.lte('mois', end);
-      const { data, error } = await query;
-      setLoading(false);
-      if (error) {
-        setError(error.message || error);
-        setRows([]);
-        return [];
-      }
-      const rows = Array.isArray(data) ? data : [];
-      setError(null);
-      setRows(rows);
-      return rows;
-    },
-    [currentMamaId]
-  );
+  const fetchConsoMensuelle = useCallback(async ({ mamaIds = [], start, end } = {}) => {
+    setLoading(true);
+    let query = supabase
+      .from("v_consolidation_mensuelle")
+      .select("*");
+    if (mamaIds.length) query = query.in("mama_id", mamaIds);
+    if (start) query = query.gte("mois", start);
+    if (end) query = query.lte("mois", end);
+    const { data, error } = await query;
+    setLoading(false);
+    if (error) {
+      setError(error.message || error);
+      setRows([]);
+      return [];
+    }
+    setError(null);
+    setRows(Array.isArray(data) ? data : []);
+    return data || [];
+  }, []);
+
+  const fetchAchats = useCallback(async (params = {}) => {
+    const { mamaIds = [], start, end } = params;
+    let query = supabase.from("v_cons_achats_mensuels").select("*");
+    if (mamaIds.length) query = query.in("mama_id", mamaIds);
+    if (start) query = query.gte("mois", start);
+    if (end) query = query.lte("mois", end);
+    const { data, error } = await query;
+    if (error) setError(error.message || error);
+    return data || [];
+  }, []);
+
+  const fetchVentes = useCallback(async (params = {}) => {
+    const { mamaIds = [], start, end } = params;
+    let query = supabase.from("v_cons_ventes_mensuelles").select("*");
+    if (mamaIds.length) query = query.in("mama_id", mamaIds);
+    if (start) query = query.gte("mois", start);
+    if (end) query = query.lte("mois", end);
+    const { data, error } = await query;
+    if (error) setError(error.message || error);
+    return data || [];
+  }, []);
+
+  const fetchFoodCost = useCallback(async (params = {}) => {
+    const { mamaIds = [], start, end } = params;
+    let query = supabase.from("v_cons_foodcost_mensuel").select("*");
+    if (mamaIds.length) query = query.in("mama_id", mamaIds);
+    if (start) query = query.gte("mois", start);
+    if (end) query = query.lte("mois", end);
+    const { data, error } = await query;
+    if (error) setError(error.message || error);
+    return data || [];
+  }, []);
+
+  const fetchEcarts = useCallback(async (params = {}) => {
+    const { mamaIds = [], start, end } = params;
+    let query = supabase.from("v_cons_ecarts_inventaire").select("*");
+    if (mamaIds.length) query = query.in("mama_id", mamaIds);
+    if (start) query = query.gte("mois", start);
+    if (end) query = query.lte("mois", end);
+    const { data, error } = await query;
+    if (error) setError(error.message || error);
+    return data || [];
+  }, []);
 
   const exportExcel = useCallback((data) => {
-    const list = Array.isArray(data) ? data : [];
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(list), "Consolidation");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), "Consolidation");
     XLSX.writeFile(wb, "consolidation.xlsx");
   }, []);
 
   const exportPdf = useCallback((data) => {
-    const list = Array.isArray(data) ? data : [];
     const doc = new JSPDF();
-    if (list.length > 0) {
-      const head = [Object.keys(list[0])];
-      const body = [];
-      for (const r of list) body.push(Object.values(r));
+    if (data && data.length > 0) {
+      const head = [Object.keys(data[0])];
+      const body = data.map((r) => Object.values(r));
       doc.autoTable({ head, body });
     }
     doc.save("consolidation.pdf");
@@ -102,6 +128,10 @@ export function useConsolidation() {
     error,
     fetchSites,
     fetchConsoMensuelle,
+    fetchAchats,
+    fetchVentes,
+    fetchFoodCost,
+    fetchEcarts,
     exportExcel,
     exportPdf,
     getKpis,

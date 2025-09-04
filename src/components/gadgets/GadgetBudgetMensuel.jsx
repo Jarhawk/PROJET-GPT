@@ -1,34 +1,32 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '../../lib/supabase';
-import { useAuth } from '../../hooks/useAuth.ts';
+import { motion as Motion } from 'framer-motion';
+import useBudgetMensuel from '@/hooks/gadgets/useBudgetMensuel';
+import LoadingSkeleton from '@/components/ui/LoadingSkeleton';
 
 export default function GadgetBudgetMensuel() {
-  const { mamaId } = useAuth();
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['budget-mensuel', mamaId],
-    enabled: !!mamaId,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('v_budget_mensuel') // adapte au nom réel de ta vue
-        .select('mois, total_ht')
-        .eq('mama_id', mamaId)
-        .order('mois', { ascending: false })
-        .limit(1);
-      if (error) throw error;
-      return data?.[0] ?? { total_ht: 0 };
-    },
-    initialData: { total_ht: 0 },
-  });
+  const { cible, reel, loading } = useBudgetMensuel();
+
+  if (loading) return <LoadingSkeleton className="h-32 w-full rounded-2xl" />;
+  if (!cible && !reel)
+    return (
+      <div className="bg-white/10 rounded-2xl p-4 text-center text-white">
+        Aucune donnée
+      </div>
+    );
+
+  const progress = cible ? Math.min(100, (reel / cible) * 100) : 0;
 
   return (
-    <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
-      <h3 className="font-medium mb-3">Budget mensuel</h3>
-      {isLoading && <div className="animate-pulse h-10 bg-white/10 rounded" />}
-      {error && <div className="text-red-300 text-sm">Erreur: {error.message}</div>}
-      {!isLoading && !error && (
-        <div className="text-2xl font-semibold">{Number(data.total_ht ?? 0).toFixed(2)} €</div>
-      )}
+    <div className="bg-white/10 border border-white/20 backdrop-blur-xl rounded-2xl shadow-md p-4 text-white">
+      <h3 className="font-bold mb-2">Budget mensuel</h3>
+      <div className="text-sm mb-2">Cible : {cible.toFixed(0)} €</div>
+      <div className="text-sm mb-2">Réel : {reel.toFixed(0)} €</div>
+      <Motion.div className="w-full h-2 rounded bg-white/20 overflow-hidden">
+        <Motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${progress}%` }}
+          className="h-2 bg-mamastock-gold"
+        />
+      </Motion.div>
     </div>
   );
 }

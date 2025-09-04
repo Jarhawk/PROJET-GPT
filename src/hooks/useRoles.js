@@ -1,52 +1,41 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/hooks/useAuth';
 
 export function useRoles() {
-  const { mama_id } = useAuth();
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchRoles = useCallback(async () => {
-    if (!mama_id) return [];
+  const fetchRoles = async () => {
     setLoading(true);
     const { data, error } = await supabase
-      .from('roles')
-      .select('id, nom, description, access_rights, actif, mama_id, created_at, updated_at')
-      .eq('mama_id', mama_id)
-      .order('nom', { ascending: true });
-    const rows = error ? [] : Array.isArray(data) ? data : [];
-    if (!error) setRoles(rows);
+      .from("roles")
+      .select("*")
+      .order("nom", { ascending: true });
+    if (!error) setRoles(data);
     setLoading(false);
-    return rows;
-  }, [mama_id]);
+  };
 
-  const addOrUpdateRole = async (role) => {
-    if (!mama_id) return { data: null, error: 'mama_id manquant' };
+  const addOrUpdateRole = async role => {
     const { data, error } = await supabase
-      .from('roles')
-      .upsert({ ...role, mama_id }, { onConflict: 'id' })
-      .select('id, nom, description, access_rights, actif, mama_id, created_at, updated_at')
-      .single();
+      .from("roles")
+      .upsert(role)
+      .select();
     if (!error) fetchRoles();
     return { data, error };
   };
 
   const toggleActif = async (id, actif) => {
-    if (!mama_id) return { error: 'mama_id manquant' };
     const { error } = await supabase
-      .from('roles')
+      .from("roles")
       .update({ actif })
-      .eq('id', id)
-      .eq('mama_id', mama_id);
+      .eq("id", id);
     if (!error) fetchRoles();
-    return { error };
   };
 
   useEffect(() => {
     fetchRoles();
-  }, [fetchRoles]);
+  }, []);
 
   return { roles, loading, fetchRoles, addOrUpdateRole, toggleActif };
 }

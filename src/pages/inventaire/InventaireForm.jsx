@@ -28,10 +28,7 @@ export default function InventaireForm() {
   const [lignes, setLignes] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const zoneSuggestions = [];
-  if (Array.isArray(zones)) {
-    for (const z of zones) zoneSuggestions.push(z.nom);
-  }
+  const zoneSuggestions = zones.map(z => z.nom);
 
 
   useEffect(() => {
@@ -55,37 +52,30 @@ export default function InventaireForm() {
   }
 
   const updateLine = (idx, newLigne) => {
-    const updated = [];
-    for (let i = 0; i < lignes.length; i++) {
-      updated[i] = i === idx ? newLigne : lignes[i];
-    }
-    setLignes(updated);
+    setLignes(lignes.map((l, i) => (i === idx ? newLigne : l)));
   };
 
   const generateLines = () => {
-    const rows = [];
-    if (Array.isArray(produits)) {
-      for (const p of produits) {
-        rows.push({
-          produit_id: p.id,
-          nom: p.nom,
-          unite: p.unite,
-          pmp: p.pmp,
-          stock_theorique: p.stock_theorique,
-          quantite_reelle: p.stock_theorique,
-        });
-      }
-    }
+    const rows = produits.map(p => ({
+      produit_id: p.id,
+      nom: p.nom,
+      unite: p.unite,
+      pmp: p.pmp,
+      stock_theorique: p.stock_theorique,
+      quantite_reelle: p.stock_theorique,
+    }));
     setLignes(rows);
   };
 
-  let totalValeur = 0;
-  let totalEcart = 0;
-  for (const l of lignes) {
-    totalValeur += Number(l.quantite_reelle || 0) * Number(l.pmp || 0);
-    totalEcart +=
-      (Number(l.quantite_reelle || 0) - Number(l.stock_theorique || 0)) * Number(l.pmp || 0);
-  }
+  const totalValeur = lignes.reduce(
+    (s, l) => s + Number(l.quantite_reelle || 0) * Number(l.pmp || 0),
+    0
+  );
+  const totalEcart = lignes.reduce(
+    (s, l) =>
+      s + (Number(l.quantite_reelle || 0) - Number(l.stock_theorique || 0)) * Number(l.pmp || 0),
+    0
+  );
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -95,26 +85,14 @@ export default function InventaireForm() {
       return;
     }
     setLoading(true);
-    let zoneObj = null;
-    if (Array.isArray(zones)) {
-      for (const z of zones) {
-        if (z.nom === zone) {
-          zoneObj = z;
-          break;
-        }
-      }
-    }
-    const lignesPayload = [];
-    for (const l of lignes) {
-      lignesPayload.push({
-        produit_id: l.produit_id,
-        quantite_reelle: Number(l.quantite_reelle || 0),
-      });
-    }
+    const zoneObj = zones.find(z => z.nom === zone);
     const payload = {
       date,
       zone_id: zoneObj?.id,
-      lignes: lignesPayload,
+      lignes: lignes.map(l => ({
+        produit_id: l.produit_id,
+        quantite_reelle: Number(l.quantite_reelle || 0),
+      })),
     };
     try {
       const created = await createInventaire(payload);
@@ -142,15 +120,11 @@ export default function InventaireForm() {
           value={zone}
           onChange={e => setZone(e.target.value)}
         />
-          <datalist id="zones">
-            {(() => {
-              const opts = [];
-              for (const z of zoneSuggestions) {
-                opts.push(<option key={z} value={z} />);
-              }
-              return opts;
-            })()}
-          </datalist>
+        <datalist id="zones">
+          {zoneSuggestions.map(z => (
+            <option key={z} value={z} />
+          ))}
+        </datalist>
       </div>
       <div className="flex justify-end">
         <Button type="button" onClick={generateLines}>Générer lignes</Button>
@@ -168,22 +142,11 @@ export default function InventaireForm() {
                 <th className="p-2">Valeur écart</th>
               </tr>
             </thead>
-              <tbody>
-                {(() => {
-                  const rows = [];
-                  for (let idx = 0; idx < lignes.length; idx++) {
-                    const l = lignes[idx];
-                    rows.push(
-                      <InventaireLigneRow
-                        key={l.produit_id}
-                        ligne={l}
-                        onChange={nl => updateLine(idx, nl)}
-                      />
-                    );
-                  }
-                  return rows;
-                })()}
-              </tbody>
+            <tbody>
+              {lignes.map((l, idx) => (
+                <InventaireLigneRow key={l.produit_id} ligne={l} onChange={nl => updateLine(idx, nl)} />
+              ))}
+            </tbody>
           </table>
         </TableContainer>
       )}

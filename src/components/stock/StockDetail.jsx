@@ -1,20 +1,16 @@
 import React from "react";
 
 export function buildRotationData(mvts) {
-  const array = Array.isArray(mvts) ? mvts : [];
   const byMonth = {};
-  for (const m of array) {
+  mvts.forEach((m) => {
     if (m.type && m.type.toLowerCase() === "sortie") {
       const mois = m.date.slice(0, 7);
       byMonth[mois] = (byMonth[mois] || 0) + m.quantite;
     }
-  }
-  const result = [];
-  const entries = Object.entries(byMonth).sort(([a], [b]) => a.localeCompare(b));
-  for (const [mois, q] of entries) {
-    result.push({ mois, q });
-  }
-  return result;
+  });
+  return Object.entries(byMonth)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([mois, q]) => ({ mois, q }));
 }
 
 export default function StockDetail() {

@@ -13,7 +13,6 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/SmartDialog";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { Badge } from "@/components/ui/badge";
@@ -58,31 +57,19 @@ export default function Logs() {
           <Input type="date" value={filters.end} onChange={(e) => setFilters({ ...filters, end: e.target.value })} />
           <Select value={filters.type} onChange={(e) => setFilters({ ...filters, type: e.target.value })}>
             <option value="">Type</option>
-            {(() => {
-              const opts = [];
-              for (const t of TYPES) {
-                opts.push(
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                );
-              }
-              return opts;
-            })()}
+            {TYPES.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
           </Select>
           <Select value={filters.module} onChange={(e) => setFilters({ ...filters, module: e.target.value })}>
             <option value="">Module</option>
-            {(() => {
-              const opts = [];
-              for (const m of MODULES) {
-                opts.push(
-                  <option key={m} value={m}>
-                    {m}
-                  </option>
-                );
-              }
-              return opts;
-            })()}
+            {MODULES.map((m) => (
+              <option key={m} value={m}>
+                {m}
+              </option>
+            ))}
           </Select>
           <label className="flex items-center gap-1">
             <Checkbox
@@ -114,41 +101,31 @@ export default function Logs() {
               </tr>
             </thead>
             <tbody>
-              {(() => {
-                const rows = [];
-                const list = Array.isArray(logs) ? logs : [];
-                for (const l of list) {
-                  rows.push(
-                    <tr key={l.id} className="align-top">
-                      <td className="border px-2 py-1 whitespace-nowrap">
-                        {new Date(l.date_log).toLocaleString()}
-                      </td>
-                      <td className="border px-2 py-1">{l.utilisateurs?.nom || l.user_id || ""}</td>
-                      <td className="border px-2 py-1">{l.type}</td>
-                      <td className="border px-2 py-1">{l.module}</td>
-                      <td className="border px-2 py-1">{l.description}</td>
-                      <td className="border px-2 py-1">
-                        {l.critique ? <Badge color="red">Critique</Badge> : ""}
-                      </td>
-                      <td className="border px-2 py-1">
-                        <Button size="sm" onClick={() => setDetail(l)}>
-                          Voir détails
-                        </Button>
-                      </td>
-                    </tr>
-                  );
-                }
-                return rows;
-              })()}
+              {logs.map((l) => (
+                <tr key={l.id} className="align-top">
+                  <td className="border px-2 py-1 whitespace-nowrap">
+                    {new Date(l.date_log).toLocaleString()}
+                  </td>
+                  <td className="border px-2 py-1">{l.utilisateurs?.nom || l.user_id || ""}</td>
+                  <td className="border px-2 py-1">{l.type}</td>
+                  <td className="border px-2 py-1">{l.module}</td>
+                  <td className="border px-2 py-1">{l.description}</td>
+                  <td className="border px-2 py-1">
+                    {l.critique ? <Badge color="red">Critique</Badge> : ""}
+                  </td>
+                  <td className="border px-2 py-1">
+                    <Button size="sm" onClick={() => setDetail(l)}>
+                      Voir détails
+                    </Button>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </TableContainer>
       )}
       <Dialog open={!!detail} onOpenChange={() => setDetail(null)}>
         <DialogContent>
-          <DialogDescription className="sr-only">
-            Détails du log sélectionné
-          </DialogDescription>
           <div className="p-4 border-b">
             <DialogTitle>Détails</DialogTitle>
           </div>

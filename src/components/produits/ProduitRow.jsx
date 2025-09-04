@@ -1,4 +1,3 @@
-import { formatEUR, formatQty } from "@/utils/number";
 import { Button } from "@/components/ui/button";
 
 export default function ProduitRow({
@@ -22,14 +21,15 @@ export default function ProduitRow({
         {produit.nom}
       </td>
       <td className="px-2 text-center">{produit.unite?.nom ?? ""}</td>
-      <td className="px-2 text-right">{formatEUR(produit.pmp)}</td>
+      <td className="px-2 text-right">
+        {produit.pmp != null ? Number(produit.pmp).toFixed(2) : "-"}
+      </td>
       <td
         className={
           "px-2 text-right" + (belowMin ? " text-red-600 font-semibold" : "")
         }
       >
-        {formatQty(produit.stock_theorique, 3)}
-        {produit.unite?.nom ? ` ${produit.unite.nom}` : ""}
+        {produit.stock_theorique}
         {rupture && <span className="ml-1 text-red-600">⚠️</span>}
       </td>
       <td

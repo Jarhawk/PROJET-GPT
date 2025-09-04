@@ -8,10 +8,6 @@ process.env.PUBLIC_API_KEY = 'dev_key';
 process.env.VITE_SUPABASE_URL = 'https://example.supabase.co';
 process.env.VITE_SUPABASE_ANON_KEY = 'key';
 
-// Use the real Supabase client rather than the global test mock for these API tests
-delete globalThis.__SUPABASE_TEST_CLIENT__;
-vi.unmock('@/lib/supabase');
-
 const data = [{ id: 'p1' }];
 
 const chain = {
@@ -87,13 +83,14 @@ describe('public API router', () => {
     expect(chain.ilike).toHaveBeenCalledWith('famille', '%bio%');
   });
 
-  it('supports search filter with pagination', async () => {
+  it('supports search and actif filters with pagination', async () => {
     const app = express();
     app.use(router);
     await request(app)
-      .get('/produits?mama_id=m1&search=choc&page=2&limit=20')
+      .get('/produits?mama_id=m1&search=choc&actif=false&page=2&limit=20')
       .set('x-api-key', 'dev_key');
     expect(chain.ilike).toHaveBeenCalledWith('nom', '%choc%');
+    expect(chain.eq).toHaveBeenCalledWith('actif', false);
     expect(chain.range).toHaveBeenCalledWith(20, 39);
   });
 

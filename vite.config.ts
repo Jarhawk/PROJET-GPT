@@ -45,9 +45,6 @@ export default defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)), // 👈 définit @ comme racine de /src
     },
   },
-  server: {
-    hmr: { overlay: false },
-  },
   optimizeDeps: {
     esbuildOptions: {
       sourcemap: false,

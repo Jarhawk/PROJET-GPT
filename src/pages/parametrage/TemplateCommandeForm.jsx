@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 
 export default function TemplateCommandeForm({ template = {}, onClose, fournisseurs = [] }) {
   const { createTemplate, updateTemplate } = useTemplatesCommandes();
-  const fournisseursList = Array.isArray(fournisseurs) ? fournisseurs : [];
   const [nom, setNom] = useState(template.nom || "");
   const [fournisseurId, setFournisseurId] = useState(template.fournisseur_id || "");
   const [logoUrl, setLogoUrl] = useState(template.logo_url || "");
@@ -21,30 +20,6 @@ export default function TemplateCommandeForm({ template = {}, onClose, fournisse
     template.champs_visibles || { ref_commande: true, date_livraison: true }
   );
   const [actif, setActif] = useState(template.actif ?? true);
-  const champKeys = Object.keys(champs || {});
-
-  const fournisseurOptions = [];
-  for (const f of fournisseursList) {
-    fournisseurOptions.push(
-      <option key={f.id} value={f.id}>
-        {f.nom}
-      </option>,
-    );
-  }
-
-  const champCheckboxes = [];
-  for (const champ of champKeys) {
-    champCheckboxes.push(
-      <label key={champ} className="flex items-center gap-1">
-        <input
-          type="checkbox"
-          checked={champs[champ]}
-          onChange={() => toggleChamp(champ)}
-        />
-        {champ}
-      </label>,
-    );
-  }
 
   const handleLogoUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -101,7 +76,11 @@ export default function TemplateCommandeForm({ template = {}, onClose, fournisse
             onChange={(e) => setFournisseurId(e.target.value)}
           >
             <option value="">Générique</option>
-            {fournisseurOptions}
+            {fournisseurs.map((f) => (
+              <option key={f.id} value={f.id}>
+                {f.nom}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -152,7 +131,18 @@ export default function TemplateCommandeForm({ template = {}, onClose, fournisse
 
         <div>
           <label className="block text-sm font-medium">Champs visibles</label>
-          <div className="grid grid-cols-2 gap-2 text-sm">{champCheckboxes}</div>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            {Object.keys(champs).map((champ) => (
+              <label key={champ} className="flex items-center gap-1">
+                <input
+                  type="checkbox"
+                  checked={champs[champ]}
+                  onChange={() => toggleChamp(champ)}
+                />
+                {champ}
+              </label>
+            ))}
+          </div>
         </div>
 
         <div className="flex items-center gap-2">

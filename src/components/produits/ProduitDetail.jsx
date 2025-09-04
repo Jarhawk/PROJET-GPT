@@ -38,48 +38,38 @@ export default function ProduitDetail({ produitId, open, onClose }) {
     };
   }, [open, produitId, fetchProductPrices, fetchProductMouvements, fetchProductStock]);
 
-  const historiqueArray = Array.isArray(historique) ? historique : [];
-  const mouvementsArray = Array.isArray(mouvements) ? mouvements : [];
-  const chartData = buildPriceData(historiqueArray);
-  const summaryMap = {};
-  for (const h of historiqueArray) {
-    const idF = h.fournisseur?.id || "";
-    if (!summaryMap[idF]) {
-      summaryMap[idF] = {
-        nom: h.fournisseur?.nom || "Inconnu",
-        count: 0,
-        total: 0,
-        lastPrice: null,
-        lastDate: null,
-      };
-    }
-    const cur = summaryMap[idF];
-    cur.count += 1;
-    if (typeof h.prix_achat === "number") {
-      cur.total += Number(h.prix_achat);
-    }
-    if (!cur.lastDate || new Date(h.created_at) > new Date(cur.lastDate)) {
-      cur.lastDate = h.created_at;
-      cur.lastPrice = h.prix_achat;
-    }
-  }
-  const summaryArray = [];
-  for (const key in summaryMap) {
-    const s = summaryMap[key];
-    summaryArray.push({
-      ...s,
-      prix_moyen: s.count ? s.total / s.count : null,
-    });
-  }
-  const chartArray = Array.isArray(chartData) ? chartData : [];
+  const chartData = buildPriceData(historique);
+  const summary = Object.values(
+    historique.reduce((acc, h) => {
+      const idF = h.fournisseur?.id || "";
+      if (!acc[idF]) {
+        acc[idF] = {
+          nom: h.fournisseur?.nom || "Inconnu",
+          count: 0,
+          total: 0,
+          lastPrice: null,
+          lastDate: null,
+        };
+      }
+      const cur = acc[idF];
+      cur.count += 1;
+      if (typeof h.prix_achat === "number") {
+        cur.total += Number(h.prix_achat);
+      }
+      if (!cur.lastDate || new Date(h.created_at) > new Date(cur.lastDate)) {
+        cur.lastDate = h.created_at;
+        cur.lastPrice = h.prix_achat;
+      }
+      return acc;
+    }, {})
+  ).map((s) => ({
+    ...s,
+    prix_moyen: s.count ? s.total / s.count : null,
+  }));
 
   const exportExcel = () => {
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(
-      wb,
-      XLSX.utils.json_to_sheet(historiqueArray),
-      "Prix"
-    );
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(historique), "Prix");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     saveAs(new Blob([buf]), `prix_produit_${produitId}.xlsx`);
   };
@@ -106,31 +96,22 @@ export default function ProduitDetail({ produitId, open, onClose }) {
               </tr>
             </thead>
             <tbody>
-              {summaryArray.length === 0 ? (
+              {summary.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="py-4 text-center">
                     Aucun historique
                   </td>
                 </tr>
               ) : (
-                (() => {
-                  const rows = [];
-                  for (let i = 0; i < summaryArray.length; i++) {
-                    const s = summaryArray[i];
-                    rows.push(
-                      <tr key={i}>
-                        <td>{s.nom}</td>
-                        <td>{s.count}</td>
-                        <td>{s.prix_moyen ? s.prix_moyen.toFixed(2) : "-"}</td>
-                        <td>{
-                          s.lastPrice != null ? s.lastPrice.toFixed(2) : "-"
-                        }</td>
-                        <td>{s.lastDate ? s.lastDate.slice(0, 10) : "-"}</td>
-                      </tr>
-                    );
-                  }
-                  return rows;
-                })()
+                summary.map((s, i) => (
+                  <tr key={i}>
+                    <td>{s.nom}</td>
+                    <td>{s.count}</td>
+                    <td>{s.prix_moyen ? s.prix_moyen.toFixed(2) : "-"}</td>
+                    <td>{s.lastPrice != null ? s.lastPrice.toFixed(2) : "-"}</td>
+                    <td>{s.lastDate ? s.lastDate.slice(0, 10) : "-"}</td>
+                  </tr>
+                ))
               )}
             </tbody>
           </table>
@@ -145,61 +126,40 @@ export default function ProduitDetail({ produitId, open, onClose }) {
               </tr>
             </thead>
             <tbody>
-              {historiqueArray.length === 0 ? (
+              {historique.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="text-center py-4">
                     Aucune donnée
                   </td>
                 </tr>
               ) : (
-                (() => {
-                  const rows = [];
-                  for (let i = 0; i < historiqueArray.length; i++) {
-                    const h = historiqueArray[i];
-                    rows.push(
-                      <tr key={i}>
-                        <td>{h.created_at?.slice(0, 10) || "-"}</td>
-                        <td>{h.fournisseur?.nom || "-"}</td>
-                        <td>{h.prix_achat ?? "-"}</td>
-                        <td>{h.derniere_livraison?.slice(0, 10) || "-"}</td>
-                      </tr>
-                    );
-                  }
-                  return rows;
-                })()
+                historique.map((h, i) => (
+                  <tr key={i}>
+                    <td>{h.created_at?.slice(0, 10) || "-"}</td>
+                    <td>{h.fournisseur?.nom || "-"}</td>
+                    <td>{h.prix_achat ?? "-"}</td>
+                    <td>{h.derniere_livraison?.slice(0, 10) || "-"}</td>
+                  </tr>
+                ))
               )}
             </tbody>
           </table>
-          {chartArray.length > 0 && (
+          {chartData.length > 0 && (
             <div className="mt-6">
               <ResponsiveContainer width="100%" height={200}>
                 <LineChart
-                  data={chartArray}
+                  data={chartData}
                   margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
                 >
                   <XAxis dataKey="date" fontSize={11} />
                   <YAxis fontSize={11} />
                   <Tooltip />
                   <Legend />
-                  {(() => {
-                    const elements = [];
-                    if (chartArray.length > 0) {
-                      const keys = Object.keys(chartArray[0]);
-                      for (const key of keys) {
-                        if (key !== "date") {
-                          elements.push(
-                            <Line
-                              key={key}
-                              type="monotone"
-                              dataKey={key}
-                              stroke="#bfa14d"
-                            />
-                          );
-                        }
-                      }
-                    }
-                    return elements;
-                  })()}
+                  {Object.keys(chartData[0])
+                    .filter((k) => k !== "date")
+                    .map((key) => (
+                      <Line key={key} type="monotone" dataKey={key} stroke="#bfa14d" />
+                    ))}
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -216,29 +176,22 @@ export default function ProduitDetail({ produitId, open, onClose }) {
               </tr>
             </thead>
             <tbody>
-              {mouvementsArray.length === 0 ? (
+              {mouvements.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="text-center py-4">
                     Aucun mouvement
                   </td>
                 </tr>
               ) : (
-                (() => {
-                  const rows = [];
-                  for (let i = 0; i < mouvementsArray.length; i++) {
-                    const m = mouvementsArray[i];
-                    rows.push(
-                      <tr key={m.id}>
-                        <td>{m.date?.slice(0, 10) || "-"}</td>
-                        <td>{m.type}</td>
-                        <td>{m.quantite}</td>
-                        <td>{m.zone_source?.nom || "-"}</td>
-                        <td>{m.zone_destination?.nom || "-"}</td>
-                      </tr>
-                    );
-                  }
-                  return rows;
-                })()
+                mouvements.map((m) => (
+                  <tr key={m.id}>
+                    <td>{m.date?.slice(0, 10) || "-"}</td>
+                    <td>{m.type}</td>
+                    <td>{m.quantite}</td>
+                    <td>{m.zone_source?.nom || "-"}</td>
+                    <td>{m.zone_destination?.nom || "-"}</td>
+                  </tr>
+                ))
               )}
             </tbody>
           </table>

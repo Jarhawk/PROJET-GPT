@@ -11,17 +11,14 @@ export function useFournisseursInactifs() {
     if (!mama_id) return [];
     const { data, error } = await supabase
       .from('v_fournisseurs_inactifs')
-      .select(
-        'id:fournisseur_id, nom, fournisseur_actif, facture_actif, dernier_achat, mama_id'
-      )
+      .select('*')
       .eq('mama_id', mama_id);
     if (error) {
       setFournisseurs([]);
       return [];
     }
-    const list = Array.isArray(data) ? data : [];
-    setFournisseurs(list);
-    return list;
+    setFournisseurs(Array.isArray(data) ? data : []);
+    return data || [];
   }
 
   return { fournisseurs, fetchInactifs };

@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 export default function AlertesRupture() {
   const { fetchAlerts, generateSuggestions } = useRuptureAlerts();
   const [alerts, setAlerts] = useState([]);
+  const [type, setType] = useState(null);
 
   const load = useCallback(async () => {
-    const data = await fetchAlerts();
-    setAlerts(Array.isArray(data) ? data : []);
-  }, [fetchAlerts]);
+    const data = await fetchAlerts(type);
+    setAlerts(data);
+  }, [fetchAlerts, type]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -17,36 +18,26 @@ export default function AlertesRupture() {
     <div className="p-6">
       <h1 className="text-2xl mb-4">Alertes rupture</h1>
       <div className="flex gap-2 mb-4">
+        <Button onClick={() => setType(null)}>Tous</Button>
+        <Button onClick={() => setType('rupture')}>Ruptures</Button>
+        <Button onClick={() => setType('prevision')}>Prévisions</Button>
         <Button onClick={() => generateSuggestions()}>Générer commande fournisseur</Button>
       </div>
       <table className="min-w-full text-sm">
         <thead>
-          <tr><th>Produit</th><th>Stock actuel</th><th>Stock min</th><th>Manque</th></tr>
+          <tr><th>Produit</th><th>Actuel</th><th>Proj.</th></tr>
         </thead>
         <tbody>
-          {(() => {
-            const list = Array.isArray(alerts) ? alerts : [];
-            const rows = [];
-            for (let i = 0; i < list.length; i++) {
-              const a = list[i];
-              rows.push(
-                <tr key={a.produit_id} className="border-t">
-                  <td className="px-2 py-1">{a.nom}</td>
-                  <td className="px-2 py-1">{a.stock_actuel}</td>
-                  <td className="px-2 py-1">{a.stock_min}</td>
-                  <td className="px-2 py-1">{a.manque}</td>
-                </tr>
-              );
-            }
-            if (rows.length === 0) {
-              rows.push(
-                <tr key="empty">
-                  <td colSpan={4} className="text-center p-2">Aucune alerte</td>
-                </tr>
-              );
-            }
-            return rows;
-          })()}
+          {alerts.map(a => (
+            <tr key={a.id} className="border-t">
+              <td className="px-2 py-1">{a.nom}</td>
+              <td className="px-2 py-1">{a.stock_actuel}</td>
+              <td className="px-2 py-1">{a.stock_projete}</td>
+            </tr>
+          ))}
+          {alerts.length === 0 && (
+            <tr><td colSpan={3} className="text-center p-2">Aucune alerte</td></tr>
+          )}
         </tbody>
       </table>
     </div>

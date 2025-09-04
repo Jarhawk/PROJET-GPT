@@ -21,9 +21,8 @@ export default function useProduitsUtilises() {
         .eq('mama_id', mama_id)
         .gte('date_utilisation', start.toISOString().slice(0, 10));
       if (error) throw error;
-      const rows = Array.isArray(data) ? data : [];
       const totals = {};
-      rows.forEach((r) => {
+      (data || []).forEach((r) => {
         const id = r.produit_id;
         if (!totals[id]) {
           totals[id] = { id, nom: r.produit_nom, total: 0 };
@@ -37,7 +36,7 @@ export default function useProduitsUtilises() {
       }
       return list;
     } catch (e) {
-      console.warn('[gadgets] vue manquante ou colonne absente:', e?.message || e);
+      console.warn('useProduitsUtilises', e);
       setError(e);
       setData([]);
       return [];

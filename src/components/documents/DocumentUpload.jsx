@@ -11,7 +11,6 @@ export default function DocumentUpload({
   const inputRef = useRef(null);
   const [files, setFiles] = useState([]);
   const [categorie, setCategorie] = useState("");
-  const cats = Array.isArray(categories) ? categories : [];
 
   const handleFiles = (list) => {
     setFiles(Array.from(list || []));
@@ -64,17 +63,9 @@ export default function DocumentUpload({
         onChange={(e) => setCategorie(e.target.value)}
       >
         <option value="">Catégorie</option>
-        {(() => {
-          const opts = []
-          for (const c of cats) {
-            opts.push(
-              <option key={c} value={c}>
-                {c}
-              </option>
-            )
-          }
-          return opts
-        })()}
+        {categories.map((c) => (
+          <option key={c} value={c}>{c}</option>
+        ))}
       </select>
       {files.length > 0 && (
         <Button onClick={upload}>Uploader</Button>

@@ -1,6 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
 import { vi, beforeEach, test, expect } from 'vitest';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 let fromMock;
 let insertMock;
@@ -24,20 +23,15 @@ function setup(initial = []) {
 }
 
 let useProducts;
-let wrapper;
 
 beforeEach(async () => {
   insertMock = vi.fn(() => query);
   setup([{ id: '1', nom: 'P', famille: 'F', unite: 'kg', pmp: 5 }]);
   ({ useProducts } = await import('@/hooks/useProducts'));
-  const qc = new QueryClient();
-  wrapper = ({ children }) => (
-    <QueryClientProvider client={qc}>{children}</QueryClientProvider>
-  );
 });
 
 test('duplicateProduct omits pmp field', async () => {
-  const { result } = renderHook(() => useProducts(), { wrapper });
+  const { result } = renderHook(() => useProducts());
   await act(async () => {
     await result.current.fetchProducts();
   });

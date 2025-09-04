@@ -15,9 +15,6 @@ export default function Achats() {
   const { achats, total, getAchats, deleteAchat } = useAchats();
   const { data: fournisseurs = [] } = useFournisseurs({ actif: true });
   const { results: produitOptions, searchProduits } = useProduitsAutocomplete();
-  const fournisseursList = Array.isArray(fournisseurs) ? fournisseurs : [];
-  const produitList = Array.isArray(produitOptions) ? produitOptions : [];
-  const achatsList = Array.isArray(achats) ? achats : [];
   const [produit, setProduit] = useState("");
   const [fournisseur, setFournisseur] = useState("");
   const [month, setMonth] = useState("");
@@ -55,13 +52,7 @@ export default function Achats() {
             <GlassCard className="flex flex-wrap gap-2 items-end">
         <select className="form-input" value={fournisseur} onChange={e => { setFournisseur(e.target.value); setPage(1); }}>
           <option value="">Tous fournisseurs</option>
-          {(() => {
-            const opts = [];
-            for (const s of fournisseursList) {
-              opts.push(<option key={s.id} value={s.id}>{s.nom}</option>);
-            }
-            return opts;
-          })()}
+          {fournisseurs.map(s => <option key={s.id} value={s.id}>{s.nom}</option>)}
         </select>
         <input
           list="produits-list"
@@ -70,15 +61,7 @@ export default function Achats() {
           onChange={e => { setProduit(e.target.value); setPage(1); if (e.target.value.length >= 2) searchProduits(e.target.value); }}
           placeholder="Produit"
         />
-        <datalist id="produits-list">
-          {(() => {
-            const opts = [];
-            for (const p of produitList) {
-              opts.push(<option key={p.id} value={p.nom} />);
-            }
-            return opts;
-          })()}
-        </datalist>
+        <datalist id="produits-list">{produitOptions.map(p => <option key={p.id} value={p.nom} />)}</datalist>
         <input
           type="month"
           className="form-input"
@@ -124,33 +107,27 @@ export default function Achats() {
             </tr>
           </thead>
           <tbody>
-            {(() => {
-              const rows = [];
-              for (const a of achatsList) {
-                rows.push(
-                  <AchatRow
-                    key={a.id}
-                    achat={a}
-                    canEdit={canEdit}
-                    onEdit={(ac) => {
-                      setSelected(ac);
-                      setShowForm(true);
-                    }}
-                    onDetail={(ac) => {
-                      setSelected(ac);
-                      setShowDetail(true);
-                    }}
-                    onArchive={async (id) => {
-                      if (window.confirm("Archiver cet achat ?")) {
-                        await deleteAchat(id);
-                        refreshList();
-                      }
-                    }}
-                  />
-                );
-              }
-              return rows;
-            })()}
+            {achats.map((a) => (
+              <AchatRow
+                key={a.id}
+                achat={a}
+                canEdit={canEdit}
+                onEdit={(ac) => {
+                  setSelected(ac);
+                  setShowForm(true);
+                }}
+                onDetail={(ac) => {
+                  setSelected(ac);
+                  setShowDetail(true);
+                }}
+                onArchive={async (id) => {
+                  if (window.confirm("Archiver cet achat ?")) {
+                    await deleteAchat(id);
+                    refreshList();
+                  }
+                }}
+              />
+            ))}
           </tbody>
         </table>
       </TableContainer>
@@ -162,7 +139,7 @@ export default function Achats() {
       {showForm && (
         <AchatForm
           achat={selected}
-          fournisseurs={fournisseursList}
+          fournisseurs={fournisseurs}
           onClose={() => {
             setShowForm(false);
             setSelected(null);

@@ -26,8 +26,7 @@ export default function ComparatifPrix() {
           .order("nom", { ascending: true });
 
         if (error) throw error;
-        const rows = Array.isArray(data) ? data : [];
-        setProduits(rows);
+        setProduits(data || []);
       } catch (err) {
         console.error("Erreur chargement produits :", err.message);
         setError(err);
@@ -42,16 +41,6 @@ export default function ComparatifPrix() {
 
   if (loading) {
     return <LoadingSpinner message="Chargement..." />;
-  }
-
-  const liste = Array.isArray(produits) ? produits : [];
-  const options = [];
-  for (const p of liste) {
-    options.push(
-      <option key={p.id} value={p.id}>
-        {p.nom}
-      </option>
-    );
   }
 
   return (
@@ -74,7 +63,11 @@ export default function ComparatifPrix() {
         ariaLabel="Sélection produit"
       >
         <option value="">-- Choisir un produit --</option>
-        {options}
+        {produits.map((p) => (
+          <option key={p.id} value={p.id}>
+            {p.nom}
+          </option>
+        ))}
       </Select>
 
       {produitId && <PrixFournisseurs produitId={produitId} />}

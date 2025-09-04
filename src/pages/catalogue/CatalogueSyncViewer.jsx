@@ -17,15 +17,12 @@ export default function CatalogueSyncViewer({ fournisseur_id }) {
     setLoading(true);
     let query = supabase
       .from("catalogue_updates")
-      .select(
-        "id, mama_id, fournisseur_id, produit_id, ancienne_valeur, nouvelle_valeur, modification, created_at, produit:produit_id(nom)"
-      )
+      .select("*, produit:produit_id(nom)")
       .eq("mama_id", mama_id)
       .order("created_at", { ascending: false });
     if (fournisseur_id) query = query.eq("fournisseur_id", fournisseur_id);
     query.then(({ data }) => {
-      const rows = Array.isArray(data) ? data : [];
-      setItems(rows);
+      setItems(data || []);
       setLoading(false);
     });
   }, [mama_id, fournisseur_id]);
@@ -48,14 +45,7 @@ export default function CatalogueSyncViewer({ fournisseur_id }) {
       .delete()
       .eq("id", row.id)
       .eq("mama_id", mama_id);
-    setItems((it) => {
-      const arr = Array.isArray(it) ? it : [];
-      const out = [];
-      for (const i of arr) {
-        if (i.id !== row.id) out.push(i);
-      }
-      return out;
-    });
+    setItems((it) => it.filter((i) => i.id !== row.id));
     toast.success("Modification appliquée");
   };
 
@@ -65,14 +55,7 @@ export default function CatalogueSyncViewer({ fournisseur_id }) {
       .delete()
       .eq("id", id)
       .eq("mama_id", mama_id);
-    setItems((it) => {
-      const arr = Array.isArray(it) ? it : [];
-      const out = [];
-      for (const i of arr) {
-        if (i.id !== id) out.push(i);
-      }
-      return out;
-    });
+    setItems((it) => it.filter((i) => i.id !== id));
   };
 
   if (loading) return <LoadingSpinner message="Chargement..." />;
@@ -91,32 +74,25 @@ export default function CatalogueSyncViewer({ fournisseur_id }) {
             </tr>
           </thead>
           <tbody>
-            {(() => {
-              const rows = [];
-              const list = Array.isArray(items) ? items : [];
-              for (const u of list) {
-                rows.push(
-                  <tr key={u.id}>
-                    <td className="border px-2 py-1">{u.produit?.nom || u.produit_id}</td>
-                    <td className="border px-2 py-1">{u.ancienne_valeur}</td>
-                    <td className="border px-2 py-1">{u.nouvelle_valeur}</td>
-                    <td className="border px-2 py-1 space-x-1">
-                      <Button size="sm" onClick={() => acceptUpdate(u)}>
-                        Accepter
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => rejectUpdate(u.id)}
-                      >
-                        Rejeter
-                      </Button>
-                    </td>
-                  </tr>
-                );
-              }
-              return rows;
-            })()}
+            {items.map((u) => (
+              <tr key={u.id}>
+                <td className="border px-2 py-1">{u.produit?.nom || u.produit_id}</td>
+                <td className="border px-2 py-1">{u.ancienne_valeur}</td>
+                <td className="border px-2 py-1">{u.nouvelle_valeur}</td>
+                <td className="border px-2 py-1 space-x-1">
+                  <Button size="sm" onClick={() => acceptUpdate(u)}>
+                    Accepter
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => rejectUpdate(u.id)}
+                  >
+                    Rejeter
+                  </Button>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </TableContainer>

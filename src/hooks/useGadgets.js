@@ -20,7 +20,6 @@ export function useGadgets() {
       .single();
     setLoading(false);
     if (error) {
-      console.warn('[gadgets] vue manquante ou colonne absente:', error?.message || error);
       setError(error.message || error);
       setGadgets([]);
       return [];
@@ -43,7 +42,6 @@ export function useGadgets() {
         );
       setLoading(false);
       if (error) {
-        console.warn('[gadgets] vue manquante ou colonne absente:', error?.message || error);
         setError(error.message || error);
         return null;
       }
@@ -61,13 +59,10 @@ export function useGadgets() {
       const { data, error } = await supabase
         .from('gadgets')
         .insert([{ ...gadget, mama_id }])
-        .select(
-          'id, tableau_id, type, config, created_at, mama_id, actif, nom, ordre, configuration_json'
-        )
+        .select()
         .single();
       setLoading(false);
       if (error) {
-        console.warn('[gadgets] vue manquante ou colonne absente:', error?.message || error);
         setError(error.message || error);
         return null;
       }
@@ -86,13 +81,10 @@ export function useGadgets() {
         .update(values)
         .eq('id', id)
         .eq('mama_id', mama_id)
-        .select(
-          'id, tableau_id, type, config, created_at, mama_id, actif, nom, ordre, configuration_json'
-        )
+        .select()
         .single();
       setLoading(false);
       if (error) {
-        console.warn('[gadgets] vue manquante ou colonne absente:', error?.message || error);
         setError(error.message || error);
         return null;
       }
@@ -113,7 +105,6 @@ export function useGadgets() {
         .eq('mama_id', mama_id);
       setLoading(false);
       if (error) {
-        console.warn('[gadgets] vue manquante ou colonne absente:', error?.message || error);
         setError(error.message || error);
       }
     },

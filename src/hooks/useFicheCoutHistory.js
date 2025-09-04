@@ -16,23 +16,13 @@ export function useFicheCoutHistory() {
     try {
       const { data, error } = await supabase
         .from("fiche_cout_history")
-        .select("id, mama_id, fiche_id, old_cout, new_cout, changed_by, changed_at, created_at, updated_at, actif")
+        .select("*")
         .eq("fiche_id", fiche_id)
         .eq("mama_id", mama_id)
         .order("changed_at", { ascending: false });
 
       if (error) throw error;
-      const rows = [];
-      if (Array.isArray(data)) {
-        for (const d of data) {
-          rows.push({
-            ...d,
-            old_cout: d.old_cout ? Number(d.old_cout) : null,
-            new_cout: d.new_cout ? Number(d.new_cout) : null,
-          });
-        }
-      }
-      setHistory(rows);
+      setHistory(Array.isArray(data) ? data : []);
     } catch (err) {
       setError(err.message || "Erreur chargement historique coût fiche.");
       setHistory([]);

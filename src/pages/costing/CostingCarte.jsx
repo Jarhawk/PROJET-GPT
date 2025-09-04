@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 export default function CostingCarte() {
   const { role, loading: authLoading, access_rights } = useAuth()
   const {
-    data: rawData,
+    data,
     settings,
     loading,
     error,
@@ -19,10 +19,6 @@ export default function CostingCarte() {
     exportExcel,
     exportPdf,
   } = useCostingCarte()
-  const data = useMemo(
-    () => (Array.isArray(rawData) ? rawData : []),
-    [rawData]
-  )
 
   const [typeFilter, setTypeFilter] = useState('')
   const [familleFilter, setFamilleFilter] = useState('')
@@ -33,47 +29,31 @@ export default function CostingCarte() {
     fetchSettings()
   }, [fetchCosting, fetchSettings])
 
-  const familles = useMemo(() => {
-    const source = Array.isArray(data) ? data : []
-    const set = new Set()
-    for (const f of source) {
-      if (f && f.famille) set.add(f.famille)
-    }
-    const arr = []
-    for (const val of set) arr.push(val)
-    arr.sort()
-    return arr
-  }, [data])
+  const familles = useMemo(
+    () => Array.from(new Set(data.map((f) => f.famille).filter(Boolean))).sort(),
+    [data]
+  )
 
-  const filtered = useMemo(() => {
-    const arr = []
-    for (const f of data) {
-      if (typeFilter && f.type !== typeFilter) continue
-      if (familleFilter && f.famille !== familleFilter) continue
-      if (actifFilter !== '' && f.actif !== (actifFilter === 'true')) continue
-      arr.push(f)
-    }
-    return arr
-  }, [data, typeFilter, familleFilter, actifFilter])
+  const filtered = data
+    .filter((f) => (!typeFilter || f.type === typeFilter))
+    .filter((f) => (!familleFilter || f.famille === familleFilter))
+    .filter((f) => (actifFilter === '' ? true : f.actif === (actifFilter === 'true')))
 
   const kpis = useMemo(() => {
     if (filtered.length === 0) return { marge: 0, food: 0, under: 0 }
-    let sumMarge = 0
-    let sumFood = 0
-    let under = 0
-    for (const f of filtered) {
-      sumMarge += f.marge_pct || 0
-      sumFood += f.food_cost_pct || 0
-      if (
+    const avgMarge =
+      filtered.reduce((sum, f) => sum + (f.marge_pct || 0), 0) / filtered.length
+    const avgFood =
+      filtered.reduce((sum, f) => sum + (f.food_cost_pct || 0), 0) /
+      filtered.length
+    const under = filtered.filter(
+      (f) =>
         (settings?.objectif_marge_pct &&
           f.marge_pct < settings.objectif_marge_pct) ||
         (settings?.objectif_food_cost_pct &&
           f.food_cost_pct > settings.objectif_food_cost_pct)
-      ) {
-        under++
-      }
-    }
-    return { marge: sumMarge / filtered.length, food: sumFood / filtered.length, under }
+    ).length
+    return { marge: avgMarge, food: avgFood, under }
   }, [filtered, settings])
 
   if (authLoading) return <LoadingSpinner message="Chargement..." />
@@ -111,18 +91,11 @@ export default function CostingCarte() {
             onChange={(e) => setFamilleFilter(e.target.value)}
           >
             <option value="">Toutes</option>
-            {(() => {
-              const opts = []
-              const source = Array.isArray(familles) ? familles : []
-              for (const f of source) {
-                opts.push(
-                  <option key={f} value={f}>
-                    {f}
-                  </option>
-                )
-              }
-              return opts
-            })()}
+            {familles.map((f) => (
+              <option key={f} value={f}>
+                {f}
+              </option>
+            ))}
           </select>
         </label>
         <label className="flex flex-col text-sm">
@@ -185,52 +158,49 @@ export default function CostingCarte() {
                 </tr>
               </thead>
               <tbody>
-                {(() => {
-                  const rows = []
-                  for (const f of filtered) {
-                    const alertMarge =
-                      settings?.objectif_marge_pct != null &&
-                      f.marge_pct < settings.objectif_marge_pct
-                    const alertFood =
-                      settings?.objectif_food_cost_pct != null &&
-                      f.food_cost_pct > settings.objectif_food_cost_pct
-                    rows.push(
-                      <tr key={f.fiche_id}>
-                        <td className="border px-2 py-1">{f.nom}</td>
-                        <td className="border px-2 py-1">{f.type}</td>
-                        <td className="border px-2 py-1 text-right">
-                          {f.cout_par_portion?.toFixed(2)}
-                        </td>
-                        <td className="border px-2 py-1 text-right">
-                          {f.prix_vente?.toFixed(2)}
-                        </td>
-                        <td className="border px-2 py-1 text-right">
-                          {f.marge_euro?.toFixed(2)}
-                        </td>
-                        <td className="border px-2 py-1 text-right">
-                          {f.marge_pct?.toFixed(2)}
-                        </td>
-                        <td className="border px-2 py-1 text-right">
-                          {f.food_cost_pct?.toFixed(2)}
-                        </td>
-                        <td className="border px-2 py-1">
-                          {alertMarge && alertBadge('M', 'red')}
-                          {alertFood && alertBadge('FC', 'orange')}
-                        </td>
-                      </tr>
-                    )
-                  }
-                  if (rows.length === 0) {
-                    rows.push(
-                      <tr key="empty">
-                        <td colSpan="8" className="p-4 text-center text-gray-500">
-                          Aucune fiche
-                        </td>
-                      </tr>
-                    )
-                  }
-                  return rows
-                })()}
+                {filtered.map((f) => {
+                  const alertMarge =
+                    settings?.objectif_marge_pct != null &&
+                    f.marge_pct < settings.objectif_marge_pct
+                  const alertFood =
+                    settings?.objectif_food_cost_pct != null &&
+                    f.food_cost_pct > settings.objectif_food_cost_pct
+                  return (
+                    <tr key={f.fiche_id}>
+                      <td className="border px-2 py-1">{f.nom}</td>
+                      <td className="border px-2 py-1">{f.type}</td>
+                      <td className="border px-2 py-1 text-right">
+                        {f.cout_par_portion?.toFixed(2)}
+                      </td>
+                      <td className="border px-2 py-1 text-right">
+                        {f.prix_vente?.toFixed(2)}
+                      </td>
+                      <td className="border px-2 py-1 text-right">
+                        {f.marge_euro?.toFixed(2)}
+                      </td>
+                      <td className="border px-2 py-1 text-right">
+                        {f.marge_pct?.toFixed(2)}
+                      </td>
+                      <td className="border px-2 py-1 text-right">
+                        {f.food_cost_pct?.toFixed(2)}
+                      </td>
+                      <td className="border px-2 py-1">
+                        {alertMarge && alertBadge('M', 'red')}
+                        {alertFood && alertBadge('FC', 'orange')}
+                      </td>
+                    </tr>
+                  )
+                })}
+                {filtered.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan="8"
+                      className="p-4 text-center text-gray-500"
+                    >
+                      Aucune fiche
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

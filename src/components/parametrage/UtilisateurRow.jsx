@@ -87,14 +87,9 @@ export default function UtilisateurRow({
             <div>
               <b>Connexions récentes :</b>
               <ul>
-                {(() => {
-                  const items = [];
-                  for (let i = 0; i < history.length; i++) {
-                    const h = history[i];
-                    items.push(<li key={i}>{h.date} — IP {h.ip}</li>);
-                  }
-                  return items;
-                })()}
+                {history.map((h, i) => (
+                  <li key={i}>{h.date} — IP {h.ip}</li>
+                ))}
               </ul>
             </div>
           </td>

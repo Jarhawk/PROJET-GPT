@@ -18,13 +18,13 @@ export default function Planning() {
   const [fin, setFin] = useState('');
   const [loading, setLoading] = useState(false);
 
-    const fetchData = async () => {
-      if (!mama_id) return;
-      setLoading(true);
-      const { data } = await getPlannings({ statut, debut, fin });
-      setItems(Array.isArray(data) ? data : []);
-      setLoading(false);
-    };
+  const fetchData = async () => {
+    if (!mama_id) return;
+    setLoading(true);
+    const { data } = await getPlannings({ statut, debut, fin });
+    setItems(data || []);
+    setLoading(false);
+  };
 
   useEffect(() => {
     if (!authLoading && mama_id) {
@@ -64,50 +64,37 @@ export default function Planning() {
           </Link>
         )}
       </div>
-        {authLoading || loading ? (
-          <LoadingSpinner message="Chargement..." />
-        ) : (
-          <TableContainer>
-            <table className="min-w-full text-sm">
-              <thead>
-                <tr>
-                  <th className="px-2 py-1 text-left">Date</th>
-                  <th className="px-2 py-1 text-left">Nom</th>
-                  <th className="px-2 py-1 text-left">Statut</th>
+      {authLoading || loading ? (
+        <LoadingSpinner message="Chargement..." />
+      ) : (
+        <TableContainer>
+          <table className="min-w-full text-sm">
+            <thead>
+              <tr>
+                <th className="px-2 py-1 text-left">Date</th>
+                <th className="px-2 py-1 text-left">Nom</th>
+                <th className="px-2 py-1 text-left">Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((p) => (
+                <tr key={p.id} className="hover:bg-white/5">
+                  <td className="px-2 py-1 whitespace-nowrap">
+                    <Link
+                      to={`/planning/${p.id}`}
+                      className="text-mamastockGold hover:underline"
+                    >
+                      {p.date_prevue}
+                    </Link>
+                  </td>
+                  <td className="px-2 py-1">{p.nom}</td>
+                  <td className="px-2 py-1">{p.statut}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {(() => {
-                  const rows = [];
-                  for (const p of items) {
-                    rows.push(
-                      <tr key={p.id} className="hover:bg-white/5">
-                        <td className="px-2 py-1 whitespace-nowrap">
-                          <Link
-                            to={`/planning/${p.id}`}
-                            className="text-mamastockGold hover:underline"
-                          >
-                            {p.date_prevue}
-                          </Link>
-                        </td>
-                        <td className="px-2 py-1">{p.nom}</td>
-                        <td className="px-2 py-1">{p.statut}</td>
-                      </tr>
-                    );
-                  }
-                  return rows;
-                })()}
-                {items.length === 0 && (
-                  <tr>
-                    <td colSpan="3" className="text-center py-4 text-gray-500">
-                      Aucun planning
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </TableContainer>
-        )}
-      </div>
-    );
-  }
+              ))}
+            </tbody>
+          </table>
+        </TableContainer>
+      )}
+    </div>
+  );
+}

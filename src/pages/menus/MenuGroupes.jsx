@@ -14,28 +14,6 @@ export default function MenuGroupes() {
     fetchMenusGroupes({ q, statut: statut || undefined, actif });
   }, [q, statut, actif]);
 
-  const menusList = Array.isArray(menus) ? menus : [];
-
-  const bodyRows = [];
-  for (const m of menusList) {
-    bodyRows.push(
-      <tr key={m.id}>
-        <td>
-          <Link to={`/menu-groupes/${m.id}`}>{m.nom}</Link>
-        </td>
-        <td>{m.statut}</td>
-        <td>{m.actif ? 'oui' : 'non'}</td>
-        <td>{Number(m.resume?.cout_par_personne || 0).toFixed(2)}</td>
-        <td>{Number(m.prix_vente_personne || 0).toFixed(2)}</td>
-        <td>{m.resume?.marge_pct ?? ''}</td>
-        <td>
-          <button onClick={() => exportExcel(m.id)}>Excel</button>
-          <button onClick={() => archiver(m.id)}>Archiver</button>
-        </td>
-      </tr>
-    );
-  }
-
   return (
     <div>
       <h1>Menu groupe</h1>
@@ -76,7 +54,24 @@ export default function MenuGroupes() {
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody>{bodyRows}</tbody>
+        <tbody>
+          {menus.map((m) => (
+            <tr key={m.id}>
+              <td>
+                <Link to={`/menu-groupes/${m.id}`}>{m.nom}</Link>
+              </td>
+              <td>{m.statut}</td>
+              <td>{m.actif ? 'oui' : 'non'}</td>
+              <td>{Number(m.resume?.cout_par_personne || 0).toFixed(2)}</td>
+              <td>{Number(m.prix_vente_personne || 0).toFixed(2)}</td>
+              <td>{m.resume?.marge_pct ?? ''}</td>
+              <td>
+                <button onClick={() => exportExcel(m.id)}>Excel</button>
+                <button onClick={() => archiver(m.id)}>Archiver</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
       </table>
     </div>
   );

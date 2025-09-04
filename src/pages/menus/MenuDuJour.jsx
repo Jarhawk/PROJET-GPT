@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useMenuDuJour } from "@/hooks/useMenuDuJour";
 import { useFiches } from "@/hooks/useFiches";
 import { useAuth } from '@/hooks/useAuth';
-import { Navigate } from 'react-router-dom';
 import MenuDuJourForm from "./MenuDuJourForm.jsx";
 import MenuDuJourDetail from "./MenuDuJourDetail.jsx";
 import { Button } from "@/components/ui/button";
@@ -14,7 +13,7 @@ import { motion as Motion } from "framer-motion";
 export default function MenuDuJour() {
   const { menusDuJour, fetchMenusDuJour, deleteMenuDuJour, exportMenusDuJourToExcel } = useMenuDuJour();
   const { fiches, fetchFiches } = useFiches();
-  const { mama_id, loading: authLoading, access_rights } = useAuth();
+  const { mama_id, loading: authLoading } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected] = useState(null);
@@ -28,17 +27,10 @@ export default function MenuDuJour() {
     }
   }, [authLoading, mama_id, search, dateFilter, fetchMenusDuJour, fetchFiches]);
 
-  const list = Array.isArray(menusDuJour) ? menusDuJour : [];
-  const menusFiltres = [];
-  for (let i = 0; i < list.length; i++) {
-    const m = list[i];
-    if (
-      (!search || m.nom?.toLowerCase().includes(search.toLowerCase())) &&
-      (!dateFilter || m.date === dateFilter)
-    ) {
-      menusFiltres.push(m);
-    }
-  }
+  const menusFiltres = menusDuJour.filter(m =>
+    (!search || m.nom?.toLowerCase().includes(search.toLowerCase())) &&
+    (!dateFilter || m.date === dateFilter)
+  );
 
   const exportExcel = () => {
     exportMenusDuJourToExcel();
@@ -51,10 +43,6 @@ export default function MenuDuJour() {
       toast.success("Menu du jour supprimé.");
     }
   };
-
-  if (!access_rights?.menus_jour?.peut_voir) {
-    return <Navigate to="/unauthorized" replace />;
-  }
 
   return (
     <div className="p-6 container mx-auto">
@@ -72,11 +60,9 @@ export default function MenuDuJour() {
           onChange={e => setDateFilter(e.target.value)}
           className="form-input"
         />
-        {access_rights?.menus_jour?.peut_modifier && (
-          <Button onClick={() => { setSelected(null); setShowForm(true); }}>
-            Ajouter un menu du jour
-          </Button>
-        )}
+        <Button onClick={() => { setSelected(null); setShowForm(true); }}>
+          Ajouter un menu du jour
+        </Button>
         <Button variant="outline" onClick={exportExcel}>Export Excel</Button>
       </div>
       <TableContainer as={Motion.table} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-2">
@@ -92,58 +78,43 @@ export default function MenuDuJour() {
           </tr>
         </thead>
         <tbody>
-          {(() => {
-            const rows = [];
-            for (let i = 0; i < menusFiltres.length; i++) {
-              const menu = menusFiltres[i];
-              const fichesList = Array.isArray(menu.fiches) ? menu.fiches : [];
-              const noms = [];
-              for (let j = 0; j < fichesList.length; j++) {
-                const f = fichesList[j];
-                noms.push(f.nom);
-              }
-              rows.push(
-                <tr key={menu.id}>
-                  <td className="border px-4 py-2">{menu.date}</td>
-                  <td className="border px-4 py-2">
-                    <Button
-                      variant="link"
-                      className="font-semibold text-mamastockGold"
-                      onClick={() => { setSelected(menu); setShowDetail(true); }}
-                    >
-                      {menu.nom}
-                    </Button>
-                  </td>
-                  <td className="border px-4 py-2">{noms.join(", ")}</td>
-                  <td className="border px-4 py-2">{menu.cout_total?.toFixed(2)} €</td>
-                  <td className="border px-4 py-2">{menu.marge != null ? `${menu.marge.toFixed(1)}%` : '-'}</td>
-                  <td className="border px-4 py-2">
-                    {access_rights?.menus_jour?.peut_modifier && (
-                      <>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="mr-2"
-                          onClick={() => { setSelected(menu); setShowForm(true); }}
-                        >
-                          Modifier
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="mr-2"
-                          onClick={() => handleDelete(menu)}
-                        >
-                          Supprimer
-                        </Button>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              );
-            }
-            return rows;
-          })()}
+          {menusFiltres.map(menu => (
+            <tr key={menu.id}>
+              <td className="border px-4 py-2">{menu.date}</td>
+              <td className="border px-4 py-2">
+                <Button
+                  variant="link"
+                  className="font-semibold text-mamastockGold"
+                  onClick={() => { setSelected(menu); setShowDetail(true); }}
+                >
+                  {menu.nom}
+                </Button>
+              </td>
+              <td className="border px-4 py-2">
+                {menu.fiches?.map(f => f.nom).join(", ")}
+              </td>
+              <td className="border px-4 py-2">{menu.cout_total?.toFixed(2)} €</td>
+              <td className="border px-4 py-2">{menu.marge != null ? `${menu.marge.toFixed(1)}%` : '-'}</td>
+              <td className="border px-4 py-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="mr-2"
+                  onClick={() => { setSelected(menu); setShowForm(true); }}
+                >
+                  Modifier
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="mr-2"
+                  onClick={() => handleDelete(menu)}
+                >
+                  Supprimer
+                </Button>
+              </td>
+            </tr>
+          ))}
         </tbody>
         </table>
       </TableContainer>

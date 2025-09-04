@@ -108,46 +108,34 @@ export default function Promotions() {
           </tr>
         </thead>
         <tbody>
-          {(() => {
-            const rows = [];
-            const list = Array.isArray(filtered) ? filtered : [];
-            for (let i = 0; i < list.length; i++) {
-              const p = list[i];
-              rows.push(
-                <PromotionRow
-                  key={p.id}
-                  promotion={p}
-                  canEdit={canEdit}
-                  onEdit={() => {
-                    setEditRow(p);
-                    setShowForm(true);
-                  }}
-                  onDelete={handleDelete}
-                />
-              );
-            }
-            return rows;
-          })()}
+          {filtered.map((p) => (
+            <PromotionRow
+              key={p.id}
+              promotion={p}
+              canEdit={canEdit}
+              onEdit={() => {
+                setEditRow(p);
+                setShowForm(true);
+              }}
+              onDelete={handleDelete}
+            />
+          ))}
         </tbody>
         </table>
         <div className="mt-4 flex gap-2 justify-center">
-          {(() => {
-            const buttons = [];
-            const count = Math.max(1, Math.ceil(total / PAGE_SIZE));
-            for (let i = 0; i < count; i++) {
-              buttons.push(
-                <Button
-                  key={i + 1}
-                  size="sm"
-                  variant={page === i + 1 ? "default" : "outline"}
-                  onClick={() => setPage(i + 1)}
-                >
-                  {i + 1}
-                </Button>
-              );
-            }
-            return buttons;
-          })()}
+          {Array.from(
+            { length: Math.max(1, Math.ceil(total / PAGE_SIZE)) },
+            (_, i) => (
+              <Button
+                key={i + 1}
+                size="sm"
+                variant={page === i + 1 ? "default" : "outline"}
+                onClick={() => setPage(i + 1)}
+              >
+                {i + 1}
+              </Button>
+            ),
+          )}
         </div>
       </TableContainer>
       {showForm && (

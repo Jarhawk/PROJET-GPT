@@ -31,14 +31,10 @@ export function useInventaireLignes() {
     setLoading(true);
     setError(null);
     let query = supabase
-      .from("inventaire_lignes")
-      .select(
-        "id, inventaire_id, produit_id, quantite, quantite_reelle, quantite_theorique, zone_id, actif, created_at, updated_at, mama_id, motif, produit:produits(id, nom, unite_id, pmp)",
-        { count: "exact" }
-      )
+      .from("produits_inventaire")
+      .select("*", { count: "exact" })
       .eq("mama_id", mama_id)
       .eq("inventaire_id", inventaireId)
-      .eq("produit.mama_id", mama_id)
       .order(sort, { ascending });
     if (!includeArchives) query = query.eq("actif", true);
     if (search) {
@@ -52,8 +48,7 @@ export function useInventaireLignes() {
       setError(error);
       return [];
     }
-    const rows = Array.isArray(data) ? data : [];
-    return { data: rows, count: count || 0 };
+    return { data: data || [], count: count || 0 };
   }
 
   async function createLigne({ inventaire_id, produit_id, quantite_reelle }) {
@@ -67,9 +62,9 @@ export function useInventaireLignes() {
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
-      .from("inventaire_lignes")
+      .from("produits_inventaire")
       .insert([{ inventaire_id, produit_id, quantite_reelle, mama_id }])
-      .select("id, inventaire_id, produit_id, quantite_reelle, quantite, quantite_theorique, zone_id, actif, created_at, updated_at, mama_id, motif")
+      .select()
       .single();
     setLoading(false);
     if (error) {
@@ -88,11 +83,11 @@ export function useInventaireLignes() {
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
-      .from("inventaire_lignes")
+      .from("produits_inventaire")
       .update(values)
       .eq("id", id)
       .eq("mama_id", mama_id)
-      .select("id, inventaire_id, produit_id, quantite_reelle, quantite, quantite_theorique, zone_id, actif, created_at, updated_at, mama_id, motif")
+      .select()
       .single();
     setLoading(false);
     if (error) {
@@ -107,7 +102,7 @@ export function useInventaireLignes() {
     setLoading(true);
     setError(null);
     const { error } = await supabase
-      .from("inventaire_lignes")
+      .from("produits_inventaire")
       .update({ actif: false })
       .eq("id", id)
       .eq("mama_id", mama_id);
@@ -118,11 +113,10 @@ export function useInventaireLignes() {
   async function getLigne(id) {
     if (!mama_id || !id) return null;
     const { data, error } = await supabase
-      .from("inventaire_lignes")
-      .select("id, inventaire_id, produit_id, quantite, quantite_reelle, quantite_theorique, zone_id, actif, created_at, updated_at, mama_id, motif, produit:produits(id, nom, unite_id, pmp)")
+      .from("produits_inventaire")
+      .select("*")
       .eq("id", id)
       .eq("mama_id", mama_id)
-      .eq("produit.mama_id", mama_id)
       .single();
     if (error) {
       setError(error);

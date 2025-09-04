@@ -6,14 +6,13 @@ import { useFiches } from '@/hooks/useFiches';
 export default function MenuGroupeForm() {
   const { createMenuGroupe, addLigne, exportPdf, exportExcel } = useMenuGroupe();
   const { fiches } = useFiches();
-  const fichesList = Array.isArray(fiches) ? fiches : [];
   const [nom, setNom] = useState('');
   const [prix, setPrix] = useState(0);
   const [items, setItems] = useState([]); // {categorie, fiche, portions}
 
   function addFiche() {
-    if (fichesList.length === 0) return;
-    const fiche = fichesList[0];
+    if (fiches.length === 0) return;
+    const fiche = fiches[0];
     setItems([...items, { categorie: 'entree', fiche, portions: 1 }]);
   }
 
@@ -54,24 +53,17 @@ export default function MenuGroupeForm() {
       <input aria-label="prix" type="number" value={prix} onChange={e => setPrix(Number(e.target.value) || 0)} />
       <button onClick={addFiche}>Ajouter fiche</button>
       <ul>
-        {(() => {
-          const rows = [];
-          for (let idx = 0; idx < items.length; idx++) {
-            const i = items[idx];
-            rows.push(
-              <li key={idx}>
-                {i.categorie} - {i.fiche.nom}
-                <input
-                  aria-label="portion"
-                  type="number"
-                  value={i.portions}
-                  onChange={e => updatePortion(idx, e.target.value)}
-                />
-              </li>
-            );
-          }
-          return rows;
-        })()}
+        {items.map((i, idx) => (
+          <li key={idx}>
+            {i.categorie} - {i.fiche.nom}
+            <input
+              aria-label="portion"
+              type="number"
+              value={i.portions}
+              onChange={e => updatePortion(idx, e.target.value)}
+            />
+          </li>
+        ))}
       </ul>
       <div>Coût total: {stats.cout.toFixed(2)} €</div>
       <div>Marge: {stats.marge.toFixed(2)} € ({stats.marge_pct.toFixed(2)}%)</div>

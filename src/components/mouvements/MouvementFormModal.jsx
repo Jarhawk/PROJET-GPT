@@ -19,7 +19,6 @@ export default function MouvementFormModal({
   loading = false,
   editMode = false,
 }) {
-  const produitList = Array.isArray(produits) ? produits : [];
   const [form, setForm] = useState({
     produit_id: initial.produit_id || "",
     type: initial.type || "ENTREE",
@@ -115,17 +114,9 @@ export default function MouvementFormModal({
                     onChange={handleChange}
                   >
                     <option value="">Sélectionner…</option>
-                    {(function () {
-                      const opts = [];
-                      for (const p of produitList) {
-                        opts.push(
-                          <option key={p.id} value={p.id}>
-                            {p.nom}
-                          </option>
-                        );
-                      }
-                      return opts;
-                    })()}
+                    {produits.map(p => (
+                      <option key={p.id} value={p.id}>{p.nom}</option>
+                    ))}
                   </select>
                   {errors.produit_id && <div className="text-red-600 text-xs">{errors.produit_id}</div>}
                 </div>

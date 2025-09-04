@@ -18,12 +18,12 @@ export default function useFournisseursRecents(limit = 10) {
       try {
         const { data, error } = await supabase
           .from('fournisseurs_recents')
-          .select('id, nom')
+          .select('id, nom, ville')
           .eq('mama_id', mama_id)
           .order('dernier_achat', { ascending: false })
           .limit(limit);
         if (error) throw error;
-        if (!aborted) setData(Array.isArray(data) ? data : []);
+        if (!aborted) setData(data || []);
       } catch (err) {
         console.error(err);
         if (!aborted) {

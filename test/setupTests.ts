@@ -1,6 +1,5 @@
 import { expect, vi } from "vitest";
 import '@testing-library/jest-dom';
-import '@/i18n.js';
 
 process.env.VITE_SUPABASE_URL ??= 'https://example.supabase.co';
 process.env.VITE_SUPABASE_ANON_KEY ??= 'key';

@@ -2,7 +2,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { vi, beforeEach, test, expect } from 'vitest';
 
-const metricsRows = [{ fiche_id: 'f1', nom: 'Plat', famille: 'F', prix_vente: 12, cout_portion: 5, periode: '2025-06-01', ventes: 10, popularite: 80, marge: 7, mama_id: 'm1' }];
+const metricsRows = [{ fiche_id: 'f1', categorie_me: 'Star' }];
 const stagedRows = [
   {
     id: 's1',
@@ -41,7 +41,7 @@ const menuQuery = {
 };
 
 const fromMock = vi.fn((table) => {
-  if (table === 'v_menu_engineering') return metricsQuery;
+  if (table === 'v_me_classification') return metricsQuery;
   if (table === 'ventes_import_staging') return stagingQuery;
   if (table === 'ventes_fiches') return ventesQuery;
   if (table === 'v_menu_du_jour_mensuel') return menuQuery;
@@ -72,17 +72,19 @@ beforeEach(async () => {
   menuQuery.maybeSingle.mockClear();
 });
 
-test('fetchMetrics queries engineering view and food cost', async () => {
+test('fetchMetrics queries classification view and food cost', async () => {
   const { result } = renderHook(() => useMenuEngineering());
   let res;
   await act(async () => {
     res = await result.current.fetchMetrics({
       dateStart: '2025-06-01',
       dateEnd: '2025-06-30',
+      type: 'plat',
+      actif: true,
     });
   });
-  expect(fromMock).toHaveBeenCalledWith('v_menu_engineering');
-  expect(metricsQuery.select).toHaveBeenCalledWith('mama_id, fiche_id, nom, famille, prix_vente, cout_portion, periode, ventes, popularite, marge');
+  expect(fromMock).toHaveBeenCalledWith('v_me_classification');
+  expect(metricsQuery.select).toHaveBeenCalledWith('*');
   expect(metricsQuery.eq).toHaveBeenCalledWith('mama_id', 'm1');
   expect(menuQuery.select).toHaveBeenCalledWith('food_cost_avg');
   expect(res.rows).toEqual(metricsRows);

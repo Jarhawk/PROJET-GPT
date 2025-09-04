@@ -21,45 +21,34 @@ export default function BLForm({ bon, fournisseurs = [], onClose }) {
   const { options: fournisseurOptions } = useFournisseursAutocomplete({ term: fournisseurName });
   const { hasAccess, loading: authLoading } = useAuth();
   const canEdit = hasAccess('bons_livraison', 'peut_modifier');
-
-  const initialLines = [];
-  if (Array.isArray(bon?.lignes)) {
-    for (const l of bon.lignes) {
-      initialLines.push({ ...l, produit_nom: l.produit?.nom || '' });
-    }
-  } else {
-    initialLines.push({
-      produit_id: '',
-      produit_nom: '',
-      quantite_recue: 1,
-      prix_unitaire: 0,
-      tva: 20,
-    });
-  }
-
-  const [date_reception, setDateReception] = useState(bon?.date_reception || '');
-  const [fournisseur_id, setFournisseurId] = useState(bon?.fournisseur_id || '');
+  const [date_reception, setDateReception] = useState(
+    bon?.date_reception || ''
+  );
+  const [fournisseur_id, setFournisseurId] = useState(
+    bon?.fournisseur_id || ''
+  );
   const [fournisseurName, setFournisseurName] = useState('');
   const [numero_bl, setNumero] = useState(bon?.numero_bl || '');
   const [commentaire, setCommentaire] = useState(bon?.commentaire || '');
-  const [lignes, setLignes] = useState(initialLines);
+  const [lignes, setLignes] = useState(
+    bon?.lignes?.map((l) => ({ ...l, produit_nom: l.produit?.nom || '' })) || [
+      {
+        produit_id: '',
+        produit_nom: '',
+        quantite_recue: 1,
+        prix_unitaire: 0,
+        tva: 20,
+      },
+    ]
+  );
   const [loading, setLoading] = useState(false);
 
-  const fournisseurList = Array.isArray(fournisseurs) ? fournisseurs : [];
-
   useEffect(() => {
-    if (bon?.fournisseur_id && fournisseurList.length) {
-      let found = null;
-      for (let i = 0; i < fournisseurList.length; i++) {
-        const s = fournisseurList[i];
-        if (s.id === bon.fournisseur_id) {
-          found = s;
-          break;
-        }
-      }
-      setFournisseurName(found?.nom || '');
+    if (bon?.fournisseur_id && fournisseurs.length) {
+      const f = fournisseurs.find((s) => s.id === bon.fournisseur_id);
+      setFournisseurName(f?.nom || '');
     }
-  }, [bon?.fournisseur_id, fournisseurList]);
+  }, [bon?.fournisseur_id, fournisseurs]);
 
   useEffect(() => {
     // fetching handled by hook
@@ -97,144 +86,6 @@ export default function BLForm({ bon, fournisseurs = [], onClose }) {
     }
   };
 
-  const fournisseurOpts = Array.isArray(fournisseurOptions)
-    ? fournisseurOptions
-    : [];
-  const produitOpts = Array.isArray(produitOptions) ? produitOptions : [];
-  const lignesList = Array.isArray(lignes) ? lignes : [];
-
-  const fournisseurNodes = [];
-  for (let i = 0; i < fournisseurOpts.length; i++) {
-    const f = fournisseurOpts[i];
-    fournisseurNodes.push(
-      <option key={f.id} value={f.nom}>
-        {f.nom}
-      </option>
-    );
-  }
-
-  const produitOptsList = [];
-  for (let i = 0; i < produitOpts.length; i++) {
-    const p = produitOpts[i];
-    produitOptsList.push({ id: p.id, nom: p.nom });
-  }
-
-  const ligneRows = [];
-  for (let idx = 0; idx < lignesList.length; idx++) {
-    const l = lignesList[idx];
-    ligneRows.push(
-      <tr key={idx}>
-        <td className="min-w-[150px]">
-          <AutoCompleteField
-            label=""
-            value={l.produit_id}
-            onChange={(obj) => {
-              setLignes((ls) => {
-                const arr = Array.isArray(ls) ? [...ls] : [];
-                for (let i = 0; i < arr.length; i++) {
-                  if (i === idx) {
-                    arr[i] = {
-                      ...arr[i],
-                      produit_nom: obj?.nom || '',
-                      produit_id: obj?.id || '',
-                    };
-                    break;
-                  }
-                }
-                return arr;
-              });
-              if ((obj?.nom || '').length >= 2) searchProduits(obj.nom);
-            }}
-            options={produitOptsList}
-          />
-        </td>
-        <td>
-          <input
-            type="number"
-            className="form-input"
-            value={l.quantite_recue}
-            onChange={(e) =>
-              setLignes((ls) => {
-                const arr = Array.isArray(ls) ? [...ls] : [];
-                for (let i = 0; i < arr.length; i++) {
-                  if (i === idx) {
-                    arr[i] = {
-                      ...arr[i],
-                      quantite_recue: Number(e.target.value),
-                    };
-                    break;
-                  }
-                }
-                return arr;
-              })
-            }
-          />
-        </td>
-        <td>
-          <input
-            type="number"
-            className="form-input"
-            value={l.prix_unitaire}
-            onChange={(e) =>
-              setLignes((ls) => {
-                const arr = Array.isArray(ls) ? [...ls] : [];
-                for (let i = 0; i < arr.length; i++) {
-                  if (i === idx) {
-                    arr[i] = {
-                      ...arr[i],
-                      prix_unitaire: Number(e.target.value),
-                    };
-                    break;
-                  }
-                }
-                return arr;
-              })
-            }
-          />
-        </td>
-        <td>
-          <input
-            type="number"
-            className="form-input"
-            value={l.tva}
-            onChange={(e) =>
-              setLignes((ls) => {
-                const arr = Array.isArray(ls) ? [...ls] : [];
-                for (let i = 0; i < arr.length; i++) {
-                  if (i === idx) {
-                    arr[i] = { ...arr[i], tva: Number(e.target.value) };
-                    break;
-                  }
-                }
-                return arr;
-              })
-            }
-          />
-        </td>
-        <td>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={() =>
-              setLignes((ls) => {
-                const arr = [];
-                if (Array.isArray(ls)) {
-                  for (let i = 0; i < ls.length; i++) {
-                    if (i !== idx) arr.push(ls[i]);
-                  }
-                }
-                return arr;
-              })
-            }
-          >
-            X
-          </Button>
-        </td>
-      </tr>
-    );
-  }
-
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
       <GlassCard
@@ -262,20 +113,19 @@ export default function BLForm({ bon, fournisseurs = [], onClose }) {
             onChange={(e) => {
               const val = e.target.value;
               setFournisseurName(val);
-              let found = null;
-              for (let i = 0; i < fournisseurOpts.length; i++) {
-                const f = fournisseurOpts[i];
-                if (f.nom === val) {
-                  found = f;
-                  break;
-                }
-              }
+              const found = fournisseurOptions.find((f) => f.nom === val);
               setFournisseurId(found ? found.id : '');
             }}
             placeholder="Fournisseur"
             required
           />
-          <datalist id="fournisseurs-list">{fournisseurNodes}</datalist>
+          <datalist id="fournisseurs-list">
+            {fournisseurOptions.map((f) => (
+              <option key={f.id} value={f.nom}>
+                {f.nom}
+              </option>
+            ))}
+          </datalist>
           <label className="block text-sm mb-1">Commentaire</label>
           <textarea
             className="form-textarea w-full"
@@ -293,22 +143,114 @@ export default function BLForm({ bon, fournisseurs = [], onClose }) {
                 <th></th>
               </tr>
             </thead>
-            <tbody>{ligneRows}</tbody>
+            <tbody>
+              {lignes.map((l, idx) => (
+                <tr key={idx}>
+                  <td className="min-w-[150px]">
+                    <AutoCompleteField
+                      label=""
+                      value={l.produit_id}
+                      onChange={(obj) => {
+                        setLignes((ls) =>
+                          ls.map((it, i) =>
+                            i === idx
+                              ? {
+                                  ...it,
+                                  produit_nom: obj?.nom || '',
+                                  produit_id: obj?.id || '',
+                                }
+                              : it
+                          )
+                        );
+                        if ((obj?.nom || '').length >= 2)
+                          searchProduits(obj.nom);
+                      }}
+                      options={produitOptions.map((p) => ({
+                        id: p.id,
+                        nom: p.nom,
+                      }))}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      className="form-input"
+                      value={l.quantite_recue}
+                      onChange={(e) =>
+                        setLignes((ls) =>
+                          ls.map((it, i) =>
+                            i === idx
+                              ? {
+                                  ...it,
+                                  quantite_recue: Number(e.target.value),
+                                }
+                              : it
+                          )
+                        )
+                      }
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      className="form-input"
+                      value={l.prix_unitaire}
+                      onChange={(e) =>
+                        setLignes((ls) =>
+                          ls.map((it, i) =>
+                            i === idx
+                              ? { ...it, prix_unitaire: Number(e.target.value) }
+                              : it
+                          )
+                        )
+                      }
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      className="form-input"
+                      value={l.tva}
+                      onChange={(e) =>
+                        setLignes((ls) =>
+                          ls.map((it, i) =>
+                            i === idx
+                              ? { ...it, tva: Number(e.target.value) }
+                              : it
+                          )
+                        )
+                      }
+                    />
+                  </td>
+                  <td>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        setLignes((ls) => ls.filter((_, i) => i !== idx))
+                      }
+                    >
+                      X
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
           </table>
           <Button
             type="button"
             onClick={() =>
-              setLignes((ls) => {
-                const arr = Array.isArray(ls) ? [...ls] : [];
-                arr.push({
+              setLignes((ls) => [
+                ...ls,
+                {
                   produit_id: '',
                   produit_nom: '',
                   quantite_recue: 1,
                   prix_unitaire: 0,
                   tva: 20,
-                });
-                return arr;
-              })
+                },
+              ])
             }
             className="mt-2"
           >

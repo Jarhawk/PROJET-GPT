@@ -1,8 +1,23 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useCallback, useMemo } from "react";
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/hooks/useAuth';
+import { useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/contexts/AuthContext';
+import { deduceEnabledModulesFromRights } from '@/lib/access';
+
+function safeQueryClient() {
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useQueryClient();
+  } catch {
+    return {
+      invalidateQueries: () => {},
+      setQueryData: () => {},
+      fetchQuery: async () => {},
+    };
+  }
+}
 
 const defaults = {
   logo_url: "",
@@ -21,10 +36,10 @@ const defaults = {
 const localEnabledModules = {};
 const localFeatureFlags = {};
 
-export const useMamaSettings = () => {
-  const { userData } = useAuth() || {};
+export default function useMamaSettings() {
+  const { userData } = useAuth();
   const mamaId = userData?.mama_id;
-  const queryClient = useQueryClient();
+  const queryClient = safeQueryClient();
 
   const query = useQuery({
     queryKey: ['mama-settings', mamaId],
@@ -35,7 +50,7 @@ export const useMamaSettings = () => {
       const { data, error } = await supabase
         .from('mamas')
         .select(
-          'logo_url, primary_color, secondary_color, email_envoi, email_alertes, dark_mode, langue, monnaie, timezone, rgpd_text, mentions_legales, enabled_modules'
+          'logo_url, primary_color, secondary_color, email_envoi, email_alertes, dark_mode, langue, monnaie, timezone, rgpd_text, mentions_legales'
         )
         .eq('id', mamaId)
         .single()
@@ -52,9 +67,7 @@ export const useMamaSettings = () => {
         .from('mamas')
         .update(fields)
         .eq('id', mamaId)
-        .select(
-          'logo_url, primary_color, secondary_color, email_envoi, email_alertes, dark_mode, langue, monnaie, timezone, rgpd_text, mentions_legales, enabled_modules'
-        )
+        .select()
         .single();
       if (!error && data) {
         queryClient.setQueryData(['mama-settings', mamaId], (old) => ({
@@ -69,18 +82,23 @@ export const useMamaSettings = () => {
 
   const settings = useMemo(() => ({ ...defaults, ...(query.data || {}) }), [query.data]);
 
+  const fallbackModules = useMemo(
+    () => deduceEnabledModulesFromRights(userData?.access_rights),
+    [userData?.access_rights]
+  );
+
   const enabledModules = useMemo(() => {
     const em = query.data?.enabled_modules;
     if (em && Object.keys(em).length > 0) return em;
+    if (Object.keys(fallbackModules).length > 0) return fallbackModules;
     return localEnabledModules;
-  }, [query.data?.enabled_modules]);
+  }, [query.data?.enabled_modules, fallbackModules]);
   const featureFlags = useMemo(
     () => query.data?.feature_flags ?? localFeatureFlags,
     [query.data?.feature_flags]
   );
 
   return {
-    mamaId,
     settings,
     loading: query.isFetching,
     enabledModules,
@@ -89,5 +107,4 @@ export const useMamaSettings = () => {
     fetchMamaSettings: query.refetch,
     updateMamaSettings,
   };
-};
-
+}

@@ -2,23 +2,15 @@
 import { Children, isValidElement, cloneElement } from "react";
 
 export default function TableContainer({ className = "", children, ...props }) {
-  const enhanced = (() => {
-    const arr = Children.toArray(children);
-    const result = [];
-    for (const child of arr) {
-      if (isValidElement(child) && child.type === "table") {
-        const childClass = child.props.className || "";
-        result.push(
-          cloneElement(child, {
-            className: `listing-table ${childClass}`.trim(),
-          }),
-        );
-      } else {
-        result.push(child);
-      }
+  const enhanced = Children.map(children, child => {
+    if (isValidElement(child) && child.type === "table") {
+      const childClass = child.props.className || "";
+      return cloneElement(child, {
+        className: `listing-table ${childClass}`.trim(),
+      });
     }
-    return result;
-  })();
+    return child;
+  });
 
   return (
     <div

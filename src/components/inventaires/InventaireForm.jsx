@@ -19,14 +19,13 @@ export default function InventaireForm({ inventaire, onClose }) {
     fetchLastClosedInventaire,
   } = useInventaires();
   const { products, fetchProducts } = useProducts();
-  const productList = Array.isArray(products) ? products : [];
 
   const [reference, setReference] = useState(inventaire?.reference || '');
   const [dateInventaire, setDateInventaire] = useState(
     inventaire?.date_inventaire || ''
   );
   const [dateDebut, setDateDebut] = useState(inventaire?.date_debut || ''); // Pour la période
-  const [lignes, setLignes] = useState(Array.isArray(inventaire?.lignes) ? inventaire.lignes : []);
+  const [lignes, setLignes] = useState(inventaire?.lignes || []);
   const [mouvementsProduits, setMouvementsProduits] = useState([]);
   const [file, setFile] = useState(null);
   const [fileUrl, setFileUrl] = useState(inventaire?.document || '');
@@ -57,35 +56,23 @@ export default function InventaireForm({ inventaire, onClose }) {
 
   // Ajout/suppression de lignes
   const addLigne = () =>
-    setLignes([...(Array.isArray(lignes) ? lignes : []), { produit_id: '', quantite: 0 }]);
+    setLignes([...lignes, { produit_id: '', quantite: 0 }]);
   const updateLigne = (i, field, val) => {
-    const next = Array.isArray(lignes) ? [...lignes] : [];
-    if (next[i]) next[i] = { ...next[i], [field]: val };
-    setLignes(next);
+    setLignes(lignes.map((l, idx) => (idx === i ? { ...l, [field]: val } : l)));
   };
-  const removeLigne = (i) => {
-    const arr = Array.isArray(lignes) ? lignes : [];
-    const next = [];
-    for (let idx = 0; idx < arr.length; idx += 1) {
-      if (idx !== i) next.push(arr[idx]);
-    }
-    setLignes(next);
-  };
+  const removeLigne = (i) => setLignes(lignes.filter((_, idx) => idx !== i));
 
   // Calcul consommation/mouvement par produit
   const getConsommationProduit = (produit_id, quantite_inventaire) => {
-    const mvtsAll = Array.isArray(mouvementsProduits) ? mouvementsProduits : [];
-    const mvts = [];
-    for (const m of mvtsAll) {
-      if (m.produit_id === produit_id) mvts.push(m);
-    }
-    let entrees = 0;
-    let sorties = 0;
-    for (const m of mvts) {
-      if (m.type === 'entree') entrees += m.quantite;
-      if (m.type === 'sortie') sorties += m.quantite;
-    }
-    const stock_debut = mvts.length > 0 && mvts[0]?.stock_debut ? mvts[0].stock_debut : 0;
+    const mvts = mouvementsProduits.filter((m) => m.produit_id === produit_id);
+    const entrees = mvts
+      .filter((m) => m.type === 'entree')
+      .reduce((sum, m) => sum + m.quantite, 0);
+    const sorties = mvts
+      .filter((m) => m.type === 'sortie')
+      .reduce((sum, m) => sum + m.quantite, 0);
+    // Stock de début : à définir selon la base (dernier inventaire clôturé, ou 0 si pas trouvé)
+    const stock_debut = mvts[0]?.stock_debut ?? 0;
     const stock_fin = quantite_inventaire ?? 0;
     const conso_theorique = stock_debut + entrees - sorties - stock_fin;
     return { stock_debut, entrees, sorties, stock_fin, conso_theorique };
@@ -130,13 +117,8 @@ export default function InventaireForm({ inventaire, onClose }) {
     e.preventDefault();
     if (!reference.trim()) return toast.error('Nom requis');
     if (!dateInventaire) return toast.error('Date requise');
-    const check = Array.isArray(lignes) ? lignes : [];
-    for (const l of check) {
-      if (!l.produit_id) {
-        toast.error('Produit manquant');
-        return;
-      }
-    }
+    if (lignes.some((l) => !l.produit_id))
+      return toast.error('Produit manquant');
     setLoading(true);
     const invData = {
       reference,
@@ -209,90 +191,78 @@ export default function InventaireForm({ inventaire, onClose }) {
               </tr>
             </thead>
             <tbody>
-              {(function () {
-                const rows = [];
-                const arr = Array.isArray(lignes) ? lignes : [];
-                let i = 0;
-                for (const l of arr) {
-                  let prod = null;
-                  for (const p of productList) {
-                    if (p.id === l.produit_id) {
-                      prod = p;
-                      break;
-                    }
-                  }
-                  const {
-                    stock_debut,
-                    entrees,
-                    sorties,
-                    stock_fin,
-                    conso_theorique,
-                  } = getConsommationProduit(l.produit_id, l.quantite);
-                  const ecart = -conso_theorique;
-                  const optionNodes = [];
-                  for (const p of productList) {
-                    optionNodes.push(
-                      <option key={p.id} value={p.id}>
-                        {p.nom}
-                      </option>
-                    );
-                  }
-                  rows.push(
-                    <tr key={i}>
-                      <td>
-                        <select
-                          className="form-input"
-                          value={l.produit_id}
-                          onChange={(e) => updateLigne(i, 'produit_id', e.target.value)}
-                          required
-                        >
-                          <option value="">Sélectionner</option>
-                          {optionNodes}
-                        </select>
-                      </td>
-                      <td>
-                        <input
-                          className="form-input"
-                          type="number"
-                          min={0}
-                          step="0.01"
-                          value={l.quantite}
-                          onChange={(e) => updateLigne(i, 'quantite', Number(e.target.value))}
-                          required
-                        />
-                      </td>
-                      <td>{prod?.unite?.nom || '-'}</td>
-                      <td>{stock_debut}</td>
-                      <td>{entrees}</td>
-                      <td>{sorties}</td>
-                      <td>{stock_fin}</td>
-                      <td>{conso_theorique.toFixed(2)}</td>
-                      <td>
-                        {Math.abs(ecart) > SEUIL_ECART ? (
-                          <span className="text-red-500 font-bold">
-                            {ecart.toFixed(2)} ⚠️
-                          </span>
-                        ) : (
-                          <span className="text-green-600">
-                            {ecart.toFixed(2)}
-                          </span>
-                        )}
-                      </td>
-                      <td>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => removeLigne(i)}
-                        >
-                          Suppr.
-                        </Button>
-                      </td>
-                    </tr>
-                  );
-                  i += 1;
-                }
-                return rows;
-              })()}
+              {lignes.map((l, i) => {
+                const prod = products.find((p) => p.id === l.produit_id);
+                const {
+                  stock_debut,
+                  entrees,
+                  sorties,
+                  stock_fin,
+                  conso_theorique,
+                } = getConsommationProduit(l.produit_id, l.quantite);
+
+                const ecart = -conso_theorique; // Si tu veux comparer à la conso constatée
+                return (
+                  <tr key={i}>
+                    <td>
+                      <select
+                        className="form-input"
+                        value={l.produit_id}
+                        onChange={(e) =>
+                          updateLigne(i, 'produit_id', e.target.value)
+                        }
+                        required
+                      >
+                        <option value="">Sélectionner</option>
+                        {products.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.nom}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td>
+                      <input
+                        className="form-input"
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        value={l.quantite}
+                        onChange={(e) =>
+                          updateLigne(i, 'quantite', Number(e.target.value))
+                        }
+                        required
+                      />
+                    </td>
+                    <td>{prod?.unite?.nom || '-'}</td>
+                    <td>{stock_debut}</td>
+                    <td>{entrees}</td>
+                    <td>{sorties}</td>
+                    <td>{stock_fin}</td>
+                    <td>{conso_theorique.toFixed(2)}</td>
+                    <td>
+                      {Math.abs(ecart) > SEUIL_ECART ? (
+                        <span className="text-red-500 font-bold">
+                          {ecart.toFixed(2)} ⚠️
+                        </span>
+                      ) : (
+                        <span className="text-green-600">
+                          {ecart.toFixed(2)}
+                        </span>
+                      )}
+                    </td>
+                    <td>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => removeLigne(i)}
+                      >
+                        Suppr.
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
           <Button type="button" size="sm" variant="outline" onClick={addLigne}>

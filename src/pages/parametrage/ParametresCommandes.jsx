@@ -18,7 +18,7 @@ export default function ParametresCommandes() {
     if (!mama_id) return;
     supabase
       .from("parametres_commandes")
-      .select("adresse_livraison, mentions_haut, mentions_bas, logo, footer_pdf")
+      .select("*")
       .eq("mama_id", mama_id)
       .maybeSingle()
       .then(({ data }) => {

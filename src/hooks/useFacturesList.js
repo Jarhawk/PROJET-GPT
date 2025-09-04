@@ -26,17 +26,13 @@ export function useFacturesList(params = {}) {
     queryFn: async () => {
       let query = supabase
         .from('factures')
-        .select(
-          'id, numero, date_facture, fournisseur_id, total_ttc, statut, actif, fournisseur:fournisseur_id(id, nom, mama_id)',
-          { count: 'exact' }
-        )
+        .select('*, fournisseur:fournisseur_id(id, nom)', { count: 'exact' })
         .eq('mama_id', mamaId)
-        .eq('fournisseur.mama_id', mamaId)
         .order('date_facture', { ascending: false })
         .range((page - 1) * pageSize, page * pageSize - 1);
 
       if (search) {
-        query = query.or(`numero.ilike.%${search}%,fournisseur.nom.ilike.%${search}%`);
+        query = query.or(`numero.ilike.%${search}%,fournisseurs.nom.ilike.%${search}%`);
       }
       if (fournisseur) query = query.eq('fournisseur_id', fournisseur);
       if (statut) query = query.eq('statut', statut);
@@ -44,7 +40,7 @@ export function useFacturesList(params = {}) {
 
       const { data, error, count } = await query;
       if (error) throw error;
-      return { factures: Array.isArray(data) ? data : [], total: count || 0 };
+      return { factures: data || [], total: count || 0 };
     },
   });
 }

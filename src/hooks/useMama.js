@@ -15,9 +15,7 @@ export function useMama() {
     setError(null);
     const { data, error } = await supabase
       .from("mamas")
-      .select(
-        "id, nom, logo_url, primary_color, secondary_color, email_envoi, email_alertes, dark_mode, langue, monnaie, timezone, rgpd_text, mentions_legales, enabled_modules"
-      )
+      .select("*")
       .eq("id", mama_id)
       .single();
     if (!error) setMama(data);

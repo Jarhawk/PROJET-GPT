@@ -9,6 +9,7 @@ import FactureLigne from '@/components/FactureLigne';
 import SupplierPicker from '@/components/factures/SupplierPicker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import NumericInput from '@/components/forms/NumericInput';
 import {
   Select,
   SelectTrigger,
@@ -20,9 +21,9 @@ import { Badge } from '@/components/ui/badge';
 import { mapUILineToPayload } from '@/features/factures/invoiceMappers';
 import useProduitLineDefaults from '@/hooks/useProduitLineDefaults';
 import useZonesStock from '@/hooks/useZonesStock';
-import { formatMoneyFR, formatMoneyFromCents } from '@/utils/numberFormat';
-import { toNumberSafeFR, formatCurrencyEUR } from '@/utils/numberFR.js';
+import { formatMoneyFR } from '@/utils/numberFormat';
 
+const FN_UPDATE_FACTURE_EXISTS = false;
 
 const today = () => format(new Date(), 'yyyy-MM-dd');
 
@@ -53,7 +54,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
     fournisseur_id: null,
     date_facture: today(),
     numero: '',
-    statut: 'Brouillon',
+    statut: 'Brouillon', // mappe vers p_actif
     total_ht_attendu: null,
     lignes: [emptyLigne()],
   });
@@ -64,16 +65,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
       : emptyForm(),
   });
 
-  const {
-    control,
-    handleSubmit,
-    watch,
-    reset,
-    setValue,
-    setError,
-    formState,
-    register,
-  } = form;
+  const { control, handleSubmit, watch, reset, setValue, setError, formState } = form;
   const { errors, submitCount } = formState;
   const [saving, setSaving] = useState(false);
   const { fields, append, remove, update } = useFieldArray({
@@ -81,10 +73,6 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
     name: 'lignes',
   });
   const lignes = watch('lignes');
-  const lignesArr = useMemo(
-    () => (Array.isArray(lignes) ? lignes : []),
-    [lignes]
-  );
   const { data: zones = [], isSuccess } = useZonesStock();
   const totalHTAttendu = watch('total_ht_attendu');
   const statut = watch('statut');
@@ -95,48 +83,24 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
 
   const sum = (arr) => arr.reduce((acc, n) => acc + n, 0);
 
-  const sumHTCents = useMemo(() => {
-    const values = [];
-    for (const l of lignesArr) {
-      values.push(Math.round(Number(l.total_ht || 0) * 100));
-    }
-    return sum(values);
-  }, [lignesArr]);
-  const sommeLignesHT = sumHTCents / 100;
-  const sumTVACents = useMemo(() => {
-    const values = [];
-    for (const l of lignesArr) {
-      values.push(Math.round(Number(l.tva_montant || 0) * 100));
-    }
-    return sum(values);
-  }, [lignesArr]);
-  const sumTTCents = useMemo(() => {
-    const values = [];
-    for (const l of lignesArr) {
-      values.push(Math.round(Number(l.total_ttc || 0) * 100));
-    }
-    return sum(values);
-  }, [lignesArr]);
-
-  const round2 = (n) =>
-    Number.isFinite(n) ? Math.round(n * 100) / 100 : NaN;
-  const [totalAttenduInput, setTotalAttenduInput] = useState(
-    totalHTAttendu ? formatCurrencyEUR(round2(totalHTAttendu)) : ''
+  const sumHT = useMemo(
+    () => sum(lignes.map((l) => Number(l.total_ht || 0))),
+    [lignes]
   );
-  useEffect(() => {
-    setTotalAttenduInput(
-    totalHTAttendu ? formatCurrencyEUR(round2(totalHTAttendu)) : ''
-    );
-  }, [totalHTAttendu]);
+  const sommeLignesHT = sumHT;
+  const sumTVA = useMemo(
+    () => sum(lignes.map((l) => Number(l.tva_montant || 0))),
+    [lignes]
+  );
+  const sumTTC = useMemo(
+    () => sum(lignes.map((l) => Number(l.total_ttc || 0))),
+    [lignes]
+  );
 
   const ecart_ht = useMemo(() => {
     const expected = Number(totalHTAttendu ?? 0);
     return +(expected - sommeLignesHT).toFixed(2);
   }, [totalHTAttendu, sommeLignesHT]);
-
-  useEffect(() => {
-    register('total_ht_attendu');
-  }, [register]);
 
   useEffect(() => {
     if (ecart_ht !== 0 && statut === 'Validée') {
@@ -147,7 +111,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
   const addLigne = () => append(emptyLigne());
 
   const updateLigne = async (i, patch) => {
-    let merged = { ...lignesArr[i], ...patch };
+    let merged = { ...lignes[i], ...patch };
     if (patch.produit_id) {
       try {
         const defaults = await fetchDefaults({ produit_id: patch.produit_id });
@@ -177,13 +141,11 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
   };
 
   useEffect(() => {
-    const arr = Array.isArray(lignes) ? lignes : [];
-    for (let i = 0; i < arr.length; i++) {
-      const l = arr[i];
+    lignes.forEach((l, i) => {
       if (!l.zone_id && isSuccess && zones.length === 1) {
         updateLigne(i, { zone_id: zones[0].id });
       }
-    }
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSuccess, zones, lignes]);
 
@@ -200,35 +162,47 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
         setError('fournisseur_id', { type: 'required' });
         return;
       }
-      const payloadLignes = [];
-      for (const l of lignesArr) {
-        if (l.produit_id) payloadLignes.push(mapUILineToPayload(l));
-      }
+      const payloadLignes = (lignes || [])
+        .filter((l) => l.produit_id)
+        .map(mapUILineToPayload);
       if (payloadLignes.length === 0) {
         toast.error('Ajoutez au moins une ligne produit.');
-        for (let i = 0; i < lignesArr.length; i++) {
-          if (!lignesArr[i]?.produit_id)
-            setError(`lignes.${i}.produit_id`, { type: 'required' });
-        }
+        (lignes || []).forEach((l, i) => {
+          if (!l.produit_id) setError(`lignes.${i}.produit_id`, { type: 'required' });
+        });
         return;
       }
 
-      const payload = {
-        facture: {
-          id: formId || undefined,
-          fournisseur_id: values.fournisseur_id,
-          numero: values.numero || null,
-          date_facture: values.date_facture,
-          etat: values.statut,
-        },
-        lignes: payloadLignes,
-      };
+      const p_actif = values.statut === 'Validée' && ecart_ht === 0;
 
-      const { data, error } = await supabase.rpc('fn_save_facture', {
-        mama_id: mamaId,
-        facture: payload.facture,
-        lignes: payload.lignes,
-      });
+      if (formId && !FN_UPDATE_FACTURE_EXISTS) {
+        toast.error(
+          'La modification nécessite fn_update_facture côté serveur'
+        );
+        return;
+      }
+
+      const rpcName = formId ? 'fn_update_facture' : 'fn_save_facture';
+      const args = formId
+        ? {
+            p_facture_id: formId,
+            p_mama_id: mamaId,
+            p_fournisseur_id: values.fournisseur_id,
+            p_numero: values.numero || null,
+            p_date: values.date_facture,
+            p_lignes: payloadLignes,
+            p_actif,
+          }
+        : {
+            p_mama_id: mamaId,
+            p_fournisseur_id: values.fournisseur_id,
+            p_numero: values.numero || null,
+            p_date: values.date_facture,
+            p_lignes: payloadLignes,
+            p_actif,
+          };
+
+      const { data, error } = await supabase.rpc(rpcName, args);
 
       if (error) {
         toast.error(error.message);
@@ -288,7 +262,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
           />
         </div>
 
-        {/* Statut */}
+        {/* Statut (mappe p_actif) */}
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium">Statut</label>
           <Controller
@@ -315,39 +289,32 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
         {/* Total HT attendu */}
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium">Total HT attendu (€)</label>
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              inputMode="decimal"
-              step="0.01"
-              value={totalAttenduInput}
-              onChange={(e) => setTotalAttenduInput(e.target.value)}
-              onBlur={() => {
-                const n = toNumberSafeFR(totalAttenduInput);
-                const t = Number.isFinite(n) ? round2(n) : NaN;
-                setTotalAttenduInput(
-                  Number.isFinite(n) ? formatCurrencyEUR(t) : ''
-                );
-                setValue('total_ht_attendu', Number.isFinite(n) ? t : null, {
-                  shouldDirty: true,
-                });
-              }}
-              className="bg-white text-gray-900 placeholder-gray-500 rounded-md h-9 px-3 w-36 text-right border border-gray-300"
-              placeholder="0,00 €"
-            />
-            <Badge
-              color={
-                ecart_ht === 0
-                  ? 'green'
-                  : Math.abs(ecart_ht) < 0.01
-                    ? 'gold'
-                    : 'red'
-              }
-              ariaLabel="Écart HT"
-            >
-              {`Écart ${formatMoneyFR(ecart_ht)}`}
-            </Badge>
-          </div>
+          <Controller
+            control={control}
+            name="total_ht_attendu"
+            render={({ field }) => (
+              <div className="flex items-center gap-2">
+                <NumericInput
+                  value={field.value}
+                  decimals={2}
+                  min={0}
+                  onValueChange={(val) => field.onChange(val)}
+                />
+                <Badge
+                  color={
+                    ecart_ht === 0
+                      ? 'green'
+                      : Math.abs(ecart_ht) < 0.01
+                        ? 'gold'
+                        : 'red'
+                  }
+                  ariaLabel="Écart HT"
+                >
+                  {`Écart ${formatMoneyFR(ecart_ht)}`}
+                </Badge>
+              </div>
+            )}
+          />
         </div>
       </div>
 
@@ -376,27 +343,18 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
             <div>Actions</div>
           </div>
 
-          {(() => {
-            const items = [];
-            if (Array.isArray(fields)) {
-              for (let i = 0; i < fields.length; i++) {
-                const f = fields[i];
-                items.push(
-                  <FactureLigne
-                    key={f.id}
-                    value={lignesArr[i]}
-                    onChange={(patch) => updateLigne(i, patch)}
-                    onRemove={() => remove(i)}
-                    allLines={lignesArr}
-                    invalidProduit={submitCount > 0 && !lignesArr[i]?.produit_id}
-                    index={i}
-                    zones={zones}
-                  />
-                );
-              }
-            }
-            return items;
-          })()}
+          {fields.map((f, i) => (
+            <FactureLigne
+              key={f.id}
+              value={lignes[i]}
+              onChange={(patch) => updateLigne(i, patch)}
+              onRemove={() => remove(i)}
+              allLines={lignes}
+              invalidProduit={submitCount > 0 && !lignes[i]?.produit_id}
+              index={i}
+              zones={zones}
+            />
+          ))}
         </div>
       </section>
 
@@ -404,15 +362,15 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
       <div className="rounded-xl border border-border bg-card p-4 grid md:grid-cols-3 gap-4">
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Total HT</span>
-          <span className="font-semibold">{formatMoneyFromCents(sumHTCents)}</span>
+          <span className="font-semibold">{formatMoneyFR(sumHT)}</span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">TVA €</span>
-          <span className="font-semibold">{formatMoneyFromCents(sumTVACents)}</span>
+          <span className="font-semibold">{formatMoneyFR(sumTVA)}</span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Total TTC</span>
-          <span className="font-semibold">{formatMoneyFromCents(sumTTCents)}</span>
+          <span className="font-semibold">{formatMoneyFR(sumTTC)}</span>
         </div>
       </div>
 
@@ -421,7 +379,11 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
         <div className="flex flex-col items-end">
           <Button
             type="submit"
-            disabled={saving || (statut === 'Validée' && ecart_ht !== 0)}
+            disabled={
+              saving ||
+              (statut === 'Validée' && ecart_ht !== 0) ||
+              (formId && !FN_UPDATE_FACTURE_EXISTS)
+            }
             title={
               statut === 'Validée' && ecart_ht !== 0
                 ? 'Écart non nul : la facture ne peut être validée.'
@@ -430,6 +392,11 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
           >
             Enregistrer
           </Button>
+          {formId && !FN_UPDATE_FACTURE_EXISTS && (
+            <p className="text-sm text-destructive mt-2">
+              La modification nécessite fn_update_facture côté serveur
+            </p>
+          )}
         </div>
       </div>
 

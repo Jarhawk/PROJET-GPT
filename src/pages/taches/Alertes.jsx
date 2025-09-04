@@ -15,12 +15,11 @@ export default function Alertes() {
       if (!mama_id || authLoading) return;
       setLoading(true);
       const { data } = await supabase
-        .from("v_alertes_rupture")
-        .select("produit_id, nom, stock_min, stock_actuel, manque")
+        .from("alertes")
+        .select("*")
         .eq("mama_id", mama_id)
-        .order("nom", { ascending: true });
-      const rows = Array.isArray(data) ? data : [];
-      setAlertes(rows);
+        .order("created_at", { ascending: false });
+      setAlertes(Array.isArray(data) ? data : []);
       setLoading(false);
     }
     fetchAlertes();
@@ -34,37 +33,24 @@ export default function Alertes() {
         <table className="min-w-full text-white text-sm">
           <thead>
             <tr>
-              <th className="px-2 py-1">Produit</th>
-              <th className="px-2 py-1 text-right">Stock min</th>
-              <th className="px-2 py-1 text-right">Stock actuel</th>
-              <th className="px-2 py-1 text-right">Manque</th>
+              <th className="px-2 py-1">Titre</th>
+              <th className="px-2 py-1">Type</th>
+              <th className="px-2 py-1">Date</th>
             </tr>
           </thead>
           <tbody>
-            {(() => {
-              const rows = [];
-              const list = Array.isArray(alertes) ? alertes : [];
-              for (const a of list) {
-                rows.push(
-                  <tr key={a.produit_id} className="">
-                    <td className="border px-2 py-1">{a.nom}</td>
-                    <td className="border px-2 py-1 text-right">{a.stock_min}</td>
-                    <td className="border px-2 py-1 text-right">{a.stock_actuel}</td>
-                    <td className="border px-2 py-1 text-right">{a.manque}</td>
-                  </tr>
-                );
-              }
-              if (rows.length === 0 && !loading) {
-                rows.push(
-                  <tr key="empty">
-                    <td colSpan="4" className="py-4 text-center text-gray-500">
-                      Aucune alerte
-                    </td>
-                  </tr>
-                );
-              }
-              return rows;
-            })()}
+            {alertes.map(a => (
+              <tr key={a.id} className="">
+                <td className="border px-2 py-1">{a.titre}</td>
+                <td className="border px-2 py-1">{a.type}</td>
+                <td className="border px-2 py-1">{new Date(a.created_at).toLocaleDateString()}</td>
+              </tr>
+            ))}
+            {alertes.length === 0 && !loading && (
+              <tr>
+                <td colSpan="3" className="py-4 text-center text-gray-500">Aucune alerte</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </TableContainer>

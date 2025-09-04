@@ -18,13 +18,11 @@ export function useFournisseurNotes() {
     setError(null);
     try {
       const { data, error } = await supabase
-        .from('fournisseur_notes')
-        .select(
-          'id, note, date, created_at, updated_at, actif, fournisseur_id, mama_id'
-        )
-        .eq('mama_id', mama_id)
-        .eq('fournisseur_id', fournisseur_id)
-        .order('date', { ascending: false });
+        .from("fournisseur_notes")
+        .select("*")
+        .eq("mama_id", mama_id)
+        .eq("fournisseur_id", fournisseur_id)
+        .order("date", { ascending: false });
 
       if (error) throw error;
       setNotes(Array.isArray(data) ? data : []);

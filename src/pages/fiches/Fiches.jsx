@@ -1,11 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useEffect, useState, useRef } from "react";
-import { Navigate, useSearchParams } from "react-router-dom";
-import { useAuth } from '@/hooks/useAuth';
-import { useQueryClient } from '@tanstack/react-query';
-import useDebounce from "@/hooks/useDebounce";
-import { useFichesTechniques } from "@/hooks/data/useFichesTechniques";
+import { useEffect, useState, useCallback } from "react";
+import { Navigate } from "react-router-dom";
 import { useFiches } from "@/hooks/useFiches";
+import { useAuth } from '@/hooks/useAuth';
 import FicheForm from "./FicheForm.jsx";
 import FicheDetail from "./FicheDetail.jsx";
 import FicheRow from "@/components/fiches/FicheRow.jsx";
@@ -17,103 +14,60 @@ import { useFamilles } from "@/hooks/useFamilles";
 import { toast } from 'sonner';
 import { motion as Motion } from "framer-motion";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
-import JSPDF from "jspdf";
-import "jspdf-autotable";
 
 const PAGE_SIZE = 20;
 
 export default function Fiches() {
-  const queryClient = useQueryClient();
-  const { deleteFiche, duplicateFiche } = useFiches();
-  const { mama_id, loading: authLoading, access_rights } = useAuth();
+  const {
+    fiches,
+    total,
+    loading,
+    getFiches,
+    deleteFiche,
+    duplicateFiche,
+    exportFichesToExcel,
+    exportFichesToPDF,
+  } = useFiches();
+  const { mama_id, loading: authLoading, access_rights, hasAccess } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState("nom");
-  const [statut, setStatut] = useState("actif");
+  const [actif, setActif] = useState("true");
   const [familleFilter, setFamilleFilter] = useState("");
   const { familles, fetchFamilles } = useFamilles();
-  const familleList = Array.isArray(familles) ? familles : [];
-  const canEdit = access_rights?.fiches?.peut_modifier;
+  const canEdit = hasAccess("fiches_techniques", "peut_modifier");
 
-  const debouncedSearch = useDebounce(search, 300);
+  const refreshList = useCallback(() => {
+    getFiches({
+      search,
+      actif: actif === "all" ? null : actif === "true",
+      famille: familleFilter || null,
+      page,
+      limit: PAGE_SIZE,
+      sortBy,
+    });
+  }, [getFiches, search, actif, familleFilter, page, sortBy]);
 
-  const { data, isLoading, isError } = useFichesTechniques({
-    page,
-    search: debouncedSearch,
-    statut,
-    famille: familleFilter || null,
-    sortBy,
-  });
-  const rows = Array.isArray(data?.rows) ? data.rows : [];
-  const total = typeof data?.total === 'number' ? data.total : 0;
-
-  const [searchParams, setSearchParams] = useSearchParams();
-  const firstSync = useRef(true);
-
-  // Lecture initiale de l'URL et chargement des familles
+  // Chargement
   useEffect(() => {
-    if (firstSync.current) {
-      firstSync.current = false;
-      const q = searchParams.get('q') || '';
-      const p = parseInt(searchParams.get('page') || '1', 10);
-      setSearch(q);
-      setPage(Number.isNaN(p) ? 1 : p);
+    if (!authLoading && mama_id) {
+      refreshList();
+      fetchFamilles();
     }
-    fetchFamilles();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [authLoading, mama_id, refreshList, fetchFamilles]);
 
-  // Écriture contrôlée dans l'URL
-  useEffect(() => {
-    if (firstSync.current) return;
-    const next = new URLSearchParams(searchParams);
-    next.set('q', search || '');
-    next.set('page', String(page));
-    if (next.toString() !== searchParams.toString()) {
-      setSearchParams(next, { replace: true });
-    }
-  }, [search, page, setSearchParams, searchParams]);
+  const exportExcel = () => exportFichesToExcel();
+  const exportPdf = () => exportFichesToPDF();
 
-  const exportExcel = () => {
-    const datas = [];
-    for (const f of rows) {
-      datas.push({
-        id: f.id,
-        nom: f.nom,
-        cout_par_portion: f.cout_par_portion,
-        actif: f.actif,
-      });
-    }
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Fiches");
-    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    saveAs(new Blob([buf]), "fiches_mamastock.xlsx");
-  };
-
-  const exportPdf = () => {
-    const doc = new JSPDF();
-    const rowsPdf = [];
-    for (const f of rows) {
-      rowsPdf.push([f.nom, f.famille || '', f.cout_par_portion]);
-    }
-    doc.autoTable({ head: [["Nom", "Famille", "Coût/portion"]], body: rowsPdf });
-    doc.save("fiches_mamastock.pdf");
-  };
-
-  if (authLoading || isLoading) {
+  const fichesFiltres = fiches;
+  if (authLoading || loading) {
     return <LoadingSpinner message="Chargement..." />;
   }
 
-  if (isError) {
-    return <div className="p-6">Erreur chargement fiches techniques.</div>;
-  }
-
-  if (!access_rights?.fiches?.peut_voir) {
+  if (!access_rights?.fiches_techniques?.peut_voir) {
     return <Navigate to="/unauthorized" replace />;
   }
 
@@ -143,15 +97,15 @@ export default function Fiches() {
         </select>
         <select
           className="form-input"
-          value={statut}
+          value={actif}
           onChange={(e) => {
             setPage(1);
-            setStatut(e.target.value);
+            setActif(e.target.value);
           }}
         >
-          <option value="actif">Actives</option>
-          <option value="inactif">Inactives</option>
-          <option value="tous">Toutes</option>
+          <option value="true">Actives</option>
+          <option value="false">Inactives</option>
+          <option value="all">Toutes</option>
         </select>
         <select
           className="form-input"
@@ -162,17 +116,11 @@ export default function Fiches() {
           }}
         >
           <option value="">-- Famille --</option>
-          {(() => {
-            const opts = [];
-            for (const f of familleList) {
-              opts.push(
-                <option key={f.id} value={f.nom}>
-                  {f.nom}
-                </option>
-              );
-            }
-            return opts;
-          })()}
+          {familles.map((f) => (
+            <option key={f.id} value={f.id}>
+              {f.nom}
+            </option>
+          ))}
         </select>
         {canEdit && (
           <Button
@@ -208,39 +156,33 @@ export default function Fiches() {
             </tr>
           </thead>
           <tbody>
-            {(() => {
-              const items = [];
-              for (const fiche of rows) {
-                items.push(
-                  <FicheRow
-                    key={fiche.id}
-                    fiche={fiche}
-                    canEdit={canEdit}
-                    onEdit={(f) => {
-                      setSelected(f);
-                      setShowForm(true);
-                    }}
-                    onDetail={(f) => {
-                      setSelected(f);
-                      setShowDetail(true);
-                    }}
-                    onDuplicate={async (id) => {
-                      await duplicateFiche(id);
-                      toast.success("Fiche dupliquée");
-                      queryClient.invalidateQueries({ queryKey: ['fiches'] });
-                    }}
-                    onDelete={(id) => {
-                      if (window.confirm("Désactiver cette fiche ?")) {
-                        deleteFiche(id);
-                        toast.success("Fiche désactivée");
-                        queryClient.invalidateQueries({ queryKey: ['fiches'] });
-                      }
-                    }}
-                  />
-                );
-              }
-              return items;
-            })()}
+            {fichesFiltres.map((fiche) => (
+              <FicheRow
+                key={fiche.id}
+                fiche={fiche}
+                canEdit={canEdit}
+                onEdit={(f) => {
+                  setSelected(f);
+                  setShowForm(true);
+                }}
+                onDetail={(f) => {
+                  setSelected(f);
+                  setShowDetail(true);
+                }}
+                onDuplicate={async (id) => {
+                  await duplicateFiche(id);
+                  toast.success("Fiche dupliquée");
+                  refreshList();
+                }}
+                onDelete={(id) => {
+                  if (window.confirm("Désactiver cette fiche ?")) {
+                    deleteFiche(id);
+                    toast.success("Fiche désactivée");
+                    refreshList();
+                  }
+                }}
+              />
+            ))}
           </tbody>
         </Motion.table>
       </ListingContainer>
@@ -255,7 +197,7 @@ export default function Fiches() {
           onClose={() => {
             setShowForm(false);
             setSelected(null);
-            queryClient.invalidateQueries({ queryKey: ['fiches'] });
+            refreshList();
           }}
         />
       )}

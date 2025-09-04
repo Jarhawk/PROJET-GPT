@@ -18,16 +18,8 @@ export default function MenuEngineering() {
     return s.length ? s[Math.floor(s.length / 2)] : 0
   }
 
-  const list = Array.isArray(data) ? data : []
-  const xs = []
-  const ys = []
-  for (let i = 0; i < list.length; i++) {
-    const d = list[i]
-    xs.push(d.x)
-    ys.push(d.y)
-  }
-  const medianPop = median(xs)
-  const medianMarge = median(ys)
+  const medianPop = median(data.map(d => d.x))
+  const medianMarge = median(data.map(d => d.y))
 
   const exportPdf = async () => {
     const el = document.getElementById('matrix')
@@ -58,19 +50,12 @@ export default function MenuEngineering() {
             <Tooltip cursor={{ strokeDasharray: '3 3' }} />
             <ReferenceLine x={medianPop} stroke="grey" />
             <ReferenceLine y={medianMarge} stroke="grey" />
-            <Scatter data={list} fill="#8884d8" />
+            <Scatter data={data} fill="#8884d8" />
           </ScatterChart>
         </ResponsiveContainer>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {(() => {
-          const cards = []
-          for (let i = 0; i < list.length; i++) {
-            const f = list[i]
-            cards.push(<FicheRentabiliteCard key={f.id} fiche={f} />)
-          }
-          return cards
-        })()}
+        {data.map(f => <FicheRentabiliteCard key={f.id} fiche={f} />)}
       </div>
     </div>
   )

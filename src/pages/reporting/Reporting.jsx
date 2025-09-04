@@ -6,7 +6,6 @@ import { useReporting } from '@/hooks/useReporting';
 import StatCard from '@/components/ui/StatCard';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import GlassCard from '@/components/ui/GlassCard';
-import { formatCurrencyEUR, formatPercent } from '@/utils/numberFR.js';
 import {
   ResponsiveContainer,
   LineChart,
@@ -112,7 +111,7 @@ export default function Reporting() {
           label="Coût matière total"
           value={
             indicators.cout_matiere_total
-              ? formatCurrencyEUR(indicators.cout_matiere_total)
+              ? indicators.cout_matiere_total.toLocaleString() + ' €'
               : '-'
           }
         />
@@ -120,7 +119,7 @@ export default function Reporting() {
           label="Évolution PMP"
           value={
             indicators.evolution_pmp
-              ? formatCurrencyEUR(indicators.evolution_pmp)
+              ? indicators.evolution_pmp.toFixed(2) + ' €'
               : '-'
           }
           variation={indicators.pmp_variation}
@@ -129,7 +128,7 @@ export default function Reporting() {
           label="Food cost"
           value={
             indicators.food_cost
-              ? formatPercent(indicators.food_cost * 100)
+              ? (indicators.food_cost * 100).toFixed(1) + ' %'
               : '-'
           }
         />
@@ -137,7 +136,7 @@ export default function Reporting() {
           label="Écart inventaire"
           value={
             indicators.ecart_inventaire
-              ? formatCurrencyEUR(indicators.ecart_inventaire)
+              ? indicators.ecart_inventaire.toLocaleString() + ' €'
               : '-'
           }
         />
@@ -197,22 +196,14 @@ export default function Reporting() {
               </tr>
             </thead>
             <tbody>
-              {(() => {
-                const rows = [];
-                const list = Array.isArray(ecarts) ? ecarts : [];
-                for (let i = 0; i < list.length; i++) {
-                  const e = list[i];
-                  rows.push(
-                    <tr key={e.produit_id} className="odd:bg-black/10">
-                      <td className="px-2 py-1">{e.produit}</td>
-                      <td className="px-2 py-1">
-                        {Number(e.ecart || 0).toLocaleString()}
-                      </td>
-                    </tr>
-                  );
-                }
-                return rows;
-              })()}
+              {ecarts.map((e) => (
+                <tr key={e.produit_id} className="odd:bg-black/10">
+                  <td className="px-2 py-1">{e.produit}</td>
+                  <td className="px-2 py-1">
+                    {Number(e.ecart || 0).toLocaleString()}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         )}

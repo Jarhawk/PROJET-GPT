@@ -1,8 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { vi, test, expect, beforeEach } from 'vitest';
 import { writeFileSync } from 'fs';
-import path from 'node:path';
-import os from 'node:os';
 
 process.env.VITE_SUPABASE_URL = 'https://example.supabase.co';
 process.env.VITE_SUPABASE_ANON_KEY = 'key';
@@ -42,7 +40,7 @@ test('backupDb fetches tables and writes file', async () => {
     'factures',
     'facture_lignes',
     'inventaires',
-    'inventaire_lignes',
+    'produits_inventaire',
     'fournisseur_produits',
     'taches',
     'tache_instances',
@@ -80,10 +78,7 @@ test('backupDb writes to BACKUP_DIR when set', async () => {
   vi.resetModules();
   ({ backupDb } = await import('../scripts/backup_db.js'));
   const result = await backupDb();
-  const resultDir = path.resolve(path.dirname(result));
-  const expectedDir = path.resolve(process.env.BACKUP_DIR || os.tmpdir());
-  expect(resultDir).toBe(expectedDir);
-  expect(path.basename(result)).toMatch(/^backup_\d{8}\.json$/);
+  expect(result).toMatch(/^\/tmp\/backup_\d{8}\.json$/);
   delete process.env.BACKUP_DIR;
 });
 

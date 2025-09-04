@@ -39,21 +39,15 @@ export default function Analyse() {
         <input type="month" className="form-input" value={filters.fin} onChange={e => setFilters(f => ({ ...f, fin: e.target.value }))} />
         <select className="form-input" value={filters.produit_id} onChange={e => setFilters(f => ({ ...f, produit_id: e.target.value }))}>
           <option value="">Tous produits</option>
-          {(() => {
-            const items = [];
-            const list = Array.isArray(results) ? results : [];
-            for (let i = 0; i < list.length; i++) {
-              const p = list[i];
-              items.push(<option key={p.id} value={p.id}>{p.nom}</option>);
-            }
-            return items;
-          })()}
+          {results.map(p => (
+            <option key={p.id} value={p.id}>{p.nom}</option>
+          ))}
         </select>
       </div>
       <GlassCard>
         <h2 className="font-semibold mb-2">Achats mensuels</h2>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={Array.isArray(monthly) ? monthly : []}>
+          <LineChart data={monthly}>
             <XAxis dataKey="mois" />
             <YAxis />
             <Tooltip />
@@ -68,28 +62,20 @@ export default function Analyse() {
             </tr>
           </thead>
           <tbody>
-            {(() => {
-              const rows = [];
-              const list = Array.isArray(monthly) ? monthly : [];
-              for (let i = 0; i < list.length; i++) {
-                const row = list[i];
-                rows.push(
-                  <tr key={row.mois}>
-                    <td className="px-2 py-1">{row.mois}</td>
-                    <td className="px-2 py-1 text-right">{Number(row.total).toFixed(2)}</td>
-                  </tr>
-                );
-              }
-              return rows;
-            })()}
+            {monthly.map(row => (
+              <tr key={row.mois}>
+                <td className="px-2 py-1">{row.mois}</td>
+                <td className="px-2 py-1 text-right">{Number(row.total).toFixed(2)}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </GlassCard>
-      {Array.isArray(evolution) && evolution.length > 0 && (
+      {evolution.length > 0 && (
         <GlassCard>
           <h2 className="font-semibold mb-2">Évolution des achats du produit</h2>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={Array.isArray(evolution) ? evolution : []}>
+            <BarChart data={evolution}>
               <XAxis dataKey="mois" />
               <YAxis />
               <Tooltip />

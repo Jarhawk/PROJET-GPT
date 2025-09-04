@@ -19,12 +19,10 @@ export function useCommandes() {
       let query = supabase
         .from("commandes")
         .select(
-          "id, mama_id, fournisseur_id, statut, created_at, date_commande, date_livraison_prevue, montant_total, commentaire, updated_at, actif, bl_id, facture_id, created_by, validated_by, fournisseur:fournisseur_id(id, nom, mama_id), lignes:commande_lignes(id, mama_id, total_ligne:total)",
+          "*, fournisseur:fournisseur_id(id, nom, email), lignes:commande_lignes(total_ligne)",
           { count: "exact" }
         )
         .eq("mama_id", mama_id)
-        .eq("fournisseur.mama_id", mama_id)
-        .eq("lignes.mama_id", mama_id)
         .order("date_commande", { ascending: false })
         .range((page - 1) * limit, page * limit - 1);
       if (fournisseur) query = query.eq("fournisseur_id", fournisseur);
@@ -40,14 +38,10 @@ export function useCommandes() {
         setCount(0);
         return { data: [], count: 0 };
       }
-      const source = Array.isArray(data) ? data : [];
-      const rows = [];
-      for (const c of source) {
-        const lignes = Array.isArray(c.lignes) ? c.lignes : [];
-        let total = 0;
-        for (const l of lignes) total += Number(l.total_ligne || 0);
-        rows.push({ ...c, lignes, total });
-      }
+      const rows = (data || []).map((c) => ({
+        ...c,
+        total: (c.lignes || []).reduce((s, l) => s + Number(l.total_ligne || 0), 0),
+      }));
       setData(rows);
       setCount(count || 0);
       return { data: rows, count: count || 0 };
@@ -63,13 +57,10 @@ export function useCommandes() {
       const { data, error } = await supabase
         .from("commandes")
         .select(
-          "id, mama_id, fournisseur_id, statut, created_at, date_commande, date_livraison_prevue, montant_total, commentaire, updated_at, actif, bl_id, facture_id, created_by, validated_by, fournisseur:fournisseur_id(id, nom, mama_id), lignes:commande_lignes(id, commande_id, produit_id, quantite, unite, prix_unitaire, tva, total_ligne:total, commentaire, part_livree, rupture, actif, mama_id, produit:produit_id(id, nom, mama_id))"
+          "*, fournisseur:fournisseur_id(id, nom, email), lignes:commande_lignes(*, produit:produit_id(id, nom))"
         )
         .eq("id", id)
         .eq("mama_id", mama_id)
-        .eq("fournisseur.mama_id", mama_id)
-        .eq("lignes.mama_id", mama_id)
-        .eq("lignes.produit.mama_id", mama_id)
         .single();
       setLoading(false);
       if (error) {
@@ -78,9 +69,8 @@ export function useCommandes() {
         setCurrent(null);
         return { data: null, error };
       }
-      const normalized = data ? { ...data, lignes: Array.isArray(data.lignes) ? data.lignes : [] } : null;
-      setCurrent(normalized);
-      return { data: normalized, error: null };
+      setCurrent(data);
+      return { data, error: null };
     },
     [mama_id]
   );
@@ -92,7 +82,7 @@ export function useCommandes() {
     const { data, error } = await supabase
       .from("commandes")
       .insert([{ ...rest, mama_id, created_by: user_id }])
-      .select("id, mama_id, fournisseur_id, statut, created_at, date_commande, date_livraison_prevue, montant_total, commentaire, updated_at, actif, bl_id, facture_id, created_by, validated_by")
+      .select()
       .single();
     setLoading(false);
     if (error) {
@@ -100,12 +90,12 @@ export function useCommandes() {
       setError(error);
       return { error };
     }
-    const arr = Array.isArray(lignes) ? lignes : [];
-    if (arr.length) {
-      const toInsert = [];
-      for (const l of arr) {
-        toInsert.push({ ...l, commande_id: data.id, mama_id });
-      }
+    if (lignes.length) {
+      const toInsert = lignes.map((l) => ({
+        ...l,
+        commande_id: data.id,
+        mama_id,
+      }));
       const { error: lineErr } = await supabase
         .from("commande_lignes")
         .insert(toInsert);
@@ -123,7 +113,7 @@ export function useCommandes() {
       .update(fields)
       .eq("id", id)
       .eq("mama_id", mama_id)
-      .select("id, mama_id, fournisseur_id, statut, created_at, date_commande, date_livraison_prevue, montant_total, commentaire, updated_at, actif, bl_id, facture_id, created_by, validated_by")
+      .select()
       .single();
     setLoading(false);
     if (error) {
@@ -138,6 +128,7 @@ export function useCommandes() {
     return updateCommande(id, {
       statut: "validée",
       validated_by: user_id,
+      envoyee_at: new Date().toISOString(),
     });
   }
 

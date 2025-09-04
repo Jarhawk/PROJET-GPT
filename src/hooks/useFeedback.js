@@ -15,8 +15,9 @@ export function useFeedback() {
     setError(null);
     const { data, error } = await supabase
       .from("feedback")
-      .select("id, mama_id, user_id, module, message, urgence, created_at")
+      .select("*")
       .eq("mama_id", mama_id)
+      .eq("actif", true)
       .order("created_at", { ascending: false });
     setLoading(false);
     if (error) {
@@ -35,7 +36,7 @@ export function useFeedback() {
       setError(null);
       const { error } = await supabase
         .from("feedback")
-        .insert([{ ...values, mama_id, user_id }]);
+        .insert([{ ...values, mama_id, user_id, actif: true }]);
       setLoading(false);
       if (error) {
         setError(error.message || error);

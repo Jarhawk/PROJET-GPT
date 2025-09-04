@@ -45,8 +45,6 @@ export default function Periodes() {
   if (authLoading || loading) return <LoadingSpinner message="Chargement..." />;
   if (!canEdit) return <Unauthorized />;
 
-  const list = Array.isArray(periodes) ? periodes : [];
-
   return (
     <div className="p-6 mx-auto w-full max-w-full">
             <h1 className="text-2xl font-bold mb-4">Périodes comptables</h1>
@@ -64,37 +62,30 @@ export default function Periodes() {
             </tr>
           </thead>
           <tbody>
-            {(() => {
-              if (list.length === 0) {
-                return (
-                  <tr>
-                    <td colSpan="4" className="py-2">
-                      Aucune période
-                    </td>
-                  </tr>
-                );
-              }
-              const rows = [];
-              for (const p of list) {
-                rows.push(
-                  <tr key={p.id}>
-                    <td className="px-2 py-1">{p.debut}</td>
-                    <td className="px-2 py-1">{p.fin}</td>
-                    <td className="px-2 py-1">
-                      {p.actif ? 'En cours' : p.cloturee ? 'Clôturée' : 'Future'}
-                    </td>
-                    <td className="px-2 py-1">
-                      {p.actif && (
-                        <Button size="sm" onClick={() => handleClose(p.id)}>
-                          Clôturer
-                        </Button>
-                      )}
-                    </td>
-                  </tr>
-                );
-              }
-              return rows;
-            })()}
+            {periodes.length === 0 ? (
+              <tr>
+                <td colSpan="4" className="py-2">
+                  Aucune période
+                </td>
+              </tr>
+            ) : (
+              periodes.map(p => (
+                <tr key={p.id}>
+                  <td className="px-2 py-1">{p.debut}</td>
+                  <td className="px-2 py-1">{p.fin}</td>
+                  <td className="px-2 py-1">
+                    {p.actif ? 'En cours' : p.cloturee ? 'Clôturée' : 'Future'}
+                  </td>
+                  <td className="px-2 py-1">
+                    {p.actif && (
+                      <Button size="sm" onClick={() => handleClose(p.id)}>
+                        Clôturer
+                      </Button>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </ListingContainer>

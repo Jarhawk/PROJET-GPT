@@ -1,26 +1,10 @@
 {
-  "nav": {
-    "accueil": "Accueil",
-    "produits": "Produits",
-    "factures": "Factures",
-    "fiches": "Fiches techniques",
-    "stock": "Stock",
-    "familles": "Familles",
-    "sousFamilles": "Sous-familles",
-    "zones": "Zones de stock",
-    "achats_fournisseurs": "Fournisseurs",
-    "achats_factures": "Factures",
-    "cuisine_fiches": "Fiches techniques",
-    "cuisine_menus": "Menus",
-    "stock_inventaire": "Inventaire",
-    "stock_transferts": "Transferts",
-    "documents_analyse": "Analyse",
-    "documents_export": "Export",
-    "parametrage_familles": "Familles",
-    "parametrage_sous-familles": "Sous-familles",
-    "parametrage_unites": "Unités",
-    "parametrage_zones": "Zones",
-    "parametrage_utilisateurs": "Utilisateurs"
-  }
+  "welcome": "Bienvenue",
+  "language": "Langue",
+  "french": "Français",
+  "english": "Anglais",
+  "spanish": "Espagnol",
+  "logout": "Déconnexion",
+  "search": "Recherche...",
+  "toggleTheme": "Basculer le thème"
 }
-

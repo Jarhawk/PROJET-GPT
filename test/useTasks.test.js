@@ -28,9 +28,9 @@ test('fetchTasks queries Supabase and stores result', async () => {
     await result.current.fetchTasks();
   });
   expect(fromMock).toHaveBeenCalledWith('taches');
-  expect(selectMock).toHaveBeenCalledWith('id, mama_id, titre, description, statut, date_echeance, assignes');
+  expect(selectMock).toHaveBeenCalledWith('*, assigned:utilisateurs!taches_assigned_to_fkey(nom)');
   expect(queryChain.eq).toHaveBeenCalledWith('mama_id', 'm1');
-  expect(orderMock).toHaveBeenCalledWith('date_echeance', { ascending: true });
+  expect(orderMock).toHaveBeenCalledWith('next_echeance', { ascending: true });
   expect(result.current.tasks).toEqual([{ id: 't1' }]);
 });
 
@@ -40,7 +40,7 @@ test('fetchTaskById queries Supabase with id and mama_id', async () => {
     await result.current.fetchTaskById('t1');
   });
   expect(fromMock).toHaveBeenCalledWith('taches');
-  expect(selectMock).toHaveBeenCalledWith('id, mama_id, titre, description, statut, date_echeance, assignes');
+  expect(selectMock).toHaveBeenCalledWith('*, assigned:utilisateurs!taches_assigned_to_fkey(nom)');
   expect(queryChain.eq).toHaveBeenNthCalledWith(1, 'id', 't1');
   expect(queryChain.eq).toHaveBeenNthCalledWith(2, 'mama_id', 'm1');
   expect(singleMock).toHaveBeenCalled();
@@ -52,8 +52,8 @@ test('fetchTasksByStatus filters by status', async () => {
     await result.current.fetchTasksByStatus('fait');
   });
   expect(fromMock).toHaveBeenCalledWith('taches');
-  expect(selectMock).toHaveBeenCalledWith('id, mama_id, titre, description, statut, date_echeance, assignes');
+  expect(selectMock).toHaveBeenCalledWith('*, assigned:utilisateurs!taches_assigned_to_fkey(nom)');
   expect(queryChain.eq).toHaveBeenNthCalledWith(1, 'mama_id', 'm1');
   expect(queryChain.eq).toHaveBeenNthCalledWith(2, 'statut', 'fait');
-  expect(orderMock).toHaveBeenCalledWith('date_echeance', { ascending: true });
+  expect(orderMock).toHaveBeenCalledWith('next_echeance', { ascending: true });
 });

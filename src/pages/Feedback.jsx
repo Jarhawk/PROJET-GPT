@@ -29,21 +29,6 @@ export default function Feedback() {
 
   if (authLoading) return <LoadingSpinner message="Chargement..." />;
 
-  const list = Array.isArray(items) ? items : [];
-  const rows = [];
-  for (const fb of list) {
-    rows.push(
-      <tr key={fb.id} className="border-t">
-        <td className="px-2 py-1 whitespace-nowrap">
-          {new Date(fb.created_at).toLocaleDateString()}
-        </td>
-        <td className="px-2 py-1">{fb.module}</td>
-        <td className="px-2 py-1">{fb.urgence}</td>
-        <td className="px-2 py-1">{fb.message}</td>
-      </tr>
-    );
-  }
-
   return (
     <div className="p-6 container mx-auto text-sm space-y-6">
             <h1 className="text-2xl font-bold">Feedback utilisateur</h1>
@@ -92,8 +77,17 @@ export default function Feedback() {
             </tr>
           </thead>
           <tbody>
-            {rows}
-            {list.length === 0 && (
+            {items.map((fb) => (
+              <tr key={fb.id} className="border-t">
+                <td className="px-2 py-1 whitespace-nowrap">
+                  {new Date(fb.created_at).toLocaleDateString()}
+                </td>
+                <td className="px-2 py-1">{fb.module}</td>
+                <td className="px-2 py-1">{fb.urgence}</td>
+                <td className="px-2 py-1">{fb.message}</td>
+              </tr>
+            ))}
+            {items.length === 0 && (
               <tr>
                 <td colSpan="4" className="py-4 text-center text-gray-500">
                   Aucun feedback pour le moment

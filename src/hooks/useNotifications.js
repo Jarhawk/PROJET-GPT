@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { useAuth as useAuthContext } from '@/hooks/useAuth';
 
-function useNotifications() {
+export default function useNotifications() {
   const { mama_id, user_id } = useAuthContext();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -57,9 +57,7 @@ function useNotifications() {
       setError(null);
       let query = supabase
         .from("notifications")
-        .select(
-          "id, mama_id, user_id, titre, texte, lien, type, lu, created_at, actif"
-        )
+        .select("*")
         .eq("mama_id", mama_id)
         .eq("user_id", user_id)
         .order("created_at", { ascending: false });
@@ -71,9 +69,8 @@ function useNotifications() {
         setItems([]);
         return [];
       }
-      const rows = Array.isArray(data) ? data : [];
-      setItems(rows);
-      return rows;
+      setItems(Array.isArray(data) ? data : []);
+      return data || [];
     },
     [mama_id, user_id]
   );
@@ -87,14 +84,7 @@ function useNotifications() {
         .eq("id", id)
         .eq("mama_id", mama_id)
         .eq("user_id", user_id);
-      setItems((ns) => {
-        const arr = Array.isArray(ns) ? ns : [];
-        const updated = [];
-        for (const n of arr) {
-          updated.push(n.id === id ? { ...n, lu: true } : n);
-        }
-        return updated;
-      });
+      setItems((ns) => ns.map((n) => (n.id === id ? { ...n, lu: true } : n)));
     },
     [mama_id, user_id]
   );
@@ -107,14 +97,7 @@ function useNotifications() {
       .eq('mama_id', mama_id)
       .eq('user_id', user_id)
       .eq('lu', false);
-    setItems((ns) => {
-      const arr = Array.isArray(ns) ? ns : [];
-      const updated = [];
-      for (const n of arr) {
-        updated.push({ ...n, lu: true });
-      }
-      return updated;
-    });
+    setItems((ns) => ns.map((n) => ({ ...n, lu: true })));
   }, [mama_id, user_id]);
 
   const fetchUnreadCount = useCallback(async () => {
@@ -132,7 +115,7 @@ function useNotifications() {
     if (!mama_id || !user_id) return null;
     const { data, error } = await supabase
       .from('notification_preferences')
-      .select('id, utilisateur_id, mama_id, email_enabled, webhook_enabled, webhook_url, webhook_token, updated_at')
+      .select('*')
       .eq('mama_id', mama_id)
       .eq('utilisateur_id', user_id)
       .single();
@@ -149,9 +132,7 @@ function useNotifications() {
           { mama_id, utilisateur_id: user_id, ...values },
           { onConflict: ['utilisateur_id', 'mama_id'] }
         )
-        .select(
-          'id, utilisateur_id, mama_id, email_enabled, webhook_enabled, webhook_url, webhook_token, updated_at'
-        )
+        .select()
         .single();
       return { data, error };
     },
@@ -167,14 +148,7 @@ function useNotifications() {
         .eq('id', id)
         .eq('mama_id', mama_id)
         .eq('user_id', user_id);
-      setItems((ns) => {
-        const arr = Array.isArray(ns) ? ns : [];
-        const kept = [];
-        for (const n of arr) {
-          if (n.id !== id) kept.push(n);
-        }
-        return kept;
-      });
+      setItems((ns) => ns.filter((n) => n.id !== id));
     },
     [mama_id, user_id],
   );
@@ -188,17 +162,10 @@ function useNotifications() {
         .eq('id', id)
         .eq('mama_id', mama_id)
         .eq('user_id', user_id)
-        .select('id, mama_id, user_id, titre, texte, lien, type, lu, created_at, actif')
+        .select()
         .single();
       if (!error && data)
-        setItems((ns) => {
-          const arr = Array.isArray(ns) ? ns : [];
-          const updated = [];
-          for (const n of arr) {
-            updated.push(n.id === id ? { ...n, ...data } : n);
-          }
-          return updated;
-        });
+        setItems((ns) => ns.map((n) => (n.id === id ? { ...n, ...data } : n)));
       return { data, error };
     },
     [mama_id, user_id],
@@ -209,20 +176,20 @@ function useNotifications() {
       if (!mama_id || !user_id || !id) return { data: null, error: 'missing' };
       const { data, error } = await supabase
         .from('notifications')
-        .select('id, mama_id, user_id, titre, texte, lien, type, lu, created_at, actif')
+        .select('*')
         .eq('id', id)
         .eq('mama_id', mama_id)
         .eq('user_id', user_id)
         .single();
       if (!error && data) {
         setItems((ns) => {
-          const arr = Array.isArray(ns) ? ns.slice() : [];
-          const idx = arr.findIndex((n) => n.id === id);
+          const idx = ns.findIndex((n) => n.id === id);
           if (idx >= 0) {
+            const arr = ns.slice();
             arr[idx] = data;
             return arr;
           }
-          return [data, ...arr];
+          return [data, ...ns];
         });
       }
       return { data, error };
@@ -241,11 +208,10 @@ function useNotifications() {
             event: 'INSERT',
             schema: 'public',
             table: 'notifications',
-            // RLS: restreint aux notifications de l'utilisateur courant et de sa MAMA
-            filter: `mama_id=eq.${mama_id} and user_id=eq.${user_id}`,
+            filter: `user_id=eq.${user_id}`,
           },
           (payload) => {
-            setItems((ns) => [payload.new, ...(Array.isArray(ns) ? ns : [])]);
+            setItems((ns) => [payload.new, ...ns]);
             if (handler) handler(payload.new);
           },
         )
@@ -278,5 +244,5 @@ function useNotifications() {
     sendWebhook,
   };
 }
-export default useNotifications;
-export { useNotifications };
+
+export { useNotifications as useAuth };

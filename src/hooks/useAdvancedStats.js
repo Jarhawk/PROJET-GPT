@@ -1,24 +1,18 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from "react";
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/hooks/useAuth';
 
 export function useAdvancedStats() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { mama_id } = useAuth();
 
   async function fetchStats({ start, end } = {}) {
-    if (!mama_id) return [];
     setLoading(true);
-    let query = supabase
-      .from('v_achats_mensuels')
-      .select('month:mois, purchases:montant_total, mama_id')
-      .eq('mama_id', mama_id);
-    if (start) query = query.gte('mois', start);
-    if (end) query = query.lte('mois', end);
-    const { data, error } = await query.order('mois', { ascending: true });
+    const { data, error } = await supabase.rpc("advanced_stats", {
+      start_date: start || null,
+      end_date: end || null,
+    });
     setLoading(false);
     if (error) {
       setError(error.message || error);
@@ -26,7 +20,7 @@ export function useAdvancedStats() {
       return [];
     }
     setData(Array.isArray(data) ? data : []);
-    return Array.isArray(data) ? data : [];
+    return data || [];
   }
 
   return { data, loading, error, fetchStats };

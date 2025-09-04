@@ -55,19 +55,6 @@ export default function ZoneForm() {
 
   if (loading) return <LoadingSpinner message="Chargement..." />;
 
-  const parentOptions = [];
-  const list = Array.isArray(zones) ? zones : [];
-  for (let i = 0; i < list.length; i++) {
-    const z = list[i];
-    if (z.id !== id) {
-      parentOptions.push(
-        <option key={z.id} value={z.id}>
-          {z.nom}
-        </option>
-      );
-    }
-  }
-
   const infoForm = (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
@@ -113,7 +100,13 @@ export default function ZoneForm() {
           className="w-full"
         >
           <option value="">Aucun</option>
-          {parentOptions}
+          {zones
+            .filter((z) => z.id !== id)
+            .map((z) => (
+              <option key={z.id} value={z.id}>
+                {z.nom}
+              </option>
+            ))}
         </Select>
       </div>
       <div>

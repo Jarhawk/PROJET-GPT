@@ -4,8 +4,9 @@ import { useRecommendations } from "@/hooks/useRecommendations";
 
 export default function RecommandationsBox({ filter }) {
   const { recommendations, loading, refresh } = useRecommendations();
-  const list = Array.isArray(recommendations) ? recommendations : [];
-  const items = filter ? list.filter(r => r.category === filter) : list;
+  const items = filter
+    ? recommendations.filter(r => r.category === filter)
+    : recommendations;
 
   if (loading) {
     return (
@@ -23,25 +24,16 @@ export default function RecommandationsBox({ filter }) {
 
   return (
     <div className="space-y-1">
-      {(function () {
-        const nodes = [];
-        const arr = Array.isArray(items) ? items : [];
-        let idx = 0;
-        for (const rec of arr) {
-          nodes.push(
-            <div
-              key={idx}
-              onClick={() => rec.onClick?.(rec) || refresh()}
-              className="flex items-center gap-2 bg-white/10 border border-white/20 backdrop-blur-xl rounded-lg p-2 shadow cursor-pointer hover:bg-white/20 text-sm"
-            >
-              <span>{rec.type === 'alert' ? '🔍' : '🧠'}</span>
-              <span className="flex-1">{rec.message}</span>
-            </div>
-          );
-          idx += 1;
-        }
-        return nodes;
-      })()}
+      {items.map((rec, idx) => (
+        <div
+          key={idx}
+          onClick={() => rec.onClick?.(rec) || refresh()}
+          className="flex items-center gap-2 bg-white/10 border border-white/20 backdrop-blur-xl rounded-lg p-2 shadow cursor-pointer hover:bg-white/20 text-sm"
+        >
+          <span>{rec.type === 'alert' ? '🔍' : '🧠'}</span>
+          <span className="flex-1">{rec.message}</span>
+        </div>
+      ))}
     </div>
   );
 }

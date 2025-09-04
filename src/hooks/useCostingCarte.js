@@ -21,7 +21,7 @@ export function useCostingCarte() {
       try {
         let query = supabase
           .from('v_costing_carte')
-          .select('id, nom, type, cout_par_portion, prix_vente, marge_euro, marge_pct, food_cost_pct, famille, actif, mama_id')
+          .select('*')
           .eq('mama_id', mama_id)
 
         if (filters.type) query = query.eq('type', filters.type)
@@ -30,9 +30,8 @@ export function useCostingCarte() {
 
         const { data: rows, error } = await query.order('nom')
         if (error) throw error
-        const list = Array.isArray(rows) ? rows : []
-        setData(list)
-        return list
+        setData(rows || [])
+        return rows || []
       } catch (e) {
         setError(e)
         setData([])
@@ -60,30 +59,25 @@ export function useCostingCarte() {
   )
 
   const exportExcel = useCallback((rows) => {
-    const list = Array.isArray(rows) ? rows : []
     const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(list), 'Costing')
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Costing')
     XLSX.writeFile(wb, 'costing_carte.xlsx')
   }, [])
 
   const exportPdf = useCallback((rows) => {
-    const list = Array.isArray(rows) ? rows : []
     const doc = new JSPDF()
     const headers = [
       ['Nom fiche', 'Type', 'Coût/portion', 'Prix vente', 'Marge €', 'Marge %', 'Food cost %'],
     ]
-    const body = []
-    for (const r of list) {
-      body.push([
-        r.nom,
-        r.type,
-        r.cout_par_portion ?? '',
-        r.prix_vente ?? '',
-        r.marge_euro ?? '',
-        r.marge_pct ?? '',
-        r.food_cost_pct ?? '',
-      ])
-    }
+    const body = rows.map((r) => [
+      r.nom,
+      r.type,
+      r.cout_par_portion ?? '',
+      r.prix_vente ?? '',
+      r.marge_euro ?? '',
+      r.marge_pct ?? '',
+      r.food_cost_pct ?? '',
+    ])
     doc.autoTable({ head: headers, body })
     doc.save('costing_carte.pdf')
   }, [])

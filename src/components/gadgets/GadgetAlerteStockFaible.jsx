@@ -22,32 +22,21 @@ export default function GadgetAlerteStockFaible() {
     <div className="bg-white/10 border border-white/20 backdrop-blur-xl rounded-2xl shadow-md p-4 text-white">
       <h3 className="font-bold mb-2">Alerte stock faible</h3>
       <Motion.ul initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-2 text-sm">
-        {
-          (() => {
-            const items = [];
-            for (const p of data) {
-              items.push(
-                <li
-                  key={p.produit_id}
-                  className="flex items-center justify-between"
-                >
-                  <span>
-                    {p.nom}
-                    {p.fournisseur_nom && (
-                      <span className="block text-xs text-white/70">
-                        {p.fournisseur_nom}
-                      </span>
-                    )}
-                  </span>
-                  <span className="text-red-300">
-                    {p.stock_actuel} / {p.stock_min} {p.unite}
-                  </span>
-                </li>
-              );
-            }
-            return items;
-          })()
-        }
+        {data.map((p) => (
+          <li key={p.produit_id} className="flex items-center justify-between">
+            <span>
+              {p.nom}
+              {p.fournisseur_nom && (
+                <span className="block text-xs text-white/70">
+                  {p.fournisseur_nom}
+                </span>
+              )}
+            </span>
+            <span className="text-red-300">
+              {p.stock_actuel} / {p.stock_min} {p.unite}
+            </span>
+          </li>
+        ))}
       </Motion.ul>
     </div>
   );

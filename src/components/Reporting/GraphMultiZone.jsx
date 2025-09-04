@@ -23,16 +23,8 @@ const allZones = [
 
 export default function GraphMultiZone({ data }) {
   const chartRef = useRef(null);
-  const initialSelected = [];
-  for (const z of allZones) initialSelected.push(z.key);
-  const [selectedZones, setSelectedZones] = useState(initialSelected);
-  const checkboxIds = useMemo(() => {
-    const entries = [];
-    for (const z of allZones) {
-      entries.push([z.key, makeId('fld')]);
-    }
-    return Object.fromEntries(entries);
-  }, []);
+  const [selectedZones, setSelectedZones] = useState(allZones.map(z => z.key));
+  const checkboxIds = useMemo(() => Object.fromEntries(allZones.map(z => [z.key, makeId('fld')])), []);
 
   const toggleZone = (key) => {
     setSelectedZones((prev) =>
@@ -63,24 +55,20 @@ export default function GraphMultiZone({ data }) {
       </div>
 
       <div className="flex gap-4 mb-4 flex-wrap text-white">
-        {(() => {
-          const labels = [];
-          for (const zone of allZones) {
-            const id = checkboxIds[zone.key];
-            labels.push(
-              <label key={zone.key} htmlFor={id} className="flex items-center gap-2 text-sm">
-                <input
-                  id={id}
-                  type="checkbox"
-                  checked={selectedZones.includes(zone.key)}
-                  onChange={() => toggleZone(zone.key)}
-                />
-                {zone.label}
-              </label>
-            );
-          }
-          return labels;
-        })()}
+        {allZones.map((zone) => {
+          const id = checkboxIds[zone.key];
+          return (
+            <label key={zone.key} htmlFor={id} className="flex items-center gap-2 text-sm">
+              <input
+                id={id}
+                type="checkbox"
+                checked={selectedZones.includes(zone.key)}
+                onChange={() => toggleZone(zone.key)}
+              />
+              {zone.label}
+            </label>
+          );
+        })}
       </div>
 
       <div ref={chartRef}>
@@ -91,25 +79,19 @@ export default function GraphMultiZone({ data }) {
             <YAxis />
             <Tooltip />
             <Legend />
-            {(() => {
-              const lines = [];
-              for (const zone of allZones) {
-                if (selectedZones.includes(zone.key)) {
-                  lines.push(
-                    <Line
-                      key={zone.key}
-                      type="monotone"
-                      dataKey={zone.key}
-                      name={zone.label}
-                      stroke={zone.color}
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                  );
-                }
-              }
-              return lines;
-            })()}
+            {allZones
+              .filter((z) => selectedZones.includes(z.key))
+              .map((zone) => (
+                <Line
+                  key={zone.key}
+                  type="monotone"
+                  dataKey={zone.key}
+                  name={zone.label}
+                  stroke={zone.color}
+                  strokeWidth={2}
+                  dot={false}
+                />
+              ))}
           </LineChart>
         </ResponsiveContainer>
       </div>

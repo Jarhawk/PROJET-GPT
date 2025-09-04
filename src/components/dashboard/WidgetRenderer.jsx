@@ -5,15 +5,12 @@ import DashboardCard from "./DashboardCard";
 export default function WidgetRenderer({ config }) {
   if (!config) return null;
   const type = config.type || "indicator";
-  const data = Array.isArray(config.data) ? config.data : [];
-  const items = Array.isArray(config.items) ? config.items : [];
-  const colors = Array.isArray(config.colors) ? config.colors : [];
 
   switch (type) {
     case "line":
       return (
         <ResponsiveContainer width="100%" height={220}>
-          <LineChart data={data}>
+          <LineChart data={config.data || []}>
             <Line type="monotone" dataKey={config.dataKey} stroke={config.color || "#bfa14d"} />
             <Tooltip />
           </LineChart>
@@ -22,7 +19,7 @@ export default function WidgetRenderer({ config }) {
     case "bar":
       return (
         <ResponsiveContainer width="100%" height={220}>
-          <BarChart data={data}>
+          <BarChart data={config.data || []}>
             <Bar dataKey={config.dataKey} fill={config.color || "#bfa14d"} />
             <Tooltip />
           </BarChart>
@@ -32,18 +29,9 @@ export default function WidgetRenderer({ config }) {
       return (
         <ResponsiveContainer width="100%" height={220}>
           <PieChart>
-            <Pie
-              data={data}
-              dataKey={config.dataKey}
-              nameKey={config.nameKey}
-              outerRadius={80}
-              fill={config.color || "#bfa14d"}
-            >
-              {data.map((_, idx) => (
-                <Cell
-                  key={idx}
-                  fill={colors[idx % colors.length] || "#bfa14d"}
-                />
+            <Pie data={config.data || []} dataKey={config.dataKey} nameKey={config.nameKey} outerRadius={80} fill={config.color || "#bfa14d"}>
+              {(config.data || []).map((_, idx) => (
+                <Cell key={idx} fill={config.colors?.[idx % config.colors.length] || "#bfa14d"} />
               ))}
             </Pie>
             <Tooltip />
@@ -53,8 +41,8 @@ export default function WidgetRenderer({ config }) {
     case "list":
       return (
         <ul className="list-disc pl-4 text-sm">
-          {items.map((item, idx) => (
-            <li key={idx}>{item}</li>
+          {(config.items || []).map((it, idx) => (
+            <li key={idx}>{it}</li>
           ))}
         </ul>
       );

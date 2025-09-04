@@ -1,12 +1,26 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState, useCallback } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
+
+function safeQueryClient() {
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useQueryClient();
+  } catch {
+    return {
+      invalidateQueries: () => {},
+      setQueryData: () => {},
+      fetchQuery: async () => {},
+    };
+  }
+}
 
 export function useFamilles() {
   const { mama_id } = useAuth();
-  const queryClient = useQueryClient();
+  const queryClient = safeQueryClient();
   const [params, setParams] = useState({ search: '', page: 1, limit: 50 });
 
   const query = useQuery({
@@ -15,7 +29,7 @@ export function useFamilles() {
     queryFn: async () => {
       let q = supabase
         .from('familles')
-        .select('id, nom, actif', { count: 'exact' })
+        .select('id, code, nom, actif', { count: 'exact' })
         .eq('mama_id', mama_id)
         .order('nom', { ascending: true })
         .range((params.page - 1) * params.limit, params.page * params.limit - 1);
@@ -33,12 +47,11 @@ export function useFamilles() {
 
   const addMutation = useMutation({
     mutationFn: async (payload) => {
-      const { code, ...rest } = payload;
-      const body = { ...rest, mama_id };
+      const body = { ...payload, mama_id };
       const { data, error } = await supabase
         .from('familles')
         .insert([body])
-        .select('id, nom, actif')
+        .select('id, code, nom, actif')
         .single();
       if (error) throw error;
       return data;
@@ -48,13 +61,12 @@ export function useFamilles() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, ...values }) => {
-      const { code, ...fields } = values;
       const { data, error } = await supabase
         .from('familles')
-        .update(fields)
+        .update(values)
         .eq('id', id)
         .eq('mama_id', mama_id)
-        .select('id, nom, actif')
+        .select('id, code, nom, actif')
         .single();
       if (error) throw error;
       return data;
@@ -75,12 +87,7 @@ export function useFamilles() {
   });
 
   const batchDeleteFamilles = async (ids = []) => {
-    const list = Array.isArray(ids) ? ids : [];
-    const tasks = [];
-    for (const id of list) {
-      tasks.push(deleteMutation.mutateAsync(id));
-    }
-    await Promise.all(tasks);
+    await Promise.all(ids.map((id) => deleteMutation.mutateAsync(id)));
   };
 
   return {

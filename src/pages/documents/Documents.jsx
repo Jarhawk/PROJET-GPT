@@ -15,18 +15,20 @@ export default function Documents() {
   const [preview, setPreview] = useState(null);
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
+  const [categorieFilter, setCategorieFilter] = useState("");
 
   useEffect(() => {
     if (!authLoading && mama_id) {
       listDocuments({
         search,
         type: typeFilter || undefined,
+        categorie: categorieFilter || undefined,
       });
     }
-  }, [authLoading, mama_id, listDocuments, search, typeFilter]);
+  }, [authLoading, mama_id, listDocuments, search, typeFilter, categorieFilter]);
 
-  const handleUploaded = async (file) => {
-    await uploadDocument(file);
+  const handleUploaded = async (file, meta) => {
+    await uploadDocument(file, meta);
     await listDocuments();
     setShowUpload(false);
   };
@@ -46,7 +48,10 @@ export default function Documents() {
       </div>
       {showUpload && (
         <div className="mb-4">
-          <DocumentForm onUploaded={handleUploaded} />
+          <DocumentForm
+            onUploaded={handleUploaded}
+            categories={["Contrat fournisseur", "Spécification produit"]}
+          />
         </div>
       )}
       <div className="flex flex-wrap gap-2 mb-4">
@@ -62,42 +67,49 @@ export default function Documents() {
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
         />
+        <input
+          className="form-input"
+          placeholder="Catégorie"
+          value={categorieFilter}
+          onChange={(e) => setCategorieFilter(e.target.value)}
+        />
       </div>
       <TableContainer>
         <table className="min-w-full text-sm">
           <thead>
             <tr>
               <th className="p-2">Nom</th>
+              <th className="p-2">Catégorie</th>
               <th className="p-2">Type</th>
+              <th className="p-2">Taille</th>
               <th className="p-2">Date</th>
               <th className="p-2">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {(() => {
-              const rows = [];
-              const safeDocs = Array.isArray(documents) ? documents : [];
-              for (let i = 0; i < safeDocs.length; i += 1) {
-                const doc = safeDocs[i];
-                const nom = doc.url?.split("/").pop() || "";
-                rows.push(
-                  <tr key={doc.id}>
-                    <td className="p-2">{nom}</td>
-                    <td className="p-2">{doc.type}</td>
-                    <td className="p-2">{doc.created_at?.split("T")[0]}</td>
-                    <td className="p-2 space-x-2">
-                      <Button size="sm" variant="outline" onClick={() => setPreview(doc)}>
-                        Prévisualiser
-                      </Button>
-                      <Button size="sm" variant="destructive" onClick={() => handleDelete(doc.id)}>
-                        Supprimer
-                      </Button>
-                    </td>
-                  </tr>
-                );
-              }
-              return rows;
-            })()}
+            {documents.map((doc) => (
+              <tr key={doc.id}>
+                <td className="p-2">{doc.titre || doc.nom}</td>
+                <td className="p-2">
+                  {doc.categorie && (
+                    <span className="bg-blue-800/50 text-white px-2 py-0.5 rounded-full text-xs">
+                      {doc.categorie}
+                    </span>
+                  )}
+                </td>
+                <td className="p-2">{doc.type}</td>
+                <td className="p-2">{(doc.taille / 1024).toFixed(1)} Ko</td>
+                <td className="p-2">{doc.created_at?.split("T")[0]}</td>
+                <td className="p-2 space-x-2">
+                  <Button size="sm" variant="outline" onClick={() => setPreview(doc)}>
+                    Prévisualiser
+                  </Button>
+                  <Button size="sm" variant="destructive" onClick={() => handleDelete(doc.id)}>
+                    Supprimer
+                  </Button>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </TableContainer>

@@ -68,47 +68,35 @@ export default function APIKeys() {
             </tr>
           </thead>
           <tbody>
-            {(() => {
-              const rows = [];
-              const list = Array.isArray(keys) ? keys : [];
-              for (let i = 0; i < list.length; i++) {
-                const k = list[i];
-                rows.push(
-                  <tr key={k.id}>
-                    <td className="border px-2 py-1">{k.name}</td>
-                    <td className="border px-2 py-1">{k.scopes}</td>
-                    <td className="border px-2 py-1">{k.role}</td>
-                    <td className="border px-2 py-1">{k.created_at?.slice(0,16).replace('T',' ')}</td>
-                    <td className="border px-2 py-1">{k.expiration?.slice(0,10) || '-'}</td>
-                    <td className="border px-2 py-1">{k.revoked ? 'Révoquée' : 'Active'}</td>
-                    <td className="border px-2 py-1">
-                      {!k.revoked && (
-                        <SecondaryButton size="sm" onClick={() => revokeKey(k.id)}>
-                          Révoquer
-                        </SecondaryButton>
-                      )}
-                    </td>
-                  </tr>
-                );
-              }
-              if (rows.length === 0 && !loading) {
-                rows.push(
-                  <tr key="empty">
-                    <td colSpan={7} className="py-4 text-gray-500">Aucune clé</td>
-                  </tr>
-                );
-              }
-              if (loading) {
-                rows.push(
-                  <tr key="loading">
-                    <td colSpan={7} className="py-4">
-                      <LoadingSpinner message="Chargement…" />
-                    </td>
-                  </tr>
-                );
-              }
-              return rows;
-            })()}
+            {keys.map(k => (
+              <tr key={k.id}>
+                <td className="border px-2 py-1">{k.name}</td>
+                <td className="border px-2 py-1">{k.scopes}</td>
+                <td className="border px-2 py-1">{k.role}</td>
+                <td className="border px-2 py-1">{k.created_at?.slice(0,16).replace('T',' ')}</td>
+                <td className="border px-2 py-1">{k.expiration?.slice(0,10) || '-'}</td>
+                <td className="border px-2 py-1">{k.revoked ? 'Révoquée' : 'Active'}</td>
+                <td className="border px-2 py-1">
+                  {!k.revoked && (
+                    <SecondaryButton size="sm" onClick={() => revokeKey(k.id)}>
+                      Révoquer
+                    </SecondaryButton>
+                  )}
+                </td>
+              </tr>
+            ))}
+            {keys.length === 0 && !loading && (
+              <tr>
+                <td colSpan={7} className="py-4 text-gray-500">Aucune clé</td>
+              </tr>
+            )}
+            {loading && (
+              <tr>
+                <td colSpan={7} className="py-4">
+                  <LoadingSpinner message="Chargement…" />
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </TableContainer>

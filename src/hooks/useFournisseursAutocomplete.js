@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { getSupabaseClient } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import useDebounce from '@/hooks/useDebounce';
 
@@ -12,13 +12,13 @@ export function useFournisseursAutocomplete({ term = '', limit = 20 } = {}) {
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const search = useDebounce(term, 300);
+  const search = useDebounce(term, 250);
 
   useEffect(() => {
     if (!mama_id) return;
     let aborted = false;
     const s = search.trim();
-    if (s.length < 2) {
+    if (s === '') {
       setOptions([]);
       setLoading(false);
       return;
@@ -26,10 +26,11 @@ export function useFournisseursAutocomplete({ term = '', limit = 20 } = {}) {
     const run = async () => {
       setLoading(true);
       setError(null);
+      const supabase = getSupabaseClient();
       try {
         let req = supabase
           .from('fournisseurs')
-          .select('id, nom')
+          .select('id, nom, ville')
           .eq('mama_id', mama_id)
           .eq('actif', true)
           .order('nom', { ascending: true })
@@ -37,7 +38,7 @@ export function useFournisseursAutocomplete({ term = '', limit = 20 } = {}) {
           .ilike('nom', `%${s}%`);
         const { data, error } = await req;
         if (error) throw error;
-        if (!aborted) setOptions(Array.isArray(data) ? data : []);
+        if (!aborted) setOptions(data || []);
       } catch (err) {
         console.error(err);
         if (!aborted) {
@@ -59,9 +60,10 @@ export function useFournisseursAutocomplete({ term = '', limit = 20 } = {}) {
 
 export async function searchFournisseurs(mamaId, term = '', limit = 20) {
   if (!mamaId) return [];
+  const supabase = getSupabaseClient();
   let req = supabase
     .from('fournisseurs')
-    .select('id, nom')
+    .select('id, nom, ville')
     .eq('mama_id', mamaId)
     .eq('actif', true)
     .order('nom', { ascending: true })
@@ -69,5 +71,5 @@ export async function searchFournisseurs(mamaId, term = '', limit = 20) {
   if (term && term.trim()) req = req.ilike('nom', `%${term.trim()}%`);
   const { data, error } = await req;
   if (error) throw error;
-  return Array.isArray(data) ? data : [];
+  return data || [];
 }

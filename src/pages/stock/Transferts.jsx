@@ -14,9 +14,6 @@ export default function Transferts() {
   const { transferts, fetchTransferts } = useTransferts();
   const { zones, fetchZones } = useZones();
   const { products, fetchProducts } = useProducts();
-  const zonesSafe = Array.isArray(zones) ? zones : [];
-  const productsSafe = Array.isArray(products) ? products : [];
-  const transfertsSafe = Array.isArray(transferts) ? transferts : [];
   const [filters, setFilters] = useState({
     debut: "",
     fin: "",
@@ -65,17 +62,11 @@ export default function Transferts() {
           }
         >
           <option value="">Zone source</option>
-          {(() => {
-            const opts = [];
-            for (const z of zonesSafe) {
-              opts.push(
-                <option key={z.id} value={z.id}>
-                  {z.nom}
-                </option>
-              );
-            }
-            return opts;
-          })()}
+          {zones.map((z) => (
+            <option key={z.id} value={z.id}>
+              {z.nom}
+            </option>
+          ))}
         </select>
         <select
           aria-label="Zone destination"
@@ -86,17 +77,11 @@ export default function Transferts() {
           }
         >
           <option value="">Zone destination</option>
-          {(() => {
-            const opts = [];
-            for (const z of zonesSafe) {
-              opts.push(
-                <option key={z.id} value={z.id}>
-                  {z.nom}
-                </option>
-              );
-            }
-            return opts;
-          })()}
+          {zones.map((z) => (
+            <option key={z.id} value={z.id}>
+              {z.nom}
+            </option>
+          ))}
         </select>
         <select
           aria-label="Produit"
@@ -107,17 +92,11 @@ export default function Transferts() {
           }
         >
           <option value="">Produit</option>
-          {(() => {
-            const opts = [];
-            for (const p of productsSafe) {
-              opts.push(
-                <option key={p.id} value={p.id}>
-                  {p.nom}
-                </option>
-              );
-            }
-            return opts;
-          })()}
+          {products.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.nom}
+            </option>
+          ))}
         </select>
         <Button onClick={() => setShowForm(true)}>Nouveau transfert</Button>
       </div>
@@ -133,21 +112,15 @@ export default function Transferts() {
             </tr>
           </thead>
           <tbody>
-            {(() => {
-              const rows = [];
-              for (const t of transfertsSafe) {
-                rows.push(
-                  <tr key={t.id}>
-                    <td className="p-2">{t.date_transfert?.slice(0, 10)}</td>
-                    <td className="p-2">{t.zone_source?.nom || ""}</td>
-                    <td className="p-2">{t.zone_destination?.nom || ""}</td>
-                    <td className="p-2">{Array.isArray(t.lignes) ? t.lignes.length : 0}</td>
-                    <td className="p-2">{t.statut || "enregistré"}</td>
-                  </tr>
-                );
-              }
-              return rows;
-            })()}
+            {transferts.map((t) => (
+              <tr key={t.id}>
+                <td className="p-2">{t.date_transfert?.slice(0, 10)}</td>
+                <td className="p-2">{t.zone_source?.nom || ""}</td>
+                <td className="p-2">{t.zone_destination?.nom || ""}</td>
+                <td className="p-2">{t.lignes?.length || 0}</td>
+                <td className="p-2">{t.statut || "enregistré"}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </TableContainer>

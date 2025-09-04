@@ -14,20 +14,14 @@ export function useEnrichedProducts() {
     setError(null);
     try {
       const { data, error } = await supabase
-        .from('produits')
+        .from("produits")
         .select(
-          `id, nom, famille_id, sous_famille_id,
-           famille:familles!fk_produits_famille(nom, mama_id),
-           sous_famille:sous_familles!fk_produits_sous_famille(nom, mama_id)`
+          "id, nom, famille_id, sous_famille_id, famille:familles!fk_produits_famille(nom), sous_famille:sous_familles!fk_produits_sous_famille(nom), liaisons:fournisseur_produits!fournisseur_produits_produit_id_fkey(*, fournisseur:fournisseurs!fk_fournisseur_produits_fournisseur_id(*))"
         )
-        .eq('mama_id', mama_id)
-        .eq('famille.mama_id', mama_id)
-        .eq('sous_famille.mama_id', mama_id);
+        .eq("mama_id", mama_id);
 
       if (error) throw error;
-      const rows = Array.isArray(data) ? data : [];
-      setProducts(rows);
-      return rows;
+      setProducts(Array.isArray(data) ? data : []);
     } catch (err) {
       setError(err.message || "Erreur chargement produits enrichis.");
       setProducts([]);

@@ -18,14 +18,7 @@ export default function AutoCompleteField({
   ...props
 }) {
   const [inputValue, setInputValue] = useState(() => {
-    const arr = Array.isArray(options) ? options : [];
-    let match = null;
-    for (const o of arr) {
-      if (o.id === value || o.nom === value) {
-        match = o;
-        break;
-      }
-    }
+    const match = (options || []).find(o => o.id === value || o.nom === value);
     return match ? match.nom : value || "";
   });
 
@@ -36,28 +29,14 @@ export default function AutoCompleteField({
     : { data: [] };
   const allOptions = options ?? hookOptions;
   const resolved = useMemo(
-    () => {
-      const arr = Array.isArray(allOptions) ? allOptions : [];
-      const result = [];
-      for (const opt of arr) {
-        result.push(typeof opt === "string" ? { id: opt, nom: opt } : opt);
-      }
-      return result;
-    },
+    () => (allOptions || []).map((opt) => (typeof opt === "string" ? { id: opt, nom: opt } : opt)),
     [allOptions],
   );
   const [showAdd, setShowAdd] = useState(false);
   const listId = useId();
 
   useEffect(() => {
-    const arr = Array.isArray(resolved) ? resolved : [];
-    let match = null;
-    for (const o of arr) {
-      if (o.id === value || o.nom === value) {
-        match = o;
-        break;
-      }
-    }
+    const match = resolved.find(o => o.id === value || o.nom === value);
     if (match) {
       setInputValue(match.nom);
     } else if (typeof value === "string") {
@@ -65,40 +44,24 @@ export default function AutoCompleteField({
     }
   }, [value, resolved]);
 
-  const disabledIds = (() => {
-    const arr = Array.isArray(disabledOptions) ? disabledOptions : [];
-    const ids = [];
-    for (const d of arr) {
-      ids.push(typeof d === "string" ? d : d.id);
-    }
-    return ids;
-  })();
+  const disabledIds = disabledOptions.map((d) =>
+    typeof d === "string" ? d : d.id,
+  );
 
-  const isValid = (() => {
-    if (!inputValue) return false;
-    const arr = Array.isArray(resolved) ? resolved : [];
-    for (const o of arr) {
-      if (
+  const isValid =
+    inputValue &&
+    resolved.some(
+      (o) =>
         o.nom.toLowerCase() === inputValue.toLowerCase() &&
-        !disabledIds.includes(o.id)
-      ) {
-        return true;
-      }
-    }
-    return false;
-  })();
+        !disabledIds.includes(o.id),
+    );
 
   const handleInputChange = (e) => {
     const val = e.target.value;
     setInputValue(val);
-    const arr = Array.isArray(resolved) ? resolved : [];
-    let match = null;
-    for (const o of arr) {
-      if (o.nom.toLowerCase() === val.toLowerCase()) {
-        match = o;
-        break;
-      }
-    }
+    const match = resolved.find(
+      (o) => o.nom.toLowerCase() === val.toLowerCase(),
+    );
     if (match) onChange(match);
     else onChange(val ? { id: null, nom: val } : { id: "", nom: "" });
     setShowAdd(val && !match && !!onAddNewValue);
@@ -116,15 +79,6 @@ export default function AutoCompleteField({
       setShowAdd(false);
     }
   };
-
-  const datalistOptions = (() => {
-    const arr = Array.isArray(resolved) ? resolved : [];
-    const elements = [];
-    for (const opt of arr) {
-      elements.push(<option key={opt.id} value={opt.nom} />);
-    }
-    return elements;
-  })();
 
 
   return (
@@ -148,7 +102,11 @@ export default function AutoCompleteField({
         }}
         {...props}
       />
-      <datalist id={listId}>{datalistOptions}</datalist>
+      <datalist id={listId}>
+        {resolved.map(opt => (
+          <option key={opt.id} value={opt.nom} />
+        ))}
+      </datalist>
       {showAdd && onAddNewValue && (
         <Button
           type="button"

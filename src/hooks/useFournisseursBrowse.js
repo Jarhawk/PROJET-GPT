@@ -24,17 +24,16 @@ export default function useFournisseursBrowse({
       try {
         let req = supabase
           .from('fournisseurs')
-          .select('id, nom', { count: 'exact' })
+          .select('id, nom, ville', { count: 'exact' })
           .eq('mama_id', mama_id)
           .eq('actif', true);
         const t = term.trim();
         if (t) req = req.ilike('nom', `%${t}%`);
-        const entries = Object.entries(filters || {});
-        for (const [k, v] of entries) {
+        Object.entries(filters || {}).forEach(([k, v]) => {
           if (v !== undefined && v !== null && v !== '') {
             req = req.eq(k, v);
           }
-        }
+        });
         const start = (page - 1) * limit;
         const end = start + limit - 1;
         const { data, error, count } = await req
@@ -42,8 +41,7 @@ export default function useFournisseursBrowse({
           .range(start, end);
         if (error) throw error;
         if (!aborted) {
-          const rows = Array.isArray(data) ? data : [];
-          setData(rows);
+          setData(data || []);
           setTotal(count || 0);
         }
       } catch (err) {
@@ -61,7 +59,7 @@ export default function useFournisseursBrowse({
     return () => {
       aborted = true;
     };
-  }, [mama_id, page, limit, term, filters]);
+  }, [mama_id, page, limit, term, JSON.stringify(filters)]);
 
   return { data, total, loading, error };
 }

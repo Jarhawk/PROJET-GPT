@@ -6,68 +6,48 @@ export function useZoneProducts() {
   const { mama_id } = useAuth();
 
   async function list(zoneId) {
-    if (!mama_id || !zoneId) return [];
-    const { data, error } = await supabase
-      .from('produits')
-      .select('id, nom, unite_id, stock_reel, stock_min')
-      .eq('zone_stock_id', zoneId)
-      .eq('mama_id', mama_id)
-      .order('nom', { ascending: true });
-    if (error) throw error;
-    const rows = Array.isArray(data) ? data : [];
-    const out = [];
-    for (const p of rows) {
-      out.push({
-        id: p.id,
-        produit_id: p.id,
-        produit_nom: p.nom,
-        unite_id: p.unite_id,
-        stock_reel: p.stock_reel,
-        stock_min: p.stock_min,
-      });
+    let q = supabase
+      .from('v_produits_par_zone')
+      .select('*')
+      .eq('zone_id', zoneId)
+      .eq('mama_id', mama_id);
+    let { data, error } = await q;
+    if (error) {
+      ({ data, error } = await supabase
+        .from('produits')
+        .select('*')
+        .eq('zone_id', zoneId)
+        .eq('mama_id', mama_id));
     }
-    return out;
+    if (error) throw error;
+    return data;
   }
 
   async function move(srcZoneId, dstZoneId, removeSrc) {
-    if (!mama_id || !srcZoneId || !dstZoneId) return { error: null };
-    const { error } = await supabase.rpc('move_zone_products', {
+    return await supabase.rpc('move_zone_products', {
       p_mama: mama_id,
       p_src_zone: srcZoneId,
       p_dest_zone: dstZoneId,
-      p_remove_src: !!removeSrc,
+      p_remove_src: removeSrc,
     });
-    return { error };
   }
 
-  async function copy(srcZoneId, dstZoneId, overwrite = false) {
-    if (!mama_id || !srcZoneId || !dstZoneId) return { error: null };
-    const { error } = await supabase.rpc('copy_zone_products', {
+  async function copy(srcZoneId, dstZoneId, overwrite) {
+    return await supabase.rpc('copy_zone_products', {
       p_mama: mama_id,
       p_src_zone: srcZoneId,
       p_dest_zone: dstZoneId,
-      p_overwrite: !!overwrite,
+      p_overwrite: overwrite,
     });
-    return { error };
   }
 
   async function merge(srcZoneId, dstZoneId) {
-    if (!mama_id || !srcZoneId || !dstZoneId) return { error: null };
-    const { error } = await supabase.rpc('merge_zone_products', {
+    return await supabase.rpc('merge_zone_products', {
       p_mama: mama_id,
       p_src_zone: srcZoneId,
       p_dest_zone: dstZoneId,
     });
-    return { error };
   }
 
-  async function setDefault(zoneId, prodId) {
-    return await supabase
-      .from('produits')
-      .update({ zone_stock_id: zoneId })
-      .eq('id', prodId)
-      .eq('mama_id', mama_id);
-  }
-
-  return { list, move, copy, merge, setDefault };
+  return { list, move, copy, merge };
 }

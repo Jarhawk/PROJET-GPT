@@ -14,15 +14,15 @@ export function HelpProvider({ children }) {
   const fetchTooltips = useCallback(async () => {
     if (!mama_id) return {};
     setLoading(true);
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('tooltips')
       .select('champ, texte')
       .eq('mama_id', mama_id);
     setLoading(false);
-    if (error) return {};
-    const rows = Array.isArray(data) ? data : [];
     const map = {};
-    for (const t of rows) map[t.champ] = t.texte;
+    (data || []).forEach((t) => {
+      map[t.champ] = t.texte;
+    });
     setTooltips(map);
     return map;
   }, [mama_id]);
@@ -35,15 +35,10 @@ export function HelpProvider({ children }) {
       .select('id, titre, contenu, categorie')
       .eq('mama_id', mama_id);
     if (search) query = query.ilike('titre', `%${search}%`);
-    const { data, error } = await query.order('titre', { ascending: true });
+    const { data } = await query.order('titre', { ascending: true });
     setLoading(false);
-    if (error) {
-      setDocs([]);
-      return [];
-    }
-    const rows = Array.isArray(data) ? data : [];
-    setDocs(rows);
-    return rows;
+    setDocs(Array.isArray(data) ? data : []);
+    return data || [];
   }, [mama_id]);
 
   useEffect(() => {
@@ -55,16 +50,12 @@ export function HelpProvider({ children }) {
 
   async function markGuideSeen(module) {
     if (!user_id || !mama_id) return;
-    try {
-      await supabase
-        .from('guides_seen')
-        .upsert(
-          { user_id, mama_id, module, seen: true },
-          { onConflict: 'user_id,module' }
-        );
-    } catch (err) {
-      console.error('markGuideSeen', err);
-    }
+    await supabase
+      .from('guides_seen')
+      .upsert(
+        { user_id, mama_id, module, seen: true },
+        { onConflict: 'user_id,module' }
+      );
   }
 
   const value = {

@@ -39,11 +39,10 @@ export function useMenus() {
     let query = supabase
       .from("menus")
       .select(
-        "id, nom, date, actif, fiches:menu_fiches(fiche_id, mama_id)",
+        "*, fiches:menu_fiches(fiche_id, fiche: fiches(id, nom))",
         { count: "exact" }
       )
-      .eq("mama_id", mama_id)
-      .eq("fiches.mama_id", mama_id);
+      .eq("mama_id", mama_id);
 
     if (search) query = query.ilike("nom", `%${search}%`);
     if (date) query = query.eq("date", date);
@@ -54,47 +53,11 @@ export function useMenus() {
     const { data, count, error } = await query
       .order("date", { ascending: false })
       .range(offset, offset + limit - 1);
-    const rows = Array.isArray(data) ? data : [];
-    const allFicheIds = new Set();
-    for (const m of rows) {
-      const fiches = Array.isArray(m.fiches) ? m.fiches : [];
-      for (const f of fiches) {
-        if (f?.fiche_id) allFicheIds.add(f.fiche_id);
-      }
-      m.fiches = fiches;
-    }
-    const fichesMap = {};
-    if (allFicheIds.size) {
-      const { data: fichesData } = await supabase
-        .from("fiches_techniques")
-        .select("fiche_id, nom, cout_par_portion")
-        .eq("mama_id", mama_id)
-        .in("fiche_id", [...allFicheIds]);
-      for (const f of Array.isArray(fichesData) ? fichesData : []) {
-        fichesMap[f.fiche_id] = {
-          nom: f.nom,
-          cout_par_portion: f.cout_par_portion
-            ? Number(f.cout_par_portion)
-            : null,
-        };
-      }
-    }
-    const mappedRows = [];
-    for (const m of rows) {
-      const fiches = [];
-      for (const f of Array.isArray(m.fiches) ? m.fiches : []) {
-        fiches.push({
-          fiche_id: f.fiche_id,
-          fiche: fichesMap[f.fiche_id] || null,
-        });
-      }
-      mappedRows.push({ ...m, fiches });
-    }
-    setMenus(mappedRows);
-      setTotal(typeof count === "number" ? count : mappedRows.length);
-      setLoading(false);
-      if (error) setError(error);
-      return mappedRows;
+    setMenus(Array.isArray(data) ? data : []);
+    setTotal(typeof count === "number" ? count : Array.isArray(data) ? data.length : 0);
+    setLoading(false);
+    if (error) setError(error);
+    return data || [];
   }
 
   // 2. Ajouter un menu (avec ses fiches)
@@ -111,10 +74,11 @@ export function useMenus() {
     if (error) { setError(error); setLoading(false); return; }
     // Ajout des fiches liées
     if (data?.id && Array.isArray(fiches) && fiches.length > 0) {
-      const fichesWithFk = [];
-      for (const fiche_id of fiches) {
-        fichesWithFk.push({ menu_id: data.id, fiche_id, mama_id });
-      }
+      const fichesWithFk = fiches.map(fiche_id => ({
+        menu_id: data.id,
+        fiche_id,
+        mama_id,
+      }));
       await supabase.from("menu_fiches").insert(fichesWithFk);
     }
     setLoading(false);
@@ -141,10 +105,11 @@ export function useMenus() {
         .delete()
         .eq("menu_id", id)
         .eq("mama_id", mama_id);
-      const fichesWithFk = [];
-      for (const fiche_id of fiches) {
-        fichesWithFk.push({ menu_id: id, fiche_id, mama_id });
-      }
+      const fichesWithFk = fiches.map(fiche_id => ({
+        menu_id: id,
+        fiche_id,
+        mama_id,
+      }));
       if (fichesWithFk.length > 0) {
         await supabase.from("menu_fiches").insert(fichesWithFk);
       }
@@ -160,44 +125,15 @@ export function useMenus() {
     setLoading(true);
     const { data, error } = await supabase
       .from("menus")
-      .select("id, nom, date, actif, fiches:menu_fiches(fiche_id, mama_id)")
+      .select(
+        "*, fiches:menu_fiches(fiche_id, fiche: fiches(id, nom, portions, cout_total))"
+      )
       .eq("id", id)
       .eq("mama_id", mama_id)
-      .eq("fiches.mama_id", mama_id)
       .single();
     setLoading(false);
     if (error) { setError(error); return null; }
-    const fichesRows = Array.isArray(data?.fiches) ? data.fiches : [];
-    const ids = [];
-    for (const f of fichesRows) {
-      if (f?.fiche_id) ids.push(f.fiche_id);
-    }
-    const detailsMap = {};
-    if (ids.length) {
-      const { data: details } = await supabase
-        .from("fiches_techniques")
-        .select("fiche_id, nom, portions, cout_total, cout_par_portion")
-        .eq("mama_id", mama_id)
-        .in("fiche_id", ids);
-      for (const d of Array.isArray(details) ? details : []) {
-        detailsMap[d.fiche_id] = {
-          nom: d.nom,
-          cout_total: d.cout_total ? Number(d.cout_total) : null,
-          cout_par_portion: d.cout_par_portion
-            ? Number(d.cout_par_portion)
-            : null,
-          portions: d.portions ? Number(d.portions) : null,
-        };
-      }
-    }
-    const fiches = [];
-    for (const f of fichesRows) {
-      fiches.push({
-        fiche_id: f.fiche_id,
-        fiche: detailsMap[f.fiche_id] || null,
-      });
-    }
-    return { id: data.id, nom: data.nom, date: data.date, actif: data.actif, fiches };
+    return data;
   }
 
   // 5. Supprimer un menu (désactivation logique)
@@ -232,29 +168,16 @@ export function useMenus() {
 
   // 7. Export Excel
   function exportMenusToExcel() {
-      const datas = [];
-      if (Array.isArray(menus)) {
-        for (const m of menus) {
-          let ficheNames = "";
-          if (Array.isArray(m.fiches)) {
-            const names = [];
-            for (const f of m.fiches) {
-              if (f.fiche?.nom) names.push(f.fiche.nom);
-            }
-            ficheNames = names.join(", ");
-          }
-          datas.push({
-            id: m.id,
-            nom: m.nom,
-            date: m.date,
-            actif: m.actif,
-            fiches: ficheNames,
-            mama_id: m.mama_id,
-          });
-        }
-      }
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Menus");
+    const datas = (menus || []).map(m => ({
+      id: m.id,
+      nom: m.nom,
+      date: m.date,
+      actif: m.actif,
+      fiches: Array.isArray(m.fiches) ? m.fiches.map(f => f.fiche?.nom).join(", ") : "",
+      mama_id: m.mama_id,
+    }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Menus");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     saveAs(new Blob([buf]), "menus_mamastock.xlsx");
   }

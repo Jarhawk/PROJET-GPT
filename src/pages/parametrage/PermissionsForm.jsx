@@ -9,13 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { MODULES as MODULE_LIST } from '@/config/modules';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
-const MODULES = (() => {
-  const list = [];
-  for (const m of MODULE_LIST) {
-    list.push({ nom: m.label, cle: m.key });
-  }
-  return list;
-})();
+const MODULES = MODULE_LIST.map((m) => ({ nom: m.label, cle: m.key }));
 
 const DROITS = [
   { nom: 'Lecture', cle: 'read' },
@@ -39,13 +33,12 @@ export default function PermissionsForm({ role, onClose, onSaved }) {
     try {
       let query = supabase
         .from('permissions')
-        .select('id, mama_id, role_id, module, droit, actif')
+        .select('*')
         .eq('role_id', role.id);
       if (myRole !== 'superadmin') query = query.eq('mama_id', mama_id);
       const { data, error } = await query;
       if (error) throw error;
-      const rows = Array.isArray(data) ? data : [];
-      setPermissions(rows);
+      setPermissions(data || []);
     } catch (err) {
       toast.error(err.message || 'Erreur chargement permissions');
     }
@@ -102,45 +95,29 @@ export default function PermissionsForm({ role, onClose, onSaved }) {
           <thead>
             <tr>
               <th className="px-2 py-1 text-left">Module</th>
-              {(() => {
-                const headers = [];
-                for (const droit of DROITS) {
-                  headers.push(
-                    <th key={droit.cle} className="px-2 py-1">
-                      {droit.nom}
-                    </th>
-                  );
-                }
-                return headers;
-              })()}
+              {DROITS.map((droit) => (
+                <th key={droit.cle} className="px-2 py-1">
+                  {droit.nom}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {(() => {
-              const rows = [];
-              for (const module of MODULES) {
-                const cells = [];
-                for (const droit of DROITS) {
-                  cells.push(
-                    <td key={droit.cle} className="px-2 py-1">
-                      <input
-                        type="checkbox"
-                        checked={hasPermission(module.cle, droit.cle)}
-                        disabled={saving}
-                        onChange={() => togglePermission(module.cle, droit.cle)}
-                      />
-                    </td>
-                  );
-                }
-                rows.push(
-                  <tr key={module.cle}>
-                    <td className="px-2 py-1 text-left">{module.nom}</td>
-                    {cells}
-                  </tr>
-                );
-              }
-              return rows;
-            })()}
+            {MODULES.map((module) => (
+              <tr key={module.cle}>
+                <td className="px-2 py-1 text-left">{module.nom}</td>
+                {DROITS.map((droit) => (
+                  <td key={droit.cle} className="px-2 py-1">
+                    <input
+                      type="checkbox"
+                      checked={hasPermission(module.cle, droit.cle)}
+                      disabled={saving}
+                      onChange={() => togglePermission(module.cle, droit.cle)}
+                    />
+                  </td>
+                ))}
+              </tr>
+            ))}
           </tbody>
         </table>
         {permissions.length === 0 && (

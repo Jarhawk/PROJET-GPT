@@ -37,16 +37,8 @@ export default function Requisitions() {
   }, [mama_id, authLoading, fetchZones, fetchProducts, fetchUsers]);
 
   useEffect(() => {
-    const zoneList = Array.isArray(zones) ? zones : [];
-    let caveId = '';
-    for (let i = 0; i < zoneList.length; i++) {
-      const z = zoneList[i];
-      if (typeof z.nom === 'string' && z.nom.toLowerCase() === 'cave') {
-        caveId = z.id;
-        break;
-      }
-    }
-    if (caveId) setCaveZone(caveId);
+    const cave = zones.find((z) => z.nom?.toLowerCase() === 'cave');
+    if (cave) setCaveZone(cave.id);
   }, [zones]);
 
   useEffect(() => {
@@ -75,29 +67,18 @@ export default function Requisitions() {
     caveZone,
   ]);
 
-  const safeProducts = Array.isArray(products) ? products : [];
-  const safeUsers = Array.isArray(users) ? users : [];
-  const filtered = Array.isArray(requisitions) ? requisitions : [];
-  const zoneList = Array.isArray(zones) ? zones : [];
-  const zoneLookup = {};
-  for (let i = 0; i < zoneList.length; i++) {
-    const z = zoneList[i];
-    zoneLookup[z.id] = z.nom;
-  }
+  const filtered = requisitions;
 
   // Export Excel
   const handleExportExcel = () => {
-    const rows = [];
-    for (let i = 0; i < filtered.length; i++) {
-      const r = filtered[i];
-      rows.push({
+    const ws = XLSX.utils.json_to_sheet(
+      filtered.map((r) => ({
         Numero: r.numero,
         Date: r.date_requisition,
         Statut: r.statut,
-        Zone: zoneLookup[r.zone_id] || '-',
-      });
-    }
-    const ws = XLSX.utils.json_to_sheet(rows);
+        Zone: zones.find((z) => z.id === r.zone_id)?.nom || '-',
+      }))
+    );
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Requisitions');
     XLSX.writeFile(wb, 'Requisitions.xlsx');
@@ -111,19 +92,12 @@ export default function Requisitions() {
     doc.autoTable({
       startY: 20,
       head: [['Numero', 'Date', 'Statut', 'Zone']],
-      body: (() => {
-        const body = [];
-        for (let i = 0; i < filtered.length; i++) {
-          const r = filtered[i];
-          body.push([
-            r.numero,
-            r.date_requisition,
-            r.statut,
-            zoneLookup[r.zone_id] || '-',
-          ]);
-        }
-        return body;
-      })(),
+      body: filtered.map((r) => [
+        r.numero,
+        r.date_requisition,
+        r.statut,
+        zones.find((z) => z.id === r.zone_id)?.nom || '-',
+      ]),
       styles: { fontSize: 9 },
     });
     doc.save('Requisitions.pdf');
@@ -183,18 +157,11 @@ export default function Requisitions() {
             onChange={(e) => setProduit(e.target.value)}
           >
             <option value="">Tous</option>
-            {(() => {
-              const opts = [];
-              for (let i = 0; i < safeProducts.length; i++) {
-                const p = safeProducts[i];
-                opts.push(
-                  <option key={p.id} value={p.id}>
-                    {p.nom}
-                  </option>
-                );
-              }
-              return opts;
-            })()}
+            {products.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.nom}
+              </option>
+            ))}
           </select>
         </div>
         <div>
@@ -205,18 +172,11 @@ export default function Requisitions() {
             onChange={(e) => setUtilisateur(e.target.value)}
           >
             <option value="">Tous</option>
-            {(() => {
-              const opts = [];
-              for (let i = 0; i < safeUsers.length; i++) {
-                const u = safeUsers[i];
-                opts.push(
-                  <option key={u.id} value={u.id}>
-                    {u.nom}
-                  </option>
-                );
-              }
-              return opts;
-            })()}
+            {users.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.nom}
+              </option>
+            ))}
           </select>
         </div>
         <Button onClick={handleExportExcel}>Export Excel</Button>
@@ -236,23 +196,16 @@ export default function Requisitions() {
             </tr>
           </thead>
           <tbody>
-            {(() => {
-              const rowsElems = [];
-              for (let i = 0; i < filtered.length; i++) {
-                const r = filtered[i];
-                rowsElems.push(
-                  <tr key={r.id}>
-                    <td className="px-2 py-1">{r.numero}</td>
-                    <td className="px-2 py-1">{r.date_requisition}</td>
-                    <td className="px-2 py-1">{r.statut}</td>
-                    <td className="px-2 py-1">
-                      {zoneLookup[r.zone_id] || '-'}
-                    </td>
-                  </tr>
-                );
-              }
-              return rowsElems;
-            })()}
+            {filtered.map((r) => (
+              <tr key={r.id}>
+                <td className="px-2 py-1">{r.numero}</td>
+                <td className="px-2 py-1">{r.date_requisition}</td>
+                <td className="px-2 py-1">{r.statut}</td>
+                <td className="px-2 py-1">
+                  {zones.find((z) => z.id === r.zone_id)?.nom || '-'}
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>

@@ -22,6 +22,6 @@ test('fetchStock queries view with mama_id', async () => {
   const { result } = renderHook(() => useStockRequisitionne());
   await act(async () => { await result.current.fetchStock(); });
   expect(fromMock).toHaveBeenCalledWith('v_stock_requisitionne');
-  expect(queryObj.select).toHaveBeenCalledWith('produit_id, quantite_30j');
+  expect(queryObj.select).toHaveBeenCalledWith('*');
   expect(queryObj.eq).toHaveBeenCalledWith('mama_id', 'm1');
 });

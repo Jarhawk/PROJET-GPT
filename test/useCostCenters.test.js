@@ -10,7 +10,6 @@ const fromMock = vi.fn(() => ({ select: selectMock }));
 
 vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
-vi.mock('@/hooks/useAuditLog', () => ({ useAuditLog: () => ({ log: vi.fn() }) }));
 const sheetToJson = vi.fn(() => [{ nom: 'Food' }]);
 let readMock = vi.fn(() => ({ SheetNames: ['CostCenters'], Sheets: { CostCenters: {} } }));
 vi.mock('xlsx', () => ({ read: (...args) => readMock(...args), utils: { sheet_to_json: sheetToJson } }), { virtual: true });
@@ -32,7 +31,7 @@ test('fetchCostCenters retrieves data', async () => {
     await result.current.fetchCostCenters();
   });
   expect(fromMock).toHaveBeenCalledWith('centres_de_cout');
-  expect(selectMock).toHaveBeenCalledWith('id, nom, actif, activite, mama_id');
+  expect(selectMock).toHaveBeenCalledWith('*');
   expect(eqMock).toHaveBeenCalledWith('mama_id', 'm1');
   expect(orderMock).toHaveBeenCalledWith('nom', { ascending: true });
   expect(result.current.costCenters).toEqual([{ id: 'c1' }]);

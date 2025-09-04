@@ -1,17 +1,11 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { render, screen, fireEvent } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { vi } from 'vitest';
 
 let mockHook;
-const navigate = vi.fn();
-
-vi.mock('@/hooks/useZones', () => ({ useZones: () => mockHook() }));
-vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ hasAccess: () => true, loading: false }) }));
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
-  return { ...actual, useNavigate: () => navigate };
-});
+vi.mock('@/hooks/useZones', () => ({
+  useZones: () => mockHook(),
+}));
 
 import Zones from '@/pages/parametrage/Zones.jsx';
 
@@ -21,17 +15,26 @@ beforeAll(() => {
   };
 });
 
-test('new zone button navigates to creation form', async () => {
+test('new zone button opens form and triggers add', async () => {
+  const add = vi.fn();
   mockHook = () => ({
-    fetchZones: vi.fn().mockResolvedValue([]),
+    zones: [],
+    total: 0,
+    fetchZones: vi.fn(),
+    addZone: add,
     updateZone: vi.fn(),
     deleteZone: vi.fn(),
   });
-  render(
-    <MemoryRouter>
-      <Zones />
-    </MemoryRouter>
-  );
-  fireEvent.click(screen.getByText('+ Nouvelle zone'));
-  expect(navigate).toHaveBeenCalledWith('/parametrage/zones/new');
+  await act(async () => {
+    render(<Zones />);
+  });
+  await act(async () => {
+    fireEvent.click(screen.getByText('+ Nouvelle zone'));
+  });
+  const input = await screen.findByPlaceholderText('Nom de la zone');
+  await act(async () => {
+    fireEvent.change(input, { target: { value: 'Cuisine' } });
+    fireEvent.click(screen.getByText('Enregistrer'));
+  });
+  expect(add).toHaveBeenCalledWith('Cuisine');
 });

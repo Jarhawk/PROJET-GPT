@@ -38,86 +38,58 @@ export default function AccessRights() {
           <thead>
             <tr>
               <th rowSpan="2" className="px-2 py-1 text-left">Utilisateur</th>
-              {(() => {
-                const headers = [];
-                const mods = Array.isArray(MODULES) ? MODULES : [];
-                for (let i = 0; i < mods.length; i++) {
-                  const m = mods[i];
-                  headers.push(
-                    <th key={m.key} colSpan={2} className="px-2 py-1">
-                      {m.label}
-                    </th>
-                  );
-                }
-                return headers;
-              })()}
+              {MODULES.map(m => (
+                <th key={m.key} colSpan={2} className="px-2 py-1">
+                  {m.label}
+                </th>
+              ))}
             </tr>
             <tr>
-              {(() => {
-                const headers = [];
-                const mods = Array.isArray(MODULES) ? MODULES : [];
-                for (let i = 0; i < mods.length; i++) {
-                  const m = mods[i];
-                  headers.push(
-                    <th key={`${m.key}-v`} className="px-2 py-1">Voir</th>,
-                    <th key={`${m.key}-e`} className="px-2 py-1">Modifier</th>
-                  );
-                }
-                return headers;
-              })()}
+              {MODULES.map(m => (
+                <>
+                  <th key={`${m.key}-v`} className="px-2 py-1">Voir</th>
+                  <th key={`${m.key}-e`} className="px-2 py-1">Modifier</th>
+                </>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {(() => {
-              const body = [];
-              const list = Array.isArray(users) ? users : [];
-              const mods = Array.isArray(MODULES) ? MODULES : [];
-              for (let i = 0; i < list.length; i++) {
-                const u = list[i];
-                const cells = [];
-                for (let j = 0; j < mods.length; j++) {
-                  const m = mods[j];
+            {users.map(u => (
+              <tr key={u.id}>
+                <td className="px-2 py-1 text-left">{u.nom || u.email}</td>
+                {MODULES.map(m => {
                   const current =
                     u.access_rights && typeof u.access_rights === 'object'
                       ? u.access_rights
                       : {};
-                  cells.push(
-                    <td key={`${u.id}-${m.key}-v`} className="px-2 py-1">
-                      <input
-                        type="checkbox"
-                        checked={current[m.key]?.peut_voir || false}
-                        onChange={() => toggle(u, m.key, 'peut_voir')}
-                      />
-                    </td>
+                  return (
+                    <>
+                      <td key={`${m.key}-v`} className="px-2 py-1">
+                        <input
+                          type="checkbox"
+                          checked={current[m.key]?.peut_voir || false}
+                          onChange={() => toggle(u, m.key, 'peut_voir')}
+                        />
+                      </td>
+                      <td key={`${m.key}-e`} className="px-2 py-1">
+                        <input
+                          type="checkbox"
+                          checked={current[m.key]?.peut_modifier || false}
+                          onChange={() => toggle(u, m.key, 'peut_modifier')}
+                        />
+                      </td>
+                    </>
                   );
-                  cells.push(
-                    <td key={`${u.id}-${m.key}-e`} className="px-2 py-1">
-                      <input
-                        type="checkbox"
-                        checked={current[m.key]?.peut_modifier || false}
-                        onChange={() => toggle(u, m.key, 'peut_modifier')}
-                      />
-                    </td>
-                  );
-                }
-                body.push(
-                  <tr key={u.id}>
-                    <td className="px-2 py-1 text-left">{u.nom || u.email}</td>
-                    {cells}
-                  </tr>
-                );
-              }
-              if (body.length === 0) {
-                body.push(
-                  <tr key="empty">
-                    <td colSpan={mods.length * 2 + 1} className="py-4 text-gray-400">
-                      Aucun utilisateur.
-                    </td>
-                  </tr>
-                );
-              }
-              return body;
-            })()}
+                })}
+              </tr>
+            ))}
+            {users.length === 0 && (
+              <tr>
+                <td colSpan={MODULES.length * 2 + 1} className="py-4 text-gray-400">
+                  Aucun utilisateur.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </TableContainer>

@@ -1,22 +1,23 @@
-export const formatEUR = (n?: number | null) =>
-  n === null || n === undefined || !Number.isFinite(n)
-    ? '—'
-    : n.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 });
+export function normalizeNumberString(value: string): string {
+  if (typeof value !== 'string') return '';
+  return value.replace(/\s+/g, '').replace(',', '.');
+}
 
-export const formatQty = (n?: number | null, max = 3) =>
-  n === null || n === undefined || !Number.isFinite(n)
-    ? '—'
-    : n.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: max });
+export function parseNumber(value: string | number | null | undefined): number | null {
+  if (value === null || value === undefined) return null;
+  const str = typeof value === 'number' ? String(value) : value;
+  const normalized = normalizeNumberString(str);
+  if (normalized === '') return null;
+  const num = Number(normalized);
+  return Number.isFinite(num) ? num : null;
+}
 
-/** Parse une entrée utilisateur FR (accepte espace, . ,) en nombre JS ou null */
-export const parseEUFloat = (raw: string): number | null => {
-  if (!raw) return null;
-  const s = raw
-    .replace(/\s/g, '')
-    .replace(/ /g, '')
-    .replace(/,/g, '.')
-    .replace(/[^\d.-]/g, '');
-  if (s === '' || s === '-' || s === '.' || s === '-.') return null;
-  const n = Number(s);
-  return Number.isFinite(n) ? n : null;
-};
+export function formatNumberFR(value: number | null | undefined, decimals = 2): string {
+  if (value === null || value === undefined || Number.isNaN(value)) return '';
+  return new Intl.NumberFormat('fr-FR', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  })
+    .format(value)
+    .replace(/[\u202F\u00A0]/g, ' ');
+}

@@ -28,9 +28,7 @@ test('getBesoinsParMenu queries view with ids', async () => {
     data = await result.current.getBesoinsParMenu('menu1', 2);
   });
   expect(fromMock).toHaveBeenCalledWith('v_besoins_previsionnels');
-  expect(query.select).toHaveBeenCalledWith(
-    'mama_id, menu_id, produit_id, quantite, valeur'
-  );
+  expect(query.select).toHaveBeenCalledWith('*');
   expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1');
   expect(query.eq).toHaveBeenCalledWith('menu_id', 'menu1');
   expect(data[0].quantite).toBe(2); // multiplied by nbPortions

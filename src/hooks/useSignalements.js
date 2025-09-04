@@ -16,7 +16,7 @@ export function useSignalements() {
     try {
       const { data, error } = await supabase
         .from("signalements")
-        .select("id, mama_id, created_by, type, description, date, created_at")
+        .select("*")
         .eq("mama_id", mama_id)
         .order("date", { ascending: false });
 
@@ -73,7 +73,7 @@ export function useSignalement(id) {
       try {
         const { data, error } = await supabase
           .from("signalements")
-          .select("id, mama_id, created_by, type, description, date, created_at")
+          .select("*")
           .eq("id", id)
           .eq("mama_id", mama_id)
           .single();

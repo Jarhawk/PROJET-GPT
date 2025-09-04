@@ -2,22 +2,18 @@
 import { useQuery } from '@tanstack/react-query';
 import useDebounce from '@/hooks/useDebounce';
 import { supabase } from '@/lib/supabase';
+import { getQueryClient } from '@/lib/react-query';
 import { useAuth } from '@/hooks/useAuth';
 
 function normalize(list = []) {
-  const arr = Array.isArray(list) ? list : [];
-  const out = [];
-  for (const p of arr) {
-    out.push({
-      id: p.id ?? p.produit_id ?? null,
-      nom: p.nom ?? null,
-      // unite_id est nécessaire pour hydrater l'unité dans les formulaires
-      unite_id: p.unite_id ?? null,
-      tva: p.tva ?? null,
-      zone_id: p.zone_id ?? null,
-    });
-  }
-  return out;
+  return list.map((p) => ({
+    id: p.id ?? p.produit_id ?? null,
+    nom: p.nom ?? null,
+    // unite_id est nécessaire pour hydrater l'unité dans les formulaires
+    unite_id: p.unite_id ?? null,
+    tva: p.tva ?? null,
+    zone_id: p.zone_stock_id ?? null,
+  }));
 }
 
 export function useProduitsSearch(
@@ -41,7 +37,7 @@ export function useProduitsSearch(
       try {
         const { data, count, error } = await supabase
           .from('produits')
-          .select('id, nom, unite_id, tva, zone_id:zone_stock_id', { count: 'exact' })
+          .select('id, nom, unite_id, tva, zone_stock_id', { count: 'exact' })
           .eq('mama_id', mamaId)
           .eq('actif', true)
           .ilike('nom', `%${q}%`)
@@ -54,7 +50,7 @@ export function useProduitsSearch(
         return { rows: [], total: 0 };
       }
     },
-  });
+  }, getQueryClient());
 
   return {
     data: query.data?.rows || [],

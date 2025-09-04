@@ -10,7 +10,6 @@ export default function ApiFournisseurs() {
   const { mama_id } = useAuth();
   const { listConfigs, loading, error } = useFournisseurApiConfig();
   const [configs, setConfigs] = useState([]);
-  const configsList = Array.isArray(configs) ? configs : [];
   const PAGE_SIZE = 50;
   const [page] = useState(1);
 
@@ -39,34 +38,24 @@ export default function ApiFournisseurs() {
             </tr>
           </thead>
           <tbody>
-            {(() => {
-              const rows = [];
-              for (const c of configsList) {
-                rows.push(
-                  <tr key={c.fournisseur_id} className="border-t">
-                    <td className="px-2 py-1">{c.fournisseur?.nom || c.fournisseur_id}</td>
-                    <td className="px-2 py-1">{c.url}</td>
-                    <td className="px-2 py-1">{c.type_api}</td>
-                    <td className="px-2 py-1">{c.actif ? "Oui" : "Non"}</td>
-                    <td className="px-2 py-1 text-right">
-                      <Link className="underline" to={`/fournisseurs/${c.fournisseur_id}/api`}>
-                        Éditer
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              }
-              if (rows.length === 0) {
-                rows.push(
-                  <tr key="empty">
-                    <td colSpan="5" className="py-4 text-center text-gray-500">
-                      Aucune configuration
-                    </td>
-                  </tr>
-                );
-              }
-              return rows;
-            })()}
+            {configs.map((c) => (
+              <tr key={c.fournisseur_id} className="border-t">
+                <td className="px-2 py-1">{c.fournisseur?.nom || c.fournisseur_id}</td>
+                <td className="px-2 py-1">{c.url}</td>
+                <td className="px-2 py-1">{c.type_api}</td>
+                <td className="px-2 py-1">{c.actif ? "Oui" : "Non"}</td>
+                <td className="px-2 py-1 text-right">
+                  <Link className="underline" to={`/fournisseurs/${c.fournisseur_id}/api`}>Éditer</Link>
+                </td>
+              </tr>
+            ))}
+            {configs.length === 0 && (
+              <tr>
+                <td colSpan="5" className="py-4 text-center text-gray-500">
+                  Aucune configuration
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </TableContainer>

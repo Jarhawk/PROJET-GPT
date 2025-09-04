@@ -22,9 +22,8 @@ test('searchProduits filters by mama_id and query', async () => {
   });
   expect(client.from).toHaveBeenCalledWith('produits');
   const query = client.from.mock.results[0].value;
-  expect(query.select).toHaveBeenCalledWith('id, nom, tva, dernier_prix, unite_id, unite:unites!fk_produits_unite(nom)');
+  expect(query.select).toHaveBeenCalledWith('id, nom, tva, dernier_prix, unite_id, unite:unite_id (nom)');
   expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1');
   expect(query.eq).toHaveBeenCalledWith('actif', true);
-  expect(query.eq).toHaveBeenCalledWith('unite.mama_id', 'm1');
   expect(query.ilike).toHaveBeenCalledWith('nom', '%car%');
 });

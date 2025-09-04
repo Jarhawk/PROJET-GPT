@@ -15,11 +15,10 @@ export function useFactures(filters = {}) {
       let q = supabase
         .from('factures')
         .select(
-          'id, numero, date_facture, fournisseur_id, montant_ttc:total_ttc, statut, actif, fournisseur:fournisseurs(id, nom, mama_id)',
+          'id, numero, date_facture, fournisseur_id, montant_ttc:total_ttc, statut, actif, fournisseur:fournisseurs(nom)',
           { count: 'exact' }
         )
         .eq('mama_id', mamaId)
-        .eq('fournisseur.mama_id', mamaId)
         .order('date_facture', { ascending: false })
         .range((page - 1) * pageSize, page * pageSize - 1);
 
@@ -37,17 +36,7 @@ export function useFactures(filters = {}) {
 
       const { data, error, count } = await q;
       if (error) throw error;
-      const rows = Array.isArray(data) ? data : [];
-      const mapped = [];
-      for (const f of rows) {
-        mapped.push({
-          ...f,
-          fournisseur: Array.isArray(f.fournisseur)
-            ? f.fournisseur[0]
-            : f.fournisseur,
-        });
-      }
-      return { factures: mapped, total: count || 0 };
+      return { factures: data ?? [], total: count || 0 };
     },
   });
 }

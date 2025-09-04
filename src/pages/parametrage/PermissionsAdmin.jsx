@@ -31,23 +31,19 @@ export default function PermissionsAdmin() {
   }, [role]);
 
   const fetchMamas = async () => {
-    const { data } = await supabase.from('mamas').select('id, nom');
-    const rows = Array.isArray(data) ? data : [];
-    setMamas(rows);
+    const { data } = await supabase.from('mamas').select('id, nom, ville');
+    setMamas(data || []);
   };
 
   const fetchRoles = async () => {
     setLoading(true);
     let query = supabase
       .from('roles')
-      .select('id, nom, description, actif, mama_id')
+      .select('*')
       .order('nom', { ascending: true });
     if (filterMama) query = query.eq('mama_id', filterMama);
     const { data, error } = await query;
-    if (!error) {
-      const rows = Array.isArray(data) ? data : [];
-      setRoles(rows);
-    }
+    if (!error) setRoles(data || []);
     setLoading(false);
   };
 
@@ -87,17 +83,11 @@ export default function PermissionsAdmin() {
             onChange={(e) => setFilterMama(e.target.value)}
           >
             <option value="">Tous</option>
-            {(() => {
-              const options = [];
-              for (const m of mamas) {
-                options.push(
-                  <option key={m.id} value={m.id}>
-                    {m.nom}
-                  </option>
-                );
-              }
-              return options;
-            })()}
+            {mamas.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.nom} ({m.ville})
+              </option>
+            ))}
           </select>
         </label>
       </div>
@@ -118,47 +108,38 @@ export default function PermissionsAdmin() {
               </tr>
             </thead>
             <tbody>
-              {(() => {
-                const rowsEl = [];
-                for (const r of roles) {
-                  let mamaNom = r.mama_id;
-                  for (const m of mamas) {
-                    if (m.id === r.mama_id) {
-                      mamaNom = m.nom;
-                      break;
-                    }
-                  }
-                  rowsEl.push(
-                    <tr key={r.id}>
-                      <td className="px-2 py-1">{mamaNom}</td>
-                      <td className="px-2 py-1">{r.nom}</td>
-                      <td className="px-2 py-1">{r.description || ''}</td>
-                      <td className="px-2 py-1">
-                        <span
-                          className={
-                            r.actif
-                              ? 'inline-block bg-green-100 text-green-800 px-2 rounded-full'
-                              : 'inline-block bg-red-100 text-red-800 px-2 rounded-full'
-                          }
-                        >
-                          {r.actif ? 'Oui' : 'Non'}
-                        </span>
-                      </td>
-                      <td className="px-2 py-1">
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => setEditRole(r)}
-                          disabled={loading}
-                        >
-                          Modifier permissions
-                        </Button>
-                      </td>
-                    </tr>
-                  );
-                }
-                return rowsEl;
-              })()}
+              {roles.map((role) => (
+                <tr key={role.id}>
+                  <td className="px-2 py-1">
+                    {mamas.find((m) => m.id === role.mama_id)
+                      ? `${mamas.find((m) => m.id === role.mama_id)?.nom} (${mamas.find((m) => m.id === role.mama_id)?.ville})`
+                      : role.mama_id}
+                  </td>
+                  <td className="px-2 py-1">{role.nom}</td>
+                  <td className="px-2 py-1">{role.description || ''}</td>
+                  <td className="px-2 py-1">
+                    <span
+                      className={
+                        role.actif
+                          ? 'inline-block bg-green-100 text-green-800 px-2 rounded-full'
+                          : 'inline-block bg-red-100 text-red-800 px-2 rounded-full'
+                      }
+                    >
+                      {role.actif ? 'Oui' : 'Non'}
+                    </span>
+                  </td>
+                  <td className="px-2 py-1">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => setEditRole(role)}
+                      disabled={loading}
+                    >
+                      Modifier permissions
+                    </Button>
+                  </td>
+                </tr>
+              ))}
               {roles.length === 0 && (
                 <tr>
                   <td colSpan={5} className="py-4 text-gray-400">

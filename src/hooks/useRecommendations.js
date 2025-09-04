@@ -10,10 +10,10 @@ export async function getRecommendations(user_id, mama_id) {
   // 1. Stock mort via view
   const { data: stockMort } = await supabase
     .from('v_reco_stockmort')
-    .select('mama_id, produit_id, nom, jours_inactif')
+    .select('*')
     .eq('mama_id', mama_id);
 
-  (Array.isArray(stockMort) ? stockMort : []).forEach(r => {
+  (stockMort || []).forEach(r => {
     recos.push({
       type: 'alert',
       category: 'rotation',
@@ -25,11 +25,11 @@ export async function getRecommendations(user_id, mama_id) {
   // 2. Surcoût
   const { data: surcout } = await supabase
     .from('v_reco_surcout')
-    .select('mama_id, produit_id, nom, variation_pct')
+    .select('*')
     .eq('mama_id', mama_id)
     .gte('variation_pct', 20);
 
-  (Array.isArray(surcout) ? surcout : []).forEach(r => {
+  (surcout || []).forEach(r => {
     recos.push({
       type: 'alert',
       category: 'coût',
@@ -44,7 +44,7 @@ export async function getRecommendations(user_id, mama_id) {
     .select('id, nom, stock_reel, stock_min, actif')
     .eq('mama_id', mama_id);
 
-  (Array.isArray(produits) ? produits : [])
+  (produits || [])
     .filter(p => p.actif && p.stock_min !== null && Number(p.stock_reel) < Number(p.stock_min))
     .forEach(p => {
       recos.push({
@@ -62,7 +62,7 @@ export async function getRecommendations(user_id, mama_id) {
     periode_param: periode,
   });
 
-  (Array.isArray(budgets) ? budgets : [])
+  (budgets || [])
     .filter(b => b.ecart_pct !== null && Math.abs(Number(b.ecart_pct)) > 15)
     .forEach(b => {
       recos.push({

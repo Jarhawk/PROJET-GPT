@@ -56,24 +56,18 @@ export default function StatsStock() {
                 </td>
               </tr>
             ) : (
-              (() => {
-                const elements = [];
-                for (const r of rows) {
-                  elements.push(
-                    <tr key={r.produit_id}>
-                      <td className="px-2 py-1">{r.nom}</td>
-                      <td className="px-2 py-1 text-right">{Number(r.stock_reel ?? 0).toLocaleString()}</td>
-                      <td className="px-2 py-1 text-right">{Number(r.pmp ?? 0).toLocaleString()}</td>
-                      <td className="px-2 py-1">
-                        {r.last_purchase
-                          ? new Date(r.last_purchase).toLocaleDateString('fr-FR')
-                          : '-'}
-                      </td>
-                    </tr>
-                  );
-                }
-                return elements;
-              })()
+              rows.map((r) => (
+                <tr key={r.produit_id}>
+                  <td className="px-2 py-1">{r.nom}</td>
+                  <td className="px-2 py-1 text-right">{Number(r.stock_reel ?? 0).toLocaleString()}</td>
+                  <td className="px-2 py-1 text-right">{Number(r.pmp ?? 0).toLocaleString()}</td>
+                  <td className="px-2 py-1">
+                    {r.last_purchase
+                      ? new Date(r.last_purchase).toLocaleDateString('fr-FR')
+                      : '-'}
+                  </td>
+                </tr>
+              ))
             )}
           </tbody>
         </table>

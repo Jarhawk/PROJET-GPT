@@ -27,17 +27,14 @@ export default function InventaireDetail() {
 
   if (!inventaire) return <LoadingSpinner message="Chargement..." />;
 
-  const lignes = Array.isArray(inventaire.lignes) ? inventaire.lignes : [];
-
   const exportExcel = () => {
-    const rows = [];
-    for (const l of lignes) {
+    const rows = (inventaire.lignes || []).map(l => {
       const ecart = l.quantite_reelle - (l.product?.stock_theorique || 0);
       const valeurEcart = ecart * (l.product?.pmp || 0);
       const conso = l.conso_calculee || 0;
       const requisition = l.requisition_mensuelle || 0;
       const ecartReq = l.ecart_requisition || requisition - conso;
-      rows.push({
+      return {
         Date: inventaire.date_inventaire,
         Zone: inventaire.zone || "",
         Produit: l.product?.nom,
@@ -52,8 +49,8 @@ export default function InventaireDetail() {
         EcartRequisition: ecartReq,
         Mois_1: l.mois_m1,
         Mois_2: l.mois_m2,
-      });
-    }
+      };
+    });
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "Inventaire");
     XLSX.writeFile(wb, `inventaire_${id}.xlsx`);
@@ -66,9 +63,10 @@ export default function InventaireDetail() {
       10,
       10
     );
-    const body = [];
-    for (const l of lignes) {
-      body.push([
+    doc.autoTable({
+      startY: 20,
+      head: [["Produit", "Unité", "Physique", "Théorique", "Prix", "Valeur", "Écart", "Valeur écart"]],
+      body: (inventaire.lignes || []).map(l => [
         l.product?.nom,
         l.product?.unite?.nom,
         l.quantite_reelle,
@@ -77,25 +75,21 @@ export default function InventaireDetail() {
         (l.quantite_reelle * (l.product?.pmp || 0)).toFixed(2),
         (l.quantite_reelle - (l.product?.stock_theorique || 0)).toFixed(2),
         ((l.quantite_reelle - (l.product?.stock_theorique || 0)) * (l.product?.pmp || 0)).toFixed(2),
-      ]);
-    }
-    doc.autoTable({
-      startY: 20,
-      head: [["Produit", "Unité", "Physique", "Théorique", "Prix", "Valeur", "Écart", "Valeur écart"]],
-      body,
+      ]),
       styles: { fontSize: 9 },
     });
     doc.save(`inventaire_${id}.pdf`);
   };
 
-  let totalValeur = 0;
-  let totalEcart = 0;
-  for (const l of lignes) {
-    totalValeur += Number(l.quantite_reelle || 0) * Number(l.product?.pmp || 0);
-    totalEcart +=
-      (Number(l.quantite_reelle || 0) - Number(l.product?.stock_theorique || 0)) *
-      Number(l.product?.pmp || 0);
-  }
+  const totalValeur = (inventaire.lignes || []).reduce(
+    (s, l) => s + Number(l.quantite_reelle || 0) * Number(l.product?.pmp || 0),
+    0
+  );
+  const totalEcart = (inventaire.lignes || []).reduce(
+    (s, l) =>
+      s + (Number(l.quantite_reelle || 0) - Number(l.product?.stock_theorique || 0)) * Number(l.product?.pmp || 0),
+    0
+  );
 
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-4">
@@ -118,27 +112,22 @@ export default function InventaireDetail() {
             </tr>
           </thead>
           <tbody>
-            {(() => {
-              const rows = [];
-              for (let idx = 0; idx < lignes.length; idx++) {
-                const l = lignes[idx];
-                const valeur = Number(l.quantite_reelle || 0) * Number(l.product?.pmp || 0);
-                const ecart = Number(l.quantite_reelle || 0) - Number(l.product?.stock_theorique || 0);
-                rows.push(
-                  <tr key={idx} className="border-b last:border-none">
-                    <td className="p-2">{l.product?.nom}</td>
-                    <td className="p-2">{l.product?.unite?.nom}</td>
-                    <td className="p-2">{l.quantite_reelle}</td>
-                    <td className="p-2">{l.product?.stock_theorique}</td>
-                    <td className="p-2">{l.product?.pmp}</td>
-                    <td className="p-2">{valeur.toFixed(2)}</td>
-                    <td className={`p-2 ${ecart < 0 ? 'text-red-600' : ecart > 0 ? 'text-green-600' : ''}`}>{ecart.toFixed(2)}</td>
-                    <td className={`p-2 ${(ecart * (l.product?.pmp || 0)) < 0 ? 'text-red-600' : (ecart * (l.product?.pmp || 0)) > 0 ? 'text-green-600' : ''}`}>{(ecart * (l.product?.pmp || 0)).toFixed(2)}</td>
-                  </tr>
-                );
-              }
-              return rows;
-            })()}
+            {(inventaire.lignes || []).map((l, idx) => {
+              const valeur = Number(l.quantite_reelle || 0) * Number(l.product?.pmp || 0);
+              const ecart = Number(l.quantite_reelle || 0) - Number(l.product?.stock_theorique || 0);
+              return (
+                <tr key={idx} className="border-b last:border-none">
+                  <td className="p-2">{l.product?.nom}</td>
+                  <td className="p-2">{l.product?.unite?.nom}</td>
+                  <td className="p-2">{l.quantite_reelle}</td>
+                  <td className="p-2">{l.product?.stock_theorique}</td>
+                  <td className="p-2">{l.product?.pmp}</td>
+                  <td className="p-2">{valeur.toFixed(2)}</td>
+                  <td className={`p-2 ${ecart < 0 ? 'text-red-600' : ecart > 0 ? 'text-green-600' : ''}`}>{ecart.toFixed(2)}</td>
+                  <td className={`p-2 ${(ecart * (l.product?.pmp || 0)) < 0 ? 'text-red-600' : (ecart * (l.product?.pmp || 0)) > 0 ? 'text-green-600' : ''}`}>{(ecart * (l.product?.pmp || 0)).toFixed(2)}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </TableContainer>

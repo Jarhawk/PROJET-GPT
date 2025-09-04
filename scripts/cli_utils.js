@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 /* eslint-env node */
 import { fileURLToPath } from 'url';
-import { resolve, dirname, join, relative, isAbsolute } from 'path';
+import { resolve, dirname, join } from 'path';
 import { readFileSync, existsSync, mkdirSync } from 'fs';
 
 export function loadEnvFile(file, override = false) {
@@ -36,7 +36,6 @@ export function loadEnvFile(file, override = false) {
 }
 
 export function isMainModule(metaUrl, argv1 = process.argv[1]) {
-  if (!argv1) return false;
   return resolve(argv1) === fileURLToPath(metaUrl);
 }
 
@@ -370,13 +369,6 @@ export function toCsv(rows) {
 export function ensureDirForFile(file) {
   const dir = dirname(resolve(file));
   mkdirSync(dir, { recursive: true });
-}
-
-export function formatShownPath(file) {
-  const norm = file.replace(/\\/g, '/');
-  if (!isAbsolute(file)) return norm;
-  const rel = relative(process.cwd(), file).replace(/\\/g, '/');
-  return rel.startsWith('..') ? norm : rel;
 }
 
 export function runScript(

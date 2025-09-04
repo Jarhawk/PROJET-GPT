@@ -48,13 +48,13 @@ export default function Factures() {
   const [loading, setLoading] = useState(false);
   const { exportData, loading: exporting } = useExport();
 
-  const STATUTS = [{ label: 'Tous', value: '' }];
-  const statutSrc = Array.isArray(FACTURE_STATUTS) ? FACTURE_STATUTS : [];
-  for (const s of statutSrc) {
-    if (s !== 'Archivée') {
-      STATUTS.push({ label: s.charAt(0).toUpperCase() + s.slice(1), value: s });
-    }
-  }
+  const STATUTS = [
+    { label: 'Tous', value: '' },
+    ...FACTURE_STATUTS.filter((s) => s !== 'Archivée').map((s) => ({
+      label: s.charAt(0).toUpperCase() + s.slice(1),
+      value: s,
+    })),
+  ];
   const ACTIVITE = [
     { label: 'Toutes', value: '' },
     { label: 'Actives', value: 'true' },
@@ -116,20 +116,11 @@ export default function Factures() {
                 className="input input-bordered w-64"
               />
               <datalist id="factures-list">
-                {(() => {
-                  const items = [];
-                  const opts = Array.isArray(factureOptions)
-                    ? factureOptions
-                    : [];
-                  for (const f of opts) {
-                    items.push(
-                      <option key={f.id} value={f.numero || f.id}>
-                        {`n°${f.numero || f.id} - ${f.fournisseur?.nom || ''}`}
-                      </option>
-                    );
-                  }
-                  return items;
-                })()}
+                {factureOptions.map((f) => (
+                  <option key={f.id} value={f.numero || f.id}>
+                    {`n°${f.numero || f.id} - ${f.fournisseur?.nom || ''}`}
+                  </option>
+                ))}
               </datalist>
 
               <SupplierFilter
@@ -148,18 +139,11 @@ export default function Factures() {
                 }}
                 className="select select-bordered h-10"
               >
-                {(() => {
-                  const items = [];
-                  const list = Array.isArray(STATUTS) ? STATUTS : [];
-                  for (const o of list) {
-                    items.push(
-                      <option key={o.label} value={o.value}>
-                        {o.label}
-                      </option>
-                    );
-                  }
-                  return items;
-                })()}
+                {STATUTS.map((o) => (
+                  <option key={o.label} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
               </select>
 
               <select
@@ -170,18 +154,11 @@ export default function Factures() {
                 }}
                 className="select select-bordered h-10"
               >
-                {(() => {
-                  const items = [];
-                  const list = Array.isArray(ACTIVITE) ? ACTIVITE : [];
-                  for (const o of list) {
-                    items.push(
-                      <option key={o.label} value={o.value}>
-                        {o.label}
-                      </option>
-                    );
-                  }
-                  return items;
-                })()}
+                {ACTIVITE.map((o) => (
+                  <option key={o.label} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
               </select>
             </div>
             {canEdit && (

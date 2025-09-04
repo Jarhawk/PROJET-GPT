@@ -51,6 +51,7 @@
     "simulation/SimulationMenu.jsx"
   ],
   "zones_stock": [
+    "Stock.jsx",
     "inventaire/InventaireZones.jsx",
     "parametrage/Zones.jsx",
     "stats/StatsStock.jsx",
@@ -193,6 +194,7 @@
     "taches/Taches.jsx"
   ],
   "alertes": [
+    "Alertes.jsx",
     "taches/Alertes.jsx"
   ],
   "analyse": [
@@ -207,6 +209,7 @@
     "reporting/ReportingPDF.jsx"
   ],
   "utilisateurs": [
+    "Utilisateurs.jsx",
     "parametrage/UtilisateurForm.jsx",
     "parametrage/Utilisateurs.jsx"
   ],

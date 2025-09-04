@@ -1,64 +1,38 @@
+// src/lib/supabase.js
 import { createClient } from '@supabase/supabase-js'
 
-let singleton
-let initError = null
-let cachedEnv
-let overlayShown = false
-
-export function getSupabaseEnv() {
-  const url =
-    (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_URL) ||
-    process.env.VITE_SUPABASE_URL ||
-    process.env.SUPABASE_URL
-  const anonKey =
-    (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_ANON_KEY) ||
-    process.env.VITE_SUPABASE_ANON_KEY ||
-    process.env.SUPABASE_ANON_KEY ||
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-  return { url, anonKey }
-}
+let client
 
 export function getSupabaseClient() {
-  if (globalThis.__SUPABASE_TEST_CLIENT__) {
-    singleton = globalThis.__SUPABASE_TEST_CLIENT__
-    cachedEnv = null
-    return singleton
+  if (globalThis.__SUPABASE_TEST_CLIENT__) return globalThis.__SUPABASE_TEST_CLIENT__
+  if (client) return client
+
+  let url
+  let anonKey
+
+  if (typeof process !== 'undefined' && process?.env) {
+    url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL
+    anonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY
   }
-  const { url, anonKey } = getSupabaseEnv()
+
+  url = url || import.meta.env?.VITE_SUPABASE_URL
+  anonKey = anonKey || import.meta.env?.VITE_SUPABASE_ANON_KEY
+
   if (!url || !anonKey) {
-    initError =
-      'Missing Supabase credentials: set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY'
-    singleton = null
-    cachedEnv = null
-    if (typeof document !== 'undefined' && !overlayShown) {
-      const el = document.createElement('div')
-      el.style.position = 'fixed'
-      el.style.top = '0'
-      el.style.left = '0'
-      el.style.right = '0'
-      el.style.bottom = '0'
-      el.style.display = 'flex'
-      el.style.alignItems = 'center'
-      el.style.justifyContent = 'center'
-      el.style.background = 'rgba(0,0,0,0.7)'
-      el.style.color = 'white'
-      el.style.zIndex = '1000'
-      el.textContent = 'Missing Supabase credentials'
-      document.body.appendChild(el)
-      overlayShown = true
-    }
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error(initError)
-    }
-    return null
+    throw new Error('Missing Supabase credentials: set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY')
   }
-  if (singleton && cachedEnv?.url === url && cachedEnv?.anonKey === anonKey) {
-    return singleton
-  }
-  singleton = createClient(url, anonKey)
-  cachedEnv = { url, anonKey }
-  return singleton
+
+  client = createClient(url, anonKey)
+  return client
 }
 
-export const supabase = getSupabaseClient()
-export { initError as supabaseInitError }
+// Lazy proxy for legacy imports
+export const supabase = new Proxy(
+  {},
+  {
+    get(_target, prop) {
+      const c = getSupabaseClient()
+      return c[prop]
+    },
+  }
+)

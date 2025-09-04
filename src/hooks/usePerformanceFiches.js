@@ -14,7 +14,7 @@ export default function usePerformanceFiches() {
     setLoading(true);
     const { data, error } = await supabase
       .from('v_performance_fiches')
-      .select('mama_id, fiche_id, nom, cout, volume, popularite')
+      .select('*')
       .eq('mama_id', mama_id);
     setLoading(false);
     if (error) {

@@ -1,7 +1,23 @@
-export function hasAccess() {
-  // TODO: branch on real rights when available
-  return true;
+export function normalizeAccessKey(k) {
+  if (!k) return null
+  const map = {
+    fiches: 'fiches_techniques',
+    engineering: 'analyse',
+    menuEngineering: 'menu_engineering',
+    menu_engineering: 'menu_engineering',
+    costing: 'costing_carte',
+  }
+  const key = String(k).trim()
+  return map[key] ?? key
 }
 
-export default hasAccess;
+export function deduceEnabledModulesFromRights(rights) {
+  if (!rights || typeof rights !== 'object') return {}
+  const modules = {}
+  for (const k of Object.keys(rights)) {
+    if (k === 'enabledModules') continue
+    modules[k] = true
+  }
+  return modules
+}
 

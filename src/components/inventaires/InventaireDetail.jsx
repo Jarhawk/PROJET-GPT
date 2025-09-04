@@ -5,12 +5,11 @@ import * as XLSX from "xlsx";
 import { toast } from 'sonner';
 
 export default function InventaireDetail({ inventaire, onClose }) {
-  const lignes = Array.isArray(inventaire?.lignes) ? inventaire.lignes : [];
 
   // Export Excel
   const exportExcel = () => {
     const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(lignes);
+    const ws = XLSX.utils.json_to_sheet(inventaire.lignes || []);
     XLSX.utils.book_append_sheet(wb, ws, "LignesInventaire");
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     saveAs(new Blob([buf]), `inventaire_${inventaire.id}.xlsx`);
@@ -48,26 +47,16 @@ export default function InventaireDetail({ inventaire, onClose }) {
               </tr>
             </thead>
             <tbody>
-              {lignes.length > 0 ? (
-                (function () {
-                  const rows = [];
-                  let idx = 0;
-                  for (const l of lignes) {
-                    rows.push(
-                      <tr key={idx}>
-                        <td>{l.nom}</td>
-                        <td>{l.quantite}</td>
-                        <td>{l.unite}</td>
-                        <td>{l.stock_theorique}</td>
-                        <td>{l.pmp}</td>
-                        <td>{(l.quantite - l.stock_theorique)?.toFixed(2)}</td>
-                      </tr>
-                    );
-                    idx += 1;
-                  }
-                  return rows;
-                })()
-              ) : (
+              {inventaire.lignes?.length > 0 ? inventaire.lignes.map((l, i) => (
+                <tr key={i}>
+                  <td>{l.nom}</td>
+                  <td>{l.quantite}</td>
+                  <td>{l.unite}</td>
+                  <td>{l.stock_theorique}</td>
+                  <td>{l.pmp}</td>
+                  <td>{(l.quantite - l.stock_theorique)?.toFixed(2)}</td>
+                </tr>
+              )) : (
                 <tr><td colSpan={6} className="text-gray-400">Aucune ligne</td></tr>
               )}
             </tbody>

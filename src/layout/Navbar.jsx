@@ -64,21 +64,15 @@ export default function Navbar() {
             className="form-input w-48"
             aria-label={t('search')}
           />
-          {Array.isArray(results) && results.length > 0 && (() => {
-            const rows = [];
-            for (const r of results) {
-              rows.push(
+          {results.length > 0 && (
+            <div className="absolute z-10 bg-white/10 backdrop-blur-xl border border-white/20 text-white w-full shadow-lg mt-1 text-xs rounded">
+              {results.map(r => (
                 <div key={r.type + r.id} className="px-2 py-1 border-b last:border-0">
                   {r.type}: {r.nom}
                 </div>
-              );
-            }
-            return (
-              <div className="absolute z-10 bg-white/10 backdrop-blur-xl border border-white/20 text-white w-full shadow-lg mt-1 text-xs rounded">
-                {rows}
-              </div>
-            );
-          })()}
+              ))}
+            </div>
+          )}
         </div>
         <LanguageSelector />
         <button

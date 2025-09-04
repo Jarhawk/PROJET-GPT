@@ -1,8 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
-import { useAuth } from '@/hooks/useAuth'
 import PageWrapper from '@/components/ui/PageWrapper'
 import GlassCard from '@/components/ui/GlassCard'
 import MamaLogo from '@/components/ui/MamaLogo'
@@ -10,13 +9,8 @@ import PreviewBanner from '@/components/ui/PreviewBanner'
 
 export default function Login() {
   const navigate = useNavigate()
-  const { session } = useAuth()
   const [pending, setPending] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
-
-  useEffect(() => {
-    if (session) navigate('/dashboard', { replace: true })
-  }, [session, navigate])
 
   async function handleLogin(e) {
     e.preventDefault()
@@ -94,13 +88,13 @@ export default function Login() {
             />
           </div>
           {errorMsg ? <div role="alert" className="text-sm text-red-500">{errorMsg}</div> : null}
-            <button
-              type="submit"
-              disabled={pending}
-              className="mt-3 px-4 py-2 rounded-xl text-sm font-semibold bg-primary text-white hover:bg-primary-90 transition-colors disabled:opacity-50"
-            >
-              {pending ? 'Connexion…' : 'Se connecter'}
-            </button>
+          <button
+            type="submit"
+            disabled={pending}
+            className="mt-3 px-4 py-2 rounded-xl text-sm font-semibold bg-primary text-white hover:bg-primary-90 transition-colors disabled:opacity-50"
+          >
+            {pending ? 'Connexion…' : 'Login'}
+          </button>
           <div className="text-right mt-2">
             <Link to="/reset-password" className="text-xs text-gold hover:underline">
               Mot de passe oublié ?

@@ -5,18 +5,18 @@ import { useAuth } from '@/hooks/useAuth';
 export function useCostCenterStats() {
   const { mama_id } = useAuth();
 
-  async function fetchStats() {
+  async function fetchStats({ debut = null, fin = null } = {}) {
     if (!mama_id) return [];
-    const { data, error } = await supabase.rpc('stats_cost_centers', {
+    const { data, error } = await supabase.rpc("stats_cost_centers", {
       mama_id_param: mama_id,
-      debut_param: null,
-      fin_param: null,
+      debut_param: debut,
+      fin_param: fin,
     });
     if (error) {
       console.error('Erreur stats_cost_centers:', error);
       return [];
     }
-    return Array.isArray(data) ? data : [];
+    return data || [];
   }
 
   return { fetchStats };

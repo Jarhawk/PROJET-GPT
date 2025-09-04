@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { Input } from "@/components/ui/input";
 import GlassCard from "@/components/ui/GlassCard";
-import { useMamaSettings } from "@/hooks/useMamaSettings";
+import useMamaSettings from "@/hooks/useMamaSettings";
 import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
 import { useAuth } from '@/hooks/useAuth';
 

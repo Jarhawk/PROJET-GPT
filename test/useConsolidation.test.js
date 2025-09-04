@@ -3,7 +3,6 @@ import { vi, beforeEach, test, expect } from 'vitest';
 
 const queryObj = {
   select: vi.fn(() => queryObj),
-  eq: vi.fn(() => queryObj),
   in: vi.fn(() => queryObj),
   gte: vi.fn(() => queryObj),
   lte: vi.fn(() => queryObj),
@@ -23,12 +22,11 @@ beforeEach(async () => {
   queryObj.lte.mockClear();
 });
 
-test('fetchSites queries mamas table', async () => {
+test('fetchSites queries mapping table', async () => {
   const { result } = renderHook(() => useConsolidation());
   await act(async () => { await result.current.fetchSites(); });
-  expect(fromMock).toHaveBeenCalledWith('mamas');
-  expect(queryObj.select).toHaveBeenCalledWith('id, nom');
-  expect(queryObj.eq).toHaveBeenCalled();
+  expect(fromMock).toHaveBeenCalledWith('user_mama_access');
+  expect(queryObj.select).toHaveBeenCalledWith('mama_id, role');
 });
 
 test('fetchConsoMensuelle filters by ids and period', async () => {

@@ -14,7 +14,6 @@ import {
   Dialog,
   DialogContent,
   DialogTrigger,
-  DialogDescription,
 } from "@/components/ui/SmartDialog";
 import TableContainer from "@/components/ui/TableContainer";
 import { motion as Motion, AnimatePresence } from "framer-motion";
@@ -61,7 +60,7 @@ export default function BarManager() {
     if (!mama_id) return;
     supabase
       .from("fiches_techniques")
-      .select("id, nom, famille, prix_vente, cout_portion, type:type_carte")
+      .select("*")
       .eq("mama_id", mama_id)
       .eq("actif", true)
       .ilike("famille", "%boisson%")
@@ -82,64 +81,40 @@ export default function BarManager() {
 
   // Map boissons et ventes
   const ventesAgg = {};
-  const ventesList = Array.isArray(ventes) ? ventes : [];
-  for (const v of ventesList) {
-    ventesAgg[v.boisson_id] = (ventesAgg[v.boisson_id] || 0) + (v.quantite || 0);
-  }
-  const boissonsList = Array.isArray(boissons) ? boissons : [];
-  const allStats = [];
-  for (const b of boissonsList) {
-    const quantiteVendue = ventesAgg[b.id] || 0;
-    const margeUnitaire =
-      b.prix_vente && b.cout_portion ? b.prix_vente - b.cout_portion : 0;
-    const foodCost =
-      b.prix_vente && b.cout_portion ? (b.cout_portion / b.prix_vente) * 100 : null;
-    const totalMarge = quantiteVendue * margeUnitaire;
-    const totalCA = quantiteVendue * (b.prix_vente || 0);
-    allStats.push({
+  ventes.forEach(v => {
+    ventesAgg[v.boisson_id] = (ventesAgg[v.boisson_id] || 0) + v.quantite;
+  });
+  const boissonsStats = boissons
+    .map(b => ({
       ...b,
-      quantiteVendue,
-      margeUnitaire,
-      foodCost,
-      totalMarge,
-      totalCA,
-    });
-  }
-  const boissonsStats = [];
-  const s = search.toLowerCase();
-  for (const b of allStats) {
-    const n = b.nom ? b.nom.toLowerCase() : "";
-    const fam = b.famille ? b.famille.toLowerCase() : "";
-    const t = b.type ? b.type.toLowerCase() : "";
-    if (n.includes(s) || fam.includes(s) || t.includes(s)) boissonsStats.push(b);
-  }
+      quantiteVendue: ventesAgg[b.id] || 0,
+      margeUnitaire: b.prix_vente && b.cout_portion ? b.prix_vente - b.cout_portion : 0,
+      foodCost: b.prix_vente && b.cout_portion ? (b.cout_portion / b.prix_vente) * 100 : null,
+      totalMarge: (ventesAgg[b.id] || 0) * (b.prix_vente && b.cout_portion ? b.prix_vente - b.cout_portion : 0),
+      totalCA: (ventesAgg[b.id] || 0) * (b.prix_vente || 0),
+    }))
+    .filter(b =>
+      b.nom?.toLowerCase().includes(search.toLowerCase()) ||
+      b.famille?.toLowerCase().includes(search.toLowerCase()) ||
+      b.type?.toLowerCase().includes(search.toLowerCase())
+    );
   // Classement top ventes
   const topVentes = [...boissonsStats].sort((a, b) => b.quantiteVendue - a.quantiteVendue).slice(0, 10);
   // Classement top marges
   const topMarge = [...boissonsStats].sort((a, b) => b.totalMarge - a.totalMarge).slice(0, 10);
 
   // Stat globales
-  let ventesTot = 0;
-  let caTot = 0;
-  let margeTot = 0;
-  let fcSum = 0;
-  let fcCount = 0;
-  for (const b of boissonsStats) {
-    ventesTot += b.quantiteVendue;
-    caTot += b.totalCA;
-    margeTot += b.totalMarge;
-    if (b.foodCost !== null) {
-      fcSum += b.foodCost;
-      fcCount++;
-    }
-  }
-  const avgFC = fcSum / (fcCount || 1);
+  const ventesTot = boissonsStats.reduce((a, b) => a + b.quantiteVendue, 0);
+  const caTot = boissonsStats.reduce((a, b) => a + b.totalCA, 0);
+  const margeTot = boissonsStats.reduce((a, b) => a + b.totalMarge, 0);
+  const avgFC =
+    boissonsStats.filter(b => b.foodCost !== null).reduce((a, b) => a + b.foodCost, 0) /
+    (boissonsStats.filter(b => b.foodCost !== null).length || 1);
 
   // Export Excel/PDF
   const handleExportExcel = () => {
-    const rows = [];
-    for (const b of boissonsStats) {
-      rows.push({
+    const ws = XLSX.utils.json_to_sheet(
+      boissonsStats.map(b => ({
         Nom: b.nom,
         Type: b.type || b.famille || "",
         "Coût/portion (€)": b.cout_portion ? Number(b.cout_portion).toFixed(2) : "",
@@ -149,9 +124,8 @@ export default function BarManager() {
         "Marge unitaire (€)": b.margeUnitaire ? b.margeUnitaire.toFixed(2) : "",
         "Marge totale (€)": b.totalMarge ? b.totalMarge.toFixed(2) : "",
         "Chiffre d'affaires (€)": b.totalCA ? b.totalCA.toFixed(2) : "",
-      });
-    }
-    const ws = XLSX.utils.json_to_sheet(rows);
+      }))
+    );
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "BarManager");
     XLSX.writeFile(wb, "BarManager.xlsx");
@@ -161,9 +135,10 @@ export default function BarManager() {
   const handleExportPDF = () => {
     const doc = new JSPDF();
     doc.text("Statistiques Bar Manager", 10, 12);
-    const pdfRows = [];
-    for (const b of boissonsStats) {
-      pdfRows.push([
+    doc.autoTable({
+      startY: 20,
+      head: [["Nom", "Type", "Coût/portion", "PV", "FC (%)", "Ventes", "Marge €", "CA €"]],
+      body: boissonsStats.map(b => [
         b.nom,
         b.type || b.famille || "",
         b.cout_portion ? Number(b.cout_portion).toFixed(2) : "-",
@@ -172,12 +147,7 @@ export default function BarManager() {
         b.quantiteVendue,
         b.margeUnitaire ? b.margeUnitaire.toFixed(2) : "-",
         b.totalCA ? b.totalCA.toFixed(2) : "-",
-      ]);
-    }
-    doc.autoTable({
-      startY: 20,
-      head: [["Nom", "Type", "Coût/portion", "PV", "FC (%)", "Ventes", "Marge €", "CA €"]],
-      body: pdfRows,
+      ]),
       styles: { fontSize: 9 }
     });
     doc.save("BarManager.pdf");
@@ -186,78 +156,6 @@ export default function BarManager() {
 
   if (authLoading) return <LoadingSpinner message="Chargement..." />;
   if (!mama_id) return null;
-
-  const periodesList = Array.isArray(PERIODES) ? PERIODES : [];
-  const periodeOptions = [];
-  for (const p of periodesList) {
-    periodeOptions.push(<option key={p.value} value={p.value}>{p.label}</option>);
-  }
-
-  const boissonsStatsList = Array.isArray(boissonsStats) ? boissonsStats : [];
-  const boissonsRows = [];
-  for (const b of boissonsStatsList) {
-    boissonsRows.push(
-      <Motion.tr
-        key={b.id}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -10 }}
-        transition={{ duration: 0.2 }}
-      >
-        <td className="border px-2 py-1">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="link" className="text-blue-700 p-0 h-auto min-w-0 underline">
-                {b.nom}
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl shadow-lg p-6 max-w-md z-[1000]">
-              <DialogDescription className="sr-only">
-                Détails de la boisson
-              </DialogDescription>
-              <h2 className="font-bold text-xl mb-2">{b.nom}</h2>
-              <p>
-                <b>Type :</b> {b.type || b.famille || "-"}
-                <br />
-                <b>Coût/portion :</b>{" "}
-                {b.cout_portion ? Number(b.cout_portion).toFixed(2) : "-"} €
-                <br />
-                <b>Prix vente :</b>{" "}
-                {b.prix_vente ? Number(b.prix_vente).toFixed(2) : "-"} €
-                <br />
-                <b>Food cost :</b>{" "}
-                {b.foodCost ? (
-                  <span className={b.foodCost > FOOD_COST_SEUIL ? "text-red-600 font-semibold" : ""}>
-                    {b.foodCost.toFixed(1)} %
-                  </span>
-                ) : (
-                  "-"
-                )}
-                <br />
-                <b>Ventes sur période sélectionnée : </b>
-                {b.quantiteVendue}
-                <br />
-                <b>Marge totale : </b>
-                {b.totalMarge ? b.totalMarge.toFixed(2) : "-"} €
-                <br />
-                <b>Chiffre d'affaires : </b>
-                {b.totalCA ? b.totalCA.toFixed(2) : "-"} €
-              </p>
-            </DialogContent>
-          </Dialog>
-        </td>
-        <td className="px-2 py-1">{b.type || b.famille || "-"}</td>
-        <td className="px-2 py-1">{b.cout_portion ? Number(b.cout_portion).toFixed(2) : "-"}</td>
-        <td className="px-2 py-1">{b.prix_vente ? Number(b.prix_vente).toFixed(2) : "-"}</td>
-        <td className={"border px-2 py-1 font-semibold " + (b.foodCost > FOOD_COST_SEUIL ? "text-red-600" : "")}> 
-          {b.foodCost ? b.foodCost.toFixed(1) : "-"}
-        </td>
-        <td className="border px-2 py-1">{b.quantiteVendue}</td>
-        <td className="border px-2 py-1">{b.totalMarge ? b.totalMarge.toFixed(2) : "-"}</td>
-        <td className="border px-2 py-1">{b.totalCA ? b.totalCA.toFixed(2) : "-"}</td>
-      </Motion.tr>
-    );
-  }
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
@@ -269,7 +167,9 @@ export default function BarManager() {
           onChange={e => setPeriode(e.target.value)}
           className="w-32"
         >
-          {periodeOptions}
+          {PERIODES.map(p => (
+            <option key={p.value} value={p.value}>{p.label}</option>
+          ))}
         </Select>
         <input
           type="date"
@@ -361,11 +261,70 @@ export default function BarManager() {
               <th className="px-2 py-1">CA €</th>
             </tr>
           </thead>
-            <tbody>
-              <AnimatePresence>
-                {boissonsRows}
-              </AnimatePresence>
-            </tbody>
+          <tbody>
+            <AnimatePresence>
+              {boissonsStats.map(b => (
+                <Motion.tr
+                  key={b.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <td className="border px-2 py-1">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="link" className="text-blue-700 p-0 h-auto min-w-0 underline">
+                          {b.nom}
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent
+                        className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl shadow-lg p-6 max-w-md z-[1000]"
+                      >
+                        <h2 className="font-bold text-xl mb-2">{b.nom}</h2>
+                        <p>
+                          <b>Type :</b> {b.type || b.famille || "-"}
+                          <br />
+                          <b>Coût/portion :</b>{" "}
+                          {b.cout_portion ? Number(b.cout_portion).toFixed(2) : "-"} €
+                          <br />
+                          <b>Prix vente :</b>{" "}
+                          {b.prix_vente ? Number(b.prix_vente).toFixed(2) : "-"} €
+                          <br />
+                          <b>Food cost :</b>{" "}
+                          {b.foodCost ? (
+                            <span className={b.foodCost > FOOD_COST_SEUIL ? "text-red-600 font-semibold" : ""}>
+                              {b.foodCost.toFixed(1)} %
+                            </span>
+                          ) : (
+                            "-"
+                          )}
+                          <br />
+                          <b>Ventes sur période sélectionnée : </b>
+                          {b.quantiteVendue}
+                          <br />
+                          <b>Marge totale : </b>
+                          {b.totalMarge ? b.totalMarge.toFixed(2) : "-"} €
+                          <br />
+                          <b>Chiffre d'affaires : </b>
+                          {b.totalCA ? b.totalCA.toFixed(2) : "-"} €
+                        </p>
+                      </DialogContent>
+                    </Dialog>
+                  </td>
+                  <td className="px-2 py-1">{b.type || b.famille || "-"}</td>
+                  <td className="px-2 py-1">{b.cout_portion ? Number(b.cout_portion).toFixed(2) : "-"}</td>
+                  <td className="px-2 py-1">{b.prix_vente ? Number(b.prix_vente).toFixed(2) : "-"}</td>
+                  <td className={"border px-2 py-1 font-semibold " + (b.foodCost > FOOD_COST_SEUIL ? "text-red-600" : "")}>
+                    {b.foodCost ? b.foodCost.toFixed(1) : "-"}
+                  </td>
+                  <td className="border px-2 py-1">{b.quantiteVendue}</td>
+                  <td className="border px-2 py-1">{b.totalMarge ? b.totalMarge.toFixed(2) : "-"}</td>
+                  <td className="border px-2 py-1">{b.totalCA ? b.totalCA.toFixed(2) : "-"}</td>
+                </Motion.tr>
+              ))}
+            </AnimatePresence>
+          </tbody>
         </table>
       </TableContainer>
     </div>

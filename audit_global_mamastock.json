@@ -6,7 +6,7 @@
       "unit tests failing",
       "duplicate 'loading' identifiers",
       "missing columns for factures/bons_livraison/commandes/menus_jour",
-      "transferts column mismatch zone_depart/zone_arrivee"
+      "transferts column mismatch zone_source_id/zone_dest_id"
     ],
     "priorities": [
       "fix analysis scripts and tests",
@@ -243,7 +243,7 @@
         "functions": []
       },
       "status": "⚠️",
-      "notes": "front expects zone_depart/zone_arrivee"
+      "notes": "front expects zone_source_id/zone_dest_id"
     },
     {
       "name": "Commandes",
@@ -2060,24 +2060,24 @@
     {
       "file": "src/pages/Transferts.jsx",
       "line": 229,
-      "query": "from('transferts').select(\"date_transfert, zone_depart, zone_arrivee, quantite, motif\").eq('mama_id', mama_id).eq('produit_id', produit_id)",
+      "query": "from('transferts').select(\\\"date_transfert, zone_source_id, zone_dest_id, quantite, motif\\\").eq('mama_id', mama_id).eq('produit_id', produit_id)",
       "target": "table:transferts",
       "columns_expected": [
         "date_transfert",
-        "zone_depart",
-        "zone_arrivee",
+        "zone_source_id",
+        "zone_dest_id",
         "quantite",
         "motif"
       ],
       "sql_presence": {
         "table": true,
         "columns": {
-          "zone_depart": false,
-          "zone_arrivee": false
+          "zone_source_id": false,
+          "zone_dest_id": false
         }
       },
       "anomalies": [
-        "zone_depart/zone_arrivee missing"
+        "zone_source_id/zone_dest_id missing"
       ]
     },
     {
@@ -2316,7 +2316,7 @@
     ],
     "naming_mismatch": [
       {
-        "front": "zone_depart/zone_arrivee",
+        "front": "zone_source_id/zone_dest_id",
         "back": "zone_source_id/zone_dest_id",
         "files": [
           "src/pages/Transferts.jsx"
@@ -2378,12 +2378,12 @@
       },
       {
         "table": "transferts",
-        "column": "zone_depart",
+        "column": "zone_source_id",
         "type": "uuid"
       },
       {
         "table": "transferts",
-        "column": "zone_arrivee",
+        "column": "zone_dest_id",
         "type": "uuid"
       }
     ],

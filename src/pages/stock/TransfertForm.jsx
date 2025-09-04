@@ -76,7 +76,7 @@ export default function TransfertForm({ onClose, onSaved }) {
                 setHeader((h) => ({ ...h, zone_source_id: e.target.value }))
               }
             >
-              <option value="">Zone source</option>
+              <option value="">Zone départ</option>
               {zonesSafe.map((z) => (
                 <option key={z.id} value={z.id}>
                   {z.nom}
@@ -93,7 +93,7 @@ export default function TransfertForm({ onClose, onSaved }) {
                 }))
               }
             >
-              <option value="">Zone destination</option>
+              <option value="">Zone arrivée</option>
               {zonesSafe.map((z) => (
                 <option key={z.id} value={z.id}>
                   {z.nom}

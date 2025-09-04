@@ -38,7 +38,8 @@
     "audit": "node scripts/audit-project.mjs",
     "audit:fix": "node scripts/fix-project.mjs",
     "sync:routes": "node scripts/generate_routes.mjs",
-    "test:nav": "vitest run test/sidebar.routes.test.jsx"
+    "test:nav": "vitest run test/sidebar.routes.test.jsx",
+    "qa": "node qa/runner.js"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

@@ -28,5 +28,5 @@ export default function useZonesStock() {
       return data ?? [];
     }
   }, getQueryClient());
-  return { ...query, zones: query.data ?? [] };
+  return { data: query.data ?? [], isLoading: query.isLoading, error: query.error };
 }

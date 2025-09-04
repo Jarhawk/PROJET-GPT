@@ -1,20 +1,18 @@
 import supabase from '@/lib/supabase';import { useEffect, useState } from 'react';
 
 import { useAuth } from '@/hooks/useAuth';
+import { createAsyncState } from '../_shared/createAsyncState';
 
 export default function useEvolutionAchats() {
   const { mama_id, loading: authLoading } = useAuth() || {};
-  const [data, setData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [state, setState] = useState(() => createAsyncState([]));
 
   useEffect(() => {
     if (authLoading) return;
     if (!mama_id) return;
 
     const fetchData = async () => {
-      setIsLoading(true);
-      setError(null);
+      setState((s) => ({ ...s, loading: true, error: null }));
       try {
         const start = new Date();
         start.setMonth(start.getMonth() - 12);
@@ -28,19 +26,16 @@ export default function useEvolutionAchats() {
 
         if (error) throw error;
 
-        setData(data || []);
+        setState({ data: data || [], loading: false, error: null });
       } catch (e) {
-        setError(e);
-        setData([]);
-      } finally {
-        setIsLoading(false);
+        setState({ data: [], loading: false, error: e });
       }
     };
 
     fetchData();
   }, [authLoading, mama_id]);
 
-  const loading = [authLoading, isLoading].some(Boolean);
+  const loading = authLoading || state.loading;
 
-  return { data, loading, error };
+  return { data: state.data, loading, error: state.error };
 }

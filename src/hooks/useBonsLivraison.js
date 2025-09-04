@@ -23,7 +23,7 @@ export function useBonsLivraison() {
       )
       .eq("mama_id", mama_id)
       .order("date_reception", { ascending: false })
-    range((page - 1) * pageSize, page * pageSize - 1);
+      .range((page - 1) * pageSize, page * pageSize - 1);
     if (fournisseur) q = q.eq("fournisseur_id", fournisseur);
     if (actif !== null) q = q.eq("actif", actif);
     if (debut) q = q.gte("date_reception", debut);

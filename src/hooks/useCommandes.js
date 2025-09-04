@@ -17,15 +17,15 @@ export function useCommandes() {
       if (!mama_id) return { data: [], count: 0 };
       setLoading(true);
       setError(null);
-      let query = supabase.
-      from("commandes").
-      select(
-        "*, fournisseur:fournisseur_id(id, nom, email), lignes:commande_lignes(total_ligne)",
-        { count: "exact" }
-      ).
-      eq("mama_id", mama_id).
-      order("date_commande", { ascending: false }).
-      range((page - 1) * limit, page * limit - 1);
+      let query = supabase
+        .from("commandes")
+        .select(
+          "id, date_commande, statut, fournisseur_id, mama_id, created_at, fournisseur:fournisseurs!commandes_fournisseur_id_fkey(id, nom, email), lignes:commande_lignes(id, total_ligne)",
+          { count: "exact" }
+        )
+        .eq("mama_id", mama_id)
+        .order("date_commande", { ascending: false })
+        .range((page - 1) * limit, page * limit - 1);
       if (fournisseur) query = query.eq("fournisseur_id", fournisseur);
       if (statut) query = query.eq("statut", statut);
       if (debut) query = query.gte("date_commande", debut);
@@ -55,14 +55,14 @@ export function useCommandes() {
       if (!id || !mama_id) return { data: null, error: null };
       setLoading(true);
       setError(null);
-      const { data, error } = await supabase.
-      from("commandes").
-      select(
-        "*, fournisseur:fournisseur_id(id, nom, email), lignes:commande_lignes(*, produit:produit_id(id, nom))"
-      ).
-      eq("id", id).
-      eq("mama_id", mama_id).
-      single();
+      const { data, error } = await supabase
+        .from("commandes")
+        .select(
+          "id, date_commande, statut, fournisseur_id, mama_id, created_at, fournisseur:fournisseurs!commandes_fournisseur_id_fkey(id, nom, email), lignes:commande_lignes(id, commande_id, produit_id, quantite, prix_unitaire, tva, total_ligne, produit:produit_id(id, nom))"
+        )
+        .eq("id", id)
+        .eq("mama_id", mama_id)
+        .single();
       setLoading(false);
       if (error) {
         console.error("❌ fetchCommandeById", error.message);

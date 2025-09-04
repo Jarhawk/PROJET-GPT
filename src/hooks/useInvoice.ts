@@ -24,15 +24,15 @@ export type Facture = {
   numero: string;
   date_facture: string;
   fournisseur_id: UUID | null;
-  total_ht: number | null;
-  total_ttc: number | null;
+  montant: number | null;
+  statut: string | null;
   lignes?: FactureLigne[];
 };
 
 async function fetchInvoiceAndLinesSeparately(id: string, mamaId: string): Promise<Facture> {
   const { data: head, error: e1 } = await supabase
     .from('factures')
-    .select('id, mama_id, numero, date_facture, fournisseur_id, total_ht, total_ttc')
+    .select('id, mama_id, numero, date_facture, fournisseur_id, montant, statut')
     .eq('id', id)
     .eq('mama_id', mamaId)
     .maybeSingle();
@@ -67,7 +67,7 @@ export function useInvoice(id: string | undefined) {
         const { data, error } = await supabase
           .from('factures')
           .select(`
-            id, mama_id, numero, date_facture, fournisseur_id, total_ht, total_ttc,
+            id, mama_id, numero, date_facture, fournisseur_id, montant, statut,
             lignes:facture_lignes (
               id, facture_id, produit_id, quantite, prix_unitaire, tva, remise, total_ht, total_ttc,
               produit:produit_id ( id, nom )

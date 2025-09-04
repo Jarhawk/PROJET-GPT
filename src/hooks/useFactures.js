@@ -17,11 +17,14 @@ export function useFactures() {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
-    let q = supabase.
-    from("bons_livraison").
-    select("*", { count: "exact" }).
-    eq("mama_id", mama_id).
-    order("date_livraison", { ascending: false });
+    let q = supabase
+      .from("bons_livraison")
+      .select(
+        "id, numero_bl, date_reception, actif, fournisseur_id, mama_id, created_at, lignes:lignes_bl!bl_id(id)",
+        { count: "exact" }
+      )
+      .eq("mama_id", mama_id)
+      .order("date_reception", { ascending: false });
     if (search) q = q.ilike("numero_bl", `%${search}%`);
     q = q.range((page - 1) * limit, page * limit - 1);
     const { data, error, count } = await q;
@@ -39,19 +42,21 @@ export function useFactures() {
     fournisseur = "",
     statut = "",
     mois = "",
-    actif = true,
     page = 1,
     pageSize = 20
   } = {}) {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
-    let query = supabase.
-    from("factures").
-    select("*, fournisseur:fournisseur_id(id, nom)", { count: "exact" }).
-    eq("mama_id", mama_id).
-    order("date_facture", { ascending: false }).
-    range((page - 1) * pageSize, page * pageSize - 1);
+    let query = supabase
+      .from("factures")
+      .select(
+        "id, numero, date_facture, montant, statut, fournisseur_id, mama_id, created_at, fournisseur:fournisseurs!factures_fournisseur_id_fkey(id, nom)",
+        { count: "exact" }
+      )
+      .eq("mama_id", mama_id)
+      .order("date_facture", { ascending: false })
+      .range((page - 1) * pageSize, page * pageSize - 1);
 
     if (search) {
       query = query.or(
@@ -60,7 +65,6 @@ export function useFactures() {
     }
     if (fournisseur) query = query.eq("fournisseur_id", fournisseur);
     if (statut) query = query.eq("statut", statut);
-    if (actif !== null) query = query.eq("actif", actif);
     if (mois) {
       const start = `${mois}-01`;
       const end = new Date(start);
@@ -83,12 +87,14 @@ export function useFactures() {
     if (!id || !mama_id) return null;
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase.
-    from("factures").
-    select("*, fournisseur:fournisseur_id(id, nom)").
-    eq("id", id).
-    eq("mama_id", mama_id).
-    single();
+    const { data, error } = await supabase
+      .from("factures")
+      .select(
+        "id, numero, date_facture, montant, statut, fournisseur_id, mama_id, created_at, fournisseur:fournisseurs!factures_fournisseur_id_fkey(id, nom)"
+      )
+      .eq("id", id)
+      .eq("mama_id", mama_id)
+      .single();
     setLoading(false);
     if (error) {
       setError(error);
@@ -145,17 +151,17 @@ export function useFactures() {
     if (!mama_id) return { error: "no mama_id" };
     setLoading(true);
     setError(null);
-    const { error } = await supabase.
-    from("factures").
-    update({ actif: false }).
-    eq("id", id).
-    eq("mama_id", mama_id);
+    const { error } = await supabase
+      .from("factures")
+      .delete()
+      .eq("id", id)
+      .eq("mama_id", mama_id);
     setLoading(false);
     if (error) {
       setError(error);
       return { error };
     }
-    setFactures((f) => f.map((ft) => ft.id === id ? { ...ft, actif: false } : ft));
+    setFactures((f) => f.filter((ft) => ft.id !== id));
     return { success: true };
   }
 
@@ -260,16 +266,7 @@ export function useFactures() {
   }
 
   async function toggleFactureActive(id, actif) {
-    if (!mama_id) return { error: "no mama_id" };
-    setLoading(true);
-    const { error } = await supabase.
-    from("factures").
-    update({ actif }).
-    eq("id", id).
-    eq("mama_id", mama_id);
-    setLoading(false);
-    if (error) setError(error);
-    return { error };
+    return { error: null };
   }
 
   async function calculateTotals(facture_id) {

@@ -12,15 +12,15 @@ export function useFactures(filters = {}) {
     enabled: !!mamaId,
     keepPreviousData: true,
     queryFn: async () => {
-      let q = supabase.
-      from('factures').
-      select(
-        'id, numero, date_facture, fournisseur_id, montant_ttc:total_ttc, statut, actif, fournisseur:fournisseurs(nom)',
-        { count: 'exact' }
-      ).
-      eq('mama_id', mamaId).
-      order('date_facture', { ascending: false }).
-      range((page - 1) * pageSize, page * pageSize - 1);
+      let q = supabase
+        .from('factures')
+        .select(
+          'id, numero, date_facture, montant, statut, fournisseur_id, mama_id, created_at, fournisseur:fournisseurs!factures_fournisseur_id_fkey(id, nom)',
+          { count: 'exact' }
+        )
+        .eq('mama_id', mamaId)
+        .order('date_facture', { ascending: false })
+        .range((page - 1) * pageSize, page * pageSize - 1);
 
       if (filters?.search) {
         q = q.ilike('numero', `%${filters.search}%`);
@@ -31,8 +31,6 @@ export function useFactures(filters = {}) {
       if (filters?.statut) {
         q = q.eq('statut', filters.statut);
       }
-      if (filters?.actif === 'true') q = q.eq('actif', true);
-      if (filters?.actif === 'false') q = q.eq('actif', false);
 
       const { data, error, count } = await q;
       if (error) throw error;

@@ -189,7 +189,7 @@ export default function ProduitDetail({ produitId, open, onClose }) {
                     <td>{m.type}</td>
                     <td>{m.quantite}</td>
                     <td>{m.zone_source?.nom || "-"}</td>
-                    <td>{m.zone_destination?.nom || "-"}</td>
+                    <td>{m.zone_dest?.nom || "-"}</td>
                   </tr>
                 ))
               )}

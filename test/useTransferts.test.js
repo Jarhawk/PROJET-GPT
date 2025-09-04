@@ -56,7 +56,7 @@ test('fetchTransferts applies filters', async () => {
       debut: '2025-01-01',
       fin: '2025-01-31',
       zone_source_id: 'zs',
-      zone_destination_id: 'zd',
+      zone_dest_id: 'zd',
       produit_id: 'p1',
     });
   });
@@ -73,7 +73,7 @@ test('createTransfert inserts header and lines', async () => {
   const { result } = renderHook(() => useTransferts());
   await act(async () => {
     await result.current.createTransfert(
-      { zone_source_id: 'zs', zone_destination_id: 'zd', motif: 'test' },
+      { zone_source_id: 'zs', zone_dest_id: 'zd', motif: 'test' },
       [{ produit_id: 'p1', quantite: 2 }]
     );
   });

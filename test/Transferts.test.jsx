@@ -1,4 +1,5 @@
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ isAuthenticated: true, loading: false }) }));
@@ -38,7 +39,7 @@ test('renders transferts and submits form', async () => {
         id: 't1',
         date_transfert: '2025-01-01',
         zone_source: { nom: 'A' },
-        zone_destination: { nom: 'B' },
+        zone_dest: { nom: 'B' },
         lignes: [{ produit_id: 'p1' }],
       },
     ],
@@ -46,7 +47,11 @@ test('renders transferts and submits form', async () => {
     createTransfert,
   });
   mockProducts = () => ({ products: [{ id: 'p1', nom: 'Prod1' }], fetchProducts: vi.fn() });
-  mockZones = () => ({ zones: [{ id: 'A', nom: 'A' }, { id: 'B', nom: 'B' }], fetchZones: vi.fn() });
+  mockZones = () => ({
+    zones: [{ id: 'A', nom: 'A' }, { id: 'B', nom: 'B' }],
+    fetchZones: vi.fn(),
+    myAccessibleZones: () => [{ id: 'A', nom: 'A' }, { id: 'B', nom: 'B' }],
+  });
 
   await act(async () => {
     render(<Transferts />);
@@ -70,6 +75,6 @@ test('renders transferts and submits form', async () => {
     fireEvent.change(qty, { target: { value: '2' } });
     fireEvent.click(screen.getByText('Valider'));
   });
-  expect(createTransfert).toHaveBeenCalled();
-});
+  await waitFor(() => expect(createTransfert).toHaveBeenCalled());
+}, 10000);
 

@@ -26,28 +26,50 @@ export function useTransferts() {
       setLoading(true);
       setError(null);
       let q = supabase
-        .from("transferts")
+        .from('v_transferts_historique')
         .select(
-          `id, mama_id, date_transfert, motif, zone_source_id, zone_dest_id, commentaire, created_at,
-        zone_source:zones_stock!fk_transferts_zone_source_id ( id, nom ),
-        zone_dest:zones_stock!fk_transferts_zone_dest_id   ( id, nom ),
-        lignes:transfert_lignes ( id, produit_id, quantite, commentaire, produit:produits ( id, nom ) )`
+          `transfert_id, mama_id, date_transfert, zone_source_id, zone_source, zone_dest_id, zone_dest, produit_id, produit, quantite, commentaire, utilisateur_id, created_at`
         )
-        .eq("mama_id", mama_id)
-        .order("date_transfert", { ascending: false });
-      if (debut) q = q.gte("date_transfert", debut);
-      if (fin) q = q.lte("date_transfert", fin);
-      if (zone_source_id) q = q.eq("zone_source_id", zone_source_id);
-      if (zone_dest_id) q = q.eq("zone_dest_id", zone_dest_id);
-      if (produit_id) q = q.eq("transfert_lignes.produit_id", produit_id);
+        .eq('mama_id', mama_id)
+        .order('date_transfert', { ascending: false });
+      if (debut) q = q.gte('date_transfert', debut);
+      if (fin) q = q.lte('date_transfert', fin);
+      if (zone_source_id) q = q.eq('zone_source_id', zone_source_id);
+      if (zone_dest_id) q = q.eq('zone_dest_id', zone_dest_id);
+      if (produit_id) q = q.eq('produit_id', produit_id);
       const { data, error } = await q;
       setLoading(false);
       if (error) {
         setError(error);
         return [];
       }
-      setTransferts(Array.isArray(data) ? data : []);
-      return data || [];
+      const grouped = (data || []).reduce((acc, row) => {
+        const id = row.transfert_id;
+        if (!acc[id]) {
+          acc[id] = {
+            id,
+            date_transfert: row.date_transfert,
+            zone_source_id: row.zone_source_id,
+            zone_dest_id: row.zone_dest_id,
+            zone_source: { id: row.zone_source_id, nom: row.zone_source },
+            zone_dest: { id: row.zone_dest_id, nom: row.zone_dest },
+            lignes: [],
+            commentaire: row.commentaire,
+            utilisateur_id: row.utilisateur_id,
+            created_at: row.created_at,
+          };
+        }
+        acc[id].lignes.push({
+          produit_id: row.produit_id,
+          produit: row.produit,
+          quantite: row.quantite,
+          commentaire: row.commentaire,
+        });
+        return acc;
+      }, {});
+      const result = Object.values(grouped);
+      setTransferts(result);
+      return result;
     },
     [mama_id]
   );
@@ -104,22 +126,41 @@ export function useTransferts() {
       setLoading(true);
       setError(null);
       const { data, error } = await supabase
-        .from("transferts")
+        .from('v_transferts_historique')
         .select(
-          `id, mama_id, date_transfert, motif, zone_source_id, zone_dest_id, commentaire, created_at,
-        zone_source:zones_stock!fk_transferts_zone_source_id ( id, nom ),
-        zone_dest:zones_stock!fk_transferts_zone_dest_id   ( id, nom ),
-        lignes:transfert_lignes ( id, produit_id, quantite, commentaire, produit:produits ( id, nom ) )`
+          `transfert_id, mama_id, date_transfert, zone_source_id, zone_source, zone_dest_id, zone_dest, produit_id, produit, quantite, commentaire, utilisateur_id, created_at`
         )
-        .eq("mama_id", mama_id)
-        .eq("id", id)
-        .single();
+        .eq('mama_id', mama_id)
+        .eq('transfert_id', id);
       setLoading(false);
       if (error) {
         setError(error);
         return null;
       }
-      return data;
+      const grouped = (data || []).reduce((acc, row) => {
+        if (!acc) {
+          acc = {
+            id: row.transfert_id,
+            date_transfert: row.date_transfert,
+            zone_source_id: row.zone_source_id,
+            zone_dest_id: row.zone_dest_id,
+            zone_source: { id: row.zone_source_id, nom: row.zone_source },
+            zone_dest: { id: row.zone_dest_id, nom: row.zone_dest },
+            lignes: [],
+            commentaire: row.commentaire,
+            utilisateur_id: row.utilisateur_id,
+            created_at: row.created_at,
+          };
+        }
+        acc.lignes.push({
+          produit_id: row.produit_id,
+          produit: row.produit,
+          quantite: row.quantite,
+          commentaire: row.commentaire,
+        });
+        return acc;
+      }, null);
+      return grouped;
     },
     [mama_id]
   );

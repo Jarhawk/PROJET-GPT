@@ -33,52 +33,35 @@ export function useProducts() {
 
   const fetchProducts = useCallback(async ({
     search = "",
-    famille = "",
-    sousFamille = "",
-    zone = "",
-    actif = null,
     page = 1,
-    limit = 100,
-    sortBy = "nom",
-    order = "asc"
+    limit = 100
   } = {}) => {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
-    let query = supabase.
-    from("produits").
-    select(
-      `*, unite:unite_id (nom), zone_stock:zones_stock(nom), famille:familles(nom), sous_famille:sous_familles(nom)`,
-      { count: "exact" }
-    ).
-    eq("mama_id", mama_id);
+    const { data, error, count } = await supabase
+      .from('produits')
+      .select(
+        `id, nom, mama_id, actif, famille_id, unite_id, code, image,
+        pmp, stock_reel, stock_min, stock_theorique, created_at, updated_at,
+        unite:unites!produits_unite_id_fkey ( nom ),
+        famille:familles!produits_famille_id_fkey ( nom )`,
+        { count: 'exact' }
+      )
+      .eq('mama_id', mama_id)
+      .ilike('nom', `%${search}%`)
+      .order('nom', { ascending: true })
+      .range((page - 1) * limit, page * limit - 1);
 
-    if (search) {
-      query = query.ilike("nom", `%${search}%`);
-    }
-    if (famille) query = query.eq("famille_id", famille);
-    if (sousFamille) query = query.eq("sous_famille_id", sousFamille);
-    if (zone) query = query.eq("zone_stock_id", zone);
-    if (typeof actif === "boolean") query = query.eq("actif", actif);
-
-    if (sortBy === "nom") {
-      query = query.order("nom", { ascending: order === "asc" });
-    } else {
-      query = query.order(sortBy, { ascending: order === "asc" }).
-      order("nom", { ascending: order === "asc" });
-    }
-    query = query.range((page - 1) * limit, page * limit - 1);
-
-    const { data, error, count } = await query;
     const [
-    { data: pmpData },
-    { data: stockData },
-    { data: lastPriceData }] =
-    await Promise.all([
-    supabase.from('v_pmp').select('produit_id, pmp').eq('mama_id', mama_id),
-    supabase.from('v_stocks').select('produit_id, stock').eq('mama_id', mama_id),
-    supabase.from('v_products_last_price').select('produit_id, dernier_prix').eq('mama_id', mama_id)]
-    );
+      { data: pmpData },
+      { data: stockData },
+      { data: lastPriceData }
+    ] = await Promise.all([
+      supabase.from('v_pmp').select('produit_id, pmp').eq('mama_id', mama_id),
+      supabase.from('v_stocks').select('produit_id, stock').eq('mama_id', mama_id),
+      supabase.from('v_produits_dernier_prix').select('produit_id, dernier_prix').eq('mama_id', mama_id)
+    ]);
     const pmpMap = Object.fromEntries((pmpData || []).map((p) => [p.produit_id, p.pmp]));
     const stockMap = Object.fromEntries((stockData || []).map((s) => [s.produit_id, s.stock]));
     const lastPriceMap = Object.fromEntries((lastPriceData || []).map((l) => [l.produit_id, l.dernier_prix]));

@@ -11,7 +11,10 @@ export function useRequisitions() {
     if (!mama_id) return { data: [], count: 0 };
     let query = supabase.
     from("v_requisitions").
-    select("*", { count: "exact" }).
+    select(
+      "id, date_requisition, quantite, mama_id, produit_id, produit_nom, photo_url",
+      { count: "exact" }
+    ).
     eq("mama_id", mama_id).
     order("date_requisition", { ascending: false }).
     range((page - 1) * limit, page * limit - 1);
@@ -36,9 +39,12 @@ export function useRequisitions() {
     if (!mama_id) return { data: [], count: 0 };
     let query = supabase.
     from("requisitions").
-    select("*, lignes:requisition_lignes(produit_id, unite, quantite)", { count: "exact" }).
+    select(
+      `id, date_requisition, statut, zone_id, mama_id,
+      lignes:requisition_lignes ( id, produit_id, unite, quantite )`,
+      { count: "exact" }
+    ).
     eq("mama_id", mama_id).
-    eq("actif", true).
     order("date_requisition", { ascending: false }).
     range((page - 1) * limit, page * limit - 1);
     if (zone) query = query.eq("zone_id", zone);
@@ -62,7 +68,10 @@ export function useRequisitions() {
     const { data, error } = await supabase.
     from("requisitions").
     select(
-      "*, lignes:requisition_lignes!requisition_id(*, produit:produit_id(id, nom))"
+      `id, date_requisition, statut, zone_id, mama_id, commentaire,
+      lignes:requisition_lignes!requisition_id(
+        id, produit_id, unite, quantite, produit:produit_id(id, nom)
+      )`
     ).
     eq("id", id).
     eq("mama_id", mama_id).

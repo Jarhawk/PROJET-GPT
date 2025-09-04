@@ -1,5 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { supabase } from '@/lib/supabase';
+import supabase from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 
 export function useAnalyse() {
@@ -13,11 +14,11 @@ export function useAnalyse() {
 
   async function getMonthlyPurchases(filters = {}) {
     if (!mama_id) return [];
-    let query = supabase
-      .from("v_achats_mensuels")
-      .select("mois, montant_total")
-      .eq("mama_id", mama_id)
-      .order("mois", { ascending: true });
+    let query = supabase.
+    from("v_achats_mensuels").
+    select("mois, montant_total").
+    eq("mama_id", mama_id).
+    order("mois", { ascending: true });
     query = applyPeriode(query, filters);
     const { data, error } = await query;
     if (error) {
@@ -29,11 +30,11 @@ export function useAnalyse() {
 
   async function getEvolutionAchats(filters = {}) {
     if (!mama_id) return [];
-    let query = supabase
-      .from("v_evolution_achats")
-      .select("mois, montant")
-      .eq("mama_id", mama_id)
-      .order("mois", { ascending: true });
+    let query = supabase.
+    from("v_evolution_achats").
+    select("mois, montant").
+    eq("mama_id", mama_id).
+    order("mois", { ascending: true });
     query = applyPeriode(query, filters);
     const { data, error } = await query;
     if (error) {
@@ -45,10 +46,10 @@ export function useAnalyse() {
 
   async function getPmp() {
     if (!mama_id) return [];
-    const { data, error } = await supabase
-      .from("v_pmp")
-      .select("*")
-      .eq("mama_id", mama_id);
+    const { data, error } = await supabase.
+    from("v_pmp").
+    select("*").
+    eq("mama_id", mama_id);
     if (error) {
       console.error("getPmp", error);
       return [];
@@ -58,11 +59,11 @@ export function useAnalyse() {
 
   async function getEcartsInventaire(filters = {}) {
     if (!mama_id) return [];
-    let query = supabase
-      .from("v_ecarts_inventaire")
-      .select("date, ecart")
-      .eq("mama_id", mama_id)
-      .order("date", { ascending: true });
+    let query = supabase.
+    from("v_ecarts_inventaire").
+    select("date, ecart").
+    eq("mama_id", mama_id).
+    order("date", { ascending: true });
     if (filters.produit_id) query = query.eq("produit_id", filters.produit_id);
     const { data, error } = await query;
     if (error) {

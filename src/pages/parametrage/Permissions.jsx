@@ -1,15 +1,16 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/lib/supabase';
+
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogTitle,
-  DialogDescription,
-} from '@/components/ui/SmartDialog';
+  DialogDescription } from
+'@/components/ui/SmartDialog';
 import PermissionsForm from './PermissionsForm';
 import { toast } from 'sonner';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
@@ -27,11 +28,11 @@ export default function Permissions() {
 
   const fetchRoles = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('roles')
-      .select('*')
-      .eq('mama_id', mama_id)
-      .order('nom', { ascending: true });
+    const { data, error } = await supabase.
+    from('roles').
+    select('*').
+    eq('mama_id', mama_id).
+    order('nom', { ascending: true });
     if (!error) setRoles(data || []);
     setLoading(false);
   };
@@ -48,12 +49,12 @@ export default function Permissions() {
         Permissions des rôles
       </h1>
       <TableContainer className="mb-6">
-        {loading ? (
-          <div className="text-center py-8 text-gray-500">
+        {loading ?
+        <div className="text-center py-8 text-gray-500">
             <LoadingSpinner message="Chargement…" />
-          </div>
-        ) : (
-          <table className="min-w-full table-auto text-center text-sm">
+          </div> :
+
+        <table className="min-w-full table-auto text-center text-sm">
             <thead>
               <tr>
                 <th className="px-2 py-1">Rôle</th>
@@ -63,43 +64,43 @@ export default function Permissions() {
               </tr>
             </thead>
             <tbody>
-              {roles.map((role) => (
-                <tr key={role.id}>
+              {roles.map((role) =>
+            <tr key={role.id}>
                   <td className="px-2 py-1">{role.nom}</td>
                   <td className="px-2 py-1">{role.description || ''}</td>
                   <td className="px-2 py-1">
                     <span
-                      className={
-                        role.actif
-                          ? 'inline-block bg-green-100 text-green-800 px-2 rounded-full'
-                          : 'inline-block bg-red-100 text-red-800 px-2 rounded-full'
-                      }
-                    >
+                  className={
+                  role.actif ?
+                  'inline-block bg-green-100 text-green-800 px-2 rounded-full' :
+                  'inline-block bg-red-100 text-red-800 px-2 rounded-full'
+                  }>
+
                       {role.actif ? 'Oui' : 'Non'}
                     </span>
                   </td>
                   <td className="px-2 py-1">
                     <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => setEditRole(role)}
-                      disabled={loading}
-                    >
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => setEditRole(role)}
+                  disabled={loading}>
+
                       Modifier permissions
                     </Button>
                   </td>
                 </tr>
-              ))}
-              {roles.length === 0 && (
-                <tr>
+            )}
+              {roles.length === 0 &&
+            <tr>
                   <td colSpan={4} className="py-4 text-gray-400">
                     Aucun rôle trouvé.
                   </td>
                 </tr>
-              )}
+            }
             </tbody>
           </table>
-        )}
+        }
       </TableContainer>
       <Dialog open={!!editRole} onOpenChange={(v) => !v && setEditRole(null)}>
         <DialogContent className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl shadow-lg p-6 max-w-xl">
@@ -109,15 +110,15 @@ export default function Permissions() {
           <DialogDescription className="sr-only">
             Gestion des permissions
           </DialogDescription>
-          {editRole && (
-            <PermissionsForm
-              role={editRole}
-              onClose={() => setEditRole(null)}
-              onSaved={handlePermissionsSaved}
-            />
-          )}
+          {editRole &&
+          <PermissionsForm
+            role={editRole}
+            onClose={() => setEditRole(null)}
+            onSaved={handlePermissionsSaved} />
+
+          }
         </DialogContent>
       </Dialog>
-    </div>
-  );
+    </div>);
+
 }

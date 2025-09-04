@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
+import supabase from '@/lib/supabase';import { useState, useCallback } from 'react';
+
 import { useAuth } from '@/hooks/useAuth';
 
 export function useGadgets() {
@@ -12,12 +12,12 @@ export function useGadgets() {
     if (!mama_id || !user_id) return [];
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase
-      .from('tableaux_de_bord')
-      .select('liste_gadgets_json')
-      .eq('utilisateur_id', user_id)
-      .eq('mama_id', mama_id)
-      .single();
+    const { data, error } = await supabase.
+    from('tableaux_de_bord').
+    select('liste_gadgets_json').
+    eq('utilisateur_id', user_id).
+    eq('mama_id', mama_id).
+    single();
     setLoading(false);
     if (error) {
       setError(error.message || error);
@@ -34,12 +34,12 @@ export function useGadgets() {
       if (!mama_id || !user_id) return null;
       setLoading(true);
       setError(null);
-      const { error } = await supabase
-        .from('tableaux_de_bord')
-        .upsert(
-          { utilisateur_id: user_id, mama_id, liste_gadgets_json: list },
-          { onConflict: 'utilisateur_id,mama_id' }
-        );
+      const { error } = await supabase.
+      from('tableaux_de_bord').
+      upsert(
+        { utilisateur_id: user_id, mama_id, liste_gadgets_json: list },
+        { onConflict: 'utilisateur_id,mama_id' }
+      );
       setLoading(false);
       if (error) {
         setError(error.message || error);
@@ -56,11 +56,11 @@ export function useGadgets() {
       if (!mama_id) return null;
       setLoading(true);
       setError(null);
-      const { data, error } = await supabase
-        .from('gadgets')
-        .insert([{ ...gadget, mama_id }])
-        .select()
-        .single();
+      const { data, error } = await supabase.
+      from('gadgets').
+      insert([{ ...gadget, mama_id }]).
+      select().
+      single();
       setLoading(false);
       if (error) {
         setError(error.message || error);
@@ -76,13 +76,13 @@ export function useGadgets() {
       if (!id || !mama_id) return null;
       setLoading(true);
       setError(null);
-      const { data, error } = await supabase
-        .from('gadgets')
-        .update(values)
-        .eq('id', id)
-        .eq('mama_id', mama_id)
-        .select()
-        .single();
+      const { data, error } = await supabase.
+      from('gadgets').
+      update(values).
+      eq('id', id).
+      eq('mama_id', mama_id).
+      select().
+      single();
       setLoading(false);
       if (error) {
         setError(error.message || error);
@@ -98,11 +98,11 @@ export function useGadgets() {
       if (!id || !mama_id) return;
       setLoading(true);
       setError(null);
-      const { error } = await supabase
-        .from('gadgets')
-        .delete()
-        .eq('id', id)
-        .eq('mama_id', mama_id);
+      const { error } = await supabase.
+      from('gadgets').
+      delete().
+      eq('id', id).
+      eq('mama_id', mama_id);
       setLoading(false);
       if (error) {
         setError(error.message || error);
@@ -119,6 +119,6 @@ export function useGadgets() {
     saveGadgets,
     addGadget,
     updateGadget,
-    deleteGadget,
+    deleteGadget
   };
 }

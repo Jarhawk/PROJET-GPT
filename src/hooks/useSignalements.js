@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useEffect, useState, useCallback } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 
 export function useSignalements() {
@@ -14,11 +15,11 @@ export function useSignalements() {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from("signalements")
-        .select("*")
-        .eq("mama_id", mama_id)
-        .order("date", { ascending: false });
+      const { data, error } = await supabase.
+      from("signalements").
+      select("*").
+      eq("mama_id", mama_id).
+      order("date", { ascending: false });
 
       if (error) throw error;
       setSignalements(data || []);
@@ -38,16 +39,16 @@ export function useSignalements() {
   const addSignalement = async (newSignalement) => {
     if (!mama_id || authLoading) return;
 
-    const { error } = await supabase
-      .from("signalements")
-      .insert([
-        {
-          ...newSignalement,
-          mama_id,
-          created_by: user_id,
-          date: new Date().toISOString(),
-        },
-      ]);
+    const { error } = await supabase.
+    from("signalements").
+    insert([
+    {
+      ...newSignalement,
+      mama_id,
+      created_by: user_id,
+      date: new Date().toISOString()
+    }]
+    );
 
     if (error) {
       console.error("❌ Erreur ajout signalement:", error.message);
@@ -69,14 +70,14 @@ export function useSignalement(id) {
   useEffect(() => {
     const fetchSignalement = async () => {
       if (!id || !mama_id || authLoading) return;
-      
+
       try {
-        const { data, error } = await supabase
-          .from("signalements")
-          .select("*")
-          .eq("id", id)
-          .eq("mama_id", mama_id)
-          .single();
+        const { data, error } = await supabase.
+        from("signalements").
+        select("*").
+        eq("id", id).
+        eq("mama_id", mama_id).
+        single();
 
         if (error) throw error;
         setSignalement(data);

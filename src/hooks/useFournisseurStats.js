@@ -1,7 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 // src/hooks/useFournisseurStats.js
 
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 
 // Stats d’évolution d’achats (tous fournisseurs ou par fournisseur)
@@ -21,7 +22,7 @@ export function useFournisseurStats() {
     if (!mama_id) return [];
     const { data, error } = await supabase.rpc("stats_achats_fournisseur", {
       mama_id_param: mama_id,
-      fournisseur_id_param: fournisseur_id,
+      fournisseur_id_param: fournisseur_id
     });
     if (error) return [];
     return data || [];

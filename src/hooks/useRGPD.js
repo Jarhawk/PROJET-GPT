@@ -1,5 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { supabase } from '@/lib/supabase';
+import supabase from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 
 export function useRGPD() {
@@ -7,11 +8,11 @@ export function useRGPD() {
 
   async function getUserDataExport(userId = user_id) {
     if (!userId) return null;
-    const { data: profil } = await supabase
-      .from("utilisateurs")
-      .select("id,created_at")
-      .eq("auth_id", userId)
-      .single();
+    const { data: profil } = await supabase.
+    from("utilisateurs").
+    select("id,created_at").
+    eq("auth_id", userId).
+    single();
     return { profil, logs: [] };
   }
 

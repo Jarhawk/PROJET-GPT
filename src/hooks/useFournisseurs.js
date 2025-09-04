@@ -1,7 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 // src/hooks/useFournisseurs.js
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
@@ -18,7 +19,7 @@ function safeQueryClient() {
       invalidateQueries: () => {},
       setQueryData: () => {},
       setQueriesData: () => {},
-      fetchQuery: async () => {},
+      fetchQuery: async () => {}
     };
   }
 }
@@ -34,11 +35,11 @@ export function useFournisseurs() {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase
-      .from('fournisseurs')
-      .select('*')
-      .eq('mama_id', mama_id)
-      .order('nom');
+    const { data, error } = await supabase.
+    from('fournisseurs').
+    select('*').
+    eq('mama_id', mama_id).
+    order('nom');
     setLoading(false);
     if (error) {
       setError(error);
@@ -58,24 +59,24 @@ export function useFournisseurs() {
   async function createFournisseur(fournisseur) {
     if (!mama_id) return;
     const { nom, actif = true, tel, email, contact } = fournisseur;
-    const { data, error } = await supabase
-      .from('fournisseurs')
-      .insert([{ nom, actif, mama_id }])
-      .select()
-      .single();
+    const { data, error } = await supabase.
+    from('fournisseurs').
+    insert([{ nom, actif, mama_id }]).
+    select().
+    single();
     if (!error && data && (tel || email || contact)) {
       await supabase.from('fournisseur_contacts').insert({
         fournisseur_id: data.id,
         mama_id,
         nom: contact,
         email,
-        tel,
+        tel
       });
     }
     if (error) {
       toast.error(error.message);
     } else if (data) {
-      setFournisseurs(prev => [...prev, { ...data, contact: { nom: contact, email, tel } }].sort((a,b)=>a.nom.localeCompare(b.nom)));
+      setFournisseurs((prev) => [...prev, { ...data, contact: { nom: contact, email, tel } }].sort((a, b) => a.nom.localeCompare(b.nom)));
     }
     queryClient.invalidateQueries({ queryKey: ['fournisseurs', mama_id] });
     queryClient.invalidateQueries({ queryKey: ['fournisseurs-autocomplete', mama_id] });
@@ -86,31 +87,31 @@ export function useFournisseurs() {
   async function updateFournisseur(id, updateFields) {
     if (!mama_id) return;
     const { tel, email, contact, ...fields } = updateFields;
-    const { error } = await supabase
-      .from('fournisseurs')
-      .update(fields)
-      .eq('id', id)
-      .eq('mama_id', mama_id);
+    const { error } = await supabase.
+    from('fournisseurs').
+    update(fields).
+    eq('id', id).
+    eq('mama_id', mama_id);
     if (!error && (tel || email || contact)) {
-      await supabase
-        .from('fournisseur_contacts')
-        .upsert(
-          [{ fournisseur_id: id, mama_id, nom: contact, email, tel }],
-          { onConflict: ['fournisseur_id', 'mama_id'] }
-        );
+      await supabase.
+      from('fournisseur_contacts').
+      upsert(
+        [{ fournisseur_id: id, mama_id, nom: contact, email, tel }],
+        { onConflict: ['fournisseur_id', 'mama_id'] }
+      );
     }
     if (!error) {
-      setFournisseurs(prev =>
-        prev
-          .map(f => {
-            if (f.id !== id) return f;
-            const contactObj = { ...f.contact };
-            if (contact !== undefined) contactObj.nom = contact;
-            if (email !== undefined) contactObj.email = email;
-            if (tel !== undefined) contactObj.tel = tel;
-            return { ...f, ...fields, contact: contactObj };
-          })
-          .sort((a, b) => a.nom.localeCompare(b.nom))
+      setFournisseurs((prev) =>
+      prev.
+      map((f) => {
+        if (f.id !== id) return f;
+        const contactObj = { ...f.contact };
+        if (contact !== undefined) contactObj.nom = contact;
+        if (email !== undefined) contactObj.email = email;
+        if (tel !== undefined) contactObj.tel = tel;
+        return { ...f, ...fields, contact: contactObj };
+      }).
+      sort((a, b) => a.nom.localeCompare(b.nom))
       );
     } else {
       toast.error(error.message);
@@ -123,15 +124,15 @@ export function useFournisseurs() {
   // Activer/désactiver un fournisseur
   async function toggleFournisseurActive(id, actif) {
     if (!mama_id) return;
-    const { error } = await supabase
-      .from('fournisseurs')
-      .update({ actif })
-      .eq('id', id)
-      .eq('mama_id', mama_id);
+    const { error } = await supabase.
+    from('fournisseurs').
+    update({ actif }).
+    eq('id', id).
+    eq('mama_id', mama_id);
     if (error) {
       toast.error(error.message);
     } else {
-      setFournisseurs(prev => prev.map(f => (f.id === id ? { ...f, actif } : f)));
+      setFournisseurs((prev) => prev.map((f) => f.id === id ? { ...f, actif } : f));
     }
     queryClient.invalidateQueries({ queryKey: ['fournisseurs', mama_id] });
     queryClient.invalidateQueries({ queryKey: ['fournisseurs-autocomplete', mama_id] });
@@ -140,13 +141,13 @@ export function useFournisseurs() {
 
   // Export Excel
   function exportFournisseursToExcel(fournisseurs = []) {
-    const datas = (fournisseurs || []).map(f => ({
+    const datas = (fournisseurs || []).map((f) => ({
       id: f.id,
       nom: f.nom,
       tel: f.contact?.tel || '',
       contact: f.contact?.nom || '',
       email: f.contact?.email || '',
-      actif: f.actif,
+      actif: f.actif
     }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), 'Fournisseurs');
@@ -174,7 +175,7 @@ export function useFournisseurs() {
     updateFournisseur,
     toggleFournisseurActive,
     exportFournisseursToExcel,
-    importFournisseursFromExcel,
+    importFournisseursFromExcel
   };
 }
 

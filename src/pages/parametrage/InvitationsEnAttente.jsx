@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState, useEffect } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { Button } from "@/components/ui/button";
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -18,43 +19,43 @@ export default function InvitationsEnAttente() {
 
   useEffect(() => {
     if (!mama_id) return;
-    supabase
-      .from("mamas")
-      .select("id, nom")
-      .eq("id", mama_id)
-      .then(({ data }) => setMamas(data || []));
-    supabase
-      .from("roles")
-      .select("*")
-      .eq("mama_id", mama_id)
-      .then(({ data }) => setRoles(data || []));
+    supabase.
+    from("mamas").
+    select("id, nom").
+    eq("id", mama_id).
+    then(({ data }) => setMamas(data || []));
+    supabase.
+    from("roles").
+    select("*").
+    eq("mama_id", mama_id).
+    then(({ data }) => setRoles(data || []));
     setLoading(true);
-    supabase
-      .from("utilisateurs")
-      .select("id, nom, mama_id, role, invite_pending, actif, created_at")
-      .eq("invite_pending", true)
-      .eq("mama_id", mama_id)
-      .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        setInvites(data || []);
-        setLoading(false);
-      });
+    supabase.
+    from("utilisateurs").
+    select("id, nom, mama_id, role, invite_pending, actif, created_at").
+    eq("invite_pending", true).
+    eq("mama_id", mama_id).
+    order("created_at", { ascending: false }).
+    then(({ data }) => {
+      setInvites(data || []);
+      setLoading(false);
+    });
   }, [mama_id]);
 
-  const mamaNom = id => mamas.find(m => m.id === id)?.nom || id;
-  const roleNom = nom => roles.find(r => r.nom === nom)?.nom || nom;
+  const mamaNom = (id) => mamas.find((m) => m.id === id)?.nom || id;
+  const roleNom = (nom) => roles.find((r) => r.nom === nom)?.nom || nom;
 
   const handleResend = async () => {
     toast.error("Impossible de renvoyer l'invitation sans email");
   };
 
   const handleCancel = async (userId) => {
-    await supabase
-      .from("utilisateurs")
-      .delete()
-      .eq("id", userId)
-      .eq("mama_id", mama_id);
-    setInvites(invites => invites.filter(u => u.id !== userId));
+    await supabase.
+    from("utilisateurs").
+    delete().
+    eq("id", userId).
+    eq("mama_id", mama_id);
+    setInvites((invites) => invites.filter((u) => u.id !== userId));
     setConfirmDeleteId(null);
     toast.success("Invitation annulée !");
   };
@@ -79,8 +80,8 @@ export default function InvitationsEnAttente() {
             </tr>
           </thead>
           <tbody>
-            {invites.map(u => (
-              <tr key={u.id}>
+            {invites.map((u) =>
+            <tr key={u.id}>
                 <td>{u.nom}</td>
                 <td>{mamaNom(u.mama_id)}</td>
                 <td>{roleNom(u.role)}</td>
@@ -88,54 +89,54 @@ export default function InvitationsEnAttente() {
                 <td>En attente</td>
                 <td>
                   <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleResend(u)}
-                  >
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleResend(u)}>
+
                     Relancer
                   </Button>
-                  {confirmDeleteId === u.id ? (
-                    <>
+                  {confirmDeleteId === u.id ?
+                <>
                       <Button
-                        size="sm"
-                        variant="destructive"
-                        className="ml-2"
-                        onClick={() => handleCancel(u.id)}
-                      >
+                    size="sm"
+                    variant="destructive"
+                    className="ml-2"
+                    onClick={() => handleCancel(u.id)}>
+
                         Confirmer
                       </Button>
                       <Button
-                        size="sm"
-                        variant="secondary"
-                        className="ml-2"
-                        onClick={() => setConfirmDeleteId(null)}
-                      >
+                    size="sm"
+                    variant="secondary"
+                    className="ml-2"
+                    onClick={() => setConfirmDeleteId(null)}>
+
                         Annuler
                       </Button>
-                    </>
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      className="ml-2"
-                      onClick={() => setConfirmDeleteId(u.id)}
-                    >
+                    </> :
+
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  className="ml-2"
+                  onClick={() => setConfirmDeleteId(u.id)}>
+
                       Annuler
                     </Button>
-                  )}
+                }
                 </td>
               </tr>
-            ))}
-            {invites.length === 0 && (
-              <tr>
+            )}
+            {invites.length === 0 &&
+            <tr>
                 <td colSpan={6} className="py-4 text-gray-500">
                   Aucune invitation en attente
                 </td>
               </tr>
-            )}
+            }
           </tbody>
         </table>
       </div>
-    </div>
-  );
+    </div>);
+
 }

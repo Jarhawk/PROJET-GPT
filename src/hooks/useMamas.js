@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 import * as XLSX from "xlsx";
 import { safeImportXLSX } from "@/lib/xlsx/safeImportXLSX";
@@ -32,9 +33,9 @@ export function useMamas() {
     if (role !== "superadmin") return { error: "Action non autorisée" };
     setLoading(true);
     setError(null);
-    const { error } = await supabase
-      .from("mamas")
-      .insert([mama]);
+    const { error } = await supabase.
+    from("mamas").
+    insert([mama]);
     if (error) setError(error);
     setLoading(false);
     await fetchMamas();
@@ -47,10 +48,10 @@ export function useMamas() {
     }
     setLoading(true);
     setError(null);
-    const { error } = await supabase
-      .from("mamas")
-      .update(updateFields)
-      .eq("id", id);
+    const { error } = await supabase.
+    from("mamas").
+    update(updateFields).
+    eq("id", id);
     if (error) setError(error);
     setLoading(false);
     await fetchMamas();
@@ -63,10 +64,10 @@ export function useMamas() {
     }
     setLoading(true);
     setError(null);
-    const { error } = await supabase
-      .from("mamas")
-      .update({ actif })
-      .eq("id", id);
+    const { error } = await supabase.
+    from("mamas").
+    update({ actif }).
+    eq("id", id);
     if (error) setError(error);
     setLoading(false);
     await fetchMamas();
@@ -76,11 +77,11 @@ export function useMamas() {
 
   // 5. Export Excel
   function exportMamasToExcel() {
-    const datas = (mamas || []).map(m => ({
+    const datas = (mamas || []).map((m) => ({
       id: m.id,
       nom: m.nom,
       ville: m.ville,
-      email: m.email,
+      email: m.email
     }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Mamas");
@@ -112,6 +113,6 @@ export function useMamas() {
     updateMama,
     toggleMamaActive,
     exportMamasToExcel,
-    importMamasFromExcel,
+    importMamasFromExcel
   };
 }

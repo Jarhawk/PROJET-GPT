@@ -1,7 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useCallback, useMemo } from "react";
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
+
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { deduceEnabledModulesFromRights } from '@/lib/access';
@@ -14,7 +15,7 @@ function safeQueryClient() {
     return {
       invalidateQueries: () => {},
       setQueryData: () => {},
-      fetchQuery: async () => {},
+      fetchQuery: async () => {}
     };
   }
 }
@@ -30,7 +31,7 @@ const defaults = {
   monnaie: "€",
   timezone: "Europe/Paris",
   rgpd_text: "",
-  mentions_legales: "",
+  mentions_legales: ""
 };
 
 const localEnabledModules = {};
@@ -47,32 +48,32 @@ export default function useMamaSettings() {
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
     queryFn: async ({ signal }) => {
-      const { data, error } = await supabase
-        .from('mamas')
-        .select(
-          'logo_url, primary_color, secondary_color, email_envoi, email_alertes, dark_mode, langue, monnaie, timezone, rgpd_text, mentions_legales'
-        )
-        .eq('id', mamaId)
-        .single()
-        .abortSignal(signal);
+      const { data, error } = await supabase.
+      from('mamas').
+      select(
+        'logo_url, primary_color, secondary_color, email_envoi, email_alertes, dark_mode, langue, monnaie, timezone, rgpd_text, mentions_legales'
+      ).
+      eq('id', mamaId).
+      single().
+      abortSignal(signal);
       if (error) throw error;
       return data;
-    },
+    }
   });
 
   const updateMamaSettings = useCallback(
     async (fields) => {
       if (!mamaId) return { error: 'missing mama_id' };
-      const { data, error } = await supabase
-        .from('mamas')
-        .update(fields)
-        .eq('id', mamaId)
-        .select()
-        .single();
+      const { data, error } = await supabase.
+      from('mamas').
+      update(fields).
+      eq('id', mamaId).
+      select().
+      single();
       if (!error && data) {
         queryClient.setQueryData(['mama-settings', mamaId], (old) => ({
           ...(old || {}),
-          ...data,
+          ...data
         }));
       }
       return { data, error };
@@ -105,6 +106,6 @@ export default function useMamaSettings() {
     featureFlags,
     ok: !query.error,
     fetchMamaSettings: query.refetch,
-    updateMamaSettings,
+    updateMamaSettings
   };
 }

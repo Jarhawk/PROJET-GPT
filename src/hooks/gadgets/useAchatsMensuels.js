@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import supabase from '@/lib/supabase';import { useEffect, useState } from 'react';
+
 import { useAuth } from '@/hooks/useAuth';
 
 export default function useAchatsMensuels() {
@@ -16,11 +16,11 @@ export default function useAchatsMensuels() {
       setLoading(true);
       setError(null);
       try {
-        const { data, error } = await supabase
-          .from('v_achats_mensuels')
-          .select('mois, montant')
-          .eq('mama_id', mama_id)
-          .order('mois', { ascending: true });
+        const { data, error } = await supabase.
+        from('v_achats_mensuels').
+        select('mois, montant').
+        eq('mama_id', mama_id).
+        order('mois', { ascending: true });
 
         if (error) throw error;
 

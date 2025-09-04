@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { getSupabaseClient } from '@/lib/supabase';
+import supabase from '@/lib/supabase';import { useEffect, useState } from 'react';
+
 import { useAuth } from '@/hooks/useAuth';
 import useDebounce from '@/hooks/useDebounce';
 
@@ -26,16 +26,16 @@ export function useFournisseursAutocomplete({ term = '', limit = 20 } = {}) {
     const run = async () => {
       setLoading(true);
       setError(null);
-      const supabase = getSupabaseClient();
+      const supabase = supabase();
       try {
-        let req = supabase
-          .from('fournisseurs')
-          .select('id, nom, ville')
-          .eq('mama_id', mama_id)
-          .eq('actif', true)
-          .order('nom', { ascending: true })
-          .limit(limit)
-          .ilike('nom', `%${s}%`);
+        let req = supabase.
+        from('fournisseurs').
+        select('id, nom, ville').
+        eq('mama_id', mama_id).
+        eq('actif', true).
+        order('nom', { ascending: true }).
+        limit(limit).
+        ilike('nom', `%${s}%`);
         const { data, error } = await req;
         if (error) throw error;
         if (!aborted) setOptions(data || []);
@@ -60,14 +60,14 @@ export function useFournisseursAutocomplete({ term = '', limit = 20 } = {}) {
 
 export async function searchFournisseurs(mamaId, term = '', limit = 20) {
   if (!mamaId) return [];
-  const supabase = getSupabaseClient();
-  let req = supabase
-    .from('fournisseurs')
-    .select('id, nom, ville')
-    .eq('mama_id', mamaId)
-    .eq('actif', true)
-    .order('nom', { ascending: true })
-    .limit(limit);
+  const supabase = supabase();
+  let req = supabase.
+  from('fournisseurs').
+  select('id, nom, ville').
+  eq('mama_id', mamaId).
+  eq('actif', true).
+  order('nom', { ascending: true }).
+  limit(limit);
   if (term && term.trim()) req = req.ilike('nom', `%${term.trim()}%`);
   const { data, error } = await req;
   if (error) throw error;

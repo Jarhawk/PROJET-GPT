@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 import { useAuditLog } from "@/hooks/useAuditLog";
 import * as XLSX from "xlsx";
@@ -39,9 +40,9 @@ export function useCostCenters() {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { error } = await supabase
-      .from("centres_de_cout")
-      .insert([{ ...values, mama_id }]);
+    const { error } = await supabase.
+    from("centres_de_cout").
+    insert([{ ...values, mama_id }]);
     if (error) setError(error);
     setLoading(false);
     await fetchCostCenters();
@@ -52,11 +53,11 @@ export function useCostCenters() {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { error } = await supabase
-      .from("centres_de_cout")
-      .update(values)
-      .eq("id", id)
-      .eq("mama_id", mama_id);
+    const { error } = await supabase.
+    from("centres_de_cout").
+    update(values).
+    eq("id", id).
+    eq("mama_id", mama_id);
     if (error) setError(error);
     setLoading(false);
     await fetchCostCenters();
@@ -67,11 +68,11 @@ export function useCostCenters() {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { error } = await supabase
-      .from("centres_de_cout")
-      .update({ actif: false })
-      .eq("id", id)
-      .eq("mama_id", mama_id);
+    const { error } = await supabase.
+    from("centres_de_cout").
+    update({ actif: false }).
+    eq("id", id).
+    eq("mama_id", mama_id);
     if (error) setError(error);
     setLoading(false);
     await fetchCostCenters();
@@ -79,9 +80,9 @@ export function useCostCenters() {
   }
 
   function exportCostCentersToExcel() {
-    const datas = (costCenters || []).map(c => ({
+    const datas = (costCenters || []).map((c) => ({
       nom: c.nom,
-      actif: c.actif,
+      actif: c.actif
     }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "CostCenters");
@@ -111,6 +112,6 @@ export function useCostCenters() {
     updateCostCenter,
     deleteCostCenter,
     exportCostCentersToExcel,
-    importCostCentersFromExcel: importCostCentersFromExcelWithState,
+    importCostCentersFromExcel: importCostCentersFromExcelWithState
   };
 }

@@ -1,7 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState, useEffect } from "react";
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/lib/supabase';
+
 import { toast } from 'sonner';
 
 export default function ParametresCommandes() {
@@ -11,37 +12,37 @@ export default function ParametresCommandes() {
     mentions_haut: "",
     mentions_bas: "",
     logo: "",
-    footer_pdf: "",
+    footer_pdf: ""
   });
 
   useEffect(() => {
     if (!mama_id) return;
-    supabase
-      .from("parametres_commandes")
-      .select("*")
-      .eq("mama_id", mama_id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data) setForm({
-          adresse_livraison: data.adresse_livraison || "",
-          mentions_haut: data.mentions_haut || "",
-          mentions_bas: data.mentions_bas || "",
-          logo: data.logo || "",
-          footer_pdf: data.footer_pdf || "",
-        });
+    supabase.
+    from("parametres_commandes").
+    select("*").
+    eq("mama_id", mama_id).
+    maybeSingle().
+    then(({ data }) => {
+      if (data) setForm({
+        adresse_livraison: data.adresse_livraison || "",
+        mentions_haut: data.mentions_haut || "",
+        mentions_bas: data.mentions_bas || "",
+        logo: data.logo || "",
+        footer_pdf: data.footer_pdf || ""
       });
+    });
   }, [mama_id]);
 
-  const handleChange = (field, value) => setForm(f => ({ ...f, [field]: value }));
+  const handleChange = (field, value) => setForm((f) => ({ ...f, [field]: value }));
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!mama_id) return;
-    const { error } = await supabase
-      .from("parametres_commandes")
-      .upsert({ ...form, mama_id });
-    if (error) toast.error(error.message);
-    else toast.success("Paramètres enregistrés");
+    const { error } = await supabase.
+    from("parametres_commandes").
+    upsert({ ...form, mama_id });
+    if (error) toast.error(error.message);else
+    toast.success("Paramètres enregistrés");
   };
 
   return (
@@ -52,8 +53,8 @@ export default function ParametresCommandes() {
           aria-label="Adresse de livraison"
           className="input"
           value={form.adresse_livraison}
-          onChange={e => handleChange("adresse_livraison", e.target.value)}
-        />
+          onChange={(e) => handleChange("adresse_livraison", e.target.value)} />
+
       </div>
       <div>
         <label>Mentions PDF haut</label>
@@ -61,8 +62,8 @@ export default function ParametresCommandes() {
           aria-label="Mentions PDF haut"
           className="input"
           value={form.mentions_haut}
-          onChange={e => handleChange("mentions_haut", e.target.value)}
-        />
+          onChange={(e) => handleChange("mentions_haut", e.target.value)} />
+
       </div>
       <div>
         <label>Mentions PDF bas</label>
@@ -70,8 +71,8 @@ export default function ParametresCommandes() {
           aria-label="Mentions PDF bas"
           className="input"
           value={form.mentions_bas}
-          onChange={e => handleChange("mentions_bas", e.target.value)}
-        />
+          onChange={(e) => handleChange("mentions_bas", e.target.value)} />
+
       </div>
       <div>
         <label>Logo</label>
@@ -79,8 +80,8 @@ export default function ParametresCommandes() {
           aria-label="Logo"
           className="input"
           value={form.logo}
-          onChange={e => handleChange("logo", e.target.value)}
-        />
+          onChange={(e) => handleChange("logo", e.target.value)} />
+
       </div>
       <div>
         <label>Footer PDF</label>
@@ -88,10 +89,10 @@ export default function ParametresCommandes() {
           aria-label="Footer PDF"
           className="input"
           value={form.footer_pdf}
-          onChange={e => handleChange("footer_pdf", e.target.value)}
-        />
+          onChange={(e) => handleChange("footer_pdf", e.target.value)} />
+
       </div>
       <button type="submit">Enregistrer</button>
-    </form>
-  );
+    </form>);
+
 }

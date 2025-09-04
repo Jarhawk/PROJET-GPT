@@ -1,7 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { supabase } from '@/lib/supabase';
+
 import LegalLayout from "@/layout/LegalLayout";
 
 export default function Confidentialite() {
@@ -12,11 +13,11 @@ export default function Confidentialite() {
   useEffect(() => {
     async function fetchText() {
       if (mamaId) {
-        const { data } = await supabase
-          .from("mamas")
-          .select("rgpd_text")
-          .eq("id", mamaId)
-          .single();
+        const { data } = await supabase.
+        from("mamas").
+        select("rgpd_text").
+        eq("id", mamaId).
+        single();
         if (data?.rgpd_text) {
           setText(data.rgpd_text);
           return;
@@ -31,6 +32,6 @@ export default function Confidentialite() {
   return (
     <LegalLayout title="Politique de confidentialité" description="Politique de confidentialité MamaStock">
       <div className="p-8 max-w-3xl mx-auto prose prose-invert whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: text }} />
-    </LegalLayout>
-  );
+    </LegalLayout>);
+
 }

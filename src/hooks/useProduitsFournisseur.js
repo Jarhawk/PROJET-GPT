@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState, useCallback } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 export function useProduitsFournisseur() {
   const { mama_id } = useAuth();
@@ -18,13 +19,13 @@ export function useProduitsFournisseur() {
       }
       setLoading(true);
       setError(null);
-      const { data, error } = await supabase
-        .from("fournisseur_produits")
-        .select(
-          "*, produit:produits!fournisseur_produits_produit_id_fkey(id, nom, unite_id, unite:unite_id (nom), famille:familles!fk_produits_famille(id, nom))"
-        )
-        .eq("fournisseur_id", fournisseur_id)
-        .eq("mama_id", mama_id);
+      const { data, error } = await supabase.
+      from("fournisseur_produits").
+      select(
+        "*, produit:produits!fournisseur_produits_produit_id_fkey(id, nom, unite_id, unite:unite_id (nom), famille:familles!fk_produits_famille(id, nom))"
+      ).
+      eq("fournisseur_id", fournisseur_id).
+      eq("mama_id", mama_id);
       setProducts(data || []);
       setLoading(false);
       if (error) setError(error);
@@ -38,13 +39,13 @@ export function useProduitsFournisseur() {
     async (fournisseur_id) => {
       if (!mama_id || !fournisseur_id) return [];
       if (cache[fournisseur_id]) return cache[fournisseur_id];
-      const { data } = await supabase
-        .from("fournisseur_produits")
-        .select(
-          "*, produit:produits!fournisseur_produits_produit_id_fkey(id, nom, unite_id, unite:unite_id (nom), famille:familles!fk_produits_famille(id, nom))"
-        )
-        .eq("fournisseur_id", fournisseur_id)
-        .eq("mama_id", mama_id);
+      const { data } = await supabase.
+      from("fournisseur_produits").
+      select(
+        "*, produit:produits!fournisseur_produits_produit_id_fkey(id, nom, unite_id, unite:unite_id (nom), famille:familles!fk_produits_famille(id, nom))"
+      ).
+      eq("fournisseur_id", fournisseur_id).
+      eq("mama_id", mama_id);
       setCache((c) => ({ ...c, [fournisseur_id]: data || [] }));
       return data || [];
     },
@@ -54,11 +55,11 @@ export function useProduitsFournisseur() {
   const countProduitsDuFournisseur = useCallback(
     async (fournisseur_id) => {
       if (!mama_id || !fournisseur_id) return 0;
-      const { count } = await supabase
-        .from("fournisseur_produits")
-        .select("id", { count: "exact", head: true })
-        .eq("fournisseur_id", fournisseur_id)
-        .eq("mama_id", mama_id);
+      const { count } = await supabase.
+      from("fournisseur_produits").
+      select("id", { count: "exact", head: true }).
+      eq("fournisseur_id", fournisseur_id).
+      eq("mama_id", mama_id);
       return count || 0;
     },
     [mama_id]
@@ -67,6 +68,6 @@ export function useProduitsFournisseur() {
   return {
     useProduitsDuFournisseur,
     getProduitsDuFournisseur,
-    countProduitsDuFournisseur,
+    countProduitsDuFournisseur
   };
 }

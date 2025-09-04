@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 
 // Hook managing invoice line items (facture_lignes)
@@ -15,14 +16,14 @@ export function useInvoiceItems() {
     if (!invoiceId || !mama_id) return [];
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase
-      .from("facture_lignes")
-      .select(
-        "*, produit:produits!facture_lignes_produit_id_fkey(id, nom, unite_id, unite:unite_id (nom), famille:familles(nom))"
-      )
-      .eq("facture_id", invoiceId)
-      .eq("mama_id", mama_id)
-      .order("id");
+    const { data, error } = await supabase.
+    from("facture_lignes").
+    select(
+      "*, produit:produits!facture_lignes_produit_id_fkey(id, nom, unite_id, unite:unite_id (nom), famille:familles(nom))"
+    ).
+    eq("facture_id", invoiceId).
+    eq("mama_id", mama_id).
+    order("id");
     setItems(data || []);
     setLoading(false);
     if (error) setError(error);
@@ -32,14 +33,14 @@ export function useInvoiceItems() {
   // Retrieve a single item by primary key
   async function fetchItemById(id) {
     if (!id || !mama_id) return null;
-    const { data, error } = await supabase
-      .from("facture_lignes")
-      .select(
-        "*, produit:produits!facture_lignes_produit_id_fkey(id, nom, unite_id, unite:unite_id (nom), famille:familles(nom))"
-      )
-      .eq("id", id)
-      .eq("mama_id", mama_id)
-      .single();
+    const { data, error } = await supabase.
+    from("facture_lignes").
+    select(
+      "*, produit:produits!facture_lignes_produit_id_fkey(id, nom, unite_id, unite:unite_id (nom), famille:familles(nom))"
+    ).
+    eq("id", id).
+    eq("mama_id", mama_id).
+    single();
     if (error) {
       setError(error);
       return null;
@@ -55,11 +56,11 @@ export function useInvoiceItems() {
       ...rest,
       produit_id,
       facture_id: invoiceId,
-      mama_id,
+      mama_id
     };
-    const { data, error } = await supabase
-      .from("facture_lignes")
-      .insert([payload]);
+    const { data, error } = await supabase.
+    from("facture_lignes").
+    insert([payload]);
     if (error) setError(error);
     return { data, error };
   }
@@ -70,13 +71,13 @@ export function useInvoiceItems() {
     const { produit_id, ...rest } = fields || {};
     const payload = {
       ...rest,
-      ...(produit_id !== undefined && { produit_id }),
+      ...(produit_id !== undefined && { produit_id })
     };
-    const { data, error } = await supabase
-      .from("facture_lignes")
-      .update(payload)
-      .eq("id", id)
-      .eq("mama_id", mama_id);
+    const { data, error } = await supabase.
+    from("facture_lignes").
+    update(payload).
+    eq("id", id).
+    eq("mama_id", mama_id);
     if (error) setError(error);
     return { data, error };
   }
@@ -84,11 +85,11 @@ export function useInvoiceItems() {
   // Delete item by id
   async function deleteItem(id) {
     if (!id || !mama_id) return { error: "no mama_id" };
-    const { error } = await supabase
-      .from("facture_lignes")
-      .eq("id", id)
-      .eq("mama_id", mama_id)
-      .delete();
+    const { error } = await supabase.
+    from("facture_lignes").
+    eq("id", id).
+    eq("mama_id", mama_id).
+    delete();
     if (error) setError(error);
     return { error };
   }
@@ -101,6 +102,6 @@ export function useInvoiceItems() {
     fetchItemById,
     addItem,
     updateItem,
-    deleteItem,
+    deleteItem
   };
 }

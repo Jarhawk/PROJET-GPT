@@ -1,8 +1,9 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from '@/hooks/useAuth';
 import { useLogs } from "@/hooks/useLogs";
-import { supabase } from '@/lib/supabase';
+
 import GlassCard from "@/components/ui/GlassCard";
 import TableContainer from "@/components/ui/TableContainer";
 import { Input } from "@/components/ui/input";
@@ -12,8 +13,8 @@ import { Select } from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-} from "@/components/ui/SmartDialog";
+  DialogTitle } from
+"@/components/ui/SmartDialog";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 const MODULES = ["produits", "factures", "inventaire"];
@@ -31,7 +32,7 @@ export default function Rapports() {
       module: filters.module || undefined,
       type: filters.type || undefined,
       start: filters.start || undefined,
-      end: filters.end || undefined,
+      end: filters.end || undefined
     });
   }, [fetchRapports, filters]);
 
@@ -52,7 +53,7 @@ export default function Rapports() {
       type: gen.type,
       periode_debut: gen.start || null,
       periode_fin: gen.end || null,
-      chemin_fichier: "",
+      chemin_fichier: ""
     });
     setOpen(false);
     load();
@@ -68,19 +69,19 @@ export default function Rapports() {
         <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-2">
           <Select value={filters.module} onChange={(e) => setFilters({ ...filters, module: e.target.value })}>
             <option value="">Module</option>
-            {MODULES.map((m) => (
-              <option key={m} value={m}>
+            {MODULES.map((m) =>
+            <option key={m} value={m}>
                 {m}
               </option>
-            ))}
+            )}
           </Select>
           <Select value={filters.type} onChange={(e) => setFilters({ ...filters, type: e.target.value })}>
             <option value="">Format</option>
-            {FORMATS.map((f) => (
-              <option key={f} value={f}>
+            {FORMATS.map((f) =>
+            <option key={f} value={f}>
                 {f}
               </option>
-            ))}
+            )}
           </Select>
           <Input type="date" value={filters.start} onChange={(e) => setFilters({ ...filters, start: e.target.value })} />
           <Input type="date" value={filters.end} onChange={(e) => setFilters({ ...filters, end: e.target.value })} />
@@ -102,8 +103,8 @@ export default function Rapports() {
             </tr>
           </thead>
           <tbody>
-            {rapports.map((r) => (
-              <tr key={r.id}>
+            {rapports.map((r) =>
+            <tr key={r.id}>
                 <td className="border px-2 py-1">{r.module}</td>
                 <td className="border px-2 py-1">{r.type}</td>
                 <td className="border px-2 py-1">
@@ -118,7 +119,7 @@ export default function Rapports() {
                   </Button>
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </TableContainer>
@@ -130,18 +131,18 @@ export default function Rapports() {
           <form onSubmit={handleGenerate} className="flex flex-col gap-2">
             <Select value={gen.module} onChange={(e) => setGen({ ...gen, module: e.target.value })}>
               <option value="">Module</option>
-              {MODULES.map((m) => (
-                <option key={m} value={m}>
+              {MODULES.map((m) =>
+              <option key={m} value={m}>
                   {m}
                 </option>
-              ))}
+              )}
             </Select>
             <Select value={gen.type} onChange={(e) => setGen({ ...gen, type: e.target.value })}>
-              {FORMATS.map((f) => (
-                <option key={f} value={f}>
+              {FORMATS.map((f) =>
+              <option key={f} value={f}>
                   {f}
                 </option>
-              ))}
+              )}
             </Select>
             <Input type="date" value={gen.start} onChange={(e) => setGen({ ...gen, start: e.target.value })} />
             <Input type="date" value={gen.end} onChange={(e) => setGen({ ...gen, end: e.target.value })} />
@@ -149,6 +150,6 @@ export default function Rapports() {
           </form>
         </DialogContent>
       </Dialog>
-    </div>
-  );
+    </div>);
+
 }

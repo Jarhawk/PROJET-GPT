@@ -1,20 +1,20 @@
-import { useEffect, useRef, useState } from "react";
+import supabase from '@/lib/supabase';import { useEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogTitle,
-  DialogDescription,
-} from "@/components/ui/SmartDialog";
+  DialogDescription } from
+"@/components/ui/SmartDialog";
 import ImportPreviewTable from "@/components/ui/ImportPreviewTable";
 import {
   parseProduitsFile,
   validateProduitRow,
-  downloadProduitsTemplate,
-} from "@/utils/excelUtils";
+  downloadProduitsTemplate } from
+"@/utils/excelUtils";
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
-import { supabase } from '@/lib/supabase';
+
 
 export default function ModalImportProduits({ open, onClose, onSuccess }) {
   const { mama_id } = useAuth();
@@ -25,7 +25,7 @@ export default function ModalImportProduits({ open, onClose, onSuccess }) {
     familles: [],
     sousFamilles: [],
     unites: [],
-    zones: [],
+    zones: []
   });
   const [importing, setImporting] = useState(false);
   const [ignoredMessages, setIgnoredMessages] = useState([]);
@@ -40,7 +40,7 @@ export default function ModalImportProduits({ open, onClose, onSuccess }) {
       familles: parsed.familles,
       sousFamilles: parsed.sousFamilles,
       unites: parsed.unites,
-      zones: parsed.zones,
+      zones: parsed.zones
     });
     if (fileRef.current) fileRef.current.value = "";
   }
@@ -52,24 +52,24 @@ export default function ModalImportProduits({ open, onClose, onSuccess }) {
     const errors = [];
     if (row.errors?.nom) errors.push("Nom manquant");
     if (row.errors?.famille_nom)
-      errors.push(`Famille '${row.famille_nom}' introuvable.`);
+    errors.push(`Famille '${row.famille_nom}' introuvable.`);
     if (row.errors?.sous_famille_nom)
-      errors.push(`Sous-famille '${row.sous_famille_nom}' introuvable.`);
+    errors.push(`Sous-famille '${row.sous_famille_nom}' introuvable.`);
     if (row.errors?.unite_nom)
-      errors.push(`Unité '${row.unite_nom}' introuvable.`);
+    errors.push(`Unité '${row.unite_nom}' introuvable.`);
     if (row.errors?.zone_stock_nom)
-      errors.push(`Zone stock '${row.zone_stock_nom}' introuvable.`);
+    errors.push(`Zone stock '${row.zone_stock_nom}' introuvable.`);
     if (row.errors?.fournisseur_id)
-      errors.push(`Fournisseur '${row.fournisseur_id}' inconnu.`);
+    errors.push(`Fournisseur '${row.fournisseur_id}' inconnu.`);
     return errors.join(", ");
   }
 
   useEffect(() => {
-    const msgs = rows
-      .map((r, idx) =>
-        r.status === "error" ? `Ligne ${idx + 1} : ${formatRowErrors(r)}` : null
-      )
-      .filter(Boolean);
+    const msgs = rows.
+    map((r, idx) =>
+    r.status === "error" ? `Ligne ${idx + 1} : ${formatRowErrors(r)}` : null
+    ).
+    filter(Boolean);
     setIgnoredMessages(msgs);
   }, [rows]);
 
@@ -87,7 +87,7 @@ export default function ModalImportProduits({ open, onClose, onSuccess }) {
           sous_famille_id: row.sous_famille_id || null,
           code: row.code || null,
           allergenes: row.allergenes || null,
-          mama_id,
+          mama_id
         });
       } else {
         const reason = formatRowErrors(row) || "données invalides";
@@ -96,9 +96,9 @@ export default function ModalImportProduits({ open, onClose, onSuccess }) {
     });
     if (!produits_valides.length) return;
     setImporting(true);
-    const { error } = await supabase
-      .from("produits")
-      .insert(produits_valides);
+    const { error } = await supabase.
+    from("produits").
+    insert(produits_valides);
     if (error) {
       console.error(error);
       toast.error("Erreur d'insertion");
@@ -112,7 +112,7 @@ export default function ModalImportProduits({ open, onClose, onSuccess }) {
   }
 
   function handleUpdate(newRows) {
-    setRows(newRows.map((r) => (maps ? validateProduitRow(r, maps) : r)));
+    setRows(newRows.map((r) => maps ? validateProduitRow(r, maps) : r));
   }
 
   return (
@@ -133,10 +133,10 @@ export default function ModalImportProduits({ open, onClose, onSuccess }) {
             accept=".xlsx,.csv"
             ref={fileRef}
             onChange={handleFileChange}
-            className="block"
-          />
-          {rows.length > 0 ? (
-            <>
+            className="block" />
+
+          {rows.length > 0 ?
+          <>
               <div className="flex justify-between my-2 text-sm">
                 <span>{rows.length} lignes chargées</span>
                 <span>
@@ -144,36 +144,36 @@ export default function ModalImportProduits({ open, onClose, onSuccess }) {
                 </span>
               </div>
               <div
-                className={`${
-                  rows.length > 20 ? "max-h-[500px] overflow-y-auto" : ""
-                } border rounded`}
-              >
+              className={`${
+              rows.length > 20 ? "max-h-[500px] overflow-y-auto" : ""} border rounded`
+              }>
+
                 <ImportPreviewTable
-                  rows={rows}
-                  onUpdate={handleUpdate}
-                  maps={maps}
-                  reference={reference}
-                />
+                rows={rows}
+                onUpdate={handleUpdate}
+                maps={maps}
+                reference={reference} />
+
               </div>
-              {ignoredMessages.map((msg, i) => (
-                <p key={i} className="text-xs text-red-600">
+              {ignoredMessages.map((msg, i) =>
+            <p key={i} className="text-xs text-red-600">
                   {msg}
                 </p>
-              ))}
+            )}
               <Button
-                disabled={validCount === 0 || importing}
-                onClick={handleImport}
-              >
+              disabled={validCount === 0 || importing}
+              onClick={handleImport}>
+
                 Valider l'import
               </Button>
-            </>
-          ) : (
-            <p className="text-sm text-center text-muted-foreground">
+            </> :
+
+          <p className="text-sm text-center text-muted-foreground">
               Aucune ligne importée
             </p>
-          )}
+          }
         </div>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>);
+
 }

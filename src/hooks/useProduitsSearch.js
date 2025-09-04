@@ -1,7 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 import useDebounce from '@/hooks/useDebounce';
-import { supabase } from '@/lib/supabase';
+
 import { getQueryClient } from '@/lib/react-query';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -12,15 +13,15 @@ function normalize(list = []) {
     // unite_id est nécessaire pour hydrater l'unité dans les formulaires
     unite_id: p.unite_id ?? null,
     tva: p.tva ?? null,
-    zone_id: p.zone_stock_id ?? null,
+    zone_id: p.zone_stock_id ?? null
   }));
 }
 
 export function useProduitsSearch(
-  term = '',
-  mamaIdParam,
-  { enabled = true, debounce = 300, page = 1, pageSize = 20 } = {}
-) {
+term = '',
+mamaIdParam,
+{ enabled = true, debounce = 300, page = 1, pageSize = 20 } = {})
+{
   const { mama_id: authMamaId } = useAuth();
   const mamaId = mamaIdParam || authMamaId;
   const debounced = useDebounce(term, debounce);
@@ -35,21 +36,21 @@ export function useProduitsSearch(
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
       try {
-        const { data, count, error } = await supabase
-          .from('produits')
-          .select('id, nom, unite_id, tva, zone_stock_id', { count: 'exact' })
-          .eq('mama_id', mamaId)
-          .eq('actif', true)
-          .ilike('nom', `%${q}%`)
-          .order('nom', { ascending: true })
-          .range(from, to);
+        const { data, count, error } = await supabase.
+        from('produits').
+        select('id, nom, unite_id, tva, zone_stock_id', { count: 'exact' }).
+        eq('mama_id', mamaId).
+        eq('actif', true).
+        ilike('nom', `%${q}%`).
+        order('nom', { ascending: true }).
+        range(from, to);
         if (error) throw error;
         return { rows: normalize(data), total: count || 0 };
       } catch (err) {
         console.warn('[useProduitsSearch] produits query failed', err);
         return { rows: [], total: 0 };
       }
-    },
+    }
   }, getQueryClient());
 
   return {
@@ -58,7 +59,7 @@ export function useProduitsSearch(
     page,
     pageSize,
     isLoading: query.isLoading,
-    error: query.error,
+    error: query.error
   };
 }
 

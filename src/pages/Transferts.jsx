@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState, useEffect } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import * as XLSX from "xlsx";
@@ -10,8 +11,8 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogTrigger,
-  DialogContent,
-} from "@/components/ui/SmartDialog";
+  DialogContent } from
+"@/components/ui/SmartDialog";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import GlassCard from "@/components/ui/GlassCard";
 import TableContainer from "@/components/ui/TableContainer";
@@ -22,8 +23,8 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  Legend,
-} from "recharts";
+  Legend } from
+"recharts";
 
 export default function Transferts() {
   const { isAuthenticated, mama_id, user_id, loading: authLoading } = useAuth();
@@ -38,7 +39,7 @@ export default function Transferts() {
     quantite: 0,
     zone_depart: "",
     zone_arrivee: "",
-    motif: "",
+    motif: ""
   });
   const [savingTf, setSavingTf] = useState(false);
   const [timeline, setTimeline] = useState([]);
@@ -46,52 +47,52 @@ export default function Transferts() {
 
   useEffect(() => {
     if (!mama_id) return;
-    supabase
-      .from("produits")
-      .select(
-        "id, nom, pmp, famille_id, sous_famille_id, famille:familles!fk_produits_famille(nom), sous_famille:sous_familles!fk_produits_sous_famille(nom)"
-      )
-      .eq("mama_id", mama_id)
-      .then(({ data }) => setProduits(data || []));
-    supabase
-      .from("inventaires")
-      .select("zone")
-      .eq("mama_id", mama_id)
-      .then(({ data }) => {
-        const uniques = [
-          ...new Set((data || []).map((z) => z.zone).filter(Boolean)),
-        ];
-        setZones(uniques);
-      });
+    supabase.
+    from("produits").
+    select(
+      "id, nom, pmp, famille_id, sous_famille_id, famille:familles!fk_produits_famille(nom), sous_famille:sous_familles!fk_produits_sous_famille(nom)"
+    ).
+    eq("mama_id", mama_id).
+    then(({ data }) => setProduits(data || []));
+    supabase.
+    from("inventaires").
+    select("zone").
+    eq("mama_id", mama_id).
+    then(({ data }) => {
+      const uniques = [
+      ...new Set((data || []).map((z) => z.zone).filter(Boolean))];
+
+      setZones(uniques);
+    });
   }, [mama_id]);
 
   useEffect(() => {
     if (!mama_id || !periode.debut || !periode.fin) return;
-    supabase
-      .from("transferts")
-      .select("*")
-      .eq("mama_id", mama_id)
-      .gte("date_transfert", periode.debut)
-      .lte("date_transfert", periode.fin)
-      .order("date_transfert", { ascending: false })
-      .then(({ data }) => setTransferts(data || []));
+    supabase.
+    from("transferts").
+    select("*").
+    eq("mama_id", mama_id).
+    gte("date_transfert", periode.debut).
+    lte("date_transfert", periode.fin).
+    order("date_transfert", { ascending: false }).
+    then(({ data }) => setTransferts(data || []));
   }, [mama_id, periode]);
 
   // Jointure produit, calcul coût €
-  const filtered = transferts
-    .map((t) => {
-      const prod = produits.find((p) => p.id === t.produit_id) || {};
-      const prix = prod.pmp || 0;
-      const cout = Math.round(t.quantite * prix * 100) / 100;
-      return { ...t, nom: prod.nom || "-", prix, cout };
-    })
-    .filter(
-      (t) =>
-        t.nom?.toLowerCase().includes(search.toLowerCase()) ||
-        t.zone_depart?.toLowerCase().includes(search.toLowerCase()) ||
-        t.zone_arrivee?.toLowerCase().includes(search.toLowerCase()) ||
-        t.motif?.toLowerCase().includes(search.toLowerCase()),
-    );
+  const filtered = transferts.
+  map((t) => {
+    const prod = produits.find((p) => p.id === t.produit_id) || {};
+    const prix = prod.pmp || 0;
+    const cout = Math.round(t.quantite * prix * 100) / 100;
+    return { ...t, nom: prod.nom || "-", prix, cout };
+  }).
+  filter(
+    (t) =>
+    t.nom?.toLowerCase().includes(search.toLowerCase()) ||
+    t.zone_depart?.toLowerCase().includes(search.toLowerCase()) ||
+    t.zone_arrivee?.toLowerCase().includes(search.toLowerCase()) ||
+    t.motif?.toLowerCase().includes(search.toLowerCase())
+  );
 
   // Stats globales coût total
   const totalEuro = filtered.reduce((sum, t) => sum + (t.cout || 0), 0);
@@ -105,7 +106,7 @@ export default function Transferts() {
   // Graphe coût par zone
   const transfertsParZone = Object.entries(statsZone).map(([key, euro]) => ({
     zone: key,
-    Euro: Math.round(euro * 100) / 100,
+    Euro: Math.round(euro * 100) / 100
   }));
 
   // Top produits transférés (€)
@@ -113,13 +114,13 @@ export default function Transferts() {
   filtered.forEach((t) => {
     statsProduit[t.nom] = (statsProduit[t.nom] || 0) + (t.cout || 0);
   });
-  const topProduits = Object.entries(statsProduit)
-    .map(([nom, euro]) => ({
-      nom,
-      Euro: Math.round(euro * 100) / 100,
-    }))
-    .sort((a, b) => b.Euro - a.Euro)
-    .slice(0, 10);
+  const topProduits = Object.entries(statsProduit).
+  map(([nom, euro]) => ({
+    nom,
+    Euro: Math.round(euro * 100) / 100
+  })).
+  sort((a, b) => b.Euro - a.Euro).
+  slice(0, 10);
 
   // Export Excel/PDF
   const handleExportExcel = () => {
@@ -132,8 +133,8 @@ export default function Transferts() {
         "Zone arrivée": t.zone_arrivee,
         Motif: t.motif,
         Prix: t.prix,
-        "Coût (€)": t.cout,
-      })),
+        "Coût (€)": t.cout
+      }))
     );
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Transferts");
@@ -147,28 +148,28 @@ export default function Transferts() {
     doc.autoTable({
       startY: 20,
       head: [
-        [
-          "Produit",
-          "Date",
-          "Quantité",
-          "Zone départ",
-          "Zone arrivée",
-          "Motif",
-          "Prix",
-          "Coût (€)",
-        ],
-      ],
+      [
+      "Produit",
+      "Date",
+      "Quantité",
+      "Zone départ",
+      "Zone arrivée",
+      "Motif",
+      "Prix",
+      "Coût (€)"]],
+
+
       body: filtered.map((t) => [
-        t.nom,
-        t.date_transfert,
-        t.quantite,
-        t.zone_depart,
-        t.zone_arrivee,
-        t.motif,
-        t.prix,
-        t.cout,
-      ]),
-      styles: { fontSize: 9 },
+      t.nom,
+      t.date_transfert,
+      t.quantite,
+      t.zone_depart,
+      t.zone_arrivee,
+      t.motif,
+      t.prix,
+      t.cout]
+      ),
+      styles: { fontSize: 9 }
     });
     doc.save("Transferts-stock.pdf");
     toast.success("Export PDF généré !");
@@ -179,11 +180,11 @@ export default function Transferts() {
     e.preventDefault();
     if (savingTf) return;
     if (
-      !createTf.produit_id ||
-      !createTf.quantite ||
-      !createTf.zone_depart ||
-      !createTf.zone_arrivee
-    ) {
+    !createTf.produit_id ||
+    !createTf.quantite ||
+    !createTf.zone_depart ||
+    !createTf.zone_arrivee)
+    {
       toast.error("Tous les champs sont obligatoires !");
       return;
     }
@@ -197,13 +198,13 @@ export default function Transferts() {
     }
     setSavingTf(true);
     const { error } = await supabase.from("transferts").insert([
-      {
-        ...createTf,
-        mama_id,
-        date_transfert: new Date().toISOString().slice(0, 10),
-        created_by: user_id,
-      },
-    ]);
+    {
+      ...createTf,
+      mama_id,
+      date_transfert: new Date().toISOString().slice(0, 10),
+      created_by: user_id
+    }]
+    );
     if (!error) {
       setShowCreate(false);
       setCreateTf({
@@ -211,7 +212,7 @@ export default function Transferts() {
         quantite: 0,
         zone_depart: "",
         zone_arrivee: "",
-        motif: "",
+        motif: ""
       });
       toast.success("Transfert enregistré !");
       setPeriode((p) => ({ ...p }));
@@ -225,14 +226,14 @@ export default function Transferts() {
   const handleShowTimeline = async (produit_id) => {
     setLoadingTimeline(true);
     if (!mama_id) return;
-    const { data, error } = await supabase
-      .from("transferts")
-      .select("date_transfert, zone_depart, zone_arrivee, quantite, motif")
-      .eq("mama_id", mama_id)
-      .eq("produit_id", produit_id)
-      .order("date_transfert", { ascending: false });
-    if (!error) setTimeline(data || []);
-    else {
+    const { data, error } = await supabase.
+    from("transferts").
+    select("date_transfert, zone_depart, zone_arrivee, quantite, motif").
+    eq("mama_id", mama_id).
+    eq("produit_id", produit_id).
+    order("date_transfert", { ascending: false });
+    if (!error) setTimeline(data || []);else
+    {
       setTimeline([]);
       toast.error("Erreur chargement timeline !");
     }
@@ -290,9 +291,9 @@ export default function Transferts() {
             className="input input-bordered"
             value={periode.debut}
             onChange={(e) =>
-              setPeriode((p) => ({ ...p, debut: e.target.value }))
-            }
-          />
+            setPeriode((p) => ({ ...p, debut: e.target.value }))
+            } />
+
         </div>
         <div>
           <label className="block font-medium">Fin période</label>
@@ -301,15 +302,15 @@ export default function Transferts() {
             className="input input-bordered"
             value={periode.fin}
             onChange={(e) => setPeriode((p) => ({ ...p, fin: e.target.value }))}
-            max={today}
-          />
+            max={today} />
+
         </div>
         <input
           className="input input-bordered w-64"
           placeholder="Recherche produit, zone, motif"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+          onChange={(e) => setSearch(e.target.value)} />
+
         <Button onClick={handleExportExcel}>Export Excel</Button>
         <Button onClick={handleExportPDF}>Export PDF</Button>
         <Button onClick={() => setShowCreate(true)}>+ Nouveau transfert</Button>
@@ -330,8 +331,8 @@ export default function Transferts() {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((t) => (
-              <tr key={t.id}>
+            {filtered.map((t) =>
+            <tr key={t.id}>
                 <td className="px-2 py-1">{t.date_transfert}</td>
                 <td className="px-2 py-1">{t.nom}</td>
                 <td className="px-2 py-1">{t.zone_depart}</td>
@@ -344,10 +345,10 @@ export default function Transferts() {
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleShowTimeline(t.produit_id)}
-                      >
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleShowTimeline(t.produit_id)}>
+
                         Timeline
                       </Button>
                     </DialogTrigger>
@@ -355,10 +356,10 @@ export default function Transferts() {
                       <h3 className="font-bold mb-2">
                         Timeline transferts : {t.nom}
                       </h3>
-                      {loadingTimeline ? (
-                        <LoadingSpinner message="Chargement..." />
-                      ) : (
-                        <table className="w-full text-xs">
+                      {loadingTimeline ?
+                    <LoadingSpinner message="Chargement..." /> :
+
+                    <table className="w-full text-xs">
                           <thead>
                             <tr>
                               <th>Date</th>
@@ -369,31 +370,31 @@ export default function Transferts() {
                             </tr>
                           </thead>
                           <tbody>
-                            {timeline.map((l, i) => (
-                              <tr key={i}>
+                            {timeline.map((l, i) =>
+                        <tr key={i}>
                                 <td>{l.date_transfert}</td>
                                 <td>{l.zone_depart}</td>
                                 <td>{l.zone_arrivee}</td>
                                 <td>{l.quantite}</td>
                                 <td>{l.motif || "-"}</td>
                               </tr>
-                            ))}
+                        )}
                           </tbody>
                         </table>
-                      )}
+                    }
                     </DialogContent>
                   </Dialog>
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </TableContainer>
       {/* Modal création transfert */}
       <Dialog
         open={showCreate}
-        onOpenChange={(v) => !v && setShowCreate(false)}
-      >
+        onOpenChange={(v) => !v && setShowCreate(false)}>
+
         <DialogContent className="bg-white/10 backdrop-blur-lg rounded-xl shadow-lg p-6 max-w-md">
           <h2 className="font-bold mb-2">Nouveau transfert de stock</h2>
           <form onSubmit={handleCreateTf} className="space-y-3">
@@ -403,15 +404,15 @@ export default function Transferts() {
                 className="input input-bordered w-full"
                 value={createTf.produit_id}
                 onChange={(e) =>
-                  setCreateTf((r) => ({ ...r, produit_id: e.target.value }))
-                }
-              >
+                setCreateTf((r) => ({ ...r, produit_id: e.target.value }))
+                }>
+
                 <option value="">Sélectionne…</option>
-                {produits.map((p) => (
-                  <option key={p.id} value={p.id}>
+                {produits.map((p) =>
+                <option key={p.id} value={p.id}>
                     {p.nom}
                   </option>
-                ))}
+                )}
               </select>
             </div>
             <div>
@@ -421,10 +422,10 @@ export default function Transferts() {
                 className="input input-bordered w-24"
                 value={createTf.quantite}
                 onChange={(e) =>
-                  setCreateTf((r) => ({ ...r, quantite: e.target.value }))
+                setCreateTf((r) => ({ ...r, quantite: e.target.value }))
                 }
-                min={0}
-              />
+                min={0} />
+
             </div>
             <div>
               <label>Zone départ</label>
@@ -432,15 +433,15 @@ export default function Transferts() {
                 className="input input-bordered w-full"
                 value={createTf.zone_depart}
                 onChange={(e) =>
-                  setCreateTf((r) => ({ ...r, zone_depart: e.target.value }))
-                }
-              >
+                setCreateTf((r) => ({ ...r, zone_depart: e.target.value }))
+                }>
+
                 <option value="">Sélectionne…</option>
-                {zones.map((z) => (
-                  <option key={z} value={z}>
+                {zones.map((z) =>
+                <option key={z} value={z}>
                     {z}
                   </option>
-                ))}
+                )}
               </select>
             </div>
             <div>
@@ -449,15 +450,15 @@ export default function Transferts() {
                 className="input input-bordered w-full"
                 value={createTf.zone_arrivee}
                 onChange={(e) =>
-                  setCreateTf((r) => ({ ...r, zone_arrivee: e.target.value }))
-                }
-              >
+                setCreateTf((r) => ({ ...r, zone_arrivee: e.target.value }))
+                }>
+
                 <option value="">Sélectionne…</option>
-                {zones.map((z) => (
-                  <option key={z} value={z}>
+                {zones.map((z) =>
+                <option key={z} value={z}>
                     {z}
                   </option>
-                ))}
+                )}
               </select>
             </div>
             <div>
@@ -467,9 +468,9 @@ export default function Transferts() {
                 value={createTf.motif}
                 rows={2}
                 onChange={(e) =>
-                  setCreateTf((r) => ({ ...r, motif: e.target.value }))
-                }
-              />
+                setCreateTf((r) => ({ ...r, motif: e.target.value }))
+                } />
+
             </div>
             <Button type="submit" disabled={savingTf}>
               {savingTf ? "Enregistrement…" : "Créer"}
@@ -477,6 +478,6 @@ export default function Transferts() {
           </form>
         </DialogContent>
       </Dialog>
-    </div>
-  );
+    </div>);
+
 }

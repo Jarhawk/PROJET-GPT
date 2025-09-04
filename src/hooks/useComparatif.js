@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 
 /**
@@ -20,12 +21,12 @@ export function useComparatif(productId) {
     }
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase
-      .from("fournisseur_produits")
-      .select("prix_achat, date_livraison, fournisseur_id, fournisseur:fournisseur_id(nom)")
-      .eq("produit_id", id)
-      .eq("mama_id", mama_id)
-      .order("date_livraison", { ascending: false });
+    const { data, error } = await supabase.
+    from("fournisseur_produits").
+    select("prix_achat, date_livraison, fournisseur_id, fournisseur:fournisseur_id(nom)").
+    eq("produit_id", id).
+    eq("mama_id", mama_id).
+    order("date_livraison", { ascending: false });
 
     if (error) {
       setError(error);
@@ -42,7 +43,7 @@ export function useComparatif(productId) {
           fournisseur: row.fournisseur?.nom || "-",
           dernierPrix: parseFloat(row.prix_achat),
           total: parseFloat(row.prix_achat),
-          nb: 1,
+          nb: 1
         };
       } else {
         grouped[fid].nb += 1;
@@ -54,7 +55,7 @@ export function useComparatif(productId) {
       fournisseur: l.fournisseur,
       dernierPrix: l.dernierPrix,
       nb: l.nb,
-      pmp: l.total / l.nb,
+      pmp: l.total / l.nb
     }));
 
     setLignes(lignesRes);

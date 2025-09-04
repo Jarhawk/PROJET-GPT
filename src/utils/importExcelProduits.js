@@ -1,6 +1,6 @@
-import * as XLSX from "xlsx";
+import supabase from '@/lib/supabase';import * as XLSX from "xlsx";
 import { v4 as uuidv4 } from "uuid";
-import { getSupabaseClient } from '@/lib/supabase';
+
 import { fetchFamillesForValidation } from "@/hooks/useFamilles";
 import { fetchUnitesForValidation } from "@/hooks/useUnites";
 import { fetchZonesForValidation } from "@/hooks/useZonesStock";
@@ -31,7 +31,7 @@ export function validateProduitRow(row, maps) {
   if (!zoneId) errors.zone_stock_nom = "zone_stock inconnue";
 
   if (row.fournisseur_id && !maps.fournisseurs.has(String(row.fournisseur_id)))
-    errors.fournisseur_id = "fournisseur inconnu";
+  errors.fournisseur_id = "fournisseur inconnu";
 
   const status = Object.keys(errors).length ? "error" : "ok";
 
@@ -42,7 +42,7 @@ export function validateProduitRow(row, maps) {
     unite_id: uniteId || null,
     zone_stock_id: zoneId || null,
     errors,
-    status,
+    status
   };
 }
 
@@ -52,25 +52,25 @@ export async function parseProduitsFile(file, mama_id) {
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const raw = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
-  const supabase = getSupabaseClient();
+  const supabase = supabase();
   const [
-    famillesRes,
-    sousFamillesRes,
-    unitesRes,
-    zonesRes,
-    fournisseursRes,
-    produitsRes,
-  ] = await Promise.all([
-    fetchFamillesForValidation(supabase, mama_id),
-    supabase.from("sous_familles").select("id, nom").eq("mama_id", mama_id),
-    fetchUnitesForValidation(mama_id),
-    fetchZonesForValidation(mama_id),
-    supabase.from("fournisseurs").select("id").eq("mama_id", mama_id),
-    supabase.from("produits").select("nom").eq("mama_id", mama_id),
-  ]);
+  famillesRes,
+  sousFamillesRes,
+  unitesRes,
+  zonesRes,
+  fournisseursRes,
+  produitsRes] =
+  await Promise.all([
+  fetchFamillesForValidation(supabase, mama_id),
+  supabase.from("sous_familles").select("id, nom").eq("mama_id", mama_id),
+  fetchUnitesForValidation(mama_id),
+  fetchZonesForValidation(mama_id),
+  supabase.from("fournisseurs").select("id").eq("mama_id", mama_id),
+  supabase.from("produits").select("nom").eq("mama_id", mama_id)]
+  );
 
   const mapByName = (res) =>
-    new Map((res.data || []).map((x) => [x.nom.toLowerCase(), x.id]));
+  new Map((res.data || []).map((x) => [x.nom.toLowerCase(), x.id]));
   const famillesMap = mapByName(famillesRes);
   const sousFamillesMap = mapByName(sousFamillesRes);
   const unitesMap = mapByName(unitesRes);
@@ -88,7 +88,7 @@ export async function parseProduitsFile(file, mama_id) {
     sousFamilles: sousFamillesMap,
     unites: unitesMap,
     zones: zonesMap,
-    fournisseurs: fournisseurIds,
+    fournisseurs: fournisseurIds
   };
 
   const seenNames = new Set();
@@ -96,9 +96,9 @@ export async function parseProduitsFile(file, mama_id) {
   const rows = raw.map((r) => {
     const n = Object.fromEntries(
       Object.entries(r).map(([k, v]) => [
-        k.toLowerCase().trim(),
-        typeof v === "string" ? v.trim() : v,
-      ])
+      k.toLowerCase().trim(),
+      typeof v === "string" ? v.trim() : v]
+      )
     );
 
     const baseRow = {
@@ -113,19 +113,19 @@ export async function parseProduitsFile(file, mama_id) {
       actif: parseBoolean(n.actif),
       pmp: n.pmp !== "" ? Number(n.pmp) : null,
       stock_theorique:
-        n.stock_theorique !== "" ? Number(n.stock_theorique) : null,
+      n.stock_theorique !== "" ? Number(n.stock_theorique) : null,
       stock_min: n.stock_min !== "" ? Number(n.stock_min) : null,
       dernier_prix: n.dernier_prix !== "" ? Number(n.dernier_prix) : null,
       fournisseur_id: String(n.fournisseur_id || "").trim() || null,
-      mama_id,
+      mama_id
     };
 
     let validated = validateProduitRow(baseRow, maps);
     const lowerName = validated.nom.toLowerCase();
     if (existingNames.has(lowerName) || seenNames.has(lowerName)) {
-      validated.errors.nom = validated.errors.nom
-        ? `${validated.errors.nom}, déjà existant`
-        : "produit déjà existant";
+      validated.errors.nom = validated.errors.nom ?
+      `${validated.errors.nom}, déjà existant` :
+      "produit déjà existant";
       validated.status = "error";
     }
     seenNames.add(lowerName);
@@ -138,12 +138,12 @@ export async function parseProduitsFile(file, mama_id) {
     familles: famillesRes.data || [],
     sousFamilles: sousFamillesRes.data || [],
     unites: unitesRes.data || [],
-    zones: zonesRes.data || [],
+    zones: zonesRes.data || []
   };
 }
 
 export async function insertProduits(rows) {
-  const supabase = getSupabaseClient();
+  const supabase = supabase();
   const results = [];
   for (const r of rows) {
     const {
@@ -158,17 +158,16 @@ export async function insertProduits(rows) {
     payload.seuil_min = payload.stock_min;
     delete payload.stock_min;
     try {
-      const { data, error } = await supabase
-        .from("produits")
-        .insert([payload])
-        .select("id")
-        .single();
-      if (error) results.push({ ...r, insertError: error.message });
-      else results.push({ ...r, id: data.id, insertError: null });
+      const { data, error } = await supabase.
+      from("produits").
+      insert([payload]).
+      select("id").
+      single();
+      if (error) results.push({ ...r, insertError: error.message });else
+      results.push({ ...r, id: data.id, insertError: null });
     } catch (err) {
       results.push({ ...r, insertError: err.message });
     }
   }
   return results;
 }
-

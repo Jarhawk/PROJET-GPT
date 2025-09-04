@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useEffect, useState, useCallback } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useMultiMama } from "@/context/MultiMamaContext";
 import TableContainer from "@/components/ui/TableContainer";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
@@ -42,19 +43,19 @@ export default function SupervisionGroupe() {
               </tr>
             </thead>
             <tbody>
-              {display.map((d) => (
-                <tr key={d.mama_id}>
+              {display.map((d) =>
+              <tr key={d.mama_id}>
                   <td className="px-2 py-1">{d.nom}</td>
                   <td className="px-2 py-1">{d.cout_matiere || '-'}</td>
                   <td className="px-2 py-1">{d.nb_factures || '-'}</td>
                   <td className="px-2 py-1">{d.taux_validation || '-'}</td>
                   <td className="px-2 py-1">{d.ecart_inventaire || '-'}</td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </TableContainer>
       </GlassCard>
-    </div>
-  );
+    </div>);
+
 }

@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react";
-import { supabase } from '@/lib/supabase';
+import supabase from '@/lib/supabase';import { useState, useCallback } from "react";
+
 import { useAuth } from '@/hooks/useAuth';
 
 export function useFacturesAutocomplete() {
@@ -12,10 +12,10 @@ export function useFacturesAutocomplete() {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
-    let q = supabase
-      .from("factures")
-      .select("id, numero, date_facture, fournisseur_id, fournisseur:fournisseur_id(nom)")
-      .eq("mama_id", mama_id);
+    let q = supabase.
+    from("factures").
+    select("id, numero, date_facture, fournisseur_id, fournisseur:fournisseur_id(nom)").
+    eq("mama_id", mama_id);
     if (query) {
       q = q.ilike("numero", `%${query}%`);
     }

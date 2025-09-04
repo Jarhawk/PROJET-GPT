@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 
 export function useMama() {
@@ -13,11 +14,11 @@ export function useMama() {
     if (!mama_id) return null;
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase
-      .from("mamas")
-      .select("*")
-      .eq("id", mama_id)
-      .single();
+    const { data, error } = await supabase.
+    from("mamas").
+    select("*").
+    eq("id", mama_id).
+    single();
     if (!error) setMama(data);
     setError(error);
     setLoading(false);
@@ -28,10 +29,10 @@ export function useMama() {
     if (!mama_id) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    const { error } = await supabase
-      .from("mamas")
-      .update(fields)
-      .eq("id", mama_id);
+    const { error } = await supabase.
+    from("mamas").
+    update(fields).
+    eq("id", mama_id);
     setError(error);
     setLoading(false);
     if (!error) await fetchMama();

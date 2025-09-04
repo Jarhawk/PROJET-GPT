@@ -1,7 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 // src/hooks/useStats.js
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 
 export function useStats() {
@@ -13,14 +14,14 @@ export function useStats() {
     setLoading(true);
 
     const queries = [
-      supabase.from("produits").select("id").eq("mama_id", mama_id),
-      supabase.from("fiches_techniques").select("cout_total").eq("mama_id", mama_id),
-      supabase
-        .from("requisition_lignes")
-        .select("quantite, requisitions!inner(mama_id, statut)")
-        .eq("requisitions.mama_id", mama_id)
-        .eq("requisitions.statut", "réalisée"),
-    ];
+    supabase.from("produits").select("id").eq("mama_id", mama_id),
+    supabase.from("fiches_techniques").select("cout_total").eq("mama_id", mama_id),
+    supabase.
+    from("requisition_lignes").
+    select("quantite, requisitions!inner(mama_id, statut)").
+    eq("requisitions.mama_id", mama_id).
+    eq("requisitions.statut", "réalisée")];
+
 
     const [products, fiches, mouvements] = await Promise.all(queries.map((q) => q));
 
@@ -29,7 +30,7 @@ export function useStats() {
       totalFiches: fiches.data?.length || 0,
       coutTotalFiches: fiches.data?.reduce((a, f) => a + (f.cout_total || 0), 0) || 0,
       mouvementsTotal:
-        mouvements.data?.reduce((a, m) => a + (m.quantite || 0), 0) || 0,
+      mouvements.data?.reduce((a, m) => a + (m.quantite || 0), 0) || 0
     });
 
     setLoading(false);

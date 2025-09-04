@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useTemplatesCommandes } from "@/hooks/useTemplatesCommandes";
 import { Button } from "@/components/ui/button";
 
@@ -49,10 +50,10 @@ export default function TemplateCommandeForm({ template = {}, onClose, fournisse
       contact_email: contactEmail,
       conditions_generales: conditions,
       champs_visibles: champs,
-      actif,
+      actif
     };
-    if (template.id) await updateTemplate(template.id, payload);
-    else await createTemplate(payload);
+    if (template.id) await updateTemplate(template.id, payload);else
+    await createTemplate(payload);
     onClose();
   };
 
@@ -73,14 +74,14 @@ export default function TemplateCommandeForm({ template = {}, onClose, fournisse
           <select
             className="w-full border p-1"
             value={fournisseurId}
-            onChange={(e) => setFournisseurId(e.target.value)}
-          >
+            onChange={(e) => setFournisseurId(e.target.value)}>
+
             <option value="">Générique</option>
-            {fournisseurs.map((f) => (
-              <option key={f.id} value={f.id}>
+            {fournisseurs.map((f) =>
+            <option key={f.id} value={f.id}>
                 {f.nom}
               </option>
-            ))}
+            )}
           </select>
         </div>
 
@@ -125,23 +126,23 @@ export default function TemplateCommandeForm({ template = {}, onClose, fournisse
           <textarea
             className="w-full border p-1"
             value={conditions}
-            onChange={(e) => setConditions(e.target.value)}
-          />
+            onChange={(e) => setConditions(e.target.value)} />
+
         </div>
 
         <div>
           <label className="block text-sm font-medium">Champs visibles</label>
           <div className="grid grid-cols-2 gap-2 text-sm">
-            {Object.keys(champs).map((champ) => (
-              <label key={champ} className="flex items-center gap-1">
+            {Object.keys(champs).map((champ) =>
+            <label key={champ} className="flex items-center gap-1">
                 <input
-                  type="checkbox"
-                  checked={champs[champ]}
-                  onChange={() => toggleChamp(champ)}
-                />
+                type="checkbox"
+                checked={champs[champ]}
+                onChange={() => toggleChamp(champ)} />
+
                 {champ}
               </label>
-            ))}
+            )}
           </div>
         </div>
 
@@ -157,7 +158,6 @@ export default function TemplateCommandeForm({ template = {}, onClose, fournisse
           <Button onClick={handleSubmit}>Enregistrer</Button>
         </div>
       </div>
-    </div>
-  );
-}
+    </div>);
 
+}

@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 import { useAuditLog } from "@/hooks/useAuditLog";
 
@@ -15,12 +16,12 @@ export function useMouvementCostCenters() {
     if (!mouvement_id) return [];
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase
-      .from("mouvements_centres_cout")
-      .select("id, mouvement_id, cost_center_id, quantite, valeur, centres_de_cout:cost_center_id(nom)")
-      .eq("mouvement_id", mouvement_id)
-      .eq("mama_id", mama_id)
-      .order("created_at");
+    const { data, error } = await supabase.
+    from("mouvements_centres_cout").
+    select("id, mouvement_id, cost_center_id, quantite, valeur, centres_de_cout:cost_center_id(nom)").
+    eq("mouvement_id", mouvement_id).
+    eq("mama_id", mama_id).
+    order("created_at");
     setLoading(false);
     if (error) {
       setError(error);
@@ -35,22 +36,22 @@ export function useMouvementCostCenters() {
     if (!mouvement_id) return;
     setLoading(true);
     setError(null);
-    await supabase
-      .from("mouvements_centres_cout")
-      .delete()
-      .eq("mouvement_id", mouvement_id)
-      .eq("mama_id", mama_id);
-    const prepared = (rows || []).map(r => ({
+    await supabase.
+    from("mouvements_centres_cout").
+    delete().
+    eq("mouvement_id", mouvement_id).
+    eq("mama_id", mama_id);
+    const prepared = (rows || []).map((r) => ({
       mouvement_id,
       cost_center_id: r.cost_center_id,
       quantite: Number(r.quantite) || 0,
       valeur: r.valeur ? Number(r.valeur) : null,
-      mama_id,
+      mama_id
     }));
     if (prepared.length > 0) {
-      const { error } = await supabase
-        .from("mouvements_centres_cout")
-        .insert(prepared);
+      const { error } = await supabase.
+      from("mouvements_centres_cout").
+      insert(prepared);
       if (error) setError(error);
     }
     setLoading(false);

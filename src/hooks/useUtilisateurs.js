@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 import * as XLSX from "xlsx";
 import { safeImportXLSX } from "@/lib/xlsx/safeImportXLSX";
@@ -19,10 +20,10 @@ export function useUtilisateurs() {
     if (!isSuperadmin && !mama_id) return [];
     setLoading(true);
     setError(null);
-    let query = supabase
-      .from("utilisateurs_complets")
-      .select("*")
-      .order("nom", { ascending: true });
+    let query = supabase.
+    from("utilisateurs_complets").
+    select("*").
+    order("nom", { ascending: true });
 
     if (!isSuperadmin) query = query.eq("mama_id", mama_id);
     if (search) query = query.ilike("nom", `%${search}%`);
@@ -66,11 +67,11 @@ export function useUtilisateurs() {
     if (updateFields.auth_id === undefined) updateFields.auth_id = null;
     let rights = null;
     if (updateFields.role_id) {
-      const { data: roleData } = await supabase
-        .from("roles")
-        .select("nom, access_rights")
-        .eq("id", updateFields.role_id)
-        .maybeSingle();
+      const { data: roleData } = await supabase.
+      from("roles").
+      select("nom, access_rights").
+      eq("id", updateFields.role_id).
+      maybeSingle();
       if (roleData?.nom === "superadmin" && !isSuperadmin) {
         setLoading(false);
         return { error: "Rôle interdit" };
@@ -78,14 +79,14 @@ export function useUtilisateurs() {
       rights = roleData?.access_rights ?? null;
     }
     const now = new Date().toISOString();
-    const { error } = await supabase
-      .from("utilisateurs")
-      .upsert({
-        id,
-        ...updateFields,
-        ...(rights ? { access_rights: rights } : {}),
-        updated_at: now,
-      });
+    const { error } = await supabase.
+    from("utilisateurs").
+    upsert({
+      id,
+      ...updateFields,
+      ...(rights ? { access_rights: rights } : {}),
+      updated_at: now
+    });
     if (error) setError(error);
     setLoading(false);
     await getUtilisateurs();
@@ -96,10 +97,10 @@ export function useUtilisateurs() {
     if (!mama_id && !isSuperadmin) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    let query = supabase
-      .from("utilisateurs")
-      .update({ actif })
-      .eq("id", id);
+    let query = supabase.
+    from("utilisateurs").
+    update({ actif }).
+    eq("id", id);
     if (!isSuperadmin) query = query.eq("mama_id", mama_id);
     const { error } = await query;
     if (error) setError(error);
@@ -114,7 +115,7 @@ export function useUtilisateurs() {
     setError(null);
     const { data, error } = await supabase.auth.admin.generateLink({
       type: "recovery",
-      user_id: authId,
+      user_id: authId
     });
     if (error) setError(error);
     setLoading(false);
@@ -126,10 +127,10 @@ export function useUtilisateurs() {
     if (!mama_id && !isSuperadmin) return { error: "Aucun mama_id" };
     setLoading(true);
     setError(null);
-    let query = supabase
-      .from("utilisateurs")
-      .update({ actif: false })
-      .eq("id", id);
+    let query = supabase.
+    from("utilisateurs").
+    update({ actif: false }).
+    eq("id", id);
     if (!isSuperadmin) query = query.eq("mama_id", mama_id);
     const { error } = await query;
     if (error) setError(error);
@@ -140,14 +141,14 @@ export function useUtilisateurs() {
   // 6. Export Excel
   // (numérotation ajustée après ajout resetPassword)
   function exportUsersToExcel(data = users) {
-    const datas = (data || []).map(u => ({
+    const datas = (data || []).map((u) => ({
       id: u.id,
       nom: u.nom,
       email: u.email,
       role_id: u.role_id,
       actif: u.actif,
       mama_id: u.mama_id,
-      access_rights: JSON.stringify(u.access_rights),
+      access_rights: JSON.stringify(u.access_rights)
     }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(datas), "Utilisateurs");
@@ -156,14 +157,14 @@ export function useUtilisateurs() {
   }
 
   function exportUsersToCSV(data = users) {
-    const datas = (data || []).map(u => ({
+    const datas = (data || []).map((u) => ({
       id: u.id,
       nom: u.nom,
       email: u.email,
       role_id: u.role_id,
       actif: u.actif,
       mama_id: u.mama_id,
-      access_rights: JSON.stringify(u.access_rights),
+      access_rights: JSON.stringify(u.access_rights)
     }));
     exportToCSV(datas, { filename: "utilisateurs_mamastock.csv" });
   }
@@ -203,6 +204,6 @@ export function useUtilisateurs() {
     // exports
     exportUsersToExcel,
     exportUsersToCSV,
-    importUsersFromExcel,
+    importUsersFromExcel
   };
 }

@@ -36,3 +36,5 @@ export const supabase = new Proxy(
     },
   }
 )
+
+export default supabase

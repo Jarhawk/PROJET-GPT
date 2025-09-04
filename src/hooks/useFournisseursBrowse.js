@@ -1,13 +1,14 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 
 export default function useFournisseursBrowse({
   page = 1,
   limit = 20,
   term = '',
-  filters = {},
+  filters = {}
 } = {}) {
   const { mama_id } = useAuth();
   const [data, setData] = useState([]);
@@ -22,11 +23,11 @@ export default function useFournisseursBrowse({
       setLoading(true);
       setError(null);
       try {
-        let req = supabase
-          .from('fournisseurs')
-          .select('id, nom, ville', { count: 'exact' })
-          .eq('mama_id', mama_id)
-          .eq('actif', true);
+        let req = supabase.
+        from('fournisseurs').
+        select('id, nom, ville', { count: 'exact' }).
+        eq('mama_id', mama_id).
+        eq('actif', true);
         const t = term.trim();
         if (t) req = req.ilike('nom', `%${t}%`);
         Object.entries(filters || {}).forEach(([k, v]) => {
@@ -36,9 +37,9 @@ export default function useFournisseursBrowse({
         });
         const start = (page - 1) * limit;
         const end = start + limit - 1;
-        const { data, error, count } = await req
-          .order('nom', { ascending: true })
-          .range(start, end);
+        const { data, error, count } = await req.
+        order('nom', { ascending: true }).
+        range(start, end);
         if (error) throw error;
         if (!aborted) {
           setData(data || []);
@@ -63,4 +64,3 @@ export default function useFournisseursBrowse({
 
   return { data, total, loading, error };
 }
-

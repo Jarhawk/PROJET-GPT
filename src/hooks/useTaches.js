@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState, useCallback } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 
 export function useTaches() {
@@ -10,10 +11,10 @@ export function useTaches() {
   const fetchTaches = useCallback(
     async (filtres = {}) => {
       if (!mama_id) return [];
-      let q = supabase
-        .from('v_taches_assignees')
-        .select('*')
-        .eq('mama_id', mama_id);
+      let q = supabase.
+      from('v_taches_assignees').
+      select('*').
+      eq('mama_id', mama_id);
       if (filtres.statut) q = q.eq('statut', filtres.statut);
       if (filtres.utilisateur) q = q.eq('utilisateur_id', filtres.utilisateur);
       if (filtres.start) q = q.gte('date_echeance', filtres.start);
@@ -26,16 +27,16 @@ export function useTaches() {
   );
 
   const createTache = useCallback(
-    async values => {
+    async (values) => {
       if (!mama_id) return {};
       const { assignes = [], ...tache } = values;
-      const { data } = await supabase
-        .from('taches')
-        .insert([{ ...tache, mama_id }])
-        .select()
-        .single();
+      const { data } = await supabase.
+      from('taches').
+      insert([{ ...tache, mama_id }]).
+      select().
+      single();
       if (assignes.length) {
-        const rows = assignes.map(uid => ({ tache_id: data.id, utilisateur_id: uid }));
+        const rows = assignes.map((uid) => ({ tache_id: data.id, utilisateur_id: uid }));
         await supabase.from('utilisateurs_taches').insert(rows);
       }
       return data;
@@ -44,17 +45,17 @@ export function useTaches() {
   );
 
   const deleteTache = useCallback(
-    async id => {
-      await supabase
-        .from('utilisateurs_taches')
-        .delete()
-        .eq('tache_id', id)
-        .eq('mama_id', mama_id);
-      await supabase
-        .from('taches')
-        .update({ actif: false })
-        .eq('id', id)
-        .eq('mama_id', mama_id);
+    async (id) => {
+      await supabase.
+      from('utilisateurs_taches').
+      delete().
+      eq('tache_id', id).
+      eq('mama_id', mama_id);
+      await supabase.
+      from('taches').
+      update({ actif: false }).
+      eq('id', id).
+      eq('mama_id', mama_id);
     },
     [mama_id]
   );
@@ -63,4 +64,3 @@ export function useTaches() {
 }
 
 export default useTaches;
-

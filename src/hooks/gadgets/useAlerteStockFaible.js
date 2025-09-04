@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
+import supabase from '@/lib/supabase';import { useState, useEffect, useCallback } from 'react';
+
 import { useAuth } from '@/hooks/useAuth';
 import { logSupaError } from '@/lib/supa/logError';
 import { toast } from 'sonner';
@@ -28,16 +28,16 @@ export default function useAlerteStockFaible() {
           receptions,
           stock_projete`;
 
-      let { data, error } = await base
-        .select(selectWith)
-        .order('manque', { ascending: false })
-        .limit(50);
+      let { data, error } = await base.
+      select(selectWith).
+      order('manque', { ascending: false }).
+      limit(50);
 
       if (error && error.code === '42703') {
         if (import.meta.env.DEV)
-          console.debug('v_alertes_rupture sans stock_projete');
-        const { data: d2, error: e2 } = await base
-          .select(`id:produit_id,
+        console.debug('v_alertes_rupture sans stock_projete');
+        const { data: d2, error: e2 } = await base.
+        select(`id:produit_id,
           produit_id,
           nom,
           unite,
@@ -46,9 +46,9 @@ export default function useAlerteStockFaible() {
           stock_min,
           manque,
           consommation_prevue,
-          receptions`)
-          .order('manque', { ascending: false })
-          .limit(50);
+          receptions`).
+        order('manque', { ascending: false }).
+        limit(50);
         if (e2) {
           logSupaError('v_alertes_rupture', e2);
           throw e2;
@@ -56,13 +56,13 @@ export default function useAlerteStockFaible() {
         data = (d2 ?? []).map((r) => ({
           ...r,
           stock_projete:
-            r.stock_actuel != null ||
-            r.receptions != null ||
-            r.consommation_prevue != null
-              ? (r.stock_actuel ?? 0) +
-                (r.receptions ?? 0) -
-                (r.consommation_prevue ?? 0)
-              : null,
+          r.stock_actuel != null ||
+          r.receptions != null ||
+          r.consommation_prevue != null ?
+          (r.stock_actuel ?? 0) + (
+          r.receptions ?? 0) - (
+          r.consommation_prevue ?? 0) :
+          null
         }));
       } else {
         if (error) {
@@ -70,19 +70,19 @@ export default function useAlerteStockFaible() {
           throw error;
         }
         if (import.meta.env.DEV)
-          console.debug('v_alertes_rupture avec stock_projete');
+        console.debug('v_alertes_rupture avec stock_projete');
       }
 
-      const list = (data || [])
-        .map((p) => ({
-          produit_id: p.produit_id,
-          nom: p.nom,
-          stock_actuel: p.stock_actuel,
-          stock_min: p.stock_min,
-          unite: p.unite,
-          fournisseur_nom: p.fournisseur_nom,
-        }))
-        .slice(0, 5);
+      const list = (data || []).
+      map((p) => ({
+        produit_id: p.produit_id,
+        nom: p.nom,
+        stock_actuel: p.stock_actuel,
+        stock_min: p.stock_min,
+        unite: p.unite,
+        fournisseur_nom: p.fournisseur_nom
+      })).
+      slice(0, 5);
       setData(list);
       if (import.meta.env.DEV) {
         console.debug('Chargement dashboard terminé');

@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState, useCallback } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 
 export function useCarte() {
@@ -13,12 +14,12 @@ export function useCarte() {
       if (!mama_id) return [];
       setLoading(true);
       setError(null);
-      let query = supabase
-        .from("fiches_techniques")
-        .select("*")
-        .eq("mama_id", mama_id)
-        .eq("carte_actuelle", true)
-        .order("nom", { ascending: true });
+      let query = supabase.
+      from("fiches_techniques").
+      select("*").
+      eq("mama_id", mama_id).
+      eq("carte_actuelle", true).
+      order("nom", { ascending: true });
       if (type) query = query.eq("type_carte", type);
       const { data, error } = await query;
       setLoading(false);
@@ -34,11 +35,11 @@ export function useCarte() {
   const updatePrixVente = useCallback(
     async (id, prix_vente) => {
       if (!mama_id) return;
-      const { error } = await supabase
-        .from("fiches_techniques")
-        .update({ prix_vente })
-        .eq("id", id)
-        .eq("mama_id", mama_id);
+      const { error } = await supabase.
+      from("fiches_techniques").
+      update({ prix_vente }).
+      eq("id", id).
+      eq("mama_id", mama_id);
       if (error) throw error;
     },
     [mama_id]
@@ -47,11 +48,11 @@ export function useCarte() {
   const toggleCarte = useCallback(
     async (id, active, extra = {}) => {
       if (!mama_id) return;
-      const { error } = await supabase
-        .from("fiches_techniques")
-        .update({ carte_actuelle: active, ...extra })
-        .eq("id", id)
-        .eq("mama_id", mama_id);
+      const { error } = await supabase.
+      from("fiches_techniques").
+      update({ carte_actuelle: active, ...extra }).
+      eq("id", id).
+      eq("mama_id", mama_id);
       if (error) throw error;
     },
     [mama_id]

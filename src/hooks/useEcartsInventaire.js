@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState, useCallback } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 
 export function useEcartsInventaire() {
@@ -13,10 +14,10 @@ export function useEcartsInventaire() {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
-    let query = supabase
-      .from("v_ecarts_inventaire")
-      .select("*")
-      .eq("mama_id", mama_id);
+    let query = supabase.
+    from("v_ecarts_inventaire").
+    select("*").
+    eq("mama_id", mama_id);
     if (filters.date_start) query = query.gte("date", filters.date_start);
     if (filters.date_end) query = query.lte("date", filters.date_end);
     const { data, error } = await query;

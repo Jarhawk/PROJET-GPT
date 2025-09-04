@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 
 export default function usePeriodes() {
@@ -14,18 +15,18 @@ export default function usePeriodes() {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase
-      .from('periodes_comptables')
-      .select('*')
-      .eq('mama_id', mama_id)
-      .order('debut', { ascending: false });
+    const { data, error } = await supabase.
+    from('periodes_comptables').
+    select('*').
+    eq('mama_id', mama_id).
+    order('debut', { ascending: false });
     setLoading(false);
     if (error) {
       setError(error);
       return [];
     }
     setPeriodes(Array.isArray(data) ? data : []);
-    setCurrent(data?.find(p => p.actif) || null);
+    setCurrent(data?.find((p) => p.actif) || null);
     return data || [];
   }
 
@@ -33,11 +34,11 @@ export default function usePeriodes() {
     if (!mama_id) return { error: 'no mama_id' };
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase
-      .from('periodes_comptables')
-      .insert([{ mama_id, debut, fin, cloturee: false, actif: true }])
-      .select()
-      .single();
+    const { data, error } = await supabase.
+    from('periodes_comptables').
+    insert([{ mama_id, debut, fin, cloturee: false, actif: true }]).
+    select().
+    single();
     setLoading(false);
     if (error) {
       setError(error);
@@ -51,22 +52,22 @@ export default function usePeriodes() {
     if (!mama_id) return { error: 'no mama_id' };
     setLoading(true);
     setError(null);
-    const { data: periode, error: selErr } = await supabase
-      .from('periodes_comptables')
-      .select('*')
-      .eq('id', id)
-      .eq('mama_id', mama_id)
-      .single();
+    const { data: periode, error: selErr } = await supabase.
+    from('periodes_comptables').
+    select('*').
+    eq('id', id).
+    eq('mama_id', mama_id).
+    single();
     if (selErr || !periode) {
       setLoading(false);
       setError(selErr);
       return { error: selErr || new Error('Période introuvable') };
     }
-    const { error: updErr } = await supabase
-      .from('periodes_comptables')
-      .update({ cloturee: true, actif: false })
-      .eq('id', id)
-      .eq('mama_id', mama_id);
+    const { error: updErr } = await supabase.
+    from('periodes_comptables').
+    update({ cloturee: true, actif: false }).
+    eq('id', id).
+    eq('mama_id', mama_id);
     if (updErr) {
       setLoading(false);
       setError(updErr);
@@ -78,14 +79,14 @@ export default function usePeriodes() {
     fin.setMonth(fin.getMonth() + 1);
     fin.setDate(fin.getDate() - 1);
     await supabase.from('periodes_comptables').insert([
-      {
-        mama_id,
-        debut: debut.toISOString().slice(0, 10),
-        fin: fin.toISOString().slice(0, 10),
-        cloturee: false,
-        actif: true,
-      },
-    ]);
+    {
+      mama_id,
+      debut: debut.toISOString().slice(0, 10),
+      fin: fin.toISOString().slice(0, 10),
+      cloturee: false,
+      actif: true
+    }]
+    );
     setLoading(false);
     await fetchPeriodes();
     return { data: true };
@@ -93,16 +94,16 @@ export default function usePeriodes() {
 
   async function checkCurrentPeriode(date) {
     if (!mama_id) return { error: 'no mama_id' };
-    const { data, error } = await supabase
-      .from('periodes_comptables')
-      .select('*')
-      .eq('mama_id', mama_id)
-      .eq('actif', true)
-      .single();
+    const { data, error } = await supabase.
+    from('periodes_comptables').
+    select('*').
+    eq('mama_id', mama_id).
+    eq('actif', true).
+    single();
     if (error) return { error };
     if (!data) return { error: new Error('Aucune période active') };
     if (data.cloturee || date < data.debut || date > data.fin)
-      return { error: new Error('Période comptable clôturée') };
+    return { error: new Error('Période comptable clôturée') };
     return { data };
   }
 
@@ -114,6 +115,6 @@ export default function usePeriodes() {
     fetchPeriodes,
     createPeriode,
     cloturerPeriode,
-    checkCurrentPeriode,
+    checkCurrentPeriode
   };
 }

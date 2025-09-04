@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+import supabase from '@/lib/supabase';
 import { useState, useCallback } from "react";
-import { supabase } from '@/lib/supabase';
+
 import { useAuth } from '@/hooks/useAuth';
 
 export function useProduitsAutocomplete() {
@@ -13,11 +14,11 @@ export function useProduitsAutocomplete() {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
-    let q = supabase
-      .from("produits")
-      .select("id, nom, tva, dernier_prix, unite_id, unite:unite_id (nom)")
-      .eq("mama_id", mama_id)
-      .eq("actif", true);
+    let q = supabase.
+    from("produits").
+    select("id, nom, tva, dernier_prix, unite_id, unite:unite_id (nom)").
+    eq("mama_id", mama_id).
+    eq("actif", true);
     if (query) q = q.ilike("nom", `%${query}%`);
     q = q.order("nom", { ascending: true }).limit(10);
     const { data, error } = await q;
@@ -26,14 +27,14 @@ export function useProduitsAutocomplete() {
       setError(error);
       return [];
     }
-    const final = (Array.isArray(data) ? data : []).map(p => ({
+    const final = (Array.isArray(data) ? data : []).map((p) => ({
       id: p.id,
       produit_id: p.id,
       nom: p.nom,
       unite_id: p.unite_id || "",
       unite: p.unite?.nom || "",
       tva: p.tva ?? 0,
-      dernier_prix: p.dernier_prix ?? 0,
+      dernier_prix: p.dernier_prix ?? 0
     }));
     setResults(final);
     return final;

@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
+import supabase from '@/lib/supabase';import { useQuery } from '@tanstack/react-query';
+
 import { useAuth } from '@/hooks/useAuth';
 
 export default function useBudgetMensuel() {
@@ -13,7 +13,7 @@ export default function useBudgetMensuel() {
       if (!mama_id) return { cible: 0, reel: 0 };
       const { data, error } = await supabase.rpc('fn_calc_budgets', {
         mama_id_param: mama_id,
-        periode_param: periode,
+        periode_param: periode
       });
       if (error) throw error;
       let cible = 0;
@@ -27,7 +27,7 @@ export default function useBudgetMensuel() {
       }
       return { cible, reel };
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 5
   });
 
   return { ...(data || { cible: 0, reel: 0 }), loading: isLoading, error, refresh: refetch };

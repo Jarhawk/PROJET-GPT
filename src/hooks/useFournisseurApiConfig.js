@@ -65,14 +65,18 @@ export function useFournisseurApiConfig() {
   async function listConfigs({ fournisseur_id, actif, page = 1, limit = 20 } = {}) {
     if (!mama_id) return { data: [], count: 0, error: null };
     setLoading(true);
-    let query = supabase.
-    from('fournisseurs_api_config').
-    select('*, fournisseur:fournisseur_id(id, nom)', { count: 'exact' }).
-    eq('mama_id', mama_id).
-    order('fournisseur_id');
+    const p = Number(page) || 1;
+    const l = Number(limit) || 20;
+    const start = (p - 1) * l;
+    const end = start + l - 1;
+    let query = supabase
+      .from('fournisseurs_api_config')
+      .select('*, fournisseur:fournisseur_id(id, nom)', { count: 'exact' })
+      .eq('mama_id', mama_id)
+      .order('fournisseur_id');
     if (fournisseur_id) query = query.eq('fournisseur_id', fournisseur_id);
     if (actif !== undefined && actif !== null) query = query.eq('actif', actif);
-    if (limit) query = query.range((page - 1) * limit, page * limit - 1);
+    query = query.range(start, end);
     const { data, count, error } = await query;
     setLoading(false);
     if (error) {

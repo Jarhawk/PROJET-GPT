@@ -2,7 +2,6 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { useProducts } from "@/hooks/useProducts";
 import { useFamilles } from "@/hooks/useFamilles";
-import { useUnites } from "@/hooks/useUnites";
 import { useSousFamilles } from "@/hooks/useSousFamilles";
 import { useZonesStock } from "@/hooks/useZonesStock";
 import { supabase } from '@/lib/supa/client'
@@ -41,7 +40,6 @@ export default function Produits() {
   const [page, setPage] = useState(1);
   const [sortField, setSortField] = useState("famille");
   const [sortOrder, setSortOrder] = useState("asc");
-  const { data: unites = [] } = useUnites(mama_id);
   const { data: familles = [] } = useFamilles(mama_id);
   const {
     data: productsResult = { data: [], count: 0 },
@@ -60,22 +58,14 @@ export default function Produits() {
   const canView = hasAccess("produits", "peut_voir");
   const [showImport, setShowImport] = useState(false);
 
-  const uniteById = useMemo(
-    () => Object.fromEntries(unites.map((u) => [u.id, u])),
-    [unites]
-  );
-  const familleById = useMemo(
-    () => Object.fromEntries(familles.map((f) => [f.id, f])),
-    [familles]
-  );
   const rows = useMemo(
     () =>
       (products || []).map((p) => ({
         ...p,
-        unite_nom: uniteById[p.unite_id]?.nom ?? '',
-        famille_nom: familleById[p.famille_id]?.nom ?? '',
+        unite_nom: p.unite?.nom ?? p.unite_nom ?? '',
+        famille_nom: p.famille?.nom ?? p.famille_nom ?? '',
       })),
-    [products, uniteById, familleById]
+    [products]
   );
 
   const refreshList = useCallback(() => {

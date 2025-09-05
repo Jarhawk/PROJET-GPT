@@ -18,7 +18,7 @@ export function useProduitsInventaire() {
       setError(null);
       let query = supabase.
       from('v_produits_dernier_prix').
-      select('id, nom, unite_id, unite:unite_id (nom), famille').
+      select('id, nom, unite_id, unite:unites!fk_produits_unite(nom), famille').
       eq('mama_id', mama_id).
       eq('actif', true);
       if (famille) query = query.ilike('famille', `%${famille}%`);

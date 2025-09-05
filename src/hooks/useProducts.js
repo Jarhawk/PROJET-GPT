@@ -47,8 +47,8 @@ export function useProducts() {
       .select(
         `id, nom, mama_id, actif, famille_id, unite_id, code, image, pmp,
         stock_reel, stock_min, stock_theorique, created_at, updated_at,
-        unite:unite_id(nom),
-        famille:famille_id(nom)`,
+        unite:unites!produits_unite_id_fkey(nom),
+        famille:familles!produits_famille_id_fkey(nom)`,
         { count: 'exact' }
       )
       .eq('mama_id', mama_id);
@@ -57,6 +57,16 @@ export function useProducts() {
 
     const from = (page - 1) * limit;
     const { data, error, count } = await applyRange(req, from, limit);
+
+    if (error) {
+      setProducts([]);
+      setTotal(0);
+      setLoading(false);
+      setError(error);
+      logError('useProducts.fetch', error, { endpoint: 'produits' });
+      toast.error('Erreur lors du chargement des produits');
+      return [];
+    }
 
     const [
       { data: pmpData },
@@ -79,11 +89,6 @@ export function useProducts() {
     setProducts(final);
     setTotal(count || 0);
     setLoading(false);
-    if (error) {
-      setError(error);
-      logError('useProducts.fetch', error, { endpoint: 'produits' });
-      toast.error('Erreur lors du chargement des produits');
-    }
     return data || [];
   }, [mama_id]);
 
@@ -269,14 +274,14 @@ export function useProducts() {
   const getProduct = useCallback(
     async (id) => {
       if (!mama_id) return null;
-      const { data, error } = await supabase.
-      from("produits").
-      select(
-        "*, famille:famille_id(nom), sous_famille:sous_familles!fk_produits_sous_famille(nom), main_fournisseur:fournisseur_id(id, nom), unite:unite_id (nom)"
-      ).
-      eq("id", id).
-      eq("mama_id", mama_id).
-      single();
+      const { data, error } = await supabase
+      .from('produits')
+      .select(
+        `*, famille:familles!produits_famille_id_fkey(nom), sous_famille:sous_familles!fk_produits_sous_famille(nom), main_fournisseur:fournisseur_id(id, nom), unite:unites!produits_unite_id_fkey(nom)`
+      )
+      .eq('id', id)
+      .eq('mama_id', mama_id)
+      .single();
       if (error) {
         setError(error);
         toast.error(error.message);

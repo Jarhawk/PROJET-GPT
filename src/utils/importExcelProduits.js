@@ -2,7 +2,7 @@ import { supabase } from '@/lib/supa/client'
 import * as XLSX from "xlsx";
 import { v4 as uuidv4 } from "uuid";
 
-import { fetchFamillesForValidation } from "@/hooks/useFamilles";
+import { fetchFamilles } from "@/hooks/useFamilles";
 import { fetchUnitesForValidation } from "@/hooks/useUnites";
 import { fetchZonesStock } from "@/hooks/useZonesStock";
 
@@ -61,7 +61,7 @@ export async function parseProduitsFile(file, mama_id) {
     fournisseursRes,
     produitsRes
   ] = await Promise.all([
-    fetchFamillesForValidation(mama_id),
+    fetchFamilles(mama_id),
     supabase.from("sous_familles").select("id, nom").eq("mama_id", mama_id),
     fetchUnitesForValidation(mama_id),
     fetchZonesStock(mama_id),

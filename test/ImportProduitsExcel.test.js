@@ -16,7 +16,7 @@ const unitesData = [{ id: 100, nom: 'Kg' }];
 const zonesData = [{ id: 200, nom: 'Reserve' }];
 
 vi.mock('@/hooks/useFamilles', () => ({
-  fetchFamillesForValidation: () => ({ data: famillesData }),
+  fetchFamilles: () => ({ data: famillesData }),
 }));
 vi.mock('@/hooks/useUnites', () => ({
   fetchUnitesForValidation: () => ({ data: unitesData }),

@@ -40,7 +40,10 @@ export default function Produits() {
   const [page, setPage] = useState(1);
   const [sortField, setSortField] = useState("famille");
   const [sortOrder, setSortOrder] = useState("asc");
-  const { data: familles = [] } = useFamilles(mama_id);
+  const { familles = [], fetchFamilles } = useFamilles();
+  useEffect(() => {
+    if (mama_id) fetchFamilles();
+  }, [mama_id, fetchFamilles]);
   const {
     data: products = [],
     count: total = 0,

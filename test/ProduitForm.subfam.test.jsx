@@ -17,6 +17,9 @@ let addProductMock;
 vi.mock('@/hooks/useProducts', () => ({
   useProducts: () => ({ addProduct: addProductMock, updateProduct: vi.fn(), loading: false }),
 }));
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({ mama_id: 'm1' }),
+}));
 vi.mock('@/hooks/useFamilles', () => ({
   useFamilles: () => ({ familles, fetchFamilles: vi.fn(), error: null }),
 }));

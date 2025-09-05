@@ -24,7 +24,10 @@ export default function ProduitForm({
   const { mama_id } = useAuth();
   const { data: fournisseursData } = useFournisseurs({ actif: true });
   const fournisseurs = fournisseursData?.data || [];
-  const { data: familles = [], error: famillesError, refetch: fetchFamilles } = useFamilles(mama_id);
+  const { familles = [], fetchFamilles } = useFamilles();
+  useEffect(() => {
+    if (mama_id) fetchFamilles();
+  }, [mama_id, fetchFamilles]);
   const {
     sousFamilles,
     list: listSousFamilles,
@@ -192,10 +195,7 @@ export default function ProduitForm({
           {errors.famille && (
             <p className="text-red-500 text-sm">{errors.famille}</p>
           )}
-          {famillesError && (
-            <p className="text-red-500 text-sm">Erreur chargement familles</p>
-          )}
-          {!famillesError && familles.length === 0 && (
+          {familles.length === 0 && (
             <p className="text-red-500 text-sm">Aucune famille disponible</p>
           )}
         </div>

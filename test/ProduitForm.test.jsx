@@ -6,6 +6,9 @@ let mockHook;
 vi.mock('@/hooks/useProducts', () => ({
   useProducts: () => mockHook(),
 }));
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({ mama_id: 'm1' }),
+}));
 vi.mock('@/hooks/useFamilles', () => ({
   useFamilles: () => ({ familles: [], fetchFamilles: vi.fn(), addFamille: vi.fn() })
 }));

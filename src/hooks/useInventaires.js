@@ -49,7 +49,7 @@ export function useInventaires() {
     let query = supabase.
     from("inventaires").
     select(
-      "*, zone:inventaire_zones!inventaires_zone_id_fkey(nom), lignes:produits_inventaire!inventaire_id(*, produit:produits!produits_inventaire_produit_id_fkey(id, nom, unite_id, unite:unite_id (nom), pmp))"
+      "*, zone:inventaire_zones!inventaires_zone_id_fkey(nom), lignes:produits_inventaire!inventaire_id(*, produit:produits!produits_inventaire_produit_id_fkey(id, nom, unite_id, unite:unites!fk_produits_unite(nom), pmp))"
     ).
     eq("mama_id", mama_id);
     if (zoneId) query = query.eq("zone_id", zoneId);
@@ -138,7 +138,7 @@ export function useInventaires() {
     const { data, error } = await supabase.
     from("inventaires").
     select(
-      "*, zone:inventaire_zones!inventaires_zone_id_fkey(nom), lignes:produits_inventaire!inventaire_id(*, produit:produits!produits_inventaire_produit_id_fkey(id, nom, unite_id, unite:unite_id (nom), pmp))"
+      "*, zone:inventaire_zones!inventaires_zone_id_fkey(nom), lignes:produits_inventaire!inventaire_id(*, produit:produits!produits_inventaire_produit_id_fkey(id, nom, unite_id, unite:unites!fk_produits_unite(nom), pmp))"
     ).
     eq("id", id).
     eq("mama_id", mama_id).

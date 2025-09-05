@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useEffect, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supa/client'
 import { useAuth } from '@/hooks/useAuth'
@@ -6,7 +6,6 @@ import { fetchUnites } from './useUnites'
 import { fetchFamilles } from './useFamilles'
 
 export async function fetchProducts({ mamaId, limit = 100, offset = 0 } = {}) {
-  if (!mamaId) return { data: [], count: 0 }
   const { data, error, count } = await supabase
     .from('produits')
     .select(
@@ -44,11 +43,23 @@ export function useProducts(opts = {}) {
   const [loading, setLoading] = useState(false)
 
   const { mamaId = mama_id, limit = 100, offset = 0 } = opts
+  const queryKey = useMemo(() => ['produits', mamaId, limit, offset], [mamaId, limit, offset])
+  const enabled = !!mamaId
+
+  const fetcher = useCallback(
+    (p = {}) => fetchProducts({ mamaId, limit, offset, ...p }),
+    [mamaId, limit, offset]
+  )
+
+  useEffect(() => {
+    const url = `/rest/v1/produits?select=id,nom,mama_id,actif,famille_id,unite_id,code,image,pmp,stock_reel,stock_min,stock_theorique,created_at,updated_at&mama_id=eq.${mamaId}&order=nom.asc&offset=${offset}&limit=${limit}`
+    console.log('[useProducts]', { queryKey, enabled, mamaId, url })
+  }, [queryKey, enabled, mamaId, limit, offset])
 
   const query = useQuery({
-    queryKey: ['produits', mamaId, limit, offset],
-    queryFn: () => fetchProducts({ mamaId, limit, offset }),
-    enabled: !!mamaId,
+    queryKey,
+    queryFn: () => fetcher(),
+    enabled,
     initialData: { data: [], count: 0 },
   })
 
@@ -130,6 +141,7 @@ export function useProducts(opts = {}) {
     toggleProductActive,
     getProduct,
     fetchProductPrices,
+    fetchProducts: fetcher,
   }
 }
 

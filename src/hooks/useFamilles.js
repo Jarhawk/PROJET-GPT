@@ -28,16 +28,37 @@ export function useFamilles() {
     queryKey: ['familles', mama_id, params],
     enabled: !!mama_id,
     queryFn: async () => {
-      let q = supabase.
-      from('familles').
-      select('id, code, nom, actif', { count: 'exact' }).
-      eq('mama_id', mama_id).
-      order('nom', { ascending: true }).
-      range((params.page - 1) * params.limit, params.page * params.limit - 1);
+      const rangeFrom = (params.page - 1) * params.limit;
+      const rangeTo = params.page * params.limit - 1;
+
+      let q = supabase
+        .from('familles')
+        .select('id, nom, mama_id, code, actif', { count: 'exact' })
+        .eq('mama_id', mama_id)
+        .order('nom', { ascending: true })
+        .range(rangeFrom, rangeTo);
+
       if (params.search) q = q.ilike('nom', `%${params.search}%`);
-      const { data, error, count } = await q;
-      if (error) throw error;
-      return { data: data || [], count: count || 0 };
+
+      let { data, error, count } = await q;
+
+      if (error) {
+        console.warn('[useFamilles] fallback to minimal projection', error);
+        q = supabase
+          .from('familles')
+          .select('id, nom, mama_id', { count: 'exact' })
+          .eq('mama_id', mama_id)
+          .order('nom', { ascending: true })
+          .range(rangeFrom, rangeTo);
+        if (params.search) q = q.ilike('nom', `%${params.search}%`);
+        ({ data, error, count } = await q);
+      }
+
+      if (error) {
+        return { data: [], count: 0 };
+      }
+
+      return { data: data ?? [], count: count ?? 0 };
     }
   });
 
@@ -49,11 +70,11 @@ export function useFamilles() {
   const addMutation = useMutation({
     mutationFn: async (payload) => {
       const body = { ...payload, mama_id };
-      const { data, error } = await supabase.
-      from('familles').
-      insert([body]).
-      select('id, code, nom, actif').
-      single();
+      const { data, error } = await supabase
+        .from('familles')
+        .insert([body])
+        .select('id, nom, mama_id')
+        .single();
       if (error) throw error;
       return data;
     },
@@ -62,13 +83,13 @@ export function useFamilles() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, ...values }) => {
-      const { data, error } = await supabase.
-      from('familles').
-      update(values).
-      eq('id', id).
-      eq('mama_id', mama_id).
-      select('id, code, nom, actif').
-      single();
+      const { data, error } = await supabase
+        .from('familles')
+        .update(values)
+        .eq('id', id)
+        .eq('mama_id', mama_id)
+        .select('id, nom, mama_id')
+        .single();
       if (error) throw error;
       return data;
     },
@@ -105,13 +126,16 @@ export function useFamilles() {
 }
 
 // export minimal attendu par importExcelProduits.js
-export async function fetchFamillesForValidation(supabase, mama_id) {
-  const { data, error } = await supabase.
-  from('familles').
-  select('id, nom, actif').
-  eq('mama_id', mama_id).
-  order('nom', { ascending: true });
-  if (error) throw error;
+export async function fetchFamillesForValidation(supabaseClient, mama_id) {
+  const { data, error } = await supabaseClient
+    .from('familles')
+    .select('id, nom, mama_id')
+    .eq('mama_id', mama_id)
+    .order('nom', { ascending: true });
+  if (error) {
+    console.warn('[fetchFamillesForValidation] error', error);
+    return [];
+  }
   return data ?? [];
 }
 

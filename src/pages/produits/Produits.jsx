@@ -34,16 +34,16 @@ export default function Produits() {
     toggleProductActive,
   } = useProducts();
   const safeProducts = Array.isArray(products) ? products : [];
-  const { familles: rawFamilles, fetchFamilles } = useFamilles();
-  const safeFamilles = Array.isArray(rawFamilles) ? rawFamilles : [];
+  const { familles: famillesData = [], fetchFamilles } = useFamilles();
+  const familles = Array.isArray(famillesData) ? famillesData : [];
   const {
     sousFamilles: rawSousFamilles,
     list: listSousFamilles,
     isLoading,
   } = useSousFamilles();
   const safeSousFamilles = Array.isArray(rawSousFamilles) ? rawSousFamilles : [];
-  const { zones } = useZonesStock();
-  const safeZones = Array.isArray(zones) ? zones : [];
+  const zonesQuery = useZonesStock();
+  const zones = Array.isArray(zonesQuery.data) ? zonesQuery.data : [];
 
   const [showForm, setShowForm] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -175,7 +175,7 @@ export default function Produits() {
             ariaLabel="Filtrer par famille"
           >
             <option value="">Toutes les familles</option>
-            {safeFamilles.map((f) => (
+            {(familles || []).map((f) => (
               <option key={f.id} value={f.id}>
                 {f.nom}
               </option>
@@ -212,7 +212,7 @@ export default function Produits() {
             ariaLabel="Filtrer par zone"
           >
             <option value="">Toutes les zones</option>
-            {safeZones.map((z) => (
+            {(zones || []).map((z) => (
               <option key={z.id} value={z.id}>
                 {z.nom}
               </option>

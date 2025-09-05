@@ -32,7 +32,8 @@ export default function ProduitForm({
     error: sousFamillesError,
   } = useSousFamilles();
   const { data: unites = [], refetch: fetchUnites } = useUnites(mama_id);
-  const { data: zones = [] } = useZonesStock(mama_id);
+  const { data: zonesData } = useZonesStock(mama_id);
+  const zones = zonesData ?? [];
 
   const [nom, setNom] = useState(produit?.nom || "");
   const [familleId, setFamilleId] = useState(produit?.famille_id || "");

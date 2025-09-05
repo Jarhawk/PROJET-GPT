@@ -4,7 +4,7 @@ import { useProducts } from "@/hooks/useProducts";
 import { useFamilles } from "@/hooks/useFamilles";
 import { useSousFamilles } from "@/hooks/useSousFamilles";
 import { useZonesStock } from "@/hooks/useZonesStock";
-import { supabase } from '@/lib/supa/client'
+import { supabase } from '@/lib/supabaseClient'
 import LoadingSkeleton from "@/components/ui/LoadingSkeleton";
 import ProduitFormModal from "@/components/produits/ProduitFormModal";
 import ProduitDetail from "@/components/produits/ProduitDetail";
@@ -40,19 +40,22 @@ export default function Produits() {
   const [page, setPage] = useState(1);
   const [sortField, setSortField] = useState("famille");
   const [sortOrder, setSortOrder] = useState("asc");
-  const { data: familles = [] } = useFamilles(mama_id);
+  const { data: famillesData } = useFamilles(mama_id);
+  const familles = famillesData ?? [];
   const {
-    data: products = [],
+    data,
     count: total = 0,
     refetch,
   } = useProducts({ mamaId: mama_id, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE });
+  const products = data ?? [];
   const {
     sousFamilles: rawSousFamilles,
     list: listSousFamilles,
     isLoading,
   } = useSousFamilles();
   const safeSousFamilles = Array.isArray(rawSousFamilles) ? rawSousFamilles : [];
-  const { data: zones = [] } = useZonesStock(mama_id);
+  const { data: zonesData } = useZonesStock(mama_id);
+  const zones = zonesData ?? [];
   const canEdit = hasAccess("produits", "peut_modifier");
   const canView = hasAccess("produits", "peut_voir");
   const [showImport, setShowImport] = useState(false);

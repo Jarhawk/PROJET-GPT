@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supa/client'
+import { supabase } from '@/lib/supabaseClient'
 
 /**
  * Hook zones de stock (plat, sans embed).
@@ -46,3 +46,5 @@ export async function fetchZonesStock(mamaId, { onlyActive = true } = {}) {
   }
   return data ?? []
 }
+
+export default useZonesStock

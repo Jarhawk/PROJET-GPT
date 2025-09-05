@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supa/client'
+import { supabase } from '@/lib/supabaseClient'
 import { useAuth } from '@/hooks/useAuth'
 
 export async function fetchProducts({ mamaId, limit = 100, offset = 0, search = '', filters = {} } = {}) {
@@ -31,13 +31,14 @@ export async function fetchProducts({ mamaId, limit = 100, offset = 0, search = 
   return { data: enriched, count: count ?? 0 }
 }
 
-export function useProducts({
-  mamaId,
-  limit = 50,
-  offset = 0,
-  filters = {},
-  search = '',
-} = {}) {
+export function useProducts(options = {}) {
+  const {
+    mamaId,
+    limit = 50,
+    offset = 0,
+    filters = {},
+    search = '',
+  } = options
   const { mama_id } = useAuth()
   const [loading, setLoading] = useState(false)
 
@@ -140,7 +141,7 @@ export function useProducts({
     count,
     products: data,
     isLoading: query.isLoading || loading,
-    error: query.error,
+    error: query.error ?? null,
     refetch: query.refetch,
     addProduct,
     updateProduct,

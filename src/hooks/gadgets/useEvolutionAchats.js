@@ -15,7 +15,7 @@ export default function useEvolutionAchats() {
       setState((s) => ({ ...s, loading: true, error: null }));
       const start = new Date();
       start.setMonth(start.getMonth() - 12);
-      const filterDate = new Date(start.getFullYear(), start.getMonth(), 1).toISOString();
+      const filterDate = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-01`;
       const { data, error } = await run(
         supabase
           .from('v_evolution_achats')

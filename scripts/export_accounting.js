@@ -16,6 +16,7 @@ import {
   shouldShowVersion,
   getPackageVersion,
 } from './cli_utils.js';
+import { supabase } from '@/lib/supa/client';
 
 export const USAGE =
   'Usage: node scripts/export_accounting.js YYYY-MM [MAMA_ID] [SUPABASE_URL] [SUPABASE_KEY] [--output FILE] [--format csv|xlsx|json] [--url URL] [--key KEY]';
@@ -32,20 +33,11 @@ if (shouldShowVersion(argv)) {
 export async function exportAccounting(
   month,
   mamaId = process.env.MAMA_ID || null,
-  supabaseUrl = null,
-  supabaseKey = null,
+  _supabaseUrl = null,
+  _supabaseKey = null,
   output = null,
   format = process.env.ACCOUNTING_FORMAT || 'csv'
 ) {
-  const { createClient } = await import('@supabase/supabase-js');
-  const supabase = createClient(
-    supabaseUrl ?? process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL ?? 'https://example.supabase.co',
-    supabaseKey ??
-      process.env.VITE_SUPABASE_ANON_KEY ??
-      process.env.SUPABASE_ANON_KEY ??
-      process.env.SUPABASE_KEY ??
-      'key'
-  );
   const mama_id = mamaId;
   const m = month || new Date().toISOString().slice(0,7);
   const start = `${m}-01`;

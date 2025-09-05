@@ -2,7 +2,6 @@
 import path from 'node:path';
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { strict as assert } from 'node:assert';
-import { createClient } from '@supabase/supabase-js';
 import * as XLSX from 'xlsx';
 import {
   runScript,
@@ -11,6 +10,7 @@ import {
   shouldShowVersion,
   getPackageVersion,
 } from './cli_utils.js';
+import { supabase } from '@/lib/supa/client';
 
 export const USAGE =
   'Usage: node scripts/weekly_report.js [--mama-id ID] [--url URL] [--key KEY] [--out FILE] [--start DATE] [--end DATE] [--format xlsx|csv|json]';
@@ -26,29 +26,13 @@ if (shouldShowVersion(argv)) {
 }
 export async function generateWeeklyCostCenterReport(
   mamaIdArg = null,
-  url = null,
-  key = null,
+  _url = null,
+  _key = null,
   start = null,
   end = null,
   outPath = null,
   format = 'xlsx'
 ) {
-  const resolvedUrl =
-    url ??
-    process.env.SUPA_URL ??
-    process.env.SUPABASE_URL ??
-    process.env.VITE_SUPABASE_URL;
-  const resolvedKey =
-    key ??
-    process.env.SUPA_KEY ??
-    process.env.SUPABASE_KEY ??
-    process.env.SUPABASE_ANON_KEY ??
-    process.env.VITE_SUPABASE_ANON_KEY;
-
-  assert(resolvedUrl, 'Supabase URL is required');
-  assert(/^https?:\/\//.test(resolvedUrl), 'Supabase URL must start with http');
-  assert(resolvedKey, 'Supabase key is required');
-
   if (start) assert(/^\d{4}-\d{2}-\d{2}$/.test(start), 'Invalid start date format');
   if (end) assert(/^\d{4}-\d{2}-\d{2}$/.test(end), 'Invalid end date format');
   if (start && end) {
@@ -72,10 +56,9 @@ export async function generateWeeklyCostCenterReport(
     throw new Error('Output file extension does not match format');
   }
 
-  const supa = createClient(resolvedUrl, resolvedKey);
   const mamaId =
     mamaIdArg ?? process.env.MAMASTOCK_MAMA_ID ?? process.env.MAMA_ID ?? null;
-  const { data, error } = await supa.rpc('stats_cost_centers', {
+  const { data, error } = await supabase.rpc('stats_cost_centers', {
     mama_id_param: mamaId,
     debut_param: start ?? null,
     fin_param: end ?? null,

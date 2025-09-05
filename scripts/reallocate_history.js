@@ -11,6 +11,7 @@ import {
   shouldShowVersion,
   getPackageVersion,
 } from './cli_utils.js';
+import { supabase } from '@/lib/supa/client';
 
 export const USAGE =
   'Usage: node scripts/reallocate_history.js [LIMIT] [MAMA_ID] [SUPABASE_URL] [SUPABASE_KEY] [--limit N] [--dry-run] [--url URL] [--key KEY]';
@@ -30,20 +31,10 @@ export async function reallocateHistory(
     return Number.isFinite(val) && val > 0 ? val : 100;
   })(),
   mamaId = process.env.MAMA_ID || null,
-  supabaseUrl = null,
-  supabaseKey = null,
+  _supabaseUrl = null,
+  _supabaseKey = null,
   dryRun = false
 ) {
-  const { createClient } = await import('@supabase/supabase-js');
-  const supabase = createClient(
-    supabaseUrl ?? process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL ?? 'https://example.supabase.co',
-    supabaseKey ??
-      process.env.VITE_SUPABASE_ANON_KEY ??
-      process.env.SUPABASE_ANON_KEY ??
-      process.env.SUPABASE_KEY ??
-      'key'
-  );
-
   const { data: mouvements, error } = await supabase.rpc(
     'mouvements_without_alloc',
     { limit_param: limit }

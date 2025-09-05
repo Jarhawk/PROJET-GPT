@@ -27,48 +27,30 @@ export function useFournisseurs(params = {}) {
     gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
     queryFn: async ({ signal }) => {
-      // 1er fetch simple (pas d'embed)
-      let q1 = supabase
+      let q = supabase
         .from('fournisseurs')
-        .select('id, nom, actif')
+        .select('id, nom, actif, contact:fournisseur_contacts(nom,email,tel)', { count: 'exact' })
         .eq('mama_id', mama_id)
         .order('nom', { ascending: true })
         .range((page - 1) * limit, page * limit - 1)
-        .abortSignal(signal);
+        .abortSignal(signal)
+        .limit(1, { foreignTable: 'fournisseur_contacts' });
 
-      if (term) q1 = q1.ilike('nom', `%${term}%`);
-      if (actif !== null && actif !== undefined) q1 = q1.eq('actif', actif);
+      if (term) q = q.ilike('nom', `%${term}%`);
+      if (actif !== null && actif !== undefined) q = q.eq('actif', actif);
 
-      const { data: fournisseurs, error: e1 } = await run(q1);
-      if (e1) {
-        logError('[useFournisseurs] q1', e1);
-        return [];
-      }
-      if (!fournisseurs?.length) return [];
-
-      // 2) Récupérer contacts par lot
-      const ids = fournisseurs.map((f) => f.id);
-      const { data: contacts, error: e2 } = await run(
-        supabase
-          .from('fournisseur_contacts')
-          .select('id, nom, email, tel, fournisseur_id')
-          .eq('mama_id', mama_id)
-          .in('fournisseur_id', ids)
-          .abortSignal(signal)
-      );
-      if (e2) {
-        logError('[useFournisseurs] contacts', e2);
+      const { data, error, count } = await run(q);
+      if (error) {
+        logError('[useFournisseurs] list', error);
+        return { data: [], count: 0, embedError: error };
       }
 
-      const byF = new Map();
-      (contacts ?? []).forEach((c) => {
-        byF.set(c.fournisseur_id, { nom: c.nom, email: c.email, tel: c.tel });
-      });
-
-      return fournisseurs.map((f) => ({
+      const mapped = (data || []).map((f) => ({
         ...f,
-        contact: byF.get(f.id) ?? null,
+        contact: Array.isArray(f.contact) ? f.contact[0] || null : f.contact ?? null,
       }));
+
+      return { data: mapped, count: count || 0, embedError: null };
     },
   });
 }

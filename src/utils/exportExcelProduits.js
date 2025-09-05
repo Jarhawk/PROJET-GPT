@@ -30,7 +30,7 @@ export async function exportExcelProduits(mama_id) {
   const { data, error } = await supabase.
   from("produits").
   select(
-    `nom, unite_id, unite:unite_id (nom), famille:familles(nom), sous_famille:sous_familles(nom), zone_stock:zones_stock(nom), stock_theorique, pmp, actif, seuil_min`
+    `nom, unite_id, unite:unite_id (nom), famille:famille_id(nom), sous_famille:sous_famille_id(nom), zone_stock:zones_stock(nom), stock_theorique, pmp, actif, seuil_min`
   ).
   eq("mama_id", mama_id);
 

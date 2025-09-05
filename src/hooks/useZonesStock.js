@@ -8,11 +8,11 @@ import { supabase } from '@/lib/supa/client'
  */
 export function useZonesStock(mamaId, { onlyActive = true } = {}) {
   return useQuery({
-    queryKey: ['zones_stock', mamaId, onlyActive],
+    queryKey: ['inventaire_zones', mamaId, onlyActive],
     queryFn: async () => {
       if (!mamaId) return []
       let q = supabase
-        .from('zones_stock')
+        .from('inventaire_zones')
         .select('id, nom, mama_id, actif')
         .eq('mama_id', mamaId)
         .order('nom', { ascending: true })
@@ -30,14 +30,11 @@ export function useZonesStock(mamaId, { onlyActive = true } = {}) {
   })
 }
 
-// ✅ Ajoute un export par défaut pour compat
-export default useZonesStock
-
 // (optionnel) utilitaire de fetch direct si besoin ailleurs
 export async function fetchZonesStock(mamaId, { onlyActive = true } = {}) {
   if (!mamaId) return []
   let q = supabase
-    .from('zones_stock')
+    .from('inventaire_zones')
     .select('id, nom, mama_id, actif')
     .eq('mama_id', mamaId)
     .order('nom', { ascending: true })

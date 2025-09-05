@@ -1,7 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import { useState } from 'react';
 import ModalGlass from '@/components/ui/ModalGlass';
-import Button from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 
 export default function ExportManager({ open, onClose, onExport }) {
   const [format, setFormat] = useState('pdf');

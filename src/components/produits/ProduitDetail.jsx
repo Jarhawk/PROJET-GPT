@@ -40,9 +40,11 @@ export default function ProduitDetail({ produitId, produit, open, onClose }) {
     };
   }, [open, produitId, fetchProductPrices, fetchProductMouvements, fetchProductStock]);
 
-  const chartData = buildPriceData(historique);
+  const histData = historique ?? [];
+  const mouvData = mouvements ?? [];
+  const chartData = buildPriceData(histData);
   const summary = Object.values(
-    historique.reduce((acc, h) => {
+    histData.reduce((acc, h) => {
       const idF = h.fournisseur?.id || "";
       if (!acc[idF]) {
         acc[idF] = {
@@ -134,14 +136,14 @@ export default function ProduitDetail({ produitId, produit, open, onClose }) {
               </tr>
             </thead>
             <tbody>
-              {historique.length === 0 ? (
+              {histData.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="text-center py-4">
                     Aucune donnée
                   </td>
                 </tr>
               ) : (
-                historique.map((h, i) => (
+                histData.map((h, i) => (
                   <tr key={i}>
                     <td>{h.created_at?.slice(0, 10) || "-"}</td>
                     <td>{h.fournisseur?.nom || "-"}</td>
@@ -184,14 +186,14 @@ export default function ProduitDetail({ produitId, produit, open, onClose }) {
               </tr>
             </thead>
             <tbody>
-              {mouvements.length === 0 ? (
+              {mouvData.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="text-center py-4">
                     Aucun mouvement
                   </td>
                 </tr>
               ) : (
-                mouvements.map((m) => (
+                mouvData.map((m) => (
                   <tr key={m.id}>
                     <td>{m.date?.slice(0, 10) || "-"}</td>
                     <td>{m.type}</td>

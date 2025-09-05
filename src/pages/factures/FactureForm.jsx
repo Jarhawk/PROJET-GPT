@@ -20,7 +20,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { mapUILineToPayload } from '@/features/factures/invoiceMappers';
 import useProduitLineDefaults from '@/hooks/useProduitLineDefaults';
-import useZonesStock from '@/hooks/useZonesStock';
+import { useZonesStock } from '@/hooks/useZonesStock';
 import { formatMoneyFR } from '@/utils/numberFormat';
 
 const FN_UPDATE_FACTURE_EXISTS = false;

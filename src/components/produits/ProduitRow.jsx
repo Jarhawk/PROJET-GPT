@@ -11,6 +11,7 @@ export default function ProduitRow({
     produit.stock_theorique != null &&
     produit.seuil_min != null &&
     produit.stock_theorique < produit.seuil_min;
+  const uniteLabel = produit.unite?.nom ?? produit.unite_nom ?? '';
   const rupture = produit.stock_theorique === 0;
   return (
     <tr className={produit.actif ? "" : "opacity-50 bg-muted"}>
@@ -20,7 +21,7 @@ export default function ProduitRow({
       >
         {produit.nom}
       </td>
-      <td className="px-2 text-center">{produit.unite?.nom ?? ""}</td>
+      <td className="px-2 text-center">{uniteLabel}</td>
       <td className="px-2 text-right">
         {produit.pmp != null ? Number(produit.pmp).toFixed(2) : "-"}
       </td>

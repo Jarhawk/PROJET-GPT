@@ -4,3 +4,7 @@ export function hasAccess(module, access_rights) {
   if (!mod || typeof mod !== "object") return false;
   return mod.peut_voir === true || mod === true;
 }
+
+export function cn(...classes) {
+  return classes.filter(Boolean).join(" ");
+}

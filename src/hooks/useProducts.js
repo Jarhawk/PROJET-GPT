@@ -47,8 +47,8 @@ export function useProducts() {
       .select(
         `id, nom, mama_id, actif, famille_id, unite_id, code, image,
         pmp, stock_reel, stock_min, stock_theorique, created_at, updated_at,
-        unite:unites!produits_unite_id_fkey ( nom ),
-        famille:familles!produits_famille_id_fkey ( nom )`,
+        unite:unites!fk_produits_unite ( nom ),
+        famille:familles!fk_produits_famille ( nom )`,
         { count: 'exact' }
       )
       .eq('mama_id', mama_id)

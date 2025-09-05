@@ -50,6 +50,19 @@ export default defineConfig({
       sourcemap: false,
     },
   },
+  build: {
+    rollupOptions: {
+      onwarn(warning, warn) {
+        if (
+          warning.code === "SOURCEMAP_ERROR" &&
+          /node_modules/.test(warning.loc?.file ?? warning.id ?? "")
+        ) {
+          return;
+        }
+        warn(warning);
+      },
+    },
+  },
   define: {
     'process.env': {}, // évite "process is not defined" côté navigateur
   },

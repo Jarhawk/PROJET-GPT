@@ -18,6 +18,7 @@ import {
   shouldShowVersion,
   getPackageVersion,
 } from './cli_utils.js';
+import { supabase } from '@/lib/supa/client';
 
 export const USAGE =
   'Usage: node scripts/backup_db.js [FILE] [MAMA_ID] [SUPABASE_URL] [SUPABASE_KEY] [--tables list] [--output FILE] [--gzip] [--pretty] [--concurrency N] [--url URL] [--key KEY]';
@@ -35,8 +36,8 @@ if (shouldShowVersion(argv)) {
 export async function backupDb(
   output = null,
   mamaId = process.env.MAMA_ID || null,
-  supabaseUrl = null,
-  supabaseKey = null,
+  _supabaseUrl = null,
+  _supabaseKey = null,
   tables = null,
   gzip = process.env.BACKUP_GZIP === 'true' || process.env.BACKUP_GZIP === '1',
   pretty =
@@ -47,15 +48,6 @@ export async function backupDb(
     return Number.isFinite(val) && val > 0 ? val : Infinity;
   })()
 ) {
-  const { createClient } = await import('@supabase/supabase-js');
-  const supabase = createClient(
-    supabaseUrl ?? process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL ?? 'https://example.supabase.co',
-    supabaseKey ??
-      process.env.VITE_SUPABASE_ANON_KEY ??
-      process.env.SUPABASE_ANON_KEY ??
-      process.env.SUPABASE_KEY ??
-      'key'
-  );
   if (!Number.isFinite(concurrency) || concurrency <= 0) concurrency = Infinity;
   const mama_id = mamaId;
   const defaultTables = process.env.BACKUP_TABLES

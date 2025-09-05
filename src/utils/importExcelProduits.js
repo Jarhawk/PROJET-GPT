@@ -1,4 +1,5 @@
-import supabase from '@/lib/supabase';import * as XLSX from "xlsx";
+import { supabase } from '@/lib/supa/client'
+import * as XLSX from "xlsx";
 import { v4 as uuidv4 } from "uuid";
 
 import { fetchFamillesForValidation } from "@/hooks/useFamilles";
@@ -52,22 +53,21 @@ export async function parseProduitsFile(file, mama_id) {
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const raw = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
-  const supabase = supabase();
   const [
-  famillesRes,
-  sousFamillesRes,
-  unitesRes,
-  zonesRes,
-  fournisseursRes,
-  produitsRes] =
-  await Promise.all([
-  fetchFamillesForValidation(supabase, mama_id),
-  supabase.from("sous_familles").select("id, nom").eq("mama_id", mama_id),
-  fetchUnitesForValidation(mama_id),
-  fetchZonesForValidation(mama_id),
-  supabase.from("fournisseurs").select("id").eq("mama_id", mama_id),
-  supabase.from("produits").select("nom").eq("mama_id", mama_id)]
-  );
+    famillesRes,
+    sousFamillesRes,
+    unitesRes,
+    zonesRes,
+    fournisseursRes,
+    produitsRes
+  ] = await Promise.all([
+    fetchFamillesForValidation(mama_id),
+    supabase.from("sous_familles").select("id, nom").eq("mama_id", mama_id),
+    fetchUnitesForValidation(mama_id),
+    fetchZonesForValidation(mama_id),
+    supabase.from("fournisseurs").select("id").eq("mama_id", mama_id),
+    supabase.from("produits").select("nom").eq("mama_id", mama_id)
+  ]);
 
   const mapByName = (res) =>
   new Map((res.data || []).map((x) => [x.nom.toLowerCase(), x.id]));
@@ -143,7 +143,6 @@ export async function parseProduitsFile(file, mama_id) {
 }
 
 export async function insertProduits(rows) {
-  const supabase = supabase();
   const results = [];
   for (const r of rows) {
     const {

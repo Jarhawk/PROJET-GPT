@@ -3,8 +3,7 @@
 import supabase from '@/lib/supabase';
 // src/hooks/useProducts.js
 import { useState, useCallback, useEffect } from "react";
-import { applyIlikeOr, normalizeSearchTerm } from '@/lib/supa/textSearch';
-import { applyRange } from '@/lib/supa/applyRange';
+import { applySearchOr, applyRange } from '@/lib/supa/queryHelpers';
 import { logError } from '@/lib/supa/logError';
 
 import { useAuth } from '@/hooks/useAuth';
@@ -43,7 +42,6 @@ export function useProducts() {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
-    const term = normalizeSearchTerm(search);
     let req = supabase
       .from('produits')
       .select(
@@ -53,10 +51,9 @@ export function useProducts() {
         famille:famille_id(nom)`,
         { count: 'exact' }
       )
-      .eq('mama_id', mama_id)
-      .order('nom', { ascending: true });
+      .eq('mama_id', mama_id);
 
-    req = applyIlikeOr(req, term);
+    req = applySearchOr(req, search).order('nom', { ascending: true });
 
     const from = (page - 1) * limit;
     const { data, error, count } = await applyRange(req, from, limit);

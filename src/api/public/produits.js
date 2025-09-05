@@ -2,8 +2,7 @@
 /* eslint-env node */
 import express from 'express';
 import supabase from '@/lib/supabase';
-import { applyIlikeOr } from '@/lib/supa/textSearch';
-import { applyRange } from '@/lib/supa/applyRange';
+import { applySearchOr, applyRange } from '@/lib/supa/queryHelpers';
 
 const router = express.Router();
 
@@ -16,7 +15,7 @@ router.get('/', async (req, res) => {
     actif,
     page = '1',
     limit = '100',
-    sortBy = 'famille',
+    sortBy = 'nom',
     order = 'asc',
   } = req.query;
   if (!mama_id) return res.status(400).json({ error: 'mama_id requis' });
@@ -26,22 +25,11 @@ router.get('/', async (req, res) => {
       .select('*')
       .eq('mama_id', mama_id);
     if (famille) query = query.ilike('famille', `%${famille}%`);
-    query = applyIlikeOr(query, search);
+    query = applySearchOr(query, search);
     if (actif !== undefined) query = query.eq('actif', actif === 'true');
-    let sortField = sortBy;
-    let ascending = order !== 'desc';
-    if (sortField.includes('.')) {
-      const parts = sortField.split('.');
-      const dir = parts.pop();
-      if (dir === 'asc' || dir === 'desc') {
-        ascending = dir === 'asc';
-        sortField = parts.join('.');
-      }
-    }
+    const sortField = sortBy;
+    const ascending = order !== 'desc';
     query = query.order(sortField, { ascending });
-    if (sortField !== 'nom') {
-      query = query.order('nom', { ascending: true });
-    }
     const p = Math.max(parseInt(page, 10), 1);
     const l = Math.max(parseInt(limit, 10), 1);
     const start = (p - 1) * l;

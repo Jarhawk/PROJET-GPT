@@ -2226,8 +2226,8 @@ export function useProducts() {
       .select(
         `id, nom, mama_id, actif, famille_id, unite_id, code, image,
         pmp, stock_reel, stock_min, stock_theorique, created_at, updated_at,
-        unite:unites!fk_produits_unite ( nom ),
-        famille:familles!fk_produits_famille ( nom )`,
+        unite:unite_id( nom ),
+        famille:famille_id( nom )`,
         { count: 'exact' }
       )
       .eq('mama_id', mama_id)
@@ -2448,7 +2448,7 @@ export function useProducts() {
       const { data, error } = await supabase.
       from("produits").
       select(
-        "*, famille:familles!fk_produits_famille(nom), sous_famille:sous_familles!fk_produits_sous_famille(nom), main_fournisseur:fournisseur_id(id, nom), unite:unite_id (nom)"
+        "*, famille:famille_id(nom), sous_famille:sous_familles!fk_produits_sous_famille(nom), main_fournisseur:fournisseur_id(id, nom), unite:unite_id (nom)"
       ).
       eq("id", id).
       eq("mama_id", mama_id).

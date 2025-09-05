@@ -1,7 +1,9 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+// fix: avoid ilike.%% on empty search.
 import supabase from '@/lib/supabase';
 // src/hooks/useProducts.js
 import { useState, useCallback, useEffect } from "react";
+import { applyIlikeOr, normalizeSearchTerm } from '@/lib/supa/textSearch';
 
 import { useAuth } from '@/hooks/useAuth';
 import * as XLSX from "xlsx";
@@ -39,7 +41,8 @@ export function useProducts() {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
-    const { data, error, count } = await supabase
+    const term = normalizeSearchTerm(search);
+    let req = supabase
       .from('produits')
       .select(
         `id, nom, mama_id, actif, famille_id, unite_id, code, image,
@@ -49,9 +52,13 @@ export function useProducts() {
         { count: 'exact' }
       )
       .eq('mama_id', mama_id)
-      .ilike('nom', `%${search}%`)
-      .order('nom', { ascending: true })
-      .range((page - 1) * limit, page * limit - 1);
+      .order('nom', { ascending: true });
+
+    req = applyIlikeOr(req, term);
+
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+    const { data, error, count } = await req.range(from, to);
 
     const [
       { data: pmpData },

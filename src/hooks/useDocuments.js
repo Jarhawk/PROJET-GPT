@@ -1,9 +1,11 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+// fix: avoid ilike.%% on empty search.
 import supabase from '@/lib/supabase';
 import { useState, useCallback } from "react";
 
 import { useAuth } from '@/hooks/useAuth';
 import { uploadFile, deleteFile, pathFromUrl } from "@/hooks/useStorage";
+import { normalizeSearchTerm } from '@/lib/supa/textSearch';
 
 export function useDocuments() {
   const { mama_id } = useAuth();
@@ -27,9 +29,10 @@ export function useDocuments() {
     query = query.eq("entite_liee_id", filters.entite_liee_id);
     if (filters.categorie) query = query.eq("categorie", filters.categorie);
     if (filters.type) query = query.eq("type", filters.type);
-    if (filters.search) {
+    const term = normalizeSearchTerm(filters.search);
+    if (term) {
       query = query.or(
-        `nom.ilike.%${filters.search}%,titre.ilike.%${filters.search}%`
+        `nom.ilike.%${term}%,titre.ilike.%${term}%`
       );
     }
 

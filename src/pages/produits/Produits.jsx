@@ -1,7 +1,8 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useProducts } from "@/hooks/useProducts";
 import { useFamilles } from "@/hooks/useFamilles";
+import { useUnites } from "@/hooks/useUnites";
 import { useSousFamilles } from "@/hooks/useSousFamilles";
 import useZonesStock from "@/hooks/useZonesStock";
 import LoadingSkeleton from "@/components/ui/LoadingSkeleton";
@@ -27,6 +28,7 @@ export default function Produits() {
   useEffect(() => {
     document.title = "Produits";
   }, []);
+  const { hasAccess, mama_id } = useAuth();
   const {
     products,
     total,
@@ -34,7 +36,9 @@ export default function Produits() {
     toggleProductActive,
   } = useProducts();
   const safeProducts = Array.isArray(products) ? products : [];
-  const { familles: famillesData = [], fetchFamilles } = useFamilles();
+  const { unites: unitesData = [] } = useUnites();
+  const unites = Array.isArray(unitesData) ? unitesData : [];
+  const { data: famillesData = [] } = useFamilles(mama_id);
   const familles = Array.isArray(famillesData) ? famillesData : [];
   const {
     sousFamilles: rawSousFamilles,
@@ -56,10 +60,27 @@ export default function Produits() {
   const [page, setPage] = useState(1);
   const [sortField, setSortField] = useState("famille");
   const [sortOrder, setSortOrder] = useState("asc");
-  const { hasAccess, mama_id } = useAuth();
   const canEdit = hasAccess("produits", "peut_modifier");
   const canView = hasAccess("produits", "peut_voir");
   const [showImport, setShowImport] = useState(false);
+
+  const uniteById = useMemo(
+    () => Object.fromEntries(unites.map((u) => [u.id, u])),
+    [unites]
+  );
+  const familleById = useMemo(
+    () => Object.fromEntries(familles.map((f) => [f.id, f])),
+    [familles]
+  );
+  const rows = useMemo(
+    () =>
+      safeProducts.map((p) => ({
+        ...p,
+        unite_nom: uniteById[p.unite_id]?.nom ?? '',
+        famille_nom: familleById[p.famille_id]?.nom ?? '',
+      })),
+    [safeProducts, uniteById, familleById]
+  );
 
   const refreshList = useCallback(() => {
     fetchProducts({
@@ -85,10 +106,6 @@ export default function Produits() {
     sortOrder,
   ]);
 
-  // Load dropdown data once on mount
-  useEffect(() => {
-    if (canView) fetchFamilles();
-  }, [fetchFamilles, canView]);
 
   async function handleExportExcel() {
     try {
@@ -252,7 +269,7 @@ export default function Produits() {
               className="min-w-[140px]"
               onClick={handleExportExcel}
               icon={FileDownIcon}
-              disabled={safeProducts.length === 0}
+              disabled={rows.length === 0}
             >
               Exporter vers Excel
             </Button>
@@ -298,14 +315,14 @@ export default function Produits() {
             </tr>
           </thead>
           <tbody>
-            {safeProducts.length === 0 ? (
+            {rows.length === 0 ? (
               <tr>
                 <td colSpan={6} className="py-4 text-center text-muted-foreground">
                   Aucun produit trouvé. Essayez d’ajouter un produit via le bouton ci-dessus.
                 </td>
               </tr>
             ) : (
-              safeProducts.map((p) => (
+              rows.map((p) => (
                 <ProduitRow
                   key={p.id}
                   produit={p}
@@ -324,19 +341,19 @@ export default function Produits() {
       </ListingContainer>
       {/* Mobile listing */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:hidden">
-        {safeProducts.length === 0 ? (
+        {rows.length === 0 ? (
           <div className="py-4 text-center text-muted-foreground">
             Aucun produit trouvé. Essayez d’ajouter un produit via le bouton ci-dessus.
           </div>
         ) : (
-          safeProducts.map((produit) => (
+          rows.map((produit) => (
             <Card key={produit.id} className="p-4 flex flex-col justify-between">
               <div className="flex justify-between items-start">
                 <div className="font-bold break-words">{produit.nom}</div>
                 <span>{produit.actif ? "✅" : "❌"}</span>
               </div>
               <div className="text-sm mt-1 flex flex-wrap gap-2">
-                <span>{produit.unite?.nom ?? ""}</span>
+                <span>{produit.unite?.nom ?? produit.unite_nom ?? ""}</span>
                 <span>Stock: {produit.stock_theorique}</span>
                 <span>PMP: {produit.pmp != null ? Number(produit.pmp).toFixed(2) : "-"}</span>
               </div>
@@ -388,6 +405,7 @@ export default function Produits() {
       {/* Modale détail historique */}
       <ProduitDetail
         produitId={selectedProduct?.id}
+        produit={selectedProduct}
         open={showDetail}
         onClose={() => {
           setShowDetail(false);

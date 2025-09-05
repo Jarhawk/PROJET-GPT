@@ -9,13 +9,15 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { buildPriceData } from "./priceHelpers";
 
-export default function ProduitDetail({ produitId, open, onClose }) {
+export default function ProduitDetail({ produitId, produit, open, onClose }) {
   const { fetchProductPrices, fetchProductMouvements, fetchProductStock } =
     useProducts();
   const [historique, setHistorique] = useState([]);
   const [mouvements, setMouvements] = useState([]);
   const [stock, setStock] = useState(null);
   const [loading, setLoading] = useState(false);
+  const uniteLabel = produit?.unite?.nom ?? produit?.unite_nom ?? '';
+  const familleLabel = produit?.famille?.nom ?? produit?.famille_nom ?? '';
 
   useEffect(() => {
     let active = true;
@@ -77,6 +79,12 @@ export default function ProduitDetail({ produitId, open, onClose }) {
   return (
     <ModalGlass open={open} onClose={onClose}>
       <h2 className="text-lg font-bold text-mamastockGold mb-3">Détails produit</h2>
+      {produit && (
+        <div className="mb-2 text-sm">
+          <p>Unité : {uniteLabel || '-'}</p>
+          <p>Famille : {familleLabel || '-'}</p>
+        </div>
+      )}
       {loading ? (
         <div className="flex justify-center py-6">
           <LoadingSpinner message="Chargement..." />

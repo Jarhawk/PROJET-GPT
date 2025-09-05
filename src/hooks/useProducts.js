@@ -1,6 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 // fix: avoid ilike.%% on empty search.
-import supabase from '@/lib/supabase';
+import { supabase } from '@/lib/supa/client';
 // src/hooks/useProducts.js
 import { useState, useCallback, useEffect } from "react";
 import { applySearchOr, applyRange } from '@/lib/supa/queryHelpers';
@@ -46,9 +46,7 @@ export function useProducts() {
       .from('produits')
       .select(
         `id, nom, mama_id, actif, famille_id, unite_id, code, image, pmp,
-        stock_reel, stock_min, stock_theorique, created_at, updated_at,
-        unite:unites!produits_unite_id_fkey(nom),
-        famille:familles!produits_famille_id_fkey(nom)`,
+        stock_reel, stock_min, stock_theorique, created_at, updated_at`,
         { count: 'exact' }
       )
       .eq('mama_id', mama_id);
@@ -275,13 +273,11 @@ export function useProducts() {
     async (id) => {
       if (!mama_id) return null;
       const { data, error } = await supabase
-      .from('produits')
-      .select(
-        `*, famille:familles!produits_famille_id_fkey(nom), sous_famille:sous_familles!fk_produits_sous_famille(nom), main_fournisseur:fournisseur_id(id, nom), unite:unites!produits_unite_id_fkey(nom)`
-      )
-      .eq('id', id)
-      .eq('mama_id', mama_id)
-      .single();
+        .from('produits')
+        .select('*')
+        .eq('id', id)
+        .eq('mama_id', mama_id)
+        .single();
       if (error) {
         setError(error);
         toast.error(error.message);

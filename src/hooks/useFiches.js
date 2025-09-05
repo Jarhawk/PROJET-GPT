@@ -24,7 +24,7 @@ export function useFiches() {
     let query = supabase.
     from("fiches_techniques").
     select(
-      "*, famille:familles!fiches_techniques_famille_id_fkey(id, nom), lignes:fiche_lignes!fiche_id(id)",
+      "*, famille:famille_id(id, nom), lignes:fiche_lignes!fiche_id(id)",
       { count: "exact" }
     ).
     eq("mama_id", mama_id).
@@ -52,7 +52,7 @@ export function useFiches() {
     const { data, error } = await supabase.
     from("fiches_techniques").
     select(
-      "*, famille:familles!fiches_techniques_famille_id_fkey(id, nom), lignes:v_fiche_lignes_complete!fiche_id(*, sous_fiche:sous_fiche_id(id, nom, cout_par_portion))"
+      "*, famille:famille_id(id, nom), lignes:v_fiche_lignes_complete!fiche_id(*, sous_fiche:sous_fiche_id(id, nom, cout_par_portion))"
     ).
     eq("id", id).
     eq("mama_id", mama_id).

@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { fetchFamillesForValidation } from "@/hooks/useFamilles";
 import { fetchUnitesForValidation } from "@/hooks/useUnites";
-import { fetchZonesForValidation } from "@/hooks/useZonesStock";
+import { fetchZonesStock } from "@/hooks/useZonesStock";
 
 function parseBoolean(value) {
   if (typeof value === "boolean") return value;
@@ -64,13 +64,13 @@ export async function parseProduitsFile(file, mama_id) {
     fetchFamillesForValidation(mama_id),
     supabase.from("sous_familles").select("id, nom").eq("mama_id", mama_id),
     fetchUnitesForValidation(mama_id),
-    fetchZonesForValidation(mama_id),
+    fetchZonesStock(mama_id),
     supabase.from("fournisseurs").select("id").eq("mama_id", mama_id),
     supabase.from("produits").select("nom").eq("mama_id", mama_id)
   ]);
 
   const mapByName = (res) =>
-  new Map((res.data || []).map((x) => [x.nom.toLowerCase(), x.id]));
+  new Map(((res?.data ?? res) || []).map((x) => [x.nom.toLowerCase(), x.id]));
   const famillesMap = mapByName(famillesRes);
   const sousFamillesMap = mapByName(sousFamillesRes);
   const unitesMap = mapByName(unitesRes);

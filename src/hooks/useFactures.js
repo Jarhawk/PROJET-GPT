@@ -1,9 +1,11 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+// fix: avoid ilike.%% on empty search.
 import supabase from '@/lib/supabase';
 import { useState } from "react";
 
 import { useAuth } from '@/hooks/useAuth';
 import usePeriodes from "@/hooks/usePeriodes";
+import { normalizeSearchTerm } from '@/lib/supa/textSearch';
 
 export function useFactures() {
   const { mama_id } = useAuth();
@@ -25,7 +27,8 @@ export function useFactures() {
       )
       .eq("mama_id", mama_id)
       .order("date_reception", { ascending: false });
-    if (search) q = q.ilike("numero_bl", `%${search}%`);
+    const termBL = normalizeSearchTerm(search);
+    if (termBL) q = q.ilike("numero_bl", `%${termBL}%`);
     q = q.range((page - 1) * limit, page * limit - 1);
     const { data, error, count } = await q;
     if (!error) {
@@ -58,9 +61,10 @@ export function useFactures() {
       .order("date_facture", { ascending: false })
       .range((page - 1) * pageSize, page * pageSize - 1);
 
-    if (search) {
+    const term = normalizeSearchTerm(search);
+    if (term) {
       query = query.or(
-        `numero.ilike.%${search}%,fournisseurs.nom.ilike.%${search}%`
+        `numero.ilike.%${term}%,fournisseurs.nom.ilike.%${term}%`
       );
     }
     if (fournisseur) query = query.eq("fournisseur_id", fournisseur);

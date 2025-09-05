@@ -1,7 +1,9 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
+// fix: avoid ilike.%% on empty search.
 import supabase from '@/lib/supabase';
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { normalizeSearchTerm } from '@/lib/supa/textSearch';
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
@@ -25,16 +27,17 @@ export function useUnites() {
   const [params, setParams] = useState({ search: '', page: 1, limit: 50 });
 
   const query = useQuery({
-    queryKey: ['unites', mama_id, params],
+    queryKey: ['unites', mama_id, { ...params, search: normalizeSearchTerm(params.search) }],
     enabled: !!mama_id,
     queryFn: async () => {
+      const term = normalizeSearchTerm(params.search);
       let q = supabase.
       from('unites').
       select('id, code, nom, actif', { count: 'exact' }).
       eq('mama_id', mama_id).
       order('nom', { ascending: true }).
       range((params.page - 1) * params.limit, params.page * params.limit - 1);
-      if (params.search) q = q.ilike('nom', `%${params.search}%`);
+      if (term) q = q.ilike('nom', `%${term}%`);
       const { data, error, count } = await q;
       if (error) throw error;
       return { data: data || [], count: count || 0 };

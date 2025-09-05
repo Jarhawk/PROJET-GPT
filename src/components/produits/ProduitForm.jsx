@@ -5,8 +5,9 @@ import { useProducts } from "@/hooks/useProducts";
 import { useFamilles } from "@/hooks/useFamilles";
 import { useSousFamilles } from "@/hooks/useSousFamilles";
 import { useUnites } from "@/hooks/useUnites";
+import { useZonesStock } from "@/hooks/useZonesStock";
 import useFournisseurs from "@/hooks/data/useFournisseurs";
-import useZonesStock from "@/hooks/useZonesStock";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from 'sonner';
 import GlassCard from "@/components/ui/GlassCard";
 import { Input } from "@/components/ui/input";
@@ -20,21 +21,18 @@ export default function ProduitForm({
   onClose,
 }) {
   const editing = !!produit;
+  const { mama_id } = useAuth();
   const { data: fournisseursData } = useFournisseurs({ actif: true });
   const fournisseurs = fournisseursData?.data || [];
-  const {
-    familles,
-    fetchFamilles,
-    error: famillesError,
-  } = useFamilles();
+  const { data: familles = [], error: famillesError, refetch: fetchFamilles } = useFamilles(mama_id);
   const {
     sousFamilles,
     list: listSousFamilles,
     loading: sousFamillesLoading,
     error: sousFamillesError,
   } = useSousFamilles();
-  const { unites, fetchUnites } = useUnites();
-  const { data: zones = [] } = useZonesStock();
+  const { data: unites = [], refetch: fetchUnites } = useUnites(mama_id);
+  const { data: zones = [] } = useZonesStock(mama_id);
 
   const [nom, setNom] = useState(produit?.nom || "");
   const [familleId, setFamilleId] = useState(produit?.famille_id || "");

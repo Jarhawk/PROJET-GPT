@@ -33,15 +33,17 @@ export default function Produits() {
     fetchProducts,
     toggleProductActive,
   } = useProducts();
-  const { familles: famillesHook, fetchFamilles } = useFamilles();
+  const safeProducts = Array.isArray(products) ? products : [];
+  const { familles: rawFamilles, fetchFamilles } = useFamilles();
+  const safeFamilles = Array.isArray(rawFamilles) ? rawFamilles : [];
   const {
     sousFamilles: rawSousFamilles,
     list: listSousFamilles,
     isLoading,
   } = useSousFamilles();
-  const sousFamilles = Array.isArray(rawSousFamilles) ? rawSousFamilles : [];
+  const safeSousFamilles = Array.isArray(rawSousFamilles) ? rawSousFamilles : [];
   const { zones } = useZonesStock();
-  const familles = famillesHook;
+  const safeZones = Array.isArray(zones) ? zones : [];
 
   const [showForm, setShowForm] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -173,7 +175,7 @@ export default function Produits() {
             ariaLabel="Filtrer par famille"
           >
             <option value="">Toutes les familles</option>
-            {familles.map((f) => (
+            {safeFamilles.map((f) => (
               <option key={f.id} value={f.id}>
                 {f.nom}
               </option>
@@ -193,8 +195,7 @@ export default function Produits() {
               ariaLabel="Filtrer par sous-famille"
             >
               <option value="">Toutes les sous-familles</option>
-              {Array.isArray(sousFamilles) &&
-                sousFamilles.map((sf) => (
+              {safeSousFamilles.map((sf) => (
                   <option key={sf.id} value={sf.id}>
                     {sf.nom}
                   </option>
@@ -211,7 +212,7 @@ export default function Produits() {
             ariaLabel="Filtrer par zone"
           >
             <option value="">Toutes les zones</option>
-            {zones.map((z) => (
+            {safeZones.map((z) => (
               <option key={z.id} value={z.id}>
                 {z.nom}
               </option>
@@ -251,7 +252,7 @@ export default function Produits() {
               className="min-w-[140px]"
               onClick={handleExportExcel}
               icon={FileDownIcon}
-              disabled={products.length === 0}
+              disabled={safeProducts.length === 0}
             >
               Exporter vers Excel
             </Button>
@@ -297,14 +298,14 @@ export default function Produits() {
             </tr>
           </thead>
           <tbody>
-            {products.length === 0 ? (
+            {safeProducts.length === 0 ? (
               <tr>
                 <td colSpan={6} className="py-4 text-center text-muted-foreground">
                   Aucun produit trouvé. Essayez d’ajouter un produit via le bouton ci-dessus.
                 </td>
               </tr>
             ) : (
-              products.map((p) => (
+              safeProducts.map((p) => (
                 <ProduitRow
                   key={p.id}
                   produit={p}
@@ -323,12 +324,12 @@ export default function Produits() {
       </ListingContainer>
       {/* Mobile listing */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:hidden">
-        {products.length === 0 ? (
+        {safeProducts.length === 0 ? (
           <div className="py-4 text-center text-muted-foreground">
             Aucun produit trouvé. Essayez d’ajouter un produit via le bouton ci-dessus.
           </div>
         ) : (
-          products.map((produit) => (
+          safeProducts.map((produit) => (
             <Card key={produit.id} className="p-4 flex flex-col justify-between">
               <div className="flex justify-between items-start">
                 <div className="font-bold break-words">{produit.nom}</div>

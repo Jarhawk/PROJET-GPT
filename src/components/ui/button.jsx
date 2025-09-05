@@ -1,11 +1,13 @@
-/* @ts-nocheck */
-import React from 'react';
+import * as React from 'react';
+import { Slot } from '@radix-ui/react-slot';
+import { cn } from '@/lib/utils'; // keep your local cn helper
 
-/** Minimal button wrapper, compatible with previous usage. */
-export function Button({ asChild = false, className = '', ...props }) {
-  const Comp = asChild ? 'span' : 'button';
-  return <Comp className={className} {...props} />;
-}
+const Button = React.forwardRef(function Button(
+  { className, asChild = false, ...props },
+  ref
+) {
+  const Comp = asChild ? Slot : 'button';
+  return <Comp ref={ref} className={cn('inline-flex items-center justify-center', className)} {...props} />;
+});
 
-/** Compat: allow `import Button from ...` */
 export default Button;

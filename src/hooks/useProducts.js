@@ -45,10 +45,10 @@ export function useProducts() {
     let req = supabase
       .from('produits')
       .select(
-        `id, nom, mama_id, actif, famille_id, unite_id, code, image,
-        pmp, stock_reel, stock_min, stock_theorique, created_at, updated_at,
-        unite:unite_id ( nom ),
-        famille:famille_id ( nom )`,
+        `id, nom, mama_id, actif, famille_id, unite_id, code, image, pmp,
+        stock_reel, stock_min, stock_theorique, created_at, updated_at,
+        unite:unite_id(nom),
+        famille:famille_id(nom)`,
         { count: 'exact' }
       )
       .eq('mama_id', mama_id)

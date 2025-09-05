@@ -105,11 +105,15 @@ export function useFournisseurs() {
       prev.
       map((f) => {
         if (f.id !== id) return f;
-        const contactObj = { ...f.contact };
+        const contactObj = f.contact ? { ...f.contact } : {};
         if (contact !== undefined) contactObj.nom = contact;
         if (email !== undefined) contactObj.email = email;
         if (tel !== undefined) contactObj.tel = tel;
-        return { ...f, ...fields, contact: contactObj };
+        return {
+          ...f,
+          ...fields,
+          contact: Object.keys(contactObj).length ? contactObj : null,
+        };
       }).
       sort((a, b) => a.nom.localeCompare(b.nom))
       );

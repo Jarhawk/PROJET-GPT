@@ -1,11 +1,11 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import supabase from '@/lib/supabase';
+import { supabase } from '@/lib/supabaseClient';
 import { useCallback, useMemo } from "react";
-import { useQuery } from '@tanstack/react-query';
-
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { deduceEnabledModulesFromRights } from '@/lib/access';
+import { run } from '@/lib/supa/fetcher';
+import { logError } from '@/lib/supa/logError';
 
 function safeQueryClient() {
   try {
@@ -48,18 +48,22 @@ export default function useMamaSettings() {
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
     queryFn: async ({ signal }) => {
-      const cols = 'logo_url, primary_color, secondary_color, email_envoi, email_alertes, dark_mode, langue, monnaie, timezone, rgpd_text, mentions_legales';
-      const { data, error } = await supabase
+      const cols =
+        'logo_url, primary_color, secondary_color, email_envoi, email_alertes, dark_mode, langue, monnaie, timezone, rgpd_text, mentions_legales';
+      const q = supabase
         .from('mamas')
         .select(cols)
         .eq('id', mamaId)
         .maybeSingle()
         .abortSignal(signal);
+
+      const { data, error } = await run(q);
       if (error) {
-        console.warn('[compat] mamas maybeSingle', error);
+        logError('mamas maybeSingle', error);
+        return defaults;
       }
       return data ?? defaults;
-    }
+    },
   });
 
   const updateMamaSettings = useCallback(

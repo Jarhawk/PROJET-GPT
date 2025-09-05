@@ -1,7 +1,9 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import supabase from '@/lib/supabase';
+import { supabase } from '@/lib/supabaseClient';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
+import { run } from '@/lib/supa/fetcher';
+import { logError } from '@/lib/supa/logError';
 
 
 export function useFournisseurs(params = {}) {
@@ -21,67 +23,49 @@ export function useFournisseurs(params = {}) {
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
-    queryFn: async () => {
-      // 1er fetch simple sans embed
+    queryFn: async ({ signal }) => {
+      // 1er fetch simple (pas d'embed)
       let q1 = supabase
         .from('fournisseurs')
-        .select('id, nom, actif', { count: 'exact' })
+        .select('id, nom, actif')
         .eq('mama_id', mama_id)
         .order('nom', { ascending: true })
-        .range((page - 1) * limit, page * limit - 1);
+        .range((page - 1) * limit, page * limit - 1)
+        .abortSignal(signal);
 
       if (search) q1 = q1.ilike('nom', `%${search}%`);
       if (actif !== null && actif !== undefined) q1 = q1.eq('actif', actif);
 
-      const { data: fournisseurs, error: err1, count } = await q1;
-      if (err1) {
-        console.error('[useFournisseurs] q1', err1); // [diag]
-        throw err1;
+      const { data: fournisseurs, error: e1 } = await run(q1);
+      if (e1) {
+        logError('[useFournisseurs] q1', e1);
+        return [];
       }
+      if (!fournisseurs?.length) return [];
 
-      const ids = (fournisseurs || []).map((f) => f.id);
-      let contactsMap = {};
-      let embedError = null;
-
-      if (ids.length) {
-        // 2e requête pour les contacts
-        const { data: contacts, error: contactErr } = await supabase
+      // 2) Récupérer contacts par lot
+      const ids = fournisseurs.map((f) => f.id);
+      const { data: contacts, error: e2 } = await run(
+        supabase
           .from('fournisseur_contacts')
           .select('id, nom, email, tel, fournisseur_id')
           .eq('mama_id', mama_id)
-          .in('fournisseur_id', ids);
-        if (contactErr) {
-          console.error('[useFournisseurs] contacts', contactErr); // [compat]
-          throw contactErr;
-        }
-        contacts.forEach((c) => {
-          contactsMap[c.fournisseur_id] = {
-            nom: c.nom,
-            email: c.email,
-            tel: c.tel,
-          };
-        });
-
-        // tentative embed pour diagnostics
-        const { error: embedErr } = await supabase
-          .from('fournisseurs')
-          .select('id, fournisseur_contacts(nom,email,tel)')
-          .in('id', ids);
-        if (embedErr) {
-          console.warn('[useFournisseurs] embed', embedErr); // [compat]
-          if (embedErr.status === 500) {
-            // [compat] fallback already in place via 2 requêtes
-          }
-          embedError = embedErr;
-        }
+          .in('fournisseur_id', ids)
+          .abortSignal(signal)
+      );
+      if (e2) {
+        logError('[useFournisseurs] contacts', e2);
       }
 
-      const list = (fournisseurs || []).map((f) => ({
-        ...f,
-        contact: contactsMap[f.id] || null,
-      }));
+      const byF = new Map();
+      (contacts ?? []).forEach((c) => {
+        byF.set(c.fournisseur_id, { nom: c.nom, email: c.email, tel: c.tel });
+      });
 
-      return { data: list, count: count || 0, embedError };
+      return fournisseurs.map((f) => ({
+        ...f,
+        contact: byF.get(f.id) ?? null,
+      }));
     },
   });
 }

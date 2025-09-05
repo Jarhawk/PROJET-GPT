@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import supabase from '@/lib/supabase';
 import { useState } from "react";
+import { applyRange } from '@/lib/supa/applyRange';
 
 import { useAuth } from '@/hooks/useAuth';
 
@@ -21,7 +22,7 @@ export function usePromotions() {
     eq("mama_id", mama_id).
     order("date_debut", { ascending: false });
     if (typeof query.range === "function") {
-      query = query.range((page - 1) * limit, page * limit - 1);
+      query = applyRange(query, (page - 1) * limit, limit);
     }
     if (search) query = query.ilike("nom", `%${search}%`);
     if (typeof actif === "boolean") query = query.eq("actif", actif);

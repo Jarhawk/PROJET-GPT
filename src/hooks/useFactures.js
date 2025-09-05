@@ -2,6 +2,7 @@
 // fix: avoid ilike.%% on empty search.
 import supabase from '@/lib/supabase';
 import { useState } from "react";
+import { applyRange } from '@/lib/supa/applyRange';
 
 import { useAuth } from '@/hooks/useAuth';
 import usePeriodes from "@/hooks/usePeriodes";
@@ -29,8 +30,11 @@ export function useFactures() {
       .order("date_reception", { ascending: false });
     const termBL = normalizeSearchTerm(search);
     if (termBL) q = q.ilike("numero_bl", `%${termBL}%`);
-    q = q.range((page - 1) * limit, page * limit - 1);
-    const { data, error, count } = await q;
+    const { data, error, count } = await applyRange(
+      q,
+      (page - 1) * limit,
+      limit
+    );
     if (!error) {
       setFactures(data || []);
       setTotal(count || 0);
@@ -58,8 +62,7 @@ export function useFactures() {
         { count: "exact" }
       )
       .eq("mama_id", mama_id)
-      .order("date_facture", { ascending: false })
-      .range((page - 1) * pageSize, page * pageSize - 1);
+      .order("date_facture", { ascending: false });
 
     const term = normalizeSearchTerm(search);
     if (term) {
@@ -77,7 +80,11 @@ export function useFactures() {
       query = query.gte("date_facture", start).lt("date_facture", endStr);
     }
 
-    const { data, error, count } = await query;
+    const { data, error, count } = await applyRange(
+      query,
+      (page - 1) * pageSize,
+      pageSize
+    );
     if (!error) {
       setFactures(data || []);
       setTotal(count || 0);

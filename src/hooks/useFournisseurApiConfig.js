@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import supabase from '@/lib/supabase';
 import { useState } from 'react';
+import { applyRange } from '@/lib/supa/applyRange';
 
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -68,7 +69,6 @@ export function useFournisseurApiConfig() {
     const p = Number(page) || 1;
     const l = Number(limit) || 20;
     const start = (p - 1) * l;
-    const end = start + l - 1;
     let query = supabase
       .from('fournisseurs_api_config')
       .select('*, fournisseur:fournisseur_id(id, nom)', { count: 'exact' })
@@ -76,8 +76,7 @@ export function useFournisseurApiConfig() {
       .order('fournisseur_id');
     if (fournisseur_id) query = query.eq('fournisseur_id', fournisseur_id);
     if (actif !== undefined && actif !== null) query = query.eq('actif', actif);
-    query = query.range(start, end);
-    const { data, count, error } = await query;
+    const { data, count, error } = await applyRange(query, start, l);
     setLoading(false);
     if (error) {
       setError(error);

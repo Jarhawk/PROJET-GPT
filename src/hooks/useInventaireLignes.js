@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import supabase from '@/lib/supabase';
 import { useState } from "react";
+import { applyRange } from '@/lib/supa/applyRange';
 
 import { useAuth } from '@/hooks/useAuth';
 
@@ -42,8 +43,7 @@ export function useInventaireLignes() {
       query = query.eq("produit_id", search);
     }
     const from = (page - 1) * limit;
-    query = query.range(from, from + limit - 1);
-    const { data, error, count } = await query;
+    const { data, error, count } = await applyRange(query, from, limit);
     setLoading(false);
     if (error) {
       setError(error);

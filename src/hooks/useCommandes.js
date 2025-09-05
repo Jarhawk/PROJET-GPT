@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import supabase from '@/lib/supabase';
 import { useState, useCallback } from "react";
+import { applyRange } from '@/lib/supa/applyRange';
 
 import { useAuth } from '@/hooks/useAuth';
 
@@ -24,13 +25,16 @@ export function useCommandes() {
           { count: "exact" }
         )
         .eq("mama_id", mama_id)
-        .order("date_commande", { ascending: false })
-        .range((page - 1) * limit, page * limit - 1);
+        .order("date_commande", { ascending: false });
       if (fournisseur) query = query.eq("fournisseur_id", fournisseur);
       if (statut) query = query.eq("statut", statut);
       if (debut) query = query.gte("date_commande", debut);
       if (fin) query = query.lte("date_commande", fin);
-      const { data, count, error } = await query;
+      const { data, count, error } = await applyRange(
+        query,
+        (page - 1) * limit,
+        limit
+      );
       setLoading(false);
       if (error) {
         console.error("❌ fetchCommandes", error.message);

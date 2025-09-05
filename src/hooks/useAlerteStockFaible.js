@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { run } from '@/lib/supa/fetcher';
 import { logError } from '@/lib/supa/logError';
+import { applyRange } from '@/lib/supa/applyRange';
 
 /**
  * Hook for low stock alerts based on v_alertes_rupture_api view.
@@ -23,16 +24,14 @@ export function useAlerteStockFaible({ page = 1, pageSize = 20 } = {}) {
       setLoading(true);
       setError(null);
       const from = (page - 1) * pageSize;
-      const to = from + pageSize - 1;
+      const base = supabase
+        .from('v_alertes_rupture_api')
+        .select(
+          'id:produit_id, produit_id, nom, unite, fournisseur_id, fournisseur_nom, stock_actuel, stock_min, manque, consommation_prevue, receptions, stock_projete'
+        )
+        .order('manque', { ascending: false });
       const { data: rows, error: err } = await run(
-        supabase
-          .from('v_alertes_rupture_api')
-          .select(
-            'id:produit_id, produit_id, nom, unite, fournisseur_id, fournisseur_nom, stock_actuel, stock_min, manque, consommation_prevue, receptions, stock_projete'
-          )
-          .order('manque', { ascending: false })
-          .range(from, to)
-          .abortSignal(signal)
+        applyRange(base, from, pageSize).abortSignal(signal)
       );
       if (err) {
         logError('[v_alertes_rupture_api]', err);

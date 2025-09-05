@@ -2,13 +2,14 @@
 import { useAuth } from '@/hooks/useAuth';
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import GlassCard from "@/components/ui/GlassCard";
+import ApiDiagnostic from '@/components/dev/ApiDiagnostic.jsx';
 
 export default function Debug() {
   const { session, role, mama_id, access_rights, loading: authLoading } = useAuth();
   if (authLoading) return <LoadingSpinner message="Chargement..." />;
 
   return (
-    <div className="p-8 flex justify-center">
+    <div className="p-8 flex flex-col items-center gap-4">
       <GlassCard className="max-w-3xl w-full">
         <h1 className="text-2xl font-bold mb-4 text-mamastock-gold">🧪 Debug AuthContext</h1>
 
@@ -33,6 +34,7 @@ export default function Debug() {
           </div>
         </div>
       </GlassCard>
+      {import.meta.env.DEV && <ApiDiagnostic mamaId={mama_id} />}
     </div>
   );
 }

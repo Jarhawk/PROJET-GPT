@@ -1,7 +1,8 @@
-import supabase from '@/lib/supabase';import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
-
+import { supabase } from '@/lib/supabaseClient';
+import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { run } from '@/lib/supa/fetcher';
+import { logError } from '@/lib/supa/logError';
 
 /**
  * Hook for low stock alerts based on v_alertes_rupture_api view.
@@ -16,80 +17,45 @@ export function useAlerteStockFaible({ page = 1, pageSize = 20 } = {}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    if (!mama_id) return;
-    let aborted = false;
-    const fetchData = async () => {
+  const fetchData = useCallback(
+    async (signal) => {
+      if (!mama_id) return [];
       setLoading(true);
       setError(null);
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
-      try {
-        const base = supabase.from('v_alertes_rupture_api');
-        const selectWith =
-          'id:produit_id, produit_id, nom, unite, fournisseur_id, fournisseur_nom, stock_actuel, stock_min, manque, consommation_prevue, receptions, stock_projete';
-
-        let { data: rows, count, error } = await base
-          .select(selectWith, { count: 'exact' })
+      const { data: rows, error: err } = await run(
+        supabase
+          .from('v_alertes_rupture_api')
+          .select(
+            'id:produit_id, produit_id, nom, unite, fournisseur_id, fournisseur_nom, stock_actuel, stock_min, manque, consommation_prevue, receptions, stock_projete'
+          )
           .order('manque', { ascending: false })
-          .range(from, to);
-
-        if (error?.status === 400) {
-          console.error('[compat] select columns:', selectWith); // [compat]
-          toast.error('API compat'); // [compat]
-          rows = [];
-          count = 0;
-        } else if (error?.status === 500) {
-          console.error('[compat] v_alertes_rupture_api', error); // [compat]
-          rows = [];
-          count = 0;
-        } else if (error && error.code === '42703') {
-          if (import.meta.env.DEV)
-            console.debug('v_alertes_rupture_api sans stock_projete');
-          const { data: d2, count: c2, error: e2 } = await base
-            .select(
-              'id:produit_id, produit_id, nom, unite, fournisseur_id, fournisseur_nom, stock_actuel, stock_min, manque, consommation_prevue, receptions',
-              { count: 'exact' }
-            )
-            .order('manque', { ascending: false })
-            .range(from, to);
-          if (e2) throw e2;
-          rows = (d2 ?? []).map((r) => ({
-            ...r,
-            stock_projete:
-              r.stock_actuel != null ||
-              r.receptions != null ||
-              r.consommation_prevue != null
-                ? (r.stock_actuel ?? 0) + (r.receptions ?? 0) - (r.consommation_prevue ?? 0)
-                : null,
-          }));
-          count = c2 || 0;
-        } else {
-          if (error) throw error;
-          if (import.meta.env.DEV)
-            console.debug('v_alertes_rupture_api avec stock_projete');
-        }
-
-        if (!aborted) {
-          setData(rows || []);
-          setTotal(count || 0);
-        }
-      } catch (err) {
-        console.error(err);
-        if (!aborted) {
-          setError(err);
-          setData([]);
-          toast.error(err.message || 'Erreur récupération alertes rupture');
-        }
-      } finally {
-        if (!aborted) setLoading(false);
+          .range(from, to)
+          .abortSignal(signal)
+      );
+      if (err) {
+        logError('[v_alertes_rupture_api]', err);
+        setData([]);
+        setTotal(0);
+        setError(err);
+        setLoading(false);
+        return [];
       }
-    };
-    fetchData();
-    return () => {
-      aborted = true;
-    };
-  }, [mama_id, page, pageSize]);
+      setData(rows ?? []);
+      setTotal(rows?.length ?? 0);
+      setLoading(false);
+      return rows ?? [];
+    },
+    [mama_id, page, pageSize]
+  );
+
+  useEffect(() => {
+    if (!mama_id) return;
+    const controller = new AbortController();
+    fetchData(controller.signal);
+    return () => controller.abort();
+  }, [mama_id, fetchData]);
 
   return { data, total, page, pageSize, loading, error };
 }

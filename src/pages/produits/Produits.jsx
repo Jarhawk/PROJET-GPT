@@ -4,7 +4,8 @@ import { useProducts } from "@/hooks/useProducts";
 import { useFamilles } from "@/hooks/useFamilles";
 import { useUnites } from "@/hooks/useUnites";
 import { useSousFamilles } from "@/hooks/useSousFamilles";
-import useZonesStock from "@/hooks/useZonesStock";
+import { useZonesStock } from "@/hooks/useZonesStock";
+import { supabase } from '@/lib/supa/client'
 import LoadingSkeleton from "@/components/ui/LoadingSkeleton";
 import ProduitFormModal from "@/components/produits/ProduitFormModal";
 import ProduitDetail from "@/components/produits/ProduitDetail";
@@ -29,26 +30,6 @@ export default function Produits() {
     document.title = "Produits";
   }, []);
   const { hasAccess, mama_id } = useAuth();
-  const {
-    products,
-    total,
-    fetchProducts,
-    toggleProductActive,
-  } = useProducts();
-  const safeProducts = Array.isArray(products) ? products : [];
-  const { unites: unitesData = [] } = useUnites();
-  const unites = Array.isArray(unitesData) ? unitesData : [];
-  const { data: famillesData = [] } = useFamilles(mama_id);
-  const familles = Array.isArray(famillesData) ? famillesData : [];
-  const {
-    sousFamilles: rawSousFamilles,
-    list: listSousFamilles,
-    isLoading,
-  } = useSousFamilles();
-  const safeSousFamilles = Array.isArray(rawSousFamilles) ? rawSousFamilles : [];
-  const zonesQuery = useZonesStock();
-  const zones = Array.isArray(zonesQuery.data) ? zonesQuery.data : [];
-
   const [showForm, setShowForm] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showDetail, setShowDetail] = useState(false);
@@ -60,6 +41,21 @@ export default function Produits() {
   const [page, setPage] = useState(1);
   const [sortField, setSortField] = useState("famille");
   const [sortOrder, setSortOrder] = useState("asc");
+  const { data: unites = [] } = useUnites(mama_id);
+  const { data: familles = [] } = useFamilles(mama_id);
+  const {
+    data: productsResult = { data: [], count: 0 },
+    refetch,
+  } = useProducts({ mamaId: mama_id, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE });
+  const products = productsResult.data ?? [];
+  const total = productsResult.count ?? 0;
+  const {
+    sousFamilles: rawSousFamilles,
+    list: listSousFamilles,
+    isLoading,
+  } = useSousFamilles();
+  const safeSousFamilles = Array.isArray(rawSousFamilles) ? rawSousFamilles : [];
+  const { data: zones = [] } = useZonesStock(mama_id);
   const canEdit = hasAccess("produits", "peut_modifier");
   const canView = hasAccess("produits", "peut_voir");
   const [showImport, setShowImport] = useState(false);
@@ -74,37 +70,17 @@ export default function Produits() {
   );
   const rows = useMemo(
     () =>
-      safeProducts.map((p) => ({
+      (products || []).map((p) => ({
         ...p,
         unite_nom: uniteById[p.unite_id]?.nom ?? '',
         famille_nom: familleById[p.famille_id]?.nom ?? '',
       })),
-    [safeProducts, uniteById, familleById]
+    [products, uniteById, familleById]
   );
 
   const refreshList = useCallback(() => {
-    fetchProducts({
-      search,
-      famille: familleFilter,
-      sousFamille: sousFamilleFilter,
-      zone: zoneFilter,
-      actif: actifFilter === "all" ? null : actifFilter === "true",
-      page,
-      limit: PAGE_SIZE,
-      sortBy: sortField,
-      order: sortOrder,
-    });
-  }, [
-    fetchProducts,
-    search,
-    familleFilter,
-    sousFamilleFilter,
-    zoneFilter,
-    actifFilter,
-    page,
-    sortField,
-    sortOrder,
-  ]);
+    refetch();
+  }, [refetch, search, familleFilter, sousFamilleFilter, zoneFilter, actifFilter, page, sortField, sortOrder]);
 
 
   async function handleExportExcel() {
@@ -148,9 +124,9 @@ export default function Produits() {
   }
 
   async function handleToggleActive(id, actif) {
-    await toggleProductActive(id, actif);
+    await supabase.from('produits').update({ actif }).eq('id', id).eq('mama_id', mama_id);
     toast.success(actif ? "Produit activé" : "Produit désactivé");
-    refreshList();
+    refetch();
   }
 
   function handleEdit(prod) {
@@ -159,8 +135,8 @@ export default function Produits() {
   }
 
   useEffect(() => {
-    if (canView) refreshList();
-  }, [refreshList, canView]);
+    if (canView) refetch();
+  }, [refetch, canView]);
 
   if (!canView) {
     return <div className="p-8">Accès refusé</div>;

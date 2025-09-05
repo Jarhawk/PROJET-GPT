@@ -3,6 +3,7 @@ import supabase from '@/lib/supabase';
 import { useState, useCallback } from "react";
 
 import { useAuth } from '@/hooks/useAuth';
+import { applyIlikeOr } from '@/lib/supa/textSearch';
 
 export function useProduitsAutocomplete() {
   const { mama_id } = useAuth();
@@ -19,7 +20,7 @@ export function useProduitsAutocomplete() {
     select("id, nom, tva, dernier_prix, unite_id, unite:unite_id (nom)").
     eq("mama_id", mama_id).
     eq("actif", true);
-    if (query) q = q.ilike("nom", `%${query}%`);
+    q = applyIlikeOr(q, query);
     q = q.order("nom", { ascending: true }).limit(10);
     const { data, error } = await q;
     setLoading(false);

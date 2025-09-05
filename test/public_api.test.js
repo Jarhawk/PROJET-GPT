@@ -89,7 +89,7 @@ describe('public API router', () => {
     await request(app)
       .get('/produits?mama_id=m1&search=choc&actif=false&page=2&limit=20')
       .set('x-api-key', 'dev_key');
-    expect(chain.ilike).toHaveBeenCalledWith('nom', '%choc%');
+    expect(chain.or).toHaveBeenCalledWith('nom.ilike.%choc%,code.ilike.%choc%');
     expect(chain.eq).toHaveBeenCalledWith('actif', false);
     expect(chain.range).toHaveBeenCalledWith(20, 39);
   });

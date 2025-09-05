@@ -40,8 +40,7 @@ export default function Produits() {
   const [page, setPage] = useState(1);
   const [sortField, setSortField] = useState("famille");
   const [sortOrder, setSortOrder] = useState("asc");
-  const { data: famillesData } = useFamilles(mama_id);
-  const familles = famillesData ?? [];
+  const { familles = [], fetchFamilles } = useFamilles();
   const {
     data,
     count: total = 0,
@@ -127,8 +126,11 @@ export default function Produits() {
   }
 
   useEffect(() => {
-    if (canView) refetch();
-  }, [refetch, canView]);
+    if (canView) {
+      refetch();
+      fetchFamilles();
+    }
+  }, [refetch, fetchFamilles, canView]);
 
   if (!canView) {
     return <div className="p-8">Accès refusé</div>;

@@ -24,7 +24,8 @@ export default function ProduitForm({
   const { mama_id } = useAuth();
   const { data: fournisseursData } = useFournisseurs({ actif: true });
   const fournisseurs = fournisseursData?.data || [];
-  const { data: familles = [], error: famillesError, refetch: fetchFamilles } = useFamilles(mama_id);
+  const { familles = [], fetchFamilles } = useFamilles();
+  const famillesError = null;
   const {
     sousFamilles,
     list: listSousFamilles,

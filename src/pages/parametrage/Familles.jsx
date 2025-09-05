@@ -22,8 +22,8 @@ export default function Familles() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (edit?.id) await updateFamille(edit.id, { code: edit.code, nom: edit.nom });
-      else await addFamille({ code: edit?.code || '', nom: edit?.nom || '' });
+      if (edit?.id) await updateFamille(edit.id, { nom: edit.nom });
+      else await addFamille({ nom: edit?.nom || '' });
       toast.success('Famille enregistrée');
       setEdit(null);
     } catch (err) {
@@ -51,13 +51,12 @@ export default function Familles() {
     <div className="p-6 max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Familles</h1>
       <TableHeader className="gap-2">
-        <Button onClick={() => setEdit({ code: '', nom: '' })}>+ Nouvelle famille</Button>
+        <Button onClick={() => setEdit({ nom: '' })}>+ Nouvelle famille</Button>
       </TableHeader>
       <ListingContainer className="w-full overflow-x-auto">
         <table className="text-sm w-full">
           <thead>
             <tr>
-              <th className="px-2 py-1">Code</th>
               <th className="px-2 py-1">Nom</th>
               <th className="px-2 py-1">Actions</th>
             </tr>
@@ -65,7 +64,6 @@ export default function Familles() {
           <tbody>
             {familles.map((f) => (
               <tr key={f.id}>
-                <td className="px-2 py-1">{f.code}</td>
                 <td className="px-2 py-1">{f.nom}</td>
                 <td className="px-2 py-1 flex gap-2">
                   <Button size="sm" variant="outline" onClick={() => setEdit(f)}>
@@ -83,7 +81,7 @@ export default function Familles() {
             ))}
             {familles.length === 0 && (
               <tr>
-                <td colSpan="3" className="py-2">
+                <td colSpan="2" className="py-2">
                   Aucune famille
                 </td>
               </tr>
@@ -96,12 +94,6 @@ export default function Familles() {
           <div className="absolute inset-0 bg-black/50" onClick={() => setEdit(null)} />
           <div className="relative bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow-lg p-6 w-full max-w-md">
             <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-              <input
-                className="input"
-                placeholder="Code"
-                value={edit.code || ''}
-                onChange={(e) => setEdit({ ...edit, code: e.target.value })}
-              />
               <input
                 className="input"
                 placeholder="Nom"

@@ -1,9 +1,13 @@
-export function logError(ctx, error) {
+export function logError(scope, error, extra = {}) {
   if (!error) return;
-  console.warn(`[supa] ${ctx}`, {
-    code: error.code,
-    message: error.message,
-    details: error.details,
-    hint: error.hint,
-  });
+  const payload = {
+    scope,
+    code: error?.code ?? '',
+    status: error?.status ?? '',
+    message: error?.message ?? String(error),
+    details: error?.details ?? '',
+    hint: error?.hint ?? '',
+    ...extra,
+  };
+  console.error('[supa]', payload);
 }

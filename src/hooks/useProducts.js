@@ -4,6 +4,7 @@ import supabase from '@/lib/supabase';
 // src/hooks/useProducts.js
 import { useState, useCallback, useEffect } from "react";
 import { applyIlikeOr, normalizeSearchTerm } from '@/lib/supa/textSearch';
+import { logError } from '@/lib/supa/logError';
 
 import { useAuth } from '@/hooks/useAuth';
 import * as XLSX from "xlsx";
@@ -83,6 +84,7 @@ export function useProducts() {
     setLoading(false);
     if (error) {
       setError(error);
+      logError('useProducts.fetch', error, { endpoint: 'produits' });
       toast.error(error.message);
     }
     return data || [];

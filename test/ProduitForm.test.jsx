@@ -24,7 +24,7 @@ vi.mock('@/hooks/data/useFournisseurs', () => ({
   default: () => ({ data: [], isLoading: false })
 }));
 vi.mock('@/hooks/useZonesStock', () => ({
-  default: () => ({ zones: [], loading: false })
+  default: () => ({ data: [], isLoading: false })
 }));
 
 import ProduitForm from '@/components/produits/ProduitForm.jsx';

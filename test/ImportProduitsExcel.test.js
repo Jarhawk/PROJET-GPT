@@ -22,7 +22,7 @@ vi.mock('@/hooks/useUnites', () => ({
   fetchUnitesForValidation: () => ({ data: unitesData }),
 }));
 vi.mock('@/hooks/useZonesStock', () => ({
-  fetchZonesForValidation: () => ({ data: zonesData }),
+  fetchZonesStock: () => ({ data: zonesData }),
 }));
 
 vi.mock('@/lib/supabase', () => {

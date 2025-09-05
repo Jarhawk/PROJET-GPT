@@ -40,7 +40,7 @@ vi.mock('@/hooks/useUnites', () => ({
 vi.mock('@/hooks/data/useFournisseurs', () => ({
   default: () => ({ data: [], isLoading: false }),
 }));
-vi.mock('@/hooks/useZonesStock', () => ({ default: () => ({ zones: [] }) }));
+vi.mock('@/hooks/useZonesStock', () => ({ default: () => ({ data: [] }) }));
 vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn(), loading: vi.fn() } }));
 
 beforeEach(() => {

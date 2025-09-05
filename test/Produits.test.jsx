@@ -33,7 +33,7 @@ vi.mock('@/hooks/useSousFamilles', () => ({
   }),
 }));
 vi.mock('@/hooks/useZonesStock', () => ({
-  useAuth: () => ({ zones: [], loading: false })
+  useZonesStock: () => ({ data: [], isLoading: false })
 }));
 
 import Produits from '@/pages/produits/Produits.jsx';

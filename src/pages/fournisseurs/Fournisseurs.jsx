@@ -32,6 +32,7 @@ import {
 import FournisseurDetail from './FournisseurDetail';
 import FournisseurForm from './FournisseurForm';
 import { PlusCircle, Search } from 'lucide-react';
+import supabase from '@/lib/supabase'; // [diag]
 import { useAuth } from '@/hooks/useAuth';
 
 export default function Fournisseurs() {
@@ -47,7 +48,7 @@ export default function Fournisseurs() {
   const { products } = useProducts();
   const { fournisseurs: inactiveByInvoices, fetchInactifs } =
     useFournisseursInactifs();
-  const { hasAccess } = useAuth();
+  const { hasAccess, mama_id } = useAuth();
   const canEdit = hasAccess('fournisseurs', 'peut_modifier');
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState(null);
@@ -60,6 +61,7 @@ export default function Fournisseurs() {
   const [actifFilter, setActifFilter] = useState('all');
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 50;
+  const [diagMsg, setDiagMsg] = useState(null); // [diag]
 
   const filters = useMemo(
     () => ({
@@ -71,9 +73,14 @@ export default function Fournisseurs() {
     [search, actifFilter, page]
   );
 
-  const { data: fournisseursData } = useFournisseursData(filters);
+  const {
+    data: fournisseursData,
+    error,
+    isLoading,
+  } = useFournisseursData(filters);
   const fournisseurs = fournisseursData?.data || [];
   const total = fournisseursData?.count || 0;
+  const embedError = fournisseursData?.embedError;
 
   const listWithContact = fournisseurs;
   const inactifs = listWithContact.filter((f) => !f.actif);
@@ -105,6 +112,23 @@ export default function Fournisseurs() {
     });
     doc.save('fournisseurs.pdf');
   };
+
+  async function handleDiag() {
+    const { data, error: diagError } = await supabase
+      .from('fournisseurs')
+      .select('*')
+      .eq('mama_id', mama_id)
+      .limit(5);
+    console.log('[diag] fournisseurs', { data, error: diagError }); // [diag]
+    if (diagError) {
+      if (diagError.code === 'PGRST116') setDiagMsg('RLS KO');
+      else if (diagError.status === 401) setDiagMsg('Token invalide');
+      else if (diagError.status === 500) setDiagMsg('Erreur base de données');
+      else setDiagMsg(diagError.message);
+    } else {
+      setDiagMsg('Connexion Supabase OK');
+    }
+  }
 
   // Chargement initial
   useEffect(() => {
@@ -142,9 +166,28 @@ export default function Fournisseurs() {
     computeTop();
   }, [fournisseurs, products]);
 
+  let banner = diagMsg;
+  if (error) {
+    if (error.code === 'PGRST116') banner = 'RLS KO';
+    else if (error.status === 401) banner = 'Token invalide';
+    else if (error.status === 500) banner = 'Erreur base de données';
+    else banner = error.message;
+  } else if (embedError) {
+    banner = 'Relation FK manquante (embed)';
+  }
+
   return (
     <div className="max-w-7xl mx-auto p-8 text-shadow space-y-6">
-            <h1 className="text-2xl font-bold">Gestion des fournisseurs</h1>
+      <h1 className="text-2xl font-bold">Gestion des fournisseurs</h1>
+      {banner && (
+        <div
+          className={`mb-4 p-2 rounded text-sm text-white ${
+            banner === 'Connexion Supabase OK' ? 'bg-green-600' : 'bg-red-600'
+          }`}
+        >
+          {banner}
+        </div>
+      )}
 
       <Card>
         <CardHeader className="pb-4">
@@ -193,6 +236,9 @@ export default function Fournisseurs() {
             </Button>
             <Button className="w-auto" onClick={exportPDF}>
               Export PDF
+            </Button>
+            <Button className="w-auto" onClick={handleDiag}>
+              Tester Supabase
             </Button>
           </TableHeader>
         </CardContent>
@@ -277,7 +323,13 @@ export default function Fournisseurs() {
             </tr>
           </thead>
           <tbody>
-            {fournisseursFiltrés.length === 0 ? (
+            {isLoading ? (
+              <tr>
+                <td colSpan={7} className="py-4">
+                  <div className="h-4 bg-white/10 animate-pulse" />
+                </td>
+              </tr>
+            ) : fournisseursFiltrés.length === 0 && !error ? (
               <tr>
                 <td colSpan={7} className="py-4 text-muted-foreground">
                   Aucun fournisseur trouvé

@@ -42,11 +42,10 @@ export default function Produits() {
   const [sortOrder, setSortOrder] = useState("asc");
   const { data: familles = [] } = useFamilles(mama_id);
   const {
-    data: productsResult = { data: [], count: 0 },
+    data: products = [],
+    count: total = 0,
     refetch,
   } = useProducts({ mamaId: mama_id, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE });
-  const products = productsResult.data ?? [];
-  const total = productsResult.count ?? 0;
   const {
     sousFamilles: rawSousFamilles,
     list: listSousFamilles,

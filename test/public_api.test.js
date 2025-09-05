@@ -94,6 +94,16 @@ describe('public API router', () => {
     expect(chain.range).toHaveBeenCalledWith(20, 39);
   });
 
+  it('avoids duplicate order when sorting by nom', async () => {
+    const app = express();
+    app.use(router);
+    await request(app)
+      .get('/produits?mama_id=m1&sortBy=nom')
+      .set('x-api-key', 'dev_key');
+    expect(chain.order).toHaveBeenCalledTimes(1);
+    expect(chain.order).toHaveBeenCalledWith('nom', { ascending: true });
+  });
+
   it('returns 400 when mama_id is missing', async () => {
     const app = express();
     app.use(router);

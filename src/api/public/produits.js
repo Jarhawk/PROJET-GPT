@@ -37,9 +37,10 @@ router.get('/', async (req, res) => {
         sortField = parts.join('.');
       }
     }
-    query = query
-      .order(sortField, { ascending })
-      .order('nom', { ascending: true });
+    query = query.order(sortField, { ascending });
+    if (sortField !== 'nom') {
+      query = query.order('nom', { ascending: true });
+    }
     const p = Math.max(parseInt(page, 10), 1);
     const l = Math.max(parseInt(limit, 10), 1);
     const start = (p - 1) * l;

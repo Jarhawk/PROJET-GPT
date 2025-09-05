@@ -52,7 +52,8 @@ export default function ProduitDetailPage() {
     };
   }, [id, fetchProductPrices]);
 
-  const chartData = buildPriceData(history);
+  const historyData = history ?? [];
+  const chartData = buildPriceData(historyData);
 
   const handleToggle = async () => {
     if (product) {
@@ -63,7 +64,7 @@ export default function ProduitDetailPage() {
   };
 
   const summary = Object.values(
-    history.reduce((acc, h) => {
+    historyData.reduce((acc, h) => {
       const idF = h.fournisseur?.id || "";
       if (!acc[idF]) {
         acc[idF] = {
@@ -158,12 +159,12 @@ export default function ProduitDetailPage() {
                 </tr>
               </thead>
               <tbody>
-                {history.length === 0 ? (
+                {historyData.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="py-4 text-center">Aucune donnée</td>
                   </tr>
                 ) : (
-                  history.map((h, i) => (
+                  historyData.map((h, i) => (
                     <tr key={i}>
                       <td>{h.created_at?.slice(0, 10) || '-'}</td>
                       <td>{h.fournisseur?.nom || '-'}</td>

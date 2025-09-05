@@ -3,6 +3,7 @@ import supabase from '@/lib/supabase';
 import { useEffect, useState } from 'react';
 
 import { useAuth } from '@/hooks/useAuth';
+import { applyIlikeOr } from '@/lib/supa/textSearch';
 
 export default function useFournisseursBrowse({
   page = 1,
@@ -28,8 +29,7 @@ export default function useFournisseursBrowse({
         select('id, nom, ville', { count: 'exact' }).
         eq('mama_id', mama_id).
         eq('actif', true);
-        const t = term.trim();
-        if (t) req = req.ilike('nom', `%${t}%`);
+        req = applyIlikeOr(req, term);
         Object.entries(filters || {}).forEach(([k, v]) => {
           if (v !== undefined && v !== null && v !== '') {
             req = req.eq(k, v);

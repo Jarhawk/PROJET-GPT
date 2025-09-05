@@ -6,21 +6,21 @@ var queryBuilder, selectMock, fromMock;
 vi.mock('@/lib/supabase', () => {
   queryBuilder = {
     eq: vi.fn(() => queryBuilder),
-    ilike: vi.fn(() => queryBuilder),
+    or: vi.fn(() => queryBuilder),
     order: vi.fn(() => queryBuilder),
     limit: vi.fn(() => queryBuilder),
     then: vi.fn((resolve) => resolve({ data: [], error: null })),
   };
   selectMock = vi.fn(() => queryBuilder);
   fromMock = vi.fn(() => ({ select: selectMock }));
-  return { getSupabaseClient: () => ({ from: fromMock }) };
+  return { default: { from: fromMock } };
 });
 
 beforeEach(() => {
   fromMock.mockClear();
   selectMock.mockClear();
   queryBuilder.eq.mockClear();
-  queryBuilder.ilike.mockClear();
+  queryBuilder.or.mockClear();
   queryBuilder.order.mockClear();
   queryBuilder.limit.mockClear();
 });
@@ -31,7 +31,7 @@ test('searchFournisseurs filters by mama_id and query', async () => {
   expect(selectMock).toHaveBeenCalledWith('id, nom, ville');
   expect(queryBuilder.eq).toHaveBeenNthCalledWith(1, 'mama_id', 'm1');
   expect(queryBuilder.eq).toHaveBeenNthCalledWith(2, 'actif', true);
-  expect(queryBuilder.ilike).toHaveBeenCalledWith('nom', '%paris%');
+  expect(queryBuilder.or).toHaveBeenCalledWith('nom.ilike.%paris%,code.ilike.%paris%');
   expect(queryBuilder.order).toHaveBeenCalledWith('nom', { ascending: true });
   expect(queryBuilder.limit).toHaveBeenCalledWith(20);
 });

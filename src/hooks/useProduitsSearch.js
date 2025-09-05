@@ -5,6 +5,7 @@ import useDebounce from '@/hooks/useDebounce';
 
 import { getQueryClient } from '@/lib/react-query';
 import { useAuth } from '@/hooks/useAuth';
+import { applyIlikeOr } from '@/lib/supa/textSearch';
 
 function normalize(list = []) {
   return list.map((p) => ({
@@ -36,12 +37,13 @@ mamaIdParam,
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
       try {
-        const { data, count, error } = await supabase.
+        let req = supabase.
         from('produits').
         select('id, nom, unite_id, tva, zone_stock_id', { count: 'exact' }).
         eq('mama_id', mamaId).
-        eq('actif', true).
-        ilike('nom', `%${q}%`).
+        eq('actif', true);
+        req = applyIlikeOr(req, q);
+        const { data, count, error } = await req.
         order('nom', { ascending: true }).
         range(from, to);
         if (error) throw error;

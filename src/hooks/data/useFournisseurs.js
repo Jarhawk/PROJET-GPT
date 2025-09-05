@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { run } from '@/lib/supa/fetcher';
 import { logError } from '@/lib/supa/logError';
-import { normalizeSearchTerm } from '@/lib/supa/textSearch';
+import { normalizeSearchTerm, applyIlikeOr } from '@/lib/supa/textSearch';
 
 
 export function useFournisseurs(params = {}) {
@@ -36,7 +36,7 @@ export function useFournisseurs(params = {}) {
         .range((page - 1) * limit, page * limit - 1)
         .abortSignal(signal);
 
-      if (term) q1 = q1.ilike('nom', `%${term}%`);
+      q1 = applyIlikeOr(q1, term);
       if (actif !== null && actif !== undefined) q1 = q1.eq('actif', actif);
 
       const { data: fournisseurs, error: e1 } = await run(q1);

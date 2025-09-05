@@ -2,6 +2,7 @@
 /* eslint-env node */
 import express from 'express';
 import supabase from '@/lib/supabase';
+import { applyIlikeOr } from '@/lib/supa/textSearch';
 
 const router = express.Router();
 
@@ -24,7 +25,7 @@ router.get('/', async (req, res) => {
       .select('*')
       .eq('mama_id', mama_id);
     if (famille) query = query.ilike('famille', `%${famille}%`);
-    if (search) query = query.ilike('nom', `%${search}%`);
+    query = applyIlikeOr(query, search);
     if (actif !== undefined) query = query.eq('actif', actif === 'true');
     let sortField = sortBy;
     let ascending = order !== 'desc';

@@ -3,6 +3,7 @@ import supabase from '@/lib/supabase';
 import { useState, useCallback } from 'react';
 
 import { useAuth } from '@/hooks/useAuth';
+import { applyIlikeOr } from '@/lib/supa/textSearch';
 
 export function useProduitsInventaire() {
   const { mama_id } = useAuth();
@@ -21,7 +22,7 @@ export function useProduitsInventaire() {
       eq('mama_id', mama_id).
       eq('actif', true);
       if (famille) query = query.ilike('famille', `%${famille}%`);
-      if (search) query = query.ilike('nom', `%${search}%`);
+      query = applyIlikeOr(query, search);
       const { data, error } = await query.order('nom', { ascending: true });
       setLoading(false);
       if (error) {

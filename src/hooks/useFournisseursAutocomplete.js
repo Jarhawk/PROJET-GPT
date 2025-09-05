@@ -1,7 +1,9 @@
-import supabase from '@/lib/supabase';import { useEffect, useState } from 'react';
+import supabase from '@/lib/supabase';
+import { useEffect, useState } from 'react';
 
 import { useAuth } from '@/hooks/useAuth';
 import useDebounce from '@/hooks/useDebounce';
+import { applyIlikeOr } from '@/lib/supa/textSearch';
 
 /**
  * Autocomplete fournisseurs by nom
@@ -26,7 +28,6 @@ export function useFournisseursAutocomplete({ term = '', limit = 20 } = {}) {
     const run = async () => {
       setLoading(true);
       setError(null);
-      const supabase = supabase();
       try {
         let req = supabase.
         from('fournisseurs').
@@ -34,8 +35,8 @@ export function useFournisseursAutocomplete({ term = '', limit = 20 } = {}) {
         eq('mama_id', mama_id).
         eq('actif', true).
         order('nom', { ascending: true }).
-        limit(limit).
-        ilike('nom', `%${s}%`);
+        limit(limit);
+        req = applyIlikeOr(req, s);
         const { data, error } = await req;
         if (error) throw error;
         if (!aborted) setOptions(data || []);
@@ -60,7 +61,6 @@ export function useFournisseursAutocomplete({ term = '', limit = 20 } = {}) {
 
 export async function searchFournisseurs(mamaId, term = '', limit = 20) {
   if (!mamaId) return [];
-  const supabase = supabase();
   let req = supabase.
   from('fournisseurs').
   select('id, nom, ville').
@@ -68,7 +68,7 @@ export async function searchFournisseurs(mamaId, term = '', limit = 20) {
   eq('actif', true).
   order('nom', { ascending: true }).
   limit(limit);
-  if (term && term.trim()) req = req.ilike('nom', `%${term.trim()}%`);
+  req = applyIlikeOr(req, term);
   const { data, error } = await req;
   if (error) throw error;
   return data || [];

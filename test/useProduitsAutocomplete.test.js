@@ -25,5 +25,5 @@ test('searchProduits filters by mama_id and query', async () => {
   expect(query.select).toHaveBeenCalledWith('id, nom, tva, dernier_prix, unite_id, unite:unite_id (nom)');
   expect(query.eq).toHaveBeenCalledWith('mama_id', 'm1');
   expect(query.eq).toHaveBeenCalledWith('actif', true);
-  expect(query.ilike).toHaveBeenCalledWith('nom', '%car%');
+  expect(query.or).toHaveBeenCalledWith('nom.ilike.%car%,code.ilike.%car%');
 });

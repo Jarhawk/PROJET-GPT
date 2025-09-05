@@ -19,6 +19,7 @@
   }
 
 html {
+  /* Ensure consistent text sizing across browsers */
   -webkit-text-size-adjust: 100%;
 }
 

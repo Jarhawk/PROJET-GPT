@@ -62,6 +62,25 @@ export default function Fournisseurs() {
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 50;
   const [diagMsg, setDiagMsg] = useState(null); // [diag]
+  async function handleApiDiag() {
+    if (!import.meta.env.DEV) return;
+    const a = await supabase
+      .from('fournisseurs')
+      .select('id,nom')
+      .eq('mama_id', mama_id)
+      .limit(3);
+    console.log('[api] fournisseurs', { data: a.data, error: a.error }); // [compat]
+    const b = await supabase
+      .from('v_alertes_rupture_api')
+      .select('produit_id,nom,stock_actuel,stock_min,manque')
+      .limit(3);
+    console.log('[api] v_alertes_rupture_api', { data: b.data, error: b.error }); // [compat]
+    const c = await supabase
+      .from('mamas')
+      .select('id,logo_url')
+      .eq('id', mama_id);
+    console.log('[api] mamas', { data: c.data, error: c.error }); // [compat]
+  }
 
   const filters = useMemo(
     () => ({
@@ -240,6 +259,11 @@ export default function Fournisseurs() {
             <Button className="w-auto" onClick={handleDiag}>
               Tester Supabase
             </Button>
+            {import.meta.env.DEV && (
+              <Button className="w-auto" onClick={handleApiDiag}>
+                Diagnostic API
+              </Button>
+            )}
           </TableHeader>
         </CardContent>
       </Card>

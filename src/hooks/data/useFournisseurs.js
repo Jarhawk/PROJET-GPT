@@ -44,42 +44,35 @@ export function useFournisseurs(params = {}) {
       let embedError = null;
 
       if (ids.length) {
-        // tentative avec embed
-        const { data: embedData, error: embedErr } = await supabase
+        // 2e requête pour les contacts
+        const { data: contacts, error: contactErr } = await supabase
+          .from('fournisseur_contacts')
+          .select('id, nom, email, tel, fournisseur_id')
+          .eq('mama_id', mama_id)
+          .in('fournisseur_id', ids);
+        if (contactErr) {
+          console.error('[useFournisseurs] contacts', contactErr); // [compat]
+          throw contactErr;
+        }
+        contacts.forEach((c) => {
+          contactsMap[c.fournisseur_id] = {
+            nom: c.nom,
+            email: c.email,
+            tel: c.tel,
+          };
+        });
+
+        // tentative embed pour diagnostics
+        const { error: embedErr } = await supabase
           .from('fournisseurs')
           .select('id, fournisseur_contacts(nom,email,tel)')
           .in('id', ids);
-
-        if (!embedErr) {
-          embedData.forEach((f) => {
-            const c = Array.isArray(f.fournisseur_contacts)
-              ? f.fournisseur_contacts[0]
-              : f.fournisseur_contacts;
-            if (c) contactsMap[f.id] = c;
-          });
-        } else {
-          console.warn('[useFournisseurs] embed', embedErr); // [diag]
+        if (embedErr) {
+          console.warn('[useFournisseurs] embed', embedErr); // [compat]
           if (embedErr.status === 500) {
-            // fallback en 2 requêtes
-            const { data: contacts, error: contactErr } = await supabase
-              .from('fournisseur_contacts')
-              .select('id, nom, email, tel, fournisseur_id')
-              .eq('mama_id', mama_id)
-              .in('fournisseur_id', ids);
-            if (!contactErr && contacts) {
-              contacts.forEach((c) => {
-                contactsMap[c.fournisseur_id] = {
-                  nom: c.nom,
-                  email: c.email,
-                  tel: c.tel,
-                };
-              });
-            } else {
-              embedError = contactErr || embedErr;
-            }
-          } else {
-            embedError = embedErr;
+            // [compat] fallback already in place via 2 requêtes
           }
+          embedError = embedErr;
         }
       }
 

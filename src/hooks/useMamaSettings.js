@@ -48,14 +48,40 @@ export default function useMamaSettings() {
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
     queryFn: async ({ signal }) => {
-      const { data, error } = await supabase.
-      from('mamas').
-      select(
-        'logo_url, primary_color, secondary_color, email_envoi, email_alertes, dark_mode, langue, monnaie, timezone, rgpd_text, mentions_legales'
-      ).
-      eq('id', mamaId).
-      single().
-      abortSignal(signal);
+      const cols = 'logo_url, primary_color, secondary_color, email_envoi, email_alertes, dark_mode, langue, monnaie, timezone, rgpd_text, mentions_legales';
+      let { data, error } = await supabase
+        .from('mamas')
+        .select(cols)
+        .eq('id', mamaId)
+        .single()
+        .abortSignal(signal);
+      if (error?.status === 500 || !data) {
+        console.warn('[compat] mamas fallback', error); // [compat]
+        const { data: baseData, error: e2 } = await supabase
+          .from('mamas')
+          .select('logo_url')
+          .eq('id', mamaId)
+          .single();
+        if (e2) {
+          console.error('[compat] logo_url only', e2); // [compat]
+          return {};
+        }
+        data = { ...baseData };
+        const optional = ['primary_color','secondary_color','email_envoi','email_alertes','dark_mode','langue','monnaie','timezone','rgpd_text','mentions_legales'];
+        for (const col of optional) {
+          const { data: colData, error: colErr } = await supabase
+            .from('mamas')
+            .select(col)
+            .eq('id', mamaId)
+            .single();
+          if (!colErr && colData && col in colData) {
+            data[col] = colData[col];
+          } else if (colErr) {
+            console.warn(`[compat] ${col}`, colErr); // [compat]
+          }
+        }
+        return data;
+      }
       if (error) throw error;
       return data;
     }

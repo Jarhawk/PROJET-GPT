@@ -9,22 +9,32 @@ export function useRuptureAlerts() {
   async function fetchAlerts(type = null) {
     if (!mama_id) return [];
     try {
-      const base = supabase.from('v_alertes_rupture');
+      const base = supabase.from('v_alertes_rupture_api');
       const selectWith =
-      'id:produit_id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, consommation_prevue, receptions, stock_projete, manque, type';
+        'id:produit_id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, consommation_prevue, receptions, stock_projete, manque, type';
 
       let query = base.select(selectWith).order('manque', { ascending: false });
       if (type) query = query.eq('type', type);
       let { data, error } = await query;
 
+      if (error?.status === 400) {
+        console.error('[compat] select columns:', selectWith); // [compat]
+        toast.error('API compat'); // [compat]
+        return [];
+      }
+      if (error?.status === 500) {
+        console.error('[compat] v_alertes_rupture_api', error); // [compat]
+        return [];
+      }
+
       if (error && error.code === '42703') {
         if (import.meta.env.DEV)
-        console.debug('v_alertes_rupture sans stock_projete');
+          console.debug('v_alertes_rupture_api sans stock_projete');
         let q2 = base.
-        select(
-          'id:produit_id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, consommation_prevue, receptions, manque, type'
-        ).
-        order('manque', { ascending: false });
+          select(
+            'id:produit_id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, consommation_prevue, receptions, manque, type'
+          ).
+          order('manque', { ascending: false });
         if (type) q2 = q2.eq('type', type);
         const { data: d2, error: e2 } = await q2;
         if (e2) throw e2;
@@ -42,7 +52,7 @@ export function useRuptureAlerts() {
       } else {
         if (error) throw error;
         if (import.meta.env.DEV)
-        console.debug('v_alertes_rupture avec stock_projete');
+          console.debug('v_alertes_rupture_api avec stock_projete');
       }
 
       return data || [];

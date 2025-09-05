@@ -10,7 +10,10 @@ const queryBuilder = {
 };
 const fromMock = vi.fn(() => queryBuilder);
 
-vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
+vi.mock('@/lib/supabase', () => ({
+  default: { from: fromMock },
+  supabase: { from: fromMock },
+}));
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
 vi.mock('sonner', () => ({ toast: { error: vi.fn() } }));
 
@@ -29,7 +32,7 @@ beforeEach(async () => {
 test('fetchAlerts selects expected view columns', async () => {
   const { fetchAlerts } = useRuptureAlerts();
   await fetchAlerts('rupture');
-  expect(fromMock).toHaveBeenCalledWith('v_alertes_rupture');
+  expect(fromMock).toHaveBeenCalledWith('v_alertes_rupture_api');
   expect(queryBuilder.select).toHaveBeenCalledWith(
     'id:produit_id, produit_id, nom, unite, fournisseur_nom, stock_actuel, stock_min, consommation_prevue, receptions, stock_projete, manque, type'
   );

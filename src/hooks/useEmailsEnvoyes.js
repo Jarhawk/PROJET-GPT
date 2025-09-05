@@ -1,5 +1,6 @@
 import supabase from '@/lib/supabase';
 import { useState } from 'react';
+import { applyRange } from '@/lib/supa/applyRange';
 
 import { useAuth } from '@/hooks/useAuth';
 import { createAsyncState } from './_shared/createAsyncState';
@@ -22,7 +23,6 @@ export function useEmailsEnvoyes() {
       const p = Number(page) || 1;
       const l = Number(limit) || 50;
       const start = (p - 1) * l;
-      const end = start + l - 1;
       let q = supabase
         .from('emails_envoyes')
         .select('*')
@@ -32,9 +32,11 @@ export function useEmailsEnvoyes() {
       if (commande_id) q = q.eq('commande_id', commande_id);
       if (date_start) q = q.gte('envoye_le', date_start);
       if (date_end) q = q.lte('envoye_le', date_end);
-      const { data, error } = await q
-        .order('envoye_le', { ascending: false })
-        .range(start, end);
+      const { data, error } = await applyRange(
+        q.order('envoye_le', { ascending: false }),
+        start,
+        l
+      );
       if (error) throw error;
       setState({ data: data || [], loading: false, error: null });
       return data;

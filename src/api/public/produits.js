@@ -3,6 +3,7 @@
 import express from 'express';
 import supabase from '@/lib/supabase';
 import { applyIlikeOr } from '@/lib/supa/textSearch';
+import { applyRange } from '@/lib/supa/applyRange';
 
 const router = express.Router();
 
@@ -44,8 +45,7 @@ router.get('/', async (req, res) => {
     const p = Math.max(parseInt(page, 10), 1);
     const l = Math.max(parseInt(limit, 10), 1);
     const start = (p - 1) * l;
-    const end = start + l - 1;
-    const { data, error } = await query.range(start, end);
+    const { data, error } = await applyRange(query, start, l);
     if (error) throw error;
     res.json(data || []);
   } catch (err) {

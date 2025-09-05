@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import supabase from '@/lib/supabase';
 import { useState } from "react";
+import { applyRange } from '@/lib/supa/applyRange';
 
 import { useAuth } from '@/hooks/useAuth';
 
@@ -22,13 +23,16 @@ export function useBonsLivraison() {
         { count: "exact" }
       )
       .eq("mama_id", mama_id)
-      .order("date_reception", { ascending: false })
-      .range((page - 1) * pageSize, page * pageSize - 1);
+      .order("date_reception", { ascending: false });
     if (fournisseur) q = q.eq("fournisseur_id", fournisseur);
     if (actif !== null) q = q.eq("actif", actif);
     if (debut) q = q.gte("date_reception", debut);
     if (fin) q = q.lte("date_reception", fin);
-    const { data, error, count } = await q;
+    const { data, error, count } = await applyRange(
+      q,
+      (page - 1) * pageSize,
+      pageSize
+    );
     if (!error) {
       setBons(Array.isArray(data) ? data : []);
       setTotal(count || 0);

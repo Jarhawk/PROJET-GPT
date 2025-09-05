@@ -1,6 +1,7 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import supabase from '@/lib/supabase';
 import { useState } from "react";
+import { applyRange } from '@/lib/supa/applyRange';
 
 import { useAuth } from '@/hooks/useAuth';
 import { useAuditLog } from "@/hooks/useAuditLog";
@@ -30,9 +31,11 @@ export function useMenuDuJour() {
     if (search) query = query.ilike("nom", `%${search}%`);
     if (date) query = query.eq("date", date);
     if (typeof actif === "boolean") query = query.eq("actif", actif);
-    const { data, count, error } = await query.
-    order("date", { ascending: false }).
-    range(offset, offset + limit - 1);
+    const { data, count, error } = await applyRange(
+      query.order("date", { ascending: false }),
+      offset,
+      limit
+    );
     const withCost = Array.isArray(data) ?
     data.map((m) => {
       const cost = (m.fiches || []).reduce(

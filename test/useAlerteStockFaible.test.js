@@ -10,7 +10,10 @@ const queryBuilder = {
 };
 const fromMock = vi.fn(() => queryBuilder);
 
-vi.mock('@/lib/supabase', () => ({ supabase: { from: fromMock } }));
+vi.mock('@/lib/supabase', () => ({
+  default: { from: fromMock },
+  supabase: { from: fromMock },
+}));
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ mama_id: 'm1' }) }));
 vi.mock('sonner', () => ({ toast: { error: vi.fn() } }));
 
@@ -25,10 +28,10 @@ beforeEach(async () => {
   queryBuilder.select.mockClear();
 });
 
-test('useAlerteStockFaible queries v_alertes_rupture without mama filter', async () => {
+test('useAlerteStockFaible queries v_alertes_rupture_api without mama filter', async () => {
   const { result } = renderHook(() => useAlerteStockFaible());
   await waitFor(() => !result.current.loading);
-  expect(fromMock).toHaveBeenCalledWith('v_alertes_rupture');
+  expect(fromMock).toHaveBeenCalledWith('v_alertes_rupture_api');
   expect(queryBuilder.select).toHaveBeenCalledWith(
     'id:produit_id, produit_id, nom, unite, fournisseur_id, fournisseur_nom, stock_actuel, stock_min, manque, consommation_prevue, receptions, stock_projete',
     { count: 'exact' }

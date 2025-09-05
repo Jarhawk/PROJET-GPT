@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useAuth } from '@/hooks/useAuth';
 import usePeriodes from "@/hooks/usePeriodes";
 import { normalizeSearchTerm } from '@/lib/supa/textSearch';
+import { applyRange } from '@/lib/supa/range';
 
 export function useFactures() {
   const { mama_id } = useAuth();
@@ -29,7 +30,7 @@ export function useFactures() {
       .order("date_reception", { ascending: false });
     const termBL = normalizeSearchTerm(search);
     if (termBL) q = q.ilike("numero_bl", `%${termBL}%`);
-    q = q.range((page - 1) * limit, page * limit - 1);
+    q = applyRange(q, (page - 1) * limit, limit);
     const { data, error, count } = await q;
     if (!error) {
       setFactures(data || []);
@@ -58,8 +59,8 @@ export function useFactures() {
         { count: "exact" }
       )
       .eq("mama_id", mama_id)
-      .order("date_facture", { ascending: false })
-      .range((page - 1) * pageSize, page * pageSize - 1);
+      .order("date_facture", { ascending: false });
+    query = applyRange(query, (page - 1) * pageSize, pageSize);
 
     const term = normalizeSearchTerm(search);
     if (term) {

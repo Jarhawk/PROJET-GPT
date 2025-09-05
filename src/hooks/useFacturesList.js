@@ -1,5 +1,7 @@
-import supabase from '@/lib/supabase';import { useQuery } from '@tanstack/react-query';
+import supabase from '@/lib/supabase';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
+import { applyRange } from '@/lib/supa/range';
 
 
 export function useFacturesList(params = {}) {
@@ -30,8 +32,8 @@ export function useFacturesList(params = {}) {
           { count: 'exact' }
         )
         .eq('mama_id', mamaId)
-        .order('date_facture', { ascending: false })
-        .range((page - 1) * pageSize, page * pageSize - 1);
+        .order('date_facture', { ascending: false });
+      query = applyRange(query, (page - 1) * pageSize, pageSize);
 
       if (search) {
         query = query.or(`numero.ilike.%${search}%,fournisseurs.nom.ilike.%${search}%`);

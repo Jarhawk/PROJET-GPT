@@ -3,6 +3,7 @@ import supabase from '@/lib/supabase';
 import { useState } from "react";
 
 import { useAuth } from '@/hooks/useAuth';
+import { applyRange } from '@/lib/supa/range';
 
 export function useInventaireLignes() {
   const { mama_id } = useAuth();
@@ -41,8 +42,7 @@ export function useInventaireLignes() {
     if (search) {
       query = query.eq("produit_id", search);
     }
-    const from = (page - 1) * limit;
-    query = query.range(from, from + limit - 1);
+    query = applyRange(query, (page - 1) * limit, limit);
     const { data, error, count } = await query;
     setLoading(false);
     if (error) {

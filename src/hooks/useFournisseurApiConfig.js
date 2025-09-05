@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { applyRange } from '@/lib/supa/range';
 
 export function useFournisseurApiConfig() {
   const { mama_id } = useAuth();
@@ -68,7 +69,6 @@ export function useFournisseurApiConfig() {
     const p = Number(page) || 1;
     const l = Number(limit) || 20;
     const start = (p - 1) * l;
-    const end = start + l - 1;
     let query = supabase
       .from('fournisseurs_api_config')
       .select('*, fournisseur:fournisseur_id(id, nom)', { count: 'exact' })
@@ -76,7 +76,7 @@ export function useFournisseurApiConfig() {
       .order('fournisseur_id');
     if (fournisseur_id) query = query.eq('fournisseur_id', fournisseur_id);
     if (actif !== undefined && actif !== null) query = query.eq('actif', actif);
-    query = query.range(start, end);
+    query = applyRange(query, start, l);
     const { data, count, error } = await query;
     setLoading(false);
     if (error) {

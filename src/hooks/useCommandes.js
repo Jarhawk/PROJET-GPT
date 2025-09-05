@@ -3,6 +3,7 @@ import supabase from '@/lib/supabase';
 import { useState, useCallback } from "react";
 
 import { useAuth } from '@/hooks/useAuth';
+import { applyRange } from '@/lib/supa/range';
 
 export function useCommandes() {
   const { mama_id, user_id } = useAuth();
@@ -24,8 +25,8 @@ export function useCommandes() {
           { count: "exact" }
         )
         .eq("mama_id", mama_id)
-        .order("date_commande", { ascending: false })
-        .range((page - 1) * limit, page * limit - 1);
+        .order("date_commande", { ascending: false });
+      query = applyRange(query, (page - 1) * limit, limit);
       if (fournisseur) query = query.eq("fournisseur_id", fournisseur);
       if (statut) query = query.eq("statut", statut);
       if (debut) query = query.gte("date_commande", debut);

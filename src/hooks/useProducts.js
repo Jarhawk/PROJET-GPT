@@ -4,6 +4,7 @@ import supabase from '@/lib/supabase';
 // src/hooks/useProducts.js
 import { useState, useCallback, useEffect } from "react";
 import { applyIlikeOr, normalizeSearchTerm } from '@/lib/supa/textSearch';
+import { applyRange } from '@/lib/supa/range';
 
 import { useAuth } from '@/hooks/useAuth';
 import * as XLSX from "xlsx";
@@ -56,9 +57,8 @@ export function useProducts() {
 
     req = applyIlikeOr(req, term);
 
-    const from = (page - 1) * limit;
-    const to = from + limit - 1;
-    const { data, error, count } = await req.range(from, to);
+    req = applyRange(req, (page - 1) * limit, limit);
+    const { data, error, count } = await req;
 
     const [
       { data: pmpData },

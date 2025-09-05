@@ -1,6 +1,7 @@
-import supabase from '@/lib/supabase';import { useQuery } from '@tanstack/react-query';
+import supabase from '@/lib/supabase';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
-
+import { applyRange } from '@/lib/supa/range';
 
 export function useFactures(filters = {}) {
   const { userData } = useAuth();
@@ -19,8 +20,8 @@ export function useFactures(filters = {}) {
           { count: 'exact' }
         )
         .eq('mama_id', mamaId)
-        .order('date_facture', { ascending: false })
-        .range((page - 1) * pageSize, page * pageSize - 1);
+        .order('date_facture', { ascending: false });
+      q = applyRange(q, (page - 1) * pageSize, pageSize);
 
       if (filters?.search) {
         q = q.ilike('numero', `%${filters.search}%`);

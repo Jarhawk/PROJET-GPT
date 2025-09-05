@@ -3,6 +3,7 @@ import supabase from '@/lib/supabase';
 import { useState } from "react";
 
 import { useAuth } from '@/hooks/useAuth';
+import { applyRange } from '@/lib/supa/range';
 
 export function usePromotions() {
   const { mama_id } = useAuth();
@@ -20,9 +21,7 @@ export function usePromotions() {
     select("*", { count: "exact" }).
     eq("mama_id", mama_id).
     order("date_debut", { ascending: false });
-    if (typeof query.range === "function") {
-      query = query.range((page - 1) * limit, page * limit - 1);
-    }
+    query = applyRange(query, (page - 1) * limit, limit);
     if (search) query = query.ilike("nom", `%${search}%`);
     if (typeof actif === "boolean") query = query.eq("actif", actif);
     const { data, error, count } = await query;

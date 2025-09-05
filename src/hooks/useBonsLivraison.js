@@ -3,6 +3,7 @@ import supabase from '@/lib/supabase';
 import { useState } from "react";
 
 import { useAuth } from '@/hooks/useAuth';
+import { applyRange } from '@/lib/supa/range';
 
 export function useBonsLivraison() {
   const { mama_id } = useAuth();
@@ -22,8 +23,8 @@ export function useBonsLivraison() {
         { count: "exact" }
       )
       .eq("mama_id", mama_id)
-      .order("date_reception", { ascending: false })
-      .range((page - 1) * pageSize, page * pageSize - 1);
+      .order("date_reception", { ascending: false });
+    q = applyRange(q, (page - 1) * pageSize, pageSize);
     if (fournisseur) q = q.eq("fournisseur_id", fournisseur);
     if (actif !== null) q = q.eq("actif", actif);
     if (debut) q = q.gte("date_reception", debut);

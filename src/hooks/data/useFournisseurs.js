@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { run } from '@/lib/supa/fetcher';
 import { logError } from '@/lib/supa/logError';
 import { normalizeSearchTerm } from '@/lib/supa/textSearch';
+import { applyRange } from '@/lib/supa/range';
 
 
 export function useFournisseurs(params = {}) {
@@ -32,9 +33,8 @@ export function useFournisseurs(params = {}) {
         .from('fournisseurs')
         .select('id, nom, actif')
         .eq('mama_id', mama_id)
-        .order('nom', { ascending: true })
-        .range((page - 1) * limit, page * limit - 1)
-        .abortSignal(signal);
+        .order('nom', { ascending: true });
+      q1 = applyRange(q1, (page - 1) * limit, limit).abortSignal(signal);
 
       if (term) q1 = q1.ilike('nom', `%${term}%`);
       if (actif !== null && actif !== undefined) q1 = q1.eq('actif', actif);

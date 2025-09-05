@@ -21,14 +21,14 @@ function safeQueryClient() {
 }
 
 const defaults = {
-  logo_url: "",
-  primary_color: "#bfa14d",
-  secondary_color: "#0f1c2e",
+  logo_url: null,
+  primary_color: "#0ea5e9",
+  secondary_color: "#f59e0b",
   email_envoi: "",
   email_alertes: "",
   dark_mode: false,
   langue: "fr",
-  monnaie: "€",
+  monnaie: "EUR",
   timezone: "Europe/Paris",
   rgpd_text: "",
   mentions_legales: ""
@@ -49,41 +49,16 @@ export default function useMamaSettings() {
     refetchOnWindowFocus: false,
     queryFn: async ({ signal }) => {
       const cols = 'logo_url, primary_color, secondary_color, email_envoi, email_alertes, dark_mode, langue, monnaie, timezone, rgpd_text, mentions_legales';
-      let { data, error } = await supabase
+      const { data, error } = await supabase
         .from('mamas')
         .select(cols)
         .eq('id', mamaId)
-        .single()
+        .maybeSingle()
         .abortSignal(signal);
-      if (error?.status === 500 || !data) {
-        console.warn('[compat] mamas fallback', error); // [compat]
-        const { data: baseData, error: e2 } = await supabase
-          .from('mamas')
-          .select('logo_url')
-          .eq('id', mamaId)
-          .single();
-        if (e2) {
-          console.error('[compat] logo_url only', e2); // [compat]
-          return {};
-        }
-        data = { ...baseData };
-        const optional = ['primary_color','secondary_color','email_envoi','email_alertes','dark_mode','langue','monnaie','timezone','rgpd_text','mentions_legales'];
-        for (const col of optional) {
-          const { data: colData, error: colErr } = await supabase
-            .from('mamas')
-            .select(col)
-            .eq('id', mamaId)
-            .single();
-          if (!colErr && colData && col in colData) {
-            data[col] = colData[col];
-          } else if (colErr) {
-            console.warn(`[compat] ${col}`, colErr); // [compat]
-          }
-        }
-        return data;
+      if (error) {
+        console.warn('[compat] mamas maybeSingle', error);
       }
-      if (error) throw error;
-      return data;
+      return data ?? defaults;
     }
   });
 
@@ -95,7 +70,7 @@ export default function useMamaSettings() {
       update(fields).
       eq('id', mamaId).
       select().
-      single();
+      maybeSingle();
       if (!error && data) {
         queryClient.setQueryData(['mama-settings', mamaId], (old) => ({
           ...(old || {}),
@@ -107,7 +82,7 @@ export default function useMamaSettings() {
     [mamaId, queryClient]
   );
 
-  const settings = useMemo(() => ({ ...defaults, ...(query.data || {}) }), [query.data]);
+  const settings = useMemo(() => query.data ?? defaults, [query.data]);
 
   const fallbackModules = useMemo(
     () => deduceEnabledModulesFromRights(userData?.access_rights),

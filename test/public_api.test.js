@@ -104,6 +104,16 @@ describe('public API router', () => {
     expect(chain.order).toHaveBeenCalledWith('nom', { ascending: true });
   });
 
+  it('applies sort field without duplicating order param', async () => {
+    const app = express();
+    app.use(router);
+    await request(app)
+      .get('/produits?mama_id=m1&sortBy=famille&order=desc')
+      .set('x-api-key', 'dev_key');
+    expect(chain.order).toHaveBeenCalledTimes(1);
+    expect(chain.order).toHaveBeenCalledWith('famille', { ascending: false });
+  });
+
   it('returns 400 when mama_id is missing', async () => {
     const app = express();
     app.use(router);

@@ -1,16 +1,41 @@
-import { Pool } from 'pg';
+import Database from 'better-sqlite3';
+import fs from 'fs';
+import path from 'path';
+import { getConfig, defaultDataDir } from './config';
 
-let pool: Pool | null = null;
+let db: Database | null = null;
 
-export function getDb() {
-  if (!pool) {
-    const connectionString =
-      process.env.DATABASE_URL ||
-      process.env.PG_URI ||
-      'postgres://postgres:postgres@localhost:5432/postgres';
-    pool = new Pool({ connectionString });
+function applyMigrations(db: Database) {
+  const migrationsDir = path.join(process.cwd(), 'public', 'migrations');
+  if (!fs.existsSync(migrationsDir)) return;
+  const files = fs
+    .readdirSync(migrationsDir)
+    .filter((f) => f.endsWith('.sql'))
+    .sort();
+  for (const file of files) {
+    const sql = fs.readFileSync(path.join(migrationsDir, file), 'utf-8');
+    db.exec(sql);
   }
-  return pool;
+}
+
+export function getDb(): any {
+  if (!db) {
+    const { dataDir } = getConfig();
+    const dir = dataDir || defaultDataDir;
+    fs.mkdirSync(dir, { recursive: true });
+    const dbPath = path.join(dir, 'mamastock.db');
+    const first = !fs.existsSync(dbPath);
+    db = new Database(dbPath);
+    if (first) applyMigrations(db);
+  }
+  return db;
+}
+
+export async function closeDb() {
+  if (db) {
+    db.close();
+    db = null;
+  }
 }
 
 export async function produits_list({ mama_id, limit = 100, offset = 0, search = '', filters = {} } : any = {}) {

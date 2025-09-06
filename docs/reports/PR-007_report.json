@@ -1,0 +1,11 @@
+{
+  "summary": [
+    "Added assets/logo.svg and npm script to generate Tauri icons",
+    "build.ps1 and Windows workflow generate icons before Tauri build",
+    "Updated offline README and progress log"
+  ],
+  "tests": [
+    "npm run icon:gen",
+    "npx tauri build (fails: missing Tauri configuration)"
+  ]
+}

@@ -1,0 +1,22 @@
+name: Build Windows
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - uses: dtolnay/rust-toolchain@stable
+      - run: npm ci
+      - name: Generate icons
+        run: npm run icon:gen
+      - name: Build Tauri app
+        run: npx tauri build

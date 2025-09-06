@@ -1944,3 +1944,8 @@
 - Added data directory selection and distributed lock with automatic shutdown.
 - Implemented startup lock checks, quit button, and config storage.
 - `npm run lint` passes; `npm test` executed (fails: missing Supabase credentials).
+
+## 2025-09-06 Step 385
+- Added branding logo and icon generation script.
+- build.ps1 and Windows workflow run `npm run icon:gen` before Tauri build.
+- `npm run icon:gen` succeeds; `npx tauri build` fails (missing Tauri configuration).

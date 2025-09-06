@@ -1940,3 +1940,7 @@
 - Implemented local DAL with plugin-sql v2 and replaced Supabase calls in products, suppliers and invoice form.
 - Added DAL mocks for tests and refreshed product cache after invoice creation.
 - `npm run lint` passes; `npm test` executed (may still report missing credentials).
+## 2025-07-31 Step 384
+- Added data directory selection and distributed lock with automatic shutdown.
+- Implemented startup lock checks, quit button, and config storage.
+- `npm run lint` passes; `npm test` executed (fails: missing Supabase credentials).

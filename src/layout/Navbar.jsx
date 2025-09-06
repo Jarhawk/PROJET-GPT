@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { useGlobalSearch } from "@/hooks/useGlobalSearch";
 import LanguageSelector from "@/components/ui/LanguageSelector";
+import { shutdownDbSafely } from '@/lib/shutdown';
+import { releaseLock } from '@/lib/lock';
 
 export default function Navbar() {
   const { t } = useTranslation();
@@ -36,6 +38,12 @@ export default function Navbar() {
     if (!confirmLogout) return;
 
     window.location.href = "/logout";
+  }, []);
+
+  const handleQuit = useCallback(async () => {
+    await shutdownDbSafely();
+    releaseLock();
+    window.close();
   }, []);
 
   return (
@@ -97,6 +105,12 @@ export default function Navbar() {
                 {mama_id}
               </span>
             )}
+            <button
+              onClick={handleQuit}
+              className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded-md transition"
+            >
+              Quitter & synchroniser
+            </button>
             <button
               onClick={handleLogout}
               className="text-sm bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded-md transition"

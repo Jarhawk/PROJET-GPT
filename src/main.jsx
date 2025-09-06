@@ -9,6 +9,8 @@ import "./registerSW.js";
 import { BrowserRouter } from "react-router-dom";
 import AuthProvider from "@/contexts/AuthContext";
 import { toast } from 'sonner';
+import { ensureSingleOwner, releaseLock } from '@/lib/lock';
+import { monitorShutdownRequests, shutdownDbSafely } from '@/lib/shutdown';
 
 // Avoid noisy output in production by disabling debug logs
 if (!import.meta.env.DEV) {
@@ -30,6 +32,13 @@ if (import.meta?.env?.DEV) {
   // @ts-ignore
   window.toast = toast;
 }
+
+await ensureSingleOwner();
+monitorShutdownRequests();
+window.addEventListener('beforeunload', () => {
+  shutdownDbSafely();
+  releaseLock();
+});
 
 // Option sentry/reporting
 // import * as Sentry from "@sentry/react";

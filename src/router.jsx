@@ -85,6 +85,7 @@ const Licence = lazyWithPreload(() => import("@/pages/legal/Licence.jsx"));
 const AideContextuelle = lazyWithPreload(() => import("@/pages/AideContextuelle.jsx"));
 const SupervisionGroupe = lazyWithPreload(() => import("@/pages/supervision/SupervisionGroupe.jsx"));
 const ComparateurFiches = lazyWithPreload(() => import("@/pages/supervision/ComparateurFiches.jsx"));
+const Settings = lazyWithPreload(() => import("@/pages/Settings.jsx"));
 const NotificationsInbox = lazyWithPreload(() => import("@/pages/notifications/NotificationsInbox.jsx"));
 const NotificationSettingsForm = lazyWithPreload(() => import("@/pages/notifications/NotificationSettingsForm.jsx"));
 const FournisseurApiSettingsForm = lazyWithPreload(() => import("@/pages/fournisseurs/FournisseurApiSettingsForm.jsx"));
@@ -187,6 +188,7 @@ export const routePreloadMap = {
   '/parametrage/unites': Unites.preload,
   '/parametrage/periodes': Periodes.preload,
   '/consentements': Consentements.preload,
+  '/settings': Settings.preload,
   '/supervision': SupervisionGroupe.preload,
   '/supervision/comparateur': ComparateurFiches.preload,
   '/supervision/logs': SupervisionLogs.preload,
@@ -587,6 +589,10 @@ export default function Router() {
           <Route
             path="/consentements"
             element={<Consentements />}
+          />
+          <Route
+            path="/settings"
+            element={<Settings />}
           />
           <Route
             path="/aide"

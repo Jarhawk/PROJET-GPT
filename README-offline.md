@@ -11,3 +11,5 @@
   - **Sauvegarder** copie `mamastock.db` dans `Documents/MamaStock/Backups` avec horodatage.
   - **Restaurer** remplace la base après sélection d'un fichier `.db` et redémarre l'application.
   - **Maintenance** exécute `wal_checkpoint(TRUNCATE)` puis `VACUUM`.
+- Les listes **Produits**, **Fournisseurs** et **Factures** disposent de boutons d'export local (CSV, XLSX, PDF).
+- Les fichiers sont enregistrés par défaut dans `Documents/MamaStock/Exports`; ce dossier peut être modifié via `config.json`.

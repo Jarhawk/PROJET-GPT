@@ -2,6 +2,7 @@
 
 - Node: v22.19.0
 - npm: 11.4.2
+- Exports: Documents/MamaStock/Exports (configurable)
 
 ## package.json
 Name: mamastock.com

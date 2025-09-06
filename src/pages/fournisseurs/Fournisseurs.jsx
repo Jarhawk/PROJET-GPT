@@ -15,9 +15,8 @@ import PaginationFooter from '@/components/ui/PaginationFooter';
 import TableHeader from '@/components/ui/TableHeader';
 import FournisseurRow from '@/components/fournisseurs/FournisseurRow';
 import { Dialog, DialogContent } from '@/components/ui/SmartDialog';
-import JSPDF from 'jspdf';
-import 'jspdf-autotable';
 import { toast } from 'sonner';
+import ExportButtons from '@/components/export/ExportButtons';
 import {
   ResponsiveContainer,
   LineChart,
@@ -36,12 +35,8 @@ import supabase from '@/lib/supabase'; // [diag]
 import { useAuth } from '@/hooks/useAuth';
 
 export default function Fournisseurs() {
-  const {
-    createFournisseur,
-    updateFournisseur,
-    toggleFournisseurActive,
-    exportFournisseursToExcel,
-  } = useFournisseursActions();
+  const { createFournisseur, updateFournisseur, toggleFournisseurActive } =
+    useFournisseursActions();
   const { fetchStatsAll } = useFournisseurStats();
   const { getProduitsDuFournisseur, countProduitsDuFournisseur } =
     useProduitsFournisseur();
@@ -103,6 +98,13 @@ export default function Fournisseurs() {
 
   const listWithContact = fournisseurs;
   const inactifs = listWithContact.filter((f) => !f.actif);
+  const exportData = listWithContact.map((f) => ({
+    nom: f.nom,
+    tel: f.contact?.tel || '',
+    contact: f.contact?.nom || '',
+    email: f.contact?.email || '',
+    produits: productCounts[f.id] || 0,
+  }));
 
   useEffect(() => {
     async function fetchCounts() {
@@ -115,22 +117,6 @@ export default function Fournisseurs() {
     if (fournisseurs.length) fetchCounts();
   }, [fournisseurs]);
 
-  const exportPDF = () => {
-    const doc = new JSPDF();
-    doc.text('Liste Fournisseurs', 10, 12);
-    doc.autoTable({
-      startY: 20,
-      head: [['Nom', 'Téléphone', 'Contact', 'Email']],
-      body: listWithContact.map((f) => [
-        f.nom,
-        f.contact?.tel || '',
-        f.contact?.nom || '',
-        f.contact?.email || '',
-      ]),
-      styles: { fontSize: 9 },
-    });
-    doc.save('fournisseurs.pdf');
-  };
 
   async function handleDiag() {
     const { data, error: diagError } = await supabase
@@ -250,12 +236,11 @@ export default function Fournisseurs() {
                 <PlusCircle className="mr-2" size={18} /> Ajouter fournisseur
               </Button>
             )}
-            <Button className="w-auto" onClick={() => exportFournisseursToExcel(fournisseurs)}>
-              Export Excel
-            </Button>
-            <Button className="w-auto" onClick={exportPDF}>
-              Export PDF
-            </Button>
+            <ExportButtons
+              data={exportData}
+              filename="fournisseurs"
+              disabled={fournisseurs.length === 0}
+            />
             <Button className="w-auto" onClick={handleDiag}>
               Tester Supabase
             </Button>

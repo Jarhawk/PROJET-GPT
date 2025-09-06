@@ -9,14 +9,6 @@ import { useFacturesAutocomplete } from '@/hooks/useFacturesAutocomplete';
 import FactureForm from './FactureForm.jsx';
 import FactureDetail from './FactureDetail.jsx';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from '@/components/ui/dropdown-menu';
-import { Menu } from 'lucide-react';
-import useExport from '@/hooks/useExport';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import TableHeader from '@/components/ui/TableHeader';
 import GlassCard from '@/components/ui/GlassCard';
@@ -26,6 +18,7 @@ import FactureTable from '@/components/FactureTable';
 import FactureImportModal from '@/components/FactureImportModal';
 import { FACTURE_STATUTS } from '@/constants/factures';
 import SupplierFilter from '@/components/filters/SupplierFilter';
+import ExportButtons from '@/components/export/ExportButtons';
 
 export default function Factures() {
   const { deleteFacture, toggleFactureActive } = useFacturesActions();
@@ -46,7 +39,6 @@ export default function Factures() {
   const [page, setPage] = useState(1);
   const pageSize = 10;
   const [loading, setLoading] = useState(false);
-  const { exportData, loading: exporting } = useExport();
 
   const STATUTS = [
     { label: 'Tous', value: '' },
@@ -68,6 +60,14 @@ export default function Factures() {
   } = useFacturesData({ ...filters, page, pageSize });
   const factures = listData?.factures || [];
   const total = listData?.total || 0;
+  const exportRows = factures.map((f) => ({
+    numero: f.numero || f.id,
+    date: f.date_facture,
+    fournisseur: f.fournisseur?.nom || '',
+    montant: f.total_ttc,
+    statut: f.statut,
+    actif: f.actif ? 'oui' : 'non',
+  }));
 
   const canEdit = hasAccess('factures', 'peut_modifier');
 
@@ -162,57 +162,23 @@ export default function Factures() {
               </select>
             </div>
             {canEdit && (
-              <div className="flex items-center gap-2 ml-auto">
-                <div className="hidden md:flex gap-2">
-                  <Button
-                    onClick={() => {
-                      setSelected(null);
-                      setShowForm(true);
-                    }}
-                  >
-                    Ajouter une facture
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() =>
-                      exportData({ type: 'factures', format: 'excel' })
-                    }
-                    disabled={exporting}
-                  >
-                    Export Excel
-                  </Button>
-                  <Button variant="outline" onClick={() => setShowImport(true)}>
-                    Importer
-                  </Button>
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="md:hidden">
-                      <Menu className="w-4 h-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      onSelect={() => {
-                        setSelected(null);
-                        setShowForm(true);
-                      }}
-                    >
-                      Ajouter une facture
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onSelect={() =>
-                        exportData({ type: 'factures', format: 'excel' })
-                      }
-                      disabled={exporting}
-                    >
-                      Export Excel
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => setShowImport(true)}>
-                      Importer
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+              <div className="flex flex-wrap items-center gap-2 ml-auto">
+                <Button
+                  onClick={() => {
+                    setSelected(null);
+                    setShowForm(true);
+                  }}
+                >
+                  Ajouter une facture
+                </Button>
+                <ExportButtons
+                  data={exportRows}
+                  filename="factures"
+                  disabled={factures.length === 0}
+                />
+                <Button variant="outline" onClick={() => setShowImport(true)}>
+                  Importer
+                </Button>
               </div>
             )}
           </TableHeader>

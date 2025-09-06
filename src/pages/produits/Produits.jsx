@@ -14,12 +14,12 @@ import TableHeader from "@/components/ui/TableHeader";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { Plus as PlusIcon, FileDown as FileDownIcon } from "lucide-react";
+import { Plus as PlusIcon } from "lucide-react";
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import ProduitRow from "@/components/produits/ProduitRow";
-import { exportExcelProduits } from "@/utils/excelUtils";
 import ModalImportProduits from "@/components/produits/ModalImportProduits";
+import ExportButtons from '@/components/export/ExportButtons';
 
 const PAGE_SIZE = 50;
 
@@ -72,16 +72,6 @@ export default function Produits() {
   const refreshList = useCallback(() => {
     refetch();
   }, [refetch, search, familleFilter, sousFamilleFilter, zoneFilter, actifFilter, page, sortField, sortOrder]);
-
-
-  async function handleExportExcel() {
-    try {
-      await exportExcelProduits(mama_id);
-      toast.success("Export Excel réussi");
-    } catch (e) {
-      toast.error(e.message);
-    }
-  }
 
   useEffect(() => {
     if (!canView) return;
@@ -235,18 +225,8 @@ export default function Produits() {
             Nouveau produit
           </Button>
           <div className="flex gap-2 flex-wrap">
-            <Button
-              className="min-w-[140px]"
-              onClick={handleExportExcel}
-              icon={FileDownIcon}
-              disabled={rows.length === 0}
-            >
-              Exporter vers Excel
-            </Button>
-            <Button
-              className="min-w-[140px]"
-              onClick={() => setShowImport(true)}
-            >
+            <ExportButtons data={rows} filename="produits" disabled={rows.length === 0} />
+            <Button className="min-w-[140px]" onClick={() => setShowImport(true)}>
               Importer via Excel
             </Button>
           </div>

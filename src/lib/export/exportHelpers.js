@@ -1,11 +1,42 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import JSPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
 import { dump } from 'js-yaml';
+import { getConfig, defaultExportDir } from '@/lib/config';
 
-export function exportToPDF(data = [], config = {}) {
+function isTauri() {
+  // @ts-ignore
+  return typeof window !== 'undefined' && !!window.__TAURI__;
+}
+
+async function saveFile(blob, filename) {
+  if (isTauri()) {
+    const { writeBinaryFile, createDir } = await import('@tauri-apps/plugin-fs');
+    const { join } = await import('@tauri-apps/api/path');
+    const cfg = getConfig();
+    const dir = cfg.exportDir || defaultExportDir;
+    await createDir(dir);
+    const filePath = await join(dir, filename);
+    await writeBinaryFile(filePath, new Uint8Array(await blob.arrayBuffer()));
+    return filePath;
+  }
+  if (typeof window === 'undefined') {
+    const fs = await import('fs');
+    const path = await import('path');
+    const cfg = getConfig();
+    const dir = cfg.exportDir || defaultExportDir;
+    fs.mkdirSync(dir, { recursive: true });
+    const filePath = path.join(dir, filename);
+    fs.writeFileSync(filePath, Buffer.from(await blob.arrayBuffer()));
+    return filePath;
+  }
+  const { saveAs } = await import('file-saver');
+  saveAs(blob, filename);
+  return filename;
+}
+
+export async function exportToPDF(data = [], config = {}) {
   const {
     filename = 'export.pdf',
     columns = [],
@@ -24,11 +55,12 @@ export function exportToPDF(data = [], config = {}) {
       ? columns.map((c) => item[c.key])
       : Object.values(item)
   );
-  doc.autoTable({ head: headers, body: rows, styles: { fontSize: 9 } });
-  doc.save(filename);
+  autoTable(doc, { head: headers, body: rows, styles: { fontSize: 9 } });
+  const buf = doc.output('arraybuffer');
+  await saveFile(new Blob([buf], { type: 'application/pdf' }), filename);
 }
 
-export function exportToExcel(data = [], config = {}) {
+export async function exportToExcel(data = [], config = {}) {
   const {
     filename = 'export.xlsx',
     sheet = 'Sheet1',
@@ -49,10 +81,10 @@ export function exportToExcel(data = [], config = {}) {
   const ws = XLSX.utils.json_to_sheet(arr);
   XLSX.utils.book_append_sheet(wb, ws, sheet);
   const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-  saveAs(new Blob([buf]), filename);
+  await saveFile(new Blob([buf]), filename);
 }
 
-export function exportToCSV(data = [], config = {}) {
+export async function exportToCSV(data = [], config = {}) {
   const {
     filename = 'export.csv',
     columns = [],
@@ -71,7 +103,7 @@ export function exportToCSV(data = [], config = {}) {
       : Object.values(item).map(quote).join(delim)
   );
   const csv = [header, ...rows].join('\n');
-  saveAs(new Blob([csv], { type: 'text/csv;charset=utf-8;' }), filename);
+  await saveFile(new Blob([csv], { type: 'text/csv;charset=utf-8;' }), filename);
 }
 
 export function exportToTSV(data = [], config = {}) {
@@ -84,14 +116,17 @@ export function exportToTSV(data = [], config = {}) {
   });
 }
 
-export function exportToJSON(data = [], config = {}) {
+export async function exportToJSON(data = [], config = {}) {
   const { filename = 'export.json', pretty = true } = config;
   if (!Array.isArray(data)) data = [data];
   const json = JSON.stringify({ data }, null, pretty ? 2 : 0);
-  saveAs(new Blob([json], { type: 'application/json;charset=utf-8;' }), filename);
+  await saveFile(
+    new Blob([json], { type: 'application/json;charset=utf-8;' }),
+    filename
+  );
 }
 
-export function exportToXML(data = [], config = {}) {
+export async function exportToXML(data = [], config = {}) {
   const {
     filename = 'export.xml',
     root = 'items',
@@ -105,10 +140,13 @@ export function exportToXML(data = [], config = {}) {
     return `<${row}>${cells}</${row}>`;
   });
   const xml = `<${root}>${rows.join('')}</${root}>`;
-  saveAs(new Blob([xml], { type: 'application/xml;charset=utf-8;' }), filename);
+  await saveFile(
+    new Blob([xml], { type: 'application/xml;charset=utf-8;' }),
+    filename
+  );
 }
 
-export function exportToHTML(data = [], config = {}) {
+export async function exportToHTML(data = [], config = {}) {
   const { filename = 'export.html', columns = [] } = config;
   if (!Array.isArray(data)) data = [data];
   const labels = columns.length ? columns.map((c) => c.label) : Object.keys(data[0] || {});
@@ -120,10 +158,13 @@ export function exportToHTML(data = [], config = {}) {
     return `<tr>${cells.join('')}</tr>`;
   });
   const html = `<table><thead><tr>${header}</tr></thead><tbody>${rows.join('')}</tbody></table>`;
-  saveAs(new Blob([html], { type: 'text/html;charset=utf-8;' }), filename);
+  await saveFile(
+    new Blob([html], { type: 'text/html;charset=utf-8;' }),
+    filename
+  );
 }
 
-export function exportToMarkdown(data = [], config = {}) {
+export async function exportToMarkdown(data = [], config = {}) {
   const { filename = 'export.md', columns = [] } = config;
   if (!Array.isArray(data)) data = [data];
   const labels = columns.length ? columns.map((c) => c.label) : Object.keys(data[0] || {});
@@ -134,17 +175,23 @@ export function exportToMarkdown(data = [], config = {}) {
     return `|${cells.join('|')}|`;
   });
   const md = [header, divider, ...rows].join('\n');
-  saveAs(new Blob([md], { type: 'text/markdown;charset=utf-8;' }), filename);
+  await saveFile(
+    new Blob([md], { type: 'text/markdown;charset=utf-8;' }),
+    filename
+  );
 }
 
-export function exportToYAML(data = [], config = {}) {
+export async function exportToYAML(data = [], config = {}) {
   const { filename = 'export.yaml' } = config;
   if (!Array.isArray(data)) data = [data];
   const yml = dump({ data });
-  saveAs(new Blob([yml], { type: 'text/yaml;charset=utf-8;' }), filename);
+  await saveFile(
+    new Blob([yml], { type: 'text/yaml;charset=utf-8;' }),
+    filename
+  );
 }
 
-export function exportToTXT(data = [], config = {}) {
+export async function exportToTXT(data = [], config = {}) {
   const { filename = 'export.txt', columns = [] } = config;
   if (!Array.isArray(data)) data = [data];
   const lines = data.map((item) => {
@@ -156,7 +203,10 @@ export function exportToTXT(data = [], config = {}) {
       .join('\n');
   });
   const txt = lines.join('\n\n');
-  saveAs(new Blob([txt], { type: 'text/plain;charset=utf-8;' }), filename);
+  await saveFile(
+    new Blob([txt], { type: 'text/plain;charset=utf-8;' }),
+    filename
+  );
 }
 
 export function exportToClipboard(data = [], config = {}) {

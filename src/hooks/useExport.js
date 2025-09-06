@@ -60,16 +60,16 @@ export default function useExport() {
         data = res.data || [];
       }
 
-      if (format === 'pdf') exportToPDF(data, options);else
-      if (format === 'excel') exportToExcel(data, options);else
-      if (format === 'csv') exportToCSV(data, options);else
-      if (format === 'tsv') exportToTSV(data, options);else
-      if (format === 'json') exportToJSON(data, options);else
-      if (format === 'xml') exportToXML(data, options);else
-      if (format === 'html') exportToHTML(data, options);else
-      if (format === 'markdown') exportToMarkdown(data, options);else
-      if (format === 'yaml') exportToYAML(data, options);else
-      if (format === 'txt') exportToTXT(data, options);else
+      if (format === 'pdf') await exportToPDF(data, options);else
+      if (format === 'excel') await exportToExcel(data, options);else
+      if (format === 'csv') await exportToCSV(data, options);else
+      if (format === 'tsv') await exportToTSV(data, options);else
+      if (format === 'json') await exportToJSON(data, options);else
+      if (format === 'xml') await exportToXML(data, options);else
+      if (format === 'html') await exportToHTML(data, options);else
+      if (format === 'markdown') await exportToMarkdown(data, options);else
+      if (format === 'yaml') await exportToYAML(data, options);else
+      if (format === 'txt') await exportToTXT(data, options);else
       if (format === 'clipboard') await exportToClipboard(data, options);else
       if (format === 'print') printView(options.content);
 

@@ -7,3 +7,7 @@
 - Les requêtes d'arrêt sont émises via `shutdown.request.json` et provoquent la fermeture automatique de l'instance active.
 - Le bouton **Quitter & synchroniser** ferme proprement la base et libère le verrou.
 - Le script `npm run icon:gen` génère les icônes Tauri à partir de `assets/logo.svg` avant la compilation.
+- Trois actions sont disponibles dans **Paramètres** :
+  - **Sauvegarder** copie `mamastock.db` dans `Documents/MamaStock/Backups` avec horodatage.
+  - **Restaurer** remplace la base après sélection d'un fichier `.db` et redémarre l'application.
+  - **Maintenance** exécute `wal_checkpoint(TRUNCATE)` puis `VACUUM`.

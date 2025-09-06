@@ -1935,3 +1935,8 @@
 - ran npm install so @eslint/js is restored before linting
 - npm run lint passes
 - npm test fails due to missing Supabase credentials (19 failed)
+
+## 2025-07-31 Step 383
+- Implemented local DAL with plugin-sql v2 and replaced Supabase calls in products, suppliers and invoice form.
+- Added DAL mocks for tests and refreshed product cache after invoice creation.
+- `npm run lint` passes; `npm test` executed (may still report missing credentials).

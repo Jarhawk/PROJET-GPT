@@ -1,5 +1,4 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import supabase from '@/lib/supabase';
 // src/hooks/useFournisseurs.js
 import { useState, useEffect, useCallback } from "react";
 
@@ -9,6 +8,11 @@ import { saveAs } from 'file-saver';
 import { toast } from 'sonner';
 import { safeImportXLSX } from '@/lib/xlsx/safeImportXLSX';
 import { useQueryClient } from '@tanstack/react-query';
+import {
+  fournisseurs_list,
+  fournisseurs_create,
+  fournisseurs_update,
+} from '@/lib/db'
 
 function safeQueryClient() {
   try {
@@ -35,11 +39,7 @@ export function useFournisseurs() {
     if (!mama_id) return [];
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase.
-    from('fournisseurs').
-    select('*').
-    eq('mama_id', mama_id).
-    order('nom');
+    const { data, error } = await fournisseurs_list({ mama_id });
     setLoading(false);
     if (error) {
       setError(error);
@@ -59,20 +59,7 @@ export function useFournisseurs() {
   async function createFournisseur(fournisseur) {
     if (!mama_id) return;
     const { nom, actif = true, tel, email, contact } = fournisseur;
-    const { data, error } = await supabase.
-    from('fournisseurs').
-    insert([{ nom, actif, mama_id }]).
-    select().
-    single();
-    if (!error && data && (tel || email || contact)) {
-      await supabase.from('fournisseur_contacts').insert({
-        fournisseur_id: data.id,
-        mama_id,
-        nom: contact,
-        email,
-        tel
-      });
-    }
+    const { data, error } = await fournisseurs_create({ nom, actif, mama_id, contact, email, tel });
     if (error) {
       toast.error(error.message);
     } else if (data) {
@@ -87,19 +74,7 @@ export function useFournisseurs() {
   async function updateFournisseur(id, updateFields) {
     if (!mama_id) return;
     const { tel, email, contact, ...fields } = updateFields;
-    const { error } = await supabase.
-    from('fournisseurs').
-    update(fields).
-    eq('id', id).
-    eq('mama_id', mama_id);
-    if (!error && (tel || email || contact)) {
-      await supabase.
-      from('fournisseur_contacts').
-      upsert(
-        [{ fournisseur_id: id, mama_id, nom: contact, email, tel }],
-        { onConflict: ['fournisseur_id', 'mama_id'] }
-      );
-    }
+    const { error } = await fournisseurs_update(id, mama_id, { ...fields, contact, email, tel });
     if (!error) {
       setFournisseurs((prev) =>
       prev.
@@ -128,11 +103,7 @@ export function useFournisseurs() {
   // Activer/désactiver un fournisseur
   async function toggleFournisseurActive(id, actif) {
     if (!mama_id) return;
-    const { error } = await supabase.
-    from('fournisseurs').
-    update({ actif }).
-    eq('id', id).
-    eq('mama_id', mama_id);
+    const { error } = await fournisseurs_update(id, mama_id, { actif });
     if (error) {
       toast.error(error.message);
     } else {

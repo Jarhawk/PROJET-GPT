@@ -1,33 +1,31 @@
 import { useCallback, useState, useEffect, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabaseClient'
 import { useAuth } from '@/hooks/useAuth'
+import {
+  produits_list,
+  produits_create,
+  produits_update,
+  produits_get,
+  produits_prices,
+} from '@/lib/db'
 
 export async function fetchProducts({ mamaId, limit = 100, offset = 0, search = '', filters = {} } = {}) {
-  const { data, error, count } = await supabase
-    .from('produits')
-    .select(
-      `id, nom, mama_id, actif, famille_id, unite_id, code, image, pmp,
-      stock_reel, stock_min, stock_theorique, created_at, updated_at,
-      unite:unites!fk_produits_unite(nom),
-      famille:familles!fk_produits_famille(nom)`,
-      { count: 'exact' }
-    )
-    .eq('mama_id', mamaId)
-    .order('nom', { ascending: true })
-    .range(offset, offset + limit - 1)
-
+  const { data, count, error } = await produits_list({
+    mama_id: mamaId,
+    limit,
+    offset,
+    search,
+    filters,
+  })
   if (error) {
     console.warn('[fetchProducts] fallback []', error)
     return { data: [], count: 0 }
   }
-
-  const enriched = (data ?? []).map(p => ({
+  const enriched = (data ?? []).map((p) => ({
     ...p,
     unite_nom: p.unite?.nom ?? null,
     famille_nom: p.famille?.nom ?? null,
   }))
-
   return { data: enriched, count: count ?? 0 }
 }
 
@@ -70,9 +68,7 @@ export function useProducts(options = {}) {
   const addProduct = useCallback(async (product, { refresh = true } = {}) => {
     if (!resolvedMama) return { error: 'no_mama' }
     setLoading(true)
-    const { error } = await supabase
-      .from('produits')
-      .insert([{ ...product, mama_id: resolvedMama }])
+    const { error } = await produits_create({ ...product, mama_id: resolvedMama })
     setLoading(false)
     if (!error && refresh) query.refetch?.()
     return { error }
@@ -81,11 +77,7 @@ export function useProducts(options = {}) {
   const updateProduct = useCallback(async (id, fields, { refresh = true } = {}) => {
     if (!resolvedMama) return { error: 'no_mama' }
     setLoading(true)
-    const { error } = await supabase
-      .from('produits')
-      .update(fields)
-      .eq('id', id)
-      .eq('mama_id', resolvedMama)
+    const { error } = await produits_update(id, { ...fields, mama_id: resolvedMama })
     setLoading(false)
     if (!error && refresh) query.refetch?.()
     return { error }
@@ -98,15 +90,7 @@ export function useProducts(options = {}) {
 
   const getProduct = useCallback(async (id) => {
     if (!resolvedMama) return null
-    const { data, error } = await supabase
-      .from('produits')
-      .select(`id, nom, mama_id, actif, famille_id, unite_id, code, image, pmp,
-        stock_reel, stock_min, stock_theorique, created_at, updated_at,
-        unite:unites!fk_produits_unite(nom),
-        famille:familles!fk_produits_famille(nom)`)
-      .eq('id', id)
-      .eq('mama_id', resolvedMama)
-      .single()
+    const { data, error } = await produits_get(id)
     if (error) {
       console.warn('[getProduct]', error)
       return null
@@ -120,12 +104,7 @@ export function useProducts(options = {}) {
 
   const fetchProductPrices = useCallback(async (productId) => {
     if (!resolvedMama) return []
-    const { data, error } = await supabase
-      .from('v_produits_dernier_prix')
-      .select('produit_id, dernier_prix, fournisseur_id, created_at')
-      .eq('produit_id', productId)
-      .eq('mama_id', resolvedMama)
-      .order('created_at', { ascending: false })
+    const { data, error } = await produits_prices(productId)
     if (error) {
       console.warn('[fetchProductPrices]', error)
       return []

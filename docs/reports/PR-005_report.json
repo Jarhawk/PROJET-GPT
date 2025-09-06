@@ -1,0 +1,12 @@
+{
+  "summary": [
+    "Implemented local DAL using plugin-sql v2",
+    "Replaced Supabase calls with DAL for products, suppliers, invoices",
+    "Refreshed product stock/PMP after invoice creation",
+    "Added DAL mocks for tests"
+  ],
+  "tests": [
+    "npm run lint",
+    "npm test"
+  ]
+}

@@ -1,4 +1,4 @@
-import supabase from '@/lib/supabase'; // src/pages/factures/FactureForm.jsx
+// src/pages/factures/FactureForm.jsx
 import { useMemo, useState, useEffect } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -22,6 +22,8 @@ import { mapUILineToPayload } from '@/features/factures/invoiceMappers';
 import useProduitLineDefaults from '@/hooks/useProduitLineDefaults';
 import { useZonesStock } from '@/hooks/useZonesStock';
 import { formatMoneyFR } from '@/utils/numberFormat';
+import { facture_create_with_lignes } from '@/lib/db';
+import { useQueryClient } from '@tanstack/react-query';
 
 const FN_UPDATE_FACTURE_EXISTS = false;
 
@@ -30,6 +32,7 @@ const today = () => format(new Date(), 'yyyy-MM-dd');
 export default function FactureForm({ facture = null, onSaved } = {}) {
   const { mama_id: mamaId } = useAuth();
   const { fetchDefaults } = useProduitLineDefaults();
+  const queryClient = useQueryClient();
 
   const emptyLigne = () => ({
     id: crypto.randomUUID(),
@@ -182,27 +185,14 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
         return;
       }
 
-      const rpcName = formId ? 'fn_update_facture' : 'fn_save_facture';
-      const args = formId ?
-      {
-        p_facture_id: formId,
-        p_mama_id: mamaId,
-        p_fournisseur_id: values.fournisseur_id,
-        p_numero: values.numero || null,
-        p_date: values.date_facture,
-        p_lignes: payloadLignes,
-        p_actif
-      } :
-      {
-        p_mama_id: mamaId,
-        p_fournisseur_id: values.fournisseur_id,
-        p_numero: values.numero || null,
-        p_date: values.date_facture,
-        p_lignes: payloadLignes,
-        p_actif
+      const facturePayload = {
+        mama_id: mamaId,
+        fournisseur_id: values.fournisseur_id,
+        numero: values.numero || null,
+        date_facture: values.date_facture,
+        p_actif,
       };
-
-      const { data, error } = await supabase.rpc(rpcName, args);
+      const { data, error } = await facture_create_with_lignes(facturePayload, payloadLignes);
 
       if (error) {
         toast.error(error.message);
@@ -214,6 +204,7 @@ export default function FactureForm({ facture = null, onSaved } = {}) {
       );
 
       onSaved?.();
+      queryClient.invalidateQueries({ queryKey: ['produits', mamaId] });
       if (!formId) reset(emptyForm());
       return data;
     } catch (e) {

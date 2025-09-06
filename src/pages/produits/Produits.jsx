@@ -4,7 +4,6 @@ import { useProducts } from "@/hooks/useProducts";
 import { useFamilles } from "@/hooks/useFamilles";
 import { useSousFamilles } from "@/hooks/useSousFamilles";
 import { useZonesStock } from "@/hooks/useZonesStock";
-import { supabase } from '@/lib/supabaseClient'
 import LoadingSkeleton from "@/components/ui/LoadingSkeleton";
 import ProduitFormModal from "@/components/produits/ProduitFormModal";
 import ProduitDetail from "@/components/produits/ProduitDetail";
@@ -45,6 +44,7 @@ export default function Produits() {
     data,
     count: total = 0,
     refetch,
+    toggleProductActive,
   } = useProducts({ mamaId: mama_id, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE });
   const products = data ?? [];
   const {
@@ -115,7 +115,7 @@ export default function Produits() {
   }
 
   async function handleToggleActive(id, actif) {
-    await supabase.from('produits').update({ actif }).eq('id', id).eq('mama_id', mama_id);
+    await toggleProductActive(id, actif);
     toast.success(actif ? "Produit activé" : "Produit désactivé");
     refetch();
   }

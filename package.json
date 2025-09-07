@@ -54,6 +54,7 @@
     "@tauri-apps/plugin-dialog": "^2.0.0",
     "@tauri-apps/plugin-fs": "^2.0.0",
     "better-sqlite3": "^11.7.0",
+    "bcrypt-ts": "^1",
     "date-fns": "3.6.0",
     "express": "^5.1.0",
     "file-saver": "^2.0.5",

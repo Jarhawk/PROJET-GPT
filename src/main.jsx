@@ -40,6 +40,14 @@ window.addEventListener('beforeunload', () => {
   releaseLock();
 });
 
+// Global error handlers for future debugging
+// window.addEventListener('error', (event) => {
+//   console.error('Global error:', event.error);
+// });
+// window.addEventListener('unhandledrejection', (event) => {
+//   console.error('Unhandled promise rejection:', event.reason);
+// });
+
 // Option sentry/reporting
 // import * as Sentry from "@sentry/react";
 // Sentry.init({ dsn: "https://xxx.ingest.sentry.io/xxx" });

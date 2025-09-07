@@ -1,0 +1,18 @@
+{
+  "summary": [
+    "Replace legacy bcryptjs with browser-compatible bcrypt-ts to avoid Node crypto dependency in front-end builds",
+    "Added bcrypt-ts dependency and removed bcryptjs"
+  ],
+  "files": [
+    "package.json",
+    "package-lock.json"
+  ],
+  "migration": [
+    "bcrypt-ts relies on Web Crypto API; ensure runtime support",
+    "Keep salt rounds factor consistent (e.g., 10)"
+  ],
+  "tests": [
+    "npm install",
+    "npm run build"
+  ]
+}

@@ -5,3 +5,7 @@
 
 ## Rationale
 - Switch `BrowserRouter` to `HashRouter` to avoid blank screens when loading deep routes without a server fallback.
+
+## Tests
+- `npm run build`
+- `npx tauri build`

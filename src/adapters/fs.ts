@@ -1,7 +1,18 @@
-import { readTextFile, writeTextFile, readFile, writeFile, exists, mkdir, remove } from '@tauri-apps/plugin-fs';
+import {
+  readTextFile,
+  writeTextFile,
+  readFile,
+  writeFile,
+  exists,
+  mkdir,
+  remove,
+} from '@tauri-apps/plugin-fs';
 
-export async function readText(path: string) {
-  return readTextFile(path);
+export const readText = readTextFile;
+export { writeFile, exists };
+
+export async function createDir(path: string) {
+  await mkdir(path, { recursive: true });
 }
 
 export async function writeText(path: string, data: string) {
@@ -22,7 +33,7 @@ export async function pathExists(path: string) {
 
 export async function ensureDir(path: string) {
   if (!(await exists(path))) {
-    await mkdir(path, { recursive: true });
+    await createDir(path);
   }
 }
 

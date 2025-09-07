@@ -9,12 +9,14 @@
 - src/lib/fsHelpers.ts
 - src/lib/db.ts
 - src/main.jsx
+- src/lib/export/exportHelpers.js
 
 ## Node API Removal
 - Replaced `fs`, `path`, and `os` imports with Tauri FS and Path adapters.
 - Removed synchronous filesystem calls in favour of async Tauri plugin calls.
 - Substituted `process.pid` based IDs with `crypto.randomUUID()`.
 - Eliminated direct Node-based database layer and routed calls through Tauri `invoke` commands.
+- Redirected file export utilities to the centralized FS and Path adapters.
 
 ## Mapping to Tauri APIs
 - File operations -> `@tauri-apps/plugin-fs` via `src/adapters/fs.ts`.

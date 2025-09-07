@@ -7,7 +7,8 @@
     "src/lib/shutdown.ts",
     "src/lib/fsHelpers.ts",
     "src/lib/db.ts",
-    "src/main.jsx"
+    "src/main.jsx",
+    "src/lib/export/exportHelpers.js"
   ],
   "node_api_removed": [
     "fs",

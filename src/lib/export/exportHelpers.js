@@ -4,6 +4,8 @@ import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { dump } from 'js-yaml';
 import { getConfig, defaultExportDir } from '@/lib/config';
+import { writeBinary, ensureDir } from '@/adapters/fs';
+import { join } from '@/adapters/path';
 
 function isTauri() {
   // @ts-ignore
@@ -12,13 +14,11 @@ function isTauri() {
 
 async function saveFile(blob, filename) {
   if (isTauri()) {
-    const fs = await import('@tauri-apps/plugin-fs');
-    const { join } = await import('@tauri-apps/api/path');
     const cfg = await getConfig();
     const dir = cfg.exportDir || (await defaultExportDir());
-    await fs.mkdir(dir, { recursive: true });
+    await ensureDir(dir);
     const filePath = await join(dir, filename);
-    await fs.writeFile(filePath, new Uint8Array(await blob.arrayBuffer()));
+    await writeBinary(filePath, new Uint8Array(await blob.arrayBuffer()));
     return filePath;
   }
   if (typeof window !== 'undefined') {

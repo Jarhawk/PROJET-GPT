@@ -1,0 +1,12 @@
+{
+  "files_modified": [
+    "src-tauri/tauri.conf.json",
+    "src/main.jsx"
+  ],
+  "reason": "Disable Tauri DevTools and retain commented global error handlers for future debugging.",
+  "tests": [
+    "npm run build",
+    "npx tauri build (fails: \"identifier\" is a required property)",
+    "./src-tauri/target/release/mamastock (binary missing)"
+  ]
+}

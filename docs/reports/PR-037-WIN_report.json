@@ -1,0 +1,6 @@
+{
+  "files_modified": [
+    "src/main.jsx"
+  ],
+  "reason": "Use HashRouter to ensure deep links render correctly without server route fallback."
+}

@@ -6,7 +6,7 @@ import "./globals.css";
 import 'nprogress/nprogress.css';
 import "@/i18n/i18n";
 import "./registerSW.js";
-import { BrowserRouter } from "react-router-dom";
+import { HashRouter } from "react-router-dom";
 import AuthProvider from "@/contexts/AuthContext";
 import { toast } from 'sonner';
 import { ensureSingleOwner, releaseLock } from '@/lib/lock';
@@ -47,10 +47,10 @@ window.addEventListener('beforeunload', () => {
 const root = createRoot(document.getElementById("root"));
 root.render(
   <StrictMode>
-    <BrowserRouter>
+    <HashRouter>
       <AuthProvider>
         <App />
       </AuthProvider>
-    </BrowserRouter>
+    </HashRouter>
   </StrictMode>
 );

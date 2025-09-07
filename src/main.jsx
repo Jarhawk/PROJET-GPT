@@ -34,7 +34,7 @@ if (import.meta?.env?.DEV) {
 }
 
 await ensureSingleOwner();
-monitorShutdownRequests();
+await monitorShutdownRequests();
 window.addEventListener('beforeunload', () => {
   shutdownDbSafely();
   releaseLock();

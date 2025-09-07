@@ -1,0 +1,23 @@
+{
+  "files_modified": [
+    "src/adapters/fs.ts",
+    "src/adapters/path.ts",
+    "src/lib/config.ts",
+    "src/lib/lock.ts",
+    "src/lib/shutdown.ts",
+    "src/lib/fsHelpers.ts",
+    "src/lib/db.ts",
+    "src/main.jsx"
+  ],
+  "node_api_removed": [
+    "fs",
+    "path",
+    "os"
+  ],
+  "tauri_mapping": {
+    "fs": "@tauri-apps/plugin-fs",
+    "path": "@tauri-apps/api/path",
+    "dialog": "@tauri-apps/plugin-dialog",
+    "invoke": "@tauri-apps/api/core"
+  }
+}

@@ -12,27 +12,20 @@ function isTauri() {
 
 async function saveFile(blob, filename) {
   if (isTauri()) {
-    const { writeBinaryFile, createDir } = await import('@tauri-apps/plugin-fs');
+    const fs = await import('@tauri-apps/plugin-fs');
     const { join } = await import('@tauri-apps/api/path');
-    const cfg = getConfig();
-    const dir = cfg.exportDir || defaultExportDir;
-    await createDir(dir);
+    const cfg = await getConfig();
+    const dir = cfg.exportDir || (await defaultExportDir());
+    await fs.mkdir(dir, { recursive: true });
     const filePath = await join(dir, filename);
-    await writeBinaryFile(filePath, new Uint8Array(await blob.arrayBuffer()));
+    await fs.writeFile(filePath, new Uint8Array(await blob.arrayBuffer()));
     return filePath;
   }
-  if (typeof window === 'undefined') {
-    const fs = await import('fs');
-    const path = await import('path');
-    const cfg = getConfig();
-    const dir = cfg.exportDir || defaultExportDir;
-    fs.mkdirSync(dir, { recursive: true });
-    const filePath = path.join(dir, filename);
-    fs.writeFileSync(filePath, Buffer.from(await blob.arrayBuffer()));
-    return filePath;
+  if (typeof window !== 'undefined') {
+    const { saveAs } = await import('file-saver');
+    saveAs(blob, filename);
+    return filename;
   }
-  const { saveAs } = await import('file-saver');
-  saveAs(blob, filename);
   return filename;
 }
 

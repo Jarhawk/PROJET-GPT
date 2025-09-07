@@ -1,35 +1,46 @@
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
+import { join, dirname, homeDir, documentDir, appDataDir } from '@/adapters/path';
+import { readText, writeText, ensureDir } from '@/adapters/fs';
 
 const APP_NAME = 'MamaStock';
-const configDir = process.env.APPDATA || path.join(os.homedir(), '.config');
-export const configPath = path.join(configDir, APP_NAME, 'config.json');
-export const defaultDataDir = path.join(os.homedir(), APP_NAME, 'data');
-export const defaultExportDir = path.join(
-  os.homedir(),
-  'Documents',
-  APP_NAME,
-  'Exports'
-);
 
-export function getConfig() {
+export async function configPath() {
+  const dir = await appDataDir();
+  return join(dir, APP_NAME, 'config.json');
+}
+
+export async function defaultDataDir() {
+  const home = await homeDir();
+  return join(home, APP_NAME, 'data');
+}
+
+export async function defaultExportDir() {
+  const docs = await documentDir();
+  return join(docs, APP_NAME, 'Exports');
+}
+
+export async function getConfig() {
+  const [file, dataDir, exportDir] = await Promise.all([
+    configPath(),
+    defaultDataDir(),
+    defaultExportDir(),
+  ]);
   try {
-    const txt = fs.readFileSync(configPath, 'utf-8');
+    const txt = await readText(file);
     const cfg = JSON.parse(txt);
     return {
-      dataDir: cfg.dataDir || defaultDataDir,
-      exportDir: cfg.exportDir || defaultExportDir,
+      dataDir: cfg.dataDir || dataDir,
+      exportDir: cfg.exportDir || exportDir,
     };
   } catch {
-    return { dataDir: defaultDataDir, exportDir: defaultExportDir };
+    return { dataDir, exportDir };
   }
 }
 
-export function saveConfig(cfg: { dataDir?: string; exportDir?: string }) {
-  const dir = path.dirname(configPath);
-  fs.mkdirSync(dir, { recursive: true });
-  const current = getConfig();
+export async function saveConfig(cfg: { dataDir?: string; exportDir?: string }) {
+  const file = await configPath();
+  const dir = await dirname(file);
+  await ensureDir(dir);
+  const current = await getConfig();
   const next = { ...current, ...cfg };
-  fs.writeFileSync(configPath, JSON.stringify(next, null, 2));
+  await writeText(file, JSON.stringify(next, null, 2));
 }

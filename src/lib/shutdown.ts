@@ -1,26 +1,26 @@
-import fs from 'fs';
-import path from 'path';
+import { pathExists, removeFile } from '@/adapters/fs';
+import { join } from '@/adapters/path';
 import { getConfig } from './config';
 import { releaseLock } from './lock';
 import { closeDb } from './db';
 
 const HEARTBEAT = 5_000;
-let monitorTimer: NodeJS.Timeout | null = null;
+let monitorTimer: ReturnType<typeof setInterval> | null = null;
 
-function requestFile(dir: string) {
-  return path.join(dir, 'shutdown.request.json');
+async function requestFile(dir: string) {
+  return join(dir, 'shutdown.request.json');
 }
 
-export function monitorShutdownRequests(onExit?: () => void) {
-  const { dataDir } = getConfig();
-  const file = requestFile(dataDir);
+export async function monitorShutdownRequests(onExit?: () => void) {
+  const { dataDir } = await getConfig();
+  const file = await requestFile(dataDir);
   monitorTimer = setInterval(async () => {
-    if (fs.existsSync(file)) {
+    if (await pathExists(file)) {
       try {
-        fs.unlinkSync(file);
+        await removeFile(file);
       } catch {}
       await shutdownDbSafely();
-      releaseLock();
+      await releaseLock();
       if (onExit) onExit();
       if (typeof window !== 'undefined') window.close();
     }

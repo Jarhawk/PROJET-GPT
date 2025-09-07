@@ -6,7 +6,7 @@ import "./globals.css";
 import 'nprogress/nprogress.css';
 import "@/i18n/i18n";
 import "./registerSW.js";
-import { HashRouter } from "react-router-dom";
+import { HashRouter } from "react-router-dom"; // Use hash-based routing to handle deep links without server fallback
 import AuthProvider from "@/contexts/AuthContext";
 import { toast } from 'sonner';
 import { ensureSingleOwner, releaseLock } from '@/lib/lock';

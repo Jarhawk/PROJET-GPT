@@ -37,11 +37,7 @@ router.get('/', async (req, res) => {
     if (error) throw error;
     res.json(data || []);
   } catch (err) {
-    if (String(err?.message).includes('Missing Supabase credentials')) {
-      res.status(500).json({ error: 'Missing Supabase credentials' });
-    } else {
-      res.status(500).json({ error: err.message });
-    }
+    res.status(500).json({ error: err.message });
   }
 });
 

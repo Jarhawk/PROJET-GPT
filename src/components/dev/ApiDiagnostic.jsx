@@ -3,10 +3,12 @@ import { run } from '@/lib/supa/fetcher';
 
 export default function ApiDiagnostic({ mamaId }) {
   const test = async () => {
-    console.log('[diag] mamaId', mamaId);
+    if (!import.meta.env.DEV) return;
 
-    console.log('[diag] mamas/logo_url');
-    console.log(
+    console.debug('[diag] mamaId', mamaId);
+
+    console.debug('[diag] mamas/logo_url');
+    console.debug(
       await run(
         supabase
           .from('mamas')
@@ -16,8 +18,8 @@ export default function ApiDiagnostic({ mamaId }) {
       )
     );
 
-    console.log('[diag] fournisseurs');
-    console.log(
+    console.debug('[diag] fournisseurs');
+    console.debug(
       await run(
         supabase
           .from('fournisseurs')
@@ -27,8 +29,8 @@ export default function ApiDiagnostic({ mamaId }) {
       )
     );
 
-    console.log('[diag] ruptures');
-    console.log(
+    console.debug('[diag] ruptures');
+    console.debug(
       await run(
         supabase
           .from('v_alertes_rupture_api')

@@ -36,7 +36,9 @@ export default function Layout() {
   }
   const user = session?.user;
   if (!userData?.access_rights) {
-    console.info('[layout] no access_rights yet, rendering with defaults');
+    if (import.meta.env.DEV) {
+      console.info('[layout] no access_rights yet, rendering with defaults');
+    }
   }
 
   return (

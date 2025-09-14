@@ -8,8 +8,11 @@ import { writeBinary, ensureDir } from '@/adapters/fs';
 import { join } from '@/adapters/path';
 
 function isTauri() {
-  // @ts-ignore
-  return typeof window !== 'undefined' && !!window.__TAURI__;
+  return Boolean(
+    // Tauri v1 exposes `__TAURI__` while v2 sets `import.meta.env.TAURI`
+    (typeof window !== 'undefined' && (window.__TAURI__ || window.__TAURI_INTERNALS__)) ||
+      (typeof import.meta !== 'undefined' && import.meta.env?.TAURI)
+  );
 }
 
 async function saveFile(blob, filename) {

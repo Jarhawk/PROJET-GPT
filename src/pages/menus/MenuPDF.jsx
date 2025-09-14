@@ -1,6 +1,6 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
 import supabase from '@/lib/supabase';
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 import { useAuth } from '@/hooks/useAuth';
 
@@ -44,7 +44,7 @@ export default function MenuPDF({ id }) {
           </style>
         </head>
         <body>
-          <img src="/logo-mamastock.png" class="logo" />
+            <img src="/logo-mamastock.png" alt="Logo MamaStock" class="logo" />
           <h1>Menu du jour : ${menu.nom}</h1>
           <p><strong>Date :</strong> ${menu.date}</p>
           ${fiches.
@@ -64,7 +64,10 @@ export default function MenuPDF({ id }) {
     win.document.write(content);
     win.document.close();
     win.focus();
-    setTimeout(() => win.print(), 300);
+    setTimeout(() => {
+      win.print();
+      win.close();
+    }, 300);
   };
 
   if (!menu) return null;

@@ -47,7 +47,9 @@ export default function Sidebar() {
   const peutVoir = (module) => {
     const ok = hasAccess(module);
     if (!ok && access_rights && !access_rights[module]) {
-      console.info(`info: module '${module}' absent des access_rights`);
+      if (import.meta.env.DEV) {
+        console.info(`info: module '${module}' absent des access_rights`);
+      }
     }
     return ok;
   };

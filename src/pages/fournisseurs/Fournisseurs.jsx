@@ -1,5 +1,4 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-/* eslint-disable react-hooks/exhaustive-deps */
 // src/pages/Fournisseurs.jsx
 import { useState, useEffect, useMemo } from 'react';
 import { useFournisseurs as useFournisseursData } from '@/hooks/data/useFournisseurs';
@@ -64,17 +63,23 @@ export default function Fournisseurs() {
       .select('id,nom')
       .eq('mama_id', mama_id)
       .limit(3);
-    console.log('[api] fournisseurs', { data: a.data, error: a.error }); // [compat]
+    toast(`fournisseurs: ${a.data?.length ?? 0}`, {
+      description: a.error?.message,
+    });
     const b = await supabase
       .from('v_alertes_rupture_api')
       .select('produit_id,nom,stock_actuel,stock_min,manque')
       .limit(3);
-    console.log('[api] v_alertes_rupture_api', { data: b.data, error: b.error }); // [compat]
+    toast(`alertes rupture: ${b.data?.length ?? 0}`, {
+      description: b.error?.message,
+    });
     const c = await supabase
       .from('mamas')
       .select('id,logo_url')
       .eq('id', mama_id);
-    console.log('[api] mamas', { data: c.data, error: c.error }); // [compat]
+    toast(`mamas: ${c.data?.length ?? 0}`, {
+      description: c.error?.message,
+    });
   }
 
   const filters = useMemo(
@@ -92,7 +97,10 @@ export default function Fournisseurs() {
     error,
     isLoading,
   } = useFournisseursData(filters);
-  const fournisseurs = fournisseursData?.data || [];
+  const fournisseurs = useMemo(
+    () => fournisseursData?.data || [],
+    [fournisseursData]
+  );
   const total = fournisseursData?.count || 0;
   const embedError = fournisseursData?.embedError;
 
@@ -108,14 +116,13 @@ export default function Fournisseurs() {
 
   useEffect(() => {
     async function fetchCounts() {
-      const counts = {};
-      for (const f of fournisseurs) {
-        counts[f.id] = await countProduitsDuFournisseur(f.id);
-      }
-      setProductCounts(counts);
+      const entries = await Promise.all(
+        fournisseurs.map(async (f) => [f.id, await countProduitsDuFournisseur(f.id)])
+      );
+      setProductCounts(Object.fromEntries(entries));
     }
     if (fournisseurs.length) fetchCounts();
-  }, [fournisseurs]);
+  }, [fournisseurs, countProduitsDuFournisseur]);
 
 
   async function handleDiag() {
@@ -124,14 +131,13 @@ export default function Fournisseurs() {
       .select('*')
       .eq('mama_id', mama_id)
       .limit(5);
-    console.log('[diag] fournisseurs', { data, error: diagError }); // [diag]
     if (diagError) {
       if (diagError.code === 'PGRST116') setDiagMsg('RLS KO');
       else if (diagError.status === 401) setDiagMsg('Token invalide');
       else if (diagError.status === 500) setDiagMsg('Erreur base de données');
       else setDiagMsg(diagError.message);
     } else {
-      setDiagMsg('Connexion Supabase OK');
+      setDiagMsg('Connexion SQLite OK');
     }
   }
 
@@ -139,7 +145,7 @@ export default function Fournisseurs() {
   useEffect(() => {
     fetchStatsAll().then(setStats);
     fetchInactifs();
-  }, []);
+  }, [fetchStatsAll, fetchInactifs]);
 
   // Recherche live
   const fournisseursFiltrés = listWithContact.filter((f) =>
@@ -151,13 +157,15 @@ export default function Fournisseurs() {
     async function computeTop() {
       if (!fournisseurs.length || !products.length) return;
       const statsProduits = {};
-      for (const f of fournisseurs) {
-        const ps = await getProduitsDuFournisseur(f.id);
+      const allProducts = await Promise.all(
+        fournisseurs.map((f) => getProduitsDuFournisseur(f.id))
+      );
+      allProducts.forEach((ps) => {
         ps.forEach((p) => {
           statsProduits[p.produit_id] =
             (statsProduits[p.produit_id] || 0) + (p.total_achat || 0);
         });
-      }
+      });
       setTopProducts(
         Object.entries(statsProduits)
           .map(([id, total]) => ({
@@ -169,7 +177,7 @@ export default function Fournisseurs() {
       );
     }
     computeTop();
-  }, [fournisseurs, products]);
+  }, [fournisseurs, products, getProduitsDuFournisseur]);
 
   let banner = diagMsg;
   if (error) {
@@ -187,7 +195,7 @@ export default function Fournisseurs() {
       {banner && (
         <div
           className={`mb-4 p-2 rounded text-sm text-white ${
-            banner === 'Connexion Supabase OK' ? 'bg-green-600' : 'bg-red-600'
+            banner === 'Connexion SQLite OK' ? 'bg-green-600' : 'bg-red-600'
           }`}
         >
           {banner}
@@ -242,7 +250,7 @@ export default function Fournisseurs() {
               disabled={fournisseurs.length === 0}
             />
             <Button className="w-auto" onClick={handleDiag}>
-              Tester Supabase
+              Tester SQLite
             </Button>
             {import.meta.env.DEV && (
               <Button className="w-auto" onClick={handleApiDiag}>

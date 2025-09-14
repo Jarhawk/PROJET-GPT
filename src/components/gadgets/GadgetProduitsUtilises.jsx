@@ -22,7 +22,7 @@ export default function GadgetProduitsUtilises() {
             <div className="flex items-center gap-2">
               <img
                 src="/icons/icon-128x128.png"
-                alt=""
+                alt={p.nom}
                 className="w-6 h-6 rounded object-cover"
               />
               <span>{p.nom}</span>

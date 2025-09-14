@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useId, forwardRef, useImperativeHandle } from 'react';
+import { useState, useRef, useEffect, useId, forwardRef, useImperativeHandle, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
 import { useProduitsSearch } from '@/hooks/useProduitsSearch';
@@ -40,14 +40,19 @@ function AutocompleteProduit(
     }
   }, [nameId]);
 
-  // Reset when line changes
+  const selectedValue = useMemo(
+    () => (value?.id ? { id: value.id, nom: value.nom } : null),
+    [value?.id, value?.nom]
+  );
+
+  // Réinitialise quand la ligne ou la valeur changent
   useEffect(() => {
-    setInputValue(value?.nom || '');
-    setSelected(value?.id ? value : null);
+    setInputValue(selectedValue?.nom || '');
+    setSelected(selectedValue);
     setSearch('');
     setOpen(false);
     setActive(-1);
-  }, [lineKey, value?.id, value?.nom]);
+  }, [lineKey, selectedValue]);
 
   const debouncedInput = useDebounce(inputValue, 250);
 

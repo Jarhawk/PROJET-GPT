@@ -33,7 +33,9 @@ mamaIdParam,
     queryFn: async () => {
       const q = debounced.trim();
       if (q.length < 2) return { rows: [], total: 0 };
-      console.debug('[useProduitsSearch] search produits', { q, mamaId, page });
+      if (import.meta.env.DEV) {
+        console.debug('[useProduitsSearch] search produits', { q, mamaId, page });
+      }
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
       try {

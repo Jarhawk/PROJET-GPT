@@ -45,10 +45,10 @@ function RequisitionDetailPage() {
               <li key={l.id} className="flex items-center gap-2">
                 <img
                   src="/icons/icon-128x128.png"
-                  alt=""
+                  alt={l.produit?.nom || l.produit_id}
                   className="w-6 h-6 rounded object-cover"
                 />
-              <span>
+                <span>
                   {l.produit?.nom || l.produit_id} - {l.quantite} {l.unite || ""}
                 </span>
               </li>

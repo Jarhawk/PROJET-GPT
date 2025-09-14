@@ -1,5 +1,5 @@
 // MamaStock © 2025 - Licence commerciale obligatoire - Toute reproduction interdite sans autorisation.
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useProducts } from "@/hooks/useProducts";
 import { useFamilles } from "@/hooks/useFamilles";
 import { useSousFamilles } from "@/hooks/useSousFamilles";
@@ -46,7 +46,6 @@ export default function Produits() {
     refetch,
     toggleProductActive,
   } = useProducts({ mamaId: mama_id, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE });
-  const products = data ?? [];
   const {
     sousFamilles: rawSousFamilles,
     list: listSousFamilles,
@@ -61,17 +60,15 @@ export default function Produits() {
 
   const rows = useMemo(
     () =>
-      (products || []).map((p) => ({
+      (data ?? []).map((p) => ({
         ...p,
         unite_nom: p.unite?.nom ?? p.unite_nom ?? '',
         famille_nom: p.famille?.nom ?? p.famille_nom ?? '',
       })),
-    [products]
+    [data]
   );
 
-  const refreshList = useCallback(() => {
-    refetch();
-  }, [refetch, search, familleFilter, sousFamilleFilter, zoneFilter, actifFilter, page, sortField, sortOrder]);
+  const refreshList = refetch;
 
   useEffect(() => {
     if (!canView) return;

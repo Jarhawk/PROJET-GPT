@@ -53,11 +53,6 @@ export function useProducts(options = {}) {
     [resolvedMama, limit, offset, filters, search]
   )
 
-  useEffect(() => {
-    const url = `/rest/v1/produits?select=id,nom,mama_id,actif,famille_id,unite_id,code,image,pmp,stock_reel,stock_min,stock_theorique,created_at,updated_at,unite:unites!fk_produits_unite(nom),famille:familles!fk_produits_famille(nom)&mama_id=eq.${resolvedMama}&order=nom.asc&offset=${offset}&limit=${limit}`
-    console.log('[useProducts]', { queryKey, enabled, mamaId: resolvedMama, url })
-  }, [queryKey, enabled, resolvedMama, limit, offset])
-
   const query = useQuery({
     queryKey,
     queryFn: () => fetcher(),

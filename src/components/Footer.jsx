@@ -17,7 +17,7 @@ export default function Footer() {
         </Link>
       </span>
       <span className="text-xs opacity-70 mt-2 sm:mt-0">
-        Accès via Supabase Auth &amp; RLS
+        Accès local via SQLite
       </span>
     </footer>
   );

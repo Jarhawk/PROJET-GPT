@@ -23,7 +23,9 @@ export function useGraphiquesMultiZone() {
       order("nom", { ascending: true });
 
       if (error) {
-        console.info('[zones_stock] fetch failed; fallback list (no order)', { code: error.code, message: error.message });
+        if (import.meta.env.DEV) {
+          console.info('[zones_stock] fetch failed; fallback list (no order)', { code: error.code, message: error.message });
+        }
         const alt = await supabase.
         from('zones_stock').
         select('id,nom,type,parent_id,position,actif,created_at').

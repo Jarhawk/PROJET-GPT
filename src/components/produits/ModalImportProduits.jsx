@@ -1,4 +1,5 @@
-import supabase from '@/lib/supabase';import { useEffect, useRef, useState } from "react";
+import supabase from '@/lib/supabase';
+import { useEffect, useRef, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -76,7 +77,7 @@ export default function ModalImportProduits({ open, onClose, onSuccess }) {
   async function handleImport() {
     const produits_valides = [];
     rows.forEach((row, idx) => {
-      if (row.status === "ok") {
+      if (row.status === 'ok') {
         produits_valides.push({
           nom: row.nom,
           unite_id: row.unite_id,
@@ -87,18 +88,18 @@ export default function ModalImportProduits({ open, onClose, onSuccess }) {
           sous_famille_id: row.sous_famille_id || null,
           code: row.code || null,
           allergenes: row.allergenes || null,
-          mama_id
+          mama_id,
         });
       } else {
-        const reason = formatRowErrors(row) || "données invalides";
-        console.warn("Produit ignoré", idx + 1, reason);
+        const reason = formatRowErrors(row) || 'données invalides';
+        if (import.meta.env.DEV) console.debug('Produit ignoré', idx + 1, reason);
       }
     });
     if (!produits_valides.length) return;
     setImporting(true);
-    const { error } = await supabase.
-    from("produits").
-    insert(produits_valides);
+    const { error } = await supabase
+      .from('produits')
+      .insert(produits_valides);
     if (error) {
       console.error(error);
       toast.error("Erreur d'insertion");

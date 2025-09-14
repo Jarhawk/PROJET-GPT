@@ -19,7 +19,8 @@ export default function useZones() {
     if (actif !== undefined) query = query.eq('actif', actif);
     let { data, error } = await query;
     if (error) {
-      console.info('[zones] fetch failed; fallback list (no order)', { code: error.code, message: error.message });
+      console.error('[zones] fetch failed; fallback list (no order)', { code: error.code, message: error.message });
+      toast.error("Impossible de charger les zones");
       const alt = await supabase
         .from('zones')
         .select('id, nom, type, parent_id, position, actif, created_at');
@@ -42,7 +43,8 @@ export default function useZones() {
       .eq('id', id)
       .single();
     if (error) {
-      console.info('[zones_stock] fetch failed; fallback list (no order)', { code: error.code, message: error.message });
+      console.error('[zones_stock] fetch failed; fallback list (no order)', { code: error.code, message: error.message });
+      toast.error("Impossible de charger la zone demandée");
       const alt = await supabase
         .from('zones_stock')
         .select('id, nom, type, parent_id, position, actif, created_at')
@@ -107,7 +109,8 @@ export default function useZones() {
     if (mode === 'requisition') query = query.in('type', ['cave', 'shop']);
     let { data, error } = await query;
     if (error) {
-      console.info('[zones_stock] fetch failed; fallback list (no order)', { code: error.code, message: error.message });
+      console.error('[zones_stock] fetch failed; fallback list (no order)', { code: error.code, message: error.message });
+      toast.error("Impossible de charger vos zones accessibles");
       const alt = await supabase
         .from('zones_stock')
         .select('id, nom, type, parent_id, position, actif, created_at, zones_droits!inner(*)')

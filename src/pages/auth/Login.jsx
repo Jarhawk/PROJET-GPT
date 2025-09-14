@@ -94,7 +94,7 @@ export default function Login() {
             disabled={pending}
             className="mt-3 px-4 py-2 rounded-xl text-sm font-semibold bg-primary text-white hover:bg-primary-90 transition-colors disabled:opacity-50">
 
-            {pending ? 'Connexion…' : 'Login'}
+            {pending ? 'Connexion…' : 'Connexion'}
           </button>
           <div className="text-right mt-2">
             <Link to="/reset-password" className="text-xs text-gold hover:underline">
